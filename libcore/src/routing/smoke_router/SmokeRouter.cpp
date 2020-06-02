@@ -27,10 +27,10 @@
 #include "SmokeRouter.h"
 
 #include "BrainStorage.h"
-#include "general/Logger.h"
 #include "pedestrian/Pedestrian.h"
 #include "sensor/SensorManager.h"
 
+#include <Logger.h>
 #include <tinyxml.h>
 
 SmokeRouter::SmokeRouter()

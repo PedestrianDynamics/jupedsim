@@ -47,12 +47,12 @@
 #include "ffRouter.h"
 
 #include "direction/walking/DirectionStrategy.h"
-#include "general/Logger.h"
 #include "geometry/SubRoom.h"
 #include "geometry/WaitingArea.h"
 #include "pedestrian/Pedestrian.h"
 #include "routing/ff_router/mesh/RectGrid.h"
 
+#include <Logger.h>
 #include <stdexcept>
 
 FFRouter::FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals, Configuration * config) :

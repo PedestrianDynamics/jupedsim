@@ -4,7 +4,6 @@
 #include "UnivFFviaFM.h"
 
 #include "general/Filesystem.h"
-#include "general/Logger.h"
 #include "geometry/Building.h"
 #include "geometry/Line.h"
 #include "geometry/SubRoom.h"
@@ -12,6 +11,7 @@
 #include "pedestrian/Pedestrian.h"
 #include "routing/ff_router/mesh/RectGrid.h"
 
+#include <Logger.h>
 #include <stdexcept>
 #include <unordered_set>
 

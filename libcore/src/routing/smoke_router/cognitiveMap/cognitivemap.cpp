@@ -1,9 +1,9 @@
 #include "cognitivemap.h"
 
-#include "general/Logger.h"
 #include "geometry/SubRoom.h"
 #include "pedestrian/Pedestrian.h"
 
+#include <Logger.h>
 #include <chrono>
 #include <visilibity.hpp>
 
