@@ -380,7 +380,7 @@ void Method_D::GetProfiles(
 
     FILE * Prf_velocity;
     if((Prf_velocity = Analysis::CreateFile(Prfvelocity)) == nullptr) {
-        LOG_ERROR("cannot open the file {} to write the field data", Prfvelocity.c_str());
+        LOG_ERROR("cannot open the file {} to write the field data", Prfvelocity);
         exit(EXIT_FAILURE);
     }
     FILE * Prf_density;
@@ -444,16 +444,16 @@ void Method_D::OutputVoroGraph(
     polygon_2d poly;
     if(!fs::exists(voroLocPath)) {
         if(!fs::create_directories(voroLocPath)) {
-            LOG_ERROR("can not create directory <{}>", voroLocPath.string().c_str());
+            LOG_ERROR("can not create directory <{}>", voroLocPath.string());
             exit(EXIT_FAILURE);
         } else
-            LOG_INFO("create directory {}", voroLocPath.string().c_str());
+            LOG_INFO("create directory {}", voroLocPath.string());
     }
 
     fs::path polygonPath = voroLocPath / "polygon";
     if(!fs::exists(polygonPath)) {
         if(!fs::create_directory(polygonPath)) {
-            LOG_ERROR("can not create directory <{}>", polygonPath.string().c_str());
+            LOG_ERROR("can not create directory <{}>", polygonPath.string());
             exit(EXIT_FAILURE);
         }
     }
@@ -479,13 +479,13 @@ void Method_D::OutputVoroGraph(
             //polys  <<dsv(poly)<< endl;
         }
     } else {
-        LOG_ERROR("cannot create the file <{}>", polygon.c_str());
+        LOG_ERROR("cannot create the file <{}>", polygon);
         exit(EXIT_FAILURE);
     }
     fs::path speedPath = voroLocPath / "speed";
     if(!fs::exists(speedPath))
         if(!fs::create_directory(speedPath)) {
-            LOG_ERROR("can not create directory <{}>", speedPath.string().c_str());
+            LOG_ERROR("can not create directory <{}>", speedPath.string());
             exit(EXIT_FAILURE);
         }
     fs::path pv         = speedPath / trajFileName;
@@ -496,7 +496,7 @@ void Method_D::OutputVoroGraph(
             velo << fabs(VInFrame[pts]) << endl;
         }
     } else {
-        LOG_ERROR("cannot create the file <{}>", pv.string().c_str());
+        LOG_ERROR("cannot create the file <{}>", pv.string());
         exit(EXIT_FAILURE);
     }
 

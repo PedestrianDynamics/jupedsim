@@ -80,8 +80,7 @@ void Method_C::OpenFileMethodC()
     string results_C = tmp.string();
 
     if((_fClassicRhoV = Analysis::CreateFile(results_C)) == nullptr) {
-        LOG_WARNING(
-            "cannot open file {} to write classical density and velocity\n", results_C.c_str());
+        LOG_WARNING("cannot open file {} to write classical density and velocity\n", results_C);
         exit(EXIT_FAILURE);
     }
     fprintf(

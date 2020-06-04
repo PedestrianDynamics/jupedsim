@@ -269,8 +269,7 @@ bool Obstacle::ConvertLineToPoly()
         for(const auto & ptw : {w.GetPoint1(), w.GetPoint2()}) {
             if(IsPartOfPolygon(ptw) == false) {
                 LOG_ERROR(
-                    "Edge was not used during polygon creation for obstacle: {}",
-                    w.toString().c_str());
+                    "Edge was not used during polygon creation for obstacle: {}", w.toString());
                 return false;
             }
         }

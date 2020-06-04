@@ -165,7 +165,7 @@ void Room::AddSubRoom(SubRoom * r)
 
 void Room::WriteToErrorLog() const
 {
-    LOG_ERROR("Room: {} [{}]:\n", _id, _caption.c_str());
+    LOG_ERROR("Room: {} [{}]:\n", _id, _caption);
 
     // SubRooms
     for(int i = 0; i < GetNumberOfSubRooms(); i++) {

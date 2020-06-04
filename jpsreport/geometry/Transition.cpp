@@ -153,7 +153,7 @@ void Transition::WriteToErrorLog() const
     LOG_ERROR(
         "\t\tTRANS: {} [{}] ({:.2f}, {:.2f}) -- ({:.2f}, {:.2f})\n",
         GetID(),
-        GetCaption().c_str(),
+        GetCaption(),
         GetPoint1().GetX(),
         GetPoint1().GetY(),
         GetPoint2().GetX(),
@@ -163,7 +163,7 @@ void Transition::WriteToErrorLog() const
         LOG_ERROR(
             "\t\t\t\tRoom: {} [{}] SubRoom: {}",
             GetRoom1()->GetID(),
-            GetRoom1()->GetCaption().c_str(),
+            GetRoom1()->GetCaption(),
             GetSubRoom1()->GetSubRoomID());
     } else {
         LOG_ERROR("\t\t\t\tAusgang");

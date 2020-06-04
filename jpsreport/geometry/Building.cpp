@@ -1124,7 +1124,7 @@ bool Building::LoadTrafficInfo()
             } else if(state == "close") {
                 GetTransition(id)->Close();
             } else {
-                LOG_WARNING("Unknown door state: {}", state.c_str());
+                LOG_WARNING("Unknown door state: {}", state);
             }
         }
     LOG_INFO("Done with loading traffic info file");
@@ -1380,9 +1380,9 @@ bool Building::SaveGeometry(const std::string & filename)
     ofstream geofile(filename);
     if(geofile.is_open()) {
         geofile << geometry.str();
-        LOG_INFO("file saved to {}}", filename.c_str());
+        LOG_INFO("file saved to {}}", filename);
     } else {
-        LOG_ERROR("unable to save the geometry to {}", filename.c_str());
+        LOG_ERROR("unable to save the geometry to {}", filename);
         return false;
     }
 

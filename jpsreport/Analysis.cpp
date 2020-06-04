@@ -198,7 +198,7 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(
     const fs::path & geometryFile,
     const std::vector<MeasurementArea_B *> & areas)
 {
-    LOG_INFO("ReadGeometry with {}.", geometryFile.string().c_str());
+    LOG_INFO("ReadGeometry with {}.", geometryFile.string());
     double geo_minX = FLT_MAX;
     double geo_minY = FLT_MAX;
     double geo_maxX = -FLT_MAX;
@@ -474,10 +474,10 @@ FILE * Analysis::CreateFile(const string & filename)
     fs::path filepath = fs::path(filename.c_str()).parent_path();
     if(fs::is_directory(filepath) == false) {
         if(fs::create_directories(filepath) == false && fs::is_directory(filepath) == false) {
-            LOG_ERROR("cannot create the directory <{}>", filepath.string().c_str());
+            LOG_ERROR("cannot create the directory <{}>", filepath.string());
             return NULL;
         }
-        LOG_INFO("create the directory <{}>", filepath.string().c_str());
+        LOG_INFO("create the directory <{}>", filepath.string());
     }
 
     //create the file

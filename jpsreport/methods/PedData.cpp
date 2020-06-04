@@ -62,8 +62,8 @@ bool PedData::ReadData(
     fs::path p(path);
     p /= _trajName;
     fs::path fullTrajectoriesPathName = path / _trajName;
-    LOG_INFO("the name of the trajectory is: <{}>", _trajName.string().c_str());
-    LOG_INFO("full name of the trajectory is: <{}>", fullTrajectoriesPathName.string().c_str());
+    LOG_INFO("the name of the trajectory is: <{}>", _trajName.string());
+    LOG_INFO("full name of the trajectory is: <{}>", fullTrajectoriesPathName.string());
     bool result = true;
     if(trajformat == FORMAT_XML_PLAIN) {
         LOG_WARNING("Input trajectory file for jpsreport should be in txt format");
@@ -88,7 +88,7 @@ bool PedData::InitializeVariables(const fs::path & filename)
     ifstream fdata;
     fdata.open(filename.string());
     if(fdata.is_open() == false) {
-        LOG_ERROR("could not open the trajectories file <{}>", filename.string().c_str());
+        LOG_ERROR("could not open the trajectories file <{}>", filename.string());
         return false;
     } else {
         string line;
@@ -112,7 +112,7 @@ bool PedData::InitializeVariables(const fs::path & filename)
                         _fps = atof(strs[1].c_str());
                         if(_fps == 0.0) // in case not valid fps found
                         {
-                            LOG_ERROR("Could not convert fps <{}>", strs[1].c_str());
+                            LOG_ERROR("Could not convert fps <{}>", strs[1]);
                             exit(EXIT_FAILURE);
                         }
                     } else {
