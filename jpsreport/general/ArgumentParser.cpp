@@ -690,30 +690,30 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
     // method D
     TiXmlElement * xMethod_D = xMainNode->FirstChildElement("method_D");
     if(xMethod_D) {
+        Log->Write("INFO: \tMethod D is selected with following options");
         if(auto configData = ParseDIJParams(xMethod_D)) {
             _configDataD = configData.value();
             _isMethodD   = true;
-            Log->Write("INFO: \tMethod D is selected");
         }
     }
 
     // method I
     TiXmlElement * xMethod_I = xMainNode->FirstChildElement("method_I");
     if(xMethod_I) {
+        Log->Write("INFO: \tMethod I is selected with following options");
         if(auto configData = ParseDIJParams(xMethod_I)) {
             _configDataI = configData.value();
             _isMethodI   = true;
-            Log->Write("INFO: \tMethod I is selected");
         }
     }
 
     // method Voronoi
     TiXmlElement * xMethod_J = xMainNode->FirstChildElement("method_J");
     if(xMethod_J) {
+        Log->Write("INFO: \tMethod J is selected with following options");
         if(auto configData = ParseDIJParams(xMethod_J)) {
             _configDataJ = configData.value();
             _isMethodJ   = true;
-            Log->Write("INFO: \tMethod Voronoi is selected");
         }
     }
 
@@ -728,6 +728,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
 std::optional<ConfigData_DIJ> ArgumentParser::ParseDIJParams(TiXmlElement * xMethod)
 {
     if(string(xMethod->Attribute("enabled")) == "false") {
+        Log->Write("INFO: \tMethod is disabled");
         return nullopt;
     }
 
