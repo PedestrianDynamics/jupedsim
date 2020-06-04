@@ -59,10 +59,8 @@ void TrainFileParser::ParseTrainTimeTable(
 
         if(trainTypes.find(type) != std::end(trainTypes)) {
             auto trainType = trainTypes.at(type);
-            // Arriving train
-            eventManager.AddEvent(std::make_unique<TrainEvent>(
-                arrival_time,
-                EventAction::TRAIN_ARRIVAL,
+            const TrainEventInfo event_info{
+                &building,
                 id,
                 platform_id,
                 trainType,
@@ -71,21 +69,14 @@ void TrainFileParser::ParseTrainTimeTable(
                 track_start,
                 track_end,
                 train_start,
-                train_end));
+                train_end};
+
+            // Arriving train
+            eventManager.AddEvent(std::make_unique<TrainArrivalEvent>(arrival_time, event_info));
 
             // Departing train
-            eventManager.AddEvent(std::make_unique<TrainEvent>(
-                departure_time,
-                EventAction::TRAIN_DEPARTURE,
-                id,
-                platform_id,
-                trainType,
-                room_id,
-                subroom_id,
-                track_start,
-                track_end,
-                train_start,
-                train_end));
+            eventManager.AddEvent(
+                std::make_unique<TrainDepartureEvent>(departure_time, event_info));
 
             building.AddTrain(id, trainType);
         } else {

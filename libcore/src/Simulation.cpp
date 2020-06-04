@@ -149,12 +149,12 @@ bool Simulation::InitArgs()
         return false;
     }
 
-    _em = std::make_unique<EventManager>(_building.get());
+    _em = std::make_unique<EventManager>();
     if(!_config->GetEventFile().empty()) {
-        EventFileParser::ParseDoorEvents(*_em, _config->GetEventFile());
+        EventFileParser::ParseDoorEvents(*_em, _building.get(), _config->GetEventFile());
     }
     if(!_config->GetScheduleFile().empty()) {
-        EventFileParser::ParseSchedule(*_em, _config->GetScheduleFile());
+        EventFileParser::ParseSchedule(*_em, _building.get(), _config->GetScheduleFile());
 
         // Read and set max door usage from schedule file
         auto groupMaxAgents = EventFileParser::ParseMaxAgents(_config->GetScheduleFile());
@@ -390,7 +390,7 @@ double Simulation::RunBody(double maxSimTime)
             _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get(), _periodic);
 
             //update the events
-            bool eventProcessed = _em->ProcessEvent();
+            bool eventProcessed = _em->ProcessEvents(Pedestrian::GetGlobalTime());
             _building->GetRoutingEngine()->setNeedUpdate(eventProcessed);
 
             //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
