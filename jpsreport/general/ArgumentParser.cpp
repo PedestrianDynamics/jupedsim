@@ -79,7 +79,7 @@ void Logs()
 void ArgumentParser::Usage(const std::string file)
 {
     LOG_INFO("Usage: \n");
-    LOG_INFO("{} inifile.xml\n", file.c_str());
+    LOG_INFO("{} inifile.xml\n", file);
     exit(EXIT_SUCCESS);
 }
 
@@ -161,7 +161,7 @@ const fs::path & ArgumentParser::GetProjectRootDir() const
 bool ArgumentParser::ParseIniFile(const string & inifile)
 {
     Logs();
-    LOG_INFO("Parsing the ini file <{}>", inifile.c_str());
+    LOG_INFO("Parsing the ini file <{}>", inifile);
     //extract and set the project root dir
     fs::path p(inifile);
     _projectRootDir = weakly_canonical(p).parent_path();
@@ -187,7 +187,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
         logfile = GetProjectRootDir() / logfile;
         this->SetErrorLogFile(logfile);
         this->SetLog(1);
-        LOG_INFO("logfile <{}>", GetErrorLogFile().string().c_str());
+        LOG_INFO("logfile <{}>", GetErrorLogFile().string());
     }
     switch(this->GetLog()) {
         case 0:
@@ -216,11 +216,11 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
         fs::path pathGeo(xMainNode->FirstChildElement("geometry")->Attribute("file"));
         _geometryFileName = GetProjectRootDir() / pathGeo;
         if(!fs::exists(_geometryFileName)) {
-            LOG_ERROR("Geometry File <{}> does not exist", _geometryFileName.string().c_str());
+            LOG_ERROR("Geometry File <{}> does not exist", _geometryFileName.string());
             return false;
         }
         _geometryFileName = fs::canonical(_geometryFileName);
-        LOG_INFO("Geometry File is: <{}>", _geometryFileName.string().c_str());
+        LOG_INFO("Geometry File is: <{}>", _geometryFileName.string());
     }
 
     //trajectories
@@ -229,7 +229,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
         //add the extension point
         string fmt =
             "." + string(xmltoa(xMainNode->FirstChildElement("trajectories")->Attribute("format")));
-        LOG_INFO("Format of the trajectory file is: <{}>", fmt.c_str());
+        LOG_INFO("Format of the trajectory file is: <{}>", fmt);
         if(fmt == ".xml") {
             _fileFormat = FORMAT_XML_PLAIN;
         } else if(fmt == ".txt") {
@@ -254,12 +254,12 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
 
             //check if the given file match the format
             if(boost::algorithm::ends_with(_trajectoriesFilename.string(), fmt)) {
-                LOG_INFO("Input trajectory file is <{}>", _trajectoriesFilename.string().c_str());
+                LOG_INFO("Input trajectory file is <{}>", _trajectoriesFilename.string());
             } else {
                 LOG_ERROR(
                     "Wrong file extension\t<{}> for file <{}>",
-                    fmt.c_str(),
-                    _trajectoriesFilename.string().c_str());
+                    fmt,
+                    _trajectoriesFilename.string());
                 return false;
             }
         }
@@ -275,9 +275,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             path_root             = canonical(path_root);
             _trajectoriesLocation = path_root.string();
         }
-        LOG_INFO(
-            "Input directory for loading trajectory is <{}>",
-            _trajectoriesLocation.string().c_str());
+        LOG_INFO("Input directory for loading trajectory is <{}>", _trajectoriesLocation.string());
 
         // in the case no file was specified, collect all files in the specified directory
         if(_trajectoriesFiles.empty()) {
@@ -293,13 +291,12 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                     s        = pos == -1 ? s : s.substr(pos + 1);
                     if(boost::algorithm::ends_with(s, fmt)) {
                         _trajectoriesFiles.push_back(s);
-                        LOG_INFO("Input trajectory file is <{}>", s.c_str());
+                        LOG_INFO("Input trajectory file is <{}>", s);
                     }
                 }
             } else {
                 /* could not open directory */
-                LOG_ERROR(
-                    "could not open the directory <{}>", _trajectoriesLocation.string().c_str());
+                LOG_ERROR("could not open the directory <{}>", _trajectoriesLocation.string());
                 return false;
             }
         }
@@ -369,7 +366,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             }
             std::map<int, polygon_2d> geoPoly;
             polygon_2d poly;
-            LOG_INFO("Measure area id  <{}> with type <{}>", areaB->_id, areaB->_type.c_str());
+            LOG_INFO("Measure area id  <{}> with type <{}>", areaB->_id, areaB->_type);
             int num_verteces = 0;
             for(TiXmlElement * xVertex = xMeasurementArea_B->FirstChildElement("vertex"); xVertex;
                 xVertex                = xVertex->NextSiblingElement("vertex")) {
@@ -469,7 +466,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             } else {
                 areaL->_zPos = 10000001.0;
             }
-            LOG_INFO("Measurement area id  <{}> with type <{}>", areaL->_id, areaL->_type.c_str());
+            LOG_INFO("Measurement area id  <{}> with type <{}>", areaL->_id, areaL->_type);
 
             if(xMeasurementArea_L->FirstChildElement("start")->Attribute("x") != nullptr &&
                xMeasurementArea_L->FirstChildElement("start")->Attribute("y") != nullptr) {
@@ -591,7 +588,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                         "Measurement area id <{}> will NOT be used for analysis (Type "
                         "<{}> is not Line)",
                         id,
-                        _measurementAreas[id]->_type.c_str());
+                        _measurementAreas[id]->_type);
                 }
 
                 if(xMeasurementArea->Attribute("frame_interval")) {
