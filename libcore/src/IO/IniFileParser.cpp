@@ -235,6 +235,17 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         xHeader->FirstChildElement("trajectories")->Attribute("fps", &fps);
         _config->SetFps(fps);
 
+
+        unsigned int precision;
+        auto ret = xHeader->FirstChildElement("trajectories")
+                       ->QueryUnsignedAttribute("precision", &precision);
+
+        if((ret == TIXML_SUCCESS && (precision < 1 || precision > 6)) ||
+           (ret == TIXML_WRONG_TYPE)) {
+            LOG_WARNING("Invalid value. Precision should be in [1, 6] (default: 2)", precision);
+        } else if(ret != TIXML_NO_ATTRIBUTE) {
+            _config->SetPrecision(precision);
+        }
         std::string format = xHeader->FirstChildElement("trajectories")->Attribute("format") ?
                                  xHeader->FirstChildElement("trajectories")->Attribute("format") :
                                  "plain";
@@ -296,7 +307,11 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         _config->SetOriginalTrajectoriesFile(canonicalTrajPath);
 
         LOG_INFO("Output file  <{}>", _config->GetTrajectoriesFile().string());
-        LOG_INFO("In format <{}> at <{:.0f}> frames per seconds", format, _config->GetFps());
+        LOG_INFO(
+            "In format <{}> at <{:.0f}> frames per seconds. Precision: <{:d}>",
+            format,
+            _config->GetFps(),
+            _config->GetPrecision());
 
 
         if(xTrajectories->FirstChild("optional_output")) {
