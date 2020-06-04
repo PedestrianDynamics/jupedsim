@@ -58,7 +58,7 @@ static fs::path getTrainTypeFileName(const fs::path & projectFile)
 /**
  * TXT format implementation
  */
-TrajectoriesTXT::TrajectoriesTXT() : Trajectories()
+TrajectoriesTXT::TrajectoriesTXT(unsigned int precision) : Trajectories{precision}
 {
     // Add header, info and output for speed
     _optionalOutputHeader[OptionalOutput::speed] = "V\t";
@@ -202,19 +202,21 @@ void TrajectoriesTXT::WriteFrame(int frameNr, Building * building)
         double b       = ped->GetSmallerAxis();
         double phi     = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
         double RAD2DEG = 180.0 / M_PI;
-
-        std::string frame = fmt::format(
-            "{:d}\t{:d}\t{:0.2f}\t{:0.2f}\t{:0.2f}\t{:0.2f}\t{:0.2f}\t{:0.2f}\t{:d}\t",
+        unsigned int precision = GetPrecision();
+        std::string frame      = fmt::format(
+            "{:d}\t{:d}\t{:0.{}f}\t{:0.{}f}\t{:0.{}f}\t{:0.2f}\t{:0.2f}\t{:0.2f}\t{:d}\t",
             ped->GetID(),
             frameNr,
             x,
+            precision,
             y,
+            precision,
             z,
+            precision,
             a,
             b,
             phi * RAD2DEG,
             color);
-
         for(const auto & option : _optionalOutputOptions) {
             frame.append(_optionalOutput[option](ped));
         }

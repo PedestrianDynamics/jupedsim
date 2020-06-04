@@ -26,54 +26,36 @@
  **/
 #include "EventManager.h"
 
-#include "DoorEvent.h"
-#include "geometry/Building.h"
-#include "pedestrian/Pedestrian.h"
-
 #include <Logger.h>
-#include <cmath>
-
-EventManager::EventManager(Building * _b)
-{
-    _building = _b;
-}
 
 void EventManager::AddEvent(std::unique_ptr<Event> event)
 {
-    event->SetBuilding(_building);
     _events.emplace_back(std::move(event));
-    std::sort(std::begin(_events), std::end(_events), [](auto & event1, auto & event2) {
-        return event1->GetTime() < event2->GetTime();
-    });
+    _needs_sorting = true;
 }
 
 void EventManager::ListEvents()
 {
     for(const auto & event : _events) {
-        LOG_INFO("{}", event->GetDescription());
+        LOG_INFO("{}", *event);
     }
 }
 
-bool EventManager::ProcessEvent()
+bool EventManager::ProcessEvents(double now)
 {
-    double timeMin = Pedestrian::GetGlobalTime() - J_EPS_EVENT;
-    std::unique_ptr<Event> eventMin =
-        std::make_unique<DoorEvent>(-1, timeMin, EventAction::DOOR_OPEN);
-
-    auto firstEventAtTime = std::upper_bound(
-        std::begin(_events), std::end(_events), eventMin, [](auto & val, auto & event) {
-            return val->GetTime() < event->GetTime();
+    if(_needs_sorting) {
+        std::sort(std::begin(_events), std::end(_events), [](auto & event1, auto & event2) {
+            return event1->GetTime() > event2->GetTime();
         });
+        _needs_sorting = false;
+    }
 
-    double timeMax = Pedestrian::GetGlobalTime() + J_EPS_EVENT;
-    std::unique_ptr<Event> eventMax =
-        std::make_unique<DoorEvent>(-1, timeMax, EventAction::DOOR_OPEN);
-    auto lastEventAtTime = std::lower_bound(
-        std::begin(_events), std::end(_events), eventMax, [](auto & event, auto & val) {
-            return event->GetTime() <= val->GetTime();
-        });
+    bool has_processed = false;
+    while(!_events.empty() && _events.back()->GetTime() <= now) {
+        _events.back()->Process();
+        _events.pop_back();
+        has_processed = true;
+    }
 
-    std::for_each(firstEventAtTime, lastEventAtTime, [](auto & event) { event->Process(); });
-
-    return std::distance(firstEventAtTime, lastEventAtTime) != 0;
+    return has_processed;
 }

@@ -1,82 +1,76 @@
-/*
- * DoorEvent.cpp
- *
- *  Created on: Jul 21, 2015
- *      Author: piccolo
- */
-
 #include "DoorEvent.h"
 
-#include "pedestrian/Pedestrian.h"
+#include <fmt/format.h>
 
-#include <algorithm>
 
-DoorEvent::DoorEvent(int doorID, double time, EventAction action)
+//============================================================================
+// DoorCloseEvent
+//============================================================================
+DoorCloseEvent::DoorCloseEvent(Building * building, int doorID, double time) :
+    Event(time), _building(building), _doorID(doorID)
 {
-    _doorID = doorID;
-    _time   = time;
-    _action = action;
 }
 
-std::string DoorEvent::GetDescription() const
-{
-    std::string action;
-    switch(_action) {
-        case EventAction::DOOR_OPEN:
-            action = "open";
-            break;
-        case EventAction::DOOR_CLOSE:
-            action = "close";
-            break;
-        case EventAction::DOOR_TEMP_CLOSE:
-            action = "temp_close";
-            break;
-        case EventAction::DOOR_RESET_USAGE:
-            action = "reset_usage";
-            break;
-        default:
-            return std::string{"something went wrong"};
-    }
-    return fmt::format(FMT_STRING("After {} sec: {} door {}"), _time, action, _doorID);
-}
-
-void DoorEvent::Process()
-{
-    LOG_INFO("{}", GetDescription());
-    switch(_action) {
-        case EventAction::DOOR_OPEN:
-            OpenDoor();
-            break;
-        case EventAction::DOOR_CLOSE:
-            CloseDoor();
-            break;
-        case EventAction::DOOR_TEMP_CLOSE:
-            TempCloseDoor();
-            break;
-        case EventAction::DOOR_RESET_USAGE:
-            ResetDoor();
-            break;
-        default:
-            throw std::runtime_error("Wrong EventAction for DoorEvent!");
-    }
-}
-
-void DoorEvent::CloseDoor()
+void DoorCloseEvent::Process()
 {
     _building->GetTransition(_doorID)->Close(true);
 }
 
-void DoorEvent::TempCloseDoor()
+std::string DoorCloseEvent::ToString() const
+{
+    return fmt::format(FMT_STRING("After {} sec: close door {}"), _time, _doorID);
+}
+
+//============================================================================
+// DoorTempCloseEvent
+//============================================================================
+DoorTempCloseEvent::DoorTempCloseEvent(Building * building, int doorID, double time) :
+    Event(time), _building(building), _doorID(doorID)
+{
+}
+
+void DoorTempCloseEvent::Process()
 {
     _building->GetTransition(_doorID)->TempClose(true);
 }
 
-void DoorEvent::OpenDoor()
+std::string DoorTempCloseEvent::ToString() const
+{
+    return fmt::format(FMT_STRING("After {} sec: temp_close door {}"), _time, _doorID);
+}
+
+//============================================================================
+// DoorOpenEvent
+//============================================================================
+DoorOpenEvent::DoorOpenEvent(Building * building, int doorID, double time) :
+    Event(time), _building(building), _doorID(doorID)
+{
+}
+
+void DoorOpenEvent::Process()
 {
     _building->GetTransition(_doorID)->Open(true);
 }
 
-void DoorEvent::ResetDoor()
+std::string DoorOpenEvent::ToString() const
+{
+    return fmt::format(FMT_STRING("After {} sec: open door {}"), _time, _doorID);
+}
+
+//============================================================================
+// DoorResetEvent
+//============================================================================
+DoorResetEvent::DoorResetEvent(Building * building, int doorID, double time) :
+    Event(time), _building(building), _doorID(doorID)
+{
+}
+
+void DoorResetEvent::Process()
 {
     _building->GetTransition(_doorID)->ResetDoorUsage();
+}
+
+std::string DoorResetEvent::ToString() const
+{
+    return fmt::format(FMT_STRING("After {} sec: reset_usage door {}"), _time, _doorID);
 }

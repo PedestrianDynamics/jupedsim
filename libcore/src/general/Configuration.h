@@ -48,6 +48,7 @@ public:
         _maxOpenMPThreads = 1;
         _seed             = 0;
         _fps              = 8;
+        _precision        = 2;
         _linkedCellSize   = 2.2;     // meter
         _model            = nullptr; // std::shared_ptr<OperationalModel>(new OperationalModel());
         _tMax             = 500;     // seconds
@@ -132,6 +133,10 @@ public:
     double GetFps() const { return _fps; };
 
     void SetFps(double fps) { _fps = fps; };
+
+    unsigned int GetPrecision() const { return _precision; };
+
+    void SetPrecision(unsigned int precision) { _precision = precision; };
 
     double GetLinkedCellSize() const { return _linkedCellSize; };
 
@@ -390,6 +395,7 @@ private:
     int _maxOpenMPThreads;
     unsigned int _seed;
     double _fps;
+    unsigned int _precision;
     double _linkedCellSize;
     std::shared_ptr<OperationalModel> _model;
     double _tMax;

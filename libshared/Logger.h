@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fmt/format.h>
+#include <fmt/ostream.h>
 #include <string_view>
 
 namespace Logging
