@@ -271,7 +271,7 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
            _deltaF,
            _vComponent,
            _IgnoreBackwardMovement) == false) {
-        LOG_ERROR("Could not parse the file {}", filename.c_str());
+        LOG_ERROR("Could not parse the file {}", filename);
         return EXIT_FAILURE;
     }
 
