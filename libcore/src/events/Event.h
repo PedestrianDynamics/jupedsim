@@ -4,35 +4,23 @@
 
 #include <Logger.h>
 #include <algorithm>
+#include <iostream>
 #include <string>
-
-// Describes the event
-enum class EventAction {
-    DOOR_OPEN,
-    DOOR_CLOSE,
-    DOOR_TEMP_CLOSE,
-    DOOR_RESET_USAGE,
-    TRAIN_ARRIVAL,
-    TRAIN_DEPARTURE
-};
 
 class Event
 {
 protected:
     /**
+     * Creates an Event.
+     * @param time when the event shall take place
+     * @param action type of the event
+     */
+    explicit Event(double time);
+
+    /**
      * Time the event is triggered
      */
     double _time;
-
-    /**
-     * Type of event
-     */
-    EventAction _action;
-
-    /**
-     * Geometry where the event should be applied to
-     */
-    Building * _building;
 
 public:
     virtual ~Event() = default;
@@ -43,23 +31,14 @@ public:
     virtual void Process() = 0;
 
     /**
-     * Sets the geometry for the event
-     * @param building Geometry, on which the event should be applied
-     */
-    void SetBuilding(Building * building) { _building = building; }
-
-    /**
-      * @return the type of the event
-      */
-    [[nodiscard]] const EventAction & GetAction() const { return _action; };
-
-    /**
       * @return the time at which the event was recorded
       */
     [[nodiscard]] double GetTime() const { return _time; };
 
     /**
-      * @return a description of the event
+      * @return human readable string representation
       */
-    [[nodiscard]] virtual std::string GetDescription() const = 0;
+    [[nodiscard]] virtual std::string ToString() const = 0;
 };
+
+std::ostream & operator<<(std::ostream & out, const Event & event);

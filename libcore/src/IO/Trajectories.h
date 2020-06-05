@@ -42,8 +42,11 @@ protected:
     std::map<OptionalOutput, std::string> _optionalOutputHeader;
     std::map<OptionalOutput, std::string> _optionalOutputInfo;
 
+private:
+    unsigned int _precision;
+
 public:
-    Trajectories()          = default;
+    explicit Trajectories(unsigned int precision) : _precision{precision} {};
     virtual ~Trajectories() = default;
     virtual void WriteHeader(long nPeds, double fps, Building * building, int seed, int count) = 0;
     virtual void WriteGeometry(Building * building)                                            = 0;
@@ -54,6 +57,7 @@ public:
         _optionalOutputOptions = options;
     }
 
+    virtual unsigned int GetPrecision() { return _precision; }
     void Write(const std::string & str) { _outputHandler->Write(str); }
 
     void SetOutputHandler(std::shared_ptr<OutputHandler> outputHandler)
@@ -65,8 +69,7 @@ public:
 class TrajectoriesTXT : public Trajectories
 {
 public:
-    TrajectoriesTXT();
-
+    explicit TrajectoriesTXT(unsigned precision);
     void WriteHeader(long nPeds, double fps, Building * building, int seed, int count) override;
     void WriteGeometry(Building * building) override;
     void WriteFrame(int frameNr, Building * building) override;

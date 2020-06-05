@@ -4,113 +4,116 @@
 #include "geometry/Wall.h"
 #include "geometry/helper/CorrectGeometry.h"
 
-void TrainEvent::Process()
+#include <fmt/format.h>
+
+TrainArrivalEvent::TrainArrivalEvent(double time, TrainEventInfo info) :
+    Event(time), _info(std::move(info))
 {
-    LOG_INFO("{}", GetDescription());
-    switch(_action) {
-        case EventAction::TRAIN_ARRIVAL:
-            TrainArrival();
-            break;
-        case EventAction::TRAIN_DEPARTURE:
-            TrainDeparture();
-            break;
-        default:
-            throw std::runtime_error("Wrong EventAction for TrainEvent!");
-    }
 }
 
-std::string TrainEvent::GetDescription() const
+void TrainArrivalEvent::Process()
 {
-    std::string action;
-    switch(_action) {
-        case EventAction::TRAIN_ARRIVAL:
-            action = "Train arrives";
-            break;
-        case EventAction::TRAIN_DEPARTURE:
-            action = "Train departs";
-            break;
-        default:
-            throw std::runtime_error("Wrong EventAction for TrainEvent!");
-    }
-    return fmt::format(
-        FMT_STRING("After {} sec: {}, type: {}, track_id: {}"),
-        _time,
-        action,
-        _trainType._type,
-        _trackID);
-}
-
-void TrainEvent::TrainArrival()
-{
-    auto track = _building->GetTrack(_trackID);
+    auto track = _info.building->GetTrack(_info.trackID);
     if(!track.has_value()) {
         std::string message = fmt::format(
-            FMT_STRING("Could not find a track with ID {}. Please check your geometry."), _trackID);
+            FMT_STRING("Could not find a track with ID {}. Please check your geometry."),
+            _info.trackID);
         throw std::runtime_error(message);
     }
 
-    auto start = _building->GetTrackStart(_trackID);
+    auto start = _info.building->GetTrackStart(_info.trackID);
     if(!start.has_value()) {
         std::string message = fmt::format(
             FMT_STRING("Could not find a start for track with ID {}. Please check your geometry."),
-            _trackID);
+            _info.trackID);
         throw std::runtime_error(message);
     }
 
     int roomID    = track->_roomID;
     int subroomID = track->_subRoomID;
-    auto subroom  = _building->GetRoom(roomID)->GetSubRoom(subroomID);
+    auto subroom  = _info.building->GetRoom(roomID)->GetSubRoom(subroomID);
 
     geometry::helper::AddTrainDoors(
-        _trainID, *_building, *subroom, _trainType, track.value(), _trainStartOffset, _fromEnd);
+        _info.trainID,
+        *_info.building,
+        *subroom,
+        _info.trainType,
+        track.value(),
+        _info.trainStartOffset,
+        _info.fromEnd);
 }
 
-void TrainEvent::TrainDeparture()
+std::string TrainArrivalEvent::ToString() const
 {
-    auto track = _building->GetTrack(_trackID);
+    return fmt::format(
+        FMT_STRING("After {} sec: {}, type: {}, platform: {}"),
+        _time,
+        "Train arrives",
+        _info.trainType._type,
+        _info.trackID);
+}
+
+TrainDepartureEvent::TrainDepartureEvent(double time, TrainEventInfo info) :
+    Event(time), _info(std::move(info))
+{
+}
+
+void TrainDepartureEvent::Process()
+{
+    auto track = _info.building->GetTrack(_info.trackID);
     if(!track.has_value()) {
         throw std::runtime_error("");
     }
 
     int roomID    = track->_roomID;
     int subroomID = track->_subRoomID;
-    auto subroom  = _building->GetRoom(roomID)->GetSubRoom(subroomID);
+    auto subroom  = _info.building->GetRoom(roomID)->GetSubRoom(subroomID);
 
     // remove temp added walls
-    auto tempAddedWalls = _building->GetTrainWallsAdded(_trainID);
+    auto tempAddedWalls = _info.building->GetTrainWallsAdded(_info.trainID);
     if(tempAddedWalls.has_value()) {
         std::for_each(
             std::begin(tempAddedWalls.value()),
             std::end(tempAddedWalls.value()),
             [&subroom](const Wall & wall) { subroom->RemoveWall(wall); });
 
-        _building->ClearTrainWallsAdded(_trainID);
+        _info.building->ClearTrainWallsAdded(_info.trainID);
     }
 
     // add removed walls
-    auto tempRemovedWalls = _building->GetTrainWallsRemoved(_trainID);
+    auto tempRemovedWalls = _info.building->GetTrainWallsRemoved(_info.trainID);
     if(tempRemovedWalls.has_value()) {
         std::for_each(
             std::begin(tempRemovedWalls.value()),
             std::end(tempRemovedWalls.value()),
             [&subroom](const Wall & wall) { subroom->AddWall(wall); });
 
-        _building->ClearTrainWallsRemoved(_trainID);
+        _info.building->ClearTrainWallsRemoved(_info.trainID);
     }
 
     // remove added doors
-    auto tempDoors = _building->GetTrainDoorsAdded(_trainID);
+    auto tempDoors = _info.building->GetTrainDoorsAdded(_info.trainID);
     if(tempDoors.has_value()) {
         std::for_each(
             std::begin(tempDoors.value()),
             std::end(tempDoors.value()),
             [&subroom, this](Transition & door) {
                 subroom->RemoveTransitionByUID(door.GetUniqueID());
-                _building->RemoveTransition(&door);
+                _info.building->RemoveTransition(&door);
             });
 
-        _building->ClearTrainDoorsAdded(_trainID);
+        _info.building->ClearTrainDoorsAdded(_info.trainID);
     }
 
     subroom->Update();
+}
+
+std::string TrainDepartureEvent::ToString() const
+{
+    return fmt::format(
+        FMT_STRING("After {} sec: {}, type: {}, platform: {}"),
+        _time,
+        "Train departs",
+        _info.trainType._type,
+        _info.trackID);
 }

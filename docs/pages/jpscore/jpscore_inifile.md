@@ -6,7 +6,7 @@ sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_inifile.html
 summary:  The project file where the settings for a jpscore simulation are defined. Within this file properties of pedestrians, model parameters, etc can be given.
-last_updated: April 17, 2020
+last_updated: May 25, 2020
 ---
 
 ## Header
@@ -45,15 +45,29 @@ The header comprises the following elements:
 -  The trajectory file
 
 ```bash
- <trajectories format="plain" fps="8" color_mode="velocity">
+ <trajectories format="plain" fps="8" precision="2" color_mode="velocity">
     <file location="trajectories.txt" />
  </trajectories>
 ```
 
 The options for the format are
 
--   `plain`: simple text format. See section [plain](jpscore_trajectory#txt).
-    - `optional_output`: possibility to give additional output. Set any of these values to `TRUE` (not case sensitive) to get the according value. `FALSE`, any other value and ignoring the option will lead to no output.
+- `plain`: simple text format. See section [plain](jpscore_trajectory#txt).
+- `fps`: defines the frame rate per second for the trajectories.
+- `precision`: define the precision of the trajectories' points. Value can be between 1 and 6. (default: 2).
+- `color_mode`: coloring agents in the trajectories. Options are:
+    - `velocity` (default): color is proportional to speed (slow --> red).
+    - `spotlight`
+    - `group`: color by group
+    - `knowledge`
+    - `router`
+    - `final_goal`
+    - `intermediate_goal`
+
+- `file location` defines the location of the trajectories.
+       All paths are relative to the location of the project file.
+
+- `optional_output`: possibility to give additional output. Set any of these values to `TRUE` (not case sensitive) to get the according value. `FALSE`, any other value and ignoring the option will lead to no output.
         - `speed`: speed of the pedestrian
         - `velocity`: x,y components of the pedestrians's velocity
         - `final_goal`: id of the final goal the pedestrian is heading to
@@ -63,29 +77,12 @@ The options for the format are
         - `router`: router used by the pedestrian (id accoriding to ini-file)
         - `spotlight`: pedestrian is highlighted.
 
-        ```xml
-            <trajectories format="plain"  fps="8">
-              <file location="bottleneck_traj.txt" />
-              <optional_output speed="FALSE" velocity="TRUE" final_goal="NoOutputWrongValue"  intermediate_goal="false" desired_direction="true" group="TRUE" router="TRUE" spotlight="TRUE"/>
-            </trajectories>
-        ```
-
-{%include warning.html content="xml trajectories tend to become large and hence slow down parsing and visualisation." %}
-
-- The value `fps` defines the frame rate per second for the trajectories.
-
-    - `color_mode`: coloring agents in the trajectories. Options are:
-       - `velocity` (default): color is proportional to speed (slow --> red).
-       - `spotlight`
-       - `group`: color by group
-       - `knowledge`
-       - `router`
-       - `final_goal`
-       - `intermediate_goal`
-
-    - `file location` defines the location of the trajectories.
-       All paths are relative to the location of the project file.
-
+```xml
+<trajectories format="plain"  fps="8">
+<file location="bottleneck_traj.txt" />
+    <optional_output speed="FALSE" velocity="TRUE" final_goal="NoOutputWrongValue"  intermediate_goal="false" desired_direction="true" group="TRUE" router="TRUE" spotlight="TRUE"/>
+</trajectories>
+```
 
 ## Train constraints
 
@@ -93,7 +90,7 @@ In the inifile the following section should be defined, where two files are spec
 - [Train timetable](jpscore_trains.html#train-timetable)
 - [Train types](jpscore_trains.html#train-types)
 
-```
+```xml
  <train_constraints>
    <train_time_table>ttt.xml</train_time_table>
    <train_types>train_types.xml</train_types>

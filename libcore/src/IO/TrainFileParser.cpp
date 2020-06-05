@@ -164,25 +164,14 @@ void TrainFileParser::ParseTrainTimeTable(
 
         if(trainTypes.find(type) != std::end(trainTypes)) {
             auto trainType = trainTypes.at(type);
+            const TrainEventInfo event_info{
+                &building, id, trackID, trainType, trainOffset, fromEnd};
+
             // Arriving train
-            eventManager.AddEvent(std::make_unique<TrainEvent>(
-                arrivalTime,
-                EventAction::TRAIN_ARRIVAL,
-                id,
-                trackID,
-                trainType,
-                trainOffset,
-                fromEnd));
+            eventManager.AddEvent(std::make_unique<TrainArrivalEvent>(arrivalTime, event_info));
 
             // Departing train
-            eventManager.AddEvent(std::make_unique<TrainEvent>(
-                departureTime,
-                EventAction::TRAIN_DEPARTURE,
-                id,
-                trackID,
-                trainType,
-                trainOffset,
-                fromEnd));
+            eventManager.AddEvent(std::make_unique<TrainDepartureEvent>(departureTime, event_info));
 
             building.AddTrain(id, trainType);
         } else {
@@ -229,7 +218,6 @@ std::map<std::string, TrainType> TrainFileParser::ParseTrainTypes(const fs::path
 std::optional<TrainType> TrainFileParser::ParseTrainTypeNode(TiXmlElement * node)
 {
     LOG_INFO("Loading train type");
-
 
     std::string type = xmltoa(node->Attribute("type"), "NO_TYPE");
     if(type == "NO_TYPE") {
