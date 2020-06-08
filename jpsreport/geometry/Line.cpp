@@ -28,7 +28,6 @@
 
 #include "Point.h"
 //#include "SubRoom.h"
-#include "../IO/OutputHandler.h"
 #include "../general/Macros.h"
 #include "Line.h"
 

@@ -40,7 +40,6 @@ using namespace std::chrono;
 
 int main(int argc, char ** argv)
 {
-    Log = new STDIOHandler();
     // Parsing the arguments
     ArgumentParser * args                       = new ArgumentParser();
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -62,7 +61,6 @@ int main(int argc, char ** argv)
             std::cout << "INFO: \tEnd Analysis for the file: " << File.string().c_str() << "\n";
         }
     } else {
-        //Log->Write("INFO:\tFail to parse the ini file");
         LOG_INFO("Finishing...");
     }
 
@@ -75,6 +73,5 @@ int main(int argc, char ** argv)
     std::cout << "Time elapsed:\t " << duration << " [s]\n";
 
     delete args;
-    delete Log;
     return (EXIT_SUCCESS);
 }

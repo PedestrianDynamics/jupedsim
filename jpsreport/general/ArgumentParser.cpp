@@ -45,14 +45,12 @@
 #endif
 #include "../../libcore/src/general/Compiler.h"
 #include "../Analysis.h"
-#include "../IO/OutputHandler.h"
 #include "../tinyxml/tinyxml.h"
 #include "ArgumentParser.h"
 
 #include <boost/range/iterator_range.hpp>
 
 using namespace std;
-
 
 void Logs()
 {
@@ -99,8 +97,6 @@ ArgumentParser::ArgumentParser()
     _isMethodJ              = false;
     _steadyStart            = 100;
     _steadyEnd              = 1000;
-    _errorLogFile           = "log.txt";
-    _log                    = 0; //stdio as default
     _trajectoriesLocation   = "./";
     _trajectoriesFilename   = "";
     _projectRootDir         = "./";
@@ -180,35 +176,6 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
     if(xMainNode->ValueStr() != "JPSreport") {
         LOG_ERROR("Root element value is not 'JPSreport'.");
         return false;
-    }
-    if(xMainNode->FirstChild("logfile")) {
-        fs::path logfile(xMainNode->FirstChild("logfile")->FirstChild()->Value());
-        // logfile is created at location of .ini-file
-        logfile = GetProjectRootDir() / logfile;
-        this->SetErrorLogFile(logfile);
-        this->SetLog(1);
-        LOG_INFO("logfile <{}>", GetErrorLogFile().string());
-    }
-    switch(this->GetLog()) {
-        case 0:
-            if(Log)
-                delete Log;
-            Log = new STDIOHandler();
-            break;
-        case 1: {
-            char name[CLENGTH] = "";
-            sprintf(name, "%s", GetErrorLogFile().string().c_str());
-            if(Log)
-                delete Log;
-            Log = new FileHandler(name);
-
-            //write basic information to file
-            Logs(); //Logging to file starts now
-
-        } break;
-        default:
-            LOG_ERROR("Wrong option for Log file!");
-            exit(0);
     }
 
     //geometry
@@ -683,7 +650,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
 std::optional<ConfigData_DIJ> ArgumentParser::ParseDIJParams(TiXmlElement * xMethod)
 {
     if(string(xMethod->Attribute("enabled")) == "false") {
-        Log->Write("INFO: \tMethod is disabled");
+        LOG_INFO("Method is disabled");
         return nullopt;
     }
 
@@ -764,17 +731,6 @@ std::optional<ConfigData_DIJ> ArgumentParser::ParseDIJParams(TiXmlElement * xMet
     }
 
     return configData;
-}
-
-
-const fs::path & ArgumentParser::GetErrorLogFile() const
-{
-    return _errorLogFile;
-}
-
-int ArgumentParser::GetLog() const
-{
-    return _log;
 }
 
 const fs::path & ArgumentParser::GetGeometryFilename() const
@@ -885,13 +841,3 @@ MeasurementArea * ArgumentParser::GetMeasurementArea(int id)
     }
     return _measurementAreas[id];
 }
-
-void ArgumentParser::SetErrorLogFile(fs::path errorLogFile)
-{
-    _errorLogFile = errorLogFile;
-};
-
-void ArgumentParser::SetLog(int log)
-{
-    _log = log;
-};

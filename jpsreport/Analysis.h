@@ -55,7 +55,6 @@ typedef boost::geometry::model::segment<boost::geometry::model::d2::point_xy<dou
 
 #include <map>
 #include <vector>
-extern OutputHandler * Log;
 
 class Analysis
 {

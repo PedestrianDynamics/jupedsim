@@ -62,7 +62,6 @@
 
 using boost::geometry::dsv;
 using namespace std;
-OutputHandler * Log = new STDIOHandler();
 
 /************************************************
  // Konstruktoren

@@ -27,8 +27,6 @@
 
 
 #include "Room.h"
-
-#include "../IO/OutputHandler.h"
 #include "SubRoom.h"
 
 #include <memory>
@@ -47,7 +45,6 @@ Room::Room()
     _egressTime = 0;
     _caption    = "no room caption";
     _zPos       = -1.0;
-    _outputFile = NULL;
 }
 
 Room::Room(const Room & orig)
@@ -57,7 +54,6 @@ Room::Room(const Room & orig)
     _zPos       = orig.GetZPos();
     _state      = orig.GetState();
     _egressTime = orig.GetEgressTime();
-    _outputFile = orig.GetOutputHandler();
 }
 
 Room::~Room()
@@ -182,14 +178,4 @@ const vector<int> & Room::GetAllTransitionsIDs() const
 void Room::AddTransitionID(int ID)
 {
     _transitionsIDs.push_back(ID);
-}
-
-void Room::SetOutputHandler(OutputHandler * oh)
-{
-    _outputFile = oh;
-}
-
-OutputHandler * Room::GetOutputHandler() const
-{
-    return _outputFile;
 }

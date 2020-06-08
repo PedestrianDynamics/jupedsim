@@ -28,6 +28,7 @@
 
 #include "Goal.h"
 
+#include "../general/Macros.h"
 #include "Point.h"
 #include "Wall.h"
 

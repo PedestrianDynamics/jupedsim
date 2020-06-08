@@ -28,7 +28,7 @@
 
 #include "Obstacle.h"
 
-#include "../IO/OutputHandler.h"
+#include "../general/Macros.h"
 #include "Line.h"
 #include "Point.h"
 #include "Wall.h"
