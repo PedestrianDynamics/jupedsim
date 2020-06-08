@@ -1,124 +1,97 @@
 #pragma once
 #include "Event.h"
+#include "geometry/Building.h"
+#include "geometry/Point.h"
 
 #include <string>
-#include <vector>
 
+struct TrainEventInfo {
+    /**
+     * Building to operate on
+     */
+    Building * building;
 
-class TrainEvent : public Event
-{
-private:
     /**
      * ID of the train handled by this event
      */
-    int _trainID;
+    int trainID;
 
     /**
      * ID of platform the train is acting on
      */
-    int _platformID;
+    int platformID;
 
     /**
      * Type of train
      */
-    TrainType _trainType;
+    TrainType trainType;
 
     /**
      * ID of room where the train is located
      */
-    int _roomID;
+    int roomID;
 
     /**
      * ID of the subroom where the train is located
      */
-    int _subroomID;
+    int subroomID;
 
     /**
      * Starting point of the track
      */
-    Point _trackStart;
+    Point trackStart;
 
     /**
      * End point of the track
      */
-    Point _trackEnd;
+    Point trackEnd;
 
     /**
      * Starting point of the train
      */
-    Point _trainStart;
+    Point trainStart;
 
     /**
      * End point of the train
      */
-    Point _trainEnd;
+    Point trainEnd;
+};
+
+/**
+ * Let a train arrive at the given platform (\a _platformID) in \a _roomID, \a _subroomID.
+ * The following happens:
+ * - find projected points of train doors on walls
+ * - split the walls at the projected point
+ * - add new doors, new walls to subroom
+ * - add new doors, new walls, old walls to building fields (for restoring)
+ * - update subroom
+ */
+class TrainArrivalEvent : public Event
+{
+private:
+    TrainEventInfo _info;
 
 public:
-    /**
-     * Constructs a TrainEvent
-     * @param time time at which the event is triggered
-     * @param action action of event
-     * @param trainID ID of train
-     * @param platformID ID of platform, where the train is located
-     * @param trainType Type of train
-     * @param roomID ID of room, where the train is located
-     * @param subroom ID of subroom, where the train is located
-     * @param trackStart starting point of track
-     * @param trackEnd end point of track
-     * @param trainStart starting point of train
-     * @param trainEnd end point of train
-     */
-    TrainEvent(
-        double time,
-        EventAction action,
-        int trainID,
-        int platformID,
-        TrainType trainType,
-        int roomID,
-        int subroomID,
-        Point trackStart,
-        Point trackEnd,
-        Point trainStart,
-        Point trainEnd) :
-        _trainID(trainID),
-        _platformID(platformID),
-        _trainType(trainType),
-        _roomID(roomID),
-        _subroomID(subroomID),
-        _trackStart(trackStart),
-        _trackEnd(trackEnd),
-        _trainStart(trainStart),
-        _trainEnd(trainEnd)
-    {
-        _time   = time;
-        _action = action;
-    };
+    TrainArrivalEvent(double time, TrainEventInfo info);
+    void Process() override;
+    [[nodiscard]] std::string ToString() const override;
+};
 
-    virtual ~TrainEvent() = default;
-
-    virtual void Process() override;
-
-    [[nodiscard]] std::string GetDescription() const override;
-
+/**
+ * Let a arrived train depart from the given platform (\a _platformID) in \a _roomID, \a _subroomID.
+ * The following happens:
+ * - remove walls added by arriving train
+ * - remove doors added by arriving train
+ * - restore old walls
+ * - update subroom
+ */
+class TrainDepartureEvent : public Event
+{
 private:
-    /**
-     * Let a train arrive at the given platform (\a _platformID) in \a _roomID, \a _subroomID.
-     * The following happens:
-     * - find projected points of train doors on walls
-     * - split the walls at the projected point
-     * - add new doors, new walls to subroom
-     * - add new doors, new walls, old walls to building fields (for restoring)
-     * - update subroom
-     */
-    void TrainArrival();
+    TrainEventInfo _info;
 
-    /**
-     * Let a arrived train depart from the given platform (\a _platformID) in \a _roomID, \a _subroomID.
-     * The following happens:
-     * - remove walls added by arriving train
-     * - remove doors added by arriving train
-     * - restore old walls
-     * - update subroom
-     */
-    void TrainDeparture();
+public:
+    TrainDepartureEvent(double time, TrainEventInfo info);
+    void Process() override;
+    [[nodiscard]] std::string ToString() const override;
 };

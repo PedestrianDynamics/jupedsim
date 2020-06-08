@@ -31,17 +31,19 @@ namespace EventFileParser
 /**
   * Reads the events from a specific file and adds them directly to \p eventManager
   * @param eventManager Manager for handling the events
+  * @param building the events will operate on
   * @param eventFile File containing the events
   */
-void ParseDoorEvents(EventManager & eventManager, const fs::path & eventFile);
+void ParseDoorEvents(EventManager & eventManager, Building * building, const fs::path & eventFile);
 
 
 /**
  * Reads the events from a specific schedule file and adds them directly to \p eventManager
  * @param eventManager Manager for handling the events
+ * @param building the events will operate on
  * @param scheduleFile File containing the schedule
  */
-void ParseSchedule(EventManager & eventManager, const fs::path & scheduleFile);
+void ParseSchedule(EventManager & eventManager, Building * building, const fs::path & scheduleFile);
 
 /**
  * Reads the max agents defintions from the schedule file and returns them as a map of transition ID to maxAgents.
