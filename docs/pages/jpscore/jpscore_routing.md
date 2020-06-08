@@ -9,7 +9,6 @@ summary: In order to navigate in (complex) buildings a router is needed to assig
 last_updated: Dec 21, 2019
 ---
 
-
 ## Floorfield Router
 
 The floorfield-router uses floorfields
@@ -71,29 +70,19 @@ Following snippet is a definition example of the routing information:
   </router>
 </route_choice_models>
 ```
+## Global quickest path
 
-## Cognitive Map router
+Route choice based on the estimated travel time.
+This router takes traffic into consideration.
 
 ```xml
-<router router_id="7" description="cognitive_map">
-  <sensors>
-      <sensor sensor_id="1" description="Room2Corridor"/>
-      <sensor sensor_id="2" description="Smoke" status="activated"/>
-  </sensors>
-  <cognitive_map status="complete" />
-</router>
+<route_choice_models>
+  <router router_id="1" description="quickest">
+    <parameters>
+    </parameters>
+  </router>
+</route_choice_models>
 ```
-
-{%include note.html content="In case the smoke sensor is used, jpsfire should be initialised before the router"%}
-
-For example in the inifile add a `JPSfire` section like this:
-```xml
-<JPSfire>
-    <A_smoke_sensor smoke_factor_grids="/path/tp//3_sfgrids/" update_time="10.0" final_time="100.0" />
-</JPSfire>
-```
-
-See also [the smoke sensor documentation in JPSfire](jpscore_smoke_sensor)
 
 
 
