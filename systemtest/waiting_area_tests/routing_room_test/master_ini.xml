@@ -1,0 +1,82 @@
+<JuPedSim xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" project="JPS-Project" version="0.7"
+          xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
+
+    <header>
+        <seed>1.0</seed>
+        <max_sim_time>100</max_sim_time>
+        <geometry>../geometry.xml</geometry>
+        <trajectories format="plain" fps="10">
+            <file location="trajectories.xml"/>
+        </trajectories>
+    </header>
+
+
+    <routing>
+        <goals>
+            <waiting_area caption="wa1" id="1" is_open="true" max_peds="1000" min_peds="1" room_id="2" subroom_id="0"
+                          waiting_time="0">
+                <polygon>
+                    <vertex px="1" py="1.8"/>
+                    <vertex px="3" py="1.8"/>
+                    <vertex px="3" py="0.5"/>
+                    <vertex px="1" py="0.5"/>
+                    <vertex px="1" py="1.8"/>
+                </polygon>
+                <next_wa id="2" p="1"/>
+            </waiting_area>
+            <waiting_area caption="wa1" id="2" is_open="true" max_peds="1000" min_peds="1" room_id="2" subroom_id="0"
+                          waiting_time="0">
+                <polygon>
+                    <vertex px="10" py="1.8"/>
+                    <vertex px="13" py="1.8"/>
+                    <vertex px="13" py="0.5"/>
+                    <vertex px="10" py="0.5"/>
+                    <vertex px="10" py="1.8"/>
+                </polygon>
+                <next_wa id="-1" p="1"/>
+            </waiting_area>
+        </goals>
+    </routing>
+
+    <agents operational_model_id="3">
+        <agents_distribution>
+            <group agent_parameter_id="1" goal_id="-1" group_id="0" number="1" room_id="0" router_id="1"
+                   subroom_id="0"/>
+            <group agent_parameter_id="1" goal_id="1" group_id="1" number="1" room_id="0" router_id="1" subroom_id="0"/>
+        </agents_distribution>
+    </agents>
+
+    <operational_models>
+        <model description="Tordeux2015" operational_model_id="3">
+            <model_parameters>
+                <solver>euler</solver>
+                <stepsize>0.05</stepsize>
+                <exit_crossing_strategy>[8,9]</exit_crossing_strategy>
+                <linkedcells cell_size="2.2" enabled="true"/>
+                <force_ped D="0.1" a="5"/>
+                <force_wall D="0.02" a="5"/>
+            </model_parameters>
+            <agent_parameters agent_parameter_id="1">
+                <v0 mu="1.0" sigma="0.001"/>
+                <bmax mu="0.15" sigma="0.00000"/>
+                <bmin mu="0.15" sigma="0.00000"/>
+                <amin mu="0.15" sigma="0.00000"/>
+                <tau mu="0.5" sigma="0.001"/>
+                <atau mu="0.0" sigma="0.00000"/>
+                <T mu="1" sigma="0.001"/>
+            </agent_parameters>
+
+        </model>
+    </operational_models>
+
+    <route_choice_models>
+        <router description="ff_global_shortest" router_id="1">
+            <parameters>
+                <write_VTK_files>true</write_VTK_files>
+                <!-- <navigation_lines file="corner_routing.xml" /> -->
+            </parameters>
+        </router>
+
+    </route_choice_models>
+
+</JuPedSim>
