@@ -28,7 +28,6 @@
 
 #include "Transition.h"
 
-#include "../IO/OutputHandler.h"
 #include "Room.h"
 #include "SubRoom.h"
 

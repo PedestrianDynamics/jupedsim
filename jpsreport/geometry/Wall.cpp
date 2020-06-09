@@ -28,6 +28,8 @@
 
 #include "Wall.h"
 
+#include "../general/Macros.h"
+
 using namespace std;
 
 /************************************************************
