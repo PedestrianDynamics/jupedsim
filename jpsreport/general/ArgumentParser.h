@@ -33,7 +33,6 @@
 #include "../tinyxml/tinyxml.h"
 #include "Macros.h"
 
-#include <Logger.h>
 #include <boost/geometry/geometries/adapted/c_array.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/polygon.hpp>

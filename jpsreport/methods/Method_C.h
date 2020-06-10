@@ -31,7 +31,6 @@
 #include "../Analysis.h"
 #include "PedData.h"
 
-#include <Logger.h>
 
 class Method_C
 {

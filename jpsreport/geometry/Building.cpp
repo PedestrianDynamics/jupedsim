@@ -32,6 +32,8 @@
 #include "../geometry/SubRoom.h"
 #include "../tinyxml/tinyxml.h"
 
+#include <Logger.h>
+
 #ifdef _SIMULATOR
 #include "../mpi/LCGrid.h"
 #include "../pedestrian/PedDistributor.h"

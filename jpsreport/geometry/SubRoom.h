@@ -32,7 +32,6 @@
 
 #include "Wall.h"
 
-#include <Logger.h>
 #include <string>
 #include <vector>
 

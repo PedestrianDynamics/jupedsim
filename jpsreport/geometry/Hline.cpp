@@ -30,6 +30,8 @@
 
 #include "SubRoom.h"
 
+#include <Logger.h>
+
 using namespace std;
 
 Hline::Hline()

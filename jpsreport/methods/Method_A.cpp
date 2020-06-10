@@ -30,6 +30,7 @@
 
 #include "../Analysis.h"
 
+#include <Logger.h>
 #include <iostream>
 
 using std::ofstream;

@@ -29,7 +29,6 @@
 #ifndef OBSTACLE_H_
 #define OBSTACLE_H_
 
-#include <Logger.h>
 #include <string>
 #include <vector>
 

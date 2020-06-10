@@ -28,7 +28,9 @@
 
 #include "PedData.h"
 
+#include <Logger.h>
 #include <cmath>
+#include <fstream>
 #include <string>
 #include <unordered_set>
 

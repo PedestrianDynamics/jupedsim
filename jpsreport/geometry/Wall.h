@@ -31,7 +31,6 @@
 
 #include "Line.h"
 
-#include <Logger.h>
 
 class Wall : public Line
 {

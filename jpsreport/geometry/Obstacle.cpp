@@ -33,6 +33,7 @@
 #include "Point.h"
 #include "Wall.h"
 
+#include <Logger.h>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>

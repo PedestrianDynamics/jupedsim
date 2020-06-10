@@ -31,6 +31,7 @@
 #include "../general/Macros.h"
 #include "Line.h"
 
+#include <Logger.h>
 #include <cmath>
 #include <sstream>
 

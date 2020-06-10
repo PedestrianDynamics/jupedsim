@@ -35,6 +35,8 @@
 #include "Transition.h"
 #include "Wall.h"
 
+#include <Logger.h>
+
 
 #ifdef _SIMULATOR
 #include "../pedestrian/Pedestrian.h"

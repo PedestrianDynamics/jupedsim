@@ -41,6 +41,7 @@
 #include "methods/PedData.h"
 #include "methods/VoronoiDiagram.h"
 
+#include <Logger.h>
 #include <algorithm> // std::min_element, std::max_element
 #include <cfloat>
 #include <fstream>

@@ -32,6 +32,8 @@
 #include "Point.h"
 #include "Wall.h"
 
+#include <Logger.h>
+
 
 using namespace std;
 

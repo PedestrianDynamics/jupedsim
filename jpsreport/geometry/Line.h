@@ -31,7 +31,6 @@
 
 #include "Point.h"
 
-#include <Logger.h>
 #include <string>
 
 class Line

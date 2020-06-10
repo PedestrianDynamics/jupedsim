@@ -31,7 +31,6 @@
 
 #include "Crossing.h"
 
-#include <Logger.h>
 #include <string>
 
 class Room;

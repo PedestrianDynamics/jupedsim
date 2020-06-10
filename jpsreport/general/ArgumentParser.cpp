@@ -25,8 +25,14 @@
  *
  *
  **/
+#include "ArgumentParser.h"
 
+#include "../../libcore/src/general/Compiler.h"
+#include "../Analysis.h"
+#include "../tinyxml/tinyxml.h"
 
+#include <Logger.h>
+#include <boost/range/iterator_range.hpp>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -43,12 +49,7 @@
 #define omp_get_thread_num() 0
 #define omp_get_max_threads() 1
 #endif
-#include "../../libcore/src/general/Compiler.h"
-#include "../Analysis.h"
-#include "../tinyxml/tinyxml.h"
-#include "ArgumentParser.h"
 
-#include <boost/range/iterator_range.hpp>
 
 using namespace std;
 

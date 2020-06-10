@@ -32,12 +32,10 @@
 #include "../general/Macros.h"
 #include "../tinyxml/tinyxml.h"
 
-#include <Logger.h>
 #include <algorithm> // std::min_element, std::max_element
 #include <boost/algorithm/string.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
-#include <fstream>
 #include <map>
 #include <string>
 #include <vector>

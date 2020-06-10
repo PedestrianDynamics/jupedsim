@@ -30,6 +30,8 @@
 
 #include "../general/Macros.h"
 
+#include <Logger.h>
+
 using namespace std;
 
 /************************************************************

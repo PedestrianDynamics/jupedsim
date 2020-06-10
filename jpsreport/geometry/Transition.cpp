@@ -31,6 +31,8 @@
 #include "Room.h"
 #include "SubRoom.h"
 
+#include <Logger.h>
+
 using namespace std;
 
 /************************************************************

@@ -30,6 +30,7 @@
 
 #include "SubRoom.h"
 
+#include <Logger.h>
 #include <memory>
 #include <sstream>
 
