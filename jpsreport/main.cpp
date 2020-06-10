@@ -33,6 +33,7 @@
 #include "general/ArgumentParser.h"
 #include "geometry/Building.h"
 
+#include <Logger.h>
 #include <chrono>
 
 using namespace std;
