@@ -32,13 +32,6 @@
 #include "PedData.h"
 #include "VoronoiDiagram.h"
 
-#include <Logger.h>
-
-//handle more than two person are in one line
-#define dmin 200
-#define joffset 200
-
-
 class Method_J
 {
 public:

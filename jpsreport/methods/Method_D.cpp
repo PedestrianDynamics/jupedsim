@@ -28,13 +28,16 @@
 
 #include "Method_D.h"
 
+#include "../general/Macros.h"
 #include "ConfigData_DIJ.h"
 
+#include <Logger.h>
 #include <cmath>
 #include <iostream>
 #include <map>
 #include <tuple>
 #include <vector>
+
 //using std::string;
 //using std::vector;
 //using std::ofstream;
@@ -158,10 +161,10 @@ bool Method_D::Process(
                     _calcIndividualFD);
             } else {
                 if(IsPointsOnOneLine(XInFrame, YInFrame)) {
-                    if(fabs(XInFrame[1] - XInFrame[0]) < dmin) {
-                        XInFrame[1] += joffset;
+                    if(fabs(XInFrame[1] - XInFrame[0]) < DMIN) {
+                        XInFrame[1] += JPS_OFFSET;
                     } else {
-                        YInFrame[1] += joffset;
+                        YInFrame[1] += JPS_OFFSET;
                     }
                 }
                 std::vector<std::pair<polygon_2d, int>> polygons_id =
@@ -683,9 +686,9 @@ bool Method_D::IsPointsOnOneLine(vector<double> & XInFrame, vector<double> & YIn
 {
     double deltaX    = XInFrame[1] - XInFrame[0];
     bool isOnOneLine = true;
-    if(fabs(deltaX) < dmin) {
+    if(fabs(deltaX) < DMIN) {
         for(unsigned int i = 2; i < XInFrame.size(); i++) {
-            if(fabs(XInFrame[i] - XInFrame[0]) > dmin) {
+            if(fabs(XInFrame[i] - XInFrame[0]) > DMIN) {
                 isOnOneLine = false;
                 break;
             }
@@ -696,7 +699,7 @@ bool Method_D::IsPointsOnOneLine(vector<double> & XInFrame, vector<double> & YIn
         for(unsigned int i = 2; i < XInFrame.size(); i++) {
             double dist =
                 fabs(slope * XInFrame[i] - YInFrame[i] + intercept) / sqrt(slope * slope + 1);
-            if(dist > dmin) {
+            if(dist > DMIN) {
                 isOnOneLine = false;
                 break;
             }
