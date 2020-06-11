@@ -28,6 +28,7 @@
 
 #include "Method_C.h"
 
+#include <Logger.h>
 
 using std::string;
 using std::vector;
@@ -52,13 +53,13 @@ bool Method_C::Process(const PedData & peddata, const double & zPos_measureArea)
     _measureAreaId  = boost::lexical_cast<string>(_areaForMethod_C->_id);
     _fps            = peddata.GetFps();
     OpenFileMethodC();
-    Log->Write("------------------------Analyzing with Method C-----------------------------");
+    LOG_INFO("------------------------Analyzing with Method C-----------------------------");
     for(auto ite = _peds_t.begin(); ite != _peds_t.end(); ite++) {
         int frameNr = ite->first;
         int frid    = frameNr + _minFrame;
 
         if(!(frid % 100)) {
-            Log->Write("frame ID = %d", frid);
+            LOG_INFO("frame ID = {}", frid);
         }
 
         vector<int> ids               = _peds_t[frameNr];
@@ -80,9 +81,7 @@ void Method_C::OpenFileMethodC()
     string results_C = tmp.string();
 
     if((_fClassicRhoV = Analysis::CreateFile(results_C)) == nullptr) {
-        Log->Write(
-            "Warning:\tcannot open file %s to write classical density and velocity\n",
-            results_C.c_str());
+        LOG_WARNING("cannot open file {} to write classical density and velocity\n", results_C);
         exit(EXIT_FAILURE);
     }
     fprintf(

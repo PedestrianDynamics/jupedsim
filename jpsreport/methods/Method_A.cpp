@@ -30,6 +30,7 @@
 
 #include "../Analysis.h"
 
+#include <Logger.h>
 #include <iostream>
 
 using std::ofstream;
@@ -70,14 +71,14 @@ bool Method_A::Process(
     for(int i = 0; i < peddata.GetNumPeds(); i++) {
         _passLine[i] = false;
     }
-    Log->Write("------------------------Analyzing with Method A-----------------------------");
+    LOG_INFO("------------------------Analyzing with Method A-----------------------------");
     bool PedInGeometry = false;
     for(std::map<int, std::vector<int>>::iterator ite = _peds_t.begin(); ite != _peds_t.end();
         ite++) {
         int frameNr = ite->first;                      //index starts by 0
         int frid    = frameNr + peddata.GetMinFrame(); // frame in traj file
         if(!(frid % 100)) {
-            Log->Write("frame ID = %d", frid);
+            LOG_INFO("frame ID = {}", frid);
         }
         vector<int> ids = peddata.GetIndexInFrame(frameNr, _peds_t[frameNr], zPos_measureArea);
         const vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
@@ -93,7 +94,7 @@ bool Method_A::Process(
         FlowRate_Velocity(peddata.GetFps(), _accumPedsPassLine, _accumVPassLine);
         WriteFile_N_t(outputRhoV);
     } else {
-        Log->Write("Warning: No pedestrian exists on the plane of the selected Measurement area!!");
+        LOG_WARNING("No pedestrian exists on the plane of the selected Measurement area!!");
     }
     delete[] _passLine;
     return true;
@@ -116,7 +117,7 @@ void Method_A::WriteFile_N_t(string data)
         //string file_N_t ="Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
         string file_N_t = fN_t; //@todo: this is redundant
     } else {
-        Log->Write("ERROR: could not create the file " + fN_t);
+        LOG_ERROR("could not create the file {}", fN_t);
     }
 }
 
@@ -181,7 +182,7 @@ void Method_A::FlowRate_Velocity(
     string fdFlowVelocity = tmp.string();
 
     if((fFD_FlowVelocity = Analysis::CreateFile(fdFlowVelocity)) == nullptr) {
-        Log->Write("cannot open the file to write the Flow-Velocity data\n");
+        LOG_ERROR("cannot open the file to write the Flow-Velocity data\n");
         exit(EXIT_FAILURE);
     }
     fprintf(fFD_FlowVelocity, "#Flow rate(1/s)	\t Mean velocity(m/s)\n");
@@ -219,7 +220,7 @@ void Method_A::FlowRate_Velocity(
         fclose(fFD_FlowVelocity);
         delete[] pedspassT;
     } else {
-        Log->Write("INFO:\tNo person passing the reference line given by Method A!\n");
+        LOG_WARNING("No person passing the reference line given by Method A!\n");
     }
 }
 

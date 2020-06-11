@@ -31,6 +31,7 @@
 
 #include "Line.h"
 
+
 class Wall : public Line
 {
 public:

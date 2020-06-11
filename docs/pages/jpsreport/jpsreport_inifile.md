@@ -21,21 +21,14 @@ In the configuration file, the following sections should be defined:
 ```
 
 ## Logfile
-It might be useful to define a logfile (for debugging purposes):
-```xml
-    <logfile>log.txt</logfile>
-```
-The logfile is created at the location of the inifile by default. Logfile can be written to another **existing** directory if needed, e.g. to results:
-
-```xml
-    <logfile>results/log.txt</logfile>
-```
-
-If no logfile is defined the information is written to the [stdio streams](http://www.cplusplus.com/reference/cstdio/) and can be redirected when executing jpsreport if required.
+The output of the logger regarding errors, warnings and basic information is written to the console by default.
+It is possible to redirect the output and write it to a file by:
 
 ```bash
 ./jpsreport <path_to_inifile> &> log_example.txt
-``` 
+```
+
+{%include note.html content="The definition of a logfile in the inifile is not supported anymore."%}
 
 ## Geometry
 indicates the file name  corresponding to the trajectory files to analyze.

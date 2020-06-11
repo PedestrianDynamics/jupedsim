@@ -117,6 +117,10 @@ typedef VD::cell_type::source_index_type source_index_type;
 // Linked cells
 #define LIST_EMPTY -1
 
+// Handle more than two person are in one line
+#define DMIN 200
+#define JPS_OFFSET 200
+
 
 enum RoomState { ROOM_CLEAN = 0, ROOM_SMOKED = 1 };
 

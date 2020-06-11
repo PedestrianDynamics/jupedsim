@@ -32,7 +32,6 @@
 #ifndef ANALYSIS_H_
 #define ANALYSIS_H_
 
-#include "IO/OutputHandler.h"
 #include "general/ArgumentParser.h"
 #include "general/Macros.h"
 #include "geometry/Building.h"
@@ -46,7 +45,6 @@
 #include <boost/geometry/geometry.hpp>
 #include <tinyxml.h>
 
-
 using namespace boost::geometry;
 typedef model::d2::point_xy<double, cs::cartesian> point_2d;
 typedef model::polygon<point_2d> polygon_2d;
@@ -56,7 +54,6 @@ typedef boost::geometry::model::segment<boost::geometry::model::d2::point_xy<dou
 
 #include <map>
 #include <vector>
-extern OutputHandler * Log;
 
 class Analysis
 {

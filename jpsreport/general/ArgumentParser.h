@@ -48,15 +48,10 @@ using namespace boost::geometry;
 typedef model::d2::point_xy<double, cs::cartesian> point_2d;
 typedef model::polygon<point_2d> polygon_2d;
 
-
-class OutputHandler;
-extern OutputHandler * Log;
-
 class ArgumentParser
 {
 private:
     fs::path _geometryFileName;
-    fs::path _errorLogFile;
     fs::path _trajectoriesLocation;
     fs::path _trajectoriesFilename;
     fs::path _projectRootDir;
@@ -80,7 +75,6 @@ private:
     std::vector<int> _areaIDforMethodA;
     std::vector<int> _areaIDforMethodB;
     std::vector<int> _areaIDforMethodC;
-    int _log;
     std::vector<int> _timeIntervalA;
 
     std::map<int, MeasurementArea *> _measurementAreas;
@@ -96,7 +90,6 @@ public:
     const fs::path & GetTrajectoriesLocation() const;
     const FileFormat & GetFileFormat() const;
     const fs::path & GetGeometryFilename() const;
-    const fs::path & GetErrorLogFile() const;
     const fs::path & GetProjectRootDir() const;
     const fs::path & GetOutputLocation() const;
 
@@ -124,10 +117,7 @@ public:
     bool GetIsOutputGraph() const;
     double GetSteadyStart() const;
     double GetSteadyEnd() const;
-    int GetLog() const;
     bool ParseArgs(int argc, char ** argv);
-    void SetErrorLogFile(fs::path errorLogFile);
-    void SetLog(int log);
     MeasurementArea * GetMeasurementArea(int id);
 
     /**

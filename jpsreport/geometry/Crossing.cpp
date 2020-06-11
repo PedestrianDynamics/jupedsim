@@ -31,6 +31,8 @@
 #include "Room.h"
 #include "SubRoom.h"
 
+#include <Logger.h>
+
 using namespace std;
 
 
@@ -105,9 +107,9 @@ SubRoom * Crossing::GetOtherSubRoom(int roomID, int subroomID) const
     else if(_subRoom2->GetSubRoomID() == subroomID)
         return _subRoom1;
     else {
-        Log->Write(
-            "WARMING: \tCrossing::GetOtherSubRoom No exit found "
-            "on the other side\n ID=%hd, roomID=%hd, subroomID=%hd\n",
+        LOG_WARNING(
+            "Crossing::GetOtherSubRoom No exit found "
+            "on the other side\n ID={}, roomID={}, subroomID={}\n",
             GetID(),
             roomID,
             subroomID);
@@ -119,24 +121,15 @@ SubRoom * Crossing::GetOtherSubRoom(int roomID, int subroomID) const
 // Ausgabe
 void Crossing::WriteToErrorLog() const
 {
-    string s;
-    char tmp[CLENGTH];
-    sprintf(
-        tmp,
-        "\t\tCROSS: %d (%f, %f) -- (%f, %f)\n",
+    LOG_ERROR(
+        "\t\tCROSS: {} ({:.2f}, {:.2f}) -- ({:.2f}, {:.2f})\n\t\t\t\tSubRoom: {} <-> SubRoom: {}\n",
         GetID(),
         GetPoint1().GetX(),
         GetPoint1().GetY(),
         GetPoint2().GetX(),
-        GetPoint2().GetY());
-    s.append(tmp);
-    sprintf(
-        tmp,
-        "\t\t\t\tSubRoom: %d <-> SubRoom: %d\n",
+        GetPoint2().GetY(),
         GetSubRoom1()->GetSubRoomID(),
         GetSubRoom2()->GetSubRoomID());
-    s.append(tmp);
-    Log->Write(s);
 }
 
 // TraVisTo Ausgabe

@@ -28,7 +28,6 @@
 #ifndef METHOD_A_H_
 #define METHOD_A_H_
 
-#include "../IO/OutputHandler.h"
 #include "../general/Macros.h"
 #include "../tinyxml/tinyxml.h"
 #include "MeasurementArea.h"
