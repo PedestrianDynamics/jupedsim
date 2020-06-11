@@ -7,7 +7,7 @@
     <!-- <path location="../data" /> -->
   </trajectories>
 
-  <output location="Output_Methods/"/>
+  <output location="Output_Methods_subrooms/"/>
 
   <measurement_areas unit="m">
     <area_B id="1" type="BoundingBox" zPos="None">
@@ -51,32 +51,47 @@
       <vertex x="28" y="12" />
       <vertex x="28" y="8" />
       <vertex x="24" y="8" />
+    </area_B
+    ><area_B id="9" type="BoundingBox" zPos="None">
+      <vertex x="16" y="12" />
+      <vertex x="20" y="12" />
+      <vertex x="20" y="8" />
+      <vertex x="16" y="8" />
+    </area_B>
+    <area_B id="10" type="BoundingBox" zPos="None">
+      <vertex x="28" y="12" />
+      <vertex x="32" y="12" />
+      <vertex x="32" y="8" />
+      <vertex x="28" y="8" />
     </area_B>
   </measurement_areas>
 
   <velocity frame_step="10" set_movement_direction="None" ignore_backward_movement="false"/>
 
-  <method_A enabled="true">
+  <method_A enabled="false">
     <measurement_area id="2" frame_interval="2"/>
     <measurement_area id="6" frame_interval="2"/>
   </method_A>
 
-  <method_B enabled="true">
+  <method_B enabled="false">
     <measurement_area id="4" />
     <measurement_area id="7" />
   </method_B>
 
-  <method_C enabled="true">
+  <method_C enabled="false">
     <measurement_area id="3"/>
     <measurement_area id="4"/>
   </method_C>
 
   <method_D enabled="true">
+    <measurement_area id="1" start_frame="None" stop_frame="None" get_individual_FD="true"/>
     <measurement_area id="5" start_frame="None" stop_frame="None" get_individual_FD="true"/>
     <measurement_area id="8" start_frame="None" stop_frame="None" get_individual_FD="true"/>
+    <measurement_area id="9" start_frame="None" stop_frame="None" get_individual_FD="true"/>
+    <measurement_area id="10" start_frame="None" stop_frame="None" get_individual_FD="true"/>
     <one_dimensional enabled="false"/>
     <cut_by_circle enabled="true" radius="1.0" edges="10"/>
-    <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/>
+    <profiles enabled="true" grid_size_x="0.20" grid_size_y="0.20"/>
   </method_D>
 
   <method_I enabled="true">
@@ -85,10 +100,11 @@
 	</method_I>
 
   <method_J enabled="true">
+    <measurement_area id="1" start_frame="None" stop_frame="None" get_individual_FD="true"/>
     <measurement_area id="5" start_frame="None" stop_frame="None" get_individual_FD="true"/>
     <one_dimensional enabled="false"/>
     <cut_by_circle enabled="true" radius="1.0" edges="10"/>
-    <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/>
+    <profiles enabled="true" grid_size_x="0.20" grid_size_y="0.20"/>
   </method_J>
 
 </JPSreport>

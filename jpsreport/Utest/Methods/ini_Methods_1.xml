@@ -2,8 +2,6 @@
 <JPSreport project="JPS-Project" version="0.8.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <geometry file="geo_Methods.xml"/>
 
-  <logfile>logfile_Methods_1.txt</logfile>
-
   <trajectories format="txt" unit="m">
     <file name="traj_Methods.txt"/>
     <!-- <path location="../data" /> -->
