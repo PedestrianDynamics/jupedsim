@@ -34,11 +34,6 @@
 #include "VoronoiDiagram.h"
 
 
-//handle more than two person are in one line
-#define dmin 200
-#define offset 200
-
-
 class Method_D
 {
 public:

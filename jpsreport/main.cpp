@@ -33,6 +33,7 @@
 #include "general/ArgumentParser.h"
 #include "geometry/Building.h"
 
+#include <Logger.h>
 #include <chrono>
 
 using namespace std;
@@ -40,7 +41,6 @@ using namespace std::chrono;
 
 int main(int argc, char ** argv)
 {
-    Log = new STDIOHandler();
     // Parsing the arguments
     ArgumentParser * args                       = new ArgumentParser();
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -53,28 +53,26 @@ int main(int argc, char ** argv)
         for(unsigned int i = 0; i < files.size(); i++) {
             const fs::path & File = files[i];
             Analysis analysis     = Analysis();
-            Log->Write("\nINFO: \tStart Analysis for the file: %s", File.string().c_str());
-            Log->Write("**********************************************************************");
+            LOG_INFO("Start Analysis for the file: {}", File.string().c_str());
+            LOG_INFO("**********************************************************************");
             analysis.InitArgs(args);
             analysis.RunAnalysis(File, Path);
-            Log->Write("**********************************************************************");
-            Log->Write("INFO: \tEnd Analysis for the file: %s\n", File.string().c_str());
+            LOG_INFO("**********************************************************************");
+            LOG_INFO("End Analysis for the file: {}\n", File.string().c_str());
             std::cout << "INFO: \tEnd Analysis for the file: " << File.string().c_str() << "\n";
         }
     } else {
-        //Log->Write("INFO:\tFail to parse the ini file");
-        Log->Write("INFO:\tFinishing...");
+        LOG_INFO("Finishing...");
     }
 
     //do the last cleaning
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     float duration =
         std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() / 1000000.0;
-    Log->Write("Time elapsed:\t %0.2f [s]\n", duration);
+    LOG_INFO("Time elapsed:\t {:.2f} [s]\n", duration);
 
     std::cout << "Time elapsed:\t " << duration << " [s]\n";
 
     delete args;
-    delete Log;
     return (EXIT_SUCCESS);
 }

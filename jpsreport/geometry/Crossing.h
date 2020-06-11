@@ -32,6 +32,7 @@
 #include "Hline.h"
 #include "NavLine.h"
 
+
 //class Line;
 class Room;
 class SubRoom;

@@ -30,7 +30,6 @@
 #include "IO/TrainFileParser.h"
 #include "general/Configuration.h"
 #include "general/Filesystem.h"
-#include "general/Logger.h"
 #include "general/Macros.h"
 #include "general/OpenMP.h"
 #include "geometry/Building.h"
@@ -50,6 +49,7 @@
 #include "pedestrian/Pedestrian.h"
 #include "routing/RoutingEngine.h"
 
+#include <Logger.h>
 #include <algorithm>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/constants.hpp>

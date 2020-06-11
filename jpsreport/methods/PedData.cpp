@@ -28,7 +28,9 @@
 
 #include "PedData.h"
 
+#include <Logger.h>
 #include <cmath>
+#include <fstream>
 #include <string>
 #include <unordered_set>
 
@@ -62,12 +64,11 @@ bool PedData::ReadData(
     fs::path p(path);
     p /= _trajName;
     fs::path fullTrajectoriesPathName = path / _trajName;
-    Log->Write("INFO:\tthe name of the trajectory is: <%s>", _trajName.string().c_str());
-    Log->Write(
-        "INFO:\tfull name of the trajectory is: <%s>", fullTrajectoriesPathName.string().c_str());
+    LOG_INFO("the name of the trajectory is: <{}>", _trajName.string());
+    LOG_INFO("full name of the trajectory is: <{}>", fullTrajectoriesPathName.string());
     bool result = true;
     if(trajformat == FORMAT_XML_PLAIN) {
-        Log->Write("WARNING: Input trajectory file for jpsreport should be in txt format");
+        LOG_WARNING("Input trajectory file for jpsreport should be in txt format");
     }
 
     else if(trajformat == FORMAT_PLAIN) {
@@ -89,8 +90,7 @@ bool PedData::InitializeVariables(const fs::path & filename)
     ifstream fdata;
     fdata.open(filename.string());
     if(fdata.is_open() == false) {
-        Log->Write(
-            "ERROR: \t could not open the trajectories file <%s>", filename.string().c_str());
+        LOG_ERROR("could not open the trajectories file <{}>", filename.string());
         return false;
     } else {
         string line;
@@ -114,14 +114,14 @@ bool PedData::InitializeVariables(const fs::path & filename)
                         _fps = atof(strs[1].c_str());
                         if(_fps == 0.0) // in case not valid fps found
                         {
-                            Log->Write("ERROR:\t Could not convert fps <%s>", strs[1].c_str());
-                            exit(1);
+                            LOG_ERROR("Could not convert fps <{}>", strs[1]);
+                            exit(EXIT_FAILURE);
                         }
                     } else {
-                        Log->Write("ERROR:\tFrame rate fps not defined");
-                        exit(1);
+                        LOG_ERROR("Frame rate fps not defined");
+                        exit(EXIT_FAILURE);
                     }
-                    Log->Write("INFO:\tFrame rate fps: <%.2f>", _fps);
+                    LOG_INFO("Frame rate fps: <{:.2f}>", _fps);
                     fps_found = 1;
                 }
                 if(line.find("ID") != std::string::npos && line.find("FR") != std::string::npos &&
@@ -158,17 +158,17 @@ bool PedData::InitializeVariables(const fs::path & filename)
                 std::vector<std::string> strs;
                 boost::split(strs, line, boost::is_any_of("\t "), boost::token_compress_on);
                 if(lineNr % 100000 == 0)
-                    std::cout << "lineNr " << lineNr << std::endl;
+                    LOG_INFO("lineNr {}", lineNr);
 
                 if(once) // && strs.size() < 5
                 {
                     once = 0;
-                    Log->Write("INFO: pos_id: %d", pos_id);
-                    Log->Write("INFO: pos_fr: %d", pos_fr);
-                    Log->Write("INFO: pos_x: %d", pos_x);
-                    Log->Write("INFO: pos_y: %d", pos_y);
-                    Log->Write("INFO: pos_z: %d", pos_z);
-                    Log->Write("INFO: pos_vd: %d", pos_vd);
+                    LOG_INFO("pos_id: {}", pos_id);
+                    LOG_INFO("pos_fr: {}", pos_fr);
+                    LOG_INFO("pos_x: {}", pos_x);
+                    LOG_INFO("pos_y: {}", pos_y);
+                    LOG_INFO("pos_z: {}", pos_z);
+                    LOG_INFO("pos_vd: {}", pos_vd);
                 }
                 _IdsTXT.push_back(atoi(strs[pos_id].c_str()));
                 _FramesTXT.push_back(atoi(strs[pos_fr].c_str()));
@@ -184,8 +184,8 @@ bool PedData::InitializeVariables(const fs::path & filename)
                     if(strs.size() >= 6 && pos_vd < (int) strs.size()) {
                         vcmp.push_back(strs[pos_vd].c_str());
                     } else {
-                        Log->Write("ERROR:\t There is no indicator for velocity component in "
-                                   "trajectory file or ini file!!");
+                        LOG_ERROR("There is no indicator for velocity component in "
+                                  "trajectory file or ini file!!");
                         return false;
                     }
                 }
@@ -193,23 +193,23 @@ bool PedData::InitializeVariables(const fs::path & filename)
             lineNr++;
         } // while
         if(fps_found == 0) {
-            Log->Write("ERROR:\tFrame rate fps not defined ");
+            LOG_ERROR("Frame rate fps ia not defined ");
             exit(EXIT_FAILURE);
         }
-        Log->Write("INFO:\t Finished reading the data");
+        LOG_INFO("Finished reading the data");
     }
 
     fdata.close();
-    Log->Write("INFO: Got %d lines", _IdsTXT.size());
+    LOG_INFO("Got {} lines", _IdsTXT.size());
     _minID = *min_element(_IdsTXT.begin(), _IdsTXT.end());
     _maxID = *max_element(_IdsTXT.begin(), _IdsTXT.end());
-    Log->Write("INFO: minID: %d", _minID);
-    Log->Write("INFO: maxID: %d", _maxID);
+    LOG_INFO("minID: {}", _minID);
+    LOG_INFO("maxID: {}", _maxID);
     _minFrame = *min_element(_FramesTXT.begin(), _FramesTXT.end());
-    Log->Write("INFO: minFrame: %d", _minFrame);
+    LOG_INFO("minFrame: {}", _minFrame);
     //Total number of frames
     _numFrames = *max_element(_FramesTXT.begin(), _FramesTXT.end()) - _minFrame + 1;
-    Log->Write("INFO: numFrames: %d", _numFrames);
+    LOG_INFO("numFrames: {}", _numFrames);
 
     //Total number of agents
 
@@ -220,9 +220,9 @@ bool PedData::InitializeVariables(const fs::path & filename)
 
     unique_ids.erase(end, unique_ids.end());
     _numPeds = unique_ids.size();
-    Log->Write("INFO: Total number of Agents: %d", _numPeds);
+    LOG_INFO("INFO: Total number of Agents: {}", _numPeds);
     CreateGlobalVariables(_numPeds, _numFrames);
-    Log->Write("INFO: Create Global Variables done");
+    LOG_INFO("Create Global Variables done");
     for(int i = 0; i < (int) unique_ids.size(); i++) {
         int firstFrameIndex   = INT_MAX; //The first frame index of a pedestrian
         int lastFrameIndex    = -1;      //The last frame index of a pedestrian
@@ -241,31 +241,31 @@ bool PedData::InitializeVariables(const fs::path & filename)
             }
         }
         if(lastFrameIndex <= 0 || firstFrameIndex == INT_MAX) {
-            Log->Write("Warning:\tThere is no trajectory for ped with ID <%d>!", unique_ids[i]);
+            LOG_WARNING("There is no trajectory for ped with ID <{}>!", unique_ids[i]);
             continue;
         }
         _firstFrame[pos_i]    = _FramesTXT[firstFrameIndex] - _minFrame;
         _lastFrame[pos_i]     = _FramesTXT[lastFrameIndex] - _minFrame;
         int expect_totalframe = _lastFrame[pos_i] - _firstFrame[pos_i] + 1;
         if(actual_totalframe != expect_totalframe) {
-            Log->Write(
-                "Error:\tThe trajectory of ped with ID <%d> is not continuous. Please modify the "
+            LOG_ERROR(
+                "The trajectory of ped with ID <{}> is not continuous. Please modify the "
                 "trajectory file!",
                 _IdsTXT[pos_i]);
-            Log->Write(
-                "Error:\t actual_totalfame = <%d>, expected_totalframe = <%d> ",
+            LOG_ERROR(
+                "actual_totalfame = <{}>, expected_totalframe = <{}>",
                 actual_totalframe,
                 expect_totalframe);
             return false;
         }
     }
-    Log->Write("convert x and y");
+    LOG_INFO("convert x and y");
     for(unsigned int i = 0; i < _IdsTXT.size(); i++) {
         int id_pos = 0; // position in array unique_ids
         //---------- get position of index in unique index vector ---------------
         auto it_uid = std::find(unique_ids.begin(), unique_ids.end(), _IdsTXT[i]);
         if(it_uid == unique_ids.end()) {
-            Log->Write("Error:\t Id %d does not exist in file", _IdsTXT[i]);
+            LOG_ERROR("Id {} does not exist in file", _IdsTXT[i]);
             return false;
         } else {
             id_pos = std::distance(unique_ids.begin(), it_uid);
@@ -284,21 +284,20 @@ bool PedData::InitializeVariables(const fs::path & filename)
         _yCor(id_pos, frm) = y;
         _zCor(id_pos, frm) = z;
         _id(id_pos, frm)   = _IdsTXT[i];
-        // std::cout << "id_pos " << id_pos << " FR " << frm << ": " << _id(id_pos,frm) << ", " << _xCor(id_pos, frm) << ", " <<  _yCor(id_pos,frm) << ", " << _zCor(id_pos,frm) << "\n";
         if(_vComponent == "F") {
             _vComp(id_pos, frm) = vcmp[i];
         } else {
             _vComp(id_pos, frm) = _vComponent;
         }
     }
-    Log->Write("Save the data for each frame");
+    LOG_INFO("Save the data for each frame");
 
     //save the data for each frame
     for(unsigned int i = 0; i < _FramesTXT.size(); i++) {
         int id_pos = 0;
         auto itIds = std::find(unique_ids.begin(), unique_ids.end(), _IdsTXT[i]);
         if(itIds == unique_ids.end()) {
-            Log->Write("Error2:\t Id %d does not exist in file", _IdsTXT[i]);
+            LOG_ERROR("Id {} does not exist in file", _IdsTXT[i]);
             return false;
         } else {
             id_pos = std::distance(unique_ids.begin(), itIds);
@@ -592,19 +591,18 @@ double PedData::GetInstantaneousVelocity1(
 
 void PedData::CreateGlobalVariables(int numPeds, int numFrames)
 {
-    Log->Write(
-        "INFO: Enter CreateGlobalVariables with numPeds=%d and numFrames=%d", numPeds, numFrames);
-    Log->Write("INFO: allocate memory for xCor");
+    LOG_INFO("Enter CreateGlobalVariables with numPeds={} and numFrames={}", numPeds, numFrames);
+    LOG_INFO("allocate memory for xCor");
     _xCor = ub::matrix<double>(numPeds, numFrames);
-    Log->Write("INFO: allocate memory for yCor");
+    LOG_INFO("allocate memory for yCor");
     _yCor = ub::matrix<double>(numPeds, numFrames);
-    Log->Write("INFO: allocate memory for zCor");
+    LOG_INFO("allocate memory for zCor");
     _zCor = ub::matrix<double>(numPeds, numFrames);
-    Log->Write("INFO: allocate memory for index");
+    LOG_INFO("allocate memory for index");
     _id = ub::matrix<double>(numPeds, numFrames);
-    Log->Write("INFO: allocate memory for vComp");
+    LOG_INFO("allocate memory for vComp");
     _vComp = ub::matrix<std::string>(numPeds, numFrames);
-    Log->Write(" Finished memory allocation");
+    LOG_INFO("Finished memory allocation");
     _firstFrame = new int[numPeds]; // Record the first frame of each pedestrian
     _lastFrame  = new int[numPeds]; // Record the last frame of each pedestrian
     for(int i = 0; i < numPeds; i++) {
@@ -617,7 +615,7 @@ void PedData::CreateGlobalVariables(int numPeds, int numFrames)
         _firstFrame[i] = INT_MAX;
         _lastFrame[i]  = INT_MIN;
     }
-    Log->Write("INFO: Leave CreateGlobalVariables()");
+    LOG_INFO("Leave CreateGlobalVariables()");
 }
 
 

@@ -35,7 +35,6 @@
 #include "IO/Trajectories.h"
 #include "SimulationHelper.h"
 #include "general/Filesystem.h"
-#include "general/Logger.h"
 #include "general/OpenMP.h"
 #include "geometry/GoalManager.h"
 #include "geometry/WaitingArea.h"
@@ -45,8 +44,8 @@
 #include "pedestrian/AgentsSourcesManager.h"
 #include "routing/ff_router/ffRouter.h"
 
+#include <Logger.h>
 #include <tinyxml.h>
-
 
 // TODO: add these variables to class simulation
 std::map<int, double> trainOutflow;
@@ -85,7 +84,7 @@ bool Simulation::InitArgs()
 {
     if(!_config->GetTrajectoriesFile().empty()) {
         // At the moment we only support plain txt format
-        _iod = std::make_unique<TrajectoriesTXT>(TrajectoriesTXT());
+        _iod = std::make_unique<TrajectoriesTXT>(TrajectoriesTXT(_config->GetPrecision()));
     }
 
     const fs::path & trajPath(_config->GetTrajectoriesFile());
@@ -150,12 +149,12 @@ bool Simulation::InitArgs()
         return false;
     }
 
-    _em = std::make_unique<EventManager>(_building.get());
+    _em = std::make_unique<EventManager>();
     if(!_config->GetEventFile().empty()) {
-        EventFileParser::ParseDoorEvents(*_em, _config->GetEventFile());
+        EventFileParser::ParseDoorEvents(*_em, _building.get(), _config->GetEventFile());
     }
     if(!_config->GetScheduleFile().empty()) {
-        EventFileParser::ParseSchedule(*_em, _config->GetScheduleFile());
+        EventFileParser::ParseSchedule(*_em, _building.get(), _config->GetScheduleFile());
 
         // Read and set max door usage from schedule file
         auto groupMaxAgents = EventFileParser::ParseMaxAgents(_config->GetScheduleFile());
@@ -391,7 +390,7 @@ double Simulation::RunBody(double maxSimTime)
             _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get(), _periodic);
 
             //update the events
-            bool eventProcessed = _em->ProcessEvent();
+            bool eventProcessed = _em->ProcessEvents(Pedestrian::GetGlobalTime());
             _building->GetRoutingEngine()->setNeedUpdate(eventProcessed);
 
             //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'

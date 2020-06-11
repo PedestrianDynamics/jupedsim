@@ -25,12 +25,11 @@
  **/
 #pragma once
 
-#include "DoorEvent.h"
+#include "Event.h"
 
+#include <memory>
 #include <string>
 #include <vector>
-
-class Building;
 
 class EventManager
 {
@@ -41,24 +40,40 @@ private:
     std::vector<std::unique_ptr<Event>> _events;
 
     /**
-     * Geometry the events will be processed on.
+     * Indicates if Events need to be sorted when calling ProcessEvent() 
      */
-    Building * _building;
+    bool _needs_sorting{false};
 
 public:
     /**
       * Constructor.
       */
-    explicit EventManager(Building * _b);
+    EventManager() = default;
 
     /**
-      * Default deconstructor.
+      * Destructor.
       */
     ~EventManager() = default;
 
-    // NOTE: disable copy constructor and assignment operator
+    /**
+     * Not copyable.
+     */
     EventManager(const EventManager &) = delete;
+
+    /**
+     * Not copyable.
+     */
     EventManager & operator=(const EventManager &) & = delete;
+
+    /**
+     * Not movable.
+     */
+    EventManager(EventManager &&) = delete;
+
+    /**
+     * Not movable.
+     */
+    EventManager & operator=(EventManager &&) = delete;
 
     /**
      * Adds \p event to the EventManager. This should be done before the simulation
@@ -73,9 +88,11 @@ public:
     void ListEvents();
 
     /**
-     * Process the event using the current time stamp from the pedestrian class.
-     *
+     * Process all events until the now timestamp.
+     * Processing is done for all events where time <=now.
+     * Processed events will be discared.
+     * @param now timestamp until which all events will be processed.
      * @return Any event was processed.
      */
-    bool ProcessEvent();
+    bool ProcessEvents(double now);
 };

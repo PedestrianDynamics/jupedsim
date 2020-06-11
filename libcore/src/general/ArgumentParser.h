@@ -25,9 +25,9 @@
 #pragma once
 
 #include "general/Filesystem.h"
-#include "general/Logger.h"
 
 #include <CLI/CLI.hpp>
+#include <Logger.h>
 #include <tuple>
 #include <vector>
 

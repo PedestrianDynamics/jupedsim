@@ -13,11 +13,10 @@ set(source_files
     src/direction/walking/DirectionStrategy.cpp
     src/direction/walking/DirectionStrategy.h
     src/events/DoorEvent.cpp
-    src/events/EventHelper.cpp
+    src/events/Event.cpp
     src/events/EventManager.cpp
     src/events/TrainEvent.cpp
     src/general/ArgumentParser.cpp
-    src/general/Logger.cpp
     src/geometry/Building.cpp
     src/geometry/Crossing.cpp
     src/geometry/Goal.cpp
@@ -100,14 +99,12 @@ set(source_files
 set(header_files
     src/events/DoorEvent.h
     src/events/Event.h
-    src/events/EventHelper.h
     src/events/EventManager.h
     src/events/TrainEvent.h
     src/general/ArgumentParser.h
     src/general/Compiler.h
     src/general/Configuration.h
     src/general/Filesystem.h
-    src/general/Logger.h
     src/general/Macros.h
     src/general/randomnumbergenerator.h
     src/geometry/Building.h
@@ -213,6 +210,7 @@ target_link_libraries(core
     spdlog::spdlog
     fmt::fmt
     git-info
+    shared
 )
 target_include_directories(core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src

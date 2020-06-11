@@ -28,13 +28,16 @@
 
 #include "Method_D.h"
 
+#include "../general/Macros.h"
 #include "ConfigData_DIJ.h"
 
+#include <Logger.h>
 #include <cmath>
 #include <iostream>
 #include <map>
 #include <tuple>
 #include <vector>
+
 //using std::string;
 //using std::vector;
 //using std::ofstream;
@@ -79,8 +82,8 @@ bool Method_D::Process(
     bool _getProfile       = configData.getProfile;
     bool _calcIndividualFD = configData.individual_FD_flags[measurementAreaID];
 
-    Log->Write(
-        "INFO:\tMethod D: frame rate fps: <%.2f>, start: <%d>, stop: <%d> (minFrame = %d)",
+    LOG_INFO(
+        "Method D: frame rate fps: <{:.2f}>, start: <{}>, stop: <{}> (minFrame = {})",
         _fps,
         _startFrame,
         _stopFrame,
@@ -111,7 +114,7 @@ bool Method_D::Process(
             return_value = false;
         }
     }
-    Log->Write("------------------------Analyzing with Method D-----------------------------");
+    LOG_INFO("------------------------Analyzing with Method D-----------------------------");
     for(auto ite : _peds_t) {
         int frameNr = ite.first;
         int frid    = frameNr + minFrame;
@@ -120,7 +123,7 @@ bool Method_D::Process(
         ss << std::setw(5) << std::setfill('0') << std::internal << frid;
         const std::string str_frid = ss.str();
         if(!(frid % 50)) {
-            Log->Write("INFO:\tframe ID = %d", frid);
+            LOG_INFO("frame ID = {}", frid);
         }
         vector<int> ids         = _peds_t[frameNr];
         vector<int> IdInFrame   = peddata.GetIdInFrame(frameNr, ids, zPos_measureArea);
@@ -132,9 +135,9 @@ bool Method_D::Process(
         //------------------------------Remove peds outside geometry------------------------------------------
         for(int i = 0; i < (int) IdInFrame.size(); i++) {
             if(false == within(point_2d(round(XInFrame[i]), round(YInFrame[i])), _geoPoly)) {
-                Log->Write(
-                    "Warning:\tPedestrian at <x=%.4f, y=%.4f> is not in geometry and not "
-                    "considered in analysis!",
+                LOG_WARNING(
+                    "Pedestrian at <x={:.4f}, y={:.4f}> is not in the geometry and will not be"
+                    "considered in the analysis!",
                     XInFrame[i] * CMtoM,
                     YInFrame[i] * CMtoM);
                 IdInFrame.erase(IdInFrame.begin() + i);
@@ -158,10 +161,10 @@ bool Method_D::Process(
                     _calcIndividualFD);
             } else {
                 if(IsPointsOnOneLine(XInFrame, YInFrame)) {
-                    if(fabs(XInFrame[1] - XInFrame[0]) < dmin) {
-                        XInFrame[1] += offset;
+                    if(fabs(XInFrame[1] - XInFrame[0]) < DMIN) {
+                        XInFrame[1] += JPS_OFFSET;
                     } else {
-                        YInFrame[1] += offset;
+                        YInFrame[1] += JPS_OFFSET;
                     }
                 }
                 std::vector<std::pair<polygon_2d, int>> polygons_id =
@@ -191,21 +194,17 @@ bool Method_D::Process(
                         GetProfiles(configData, str_frid, polygons, VInFrame); // TODO polygons_id
                     }
                 } else {
-                    for(int i = 0; i < (int) IdInFrame.size(); i++) {
-                        std::cout << XInFrame[i] * CMtoM << "   " << YInFrame[i] * CMtoM << "   "
-                                  << IdInFrame[i] << "\n";
-                    }
-                    Log->Write(
-                        "WARNING: \tVoronoi Diagrams are not obtained!. Frame: %d (minFrame = "
-                        "%d)\n",
+                    LOG_WARNING(
+                        "Voronoi Diagrams are not obtained!. Frame: {} (minFrame = "
+                        "{})",
                         frid,
                         minFrame);
                 }
             }
         } // if N >3
         else {
-            Log->Write(
-                "INFO: \tThe number of the pedestrians is small (%d). Frame = %d (minFrame = %d)\n",
+            LOG_INFO(
+                "The number of the pedestrians is small ({}). Frame = {} (minFrame = {})",
                 NumPeds,
                 frid,
                 minFrame);
@@ -226,7 +225,7 @@ bool Method_D::OpenFileMethodD(bool _isOneDimensional)
     string results_V = tmp.string();
 
     if((_fVoronoiRhoV = Analysis::CreateFile(results_V)) == nullptr) {
-        Log->Write("ERROR: \tcannot open the file to write Voronoi density and velocity\n");
+        LOG_ERROR("cannot open the file to write Voronoi density and velocity.");
         return false;
     } else {
         if(_isOneDimensional) {
@@ -254,7 +253,7 @@ bool Method_D::OpenFileIndividualFD(bool _isOneDimensional)
                 ("IFD_D_" + _trajName.string() + trajFileName.string());
     string Individualfundment = indFDPath.string();
     if((_fIndividualFD = Analysis::CreateFile(Individualfundment)) == nullptr) {
-        Log->Write("ERROR:\tcannot open the file individual\n");
+        LOG_ERROR("cannot open the file individual.");
         return false;
     } else {
         if(_isOneDimensional) {
@@ -384,12 +383,12 @@ void Method_D::GetProfiles(
 
     FILE * Prf_velocity;
     if((Prf_velocity = Analysis::CreateFile(Prfvelocity)) == nullptr) {
-        Log->Write("cannot open the file <%s> to write the field data\n", Prfvelocity.c_str());
+        LOG_ERROR("cannot open the file {} to write the field data", Prfvelocity);
         exit(EXIT_FAILURE);
     }
     FILE * Prf_density;
     if((Prf_density = Analysis::CreateFile(Prfdensity)) == nullptr) {
-        Log->Write("cannot open the file to write the field density\n");
+        LOG_ERROR("cannot open the file to write the field density");
         exit(EXIT_FAILURE);
     }
 
@@ -448,17 +447,16 @@ void Method_D::OutputVoroGraph(
     polygon_2d poly;
     if(!fs::exists(voroLocPath)) {
         if(!fs::create_directories(voroLocPath)) {
-            Log->Write("ERROR:\tcan not create directory <%s>", voroLocPath.string().c_str());
-            std::cout << "can not create directory " << voroLocPath.string().c_str() << "\n";
+            LOG_ERROR("can not create directory <{}>", voroLocPath.string());
             exit(EXIT_FAILURE);
         } else
-            std::cout << "create directory " << voroLocPath.string().c_str() << "\n";
+            LOG_INFO("create directory {}", voroLocPath.string());
     }
 
     fs::path polygonPath = voroLocPath / "polygon";
     if(!fs::exists(polygonPath)) {
         if(!fs::create_directory(polygonPath)) {
-            Log->Write("ERROR:\tcan not create directory <%s>", polygonPath.string().c_str());
+            LOG_ERROR("can not create directory <{}>", polygonPath.string());
             exit(EXIT_FAILURE);
         }
     }
@@ -484,13 +482,13 @@ void Method_D::OutputVoroGraph(
             //polys  <<dsv(poly)<< endl;
         }
     } else {
-        Log->Write("ERROR:\tcannot create the file <%s>", polygon.c_str());
+        LOG_ERROR("cannot create the file <{}>", polygon);
         exit(EXIT_FAILURE);
     }
     fs::path speedPath = voroLocPath / "speed";
     if(!fs::exists(speedPath))
         if(!fs::create_directory(speedPath)) {
-            Log->Write("ERROR:\tcan not create directory <%s>", speedPath.string().c_str());
+            LOG_ERROR("can not create directory <{}>", speedPath.string());
             exit(EXIT_FAILURE);
         }
     fs::path pv         = speedPath / trajFileName;
@@ -501,7 +499,7 @@ void Method_D::OutputVoroGraph(
             velo << fabs(VInFrame[pts]) << endl;
         }
     } else {
-        Log->Write("ERROR:\tcannot create the file <%s>", pv.string().c_str());
+        LOG_ERROR("cannot create the file <{}>", pv.string());
         exit(EXIT_FAILURE);
     }
 
@@ -688,9 +686,9 @@ bool Method_D::IsPointsOnOneLine(vector<double> & XInFrame, vector<double> & YIn
 {
     double deltaX    = XInFrame[1] - XInFrame[0];
     bool isOnOneLine = true;
-    if(fabs(deltaX) < dmin) {
+    if(fabs(deltaX) < DMIN) {
         for(unsigned int i = 2; i < XInFrame.size(); i++) {
-            if(fabs(XInFrame[i] - XInFrame[0]) > dmin) {
+            if(fabs(XInFrame[i] - XInFrame[0]) > DMIN) {
                 isOnOneLine = false;
                 break;
             }
@@ -701,7 +699,7 @@ bool Method_D::IsPointsOnOneLine(vector<double> & XInFrame, vector<double> & YIn
         for(unsigned int i = 2; i < XInFrame.size(); i++) {
             double dist =
                 fabs(slope * XInFrame[i] - YInFrame[i] + intercept) / sqrt(slope * slope + 1);
-            if(dist > dmin) {
+            if(dist > DMIN) {
                 isOnOneLine = false;
                 break;
             }
