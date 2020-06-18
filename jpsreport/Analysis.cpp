@@ -44,9 +44,11 @@
 #include <Logger.h>
 #include <algorithm> // std::min_element, std::max_element
 #include <cfloat>
+#include <fmt/format.h>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <stdlib.h>
 #include <vector>
 
@@ -246,8 +248,9 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(
         } //room
 
         if(geoPoly.count(area->_id) == 0) {
-            LOG_ERROR("No polygon containing the measurement id {}.", area->_id);
             geoPoly[area->_id] = area->_poly;
+            throw std::runtime_error(
+                fmt::format(FMT_STRING("No polygon containing the measurement id {}."), area->_id));
         }
     }
 

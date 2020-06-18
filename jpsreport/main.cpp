@@ -35,6 +35,7 @@
 
 #include <Logger.h>
 #include <chrono>
+#include <exception>
 
 using namespace std;
 using namespace std::chrono;
@@ -55,7 +56,13 @@ int main(int argc, char ** argv)
             Analysis analysis     = Analysis();
             LOG_INFO("Start Analysis for the file: {}", File.string().c_str());
             LOG_INFO("**********************************************************************");
-            analysis.InitArgs(args);
+            try {
+                analysis.InitArgs(args);
+            } catch(const std::exception & e) {
+                LOG_ERROR("Exception in Analysis::InitArgs thrown, what: {}", e.what());
+
+                return EXIT_FAILURE;
+            }
             analysis.RunAnalysis(File, Path);
             LOG_INFO("**********************************************************************");
             LOG_INFO("End Analysis for the file: {}\n", File.string().c_str());
