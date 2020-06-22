@@ -7,11 +7,6 @@
 typedef struct SimulationContext SimulationContext;
 
 typedef struct {
-    bool has_error;
-    char * error_message;
-} Status;
-
-typedef struct {
     int id;
     double x;
     double y;
@@ -32,7 +27,6 @@ typedef struct {
 /**
  * @name JPSlib Functions.
  * @param [in]  simulation_context  The simulation context (owned by JPSlib).
- * @param [out] status              Status object containing error information and message.
  * @{
  **/
 
@@ -41,7 +35,7 @@ typedef struct {
  * @param [in]  geometry_file The filepath to the geometry configuration file.
  * @return                    The simulation context.
  **/
-extern SimulationContext * initialize(const char * geometry_file, Status * status);
+extern SimulationContext * initialize(const char * geometry_file);
 
 /**
  * Adds a new agent to the pedestrian simulation.
@@ -50,42 +44,39 @@ extern SimulationContext * initialize(const char * geometry_file, Status * statu
  * @param [in] route              The goals of the pedestrian reflecting the desired route.
  * @return                        Returns the ID of the newly added agent or -1 if agent could not be added.
  **/
-extern int
-add_agent(SimulationContext * simulation_context, int starting_area, Route route, Status * status);
+extern int add_agent(SimulationContext * simulation_context, int starting_area, Route route);
 
 /**
  * Computes the trajectories for all pedestrians for a given simulation_time.
  *
  * @param [in]  simulation_time Simulation time duration to compute.
  **/
-extern void
-simulate(SimulationContext * simulation_context, double simulation_time, Status * status);
+extern void simulate(SimulationContext * simulation_context, double simulation_time);
 
 /**
  * Receives the agents from the simulation containing position and velocity.
  *
  * @return Agents array containing coordinates and velocities.
  **/
-extern Agents get_agents(SimulationContext * simulation_context, Status * status);
+extern Agents get_agents(SimulationContext * simulation_context);
 
 /**
  * Retrieves the agents which are removed from the pedestrian simulation.
  *
  * @returns An array of agents.
  **/
-extern Agents get_retrievable_agents(SimulationContext * simulation_context, Status * status);
+extern Agents get_retrievable_agents(SimulationContext * simulation_context);
 
 /**
  * Confirms the retrieved agents, not confirmed agents must be kept in the pedestrian simulation.
  *
  * @param [in] agents An array of agents which are retrieved successfully.
  **/
-extern void
-confirm_retrieved_agents(SimulationContext * simulation_context, Agents agents, Status * status);
+extern void confirm_retrieved_agents(SimulationContext * simulation_context, Agents agents);
 
 /**
  * Finalizes the simulation and cleans up memory.
  **/
-extern void finalize(SimulationContext * simulation_context, Status * status);
+extern void finalize(SimulationContext * simulation_context);
 /** @} */
 #endif /* _JPS_H_ */

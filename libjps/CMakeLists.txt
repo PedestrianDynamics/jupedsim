@@ -1,8 +1,17 @@
+set(LIBJPS_HEADERS
+    libjps/include/jps.h
+    libjps/include/error.h
+)
+
 add_library(jps SHARED
     src/jps.c
+    src/error.c
     )
+
 set_target_properties(jps PROPERTIES VERSION 0.0.1)
-set_target_properties(jps PROPERTIES PUBLIC_HEADER libjps/include/jps.h)
+set_target_properties(jps PROPERTIES PUBLIC_HEADER
+    "${LIBJPS_HEADERS}"
+    )
 
 target_compile_options(jps PRIVATE
     ${COMMON_COMPILE_OPTIONS}
