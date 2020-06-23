@@ -25,3 +25,27 @@ target_include_directories(jps PUBLIC
     ${core_include_directories}
     include
     )
+
+################################################################################
+# libjps unit tests
+################################################################################
+if (BUILD_CPPUNIT_TEST)
+    find_package(GTest REQUIRED)
+
+    add_executable(libjps_unittests
+            test/gtest/jps_api.cpp
+            )
+
+    target_link_libraries(libjps_unittests PRIVATE
+        jps
+        GTest::GTest
+        GTest::Main
+    )
+
+    target_compile_options(unittests PRIVATE
+        ${COMMON_COMPILE_OPTIONS}
+    )
+
+    set_property(TARGET unittests PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
+    set_property(TARGET unittests PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
+endif()
