@@ -34,7 +34,7 @@ add_test(NAME J08_corridor_low_cut_off COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURR
 add_test(NAME J09_corridor_high_cut_off COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J09_corridor_high_cut_off/J09_corridor_high_cut_off.py ${jpsreport_exe})
 add_test(NAME J10_corridor_cut_off_velocity COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J10_corridor_cut_off_velocity/J10_corridor_cut_off_velocity.py ${jpsreport_exe})
 
-add_test(NAME reference_cut_off_small COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_test/cut_off_small/test_cu_off_small.py ${jpsreport_exe})
+add_test(NAME reference_cut_off_small COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_test/cut_off_small/test_cut_off_small.py ${jpsreport_exe})
 
 set_tests_properties(
   01_method_A
