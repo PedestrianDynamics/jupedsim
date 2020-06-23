@@ -29,7 +29,6 @@
 #ifndef PEDDATA_H_
 #define PEDDATA_H_
 
-#include "../IO/OutputHandler.h"
 #include "../general/Macros.h"
 #include "../tinyxml/tinyxml.h"
 
@@ -46,7 +45,6 @@ namespace ub = boost::numeric::ublas;
 
 namespace fs = std::filesystem;
 
-extern OutputHandler * Log;
 
 #define CMtoM 0.0001
 #define M2CM 10000

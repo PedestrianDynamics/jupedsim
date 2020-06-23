@@ -11,7 +11,6 @@ set(methods
 
 set(source_files
     Analysis.cpp
-    IO/OutputHandler.cpp
     general/ArgumentParser.cpp
     geometry/Building.cpp
     geometry/Line.cpp
@@ -39,7 +38,6 @@ set (header_files
     methods/Method_I.h
     methods/Method_J.h
     methods/ConfigData_DIJ.h
-    IO/OutputHandler.h
     general/ArgumentParser.h
     general/Macros.h
     geometry/Building.h
@@ -62,6 +60,9 @@ add_library(report STATIC
 )
 
 target_link_libraries(report PUBLIC
+    shared
+    spdlog::spdlog
+    fmt::fmt
     tinyxml
     fs
     Boost::boost

@@ -30,6 +30,8 @@
 
 #include "SubRoom.h"
 
+#include <Logger.h>
+
 using namespace std;
 
 Hline::Hline()
@@ -102,20 +104,15 @@ bool Hline::IsInRoom(int roomID) const
 
 void Hline::WriteToErrorLog() const
 {
-    string s;
-    char tmp[CLENGTH];
-    sprintf(
-        tmp,
-        "\t\tHline: %d (%f, %f) -- (%f, %f)\n",
+    LOG_ERROR(
+        "\t\tHline: {} ({:.2f}, {:.2f}) -- ({:.2f}, {:.2f})\n\t\t\t\tRoom: {} <-> SubRoom: {}\n",
         GetID(),
         GetPoint1().GetX(),
         GetPoint1().GetY(),
         GetPoint2().GetX(),
-        GetPoint2().GetY());
-    s.append(tmp);
-    sprintf(tmp, "\t\t\t\tRoom: %d <-> SubRoom: %d\n", _room1->GetID(), _subRoom1->GetSubRoomID());
-    s.append(tmp);
-    Log->Write(s);
+        GetPoint2().GetY(),
+        _room1->GetID(),
+        _subRoom1->GetSubRoomID());
 }
 
 // TraVisTo Ausgabe

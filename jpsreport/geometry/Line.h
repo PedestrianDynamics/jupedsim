@@ -29,17 +29,9 @@
 #ifndef _LINE_H
 #define _LINE_H
 
-#include "../IO/OutputHandler.h"
 #include "Point.h"
 
 #include <string>
-
-//forward declarations
-class OutputHandler;
-
-// external variables
-extern OutputHandler * Log;
-
 
 class Line
 {

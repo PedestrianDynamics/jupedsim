@@ -28,8 +28,11 @@
 
 #include "Goal.h"
 
+#include "../general/Macros.h"
 #include "Point.h"
 #include "Wall.h"
+
+#include <Logger.h>
 
 
 using namespace std;
@@ -215,9 +218,7 @@ bool Goal::ConvertLineToPoly()
         }
     }
     if((tmpPoly[0] - point).Norm() > J_TOLERANZ) {
-        char tmp[CLENGTH];
-        sprintf(tmp, "ERROR: \tGoal::ConvertLineToPoly(): ID %d !!!\n", _id);
-        Log->Write(tmp);
+        LOG_ERROR("Goal::ConvertLineToPoly(): ID {} !!!\n", _id);
         return false;
     }
     _poly = tmpPoly;

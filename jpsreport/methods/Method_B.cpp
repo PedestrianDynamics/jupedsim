@@ -28,6 +28,8 @@
 
 #include "Method_B.h"
 
+#include <Logger.h>
+
 using std::string;
 using std::vector;
 
@@ -48,7 +50,7 @@ Method_B::~Method_B() {}
 
 bool Method_B::Process(const PedData & peddata)
 {
-    Log->Write("------------------------Analyzing with Method B-----------------------------");
+    LOG_INFO("------------------------Analyzing with Method B-----------------------------");
     _trajName       = peddata.GetTrajName();
     _projectRootDir = peddata.GetProjectRootDir();
     _outputLocation = peddata.GetOutputLocation();
@@ -74,10 +76,9 @@ bool Method_B::Process(const PedData & peddata)
     GetTinTout(peddata.GetNumFrames());
 
     if(_areaForMethod_B->_length < 0) {
-        Log->Write("INFO:\tThe measurement area length for method B is not assigned!");
+        LOG_WARNING("The measurement area length for method B is not assigned!");
     } else {
-        Log->Write(
-            "INFO:\tThe measurement area length for method B is %.3f", _areaForMethod_B->_length);
+        LOG_INFO("The measurement area length for method B is {:.3f}", _areaForMethod_B->_length);
     }
     GetFundamentalTinTout(_DensityPerFrame, _areaForMethod_B->_length);
 
@@ -110,8 +111,6 @@ void Method_B::GetTinTout(int numFrames)
                 IsinMeasurezone[ID]   = true;
                 _entrancePoint[ID]._x = x * CMtoM;
                 _entrancePoint[ID]._y = y * CMtoM;
-                std::cout << "ID: " << ID << " x: " << x * CMtoM << " y: " << y * CMtoM
-                          << std::endl;
             }
             if((!within(make<point_2d>((x), (y)), _areaForMethod_B->_poly)) &&
                IsinMeasurezone[ID]) {
@@ -119,8 +118,6 @@ void Method_B::GetTinTout(int numFrames)
                 _exitPoint[ID]._x   = x * CMtoM;
                 _exitPoint[ID]._y   = y * CMtoM;
                 IsinMeasurezone[ID] = false;
-                std::cout << "ID: " << ID << " OUT x: " << x * CMtoM << " y: " << y * CMtoM
-                          << std::endl;
             }
         }
         _DensityPerFrame[frameNr] =
@@ -132,7 +129,7 @@ void Method_B::GetTinTout(int numFrames)
 void Method_B::GetFundamentalTinTout(double * DensityPerFrame, double LengthMeasurementarea)
 {
     FILE * fFD_TinTout;
-    Log->Write("---------Fundamental diagram from Method B will be calculated!------------------");
+    LOG_INFO(" Fundamental diagram with Method B will be calculated");
     fs::path tmp("_id_" + _measureAreaId + ".dat");
     tmp = _outputLocation / "Fundamental_Diagram" / "TinTout" /
           ("FDTinTout_" + _trajName.string() + tmp.string());
@@ -140,7 +137,7 @@ void Method_B::GetFundamentalTinTout(double * DensityPerFrame, double LengthMeas
     string fdTinTout = tmp.string();
 
     if((fFD_TinTout = Analysis::CreateFile(fdTinTout)) == nullptr) {
-        Log->Write("ERROR:\tcannot open the file to write the TinTout data\n");
+        LOG_ERROR("cannot open the file to write the TinTout data");
         exit(EXIT_FAILURE);
     }
     fprintf(fFD_TinTout, "#person Index\t	density_i(m^(-2))\t	velocity_i(m/s)\n");
@@ -152,14 +149,8 @@ void Method_B::GetFundamentalTinTout(double * DensityPerFrame, double LengthMeas
                          (_entrancePoint[i]._y - _exitPoint[i]._y);
             LengthMeasurementarea = std::sqrt(dxq + dyq);
         }
-        std::cout << "i: " << i << ", Tin: " << _tIn[i] << ", Tout: " << _tOut[i] << ", PointIn ("
-                  << _entrancePoint[i]._x << ", " << _entrancePoint[i]._y << "), PointOut ("
-                  << _exitPoint[i]._x << ", " << _exitPoint[i]._y
-                  << "), L: " << LengthMeasurementarea << std::endl;
-
         double velocity_temp = _fps * LengthMeasurementarea / (_tOut[i] - _tIn[i]);
-        std::cout << ">> i: " << i << " vel = " << velocity_temp << std::endl;
-        double density_temp = 0;
+        double density_temp  = 0;
         for(int j = _tIn[i]; j < _tOut[i]; j++) {
             density_temp += DensityPerFrame[j];
         }
