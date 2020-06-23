@@ -1,6 +1,6 @@
 #include "error.h"
 
-int set_error_callback(ErrorCallback callback)
+int JPS_set_error_callback(JPS_ErrorCallback callback)
 {
     (void) callback;
     return 0;

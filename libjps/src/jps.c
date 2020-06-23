@@ -1,17 +1,18 @@
 #include "jps.h"
 
-typedef struct SimulationContext {
+typedef struct JPS_SimulationContext {
     void * sim_context;
-} SimulationContext;
+} JPS_SimulationContext;
 
-SimulationContext * initialize(const char * geometry_file)
+JPS_SimulationContext * JPS_initialize(const char * geometry_file)
 {
     (void) geometry_file;
 
     return NULL;
 }
 
-extern int add_agent(SimulationContext * simulation_context, int starting_area, Route route)
+extern int
+JPS_add_agent(JPS_SimulationContext * simulation_context, int starting_area, JPS_Route route)
 {
     (void) simulation_context;
     (void) starting_area;
@@ -20,35 +21,35 @@ extern int add_agent(SimulationContext * simulation_context, int starting_area, 
     return -1;
 }
 
-void simulate(SimulationContext * simulation_context, double simulation_time)
+void JPS_simulate(JPS_SimulationContext * simulation_context, double simulation_time)
 {
     (void) simulation_context;
     (void) simulation_time;
 }
 
-Agents get_agents(SimulationContext * simulation_context)
+JPS_Agents JPS_get_agents(JPS_SimulationContext * simulation_context)
 {
     (void) simulation_context;
 
-    Agents agents = {.agents = NULL, .size = 0};
+    JPS_Agents agents = {.agents = NULL, .size = 0};
     return agents;
 }
 
-Agents get_retrievable_agents(SimulationContext * simulation_context)
+JPS_Agents JPS_get_retrievable_agents(JPS_SimulationContext * simulation_context)
 {
     (void) simulation_context;
 
-    Agents agents = {.agents = NULL, .size = 0};
+    JPS_Agents agents = {.agents = NULL, .size = 0};
     return agents;
 }
 
-void confirm_retrieved_agents(SimulationContext * simulation_context, Agents agents)
+void JPS_confirm_retrieved_agents(JPS_SimulationContext * simulation_context, JPS_Agents agents)
 {
     (void) simulation_context;
     (void) agents;
 }
 
-void finalize(SimulationContext * simulation_context)
+void JPS_finalize(JPS_SimulationContext * simulation_context)
 {
     (void) simulation_context;
 }

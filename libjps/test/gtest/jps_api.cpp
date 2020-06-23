@@ -6,5 +6,5 @@ extern "C" {
 
 TEST(LibJPSTest, Init)
 {
-    finalize(nullptr);
+    JPS_finalize(nullptr);
 }
