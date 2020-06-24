@@ -21,7 +21,7 @@ typedef struct {
 
 typedef struct {
     int * goals;
-    size_t num_golas;
+    size_t num_goals;
 } JPS_Route;
 
 /**
