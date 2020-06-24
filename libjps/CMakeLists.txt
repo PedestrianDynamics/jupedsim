@@ -27,8 +27,8 @@ target_include_directories(jps PUBLIC
     )
 
 install(TARGETS jps
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+    LIBRARY DESTINATION lib
+    PUBLIC_HEADER DESTINATION include)
 
 ################################################################################
 # libjps unit tests
