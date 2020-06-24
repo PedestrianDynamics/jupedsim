@@ -1,6 +1,6 @@
 set(LIBJPS_HEADERS
-    libjps/include/jps.h
-    libjps/include/error.h
+    include/jps.h
+    include/error.h
 )
 
 add_library(jps SHARED
@@ -25,6 +25,10 @@ target_include_directories(jps PUBLIC
     ${core_include_directories}
     include
     )
+
+install(TARGETS jps
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 ################################################################################
 # libjps unit tests
