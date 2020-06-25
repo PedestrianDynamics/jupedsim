@@ -61,6 +61,7 @@ add_library(report STATIC
 
 target_link_libraries(report PUBLIC
     shared
+    $<$<BOOL:${USE_OPENMP}>:OpenMP::OpenMP_CXX>
     spdlog::spdlog
     fmt::fmt
     tinyxml
