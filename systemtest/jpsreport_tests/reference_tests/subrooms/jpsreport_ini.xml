@@ -83,7 +83,7 @@
     <measurement_area id="4"/>
   </method_C>
 
-  <method_D enabled="true">
+  <method_D enabled="false">
     <measurement_area id="1" start_frame="None" stop_frame="None" get_individual_FD="true"/>
     <measurement_area id="5" start_frame="None" stop_frame="None" get_individual_FD="true"/>
     <measurement_area id="8" start_frame="None" stop_frame="None" get_individual_FD="true"/>
@@ -99,7 +99,7 @@
     <cut_by_circle enabled="true" radius="1.0" edges="10"/>
 	</method_I>
 
-  <method_J enabled="true">
+  <method_J enabled="false">
     <measurement_area id="1" start_frame="None" stop_frame="None" get_individual_FD="true"/>
     <measurement_area id="5" start_frame="None" stop_frame="None" get_individual_FD="true"/>
     <one_dimensional enabled="false"/>

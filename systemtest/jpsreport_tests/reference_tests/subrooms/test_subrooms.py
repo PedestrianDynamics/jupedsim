@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+####################
+# Test of Method I with one measurement area spreading over several subrooms
+####################
 
 import os
 from sys import argv, path, stdout
