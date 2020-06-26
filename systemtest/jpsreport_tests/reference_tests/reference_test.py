@@ -56,7 +56,6 @@ def runtest(inifile, trajfile):
 
     if not (mismatch or errors):
         logging.info("OK. Output files of jpsreport have not changed.")
-        exit(SUCCESS)
     else:
         exit(FAILURE)
 
@@ -69,6 +68,6 @@ if __name__ == "__main__":
     logging.info("=========== %s ===============" % test_desription[0])
 
     test = JPSRunTestDriver(4, argv0=argv[0], testdir=testdir, utestdir=utestdir, jpsreport=argv[1])
-    test.run_analysis(trajfile= "traj_Methods.xml", testfunction=runtest)
+    test.run_analysis(trajfile= "trajectories.xml", testfunction=runtest)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
