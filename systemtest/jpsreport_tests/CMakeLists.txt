@@ -34,7 +34,11 @@ add_test(NAME J08_corridor_low_cut_off COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURR
 add_test(NAME J09_corridor_high_cut_off COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J09_corridor_high_cut_off/J09_corridor_high_cut_off.py ${jpsreport_exe})
 add_test(NAME J10_corridor_cut_off_velocity COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J10_corridor_cut_off_velocity/J10_corridor_cut_off_velocity.py ${jpsreport_exe})
 
+add_test(NAME reference_cut_off_disabled COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_test/cut_off_disabled/test_cut_off_disabled.py ${jpsreport_exe})
+add_test(NAME reference_cut_off_enabled COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_test/cut_off_enabled/test_cut_off_enabled.py ${jpsreport_exe})
+add_test(NAME reference_cut_off_large COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_test/cut_off_large/test_cut_off_large.py ${jpsreport_exe})
 add_test(NAME reference_cut_off_small COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_test/cut_off_small/test_cut_off_small.py ${jpsreport_exe})
+add_test(NAME reference_subrooms COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_test/subrooms/test_subrooms.py ${jpsreport_exe})
 
 set_tests_properties(
   01_method_A
@@ -72,6 +76,10 @@ set_tests_properties(
   J08_corridor_low_cut_off
   J09_corridor_high_cut_off
   J10_corridor_cut_off_velocity
+  reference_cut_off_disabled
+  reference_cut_off_enabled
+  reference_cut_off_large
   reference_cut_off_small
+  reference_subrooms
   PROPERTIES LABELS "CI:FAST;jpsreport")
 

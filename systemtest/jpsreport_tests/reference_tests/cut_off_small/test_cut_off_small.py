@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-# ---------
-# Test of classical voronoi output
-# ---------
 
 import os
 from sys import argv, path, stdout
@@ -26,6 +23,6 @@ def runtest(inifile, trajfile):
 
 if __name__ == "__main__":
     test = JPSRunTestDriver(4, argv0=argv[0], testdir=path[0], utestdir=utestdir, jpsreport=argv[1])
-    test.run_analysis(trajfile= "traj_Methods.xml", testfunction=runtest)
+    test.run_analysis(trajfile= "trajectories.xml", testfunction=runtest)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
