@@ -28,6 +28,10 @@
 
 #include "Wall.h"
 
+#include "../general/Macros.h"
+
+#include <Logger.h>
+
 using namespace std;
 
 /************************************************************
@@ -47,15 +51,12 @@ Wall::Wall(const Wall & orig) : Line(orig)
 
 void Wall::WriteToErrorLog() const
 {
-    char tmp[CLENGTH];
-    sprintf(
-        tmp,
-        "\t\tWALL: (%f, %f) -- (%f, %f)\n",
+    LOG_ERROR(
+        "\t\tWALL: ({:.2f}, {:.2f}) -- ({:.2f}, {:.2f})\n",
         GetPoint1().GetX(),
         GetPoint1().GetY(),
         GetPoint2().GetX(),
         GetPoint2().GetY());
-    Log->Write(tmp);
 }
 
 string Wall::Write() const

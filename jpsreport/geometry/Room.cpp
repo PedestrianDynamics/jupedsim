@@ -28,9 +28,9 @@
 
 #include "Room.h"
 
-#include "../IO/OutputHandler.h"
 #include "SubRoom.h"
 
+#include <Logger.h>
 #include <memory>
 #include <sstream>
 
@@ -47,7 +47,6 @@ Room::Room()
     _egressTime = 0;
     _caption    = "no room caption";
     _zPos       = -1.0;
-    _outputFile = NULL;
 }
 
 Room::Room(const Room & orig)
@@ -57,7 +56,6 @@ Room::Room(const Room & orig)
     _zPos       = orig.GetZPos();
     _state      = orig.GetState();
     _egressTime = orig.GetEgressTime();
-    _outputFile = orig.GetOutputHandler();
 }
 
 Room::~Room()
@@ -132,8 +130,7 @@ SubRoom * Room::GetSubRoom(int index) const
 {
     //todo: the check is done in _subRooms.at(index);
     if(_subRooms.count(index) == 0) {
-        Log->Write(
-            "ERROR: Room::GetSubRoom() No subroom id [%d] present in room id [%d] ", index, _id);
+        LOG_ERROR("Room::GetSubRoom() No subroom id [{}] present in room id [{}] ", index, _id);
         return nullptr;
     }
     return _subRooms.at(index).get();
@@ -166,11 +163,8 @@ void Room::AddSubRoom(SubRoom * r)
 
 void Room::WriteToErrorLog() const
 {
-    char tmp[CLENGTH];
-    string s;
-    sprintf(tmp, "\tRaum: %d [%s]:\n", _id, _caption.c_str());
-    s.append(tmp);
-    Log->Write(s);
+    LOG_ERROR("Room: {} [{}]:\n", _id, _caption);
+
     // SubRooms
     for(int i = 0; i < GetNumberOfSubRooms(); i++) {
         SubRoom * sub = GetSubRoom(i);
@@ -186,14 +180,4 @@ const vector<int> & Room::GetAllTransitionsIDs() const
 void Room::AddTransitionID(int ID)
 {
     _transitionsIDs.push_back(ID);
-}
-
-void Room::SetOutputHandler(OutputHandler * oh)
-{
-    _outputFile = oh;
-}
-
-OutputHandler * Room::GetOutputHandler() const
-{
-    return _outputFile;
 }

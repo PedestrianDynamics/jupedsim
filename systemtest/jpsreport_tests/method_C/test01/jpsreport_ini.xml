@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <JPSreport project="JPS-Project" version="0.8.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <geometry file="geometry.xml"/>
-    <logfile>logfile_Method_C.txt</logfile>
+
     <trajectories format="txt" unit="m">
         <file name="traj.txt"/>
     </trajectories>

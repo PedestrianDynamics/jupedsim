@@ -28,10 +28,10 @@
 
 #include "Point.h"
 //#include "SubRoom.h"
-#include "../IO/OutputHandler.h"
 #include "../general/Macros.h"
 #include "Line.h"
 
+#include <Logger.h>
 #include <cmath>
 #include <sstream>
 
@@ -148,7 +148,7 @@ Point Line::NormalVec() const
         /* Normieren */
         norm = sqrt(nx * nx + ny * ny);
         if(fabs(norm) < J_EPS) {
-            Log->Write("ERROR: \tLine::NormalVec() norm==0\n");
+            LOG_ERROR("Line::NormalVec() norm==0\n");
             exit(0);
         }
         nx /= norm;
@@ -422,17 +422,14 @@ bool Line::IntersectionWithCircle(const Point & centre, double radius /*cm for p
     delta = b * b - 4 * a * c;
 
     if((x1 == x2) && (y1 == y2)) {
-        Log->Write("isLineCrossingCircle: Your line is a point");
+        LOG_INFO("isLineCrossingCircle: Your line is a point");
         return false;
     }
     if(delta < 0.0) {
-        char tmp[CLENGTH];
-        sprintf(
-            tmp,
-            "there is a bug in 'isLineCrossingCircle', delta(%f) can t be <0 at this point.",
+        LOG_INFO(
+            "there is a bug in 'isLineCrossingCircle', delta({:.2f}) can t be <0 at this point.",
             delta);
-        Log->Write(tmp);
-        Log->Write("press ENTER");
+        LOG_INFO("press ENTER");
         return false; //fixme
         //getc(stdin);
     }

@@ -26,7 +26,6 @@
  **/
 #include "DirectionStrategy.h"
 
-#include "general/Logger.h"
 #include "geometry/Line.h"
 #include "geometry/Point.h"
 #include "geometry/Room.h"
@@ -35,6 +34,7 @@
 #include "pedestrian/Pedestrian.h"
 #include "routing/ff_router/UnivFFviaFM.h"
 
+#include <Logger.h>
 #include <chrono>
 
 /// 1

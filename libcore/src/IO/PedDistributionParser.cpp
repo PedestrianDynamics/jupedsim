@@ -22,8 +22,8 @@
 
 #include "IO/OutputHandler.h"
 #include "general/Filesystem.h"
-#include "general/Logger.h"
 
+#include <Logger.h>
 #include <cstdarg> // va_start and va_end
 
 PedDistributionParser::PedDistributionParser(const Configuration * configuration) :

@@ -27,9 +27,9 @@
  **/
 #include "BrainStorage.h"
 
-#include "general/Logger.h"
 #include "pedestrian/Pedestrian.h"
 
+#include <Logger.h>
 #include <tinyxml.h>
 
 BrainStorage::BrainStorage(

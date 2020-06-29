@@ -41,11 +41,14 @@
 #include "methods/PedData.h"
 #include "methods/VoronoiDiagram.h"
 
+#include <Logger.h>
 #include <algorithm> // std::min_element, std::max_element
 #include <cfloat>
+#include <fmt/format.h>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <stdlib.h>
 #include <vector>
 
@@ -62,7 +65,6 @@
 
 using boost::geometry::dsv;
 using namespace std;
-OutputHandler * Log = new STDIOHandler();
 
 /************************************************
  // Konstruktoren
@@ -198,7 +200,7 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(
     const fs::path & geometryFile,
     const std::vector<MeasurementArea_B *> & areas)
 {
-    Log->Write("INFO:\tReadGeometry with %s", geometryFile.string().c_str());
+    LOG_INFO("ReadGeometry with {}.", geometryFile.string());
     double geo_minX = FLT_MAX;
     double geo_minY = FLT_MAX;
     double geo_maxX = -FLT_MAX;
@@ -230,8 +232,7 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(
                             (tmp_point._y * M2CM >= geo_maxY) ? (tmp_point._y * M2CM) : geo_maxY;
                     }
                     correct(geoPoly[area->_id]);
-                    //cout<<"this is:\t"<<subroom->GetAllObstacles().size()<<endl;
-                    //appen the holes/obstacles if any
+                    //append the holes/obstacles if any
                     int k = 1;
                     for(auto && obst : subroom->GetAllObstacles()) {
                         geoPoly[area->_id].inners().resize(k++);
@@ -247,8 +248,9 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(
         } //room
 
         if(geoPoly.count(area->_id) == 0) {
-            Log->Write("ERROR: \t No polygon containing the measurement id [%d]", area->_id);
             geoPoly[area->_id] = area->_poly;
+            throw std::runtime_error(
+                fmt::format(FMT_STRING("No polygon containing the measurement id {}."), area->_id));
         }
     }
 
@@ -272,8 +274,8 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
            _deltaF,
            _vComponent,
            _IgnoreBackwardMovement) == false) {
-        Log->Write("ERROR:\tCould not parse the file %s", filename.c_str());
-        return -1;
+        LOG_ERROR("Could not parse the file {}", filename);
+        return EXIT_FAILURE;
     }
 
     //-----------------------------check whether there is pedestrian outside the whole geometry--------------------------------------------
@@ -298,8 +300,8 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
                 }
             }
             if(false == IsInBuilding) {
-                Log->Write(
-                    "Warning:\tAt %dth frame pedestrian at <x=%.4f, y=%.4f> is not in geometry!",
+                LOG_WARNING(
+                    "Warning:\tAt %dth frame pedestrian at <x={}, y={}> is not in geometry!",
                     frameNr + data.GetMinFrame(),
                     XInFrame[i] * CMtoM,
                     YInFrame[i] * CMtoM);
@@ -311,7 +313,7 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
     if(_DoesUseMethodA) //Method A
     {
         if(_areaForMethod_A.empty()) {
-            Log->Write("ERROR: Method A selected with no measurement area!");
+            LOG_ERROR("Method A selected with no measurement area!");
             exit(EXIT_FAILURE);
         }
 #pragma omp parallel for
@@ -321,14 +323,12 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
             method_A.SetTimeInterval(_deltaT[i]);
             bool result_A = method_A.Process(data, _scriptsLocation, _areaForMethod_A[i]->_zPos);
             if(result_A) {
-                Log->Write(
-                    "INFO:\tSuccess with Method A using measurement area id %d!\n",
+                LOG_INFO(
+                    "Success with Method A using measurement area id {}!\n",
                     _areaForMethod_A[i]->_id);
-                std::cout << "INFO:\tSuccess with Method A using measurement area id "
-                          << _areaForMethod_A[i]->_id << "\n";
             } else {
-                Log->Write(
-                    "INFO:\tFailed with Method A using measurement area id %d!\n",
+                LOG_ERROR(
+                    "Failed with Method A using measurement area id {}!\n",
                     _areaForMethod_A[i]->_id);
             }
         }
@@ -337,7 +337,7 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
     if(_DoesUseMethodB) //Method_B
     {
         if(_areaForMethod_B.empty()) {
-            Log->Write("ERROR: Method B selected with no measurement area!");
+            LOG_ERROR("Method B selected with no measurement area!");
             exit(EXIT_FAILURE);
         }
 
@@ -347,14 +347,12 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
             method_B.SetMeasurementArea(_areaForMethod_B[i]);
             bool result_B = method_B.Process(data);
             if(result_B) {
-                Log->Write(
-                    "INFO:\tSuccess with Method B using measurement area id %d!\n",
+                LOG_INFO(
+                    "Success with Method B using measurement area id {}!\n",
                     _areaForMethod_B[i]->_id);
-                std::cout << "INFO:\tSuccess with Method B using measurement area id "
-                          << _areaForMethod_B[i]->_id << "\n";
             } else {
-                Log->Write(
-                    "INFO:\tFailed with Method B using measurement area id %d!\n",
+                LOG_ERROR(
+                    "Failed with Method B using measurement area id {}!\n",
                     _areaForMethod_B[i]->_id);
             }
         }
@@ -363,7 +361,7 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
     if(_DoesUseMethodC) //Method C
     {
         if(_areaForMethod_C.empty()) {
-            Log->Write("ERROR: Method C selected with no measurement area!");
+            LOG_ERROR("Method C selected with no measurement area!");
             exit(EXIT_FAILURE);
         }
 #pragma omp parallel for
@@ -372,14 +370,12 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
             method_C.SetMeasurementArea(_areaForMethod_C[i]);
             bool result_C = method_C.Process(data, _areaForMethod_C[i]->_zPos);
             if(result_C) {
-                Log->Write(
-                    "INFO:\tSuccess with Method C using measurement area id %d!\n",
+                LOG_INFO(
+                    "Success with Method C using measurement area id {}!\n",
                     _areaForMethod_C[i]->_id);
-                std::cout << "INFO:\tSuccess with Method C using measurement area id "
-                          << _areaForMethod_C[i]->_id << "\n";
             } else {
-                Log->Write(
-                    "INFO:\tFailed with Method C using measurement area id %d!\n",
+                LOG_ERROR(
+                    "Failed with Method C using measurement area id {}!\n",
                     _areaForMethod_C[i]->_id);
             }
         }
@@ -388,7 +384,7 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
     if(_DoesUseMethodD) //method_D
     {
         if(_areaForMethod_D.empty()) {
-            Log->Write("ERROR: Method D selected with no measurement area!");
+            LOG_ERROR("Method D selected with no measurement area!");
             exit(EXIT_FAILURE);
         }
 
@@ -403,14 +399,12 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
             bool result_D = method_D.Process(
                 configData_D, i, data, _scriptsLocation, _areaForMethod_D[i]->_zPos);
             if(result_D) {
-                Log->Write(
-                    "INFO:\tSuccess with Method D using measurement area id %d!\n",
+                LOG_INFO(
+                    "Success with Method D using measurement area id {}!\n",
                     _areaForMethod_D[i]->_id);
-                std::cout << "INFO:\tSuccess with Method D using measurement area id "
-                          << _areaForMethod_D[i]->_id << "\n";
             } else {
-                Log->Write(
-                    "INFO:\tFailed with Method D using measurement area id %d!\n",
+                LOG_ERROR(
+                    "Failed with Method D using measurement area id {}!\n",
                     _areaForMethod_D[i]->_id);
             }
         }
@@ -419,7 +413,7 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
     if(_DoesUseMethodI) //method_I
     {
         if(_areaForMethod_I.empty()) {
-            Log->Write("ERROR: Method I selected with no measurement area!");
+            LOG_ERROR("Method I selected with no measurement area!");
             exit(EXIT_FAILURE);
         }
 
@@ -434,14 +428,12 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
             bool result_I = method_I.Process(
                 configData_I, i, data, _scriptsLocation, _areaForMethod_I[i]->_zPos);
             if(result_I) {
-                Log->Write(
-                    "INFO:\tSuccess with Method I using measurement area id %d!\n",
+                LOG_INFO(
+                    "Success with Method I using measurement area id {}!\n",
                     _areaForMethod_I[i]->_id);
-                std::cout << "INFO:\tSuccess with Method I using measurement area id "
-                          << _areaForMethod_I[i]->_id << "\n";
             } else {
-                Log->Write(
-                    "INFO:\tFailed with Method I using measurement area id %d!\n",
+                LOG_ERROR(
+                    "Failed with Method I using measurement area id {}!\n",
                     _areaForMethod_I[i]->_id);
             }
         }
@@ -450,7 +442,7 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
     if(_DoesUseMethodJ) //Method_J
     {
         if(_areaForMethod_J.empty()) {
-            Log->Write("ERROR: Method Voronoi selected with no measurement area!");
+            LOG_ERROR("Method Voronoi selected with no measurement area!");
             exit(EXIT_FAILURE);
         }
 
@@ -465,14 +457,12 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
             bool result_Voronoi = Method_J.Process(
                 configData_J, i, data, _scriptsLocation, _areaForMethod_J[i]->_zPos);
             if(result_Voronoi) {
-                Log->Write(
-                    "INFO:\tSuccess with Method J using measurement area id %d!\n",
+                LOG_INFO(
+                    "Success with Method J using measurement area id {}!\n",
                     _areaForMethod_J[i]->_id);
-                std::cout << "INFO:\tSuccess with Method J using measurement area id "
-                          << _areaForMethod_J[i]->_id << "\n";
             } else {
-                Log->Write(
-                    "INFO:\tFailed with Method J using measurement area id %d!\n",
+                LOG_ERROR(
+                    "Failed with Method J using measurement area id {}!\n",
                     _areaForMethod_J[i]->_id);
             }
         }
@@ -487,10 +477,10 @@ FILE * Analysis::CreateFile(const string & filename)
     fs::path filepath = fs::path(filename.c_str()).parent_path();
     if(fs::is_directory(filepath) == false) {
         if(fs::create_directories(filepath) == false && fs::is_directory(filepath) == false) {
-            Log->Write("ERROR:\tcannot create the directory <%s>", filepath.string().c_str());
+            LOG_ERROR("cannot create the directory <{}>", filepath.string());
             return NULL;
         }
-        Log->Write("INFO:\tcreate the directory <%s>", filepath.string().c_str());
+        LOG_INFO("create the directory <{}>", filepath.string());
     }
 
     //create the file

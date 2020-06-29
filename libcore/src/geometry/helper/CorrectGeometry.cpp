@@ -23,7 +23,6 @@
 
 #include "general/Configuration.h"
 #include "general/Filesystem.h"
-#include "general/Logger.h"
 #include "geometry/Building.h"
 #include "geometry/Crossing.h"
 #include "geometry/Line.h"
@@ -33,6 +32,7 @@
 #include "geometry/Transition.h"
 #include "geometry/Wall.h"
 
+#include <Logger.h>
 #include <algorithm>
 #include <cassert>
 #include <chrono>

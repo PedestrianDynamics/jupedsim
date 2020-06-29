@@ -277,6 +277,7 @@ endif()
 ################################################################################
 # Add libraries / executables
 ################################################################################
+add_subdirectory(libshared)
 add_subdirectory(libcore)
 add_subdirectory(jpscore)
 add_subdirectory(jpsreport)
@@ -297,9 +298,9 @@ if(UNIX)
             ERROR_QUIET
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
-        if(version_string MATCHES "^clang-format version .*")
+        if(version_string MATCHES "^.*clang-format version .*")
             string(REGEX REPLACE
-                "clang-format version ([.0-9]+).*"
+                "^.*clang-format version ([.0-9]+).*"
                 "\\1"
                 version
                 "${version_string}"

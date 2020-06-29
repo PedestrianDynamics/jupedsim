@@ -28,11 +28,12 @@
 
 #include "Obstacle.h"
 
-#include "../IO/OutputHandler.h"
+#include "../general/Macros.h"
 #include "Line.h"
 #include "Point.h"
 #include "Wall.h"
 
+#include <Logger.h>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -257,12 +258,8 @@ bool Obstacle::ConvertLineToPoly()
         }
     }
     if((tmpPoly[0] - point).Norm() > J_TOLERANZ) {
-        char tmp[CLENGTH];
-        sprintf(tmp, "ERROR: \tObstacle::ConvertLineToPoly(): ID %d !!!\n", _id);
-        Log->Write(tmp);
-        sprintf(
-            tmp, "ERROR: \tDistance between the points: %lf !!!\n", (tmpPoly[0] - point).Norm());
-        Log->Write(tmp);
+        LOG_ERROR("Obstacle::ConvertLineToPoly(): ID {} !!!\\n", _id);
+        LOG_ERROR("Distance between the points: {:.2f} !!!\n", (tmpPoly[0] - point).Norm());
         return false;
     }
     _poly = tmpPoly;
@@ -272,9 +269,8 @@ bool Obstacle::ConvertLineToPoly()
     for(const auto & w : _walls) {
         for(const auto & ptw : {w.GetPoint1(), w.GetPoint2()}) {
             if(IsPartOfPolygon(ptw) == false) {
-                Log->Write(
-                    "ERROR:\t Edge was not used during polygon creation for obstacle: %s",
-                    w.toString().c_str());
+                LOG_ERROR(
+                    "Edge was not used during polygon creation for obstacle: {}", w.toString());
                 return false;
             }
         }
@@ -325,8 +321,7 @@ const Point Obstacle::GetCentroid() const
 bool Obstacle::IsClockwise() const
 {
     if(_poly.size() < 3) {
-        Log->Write(
-            "ERROR:\tYou need at least 3 vertices to check for orientation. Subroom ID [%d]");
+        LOG_ERROR("You need at least 3 vertices to check for orientation. Obstacle ID [{}]", _id);
         return false;
         //exit(EXIT_FAILURE);
     }

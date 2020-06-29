@@ -1,6 +1,24 @@
 # Change Log
 All notable changes to `jpsreport` will be documented in this file.
 
+## v0.8.5 [08.06.2020]
+
+### Added
+
+### Changed
+- Use common Logger which is defined in /libshared 
+- File with logging data can be created by piping the console output to a file
+
+### Deprecated
+- Definition of logfile in .ini file is not used anymore
+
+### Removed
+- Removed OutputHandler since it was used for logging only
+- Removed read in and processing of logfile options
+
+### Fixed
+
+
 ## v0.8.5 [04.11.2019]
 
 ### Added
