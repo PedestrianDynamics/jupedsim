@@ -6,7 +6,7 @@
            arrival_time="5" departure_time="15">
     </train>
 
-    <train id="1" type="RE" room_id="1"
+    <train id="2" type="RE" room_id="1"
            track_id="2"
            train_offset="0" from_end="true"
            arrival_time="20" departure_time="30">

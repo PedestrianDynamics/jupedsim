@@ -13,7 +13,7 @@ TrainArrivalEvent::TrainArrivalEvent(double time, TrainEventInfo info) :
 
 void TrainArrivalEvent::Process()
 {
-    auto track = _info.building->GetTrack(_info.trackID);
+    const auto track = _info.building->GetTrack(_info.trackID);
     if(!track.has_value()) {
         std::string message = fmt::format(
             FMT_STRING("Could not find a track with ID {}. Please check your geometry."),
@@ -21,7 +21,7 @@ void TrainArrivalEvent::Process()
         throw std::runtime_error(message);
     }
 
-    auto start = _info.building->GetTrackStart(_info.trackID);
+    const auto start = _info.building->GetTrackStart(_info.trackID);
     if(!start.has_value()) {
         std::string message = fmt::format(
             FMT_STRING("Could not find a start for track with ID {}. Please check your geometry."),

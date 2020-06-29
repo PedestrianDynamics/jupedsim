@@ -485,13 +485,9 @@ bool Line::IntersectionWithCircle(const Point & centre, double radius /*cm for p
     return !((t2 < 0.0) || (t2 > 1.0));
 }
 
-bool Line::IntersectionWithCircle(
-    const Point & centre,
-    double radius,
-    std::vector<Point> & intersectionPoints) const
+std::vector<Point> Line::IntersectionPointsWithCircle(const Point & centre, double radius) const
 {
-    // assure that only the intersection points are returned
-    intersectionPoints.clear();
+    std::vector<Point> intersectionPoints;
 
     // shift everything, such that the centre of the circle is at the origin
     Point p1 = _point1 - centre;
@@ -511,7 +507,7 @@ bool Line::IntersectionWithCircle(
 
     // no real intersection points of line segment and circle exist
     if(discriminant < 0) {
-        return false;
+        return intersectionPoints;
     }
 
     // only one intersection exists
@@ -523,11 +519,8 @@ bool Line::IntersectionWithCircle(
         Point intersection{x, y};
         intersection += centre;
         intersectionPoints.emplace_back(intersection);
-        return true;
+        return intersectionPoints;
     }
-
-    // two intersection of infinite line and circle exist
-    bool onLineSegment = false;
 
     // Check if first intersection is in line segment, if so add to intersection points
     if(double t = (-b + std::sqrt(std::pow(b, 2.) - 4. * a * c)) / (2. * a);
@@ -538,7 +531,6 @@ bool Line::IntersectionWithCircle(
         Point intersection{x, y};
         intersection += centre;
         intersectionPoints.emplace_back(intersection);
-        onLineSegment = true;
     }
 
     // Check if second intersection is in line segment, if so add to intersection points
@@ -550,10 +542,9 @@ bool Line::IntersectionWithCircle(
         Point intersection{x, y};
         intersection += centre;
         intersectionPoints.emplace_back(intersection);
-        onLineSegment = true;
     }
 
-    return onLineSegment;
+    return intersectionPoints;
 }
 
 

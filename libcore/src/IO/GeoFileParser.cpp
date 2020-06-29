@@ -204,7 +204,10 @@ bool GeoFileParser::LoadGeometry(Building * building)
                         int trackID = xmltoi(
                             xPolyVertices->Attribute("track_id"), std::numeric_limits<int>::min());
                         if(trackID < 0) {
-                            //TODO warning
+                            LOG_WARNING(
+                                "Track ID should be non-negative integer value but is {}. This "
+                                "track will be ignored.",
+                                trackID);
                             continue;
                         }
                         building->AddTrackWall(trackID, room->GetID(), subroom_id, wall);

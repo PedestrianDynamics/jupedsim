@@ -281,12 +281,3 @@ TEST_CASE("geometry/Line/IsInLineSegment", "[geometry][Line][IsInLineSegment]")
         REQUIRE_FALSE(L3.IsInLineSegment(P2));
     }
 }
-
-TEST_CASE("geometry/Line/IntersectionWithCircle", "[geometry][Line][IntersectionWithCircle]")
-{
-    Line line{{0, 0}, {0, 1}};
-
-    std::vector<Point> intersection;
-    bool hasIntersection = line.IntersectionWithCircle({0, 0}, 1, intersection);
-    REQUIRE(hasIntersection);
-}

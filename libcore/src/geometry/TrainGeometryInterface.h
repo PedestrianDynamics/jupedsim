@@ -41,7 +41,7 @@ struct Track {
 struct TrainDoor {
     double _distance; /** Distance to start of train. */
     double _width;    /** Width of train door. */
-    double _outflow;  /** Max. allowed flow at train door. */
+    double _flow;     /** Max. allowed flow at train door. */
 };
 
 /**

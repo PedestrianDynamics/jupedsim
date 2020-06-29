@@ -104,7 +104,11 @@ void TrainFileParser::ParseTrainTimeTable(
                 fromEnd = true;
             } else {
                 fromEnd = false;
-                LOG_WARNING("");
+                LOG_WARNING(
+                    "id {}: input for from_end should be true or false, but is {}. Use default: "
+                    "false.",
+                    id,
+                    in);
             }
         } else {
             fromEnd = false;
@@ -242,9 +246,10 @@ std::optional<TrainType> TrainFileParser::ParseTrainTypeNode(TiXmlElement * node
             return std::nullopt;
         }
     } else {
-        LOG_WARNING("{}: input for departure_time not found. Skip entry.", type);
+        LOG_WARNING("{}: input for length not found. Skip entry.", type);
+        return std::nullopt;
     }
-    LOG_INFO("length: {}", agents_max);
+    LOG_INFO("length: {}", length);
 
 
     std::vector<TrainDoor> doors;
@@ -266,7 +271,7 @@ std::optional<TrainType> TrainFileParser::ParseTrainTypeNode(TiXmlElement * node
             continue;
         }
 
-        // Read distance and check if correct value
+        // Read width and check if correct value
         double width = -std::numeric_limits<double>::infinity();
         if(const char * attribute = xDoor->Attribute("width"); attribute) {
             if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
@@ -282,20 +287,20 @@ std::optional<TrainType> TrainFileParser::ParseTrainTypeNode(TiXmlElement * node
             continue;
         }
 
-        // Read distance and check if correct value
-        double outflow = -std::numeric_limits<double>::infinity();
-        if(const char * attribute = xDoor->Attribute("outflow"); attribute) {
+        // Read flow and check if correct value
+        double flow = -std::numeric_limits<double>::infinity();
+        if(const char * attribute = xDoor->Attribute("flow"); attribute) {
             if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
                value > 0.) {
-                outflow = value;
+                flow = value;
             } else {
                 LOG_WARNING(
-                    "{}: input for outflow should be >0 but is {:5.2}. Skip entry.", type, value);
+                    "{}: input for flow should be >0 but is {:5.2}. Skip entry.", type, value);
                 continue;
             }
         }
 
-        doors.emplace_back(TrainDoor{distance, width, outflow});
+        doors.emplace_back(TrainDoor{distance, width, flow});
     }
 
     if(doors.empty()) {
@@ -309,7 +314,7 @@ std::optional<TrainType> TrainFileParser::ParseTrainTypeNode(TiXmlElement * node
             "Door:\tdistance: {:5.2f}\twidth: {:5.2f}\toutflow: {:5.2f}",
             d._distance,
             d._width,
-            d._outflow);
+            d._flow);
     }
 
     return TrainType{type, agents_max, length, doors};
