@@ -20,7 +20,7 @@ from JPSRunTest import JPSRunTestDriver
 
 def runtest(inifile, trajfile):
 
-    logging.info("===== Tests methods with for geometry with several subrooms ===============")
+    logging.info("===== Test of Method I with one measurement area spreading over several subrooms ===============")
     check_diff_to_reference_data()
 
 

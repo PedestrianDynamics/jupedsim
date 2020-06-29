@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+####################
+# Test of Method D, I and J with cut_by_circle enabled and various radius of 1.5, 2.0 and 2.5
+####################
 
 import os
 from sys import argv, path, stdout
@@ -17,7 +20,7 @@ from JPSRunTest import JPSRunTestDriver
 
 def runtest(inifile, trajfile):
 
-    logging.info("===== Tests methods with cut off radius of 1.5 ===============")
+    logging.info("===== Test of Method D, I and J with cut_by_circle enabled and various radius of 1.5, 2.0 and 2.5 ===============")
     check_diff_to_reference_data()
 
 

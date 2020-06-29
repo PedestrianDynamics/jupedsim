@@ -16,9 +16,11 @@
 
   <velocity frame_step="10" set_movement_direction="None" ignore_backward_movement="false"/>
 
-  <method_I enabled="true">
-    <measurement_area id="1" start_frame="None" stop_frame="None" get_individual_FD="true"/>
-    <cut_by_circle enabled="true" radius="1.0" edges="10"/>
-	</method_I>
+  <method_D enabled="true">
+    <measurement_area id="1" start_frame="85" stop_frame="86" get_individual_FD="false"/>
+    <one_dimensional enabled="false"/>
+    <cut_by_circle enabled="true" radius="1" edges="10"/>
+    <profiles enabled="true" grid_size_x="0.20" grid_size_y="0.20"/>
+  </method_D>
 
 </JPSreport>

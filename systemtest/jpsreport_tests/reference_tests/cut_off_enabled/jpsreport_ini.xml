@@ -56,21 +56,6 @@
 
   <velocity frame_step="10" set_movement_direction="None" ignore_backward_movement="false"/>
 
-  <method_A enabled="true">
-    <measurement_area id="2" frame_interval="2"/>
-    <measurement_area id="6" frame_interval="2"/>
-  </method_A>
-
-  <method_B enabled="true">
-    <measurement_area id="4" />
-    <measurement_area id="7" />
-  </method_B>
-
-  <method_C enabled="true">
-    <measurement_area id="3"/>
-    <measurement_area id="4"/>
-  </method_C>
-
   <method_D enabled="true">
     <measurement_area id="5" start_frame="None" stop_frame="None" get_individual_FD="true"/>
     <measurement_area id="8" start_frame="None" stop_frame="None" get_individual_FD="true"/>

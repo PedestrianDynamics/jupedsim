@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ####################
-# Test of Method D, I and J with cut_by_circle enabled and small radius of 0.5
+# Test profile calculation for 2 frames with Method D
 ####################
 
 import os
@@ -20,7 +20,7 @@ from JPSRunTest import JPSRunTestDriver
 
 def runtest(inifile, trajfile):
 
-    logging.info("=====  Test of Method D, I and J with cut_by_circle enabled and small radius of 0.5 ===============")
+    logging.info("===== Test profile calculation for 2 frames with Method D ===============")
     check_diff_to_reference_data()
 
 
