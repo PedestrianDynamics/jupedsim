@@ -169,8 +169,8 @@ void FFRouter::CalculateFloorFields()
                     for(auto transUID : room->GetAllTransitionsIDs()) {
                         doorUIDs.emplace(transUID);
                     }
-                    for(auto const & [_, subroom] : room->GetAllSubRooms()) {
-                        for(auto const * cross : subroom->GetAllCrossings()) {
+                    for(const auto & [_, subroom] : room->GetAllSubRooms()) {
+                        for(const auto * cross : subroom->GetAllCrossings()) {
                             doorUIDs.emplace(cross->GetUniqueID());
                         }
                     }
@@ -191,7 +191,7 @@ void FFRouter::CalculateFloorFields()
                 double minDist = std::numeric_limits<double>::max();
                 int minID      = -1;
 
-                for(auto const & [exitID, exit] : _exitsByUID) {
+                for(const auto & [exitID, exit] : _exitsByUID) {
                     double dist = goal->GetDistance(exit->GetCentre());
                     if(dist < minDist) {
                         minDist = dist;
