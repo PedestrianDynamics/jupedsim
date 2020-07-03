@@ -26,6 +26,28 @@ void ParseTrainTimeTable(
     const fs::path & trainTimeTableFile);
 
 /**
+ * Parse a specific train time table node to get the needed information and check if valid.
+ * @param node Node containing the train time table element
+ * @param building Geometry of the simulation
+ * @param trainTypes User defined train types
+ * @return information of train event if vaild, std::nullopt otherwise
+ */
+std::optional<TrainEventInfo> ParseTrainTimeTableNode(
+    TiXmlElement * node,
+    Building & building,
+    const std::map<std::string, TrainType> & trainTypes);
+
+/**
+ * Parse the arrival and departure time of a train based on specific train time table node and
+ * check if valid.
+ * @param node Node containing the train time table element
+ * @param trainID ID of the train
+ * @return arrival and departure time if valid, std::nullopt otherwise
+ */
+std::optional<std::tuple<double, double>>
+ParseTrainTimeTableTimes(TiXmlElement * node, int trainID);
+
+/**
  * Parses the train types from a specific file: \p trainTypeFile.
  * @param trainTypeFile File containing information of the train
  * @return map of parsed TrainTypes with the _type as key
