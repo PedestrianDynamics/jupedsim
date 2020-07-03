@@ -46,9 +46,9 @@ A train is defined through the following information:
 - length (int): length of the train
 - agents_max (int): maximal number of passengers
 - door: 
-    - id (int): id of the train door
-    - distance (float): distance to train start
-    - width (float): width of the door
+    - `id` (int): id of the train door
+    - `distance` (float): distance to train start
+    - `width` (float): width of the door
     
 {%include note.html content="The parameter `length` is not used yet. In future it will be used for sanity checks and for avoiding overlapping trains."%}
 
@@ -62,7 +62,7 @@ A train is defined through the following information:
     </train>
 
     <train type="ICE" agents_max="20" length="23">
-        <door id="1" distance="3" width="2"/>
+        <door id="1" distance="1.5" width="2"/>
         <door id="2" distance="10" width="3"/>
         <door id="3" distance="18" width="2"/>
     </train>
@@ -81,13 +81,15 @@ When this number exceeds the `agents_max` parameter, all train's doors are close
 ## Train timetable
 ### Definition 
 A train is defined through the following information: 
-- id (int): id of the train
-- type (string): identifier of the train defined with the train types
-- track_id (int): id of the track the train arrives
-- train_offset (float): offset of the train to the track start
-- from_end (bool): false: train starts at track start, true: train starts at track end
-- arrival_time (float): time the train arrives
-- departure_time (float): time the train departs
+- `id` (int): id of the train
+- `type` (string): identifier of the train defined with the train types
+- `track_id` (int): id of the track the train arrives
+- `train_offset` (float): offset of the train to the track start
+- `reversed` (bool): false: train starts at track start, true: train starts at track end, default: false
+- `arrival_time` (float): time the train arrives
+- `departure_time` (float): time the train departs
+
+{%include note.html content="The parameter `reversed` add doors starting from track end in direction of track start!."%}
 
 ### Example
 
@@ -96,17 +98,20 @@ A train is defined through the following information:
 <train_time_table>
     <train id="1" type="RE"
            track_id="2"
-           train_offset="0"
+           train_offset="2"
            arrival_time="5" departure_time="15">
     </train>
 
     <train id="2" type="ICE"
            track_id="3"
-           train_offset="0" from_end="true"
+           train_offset="1" reversed="true"
            arrival_time="20" departure_time="30">
     </train>
 </train_time_table>
 ```
+
+With the train defined as above, this would lead to the positioning of the train doors as seen here:
+![Schematic overview of train arrival on platform.]({{ site.baseurl }}/images/traintimetable.png)
 
 ## Geometry changes due to trains
 For realizing trains in the simulation, doors need to be added or removed dynamically during the simulation. 
