@@ -6,7 +6,7 @@ sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_trains.html
 summary: The interaction with trains is modeled with an event-based deleting and creating of doors. When a train arrives on the platform, doors are created and again deleted when the train departs.
-last_updated: Jun 02, 2020
+last_updated: Jul 03, 2020
 ---
 
 
@@ -69,7 +69,7 @@ A train is defined through the following information:
 </train_type>
 ```
 
-![Schematic overview of train type definition.]({{ site.baseurl }}/images/traintype.png)
+![Schematic overview of train type definition.]({{ site.baseurl }}/images/trains/traintype.png)
 
 ### Capacity of a train
 
@@ -111,7 +111,7 @@ A train is defined through the following information:
 ```
 
 With the train defined as above, this would lead to the positioning of the train doors as seen here:
-![Schematic overview of train arrival on platform.]({{ site.baseurl }}/images/traintimetable.png)
+![Schematic overview of train arrival on platform.]({{ site.baseurl }}/images/trains/traintimetable.png)
 
 ## Geometry changes due to trains
 For realizing trains in the simulation, doors need to be added or removed dynamically during the simulation. 
@@ -124,13 +124,13 @@ The following accounts when calculating the train door coordinates:
 
 ### Splitting of the track walls
 #### Case 1: Door on one single wall element
-![Door on one single wall element.]({{ site.baseurl }}/images/trainCase1.png)
+![Door on one single wall element.]({{ site.baseurl }}/images/trains/trainCase1.png)
 
 #### Case 2: Door on two neighboring wall elements
-![Door on two neighboring wall elements.]({{ site.baseurl }}/images/trainCase2.png)
+![Door on two neighboring wall elements.]({{ site.baseurl }}/images/trains/trainCase2.png)
 
 #### Case 3: Door on more than two wall elements
-![Door on more than two wall elements.]({{ site.baseurl }}/images/trainCase3.png)
+![Door on more than two wall elements.]({{ site.baseurl }}/images/trains/trainCase3.png)
 
 {%include note.html content="Please be aware that depending on the curvature of the platform edges a significant area of
  platform might be not accessible. Pedestrian inside this area will be removed from the simulation and report as 
