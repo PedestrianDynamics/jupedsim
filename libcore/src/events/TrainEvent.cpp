@@ -40,7 +40,7 @@ void TrainArrivalEvent::Process()
         _info.trainType,
         track.value(),
         _info.trainStartOffset,
-        _info.fromEnd);
+        _info.reversed);
 }
 
 std::string TrainArrivalEvent::ToString() const

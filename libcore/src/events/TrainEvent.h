@@ -27,14 +27,14 @@ struct TrainEventInfo {
     TrainType trainType;
 
     /**
-     *
+     * Offset of train to start of track start/end point
      */
     double trainStartOffset;
 
     /**
-     *
+     * Train will be added from track end
      */
-    bool fromEnd;
+    bool reversed;
 };
 
 /**

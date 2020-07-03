@@ -34,7 +34,7 @@ void TrainFileParser::ParseTrainTimeTable(
                 LOG_INFO("Type: {}", trainInfo.value().trainType._type);
                 LOG_INFO("track_id: {}", trainInfo.value().trackID);
                 LOG_INFO("train_offset: {}", trainInfo.value().trainStartOffset);
-                LOG_INFO("from_end: {}", trainInfo.value().fromEnd);
+                LOG_INFO("reversed: {}", trainInfo.value().reversed);
                 LOG_INFO("arrival_time: {}", arrivalTime);
                 LOG_INFO("departure_time: {}", departureTime);
 
@@ -45,7 +45,7 @@ void TrainFileParser::ParseTrainTimeTable(
                     trainInfo.value().trackID,
                     trainInfo.value().trainType,
                     trainInfo.value().trainStartOffset,
-                    trainInfo.value().fromEnd};
+                    trainInfo.value().reversed};
 
                 // Arriving train
                 eventManager.AddEvent(std::make_unique<TrainArrivalEvent>(arrivalTime, eventInfo));
@@ -139,28 +139,28 @@ std::optional<TrainEventInfo> TrainFileParser::ParseTrainTimeTableNode(
     }
 
     // Read from_end and check if correct value
-    bool fromEnd = false;
-    if(const char * attribute = node->Attribute("from_end"); attribute) {
+    bool reversed = false;
+    if(const char * attribute = node->Attribute("reversed"); attribute) {
         std::string in = xmltoa(attribute, "false");
         std::transform(in.begin(), in.end(), in.begin(), ::tolower);
 
         if(in == "false") {
-            fromEnd = false;
+            reversed = false;
         } else if(in == "true") {
-            fromEnd = true;
+            reversed = true;
         } else {
-            fromEnd = false;
+            reversed = false;
             LOG_WARNING(
-                "id {}: input for from_end should be true or false, but is {}. Use default: "
+                "id {}: input for reversed should be true or false, but is {}. Use default: "
                 "false.",
                 id,
                 in);
         }
     } else {
-        fromEnd = false;
+        reversed = false;
     }
 
-    return TrainEventInfo{&building, id, trackID, trainTypes.at(type), trainOffset, fromEnd};
+    return TrainEventInfo{&building, id, trackID, trainTypes.at(type), trainOffset, reversed};
 }
 
 std::optional<std::tuple<double, double>>

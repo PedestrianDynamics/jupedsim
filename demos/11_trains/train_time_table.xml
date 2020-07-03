@@ -8,7 +8,7 @@
 
     <train id="2" type="RE" room_id="1"
            track_id="2"
-           train_offset="0" from_end="true"
+           train_offset="0" reversed="true"
            arrival_time="20" departure_time="30">
     </train>
 </train_time_table>
