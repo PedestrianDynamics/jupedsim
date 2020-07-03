@@ -204,32 +204,32 @@ protected:
     /**
      * Map of the underlying floorfields. _locffviafm[id] gives the floorfield in room with ID==id.
      */
-    std::map<int, UnivFFviaFM *> _locffviafm;
+    std::map<int, UnivFFviaFM *> _floorfieldByRoomID;
 
     /**
      * Map containing all the exits from the geometry.
      */
-    std::map<int, Transition *> _ExitsByUID;
+    std::map<int, Transition *> _exitsByUID;
 
     /**
      * Map containing all doors in geometry.
      */
-    std::map<int, Crossing *> _CroTrByUID;
+    std::map<int, Crossing *> _doorByUID;
 
     /**
      * Time when the next recalculation is needed when using \a _strategy=ROUTING_FF_QUICKEST.
      */
-    double _timeToRecalc = 0.;
+    double _timeToRecalculation = 0.;
 
     /**
      * Time span between calculations when using \a _strategy=ROUTING_FF_QUICKEST.
      */
-    double _recalc_interval{};
+    double _recalculationInterval{};
 
     /**
      * Router needs a recalculation when using \a _strategy=ROUTING_FF_QUICKEST.
      */
-    bool _plzReInit = false;
+    bool _needsRecalculation = false;
 
     /**
      * The pedestrian head for specific goals (true) or just for the outside (false)
@@ -244,5 +244,5 @@ protected:
     /**
      * Map from goalID to the closest exit. It maps goals to door UID.
      */
-    std::map<int, int> _goalToLineUIDmap;
+    std::map<int, std::set<int>> _doorsToGoalUID;
 };

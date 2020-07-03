@@ -4,10 +4,10 @@ import numpy as np
 import pandas as pd
 import re
 from xml.dom import minidom
+
 SUCCESS = 0
 FAILURE = -1
 critical_value = 0.9
-
 
 try:
     import xml.etree.cElementTree as ET
@@ -16,7 +16,8 @@ except ImportError:
 
 
 def contains(item, lower, upper, err):
-    return lower-err <= item <= upper+err
+    return lower - err <= item <= upper + err
+
 
 def equals(item, val, err):
     return abs(item - val) <= err
@@ -36,11 +37,12 @@ def get_polygon(poly):
     #     #     #         Y.append( q.attrib['py'] )
     #     #     pass
     #     # else:
-    for p in poly.getchildren(): # vertex
+    for p in poly.getchildren():  # vertex
         X.append(p.attrib['px'])
         Y.append(p.attrib['py'])
 
     return X, Y
+
 
 def plot_geometry(filename):
     tree = ET.parse(geometry)
@@ -69,8 +71,6 @@ def plot_geometry(filename):
             plt.plot(X, Y, "--r", lw=1.6, alpha=0.2)
 
 
-
-
 def is_inside(trajectories, left, right, down, up):
     """
     up --> . _____.
@@ -85,11 +85,20 @@ def is_inside(trajectories, left, right, down, up):
                 (trajectories[0, 3] < up)
     return condition.all()
 
+
+def PassedPolygon(trajectories, left, right, lower, upper):
+    trajInside = trajectories[np.where(np.logical_and(trajectories[:, 2] > left,
+                                                      np.logical_and(trajectories[:, 2] < right,
+                                                                     np.logical_and(trajectories[:, 3] > lower,
+                                                                                    trajectories[:, 3] < upper))))]
+    return trajInside.size != 0
+
+
 def PassedLine(p, e):
     """
     check if pedestrian (given by matrix p) passed the line [x1, x2, y1, y2] with x1<x2 and  y1<y2
     """
-    assert (isinstance(e, list) or isinstance(e, np.ndarray)) and len(e) == 4,\
+    assert (isinstance(e, list) or isinstance(e, np.ndarray)) and len(e) == 4, \
         "exit should be a list with len=4"
 
     x1 = e[0]
@@ -99,17 +108,17 @@ def PassedLine(p, e):
     A = np.array([x1, y1])
     B = np.array([x2, y2])
 
-    is_left_and_right = (any(np.cross(B-A, p[:, 2:]-A)) < 0) & (any(np.cross(B-A, p[:, 2:]-A)) > 0)
-    is_between = any(np.dot(p[:, 2:]-A, B-A) > 0) & any(np.dot(p[:, 2:]-B, A-B) > 0)
+    is_left_and_right = (any(np.cross(B - A, p[:, 2:] - A)) < 0) & (any(np.cross(B - A, p[:, 2:] - A)) > 0)
+    is_between = any(np.dot(p[:, 2:] - A, B - A) > 0) & any(np.dot(p[:, 2:] - B, A - B) > 0)
 
-    return  is_left_and_right and is_between
+    return is_left_and_right and is_between
 
 
 def PassedLineX(p, exit):
     """
     check if pedestrian (given by matrix p) passed the vertical line x, [y1, y2] y1<y2
     """
-    eps = 0.1 # fps should be big enough, otherwise eps maybe too bis for a guess.
+    eps = 0.1  # fps should be big enough, otherwise eps maybe too bis for a guess.
     x = exit[0]
     y1 = exit[1]
     y2 = exit[2]
@@ -117,14 +126,14 @@ def PassedLineX(p, exit):
     X = p[:, 2]
     Y = p[:, 3]
 
-    return (np.logical_and(np.logical_and(X >= x-eps, X <= x+eps), np.logical_and(Y >= y1, Y <= y2) ) ).any()
+    return (np.logical_and(np.logical_and(X >= x - eps, X <= x + eps), np.logical_and(Y >= y1, Y <= y2))).any()
 
 
 def PassedLineY(p, exit):
     """
     check if pedestrian (given by matrix p) passed the horizontal line y, [x1, x2] x1<x2
     """
-    eps = 0.1 # fps should be big enough, otherwise eps maybe too bis for a guess.
+    eps = 0.1  # fps should be big enough, otherwise eps maybe too bis for a guess.
     y = exit[0]
     x1 = exit[1]
     x2 = exit[2]
@@ -132,33 +141,36 @@ def PassedLineY(p, exit):
     X = p[:, 2]
     Y = p[:, 3]
 
-    return (np.logical_and(np.logical_and(Y >= y-eps, Y <= y+eps), np.logical_and(X >= x1, X <= x2) ) ).any()
+    return (np.logical_and(np.logical_and(Y >= y - eps, Y <= y + eps), np.logical_and(X >= x1, X <= x2))).any()
+
 
 def get_num_threads(filename):
     """
     get num_threads
     """
-    logging.info("parsing <%s>"%filename)
+    logging.info("parsing <%s>" % filename)
     try:
         xmldoc = minidom.parse(filename)
     except:
-        logging.critical('could not parse file %s. exit'%filename)
+        logging.critical('could not parse file %s. exit' % filename)
         exit(FAILURE)
     num_threads = float(xmldoc.getElementsByTagName('num_threads')[0].firstChild.nodeValue)
     return num_threads
+
 
 def get_maxtime(filename):
     """
     get max sim time
     """
-    logging.info("parsing <%s>"%filename)
+    logging.info("parsing <%s>" % filename)
     try:
         xmldoc = minidom.parse(filename)
     except:
-        logging.critical('could not parse file %s. exit'%filename)
+        logging.critical('could not parse file %s. exit' % filename)
         exit(FAILURE)
     maxtime = float(xmldoc.getElementsByTagName('max_sim_time')[0].firstChild.nodeValue)
     return maxtime
+
 
 def get_outflow(filename):
     """
@@ -171,11 +183,12 @@ def get_outflow(filename):
     for node in root.iter():
         tag = node.tag
         if tag == "traffic_constraints":
-            for doors in node.getchildren(): # doors
-                for door in doors.getchildren(): # door
+            for doors in node.getchildren():  # doors
+                for door in doors.getchildren():  # door
                     ids.append(int(door.attrib['trans_id']))
                     outflow.append(float(door.attrib['outflow']))
     return ids, outflow
+
 
 def parse_file(filename):
     """
@@ -187,8 +200,7 @@ def parse_file(filename):
     N: number of pedestrians
     data: trajectories (numpy.array) [id fr x y]
     """
-    logging.info("parsing <%s>"%filename)
-
+    logging.info("parsing <%s>" % filename)
 
     f = open(filename)
     for i, line in enumerate(f):
@@ -203,18 +215,20 @@ def parse_file(filename):
     try:
         N = int(N)
     except:
-        print ("ERROR: could not read <agents>")
+        print("ERROR: could not read <agents>")
         exit()
 
     try:
         fps = float(fps)
     except:
-        print ("ERROR: could not read <fps>")
+        print("ERROR: could not read <fps>")
         exit()
 
-    data = pd.read_table(filename,  comment="#", skip_blank_lines=True, names=header, usecols=['ID', 'FR', 'X', 'Y', 'Z']).to_numpy()
+    data = pd.read_table(filename, comment="#", skip_blank_lines=True, names=header,
+                         usecols=['ID', 'FR', 'X', 'Y', 'Z']).to_numpy()
 
     return fps, N, data
+
 
 def parse_file_deprecated(filename):
     """
@@ -226,19 +240,19 @@ def parse_file_deprecated(filename):
     N: number of pedestrians
     data: trajectories (numpy.array) [id fr x y]
     """
-    logging.info("parsing <%s>"%filename)
+    logging.info("parsing <%s>" % filename)
     try:
         xmldoc = minidom.parse(filename)
     except:
         logging.critical('could not parse file. exit')
         exit(FAILURE)
     N = int(xmldoc.getElementsByTagName('agents')[0].childNodes[0].data)
-    fps = xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data #type unicode
+    fps = xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data  # type unicode
     fps = float(fps)
     fps = int(fps)
-    #print "fps=", fps
-    #fps = int(xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data)
-    logging.info("Npeds = %d, fps = %d"%(N, fps))
+    # print "fps=", fps
+    # fps = int(xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data)
+    logging.info("Npeds = %d, fps = %d" % (N, fps))
     frames = xmldoc.childNodes[0].getElementsByTagName('frame')
     data = []
     for frame in frames:
@@ -264,7 +278,7 @@ def rolling_flow(fps, N, data, x0, name):
     output:
     - flow
     """
-    logging.info('Measure flow at %f'%x0)
+    logging.info('Measure flow at %f' % x0)
     if not isinstance(data, np.ndarray):
         logging.critical("flow() accepts data of type <ndarray>. exit")
         exit(FAILURE)
@@ -274,10 +288,10 @@ def rolling_flow(fps, N, data, x0, name):
         d = data[data[:, 0] == ped]
         passed = d[d[:, 2] >= x0]
         if passed.size == 0:  # pedestrian did not pass the line
-            logging.critical("Pedestrian <%d> did not pass the line at <%.2f>"%(ped, x0))
+            logging.critical("Pedestrian <%d> did not pass the line at <%.2f>" % (ped, x0))
             exit(FAILURE)
         first = min(passed[:, 1])
-        #print "ped= ", ped, "first=",first
+        # print "ped= ", ped, "first=",first
         times.append(first)
     if len(times) < 2:
         logging.warning("Number of pedestrians passing the line is small. return 0")
@@ -285,16 +299,18 @@ def rolling_flow(fps, N, data, x0, name):
 
     times = np.sort(times)
     serie = pd.Series(times)
-    minp = 100; windows = int(len(times)/10);
+    minp = 100;
+    windows = int(len(times) / 10);
     minp = min(minp, windows)
-    flow = fps*(windows-1)/(serie.rolling(windows, min_periods=minp).max()  - serie.rolling(windows, min_periods=minp).min() )
-    flow = flow[~np.isnan(flow)] # remove NaN
+    flow = fps * (windows - 1) / (
+            serie.rolling(windows, min_periods=minp).max() - serie.rolling(windows, min_periods=minp).min())
+    flow = flow[~np.isnan(flow)]  # remove NaN
     wmean = flow.rolling(windows, min_periods=minp).mean()
 
     np.savetxt(name, np.array(times))
 
-    logging.info("min(times)=%f max(times)=%f"%(min(times), max(times)))
-    return np.mean(wmean) #fps * float(N-1) / (max(times) - min(times))
+    logging.info("min(times)=%f max(times)=%f" % (min(times), max(times)))
+    return np.mean(wmean)  # fps * float(N-1) / (max(times) - min(times))
 
 
 def flow(fps, N, data, x0):
@@ -309,7 +325,7 @@ def flow(fps, N, data, x0):
     output:
     - flow
     """
-    logging.info('Measure flow at %f'%x0)
+    logging.info('Measure flow at %f' % x0)
     if not isinstance(data, np.ndarray):
         logging.critical("flow() accepts data of type <ndarray>. exit")
         exit(FAILURE)
@@ -319,19 +335,20 @@ def flow(fps, N, data, x0):
         d = data[data[:, 0] == ped]
         passed = d[d[:, 2] >= x0]
         if passed.size == 0:  # pedestrian did not pass the line
-            logging.critical("Pedestrian <%d> did not pass the line at <%.2f>"%(ped, x0))
+            logging.critical("Pedestrian <%d> did not pass the line at <%.2f>" % (ped, x0))
             exit(FAILURE)
         first = min(passed[:, 1])
-        #print "ped= ", ped, "first=",first
+        # print "ped= ", ped, "first=",first
         times.append(first)
     if len(times) < 2:
         logging.warning("Number of pedestrians passing the line is small. return 0")
         return 0
 
-    logging.info("min(times)=%f max(times)=%f"%(min(times), max(times)))
-    return fps * float(N-1) / (max(times) - min(times))
+    logging.info("min(times)=%f max(times)=%f" % (min(times), max(times)))
+    return fps * float(N - 1) / (max(times) - min(times))
 
-def CalcBiVarCDF(x,y,xGrid,yGrid):
+
+def CalcBiVarCDF(x, y, xGrid, yGrid):
     """
     Calculate the bivariate CDF of two given input signals on predefined grids.
     input:
@@ -345,12 +362,12 @@ def CalcBiVarCDF(x,y,xGrid,yGrid):
     nPoints = np.size(x);
     xGridLen = np.size(xGrid);
     yGridLen = np.size(yGrid);
-    CDF2D = np.zeros([xGridLen,yGridLen]);
+    CDF2D = np.zeros([xGridLen, yGridLen]);
     for i in range(xGridLen):
         for j in range(yGridLen):
             for k in range(nPoints):
                 if ((x[k] <= xGrid[i]) and (y[k] <= yGrid[j])):
-                     CDF2D[i,j] += 1;
+                    CDF2D[i, j] += 1;
 
     CDF2D = CDF2D / nPoints;
     return CDF2D
@@ -373,8 +390,8 @@ def CDFDistance(x1, y1, x2, y2):
     xCommonGrid = np.linspace(np.min(x), np.max(x), xPoints);
     y = np.hstack((y1, y2))
     yCommonGrid = np.linspace(np.min(y), np.max(y), yPoints);
-    CDF1 = CalcBiVarCDF(x1,y1,xCommonGrid,yCommonGrid);
-    CDF2 = CalcBiVarCDF(x2,y2,xCommonGrid,yCommonGrid);
-#    KSD = np.linalg.norm(CDF1-CDF2)/(np.linalg.norm(CDF1)+np.linalg.norm(CDF1); # Frobenius norm (p=2)
-    KSD = np.max(np.abs(CDF1-CDF2)); # Kolmogorov-Smirnov distance (p=inf)
+    CDF1 = CalcBiVarCDF(x1, y1, xCommonGrid, yCommonGrid);
+    CDF2 = CalcBiVarCDF(x2, y2, xCommonGrid, yCommonGrid);
+    #    KSD = np.linalg.norm(CDF1-CDF2)/(np.linalg.norm(CDF1)+np.linalg.norm(CDF1); # Frobenius norm (p=2)
+    KSD = np.max(np.abs(CDF1 - CDF2));  # Kolmogorov-Smirnov distance (p=inf)
     return KSD
