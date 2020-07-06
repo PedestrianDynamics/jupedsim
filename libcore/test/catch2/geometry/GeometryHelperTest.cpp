@@ -50,7 +50,7 @@ TEST_CASE(
         {
             SECTION("Doors on separate track wall")
             {
-                double outflow = std::numeric_limits<double>::max();
+                double flow = std::numeric_limits<double>::max();
 
                 std::vector<TrainDoor> trainDoors;
                 for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls);
@@ -61,7 +61,7 @@ TEST_CASE(
                             return sum + wall.GetLength();
                         });
                     distance += 0.25 * wallItr->GetLength();
-                    trainDoors.emplace_back(TrainDoor{distance, width, outflow});
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
                 }
                 TrainType train{"TEST", 20, 10, trainDoors};
 
@@ -112,7 +112,7 @@ TEST_CASE(
 
             SECTION("Doors on neighboring track walls")
             {
-                double outflow = std::numeric_limits<double>::max();
+                double flow = std::numeric_limits<double>::max();
 
                 std::vector<TrainDoor> trainDoors;
                 for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls) - 1;
@@ -129,7 +129,7 @@ TEST_CASE(
                         [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
                     distanceDoorEnd += 0.25 * std::next(wallItr)->GetLength();
                     double width = distanceDoorEnd - distance;
-                    trainDoors.emplace_back(TrainDoor{distance, width, outflow});
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
                 }
                 TrainType train{"TEST", 20, 10, trainDoors};
 
@@ -180,7 +180,7 @@ TEST_CASE(
 
             SECTION("Doors not on neighboring track walls")
             {
-                double outflow = std::numeric_limits<double>::max();
+                double flow = std::numeric_limits<double>::max();
 
                 std::vector<TrainDoor> trainDoors;
                 for(size_t i = 0; i < trainDoors.size() - 2; i += 2) {
@@ -199,7 +199,7 @@ TEST_CASE(
                         });
                     distanceDoorEnd += 0.5 * wallItr->GetLength();
                     double width = distanceDoorEnd - distance;
-                    trainDoors.emplace_back(TrainDoor{distance, width, outflow});
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
                 }
 
                 TrainType train{"TEST", 20, 10, trainDoors};
@@ -250,7 +250,7 @@ TEST_CASE(
 
             SECTION("Door starts or ends on wall points")
             {
-                double outflow = std::numeric_limits<double>::max();
+                double flow = std::numeric_limits<double>::max();
 
                 std::vector<TrainDoor> trainDoors;
                 for(size_t i = 0; i < trainDoors.size() - 2; i += 2) {
@@ -263,7 +263,7 @@ TEST_CASE(
                     distance += wallItr->GetLength();
 
                     double width = std::next(wallItr)->GetLength();
-                    trainDoors.emplace_back(TrainDoor{distance, width, outflow});
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
                 }
 
                 TrainType train{"TEST", 20, 10, trainDoors};
@@ -316,22 +316,22 @@ TEST_CASE(
             {
                 trainStartOffSet = trackWall1.GetLength() + 0.25 * trackWall2.GetLength();
 
-                double outflow = std::numeric_limits<double>::max();
+                double flow = std::numeric_limits<double>::max();
 
                 std::vector<TrainDoor> trainDoors;
 
                 double distance = 0;
                 double width    = 0.25 * trackWall2.GetLength();
-                trainDoors.emplace_back(TrainDoor{distance, width, outflow});
+                trainDoors.emplace_back(TrainDoor{distance, width, flow});
 
                 distance = distance + width + 0.25 * trackWall2.GetLength();
                 width    = 0.25 * trackWall2.GetLength() + 0.25 * trackWall3.GetLength();
-                trainDoors.emplace_back(TrainDoor{distance, width, outflow});
+                trainDoors.emplace_back(TrainDoor{distance, width, flow});
 
                 distance = distance + width + 0.5 * trackWall3.GetLength();
                 width    = 0.25 * trackWall3.GetLength() + trackWall4.GetLength() +
                         0.25 * trackWall5.GetLength();
-                trainDoors.emplace_back(TrainDoor{distance, width, outflow});
+                trainDoors.emplace_back(TrainDoor{distance, width, flow});
 
                 TrainType train{"TEST", 20, 10, trainDoors};
 
@@ -383,7 +383,7 @@ TEST_CASE(
 
             SECTION("Multiple doors in one wall element")
             {
-                double outflow = std::numeric_limits<double>::max();
+                double flow = std::numeric_limits<double>::max();
 
                 std::vector<TrainDoor> trainDoors;
                 for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls);
@@ -394,9 +394,9 @@ TEST_CASE(
                             return sum + wall.GetLength();
                         });
                     trainDoors.emplace_back(
-                        TrainDoor{distance + 0.1 * wallItr->GetLength(), width, outflow});
+                        TrainDoor{distance + 0.1 * wallItr->GetLength(), width, flow});
                     trainDoors.emplace_back(
-                        TrainDoor{distance + 0.4 * wallItr->GetLength(), width, outflow});
+                        TrainDoor{distance + 0.4 * wallItr->GetLength(), width, flow});
                 }
 
                 TrainType train{"TEST", 20, 10, trainDoors};
@@ -448,7 +448,7 @@ TEST_CASE(
 
             SECTION("Train longer than platform")
             {
-                double outflow = std::numeric_limits<double>::max();
+                double flow = std::numeric_limits<double>::max();
 
                 std::vector<TrainDoor> trainDoors;
                 for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls);
@@ -459,7 +459,7 @@ TEST_CASE(
                             return sum + wall.GetLength();
                         });
                     distance += 0.25 * wallItr->GetLength();
-                    trainDoors.emplace_back(TrainDoor{distance, width, outflow});
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
                 }
 
                 // Create door not on track walls
@@ -471,7 +471,7 @@ TEST_CASE(
                         [](double & sum, const Wall & wall) { return sum + wall.GetLength(); }) +
                     1.;
                 double width = 1.;
-                trainDoors.emplace_back(TrainDoor{distance, width, outflow});
+                trainDoors.emplace_back(TrainDoor{distance, width, flow});
 
                 TrainType train{"TEST", 20, 10, trainDoors};
 
@@ -525,7 +525,7 @@ TEST_CASE(
         {
             SECTION("Doors on separate track wall")
             {
-                double outflow = std::numeric_limits<double>::max();
+                double flow = std::numeric_limits<double>::max();
 
                 std::vector<TrainDoor> trainDoors;
                 for(auto wallItr = std::rbegin(trackWalls); wallItr != std::rend(trackWalls);
@@ -536,7 +536,7 @@ TEST_CASE(
                             return sum + wall.GetLength();
                         });
                     distance += 0.25 * wallItr->GetLength();
-                    trainDoors.emplace_back(TrainDoor{distance, width, outflow});
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
                 }
                 TrainType train{"TEST", 20, 10, trainDoors};
 
@@ -587,7 +587,7 @@ TEST_CASE(
 
             SECTION("Doors on neighboring track walls")
             {
-                double outflow = std::numeric_limits<double>::max();
+                double flow = std::numeric_limits<double>::max();
 
                 std::vector<TrainDoor> trainDoors;
                 for(auto wallItr = std::rbegin(trackWalls); wallItr != std::rend(trackWalls) - 1;
@@ -604,7 +604,7 @@ TEST_CASE(
                         [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
                     distanceDoorEnd += 0.25 * std::next(wallItr)->GetLength();
                     double width = distanceDoorEnd - distance;
-                    trainDoors.emplace_back(TrainDoor{distance, width, outflow});
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
                 }
                 TrainType train{"TEST", 20, 10, trainDoors};
 
@@ -655,7 +655,7 @@ TEST_CASE(
 
             SECTION("Doors not on neighboring track walls")
             {
-                double outflow = std::numeric_limits<double>::max();
+                double flow = std::numeric_limits<double>::max();
 
                 std::vector<TrainDoor> trainDoors;
                 for(size_t i = 0; i < trainDoors.size() - 2; i += 2) {
@@ -674,7 +674,7 @@ TEST_CASE(
                         });
                     distanceDoorEnd += 0.5 * wallItr->GetLength();
                     double width = distanceDoorEnd - distance;
-                    trainDoors.emplace_back(TrainDoor{distance, width, outflow});
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
                 }
 
                 TrainType train{"TEST", 20, 10, trainDoors};
@@ -725,7 +725,7 @@ TEST_CASE(
 
             SECTION("Door starts or ends on wall points")
             {
-                double outflow = std::numeric_limits<double>::max();
+                double flow = std::numeric_limits<double>::max();
 
                 std::vector<TrainDoor> trainDoors;
                 for(size_t i = 0; i < trainDoors.size() - 2; i += 2) {
@@ -738,7 +738,7 @@ TEST_CASE(
                     distance += wallItr->GetLength();
 
                     double width = std::next(wallItr)->GetLength();
-                    trainDoors.emplace_back(TrainDoor{distance, width, outflow});
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
                 }
 
                 TrainType train{"TEST", 20, 10, trainDoors};
@@ -791,22 +791,22 @@ TEST_CASE(
             {
                 trainStartOffSet = trackWall5.GetLength() + 0.25 * trackWall4.GetLength();
 
-                double outflow = std::numeric_limits<double>::max();
+                double flow = std::numeric_limits<double>::max();
 
                 std::vector<TrainDoor> trainDoors;
 
                 double distance = 0;
                 double width    = 0.25 * trackWall4.GetLength();
-                trainDoors.emplace_back(TrainDoor{distance, width, outflow});
+                trainDoors.emplace_back(TrainDoor{distance, width, flow});
 
                 distance = distance + width + 0.25 * trackWall4.GetLength();
                 width    = 0.25 * trackWall4.GetLength() + 0.25 * trackWall3.GetLength();
-                trainDoors.emplace_back(TrainDoor{distance, width, outflow});
+                trainDoors.emplace_back(TrainDoor{distance, width, flow});
 
                 distance = distance + width + 0.5 * trackWall3.GetLength();
                 width    = 0.25 * trackWall3.GetLength() + trackWall2.GetLength() +
                         0.25 * trackWall1.GetLength();
-                trainDoors.emplace_back(TrainDoor{distance, width, outflow});
+                trainDoors.emplace_back(TrainDoor{distance, width, flow});
 
                 TrainType train{"TEST", 20, 10, trainDoors};
 
@@ -858,7 +858,7 @@ TEST_CASE(
 
             SECTION("Multiple doors in one wall element")
             {
-                double outflow = std::numeric_limits<double>::max();
+                double flow = std::numeric_limits<double>::max();
 
                 std::vector<TrainDoor> trainDoors;
                 for(auto wallItr = std::rbegin(trackWalls); wallItr != std::rend(trackWalls);
@@ -869,9 +869,9 @@ TEST_CASE(
                             return sum + wall.GetLength();
                         });
                     trainDoors.emplace_back(
-                        TrainDoor{distance + 0.1 * wallItr->GetLength(), width, outflow});
+                        TrainDoor{distance + 0.1 * wallItr->GetLength(), width, flow});
                     trainDoors.emplace_back(
-                        TrainDoor{distance + 0.4 * wallItr->GetLength(), width, outflow});
+                        TrainDoor{distance + 0.4 * wallItr->GetLength(), width, flow});
                 }
 
                 TrainType train{"TEST", 20, 10, trainDoors};
@@ -923,7 +923,7 @@ TEST_CASE(
 
             SECTION("Train longer than platform")
             {
-                double outflow = std::numeric_limits<double>::max();
+                double flow = std::numeric_limits<double>::max();
 
                 std::vector<TrainDoor> trainDoors;
                 for(auto wallItr = std::rbegin(trackWalls); wallItr != std::rend(trackWalls);
@@ -934,7 +934,7 @@ TEST_CASE(
                             return sum + wall.GetLength();
                         });
                     distance += 0.25 * wallItr->GetLength();
-                    trainDoors.emplace_back(TrainDoor{distance, width, outflow});
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
                 }
 
                 // Create door not on track walls
@@ -946,7 +946,7 @@ TEST_CASE(
                         [](double & sum, const Wall & wall) { return sum + wall.GetLength(); }) +
                     1.;
                 double width = 1.;
-                trainDoors.emplace_back(TrainDoor{distance, width, outflow});
+                trainDoors.emplace_back(TrainDoor{distance, width, flow});
 
                 TrainType train{"TEST", 20, 10, trainDoors};
 
