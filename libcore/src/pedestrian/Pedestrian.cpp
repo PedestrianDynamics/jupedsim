@@ -59,16 +59,16 @@ Pedestrian::Pedestrian()
     _riskTolerance             = 0;
     _mass                      = 1;
     _tau                       = 0.5;
-    _T                         = 1.0;
+    _t                         = 1.0;
     _deltaT                    = 0.01;
     _ellipse                   = JEllipse();
-    _V0                        = Point(0, 0);
-    _V0UpStairs                = 0.6;
-    _V0DownStairs              = 0.6;
-    _EscalatorUpStairs         = 0.8;
-    _EscalatorDownStairs       = 0.8;
-    _V0IdleEscalatorUpStairs   = 0.6;
-    _V0IdleEscalatorDownStairs = 0.6;
+    _v0                        = Point(0, 0);
+    _v0UpStairs                = 0.6;
+    _v0DownStairs              = 0.6;
+    _v0EscalatorUpStairs       = 0.8;
+    _v0EscalatorDownStairs     = 0.8;
+    _v0IdleEscalatorUpStairs   = 0.6;
+    _v0IdleEscalatorDownStairs = 0.6;
     _roomCaption               = "";
     _roomID                    = -1;
     _subRoomID                 = -1;
@@ -79,33 +79,27 @@ Pedestrian::Pedestrian()
     _navLine                   = nullptr;
     _mentalMap                 = std::map<int, int>();
     _destHistory               = std::vector<int>();
-    _trip                      = std::vector<int>();
-    _lastPosition              = Point(J_NAN, J_NAN);
-    _lastCellPosition          = -1;
+    std::vector<int>();
+    _lastPosition = Point(J_NAN, J_NAN);
     _knownDoors.clear();
     _distToBlockade      = 0.0;
-    _reroutingThreshold  = 0.0; // new orientation after 10 seconds, value is incremented
+    // new orientation after 10 seconds, value is incremented
     _timeBeforeRerouting = 0.0;
     _timeInJam           = 0.0;
     _patienceTime        = 5.0; // time after which the ped feels to be in jam
     _recordingTime       = 20;  //seconds
     _routingStrategy     = ROUTING_GLOBAL_SHORTEST;
     _newOrientationDelay = 0; //0 seconds, in steps
-    _updateRate          = _deltaT;
-    _turninAngle         = 0.0;
     _reroutingEnabled    = false;
-    _tmpFirstOrientation = true;
-    _newOrientationFlag  = false;
     _router              = nullptr;
     _building            = nullptr;
     _spotlight           = false;
-    _ticksInThisRoom     = 0;
 
     _agentsCreated++; //increase the number of object created
-    _FED_In           = 0.0;
-    _FED_Heat         = 0.0;
-    _WalkingSpeed     = nullptr;
-    _ToxicityAnalysis = nullptr;
+    _fedIn            = 0.0;
+    _fedHeat          = 0.0;
+    _walkingSpeed     = nullptr;
+    _toxicityAnalysis = nullptr;
     _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
 }
 
@@ -121,8 +115,7 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
 
     _patienceTime(agentsParameters.GetPatience()),
     _router(building.GetRoutingEngine()->GetRouter(agentsParameters.GetRouterId())),
-    _building(&building),
-    _ticksInThisRoom(0)
+    _building(&building)
 {
     _roomID                  = -1;
     _subRoomID               = -1;
@@ -133,16 +126,13 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _id                      = _agentsCreated; //default id
     _mass                    = 1;
     _tau                     = 0.5;
-    _T                       = 1.0;
-    _newOrientationFlag      = false;
+    _t                       = 1.0;
     _newOrientationDelay     = 0; //0 seconds, in steps
-    _tmpFirstOrientation     = true;
-    _turninAngle             = 0.0;
     _ellipse                 = JEllipse();
     _navLine                 = nullptr;
     _router                  = nullptr;
     _building                = nullptr;
-    _reroutingThreshold      = 0.0; // new orientation after 10 seconds, value is incremented
+    // new orientation after 10 seconds, value is incremented
     _timeBeforeRerouting     = 0.0;
     _reroutingEnabled        = false;
     _timeInJam               = 0.0;
@@ -151,29 +141,27 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _mentalMap               = std::map<int, int>();
     _destHistory             = std::vector<int>();
     _deltaT                  = 0.01;
-    _updateRate              = _deltaT;
-    _V0                      = Point(0, 0);
+    _v0                      = Point(0, 0);
     _lastPosition            = Point(0, 0);
-    _lastCellPosition        = -1;
     _recordingTime           = 20; //seconds
     _knownDoors.clear();
-    _trip                      = std::vector<int>();
+    std::vector<int>();
     _group                     = -1;
     _spotlight                 = false;
-    _V0UpStairs                = 0.6;
-    _V0DownStairs              = 0.6;
-    _EscalatorUpStairs         = 0.8;
-    _EscalatorDownStairs       = 0.8;
-    _V0IdleEscalatorUpStairs   = 0.6;
-    _V0IdleEscalatorDownStairs = 0.6;
+    _v0UpStairs                = 0.6;
+    _v0DownStairs              = 0.6;
+    _v0EscalatorUpStairs       = 0.8;
+    _v0EscalatorDownStairs     = 0.8;
+    _v0IdleEscalatorUpStairs   = 0.6;
+    _v0IdleEscalatorDownStairs = 0.6;
     _distToBlockade            = 0.0;
     _routingStrategy           = ROUTING_GLOBAL_SHORTEST;
     _lastE0                    = Point(0, 0);
     _agentsCreated++; //increase the number of object created
-    _FED_In           = 0.0;
-    _FED_Heat         = 0.0;
-    _ToxicityAnalysis = nullptr;
-    _WalkingSpeed     = nullptr;
+    _fedIn            = 0.0;
+    _fedHeat          = 0.0;
+    _toxicityAnalysis = nullptr;
+    _walkingSpeed     = nullptr;
     _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
 }
 
@@ -210,11 +198,6 @@ void Pedestrian::SetSubRoomUID(int i)
     _subRoomUID = i;
 }
 
-void Pedestrian::SetMass(double m)
-{
-    _mass = m;
-}
-
 void Pedestrian::SetTau(double tau)
 {
     _tau = tau;
@@ -222,7 +205,7 @@ void Pedestrian::SetTau(double tau)
 
 void Pedestrian::SetT(double T)
 {
-    _T = T;
+    _t = T;
 }
 
 void Pedestrian::SetEllipse(const JEllipse & e)
@@ -258,11 +241,6 @@ void Pedestrian::SetPos(const Point & pos, bool initial)
     }
 }
 
-void Pedestrian::SetCellPos(int cp)
-{
-    _lastCellPosition = cp;
-}
-
 void Pedestrian::SetV(const Point & v)
 {
     if(_globalTime >= _premovement) {
@@ -286,31 +264,31 @@ void Pedestrian::SetV0Norm(
     double v0IdleEscalatorDown)
 {
     _ellipse.SetV0(v0);
-    _V0DownStairs              = v0DownStairs;
-    _V0UpStairs                = v0UpStairs;
-    _EscalatorUpStairs         = escalatorUp;
-    _EscalatorDownStairs       = escalatorDown;
-    _V0IdleEscalatorUpStairs   = v0IdleEscalatorUp;
-    _V0IdleEscalatorDownStairs = v0IdleEscalatorDown;
+    _v0DownStairs              = v0DownStairs;
+    _v0UpStairs                = v0UpStairs;
+    _v0EscalatorUpStairs       = escalatorUp;
+    _v0EscalatorDownStairs     = escalatorDown;
+    _v0IdleEscalatorUpStairs   = v0IdleEscalatorUp;
+    _v0IdleEscalatorDownStairs = v0IdleEscalatorDown;
 }
 
 
 void Pedestrian::SetFEDIn(double FED_In)
 {
-    _FED_In = FED_In;
+    _fedIn = FED_In;
 }
 double Pedestrian::GetFEDIn()
 {
-    return _FED_In;
+    return _fedIn;
 }
 
 void Pedestrian::SetFEDHeat(double FED_Heat)
 {
-    _FED_Heat = FED_Heat;
+    _fedHeat = FED_Heat;
 }
 double Pedestrian::GetFEDHeat()
 {
-    return _FED_Heat;
+    return _fedHeat;
 }
 
 
@@ -323,21 +301,12 @@ double Pedestrian::Getdt() const
     return _deltaT;
 }
 
-void Pedestrian::SetTrip(const std::vector<int> & trip)
-{
-    _trip = trip;
-}
-
 
 int Pedestrian::GetID() const
 {
     return _id;
 }
 
-double Pedestrian::GetUpdateRate() const
-{
-    return _updateRate;
-}
 int Pedestrian::GetRoomID() const
 {
     return _roomID;
@@ -375,7 +344,7 @@ double Pedestrian::GetTau() const
 
 double Pedestrian::GetT() const
 {
-    return _T;
+    return _t;
 }
 
 const JEllipse & Pedestrian::GetEllipse() const
@@ -391,11 +360,6 @@ int Pedestrian::GetExitIndex() const
 NavLine * Pedestrian::GetExitLine() const
 {
     return _navLine;
-}
-
-const std::vector<int> & Pedestrian::GetTrip() const
-{
-    return _trip;
 }
 
 // return the unique subroom Identifier
@@ -431,14 +395,6 @@ void Pedestrian::SetLastE0(Point E0)
     _lastE0 = E0;
 }
 
-int Pedestrian::GetLastDestination()
-{
-    if(_destHistory.size() == 0)
-        return -1;
-    else
-        return _destHistory.back();
-}
-
 bool Pedestrian::ChangedSubRoom() const
 {
     return (ChangedRoom() || _oldSubRoomID != _subRoomID) &&
@@ -448,34 +404,6 @@ bool Pedestrian::ChangedSubRoom() const
 bool Pedestrian::ChangedRoom() const
 {
     return _oldRoomID != _roomID && _oldRoomID != std::numeric_limits<int>::min();
-}
-
-void Pedestrian::ClearMentalMap()
-{
-    _mentalMap.clear();
-    _exitIndex = -1;
-}
-
-void Pedestrian::AddKnownClosedDoor(
-    int door,
-    double ttime,
-    bool state,
-    double quality,
-    double latency)
-{
-    if(ttime == 0)
-        ttime = _globalTime;
-    _knownDoors[door].SetState(door, state, ttime, quality, latency);
-}
-
-void Pedestrian::ClearKnowledge()
-{
-    _knownDoors.clear();
-}
-
-std::map<int, Knowledge> & Pedestrian::GetKnownledge()
-{
-    return _knownDoors;
 }
 
 const std::vector<int> & Pedestrian::GetLastDestinations() const
@@ -505,11 +433,6 @@ const Point & Pedestrian::GetPos() const
     return _ellipse.GetCenter();
 }
 
-int Pedestrian::GetCellPos() const
-{
-    return _lastCellPosition;
-}
-
 const Point & Pedestrian::GetV() const
 {
     return _ellipse.GetV();
@@ -517,7 +440,7 @@ const Point & Pedestrian::GetV() const
 
 const Point & Pedestrian::GetV0() const
 {
-    return _V0;
+    return _v0;
 }
 
 
@@ -563,11 +486,11 @@ double Pedestrian::GetV0Norm() const
                        exp(-c * stairInclination * (maxSubElevation - ped_elevation - stairLength) *
                            (maxSubElevation - ped_elevation - stairLength))) -
                 1;
-            double speed_down = _V0DownStairs;
+            double speed_down = _v0DownStairs;
             if(sub->GetType() == "escalator") {
-                speed_down = _EscalatorDownStairs;
+                speed_down = _v0EscalatorDownStairs;
             } else if(sub->GetType() == "idle_escalator") {
-                speed_down = _V0IdleEscalatorDownStairs;
+                speed_down = _v0IdleEscalatorDownStairs;
             }
             walking_speed = (1 - f * g) * _ellipse.GetV0() + f * g * speed_down;
         }
@@ -585,20 +508,20 @@ double Pedestrian::GetV0Norm() const
                 1;
 
             //FIXME std::normal_distribution generated V0's that are very small or even < 0
-            double speed_up = std::max(0.0, _V0UpStairs);
+            double speed_up = std::max(0.0, _v0UpStairs);
 
             if(sub->GetType() == "escalator") {
-                speed_up = _EscalatorUpStairs;
+                speed_up = _v0EscalatorUpStairs;
             } else if(sub->GetType() == "idle_escalator") {
-                speed_up = _V0IdleEscalatorUpStairs;
+                speed_up = _v0IdleEscalatorUpStairs;
             }
             walking_speed = (1 - f * g) * _ellipse.GetV0() + f * g * speed_up;
         }
     }
 
     //IF execution of WalkingInSmoke depending on JPSfire section in INI file
-    if(_WalkingSpeed && _WalkingSpeed->ReduceWalkingSpeed()) {
-        walking_speed = _WalkingSpeed->WalkingInSmoke(this, walking_speed);
+    if(_walkingSpeed && _walkingSpeed->ReduceWalkingSpeed()) {
+        walking_speed = _walkingSpeed->WalkingInSmoke(this, walking_speed);
     }
     //WHERE should the call to that routine be placed properly?
     //only executed every 3 seconds
@@ -607,8 +530,8 @@ double Pedestrian::GetV0Norm() const
 
 void Pedestrian::ConductToxicityAnalysis()
 {
-    if(_ToxicityAnalysis->ConductToxicityAnalysis()) {
-        _ToxicityAnalysis->HazardAnalysis(this);
+    if(_toxicityAnalysis->ConductToxicityAnalysis()) {
+        _toxicityAnalysis->HazardAnalysis(this);
     }
 }
 
@@ -644,76 +567,25 @@ void Pedestrian::SetPhiPed()
 
 void Pedestrian::InitV0(const Point & target)
 {
-#define DEBUG 0
     const Point & pos = GetPos();
     Point delta       = target - pos;
 
-    _V0 = delta.Normalized();
-
-#if DEBUG
-    printf(
-        "Ped=%d : _v0=[%f, %f] delta=[%f, %f], pos=[%f, %f], target=[%f, %f]\n",
-        _id,
-        _V0._x,
-        _V0._y,
-        delta._x,
-        delta._y,
-        pos._x,
-        pos._y,
-        target._x,
-        target._y);
-#endif
+    _v0 = delta.Normalized();
 }
 
 
 const Point & Pedestrian::GetV0(const Point & target)
 {
-#define DEBUGV0 1
+    // Molification around the targets makes little sense
     const Point & pos = GetPos();
     Point delta       = target - pos;
-    Point new_v0;
-    double t;
-    // Molification around the targets makes little sense
-    //new_v0 = delta.NormalizedMolified();
-    new_v0 = delta.Normalized();
-    // -------------------------------------- Handover new target
-    t = _newOrientationDelay++ * _deltaT / (1.0 + 100 * _distToBlockade);
+    Point new_v0      = delta.Normalized();
+    ;
+    double t = _newOrientationDelay++ * _deltaT / (1.0 + 100 * _distToBlockade);
 
-    _V0 = _V0 + (new_v0 - _V0) * (1 - exp(-t / _tau));
-#if DEBUGV0
-    if(0) {
-        printf(
-            "=====\nGoal Line=[%f, %f]-[%f, %f]\n",
-            _navLine->GetPoint1()._x,
-            _navLine->GetPoint1()._y,
-            _navLine->GetPoint2()._x,
-            _navLine->GetPoint2()._y);
-        printf(
-            "Ped=%d, sub=%d, room=%d pos=[%f, %f], target=[%f, %f]\n",
-            _id,
-            _subRoomID,
-            _roomID,
-            pos._x,
-            pos._y,
-            target._x,
-            target._y);
-        printf(
-            "Ped=%d : BEFORE new_v0=%f %f norm = %f\n", _id, new_v0._x, new_v0._y, new_v0.Norm());
-        printf(
-            "ped=%d: t=%f, _newOrientationFlag=%d, neworientationDelay=%d, _DistToBlockade=%f\n",
-            _id,
-            t,
-            _newOrientationFlag,
-            _newOrientationDelay,
-            _distToBlockade);
-        printf("_v0=[%f, %f] norm = %f\n=====\n", _V0._x, _V0._y, _V0.Norm());
-        getc(stdin);
-    }
-
-#endif
-    // --------------------------------------
-
-    return _V0;
+    //Handover new target
+    _v0 = _v0 + (new_v0 - _v0) * (1 - exp(-t / _tau));
+    return _v0;
 }
 
 double Pedestrian::GetTimeInJam() const
@@ -742,16 +614,6 @@ void Pedestrian::UpdateTimeInJam()
     _timeInJam += _deltaT;
 }
 
-//TODO: magic
-void Pedestrian::UpdateJamData()
-{
-    if(GetV().NormSquare() < 0.25 * GetV0().NormSquare()) {
-        _timeInJam += _deltaT;
-    } else {
-        _timeInJam /= 2.0;
-    }
-}
-
 void Pedestrian::UpdateReroutingTime()
 {
     _timeBeforeRerouting -= _deltaT;
@@ -768,11 +630,6 @@ bool Pedestrian::IsReadyForRerouting()
     return (_reroutingEnabled && (_timeBeforeRerouting <= 0.0));
 }
 
-
-double Pedestrian::GetReroutingTime()
-{
-    return _timeBeforeRerouting;
-}
 
 int Pedestrian::GetGroup() const
 {
@@ -850,7 +707,7 @@ void Pedestrian::Dump(int ID, int pa) const
             printf(">> Destination [ %d ]\n", _exitIndex);
             printf(">> Final Destination [ %d ]\n", _desiredFinalDestination);
             printf(">> Position [%0.2f, %0.2f]\n", GetPos()._x, GetPos()._y);
-            printf(">> V0       [%0.2f, %0.2f]  Norm = [%0.2f]\n", _V0._x, _V0._y, GetV0Norm());
+            printf(">> V0       [%0.2f, %0.2f]  Norm = [%0.2f]\n", _v0._x, _v0._y, GetV0Norm());
             printf(
                 ">> Velocity [%0.2f, %0.2f]  Norm = [%0.2f]\n",
                 GetV()._x,
@@ -884,7 +741,7 @@ void Pedestrian::Dump(int ID, int pa) const
             break;
 
         case 3:
-            printf(">> V0       [%f, %f]  Norm = [%f]\n", _V0._x, _V0._y, GetV0Norm());
+            printf(">> V0       [%f, %f]  Norm = [%f]\n", _v0._x, _v0._y, GetV0Norm());
             break;
 
         case 4:
@@ -917,16 +774,6 @@ void Pedestrian::Dump(int ID, int pa) const
     getc(stdin);
 }
 
-void Pedestrian::RecordActualPosition()
-{
-    _lastPosition = GetPos();
-}
-
-double Pedestrian::GetDistanceSinceLastRecord()
-{
-    return (_lastPosition - GetPos()).Norm();
-}
-
 double Pedestrian::GetGlobalTime()
 {
     return _globalTime;
@@ -936,11 +783,6 @@ void Pedestrian::SetRouter(Router * router)
 {
     _router          = router;
     _routingStrategy = router->GetStrategy();
-}
-
-Router * Pedestrian::GetRouter() const
-{
-    return _router;
 }
 
 int Pedestrian::FindRoute()
@@ -1016,12 +858,12 @@ void Pedestrian::SetBuilding(Building * building)
 
 void Pedestrian::SetWalkingSpeed(std::shared_ptr<WalkingSpeed> walkingSpeed)
 {
-    _WalkingSpeed = walkingSpeed;
+    _walkingSpeed = walkingSpeed;
 }
 
 void Pedestrian::SetTox(std::shared_ptr<ToxicityAnalysis> toxicityAnalysis)
 {
-    _ToxicityAnalysis = toxicityAnalysis;
+    _toxicityAnalysis = toxicityAnalysis;
 }
 
 void Pedestrian::SetSpotlight(bool spotlight)
@@ -1102,53 +944,9 @@ int Pedestrian::GetColor() const
 }
 
 
-bool Pedestrian::Relocate(std::function<void(const Pedestrian &)> flowupdater)
-{
-    auto allRooms = _building->GetAllRooms();
-    bool status   = false;
-    for(auto & it_room : allRooms) {
-        auto & room                                           = it_room.second;
-        auto subrooms                                         = room->GetAllSubRooms();
-        std::map<int, std::shared_ptr<SubRoom>>::iterator sub = std::find_if(
-            subrooms.begin(),
-            subrooms.end(),
-            [&](std::pair<int, std::shared_ptr<SubRoom>> iterator) {
-                return (
-                    (iterator.second->IsDirectlyConnectedWith(
-                        allRooms[_roomID]->GetSubRoom(_subRoomID))) &&
-                    iterator.second->IsInSubRoom(this));
-            });
-        if(sub != subrooms.end()) {
-            flowupdater(
-                *this); //@todo: ar.graf : this call should move into a critical region? check plz
-            ClearMentalMap(); // reset the destination
-            const int oldRoomID = _roomID;
-            SetRoomID(room->GetID(), room->GetCaption());
-            SetSubRoomID(sub->second->GetSubRoomID());
-            SetSubRoomUID(sub->second->GetUID());
-            _router->FindExit(this);
-            if(oldRoomID != room->GetID()) {
-                //the agent left the old room
-                //actualize the egress time for that room
-#pragma omp critical(SetEgressTime)
-                allRooms.at(oldRoomID)->SetEgressTime(
-                    GetGlobalTime()); //set Egresstime to old room //@todo: ar.graf : GetRoomID() yields NEW room
-            }
-            status = true;
-            break;
-        }
-    }
-    return status;
-}
-
 int Pedestrian::GetLastGoalID() const
 {
     return _lastGoalID;
-}
-
-bool Pedestrian::IsInsideGoal() const
-{
-    return _insideGoal;
 }
 
 bool Pedestrian::IsInsideWaitingAreaWaiting() const
@@ -1189,24 +987,6 @@ void Pedestrian::StartWaiting()
 void Pedestrian::EndWaiting()
 {
     _waiting = false;
-}
-
-bool Pedestrian::IsOutside()
-{
-    Room * room = _building->GetRoom(_roomID);
-
-    if(room->GetCaption() == "outside") {
-        return true;
-    }
-
-    for(auto & itr : room->GetAllSubRooms()) {
-        auto subRoom = itr.second;
-
-        if(subRoom->IsInSubRoom(this)) {
-            return false;
-        }
-    }
-    return true;
 }
 
 const Point & Pedestrian::GetWaitingPos() const
