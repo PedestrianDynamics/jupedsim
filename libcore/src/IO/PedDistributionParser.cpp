@@ -66,9 +66,6 @@ bool PedDistributionParser::LoadPedDistribution(
         int goal_id               = xmltoi(e->Attribute("goal_id"), FINAL_DEST_OUT);
         int router_id             = xmltoi(e->Attribute("router_id"), -1);
         int route_id              = xmltoi(e->Attribute("route_id"), -1);
-        int age                   = xmltoi(e->Attribute("age"), -1);
-        std::string gender        = xmltoa(e->Attribute("gender"), "female");
-        double height             = xmltof(e->Attribute("height"), -1);
         double patience           = xmltof(e->Attribute("patience"), 5);
         double premovement_mean   = xmltof(e->Attribute("pre_movement_mean"), 0);
         double premovement_sigma  = xmltof(e->Attribute("pre_movement_sigma"), 0);
@@ -99,12 +96,9 @@ bool PedDistributionParser::LoadPedDistribution(
         dis->SetGroupId(group_id);
         dis->Setbounds(bounds);
         dis->SetAgentsNumber(number);
-        dis->SetAge(age);
-        dis->SetGender(gender);
         dis->SetGoalId(goal_id);
         dis->SetRouteId(route_id);
         dis->SetRouterId(router_id);
-        dis->SetHeight(height);
         dis->SetPatience(patience);
         dis->InitPremovementTime(premovement_mean, premovement_sigma);
         dis->SetPositionsDir(positions_dir);

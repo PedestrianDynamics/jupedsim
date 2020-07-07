@@ -55,11 +55,8 @@ Pedestrian::Pedestrian()
     _exitIndex                 = -1;
     _group                     = -1;
     _desiredFinalDestination   = FINAL_DEST_OUT;
-    _height                    = 170;
-    _age                       = 30;
     _premovement               = 0;
     _riskTolerance             = 0;
-    _gender                    = "female";
     _mass                      = 1;
     _tau                       = 0.5;
     _T                         = 1.0;
@@ -115,10 +112,7 @@ Pedestrian::Pedestrian()
 Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & building) :
     _group(agentsParameters.GetGroupId()),
     _desiredFinalDestination(agentsParameters.GetGoalId()),
-    _height(agentsParameters.GetHeight()),
-    _age(agentsParameters.GetAge()),
     _premovement(agentsParameters.GetPremovementTime()),
-    _gender(agentsParameters.GetGender()),
     _roomCaption(""),
     _roomID(agentsParameters.GetRoomId()),
     _subRoomID(agentsParameters.GetSubroomID()),
@@ -163,9 +157,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _lastCellPosition        = -1;
     _recordingTime           = 20; //seconds
     _knownDoors.clear();
-    _height                    = 170;
-    _age                       = 30;
-    _gender                    = "male";
     _trip                      = std::vector<int>();
     _group                     = -1;
     _spotlight                 = false;
@@ -783,32 +774,6 @@ double Pedestrian::GetReroutingTime()
     return _timeBeforeRerouting;
 }
 
-
-double Pedestrian::GetAge() const
-{
-    return _age;
-}
-
-void Pedestrian::SetAge(double age)
-{
-    _age = age;
-}
-
-std::string Pedestrian::GetGender() const
-{
-    return _gender;
-}
-
-void Pedestrian::SetGender(std::string gender)
-{
-    _gender = gender;
-}
-
-double Pedestrian::GetHeight() const
-{
-    return _height;
-}
-
 int Pedestrian::GetGroup() const
 {
     return _group;
@@ -817,11 +782,6 @@ int Pedestrian::GetGroup() const
 void Pedestrian::SetGroup(int group)
 {
     _group = group;
-}
-
-void Pedestrian::SetHeight(double height)
-{
-    _height = height;
 }
 
 void Pedestrian::ResetRerouting()

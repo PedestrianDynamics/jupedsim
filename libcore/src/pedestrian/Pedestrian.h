@@ -53,11 +53,8 @@ private:
     int _exitIndex; // current exit
     int _group;
     int _desiredFinalDestination;
-    double _height;
-    double _age;
     double _premovement   = 0;
     double _riskTolerance = 0;
-    std::string _gender;
 
     //gcfm specific parameters
     double _mass;      // Mass: 1
@@ -438,12 +435,6 @@ public:
       */
     double GetMeanVelOverRecTime() const;
 
-    double GetAge() const;
-    void SetAge(double age);
-    std::string GetGender() const;
-    void SetGender(std::string gender);
-    double GetHeight() const;
-    void SetHeight(double height);
     int GetGroup() const;
     void SetGroup(int group);
 
