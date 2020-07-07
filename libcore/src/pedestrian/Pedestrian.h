@@ -254,11 +254,11 @@ public:
     std::string GetPath();
 
     /**
-      * Dump the parameters of this pedestrians.
+      * ToString the parameters of this pedestrians.
       * @param ID, the id of the pedestrian
       * @param pa, the parameter to display (0 for all parameters)
       */
-    void Dump(int ID, int pa = 0) const;
+    std::string ToString() const;
 
     /**
       * @return true if the time spent in jam exceed the patience time
@@ -443,3 +443,5 @@ public:
 
     Point GetLastPosition() const;
 };
+
+std::ostream & operator<<(std::ostream & out, const Pedestrian & pedestrian);

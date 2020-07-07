@@ -38,7 +38,7 @@
 // initialize the static variables
 double Pedestrian::_globalTime         = 0.0;
 int Pedestrian::_agentsCreated         = 1;
-double Pedestrian::_minPremovementTime = FLT_MAX;
+double Pedestrian::_minPremovementTime = std::numeric_limits<double>::max();
 AgentColorMode Pedestrian::_colorMode  = BY_VELOCITY;
 std::vector<int> colors                = {
     0,
@@ -689,86 +689,6 @@ std::string Pedestrian::GetPath()
     return path;
 }
 
-void Pedestrian::Dump(int ID, int pa) const
-{
-    if(ID != _id)
-        return;
-
-    printf("------> ped %d <-------\n", _id);
-
-    switch(pa) {
-        case 0:
-            printf(">> Room/Subroom [%d / %d]\n", _roomID, _subRoomID);
-            printf(">> Destination [ %d ]\n", _exitIndex);
-            printf(">> Final Destination [ %d ]\n", _desiredFinalDestination);
-            printf(">> Position [%0.2f, %0.2f]\n", GetPos()._x, GetPos()._y);
-            printf(">> V0       [%0.2f, %0.2f]  Norm = [%0.2f]\n", _v0._x, _v0._y, GetV0Norm());
-            printf(
-                ">> Velocity [%0.2f, %0.2f]  Norm = [%0.2f]\n",
-                GetV()._x,
-                GetV()._y,
-                GetV().Norm());
-            if(GetExitLine()) {
-                printf(
-                    ">> ExitLine: (%0.2f, %0.2f) -- (%0.2f, %0.2f)\n",
-                    GetExitLine()->GetPoint1()._x,
-                    GetExitLine()->GetPoint1()._y,
-                    GetExitLine()->GetPoint2()._x,
-                    GetExitLine()->GetPoint2()._y);
-                printf(">> dist: %f\n", GetExitLine()->DistTo(GetPos()));
-            }
-            printf(">> smooth rotating: %s \n", (_newOrientationDelay > 0) ? "yes" : "no");
-            printf(">> mental map");
-            for(auto && item : _mentalMap)
-                printf("\t room / destination  [%d, %d]\n", item.first, item.second);
-            for(auto && item : _knownDoors)
-                printf(">> %s \n", item.second.Dump().c_str());
-            printf(">> Knowledge: %s \n", GetKnowledgeAsString().c_str());
-            printf(">> Color: %d \n", GetColor());
-            break;
-
-        case 1:
-            printf(">> Position [%f, %f]\n", GetPos()._x, GetPos()._y);
-            break;
-
-        case 2:
-            printf(">> Velocity [%f, %f]\n", GetV()._x, GetV()._y);
-            break;
-
-        case 3:
-            printf(">> V0       [%f, %f]  Norm = [%f]\n", _v0._x, _v0._y, GetV0Norm());
-            break;
-
-        case 4:
-            printf(">> Room/Subroom [%d / %d]\n", _roomID, _subRoomID);
-            break;
-
-        case 5:
-            printf(">> Destination [ %d ]\n", _exitIndex);
-            break;
-
-        case 6: //Mental Map
-            printf(">> mental map");
-            for(auto && item : _mentalMap)
-                printf("\t room / destination  [%d, %d]", item.first, item.second);
-            break;
-
-        case 7:
-            printf(">> knowledge\n");
-            for(auto && item : _knownDoors)
-                printf(
-                    "\t door [%d] closed since [%.2f] sec\n",
-                    item.first,
-                    _globalTime - item.second.GetTime());
-            break;
-
-        default:
-            break;
-    }
-    fflush(stdout);
-    getc(stdin);
-}
-
 double Pedestrian::GetGlobalTime()
 {
     return _globalTime;
@@ -1014,4 +934,32 @@ const std::queue<Point> & Pedestrian::GetLastPositions() const
 Point Pedestrian::GetLastPosition() const
 {
     return _lastPosition;
+}
+
+std::string Pedestrian::ToString() const
+{
+    std::string message = fmt::format(
+        FMT_STRING("------> ped {:d} <-------\n"
+                   ">> Room/Subroom [{:d} / {:d}]\n"
+                   ">> Destination [ {:d} ]\n"
+                   ">> Final Destination [ {:d} ]\n"
+                   ">> Position [{:.2f}, {:.2f}]\n"
+                   ">> Velocity [{:.2f}, {:.2f}]  Norm = [{:.2f}]\n"),
+        _id,
+        _roomID,
+        _subRoomID,
+        _exitIndex,
+        _desiredFinalDestination,
+        GetPos()._x,
+        GetPos()._y,
+        GetV()._x,
+        GetV()._y,
+        GetV().Norm());
+
+    return message;
+}
+
+std::ostream & operator<<(std::ostream & out, const Pedestrian & pedestrian)
+{
+    return out << pedestrian.ToString();
 }
