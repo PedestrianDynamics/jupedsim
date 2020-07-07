@@ -441,7 +441,7 @@ double Pedestrian::GetV0Norm() const
     SubRoom * sub        = _building->GetRoom(_roomID)->GetSubRoom(_subRoomID);
     double ped_elevation = sub->GetElevation(_ellipse.GetCenter());
     if(_navLine == nullptr) {
-        //printf("Error: ped %d has no navline\n", _id);
+        LOG_ERROR("ped {:d} has no navline", _id);
         return std::max(0., _ellipse.GetV0());
     }
     const Point & target = _navLine->GetCentre();
@@ -818,7 +818,7 @@ int Pedestrian::GetColor() const
                 color    = static_cast<int>(v / v0 * 255);
             }
             return color;
-        } break;
+        }
 
         // Hash the knowledge represented as String
         case BY_KNOWLEDGE: {
@@ -838,7 +838,7 @@ int Pedestrian::GetColor() const
                                           // colors clearly distinguishable form
                                           // each other
             return (colors[_group % colors.size()]);
-        } break;
+        }
 
         case BY_FINAL_GOAL: {
             key = std::to_string(_desiredFinalDestination);
