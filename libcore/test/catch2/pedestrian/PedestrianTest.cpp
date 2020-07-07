@@ -221,7 +221,7 @@ TEST_CASE("Pedestrian::ChangedSubRoom", "[Pedestrian][ChangedSubRoom]")
 TEST_CASE("Pedestrian::SetPos", "[Pedestrian][SetPos]")
 {
     Pedestrian ped;
-    ped.Setdt(0.1);
+    double deltaT = 0.1;
 
     SECTION("global timer larger premovement time and not initial")
     {
@@ -296,7 +296,7 @@ TEST_CASE("Pedestrian::SetPos", "[Pedestrian][SetPos]")
         ped.SetPremovementTime(Pedestrian::GetGlobalTime() - 1.);
         ped.SetRecordingTime(10.);
 
-        size_t steps = std::floor(ped.GetRecordingTime() / ped.Getdt());
+        size_t steps = std::floor(ped.GetRecordingTime() / deltaT);
         double min   = -10;
         double max   = 10;
         double step  = std::abs(max - min) / steps;
@@ -316,7 +316,7 @@ TEST_CASE("Pedestrian::SetPos", "[Pedestrian][SetPos]")
         ped.SetPremovementTime(Pedestrian::GetGlobalTime() - 1.);
         ped.SetRecordingTime(10.);
 
-        size_t maxSize = std::floor(ped.GetRecordingTime() / ped.Getdt());
+        size_t maxSize = std::floor(ped.GetRecordingTime() / deltaT);
         int steps      = maxSize + 1;
         double min     = -10;
         double max     = 10;

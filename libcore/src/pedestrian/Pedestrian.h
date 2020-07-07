@@ -158,8 +158,7 @@ public:
     void SetFEDHeat(double FED_Heat);
     double GetFEDHeat() const;
 
-    void Setdt(double dt);
-    double Getdt() const;
+    void SetDeltaT(double dt);
 
     // Eigenschaften der Ellipse
     void SetPos(const Point & pos, bool initial = false); // setzt x und y-Koordinaten

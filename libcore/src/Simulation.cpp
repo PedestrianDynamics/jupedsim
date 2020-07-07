@@ -135,7 +135,7 @@ bool Simulation::InitArgs()
 
     //other initializations
     for(auto && ped : _building->GetAllPedestrians()) {
-        ped->Setdt(_deltaT);
+        ped->SetDeltaT(_deltaT);
     }
     _nPeds = _building->GetAllPedestrians().size();
     LOG_INFO("Number of peds received: {}", _nPeds);

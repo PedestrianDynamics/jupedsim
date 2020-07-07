@@ -286,16 +286,10 @@ double Pedestrian::GetFEDHeat() const
     return _fedHeat;
 }
 
-
-void Pedestrian::Setdt(double dt)
+void Pedestrian::SetDeltaT(double dt)
 {
     _deltaT = dt;
 }
-double Pedestrian::Getdt() const
-{
-    return _deltaT;
-}
-
 
 int Pedestrian::GetID() const
 {
