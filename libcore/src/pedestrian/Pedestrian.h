@@ -70,8 +70,6 @@ private:
     double _v0EscalatorDownStairs;
     double _v0IdleEscalatorUpStairs;
     double _v0IdleEscalatorDownStairs;
-    //location parameters
-    std::string _roomCaption;
     int _roomID;
     int _subRoomID;
     int _subRoomUID;
@@ -142,7 +140,7 @@ public:
 
     // Setter-Funktionen
     void SetID(int i);
-    void SetRoomID(int i, std::string roomCaption);
+    void SetRoomID(int i);
     void SetSubRoomID(int i);
     void SetSubRoomUID(int i);
     void SetTau(double tau);

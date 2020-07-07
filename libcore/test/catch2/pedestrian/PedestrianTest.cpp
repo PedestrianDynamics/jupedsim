@@ -29,7 +29,7 @@ TEST_CASE("Pedestrian::UpdateRoom", "[Pedestrian][UpdateRoom]")
         Pedestrian ped;
         int oldRoomID    = 1;
         int oldSubRoomID = 1;
-        ped.SetRoomID(oldRoomID, "");
+        ped.SetRoomID(oldRoomID);
         ped.SetSubRoomID(oldSubRoomID);
 
         int newRoomID    = oldRoomID + 5;
@@ -48,7 +48,7 @@ TEST_CASE("Pedestrian::ChangedRoom", "[Pedestrian][ChangedRoom]")
     SECTION("Same room and subroom")
     {
         Pedestrian ped;
-        ped.SetRoomID(1, "");
+        ped.SetRoomID(1);
         ped.SetSubRoomID(1);
 
         int oldRoomID    = ped.GetRoomID();
@@ -66,7 +66,7 @@ TEST_CASE("Pedestrian::ChangedRoom", "[Pedestrian][ChangedRoom]")
     SECTION("Same room and changed subroom")
     {
         Pedestrian ped;
-        ped.SetRoomID(1, "");
+        ped.SetRoomID(1);
         ped.SetSubRoomID(1);
 
         int oldRoomID    = ped.GetRoomID();
@@ -84,7 +84,7 @@ TEST_CASE("Pedestrian::ChangedRoom", "[Pedestrian][ChangedRoom]")
     SECTION("Changed room and same subroom")
     {
         Pedestrian ped;
-        ped.SetRoomID(1, "");
+        ped.SetRoomID(1);
         ped.SetSubRoomID(1);
 
         int oldRoomID    = ped.GetRoomID();
@@ -102,7 +102,7 @@ TEST_CASE("Pedestrian::ChangedRoom", "[Pedestrian][ChangedRoom]")
     SECTION("Changed room and changed subroom")
     {
         Pedestrian ped;
-        ped.SetRoomID(1, "");
+        ped.SetRoomID(1);
         ped.SetSubRoomID(1);
 
         int oldRoomID    = ped.GetRoomID();
@@ -120,7 +120,7 @@ TEST_CASE("Pedestrian::ChangedRoom", "[Pedestrian][ChangedRoom]")
     SECTION("Old RoomID not set yet")
     {
         Pedestrian ped;
-        ped.SetRoomID(1, "");
+        ped.SetRoomID(1);
         ped.SetSubRoomID(1);
         REQUIRE_FALSE(ped.ChangedRoom());
     }
@@ -131,7 +131,7 @@ TEST_CASE("Pedestrian::ChangedSubRoom", "[Pedestrian][ChangedSubRoom]")
     SECTION("Same room and subroom")
     {
         Pedestrian ped;
-        ped.SetRoomID(1, "");
+        ped.SetRoomID(1);
         ped.SetSubRoomID(1);
 
         int oldRoomID    = ped.GetRoomID();
@@ -149,7 +149,7 @@ TEST_CASE("Pedestrian::ChangedSubRoom", "[Pedestrian][ChangedSubRoom]")
     SECTION("Same room and changed subroom")
     {
         Pedestrian ped;
-        ped.SetRoomID(1, "");
+        ped.SetRoomID(1);
         ped.SetSubRoomID(1);
 
         int oldRoomID    = ped.GetRoomID();
@@ -167,7 +167,7 @@ TEST_CASE("Pedestrian::ChangedSubRoom", "[Pedestrian][ChangedSubRoom]")
     SECTION("Changed room and same subroom")
     {
         Pedestrian ped;
-        ped.SetRoomID(1, "");
+        ped.SetRoomID(1);
         ped.SetSubRoomID(1);
 
         int oldRoomID    = ped.GetRoomID();
@@ -185,7 +185,7 @@ TEST_CASE("Pedestrian::ChangedSubRoom", "[Pedestrian][ChangedSubRoom]")
     SECTION("Changed room and changed subroom")
     {
         Pedestrian ped;
-        ped.SetRoomID(1, "");
+        ped.SetRoomID(1);
         ped.SetSubRoomID(1);
 
         int oldRoomID    = ped.GetRoomID();
@@ -203,7 +203,7 @@ TEST_CASE("Pedestrian::ChangedSubRoom", "[Pedestrian][ChangedSubRoom]")
     SECTION("Old RoomID not set yet")
     {
         Pedestrian ped;
-        ped.SetRoomID(1, "");
+        ped.SetRoomID(1);
         ped.SetSubRoomID(1);
         REQUIRE_FALSE(ped.ChangedSubRoom());
     }
@@ -211,7 +211,7 @@ TEST_CASE("Pedestrian::ChangedSubRoom", "[Pedestrian][ChangedSubRoom]")
     SECTION("Old SubRoomID not set yet")
     {
         Pedestrian ped;
-        ped.SetRoomID(1, "");
+        ped.SetRoomID(1);
         ped.SetSubRoomID(std::numeric_limits<int>::min());
         ped.UpdateRoom(1, 1);
         REQUIRE_FALSE(ped.ChangedSubRoom());

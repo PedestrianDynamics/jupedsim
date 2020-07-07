@@ -167,7 +167,7 @@ StartDistribution::GenerateAgent(Building * building, int * pid, std::vector<Poi
     ped->SetGroup(GetGroupId());
     ped->SetRouter(building->GetRoutingEngine()->GetRouter(_routerID));
     ped->SetBuilding(building);
-    ped->SetRoomID(GetRoomId(), "");
+    ped->SetRoomID(GetRoomId());
     ped->SetSubRoomID(GetSubroomID());
     ped->SetSubRoomUID(building->GetRoom(GetRoomId())->GetSubRoom(GetSubroomID())->GetUID());
     ped->SetPatienceTime(GetPatience());

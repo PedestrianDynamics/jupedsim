@@ -69,7 +69,6 @@ Pedestrian::Pedestrian()
     _v0EscalatorDownStairs     = 0.8;
     _v0IdleEscalatorUpStairs   = 0.6;
     _v0IdleEscalatorDownStairs = 0.6;
-    _roomCaption               = "";
     _roomID                    = -1;
     _subRoomID                 = -1;
     _subRoomUID                = -1;
@@ -105,7 +104,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _group(agentsParameters.GetGroupId()),
     _desiredFinalDestination(agentsParameters.GetGoalId()),
     _premovement(agentsParameters.GetPremovementTime()),
-    _roomCaption(""),
     _roomID(agentsParameters.GetRoomId()),
     _subRoomID(agentsParameters.GetSubroomID()),
     _subRoomUID(building.GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetUID()),
@@ -178,10 +176,9 @@ void Pedestrian::SetID(int i)
     }
 }
 
-void Pedestrian::SetRoomID(int i, std::string roomCaption)
+void Pedestrian::SetRoomID(int i)
 {
-    _roomID      = i;
-    _roomCaption = roomCaption;
+    _roomID = i;
 }
 
 void Pedestrian::SetSubRoomID(int i)

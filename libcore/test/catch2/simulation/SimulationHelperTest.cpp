@@ -203,7 +203,7 @@ TEST_CASE(
     {
         Pedestrian ped;
         ped.SetPos({-8, -1}, true);
-        ped.SetRoomID(sub11->GetRoomID(), "");
+        ped.SetRoomID(sub11->GetRoomID());
         ped.SetSubRoomID(sub11->GetSubRoomID());
         ped.SetSubRoomUID(sub11->GetUID());
 
@@ -218,7 +218,7 @@ TEST_CASE(
     {
         Pedestrian ped;
         ped.SetPos({-6, -1}, true);
-        ped.SetRoomID(sub11->GetRoomID(), "");
+        ped.SetRoomID(sub11->GetRoomID());
         ped.SetSubRoomID(sub11->GetSubRoomID());
         ped.SetSubRoomUID(sub11->GetUID());
 
@@ -233,7 +233,7 @@ TEST_CASE(
     {
         Pedestrian ped;
         ped.SetPos({2, -1}, true);
-        ped.SetRoomID(sub13->GetRoomID(), "");
+        ped.SetRoomID(sub13->GetRoomID());
         ped.SetSubRoomID(sub13->GetSubRoomID());
         ped.SetSubRoomUID(sub13->GetUID());
 
@@ -248,7 +248,7 @@ TEST_CASE(
     {
         Pedestrian ped;
         ped.SetPos({-8, -1}, true);
-        ped.SetRoomID(sub12->GetRoomID(), "");
+        ped.SetRoomID(sub12->GetRoomID());
         ped.SetSubRoomID(sub12->GetSubRoomID());
         ped.SetSubRoomUID(sub12->GetUID());
 
@@ -263,7 +263,7 @@ TEST_CASE(
     {
         Pedestrian ped;
         ped.SetPos({1, -1}, true);
-        ped.SetRoomID(sub21->GetRoomID(), "");
+        ped.SetRoomID(sub21->GetRoomID());
         ped.SetSubRoomID(sub21->GetSubRoomID());
         ped.SetSubRoomUID(sub21->GetUID());
 
@@ -279,7 +279,7 @@ TEST_CASE(
     {
         Pedestrian ped;
         ped.SetPos({-8, -1}, true);
-        ped.SetRoomID(sub13->GetRoomID(), "");
+        ped.SetRoomID(sub13->GetRoomID());
         ped.SetSubRoomID(sub13->GetSubRoomID());
         ped.SetSubRoomUID(sub13->GetUID());
 
@@ -294,7 +294,7 @@ TEST_CASE(
     {
         Pedestrian ped;
         ped.SetPos({1, -1}, true);
-        ped.SetRoomID(sub31->GetRoomID(), "");
+        ped.SetRoomID(sub31->GetRoomID());
         ped.SetSubRoomID(sub31->GetSubRoomID());
         ped.SetSubRoomUID(sub31->GetUID());
 
@@ -408,22 +408,22 @@ TEST_CASE(
     Pedestrian pedInsideGoalOutsideInGoalFinal;
     pedInsideGoalOutsideInGoalFinal.SetPos({-0.5, 1.});
     pedInsideGoalOutsideInGoalFinal.SetFinalDestination(goalOutside->GetId());
-    pedInsideGoalOutsideInGoalFinal.SetRoomID(1, "");
+    pedInsideGoalOutsideInGoalFinal.SetRoomID(1);
     pedInsideGoalOutsideInGoalFinal.SetSubRoomID(1);
     Pedestrian pedInsideGoalOutsideInGoalNotFinal;
     pedInsideGoalOutsideInGoalNotFinal.SetPos({-1.5, -1.});
     pedInsideGoalOutsideInGoalNotFinal.SetFinalDestination(goalOutside->GetId());
-    pedInsideGoalOutsideInGoalNotFinal.SetRoomID(1, "");
+    pedInsideGoalOutsideInGoalNotFinal.SetRoomID(1);
     pedInsideGoalOutsideInGoalNotFinal.SetSubRoomID(1);
     Pedestrian pedInsideGoalOutsideInRoomLeft;
     pedInsideGoalOutsideInRoomLeft.SetPos({-3.5, -0.5});
     pedInsideGoalOutsideInRoomLeft.SetFinalDestination(goalOutside->GetId());
-    pedInsideGoalOutsideInRoomLeft.SetRoomID(1, "");
+    pedInsideGoalOutsideInRoomLeft.SetRoomID(1);
     pedInsideGoalOutsideInRoomLeft.SetSubRoomID(1);
     Pedestrian pedInsideGoalOutsideInRoomRight;
     pedInsideGoalOutsideInRoomRight.SetPos({3.5, 0.5});
     pedInsideGoalOutsideInRoomRight.SetFinalDestination(goalOutside->GetId());
-    pedInsideGoalOutsideInRoomRight.SetRoomID(1, "");
+    pedInsideGoalOutsideInRoomRight.SetRoomID(1);
     pedInsideGoalOutsideInRoomRight.SetSubRoomID(1);
 
     // no goal
@@ -436,22 +436,22 @@ TEST_CASE(
     Pedestrian pedInsideNoGoalOutsideInGoalFinal;
     pedInsideNoGoalOutsideInGoalFinal.SetPos({-1.5, 1.});
     pedInsideNoGoalOutsideInGoalFinal.SetFinalDestination(FINAL_DEST_OUT);
-    pedInsideNoGoalOutsideInGoalFinal.SetRoomID(1, "");
+    pedInsideNoGoalOutsideInGoalFinal.SetRoomID(1);
     pedInsideNoGoalOutsideInGoalFinal.SetSubRoomID(1);
     Pedestrian pedInsideNoGoalOutsideInGoalNotFinal;
     pedInsideNoGoalOutsideInGoalNotFinal.SetPos({0.5, -1.});
     pedInsideNoGoalOutsideInGoalNotFinal.SetFinalDestination(FINAL_DEST_OUT);
-    pedInsideNoGoalOutsideInGoalNotFinal.SetRoomID(1, "");
+    pedInsideNoGoalOutsideInGoalNotFinal.SetRoomID(1);
     pedInsideNoGoalOutsideInGoalNotFinal.SetSubRoomID(1);
     Pedestrian pedInsideNoGoalOutsideInRoomLeft;
     pedInsideNoGoalOutsideInRoomLeft.SetPos({-3.5, 1.5});
     pedInsideNoGoalOutsideInRoomLeft.SetFinalDestination(FINAL_DEST_OUT);
-    pedInsideNoGoalOutsideInRoomLeft.SetRoomID(1, "");
+    pedInsideNoGoalOutsideInRoomLeft.SetRoomID(1);
     pedInsideNoGoalOutsideInRoomLeft.SetSubRoomID(1);
     Pedestrian pedInsideNoGoalOutsideInRoomRight;
     pedInsideNoGoalOutsideInRoomRight.SetPos({3.5, -1.5});
     pedInsideNoGoalOutsideInRoomRight.SetFinalDestination(FINAL_DEST_OUT);
-    pedInsideNoGoalOutsideInRoomRight.SetRoomID(1, "");
+    pedInsideNoGoalOutsideInRoomRight.SetRoomID(1);
     pedInsideNoGoalOutsideInRoomRight.SetSubRoomID(1);
 
 
@@ -465,22 +465,22 @@ TEST_CASE(
     Pedestrian pedInsideGoalFinalInsideInGoalFinal;
     pedInsideGoalFinalInsideInGoalFinal.SetPos({1.5, 1.});
     pedInsideGoalFinalInsideInGoalFinal.SetFinalDestination(goalInsideFinal->GetId());
-    pedInsideGoalFinalInsideInGoalFinal.SetRoomID(1, "");
+    pedInsideGoalFinalInsideInGoalFinal.SetRoomID(1);
     pedInsideGoalFinalInsideInGoalFinal.SetSubRoomID(1);
     Pedestrian pedInsideGoalFinalInsideInGoalNotFinal;
     pedInsideGoalFinalInsideInGoalNotFinal.SetPos({-0.5, -1.});
     pedInsideGoalFinalInsideInGoalNotFinal.SetFinalDestination(goalInsideFinal->GetId());
-    pedInsideGoalFinalInsideInGoalNotFinal.SetRoomID(1, "");
+    pedInsideGoalFinalInsideInGoalNotFinal.SetRoomID(1);
     pedInsideGoalFinalInsideInGoalNotFinal.SetSubRoomID(1);
     Pedestrian pedInsideGoalFinalInsideInRoomLeft;
     pedInsideGoalFinalInsideInRoomLeft.SetPos({-3.5, 0.5});
     pedInsideGoalFinalInsideInRoomLeft.SetFinalDestination(goalInsideFinal->GetId());
-    pedInsideGoalFinalInsideInRoomLeft.SetRoomID(1, "");
+    pedInsideGoalFinalInsideInRoomLeft.SetRoomID(1);
     pedInsideGoalFinalInsideInRoomLeft.SetSubRoomID(1);
     Pedestrian pedInsideGoalFinalInsideInRoomRight;
     pedInsideGoalFinalInsideInRoomRight.SetPos({3.5, -0.5});
     pedInsideGoalFinalInsideInRoomRight.SetFinalDestination(goalInsideFinal->GetId());
-    pedInsideGoalFinalInsideInRoomRight.SetRoomID(1, "");
+    pedInsideGoalFinalInsideInRoomRight.SetRoomID(1);
     pedInsideGoalFinalInsideInRoomRight.SetSubRoomID(1);
 
 
@@ -494,22 +494,22 @@ TEST_CASE(
     Pedestrian pedInsideGoalNotFinalInsideInGoalFinal;
     pedInsideGoalNotFinalInsideInGoalFinal.SetPos({0.5, 1.});
     pedInsideGoalNotFinalInsideInGoalFinal.SetFinalDestination(goalInside->GetId());
-    pedInsideGoalNotFinalInsideInGoalFinal.SetRoomID(1, "");
+    pedInsideGoalNotFinalInsideInGoalFinal.SetRoomID(1);
     pedInsideGoalNotFinalInsideInGoalFinal.SetSubRoomID(1);
     Pedestrian pedInsideGoalNotFinalInsideInGoalNotFinal;
     pedInsideGoalNotFinalInsideInGoalNotFinal.SetPos({1.5, -1.});
     pedInsideGoalNotFinalInsideInGoalNotFinal.SetFinalDestination(goalInside->GetId());
-    pedInsideGoalNotFinalInsideInGoalNotFinal.SetRoomID(1, "");
+    pedInsideGoalNotFinalInsideInGoalNotFinal.SetRoomID(1);
     pedInsideGoalNotFinalInsideInGoalNotFinal.SetSubRoomID(1);
     Pedestrian pedInsideGoalNotFinalInsideInRoomLeft;
     pedInsideGoalNotFinalInsideInRoomLeft.SetPos({-3.5, -1.5});
     pedInsideGoalNotFinalInsideInRoomLeft.SetFinalDestination(goalInside->GetId());
-    pedInsideGoalNotFinalInsideInRoomLeft.SetRoomID(1, "");
+    pedInsideGoalNotFinalInsideInRoomLeft.SetRoomID(1);
     pedInsideGoalNotFinalInsideInRoomLeft.SetSubRoomID(1);
     Pedestrian pedInsideGoalNotFinalInsideInRoomRight;
     pedInsideGoalNotFinalInsideInRoomRight.SetPos({3.5, 1.5});
     pedInsideGoalNotFinalInsideInRoomRight.SetFinalDestination(goalInside->GetId());
-    pedInsideGoalNotFinalInsideInRoomRight.SetRoomID(1, "");
+    pedInsideGoalNotFinalInsideInRoomRight.SetRoomID(1);
     pedInsideGoalNotFinalInsideInRoomRight.SetSubRoomID(1);
 
 
@@ -640,7 +640,7 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
     SECTION("Normal transition crossed")
     {
         Pedestrian ped;
-        ped.SetRoomID(1, "");
+        ped.SetRoomID(1);
         ped.SetSubRoomID(1);
         ped.SetPos({-1.7, -1.}, false);
         ped.SetPos({-2.2, -1.}, false);
@@ -655,7 +655,7 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
     SECTION("Exit crossed")
     {
         Pedestrian ped;
-        ped.SetRoomID(1, "");
+        ped.SetRoomID(1);
         ped.SetSubRoomID(1);
         ped.SetPos({4., -1.}, false);
         ped.SetPos({5.2, -1.}, false);
@@ -673,7 +673,7 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
         std::vector<Pedestrian *> peds;
         for(size_t i = 0; i < largeNumber; ++i) {
             auto ped = new Pedestrian();
-            ped->SetRoomID(1, "");
+            ped->SetRoomID(1);
             ped->SetSubRoomID(1);
             ped->SetPos({4., -1.}, false);
             ped->SetPos({5.2, -1.}, false);
@@ -695,7 +695,7 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
     SECTION("Walked through wall")
     {
         Pedestrian ped;
-        ped.SetRoomID(1, "");
+        ped.SetRoomID(1);
         ped.SetSubRoomID(1);
         ped.SetPos({4., -1.}, false);
         ped.SetPos({4, -3.}, false);
@@ -710,7 +710,7 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
     SECTION("Walked through closed door")
     {
         Pedestrian ped;
-        ped.SetRoomID(1, "");
+        ped.SetRoomID(1);
         ped.SetSubRoomID(1);
         ped.SetPos({4., -1.}, false);
         ped.SetPos({5.2, -1.}, false);
@@ -815,7 +815,7 @@ TEST_CASE("SimulationHelper::UpdateFlowAtDoors", "[SimulationHelper][UpdateFlowA
         SECTION("inside ped passed transition")
         {
             Pedestrian ped;
-            ped.SetRoomID(2, "");
+            ped.SetRoomID(2);
             ped.SetSubRoomID(1);
             ped.SetExitIndex(trans12->GetUniqueID());
             ped.SetPos({-2.05, -1.}, false);
@@ -832,7 +832,7 @@ TEST_CASE("SimulationHelper::UpdateFlowAtDoors", "[SimulationHelper][UpdateFlowA
         SECTION("used unindented door")
         {
             Pedestrian ped;
-            ped.SetRoomID(1, "");
+            ped.SetRoomID(1);
             ped.SetSubRoomID(1);
             ped.SetExitIndex(trans11->GetUniqueID());
             ped.SetPos({-2.05, -1.}, false);
@@ -852,7 +852,7 @@ TEST_CASE("SimulationHelper::UpdateFlowAtDoors", "[SimulationHelper][UpdateFlowA
         SECTION("outside ped passed exit")
         {
             Pedestrian ped;
-            ped.SetRoomID(1, "");
+            ped.SetRoomID(1);
             ped.SetSubRoomID(1);
             ped.SetExitIndex(trans11->GetUniqueID());
             ped.SetPos({4.95, -1.}, false);
@@ -1012,7 +1012,7 @@ TEST_CASE("SimulationHelper::FindPassedDoor", "[SimulationHelper][FindPassedDoor
         SECTION("transition passed")
         {
             Pedestrian ped;
-            ped.SetRoomID(1, "");
+            ped.SetRoomID(1);
             ped.SetSubRoomID(3);
             ped.SetPos({1.95, -1.2});
             ped.UpdateRoom(2, 1);
@@ -1025,7 +1025,7 @@ TEST_CASE("SimulationHelper::FindPassedDoor", "[SimulationHelper][FindPassedDoor
         SECTION("step ends on transition")
         {
             Pedestrian ped;
-            ped.SetRoomID(1, "");
+            ped.SetRoomID(1);
             ped.SetSubRoomID(3);
             ped.SetPos({1.95, -1.2});
             ped.SetPos({2.00, -1.2});
@@ -1036,7 +1036,7 @@ TEST_CASE("SimulationHelper::FindPassedDoor", "[SimulationHelper][FindPassedDoor
         SECTION("step starts on transition")
         {
             Pedestrian ped;
-            ped.SetRoomID(1, "");
+            ped.SetRoomID(1);
             ped.SetSubRoomID(3);
             ped.SetPos({2.00, -1.2});
             ped.SetPos({2.05, -1.2});
@@ -1048,7 +1048,7 @@ TEST_CASE("SimulationHelper::FindPassedDoor", "[SimulationHelper][FindPassedDoor
         SECTION("step on transition")
         {
             Pedestrian ped;
-            ped.SetRoomID(1, "");
+            ped.SetRoomID(1);
             ped.SetSubRoomID(3);
             ped.SetPos({2.00, -1.2});
             ped.SetPos({2.00, -1.15});
@@ -1060,7 +1060,7 @@ TEST_CASE("SimulationHelper::FindPassedDoor", "[SimulationHelper][FindPassedDoor
         SECTION("crossing passed")
         {
             Pedestrian ped;
-            ped.SetRoomID(1, "");
+            ped.SetRoomID(1);
             ped.SetSubRoomID(3);
             ped.SetPos({-1.95, -1.2});
             ped.UpdateRoom(1, 2);
@@ -1072,7 +1072,7 @@ TEST_CASE("SimulationHelper::FindPassedDoor", "[SimulationHelper][FindPassedDoor
         SECTION("ped still in same subroom")
         {
             Pedestrian ped;
-            ped.SetRoomID(1, "");
+            ped.SetRoomID(1);
             ped.SetSubRoomID(3);
             ped.SetPos({-1.95, -1.2});
             ped.SetPos({-1.90, -1.2});
@@ -1086,7 +1086,7 @@ TEST_CASE("SimulationHelper::FindPassedDoor", "[SimulationHelper][FindPassedDoor
         SECTION("transition passed")
         {
             Pedestrian ped;
-            ped.SetRoomID(2, "");
+            ped.SetRoomID(2);
             ped.SetSubRoomID(1);
             ped.SetPos({5.95, -1.2});
             ped.UpdateRoom(-1, -1);
@@ -1099,7 +1099,7 @@ TEST_CASE("SimulationHelper::FindPassedDoor", "[SimulationHelper][FindPassedDoor
         SECTION("step starts on transition")
         {
             Pedestrian ped;
-            ped.SetRoomID(2, "");
+            ped.SetRoomID(2);
             ped.SetSubRoomID(1);
             ped.SetPos({6.00, -1.2});
             ped.UpdateRoom(-1, -1);
