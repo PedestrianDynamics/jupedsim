@@ -155,10 +155,10 @@ public:
     void SetExitLine(const NavLine * l);
 
     void SetFEDIn(double FED_In);
-    double GetFEDIn();
+    double GetFEDIn() const;
 
     void SetFEDHeat(double FED_Heat);
-    double GetFEDHeat();
+    double GetFEDHeat() const;
 
     void Setdt(double dt);
     double Getdt() const;
@@ -219,7 +219,7 @@ public:
       * For convenience
       * @return a string representation of the knowledge
       */
-    const std::string GetKnowledgeAsString() const;
+    std::string GetKnowledgeAsString() const;
 
     RoutingStrategy GetRoutingStrategy() const;
     int GetUniqueRoomID() const;
@@ -266,7 +266,7 @@ public:
       * @return true if the time spent in jam exceed the patience time
       * @see GetPatienceTime
       */
-    bool IsFeelingLikeInJam();
+    bool IsFeelingLikeInJam() const;
 
     /**
       * Set/Get the patience time.
@@ -294,7 +294,7 @@ public:
       * this pedestrians will be coloured and all other grey out.
       * @param spotlight true for enabling, false for disabling
       */
-    bool GetSpotlight();
+    bool GetSpotlight() const;
 
     /***
       * Set/Get the time after which this pedestrian will start taking actions.
@@ -304,7 +304,7 @@ public:
     /***
       * Set/Get the time after which this pedestrian will start taking actions.
       */
-    double GetPremovementTime();
+    double GetPremovementTime() const;
 
     /**
       * Get min Premovement time of all pedestrians
@@ -336,7 +336,7 @@ public:
     void UpdateTimeInJam();
     void UpdateReroutingTime();
     void RerouteIn(double time);
-    bool IsReadyForRerouting();
+    bool IsReadyForRerouting() const;
 
     /**
       * clear the parameter related to the re routing
@@ -443,5 +443,5 @@ public:
 
     const std::queue<Point> & GetLastPositions() const;
 
-    const Point GetLastPosition() const;
+    Point GetLastPosition() const;
 };

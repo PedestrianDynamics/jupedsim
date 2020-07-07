@@ -79,10 +79,8 @@ Pedestrian::Pedestrian()
     _navLine                   = nullptr;
     _mentalMap                 = std::map<int, int>();
     _destHistory               = std::vector<int>();
-    std::vector<int>();
-    _lastPosition = Point(J_NAN, J_NAN);
-    _knownDoors.clear();
-    _distToBlockade      = 0.0;
+    _lastPosition              = Point(J_NAN, J_NAN);
+    _distToBlockade            = 0.0;
     // new orientation after 10 seconds, value is incremented
     _timeBeforeRerouting = 0.0;
     _timeInJam           = 0.0;
@@ -117,35 +115,33 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _router(building.GetRoutingEngine()->GetRouter(agentsParameters.GetRouterId())),
     _building(&building)
 {
-    _roomID                  = -1;
-    _subRoomID               = -1;
-    _subRoomUID              = -1;
-    _oldRoomID               = -1;
-    _oldSubRoomID            = -1;
-    _exitIndex               = -1;
-    _id                      = _agentsCreated; //default id
-    _mass                    = 1;
-    _tau                     = 0.5;
-    _t                       = 1.0;
-    _newOrientationDelay     = 0; //0 seconds, in steps
-    _ellipse                 = JEllipse();
-    _navLine                 = nullptr;
-    _router                  = nullptr;
-    _building                = nullptr;
+    _roomID              = -1;
+    _subRoomID           = -1;
+    _subRoomUID          = -1;
+    _oldRoomID           = -1;
+    _oldSubRoomID        = -1;
+    _exitIndex           = -1;
+    _id                  = _agentsCreated; //default id
+    _mass                = 1;
+    _tau                 = 0.5;
+    _t                   = 1.0;
+    _newOrientationDelay = 0; //0 seconds, in steps
+    _ellipse             = JEllipse();
+    _navLine             = nullptr;
+    _router              = nullptr;
+    _building            = nullptr;
     // new orientation after 10 seconds, value is incremented
-    _timeBeforeRerouting     = 0.0;
-    _reroutingEnabled        = false;
-    _timeInJam               = 0.0;
-    _patienceTime            = 5.0; // time after which the ped feels to be in jam
-    _desiredFinalDestination = FINAL_DEST_OUT;
-    _mentalMap               = std::map<int, int>();
-    _destHistory             = std::vector<int>();
-    _deltaT                  = 0.01;
-    _v0                      = Point(0, 0);
-    _lastPosition            = Point(0, 0);
-    _recordingTime           = 20; //seconds
-    _knownDoors.clear();
-    std::vector<int>();
+    _timeBeforeRerouting       = 0.0;
+    _reroutingEnabled          = false;
+    _timeInJam                 = 0.0;
+    _patienceTime              = 5.0; // time after which the ped feels to be in jam
+    _desiredFinalDestination   = FINAL_DEST_OUT;
+    _mentalMap                 = std::map<int, int>();
+    _destHistory               = std::vector<int>();
+    _deltaT                    = 0.01;
+    _v0                        = Point(0, 0);
+    _lastPosition              = Point(0, 0);
+    _recordingTime             = 20; //seconds
     _group                     = -1;
     _spotlight                 = false;
     _v0UpStairs                = 0.6;
@@ -221,9 +217,9 @@ void Pedestrian::SetExitIndex(int i)
 
 void Pedestrian::SetExitLine(const NavLine * l)
 {
-    if(_navLine)
+    if(_navLine != nullptr)
         delete _navLine;
-    if(l) {
+    if(l != nullptr) {
         _navLine = new NavLine(*l);
     }
 }
@@ -236,8 +232,9 @@ void Pedestrian::SetPos(const Point & pos, bool initial)
         //save the last values for the records
         _lastPositions.push(pos);
         unsigned int max_size = _recordingTime / _deltaT;
-        if(_lastPositions.size() > max_size)
+        if(_lastPositions.size() > max_size) {
             _lastPositions.pop();
+        }
     }
 }
 
@@ -249,8 +246,9 @@ void Pedestrian::SetV(const Point & v)
         _lastVelocites.push(v);
 
         unsigned int max_size = _recordingTime / _deltaT;
-        if(_lastVelocites.size() > max_size)
+        if(_lastVelocites.size() > max_size) {
             _lastVelocites.pop();
+        }
     }
 }
 
@@ -277,7 +275,7 @@ void Pedestrian::SetFEDIn(double FED_In)
 {
     _fedIn = FED_In;
 }
-double Pedestrian::GetFEDIn()
+double Pedestrian::GetFEDIn() const
 {
     return _fedIn;
 }
@@ -286,7 +284,7 @@ void Pedestrian::SetFEDHeat(double FED_Heat)
 {
     _fedHeat = FED_Heat;
 }
-double Pedestrian::GetFEDHeat()
+double Pedestrian::GetFEDHeat() const
 {
     return _fedHeat;
 }
@@ -381,9 +379,8 @@ int Pedestrian::GetNextDestination()
 {
     if(_mentalMap.count(GetUniqueRoomID()) == 0) {
         return -1;
-    } else {
-        return _mentalMap[GetUniqueRoomID()];
     }
+    return _mentalMap[GetUniqueRoomID()];
 }
 
 Point Pedestrian::GetLastE0() const
@@ -411,19 +408,21 @@ const std::vector<int> & Pedestrian::GetLastDestinations() const
     return _destHistory;
 }
 
-const std::string Pedestrian::GetKnowledgeAsString() const
+std::string Pedestrian::GetKnowledgeAsString() const
 {
-    std::string key = "";
+    std::string key;
     for(auto && knowledge : _knownDoors) {
         //skip low quality information
-        if(knowledge.second.GetQuality() < 0.2)
+        if(knowledge.second.GetQuality() < 0.2) {
             continue;
+        }
 
         int door = knowledge.first;
-        if(key.empty())
+        if(key.empty()) {
             key.append(std::to_string(door));
-        else
+        } else {
             key.append(":" + std::to_string(door));
+        }
     }
     return key;
 }
@@ -452,7 +451,6 @@ double Pedestrian::GetV0Norm() const
     double ped_elevation = sub->GetElevation(_ellipse.GetCenter());
     if(_navLine == nullptr) {
         //printf("Error: ped %d has no navline\n", _id);
-        //exit(EXIT_FAILURE);
         return std::max(0., _ellipse.GetV0());
     }
     const Point & target = _navLine->GetCentre();
@@ -466,7 +464,6 @@ double Pedestrian::GetV0Norm() const
         //assume absolute v_min according to Weidmann
         walking_speed = std::max(0., _ellipse.GetV0());
 
-        //fprintf(stderr, "%f  %f  %f  %f\n", pos._x, pos._y, ped_elevation, walking_speed);
     }
     // we are walking downstairs
     else {
@@ -474,18 +471,17 @@ double Pedestrian::GetV0Norm() const
         // c should be chosen so that the func grows fast (but smooth) from 0 to 1
         // However we have to pay attention to tau. The velocity adaptation
         // from v to v0 in the driven force takes tau time.
-        double f, g; // f in [0, 1]
         if(delta < 0) {
             double maxSubElevation  = sub->GetMaxElevation();
             double stairLength      = maxSubElevation - sub->GetMinElevation();
             double stairInclination = acos(sub->GetCosAngleWithHorizontal());
-            f = 2.0 / (1 + exp(-c * stairInclination * (maxSubElevation - ped_elevation) *
-                               (maxSubElevation - ped_elevation))) -
-                1;
-            g = 2.0 / (1 +
-                       exp(-c * stairInclination * (maxSubElevation - ped_elevation - stairLength) *
-                           (maxSubElevation - ped_elevation - stairLength))) -
-                1;
+            double f = 2.0 / (1 + exp(-c * stairInclination * (maxSubElevation - ped_elevation) *
+                                      (maxSubElevation - ped_elevation))) -
+                       1;
+            double g = 2.0 / (1 + exp(-c * stairInclination *
+                                      (maxSubElevation - ped_elevation - stairLength) *
+                                      (maxSubElevation - ped_elevation - stairLength))) -
+                       1;
             double speed_down = _v0DownStairs;
             if(sub->GetType() == "escalator") {
                 speed_down = _v0EscalatorDownStairs;
@@ -499,13 +495,13 @@ double Pedestrian::GetV0Norm() const
             double minSubElevation  = sub->GetMinElevation();
             double stairHeight      = sub->GetMaxElevation() - minSubElevation;
             double stairInclination = acos(sub->GetCosAngleWithHorizontal());
-            f = 2.0 / (1 + exp(-c * stairInclination * (minSubElevation - ped_elevation) *
-                               (minSubElevation - ped_elevation))) -
-                1;
-            g = 2.0 / (1 +
-                       exp(-c * stairInclination * (ped_elevation - minSubElevation - stairHeight) *
-                           (ped_elevation - minSubElevation - stairHeight))) -
-                1;
+            double f = 2.0 / (1 + exp(-c * stairInclination * (minSubElevation - ped_elevation) *
+                                      (minSubElevation - ped_elevation))) -
+                       1;
+            double g = 2.0 / (1 + exp(-c * stairInclination *
+                                      (ped_elevation - minSubElevation - stairHeight) *
+                                      (ped_elevation - minSubElevation - stairHeight))) -
+                       1;
 
             //FIXME std::normal_distribution generated V0's that are very small or even < 0
             double speed_up = std::max(0.0, _v0UpStairs);
@@ -548,7 +544,8 @@ double Pedestrian::GetSmallerAxis() const
 
 void Pedestrian::SetPhiPed()
 {
-    double cosPhi, sinPhi;
+    double cosPhi;
+    double sinPhi;
     double vx = GetV()._x;
     double vy = GetV()._y;
 
@@ -580,7 +577,7 @@ const Point & Pedestrian::GetV0(const Point & target)
     const Point & pos = GetPos();
     Point delta       = target - pos;
     Point new_v0      = delta.Normalized();
-    ;
+
     double t = _newOrientationDelay++ * _deltaT / (1.0 + 100 * _distToBlockade);
 
     //Handover new target
@@ -598,7 +595,7 @@ void Pedestrian::SetSmoothTurning()
     _newOrientationDelay = 0;
 }
 
-bool Pedestrian::IsFeelingLikeInJam()
+bool Pedestrian::IsFeelingLikeInJam() const
 {
     return (_patienceTime < _timeInJam);
 }
@@ -625,7 +622,7 @@ void Pedestrian::RerouteIn(double time)
     _timeBeforeRerouting = time;
 }
 
-bool Pedestrian::IsReadyForRerouting()
+bool Pedestrian::IsReadyForRerouting() const
 {
     return (_reroutingEnabled && (_timeBeforeRerouting <= 0.0));
 }
@@ -660,8 +657,9 @@ double Pedestrian::GetRecordingTime() const
 double Pedestrian::GetMeanVelOverRecTime() const
 {
     //just few position were saved
-    if(_lastPositions.size() < 2)
+    if(_lastPositions.size() < 2) {
         return _ellipse.GetV().Norm();
+    }
     return fabs((_lastPositions.back() - _lastPositions.front()).Norm() / _recordingTime);
 }
 
@@ -787,7 +785,7 @@ void Pedestrian::SetRouter(Router * router)
 
 int Pedestrian::FindRoute()
 {
-    if(!_router) {
+    if(_router == nullptr) {
         LOG_ERROR("One or more routers does not exist! Check your router_ids");
         return -1;
     }
@@ -816,9 +814,9 @@ void Pedestrian::SetPatienceTime(double patienceTime)
 
 void Pedestrian::SetPremovementTime(double pretime)
 {
-    if(pretime < _minPremovementTime)
+    if(pretime < _minPremovementTime) {
         _minPremovementTime = pretime;
-
+    }
     _premovement = pretime;
 }
 
@@ -827,17 +825,19 @@ double Pedestrian::GetMinPremovementTime()
     return _minPremovementTime;
 }
 
-double Pedestrian::GetPremovementTime()
+double Pedestrian::GetPremovementTime() const
 {
     return _premovement;
 }
 
 void Pedestrian::SetRiskTolerance(double tol)
 {
-    if(tol > 1)
+    if(tol > 1) {
         tol = 1;
-    if(tol < 0)
+    }
+    if(tol < 0) {
         tol = 0;
+    }
     _riskTolerance = tol;
 }
 
@@ -871,7 +871,7 @@ void Pedestrian::SetSpotlight(bool spotlight)
     _spotlight = spotlight;
 }
 
-bool Pedestrian::GetSpotlight()
+bool Pedestrian::GetSpotlight() const
 {
     return _spotlight;
 }
@@ -893,8 +893,9 @@ int Pedestrian::GetColor() const
 
     switch(_colorMode) {
         case BY_SPOTLIGHT: {
-            if(_spotlight == false)
+            if(!_spotlight) {
                 return -1;
+            }
             break;
         }
 
@@ -903,7 +904,7 @@ int Pedestrian::GetColor() const
             double v0 = GetV0Norm();
             if(v0 != 0.0) {
                 double v = GetV().Norm();
-                color    = (int) (v / v0 * 255);
+                color    = static_cast<int>(v / v0 * 255);
             }
             return color;
         } break;
@@ -911,8 +912,9 @@ int Pedestrian::GetColor() const
         // Hash the knowledge represented as String
         case BY_KNOWLEDGE: {
             key = GetKnowledgeAsString();
-            if(key.empty())
+            if(key.empty()) {
                 return -1;
+            }
         } break;
 
         case BY_ROUTER:
@@ -955,7 +957,7 @@ bool Pedestrian::IsInsideWaitingAreaWaiting() const
         auto itr = _building->GetAllGoals().find(_desiredFinalDestination);
         if(itr != _building->GetAllGoals().end()) {
             Goal * goal = itr->second;
-            if(WaitingArea * wa = dynamic_cast<WaitingArea *>(goal)) {
+            if(auto wa = dynamic_cast<WaitingArea *>(goal)) {
                 return wa->IsWaiting(Pedestrian::GetGlobalTime(), _building);
             }
         }
@@ -1012,7 +1014,7 @@ const std::queue<Point> & Pedestrian::GetLastPositions() const
     return _lastPositions;
 }
 
-const Point Pedestrian::GetLastPosition() const
+Point Pedestrian::GetLastPosition() const
 {
     return _lastPosition;
 }
