@@ -222,6 +222,7 @@ TEST_CASE("Pedestrian::SetPos", "[Pedestrian][SetPos]")
 {
     Pedestrian ped;
     double deltaT = 0.1;
+    ped.SetDeltaT(deltaT);
 
     SECTION("global timer larger premovement time and not initial")
     {
@@ -317,7 +318,7 @@ TEST_CASE("Pedestrian::SetPos", "[Pedestrian][SetPos]")
         ped.SetRecordingTime(10.);
 
         size_t maxSize = std::floor(ped.GetRecordingTime() / deltaT);
-        int steps      = maxSize + 1;
+        int steps      = maxSize + 10;
         double min     = -10;
         double max     = 10;
         double step    = std::abs(max - min) / steps;
