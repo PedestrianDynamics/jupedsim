@@ -60,7 +60,7 @@ When this number exceeds the `agents_max` parameter, all train's doors are close
 A train is defined through the following information: 
 - `id` (int): id of the train
 - `type` (string): identifier of the train defined with the train types
-- `track_id` (int): id of the track the train arrives, more information on tracks ([geometry adaption](#geometry-adaptation))
+- `track_id` (int): id of the track the train arrives, more information on tracks ([geometry defintion](#geometry-definition))
 - `train_offset` (float): offset of the train to the track start
 - `reversed` (bool): <br>false: train starts at track start (default), <br>true: train starts at track end
 - `arrival_time` (float): time the train arrives
@@ -91,7 +91,7 @@ With the train defined as above, this would lead to the positioning of the train
 ![Schematic overview of train arrival on platform.]({{ site.baseurl }}/images/trains/traintimetable.png)
 
 
-## Geometry adaptation
+## Geometry definition
 For using trains in the simulation, tracks need to be defined in the geometry.
 A track is a consecutive line sequence, marked by the type `type="track"`.
 For each track, one point needs to be marked as a starting point with `start="true"`, which represents the reference point for the location of trains on tracks (defined in [Train timetable](#train-timetable))
@@ -113,7 +113,7 @@ For each track, one point needs to be marked as a starting point with `start="tr
 </room>
 ```
 
-## Geometry changes due to trains
+## Geometry adaptation
 For realizing trains in the simulation, doors need to be added or removed dynamically during the simulation when trains are arriving or departing.
  
 ### Calculation of train door positions
