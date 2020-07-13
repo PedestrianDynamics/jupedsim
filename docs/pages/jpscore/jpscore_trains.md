@@ -12,39 +12,16 @@ last_updated: Jul 03, 2020
 
 ## Train constraints
 Information regarding trains are organized in two different files:
-- [Train timetable](#train-timetable): This file defines arrival and departure times of trains.
 - [Train types](#train-types): In this file types of trains are defined.
-
-## Geometry definition
-For using train in the simulation, tracks need to be defined in the geometry. 
-A track is a consecutive line sequence, marked by the type `type="track"`.
-For each track, one point needs to marked as starting point with `start="true"`. 
-
-### Example
-```xml
-<room id="1" caption="floor">
-    <subroom id="2" caption="Room 2" A_x="0" B_y="0" C_z="0">
-        ...
-        <polygon caption="wall" type="track" track_id="1">
-            <vertex px="-10" py="10" start="true" />
-            <vertex px="-5" py="10" />
-        </polygon>
-        <polygon caption="wall" type="track" track_id="1">
-            <vertex px="-5" py="10" />
-            <vertex px="0" py="10" />
-        </polygon>
-        ...
-    </subroom>
-</room>
-```
+- [Train timetable](#train-timetable): This file defines arrival and departure times of trains and specifies their location on tracks.
 
 ## Train types
 ### Definition
 A train is defined through the following information: 
 
-- type (string): Unique key to identify train
-- length (int): length of the train
-- agents_max (int): maximal number of passengers
+- `type` (string): unique key to identify train
+- `length` (float): length of the train
+- `agents_max` (int): maximal number of passengers
 - door: 
     - `id` (int): id of the train door
     - `distance` (float): distance to train start
@@ -83,13 +60,13 @@ When this number exceeds the `agents_max` parameter, all train's doors are close
 A train is defined through the following information: 
 - `id` (int): id of the train
 - `type` (string): identifier of the train defined with the train types
-- `track_id` (int): id of the track the train arrives
+- `track_id` (int): id of the track the train arrives, more information on tracks ([geometry adaption](#geometry-adaptation))
 - `train_offset` (float): offset of the train to the track start
-- `reversed` (bool): false: train starts at track start, true: train starts at track end, default: false
+- `reversed` (bool): <br>false: train starts at track start (default), <br>true: train starts at track end
 - `arrival_time` (float): time the train arrives
 - `departure_time` (float): time the train departs
 
-{%include note.html content="The parameter `reversed` add doors starting from track end in direction of track start!."%}
+{%include note.html content="The parameter `reversed` adds doors starting from track end in direction of track start!"%}
 
 ### Example
 
@@ -113,18 +90,40 @@ A train is defined through the following information:
 With the train defined as above, this would lead to the positioning of the train doors as seen here:
 ![Schematic overview of train arrival on platform.]({{ site.baseurl }}/images/trains/traintimetable.png)
 
+
+## Geometry adaptation
+For using trains in the simulation, tracks need to be defined in the geometry.
+A track is a consecutive line sequence, marked by the type `type="track"`.
+For each track, one point needs to be marked as a starting point with `start="true"`, which represents the reference point for the location of trains on tracks (defined in [Train timetable](#train-timetable))
+### Example
+```xml
+<room id="1" caption="floor">
+    <subroom id="2" caption="Room 2" A_x="0" B_y="0" C_z="0">
+        ...
+        <polygon caption="wall" type="track" track_id="1">
+            <vertex px="-10" py="10" start="true" />
+            <vertex px="-5" py="10" />
+        </polygon>
+        <polygon caption="wall" type="track" track_id="1">
+            <vertex px="-5" py="10" />
+            <vertex px="0" py="10" />
+        </polygon>
+        ...
+    </subroom>
+</room>
+```
+
 ## Geometry changes due to trains
-For realizing trains in the simulation, doors need to be added or removed dynamically during the simulation. 
+For realizing trains in the simulation, doors need to be added or removed dynamically during the simulation when trains are arriving or departing.
  
 ### Calculation of train door positions
-The following accounts when calculating the train door coordinates:
-- Distance between train start and door start is calculated along the lines
-- Distance between door start and door end is calculated as direct connection
-- Distance and width are persevered 
+For calculating the train door coordinates, the following rules apply:
+- Distance between train start and door start is calculated along the track walls 
+- Distance between door start and door end is calculated as direct connection (see below)
 
 ### Splitting of the track walls
 #### Case 1: Door on one single wall element
-![Door on one single wall element.]({{ site.baseurl }}/images/trains/trainCase1.png)
+![Door on a single wall element.]({{ site.baseurl }}/images/trains/trainCase1.png)
 
 #### Case 2: Door on two neighboring wall elements
 ![Door on two neighboring wall elements.]({{ site.baseurl }}/images/trains/trainCase2.png)
