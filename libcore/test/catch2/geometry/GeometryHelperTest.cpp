@@ -26,6 +26,9 @@
 #include <algorithm>
 #include <catch2/catch.hpp>
 #include <cmath>
+#include <numeric>
+#include <utility>
+#include <vector>
 
 TEST_CASE(
     "geometry/helper/ComputeTrainDoorCoordinates",
@@ -33,573 +36,1651 @@ TEST_CASE(
 {
     SECTION("ComputeTrainDoorCoordinates")
     {
-        Wall wall1{{-10., 10.}, {-8., 11.}};
-        Wall wall2{{-8., 11.}, {-6., 11.5}};
-        Wall wall3{{-6., 11.5}, {-4., 12}};
-        Wall wall4{{-4., 12.}, {-2., 12.25}};
-        Wall wall5{{-2., 12.25}, {0, 12.25}};
+        Wall trackWall1{{-10., -10.}, {-8., -8.}};
+        Wall trackWall2{{-8., -8.}, {-6., -6.}};
+        Wall trackWall3{{-6., -6.}, {-4., -4.}};
+        Wall trackWall4{{-4., -4.}, {-2., -2.}};
+        Wall trackWall5{{-2., -2.}, {0., 0.}};
+        std::vector<Wall> trackWalls{trackWall1, trackWall2, trackWall3, trackWall4, trackWall5};
+        double trainStartOffSet = 0.;
 
-        std::vector<Wall> trackWalls{wall1, wall2, wall3, wall4, wall5};
+        Track track{1, 0, 0, trackWalls};
 
-        SECTION("Each door on one track wall")
+        SECTION("From beginning")
         {
-            double offset = -10.;
-            std::vector<Transition> trainDoors;
-            for(size_t i = 0; i < trackWalls.size(); ++i) {
-                Transition door;
+            SECTION("Doors on separate track wall")
+            {
+                double flow = std::numeric_limits<double>::max();
 
-                door.SetPoint1({offset + 2. * i + 0.5, 0.});
-                door.SetPoint2({offset + 2. * i + 1.5, 0.});
-                trainDoors.emplace_back(door);
+                std::vector<TrainDoor> trainDoors;
+                for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls);
+                    ++wallItr) {
+                    double width    = 0.5 * wallItr->GetLength();
+                    double distance = std::accumulate(
+                        std::begin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                            return sum + wall.GetLength();
+                        });
+                    distance += 0.25 * wallItr->GetLength();
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                }
+                TrainType train{"TEST", 20, 10, trainDoors};
+
+                auto doorCoordinates = geometry::helper::ComputeTrainDoorCoordinates(
+                    train, track, trainStartOffSet, false);
+
+                REQUIRE(doorCoordinates.size() == trainDoors.size());
+                for(size_t i = 0; i < doorCoordinates.size(); ++i) {
+                    // check distance to start
+                    auto doorCoordinate   = doorCoordinates[i];
+                    auto wallDoorStartItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    double distanceShould = std::accumulate(
+                        std::begin(trackWalls),
+                        wallDoorStartItr,
+                        trainStartOffSet,
+                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                    distanceShould += Distance(wallDoorStartItr->GetPoint1(), doorCoordinate.first);
+                    REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
+
+                    // check distance of door elements
+                    REQUIRE(
+                        trainDoors[i]._width ==
+                        Approx(Distance(doorCoordinate.first, doorCoordinate.second)));
+
+                    // check if on any of these lines
+                    auto wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+
+                    wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.second);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+                }
             }
 
-            auto doorCoordinates =
-                geometry::helper::ComputeTrainDoorCoordinates(trackWalls, trainDoors);
-            REQUIRE(doorCoordinates.size() == trainDoors.size());
+            SECTION("Doors on neighboring track walls")
+            {
+                double flow = std::numeric_limits<double>::max();
 
-            for(auto doorCoordinate = std::begin(doorCoordinates);
-                doorCoordinate != std::end(doorCoordinates);
-                ++doorCoordinate) {
-                auto trainDoor1 = doorCoordinate->first;
-                auto trainDoor2 = doorCoordinate->second;
-                auto index      = std::distance(std::begin(doorCoordinates), doorCoordinate);
+                std::vector<TrainDoor> trainDoors;
+                for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls) - 1;
+                    ++wallItr) {
+                    double distance = std::accumulate(
+                        std::begin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                            return sum + wall.GetLength();
+                        });
+                    distance += 0.25 * wallItr->GetLength();
+                    double distanceDoorEnd = std::accumulate(
+                        std::begin(trackWalls),
+                        std::next(wallItr),
+                        0.,
+                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                    distanceDoorEnd += 0.25 * std::next(wallItr)->GetLength();
+                    double width = distanceDoorEnd - distance;
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                }
+                TrainType train{"TEST", 20, 10, trainDoors};
 
-                // check if point is really on line
-                REQUIRE(trainDoor1.second.IsInLineSegment(trainDoor1.first));
-                REQUIRE(trainDoor2.second.IsInLineSegment(trainDoor2.first));
+                auto doorCoordinates = geometry::helper::ComputeTrainDoorCoordinates(
+                    train, track, trainStartOffSet, false);
 
-                // check if both points of door are on the same line
-                auto computedWall1 =
-                    std::find(std::begin(trackWalls), std::end(trackWalls), trainDoor1.second);
-                auto computedWall2 =
-                    std::find(std::begin(trackWalls), std::end(trackWalls), trainDoor2.second);
-                REQUIRE(computedWall1 == computedWall2);
+                REQUIRE(doorCoordinates.size() == trainDoors.size());
+                for(size_t i = 0; i < doorCoordinates.size(); ++i) {
+                    // check distance to start
+                    auto doorCoordinate   = doorCoordinates[i];
+                    auto wallDoorStartItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    double distanceShould = std::accumulate(
+                        std::begin(trackWalls),
+                        wallDoorStartItr,
+                        trainStartOffSet,
+                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                    distanceShould += Distance(wallDoorStartItr->GetPoint1(), doorCoordinate.first);
+                    REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
 
-                // check if both points are correct
-                double slope = (computedWall1->GetPoint2()._y - computedWall1->GetPoint1()._y) /
-                               (computedWall1->GetPoint2()._x - computedWall1->GetPoint1()._x);
+                    // check distance of door elements
+                    REQUIRE(
+                        trainDoors[i]._width ==
+                        Approx(Distance(doorCoordinate.first, doorCoordinate.second)));
 
-                double expectedX1 = offset + 2. * index + 0.5;
-                REQUIRE(trainDoor1.first._x == Approx(expectedX1));
-                double expectedY1 = computedWall1->GetPoint1()._y + slope * 0.5;
-                REQUIRE(trainDoor1.first._y == Approx(expectedY1));
+                    // check if on any of these lines
+                    auto wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
 
-                double expectedX2 = offset + 2. * index + 1.5;
-                REQUIRE(trainDoor2.first._x == Approx(expectedX2));
-                double expectedY2 = computedWall1->GetPoint1()._y + slope * 1.5;
-                REQUIRE(trainDoor2.first._y == Approx(expectedY2));
+                    wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.second);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+                }
+            }
+
+            SECTION("Doors not on neighboring track walls")
+            {
+                double flow = std::numeric_limits<double>::max();
+
+                std::vector<TrainDoor> trainDoors;
+                for(size_t i = 0; i < trainDoors.size() - 2; i += 2) {
+                    auto wallItr = std::begin(trackWalls);
+                    std::advance(wallItr, i);
+                    double distance = std::accumulate(
+                        std::begin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                            return sum + wall.GetLength();
+                        });
+                    distance += 0.5 * wallItr->GetLength();
+                    std::advance(wallItr, 2);
+
+                    double distanceDoorEnd = std::accumulate(
+                        std::begin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                            return sum + wall.GetLength();
+                        });
+                    distanceDoorEnd += 0.5 * wallItr->GetLength();
+                    double width = distanceDoorEnd - distance;
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                }
+
+                TrainType train{"TEST", 20, 10, trainDoors};
+                auto doorCoordinates = geometry::helper::ComputeTrainDoorCoordinates(
+                    train, track, trainStartOffSet, false);
+
+                REQUIRE(doorCoordinates.size() == trainDoors.size());
+                for(size_t i = 0; i < doorCoordinates.size(); ++i) {
+                    // check distance to start
+                    auto doorCoordinate   = doorCoordinates[i];
+                    auto wallDoorStartItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    double distanceShould = std::accumulate(
+                        std::begin(trackWalls),
+                        wallDoorStartItr,
+                        trainStartOffSet,
+                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                    distanceShould += Distance(wallDoorStartItr->GetPoint1(), doorCoordinate.first);
+                    REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
+
+                    // check distance of door elements
+                    REQUIRE(
+                        trainDoors[i]._width ==
+                        Approx(Distance(doorCoordinate.first, doorCoordinate.second)));
+
+                    // check if on any of these lines
+                    auto wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+
+                    wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.second);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+                }
+            }
+
+            SECTION("Door starts or ends on wall points")
+            {
+                double flow = std::numeric_limits<double>::max();
+
+                std::vector<TrainDoor> trainDoors;
+                for(size_t i = 0; i < trainDoors.size() - 2; i += 2) {
+                    auto wallItr = std::begin(trackWalls);
+                    std::advance(wallItr, i);
+                    double distance = std::accumulate(
+                        std::begin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                            return sum + wall.GetLength();
+                        });
+                    distance += wallItr->GetLength();
+
+                    double width = std::next(wallItr)->GetLength();
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                }
+
+                TrainType train{"TEST", 20, 10, trainDoors};
+                auto doorCoordinates = geometry::helper::ComputeTrainDoorCoordinates(
+                    train, track, trainStartOffSet, false);
+
+                REQUIRE(doorCoordinates.size() == trainDoors.size());
+                for(size_t i = 0; i < doorCoordinates.size(); ++i) {
+                    // check distance to start
+                    auto doorCoordinate   = doorCoordinates[i];
+                    auto wallDoorStartItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    double distanceShould = std::accumulate(
+                        std::begin(trackWalls),
+                        wallDoorStartItr,
+                        trainStartOffSet,
+                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                    distanceShould += Distance(wallDoorStartItr->GetPoint1(), doorCoordinate.first);
+                    REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
+
+                    // check distance of door elements
+                    REQUIRE(
+                        trainDoors[i]._width ==
+                        Approx(Distance(doorCoordinate.first, doorCoordinate.second)));
+
+                    // check if on any of these lines
+                    auto wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+
+                    wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.second);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+                }
+            }
+
+            SECTION("with train start offset")
+            {
+                trainStartOffSet = trackWall1.GetLength() + 0.25 * trackWall2.GetLength();
+
+                double flow = std::numeric_limits<double>::max();
+
+                std::vector<TrainDoor> trainDoors;
+
+                double distance = 0;
+                double width    = 0.25 * trackWall2.GetLength();
+                trainDoors.emplace_back(TrainDoor{distance, width, flow});
+
+                distance = distance + width + 0.25 * trackWall2.GetLength();
+                width    = 0.25 * trackWall2.GetLength() + 0.25 * trackWall3.GetLength();
+                trainDoors.emplace_back(TrainDoor{distance, width, flow});
+
+                distance = distance + width + 0.5 * trackWall3.GetLength();
+                width    = 0.25 * trackWall3.GetLength() + trackWall4.GetLength() +
+                        0.25 * trackWall5.GetLength();
+                trainDoors.emplace_back(TrainDoor{distance, width, flow});
+
+                TrainType train{"TEST", 20, 10, trainDoors};
+
+                auto doorCoordinates = geometry::helper::ComputeTrainDoorCoordinates(
+                    train, track, trainStartOffSet, false);
+
+                REQUIRE(doorCoordinates.size() == trainDoors.size());
+                for(size_t i = 0; i < doorCoordinates.size(); ++i) {
+                    // check distance to start
+                    auto doorCoordinate   = doorCoordinates[i];
+                    auto wallDoorStartItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    double distanceIs = std::accumulate(
+                        std::begin(trackWalls),
+                        wallDoorStartItr,
+                        0.,
+                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                    distanceIs += Distance(wallDoorStartItr->GetPoint1(), doorCoordinate.first);
+                    double distanceShould = trainDoors[i]._distance + trainStartOffSet;
+                    REQUIRE(distanceIs == Approx(distanceShould));
+
+                    // check distance of door elements
+                    REQUIRE(
+                        trainDoors[i]._width ==
+                        Approx(Distance(doorCoordinate.first, doorCoordinate.second)));
+
+                    // check if on any of these lines
+                    auto wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+
+                    wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.second);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+                }
+            }
+
+            SECTION("Multiple doors in one wall element")
+            {
+                double flow = std::numeric_limits<double>::max();
+
+                std::vector<TrainDoor> trainDoors;
+                for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls);
+                    ++wallItr) {
+                    double width    = 0.3 * wallItr->GetLength();
+                    double distance = std::accumulate(
+                        std::begin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                            return sum + wall.GetLength();
+                        });
+                    trainDoors.emplace_back(
+                        TrainDoor{distance + 0.1 * wallItr->GetLength(), width, flow});
+                    trainDoors.emplace_back(
+                        TrainDoor{distance + 0.4 * wallItr->GetLength(), width, flow});
+                }
+
+                TrainType train{"TEST", 20, 10, trainDoors};
+
+                auto doorCoordinates = geometry::helper::ComputeTrainDoorCoordinates(
+                    train, track, trainStartOffSet, false);
+
+                REQUIRE(doorCoordinates.size() == trainDoors.size());
+                for(size_t i = 0; i < doorCoordinates.size(); ++i) {
+                    // check distance to start
+                    auto doorCoordinate   = doorCoordinates[i];
+                    auto wallDoorStartItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    double distanceShould = std::accumulate(
+                        std::begin(trackWalls),
+                        wallDoorStartItr,
+                        trainStartOffSet,
+                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                    distanceShould += Distance(wallDoorStartItr->GetPoint1(), doorCoordinate.first);
+                    REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
+
+                    // check distance of door elements
+                    REQUIRE(
+                        trainDoors[i]._width ==
+                        Approx(Distance(doorCoordinate.first, doorCoordinate.second)));
+
+                    // check if on any of these lines
+                    auto wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+
+                    wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.second);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+                }
+            }
+
+            SECTION("Train longer than platform")
+            {
+                double flow = std::numeric_limits<double>::max();
+
+                std::vector<TrainDoor> trainDoors;
+                for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls);
+                    ++wallItr) {
+                    double width    = 0.5 * wallItr->GetLength();
+                    double distance = std::accumulate(
+                        std::begin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                            return sum + wall.GetLength();
+                        });
+                    distance += 0.25 * wallItr->GetLength();
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                }
+
+                // Create door not on track walls
+                double distance =
+                    std::accumulate(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        0.,
+                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); }) +
+                    1.;
+                double width = 1.;
+                trainDoors.emplace_back(TrainDoor{distance, width, flow});
+
+                TrainType train{"TEST", 20, 10, trainDoors};
+
+                auto doorCoordinates = geometry::helper::ComputeTrainDoorCoordinates(
+                    train, track, trainStartOffSet, false);
+
+                REQUIRE(doorCoordinates.size() == trainDoors.size() - 1);
+                for(size_t i = 0; i < doorCoordinates.size(); ++i) {
+                    // check distance to start
+                    auto doorCoordinate   = doorCoordinates[i];
+                    auto wallDoorStartItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    double distanceShould = std::accumulate(
+                        std::begin(trackWalls),
+                        wallDoorStartItr,
+                        trainStartOffSet,
+                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                    distanceShould += Distance(wallDoorStartItr->GetPoint1(), doorCoordinate.first);
+                    REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
+
+                    // check distance of door elements
+                    REQUIRE(
+                        trainDoors[i]._width ==
+                        Approx(Distance(doorCoordinate.first, doorCoordinate.second)));
+
+                    // check if on any of these lines
+                    auto wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+
+                    wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.second);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+                }
             }
         }
 
-        SECTION("Each door on seperate track wall")
+        SECTION("from end")
         {
-            double offset = -10.;
-            std::vector<Transition> trainDoors;
-            for(size_t i = 0; i < trackWalls.size() - 1; ++i) {
-                Transition door;
+            SECTION("Doors on separate track wall")
+            {
+                double flow = std::numeric_limits<double>::max();
 
-                door.SetPoint1({offset + 2. * i + 1.75, 0.});
-                door.SetPoint2({offset + 2. * i + 2.25, 0.});
-                trainDoors.emplace_back(door);
+                std::vector<TrainDoor> trainDoors;
+                for(auto wallItr = std::rbegin(trackWalls); wallItr != std::rend(trackWalls);
+                    ++wallItr) {
+                    double width    = 0.5 * wallItr->GetLength();
+                    double distance = std::accumulate(
+                        std::rbegin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                            return sum + wall.GetLength();
+                        });
+                    distance += 0.25 * wallItr->GetLength();
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                }
+                TrainType train{"TEST", 20, 10, trainDoors};
+
+                auto doorCoordinates = geometry::helper::ComputeTrainDoorCoordinates(
+                    train, track, trainStartOffSet, true);
+
+                REQUIRE(doorCoordinates.size() == trainDoors.size());
+                for(size_t i = 0; i < doorCoordinates.size(); ++i) {
+                    // check distance to start
+                    auto doorCoordinate   = doorCoordinates[i];
+                    auto wallDoorStartItr = std::find_if(
+                        std::rbegin(trackWalls),
+                        std::rend(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    double distanceShould = std::accumulate(
+                        std::rbegin(trackWalls),
+                        wallDoorStartItr,
+                        trainStartOffSet,
+                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                    distanceShould += Distance(wallDoorStartItr->GetPoint2(), doorCoordinate.first);
+                    REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
+
+                    // check distance of door elements
+                    REQUIRE(
+                        trainDoors[i]._width ==
+                        Approx(Distance(doorCoordinate.first, doorCoordinate.second)));
+
+                    // check if on any of these lines
+                    auto wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+
+                    wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.second);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+                }
             }
 
-            auto doorCoordinates =
-                geometry::helper::ComputeTrainDoorCoordinates(trackWalls, trainDoors);
-            REQUIRE(doorCoordinates.size() == trainDoors.size());
+            SECTION("Doors on neighboring track walls")
+            {
+                double flow = std::numeric_limits<double>::max();
 
-            for(auto doorCoordinate = std::begin(doorCoordinates);
-                doorCoordinate != std::end(doorCoordinates);
-                ++doorCoordinate) {
-                auto trainDoor1 = doorCoordinate->first;
-                auto trainDoor2 = doorCoordinate->second;
-                auto index      = std::distance(std::begin(doorCoordinates), doorCoordinate);
+                std::vector<TrainDoor> trainDoors;
+                for(auto wallItr = std::rbegin(trackWalls); wallItr != std::rend(trackWalls) - 1;
+                    ++wallItr) {
+                    double distance = std::accumulate(
+                        std::rbegin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                            return sum + wall.GetLength();
+                        });
+                    distance += 0.25 * wallItr->GetLength();
+                    double distanceDoorEnd = std::accumulate(
+                        std::rbegin(trackWalls),
+                        std::next(wallItr),
+                        0.,
+                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                    distanceDoorEnd += 0.25 * std::next(wallItr)->GetLength();
+                    double width = distanceDoorEnd - distance;
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                }
+                TrainType train{"TEST", 20, 10, trainDoors};
 
-                // check if point is really on line
-                REQUIRE(trainDoor1.second.IsInLineSegment(trainDoor1.first));
-                REQUIRE(trainDoor2.second.IsInLineSegment(trainDoor2.first));
+                auto doorCoordinates = geometry::helper::ComputeTrainDoorCoordinates(
+                    train, track, trainStartOffSet, true);
 
-                // check if both points of door are on the same line
-                auto computedWall1 =
-                    std::find(std::begin(trackWalls), std::end(trackWalls), trainDoor1.second);
-                auto computedWall2 =
-                    std::find(std::begin(trackWalls), std::end(trackWalls), trainDoor2.second);
-                REQUIRE(computedWall1 != computedWall2);
+                REQUIRE(doorCoordinates.size() == trainDoors.size());
+                for(size_t i = 0; i < doorCoordinates.size(); ++i) {
+                    // check distance to start
+                    auto doorCoordinate   = doorCoordinates[i];
+                    auto wallDoorStartItr = std::find_if(
+                        std::rbegin(trackWalls),
+                        std::rend(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    double distanceShould = std::accumulate(
+                        std::rbegin(trackWalls),
+                        wallDoorStartItr,
+                        trainStartOffSet,
+                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                    distanceShould += Distance(wallDoorStartItr->GetPoint2(), doorCoordinate.first);
+                    REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
 
-                // check if both points are correct
-                double slope1 = (computedWall1->GetPoint2()._y - computedWall1->GetPoint1()._y) /
-                                (computedWall1->GetPoint2()._x - computedWall1->GetPoint1()._x);
+                    // check distance of door elements
+                    REQUIRE(
+                        trainDoors[i]._width ==
+                        Approx(Distance(doorCoordinate.first, doorCoordinate.second)));
 
-                double expectedX1 = offset + 2. * index + 1.75;
-                REQUIRE(trainDoor1.first._x == Approx(expectedX1));
-                double expectedY1 = computedWall1->GetPoint1()._y + slope1 * 1.75;
-                REQUIRE(trainDoor1.first._y == Approx(expectedY1));
+                    // check if on any of these lines
+                    auto wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
 
-                double slope2 = (computedWall2->GetPoint2()._y - computedWall2->GetPoint1()._y) /
-                                (computedWall2->GetPoint2()._x - computedWall2->GetPoint1()._x);
-                double expectedX2 = offset + 2. * index + 2.25;
-                REQUIRE(trainDoor2.first._x == Approx(expectedX2));
-                double expectedY2 = computedWall2->GetPoint1()._y + slope2 * 0.25;
-                REQUIRE(trainDoor2.first._y == Approx(expectedY2));
+                    wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.second);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+                }
+            }
+
+            SECTION("Doors not on neighboring track walls")
+            {
+                double flow = std::numeric_limits<double>::max();
+
+                std::vector<TrainDoor> trainDoors;
+                for(size_t i = 0; i < trainDoors.size() - 2; i += 2) {
+                    auto wallItr = std::rbegin(trackWalls);
+                    std::advance(wallItr, i);
+                    double distance = std::accumulate(
+                        std::rbegin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                            return sum + wall.GetLength();
+                        });
+                    distance += 0.5 * wallItr->GetLength();
+                    std::advance(wallItr, 2);
+
+                    double distanceDoorEnd = std::accumulate(
+                        std::rbegin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                            return sum + wall.GetLength();
+                        });
+                    distanceDoorEnd += 0.5 * wallItr->GetLength();
+                    double width = distanceDoorEnd - distance;
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                }
+
+                TrainType train{"TEST", 20, 10, trainDoors};
+                auto doorCoordinates = geometry::helper::ComputeTrainDoorCoordinates(
+                    train, track, trainStartOffSet, true);
+
+                REQUIRE(doorCoordinates.size() == trainDoors.size());
+                for(size_t i = 0; i < doorCoordinates.size(); ++i) {
+                    // check distance to start
+                    auto doorCoordinate   = doorCoordinates[i];
+                    auto wallDoorStartItr = std::find_if(
+                        std::rbegin(trackWalls),
+                        std::rend(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    double distanceShould = std::accumulate(
+                        std::rbegin(trackWalls),
+                        wallDoorStartItr,
+                        trainStartOffSet,
+                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                    distanceShould += Distance(wallDoorStartItr->GetPoint2(), doorCoordinate.first);
+                    REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
+
+                    // check distance of door elements
+                    REQUIRE(
+                        trainDoors[i]._width ==
+                        Approx(Distance(doorCoordinate.first, doorCoordinate.second)));
+
+                    // check if on any of these lines
+                    auto wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+
+                    wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.second);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+                }
+            }
+
+            SECTION("Door starts or ends on wall points")
+            {
+                double flow = std::numeric_limits<double>::max();
+
+                std::vector<TrainDoor> trainDoors;
+                for(size_t i = 0; i < trainDoors.size() - 2; i += 2) {
+                    auto wallItr = std::rbegin(trackWalls);
+                    std::advance(wallItr, i);
+                    double distance = std::accumulate(
+                        std::rbegin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                            return sum + wall.GetLength();
+                        });
+                    distance += wallItr->GetLength();
+
+                    double width = std::next(wallItr)->GetLength();
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                }
+
+                TrainType train{"TEST", 20, 10, trainDoors};
+                auto doorCoordinates = geometry::helper::ComputeTrainDoorCoordinates(
+                    train, track, trainStartOffSet, true);
+
+                REQUIRE(doorCoordinates.size() == trainDoors.size());
+                for(size_t i = 0; i < doorCoordinates.size(); ++i) {
+                    // check distance to start
+                    auto doorCoordinate   = doorCoordinates[i];
+                    auto wallDoorStartItr = std::find_if(
+                        std::rbegin(trackWalls),
+                        std::rend(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    double distanceShould = std::accumulate(
+                        std::rbegin(trackWalls),
+                        wallDoorStartItr,
+                        trainStartOffSet,
+                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                    distanceShould += Distance(wallDoorStartItr->GetPoint2(), doorCoordinate.first);
+                    REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
+
+                    // check distance of door elements
+                    REQUIRE(
+                        trainDoors[i]._width ==
+                        Approx(Distance(doorCoordinate.first, doorCoordinate.second)));
+
+                    // check if on any of these lines
+                    auto wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+
+                    wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.second);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+                }
+            }
+
+            SECTION("with train start offset")
+            {
+                trainStartOffSet = trackWall5.GetLength() + 0.25 * trackWall4.GetLength();
+
+                double flow = std::numeric_limits<double>::max();
+
+                std::vector<TrainDoor> trainDoors;
+
+                double distance = 0;
+                double width    = 0.25 * trackWall4.GetLength();
+                trainDoors.emplace_back(TrainDoor{distance, width, flow});
+
+                distance = distance + width + 0.25 * trackWall4.GetLength();
+                width    = 0.25 * trackWall4.GetLength() + 0.25 * trackWall3.GetLength();
+                trainDoors.emplace_back(TrainDoor{distance, width, flow});
+
+                distance = distance + width + 0.5 * trackWall3.GetLength();
+                width    = 0.25 * trackWall3.GetLength() + trackWall2.GetLength() +
+                        0.25 * trackWall1.GetLength();
+                trainDoors.emplace_back(TrainDoor{distance, width, flow});
+
+                TrainType train{"TEST", 20, 10, trainDoors};
+
+                auto doorCoordinates = geometry::helper::ComputeTrainDoorCoordinates(
+                    train, track, trainStartOffSet, true);
+
+                REQUIRE(doorCoordinates.size() == trainDoors.size());
+                for(size_t i = 0; i < doorCoordinates.size(); ++i) {
+                    // check distance to start
+                    auto doorCoordinate   = doorCoordinates[i];
+                    auto wallDoorStartItr = std::find_if(
+                        std::rbegin(trackWalls),
+                        std::rend(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    double distanceIs = std::accumulate(
+                        std::rbegin(trackWalls),
+                        wallDoorStartItr,
+                        0.,
+                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                    distanceIs += Distance(wallDoorStartItr->GetPoint2(), doorCoordinate.first);
+                    double distanceShould = trainDoors[i]._distance + trainStartOffSet;
+                    REQUIRE(distanceIs == Approx(distanceShould));
+
+                    // check distance of door elements
+                    REQUIRE(
+                        trainDoors[i]._width ==
+                        Approx(Distance(doorCoordinate.first, doorCoordinate.second)));
+
+                    // check if on any of these lines
+                    auto wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+
+                    wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.second);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+                }
+            }
+
+            SECTION("Multiple doors in one wall element")
+            {
+                double flow = std::numeric_limits<double>::max();
+
+                std::vector<TrainDoor> trainDoors;
+                for(auto wallItr = std::rbegin(trackWalls); wallItr != std::rend(trackWalls);
+                    ++wallItr) {
+                    double width    = 0.3 * wallItr->GetLength();
+                    double distance = std::accumulate(
+                        std::rbegin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                            return sum + wall.GetLength();
+                        });
+                    trainDoors.emplace_back(
+                        TrainDoor{distance + 0.1 * wallItr->GetLength(), width, flow});
+                    trainDoors.emplace_back(
+                        TrainDoor{distance + 0.4 * wallItr->GetLength(), width, flow});
+                }
+
+                TrainType train{"TEST", 20, 10, trainDoors};
+
+                auto doorCoordinates = geometry::helper::ComputeTrainDoorCoordinates(
+                    train, track, trainStartOffSet, true);
+
+                REQUIRE(doorCoordinates.size() == trainDoors.size());
+                for(size_t i = 0; i < doorCoordinates.size(); ++i) {
+                    // check distance to start
+                    auto doorCoordinate   = doorCoordinates[i];
+                    auto wallDoorStartItr = std::find_if(
+                        std::rbegin(trackWalls),
+                        std::rend(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    double distanceShould = std::accumulate(
+                        std::rbegin(trackWalls),
+                        wallDoorStartItr,
+                        trainStartOffSet,
+                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                    distanceShould += Distance(wallDoorStartItr->GetPoint2(), doorCoordinate.first);
+                    REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
+
+                    // check distance of door elements
+                    REQUIRE(
+                        trainDoors[i]._width ==
+                        Approx(Distance(doorCoordinate.first, doorCoordinate.second)));
+
+                    // check if on any of these lines
+                    auto wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+
+                    wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.second);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+                }
+            }
+
+            SECTION("Train longer than platform")
+            {
+                double flow = std::numeric_limits<double>::max();
+
+                std::vector<TrainDoor> trainDoors;
+                for(auto wallItr = std::rbegin(trackWalls); wallItr != std::rend(trackWalls);
+                    ++wallItr) {
+                    double width    = 0.5 * wallItr->GetLength();
+                    double distance = std::accumulate(
+                        std::rbegin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                            return sum + wall.GetLength();
+                        });
+                    distance += 0.25 * wallItr->GetLength();
+                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                }
+
+                // Create door not on track walls
+                double distance =
+                    std::accumulate(
+                        std::rbegin(trackWalls),
+                        std::rend(trackWalls),
+                        0.,
+                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); }) +
+                    1.;
+                double width = 1.;
+                trainDoors.emplace_back(TrainDoor{distance, width, flow});
+
+                TrainType train{"TEST", 20, 10, trainDoors};
+
+                auto doorCoordinates = geometry::helper::ComputeTrainDoorCoordinates(
+                    train, track, trainStartOffSet, true);
+
+                REQUIRE(doorCoordinates.size() == trainDoors.size() - 1);
+                for(size_t i = 0; i < doorCoordinates.size(); ++i) {
+                    // check distance to start
+                    auto doorCoordinate   = doorCoordinates[i];
+                    auto wallDoorStartItr = std::find_if(
+                        std::rbegin(trackWalls),
+                        std::rend(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    double distanceShould = std::accumulate(
+                        std::rbegin(trackWalls),
+                        wallDoorStartItr,
+                        trainStartOffSet,
+                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                    distanceShould += Distance(wallDoorStartItr->GetPoint2(), doorCoordinate.first);
+                    REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
+
+                    // check distance of door elements
+                    REQUIRE(
+                        trainDoors[i]._width ==
+                        Approx(Distance(doorCoordinate.first, doorCoordinate.second)));
+
+                    // check if on any of these lines
+                    auto wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.first);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+
+                    wallPointItr = std::find_if(
+                        std::begin(trackWalls),
+                        std::end(trackWalls),
+                        [&doorCoordinate](const Wall & wall) {
+                            return wall.IsInLineSegment(doorCoordinate.second);
+                        });
+                    REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
+                }
             }
         }
     }
 }
 
-TEST_CASE("geometry/helper/SplitWall", "[geometry][helper][SplitWall]")
+TEST_CASE("geometry/helper/SortTrackWalls", "[geometry][helper][SortWalls]")
 {
-    SECTION("Straight track")
+    SECTION("straight walls")
     {
-        SECTION("ordered track walls")
+        Wall trackWall1{{-10., -10.}, {-8., -8.}};
+        Wall trackWall2{{-6., -6.}, {-8., -8.}};
+        Wall trackWall3{{-6., -6.}, {-4., -4.}};
+        Wall trackWall4{{-2., -2.}, {-4., -4.}};
+        Wall trackWall5{{-2., -2.}, {0., 0.}};
+
+        std::vector<Wall> trackWallsOrdered{
+            trackWall1, trackWall2, trackWall3, trackWall4, trackWall5};
+
+        Point trackStart = trackWall1.GetPoint1();
+
+        SECTION("one wall")
         {
-            Wall trackWall1{{-10., -10.}, {-8., -8.}};
-            Wall trackWall2{{-8., -8.}, {-6., -6.}};
-            Wall trackWall3{{-6., -6.}, {-4., -4.}};
-            Wall trackWall4{{-4., -4.}, {-2., -2.}};
-            Wall trackWall5{{-2., -2.}, {0., 0.}};
-
-            std::vector<Wall> trackWalls{
-                trackWall1, trackWall2, trackWall3, trackWall4, trackWall5};
-
-            SECTION("Door on one wall element")
-            {
-                for(size_t i = 0; i < trackWalls.size(); ++i) {
-                    Point doorVector{trackWalls[i].GetPoint2() - trackWalls[i].GetPoint1()};
-                    Point doorVectorNormalized{doorVector.Normalized()};
-
-                    Transition trainDoor;
-                    trainDoor.SetPoint1(trackWalls[i].GetCentre() - doorVectorNormalized * 0.5);
-                    trainDoor.SetPoint2(trackWalls[i].GetCentre() + doorVectorNormalized * 0.5);
-
-                    std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>> wallDoorIntersection =
-                        {{trainDoor.GetPoint1(), trackWalls[i]},
-                         {trainDoor.GetPoint2(), trackWalls[i]}};
-
-                    auto [addedWalls, removedWalls] =
-                        geometry::helper::SplitWall(wallDoorIntersection, trackWalls, trainDoor);
-
-                    Wall newWall1 = {trackWalls[i].GetPoint1(), trainDoor.GetPoint1()};
-                    Wall newWall2 = {trackWalls[i].GetPoint2(), trainDoor.GetPoint2()};
-
-                    REQUIRE(addedWalls.size() == 2);
-                    REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall1));
-                    REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall2));
-                    REQUIRE(removedWalls.size() == 1);
-                    REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWalls[i]));
-                }
-            }
-
-            SECTION("Door on neighboring wall elements")
-            {
-                for(size_t i = 0; i < trackWalls.size() - 1; ++i) {
-                    Transition trainDoor;
-                    trainDoor.SetPoint1(trackWalls[i].GetCentre());
-                    trainDoor.SetPoint2(trackWalls[i + 1].GetCentre());
-
-                    std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>> wallDoorIntersection =
-                        {{trainDoor.GetPoint1(), trackWalls[i]},
-                         {trainDoor.GetPoint2(), trackWalls[i + 1]}};
-
-                    auto [addedWalls, removedWalls] =
-                        geometry::helper::SplitWall(wallDoorIntersection, trackWalls, trainDoor);
-
-                    Wall newWall1 = {trackWalls[i].GetPoint1(), trainDoor.GetPoint1()};
-                    Wall newWall2 = {trackWalls[i + 1].GetPoint2(), trainDoor.GetPoint2()};
-
-                    REQUIRE(addedWalls.size() == 2);
-                    REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall1));
-                    REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall2));
-                    REQUIRE(removedWalls.size() == 2);
-                    REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWalls[i]));
-                    REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWalls[i + 1]));
-                }
-            }
-
-            SECTION("Door on not neighboring wall elements")
-            {
-                for(size_t i = 0; i < trackWalls.size(); ++i) {
-                    for(size_t j = 0; j < trackWalls.size(); ++j) {
-                        if(std::abs(static_cast<int>(i) - static_cast<int>(j)) <= 1) {
-                            continue;
-                        }
-                        Transition trainDoor;
-                        trainDoor.SetPoint1(trackWalls[i].GetCentre());
-                        trainDoor.SetPoint2(trackWalls[j].GetCentre());
-
-                        std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>
-                            wallDoorIntersection = {
-                                {trainDoor.GetPoint1(), trackWalls[i]},
-                                {trainDoor.GetPoint2(), trackWalls[j]}};
-
-                        auto [addedWalls, removedWalls] = geometry::helper::SplitWall(
-                            wallDoorIntersection, trackWalls, trainDoor);
-
-                        Wall newWall1, newWall2;
-
-                        if(i < j) {
-                            newWall1 = {trackWalls[i].GetPoint1(), trainDoor.GetPoint1()};
-                            newWall2 = {trackWalls[j].GetPoint2(), trainDoor.GetPoint2()};
-                        } else {
-                            newWall1 = {trackWalls[j].GetPoint1(), trainDoor.GetPoint2()};
-                            newWall2 = {trackWalls[i].GetPoint2(), trainDoor.GetPoint1()};
-                        }
-
-                        REQUIRE(addedWalls.size() == 2);
-                        REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall1));
-                        REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall2));
-
-                        unsigned int numRemovedWalls =
-                            1 + std::abs(static_cast<int>(i) - static_cast<int>(j));
-                        REQUIRE(removedWalls.size() == numRemovedWalls);
-
-                        for(auto k = std::min(i, j); k <= std::max(i, j); ++k) {
-                            REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWalls[k]));
-                        }
-                    }
-                }
-            }
+            std::vector<Wall> trackWallOne{trackWall1};
+            std::vector<Wall> trackWalls{trackWall1};
+            REQUIRE_NOTHROW(geometry::helper::SortWalls(trackWalls, trackStart));
+            CHECK_THAT(trackWalls, Catch::Equals(trackWallOne));
+            REQUIRE(trackWallOne.begin()->GetPoint1() == trackStart);
         }
 
-        SECTION("unordered track walls")
+        SECTION("continuous wall")
         {
-            Wall trackWall1{{-10., -10.}, {-8., -8.}};
-            Wall trackWall2{{-8., -8.}, {-6., -6.}};
-            Wall trackWall3{{-6., -6.}, {-4., -4.}};
-            Wall trackWall4{{-4., -4.}, {-2., -2.}};
-            Wall trackWall5{{-2., -2.}, {0., 0.}};
-
-            std::vector<Wall> trackWallsOrdered{
-                trackWall1, trackWall2, trackWall3, trackWall4, trackWall5};
-
             std::vector<Wall> trackWalls{
                 trackWall2, trackWall5, trackWall1, trackWall4, trackWall3};
 
-            std::map<int, int> zuordnung{{0, 1}, {1, 4}, {2, 0}, {3, 3}, {4, 2}};
-
-            SECTION("Door on one wall element")
-            {
-                for(size_t i = 0; i < trackWalls.size(); ++i) {
-                    Point doorVector{trackWalls[i].GetPoint2() - trackWalls[i].GetPoint1()};
-                    Point doorVectorNormalized{doorVector.Normalized()};
-
-                    Transition trainDoor;
-                    trainDoor.SetPoint1(trackWalls[i].GetCentre() - doorVectorNormalized * 0.5);
-                    trainDoor.SetPoint2(trackWalls[i].GetCentre() + doorVectorNormalized * 0.5);
-
-                    std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>> wallDoorIntersection =
-                        {{trainDoor.GetPoint1(), trackWalls[i]},
-                         {trainDoor.GetPoint2(), trackWalls[i]}};
-
-                    auto [addedWalls, removedWalls] =
-                        geometry::helper::SplitWall(wallDoorIntersection, trackWalls, trainDoor);
-
-                    Wall newWall1 = {trackWalls[i].GetPoint1(), trainDoor.GetPoint1()};
-                    Wall newWall2 = {trackWalls[i].GetPoint2(), trainDoor.GetPoint2()};
-
-                    REQUIRE(addedWalls.size() == 2);
-                    REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall1));
-                    REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall2));
-                    REQUIRE(removedWalls.size() == 1);
-                    REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWalls[i]));
-                }
+            REQUIRE_NOTHROW(geometry::helper::SortWalls(trackWalls, trackStart));
+            CHECK_THAT(trackWalls, Catch::Equals(trackWallsOrdered));
+            for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls) - 1;
+                ++wallItr) {
+                REQUIRE(wallItr->GetPoint2() == std::next(wallItr)->GetPoint1());
             }
 
-            SECTION("Door on neighboring wall elements")
-            {
-                for(size_t i = 0; i < trackWallsOrdered.size() - 1; ++i) {
-                    Transition trainDoor;
-                    trainDoor.SetPoint1(trackWallsOrdered[i].GetCentre());
-                    trainDoor.SetPoint2(trackWallsOrdered[i + 1].GetCentre());
 
-                    std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>> wallDoorIntersection =
-                        {{trainDoor.GetPoint1(), trackWallsOrdered[i]},
-                         {trainDoor.GetPoint2(), trackWallsOrdered[i + 1]}};
+            std::vector<Wall> trackWallsReversed{
+                trackWall5, trackWall4, trackWall3, trackWall2, trackWall1};
 
-                    auto [addedWalls, removedWalls] =
-                        geometry::helper::SplitWall(wallDoorIntersection, trackWalls, trainDoor);
-
-                    Wall newWall1 = {trackWallsOrdered[i].GetPoint1(), trainDoor.GetPoint1()};
-                    Wall newWall2 = {trackWallsOrdered[i + 1].GetPoint2(), trainDoor.GetPoint2()};
-
-                    REQUIRE(addedWalls.size() == 2);
-                    REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall1));
-                    REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall2));
-                    REQUIRE(removedWalls.size() == 2);
-                    REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWallsOrdered[i]));
-                    REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWallsOrdered[i + 1]));
-                }
+            REQUIRE_NOTHROW(geometry::helper::SortWalls(trackWallsReversed, trackStart));
+            CHECK_THAT(trackWallsReversed, Catch::Equals(trackWallsOrdered));
+            for(auto wallItr = std::begin(trackWallsReversed);
+                wallItr != std::end(trackWallsReversed) - 1;
+                ++wallItr) {
+                REQUIRE(wallItr->GetPoint2() == std::next(wallItr)->GetPoint1());
             }
+        }
 
-            SECTION("Door on not neighboring wall elements")
-            {
-                for(size_t i = 0; i < trackWalls.size(); ++i) {
-                    for(size_t j = 0; j < trackWalls.size(); ++j) {
-                        if(std::abs(static_cast<int>(i) - static_cast<int>(j)) <= 1) {
-                            continue;
-                        }
-                        Transition trainDoor;
-                        trainDoor.SetPoint1(trackWallsOrdered[i].GetCentre());
-                        trainDoor.SetPoint2(trackWallsOrdered[j].GetCentre());
+        SECTION("non-continuous wall")
+        {
+            std::vector<Wall> trackWalls{trackWall5, trackWall1, trackWall4, trackWall3};
 
-                        std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>
-                            wallDoorIntersection = {
-                                {trainDoor.GetPoint1(), trackWallsOrdered[i]},
-                                {trainDoor.GetPoint2(), trackWallsOrdered[j]}};
+            REQUIRE_THROWS_WITH(
+                geometry::helper::SortWalls(trackWalls, trackStart),
+                "Track walls could not be sorted. Could not find a wall succeeding ( -10 : -10 "
+                ")--( -8 : -8 ) in track walls. Please check your geometry");
+        }
 
-                        auto [addedWalls, removedWalls] = geometry::helper::SplitWall(
-                            wallDoorIntersection, trackWalls, trainDoor);
+        SECTION("Start not on track wall")
+        {
+            std::vector<Wall> trackWalls{
+                trackWall2, trackWall5, trackWall1, trackWall4, trackWall3};
+            Point start{-25., 10.};
 
-                        Wall newWall1, newWall2;
-
-                        if(i < j) {
-                            newWall1 = {trackWallsOrdered[i].GetPoint1(), trainDoor.GetPoint1()};
-                            newWall2 = {trackWallsOrdered[j].GetPoint2(), trainDoor.GetPoint2()};
-                        } else {
-                            newWall1 = {trackWallsOrdered[j].GetPoint1(), trainDoor.GetPoint2()};
-                            newWall2 = {trackWallsOrdered[i].GetPoint2(), trainDoor.GetPoint1()};
-                        }
-
-                        REQUIRE(addedWalls.size() == 2);
-                        REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall1));
-                        REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall2));
-
-                        unsigned int numRemovedWalls =
-                            1 + std::abs(static_cast<int>(i) - static_cast<int>(j));
-                        REQUIRE(removedWalls.size() == numRemovedWalls);
-
-                        for(auto k = std::min(i, j); k <= std::max(i, j); ++k) {
-                            REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWallsOrdered[k]));
-                        }
-                    }
-                }
-            }
+            REQUIRE_THROWS_WITH(
+                geometry::helper::SortWalls(trackWalls, start),
+                "Track walls could not be sorted. Start ( -25 : 10 ) is not on one of the track "
+                "walls. Please check your geometry.");
         }
     }
 
-    SECTION("Curved track")
+    SECTION("curved walls")
     {
-        SECTION("ordered track walls")
+        Wall trackWall1{{-8., -8.}, {-10., -10.}};
+        Wall trackWall2{{-8., -8.}, {-6., -7.}};
+        Wall trackWall3{{-6., -7.}, {-4., -2.}};
+        Wall trackWall4{{-2., -0.}, {-4., -2.}};
+        Wall trackWall5{{0., 0.}, {-2., 0.}};
+
+        std::vector<Wall> trackWallsOrdered{
+            trackWall1, trackWall2, trackWall3, trackWall4, trackWall5};
+
+        Point trackStart = trackWall1.GetPoint2();
+
+        SECTION("continuous wall")
         {
-            Wall trackWall1{{-10., -10.}, {-8., -8.}};
-            Wall trackWall2{{-8., -8.}, {-6., -7.}};
-            Wall trackWall3{{-6., -7.}, {-4., -2.}};
-            Wall trackWall4{{-4., -2.}, {-2., -0.}};
-            Wall trackWall5{{-2., 0.}, {0., 0.}};
-
-            std::vector<Wall> trackWalls{
-                trackWall1, trackWall2, trackWall3, trackWall4, trackWall5};
-
-            SECTION("Door on one wall element")
-            {
-                for(size_t i = 0; i < trackWalls.size(); ++i) {
-                    Point doorVector{trackWalls[i].GetPoint2() - trackWalls[i].GetPoint1()};
-                    Point doorVectorNormalized{doorVector.Normalized()};
-
-                    Transition trainDoor;
-                    trainDoor.SetPoint1(trackWalls[i].GetCentre() - doorVectorNormalized * 0.5);
-                    trainDoor.SetPoint2(trackWalls[i].GetCentre() + doorVectorNormalized * 0.5);
-                    std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>> wallDoorIntersection =
-                        {{trainDoor.GetPoint1(), trackWalls[i]},
-                         {trainDoor.GetPoint2(), trackWalls[i]}};
-
-                    auto [addedWalls, removedWalls] =
-                        geometry::helper::SplitWall(wallDoorIntersection, trackWalls, trainDoor);
-
-
-                    Wall newWall1 = {trackWalls[i].GetPoint1(), trainDoor.GetPoint1()};
-                    Wall newWall2 = {trackWalls[i].GetPoint2(), trainDoor.GetPoint2()};
-
-                    REQUIRE(addedWalls.size() == 2);
-                    REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall1));
-                    REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall2));
-                    REQUIRE(removedWalls.size() == 1);
-                    REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWalls[i]));
-                }
-            }
-
-            SECTION("Door on neighboring wall elements")
-            {
-                for(size_t i = 0; i < trackWalls.size() - 1; ++i) {
-                    Transition trainDoor;
-                    trainDoor.SetPoint1(trackWalls[i].GetCentre());
-                    trainDoor.SetPoint2(trackWalls[i + 1].GetCentre());
-
-                    std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>> wallDoorIntersection =
-                        {{trainDoor.GetPoint1(), trackWalls[i]},
-                         {trainDoor.GetPoint2(), trackWalls[i + 1]}};
-
-                    auto [addedWalls, removedWalls] =
-                        geometry::helper::SplitWall(wallDoorIntersection, trackWalls, trainDoor);
-
-                    Wall newWall1 = {trackWalls[i].GetPoint1(), trainDoor.GetPoint1()};
-                    Wall newWall2 = {trackWalls[i + 1].GetPoint2(), trainDoor.GetPoint2()};
-
-                    REQUIRE(addedWalls.size() == 2);
-                    REQUIRE(addedWalls[0] == newWall1);
-                    REQUIRE(addedWalls[1] == newWall2);
-                    REQUIRE(removedWalls.size() == 2);
-                    REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWalls[i]));
-                    REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWalls[i + 1]));
-                }
-            }
-
-            SECTION("Door on not neighboring wall elements")
-            {
-                for(size_t i = 0; i < trackWalls.size(); ++i) {
-                    for(size_t j = 0; j < trackWalls.size(); ++j) {
-                        if(std::abs(static_cast<int>(i) - static_cast<int>(j)) <= 1) {
-                            continue;
-                        }
-                        Transition trainDoor;
-                        trainDoor.SetPoint1(trackWalls[i].GetCentre());
-                        trainDoor.SetPoint2(trackWalls[j].GetCentre());
-
-                        std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>
-                            wallDoorIntersection = {
-                                {trainDoor.GetPoint1(), trackWalls[i]},
-                                {trainDoor.GetPoint2(), trackWalls[j]}};
-
-                        auto [addedWalls, removedWalls] = geometry::helper::SplitWall(
-                            wallDoorIntersection, trackWalls, trainDoor);
-
-                        Wall newWall1, newWall2;
-
-                        if(i < j) {
-                            newWall1 = {trackWalls[i].GetPoint1(), trainDoor.GetPoint1()};
-                            newWall2 = {trackWalls[j].GetPoint2(), trainDoor.GetPoint2()};
-                        } else {
-                            newWall1 = {trackWalls[j].GetPoint1(), trainDoor.GetPoint2()};
-                            newWall2 = {trackWalls[i].GetPoint2(), trainDoor.GetPoint1()};
-                        }
-
-                        REQUIRE(addedWalls.size() == 2);
-                        REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall1));
-                        REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall2));
-
-                        unsigned int numRemovedWalls =
-                            1 + std::abs(static_cast<int>(i) - static_cast<int>(j));
-                        REQUIRE(removedWalls.size() == numRemovedWalls);
-
-                        for(auto k = std::min(i, j); k <= std::max(i, j); ++k) {
-                            REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWalls[k]));
-                        }
-                    }
-                }
-            }
-        }
-
-        SECTION("unordered track walls")
-        {
-            Wall trackWall1{{-10., -10.}, {-8., -8.}};
-            Wall trackWall2{{-8., -8.}, {-6., -7.}};
-            Wall trackWall3{{-6., -7.}, {-4., -2.}};
-            Wall trackWall4{{-4., -2.}, {-2., -0.}};
-            Wall trackWall5{{-2., 0.}, {0., 0.}};
-
-            std::vector<Wall> trackWallsOrdered{
-                trackWall1, trackWall2, trackWall3, trackWall4, trackWall5};
-
             std::vector<Wall> trackWalls{
                 trackWall2, trackWall5, trackWall1, trackWall4, trackWall3};
 
-            std::map<int, int> zuordnung{{0, 1}, {1, 4}, {2, 0}, {3, 3}, {4, 2}};
-
-            SECTION("Door on one wall element")
-            {
-                for(size_t i = 0; i < trackWalls.size(); ++i) {
-                    Point doorVector{trackWalls[i].GetPoint2() - trackWalls[i].GetPoint1()};
-                    Point doorVectorNormalized{doorVector.Normalized()};
-
-                    Transition trainDoor;
-                    trainDoor.SetPoint1(trackWalls[i].GetCentre() - doorVectorNormalized * 0.5);
-                    trainDoor.SetPoint2(trackWalls[i].GetCentre() + doorVectorNormalized * 0.5);
-
-                    std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>> wallDoorIntersection =
-                        {{trainDoor.GetPoint1(), trackWalls[i]},
-                         {trainDoor.GetPoint2(), trackWalls[i]}};
-
-                    auto [addedWalls, removedWalls] =
-                        geometry::helper::SplitWall(wallDoorIntersection, trackWalls, trainDoor);
-
-                    Wall newWall1 = {trackWalls[i].GetPoint1(), trainDoor.GetPoint1()};
-                    Wall newWall2 = {trackWalls[i].GetPoint2(), trainDoor.GetPoint2()};
-
-                    REQUIRE(addedWalls.size() == 2);
-                    REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall1));
-                    REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall2));
-                    REQUIRE(removedWalls.size() == 1);
-                    REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWalls[i]));
-                }
+            REQUIRE_NOTHROW(geometry::helper::SortWalls(trackWalls, trackStart));
+            CHECK_THAT(trackWalls, Catch::Equals(trackWallsOrdered));
+            for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls) - 1;
+                ++wallItr) {
+                REQUIRE(wallItr->GetPoint2() == std::next(wallItr)->GetPoint1());
             }
 
-            SECTION("Door on neighboring wall elements")
-            {
-                for(size_t i = 0; i < trackWallsOrdered.size() - 1; ++i) {
-                    Transition trainDoor;
-                    trainDoor.SetPoint1(trackWallsOrdered[i].GetCentre());
-                    trainDoor.SetPoint2(trackWallsOrdered[i + 1].GetCentre());
+            std::vector<Wall> trackWallsReversed{
+                trackWall5, trackWall4, trackWall3, trackWall2, trackWall1};
 
-                    std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>> wallDoorIntersection =
-                        {{trainDoor.GetPoint1(), trackWallsOrdered[i]},
-                         {trainDoor.GetPoint2(), trackWallsOrdered[i + 1]}};
+            REQUIRE_NOTHROW(geometry::helper::SortWalls(trackWallsReversed, trackStart));
+            CHECK_THAT(trackWallsReversed, Catch::Equals(trackWallsOrdered));
+            for(auto wallItr = std::begin(trackWallsReversed);
+                wallItr != std::end(trackWallsReversed) - 1;
+                ++wallItr) {
+                REQUIRE(wallItr->GetPoint2() == std::next(wallItr)->GetPoint1());
+            }
+        }
+    }
+}
 
-                    auto [addedWalls, removedWalls] =
-                        geometry::helper::SplitWall(wallDoorIntersection, trackWalls, trainDoor);
+TEST_CASE(
+    "geometry/helper/FindWallPointWithDistanceOnWall",
+    "[geometry][helper][FindWallPointWithDistanceOnWall]")
+{
+    SECTION("Error handling")
+    {
+        Wall trackWall1{{-10., -10.}, {-8., -8.}};
+        Wall trackWall2{{-8., -8.}, {-6., -6.}};
+        Wall trackWall3{{-6., -6.}, {-4., -4.}};
+        Wall trackWall4{{-4., -4.}, {-2., -2.}};
+        Wall trackWall5{{-2., -2.}, {0., 0.}};
 
-                    Wall newWall1 = {trackWallsOrdered[i].GetPoint1(), trainDoor.GetPoint1()};
-                    Wall newWall2 = {trackWallsOrdered[i + 1].GetPoint2(), trainDoor.GetPoint2()};
+        std::vector<Wall> trackWalls{trackWall1, trackWall2, trackWall3, trackWall4, trackWall5};
 
-                    REQUIRE(addedWalls.size() == 2);
-                    REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall1));
-                    REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall2));
-                    REQUIRE(removedWalls.size() == 2);
-                    REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWallsOrdered[i]));
-                    REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWallsOrdered[i + 1]));
+        SECTION("trackWalls empty")
+        {
+            auto result = geometry::helper::FindWallPointWithDistanceOnWall(
+                std::vector<Wall>{}, Point{0, 0}, 0);
+            REQUIRE_FALSE(result.has_value());
+        }
+
+        SECTION("starting point not in track walls")
+        {
+            std::pair<Point, Wall> start{{-5., -5.}, {{-6., -5.}, {-4., -5.}}};
+            auto result =
+                geometry::helper::FindWallPointWithDistanceOnWall(trackWalls, Point{0, 0}, 0);
+            REQUIRE_FALSE(result.has_value());
+        }
+
+        SECTION("distance too large")
+        {
+            std::pair<Point, Wall> start{{-5., -5.}, {{-6., -5.}, {-4., -5.}}};
+            auto result =
+                geometry::helper::FindWallPointWithDistanceOnWall(trackWalls, Point{0, 0}, 20.);
+            REQUIRE_FALSE(result.has_value());
+        }
+    }
+
+    SECTION("straight walls")
+    {
+        Wall trackWall1{{-10., -10.}, {-8., -8.}};
+        Wall trackWall2{{-8., -8.}, {-6., -6.}};
+        Wall trackWall3{{-6., -6.}, {-4., -4.}};
+        Wall trackWall4{{-4., -4.}, {-2., -2.}};
+        Wall trackWall5{{-2., -2.}, {0., 0.}};
+        std::vector<Wall> trackWalls{trackWall1, trackWall2, trackWall3, trackWall4, trackWall5};
+
+        SECTION("point on same wall")
+        {
+            Point start{-5., -5.};
+            double distance = 0.5;
+            auto result =
+                geometry::helper::FindWallPointWithDistanceOnWall(trackWalls, start, distance);
+            REQUIRE(result.has_value());
+            auto point = result.value();
+            REQUIRE(Distance(start, point) == Approx(distance));
+            REQUIRE(trackWall3.IsInLineSegment(point));
+        }
+
+        SECTION("point on neighbor wall")
+        {
+            Point start{-5., -5.};
+            double distance = 2.;
+            auto result =
+                geometry::helper::FindWallPointWithDistanceOnWall(trackWalls, start, distance);
+            REQUIRE(result.has_value());
+            auto point = result.value();
+            REQUIRE(trackWall4.IsInLineSegment(point));
+            double computedDistance = 0.;
+            Point startPoint        = start;
+            auto startItr           = std::find_if(
+                std::begin(trackWalls), std::end(trackWalls), [&start](const Wall & wall) {
+                    return wall.IsInLineSegment(start) && wall.GetPoint2() != start;
+                });
+
+            for(auto wallItr = startItr; wallItr != std::end(trackWalls); ++wallItr) {
+                if(wallItr->IsInLineSegment(point)) {
+                    computedDistance += Distance(startPoint, point);
+                    break;
                 }
+                computedDistance += Distance(startPoint, wallItr->GetPoint2());
+                startPoint = wallItr->GetPoint2();
+            }
+            REQUIRE(computedDistance == Approx(distance));
+        }
+
+        SECTION("point on not neighbor wall")
+        {
+            Point start{-5., -5.};
+            double distance = 5.;
+            auto result =
+                geometry::helper::FindWallPointWithDistanceOnWall(trackWalls, start, distance);
+
+            REQUIRE(result.has_value());
+
+            auto point = result.value();
+            REQUIRE(trackWall5.IsInLineSegment(point));
+
+            double computedDistance = 0.;
+            Point startPoint        = start;
+            auto startItr           = std::find_if(
+                std::begin(trackWalls), std::end(trackWalls), [&start](const Wall & wall) {
+                    return wall.IsInLineSegment(start) && wall.GetPoint2() != start;
+                });
+            for(auto wallItr = startItr; wallItr != std::end(trackWalls); ++wallItr) {
+                if(wallItr->IsInLineSegment(point)) {
+                    computedDistance += Distance(startPoint, point);
+                    break;
+                }
+                computedDistance += Distance(startPoint, wallItr->GetPoint2());
+                startPoint = wallItr->GetPoint2();
+            }
+            REQUIRE(computedDistance == Approx(distance));
+        }
+    }
+
+    SECTION("curved walls")
+    {
+        Wall trackWall1{{-10., -10.}, {-8., -8.}};
+        Wall trackWall2{{-8., -8.}, {-6., -7.}};
+        Wall trackWall3{{-6., -7.}, {-4., -2.}};
+        Wall trackWall4{{-4., -2.}, {-2., -0.}};
+        Wall trackWall5{{-2., 0.}, {0., 0.}};
+
+        std::vector<Wall> trackWalls{trackWall1, trackWall2, trackWall3, trackWall4, trackWall5};
+
+        SECTION("point on same wall")
+        {
+            Point start{-5., -4.5};
+            double distance = 0.5;
+            auto result =
+                geometry::helper::FindWallPointWithDistanceOnWall(trackWalls, start, distance);
+            REQUIRE(result.has_value());
+            auto point = result.value();
+            REQUIRE(Distance(start, point) == Approx(distance));
+            REQUIRE(trackWall3.IsInLineSegment(point));
+        }
+
+        SECTION("point on neighbor wall")
+        {
+            Point start{-5., -4.5};
+            double distance = 4.;
+            auto result =
+                geometry::helper::FindWallPointWithDistanceOnWall(trackWalls, start, distance);
+            REQUIRE(result.has_value());
+            auto point = result.value();
+            REQUIRE(trackWall4.IsInLineSegment(point));
+            double computedDistance = 0.;
+            Point startPoint        = start;
+            auto startItr           = std::find_if(
+                std::begin(trackWalls), std::end(trackWalls), [&start](const Wall & wall) {
+                    return wall.IsInLineSegment(start) && wall.GetPoint2() != start;
+                });
+            for(auto wallItr = startItr; wallItr != std::end(trackWalls); ++wallItr) {
+                if(wallItr->IsInLineSegment(point)) {
+                    computedDistance += Distance(startPoint, point);
+                    break;
+                }
+                computedDistance += Distance(startPoint, wallItr->GetPoint2());
+                startPoint = wallItr->GetPoint2();
+            }
+            REQUIRE(computedDistance == Approx(distance));
+        }
+
+        SECTION("point on not neighbor wall")
+        {
+            Point start{-5., -4.5};
+            double distance = 7.;
+            auto result =
+                geometry::helper::FindWallPointWithDistanceOnWall(trackWalls, start, distance);
+
+            REQUIRE(result.has_value());
+
+            auto point = result.value();
+            REQUIRE(trackWall5.IsInLineSegment(point));
+
+            double computedDistance = 0.;
+            Point startPoint        = start;
+            auto startItr           = std::find_if(
+                std::begin(trackWalls), std::end(trackWalls), [&start](const Wall & wall) {
+                    return wall.IsInLineSegment(start) && wall.GetPoint2() != start;
+                });
+            for(auto wallItr = startItr; wallItr != std::end(trackWalls); ++wallItr) {
+                if(wallItr->IsInLineSegment(point)) {
+                    computedDistance += Distance(startPoint, point);
+                    break;
+                }
+                computedDistance += Distance(startPoint, wallItr->GetPoint2());
+                startPoint = wallItr->GetPoint2();
+            }
+            REQUIRE(computedDistance == Approx(distance));
+        }
+    }
+}
+
+TEST_CASE("geometry/helper/SplitWalls", "[geometry][helper][SplitWalls]")
+{
+    SECTION("on one element")
+    {
+        Wall trackWall{{-10., -10.}, {10., -10.}};
+        std::vector<Wall> trackWalls{trackWall};
+
+        SECTION("One door on one wall element")
+        {
+            Point point1{-1., -10.};
+            Point point2{1., -10.};
+
+            Transition trainDoor;
+            trainDoor.SetPoint1(point1);
+            trainDoor.SetPoint2(point2);
+            std::vector<Transition> trainDoors{trainDoor};
+
+            auto [addedWalls, removedWalls] = geometry::helper::SplitWalls(trackWalls, trainDoors);
+            REQUIRE(removedWalls.size() == 1);
+            REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWall));
+
+            REQUIRE(addedWalls.size() == 2);
+            Wall wallSplit1{trackWall.GetPoint1(), point1};
+            REQUIRE_THAT(addedWalls, Catch::VectorContains(wallSplit1));
+            Wall wallSplit2{point2, trackWall.GetPoint2()};
+            REQUIRE_THAT(addedWalls, Catch::VectorContains(wallSplit2));
+        }
+
+        SECTION("door on start of wall")
+        {
+            Point point1{-10., -10.};
+            Point point2{-8., -10.};
+
+            Transition trainDoor;
+            trainDoor.SetPoint1(point1);
+            trainDoor.SetPoint2(point2);
+            std::vector<Transition> trainDoors{trainDoor};
+
+            auto [addedWalls, removedWalls] = geometry::helper::SplitWalls(trackWalls, trainDoors);
+            REQUIRE(removedWalls.size() == 1);
+            REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWall));
+
+            REQUIRE(addedWalls.size() == 1);
+            Wall wallSplit{point2, trackWall.GetPoint2()};
+            REQUIRE_THAT(addedWalls, Catch::VectorContains(wallSplit));
+        }
+
+        SECTION("door on end of wall")
+        {
+            Point point1{8., -10.};
+            Point point2{10., -10.};
+
+            Transition trainDoor;
+            trainDoor.SetPoint1(point1);
+            trainDoor.SetPoint2(point2);
+            std::vector<Transition> trainDoors{trainDoor};
+
+            auto [addedWalls, removedWalls] = geometry::helper::SplitWalls(trackWalls, trainDoors);
+            REQUIRE(removedWalls.size() == 1);
+            REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWall));
+
+            REQUIRE(addedWalls.size() == 1);
+            Wall wallSplit{trackWall.GetPoint1(), point1};
+            REQUIRE_THAT(addedWalls, Catch::VectorContains(wallSplit));
+        }
+
+        SECTION("Multiple doors on one wall element")
+        {
+            Transition trainDoor1;
+            trainDoor1.SetPoint1({-7., -10.});
+            trainDoor1.SetPoint2({-5., -10.});
+
+            Transition trainDoor2;
+            trainDoor2.SetPoint1({-1., -10.});
+            trainDoor2.SetPoint2({1., -10.});
+
+            Transition trainDoor3;
+            trainDoor3.SetPoint1({5., -10.});
+            trainDoor3.SetPoint2({7., -10.});
+
+            std::vector<Transition> trainDoors{trainDoor1, trainDoor2, trainDoor3};
+
+            std::vector<Wall> splitWalls{
+                {trackWall.GetPoint1(), trainDoor1.GetPoint1()},
+                {trainDoor1.GetPoint2(), trainDoor2.GetPoint1()},
+                {trainDoor2.GetPoint2(), trainDoor3.GetPoint1()},
+                {trainDoor3.GetPoint2(), trackWall.GetPoint2()}};
+
+            auto [addedWalls, removedWalls] = geometry::helper::SplitWalls(trackWalls, trainDoors);
+            REQUIRE(removedWalls.size() == 1);
+            REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWall));
+
+            REQUIRE(addedWalls.size() == 4);
+            REQUIRE_THAT(addedWalls, Catch::Matchers::UnorderedEquals(splitWalls));
+        }
+    }
+
+    SECTION("straight wall, multiple elements")
+    {
+        Wall trackWall1{{-10., -10.}, {-8., -10.}};
+        Wall trackWall2{{-8., -10.}, {-6., -10.}};
+        Wall trackWall3{{-6., -10.}, {-4., -10.}};
+        Wall trackWall4{{-4., -10.}, {-2., -10.}};
+        Wall trackWall5{{-2., -10.}, {0., -10.}};
+
+        std::vector<Wall> trackWalls{trackWall1, trackWall2, trackWall3, trackWall4, trackWall5};
+
+        SECTION("One door on one wall element")
+        {
+            Point point1{-9.5, -10.};
+            Point point2{-8.5, -10.};
+
+            Transition trainDoor;
+            trainDoor.SetPoint1(point1);
+            trainDoor.SetPoint2(point2);
+            std::vector<Transition> trainDoors{trainDoor};
+
+            auto [addedWalls, removedWalls] = geometry::helper::SplitWalls(trackWalls, trainDoors);
+            REQUIRE(removedWalls.size() == 1);
+            REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWall1));
+
+            REQUIRE(addedWalls.size() == 2);
+            Wall wallSplit1{trackWall1.GetPoint1(), point1};
+            REQUIRE_THAT(addedWalls, Catch::VectorContains(wallSplit1));
+            Wall wallSplit2{point2, trackWall1.GetPoint2()};
+            REQUIRE_THAT(addedWalls, Catch::VectorContains(wallSplit2));
+        }
+
+        SECTION("One door on neighboring wall element")
+        {
+            Point point1{-9.5, -10.};
+            Point point2{-7.5, -10.};
+
+            Transition trainDoor;
+            trainDoor.SetPoint1(point1);
+            trainDoor.SetPoint2(point2);
+            std::vector<Transition> trainDoors{trainDoor};
+
+            auto [addedWalls, removedWalls] = geometry::helper::SplitWalls(trackWalls, trainDoors);
+            REQUIRE(removedWalls.size() == 2);
+            REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWall1));
+            REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWall2));
+
+            REQUIRE(addedWalls.size() == 2);
+            Wall wallSplit1{trackWall1.GetPoint1(), point1};
+            REQUIRE_THAT(addedWalls, Catch::VectorContains(wallSplit1));
+            Wall wallSplit2{point2, trackWall2.GetPoint2()};
+            REQUIRE_THAT(addedWalls, Catch::VectorContains(wallSplit2));
+        }
+
+        SECTION("One door ends on wall endpoint")
+        {
+            std::vector<Wall> wallSplit;
+            std::vector<Transition> trainDoors;
+
+            Transition door;
+            door.SetPoint1(trackWall2.GetCentre());
+            door.SetPoint2(trackWall2.GetPoint2());
+            trainDoors.emplace_back(door);
+            wallSplit.emplace_back(Wall{trackWall2.GetPoint1(), trackWall2.GetCentre()});
+
+            auto [addedWalls, removedWalls] = geometry::helper::SplitWalls(trackWalls, trainDoors);
+            REQUIRE(removedWalls.size() == 1);
+            REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWall2));
+
+            REQUIRE(addedWalls.size() == 1);
+            REQUIRE_THAT(addedWalls, Catch::Matchers::UnorderedEquals(wallSplit));
+        }
+
+        SECTION("Multiple doors end on wall endpoint")
+        {
+            std::vector<Wall> wallSplit;
+            std::vector<Transition> trainDoors;
+            for(const auto & wall : trackWalls) {
+                Transition door;
+                door.SetPoint1(wall.GetCentre());
+                door.SetPoint2(wall.GetPoint2());
+                trainDoors.emplace_back(door);
+                wallSplit.emplace_back(Wall{wall.GetPoint1(), wall.GetCentre()});
             }
 
-            SECTION("Door on not neighboring wall elements")
-            {
-                for(size_t i = 0; i < trackWalls.size(); ++i) {
-                    for(size_t j = 0; j < trackWalls.size(); ++j) {
-                        if(std::abs(static_cast<int>(i) - static_cast<int>(j)) <= 1) {
-                            continue;
-                        }
-                        Transition trainDoor;
-                        trainDoor.SetPoint1(trackWallsOrdered[i].GetCentre());
-                        trainDoor.SetPoint2(trackWallsOrdered[j].GetCentre());
+            auto [addedWalls, removedWalls] = geometry::helper::SplitWalls(trackWalls, trainDoors);
+            REQUIRE(removedWalls.size() == trackWalls.size());
+            REQUIRE_THAT(removedWalls, Catch::Matchers::UnorderedEquals(trackWalls));
 
-                        std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>
-                            wallDoorIntersection = {
-                                {trainDoor.GetPoint1(), trackWallsOrdered[i]},
-                                {trainDoor.GetPoint2(), trackWallsOrdered[j]}};
+            REQUIRE(addedWalls.size() == wallSplit.size());
+            REQUIRE_THAT(addedWalls, Catch::Matchers::UnorderedEquals(wallSplit));
+        }
 
-                        auto [addedWalls, removedWalls] = geometry::helper::SplitWall(
-                            wallDoorIntersection, trackWalls, trainDoor);
+        SECTION("One door starts on wall endpoint")
+        {
+            std::vector<Wall> wallSplit;
+            std::vector<Transition> trainDoors;
 
-                        Wall newWall1, newWall2;
+            Transition door;
+            door.SetPoint1(trackWall2.GetPoint1());
+            door.SetPoint2(trackWall2.GetCentre());
+            trainDoors.emplace_back(door);
+            wallSplit.emplace_back(Wall{trackWall2.GetCentre(), trackWall2.GetPoint2()});
 
-                        if(i < j) {
-                            newWall1 = {trackWallsOrdered[i].GetPoint1(), trainDoor.GetPoint1()};
-                            newWall2 = {trackWallsOrdered[j].GetPoint2(), trainDoor.GetPoint2()};
-                        } else {
-                            newWall1 = {trackWallsOrdered[j].GetPoint1(), trainDoor.GetPoint2()};
-                            newWall2 = {trackWallsOrdered[i].GetPoint2(), trainDoor.GetPoint1()};
-                        }
+            auto [addedWalls, removedWalls] = geometry::helper::SplitWalls(trackWalls, trainDoors);
+            REQUIRE(removedWalls.size() == 1);
+            REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWall2));
 
-                        REQUIRE(addedWalls.size() == 2);
-                        REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall1));
-                        REQUIRE_THAT(addedWalls, Catch::VectorContains(newWall2));
+            REQUIRE(addedWalls.size() == wallSplit.size());
+            REQUIRE_THAT(addedWalls, Catch::Matchers::UnorderedEquals(wallSplit));
+        }
 
-                        unsigned int numRemovedWalls =
-                            1 + std::abs(static_cast<int>(i) - static_cast<int>(j));
-                        REQUIRE(removedWalls.size() == numRemovedWalls);
+        SECTION("One door on not neighboring wall element")
+        {
+            Point point1{-9.5, -10.};
+            Point point2{-0.5, -10.};
 
-                        for(auto k = std::min(i, j); k <= std::max(i, j); ++k) {
-                            REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWallsOrdered[k]));
-                        }
-                    }
-                }
-            }
+            Transition trainDoor;
+            trainDoor.SetPoint1(point1);
+            trainDoor.SetPoint2(point2);
+            std::vector<Transition> trainDoors{trainDoor};
+
+            auto [addedWalls, removedWalls] = geometry::helper::SplitWalls(trackWalls, trainDoors);
+            REQUIRE(removedWalls.size() == 5);
+            REQUIRE_THAT(removedWalls, Catch::Matchers::UnorderedEquals(trackWalls));
+
+            REQUIRE(addedWalls.size() == 2);
+            Wall wallSplit1{trackWall1.GetPoint1(), point1};
+            REQUIRE_THAT(addedWalls, Catch::VectorContains(wallSplit1));
+            Wall wallSplit2{point2, trackWall5.GetPoint2()};
+            REQUIRE_THAT(addedWalls, Catch::VectorContains(wallSplit2));
+        }
+
+        SECTION("Multiple doors on one element")
+        {
+            Transition trainDoor1;
+            trainDoor1.SetPoint1({-9.75, -10.});
+            trainDoor1.SetPoint2({-9.25, -10.});
+
+            Transition trainDoor2;
+            trainDoor2.SetPoint1({-8.75, -10.});
+            trainDoor2.SetPoint2({-8.25, -10.});
+
+            std::vector<Transition> trainDoors{trainDoor1, trainDoor2};
+
+            std::vector<Wall> shouldAdded;
+            shouldAdded.emplace_back(Wall{trackWall1.GetPoint1(), trainDoor1.GetPoint1()});
+            shouldAdded.emplace_back(Wall{trainDoor1.GetPoint2(), trainDoor2.GetPoint1()});
+            shouldAdded.emplace_back(Wall{trainDoor2.GetPoint2(), trackWall1.GetPoint2()});
+
+            auto [addedWalls, removedWalls] = geometry::helper::SplitWalls(trackWalls, trainDoors);
+
+            REQUIRE(removedWalls.size() == 1);
+            REQUIRE_THAT(removedWalls, Catch::VectorContains(trackWall1));
+
+            REQUIRE(addedWalls.size() == shouldAdded.size());
+            REQUIRE_THAT(addedWalls, Catch::Matchers::UnorderedEquals(shouldAdded));
+        }
+
+        SECTION("Multiple doors on neighboring elements")
+        {
+            Transition trainDoor1;
+            trainDoor1.SetPoint1(trackWall1.GetCentre());
+            trainDoor1.SetPoint2(trackWall2.GetCentre());
+
+            Transition trainDoor2;
+            trainDoor2.SetPoint1(trackWall3.GetCentre());
+            trainDoor2.SetPoint2(trackWall4.GetCentre());
+
+            std::vector<Transition> trainDoors{trainDoor1, trainDoor2};
+
+            std::vector<Wall> shouldRemoved{trackWall1, trackWall2, trackWall3, trackWall4};
+            std::vector<Wall> shouldAdded;
+            shouldAdded.emplace_back(Wall{trackWall1.GetPoint1(), trainDoor1.GetPoint1()});
+            shouldAdded.emplace_back(Wall{trainDoor1.GetPoint2(), trackWall2.GetPoint2()});
+            shouldAdded.emplace_back(Wall{trackWall3.GetPoint1(), trainDoor2.GetPoint1()});
+            shouldAdded.emplace_back(Wall{trainDoor2.GetPoint2(), trackWall4.GetPoint2()});
+
+            auto [addedWalls, removedWalls] = geometry::helper::SplitWalls(trackWalls, trainDoors);
+
+            REQUIRE(removedWalls.size() == shouldRemoved.size());
+            REQUIRE_THAT(removedWalls, Catch::Matchers::UnorderedEquals(shouldRemoved));
+
+            REQUIRE(addedWalls.size() == shouldAdded.size());
+            REQUIRE_THAT(addedWalls, Catch::Matchers::UnorderedEquals(shouldAdded));
+        }
+
+        SECTION("Multiple doors on not neighboring elements")
+        {
+            Transition trainDoor1;
+            trainDoor1.SetPoint1({-8.5, -10.});
+            trainDoor1.SetPoint2({-5.5, -10.});
+
+            Transition trainDoor2;
+            trainDoor2.SetPoint1({-4.5, -10.});
+            trainDoor2.SetPoint2({-0.5, -10.});
+
+            std::vector<Transition> trainDoors{trainDoor1, trainDoor2};
+
+            std::vector<Wall> shouldAdded;
+            shouldAdded.emplace_back(Wall{trackWall1.GetPoint1(), trainDoor1.GetPoint1()});
+            shouldAdded.emplace_back(Wall{trainDoor1.GetPoint2(), trainDoor2.GetPoint1()});
+            shouldAdded.emplace_back(Wall{trainDoor2.GetPoint2(), trackWall5.GetPoint2()});
+
+            auto [addedWalls, removedWalls] = geometry::helper::SplitWalls(trackWalls, trainDoors);
+
+            REQUIRE(removedWalls.size() == 5);
+            REQUIRE_THAT(removedWalls, Catch::Matchers::UnorderedEquals(trackWalls));
+
+            REQUIRE(addedWalls.size() == shouldAdded.size());
+            REQUIRE_THAT(addedWalls, Catch::Matchers::UnorderedEquals(shouldAdded));
+        }
+
+        SECTION("mix all")
+        {
+            Transition trainDoor1;
+            trainDoor1.SetPoint1({-9.5, -10.});
+            trainDoor1.SetPoint2({-9., -10.});
+
+            Transition trainDoor2;
+            trainDoor2.SetPoint1({-8.5, -10.});
+            trainDoor2.SetPoint2({-7.5, -10.});
+
+            Transition trainDoor3;
+            trainDoor3.SetPoint1({-6., -10.});
+            trainDoor3.SetPoint2({-1.5, -10.});
+
+            Transition trainDoor4;
+            trainDoor4.SetPoint1({-1., -10.});
+            trainDoor4.SetPoint2({-0., -10.});
+
+            std::vector<Transition> trainDoors{trainDoor1, trainDoor2, trainDoor3, trainDoor4};
+
+            std::vector<Wall> shouldAdded;
+            shouldAdded.emplace_back(Wall{trackWall1.GetPoint1(), trainDoor1.GetPoint1()});
+            shouldAdded.emplace_back(Wall{trainDoor1.GetPoint2(), trainDoor2.GetPoint1()});
+            shouldAdded.emplace_back(Wall{trainDoor2.GetPoint2(), trainDoor3.GetPoint1()});
+            shouldAdded.emplace_back(Wall{trainDoor3.GetPoint2(), trainDoor4.GetPoint1()});
+
+            auto [addedWalls, removedWalls] = geometry::helper::SplitWalls(trackWalls, trainDoors);
+
+            REQUIRE(removedWalls.size() == 5);
+            REQUIRE_THAT(removedWalls, Catch::Matchers::UnorderedEquals(trackWalls));
+
+            REQUIRE(addedWalls.size() == shouldAdded.size());
+            REQUIRE_THAT(addedWalls, Catch::Matchers::UnorderedEquals(shouldAdded));
+        }
+    }
+
+    SECTION("error handling")
+    {
+        Wall trackWall1{{-10., -10.}, {-8., -10.}};
+        Wall trackWall2{{-8., -10.}, {-6., -10.}};
+        Wall trackWall3{{-6., -10.}, {-4., -10.}};
+        Wall trackWall4{{-4., -10.}, {-2., -10.}};
+        Wall trackWall5{{-2., -10.}, {0., -10.}};
+
+        std::vector<Wall> trackWalls{trackWall1, trackWall2, trackWall3, trackWall4, trackWall5};
+
+        SECTION("door start not on walls")
+        {
+            Transition trainDoor;
+            trainDoor.SetPoint1({-12, -10.});
+            trainDoor.SetPoint2({-10., -10.});
+
+            std::vector<Transition> trainDoors{trainDoor};
+            REQUIRE_THROWS_WITH(
+                geometry::helper::SplitWalls(trackWalls, trainDoors),
+                "Point ( -12 : -10 ) does not belong to any track walls.");
+        }
+
+        SECTION("door end not on walls")
+        {
+            Transition trainDoor;
+            trainDoor.SetPoint1({-1., -10.});
+            trainDoor.SetPoint2({1., -10.});
+
+            std::vector<Transition> trainDoors{trainDoor};
+            REQUIRE_THROWS_WITH(
+                geometry::helper::SplitWalls(trackWalls, trainDoors),
+                "Point ( 1 : -10 ) does not belong to any track walls.");
         }
     }
 }

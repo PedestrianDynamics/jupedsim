@@ -20,91 +20,45 @@
             <crossings/>
         </room>
         <room id="1" caption="floor">
-            <subroom id="2" caption="Room 2" class="Platform" A_x="0" B_y="0" C_z="0">
-                <polygon caption="wall" type="track-3">
-                    <vertex px="2" py="6"/>
-                    <vertex px="10" py="6"/>
-                </polygon>
-                <polygon caption="wall" type="track-4">
+            <subroom id="2" caption="Room 2" A_x="0" B_y="0" C_z="0">
+                <polygon caption="wall">
                     <vertex px="-2" py="6"/>
                     <vertex px="-10" py="6"/>
                 </polygon>
 
-                <polygon caption="wall" type="track-1">
+                <polygon caption="wall">
                     <vertex px="-10" py="6"/>
                     <vertex px="-10" py="10"/>
                 </polygon>
 
-                <polygon caption="wall" type="track-1">
-                    <vertex px="-8" py="11"/>
-                    <vertex px="-9" py="10.5"/>
+                <polygon caption="wall" type="track" track_id="1">
+                    <vertex px="-10" py="10" start="true"/>
+                    <vertex px="-5" py="10"/>
                 </polygon>
-                <polygon caption="wall" type="track-1">
-                    <vertex px="-9" py="10.5"/>
-                    <vertex px="-10" py="10"/>
-                </polygon>
-                <polygon caption="wall" type="track-1">
-                    <vertex px="-8" py="11"/>
-                    <vertex px="-6" py="11.5"/>
-                </polygon>
-                <polygon caption="wall" type="track-1">
-                    <vertex px="-6" py="11.5"/>
-                    <vertex px="-4" py="12"/>
-                </polygon>
-                <polygon caption="wall" type="track-1">
-                    <vertex px="-4" py="12"/>
-                    <vertex px="-3" py="12.125"/>
-                </polygon>
-                <polygon caption="wall" type="track-1">
-                    <vertex px="-3" py="12.125"/>
-                    <vertex px="-2" py="12.25"/>
-                </polygon>
-                <polygon caption="wall" type="track-1">
-                    <vertex px="-2" py="12.25"/>
-                    <vertex px="-1" py="12.25"/>
-                </polygon>
-                <polygon caption="wall" type="track-1">
-                    <vertex px="-1" py="12.25"/>
-                    <vertex px="0" py="12.25"/>
+                <polygon caption="wall" type="track" track_id="1">
+                    <vertex px="-5" py="10"/>
+                    <vertex px="0" py="10"/>
                 </polygon>
 
-                <polygon caption="wall" type="track-2">
+                <polygon caption="wall" type="track" track_id="2">
+                    <vertex px="0" py="10" start="true"/>
+                    <vertex px="5" py="10"/>
+                </polygon>
+                <polygon caption="wall" type="track" track_id="2">
+                    <vertex px="5" py="10"/>
+                    <vertex px="10" py="10"/>
+                </polygon>
+
+                <polygon caption="wall">
+                    <vertex px="10" py="10"/>
                     <vertex px="10" py="6"/>
-                    <vertex px="10" py="10"/>
                 </polygon>
 
-                <polygon caption="wall" type="track-2">
-                    <vertex px="10" py="10"/>
-                    <vertex px="9" py="10.5"/>
+                <polygon caption="wall">
+                    <vertex px="10" py="6"/>
+                    <vertex px="2" py="6"/>
                 </polygon>
-                <polygon caption="wall" type="track-2">
-                    <vertex px="9" py="10.5"/>
-                    <vertex px="8" py="11"/>
-                </polygon>
-                <polygon caption="wall" type="track-2">
-                    <vertex px="8" py="11"/>
-                    <vertex px="6" py="11.5"/>
-                </polygon>
-                <polygon caption="wall" type="track-2">
-                    <vertex px="6" py="11.5"/>
-                    <vertex px="4" py="12"/>
-                </polygon>
-                <polygon caption="wall" type="track-2">
-                    <vertex px="4" py="12"/>
-                    <vertex px="3" py="12.125"/>
-                </polygon>
-                <polygon caption="wall" type="track-2">
-                    <vertex px="3" py="12.125"/>
-                    <vertex px="2" py="12.25"/>
-                </polygon>
-                <polygon caption="wall" type="track-2">
-                    <vertex px="0" py="12.25"/>
-                    <vertex px="1" py="12.25"/>
-                </polygon>
-                <polygon caption="wall" type="track-2">
-                    <vertex px="1" py="12.25"/>
-                    <vertex px="2" py="12.25"/>
-                </polygon>
+
             </subroom>
             <crossings/>
         </room>

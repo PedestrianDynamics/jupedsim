@@ -301,238 +301,362 @@ void CorrectInputGeometry(Building & building)
     }
 }
 
-bool CorrectSubRoom(SubRoom & subroom)
+std::vector<std::pair<Point, Point>> ComputeTrainDoorCoordinates(
+    const TrainType & train,
+    const Track & track,
+    double trainStartOffset,
+    bool fromEnd)
 {
-    bool geometry_changed = false;
-    geometry_changed      = RemoveWallsOverlappingWithDoors(subroom) || geometry_changed;
+    std::vector<std::pair<Point, Point>> trainDoorCoordinates;
 
-    // remove walls reaching out of the subroom
-    geometry_changed = RemoveBigWalls(subroom) || geometry_changed;
+    if(track._walls.empty()) {
+        LOG_WARNING(
+            "Compute train door coordinates of train {} at track {}: no tracks wall given. Please "
+            "check your "
+            "input files (geometry, train time table).",
+            train._type,
+            track._id);
+        return trainDoorCoordinates;
+    }
 
-    return geometry_changed;
-}
+    std::vector<Wall> trackWalls{track._walls};
 
-std::vector<std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>> ComputeTrainDoorCoordinates(
-    const std::vector<Wall> & trackWalls,
-    const std::vector<Transition> & trainDoors)
-{
-    const int scaleFactor = 1000; // very long orthogonal walls to train's doors
-    std::vector<std::pair<PointWall, PointWall>> pws;
-    // every door has two points.
-    // for every point -> get pair<P, W>
-    // collect pairs of pairs
-    for(const auto & door : trainDoors) {
-        PointWall pw1, pw2;
-        int nintersections = 0;
-        auto n             = door.NormalVec();
-        auto p11           = door.GetPoint1() + n * scaleFactor;
-        auto p12           = door.GetPoint1() - n * scaleFactor;
-        auto p21           = door.GetPoint2() + n * scaleFactor;
-        auto p22           = door.GetPoint2() - n * scaleFactor;
-        auto normalWall1   = Wall(p11, p12);
-        auto normalWall2   = Wall(p21, p22);
-        for(const auto & twall : trackWalls) {
-            Point interPoint1, interPoint2;
-            auto res  = normalWall1.IntersectionWith(twall, interPoint1);
-            auto res2 = normalWall2.IntersectionWith(twall, interPoint2);
-            if(res == 1) {
-                if(!twall.NearlyHasEndPoint(interPoint1)) {
-                    pw1 = std::make_pair(interPoint1, twall);
-                    nintersections++;
-                } else // end point
-                {
-                    if(res2 == 0) {
-                    } else {
-                        pw1 = std::make_pair(interPoint1, twall);
-                        nintersections++;
+    // reverse direction of walls and their points if needed
+    if(fromEnd) {
+        std::reverse(std::begin(trackWalls), std::end(trackWalls));
+        std::for_each(std::begin(trackWalls), std::end(trackWalls), [](Wall & wall) {
+            Point tmp{wall.GetPoint1()};
+            wall.SetPoint1(wall.GetPoint2());
+            wall.SetPoint2(tmp);
+        });
+    }
+
+    Point start{std::begin(trackWalls)->GetPoint1()};
+    for(const auto trainDoor : train._doors) {
+        double distanceFromTrackStart = trainStartOffset + trainDoor._distance;
+        double width                  = trainDoor._width;
+        std::vector<Point> intersectionPoints;
+
+        // Find the door start on track walls
+        auto doorStart = FindWallPointWithDistanceOnWall(trackWalls, start, distanceFromTrackStart);
+
+        if(doorStart.has_value()) {
+            // Find wall on which door start is located
+            auto doorStartWallItr = std::find_if(
+                std::begin(trackWalls), std::end(trackWalls), [&doorStart](const Wall & wall) {
+                    return wall.IsInLineSegment(doorStart.value()) &&
+                           wall.GetPoint2() != doorStart.value();
+                });
+
+            // Find all points with distance width from door start
+            std::for_each(
+                doorStartWallItr,
+                std::end(trackWalls),
+                [&width, &doorStart, &intersectionPoints](const Wall & wall) {
+                    std::vector<Point> intersections =
+                        wall.IntersectionPointsWithCircle(doorStart.value(), width);
+                    intersectionPoints.insert(
+                        std::end(intersectionPoints),
+                        std::begin(intersections),
+                        std::end(intersections));
+                });
+
+            // Check if one of the intersection points is between doorStart and end(trackWalls)
+            auto doorEndPointItr = std::find_if(
+                std::begin(intersectionPoints),
+                std::end(intersectionPoints),
+                [&trackWalls, &doorStart, &doorStartWallItr](const Point & intersectionPoint) {
+                    // Find wall succeeding doorStartWallItr, where intersectionPoint is located
+                    auto endItr = std::find_if(
+                        doorStartWallItr,
+                        std::end(trackWalls),
+                        [&intersectionPoint](const Wall & wall) {
+                            return wall.IsInLineSegment(intersectionPoint) &&
+                                   wall.GetPoint2() != intersectionPoint;
+                        });
+
+                    if(endItr == std::end(trackWalls)) {
+                        return false;
                     }
-                }
-            }
-            if(res2 == 1) {
-                if(!twall.NearlyHasEndPoint(interPoint2)) {
-                    pw2 = std::make_pair(interPoint2, twall);
-                    nintersections++;
-                } else {
-                    if(res == 0) {
-                    } else {
-                        pw2 = std::make_pair(interPoint2, twall);
-                        nintersections++;
+
+                    if(endItr == doorStartWallItr) {
+                        // Check if end point is between doorStart and wall.Point2 for correct
+                        // direction
+                        Line tmp{doorStart.value(), endItr->GetPoint2(), 0};
+                        return tmp.IsInLineSegment(intersectionPoint);
                     }
-                }
+                    return true;
+                });
+
+            // No intersection point in correct direction found
+            if(doorEndPointItr == std::end(intersectionPoints)) {
+                LOG_WARNING(
+                    "Compute train door coordinates of train {} at track {}: train door with "
+                    "distance {} and width {} could not be placed on track walls. Please check "
+                    "your geometry.",
+                    train._type,
+                    track._id,
+                    trainDoor._distance,
+                    trainDoor._width);
+                continue;
             }
 
-
-        } // tracks
-
-        if(nintersections == 2) {
-            pws.emplace_back(std::make_pair(pw1, pw2));
-        } else {
-            std::string message{fmt::format(
-                FMT_STRING("Error in GetIntersection. Should be 2 but got {}."), nintersections)};
-            throw std::runtime_error(message);
+            trainDoorCoordinates.emplace_back(doorStart.value(), *doorEndPointItr);
         }
-    } // doors
+    }
 
-    return pws;
+    return trainDoorCoordinates;
 }
 
 void AddTrainDoors(
     int trainID,
     Building & building,
     SubRoom & subroom,
-    const std::vector<Wall> & trackWalls,
-    const std::vector<Transition> & trainDoors)
+    const TrainType & train,
+    const Track & track,
+    double trainStartOffset,
+    bool fromEnd)
 {
-    auto wallDoorIntersectionPoints =
-        geometry::helper::ComputeTrainDoorCoordinates(trackWalls, trainDoors);
-
     static int transition_id = 10000; // randomly high number
 
-    auto room      = building.GetRoom(subroom.GetRoomID());
-    auto trainType = building.GetTrain(trainID);
+    // Get the door coordinates
+    auto wallDoorIntersectionPoints =
+        geometry::helper::ComputeTrainDoorCoordinates(train, track, trainStartOffset, fromEnd);
 
-    auto walls = subroom.GetAllWalls();
-    //---
-    for(const auto & wallDoorIntersection : wallDoorIntersectionPoints) {
-        //------------ transition --------
-        auto * trainDoor = new Transition();
+    auto room = building.GetRoom(subroom.GetRoomID());
+
+    // Create train doors at the computed locations
+    std::vector<Transition> trainDoors;
+    for(auto & trainDoorCoordinates : wallDoorIntersectionPoints) {
+        auto trainDoor = new Transition();
         trainDoor->SetID(transition_id++);
-        trainDoor->SetCaption(trainType._type);
-        trainDoor->SetPoint1(wallDoorIntersection.first.first);
-        trainDoor->SetPoint2(wallDoorIntersection.second.first);
+        trainDoor->SetCaption(train._type);
+        if(fromEnd) {
+            trainDoor->SetPoint1(trainDoorCoordinates.second);
+            trainDoor->SetPoint2(trainDoorCoordinates.first);
+        } else {
+            trainDoor->SetPoint1(trainDoorCoordinates.first);
+            trainDoor->SetPoint2(trainDoorCoordinates.second);
+        }
         std::string transType = "Train_" + std::to_string(trainID);
         trainDoor->SetType(transType);
         trainDoor->SetRoom1(room);
         trainDoor->SetSubRoom1(&subroom);
 
-        room->AddTransitionID(trainDoor->GetUniqueID()); // danger area
-        subroom.AddTransition(trainDoor);                // danger area
-        building.AddTransition(trainDoor);               // danger area
-
-        auto [addedWalls, removedWalls] = SplitWall(wallDoorIntersection, trackWalls, *trainDoor);
-
-        std::for_each(
-            std::begin(addedWalls),
-            std::end(addedWalls),
-            [trainID, &building, &subroom](const Wall & wall) {
-                building.AddTrainWallAdded(trainID, wall);
-                subroom.AddWall(wall);
-            });
-        std::for_each(
-            std::begin(removedWalls),
-            std::end(removedWalls),
-            [trainID, &building, &subroom](const Wall & wall) {
-                building.AddTrainWallRemoved(trainID, wall);
-                subroom.RemoveWall(wall);
-            });
-        building.AddTrainDoorAdded(trainID, *trainDoor);
+        trainDoors.emplace_back(*trainDoor);
     }
+
+    // Add/remove walls to create a valid geometry
+    auto [addedWalls, removedWalls] = SplitWalls(track._walls, trainDoors);
+
+    std::for_each(
+        std::begin(addedWalls),
+        std::end(addedWalls),
+        [trainID, &building, &subroom](const Wall & wall) {
+            building.AddTrainWallAdded(trainID, wall);
+            subroom.AddWall(wall);
+        });
+
+    std::for_each(
+        std::begin(removedWalls),
+        std::end(removedWalls),
+        [trainID, &building, &subroom](const Wall & wall) {
+            building.AddTrainWallRemoved(trainID, wall);
+            subroom.RemoveWall(wall);
+        });
+
+    // Add doors to geometry
+    std::for_each(
+        std::begin(trainDoors),
+        std::end(trainDoors),
+        [trainID, &building, &room, &subroom](const Transition & door) {
+            auto trainDoor = new Transition(door);
+            building.AddTrainDoorAdded(trainID, door);
+            // Important: Door needs to be added to room, subroom, and building!
+            room->AddTransitionID(trainDoor->GetUniqueID());
+            subroom.AddTransition(trainDoor);
+            building.AddTransition(trainDoor);
+        });
+
     subroom.Update();
 }
 
-std::tuple<std::vector<Wall>, std::vector<Wall>> SplitWall(
-    const std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>> & wallDoorIntersectionPoints,
-    const std::vector<Wall> & trackWalls,
-    const Transition & door)
+std::tuple<std::vector<Wall>, std::vector<Wall>>
+SplitWalls(const std::vector<Wall> & trackWalls, const std::vector<Transition> & doors)
 {
+    std::vector<Wall> walls{trackWalls};
     std::vector<Wall> addedWalls;
     std::vector<Wall> removedWalls;
 
-    auto pw1 = wallDoorIntersectionPoints.first;
-    auto pw2 = wallDoorIntersectionPoints.second;
-    auto p1  = pw1.first;
-    auto w1  = pw1.second;
-    auto p2  = pw2.first;
-    auto w2  = pw2.second;
+    for(auto const & door : doors) {
+        // search for wall containing door.Point1
+        auto wallStartItr =
+            std::find_if(std::begin(walls), std::end(walls), [&door](const Wall & wall) {
+                return wall.IsInLineSegment(door.GetPoint1()) &&
+                       wall.GetPoint2() != door.GetPoint1();
+            });
+        if(wallStartItr == std::end(walls)) {
+            std::string message{fmt::format(
+                FMT_STRING("Point {} does not belong to any track walls."),
+                door.GetPoint1().toString())};
+            throw std::runtime_error(message);
+        }
 
-    // case 1
-    Point P;
-    if(w1 == w2) {
-        double dist_pt1 = (w1.GetPoint1() - door.GetPoint1()).NormSquare();
-        double dist_pt2 = (w1.GetPoint1() - door.GetPoint2()).NormSquare();
-        Point A, B;
+        // search for wall containing door.Point1
+        auto wallEndItr =
+            std::find_if(std::begin(walls), std::end(walls), [&door](const Wall & wall) {
+                return wall.IsInLineSegment(door.GetPoint2());
+            });
+        if(wallEndItr == std::end(walls)) {
+            std::string message{fmt::format(
+                FMT_STRING("Point {} does not belong to any track walls."),
+                door.GetPoint2().toString())};
+            throw std::runtime_error(message);
+        }
 
-        if(dist_pt1 < dist_pt2) {
-            A = door.GetPoint1();
-            B = door.GetPoint2();
+        std::vector<Wall> splittedWalls;
+        if(wallStartItr->HasEndPoint(door.GetPoint1())) {
+            splittedWalls.emplace_back(Wall{door.GetPoint2(), wallEndItr->GetPoint2()});
+        } else if(wallEndItr->HasEndPoint(door.GetPoint2())) {
+            splittedWalls.emplace_back(Wall{wallStartItr->GetPoint1(), door.GetPoint1()});
         } else {
-            A = door.GetPoint2();
-            B = door.GetPoint1();
+            Wall wallSplitStart{wallStartItr->GetPoint1(), door.GetPoint1()};
+            Wall wallSplitEnd{door.GetPoint2(), wallEndItr->GetPoint2()};
+            splittedWalls.insert(std::end(splittedWalls), {wallSplitStart, wallSplitEnd});
         }
 
-        Wall NewWall(w1.GetPoint1(), A);
-        Wall NewWall1(w1.GetPoint2(), B);
-        NewWall.SetType(w1.GetType());
-        NewWall1.SetType(w1.GetType());
-
-        // add new lines to be controled against overlap with exits
-        if(NewWall.GetLength() > J_EPS_DIST) {
-            addedWalls.emplace_back(NewWall);
-        }
-
-
-        if(NewWall1.GetLength() > J_EPS_DIST) {
-            addedWalls.emplace_back(NewWall1);
-        }
-
-        removedWalls.emplace_back(w1);
-
-    } else if(w1.ShareCommonPointWith(w2, P)) {
-        //--------------------------------
-        Point N, M;
-        if(w1.GetPoint1() == P) {
-            N = w1.GetPoint2();
-        } else {
-            N = w1.GetPoint1();
-        }
-
-        if(w2.GetPoint1() == P) {
-            M = w2.GetPoint2();
-        } else {
-            M = w2.GetPoint1();
-        }
-        Wall NewWall(N, p1);
-        Wall NewWall1(M, p2);
-        NewWall.SetType(w1.GetType());
-        NewWall1.SetType(w2.GetType());
-        // changes to building
-        addedWalls.emplace_back(NewWall);
-        addedWalls.emplace_back(NewWall1);
-
-        removedWalls.emplace_back(w1);
-        removedWalls.emplace_back(w2);
-    } else // disjoint
-    {
-        //--------------------------------
-        // find points on w1 and w2 between p1 and p2
-        // (A, B)
-        Point A, B;
-        if(door.isBetween(w1.GetPoint1())) {
-            A = w1.GetPoint2();
-        } else {
-            A = w1.GetPoint1();
-        }
-
-        if(door.isBetween(w2.GetPoint1())) {
-            B = w2.GetPoint2();
-        } else {
-            B = w2.GetPoint1();
-        }
-        Wall NewWall(A, p1);
-        Wall NewWall1(B, p2);
-        NewWall.SetType(w1.GetType());
-        NewWall1.SetType(w2.GetType());
-        // remove walls between
-        for(const auto & wall : trackWalls) {
-            if(door.isBetween(wall.GetPoint1()) || door.isBetween(wall.GetPoint2())) {
-                removedWalls.emplace_back(wall);
-            }
-        }
-        // changes to building
-        addedWalls.emplace_back(NewWall);
-        addedWalls.emplace_back(NewWall1);
+        // Update walls to use already split walls for next doors
+        std::vector<Wall> tmp;
+        std::copy(std::begin(walls), wallStartItr, std::back_inserter(tmp));
+        tmp.insert(std::end(tmp), std::begin(splittedWalls), std::end(splittedWalls));
+        std::copy(wallEndItr + 1, std::end(walls), std::back_inserter(tmp));
+        walls.assign(std::begin(tmp), std::end(tmp));
     }
 
+    // Add all walls which have not been in the original track walls to addedWalls
+    std::copy_if(
+        std::begin(walls),
+        std::end(walls),
+        std::back_inserter(addedWalls),
+        [&trackWalls](const Wall & wall) {
+            return std::find(std::begin(trackWalls), std::end(trackWalls), wall) ==
+                   std::end(trackWalls);
+        });
+
+    // Add all walls which are in the original track walls but not in the split track walls
+    // to removedWalls
+    std::copy_if(
+        std::begin(trackWalls),
+        std::end(trackWalls),
+        std::back_inserter(removedWalls),
+        [&walls](const Wall & wall) {
+            return std::find(std::begin(walls), std::end(walls), wall) == std::end(walls);
+        });
+
     return std::tuple{addedWalls, removedWalls};
+}
+
+void SortWalls(std::vector<Wall> & walls, const Point & start)
+{
+    if(walls.size() == 1) {
+        return;
+    }
+
+    // Find wall containing the starting point
+    auto startItr = std::find_if(std::begin(walls), std::end(walls), [&start](const Wall & wall) {
+        return wall.HasEndPoint(start);
+    });
+
+    if(startItr == std::end(walls)) {
+        std::string message{fmt::format(
+            FMT_STRING("Track walls could not be sorted. Start {} is not on one of the track "
+                       "walls. Please check your geometry."),
+            start.toString())};
+        throw std::runtime_error(message);
+    }
+
+    // move start point to begin
+    std::iter_swap(startItr, std::begin(walls));
+    bool sane = true;
+    std::string message{};
+
+    for(auto compare = std::begin(walls); compare != std::prev(std::end(walls)); ++compare) {
+        // find element that succeeds compare
+        auto nextItr =
+            std::find_if(std::next(compare), std::end(walls), [&compare](const Wall & wall) {
+                return wall.ShareCommonPointWith(*compare);
+            });
+
+        if(nextItr != std::end(walls)) {
+            // move found element such that it follows compare in vector
+            std::iter_swap(nextItr, std::next(compare));
+        } else {
+            // if no succeeding element found, there is an issue
+            sane    = false;
+            message = fmt::format(
+                FMT_STRING("Track walls could not be sorted. Could not find a wall succeeding {} "
+                           "in track walls. Please check your geometry"),
+                compare->toString());
+            break;
+        }
+    }
+
+    if(!sane) {
+        throw std::runtime_error(message);
+    }
+
+    // rotate walls such that walls[n]->P2 == wall[n+1]->P1
+    auto wallStart = std::begin(walls);
+    if(wallStart->GetPoint2() == start) {
+        Point tmp = wallStart->GetPoint2();
+        wallStart->SetPoint2(wallStart->GetPoint1());
+        wallStart->SetPoint1(tmp);
+    }
+
+    for(auto wallItr = std::begin(walls) + 1; wallItr != std::end(walls); ++wallItr) {
+        auto prev = std::prev(wallItr);
+        if(prev->GetPoint2() != wallItr->GetPoint1()) {
+            Point tmp = wallItr->GetPoint2();
+            wallItr->SetPoint2(wallItr->GetPoint1());
+            wallItr->SetPoint1(tmp);
+        }
+    }
+}
+
+std::optional<Point> FindWallPointWithDistanceOnWall(
+    const std::vector<Wall> & walls,
+    const Point & origin,
+    double distance)
+{
+    // find wall segment containing origin
+    auto startItr = std::find_if(std::begin(walls), std::end(walls), [&origin](const Wall & wall) {
+        return wall.IsInLineSegment(origin) && wall.GetPoint2() != origin;
+    });
+
+    if(startItr == std::end(walls)) {
+        LOG_WARNING("Starting point does not belong to given walls.");
+        return std::nullopt;
+    }
+
+    for(auto itr = startItr; itr != std::end(walls); ++itr) {
+        Point start;
+        if(itr == startItr) {
+            start = origin;
+        } else {
+            start = itr->GetPoint1();
+        }
+
+        // check if point is in current wall segment
+        if(Distance(start, itr->GetPoint2()) >= distance) {
+            Point connection     = (itr->GetPoint2() - itr->GetPoint1()).Normalized();
+            Point distConnection = connection * distance;
+            Point distPoint      = start + distConnection;
+
+            return distPoint;
+        }
+        distance -= Distance(start, itr->GetPoint2());
+    }
+
+    return std::nullopt;
 }
 } // namespace geometry::helper

@@ -25,9 +25,7 @@ def runtest(inifile, trajfile):
     fps, N, traj = parse_file(trajfile)
 
     df = pd.DataFrame(data=traj, columns=['ID', 'FR', 'X', 'Y', 'Z'])
-    trainTimes = [[5,15, 15], [35, 50, 20]]
-
-    errorFPS = 5 * fps
+    trainTimes = [[5, 15, 15], [20, 30, 20]]
 
     numPedsByFrame = df.groupby('FR').FR.agg('count').to_frame('count').reset_index()
 
@@ -35,13 +33,13 @@ def runtest(inifile, trajfile):
     for i, trainTime in enumerate(trainTimes):
         allowedAgents = N - trainTimes[i][2]
         timeDeparture = trainTimes[i][1]
-        if (i < len(trainTimes)-1):
-            timeArrival = trainTimes[i+1][0]
+        if (i < len(trainTimes) - 1):
+            timeArrival = trainTimes[i + 1][0]
         else:
             timeArrival = 99999999
 
-        fpsDeparture = timeDeparture * fps + errorFPS
-        fpsArrival = timeArrival * fps - errorFPS
+        fpsDeparture = timeDeparture * fps
+        fpsArrival = timeArrival * fps
 
         dfBetweenTrain = numPedsByFrame[(numPedsByFrame.FR > fpsDeparture) & (numPedsByFrame.FR < fpsArrival)]
 
@@ -49,7 +47,8 @@ def runtest(inifile, trajfile):
         minAgents = dfBetweenTrain['count'].min()
 
         if math.isnan(minAgents) or math.isnan(minAgents):
-            logging.critical("There are no pedestrians left, there should be %d pedestrians in the simulation" % allowedAgents)
+            logging.critical(
+                "There are no pedestrians left, there should be %d pedestrians in the simulation" % allowedAgents)
             success = False
         elif maxAgents != minAgents:
             logging.critical("The number of pedestrians changes during waiting time from %d to %d" % (maxAgents, minAgents))

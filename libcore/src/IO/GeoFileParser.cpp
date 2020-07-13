@@ -191,9 +191,43 @@ bool GeoFileParser::LoadGeometry(Building * building)
                     xVertex = xVertex->NextSiblingElement("vertex")) {
                     double x1 = xmltof(xVertex->Attribute("px"));
                     double y1 = xmltof(xVertex->Attribute("py"));
+                    Point p1{x1, y1};
+
                     double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
                     double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
-                    subroom->AddWall(Wall(Point(x1, y1), Point(x2, y2), wall_type));
+                    Point p2{x2, y2};
+
+                    Wall wall{p1, p2, wall_type};
+                    subroom->AddWall(wall);
+
+                    if(wall_type == "track") {
+                        int trackID = xmltoi(
+                            xPolyVertices->Attribute("track_id"), std::numeric_limits<int>::min());
+                        if(trackID < 0) {
+                            LOG_WARNING(
+                                "Track ID should be non-negative integer value but is {}. This "
+                                "track will be ignored.",
+                                trackID);
+                            continue;
+                        }
+                        building->AddTrackWall(trackID, room->GetID(), subroom_id, wall);
+
+
+                        std::string input;
+                        if(const char * attribute = xVertex->Attribute("start"); attribute) {
+                            input = attribute;
+                            if(input == "true") {
+                                building->AddTrackStart(trackID, p1);
+                            }
+                        } else if(const char * attribute =
+                                      xVertex->NextSiblingElement("vertex")->Attribute("start");
+                                  attribute) {
+                            input = attribute;
+                            if(input == "true") {
+                                building->AddTrackStart(trackID, p2);
+                            }
+                        }
+                    }
                 }
             }
 

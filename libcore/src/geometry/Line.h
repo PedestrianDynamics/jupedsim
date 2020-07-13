@@ -229,7 +229,17 @@ public:
     /**
       * @return true if the segment intersects with the circle of radius r
       */
-    bool IntersectionWithCircle(const Point & centre, double radius = 0.30 /*m for pedestrians*/);
+    bool
+    IntersectionWithCircle(const Point & centre, double radius = 0.30 /*m for pedestrians*/) const;
+
+    /**
+     * Returns the intersection points of the line segment with a circle centered at \p centre with
+     * \p radius.
+     * @param centre centre of the circle
+     * @param radius radius of the circle
+     * @return intersection points of line segment with circle
+     */
+    std::vector<Point> IntersectionPointsWithCircle(const Point & centre, double radius) const;
 
     /**
       * @return true if both segments share at least one common point

@@ -31,28 +31,16 @@
 #include "NavLine.h"
 #include "Obstacle.h"
 #include "Room.h"
+#include "TrainGeometryInterface.h"
 #include "Transition.h"
+#include "Wall.h"
 #include "general/Configuration.h"
 #include "general/Filesystem.h"
 #include "neighborhood/NeighborhoodSearch.h"
 
 #include <optional>
 
-typedef std::pair<Point, Wall> PointWall;
-
-struct Platform {
-    int id;
-    int rid;
-    int sid;
-    std::map<int, std::vector<Wall>> tracks;
-};
-
-struct TrainType {
-    std::string _type;
-    int _maxAgents;
-    float _length;
-    std::vector<Transition> _doors;
-};
+using PointWall = std::pair<Point, Wall>;
 
 class RoutingEngine;
 
@@ -80,11 +68,13 @@ private:
     std::map<int, Transition *> _transitions;
     std::map<int, Hline *> _hLines;
     std::map<int, Goal *> _goals;
-    std::map<int, std::shared_ptr<Platform>> _platforms;
     /// pedestrians pathway
     bool _savePathway;
     std::ofstream _pathWayStream;
     std::map<int, TrainType> _trains;
+
+    std::map<int, Track> _tracks;
+    std::map<int, Point> _trackStarts;
 
     /**
      * Map of walls added temporarily for a specific train
@@ -226,22 +216,23 @@ public:
     const std::map<int, Hline *> & GetAllHlines() const;
 
     const std::map<int, Goal *> & GetAllGoals() const;
+
     // --------------- Trains interface
-    const std::map<int, std::shared_ptr<Platform>> & GetPlatforms() const;
+    const std::map<int, Track> & GetTracks() const;
 
     const std::vector<Wall>
     GetTrackWalls(Point TrackStart, Point TrackEnd, int & room_id, int & subroom_id) const;
 
     void AddTrainWallAdded(int trainID, Wall trainAddedWall);
-    void SetTrainWallsAdded(int trainID, std::vector<Wall> trainAddedWalls);
+    void ClearTrainWallsAdded(int trainID);
     std::optional<std::vector<Wall>> GetTrainWallsAdded(int trainID);
 
     void AddTrainWallRemoved(int trainID, Wall trainRemovedWall);
-    void SetTrainWallsRemoved(int trainID, std::vector<Wall> trainRemovedWalls);
+    void ClearTrainWallsRemoved(int trainID);
     std::optional<std::vector<Wall>> GetTrainWallsRemoved(int trainID);
 
     void AddTrainDoorAdded(int trainID, Transition trainAddedDoor);
-    void SetTrainDoorsAdded(int trainID, std::vector<Transition> trainAddedDoors);
+    void ClearTrainDoorsAdded(int trainID);
     std::optional<std::vector<Transition>> GetTrainDoorsAdded(int trainID);
 
     // ------------------------------------
@@ -254,8 +245,6 @@ public:
     bool AddHline(Hline * line);
 
     bool AddGoal(Goal * goal);
-
-    bool AddPlatform(std::shared_ptr<Platform> P);
 
     const fs::path & GetProjectRootDir() const;
 
@@ -312,6 +301,14 @@ public:
      * @return vector of train types in \a _trains
      */
     std::vector<TrainType> GetTrainTypes();
+
+    void AddTrackWall(int trackID, int roomID, int subRoomID, Wall trackWall);
+
+    std::optional<Track> GetTrack(int track) const;
+
+    void AddTrackStart(int trackID, Point trackStart);
+
+    std::optional<Point> GetTrackStart(int trackID) const;
 
 private:
     bool InitInsideGoals();

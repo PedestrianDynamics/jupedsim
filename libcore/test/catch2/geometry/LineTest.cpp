@@ -281,3 +281,75 @@ TEST_CASE("geometry/Line/IsInLineSegment", "[geometry][Line][IsInLineSegment]")
         REQUIRE_FALSE(L3.IsInLineSegment(P2));
     }
 }
+
+TEST_CASE(
+    "geometry/Line/IntersectionPointsWithCircle",
+    "[geometry][Line][IntersectionPointsWithCircle]")
+{
+    Line line{{-1, -1}, {1, -1}};
+
+    SECTION("Circle on line")
+    {
+        Point center{0.5, -1};
+
+        SECTION("No intersections")
+        {
+            std::vector<Point> intersections = line.IntersectionPointsWithCircle(center, 10);
+            REQUIRE(intersections.empty());
+        }
+        SECTION("One intersection")
+        {
+            std::vector<Point> intersections = line.IntersectionPointsWithCircle(center, 1.);
+            REQUIRE(intersections.size() == 1);
+            REQUIRE_THAT(intersections, Catch::VectorContains(Point{-0.5, -1}));
+        }
+        SECTION("Two intersections")
+        {
+            std::vector<Point> intersections = line.IntersectionPointsWithCircle(center, 0.5);
+            REQUIRE(intersections.size() == 2);
+            REQUIRE_THAT(intersections, Catch::VectorContains(Point{0, -1}));
+            REQUIRE_THAT(intersections, Catch::VectorContains(Point{1, -1}));
+        }
+    }
+
+    SECTION("Circle on endpoint of line")
+    {
+        Point center{-1, -1};
+
+        SECTION("No intersections")
+        {
+            std::vector<Point> intersections = line.IntersectionPointsWithCircle(center, 10);
+            REQUIRE(intersections.empty());
+        }
+        SECTION("One intersection")
+        {
+            std::vector<Point> intersections = line.IntersectionPointsWithCircle(center, 1.);
+            REQUIRE(intersections.size() == 1);
+            REQUIRE_THAT(intersections, Catch::VectorContains(Point{0, -1}));
+        }
+    }
+    SECTION("Circle not on line")
+    {
+        Point center{0, 0};
+
+        SECTION("No intersections")
+        {
+            std::vector<Point> intersections = line.IntersectionPointsWithCircle(center, 10);
+            REQUIRE(intersections.empty());
+        }
+        SECTION("One intersection")
+        {
+            std::vector<Point> intersections = line.IntersectionPointsWithCircle(center, 1.);
+            REQUIRE(intersections.size() == 1);
+            REQUIRE_THAT(intersections, Catch::VectorContains(Point{0, -1}));
+        }
+        SECTION("Two intersections")
+        {
+            std::vector<Point> intersections =
+                line.IntersectionPointsWithCircle(center, std::sqrt(1.25));
+            REQUIRE(intersections.size() == 2);
+            REQUIRE_THAT(intersections, Catch::VectorContains(Point{-0.5, -1}));
+            REQUIRE_THAT(intersections, Catch::VectorContains(Point{0.5, -1}));
+        }
+    }
+}
