@@ -94,7 +94,7 @@ With the train defined as above, this would lead to the positioning of the train
 ## Geometry definition
 For using trains in the simulation, tracks need to be defined in the geometry.
 A track is a consecutive line sequence, marked by the type `type="track"`.
-For each track, one point needs to be marked as a starting point with `start="true"`, which represents the reference point for the location of trains on tracks (defined in [Train timetable](#train-timetable))
+For each track, one point needs to be marked as a starting point with `start="true"`, which represents the reference point for the location of trains on tracks (defined in [Train timetable](#train-timetable)).
 ### Example
 ```xml
 <room id="1" caption="floor">
