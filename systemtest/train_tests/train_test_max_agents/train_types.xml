@@ -1,32 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <train_type>
-    <train type="RE" agents_max="15" length="7"> <!-- length not used. Maybe later for sanity checks -->
-        <!-- length of the train should be calculated from train_Start and train_end -->
-        <door id="1">
-            <vertex px="0.5" py="0.0"/>
-            <vertex px="1.5" py="0.0"/>
-        </door>
-        <door id="2" outflow="3">
-            <vertex px="3" py="0.0"/>
-            <vertex px="4" py="0.0"/>
-        </door>
-        <door id="3" outflow="1">
-            <vertex px="5.5" py="0.0"/>
-            <vertex px="6.5" py="0.0"/>
-        </door>
+    <train type="RE" agents_max="15" length="9">
+        <door id="1" distance="1" width="1" outflow="2"/>
+        <door id="3" distance="5" width="1"/>
     </train>
-    <train type="ICE" agents_max="20" length="8">-->
-        <door id="1">
-            <vertex px="1" py="0.0"/>
-            <vertex px="2" py="0.0"/>
-        </door>
-        <door id="2">
-            <vertex px="4" py="0.0"/>
-            <vertex px="5" py="0.0"/>
-        </door>
-        <door id="3">
-            <vertex px="7" py="0.0"/>
-            <vertex px="8" py="0.0"/>
-        </door>
+
+    <train type="ICE" agents_max="20" length="7">
+        <door id="1" distance="1" width="1"/>
+        <door id="2" distance="3" width="1"/>
+        <door id="3" distance="5" width="1"/>
     </train>
 </train_type>

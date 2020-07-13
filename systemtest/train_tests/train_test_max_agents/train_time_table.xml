@@ -1,19 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- train_end_x="10" train_end_y="3" -->
-<!-- alles relativ to track_start -->
 <train_time_table>
     <train id="1" type="RE" room_id="1"
-           track_start_x="-10" track_start_y="10" track_end_x="0" track_end_y="10"
-           train_start_x="0" train_start_y="3"
-           train_end_x="7" train_end_y="3"
+           track_id="2"
+           train_offset="0"
            arrival_time="5" departure_time="15">
     </train>
-
-    <train id="3" type="ICE" room_id="1"
-           track_start_x="-10" track_start_y="10" track_end_x="0" track_end_y="10"
-           train_start_x="0" train_start_y="3"
-           train_end_x="8" train_end_y="3"
-           arrival_time="35" departure_time="50">
+    <train id="2" type="ICE" room_id="1"
+           track_id="1"
+           train_offset="2" from_end="true"
+           arrival_time="20" departure_time="30">
     </train>
-
 </train_time_table>

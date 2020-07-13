@@ -298,6 +298,8 @@ public:
     //navigation
     bool AddCrossing(Crossing * line);
     bool AddTransition(Transition * line);
+
+    bool RemoveTransitionByUID(int uid);
     bool RemoveTransition(Transition * t);
     bool AddHline(Hline * line);
     void AddNeighbor(SubRoom * sub);

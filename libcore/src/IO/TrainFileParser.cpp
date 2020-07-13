@@ -20,74 +20,199 @@ void TrainFileParser::ParseTrainTimeTable(
     if(xTTT->ValueStr() != "train_time_table") {
         LOG_ERROR("Parsing train timetable file. Root element value is not 'train_time_table'.");
     }
+
     for(TiXmlElement * e = xTTT->FirstChildElement("train"); e;
         e                = e->NextSiblingElement("train")) {
-        //TODO check these values for correctness e.g. arrival < departure
-        LOG_INFO("Loading train time table NODE");
-        std::string caption = xmltoa(e->Attribute("caption"), "-1");
-        int id              = xmltoi(e->Attribute("id"), -1);
-        std::string type    = xmltoa(e->Attribute("type"), "-1");
-        int room_id         = xmltoi(e->Attribute("room_id"), -1);
-        int subroom_id      = xmltoi(e->Attribute("subroom_id"), -1);
-        int platform_id     = xmltoi(e->Attribute("platform_id"), -1);
-        float track_start_x = xmltof(e->Attribute("track_start_x"), -1);
-        float track_start_y = xmltof(e->Attribute("track_start_y"), -1);
-        float track_end_x   = xmltof(e->Attribute("track_end_x"), -1);
-        float track_end_y   = xmltof(e->Attribute("track_end_y"), -1);
+        auto trainInfo = ParseTrainTimeTableNode(e, building, trainTypes);
+        if(trainInfo.has_value()) {
+            auto trainTimes = ParseTrainTimeTableTimes(e, trainInfo.value().trainID);
+            if(trainTimes.has_value()) {
+                auto [arrivalTime, departureTime] = trainTimes.value();
 
-        float train_start_x = xmltof(e->Attribute("train_start_x"), -1);
-        float train_start_y = xmltof(e->Attribute("train_start_y"), -1);
-        float train_end_x   = xmltof(e->Attribute("train_end_x"), -1);
-        float train_end_y   = xmltof(e->Attribute("train_end_y"), -1);
+                LOG_INFO("Loading train time table NODE");
+                LOG_INFO("ID: {}", trainInfo.value().trainID);
+                LOG_INFO("Type: {}", trainInfo.value().trainType._type);
+                LOG_INFO("track_id: {}", trainInfo.value().trackID);
+                LOG_INFO("train_offset: {}", trainInfo.value().trainStartOffset);
+                LOG_INFO("reversed: {}", trainInfo.value().reversed);
+                LOG_INFO("arrival_time: {}", arrivalTime);
+                LOG_INFO("departure_time: {}", departureTime);
 
-        float arrival_time   = xmltof(e->Attribute("arrival_time"), -1);
-        float departure_time = xmltof(e->Attribute("departure_time"), -1);
-        LOG_INFO("Train time table:");
-        LOG_INFO("ID: {}", id);
-        LOG_INFO("Type: {}", type);
-        LOG_INFO("room_id: {}", room_id);
-        LOG_INFO("subroom_id: {}", subroom_id);
-        LOG_INFO("platform_id: {}", platform_id);
-        LOG_INFO("track_start: [{:.2f}, {:.2f}]", track_start_x, track_start_y);
-        LOG_INFO("track_end: [{:.2f}, {:.2f}]", track_end_x, track_end_y);
-        LOG_INFO("arrival_time: {:.2f}", arrival_time);
-        LOG_INFO("departure_time: {:.2f}", departure_time);
-        Point track_start(track_start_x, track_start_y);
-        Point track_end(track_end_x, track_end_y);
-        Point train_start(train_start_x, train_start_y);
-        Point train_end(train_end_x, train_end_y);
+                const auto & trainType = trainTypes.at(trainInfo.value().trainType._type);
+                const TrainEventInfo eventInfo{
+                    &building,
+                    trainInfo.value().trainID,
+                    trainInfo.value().trackID,
+                    trainInfo.value().trainType,
+                    trainInfo.value().trainStartOffset,
+                    trainInfo.value().reversed};
 
-        if(trainTypes.find(type) != std::end(trainTypes)) {
-            auto trainType = trainTypes.at(type);
-            const TrainEventInfo event_info{
-                &building,
-                id,
-                platform_id,
-                trainType,
-                room_id,
-                subroom_id,
-                track_start,
-                track_end,
-                train_start,
-                train_end};
+                // Arriving train
+                eventManager.AddEvent(std::make_unique<TrainArrivalEvent>(arrivalTime, eventInfo));
 
-            // Arriving train
-            eventManager.AddEvent(std::make_unique<TrainArrivalEvent>(arrival_time, event_info));
+                // Departing train
+                eventManager.AddEvent(
+                    std::make_unique<TrainDepartureEvent>(departureTime, eventInfo));
 
-            // Departing train
-            eventManager.AddEvent(
-                std::make_unique<TrainDepartureEvent>(departure_time, event_info));
-
-            building.AddTrain(id, trainType);
-        } else {
-            LOG_ERROR(
-                "Train {:2d}: the train type '{}' could not be found. Please check your train type "
-                "file.",
-                id,
-                type);
+                building.AddTrain(trainInfo.value().trainID, trainType);
+            }
         }
     }
 }
+
+std::optional<TrainEventInfo> TrainFileParser::ParseTrainTimeTableNode(
+    TiXmlElement * node,
+    Building & building,
+    const std::map<std::string, TrainType> & trainTypes)
+{
+    // Read ID and check if correct value
+    int id = std::numeric_limits<int>::min();
+    if(const char * attribute = node->Attribute("id"); attribute) {
+        if(int value = xmltoi(attribute, std::numeric_limits<int>::min());
+           value > -1 && attribute == std::to_string(value)) {
+            id = value;
+        } else {
+            LOG_WARNING("id {}: input for id should be positive integer. Skip entry", attribute);
+            return std::nullopt;
+        }
+    } else {
+        LOG_WARNING("no ID given. Skip entry.");
+        return std::nullopt;
+    }
+
+    // Read track_id and check if correct value
+    int trackID = std::numeric_limits<int>::min();
+    if(const char * attribute = node->Attribute("track_id"); attribute) {
+        if(int value = xmltoi(attribute, std::numeric_limits<int>::min());
+           value > -1 && attribute == std::to_string(value)) {
+            trackID = value;
+        } else {
+            LOG_WARNING(
+                "id {}: input for track_id should be positive integer but is {}. Skip entry.",
+                id,
+                attribute);
+            return std::nullopt;
+        }
+    } else {
+        LOG_WARNING("id {}: input for track_id not found. Skip entry.", id);
+        return std::nullopt;
+    }
+
+    // Read train type and check if correct value
+    std::string type;
+    if(const char * attribute = node->Attribute("type"); attribute) {
+        if(std::string value = xmltoa(attribute, ""); !value.empty()) {
+            type = value;
+        } else {
+            LOG_WARNING("id {}: input for type could not be parsed {}. Skip entry.", id, attribute);
+            return std::nullopt;
+        }
+    } else {
+        LOG_WARNING("id {}: input for type not found. Skip entry.", id);
+        return std::nullopt;
+    }
+    // Check if train exists
+    if(trainTypes.find(type) == std::end(trainTypes)) {
+        LOG_ERROR(
+            "Train {:2d}: the train type '{}' could not be found. Please check your "
+            "train type "
+            "file.",
+            id,
+            type);
+        return std::nullopt;
+    }
+
+    // Read train type and check if correct value
+    double trainOffset = -std::numeric_limits<double>::infinity();
+    if(const char * attribute = node->Attribute("train_offset"); attribute) {
+        if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
+           value >= 0.) {
+            trainOffset = value;
+        } else {
+            LOG_WARNING(
+                "id {}: input for train_offset should be non-negative {}. Skip entry.", id, value);
+            return std::nullopt;
+        }
+    } else {
+        LOG_WARNING("id {}: input for train_offset not found. Skip entry.", id);
+        return std::nullopt;
+    }
+
+    // Read from_end and check if correct value
+    bool reversed = false;
+    if(const char * attribute = node->Attribute("reversed"); attribute) {
+        std::string in = xmltoa(attribute, "false");
+        std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+
+        if(in == "false") {
+            reversed = false;
+        } else if(in == "true") {
+            reversed = true;
+        } else {
+            reversed = false;
+            LOG_WARNING(
+                "id {}: input for reversed should be true or false, but is {}. Use default: "
+                "false.",
+                id,
+                in);
+        }
+    } else {
+        reversed = false;
+    }
+
+    return TrainEventInfo{&building, id, trackID, trainTypes.at(type), trainOffset, reversed};
+}
+
+std::optional<std::tuple<double, double>>
+TrainFileParser::ParseTrainTimeTableTimes(TiXmlElement * node, int trainID)
+{
+    // Read arrival_time and check if correct value
+    double arrivalTime = -std::numeric_limits<double>::infinity();
+    if(const char * attribute = node->Attribute("arrival_time"); attribute) {
+        if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
+           value >= 0.) {
+            arrivalTime = value;
+        } else {
+            LOG_WARNING(
+                "id {}: input for arrival_time should be non-negative {}. Skip entry.",
+                trainID,
+                value);
+            return std::nullopt;
+        }
+    } else {
+        LOG_WARNING("id {}: input for arrival_time not found. Skip entry.", trainID);
+        return std::nullopt;
+    }
+
+    // Read departure_time and check if correct value
+    double departureTime = -std::numeric_limits<double>::infinity();
+    if(const char * attribute = node->Attribute("departure_time"); attribute) {
+        if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
+           value >= 0.) {
+            departureTime = value;
+        } else {
+            LOG_WARNING(
+                "id {}: input for departure_time should be non-negative {}. Skip entry.",
+                trainID,
+                value);
+            return std::nullopt;
+        }
+    } else {
+        LOG_WARNING("id {}: input for departure_time not found. Skip entry.", trainID);
+    }
+
+    if(arrivalTime >= departureTime) {
+        LOG_WARNING(
+            "id {}: train departure {} is scheduled before train arrival {}. Skip entry.",
+            trainID,
+            departureTime,
+            arrivalTime);
+        return std::nullopt;
+    }
+
+    return std::make_tuple(arrivalTime, departureTime);
+}
+
 
 std::map<std::string, TrainType> TrainFileParser::ParseTrainTypes(const fs::path & trainTypeFile)
 {
@@ -123,43 +248,100 @@ std::map<std::string, TrainType> TrainFileParser::ParseTrainTypes(const fs::path
 std::optional<TrainType> TrainFileParser::ParseTrainTypeNode(TiXmlElement * node)
 {
     LOG_INFO("Loading train type");
-    std::string type = xmltoa(node->Attribute("type"), "-1");
-    int agents_max   = xmltoi(node->Attribute("agents_max"), -1);
-    float length     = xmltof(node->Attribute("length"), -1);
-    Transition t;
-    std::vector<Transition> doors;
 
-    for(TiXmlElement * xDoor = node->FirstChildElement("door"); xDoor;
-        xDoor                = xDoor->NextSiblingElement("door")) {
-        int D_id = xmltoi(xDoor->Attribute("id"), -1);
-        float x1 = xmltof(xDoor->FirstChildElement("vertex")->Attribute("px"), -1);
-        float y1 = xmltof(xDoor->FirstChildElement("vertex")->Attribute("py"), -1);
-        float x2 = xmltof(xDoor->LastChild("vertex")->ToElement()->Attribute("px"), -1);
-        float y2 = xmltof(xDoor->LastChild("vertex")->ToElement()->Attribute("py"), -1);
-        Point start(x1, y1);
-        Point end(x2, y2);
-        float outflow = xmltof(xDoor->Attribute("outflow"), -1);
-        float dn      = xmltoi(xDoor->Attribute("dn"), -1);
-        t.SetID(D_id);
-        t.SetCaption(type + std::to_string(D_id));
-        t.SetPoint1(start);
-        t.SetPoint2(end);
-        t.SetOutflowRate(outflow);
-        t.SetDN(dn);
-        doors.push_back(t);
+    std::string type = xmltoa(node->Attribute("type"), "NO_TYPE");
+    if(type == "NO_TYPE") {
+        LOG_WARNING("No train type name given. Use 'NO_TYPE' instead.");
     }
     LOG_INFO("type: {}", type);
-    LOG_INFO("capacity: {}", agents_max);
+
+    int agents_max = xmltoi(node->Attribute("agents_max"), std::numeric_limits<int>::max());
+    if(agents_max == std::numeric_limits<int>::max()) {
+        LOG_WARNING("No agents_max given. Set to default: {}.", agents_max);
+    }
+    LOG_INFO("max Agents: {}", agents_max);
+
+    // Read length and check if correct value
+    double length = -std::numeric_limits<double>::infinity();
+    if(const char * attribute = node->Attribute("length"); attribute) {
+        if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
+           value >= 0.) {
+            length = value;
+        } else {
+            LOG_WARNING("{}: input for length should be non-negative {}. Skip entry.", type, value);
+            return std::nullopt;
+        }
+    } else {
+        LOG_WARNING("{}: input for length not found. Skip entry.", type);
+        return std::nullopt;
+    }
+    LOG_INFO("length: {}", length);
+
+
+    std::vector<TrainDoor> doors;
+    for(TiXmlElement * xDoor = node->FirstChildElement("door"); xDoor != nullptr;
+        xDoor                = xDoor->NextSiblingElement("door")) {
+        // Read distance and check if correct value
+        double distance = -std::numeric_limits<double>::infinity();
+        if(const char * attribute = xDoor->Attribute("distance"); attribute) {
+            if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
+               value >= 0.) {
+                distance = value;
+            } else {
+                LOG_WARNING(
+                    "{}: input for distance should be non-negative {}. Skip entry.", type, value);
+                continue;
+            }
+        } else {
+            LOG_WARNING("{}: input for distance not found. Skip entry.", type);
+            continue;
+        }
+
+        // Read width and check if correct value
+        double width = -std::numeric_limits<double>::infinity();
+        if(const char * attribute = xDoor->Attribute("width"); attribute) {
+            if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
+               value > 0.) {
+                width = value;
+            } else {
+                LOG_WARNING(
+                    "{}: input for width should be non-negative {}. Skip entry.", type, value);
+                continue;
+            }
+        } else {
+            LOG_WARNING("{}: input for width not found. Skip entry.", type);
+            continue;
+        }
+
+        // Read flow and check if correct value
+        double flow = -std::numeric_limits<double>::infinity();
+        if(const char * attribute = xDoor->Attribute("flow"); attribute) {
+            if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
+               value > 0.) {
+                flow = value;
+            } else {
+                LOG_WARNING(
+                    "{}: input for flow should be >0 but is {:5.2}. Skip entry.", type, value);
+                continue;
+            }
+        }
+
+        doors.emplace_back(TrainDoor{distance, width, flow});
+    }
+
+    if(doors.empty()) {
+        LOG_ERROR("Train {}: no doors given. Train will be ignored.", type);
+        return std::nullopt;
+    }
+
     LOG_INFO("number of doors: {}", doors.size());
     for(const auto & d : doors) {
         LOG_INFO(
-            "Door ({}): {} | {}", d.GetID(), d.GetPoint1().toString(), d.GetPoint2().toString());
+            "Door:\tdistance: {:5.2f}\twidth: {:5.2f}\toutflow: {:5.2f}",
+            d._distance,
+            d._width,
+            d._flow);
     }
 
-    return TrainType{
-        type,
-        agents_max,
-        length,
-        doors,
-    };
+    return TrainType{type, agents_max, length, doors};
 }

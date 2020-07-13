@@ -6,55 +6,6 @@
 #include <Logger.h>
 #include <tinyxml.h>
 
-static fs::path getTrainTimeTableFileName(const fs::path & projectFile)
-{
-    fs::path ret{};
-
-    TiXmlDocument doc(projectFile.string());
-    if(!doc.LoadFile()) {
-        LOG_ERROR("{}", doc.ErrorDesc());
-        LOG_ERROR("GetTrainTimeTable could not parse the project file");
-        return ret;
-    }
-    TiXmlNode * xMainNode = doc.RootElement();
-    if(xMainNode->FirstChild("train_constraints")) {
-        TiXmlNode * xFileNode =
-            xMainNode->FirstChild("train_constraints")->FirstChild("train_time_table");
-
-        if(xFileNode) {
-            ret = xFileNode->FirstChild()->ValueStr();
-        }
-        LOG_INFO("train_time_table <{}>", ret.string());
-    } else {
-        LOG_INFO("No ttt file found");
-        return ret;
-    }
-    return ret;
-}
-
-static fs::path getTrainTypeFileName(const fs::path & projectFile)
-{
-    fs::path ret{};
-
-    TiXmlDocument doc(projectFile.string());
-    if(!doc.LoadFile()) {
-        LOG_ERROR("{}", doc.ErrorDesc());
-        LOG_ERROR("GetTrainType could not parse the project file");
-        return ret;
-    }
-    TiXmlNode * xMainNode = doc.RootElement();
-    if(xMainNode->FirstChild("train_constraints")) {
-        auto xFileNode = xMainNode->FirstChild("train_constraints")->FirstChild("train_types");
-        if(xFileNode)
-            ret = xFileNode->FirstChild()->ValueStr();
-        LOG_INFO("train_types <{}>", ret.string());
-    } else {
-        LOG_INFO("No train types file found");
-        return ret;
-    }
-    return ret;
-}
-
 /**
  * TXT format implementation
  */
@@ -151,21 +102,6 @@ void TrajectoriesTXT::WriteHeader(long nPeds, double fps, Building * building, i
     if(!building->GetConfig()->GetEventFile().empty()) {
         header.append(fmt::format(
             "#events: {:s}\n", building->GetConfig()->GetEventFile().filename().string()));
-    }
-
-    // if used: add trainTimeTable file name
-    if(const fs::path trainTimeTableFileName =
-           getTrainTimeTableFileName(building->GetProjectFilename());
-       !trainTimeTableFileName.empty()) {
-        const fs::path tmpTTT = projRoot / trainTimeTableFileName;
-        header.append(fmt::format("#trainTimeTable: {:s}\n", tmpTTT.string()));
-    }
-
-    // if used: add trainType file name
-    if(const fs::path trainTypeFileName = getTrainTypeFileName(building->GetProjectFilename());
-       !trainTypeFileName.empty()) {
-        const fs::path tmpTT = projRoot / trainTypeFileName;
-        header.append(fmt::format("#trainType: {:s}\n", tmpTT.string()));
     }
 
     header.append("#ID: the agent ID\n");

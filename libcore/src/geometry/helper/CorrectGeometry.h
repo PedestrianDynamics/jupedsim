@@ -29,6 +29,8 @@ class Line;
 class Point;
 class Transition;
 
+#include "geometry/TrainGeometryInterface.h"
+
 #include <optional>
 #include <vector>
 
@@ -58,8 +60,6 @@ namespace geometry::helper
  *
  */
 void CorrectInputGeometry(Building & building);
-
-bool CorrectSubRoom(SubRoom & subRoom);
 
 bool RemoveOverlappingWall(const Line & exit, SubRoom & subroom);
 
@@ -98,46 +98,86 @@ void ReplaceBigWall(SubRoom & subroom, const Wall & bigWall, const std::vector<W
 bool RemoveBigWalls(SubRoom & subroom);
 
 /**
- * Projects the door coordinates to the walls of the track.
- * @param trackWalls walls of the track
- * @param trainDoors doors of the train
- * @return Vector containing: [[Point1 of door, wall containing Point1],
- *                             [Point2 of door, wall containing Point2]]
- */
-std::vector<std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>> ComputeTrainDoorCoordinates(
-    const std::vector<Wall> & trackWalls,
-    const std::vector<Transition> & trainDoors);
+  * @brief Computes the train door coordinates by finding the points with the distance and width given by
+  * \p train on \p track, considering \p trainStartOffset and \p fromEnd.
+  *
+  * @param train train to be added to geometry
+  * @param track track at which the train should be added
+  * @param trainStartOffset distance the train start has from the track start
+  * @param fromEnd train should be added from end or beginning of track walls
+  * @return All found endpoints of the train doors on the track walls
+  */
+std::vector<std::pair<Point, Point>> ComputeTrainDoorCoordinates(
+    const TrainType & train,
+    const Track & track,
+    double trainStartOffset,
+    bool fromEnd);
 
 /**
+ * @brief Adds train doors defined by \p train, \p trainStartOffset, and \p fromEnd to \p subroom
+ * and \p building.
+ *
  * Interface for adding trains to the geometry. Adds the \p trainDoors to the given \p subroom and
  * updates afterwards. \p trainDoors will also be add to \p building. Geometry changes added/removed
  * walls and added doors will be saved with \p trainID as identifier.
+ *
  * @param trainID ID of the arriving train
  * @param building simulation geometry
  * @param subroom subroom containing the platform the train is arriving
- * @param trackWalls platform edges where the train might arrive
- * @param trainDoors doors of the train
+ * @param train train to be added to geometry
+ * @param track track at which the train should be added
+ * @param trainStartOffset distance the train start has from the track start
+ * @param fromEnd train should be added from end or beginning of track walls
  */
 void AddTrainDoors(
     int trainID,
     Building & building,
     SubRoom & subroom,
-    const std::vector<Wall> & trackWalls,
-    const std::vector<Transition> & trainDoors);
+    const TrainType & train,
+    const Track & track,
+    double trainStartOffset,
+    bool fromEnd);
 
 /**
- * Splits the given \p trackWalls at the \p wallDoorIntersectionPoints. The new line segments to
- * create a closed polygon are returned in addedWalls (size 2). Each wall between the door points is
- * returned in removedDoors.
- * @param wallDoorIntersectionPoints door coordinates and the corresponding wall containings these
- * points
- * @param trackWalls platform edges where the train might arrive
- * @param door train door to add
- * @return [addedWalls, removedWalls]
+ * Splits the given \p trackWalls with the \p doors. The new line segments to create a closed
+ * polygon are returned in addedWalls (size 2). Each wall between the door points is returned in
+ * removedWalls.
+ * @param walls walls containing the \p doors
+ * @param doors doors to be included into the \p walls
+ * @return [addedWalls, removedWalls] walls need to be added/removed to create a closed line
  */
-std::tuple<std::vector<Wall>, std::vector<Wall>> SplitWall(
-    const std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>> & wallDoorIntersectionPoints,
-    const std::vector<Wall> & trackWalls,
-    const Transition & door);
+std::tuple<std::vector<Wall>, std::vector<Wall>>
+SplitWalls(const std::vector<Wall> & walls, const std::vector<Transition> & doors);
+
+/**
+ * @brief Sorts the \p walls, to create a line chain, starting with the wall containing \p start
+ *
+ * The walls in \p walls will be sorted in a way, that the first wall has \p start as Point1. All
+ * lines will be connected in a way that wall.Point2 == nextWall.Point1.
+ *
+ * @throw std::runtime_error If no continuous line chain can be created from the given \p walls
+ * @throw std::runtime_error No wall in \p walls has endpoint \p start.
+ *
+ * @param trackWalls in: unsorted track walls, out: sorted track walls
+ * @param start start point of the sorted walls (is an endpoint of one of the walls in \p walls)
+ */
+void SortWalls(std::vector<Wall> & walls, const Point & start);
+
+/**
+ * @brief Finds a point with \p distance to starting point along the \p walls.
+ * @pre trackWalls sorted, such that first element contains track start, last element contains
+ * track end. [trackStart] -> [wall] -> ... -> [trackEnd]
+ * @warning: only looks for the point in walls following (including) wall containing \p starting
+ * point
+ *
+ * @param walls walls to look for point with \p distance.
+ * @param origin reference point the distance is measured from.
+ * @param distance distance from origin to desired point
+ * @return if point with \p distance exist desired point, else std::nullopt
+ */
+std::optional<Point> FindWallPointWithDistanceOnWall(
+    const std::vector<Wall> & walls,
+    const Point & origin,
+    double distance);
 
 } // namespace geometry::helper
