@@ -50,11 +50,8 @@ private:
     int _subroomUID;
     //demographic parameters
     //TODO: should also follow a distribution, see _premovement
-    std::string _gender;
     std::string _positions_dir; // directory containing >=1 file(s) used to setup starting positions
     std::string _unit_traj;     //unit of traj from file
-    int _age;
-    double _height;
     double _patience;
 
     //force model parameters
@@ -92,16 +89,10 @@ public:
     int GetAgentsNumber() const;
     void SetRoomID(int id);
     void SetAgentsNumber(int N);
-    int GetAge() const;
-    void SetAge(int age);
-    const std::string & GetGender() const;
-    void SetGender(const std::string & gender);
     int GetGoalId() const;
     void SetGoalId(int goalId);
     int GetGroupId() const;
     void SetGroupId(int groupId);
-    double GetHeight() const;
-    void SetHeight(double height);
     int GetRoomId() const;
     void SetRoomId(int roomId);
     int GetSubroomID() const;

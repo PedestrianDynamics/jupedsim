@@ -42,12 +42,9 @@ StartDistribution::StartDistribution(int seed)
     _goalID             = -1;
     _routerID           = -1;
     _routeID            = -1;
-    _age                = -1;
-    _height             = -1;
     _startX             = NAN;
     _startY             = NAN;
     _startZ             = NAN;
-    _gender             = "male";
     _patience           = 5;
     _xMin               = -FLT_MAX;
     _xMax               = FLT_MAX;
@@ -81,26 +78,6 @@ void StartDistribution::SetRoomID(int id)
     _roomID = id;
 }
 
-int StartDistribution::GetAge() const
-{
-    return _age;
-}
-
-void StartDistribution::SetAge(int age)
-{
-    _age = age;
-}
-
-const std::string & StartDistribution::GetGender() const
-{
-    return _gender;
-}
-
-void StartDistribution::SetGender(const std::string & gender)
-{
-    _gender = gender;
-}
-
 int StartDistribution::GetGoalId() const
 {
     return _goalID;
@@ -119,16 +96,6 @@ int StartDistribution::GetGroupId() const
 void StartDistribution::SetGroupId(int groupId)
 {
     _groupID = groupId;
-}
-
-double StartDistribution::GetHeight() const
-{
-    return _height;
-}
-
-void StartDistribution::SetHeight(double height)
-{
-    _height = height;
 }
 
 int StartDistribution::GetRoomId() const
@@ -196,14 +163,11 @@ StartDistribution::GenerateAgent(Building * building, int * pid, std::vector<Poi
     ped->SetWalkingSpeed(building->GetConfig()->GetWalkingSpeed());
     ped->SetTox(building->GetConfig()->GetToxicityAnalysis());
     ped->SetID(*pid);
-    ped->SetAge(GetAge());
-    ped->SetGender(GetGender());
-    ped->SetHeight(GetHeight());
     ped->SetFinalDestination(GetGoalId());
     ped->SetGroup(GetGroupId());
     ped->SetRouter(building->GetRoutingEngine()->GetRouter(_routerID));
     ped->SetBuilding(building);
-    ped->SetRoomID(GetRoomId(), "");
+    ped->SetRoomID(GetRoomId());
     ped->SetSubRoomID(GetSubroomID());
     ped->SetSubRoomUID(building->GetRoom(GetRoomId())->GetSubRoom(GetSubroomID())->GetUID());
     ped->SetPatienceTime(GetPatience());
