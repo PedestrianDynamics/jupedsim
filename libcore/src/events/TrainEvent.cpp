@@ -13,47 +13,34 @@ TrainArrivalEvent::TrainArrivalEvent(double time, TrainEventInfo info) :
 
 void TrainArrivalEvent::Process()
 {
-    int room_id    = -1;
-    int subroom_id = -1;
-    auto mytrack =
-        _info.building->GetTrackWalls(_info.trackStart, _info.trackEnd, room_id, subroom_id);
-    Room * room       = _info.building->GetRoom(room_id);
-    SubRoom * subroom = room->GetSubRoom(subroom_id);
-
-    if(subroom == nullptr) {
-        std::string message(fmt::format(
-            FMT_STRING(
-                "Simulation::correctGeometry got wrong room_id|subroom_id ({}|{}). TrainId {}"),
-            room_id,
-            subroom_id,
-            _info.trainID));
+    const auto track = _info.building->GetTrack(_info.trackID);
+    if(!track.has_value()) {
+        std::string message = fmt::format(
+            FMT_STRING("Could not find a track with ID {}. Please check your geometry."),
+            _info.trackID);
         throw std::runtime_error(message);
     }
 
-    if(mytrack.empty()) {
-        return;
+    const auto start = _info.building->GetTrackStart(_info.trackID);
+    if(!start.has_value()) {
+        std::string message = fmt::format(
+            FMT_STRING("Could not find a start for track with ID {}. Please check your geometry."),
+            _info.trackID);
+        throw std::runtime_error(message);
     }
 
-    auto doors = _info.trainType._doors;
-    for(auto && door : doors) {
-        auto newX = door.GetPoint1()._x + _info.trainStart._x + _info.trackStart._x;
-        auto newY = door.GetPoint1()._y + _info.trainStart._y + _info.trackStart._y;
-        door.SetPoint1(Point(newX, newY));
-        newX = door.GetPoint2()._x + _info.trainStart._x + _info.trackStart._x;
-        newY = door.GetPoint2()._y + _info.trainStart._y + _info.trackStart._y;
-        door.SetPoint2(Point(newX, newY));
-    }
+    int roomID    = track->_roomID;
+    int subroomID = track->_subRoomID;
+    auto subroom  = _info.building->GetRoom(roomID)->GetSubRoom(subroomID);
 
-    for(const auto & door : doors) {
-        LOG_DEBUG(
-            "Train {} {}. Transformed coordinates of doors: {} -- {}",
-            _info.trainType._type,
-            _info.trainID,
-            door.GetPoint1().toString(),
-            door.GetPoint2().toString());
-    }
-
-    geometry::helper::AddTrainDoors(_info.trainID, *_info.building, *subroom, mytrack, doors);
+    geometry::helper::AddTrainDoors(
+        _info.trainID,
+        *_info.building,
+        *subroom,
+        _info.trainType,
+        track.value(),
+        _info.trainStartOffset,
+        _info.reversed);
 }
 
 std::string TrainArrivalEvent::ToString() const
@@ -63,7 +50,7 @@ std::string TrainArrivalEvent::ToString() const
         _time,
         "Train arrives",
         _info.trainType._type,
-        _info.platformID);
+        _info.trackID);
 }
 
 TrainDepartureEvent::TrainDepartureEvent(double time, TrainEventInfo info) :
@@ -73,108 +60,52 @@ TrainDepartureEvent::TrainDepartureEvent(double time, TrainEventInfo info) :
 
 void TrainDepartureEvent::Process()
 {
-    // this function is composed of three copy/pasted blocks.
-    int room_id;
-    int subroom_id;
-    std::set<SubRoom *> subRoomsToUpdate;
+    auto track = _info.building->GetTrack(_info.trackID);
+    if(!track.has_value()) {
+        throw std::runtime_error("");
+    }
+
+    int roomID    = track->_roomID;
+    int subroomID = track->_subRoomID;
+    auto subroom  = _info.building->GetRoom(roomID)->GetSubRoom(subroomID);
 
     // remove temp added walls
-    auto tempWalls = _info.building->GetTrainWallsAdded(_info.trainID);
+    auto tempAddedWalls = _info.building->GetTrainWallsAdded(_info.trainID);
+    if(tempAddedWalls.has_value()) {
+        std::for_each(
+            std::begin(tempAddedWalls.value()),
+            std::end(tempAddedWalls.value()),
+            [&subroom](const Wall & wall) { subroom->RemoveWall(wall); });
 
-    if(tempWalls.has_value()) {
-        for(auto it = tempWalls.value().begin(); it != tempWalls.value().end();) {
-            auto wall = *it;
-            if(it != tempWalls.value().end()) {
-                tempWalls.value().erase(it);
-            }
-            for(const auto & platform : _info.building->GetPlatforms()) {
-                room_id           = platform.second->rid;
-                subroom_id        = platform.second->sid;
-                SubRoom * subroom = _info.building->GetAllRooms()
-                                        .at(room_id)
-                                        ->GetAllSubRooms()
-                                        .at(subroom_id)
-                                        .get();
-                for(const auto & subWall : subroom->GetAllWalls()) {
-                    if(subWall == wall) {
-                        // if everything goes right, then we should enter this
-                        // if. We already erased from tempWalls!
-                        subroom->RemoveWall(wall);
-                    } //if
-                }     //subroom
-                subRoomsToUpdate.insert(subroom);
-            } //platforms
-        }
-        _info.building->SetTrainWallsAdded(_info.trainID, tempWalls.value());
+        _info.building->ClearTrainWallsAdded(_info.trainID);
     }
 
     // add removed walls
     auto tempRemovedWalls = _info.building->GetTrainWallsRemoved(_info.trainID);
-
     if(tempRemovedWalls.has_value()) {
-        for(auto it = tempRemovedWalls.value().begin(); it != tempRemovedWalls.value().end();) {
-            auto wall = *it;
-            if(it != tempRemovedWalls.value().end()) {
-                tempRemovedWalls.value().erase(it);
-            }
-            for(const auto & platform : _info.building->GetPlatforms()) {
-                auto tracks       = platform.second->tracks;
-                room_id           = platform.second->rid;
-                subroom_id        = platform.second->sid;
-                SubRoom * subroom = _info.building->GetAllRooms()
-                                        .at(room_id)
-                                        ->GetAllSubRooms()
-                                        .at(subroom_id)
-                                        .get();
-                for(const auto & track : tracks) {
-                    auto walls = track.second;
-                    for(const auto & trackWall : walls) {
-                        if(trackWall == wall) {
-                            subroom->AddWall(wall);
-                        }
-                    }
-                }
-                subRoomsToUpdate.insert(subroom);
-            }
-        }
-        _info.building->SetTrainWallsRemoved(_info.trainID, tempRemovedWalls.value());
+        std::for_each(
+            std::begin(tempRemovedWalls.value()),
+            std::end(tempRemovedWalls.value()),
+            [&subroom](const Wall & wall) { subroom->AddWall(wall); });
+
+        _info.building->ClearTrainWallsRemoved(_info.trainID);
     }
 
     // remove added doors
     auto tempDoors = _info.building->GetTrainDoorsAdded(_info.trainID);
-
     if(tempDoors.has_value()) {
-        for(auto it = tempDoors.value().begin(); it != tempDoors.value().end();) {
-            auto door = *it;
-            if(it != tempDoors.value().end()) {
-                tempDoors.value().erase(it);
-            }
-            for(const auto & platform : _info.building->GetPlatforms()) {
-                auto tracks       = platform.second->tracks;
-                room_id           = platform.second->rid;
-                subroom_id        = platform.second->sid;
-                SubRoom * subroom = _info.building->GetAllRooms()
-                                        .at(room_id)
-                                        ->GetAllSubRooms()
-                                        .at(subroom_id)
-                                        .get();
-                for(auto subTrans : subroom->GetAllTransitions()) {
-                    if(*subTrans == door) {
-                        // Trnasitions are added to subrooms and building!!
-                        subroom->RemoveTransition(subTrans);
-                        _info.building->RemoveTransition(subTrans);
-                    }
-                }
-                subRoomsToUpdate.insert(subroom);
-            }
-        }
-        _info.building->SetTrainDoorsAdded(_info.trainID, tempDoors.value());
+        std::for_each(
+            std::begin(tempDoors.value()),
+            std::end(tempDoors.value()),
+            [&subroom, this](Transition & door) {
+                subroom->RemoveTransitionByUID(door.GetUniqueID());
+                _info.building->RemoveTransition(&door);
+            });
+
+        _info.building->ClearTrainDoorsAdded(_info.trainID);
     }
 
-
-    std::for_each(std::begin(subRoomsToUpdate), std::end(subRoomsToUpdate), [](SubRoom * subroom) {
-        subroom->Update();
-    });
+    subroom->Update();
 }
 
 std::string TrainDepartureEvent::ToString() const
@@ -184,5 +115,5 @@ std::string TrainDepartureEvent::ToString() const
         _time,
         "Train departs",
         _info.trainType._type,
-        _info.platformID);
+        _info.trackID);
 }

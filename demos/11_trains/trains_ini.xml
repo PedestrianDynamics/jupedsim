@@ -3,20 +3,18 @@
 <JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
 
-    <header>
-        <seed>12542</seed>
-        <geometry>../geometry.xml</geometry>
-        <max_sim_time>50</max_sim_time>
+    <seed>12542</seed>
+    <geometry>geometry.xml</geometry>
+    <max_sim_time>40</max_sim_time>
 
-        <!-- trajectories file and format -->
-        <trajectories format="plain" fps="33">
-            <file location="trajectories.txt"/>
-        </trajectories>
-    </header>
+    <!-- trajectories file and format -->
+    <trajectories format="plain" fps="10">
+        <file location="train_traj.txt"/>
+    </trajectories>
 
     <train_constraints>
-        <train_time_table>../train_time_table.xml</train_time_table>
-        <train_types>../train_types.xml</train_types>
+        <train_time_table>train_time_table.xml</train_time_table>
+        <train_types>train_types.xml</train_types>
     </train_constraints>
 
     <!-- traffic information: e.g closed doors or smoked rooms -->
@@ -38,7 +36,6 @@
     </agents>
 
     <operational_models>
-
         <model operational_model_id="3" description="Tordeux2015">
             <model_parameters>
                 <solver>euler</solver>
@@ -84,11 +81,14 @@
                 <atau mu="0.5" sigma="0.001"/>
             </agent_parameters>
         </model>
-
     </operational_models>
 
     <route_choice_models>
-        <router router_id="1" description="ff_global_shortest"/>
+        <router router_id="1" description="ff_global_shortest">
+            <parameters>
+                <write_VTK_files>false</write_VTK_files>
+            </parameters>
+        </router>
     </route_choice_models>
 
 </JuPedSim>

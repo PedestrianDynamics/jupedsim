@@ -17,9 +17,9 @@ struct TrainEventInfo {
     int trainID;
 
     /**
-     * ID of platform the train is acting on
+     * ID of the track the train is acting on
      */
-    int platformID;
+    int trackID;
 
     /**
      * Type of train
@@ -27,34 +27,14 @@ struct TrainEventInfo {
     TrainType trainType;
 
     /**
-     * ID of room where the train is located
+     * Offset of train to start of track start/end point
      */
-    int roomID;
+    double trainStartOffset;
 
     /**
-     * ID of the subroom where the train is located
+     * Train will be added from track end
      */
-    int subroomID;
-
-    /**
-     * Starting point of the track
-     */
-    Point trackStart;
-
-    /**
-     * End point of the track
-     */
-    Point trackEnd;
-
-    /**
-     * Starting point of the train
-     */
-    Point trainStart;
-
-    /**
-     * End point of the train
-     */
-    Point trainEnd;
+    bool reversed;
 };
 
 /**

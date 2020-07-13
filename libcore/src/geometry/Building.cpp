@@ -371,101 +371,20 @@ bool Building::InitGeometry()
 
     InitInsideGoals();
     InitPlatforms();
-    //---
-    for(auto platform : _platforms) {
-        std::cout << "\n platform " << platform.first << ", " << platform.second->id << "\n";
-        std::cout << "\t rid " << platform.second->rid << "\n";
-        auto tracks = platform.second->tracks;
-        for(auto track : tracks) {
-            std::cout << "\t track " << track.first << "\n";
-            auto walls = track.second;
-            for(auto wall : walls) {
-                std::cout << "\t\t wall: " << wall.GetType() << ". " << wall.GetPoint1().toString()
-                          << " | " << wall.GetPoint2().toString() << "\n";
-            }
-        }
-    }
     LOG_INFO("Init Geometry successful!!!");
 
     return true;
 }
 
-const std::vector<Wall>
-Building::GetTrackWalls(Point TrackStart, Point TrackEnd, int & room_id, int & subroom_id) const
-{
-    bool trackFound = false;
-    int track_id    = -1;
-    int platform_id = -1;
-    std::vector<Wall> mytrack;
-    for(const auto & platform : _platforms) {
-        platform_id = platform.second->id;
-        auto tracks = platform.second->tracks;
-        for(const auto & track : tracks) {
-            track_id         = track.first;
-            int commonPoints = 0;
-            auto walls       = track.second;
-            for(const auto & wall : walls) {
-                Point P1 = wall.GetPoint1();
-                Point P2 = wall.GetPoint2();
-                if(P1 == TrackStart)
-                    commonPoints++;
-                if(P1 == TrackEnd)
-                    commonPoints++;
-                if(P2 == TrackStart)
-                    commonPoints++;
-                if(P2 == TrackEnd)
-                    commonPoints++;
-            }
-            if(commonPoints == 2) {
-                trackFound = true;
-                break;
-            }
-        } // tracks
-        if(trackFound)
-            break;
-    } // plattforms
-    if(trackFound) {
-        room_id    = _platforms.at(platform_id)->rid;
-        subroom_id = _platforms.at(platform_id)->sid;
-        mytrack    = _platforms.at(platform_id)->tracks[track_id];
-    } else {
-        std::cout << "could not find any track! Exit.\n";
-        exit(-1);
-    }
-    return mytrack;
-}
-
 void Building::InitPlatforms()
 {
-    int num_platform = -1;
-    for(auto & roomItr : _rooms) {
-        Room * room = roomItr.second.get();
-        for(auto & subRoomItr : room->GetAllSubRooms()) {
-            auto subRoom   = subRoomItr.second.get();
-            int subroom_id = subRoom->GetSubRoomID();
-            if(subRoom->GetType() != "Platform")
-                continue;
-            std::map<int, std::vector<Wall>> tracks;
-            num_platform++;
-            for(auto && wall : subRoom->GetAllWalls()) {
-                if(wall.GetType().find("track") == std::string::npos)
-                    continue;
-                // add wall to track
-                std::vector<std::string> strs;
-                boost::split(strs, wall.GetType(), boost::is_any_of("-"), boost::token_compress_on);
-                if(strs.size() <= 1)
-                    continue;
-                int n = atoi(strs[1].c_str());
-                tracks[n].push_back(wall);
-            } //walls
-            std::shared_ptr<Platform> p = std::make_shared<Platform>(Platform{
-                num_platform,
-                room->GetID(),
-                subroom_id,
-                tracks,
-            });
-            AddPlatform(p);
+    for(auto & [trackID, track] : _tracks) {
+        LOG_INFO("track {}:", trackID);
+        geometry::helper::SortWalls(track._walls, _trackStarts.at(trackID));
+        for(const auto & wall : track._walls) {
+            LOG_INFO("wall: {}", wall.toString());
         }
+        LOG_INFO("track start: {}", _trackStarts.at(trackID).toString());
     }
 }
 
@@ -624,19 +543,6 @@ const std::map<int, Hline *> & Building::GetAllHlines() const
     return _hLines;
 }
 
-const std::map<int, std::shared_ptr<Platform>> & Building::GetPlatforms() const
-{
-    return _platforms;
-}
-
-bool Building::AddPlatform(std::shared_ptr<Platform> P)
-{
-    if(_platforms.count(P->id) != 0) {
-        LOG_WARNING("Duplicate platform found [{}]", P->id);
-    }
-    _platforms[P->id] = P;
-    return true;
-}
 
 const std::map<int, Goal *> & Building::GetAllGoals() const
 {
@@ -1198,9 +1104,9 @@ void Building::AddTrainWallAdded(int trainID, Wall trainAddedWall)
     }
 }
 
-void Building::SetTrainWallsAdded(int trainID, std::vector<Wall> trainAddedWalls)
+void Building::ClearTrainWallsAdded(int trainID)
 {
-    _trainWallsAdded[trainID] = trainAddedWalls;
+    _trainWallsAdded.erase(trainID);
 }
 
 std::optional<std::vector<Wall>> Building::GetTrainWallsAdded(int trainID)
@@ -1225,9 +1131,9 @@ void Building::AddTrainWallRemoved(int trainID, Wall trainRemovedWall)
     }
 }
 
-void Building::SetTrainWallsRemoved(int trainID, std::vector<Wall> trainRemovedWalls)
+void Building::ClearTrainWallsRemoved(int trainID)
 {
-    _trainWallsRemoved[trainID] = trainRemovedWalls;
+    _trainWallsRemoved.erase(trainID);
 }
 
 std::optional<std::vector<Wall>> Building::GetTrainWallsRemoved(int trainID)
@@ -1252,9 +1158,9 @@ void Building::AddTrainDoorAdded(int trainID, Transition trainAddedDoor)
     }
 }
 
-void Building::SetTrainDoorsAdded(int trainID, std::vector<Transition> trainAddedDoors)
+void Building::ClearTrainDoorsAdded(int trainID)
 {
-    _trainDoorsAdded[trainID] = trainAddedDoors;
+    _trainDoorsAdded.erase(trainID);
 }
 
 std::optional<std::vector<Transition>> Building::GetTrainDoorsAdded(int trainID)
@@ -1262,6 +1168,49 @@ std::optional<std::vector<Transition>> Building::GetTrainDoorsAdded(int trainID)
     auto iter = _trainDoorsAdded.find(trainID);
 
     if(iter != _trainDoorsAdded.end()) {
+        return iter->second;
+    }
+
+    return std::nullopt;
+}
+
+void Building::AddTrackWall(int trackID, int roomID, int subRoomID, Wall trackWall)
+{
+    auto iter = _tracks.find(trackID);
+
+    if(iter != _tracks.end()) {
+        iter->second._walls.emplace_back(trackWall);
+    } else {
+        Track track{trackID, roomID, subRoomID, std::vector<Wall>{trackWall}};
+        _tracks.emplace(trackID, track);
+    }
+}
+
+std::optional<Track> Building::GetTrack(int trackID) const
+{
+    auto iter = _tracks.find(trackID);
+
+    if(iter != _tracks.end()) {
+        return iter->second;
+    }
+
+    return std::nullopt;
+}
+
+void Building::AddTrackStart(int trackID, Point trackStart)
+{
+    if(_trackStarts.find(trackID) != _trackStarts.end()) {
+        LOG_WARNING("Track start already exist, will be overwritten.");
+    }
+
+    _trackStarts[trackID] = trackStart;
+}
+
+std::optional<Point> Building::GetTrackStart(int trackID) const
+{
+    auto iter = _trackStarts.find(trackID);
+
+    if(iter != _trackStarts.end()) {
         return iter->second;
     }
 

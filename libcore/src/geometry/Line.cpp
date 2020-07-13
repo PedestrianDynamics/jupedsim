@@ -445,7 +445,7 @@ bool Line::NearlyHasEndPoint(const Point & point) const
 }
 
 
-bool Line::IntersectionWithCircle(const Point & centre, double radius /*cm for pedestrians*/)
+bool Line::IntersectionWithCircle(const Point & centre, double radius /*cm for pedestrians*/) const
 {
     //this formula assumes that the circle is centered the origin.
     // so we translate the complete stuff such that the circle ends up at the origin
@@ -465,7 +465,7 @@ bool Line::IntersectionWithCircle(const Point & centre, double radius /*cm for p
     double a = dr2;
 
     double b = 2 * 2 * (p2 - p1).ScalarProduct(p1);
-    ;
+
     double c = p1.ScalarProduct(p1) - radius * radius;
 
     delta = b * b - 4 * a * c;
@@ -484,6 +484,69 @@ bool Line::IntersectionWithCircle(const Point & centre, double radius /*cm for p
         return false;
     return !((t2 < 0.0) || (t2 > 1.0));
 }
+
+std::vector<Point> Line::IntersectionPointsWithCircle(const Point & centre, double radius) const
+{
+    std::vector<Point> intersectionPoints;
+
+    // shift everything, such that the centre of the circle is at the origin
+    Point p1 = _point1 - centre;
+    Point p2 = _point2 - centre;
+
+    // x1/y1 : coordinates of point 1 of line segment
+    // x2/y2 : coordinates of point 2 of line segment
+    // circle: x^2 + y^2 = radius^2
+    // line:   x = t*x1 + (1-t)*x2    and y = t*y1 + (1-t)*y2
+    // substitute  x and y into circle equation and solve for t yields:
+    // [(x1-x2)^2 + (y1-y2)^2] t^2 + 2 * [x2 (x1-x2) + y2 (y1-y2)] t + x2^2 +y2^2 - radius ^2 = 0
+    // solve quadratic equation: a * t^2 + t * x + c = 0
+    double a            = std::pow(p1._x - p2._x, 2.) + std::pow(p1._y - p2._y, 2.);
+    double b            = 2. * (p2._x * (p1._x - p2._x) + p2._y * (p1._y - p2._y));
+    double c            = std::pow(p2._x, 2.) + std::pow(p2._y, 2.) - std::pow(radius, 2.);
+    double discriminant = std::pow(b, 2.) - 4 * a * c;
+
+    // no real intersection points of line segment and circle exist
+    if(discriminant < 0) {
+        return intersectionPoints;
+    }
+
+    // only one intersection exists
+    if(std::fabs(discriminant) < J_EPS) {
+        double t = -b / (2. * a);
+        double x = t * p1._x + (1. - t) * p2._x;
+        double y = t * p1._y + (1. - t) * p2._y;
+
+        Point intersection{x, y};
+        intersection += centre;
+        intersectionPoints.emplace_back(intersection);
+        return intersectionPoints;
+    }
+
+    // Check if first intersection is in line segment, if so add to intersection points
+    if(double t = (-b + std::sqrt(std::pow(b, 2.) - 4. * a * c)) / (2. * a);
+       (t >= 0.) && (t <= 1.)) {
+        double x = t * p1._x + (1. - t) * p2._x;
+        double y = t * p1._y + (1. - t) * p2._y;
+
+        Point intersection{x, y};
+        intersection += centre;
+        intersectionPoints.emplace_back(intersection);
+    }
+
+    // Check if second intersection is in line segment, if so add to intersection points
+    if(double t = (-b - std::sqrt(std::pow(b, 2.) - 4. * a * c)) / (2. * a);
+       (t >= 0.) && (t <= 1.)) {
+        double x = t * p1._x + (1. - t) * p2._x;
+        double y = t * p1._y + (1. - t) * p2._y;
+
+        Point intersection{x, y};
+        intersection += centre;
+        intersectionPoints.emplace_back(intersection);
+    }
+
+    return intersectionPoints;
+}
+
 
 //TODO: Consider numerical stability and special case pt is on line
 // Returns true if pt is on the left side ( from point1 toward point2)
