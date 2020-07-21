@@ -110,7 +110,7 @@ TEST_CASE("neighborhood/Grid2D", "[neighborhood][neighbor-search][grid2d]")
                 REQUIRE(grid.num_columns() == 10);
                 for(unsigned i = 0; i < 5; ++i) {
                     for(unsigned j = 0; j < 10; ++j) {
-                        REQUIRE(grid[i][j] == i * j);
+                        REQUIRE(grid[i][j] == static_cast<int>(i * j));
                     }
                 }
 
@@ -119,7 +119,7 @@ TEST_CASE("neighborhood/Grid2D", "[neighborhood][neighbor-search][grid2d]")
                 REQUIRE(grid_copy.num_columns() == 10);
                 for(unsigned i = 0; i < 5; ++i) {
                     for(unsigned j = 0; j < 10; ++j) {
-                        REQUIRE(grid_copy[i][j] == i * j);
+                        REQUIRE(grid_copy[i][j] == static_cast<int>(i * j));
                     }
                 }
             }
