@@ -6,7 +6,7 @@ sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_routing.html
 summary: In order to navigate in (complex) buildings a router is needed to assign pedestrians exits. Different algorithms are implemented and explained briefly in this page
-last_updated: Dec 21, 2019
+last_updated: Jul 22, 2020
 ---
 
 ## Floorfield Router
@@ -57,7 +57,7 @@ build a network which is then cached and used through the simulation
 life time.
 
 Detailed information about the aforementioned models
-are presented in: [KemlohWagoum2012a][#KemlohWagoum2012a]
+are presented in [KemlohWagoum2012a][#KemlohWagoum2012a]
 
 Following snippet is a definition example of the routing information:
 
@@ -90,4 +90,4 @@ This router takes traffic into consideration.
       In these special cases, global router will be faster in computation time.
 
 
-[#KemlohWagoum2012a]: dx.doi.org/10.1142%2FS0219525912500294 "Kemloh et al "Modeling the dynamic route choice of pedestrians to assess the criticality of building evacuation. Advances in Complex Systems. 2012"
+[#KemlohWagoum2012a]: https://doi.org/10.1142/S0219525912500294 "Kemloh et al "Modeling the dynamic route choice of pedestrians to assess the criticality of building evacuation. Advances in Complex Systems. 2012"
