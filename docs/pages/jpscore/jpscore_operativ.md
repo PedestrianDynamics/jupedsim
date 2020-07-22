@@ -6,7 +6,7 @@ sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_operativ.html
 summary: Several operational models are implemented in jpscore. An operational model defines how pedestrians interact with each other and with their environment.
-last_updated: Mar 10, 2020
+last_updated: Jul 22, 2020
 ---
 
 ## Introduction
