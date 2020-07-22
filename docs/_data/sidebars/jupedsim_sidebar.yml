@@ -93,7 +93,7 @@ entries:
       output: web, pdf
 
       subfolders:
-      - title: Input files
+      - title: Files
         output: web, pdf
         subfolderitems:
         - title: Inifile

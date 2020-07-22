@@ -21,7 +21,7 @@ entries:
       type: frontmatter
 
 
-  - title: Input files
+  - title: Files
     output: web, pdf
 
     folderitems:
