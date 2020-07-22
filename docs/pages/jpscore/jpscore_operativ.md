@@ -6,7 +6,7 @@ sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_operativ.html
 summary: Several operational models are implemented in jpscore. An operational model defines how pedestrians interact with each other and with their environment.
-last_updated: Mar 10, 2020
+last_updated: Jul 22, 2020
 ---
 
 ## Introduction
@@ -116,7 +116,7 @@ Usage:
   The repulsive force between two agents. See [Fig. 7](https://arxiv.org/pdf/1008.4297.pdf).
     - `nu` is the strength of the force ($$\nu$$ in Eq. (19)). 
     - `dist_max` is the maximum force at contact ($$f_m$$)
-    - `disteff_max`: cut-off radius ($$r_c$$)
+    - `disteff_max`: cut-off radius ($$r_c$$). Note this value should be smaller than `cell_size` of the linkedcells. See [Model parameters (in general)](#model-parameters-in-general).
     - `interpolation_width` ($$r_{eps}$$)
 - `<force_wall nu="0.1" dist_max="1" disteff_max="2" interpolation_width="0.1" />`
 The parameters for the repulsive force between a wall and an agent are defined in analogy to the agent-agent repulsive force.
