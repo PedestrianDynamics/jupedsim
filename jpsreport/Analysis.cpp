@@ -392,12 +392,9 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
         for(int i = 0; i < int(_areaForMethod_D.size()); i++) {
             Method_D method_D;
             method_D.SetGeometryPolygon(_geoPolyMethodD[_areaForMethod_D[i]->_id]);
-            method_D.SetGeometryFileName(_geometryFileName);
             method_D.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
-            method_D.SetTrajectoriesLocation(path);
             method_D.SetMeasurementArea(_areaForMethod_D[i]);
-            bool result_D = method_D.Process(
-                configData_D, i, data, _scriptsLocation, _areaForMethod_D[i]->_zPos);
+            bool result_D = method_D.Process(configData_D, i, data, _areaForMethod_D[i]->_zPos);
             if(result_D) {
                 LOG_INFO(
                     "Success with Method D using measurement area id {}!\n",

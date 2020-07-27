@@ -43,13 +43,10 @@ public:
         const ConfigData_DIJ & configData,
         int measurementAreaID,
         const PedData & peddata,
-        const fs::path & scriptsLocation,
         const double & zPos_measureArea);
     void SetGeometryPolygon(polygon_2d geometryPolygon);
-    void SetGeometryFileName(const fs::path & geometryFile);
     void SetGeometryBoundaries(double minX, double minY, double maxX, double maxY);
     void SetMeasurementArea(MeasurementArea_B * area);
-    void SetTrajectoriesLocation(const fs::path & trajectoryPath);
 
 private:
     std::map<int, std::vector<int>> _peds_t;
@@ -58,8 +55,7 @@ private:
     fs::path _trajName;
     fs::path _projectRootDir;
     fs::path _outputLocation;
-    fs::path _scriptsLocation;
-    polygon_2d _areaIndividualFD;
+
     polygon_2d _geoPoly;
     double _geoMinX; // LOWest vertex of the geometry (x coordinate)
     double _geoMinY; //  LOWest vertex of the geometry (y coordinate)
@@ -70,9 +66,6 @@ private:
     float _fps;
     bool OpenFileMethodD(bool _isOneDimensional);
     bool OpenFileIndividualFD(bool _isOneDimensional);
-    fs::path _geometryFileName;
-    fs::path _trajectoryPath;
-
 
     std::vector<std::pair<polygon_2d, int>> GetPolygons(
         const ConfigData_DIJ & configData,
@@ -93,11 +86,6 @@ private:
         const std::string & frameId,
         const std::vector<polygon_2d> & polygons,
         const std::vector<double> & velocity);
-    void OutputVoroGraph(
-        const std::string & frameId,
-        std::vector<std::pair<polygon_2d, int>> & polygons,
-        int numPedsInFrame,
-        const std::vector<double> & VInFrame);
     void GetIndividualFD(
         const std::vector<polygon_2d> & polygon,
         const std::vector<double> & Velocity,
@@ -119,13 +107,6 @@ private:
         const std::string & frid,
         bool _calcIndividualFD);
     void ReducePrecision(polygon_2d & polygon);
-    bool IsPedInGeometry(
-        int frames,
-        int peds,
-        double ** Xcor,
-        double ** Ycor,
-        int * firstFrame,
-        int * lastFrame); //check whether all the pedestrians are in the geometry
     double getOverlapRatio(
         const double & left,
         const double & right,

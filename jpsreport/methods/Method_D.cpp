@@ -62,11 +62,9 @@ bool Method_D::Process(
     const ConfigData_DIJ & configData,
     int measurementAreaID,
     const PedData & peddata,
-    const fs::path & scriptsLocation,
     const double & zPos_measureArea)
 {
     bool return_value = true;
-    _scriptsLocation  = scriptsLocation;
     _outputLocation   = peddata.GetOutputLocation();
     _peds_t           = peddata.GetPedsFrame();
     _trajName         = peddata.GetTrajName();
@@ -432,81 +430,6 @@ void Method_D::GetProfiles(
     fclose(Prf_density);
 }
 
-void Method_D::OutputVoroGraph(
-    const string & frameId,
-    std::vector<std::pair<polygon_2d, int>> & polygons_id,
-    int numPedsInFrame,
-    const vector<double> & VInFrame)
-{
-    fs::path voroLocPath(_outputLocation);
-    fs::path voro_location_path(VORO_LOCATION); // TODO: convert
-                                                // this MACRO to
-                                                // path. Maybe
-                                                // remove the MACRO?
-    voroLocPath = voroLocPath / voro_location_path / "VoronoiCell";
-    polygon_2d poly;
-    if(!fs::exists(voroLocPath)) {
-        if(!fs::create_directories(voroLocPath)) {
-            LOG_ERROR("can not create directory <{}>", voroLocPath.string());
-            exit(EXIT_FAILURE);
-        } else
-            LOG_INFO("create directory {}", voroLocPath.string());
-    }
-
-    fs::path polygonPath = voroLocPath / "polygon";
-    if(!fs::exists(polygonPath)) {
-        if(!fs::create_directory(polygonPath)) {
-            LOG_ERROR("can not create directory <{}>", polygonPath.string());
-            exit(EXIT_FAILURE);
-        }
-    }
-    fs::path trajFileName(_trajName.string() + "_id_" + _measureAreaId + "_" + frameId + ".dat");
-    fs::path p     = polygonPath / trajFileName;
-    string polygon = p.string();
-    ofstream polys(polygon.c_str());
-
-    if(polys.is_open()) {
-        for(auto && p_it : polygons_id) {
-            poly = p_it.first;
-            for(auto && point : poly.outer()) {
-                point.x(point.x() * CMtoM);
-                point.y(point.y() * CMtoM);
-            }
-            for(auto && innerpoly : poly.inners()) {
-                for(auto && point : innerpoly) {
-                    point.x(point.x() * CMtoM);
-                    point.y(point.y() * CMtoM);
-                }
-            }
-            polys << p_it.second << " | " << dsv(poly) << endl;
-            //polys  <<dsv(poly)<< endl;
-        }
-    } else {
-        LOG_ERROR("cannot create the file <{}>", polygon);
-        exit(EXIT_FAILURE);
-    }
-    fs::path speedPath = voroLocPath / "speed";
-    if(!fs::exists(speedPath))
-        if(!fs::create_directory(speedPath)) {
-            LOG_ERROR("can not create directory <{}>", speedPath.string());
-            exit(EXIT_FAILURE);
-        }
-    fs::path pv         = speedPath / trajFileName;
-    string v_individual = pv.string();
-    ofstream velo(v_individual.c_str());
-    if(velo.is_open()) {
-        for(int pts = 0; pts < numPedsInFrame; pts++) {
-            velo << fabs(VInFrame[pts]) << endl;
-        }
-    } else {
-        LOG_ERROR("cannot create the file <{}>", pv.string());
-        exit(EXIT_FAILURE);
-    }
-
-    polys.close();
-    velo.close();
-}
-
 void Method_D::GetIndividualFD(
     const vector<polygon_2d> & polygon,
     const vector<double> & Velocity,
@@ -563,16 +486,6 @@ void Method_D::SetGeometryBoundaries(double minX, double minY, double maxX, doub
     _geoMinY = minY;
     _geoMaxX = maxX;
     _geoMaxY = maxY;
-}
-
-void Method_D::SetGeometryFileName(const fs::path & geometryFile)
-{
-    _geometryFileName = geometryFile;
-}
-
-void Method_D::SetTrajectoriesLocation(const fs::path & trajectoryPath)
-{
-    _trajectoryPath = trajectoryPath;
 }
 
 void Method_D::SetMeasurementArea(MeasurementArea_B * area)
