@@ -56,7 +56,7 @@ bool Method_B::Process(const PedData & peddata)
     _outputLocation = peddata.GetOutputLocation();
 
     _fps           = peddata.GetFps();
-    _peds_t        = peddata.GetPedsFrame();
+    _peds_t        = peddata.GetPedIDsByFrameNr();
     _NumPeds       = peddata.GetNumPeds();
     _xCor          = peddata.GetXCor();
     _yCor          = peddata.GetYCor();

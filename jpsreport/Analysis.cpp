@@ -279,7 +279,7 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
     }
 
     //-----------------------------check whether there is pedestrian outside the whole geometry--------------------------------------------
-    std::map<int, std::vector<int>> _peds_t = data.GetPedsFrame();
+    std::map<int, std::vector<int>> _peds_t = data.GetPedIDsByFrameNr();
     for(int frameNr = 0; frameNr < data.GetNumFrames(); frameNr++) {
         vector<int> ids         = _peds_t[frameNr];
         vector<int> IdInFrame   = data.GetIdInFrame(frameNr, ids);

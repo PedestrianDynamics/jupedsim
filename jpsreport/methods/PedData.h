@@ -61,7 +61,7 @@ public:
     float GetFps() const;
     fs::path GetTrajName() const;
     fs::path GetProjectRootDir() const;
-    std::map<int, std::vector<int>> GetPedsFrame() const;
+    std::map<int, std::vector<int>> GetPedIDsByFrameNr() const;
     ub::matrix<double> GetXCor() const;
     ub::matrix<double> GetYCor() const;
     ub::matrix<double> GetZCor() const;
@@ -122,7 +122,7 @@ private:
     int _numFrames           = 0; // total number of frames
     int _numPeds             = 0; // total number of pedestrians
     float _fps               = 16;
-    std::map<int, std::vector<int>> _peds_t;
+    std::map<int, std::vector<int>> _pedIDsByFrameNr;
 
     int _deltaF                  = 5;
     std::string _vComponent      = "B";

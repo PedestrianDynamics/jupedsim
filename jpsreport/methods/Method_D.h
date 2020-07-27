@@ -42,14 +42,14 @@ public:
     bool Process(
         const ConfigData_DIJ & configData,
         int measurementAreaID,
-        const PedData & peddata,
+        const PedData & pedData,
         const double & zPos_measureArea);
     void SetGeometryPolygon(polygon_2d geometryPolygon);
     void SetGeometryBoundaries(double minX, double minY, double maxX, double maxY);
     void SetMeasurementArea(MeasurementArea_B * area);
 
 private:
-    std::map<int, std::vector<int>> _peds_t;
+    std::map<int, std::vector<int>> _pedIDsByFrameNr;
     std::string _measureAreaId;
     MeasurementArea_B * _areaForMethod_D;
     fs::path _trajName;

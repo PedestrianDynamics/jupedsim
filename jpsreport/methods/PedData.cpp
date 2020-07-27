@@ -308,7 +308,7 @@ bool PedData::InitializeVariables(const fs::path & filename)
            * index: frame id - minFrame, value: position id in unique_ids
            */
 
-        _peds_t[t].push_back(id_pos);
+        _pedIDsByFrameNr[t].push_back(id_pos);
         // std::cout << "frame: " << _FramesTXT[i] << " t: " << t << " > " << id_pos << "\n";
     }
 
@@ -649,9 +649,9 @@ fs::path PedData::GetTrajName() const
     return _trajName;
 }
 
-map<int, vector<int>> PedData::GetPedsFrame() const
+map<int, vector<int>> PedData::GetPedIDsByFrameNr() const
 {
-    return _peds_t;
+    return _pedIDsByFrameNr;
 }
 
 ub::matrix<double> PedData::GetXCor() const

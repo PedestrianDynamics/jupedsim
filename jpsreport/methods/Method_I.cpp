@@ -66,7 +66,7 @@ bool Method_I::Process(
     bool return_value = true;
     _scriptsLocation  = scriptsLocation;
     _outputLocation   = peddata.GetOutputLocation();
-    _peds_t           = peddata.GetPedsFrame();
+    _peds_t           = peddata.GetPedIDsByFrameNr();
     _trajName         = peddata.GetTrajName();
     _projectRootDir   = peddata.GetProjectRootDir();
     _measureAreaId    = boost::lexical_cast<string>(_areaForMethod_I->_id);
@@ -74,8 +74,8 @@ bool Method_I::Process(
     int mycounter     = 0;
     int minFrame      = peddata.GetMinFrame();
 
-    int _startFrame        = configData.start_frames[measurementAreaID];
-    int _stopFrame         = configData.stop_frames[measurementAreaID];
+    int _startFrame        = configData.startFrames[measurementAreaID];
+    int _stopFrame         = configData.stopFrames[measurementAreaID];
     bool _isOneDimensional = configData.isOneDimensional;
 
     LOG_INFO(

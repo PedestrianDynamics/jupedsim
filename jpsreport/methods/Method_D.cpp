@@ -61,24 +61,25 @@ Method_D::~Method_D() {}
 bool Method_D::Process(
     const ConfigData_DIJ & configData,
     int measurementAreaID,
-    const PedData & peddata,
+    const PedData & pedData,
     const double & zPos_measureArea)
 {
     bool return_value = true;
-    _outputLocation   = peddata.GetOutputLocation();
-    _peds_t           = peddata.GetPedsFrame();
-    _trajName         = peddata.GetTrajName();
-    _projectRootDir   = peddata.GetProjectRootDir();
+    _outputLocation   = pedData.GetOutputLocation();
+    _pedIDsByFrameNr  = pedData.GetPedIDsByFrameNr();
+    _trajName         = pedData.GetTrajName();
+    _projectRootDir   = pedData.GetProjectRootDir();
     _measureAreaId    = boost::lexical_cast<string>(_areaForMethod_D->_id);
-    _fps              = peddata.GetFps();
-    int mycounter     = 0;
-    int minFrame      = peddata.GetMinFrame();
+    _fps              = pedData.GetFps();
+    int minFrame      = pedData.GetMinFrame();
 
-    int _startFrame        = configData.start_frames[measurementAreaID];
-    int _stopFrame         = configData.stop_frames[measurementAreaID];
+    int _startFrame        = configData.startFrames[measurementAreaID];
+    int _stopFrame         = configData.stopFrames[measurementAreaID];
     bool _isOneDimensional = configData.isOneDimensional;
     bool _getProfile       = configData.getProfile;
-    bool _calcIndividualFD = configData.individual_FD_flags[measurementAreaID];
+    bool _calcLocalIFD     = configData.calcLocalIFD[measurementAreaID];
+    bool _useBlindPoints   = configData.useBlindPoints;
+    bool _calcGlobalIFD    = configData.calcGlobalIFD;
 
     LOG_INFO(
         "Method D: frame rate fps: <{:.2f}>, start: <{}>, stop: <{}> (minFrame = {})",
@@ -91,13 +92,12 @@ bool Method_D::Process(
             _startFrame = minFrame;
         }
         if(_stopFrame == -1) {
-            _stopFrame = peddata.GetNumFrames() + minFrame;
+            _stopFrame = pedData.GetNumFrames() + minFrame;
         }
-        for(std::map<int, std::vector<int>>::iterator ite = _peds_t.begin();
-            ite != _peds_t.end();) {
+        for(std::map<int, std::vector<int>>::iterator ite = _pedIDsByFrameNr.begin();
+            ite != _pedIDsByFrameNr.end();) {
             if((ite->first + minFrame) < _startFrame || (ite->first + minFrame) > _stopFrame) {
-                mycounter++;
-                ite = _peds_t.erase(ite);
+                ite = _pedIDsByFrameNr.erase(ite);
             } else {
                 ++ite;
             }
@@ -107,13 +107,13 @@ bool Method_D::Process(
     if(!OpenFileMethodD(_isOneDimensional)) {
         return_value = false;
     }
-    if(_calcIndividualFD) {
+    if(_calcLocalIFD) {
         if(!OpenFileIndividualFD(_isOneDimensional)) {
             return_value = false;
         }
     }
     LOG_INFO("------------------------Analyzing with Method D-----------------------------");
-    for(auto ite : _peds_t) {
+    for(auto ite : _pedIDsByFrameNr) {
         int frameNr = ite.first;
         int frid    = frameNr + minFrame;
         //padd the frameid with 0
@@ -123,12 +123,12 @@ bool Method_D::Process(
         if(!(frid % 50)) {
             LOG_INFO("frame ID = {}", frid);
         }
-        vector<int> ids         = _peds_t[frameNr];
-        vector<int> IdInFrame   = peddata.GetIdInFrame(frameNr, ids, zPos_measureArea);
-        vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids, zPos_measureArea);
-        vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids, zPos_measureArea);
-        vector<double> ZInFrame = peddata.GetZInFrame(frameNr, ids, zPos_measureArea);
-        vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
+        vector<int> ids         = _pedIDsByFrameNr[frameNr];
+        vector<int> IdInFrame   = pedData.GetIdInFrame(frameNr, ids, zPos_measureArea);
+        vector<double> XInFrame = pedData.GetXInFrame(frameNr, ids, zPos_measureArea);
+        vector<double> YInFrame = pedData.GetYInFrame(frameNr, ids, zPos_measureArea);
+        vector<double> ZInFrame = pedData.GetZInFrame(frameNr, ids, zPos_measureArea);
+        vector<double> VInFrame = pedData.GetVInFrame(frameNr, ids, zPos_measureArea);
         //vector int to_remove
         //------------------------------Remove peds outside geometry------------------------------------------
         for(int i = 0; i < (int) IdInFrame.size(); i++) {
@@ -156,7 +156,7 @@ bool Method_D::Process(
                     IdInFrame,
                     _areaForMethod_D->_poly,
                     str_frid,
-                    _calcIndividualFD);
+                    _calcLocalIFD);
             } else {
                 if(IsPointsOnOneLine(XInFrame, YInFrame)) {
                     if(fabs(XInFrame[1] - XInFrame[0]) < DMIN) {
@@ -174,7 +174,7 @@ bool Method_D::Process(
 
                 if(!polygons.empty()) {
                     OutputVoronoiResults(polygons, str_frid, VInFrame); // TODO polygons_id
-                    if(_calcIndividualFD) {
+                    if(_calcLocalIFD) {
                         if(!_isOneDimensional) {
                             // GetIndividualFD(polygons,VInFrame, IdInFrame, _areaForMethod_D->_poly, str_frid); // TODO polygons_id
                             GetIndividualFD(
@@ -209,7 +209,7 @@ bool Method_D::Process(
         }
     }
     fclose(_fVoronoiRhoV);
-    if(_calcIndividualFD) {
+    if(_calcLocalIFD) {
         fclose(_fIndividualFD);
     }
     return return_value;
@@ -364,8 +364,8 @@ void Method_D::GetProfiles(
     const vector<polygon_2d> & polygons,
     const vector<double> & velocity)
 {
-    float _grid_size_X = configData.grid_size_X;
-    float _grid_size_Y = configData.grid_size_Y;
+    float _grid_size_X = configData.gridSizeX;
+    float _grid_size_Y = configData.gridSizeY;
 
     std::string voroLocation(VORO_LOCATION);
     fs::path tmp("field");

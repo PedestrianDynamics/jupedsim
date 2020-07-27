@@ -59,7 +59,7 @@ bool Method_A::Process(
     _projectRootDir  = peddata.GetProjectRootDir();
     _scriptsLocation = scriptsLocation;
     _outputLocation  = peddata.GetOutputLocation();
-    _peds_t          = peddata.GetPedsFrame();
+    _peds_t          = peddata.GetPedIDsByFrameNr();
     _xCor            = peddata.GetXCor();
     _yCor            = peddata.GetYCor();
     _firstFrame      = peddata.GetFirstFrame();
