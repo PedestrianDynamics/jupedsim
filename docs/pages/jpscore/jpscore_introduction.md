@@ -48,10 +48,10 @@ Taking the 7th demo as input, we run a simulation as follows:
  ./bin/jpscore  demos/corner_ini.xml
 ```
 
-It is possible to redirect the output and write it to a file like:
+Information on processing steps, warnings and errors of jpscore are written to the console. This output can be redirected to a file by:
 
 ```bash
- ./bin/jpscore  demos/corner_ini.xml &> log_example.txt
+ ./bin/jpscore  demos/corner_ini.xml > log_example.txt
 ```
 
 This program call produces a trajectory file in the folder `results` in the same directory. This can be visualized with `jpsvis`
