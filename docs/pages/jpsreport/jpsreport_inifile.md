@@ -25,7 +25,7 @@ The output of the logger regarding errors, warnings and basic information is wri
 It is possible to redirect the output and write it to a file by:
 
 ```bash
-./jpsreport <path_to_inifile> &> log_example.txt
+./jpsreport <path_to_inifile> > log_example.txt
 ```
 
 {%include note.html content="The definition of a logfile in the inifile is not supported anymore."%}
