@@ -30,11 +30,10 @@
 
 #include "../general/Macros.h"
 
+#include <Logger.h>
 #include <cmath>
 #include <iostream>
 #include <sstream>
-
-
 /************************************************************
   Konstruktoren
  ************************************************************/
@@ -259,8 +258,7 @@ const Point operator/(const Point & p, double f)
     if(f > J_EPS * J_EPS)
         return Point(p._x / f, p._y / f);
     else {
-        std::cout << "Warning: Point::/operator. dividand " << f
-                  << " is to small. Set it to 1 instead" << std::endl;
+        LOG_WARNING("Point::operator/ dividend {} is too small. Using 1 instead.", f);
         return Point(p._x, p._y);
     }
     //return Point(p.GetX() / f, p.GetY() / f);

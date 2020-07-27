@@ -53,7 +53,7 @@ FDSMeshStorage::FDSMeshStorage(
     fs::path p(_filepath);
     p         = fs::canonical(p).make_preferred(); //remove ..
     _filepath = p.string(); // TODO: refactor this class. Use path instead of string
-    LOG_INFO("FDSMeshStorage: {}", p.c_str());
+    LOG_INFO("FDSMeshStorage: {}", p.string());
 
     if(fs::exists(p)) {
         LOG_INFO("Creating QuantityList ...");
