@@ -226,7 +226,7 @@ void AccessPoint::RemoveConnectingAP(AccessPoint * ap)
     std::vector<AccessPoint *>::iterator it;
     it = find(_connectingAPs.begin(), _connectingAPs.end(), ap);
     if(it == _connectingAPs.end()) {
-        std::cout << " there is no connection to AP: " << ap->GetID() << std::endl;
+        LOG_WARNING("AP {} RemoveConnection: There is no connection to AP {}", _id, ap->GetID());
     } else {
         _connectingAPs.erase(it);
     }
@@ -272,59 +272,57 @@ DoorState AccessPoint::GetState() const
 
 void AccessPoint::Dump()
 {
-    std::cout << std::endl << "--------> Dumping AP <-----------" << std::endl << std::endl;
-    //cout<<" ID: " <<_id<<" centre = [ "<< _center[0] <<", " <<_center[1] <<" ]"<<endl;
-    std::cout << " Friendly ID: " << _friendlyName << " centre = [ " << _center[0] << ", "
-              << _center[1] << " ]" << std::endl;
-    std::cout << " Real ID: " << _id << std::endl;
-    std::cout << " Length:  " << _navLine->LengthSquare() << std::endl;
+    std::stringstream dumpStream;
+    dumpStream << std::endl << "--------> Dumping AP <-----------" << std::endl << std::endl;
+    dumpStream << " Friendly ID: " << _friendlyName << " centre = [ " << _center[0] << ", "
+               << _center[1] << " ]" << std::endl;
+    dumpStream << " Real ID: " << _id << std::endl;
+    dumpStream << " Length:  " << _navLine->LengthSquare() << std::endl;
 
-    std::cout << " Is final exit to outside :" << GetFinalExitToOutside() << std::endl;
-    std::cout << " Distance to final goals" << std::endl;
+    dumpStream << " Is final exit to outside :" << GetFinalExitToOutside() << std::endl;
+    dumpStream << " Distance to final goals" << std::endl;
 
     for(std::map<int, double>::iterator p = _mapDestToDist.begin(); p != _mapDestToDist.end();
         ++p) {
-        std::cout << "\t [ " << p->first << ", " << p->second << " m ]";
+        dumpStream << "\t [ " << p->first << ", " << p->second << " m ]";
     }
-    std::cout << std::endl << std::endl;
+    dumpStream << std::endl << std::endl;
 
-    std::cout << " transit to final goals:" << std::endl;
+    dumpStream << " transit to final goals:" << std::endl;
     for(std::map<int, std::vector<AccessPoint *>>::iterator p = _navigationGraphTo.begin();
         p != _navigationGraphTo.end();
         ++p) {
-        std::cout << std::endl << "\t to UID ---> [ " << p->first << " ]";
+        dumpStream << std::endl << "\t to UID ---> [ " << p->first << " ]";
 
         if(p->second.size() == 0) {
-            std::cout << "\t ---> [ Nothing ]";
+            dumpStream << "\t ---> [ Nothing ]";
         } else {
             for(unsigned int i = 0; i < p->second.size(); i++) {
-                std::cout << "\t distance ---> [ "
-                          << GetDistanceTo(p->second[i]) + p->second[i]->GetDistanceTo(p->first)
-                          << " m via " << p->second[i]->GetID() << " ]";
-                //cout<<"\t distance ---> [ "<<p->second[i]->GetID()<<" @ " << GetDistanceTo(p->first)<<" ]";
+                dumpStream << "\t distance ---> [ "
+                           << GetDistanceTo(p->second[i]) + p->second[i]->GetDistanceTo(p->first)
+                           << " m via " << p->second[i]->GetID() << " ]";
             }
         }
     }
 
-    std::cout << std::endl << std::endl;
+    dumpStream << std::endl << std::endl;
 
-    std::cout << " connected to aps : ";
+    dumpStream << " connected to aps : ";
     for(unsigned int p = 0; p < _connectingAPs.size(); p++) {
-        //cout<<" [ "<<_connectingAPs[p]->GetID()<<" , "<<_connectingAPs[p]->GetDistanceTo(this)<<" m ]";
-        std::cout << std::endl
-                  << "\t [ " << _connectingAPs[p]->GetID() << "_"
-                  << _connectingAPs[p]->GetFriendlyName() << " , "
-                  << _connectingAPs[p]->GetDistanceTo(this) << " m ]";
+        dumpStream << std::endl
+                   << "\t [ " << _connectingAPs[p]->GetID() << "_"
+                   << _connectingAPs[p]->GetFriendlyName() << " , "
+                   << _connectingAPs[p]->GetDistanceTo(this) << " m ]";
     }
 
-    std::cout << std::endl << std::endl;
-    std::cout << " queue [ ";
+    dumpStream << std::endl << std::endl;
+    dumpStream << " queue [ ";
     for(unsigned int p = 0; p < _transitPedestrians.size(); p++) {
-        std::cout << " " << _transitPedestrians[p]->GetID();
+        dumpStream << " " << _transitPedestrians[p]->GetID();
     }
-    std::cout << " ]" << std::endl;
+    dumpStream << " ]" << std::endl;
 
-    //cout<<endl<<" connected to rooms: "<<_room1ID<<" and "<<_room2ID<<endl;
-    std::cout << std::endl;
-    std::cout << std::endl << "------------------------------" << std::endl << std::endl;
+    dumpStream << std::endl;
+    dumpStream << std::endl << "------------------------------" << std::endl << std::endl;
+    LOG_DEBUG("{}", dumpStream.str());
 }

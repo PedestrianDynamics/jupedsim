@@ -371,9 +371,8 @@ double Simulation::RunBody(double maxSimTime)
     //important since the number of peds is used
     //to break the main simulation loop
     AddNewAgents();
-    _nPeds = _building->GetAllPedestrians().size();
-    std::cout << "\n";
-    std::string description = "Evacutation ";
+    _nPeds                  = _building->GetAllPedestrians().size();
+    std::string description = "Evacuation ";
     int initialnPeds        = _nPeds;
     // main program loop
     while((_nPeds || (!_agentSrcManager.IsCompleted() && _gotSources)) && t < maxSimTime) {

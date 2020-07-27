@@ -31,7 +31,6 @@
 // ok that is not perfect. For a profound discussion see http://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
 bool almostEqual(double a, double b, double eps)
 {
-    // std::cout<< "a=" << a << "  b=" << b<< "diff= "<<std::fabs(a-b)<<std::endl;
     return fabs(a - b) < eps; //std::numeric_limits<double>::epsilon();
 }
 
