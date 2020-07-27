@@ -28,7 +28,6 @@
 #pragma once
 
 #include "geometry/Line.h"
-#include "routing/smoke_router/fire_mesh/FireMesh.h"
 
 #include <map>
 
