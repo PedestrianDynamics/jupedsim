@@ -48,7 +48,13 @@ Taking the 7th demo as input, we run a simulation as follows:
  ./bin/jpscore  demos/corner_ini.xml
 ```
 
-which produces a trajectory file in the folder `results` in the same directory. This can be visualized with `jpsvis`
+Information on processing steps, warnings and errors of jpscore are written to the console. This output can be redirected to a file by:
+
+```bash
+ ./bin/jpscore  demos/corner_ini.xml > log_example.txt
+```
+
+This program call produces a trajectory file in the folder `results` in the same directory. This can be visualized with `jpsvis`
 
 ```bash
  jpsvis demos/scenario_7_floorfield/results/Kobes_traj.xml

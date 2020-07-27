@@ -39,6 +39,7 @@ run `jpsreport` in a terminal as follows:
 ./bin/jpsreport inifile.xml
 ```
 
+{%include note.html content="It is possible to redirect the console output and write it to a file. See [inifile - Logfile](jpsreport_inifile#logfile)"%}
 
 ## Results
 
