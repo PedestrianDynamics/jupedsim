@@ -10,8 +10,6 @@
   <output location="Output_new/"/>
 
   <measurement_areas unit="m">
-    <area_B id="1" type="BoundingBox" zPos="None">
-    </area_B>
     <area_L id="2" type="Line" zPos="None">
       <start x="20.0" y="8.0" />
       <end x="20.0" y="12.0" />
@@ -62,12 +60,8 @@
     <one_dimensional enabled="false"/>
     <cut_by_circle enabled="false" radius="1.0" edges="10"/>
     <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/>
+    <use_blind_points enabled="false"/>
   </method_D>
-
-  <method_I enabled="true">
-    <measurement_area id="1" start_frame="None" stop_frame="None" get_individual_FD="true"/>
-    <cut_by_circle enabled="false" radius="1.0" edges="10"/>
-	</method_I>
 
   <method_J enabled="true">
     <measurement_area id="5" start_frame="None" stop_frame="None" get_individual_FD="true"/>
