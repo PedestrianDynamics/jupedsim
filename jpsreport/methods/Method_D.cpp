@@ -53,14 +53,14 @@ Method_D::Method_D()
     _geoMaxY         = 0;
     _fIndividualFD   = nullptr;
     _fVoronoiRhoV    = nullptr;
-    _areaForMethod_D = nullptr;
+    _measurementArea = nullptr;
 }
 
 Method_D::~Method_D() {}
 
 bool Method_D::Process(
     const ConfigData_DIJ & configData,
-    int measurementAreaID,
+    int measurementAreaIndex,
     const PedData & pedData,
     const double & zPos_measureArea)
 {
@@ -69,17 +69,24 @@ bool Method_D::Process(
     _pedIDsByFrameNr  = pedData.GetPedIDsByFrameNr();
     _trajName         = pedData.GetTrajName();
     _projectRootDir   = pedData.GetProjectRootDir();
-    _measureAreaId    = boost::lexical_cast<string>(_areaForMethod_D->_id);
     _fps              = pedData.GetFps();
     int minFrame      = pedData.GetMinFrame();
 
-    int _startFrame        = configData.startFrames[measurementAreaID];
-    int _stopFrame         = configData.stopFrames[measurementAreaID];
-    bool _isOneDimensional = configData.isOneDimensional;
-    bool _getProfile       = configData.getProfile;
-    bool _calcLocalIFD     = configData.calcLocalIFD[measurementAreaID];
-    bool _useBlindPoints   = configData.useBlindPoints;
-    bool _calcGlobalIFD    = configData.calcGlobalIFD;
+    auto _startFrame   = configData.startFrames[measurementAreaIndex];
+    auto _stopFrame    = configData.stopFrames[measurementAreaIndex];
+    auto _calcLocalIFD = configData.calcLocalIFD[measurementAreaIndex];
+
+    auto _getProfile        = configData.getProfile;
+    auto _isOneDimensional  = configData.isOneDimensional;
+    auto _useBlindPoints    = configData.useBlindPoints;
+    bool _calcGlobalIFDOnly = false;
+
+
+    if(_measurementArea->_id == -1) {
+        // change parameters for calculating global IFD only
+        _getProfile        = false;
+        _calcGlobalIFDOnly = true;
+    }
 
     LOG_INFO(
         "Method D: frame rate fps: <{:.2f}>, start: <{}>, stop: <{}> (minFrame = {})",
@@ -113,14 +120,14 @@ bool Method_D::Process(
         }
     }
     LOG_INFO("------------------------Analyzing with Method D-----------------------------");
-    for(auto ite : _pedIDsByFrameNr) {
+    for(const auto & ite : _pedIDsByFrameNr) {
         int frameNr = ite.first;
         int frid    = frameNr + minFrame;
         //padd the frameid with 0
         std::ostringstream ss;
         ss << std::setw(5) << std::setfill('0') << std::internal << frid;
         const std::string str_frid = ss.str();
-        if(!(frid % 50)) {
+        if((frid % 50) == 0) {
             LOG_INFO("frame ID = {}", frid);
         }
         vector<int> ids         = _pedIDsByFrameNr[frameNr];
@@ -129,15 +136,23 @@ bool Method_D::Process(
         vector<double> YInFrame = pedData.GetYInFrame(frameNr, ids, zPos_measureArea);
         vector<double> ZInFrame = pedData.GetZInFrame(frameNr, ids, zPos_measureArea);
         vector<double> VInFrame = pedData.GetVInFrame(frameNr, ids, zPos_measureArea);
-        //vector int to_remove
+
+        if(IdInFrame.size() == 0) {
+            LOG_WARNING("no pedestrians in frame <{}>", frameNr);
+            continue;
+        }
+
         //------------------------------Remove peds outside geometry------------------------------------------
-        for(int i = 0; i < (int) IdInFrame.size(); i++) {
-            if(false == within(point_2d(round(XInFrame[i]), round(YInFrame[i])), _geoPoly)) {
+        for(int i = 0; i < static_cast<int>(IdInFrame.size()); i++) {
+            if(!within(point_2d(round(XInFrame[i]), round(YInFrame[i])), _geoPoly)) {
                 LOG_WARNING(
-                    "Pedestrian at <x={:.4f}, y={:.4f}> is not in the geometry and will not be"
+                    "Pedestrian with id <{}> at <x={:.4f}, y={:.4f}, z={:.4f}> is not in the "
+                    "geometry and will not be"
                     "considered in the analysis!",
+                    IdInFrame[i],
                     XInFrame[i] * CMtoM,
-                    YInFrame[i] * CMtoM);
+                    YInFrame[i] * CMtoM,
+                    ZInFrame[i] * CMtoM);
                 IdInFrame.erase(IdInFrame.begin() + i);
                 XInFrame.erase(XInFrame.begin() + i);
                 YInFrame.erase(YInFrame.begin() + i);
@@ -146,19 +161,20 @@ bool Method_D::Process(
                 i--;
             }
         }
-        int NumPeds = IdInFrame.size();
+        int numPeds = IdInFrame.size();
         //---------------------------------------------------------------------------------------------------------------
-        if(NumPeds > 3) {
+        if((numPeds > 3) || _useBlindPoints) {
             if(_isOneDimensional) {
                 CalcVoronoiResults1D(
                     XInFrame,
                     VInFrame,
                     IdInFrame,
-                    _areaForMethod_D->_poly,
+                    _measurementArea->_poly,
                     str_frid,
                     _calcLocalIFD);
             } else {
-                if(IsPointsOnOneLine(XInFrame, YInFrame)) {
+                // TODO: not sure what is happening here?? Positions are shifted when they are on the same line?
+                if(ArePointsOnOneLine(XInFrame, YInFrame)) {
                     if(fabs(XInFrame[1] - XInFrame[0]) < DMIN) {
                         XInFrame[1] += JPS_OFFSET;
                     } else {
@@ -167,21 +183,24 @@ bool Method_D::Process(
                 }
                 std::vector<std::pair<polygon_2d, int>> polygons_id =
                     GetPolygons(configData, XInFrame, YInFrame, VInFrame, IdInFrame);
-                // std::cout << ">> polygons_id " << polygons_id.size() << "\n";
+
                 vector<polygon_2d> polygons;
-                for(auto p : polygons_id)
+                polygons.reserve(polygons_id.size());
+                for(const auto & p : polygons_id)
                     polygons.push_back(p.first);
 
                 if(!polygons.empty()) {
-                    OutputVoronoiResults(polygons, str_frid, VInFrame); // TODO polygons_id
+                    if(!_calcGlobalIFDOnly) {
+                        OutputVoronoiResults(polygons, str_frid, VInFrame); // TODO polygons_id
+                    }
+
                     if(_calcLocalIFD) {
                         if(!_isOneDimensional) {
-                            // GetIndividualFD(polygons,VInFrame, IdInFrame, _areaForMethod_D->_poly, str_frid); // TODO polygons_id
                             GetIndividualFD(
                                 polygons,
                                 VInFrame,
                                 IdInFrame,
-                                _areaForMethod_D->_poly,
+                                _measurementArea->_poly,
                                 str_frid,
                                 XInFrame,
                                 YInFrame,
@@ -199,16 +218,19 @@ bool Method_D::Process(
                         minFrame);
                 }
             }
-        } // if N >3
-        else {
+        } else {
+            // numPeds <= 3 and _useblindPoints is disabled
             LOG_INFO(
-                "The number of the pedestrians is small ({}). Frame = {} (minFrame = {})",
-                NumPeds,
+                "Not enough pedestrians (N={}) available to calculate Voronoi cells for frame = {} "
+                "(minFrame = {}). Consider enable use of blind points.",
+                numPeds,
                 frid,
                 minFrame);
         }
     }
-    fclose(_fVoronoiRhoV);
+    if(!_calcGlobalIFDOnly) {
+        fclose(_fVoronoiRhoV);
+    }
     if(_calcLocalIFD) {
         fclose(_fIndividualFD);
     }
@@ -218,7 +240,7 @@ bool Method_D::Process(
 bool Method_D::OpenFileMethodD(bool _isOneDimensional)
 {
     std::string voroLocation(VORO_LOCATION);
-    fs::path tmp("_id_" + _measureAreaId + ".dat");
+    fs::path tmp("_id_" + std::to_string(_measurementArea->_id) + ".dat");
     tmp = _outputLocation / voroLocation / ("rho_v_Voronoi_" + _trajName.string() + tmp.string());
     string results_V = tmp.string();
 
@@ -245,7 +267,7 @@ bool Method_D::OpenFileMethodD(bool _isOneDimensional)
 
 bool Method_D::OpenFileIndividualFD(bool _isOneDimensional)
 {
-    fs::path trajFileName("_id_" + _measureAreaId + ".dat");
+    fs::path trajFileName("_id_" + std::to_string(_measurementArea->_id) + ".dat");
     fs::path indFDPath("Fundamental_Diagram");
     indFDPath = _outputLocation / indFDPath / "IndividualFD" /
                 ("IFD_D_" + _trajName.string() + trajFileName.string());
@@ -280,12 +302,12 @@ std::vector<std::pair<polygon_2d, int>> Method_D::GetPolygons(
     vector<int> & IdInFrame)
 {
     VoronoiDiagram vd;
-    //int NrInFrm = ids.size();
+
+    // get range for bounding box around the geoemtry
     double boundpoint =
         10 * max(max(fabs(_geoMinX), fabs(_geoMinY)), max(fabs(_geoMaxX), fabs(_geoMaxY)));
     std::vector<std::pair<polygon_2d, int>> polygons_id;
     polygons_id = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame, IdInFrame, boundpoint);
-    // std:: cout << " GetPolygons " << polygons_id.size() << "\n";
 
     polygon_2d poly;
     if(configData.cutByCircle) {
@@ -313,7 +335,7 @@ void Method_D::OutputVoronoiResults(
     double VoronoiVelocity = 1;
     double VoronoiDensity  = -1;
     std::tie(VoronoiDensity, VoronoiVelocity) =
-        GetVoronoiDensityVelocity(polygons, VInFrame, _areaForMethod_D->_poly);
+        GetVoronoiDensityVelocity(polygons, VInFrame, _measurementArea->_poly);
     fprintf(_fVoronoiRhoV, "%s\t%.3f\t%.3f\n", frid.c_str(), VoronoiDensity, VoronoiVelocity);
 }
 
@@ -373,9 +395,11 @@ void Method_D::GetProfiles(
     fs::path dtmp("density");
     tmp  = _outputLocation / voroLocation / tmp;
     vtmp = tmp / vtmp /
-           ("Prf_v_" + _trajName.string() + "_id_" + _measureAreaId + "_" + frameId + ".dat");
+           ("Prf_v_" + _trajName.string() + "_id_" + std::to_string(_measurementArea->_id) + "_" +
+            frameId + ".dat");
     dtmp = tmp / dtmp /
-           ("Prf_d_" + _trajName.string() + "_id_" + _measureAreaId + "_" + frameId + ".dat");
+           ("Prf_d_" + _trajName.string() + "_id_" + std::to_string(_measurementArea->_id) + "_" +
+            frameId + ".dat");
     string Prfvelocity = vtmp.string();
     string Prfdensity  = dtmp.string();
 
@@ -490,7 +514,7 @@ void Method_D::SetGeometryBoundaries(double minX, double minY, double maxX, doub
 
 void Method_D::SetMeasurementArea(MeasurementArea_B * area)
 {
-    _areaForMethod_D = area;
+    _measurementArea = area;
 }
 
 void Method_D::ReducePrecision(polygon_2d & polygon)
@@ -595,7 +619,7 @@ double Method_D::getOverlapRatio(
     return OverlapRatio;
 }
 
-bool Method_D::IsPointsOnOneLine(vector<double> & XInFrame, vector<double> & YInFrame)
+bool Method_D::ArePointsOnOneLine(vector<double> & XInFrame, vector<double> & YInFrame)
 {
     double deltaX    = XInFrame[1] - XInFrame[0];
     bool isOnOneLine = true;

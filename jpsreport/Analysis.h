@@ -126,10 +126,10 @@ private:
     fs::path _geometryFileName;
     FileFormat _trajFormat; // format of the trajectory file
 
-    std::vector<MeasurementArea_L *> _areaForMethod_A;
-    std::vector<MeasurementArea_B *> _areaForMethod_B;
-    std::vector<MeasurementArea_B *> _areaForMethod_C;
-    std::vector<MeasurementArea_B *> _areaForMethod_D;
+    std::vector<MeasurementArea_L *> _areasForMethodA;
+    std::vector<MeasurementArea_B *> _areasForMethodB;
+    std::vector<MeasurementArea_B *> _areasForMethodC;
+    std::vector<MeasurementArea_B *> _areasForMethodD;
     std::vector<MeasurementArea_B *> _areaForMethod_I; // we still need to know
                                                        // the zpos of the
                                                        // measurement are, even

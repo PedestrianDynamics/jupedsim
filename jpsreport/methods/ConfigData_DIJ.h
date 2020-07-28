@@ -46,7 +46,6 @@ struct ConfigData_DIJ {
 
     //general parameters
     bool isOneDimensional = false;
-    bool calcGlobalIFD    = false;
     bool useBlindPoints   = true;
     //TODO Does it make sense to include the configs of measurement areas here as well?
 };

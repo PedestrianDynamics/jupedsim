@@ -41,7 +41,7 @@ public:
     virtual ~Method_D();
     bool Process(
         const ConfigData_DIJ & configData,
-        int measurementAreaID,
+        int measurementAreaIndex,
         const PedData & pedData,
         const double & zPos_measureArea);
     void SetGeometryPolygon(polygon_2d geometryPolygon);
@@ -50,8 +50,7 @@ public:
 
 private:
     std::map<int, std::vector<int>> _pedIDsByFrameNr;
-    std::string _measureAreaId;
-    MeasurementArea_B * _areaForMethod_D;
+    MeasurementArea_B * _measurementArea;
     fs::path _trajName;
     fs::path _projectRootDir;
     fs::path _outputLocation;
@@ -112,7 +111,7 @@ private:
         const double & right,
         const double & measurearea_left,
         const double & measurearea_right);
-    bool IsPointsOnOneLine(std::vector<double> & XInFrame, std::vector<double> & YInFrame);
+    bool ArePointsOnOneLine(std::vector<double> & XInFrame, std::vector<double> & YInFrame);
 };
 
 #endif /* METHOD_D_H_ */

@@ -77,7 +77,7 @@ private:
     std::vector<int> _areaIDforMethodC;
     std::vector<int> _timeIntervalA;
 
-    std::map<int, MeasurementArea *> _measurementAreas;
+    std::map<int, MeasurementArea *> _measurementAreasByIDs;
     void Usage(const std::string file);
 
     std::optional<ConfigData_DIJ> ParseDIJParams(TiXmlElement * xMethod);
@@ -92,13 +92,6 @@ public:
     const fs::path & GetGeometryFilename() const;
     const fs::path & GetProjectRootDir() const;
     const fs::path & GetOutputLocation() const;
-
-    double GetLengthMeasurementArea() const;
-    polygon_2d GetMeasureArea() const;
-    double GetLineStartX() const;
-    double GetLineStartY() const;
-    double GetLineEndX() const;
-    double GetLineEndY() const;
 
     std::string GetVComponent() const;
     bool GetIgnoreBackwardMovement() const;
