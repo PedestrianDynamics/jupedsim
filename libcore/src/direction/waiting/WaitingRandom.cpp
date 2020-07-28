@@ -29,11 +29,7 @@
 #include "geometry/SubRoom.h"
 #include "pedestrian/Pedestrian.h"
 
-double fRand(double fMin, double fMax)
-{
-    double f = static_cast<double>(std::rand()) / RAND_MAX;
-    return fMin + f * (fMax - fMin);
-}
+#include <RandomToolset.h>
 
 Point WaitingRandom::GetWaitingPosition(Room * room, Pedestrian * ped)
 {
@@ -67,16 +63,16 @@ Point WaitingRandom::GetWaitingPosition(Room * room, Pedestrian * ped)
         auto goal = ped->GetBuilding()->GetFinalGoal(ped->GetLastGoalID());
 
         do {
-            target._x = fRand(xMin, xMax);
-            target._y = fRand(yMin, yMax);
+            target._x = Random::GetUniformReal(xMin, xMax);
+            target._y = Random::GetUniformReal(yMin, yMax);
         } while(!goal->IsInsideGoal(target));
 
     } else {
         SubRoom * subRoom = room->GetSubRoom(ped->GetSubRoomID());
 
         do {
-            target._x = fRand(xMin, xMax);
-            target._y = fRand(yMin, yMax);
+            target._x = Random::GetUniformReal(xMin, xMax);
+            target._y = Random::GetUniformReal(yMin, yMax);
         } while(!subRoom->IsInSubRoom(target));
     }
 

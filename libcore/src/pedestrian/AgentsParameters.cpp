@@ -31,10 +31,11 @@
 
 #include "general/Macros.h"
 
+#include <RandomToolset.h>
+
 AgentsParameters::AgentsParameters(int id, int seed)
 {
-    _id        = id;
-    _generator = std::default_random_engine(seed);
+    _id = id;
 }
 
 AgentsParameters::~AgentsParameters() {}
@@ -49,7 +50,8 @@ void AgentsParameters::InitV0(double mean, double stdv)
     if(stdv == 0) {
         stdv = judge;
     }
-    _V0 = std::normal_distribution<double>(mean, stdv);
+    _v0Mean  = mean;
+    _v0Sigma = stdv;
 }
 
 void AgentsParameters::InitV0UpStairs(double mean, double stdv)
@@ -57,7 +59,8 @@ void AgentsParameters::InitV0UpStairs(double mean, double stdv)
     if(stdv == 0) {
         stdv = judge;
     }
-    _V0UpStairs = std::normal_distribution<double>(mean, stdv);
+    _v0UpStairsMean  = mean;
+    _v0UpStairsSigma = stdv;
 }
 
 void AgentsParameters::InitV0DownStairs(double mean, double stdv)
@@ -65,7 +68,8 @@ void AgentsParameters::InitV0DownStairs(double mean, double stdv)
     if(stdv == 0) {
         stdv = judge;
     }
-    _V0DownStairs = std::normal_distribution<double>(mean, stdv);
+    _v0DownStairsMean  = mean;
+    _v0DownStairsSigma = stdv;
 }
 
 void AgentsParameters::InitEscalatorUpStairs(double mean, double stdv)
@@ -73,7 +77,8 @@ void AgentsParameters::InitEscalatorUpStairs(double mean, double stdv)
     if(stdv == 0) {
         stdv = judge;
     }
-    _EscalatorUpStairs = std::normal_distribution<double>(mean, stdv);
+    _v0EscalatorUpStairsMean  = mean;
+    _v0EscalatorUpStairsSigma = stdv;
 }
 
 void AgentsParameters::InitEscalatorDownStairs(double mean, double stdv)
@@ -81,7 +86,8 @@ void AgentsParameters::InitEscalatorDownStairs(double mean, double stdv)
     if(stdv == 0) {
         stdv = judge;
     }
-    _EscalatorDownStairs = std::normal_distribution<double>(mean, stdv);
+    _v0EscalatorDownStairsMean  = mean;
+    _v0EscalatorDownStairsSigma = stdv;
 }
 
 void AgentsParameters::InitV0IdleEscalatorUpStairs(double mean, double stdv)
@@ -89,7 +95,8 @@ void AgentsParameters::InitV0IdleEscalatorUpStairs(double mean, double stdv)
     if(stdv == 0) {
         stdv = judge;
     }
-    _V0IdleEscalatorUpStairs = std::normal_distribution<double>(mean, stdv);
+    _v0IdleEscalatorUpStairsMean  = mean;
+    _v0IdleEscalatorUpStairsSigma = stdv;
 }
 
 void AgentsParameters::InitV0IdleEscalatorDownStairs(double mean, double stdv)
@@ -97,7 +104,8 @@ void AgentsParameters::InitV0IdleEscalatorDownStairs(double mean, double stdv)
     if(stdv == 0) {
         stdv = judge;
     }
-    _V0IdleEscalatorDownStairs = std::normal_distribution<double>(mean, stdv);
+    _v0IdleEscalatorDownStairsMean  = mean;
+    _v0IdleEscalatorDownStairsSigma = stdv;
 }
 
 void AgentsParameters::InitBmax(double mean, double stdv)
@@ -105,7 +113,8 @@ void AgentsParameters::InitBmax(double mean, double stdv)
     if(stdv == 0) {
         stdv = judge;
     }
-    _Bmax = std::normal_distribution<double>(mean, stdv);
+    _bMaxMean  = mean;
+    _bMaxSigma = stdv;
 }
 
 void AgentsParameters::InitBmin(double mean, double stdv)
@@ -113,7 +122,8 @@ void AgentsParameters::InitBmin(double mean, double stdv)
     if(stdv == 0) {
         stdv = judge;
     }
-    _Bmin = std::normal_distribution<double>(mean, stdv);
+    _bMinMean  = mean;
+    _bMinSigma = stdv;
 }
 
 void AgentsParameters::InitAmin(double mean, double stdv)
@@ -121,7 +131,8 @@ void AgentsParameters::InitAmin(double mean, double stdv)
     if(stdv == 0) {
         stdv = judge;
     }
-    _Amin = std::normal_distribution<double>(mean, stdv);
+    _aMinMean  = mean;
+    _aMinSigma = stdv;
 }
 
 void AgentsParameters::InitAtau(double mean, double stdv)
@@ -129,7 +140,8 @@ void AgentsParameters::InitAtau(double mean, double stdv)
     if(stdv == 0) {
         stdv = judge;
     }
-    _Atau = std::normal_distribution<double>(mean, stdv);
+    _aTauMean  = mean;
+    _aTauSigma = stdv;
 }
 
 void AgentsParameters::InitTau(double mean, double stdv)
@@ -137,7 +149,8 @@ void AgentsParameters::InitTau(double mean, double stdv)
     if(stdv == 0) {
         stdv = judge;
     }
-    _Tau = std::normal_distribution<double>(mean, stdv);
+    _tauMean  = mean;
+    _tauSigma = stdv;
 }
 
 void AgentsParameters::InitT(double mean, double stdv)
@@ -145,7 +158,8 @@ void AgentsParameters::InitT(double mean, double stdv)
     if(stdv == 0) {
         stdv = judge;
     }
-    _T = std::normal_distribution<double>(mean, stdv);
+    _tMean  = mean;
+    _tSigma = stdv;
 }
 
 
@@ -157,120 +171,120 @@ void AgentsParameters::EnableStretch(bool stretch)
 
 double AgentsParameters::GetV0()
 {
-    if(_V0.stddev() == judge) {
-        return _V0.mean();
+    if(_v0Sigma == judge) {
+        return _v0Mean;
     } else {
-        return _V0(_generator);
+        return Random::GetNormal(_v0Mean, _v0Sigma);
     }
 }
 
 double AgentsParameters::GetV0UpStairs()
 {
-    if(_V0UpStairs.stddev() == judge) {
-        return _V0UpStairs.mean();
+    if(_v0UpStairsSigma == judge) {
+        return _v0UpStairsMean;
     } else {
-        return _V0UpStairs(_generator);
+        return Random::GetNormal(_v0UpStairsMean, _v0UpStairsSigma);
     }
 }
 
 double AgentsParameters::GetV0DownStairs()
 {
-    if(_V0DownStairs.stddev() == judge) {
-        return _V0DownStairs.mean();
+    if(_v0DownStairsSigma == judge) {
+        return _v0DownStairsMean;
     } else {
-        return _V0DownStairs(_generator);
+        return Random::GetNormal(_v0DownStairsMean, _v0DownStairsSigma);
     }
 }
 
 double AgentsParameters::GetEscalatorUpStairs()
 {
-    if(_EscalatorUpStairs.stddev() == judge) {
-        return _EscalatorUpStairs.mean();
+    if(_v0EscalatorUpStairsSigma == judge) {
+        return _v0EscalatorUpStairsMean;
     } else {
-        return _EscalatorUpStairs(_generator);
+        return Random::GetNormal(_v0EscalatorUpStairsMean, _v0EscalatorUpStairsSigma);
     }
 }
 
 double AgentsParameters::GetEscalatorDownStairs()
 {
-    if(_EscalatorDownStairs.stddev() == judge) {
-        return _EscalatorDownStairs.mean();
+    if(_v0EscalatorDownStairsSigma == judge) {
+        return _v0EscalatorDownStairsMean;
     } else {
-        return _EscalatorDownStairs(_generator);
+        return Random::GetNormal(_v0EscalatorDownStairsMean, _v0EscalatorDownStairsSigma);
     }
 }
 
 
 double AgentsParameters::GetV0IdleEscalatorUpStairs()
 {
-    if(_V0IdleEscalatorUpStairs.stddev() == judge) {
-        return _V0IdleEscalatorUpStairs.mean();
+    if(_v0IdleEscalatorUpStairsSigma == judge) {
+        return _v0IdleEscalatorUpStairsMean;
     } else {
-        return _V0IdleEscalatorUpStairs(_generator);
+        return Random::GetNormal(_v0IdleEscalatorUpStairsMean, _v0IdleEscalatorUpStairsSigma);
     }
 }
 
 double AgentsParameters::GetV0IdleEscalatorDownStairs()
 {
-    if(_V0IdleEscalatorDownStairs.stddev() == judge) {
-        return _V0IdleEscalatorDownStairs.mean();
+    if(_v0IdleEscalatorDownStairsSigma == judge) {
+        return _v0IdleEscalatorDownStairsMean;
     } else {
-        return _V0IdleEscalatorDownStairs(_generator);
+        return Random::GetNormal(_v0IdleEscalatorDownStairsMean, _v0IdleEscalatorDownStairsSigma);
     }
 }
 
 
 double AgentsParameters::GetBmax()
 {
-    if(_Bmax.stddev() == judge) {
-        return _Bmax.mean();
+    if(_bMaxSigma == judge) {
+        return _bMaxMean;
     } else {
-        return _Bmax(_generator);
+        return Random::GetNormal(_bMaxMean, _bMaxSigma);
     }
 }
 
 double AgentsParameters::GetBmin()
 {
-    if(_Bmin.stddev() == judge) {
-        return _Bmin.mean();
+    if(_bMinSigma == judge) {
+        return _bMinMean;
     } else {
-        return _Bmin(_generator);
+        return Random::GetNormal(_bMinMean, _bMinSigma);
     }
 }
 
 double AgentsParameters::GetAtau()
 {
-    if(_Atau.stddev() == judge) {
-        return _Atau.mean();
+    if(_aTauSigma == judge) {
+        return _aTauMean;
     } else {
-        return _Atau(_generator);
+        return Random::GetNormal(_aTauMean, _aTauSigma);
     }
 }
 
 double AgentsParameters::GetAmin()
 {
-    if(_Amin.stddev() == judge) {
-        return _Amin.mean();
+    if(_aMinSigma == judge) {
+        return _aMinMean;
     } else {
-        return _Amin(_generator);
+        return Random::GetNormal(_aMinMean, _aMinSigma);
     }
 }
 
 double AgentsParameters::GetTau()
 {
-    if(_Tau.stddev() == judge) {
-        return _Tau.mean();
+    if(_tauSigma == judge) {
+        return _tauMean;
     } else {
-        return _Tau(_generator);
+        return Random::GetNormal(_tauMean, _tauSigma);
     }
 }
 
 double AgentsParameters::GetT()
 {
-    if(_T.stddev() == judge) {
-        return _T.mean();
+    if(_tSigma == judge) {
+        return _tMean;
     } else {
-        return _T(_generator);
+        return Random::GetNormal(_tMean, _tSigma);
     }
 }
 
@@ -278,63 +292,64 @@ bool AgentsParameters::StretchEnabled()
 {
     return _enableStretch;
 }
+
 std::string AgentsParameters::writeParameter()
 {
     std::string s;
     char tmp[1024];
 
     s.append("\tPedestrians Parameter:\n");
-    if(_V0.stddev() == judge) {
-        sprintf(tmp, "\t\tv0 ~ N(%f, %f)\n", _V0.mean(), _V0.stddev() - judge);
+    if(_v0Sigma == judge) {
+        sprintf(tmp, "\t\tv0 ~ N(%f, %f)\n", _v0Mean, _v0Sigma - judge);
     } else {
-        sprintf(tmp, "\t\tv0 ~ N(%f, %f)\n", _V0.mean(), _V0.stddev());
+        sprintf(tmp, "\t\tv0 ~ N(%f, %f)\n", _v0Mean, _v0Sigma);
     }
     s.append(tmp);
-    if(_Bmax.stddev() == judge) {
-        sprintf(tmp, "\t\tb_max ~ N(%f, %f)\n", _Bmax.mean(), _Bmax.stddev() - judge);
-    } else {
-        sprintf(tmp, "\t\tb_max ~ N(%f, %f)\n", _Bmax.mean(), _Bmax.stddev());
-    }
-    s.append(tmp);
-    if(_Bmin.stddev() == judge) {
-        sprintf(tmp, "\t\tb_max ~ N(%f, %f)\n", _Bmin.mean(), _Bmin.stddev() - judge);
-    } else {
-        sprintf(tmp, "\t\tb_min ~ N(%f, %f)\n", _Bmin.mean(), _Bmin.stddev());
-    }
-    s.append(tmp);
-    if(_Amin.stddev() == judge) {
-        sprintf(tmp, "\t\tb_max ~ N(%f, %f)\n", _Amin.mean(), _Amin.stddev() - judge);
-    } else {
-        sprintf(tmp, "\t\tb_min ~ N(%f, %f)\n", _Amin.mean(), _Amin.stddev());
-    }
-    s.append(tmp);
-    if(_Atau.stddev() == judge) {
-        sprintf(tmp, "\t\ta_tau ~ N(%f, %f)\n", _Atau.mean(), _Atau.stddev() - judge);
-    } else {
-        sprintf(tmp, "\t\ta_tau ~ N(%f, %f)\n", _Atau.mean(), _Atau.stddev());
-    }
-    s.append(tmp);
-    if(_Tau.stddev() == judge) {
-        sprintf(tmp, "\t\ttau ~ N(%f, %f)\n", _Tau.mean(), _Tau.stddev() - judge);
-    } else {
-        sprintf(tmp, "\t\ttau ~ N(%f, %f)\n", _Tau.mean(), _Tau.stddev());
-    }
-    s.append(tmp);
-    if(_T.stddev() == judge) {
-        sprintf(tmp, "\t\tT ~ N(%f, %f)\n", _T.mean(), _T.stddev() - judge);
-    } else {
-        sprintf(tmp, "\t\tT ~ N(%f, %f)\n", _T.mean(), _T.stddev());
-    }
-    s.append(tmp);
+    //    if(_Bmax.stddev() == judge) {
+    //        sprintf(tmp, "\t\tb_max ~ N(%f, %f)\n", _Bmax.mean(), _Bmax.stddev() - judge);
+    //    } else {
+    //        sprintf(tmp, "\t\tb_max ~ N(%f, %f)\n", _Bmax.mean(), _Bmax.stddev());
+    //    }
+    //    s.append(tmp);
+    //    if(_Bmin.stddev() == judge) {
+    //        sprintf(tmp, "\t\tb_max ~ N(%f, %f)\n", _Bmin.mean(), _Bmin.stddev() - judge);
+    //    } else {
+    //        sprintf(tmp, "\t\tb_min ~ N(%f, %f)\n", _Bmin.mean(), _Bmin.stddev());
+    //    }
+    //    s.append(tmp);
+    //    if(_Amin.stddev() == judge) {
+    //        sprintf(tmp, "\t\tb_max ~ N(%f, %f)\n", _Amin.mean(), _Amin.stddev() - judge);
+    //    } else {
+    //        sprintf(tmp, "\t\tb_min ~ N(%f, %f)\n", _Amin.mean(), _Amin.stddev());
+    //    }
+    //    s.append(tmp);
+    //    if(_Atau.stddev() == judge) {
+    //        sprintf(tmp, "\t\ta_tau ~ N(%f, %f)\n", _Atau.mean(), _Atau.stddev() - judge);
+    //    } else {
+    //        sprintf(tmp, "\t\ta_tau ~ N(%f, %f)\n", _Atau.mean(), _Atau.stddev());
+    //    }
+    //    s.append(tmp);
+    //    if(_Tau.stddev() == judge) {
+    //        sprintf(tmp, "\t\ttau ~ N(%f, %f)\n", _Tau.mean(), _Tau.stddev() - judge);
+    //    } else {
+    //        sprintf(tmp, "\t\ttau ~ N(%f, %f)\n", _Tau.mean(), _Tau.stddev());
+    //    }
+    //    s.append(tmp);
+    //    if(_T.stddev() == judge) {
+    //        sprintf(tmp, "\t\tT ~ N(%f, %f)\n", _T.mean(), _T.stddev() - judge);
+    //    } else {
+    //        sprintf(tmp, "\t\tT ~ N(%f, %f)\n", _T.mean(), _T.stddev());
+    //    }
+    //    s.append(tmp);
     return s;
 }
 
 double AgentsParameters::GetAminMean()
 {
-    return _Amin.mean();
+    return _aMinMean;
 }
 
 double AgentsParameters::GetBmaxMean()
 {
-    return _Bmax.mean();
+    return _bMaxMean;
 }

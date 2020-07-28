@@ -17,6 +17,8 @@
  **/
 #pragma once
 
+#include <algorithm>
+#include <assert.h>
 #include <random>
 #include <stdexcept>
 
@@ -42,7 +44,7 @@ bool _init = false;
  * Seed the random number generator
  * @param seed seed used for the random number generator
  */
-void Setup(int seed)
+inline void Setup(int seed)
 {
     _randomEngine = std::mt19937(seed);
     _init         = true;
@@ -59,9 +61,8 @@ template <typename RealType = double>
 RealType GetNormal(RealType mean, RealType stddev)
 {
     if(!_init) {
-        throw std::logic_error("RandomNumber not yet seeded!");
+        throw std::runtime_error("!");
     }
-
     std::normal_distribution dist(mean, stddev);
     return dist(_randomEngine);
 }
@@ -77,10 +78,7 @@ RealType GetNormal(RealType mean, RealType stddev)
 template <typename IntType = int>
 IntType GetUniformInt(IntType min, IntType max)
 {
-    if(!_init) {
-        throw std::logic_error("RandomNumber not yet seeded!");
-    }
-
+    assert(_init);
     std::uniform_int_distribution dist(min, max);
     return dist(_randomEngine);
 }
@@ -96,10 +94,7 @@ IntType GetUniformInt(IntType min, IntType max)
 template <typename RealType = double>
 RealType GetUniformReal(RealType min, RealType max)
 {
-    if(!_init) {
-        throw std::logic_error("RandomNumber not yet seeded!");
-    }
-
+    assert(_init);
     std::uniform_real_distribution dist(min, max);
     return dist(_randomEngine);
 }
@@ -117,10 +112,7 @@ RealType GetUniformReal(RealType min, RealType max)
 template <typename RealType = double>
 RealType GetTriangular(RealType min, RealType max, RealType peak)
 {
-    if(!_init) {
-        throw std::logic_error("RandomNumber not yet seeded!");
-    }
-
+    assert(_init);
     std::vector<RealType> i{min, peak, max};
     std::vector<RealType> w{0, 1, 0};
     std::piecewise_linear_distribution<RealType> dist{i.begin(), i.end(), w.begin()};
@@ -137,11 +129,42 @@ RealType GetTriangular(RealType min, RealType max, RealType peak)
 template <typename RealType = double>
 RealType GetLogNormal(RealType mean, RealType stddev)
 {
-    if(!_init) {
-        throw std::logic_error("RandomNumber not yet seeded!");
-    }
-
+    assert(_init);
     std::lognormal_distribution dist(mean, stddev);
     return dist(_randomEngine);
+}
+
+/**
+ * Returns a random number based on the weights given by \p weights.
+ * @tparam IntType
+ * @param weights weights for the different values
+ * @return random number of a normal distribution with given parameters
+ */
+template <typename IntType = int>
+IntType GetDiscreteDistribution(std::vector<double> weights)
+{
+    assert(_init);
+    std::discrete_distribution<IntType> dist(std::begin(weights), std::end(weights));
+    return dist(_randomEngine);
+}
+
+template <typename RealType = double>
+RealType GetBetaDistribution(RealType alpha, RealType beta)
+{
+    assert(_init);
+    std::gamma_distribution<RealType> alphaDist(alpha);
+    std::gamma_distribution<RealType> betaDist(beta);
+
+    RealType x = alphaDist(_randomEngine);
+    RealType y = betaDist(_randomEngine);
+
+    return x / (x + y);
+}
+
+template <typename InputIt>
+void ShuffleContainer(InputIt first, InputIt last)
+{
+    assert(_init);
+    std::shuffle(first, last, _randomEngine);
 }
 } // namespace Random

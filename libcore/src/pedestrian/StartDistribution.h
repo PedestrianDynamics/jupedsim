@@ -26,8 +26,6 @@
  **/
 #pragma once
 
-#include <boost/math/distributions.hpp>
-#include <random>
 #include <string>
 #include <vector>
 
@@ -67,25 +65,23 @@ private:
     double _xMax;
     double _yMin;
     double _yMax;
+
     //pre movement time distribution
-    mutable std::normal_distribution<double> _premovementTime;
+    double _premovementMean;
+    double _premovementStdv;
 
     //risk tolerance distribution
     std::string _distribution_type;
-    mutable std::normal_distribution<double> _riskTolerance;
-    mutable boost::math::beta_distribution<> _risk_beta_dist;
-
-    static bool seeded;
-    //random number generator engine
-    mutable std::default_random_engine _generator;
+    double _riskToleranceAlpha;
+    double _riskToleranceBeta;
+    double _riskToleranceMean;
+    double _riskToleranceStdv;
 
     //judge whether sigma>0
     const double judge = 10000;
 
 public:
-    StartDistribution(int seed);
-    virtual ~StartDistribution();
-    std::default_random_engine GetGenerator();
+    StartDistribution();
     int GetAgentsNumber() const;
     void SetRoomID(int id);
     void SetAgentsNumber(int N);

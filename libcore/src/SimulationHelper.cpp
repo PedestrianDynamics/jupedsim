@@ -24,6 +24,7 @@
 
 #include <Logger.h>
 #include <algorithm>
+#include <numeric>
 
 PedRelocation
 SimulationHelper::UpdatePedestrianRoomInformation(const Building & building, Pedestrian & ped)

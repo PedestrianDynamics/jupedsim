@@ -4,6 +4,7 @@
 #include "pedestrian/Pedestrian.h"
 
 #include <Logger.h>
+#include <RandomToolset.h>
 #include <chrono>
 #include <visilibity.hpp>
 
@@ -525,17 +526,7 @@ void CognitiveMap::WriteToFile()
 
 double CognitiveMap::MakeItFuzzy(const double & mean, const double & std)
 {
-    using myClock       = std::chrono::high_resolution_clock;
-    myClock::duration d = myClock::now().time_since_epoch();
-
-    auto seed = d.count();
-
-    std::default_random_engine generator(seed);
-    std::normal_distribution<double> distribution(mean, std);
-
-    double number = distribution(generator);
-
-    return number;
+    return Random::GetNormal(mean, std);
 }
 
 

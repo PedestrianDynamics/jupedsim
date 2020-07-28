@@ -33,7 +33,6 @@
 
 #include <cfloat>
 #include <fstream>
-#include <random>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -226,9 +225,6 @@ private:
     ///map the internal crossings/transition id to
     ///the global ID (description) for that final destination
     std::map<int, int> _mapIdToFinalDestination;
-    // normalize the probs
-    std::default_random_engine _rdGenerator;
-    std::uniform_real_distribution<double> _rdDistribution;
 
 protected:
     // store all subrooms at the same elevation

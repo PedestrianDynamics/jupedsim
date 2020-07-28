@@ -28,8 +28,7 @@
  **/
 #pragma once
 
-#include <random>
-
+#include <string>
 class AgentsParameters
 {
 public:
@@ -230,21 +229,21 @@ public:
 
 private:
     int _id;
-    std::default_random_engine _generator;
-    std::normal_distribution<double> _V0;
-    std::normal_distribution<double> _V0UpStairs;
-    std::normal_distribution<double> _V0DownStairs;
-    std::normal_distribution<double> _EscalatorUpStairs;
-    std::normal_distribution<double> _EscalatorDownStairs;
-    std::normal_distribution<double> _V0IdleEscalatorUpStairs;
-    std::normal_distribution<double> _V0IdleEscalatorDownStairs;
-    std::normal_distribution<double> _Bmax;
-    std::normal_distribution<double> _Bmin;
-    bool _enableStretch = true;
-    std::normal_distribution<double> _Atau;
-    std::normal_distribution<double> _Amin;
-    std::normal_distribution<double> _Tau;
-    std::normal_distribution<double> _T;
 
-    const double judge = 10000;
+    double _v0Mean, _v0Sigma;
+    double _v0UpStairsMean, _v0UpStairsSigma;
+    double _v0DownStairsMean, _v0DownStairsSigma;
+    double _v0EscalatorUpStairsMean, _v0EscalatorUpStairsSigma;
+    double _v0EscalatorDownStairsMean, _v0EscalatorDownStairsSigma;
+    double _v0IdleEscalatorUpStairsMean, _v0IdleEscalatorUpStairsSigma;
+    double _v0IdleEscalatorDownStairsMean, _v0IdleEscalatorDownStairsSigma;
+    double _bMaxMean, _bMaxSigma;
+    double _bMinMean, _bMinSigma;
+    double _aTauMean, _aTauSigma;
+    double _aMinMean, _aMinSigma;
+    double _tauMean, _tauSigma;
+    double _tMean, _tSigma;
+
+    bool _enableStretch;
+    constexpr static const double judge = 10000;
 };

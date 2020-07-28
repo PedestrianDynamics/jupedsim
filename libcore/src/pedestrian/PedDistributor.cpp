@@ -33,6 +33,7 @@
 #include "pedestrian/Pedestrian.h"
 
 #include <Logger.h>
+#include <RandomToolset.h>
 #include <boost/foreach.hpp>
 #include <boost/lambda/bind.hpp>
 #include <boost/range/combine.hpp>
@@ -130,10 +131,8 @@ bool PedDistributor::Distribute(Building * building) const
         //------------------------------------- pack in function ------------
         else {
             auto possibleSubroomPositions = PossiblePositions(*sr);
-            shuffle(
-                possibleSubroomPositions.begin(),
-                possibleSubroomPositions.end(),
-                dist->GetGenerator());
+            Random::ShuffleContainer(
+                possibleSubroomPositions.begin(), possibleSubroomPositions.end());
             allFreePosRoom[subroomID] = possibleSubroomPositions;
         }
     } // for sub_dis
@@ -154,10 +153,9 @@ bool PedDistributor::Distribute(Building * building) const
             if(allFreePosRoom.count(subroomID) > 0)
                 continue;
             auto possibleSubroomPositions = PossiblePositions(*it_sr.second);
-            shuffle(
-                possibleSubroomPositions.begin(),
-                possibleSubroomPositions.end(),
-                dist->GetGenerator());
+            Random::ShuffleContainer(
+                possibleSubroomPositions.begin(), possibleSubroomPositions.end());
+
             allFreePosRoom[subroomID] = possibleSubroomPositions;
         }
     }

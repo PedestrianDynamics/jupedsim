@@ -89,8 +89,7 @@ bool PedDistributionParser::LoadPedDistribution(
                 group_id);
             return false;
         }
-        auto dis =
-            std::shared_ptr<StartDistribution>(new StartDistribution(_configuration->GetSeed()));
+        auto dis = std::shared_ptr<StartDistribution>(new StartDistribution());
         dis->SetRoomID(room_id);
         dis->SetSubroomID(subroom_id);
         dis->SetGroupId(group_id);

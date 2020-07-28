@@ -16,8 +16,8 @@ static int global_count = 0;
 #include "geometry/Wall.h"
 
 #include <Logger.h>
+#include <RandomToolset.h>
 #include <thread>
-
 using boost::polygon::high;
 using boost::polygon::low;
 using boost::polygon::voronoi_builder;
@@ -273,14 +273,11 @@ void VoronoiBestVertexRandMax(
 
     double lower_bound = 0;
     double upper_bound = partial_sums[size - 1];
-    std::random_device rd;
-    std::mt19937 gen(1); //@todo use seed instead of rd(). Generator should not be here
-    std::uniform_real_distribution<double> distribution(lower_bound, upper_bound);
     std::vector<double> random_numbers;
-    for(unsigned int r = 0; r < size; r++)
-        random_numbers.push_back(distribution(gen));
-
-    shuffle(random_numbers.begin(), random_numbers.end(), gen);
+    for(unsigned int r = 0; r < size; r++) {
+        random_numbers.push_back(Random::GetUniformReal(lower_bound, upper_bound));
+    }
+    Random::ShuffleContainer(std::begin(random_numbers), std::end(random_numbers));
     double a_random_double = random_numbers[0];
 
     //the first element in the range [first, last) that is not less than a_random_double

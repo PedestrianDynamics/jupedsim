@@ -31,18 +31,12 @@
 
 #include <cstdio>
 #include <map>
-#include <random>
 #include <vector>
 
 class Building;
 class WaitingArea : public Goal
 {
 protected:
-    /**
-     * Random device
-     */
-    std::random_device _rd;
-
     /**
      * Number of pedestrians which are allowed inside the waiting area
      */

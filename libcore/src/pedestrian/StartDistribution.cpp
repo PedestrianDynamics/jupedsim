@@ -31,41 +31,29 @@
 #include "geometry/SubRoom.h"
 
 #include <Logger.h>
+#include <RandomToolset.h>
 
-StartDistribution::StartDistribution(int seed)
+StartDistribution::StartDistribution()
 {
-    _roomID             = -1;
-    _subroomID          = -1;
-    _subroomUID         = -1;
-    _nPeds              = -1;
-    _groupID            = -1;
-    _goalID             = -1;
-    _routerID           = -1;
-    _routeID            = -1;
-    _startX             = NAN;
-    _startY             = NAN;
-    _startZ             = NAN;
-    _patience           = 5;
-    _xMin               = -FLT_MAX;
-    _xMax               = FLT_MAX;
-    _yMin               = -FLT_MAX;
-    _yMax               = FLT_MAX;
-    _groupParameters    = nullptr;
-    _positions_dir      = "";
-    _unit_traj          = "m";
-    static bool _seeded = false; // seed only once, not every time
-    if(!_seeded) {
-        _generator = std::default_random_engine(seed);
-        _seeded    = true;
-    }
-}
-
-StartDistribution::~StartDistribution() {}
-
-
-std::default_random_engine StartDistribution::GetGenerator()
-{
-    return _generator;
+    _roomID          = -1;
+    _subroomID       = -1;
+    _subroomUID      = -1;
+    _nPeds           = -1;
+    _groupID         = -1;
+    _goalID          = -1;
+    _routerID        = -1;
+    _routeID         = -1;
+    _startX          = NAN;
+    _startY          = NAN;
+    _startZ          = NAN;
+    _patience        = 5;
+    _xMin            = -FLT_MAX;
+    _xMax            = FLT_MAX;
+    _yMin            = -FLT_MAX;
+    _yMax            = FLT_MAX;
+    _groupParameters = nullptr;
+    _positions_dir   = "";
+    _unit_traj       = "m";
 }
 
 int StartDistribution::GetAgentsNumber() const
@@ -314,15 +302,16 @@ void StartDistribution::InitPremovementTime(double mean, double stdv)
     if(stdv <= 0) {
         stdv = judge;
     }
-    _premovementTime = std::normal_distribution<double>(mean, stdv);
+    _premovementMean = mean;
+    _premovementStdv = stdv;
 }
 
 double StartDistribution::GetPremovementTime() const
 {
-    if(_premovementTime.stddev() == judge) {
-        return _premovementTime.mean();
+    if(_premovementStdv == judge) {
+        return _premovementMean;
     } else {
-        return _premovementTime(_generator);
+        return Random::GetNormal(_premovementMean, _premovementStdv);
     }
 }
 
@@ -333,30 +322,33 @@ void StartDistribution::InitRiskTolerance(std::string distribution_type, double 
         if(para2 <= 0) {
             para2 = judge;
         }
-        _riskTolerance = std::normal_distribution<double>(para1, para2);
+        _riskToleranceMean = para1;
+        _riskToleranceStdv = para2;
     }
     if(distribution_type == "beta") {
-        _risk_beta_dist = boost::math::beta_distribution<>(para1, para2);
+        _riskToleranceAlpha = para1;
+        _riskToleranceBeta  = para2;
     }
 }
 
 double StartDistribution::GetRiskTolerance()
 {
     if(_distribution_type == "normal") {
-        if(_riskTolerance.stddev() == judge) {
-            return _riskTolerance.mean();
+        if(_riskToleranceStdv == judge) {
+            return _riskToleranceMean;
         } else {
-            return _riskTolerance(_generator);
+            return Random::GetNormal(_riskToleranceMean, _riskToleranceStdv);
         }
-    } else {
-        std::uniform_real_distribution<float> normalize(0.0, 1.0);
-        float rand_norm = normalize(_generator);
-        if(_distribution_type == "beta") {
-            return quantile(_risk_beta_dist, rand_norm);
-        }
-        LOG_WARNING("Distribution Type invalid or not set. Fallback to uniform distribution");
-        return (double) rand_norm; // todo: ar.graf: check if this quick fix executes and why
     }
+    //    else {
+    //        std::uniform_real_distribution<float> normalize(0.0, 1.0);
+    //        float rand_norm = normalize(_generator);
+    //        if(_distribution_type == "beta") {
+    //            return quantile(_risk_beta_dist, rand_norm);
+    //        }
+    //        LOG_WARNING("Distribution Type invalid or not set. Fallback to uniform distribution");
+    //        return (double) rand_norm; // todo: ar.graf: check if this quick fix executes and why
+    //    }
 }
 
 void StartDistribution::SetPositionsDir(const std::string & dir)

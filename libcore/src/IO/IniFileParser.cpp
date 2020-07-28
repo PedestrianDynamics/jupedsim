@@ -15,9 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  **/
-//
-// Created by laemmel on 24.03.16.
-//
 #include "IniFileParser.h"
 
 #include "OutputHandler.h"
@@ -37,6 +34,7 @@
 #include "routing/smoke_router/SmokeRouter.h"
 
 #include <Logger.h>
+#include <RandomToolset.h>
 #include <stdexcept>
 #include <string>
 #include <tinyxml.h>
@@ -170,13 +168,17 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         TiXmlNode * seedNode = xHeader->FirstChild("seed")->FirstChild();
         if(seedNode) {
             const char * seedValue = seedNode->Value();
-            _config->SetSeed((unsigned int) atoi(seedValue)); //strtol
+            _config->SetSeed(static_cast<unsigned int>(atoi(seedValue))); //strtol
         } else {
             _config->SetSeed(static_cast<unsigned int>(time(NULL)));
         }
     } else {
         _config->SetSeed(static_cast<unsigned int>(time(NULL)));
     }
+
+    // Setup random toolset
+    Random::Setup(_config->GetSeed());
+
     LOG_INFO("Random seed <{}>", _config->GetSeed());
 
     // max simulation time

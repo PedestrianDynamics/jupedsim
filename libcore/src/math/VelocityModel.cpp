@@ -36,6 +36,7 @@
 #include "pedestrian/Pedestrian.h"
 
 #include <Logger.h>
+#include <RandomToolset.h>
 
 double xRight = 26.0;
 double xLeft  = 0.0;
@@ -304,10 +305,8 @@ Point VelocityModel::e0(Pedestrian * ped, Room * room) const
     } else { //@todo: we need a model for waiting pedestrians
         LOG_WARNING("VelocityModel::e0 Ped {} has no navline.", ped->GetID());
         // set random destination
-        std::mt19937 mt(ped->GetBuilding()->GetConfig()->GetSeed());
-        std::uniform_real_distribution<double> dist(0, 1.0);
-        double random_x = dist(mt);
-        double random_y = dist(mt);
+        double random_x = Random::GetUniformReal(0., 1.);
+        double random_y = Random::GetUniformReal(0., 1.);
         Point P1        = Point(ped->GetPos()._x - random_x, ped->GetPos()._y - random_y);
         Point P2        = Point(ped->GetPos()._x + random_x, ped->GetPos()._y + random_y);
         const NavLine L = Line(P1, P2);

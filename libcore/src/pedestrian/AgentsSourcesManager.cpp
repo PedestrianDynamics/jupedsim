@@ -34,6 +34,7 @@
 #include "voronoi-boost/VoronoiPositionGenerator.h"
 
 #include <Logger.h>
+#include <numeric>
 #include <thread>
 
 bool AgentsSourcesManager::_isCompleted = true;

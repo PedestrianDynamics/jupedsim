@@ -29,6 +29,7 @@
 
 #include "Building.h"
 
+#include <RandomToolset.h>
 #include <sstream>
 
 int WaitingArea::GetMaxNumPed() const
@@ -134,8 +135,6 @@ void WaitingArea::SetWaitingTime(int waitingTime)
 
 int WaitingArea::GetNextGoal()
 {
-    //TODO create global util for random numbers
-    std::mt19937_64 gen(_rd());
     // probability of the next goals
     std::vector<double> weights;
     // states if at least one of the succeeding goals is open
@@ -152,10 +151,8 @@ int WaitingArea::GetNextGoal()
     }
 
     if(open) {
-        // if at least one open goal, get random number regarding the
-        // weights
-        std::discrete_distribution<> distribution(weights.begin(), weights.end());
-        int index = distribution(gen);
+        // if at least one open goal, get random number regarding the weights
+        int index = Random::GetDiscreteDistribution(weights);
 
         auto iter = _nextGoals.begin();
         std::advance(iter, index);
