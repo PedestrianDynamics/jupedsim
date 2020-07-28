@@ -20,10 +20,11 @@
 
     <method_D enabled="true">
         <measurement_area id="1" start_frame="None" stop_frame="None"
-                          get_individual_FD="true"/>
+                          get_individual_FD="false"/>
         <one_dimensional enabled="false"/>
         <cut_by_circle enabled="false" radius="1.0" edges="10"/>
         <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/>
+        <use_blind_points enabled="false"/>
     </method_D>
 
 </JPSreport>

@@ -9,10 +9,10 @@
 
     <measurement_areas unit="m">
         <area_B id="1" type="BoundingBox" zPos="None">
-            <vertex px="9.75" py="2.25"/>
-            <vertex px="9.75" py="8.25"/>
-            <vertex px="15.75" py="8.25"/>
-            <vertex px="15.75" py="2.25"/>
+            <vertex px="9.5" py="1.5"/>
+            <vertex px="9.5" py="5.5"/>
+            <vertex px="13.5" py="5.5"/>
+            <vertex px="13.5" py="1.5"/>
         </area_B>
     </measurement_areas>
 
@@ -20,10 +20,11 @@
 
     <method_D enabled="true">
         <measurement_area id="1" start_frame="None" stop_frame="None"
-                          get_individual_FD="true"/>
+                          get_individual_FD="false"/>
         <one_dimensional enabled="false"/>
-        <cut_by_circle enabled="true" radius="0.75" edges="100"/>
+        <cut_by_circle enabled="false" radius="1.0" edges="10"/>
         <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/>
+        <use_blind_points enabled="false"/>
     </method_D>
 
 </JPSreport>

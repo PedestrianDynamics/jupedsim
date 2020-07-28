@@ -9,18 +9,17 @@ import logging
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(path[0]))))
 path.append(utestdir)
 path.append(os.path.dirname(os.path.dirname(path[0])))  # source helper file
-from tests_method_DIJ import test_classical_voronoi
+from tests_method_DIJ import test_IFD_geometry_intersection
 
 from utils import SUCCESS, FAILURE
 import numpy as np
 from JPSRunTest import JPSRunTestDriver
 
-# horizontal and vertical distance between pedestrians
-ped_distance = 1.5
 
 def runtest(inifile, trajfile):
-    logging.info("===== Method D - Classical Voronoi ===============")
-    test_classical_voronoi(trajfile, ped_distance)
+    logging.info("===== Method D - IFD for intersecting voronoi cells, no blind points ===============")
+    test_IFD_geometry_intersection("D", trajfile)
+
 
 if __name__ == "__main__":
     test = JPSRunTestDriver(4, argv0=argv[0], testdir=path[0], utestdir=utestdir, jpsreport=argv[1])

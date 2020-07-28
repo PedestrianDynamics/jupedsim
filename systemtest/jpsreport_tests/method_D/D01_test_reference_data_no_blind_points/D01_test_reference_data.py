@@ -14,7 +14,7 @@ import numpy as np
 alpha = 0.01
 
 def runtest(inifile, trajfile):
-    logging.info("===== Method D - IFD =========================")
+    logging.info("===== Method D - IFD, no blind points =========================")
 
     data_1_filename = 'reference_data_Method_D_IFD.dat'
     data_1 = np.loadtxt(data_1_filename, usecols = (0,1,2,3,4,5,6))
