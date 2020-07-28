@@ -693,7 +693,7 @@ std::optional<ConfigData_DIJ> ArgumentParser::ParseDIJParams(TiXmlElement * xMet
     if(xMethod->FirstChildElement("use_blind_points") &&
        string(xMethod->FirstChildElement("use_blind_points")->Attribute("enabled")) == "false") {
         configData.useBlindPoints = false;
-        LOG_INFO("Use of blind points enabled");
+        LOG_INFO("Use of blind points disabled");
     }
 
     if(xMethod->FirstChildElement("global_IFD") &&
