@@ -66,7 +66,6 @@ int main(int argc, char ** argv)
             analysis.RunAnalysis(File, Path);
             LOG_INFO("**********************************************************************");
             LOG_INFO("End Analysis for the file: {}\n", File.string().c_str());
-            std::cout << "INFO: \tEnd Analysis for the file: " << File.string().c_str() << "\n";
         }
     } else {
         LOG_INFO("Finishing...");
@@ -77,8 +76,6 @@ int main(int argc, char ** argv)
     float duration =
         std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() / 1000000.0;
     LOG_INFO("Time elapsed:\t {:.2f} [s]\n", duration);
-
-    std::cout << "Time elapsed:\t " << duration << " [s]\n";
 
     delete args;
     return (EXIT_SUCCESS);

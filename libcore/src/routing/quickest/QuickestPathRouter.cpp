@@ -764,8 +764,8 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian * ped)
                 }
             }
         } else {
-            std::cout << "Unknown Strategy: " << _defaultStrategy << std::endl;
-            exit(0);
+            throw std::runtime_error(
+                fmt::format(FMT_STRING("Unknown strategy: {}"), _defaultStrategy));
         }
     }
 

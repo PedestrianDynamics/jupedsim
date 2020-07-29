@@ -170,9 +170,7 @@ void Pedestrian::SetID(int i)
 {
     _id = i;
     if(i <= 0) {
-        std::cerr << ">> Invalid pedestrians ID " << i << std::endl;
-        std::cerr << ">> Pedestrian ID should be > 0. Exit." << std::endl;
-        exit(0);
+        throw std::logic_error("Invalid pedestrians ID: Pedestrian ID should be > 0.");
     }
 }
 

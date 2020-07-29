@@ -235,11 +235,13 @@ void AgentsSource::GenerateAgents(std::vector<Pedestrian *> & peds, int count, B
             auto ped = GetStartDistribution()->GenerateAgent(building, &pid, emptyPositions);
             peds.push_back(ped);
         } else {
-            std::cout << " \n Source: StartDistribution is null!\n"
-                         " This happens when group_id in <source> does not much any group_id in "
-                         "<agents>\n"
-                         " Check again your inifile. If the problem persists report an issue\n";
-            exit(EXIT_FAILURE);
+            std::string message =
+                "Source: StartDistribution is null!\n"
+                " This happens when group_id in <source> does not much any group_id in "
+                "<agents>\n"
+                " Check again your inifile. If the problem persists report an issue\n";
+
+            throw std::runtime_error(message);
         }
     }
 }

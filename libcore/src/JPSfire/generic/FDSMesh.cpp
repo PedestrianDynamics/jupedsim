@@ -5,7 +5,6 @@
 #include <Logger.h>
 #include <cmath>
 #include <cnpy.h>
-
 std::vector<std::string> &
 split2(const std::string & s, char delim, std::vector<std::string> & elems)
 {
@@ -29,7 +28,7 @@ FDSMesh::FDSMesh(
     _statMesh(false)
 {
     SetUpMesh(xmin, ymin, xmax, ymax, cellsize);
-    std::cout << "FDSMesh set up!" << std::endl;
+    LOG_INFO("FDSMesh set up!");
 }
 
 FDSMesh::FDSMesh(const std::string & filename) : _statMesh(false)
@@ -159,7 +158,7 @@ void FDSMesh::ReadMatrix(std::string line, std::ifstream & pFile)
                 try {
                     temp = std::stod(elem);
                 } catch(...) {
-                    std::cout << "can not convert " << elem << std::endl;
+                    LOG_WARNING("can not convert {}", elem);
                 }
                 _matrix[m][n].SetValue(temp);
             }

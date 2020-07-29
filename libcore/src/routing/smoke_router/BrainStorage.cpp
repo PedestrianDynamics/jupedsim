@@ -205,7 +205,6 @@ void BrainStorage::ParseCogMap(BStorageKeyType ped)
                     std::stod(asso_a),
                     std::stod(asso_b)));
                 assolandmark->SetId(std::stod(asso_id));
-                //std::cout << assolandmark->GetId() << std::endl;
                 assolandmark->SetCaption(asso_caption);
                 //assolandmark->AddConnection(std::stoi(connection));
                 //assolandmark->SetPriority(std::stod(priority));
