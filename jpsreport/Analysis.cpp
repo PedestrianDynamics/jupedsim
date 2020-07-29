@@ -101,14 +101,12 @@ Analysis::~Analysis()
 // file.txt ---> file
 std::string Analysis::GetBasename(const std::string & str)
 {
-    std::cout << "Splitting: " << str << '\n';
     unsigned found = str.find_last_of(".");
     return str.substr(0, found);
 }
 // c:\\windows\\winhelp.exe ---> winhelp.exe
 std::string Analysis::GetFilename(const std::string & str)
 {
-    std::cout << "GetFilename: " << str << '\n';
     unsigned found = str.find_last_of("/\\");
     return str.substr(found + 1);
 }

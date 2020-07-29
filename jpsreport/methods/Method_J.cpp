@@ -194,8 +194,12 @@ bool Method_J::Process(
                     }
                 } else {
                     for(int i = 0; i < (int) IdInFrame.size(); i++) {
-                        std::cout << XInFrame[i] * CMtoM << "   " << YInFrame[i] * CMtoM << "   "
-                                  << IdInFrame[i] << "\n";
+                        LOG_WARNING(
+                            "Polygons could not be obtained for frame={}: id={} x={:.5} y={:.5}",
+                            frameNr,
+                            IdInFrame[i],
+                            XInFrame[i] * CMtoM,
+                            YInFrame[i] * CMtoM);
                     }
                     LOG_WARNING(
                         "Voronoi Diagrams are not obtained!. Frame: {} (minFrame = "
@@ -342,18 +346,20 @@ std::tuple<double, double> Method_J::GetVoronoiDensityVelocity(
             pedsinMeasureArea++;
             density += area(v[0]) / area(polygon_iterator);
             if((area(v[0]) - area(polygon_iterator)) > J_EPS) {
-                std::cout << "----------------------Now calculating "
-                             "density-velocity!!!-----------------\n ";
-                std::cout << "measure area: \t" << std::setprecision(16) << dsv(measureArea)
-                          << "\n";
-                std::cout << "Original polygon:\t" << std::setprecision(16) << dsv(polygon_iterator)
-                          << "\n";
-                std::cout << "intersected polygon: \t" << std::setprecision(16) << dsv(v[0])
-                          << "\n";
-                std::cout << "this is a wrong result in density calculation\t " << area(v[0])
-                          << '\t' << area(polygon_iterator)
-                          << "  (diff=" << (area(v[0]) - area(polygon_iterator)) << ")"
-                          << "\n";
+                std::stringstream stringStream;
+                stringStream << "----------------------Now calculating "
+                                "density-velocity!!!-----------------\n ";
+                stringStream << "measure area: \t" << std::setprecision(16) << dsv(measureArea)
+                             << "\n";
+                stringStream << "Original polygon:\t" << std::setprecision(16)
+                             << dsv(polygon_iterator) << "\n";
+                stringStream << "intersected polygon: \t" << std::setprecision(16) << dsv(v[0])
+                             << "\n";
+                stringStream << "this is a wrong result in density calculation\t " << area(v[0])
+                             << '\t' << area(polygon_iterator)
+                             << "  (diff=" << (area(v[0]) - area(polygon_iterator)) << ")"
+                             << "\n";
+                LOG_WARNING("{}", stringStream.str());
             }
         }
         i++;
