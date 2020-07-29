@@ -863,7 +863,7 @@ void Building::AddPedestrian(Pedestrian * ped)
            std::begin(_allPedestrians), std::end(_allPedestrians), [ped](const Pedestrian * other) {
                return ped->GetID() == other->GetID();
            }) != std::end(_allPedestrians)) {
-        LOG_ERROR("Pedestrian {} already in the romm.", ped->GetID());
+        LOG_WARNING("Pedestrian {} already in the room.", ped->GetID());
     } else {
         _allPedestrians.push_back(ped);
     }

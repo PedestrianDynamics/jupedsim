@@ -98,7 +98,7 @@ bool VelocityModel::Init(Building * building)
         if(ped->GetExitLine())
             target = ped->GetExitLine()->ShortestPoint(ped->GetPos());
         else {
-            LOG_ERROR("Ped {} has no exit line in INIT", ped->GetID());
+            LOG_WARNING("Ped {} has no exit line in INIT", ped->GetID());
         }
         Point d     = target - ped->GetPos();
         double dist = d.Norm();

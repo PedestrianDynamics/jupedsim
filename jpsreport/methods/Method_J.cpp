@@ -195,7 +195,7 @@ bool Method_J::Process(
                 } else {
                     for(int i = 0; i < (int) IdInFrame.size(); i++) {
                         LOG_WARNING(
-                            "frame={}: id={} x={:.5} y={:.5}",
+                            "Polygons could not be obtained for frame={}: id={} x={:.5} y={:.5}",
                             frameNr,
                             IdInFrame[i],
                             XInFrame[i] * CMtoM,
