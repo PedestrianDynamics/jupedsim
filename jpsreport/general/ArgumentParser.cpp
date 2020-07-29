@@ -748,6 +748,8 @@ std::optional<ConfigData_DIJ> ArgumentParser::ParseDIJParams(TiXmlElement * xMet
 
         correct(poly); // in the case the Polygone is not closed
         areaB->_poly = poly;
+        // TODO: why do we need to do this??
+        areaB->_zPos = 10000001.0;
 
         _measurementAreasByIDs[areaB->_id] = areaB;
 

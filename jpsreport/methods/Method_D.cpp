@@ -111,7 +111,7 @@ bool Method_D::Process(
         }
     }
 
-    if(!OpenFileMethodD(_isOneDimensional)) {
+    if(!_calcGlobalIFDOnly && !OpenFileMethodD(_isOneDimensional)) {
         return_value = false;
     }
     if(_calcLocalIFD) {
