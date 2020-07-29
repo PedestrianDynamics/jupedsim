@@ -53,23 +53,24 @@ FDSMeshStorage::FDSMeshStorage(
     fs::path p(_filepath);
     p         = fs::canonical(p).make_preferred(); //remove ..
     _filepath = p.string(); // TODO: refactor this class. Use path instead of string
-    std::cout << "\nFDSMeshStorage: <" << p << ">\n";
+    LOG_INFO("FDSMeshStorage: {}", p.string());
+
     if(fs::exists(p)) {
-        std::cout << "\nCreating QuantityList..." << std::endl;
+        LOG_INFO("Creating QuantityList ...");
         CreateQuantityList();
-        std::cout << "Success!" << std::endl;
-        std::cout << "\nCreating ElevationList..." << std::endl;
+        LOG_INFO("Success!");
+        LOG_INFO("Creating ElevationList ...");
         CreateElevationList();
-        std::cout << "Success!" << std::endl;
-        std::cout << "\nCreating DoorList..." << std::endl;
+        LOG_INFO("Success!");
+        LOG_INFO("Creating DoorList ...");
         CreateDoorList();
-        std::cout << "Success!" << std::endl;
-        std::cout << "\nCreating TimeList..." << std::endl;
+        LOG_INFO("Success!");
+        LOG_INFO("Creating TimeList ...");
         CreateTimeList();
-        std::cout << "Success!" << std::endl;
-        std::cout << "\nCreating FDSMeshes..." << std::endl;
+        LOG_INFO("Success!");
+        LOG_INFO("Creating FDSMeshes ...");
         CreateFDSMeshes();
-        std::cout << "Success!" << std::endl;
+        LOG_INFO("Success!");
     } else {
         LOG_ERROR("Could not find directory {}", _filepath);
         exit(EXIT_FAILURE);
@@ -95,7 +96,7 @@ bool FDSMeshStorage::CreateQuantityList()
         LOG_ERROR("Could not find suitable quantities in {}", _filepath);
         return false;
     }
-    std::cout << "_quantitylist.size(): " << _quantitylist.size() << "\n";
+    LOG_INFO("_quantitylist.size(): {}", _quantitylist.size());
     return true;
 }
 
@@ -119,7 +120,7 @@ bool FDSMeshStorage::CreateElevationList()
         exit(EXIT_FAILURE);
         return false;
     }
-    std::cout << "_elevationlist.size(): " << _elevationlist.size() << "\n";
+    LOG_INFO("_elevationlist.size(): {}", _elevationlist.size());
     return true;
 }
 
@@ -162,7 +163,7 @@ void FDSMeshStorage::CreateDoorList()
             }
         }
     }
-    std::cout << "_doorlist.size(): " << _doorlist.size() << "\n";
+    LOG_INFO("_doorlist.size(): {}", _doorlist.size());
 }
 void FDSMeshStorage::CreateTimeList()
 {
@@ -194,12 +195,11 @@ void FDSMeshStorage::CreateTimeList()
             exit(EXIT_FAILURE);
         }
     }
-    std::cout << "_timelist.size(): " << _timelist.size() << "\n";
+    LOG_INFO("_timelist.size(): {}", _timelist.size());
 }
 
 void FDSMeshStorage::CreateFDSMeshes()
 {
-    std::cout << "Enter CreateFDSMeshes\n";
     _fMContainer.clear();
     if(_doorlist.size() > 0) {        // Smoke sensor active
         for(auto & h : _quantitylist) //list of quantities
@@ -235,7 +235,7 @@ void FDSMeshStorage::CreateFDSMeshes()
             }
         }
     }
-    std::cout << "_fdcontainer.size(): " << _fMContainer.size() << "\n";
+    LOG_INFO("_fdcontainer.size(): {}", _fMContainer.size());
 }
 
 const FDSMesh & FDSMeshStorage::GetFDSMesh(
@@ -258,7 +258,7 @@ const FDSMesh & FDSMeshStorage::GetFDSMesh(
     Ztime = _filepath / Ztime;
     Ztime = fs::canonical(Ztime).make_preferred();
     if(_fMContainer.count(Ztime.string()) == 0) {
-        std::cout << "\n time ERROR: requested grid not available: " << Ztime.string() << std::endl;
+        LOG_ERROR("requested grid not available: {}", Ztime.string());
         std::exit(EXIT_FAILURE);
     }
     return _fMContainer.at(Ztime.string());
@@ -288,8 +288,7 @@ FDSMeshStorage::GetFDSMesh(const double & pedElev, const Point & doorCentre, con
     door_xy = _filepath / door_xy;
     door_xy = fs::canonical(door_xy).make_preferred();
     if(_fMContainer.count(door_xy.string()) == 0) {
-        std::cout << "\n > ERROR: requested sfgrid not available: " << door_xy.string()
-                  << std::endl;
+        LOG_ERROR("requested sfgrid not available: {}", door_xy.string());
         std::exit(EXIT_FAILURE);
     }
 

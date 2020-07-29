@@ -859,14 +859,14 @@ const std::vector<Pedestrian *> & Building::GetAllPedestrians() const
 
 void Building::AddPedestrian(Pedestrian * ped)
 {
-    for(unsigned int p = 0; p < _allPedestrians.size(); p++) {
-        Pedestrian * ped1 = _allPedestrians[p];
-        if(ped->GetID() == ped1->GetID()) {
-            std::cout << "Pedestrian " << ped->GetID() << " already in the room." << std::endl;
-            return;
-        }
+    if(std::find_if(
+           std::begin(_allPedestrians), std::end(_allPedestrians), [ped](const Pedestrian * other) {
+               return ped->GetID() == other->GetID();
+           }) != std::end(_allPedestrians)) {
+        LOG_WARNING("Pedestrian {} already in the room.", ped->GetID());
+    } else {
+        _allPedestrians.push_back(ped);
     }
-    _allPedestrians.push_back(ped);
 }
 
 void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const

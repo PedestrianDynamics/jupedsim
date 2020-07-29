@@ -76,7 +76,6 @@ bool VelocityModel::Init(Building * building)
         // to wait in waiting areas
         int res = ped->FindRoute();
         if(!ped_is_waiting && res == -1) {
-            std::cout << ped->GetID() << " has no route\n";
             LOG_ERROR(
                 "VelocityModel::Init() cannot initialise route. ped {:d} is deleted in Room "
                 "%d %d.\n",
@@ -99,7 +98,7 @@ bool VelocityModel::Init(Building * building)
         if(ped->GetExitLine())
             target = ped->GetExitLine()->ShortestPoint(ped->GetPos());
         else {
-            std::cout << "Ped " << ped->GetID() << " has no exit line in INIT\n";
+            LOG_WARNING("Ped {} has no exit line in INIT", ped->GetID());
         }
         Point d     = target - ped->GetPos();
         double dist = d.Norm();
@@ -166,9 +165,6 @@ void VelocityModel::ComputeNextTimeStep(
             int size = (int) neighbours.size();
             for(int i = 0; i < size; i++) {
                 Pedestrian * ped1 = neighbours[i];
-                if(ped1 == nullptr) {
-                    std::cout << "Velocity Model debug: " << size << std::endl;
-                }
                 //if they are in the same subroom
                 Point p1 = ped->GetPos();
 
@@ -306,7 +302,7 @@ Point VelocityModel::e0(Pedestrian * ped, Room * room) const
         // target is where the ped wants to be after the next timestep
         target = _direction->GetTarget(room, ped);
     } else { //@todo: we need a model for waiting pedestrians
-        std::cout << ped->GetID() << " VelocityModel::e0 Ped has no navline.\n";
+        LOG_WARNING("VelocityModel::e0 Ped {} has no navline.", ped->GetID());
         // set random destination
         std::mt19937 mt(ped->GetBuilding()->GetConfig()->GetSeed());
         std::uniform_real_distribution<double> dist(0, 1.0);
