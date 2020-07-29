@@ -642,10 +642,10 @@ std::optional<ConfigData_DIJ> ArgumentParser::ParseDIJParams(TiXmlElement * xMet
             configData.stopFrames.push_back(-1);
         }
 
-        if(xMeasurementArea->Attribute("get_individual_FD") &&
-           string(xMeasurementArea->Attribute("get_individual_FD")) == "true") {
+        if(xMeasurementArea->Attribute("local_IFD") &&
+           string(xMeasurementArea->Attribute("local_IFD")) == "true") {
             configData.calcLocalIFD.push_back(true);
-            LOG_INFO("Individual FD will be output");
+            LOG_INFO("Local individual FD will be output");
         } else {
             configData.calcLocalIFD.push_back(false);
         }
