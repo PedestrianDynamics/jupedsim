@@ -19,12 +19,11 @@ from JPSRunTest import JPSRunTestDriver
 ped_distance = 1.5
 # ids of pedestrians to validate
 ped_IDs = np.array([8.0, 9.0, 10.0, 11.0, 14.0, 15.0, 16.0, 17.0, 20.0, 21.0, 22.0, 23.0, 26.0, 27.0, 28.0, 29.0])
-# cut off radius is set to 0.75 in inifile --> cut off function should be applied for inner vornoi cells
-cut_off_has_effect = True
-
+# cut off radius is set to 1.0607 (radius of circumcircle) in inifile --> cut off function not be applied for inner vornoi cells
+cut_off_has_effect = False
 
 def runtest(inifile, trajfile):
-    logging.info("===== Method I - Cut off   ===============")
+    logging.info("===== Method D - Global IFD, Cut off   ===============")
     test_cut_off_all_frames(trajfile, ped_distance, ped_IDs, cut_off_has_effect)
 
 

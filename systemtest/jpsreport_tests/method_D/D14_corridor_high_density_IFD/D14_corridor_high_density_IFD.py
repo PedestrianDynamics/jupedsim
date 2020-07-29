@@ -20,7 +20,7 @@ ped_distance = 0.5
 
 
 def runtest(inifile, trajfile):
-    logging.info("===== Method I - IFD  ===============")
+    logging.info("===== Method D - Global IFD  ===============")
     test_IFD_all_frames(trajfile, ped_distance)
 
 

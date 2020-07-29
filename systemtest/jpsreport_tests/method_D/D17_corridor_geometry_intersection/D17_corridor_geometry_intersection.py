@@ -9,19 +9,16 @@ import logging
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(path[0]))))
 path.append(utestdir)
 path.append(os.path.dirname(os.path.dirname(path[0])))  # source helper file
-from tests_method_DIJ import test_IFD_all_frames
+from tests_method_DIJ import test_IFD_geometry_intersection_all_frames
 
 from utils import SUCCESS, FAILURE
 import numpy as np
 from JPSRunTest import JPSRunTestDriver
 
-# horizontal and vertical distance between pedestrians
-ped_distance = 1.5
-
 
 def runtest(inifile, trajfile):
-    logging.info("===== Method I - IFD  ===============")
-    test_IFD_all_frames(trajfile, ped_distance)
+    logging.info("===== Method D - Global IFD for intersecting voronoi cells ===============")
+    test_IFD_geometry_intersection_all_frames(trajfile)
 
 
 if __name__ == "__main__":

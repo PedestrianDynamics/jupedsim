@@ -14,15 +14,15 @@ import numpy as np
 alpha = 0.01
 
 def runtest(inifile, trajfile):
-    logging.info("===== Method I - IFD =========================")
+    logging.info("===== Method D - Global IFD =========================")
 
-    data_1_filename = 'reference_data_Method_I_IFD.dat'
-    data_1 = np.loadtxt(data_1_filename, usecols = (0,1,2,3,4,5,6))
+    data_1_filename = 'reference_data_Method_D_global_IFD.dat'
+    data_1 = np.loadtxt(data_1_filename, usecols=(0, 1, 2, 3, 4, 5, 6))
 
     data_2_filename = os.path.join('./Output',
                                    'Fundamental_Diagram',
                                    'IndividualFD',
-                                   'IFD_I_%s_id_1.dat'%trajfile
+                                   'IFD_D_%s_id_-1.dat' % trajfile
                                    )
     if not os.path.exists(data_2_filename):
         logging.critical("jpsreport did not output results correctly.")

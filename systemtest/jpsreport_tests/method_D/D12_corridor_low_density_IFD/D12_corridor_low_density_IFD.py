@@ -16,11 +16,11 @@ import numpy as np
 from JPSRunTest import JPSRunTestDriver
 
 # horizontal and vertical distance between pedestrians
-ped_distance = 1.0
+ped_distance = 1.5
 
 
 def runtest(inifile, trajfile):
-    logging.info("===== Method I - IFD  ===============")
+    logging.info("===== Method D - Global IFD  ===============")
     test_IFD_all_frames(trajfile, ped_distance)
 
 
