@@ -366,6 +366,12 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                     "at all!!",
                     num_verteces);
 
+            // TODO: this needs to be restructured. Same default MA can be used for profiles and globalIFD
+            if(num_verteces == 0) {
+                LOG_WARNING("Measurement are with 0 points. Default bounding box!!");
+                poly = GetSurroundingPolygon();
+            }
+
             correct(poly); // in the case the Polygone is not closed
             areaB->_poly = poly;
 
@@ -688,6 +694,7 @@ std::optional<ConfigData_DIJ> ArgumentParser::ParseDIJParams(TiXmlElement * xMet
             "The discretized grid size in x, y direction is: <{}> by <{}> m^2",
             configData.gridSizeX * CMtoM,
             configData.gridSizeY * CMtoM);
+        //TODO: restructuring needed. profiles option should be independet of MA so that start and stop frame can be set here.
     }
 
     if(xMethod->FirstChildElement("use_blind_points") &&
@@ -701,56 +708,14 @@ std::optional<ConfigData_DIJ> ArgumentParser::ParseDIJParams(TiXmlElement * xMet
         LOG_INFO(
             "Global IFD data will be calculated. Bounding box is created as measurement area.");
 
-        // create bounding box MA
+        // create MA with polygon points outside the geometry
         MeasurementArea_B * areaB = new MeasurementArea_B();
         areaB->_id                = -1;
         areaB->_type              = "Bounding Box";
-
-        polygon_2d poly;
-
-        // loading geometry is done in  analysis.cpp
-        // so this is done twice, which is not nice.
-        // For big geometries it could be slow.
-        Building * building = new Building();
-        building->LoadGeometry(GetGeometryFilename().string());
-        building->InitGeometry();
-        building->AddSurroundingRoom(); // this is a big reactagle
-        // slightly bigger than the
-        // geometry boundaries
-        double geo_minX = building->_xMin;
-        double geo_minY = building->_yMin;
-        double geo_maxX = building->_xMax;
-        double geo_maxY = building->_yMax;
-        LOG_INFO(
-            "Bounding box:\n \t\tminX = {:.2f}\n \t\tmaxX = {:.2f} \n \t\tminY = {:.2f} "
-            "\n\t\tmaxY = {:.2f}",
-            geo_minX,
-            geo_maxX,
-            geo_minY,
-            geo_maxY);
-
-        //1
-        double box_px = geo_minX * M2CM;
-        double box_py = geo_minY * M2CM;
-        boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
-        //2
-        box_px = geo_minX * M2CM;
-        box_py = geo_maxY * M2CM;
-        boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
-        //3
-        box_px = geo_maxX * M2CM;
-        box_py = geo_maxY * M2CM;
-        boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
-        //4
-        box_px = geo_maxX * M2CM;
-        box_py = geo_minY * M2CM;
-        boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
-
-        correct(poly); // in the case the Polygone is not closed
-        areaB->_poly = poly;
-        // TODO: why do we need to do this??
-        areaB->_zPos = 10000001.0;
-
+        polygon_2d poly           = GetSurroundingPolygon();
+        correct(poly);
+        areaB->_poly                       = poly;
+        areaB->_zPos                       = 10000001.0; // TODO: why do we need to do this??
         _measurementAreasByIDs[areaB->_id] = areaB;
 
         // set config parameters
@@ -762,6 +727,52 @@ std::optional<ConfigData_DIJ> ArgumentParser::ParseDIJParams(TiXmlElement * xMet
     }
 
     return configData;
+}
+
+polygon_2d ArgumentParser::GetSurroundingPolygon()
+{
+    polygon_2d poly;
+    // loading geometry is done in  analysis.cpp
+    // so this is done twice, which is not nice.
+    // For big geometries it could be slow.
+    Building * building = new Building();
+    building->LoadGeometry(
+        GetGeometryFilename()
+            .string()); //TODO: Geometry is load after MA. Resturcturing needed for creating default MA
+    building->InitGeometry();
+    building->AddSurroundingRoom(); // this is a big reactagle
+    // slightly bigger than the
+    // geometry boundaries
+    double geo_minX = building->_xMin;
+    double geo_minY = building->_yMin;
+    double geo_maxX = building->_xMax;
+    double geo_maxY = building->_yMax;
+    LOG_INFO(
+        "Bounding box:\n \t\tminX = {:.2f}\n \t\tmaxX = {:.2f} \n \t\tminY = {:.2f} "
+        "\n\t\tmaxY = {:.2f}",
+        geo_minX,
+        geo_maxX,
+        geo_minY,
+        geo_maxY);
+
+    //1
+    double box_px = geo_minX * M2CM;
+    double box_py = geo_minY * M2CM;
+    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
+    //2
+    box_px = geo_minX * M2CM;
+    box_py = geo_maxY * M2CM;
+    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
+    //3
+    box_px = geo_maxX * M2CM;
+    box_py = geo_maxY * M2CM;
+    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
+    //4
+    box_px = geo_maxX * M2CM;
+    box_py = geo_minY * M2CM;
+    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
+
+    return poly;
 }
 
 const fs::path & ArgumentParser::GetGeometryFilename() const

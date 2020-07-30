@@ -81,6 +81,7 @@ private:
     void Usage(const std::string file);
 
     std::optional<ConfigData_DIJ> ParseDIJParams(TiXmlElement * xMethod);
+    polygon_2d GetSurroundingPolygon();
 
 public:
     // Konstruktor

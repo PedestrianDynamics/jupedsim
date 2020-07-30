@@ -85,7 +85,8 @@ bool Method_D::Process(
 
     if(_measurementArea->_id == -1) {
         // change parameters for calculating global IFD only
-        _getProfile        = false;
+        _getProfile =
+            false; // TODO: should be changed in future. There should be a function for processing global data (once) which are measurement area independent
         _calcGlobalIFDOnly = true;
     }
 
@@ -209,6 +210,7 @@ bool Method_D::Process(
                                 _calcGlobalIFDOnly);
                         }
                     }
+                    // TODO: profiles should be calculated for the default MA only.
                     if(_getProfile) {                                          //	field analysis
                         GetProfiles(configData, str_frid, polygons, VInFrame); // TODO polygons_id
                     }
