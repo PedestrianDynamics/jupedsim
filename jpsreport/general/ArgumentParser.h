@@ -66,7 +66,6 @@ private:
     bool _isMethodB;
     bool _isMethodC;
     bool _isMethodD;
-    bool _isMethodI;
     bool _isMethodJ;
     double _steadyStart;
     double _steadyEnd;
@@ -102,7 +101,6 @@ public:
     bool GetIsMethodB() const;
     bool GetIsMethodC() const;
     bool GetIsMethodD() const;
-    bool GetIsMethodI() const;
     bool GetIsMethodJ() const;
     std::vector<int> GetAreaIDforMethodA() const;
     std::vector<int> GetAreaIDforMethodB() const;
@@ -120,7 +118,7 @@ public:
       */
     bool ParseIniFile(const std::string & inifile);
 
-    ConfigData_DIJ _configDataD, _configDataI, _configDataJ;
+    ConfigData_DIJ _configDataD, _configDataJ;
 };
 
 #endif /*ARGPARSER_H_*/

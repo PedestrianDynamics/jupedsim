@@ -36,7 +36,6 @@
 #include "methods/Method_B.h"
 #include "methods/Method_C.h"
 #include "methods/Method_D.h"
-#include "methods/Method_I.h"
 #include "methods/Method_J.h"
 #include "methods/PedData.h"
 #include "methods/VoronoiDiagram.h"
@@ -80,7 +79,6 @@ Analysis::Analysis()
     _DoesUseMethodB = false; // Method B (Zhang2011a)
     _DoesUseMethodC = false; // Method C //calculate and save results of classic in separate file
     _DoesUseMethodD = false; // Method D--Voronoi method
-    _DoesUseMethodI = false;
     _DoesUseMethodJ = false;
 
     _vComponent =
@@ -158,16 +156,6 @@ void Analysis::InitArgs(ArgumentParser * args)
 
         _geoPolyMethodD = ReadGeometry(args->GetGeometryFilename(), _areasForMethodD);
     }
-    if(args->GetIsMethodI()) {
-        _DoesUseMethodI = true;
-        // TODO[DH]: modernize loops
-        for(unsigned int i = 0; i < args->_configDataI.areaIDs.size(); i++) {
-            _areaForMethod_I.push_back(dynamic_cast<MeasurementArea_B *>(
-                args->GetMeasurementArea(args->_configDataI.areaIDs[i])));
-        }
-
-        _geoPolyMethodI = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_I);
-    }
 
     if(args->GetIsMethodJ()) {
         _DoesUseMethodJ = true;
@@ -189,7 +177,6 @@ void Analysis::InitArgs(ArgumentParser * args)
     _outputLocation         = args->GetOutputLocation();
 
     configData_D = args->_configDataD;
-    configData_I = args->_configDataI;
     configData_J = args->_configDataJ;
 }
 
@@ -403,35 +390,6 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
                 LOG_ERROR(
                     "Failed with Method D using measurement area id {}!\n",
                     _areasForMethodD[i]->_id);
-            }
-        }
-    }
-
-    if(_DoesUseMethodI) //method_I
-    {
-        if(_areaForMethod_I.empty()) {
-            LOG_ERROR("Method I selected with no measurement area!");
-            exit(EXIT_FAILURE);
-        }
-
-#pragma omp parallel for
-        for(int i = 0; i < int(_areaForMethod_I.size()); i++) {
-            Method_I method_I;
-            method_I.SetGeometryPolygon(_geoPolyMethodI[_areaForMethod_I[i]->_id]);
-            method_I.SetGeometryFileName(_geometryFileName);
-            method_I.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
-            method_I.SetTrajectoriesLocation(path);
-            method_I.SetMeasurementArea(_areaForMethod_I[i]);
-            bool result_I = method_I.Process(
-                configData_I, i, data, _scriptsLocation, _areaForMethod_I[i]->_zPos);
-            if(result_I) {
-                LOG_INFO(
-                    "Success with Method I using measurement area id {}!\n",
-                    _areaForMethod_I[i]->_id);
-            } else {
-                LOG_ERROR(
-                    "Failed with Method I using measurement area id {}!\n",
-                    _areaForMethod_I[i]->_id);
             }
         }
     }

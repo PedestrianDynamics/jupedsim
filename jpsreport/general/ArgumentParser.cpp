@@ -94,7 +94,6 @@ ArgumentParser::ArgumentParser()
     _isMethodB              = false;
     _isMethodC              = false;
     _isMethodD              = false;
-    _isMethodI              = false;
     _isMethodJ              = false;
     _steadyStart            = 100;
     _steadyEnd              = 1000;
@@ -585,16 +584,6 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
         }
     }
 
-    // method I
-    TiXmlElement * xMethod_I = xMainNode->FirstChildElement("method_I");
-    if(xMethod_I) {
-        LOG_INFO("Method I is selected with following options");
-        if(auto configData = ParseDIJParams(xMethod_I)) {
-            _configDataI = configData.value();
-            _isMethodI   = true;
-        }
-    }
-
     // method Voronoi
     TiXmlElement * xMethod_J = xMainNode->FirstChildElement("method_J");
     if(xMethod_J) {
@@ -606,7 +595,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
     }
 
     LOG_INFO("Finish parsing inifile");
-    if(!(_isMethodA || _isMethodB || _isMethodC || _isMethodD || _isMethodI || _isMethodJ)) {
+    if(!(_isMethodA || _isMethodB || _isMethodC || _isMethodD || _isMethodJ)) {
         LOG_WARNING("No measurement method enabled. Nothing to do.");
         exit(EXIT_SUCCESS);
     }
@@ -839,10 +828,6 @@ bool ArgumentParser::GetIsMethodC() const
 bool ArgumentParser::GetIsMethodD() const
 {
     return _isMethodD;
-}
-bool ArgumentParser::GetIsMethodI() const
-{
-    return _isMethodI;
 }
 
 bool ArgumentParser::GetIsMethodJ() const

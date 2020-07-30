@@ -112,8 +112,6 @@ private:
     bool _DoesUseMethodB;     // Method B (Zhang2011a)
     bool _DoesUseMethodC;     // Method C //calculate and save results of classic in separate file
     bool _DoesUseMethodD;     // Method D--Voronoi method
-    bool _DoesUseMethodI;     // Method I--Voronoi method  modified
-                              // no measurement are)
     bool _DoesUseMethodJ;
 
     std::string
@@ -130,13 +128,9 @@ private:
     std::vector<MeasurementArea_B *> _areasForMethodB;
     std::vector<MeasurementArea_B *> _areasForMethodC;
     std::vector<MeasurementArea_B *> _areasForMethodD;
-    std::vector<MeasurementArea_B *> _areaForMethod_I; // we still need to know
-                                                       // the zpos of the
-                                                       // measurement are, even
-                                                       // if we don't use its polygon
     std::vector<MeasurementArea_B *> _areaForMethod_J;
 
-    ConfigData_DIJ configData_D, configData_I, configData_J;
+    ConfigData_DIJ configData_D, configData_J;
 };
 
 #endif /*ANALYSIS_H_*/
