@@ -64,7 +64,7 @@ private:
     FILE * _fIndividualFD;
     float _fps;
     bool OpenFileMethodD(bool _isOneDimensional);
-    bool OpenFileIndividualFD(bool _isOneDimensional);
+    bool OpenFileIndividualFD(bool _isOneDimensional, bool global);
 
     std::vector<std::pair<polygon_2d, int>> GetPolygons(
         const ConfigData_DIJ & configData,
@@ -93,7 +93,8 @@ private:
         const std::string & frid,
         std::vector<double> & XInFrame,
         std::vector<double> & YInFrame,
-        std::vector<double> & ZInFrame);
+        std::vector<double> & ZInFrame,
+        bool global);
     /**
       * Reduce the precision of the points to two digits
       * @param polygon

@@ -64,6 +64,7 @@ bool Method_D::Process(
     const PedData & pedData,
     const double & zPos_measureArea)
 {
+    // TODO: lots of these parameters should be initialized in the constructor
     bool return_value = true;
     _outputLocation   = pedData.GetOutputLocation();
     _pedIDsByFrameNr  = pedData.GetPedIDsByFrameNr();
@@ -115,7 +116,7 @@ bool Method_D::Process(
         return_value = false;
     }
     if(_calcLocalIFD) {
-        if(!OpenFileIndividualFD(_isOneDimensional)) {
+        if(!OpenFileIndividualFD(_isOneDimensional, _calcGlobalIFDOnly)) {
             return_value = false;
         }
     }
@@ -204,7 +205,8 @@ bool Method_D::Process(
                                 str_frid,
                                 XInFrame,
                                 YInFrame,
-                                ZInFrame);
+                                ZInFrame,
+                                _calcGlobalIFDOnly);
                         }
                     }
                     if(_getProfile) {                                          //	field analysis
@@ -265,7 +267,7 @@ bool Method_D::OpenFileMethodD(bool _isOneDimensional)
     }
 }
 
-bool Method_D::OpenFileIndividualFD(bool _isOneDimensional)
+bool Method_D::OpenFileIndividualFD(bool _isOneDimensional, bool global)
 {
     fs::path trajFileName("_id_" + std::to_string(_measurementArea->_id) + ".dat");
     fs::path indFDPath("Fundamental_Diagram");
@@ -282,12 +284,18 @@ bool Method_D::OpenFileIndividualFD(bool _isOneDimensional)
                 "#framerate (fps):\t%.2f\n\n#Frame\tPersID\tIndividual density(m^(-1))\tIndividual "
                 "velocity(m/s)\tHeadway(m)\n",
                 _fps);
-        } else {
+        } else if(!global) {
             fprintf(
                 _fIndividualFD,
                 "#framerate (fps):\t%.2f\n\n#Frame\tPersID\tx/m\ty/m\tz/m\tIndividual "
                 "density(m^(-2))\tIndividual velocity(m/s)\tVoronoi Polygon\tIntersection "
                 "Polygon\n",
+                _fps);
+        } else {
+            fprintf(
+                _fIndividualFD,
+                "#framerate (fps):\t%.2f\n\n#Frame\tPersID\tx/m\ty/m\tz/m\tIndividual "
+                "density(m^(-2))\tIndividual velocity(m/s)\tVoronoi Polygon\n",
                 _fps);
         }
         return true;
@@ -464,7 +472,8 @@ void Method_D::GetIndividualFD(
     const string & frid,
     vector<double> & XInFrame,
     vector<double> & YInFrame,
-    vector<double> & ZInFrame)
+    vector<double> & ZInFrame,
+    bool global)
 {
     double uniquedensity  = 0;
     double uniquevelocity = 0;
@@ -476,7 +485,7 @@ void Method_D::GetIndividualFD(
         intersection(measureArea, polygon_iterator, v);
         if(!v.empty()) {
             string polygon_str = polygon_to_string(polygon_iterator);
-            string v_str       = polygon_to_string(v[0]);
+
 
             uniquedensity  = 1.0 / (area(polygon_iterator) * CMtoM * CMtoM);
             uniquevelocity = Velocity[temp];
@@ -484,18 +493,36 @@ void Method_D::GetIndividualFD(
             x              = XInFrame[temp] * CMtoM;
             y              = YInFrame[temp] * CMtoM;
             z              = ZInFrame[temp] * CMtoM;
-            fprintf(
-                _fIndividualFD,
-                "%s\t %d\t %.4f\t %.4f\t %.4f\t %.4f\t %.4f\t%s\t%s\n",
-                frid.c_str(),
-                uniqueId,
-                x,
-                y,
-                z,
-                uniquedensity,
-                uniquevelocity,
-                polygon_str.c_str(),
-                v_str.c_str());
+
+            if(global) {
+                // no need to print inersection polygon
+                fprintf(
+                    _fIndividualFD,
+                    "%s\t %d\t %.4f\t %.4f\t %.4f\t %.4f\t %.4f\t%s\n",
+                    frid.c_str(),
+                    uniqueId,
+                    x,
+                    y,
+                    z,
+                    uniquedensity,
+                    uniquevelocity,
+                    polygon_str.c_str());
+            } else {
+                // print intersection polygons as well
+                string v_str = polygon_to_string(v[0]);
+                fprintf(
+                    _fIndividualFD,
+                    "%s\t %d\t %.4f\t %.4f\t %.4f\t %.4f\t %.4f\t%s\t%s\n",
+                    frid.c_str(),
+                    uniqueId,
+                    x,
+                    y,
+                    z,
+                    uniquedensity,
+                    uniquevelocity,
+                    polygon_str.c_str(),
+                    v_str.c_str());
+            }
         }
         temp++;
     }
