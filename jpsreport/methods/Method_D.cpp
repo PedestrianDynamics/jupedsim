@@ -145,7 +145,7 @@ bool Method_D::Process(
         }
 
         //------------------------------Remove peds outside geometry------------------------------------------
-        for(int i = 0; i < static_cast<int>(IdInFrame.size()); i++) {
+        for(size_t i = 0; i < static_cast<size_t>(IdInFrame.size()); i++) {
             if(!within(point_2d(round(XInFrame[i]), round(YInFrame[i])), _geoPoly)) {
                 LOG_WARNING(
                     "Pedestrian with id <{}> at <x={:.4f}, y={:.4f}, z={:.4f}> is not in the "

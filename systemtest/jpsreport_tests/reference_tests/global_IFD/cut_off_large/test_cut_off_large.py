@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ####################
-# Test global IFD data of Method D with us_blind_points enabled, cut_by_circle enabled and various radius of 1.5, 2.0 and 2.5
+# Test global IFD data of Method D with us_blind_points enabled, cut_by_circle enabled and radius of 2.0
 ####################
 
 import os
@@ -19,8 +19,8 @@ from utils import SUCCESS, FAILURE
 from JPSRunTest import JPSRunTestDriver
 
 def runtest(inifile, trajfile):
-
-    logging.info("=====  Test global IFD data of Method D with us_blind_points enabled, cut_by_circle enabled and various radius of 1.5, 2.0 and 2.5 ===============")
+    logging.info(
+        "=====  Test global IFD data of Method D with us_blind_points enabled, cut_by_circle enabled and radius 2.0 ===============")
     check_diff_to_reference_data()
 
 

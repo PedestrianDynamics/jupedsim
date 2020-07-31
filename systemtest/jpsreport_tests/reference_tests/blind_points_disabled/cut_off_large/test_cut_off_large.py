@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ####################
-# Test of Method D and J with use_blind_points_disabled, cut_by_circle enabled and various radius of 1.5, 2.0 and 2.5
+# Test of Method D and J with use_blind_points_disabled, cut_by_circle enabled and radiuses of 1.5 and 2.5
 ####################
 
 import os
@@ -19,8 +19,8 @@ from utils import SUCCESS, FAILURE
 from JPSRunTest import JPSRunTestDriver
 
 def runtest(inifile, trajfile):
-
-    logging.info("===== Test of Method D and J with use_blind_points_disabled, cut_by_circle enabled and various radius of 1.5, 2.0 and 2.5 ===============")
+    logging.info(
+        "===== Test of Method D and J with use_blind_points_disabled, cut_by_circle enabled and radiuses of 1.5 and 2.5 ===============")
     check_diff_to_reference_data()
 
 

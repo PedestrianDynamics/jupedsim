@@ -20,7 +20,8 @@ from JPSRunTest import JPSRunTestDriver
 
 def runtest(inifile, trajfile):
 
-    logging.info("=====  Test of Method D and J with use_blind_points disabled, cut_by_circle enabled and small radius of 0.5                 ===============")
+    logging.info(
+        "=====  Test of Method D and J with use_blind_points disabled, cut_by_circle enabled and small radius of 0.5 ===============")
     check_diff_to_reference_data()
 
 
