@@ -6,7 +6,7 @@ sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_operativ.html
 summary: Several operational models are implemented in jpscore. An operational model defines how pedestrians interact with each other and with their environment.
-last_updated: Jul 22, 2020
+last_updated: Aug 11, 2020
 ---
 
 ## Introduction
@@ -213,7 +213,11 @@ In summary the relevant section for this model could look like:
  </model>
 ```
 
-{%include note.html content="The recommended values are by no means universal, and may/should be calibrated to fit your scenario."%}
+{%include note.html content="The recommended values are by no means universal, and may/should be calibrated to fit your scenario.
+
+Moreover, some parameter values, for instance $$\nu$$ in the GCFM or $$a$$ in Tordeux2015, have to be chosen wisely.
+Otherwise, it is possible that the agents overlap excessively, since no explicit collision-detection algorithms are implemented in these models. In case of excessive overlapping we recommend to perform  the simulation again with different values.
+"%}
 
 
 
