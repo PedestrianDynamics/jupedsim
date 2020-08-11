@@ -10,19 +10,18 @@
 \textsc{\small Forschungszentrum Jülich GmbH} \\ [0.5cm]
 
 \HRule \\ [0.4cm]
-{ \huge \bfseries User's Guide Version @PROJECT_VERSION@} \\ [0.4cm]
+{ \huge \bfseries User's Guide} \\ [0.4cm]
 
 
 \HRule \\ [1.5cm]
 
-{\large Stand: \today}
 \end{center}
 %>>>>>>>>>>>>>
 \vfill
 \vfill
 \begin{minipage}{0.8\textwidth}
     \begin{flushleft} \large
-      \color{gray}{\sffamily jpscore \hspace{0.22cm} \textbullet~{$@GIT_TAG@$} \textbullet~{@GIT_DATE@
+      \color{gray}{\sffamily {@GIT_DATE@}~\textbullet~{@GIT_SHA1@
         }}
     \end{flushleft}
 \end{minipage}
