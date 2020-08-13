@@ -80,6 +80,7 @@ private:
     void Usage(const std::string file);
 
     std::optional<ConfigData_DIJ> ParseDIJParams(TiXmlElement * xMethod);
+    // TODO: should be moved somewhere else. maybe Building.h
     polygon_2d GetSurroundingPolygon();
 
 public:
