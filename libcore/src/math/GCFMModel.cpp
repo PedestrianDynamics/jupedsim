@@ -304,9 +304,11 @@ Point GCFMModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
         ep12 = distp12.Normalized();
 
     } else {
-        LOG_ERROR("GCFMModel::forcePedPed() ep12 cannot be computed.");
-        return F_rep; // FIXME: should never happen
-        exit(EXIT_FAILURE);
+        LOG_WARNING(
+            "Distance between two pedestrians is small ({}<{}). Force can not be calculated.",
+            distp12.Norm(),
+            J_EPS);
+        return F_rep; // Parameter values are not chosen wisely --> unrealistic overlaping ... ignore.
     }
     // calculate the parameter (whatever dist is)
     tmp  = (vp1 - vp2).ScalarProduct(ep12); // < v_ij , e_ij >
