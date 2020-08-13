@@ -1,4 +1,4 @@
-/**
+#/**
  * \file        GCFMModel.cpp
  * \date        Apr 15, 2014
  * \version     v0.7
@@ -539,64 +539,4 @@ Point GCFMModel::ForceInterpolation(
         F_rep = e * px;
     }
     return F_rep;
-}
-
-
-// Getter-Funktionen
-
-double GCFMModel::GetNuPed() const
-{
-    return _nuPed;
-}
-
-double GCFMModel::GetNuWall() const
-{
-    return _nuWall;
-}
-
-double GCFMModel::GetIntpWidthPed() const
-{
-    return _intp_widthPed;
-}
-
-double GCFMModel::GetIntpWidthWall() const
-{
-    return _intp_widthWall;
-}
-
-double GCFMModel::GetMaxFPed() const
-{
-    return _maxfPed;
-}
-
-double GCFMModel::GetMaxFWall() const
-{
-    return _maxfWall;
-}
-
-double GCFMModel::GetDistEffMaxPed() const
-{
-    return _distEffMaxPed;
-}
-
-double GCFMModel::GetDistEffMaxWall() const
-{
-    return _distEffMaxWall;
-}
-
-std::string GCFMModel::GetDescription()
-{
-    std::string rueck;
-    char tmp[1024];
-
-    sprintf(tmp, "\t\tNu: \t\tPed: %f \tWall: %f\n", _nuPed, _nuWall);
-    rueck.append(tmp);
-    sprintf(tmp, "\t\tInterp. Width: \tPed: %f \tWall: %f\n", _intp_widthPed, _intp_widthWall);
-    rueck.append(tmp);
-    sprintf(tmp, "\t\tMaxF: \t\tPed: %f \tWall: %f\n", _maxfPed, _maxfWall);
-    rueck.append(tmp);
-    sprintf(tmp, "\t\tDistEffMax: \tPed: %f \tWall: %f\n", _distEffMaxPed, _distEffMaxWall);
-    rueck.append(tmp);
-
-    return rueck;
 }

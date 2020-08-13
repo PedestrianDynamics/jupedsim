@@ -169,11 +169,6 @@ public:
     double GetDWall() const;
 
     /**
-      * @return all model parameters in a nicely formatted string
-      */
-    virtual std::string GetDescription();
-
-    /**
       * initialize the phi angle
       * @param building
       */

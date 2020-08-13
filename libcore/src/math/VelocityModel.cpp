@@ -526,18 +526,6 @@ Point VelocityModel::ForceRepWall(
     return F_wrep;
 }
 
-std::string VelocityModel::GetDescription()
-{
-    std::string rueck;
-    char tmp[1024];
-
-    sprintf(tmp, "\t\ta: \t\tPed: %f \tWall: %f\n", _aPed, _aWall);
-    rueck.append(tmp);
-    sprintf(tmp, "\t\tD: \t\tPed: %f \tWall: %f\n", _DPed, _DWall);
-    rueck.append(tmp);
-    return rueck;
-}
-
 double VelocityModel::GetaPed() const
 {
     return _aPed;

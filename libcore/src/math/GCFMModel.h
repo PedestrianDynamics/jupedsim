@@ -59,16 +59,6 @@ public:
         double maxfwall);
     virtual ~GCFMModel(void);
 
-    // Getter
-    double GetNuPed() const;
-    double GetNuWall() const;
-    double GetDistEffMax() const;
-    double GetIntpWidthPed() const;
-    double GetIntpWidthWall() const;
-    double GetMaxFPed() const;
-    double GetMaxFWall() const;
-    double GetDistEffMaxPed() const;
-    double GetDistEffMaxWall() const;
 
     /**
      * Compute the next simulation step
@@ -79,7 +69,6 @@ public:
      */
     virtual void
     ComputeNextTimeStep(double current, double deltaT, Building * building, int periodic);
-    virtual std::string GetDescription();
     virtual bool Init(Building * building);
 
 private:

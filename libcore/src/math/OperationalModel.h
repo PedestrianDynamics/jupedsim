@@ -69,11 +69,6 @@ public:
     virtual bool Init(Building * building) = 0;
 
     /**
-      * @return a description of the model possibly with all model parameters in a nicely formatted string
-      */
-    virtual std::string GetDescription() = 0;
-
-    /**
       * Computes and update the positions/velocities /... of the pedestrians for the next time steps.
       * The pedestrians are stored in the Building object.
       *
