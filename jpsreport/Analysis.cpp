@@ -36,7 +36,6 @@
 #include "methods/Method_B.h"
 #include "methods/Method_C.h"
 #include "methods/Method_D.h"
-#include "methods/Method_I.h"
 #include "methods/Method_J.h"
 #include "methods/PedData.h"
 #include "methods/VoronoiDiagram.h"
@@ -80,7 +79,6 @@ Analysis::Analysis()
     _DoesUseMethodB = false; // Method B (Zhang2011a)
     _DoesUseMethodC = false; // Method C //calculate and save results of classic in separate file
     _DoesUseMethodD = false; // Method D--Voronoi method
-    _DoesUseMethodI = false;
     _DoesUseMethodJ = false;
 
     _vComponent =
@@ -124,7 +122,7 @@ void Analysis::InitArgs(ArgumentParser * args)
         _DoesUseMethodA                  = true;
         vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodA();
         for(unsigned int i = 0; i < Measurement_Area_IDs.size(); i++) {
-            _areaForMethod_A.push_back(dynamic_cast<MeasurementArea_L *>(
+            _areasForMethodA.push_back(dynamic_cast<MeasurementArea_L *>(
                 args->GetMeasurementArea(Measurement_Area_IDs[i])));
         }
         _deltaT = args->GetTimeIntervalA();
@@ -134,7 +132,7 @@ void Analysis::InitArgs(ArgumentParser * args)
         _DoesUseMethodB                  = true;
         vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodB();
         for(unsigned int i = 0; i < Measurement_Area_IDs.size(); i++) {
-            _areaForMethod_B.push_back(dynamic_cast<MeasurementArea_B *>(
+            _areasForMethodB.push_back(dynamic_cast<MeasurementArea_B *>(
                 args->GetMeasurementArea(Measurement_Area_IDs[i])));
         }
     }
@@ -143,7 +141,7 @@ void Analysis::InitArgs(ArgumentParser * args)
         _DoesUseMethodC                  = true;
         vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodC();
         for(unsigned int i = 0; i < Measurement_Area_IDs.size(); i++) {
-            _areaForMethod_C.push_back(dynamic_cast<MeasurementArea_B *>(
+            _areasForMethodC.push_back(dynamic_cast<MeasurementArea_B *>(
                 args->GetMeasurementArea(Measurement_Area_IDs[i])));
         }
     }
@@ -152,21 +150,11 @@ void Analysis::InitArgs(ArgumentParser * args)
         _DoesUseMethodD = true;
         // TODO[DH]: modernize loops
         for(unsigned int i = 0; i < args->_configDataD.areaIDs.size(); i++) {
-            _areaForMethod_D.push_back(dynamic_cast<MeasurementArea_B *>(
+            _areasForMethodD.push_back(dynamic_cast<MeasurementArea_B *>(
                 args->GetMeasurementArea(args->_configDataD.areaIDs[i])));
         }
 
-        _geoPolyMethodD = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_D);
-    }
-    if(args->GetIsMethodI()) {
-        _DoesUseMethodI = true;
-        // TODO[DH]: modernize loops
-        for(unsigned int i = 0; i < args->_configDataI.areaIDs.size(); i++) {
-            _areaForMethod_I.push_back(dynamic_cast<MeasurementArea_B *>(
-                args->GetMeasurementArea(args->_configDataI.areaIDs[i])));
-        }
-
-        _geoPolyMethodI = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_I);
+        _geoPolyMethodD = ReadGeometry(args->GetGeometryFilename(), _areasForMethodD);
     }
 
     if(args->GetIsMethodJ()) {
@@ -189,7 +177,6 @@ void Analysis::InitArgs(ArgumentParser * args)
     _outputLocation         = args->GetOutputLocation();
 
     configData_D = args->_configDataD;
-    configData_I = args->_configDataI;
     configData_J = args->_configDataJ;
 }
 
@@ -277,7 +264,7 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
     }
 
     //-----------------------------check whether there is pedestrian outside the whole geometry--------------------------------------------
-    std::map<int, std::vector<int>> _peds_t = data.GetPedsFrame();
+    std::map<int, std::vector<int>> _peds_t = data.GetPedIDsByFrameNr();
     for(int frameNr = 0; frameNr < data.GetNumFrames(); frameNr++) {
         vector<int> ids         = _peds_t[frameNr];
         vector<int> IdInFrame   = data.GetIdInFrame(frameNr, ids);
@@ -310,129 +297,99 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
 
     if(_DoesUseMethodA) //Method A
     {
-        if(_areaForMethod_A.empty()) {
+        if(_areasForMethodA.empty()) {
             LOG_ERROR("Method A selected with no measurement area!");
             exit(EXIT_FAILURE);
         }
 #pragma omp parallel for
-        for(int i = 0; i < int(_areaForMethod_A.size()); i++) {
+        for(int i = 0; i < int(_areasForMethodA.size()); i++) {
             Method_A method_A;
-            method_A.SetMeasurementArea(_areaForMethod_A[i]);
+            method_A.SetMeasurementArea(_areasForMethodA[i]);
             method_A.SetTimeInterval(_deltaT[i]);
-            bool result_A = method_A.Process(data, _scriptsLocation, _areaForMethod_A[i]->_zPos);
+            bool result_A = method_A.Process(data, _scriptsLocation, _areasForMethodA[i]->_zPos);
             if(result_A) {
                 LOG_INFO(
                     "Success with Method A using measurement area id {}!\n",
-                    _areaForMethod_A[i]->_id);
+                    _areasForMethodA[i]->_id);
             } else {
                 LOG_ERROR(
                     "Failed with Method A using measurement area id {}!\n",
-                    _areaForMethod_A[i]->_id);
+                    _areasForMethodA[i]->_id);
             }
         }
     }
 
     if(_DoesUseMethodB) //Method_B
     {
-        if(_areaForMethod_B.empty()) {
+        if(_areasForMethodB.empty()) {
             LOG_ERROR("Method B selected with no measurement area!");
             exit(EXIT_FAILURE);
         }
 
 #pragma omp parallel for
-        for(int i = 0; i < int(_areaForMethod_B.size()); i++) {
+        for(int i = 0; i < int(_areasForMethodB.size()); i++) {
             Method_B method_B;
-            method_B.SetMeasurementArea(_areaForMethod_B[i]);
+            method_B.SetMeasurementArea(_areasForMethodB[i]);
             bool result_B = method_B.Process(data);
             if(result_B) {
                 LOG_INFO(
                     "Success with Method B using measurement area id {}!\n",
-                    _areaForMethod_B[i]->_id);
+                    _areasForMethodB[i]->_id);
             } else {
                 LOG_ERROR(
                     "Failed with Method B using measurement area id {}!\n",
-                    _areaForMethod_B[i]->_id);
+                    _areasForMethodB[i]->_id);
             }
         }
     }
 
     if(_DoesUseMethodC) //Method C
     {
-        if(_areaForMethod_C.empty()) {
+        if(_areasForMethodC.empty()) {
             LOG_ERROR("Method C selected with no measurement area!");
             exit(EXIT_FAILURE);
         }
 #pragma omp parallel for
-        for(int i = 0; i < int(_areaForMethod_C.size()); i++) {
+        for(int i = 0; i < int(_areasForMethodC.size()); i++) {
             Method_C method_C;
-            method_C.SetMeasurementArea(_areaForMethod_C[i]);
-            bool result_C = method_C.Process(data, _areaForMethod_C[i]->_zPos);
+            method_C.SetMeasurementArea(_areasForMethodC[i]);
+            bool result_C = method_C.Process(data, _areasForMethodC[i]->_zPos);
             if(result_C) {
                 LOG_INFO(
                     "Success with Method C using measurement area id {}!\n",
-                    _areaForMethod_C[i]->_id);
+                    _areasForMethodC[i]->_id);
             } else {
                 LOG_ERROR(
                     "Failed with Method C using measurement area id {}!\n",
-                    _areaForMethod_C[i]->_id);
+                    _areasForMethodC[i]->_id);
             }
         }
     }
 
     if(_DoesUseMethodD) //method_D
     {
-        if(_areaForMethod_D.empty()) {
+        if(_areasForMethodD.empty()) {
             LOG_ERROR("Method D selected with no measurement area!");
             exit(EXIT_FAILURE);
         }
 
 #pragma omp parallel for
-        for(int i = 0; i < int(_areaForMethod_D.size()); i++) {
+        for(int i = 0; i < int(_areasForMethodD.size()); i++) {
             Method_D method_D;
-            method_D.SetGeometryPolygon(_geoPolyMethodD[_areaForMethod_D[i]->_id]);
-            method_D.SetGeometryFileName(_geometryFileName);
+            // TODO: setting and processing should be restructured. constructor?
+            method_D.SetGeometryPolygon(_geoPolyMethodD[_areasForMethodD[i]->_id]);
             method_D.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
-            method_D.SetTrajectoriesLocation(path);
-            method_D.SetMeasurementArea(_areaForMethod_D[i]);
-            bool result_D = method_D.Process(
-                configData_D, i, data, _scriptsLocation, _areaForMethod_D[i]->_zPos);
+            method_D.SetMeasurementArea(_areasForMethodD[i]);
+            bool result_D;
+            result_D = method_D.Process(configData_D, i, data, _areasForMethodD[i]->_zPos);
             if(result_D) {
                 LOG_INFO(
                     "Success with Method D using measurement area id {}!\n",
-                    _areaForMethod_D[i]->_id);
+                    _areasForMethodD[i]->_id);
             } else {
                 LOG_ERROR(
                     "Failed with Method D using measurement area id {}!\n",
-                    _areaForMethod_D[i]->_id);
-            }
-        }
-    }
-
-    if(_DoesUseMethodI) //method_I
-    {
-        if(_areaForMethod_I.empty()) {
-            LOG_ERROR("Method I selected with no measurement area!");
-            exit(EXIT_FAILURE);
-        }
-
-#pragma omp parallel for
-        for(int i = 0; i < int(_areaForMethod_I.size()); i++) {
-            Method_I method_I;
-            method_I.SetGeometryPolygon(_geoPolyMethodI[_areaForMethod_I[i]->_id]);
-            method_I.SetGeometryFileName(_geometryFileName);
-            method_I.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
-            method_I.SetTrajectoriesLocation(path);
-            method_I.SetMeasurementArea(_areaForMethod_I[i]);
-            bool result_I = method_I.Process(
-                configData_I, i, data, _scriptsLocation, _areaForMethod_I[i]->_zPos);
-            if(result_I) {
-                LOG_INFO(
-                    "Success with Method I using measurement area id {}!\n",
-                    _areaForMethod_I[i]->_id);
-            } else {
-                LOG_ERROR(
-                    "Failed with Method I using measurement area id {}!\n",
-                    _areaForMethod_I[i]->_id);
+                    _areasForMethodD[i]->_id);
             }
         }
     }

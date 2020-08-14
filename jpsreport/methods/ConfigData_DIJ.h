@@ -29,15 +29,15 @@
 
 struct ConfigData_DIJ {
     //parameters that are provided for measurement areas
-    std::vector<bool> individual_FD_flags;
-    std::vector<int> start_frames;
-    std::vector<int> stop_frames;
+    std::vector<bool> calcLocalIFD;
+    std::vector<int> startFrames;
+    std::vector<int> stopFrames;
     std::vector<int> areaIDs;
 
     //parameters for creating profiles
-    bool getProfile   = false;
-    float grid_size_X = 0.1;
-    float grid_size_Y = 0.1;
+    bool getProfile = false;
+    float gridSizeX = 0.1;
+    float gridSizeY = 0.1;
 
     //parameters for cutting voronoi cells
     bool cutByCircle = false;
@@ -46,5 +46,6 @@ struct ConfigData_DIJ {
 
     //general parameters
     bool isOneDimensional = false;
+    bool useBlindPoints   = true;
     //TODO Does it make sense to include the configs of measurement areas here as well?
 };

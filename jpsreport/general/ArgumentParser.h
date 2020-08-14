@@ -66,7 +66,6 @@ private:
     bool _isMethodB;
     bool _isMethodC;
     bool _isMethodD;
-    bool _isMethodI;
     bool _isMethodJ;
     double _steadyStart;
     double _steadyEnd;
@@ -77,10 +76,12 @@ private:
     std::vector<int> _areaIDforMethodC;
     std::vector<int> _timeIntervalA;
 
-    std::map<int, MeasurementArea *> _measurementAreas;
+    std::map<int, MeasurementArea *> _measurementAreasByIDs;
     void Usage(const std::string file);
 
     std::optional<ConfigData_DIJ> ParseDIJParams(TiXmlElement * xMethod);
+    // TODO: should be moved somewhere else. maybe Building.h
+    polygon_2d GetSurroundingPolygon();
 
 public:
     // Konstruktor
@@ -93,13 +94,6 @@ public:
     const fs::path & GetProjectRootDir() const;
     const fs::path & GetOutputLocation() const;
 
-    double GetLengthMeasurementArea() const;
-    polygon_2d GetMeasureArea() const;
-    double GetLineStartX() const;
-    double GetLineStartY() const;
-    double GetLineEndX() const;
-    double GetLineEndY() const;
-
     std::string GetVComponent() const;
     bool GetIgnoreBackwardMovement() const;
     int GetDelatT_Vins() const;
@@ -108,7 +102,6 @@ public:
     bool GetIsMethodB() const;
     bool GetIsMethodC() const;
     bool GetIsMethodD() const;
-    bool GetIsMethodI() const;
     bool GetIsMethodJ() const;
     std::vector<int> GetAreaIDforMethodA() const;
     std::vector<int> GetAreaIDforMethodB() const;
@@ -126,7 +119,7 @@ public:
       */
     bool ParseIniFile(const std::string & inifile);
 
-    ConfigData_DIJ _configDataD, _configDataI, _configDataJ;
+    ConfigData_DIJ _configDataD, _configDataJ;
 };
 
 #endif /*ARGPARSER_H_*/

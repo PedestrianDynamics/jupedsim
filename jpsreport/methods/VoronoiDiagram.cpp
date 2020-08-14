@@ -39,7 +39,7 @@ using namespace boost::geometry;
 VoronoiDiagram::VoronoiDiagram() {}
 
 VoronoiDiagram::~VoronoiDiagram() {}
-//typedef std::vector<std::pair<polygon_2d>, int> >  poly_id;
+
 // Traversing Voronoi edges using cell iterator.
 std::vector<std::pair<polygon_2d, int>> VoronoiDiagram::getVoronoiPolygons(
     vector<double> & XInFrame,

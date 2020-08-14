@@ -5,7 +5,6 @@ set(methods
     methods/Method_B.cpp
     methods/Method_C.cpp
     methods/Method_D.cpp
-    methods/Method_I.cpp
     methods/Method_J.cpp
 )
 
@@ -35,7 +34,6 @@ set (header_files
     methods/Method_B.h
     methods/Method_C.h
     methods/Method_D.h
-    methods/Method_I.h
     methods/Method_J.h
     methods/ConfigData_DIJ.h
     general/ArgumentParser.h
