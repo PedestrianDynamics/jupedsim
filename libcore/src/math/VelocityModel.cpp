@@ -62,8 +62,6 @@ VelocityModel::~VelocityModel() {}
 
 bool VelocityModel::Init(Building * building)
 {
-    _direction->Init(building);
-
     const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
     size_t peds_size                          = allPeds.size();
     for(unsigned int p = 0; p < peds_size; p++) {

@@ -123,6 +123,9 @@ bool Simulation::InitArgs()
     //this should be called after the routing engine has been initialised
     // because a direction is needed for this initialisation.
     LOG_INFO("Init Operational Model starting ...");
+
+    _config->GetDirectionManager()->Init(_building.get());
+
     if(!_operationalModel->Init(_building.get())) {
         return false;
     }
