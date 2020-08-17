@@ -9,6 +9,7 @@ if(UNIX AND NOT APPLE)
         ${CMAKE_SOURCE_DIR}/systemtest/reference_tests/RT01_corridor_GCFM_global-shortest
         ${CMAKE_SOURCE_DIR}/systemtest/reference_tests/RT02_corridor_velocity_global-shortest
         ${CMAKE_SOURCE_DIR}/systemtest/reference_tests/RT03_corridor_velocity_ff-global-shortest
+        ${CMAKE_SOURCE_DIR}/systemtest/reference_tests/RT04_corridor_GCFM_ff-global-shortest
         )
 
     # For each directory in ${reference_tests} at least an inifile.xml and an output_expected directory is required.
