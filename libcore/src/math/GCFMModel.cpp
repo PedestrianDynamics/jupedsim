@@ -63,103 +63,66 @@ GCFMModel::GCFMModel(
 
 GCFMModel::~GCFMModel(void) {}
 
-void GCFMModel::ComputeNextTimeStep(
-    double current,
-    double deltaT,
-    Building * building,
-    int periodic)
+void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building * building, int)
 {
-    // collect all pedestrians in the simulation.
-    const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
+    std::vector<Point> result_acc = std::vector<Point>();
+    result_acc.reserve(2200);
 
-    unsigned int nSize = allPeds.size();
-    int nThreads       = omp_get_max_threads();
+    for(Pedestrian * ped : building->GetAllPedestrians()) {
+        result_acc.push_back(ComputeAcc(*ped, building, current, deltaT));
+    }
 
-
-    int partSize;
-    partSize = ((int) nSize > nThreads) ? (int) (nSize / nThreads) : (int) nSize;
-    if(partSize == (int) nSize)
-        nThreads = 1; // not worthy to parallelize
-
-#pragma omp parallel default(shared) num_threads(nThreads)
-    {
-        std::vector<Point> result_acc = std::vector<Point>();
-        result_acc.reserve(2200);
-
-        const int threadID = omp_get_thread_num();
-
-        int start = threadID * partSize;
-        int end;
-        end = (threadID < nThreads - 1) ? (threadID + 1) * partSize - 1 : (int) (nSize - 1);
-
-        for(int p = start; p <= end; ++p) {
-            Pedestrian * ped = allPeds[p];
-            result_acc.push_back(ComputeForce(ped, building, deltaT, current, periodic));
+    // update
+    for(int p = 0; p < building->GetAllPedestrians().size(); ++p) {
+        Pedestrian * ped = building->GetAllPedestrians()[p];
+        Point v_neu      = ped->GetV() + result_acc[p] * deltaT;
+        Point pos_neu    = ped->GetPos() + v_neu * deltaT;
+        //Jam is based on the current velocity
+        if(v_neu.Norm() >= J_EPS_V) {
+            ped->ResetTimeInJam();
+        } else {
+            ped->UpdateTimeInJam();
         }
 
-#pragma omp barrier
-        // update
-        for(int p = start; p <= end; ++p) {
-            Pedestrian * ped = allPeds[p];
-            Point v_neu      = ped->GetV() + result_acc[p - start] * deltaT;
-            Point pos_neu    = ped->GetPos() + v_neu * deltaT;
-            //Jam is based on the current velocity
-            if(v_neu.Norm() >= J_EPS_V) {
-                ped->ResetTimeInJam();
-            } else {
-                ped->UpdateTimeInJam();
-            }
-
-            ped->SetPos(pos_neu);
-            ped->SetV(v_neu);
-            ped->SetPhiPed();
-        }
-
-    } //end parallel
+        ped->SetPos(pos_neu);
+        ped->SetV(v_neu);
+        ped->SetPhiPed();
+    }
 }
 
-Point GCFMModel::ComputeForce(
-    Pedestrian * ped,
-    Building * building,
-    double current,
-    double deltaT,
-    int periodic)
+Point GCFMModel::ComputeAcc(Pedestrian & ped, Building * building, double current, double deltaT)
 {
     double delta      = 1.5;
-    Room * room       = building->GetRoom(ped->GetRoomID());
-    SubRoom * subroom = room->GetSubRoom(ped->GetSubRoomID());
-    double normVi     = ped->GetV().ScalarProduct(ped->GetV());
-    double tmp        = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta);
-    if(normVi > tmp && ped->GetV0Norm() > 0) {
-        fprintf(
-            stderr,
-            "GCFMModel::calculateForce() WARNING: actual velocity (%f) of iped %d "
-            "is bigger than desired velocity (%f) at time: %fs (periodic=%d)\n",
+    Room * room       = building->GetRoom(ped.GetRoomID());
+    SubRoom * subroom = room->GetSubRoom(ped.GetSubRoomID());
+    double normVi     = ped.GetV().ScalarProduct(ped.GetV());
+    double tmp        = (ped.GetV0Norm() + delta) * (ped.GetV0Norm() + delta);
+    if(normVi > tmp && ped.GetV0Norm() > 0) {
+        LOG_ERROR(
+            "GCFMModel::calculateForce() WARNING: actual velocity {} of pedestrian {} is bigger "
+            "than desired velocity {} at time: {}",
             sqrt(normVi),
-            ped->GetID(),
-            ped->GetV0Norm(),
-            current,
-            periodic);
-        // remove the pedestrian and abort
-        building->DeletePedestrian(ped);
+            ped.GetID(),
+            ped.GetV0Norm(),
+            current);
         // TODO KKZ track deleted peds
         LOG_ERROR("One ped was removed due to high velocity");
     }
 
     Point F_rep;
-    std::vector<Pedestrian *> neighbours = building->GetNeighborhoodSearch().GetNeighbourhood(ped);
+    std::vector<Pedestrian *> neighbours = building->GetNeighborhoodSearch().GetNeighbourhood(&ped);
     std::vector<SubRoom *> emptyVector;
 
     int neighborsSize = neighbours.size();
     for(int i = 0; i < neighborsSize; i++) {
         Pedestrian * ped1   = neighbours[i];
-        Point p1            = ped->GetPos();
+        Point p1            = ped.GetPos();
         Point p2            = ped1->GetPos();
         bool ped_is_visible = building->IsVisible(p1, p2, emptyVector, false);
         if(!ped_is_visible)
             continue;
         //if they are in the same subroom
-        if(ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
+        if(ped.GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
             F_rep = F_rep + ForceRepPed(ped, ped1);
         } else {
             // or in neighbour subrooms
@@ -174,46 +137,46 @@ Point GCFMModel::ComputeForce(
     //repulsive forces to the walls and transitions that are not my target
     Point repwall = ForceRepRoom(ped, subroom);
     Point fd      = ForceDriv(ped, room);
-    Point acc     = (fd + F_rep + repwall) / ped->GetMass();
+    Point acc     = (fd + F_rep + repwall) / ped.GetMass();
 
     return acc;
 }
 
-inline Point GCFMModel::ForceDriv(Pedestrian * ped, Room * room) const
+inline Point GCFMModel::ForceDriv(Pedestrian & ped, Room * room) const
 {
-    const Point & target = _direction->GetTarget(room, ped);
+    const Point & target = _direction->GetTarget(room, &ped);
     Point F_driv;
-    const Point & pos = ped->GetPos();
-    double dist       = ped->GetExitLine()->DistTo(pos);
-    Point lastE0      = ped->GetLastE0();
-    ped->SetLastE0(target - pos);
+    const Point & pos = ped.GetPos();
+    double dist       = ped.GetExitLine()->DistTo(pos);
+    Point lastE0      = ped.GetLastE0();
+    ped.SetLastE0(target - pos);
 
     if((dynamic_cast<DirectionLocalFloorfield *>(_direction->GetDirectionStrategy().get())) ||
        (dynamic_cast<DirectionSubLocalFloorfield *>(_direction->GetDirectionStrategy().get()))) {
         if(dist > 50 * J_EPS_GOAL) {
-            const Point & v0 = ped->GetV0(target);
-            F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
+            const Point & v0 = ped.GetV0(target);
+            F_driv           = ((v0 * ped.GetV0Norm() - ped.GetV()) * ped.GetMass()) / ped.GetTau();
         } else {
-            F_driv = ((lastE0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
-            ped->SetLastE0(lastE0);
+            F_driv = ((lastE0 * ped.GetV0Norm() - ped.GetV()) * ped.GetMass()) / ped.GetTau();
+            ped.SetLastE0(lastE0);
         }
     } else if(dist > J_EPS_GOAL) {
-        const Point & v0 = ped->GetV0(target);
-        F_driv           = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
+        const Point & v0 = ped.GetV0(target);
+        F_driv           = ((v0 * ped.GetV0Norm() - ped.GetV()) * ped.GetMass()) / ped.GetTau();
     } else {
-        const Point & v0 = ped->GetV0();
-        F_driv           = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
+        const Point & v0 = ped.GetV0();
+        F_driv           = ((v0 * ped.GetV0Norm() - ped.GetV()) * ped.GetMass()) / ped.GetTau();
     }
 
     return F_driv;
 }
 
-Point GCFMModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
+Point GCFMModel::ForceRepPed(Pedestrian & ped1, Pedestrian * ped2) const
 {
     Point F_rep;
     // x- and y-coordinate of the distance between p1 and p2
-    Point distp12     = ped2->GetPos() - ped1->GetPos();
-    const Point & vp1 = ped1->GetV(); // v Ped1
+    Point distp12     = ped2->GetPos() - ped1.GetPos();
+    const Point & vp1 = ped1.GetV();  // v Ped1
     const Point & vp2 = ped2->GetV(); // v Ped2
     Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
     double tmp, tmp2;
@@ -221,7 +184,7 @@ Point GCFMModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
     double K_ij;
     double nom; //nominator of Frep
     double px;  // hermite Interpolation value
-    const JEllipse & E1 = ped1->GetEllipse();
+    const JEllipse & E1 = ped1.GetEllipse();
     const JEllipse & E2 = ped2->GetEllipse();
     double distsq;
     double dist_eff = E1.EffectiveDistanceToEllipse(E2, &distsq);
@@ -281,12 +244,12 @@ Point GCFMModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
             return F_rep;
         }
     }
-    nom = _nuPed * ped1->GetV0Norm() + v_ij; // Nu: 0=CFM, 0.28=modifCFM;
+    nom = _nuPed * ped1.GetV0Norm() + v_ij; // Nu: 0=CFM, 0.28=modifCFM;
     nom *= nom;
 
     K_ij = sqrt(K_ij);
     if(dist_eff <= smax) { //5
-        f     = -ped1->GetMass() * K_ij * nom / dist_intpol_left;
+        f     = -ped1.GetMass() * K_ij * nom / dist_intpol_left;
         F_rep = ep12 * _maxfPed * f;
         return F_rep;
     }
@@ -295,16 +258,16 @@ Point GCFMModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
     //           ----|-------------|--------------------------|--------------|----
     //           5   |     4       |            3             |      2       | 1
 
-    if(dist_eff >= dist_intpol_right) {                            //2
-        f     = -ped1->GetMass() * K_ij * nom / dist_intpol_right; // abs(NR-Dv(i)+Sa)
+    if(dist_eff >= dist_intpol_right) {                           //2
+        f     = -ped1.GetMass() * K_ij * nom / dist_intpol_right; // abs(NR-Dv(i)+Sa)
         f1    = -f / dist_intpol_right;
         px    = hermite_interp(dist_eff, dist_intpol_right, _distEffMaxPed, f, 0, f1, 0);
         F_rep = ep12 * px;
-    } else if(dist_eff >= dist_intpol_left) {                   //3
-        f     = -ped1->GetMass() * K_ij * nom / fabs(dist_eff); // abs(NR-Dv(i)+Sa)
+    } else if(dist_eff >= dist_intpol_left) {                  //3
+        f     = -ped1.GetMass() * K_ij * nom / fabs(dist_eff); // abs(NR-Dv(i)+Sa)
         F_rep = ep12 * f;
     } else { //4
-        f     = -ped1->GetMass() * K_ij * nom / dist_intpol_left;
+        f     = -ped1.GetMass() * K_ij * nom / dist_intpol_left;
         f1    = -f / dist_intpol_left;
         px    = hermite_interp(dist_eff, smax, dist_intpol_left, _maxfPed * f, f, 0, f1);
         F_rep = ep12 * px;
@@ -312,7 +275,7 @@ Point GCFMModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
     if(F_rep._x != F_rep._x || F_rep._y != F_rep._y) {
         LOG_ERROR(
             "NAN return p1{:d} p2 {:d} Frepx={:f} Frepy={:f} K_ij={:f}",
-            ped1->GetID(),
+            ped1.GetID(),
             ped2->GetID(),
             F_rep._x,
             F_rep._y,
@@ -329,7 +292,7 @@ Point GCFMModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
  *   - Vektor(x,y) mit Summe aller abstoßenden Kräfte im SubRoom
  * */
 
-inline Point GCFMModel::ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const
+inline Point GCFMModel::ForceRepRoom(Pedestrian & ped, SubRoom * subroom) const
 {
     Point f(0., 0.);
     //first the walls
@@ -338,10 +301,10 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const
     }
     //then the obstacles
     for(const auto & obst : subroom->GetAllObstacles()) {
-        if(obst->Contains(ped->GetPos())) {
+        if(obst->Contains(ped.GetPos())) {
             LOG_ERROR(
                 "Agent {:d} is trapped in obstacle in room/subroom {:d}/{:d}",
-                ped->GetID(),
+                ped.GetID(),
                 subroom->GetRoomID(),
                 subroom->GetSubRoomID());
             exit(EXIT_FAILURE);
@@ -362,10 +325,10 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const
 }
 
 
-inline Point GCFMModel::ForceRepWall(Pedestrian * ped, const Line & w) const
+inline Point GCFMModel::ForceRepWall(Pedestrian & ped, const Line & w) const
 {
     Point F     = Point(0.0, 0.0);
-    Point pt    = w.ShortestPoint(ped->GetPos());
+    Point pt    = w.ShortestPoint(ped.GetPos());
     double wlen = w.LengthSquare();
 
     if(wlen < 0.01) { // ignore walls smaller than 10 cm
@@ -373,15 +336,15 @@ inline Point GCFMModel::ForceRepWall(Pedestrian * ped, const Line & w) const
     }
     // Kraft soll nur orthgonal wirken
     // ???
-    if(fabs((w.GetPoint1() - w.GetPoint2()).ScalarProduct(ped->GetPos() - pt)) > J_EPS) {
+    if(fabs((w.GetPoint1() - w.GetPoint2()).ScalarProduct(ped.GetPos() - pt)) > J_EPS) {
         return F;
     }
-    //double mind = ped->GetEllipse().MinimumDistanceToLine(w);
+    //double mind = ped.GetEllipse().MinimumDistanceToLine(w);
     double mind = 0.5; //for performance reasons this distance is assumed to be constant
-    double vn   = w.NormalComp(ped->GetV()); //normal component of the velocity on the wall
+    double vn   = w.NormalComp(ped.GetV()); //normal component of the velocity on the wall
     F           = ForceRepStatPoint(ped, pt, mind, vn);
 
-    if(ped->GetID() == -33) {
+    if(ped.GetID() == -33) {
         printf(
             "wall = [%f, %f]--[%f, %f] F= [%f %f]\n",
             w.GetPoint1()._x,
@@ -405,19 +368,19 @@ inline Point GCFMModel::ForceRepWall(Pedestrian * ped, const Line & w) const
  *   - Vektor(x,y) mit abstoßender Kraft
  * */
 //TODO: use effective DistanceToEllipse and simplify this function.
-Point GCFMModel::ForceRepStatPoint(Pedestrian * ped, const Point & p, double l, double vn) const
+Point GCFMModel::ForceRepStatPoint(Pedestrian & ped, const Point & p, double l, double vn) const
 {
     Point F_rep     = Point(0.0, 0.0);
-    const Point & v = ped->GetV();
-    Point dist      = p - ped->GetPos(); // x- and y-coordinate of the distance between ped and p
-    double d        = dist.Norm();       // distance between the centre of ped and point p
+    const Point & v = ped.GetV();
+    Point dist      = p - ped.GetPos(); // x- and y-coordinate of the distance between ped and p
+    double d        = dist.Norm();      // distance between the centre of ped and point p
     Point e_ij; // x- and y-coordinate of the normalized vector between ped and p
 
     double tmp;
     double bla;
     Point r;
     Point pinE; // vorher x1, y1
-    const JEllipse & E = ped->GetEllipse();
+    const JEllipse & E = ped.GetEllipse();
 
     if(d < J_EPS)
         return Point(0.0, 0.0);
@@ -435,7 +398,7 @@ Point GCFMModel::ForceRepStatPoint(Pedestrian * ped, const Point & p, double l, 
     // Punkt auf der Ellipse
     r = E.PointOnEllipse(pinE);
     //interpolierte Kraft
-    F_rep = ForceInterpolation(ped->GetV0Norm(), K_ij, e_ij, vn, d, (r - E.GetCenter()).Norm(), l);
+    F_rep = ForceInterpolation(ped.GetV0Norm(), K_ij, e_ij, vn, d, (r - E.GetCenter()).Norm(), l);
     return F_rep;
 }
 
