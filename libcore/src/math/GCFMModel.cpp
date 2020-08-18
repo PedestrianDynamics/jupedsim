@@ -83,7 +83,6 @@ void GCFMModel::ComputeNextTimeStep(
     if(partSize == (int) nSize)
         nThreads = 1; // not worthy to parallelize
 
-    int debugPed = -10;
 #pragma omp parallel default(shared) num_threads(nThreads)
     {
         std::vector<Point> result_acc = std::vector<Point>();
@@ -149,18 +148,6 @@ void GCFMModel::ComputeNextTimeStep(
             Point fd      = ForceDriv(ped, room);
             Point acc     = (fd + F_rep + repwall) / ped->GetMass();
 
-            if(ped->GetID() == debugPed) {
-                printf(
-                    "\nacc= %f %f, fd= %f, %f,  repPed = %f %f, repWall= %f, %f\n",
-                    acc._x,
-                    acc._y,
-                    fd._x,
-                    fd._y,
-                    F_rep._x,
-                    F_rep._y,
-                    repwall._x,
-                    repwall._y);
-            }
 
             result_acc.push_back(acc);
         }
