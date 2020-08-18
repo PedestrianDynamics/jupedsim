@@ -125,10 +125,56 @@ bool Simulation::InitArgs()
     LOG_INFO("Init Operational Model starting ...");
 
     _config->GetDirectionManager()->Init(_building.get());
+    // Initialization moved from the operational model
+    // removes pedestrians without a route and initializes v0
+    {
+        const std::vector<Pedestrian *> & allPeds = _building->GetAllPedestrians();
+        size_t peds_size                          = allPeds.size();
+        for(unsigned int p = 0; p < peds_size; p++) {
+            Pedestrian * ped = allPeds[p];
+            double cosPhi, sinPhi;
+            if(!ped->IsWaiting() && ped->FindRoute() == -1) {
+                LOG_ERROR(
+                    "Pedestrian {} in Room ({}-{}) cannot find a route and will be deleted from "
+                    "the simulation.",
+                    ped->GetID(),
+                    ped->GetRoomID(),
+                    ped->GetSubRoomID());
+                _building->DeletePedestrian(ped);
+                // TODO KKZ track deleted peds
+                p--;
+                peds_size--;
+                continue;
+            }
 
+            Point target = Point(0, 0);
+            if(ped->GetExitLine())
+                target = ped->GetExitLine()->ShortestPoint(ped->GetPos());
+            else {
+                LOG_WARNING("Ped {} has no exit line in INIT", ped->GetID());
+            }
+            Point d     = target - ped->GetPos();
+            double dist = d.Norm();
+            if(dist != 0.0) {
+                cosPhi = d._x / dist;
+                sinPhi = d._y / dist;
+            } else {
+                LOG_ERROR("allPeds::Init() cannot initialise phi! dist to target is 0");
+                return false;
+            }
+
+            ped->InitV0(target);
+
+            JEllipse E = ped->GetEllipse();
+            E.SetCosPhi(cosPhi);
+            E.SetSinPhi(sinPhi);
+            ped->SetEllipse(E);
+        }
+    }
     if(!_operationalModel->Init(_building.get())) {
         return false;
     }
+
     LOG_INFO("Init Operational Model done.");
 
     // Give the DirectionStrategy the chance to perform some initialization.

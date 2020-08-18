@@ -168,11 +168,7 @@ public:
       */
     double GetDWall() const;
 
-    /**
-      * initialize the phi angle
-      * @param building
-      */
-    virtual bool Init(Building * building);
+    virtual bool Init(Building * building) { return true; };
 
     /**
       * Compute the next simulation step

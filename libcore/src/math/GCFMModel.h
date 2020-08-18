@@ -69,7 +69,7 @@ public:
      */
     virtual void
     ComputeNextTimeStep(double current, double deltaT, Building * building, int periodic);
-    virtual bool Init(Building * building);
+    virtual bool Init(Building *) { return true; };
 
 private:
     // Modellparameter

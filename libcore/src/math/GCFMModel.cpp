@@ -63,42 +63,6 @@ GCFMModel::GCFMModel(
 
 GCFMModel::~GCFMModel(void) {}
 
-
-bool GCFMModel::Init(Building * building)
-{
-    const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
-    size_t peds_size                          = allPeds.size();
-    for(unsigned int p = 0; p < peds_size; p++) {
-        Pedestrian * ped = allPeds[p];
-        double cosPhi, sinPhi;
-        //a destination could not be found for that pedestrian
-        if(ped->FindRoute() == -1) {
-            building->DeletePedestrian(ped);
-            //TODO KKZ track deleted peds
-            p--;
-            peds_size--;
-            continue;
-        }
-
-        Point target = ped->GetExitLine()->LotPoint(ped->GetPos());
-        Point d      = target - ped->GetPos();
-        double dist  = d.Norm();
-        if(dist != 0.0) {
-            cosPhi = d._x / dist;
-            sinPhi = d._y / dist;
-        } else {
-            LOG_ERROR("allPeds::Init() cannot initialise phi! dist to target is 0");
-            return false;
-        }
-        ped->InitV0(target);
-        JEllipse E = ped->GetEllipse();
-        E.SetCosPhi(cosPhi);
-        E.SetSinPhi(sinPhi);
-        ped->SetEllipse(E);
-    }
-    return true;
-}
-
 void GCFMModel::ComputeNextTimeStep(
     double current,
     double deltaT,

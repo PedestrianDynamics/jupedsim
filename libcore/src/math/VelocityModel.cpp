@@ -60,64 +60,6 @@ VelocityModel::VelocityModel(
 
 VelocityModel::~VelocityModel() {}
 
-bool VelocityModel::Init(Building * building)
-{
-    const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
-    size_t peds_size                          = allPeds.size();
-    for(unsigned int p = 0; p < peds_size; p++) {
-        Pedestrian * ped = allPeds[p];
-        double cosPhi, sinPhi;
-        //a destination could not be found for that pedestrian
-        int ped_is_waiting = 1; // quick and dirty fix
-        // we should maybe differentiate between pedestrians who did not find
-        // routs because of a bug in the router and these who simplyt just want
-        // to wait in waiting areas
-        int res = ped->FindRoute();
-        if(!ped_is_waiting && res == -1) {
-            LOG_ERROR(
-                "VelocityModel::Init() cannot initialise route. ped {:d} is deleted in Room "
-                "%d %d.\n",
-                ped->GetID(),
-                ped->GetRoomID(),
-                ped->GetSubRoomID());
-            building->DeletePedestrian(ped);
-            // TODO KKZ track deleted peds
-            p--;
-            peds_size--;
-            continue;
-        }
-
-        // TODO
-        // HERE every ped should have a navline already
-        //
-
-
-        Point target = Point(0, 0);
-        if(ped->GetExitLine())
-            target = ped->GetExitLine()->ShortestPoint(ped->GetPos());
-        else {
-            LOG_WARNING("Ped {} has no exit line in INIT", ped->GetID());
-        }
-        Point d     = target - ped->GetPos();
-        double dist = d.Norm();
-        if(dist != 0.0) {
-            cosPhi = d._x / dist;
-            sinPhi = d._y / dist;
-        } else {
-            LOG_ERROR("allPeds::Init() cannot initialise phi! dist to target is 0");
-            return false;
-        }
-
-        ped->InitV0(target);
-
-        JEllipse E = ped->GetEllipse();
-        E.SetCosPhi(cosPhi);
-        E.SetSinPhi(sinPhi);
-        ped->SetEllipse(E);
-    }
-    return true;
-}
-
 void VelocityModel::ComputeNextTimeStep(
     double current,
     double deltaT,
