@@ -1,4 +1,4 @@
-#/**
+/**
  * \file        GCFMModel.cpp
  * \date        Apr 15, 2014
  * \version     v0.7
