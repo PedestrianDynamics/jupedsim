@@ -71,6 +71,13 @@ public:
     ComputeNextTimeStep(double current, double deltaT, Building * building, int periodic);
     virtual bool Init(Building *) { return true; };
 
+    Point ComputeForce(
+        Pedestrian * ped,
+        Building * building,
+        double current,
+        double deltaT,
+        int periodic);
+
 private:
     // Modellparameter
     double _nuPed;          /**< strength of the pedestrian repulsive force */

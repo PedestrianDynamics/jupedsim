@@ -69,8 +69,6 @@ void GCFMModel::ComputeNextTimeStep(
     Building * building,
     int periodic)
 {
-    double delta = 1.5;
-
     // collect all pedestrians in the simulation.
     const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
 
@@ -95,61 +93,8 @@ void GCFMModel::ComputeNextTimeStep(
         end = (threadID < nThreads - 1) ? (threadID + 1) * partSize - 1 : (int) (nSize - 1);
 
         for(int p = start; p <= end; ++p) {
-            Pedestrian * ped  = allPeds[p];
-            Room * room       = building->GetRoom(ped->GetRoomID());
-            SubRoom * subroom = room->GetSubRoom(ped->GetSubRoomID());
-            double normVi     = ped->GetV().ScalarProduct(ped->GetV());
-            double tmp        = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta);
-            if(normVi > tmp && ped->GetV0Norm() > 0) {
-                fprintf(
-                    stderr,
-                    "GCFMModel::calculateForce() WARNING: actual velocity (%f) of iped %d "
-                    "is bigger than desired velocity (%f) at time: %fs (periodic=%d)\n",
-                    sqrt(normVi),
-                    ped->GetID(),
-                    ped->GetV0Norm(),
-                    current,
-                    periodic);
-                // remove the pedestrian and abort
-                building->DeletePedestrian(ped);
-                // TODO KKZ track deleted peds
-                LOG_ERROR("One ped was removed due to high velocity");
-            }
-
-            Point F_rep;
-            std::vector<Pedestrian *> neighbours =
-                building->GetNeighborhoodSearch().GetNeighbourhood(ped);
-            std::vector<SubRoom *> emptyVector;
-
-            int neighborsSize = neighbours.size();
-            for(int i = 0; i < neighborsSize; i++) {
-                Pedestrian * ped1   = neighbours[i];
-                Point p1            = ped->GetPos();
-                Point p2            = ped1->GetPos();
-                bool ped_is_visible = building->IsVisible(p1, p2, emptyVector, false);
-                if(!ped_is_visible)
-                    continue;
-                //if they are in the same subroom
-                if(ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
-                    F_rep = F_rep + ForceRepPed(ped, ped1);
-                } else {
-                    // or in neighbour subrooms
-                    SubRoom * sb2 =
-                        building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
-                    if(subroom->IsDirectlyConnectedWith(sb2)) {
-                        F_rep = F_rep + ForceRepPed(ped, ped1);
-                    }
-                }
-            } //for peds
-
-
-            //repulsive forces to the walls and transitions that are not my target
-            Point repwall = ForceRepRoom(allPeds[p], subroom);
-            Point fd      = ForceDriv(ped, room);
-            Point acc     = (fd + F_rep + repwall) / ped->GetMass();
-
-
-            result_acc.push_back(acc);
+            Pedestrian * ped = allPeds[p];
+            result_acc.push_back(ComputeForce(ped, building, deltaT, current, periodic));
         }
 
 #pragma omp barrier
@@ -173,6 +118,66 @@ void GCFMModel::ComputeNextTimeStep(
     } //end parallel
 }
 
+Point GCFMModel::ComputeForce(
+    Pedestrian * ped,
+    Building * building,
+    double current,
+    double deltaT,
+    int periodic)
+{
+    double delta      = 1.5;
+    Room * room       = building->GetRoom(ped->GetRoomID());
+    SubRoom * subroom = room->GetSubRoom(ped->GetSubRoomID());
+    double normVi     = ped->GetV().ScalarProduct(ped->GetV());
+    double tmp        = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta);
+    if(normVi > tmp && ped->GetV0Norm() > 0) {
+        fprintf(
+            stderr,
+            "GCFMModel::calculateForce() WARNING: actual velocity (%f) of iped %d "
+            "is bigger than desired velocity (%f) at time: %fs (periodic=%d)\n",
+            sqrt(normVi),
+            ped->GetID(),
+            ped->GetV0Norm(),
+            current,
+            periodic);
+        // remove the pedestrian and abort
+        building->DeletePedestrian(ped);
+        // TODO KKZ track deleted peds
+        LOG_ERROR("One ped was removed due to high velocity");
+    }
+
+    Point F_rep;
+    std::vector<Pedestrian *> neighbours = building->GetNeighborhoodSearch().GetNeighbourhood(ped);
+    std::vector<SubRoom *> emptyVector;
+
+    int neighborsSize = neighbours.size();
+    for(int i = 0; i < neighborsSize; i++) {
+        Pedestrian * ped1   = neighbours[i];
+        Point p1            = ped->GetPos();
+        Point p2            = ped1->GetPos();
+        bool ped_is_visible = building->IsVisible(p1, p2, emptyVector, false);
+        if(!ped_is_visible)
+            continue;
+        //if they are in the same subroom
+        if(ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
+            F_rep = F_rep + ForceRepPed(ped, ped1);
+        } else {
+            // or in neighbour subrooms
+            SubRoom * sb2 = building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
+            if(subroom->IsDirectlyConnectedWith(sb2)) {
+                F_rep = F_rep + ForceRepPed(ped, ped1);
+            }
+        }
+    } //for peds
+
+
+    //repulsive forces to the walls and transitions that are not my target
+    Point repwall = ForceRepRoom(ped, subroom);
+    Point fd      = ForceDriv(ped, room);
+    Point acc     = (fd + F_rep + repwall) / ped->GetMass();
+
+    return acc;
+}
 
 inline Point GCFMModel::ForceDriv(Pedestrian * ped, Room * room) const
 {
