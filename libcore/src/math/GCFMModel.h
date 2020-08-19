@@ -57,7 +57,7 @@ public:
         double intp_widthwall,
         double maxfped,
         double maxfwall);
-    virtual ~GCFMModel(void);
+    virtual ~GCFMModel() = default;
 
 
     /**
@@ -68,7 +68,7 @@ public:
      * @param building the geometry object
      */
     virtual void
-    ComputeNextTimeStep(double current, double deltaT, Building * building, int periodic);
+    ComputeNextTimeStep(double current, double deltaT, Building * building, int /*periodic*/);
     virtual bool Init(Building *) { return true; };
 
     Point ComputeAcc(Pedestrian & ped, Building * building, double current, double deltaT);
@@ -114,7 +114,7 @@ private:
      * @return
      */
     Point ForceRepRoom(Pedestrian & ped, SubRoom * subroom) const;
-    Point ForceRepWall(Pedestrian & ped, const Line & l) const;
+    Point ForceRepWall(Pedestrian & ped, const Line & w) const;
     Point ForceRepStatPoint(Pedestrian & ped, const Point & p, double l, double vn) const;
     Point ForceInterpolation(
         double v0,

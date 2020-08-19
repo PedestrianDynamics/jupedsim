@@ -48,22 +48,24 @@ GCFMModel::GCFMModel(
     double intp_widthped,
     double intp_widthwall,
     double maxfped,
-    double maxfwall)
+    double maxfwall) :
+    _nuPed(nuped),
+    _nuWall(nuwall),
+    _intp_widthPed(intp_widthped),
+    _intp_widthWall(intp_widthwall),
+    _maxfPed(maxfped),
+    _maxfWall(maxfwall),
+    _distEffMaxPed(dist_effPed),
+    _distEffMaxWall(dist_effWall)
 {
-    _direction      = dir;
-    _nuPed          = nuped;
-    _nuWall         = nuwall;
-    _intp_widthPed  = intp_widthped;
-    _intp_widthWall = intp_widthwall;
-    _maxfPed        = maxfped;
-    _maxfWall       = maxfwall;
-    _distEffMaxPed  = dist_effPed;
-    _distEffMaxWall = dist_effWall;
+    _direction = std::move(dir);
 }
 
-GCFMModel::~GCFMModel(void) {}
-
-void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building * building, int)
+void GCFMModel::ComputeNextTimeStep(
+    double current,
+    double deltaT,
+    Building * building,
+    int /*periodic*/)
 {
     std::vector<Point> result_acc = std::vector<Point>();
     result_acc.reserve(2200);
@@ -73,7 +75,7 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building * bu
     }
 
     // update
-    for(int p = 0; p < building->GetAllPedestrians().size(); ++p) {
+    for(std::size_t p = 0; p < building->GetAllPedestrians().size(); ++p) {
         Pedestrian * ped = building->GetAllPedestrians()[p];
         Point v_neu      = ped->GetV() + result_acc[p] * deltaT;
         Point pos_neu    = ped->GetPos() + v_neu * deltaT;
@@ -90,7 +92,11 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building * bu
     }
 }
 
-Point GCFMModel::ComputeAcc(Pedestrian & ped, Building * building, double current, double deltaT)
+Point GCFMModel::ComputeAcc(
+    Pedestrian & ped,
+    Building * building,
+    double current,
+    double /*deltaT*/)
 {
     double delta      = 1.5;
     Room * room       = building->GetRoom(ped.GetRoomID());
@@ -119,8 +125,9 @@ Point GCFMModel::ComputeAcc(Pedestrian & ped, Building * building, double curren
         Point p1            = ped.GetPos();
         Point p2            = ped1->GetPos();
         bool ped_is_visible = building->IsVisible(p1, p2, emptyVector, false);
-        if(!ped_is_visible)
+        if(!ped_is_visible) {
             continue;
+        }
         //if they are in the same subroom
         if(ped.GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
             F_rep = F_rep + ForceRepPed(ped, ped1);
@@ -151,8 +158,10 @@ inline Point GCFMModel::ForceDriv(Pedestrian & ped, Room * room) const
     Point lastE0      = ped.GetLastE0();
     ped.SetLastE0(target - pos);
 
-    if((dynamic_cast<DirectionLocalFloorfield *>(_direction->GetDirectionStrategy().get())) ||
-       (dynamic_cast<DirectionSubLocalFloorfield *>(_direction->GetDirectionStrategy().get()))) {
+    if((dynamic_cast<DirectionLocalFloorfield *>(_direction->GetDirectionStrategy().get()) !=
+        nullptr) ||
+       (dynamic_cast<DirectionSubLocalFloorfield *>(_direction->GetDirectionStrategy().get()) !=
+        nullptr)) {
         if(dist > 50 * J_EPS_GOAL) {
             const Point & v0 = ped.GetV0(target);
             F_driv           = ((v0 * ped.GetV0Norm() - ped.GetV()) * ped.GetMass()) / ped.GetTau();
@@ -179,15 +188,15 @@ Point GCFMModel::ForceRepPed(Pedestrian & ped1, Pedestrian * ped2) const
     const Point & vp1 = ped1.GetV();  // v Ped1
     const Point & vp2 = ped2->GetV(); // v Ped2
     Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
-    double tmp, tmp2;
-    double v_ij;
-    double K_ij;
-    double nom; //nominator of Frep
-    double px;  // hermite Interpolation value
+    double tmp = 0, tmp2 = 0;
+    double v_ij         = 0;
+    double K_ij         = 0;
+    double nom          = 0; //nominator of Frep
+    double px           = 0; // hermite Interpolation value
     const JEllipse & E1 = ped1.GetEllipse();
     const JEllipse & E2 = ped2->GetEllipse();
-    double distsq;
-    double dist_eff = E1.EffectiveDistanceToEllipse(E2, &distsq);
+    double distsq       = 0;
+    double dist_eff     = E1.EffectiveDistanceToEllipse(E2, &distsq);
 
 
     //          smax    dist_intpol_left      dist_intpol_right       dist_eff_max
@@ -202,7 +211,7 @@ Point GCFMModel::ForceRepPed(Pedestrian & ped1, Pedestrian * ped2) const
 
     //%------- Free parameter --------------
     Point p1, p2; // "Normale" Koordinaten
-    double mindist;
+    double mindist = 0;
 
 
     p1 = Point(E1.GetXp(), 0)
@@ -214,7 +223,7 @@ Point GCFMModel::ForceRepPed(Pedestrian & ped1, Pedestrian * ped2) const
     double dist_intpol_left  = mindist + _intp_widthPed;        // lower cut-off for Frep (modCFM)
     double dist_intpol_right = _distEffMaxPed - _intp_widthPed; //upper cut-off for Frep (modCFM)
     double smax              = mindist - _intp_widthPed;        //max overlapping
-    double f = 0.0f, f1 = 0.0f; //function value and its derivative at the interpolation point'
+    double f = 0.0, f1 = 0.0; //function value and its derivative at the interpolation point'
 
     //todo: runtime normsquare?
     if(distp12.Norm() >= J_EPS) {
@@ -308,14 +317,15 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian & ped, SubRoom * subroom) const
                 subroom->GetRoomID(),
                 subroom->GetSubRoomID());
             exit(EXIT_FAILURE);
-        } else
+        } else {
             for(const auto & wall : obst->GetAllWalls()) {
                 f += ForceRepWall(ped, wall);
             }
+        }
     }
 
     // and finally the closed doors
-    for(auto & goal : subroom->GetAllTransitions()) {
+    for(const auto & goal : subroom->GetAllTransitions()) {
         if(!goal->IsOpen()) {
             f += ForceRepWall(ped, *(static_cast<Line *>(goal)));
         }
@@ -344,17 +354,6 @@ inline Point GCFMModel::ForceRepWall(Pedestrian & ped, const Line & w) const
     double vn   = w.NormalComp(ped.GetV()); //normal component of the velocity on the wall
     F           = ForceRepStatPoint(ped, pt, mind, vn);
 
-    if(ped.GetID() == -33) {
-        printf(
-            "wall = [%f, %f]--[%f, %f] F= [%f %f]\n",
-            w.GetPoint1()._x,
-            w.GetPoint1()._y,
-            w.GetPoint2()._x,
-            w.GetPoint2()._y,
-            F._x,
-            F._y);
-    }
-
     return F; //line --> l != 0
 }
 
@@ -376,23 +375,29 @@ Point GCFMModel::ForceRepStatPoint(Pedestrian & ped, const Point & p, double l, 
     double d        = dist.Norm();      // distance between the centre of ped and point p
     Point e_ij; // x- and y-coordinate of the normalized vector between ped and p
 
-    double tmp;
-    double bla;
+    double tmp = 0;
+    double bla = 0;
     Point r;
     Point pinE; // vorher x1, y1
     const JEllipse & E = ped.GetEllipse();
 
-    if(d < J_EPS)
+    if(d < J_EPS) {
         return Point(0.0, 0.0);
+    }
+
     e_ij = dist / d;
     tmp  = v.ScalarProduct(e_ij); // < v_i , e_ij >;
     bla  = (tmp + fabs(tmp));
-    if(!bla) // Fussgaenger nicht im Sichtfeld
+    if(tmp <= 0) { // Fussgaenger nicht im Sichtfeld
         return Point(0.0, 0.0);
-    if(fabs(v._x) < J_EPS && fabs(v._y) < J_EPS) // v==0)
+    }
+
+    if(fabs(v._x) < J_EPS && fabs(v._y) < J_EPS) { // v==0)
         return Point(0.0, 0.0);
-    double K_ij;
-    K_ij = 0.5 * bla / v.Norm(); // K_ij
+    }
+
+    double K_ij = 0;
+    K_ij        = 0.5 * bla / v.Norm(); // K_ij
     // Punkt auf der Ellipse
     pinE = p.TransformToEllipseCoordinates(E.GetCenter(), E.GetCosPhi(), E.GetSinPhi());
     // Punkt auf der Ellipse
