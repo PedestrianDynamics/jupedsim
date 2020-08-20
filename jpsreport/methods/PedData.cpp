@@ -308,7 +308,7 @@ bool PedData::InitializeVariables(const fs::path & filename)
            * index: frame id - minFrame, value: position id in unique_ids
            */
 
-        _peds_t[t].push_back(id_pos);
+        _pedIDsByFrameNr[t].push_back(id_pos);
         // std::cout << "frame: " << _FramesTXT[i] << " t: " << t << " > " << id_pos << "\n";
     }
 
@@ -324,6 +324,7 @@ vector<double> PedData::GetVInFrame(int frame, const vector<int> & ids, double z
         int Tfuture = frame + _deltaF;
         double v    = GetInstantaneousVelocity1(
             frame, Tpast, Tfuture, id, _firstFrame, _lastFrame, _xCor, _yCor);
+        // TODO: zPos is set to 10000001.0 if it's None. Needed for this if-clause. But why?
         if(zPos < 1000000.0) {
             if(fabs(_zCor(id, frame) - zPos * M2CM) < J_EPS_EVENT) {
                 VInFrame.push_back(v);
@@ -339,6 +340,7 @@ vector<double> PedData::GetXInFrame(int frame, const vector<int> & ids, double z
 {
     vector<double> XInFrame;
     for(int id : ids) {
+        // TODO: zPos is set to 10000001.0 if it's None. Needed for this if-clause. But why?
         if(zPos < 1000000.0) {
             if(fabs(_zCor(id, frame) - zPos * M2CM) < J_EPS_EVENT) {
                 XInFrame.push_back(_xCor(id, frame));
@@ -364,6 +366,7 @@ vector<double> PedData::GetYInFrame(int frame, const vector<int> & ids, double z
     vector<double> YInFrame;
     for(unsigned int i = 0; i < ids.size(); i++) {
         int id = ids[i];
+        // TODO: zPos is set to 10000001.0 if it's None. Needed for this if-clause. But why?
         if(zPos < 1000000.0) {
             if(fabs(_zCor(id, frame) - zPos * M2CM) < J_EPS_EVENT) {
                 YInFrame.push_back(_yCor(id, frame));
@@ -399,6 +402,7 @@ vector<double> PedData::GetZInFrame(int frame, const vector<int> & ids, double z
     vector<double> ZInFrame;
     for(unsigned int i = 0; i < ids.size(); i++) {
         int id = ids[i];
+        // TODO: zPos is set to 10000001.0 if it's None. Needed for this if-clause. But why?
         if(zPos < 1000000.0) {
             if(fabs(_zCor(id, frame) - zPos * M2CM) < J_EPS_EVENT) {
                 ZInFrame.push_back(_zCor(id, frame));
@@ -423,6 +427,7 @@ vector<int> PedData::GetIndexInFrame(int frame, const vector<int> & ids, double 
 {
     vector<int> IdInFrame;
     for(int id : ids) {
+        // TODO: zPos is set to 10000001.0 if it's None. Needed for this if-clause. But why?
         if(zPos < 1000000.0) {
             if(fabs(_zCor(id, frame) - zPos * M2CM) < J_EPS_EVENT) {
                 IdInFrame.push_back(id);
@@ -438,6 +443,7 @@ vector<int> PedData::GetIdInFrame(int frame, const vector<int> & ids, double zPo
 {
     vector<int> IdInFrame;
     for(int id : ids) {
+        // TODO: zPos is set to 10000001.0 if it's None. Needed for this if-clause. But why?
         if(zPos < 1000000.0) {
             if(fabs(_zCor(id, frame) - zPos * M2CM) < J_EPS_EVENT) {
                 //IdInFrame.push_back(id +_minID);
@@ -649,9 +655,9 @@ fs::path PedData::GetTrajName() const
     return _trajName;
 }
 
-map<int, vector<int>> PedData::GetPedsFrame() const
+map<int, vector<int>> PedData::GetPedIDsByFrameNr() const
 {
-    return _peds_t;
+    return _pedIDsByFrameNr;
 }
 
 ub::matrix<double> PedData::GetXCor() const

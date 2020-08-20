@@ -3,8 +3,6 @@
 
     <geometry file="geo_AO_300.xml"/>
 
-    <logfile>log_AO_300.txt</logfile>
-
     <output location="bottleneck_Output"/>
 
     <trajectories format="txt" unit="m">

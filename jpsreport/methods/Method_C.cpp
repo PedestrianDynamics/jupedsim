@@ -45,7 +45,7 @@ Method_C::~Method_C() {}
 
 bool Method_C::Process(const PedData & peddata, const double & zPos_measureArea)
 {
-    _peds_t         = peddata.GetPedsFrame();
+    _peds_t         = peddata.GetPedIDsByFrameNr();
     _minFrame       = peddata.GetMinFrame();
     _trajName       = peddata.GetTrajName();
     _projectRootDir = peddata.GetProjectRootDir();

@@ -66,7 +66,7 @@ bool Method_J::Process(
     bool return_value = true;
     _scriptsLocation  = scriptsLocation;
     _outputLocation   = peddata.GetOutputLocation();
-    _peds_t           = peddata.GetPedsFrame();
+    _peds_t           = peddata.GetPedIDsByFrameNr();
     _trajName         = peddata.GetTrajName();
     _projectRootDir   = peddata.GetProjectRootDir();
     _measureAreaId    = boost::lexical_cast<string>(_areaForMethod_J->_id);
@@ -74,11 +74,11 @@ bool Method_J::Process(
     int mycounter     = 0;
     int minFrame      = peddata.GetMinFrame();
 
-    int _startFrame        = configData.start_frames[measurementAreaID];
-    int _stopFrame         = configData.stop_frames[measurementAreaID];
+    int _startFrame        = configData.startFrames[measurementAreaID];
+    int _stopFrame         = configData.stopFrames[measurementAreaID];
     bool _isOneDimensional = configData.isOneDimensional;
     bool _getProfile       = configData.getProfile;
-    bool _calcIndividualFD = configData.individual_FD_flags[measurementAreaID];
+    bool _calcIndividualFD = configData.calcLocalIFD[measurementAreaID];
 
 
     LOG_INFO(
@@ -379,8 +379,8 @@ void Method_J::GetProfiles(
     const vector<polygon_2d> & polygons,
     const vector<double> & velocity)
 {
-    float _grid_size_X = configData.grid_size_X;
-    float _grid_size_Y = configData.grid_size_Y;
+    float _grid_size_X = configData.gridSizeX;
+    float _grid_size_Y = configData.gridSizeY;
 
     std::string voroLocation(VORO_LOCATION);
     fs::path tmp("field");

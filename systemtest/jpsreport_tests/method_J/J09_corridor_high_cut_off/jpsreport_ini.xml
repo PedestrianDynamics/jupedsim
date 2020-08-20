@@ -20,7 +20,7 @@
 
     <method_J enabled="true">
         <measurement_area id="1" start_frame="None" stop_frame="None"
-                          get_individual_FD="true"/>
+                          local_IFD="true"/>
         <one_dimensional enabled="false"/>
         <cut_by_circle enabled="true" radius="1.0607" edges="100"/>
         <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/>

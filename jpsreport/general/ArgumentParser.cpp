@@ -94,7 +94,6 @@ ArgumentParser::ArgumentParser()
     _isMethodB              = false;
     _isMethodC              = false;
     _isMethodD              = false;
-    _isMethodI              = false;
     _isMethodJ              = false;
     _steadyStart            = 100;
     _steadyEnd              = 1000;
@@ -332,7 +331,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             } else {
                 areaB->_zPos = 10000001.0;
             }
-            std::map<int, polygon_2d> geoPoly;
+
             polygon_2d poly;
             LOG_INFO("Measure area id  <{}> with type <{}>", areaB->_id, areaB->_type);
             int num_verteces = 0;
@@ -365,48 +364,13 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                     "Less than 3 measure area points given ({}). At least 3 or nothing "
                     "at all!!",
                     num_verteces);
-            if(num_verteces == 0) // big bounding box
-            {
-                LOG_WARNING("Measurement are with 0 points. Default bounding box!!");
-                // get bounding box
-                // loading geometry is done in  analysis.cpp
-                // so this is done twice, which is not nice.
-                // For big geometries it could be slow.
-                Building * building = new Building();
-                building->LoadGeometry(GetGeometryFilename().string());
-                building->InitGeometry();
-                building->AddSurroundingRoom(); // this is a big reactagle
-                // slightly bigger than the
-                // geometry boundaries
-                double geo_minX = building->_xMin;
-                double geo_minY = building->_yMin;
-                double geo_maxX = building->_xMax;
-                double geo_maxY = building->_yMax;
-                LOG_INFO(
-                    "Bounding box:\n \t\tminX = {:.2f}\n \t\tmaxX = {:.2f} \n \t\tminY = {:.2f} "
-                    "\n\t\tmaxY = {:.2f}",
-                    geo_minX,
-                    geo_maxX,
-                    geo_minY,
-                    geo_maxY);
 
-                //1
-                double box_px = geo_minX * M2CM;
-                double box_py = geo_minY * M2CM;
-                boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
-                //2
-                box_px = geo_minX * M2CM;
-                box_py = geo_maxY * M2CM;
-                boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
-                //3
-                box_px = geo_maxX * M2CM;
-                box_py = geo_maxY * M2CM;
-                boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
-                //4
-                box_px = geo_maxX * M2CM;
-                box_py = geo_minY * M2CM;
-                boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
+            // TODO: this needs to be restructured. Same default MA can be used for profiles and globalIFD
+            if(num_verteces == 0) {
+                LOG_WARNING("Measurement are with 0 points. Default bounding box!!");
+                poly = GetSurroundingPolygon();
             }
+
             correct(poly); // in the case the Polygone is not closed
             areaB->_poly = poly;
 
@@ -416,7 +380,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 areaB->_length = xmltof(xLength->Attribute("distance"));
                 LOG_INFO("Length in movement direction {:.3f}", areaB->_length);
             }
-            _measurementAreas[areaB->_id] = areaB;
+            _measurementAreasByIDs[areaB->_id] = areaB;
         }
         for(TiXmlNode * xMeasurementArea_L =
                 xMainNode->FirstChild("measurement_areas")->FirstChild("area_L");
@@ -477,7 +441,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 exit(EXIT_FAILURE);
             }
 
-            _measurementAreas[areaL->_id] = areaL;
+            _measurementAreasByIDs[areaL->_id] = areaL;
             LOG_INFO(
                 "Measurement line starts from  <{:.3f}, {:.3f}> to <{:.3f}, {:.3f}>",
                 areaL->_lineStartX * CMtoM,
@@ -548,7 +512,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area")) {
                 int id = xmltoi(xMeasurementArea->Attribute("id"));
 
-                if(_measurementAreas[id]->_type == "Line") {
+                if(_measurementAreasByIDs[id]->_type == "Line") {
                     _areaIDforMethodA.push_back(id);
                     LOG_INFO("Measurement area id <{}> will be used for analysis", id);
                 } else {
@@ -556,7 +520,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                         "Measurement area id <{}> will NOT be used for analysis (Type "
                         "<{}> is not Line)",
                         id,
-                        _measurementAreas[id]->_type);
+                        _measurementAreasByIDs[id]->_type);
                 }
 
                 if(xMeasurementArea->Attribute("frame_interval")) {
@@ -620,16 +584,6 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
         }
     }
 
-    // method I
-    TiXmlElement * xMethod_I = xMainNode->FirstChildElement("method_I");
-    if(xMethod_I) {
-        LOG_INFO("Method I is selected with following options");
-        if(auto configData = ParseDIJParams(xMethod_I)) {
-            _configDataI = configData.value();
-            _isMethodI   = true;
-        }
-    }
-
     // method Voronoi
     TiXmlElement * xMethod_J = xMainNode->FirstChildElement("method_J");
     if(xMethod_J) {
@@ -641,7 +595,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
     }
 
     LOG_INFO("Finish parsing inifile");
-    if(!(_isMethodA || _isMethodB || _isMethodC || _isMethodD || _isMethodI || _isMethodJ)) {
+    if(!(_isMethodA || _isMethodB || _isMethodC || _isMethodD || _isMethodJ)) {
         LOG_WARNING("No measurement method enabled. Nothing to do.");
         exit(EXIT_SUCCESS);
     }
@@ -666,29 +620,29 @@ std::optional<ConfigData_DIJ> ArgumentParser::ParseDIJParams(TiXmlElement * xMet
 
         if(xMeasurementArea->Attribute("start_frame") &&
            string(xMeasurementArea->Attribute("start_frame")) != "None") {
-            configData.start_frames.push_back(xmltoi(xMeasurementArea->Attribute("start_frame")));
+            configData.startFrames.push_back(xmltoi(xMeasurementArea->Attribute("start_frame")));
             LOG_INFO(
                 "the analysis starts from frame <{}>",
                 xmltoi(xMeasurementArea->Attribute("start_frame")));
         } else {
-            configData.start_frames.push_back(-1);
+            configData.startFrames.push_back(-1);
         }
         if(xMeasurementArea->Attribute("stop_frame") &&
            string(xMeasurementArea->Attribute("stop_frame")) != "None") {
-            configData.stop_frames.push_back(xmltoi(xMeasurementArea->Attribute("stop_frame")));
+            configData.stopFrames.push_back(xmltoi(xMeasurementArea->Attribute("stop_frame")));
             LOG_INFO(
                 "the analysis stops from frame <{}>",
                 xmltoi(xMeasurementArea->Attribute("stop_frame")));
         } else {
-            configData.stop_frames.push_back(-1);
+            configData.stopFrames.push_back(-1);
         }
 
-        if(xMeasurementArea->Attribute("get_individual_FD") &&
-           string(xMeasurementArea->Attribute("get_individual_FD")) == "true") {
-            configData.individual_FD_flags.push_back(true);
-            LOG_INFO("Individual FD will be output");
+        if(xMeasurementArea->Attribute("local_IFD") &&
+           string(xMeasurementArea->Attribute("local_IFD")) == "true") {
+            configData.calcLocalIFD.push_back(true);
+            LOG_INFO("Local individual FD will be output");
         } else {
-            configData.individual_FD_flags.push_back(false);
+            configData.calcLocalIFD.push_back(false);
         }
     }
     if(xMethod->FirstChildElement("one_dimensional") &&
@@ -720,18 +674,94 @@ std::optional<ConfigData_DIJ> ArgumentParser::ParseDIJParams(TiXmlElement * xMet
     if(xMethod->FirstChildElement("profiles") &&
        string(xMethod->FirstChildElement("profiles")->Attribute("enabled")) == "true") {
         configData.getProfile = true;
-        configData.grid_size_X =
+        configData.gridSizeX =
             xmltof(xMethod->FirstChildElement("profiles")->Attribute("grid_size_x")) * M2CM;
-        configData.grid_size_Y =
+        configData.gridSizeY =
             xmltof(xMethod->FirstChildElement("profiles")->Attribute("grid_size_y")) * M2CM;
         LOG_INFO("Profiles will be calculated");
         LOG_INFO(
             "The discretized grid size in x, y direction is: <{}> by <{}> m^2",
-            configData.grid_size_X * CMtoM,
-            configData.grid_size_Y * CMtoM);
+            configData.gridSizeX * CMtoM,
+            configData.gridSizeY * CMtoM);
+        //TODO: restructuring needed. profiles option should be independet of MA so that start and stop frame can be set here.
+    }
+
+    if(xMethod->FirstChildElement("use_blind_points") &&
+       string(xMethod->FirstChildElement("use_blind_points")->Attribute("enabled")) == "false") {
+        configData.useBlindPoints = false;
+        LOG_INFO("Use of blind points disabled");
+    }
+
+    if(xMethod->FirstChildElement("global_IFD") &&
+       string(xMethod->FirstChildElement("global_IFD")->Attribute("enabled")) == "true") {
+        LOG_INFO(
+            "Global IFD data will be calculated. Bounding box is created as measurement area.");
+
+        // create MA with polygon points outside the geometry
+        MeasurementArea_B * areaB = new MeasurementArea_B();
+        areaB->_id                = -1;
+        areaB->_type              = "Bounding Box";
+        polygon_2d poly           = GetSurroundingPolygon();
+        correct(poly);
+        areaB->_poly                       = poly;
+        areaB->_zPos                       = 10000001.0; // TODO: why do we need to do this??
+        _measurementAreasByIDs[areaB->_id] = areaB;
+
+        // set config parameters
+        configData.areaIDs.push_back(areaB->_id);
+        // TODO: do we want to read in following parameters for these option too?
+        configData.startFrames.push_back(-1);
+        configData.stopFrames.push_back(-1);
+        configData.calcLocalIFD.push_back(true);
     }
 
     return configData;
+}
+
+polygon_2d ArgumentParser::GetSurroundingPolygon()
+{
+    polygon_2d poly;
+    // loading geometry is done in  analysis.cpp
+    // so this is done twice, which is not nice.
+    // For big geometries it could be slow.
+    Building * building = new Building();
+    building->LoadGeometry(
+        GetGeometryFilename()
+            .string()); //TODO: Geometry is load after MA. Resturcturing needed for creating default MA
+    building->InitGeometry();
+    building->AddSurroundingRoom(); // this is a big reactagle
+    // slightly bigger than the
+    // geometry boundaries
+    double geo_minX = building->_xMin;
+    double geo_minY = building->_yMin;
+    double geo_maxX = building->_xMax;
+    double geo_maxY = building->_yMax;
+    LOG_INFO(
+        "Bounding box:\n \t\tminX = {:.2f}\n \t\tmaxX = {:.2f} \n \t\tminY = {:.2f} "
+        "\n\t\tmaxY = {:.2f}",
+        geo_minX,
+        geo_maxX,
+        geo_minY,
+        geo_maxY);
+
+    //1
+    double box_px = geo_minX * M2CM;
+    double box_py = geo_minY * M2CM;
+    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
+    //2
+    box_px = geo_minX * M2CM;
+    box_py = geo_maxY * M2CM;
+    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
+    //3
+    box_px = geo_maxX * M2CM;
+    box_py = geo_maxY * M2CM;
+    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
+    //4
+    box_px = geo_maxX * M2CM;
+    box_py = geo_minY * M2CM;
+    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
+
+    return poly;
 }
 
 const fs::path & ArgumentParser::GetGeometryFilename() const
@@ -799,10 +829,6 @@ bool ArgumentParser::GetIsMethodD() const
 {
     return _isMethodD;
 }
-bool ArgumentParser::GetIsMethodI() const
-{
-    return _isMethodI;
-}
 
 bool ArgumentParser::GetIsMethodJ() const
 {
@@ -836,9 +862,9 @@ vector<int> ArgumentParser::GetAreaIDforMethodC() const
 
 MeasurementArea * ArgumentParser::GetMeasurementArea(int id)
 {
-    if(_measurementAreas.count(id) == 0) {
+    if(_measurementAreasByIDs.count(id) == 0) {
         LOG_ERROR("Measurement id [%d] not found.", id);
         exit(EXIT_FAILURE);
     }
-    return _measurementAreas[id];
+    return _measurementAreasByIDs[id];
 }
