@@ -1,4 +1,6 @@
 %% this file is generated automatically. All manual changes will be deleted.
+%% see ../README.md (Sec. producing a pdf file of the documentation)
+
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 \begin{titlepage}
 \begin{center}
