@@ -40,7 +40,7 @@ public:
     // constructors
     Point();
     Point(double x, double y);
-    Point(const Point & orig);
+    Point(const Point & orig) = default;
 
 
     /**
