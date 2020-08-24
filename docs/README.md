@@ -66,6 +66,11 @@ Pages can be sorted and grouped by `tag`. The following tags are implemented (se
 The documentation using markdown can be rendered using GitHub pages.
 Moreover, the same md-files can also be used to produce a pdf-file.
 
+The easiest way to produce the guide is to run `cmake` with `-DBUILD_DOC=ON` followed with a subsequent call to `make guide`.
+
+The cmake-call creates `titelpage.tex` based on the content of `titlepage.tex.in`.
+
+
 The directory `jps_guide` contains the files necessary to make this happen.
 It contains the following files:
 
@@ -74,10 +79,9 @@ It contains the following files:
 - `make_guide.py`: This script does the main work and triggers the whole markdown -> latex -> pdf magic. Especially it does the following:
   - Creates a directory called `_tex`
   - Converts `pages/*.md` to `_tex/\*.tex`
-  - Copies the file `post-checkout` in  `../../.git/hooks/post-checkout`. After calling `git checkout` a `titlepage.tex` is created containing the front page of the guide with useful git information.
   - Calls `make`, which creates the pdf file.
   - Finally, it calls `make clean` and deletes unnecessary files.
-- post-checkout: necessary to create `titlepage.tex`.
+
 
 **Note**: This script depends on `kramdown`.
 
