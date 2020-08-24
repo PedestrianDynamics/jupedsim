@@ -41,12 +41,6 @@ Point::Point() : _x(0), _y(0) {}
 
 Point::Point(double x, double y) : _x(x), _y(y) {}
 
-Point::Point(const Point & orig)
-{
-    _x = orig._x;
-    _y = orig._y;
-}
-
 std::string Point::toString() const
 {
     std::stringstream tmp;
