@@ -4,11 +4,13 @@
 
 set(source_files
         Logger.cpp
+        RandomToolset.cpp
 )
 
 set(header_files
         Logger.h
         RandomToolset.h
+        RandomToolset.cpp
         )
 
 add_library(shared STATIC

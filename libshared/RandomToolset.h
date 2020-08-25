@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <assert.h>
+#include <atomic>
 #include <random>
 #include <stdexcept>
 
@@ -27,28 +28,21 @@
  */
 namespace Random
 {
-namespace
-{
 /**
  * Random engine used for creating the random numbers
  */
-std::mt19937 _randomEngine;
+extern std::mt19937 _randomEngine;
 
 /**
  * Flag if a seed was properly set
  */
-bool _init = false;
-} // namespace
+extern std::atomic<bool> _init;
 
 /**
  * Seed the random number generator
  * @param seed seed used for the random number generator
  */
-inline void Setup(int seed)
-{
-    _randomEngine = std::mt19937(seed);
-    _init         = true;
-}
+void Setup(int seed);
 
 /**
  * Returns a random number of a normal distribution with mean (\p mean) and standard deviation (\p stddev).
@@ -60,9 +54,7 @@ inline void Setup(int seed)
 template <typename RealType = double>
 RealType GetNormal(RealType mean, RealType stddev)
 {
-    if(!_init) {
-        throw std::runtime_error("!");
-    }
+    assert(_init.load());
     std::normal_distribution dist(mean, stddev);
     return dist(_randomEngine);
 }
@@ -78,7 +70,7 @@ RealType GetNormal(RealType mean, RealType stddev)
 template <typename IntType = int>
 IntType GetUniformInt(IntType min, IntType max)
 {
-    assert(_init);
+    assert(_init.load());
     std::uniform_int_distribution dist(min, max);
     return dist(_randomEngine);
 }
@@ -94,7 +86,7 @@ IntType GetUniformInt(IntType min, IntType max)
 template <typename RealType = double>
 RealType GetUniformReal(RealType min, RealType max)
 {
-    assert(_init);
+    assert(_init.load());
     std::uniform_real_distribution dist(min, max);
     return dist(_randomEngine);
 }
@@ -112,7 +104,7 @@ RealType GetUniformReal(RealType min, RealType max)
 template <typename RealType = double>
 RealType GetTriangular(RealType min, RealType max, RealType peak)
 {
-    assert(_init);
+    assert(_init.load());
     std::vector<RealType> i{min, peak, max};
     std::vector<RealType> w{0, 1, 0};
     std::piecewise_linear_distribution<RealType> dist{i.begin(), i.end(), w.begin()};
@@ -129,7 +121,7 @@ RealType GetTriangular(RealType min, RealType max, RealType peak)
 template <typename RealType = double>
 RealType GetLogNormal(RealType mean, RealType stddev)
 {
-    assert(_init);
+    assert(_init.load());
     std::lognormal_distribution dist(mean, stddev);
     return dist(_randomEngine);
 }
@@ -143,7 +135,7 @@ RealType GetLogNormal(RealType mean, RealType stddev)
 template <typename IntType = int>
 IntType GetDiscreteDistribution(std::vector<double> weights)
 {
-    assert(_init);
+    assert(_init.load());
     std::discrete_distribution<IntType> dist(std::begin(weights), std::end(weights));
     return dist(_randomEngine);
 }
@@ -151,7 +143,7 @@ IntType GetDiscreteDistribution(std::vector<double> weights)
 template <typename RealType = double>
 RealType GetBetaDistribution(RealType alpha, RealType beta)
 {
-    assert(_init);
+    assert(_init.load());
     std::gamma_distribution<RealType> alphaDist(alpha);
     std::gamma_distribution<RealType> betaDist(beta);
 
@@ -164,7 +156,7 @@ RealType GetBetaDistribution(RealType alpha, RealType beta)
 template <typename InputIt>
 void ShuffleContainer(InputIt first, InputIt last)
 {
-    assert(_init);
+    assert(_init.load());
     std::shuffle(first, last, _randomEngine);
 }
 } // namespace Random

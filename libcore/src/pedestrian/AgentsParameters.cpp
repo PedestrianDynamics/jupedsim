@@ -33,7 +33,7 @@
 
 #include <RandomToolset.h>
 
-AgentsParameters::AgentsParameters(int id, int seed)
+AgentsParameters::AgentsParameters(int id)
 {
     _id = id;
 }

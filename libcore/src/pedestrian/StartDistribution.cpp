@@ -339,16 +339,14 @@ double StartDistribution::GetRiskTolerance()
         } else {
             return Random::GetNormal(_riskToleranceMean, _riskToleranceStdv);
         }
+    } else {
+        if(_distribution_type == "beta") {
+            return Random::GetBetaDistribution(_riskToleranceAlpha, _riskToleranceBeta);
+        } else {
+            LOG_WARNING("Distribution Type invalid or not set. Fallback to uniform distribution");
+            return Random::GetNormal(0., 1.);
+        }
     }
-    //    else {
-    //        std::uniform_real_distribution<float> normalize(0.0, 1.0);
-    //        float rand_norm = normalize(_generator);
-    //        if(_distribution_type == "beta") {
-    //            return quantile(_risk_beta_dist, rand_norm);
-    //        }
-    //        LOG_WARNING("Distribution Type invalid or not set. Fallback to uniform distribution");
-    //        return (double) rand_norm; // todo: ar.graf: check if this quick fix executes and why
-    //    }
 }
 
 void StartDistribution::SetPositionsDir(const std::string & dir)

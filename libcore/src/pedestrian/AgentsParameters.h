@@ -35,7 +35,7 @@ public:
     /**
      * Constructor
      */
-    AgentsParameters(int id, int seed = 1234);
+    AgentsParameters(int id);
 
     /**
      * Destructor

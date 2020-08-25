@@ -635,8 +635,7 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
            usedAgentParams.end()) {
             LOG_INFO("Parsing the group parameter id [{}]", para_id);
 
-            auto agentParameters = std::shared_ptr<AgentsParameters>(
-                new AgentsParameters(para_id, _config->GetSeed()));
+            auto agentParameters = std::make_shared<AgentsParameters>(para_id);
             _config->AddAgentsParameters(agentParameters, para_id);
 
             //desired speed
