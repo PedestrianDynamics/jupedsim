@@ -46,15 +46,10 @@ VelocityModel::VelocityModel(
     double aped,
     double Dped,
     double awall,
-    double Dwall)
+    double Dwall) :
+    _aPed(aped), _DPed(Dped), _aWall(awall), _DWall(Dwall)
 {
-    _direction = dir;
-    // Force_rep_PED Parameter
-    _aPed = aped;
-    _DPed = Dped;
-    // Force_rep_WALL Parameter
-    _aWall = awall;
-    _DWall = Dwall;
+    _direction = std::move(dir);
 }
 
 
@@ -66,172 +61,141 @@ void VelocityModel::ComputeNextTimeStep(
     Building * building,
     int periodic)
 {
-    // collect all pedestrians in the simulation.
-    const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
-    std::vector<Pedestrian *> pedsToRemove;
-    pedsToRemove.reserve(500);
-    unsigned long nSize;
-    nSize = allPeds.size();
+    std::vector<Point> result_acc = std::vector<Point>();
+    result_acc.reserve(building->GetAllPedestrians().size());
 
-    int nThreads = omp_get_max_threads();
-
-    int partSize;
-    partSize = ((int) nSize > nThreads) ? (int) (nSize / nThreads) : (int) nSize;
-    if(partSize == (int) nSize)
-        nThreads = 1; // not worthy to parallelize
-
-
-//TODO richtig parallelisieren!
-#pragma omp parallel default(shared) num_threads(nThreads)
-    {
-        std::vector<Point> result_acc = std::vector<Point>();
-        result_acc.reserve(nSize);
-        std::vector<my_pair> spacings = std::vector<my_pair>();
-        spacings.reserve(nSize);             // larger than needed
-        spacings.push_back(my_pair(100, 1)); // in case there are no neighbors
-        const int threadID = omp_get_thread_num();
-
-        int start = threadID * partSize;
-        int end;
-        end = (threadID < nThreads - 1) ? (threadID + 1) * partSize - 1 : (int) (nSize - 1);
-        for(int p = start; p <= end; ++p) {
-            Pedestrian * ped  = allPeds[p];
-            Room * room       = building->GetRoom(ped->GetRoomID());
-            SubRoom * subroom = room->GetSubRoom(ped->GetSubRoomID());
-            Point repPed      = Point(0, 0);
-            std::vector<Pedestrian *> neighbours =
-                building->GetNeighborhoodSearch().GetNeighbourhood(ped);
-
-            int size = (int) neighbours.size();
-            for(int i = 0; i < size; i++) {
-                Pedestrian * ped1 = neighbours[i];
-                //if they are in the same subroom
-                Point p1 = ped->GetPos();
-
-                Point p2 = ped1->GetPos();
-                //subrooms to consider when looking for neighbour for the 3d visibility
-                std::vector<SubRoom *> emptyVector;
-                emptyVector.push_back(subroom);
-                emptyVector.push_back(
-                    building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID()));
-                bool isVisible = building->IsVisible(p1, p2, emptyVector, false);
-                if(!isVisible)
-                    continue;
-                if(ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
-                    repPed += ForceRepPed(ped, ped1, periodic);
-                } else {
-                    // or in neighbour subrooms
-                    SubRoom * sb2 =
-                        building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
-                    if(subroom->IsDirectlyConnectedWith(sb2)) {
-                        repPed += ForceRepPed(ped, ped1, periodic);
-                    }
-                }
-            } // for i
-            //repulsive forces to walls and closed transitions that are not my target
-            Point repWall = ForceRepRoom(allPeds[p], subroom);
-
-            // calculate new direction ei according to (6)
-            Point direction = e0(ped, room) + repPed + repWall;
-            for(int i = 0; i < size; i++) {
-                Pedestrian * ped1 = neighbours[i];
-                // calculate spacing
-                // my_pair spacing_winkel = GetSpacing(ped, ped1);
-                if(ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
-                    spacings.push_back(GetSpacing(ped, ped1, direction, periodic));
-                } else {
-                    // or in neighbour subrooms
-                    SubRoom * sb2 =
-                        building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
-                    if(subroom->IsDirectlyConnectedWith(sb2)) {
-                        spacings.push_back(GetSpacing(ped, ped1, direction, periodic));
-                    }
-                }
-            }
-            //TODO get spacing to walls
-            //TODO update direction every DT?
-
-            // calculate min spacing
-            std::sort(spacings.begin(), spacings.end(), sort_pred());
-            double spacing = spacings[0].first;
-            //============================================================
-            // TODO: Hack for Head on situations: ped1 x ------> | <------- x ped2
-            if(0 && direction.NormSquare() < 0.5) {
-                double pi_half = 1.57079663;
-                double alpha   = pi_half * exp(-spacing);
-                direction      = e0(ped, room).Rotate(cos(alpha), sin(alpha));
-                printf(
-                    "\nRotate %f, %f, norm = %f alpha = %f, spacing = %f\n",
-                    direction._x,
-                    direction._y,
-                    direction.NormSquare(),
-                    alpha,
-                    spacing);
-                getc(stdin);
-            }
-            //============================================================
-            Point speed = direction.Normalized() * OptimalSpeed(ped, spacing);
-            result_acc.push_back(speed);
-
-
-            spacings.clear(); //clear for ped p
-
-            // stuck peds get removed. Warning is thrown. low speed due to jam is omitted.
-            if(ped->GetTimeInJam() > ped->GetPatienceTime() &&
-               ped->GetGlobalTime() > 10000 + ped->GetPremovementTime() &&
-               std::max(ped->GetMeanVelOverRecTime(), ped->GetV().Norm()) < 0.01 &&
-               size == 0) // size length of peds neighbour vector
-            {
-                LOG_WARNING(
-                    "ped {:d} with vmean {:f} has been deleted in room {:d}/{:d} after time "
-                    "{:f}s (current={:f}",
-                    ped->GetID(),
-                    ped->GetMeanVelOverRecTime(),
-                    ped->GetRoomID(),
-                    ped->GetSubRoomID(),
-                    ped->GetGlobalTime(),
-                    current);
-                //TODO KKZ track deleted peds
-#pragma omp critical(VelocityModel_ComputeNextTimeStep_pedsToRemove)
-                pedsToRemove.push_back(ped);
-            }
-
-        } // for p
-
-#pragma omp barrier
-        // update
-        for(int p = start; p <= end; ++p) {
-            Pedestrian * ped = allPeds[p];
-
-            Point v_neu   = result_acc[p - start];
-            Point pos_neu = ped->GetPos() + v_neu * deltaT;
-
-            //Jam is based on the current velocity
-            if(v_neu.Norm() >= ped->GetV0Norm() * 0.5) {
-                ped->ResetTimeInJam();
-            } else {
-                ped->UpdateTimeInJam();
-            }
-            //only update the position if the velocity is above a threshold
-            if(v_neu.Norm() >= J_EPS_V) {
-                ped->SetPhiPed();
-            }
-            ped->SetPos(pos_neu);
-            if(periodic) {
-                if(ped->GetPos()._x >= xRight) {
-                    ped->SetPos(Point(ped->GetPos()._x - (xRight - xLeft), ped->GetPos()._y));
-                    //ped->SetID( ped->GetID() + 1);
-                }
-            }
-            ped->SetV(v_neu);
-        }
-    } //end parallel
-
-    // remove the pedestrians that have left the building
-    for(unsigned int p = 0; p < pedsToRemove.size(); p++) {
-        building->DeletePedestrian(pedsToRemove[p]);
+    for(Pedestrian * ped : building->GetAllPedestrians()) {
+        result_acc.push_back(ComputeVelocity(*ped, building, current, periodic));
     }
-    pedsToRemove.clear();
+
+
+    // update
+    for(std::size_t p = 0; p < building->GetAllPedestrians().size(); ++p) {
+        Pedestrian * ped = building->GetAllPedestrians()[p];
+
+        Point v_neu   = result_acc[p];
+        Point pos_neu = ped->GetPos() + v_neu * deltaT;
+
+        //Jam is based on the current velocity
+        if(v_neu.Norm() >= ped->GetV0Norm() * 0.5) {
+            ped->ResetTimeInJam();
+        } else {
+            ped->UpdateTimeInJam();
+        }
+        //only update the position if the velocity is above a threshold
+        if(v_neu.Norm() >= J_EPS_V) {
+            ped->SetPhiPed();
+        }
+        ped->SetPos(pos_neu);
+        if(periodic) {
+            if(ped->GetPos()._x >= xRight) {
+                ped->SetPos(Point(ped->GetPos()._x - (xRight - xLeft), ped->GetPos()._y));
+                //ped->SetID( ped->GetID() + 1);
+            }
+        }
+        ped->SetV(v_neu);
+    }
+}
+Point VelocityModel::ComputeVelocity(
+    Pedestrian & ped,
+    Building * building,
+    double current,
+    int periodic)
+{
+    std::vector<my_pair> spacings = std::vector<my_pair>();
+    spacings.push_back(my_pair(100, 1)); // in case there are no neighbors
+    Room * room                          = building->GetRoom(ped.GetRoomID());
+    SubRoom * subroom                    = room->GetSubRoom(ped.GetSubRoomID());
+    Point repPed                         = Point(0, 0);
+    std::vector<Pedestrian *> neighbours = building->GetNeighborhoodSearch().GetNeighbourhood(&ped);
+
+    int size = (int) neighbours.size();
+    for(int i = 0; i < size; i++) {
+        Pedestrian * ped1 = neighbours[i];
+        //if they are in the same subroom
+        Point p1 = ped.GetPos();
+
+        Point p2 = ped1->GetPos();
+        //subrooms to consider when looking for neighbour for the 3d visibility
+        std::vector<SubRoom *> emptyVector;
+        emptyVector.push_back(subroom);
+        emptyVector.push_back(
+            building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID()));
+        bool isVisible = building->IsVisible(p1, p2, emptyVector, false);
+        if(!isVisible)
+            continue;
+        if(ped.GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
+            repPed += ForceRepPed(&ped, ped1, periodic);
+        } else {
+            // or in neighbour subrooms
+            SubRoom * sb2 = building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
+            if(subroom->IsDirectlyConnectedWith(sb2)) {
+                repPed += ForceRepPed(&ped, ped1, periodic);
+            }
+        }
+    } // for i
+    //repulsive forces to walls and closed transitions that are not my target
+    Point repWall = ForceRepRoom(&ped, subroom);
+
+    // calculate new direction ei according to (6)
+    Point direction = e0(&ped, room) + repPed + repWall;
+    for(int i = 0; i < size; i++) {
+        Pedestrian * ped1 = neighbours[i];
+        // calculate spacing
+        // my_pair spacing_winkel = GetSpacing(&ped, ped1);
+        if(ped.GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
+            spacings.push_back(GetSpacing(&ped, ped1, direction, periodic));
+        } else {
+            // or in neighbour subrooms
+            SubRoom * sb2 = building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
+            if(subroom->IsDirectlyConnectedWith(sb2)) {
+                spacings.push_back(GetSpacing(&ped, ped1, direction, periodic));
+            }
+        }
+    }
+    //TODO get spacing to walls
+    //TODO update direction every DT?
+
+    // calculate min spacing
+    std::sort(spacings.begin(), spacings.end(), sort_pred());
+    double spacing = spacings[0].first;
+    //============================================================
+    // TODO: Hack for Head on situations: ped1 x ------> | <------- x ped2
+    if(0 && direction.NormSquare() < 0.5) {
+        double pi_half = 1.57079663;
+        double alpha   = pi_half * exp(-spacing);
+        direction      = e0(&ped, room).Rotate(cos(alpha), sin(alpha));
+        printf(
+            "\nRotate %f, %f, norm = %f alpha = %f, spacing = %f\n",
+            direction._x,
+            direction._y,
+            direction.NormSquare(),
+            alpha,
+            spacing);
+        getc(stdin);
+    }
+    //============================================================
+    Point speed = direction.Normalized() * OptimalSpeed(&ped, spacing);
+
+    // stuck peds get removed. Warning is thrown. low speed due to jam is omitted.
+    if(ped.GetTimeInJam() > ped.GetPatienceTime() &&
+       ped.GetGlobalTime() > 10000 + ped.GetPremovementTime() &&
+       std::max(ped.GetMeanVelOverRecTime(), ped.GetV().Norm()) < 0.01 &&
+       size == 0) // size length of peds neighbour vector
+    {
+        LOG_WARNING(
+            "ped {:d} with vmean {:f} has been deleted in room {:d}/{:d} after time "
+            "{:f}s (current={:f}",
+            ped.GetID(),
+            ped.GetMeanVelOverRecTime(),
+            ped.GetRoomID(),
+            ped.GetSubRoomID(),
+            ped.GetGlobalTime(),
+            current);
+        //TODO (DH) Remove pedestrian
+        //pedsToRemove.push_back(&ped);
+    }
+    return speed;
 }
 
 Point VelocityModel::e0(Pedestrian * ped, Room * room) const

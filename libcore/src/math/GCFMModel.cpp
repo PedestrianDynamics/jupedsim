@@ -68,7 +68,7 @@ void GCFMModel::ComputeNextTimeStep(
     int /*periodic*/)
 {
     std::vector<Point> result_acc = std::vector<Point>();
-    result_acc.reserve(2200);
+    result_acc.reserve(building->GetAllPedestrians().size());
 
     for(Pedestrian * ped : building->GetAllPedestrians()) {
         result_acc.push_back(ComputeAcc(*ped, building, current, deltaT));

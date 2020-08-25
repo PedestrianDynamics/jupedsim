@@ -69,6 +69,8 @@ private:
     double _aWall;
     double _DWall;
 
+    Point ComputeVelocity(Pedestrian & ped, Building * building, double current, int periodic);
+
     /**
       * Optimal velocity function \f$ V(spacing) =\min{v_0, \max{0, (s-l)/T}}  \f$
       *
@@ -168,7 +170,7 @@ public:
       */
     double GetDWall() const;
 
-    virtual bool Init(Building * building) { return true; };
+    virtual bool Init(Building * /*building*/) { return true; };
 
     /**
       * Compute the next simulation step
