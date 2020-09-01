@@ -35,17 +35,17 @@ public:
     /**
      * Constructor
      */
-    AgentsParameters(int id);
+    explicit AgentsParameters(int id);
 
     /**
      * Destructor
      */
-    virtual ~AgentsParameters();
+    ~AgentsParameters() = default;
 
     /**
      * @return the ID of the agents parameters sets.
      */
-    int GetID();
+    int GetID() const;
 
     /**
      * Set the ID of the parameter set
@@ -146,86 +146,80 @@ public:
 
     void EnableStretch(bool stretch);
 
+    /**
+     * @return a random number following the distribution
+     */
+    double GetV0() const;
 
     /**
      * @return a random number following the distribution
      */
-    double GetV0();
+    double GetV0UpStairs() const;
 
     /**
      * @return a random number following the distribution
      */
-    double GetV0UpStairs();
+    double GetV0DownStairs() const;
 
     /**
      * @return a random number following the distribution
      */
-    double GetV0DownStairs();
+    double GetEscalatorUpStairs() const;
 
     /**
      * @return a random number following the distribution
      */
-    double GetEscalatorUpStairs();
+    double GetEscalatorDownStairs() const;
 
     /**
      * @return a random number following the distribution
      */
-    double GetEscalatorDownStairs();
+    double GetV0IdleEscalatorUpStairs() const;
 
     /**
      * @return a random number following the distribution
      */
-    double GetV0IdleEscalatorUpStairs();
+    double GetV0IdleEscalatorDownStairs() const;
 
     /**
      * @return a random number following the distribution
      */
-    double GetV0IdleEscalatorDownStairs();
+    double GetBmax() const;
 
     /**
      * @return a random number following the distribution
      */
-    double GetBmax();
-
-    /**
-     * @return a random number following the distribution
-     */
-    double GetBmin();
+    double GetBmin() const;
 
 
     /**
      * @return a random number following the distribution
      */
-    double GetAtau();
+    double GetAtau() const;
 
     /**
      * @return a random number following the distribution
      */
-    double GetAmin();
+    double GetAmin() const;
 
     /**
      * @return a random number following the distribution
      */
-    double GetTau();
+    double GetTau() const;
 
     /**
      * @return a random number following the distribution
      */
-    double GetT();
+    double GetT() const;
 
     /**
      * @return whether Ellipse stretching is enabled
      */
-    bool StretchEnabled();
+    bool StretchEnabled() const;
 
-    /**
-     * return a summary of the parameters
-     */
-    std::string writeParameter();
+    double GetAminMean() const;
 
-    double GetAminMean();
-
-    double GetBmaxMean();
+    double GetBmaxMean() const;
 
 private:
     int _id;

@@ -38,9 +38,7 @@ AgentsParameters::AgentsParameters(int id)
     _id = id;
 }
 
-AgentsParameters::~AgentsParameters() {}
-
-int AgentsParameters::GetID()
+int AgentsParameters::GetID() const
 {
     return _id;
 }
@@ -162,106 +160,94 @@ void AgentsParameters::InitT(double mean, double stdv)
     _tSigma = stdv;
 }
 
-
 void AgentsParameters::EnableStretch(bool stretch)
 {
     _enableStretch = stretch;
 }
 
-
-double AgentsParameters::GetV0()
+double AgentsParameters::GetV0() const
 {
     if(_v0Sigma == judge) {
         return _v0Mean;
-    } else {
-        return Random::GetNormal(_v0Mean, _v0Sigma);
     }
+    return Random::GetNormal(_v0Mean, _v0Sigma);
 }
 
-double AgentsParameters::GetV0UpStairs()
+double AgentsParameters::GetV0UpStairs() const
 {
     if(_v0UpStairsSigma == judge) {
         return _v0UpStairsMean;
-    } else {
-        return Random::GetNormal(_v0UpStairsMean, _v0UpStairsSigma);
     }
+    return Random::GetNormal(_v0UpStairsMean, _v0UpStairsSigma);
 }
 
-double AgentsParameters::GetV0DownStairs()
+double AgentsParameters::GetV0DownStairs() const
 {
     if(_v0DownStairsSigma == judge) {
         return _v0DownStairsMean;
-    } else {
-        return Random::GetNormal(_v0DownStairsMean, _v0DownStairsSigma);
     }
+    return Random::GetNormal(_v0DownStairsMean, _v0DownStairsSigma);
 }
 
-double AgentsParameters::GetEscalatorUpStairs()
+double AgentsParameters::GetEscalatorUpStairs() const
 {
     if(_v0EscalatorUpStairsSigma == judge) {
         return _v0EscalatorUpStairsMean;
-    } else {
-        return Random::GetNormal(_v0EscalatorUpStairsMean, _v0EscalatorUpStairsSigma);
     }
+    return Random::GetNormal(_v0EscalatorUpStairsMean, _v0EscalatorUpStairsSigma);
 }
 
-double AgentsParameters::GetEscalatorDownStairs()
+double AgentsParameters::GetEscalatorDownStairs() const
 {
     if(_v0EscalatorDownStairsSigma == judge) {
         return _v0EscalatorDownStairsMean;
-    } else {
-        return Random::GetNormal(_v0EscalatorDownStairsMean, _v0EscalatorDownStairsSigma);
     }
+    return Random::GetNormal(_v0EscalatorDownStairsMean, _v0EscalatorDownStairsSigma);
 }
 
 
-double AgentsParameters::GetV0IdleEscalatorUpStairs()
+double AgentsParameters::GetV0IdleEscalatorUpStairs() const
 {
     if(_v0IdleEscalatorUpStairsSigma == judge) {
         return _v0IdleEscalatorUpStairsMean;
-    } else {
-        return Random::GetNormal(_v0IdleEscalatorUpStairsMean, _v0IdleEscalatorUpStairsSigma);
     }
+    return Random::GetNormal(_v0IdleEscalatorUpStairsMean, _v0IdleEscalatorUpStairsSigma);
 }
 
-double AgentsParameters::GetV0IdleEscalatorDownStairs()
+double AgentsParameters::GetV0IdleEscalatorDownStairs() const
 {
     if(_v0IdleEscalatorDownStairsSigma == judge) {
         return _v0IdleEscalatorDownStairsMean;
-    } else {
-        return Random::GetNormal(_v0IdleEscalatorDownStairsMean, _v0IdleEscalatorDownStairsSigma);
     }
+    return Random::GetNormal(_v0IdleEscalatorDownStairsMean, _v0IdleEscalatorDownStairsSigma);
 }
 
 
-double AgentsParameters::GetBmax()
+double AgentsParameters::GetBmax() const
 {
     if(_bMaxSigma == judge) {
         return _bMaxMean;
-    } else {
-        return Random::GetNormal(_bMaxMean, _bMaxSigma);
     }
+    return Random::GetNormal(_bMaxMean, _bMaxSigma);
 }
 
-double AgentsParameters::GetBmin()
+double AgentsParameters::GetBmin() const
 {
     if(_bMinSigma == judge) {
         return _bMinMean;
-    } else {
-        return Random::GetNormal(_bMinMean, _bMinSigma);
     }
+    return Random::GetNormal(_bMinMean, _bMinSigma);
 }
 
-double AgentsParameters::GetAtau()
+double AgentsParameters::GetAtau() const
 {
     if(_aTauSigma == judge) {
         return _aTauMean;
-    } else {
-        return Random::GetNormal(_aTauMean, _aTauSigma);
     }
+    return Random::GetNormal(_aTauMean, _aTauSigma);
 }
 
-double AgentsParameters::GetAmin()
+double AgentsParameters::GetAmin() const
 {
     if(_aMinSigma == judge) {
         return _aMinMean;
@@ -270,86 +256,33 @@ double AgentsParameters::GetAmin()
     }
 }
 
-double AgentsParameters::GetTau()
+double AgentsParameters::GetTau() const
 {
     if(_tauSigma == judge) {
         return _tauMean;
-    } else {
-        return Random::GetNormal(_tauMean, _tauSigma);
     }
+    return Random::GetNormal(_tauMean, _tauSigma);
 }
 
-double AgentsParameters::GetT()
+double AgentsParameters::GetT() const
 {
     if(_tSigma == judge) {
         return _tMean;
-    } else {
-        return Random::GetNormal(_tMean, _tSigma);
     }
+    return Random::GetNormal(_tMean, _tSigma);
 }
 
-bool AgentsParameters::StretchEnabled()
+bool AgentsParameters::StretchEnabled() const
 {
     return _enableStretch;
 }
 
-std::string AgentsParameters::writeParameter()
-{
-    std::string s;
-    char tmp[1024];
-
-    s.append("\tPedestrians Parameter:\n");
-    if(_v0Sigma == judge) {
-        sprintf(tmp, "\t\tv0 ~ N(%f, %f)\n", _v0Mean, _v0Sigma - judge);
-    } else {
-        sprintf(tmp, "\t\tv0 ~ N(%f, %f)\n", _v0Mean, _v0Sigma);
-    }
-    s.append(tmp);
-    //    if(_Bmax.stddev() == judge) {
-    //        sprintf(tmp, "\t\tb_max ~ N(%f, %f)\n", _Bmax.mean(), _Bmax.stddev() - judge);
-    //    } else {
-    //        sprintf(tmp, "\t\tb_max ~ N(%f, %f)\n", _Bmax.mean(), _Bmax.stddev());
-    //    }
-    //    s.append(tmp);
-    //    if(_Bmin.stddev() == judge) {
-    //        sprintf(tmp, "\t\tb_max ~ N(%f, %f)\n", _Bmin.mean(), _Bmin.stddev() - judge);
-    //    } else {
-    //        sprintf(tmp, "\t\tb_min ~ N(%f, %f)\n", _Bmin.mean(), _Bmin.stddev());
-    //    }
-    //    s.append(tmp);
-    //    if(_Amin.stddev() == judge) {
-    //        sprintf(tmp, "\t\tb_max ~ N(%f, %f)\n", _Amin.mean(), _Amin.stddev() - judge);
-    //    } else {
-    //        sprintf(tmp, "\t\tb_min ~ N(%f, %f)\n", _Amin.mean(), _Amin.stddev());
-    //    }
-    //    s.append(tmp);
-    //    if(_Atau.stddev() == judge) {
-    //        sprintf(tmp, "\t\ta_tau ~ N(%f, %f)\n", _Atau.mean(), _Atau.stddev() - judge);
-    //    } else {
-    //        sprintf(tmp, "\t\ta_tau ~ N(%f, %f)\n", _Atau.mean(), _Atau.stddev());
-    //    }
-    //    s.append(tmp);
-    //    if(_Tau.stddev() == judge) {
-    //        sprintf(tmp, "\t\ttau ~ N(%f, %f)\n", _Tau.mean(), _Tau.stddev() - judge);
-    //    } else {
-    //        sprintf(tmp, "\t\ttau ~ N(%f, %f)\n", _Tau.mean(), _Tau.stddev());
-    //    }
-    //    s.append(tmp);
-    //    if(_T.stddev() == judge) {
-    //        sprintf(tmp, "\t\tT ~ N(%f, %f)\n", _T.mean(), _T.stddev() - judge);
-    //    } else {
-    //        sprintf(tmp, "\t\tT ~ N(%f, %f)\n", _T.mean(), _T.stddev());
-    //    }
-    //    s.append(tmp);
-    return s;
-}
-
-double AgentsParameters::GetAminMean()
+double AgentsParameters::GetAminMean() const
 {
     return _aMinMean;
 }
 
-double AgentsParameters::GetBmaxMean()
+double AgentsParameters::GetBmaxMean() const
 {
     return _bMaxMean;
 }

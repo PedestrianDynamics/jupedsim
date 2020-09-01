@@ -5,7 +5,7 @@
 set(source_files
         Logger.cpp
         RandomToolset.cpp
-)
+        )
 
 set(header_files
         Logger.h
@@ -19,6 +19,7 @@ add_library(shared STATIC
         )
 
 target_link_libraries(shared PUBLIC
+        Boost::boost
         spdlog::spdlog
         fmt::fmt
         )

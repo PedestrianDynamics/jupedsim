@@ -18,9 +18,9 @@
 #pragma once
 
 #include <algorithm>
-#include <assert.h>
 #include <atomic>
-#include <random>
+#include <boost/random.hpp>
+#include <cassert>
 #include <stdexcept>
 
 /**
@@ -31,7 +31,7 @@ namespace Random
 /**
  * Random engine used for creating the random numbers
  */
-extern std::mt19937 _randomEngine;
+extern boost::random::mt19937 _randomEngine;
 
 /**
  * Flag if a seed was properly set
@@ -55,7 +55,7 @@ template <typename RealType = double>
 RealType GetNormal(RealType mean, RealType stddev)
 {
     assert(_init.load());
-    std::normal_distribution dist(mean, stddev);
+    boost::random::normal_distribution dist(mean, stddev);
     return dist(_randomEngine);
 }
 
@@ -71,7 +71,7 @@ template <typename IntType = int>
 IntType GetUniformInt(IntType min, IntType max)
 {
     assert(_init.load());
-    std::uniform_int_distribution dist(min, max);
+    boost::random::uniform_int_distribution dist(min, max);
     return dist(_randomEngine);
 }
 
@@ -87,7 +87,7 @@ template <typename RealType = double>
 RealType GetUniformReal(RealType min, RealType max)
 {
     assert(_init.load());
-    std::uniform_real_distribution dist(min, max);
+    boost::random::uniform_real_distribution dist(min, max);
     return dist(_randomEngine);
 }
 
@@ -107,7 +107,7 @@ RealType GetTriangular(RealType min, RealType max, RealType peak)
     assert(_init.load());
     std::vector<RealType> i{min, peak, max};
     std::vector<RealType> w{0, 1, 0};
-    std::piecewise_linear_distribution<RealType> dist{i.begin(), i.end(), w.begin()};
+    boost::random::piecewise_linear_distribution<RealType> dist{i.begin(), i.end(), w.begin()};
     return dist(_randomEngine);
 }
 
@@ -122,7 +122,7 @@ template <typename RealType = double>
 RealType GetLogNormal(RealType mean, RealType stddev)
 {
     assert(_init.load());
-    std::lognormal_distribution dist(mean, stddev);
+    boost::random::lognormal_distribution dist(mean, stddev);
     return dist(_randomEngine);
 }
 
@@ -136,27 +136,45 @@ template <typename IntType = int>
 IntType GetDiscreteDistribution(std::vector<double> weights)
 {
     assert(_init.load());
-    std::discrete_distribution<IntType> dist(std::begin(weights), std::end(weights));
+    boost::random::discrete_distribution<IntType> dist(std::begin(weights), std::end(weights));
     return dist(_randomEngine);
 }
 
+/**
+ * Returns a random number based on a beta distribution with alpha (\p alpha) and beta (\p beta).
+ * @tparam RealType
+ * @param alpha alpha of the beta distribution
+ * @param beta beta of the beta distribution
+ * @return random number of a beta distribution
+ */
 template <typename RealType = double>
 RealType GetBetaDistribution(RealType alpha, RealType beta)
 {
     assert(_init.load());
-    std::gamma_distribution<RealType> alphaDist(alpha);
-    std::gamma_distribution<RealType> betaDist(beta);
-
-    RealType x = alphaDist(_randomEngine);
-    RealType y = betaDist(_randomEngine);
-
-    return x / (x + y);
+    boost::random::beta_distribution dist(alpha, beta);
+    return dist(_randomEngine);
 }
 
-template <typename InputIt>
-void ShuffleContainer(InputIt first, InputIt last)
+/**
+ * Shuffles the given \p container with the Fisher-Yates algorithm (see
+ * https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle for details).
+ * Note: somehow std::shuffle and boost::random_shuffle do not work with MacOs
+ * @tparam RandomAccessRange
+ * @param container Container to shuffle
+ */
+template <class RandomAccessRange>
+void ShuffleContainer(RandomAccessRange & container)
 {
     assert(_init.load());
-    std::shuffle(first, last, _randomEngine);
+
+    auto currentIndexCounter = container.size();
+    for(auto iter = std::rbegin(container); iter != std::rend(container);
+        ++iter, --currentIndexCounter) {
+        const int randomIndex = GetUniformInt(0ul, currentIndexCounter);
+
+        if(*iter != container.at(randomIndex)) {
+            std::swap(container.at(randomIndex), *iter);
+        }
+    }
 }
 } // namespace Random

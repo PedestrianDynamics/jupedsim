@@ -19,12 +19,12 @@
 
 namespace Random
 {
-std::mt19937 _randomEngine{};
+boost::random::mt19937 _randomEngine{};
 std::atomic<bool> _init = false;
 
 void Setup(int seed)
 {
-    _randomEngine = std::mt19937(seed);
+    _randomEngine = boost::random::mt19937(seed);
     _init.store(true);
 }
 } // namespace Random

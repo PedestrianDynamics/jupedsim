@@ -131,8 +131,7 @@ bool PedDistributor::Distribute(Building * building) const
         //------------------------------------- pack in function ------------
         else {
             auto possibleSubroomPositions = PossiblePositions(*sr);
-            Random::ShuffleContainer(
-                possibleSubroomPositions.begin(), possibleSubroomPositions.end());
+            Random::ShuffleContainer(possibleSubroomPositions);
             allFreePosRoom[subroomID] = possibleSubroomPositions;
         }
     } // for sub_dis
@@ -153,9 +152,7 @@ bool PedDistributor::Distribute(Building * building) const
             if(allFreePosRoom.count(subroomID) > 0)
                 continue;
             auto possibleSubroomPositions = PossiblePositions(*it_sr.second);
-            Random::ShuffleContainer(
-                possibleSubroomPositions.begin(), possibleSubroomPositions.end());
-
+            Random::ShuffleContainer(possibleSubroomPositions);
             allFreePosRoom[subroomID] = possibleSubroomPositions;
         }
     }
