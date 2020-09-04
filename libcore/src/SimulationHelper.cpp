@@ -270,6 +270,9 @@ void SimulationHelper::RemoveFaultyPedestrians(
 
 void SimulationHelper::RemovePedestrians(Building & building, std::vector<Pedestrian *> & peds)
 {
+    sort(peds.begin(), peds.end());
+    peds.erase(unique(peds.begin(), peds.end()), peds.end());
+
     std::for_each(std::begin(peds), std::end(peds), [&building](Pedestrian * ped) {
         building.DeletePedestrian(ped);
     });
