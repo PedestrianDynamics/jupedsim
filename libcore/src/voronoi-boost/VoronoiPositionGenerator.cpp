@@ -277,7 +277,8 @@ void VoronoiBestVertexRandMax(
     for(unsigned int r = 0; r < size; r++) {
         random_numbers.push_back(Random::GetUniformReal(lower_bound, upper_bound));
     }
-    double a_random_double = random_numbers.at(Random::GetUniformInt(0ul, random_numbers.size()));
+    double a_random_double =
+        random_numbers.at(Random::GetUniformInt(0ul, random_numbers.size() - 1));
 
     //the first element in the range [first, last) that is not less than a_random_double
     auto lower    = std::lower_bound(partial_sums.begin(), partial_sums.end(), a_random_double);

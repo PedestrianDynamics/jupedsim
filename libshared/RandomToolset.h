@@ -167,7 +167,7 @@ void ShuffleContainer(RandomAccessRange & container)
 {
     assert(_init.load());
 
-    auto currentIndexCounter = container.size();
+    auto currentIndexCounter = container.size()-1;
     for(auto iter = std::rbegin(container); iter != std::rend(container);
         ++iter, --currentIndexCounter) {
         const int randomIndex = GetUniformInt(0ul, currentIndexCounter);

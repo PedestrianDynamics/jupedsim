@@ -224,19 +224,19 @@ public:
 private:
     int _id;
 
-    double _v0Mean, _v0Sigma;
-    double _v0UpStairsMean, _v0UpStairsSigma;
-    double _v0DownStairsMean, _v0DownStairsSigma;
-    double _v0EscalatorUpStairsMean, _v0EscalatorUpStairsSigma;
-    double _v0EscalatorDownStairsMean, _v0EscalatorDownStairsSigma;
-    double _v0IdleEscalatorUpStairsMean, _v0IdleEscalatorUpStairsSigma;
-    double _v0IdleEscalatorDownStairsMean, _v0IdleEscalatorDownStairsSigma;
-    double _bMaxMean, _bMaxSigma;
-    double _bMinMean, _bMinSigma;
-    double _aTauMean, _aTauSigma;
-    double _aMinMean, _aMinSigma;
-    double _tauMean, _tauSigma;
-    double _tMean, _tSigma;
+    double _v0Mean = 0., _v0Sigma = 1.;
+    double _v0UpStairsMean = 0., _v0UpStairsSigma = 1.;
+    double _v0DownStairsMean = 0., _v0DownStairsSigma = 1.;
+    double _v0EscalatorUpStairsMean = 0., _v0EscalatorUpStairsSigma = 1.;
+    double _v0EscalatorDownStairsMean = 0., _v0EscalatorDownStairsSigma = 1.;
+    double _v0IdleEscalatorUpStairsMean = 0., _v0IdleEscalatorUpStairsSigma = 1.;
+    double _v0IdleEscalatorDownStairsMean = 0., _v0IdleEscalatorDownStairsSigma = 1.;
+    double _bMaxMean = 0., _bMaxSigma = 1.;
+    double _bMinMean = 0., _bMinSigma = 1.;
+    double _aTauMean = 0., _aTauSigma = 1.;
+    double _aMinMean = 0., _aMinSigma = 1.;
+    double _tauMean = 0., _tauSigma = 1.;
+    double _tMean = 0., _tSigma = 1.;
 
     bool _enableStretch;
     constexpr static const double judge = 10000;
