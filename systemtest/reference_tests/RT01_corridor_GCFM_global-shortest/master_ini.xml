@@ -9,10 +9,10 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <seed>1254</seed>
     <max_sim_time>400</max_sim_time>
     <!-- geometry file -->
-    <geometry>corridor_geo.xml</geometry>
+    <geometry>../geometry.xml</geometry>
     <!-- trajectories file and format -->
     <trajectories format="plain" fps="8">
-      <file location="traj.txt" />
+      <file location="trajectories.txt"/>
     </trajectories>
     <!-- where to store the logs -->
     <!--<logfile>log.txt</logfile> -->
