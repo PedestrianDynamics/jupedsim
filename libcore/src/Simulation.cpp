@@ -390,7 +390,7 @@ double Simulation::RunBody(double maxSimTime)
 
             //update the events
             bool eventProcessed = _em->ProcessEvents(Pedestrian::GetGlobalTime());
-            _building->GetRoutingEngine()->setNeedUpdate(eventProcessed);
+            _routingEngine->setNeedUpdate(eventProcessed || _routingEngine->NeedsUpdate());
 
             //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
             //update quickestRouter
