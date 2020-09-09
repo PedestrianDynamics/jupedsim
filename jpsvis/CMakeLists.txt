@@ -181,6 +181,10 @@ set( HDR
   src/network/TraVisToServer.h
   src/MainWindow.h
   src/TrailPlotter.h
+  src/trains/TrainFileParser.h
+  src/trains/train.h
+  src/Event.h
+  src/EventManager.h
   )
 IF(APPLE)
   SET(SRCS ${SRCS} ${MAC_FIX_SRC})

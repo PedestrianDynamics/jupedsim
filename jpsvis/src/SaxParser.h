@@ -38,7 +38,7 @@
 #include "tinyxml/tinyxml.h"
 #include "general/Macros.h"
 
-#include "train.h"
+#include "trains/train.h"
 
 
 

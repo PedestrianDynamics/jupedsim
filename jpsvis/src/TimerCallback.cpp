@@ -189,7 +189,7 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                              auto trainStart = tab.second->tstart;
                              auto trainEnd = tab.second->tend;
                              auto train = extern_trainTypes[trainType];
-                             auto doors = train->doors;
+                             auto doors = train->_doors;
                              std::vector<Point> doorPoints;
                              auto mapper = tab.second->mapper;
                              auto actor = tab.second->actor;

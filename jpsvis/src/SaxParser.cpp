@@ -26,7 +26,7 @@
  *
  *
  */
-
+#include <optional>
 #include "SaxParser.h"
 #include "TrajectoryPoint.h"
 #include "FrameElement.h"
@@ -1811,10 +1811,10 @@ bool   SaxParser::LoadTrainType(std::string Filename, std::map<std::string, std:
                     e = e->NextSiblingElement("train")) {
           std::shared_ptr<TrainType> TT = parseTrainTypeNode(e);
           if (TT) {
-               if (trainTypes.count(TT->type)!=0) {
-                    Debug::Messages("WARNING: Duplicate type for train found [%s]",TT->type.c_str());
+                if (trainTypes.count(TT->_type.c_str())!=0) {
+                    Debug::Messages("WARNING: Duplicate type for train found [%s]",TT->_type.c_str());
                }
-               trainTypes[TT->type] = TT;
+               trainTypes[TT->_type] = TT;
           }
      }
      return true;
@@ -1883,44 +1883,104 @@ std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement 
      return trainTimeTab;
 }
 
-std::shared_ptr<TrainType> SaxParser::parseTrainTypeNode(TiXmlElement * e)
+std::shared_ptr<TrainType> SaxParser::parseTrainTypeNode(TiXmlElement * node)
 {
-     Debug::Messages("INFO:\tLoading train type");
-     // int T_id = xmltoi(e->Attribute("id"), -1);
-     std::string type = xmltoa(e->Attribute("type"), "-1");
-     int agents_max = xmltoi(e->Attribute("agents_max"), -1);
-     float length = xmltof(e->Attribute("length"), -1);
-     // std::shared_ptr<Transition> t = new Transition();
-     // std::shared_ptr<Transition> doors;
-     Transition t;
-     std::vector<Transition> doors;
+      Debug::Info("Loading train type");
 
-     for (TiXmlElement* xDoor = e->FirstChildElement("door"); xDoor;
-          xDoor = xDoor->NextSiblingElement("door")) {
-          int D_id = xmltoi(xDoor->Attribute("id"), -1);
-          float x1 = xmltof(xDoor->FirstChildElement("vertex")->Attribute("px"), -1);
-          float y1 = xmltof(xDoor->FirstChildElement("vertex")->Attribute("py"), -1);
-          float x2 = xmltof(xDoor->LastChild("vertex")->ToElement()->Attribute("px"), -1);
-          float y2 = xmltof(xDoor->LastChild("vertex")->ToElement()->Attribute("py"), -1);
-          Point start(x1, y1);
-          Point end(x2, y2);
-          float outflow = xmltof(xDoor->Attribute("outflow"), -1);
-          float dn = xmltoi(xDoor->Attribute("dn"), -1);
-          t.SetID(D_id);
-          t.SetCaption(type + std::to_string(D_id));
-          t.SetPoint1(start);
-          t.SetPoint2(end);
-          //t.SetOutflowRate(outflow);
-          //t.SetDN(dn);
-          doors.push_back(t);
-     }
-     Debug::Messages("INFO:\t   type: %s", type.c_str());
-     Debug::Messages("INFO:\t   capacity: %d", agents_max);
-     Debug::Messages("INFO:\t   number of doors: %d", doors.size());
-     for(auto d: doors)
-     {
-          Debug::Messages("INFO\t      door (%d): %s | %s", d.GetID(), d.GetPoint1().toString().c_str(), d.GetPoint2().toString().c_str());
-     }
+    std::string type = xmltoa(node->Attribute("type"), "NO_TYPE");
+    if(type == "NO_TYPE") {
+          Debug::Warning("No train type name given. Use 'NO_TYPE' instead.");
+    }
+    Debug::Info("type: {}", type.c_str());
+
+    int agents_max = xmltoi(node->Attribute("agents_max"), std::numeric_limits<int>::max());
+    if(agents_max == std::numeric_limits<int>::max()) {
+          Debug::Warning("No agents_max given. Set to default: {}.", agents_max);
+    }
+    Debug::Info("max Agents: {}", agents_max);
+
+    // Read and check if correct value
+    double length = -std::numeric_limits<double>::infinity();
+    if(const char * attribute = node->Attribute("length"); attribute) {
+        if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
+           value >= 0.) {
+            length = value;
+        } else {
+              Debug::Warning("{}: input for length should be non-negative {}. Skip entry.", type.c_str(), value);
+            return nullptr;
+        }
+    } else {
+          Debug::Warning("{}: input for length not found. Skip entry.", type.c_str());
+        return nullptr;
+    }
+    Debug::Info("length: {}", length);
+
+
+    std::vector<TrainDoor> doors;
+    for(TiXmlElement * xDoor = node->FirstChildElement("door"); xDoor != nullptr;
+        xDoor                = xDoor->NextSiblingElement("door")) {
+        // Read distance and check if correct value
+        double distance = -std::numeric_limits<double>::infinity();
+        if(const char * attribute = xDoor->Attribute("distance"); attribute) {
+            if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
+               value >= 0.) {
+                distance = value;
+            } else {
+                Debug::Warning(
+                      "{}: input for distance should be non-negative {}. Skip entry.", type.c_str(), value);
+                continue;
+            }
+        } else {
+              Debug::Warning("{}: input for distance not found. Skip entry.", type.c_str());
+            continue;
+        }
+
+        // Read width and check if correct value
+        double width = -std::numeric_limits<double>::infinity();
+        if(const char * attribute = xDoor->Attribute("width"); attribute) {
+            if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
+               value > 0.) {
+                width = value;
+            } else {
+                Debug::Warning(
+                      "{}: input for width should be non-negative {}. Skip entry.", type.c_str(), value);
+                continue;
+            }
+        } else {
+              Debug::Warning("{}: input for width not found. Skip entry.", type.c_str());
+            continue;
+        }
+
+        // Read flow and check if correct value
+        double flow = -std::numeric_limits<double>::infinity();
+        if(const char * attribute = xDoor->Attribute("flow"); attribute) {
+            if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
+               value > 0.) {
+                flow = value;
+            } else {
+                Debug::Warning(
+                      "{}: input for flow should be >0 but is {:5.2}. Skip entry.", type.c_str(), value);
+                continue;
+            }
+        }
+
+        doors.emplace_back(TrainDoor{distance, width, flow});
+    }
+
+    if(doors.empty()) {
+          Debug::Error("Train {}: no doors given. Train will be ignored.", type.c_str());
+        return nullptr;
+    }
+
+    Debug::Info("number of doors: {}", doors.size());
+    for(const auto & d : doors) {
+        Debug::Info(
+            "Door:\tdistance: {:5.2f}\twidth: {:5.2f}\toutflow: {:5.2f}",
+            d._distance,
+            d._width,
+            d._flow);
+    }
+
 
      std::shared_ptr<TrainType> Type = std::make_shared<TrainType>(
           TrainType{
