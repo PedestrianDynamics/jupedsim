@@ -9,7 +9,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     <max_sim_time>100</max_sim_time>
     <geometry>../geometry.xml</geometry>
 
-    <num_threads>10</num_threads>
+    <num_threads>1</num_threads>
     <show_statistics>true</show_statistics>
     <logfile>Test5_log.txt</logfile>
 

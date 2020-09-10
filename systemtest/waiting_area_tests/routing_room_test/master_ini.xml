@@ -2,6 +2,7 @@
           xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 
     <header>
+        <num_threads>1</num_threads>
         <seed>1.0</seed>
         <max_sim_time>100</max_sim_time>
         <geometry>../geometry.xml</geometry>

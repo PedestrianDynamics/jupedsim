@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-
+    <num_threads>1</num_threads>
     <max_sim_time>20</max_sim_time>
     <!-- seed used for initialising random generator -->
     <seed>1</seed>

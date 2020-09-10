@@ -2,6 +2,7 @@
 <JuPedSim project="JPS-Project" version="0.7" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <header>
         <!-- seed used for initialising random generator -->
+        <num_threads>1</num_threads>
         <seed>12542</seed>
         <!-- geometry file -->
         <max_sim_time>250</max_sim_time>
