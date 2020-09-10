@@ -2,7 +2,7 @@
 #agents: 40
 #count: 0
 #framerate: 8.00
-#geometry: geometry.xml
+#geometry: corridor_geo.xml
 #ID: the agent ID
 #FR: the current frame
 #X,Y,Z: the agents coordinates (in metres)
