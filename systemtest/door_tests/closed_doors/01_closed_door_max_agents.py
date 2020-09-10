@@ -67,8 +67,12 @@ def read_num_agents(inifile):
     tree = ET.parse(inifile)
     root = tree.getroot()
 
+    number = 0
+
     for group in root.iter("group"):
-        number = int(group.attrib["number"])
+        number = number + int(group.attrib["number"])
+
+    if number > 0:
         return number
 
     logging.error('Could not read inifile for number of agents: {}.'.format(inifile))

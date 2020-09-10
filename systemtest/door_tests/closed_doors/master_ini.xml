@@ -37,8 +37,11 @@
     <!--persons information and distribution -->
     <agents operational_model_id="3">
         <agents_distribution>
-            <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="100" goal_id="0"
-                   router_id="1"/>
+            <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="50" goal_id="0" router_id="1"
+                   x_min="11" x_max="24" y_min="11" y_max="29"/>
+            <group group_id="2" agent_parameter_id="1" room_id="0" subroom_id="0" number="50" goal_id="0" router_id="1"
+                   x_min="24" x_max="39" y_min="11" y_max="29"/>
+
         </agents_distribution>
     </agents>
     <!-- These parameters may be overwritten -->
