@@ -53,7 +53,7 @@ class vtkFFMPEGWriter;
 #include <vtkSmartPointer.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkLineSource.h>
-#include "train.h"
+#include "trains/train.h"
 
 class SyncData;
 class QObject;

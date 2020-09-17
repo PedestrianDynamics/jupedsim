@@ -14,13 +14,15 @@ struct TrainTimeTable
      int sid; // subroom id
      double tin; // arrival time
      double tout; //leaving time
-     Point pstart; // track start
-     Point pend; // track end
-     Point tstart; // train start
-     Point tend; // train end
+     // Point pstart; // track start
+     // Point pend; // track end
+     // Point tstart; // train start
+     // Point tend; // train end
      int pid; // Platform id
      bool arrival;
      bool departure;
+     bool reversed;
+     double train_offset; 
      vtkSmartPointer<vtkPolyDataMapper> mapper;
      vtkSmartPointer<vtkActor> actor;
      vtkSmartPointer<vtkTextActor3D> textActor;
@@ -42,6 +44,15 @@ struct TrainType {
     double _length;    /** Length of the train. */
     std::vector<TrainDoor> _doors; /** Doors of the train. */
 };
+
+struct TrainEventInfo {
+    int trainID;
+    int trackID;
+    TrainType trainType;
+    double trainStartOffset;
+    bool reversed;
+};
+
 
 
 #endif /* TRAIN_H_ */

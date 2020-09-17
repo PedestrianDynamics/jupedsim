@@ -171,7 +171,7 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                     //      {
                     //           VTK_CREATE(vtkPolyDataMapper, mapper);
                     //           VTK_CREATE(vtkActor, actor);
-                    //      }
+                    //      }p
 
                     // }
                     int countTrains  = 0;
@@ -188,6 +188,8 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                              auto trackEnd = tab.second->pend;
                              auto trainStart = tab.second->tstart;
                              auto trainEnd = tab.second->tend;
+                             auto trainOffset = tab.second->train_offset;
+                             auto reversed = tab.second->reversed;
                              auto train = extern_trainTypes[trainType];
                              auto doors = train->_doors;
                              std::vector<Point> doorPoints;
@@ -196,8 +198,12 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                              auto txtActor = tab.second->textActor;
                              for(auto door: doors)
                              {
-                                  doorPoints.push_back(door.GetPoint1());
-                                  doorPoints.push_back(door.GetPoint2());
+                                   Point wand_vektor;
+                                   wand_vektor = (reversed)?trainEnd - trainStart:trainStart - trainEnd;
+                                   Point point1 = trackStart + wand_vektor*(trainOffset+door._distance);
+                                   Point point2 = trackStart + wand_vektor*(trainOffset+door._distance+door._width);
+                                  doorPoints.push_back(point1);
+                                  doorPoints.push_back(point2);
                              }//doors
                              if(once)
                              {

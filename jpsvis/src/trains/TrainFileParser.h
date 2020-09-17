@@ -1,10 +1,5 @@
 #pragma once
 
-#include "../events/Event.h"
-#include "../events/EventManager.h"
-#include "../events/TrainEvent.h"
-#include "../geometry/Building.h"
-
 #include <optional>
 #include <string>
 #include <tinyxml.h>
@@ -14,27 +9,21 @@ namespace TrainFileParser
 /**
  * Parses the time table for trains from \p trainTimeTableFile and adds the arriving and departing
  * trains as event in \p eventManager. Additionally the trains will also be added to \p building.
- * @param eventManager Manager for handling the events
- * @param building Geometry of the simulation
  * @param trainTypes User defined train types
  * @param trainTimeTableFile File containing information of arriving and departing trains
  */
 void ParseTrainTimeTable(
-    EventManager & eventManager,
-    Building & building,
     const std::map<std::string, TrainType> & trainTypes,
     const fs::path & trainTimeTableFile);
 
 /**
  * Parse a specific train time table node to get the needed information and check if valid.
  * @param node Node containing the train time table element
- * @param building Geometry of the simulation
  * @param trainTypes User defined train types
  * @return information of train event if vaild, std::nullopt otherwise
  */
 std::optional<TrainEventInfo> ParseTrainTimeTableNode(
     TiXmlElement * node,
-    Building & building,
     const std::map<std::string, TrainType> & trainTypes);
 
 /**

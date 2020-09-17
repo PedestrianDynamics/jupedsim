@@ -1,8 +1,6 @@
 #include "TrainFileParser.h"
 
 void TrainFileParser::ParseTrainTimeTable(
-    EventManager & eventManager,
-    Building & building,
     const std::map<std::string, TrainType> & trainTypes,
     const fs::path & trainTimeTableFile)
 {
@@ -21,7 +19,7 @@ void TrainFileParser::ParseTrainTimeTable(
 
     for(TiXmlElement * e = xTTT->FirstChildElement("train"); e;
         e                = e->NextSiblingElement("train")) {
-        auto trainInfo = ParseTrainTimeTableNode(e, building, trainTypes);
+        auto trainInfo = ParseTrainTimeTableNode(e, trainTypes);
         if(trainInfo.has_value()) {
             auto trainTimes = ParseTrainTimeTableTimes(e, trainInfo.value().trainID);
             if(trainTimes.has_value()) {
@@ -37,22 +35,14 @@ void TrainFileParser::ParseTrainTimeTable(
                 Debug::Info("departure_time: {}", departureTime);
 
                 const auto & trainType = trainTypes.at(trainInfo.value().trainType._type);
-                const TrainEventInfo eventInfo{
-                    &building,
-                    trainInfo.value().trainID,
-                    trainInfo.value().trackID,
-                    trainInfo.value().trainType,
-                    trainInfo.value().trainStartOffset,
-                    trainInfo.value().reversed};
+                // const TrainEventInfo eventInfo{
+                //     &building,
+                //     trainInfo.value().trainID,
+                //     trainInfo.value().trackID,
+                //     trainInfo.value().trainType,
+                //     trainInfo.value().trainStartOffset,
+                //     trainInfo.value().reversed};
 
-                // Arriving train
-                eventManager.AddEvent(std::make_unique<TrainArrivalEvent>(arrivalTime, eventInfo));
-
-                // Departing train
-                eventManager.AddEvent(
-                    std::make_unique<TrainDepartureEvent>(departureTime, eventInfo));
-
-                building.AddTrain(trainInfo.value().trainID, trainType);
             }
         }
     }
@@ -60,7 +50,6 @@ void TrainFileParser::ParseTrainTimeTable(
 
 std::optional<TrainEventInfo> TrainFileParser::ParseTrainTimeTableNode(
     TiXmlElement * node,
-    Building & building,
     const std::map<std::string, TrainType> & trainTypes)
 {
     // Read ID and check if correct value
@@ -158,7 +147,7 @@ std::optional<TrainEventInfo> TrainFileParser::ParseTrainTimeTableNode(
         reversed = false;
     }
 
-    return TrainEventInfo{&building, id, trackID, trainTypes.at(type), trainOffset, reversed};
+    // return TrainEventInfo{&building, id, trackID, trainTypes.at(type), trainOffset, reversed};
 }
 
 std::optional<std::tuple<double, double>>

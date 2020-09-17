@@ -1827,22 +1827,23 @@ bool   SaxParser::LoadTrainType(std::string Filename, std::map<std::string, std:
 std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement * e)
 {
      Debug::Messages("INFO:\tLoading train time table NODE");
-     std::string caption = xmltoa(e->Attribute("caption"), "-1");
+     // std::string caption = xmltoa(e->Attribute("caption"), "-1");
      int id = xmltoi(e->Attribute("id"), -1);
+     int track_id = xmltoi(e->Attribute("track_id"), -1);
+     float train_offset = xmltof(e->Attribute("train_offset"), -1);
+     bool reversed = false;
+     std::string in = xmltoa(e->Attribute("reversed"), "false");
+     std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+     if(in == "false") {
+           reversed = false;
+     } else if(in == "true") {
+           reversed = true;
+     } else {
+           reversed = false;
+     }
      std::string type = xmltoa(e->Attribute("type"), "-1");
      int room_id = xmltoi(e->Attribute("room_id"), -1);
      int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
-     int platform_id = xmltoi(e->Attribute("platform_id"), -1);
-     float track_start_x = xmltof(e->Attribute("track_start_x"), -1);
-     float track_start_y = xmltof(e->Attribute("track_start_y"), -1);
-     float track_end_x = xmltof(e->Attribute("track_end_x"), -1);
-     float track_end_y = xmltof(e->Attribute("track_end_y"), -1);
-
-     float train_start_x = xmltof(e->Attribute("train_start_x"),-1);
-     float train_start_y = xmltof(e->Attribute("train_start_y"), -1);
-     float train_end_x = xmltof(e->Attribute("train_end_x"), -1);
-     float train_end_y = xmltof(e->Attribute("train_end_y"), -1);
-
      float arrival_time = xmltof(e->Attribute("arrival_time"), -1);
      float departure_time = xmltof(e->Attribute("departure_time"), -1);
      // @todo: check these values for correctness e.g. arrival < departure
@@ -1851,15 +1852,16 @@ std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement 
      Debug::Messages("INFO:\t   type: %s", type.c_str());
      Debug::Messages("INFO:\t   room_id: %d", room_id);
      Debug::Messages("INFO:\t   subroom_id: %d", subroom_id);
-     Debug::Messages("INFO:\t   platform_id: %d", platform_id);
-     Debug::Messages("INFO:\t   track_start: [%.2f, %.2f]", track_start_x, track_start_y);
-     Debug::Messages("INFO:\t   track_end: [%.2f, %.2f]", track_end_x, track_end_y);
+     Debug::Messages("INFO:\t   track_id: %d", track_id);
+     Debug::Messages("INFO:\t   train_offset: %d", train_offset);
      Debug::Messages("INFO:\t   arrival_time: %.2f", arrival_time);
-     Debug::Messages("INFO:\t   departure_time: %.2f", departure_time);
-     Point track_start(track_start_x, track_start_y);
-     Point track_end(track_end_x, track_end_y);
-     Point train_start(train_start_x, train_start_y);
-     Point train_end(train_end_x, train_end_y);
+     Debug::Info("departure_time: %.2f", departure_time);
+     // Debug::Info("Reversed: {}", reversed);
+     // Point track_start(track_start_x, track_start_y);
+     // Point track_end(track_end_x, track_end_y);
+     // Point train_start(train_start_x, train_start_y);
+     // Point train_end(train_end_x, train_end_y);
+
      std::shared_ptr<TrainTimeTable> trainTimeTab = std::make_shared<TrainTimeTable>(
           TrainTimeTable{
                     id,
@@ -1868,13 +1870,11 @@ std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement 
                     subroom_id,
                     arrival_time,
                     departure_time,
-                    track_start,
-                    track_end,
-                    train_start,
-                    train_end,
-                    platform_id,
+                    track_id,
                     false,
                     false,
+                    reversed,
+                    train_offset,
                     vtkSmartPointer<vtkPolyDataMapper>::New(),
                     vtkSmartPointer<vtkActor>::New(),
                     vtkSmartPointer<vtkTextActor3D>::New(),
