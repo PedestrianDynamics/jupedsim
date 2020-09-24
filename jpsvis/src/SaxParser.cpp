@@ -684,7 +684,63 @@ void SaxParser::clearPoints()
      _currentPointsList.clear();
      return;
 }
+double SaxParser::GetElevation(QString geometryFile, int roomId, int subroomId)
+{
 
+     double C_z;
+     QString wd;
+     QDir dir(wd);
+     QDir fileDir(geometryFile);
+     SystemSettings::getWorkingDirectory(wd);
+     if(!fileDir.isAbsolute())
+     {
+          QString s = dir.relativeFilePath(geometryFile);
+          geometryFile=wd + QDir::separator() + s;
+     }
+     QDomDocument doc("");
+     QFile file(geometryFile);
+     if (!file.open(QIODevice::ReadOnly)) {
+          qDebug()<<"GetElevation: could not open the file: "<< geometryFile <<endl;
+          exit(-1);
+     }
+     QString *errorCode = new QString();
+     if (!doc.setContent(&file, errorCode)) {
+          file.close();
+          qDebug()<<errorCode<<endl;
+          exit(-1);
+     }
+     TiXmlDocument docGeo(geometryFile.toStdString());
+     if (!docGeo.LoadFile()) {
+           Debug::Messages("%s", docGeo.ErrorDesc());
+           Debug::Error("LoadGeometry: could not parse the geometry file %s", geometryFile.toStdString().c_str());
+           return -1;
+     }
+
+     TiXmlElement* xRootNode = docGeo.RootElement();
+     if( ! xRootNode ) {
+           Debug::Error("Root element does not exist");
+           return -1;
+     }
+     TiXmlNode*  xRoomsNode = xRootNode->FirstChild("rooms");
+     if (!xRoomsNode) {
+           Debug::Error("The geometry should have at least one room and one subroom");
+          return false;
+     }
+     for(TiXmlElement* xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
+               xRoom = xRoom->NextSiblingElement("room")) {
+           int room_id = xmltoi(xRoom->Attribute("id"), -1);
+           if (room_id != roomId) continue;
+           
+           for(TiXmlElement* xSubRoom = xRoom->FirstChildElement("subroom"); xSubRoom;
+                    xSubRoom = xSubRoom->NextSiblingElement("subroom")) {
+
+               int subroom_id = xmltoi(xSubRoom->Attribute("id"), -1);
+               if(subroom_id != subroomId) continue;
+               C_z = xmltof(xSubRoom->Attribute("C_z"), 0.0);
+           }
+     }
+     return C_z;     
+}
 std::tuple<Point, Point> SaxParser::GetTrackStartEnd(QString geometryFile, int trackId)
 {
      QString wd;
@@ -726,6 +782,8 @@ std::tuple<Point, Point> SaxParser::GetTrackStartEnd(QString geometryFile, int t
                  std::cout << root.tagName().toStdString() << "\n";
                  return ret;
      }
+
+
      //parsing the subrooms
      QDomNodeList xSubRoomsNodeList=doc.elementsByTagName("subroom");
      //parsing the walls     
@@ -1928,6 +1986,7 @@ std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement 
      int track_id = xmltoi(e->Attribute("track_id"), -1);
      double train_offset = xmltof(e->Attribute("train_offset"), -1);
      bool reversed = false;
+     double elevation = 5; // dummy default value
      std::string in = xmltoa(e->Attribute("reversed"), "false");
      std::transform(in.begin(), in.end(), in.begin(), ::tolower);
      if(in == "false") {
@@ -1975,6 +2034,7 @@ std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement 
                     false,
                     reversed,
                     train_offset,
+                    elevation,
                     vtkSmartPointer<vtkPolyDataMapper>::New(),
                     vtkSmartPointer<vtkActor>::New(),
                     vtkSmartPointer<vtkTextActor3D>::New(),

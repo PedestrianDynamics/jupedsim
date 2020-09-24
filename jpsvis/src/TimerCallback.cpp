@@ -194,6 +194,7 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                              std::vector<Point> doorPoints;
                              auto mapper = tab.second->mapper;
                              auto actor = tab.second->actor;
+                             double elevation = tab.second->elevation;
                              auto txtActor = tab.second->textActor;
                              auto trackDirection = (reversed)?(trackStart - trackEnd):(trackEnd - trackStart);
                              trackDirection = trackDirection.Normalized();
@@ -211,7 +212,7 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                              }//doors
                              if(once)
                              {
-                                  auto data = getTrainData(trainStart, trainEnd, doorPoints);
+                                   auto data = getTrainData(trainStart, trainEnd, doorPoints, elevation);
                                   mapper->SetInputData(data);
                                   actor->SetMapper(mapper);
                                   actor->GetProperty()->SetLineWidth(10);
@@ -685,8 +686,10 @@ void TimerCallback::setTextActor(vtkTextActor* ra)
 
 
 vtkSmartPointer<vtkPolyData>  TimerCallback::getTrainData(
-     Point trainStart, Point trainEnd, std::vector<Point> doorPoints)
+      Point trainStart, Point trainEnd, std::vector<Point> doorPoints, double elevation)
 {
+      std::cout << elevation << "\n";
+      exit(-1);
      float factor = 100.0;
 
      double pt[3] = { 1.0, 0.0, 0.0 }; // to convert from Point
@@ -698,15 +701,21 @@ vtkSmartPointer<vtkPolyData>  TimerCallback::getTrainData(
      vtkSmartPointer<vtkPoints> pts =
           vtkSmartPointer<vtkPoints>::New();
 
-     pt[0] = factor*trainStart._x; pt[1] = factor*trainStart._y;
+     pt[0] = factor*trainStart._x; 
+     pt[1] = factor*trainStart._y;
+     pt[2] = factor*elevation;
      pts->InsertNextPoint(pt);
 
      for(auto p: doorPoints)
      {
-          pt[0] = factor*p._x; pt[1] = factor*p._y;
-           pts->InsertNextPoint(pt);
+          pt[0] = factor*p._x; 
+          pt[1] = factor*p._y;
+          pt[2] = factor*elevation;
+          pts->InsertNextPoint(pt);
      }
-     pt[0] = factor*trainEnd._x; pt[1] = factor*trainEnd._y;
+     pt[0] = factor*trainEnd._x; 
+     pt[1] = factor*trainEnd._y;
+     pt[2] = factor*elevation;
      pts->InsertNextPoint(pt);
 
 

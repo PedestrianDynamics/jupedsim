@@ -23,6 +23,7 @@ struct TrainTimeTable
      bool departure;
      bool reversed;
      double train_offset; 
+     double elevation; 
      vtkSmartPointer<vtkPolyDataMapper> mapper;
      vtkSmartPointer<vtkActor> actor;
      vtkSmartPointer<vtkTextActor3D> textActor;

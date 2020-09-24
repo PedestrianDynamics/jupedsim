@@ -929,20 +929,34 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
         QString geofileName = SaxParser::extractGeometryFilenameTXT(fileName);
 
         std::tuple<Point, Point>  trackStartEnd;
+        double elevation;
         for(auto tab: trainTimeTable)
         {
               int trackId = tab.second->pid;
               trackStartEnd = SaxParser::GetTrackStartEnd(geofileName, trackId);
+              // todo: 
+              // int roomId = SaxParser::GetRoomId(tab.second->pid)
+              // int subroomId = SaxParser::GetSubroomId(tab.second->pid)
+              // elevation = SaxParser::GetElevation(geofileName, roomId, subroomId);
+              //--------
+              elevation = 0;
+
               Point trackStart = std::get<0>(trackStartEnd);
               Point trackEnd = std::get<1>(trackStartEnd);
+
+              tab.second->pstart = trackStart;
+              tab.second->pend = trackEnd;
+              tab.second->elevation = elevation;
 
               std::cout << "=======\n";
               std::cout << "tab: " << tab.first << "\n";
               std::cout << "Track start: " <<  trackStart._x << ", " << trackStart._y << "\n";
               std::cout << "Track end: " <<  trackEnd._x << ", " << trackEnd._y << "\n";
+              std::cout << " room " << tab.second->rid << "\n";
+              std::cout << " subroom " << tab.second->sid << "\n";
+              std::cout << " elevation " << tab.second->elevation << "\n";
+              exit(-1);
               std::cout << "=======\n";
-              tab.second->pstart = trackStart;
-              tab.second->pend = trackEnd;
         }
 
 
