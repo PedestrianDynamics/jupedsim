@@ -685,6 +685,101 @@ void SaxParser::clearPoints()
      return;
 }
 
+std::tuple<Point, Point> SaxParser::GetTrackStartEnd(QString geometryFile, int trackId)
+{
+     QString wd;
+     QDir dir(wd);
+     QDir fileDir(geometryFile);
+     SystemSettings::getWorkingDirectory(wd);
+     if(!fileDir.isAbsolute())
+     {
+          QString s = dir.relativeFilePath(geometryFile);
+          geometryFile=wd + QDir::separator() + s;
+     }
+
+     // QString = QDir::cleanPath(wd + QDir::separator() + fileName);
+     Debug::Messages("filename: <%s)", geometryFile.toStdString().c_str());
+     Debug::Messages("wd: <%s>",wd.toStdString().c_str());
+
+
+     std::vector<Point> end_points;
+     Point start_point(0,0);
+     Point end_point(0,0);
+
+     QDomDocument doc("");
+     QFile file(geometryFile);
+     if (!file.open(QIODevice::ReadOnly)) {
+          qDebug()<<"GetTrackStartEnd: could not open the file: "<< geometryFile <<endl;
+          exit(-1);
+     }
+     QString *errorCode = new QString();
+     if (!doc.setContent(&file, errorCode)) {
+          file.close();
+          qDebug()<<errorCode<<endl;
+          exit(-1);
+     }
+     QDomElement root= doc.firstChildElement("geometry");
+     //only parsing the geometry node
+     if(root.tagName()!="geometry"){
+                 std::tuple<Point, Point> ret = std::make_tuple(Point(0,0), Point(0,0));
+                 std::cout << "root is not geometry\n";
+                 std::cout << root.tagName().toStdString() << "\n";
+                 return ret;
+     }
+     //parsing the subrooms
+     QDomNodeList xSubRoomsNodeList=doc.elementsByTagName("subroom");
+     //parsing the walls     
+     for (int i = 0; i < xSubRoomsNodeList.length(); i++) {
+          QDomElement xPoly = xSubRoomsNodeList.item(i).firstChildElement("polygon");
+          while(!xPoly.isNull()) {
+                auto Type = xPoly.attribute("type","notype").toStdString();
+                auto Caption = xPoly.attribute("caption", "nocaption").toStdString();
+                int parsed_trackId = xPoly.attribute("track_id", "-1").toInt();
+                if(Type != "track")
+                {
+                      // std::cout << "Polygon is not a track. Continue\n";
+                      // std::cout << Type << "\n";
+                      xPoly = xPoly.nextSiblingElement("polygon");
+                      continue;
+                }
+
+                if(parsed_trackId != trackId)
+                {
+                      xPoly = xPoly.nextSiblingElement("polygon");
+                      continue;
+                }
+               QDomNodeList xVertices=xPoly.elementsByTagName("vertex");
+               for( int i=0; i<xVertices.count(); i++) {
+                     auto start=xVertices.item(i).toElement().attribute("start", "false");
+
+                     double x1=xVertices.item(i).toElement().attribute("px", "0").toDouble();
+                     double y1=xVertices.item(i).toElement().attribute("py", "0").toDouble();
+                     if (start == "true")
+                     {
+                           start_point = Point(x1, y1);
+                     }
+                     else{
+                           end_points.push_back(Point(x1, y1)); // collect other points of track 
+                     }
+               }
+               xPoly = xPoly.nextSiblingElement("polygon");
+          }//poly
+     }//sub
+
+     double min_d = -10000;
+     // find the track point with the biggest distance to start.
+     for (auto p: end_points){
+           double d = (p-start_point).NormSquare();
+           if (d > min_d)
+           {
+                 end_point = p;
+                 min_d = d;
+           }
+     }
+     std::tuple<Point, Point> ret = std::make_tuple(start_point, end_point);
+     return ret;
+}
+
 
 bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
 {
@@ -1778,11 +1873,12 @@ bool SaxParser::LoadTrainTimetable(std::string Filename, std::map<int, std::shar
                     Debug::Messages("WARNING: Duplicate id for train time table found [%d]",TTT->id);
                     exit(EXIT_FAILURE);
                }
+               // get track start 
+               
                trainTimeTables[TTT->id] = TTT;
           }
           else {
           std:cout << "too bad! \n" ;
-
           }
      }
      return true;
@@ -1830,7 +1926,7 @@ std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement 
      // std::string caption = xmltoa(e->Attribute("caption"), "-1");
      int id = xmltoi(e->Attribute("id"), -1);
      int track_id = xmltoi(e->Attribute("track_id"), -1);
-     float train_offset = xmltof(e->Attribute("train_offset"), -1);
+     double train_offset = xmltof(e->Attribute("train_offset"), -1);
      bool reversed = false;
      std::string in = xmltoa(e->Attribute("reversed"), "false");
      std::transform(in.begin(), in.end(), in.begin(), ::tolower);
@@ -1853,7 +1949,7 @@ std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement 
      Debug::Messages("INFO:\t   room_id: %d", room_id);
      Debug::Messages("INFO:\t   subroom_id: %d", subroom_id);
      Debug::Messages("INFO:\t   track_id: %d", track_id);
-     Debug::Messages("INFO:\t   train_offset: %d", train_offset);
+     Debug::Messages("INFO:\t   train_offset: %.2f", train_offset);
      Debug::Messages("INFO:\t   arrival_time: %.2f", arrival_time);
      Debug::Info("departure_time: %.2f", departure_time);
      // Debug::Info("Reversed: {}", reversed);
@@ -1870,6 +1966,10 @@ std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement 
                     subroom_id,
                     arrival_time,
                     departure_time,
+                    Point (0, 0),
+                    Point (0, 0),
+                    Point (0, 0),
+                    Point (0, 0),
                     track_id,
                     false,
                     false,

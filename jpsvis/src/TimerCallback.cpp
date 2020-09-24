@@ -186,22 +186,26 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                              auto trainId = tab.second->id;
                              auto trackStart = tab.second->pstart;
                              auto trackEnd = tab.second->pend;
-                             auto trainStart = tab.second->tstart;
-                             auto trainEnd = tab.second->tend;
                              auto trainOffset = tab.second->train_offset;
                              auto reversed = tab.second->reversed;
                              auto train = extern_trainTypes[trainType];
+                             auto train_length = train->_length;
                              auto doors = train->_doors;
                              std::vector<Point> doorPoints;
                              auto mapper = tab.second->mapper;
                              auto actor = tab.second->actor;
                              auto txtActor = tab.second->textActor;
+                             auto trackDirection = (reversed)?(trackStart - trackEnd):(trackEnd - trackStart);
+                             trackDirection = trackDirection.Normalized();
+                             auto trainStart = (reversed)?trackEnd + trackDirection*trainOffset:trackStart + trackDirection*trainOffset;
+                             auto trainEnd = (reversed)?trackEnd + trackDirection*(trainOffset+train_length):trackStart + trackDirection*(trainOffset+train_length);
+                             
                              for(auto door: doors)
                              {
-                                   Point wand_vektor;
-                                   wand_vektor = (reversed)?trainEnd - trainStart:trainStart - trainEnd;
-                                   Point point1 = trackStart + wand_vektor*(trainOffset+door._distance);
-                                   Point point2 = trackStart + wand_vektor*(trainOffset+door._distance+door._width);
+                                   Point trainDirection =  trainEnd - trainStart;;                                   
+                                   trainDirection = trainDirection.Normalized();
+                                   Point point1 = trainStart + trainDirection*(door._distance);
+                                   Point point2 = trainStart + trainDirection*(door._distance+door._width);
                                   doorPoints.push_back(point1);
                                   doorPoints.push_back(point2);
                              }//doors

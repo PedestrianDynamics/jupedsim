@@ -569,8 +569,6 @@ void MainWindow::parseGeometry(const QString& geometryString)
     //check if there is a tag 'file' there in
     QString geofileName = SaxParser::extractGeometryFilename(tmpFileName);
 
-    //cout<<"filename: "<<geofileName.toStdString()<<endl;exit(0);
-
     auto&& geometry = _visualisationThread->getGeometry();
 
     if(!geofileName.isEmpty()) {
@@ -928,8 +926,25 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
         if(!ret) std::cout << "hmmm\n";
 
         extern_trainTimeTables = trainTimeTable;
+        QString geofileName = SaxParser::extractGeometryFilenameTXT(fileName);
+
+        std::tuple<Point, Point>  trackStartEnd;
         for(auto tab: trainTimeTable)
-             std::cout << "tab: " << tab.first << "\n";
+        {
+              int trackId = tab.second->pid;
+              trackStartEnd = SaxParser::GetTrackStartEnd(geofileName, trackId);
+              Point trackStart = std::get<0>(trackStartEnd);
+              Point trackEnd = std::get<1>(trackStartEnd);
+
+              std::cout << "=======\n";
+              std::cout << "tab: " << tab.first << "\n";
+              std::cout << "Track start: " <<  trackStart._x << ", " << trackStart._y << "\n";
+              std::cout << "Track end: " <<  trackEnd._x << ", " << trackEnd._y << "\n";
+              std::cout << "=======\n";
+              tab.second->pstart = trackStart;
+              tab.second->pend = trackEnd;
+        }
+
 
         for(auto tab: trainTypes)
              std::cout << "type: " << tab.first << "\n";
@@ -938,7 +953,6 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
             return false;
 
     }
-
 
     QString frameRateStr=QString::number(frameRate);
     // set the visualisation window title

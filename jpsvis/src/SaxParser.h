@@ -105,6 +105,7 @@ public:
 
      static bool   LoadTrainType(std::string Filename, std::map<std::string, std::shared_ptr<TrainType> > & trainTypes);
 
+      static std::tuple<Point, Point> GetTrackStartEnd(QString geometryFile, int trackId); 
 private:
     //clear the mo
     void clearPoints();
