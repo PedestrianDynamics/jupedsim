@@ -11,7 +11,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <geometry>corridor_geo.xml</geometry>
     <!-- trajectories file and format -->
     <trajectories format="plain" fps="8">
-      <file location="traj.txt" />
+      <file location="traj.txt"/>
     </trajectories>
     <!-- where to store the logs -->
     <!--<logfile>log.txt</logfile> -->

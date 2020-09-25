@@ -93,7 +93,7 @@ if __name__ == "__main__":
 
     source_path = os.path.normpath(pathname + os.sep + os.pardir + os.sep + os.pardir)
     if not os.path.exists("./titlepage.tex"):
-        sys.exit("could not find titlepage.tex. git checkout was not successful!")
+        sys.exit("could not find titlepage.tex.")
 
     # process jupedsim.tex
     subprocess.call("make")
