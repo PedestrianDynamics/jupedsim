@@ -86,6 +86,16 @@ void TrajectoriesTXT::WriteHeader(long nPeds, double fps, Building * building, i
     header.append(fmt::format(
         "#geometry: {:s}\n", building->GetConfig()->GetGeometryFile().filename().string()));
 
+    // if used: add two necessary files time table and train types
+    if(!building->GetConfig()->GetTrainTimeTableFile().empty() &&
+       !building->GetConfig()->GetTrainTypeFile().empty()) {
+        header.append(fmt::format(
+            "#trainTimeTable: {:s}\n",
+            building->GetConfig()->GetTrainTimeTableFile().filename().string()));
+
+        header.append(fmt::format(
+            "#trainType: {:s}\n", building->GetConfig()->GetTrainTypeFile().filename().string()));
+    }
     // if used: add source file name
     if(!building->GetConfig()->GetSourceFile().empty()) {
         header.append(fmt::format(
