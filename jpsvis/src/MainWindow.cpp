@@ -955,7 +955,6 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
               std::cout << " room " << tab.second->rid << "\n";
               std::cout << " subroom " << tab.second->sid << "\n";
               std::cout << " elevation " << tab.second->elevation << "\n";
-              exit(-1);
               std::cout << "=======\n";
         }
 

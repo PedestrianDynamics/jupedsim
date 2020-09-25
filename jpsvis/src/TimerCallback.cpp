@@ -688,8 +688,6 @@ void TimerCallback::setTextActor(vtkTextActor* ra)
 vtkSmartPointer<vtkPolyData>  TimerCallback::getTrainData(
       Point trainStart, Point trainEnd, std::vector<Point> doorPoints, double elevation)
 {
-      std::cout << elevation << "\n";
-      exit(-1);
      float factor = 100.0;
 
      double pt[3] = { 1.0, 0.0, 0.0 }; // to convert from Point
