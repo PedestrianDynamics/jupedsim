@@ -173,7 +173,7 @@ precises the method for calculating the instantaneous velocity $$v_i(t)$$
 ## Methods
 
   Indicates the parameters related to each measurement method.
-  Six different methods `method_A` to `method_D` and `Method_I` to `Method_J` are integrated in the current
+  Five different methods `method_A` to `method_D` and `Method_J` are integrated in the current
   version of `JPSreport` and can be chosen for the analysis. The five methods `method_A` to `method_D` and `method_J` are used to analyze the steady state.
 
 | Method | measurement area | output data |
@@ -187,7 +187,7 @@ precises the method for calculating the instantaneous velocity $$v_i(t)$$
   Further information relating to each method can be found
   in [Pedestrian fundamental diagrams: Comparative analysis of experiments in different geometries](http://hdl.handle.net/2128/4898).
 
-`Method_I` can be used for time-series analysis of individual data.
+`Method_D` with `<local_IFD enabled="true"/>` can be used for time-series analysis of individual data.
 
 
 ### Method A
@@ -260,10 +260,12 @@ For definition see [Method D](jpsreport_method_D.html). Method D is used to anal
 ```xml
  <method_D enabled="true">
    <measurement_area id="1" start_frame="None" stop_frame="None"
-         get_individual_FD="false"/>
+         local_IFD="false"/>
    <one_dimensional enabled="false"/>
+   <global_IFD enabled="true"/>
    <cut_by_circle enabled="false" radius="1.0" edges="10"/>
    <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/>
+   <use_blind_points enabled="true"/>
  </method_D>
 ```
 
@@ -278,13 +280,13 @@ Possible parameters are:
   then analysis will be performed from beginning of the trajectory to the `stop_frame`.
   If `start_frame` is not `None` but `stop_frame = None`,
   it will analyze from the `start_frame` to the end of the movement.
-  `get_individual_FD` determines whether or not to output the data
+  `local_IFD` determines whether or not to output the data
   for individual fundamental diagram in the given measurement area,
   which is based on the Voronoi density $$\rho_i$$,  velocity $$v_i$$, position ($$x_i$$,$$y_i$$ and $$z_i$$) and Voronoi polygon
   of each pedestrian $$i$$ in a given measurement area but not mean
   value over space.
   If true, the related data will be written in the
-  folder `./Output/Fundamental_Diagram/IndividualFD/` in the output file `IFD_D_`.
+  folder `./Output/Fundamental_Diagram/IndividualFD/` in the output file `IFD_filename.txt_id_1.dat`.
 
  - up to version 0.8.5: `plot_time_series` specifies whether output the $$\rho-t$$ and $$v-t$$-diagram.
 
@@ -311,48 +313,18 @@ Possible parameters are:
   parameters `grid_size_x` and `grid_size_x` should be set.
   The data will be in the folder.
 
+- up to version X.Y.Z: `global_IFD` determines whether or not to output individual data of pedestrians. 
+
+- up to version X.Y.Z: `use_blind_points` indicates a global measurement area encompassing the geometry. The blind points are defined automatically.
+
 Possible output data are:
   - `/Fundamental_Diagram/Classical_Voronoi/`: output file `rho_v_Voronoi_` with mean density and velocity of over time (frame, $$rho(t)$$, $$v(t)$$).
-  - `/Fundamental_Diagram/IndividualFD/`: output file `IFD_D_` with Voronoi density $$\rho_i$$, velocity $$v_i$$, position ($$x_i$$,$$y_i$$ and $$z_i$$) and Voronoi polygon of each pedestrian $$i$$.
+  - `/Fundamental_Diagram/IndividualFD/`: output file `IFD_filename.txt_local_id_1.dat` with Voronoi density $$\rho_i$$, velocity $$v_i$$, position ($$x_i$$,$$y_i$$ and $$z_i$$) and Voronoi polygon of each pedestrian $$i$$ in measurement area.
+  - `/Fundamental_Diagram/IndividualFD/`: output file `IFD_filename.txt_global_zPos_m-cm.dat` with Voronoi density $$\rho_i$$, velocity $$v_i$$, position ($$x_i$$,$$y_i$$ and $$z_i$$) and Voronoi polygon of each pedestrian $$i$$ in global area.
   - `./Output/Fundamental_ Diagram/Classical_Voronoi/field/`:
     - output file `Prf_d_` contains the profile data for density.
     - output file `Prf_v_` contains the profile data for velocity.
   - The output folder `./Output/Fundamental_ Diagram/Classical_Voronoi/VoronoiCell/` contains the data for plotting the Voronoi cells.
-
-
-### Method I
-
-Method I is based on the definition of [Method D](jpsreport_method_D.html). 
-
-{%include note.html content="The only difference 
-between both methods is that in I the calculations are not restricted to a measurement area."%}
-Method I can be used for time-series analysis of individual data.
-
-```xml
- <method_I enabled="true">
-   <measurement_area id="1" start_frame="None" stop_frame="None"/>
-   <cut_by_circle enabled="true" radius="1.0" edges="10"/>
- </method_I>
-```
-
-Possible parameters are:
-
-- For each `measurement_area`, several id numbers can be set in one inifile.
-  `start_frame` and `stop_frame` give the starting and ending frame for data analysis.
-  The default values of these two parameters are `None`.
-  If you plan to analysis the whole run from beginning to the end,
-  set both of `start_frame` and `stop_frame` as `None`;
-  If `start_frame = None` but `stop_frame` is not,
-  then analysis will be performed from beginning of the trajectory to the `stop_frame`.
-  If `start_frame` is not `None` but `stop_frame = None`,
-  it will analyze from the `start_frame` to the end of the movement.
-
-- `cut_by_circle` determines whether to cut each cell by circle or not.
-         Two options `radius` of the circle and the number of `edges` have
-         to be supplied for approximating the circle if `enabled` is *true*.
-
-The data are saved in the output folder: `/Fundamental_Diagram/IndividualFD/` in the output file `IFD_I_` with
-Voronoi density $$\rho_i$$, velocity $$v_i$$, position ($$x_i$$,$$y_i$$ and $$z_i$$) and Voronoi polygon of each pedestrian $$i$$.
 
 
 ### Method J
