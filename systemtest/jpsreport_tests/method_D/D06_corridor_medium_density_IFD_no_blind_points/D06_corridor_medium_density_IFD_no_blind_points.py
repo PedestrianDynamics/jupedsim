@@ -21,7 +21,7 @@ ped_distance = 1.0
 
 def runtest(inifile, trajfile):
     logging.info("===== Method D - IFD, no blind points  ===============")
-    test_IFD("D", trajfile, ped_distance, )
+    test_IFD(trajfile, ped_distance)
 
 
 if __name__ == "__main__":

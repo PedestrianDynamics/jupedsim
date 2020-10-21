@@ -20,10 +20,9 @@ ped_distance = 1.5
 # cut off radius is set to 0.75 in inifile --> cut off function should be applied for inner vornoi cells
 cut_off_has_effect = True
 
-
 def runtest(inifile, trajfile):
     logging.info("===== Method D - Cut off, no blind points   ===============")
-    test_cut_off("D", trajfile, ped_distance, cut_off_has_effect)
+    test_cut_off(trajfile, ped_distance, cut_off_has_effect)
 
 
 if __name__ == "__main__":

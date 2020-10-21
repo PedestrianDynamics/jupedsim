@@ -18,7 +18,7 @@ from JPSRunTest import JPSRunTestDriver
 
 def runtest(inifile, trajfile):
     logging.info("===== Method D - IFD for intersecting voronoi cells, no blind points ===============")
-    test_IFD_geometry_intersection("D", trajfile)
+    test_IFD_geometry_intersection(trajfile)
 
 
 if __name__ == "__main__":

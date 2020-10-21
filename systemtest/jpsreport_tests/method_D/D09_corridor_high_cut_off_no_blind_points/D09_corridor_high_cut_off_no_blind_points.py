@@ -23,7 +23,7 @@ cut_off_has_effect = False
 
 def runtest(inifile, trajfile):
     logging.info("===== Method D - Cut off, no blind points   ===============")
-    test_cut_off("D", trajfile, ped_distance, cut_off_has_effect)
+    test_cut_off(trajfile, ped_distance, cut_off_has_effect)
 
 
 if __name__ == "__main__":
