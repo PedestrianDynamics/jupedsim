@@ -52,7 +52,7 @@ Method_D::Method_D()
     _geoMaxX         = 0;
     _geoMaxY         = 0;
     _fIndividualFD   = nullptr;
-    _fVoronoiRhoV    = nullptr;
+    _fOutputRhoV     = nullptr;
     _measurementArea = nullptr;
 }
 
@@ -83,7 +83,8 @@ bool Method_D::Process(
     bool _calcGlobalIFDOnly = false;
 
     _velocityCalcFunc = configData.velocityCalcFunc;
-
+    _densityType      = configData.densityType;
+    _velocityType     = configData.velocityType;
 
     if(_measurementArea->_id == -1) {
         // change parameters for calculating global IFD only
@@ -235,7 +236,7 @@ bool Method_D::Process(
         }
     }
     if(!_calcGlobalIFDOnly) {
-        fclose(_fVoronoiRhoV);
+        fclose(_fOutputRhoV);
     }
     if(_calcLocalIFD) {
         fclose(_fIndividualFD);
@@ -247,25 +248,30 @@ bool Method_D::OpenFileMethodD(bool _isOneDimensional)
 {
     std::string voroLocation(VORO_LOCATION);
     fs::path tmp("_id_" + std::to_string(_measurementArea->_id) + ".dat");
-    tmp = _outputLocation / voroLocation / ("rho_v_Voronoi_" + _trajName.string() + tmp.string());
+    tmp = _outputLocation / voroLocation /
+          ("rho_v_" + _densityType + "_" + _velocityType + "_" + _trajName.string() + tmp.string());
     string results_V = tmp.string();
 
-    if((_fVoronoiRhoV = Analysis::CreateFile(results_V)) == nullptr) {
-        LOG_ERROR("cannot open the file to write Voronoi density and velocity.");
+    if((_fOutputRhoV = Analysis::CreateFile(results_V)) == nullptr) {
+        LOG_ERROR("cannot open the file to write density and velocity.");
         return false;
     } else {
         if(_isOneDimensional) {
             fprintf(
-                _fVoronoiRhoV,
-                "#framerate:\t%.2f\n\n#Frame \t Voronoi density(m^(-1))\t	Voronoi "
+                _fOutputRhoV,
+                "#framerate:\t%.2f\n\n#Frame \t %s density(m^(-1))\t	%s "
                 "velocity(m/s)\n",
-                _fps);
+                _fps,
+                _densityType.c_str(),
+                _velocityType.c_str());
         } else {
             fprintf(
-                _fVoronoiRhoV,
-                "#framerate:\t%.2f\n\n#Frame \t Voronoi density(m^(-2))\t	Voronoi "
+                _fOutputRhoV,
+                "#framerate:\t%.2f\n\n#Frame \t %s density(m^(-2))\t	%s "
                 "velocity(m/s)\n",
-                _fps);
+                _fps,
+                _densityType.c_str(),
+                _velocityType.c_str());
         }
         return true;
     }
@@ -276,7 +282,8 @@ bool Method_D::OpenFileIndividualFD(bool _isOneDimensional, bool global)
     fs::path trajFileName("_id_" + std::to_string(_measurementArea->_id) + ".dat");
     fs::path indFDPath("Fundamental_Diagram");
     indFDPath = _outputLocation / indFDPath / "IndividualFD" /
-                ("IFD_D_" + _trajName.string() + trajFileName.string());
+                ("IFD_rho_v_" + _densityType + "_" + _velocityType + "_" + _trajName.string() +
+                 trajFileName.string());
     string Individualfundment = indFDPath.string();
     if((_fIndividualFD = Analysis::CreateFile(Individualfundment)) == nullptr) {
         LOG_ERROR("cannot open the file individual.");
@@ -285,22 +292,29 @@ bool Method_D::OpenFileIndividualFD(bool _isOneDimensional, bool global)
         if(_isOneDimensional) {
             fprintf(
                 _fIndividualFD,
-                "#framerate (fps):\t%.2f\n\n#Frame\tPersID\tIndividual density(m^(-1))\tIndividual "
+                "#framerate (fps):\t%.2f\n\n#Frame\tPersID\tIndividual %s "
+                "density(m^(-1))\tIndividual %s "
                 "velocity(m/s)\tHeadway(m)\n",
-                _fps);
+                _fps,
+                _densityType.c_str(),
+                _velocityType.c_str());
         } else if(!global) {
             fprintf(
                 _fIndividualFD,
-                "#framerate (fps):\t%.2f\n\n#Frame\tPersID\tx/m\ty/m\tz/m\tIndividual "
-                "density(m^(-2))\tIndividual velocity(m/s)\tVoronoi Polygon\tIntersection "
+                "#framerate (fps):\t%.2f\n\n#Frame\tPersID\tx/m\ty/m\tz/m\tIndividual %s "
+                "density(m^(-2))y\tIndividual %s velocity(m/s)\tVoronoi Polygon\tIntersection "
                 "Polygon\n",
-                _fps);
+                _fps,
+                _densityType.c_str(),
+                _velocityType.c_str());
         } else {
             fprintf(
                 _fIndividualFD,
-                "#framerate (fps):\t%.2f\n\n#Frame\tPersID\tx/m\ty/m\tz/m\tIndividual "
-                "density(m^(-2))\tIndividual velocity(m/s)\tVoronoi Polygon\n",
-                _fps);
+                "#framerate (fps):\t%.2f\n\n#Frame\tPersID\tx/m\ty/m\tz/m\tIndividual %s "
+                "density(m^(-2))\tIndividual %s velocity(m/s)\tVoronoi Polygon\n",
+                _fps,
+                _densityType.c_str(),
+                _velocityType.c_str());
         }
         return true;
     }
@@ -349,7 +363,7 @@ void Method_D::OutputVoronoiResults(
     std::tie(voronoiDensity, voronoiVelocity) =
         CalcDensityVelocity(polygons, VInFrame, _measurementArea->_poly);
 
-    fprintf(_fVoronoiRhoV, "%s\t%.3f\t%.3f\n", frid.c_str(), voronoiDensity, voronoiVelocity);
+    fprintf(_fOutputRhoV, "%s\t%.3f\t%.3f\n", frid.c_str(), voronoiDensity, voronoiVelocity);
 }
 
 /**
@@ -427,11 +441,11 @@ void Method_D::GetProfiles(
     fs::path dtmp("density");
     tmp  = _outputLocation / voroLocation / tmp;
     vtmp = tmp / vtmp /
-           ("Prf_v_" + _trajName.string() + "_id_" + std::to_string(_measurementArea->_id) + "_" +
-            frameId + ".dat");
+           ("Prf_v_" + _velocityType + "_" + _trajName.string() + "_id_" +
+            std::to_string(_measurementArea->_id) + "_" + frameId + ".dat");
     dtmp = tmp / dtmp /
-           ("Prf_d_" + _trajName.string() + "_id_" + std::to_string(_measurementArea->_id) + "_" +
-            frameId + ".dat");
+           ("Prf_d_" + _densityType + "_" + _trajName.string() + "_id_" +
+            std::to_string(_measurementArea->_id) + "_" + frameId + ".dat");
     string Prfvelocity = vtmp.string();
     string Prfdensity  = dtmp.string();
 
@@ -646,7 +660,7 @@ void Method_D::CalcVoronoiResults1D(
     }
     VoronoiDensity /= ((right_boundary - left_boundary) * CMtoM);
     VoronoiVelocity /= ((right_boundary - left_boundary) * CMtoM);
-    fprintf(_fVoronoiRhoV, "%s\t%.3f\t%.3f\n", frid.c_str(), VoronoiDensity, VoronoiVelocity);
+    fprintf(_fOutputRhoV, "%s\t%.3f\t%.3f\n", frid.c_str(), VoronoiDensity, VoronoiVelocity);
 }
 
 double Method_D::getOverlapRatio(

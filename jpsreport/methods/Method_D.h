@@ -57,13 +57,16 @@ private:
 
     std::function<double(const polygon_list &, const std::vector<double> &, const polygon_2d &)>
         _velocityCalcFunc;
+    // parameters to handle different file names for different calculation types
+    std::string _densityType;
+    std::string _velocityType;
 
     polygon_2d _geoPoly;
     double _geoMinX; // LOWest vertex of the geometry (x coordinate)
     double _geoMinY; //  LOWest vertex of the geometry (y coordinate)
     double _geoMaxX; // Highest vertex of the geometry
     double _geoMaxY;
-    FILE * _fVoronoiRhoV;
+    FILE * _fOutputRhoV;
     FILE * _fIndividualFD;
     float _fps;
     bool OpenFileMethodD(bool _isOneDimensional);

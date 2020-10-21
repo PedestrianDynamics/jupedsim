@@ -51,6 +51,9 @@ struct ConfigData_DIJ {
     bool isOneDimensional = false;
     bool useBlindPoints   = true;
 
+    std::string densityType  = "Voronoi";
+    std::string velocityType = "Voronoi";
+
     //parameter for velocity calculation function
     /** default:
     Calculates the velocity of pedestrians based on their voronoi cell and their instantaneous velocity.

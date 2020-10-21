@@ -702,7 +702,8 @@ std::optional<ConfigData_DIJ> ArgumentParser::ParseDIJParams(TiXmlElement * xMet
         **/
         configData.velocityCalcFunc = [](const polygon_list & polygons,
                                          const vector<double> & individualVelocity,
-                                         const polygon_2d & /*measurementArea*/) -> double {
+                                         const polygon_2d &
+                                         /*measurementArea*/) -> double {
             double arithmeticVelocity = 0;
             int pedsInMeasurementArea = polygons.size();
             double velocitySum =
@@ -713,6 +714,7 @@ std::optional<ConfigData_DIJ> ArgumentParser::ParseDIJParams(TiXmlElement * xMet
             }
             return arithmeticVelocity;
         };
+        configData.velocityType = "Arithmetic";
         LOG_INFO("Arithmetic velocity calculation is used.");
     } else {
         LOG_INFO("Default Voronoi velocity calculation is used.");
