@@ -302,7 +302,7 @@ bool Method_D::OpenFileIndividualFD(bool _isOneDimensional, bool global)
             fprintf(
                 _fIndividualFD,
                 "#framerate (fps):\t%.2f\n\n#Frame\tPersID\tx/m\ty/m\tz/m\tIndividual %s "
-                "density(m^(-2))y\tIndividual %s velocity(m/s)\tVoronoi Polygon\tIntersection "
+                "density(m^(-2))\tIndividual %s velocity(m/s)\tVoronoi Polygon\tIntersection "
                 "Polygon\n",
                 _fps,
                 _densityType.c_str(),
