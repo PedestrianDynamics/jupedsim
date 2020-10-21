@@ -55,6 +55,9 @@ private:
     fs::path _projectRootDir;
     fs::path _outputLocation;
 
+    std::function<double(const polygon_list &, const std::vector<double> &, const polygon_2d &)>
+        _velocityCalcFunc;
+
     polygon_2d _geoPoly;
     double _geoMinX; // LOWest vertex of the geometry (x coordinate)
     double _geoMinY; //  LOWest vertex of the geometry (y coordinate)
@@ -73,20 +76,20 @@ private:
         std::vector<double> & VInFrame,
         std::vector<int> & IdInFrame);
     void OutputVoronoiResults(
-        const std::vector<polygon_2d> & polygons,
+        const polygon_list & polygons,
         const std::string & frid,
         const std::vector<double> & VInFrame);
-    std::tuple<double, double> GetVoronoiDensityVelocity(
-        const std::vector<polygon_2d> & polygon,
-        const std::vector<double> & Velocity,
-        const polygon_2d & measureArea);
+    std::tuple<double, double> CalcDensityVelocity(
+        const polygon_list & polygons,
+        const std::vector<double> & VInFrame,
+        const polygon_2d & measurementArea);
     void GetProfiles(
         const ConfigData_DIJ & configData,
         const std::string & frameId,
-        const std::vector<polygon_2d> & polygons,
+        const polygon_list & polygons,
         const std::vector<double> & velocity);
     void GetIndividualFD(
-        const std::vector<polygon_2d> & polygon,
+        const polygon_list & polygon,
         const std::vector<double> & Velocity,
         const std::vector<int> & Id,
         const polygon_2d & measureArea,

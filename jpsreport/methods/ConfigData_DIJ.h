@@ -25,7 +25,10 @@
 
 #pragma once
 
+#include "../general/Macros.h"
+
 #include <vector>
+
 
 struct ConfigData_DIJ {
     //parameters that are provided for measurement areas
@@ -47,5 +50,24 @@ struct ConfigData_DIJ {
     //general parameters
     bool isOneDimensional = false;
     bool useBlindPoints   = true;
+
+    //parameter for velocity calculation function
+    /** default:
+    Calculates the velocity of pedestrians based on their voronoi cell and their instantaneous velocity.
+    input: intersecting polygons (with MA), instantaneous velocities and measurement area.
+    output: mean velocity in the MA
+    **/
+    std::function<double(const polygon_list &, const std::vector<double> &, const polygon_2d &)>
+        velocityCalcFunc = [](const polygon_list & polygons,
+                              const std::vector<double> & individualVelocity,
+                              const polygon_2d & measurementArea) -> double {
+        double sumV = 0;
+        for(std::size_t i = 0; i < polygons.size(); ++i) {
+            sumV += individualVelocity[i] * boost::geometry::area(polygons[i]);
+        }
+        double meanV = sumV / boost::geometry::area(measurementArea);
+        return meanV;
+    };
+
     //TODO Does it make sense to include the configs of measurement areas here as well?
 };

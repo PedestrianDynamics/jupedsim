@@ -39,6 +39,7 @@
 #include <ctime>
 #include <iostream>
 #include <math.h>
+#include <numeric>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -690,6 +691,31 @@ std::optional<ConfigData_DIJ> ArgumentParser::ParseDIJParams(TiXmlElement * xMet
        string(xMethod->FirstChildElement("use_blind_points")->Attribute("enabled")) == "false") {
         configData.useBlindPoints = false;
         LOG_INFO("Use of blind points disabled");
+    }
+
+    if(xMethod->FirstChildElement("vel_calculation") &&
+       string(xMethod->FirstChildElement("vel_calculation")->Attribute("type")) == "Arithmetic") {
+        /** Arithmetic velocity calculation is chosen
+        Calculates the velocity of pedestrians based as arithmetic mean based on their instantaneous velocity. Method is independent of size of vornoi cells.
+        input: intersecting polygons (with MA), instantaneous velocities and measurement area.
+        output: mean velocity in the MA
+        **/
+        configData.velocityCalcFunc = [](const polygon_list & polygons,
+                                         const vector<double> & individualVelocity,
+                                         const polygon_2d & /*measurementArea*/) -> double {
+            double arithmeticVelocity = 0;
+            int pedsInMeasurementArea = polygons.size();
+            double velocitySum =
+                std::accumulate(individualVelocity.begin(), individualVelocity.end(), 0.0);
+
+            if(pedsInMeasurementArea != 0) {
+                arithmeticVelocity = velocitySum / (1.0 * pedsInMeasurementArea);
+            }
+            return arithmeticVelocity;
+        };
+        LOG_INFO("Arithmetic velocity calculation is used.");
+    } else {
+        LOG_INFO("Default Voronoi velocity calculation is used.");
     }
 
     if(xMethod->FirstChildElement("global_IFD") &&
