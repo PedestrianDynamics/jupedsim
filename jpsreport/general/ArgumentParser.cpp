@@ -95,7 +95,6 @@ ArgumentParser::ArgumentParser()
     _isMethodB              = false;
     _isMethodC              = false;
     _isMethodD              = false;
-    _isMethodJ              = false;
     _steadyStart            = 100;
     _steadyEnd              = 1000;
     _trajectoriesLocation   = "./";
@@ -585,32 +584,22 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
         }
     }
 
-    // method Voronoi
-    TiXmlElement * xMethod_J = xMainNode->FirstChildElement("method_J");
-    if(xMethod_J) {
-        LOG_INFO("Method J is selected with following options");
-        if(auto configData = ParseDIJParams(xMethod_J)) {
-            _configDataJ = configData.value();
-            _isMethodJ   = true;
-        }
-    }
-
     LOG_INFO("Finish parsing inifile");
-    if(!(_isMethodA || _isMethodB || _isMethodC || _isMethodD || _isMethodJ)) {
+    if(!(_isMethodA || _isMethodB || _isMethodC || _isMethodD )) {
         LOG_WARNING("No measurement method enabled. Nothing to do.");
         exit(EXIT_SUCCESS);
     }
     return true;
 }
 
-std::optional<ConfigData_DIJ> ArgumentParser::ParseDIJParams(TiXmlElement * xMethod)
+std::optional<ConfigData_D> ArgumentParser::ParseDIJParams(TiXmlElement * xMethod)
 {
     if(string(xMethod->Attribute("enabled")) == "false") {
         LOG_INFO("Method is disabled");
         return nullopt;
     }
 
-    ConfigData_DIJ configData;
+    ConfigData_D configData;
     for(TiXmlElement * xMeasurementArea = xMethod->FirstChildElement("measurement_area");
         xMeasurementArea;
         xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area")) {
@@ -856,11 +845,6 @@ bool ArgumentParser::GetIsMethodC() const
 bool ArgumentParser::GetIsMethodD() const
 {
     return _isMethodD;
-}
-
-bool ArgumentParser::GetIsMethodJ() const
-{
-    return _isMethodJ;
 }
 
 double ArgumentParser::GetSteadyStart() const

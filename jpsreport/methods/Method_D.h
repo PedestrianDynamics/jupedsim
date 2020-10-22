@@ -29,7 +29,7 @@
 #define METHOD_D_H_
 
 #include "../Analysis.h"
-#include "ConfigData_DIJ.h"
+#include "ConfigData_D.h"
 #include "PedData.h"
 #include "VoronoiDiagram.h"
 
@@ -40,7 +40,7 @@ public:
     Method_D();
     virtual ~Method_D();
     bool Process(
-        const ConfigData_DIJ & configData,
+        const ConfigData_D & configData,
         int measurementAreaIndex,
         const PedData & pedData,
         const double & zPos_measureArea);
@@ -73,7 +73,7 @@ private:
     bool OpenFileIndividualFD(bool _isOneDimensional, bool global);
 
     std::vector<std::pair<polygon_2d, int>> GetPolygons(
-        const ConfigData_DIJ & configData,
+        const ConfigData_D & configData,
         std::vector<double> & XInFrame,
         std::vector<double> & YInFrame,
         std::vector<double> & VInFrame,
@@ -87,7 +87,7 @@ private:
         const std::vector<double> & VInFrame,
         const polygon_2d & measurementArea);
     void GetProfiles(
-        const ConfigData_DIJ & configData,
+        const ConfigData_D & configData,
         const std::string & frameId,
         const polygon_list & polygons,
         const std::vector<double> & velocity);

@@ -29,7 +29,7 @@
 #include "Method_D.h"
 
 #include "../general/Macros.h"
-#include "ConfigData_DIJ.h"
+#include "ConfigData_D.h"
 
 #include <Logger.h>
 #include <cmath>
@@ -59,7 +59,7 @@ Method_D::Method_D()
 Method_D::~Method_D() {}
 
 bool Method_D::Process(
-    const ConfigData_DIJ & configData,
+    const ConfigData_D & configData,
     int measurementAreaIndex,
     const PedData & pedData,
     const double & zPos_measureArea)
@@ -321,7 +321,7 @@ bool Method_D::OpenFileIndividualFD(bool _isOneDimensional, bool global)
 }
 
 std::vector<std::pair<polygon_2d, int>> Method_D::GetPolygons(
-    const ConfigData_DIJ & configData,
+    const ConfigData_D & configData,
     vector<double> & XInFrame,
     vector<double> & YInFrame,
     vector<double> & VInFrame,
@@ -427,7 +427,7 @@ std::tuple<double, double> Method_D::CalcDensityVelocity(
 
 // and velocity is calculated for every frame
 void Method_D::GetProfiles(
-    const ConfigData_DIJ & configData,
+    const ConfigData_D & configData,
     const string & frameId,
     const polygon_list & polygons,
     const vector<double> & velocity)

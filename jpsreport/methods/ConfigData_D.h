@@ -30,7 +30,7 @@
 #include <vector>
 
 
-struct ConfigData_DIJ {
+struct ConfigData_D {
     //parameters that are provided for measurement areas
     std::vector<bool> calcLocalIFD;
     std::vector<int> startFrames;
