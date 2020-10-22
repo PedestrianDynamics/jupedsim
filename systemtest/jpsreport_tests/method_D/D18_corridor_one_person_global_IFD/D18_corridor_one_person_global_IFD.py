@@ -11,7 +11,7 @@ import logging
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(path[0]))))
 path.append(utestdir)
 path.append(os.path.dirname(path[0]))  # source helper file
-from tests_method_D import test_cut_off_all_frames
+from tests_method_D import test_cut_off_density_all_frames
 
 from utils import SUCCESS, FAILURE
 import numpy as np
@@ -27,7 +27,7 @@ cut_off_has_effect = True
 
 def runtest(inifile, trajfile):
     logging.info("===== Method D - Global IFD with cut off for one person only  ===============")
-    test_cut_off_all_frames(trajfile, ped_distance, ped_IDs, cut_off_has_effect)
+    test_cut_off_density_all_frames(trajfile, ped_distance, ped_IDs, cut_off_has_effect)
 
 
 if __name__ == "__main__":

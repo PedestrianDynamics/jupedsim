@@ -23,8 +23,8 @@ add_test(NAME D15_corridor_low_cut_off_global_IFD COMMAND ${PYTHON_EXECUTABLE} $
 add_test(NAME D16_corridor_high_cut_off_global_IFD COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D16_corridor_high_cut_off_global_IFD/D16_corridor_high_cut_off_global_IFD.py ${jpsreport_exe})
 add_test(NAME D17_corridor_geometry_intersection_global_IFD COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D17_corridor_geometry_intersection_global_IFD/D17_corridor_geometry_intersection_global_IFD.py ${jpsreport_exe})
 add_test(NAME D18_corridor_one_person_global_IFD COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D18_corridor_one_person_global_IFD/D18_corridor_one_person_global_IFD.py ${jpsreport_exe})
-add_test(NAME D19_test_reference_data_no_blind_points_arithmetic COMMAND ${PYTHON_EXECUTABLE} method_D/D19_test_reference_data_no_blind_points_arithmetic/D19_test_reference_data_no_blind_points_arithmetic.py ${jpsreport_exe})
-add_test(NAME D20_corridor_cut_off_no_blind_points_arithmetic COMMAND ${PYTHON_EXECUTABLE} method_D/D20_corridor_cut_off_no_blind_points_arithmetic/D20_corridor_cut_off_no_blind_points_arithmetic.py ${jpsreport_exe})
+add_test(NAME D19_test_reference_data_no_blind_points_arithmetic COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D19_test_reference_data_no_blind_points_arithmetic/D19_test_reference_data_no_blind_points_arithmetic.py ${jpsreport_exe})
+add_test(NAME D20_corridor_cut_off_no_blind_points_arithmetic COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D20_corridor_cut_off_no_blind_points_arithmetic/D20_corridor_cut_off_no_blind_points_arithmetic.py ${jpsreport_exe})
 
 add_test(NAME reference_no_blind_points_cut_off_disabled COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_tests/blind_points_disabled/cut_off_disabled/test_cut_off_disabled.py ${jpsreport_exe})
 add_test(NAME reference_no_blind_points_cut_off_edges COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_tests/blind_points_disabled/cut_off_edges/test_cut_off_edges.py ${jpsreport_exe})
