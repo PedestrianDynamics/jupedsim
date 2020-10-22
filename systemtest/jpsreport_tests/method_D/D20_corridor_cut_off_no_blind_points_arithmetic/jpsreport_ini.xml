@@ -18,12 +18,14 @@
 
     <velocity frame_step="10" set_movement_direction="None" ignore_backward_movement="false"/>
 
-    <method_J enabled="true">
+    <method_D enabled="true">
         <measurement_area id="1" start_frame="None" stop_frame="None"
                           local_IFD="false"/>
         <one_dimensional enabled="false"/>
         <cut_by_circle enabled="true" radius="0.75" edges="100"/>
         <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/>
-    </method_J>
+        <use_blind_points enabled="false"/>
+        <vel_calculation type="Arithmetic"/>
+    </method_D>
 
 </JPSreport>

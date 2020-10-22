@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Test method J using a reference file
+# Test method D using a reference file
 import os
 from sys import argv, path
 import logging
@@ -14,15 +14,15 @@ import numpy as np
 alpha = 0.01
 
 def runtest(inifile, trajfile):
-    logging.info("===== Method J =========================")
+    logging.info("===== Method D =========================")
 
-    data_1_filename = 'reference_data_Method_J.dat'
+    data_1_filename = 'reference_data_Method_D_classical_arithmetic.dat'
     data_1 = np.loadtxt(data_1_filename)
 
     data_2_filename = os.path.join('./Output',
                                    'Fundamental_Diagram',
                                    'Classical_Voronoi',
-                                   'rho_v_Voronoi_J_%s_id_5.dat'%trajfile
+                                   'rho_v_Voronoi_Arithmetic_%s_id_5.dat'%trajfile
                                    )
     if not os.path.exists(data_2_filename):
         logging.critical("jpsreport did not output results correctly.")

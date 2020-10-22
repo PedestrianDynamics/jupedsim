@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ---------
-# Test functionality of cut off option
+# Test functionality of arithmetic velocity calculation with cut off option
 # ---------
 import os
 from sys import argv, path
@@ -8,18 +8,17 @@ import logging
 
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(path[0]))))
 path.append(utestdir)
-path.append(os.path.dirname(os.path.dirname(path[0])))  # source helper file
-from tests_method_DIJ import test_cut_off_velocity
+path.append(os.path.dirname(path[0]))  # source helper file
+from tests_method_D import test_cut_off_velocity
 
 from utils import SUCCESS, FAILURE
-import numpy as np
 from JPSRunTest import JPSRunTestDriver
 
 # horizontal and vertical distance between pedestrians
 ped_distance = 1.5
 
 def runtest(inifile, trajfile):
-    logging.info("===== Method J - Cut off velocity   ===============")
+    logging.info("===== Method D - Arithmetic velocity calculation with cut off radius   ===============")
     test_cut_off_velocity( trajfile)
 
 

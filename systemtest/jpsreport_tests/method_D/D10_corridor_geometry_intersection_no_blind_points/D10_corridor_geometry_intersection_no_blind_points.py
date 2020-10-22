@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ---------
-# Test of classical voronoi output
+# Test of IFD output for arithmetic velocity calculation
 # ---------
 import os
 from sys import argv, path
@@ -8,17 +8,16 @@ import logging
 
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(path[0]))))
 path.append(utestdir)
-path.append(os.path.dirname(os.path.dirname(path[0])))  # source helper file
-from tests_method_DIJ import test_IFD_geometry_intersection
+path.append(os.path.dirname(path[0]))  # source helper file
+from tests_method_D import test_IFD_density_geometry_intersection
 
 from utils import SUCCESS, FAILURE
-import numpy as np
 from JPSRunTest import JPSRunTestDriver
 
 
 def runtest(inifile, trajfile):
     logging.info("===== Method D - IFD for intersecting voronoi cells, no blind points ===============")
-    test_IFD_geometry_intersection(trajfile)
+    test_IFD_density_geometry_intersection(trajfile)
 
 
 if __name__ == "__main__":

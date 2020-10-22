@@ -19,7 +19,7 @@ import numpy as np
 
 
 # ---------
-# Test of classical voronoi output for Method D and J (use of blind points disabled)
+# Test of classical voronoi output for Method D
 # Real voronoi density can be calculated by 1 person / (ped_distance^2)
 # Real velocity is 1.0 m/s for all frames (since cut off is false parts of the outer voronoi cells lay in the measurement area)
 # ---------
@@ -72,11 +72,11 @@ def test_classical_voronoi(trajfile, ped_distance, velocity_type="Voronoi"):
 
 
 # ---------
-# Test of IFD output for Method D and J (use of blind points disabled)
+# Test of IFD output for Method D (use of blind points disabled)
 # IDs of pedestrians that are in the measurement area for frame 109 are checked
 # Their individual density must be 1 person / (ped_distance^2)
 # ---------
-def test_IFD(trajfile, ped_distance, velocity_type="Voronoi"):
+def test_IFD_density(trajfile, ped_distance, velocity_type="Voronoi"):
     jpsreport_result_file = os.path.join('./Output',
                                          'Fundamental_Diagram',
                                          'IndividualFD',
@@ -129,7 +129,7 @@ def test_IFD(trajfile, ped_distance, velocity_type="Voronoi"):
 # Test of global IFD output for Method D (use of blind points enabled)
 # Individual density for inner pedestrians must be 1 person / (ped_distance^2) for all frames
 # ---------
-def test_IFD_all_frames(trajfile, ped_distance):
+def test_IFD_density_all_frames(trajfile, ped_distance):
     jpsreport_result_file = os.path.join('./Output',
                                          'Fundamental_Diagram',
                                          'IndividualFD',
@@ -164,14 +164,14 @@ def test_IFD_all_frames(trajfile, ped_distance):
 
 
 # ---------
-# Test of cut off option for Method D and J (use of blind points disabled)
+# Test of cut off option for Method D (use of blind points disabled)
 # Densities of pedestrians that are in the measurement area for frame 109 are checked
 # Cut off voronoi cells are approximated by circles
 # If the area of the circle is smaller than the area of the square, the cut off option has an effect on the inner voronoi cells
 # If the area of the circle is larger than the area of the square, the cut off option has no effect on the inner voronoi cells
 # Both scenarios can be tested with this function by setting `cut_off_has_effect`
 # ---------
-def test_cut_off(trajfile, ped_distance, cut_off_has_effect, velocity_type="Voronoi"):
+def test_cut_off_density(trajfile, ped_distance, cut_off_has_effect, velocity_type="Voronoi"):
     jpsreport_result_file = os.path.join('./Output',
                                          'Fundamental_Diagram',
                                          'IndividualFD',
@@ -212,9 +212,9 @@ def test_cut_off(trajfile, ped_distance, cut_off_has_effect, velocity_type="Voro
 
 
 # ---------
-# Test velocity calculation with cut off option for Method J (use of blind points disabled)
+# Test arithmetic velocity calculation with cut off option for Method D (use of blind points disabled)
 # Voronoi cells are approximated by a circle with radius =0.75
-# Velocity in MA should be 1 when vornoi cells are intersecting or 0 when no pedestrians are in MA
+# Velocity in MA should be 1 when voronoi cells are intersecting or 0 when no pedestrians are in MA
 # Voronoi cells in the last column of the grid reach the MA at frame 19 (only one point on MA is not recognized as intersection)
 # Voronoi cells in first column of the grid leave the MA at frame 199
 # Note: Function is only applicable for one specified scenario since the shape of the voronoi cells needs to be known
@@ -223,7 +223,7 @@ def test_cut_off_velocity(trajfile):
     jpsreport_result_file = os.path.join('./Output',
                                          'Fundamental_Diagram',
                                          'Classical_Voronoi',
-                                         'rho_v_Voronoi_J_%s_id_1.dat' %trajfile
+                                         'rho_v_Voronoi_Arithmetic_%s_id_1.dat' %trajfile
                                          )
 
     if not os.path.exists(jpsreport_result_file):
@@ -272,7 +272,7 @@ def test_cut_off_velocity(trajfile):
 # Both scenarios can be tested with this function by setting `cut_off_has_effect`
 # ped_IDs as parameter so that this test can be applied for the one person scenario as well and not for inner pedestrians only
 # ---------
-def test_cut_off_all_frames(trajfile, ped_distance, ped_IDs, cut_off_has_effect=True):
+def test_cut_off_density_all_frames(trajfile, ped_distance, ped_IDs, cut_off_has_effect=True):
     jpsreport_result_file = os.path.join('./Output',
                                          'Fundamental_Diagram',
                                          'IndividualFD',
@@ -310,13 +310,13 @@ def test_cut_off_all_frames(trajfile, ped_distance, ped_IDs, cut_off_has_effect=
 
 
 # ---------
-# Test of IFD output when intersecting with geometry for Method D and J (use of blind points disabled)
+# Test of IFD output when intersecting with geometry for Method D (use of blind points disabled)
 # Corridor is choosen more narrow so that voronoi cells next to walls should intersect with the geometry
 # Measurement area contains first and last row of these pedestrians
 # Their individual density must be 1 person / (area of the rectangle)
 # Note: Function is only applicable for one specified scenario since the distance to the geometry needs to be known
 # ---------
-def test_IFD_geometry_intersection(trajfile, velocity_type="Voronoi"):
+def test_IFD_density_geometry_intersection(trajfile, velocity_type="Voronoi"):
     jpsreport_result_file = os.path.join('./Output',
                                          'Fundamental_Diagram',
                                          'IndividualFD',
@@ -375,7 +375,7 @@ def test_IFD_geometry_intersection(trajfile, velocity_type="Voronoi"):
 # Their individual density must be 1 person / (area of the rectangle)
 # Note: Function is only applicable for one specified scenario since the distance to the geometry needs to be known
 # ---------
-def test_IFD_geometry_intersection_all_frames(trajfile):
+def test_IFD_density_geometry_intersection_all_frames(trajfile):
     jpsreport_result_file = os.path.join('./Output',
                                          'Fundamental_Diagram',
                                          'IndividualFD',

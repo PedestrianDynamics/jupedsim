@@ -8,11 +8,10 @@ import logging
 
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(path[0]))))
 path.append(utestdir)
-path.append(os.path.dirname(os.path.dirname(path[0])))  # source helper file
-from tests_method_DIJ import test_cut_off
+path.append(os.path.dirname(path[0]))  # source helper file
+from tests_method_D import test_cut_off_density
 
 from utils import SUCCESS, FAILURE
-import numpy as np
 from JPSRunTest import JPSRunTestDriver
 
 # horizontal and vertical distance between pedestrians
@@ -22,7 +21,7 @@ cut_off_has_effect = True
 
 def runtest(inifile, trajfile):
     logging.info("===== Method D - Cut off, no blind points   ===============")
-    test_cut_off(trajfile, ped_distance, cut_off_has_effect)
+    test_cut_off_density(trajfile, ped_distance, cut_off_has_effect)
 
 
 if __name__ == "__main__":
