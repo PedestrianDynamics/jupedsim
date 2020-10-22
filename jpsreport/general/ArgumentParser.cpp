@@ -585,7 +585,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
     }
 
     LOG_INFO("Finish parsing inifile");
-    if(!(_isMethodA || _isMethodB || _isMethodC || _isMethodD )) {
+    if(!(_isMethodA || _isMethodB || _isMethodC || _isMethodD)) {
         LOG_WARNING("No measurement method enabled. Nothing to do.");
         exit(EXIT_SUCCESS);
     }
