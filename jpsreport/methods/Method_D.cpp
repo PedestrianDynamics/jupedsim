@@ -444,7 +444,7 @@ void Method_D::GetProfiles(
            ("Prf_v_" + _velocityType + "_" + _trajName.string() + "_id_" +
             std::to_string(_measurementArea->_id) + "_" + frameId + ".dat");
     dtmp = tmp / dtmp /
-           ("Prf_d_" + _densityType + "_" + _trajName.string() + "_id_" +
+           ("Prf_rho_" + _densityType + "_" + _trajName.string() + "_id_" +
             std::to_string(_measurementArea->_id) + "_" + frameId + ".dat");
     string Prfvelocity = vtmp.string();
     string Prfdensity  = dtmp.string();
