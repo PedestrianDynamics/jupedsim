@@ -54,11 +54,12 @@ struct ConfigData_D {
     std::string densityType  = "Voronoi";
     std::string velocityType = "Voronoi";
 
-    //parameter for velocity calculation function
-    /** default:
-    Calculates the velocity of pedestrians based on their voronoi cell and their instantaneous velocity.
-    input: intersecting polygons (with MA), instantaneous velocities and measurement area.
-    output: mean velocity in the MA
+    /** @brief Parameter for velocity calculation function
+     * @details Default velocity calculation function is based on the Voronoi velocity method using pedestrians' Voronoi cell and their instantaneous velocity.
+     * @param[input]: polygons polygon list containing intersecting polygons with MA
+     * @param[input]: individualVelocity vector with instantaneous velocities
+     * @param[input]: measurementArea measurement area for which the data are calculated
+     * @return: mean velocity in the MA
     **/
     std::function<double(const polygon_list &, const std::vector<double> &, const polygon_2d &)>
         velocityCalcFunc = [](const polygon_list & polygons,

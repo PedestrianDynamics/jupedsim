@@ -684,10 +684,9 @@ std::optional<ConfigData_D> ArgumentParser::ParseDIJParams(TiXmlElement * xMetho
 
     if(xMethod->FirstChildElement("vel_calculation") &&
        string(xMethod->FirstChildElement("vel_calculation")->Attribute("type")) == "Arithmetic") {
-        /** Arithmetic velocity calculation is chosen
-        Calculates the velocity of pedestrians based as arithmetic mean based on their instantaneous velocity. Method is independent of size of vornoi cells.
-        input: intersecting polygons (with MA), instantaneous velocities and measurement area.
-        output: mean velocity in the MA
+        /** Arithmetic velocity calculation is chosen.
+         * Calculates the velocity of pedestrians based as arithmetic mean of their instantaneous velocity.
+         * Method is independent of size of Voronoi cells.
         **/
         configData.velocityCalcFunc = [](const polygon_list & polygons,
                                          const vector<double> & individualVelocity,
