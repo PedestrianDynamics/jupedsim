@@ -39,6 +39,7 @@ struct Track {
  * Information of train doors, as position, width, and allowed flow.
  */
 struct TrainDoor {
+    int _id;          /** ID of the train door. */
     double _distance; /** Distance to start of train. */
     double _width;    /** Width of train door. */
     double _flow;     /** Max. allowed flow at train door. */
@@ -51,5 +52,5 @@ struct TrainType {
     std::string _type; /** Name of the train type, used for stating which train arrives/deptarts. */
     int _maxAgents;    /** Max. number of agents allowed in the train. */
     double _length;    /** Length of the train. */
-    std::vector<TrainDoor> _doors; /** Doors of the train. */
+    std::map<int, TrainDoor> _doors; /** Doors of the train. */
 };
