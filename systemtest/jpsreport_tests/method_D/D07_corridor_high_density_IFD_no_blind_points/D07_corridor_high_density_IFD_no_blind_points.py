@@ -8,11 +8,10 @@ import logging
 
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(path[0]))))
 path.append(utestdir)
-path.append(os.path.dirname(os.path.dirname(path[0])))  # source helper file
-from tests_method_DIJ import test_IFD
+path.append(os.path.dirname(path[0]))  # source helper file
+from tests_method_D import test_IFD_density
 
 from utils import SUCCESS, FAILURE
-import numpy as np
 from JPSRunTest import JPSRunTestDriver
 
 # horizontal and vertical distance between pedestrians
@@ -21,7 +20,7 @@ ped_distance = 0.5
 
 def runtest(inifile, trajfile):
     logging.info("===== Method D - IFD, no blind points  ===============")
-    test_IFD("D", trajfile, ped_distance, )
+    test_IFD_density(trajfile, ped_distance)
 
 
 if __name__ == "__main__":

@@ -35,7 +35,7 @@
 #include "general/ArgumentParser.h"
 #include "general/Macros.h"
 #include "geometry/Building.h"
-#include "methods/ConfigData_DIJ.h"
+#include "methods/ConfigData_D.h"
 #include "methods/PedData.h"
 
 #include <boost/geometry/geometries/adapted/c_array.hpp>
@@ -99,8 +99,6 @@ private:
     Building * _building;
     //polygon_2d _geoPoly;
     std::map<int, polygon_2d> _geoPolyMethodD;
-    std::map<int, polygon_2d> _geoPolyMethodI;
-    std::map<int, polygon_2d> _geoPolyMethodJ;
 
     double _lowVertexX;  // LOWest vertex of the geometry (x coordinate)
     double _lowVertexY;  //  LOWest vertex of the geometry (y coordinate)
@@ -112,7 +110,6 @@ private:
     bool _DoesUseMethodB;     // Method B (Zhang2011a)
     bool _DoesUseMethodC;     // Method C //calculate and save results of classic in separate file
     bool _DoesUseMethodD;     // Method D--Voronoi method
-    bool _DoesUseMethodJ;
 
     std::string
         _vComponent; // to mark whether x, y or x and y coordinate are used when calculating the velocity
@@ -128,9 +125,8 @@ private:
     std::vector<MeasurementArea_B *> _areasForMethodB;
     std::vector<MeasurementArea_B *> _areasForMethodC;
     std::vector<MeasurementArea_B *> _areasForMethodD;
-    std::vector<MeasurementArea_B *> _areaForMethod_J;
 
-    ConfigData_DIJ configData_D, configData_J;
+    ConfigData_D configData_D;
 };
 
 #endif /*ANALYSIS_H_*/

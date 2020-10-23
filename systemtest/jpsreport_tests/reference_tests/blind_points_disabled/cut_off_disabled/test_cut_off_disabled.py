@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ####################
-# Test of Method D and J with cut_by_circle disabled
+# Test of Method D with blind points disabled and cut_by_circle disabled
 ####################
 
 import os
@@ -20,7 +20,7 @@ from JPSRunTest import JPSRunTestDriver
 
 def runtest(inifile, trajfile):
 
-    logging.info("===== Test of Method D and J with cut_by_circle and use_blind_points disabled ===============")
+    logging.info("===== Test of Method D with blind points disabled and cut_by_circle disabled ===============")
     check_diff_to_reference_data()
 
 

@@ -28,7 +28,7 @@
 #ifndef ARGUMENTPARSER_H_
 #define ARGUMENTPARSER_H_
 
-#include "../methods/ConfigData_DIJ.h"
+#include "../methods/ConfigData_D.h"
 #include "../methods/MeasurementArea.h"
 #include "../tinyxml/tinyxml.h"
 #include "Macros.h"
@@ -66,7 +66,6 @@ private:
     bool _isMethodB;
     bool _isMethodC;
     bool _isMethodD;
-    bool _isMethodJ;
     double _steadyStart;
     double _steadyEnd;
     int _delatTVInst;
@@ -79,7 +78,7 @@ private:
     std::map<int, MeasurementArea *> _measurementAreasByIDs;
     void Usage(const std::string file);
 
-    std::optional<ConfigData_DIJ> ParseDIJParams(TiXmlElement * xMethod);
+    std::optional<ConfigData_D> ParseDIJParams(TiXmlElement * xMethod);
     // TODO: should be moved somewhere else. maybe Building.h
     polygon_2d GetSurroundingPolygon();
 
@@ -102,7 +101,6 @@ public:
     bool GetIsMethodB() const;
     bool GetIsMethodC() const;
     bool GetIsMethodD() const;
-    bool GetIsMethodJ() const;
     std::vector<int> GetAreaIDforMethodA() const;
     std::vector<int> GetAreaIDforMethodB() const;
     std::vector<int> GetAreaIDforMethodC() const;
@@ -119,7 +117,7 @@ public:
       */
     bool ParseIniFile(const std::string & inifile);
 
-    ConfigData_DIJ _configDataD, _configDataJ;
+    ConfigData_D _configDataD;
 };
 
 #endif /*ARGPARSER_H_*/

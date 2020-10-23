@@ -29,7 +29,7 @@
 #define METHOD_D_H_
 
 #include "../Analysis.h"
-#include "ConfigData_DIJ.h"
+#include "ConfigData_D.h"
 #include "PedData.h"
 #include "VoronoiDiagram.h"
 
@@ -40,7 +40,7 @@ public:
     Method_D();
     virtual ~Method_D();
     bool Process(
-        const ConfigData_DIJ & configData,
+        const ConfigData_D & configData,
         int measurementAreaIndex,
         const PedData & pedData,
         const double & zPos_measureArea);
@@ -55,38 +55,44 @@ private:
     fs::path _projectRootDir;
     fs::path _outputLocation;
 
+    std::function<double(const polygon_list &, const std::vector<double> &, const polygon_2d &)>
+        _velocityCalcFunc;
+    // parameters to handle different file names for different calculation types
+    std::string _densityType;
+    std::string _velocityType;
+
     polygon_2d _geoPoly;
     double _geoMinX; // LOWest vertex of the geometry (x coordinate)
     double _geoMinY; //  LOWest vertex of the geometry (y coordinate)
     double _geoMaxX; // Highest vertex of the geometry
     double _geoMaxY;
-    FILE * _fVoronoiRhoV;
+    FILE * _fOutputRhoV;
     FILE * _fIndividualFD;
     float _fps;
     bool OpenFileMethodD(bool _isOneDimensional);
     bool OpenFileIndividualFD(bool _isOneDimensional, bool global);
 
     std::vector<std::pair<polygon_2d, int>> GetPolygons(
-        const ConfigData_DIJ & configData,
+        const ConfigData_D & configData,
         std::vector<double> & XInFrame,
         std::vector<double> & YInFrame,
         std::vector<double> & VInFrame,
         std::vector<int> & IdInFrame);
     void OutputVoronoiResults(
-        const std::vector<polygon_2d> & polygons,
+        const polygon_list & polygons,
         const std::string & frid,
         const std::vector<double> & VInFrame);
-    std::tuple<double, double> GetVoronoiDensityVelocity(
-        const std::vector<polygon_2d> & polygon,
-        const std::vector<double> & Velocity,
-        const polygon_2d & measureArea);
+    std::tuple<double, double> CalcDensityVelocity(
+        const polygon_list & polygons,
+        const std::vector<double> & VInFrame,
+        const polygon_2d & measurementArea);
     void GetProfiles(
-        const ConfigData_DIJ & configData,
+        const ConfigData_D & configData,
         const std::string & frameId,
-        const std::vector<polygon_2d> & polygons,
+        const polygon_list & polygons,
         const std::vector<double> & velocity);
     void GetIndividualFD(
-        const std::vector<polygon_2d> & polygon,
+        const polygon_list & polygon,
         const std::vector<double> & Velocity,
         const std::vector<int> & Id,
         const polygon_2d & measureArea,

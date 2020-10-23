@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ####################
-# Test profile calculation for 2 frames with Method D
+# Test profile calculation for 2 frames with Method D with use_blind_points disabled
 ####################
 
 import os

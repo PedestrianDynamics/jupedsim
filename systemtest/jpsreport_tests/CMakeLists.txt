@@ -23,16 +23,8 @@ add_test(NAME D15_corridor_low_cut_off_global_IFD COMMAND ${PYTHON_EXECUTABLE} $
 add_test(NAME D16_corridor_high_cut_off_global_IFD COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D16_corridor_high_cut_off_global_IFD/D16_corridor_high_cut_off_global_IFD.py ${jpsreport_exe})
 add_test(NAME D17_corridor_geometry_intersection_global_IFD COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D17_corridor_geometry_intersection_global_IFD/D17_corridor_geometry_intersection_global_IFD.py ${jpsreport_exe})
 add_test(NAME D18_corridor_one_person_global_IFD COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D18_corridor_one_person_global_IFD/D18_corridor_one_person_global_IFD.py ${jpsreport_exe})
-add_test(NAME J01_test_reference_data COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J01_test_reference_data/J01_test_reference_data.py ${jpsreport_exe})
-add_test(NAME J02_corridor_low_density COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J02_corridor_low_density/J02_corridor_low_density.py ${jpsreport_exe})
-add_test(NAME J03_corridor_medium_density COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J03_corridor_medium_density/J03_corridor_medium_density.py ${jpsreport_exe})
-add_test(NAME J04_corridor_high_density COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J04_corridor_high_density/J04_corridor_high_density.py ${jpsreport_exe})
-add_test(NAME J05_corridor_low_density_IFD COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J05_corridor_low_density_IFD/J05_corridor_low_density_IFD.py ${jpsreport_exe})
-add_test(NAME J06_corridor_medium_density_IFD COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J06_corridor_medium_density_IFD/J06_corridor_medium_density_IFD.py ${jpsreport_exe})
-add_test(NAME J07_corridor_high_density_IFD COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J07_corridor_high_density_IFD/J07_corridor_high_density_IFD.py ${jpsreport_exe})
-add_test(NAME J08_corridor_low_cut_off COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J08_corridor_low_cut_off/J08_corridor_low_cut_off.py ${jpsreport_exe})
-add_test(NAME J09_corridor_high_cut_off COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J09_corridor_high_cut_off/J09_corridor_high_cut_off.py ${jpsreport_exe})
-add_test(NAME J10_corridor_cut_off_velocity COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J10_corridor_cut_off_velocity/J10_corridor_cut_off_velocity.py ${jpsreport_exe})
+add_test(NAME D19_test_reference_data_no_blind_points_arithmetic COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D19_test_reference_data_no_blind_points_arithmetic/D19_test_reference_data_no_blind_points_arithmetic.py ${jpsreport_exe})
+add_test(NAME D20_corridor_cut_off_no_blind_points_arithmetic COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D20_corridor_cut_off_no_blind_points_arithmetic/D20_corridor_cut_off_no_blind_points_arithmetic.py ${jpsreport_exe})
 
 add_test(NAME reference_no_blind_points_cut_off_disabled COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_tests/blind_points_disabled/cut_off_disabled/test_cut_off_disabled.py ${jpsreport_exe})
 add_test(NAME reference_no_blind_points_cut_off_edges COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_tests/blind_points_disabled/cut_off_edges/test_cut_off_edges.py ${jpsreport_exe})
@@ -40,6 +32,13 @@ add_test(NAME reference_no_blind_points_cut_off_enabled COMMAND ${PYTHON_EXECUTA
 add_test(NAME reference_no_blind_points_cut_off_large COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_tests/blind_points_disabled/cut_off_large/test_cut_off_large.py ${jpsreport_exe})
 add_test(NAME reference_no_blind_points_cut_off_small COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_tests/blind_points_disabled/cut_off_small/test_cut_off_small.py ${jpsreport_exe})
 add_test(NAME reference_no_blind_points_profiles COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_tests/blind_points_disabled/profiles/test_profiles.py ${jpsreport_exe})
+
+add_test(NAME reference_no_blind_points_arithmetic_cut_off_disabled COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_tests/blind_points_disabled_arithmetic/cut_off_disabled/test_cut_off_disabled.py ${jpsreport_exe})
+add_test(NAME reference_no_blind_points_arithmetic_cut_off_edges COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_tests/blind_points_disabled_arithmetic/cut_off_edges/test_cut_off_edges.py ${jpsreport_exe})
+add_test(NAME reference_no_blind_points_arithmetic_cut_off_enabled COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_tests/blind_points_disabled_arithmetic/cut_off_enabled/test_cut_off_enabled.py ${jpsreport_exe})
+add_test(NAME reference_no_blind_points_arithmetic_cut_off_large COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_tests/blind_points_disabled_arithmetic/cut_off_large/test_cut_off_large.py ${jpsreport_exe})
+add_test(NAME reference_no_blind_points_arithmetic_cut_off_small COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_tests/blind_points_disabled_arithmetic/cut_off_small/test_cut_off_small.py ${jpsreport_exe})
+add_test(NAME reference_no_blind_points_arithmetic_profiles COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_tests/blind_points_disabled_arithmetic/profiles/test_profiles.py ${jpsreport_exe})
 
 add_test(NAME reference_cut_off_disabled_global_IFD COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_tests/global_IFD/cut_off_disabled/test_cut_off_disabled.py ${jpsreport_exe})
 add_test(NAME reference_cut_off_edges_global_IFD COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/reference_tests/global_IFD/cut_off_edges/test_cut_off_edges.py ${jpsreport_exe})
@@ -76,16 +75,8 @@ set_tests_properties(
   D16_corridor_high_cut_off_global_IFD
   D17_corridor_geometry_intersection_global_IFD
   D18_corridor_one_person_global_IFD
-  J01_test_reference_data
-  J02_corridor_low_density
-  J03_corridor_medium_density
-  J04_corridor_high_density
-  J05_corridor_low_density_IFD
-  J06_corridor_medium_density_IFD
-  J07_corridor_high_density_IFD
-  J08_corridor_low_cut_off
-  J09_corridor_high_cut_off
-  J10_corridor_cut_off_velocity
+  D19_test_reference_data_no_blind_points_arithmetic
+  D20_corridor_cut_off_no_blind_points_arithmetic
   reference_no_blind_points_cut_off_disabled
   reference_no_blind_points_cut_off_edges
   reference_no_blind_points_cut_off_enabled
@@ -93,6 +84,13 @@ set_tests_properties(
   reference_no_blind_points_cut_off_small
   reference_no_blind_points_cut_off_disabled
   reference_no_blind_points_profiles
+  reference_no_blind_points_arithmetic_cut_off_disabled
+  reference_no_blind_points_arithmetic_cut_off_edges
+  reference_no_blind_points_arithmetic_cut_off_enabled
+  reference_no_blind_points_arithmetic_cut_off_large
+  reference_no_blind_points_arithmetic_cut_off_small
+  reference_no_blind_points_arithmetic_cut_off_disabled
+  reference_no_blind_points_arithmetic_profiles
   reference_cut_off_edges_global_IFD
   reference_cut_off_enabled_global_IFD
   reference_cut_off_large_global_IFD
