@@ -31,7 +31,6 @@
 
 #include "Analysis.h"
 #include "general/ArgumentParser.h"
-#include "geometry/Building.h"
 
 #include <Logger.h>
 #include <chrono>

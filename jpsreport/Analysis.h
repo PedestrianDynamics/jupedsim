@@ -34,7 +34,6 @@
 
 #include "general/ArgumentParser.h"
 #include "general/Macros.h"
-#include "geometry/Building.h"
 #include "methods/ConfigData_D.h"
 #include "methods/PedData.h"
 
@@ -59,12 +58,9 @@ class Analysis
 {
 public:
     Analysis();
-    virtual ~Analysis();
+    ~Analysis() = default;
 
     void InitArgs(ArgumentParser * args);
-
-    std::map<int, polygon_2d>
-    ReadGeometry(const fs::path & geometryFile, const std::vector<MeasurementArea_B *> & areas);
 
     /**
       * Run the analysis for different files.
@@ -96,9 +92,28 @@ public:
     static FILE * CreateFile(const std::string & filename);
 
 private:
-    Building * _building;
-    //polygon_2d _geoPoly;
+    /**
+     * Checks which rooms contain measurement areas \p areas.
+     * @param areas Measurement areas of interest
+     * @return Mapping from ID of measurement area to polygon.
+     */
+    std::map<int, polygon_2d>
+    GetRoomForMeasurementArea(const std::vector<MeasurementArea_B *> & areas);
+
+    /**
+     * Compute the bounding box around all polygons contained in \p polygons. Bounding box can be
+     * extended by \p extension.
+     * @param polygons polygons of interest
+     * @param extension extension of the bounding box [in cm]
+     * @return bounding box of \p polygons extended \p extension
+     */
+    boost::geometry::model::box<point_2d>
+    GetBoundingBox(const std::vector<polygon_2d> & polygons, double extension = 0.);
+
+private:
     std::map<int, polygon_2d> _geoPolyMethodD;
+    std::vector<polygon_2d> _geometry;
+    polygon_2d _boundingBox;
 
     double _lowVertexX;  // LOWest vertex of the geometry (x coordinate)
     double _lowVertexY;  //  LOWest vertex of the geometry (y coordinate)

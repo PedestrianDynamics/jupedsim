@@ -31,6 +31,7 @@
 #include "../Analysis.h"
 
 #include <Logger.h>
+#include <fstream>
 #include <iostream>
 
 using std::ofstream;

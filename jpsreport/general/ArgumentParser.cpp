@@ -109,7 +109,7 @@ bool ArgumentParser::ParseArgs(int argc, char ** argv)
     //special case of the default configuration ini.xml
     if(argc == 1) {
         LOG_INFO("Trying to load the default configuration from the file <ini.xml>");
-        if(ParseIniFile("ini.xml") == false) {
+        if(!ParseInputFiles("ini.xml")) {
             Usage(argv[0]);
         }
         return true;
@@ -135,7 +135,7 @@ bool ArgumentParser::ParseArgs(int argc, char ** argv)
         } else if(!argument.compare(0, prefix1.size(), prefix1)) {
             argument.erase(0, prefix1.size());
         }
-        return ParseIniFile(argument);
+        return ParseInputFiles(argument);
     }
 
     //more than one argument was supplied
@@ -153,8 +153,7 @@ const fs::path & ArgumentParser::GetProjectRootDir() const
     return _projectRootDir;
 }
 
-
-bool ArgumentParser::ParseIniFile(const string & inifile)
+bool ArgumentParser::ParseInifile(const fs::path & inifile)
 {
     Logs();
     LOG_INFO("Parsing the ini file <{}>", inifile);
@@ -364,12 +363,6 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                     "Less than 3 measure area points given ({}). At least 3 or nothing "
                     "at all!!",
                     num_verteces);
-
-            // TODO: this needs to be restructured. Same default MA can be used for profiles and globalIFD
-            if(num_verteces == 0) {
-                LOG_WARNING("Measurement are with 0 points. Default bounding box!!");
-                poly = GetSurroundingPolygon();
-            }
 
             correct(poly); // in the case the Polygone is not closed
             areaB->_poly = poly;
@@ -592,6 +585,138 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
     return true;
 }
 
+bool ArgumentParser::ParseInputFiles(const string & inifile)
+{
+    if(ParseInifile(inifile)) {
+        if(auto geometry = ParseGeometry(_geometryFileName); geometry.has_value()) {
+            _geometry = geometry.value();
+            return true;
+        }
+        return false;
+    }
+
+    return false;
+}
+
+std::optional<std::vector<polygon_2d>> ArgumentParser::ParseGeometry(const fs::path & geometryFile)
+{
+    LOG_INFO("ReadGeometry with {}.", geometryFile.string());
+
+    std::vector<polygon_2d> geoPoly;
+
+    TiXmlDocument docGeo(geometryFile);
+    if(!docGeo.LoadFile()) {
+        LOG_ERROR("{}", docGeo.ErrorDesc());
+        LOG_ERROR("could not parse the geometry file");
+        return std::nullopt;
+    }
+
+    TiXmlElement * xRootNode = docGeo.RootElement();
+    if(!xRootNode) {
+        LOG_ERROR("Root element does not exist");
+        return std::nullopt;
+    }
+
+    if(xRootNode->ValueStr() != "geometry") {
+        LOG_ERROR("Root element value is not 'geometry'.");
+        return std::nullopt;
+    }
+    if(xRootNode->Attribute("unit"))
+        if(string(xRootNode->Attribute("unit")) != "m") {
+            LOG_ERROR(
+                "Only the unit m (meters) is supported. \n\tYou supplied [{}]",
+                xRootNode->Attribute("unit"));
+            return std::nullopt;
+        }
+
+    double version = xmltof(xRootNode->Attribute("version"), -1);
+
+    if(version != std::stod(JPS_VERSION) && version != std::stod(JPS_OLD_VERSION)) {
+        LOG_ERROR(" Wrong geometry version!");
+        LOG_ERROR(" Only version >= {} supported", JPS_VERSION);
+        LOG_ERROR(" Please update the version of your geometry file to {}", JPS_VERSION);
+        return std::nullopt;
+    }
+
+    //processing the rooms node
+    TiXmlNode * xRoomsNode = xRootNode->FirstChild("rooms");
+    if(!xRoomsNode) {
+        LOG_ERROR("The geometry should have at least one room and one subroom");
+        return std::nullopt;
+    }
+
+    for(TiXmlElement * xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
+        xRoom                = xRoom->NextSiblingElement("room")) {
+        string room_id = xmltoa(xRoom->Attribute("id"), "-1");
+
+        boost::geometry::model::multi_polygon<polygon_2d> room;
+        //parsing the subrooms
+        //processing the rooms node
+        for(TiXmlElement * xSubRoom = xRoom->FirstChildElement("subroom"); xSubRoom;
+            xSubRoom                = xSubRoom->NextSiblingElement("subroom")) {
+            polygon_2d subroom;
+
+            string subroom_id = xmltoa(xSubRoom->Attribute("id"), "-1");
+
+            //looking for polygons (walls)
+            for(TiXmlElement * xPolyVertices = xSubRoom->FirstChildElement("polygon");
+                xPolyVertices;
+                xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
+                for(TiXmlElement * xVertex = xPolyVertices->FirstChildElement("vertex");
+                    xVertex && xVertex != xPolyVertices->LastChild("vertex");
+                    xVertex = xVertex->NextSiblingElement("vertex")) {
+                    double x1 = xmltof(xVertex->Attribute("px"));
+                    double y1 = xmltof(xVertex->Attribute("py"));
+                    double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
+                    double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
+                    append(subroom, make<point_2d>(x1 * M2CM, y1 * M2CM));
+                    append(subroom, make<point_2d>(x2 * M2CM, y2 * M2CM));
+                }
+            }
+            correct(subroom);
+
+            std::vector<polygon_2d> obstacles;
+            //looking for obstacles
+            for(TiXmlElement * xObstacle = xSubRoom->FirstChildElement("obstacle"); xObstacle;
+                xObstacle                = xObstacle->NextSiblingElement("obstacle")) {
+                //looking for polygons (walls)
+                polygon_2d obstacle;
+
+                for(TiXmlElement * xPolyVertices = xObstacle->FirstChildElement("polygon");
+                    xPolyVertices;
+                    xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
+                    for(TiXmlElement * xVertex = xPolyVertices->FirstChildElement("vertex");
+                        xVertex && xVertex != xPolyVertices->LastChild("vertex");
+                        xVertex = xVertex->NextSiblingElement("vertex")) {
+                        double x1 = xmltof(xVertex->Attribute("px"));
+                        double y1 = xmltof(xVertex->Attribute("py"));
+                        double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
+                        double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
+
+                        append(obstacle, make<point_2d>(x1 * M2CM, y1 * M2CM));
+                        append(obstacle, make<point_2d>(x2 * M2CM, y2 * M2CM));
+                    }
+                }
+                correct(obstacle);
+            }
+
+            int k = 1;
+            for(auto && obstacle : obstacles) {
+                subroom.inners().resize(k++);
+                subroom.inners().back();
+                model::ring<point_2d> & inner = subroom.inners().back();
+                for(auto && tmp_point : obstacle.outer()) {
+                    append(inner, make<point_2d>(tmp_point.x() * M2CM, tmp_point.y() * M2CM));
+                }
+                correct(subroom);
+            }
+            unique(subroom);
+            geoPoly.emplace_back(subroom);
+        }
+    }
+    return std::optional<std::vector<polygon_2d>>{geoPoly};
+}
+
 std::optional<ConfigData_D> ArgumentParser::ParseDIJParams(TiXmlElement * xMethod)
 {
     if(string(xMethod->Attribute("enabled")) == "false") {
@@ -751,8 +876,7 @@ std::optional<ConfigData_D> ArgumentParser::ParseDIJParams(TiXmlElement * xMetho
         MeasurementArea_B * areaB = new MeasurementArea_B();
         areaB->_id                = -1;
         areaB->_type              = "Bounding Box";
-        polygon_2d poly           = GetSurroundingPolygon();
-        correct(poly);
+        polygon_2d poly;
         areaB->_poly                       = poly;
         areaB->_zPos                       = 10000001.0; // TODO: why do we need to do this??
         _measurementAreasByIDs[areaB->_id] = areaB;
@@ -782,52 +906,6 @@ std::optional<ConfigData_D> ArgumentParser::ParseDIJParams(TiXmlElement * xMetho
     }
 
     return configData;
-}
-
-polygon_2d ArgumentParser::GetSurroundingPolygon()
-{
-    polygon_2d poly;
-    // loading geometry is done in  analysis.cpp
-    // so this is done twice, which is not nice.
-    // For big geometries it could be slow.
-    Building * building = new Building();
-    building->LoadGeometry(
-        GetGeometryFilename()
-            .string()); //TODO: Geometry is load after MA. Resturcturing needed for creating default MA
-    building->InitGeometry();
-    building->AddSurroundingRoom(); // this is a big reactagle
-    // slightly bigger than the
-    // geometry boundaries
-    double geo_minX = building->_xMin;
-    double geo_minY = building->_yMin;
-    double geo_maxX = building->_xMax;
-    double geo_maxY = building->_yMax;
-    LOG_INFO(
-        "Bounding box:\n \t\tminX = {:.2f}\n \t\tmaxX = {:.2f} \n \t\tminY = {:.2f} "
-        "\n\t\tmaxY = {:.2f}",
-        geo_minX,
-        geo_maxX,
-        geo_minY,
-        geo_maxY);
-
-    //1
-    double box_px = geo_minX * M2CM;
-    double box_py = geo_minY * M2CM;
-    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
-    //2
-    box_px = geo_minX * M2CM;
-    box_py = geo_maxY * M2CM;
-    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
-    //3
-    box_px = geo_maxX * M2CM;
-    box_py = geo_maxY * M2CM;
-    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
-    //4
-    box_px = geo_maxX * M2CM;
-    box_py = geo_minY * M2CM;
-    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
-
-    return poly;
 }
 
 const fs::path & ArgumentParser::GetGeometryFilename() const
@@ -928,4 +1006,9 @@ MeasurementArea * ArgumentParser::GetMeasurementArea(int id)
         exit(EXIT_FAILURE);
     }
     return _measurementAreasByIDs[id];
+}
+
+const std::vector<polygon_2d> & ArgumentParser::GetGeometry() const
+{
+    return _geometry;
 }
