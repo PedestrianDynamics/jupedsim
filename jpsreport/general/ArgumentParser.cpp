@@ -160,7 +160,7 @@ bool ArgumentParser::ParseInifile(const fs::path & inifile)
     //extract and set the project root dir
     fs::path p(inifile);
     _projectRootDir = weakly_canonical(p).parent_path();
-    TiXmlDocument doc(inifile);
+    TiXmlDocument doc(inifile.string());
     if(!doc.LoadFile()) {
         LOG_ERROR("{}", doc.ErrorDesc());
         LOG_ERROR("Could not parse the ini file");
@@ -604,7 +604,7 @@ std::optional<std::vector<polygon_2d>> ArgumentParser::ParseGeometry(const fs::p
 
     std::vector<polygon_2d> geoPoly;
 
-    TiXmlDocument docGeo(geometryFile);
+    TiXmlDocument docGeo(geometryFile.string());
     if(!docGeo.LoadFile()) {
         LOG_ERROR("{}", docGeo.ErrorDesc());
         LOG_ERROR("could not parse the geometry file");

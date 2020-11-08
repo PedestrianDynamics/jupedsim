@@ -35,6 +35,7 @@
 #include <Logger.h>
 #include <chrono>
 #include <exception>
+#include <stdexcept>
 
 using namespace std;
 using namespace std::chrono;
