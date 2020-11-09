@@ -281,9 +281,9 @@ bool Method_D::OpenFileIndividualFD(bool _isOneDimensional, bool global)
 {
     fs::path trajFileName("_id_" + std::to_string(_measurementArea->_id) + ".dat");
     fs::path indFDPath("Fundamental_Diagram");
-    indFDPath = _outputLocation / indFDPath / "IndividualFD" /
-                ("IFD_rho_v_" + _densityType + "_" + _velocityType + "_" + _trajName.string() +
-                 trajFileName.string());
+    indFDPath = _outputLocation / indFDPath / "IndividualFD" / (global?
+                ("IFD_global_" + _trajName.string() + ".dat" ) : ("IFD_local_" + _trajName.string() +
+                                           trajFileName.string())) ;
     string Individualfundment = indFDPath.string();
     if((_fIndividualFD = Analysis::CreateFile(Individualfundment)) == nullptr) {
         LOG_ERROR("cannot open the file individual.");
@@ -293,28 +293,25 @@ bool Method_D::OpenFileIndividualFD(bool _isOneDimensional, bool global)
             fprintf(
                 _fIndividualFD,
                 "#framerate (fps):\t%.2f\n\n#Frame\tPersID\tIndividual %s "
-                "density(m^(-1))\tIndividual %s "
+                "density(m^(-1))\tIndividual "
                 "velocity(m/s)\tHeadway(m)\n",
                 _fps,
-                _densityType.c_str(),
-                _velocityType.c_str());
+                _densityType.c_str());
         } else if(!global) {
             fprintf(
                 _fIndividualFD,
                 "#framerate (fps):\t%.2f\n\n#Frame\tPersID\tx/m\ty/m\tz/m\tIndividual %s "
-                "density(m^(-2))\tIndividual %s velocity(m/s)\tVoronoi Polygon\tIntersection "
+                "density(m^(-2))\tIndividual velocity(m/s)\tVoronoi Polygon\tIntersection "
                 "Polygon\n",
                 _fps,
-                _densityType.c_str(),
-                _velocityType.c_str());
+                _densityType.c_str());
         } else {
             fprintf(
                 _fIndividualFD,
                 "#framerate (fps):\t%.2f\n\n#Frame\tPersID\tx/m\ty/m\tz/m\tIndividual %s "
-                "density(m^(-2))\tIndividual %s velocity(m/s)\tVoronoi Polygon\n",
+                "density(m^(-2))\tIndividual velocity(m/s)\tVoronoi Polygon\n",
                 _fps,
-                _densityType.c_str(),
-                _velocityType.c_str());
+                _densityType.c_str());
         }
         return true;
     }
