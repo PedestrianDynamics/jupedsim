@@ -175,6 +175,8 @@ precises the method for calculating the instantaneous velocity $$v_i(t)$$
   Indicates the parameters related to each measurement method.
   Four different methods `method_A` to `method_D`are integrated in the current
   version of `JPSreport` and can be chosen for the analysis. They are used to analyze the movement of pedestrians for the steady state.
+  Additionally, `Method_D` can be used for time-series analysis of individual data.
+
 
 | Method | measurement area | output data |
 | :---:  |     :---:        | :---:       |
@@ -185,8 +187,6 @@ precises the method for calculating the instantaneous velocity $$v_i(t)$$
 
   Further information relating to each method can be found
   in [Pedestrian fundamental diagrams: Comparative analysis of experiments in different geometries](http://hdl.handle.net/2128/4898).
-
-`Method_D` with `<local_IFD enabled="true"/>` can be used for time-series analysis of individual data.
 
 
 ### Method A
