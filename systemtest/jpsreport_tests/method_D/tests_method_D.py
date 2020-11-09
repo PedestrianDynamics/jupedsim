@@ -76,11 +76,11 @@ def test_classical_voronoi(trajfile, ped_distance, velocity_type="Voronoi"):
 # IDs of pedestrians that are in the measurement area for frame 109 are checked
 # Their individual density must be 1 person / (ped_distance^2)
 # ---------
-def test_IFD_density(trajfile, ped_distance, velocity_type="Voronoi"):
+def test_IFD_density(trajfile, ped_distance):
     jpsreport_result_file = os.path.join('./Output',
                                          'Fundamental_Diagram',
                                          'IndividualFD',
-                                         'IFD_rho_v_Voronoi_%s_%s_id_1.dat' % (velocity_type,trajfile)
+                                         'IFD_local_%s_id_1.dat' % (trajfile)
                                          )
 
     if not os.path.exists(jpsreport_result_file):
@@ -133,7 +133,7 @@ def test_IFD_density_all_frames(trajfile, ped_distance):
     jpsreport_result_file = os.path.join('./Output',
                                          'Fundamental_Diagram',
                                          'IndividualFD',
-                                         'IFD_rho_v_Voronoi_Voronoi_%s_id_-1.dat' % trajfile)
+                                         'IFD_global_%s.dat' % trajfile)
 
     if not os.path.exists(jpsreport_result_file):
         logging.critical("jpsreport did not output results correctly.")
@@ -171,11 +171,11 @@ def test_IFD_density_all_frames(trajfile, ped_distance):
 # If the area of the circle is larger than the area of the square, the cut off option has no effect on the inner voronoi cells
 # Both scenarios can be tested with this function by setting `cut_off_has_effect`
 # ---------
-def test_cut_off_density(trajfile, ped_distance, cut_off_has_effect, velocity_type="Voronoi"):
+def test_cut_off_density(trajfile, ped_distance, cut_off_has_effect):
     jpsreport_result_file = os.path.join('./Output',
                                          'Fundamental_Diagram',
                                          'IndividualFD',
-                                         'IFD_rho_v_Voronoi_%s_%s_id_1.dat' % (velocity_type, trajfile)
+                                         'IFD_local_%s_id_1.dat' % ( trajfile)
                                          )
 
     if not os.path.exists(jpsreport_result_file):
@@ -276,7 +276,7 @@ def test_cut_off_density_all_frames(trajfile, ped_distance, ped_IDs, cut_off_has
     jpsreport_result_file = os.path.join('./Output',
                                          'Fundamental_Diagram',
                                          'IndividualFD',
-                                         'IFD_rho_v_Voronoi_Voronoi_%s_id_-1.dat' % trajfile)
+                                         'IFD_global_%s.dat' % trajfile)
     if not os.path.exists(jpsreport_result_file):
         logging.critical("jpsreport did not output results correctly.")
         exit(FAILURE)
@@ -311,16 +311,16 @@ def test_cut_off_density_all_frames(trajfile, ped_distance, ped_IDs, cut_off_has
 
 # ---------
 # Test of IFD output when intersecting with geometry for Method D (use of blind points disabled)
-# Corridor is choosen more narrow so that voronoi cells next to walls should intersect with the geometry
+# Corridor is chosen more narrow so that voronoi cells next to walls should intersect with the geometry
 # Measurement area contains first and last row of these pedestrians
 # Their individual density must be 1 person / (area of the rectangle)
 # Note: Function is only applicable for one specified scenario since the distance to the geometry needs to be known
 # ---------
-def test_IFD_density_geometry_intersection(trajfile, velocity_type="Voronoi"):
+def test_IFD_density_geometry_intersection(trajfile):
     jpsreport_result_file = os.path.join('./Output',
                                          'Fundamental_Diagram',
                                          'IndividualFD',
-                                         'IFD_rho_v_Voronoi_%s_%s_id_1.dat' % (velocity_type, trajfile)
+                                         'IFD_local_%s_id_1.dat' % (trajfile)
                                          )
 
     if not os.path.exists(jpsreport_result_file):
@@ -379,7 +379,7 @@ def test_IFD_density_geometry_intersection_all_frames(trajfile):
     jpsreport_result_file = os.path.join('./Output',
                                          'Fundamental_Diagram',
                                          'IndividualFD',
-                                         'IFD_rho_v_Voronoi_Voronoi_%s_id_-1.dat' % trajfile)
+                                         'IFD_global_%s.dat' % trajfile)
 
     if not os.path.exists(jpsreport_result_file):
         logging.critical("jpsreport did not output results correctly.")
