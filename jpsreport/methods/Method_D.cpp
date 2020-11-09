@@ -281,9 +281,9 @@ bool Method_D::OpenFileIndividualFD(bool _isOneDimensional, bool global)
 {
     fs::path trajFileName("_id_" + std::to_string(_measurementArea->_id) + ".dat");
     fs::path indFDPath("Fundamental_Diagram");
-    indFDPath = _outputLocation / indFDPath / "IndividualFD" / (global?
-                ("IFD_global_" + _trajName.string() + ".dat" ) : ("IFD_local_" + _trajName.string() +
-                                           trajFileName.string())) ;
+    indFDPath = _outputLocation / indFDPath / "IndividualFD" /
+                (global ? ("IFD_global_" + _trajName.string() + ".dat") :
+                          ("IFD_local_" + _trajName.string() + trajFileName.string()));
     string Individualfundment = indFDPath.string();
     if((_fIndividualFD = Analysis::CreateFile(Individualfundment)) == nullptr) {
         LOG_ERROR("cannot open the file individual.");
