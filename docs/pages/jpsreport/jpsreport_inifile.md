@@ -254,7 +254,7 @@ Possible output data are:
 
 
 ### Method D
-For definition see [Method D](jpsreport_method_D.html). Method D is used to analyze the steady state.
+For definition see [Method D](jpsreport_method_D.html). Method D is used to analyze velocity and density in the steady state as well as for time-series analysis.
 
 ```xml
  <method_D enabled="true">
