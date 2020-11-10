@@ -301,13 +301,13 @@ void CorrectInputGeometry(Building & building)
     }
 }
 
-std::vector<std::pair<Point, Point>> ComputeTrainDoorCoordinates(
+std::map<int, std::pair<Point, Point>> ComputeTrainDoorCoordinates(
     const TrainType & train,
     const Track & track,
     double trainStartOffset,
     bool fromEnd)
 {
-    std::vector<std::pair<Point, Point>> trainDoorCoordinates;
+    std::map<int, std::pair<Point, Point>> trainDoorCoordinates;
 
     if(track._walls.empty()) {
         LOG_WARNING(
@@ -332,7 +332,7 @@ std::vector<std::pair<Point, Point>> ComputeTrainDoorCoordinates(
     }
 
     Point start{std::begin(trackWalls)->GetPoint1()};
-    for(const auto trainDoor : train._doors) {
+    for(const auto [_, trainDoor] : train._doors) {
         double distanceFromTrackStart = trainStartOffset + trainDoor._distance;
         double width                  = trainDoor._width;
         std::vector<Point> intersectionPoints;
@@ -401,7 +401,8 @@ std::vector<std::pair<Point, Point>> ComputeTrainDoorCoordinates(
                 continue;
             }
 
-            trainDoorCoordinates.emplace_back(doorStart.value(), *doorEndPointItr);
+            trainDoorCoordinates.emplace(
+                trainDoor._id, std::make_pair(doorStart.value(), *doorEndPointItr));
         }
     }
 
@@ -427,7 +428,7 @@ void AddTrainDoors(
 
     // Create train doors at the computed locations
     std::vector<Transition> trainDoors;
-    for(auto & trainDoorCoordinates : wallDoorIntersectionPoints) {
+    for(const auto & [trainDoorID, trainDoorCoordinates] : wallDoorIntersectionPoints) {
         auto trainDoor = new Transition();
         trainDoor->SetID(transition_id++);
         trainDoor->SetCaption(train._type);
@@ -443,6 +444,9 @@ void AddTrainDoors(
         trainDoor->SetRoom1(room);
         trainDoor->SetSubRoom1(&subroom);
 
+        // Set outflow rate of train door
+        trainDoor->SetDN(1);
+        trainDoor->SetOutflowRate(train._doors.at(trainDoorID)._flow);
         trainDoors.emplace_back(*trainDoor);
     }
 

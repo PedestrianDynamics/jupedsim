@@ -8,17 +8,16 @@ import logging
 
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(path[0]))))
 path.append(utestdir)
-path.append(os.path.dirname(os.path.dirname(path[0])))  # source helper file
-from tests_method_DIJ import test_IFD_geometry_intersection_all_frames
+path.append(os.path.dirname(path[0]))  # source helper file
+from tests_method_D import test_IFD_density_geometry_intersection_all_frames
 
 from utils import SUCCESS, FAILURE
-import numpy as np
 from JPSRunTest import JPSRunTestDriver
 
 
 def runtest(inifile, trajfile):
     logging.info("===== Method D - Global IFD for intersecting voronoi cells ===============")
-    test_IFD_geometry_intersection_all_frames(trajfile)
+    test_IFD_density_geometry_intersection_all_frames(trajfile)
 
 
 if __name__ == "__main__":

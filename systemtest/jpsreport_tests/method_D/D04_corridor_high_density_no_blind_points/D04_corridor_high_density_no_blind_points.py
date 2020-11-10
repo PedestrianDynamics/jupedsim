@@ -8,8 +8,8 @@ import logging
 
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(path[0]))))
 path.append(utestdir)
-path.append(os.path.dirname(os.path.dirname(path[0])))  # source helper file
-from tests_method_DIJ import test_classical_voronoi
+path.append(os.path.dirname(path[0]))  # source helper file
+from tests_method_D import test_classical_voronoi
 
 from utils import SUCCESS, FAILURE
 import numpy as np

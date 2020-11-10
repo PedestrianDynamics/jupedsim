@@ -22,7 +22,7 @@ def runtest(inifile, trajfile):
     data_2_filename = os.path.join('./Output',
                                    'Fundamental_Diagram',
                                    'IndividualFD',
-                                   'IFD_D_%s_id_-1.dat' % trajfile
+                                   'IFD_global_%s.dat' % trajfile
                                    )
     if not os.path.exists(data_2_filename):
         logging.critical("jpsreport did not output results correctly.")

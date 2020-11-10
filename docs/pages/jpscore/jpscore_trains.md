@@ -26,6 +26,7 @@ A train is defined through the following information:
     - `id` (int): id of the train door
     - `distance` (float): distance to train start
     - `width` (float): width of the door
+    - (optional) `outflow` (float): maximum flow at the specific train door (persons per second).
     
 {%include note.html content="The parameter `length` is not used yet. In future it will be used for sanity checks and for avoiding overlapping trains."%}
 
@@ -35,13 +36,13 @@ A train is defined through the following information:
 <train_type>
     <train type="RE" agents_max="15" length="9">
         <door id="1" distance="1" width="1"/>
-        <door id="3" distance="5" width="1"/>
+        <door id="3" distance="5" width="1" outflow="2."/>
     </train>
 
     <train type="ICE" agents_max="20" length="23">
-        <door id="1" distance="1.5" width="2"/>
-        <door id="2" distance="10" width="3"/>
-        <door id="3" distance="18" width="2"/>
+        <door id="1" distance="1.5" width="2" outflow="1.5"/>
+        <door id="2" distance="10" width="3" outflow="3."/>
+        <door id="3" distance="18" width="2" outflow="1.5"/>
     </train>
 </train_type>
 ```

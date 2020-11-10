@@ -32,6 +32,7 @@ class Transition;
 #include "geometry/TrainGeometryInterface.h"
 
 #include <optional>
+#include <unordered_map>
 #include <vector>
 
 namespace geometry::helper
@@ -107,7 +108,7 @@ bool RemoveBigWalls(SubRoom & subroom);
   * @param fromEnd train should be added from end or beginning of track walls
   * @return All found endpoints of the train doors on the track walls
   */
-std::vector<std::pair<Point, Point>> ComputeTrainDoorCoordinates(
+std::map<int, std::pair<Point, Point>> ComputeTrainDoorCoordinates(
     const TrainType & train,
     const Track & track,
     double trainStartOffset,

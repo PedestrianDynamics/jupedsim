@@ -52,7 +52,8 @@ TEST_CASE(
             {
                 double flow = std::numeric_limits<double>::max();
 
-                std::vector<TrainDoor> trainDoors;
+                std::map<int, TrainDoor> trainDoors;
+                int doorID = 0;
                 for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls);
                     ++wallItr) {
                     double width    = 0.5 * wallItr->GetLength();
@@ -61,7 +62,8 @@ TEST_CASE(
                             return sum + wall.GetLength();
                         });
                     distance += 0.25 * wallItr->GetLength();
-                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                    trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
+                    doorID++;
                 }
                 TrainType train{"TEST", 20, 10, trainDoors};
 
@@ -114,7 +116,8 @@ TEST_CASE(
             {
                 double flow = std::numeric_limits<double>::max();
 
-                std::vector<TrainDoor> trainDoors;
+                std::map<int, TrainDoor> trainDoors;
+                int doorID = 0;
                 for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls) - 1;
                     ++wallItr) {
                     double distance = std::accumulate(
@@ -129,7 +132,8 @@ TEST_CASE(
                         [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
                     distanceDoorEnd += 0.25 * std::next(wallItr)->GetLength();
                     double width = distanceDoorEnd - distance;
-                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                    trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
+                    doorID++;
                 }
                 TrainType train{"TEST", 20, 10, trainDoors};
 
@@ -182,7 +186,8 @@ TEST_CASE(
             {
                 double flow = std::numeric_limits<double>::max();
 
-                std::vector<TrainDoor> trainDoors;
+                std::map<int, TrainDoor> trainDoors;
+                int doorID = 0;
                 for(size_t i = 0; i < trainDoors.size() - 2; i += 2) {
                     auto wallItr = std::begin(trackWalls);
                     std::advance(wallItr, i);
@@ -199,7 +204,8 @@ TEST_CASE(
                         });
                     distanceDoorEnd += 0.5 * wallItr->GetLength();
                     double width = distanceDoorEnd - distance;
-                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                    trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
+                    doorID++;
                 }
 
                 TrainType train{"TEST", 20, 10, trainDoors};
@@ -252,7 +258,8 @@ TEST_CASE(
             {
                 double flow = std::numeric_limits<double>::max();
 
-                std::vector<TrainDoor> trainDoors;
+                std::map<int, TrainDoor> trainDoors;
+                int doorID = 0;
                 for(size_t i = 0; i < trainDoors.size() - 2; i += 2) {
                     auto wallItr = std::begin(trackWalls);
                     std::advance(wallItr, i);
@@ -263,7 +270,8 @@ TEST_CASE(
                     distance += wallItr->GetLength();
 
                     double width = std::next(wallItr)->GetLength();
-                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                    trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
+                    doorID++;
                 }
 
                 TrainType train{"TEST", 20, 10, trainDoors};
@@ -318,20 +326,23 @@ TEST_CASE(
 
                 double flow = std::numeric_limits<double>::max();
 
-                std::vector<TrainDoor> trainDoors;
-
+                std::map<int, TrainDoor> trainDoors;
+                int doorID      = 0;
                 double distance = 0;
                 double width    = 0.25 * trackWall2.GetLength();
-                trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
+                doorID++;
 
                 distance = distance + width + 0.25 * trackWall2.GetLength();
                 width    = 0.25 * trackWall2.GetLength() + 0.25 * trackWall3.GetLength();
-                trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
+                doorID++;
 
                 distance = distance + width + 0.5 * trackWall3.GetLength();
                 width    = 0.25 * trackWall3.GetLength() + trackWall4.GetLength() +
                         0.25 * trackWall5.GetLength();
-                trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
+                doorID++;
 
                 TrainType train{"TEST", 20, 10, trainDoors};
 
@@ -385,7 +396,8 @@ TEST_CASE(
             {
                 double flow = std::numeric_limits<double>::max();
 
-                std::vector<TrainDoor> trainDoors;
+                std::map<int, TrainDoor> trainDoors;
+                int doorID = 0;
                 for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls);
                     ++wallItr) {
                     double width    = 0.3 * wallItr->GetLength();
@@ -393,10 +405,14 @@ TEST_CASE(
                         std::begin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
                             return sum + wall.GetLength();
                         });
-                    trainDoors.emplace_back(
-                        TrainDoor{distance + 0.1 * wallItr->GetLength(), width, flow});
-                    trainDoors.emplace_back(
-                        TrainDoor{distance + 0.4 * wallItr->GetLength(), width, flow});
+                    trainDoors.emplace(
+                        doorID,
+                        TrainDoor{doorID, distance + 0.1 * wallItr->GetLength(), width, flow});
+                    doorID++;
+                    trainDoors.emplace(
+                        doorID,
+                        TrainDoor{doorID, distance + 0.4 * wallItr->GetLength(), width, flow});
+                    doorID++;
                 }
 
                 TrainType train{"TEST", 20, 10, trainDoors};
@@ -450,7 +466,8 @@ TEST_CASE(
             {
                 double flow = std::numeric_limits<double>::max();
 
-                std::vector<TrainDoor> trainDoors;
+                std::map<int, TrainDoor> trainDoors;
+                int doorID = 0;
                 for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls);
                     ++wallItr) {
                     double width    = 0.5 * wallItr->GetLength();
@@ -459,7 +476,8 @@ TEST_CASE(
                             return sum + wall.GetLength();
                         });
                     distance += 0.25 * wallItr->GetLength();
-                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                    trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
+                    doorID++;
                 }
 
                 // Create door not on track walls
@@ -471,7 +489,8 @@ TEST_CASE(
                         [](double & sum, const Wall & wall) { return sum + wall.GetLength(); }) +
                     1.;
                 double width = 1.;
-                trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
+                doorID++;
 
                 TrainType train{"TEST", 20, 10, trainDoors};
 
@@ -527,7 +546,8 @@ TEST_CASE(
             {
                 double flow = std::numeric_limits<double>::max();
 
-                std::vector<TrainDoor> trainDoors;
+                std::map<int, TrainDoor> trainDoors;
+                int doorID = 0;
                 for(auto wallItr = std::rbegin(trackWalls); wallItr != std::rend(trackWalls);
                     ++wallItr) {
                     double width    = 0.5 * wallItr->GetLength();
@@ -536,7 +556,8 @@ TEST_CASE(
                             return sum + wall.GetLength();
                         });
                     distance += 0.25 * wallItr->GetLength();
-                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                    trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
+                    doorID++;
                 }
                 TrainType train{"TEST", 20, 10, trainDoors};
 
@@ -589,7 +610,8 @@ TEST_CASE(
             {
                 double flow = std::numeric_limits<double>::max();
 
-                std::vector<TrainDoor> trainDoors;
+                std::map<int, TrainDoor> trainDoors;
+                int doorID = 0;
                 for(auto wallItr = std::rbegin(trackWalls); wallItr != std::rend(trackWalls) - 1;
                     ++wallItr) {
                     double distance = std::accumulate(
@@ -604,7 +626,8 @@ TEST_CASE(
                         [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
                     distanceDoorEnd += 0.25 * std::next(wallItr)->GetLength();
                     double width = distanceDoorEnd - distance;
-                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                    trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
+                    doorID++;
                 }
                 TrainType train{"TEST", 20, 10, trainDoors};
 
@@ -657,7 +680,8 @@ TEST_CASE(
             {
                 double flow = std::numeric_limits<double>::max();
 
-                std::vector<TrainDoor> trainDoors;
+                std::map<int, TrainDoor> trainDoors;
+                int doorID = 0;
                 for(size_t i = 0; i < trainDoors.size() - 2; i += 2) {
                     auto wallItr = std::rbegin(trackWalls);
                     std::advance(wallItr, i);
@@ -674,7 +698,8 @@ TEST_CASE(
                         });
                     distanceDoorEnd += 0.5 * wallItr->GetLength();
                     double width = distanceDoorEnd - distance;
-                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                    trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
+                    doorID++;
                 }
 
                 TrainType train{"TEST", 20, 10, trainDoors};
@@ -727,7 +752,8 @@ TEST_CASE(
             {
                 double flow = std::numeric_limits<double>::max();
 
-                std::vector<TrainDoor> trainDoors;
+                std::map<int, TrainDoor> trainDoors;
+                int doorID = 0;
                 for(size_t i = 0; i < trainDoors.size() - 2; i += 2) {
                     auto wallItr = std::rbegin(trackWalls);
                     std::advance(wallItr, i);
@@ -738,7 +764,8 @@ TEST_CASE(
                     distance += wallItr->GetLength();
 
                     double width = std::next(wallItr)->GetLength();
-                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                    trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
+                    doorID++;
                 }
 
                 TrainType train{"TEST", 20, 10, trainDoors};
@@ -793,20 +820,24 @@ TEST_CASE(
 
                 double flow = std::numeric_limits<double>::max();
 
-                std::vector<TrainDoor> trainDoors;
+                std::map<int, TrainDoor> trainDoors;
+                int doorID = 0;
 
                 double distance = 0;
                 double width    = 0.25 * trackWall4.GetLength();
-                trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
+                doorID++;
 
                 distance = distance + width + 0.25 * trackWall4.GetLength();
                 width    = 0.25 * trackWall4.GetLength() + 0.25 * trackWall3.GetLength();
-                trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
+                doorID++;
 
                 distance = distance + width + 0.5 * trackWall3.GetLength();
                 width    = 0.25 * trackWall3.GetLength() + trackWall2.GetLength() +
                         0.25 * trackWall1.GetLength();
-                trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
+                doorID++;
 
                 TrainType train{"TEST", 20, 10, trainDoors};
 
@@ -860,7 +891,8 @@ TEST_CASE(
             {
                 double flow = std::numeric_limits<double>::max();
 
-                std::vector<TrainDoor> trainDoors;
+                std::map<int, TrainDoor> trainDoors;
+                int doorID = 0;
                 for(auto wallItr = std::rbegin(trackWalls); wallItr != std::rend(trackWalls);
                     ++wallItr) {
                     double width    = 0.3 * wallItr->GetLength();
@@ -868,10 +900,14 @@ TEST_CASE(
                         std::rbegin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
                             return sum + wall.GetLength();
                         });
-                    trainDoors.emplace_back(
-                        TrainDoor{distance + 0.1 * wallItr->GetLength(), width, flow});
-                    trainDoors.emplace_back(
-                        TrainDoor{distance + 0.4 * wallItr->GetLength(), width, flow});
+                    trainDoors.emplace(
+                        doorID,
+                        TrainDoor{doorID, distance + 0.1 * wallItr->GetLength(), width, flow});
+                    doorID++;
+                    trainDoors.emplace(
+                        doorID,
+                        TrainDoor{doorID, distance + 0.4 * wallItr->GetLength(), width, flow});
+                    doorID++;
                 }
 
                 TrainType train{"TEST", 20, 10, trainDoors};
@@ -925,7 +961,8 @@ TEST_CASE(
             {
                 double flow = std::numeric_limits<double>::max();
 
-                std::vector<TrainDoor> trainDoors;
+                std::map<int, TrainDoor> trainDoors;
+                int doorID = 0;
                 for(auto wallItr = std::rbegin(trackWalls); wallItr != std::rend(trackWalls);
                     ++wallItr) {
                     double width    = 0.5 * wallItr->GetLength();
@@ -934,7 +971,8 @@ TEST_CASE(
                             return sum + wall.GetLength();
                         });
                     distance += 0.25 * wallItr->GetLength();
-                    trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                    trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
+                    doorID++;
                 }
 
                 // Create door not on track walls
@@ -946,7 +984,8 @@ TEST_CASE(
                         [](double & sum, const Wall & wall) { return sum + wall.GetLength(); }) +
                     1.;
                 double width = 1.;
-                trainDoors.emplace_back(TrainDoor{distance, width, flow});
+                trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
+                doorID++;
 
                 TrainType train{"TEST", 20, 10, trainDoors};
 

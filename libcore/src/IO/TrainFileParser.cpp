@@ -277,10 +277,23 @@ std::optional<TrainType> TrainFileParser::ParseTrainTypeNode(TiXmlElement * node
     }
     LOG_INFO("length: {}", length);
 
-
-    std::vector<TrainDoor> doors;
+    std::map<int, TrainDoor> doors;
     for(TiXmlElement * xDoor = node->FirstChildElement("door"); xDoor != nullptr;
         xDoor                = xDoor->NextSiblingElement("door")) {
+        // Read ID and check if correct value
+        int id = -std::numeric_limits<int>::infinity();
+        if(const char * attribute = xDoor->Attribute("id"); attribute) {
+            if(int value = xmltoi(attribute, -std::numeric_limits<int>::infinity()); value >= 0) {
+                id = value;
+            } else {
+                LOG_WARNING("{}: input for ID should be non-negative {}. Skip entry.", type, value);
+                continue;
+            }
+        } else {
+            LOG_WARNING("{}: input for ID not found. Skip entry.", type);
+            continue;
+        }
+
         // Read distance and check if correct value
         double distance = -std::numeric_limits<double>::infinity();
         if(const char * attribute = xDoor->Attribute("distance"); attribute) {
@@ -315,18 +328,18 @@ std::optional<TrainType> TrainFileParser::ParseTrainTypeNode(TiXmlElement * node
 
         // Read flow and check if correct value
         double flow = -std::numeric_limits<double>::infinity();
-        if(const char * attribute = xDoor->Attribute("flow"); attribute) {
+        if(const char * attribute = xDoor->Attribute("outflow"); attribute) {
             if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
                value > 0.) {
                 flow = value;
             } else {
                 LOG_WARNING(
-                    "{}: input for flow should be >0 but is {:5.2}. Skip entry.", type, value);
+                    "{}: input for outflow should be >0 but is {:5.2}. Skip entry.", type, value);
                 continue;
             }
         }
 
-        doors.emplace_back(TrainDoor{distance, width, flow});
+        doors.emplace(id, TrainDoor{id, distance, width, flow});
     }
 
     if(doors.empty()) {
@@ -335,7 +348,7 @@ std::optional<TrainType> TrainFileParser::ParseTrainTypeNode(TiXmlElement * node
     }
 
     LOG_INFO("number of doors: {}", doors.size());
-    for(const auto & d : doors) {
+    for(const auto & [_, d] : doors) {
         LOG_INFO(
             "Door:\tdistance: {:5.2f}\twidth: {:5.2f}\toutflow: {:5.2f}",
             d._distance,
