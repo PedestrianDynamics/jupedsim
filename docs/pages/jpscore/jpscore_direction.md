@@ -26,17 +26,15 @@ The direction of the pedestrian is towards the middle of $$L$$ ($$\frac{P_1+P2}{
 ![Strategy 1: Goal towards the center of the door]({{ site.baseurl }}/images/strategy1.png)
 
 ## Strategy 2
-The direction is given by the nearest point on $$L$$ to the position of the pedestrian.
-   $$L$$ is shorten by the shoulder width of the pedestrians (+10 cm).
-  
-  
-![Strategy 2: Goal towards the center if pedestrian is out of range of the door.]({{ site.baseurl }}/images/strategy2.png)
-
-## Strategy 3 
 Choose the nearest point on the *line* $$L$$. 
 If the nearest point of the pedestrian on the line $$L$$ is outside the segment, then chose the middle point as target.
 Otherwise the nearest point is chosen.
-![Strategy 3: Goal towards the nearest point on the door.]({{ site.baseurl }}/images/strategy3.png)
+![Strategy 2: Goal towards the nearest point on the door.]({{ site.baseurl }}/images/strategy3.png)
+
+## Strategy 3 
+The direction is given by the nearest point on $$L$$ to the position of the pedestrian.
+$$L$$ is shorten by the shoulder width of the pedestrians (+10 cm).
+![Strategy 3: Goal towards the center if pedestrian is out of range of the door.]({{ site.baseurl }}/images/strategy2.png)
 
 ## Strategy 8 
 {% include note.html content="For this to work properly the [floor field router](jpscore_routing.html#floorfield-router) has to be used"%}
