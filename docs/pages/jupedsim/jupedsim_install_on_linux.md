@@ -6,7 +6,7 @@ summary: "JuPedSim does not offer any Linux binaries. A compilation of the code 
 sidebar: jupedsim_sidebar
 permalink: jupedsim_install_on_linux.html
 folder: jupedsim
-last_updated: Mar 02, 2020
+last_updated: Nov 16, 2020
 ---
 
 ## Get the code 
@@ -22,12 +22,10 @@ Before starting building `jpscore` and `jpsreport` it is necessary to install th
 To do so, run the script `scripts/setup-deps.sh`, for example as follows:
 
 ```bash
-mkdir build
-cd build
 ../scripts/setup-deps.sh
 ```
 
-This creates a new directory `deps` inside `build` with the required libraries.
+This creates a new directory `deps` with the required libraries.
 
 ## How to build
 Once you have installed all dependencies and cloned the repository continue
@@ -35,7 +33,7 @@ with a ninja based build:
 ```bash
 mkdir build
 cd build
-cmake -GNinja -DCMAKE_BUILD_TYPE=Debug <path-to-cmakelists> -DCMAKE_PREFIX_PATH=$(pwd)/deps
+cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=../deps ..
 ninja
 ```
 
@@ -45,13 +43,13 @@ Alternatively you can generate a make based build with:
 ```bash
 mkdir build
 cd build
-cmake -DCMAKE_BUILD_TYPE=Debug <path-to-cmakelists> -DCMAKE_PREFIX_PATH=$(pwd)/deps
+cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=../deps ..
 make -j$(nproc)
 ```
 
 {% include note.html content="If you do not want to use OpenMP you have to pass `-DUSE_OPENMP=OFF` to cmake on generation." %}
 ```bash
-cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_OPENMP=OFF <path-to-cmakelists> -DCMAKE_PREFIX_PATH=$(pwd)/deps
+cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_OPENMP=OFF -DCMAKE_PREFIX_PATH=../deps ..
 ```
 
 ## CMake configuration flags
