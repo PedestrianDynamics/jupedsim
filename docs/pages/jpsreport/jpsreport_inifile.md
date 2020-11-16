@@ -310,12 +310,11 @@ Possible parameters are:
 
 - `profiles` indicates whether to calculate the profiles over time and space.
   If `enabled` is true, the resolution which is decided by the
-  parameters `grid_size_x` and `grid_size_x` should be set.
-  The data will be in the folder.
+  parameters `grid_size_x` and `grid_size_x` should be set. `start_frame` and `stop_frame` can be used to specify the time range for the analysis.
   
 With this [commit](https://github.com/JuPedSim/jpscore/commit/d6ce443a4b27d0d83c05b2a77d7139c17959a224) the functionalities of Method I and J are part of Method D and can be used by configuring following parameters:
 
-- `global_IFD` indicates a global measurement area encompassing the entire geometry for which individual data (IFD) are calculated. This parameter is set to `false`by default. 
+- `global_IFD` indicates a global measurement area encompassing the entire geometry for which individual data (IFD) are calculated. This parameter is set to `false`by default. `start_frame` and `stop_frame` can be used to specify the time range for the analysis.
 
 - `use_blind_points` allows to calculate Voronoi cells in measurement areas even if less than four pedestrians are present. This is realized with the help of blind points are automatically defined outside the geometry. This parameter is set to `true`by default.
 
@@ -326,8 +325,8 @@ Possible output data are:
   - `/Fundamental_Diagram/IndividualFD/`: 
     - output file `IFD_local_[filename.txt]_id_[local_measurement_area_id].dat` contains data for each pedestrian $$i$$ (in the measurement area) about individual Voronoi density $$\rho_i$$, individual velocity $$v_i$$, position ($$x_i$$,$$y_i$$ and $$z_i$$), Voronoi polygon of the pedestrian and the intersection of the Voronoi polygon with the measurement area.
     - output file `IFD_global_[filename.txt].dat` contains data for each pedestrian $$i$$ about individual Voronoi density $$\rho_i$$, individual velocity $$v_i$$, position ($$x_i$$,$$y_i$$ and $$z_i$$) and the Voronoi polygon of the pedestrian.
-  - `./Output/Fundamental_ Diagram/Classical_Voronoi/field/`:
-    - output file `Prf_rho_Voronoi_[filename.txt]_id_[local_measurement_area_id]` contains the profile data for density.
-    - output file `Prf_v_[velocity_calculation_type]_[filename.txt]_id_[local_measurement_area_id]` contains the profile data for velocity.
-  - The output folder `./Output/Fundamental_ Diagram/Classical_Voronoi/VoronoiCell/` contains the data for plotting the Voronoi cells.
+  - `./Output/Fundamental_Diagram/Classical_Voronoi/field/`:
+    - output file `Profile_rho_Voronoi_[filename.txt]_[frame]` contains the profile data for density for one frame.
+    - output file `Profile_v_[velocity_calculation_type]_[filename.txt]_[frame]` contains the profile data for velocity for one frame.
+  - The output folder `./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/` contains the data for plotting the Voronoi cells.
   - The velocity calculation type is based on the `vel_cacluation` parameter and can be `Voronoi`or `Arithmetic`. 
