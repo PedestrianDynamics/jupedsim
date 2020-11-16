@@ -77,20 +77,24 @@ bool Method_D::Process(
     auto _stopFrame    = configData.stopFrames[measurementAreaIndex];
     auto _calcLocalIFD = configData.calcLocalIFD[measurementAreaIndex];
 
-    auto _getProfile        = configData.getProfile;
-    auto _isOneDimensional  = configData.isOneDimensional;
-    auto _useBlindPoints    = configData.useBlindPoints;
-    bool _calcGlobalIFDOnly = false;
+    auto _isOneDimensional = configData.isOneDimensional;
+    auto _useBlindPoints   = configData.useBlindPoints;
 
     _velocityCalcFunc = configData.velocityCalcFunc;
     _densityType      = configData.densityType;
     _velocityType     = configData.velocityType;
 
+    // global options are calculated only once --> default: false, change to true for corresponding measurement areas
+    // TODO: should be changed in future. There should be a function for processing global data (once) which are measurement area independent
+    bool _calcProfileOnly   = false;
+    bool _calcGlobalIFDOnly = false;
+
     if(_measurementArea->_id == -1) {
         // change parameters for calculating global IFD only
-        _getProfile =
-            false; // TODO: should be changed in future. There should be a function for processing global data (once) which are measurement area independent
         _calcGlobalIFDOnly = true;
+    } else if(_measurementArea->_id == -2) {
+        // change parameters for calculating profile only
+        _calcProfileOnly = true;
     }
 
     LOG_INFO(
@@ -116,10 +120,13 @@ bool Method_D::Process(
         }
     }
 
-    if(!_calcGlobalIFDOnly && !OpenFileMethodD(_isOneDimensional)) {
+    // open file for general Method D output. should not be done if global_IFD or profile option is enabled
+    if(!_calcGlobalIFDOnly && !_calcProfileOnly && !OpenFileMethodD(_isOneDimensional)) {
         return_value = false;
     }
-    if(_calcLocalIFD) {
+
+    // open file for IFD output
+    if(_calcLocalIFD || _calcGlobalIFDOnly) {
         if(!OpenFileIndividualFD(_isOneDimensional, _calcGlobalIFDOnly)) {
             return_value = false;
         }
@@ -167,6 +174,7 @@ bool Method_D::Process(
             }
         }
         int numPeds = IdInFrame.size();
+
         //---------------------------------------------------------------------------------------------------------------
         if((numPeds > 3) || _useBlindPoints) {
             if(_isOneDimensional) {
@@ -195,11 +203,13 @@ bool Method_D::Process(
                     polygons.push_back(p.first);
 
                 if(!polygons.empty()) {
-                    if(!_calcGlobalIFDOnly) {
+                    // no voronoi output or global options
+                    if(!_calcGlobalIFDOnly && !_calcProfileOnly) {
                         OutputVoronoiResults(polygons, str_frid, VInFrame); // TODO polygons_id
                     }
 
-                    if(_calcLocalIFD) {
+                    // write IFD output
+                    if(_calcLocalIFD || _calcGlobalIFDOnly) {
                         if(!_isOneDimensional) {
                             GetIndividualFD(
                                 polygons,
@@ -213,8 +223,9 @@ bool Method_D::Process(
                                 _calcGlobalIFDOnly);
                         }
                     }
-                    // TODO: profiles should be calculated for the default MA only.
-                    if(_getProfile) {                                          //	field analysis
+
+                    // write profile output
+                    if(_calcProfileOnly) {
                         GetProfiles(configData, str_frid, polygons, VInFrame); // TODO polygons_id
                     }
                 } else {
@@ -235,10 +246,10 @@ bool Method_D::Process(
                 minFrame);
         }
     }
-    if(!_calcGlobalIFDOnly) {
+    if(!_calcGlobalIFDOnly && !_calcProfileOnly) {
         fclose(_fOutputRhoV);
     }
-    if(_calcLocalIFD) {
+    if(_calcLocalIFD || _calcGlobalIFDOnly) {
         fclose(_fIndividualFD);
     }
     return return_value;
@@ -438,11 +449,9 @@ void Method_D::GetProfiles(
     fs::path dtmp("density");
     tmp  = _outputLocation / voroLocation / tmp;
     vtmp = tmp / vtmp /
-           ("Prf_v_" + _velocityType + "_" + _trajName.string() + "_id_" +
-            std::to_string(_measurementArea->_id) + "_" + frameId + ".dat");
+           ("Profile_v_" + _velocityType + "_" + _trajName.string() + "_" + frameId + ".dat");
     dtmp = tmp / dtmp /
-           ("Prf_rho_" + _densityType + "_" + _trajName.string() + "_id_" +
-            std::to_string(_measurementArea->_id) + "_" + frameId + ".dat");
+           ("Profile_rho_" + _densityType + "_" + _trajName.string() + "_" + frameId + ".dat");
     string Prfvelocity = vtmp.string();
     string Prfdensity  = dtmp.string();
 
