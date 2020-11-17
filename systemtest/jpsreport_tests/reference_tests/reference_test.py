@@ -46,7 +46,29 @@ def check_diff_to_reference_data():
         new_file_name = os.path.join(new_folder, file)
         logging.critical("jpsreport did not output results correctly. File was not created: %s" % (new_file_name))
 
-    if not (mismatch or errors):
+    # check if files have been generated that shouldn't
+    new_files = []
+    # create a list of all files that have been generated
+    for root, dirs, files in os.walk(new_folder):
+
+        #consider .dat files only
+        files = [ f for f in files if f.endswith(".dat") ]
+
+        for name in files:
+            tmp_path = os.path.join(root, name)
+            #remove parent directory
+            new_files.append(os.path.relpath(tmp_path, new_folder))
+
+    # shallow compare of file names in both directories considering new_files
+    match_new, mismatch_new, errors_new = filecmp.cmpfiles(reference_folder, new_folder, new_files)
+
+    # print name of files that are missing
+    for file in errors_new:
+        new_file_name = os.path.join(new_folder, file)
+        logging.critical("jpsreport did not output results correctly. New file was created: %s" % (new_file_name))
+
+
+    if not (mismatch or errors or errors_new):
         logging.info("OK. Output files of jpsreport have not changed.")
     else:
         exit(FAILURE)
