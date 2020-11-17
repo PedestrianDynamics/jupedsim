@@ -56,10 +56,6 @@ entries:
       url: /jpsreport_method_D.html
       output: web
 
-    - title: Method J
-      url: /jpsreport_method_J.html
-      output: web
-
   - title: Tutorials
     output: web, pdf
     folderitems:
