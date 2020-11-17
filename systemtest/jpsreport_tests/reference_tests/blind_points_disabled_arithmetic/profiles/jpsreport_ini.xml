@@ -20,7 +20,7 @@
     <measurement_area id="1" start_frame="85" stop_frame="86" local_IFD="false"/>
     <one_dimensional enabled="false"/>
     <cut_by_circle enabled="true" radius="1" edges="10"/>
-    <profiles enabled="true" grid_size_x="0.20" grid_size_y="0.20"/>
+    <profiles enabled="true" grid_size_x="0.20" grid_size_y="0.20" start_frame="85" stop_frame="86"/>
     <use_blind_points enabled="false"/>
     <vel_calculation type="Arithmetic"/>
   </method_D>

@@ -663,17 +663,50 @@ std::optional<ConfigData_D> ArgumentParser::ParseDIJParams(TiXmlElement * xMetho
 
     if(xMethod->FirstChildElement("profiles") &&
        string(xMethod->FirstChildElement("profiles")->Attribute("enabled")) == "true") {
-        configData.getProfile = true;
-        configData.gridSizeX =
-            xmltof(xMethod->FirstChildElement("profiles")->Attribute("grid_size_x")) * M2CM;
-        configData.gridSizeY =
-            xmltof(xMethod->FirstChildElement("profiles")->Attribute("grid_size_y")) * M2CM;
+        TiXmlElement * xProfile = xMethod->FirstChildElement("profiles");
+        configData.getProfile   = true;
+        configData.gridSizeX    = xmltof(xProfile->Attribute("grid_size_x")) * M2CM;
+        configData.gridSizeY    = xmltof(xProfile->Attribute("grid_size_y")) * M2CM;
         LOG_INFO("Profiles will be calculated");
         LOG_INFO(
             "The discretized grid size in x, y direction is: <{}> by <{}> m^2",
             configData.gridSizeX * CMtoM,
             configData.gridSizeY * CMtoM);
+
+        // read in start and stop frame
+        if(xProfile->Attribute("start_frame") &&
+           string(xProfile->Attribute("start_frame")) != "None") {
+            configData.startFrames.push_back(xmltoi(xProfile->Attribute("start_frame")));
+            LOG_INFO(
+                "the profile analysis starts from frame <{}>",
+                xmltoi(xProfile->Attribute("start_frame")));
+        } else {
+            configData.startFrames.push_back(-1);
+        }
+        if(xProfile->Attribute("stop_frame") &&
+           string(xProfile->Attribute("stop_frame")) != "None") {
+            configData.stopFrames.push_back(xmltoi(xProfile->Attribute("stop_frame")));
+            LOG_INFO(
+                "the profile analysis stops from frame <{}>",
+                xmltoi(xProfile->Attribute("stop_frame")));
+        } else {
+            configData.stopFrames.push_back(-1);
+        }
+
         //TODO: restructuring needed. profiles option should be independet of MA so that start and stop frame can be set here.
+        // create MA with polygon points outside the geometry
+        MeasurementArea_B * areaB = new MeasurementArea_B();
+        areaB->_id                = -2;
+        areaB->_type              = "Bounding Box";
+        polygon_2d poly           = GetSurroundingPolygon();
+        correct(poly);
+        areaB->_poly                       = poly;
+        areaB->_zPos                       = 10000001.0; // TODO: why do we need to do this??
+        _measurementAreasByIDs[areaB->_id] = areaB;
+
+        // set config parameters
+        configData.areaIDs.push_back(areaB->_id);
+        configData.calcLocalIFD.push_back(false);
     }
 
     if(xMethod->FirstChildElement("use_blind_points") &&
@@ -710,6 +743,7 @@ std::optional<ConfigData_D> ArgumentParser::ParseDIJParams(TiXmlElement * xMetho
 
     if(xMethod->FirstChildElement("global_IFD") &&
        string(xMethod->FirstChildElement("global_IFD")->Attribute("enabled")) == "true") {
+        auto xGlobal = xMethod->FirstChildElement("global_IFD");
         LOG_INFO(
             "Global IFD data will be calculated. Bounding box is created as measurement area.");
 
@@ -725,10 +759,26 @@ std::optional<ConfigData_D> ArgumentParser::ParseDIJParams(TiXmlElement * xMetho
 
         // set config parameters
         configData.areaIDs.push_back(areaB->_id);
-        // TODO: do we want to read in following parameters for these option too?
-        configData.startFrames.push_back(-1);
-        configData.stopFrames.push_back(-1);
-        configData.calcLocalIFD.push_back(true);
+        configData.calcLocalIFD.push_back(false);
+
+        // read in start and stop frame
+        if(xGlobal->Attribute("start_frame") &&
+           string(xGlobal->Attribute("start_frame")) != "None") {
+            configData.startFrames.push_back(xmltoi(xGlobal->Attribute("start_frame")));
+            LOG_INFO(
+                "the global IFD analysis starts from frame <{}>",
+                xmltoi(xGlobal->Attribute("start_frame")));
+        } else {
+            configData.startFrames.push_back(-1);
+        }
+        if(xGlobal->Attribute("stop_frame") && string(xGlobal->Attribute("stop_frame")) != "None") {
+            configData.stopFrames.push_back(xmltoi(xGlobal->Attribute("stop_frame")));
+            LOG_INFO(
+                "the global IFD analysis stops from frame <{}>",
+                xmltoi(xGlobal->Attribute("stop_frame")));
+        } else {
+            configData.stopFrames.push_back(-1);
+        }
     }
 
     return configData;
