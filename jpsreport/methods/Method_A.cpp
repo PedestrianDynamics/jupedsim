@@ -67,7 +67,7 @@ bool Method_A::Process(
     _measureAreaId   = boost::lexical_cast<string>(_areaForMethod_A->_id);
     _passLine        = new bool[peddata.GetNumPeds()];
     string outputRhoV;
-    outputRhoV.append("#Frame\t	Cumulative pedestrians\n");
+    outputRhoV.append("#framerate:\t%.2f\n\n#Frame\t	Cumulative pedestrians\n", _fps);
     for(int i = 0; i < peddata.GetNumPeds(); i++) {
         _passLine[i] = false;
     }
