@@ -67,7 +67,7 @@ bool Method_A::Process(
     _measureAreaId   = boost::lexical_cast<string>(_areaForMethod_A->_id);
     _passLine        = new bool[peddata.GetNumPeds()];
     string outputRhoV;
-    outputRhoV.append("#framerate:\t"+std::to_string(_fps)+"\n\n#Frame \t time (s) \t cumulative pedestrians\n");
+    outputRhoV.append("#framerate:\t"+std::to_string(_fps)+"\n\n#Frame\tTime [s]\tCumulative pedestrians\n");
 
     for(int i = 0; i < peddata.GetNumPeds(); i++) {
         _passLine[i] = false;
@@ -86,7 +86,7 @@ bool Method_A::Process(
         if(VInFrame.size() > 0) {
             GetAccumFlowVelocity(frameNr, ids, VInFrame);
             char tmp[30];
-            sprintf(tmp, "%d\t%.4f\t%d\n", frid, frid / _fps, _classicFlow);
+            sprintf(tmp, "%d\t%.2f\t%d\n", frid, frid / _fps, _classicFlow);
             outputRhoV.append(tmp);
             PedInGeometry = true;
         }

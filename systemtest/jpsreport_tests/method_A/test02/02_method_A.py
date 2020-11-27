@@ -36,7 +36,7 @@ def runtest(inifile, trajfile):
         exit(FAILURE)
 
     data_9 = np.loadtxt(data_9_filename)
-    time_change_9 = data_9[np.nonzero(np.diff(data_9[:,1]) >0)][0][0]
+    time_change_9 = data_9[np.nonzero(np.diff(data_9[:,2]) >0)][0][1]
     if np.abs(time_change_9 - should_be_9) < 0.5:
         logging.info("should_be_9 OK.")
     else:
@@ -53,7 +53,7 @@ def runtest(inifile, trajfile):
         exit(FAILURE)
 
     data_7 = np.loadtxt(data_7_filename)
-    time_change_7 = data_7[np.nonzero(np.diff(data_7[:, 1]) >0)][0][0]
+    time_change_7 = data_7[np.nonzero(np.diff(data_7[:, 2]) >0)][0][1]
     if np.abs(time_change_7 - should_be_7) < 0.5:
         logging.info("should_be_7 OK.")
     else:

@@ -30,9 +30,9 @@ def runtest(inifile, trajfile):
 
     # test
     alpha = 0.01
-    Tin_ks_statistic, Tin_p_value = ks_2samp(data_2[:, 0],
+    Tin_ks_statistic, Tin_p_value = ks_2samp(data_2[:, 1],
                                              data_1[:, 0])
-    cumPed_ks_statistic, cumPed_p_value = ks_2samp(data_2[:, 1],
+    cumPed_ks_statistic, cumPed_p_value = ks_2samp(data_2[:, 2],
                                                    data_1[:, 1])
 
     if Tin_p_value > alpha:
