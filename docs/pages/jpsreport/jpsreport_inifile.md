@@ -209,7 +209,7 @@ several measurement areas can be set in one inifile with different id-numbers.
 - up to version 0.8.5: `plot_time_series` specifies whether output the ($$N-t$$)-Diagram.
 
 Possible output data are:
-- `/Fundamental_Diagram/FlowVelocity/`: the output files `Flow_NT_traj_` and `FDFlowVelocity_traj_`.
+- `/Fundamental_Diagram/FlowVelocity/`: the output files `Flow_NT_traj_` (Frame, time and cumulative pedestrians) and `FDFlowVelocity_traj_`.
 
 
 ### Method B
