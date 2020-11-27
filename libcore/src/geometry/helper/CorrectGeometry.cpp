@@ -332,7 +332,7 @@ std::map<int, std::pair<Point, Point>> ComputeTrainDoorCoordinates(
     }
 
     Point start{std::begin(trackWalls)->GetPoint1()};
-    for(const auto [_, trainDoor] : train._doors) {
+    for(const auto & [_, trainDoor] : train._doors) {
         double distanceFromTrackStart = trainStartOffset + trainDoor._distance;
         double width                  = trainDoor._width;
         std::vector<Point> intersectionPoints;

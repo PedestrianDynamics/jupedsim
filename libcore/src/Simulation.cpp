@@ -158,7 +158,7 @@ bool Simulation::InitArgs()
 
         // Read and set max door usage from schedule file
         auto groupMaxAgents = EventFileParser::ParseMaxAgents(_config->GetScheduleFile());
-        for(auto const [transID, maxAgents] : groupMaxAgents) {
+        for(auto const & [transID, maxAgents] : groupMaxAgents) {
             _building->GetTransition(transID)->SetMaxDoorUsage(maxAgents);
         }
     }
