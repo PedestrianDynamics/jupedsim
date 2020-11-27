@@ -72,3 +72,16 @@ cmake .. \
 cmake --build . --target install -- -j${CPUS}
 cd ../..
 rm -rf CLI11-${CLI11_VER} v${CLI11_VER}.tar.gz
+
+GTEST_VER="1.10.0"
+wget https://github.com/google/googletest/archive/release-${GTEST_VER}.tar.gz
+tar xf release-${GTEST_VER}.tar.gz
+cd googletest-release-${GTEST_VER}
+mkdir build
+cd build
+cmake .. \
+    -DCMAKE_PREFIX_PATH=${INSTALL_DIR} \
+    -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
+cmake --build . --target install -- -j${CPUS}
+cd ../..
+rm -rf release-${GTEST_VER}.tar.gz googletest-release-${GTEST_VER}

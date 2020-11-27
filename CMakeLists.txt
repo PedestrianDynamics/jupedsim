@@ -10,10 +10,15 @@
 # Project setup
 ################################################################################
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-project(JPScore VERSION 0.8.4 LANGUAGES CXX)
+project(JPScore VERSION 0.8.4 LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+set(C_STANDARD 90)
+set(C_STANDARD_REQUIRED ON)
+set(C_EXTENSIONS OFF)
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -281,6 +286,7 @@ add_subdirectory(libshared)
 add_subdirectory(libcore)
 add_subdirectory(jpscore)
 add_subdirectory(jpsreport)
+add_subdirectory(libjps)
 
 ################################################################################
 # Code formating
@@ -359,4 +365,3 @@ if(APPLE)
 endif()
 
 cpack_write_config()
-
