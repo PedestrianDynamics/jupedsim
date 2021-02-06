@@ -700,6 +700,7 @@ std::optional<std::vector<polygon_2d>> ArgumentParser::ParseGeometry(const fs::p
                 correct(obstacle);
             }
 
+            // Add obstacles as holes in subroom polygon
             int k = 1;
             for(auto && obstacle : obstacles) {
                 subroom.inners().resize(k++);

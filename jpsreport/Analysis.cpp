@@ -113,7 +113,6 @@ void Analysis::InitArgs(ArgumentParser * args)
         box.max_corner().y() * CMtoM);
 
     // TODO Same default MA can be used for profiles and globalIFD, currently only the polygon is reused
-
     if(args->GetIsMethodA()) {
         _DoesUseMethodA                  = true;
         vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodA();
@@ -131,11 +130,10 @@ void Analysis::InitArgs(ArgumentParser * args)
             MeasurementArea_B * area = dynamic_cast<MeasurementArea_B *>(
                 args->GetMeasurementArea(Measurement_Area_IDs[i]));
             if(area->_poly.outer().empty()) {
-                LOG_WARNING(
-                    "Measurement {} has 0 points. Using default bounding box instead", area->_id);
-                area->_poly = _boundingBox;
+                LOG_WARNING("Measurement {} has 0 points, will be skipped.", area->_id);
+            } else {
+                _areasForMethodB.push_back(area);
             }
-            _areasForMethodB.push_back(area);
         }
     }
 
@@ -146,11 +144,10 @@ void Analysis::InitArgs(ArgumentParser * args)
             MeasurementArea_B * area = dynamic_cast<MeasurementArea_B *>(
                 args->GetMeasurementArea(Measurement_Area_IDs[i]));
             if(area->_poly.outer().empty()) {
-                LOG_WARNING(
-                    "Measurement {} has 0 points. Using default bounding box instead", area->_id);
-                area->_poly = _boundingBox;
+                LOG_WARNING("Measurement {} has 0 points, will be skipped.", area->_id);
+            } else {
+                _areasForMethodC.push_back(area);
             }
-            _areasForMethodC.push_back(area);
         }
     }
 
