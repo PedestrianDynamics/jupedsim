@@ -823,8 +823,7 @@ std::optional<ConfigData_D> ArgumentParser::ParseDIJParams(TiXmlElement * xMetho
         MeasurementArea_B * areaB = new MeasurementArea_B();
         areaB->_id                = -2;
         areaB->_type              = "Bounding Box";
-        polygon_2d poly           = GetSurroundingPolygon();
-        correct(poly);
+        polygon_2d poly;
         areaB->_poly                       = poly;
         areaB->_zPos                       = 10000001.0; // TODO: why do we need to do this??
         _measurementAreasByIDs[areaB->_id] = areaB;
