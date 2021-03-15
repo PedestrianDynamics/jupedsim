@@ -155,11 +155,6 @@ entries:
         - title: Method D
           url: /jpsreport_method_D.html
           output: web, pdf
-    
-        - title: Method J
-          url: /jpsreport_method_J.html
-          output: web, pdf
-    
 
         # - title: Fundamental Diagram
         #   url: /jpsreport_fd.html
