@@ -108,7 +108,7 @@ Mainly two kind of measurement areas can be defined:
 - `area_L`: a reference segment line defined by  two points.
 
 `area_L` is only used in method A, while  `area_B` is used for method B, method C and method D.
-Several measurement areas can be given and distinguished with different `id`.
+Several measurement areas can be given and distinguished with different `id`. Measurement areas must be defined within one room according to the geometry file. They should not spread over several rooms or cross with walls.
 
 The parameter `zPos` is used to indicate the position of measurement area in z axis. `zPos` is useful for geometry with several stories.
 
