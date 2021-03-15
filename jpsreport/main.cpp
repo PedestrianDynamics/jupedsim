@@ -31,11 +31,11 @@
 
 #include "Analysis.h"
 #include "general/ArgumentParser.h"
-#include "geometry/Building.h"
 
 #include <Logger.h>
 #include <chrono>
 #include <exception>
+#include <stdexcept>
 
 using namespace std;
 using namespace std::chrono;

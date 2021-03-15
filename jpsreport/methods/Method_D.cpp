@@ -366,9 +366,7 @@ void Method_D::OutputVoronoiResults(
     const string & frid,
     const vector<double> & VInFrame)
 {
-    double voronoiVelocity = 1;
-    double voronoiDensity  = -1;
-    std::tie(voronoiDensity, voronoiVelocity) =
+    auto [voronoiDensity, voronoiVelocity] =
         CalcDensityVelocity(polygons, VInFrame, _measurementArea->_poly);
 
     fprintf(_fOutputRhoV, "%s\t%.3f\t%.3f\n", frid.c_str(), voronoiDensity, voronoiVelocity);
@@ -491,11 +489,7 @@ void Method_D::GetProfiles(
             }
             correct(
                 measurezoneXY); // Polygons should be closed, and directed clockwise. If you're not sure if that is the case, call this function
-
-            double densityXY;
-            double velocityXY;
-            std::tie(densityXY, velocityXY) =
-                CalcDensityVelocity(polygons, velocity, measurezoneXY);
+            auto [densityXY, velocityXY] = CalcDensityVelocity(polygons, velocity, measurezoneXY);
             fprintf(Prf_density, "%.3f\t", densityXY);
             fprintf(Prf_velocity, "%.3f\t", velocityXY);
         }

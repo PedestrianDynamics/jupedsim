@@ -6,7 +6,8 @@ Checks: >-
     -cppcoreguidelines-avoid-magic-numbers,
     -readability-magic-numbers,
     -modernize-use-trailing-return-type,
-    -modernize-use-nodiscard
+    -modernize-use-nodiscard,
+    -llvmlibc-*
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false

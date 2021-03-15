@@ -75,12 +75,27 @@ private:
     std::vector<int> _areaIDforMethodC;
     std::vector<int> _timeIntervalA;
 
+
     std::map<int, MeasurementArea *> _measurementAreasByIDs;
+    std::vector<polygon_2d> _geometry;
+
     void Usage(const std::string file);
 
+    /**
+     * Parse the ini file
+     * @param inifile file containing the configuration of the analysis
+     * @return Parsing was successful
+     */
+    bool ParseInifile(const fs::path & inifile);
+
+    /**
+     * Parse the geometry file. Returns all subrooms as seperate polygons.
+     * @param geometryFile file containing the geometry of the analysis
+     * @return vector of polygons (subrooms) if successful, std::nullopt otherwise
+     */
+    std::optional<std::vector<polygon_2d>> ParseGeometry(const fs::path & geometryFile);
+
     std::optional<ConfigData_D> ParseDIJParams(TiXmlElement * xMethod);
-    // TODO: should be moved somewhere else. maybe Building.h
-    polygon_2d GetSurroundingPolygon();
 
 public:
     // Konstruktor
@@ -104,7 +119,6 @@ public:
     std::vector<int> GetAreaIDforMethodA() const;
     std::vector<int> GetAreaIDforMethodB() const;
     std::vector<int> GetAreaIDforMethodC() const;
-
     bool GetIsOutputGraph() const;
     double GetSteadyStart() const;
     double GetSteadyEnd() const;
@@ -115,7 +129,9 @@ public:
       * parse the initialization file
       * @param inifile
       */
-    bool ParseIniFile(const std::string & inifile);
+    bool ParseInputFiles(const std::string & inifile);
+
+    const std::vector<polygon_2d> & GetGeometry() const;
 
     ConfigData_D _configDataD;
 };

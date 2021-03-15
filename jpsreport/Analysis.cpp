@@ -30,8 +30,6 @@
 
 #include "Analysis.h"
 
-#include "geometry/Room.h"
-#include "geometry/SubRoom.h"
 #include "methods/Method_A.h"
 #include "methods/Method_B.h"
 #include "methods/Method_C.h"
@@ -70,7 +68,6 @@ using namespace std;
 
 Analysis::Analysis()
 {
-    _building       = NULL;
     _projectRootDir = "";
     _deltaF =
         5; // half of the time interval that used to calculate instantaneous velocity of ped i. Here v_i = (X(t+deltaF) - X(t+deltaF))/(2*deltaF).   X is location.
@@ -89,11 +86,6 @@ Analysis::Analysis()
     _trajFormat             = FileFormat::FORMAT_PLAIN;
 }
 
-Analysis::~Analysis()
-{
-    delete _building;
-}
-
 // file.txt ---> file
 std::string Analysis::GetBasename(const std::string & str)
 {
@@ -109,13 +101,18 @@ std::string Analysis::GetFilename(const std::string & str)
 
 void Analysis::InitArgs(ArgumentParser * args)
 {
-    string s  = "Parameter:\n";
-    _building = new Building();
-    _building->LoadGeometry(args->GetGeometryFilename().string());
-    // create the polygons
-    _building->InitGeometry();
-    // _building->AddSurroundingRoom();
+    _geometry = args->GetGeometry();
+    auto box  = GetBoundingBox(_geometry, 10);
+    boost::geometry::convert(box, _boundingBox);
+    LOG_INFO(
+        "Bounding box: \n \t\tminX = {:.2f}\n \t\tmaxX = {:.2f} \n \t\tminY = {:.2f} \n\t\tmaxY = "
+        "{:.2f}",
+        box.min_corner().x() * CMtoM,
+        box.max_corner().x() * CMtoM,
+        box.min_corner().y() * CMtoM,
+        box.max_corner().y() * CMtoM);
 
+    // TODO Same default MA can be used for profiles and globalIFD, currently only the polygon is reused
     if(args->GetIsMethodA()) {
         _DoesUseMethodA                  = true;
         vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodA();
@@ -130,8 +127,13 @@ void Analysis::InitArgs(ArgumentParser * args)
         _DoesUseMethodB                  = true;
         vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodB();
         for(unsigned int i = 0; i < Measurement_Area_IDs.size(); i++) {
-            _areasForMethodB.push_back(dynamic_cast<MeasurementArea_B *>(
-                args->GetMeasurementArea(Measurement_Area_IDs[i])));
+            MeasurementArea_B * area = dynamic_cast<MeasurementArea_B *>(
+                args->GetMeasurementArea(Measurement_Area_IDs[i]));
+            if(area->_poly.outer().empty()) {
+                LOG_WARNING("Measurement {} has 0 points, will be skipped.", area->_id);
+            } else {
+                _areasForMethodB.push_back(area);
+            }
         }
     }
 
@@ -139,8 +141,13 @@ void Analysis::InitArgs(ArgumentParser * args)
         _DoesUseMethodC                  = true;
         vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodC();
         for(unsigned int i = 0; i < Measurement_Area_IDs.size(); i++) {
-            _areasForMethodC.push_back(dynamic_cast<MeasurementArea_B *>(
-                args->GetMeasurementArea(Measurement_Area_IDs[i])));
+            MeasurementArea_B * area = dynamic_cast<MeasurementArea_B *>(
+                args->GetMeasurementArea(Measurement_Area_IDs[i]));
+            if(area->_poly.outer().empty()) {
+                LOG_WARNING("Measurement {} has 0 points, will be skipped.", area->_id);
+            } else {
+                _areasForMethodC.push_back(area);
+            }
         }
     }
 
@@ -148,11 +155,14 @@ void Analysis::InitArgs(ArgumentParser * args)
         _DoesUseMethodD = true;
         // TODO[DH]: modernize loops
         for(unsigned int i = 0; i < args->_configDataD.areaIDs.size(); i++) {
-            _areasForMethodD.push_back(dynamic_cast<MeasurementArea_B *>(
-                args->GetMeasurementArea(args->_configDataD.areaIDs[i])));
+            MeasurementArea_B * area = dynamic_cast<MeasurementArea_B *>(
+                args->GetMeasurementArea(args->_configDataD.areaIDs[i]));
+            if(area->_poly.outer().empty()) {
+                area->_poly = _boundingBox;
+            }
+            _areasForMethodD.push_back(area);
         }
-
-        _geoPolyMethodD = ReadGeometry(args->GetGeometryFilename(), _areasForMethodD);
+        _geoPolyMethodD = GetRoomForMeasurementArea(_areasForMethodD);
     }
 
     _deltaF                 = args->GetDelatT_Vins();
@@ -167,71 +177,72 @@ void Analysis::InitArgs(ArgumentParser * args)
 }
 
 
-std::map<int, polygon_2d> Analysis::ReadGeometry(
-    const fs::path & geometryFile,
-    const std::vector<MeasurementArea_B *> & areas)
+std::map<int, polygon_2d>
+Analysis::GetRoomForMeasurementArea(const std::vector<MeasurementArea_B *> & areas)
 {
-    LOG_INFO("ReadGeometry with {}.", geometryFile.string());
-    double geo_minX = FLT_MAX;
-    double geo_minY = FLT_MAX;
-    double geo_maxX = -FLT_MAX;
-    double geo_maxY = -FLT_MAX;
-
     std::map<int, polygon_2d> geoPoly;
 
     //loop over all areas
     for(auto && area : areas) {
         //search for the subroom that contains that area
-        for(auto && it_room : _building->GetAllRooms()) {
-            for(auto && it_sub : it_room.second->GetAllSubRooms()) {
-                SubRoom * subroom = it_sub.second.get();
-                point_2d point(0, 0);
-                boost::geometry::centroid(area->_poly, point);
-                //check if the area is contained in the obstacle
-                if(subroom->IsInSubRoom(Point(point.x() / M2CM, point.y() / M2CM))) {
-                    for(auto && tmp_point : subroom->GetPolygon()) {
-                        append(
-                            geoPoly[area->_id],
-                            make<point_2d>(tmp_point._x * M2CM, tmp_point._y * M2CM));
-                        geo_minX =
-                            (tmp_point._x * M2CM <= geo_minX) ? (tmp_point._x * M2CM) : geo_minX;
-                        geo_minY =
-                            (tmp_point._y * M2CM <= geo_minY) ? (tmp_point._y * M2CM) : geo_minY;
-                        geo_maxX =
-                            (tmp_point._x * M2CM >= geo_maxX) ? (tmp_point._x * M2CM) : geo_maxX;
-                        geo_maxY =
-                            (tmp_point._y * M2CM >= geo_maxY) ? (tmp_point._y * M2CM) : geo_maxY;
-                    }
-                    correct(geoPoly[area->_id]);
-                    //append the holes/obstacles if any
-                    int k = 1;
-                    for(auto && obst : subroom->GetAllObstacles()) {
-                        geoPoly[area->_id].inners().resize(k++);
-                        geoPoly[area->_id].inners().back();
-                        model::ring<point_2d> & inner = geoPoly[area->_id].inners().back();
-                        for(auto && tmp_point : obst->GetPolygon()) {
-                            append(inner, make<point_2d>(tmp_point._x * M2CM, tmp_point._y * M2CM));
-                        }
-                        correct(geoPoly[area->_id]);
-                    }
-                }
+        for(auto && room : _geometry) {
+            point_2d point(0, 0);
+            boost::geometry::centroid(area->_poly, point);
+
+            if(boost::geometry::within(point, room)) {
+                geoPoly.emplace(area->_id, room);
             }
-        } //room
+        }
 
         if(geoPoly.count(area->_id) == 0) {
-            geoPoly[area->_id] = area->_poly;
             throw std::runtime_error(
                 fmt::format(FMT_STRING("No polygon containing the measurement id {}."), area->_id));
         }
     }
 
-    _highVertexX = geo_maxX;
-    _highVertexY = geo_maxY;
-    _lowVertexX  = geo_minX;
-    _lowVertexY  = geo_minY;
+    // Get min/max values of all used rooms containing a measurement area
+    std::vector<polygon_2d> rooms;
+    std::for_each(
+        std::begin(geoPoly), std::end(geoPoly), [&](const std::pair<int, polygon_2d> & element) {
+            rooms.push_back(element.second);
+        });
+
+    auto box = GetBoundingBox(rooms);
+
+    // These values are used for the grid when computing profiles
+    _highVertexX = box.max_corner().x();
+    _highVertexY = box.max_corner().y();
+    _lowVertexX  = box.min_corner().x();
+    _lowVertexY  = box.min_corner().y();
+
     return geoPoly;
 }
 
+boost::geometry::model::box<point_2d>
+Analysis::GetBoundingBox(const std::vector<polygon_2d> & polygons, double extension)
+{
+    // Union all rooms
+    boost::geometry::model::multi_polygon<polygon_2d> border;
+
+    for(polygon_2d poly : polygons) {
+        boost::geometry::model::multi_polygon<polygon_2d> tmp;
+        union_(border, poly, tmp);
+        border = tmp;
+    }
+
+    // Compute bounding box
+    boost::geometry::model::box<point_2d> box;
+    boost::geometry::envelope(border, box);
+
+    // Slightly increase bounding box
+    box.max_corner().x(box.max_corner().x() + extension * M2CM);
+    box.max_corner().y(box.max_corner().y() + extension * M2CM);
+
+    box.min_corner().x(box.min_corner().x() - extension * M2CM);
+    box.min_corner().y(box.min_corner().y() - extension * M2CM);
+
+    return box;
+}
 
 int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
 {
@@ -257,22 +268,14 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
         vector<double> XInFrame = data.GetXInFrame(frameNr, ids);
         vector<double> YInFrame = data.GetYInFrame(frameNr, ids);
         for(unsigned int i = 0; i < IdInFrame.size(); i++) {
-            bool IsInBuilding = false;
-            for(auto && it_room : _building->GetAllRooms()) {
-                for(auto && it_sub : it_room.second->GetAllSubRooms()) {
-                    SubRoom * subroom = it_sub.second.get();
-                    if(subroom->IsInSubRoom(Point(XInFrame[i] * CMtoM, YInFrame[i] * CMtoM))) {
-                        IsInBuilding = true;
-                        break;
-                    }
-                }
-                if(IsInBuilding) {
-                    break;
-                }
-            }
-            if(false == IsInBuilding) {
+            point_2d p{XInFrame[i] * CMtoM, YInFrame[i] * CMtoM};
+            bool isInBuilding = std::any_of(
+                std::begin(_geometry), std::end(_geometry), [&p](const polygon_2d & polygon) {
+                    return within(p, polygon);
+                });
+            if(!isInBuilding) {
                 LOG_WARNING(
-                    "Warning:\tAt %dth frame pedestrian at <x={}, y={}> is not in geometry!",
+                    "Warning:\tAt {:d}th frame pedestrian at <x={}, y={}> is not in geometry!",
                     frameNr + data.GetMinFrame(),
                     XInFrame[i] * CMtoM,
                     YInFrame[i] * CMtoM);
