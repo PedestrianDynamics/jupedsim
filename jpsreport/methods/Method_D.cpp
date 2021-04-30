@@ -156,15 +156,15 @@ bool Method_D::Process(
 
         //------------------------------Remove peds outside geometry------------------------------------------
         for(size_t i = 0; i < static_cast<size_t>(IdInFrame.size()); i++) {
-            if(!within(point_2d(round(XInFrame[i]), round(YInFrame[i])), _geoPoly)) {
-                LOG_WARNING(
-                    "Pedestrian with id <{}> at <x={:.4f}, y={:.4f}, z={:.4f}> is not in the "
-                    "geometry and will not be"
-                    "considered in the analysis!",
-                    IdInFrame[i],
-                    XInFrame[i] * CMtoM,
-                    YInFrame[i] * CMtoM,
-                    ZInFrame[i] * CMtoM);
+            if(!covered_by(point_2d(round(XInFrame[i]), round(YInFrame[i])), _geoPoly)) {
+                //                LOG_WARNING(
+                //                    "Pedestrian with id <{}> at <x={:.4f}, y={:.4f}, z={:.4f}> is not in the "
+                //                    "measurement area and will not be"
+                //                    "considered in the analysis!",
+                //                    IdInFrame[i],
+                //                    XInFrame[i] * CMtoM,
+                //                    YInFrame[i] * CMtoM,
+                //                    ZInFrame[i] * CMtoM);
                 IdInFrame.erase(IdInFrame.begin() + i);
                 XInFrame.erase(XInFrame.begin() + i);
                 YInFrame.erase(YInFrame.begin() + i);
@@ -233,7 +233,7 @@ bool Method_D::Process(
                         "Voronoi Diagrams are not obtained!. Frame: {} (minFrame = "
                         "{})",
                         frid,
-                        minFrame);
+                        numPeds);
                 }
             }
         } else {

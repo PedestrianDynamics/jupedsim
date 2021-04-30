@@ -268,10 +268,10 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
         vector<double> XInFrame = data.GetXInFrame(frameNr, ids);
         vector<double> YInFrame = data.GetYInFrame(frameNr, ids);
         for(unsigned int i = 0; i < IdInFrame.size(); i++) {
-            point_2d p{XInFrame[i] * CMtoM, YInFrame[i] * CMtoM};
+            point_2d p{XInFrame[i], YInFrame[i]};
             bool isInBuilding = std::any_of(
                 std::begin(_geometry), std::end(_geometry), [&p](const polygon_2d & polygon) {
-                    return within(p, polygon);
+                    return covered_by(p, polygon);
                 });
             if(!isInBuilding) {
                 LOG_WARNING(
