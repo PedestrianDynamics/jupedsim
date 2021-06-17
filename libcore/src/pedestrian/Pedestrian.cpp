@@ -897,7 +897,9 @@ void Pedestrian::StartWaiting()
 
 void Pedestrian::EndWaiting()
 {
-    _waiting = false;
+    _waiting       = false;
+    _waitingPos._x = std::numeric_limits<double>::max();
+    _waitingPos._y = std::numeric_limits<double>::max();
 }
 
 const Point & Pedestrian::GetWaitingPos() const

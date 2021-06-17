@@ -235,8 +235,8 @@ bool Goal::ConvertLineToPoly()
         point1 = _poly[0];
         Line tmp_line(_poly[_poly.size() / 2], _poly[(_poly.size() / 2) + 1], 0);
 
-        tmp    = tmp_line.GetCentre();
-        diff   = point1 - tmp;
+        tmp  = tmp_line.GetCentre();
+        diff = point1 - tmp;
 
         point1 = tmp + diff * 0.51;
         point2 = tmp + diff * 0.49;
