@@ -514,6 +514,12 @@ void MainWindow::slotStopPlaying()
  */
 bool MainWindow::slotLoadFile()
 {
+    //reset before load new file
+    slotReset();// when choose Discard : anyDatasetLoaded()==true
+    if (anyDatasetLoaded())
+    {
+        return false;
+    }
     return slotAddDataSet();
 }
 
@@ -707,7 +713,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     SystemSettings::setFilenamePrefix(QFileInfo ( fileName ).baseName()+"_");
 
     //the geometry actor
-    auto&& geometry = _visualisationThread->getGeometry();
+    GeometryFactory & geometry = _visualisationThread->getGeometry();
     QString geometry_file;
     //try to get a geometry filename
     if(fileName.endsWith(".xml",Qt::CaseInsensitive))
@@ -1046,7 +1052,7 @@ void MainWindow::slotReset()
                                         "This will also clear any dataset if loaded.\n"
                                         "Do you wish to continue?", QMessageBox::Discard
                                         | QMessageBox::Yes, QMessageBox::Yes);
-        if (res == QMessageBox::No) {
+        if (res == QMessageBox::Discard) {
             return;
         }
     }
@@ -1383,6 +1389,7 @@ void MainWindow::clearDataSet(int ID)
         ui.actionFirst_Group->setChecked(false);
         slotToggleFirstPedestrianGroup();
         numberOfDatasetLoaded--;
+        _visualisationThread->getGeometry().Clear(); //also clear the geometry info
         break;
 
     default:
@@ -2033,7 +2040,12 @@ void MainWindow::dropEvent(QDropEvent *event)
     if (urls.isEmpty())
         return;
 
-    slotStopPlaying();
+    //reset before load new file
+    slotReset();// when choose Discard : anyDatasetLoaded()==true
+    if (anyDatasetLoaded())
+    {
+        return;
+    }
 
     bool mayPlay = false;
 
