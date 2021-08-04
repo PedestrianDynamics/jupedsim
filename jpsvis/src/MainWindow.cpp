@@ -202,6 +202,11 @@ MainWindow::MainWindow(QWidget *parent) :
     frameSliderHold=false;
 
     //some hand made stuffs
+	//the state of actionShowGeometry_Structure connect the state of the structure window
+    connect(&_geoStructure,&MyQTreeView::changeState,[=](){
+         ui.actionShowGeometry_Structure->setChecked(false);
+    });
+
     ui.BtFullscreen->setVisible(false);
 
     labelCurrentAction = new QLabel();
@@ -1390,6 +1395,9 @@ void MainWindow::clearDataSet(int ID)
         slotToggleFirstPedestrianGroup();
         numberOfDatasetLoaded--;
         _visualisationThread->getGeometry().Clear(); //also clear the geometry info
+        //close geometryStrucutre window
+        if (_geoStructure.isVisible())
+            _geoStructure.close();
         break;
 
     default:
