@@ -38,7 +38,7 @@
 #include <QMainWindow>
 #include <QSettings>
 #include <QSplitter>
-#include <QTreeView>
+#include "myqtreeview.h"
 #include <QStandardItem>
 #include <QTreeWidget>
 
@@ -334,7 +334,7 @@ private:
     QLabel *labelMode;
     QSplitter _splitter;
     //QTreeWidget _geoStructure;
-    QTreeView _geoStructure;
+    MyQTreeView _geoStructure;
 
 };
 

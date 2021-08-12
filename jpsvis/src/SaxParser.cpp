@@ -1786,7 +1786,7 @@ bool SaxParser::LoadTrainTimetable(std::string Filename, std::map<int, std::shar
                trainTimeTables[TTT->id] = TTT;
           }
           else {
-          std:cout << "too bad! \n" ;
+          cout << "too bad! \n" ;
 
           }
      }
