@@ -1588,6 +1588,11 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
                     break;
 
                case 9:
+               case 10:
+               case 11:      
+               case 12:
+               case 13:
+               case 14:
                     agentID=pieces[0].toInt();
                     frameID=pieces[1].toInt();
                     color=pieces[8].toDouble();
