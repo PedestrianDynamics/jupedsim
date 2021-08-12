@@ -348,13 +348,13 @@ void MainWindow::slotHelpAbout()
      Debug::Messages("About JPSvis");
      QString gittext = QMessageBox::tr(
           "<p style=\"line-height:1.4\" style=\"color:Gray;\"><small><i>Version %1</i></small></p>"
-          "<p style=\"line-height:0.4\" style=\"color:Gray;\"><i>CommHash</i> %2</p>"
-          "<p  style=\"line-height:0.4\" style=\"color:Gray;\"><i>CommDate</i> %3</p>"
+          "<p style=\"line-height:0.4\" style=\"color:Gray;\"><i>Hash</i> %2</p>"
+          "<p  style=\"line-height:0.4\" style=\"color:Gray;\"><i>Date</i> %3</p>"
           "<p  style=\"line-height:0.4\" style=\"color:Gray;\"><i>Branch</i> %4</p><hr>"
           ).arg(JPSVIS_VERSION).arg(GIT_COMMIT_HASH).arg(GIT_COMMIT_DATE).arg(GIT_BRANCH);
 
      QString text = QMessageBox::tr(
-          "<p style=\"color:Gray;\"><small><i> &copy; 2009-2019  Ulrich Kemloh <br><a href=\"http://jupedsim.org\">jupedsim.org</a></i></small></p>"
+          "<p style=\"color:Gray;\"><small><i> &copy; 2009-2021  Ulrich Kemloh <br><a href=\"http://jupedsim.org\">jupedsim.org</a></i></small></p>"
 
         );
 
