@@ -69,6 +69,7 @@
 #include <vtkRegularPolygonSource.h>
 #include <vtkLabeledDataMapper.h>
 #include <vtkDiskSource.h>
+#include <vtkConeSource.h>
 #include <vtkTriangleFilter.h>
 #include <vtkStripper.h>
 #include <vtkSphereSource.h>
@@ -122,6 +123,9 @@ ThreadVisualisation::~ThreadVisualisation()
     if(extern_glyphs_pedestrians) extern_glyphs_pedestrians->Delete();
     if(extern_glyphs_pedestrians_actor_2D) extern_glyphs_pedestrians_actor_2D->Delete();
     if(extern_pedestrians_labels) extern_pedestrians_labels->Delete();
+    //show directions of movement
+    if(extern_glyphs_directions) extern_glyphs_directions->Delete();
+    if(extern_glyphs_directions_actor) extern_glyphs_directions_actor->Delete();
 
     _runningTime->Delete();
 
@@ -476,10 +480,15 @@ void  ThreadVisualisation::initGlyphs2D()
     if(extern_glyphs_pedestrians) extern_glyphs_pedestrians->Delete();
     if(extern_glyphs_pedestrians_actor_2D) extern_glyphs_pedestrians_actor_2D->Delete();
     if(extern_pedestrians_labels) extern_pedestrians_labels->Delete();
+    //show directions of movement
+    if(extern_glyphs_directions) extern_glyphs_directions->Delete();
+    if(extern_glyphs_directions_actor) extern_glyphs_directions_actor->Delete();
 
     extern_glyphs_pedestrians = vtkTensorGlyph::New();
     extern_glyphs_pedestrians_actor_2D = vtkActor::New();
     extern_pedestrians_labels =  vtkActor2D::New();
+    extern_glyphs_directions=vtkTensorGlyph::New();
+    extern_glyphs_directions_actor=vtkActor::New();
 
     //glyphs with ellipsoids
     //    VTK_CREATE (vtkSphereSource, agentShape);
@@ -577,6 +586,31 @@ void  ThreadVisualisation::initGlyphs2D()
 
     //if(extern_trajectories_firstSet.getNumberOfAgents()>0)
     _renderer->AddActor(extern_glyphs_pedestrians_actor_2D);
+
+    //Show directions
+    VTK_CREATE(vtkConeSource,agentDirection);
+    agentDirection->SetHeight(40);
+    agentDirection->SetRadius(15);
+
+    VTK_CREATE(vtkTriangleFilter, tris2);
+    tris2->SetInputConnection(agentDirection->GetOutputPort());
+    VTK_CREATE(vtkStripper, strip2);
+    strip2->SetInputConnection(tris2->GetOutputPort());
+
+    extern_glyphs_directions->SetSourceConnection(strip2->GetOutputPort());
+    extern_glyphs_directions->SetInputConnection(agentDirection->GetOutputPort());
+    if (frame) extern_glyphs_directions->SetInputData(pData);
+    extern_glyphs_directions->ThreeGlyphsOff();
+    extern_glyphs_directions->ExtractEigenvaluesOff();
+
+    VTK_CREATE(vtkPolyDataMapper, mapper2);
+    mapper2->SetInputConnection(extern_glyphs_directions->GetOutputPort());
+    mapper2->ScalarVisibilityOff(); //to set color
+    mapper2->SetLookupTable(lut);
+
+    extern_glyphs_directions_actor->SetMapper(mapper2);
+    extern_glyphs_directions_actor->GetProperty()->SetColor(0,0,0); //black
+    _renderer->AddActor2D(extern_glyphs_directions_actor);
 
     // structure for the labels
     VTK_CREATE(vtkLabeledDataMapper, labelMapper);

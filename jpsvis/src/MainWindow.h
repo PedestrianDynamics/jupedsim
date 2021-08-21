@@ -195,6 +195,9 @@ public Q_SLOTS:
     /// enable/disable the pedestrian captions
     void slotShowPedestrianCaption();
 
+    /// enable/disable the pedestrian Directions
+    void slotShowDirections();
+
     /// update the contrast
     void slotUpdateContrastSlider(int newValue);
 

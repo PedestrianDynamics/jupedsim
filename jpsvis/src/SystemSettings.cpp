@@ -44,6 +44,7 @@
 bool SystemSettings::showLegend=false;
 bool SystemSettings::pedColorProfileReadFromFile=true;
 bool SystemSettings::showAgentsCaptions=false;
+bool SystemSettings::showDirections=false;
 bool SystemSettings::is2D=false;
 bool SystemSettings::showAgents=true;
 bool SystemSettings::showGeometry=true;
@@ -124,6 +125,16 @@ void SystemSettings::setShowAgentsCaptions(bool caption)
 bool SystemSettings::getShowAgentsCaptions()
 {
     return showAgentsCaptions;
+}
+
+void SystemSettings::setShowDirections(bool direction)
+{
+    showDirections=direction;
+}
+
+bool SystemSettings::getShowDirections()
+{
+    return showDirections;
 }
 
 void SystemSettings::set2D(bool lis2D)

@@ -93,9 +93,11 @@ std::map<int, std::shared_ptr<TrainTimeTable> > extern_trainTimeTables;
 
 vtkTensorGlyph* extern_glyphs_pedestrians=NULL;
 vtkTensorGlyph* extern_glyphs_pedestrians_3D=NULL;
+vtkTensorGlyph* extern_glyphs_directions=NULL;
 vtkActor2D* extern_pedestrians_labels = NULL;
 vtkActor* extern_glyphs_pedestrians_actor_2D = NULL;
 vtkActor* extern_glyphs_pedestrians_actor_3D = NULL;
+vtkActor* extern_glyphs_directions_actor=NULL;
 
 //VTK_CREATE (vtkTensorGlyph, extern_glyphs_pedestrians);
 //VTK_CREATE (vtkTensorGlyph, extern_glyphs_pedestrians_3D);

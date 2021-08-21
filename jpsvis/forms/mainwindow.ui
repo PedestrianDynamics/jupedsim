@@ -539,7 +539,7 @@ border-color: rgb(255, 255, 255);</string>
      <x>0</x>
      <y>0</y>
      <width>450</width>
-     <height>22</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -590,7 +590,6 @@ border-color: rgb(255, 255, 255);</string>
     <addaction name="actionBackground_Color"/>
     <addaction name="actionFloor_Color"/>
     <addaction name="actionWalls_Color"/>
-    <!-- <addaction name="actionExtColor"/> -->
     <addaction name="actionObstacles_Color"/>
     <addaction name="actionNavigation_Lines_Color"/>
     <addaction name="separator"/>
@@ -619,6 +618,7 @@ border-color: rgb(255, 255, 255);</string>
     <addaction name="actionShow_Agents"/>
     <addaction name="actionShow_Captions"/>
     <addaction name="actionShow_Trajectories"/>
+    <addaction name="actionShow_Directions"/>
     <addaction name="separator"/>
     <addaction name="actionShow_Geometry"/>
     <addaction name="actionShow_Floor"/>
@@ -1362,6 +1362,14 @@ border-color: rgb(255, 255, 255);</string>
    </property>
    <property name="text">
     <string>Show Gradient Field</string>
+   </property>
+  </action>
+  <action name="actionShow_Directions">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Directions</string>
    </property>
   </action>
  </widget>

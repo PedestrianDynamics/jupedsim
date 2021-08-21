@@ -286,8 +286,10 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 #else
                             extern_glyphs_pedestrians->SetInputData(pData);
                             extern_pedestrians_labels->GetMapper()->SetInputDataObject(pData);
+                            extern_glyphs_directions->SetInputData(pData);
 #endif
                             extern_glyphs_pedestrians->Update();
+                            extern_glyphs_directions->Update();
                         } else {
                             vtkPolyData* pData=frame->GetPolyData3D();
 #if VTK_MAJOR_VERSION <= 5
@@ -462,6 +464,7 @@ void TimerCallback::updateSettings(vtkRenderWindow* renderWindow)
 
     extern_glyphs_pedestrians_actor_2D->SetVisibility(SystemSettings::getShowAgents()&& SystemSettings::get2D());
     extern_glyphs_pedestrians_actor_3D->SetVisibility(SystemSettings::getShowAgents()&& !SystemSettings::get2D());
+    extern_glyphs_directions_actor->SetVisibility(SystemSettings::getShowDirections()&& SystemSettings::get2D());
     extern_trail_plotter->SetVisibility(SystemSettings::getShowTrajectories());
 
     //agents captions

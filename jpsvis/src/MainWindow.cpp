@@ -206,6 +206,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&_geoStructure,&MyQTreeView::changeState,[=](){
          ui.actionShowGeometry_Structure->setChecked(false);
     });
+    connect(ui.actionShow_Directions,&QAction::changed,this,&MainWindow::slotShowDirections);
 
     ui.BtFullscreen->setVisible(false);
 
@@ -1590,6 +1591,12 @@ void MainWindow::slotShowPedestrianCaption()
     extern_force_system_update=true;
 }
 
+void MainWindow::slotShowDirections()
+{
+    SystemSettings::setShowDirections(ui.actionShow_Directions->isChecked());
+    extern_force_system_update=true;
+}
+
 void MainWindow::slotToogleShowAxis()
 {
 
@@ -1799,7 +1806,7 @@ void MainWindow::slotTakeScreenShot()
 /// load settings, parsed from the project file
 void MainWindow::loadAllSettings()
 {
-     Debug::Messages("restoring previous settings");
+    Debug::Messages("restoring previous settings");
     QSettings settings;
 
     //visualisation
@@ -1846,6 +1853,13 @@ void MainWindow::loadAllSettings()
         SystemSettings::setShowAgentsCaptions(checked);
         Debug::Messages("show Captions: %s", checked?"Yes":"No");
     }
+    if (settings.contains("view/showDirections"))
+    {
+        bool checked=settings.value("view/showDirections").toBool();
+        ui.actionShow_Directions->setChecked(checked);
+        SystemSettings::setShowDirections(checked);
+        Debug::Messages("show Directions: %s", checked?"Yes":"No");
+    }
     if (settings.contains("view/showTrajectories"))
     {
         bool checked = settings.value("view/showTrajectories").toBool();
@@ -1879,7 +1893,7 @@ void MainWindow::loadAllSettings()
         bool checked = settings.value("view/showWalls").toBool();
         ui.actionShow_Walls->setChecked(checked);
         slotShowHideWalls();
-        Debug::Messages("show Walls: ", checked?"Yes":"No");
+        Debug::Messages("show Walls: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showGeoCaptions"))
     {
@@ -1978,6 +1992,7 @@ void MainWindow::saveAllSettings()
     settings.setValue("view/2d", ui.action2_D->isChecked());
     settings.setValue("view/showAgents", ui.actionShow_Agents->isChecked());
     settings.setValue("view/showCaptions", ui.actionShow_Captions->isChecked());
+    settings.setValue("view/showDirections",ui.actionShow_Directions->isChecked());
     settings.setValue("view/showTrajectories", ui.actionShow_Trajectories->isChecked());
     settings.setValue("view/showGeometry", ui.actionShow_Geometry->isChecked());
     settings.setValue("view/showFloor", ui.actionShow_Floor->isChecked());

@@ -85,8 +85,10 @@ extern Pedestrian** extern_pedestrians_firstSet;
 extern vtkActor2D* extern_pedestrians_labels;
 extern vtkTensorGlyph* extern_glyphs_pedestrians;
 extern vtkTensorGlyph* extern_glyphs_pedestrians_3D;
+extern vtkTensorGlyph* extern_glyphs_directions;
 extern vtkActor* extern_glyphs_pedestrians_actor_2D;
 extern vtkActor* extern_glyphs_pedestrians_actor_3D;
+extern vtkActor* extern_glyphs_directions_actor;
 extern PointPlotter* extern_trail_plotter;
 
 extern SyncData extern_trajectories_firstSet;

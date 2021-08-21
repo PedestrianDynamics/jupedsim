@@ -51,6 +51,10 @@ public:
     void static setShowAgentsCaptions(bool caption);
     bool static getShowAgentsCaptions();
 
+    //set/get the velocity status
+    void static setShowDirections(bool direction);
+    bool static getShowDirections();
+
     // set/get the listening port
     void static setListeningPort(unsigned short port);
     unsigned short static getListeningPort();
@@ -206,6 +210,7 @@ private:
     static bool pedColorProfileReadFromFile;
     static bool showLegend;
     static bool showAgentsCaptions;
+    static bool showDirections;
     static bool is2D; //   Toggle 2D/3D mode
     static bool showAgents;
     static bool showGeometry;
