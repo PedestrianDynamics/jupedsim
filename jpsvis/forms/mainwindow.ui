@@ -607,8 +607,10 @@ border-color: rgb(255, 255, 255);</string>
       <string>Camera View</string>
      </property>
      <addaction name="actionCameraViewTop"/>
-     <addaction name="actionCameraViewSide"/>
-     <addaction name="actionCameraViewFront"/>
+     <addaction name="separator"/>
+     <addaction name="actionTop_Rotate"/>
+     <addaction name="actionSide_Rotate"/>
+     <addaction name="separator"/>
      <addaction name="actionCameraViewAgent"/>
     </widget>
     <addaction name="action2_D"/>
@@ -1088,35 +1090,7 @@ border-color: rgb(255, 255, 255);</string>
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Top</string>
-   </property>
-  </action>
-  <action name="actionCameraViewSide">
-   <property name="checkable">
-    <bool>false</bool>
-   </property>
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Side</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
-   </property>
-  </action>
-  <action name="actionCameraViewFront">
-   <property name="checkable">
-    <bool>false</bool>
-   </property>
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Front</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
+    <string>Top Reset</string>
    </property>
   </action>
   <action name="actionPedestrian_Shape">
@@ -1370,6 +1344,16 @@ border-color: rgb(255, 255, 255);</string>
    </property>
    <property name="text">
     <string>Show Directions</string>
+   </property>
+  </action>
+  <action name="actionTop_Rotate">
+   <property name="text">
+    <string>Top Rotate</string>
+   </property>
+  </action>
+  <action name="actionSide_Rotate">
+   <property name="text">
+    <string>Side Rotate</string>
    </property>
   </action>
  </widget>
@@ -1846,38 +1830,6 @@ border-color: rgb(255, 255, 255);</string>
    <signal>changed()</signal>
    <receiver>mainwindow</receiver>
    <slot>slotToogleShowAxis()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>224</x>
-     <y>199</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionCameraViewFront</sender>
-   <signal>triggered(bool)</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotSetCameraPerspectiveToFront()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>224</x>
-     <y>199</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionCameraViewSide</sender>
-   <signal>triggered(bool)</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotSetCameraPerspectiveToSide()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>

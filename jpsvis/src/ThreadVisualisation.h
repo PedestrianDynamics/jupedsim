@@ -92,7 +92,7 @@ public:
     void setFullsreen(bool status);
 
     /// set the camera to one of TOP/FRONT/SIDE
-    void setCameraPerspective(int mode);
+    void setCameraPerspective(int mode,int degree=0);
 
     /// load and display the geometry where
     /// the pedestrians will move

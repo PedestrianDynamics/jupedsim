@@ -791,7 +791,7 @@ void ThreadVisualisation::setAxisVisible(bool status)
     _axis->SetVisibility(status);
 }
 
-void ThreadVisualisation::setCameraPerspective(int mode)
+void ThreadVisualisation::setCameraPerspective(int mode,int degree)
 {
     if(_renderer==NULL) return;
 
@@ -799,15 +799,16 @@ void ThreadVisualisation::setCameraPerspective(int mode)
     case 1: //TOP oder RESET
         _renderer->GetActiveCamera()->DeepCopy(_topViewCamera);
         break;
-
-    case 2://SIDE
-
+    case 2://TOP Rotate [range:-180-->180]
+        _topViewCamera->Roll(degree);
+        _renderer->GetActiveCamera()->DeepCopy(_topViewCamera);
+        _topViewCamera->Roll(-degree);
         break;
-
-    case 3:
-        //FRONT
+    case 3://Side Rotate [range:-80-->80]
+        _topViewCamera->Elevation(-degree);
+        _renderer->GetActiveCamera()->DeepCopy(_topViewCamera);
+        _topViewCamera->Elevation(degree);
         break;
-
     case 4: { // agent virtual reality
         //vtkCamera *camera = renderer->GetActiveCamera();
         //camera->SetRoll(-90);
@@ -819,6 +820,8 @@ void ThreadVisualisation::setCameraPerspective(int mode)
 
         break;
     }
+    _renderer->ResetCamera();
+
 }
 
 void ThreadVisualisation::setBackgroundColor(const QColor& col)

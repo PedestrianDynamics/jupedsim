@@ -206,7 +206,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&_geoStructure,&MyQTreeView::changeState,[=](){
          ui.actionShowGeometry_Structure->setChecked(false);
     });
+    //connections
     connect(ui.actionShow_Directions,&QAction::changed,this,&MainWindow::slotShowDirections);
+    connect(ui.actionTop_Rotate,&QAction::triggered,this,&MainWindow::slotSetCameraPerspectiveToTopRotate);
+    connect(ui.actionSide_Rotate,&QAction::triggered,this,&MainWindow::slotSetCameraPerspectiveToSideRotate);
 
     ui.BtFullscreen->setVisible(false);
 
@@ -1747,22 +1750,32 @@ void MainWindow::slotSetCameraPerspectiveToTop()
     //cerr <<"Setting camera view to top"<<endl;
 }
 
-void MainWindow::slotSetCameraPerspectiveToFront()
+void MainWindow::slotSetCameraPerspectiveToTopRotate()
 {
-    int p= 2; //FRONT
-    _visualisationThread->setCameraPerspective(p);
-    //disable the virtual agent view
-    SystemSettings::setVirtualAgent(-1);
-    //	cerr <<"Setting camera view to FRONT"<<endl;
+    int p= 2; //TOP rotate
+    bool ok=false;
+    int degree=QInputDialog::getInt(this,"Top rotate","Rotation degrees [range:-180-->180]:",0,-180,180,10,&ok);
+    if (ok)
+    {
+        _visualisationThread->setCameraPerspective(p,degree);
+        //disable the virtual agent view
+        SystemSettings::setVirtualAgent(-1);
+        //cerr <<"Setting camera view to top"<<endl;
+    }
 }
 
-void MainWindow::slotSetCameraPerspectiveToSide()
+void MainWindow::slotSetCameraPerspectiveToSideRotate()
 {
-    int p= 3; //SIDE
-    _visualisationThread->setCameraPerspective(p);
-    //disable the virtual agent view
-    SystemSettings::setVirtualAgent(-1);
-    //cerr <<"Setting camera view to Side"<<endl;
+    int p= 3; //SIDE rotate
+    bool ok=false;
+    int degree=QInputDialog::getInt(this,"Side rotate","Rotation degrees [range:-80-->80]:",0,-80,80,10,&ok);
+    if (ok)
+    {
+        _visualisationThread->setCameraPerspective(p,degree);
+        //disable the virtual agent view
+        SystemSettings::setVirtualAgent(-1);
+        //cerr <<"Setting camera view to top"<<endl;
+    }
 }
 
 void MainWindow::slotSetCameraPerspectiveToVirtualAgent()

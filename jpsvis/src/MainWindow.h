@@ -119,8 +119,8 @@ public Q_SLOTS:
     /// set the camera view angle to  TOP/FRONT/SIDE
     // TODO: high priority
     void slotSetCameraPerspectiveToTop();
-    void slotSetCameraPerspectiveToFront();
-    void slotSetCameraPerspectiveToSide();
+    void slotSetCameraPerspectiveToTopRotate();
+    void slotSetCameraPerspectiveToSideRotate();
     void slotSetCameraPerspectiveToVirtualAgent();
 
     //controls visualisation
