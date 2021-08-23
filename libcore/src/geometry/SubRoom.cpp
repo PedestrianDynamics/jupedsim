@@ -954,7 +954,7 @@ bool NormalSubRoom::ConvertLineToPoly(const std::vector<Line *> & goals)
                 if(it.ShareCommonPointWith(*copy[i]) == false) {
                     LOG_ERROR(
                         "NormalSubRoom::ConvertLineToPoly(): SubRoom {} Room {}, walls "
-                        "%s & %s intersect.",
+                        "{} & {} intersect.",
                         GetSubRoomID(),
                         GetRoomID(),
                         it.toString(),
