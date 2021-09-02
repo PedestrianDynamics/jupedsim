@@ -1973,7 +1973,7 @@ bool   SaxParser::LoadTrainType(std::string Filename, std::map<std::string, std:
                     Debug::Messages("WARNING: Duplicate type for train found [%s]",TT->_type.c_str());
                }
                trainTypes[TT->_type] = TT;
-OB          }
+          }
      }
      return true;
 
