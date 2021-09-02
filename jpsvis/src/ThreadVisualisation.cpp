@@ -545,15 +545,9 @@ void  ThreadVisualisation::initGlyphs2D()
     vtkPolyData* pData=NULL;
 
     if(frame) pData=frame->GetPolyData2D();
-
-#if VTK_MAJOR_VERSION <= 5
-    extern_glyphs_pedestrians->SetSource(agentShape->GetOutput());
-    if (frame )extern_glyphs_pedestrians->SetInput(pData);
-#else
+    
     extern_glyphs_pedestrians->SetInputConnection(agentShape->GetOutputPort());
     if (frame) extern_glyphs_pedestrians->SetInputData(pData);
-#endif
-
     extern_glyphs_pedestrians->ThreeGlyphsOff();
     extern_glyphs_pedestrians->ExtractEigenvaluesOff();
     //_agents->SymmetricOn();
@@ -650,13 +644,8 @@ void ThreadVisualisation::initGlyphs3D()
     vtkPolyData* pData=NULL;
     if(frame) pData=frame->GetPolyData2D();
 
-#if VTK_MAJOR_VERSION <= 5
-    extern_glyphs_pedestrians_3D->SetSource(strip->GetOutput());
-    if (frame )extern_glyphs_pedestrians_3D->SetInput(pData);
-#else
     extern_glyphs_pedestrians_3D->SetInputConnection(strip->GetOutputPort());
     if (frame )extern_glyphs_pedestrians_3D->SetInputData(pData);
-#endif
 
     extern_glyphs_pedestrians_3D->ThreeGlyphsOff();
     extern_glyphs_pedestrians_3D->ExtractEigenvaluesOff();

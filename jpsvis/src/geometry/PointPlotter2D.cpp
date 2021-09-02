@@ -90,11 +90,7 @@ vtkPolyData* PointPlotter2D::CreatePolyData()
 
     vtkGlyph3D* glyph = vtkGlyph3D::New();
     glyph->SetSourceConnection(src->GetOutputPort());
-#if VTK_MAJOR_VERSION <= 5
-    glyph->SetInput(polyData);
-#else
     glyph->SetInputData(polyData);
-#endif
 
     glyph->SetColorModeToColorByScalar();
     glyph->SetScaleModeToDataScalingOff() ;
@@ -109,11 +105,7 @@ vtkActor* PointPlotter2D::CreateActor()
     vtkPolyData* polyData = CreatePolyData();
 
     vtkPolyDataMapper* mapper = vtkPolyDataMapper::New();
-#if VTK_MAJOR_VERSION <= 5
-    mapper->SetInput(polyData);
-#else
     mapper->SetInputData(polyData);
-#endif
 
     vtkActor* actor = vtkActor::New();
     actor->SetMapper(mapper);

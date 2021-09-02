@@ -342,7 +342,7 @@ void MainWindow::slotHelpAbout()
 
      Debug::Messages("About JPSvis");
      QString gittext = QMessageBox::tr(
-          "<h1><p style=\"line-height:0.7\">JPSvis</p></h1><p style=\"line-height:1.4\" style=\"color:Gray;\"><small><i>Version %1</i></small></p>"
+          "<p style=\"line-height:1.4\" style=\"color:Gray;\"><small><i>Version %1</i></small></p>"
           "<p style=\"line-height:0.4\" style=\"color:Gray;\"><i>CommHash</i> %2</p>"
           "<p  style=\"line-height:0.4\" style=\"color:Gray;\"><i>CommDate</i> %3</p>"
           "<p  style=\"line-height:0.4\" style=\"color:Gray;\"><i>Branch</i> %4</p><hr>"
@@ -918,12 +918,10 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
         // train type
         std::map<int, std::shared_ptr<TrainTimeTable> > trainTimeTable;
         std::map<std::string, std::shared_ptr<TrainType> > trainTypes;
-
         SaxParser::LoadTrainType(tt_file.toStdString(), trainTypes);
         extern_trainTypes = trainTypes;
 
         bool ret = SaxParser::LoadTrainTimetable(ttt_file.toStdString(), trainTimeTable);
-        if(!ret) std::cout << "hmmm\n";
 
         extern_trainTimeTables = trainTimeTable;
         QString geofileName = SaxParser::extractGeometryFilenameTXT(fileName);
@@ -957,8 +955,6 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
               std::cout << " elevation " << tab.second->elevation << "\n";
               std::cout << "=======\n";
         }
-
-
         for(auto tab: trainTypes)
              std::cout << "type: " << tab.first << "\n";
 

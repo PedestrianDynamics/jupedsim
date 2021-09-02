@@ -43,7 +43,6 @@
 
 
 
-
 //forwarded classes
 class JPoint;
 class TrajectoryPoint;
@@ -105,7 +104,8 @@ public:
 
      static bool   LoadTrainType(std::string Filename, std::map<std::string, std::shared_ptr<TrainType> > & trainTypes);
      static double GetElevation(QString geometryFile, int roomId, int subroomId);
-      static std::tuple<Point, Point> GetTrackStartEnd(QString geometryFile, int trackId); 
+     static std::tuple<Point, Point> GetTrackStartEnd(QString geometryFile, int trackId); 
+
 private:
     //clear the mo
     void clearPoints();

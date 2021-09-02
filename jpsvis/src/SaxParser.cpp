@@ -1503,13 +1503,13 @@ void SaxParser::parseGeometryXMLV04(QString filename, GeometryFactory& geoFac)
      // This should be a fall back option
 
      if (!file.open(QIODevice::ReadOnly)) {
-          qDebug()<<"could not open the file: "<<filename<<endl;
+          qDebug()<<"could not open the file: "<<filename<<Qt::endl;
           return ;
      }
      QString *errorCode = new QString();
      if (!doc.setContent(&file, errorCode)) {
           file.close();
-          qDebug()<<errorCode<<endl;
+          qDebug()<<errorCode<<Qt::endl;
           return ;
      }
      QDomElement root= doc.documentElement();
@@ -1695,7 +1695,7 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
           while ( !in.atEnd() )
           {
                QString line = in.readLine();
-               if(line[0] == "#")  // looking for framerate
+               if(line.startsWith("#"))  // looking for framerate
                {
                     if(line.split(":").size()==2)
                     {
@@ -1741,6 +1741,11 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
                     break;
 
                case 9:
+               case 10:
+               case 11:      
+               case 12:
+               case 13:
+               case 14:
                     agentID=pieces[0].toInt();
                     frameID=pieces[1].toInt();
                     color=pieces[8].toDouble();
@@ -1839,7 +1844,7 @@ bool SaxParser::ParseGradientFieldVTK(QString fileName, GeometryFactory& geoFac)
           fileName=wd+"/"+fileName;
      }
 
-     qDebug()<<"Opening the gradient field:"<<fileName<<endl;
+     qDebug()<<"Opening the gradient field:"<<fileName<<Qt::endl;
      // Read the file
      VTK_CREATE(vtkStructuredPointsReader, reader);
      reader->SetFileName(fileName.toStdString().c_str());
@@ -1932,7 +1937,6 @@ bool SaxParser::LoadTrainTimetable(std::string Filename, std::map<int, std::shar
                     exit(EXIT_FAILURE);
                }
                // get track start 
-               
                trainTimeTables[TTT->id] = TTT;
           }
           else {
@@ -1969,7 +1973,7 @@ bool   SaxParser::LoadTrainType(std::string Filename, std::map<std::string, std:
                     Debug::Messages("WARNING: Duplicate type for train found [%s]",TT->_type.c_str());
                }
                trainTypes[TT->_type] = TT;
-          }
+OB          }
      }
      return true;
 
@@ -2012,11 +2016,6 @@ std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement 
      Debug::Messages("INFO:\t   arrival_time: %.2f", arrival_time);
      Debug::Info("departure_time: %.2f", departure_time);
      // Debug::Info("Reversed: {}", reversed);
-     // Point track_start(track_start_x, track_start_y);
-     // Point track_end(track_end_x, track_end_y);
-     // Point train_start(train_start_x, train_start_y);
-     // Point train_end(train_end_x, train_end_y);
-
      std::shared_ptr<TrainTimeTable> trainTimeTab = std::make_shared<TrainTimeTable>(
           TrainTimeTable{
                     id,
@@ -2042,7 +2041,6 @@ std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement 
 
      return trainTimeTab;
 }
-
 std::shared_ptr<TrainType> SaxParser::parseTrainTypeNode(TiXmlElement * node)
 {
       Debug::Info("Loading train type");
@@ -2140,7 +2138,6 @@ std::shared_ptr<TrainType> SaxParser::parseTrainTypeNode(TiXmlElement * node)
             d._width,
             d._flow);
     }
-
 
      std::shared_ptr<TrainType> Type = std::make_shared<TrainType>(
           TrainType{

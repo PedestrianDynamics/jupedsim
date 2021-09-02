@@ -7,7 +7,7 @@
 #windows flags: -DDESIRED_QT_VERSION=5 -DCMAKE_PREFIX_PATH=D:\Qt32bit\Qt5.4.1\5.4\msvc2013 -DCMAKE_PREFIX_PATH=VTK.0.0\VTK-7.0.0\build -G "Visual Studio 12 2013"
 #--------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.2)
-project( jpsvis LANGUAGES CXX)
+project( jpsvis LANGUAGES CXX C)
 IF(APPLE)
   cmake_policy(SET CMP0025 NEW) #fixes error No known features for CXX compiler (on mac)
 ENDIF(APPLE)
@@ -202,15 +202,15 @@ set( RCS
 
 
 #set(VTK_USE_HYBRID ON CACHE BOOL "doc" FORCE)
-find_package(VTK REQUIRED)
+find_package(VTK QUIET)
 
 if(VTK_FOUND)
   message(STATUS "Check VTK ..................................... yes (${VTK_VERSION})")
 else(VTK_FOUND)
   message(FATAL_ERROR "Check VTK ..................................... no")
+  return()
 endif(VTK_FOUND)
 
-include(${VTK_USE_FILE})
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
 
@@ -280,7 +280,6 @@ if(${QT4_INSTALLED})
   ${UI_HDRS}
   ${RCS}
   )
-  TARGET_LINK_LIBRARIES( jpsvis ${QT_LIBRARIES})
 elseif( ${QT5_INSTALLED})
   message(STATUS "qt libs: ${Qt5Widgets_LIBRARIES}  ${QT_LIBRARIES}")
   # http://www.kdab.com/using-cmake-with-qt-5/
@@ -294,8 +293,6 @@ elseif( ${QT5_INSTALLED})
   ${UI_HDRS}
   ${RCS}
   )
- qt5_use_modules(jpsvis Widgets)
- target_link_libraries(jpsvis ${Qt5Widgets_LIBRARIES} Qt5::Network Qt5::Xml)
 else()
     MESSAGE(STATUS "Check Qt           ...  no")
 endif()
@@ -323,16 +320,17 @@ elseif( ${QT5_INSTALLED})
   SET(QTLIBS ${Qt5Widgets_LIBRARIES})
 endif()
 
-if(VTK_LIBRARIES)
-  if(${VTK_VERSION} VERSION_LESS "6")
-   TARGET_LINK_LIBRARIES( jpsvis ${QTLIBS} QVTK) #qt5
-  else()
-    #    TARGET_LINK_LIBRARIES( jpsvis  ${VTK_LIBRARIES} ${QT_LIBRARIES})
-    TARGET_LINK_LIBRARIES( jpsvis  ${VTK_LIBRARIES} ${QTLIBS}) #qt5
-  endif()
-else() # this else is not yet tested
-  target_link_libraries(jpsvis vtkHybrid QVTK vtkViews ${QTLIBS})
-endif()
+target_link_libraries(jpsvis ${VTK_LIBRARIES} Qt5::Widgets  Qt5::Network Qt5::Xml)
+if (VTK_VERSION VERSION_LESS "8.90.0")
+  # old system
+  include(${VTK_USE_FILE})
+else ()
+  # vtk_module_autoinit is needed
+  vtk_module_autoinit(
+    TARGETS jpsvis
+    MODULES ${VTK_LIBRARIES}
+    )
+endif ()
 # ================================ Compiler flags
 # enable as many warnings as possible
 set(warning_flags "-Wall -Wextra")
@@ -438,7 +436,11 @@ IF(APPLE)
   # SET(MACOSX_BUNDLE_ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.png)
   SET(MACOSX_BUNDLE_ICON_FILE JPSvis.icns)
   SET(MACOSX_GUI_ICON JPSvis.icns)
-  set_target_properties(jpsvis PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Resources/Info.plist.in)
+  set_target_properties(jpsvis PROPERTIES
+    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Resources/Info.plist.in
+    XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
+    XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO"
+  )
   SET(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2015 Forschungszentrum Juelich. All rights reserved.")
   SET(MACOSX_BUNDLE_BUNDLE_NAME "jpsvis")
   SET(MACOSX_BUNDLE_BUNDLE_VERSION "${JPSVIS_VERSION}")

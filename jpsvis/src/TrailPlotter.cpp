@@ -56,13 +56,7 @@ TrailPlotter::~TrailPlotter()
 
 void TrailPlotter::AddDataSet(vtkPolyData *_polydata)
 {
-
-#if VTK_MAJOR_VERSION <= 5
-    _appendFilter->AddInputConnection(_polydata->GetProducerPort());
-#else
     _appendFilter->AddInputData(_polydata);
-#endif
-
     _appendFilter->Update();
     _cleanFilter->Update();
 }
