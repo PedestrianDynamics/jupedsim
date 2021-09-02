@@ -280,23 +280,13 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 
                         if(SystemSettings::get2D()==true) {
                             vtkPolyData* pData=frame->GetPolyData2D();
-#if VTK_MAJOR_VERSION <= 5
-                            extern_glyphs_pedestrians->SetInput(pData);
-                            ((vtkLabeledDataMapper*)extern_pedestrians_labels->GetMapper())->SetInput(pData);
-#else
                             extern_glyphs_pedestrians->SetInputData(pData);
                             extern_pedestrians_labels->GetMapper()->SetInputDataObject(pData);
-#endif
                             extern_glyphs_pedestrians->Update();
                         } else {
                             vtkPolyData* pData=frame->GetPolyData3D();
-#if VTK_MAJOR_VERSION <= 5
-                            extern_glyphs_pedestrians_3D->SetInput(pData);
-                            ((vtkLabeledDataMapper*)extern_pedestrians_labels->GetMapper())->SetInput(pData);
-#else
                             extern_glyphs_pedestrians_3D->SetInputData(pData);
                             extern_pedestrians_labels->GetMapper()->SetInputDataObject(pData);
-#endif
                             extern_glyphs_pedestrians_3D->Update();
                         }
                         auto FrameElements =  frame->GetFrameElements();
