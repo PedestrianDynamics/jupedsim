@@ -202,15 +202,15 @@ set( RCS
 
 
 #set(VTK_USE_HYBRID ON CACHE BOOL "doc" FORCE)
-find_package(VTK REQUIRED)
+find_package(VTK QUIET)
 
 if(VTK_FOUND)
   message(STATUS "Check VTK ..................................... yes (${VTK_VERSION})")
 else(VTK_FOUND)
   message(FATAL_ERROR "Check VTK ..................................... no")
+  return()
 endif(VTK_FOUND)
 
-include(${VTK_USE_FILE})
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
 
@@ -280,7 +280,6 @@ if(${QT4_INSTALLED})
   ${UI_HDRS}
   ${RCS}
   )
-  TARGET_LINK_LIBRARIES( jpsvis ${QT_LIBRARIES})
 elseif( ${QT5_INSTALLED})
   message(STATUS "qt libs: ${Qt5Widgets_LIBRARIES}  ${QT_LIBRARIES}")
   # http://www.kdab.com/using-cmake-with-qt-5/
@@ -295,7 +294,6 @@ elseif( ${QT5_INSTALLED})
   ${RCS}
   )
  qt5_use_modules(jpsvis Widgets)
- target_link_libraries(jpsvis ${Qt5Widgets_LIBRARIES} Qt5::Network Qt5::Xml)
 else()
     MESSAGE(STATUS "Check Qt           ...  no")
 endif()
@@ -323,16 +321,17 @@ elseif( ${QT5_INSTALLED})
   SET(QTLIBS ${Qt5Widgets_LIBRARIES})
 endif()
 
-if(VTK_LIBRARIES)
-  if(${VTK_VERSION} VERSION_LESS "6")
-   TARGET_LINK_LIBRARIES( jpsvis ${QTLIBS} QVTK) #qt5
-  else()
-    #    TARGET_LINK_LIBRARIES( jpsvis  ${VTK_LIBRARIES} ${QT_LIBRARIES})
-    TARGET_LINK_LIBRARIES( jpsvis  ${VTK_LIBRARIES} ${QTLIBS}) #qt5
-  endif()
-else() # this else is not yet tested
-  target_link_libraries(jpsvis vtkHybrid QVTK vtkViews ${QTLIBS})
-endif()
+target_link_libraries(jpsvis ${VTK_LIBRARIES} Qt5::Widgets  Qt5::Network Qt5::Xml)
+if (VTK_VERSION VERSION_LESS "8.90.0")
+  # old system
+  include(${VTK_USE_FILE})
+else ()
+  # vtk_module_autoinit is needed
+  vtk_module_autoinit(
+    TARGETS jpsvis
+    MODULES ${VTK_LIBRARIES}
+    )
+endif ()
 # ================================ Compiler flags
 # enable as many warnings as possible
 set(warning_flags "-Wall -Wextra")
