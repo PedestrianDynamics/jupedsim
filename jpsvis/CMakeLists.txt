@@ -293,7 +293,6 @@ elseif( ${QT5_INSTALLED})
   ${UI_HDRS}
   ${RCS}
   )
- qt5_use_modules(jpsvis Widgets)
 else()
     MESSAGE(STATUS "Check Qt           ...  no")
 endif()
