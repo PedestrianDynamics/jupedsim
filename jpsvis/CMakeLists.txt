@@ -7,7 +7,7 @@
 #windows flags: -DDESIRED_QT_VERSION=5 -DCMAKE_PREFIX_PATH=D:\Qt32bit\Qt5.4.1\5.4\msvc2013 -DCMAKE_PREFIX_PATH=VTK.0.0\VTK-7.0.0\build -G "Visual Studio 12 2013"
 #--------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.2)
-project( jpsvis LANGUAGES CXX)
+project( jpsvis LANGUAGES CXX C)
 IF(APPLE)
   cmake_policy(SET CMP0025 NEW) #fixes error No known features for CXX compiler (on mac)
 ENDIF(APPLE)
