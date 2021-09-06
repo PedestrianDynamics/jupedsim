@@ -5,7 +5,6 @@
 #include "geometry/Transition.h"
 #include <vtkPolyDataMapper.h>
 #include <vtkTextActor3D.h>
-#include <vtkTubeFilter.h>
 struct TrainTimeTable
 {
      int id;
@@ -24,8 +23,7 @@ struct TrainTimeTable
      vtkSmartPointer<vtkPolyDataMapper> mapper;
      vtkSmartPointer<vtkActor> actor;
      vtkSmartPointer<vtkTextActor3D> textActor;
-     vtkSmartPointer<vtkPolyDataMapper> tubeMapper;
-     vtkSmartPointer<vtkActor> tubeActor;
+
 };
 struct TrainType
 {

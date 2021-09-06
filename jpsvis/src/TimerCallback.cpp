@@ -84,8 +84,7 @@
 #include <vtkVectorText.h>
 #include <vtkFollower.h>
 #include <vtkLine.h>
-#include <vtkCellArray.h>
-#include <vtkCylinderSource.h>
+#include <vtkTubeFilter.h>
 
 #include "geometry/FacilityGeometry.h"
 #include "geometry/Point.h"
@@ -171,41 +170,59 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 
                     for (auto tab: extern_trainTimeTables)
                         {
-
+                             VTK_CREATE(vtkTextActor3D, textActor);
                              auto trainType = tab.second->type;
                              sprintf(label, "%s_%d", trainType.c_str(), tab.second->id);
                              auto trainId = tab.second->id;
                              auto trackStart = tab.second->pstart;
                              auto trackEnd = tab.second->pend;
-                             auto trainStart = tab.second->tstart;
-                             auto trainEnd = tab.second->tend;
+                             auto trainOffset = tab.second->train_offset;
+                             auto reversed = tab.second->reversed;
                              auto train = extern_trainTypes[trainType];
-                             auto doors = train->doors;
+                             auto train_length = train->_length;
+                             auto doors = train->_doors;
                              std::vector<Point> doorPoints;
                              auto mapper = tab.second->mapper;
                              auto actor = tab.second->actor;
+                             double elevation = tab.second->elevation;
                              auto txtActor = tab.second->textActor;
-                             auto tactor = tab.second->tubeActor;
-                             auto tmapper = tab.second->tubeMapper;
-                             trainStart = trainStart + trackStart;
-                             trainEnd = trainEnd + trackStart;
-                             for(auto && door: doors)
+                             auto trackDirection = (reversed)?(trackStart - trackEnd):(trackEnd - trackStart);
+                             trackDirection = trackDirection.Normalized();
+                             auto trainStart = (reversed)?trackEnd + trackDirection*trainOffset:trackStart + trackDirection*trainOffset;
+                             auto trainEnd = (reversed)?trackEnd + trackDirection*(trainOffset+train_length):trackStart + trackDirection*(trainOffset+train_length);
+                             
+                             for(auto door: doors)
                              {
-                                  doorPoints.push_back(door.GetPoint1() + trainStart);
-                                  doorPoints.push_back(door.GetPoint2() + trainStart);
+                                   Point trainDirection =  trainEnd - trainStart;;                                   
+                                   trainDirection = trainDirection.Normalized();
+                                   Point point1 = trainStart + trainDirection*(door._distance);
+                                   Point point2 = trainStart + trainDirection*(door._distance+door._width);
+                                  doorPoints.push_back(point1);
+                                  doorPoints.push_back(point2);
                              }//doors
                              if(once)
                              {
-                                  auto data = getTrainData(trainStart, trainEnd, doorPoints);
+                                   auto data = getTrainData(trainStart, trainEnd, doorPoints, elevation);
                                   mapper->SetInputData(data);
                                   actor->SetMapper(mapper);
-                                  actor->GetProperty()->SetLineWidth(12.5);
-                                  actor->GetProperty()->SetOpacity(0.9);
-                                  actor->GetProperty()->SetColor(
-                                       std::abs(0.9-renderer->GetBackground()[0]),
-                                       std::abs(0.9-renderer->GetBackground()[1]),
-                                       std::abs(0.9-renderer->GetBackground()[2])
-                                       );
+                                  actor->GetProperty()->SetLineWidth(10);
+                                  actor->GetProperty()->SetOpacity(0.1);//feels cool!
+                                  if(trainType == "RE")
+                                  {
+                                        actor->GetProperty()->SetColor(
+                                              std::abs(0.0-renderer->GetBackground()[0]),
+                                              std::abs(1.0-renderer->GetBackground()[1]),
+                                              std::abs(1.0-renderer->GetBackground()[2])
+                                              );
+                                  }                              
+                                  else
+                                  {
+                                        actor->GetProperty()->SetColor(
+                                              std::abs(0.9-renderer->GetBackground()[0]),
+                                              std::abs(0.9-renderer->GetBackground()[1]),
+                                              std::abs(1.0-renderer->GetBackground()[2])
+                                              );
+                                  }
                                   // text
                                   txtActor->GetTextProperty()->SetOpacity(0.7);
                                   double pos_x = 50*(trainStart._x + trainEnd._x+0.5);
@@ -215,57 +232,43 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                                   txtActor->SetInput (label);
                                   txtActor->GetTextProperty()->SetFontSize (30);
                                   txtActor->GetTextProperty()->SetBold (true);
-                                  txtActor->GetTextProperty()->SetColor (
-                                       std::abs(0.9-renderer->GetBackground()[0]),
-                                       std::abs(0.9-renderer->GetBackground()[1]),
-                                       std::abs(0.5-renderer->GetBackground()[2])
-                                       );
+                                  if(trainType == "RE")
+                                  {
+                                        txtActor->GetTextProperty()->SetColor (
+                                              std::abs(0.0-renderer->GetBackground()[0]),
+                                              std::abs(1.0-renderer->GetBackground()[1]),
+                                              std::abs(1.0-renderer->GetBackground()[2])
+                                              );                                        
+                                  }
+                                  else{
+                                        txtActor->GetTextProperty()->SetColor (
+                                              std::abs(0.9-renderer->GetBackground()[0]),
+                                              std::abs(0.9-renderer->GetBackground()[1]),
+                                              std::abs(0.5-renderer->GetBackground()[2])
+                                              );                                        
+                                        
+                                  }                        
                                   txtActor->SetVisibility(false);
-                                  //-----------
-                                  // Create a line
-                                  vtkSmartPointer<vtkLineSource> lineSource =
-                                       vtkSmartPointer<vtkLineSource>::New();
-                                  lineSource->SetPoint1(100*trainStart._x, 100*trainStart._y, 0.0);
-                                  lineSource->SetPoint2(100*trainEnd._x, 100*trainEnd._y, 0.0);
-
-                                  // Create a tube (cylinder) around the line
-                                  vtkSmartPointer<vtkTubeFilter> tubeFilter =
-                                       vtkSmartPointer<vtkTubeFilter>::New();
-                                  tubeFilter->SetInputConnection(lineSource->GetOutputPort());
-                                  tubeFilter->SetRadius(12.5);
-                                  tubeFilter->SetNumberOfSides(50);
-                                  tubeFilter->Update();
-
-                                  // Create a mapper and actor
-                                  tmapper->SetInputConnection(tubeFilter->GetOutputPort());
-                                  tactor->GetProperty()->SetOpacity(0.3); //Make the tube have some transparency.
-                                  tactor->SetMapper(tmapper);
-
-
                              }
                              if((now >= tab.second->tin) && (now <= tab.second->tout))
                              {
                                   actor->SetVisibility(true);
                                   txtActor->SetVisibility(true);
-                                  tactor->SetVisibility(true);
                              }
                              else
                              {
                                   actor->SetVisibility(false);
                                   txtActor->SetVisibility(false);
-                                  tactor->SetVisibility(false);
                              }
                              if(once)
                              {
                                   renderer->AddActor(actor);
                                   renderer->AddActor(txtActor);
-                                  renderer->AddActor(tactor);
                                   if(countTrains == extern_trainTimeTables.size())
                                        once = 0;
                              }
 
                              countTrains++;
-
                         }// time table
 
 
@@ -666,7 +669,8 @@ void TimerCallback::setTextActor(vtkTextActor* ra)
 
 
 vtkSmartPointer<vtkPolyData>  TimerCallback::getTrainData(
-     Point trainStart, Point trainEnd, std::vector<Point> doorPoints)
+      Point trainStart, Point trainEnd, std::vector<Point> doorPoints, double elevation)
+
 {
      float factor = 100.0;
 
@@ -679,15 +683,21 @@ vtkSmartPointer<vtkPolyData>  TimerCallback::getTrainData(
      vtkSmartPointer<vtkPoints> pts =
           vtkSmartPointer<vtkPoints>::New();
 
-     pt[0] = factor*trainStart._x; pt[1] = factor*trainStart._y;
+     pt[0] = factor*trainStart._x; 
+     pt[1] = factor*trainStart._y;
+     pt[2] = factor*elevation;
      pts->InsertNextPoint(pt);
 
      for(auto p: doorPoints)
      {
-          pt[0] = factor*p._x; pt[1] = factor*p._y;
-           pts->InsertNextPoint(pt);
+          pt[0] = factor*p._x; 
+          pt[1] = factor*p._y;
+          pt[2] = factor*elevation;
+          pts->InsertNextPoint(pt);
      }
-     pt[0] = factor*trainEnd._x; pt[1] = factor*trainEnd._y;
+     pt[0] = factor*trainEnd._x; 
+     pt[1] = factor*trainEnd._y;
+     pt[2] = factor*elevation;
      pts->InsertNextPoint(pt);
 
 
