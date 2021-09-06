@@ -26,7 +26,7 @@
  *
  *
  */
-
+#include <optional>
 #include "SaxParser.h"
 #include "TrajectoryPoint.h"
 #include "FrameElement.h"
@@ -683,6 +683,159 @@ void SaxParser::clearPoints()
      }
      _currentPointsList.clear();
      return;
+}
+double SaxParser::GetElevation(QString geometryFile, int roomId, int subroomId)
+{
+
+     double C_z;
+     QString wd;
+     QDir dir(wd);
+     QDir fileDir(geometryFile);
+     SystemSettings::getWorkingDirectory(wd);
+     if(!fileDir.isAbsolute())
+     {
+          QString s = dir.relativeFilePath(geometryFile);
+          geometryFile=wd + QDir::separator() + s;
+     }
+     QDomDocument doc("");
+     QFile file(geometryFile);
+     if (!file.open(QIODevice::ReadOnly)) {
+          qDebug()<<"GetElevation: could not open the file: "<< geometryFile <<endl;
+          exit(-1);
+     }
+     QString *errorCode = new QString();
+     if (!doc.setContent(&file, errorCode)) {
+          file.close();
+          qDebug()<<errorCode<<endl;
+          exit(-1);
+     }
+     TiXmlDocument docGeo(geometryFile.toStdString());
+     if (!docGeo.LoadFile()) {
+           Debug::Messages("%s", docGeo.ErrorDesc());
+           Debug::Error("LoadGeometry: could not parse the geometry file %s", geometryFile.toStdString().c_str());
+           return -1;
+     }
+
+     TiXmlElement* xRootNode = docGeo.RootElement();
+     if( ! xRootNode ) {
+           Debug::Error("Root element does not exist");
+           return -1;
+     }
+     TiXmlNode*  xRoomsNode = xRootNode->FirstChild("rooms");
+     if (!xRoomsNode) {
+           Debug::Error("The geometry should have at least one room and one subroom");
+          return false;
+     }
+     for(TiXmlElement* xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
+               xRoom = xRoom->NextSiblingElement("room")) {
+           int room_id = xmltoi(xRoom->Attribute("id"), -1);
+           if (room_id != roomId) continue;
+           
+           for(TiXmlElement* xSubRoom = xRoom->FirstChildElement("subroom"); xSubRoom;
+                    xSubRoom = xSubRoom->NextSiblingElement("subroom")) {
+
+               int subroom_id = xmltoi(xSubRoom->Attribute("id"), -1);
+               if(subroom_id != subroomId) continue;
+               C_z = xmltof(xSubRoom->Attribute("C_z"), 0.0);
+           }
+     }
+     return C_z;     
+}
+std::tuple<Point, Point> SaxParser::GetTrackStartEnd(QString geometryFile, int trackId)
+{
+     QString wd;
+     QDir dir(wd);
+     QDir fileDir(geometryFile);
+     SystemSettings::getWorkingDirectory(wd);
+     if(!fileDir.isAbsolute())
+     {
+          QString s = dir.relativeFilePath(geometryFile);
+          geometryFile=wd + QDir::separator() + s;
+     }
+
+     // QString = QDir::cleanPath(wd + QDir::separator() + fileName);
+     Debug::Messages("filename: <%s)", geometryFile.toStdString().c_str());
+     Debug::Messages("wd: <%s>",wd.toStdString().c_str());
+
+
+     std::vector<Point> end_points;
+     Point start_point(0,0);
+     Point end_point(0,0);
+
+     QDomDocument doc("");
+     QFile file(geometryFile);
+     if (!file.open(QIODevice::ReadOnly)) {
+          qDebug()<<"GetTrackStartEnd: could not open the file: "<< geometryFile <<endl;
+          exit(-1);
+     }
+     QString *errorCode = new QString();
+     if (!doc.setContent(&file, errorCode)) {
+          file.close();
+          qDebug()<<errorCode<<endl;
+          exit(-1);
+     }
+     QDomElement root= doc.firstChildElement("geometry");
+     //only parsing the geometry node
+     if(root.tagName()!="geometry"){
+                 std::tuple<Point, Point> ret = std::make_tuple(Point(0,0), Point(0,0));
+                 std::cout << "root is not geometry\n";
+                 std::cout << root.tagName().toStdString() << "\n";
+                 return ret;
+     }
+
+
+     //parsing the subrooms
+     QDomNodeList xSubRoomsNodeList=doc.elementsByTagName("subroom");
+     //parsing the walls     
+     for (int i = 0; i < xSubRoomsNodeList.length(); i++) {
+          QDomElement xPoly = xSubRoomsNodeList.item(i).firstChildElement("polygon");
+          while(!xPoly.isNull()) {
+                auto Type = xPoly.attribute("type","notype").toStdString();
+                auto Caption = xPoly.attribute("caption", "nocaption").toStdString();
+                int parsed_trackId = xPoly.attribute("track_id", "-1").toInt();
+                if(Type != "track")
+                {
+                      // std::cout << "Polygon is not a track. Continue\n";
+                      // std::cout << Type << "\n";
+                      xPoly = xPoly.nextSiblingElement("polygon");
+                      continue;
+                }
+
+                if(parsed_trackId != trackId)
+                {
+                      xPoly = xPoly.nextSiblingElement("polygon");
+                      continue;
+                }
+               QDomNodeList xVertices=xPoly.elementsByTagName("vertex");
+               for( int i=0; i<xVertices.count(); i++) {
+                     auto start=xVertices.item(i).toElement().attribute("start", "false");
+
+                     double x1=xVertices.item(i).toElement().attribute("px", "0").toDouble();
+                     double y1=xVertices.item(i).toElement().attribute("py", "0").toDouble();
+                     if (start == "true")
+                     {
+                           start_point = Point(x1, y1);
+                     }
+                     else{
+                           end_points.push_back(Point(x1, y1)); // collect other points of track 
+                     }
+               }
+               xPoly = xPoly.nextSiblingElement("polygon");
+          }//poly
+     }//sub
+
+     double min_d = -10000;
+     // find the track point with the biggest distance to start.
+     for (auto p: end_points){
+           double d = (p-start_point).NormSquare();
+           if (d > min_d)
+           {
+                 end_point = p;
+                 min_d = d;
+           }
+     }
+     std::tuple<Point, Point> ret = std::make_tuple(start_point, end_point);
+     return ret;
 }
 
 
@@ -1783,11 +1936,11 @@ bool SaxParser::LoadTrainTimetable(std::string Filename, std::map<int, std::shar
                     Debug::Messages("WARNING: Duplicate id for train time table found [%d]",TTT->id);
                     exit(EXIT_FAILURE);
                }
+               // get track start 
                trainTimeTables[TTT->id] = TTT;
           }
           else {
-          cout << "too bad! \n" ;
-
+          std:cout << "too bad! \n" ;
           }
      }
      return true;
@@ -1816,10 +1969,10 @@ bool   SaxParser::LoadTrainType(std::string Filename, std::map<std::string, std:
                     e = e->NextSiblingElement("train")) {
           std::shared_ptr<TrainType> TT = parseTrainTypeNode(e);
           if (TT) {
-               if (trainTypes.count(TT->type)!=0) {
-                    Debug::Messages("WARNING: Duplicate type for train found [%s]",TT->type.c_str());
+                if (trainTypes.count(TT->_type.c_str())!=0) {
+                    Debug::Messages("WARNING: Duplicate type for train found [%s]",TT->_type.c_str());
                }
-               trainTypes[TT->type] = TT;
+               trainTypes[TT->_type] = TT;
           }
      }
      return true;
@@ -1832,22 +1985,24 @@ bool   SaxParser::LoadTrainType(std::string Filename, std::map<std::string, std:
 std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement * e)
 {
      Debug::Messages("INFO:\tLoading train time table NODE");
-     std::string caption = xmltoa(e->Attribute("caption"), "-1");
+     // std::string caption = xmltoa(e->Attribute("caption"), "-1");
      int id = xmltoi(e->Attribute("id"), -1);
+     int track_id = xmltoi(e->Attribute("track_id"), -1);
+     double train_offset = xmltof(e->Attribute("train_offset"), -1);
+     bool reversed = false;
+     double elevation = 5; // dummy default value
+     std::string in = xmltoa(e->Attribute("reversed"), "false");
+     std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+     if(in == "false") {
+           reversed = false;
+     } else if(in == "true") {
+           reversed = true;
+     } else {
+           reversed = false;
+     }
      std::string type = xmltoa(e->Attribute("type"), "-1");
      int room_id = xmltoi(e->Attribute("room_id"), -1);
      int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
-     int platform_id = xmltoi(e->Attribute("platform_id"), -1);
-     float track_start_x = xmltof(e->Attribute("track_start_x"), -1);
-     float track_start_y = xmltof(e->Attribute("track_start_y"), -1);
-     float track_end_x = xmltof(e->Attribute("track_end_x"), -1);
-     float track_end_y = xmltof(e->Attribute("track_end_y"), -1);
-
-     float train_start_x = xmltof(e->Attribute("train_start_x"),-1);
-     float train_start_y = xmltof(e->Attribute("train_start_y"), -1);
-     float train_end_x = xmltof(e->Attribute("train_end_x"), -1);
-     float train_end_y = xmltof(e->Attribute("train_end_y"), -1);
-
      float arrival_time = xmltof(e->Attribute("arrival_time"), -1);
      float departure_time = xmltof(e->Attribute("departure_time"), -1);
      // @todo: check these values for correctness e.g. arrival < departure
@@ -1856,15 +2011,11 @@ std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement 
      Debug::Messages("INFO:\t   type: %s", type.c_str());
      Debug::Messages("INFO:\t   room_id: %d", room_id);
      Debug::Messages("INFO:\t   subroom_id: %d", subroom_id);
-     Debug::Messages("INFO:\t   platform_id: %d", platform_id);
-     Debug::Messages("INFO:\t   track_start: [%.2f, %.2f]", track_start_x, track_start_y);
-     Debug::Messages("INFO:\t   track_end: [%.2f, %.2f]", track_end_x, track_end_y);
+     Debug::Messages("INFO:\t   track_id: %d", track_id);
+     Debug::Messages("INFO:\t   train_offset: %.2f", train_offset);
      Debug::Messages("INFO:\t   arrival_time: %.2f", arrival_time);
-     Debug::Messages("INFO:\t   departure_time: %.2f", departure_time);
-     Point track_start(track_start_x, track_start_y);
-     Point track_end(track_end_x, track_end_y);
-     Point train_start(train_start_x, train_start_y);
-     Point train_end(train_end_x, train_end_y);
+     Debug::Info("departure_time: %.2f", departure_time);
+     // Debug::Info("Reversed: {}", reversed);
      std::shared_ptr<TrainTimeTable> trainTimeTab = std::make_shared<TrainTimeTable>(
           TrainTimeTable{
                     id,
@@ -1873,61 +2024,120 @@ std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement 
                     subroom_id,
                     arrival_time,
                     departure_time,
-                    track_start,
-                    track_end,
-                    train_start,
-                    train_end,
-                    platform_id,
+                    Point (0, 0),
+                    Point (0, 0),
+                    Point (0, 0),
+                    Point (0, 0),
+                    track_id,
                     false,
                     false,
+                    reversed,
+                    train_offset,
+                    elevation,
                     vtkSmartPointer<vtkPolyDataMapper>::New(),
                     vtkSmartPointer<vtkActor>::New(),
                     vtkSmartPointer<vtkTextActor3D>::New(),
-                    vtkSmartPointer<vtkPolyDataMapper>::New(),
-                    vtkSmartPointer<vtkActor>::New(),
                     });
 
      return trainTimeTab;
 }
-
-std::shared_ptr<TrainType> SaxParser::parseTrainTypeNode(TiXmlElement * e)
+std::shared_ptr<TrainType> SaxParser::parseTrainTypeNode(TiXmlElement * node)
 {
-     Debug::Messages("INFO:\tLoading train type");
-     // int T_id = xmltoi(e->Attribute("id"), -1);
-     std::string type = xmltoa(e->Attribute("type"), "-1");
-     int agents_max = xmltoi(e->Attribute("agents_max"), -1);
-     float length = xmltof(e->Attribute("length"), -1);
-     // std::shared_ptr<Transition> t = new Transition();
-     // std::shared_ptr<Transition> doors;
-     Transition t;
-     std::vector<Transition> doors;
+      Debug::Info("Loading train type");
 
-     for (TiXmlElement* xDoor = e->FirstChildElement("door"); xDoor;
-          xDoor = xDoor->NextSiblingElement("door")) {
-          int D_id = xmltoi(xDoor->Attribute("id"), -1);
-          float x1 = xmltof(xDoor->FirstChildElement("vertex")->Attribute("px"), -1);
-          float y1 = xmltof(xDoor->FirstChildElement("vertex")->Attribute("py"), -1);
-          float x2 = xmltof(xDoor->LastChild("vertex")->ToElement()->Attribute("px"), -1);
-          float y2 = xmltof(xDoor->LastChild("vertex")->ToElement()->Attribute("py"), -1);
-          Point start(x1, y1);
-          Point end(x2, y2);
-          float outflow = xmltof(xDoor->Attribute("outflow"), -1);
-          float dn = xmltoi(xDoor->Attribute("dn"), -1);
-          t.SetID(D_id);
-          t.SetCaption(type + std::to_string(D_id));
-          t.SetPoint1(start);
-          t.SetPoint2(end);
-          //t.SetOutflowRate(outflow);
-          //t.SetDN(dn);
-          doors.push_back(t);
-     }
-     Debug::Messages("INFO:\t   type: %s", type.c_str());
-     Debug::Messages("INFO:\t   capacity: %d", agents_max);
-     Debug::Messages("INFO:\t   number of doors: %d", doors.size());
-     for(auto d: doors)
-     {
-          Debug::Messages("INFO\t      door (%d): %s | %s", d.GetID(), d.GetPoint1().toString().c_str(), d.GetPoint2().toString().c_str());
-     }
+    std::string type = xmltoa(node->Attribute("type"), "NO_TYPE");
+    if(type == "NO_TYPE") {
+          Debug::Warning("No train type name given. Use 'NO_TYPE' instead.");
+    }
+    Debug::Info("type: {}", type.c_str());
+
+    int agents_max = xmltoi(node->Attribute("agents_max"), std::numeric_limits<int>::max());
+    if(agents_max == std::numeric_limits<int>::max()) {
+          Debug::Warning("No agents_max given. Set to default: {}.", agents_max);
+    }
+    Debug::Info("max Agents: {}", agents_max);
+
+    // Read and check if correct value
+    double length = -std::numeric_limits<double>::infinity();
+    if(const char * attribute = node->Attribute("length"); attribute) {
+        if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
+           value >= 0.) {
+            length = value;
+        } else {
+              Debug::Warning("{}: input for length should be non-negative {}. Skip entry.", type.c_str(), value);
+            return nullptr;
+        }
+    } else {
+          Debug::Warning("{}: input for length not found. Skip entry.", type.c_str());
+        return nullptr;
+    }
+    Debug::Info("length: {}", length);
+
+
+    std::vector<TrainDoor> doors;
+    for(TiXmlElement * xDoor = node->FirstChildElement("door"); xDoor != nullptr;
+        xDoor                = xDoor->NextSiblingElement("door")) {
+        // Read distance and check if correct value
+        double distance = -std::numeric_limits<double>::infinity();
+        if(const char * attribute = xDoor->Attribute("distance"); attribute) {
+            if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
+               value >= 0.) {
+                distance = value;
+            } else {
+                Debug::Warning(
+                      "{}: input for distance should be non-negative {}. Skip entry.", type.c_str(), value);
+                continue;
+            }
+        } else {
+              Debug::Warning("{}: input for distance not found. Skip entry.", type.c_str());
+            continue;
+        }
+
+        // Read width and check if correct value
+        double width = -std::numeric_limits<double>::infinity();
+        if(const char * attribute = xDoor->Attribute("width"); attribute) {
+            if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
+               value > 0.) {
+                width = value;
+            } else {
+                Debug::Warning(
+                      "{}: input for width should be non-negative {}. Skip entry.", type.c_str(), value);
+                continue;
+            }
+        } else {
+              Debug::Warning("{}: input for width not found. Skip entry.", type.c_str());
+            continue;
+        }
+
+        // Read flow and check if correct value
+        double flow = -std::numeric_limits<double>::infinity();
+        if(const char * attribute = xDoor->Attribute("flow"); attribute) {
+            if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
+               value > 0.) {
+                flow = value;
+            } else {
+                Debug::Warning(
+                      "{}: input for flow should be >0 but is {:5.2}. Skip entry.", type.c_str(), value);
+                continue;
+            }
+        }
+
+        doors.emplace_back(TrainDoor{distance, width, flow});
+    }
+
+    if(doors.empty()) {
+          Debug::Error("Train {}: no doors given. Train will be ignored.", type.c_str());
+        return nullptr;
+    }
+
+    Debug::Info("number of doors: {}", doors.size());
+    for(const auto & d : doors) {
+        Debug::Info(
+            "Door:\tdistance: {:5.2f}\twidth: {:5.2f}\toutflow: {:5.2f}",
+            d._distance,
+            d._width,
+            d._flow);
+    }
 
      std::shared_ptr<TrainType> Type = std::make_shared<TrainType>(
           TrainType{

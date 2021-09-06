@@ -53,7 +53,7 @@ class vtkFFMPEGWriter;
 #include <vtkSmartPointer.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkLineSource.h>
-#include "train.h"
+#include "trains/train.h"
 
 class SyncData;
 class QObject;
@@ -137,7 +137,7 @@ public:
      //      Point trainStart, Point trainEnd, std::vector<Point> doorPoints);
 
      vtkSmartPointer<vtkPolyData> getTrainData(
-          Point trainStart, Point trainEnd, std::vector<Point> doorPoints);
+           Point trainStart, Point trainEnd, std::vector<Point> doorPoints, double elevation);
 
 
 private:
