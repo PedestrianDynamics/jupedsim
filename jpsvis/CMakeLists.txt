@@ -134,6 +134,7 @@ set( SRCS
   src/network/TraVisToServer.cpp
   src/MainWindow.cpp
   src/TrailPlotter.cpp
+  src/myqtreeview.cpp
   forms/jpsvis.rc
   )
 # all header files that should be treated with moc
@@ -181,6 +182,7 @@ set( HDR
   src/network/TraVisToServer.h
   src/MainWindow.h
   src/TrailPlotter.h
+  src/myqtreeview.h
   )
 IF(APPLE)
   SET(SRCS ${SRCS} ${MAC_FIX_SRC})

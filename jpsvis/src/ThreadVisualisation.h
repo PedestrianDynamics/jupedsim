@@ -68,10 +68,12 @@ extern Pedestrian** extern_pedestrians_firstSet;
 
 extern PointPlotter* extern_trail_plotter;
 
-extern  vtkTensorGlyph* extern_glyphs_pedestrians;
-extern  vtkTensorGlyph* extern_glyphs_pedestrians_3D;
-extern  vtkActor* extern_glyphs_pedestrians_actor_2D;
-extern  vtkActor* extern_glyphs_pedestrians_actor_3D;
+extern vtkTensorGlyph* extern_glyphs_pedestrians;
+extern vtkTensorGlyph* extern_glyphs_pedestrians_3D;
+extern vtkTensorGlyph* extern_glyphs_directions;
+extern vtkActor* extern_glyphs_pedestrians_actor_2D;
+extern vtkActor* extern_glyphs_pedestrians_actor_3D;
+extern vtkActor* extern_glyphs_directions_actor;
 
 extern SyncData extern_trajectories_firstSet;
 // extern vtkSmartPointer<vtkSphereSource> extern_mysphere;
@@ -90,7 +92,7 @@ public:
     void setFullsreen(bool status);
 
     /// set the camera to one of TOP/FRONT/SIDE
-    void setCameraPerspective(int mode);
+    void setCameraPerspective(int mode,int degree=0);
 
     /// load and display the geometry where
     /// the pedestrians will move

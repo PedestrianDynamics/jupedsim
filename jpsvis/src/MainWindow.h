@@ -38,7 +38,7 @@
 #include <QMainWindow>
 #include <QSettings>
 #include <QSplitter>
-#include <QTreeView>
+#include "myqtreeview.h"
 #include <QStandardItem>
 #include <QTreeWidget>
 
@@ -119,8 +119,8 @@ public Q_SLOTS:
     /// set the camera view angle to  TOP/FRONT/SIDE
     // TODO: high priority
     void slotSetCameraPerspectiveToTop();
-    void slotSetCameraPerspectiveToFront();
-    void slotSetCameraPerspectiveToSide();
+    void slotSetCameraPerspectiveToTopRotate();
+    void slotSetCameraPerspectiveToSideRotate();
     void slotSetCameraPerspectiveToVirtualAgent();
 
     //controls visualisation
@@ -194,6 +194,9 @@ public Q_SLOTS:
 
     /// enable/disable the pedestrian captions
     void slotShowPedestrianCaption();
+
+    /// enable/disable the pedestrian Directions
+    void slotShowDirections();
 
     /// update the contrast
     void slotUpdateContrastSlider(int newValue);
@@ -334,7 +337,7 @@ private:
     QLabel *labelMode;
     QSplitter _splitter;
     //QTreeWidget _geoStructure;
-    QTreeView _geoStructure;
+    MyQTreeView _geoStructure;
 
 };
 

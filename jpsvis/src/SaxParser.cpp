@@ -883,7 +883,7 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
 void SaxParser::parseGeometryTRAV(QString content, GeometryFactory& geoFac,QDomNode geo)
 {
 
-     cout<<"external geometry found"<<endl;
+     cout<<"external geometry found"<<std::endl;
      //creating am empty document
      // to be filled
      QDomDocument doc("");
@@ -895,26 +895,26 @@ void SaxParser::parseGeometryTRAV(QString content, GeometryFactory& geoFac,QDomN
           QFile file(content);
           if (!file.open(QIODevice::ReadOnly)) {
                //slotErrorOutput("could not open the File" );
-               cout<<"could not open the File"<<endl;
+               cout<<"could not open the File"<<std::endl;
                return ;
           }
           QString *errorCode = new QString();
           if (!doc.setContent(&file, errorCode)) {
                file.close();
                //slotErrorOutput(*errorCode);
-               cout<<errorCode->toStdString()<<endl;
+               cout<<errorCode->toStdString()<<std::endl;
                return ;
           }
           file.close();
           geoNode =doc.documentElement().namedItem("geometry");
 
           if (geoNode.isNull()) {
-               cout<<"No geometry information found. <geometry> <geometry/> tag is missing."<<endl;
+               cout<<"No geometry information found. <geometry> <geometry/> tag is missing."<<std::endl;
           }
      } else {
           if(content.isEmpty()) {
                geoNode=geo;
-               cout <<"parsing the old fashion way"<<endl;
+               cout <<"parsing the old fashion way"<<std::endl;
           } else {
                content = "<travisto>\n" +content+ "\n</travisto>\n";
                QString errorMsg="";
@@ -1425,7 +1425,7 @@ void SaxParser::parseGeometryXMLV04(QString filename, GeometryFactory& geoFac)
           geo->addObjectLabel(position,position,caption,color);
           geo->SetRoomCaption(roomCaption);
           geo->SetSubRoomCaption(subroomCaption);
-          cout<<"position: [" <<position[0]<<", "<<position[1]<<", "<<position[2]<<" ]"<<endl;;
+          cout<<"position: [" <<position[0]<<", "<<position[1]<<", "<<position[2]<<" ]"<<std::endl;;
           cout << roomCaption<< "  " << subroomCaption << "\n" ;
      }
 
@@ -1751,8 +1751,8 @@ void SaxParser::InitHeader(int major, int minor, int patch)
           _jps_ellipseColor=QString("ellipseColor");
      }
      if(major!=0) {
-          cout<<"unsupported header version: "<<major<<"."<<minor<<"."<<patch<<endl;
-          cout<<"Please use 0.5 0.5.1 or 0.6 "<<endl;
+          cout<<"unsupported header version: "<<major<<"."<<minor<<"."<<patch<<std::endl;
+          cout<<"Please use 0.5 0.5.1 or 0.6 "<<std::endl;
           exit(0);
      }
 }
@@ -1786,7 +1786,7 @@ bool SaxParser::LoadTrainTimetable(std::string Filename, std::map<int, std::shar
                trainTimeTables[TTT->id] = TTT;
           }
           else {
-          std:cout << "too bad! \n" ;
+          cout << "too bad! \n" ;
 
           }
      }

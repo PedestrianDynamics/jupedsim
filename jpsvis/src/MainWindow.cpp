@@ -202,6 +202,15 @@ MainWindow::MainWindow(QWidget *parent) :
     frameSliderHold=false;
 
     //some hand made stuffs
+	//the state of actionShowGeometry_Structure connect the state of the structure window
+    connect(&_geoStructure,&MyQTreeView::changeState,[=](){
+         ui.actionShowGeometry_Structure->setChecked(false);
+    });
+    //connections
+    connect(ui.actionShow_Directions,&QAction::changed,this,&MainWindow::slotShowDirections);
+    connect(ui.actionTop_Rotate,&QAction::triggered,this,&MainWindow::slotSetCameraPerspectiveToTopRotate);
+    connect(ui.actionSide_Rotate,&QAction::triggered,this,&MainWindow::slotSetCameraPerspectiveToSideRotate);
+
     ui.BtFullscreen->setVisible(false);
 
     labelCurrentAction = new QLabel();
@@ -343,13 +352,13 @@ void MainWindow::slotHelpAbout()
      Debug::Messages("About JPSvis");
      QString gittext = QMessageBox::tr(
           "<p style=\"line-height:1.4\" style=\"color:Gray;\"><small><i>Version %1</i></small></p>"
-          "<p style=\"line-height:0.4\" style=\"color:Gray;\"><i>CommHash</i> %2</p>"
-          "<p  style=\"line-height:0.4\" style=\"color:Gray;\"><i>CommDate</i> %3</p>"
+          "<p style=\"line-height:0.4\" style=\"color:Gray;\"><i>Hash</i> %2</p>"
+          "<p  style=\"line-height:0.4\" style=\"color:Gray;\"><i>Date</i> %3</p>"
           "<p  style=\"line-height:0.4\" style=\"color:Gray;\"><i>Branch</i> %4</p><hr>"
           ).arg(JPSVIS_VERSION).arg(GIT_COMMIT_HASH).arg(GIT_COMMIT_DATE).arg(GIT_BRANCH);
 
      QString text = QMessageBox::tr(
-          "<p style=\"color:Gray;\"><small><i> &copy; 2009-2019  Ulrich Kemloh <br><a href=\"http://jupedsim.org\">jupedsim.org</a></i></small></p>"
+          "<p style=\"color:Gray;\"><small><i> &copy; 2009-2021  Ulrich Kemloh <br><a href=\"http://jupedsim.org\">jupedsim.org</a></i></small></p>"
 
         );
 
@@ -514,6 +523,12 @@ void MainWindow::slotStopPlaying()
  */
 bool MainWindow::slotLoadFile()
 {
+    //reset before load new file
+    slotReset();// when choose Discard : anyDatasetLoaded()==true
+    if (anyDatasetLoaded())
+    {
+        return false;
+    }
     return slotAddDataSet();
 }
 
@@ -707,7 +722,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     SystemSettings::setFilenamePrefix(QFileInfo ( fileName ).baseName()+"_");
 
     //the geometry actor
-    auto&& geometry = _visualisationThread->getGeometry();
+    GeometryFactory & geometry = _visualisationThread->getGeometry();
     QString geometry_file;
     //try to get a geometry filename
     if(fileName.endsWith(".xml",Qt::CaseInsensitive))
@@ -1046,7 +1061,7 @@ void MainWindow::slotReset()
                                         "This will also clear any dataset if loaded.\n"
                                         "Do you wish to continue?", QMessageBox::Discard
                                         | QMessageBox::Yes, QMessageBox::Yes);
-        if (res == QMessageBox::No) {
+        if (res == QMessageBox::Discard) {
             return;
         }
     }
@@ -1383,6 +1398,10 @@ void MainWindow::clearDataSet(int ID)
         ui.actionFirst_Group->setChecked(false);
         slotToggleFirstPedestrianGroup();
         numberOfDatasetLoaded--;
+        _visualisationThread->getGeometry().Clear(); //also clear the geometry info
+        //close geometryStrucutre window
+        if (_geoStructure.isVisible())
+            _geoStructure.close();
         break;
 
     default:
@@ -1575,6 +1594,12 @@ void MainWindow::slotShowPedestrianCaption()
     extern_force_system_update=true;
 }
 
+void MainWindow::slotShowDirections()
+{
+    SystemSettings::setShowDirections(ui.actionShow_Directions->isChecked());
+    extern_force_system_update=true;
+}
+
 void MainWindow::slotToogleShowAxis()
 {
 
@@ -1725,22 +1750,32 @@ void MainWindow::slotSetCameraPerspectiveToTop()
     //cerr <<"Setting camera view to top"<<endl;
 }
 
-void MainWindow::slotSetCameraPerspectiveToFront()
+void MainWindow::slotSetCameraPerspectiveToTopRotate()
 {
-    int p= 2; //FRONT
-    _visualisationThread->setCameraPerspective(p);
-    //disable the virtual agent view
-    SystemSettings::setVirtualAgent(-1);
-    //	cerr <<"Setting camera view to FRONT"<<endl;
+    int p= 2; //TOP rotate
+    bool ok=false;
+    int degree=QInputDialog::getInt(this,"Top rotate","Rotation degrees [range:-180-->180]:",0,-180,180,10,&ok);
+    if (ok)
+    {
+        _visualisationThread->setCameraPerspective(p,degree);
+        //disable the virtual agent view
+        SystemSettings::setVirtualAgent(-1);
+        //cerr <<"Setting camera view to top"<<endl;
+    }
 }
 
-void MainWindow::slotSetCameraPerspectiveToSide()
+void MainWindow::slotSetCameraPerspectiveToSideRotate()
 {
-    int p= 3; //SIDE
-    _visualisationThread->setCameraPerspective(p);
-    //disable the virtual agent view
-    SystemSettings::setVirtualAgent(-1);
-    //cerr <<"Setting camera view to Side"<<endl;
+    int p= 3; //SIDE rotate
+    bool ok=false;
+    int degree=QInputDialog::getInt(this,"Side rotate","Rotation degrees [range:-80-->80]:",0,-80,80,10,&ok);
+    if (ok)
+    {
+        _visualisationThread->setCameraPerspective(p,degree);
+        //disable the virtual agent view
+        SystemSettings::setVirtualAgent(-1);
+        //cerr <<"Setting camera view to top"<<endl;
+    }
 }
 
 void MainWindow::slotSetCameraPerspectiveToVirtualAgent()
@@ -1784,7 +1819,7 @@ void MainWindow::slotTakeScreenShot()
 /// load settings, parsed from the project file
 void MainWindow::loadAllSettings()
 {
-     Debug::Messages("restoring previous settings");
+    Debug::Messages("restoring previous settings");
     QSettings settings;
 
     //visualisation
@@ -1831,6 +1866,13 @@ void MainWindow::loadAllSettings()
         SystemSettings::setShowAgentsCaptions(checked);
         Debug::Messages("show Captions: %s", checked?"Yes":"No");
     }
+    if (settings.contains("view/showDirections"))
+    {
+        bool checked=settings.value("view/showDirections").toBool();
+        ui.actionShow_Directions->setChecked(checked);
+        SystemSettings::setShowDirections(checked);
+        Debug::Messages("show Directions: %s", checked?"Yes":"No");
+    }
     if (settings.contains("view/showTrajectories"))
     {
         bool checked = settings.value("view/showTrajectories").toBool();
@@ -1864,7 +1906,7 @@ void MainWindow::loadAllSettings()
         bool checked = settings.value("view/showWalls").toBool();
         ui.actionShow_Walls->setChecked(checked);
         slotShowHideWalls();
-        Debug::Messages("show Walls: ", checked?"Yes":"No");
+        Debug::Messages("show Walls: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showGeoCaptions"))
     {
@@ -1963,6 +2005,7 @@ void MainWindow::saveAllSettings()
     settings.setValue("view/2d", ui.action2_D->isChecked());
     settings.setValue("view/showAgents", ui.actionShow_Agents->isChecked());
     settings.setValue("view/showCaptions", ui.actionShow_Captions->isChecked());
+    settings.setValue("view/showDirections",ui.actionShow_Directions->isChecked());
     settings.setValue("view/showTrajectories", ui.actionShow_Trajectories->isChecked());
     settings.setValue("view/showGeometry", ui.actionShow_Geometry->isChecked());
     settings.setValue("view/showFloor", ui.actionShow_Floor->isChecked());
@@ -2033,7 +2076,12 @@ void MainWindow::dropEvent(QDropEvent *event)
     if (urls.isEmpty())
         return;
 
-    slotStopPlaying();
+    //reset before load new file
+    slotReset();// when choose Discard : anyDatasetLoaded()==true
+    if (anyDatasetLoaded())
+    {
+        return;
+    }
 
     bool mayPlay = false;
 

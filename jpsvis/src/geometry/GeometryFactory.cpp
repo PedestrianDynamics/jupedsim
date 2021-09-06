@@ -48,10 +48,9 @@ void GeometryFactory::Set3D(bool status)
 
 void GeometryFactory::Clear()
 {
-    for (auto&& src: _geometryFactory)
-    {
-        cout<<"cleaning...";
-    }
+    _geometryFactory.clear();
+    _model.clear();
+    _model.setObjectName("");
 }
 
 void GeometryFactory::ChangeWallsColor(double* color)
