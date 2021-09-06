@@ -426,7 +426,7 @@ void SystemSettings::DeleteLogfile()
     //first close the opened file
     delete Log;
     if(! QFile::remove(logfile)) {
-        qDebug()<<"he log file could not delete the file"<<endl;
+        qDebug()<<"he log file could not delete the file"<<Qt::endl;
     }
 }
 

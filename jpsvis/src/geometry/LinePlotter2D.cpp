@@ -235,12 +235,8 @@ vtkAssembly* LinePlotter2D::createAssembly()
         polyData->GetPointData()->SetScalars(door_lineScalars);
 
         // create mapper
-
-#if VTK_MAJOR_VERSION <= 5
-        door_mapper->SetInput(polyData);
-#else
         door_mapper->SetInputData(polyData);
-#endif
+
         door_mapper->SetLookupTable(m_lookupTable);
         door_mapper->SetColorModeToMapScalars();
         door_mapper->SetScalarModeToUsePointData();
@@ -267,11 +263,7 @@ vtkAssembly* LinePlotter2D::createAssembly()
         polyData->SetLines(wall_lines);
         polyData->GetPointData()->SetScalars(wall_lineScalars);
         // create mapper
-#if VTK_MAJOR_VERSION <= 5
-        wall_mapper->SetInput(polyData);
-#else
         wall_mapper->SetInputData(polyData);
-#endif
         wall_mapper->SetLookupTable(m_lookupTable);
         wall_mapper->SetColorModeToMapScalars();
         wall_mapper->SetScalarModeToUsePointData();
@@ -289,11 +281,8 @@ vtkAssembly* LinePlotter2D::createAssembly()
         polyData->SetLines(navline_lines);
         polyData->GetPointData()->SetScalars(navline_lineScalars);
         // create mapper
-#if VTK_MAJOR_VERSION <= 5
-        navline_mapper->SetInput(polyData);
-#else
         navline_mapper->SetInputData(polyData);
-#endif
+
         navline_mapper->SetLookupTable(m_lookupTable);
         navline_mapper->SetColorModeToMapScalars();
         navline_mapper->SetScalarModeToUsePointData();

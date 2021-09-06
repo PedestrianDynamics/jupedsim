@@ -1350,13 +1350,13 @@ void SaxParser::parseGeometryXMLV04(QString filename, GeometryFactory& geoFac)
      // This should be a fall back option
 
      if (!file.open(QIODevice::ReadOnly)) {
-          qDebug()<<"could not open the file: "<<filename<<endl;
+          qDebug()<<"could not open the file: "<<filename<<Qt::endl;
           return ;
      }
      QString *errorCode = new QString();
      if (!doc.setContent(&file, errorCode)) {
           file.close();
-          qDebug()<<errorCode<<endl;
+          qDebug()<<errorCode<<Qt::endl;
           return ;
      }
      QDomElement root= doc.documentElement();
@@ -1691,7 +1691,7 @@ bool SaxParser::ParseGradientFieldVTK(QString fileName, GeometryFactory& geoFac)
           fileName=wd+"/"+fileName;
      }
 
-     qDebug()<<"Opening the gradient field:"<<fileName<<endl;
+     qDebug()<<"Opening the gradient field:"<<fileName<<Qt::endl;
      // Read the file
      VTK_CREATE(vtkStructuredPointsReader, reader);
      reader->SetFileName(fileName.toStdString().c_str());

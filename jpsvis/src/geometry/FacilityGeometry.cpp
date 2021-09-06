@@ -526,14 +526,9 @@ void FacilityGeometry::addFloor(vtkPolyData* polygonPolyData )
     // Create a mapper and actor
     VTK_CREATE(vtkTriangleFilter,filter);
     VTK_CREATE(vtkPolyDataMapper,mapper);
-
-#if VTK_MAJOR_VERSION <= 5
-    filter->SetInput(polygonPolyData);
-    mapper->SetInput(filter->GetOutput());
-#else
+    
     filter->SetInputData(polygonPolyData);
     mapper->SetInputConnection(filter->GetOutputPort());
-#endif
 
     floorActor->SetMapper(mapper);
     floorActor->GetProperty()->SetColor(0,0,1);
@@ -557,13 +552,9 @@ void FacilityGeometry::addObstacles(vtkPolyData* polygonPolyData )
     VTK_CREATE(vtkTriangleFilter,filter);
     VTK_CREATE(vtkPolyDataMapper,mapper);
 
-#if VTK_MAJOR_VERSION <= 5
-    filter->SetInput(polygonPolyData);
-    mapper->SetInput(filter->GetOutput());
-#else
     filter->SetInputData(polygonPolyData);
     mapper->SetInputConnection(filter->GetOutputPort());
-#endif
+
 
     obstaclesActor->SetMapper(mapper);
     obstaclesActor->GetProperty()->SetColor(0.4,0.4,0.4);
@@ -618,11 +609,7 @@ void FacilityGeometry::addRectangle(double x1, double y1, double x2, double y2, 
     VTK_CREATE(vtkActor, imageActor);
     VTK_CREATE(vtkDataSetMapper, map);
 
-#if VTK_MAJOR_VERSION <= 5
-    map->SetInput(image);
-#else
     map->SetInputData(image);
-#endif
 
     //map->SetLookupTable(lookupTable);
     imageActor->SetMapper(map);
@@ -684,11 +671,7 @@ void FacilityGeometry::addFloor(double x1, double y1, double x2, double y2, doub
     VTK_CREATE(vtkActor, imageActor);
     VTK_CREATE(vtkDataSetMapper, map);
 
-#if VTK_MAJOR_VERSION <= 5
-    map->SetInput(image);
-#else
     map->SetInputData(image);
-#endif
 
     //map->SetLookupTable(lookupTable);
     imageActor->SetMapper(map);
