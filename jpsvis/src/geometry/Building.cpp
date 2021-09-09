@@ -29,7 +29,7 @@
 #include "Building.h"
 #include "../geometry/SubRoom.h"
 #include "../geometry/Room.h"
-#include "../Debug.h"
+#include "../Log.h"
 
 #ifdef _SIMULATOR
 #include "../pedestrian/Pedestrian.h"
@@ -82,33 +82,6 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
 }
 #endif
 
-// bool Building::AddTrainType(std::shared_ptr<TrainType> TT)
-// {
-//       if (_trainTypes.count(TT->type)!=0) {
-//             // Log->Write("WARNING: Duplicate type for train found [%s]",TT->type);
-//       }
-//       _trainTypes[TT->type] = TT;
-//       return true;
-// }
-
-// bool Building::AddTrainTimeTable(std::shared_ptr<TrainTimeTable> TTT)
-// {
-//       if (_trainTimeTables.count(TTT->id)!=0) {
-//             Log->Write("WARNING: Duplicate id for train time table found [%d]",TTT->id);
-//             exit(EXIT_FAILURE);
-//       }
-//       _trainTimeTables[TTT->id] = TTT;
-//       return true;
-// }
-// const std::map<std::string, std::shared_ptr<TrainType> >& Building::GetTrainTypes() const
-// {
-//       return _trainTypes;
-// }
-
-// const std::map<int, std::shared_ptr<TrainTimeTable> >& Building::GetTrainTimeTables() const
-// {
-//       return _trainTimeTables;
-// }
 
 
 Building::~Building()
@@ -195,8 +168,8 @@ Room* Building::GetRoom(int index) const
      //todo: obsolete since the check is done by .at()
      if(_rooms.count(index)==0)
      {
-          Log->Write("ERROR: Wrong 'index' in CBuiling::GetRoom() Room ID: %d size: %d",index, _rooms.size());
-          Log->Write("\tControl your rooms ID and make sure they are in the order 0, 1, 2,.. ");
+          Log::Error("Wrong 'index' in CBuiling::GetRoom() Room ID: %d size: %d",index, _rooms.size());
+          Log::Error("Control your rooms ID and make sure they are in the order 0, 1, 2,.. ");
           return nullptr;
      }
      //return _rooms[index];
@@ -216,7 +189,7 @@ void Building::AddRoom(Room* room)
 
 void Building::AddSurroundingRoom()
 {
-     Log->Write("INFO: \tAdding the room 'outside' ");
+     Log::Info("Adding the room 'outside' ");
      // first look for the geometry boundaries
      double x_min = FLT_MAX;
      double x_max = -FLT_MAX;
@@ -293,7 +266,7 @@ void Building::AddSurroundingRoom()
 
 bool Building::InitGeometry()
 {
-     Log->Write("INFO: \tInit Geometry");
+     Log::Info("Init Geometry");
 
      for(auto&& itr_room: _rooms)
      {
@@ -346,7 +319,7 @@ bool Building::InitGeometry()
           if(s2) s2->AddNeighbor(s1);
      }
 
-     Log->Write("INFO: \tInit Geometry successful!!!\n");
+     Log::Info("Init Geometry successful!!!\n");
 
      return true;
 }
@@ -381,65 +354,57 @@ bool Building::LoadGeometry(const std::string &geometryfile)
      //get the geometry filename from the project file
      string geoFilenameWithPath=  geometryfile; //_projectRootDir +
 
-     Debug::Messages("LoadGeometry: Root Dir: <%s>", _projectRootDir.c_str());
-     Debug::Messages("LoadGeometry: geometryfile: <%s>", geometryfile.c_str());
-     Debug::Messages("LoadGeometry: geoFilenameWithPath: <%s>", geoFilenameWithPath.c_str());
+     Log::Info("LoadGeometry: Root Dir: <%s>", _projectRootDir.c_str());
+     Log::Info("LoadGeometry: geometryfile: <%s>", geometryfile.c_str());
+     Log::Info("LoadGeometry: geoFilenameWithPath: <%s>", geoFilenameWithPath.c_str());
 
      if(geometryfile=="")
      {
           TiXmlDocument doc(_projectFilename);
           if (!doc.LoadFile()) {
-                Debug::Error("%s", doc.ErrorDesc());
-                Debug::Error("LoadGeometry: could not parse the project file");
+                Log::Error("%s", doc.ErrorDesc());
+                Log::Error("LoadGeometry: could not parse the project file");
                return false;
           }
 
-          Debug::Messages("Parsing the geometry file");
+          Log::Info("Parsing the geometry file");
           TiXmlElement* xMainNode = doc.RootElement();
 
           if(xMainNode->FirstChild("geometry")) {
                 std::cout <<"geometry file found.\n";
                 _geometryFilename=xMainNode->FirstChild("geometry")->FirstChild()->Value();
                 geoFilenameWithPath=_projectRootDir+_geometryFilename;
-                Debug::Messages("LoadGeometry: Root Dir: <%s>", _projectRootDir.c_str());
-                Debug::Messages("LoadGeometry: geometryfile: <%s>", geometryfile.c_str());
-                Debug::Messages("LoadGeometry: geoFilenameWithPath: <%s>", geoFilenameWithPath.c_str());
-                Debug::Messages("INFO: \tgeometry <%s>", _geometryFilename.c_str());
+                Log::Info("LoadGeometry: Root Dir: <%s>", _projectRootDir.c_str());
+                Log::Info("LoadGeometry: geometryfile: <%s>", geometryfile.c_str());
+                Log::Info("LoadGeometry: geoFilenameWithPath: <%s>", geoFilenameWithPath.c_str());
+                Log::Info("INFO: \tgeometry <%s>", _geometryFilename.c_str());
           }
      }
 
      TiXmlDocument docGeo(geoFilenameWithPath);
      if (!docGeo.LoadFile()) {
-           Debug::Messages("%s", docGeo.ErrorDesc());
-           Debug::Error("LoadGeometry: could not parse the geometry file %s", geoFilenameWithPath.c_str());
+           Log::Info("%s", docGeo.ErrorDesc());
+           Log::Error("LoadGeometry: could not parse the geometry file %s", geoFilenameWithPath.c_str());
           return false;
      }
 
      TiXmlElement* xRootNode = docGeo.RootElement();
      if( ! xRootNode ) {
-           Debug::Error("Root element does not exist");
+           Log::Error("Root element does not exist");
           return false;
      }
 
      if( xRootNode->ValueStr () != "geometry" ) {
-          Debug::Error("Root element value is not 'geometry'.");
+          Log::Error("Root element value is not 'geometry'.");
           return false;
      }
      if(xRootNode->Attribute("unit"))
           if(string(xRootNode->Attribute("unit")) != "m") {
-                Debug::Error("Only the unit m (meters) is supported. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
+                Log::Error("Only the unit m (meters) is supported. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
                return false;
           }
 
-     /* double version = xmltof(xRootNode->Attribute("version"), -1); */
-
-     /* if ( (version - std::stod(JPS_VERSION))*(version - std::stod(JPS_VERSION)) > 0.01*0.01){  //|| version != std::stod(JPS_OLD_VERSION)) { */
-     /*       Log->Write(" \tWrong geometry version %.2f!", version); */
-     /*       Log->Write(" \tOnly versions = %s or %s are supported",JPS_VERSION, JPS_OLD_VERSION); */
-     /*      Log->Write(" \tPlease update the version of your geometry file to %s",JPS_VERSION); */
-     /*      return false; */
-     /* } */
-
+     
      _caption = xmltoa(xRootNode->Attribute("caption"), "virtual building");
      //The file has two main nodes
      //<rooms> and <transitions>
@@ -447,7 +412,7 @@ bool Building::LoadGeometry(const std::string &geometryfile)
      //processing the rooms node
      TiXmlNode*  xRoomsNode = xRootNode->FirstChild("rooms");
      if (!xRoomsNode) {
-           Debug::Error("The geometry should have at least one room and one subroom");
+           Log::Error("The geometry should have at least one room and one subroom");
           return false;
      }
 
@@ -493,8 +458,8 @@ bool Building::LoadGeometry(const std::string &geometryfile)
 
                if (type == "stair") {
                     if(xSubRoom->FirstChildElement("up")==NULL) {
-                          Debug::Error("the attribute <up> and <down> are missing for the stair");
-                          Debug::Error("check your geometry file");
+                          Log::Error("the attribute <up> and <down> are missing for the stair");
+                          Log::Error("check your geometry file");
                           return false;
                     }
                     double up_x = xmltof( xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
@@ -619,25 +584,25 @@ bool Building::LoadGeometry(const std::string &geometryfile)
           if(xNodeFile)
           {
                std::string transFilename = _projectRootDir + "/" +xNodeFile->FirstChild()->ValueStr();
-               Log->Write("INFO:\tParsing transition from file <%s>", transFilename.c_str());
+               Log::Info("Parsing transition from file <%s>", transFilename.c_str());
                TiXmlDocument docTrans(transFilename);
                if (!docTrans.LoadFile()) {
-                    Log->Write("ERROR: \t%s", docTrans.ErrorDesc());
-                    Log->Write("ERROR: \t could not parse the transitions file.");
+                    Log::Error("%s", docTrans.ErrorDesc());
+                    Log::Error("could not parse the transitions file.");
                     return false;
                }
                TiXmlElement* xRootNodeTrans = docTrans.RootElement();
                if (!xRootNodeTrans) {
-                    Log->Write("ERROR:\tRoot element does not exist in transitions file.");
+                 Log::Error("Root element does not exist in transitions file.");
                     return false;
                }
                if (xRootNodeTrans->ValueStr() != "JPScore") {
-                    Log->Write("ERROR:\tParsing transitions file. Root element value is not 'JPScore'.");
+                    Log::Error("Parsing transitions file. Root element value is not 'JPScore'.");
                     return false;
                }
                TiXmlNode* xTransNodeFile = xRootNodeTrans->FirstChild("transitions");
                if (!xTransNodeFile) {
-                    Log->Write("ERROR:\tNo Transitions in file found.");
+                    Log::Error("No Transitions in file found.");
                     return false;
                }
                for (TiXmlElement* xTrans = xTransNodeFile->FirstChildElement("transition"); xTrans;
@@ -647,12 +612,12 @@ bool Building::LoadGeometry(const std::string &geometryfile)
                }
           }
           else{
-               Log->Write("INFO:\tNot parsing transition from file %s");
+            Log::Info("Not parsing transition from file %s");
           }
 
      }
 
-     Debug::Messages("Loading building file successful!!!\n");
+     Log::Info("Loading building file successful!!!\n");
 
      //everything went fine
      return true;
@@ -718,12 +683,12 @@ Transition* Building::ParseTransitionNode(TiXmlElement * xTrans)
 
 void Building::WriteToErrorLog() const
 {
-     Log->Write("GEOMETRY: ");
+     Log::Info("GEOMETRY: ");
      for (int i = 0; i < GetNumberOfRooms(); i++) {
           Room* r = GetRoom(i);
           r->WriteToErrorLog();
      }
-     Log->Write("ROUTING: ");
+     Log::Info("ROUTING: ");
 
      for (map<int, Crossing*>::const_iterator iter = _crossings.begin();
                iter != _crossings.end(); ++iter) {
@@ -737,7 +702,6 @@ void Building::WriteToErrorLog() const
                iter != _hLines.end(); ++iter) {
           iter->second->WriteToErrorLog();
      }
-     Log->Write("\n");
 }
 
 Room* Building::GetRoom(string caption) const
@@ -747,7 +711,7 @@ Room* Building::GetRoom(string caption) const
           if(it.second->GetCaption()==caption)
                return it.second.get();
      }
-     Log->Write("ERROR: Room not found with caption " + caption);
+     Log::Error("Room not found with caption %s", caption.c_str());
      //return NULL;
      exit(EXIT_FAILURE);
 }
@@ -759,11 +723,7 @@ bool Building::AddCrossing(Crossing* line)
          int IDCrossing = 1000 * IDRoom + IDLine;
          if (_crossings.count(IDCrossing) != 0)
          {
-                 char tmp[CLENGTH];
-                 sprintf(tmp,
-                         "ERROR: Duplicate index for crossing found [%d] in Routing::AddCrossing()",
-                         IDCrossing);
-                 Log->Write(tmp);
+                 Log::Error("Duplicate index for crossing found [%d] in Routing::AddCrossing()", IDCrossing);                 
                  exit(EXIT_FAILURE);
          }
      _crossings[IDCrossing] = line;
@@ -773,11 +733,8 @@ bool Building::AddCrossing(Crossing* line)
 void Building::AddTransition(Transition* line)
 {
      if (_transitions.count(line->GetID()) != 0) {
-          char tmp[CLENGTH];
-          sprintf(tmp,
-                    "ERROR: Duplicate index for transition found [%d] in Routing::AddTransition()",
-                    line->GetID());
-          Log->Write(tmp);
+          Log::Error("Duplicate index for transition found [%d] in Routing::AddTransition()",
+                    line->GetID());         
           exit(EXIT_FAILURE);
      }
      _transitions[line->GetID()] = line;
@@ -789,10 +746,10 @@ void Building::AddHline(Hline* line)
           // check if the lines are identical
           Hline* ori= _hLines[line->GetID()];
           if(ori->operator ==(*line)) {
-                Debug::Messages("Skipping identical hlines with ID [%d]",line->GetID());
+                Log::Info("Skipping identical hlines with ID [%d]",line->GetID());
                return;
           } else {
-               Log->Write(
+               Log::Error(
                          "ERROR: Duplicate index for hlines found [%d] in Routing::AddHline(). You have [%d] hlines",
                          line->GetID(), _hLines.size());
                exit(EXIT_FAILURE);
@@ -804,8 +761,8 @@ void Building::AddHline(Hline* line)
 void Building::AddGoal(Goal* goal)
 {
      if (_goals.count(goal->GetId()) != 0) {
-          Log->Write(
-                    "ERROR: Duplicate index for goal found [%d] in Routing::AddGoal()",
+       Log::Error(
+                    "Duplicate index for goal found [%d] in Routing::AddGoal()",
                     goal->GetId());
           exit(EXIT_FAILURE);
      }
@@ -841,7 +798,7 @@ Transition* Building::GetTransition(string caption) const
                return itr->second;
      }
 
-     Log->Write("WARNING: No Transition with Caption: " + caption);
+     Log::Warning("No Transition with Caption: %s",caption.c_str());
      exit(EXIT_FAILURE);
 }
 
@@ -853,8 +810,8 @@ Transition* Building::GetTransition(int ID)
           if (ID == -1)
                return NULL;
           else {
-               Log->Write(
-                         "ERROR: I could not find any transition with the 'ID' [%d]. You have defined [%d] transitions",
+               Log::Error(
+                         "I could not find any transition with the 'ID' [%d]. You have defined [%d] transitions",
                          ID, _transitions.size());
                exit(EXIT_FAILURE);
           }
@@ -869,8 +826,8 @@ Goal* Building::GetFinalGoal(int ID)
           if (ID == -1)
                return NULL;
           else {
-               Log->Write(
-                         "ERROR: I could not find any goal with the 'ID' [%d]. You have defined [%d] goals",
+               Log::Error(
+                         "I could not find any goal with the 'ID' [%d]. You have defined [%d] goals",
                          ID, _goals.size());
                exit(EXIT_FAILURE);
           }
@@ -898,7 +855,7 @@ Crossing* Building::GetTransOrCrossByName(string caption) const
           }
      }
 
-     Log->Write("WARNING: No Transition or Crossing with Caption: " + caption);
+     Log::Warning("No Transition or Crossing with Caption: %s", caption.c_str());
      return NULL;
 }
 
@@ -930,7 +887,7 @@ Hline* Building::GetTransOrCrossByUID(int id) const
                     return itr->second;
           }
      }
-     Log->Write("ERROR: No Transition or Crossing or hline with ID %d: " ,id);
+     Log::Error("No Transition or Crossing or hline with ID %d: " ,id);
      return NULL;
 }
 
@@ -944,22 +901,10 @@ SubRoom* Building::GetSubRoomByUID( int uid)
                     return itr_subroom.second.get();
           }
      }
-     Log->Write("ERROR:\t No subroom exits with the unique id %d",uid);
+     Log::Error("No subroom exits with the unique id %d",uid);
      return NULL;
 }
 
-//bool Building::IsVisible(Line* l1, Line* l2, bool considerHlines)
-//{
-//
-//     for(auto&& itr_room: _rooms)
-//     {
-//          for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
-//          {
-//               if(itr_subroom.second->IsVisible(l1,l2,considerHlines)==false) return false;
-//          }
-//     }
-//     return true;
-//}
 
 bool Building::IsVisible(const Point& p1, const Point& p2, const std::vector<SubRoom*>& subrooms, bool considerHlines)
 {
@@ -987,7 +932,7 @@ bool Building::IsVisible(const Point& p1, const Point& p2, const std::vector<Sub
 
 bool Building::SanityCheck()
 {
-     Log->Write("INFO: \tChecking the geometry for artifacts");
+     Log::Info("Checking the geometry for artifacts");
      bool status = true;
 
      for(auto&& itr_room: _rooms)
@@ -999,7 +944,7 @@ bool Building::SanityCheck()
           }
      }
 
-     Log->Write("INFO: \t...Done!!!\n");
+     Log::Info("...Done!!!\n");
      return status;
 }
 
@@ -1057,7 +1002,7 @@ void Building::InitGrid(double cellSize)
      //no algorithms
      // the domain is made of a single cell
      if(cellSize==-1) {
-          Log->Write("INFO: \tBrute Force will be used for neighborhoods query");
+       Debug::Info("Brute Force will be used for neighborhoods query");
           if ( (x_max-x_min) < (y_max-y_min) ) {
                cellSize=(y_max-y_min);
           } else {
@@ -1065,34 +1010,34 @@ void Building::InitGrid(double cellSize)
           }
 
      } else {
-          Log->Write("INFO: \tInitializing the grid with cell size: %f ", cellSize);
+       Debug::Info("Initializing the grid with cell size: %f ", cellSize);
      }
 
      //_linkedCellGrid = new LCGrid(boundaries, cellSize, _allPedestians.size());
      _linkedCellGrid = new LCGrid(boundaries, cellSize, Pedestrian::GetAgentsCreated());
      _linkedCellGrid->ShallowCopy(_allPedestians);
 
-     Log->Write("INFO: \tDone with Initializing the grid ");
+     Debug::Info("Done with Initializing the grid ");
 }
 
 bool Building::LoadRoutingInfo(const string &filename)
 {
-     Log->Write("INFO:\tLoading extra routing information");
+     Debug::Info("Loading extra routing information");
      if (filename == "") {
-          Log->Write("INFO:\t No file supplied !");
-          Log->Write("INFO:\t done with loading extra routing information");
+          Debug::Info("No file supplied !");
+          Debug::Info("done with loading extra routing information");
           return true;
      }
      TiXmlDocument docRouting(filename);
      if (!docRouting.LoadFile()) {
-          Log->Write("ERROR: \t%s", docRouting.ErrorDesc());
-          Log->Write("ERROR: \t could not parse the routing file");
+          Debug::Error("%s", docRouting.ErrorDesc());
+          Debug::Error("could not parse the routing file");
           return false;
      }
 
      TiXmlElement* xRootNode = docRouting.RootElement();
      if( ! xRootNode ) {
-          Log->Write("ERROR:\tRoot element does not exist");
+          Debug::Error("tRoot element does not exist");
           return false;
      }
 
@@ -1150,7 +1095,7 @@ bool Building::LoadRoutingInfo(const string &filename)
 
                double id = xmltof(trip->Attribute("id"), -1);
                if (id == -1) {
-                    Log->Write("ERROR:\t id missing for trip");
+                    Debug::Error("id missing for trip");
                     return false;
                }
                string sTrip = trip->FirstChild()->ValueStr();
@@ -1165,26 +1110,26 @@ bool Building::LoadRoutingInfo(const string &filename)
                }
                _routingEngine->AddTrip(vTrip);
           }
-     Log->Write("INFO:\tdone with loading extra routing information");
+     Debug::Info("done with loading extra routing information");
      return true;
 }
 
 bool Building::LoadTrafficInfo()
 {
 
-     Log->Write("INFO:\tLoading  the traffic info file");
+     Debug::Info("Loading  the traffic info file");
 
      string trafficFile="";
      TiXmlDocument doc(_projectFilename);
      if (!doc.LoadFile()) {
-          Log->Write("ERROR: \t%s", doc.ErrorDesc());
-          Log->Write("ERROR: \t could not parse the project file");
+          Debug::Error("%s", doc.ErrorDesc());
+          Debug::Error("could not parse the project file");
           return false;
      }
 
      TiXmlNode* xRootNode = doc.RootElement()->FirstChild("traffic_constraints");
      if( ! xRootNode ) {
-          Log->Write("WARNING:\tcould not find any traffic information");
+          Debug::Warning("could not find any traffic information");
           return true;
      }
 
@@ -1215,10 +1160,10 @@ bool Building::LoadTrafficInfo()
                } else if (state == "close") {
                     GetTransition(id)->Close();
                } else {
-                    Log->Write("WARNING:\t Unknown door state: %s", state.c_str());
+                 Debug::Warning("Unknown door state: %s", state.c_str());
                }
           }
-     Log->Write("INFO:\tDone with loading traffic info file");
+     Debug::Info("Done with loading traffic info file");
      return true;
 }
 
@@ -1228,7 +1173,7 @@ void Building::DeletePedestrian(Pedestrian* &ped)
      vector<Pedestrian*>::iterator it;
      it = find(_allPedestians.begin(), _allPedestians.end(), ped);
      if (it == _allPedestians.end()) {
-          Log->Write ("\tERROR: \tPed not found with ID %d ",ped->GetID());
+          Debug::Error("Ped not found with ID %d ",ped->GetID());
           exit(EXIT_FAILURE);
           return;
      } else {
@@ -1249,7 +1194,6 @@ void Building::DeletePedestrian(Pedestrian* &ped)
                }
 
           }
-          //cout << "rescued agent: " << (*it)->GetID()<<endl;
 
           static int totalPeds= _allPedestians.size();
           _allPedestians.erase(it);
@@ -1276,7 +1220,7 @@ void Building::AddPedestrian(Pedestrian* ped)
      for(unsigned int p = 0;p<_allPedestians.size();p++){
           Pedestrian* ped1=_allPedestians[p];
           if(ped->GetID()==ped1->GetID()){
-               cout<<"Pedestrian already in the room ??? "<<ped->GetID()<<endl;
+               Debug::Warning("Pedestrian already in the room %d? ", ped->GetID());
                return;
           }
      }
@@ -1304,24 +1248,13 @@ void Building::InitSavePedPathway(const string &filename)
      _savePathway = true;
 
      if (_pathWayStream.is_open()) {
-          Log->Write("#INFO:\tsaving pedestrian paths to [ " + filename + " ]");
+       Debug::Info("saving pedestrian paths to [%s]", filename.c_str());
           _pathWayStream << "##pedestrian ways" << endl;
-          _pathWayStream << "#nomenclature roomid  caption" << endl;
-          //              for (unsigned int r=0;r< pRooms.size();r++){
-          //                      Room* room= GetRoom(r);
-          //                      const vector<int>& goals=room->GetAllTransitionsIDs();
-          //
-          //                      for(unsigned int g=0;g<goals.size();g++){
-          //                              int exitid=goals[g];
-          //                              string exit_caption=pRouting->GetGoal(exitid)->GetCaption();
-          //                              PpathWayStream<<exitid<<" "<<exit_caption<<endl;
-          //                      }
-          //              }
-          //
+          _pathWayStream << "#nomenclature roomid  caption" << endl;\          
           _pathWayStream << "#data room exit_id" << endl;
      } else {
-          Log->Write("#INFO:\t Unable to open [ " + filename + " ]");
-          Log->Write("#INFO:\t saving to stdout");
+       Debug::Info("#INFO:\t Unable to open [%s]", filename.c_Str());
+       Debug::Info("saving to stdout");
 
      }
 }
@@ -1485,11 +1418,11 @@ bool Building::SaveGeometry(const std::string &filename)
      if(geofile.is_open())
      {
           geofile<<geometry.str();
-          Log->Write("INFO:\tfile saved to %s",filename.c_str());
+          Debug::Info("file saved to %s",filename.c_str());
      }
      else
      {
-          Log->Write("ERROR:\tunable to save the geometry to %s",filename.c_str());
+          Debug::Error("unable to save the geometry to %s",filename.c_str());
           return false;
      }
 

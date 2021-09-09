@@ -31,7 +31,7 @@
 #include "../general/Macros.h"
 #include "Line.h"
 #include "../IO/OutputHandler.h"
-
+#include "../Log.h"
 
 #include  <cmath>
 #include  <sstream>
@@ -135,8 +135,8 @@ Point Line::NormalVec() const {
         /* Normieren */
         norm = sqrt(nx * nx + ny * ny);
         if (fabs(norm) < J_EPS) {
-            Log->Write("ERROR: \tLine::NormalVec() norm==0\n");
-            exit(0);
+            Log::Error("Line::NormalVec() norm==0\n");
+            exit(EXIT_FAILURE);
         }
         nx /= norm;
         ny /= norm;
@@ -269,14 +269,12 @@ bool Line::Overlapp(const Line& l) const
      {
 
           if( IsInLineSegment(l.GetPoint1()) && !HasEndPoint(l.GetPoint1()))
-          {
-               //Log->Write("ERROR: 1. Overlapping walls %s and %s ", toString().c_str(),l.toString().c_str());
+          {               
                return true;
           }
 
           if( IsInLineSegment(l.GetPoint2()) && !HasEndPoint(l.GetPoint2()))
-          {
-               //Log->Write("ERROR: 2. Overlapping walls %s and %s ", toString().c_str(),l.toString().c_str());
+          {           
                return true;
           }
      }
@@ -396,16 +394,12 @@ bool Line::IntersectionWithCircle(const Point &centre, double radius /*cm for pe
     delta = b * b - 4 * a * c;
 
     if ((x1 == x2) && (y1 == y2)) {
-        Log->Write("isLineCrossingCircle: Your line is a point");
+        Log::Error("isLineCrossingCircle: Your line is a point");
         return false;
     }
-    if (delta < 0.0) {
-        char tmp[CLENGTH];
-        sprintf(tmp, "there is a bug in 'isLineCrossingCircle', delta(%f) can t be <0 at this point.", delta);
-        Log->Write(tmp);
-        Log->Write("press ENTER");
+    if (delta < 0.0) {       
+        Log::Error("there is a bug in 'isLineCrossingCircle', delta(%f) can t be <0 at this point.", delta);       
         return false; //fixme
-        //getc(stdin);
     }
 
     double t1 = (-b + sqrt(delta)) / (2 * a);

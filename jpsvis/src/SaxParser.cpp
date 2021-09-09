@@ -32,7 +32,7 @@
 #include "FrameElement.h"
 #include "Frame.h"
 #include "SyncData.h"
-#include "Debug.h"
+#include "Log.h"
 
 #include "geometry/JPoint.h"
 #include "geometry/FacilityGeometry.h"
@@ -134,7 +134,6 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
                          break;
                     }
                     InitHeader(major,minor,patch);
-                    //cout<<"version found:"<<at.value(i).toStdString()<<endl;exit(0);
                }
           }
      } else if (qName == "file") {
@@ -312,9 +311,6 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
      } else if (qName == "frameRate") {
      } else if (qName == "geometry")
      {
-          //cout<<"geo tag found"<<endl;
-          //_geometry = std::shared_ptr<FacilityGeometry>(new FacilityGeometry("No name"));
-          //_geoFactory.AddElement(0,0,_geometry);
 
      }else if (qName == "gradient_field"){
           for(int i=0; i<at.length(); i++) {
@@ -451,7 +447,6 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
           for(int i=0; i<at.length(); i++) {
                if(at.localName(i)=="ID") {
                     _currentFrameID=at.value(i).toInt();
-                    //cout<<"frame: " <<_currentFrameID<<endl;
                }
           }
 
@@ -514,17 +509,6 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
 
           }
 //        xml2txt
-//        cout << _currentFrameID << " " << id << " " << xPos << " " << yPos << " " << zPos << "\n";
-
-          //coordinates of the ellipse, default to the head of the agent
-          //if(std::isnan(el_x)) el_x=xPos;
-          //if(std::isnan(el_y)) el_y=yPos;
-          //if(std::isnan(el_z)) el_z=zPos;
-
-          //double pos[3]={xPos,yPos,zPos};
-          //double vel[3]={xVel,yPos,zPos};
-          //double ellipse[7]={el_x,el_y,el_z,dia_a,dia_b,el_angle,el_color};
-          //double para[2]={agent_color,el_angle};
 
           double pos[3]= {xPos,yPos,zPos};
           double angle[3]= {0,0,el_angle};
@@ -668,8 +652,6 @@ bool SaxParser::fatalError(const QXmlParseException &exception)
 bool SaxParser::attributeDecl(const QString& eName, const QString& aName,
                               const QString& type, const QString& valueDefault, const QString& value)
 {
-     //cout<<aName.toStdString()<<endl;
-
      QString dummy=eName+aName+type+valueDefault+value;
      return (dummy==dummy);
      //return true;
@@ -700,30 +682,30 @@ double SaxParser::GetElevation(QString geometryFile, int roomId, int subroomId)
      QDomDocument doc("");
      QFile file(geometryFile);
      if (!file.open(QIODevice::ReadOnly)) {
-          qDebug()<<"GetElevation: could not open the file: "<< geometryFile <<endl;
-          exit(-1);
+       Log::Error("GetElevation: could not open the file: %s\n", geometryFile.toStdString().c_str());
+       exit(EXIT_FAILURE);
      }
      QString *errorCode = new QString();
      if (!doc.setContent(&file, errorCode)) {
           file.close();
-          qDebug()<<errorCode<<endl;
-          exit(-1);
+          Log::Error(">> ErrorCode %d\n", errorCode);
+          exit(EXIT_FAILURE);
      }
      TiXmlDocument docGeo(geometryFile.toStdString());
      if (!docGeo.LoadFile()) {
-           Debug::Messages("%s", docGeo.ErrorDesc());
-           Debug::Error("LoadGeometry: could not parse the geometry file %s", geometryFile.toStdString().c_str());
+           Log::Info("%s", docGeo.ErrorDesc());
+           Log::Error("LoadGeometry: could not parse the geometry file %s\n", geometryFile.toStdString().c_str());
            return -1;
      }
 
      TiXmlElement* xRootNode = docGeo.RootElement();
      if( ! xRootNode ) {
-           Debug::Error("Root element does not exist");
+           Log::Error("Root element does not exist");
            return -1;
      }
      TiXmlNode*  xRoomsNode = xRootNode->FirstChild("rooms");
      if (!xRoomsNode) {
-           Debug::Error("The geometry should have at least one room and one subroom");
+           Log::Error("The geometry should have at least one room and one subroom");
           return false;
      }
      for(TiXmlElement* xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
@@ -754,8 +736,8 @@ std::tuple<Point, Point> SaxParser::GetTrackStartEnd(QString geometryFile, int t
      }
 
      // QString = QDir::cleanPath(wd + QDir::separator() + fileName);
-     Debug::Messages("filename: <%s)", geometryFile.toStdString().c_str());
-     Debug::Messages("wd: <%s>",wd.toStdString().c_str());
+     Log::Info("filename: <%s)", geometryFile.toStdString().c_str());
+     Log::Info("wd: <%s>",wd.toStdString().c_str());
 
 
      std::vector<Point> end_points;
@@ -765,21 +747,20 @@ std::tuple<Point, Point> SaxParser::GetTrackStartEnd(QString geometryFile, int t
      QDomDocument doc("");
      QFile file(geometryFile);
      if (!file.open(QIODevice::ReadOnly)) {
-          qDebug()<<"GetTrackStartEnd: could not open the file: "<< geometryFile <<endl;
-          exit(-1);
+       Log::Error("GetTrackStartEnd: could not open the file: %s\n", geometryFile.toStdString().c_str());
+       exit(EXIT_FAILURE);
      }
      QString *errorCode = new QString();
      if (!doc.setContent(&file, errorCode)) {
           file.close();
-          qDebug()<<errorCode<<endl;
-          exit(-1);
+          Log::Error(">> ErrorCode: %d\n", errorCode);
+          exit(EXIT_FAILURE);
      }
      QDomElement root= doc.firstChildElement("geometry");
      //only parsing the geometry node
      if(root.tagName()!="geometry"){
                  std::tuple<Point, Point> ret = std::make_tuple(Point(0,0), Point(0,0));
-                 std::cout << "root is not geometry\n";
-                 std::cout << root.tagName().toStdString() << "\n";
+                 Log::Error("root %s is not geometry\n", root.tagName().toStdString().c_str());
                  return ret;
      }
 
@@ -795,8 +776,6 @@ std::tuple<Point, Point> SaxParser::GetTrackStartEnd(QString geometryFile, int t
                 int parsed_trackId = xPoly.attribute("track_id", "-1").toInt();
                 if(Type != "track")
                 {
-                      // std::cout << "Polygon is not a track. Continue\n";
-                      // std::cout << Type << "\n";
                       xPoly = xPoly.nextSiblingElement("polygon");
                       continue;
                 }
@@ -841,7 +820,7 @@ std::tuple<Point, Point> SaxParser::GetTrackStartEnd(QString geometryFile, int t
 
 bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
 {
-     Debug::Messages( "Enter SaxParser::parseGeometryJPS with filename <%s>",fileName.toStdString().c_str());
+     Log::Info( "Enter SaxParser::parseGeometryJPS with filename <%s>",fileName.toStdString().c_str());
 
      double captionsColor=0;//red
      QDir fileDir(fileName);
@@ -857,8 +836,8 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
      }
 
      // QString = QDir::cleanPath(wd + QDir::separator() + fileName);
-     Debug::Messages("filename: <%s)", fileName.toStdString().c_str());
-     Debug::Messages("wd: <%s>",wd.toStdString().c_str());
+     Log::Info("filename: <%s)", fileName.toStdString().c_str());
+     Log::Info("wd: <%s>",wd.toStdString().c_str());
      Building* building = new Building();
      string geometrypath = fileName.toStdString();
      building->SetProjectRootDir(wd.toStdString());
@@ -1013,7 +992,7 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
                          z1 = tr->GetSubRoom2()->GetElevation(p1);
                     }
                     else
-                         std::cout << "ERROR: Can not calculate elevations for transition " << tr->GetID() << ", " << tr->GetCaption() << ". Both subrooms are not defined \n";
+                         Log::Error("Can not calculate elevations for transition %d:%s. Both subrooms are not defined\n", tr->GetID(), tr->GetCaption().c_str());
 
                     geometry->addDoor(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
 
@@ -1031,277 +1010,34 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
      return true;
 }
 
-/// provided for convenience and will be removed in the next version
-
-void SaxParser::parseGeometryTRAV(QString content, GeometryFactory& geoFac,QDomNode geo)
-{
-
-     cout<<"external geometry found"<<std::endl;
-     //creating am empty document
-     // to be filled
-     QDomDocument doc("");
-     QDomNode geoNode;
-     auto geometry= shared_ptr<FacilityGeometry>(new FacilityGeometry("no name", "no name", "no name"));
-
-     //first try to open the file
-     if(content.endsWith(".trav",Qt::CaseInsensitive) ) {
-          QFile file(content);
-          if (!file.open(QIODevice::ReadOnly)) {
-               //slotErrorOutput("could not open the File" );
-               cout<<"could not open the File"<<std::endl;
-               return ;
-          }
-          QString *errorCode = new QString();
-          if (!doc.setContent(&file, errorCode)) {
-               file.close();
-               //slotErrorOutput(*errorCode);
-               cout<<errorCode->toStdString()<<std::endl;
-               return ;
-          }
-          file.close();
-          geoNode =doc.documentElement().namedItem("geometry");
-
-          if (geoNode.isNull()) {
-               cout<<"No geometry information found. <geometry> <geometry/> tag is missing."<<std::endl;
-          }
-     } else {
-          if(content.isEmpty()) {
-               geoNode=geo;
-               cout <<"parsing the old fashion way"<<std::endl;
-          } else {
-               content = "<travisto>\n" +content+ "\n</travisto>\n";
-               QString errorMsg="";
-               doc.setContent(content,&errorMsg);
-
-               if(!errorMsg.isEmpty()) {
-                    Debug::Error("%s", (const char *)errorMsg.toStdString().c_str());
-                    return;
-               }
-               geoNode =doc.elementsByTagName("geometry").item(0);
-          }
-     }
-
-     // for the case there is more than just one geometry Node
-     while (!geoNode.isNull()) {
-          QDomElement e = geoNode.toElement();
-          QDomNodeList walls = e.elementsByTagName("wall");
-          QDomNodeList doors = e.elementsByTagName("door");
-
-          //objects which can be positioned everywhere in the facility
-          QDomNodeList spheres = e.elementsByTagName("sphere");
-          QDomNodeList cuboids = e.elementsByTagName("cuboid");
-          QDomNodeList floors = e.elementsByTagName("floor");
-          QDomNodeList cylinders = e.elementsByTagName("cylinder");
-          QDomNodeList labels = e.elementsByTagName("label");
-
-
-          //parsing the walls
-          for (  int i = 0; i < walls.length(); i++) {
-               QDomElement el = walls.item(i).toElement();
-
-               //wall thickness, default to 30 cm
-               double thickness = el.attribute("thickness","15").toDouble()*FAKTOR;
-               //wall height default to 250 cm
-               double height = el.attribute("height","250").toDouble()*FAKTOR;
-               //wall color default to blue
-               double color = el.attribute("color","0").toDouble();
-
-               //get the points defining each wall
-               //not that a wall is not necessarily defined by two points, could be more...
-               QDomNodeList points = el.elementsByTagName("point");
-               for (  int i = 0; i < points.length() - 1; i++) {
-
-                    double x1=points.item(i).toElement().attribute("xPos", "0").toDouble()*FAKTOR;
-                    double y1=points.item(i).toElement().attribute("yPos", "0").toDouble()*FAKTOR;
-                    double z1=points.item(i).toElement().attribute("zPos", "0").toDouble()*FAKTOR;
-
-                    double x2=points.item(i+1).toElement().attribute("xPos", "0").toDouble()*FAKTOR;
-                    double y2=points.item(i+1).toElement().attribute("yPos", "0").toDouble()*FAKTOR;
-                    double z2=points.item(i+1).toElement().attribute("zPos", "0").toDouble()*FAKTOR;
-                    geometry->addWall(x1, y1,z1 ,x2, y2,z2,thickness,height,color);
-               }
-          }
-
-          //parsing the doors
-          if(doors.length()>0)
-               for (  int i = 0; i < doors.length(); i++) {
-                    QDomElement el = doors.item(i).toElement();
-
-                    //door thickness, default to 15 cm
-                    double thickness = el.attribute("thickness","15").toDouble()*FAKTOR;
-                    //door height default to 250 cm
-                    double height = el.attribute("height","250").toDouble()*FAKTOR;
-                    //door color default to blue
-                    double color = el.attribute("color","255").toDouble();
-
-                    //get the points defining each wall
-                    //not that a wall is not necesarily defined by two points, could be more...
-                    QDomNodeList points = el.elementsByTagName("point");
-                    //Debug::Messages("found:  " << points.length() <<" for this wall" <<endl;
-                    for (  int i = 0; i < points.length() - 1; i++) {
-
-                         double x1=points.item(i).toElement().attribute("xPos", "0").toDouble()*FAKTOR;
-                         double y1=points.item(i).toElement().attribute("yPos", "0").toDouble()*FAKTOR;
-                         double z1=points.item(i).toElement().attribute("zPos", "0").toDouble()*FAKTOR;
-
-                         double x2=points.item(i+1).toElement().attribute("xPos", "0").toDouble()*FAKTOR;
-                         double y2=points.item(i+1).toElement().attribute("yPos", "0").toDouble()*FAKTOR;
-                         double z2=points.item(i+1).toElement().attribute("zPos", "0").toDouble()*FAKTOR;
-                         geometry->addDoor(x1, y1, z1, x2, y2,z2,thickness,height,color);
-                    }
-               }
-
-          // parsing the objets
-          for (  int i = 0; i < spheres.length(); i++) {
-
-               double center[3];
-               center[0] = spheres.item(i).toElement().attribute("centerX", "0").toDouble()*FAKTOR;
-               center[1]= spheres.item(i).toElement().attribute("centerY", "0").toDouble()*FAKTOR;
-               center[2]= spheres.item(i).toElement().attribute("centerZ", "0").toDouble()*FAKTOR;
-               double color= spheres.item(i).toElement().attribute("color", "0").toDouble()*FAKTOR;
-               double radius= spheres.item(i).toElement().attribute("radius", "0").toDouble()*FAKTOR;
-               //double width = spheres.item(i).toElement().attribute("width", "0").toDouble();
-               //double height= spheres.item(i).toElement().attribute("height", "0").toDouble();
-
-               geometry->addObjectSphere(center,radius,color);
-          }
-          // cubic shapes
-          for (  int i = 0; i < cuboids.length(); i++) {
-
-               double center[3];
-               center[0] = cuboids.item(i).toElement().attribute("centerX", "0").toDouble()*FAKTOR;
-               center[1]= cuboids.item(i).toElement().attribute("centerY", "0").toDouble()*FAKTOR;
-               center[2]= cuboids.item(i).toElement().attribute("centerZ", "0").toDouble()*FAKTOR;
-               double color= cuboids.item(i).toElement().attribute("color", "0").toDouble();
-               double length= cuboids.item(i).toElement().attribute("length", "0").toDouble()*FAKTOR;
-               double width = cuboids.item(i).toElement().attribute("width", "0").toDouble()*FAKTOR;
-               double height= cuboids.item(i).toElement().attribute("height", "0").toDouble()*FAKTOR;
-               geometry->addObjectBox(center,height,width,length,color);
-               //		Debug::Error("cuboids: "<<length<<" || " <<width << " || "<<height<<" || "<<color<<endl;
-          }
-          // floors
-          for (  int i = 0; i < floors.length(); i++) {
-
-               double left =floors.item(i).toElement().attribute("xMin","0").toDouble()*FAKTOR;
-               double right =floors.item(i).toElement().attribute("xMax","0").toDouble()*FAKTOR;
-               double up =floors.item(i).toElement().attribute("yMax","0").toDouble()*FAKTOR;
-               double down =floors.item(i).toElement().attribute("yMin","0").toDouble()*FAKTOR;
-               double z =floors.item(i).toElement().attribute("z","0").toDouble()*FAKTOR;
-               geometry->addFloor(left,down,right,up,z);
-          }
-          // cylinders
-          for (  int i = 0; i < cylinders.length(); i++) {
-
-               double center[3], rotation[3];
-               center[0] = cylinders.item(i).toElement().attribute("centerX", "0").toDouble()*FAKTOR;
-               center[1]= cylinders.item(i).toElement().attribute("centerY", "0").toDouble()*FAKTOR;
-               center[2]= cylinders.item(i).toElement().attribute("centerZ", "0").toDouble()*FAKTOR;
-               double color= cylinders.item(i).toElement().attribute("color", "0").toDouble();
-               double radius= cylinders.item(i).toElement().attribute("radius", "0").toDouble()*FAKTOR;
-               double height= cylinders.item(i).toElement().attribute("height", "0").toDouble()*FAKTOR;
-               rotation[0] = cylinders.item(i).toElement().attribute("angleX", "90").toDouble();
-               rotation[1] = cylinders.item(i).toElement().attribute("angleY", "0").toDouble();
-               rotation[2] = cylinders.item(i).toElement().attribute("angleZ", "0").toDouble();
-               geometry->addObjectCylinder(center,radius,height,rotation,color);
-          }
-
-          //Labels
-          for (  int i = 0; i < labels.length(); i++) {
-
-               double center[3];
-               center[0] = labels.item(i).toElement().attribute("centerX", "0").toDouble()*FAKTOR;
-               center[1]= labels.item(i).toElement().attribute("centerY", "0").toDouble()*FAKTOR;
-               center[2]= labels.item(i).toElement().attribute("centerZ", "0").toDouble()*FAKTOR;
-               double color= labels.item(i).toElement().attribute("color", "0").toDouble();
-               string caption= labels.item(i).toElement().attribute("text", "").toStdString();
-               geometry->addObjectLabel(center,center,caption,color);
-          }
-          // you should normally have only one geometry node, but one never knows...
-          geoNode = geoNode.nextSiblingElement("geometry");
-     }
-
-     geoFac.AddElement(0,0,geometry);
-}
-
-QString SaxParser::extractGeometryFilename(QString &filename)
-{
-     QString extracted_geo_name="";
-     //first try to look at a string <file location="filename.xml"/>
-     QFile file(filename);
-     QString line;
-     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-          QTextStream in(&file);
-          while (!in.atEnd()) {
-               //look for a line with
-               line = in.readLine();
-               //cout<<"checking: "<<line.toStdString()<<endl;
-               if(line.contains("location" ,Qt::CaseInsensitive))
-                    if(line.contains("<file" ,Qt::CaseInsensitive)) {
-                         //try to extract what ever is inside the quotes
-
-                         QString begin="\"";
-                         QString end="\"";
-                         int startIndex = line.indexOf(begin)+begin.length();
-                         if(startIndex <= 0)continue; //false alarm
-                         int endIndex = line.indexOf(end,startIndex);
-                         if(endIndex <= 0)continue; // false alarm
-                         extracted_geo_name= line.mid(startIndex,endIndex - startIndex);
-                         return extracted_geo_name;
-                         //break;// we are done
-                    }
-               if(line.contains("<geometry" ,Qt::CaseInsensitive))
-                    if(line.contains("version" ,Qt::CaseInsensitive)) {
-                         //real geometry file
-                         QFileInfo fileInfoGeometry(filename);
-                         extracted_geo_name=fileInfoGeometry.fileName();
-                         return extracted_geo_name;
-                    }
-          }
-     }
-
-     //maybe this is already the geometry file itself ?
-     //do a rapid test
-     //    FacilityGeometry* geo = new FacilityGeometry();
-     //    QFileInfo fileInfoGeometry(filename);
-     //    extracted_geo_name=fileInfoGeometry.fileName();
-
-     //    //just check if it starts with geometry
-     //    //if(parseGeometryJPS(extracted_geo_name,geo)==true)
-     //    //{
-     //        return extracted_geo_name;
-     //    //}
-     //    delete geo;
-
-     return "";
-}
 // not used yet!!
 bool SaxParser::getSourcesTXT(QString &filename)
 {
-     std::cout << "Enter getSourcesTXT with " << filename.toStdString().c_str() << "\n";
+    Log::Info("Enter getSourcesTXT with %s\n", filename.toStdString().c_str());
 
      std::string  sfilename = filename.toStdString();
      TiXmlDocument docSource(sfilename);
      if (!docSource.LoadFile()) {
-          Debug::Error("ERROR: \t%s", docSource.ErrorDesc());
-          Debug::Error("ERROR: \t could not parse the sources file.");
+          Log::Error("%s", docSource.ErrorDesc());
+          Log::Error("could not parse the sources file.");
           return false;
      }
 
      TiXmlElement* xRootNodeSource = docSource.RootElement();
      if (!xRootNodeSource) {
-          Debug::Messages("ERROR:\tRoot element does not exist in source file.");
+          Log::Error("Root element does not exist in source file.");
           return false;
      }
      if (xRootNodeSource->ValueStr() != "JPScore") {
-          Debug::Messages("ERROR:\tRoot element value in source file is not 'JPScore'.");
+          Log::Error("Root element value in source file is not 'JPScore'.");
           return false;
      }
      TiXmlNode* xSourceF = xRootNodeSource->FirstChild("agents_sources");
      if (!xSourceF) {
-          Debug::Messages("ERROR:\tNo agents_sources tag in file not found.");
+          Log::Error("No agents_sources tag in file not found.");
           return false;
      }
-                                                 Debug::Messages("INFO:\t  Loading sources from file");
+     Log::Info("Loading sources from file");
      TiXmlNode* xSourceNodeF = xSourceF->FirstChild("source");
      if(xSourceNodeF)
      {
@@ -1344,11 +1080,11 @@ QString SaxParser::extractSourceFileTXT(QString &filename)
      } // if open
      if(extracted_source_name=="")
      {
-          Debug::Warning("Could not extract source file!");
+          Log::Warning("Could not extract source file!");
      }
 
      else
-          Debug::Messages("Extracted source from TXT file <%s>", extracted_source_name.toStdString().c_str());
+          Log::Info("Extracted source from TXT file <%s>", extracted_source_name.toStdString().c_str());
      return extracted_source_name;
 }
 
@@ -1362,7 +1098,6 @@ QString SaxParser::extractTrainTypeFileTXT(QString &filename)
           while (!in.atEnd()) {
                //look for a line with
                line = in.readLine();
-               // std::cout << " >> " <<  line.toStdString().c_str() << endl;
                if(line.split(":").size()==2)
                {
                     if(line.split(":")[0].contains("trainType",Qt::CaseInsensitive))
@@ -1375,11 +1110,11 @@ QString SaxParser::extractTrainTypeFileTXT(QString &filename)
      } // if open
      if(extracted_tt_name=="")
      {
-          Debug::Warning("Could not extract trainType file!");
+          Log::Warning("Could not extract trainType file!");
      }
 
      else
-          Debug::Messages("Extracted trainType from TXT file <%s>", extracted_tt_name.toStdString().c_str());
+          Log::Info("Extracted trainType from TXT file <%s>", extracted_tt_name.toStdString().c_str());
      return extracted_tt_name;
 }
 
@@ -1393,7 +1128,6 @@ QString SaxParser::extractTrainTimeTableFileTXT(QString &filename)
           while (!in.atEnd()) {
                //look for a line with
                line = in.readLine();
-               // std::cout << " >> " <<  line.toStdString().c_str() << endl;
                if(line.split(":").size()==2)
                {
                     if(line.split(":")[0].contains("trainTimeTable",Qt::CaseInsensitive))
@@ -1406,11 +1140,11 @@ QString SaxParser::extractTrainTimeTableFileTXT(QString &filename)
      } // if open
      if(extracted_ttt_name=="")
      {
-          Debug::Warning("Could not extract trainTimeTable file!");
+          Log::Warning("Could not extract trainTimeTable file!");
      }
 
      else
-          Debug::Messages("Extracted trainTimeTable from TXT file <%s>", extracted_ttt_name.toStdString().c_str());
+          Log::Info("Extracted trainTimeTable from TXT file <%s>", extracted_ttt_name.toStdString().c_str());
      return extracted_ttt_name;
 }
 
@@ -1426,7 +1160,6 @@ QString SaxParser::extractGoalFileTXT(QString &filename)
           while (!in.atEnd()) {
                //look for a line with
                line = in.readLine();
-               // std::cout << " >> " <<  line.toStdString().c_str() << endl;
                if(line.split(":").size()==2)
                {
                     if(line.split(":")[0].contains("goals",Qt::CaseInsensitive))
@@ -1439,11 +1172,11 @@ QString SaxParser::extractGoalFileTXT(QString &filename)
      } // if open
      if(extracted_goal_name=="")
      {
-          Debug::Warning("Could not extract goal file!");
+          Log::Warning("Could not extract goal file!");
      }
 
      else
-          Debug::Messages("Extracted goal from TXT file <%s>", extracted_goal_name.toStdString().c_str());
+          Log::Info("Extracted goal from TXT file <%s>", extracted_goal_name.toStdString().c_str());
      return extracted_goal_name;
 }
 
@@ -1459,7 +1192,6 @@ QString SaxParser::extractGeometryFilenameTXT(QString &filename)
           while (!in.atEnd()) {
                //look for a line with
                line = in.readLine();
-               // std::cout << " >> " <<  line.toStdString().c_str() << endl;
                if(line.split(":").size()==2)
                {
                     if(line.split(":")[0].contains("geometry",Qt::CaseInsensitive))
@@ -1472,204 +1204,21 @@ QString SaxParser::extractGeometryFilenameTXT(QString &filename)
      } // if open
      if(extracted_geo_name=="")
      {
-          Debug::Warning("Could not extract geometry file!");
+          Log::Warning("Could not extract geometry file!");
 //          extracted_geo_name = "geo.xml";
      }
 
      else
-          Debug::Messages("Extracted geometry from TXT file <%s>", extracted_geo_name.toStdString().c_str());
+          Log::Info("Extracted geometry from TXT file <%s>", extracted_geo_name.toStdString().c_str());
      return extracted_geo_name;
 }
 
 
-void SaxParser::parseGeometryXMLV04(QString filename, GeometryFactory& geoFac)
-{
-     cout << "parsing 04\n" ;
-     QDomDocument doc("");
-     QFile file(filename);
 
-     int size =file.size()/(1024*1024);
-
-     //avoid dom parsing a very large dataset
-     if(size>500) {
-          //cout<<"The file is too large: "<<filename.toStdString()<<endl;
-          return;
-     }
-
-     auto geo= shared_ptr<FacilityGeometry>(new FacilityGeometry("no name", "no name", "no name"));
-     //cout<<"filename: "<<filename.toStdString()<<endl;
-
-     //TODO: check if you can parse this with the building classes.
-     // This should be a fall back option
-
-     if (!file.open(QIODevice::ReadOnly)) {
-          qDebug()<<"could not open the file: "<<filename<<Qt::endl;
-          return ;
-     }
-     QString *errorCode = new QString();
-     if (!doc.setContent(&file, errorCode)) {
-          file.close();
-          qDebug()<<errorCode<<Qt::endl;
-          return ;
-     }
-     QDomElement root= doc.documentElement();
-
-     //only parsing the geometry node
-     if(root.tagName()!="geometry") return;
-
-
-     double version =root.attribute("version","-1").toDouble();
-
-     string unit=root.attribute("unit","cm").toStdString();
-     double xToCmfactor=100;
-     if (unit=="cm") xToCmfactor=1;
-     if (unit=="m") xToCmfactor=100;
-
-     if(version<0.4) {
-          QMessageBox::warning(0, QObject::tr("Parsing Error"),
-                               QObject::tr("Only geometry version >= 0.4 supported"));
-     }
-
-     //parsing the subrooms
-     QDomNodeList xSubRoomsNodeList=doc.elementsByTagName("subroom");
-     //parsing the walls
-     for (  int i = 0; i < xSubRoomsNodeList.length(); i++) {
-          QDomElement xPoly = xSubRoomsNodeList.item(i).firstChildElement("polygon");
-          double position[3]= {0,0,0};
-          double pos_count=1;
-          double color=0;
-
-          while(!xPoly.isNull()) {
-               //wall thickness, default to 30 cm
-               double thickness = xPoly.attribute("thickness","15").toDouble();
-               //wall height default to 250 cm
-               double height = xPoly.attribute("height","250").toDouble();
-               //wall color default to blue
-               color = xPoly.attribute("color","0").toDouble();
-
-               QDomNodeList xVertices=xPoly.elementsByTagName("vertex");
-               pos_count+=xVertices.count()-1;
-
-               for( int i=0; i<xVertices.count()-1; i++) {
-                    //all unit are converted in cm
-                    double x1=xVertices.item(i).toElement().attribute("px", "0").toDouble()*xToCmfactor;
-                    double y1=xVertices.item(i).toElement().attribute("py", "0").toDouble()*xToCmfactor;
-                    double z1=xVertices.item(i).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
-                    double x2=xVertices.item(i+1).toElement().attribute("px", "0").toDouble()*xToCmfactor;
-                    double y2=xVertices.item(i+1).toElement().attribute("py", "0").toDouble()*xToCmfactor;
-                    double z2=xVertices.item(i+1).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
-
-                    position[0]+= x1;
-                    position[1]+= y1;
-                    position[2]+= z1;
-
-                    geo->addWall(x1, y1, z1, x2, y2,z2,thickness,height,color);
-               }
-               xPoly = xPoly.nextSiblingElement("polygon");
-          }
-
-          //add the caption
-          string roomCaption = xSubRoomsNodeList.item(i).parentNode().toElement().attribute("caption").toStdString();
-          string subroomCaption=xSubRoomsNodeList.item(i).toElement().attribute("id").toStdString();
-          string caption=roomCaption+" ( " + subroomCaption + " ) ";
-          position[0]/=pos_count;
-          position[1]/=pos_count;
-          position[2]/=pos_count;
-          geo->addObjectLabel(position,position,caption,color);
-          geo->SetRoomCaption(roomCaption);
-          geo->SetSubRoomCaption(subroomCaption);
-          cout<<"position: [" <<position[0]<<", "<<position[1]<<", "<<position[2]<<" ]"<<std::endl;;
-          cout << roomCaption<< "  " << subroomCaption << "\n" ;
-     }
-
-     QDomNodeList xObstaclesList=doc.elementsByTagName("obstacle");
-     for (  int i = 0; i < xObstaclesList.length(); i++) {
-          QDomElement xPoly = xObstaclesList.item(i).firstChildElement("polygon");
-          while(!xPoly.isNull()) {
-               //wall thickness, default to 30 cm
-               double thickness = xPoly.attribute("thickness","15").toDouble();
-               //wall height default to 250 cm
-               double height = xPoly.attribute("height","250").toDouble();
-               //wall color default to blue
-               double color = xPoly.attribute("color","0").toDouble();
-
-               QDomNodeList xVertices=xPoly.elementsByTagName("vertex");
-               for( int i=0; i<xVertices.count()-1; i++) {
-                    double x1=xVertices.item(i).toElement().attribute("px", "0").toDouble()*xToCmfactor;
-                    double y1=xVertices.item(i).toElement().attribute("py", "0").toDouble()*xToCmfactor;
-                    double z1=xVertices.item(i).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
-
-                    double x2=xVertices.item(i+1).toElement().attribute("px", "0").toDouble()*xToCmfactor;
-                    double y2=xVertices.item(i+1).toElement().attribute("py", "0").toDouble()*xToCmfactor;
-                    double z2=xVertices.item(i+1).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
-                    geo->addWall(x1, y1, z1, x2, y2,z2,thickness,height,color);
-               }
-               xPoly = xPoly.nextSiblingElement("polygon");
-          }
-     }
-
-     QDomNodeList xCrossingsList=doc.elementsByTagName("crossing");
-
-     for (int i = 0; i < xCrossingsList.length(); i++) {
-          QDomElement xCrossing = xCrossingsList.item(i).toElement();
-          QDomNodeList xVertices=xCrossing.elementsByTagName("vertex");
-
-          ///door thickness, default to 15 cm
-          double thickness = xCrossing.attribute("thickness","15").toDouble();
-          //door height default to 250 cm
-          double height = xCrossing.attribute("height","250").toDouble();
-          //door color default to blue
-          double color = xCrossing.attribute("color","120").toDouble();
-          QString id= xCrossing.attribute("id","-1");
-
-          double x1=xVertices.item(0).toElement().attribute("px", "0").toDouble()*xToCmfactor;
-          double y1=xVertices.item(0).toElement().attribute("py", "0").toDouble()*xToCmfactor;
-          double z1=xVertices.item(0).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
-
-          double x2=xVertices.item(1).toElement().attribute("px", "0").toDouble()*xToCmfactor;
-          double y2=xVertices.item(1).toElement().attribute("py", "0").toDouble()*xToCmfactor;
-          double z2=xVertices.item(1).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
-          geo->addNavLine(x1, y1, z1, x2, y2,z2,thickness,height,color);
-
-          double center[3]= {(x1+x2)/2.0, (y1+y2)/2.0, (z2+z1)/2.0};
-          geo->addObjectLabel(center,center,id.toStdString(),21);
-     }
-
-     QDomNodeList xTransitionsList=doc.elementsByTagName("transition");
-     for (int i = 0; i < xTransitionsList.length(); i++) {
-          QDomElement xTransition = xTransitionsList.item(i).toElement();
-          QDomNodeList xVertices=xTransition.elementsByTagName("vertex");
-
-          ///door thickness, default to 15 cm
-          double thickness = xTransition.attribute("thickness","15").toDouble();
-          //door height default to 250 cm
-          double height = xTransition.attribute("height","250").toDouble();
-          //door color default to blue
-          double color = xTransition.attribute("color","255").toDouble();
-
-          double x1=xVertices.item(0).toElement().attribute("px", "0").toDouble()*xToCmfactor;
-          double y1=xVertices.item(0).toElement().attribute("py", "0").toDouble()*xToCmfactor;
-          double z1=xVertices.item(0).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
-
-          double x2=xVertices.item(1).toElement().attribute("px", "0").toDouble()*xToCmfactor;
-          double y2=xVertices.item(1).toElement().attribute("py", "0").toDouble()*xToCmfactor;
-          double z2=xVertices.item(1).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
-          geo->addDoor(x1, y1, z1, x2, y2,z2,thickness,height,color);
-
-          string id= xTransition.attribute("id","-1").toStdString();
-          double center[3]= {(x1+x2)/2.0, (y1+y2)/2.0, (z2+z1)/2.0};
-          geo->addObjectLabel(center,center,id,21);
-     }
-
-     //room 0, subroom 0
-     geoFac.AddElement(0,0,geo);
-}
 
 bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, double * fps)
 {
-     //fileName="data/trajectories/1000_1_0_0_1_1.txt";
-     //fileName="data/trajectories/50_3_0_1_1_2.txt";
-     Debug::Messages("parsing txt trajectory <%s> ", fileName.toStdString().c_str());
+     Log::Info("parsing txt trajectory <%s> ", fileName.toStdString().c_str());
      *fps=16;//default value
      QFile inputFile(fileName);
      if (inputFile.open(QIODevice::ReadOnly))
@@ -1702,7 +1251,7 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
                          if(line.split(":")[0].contains("framerate",Qt::CaseInsensitive))
                          {
                               *fps = line.split(":")[1].toDouble();
-                              Debug::Messages("Frame rate  <%.0f>", *fps);
+                              Log::Info("Frame rate  <%.0f>", *fps);
                          }
                     }
                     continue;
@@ -1758,7 +1307,7 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
                     if (once) // first frame we get
                     {
                          minFrame =  frameID;
-                         std::cout << ">> minFrame =  " << minFrame << "\n";
+                         Log::Info("minFrame =  %d\n", minFrame);
                          once = 0;
                     }
                     // std::cout << ">> minFrame =  " << minFrame << " frame " << frameID<< "\n";
@@ -1771,18 +1320,18 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
                        line.contains("centimetre", Qt::CaseInsensitive))
                     {
                          unitFactor=0.01;
-                         qDebug()<<"unit centimetre detected";
+                         Log::Info("unit centimetre detected");
                     }
                     else
                          if(line.contains("meter", Qt::CaseInsensitive)||
                             line.contains("metre", Qt::CaseInsensitive))
                          {
                               unitFactor=1;
-                              qDebug()<<"unit metre detected";
+                              Log::Info("unit metre detected");
                          }
                          else
                          {
-                              Debug::Warning("Ignoring line: <%s>",line.toStdString().c_str());
+                              Log::Warning("Ignoring line: <%s>",line.toStdString().c_str());
                          }
                     continue;//next line
                     break;
@@ -1799,7 +1348,6 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
                     Frame* frame = new Frame(frameID);
                     frame->addElement(element);
                     dataset->addFrame(frame);
-                    // cout<<"adding frame: "<<frameID<<endl;
                }
                else
                {
@@ -1817,19 +1365,16 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
           }
 
           inputFile.close();
-          Debug::Messages("%d frames added!", dataset->GetFrames().size());
+          Log::Info("%d frames added!", dataset->GetFrames().size());
           //construct the polydata
           for( const auto & frame:dataset->GetFrames())
           {
                frame.second->ComputePolyData();
-               // cout<<"computing polydata " << frame.first<<endl;
           }
-          //dataset->setNumberOfAgents(50);
-
      }
      else
      {
-          Debug::Error("could not open the file  <%s>", fileName.toStdString().c_str());
+          Log::Error("could not open the file  <%s>", fileName.toStdString().c_str());
           return false;
      }
      return true;
@@ -1844,7 +1389,7 @@ bool SaxParser::ParseGradientFieldVTK(QString fileName, GeometryFactory& geoFac)
           fileName=wd+"/"+fileName;
      }
 
-     qDebug()<<"Opening the gradient field:"<<fileName<<Qt::endl;
+     Log::Info("Opening the gradient field: %s", fileName.toStdString().c_str());
      // Read the file
      VTK_CREATE(vtkStructuredPointsReader, reader);
      reader->SetFileName(fileName.toStdString().c_str());
@@ -1854,13 +1399,6 @@ bool SaxParser::ParseGradientFieldVTK(QString fileName, GeometryFactory& geoFac)
      VTK_CREATE(vtkImageDataGeometryFilter,geometryFilter );
      geometryFilter->SetInputConnection(reader->GetOutputPort());
      geometryFilter->Update();
-
-     //try a triangle strip
-//    VTK_CREATE(vtkStripper,stripper);
-//    stripper->SetInputConnection(geometryFilter->GetOutputPort());
-//    VTK_CREATE(vtkTriangleFilter,trianglefilter);
-//    trianglefilter->SetInputConnection(stripper->GetOutputPort());
-
 
      VTK_CREATE(vtkPolyDataMapper,mapper);
      mapper->SetInputConnection(geometryFilter->GetOutputPort());
@@ -1904,9 +1442,8 @@ void SaxParser::InitHeader(int major, int minor, int patch)
           _jps_ellipseColor=QString("ellipseColor");
      }
      if(major!=0) {
-          cout<<"unsupported header version: "<<major<<"."<<minor<<"."<<patch<<std::endl;
-          cout<<"Please use 0.5 0.5.1 or 0.6 "<<std::endl;
-          exit(0);
+          Log::Info("unsupported header version: %d.%d.%d\n", major, minor, patch);
+          exit(EXIT_FAILURE);
      }
 }
 
@@ -1915,17 +1452,17 @@ bool SaxParser::LoadTrainTimetable(std::string Filename, std::map<int, std::shar
 {
      TiXmlDocument docTTT(Filename);
      if (!docTTT.LoadFile()) {
-          Debug::Messages("ERROR: \t%s", docTTT.ErrorDesc());
-          Debug::Messages("ERROR: \t could not parse the train timetable file.");
+          Log::Error("%s", docTTT.ErrorDesc());
+          Log::Error("could not parse the train timetable file.");
           return false;
      }
      TiXmlElement* xTTT = docTTT.RootElement();
      if (!xTTT) {
-          Debug::Messages("ERROR:\tRoot element does not exist in TTT file.");
+          Log::Error("Root element does not exist in TTT file.");
           return false;
      }
      if (xTTT->ValueStr() != "train_time_table") {
-          Debug::Messages("ERROR:\tParsing train timetable file. Root element value is not 'train_time_table'.");
+          Log::Error("Parsing train timetable file. Root element value is not 'train_time_table'.");
           return false;
      }
      for (TiXmlElement* e = xTTT->FirstChildElement("train"); e;
@@ -1933,14 +1470,14 @@ bool SaxParser::LoadTrainTimetable(std::string Filename, std::map<int, std::shar
           std::shared_ptr<TrainTimeTable> TTT = parseTrainTimeTableNode(e);
           if (TTT) { // todo: maybe get pointer to train
                if (trainTimeTables.count(TTT->id)!=0) {
-                    Debug::Messages("WARNING: Duplicate id for train time table found [%d]",TTT->id);
+                    Log::Warning("Duplicate id for train time table found [%d]",TTT->id);
                     exit(EXIT_FAILURE);
                }
                // get track start 
                trainTimeTables[TTT->id] = TTT;
           }
           else {
-          std:cout << "too bad! \n" ;
+          Log::Error("Something went south!\n") ;
           }
      }
      return true;
@@ -1952,17 +1489,17 @@ bool   SaxParser::LoadTrainType(std::string Filename, std::map<std::string, std:
 
      TiXmlDocument docTT(Filename);
      if (!docTT.LoadFile()) {
-          Debug::Messages("ERROR: \t%s", docTT.ErrorDesc());
-          Debug::Messages("ERROR: \t could not parse the train type file.");
+          Log::Error("%s", docTT.ErrorDesc());
+          Log::Error("could not parse the train type file.");
           return false;
      }
      TiXmlElement* xTT = docTT.RootElement();
      if (!xTT) {
-          Debug::Messages("ERROR:\tRoot element does not exist in TT file.");
+          Log::Error("Root element does not exist in TT file.");
           return false;
      }
      if (xTT->ValueStr() != "train_type") {
-          Debug::Messages("ERROR:\tParsing train type file. Root element value is not 'train_type'.");
+          Log::Error("Parsing train type file. Root element value is not 'train_type'.");
           return false;
      }
      for (TiXmlElement* e = xTT->FirstChildElement("train"); e;
@@ -1970,7 +1507,7 @@ bool   SaxParser::LoadTrainType(std::string Filename, std::map<std::string, std:
           std::shared_ptr<TrainType> TT = parseTrainTypeNode(e);
           if (TT) {
                 if (trainTypes.count(TT->_type.c_str())!=0) {
-                    Debug::Messages("WARNING: Duplicate type for train found [%s]",TT->_type.c_str());
+                    Log::Warning("Duplicate type for train found [%s]",TT->_type.c_str());
                }
                trainTypes[TT->_type] = TT;
           }
@@ -1984,7 +1521,7 @@ bool   SaxParser::LoadTrainType(std::string Filename, std::map<std::string, std:
 
 std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement * e)
 {
-     Debug::Messages("INFO:\tLoading train time table NODE");
+     Log::Info("Loading train time table NODE");
      // std::string caption = xmltoa(e->Attribute("caption"), "-1");
      int id = xmltoi(e->Attribute("id"), -1);
      int track_id = xmltoi(e->Attribute("track_id"), -1);
@@ -2006,15 +1543,15 @@ std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement 
      float arrival_time = xmltof(e->Attribute("arrival_time"), -1);
      float departure_time = xmltof(e->Attribute("departure_time"), -1);
      // @todo: check these values for correctness e.g. arrival < departure
-     Debug::Messages("INFO:\tTrain time table:");
-     Debug::Messages("INFO:\t   id: %d", id);
-     Debug::Messages("INFO:\t   type: %s", type.c_str());
-     Debug::Messages("INFO:\t   room_id: %d", room_id);
-     Debug::Messages("INFO:\t   subroom_id: %d", subroom_id);
-     Debug::Messages("INFO:\t   track_id: %d", track_id);
-     Debug::Messages("INFO:\t   train_offset: %.2f", train_offset);
-     Debug::Messages("INFO:\t   arrival_time: %.2f", arrival_time);
-     Debug::Info("departure_time: %.2f", departure_time);
+     Log::Info("Train time table:");
+     Log::Info("   id: %d", id);
+     Log::Info("   type: %s", type.c_str());
+     Log::Info("   room_id: %d", room_id);
+     Log::Info("   subroom_id: %d", subroom_id);
+     Log::Info("   track_id: %d", track_id);
+     Log::Info("   train_offset: %.2f", train_offset);
+     Log::Info("   arrival_time: %.2f", arrival_time);
+     Log::Info("departure_time: %.2f", departure_time);
      // Debug::Info("Reversed: {}", reversed);
      std::shared_ptr<TrainTimeTable> trainTimeTab = std::make_shared<TrainTimeTable>(
           TrainTimeTable{
@@ -2043,19 +1580,19 @@ std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement 
 }
 std::shared_ptr<TrainType> SaxParser::parseTrainTypeNode(TiXmlElement * node)
 {
-      Debug::Info("Loading train type");
+      Log::Info("Loading train type");
 
     std::string type = xmltoa(node->Attribute("type"), "NO_TYPE");
     if(type == "NO_TYPE") {
-          Debug::Warning("No train type name given. Use 'NO_TYPE' instead.");
+          Log::Warning("No train type name given. Use 'NO_TYPE' instead.");
     }
-    Debug::Info("type: {}", type.c_str());
+    Log::Info("type: {}", type.c_str());
 
     int agents_max = xmltoi(node->Attribute("agents_max"), std::numeric_limits<int>::max());
     if(agents_max == std::numeric_limits<int>::max()) {
-          Debug::Warning("No agents_max given. Set to default: {}.", agents_max);
+          Log::Warning("No agents_max given. Set to default: {}.", agents_max);
     }
-    Debug::Info("max Agents: {}", agents_max);
+    Log::Info("max Agents: {}", agents_max);
 
     // Read and check if correct value
     double length = -std::numeric_limits<double>::infinity();
@@ -2064,14 +1601,14 @@ std::shared_ptr<TrainType> SaxParser::parseTrainTypeNode(TiXmlElement * node)
            value >= 0.) {
             length = value;
         } else {
-              Debug::Warning("{}: input for length should be non-negative {}. Skip entry.", type.c_str(), value);
+              Log::Warning("{}: input for length should be non-negative {}. Skip entry.", type.c_str(), value);
             return nullptr;
         }
     } else {
-          Debug::Warning("{}: input for length not found. Skip entry.", type.c_str());
+          Log::Warning("{}: input for length not found. Skip entry.", type.c_str());
         return nullptr;
     }
-    Debug::Info("length: {}", length);
+    Log::Info("length: {}", length);
 
 
     std::vector<TrainDoor> doors;
@@ -2084,12 +1621,12 @@ std::shared_ptr<TrainType> SaxParser::parseTrainTypeNode(TiXmlElement * node)
                value >= 0.) {
                 distance = value;
             } else {
-                Debug::Warning(
+                Log::Warning(
                       "{}: input for distance should be non-negative {}. Skip entry.", type.c_str(), value);
                 continue;
             }
         } else {
-              Debug::Warning("{}: input for distance not found. Skip entry.", type.c_str());
+              Log::Warning("{}: input for distance not found. Skip entry.", type.c_str());
             continue;
         }
 
@@ -2100,12 +1637,12 @@ std::shared_ptr<TrainType> SaxParser::parseTrainTypeNode(TiXmlElement * node)
                value > 0.) {
                 width = value;
             } else {
-                Debug::Warning(
+                Log::Warning(
                       "{}: input for width should be non-negative {}. Skip entry.", type.c_str(), value);
                 continue;
             }
         } else {
-              Debug::Warning("{}: input for width not found. Skip entry.", type.c_str());
+              Log::Warning("{}: input for width not found. Skip entry.", type.c_str());
             continue;
         }
 
@@ -2116,7 +1653,7 @@ std::shared_ptr<TrainType> SaxParser::parseTrainTypeNode(TiXmlElement * node)
                value > 0.) {
                 flow = value;
             } else {
-                Debug::Warning(
+                Log::Warning(
                       "{}: input for flow should be >0 but is {:5.2}. Skip entry.", type.c_str(), value);
                 continue;
             }
@@ -2126,14 +1663,14 @@ std::shared_ptr<TrainType> SaxParser::parseTrainTypeNode(TiXmlElement * node)
     }
 
     if(doors.empty()) {
-          Debug::Error("Train {}: no doors given. Train will be ignored.", type.c_str());
+          Log::Error("Train {}: no doors given. Train will be ignored.", type.c_str());
         return nullptr;
     }
 
-    Debug::Info("number of doors: {}", doors.size());
+    Log::Info("number of doors: {}", doors.size());
     for(const auto & d : doors) {
-        Debug::Info(
-            "Door:\tdistance: {:5.2f}\twidth: {:5.2f}\toutflow: {:5.2f}",
+        Log::Info(
+            "Door:\tdistance: {%5.2f}\twidth: {%5.2f}\toutflow: {%5.2f}",
             d._distance,
             d._width,
             d._flow);

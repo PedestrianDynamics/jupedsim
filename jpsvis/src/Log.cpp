@@ -31,7 +31,7 @@
 */
 
 
-#include "Debug.h"
+#include "Log.h"
 
 #include <fstream>
 #include <iostream>
@@ -41,40 +41,39 @@
 
 using namespace std;
 
-std::ostream& Debug::os=std::cerr;
-Debug::LEVEL Debug::debugLevel=Debug::ALL;
-int Debug::MSG_Count=0;
-int Debug::ERR_Count=0;
-int Debug::WAR_Count=0;
+std::ostream& Log::os=std::cerr;
+Log::LEVEL Log::debugLevel=Log::ALL;
+int Log::INFO_Count=0;
+int Log::ERR_Count=0;
+int Log::WAR_Count=0;
 
-Debug::Debug()
+Log::Log()
 {
 
 }
 
-Debug::~Debug()
+Log::~Log()
 {
 
 }
 
 
-void Debug::setOutputStream(std::ostream &osl )
+void Log::setOutputStream(std::ostream &osl )
 {
     os.rdbuf(osl.rdbuf());
 }
 
-void Debug::setDebugLevel(Debug::LEVEL level)
+void Log::setDebugLevel(Log::LEVEL level)
 {
     debugLevel=level;
 }
 
-void Debug::Info(const char *format, ...)
+void Log::Messages(const char *format, ...)
 {
     switch (debugLevel) {
 
     case ALL:
     case INFO: {
-        MSG_Count++;
         char msg[256];
         va_list ap;
         va_start (ap, format);
@@ -93,20 +92,20 @@ void Debug::Info(const char *format, ...)
 
 }
 
-void Debug::Messages(const char *format, ...)
+void Log::Info(const char *format, ...)
 {
     switch (debugLevel) {
 
     case ALL:
     case INFO: {
-        MSG_Count++;
+        INFO_Count++;
         char msg[256];
         va_list ap;
         va_start (ap, format);
         vsprintf (msg,format ,ap);
         va_end (ap);
 
-        os<<"Info ["<< std::setw(3) <<MSG_Count<<"]: "<<msg<<endl;
+        os<<"Info ["<< std::setw(3) <<INFO_Count<<"]: "<<msg<<endl;
     }
     break;
 
@@ -118,7 +117,7 @@ void Debug::Messages(const char *format, ...)
 
 }
 
-void Debug::Warning(const char *format, ...)
+void Log::Warning(const char *format, ...)
 {
 
     switch (debugLevel) {
@@ -143,7 +142,7 @@ os<<"Warning ["<< std::setw(3)<<WAR_Count<<"]: "<<msg<<endl;
 }
 
 
-void Debug::Error(const char *format, ...)
+void Log::Error(const char *format, ...)
 {
 
     switch (debugLevel) {

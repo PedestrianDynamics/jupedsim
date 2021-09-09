@@ -30,7 +30,7 @@
 #include "Room.h"
 #include "SubRoom.h"
 #include "../IO/OutputHandler.h"
-
+#include "../Log.h"
 using namespace std;
 
 /************************************************************
@@ -96,9 +96,8 @@ Room* Transition::GetOtherRoom(int roomID) const
           return GetRoom1();
      } else {
           char msg[CLENGTH];
-          sprintf(msg,"ERROR: \tTransition::GetOtherRoom() wrong roomID [%d]",roomID);
-          Log->Write(msg);
-          exit(0);
+          Log::Error("Transition::GetOtherRoom() wrong roomID [%d]",roomID);          
+          exit(EXIT_FAILURE);
      }
 
 }
@@ -140,7 +139,7 @@ SubRoom* Transition::GetOtherSubRoom(int roomID, int subroomID) const
      else if ((GetRoom2() != NULL) && (GetRoom2()->GetID() == roomID))
           return GetSubRoom1();
      else {
-          Log->Write("ERROR: \tTransition::GetOtherSubRoom No exit found "
+          Log::Error("Transition::GetOtherSubRoom No exit found "
                      "on the other side\n ID=%d, roomID=%d, subroomID=%d\n",GetUniqueID(),roomID,subroomID);
           exit(EXIT_FAILURE);
      }
@@ -171,7 +170,7 @@ void Transition::WriteToErrorLog() const
           sprintf(tmp, " <->\tAusgang\n");
      }
      s.append(tmp);
-     Log->Write(s);
+     Log::Info("%s", s.c_str());
 }
 
 // TraVisTo Ausgabe

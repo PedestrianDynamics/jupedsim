@@ -35,8 +35,7 @@
 #include <QColor>
 
 #include "SystemSettings.h"
-#include "Debug.h"
-#include "qdebug.h"
+#include "Log.h"
 #include "QDateTime"
 #include "IO/OutputHandler.h"
 #include "./forms/Settings.h"
@@ -354,7 +353,7 @@ void  SystemSettings::getTrailsInfo(int* count, int *type, int* geo)
 void  SystemSettings::setPedestrianColor(int groupID, int color[3])
 {
     if((groupID<0) || (groupID>3)) {
-        Debug::Error(" wrong pedestrian group ID %d",groupID);
+        Log::Error(" wrong pedestrian group ID %d",groupID);
         return;
     }
     pedestriansColor[groupID][0]=color[0];
@@ -366,7 +365,7 @@ void  SystemSettings::setPedestrianColor(int groupID, int color[3])
 void  SystemSettings::getPedestrianColor(int groupID, int color[3])
 {
     if((groupID<0) || (groupID>3)) {
-        Debug::Error(" wrong pedestrian group ID %d",groupID);
+        Log::Error(" wrong pedestrian group ID %d",groupID);
         return;
     }
 
@@ -417,8 +416,7 @@ void SystemSettings::CreateLogfile()
     if(!QDir(outputDir).exists()) {
         QDir dir;
         if(!dir.mkpath (outputDir )) {
-            qDebug()<<"could not create directory: "<< outputDir;
-            qDebug()<<"could not create directory: "<< QDir::homePath();
+            Log::Error("could not create directory: %s", outputDir.toStdString().c_str());
             outputDir=""; // current
         }
     }
@@ -437,7 +435,7 @@ void SystemSettings::DeleteLogfile()
     //first close the opened file
     delete Log;
     if(! QFile::remove(logfile)) {
-        qDebug()<<"he log file could not delete the file"<<Qt::endl;
+        Log::Info("Could not delete logfile %s", logfile.toStdString().c_str());
     }
 }
 

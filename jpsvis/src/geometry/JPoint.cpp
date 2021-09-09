@@ -30,7 +30,7 @@
  */
 
 #include "JPoint.h"
-#include "../Debug.h"
+#include "../Log.h"
 
 #include "../general/Macros.h"
 #include <math.h>
@@ -120,8 +120,8 @@ double JPoint::angleMadeWith(JPoint& pt) const
     //double dist=distanceTo(pt);
 
     if((dx==0) && (dy==0)) {
-        Debug::Error("error found in geometry");
-        Debug::Error("wrong angle might be returned");
+        Log::Error("error found in geometry");
+        Log::Error("wrong angle might be returned");
         return 0;
         //return vtkMath::DegreesFromRadians(asin(dx/dist));
     }

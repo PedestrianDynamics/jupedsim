@@ -27,7 +27,7 @@
 
 
 #include "Obstacle.h"
-
+#include "../Log.h"
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -254,12 +254,9 @@ bool Obstacle::ConvertLineToPoly()
                i = -1;
           }
      }
-     if ((tmpPoly[0] - point).Norm() > J_TOLERANZ) {
-          char tmp[CLENGTH];
-          sprintf(tmp, "ERROR: \tObstacle::ConvertLineToPoly(): ID %d !!!\n", _id);
-          Log->Write(tmp);
-          sprintf(tmp, "ERROR: \tDistance between the points: %lf !!!\n", (tmpPoly[0] - point).Norm());
-          Log->Write(tmp);
+     if ((tmpPoly[0] - point).Norm() > J_TOLERANZ) {         
+          Log::Error("Obstacle::ConvertLineToPoly(): ID %d !!!\n", _id);          
+          Log::Error("Distance between the points: %lf !!!\n", (tmpPoly[0] - point).Norm());         
           return false;
      }
      _poly = tmpPoly;
@@ -272,7 +269,7 @@ bool Obstacle::ConvertLineToPoly()
           {
                if(IsPartOfPolygon(ptw)==false)
                {
-                    Log->Write("ERROR:\t Edge was not used during polygon creation for obstacle: %s",w.toString().c_str());
+                    Log::Error("Edge was not used during polygon creation for obstacle: %s",w.toString().c_str());
                     return false;
                }
           }
@@ -324,9 +321,8 @@ const Point Obstacle::GetCentroid() const
 bool Obstacle::IsClockwise() const
 {
      if(_poly.size()<3) {
-          Log->Write("ERROR:\tYou need at least 3 vertices to check for orientation. Subroom ID [%d]");
+          Log::Error("You need at least 3 vertices to check for orientation.");
           return false;
-          //exit(EXIT_FAILURE);
      }
 
      Point vecAB= _poly[1]-_poly[0];

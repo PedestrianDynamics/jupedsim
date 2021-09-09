@@ -35,7 +35,7 @@
 
 #include <fstream>
 
-class Debug {
+class Log {
 public:
 
     /**
@@ -53,12 +53,12 @@ public:
     /**
      * Constructor
      */
-    Debug();
+    Log();
 
     /**
      * Destructor
      */
-    virtual ~Debug();
+    virtual ~Log();
 
     /**
      * set the debug output stream. can be a file as well
@@ -76,7 +76,7 @@ public:
      *
      * @param level, the desired debug level
      */
-    static void setDebugLevel(Debug::LEVEL level);
+    static void setDebugLevel(Log::LEVEL level);
 
     static void Info(const char *string, ...);
     /**
@@ -103,8 +103,8 @@ public:
 
 private:
     static std::ostream &os;
-    static Debug::LEVEL debugLevel;
-    static int MSG_Count;
+    static Log::LEVEL debugLevel;
+    static int INFO_Count;
     static int ERR_Count;
     static int WAR_Count;
 };

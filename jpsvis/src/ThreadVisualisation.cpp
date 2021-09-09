@@ -92,7 +92,7 @@
 #include "InteractorStyle.h"
 #include "SystemSettings.h"
 #include "geometry/PointPlotter.h"
-#include "Debug.h"
+#include "Log.h"
 
 
 #define VTK_CREATE(type, name) \

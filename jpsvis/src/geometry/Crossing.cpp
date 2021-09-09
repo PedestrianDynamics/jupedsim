@@ -25,7 +25,7 @@
  *
  **/
 
-
+#include "../Log.h"
 #include "Crossing.h"
 #include "Room.h"
 #include "SubRoom.h"
@@ -106,7 +106,7 @@ SubRoom* Crossing::GetOtherSubRoom(int roomID, int subroomID) const
      else if (_subRoom2->GetSubRoomID() == subroomID)
           return _subRoom1;
      else {
-          Log->Write("WARMING: \tCrossing::GetOtherSubRoom No exit found "
+       Log::Warning("Crossing::GetOtherSubRoom No exit found "
                      "on the other side\n ID=%hd, roomID=%hd, subroomID=%hd\n",GetID(),roomID,subroomID);
           return NULL;
      }
@@ -124,7 +124,7 @@ void Crossing::WriteToErrorLog() const
      sprintf(tmp, "\t\t\t\tSubRoom: %d <-> SubRoom: %d\n", GetSubRoom1()->GetSubRoomID(),
              GetSubRoom2()->GetSubRoomID());
      s.append(tmp);
-     Log->Write(s);
+     Log::Info("%s", s.c_str());
 }
 
 // TraVisTo Ausgabe

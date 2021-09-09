@@ -113,7 +113,7 @@ set( SRCS
   src/IO/TraVisToClient.cpp
   forms/Settings.cpp
   src/SaxParser.cpp
-  src/Debug.cpp
+  src/Log.cpp
   src/main.cpp
   src/Frame.cpp
   src/InteractorStyle.cpp
@@ -161,7 +161,7 @@ set( HDR
   forms/Settings.h
   src/SaxParser.h
   src/train.h
-  src/Debug.h
+  src/Log.h
   src/Frame.h
   src/InteractorStyle.h
   src/Message.h

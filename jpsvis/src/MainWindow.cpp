@@ -40,7 +40,7 @@
 #include "extern_var.h"
 #include "TrajectoryPoint.h"
 #include "Frame.h"
-#include "Debug.h"
+#include "Log.h"
 #include "ThreadVisualisation.h"
 #include "ThreadDataTransfert.h"
 #include "SimpleVisualisationWindow.h"
@@ -74,7 +74,6 @@
 #include <string>
 #include <vector>
 
-using namespace std;
 
 //----------- @todo: this part is copy/paste from main.cpp.
 std::string ver_string1(int a, int b, int c) {
@@ -122,10 +121,10 @@ void is_main_thread() {
 
     if ( main_thread_id == std::this_thread::get_id() )
     {
-         std::cout << "This is the main thread.\n";
+         Log::Info("This is the main thread.\n");
     }
     else
-        std::cout << "This is not the main thread.\n";
+        Log::Info("This is not the main thread.\n");
 }
 #endif
 
@@ -157,25 +156,25 @@ MainWindow::MainWindow(QWidget *parent) :
     if(!QObject::connect(dataTransferThread,
                          SIGNAL(signal_controlSequence(const char*)), this,
                          SLOT(slotControlSequence(const char *)))) {
-        Debug::Error("dataTransferThread Thread: control sequence could not be connected");
+        Log::Error("dataTransferThread Thread: control sequence could not be connected");
     }
 
     if(!QObject::connect(dataTransferThread,
                          SIGNAL(signal_startVisualisationThread(QString,int,float )), this,
                          SLOT(slotStartVisualisationThread(QString,int,float )))) {
-        Debug::Error(" signal_startVisualisationThread not connected");
+        Log::Error(" signal_startVisualisationThread not connected");
     }
 
     if(!QObject::connect(dataTransferThread,
                          SIGNAL(signal_stopVisualisationThread(bool )), this,
                          SLOT(slotShutdownVisualisationThread(bool )))) {
-        Debug::Error(" signal_stopVisualisationThread not connected ");
+        Log::Error(" signal_stopVisualisationThread not connected ");
     }
 
     if(!QObject::connect(dataTransferThread,
                          SIGNAL(signal_errorMessage(QString)), this,
                          SLOT(slotErrorOutput(QString)))) {
-        Debug::Error("signal_errorMessage  not connected ");
+        Log::Error("signal_errorMessage  not connected ");
     }
 
     QObject::connect(_visualisationThread,
@@ -256,7 +255,7 @@ MainWindow::MainWindow(QWidget *parent) :
             QString argument=arguments[argCount];
 
             if(argument.compare("help")==0) {
-                Debug::Messages("Usage: jpsvis [file1] [-2D] [-caption] [-online [port]]");
+                Log::Info("Usage: jpsvis [file1] [-2D] [-caption] [-online [port]]");
                 exit(0);
             } else if(argument.compare("-2D")==0) {
                 ui.action2_D->setChecked(true);
@@ -267,12 +266,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
             } else if(argument.compare("-online")==0) {
                 slotSetOnlineMode(true);
-                Debug::Messages("Online option parsed");
+                Log::Info("Online option parsed");
                 // checking for other possible options [ port...]
                 if(argCount!=arguments.size()-1) {
                     bool ok=false;
                     int port = arguments[++argCount].toInt(&ok);
-                    Debug::Messages(" listening port: %d",port);
+                    Log::Info(" listening port: %d",port);
 
                     if (ok) {
                         SystemSettings::setListeningPort(port);
@@ -283,18 +282,17 @@ MainWindow::MainWindow(QWidget *parent) :
                 //mayPlay=true;
 
             } else if(argument.startsWith("-")) {
-                const char* std=argument.toStdString().c_str();
-                Debug::Error("unknown options: %s",std);
-                Debug::Error("Usage: jpsvis [file1] [-2D] [-caption] [-online [port] ]");
+                Log::Error("unknown options: %s", argument.toStdString().c_str());
+                Log::Error("Usage: jpsvis [file1] [-2D] [-caption] [-online [port] ]");
             } else if(addPedestrianGroup(group,argument)) {
                 //slotHelpAbout();
-                 Debug::Messages("group: %d, arg: %s", group, argument.toStdString().c_str());
+                 Log::Info("group: %d, arg: %s", group, argument.toStdString().c_str());
                 group++;
                 mayPlay=true;
             }
 
         }
-    Debug::Messages("MayPlay: %s", mayPlay?"True":"False");
+    Log::Info("MayPlay: %s", mayPlay?"True":"False");
     // was call from the command line with a file.
     // disable the online mode if it was enabled
     if(mayPlay)
@@ -313,7 +311,7 @@ MainWindow::~MainWindow()
     if(ui.actionRemember_Settings->isChecked())
     {
         saveAllSettings();
-        Debug::Messages("saving all settings");
+        Log::Info("saving all settings");
     }
     else
     {
@@ -322,17 +320,15 @@ MainWindow::~MainWindow()
         settings.clear();
         //then remember that we do not want any settings saved
         settings.setValue("options/rememberSettings", false);
-        Debug::Messages("clearing all settings");
+        Log::Info("clearing all settings");
     }
 
 
     if (_visualisationThread->isRunning()) {
-        //std::Debug::Messages("Thread  visualisation is still running" << std::endl;
         waitForVisioThread();
     }
 
     if (dataTransferThread->isRunning()) {
-        //std::Debug::Messages("Thread  visualisation is still running" << std::endl;
         //it is your own fault if you were still recording something
         waitForDataThread();
     }
@@ -349,7 +345,7 @@ MainWindow::~MainWindow()
 void MainWindow::slotHelpAbout()
 {
 
-     Debug::Messages("About JPSvis");
+     Log::Info("About JPSvis");
      QString gittext = QMessageBox::tr(
           "<p style=\"line-height:1.4\" style=\"color:Gray;\"><small><i>Version %1</i></small></p>"
           "<p style=\"line-height:0.4\" style=\"color:Gray;\"><i>Hash</i> %2</p>"
@@ -536,7 +532,7 @@ bool MainWindow::slotLoadFile()
 void MainWindow::parseGeometry(const QDomNode &geoNode)
 {
 
-     Debug::Messages("parsing the geo");
+     Log::Info("parsing the geo");
     if(geoNode.isNull()) return ;
 
     //check if there is a tag 'file' there in
@@ -555,13 +551,11 @@ void MainWindow::parseGeometry(const QDomNode &geoNode)
     // I assume it is a trav format node,
     //which is the only one which can directly be inserted into a file
     else {
-        //cout<<"online geo: "<<geoNode.toDocument().toString().toStdString()<<endl; exit(0);
-        //geoNode.toText().toComment().toDocument().toString()
         QDomDocument doc("");
         QDomNode geoNode;
         if(!geoNode.isNull()) {
-             std::cout << "online geo: "<<geoNode.toElement().toDocument().toString().toStdString();
-            exit(0);
+             Log::Error("online geo: %s", geoNode.toElement().toDocument().toString().toStdString().c_str());
+            exit(EXIT_FAILURE);
         }
 
         //must not be a file name
@@ -576,7 +570,7 @@ void MainWindow::parseGeometry(const QString& geometryString)
     QFile file("_geometry_tmp_file.xml");
     if (file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         QTextStream stream(&file);
-        stream << geometryString << endl;
+        stream << geometryString << Qt::endl;
     }
 
     QString tmpFileName = file.fileName();
@@ -646,7 +640,7 @@ void MainWindow::parseGeometry(const QString& geometryString)
 
 //         int color=agents.item(i).toElement().attribute("color").toDouble(&ok);
 //         if(!ok)color=std::numeric_limits<int>::quiet_NaN();
-//         Debug::Messages("id= %d height= %lf color =%d",id,height,color);
+//         Debug::Info("id= %d height= %lf color =%d",id,height,color);
 
 //         if(height!=height) {
 //             heights.append(QString::number(id));
@@ -698,7 +692,7 @@ void MainWindow::slotClearAllDataset()
 
 bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
 {
-     Debug::Messages("Enter MainWindow::addPedestrianGroup with filename <%s>", fileName.toStdString().c_str());
+     Log::Info("Enter MainWindow::addPedestrianGroup with filename <%s>", fileName.toStdString().c_str());
 
     statusBar()->showMessage(tr("Select a file"));
      if(fileName.isEmpty())
@@ -715,7 +709,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     //get and set the working dir
     QFileInfo fileInfo(fileName);
     QString wd=fileInfo.absoluteDir().absolutePath();
-    Debug::Messages("MainWindow::addPedestrianGroup: wd:  <%s>", wd.toStdString().c_str());
+    Log::Info("MainWindow::addPedestrianGroup: wd:  <%s>", wd.toStdString().c_str());
     SystemSettings::setWorkingDirectory(wd);
     SystemSettings::setFilenamePrefix(QFileInfo ( fileName ).baseName()+"_");
 
@@ -725,16 +719,16 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     //try to get a geometry filename
     if(fileName.endsWith(".xml",Qt::CaseInsensitive))
     {
-         Debug::Messages("1. Extract geometry file from <%s>", fileName.toStdString().c_str());
+         Log::Info("1. Extract geometry file from <%s>", fileName.toStdString().c_str());
          geometry_file=SaxParser::extractGeometryFilename(fileName);
     }
     else
     {
-         Debug::Messages("Extract geometry file from <%s>", fileName.toStdString().c_str());
+         Log::Info("Extract geometry file from <%s>", fileName.toStdString().c_str());
          geometry_file=SaxParser::extractGeometryFilenameTXT(fileName);
     }
 
-    Debug::Messages("MainWindow::addPedestrianGroup: geometry name: <%s>", geometry_file.toStdString().c_str());
+    Log::Info("MainWindow::addPedestrianGroup: geometry name: <%s>", geometry_file.toStdString().c_str());
     if(geometry_file.isEmpty())
     {
          auto fileDir = fileInfo.path();
@@ -752,11 +746,11 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
                                                            "Select a geometry file",
                                                            fileDir,
                                                            "Geometry (*.xml)");
-              Debug::Messages("Got geometry file: <%s>", geometry_file.toStdString().c_str());
+              Log::Info("Got geometry file: <%s>", geometry_file.toStdString().c_str());
               QFileInfo check_file(geometry_file);
               if( !(check_file.exists() && check_file.isFile()) )
               {
-                   Debug::Error("Geomery file does not exist.");
+                   Log::Error("Geomery file does not exist.");
                    //exit(EXIT_FAILURE);
                    return(false);
 
@@ -767,7 +761,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
          // always have a geometry tag
 
     }
-    std::cout << "---> geometry " << geometry_file.toStdString().c_str() << "\n" ;
+    Log::Info("---> geometry: %s \n", geometry_file.toStdString().c_str());
 
     // if xml is detected, just load and show the geometry then exit
     if(geometry_file.endsWith(".xml",Qt::CaseInsensitive)) {
@@ -775,7 +769,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
         //try to parse the correct way
         // fall back to this if it fails
         SystemSettings::CreateLogfile();
-        Debug::Messages("Calling parseGeometryJPS with <%s>", geometry_file.toStdString().c_str());
+        Log::Info("Calling parseGeometryJPS with <%s>", geometry_file.toStdString().c_str());
         if(! SaxParser::parseGeometryJPS(geometry_file,geometry)) {
             int res = QMessageBox::warning(this, "Errors in Geometry. Continue Parsing?",
                                            "JuPedSim has detected an error in the supplied geometry.\n"
@@ -796,7 +790,6 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
                                                                           //qt sep
         } else {
             //everything was fine. Delete the log file
-             //std::cout << "won't delete logfile\n";
             SystemSettings::DeleteLogfile();
         }
 
@@ -815,7 +808,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
 
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly)) {
-        Debug::Error("parseGeometryJPS:  could not open the File: ",fileName.toStdString().c_str());
+        Log::Error("parseGeometryJPS:  could not open the File: ",fileName.toStdString().c_str());
         return false;
 
     }
@@ -832,7 +825,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
 
     switch(groupID) {
     case 1:
-        Debug::Messages("handling first set");
+        Log::Info("handling first set");
         dataset=&extern_trajectories_firstSet;
         extern_first_dataset_loaded=true;
         extern_first_dataset_visible=true;
@@ -842,7 +835,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
         break;
 
     default:
-        Debug::Error("Only one dataset can be loaded at a time");
+        Log::Error("Only one dataset can be loaded at a time");
         //return false;
         break;
     }
@@ -879,66 +872,80 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
          QString tt_file= wd + QDir::separator() + SaxParser::extractTrainTypeFileTXT(fileName);
          QString goal_file=wd + QDir::separator() + SaxParser::extractGoalFileTXT(fileName);
          QFileInfo check_file(source_file);
+         bool readSource = true;
+         bool readGoal = true;
+         bool readTrainTypes = true;
+         bool readTrainTimeTable = true;
          if( !(check_file.exists() && check_file.isFile()) )
         {
-             Debug::Messages("WARNING: MainWindow::addPedestrianGroup: source name: <%s> not found!", source_file.toStdString().c_str());
+          //Debug::Warning("MainWindow::addPedestrianGroup: source name: <%s> not found!", source_file.toStdString().c_str());
+             readSource = false;
         }
          else
-              Debug::Messages("INFO: MainWindow::addPedestrianGroup: source name: <%s>", source_file.toStdString().c_str());
+              Log::Info("MainWindow::addPedestrianGroup: source name: <%s>", source_file.toStdString().c_str());
 
          check_file = goal_file;
          if( !(check_file.exists() && check_file.isFile()) )
         {
-             Debug::Messages("WARNING: MainWindow::addPedestrianGroup: goal name: <%s> not found!", goal_file.toStdString().c_str());
+          //Debug::Warning("MainWindow::addPedestrianGroup: goal name: <%s> not found!", goal_file.toStdString().c_str());
+             readGoal = false;
         }
          else
-              Debug::Messages("INFO: MainWindow::addPedestrianGroup: goal name: <%s>", goal_file.toStdString().c_str());
+              Log::Info("MainWindow::addPedestrianGroup: goal name: <%s>", goal_file.toStdString().c_str());
 
 
          check_file = ttt_file;
          if( !(check_file.exists() && check_file.isFile()) )
         {
-             Debug::Messages("WARNING: MainWindow::addPedestrianGroup: ttt name: <%s> not found!", ttt_file.toStdString().c_str());
+             readTrainTimeTable = false;
         }
          else
-              Debug::Messages("INFO: MainWindow::addPedestrianGroup: ttt name: <%s>", ttt_file.toStdString().c_str());
+              Log::Info("MainWindow::addPedestrianGroup: ttt name: <%s>", ttt_file.toStdString().c_str());
 
          check_file = tt_file;
          if( !(check_file.exists() && check_file.isFile()) )
         {
-             Debug::Messages("WARNING: MainWindow::addPedestrianGroup: tt name: <%s> not found!", tt_file.toStdString().c_str());
+             readTrainTypes = false;
         }
          else
-              Debug::Messages("INFO: MainWindow::addPedestrianGroup: tt name: <%s>", tt_file.toStdString().c_str());
+              Log::Info("MainWindow::addPedestrianGroup: tt name: <%s>", tt_file.toStdString().c_str());
 
-
-
-
+         QXmlSimpleReader reader;
+         SaxParser handler(geometry,*dataset,&frameRate);
+         reader.setContentHandler(&handler);
         // ------ parsing sources
-        QFile file(source_file);
-        QXmlInputSource source(&file);
-        QXmlSimpleReader reader;
-        SaxParser handler(geometry,*dataset,&frameRate);
-        reader.setContentHandler(&handler);
-        reader.parse(source);
-        file.close();
+        if (readSource)
+          {
+            QFile file(source_file);
+            QXmlInputSource source(&file);            
+            reader.parse(source);
+            file.close();
+          }
         // -----
         // // ---- parsing goals
         // -----
-        QFile file2(goal_file);
-        QXmlInputSource source2(&file2);
-        reader.parse(source2);
-        file2.close();
-        // parsing trains
-        // train type
+        if(readGoal)
+          {
+            QFile file2(goal_file);
+            QXmlInputSource source2(&file2);
+            reader.parse(source2);
+            file2.close();
+          }
+            // parsing trains
+            // train type
         std::map<int, std::shared_ptr<TrainTimeTable> > trainTimeTable;
-        std::map<std::string, std::shared_ptr<TrainType> > trainTypes;
-        SaxParser::LoadTrainType(tt_file.toStdString(), trainTypes);
-        extern_trainTypes = trainTypes;
-
-        bool ret = SaxParser::LoadTrainTimetable(ttt_file.toStdString(), trainTimeTable);
-
-        extern_trainTimeTables = trainTimeTable;
+        std::map<std::string, std::shared_ptr<TrainType> > trainTypes;           
+        if(readTrainTypes)
+          {
+            SaxParser::LoadTrainType(tt_file.toStdString(), trainTypes);
+            extern_trainTypes = trainTypes;            
+            }
+        if(readTrainTimeTable)
+          {
+            bool ret = SaxParser::LoadTrainTimetable(ttt_file.toStdString(), trainTimeTable);
+            extern_trainTimeTables = trainTimeTable;
+          }
+        
         QString geofileName = SaxParser::extractGeometryFilenameTXT(fileName);
 
         std::tuple<Point, Point>  trackStartEnd;
@@ -961,17 +968,17 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
               tab.second->pend = trackEnd;
               tab.second->elevation = elevation;
 
-              std::cout << "=======\n";
-              std::cout << "tab: " << tab.first << "\n";
-              std::cout << "Track start: " <<  trackStart._x << ", " << trackStart._y << "\n";
-              std::cout << "Track end: " <<  trackEnd._x << ", " << trackEnd._y << "\n";
-              std::cout << " room " << tab.second->rid << "\n";
-              std::cout << " subroom " << tab.second->sid << "\n";
-              std::cout << " elevation " << tab.second->elevation << "\n";
-              std::cout << "=======\n";
+              Log::Info("=======\n");
+              Log::Info("tab: %d\n", tab.first);
+              Log::Info("Track start: [%.2f, %.2f]\n", trackStart._x, trackStart._y);
+              Log::Info("Track end: [%.2f, %.2f]\n", trackEnd._x, trackEnd._y);
+              Log::Info("Room: %d\n", tab.second->rid);
+              Log::Info("Subroom %d\n", tab.second->sid);
+              Log::Info("Elevation %d\n", tab.second->elevation);
+              Log::Info("=======\n");
         }
         for(auto tab: trainTypes)
-             std::cout << "type: " << tab.first << "\n";
+            Log::Info("type: %s\n", tab.first.c_str());
 
         if(false==SaxParser::ParseTxtFormat(fileName, dataset,&frameRate))
             return false;
@@ -1030,7 +1037,7 @@ QString MainWindow::getTagValueFromElement(QDomNode node,
 void MainWindow::slotFullScreen(bool status)
 {
 
-    Debug::Messages("changing full screen status %d",status);
+    Log::Info("changing full screen status %d",status);
     extern_fullscreen_enable = true;
     //dont forget this.
     extern_force_system_update=true;
@@ -1134,27 +1141,7 @@ void MainWindow::slotFrameNumber(unsigned long actualFrameCount, unsigned long m
 
 void MainWindow::slotRunningTime(unsigned long timems)
 {
-    //	QString msg;
-    //	msg.setNum(timems);
-    //	msg.append(" milsec");
-    //labelRunningTime->setText(msg);
     ui.lcdRunningTime->display((int)timems);
-// TODO HHH this slows down the thread
-    // std::cout << timems  << "\n";
-
-    // QColor col="green";
-    // if(fmod(timems,1000) <=100 )
-    // {
-    //      col=Qt::red;
-    //      _visualisationThread->setExitsColor(col);
-    // }
-    // else if(fmod(timems,5000) <=100 )
-    // {
-    //      col=Qt::white;
-    //      _visualisationThread->setExitsColor(col);
-    // }
-
-
 }
 
 void MainWindow::slotRenderingTime(int fps)
@@ -1164,7 +1151,7 @@ void MainWindow::slotRenderingTime(int fps)
 }
 void MainWindow::slotExit()
 {
-     Debug::Messages("Exit jpsvis");
+     Log::Info("Exit jpsvis");
     cleanUp();
     qApp->exit();
 }
@@ -1205,7 +1192,7 @@ void MainWindow::slotControlSequence(const char * sex)
         ui.BtRecord->setToolTip("Start Recording");
         labelRecording->setText(" rec: off ");
     } else if (str.compare("CONTROL_RESET") == 0) {
-        Debug::Messages("resetting all");
+        Log::Info("resetting all");
         isPlaying = false;
         isPaused = false;
         labelCurrentAction->setText("   Idle   ");
@@ -1220,7 +1207,7 @@ void MainWindow::slotControlSequence(const char * sex)
     } else if (str.compare("STACK_REACHS_BEGINNING")==0) {
         //return to normal speed
         if(extern_update_step<0) {
-            Debug::Messages("stack reaches beginning, resuming the playback with vel 1");
+            Log::Info("stack reaches beginning, resuming the playback with vel 1");
             extern_update_step=1;
             ui.speedSettingSlider->setValue(1);
         }
@@ -1374,8 +1361,6 @@ void MainWindow::slotUpdateSpeedSlider(int newValue)
 /// update the position slider
 void MainWindow::slotUpdateFrameSlider(int newValue)
 {
-     // std::cout << "update frame slide " << newValue << "\n";
-
     // first get the correct position
     int maxFrameCount=1;
     if(extern_first_dataset_loaded) {
@@ -1388,7 +1373,6 @@ void MainWindow::slotUpdateFrameSlider(int newValue)
     // then set the correct position
     if(extern_first_dataset_loaded) {
         extern_trajectories_firstSet.setFrameCursorTo(update);
-        // Debug::Error( " first dataset frames update to [1] : " <<update<<endl;
     }
 }
 
@@ -1402,7 +1386,7 @@ void MainWindow::slotUpdateContrastSlider(int newValue)
     QString msg;
     msg.setNum(newValue);
     ui.framePerSecondSliderLabel->setText("Frames Per Second: " +msg +" ");
-    Debug::Error( " contrast updated to: %d",newValue);
+    Log::Error( " contrast updated to: %d",newValue);
 
 }
 
@@ -1448,14 +1432,14 @@ void MainWindow::waitForVisioThread()
 {
     while(_visualisationThread->isRunning()) {
         _visualisationThread->wait(200);
-        Debug::Messages("waiting for visualisation engine to terminate ...");
+        Log::Info("waiting for visualisation engine to terminate ...");
 #ifdef __linux__
         _visualisationThread->quit();
 #else
         _visualisationThread->terminate();
 #endif
     }
-    Debug::Messages("Visualisation Engine shutdown successfully");
+    Log::Info("Visualisation Engine shutdown successfully");
 
     //to avoid some sudden shutting down after resuming
     extern_shutdown_visual_thread=false;
@@ -1467,10 +1451,10 @@ void MainWindow::waitForDataThread()
 
     while(dataTransferThread->isRunning()) {
         dataTransferThread->shutdown();
-        Debug::Messages("Waiting for network engine to terminate ...");
+        Log::Info("Waiting for network engine to terminate ...");
         dataTransferThread->wait(500);
     }
-    Debug::Messages("Network Engine shutdown successfully.");
+    Log::Info("Network Engine shutdown successfully.");
 }
 
 /// set visualisation mode to 2D
@@ -1550,7 +1534,7 @@ void MainWindow::slotStartVisualisationThread(QString data,int numberOfAgents,fl
     doc.setContent(data,&errorMsg);
 
     if(!errorMsg.isEmpty()) {
-        Debug::Error("%s", (const char *)errorMsg.toStdString().c_str());
+        Log::Error("%s", (const char *)errorMsg.toStdString().c_str());
         return;
     }
 
@@ -1596,7 +1580,6 @@ void MainWindow::slotNextFrame()
     if(extern_first_dataset_loaded) {
         int newValue=extern_trajectories_firstSet.getFrameCursor()+1;
         extern_trajectories_firstSet.setFrameCursorTo(newValue);
-        //Debug::Error( " update to : " <<newValue<<endl;
         // HH
     }
 }
@@ -1606,7 +1589,6 @@ void MainWindow::slotPreviousFrame()
     if(extern_first_dataset_loaded) {
         int newValue=extern_trajectories_firstSet.getFrameCursor()-1;
         extern_trajectories_firstSet.setFrameCursorTo(newValue);
-        //Debug::Error( " update to : " <<newValue<<endl;
     }
 }
 
@@ -1707,7 +1689,7 @@ void MainWindow::slotChangeExitsColor()
 
     QSettings settings;
     settings.setValue("options/exitsColor", col);
-    Debug::Messages("Change Exits Color to %s", col.name().toStdString().c_str());
+    Log::Info("Change Exits Color to %s", col.name().toStdString().c_str());
     delete colorDialog;
 }
 
@@ -1770,7 +1752,6 @@ void MainWindow::slotSetCameraPerspectiveToTop()
     _visualisationThread->setCameraPerspective(p);
     //disable the virtual agent view
     SystemSettings::setVirtualAgent(-1);
-    //cerr <<"Setting camera view to top"<<endl;
 }
 
 void MainWindow::slotSetCameraPerspectiveToTopRotate()
@@ -1783,7 +1764,6 @@ void MainWindow::slotSetCameraPerspectiveToTopRotate()
         _visualisationThread->setCameraPerspective(p,degree);
         //disable the virtual agent view
         SystemSettings::setVirtualAgent(-1);
-        //cerr <<"Setting camera view to top"<<endl;
     }
 }
 
@@ -1797,7 +1777,6 @@ void MainWindow::slotSetCameraPerspectiveToSideRotate()
         _visualisationThread->setCameraPerspective(p,degree);
         //disable the virtual agent view
         SystemSettings::setVirtualAgent(-1);
-        //cerr <<"Setting camera view to top"<<endl;
     }
 }
 
@@ -1842,7 +1821,7 @@ void MainWindow::slotTakeScreenShot()
 /// load settings, parsed from the project file
 void MainWindow::loadAllSettings()
 {
-    Debug::Messages("restoring previous settings");
+    Log::Info("restoring previous settings");
     QSettings settings;
 
     //visualisation
@@ -1858,11 +1837,11 @@ void MainWindow::loadAllSettings()
                 port = settings.value("options/listeningPort").toInt();
                 SystemSettings::setListeningPort(port);
             }
-            Debug::Messages("online listening on port: %d",port);
+            Log::Info("online listening on port: %d",port);
         }
         else
         {
-             Debug::Messages("offline: %s", offline?"Yes":"No");
+             Log::Info("offline: %s", offline?"Yes":"No");
         }
     }
 
@@ -1873,146 +1852,146 @@ void MainWindow::loadAllSettings()
         ui.action2_D->setChecked(checked);
         ui.action3_D->setChecked(!checked);
         SystemSettings::set2D(checked);
-        Debug::Messages("2D: %s", checked?"Yes":"No");
+        Log::Info("2D: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showAgents"))
     {
         bool checked = settings.value("view/showAgents").toBool();
         ui.actionShow_Agents->setChecked(checked);
         SystemSettings::setShowAgents(checked);
-        Debug::Messages("show Agents: %s", checked?"Yes":"No");
+        Log::Info("show Agents: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showCaptions"))
     {
         bool checked = settings.value("view/showCaptions").toBool();
         ui.actionShow_Captions->setChecked(checked);
         SystemSettings::setShowAgentsCaptions(checked);
-        Debug::Messages("show Captions: %s", checked?"Yes":"No");
+        Log::Info("show Captions: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showDirections"))
     {
         bool checked=settings.value("view/showDirections").toBool();
         ui.actionShow_Directions->setChecked(checked);
         SystemSettings::setShowDirections(checked);
-        Debug::Messages("show Directions: %s", checked?"Yes":"No");
+        Log::Info("show Directions: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showTrajectories"))
     {
         bool checked = settings.value("view/showTrajectories").toBool();
         ui.actionShow_Trajectories->setChecked(checked);
         SystemSettings::setShowTrajectories(checked);
-        Debug::Messages("show Trajectories: %s", checked?"Yes":"No");
+        Log::Info("show Trajectories: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showGeometry"))
     {
         bool checked = settings.value("view/showGeometry").toBool();
         ui.actionShow_Geometry->setChecked(checked);
         slotShowGeometry();//will take care of the others things like enabling options
-        Debug::Messages("show Geometry: %s", checked?"Yes":"No");
+        Log::Info("show Geometry: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showFloor"))
     {
         bool checked = settings.value("view/showFloor").toBool();
         ui.actionShow_Floor->setChecked(checked);
         slotShowHideFloor();
-        Debug::Messages("show Floor: %s", checked?"Yes":"No");
+        Log::Info("show Floor: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showExits"))
     {
         bool checked = settings.value("view/showExits").toBool();
         ui.actionShow_Exits->setChecked(checked);
         slotShowHideExits();
-        Debug::Messages("show Exits: %s", checked?"Yes":"No");
+        Log::Info("show Exits: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showWalls"))
     {
         bool checked = settings.value("view/showWalls").toBool();
         ui.actionShow_Walls->setChecked(checked);
         slotShowHideWalls();
-        Debug::Messages("show Walls: %s", checked?"Yes":"No");
+        Log::Info("show Walls: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showGeoCaptions"))
     {
         bool checked = settings.value("view/showGeoCaptions").toBool();
         ui.actionShow_Geometry_Captions->setChecked(checked);
         slotShowHideGeometryCaptions();
-        Debug::Messages("show geometry Captions: %s", checked?"Yes":"No");
+        Log::Info("show geometry Captions: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showNavLines"))
     {
         bool checked = settings.value("view/showNavLines").toBool();
         ui.actionShow_Navigation_Lines->setChecked(checked);
         slotShowHideNavLines();
-        Debug::Messages("show Navlines: %s", checked?"Yes":"No");
+        Log::Info("show Navlines: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showObstacles"))
     {
         bool checked = settings.value("view/showObstacles").toBool();
         ui.actionShow_Obstacles->setChecked(checked);
         slotShowHideObstacles();
-        Debug::Messages("show showObstacles: %s", checked?"Yes":"No");
+        Log::Info("show showObstacles: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showOnScreensInfos"))
     {
         bool checked = settings.value("view/showOnScreensInfos").toBool();
         ui.actionShow_Onscreen_Infos->setChecked(checked);
         slotShowOnScreenInfos();
-        Debug::Messages("show OnScreensInfos: %s", checked?"Yes":"No");
+        Log::Info("show OnScreensInfos: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showGradientField"))
     {
         bool checked = settings.value("view/showGradientField").toBool();
         ui.actionShow_Gradient_Field->setChecked(checked);
         slotShowHideGradientField();
-        Debug::Messages("show GradientField: %s", checked?"Yes":"No");
+        Log::Info("show GradientField: %s", checked?"Yes":"No");
     }
     //options
     if (settings.contains("options/rememberSettings"))
     {
         bool checked = settings.value("options/rememberSettings").toBool();
         ui.actionRemember_Settings->setChecked(checked);
-        Debug::Messages("remember settings: %s", checked?"Yes":"No");
+        Log::Info("remember settings: %s", checked?"Yes":"No");
     }
 
     if (settings.contains("options/bgColor"))
     {
         QColor color = settings.value("options/bgColor").value<QColor>();
         SystemSettings::setBackgroundColor(color);
-        Debug::Messages("background color: %s",color.name().toStdString().c_str());
+        Log::Info("background color: %s",color.name().toStdString().c_str());
     }
 
     if (settings.contains("options/exitsColor"))
     {
         QColor color = settings.value("options/exitsColor").value<QColor>();
         SystemSettings::setExitsColor(color);
-        Debug::Messages("Exit color: %s",color.name().toStdString().c_str());
+        Log::Info("Exit color: %s",color.name().toStdString().c_str());
     }
 
     if (settings.contains("options/floorColor"))
     {
         QColor color = settings.value("options/floorColor").value<QColor>();
         SystemSettings::setFloorColor(color);
-        Debug::Messages("Floor color: %s",color.name().toStdString().c_str());
+        Log::Info("Floor color: %s",color.name().toStdString().c_str());
     }
 
     if (settings.contains("options/wallsColor"))
     {
         QColor color = settings.value("options/wallsColor").value<QColor>();
         SystemSettings::setWallsColor(color);
-        Debug::Messages("Walls color: %s",color.name().toStdString().c_str());
+        Log::Info("Walls color: %s",color.name().toStdString().c_str());
     }
 
     if (settings.contains("options/navLinesColor"))
     {
         QColor color = settings.value("options/navLinesColor").value<QColor>();
         SystemSettings::setNavLinesColor(color);
-        Debug::Messages("NavLines color: %s",color.name().toStdString().c_str());
+        Log::Info("NavLines color: %s",color.name().toStdString().c_str());
     }
     if (settings.contains("options/obstaclesColor"))
     {
         QColor color = settings.value("options/obstaclesColor").value<QColor>();
         SystemSettings::setObstacleColor(color);
-        Debug::Messages("Obstacles color: %s",color.name().toStdString().c_str());
+        Log::Info("Obstacles color: %s",color.name().toStdString().c_str());
     }
 
     extern_force_system_update=true;
@@ -2128,7 +2107,7 @@ void MainWindow::slotShowOnScreenInfos()
     bool value=ui.actionShow_Onscreen_Infos->isChecked();
     _visualisationThread->setOnscreenInformationVisibility(value);
     SystemSettings::setOnScreenInfos(value);
-    Debug::Messages("Show On Screen Infos: %s", value?"On":"Off");
+    Log::Info("Show On Screen Infos: %s", value?"On":"Off");
 }
 
 /// show/hide the geometry captions
@@ -2165,7 +2144,7 @@ void MainWindow::slotShowGeometryStructure()
         _geoStructure.setWindowTitle("Geometry structure");
         _geoStructure.setModel(&_visualisationThread->getGeometry().GetModel());
     }
-    Debug::Messages("Show Geometry Structure: %s", ui.actionShowGeometry_Structure->isChecked()?"On":"Off");
+    Log::Info("Show Geometry Structure: %s", ui.actionShowGeometry_Structure->isChecked()?"On":"Off");
 }
 
 void MainWindow::slotOnGeometryItemChanged( QStandardItem *item)

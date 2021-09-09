@@ -29,7 +29,7 @@
 #include "Room.h"
 #include "SubRoom.h"
 #include "../IO/OutputHandler.h"
-
+#include "../Log.h"
 #include <sstream>
 #include <memory>
 
@@ -132,7 +132,7 @@ SubRoom* Room::GetSubRoom(int index) const
      //todo: the check is done in _subRooms.at(index);
      if(_subRooms.count(index)==0)
      {
-          Log->Write("ERROR: Room::GetSubRoom() No subroom id [%d] present in room id [%d] ",index,_id);
+          Log::Error("Room::GetSubRoom() No subroom id [%d] present in room id [%d] ",index,_id);
           return nullptr;
      }
      return _subRooms.at(index).get();
@@ -165,12 +165,9 @@ void Room::AddSubRoom(SubRoom* r)
 
 
 void Room::WriteToErrorLog() const
-{
-     char tmp[CLENGTH];
-     string s;
-     sprintf(tmp, "\tRaum: %d [%s]:\n", _id, _caption.c_str());
-     s.append(tmp);
-     Log->Write(s);
+{    
+     Log::Info("Raum: %d [%s]:\n", _id, _caption.c_str());
+    
      // SubRooms
      for (int i = 0; i < GetNumberOfSubRooms(); i++) {
           SubRoom*sub = GetSubRoom(i);

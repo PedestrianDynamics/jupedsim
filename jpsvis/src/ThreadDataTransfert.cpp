@@ -56,7 +56,7 @@
 #include "network/TraVisToServer.h"
 #include "geometry/FacilityGeometry.h"
 #include "general/Macros.h"
-#include "Debug.h"
+#include "Log.h"
 
 
 //using namespace std;
@@ -140,7 +140,7 @@ void ThreadDataTransfer::run()
 void ThreadDataTransfer::slotHandleConnection()
 {
 
-    Debug::Messages("handling new connection");
+    Log::Info("handling new connection");
 
     QTcpSocket *clientConnection = tcpServer->nextPendingConnection();
     connect(clientConnection, SIGNAL(disconnected()),
@@ -151,12 +151,12 @@ void ThreadDataTransfer::slotHandleConnection()
     connect(clientConnection, SIGNAL(error(QAbstractSocket::SocketError)),
             this, SLOT(displayError(QAbstractSocket::SocketError)));
     //Q_DECLARE_METATYPE( QAbstractSocket::SocketError );
-    Debug::Messages("juhuuuu");
+    Log::Info("juhuuuu");
 }
 
 void ThreadDataTransfer::slotReadMessage()
 {
-    Debug::Messages("new post");
+    Log::Info("new post");
     //slotProcessMessage();
 }
 
@@ -185,17 +185,17 @@ void ThreadDataTransfer::slotProcessMessage(QString& data)
 
     if(!header.isNull()) {
         parseHeaderNode(header);
-        Debug::Messages("header received and parsed");
+        Log::Info("header received and parsed");
     }
     if(!shapes.isNull()) {
         parseShapeNode(shapes);
-        Debug::Messages("header received and parsed");
+        Log::Info("header received and parsed");
     }
 
     if(!geometry.isNull()) {
         //emit signal_loadGeometry(data);
         geoData=data;
-        Debug::Messages("geometry received and parsed");
+        Log::Info("geometry received and parsed");
         //parseGeometryNode(geometry);
     }
     if(!dataList.isEmpty()) {
@@ -207,7 +207,7 @@ void ThreadDataTransfer::slotProcessMessage(QString& data)
 
 void ThreadDataTransfer::slotConnectionClosed()
 {
-    Debug::Error("connection lost");
+    Log::Error("connection lost");
 }
 
 
@@ -221,8 +221,8 @@ void ThreadDataTransfer::parseHeaderNode(QDomNode header )
     numberOfAgents = getTagValueFromElement(header, "agents").toInt(&ok);
 
     if(!ok) {
-        Debug::Error("The number of agents is invalid");
-        Debug::Error("The number must be between 1...65355");
+        Log::Error("The number of agents is invalid");
+        Log::Error("The number must be between 1...65355");
         emit signal_errorMessage("The number of agents is invalid");
         numberOfAgents=1000;
     }
@@ -238,8 +238,8 @@ void ThreadDataTransfer::parseHeaderNode(QDomNode header )
     frameRate =frameRateStr.toFloat(&ok);
 
     if(!ok) {
-        Debug::Error("The frame rate is invalid");
-        Debug::Error("The number must be between 1...1000");
+        Log::Error("The frame rate is invalid");
+        Log::Error("The number must be between 1...1000");
         QMessageBox msgBox;
         msgBox.setText("The frame rate is invalid");
         msgBox.setInformativeText("The number must be between 1...1000,  I will consider 25");
@@ -352,24 +352,24 @@ void ThreadDataTransfer::slotDisplayError(QAbstractSocket::SocketError socketErr
     switch (socketError) {
 
     case QAbstractSocket::RemoteHostClosedError:
-        Debug::Error( "The host closes the connection ");
+        Log::Error( "The host closes the connection ");
         break;
 
     case QAbstractSocket::HostNotFoundError:
-        Debug::Error("The host was not found. Please check the ");
-        Debug::Error("host name and port settings.");
+        Log::Error("The host was not found. Please check the ");
+        Log::Error("host name and port settings.");
         break;
 
     case QAbstractSocket::ConnectionRefusedError:
-        Debug::Error("The connection was refused by the peer. ");
-        Debug::Error("Make sure the fortune server is running");
-        Debug::Error("and check that the host name and port ");
-        Debug::Error("settings are correct.");
+        Log::Error("The connection was refused by the peer. ");
+        Log::Error("Make sure the fortune server is running");
+        Log::Error("and check that the host name and port ");
+        Log::Error("settings are correct.");
         break;
 
     default:
-        Debug::Error("TraVisTo Client:");
-        Debug::Error("The following error occurred: ");
+        Log::Error("TraVisTo Client:");
+        Log::Error("The following error occurred: ");
         //cerr<< clientConnection->errorString().toStdString()<<endl;
         break;
     }
@@ -379,12 +379,12 @@ void ThreadDataTransfer::slotDisplayError(QAbstractSocket::SocketError socketErr
 
 void ThreadDataTransfer::slotProcessPendingDatagrams()
 {
-    Debug::Messages("connected");
+    Log::Info("connected");
     while (udpSocket->hasPendingDatagrams()) {
         QByteArray datagram;
         datagram.resize(udpSocket->pendingDatagramSize());
         udpSocket->readDatagram(datagram.data(), datagram.size());
-        //		Debug::Messages("%s",(const char *) datagram.data().c_str()));
+        //		Debug::Info("%s",(const char *) datagram.data().c_str()));
     }
 }
 
