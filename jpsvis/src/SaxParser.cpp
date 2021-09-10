@@ -1010,6 +1010,245 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
      return true;
 }
 
+/// provided for convenience and will be removed in the next version
+void SaxParser::parseGeometryTRAV(QString content, GeometryFactory& geoFac,QDomNode geo)
+{
+     Log::Info("external geometry found");
+     //creating am empty document
+     // to be filled
+     QDomDocument doc("");
+     QDomNode geoNode;
+     auto geometry= shared_ptr<FacilityGeometry>(new FacilityGeometry("no name", "no name", "no name"));
+
+     //first try to open the file
+     if(content.endsWith(".trav",Qt::CaseInsensitive) ) {
+          QFile file(content);
+          if (!file.open(QIODevice::ReadOnly)) {
+               Log::Error("could not open the File");
+               return ;
+          }
+          QString *errorCode = new QString();
+          if (!doc.setContent(&file, errorCode)) {
+               file.close();
+               //slotErrorOutput(*errorCode);
+               Log::Error("error code: <%s>", errorCode->toStdString().c_str());
+               return ;
+          }
+          file.close();
+          geoNode =doc.documentElement().namedItem("geometry");
+
+          if (geoNode.isNull()) {
+               Log::Error("No geometry information found. <geometry> <geometry/> tag is missing.");
+          }
+     } else {
+          if(content.isEmpty()) {
+               geoNode=geo;
+               Log::Info("parsing the old fashion way");
+          } else {
+               content = "<travisto>\n" +content+ "\n</travisto>\n";
+               QString errorMsg="";
+               doc.setContent(content,&errorMsg);
+
+               if(!errorMsg.isEmpty()) {
+                    Log::Error("%s", (const char *)errorMsg.toStdString().c_str());
+                    return;
+               }
+               geoNode =doc.elementsByTagName("geometry").item(0);
+          }
+     }
+
+     // for the case there is more than just one geometry Node
+     while (!geoNode.isNull()) {
+          QDomElement e = geoNode.toElement();
+          QDomNodeList walls = e.elementsByTagName("wall");
+          QDomNodeList doors = e.elementsByTagName("door");
+
+          //objects which can be positioned everywhere in the facility
+          QDomNodeList spheres = e.elementsByTagName("sphere");
+          QDomNodeList cuboids = e.elementsByTagName("cuboid");
+          QDomNodeList floors = e.elementsByTagName("floor");
+          QDomNodeList cylinders = e.elementsByTagName("cylinder");
+          QDomNodeList labels = e.elementsByTagName("label");
+
+
+          //parsing the walls
+          for (  int i = 0; i < walls.length(); i++) {
+               QDomElement el = walls.item(i).toElement();
+
+               //wall thickness, default to 30 cm
+               double thickness = el.attribute("thickness","15").toDouble()*FAKTOR;
+               //wall height default to 250 cm
+               double height = el.attribute("height","250").toDouble()*FAKTOR;
+               //wall color default to blue
+               double color = el.attribute("color","0").toDouble();
+
+               //get the points defining each wall
+               //not that a wall is not necessarily defined by two points, could be more...
+               QDomNodeList points = el.elementsByTagName("point");
+               for (  int i = 0; i < points.length() - 1; i++) {
+
+                    double x1=points.item(i).toElement().attribute("xPos", "0").toDouble()*FAKTOR;
+                    double y1=points.item(i).toElement().attribute("yPos", "0").toDouble()*FAKTOR;
+                    double z1=points.item(i).toElement().attribute("zPos", "0").toDouble()*FAKTOR;
+
+                    double x2=points.item(i+1).toElement().attribute("xPos", "0").toDouble()*FAKTOR;
+                    double y2=points.item(i+1).toElement().attribute("yPos", "0").toDouble()*FAKTOR;
+                    double z2=points.item(i+1).toElement().attribute("zPos", "0").toDouble()*FAKTOR;
+                    geometry->addWall(x1, y1,z1 ,x2, y2,z2,thickness,height,color);
+               }
+          }
+
+          //parsing the doors
+          if(doors.length()>0)
+               for (  int i = 0; i < doors.length(); i++) {
+                    QDomElement el = doors.item(i).toElement();
+
+                    //door thickness, default to 15 cm
+                    double thickness = el.attribute("thickness","15").toDouble()*FAKTOR;
+                    //door height default to 250 cm
+                    double height = el.attribute("height","250").toDouble()*FAKTOR;
+                    //door color default to blue
+                    double color = el.attribute("color","255").toDouble();
+
+                    //get the points defining each wall
+                    //not that a wall is not necesarily defined by two points, could be more...
+                    QDomNodeList points = el.elementsByTagName("point");
+                    //Debug::Messages("found:  " << points.length() <<" for this wall" <<endl;
+                    for (  int i = 0; i < points.length() - 1; i++) {
+
+                         double x1=points.item(i).toElement().attribute("xPos", "0").toDouble()*FAKTOR;
+                         double y1=points.item(i).toElement().attribute("yPos", "0").toDouble()*FAKTOR;
+                         double z1=points.item(i).toElement().attribute("zPos", "0").toDouble()*FAKTOR;
+
+                         double x2=points.item(i+1).toElement().attribute("xPos", "0").toDouble()*FAKTOR;
+                         double y2=points.item(i+1).toElement().attribute("yPos", "0").toDouble()*FAKTOR;
+                         double z2=points.item(i+1).toElement().attribute("zPos", "0").toDouble()*FAKTOR;
+                         geometry->addDoor(x1, y1, z1, x2, y2,z2,thickness,height,color);
+                    }
+               }
+
+          // parsing the objets
+          for (  int i = 0; i < spheres.length(); i++) {
+
+               double center[3];
+               center[0] = spheres.item(i).toElement().attribute("centerX", "0").toDouble()*FAKTOR;
+               center[1]= spheres.item(i).toElement().attribute("centerY", "0").toDouble()*FAKTOR;
+               center[2]= spheres.item(i).toElement().attribute("centerZ", "0").toDouble()*FAKTOR;
+               double color= spheres.item(i).toElement().attribute("color", "0").toDouble()*FAKTOR;
+               double radius= spheres.item(i).toElement().attribute("radius", "0").toDouble()*FAKTOR;
+               //double width = spheres.item(i).toElement().attribute("width", "0").toDouble();
+               //double height= spheres.item(i).toElement().attribute("height", "0").toDouble();
+
+               geometry->addObjectSphere(center,radius,color);
+          }
+          // cubic shapes
+          for (  int i = 0; i < cuboids.length(); i++) {
+
+               double center[3];
+               center[0] = cuboids.item(i).toElement().attribute("centerX", "0").toDouble()*FAKTOR;
+               center[1]= cuboids.item(i).toElement().attribute("centerY", "0").toDouble()*FAKTOR;
+               center[2]= cuboids.item(i).toElement().attribute("centerZ", "0").toDouble()*FAKTOR;
+               double color= cuboids.item(i).toElement().attribute("color", "0").toDouble();
+               double length= cuboids.item(i).toElement().attribute("length", "0").toDouble()*FAKTOR;
+               double width = cuboids.item(i).toElement().attribute("width", "0").toDouble()*FAKTOR;
+               double height= cuboids.item(i).toElement().attribute("height", "0").toDouble()*FAKTOR;
+               geometry->addObjectBox(center,height,width,length,color);
+               //		Debug::Error("cuboids: "<<length<<" || " <<width << " || "<<height<<" || "<<color<<endl;
+          }
+          // floors
+          for (  int i = 0; i < floors.length(); i++) {
+
+               double left =floors.item(i).toElement().attribute("xMin","0").toDouble()*FAKTOR;
+               double right =floors.item(i).toElement().attribute("xMax","0").toDouble()*FAKTOR;
+               double up =floors.item(i).toElement().attribute("yMax","0").toDouble()*FAKTOR;
+               double down =floors.item(i).toElement().attribute("yMin","0").toDouble()*FAKTOR;
+               double z =floors.item(i).toElement().attribute("z","0").toDouble()*FAKTOR;
+               geometry->addFloor(left,down,right,up,z);
+          }
+          // cylinders
+          for (  int i = 0; i < cylinders.length(); i++) {
+
+               double center[3], rotation[3];
+               center[0] = cylinders.item(i).toElement().attribute("centerX", "0").toDouble()*FAKTOR;
+               center[1]= cylinders.item(i).toElement().attribute("centerY", "0").toDouble()*FAKTOR;
+               center[2]= cylinders.item(i).toElement().attribute("centerZ", "0").toDouble()*FAKTOR;
+               double color= cylinders.item(i).toElement().attribute("color", "0").toDouble();
+               double radius= cylinders.item(i).toElement().attribute("radius", "0").toDouble()*FAKTOR;
+               double height= cylinders.item(i).toElement().attribute("height", "0").toDouble()*FAKTOR;
+               rotation[0] = cylinders.item(i).toElement().attribute("angleX", "90").toDouble();
+               rotation[1] = cylinders.item(i).toElement().attribute("angleY", "0").toDouble();
+               rotation[2] = cylinders.item(i).toElement().attribute("angleZ", "0").toDouble();
+               geometry->addObjectCylinder(center,radius,height,rotation,color);
+          }
+
+          //Labels
+          for (  int i = 0; i < labels.length(); i++) {
+
+               double center[3];
+               center[0] = labels.item(i).toElement().attribute("centerX", "0").toDouble()*FAKTOR;
+               center[1]= labels.item(i).toElement().attribute("centerY", "0").toDouble()*FAKTOR;
+               center[2]= labels.item(i).toElement().attribute("centerZ", "0").toDouble()*FAKTOR;
+               double color= labels.item(i).toElement().attribute("color", "0").toDouble();
+               string caption= labels.item(i).toElement().attribute("text", "").toStdString();
+               geometry->addObjectLabel(center,center,caption,color);
+          }
+          // you should normally have only one geometry node, but one never knows...
+          geoNode = geoNode.nextSiblingElement("geometry");
+     }
+
+     geoFac.AddElement(0,0,geometry);
+}
+
+QString SaxParser::extractGeometryFilename(QString &filename)
+{
+     QString extracted_geo_name="";
+     //first try to look at a string <file location="filename.xml"/>
+     QFile file(filename);
+     QString line;
+     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+          QTextStream in(&file);
+          while (!in.atEnd()) {
+               //look for a line with
+               line = in.readLine();
+               if(line.contains("location" ,Qt::CaseInsensitive))
+                    if(line.contains("<file" ,Qt::CaseInsensitive)) {
+                         //try to extract what ever is inside the quotes
+
+                         QString begin="\"";
+                         QString end="\"";
+                         int startIndex = line.indexOf(begin)+begin.length();
+                         if(startIndex <= 0)continue; //false alarm
+                         int endIndex = line.indexOf(end,startIndex);
+                         if(endIndex <= 0)continue; // false alarm
+                         extracted_geo_name= line.mid(startIndex,endIndex - startIndex);
+                         return extracted_geo_name;
+                         //break;// we are done
+                    }
+               if(line.contains("<geometry" ,Qt::CaseInsensitive))
+                    if(line.contains("version" ,Qt::CaseInsensitive)) {
+                         //real geometry file
+                         QFileInfo fileInfoGeometry(filename);
+                         extracted_geo_name=fileInfoGeometry.fileName();
+                         return extracted_geo_name;
+                    }
+          }
+     }
+
+     //maybe this is already the geometry file itself ?
+     //do a rapid test
+     //    FacilityGeometry* geo = new FacilityGeometry();
+     //    QFileInfo fileInfoGeometry(filename);
+     //    extracted_geo_name=fileInfoGeometry.fileName();
+
+     //    //just check if it starts with geometry
+     //    //if(parseGeometryJPS(extracted_geo_name,geo)==true)
+     //    //{
+     //        return extracted_geo_name;
+     //    //}
+     //    delete geo;
+
+     return "";
+}
 // not used yet!!
 bool SaxParser::getSourcesTXT(QString &filename)
 {
@@ -1067,7 +1306,6 @@ QString SaxParser::extractSourceFileTXT(QString &filename)
           while (!in.atEnd()) {
                //look for a line with
                line = in.readLine();
-               // std::cout << " >> " <<  line.toStdString().c_str() << endl;
                if(line.split(":").size()==2)
                {
                     if(line.split(":")[0].contains("sources",Qt::CaseInsensitive))
@@ -1214,7 +1452,185 @@ QString SaxParser::extractGeometryFilenameTXT(QString &filename)
 }
 
 
+void SaxParser::parseGeometryXMLV04(QString filename, GeometryFactory& geoFac)
+{
+     Log::Info("Parsing XML v04");
+     QDomDocument doc("");
+     QFile file(filename);
 
+     int size =file.size()/(1024*1024);
+
+     //avoid dom parsing a very large dataset
+     if(size>500) {
+         Log::Error("The file is too large: %s", filename.toStdString().c_str());
+         return;
+     }
+
+     auto geo= shared_ptr<FacilityGeometry>(new FacilityGeometry("no name", "no name", "no name"));
+
+     //TODO: check if you can parse this with the building classes.
+     // This should be a fall back option
+
+     if (!file.open(QIODevice::ReadOnly)) {
+          qDebug()<<"could not open the file: "<<filename<<Qt::endl;
+          return ;
+     }
+     QString *errorCode = new QString();
+     if (!doc.setContent(&file, errorCode)) {
+          file.close();
+          qDebug()<<errorCode<<Qt::endl;
+          return ;
+     }
+     QDomElement root= doc.documentElement();
+
+     //only parsing the geometry node
+     if(root.tagName()!="geometry") return;
+
+
+     double version =root.attribute("version","-1").toDouble();
+
+     string unit=root.attribute("unit","cm").toStdString();
+     double xToCmfactor=100;
+     if (unit=="cm") xToCmfactor=1;
+     if (unit=="m") xToCmfactor=100;
+
+     if(version<0.4) {
+          QMessageBox::warning(0, QObject::tr("Parsing Error"),
+                               QObject::tr("Only geometry version >= 0.4 supported"));
+     }
+
+     //parsing the subrooms
+     QDomNodeList xSubRoomsNodeList=doc.elementsByTagName("subroom");
+     //parsing the walls
+     for (  int i = 0; i < xSubRoomsNodeList.length(); i++) {
+          QDomElement xPoly = xSubRoomsNodeList.item(i).firstChildElement("polygon");
+          double position[3]= {0,0,0};
+          double pos_count=1;
+          double color=0;
+
+          while(!xPoly.isNull()) {
+               //wall thickness, default to 30 cm
+               double thickness = xPoly.attribute("thickness","15").toDouble();
+               //wall height default to 250 cm
+               double height = xPoly.attribute("height","250").toDouble();
+               //wall color default to blue
+               color = xPoly.attribute("color","0").toDouble();
+
+               QDomNodeList xVertices=xPoly.elementsByTagName("vertex");
+               pos_count+=xVertices.count()-1;
+
+               for( int i=0; i<xVertices.count()-1; i++) {
+                    //all unit are converted in cm
+                    double x1=xVertices.item(i).toElement().attribute("px", "0").toDouble()*xToCmfactor;
+                    double y1=xVertices.item(i).toElement().attribute("py", "0").toDouble()*xToCmfactor;
+                    double z1=xVertices.item(i).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
+                    double x2=xVertices.item(i+1).toElement().attribute("px", "0").toDouble()*xToCmfactor;
+                    double y2=xVertices.item(i+1).toElement().attribute("py", "0").toDouble()*xToCmfactor;
+                    double z2=xVertices.item(i+1).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
+
+                    position[0]+= x1;
+                    position[1]+= y1;
+                    position[2]+= z1;
+
+                    geo->addWall(x1, y1, z1, x2, y2,z2,thickness,height,color);
+               }
+               xPoly = xPoly.nextSiblingElement("polygon");
+          }
+
+          //add the caption
+          string roomCaption = xSubRoomsNodeList.item(i).parentNode().toElement().attribute("caption").toStdString();
+          string subroomCaption=xSubRoomsNodeList.item(i).toElement().attribute("id").toStdString();
+          string caption=roomCaption+" ( " + subroomCaption + " ) ";
+          position[0]/=pos_count;
+          position[1]/=pos_count;
+          position[2]/=pos_count;
+          geo->addObjectLabel(position,position,caption,color);
+          geo->SetRoomCaption(roomCaption);
+          geo->SetSubRoomCaption(subroomCaption);
+     }
+
+     QDomNodeList xObstaclesList=doc.elementsByTagName("obstacle");
+     for (  int i = 0; i < xObstaclesList.length(); i++) {
+          QDomElement xPoly = xObstaclesList.item(i).firstChildElement("polygon");
+          while(!xPoly.isNull()) {
+               //wall thickness, default to 30 cm
+               double thickness = xPoly.attribute("thickness","15").toDouble();
+               //wall height default to 250 cm
+               double height = xPoly.attribute("height","250").toDouble();
+               //wall color default to blue
+               double color = xPoly.attribute("color","0").toDouble();
+
+               QDomNodeList xVertices=xPoly.elementsByTagName("vertex");
+               for( int i=0; i<xVertices.count()-1; i++) {
+                    double x1=xVertices.item(i).toElement().attribute("px", "0").toDouble()*xToCmfactor;
+                    double y1=xVertices.item(i).toElement().attribute("py", "0").toDouble()*xToCmfactor;
+                    double z1=xVertices.item(i).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
+
+                    double x2=xVertices.item(i+1).toElement().attribute("px", "0").toDouble()*xToCmfactor;
+                    double y2=xVertices.item(i+1).toElement().attribute("py", "0").toDouble()*xToCmfactor;
+                    double z2=xVertices.item(i+1).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
+                    geo->addWall(x1, y1, z1, x2, y2,z2,thickness,height,color);
+               }
+               xPoly = xPoly.nextSiblingElement("polygon");
+          }
+     }
+
+     QDomNodeList xCrossingsList=doc.elementsByTagName("crossing");
+
+     for (int i = 0; i < xCrossingsList.length(); i++) {
+          QDomElement xCrossing = xCrossingsList.item(i).toElement();
+          QDomNodeList xVertices=xCrossing.elementsByTagName("vertex");
+
+          ///door thickness, default to 15 cm
+          double thickness = xCrossing.attribute("thickness","15").toDouble();
+          //door height default to 250 cm
+          double height = xCrossing.attribute("height","250").toDouble();
+          //door color default to blue
+          double color = xCrossing.attribute("color","120").toDouble();
+          QString id= xCrossing.attribute("id","-1");
+
+          double x1=xVertices.item(0).toElement().attribute("px", "0").toDouble()*xToCmfactor;
+          double y1=xVertices.item(0).toElement().attribute("py", "0").toDouble()*xToCmfactor;
+          double z1=xVertices.item(0).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
+
+          double x2=xVertices.item(1).toElement().attribute("px", "0").toDouble()*xToCmfactor;
+          double y2=xVertices.item(1).toElement().attribute("py", "0").toDouble()*xToCmfactor;
+          double z2=xVertices.item(1).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
+          geo->addNavLine(x1, y1, z1, x2, y2,z2,thickness,height,color);
+
+          double center[3]= {(x1+x2)/2.0, (y1+y2)/2.0, (z2+z1)/2.0};
+          geo->addObjectLabel(center,center,id.toStdString(),21);
+     }
+
+     QDomNodeList xTransitionsList=doc.elementsByTagName("transition");
+     for (int i = 0; i < xTransitionsList.length(); i++) {
+          QDomElement xTransition = xTransitionsList.item(i).toElement();
+          QDomNodeList xVertices=xTransition.elementsByTagName("vertex");
+
+          ///door thickness, default to 15 cm
+          double thickness = xTransition.attribute("thickness","15").toDouble();
+          //door height default to 250 cm
+          double height = xTransition.attribute("height","250").toDouble();
+          //door color default to blue
+          double color = xTransition.attribute("color","255").toDouble();
+
+          double x1=xVertices.item(0).toElement().attribute("px", "0").toDouble()*xToCmfactor;
+          double y1=xVertices.item(0).toElement().attribute("py", "0").toDouble()*xToCmfactor;
+          double z1=xVertices.item(0).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
+
+          double x2=xVertices.item(1).toElement().attribute("px", "0").toDouble()*xToCmfactor;
+          double y2=xVertices.item(1).toElement().attribute("py", "0").toDouble()*xToCmfactor;
+          double z2=xVertices.item(1).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
+          geo->addDoor(x1, y1, z1, x2, y2,z2,thickness,height,color);
+
+          string id= xTransition.attribute("id","-1").toStdString();
+          double center[3]= {(x1+x2)/2.0, (y1+y2)/2.0, (z2+z1)/2.0};
+          geo->addObjectLabel(center,center,id,21);
+     }
+
+     //room 0, subroom 0
+     geoFac.AddElement(0,0,geo);
+}
 
 bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, double * fps)
 {
@@ -1277,7 +1693,6 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
                     {
                          minFrame =  frameID;
                          once = 0;
-                         std::cout << "minFrame =  " << minFrame << "\n";
                     }
 
 
@@ -1310,8 +1725,6 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
                          Log::Info("minFrame =  %d\n", minFrame);
                          once = 0;
                     }
-                    // std::cout << ">> minFrame =  " << minFrame << " frame " << frameID<< "\n";
-
                     break;
 
                default:
@@ -1486,7 +1899,6 @@ bool SaxParser::LoadTrainTimetable(std::string Filename, std::map<int, std::shar
 
 bool   SaxParser::LoadTrainType(std::string Filename, std::map<std::string, std::shared_ptr<TrainType> > & trainTypes)
 {
-
      TiXmlDocument docTT(Filename);
      if (!docTT.LoadFile()) {
           Log::Error("%s", docTT.ErrorDesc());
