@@ -36,8 +36,9 @@ Crossing::Crossing()
     _id            = -1;
     _doorUsage     = 0;
     _tempDoorUsage = 0;
-    _maxDoorUsage = (std::numeric_limits<int>::max)(); //avoid name conflicts in windows winmindef.h
-    _outflowRate  = (std::numeric_limits<double>::max)();
+    _maxDoorUsage =
+        (std::numeric_limits<int>::max) (); //avoid name conflicts in windows winmindef.h
+    _outflowRate         = (std::numeric_limits<double>::max) ();
     _lastPassingTime     = 0;
     _lastFlowMeasurement = 0;
     _DT                  = 1;
@@ -185,12 +186,13 @@ int Crossing::CommonSubroomWith(Crossing * other, SubRoom *& subroom)
     return result;
 }
 
-void Crossing::IncreaseDoorUsage(int number, double time)
+void Crossing::IncreaseDoorUsage(int number, double time, int ped_id)
 {
     _doorUsage += number;
     _tempDoorUsage += number;
     _lastPassingTime = time;
-    _flowAtExit += std::to_string(time) + "  " + std::to_string(_doorUsage) + "\n";
+    _flowAtExit += std::to_string(time) + "  " + std::to_string(_doorUsage) + "  " +
+                   std::to_string(ped_id) + "\n";
 }
 
 void Crossing::IncreasePartialDoorUsage(int number)
