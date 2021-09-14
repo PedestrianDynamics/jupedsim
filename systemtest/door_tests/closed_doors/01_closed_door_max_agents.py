@@ -35,7 +35,7 @@ def read_flow():
                                    skip_blank_lines=True,
                                    header=None,
                                    engine='python')
-                flow.columns = ['time', 'peds']
+                flow.columns = ['time', 'peds', 'pedIDs']
                 flow_dict[door_id] = flow.shape[0]
 
     if len(flow_dict.keys()) > 0:

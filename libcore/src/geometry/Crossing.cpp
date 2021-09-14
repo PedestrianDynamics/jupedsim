@@ -185,12 +185,13 @@ int Crossing::CommonSubroomWith(Crossing * other, SubRoom *& subroom)
     return result;
 }
 
-void Crossing::IncreaseDoorUsage(int number, double time)
+void Crossing::IncreaseDoorUsage(int number, double time, int ped_id)
 {
     _doorUsage += number;
     _tempDoorUsage += number;
     _lastPassingTime = time;
-    _flowAtExit += std::to_string(time) + "  " + std::to_string(_doorUsage) + "\n";
+    _flowAtExit += std::to_string(time) + "  " + std::to_string(_doorUsage) + "  " +
+                   std::to_string(ped_id) + "\n";
 }
 
 void Crossing::IncreasePartialDoorUsage(int number)

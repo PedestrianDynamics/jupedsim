@@ -149,7 +149,7 @@ void SimulationHelper::UpdateFlowAtDoors(
             return;
         }
 
-        closestTransition.value()->IncreaseDoorUsage(1, Pedestrian::GetGlobalTime());
+        closestTransition.value()->IncreaseDoorUsage(1, Pedestrian::GetGlobalTime(), ped->GetID());
         closestTransition.value()->IncreasePartialDoorUsage(1);
     }
 }

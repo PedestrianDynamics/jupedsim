@@ -293,7 +293,7 @@ void Simulation::PrintStatistics(double simTime)
                 statOutput.Write(
                     "#Flow at exit " + goal->GetCaption() + "( ID " +
                     std::to_string(goal->GetID()) + " )");
-                statOutput.Write("#Time (s)  cummulative number of agents \n");
+                statOutput.Write("#Time (s), cummulative number of agents, pedestrian ID\n");
                 statOutput.Write(goal->GetFlowCurve());
             }
         }

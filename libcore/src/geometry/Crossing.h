@@ -195,8 +195,9 @@ public:
      * Increment the number of persons that used that crossing.
      * @param number, how many person have passed the crossing.
      * @param time, at which time persons have passed.
+     * @param ped_id, id of the person that has passed
      */
-    void IncreaseDoorUsage(int number, double time);
+    void IncreaseDoorUsage(int number, double time, int ped_id);
 
     /**
      * Increment the number of persons that used that crossing in time span \a _DT.

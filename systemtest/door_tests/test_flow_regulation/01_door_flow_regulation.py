@@ -33,7 +33,7 @@ def readFlow(outflow):
                                    skip_blank_lines=True,
                                    header=None,
                                    engine='python')
-                flow.columns = ['time', 'peds']
+                flow.columns = ['time', 'peds', 'pedIDs']
                 return flow
 
     logging.error('Could not find flow file to expected flow {}.'.format(outflow))
