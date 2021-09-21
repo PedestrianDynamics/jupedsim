@@ -64,7 +64,6 @@ bool extern_shutdown_visual_thread=false;
 bool extern_recording_enable=false;
 bool extern_is_pause =false;
 bool extern_launch_recording=false;
-bool extern_offline_mode = true;
 bool extern_fullscreen_enable = false;
 bool extern_take_screenshot = false;
 /// states whether a setting has been altered

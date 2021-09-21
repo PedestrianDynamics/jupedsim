@@ -28,9 +28,8 @@
 *  Created on: Aug 18, 2009
 */
 
-
-#ifndef INTERACTORSTYLE_H_
-#define INTERACTORSTYLE_H_
+#pragma once
+#include <vtkInteractorStyleTrackballCamera.h>
 
 // Extern variables;
 extern bool extern_fullscreen_enable;
@@ -60,11 +59,5 @@ public:
     virtual void Dolly();
     virtual void OnLeftButtonUp();
     virtual void OnMouseMove();
-
-
-private:
-    //vtkActor* mActor ;
-    //vtkSphereSource* mSrc ;
 };
 
-#endif /* INTERACTORSTYLE_H_ */

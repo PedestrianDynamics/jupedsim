@@ -191,7 +191,6 @@ Frame* SyncData::getNextFrame()
         }
 
         _mutex.unlock();
-        //if(extern_offline_mode)
         emit signal_controlSequences("CONTROL_STACK_EMPTY");
         return res;
     }

@@ -50,7 +50,6 @@ class QStringList;
 class Frame;
 
 extern int extern_update_step;
-extern bool extern_offline_mode;
 
 class SyncData: public QObject {
 

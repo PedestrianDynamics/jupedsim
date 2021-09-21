@@ -1,8 +1,3 @@
-# Documentation: Some useful options:
-# -DCMAKE_CXX_COMPILER:STRING=clang++   -DCMAKE_C_COMPILER:STRING=clang .
-# -DCMAKE_BUILD_TYPE:STRING=Debug (default Release)
-# -DBUILD_TESTING=ON (default OFF)
-#--------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.16)
 project(jpsvis LANGUAGES CXX C VERSION 0.8.3)
 
@@ -19,7 +14,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_COLOR_MAKEFILE ON)
-
 include(helper_functions)
 check_prefix_path()
 enforce_build_type_is_set()
@@ -65,7 +59,7 @@ endif()
 # Qt
 find_package(
     Qt5 5.12
-    COMPONENTS Widgets Xml Core Gui Network
+    COMPONENTS Widgets Xml Core Gui
     REQUIRED
 )
 
@@ -88,6 +82,12 @@ add_executable(jpsvis MACOSX_BUNDLE WIN32 src/main.cpp ${app_icon_macos})
 
 target_compile_options(jpsvis PRIVATE ${COMMON_COMPILE_OPTIONS})
 
+target_compile_definitions(jpsvis
+    PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:NOGDI>
+        $<$<CXX_COMPILER_ID:MSVC>:WIN32_LEAN_AND_MEAN>
+)
+
 #**********************************************************
 # Linking Qt and VTK
 #**********************************************************
@@ -96,7 +96,6 @@ target_link_libraries(jpsvis PUBLIC
         Qt5::Widgets
         Qt5::Xml
         Qt5::Core
-        Qt5::Network
         ${VTK_LIBRARIES}
         git-info
 )
@@ -114,110 +113,98 @@ endif()
 #**************************************************************
 target_include_directories(jpsvis PUBLIC "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/forms" ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 set(SRCS
+    forms/Settings.cpp
+    forms/jpsvis.rc
+    src/Frame.cpp
+    src/FrameElement.cpp
+    src/IO/OutputHandler.cpp
+    src/IO/TraVisToClient.cpp
+    src/InteractorStyle.cpp
+    src/Log.cpp
+    src/MainWindow.cpp
+    src/Pedestrian.cpp
+    src/SaxParser.cpp
+    src/SyncData.cpp
+    src/SystemSettings.cpp
+    src/TimerCallback.cpp
+    src/TrailPlotter.cpp
+    src/Visualisation.cpp
     src/geometry/Building.cpp
     src/geometry/Crossing.cpp
+    src/geometry/FacilityGeometry.cpp
+    src/geometry/GeometryFactory.cpp
     src/geometry/Goal.cpp
     src/geometry/Hline.cpp
+    src/geometry/JPoint.cpp
     src/geometry/Line.cpp
+    src/geometry/LinePlotter.cpp
+    src/geometry/LinePlotter2D.cpp
     src/geometry/NavLine.cpp
     src/geometry/Obstacle.cpp
     src/geometry/Point.cpp
+    src/geometry/PointPlotter.cpp
+    src/geometry/PointPlotter2D.cpp
     src/geometry/Room.cpp
     src/geometry/SubRoom.cpp
     src/geometry/Transition.cpp
     src/geometry/Wall.cpp
-    src/geometry/JPoint.cpp
+    src/main.cpp
+    src/myqtreeview.cpp
     src/tinyxml/tinystr.cpp
     src/tinyxml/tinyxml.cpp
     src/tinyxml/tinyxmlerror.cpp
     src/tinyxml/tinyxmlparser.cpp
-    src/IO/OutputHandler.cpp
-    src/IO/TraVisToClient.cpp
-    forms/Settings.cpp
-    src/SaxParser.cpp
-    src/Log.cpp
-    src/main.cpp
-    src/Frame.cpp
-    src/InteractorStyle.cpp
-    src/Pedestrian.cpp
-    src/SimpleVisualisationWindow.cpp
-    src/SyncData.cpp
-    src/SystemSettings.cpp
-    src/ThreadDataTransfert.cpp
-    src/ThreadVisualisation.cpp
-    src/TimerCallback.cpp
-    src/FrameElement.cpp
-    src/geometry/LinePlotter2D.cpp
-    src/geometry/PointPlotter2D.cpp
-    src/geometry/FacilityGeometry.cpp
-    src/geometry/LinePlotter.cpp
-    src/geometry/PointPlotter.cpp
-    src/geometry/GeometryFactory.cpp
-    src/network/TraVisToServer.cpp
-    src/MainWindow.cpp
-    src/TrailPlotter.cpp
-    src/myqtreeview.cpp
-    forms/jpsvis.rc
 )
 
 set(HDR
+    forms/Settings.h
+    src/ApplicationState.h
+    src/Frame.h
+    src/FrameElement.h
+    src/IO/OutputHandler.h
+    src/IO/TraVisToClient.h
+    src/InteractorStyle.h
+    src/Log.h
+    src/MainWindow.h
+    src/Message.h
+    src/Pedestrian.h
+    src/SaxParser.h
+    src/SyncData.h
+    src/SystemSettings.h
+    src/TimerCallback.h
+    src/TrailPlotter.h
+    src/Visualisation.h
+    src/VtkVersionSwitch.h
+    src/extern_var.h
+    src/general/Macros.h
     src/geometry/Building.h
     src/geometry/Crossing.h
+    src/geometry/FacilityGeometry.h
+    src/geometry/GeometryFactory.h
     src/geometry/Goal.h
     src/geometry/Hline.h
+    src/geometry/JPoint.h
     src/geometry/Line.h
+    src/geometry/LinePlotter.h
+    src/geometry/LinePlotter2D.h
     src/geometry/NavLine.h
     src/geometry/Obstacle.h
     src/geometry/Point.h
+    src/geometry/PointPlotter.h
+    src/geometry/PointPlotter2D.h
     src/geometry/Room.h
     src/geometry/SubRoom.h
     src/geometry/Transition.h
     src/geometry/Wall.h
-    src/geometry/JPoint.h
-    src/geometry/GeometryFactory.h
+    src/myqtreeview.h
     src/tinyxml/tinystr.h
     src/tinyxml/tinyxml.h
-    src/general/Macros.h
-    src/IO/OutputHandler.h
-    src/IO/TraVisToClient.h
-    forms/Settings.h
-    src/SaxParser.h
     src/train.h
-    src/Log.h
-    src/Frame.h
-    src/InteractorStyle.h
-    src/Message.h
-    src/Pedestrian.h
-    src/SimpleVisualisationWindow.h
-    src/SyncData.h
-    src/SystemSettings.h
-    src/ThreadDataTransfert.h
-    src/ThreadVisualisation.h
-    src/TimerCallback.h
-    src/FrameElement.h
-    src/extern_var.h
-    src/geometry/FacilityGeometry.h
-    src/geometry/LinePlotter.h
-    src/geometry/PointPlotter.h
-    src/geometry/LinePlotter2D.h
-    src/geometry/PointPlotter2D.h
-    src/network/TraVisToServer.h
-    src/MainWindow.h
-    src/TrailPlotter.h
-    src/myqtreeview.h
 )
 
-IF(APPLE)
-    set(MAC_FIX_SRC src/fix/osx_thread_fix.mm) #.mm
-    set(MAC_FIX_HDR src/fix/osx_thread_fix.h) #.h
-
-    set(SRCS ${SRCS} ${MAC_FIX_SRC})
-    set(HDR ${HDR} ${MAC_FIX_HDR})
-ENDIF(APPLE)
-
 set(UIS
-    forms/settings.ui
     forms/mainwindow.ui
+    forms/settings.ui
 )
 
 set(RCS

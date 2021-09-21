@@ -28,7 +28,6 @@
  *  Created on: Aug 18, 2009
  */
 
-#include <vtkInteractorStyleTrackballCamera.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderWindow.h>
 #include <vtkRendererCollection.h>

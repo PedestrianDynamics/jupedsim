@@ -39,15 +39,6 @@
 #include <iostream>
 #include <stdio.h>
 
-#ifdef TRAVISTO_FFMPEG
-#ifdef _WIN32
-#include <vtkAVIWriter.h>
-#include <windows.h>
-#else
-#include <vtkFFMPEGWriter.h>
-#endif
-#endif
-
 #include "general/Macros.h"
 
 #include <QObject>
@@ -122,333 +113,266 @@ TimerCallback* TimerCallback::New()
 void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                             void *callData)
 {
-    if (vtkCommand::TimerEvent == eventId) {
-        int  frameNumber=0;
-        int minFrame=0;
-        int nPeds=0;
-        static bool isRecording =false;
-        int tid = * static_cast<int *>(callData);
+    if (vtkCommand::TimerEvent != eventId) {
+        return;
+    }
 
-        if (tid == this->RenderTimerId) {
-            //dont update anything if the system is actually paused
-            //if(extern_is_pause) return;
+    const int tid = * static_cast<int *>(callData);
+    if (tid != this->RenderTimerId) {
+        return;
+    }
+    
 
-            vtkRenderWindowInteractor *iren = vtkRenderWindowInteractor::SafeDownCast(caller);
-            vtkRenderWindow  *renderWindow = iren->GetRenderWindow();
-            vtkRenderer *renderer =renderWindow->GetRenderers()->GetFirstRenderer();
+    vtkRenderWindowInteractor * const iren = vtkRenderWindowInteractor::SafeDownCast(caller);
+    vtkRenderWindow  * const renderWindow = iren->GetRenderWindow();
+    vtkRenderer * const renderer =renderWindow->GetRenderers()->GetFirstRenderer();
 
+    int  frameNumber=0;
+    int minFrame=0;
+    int nPeds=0;
+    static bool isRecording =false;
+    
+    //first pedestrian group
+    if(extern_first_dataset_loaded) {
+        Frame * frame=NULL;
 
+        // return the same frame if the system is paused
+        // in fact you could just return, but in this case no update will be made
+        // e.g showing captions/trails...
 
-
-
-            if (iren && renderWindow && renderer) {
-
-                //first pedestrian group
-                if(extern_first_dataset_loaded) {
-                    Frame * frame=NULL;
-
-                    // return the same frame if the system is paused
-                    // in fact you could just return, but in this case no update will be made
-                    // e.g showing captions/trails...
-
-                    if(extern_is_pause)
-                    {
-                        frame=extern_trajectories_firstSet.getFrame(extern_trajectories_firstSet.getFrameCursor());
-                    }
-                    else
-                    {
-                        frame = extern_trajectories_firstSet.getNextFrame();
-                    }
+        if(extern_is_pause)
+        {
+            frame=extern_trajectories_firstSet.getFrame(extern_trajectories_firstSet.getFrameCursor());
+        }
+        else
+        {
+            frame = extern_trajectories_firstSet.getNextFrame();
+        }
 
 
-                    frameNumber=extern_trajectories_firstSet.getFrameCursor();
+        frameNumber=extern_trajectories_firstSet.getFrameCursor();
 
 
-                    double now = frameNumber*iren->GetTimerDuration(tid)/1000;
-                    int countTrains  = 0;
-                    char label[100];
+        double now = frameNumber*iren->GetTimerDuration(tid)/1000;
+        int countTrains  = 0;
+        char label[100];
 
-                    for (auto tab: extern_trainTimeTables)
-                        {
-                             VTK_CREATE(vtkTextActor3D, textActor);
-                             auto trainType = tab.second->type;
-                             sprintf(label, "%s_%d", trainType.c_str(), tab.second->id);
-                             auto trainId = tab.second->id;
-                             auto trackStart = tab.second->pstart;
-                             auto trackEnd = tab.second->pend;
-                             auto trainOffset = tab.second->train_offset;
-                             auto reversed = tab.second->reversed;
-                             auto train = extern_trainTypes[trainType];
-                             auto train_length = train->_length;
-                             auto doors = train->_doors;
-                             std::vector<Point> doorPoints;
-                             auto mapper = tab.second->mapper;
-                             auto actor = tab.second->actor;
-                             double elevation = tab.second->elevation;
-                             auto txtActor = tab.second->textActor;
-                             auto trackDirection = (reversed)?(trackStart - trackEnd):(trackEnd - trackStart);
-                             trackDirection = trackDirection.Normalized();
-                             auto trainStart = (reversed)?trackEnd + trackDirection*trainOffset:trackStart + trackDirection*trainOffset;
-                             auto trainEnd = (reversed)?trackEnd + trackDirection*(trainOffset+train_length):trackStart + trackDirection*(trainOffset+train_length);
-                             
-                             for(auto door: doors)
-                             {
-                                   Point trainDirection =  trainEnd - trainStart;;                                   
-                                   trainDirection = trainDirection.Normalized();
-                                   Point point1 = trainStart + trainDirection*(door._distance);
-                                   Point point2 = trainStart + trainDirection*(door._distance+door._width);
-                                  doorPoints.push_back(point1);
-                                  doorPoints.push_back(point2);
-                             }//doors
-                             if(once)
-                             {
-                                   auto data = getTrainData(trainStart, trainEnd, doorPoints, elevation);
-                                  mapper->SetInputData(data);
-                                  actor->SetMapper(mapper);
-                                  actor->GetProperty()->SetLineWidth(10);
-                                  actor->GetProperty()->SetOpacity(0.1);//feels cool!
-                                  if(trainType == "RE")
-                                  {
-                                        actor->GetProperty()->SetColor(
-                                              std::abs(0.0-renderer->GetBackground()[0]),
-                                              std::abs(1.0-renderer->GetBackground()[1]),
-                                              std::abs(1.0-renderer->GetBackground()[2])
-                                              );
-                                  }                              
-                                  else
-                                  {
-                                        actor->GetProperty()->SetColor(
-                                              std::abs(0.9-renderer->GetBackground()[0]),
-                                              std::abs(0.9-renderer->GetBackground()[1]),
-                                              std::abs(1.0-renderer->GetBackground()[2])
-                                              );
-                                  }
-                                  // text
-                                  txtActor->GetTextProperty()->SetOpacity(0.7);
-                                  double pos_x = 50*(trainStart._x + trainEnd._x+0.5);
-                                  double pos_y = 50*(trainStart._y + trainEnd._y+0.5);
+        for (auto tab: extern_trainTimeTables)
+            {
+                 VTK_CREATE(vtkTextActor3D, textActor);
+                 auto trainType = tab.second->type;
+                 sprintf(label, "%s_%d", trainType.c_str(), tab.second->id);
+                 auto trainId = tab.second->id;
+                 auto trackStart = tab.second->pstart;
+                 auto trackEnd = tab.second->pend;
+                 auto trainOffset = tab.second->train_offset;
+                 auto reversed = tab.second->reversed;
+                 auto train = extern_trainTypes[trainType];
+                 auto train_length = train->_length;
+                 auto doors = train->_doors;
+                 std::vector<Point> doorPoints;
+                 auto mapper = tab.second->mapper;
+                 auto actor = tab.second->actor;
+                 double elevation = tab.second->elevation;
+                 auto txtActor = tab.second->textActor;
+                 auto trackDirection = (reversed)?(trackStart - trackEnd):(trackEnd - trackStart);
+                 trackDirection = trackDirection.Normalized();
+                 auto trainStart = (reversed)?trackEnd + trackDirection*trainOffset:trackStart + trackDirection*trainOffset;
+                 auto trainEnd = (reversed)?trackEnd + trackDirection*(trainOffset+train_length):trackStart + trackDirection*(trainOffset+train_length);
+                 
+                 for(auto door: doors)
+                 {
+                       Point trainDirection =  trainEnd - trainStart;;                                   
+                       trainDirection = trainDirection.Normalized();
+                       Point point1 = trainStart + trainDirection*(door._distance);
+                       Point point2 = trainStart + trainDirection*(door._distance+door._width);
+                      doorPoints.push_back(point1);
+                      doorPoints.push_back(point2);
+                 }//doors
+                 if(once)
+                 {
+                       auto data = getTrainData(trainStart, trainEnd, doorPoints, elevation);
+                      mapper->SetInputData(data);
+                      actor->SetMapper(mapper);
+                      actor->GetProperty()->SetLineWidth(10);
+                      actor->GetProperty()->SetOpacity(0.1);//feels cool!
+                      if(trainType == "RE")
+                      {
+                            actor->GetProperty()->SetColor(
+                                  std::abs(0.0-renderer->GetBackground()[0]),
+                                  std::abs(1.0-renderer->GetBackground()[1]),
+                                  std::abs(1.0-renderer->GetBackground()[2])
+                                  );
+                      }                              
+                      else
+                      {
+                            actor->GetProperty()->SetColor(
+                                  std::abs(0.9-renderer->GetBackground()[0]),
+                                  std::abs(0.9-renderer->GetBackground()[1]),
+                                  std::abs(1.0-renderer->GetBackground()[2])
+                                  );
+                      }
+                      // text
+                      txtActor->GetTextProperty()->SetOpacity(0.7);
+                      double pos_x = 50*(trainStart._x + trainEnd._x+0.5);
+                      double pos_y = 50*(trainStart._y + trainEnd._y+0.5);
 
-                                  txtActor->SetPosition (pos_x, pos_y+2, 20);
-                                  txtActor->SetInput (label);
-                                  txtActor->GetTextProperty()->SetFontSize (30);
-                                  txtActor->GetTextProperty()->SetBold (true);
-                                  if(trainType == "RE")
-                                  {
-                                        txtActor->GetTextProperty()->SetColor (
-                                              std::abs(0.0-renderer->GetBackground()[0]),
-                                              std::abs(1.0-renderer->GetBackground()[1]),
-                                              std::abs(1.0-renderer->GetBackground()[2])
-                                              );                                        
-                                  }
-                                  else{
-                                        txtActor->GetTextProperty()->SetColor (
-                                              std::abs(0.9-renderer->GetBackground()[0]),
-                                              std::abs(0.9-renderer->GetBackground()[1]),
-                                              std::abs(0.5-renderer->GetBackground()[2])
-                                              );                                        
-                                        
-                                  }                        
-                                  txtActor->SetVisibility(false);
-                             }
-                             if((now >= tab.second->tin) && (now <= tab.second->tout))
-                             {
-                                  actor->SetVisibility(true);
-                                  txtActor->SetVisibility(true);
-                             }
-                             else
-                             {
-                                  actor->SetVisibility(false);
-                                  txtActor->SetVisibility(false);
-                             }
-                             if(once)
-                             {
-                                  renderer->AddActor(actor);
-                                  renderer->AddActor(txtActor);
-                                  if(countTrains == extern_trainTimeTables.size())
-                                       once = 0;
-                             }
+                      txtActor->SetPosition (pos_x, pos_y+2, 20);
+                      txtActor->SetInput (label);
+                      txtActor->GetTextProperty()->SetFontSize (30);
+                      txtActor->GetTextProperty()->SetBold (true);
+                      if(trainType == "RE")
+                      {
+                            txtActor->GetTextProperty()->SetColor (
+                                  std::abs(0.0-renderer->GetBackground()[0]),
+                                  std::abs(1.0-renderer->GetBackground()[1]),
+                                  std::abs(1.0-renderer->GetBackground()[2])
+                                  );                                        
+                      }
+                      else{
+                            txtActor->GetTextProperty()->SetColor (
+                                  std::abs(0.9-renderer->GetBackground()[0]),
+                                  std::abs(0.9-renderer->GetBackground()[1]),
+                                  std::abs(0.5-renderer->GetBackground()[2])
+                                  );                                        
+                            
+                      }                        
+                      txtActor->SetVisibility(false);
+                 }
+                 if((now >= tab.second->tin) && (now <= tab.second->tout))
+                 {
+                      actor->SetVisibility(true);
+                      txtActor->SetVisibility(true);
+                 }
+                 else
+                 {
+                      actor->SetVisibility(false);
+                      txtActor->SetVisibility(false);
+                 }
+                 if(once)
+                 {
+                      renderer->AddActor(actor);
+                      renderer->AddActor(txtActor);
+                      if(countTrains == extern_trainTimeTables.size())
+                           once = 0;
+                 }
 
-                             countTrains++;
-                        }// time table
+                 countTrains++;
+            }// time table
 
 
 
 
-                     if(frame==NULL)
-                    {
+         if(frame==NULL)
+        {
 
-                    } else {
+        } else {
 
-                        nPeds= frame->getSize();
+            nPeds= frame->getSize();
 
-                        if(SystemSettings::get2D()==true) {
-                            vtkPolyData* pData=frame->GetPolyData2D();
-                            extern_glyphs_pedestrians->SetInputData(pData);
-                            extern_pedestrians_labels->GetMapper()->SetInputDataObject(pData);
-                            extern_glyphs_directions->SetInputData(pData);
-                            extern_glyphs_pedestrians->Update();
-                            extern_glyphs_directions->Update();
-                        } else {
-                            vtkPolyData* pData=frame->GetPolyData3D();
-                            extern_glyphs_pedestrians_3D->SetInputData(pData);
-                            extern_pedestrians_labels->GetMapper()->SetInputDataObject(pData);
-                            extern_glyphs_pedestrians_3D->Update();
-                        }
-                        auto FrameElements =  frame->GetFrameElements();
-                        if(FrameElements.size())
-                             minFrame = frame->GetFrameElements()[0]->GetMinFrame();
-                        else
-                             minFrame = 0;
+            if(SystemSettings::get2D()==true) {
+                vtkPolyData* pData=frame->GetPolyData2D();
+                extern_glyphs_pedestrians->SetInputData(pData);
+                extern_pedestrians_labels->GetMapper()->SetInputDataObject(pData);
+                extern_glyphs_directions->SetInputData(pData);
+                extern_glyphs_pedestrians->Update();
+                extern_glyphs_directions->Update();
+            } else {
+                vtkPolyData* pData=frame->GetPolyData3D();
+                extern_glyphs_pedestrians_3D->SetInputData(pData);
+                extern_pedestrians_labels->GetMapper()->SetInputDataObject(pData);
+                extern_glyphs_pedestrians_3D->Update();
+            }
+            auto FrameElements =  frame->GetFrameElements();
+            if(FrameElements.size())
+                 minFrame = frame->GetFrameElements()[0]->GetMinFrame();
+            else
+                 minFrame = 0;
 
-                        frameNumber += minFrame;
-                        if(SystemSettings::getShowTrajectories()) {
-                            const std::vector<FrameElement *> &elements=frame->GetFrameElements();
+            frameNumber += minFrame;
+            if(SystemSettings::getShowTrajectories()) {
+                const std::vector<FrameElement *> &elements=frame->GetFrameElements();
 
-                            for(unsigned int i=0; i<elements.size(); i++) {
-                                FrameElement* el = elements[i];
-                                double pos[3];
-                                double color;
-                                el->GetPos(pos);
-                                el->GetColor(&color);
-                                extern_trail_plotter->PlotPoint(pos,color);
-                            }
-                        }
-
-                        //virtual cam
-                        if(SystemSettings::getVirtualAgent()!=-1){
-                            updateVirtualCamera(frame,renderer);
-                        }
-                    }
+                for(unsigned int i=0; i<elements.size(); i++) {
+                    FrameElement* el = elements[i];
+                    double pos[3];
+                    double color;
+                    el->GetPos(pos);
+                    el->GetColor(&color);
+                    extern_trail_plotter->PlotPoint(pos,color);
                 }
+            }
 
-                int* winSize=renderWindow->GetSize();
-                static int  lastWinX=winSize[0]+1; // +1 to trigger a first change
-                static int lastWinY=winSize[1];
-                // HHHHHH
-                sprintf(runningTimeText,"Pedestrians: %d      Time: %ld Sec",nPeds,frameNumber*iren->GetTimerDuration(tid)/1000);
-                runningTime->SetInput(runningTimeText);
-                runningTime->Modified();
-
-                if((lastWinX!=winSize[0]) || (lastWinY!=winSize[1]) /*|| (frameNumber<10)*/) {
-                    static std::string winBaseName(renderWindow->GetWindowName());
-                    std::string winName=winBaseName;
-                    std::string s;
-                    winName.append(" [ ");
-                    s=QString::number(winSize[0]).toStdString();
-                    winName.append(s);
-                    winName.append(" x ");
-                    s=QString::number(winSize[1]).toStdString();
-                    winName.append(s);
-                    winName.append(" ] -->");
-
-                    int posY=winSize[1]*(1.0-30.0/536.0);
-                    int posX=winSize[0]*(1.0-450.0/720.0);
-                    runningTime->SetPosition(posX,posY);
-                    renderWindow->SetWindowName(winName.c_str());
-
-                    lastWinX=winSize[0];
-                    lastWinY=winSize[1];
-                }
-
-                iren->Render();
-
-                if(extern_force_system_update) {
-                    updateSettings(renderWindow);
-                }
-                if(extern_take_screenshot) {
-                    takeScreenshot(renderWindow);
-                }
-                if(SystemSettings::getRecordPNGsequence()) {
-                    takeScreenshotSequence(renderWindow);
-                }
-
-                if (frameNumber!=0) {
-                    int desiredfps=1000.0/iren->GetTimerDuration(tid);
-                    int effectivefps=1/(renderer->GetLastRenderTimeInSeconds());
-
-                    effectivefps = (effectivefps>desiredfps)?desiredfps:effectivefps;
-
-                    emit signalFrameNumber(frameNumber, minFrame);
-                    emit signalRunningTime(frameNumber*iren->GetTimerDuration(tid));
-                    emit signalRenderingTime(effectivefps);
-
-                }
-
-#ifdef TRAVISTO_FFMPEG
-
-                if(extern_launch_recording) {
-                    extern_launch_recording=false; //reset
-
-                    windowToImageFilter=vtkWindowToImageFilter::New();
-#ifdef _WIN32
-                    pAVIWriter=vtkAVIWriter::New();
-#endif
-
-#ifdef __linux__
-                    pAVIWriter=vtkFFMPEGWriter::New();
-#endif
-
-                    pAVIWriter->SetQuality(2);
-                    pAVIWriter->SetRate(1000.0/iren->GetTimerDuration(tid));
-
-                    QString videoName;
-                    SystemSettings::getOutputDirectory(videoName);
-                    //create directory if not exits
-                    if(!QDir(videoName).exists()) {
-                        QDir dir;
-                        if(!dir.mkpath (videoName )) {
-                            cerr<<"could not create directory: "<< videoName.toStdString();
-                            videoName=""; // current
-                        }
-                    }
-
-                    videoName += "/tvtvid_"+QDateTime::currentDateTime().toString("yyMMdd_hh_mm_").append(SystemSettings::getFilenamePrefix()).append(".avi");
-
-                    pAVIWriter->SetFileName(videoName.toStdString().c_str());
-
-                    if(windowToImageFilter!=NULL)
-                        if(windowToImageFilter->GetInput()==NULL) { //should be the case by first call
-                            windowToImageFilter->SetInput(renderWindow);
-#if VTK_MAJOR_VERSION <= 5
-                            pAVIWriter->SetInput(windowToImageFilter->GetOutput());
-#else
-                            pAVIWriter->SetInputConnection(windowToImageFilter->GetOutputPort());
-#endif
-                            pAVIWriter->Start();
-                        }
-                    extern_recording_enable=true;
-                    isRecording=true;
-                }
-
-                if(isRecording) {
-                    windowToImageFilter->Modified();
-                    // only write when not paused
-                    if(!extern_is_pause) pAVIWriter->Write();
-
-                    if(extern_recording_enable==false) { //stop the recording
-                        pAVIWriter->End();
-                        windowToImageFilter->Delete();
-                        pAVIWriter->Delete();
-                        isRecording=false;
-                    }
-                }
-#endif //TRAVISTO_FFMPEG
-
-                if(extern_shutdown_visual_thread) {
-                     emit signalFrameNumber(0, 0);
-
-                    // this will force an update of the windows
-                    lastWinX=0;
-                    lastWinY=0;
-                    //exit if and only if the recording process is terminated
-                    if(isRecording) extern_recording_enable=false;
-                    else iren->ExitCallback();
-                }
+            //virtual cam
+            if(SystemSettings::getVirtualAgent()!=-1){
+                updateVirtualCamera(frame,renderer);
             }
         }
     }
 
+    int* winSize=renderWindow->GetSize();
+    static int  lastWinX=winSize[0]+1; // +1 to trigger a first change
+    static int lastWinY=winSize[1];
+    // HHHHHH
+    sprintf(runningTimeText,"Pedestrians: %d      Time: %ld Sec",nPeds,frameNumber*iren->GetTimerDuration(tid)/1000);
+    runningTime->SetInput(runningTimeText);
+    runningTime->Modified();
 
+    if((lastWinX!=winSize[0]) || (lastWinY!=winSize[1]) /*|| (frameNumber<10)*/) {
+        static std::string winBaseName(renderWindow->GetWindowName());
+        std::string winName=winBaseName;
+        std::string s;
+        winName.append(" [ ");
+        s=QString::number(winSize[0]).toStdString();
+        winName.append(s);
+        winName.append(" x ");
+        s=QString::number(winSize[1]).toStdString();
+        winName.append(s);
+        winName.append(" ] -->");
+
+        int posY=winSize[1]*(1.0-30.0/536.0);
+        int posX=winSize[0]*(1.0-450.0/720.0);
+        runningTime->SetPosition(posX,posY);
+        renderWindow->SetWindowName(winName.c_str());
+
+        lastWinX=winSize[0];
+        lastWinY=winSize[1];
+    }
+
+    iren->Render();
+
+    if(extern_force_system_update) {
+        updateSettings(renderWindow);
+    }
+    if(extern_take_screenshot) {
+        takeScreenshot(renderWindow);
+    }
+    if(SystemSettings::getRecordPNGsequence()) {
+        takeScreenshotSequence(renderWindow);
+    }
+
+    if (frameNumber!=0) {
+        int desiredfps=1000.0/iren->GetTimerDuration(tid);
+        int effectivefps=1/(renderer->GetLastRenderTimeInSeconds());
+
+        effectivefps = (effectivefps>desiredfps)?desiredfps:effectivefps;
+
+        emit signalFrameNumber(frameNumber, minFrame);
+        emit signalRunningTime(frameNumber*iren->GetTimerDuration(tid));
+        emit signalRenderingTime(effectivefps);
+
+    }
+
+    if(extern_shutdown_visual_thread) {
+         emit signalFrameNumber(0, 0);
+
+        // this will force an update of the windows
+        lastWinX=0;
+        lastWinY=0;
+        //exit if and only if the recording process is terminated
+        if(isRecording) extern_recording_enable=false;
+        else iren->ExitCallback();
+    }
 }
 
 void TimerCallback::updateSettings(vtkRenderWindow* renderWindow)

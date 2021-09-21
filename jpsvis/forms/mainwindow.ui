@@ -6,30 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>450</width>
-    <height>400</height>
+    <width>1200</width>
+    <height>1164</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+   <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
-  </property>
-  <property name="minimumSize">
-   <size>
-    <width>450</width>
-    <height>400</height>
-   </size>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>450</width>
-    <height>400</height>
-   </size>
-  </property>
-  <property name="mouseTracking">
-   <bool>true</bool>
   </property>
   <property name="acceptDrops">
    <bool>true</bool>
@@ -48,511 +33,241 @@
    <string>a Software....</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>1024</width>
+     <height>768</height>
+    </size>
+   </property>
    <property name="sizeIncrement">
     <size>
      <width>3</width>
      <height>3</height>
     </size>
    </property>
-   <widget class="QGroupBox" name="parameters">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>160</x>
-      <y>20</y>
-      <width>271</width>
-      <height>161</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="mouseTracking">
-     <bool>false</bool>
-    </property>
-    <property name="title">
-     <string>Settings</string>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout_2">
-     <item>
-      <widget class="QLabel" name="speedSliderLabel">
-       <property name="text">
-        <string>Speed (1X)</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSlider" name="speedSettingSlider">
-       <property name="minimum">
-        <number>-20</number>
-       </property>
-       <property name="maximum">
-        <number>20</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>1</number>
-       </property>
-       <property name="sliderPosition">
-        <number>1</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="invertedControls">
-        <bool>false</bool>
-       </property>
-       <property name="tickPosition">
-        <enum>QSlider::TicksBelow</enum>
-       </property>
-       <property name="tickInterval">
-        <number>2</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>50</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QLabel" name="framePerSecondSliderLabel">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>Frames per Sec</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSlider" name="contrastSettingSlider">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: rgb(255, 149, 107);</string>
-       </property>
-       <property name="maximum">
-        <number>10</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="sliderPosition">
-        <number>0</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="tickPosition">
-        <enum>QSlider::TicksBelow</enum>
-       </property>
-       <property name="tickInterval">
-        <number>5</number>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QGroupBox" name="Controls">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>20</y>
-      <width>111</width>
-      <height>161</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="title">
-     <string>Control</string>
-    </property>
-    <widget class="QPushButton" name="BtStart">
-     <property name="geometry">
-      <rect>
-       <x>11</x>
-       <y>21</y>
-       <width>80</width>
-       <height>30</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Start Visualisation</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="icons.qrc">
-       <normaloff>:/new/iconsS/icons/Play1Hot.png</normaloff>:/new/iconsS/icons/Play1Hot.png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>20</width>
-       <height>20</height>
-      </size>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="BtStop">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>11</x>
-       <y>55</y>
-       <width>80</width>
-       <height>30</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Stop Visualisation</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="icons.qrc">
-       <normaloff>:/new/iconsS/icons/Stop1PressedBlue.png</normaloff>:/new/iconsS/icons/Stop1PressedBlue.png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>20</width>
-       <height>20</height>
-      </size>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="BtRecord">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>11</x>
-       <y>89</y>
-       <width>80</width>
-       <height>30</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Start Recording</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="icons.qrc">
-       <normaloff>:/new/iconsS/icons/RecordPressed.png</normaloff>:/new/iconsS/icons/RecordPressed.png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>20</width>
-       <height>20</height>
-      </size>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="BtReset">
-     <property name="geometry">
-      <rect>
-       <x>11</x>
-       <y>123</y>
-       <width>80</width>
-       <height>30</height>
-      </rect>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>23</height>
-      </size>
-     </property>
-     <property name="toolTip">
-      <string>Reset the simulation and clear all datasets loaded</string>
-     </property>
-     <property name="text">
-      <string>Reset</string>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>20</width>
-       <height>20</height>
-      </size>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QGroupBox" name="groupBox">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>250</y>
-      <width>401</width>
-      <height>63</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="maximumSize">
-     <size>
-      <width>16777215</width>
-      <height>16777215</height>
-     </size>
-    </property>
-    <property name="title">
-     <string/>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout_3">
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
-       <item>
-        <widget class="QLabel" name="frameSliderLabel">
-         <property name="text">
-          <string>Frames</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <widget class="QSlider" name="framesIndicatorSlider">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="mouseTracking">
-        <bool>true</bool>
-       </property>
-       <property name="maximum">
-        <number>20000</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="tracking">
-        <bool>true</bool>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QLCDNumber" name="lcdRunningTime">
-    <property name="geometry">
-     <rect>
-      <x>160</x>
-      <y>200</y>
-      <width>91</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="palette">
-     <palette>
-      <active>
-       <colorrole role="WindowText">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>170</red>
-          <green>255</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </colorrole>
-      </active>
-      <inactive>
-       <colorrole role="WindowText">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>170</red>
-          <green>255</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </colorrole>
-      </inactive>
-      <disabled>
-       <colorrole role="WindowText">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>118</red>
-          <green>116</green>
-          <blue>108</blue>
-         </color>
-        </brush>
-       </colorrole>
-      </disabled>
-     </palette>
-    </property>
-    <property name="font">
-     <font>
-      <family>MS Sans Serif</family>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">
-border-color: rgb(255, 255, 255);</string>
-    </property>
-    <property name="smallDecimalPoint">
-     <bool>false</bool>
-    </property>
-    <property name="digitCount">
-     <number>10</number>
-    </property>
-    <property name="segmentStyle">
-     <enum>QLCDNumber::Filled</enum>
-    </property>
-    <property name="intValue" stdset="0">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <property name="leftMargin">
      <number>0</number>
     </property>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>290</x>
-      <y>201</y>
-      <width>51</width>
-      <height>20</height>
-     </rect>
+    <property name="topMargin">
+     <number>0</number>
     </property>
-    <property name="font">
-     <font>
-      <pointsize>8</pointsize>
-     </font>
+    <property name="rightMargin">
+     <number>0</number>
     </property>
-    <property name="text">
-     <string>millisec</string>
+    <property name="bottomMargin">
+     <number>0</number>
     </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="BtNextFrame">
-    <property name="geometry">
-     <rect>
-      <x>350</x>
-      <y>190</y>
-      <width>81</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>8</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Next Frame</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="BtPreviousFrame">
-    <property name="geometry">
-     <rect>
-      <x>350</x>
-      <y>220</y>
-      <width>81</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>8</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Previous</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="BtFullscreen">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>200</y>
-      <width>80</width>
-      <height>30</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Fullscreen</string>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="icon">
-     <iconset resource="icons.qrc">
-      <normaloff>:/new/iconsS/icons/window_fullscreen-64.png</normaloff>:/new/iconsS/icons/window_fullscreen-64.png</iconset>
-    </property>
-    <property name="iconSize">
-     <size>
-      <width>20</width>
-      <height>20</height>
-     </size>
-    </property>
-   </widget>
+    <item>
+     <widget class="QVTKOpenGLNativeWidget" name="render_widget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>10</horstretch>
+        <verstretch>10</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="leftMargin">
+       <number>5</number>
+      </property>
+      <property name="topMargin">
+       <number>5</number>
+      </property>
+      <property name="rightMargin">
+       <number>5</number>
+      </property>
+      <property name="bottomMargin">
+       <number>5</number>
+      </property>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="BtPreviousFrame">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Prev</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="BtStart">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Start Visualisation</string>
+          </property>
+          <property name="icon">
+           <iconset resource="icons.qrc">
+            <normaloff>:/new/iconsS/icons/Play1Hot.png</normaloff>
+            <normalon>:/new/iconsS/icons/PauseHot.png</normalon>:/new/iconsS/icons/Play1Hot.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="BtNextFrame">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Next</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="rewind">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Rewind</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="replaySpeed">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="currentText">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="BtRecord">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Start Recording</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="icons.qrc">
+            <normaloff>:/new/iconsS/icons/RecordPressed.png</normaloff>:/new/iconsS/icons/RecordPressed.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout" stretch="19,1">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetFixedSize</enum>
+        </property>
+        <item>
+         <widget class="QSlider" name="framesIndicatorSlider">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="maximum">
+           <number>60</number>
+          </property>
+          <property name="pageStep">
+           <number>1</number>
+          </property>
+          <property name="tracking">
+           <bool>true</bool>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="tickPosition">
+           <enum>QSlider::TicksBelow</enum>
+          </property>
+          <property name="tickInterval">
+           <number>10</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="time">
+          <property name="text">
+           <string>Frame / Elapsed Time</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>450</width>
-     <height>26</height>
+     <width>1200</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionLoad_File"/>
-    <addaction name="separator"/>
+    <addaction name="actionOpenFile"/>
     <addaction name="actionLoad_Geometry"/>
     <addaction name="actionClear_Geometry"/>
-    <addaction name="actionAdd_Trajectories_File"/>
     <addaction name="actionClear_Trajectories_Files"/>
-    <addaction name="separator"/>
     <addaction name="actionOpen"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
@@ -561,18 +276,11 @@ border-color: rgb(255, 255, 255);</string>
     <property name="title">
      <string>Visualisation</string>
     </property>
-    <addaction name="separator"/>
     <addaction name="actionReset"/>
     <addaction name="actionStart"/>
     <addaction name="actionRecord"/>
     <addaction name="actionStop"/>
     <addaction name="actionPause_Resume"/>
-    <addaction name="actionFullscreen"/>
-    <addaction name="separator"/>
-    <addaction name="actionOnline"/>
-    <addaction name="actionOffline"/>
-    <addaction name="separator"/>
-    <addaction name="actionFrames_Navigation"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -594,8 +302,6 @@ border-color: rgb(255, 255, 255);</string>
     <addaction name="actionNavigation_Lines_Color"/>
     <addaction name="separator"/>
     <addaction name="actionPedestrian_Shape"/>
-    <addaction name="actionNetwork_settings"/>
-    <addaction name="separator"/>
     <addaction name="actionRemember_Settings"/>
    </widget>
    <widget class="QMenu" name="menuView">
@@ -736,62 +442,6 @@ border-color: rgb(255, 255, 255);</string>
     <bool>false</bool>
    </property>
   </action>
-  <action name="actionNetwork_settings">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Listening Port</string>
-   </property>
-  </action>
-  <action name="actionOnline">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>false</bool>
-   </property>
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Online</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+N</string>
-   </property>
-  </action>
-  <action name="actionOffline">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Offline</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+F</string>
-   </property>
-  </action>
-  <action name="actionFullscreen">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Fullscreen</string>
-   </property>
-   <property name="shortcut">
-    <string>F</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
-   </property>
-  </action>
   <action name="actionRecord">
    <property name="enabled">
     <bool>false</bool>
@@ -839,20 +489,6 @@ border-color: rgb(255, 255, 255);</string>
     <string>Alt+A</string>
    </property>
   </action>
-  <action name="actionAdd_Trajectories_File">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Add Trajectories File</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+A</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
-   </property>
-  </action>
   <action name="actionClear_Trajectories_Files">
    <property name="enabled">
     <bool>false</bool>
@@ -875,7 +511,7 @@ border-color: rgb(255, 255, 255);</string>
     <bool>false</bool>
    </property>
   </action>
-  <action name="actionLoad_File">
+  <action name="actionOpenFile">
    <property name="enabled">
     <bool>true</bool>
    </property>
@@ -1357,6 +993,14 @@ border-color: rgb(255, 255, 255);</string>
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QVTKOpenGLNativeWidget</class>
+   <extends>QWidget</extends>
+   <header>QVTKOpenGLNativeWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="icons.qrc"/>
  </resources>
@@ -1394,138 +1038,10 @@ border-color: rgb(255, 255, 255);</string>
    </hints>
   </connection>
   <connection>
-   <sender>BtStart</sender>
-   <signal>clicked()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotStartPlaying()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>61</x>
-     <y>89</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>261</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>BtFullscreen</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotFullScreen(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>81</x>
-     <y>204</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>261</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>BtRecord</sender>
-   <signal>clicked()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotRecord()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>61</x>
-     <y>157</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>261</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>BtReset</sender>
-   <signal>clicked()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotReset()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>81</x>
-     <y>233</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>261</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>BtStop</sender>
-   <signal>clicked()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotStopPlaying()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>61</x>
-     <y>123</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>261</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionNetwork_settings</sender>
+   <sender>actionOpenFile</sender>
    <signal>triggered()</signal>
    <receiver>mainwindow</receiver>
-   <slot>slotNetworkSettings()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>261</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionOnline</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotSetOnlineMode(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>261</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionOffline</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotSetOfflineMode(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>261</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionLoad_File</sender>
-   <signal>triggered()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotLoadFile()</slot>
+   <slot>slotOpenFile()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1542,22 +1058,6 @@ border-color: rgb(255, 255, 255);</string>
    <signal>toggled(bool)</signal>
    <receiver>mainwindow</receiver>
    <slot>slotToggleFirstPedestrianGroup()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>264</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionAdd_Trajectories_File</sender>
-   <signal>triggered()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotAddDataSet()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1610,38 +1110,6 @@ border-color: rgb(255, 255, 255);</string>
     <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>264</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>contrastSettingSlider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotUpdateContrastSlider(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>201</x>
-     <y>191</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>264</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>speedSettingSlider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotUpdateSpeedSlider(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>201</x>
-     <y>116</y>
     </hint>
     <hint type="destinationlabel">
      <x>318</x>
@@ -1710,102 +1178,6 @@ border-color: rgb(255, 255, 255);</string>
     <hint type="destinationlabel">
      <x>318</x>
      <y>264</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>framesIndicatorSlider</sender>
-   <signal>sliderMoved(int)</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotUpdateFrameSlider(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>303</x>
-     <y>323</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>264</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>framesIndicatorSlider</sender>
-   <signal>sliderPressed()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotFrameSliderPressed()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>303</x>
-     <y>323</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>264</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>framesIndicatorSlider</sender>
-   <signal>sliderReleased()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotFrameSliderReleased()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>303</x>
-     <y>323</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>264</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionFrames_Navigation</sender>
-   <signal>changed()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotFramesByFramesNavigation()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>224</x>
-     <y>199</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>BtNextFrame</sender>
-   <signal>clicked()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotNextFrame()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>395</x>
-     <y>222</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>224</x>
-     <y>199</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>BtPreviousFrame</sender>
-   <signal>clicked()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotPreviousFrame()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>395</x>
-     <y>252</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>224</x>
-     <y>199</y>
     </hint>
    </hints>
   </connection>
@@ -2225,22 +1597,147 @@ border-color: rgb(255, 255, 255);</string>
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>BtNextFrame</sender>
+   <signal>clicked()</signal>
+   <receiver>mainwindow</receiver>
+   <slot>slotNextFrame()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>577</x>
+     <y>1090</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>224</x>
+     <y>199</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>BtPreviousFrame</sender>
+   <signal>clicked()</signal>
+   <receiver>mainwindow</receiver>
+   <slot>slotPreviousFrame()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>436</x>
+     <y>1090</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>224</x>
+     <y>199</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>BtRecord</sender>
+   <signal>clicked()</signal>
+   <receiver>mainwindow</receiver>
+   <slot>slotRecord()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>829</x>
+     <y>1092</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>318</x>
+     <y>261</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>BtStart</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>mainwindow</receiver>
+   <slot>slotToggleReplay(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>500</x>
+     <y>1092</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>318</x>
+     <y>261</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>framesIndicatorSlider</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>mainwindow</receiver>
+   <slot>slotUpdateFrameSlider(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>309</x>
+     <y>1130</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>318</x>
+     <y>264</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>framesIndicatorSlider</sender>
+   <signal>sliderReleased()</signal>
+   <receiver>mainwindow</receiver>
+   <slot>slotFrameSliderReleased()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>309</x>
+     <y>1130</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>318</x>
+     <y>264</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>framesIndicatorSlider</sender>
+   <signal>sliderPressed()</signal>
+   <receiver>mainwindow</receiver>
+   <slot>slotFrameSliderPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>309</x>
+     <y>1130</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>318</x>
+     <y>264</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rewind</sender>
+   <signal>clicked()</signal>
+   <receiver>mainwindow</receiver>
+   <slot>slotRewindFramesToBegin()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>632</x>
+     <y>1078</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>957</x>
+     <y>1043</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>slotHelpAbout()</slot>
   <slot>slotExit()</slot>
   <slot>slotStartPlaying()</slot>
-  <slot>slotStopPlaying()</slot>
+  <slot>slotToggleReplay(bool)</slot>
   <slot>slotRecord()</slot>
   <slot>slotReset()</slot>
   <slot>slotFullScreen(bool)</slot>
-  <slot>slotLoadFile()</slot>
-  <slot>slotNetworkSettings()</slot>
+  <slot>slotOpenFile()</slot>
   <slot>slotToggleVisualisationMode()</slot>
   <slot>slotFrameNumber()</slot>
   <slot>slotRunningTime()</slot>
-  <slot>slotSetOfflineMode(bool)</slot>
-  <slot>slotSetOnlineMode(bool)</slot>
   <slot>slotLoadGeometry()</slot>
   <slot>slotToggleFirstPedestrianGroup()</slot>
   <slot>slotToggleSecondPedestrianGroup()</slot>
@@ -2251,7 +1748,6 @@ border-color: rgb(255, 255, 255);</string>
   <slot>slotShowPedestrianOnly()</slot>
   <slot>slotUpdateSpeedSlider(int)</slot>
   <slot>slotUpdateFrameSlider(int)</slot>
-  <slot>slotUpdateContrastSlider(int)</slot>
   <slot>slotShowGeometry()</slot>
   <slot>slotToogle2D()</slot>
   <slot>slotToogle3D()</slot>
@@ -2259,7 +1755,6 @@ border-color: rgb(255, 255, 255);</string>
   <slot>slotFrameSliderReleased()</slot>
   <slot>slotFrameSliderChanged()</slot>
   <slot>slotToogleShowLegend()</slot>
-  <slot>slotFramesByFramesNavigation()</slot>
   <slot>slotNextFrame()</slot>
   <slot>slotPreviousFrame()</slot>
   <slot>slotShowPedestrianCaption()</slot>
@@ -2292,5 +1787,6 @@ border-color: rgb(255, 255, 255);</string>
   <slot>slotChangeObstacleColor()</slot>
   <slot>slotShowHideObstacles()</slot>
   <slot>slotShowHideGradientField()</slot>
+  <slot>slotRewindFramesToBegin()</slot>
  </slots>
 </ui>

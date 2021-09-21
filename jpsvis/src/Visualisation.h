@@ -31,17 +31,16 @@
 *
 */
 
-
-#ifndef THREADVISUALISATION_H_
-#define THREADVISUALISATION_H_
-
+#pragma once
 #include <QThread>
 #include <QObject>
 #include <vtkGlyph3D.h>
 #include <vtkTensorGlyph.h>
 #include <vtkSmartPointer.h>
 #include <vtkPolyDataMapper.h>
+#include "TimerCallback.h"
 #include "geometry/GeometryFactory.h"
+#include "InteractorStyle.h"
 
 // forwarded classes
 class QThread;
@@ -76,16 +75,16 @@ extern vtkActor* extern_glyphs_pedestrians_actor_3D;
 extern vtkActor* extern_glyphs_directions_actor;
 
 extern SyncData extern_trajectories_firstSet;
-// extern vtkSmartPointer<vtkSphereSource> extern_mysphere;
 
 
-class ThreadVisualisation :public QThread {
+class Visualisation :public QObject {
     Q_OBJECT
 
 public:
-    ThreadVisualisation(QObject *parent = 0);
-    virtual ~ThreadVisualisation();
-    virtual void run();
+    Visualisation(QObject *parent, vtkRenderWindow* renderWindow);
+    virtual ~Visualisation();
+    void run();
+    void stop();
 
     void setAxisVisible(bool status);
 
@@ -160,9 +159,6 @@ public:
     void setOnscreenInformationVisibility(bool show);
 
 public Q_SLOTS:
-    /**control sequence received*/
-    void slotControlSequence(const char* para);
-
     /// set the frame rate in frames per second
     void slotSetFrameRate( float fps);
 
@@ -193,17 +189,17 @@ private:
 
 private:
     //FacilityGeometry* _geometry;
+    vtkRenderWindow* _renderWindow;
     GeometryFactory _geometry;
     vtkRenderer* _renderer;
-    vtkRenderWindow* _renderWindow;
-    vtkRenderWindowInteractor* _renderWinInteractor;
     vtkAxesActor* _axis;
     vtkTextActor* _runningTime;
     vtkCamera* _topViewCamera;
     QString _winTitle;
 
     float _framePerSecond;
+    InteractorStyle _interactorStyle{};
+    std::unique_ptr<TimerCallback> _timer_cb{nullptr};
+    int _timer_id = 1;
 
 };
-
-#endif /* THREADVISUALISATION_H_ */

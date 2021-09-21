@@ -612,7 +612,7 @@ bool Building::LoadGeometry(const std::string &geometryfile)
                }
           }
           else{
-            Log::Info("Not parsing transition from file %s");
+            Log::Info("Not parsing transition from file %s", geometryfile.c_str());
           }
 
      }

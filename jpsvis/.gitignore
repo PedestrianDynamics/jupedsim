@@ -187,3 +187,9 @@ flycheck_*.el
 
 .vscode/
 build*
+
+# VIM
+.vim
+
+# MacOS
+.DS_Store
