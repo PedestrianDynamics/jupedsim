@@ -108,28 +108,49 @@ macro(write_package_content_macos)
 
 endmacro()
 
-################################################################################
-# Windows Installer
-################################################################################
-macro(write_package_information_win)
-    message(STATUS "Package generation - Windows")
-    message(STATUS "not yet implemented")
-endmacro()
+###############################################################################
+# WINDOWS
+###############################################################################
+function(cpack_write_windows_package_information)
+    set(CPACK_GENERATOR "NSIS" CACHE STRING "Generator used by CPack")
 
-macro(write_package_content_win)
-    message(STATUS "Package generation - Windows")
-    message(STATUS "not yet implemented")
-endmacro()
+    set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/forms/icons/jpsvis.ico")
+    set(CPACK_NSIS_MODIFY_PATH ON)
+    set(CPACK_NSIS_DISPLAY_NAME "JPSvis")
+    set(CPACK_NSIS_PACKAGE_NAME "JPSvis")
+    set(CPACK_NSIS_INSTALLED_ICON_NAME "${CMAKE_SOURCE_DIR}/forms/icons/jpsvis.ico")
+    set(CPACK_NSIS_HELP_LINK "www.jupedsim.org")
+    set(CPACK_NSIS_URL_INFO_ABOUT ${CPACK_NSIS_HELP_LINK})
+    set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+endfunction()
 
-################################################################################
-# Deb package
-################################################################################
-macro(write_package_information_unix)
-    message(STATUS "Package generation - Deb")
-    message(STATUS "not yet implemented")
-endmacro()
 
-macro(write_package_content_unix)
-    message(STATUS "Package generation - Deb")
-    message(STATUS "not yet implemented")
-endmacro()
+function(cpack_create_windows_package)
+    include(InstallRequiredSystemLibraries)
+    include(GNUInstallDirs)
+
+    install(TARGETS petrack)
+
+    # install Qwt and OpenCV
+    install(CODE "
+        include(BundleUtilities)
+        fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/jpsvis${CMAKE_EXECUTABLE_SUFFIX}\"  \"\" \"\")
+    ")
+
+    get_target_property(mocExe Qt5::moc IMPORTED_LOCATION)
+    get_filename_component(qtBinDir "${mocExe}" DIRECTORY)
+
+    find_program(DEPLOYQT_EXECUTABLE windeployqt PATHS "${qtBinDir}" NO_DEFAULT_PATH)
+endfunction()
+
+
+###############################################################################
+# UNIX
+###############################################################################
+function (write_package_information_unix)
+    message(STATUS "Package generation - Unix - not yet implemented")
+endfunction()
+
+function (write_package_content_unix)
+    message(STATUS "Cpack write configs - Unix - not yet implemented")
+endfunction()
