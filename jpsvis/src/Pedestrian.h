@@ -28,29 +28,30 @@
 #ifndef PEDESTRIAN_H_
 #define PEDESTRIAN_H_
 
-#include <QStack>
 #include <QColor>
+#include <QStack>
 
 
-//extern variables
-//TODO: pipe my through the setting class
-extern bool   extern_tracking_enable;
+// extern variables
+// TODO: pipe my through the setting class
+extern bool extern_tracking_enable;
 
-//forwarded classes
+// forwarded classes
 class vtkDiskSource;
 class vtkAssembly;
 class vtkActor;
 class vtkDataArray;
-class vtkTextActor3D ;
+class vtkTextActor3D;
 class PointPlotter;
 class LinePlotter;
 class JPoint;
 class vtkPoints;
 class TrajectoryPoint;
 class vtkCamera;
-//class QRgb;
+// class QRgb;
 
-class Pedestrian {
+class Pedestrian
+{
 public:
     /**
      * constructor
@@ -67,19 +68,19 @@ public:
      * @param z
      * @return
      */
-    Pedestrian(int ID, double x ,double y, double z);
+    Pedestrian(int ID, double x, double y, double z);
 
     /**
      * Class destructor
      *
-    */
+     */
     virtual ~Pedestrian();
 
     /**
-    * \brief  to provide a virtual reality-like impression
-    * @param cam a vtkcamera object
-    */
-    static void setCamera(vtkCamera* cam);
+     * \brief  to provide a virtual reality-like impression
+     * @param cam a vtkcamera object
+     */
+    static void setCamera(vtkCamera * cam);
 
     /**
      * set the agent id, whose eyes you want to see the scene through, -1
@@ -87,34 +88,34 @@ public:
      *
      * @param agent, the ID of the agent you want to see the world through
      */
-    //static void setVirtualRealityAgent(int agent);
+    // static void setVirtualRealityAgent(int agent);
 
-    ///returns the pedestrian ID
+    /// returns the pedestrian ID
     int getID();
 
-    ///returns the pedestrians  Y coordinate
+    /// returns the pedestrians  Y coordinate
     double getY();
 
-    ///returns the pedestrians  X coordinate
+    /// returns the pedestrians  X coordinate
     double getX();
 
-    ///returns the pedestrians  Z coordinate
+    /// returns the pedestrians  Z coordinate
     double getZ();
 
 
     /// return the actor to the pedestrians trail/trace
-    vtkAssembly* getTrailActor();
+    vtkAssembly * getTrailActor();
 
     /// call after the pedestrian has been created
-    vtkAssembly* getActor();
+    vtkAssembly * getActor();
 
     /// move the pedestrian to  the next position
     /// @param [x y z] coordinates and the velocities
-    void moveTo(TrajectoryPoint *Point );
+    void moveTo(TrajectoryPoint * Point);
 
     /// change the size of the caption
     /// @todo: also change size and orientation
-    void  setCaptionSize(int size);
+    void setCaptionSize(int size);
 
     /// enable/disable the pedestrians captions
     void enableCaption(bool status);
@@ -144,20 +145,20 @@ public:
 
     /// true if the pedestrian is out of the system
     /// it might be deleted
-    ///void setOutOfTheSystem(bool isOut);
+    /// void setOutOfTheSystem(bool isOut);
 
     /// set the pedestrian size, height in cm
     void setSize(double size);
 
     /// plot the pedestrian trails
     void plotTrail(double x, double y, double z);
-    //void plotTrail(double* points,int size);
+    // void plotTrail(double* points,int size);
 
     /// set the trail types
     /// 0 points, 1 polygon
     void setTrailGeometry(int type);
 
-    //tODO???? what is todo?
+    // tODO???? what is todo?
     void setColor(int color[3]);
     void setColor(int color);
 
@@ -174,7 +175,7 @@ public:
      * @brief set the caption colour
      * @param a value between 0 and 255 specifying the desired colour
      */
-    void setCaptionsColor(QColor& col);
+    void setCaptionsColor(QColor & col);
 
     /// enable or disable automatic caption color
     void setCaptionsColorModeToAuto(bool status);
@@ -183,11 +184,10 @@ private:
     void createActor();
     void CreateActor2D();
     void CreateActor3D();
-    void createSnowMan();
     void createTrailActor();
     void triggerPlotTrail();
 
-private :
+private:
     // pedestrian properties
     int ID;
     int type;
@@ -204,37 +204,37 @@ private :
     static vtkCamera * virtualCam;
 
     /// throug its eyes you will see the world
-    //static int virtualRealityAgent;
+    // static int virtualRealityAgent;
 
     /// define the pedestrian body;
-    vtkActor* bodyActor;
+    vtkActor * bodyActor;
 
-    ///define the pedestrian structure
-    vtkAssembly* pedestrianAssembly;
+    /// define the pedestrian structure
+    vtkAssembly * pedestrianAssembly;
 
     /// define the pedestrian structure 3D
-    vtkAssembly* assembly3D;
+    vtkAssembly * assembly3D;
 
     /// define the pedestrian structure 2D
 
-    vtkAssembly* assembly2D;
+    vtkAssembly * assembly2D;
 
     /// to increase the radius, the actor could be scale up or down.
-    vtkDiskSource* spaceNeeded ; //private sphere needed by agents for moving
+    vtkDiskSource * spaceNeeded; // private sphere needed by agents for moving
 
     /// private sphere actor needed by the pedestrian. It is a function of the velocity
-    vtkActor* ellipseActor;
+    vtkActor * ellipseActor;
 
     /// trail actor left by the pedestrian
-    vtkAssembly* trailActor;
+    vtkAssembly * trailActor;
 
     /// caption actor
-    vtkTextActor3D* caption;
+    vtkTextActor3D * caption;
 
     /// trails plotter
-    QStack<JPoint*> trailPoint;
-    PointPlotter* trailPlotterPoint;
-    LinePlotter* trailPlotterLine;
+    QStack<JPoint *> trailPoint;
+    PointPlotter * trailPlotterPoint;
+    LinePlotter * trailPlotterLine;
 };
 
 #endif /* PEDESTRIAN_H_ */

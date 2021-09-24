@@ -1,46 +1,47 @@
 /**
-* @headerfile ThreadDataTransfert.cpp
-* @author   Ulrich Kemloh <kemlohulrich@gmail.com>
-* @version 0.1
-* Copyright (C) <2009-2010>
-*
-* @section LICENSE
-* This file is part of OpenPedSim.
-*
-* OpenPedSim is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* any later version.
-*
-* OpenPedSim is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
-*
-* @section DESCRIPTION
-* This class implements the thread that manages the main visulisation
-*
-* \brief visualise the data
-*
-*
-*
-*  Created on: 22.05.2009
-*
-*/
+ * @headerfile ThreadDataTransfert.cpp
+ * @author   Ulrich Kemloh <kemlohulrich@gmail.com>
+ * @version 0.1
+ * Copyright (C) <2009-2010>
+ *
+ * @section LICENSE
+ * This file is part of OpenPedSim.
+ *
+ * OpenPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * OpenPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @section DESCRIPTION
+ * This class implements the thread that manages the main visulisation
+ *
+ * \brief visualise the data
+ *
+ *
+ *
+ *  Created on: 22.05.2009
+ *
+ */
 
 #pragma once
-#include <QThread>
-#include <QObject>
-#include <vtkGlyph3D.h>
-#include <vtkTensorGlyph.h>
-#include <vtkSmartPointer.h>
-#include <vtkPolyDataMapper.h>
+#include "InteractorStyle.h"
 #include "TimerCallback.h"
 #include "geometry/GeometryFactory.h"
-#include "InteractorStyle.h"
+
+#include <QObject>
+#include <QThread>
+#include <vtkGlyph3D.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkSmartPointer.h>
+#include <vtkTensorGlyph.h>
 
 // forwarded classes
 class QThread;
@@ -63,25 +64,26 @@ class FacilityGeometry;
 class TrailPlotter;
 class PointPlotter;
 
-extern Pedestrian** extern_pedestrians_firstSet;
+extern Pedestrian ** extern_pedestrians_firstSet;
 
-extern PointPlotter* extern_trail_plotter;
+extern PointPlotter * extern_trail_plotter;
 
-extern vtkTensorGlyph* extern_glyphs_pedestrians;
-extern vtkTensorGlyph* extern_glyphs_pedestrians_3D;
-extern vtkTensorGlyph* extern_glyphs_directions;
-extern vtkActor* extern_glyphs_pedestrians_actor_2D;
-extern vtkActor* extern_glyphs_pedestrians_actor_3D;
-extern vtkActor* extern_glyphs_directions_actor;
+extern vtkTensorGlyph * extern_glyphs_pedestrians;
+extern vtkTensorGlyph * extern_glyphs_pedestrians_3D;
+extern vtkTensorGlyph * extern_glyphs_directions;
+extern vtkActor * extern_glyphs_pedestrians_actor_2D;
+extern vtkActor * extern_glyphs_pedestrians_actor_3D;
+extern vtkActor * extern_glyphs_directions_actor;
 
 extern SyncData extern_trajectories_firstSet;
 
 
-class Visualisation :public QObject {
+class Visualisation : public QObject
+{
     Q_OBJECT
 
 public:
-    Visualisation(QObject *parent, vtkRenderWindow* renderWindow);
+    Visualisation(QObject * parent, vtkRenderWindow * renderWindow);
     virtual ~Visualisation();
     void run();
     void stop();
@@ -91,19 +93,19 @@ public:
     void setFullsreen(bool status);
 
     /// set the camera to one of TOP/FRONT/SIDE
-    void setCameraPerspective(int mode,int degree=0);
+    void setCameraPerspective(int mode, int degree = 0);
 
     /// load and display the geometry where
     /// the pedestrians will move
-    void setGeometry(FacilityGeometry* _geometry);
+    void setGeometry(FacilityGeometry * _geometry);
 
-    GeometryFactory& getGeometry();
+    GeometryFactory & getGeometry();
 
-    ///this is for convenience and will be delete later
+    /// this is for convenience and will be delete later
     void setWindowTitle(QString title);
 
     /// shutdown the thread
-    //void shutdown();
+    // void shutdown();
 
     void setGeometryLabelsVisibility(int v);
 
@@ -117,22 +119,22 @@ public:
     void setGeometryVisibility3D(bool status);
 
     /// change the background color of the rendering windows
-    void setBackgroundColor(const QColor &col);
+    void setBackgroundColor(const QColor & col);
 
     /// change the walls color
-    void setWallsColor(const QColor &color);
+    void setWallsColor(const QColor & color);
 
     /// change the floor color
-    void setFloorColor(const QColor &color);
+    void setFloorColor(const QColor & color);
 
     /// change the obstacle color
-    void setObstacleColor(const QColor &color);
+    void setObstacleColor(const QColor & color);
 
     /// change the exits color.
-    void setExitsColor(const QColor &color);
+    void setExitsColor(const QColor & color);
 
     /// change the exits color.
-    void setNavLinesColor(const QColor &color);
+    void setNavLinesColor(const QColor & color);
 
     /// show / hide the walls
     void showWalls(bool status);
@@ -153,21 +155,20 @@ public:
     void showGradientField(bool status);
 
     /// show / hide stairs
-    ///not implemented
+    /// not implemented
     void showStairs(bool status);
 
     void setOnscreenInformationVisibility(bool show);
 
 public Q_SLOTS:
     /// set the frame rate in frames per second
-    void slotSetFrameRate( float fps);
+    void slotSetFrameRate(float fps);
 
 
 Q_SIGNALS:
-    void signal_controlSequences(const char* para);
+    void signal_controlSequences(const char * para);
 
 private:
-
     /// initialize the legend
     void initLegend(/*std::vector scalars*/);
 
@@ -177,29 +178,28 @@ private:
     /// initialize the datasets
     void initGlyphs2D();
 
-    //initialize the 3D agents
+    // initialize the 3D agents
     void initGlyphs3D();
 
-    //finalize the datasets
+    // finalize the datasets
     void finalize();
 
-    void QcolorToDouble(const QColor& col, double* rgb);
+    void QcolorToDouble(const QColor & col, double * rgb);
 
     void Create2dAgent();
 
 private:
-    //FacilityGeometry* _geometry;
-    vtkRenderWindow* _renderWindow;
+    // FacilityGeometry* _geometry;
+    vtkRenderWindow * _renderWindow;
     GeometryFactory _geometry;
-    vtkRenderer* _renderer;
-    vtkAxesActor* _axis;
-    vtkTextActor* _runningTime;
-    vtkCamera* _topViewCamera;
+    vtkRenderer * _renderer;
+    vtkAxesActor * _axis;
+    vtkTextActor * _runningTime;
+    vtkCamera * _topViewCamera;
     QString _winTitle;
 
     float _framePerSecond;
     InteractorStyle _interactorStyle{};
     std::unique_ptr<TimerCallback> _timer_cb{nullptr};
     int _timer_id = 1;
-
 };

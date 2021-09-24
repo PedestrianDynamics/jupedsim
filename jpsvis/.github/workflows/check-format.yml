@@ -1,0 +1,26 @@
+name: jpsvis-check-format
+
+on: [push]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  DEBIAN_FRONTEND: noninteractive
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:21.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: |
+          apt-get update && apt-get install -y software-properties-common
+          apt-get update && apt-get install -y \
+              parallel \
+              clang-format-12 \
+
+      - name: Run clang format
+        run: $GITHUB_WORKSPACE/scripts/check-format-cpp

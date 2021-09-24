@@ -31,69 +31,67 @@
 
 
 #include "LinePlotter2D.h"
+
 #include "../SystemSettings.h"
 
-#include <vtkLookupTable.h>
-#include <vtkPoints.h>
+#include <QColor>
+#include <vtkActor.h>
+#include <vtkAssembly.h>
 #include <vtkCellArray.h>
 #include <vtkFloatArray.h>
+#include <vtkLookupTable.h>
+#include <vtkPointData.h>
+#include <vtkPoints.h>
 #include <vtkPolyData.h>
 #include <vtkPolyDataMapper.h>
-#include <vtkActor.h>
-#include <vtkPointData.h>
 #include <vtkProperty.h>
-#include <vtkAssembly.h>
 #include <vtkSmartPointer.h>
 
-#include <QColor>
+#define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
-#define VTK_CREATE(type, name) \
-		vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
-
-bool LinePlotter2D::doorColorsToDefault=true;
+bool LinePlotter2D::doorColorsToDefault = true;
 
 LinePlotter2D::LinePlotter2D()
 {
+    assembly = vtkAssembly::New();
 
-    assembly=vtkAssembly::New();
-
-    door_mapper= vtkPolyDataMapper::New();
-    door_actor= vtkActor::New();
-    door_points = vtkPoints::New();
-    door_lines = vtkCellArray::New();
+    door_mapper      = vtkPolyDataMapper::New();
+    door_actor       = vtkActor::New();
+    door_points      = vtkPoints::New();
+    door_lines       = vtkCellArray::New();
     door_lineScalars = vtkFloatArray::New();
-    door_curPointID=0;
-//    door_width=3.5;
-    door_width=2;
+    door_curPointID  = 0;
+    //    door_width=3.5;
+    door_width = 2;
 
-    wall_mapper= vtkPolyDataMapper::New();
-    wall_actor= vtkActor::New();
-    wall_points = vtkPoints::New();
-    wall_lines = vtkCellArray::New();
+    wall_mapper      = vtkPolyDataMapper::New();
+    wall_actor       = vtkActor::New();
+    wall_points      = vtkPoints::New();
+    wall_lines       = vtkCellArray::New();
     wall_lineScalars = vtkFloatArray::New();
-    wall_curPointID=0;
-//    wall_width=4;
-    wall_width=2;
+    wall_curPointID  = 0;
+    //    wall_width=4;
+    wall_width = 2;
 
-    navline_curPointID =0;
-    navline_width=2;
-    navline_points= vtkPoints::New();
-    navline_lines=vtkCellArray::New();
-    navline_lineScalars= vtkFloatArray::New();
-    navline_mapper=vtkPolyDataMapper::New();
-    navline_actor= vtkActor::New();
+    navline_curPointID  = 0;
+    navline_width       = 2;
+    navline_points      = vtkPoints::New();
+    navline_lines       = vtkCellArray::New();
+    navline_lineScalars = vtkFloatArray::New();
+    navline_mapper      = vtkPolyDataMapper::New();
+    navline_actor       = vtkActor::New();
 
     // create a color lookup table
     m_lookupTable = vtkLookupTable::New();
-    m_lookupTable->SetTableRange(0,255);
+    m_lookupTable->SetTableRange(0, 255);
     m_lookupTable->SetNumberOfTableValues(256);
 
-    //m_lookupTable->SetHueRange(0.0,0.566);
-    //m_lookupTable->SetSaturationRange(0,0);
-    //m_lookupTable->SetValueRange(0.0,1.0);
-    //m_lookupTable->SetHueRange(0.0,0.0);
-    //m_lookupTable->SetValueRange(0.0,1.0);
-    //m_lookupTable->SetSaturationRange(0.0,0.0);
+    // m_lookupTable->SetHueRange(0.0,0.566);
+    // m_lookupTable->SetSaturationRange(0,0);
+    // m_lookupTable->SetValueRange(0.0,1.0);
+    // m_lookupTable->SetHueRange(0.0,0.0);
+    // m_lookupTable->SetValueRange(0.0,1.0);
+    // m_lookupTable->SetSaturationRange(0.0,0.0);
     m_lookupTable->Build();
 }
 
@@ -120,7 +118,7 @@ LinePlotter2D::~LinePlotter2D()
 
 void LinePlotter2D::SetAllLineWidth(int width)
 {
-    //m_allLineWidth = width ;
+    // m_allLineWidth = width ;
 }
 
 void LinePlotter2D::PlotDoor(double m[3], double n[3], double scalar)
@@ -132,20 +130,20 @@ void LinePlotter2D::PlotDoor(double m[3], double n[3], double scalar)
 
     door_lines->InsertNextCell(2);
     door_lines->InsertCellPoint(door_curPointID);
-    door_lines->InsertCellPoint(door_curPointID+1);
+    door_lines->InsertCellPoint(door_curPointID + 1);
 
-    door_curPointID+=2;
+    door_curPointID += 2;
 
-    if(scalar!=1.0) {
-        doorColorsToDefault=false;
+    if(scalar != 1.0) {
+        doorColorsToDefault = false;
     }
 }
 
-void LinePlotter2D::changeWallsColor(double *col)
+void LinePlotter2D::changeWallsColor(double * col)
 {
-    //first switch off the automatic mapping
+    // first switch off the automatic mapping
     wall_mapper->SetScalarVisibility(0);
-    //then set the new color
+    // then set the new color
     wall_actor->GetProperty()->SetColor(col);
 }
 
@@ -158,24 +156,24 @@ void LinePlotter2D::PlotNavLine(double m[], double n[], double scalar)
 
     navline_lines->InsertNextCell(2);
     navline_lines->InsertCellPoint(navline_curPointID);
-    navline_lines->InsertCellPoint(navline_curPointID+1);
+    navline_lines->InsertCellPoint(navline_curPointID + 1);
 
-    navline_curPointID+=2;
+    navline_curPointID += 2;
 }
 
-void LinePlotter2D::changeNavLinesColor(double *col)
+void LinePlotter2D::changeNavLinesColor(double * col)
 {
-    //first switch off the automatic mapping
+    // first switch off the automatic mapping
     navline_mapper->SetScalarVisibility(0);
-    //then set the new color
+    // then set the new color
     navline_actor->GetProperty()->SetColor(col);
 }
 
-void LinePlotter2D::changeDoorsColor(double *col)
+void LinePlotter2D::changeDoorsColor(double * col)
 {
-    //first switch off the automatic mapping
+    // first switch off the automatic mapping
     door_mapper->SetScalarVisibility(0);
-    //then set the new color
+    // then set the new color
     door_actor->GetProperty()->SetColor(col);
 }
 
@@ -188,12 +186,12 @@ void LinePlotter2D::PlotWall(double m[3], double n[3], double scalar)
 
     wall_lines->InsertNextCell(2);
     wall_lines->InsertCellPoint(wall_curPointID);
-    wall_lines->InsertCellPoint(wall_curPointID+1);
+    wall_lines->InsertCellPoint(wall_curPointID + 1);
 
-    wall_curPointID+=2;
+    wall_curPointID += 2;
 }
 
-//vtkPolyData* LinePlotter2D::CreatePolyData()
+// vtkPolyData* LinePlotter2D::CreatePolyData()
 //{
 //	// Create poly data
 //	vtkPolyData* polyData = vtkPolyData::New();
@@ -203,7 +201,7 @@ void LinePlotter2D::PlotWall(double m[3], double n[3], double scalar)
 //	return polyData;
 //}
 
-//vtkActor* LinePlotter2D::CreateActor()
+// vtkActor* LinePlotter2D::CreateActor()
 //{
 //	// Create poly data
 //	vtkPolyData* polyData = CreatePolyData();
@@ -223,13 +221,13 @@ void LinePlotter2D::PlotWall(double m[3], double n[3], double scalar)
 //	return actor ;
 //}
 
-vtkAssembly* LinePlotter2D::createAssembly()
+vtkAssembly * LinePlotter2D::createAssembly()
 {
-    //doors
+    // doors
     {
         // Create poly data
-        //vtkPolyData* polyData =vtkPolyData::New();
-        VTK_CREATE(vtkPolyData,polyData);
+        // vtkPolyData* polyData =vtkPolyData::New();
+        VTK_CREATE(vtkPolyData, polyData);
         polyData->SetPoints(door_points);
         polyData->SetLines(door_lines);
         polyData->GetPointData()->SetScalars(door_lineScalars);
@@ -245,20 +243,23 @@ vtkAssembly* LinePlotter2D::createAssembly()
         door_actor->GetProperty()->SetLineWidth(door_width);
         assembly->AddPart(door_actor);
 
-        //if default, then hide all doors
+        // if default, then hide all doors
         // fixme: not working
         if(doorColorsToDefault) {
-            const QColor& bgcolor = SystemSettings::getBackgroundColor();
-            double  col[3]= {(double)bgcolor.red()/255.0 ,(double)bgcolor.green()/255.0 ,(double)bgcolor.blue()/255.0};
+            const QColor & bgcolor = SystemSettings::getBackgroundColor();
+            double col[3]          = {
+                (double) bgcolor.red() / 255.0,
+                (double) bgcolor.green() / 255.0,
+                (double) bgcolor.blue() / 255.0};
             door_actor->GetProperty()->SetColor(col);
             door_actor->Modified();
         }
     }
 
-    //walls
+    // walls
     {
         // Create poly data
-        VTK_CREATE(vtkPolyData,polyData);
+        VTK_CREATE(vtkPolyData, polyData);
         polyData->SetPoints(wall_points);
         polyData->SetLines(wall_lines);
         polyData->GetPointData()->SetScalars(wall_lineScalars);
@@ -273,10 +274,10 @@ vtkAssembly* LinePlotter2D::createAssembly()
         assembly->AddPart(wall_actor);
     }
 
-    //navlines
+    // navlines
     {
         // Create poly data
-        VTK_CREATE(vtkPolyData,polyData);
+        VTK_CREATE(vtkPolyData, polyData);
         polyData->SetPoints(navline_points);
         polyData->SetLines(navline_lines);
         polyData->GetPointData()->SetScalars(navline_lineScalars);

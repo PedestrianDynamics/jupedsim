@@ -31,13 +31,13 @@ public:
     virtual void Process() = 0;
 
     /**
-      * @return the time at which the event was recorded
-      */
+     * @return the time at which the event was recorded
+     */
     [[nodiscard]] double GetTime() const { return _time; };
 
     /**
-      * @return human readable string representation
-      */
+     * @return human readable string representation
+     */
     [[nodiscard]] virtual std::string ToString() const = 0;
 };
 

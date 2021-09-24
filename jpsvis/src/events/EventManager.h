@@ -40,19 +40,19 @@ private:
     std::vector<std::unique_ptr<Event>> _events;
 
     /**
-     * Indicates if Events need to be sorted when calling ProcessEvent() 
+     * Indicates if Events need to be sorted when calling ProcessEvent()
      */
     bool _needs_sorting{false};
 
 public:
     /**
-      * Constructor.
-      */
+     * Constructor.
+     */
     EventManager() = default;
 
     /**
-      * Destructor.
-      */
+     * Destructor.
+     */
     ~EventManager() = default;
 
     /**
@@ -83,8 +83,8 @@ public:
     void AddEvent(std::unique_ptr<Event> event);
 
     /**
-      * Print the events handled by EventManager.
-      */
+     * Print the events handled by EventManager.
+     */
     void ListEvents();
 
     /**

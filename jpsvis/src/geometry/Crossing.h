@@ -24,97 +24,97 @@
  *
  *
  **/
- 
+
 
 #ifndef _CROSSING_H
 #define _CROSSING_H
 
-#include "NavLine.h"
 #include "Hline.h"
+#include "NavLine.h"
 
-//class Line;
+// class Line;
 class Room;
 class SubRoom;
 
-class Crossing : public Hline {
+class Crossing : public Hline
+{
 private:
-     /// TODO ? unique between crossings and transitions ?
-     int _id;
-     /// only one room needed, since a crossing only separates 2 subrooms
-     //Room* _room1;
-     //SubRoom* _subRoom1;
-     //SubRoom* _subRoom2;
+    /// TODO ? unique between crossings and transitions ?
+    int _id;
+    /// only one room needed, since a crossing only separates 2 subrooms
+    // Room* _room1;
+    // SubRoom* _subRoom1;
+    // SubRoom* _subRoom2;
 
 public:
-     /**
-      * Constructor
-      */
-     Crossing();
+    /**
+     * Constructor
+     */
+    Crossing();
 
-     /**
-      * Destructor
-      */
-     virtual ~Crossing();
+    /**
+     * Destructor
+     */
+    virtual ~Crossing();
 
-     /**
-      * Set/Get the Id of the crossing
-      * TODO: do you really want to shadow ?
-      */
-     void SetID(int ID);
+    /**
+     * Set/Get the Id of the crossing
+     * TODO: do you really want to shadow ?
+     */
+    void SetID(int ID);
 
-     /**
-      * Set/Get the Id of the crossing
-      * TODO: do you really want to shadow ?
-      */
-     int GetID () const;
+    /**
+     * Set/Get the Id of the crossing
+     * TODO: do you really want to shadow ?
+     */
+    int GetID() const;
 
-     /**
-      * Set/Get the second subroom
-      */
-     //void SetSubRoom2(SubRoom* r2);
+    /**
+     * Set/Get the second subroom
+     */
+    // void SetSubRoom2(SubRoom* r2);
 
-     /**
-      * Set/Get the second subroom
-      */
-     //SubRoom* GetSubRoom2() const;
+    /**
+     * Set/Get the second subroom
+     */
+    // SubRoom* GetSubRoom2() const;
 
-     /**
-      * \return true if the subroomID is associated with the current crossing
-      */
-     bool IsInSubRoom(int subroomID) const;
+    /**
+     * \return true if the subroomID is associated with the current crossing
+     */
+    bool IsInSubRoom(int subroomID) const;
 
-     /**
-      * @return true if the crossing is open = passable
-      */
-     virtual bool IsOpen() const;
+    /**
+     * @return true if the crossing is open = passable
+     */
+    virtual bool IsOpen() const;
 
-     /**
-      * @return true if the crossing is an exit/transition. (Transitions are derived from this class)
-      * @see Transition
-      */
-     virtual bool IsExit() const;
+    /**
+     * @return true if the crossing is an exit/transition. (Transitions are derived from this class)
+     * @see Transition
+     */
+    virtual bool IsExit() const;
 
-     /**
-      *
-      * @return true if it is a transition
-      */
-     virtual bool IsTransition() const;
+    /**
+     *
+     * @return true if it is a transition
+     */
+    virtual bool IsTransition() const;
 
-     /**
-      * @return the other subroom not matching the data
-      */
-     virtual SubRoom* GetOtherSubRoom(int roomID, int subroomID) const;
+    /**
+     * @return the other subroom not matching the data
+     */
+    virtual SubRoom * GetOtherSubRoom(int roomID, int subroomID) const;
 
-     /**
-      * Debug output
-      */
-     virtual void WriteToErrorLog() const;
+    /**
+     * Debug output
+     */
+    virtual void WriteToErrorLog() const;
 
-     /**
-      * @return a nicely formatted string representation of the object
-      */
-     virtual std::string GetDescription() const;
+    /**
+     * @return a nicely formatted string representation of the object
+     */
+    virtual std::string GetDescription() const;
 };
 
-#endif  /* _CROSSING_H */
-
+#endif /* _CROSSING_H */

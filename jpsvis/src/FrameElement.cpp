@@ -1,41 +1,41 @@
 /**
-* @file FrameElement.cpp
-* @author   Ulrich Kemloh <kemlohulrich@gmail.com>
-* @version 0.1
-* Copyright (C) <2009-2014>
-*
-* @section LICENSE
-* This file is part of JuPedsim.
-*
-* JuPedSim is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* any later version.
-*
-* OpenPedSim is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
-*
-* @section DESCRIPTION
-*
-* \brief
-*
-*
-*/
+ * @file FrameElement.cpp
+ * @author   Ulrich Kemloh <kemlohulrich@gmail.com>
+ * @version 0.1
+ * Copyright (C) <2009-2014>
+ *
+ * @section LICENSE
+ * This file is part of JuPedsim.
+ *
+ * JuPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * OpenPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @section DESCRIPTION
+ *
+ * \brief
+ *
+ *
+ */
 
 
+#include "FrameElement.h"
 
 #include <limits>
-#include "FrameElement.h"
 
 
 FrameElement::FrameElement(int id)
 {
-    _id=id;
+    _id     = id;
     _pos[0] = std::numeric_limits<double>::quiet_NaN();
     _pos[1] = std::numeric_limits<double>::quiet_NaN();
     _pos[2] = std::numeric_limits<double>::quiet_NaN();
@@ -47,13 +47,10 @@ FrameElement::FrameElement(int id)
     _radius[0] = std::numeric_limits<double>::quiet_NaN();
     _radius[1] = std::numeric_limits<double>::quiet_NaN();
     _radius[2] = std::numeric_limits<double>::quiet_NaN();
-    _minFrame = 0;
+    _minFrame  = 0;
 }
 
-FrameElement::~FrameElement()
-{
-
-}
+FrameElement::~FrameElement() {}
 
 void FrameElement::SetMinFrame(int minframe)
 {
@@ -61,7 +58,7 @@ void FrameElement::SetMinFrame(int minframe)
 }
 int FrameElement::GetMinFrame()
 {
-     return _minFrame;
+    return _minFrame;
 }
 
 
@@ -100,26 +97,26 @@ void FrameElement::GetPos(double pos[3])
 
 void FrameElement::SetOrientation(double angle[])
 {
-    _orientation[0]=angle[0];
-    _orientation[1]=angle[1];
-    _orientation[2]=angle[2];
+    _orientation[0] = angle[0];
+    _orientation[1] = angle[1];
+    _orientation[2] = angle[2];
 }
 
 void FrameElement::GetOrientation(double angle[])
 {
-    angle[0]=_orientation[0];
-    angle[1]=_orientation[1];
-    angle[2]=_orientation[2];
+    angle[0] = _orientation[0];
+    angle[1] = _orientation[1];
+    angle[2] = _orientation[2];
 }
 
 void FrameElement::SetColor(double color)
 {
-    _color=color;
+    _color = color;
 }
 
-void FrameElement::GetColor(double *color)
+void FrameElement::GetColor(double * color)
 {
-    *color=_color;
+    *color = _color;
 }
 
 int FrameElement::GetId()

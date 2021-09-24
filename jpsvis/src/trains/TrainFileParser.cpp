@@ -42,7 +42,6 @@ void TrainFileParser::ParseTrainTimeTable(
                 //     trainInfo.value().trainType,
                 //     trainInfo.value().trainStartOffset,
                 //     trainInfo.value().reversed};
-
             }
         }
     }
@@ -91,7 +90,8 @@ std::optional<TrainEventInfo> TrainFileParser::ParseTrainTimeTableNode(
         if(std::string value = xmltoa(attribute, ""); !value.empty()) {
             type = value;
         } else {
-            Debug::Warning("id {}: input for type could not be parsed {}. Skip entry.", id, attribute);
+            Debug::Warning(
+                "id {}: input for type could not be parsed {}. Skip entry.", id, attribute);
             return std::nullopt;
         }
     } else {
@@ -255,7 +255,8 @@ std::optional<TrainType> TrainFileParser::ParseTrainTypeNode(TiXmlElement * node
            value >= 0.) {
             length = value;
         } else {
-            Debug::Warning("{}: input for length should be non-negative {}. Skip entry.", type, value);
+            Debug::Warning(
+                "{}: input for length should be non-negative {}. Skip entry.", type, value);
             return std::nullopt;
         }
     } else {

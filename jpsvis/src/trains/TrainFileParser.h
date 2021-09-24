@@ -22,9 +22,8 @@ void ParseTrainTimeTable(
  * @param trainTypes User defined train types
  * @return information of train event if vaild, std::nullopt otherwise
  */
-std::optional<TrainEventInfo> ParseTrainTimeTableNode(
-    TiXmlElement * node,
-    const std::map<std::string, TrainType> & trainTypes);
+std::optional<TrainEventInfo>
+ParseTrainTimeTableNode(TiXmlElement * node, const std::map<std::string, TrainType> & trainTypes);
 
 /**
  * Parse the arrival and departure time of a train based on specific train time table node and

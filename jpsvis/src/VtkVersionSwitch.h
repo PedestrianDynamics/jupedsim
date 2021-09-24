@@ -10,7 +10,8 @@
 #endif
 
 template <typename T>
-vtkRenderWindow* GetRenderWindow(T* obj) {
+vtkRenderWindow * GetRenderWindow(T * obj)
+{
 #if VTK890
     return obj->renderWindow();
 #else

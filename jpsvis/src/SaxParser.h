@@ -30,20 +30,18 @@
 #ifndef SAXPARSER_H_
 #define SAXPARSER_H_
 
-#include <QtXml>
-#include <QTreeWidget>
-#include <vector>
 #include "SyncData.h"
-#include"geometry/GeometryFactory.h"
-#include "tinyxml/tinyxml.h"
 #include "general/Macros.h"
-
+#include "geometry/GeometryFactory.h"
+#include "tinyxml/tinyxml.h"
 #include "trains/train.h"
 
+#include <QTreeWidget>
+#include <QtXml>
+#include <vector>
 
 
-
-//forwarded classes
+// forwarded classes
 class JPoint;
 class TrajectoryPoint;
 class FrameElement;
@@ -51,73 +49,74 @@ class SyncData;
 class GeometryFactory;
 
 
-class SaxParser: public QXmlDefaultHandler
+class SaxParser : public QXmlDefaultHandler
 {
 public:
-    SaxParser(GeometryFactory& geoFac, SyncData& _dataset, double * fps);
+    SaxParser(GeometryFactory & geoFac, SyncData & _dataset, double * fps);
     virtual ~SaxParser();
-    bool startElement(const QString &namespaceURI,
-                      const QString &localName,
-                      const QString &qName,
-                      const QXmlAttributes &attributes);
-    bool endElement(const QString &namespaceURI,
-                    const QString &localName,
-                    const QString &qName);
-    bool characters(const QString &str);
-    bool fatalError(const QXmlParseException &exception);
-    bool attributeDecl(const QString& eName,
-                       const QString& aName,
-                       const QString& type,
-                       const QString& valueDefault,
-                       const QString& value);
-     std::shared_ptr<FacilityGeometry> GetGeometryFactory()
-     {
-          return _geometry;
-
-     }
-     bool getSourcesTXT(QString &filename);
+    bool startElement(
+        const QString & namespaceURI,
+        const QString & localName,
+        const QString & qName,
+        const QXmlAttributes & attributes);
+    bool endElement(const QString & namespaceURI, const QString & localName, const QString & qName);
+    bool characters(const QString & str);
+    bool fatalError(const QXmlParseException & exception);
+    bool attributeDecl(
+        const QString & eName,
+        const QString & aName,
+        const QString & type,
+        const QString & valueDefault,
+        const QString & value);
+    std::shared_ptr<FacilityGeometry> GetGeometryFactory() { return _geometry; }
+    bool getSourcesTXT(QString & filename);
     /// provided for convenience and will be removed in the next version
-    static bool parseGeometryJPS(QString content, GeometryFactory& geo);
+    static bool parseGeometryJPS(QString content, GeometryFactory & geo);
 
     /// provided for convenience and will be removed in the next version
-    static void parseGeometryXMLV04(QString content, GeometryFactory& geo);
+    static void parseGeometryXMLV04(QString content, GeometryFactory & geo);
 
     /// provided for convenience and will be removed in the next version
-    static void parseGeometryTRAV(QString fileName, GeometryFactory& geoFac, QDomNode geoNode=QDomNode());
+    static void
+    parseGeometryTRAV(QString fileName, GeometryFactory & geoFac, QDomNode geoNode = QDomNode());
 
     /// take a large file and find the geometry file location.
-     static QString extractGeometryFilename(QString& filename);
-     static QString extractGeometryFilenameTXT(QString &filename);
-     static QString extractSourceFileTXT(QString &filename);
-     static QString extractGoalFileTXT(QString &filename);
+    static QString extractGeometryFilename(QString & filename);
+    static QString extractGeometryFilenameTXT(QString & filename);
+    static QString extractSourceFileTXT(QString & filename);
+    static QString extractGoalFileTXT(QString & filename);
     /// parse the txt file format
-    static bool ParseTxtFormat(const QString& fileName, SyncData* dataset, double * fps);
+    static bool ParseTxtFormat(const QString & fileName, SyncData * dataset, double * fps);
 
     /// parse a vtk file
-    static bool ParseGradientFieldVTK(QString fileName, GeometryFactory& geoFac);
-     /// Trains
-     static bool LoadTrainTimetable(std::string filename, std::map<int, std::shared_ptr<TrainTimeTable> > & trainTimeTables);
-     static std::shared_ptr<TrainTimeTable> parseTrainTimeTableNode(TiXmlElement * e);
-     static std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement * e);
-     static QString extractTrainTypeFileTXT(QString &filename);
-     static QString extractTrainTimeTableFileTXT(QString &filename);
+    static bool ParseGradientFieldVTK(QString fileName, GeometryFactory & geoFac);
+    /// Trains
+    static bool LoadTrainTimetable(
+        std::string filename,
+        std::map<int, std::shared_ptr<TrainTimeTable>> & trainTimeTables);
+    static std::shared_ptr<TrainTimeTable> parseTrainTimeTableNode(TiXmlElement * e);
+    static std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement * e);
+    static QString extractTrainTypeFileTXT(QString & filename);
+    static QString extractTrainTimeTableFileTXT(QString & filename);
 
-     static bool   LoadTrainType(std::string Filename, std::map<std::string, std::shared_ptr<TrainType> > & trainTypes);
-     static double GetElevation(QString geometryFile, int roomId, int subroomId);
-     static std::tuple<Point, Point> GetTrackStartEnd(QString geometryFile, int trackId); 
+    static bool LoadTrainType(
+        std::string Filename,
+        std::map<std::string, std::shared_ptr<TrainType>> & trainTypes);
+    static double GetElevation(QString geometryFile, int roomId, int subroomId);
+    static std::tuple<Point, Point> GetTrackStartEnd(QString geometryFile, int trackId);
 
 private:
-    //clear the mo
+    // clear the mo
     void clearPoints();
     void InitHeader(int major, int minor, int patch);
 
 private:
-    GeometryFactory& _geoFactory;
+    GeometryFactory & _geoFactory;
     std::shared_ptr<FacilityGeometry> _geometry;
-    SyncData& _dataset;
-    double* _para;
+    SyncData & _dataset;
+    double * _para;
     QString _currentText;
-    int _currentFrameID=-1;
+    int _currentFrameID = -1;
     QStringList _initialPedestriansColors;
     QStringList _initialPedestriansHeights;
     std::vector<JPoint *> _currentPointsList;
@@ -125,15 +124,15 @@ private:
     bool _parsingWalls;
     bool _parsingCrossings;
 
-    //wall and door and hlines parameters
+    // wall and door and hlines parameters
     double _thickness;
     double _height;
     double _color;
 
-    //actual caption of door/wall/hlines
+    // actual caption of door/wall/hlines
     QString _caption;
 
-    //header dependant variables
+    // header dependant variables
     QString _jps_xPos;
     QString _jps_yPos;
     QString _jps_zPos;

@@ -7,12 +7,11 @@ class MyQTreeView : public QTreeView
 {
     Q_OBJECT
 public:
-    explicit MyQTreeView(QWidget *parent = nullptr);
+    explicit MyQTreeView(QWidget * parent = nullptr);
 
     void closeEvent(QCloseEvent *) override;
 signals:
     void changeState();
-
 };
 
 #endif // MYQTREEVIEW_H

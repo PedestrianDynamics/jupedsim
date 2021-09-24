@@ -1,77 +1,75 @@
 /**
-* @file SyncData.cpp
-* @author   Ulrich Kemloh <kemlohulrich@gmail.com>
-* @version 0.1
-* Copyright (C) <2009-2010>
-*
-* @section LICENSE
-* This file is part of OpenPedSim.
-*
-* OpenPedSim is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* any later version.
-*
-* OpenPedSim is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
-*
-* @section DESCRIPTION
-* This class contains the data (trajectories / floor field) after they have
-* been parsed in the appropriate structure. They are either read from a file or obtained via a TCP socket
-*
-* \brief maintains the parsed data in an appropriate structure
-*
-*
-*  Created on: 02.06.2009
-*
-*/
+ * @file SyncData.cpp
+ * @author   Ulrich Kemloh <kemlohulrich@gmail.com>
+ * @version 0.1
+ * Copyright (C) <2009-2010>
+ *
+ * @section LICENSE
+ * This file is part of OpenPedSim.
+ *
+ * OpenPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * OpenPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @section DESCRIPTION
+ * This class contains the data (trajectories / floor field) after they have
+ * been parsed in the appropriate structure. They are either read from a file or obtained via a TCP
+ * socket
+ *
+ * \brief maintains the parsed data in an appropriate structure
+ *
+ *
+ *  Created on: 02.06.2009
+ *
+ */
 
 #include "SyncData.h"
+
 #include "Frame.h"
-#include "TrajectoryPoint.h"
-#include "Message.h"
 #include "Log.h"
+#include "Message.h"
+#include "TrajectoryPoint.h"
 
 #include <QMutex>
 #include <QObject>
 #include <QStringList>
-
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <fstream>
 
 using namespace std;
 
 SyncData::SyncData()
 {
-    _frameCursor=0;
-    _numberOfAgents=0;
-    _frameCursorOffset=0;
+    _frameCursor       = 0;
+    _numberOfAgents    = 0;
+    _frameCursorOffset = 0;
 }
 
 SyncData::~SyncData()
 {
-
-    //while (!_frames.empty()) {
+    // while (!_frames.empty()) {
     //    delete _frames.back();
     //    _frames.pop_back();
     //}
     //
 
-    for(auto itr = _frames.begin(); itr != _frames.end(); itr++)
-    {
-        //FIXME
-        //delete itr->second;
+    for(auto itr = _frames.begin(); itr != _frames.end(); itr++) {
+        // FIXME
+        // delete itr->second;
     }
     _frames.clear();
 }
-
 
 
 void SyncData::add(std::string newData)
@@ -83,7 +81,7 @@ void SyncData::add(std::string newData)
 
 
 // and the clearframe alternative for offline visualisation
-//void SyncData::clear(){
+// void SyncData::clear(){
 //	//	mutex.lock();
 //	//	frameCursor=0;
 //	//	trajectories.clear();
@@ -112,81 +110,73 @@ std::string SyncData::get()
 
 void SyncData::setFrameCursorOffset(int offset)
 {
-    _frameCursorOffset=offset;
+    _frameCursorOffset = offset;
 }
 
-void SyncData::addFrame(Frame* frame)
+void SyncData::addFrame(Frame * frame)
 {
     _mutex.lock();
-    _frames[frame->GetID()]=frame;
+    _frames[frame->GetID()] = frame;
     //_frames.push_back(frame);
     _mutex.unlock();
 }
 
-Frame* SyncData::getFrame( int i)
+Frame * SyncData::getFrame(int i)
 {
     _mutex.lock();
-    i+=_frameCursorOffset;
+    i += _frameCursorOffset;
 
-    if((i<0) || (i>= (int)_frames.size())) {
+    if((i < 0) || (i >= (int) _frames.size())) {
         _mutex.unlock();
         return NULL;
     } else {
         _mutex.unlock();
         return _frames.at(i);
     }
-
 }
 
 vtkSmartPointer<vtkSphereSource> SyncData::getTTT()
 {
-     return _ttt;
+    return _ttt;
 }
 
 void SyncData::setTTT(vtkSmartPointer<vtkSphereSource> s)
 {
-     _ttt = s;
+    _ttt = s;
 }
 
 
-Frame* SyncData::getNextFrame()
+Frame * SyncData::getNextFrame()
 {
-
     // this may be the case if the file only contains geometry, thus no trajectories available
-    if(_frames.empty()) return nullptr;
+    if(_frames.empty())
+        return nullptr;
 
     // Navigation  in the negative direction is also possible
-    //review
+    // review
     _mutex.lock();
 
-    _frameCursor+=extern_update_step;
+    _frameCursor += extern_update_step;
 
-    //FIXME: do I really need two variables to handle this?
-    int cursor =_frameCursor+_frameCursorOffset;
+    // FIXME: do I really need two variables to handle this?
+    int cursor = _frameCursor + _frameCursorOffset;
 
-    if (cursor<0)
-    {
-        //frameCursor=0;
+    if(cursor < 0) {
+        // frameCursor=0;
         emit signal_controlSequences("STACK_REACHS_BEGINNING");
         _mutex.unlock();
         return NULL;
 
-    }
-    else if ( _frames.count(cursor)==0)
-    {
-
-        //return the last frame, if I am at the end
+    } else if(_frames.count(cursor) == 0) {
+        // return the last frame, if I am at the end
         // otherwise retrun the first frame
-        Frame* res=nullptr;
-        if(_frameCursor>_frames.rbegin()->first)
-        {
+        Frame * res = nullptr;
+        if(_frameCursor > _frames.rbegin()->first) {
             //_frameCursor-=extern_update_step;
-            res= _frames.rbegin()->second;
-            _frameCursor=res->GetID();
-        }
-        else
-        {
-            //res=_frames.begin()->second;
+            res          = _frames.rbegin()->second;
+            _frameCursor = res->GetID();
+        } else {
+            // res=_frames.begin()->second;
             //_frameCursor=res->GetID();
         }
 
@@ -195,19 +185,19 @@ Frame* SyncData::getNextFrame()
         return res;
     }
 
-    Frame* res =_frames[cursor];
+    Frame * res = _frames[cursor];
     _mutex.unlock();
     return res;
 }
 
 /***
-* This method is for convenience only.
-* The normal way to get the previous frame is:
-*               1. either set the variable extern_update_step to a negative value;
-*               2. using the function getFrame(int frameNumber). one may first get
-* the current framecursor position using getFrameCursor()
-*/
-//Frame* SyncData::getPreviousFrame()
+ * This method is for convenience only.
+ * The normal way to get the previous frame is:
+ *               1. either set the variable extern_update_step to a negative value;
+ *               2. using the function getFrame(int frameNumber). one may first get
+ * the current framecursor position using getFrameCursor()
+ */
+// Frame* SyncData::getPreviousFrame()
 //{
 //    _mutex.lock();
 //    _frameCursor--;
@@ -237,9 +227,9 @@ void SyncData::clearFrames()
 {
     _mutex.lock();
 
-    _frameCursor=0;
-    _numberOfAgents=0;
-    _frameCursorOffset=0;
+    _frameCursor       = 0;
+    _numberOfAgents    = 0;
+    _frameCursorOffset = 0;
     _pedHeight.clear();
     _pedColor.clear();
 
@@ -253,15 +243,15 @@ void SyncData::clearFrames()
 
 int SyncData::getFramesNumber()
 {
-    //mutex.lock(); //FIXME
+    // mutex.lock(); //FIXME
     return _frames.size();
-    //mutex.unlock();
+    // mutex.unlock();
 }
 
 void SyncData::resetFrameCursor()
 {
     _mutex.lock();
-    _frameCursor=0;
+    _frameCursor = 0;
     _mutex.unlock();
 }
 
@@ -273,14 +263,13 @@ int SyncData::getFrameCursor()
 
 void SyncData::setFrameCursorTo(int position)
 {
-
     _mutex.lock();
 
-    //TODO: check the unsigned
-    //if((unsigned)position>=frames.size())	frameCursor =frames.size()-1;
-    //else if (position<0) frameCursor =0;
-    //else
-    _frameCursor=position;
+    // TODO: check the unsigned
+    // if((unsigned)position>=frames.size())	frameCursor =frames.size()-1;
+    // else if (position<0) frameCursor =0;
+    // else
+    _frameCursor = position;
 
     _mutex.unlock();
 }
@@ -297,20 +286,22 @@ void SyncData::setNumberOfAgents(int numberOfAgents)
     _mutex.unlock();
 }
 
-void SyncData::setInitialHeights(const QStringList& pedHeight)
+void SyncData::setInitialHeights(const QStringList & pedHeight)
 {
     _pedHeight.clear();
-    _pedHeight=pedHeight;
+    _pedHeight = pedHeight;
 }
 
 unsigned int SyncData::getSize()
 {
-    if(_frames.empty()) return 0;
-    else return _frames.size();
+    if(_frames.empty())
+        return 0;
+    else
+        return _frames.size();
 }
 
 
-//bool SyncData::writeToFile(char* fileName,int version){
+// bool SyncData::writeToFile(char* fileName,int version){
 //	ofstream myfile (fileName);
 //		if (myfile.is_open())
 //		{
@@ -332,7 +323,8 @@ unsigned int SyncData::getSize()
 //						if(!ok) {cerr<<"skipping size arguments" <<endl;continue;}
 //						double size= pedHeight[i+1].toDouble(&ok);
 //						if(!ok) {cerr<<"skipping size arguments" <<endl;continue;}
-//						myfile<<"<agentInfo ID=\""<<i<<" height=\""<<size<<"\" color =\"TBD\" "<<endl;
+//						myfile<<"<agentInfo ID=\""<<i<<" height=\""<<size<<"\" color =\"TBD\"
+//"<<endl;
 //			}
 //
 //			myfile << "</shape>"<<endl;
@@ -352,11 +344,13 @@ unsigned int SyncData::getSize()
 //
 //								}else if (version==2){
 ////									myfile <<"<agent ID=\""<<point->getIndex()<<"\"";
-////									myfile <<" xPos=\""<<1311.00<<" yPos=\""<<828.00<<" zPos=\""<<0.00<<"\"";
-////									myfile <<" agentOrientation =\""<<10<<"\"";
-////									myfile <<" xVel=\""<<1311.00<<" yVel=\""<<828.00<<" zVel=\""<<0.00<<"\"";
-////									myfile <<" diameterA=\""<<1311.00<<" diameterB=\""<<828.00<<"\"";
-////									myfile <<" ellipseOrientation=\""<<1311.00<<" ellipseColor=\""<<828.00<<"\"";
+////									myfile <<" xPos=\""<<1311.00<<" yPos=\""<<828.00<<"
+/// zPos=\""<<0.00<<"\""; /									myfile <<" agentOrientation
+///=\""<<10<<"\"";
+////									myfile <<" xVel=\""<<1311.00<<" yVel=\""<<828.00<<"
+/// zVel=\""<<0.00<<"\""; /									myfile <<" diameterA=\""<<1311.00<<"
+/// diameterB=\""<<828.00<<"\""; /									myfile <<"
+/// ellipseOrientation=\""<<1311.00<<" ellipseColor=\""<<828.00<<"\"";
 //
 //								}
 //							}

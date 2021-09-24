@@ -47,14 +47,13 @@
  *
  */
 
-#include <locale.h>
+#include "Log.h"
+#include "MainWindow.h"
 
 #include <QApplication>
 #include <QDir>
+#include <locale.h>
 #include <sstream>
-
-#include "Log.h"
-#include "MainWindow.h"
 
 // for compiling a standalone windows exe with VS
 #ifdef _MSC_VER
@@ -64,7 +63,8 @@
 #pragma comment(linker, "/SUBSYSTEM:CONSOLE")
 #endif
 #endif
-std::string ver_string(int a, int b, int c) {
+std::string ver_string(int a, int b, int c)
+{
     std::ostringstream ss;
     ss << a << '.' << b << '.' << c;
     return ss.str();
@@ -96,12 +96,12 @@ std::string true_cxx_ver =
     "";
 #endif
 
-int main(int argc, char *argv[]) {
+int main(int argc, char * argv[])
+{
     Log::Info("\n----\nJuPedSim - JPSvis\n");
     Log::Info("Current date   : %s %s", __DATE__, __TIME__);
     Log::Info("Version        : %s", JPSVIS_VERSION);
-    Log::Info("Compiler       : %s (%s)", true_cxx.c_str(),
-              true_cxx_ver.c_str());
+    Log::Info("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
     Log::Info("Commit hash    : %s", GIT_COMMIT_HASH);
     Log::Info("Commit date    : %s", GIT_COMMIT_DATE);
     Log::Info("Branch         : %s\n----\n", GIT_BRANCH);
@@ -115,8 +115,7 @@ int main(int argc, char *argv[]) {
     setlocale(LC_NUMERIC, "C");
 
     // force the application to first looks for privated libs
-    a.addLibraryPath(QApplication::applicationDirPath() + QDir::separator() +
-                     "lib");
+    a.addLibraryPath(QApplication::applicationDirPath() + QDir::separator() + "lib");
 
     MainWindow w;
     w.show();

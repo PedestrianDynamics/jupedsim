@@ -1,51 +1,49 @@
 /**
-* @headerfile travisto.h
-* @author   Ulrich Kemloh <kemlohulrich@gmail.com>
-* @version 0.1
-* Copyright (C) <2009-2010>
-*
-* @section LICENSE
-* This file is part of JuPedSim.
-*
-* JuPedSim is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* any later version.
-*
-* JuPedSim is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
-*
-* @section DESCRIPTION
-*
-* \brief main program class
-*
-*
-*
-*  Created on: 11.05.2009
-*
-*/
+ * @headerfile travisto.h
+ * @author   Ulrich Kemloh <kemlohulrich@gmail.com>
+ * @version 0.1
+ * Copyright (C) <2009-2010>
+ *
+ * @section LICENSE
+ * This file is part of JuPedSim.
+ *
+ * JuPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * JuPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @section DESCRIPTION
+ *
+ * \brief main program class
+ *
+ *
+ *
+ *  Created on: 11.05.2009
+ *
+ */
 
 #ifndef TRAVISTO_H
 #define TRAVISTO_H
 
+#include "ApplicationState.h"
+#include "myqtreeview.h"
 #include "ui_mainwindow.h"
 
+#include <QLabel>
 #include <QMainWindow>
 #include <QSettings>
 #include <QSplitter>
 #include <QStandardItem>
 #include <QTreeWidget>
-#include <QLabel>
-
 #include <vector>
-
-#include "myqtreeview.h"
-#include "ApplicationState.h"
 
 class vtkWindowToImageFilter;
 class SyncData;
@@ -71,24 +69,25 @@ extern bool extern_pedestrians_firstSet_visible;
 
 extern SyncData extern_trajectories_firstSet;
 
-//states if the datasets are loaded.
+// states if the datasets are loaded.
 extern bool extern_first_dataset_loaded;
 
-//states whether the loaded datasets are visible
+// states whether the loaded datasets are visible
 extern bool extern_first_dataset_visible;
 
 
-class MainWindow : public QMainWindow {
+class MainWindow : public QMainWindow
+{
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = 0);
+    MainWindow(QWidget * parent = 0);
     virtual ~MainWindow();
 
 
 public Q_SLOTS:
     /// NEW SLOTS
-    
+
     /// Open a trajectory file
     /// @return file could be opened successfully
     bool slotOpenFile();
@@ -105,7 +104,7 @@ public Q_SLOTS:
     /// display the help modus
     void slotHelpAbout();
 
-    ///quit the program
+    /// quit the program
     void slotExit();
 
     /// output an Error
@@ -121,7 +120,7 @@ public Q_SLOTS:
     void slotSetCameraPerspectiveToSideRotate();
     void slotSetCameraPerspectiveToVirtualAgent();
 
-    //controls visualisation
+    // controls visualisation
     void slotRecord();
     void slotReset();
     /// take a screenshot of the rendering window
@@ -129,7 +128,7 @@ public Q_SLOTS:
 
     /// update the status message
     void slotCurrentAction(QString msg);
-     void slotFrameNumber(unsigned long timems, unsigned long minFrame);
+    void slotFrameNumber(unsigned long timems, unsigned long minFrame);
     void slotRunningTime(unsigned long timems);
     void slotRenderingTime(int fps);
 
@@ -225,19 +224,19 @@ public Q_SLOTS:
     /// information include Time and number pedestrians left in the facility
     void slotShowOnScreenInfos();
 
-    ///show the detailed structure of the geometry
+    /// show the detailed structure of the geometry
     void slotShowGeometryStructure();
 
-    void slotOnGeometryItemChanged(QStandardItem *item);
+    void slotOnGeometryItemChanged(QStandardItem * item);
 
 private:
 Q_SIGNALS:
     void signal_controlSequence(QString);
 
 protected:
-    virtual void closeEvent(QCloseEvent* event);
-    void dragEnterEvent(QDragEnterEvent *event);
-    void dropEvent(QDropEvent *event);
+    virtual void closeEvent(QCloseEvent * event);
+    void dragEnterEvent(QDragEnterEvent * event);
+    void dropEvent(QDropEvent * event);
 
 private:
     void startReplay();
@@ -264,9 +263,9 @@ private:
     ///  groupID may be 2 or 3
     /// @return false if something went wrong.
 
-    bool addPedestrianGroup(int groupID, QString fileName="");
+    bool addPedestrianGroup(int groupID, QString fileName = "");
 
-    ///return true if at least one dataset was loaded
+    /// return true if at least one dataset was loaded
     bool anyDatasetLoaded();
 
     /// clear the corresponding dataset if it exists
@@ -287,15 +286,14 @@ private:
     bool frameSliderHold;
     int numberOfDatasetLoaded;
 
-    Settings* travistoOptions;
-    Visualisation* _visualisationThread;
-    QLabel *labelCurrentAction;
-    QLabel *labelFrameNumber;
-    QLabel *labelRecording;
+    Settings * travistoOptions;
+    Visualisation * _visualisationThread;
+    QLabel * labelCurrentAction;
+    QLabel * labelFrameNumber;
+    QLabel * labelRecording;
     QSplitter _splitter;
-    //QTreeWidget _geoStructure;
+    // QTreeWidget _geoStructure;
     MyQTreeView _geoStructure;
-
 };
 
 #endif // TRAVISTO_H

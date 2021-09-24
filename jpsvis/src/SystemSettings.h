@@ -1,34 +1,34 @@
 /**
-* @headerfile SystemSettings.h
-* @author   Ulrich Kemloh <kemlohulrich@gmail.com>
-* @version 0.1
-* Copyright (C) <2009-2010>
-*
-* @section LICENSE
-* This file is part of OpenPedSim.
-*
-* OpenPedSim is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* any later version.
-*
-* OpenPedSim is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
-*
-* @section DESCRIPTION
-*
-* \brief contains travisto global settings
-*
-*
-*
-*  Created on: 14.09.2009
-*
-*/
+ * @headerfile SystemSettings.h
+ * @author   Ulrich Kemloh <kemlohulrich@gmail.com>
+ * @version 0.1
+ * Copyright (C) <2009-2010>
+ *
+ * @section LICENSE
+ * This file is part of OpenPedSim.
+ *
+ * OpenPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * OpenPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @section DESCRIPTION
+ *
+ * \brief contains travisto global settings
+ *
+ *
+ *
+ *  Created on: 14.09.2009
+ *
+ */
 
 
 #ifndef SYSTEMSETTINGS_H_
@@ -38,7 +38,8 @@ class QString;
 class QColor;
 
 
-class SystemSettings {
+class SystemSettings
+{
 public:
     SystemSettings();
     virtual ~SystemSettings();
@@ -47,11 +48,11 @@ public:
     void static setShowLegend(bool legend);
     bool static getShowLegend();
 
-    //set/get the caption status
+    // set/get the caption status
     void static setShowAgentsCaptions(bool caption);
     bool static getShowAgentsCaptions();
 
-    //set/get the velocity status
+    // set/get the velocity status
     void static setShowDirections(bool direction);
     bool static getShowDirections();
 
@@ -87,11 +88,11 @@ public:
     void static setShowWalls(bool status);
     bool static getShowWalls();
 
-    //set/get the obstacles visibility
+    // set/get the obstacles visibility
     void static setShowObstacles(bool status);
     bool static getShowObstacles();
 
-    //set/get the gradient field visibility
+    // set/get the gradient field visibility
     void static setShowGradientField(bool status);
     bool static getShowGradientField();
 
@@ -104,28 +105,28 @@ public:
     void static setShowTrajectories(bool status);
     bool static getShowTrajectories();
 
-    void static setWorkingDirectory(const QString &dir);
-    void static getWorkingDirectory(QString& dir);
+    void static setWorkingDirectory(const QString & dir);
+    void static getWorkingDirectory(QString & dir);
 
     // set/get the gk color
     // todo done directly in the travisto.cpp
-    static const QColor& getBackgroundColor();
-    void static setBackgroundColor(const QColor &col);
+    static const QColor & getBackgroundColor();
+    void static setBackgroundColor(const QColor & col);
 
-    static const QColor& getFloorColor();
-    void static setFloorColor(const QColor &col);
+    static const QColor & getFloorColor();
+    void static setFloorColor(const QColor & col);
 
-    static const QColor& getWallsColor();
-    void static setWallsColor(const QColor &col);
+    static const QColor & getWallsColor();
+    void static setWallsColor(const QColor & col);
 
-    static const QColor& getExitsColor();
-    void static setExitsColor(const QColor &col);
+    static const QColor & getExitsColor();
+    void static setExitsColor(const QColor & col);
 
-    static const QColor& getNavLinesColor();
-    void static setNavLinesColor(const QColor &col);
+    static const QColor & getNavLinesColor();
+    void static setNavLinesColor(const QColor & col);
 
-    static const QColor& getObstacleColor();
-    void static setObstacleColor(const QColor &col);
+    static const QColor & getObstacleColor();
+    void static setObstacleColor(const QColor & col);
 
     /// set/get pedestrian private sphere ellipse resolution
     int static getEllipseResolution();
@@ -138,9 +139,9 @@ public:
 
     /// define the pedestrian trail count and type
     /// type =0, backwards, 1= symetric, 3=forward
-    //geometry= 0 point, polygones=1;
+    // geometry= 0 point, polygones=1;
     void static setTrailsInfo(int count, int type, int geometry);
-    void static getTrailsInfo(int* count, int *type, int *geometry);
+    void static getTrailsInfo(int * count, int * type, int * geometry);
 
     /// set the pedestrian colors
     void static setPedestrianColor(int groupID, int color[3]);
@@ -151,12 +152,12 @@ public:
     void static setPedestrianColorProfileFromFile(bool readFromFile);
     bool static getPedestrianColorProfileFromFile();
 
-    ///set/get the file directory. where travisto will output video/screenshots etc..
+    /// set/get the file directory. where travisto will output video/screenshots etc..
     void static setOutputDirectory(QString dir);
-    void static getOutputDirectory(QString& dir);
+    void static getOutputDirectory(QString & dir);
 
     /// set/get the caption size
-    //void static setPedestrianCaptionSize( int size);
+    // void static setPedestrianCaptionSize( int size);
     int static getPedestrianCaptionSize();
 
     /**
@@ -167,7 +168,11 @@ public:
      * @param orientation 0 is default, 1 is billboard
      * @param automaticRotation true if the captions should keep their original orientation
      */
-    void static setCaptionsParameters(int size, const QColor& Col, int orientation=0, bool automaticRotation=true);
+    void static setCaptionsParameters(
+        int size,
+        const QColor & Col,
+        int orientation        = 0,
+        bool automaticRotation = true);
 
     /**
      *
@@ -178,7 +183,11 @@ public:
      * @param orientation 0 is default, 1 is billboard
      * @param automaticRotation true if the captions should keep their original orientation
      */
-    void static getCaptionsParameters(int &size, QColor& Col, int &orientation, bool &automaticRotation);
+    void static getCaptionsParameters(
+        int & size,
+        QColor & Col,
+        int & orientation,
+        bool & automaticRotation);
 
     /// set/get the virtual reality agent id
     void static setVirtualAgent(int agent);
@@ -198,14 +207,13 @@ public:
 
     ///\brief get the video/picture prefix name.
     /// This is just the name of the input file.
-    static QString  getFilenamePrefix();
+    static QString getFilenamePrefix();
 
     static void CreateLogfile();
-    static QString &getLogfile();
+    static QString & getLogfile();
     static void DeleteLogfile();
 
 private:
-
     static bool recordPNGsequence;
     static bool pedColorProfileReadFromFile;
     static bool showLegend;

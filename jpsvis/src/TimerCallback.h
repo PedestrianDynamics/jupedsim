@@ -34,10 +34,10 @@
 #ifndef TIMERCALLBACK_H_
 #define TIMERCALLBACK_H_
 
+#include "SyncData.h"
+
 #include <iostream>
 #include <vtkCommand.h>
-
-#include "SyncData.h"
 
 #ifdef WIN32
 class vtkAVIWriter;
@@ -49,11 +49,12 @@ class vtkFFMPEGWriter;
 
 
 //#include <vtkGlyph3D.h>
-#include <vtkTensorGlyph.h>
-#include <vtkSmartPointer.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkLineSource.h>
 #include "trains/train.h"
+
+#include <vtkLineSource.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkSmartPointer.h>
+#include <vtkTensorGlyph.h>
 
 class SyncData;
 class QObject;
@@ -69,7 +70,7 @@ class vtkActor2D;
 class TrailPlotter;
 class PointPlotter;
 
-//extern variables
+// extern variables
 
 extern bool extern_force_system_update;
 extern bool extern_is_pause;
@@ -80,89 +81,86 @@ extern bool extern_launch_recording;
 extern bool extern_fullscreen_enable;
 extern bool extern_take_screenshot;
 
-extern Pedestrian** extern_pedestrians_firstSet;
+extern Pedestrian ** extern_pedestrians_firstSet;
 
-extern vtkActor2D* extern_pedestrians_labels;
-extern vtkTensorGlyph* extern_glyphs_pedestrians;
-extern vtkTensorGlyph* extern_glyphs_pedestrians_3D;
-extern vtkTensorGlyph* extern_glyphs_directions;
-extern vtkActor* extern_glyphs_pedestrians_actor_2D;
-extern vtkActor* extern_glyphs_pedestrians_actor_3D;
-extern vtkActor* extern_glyphs_directions_actor;
-extern PointPlotter* extern_trail_plotter;
+extern vtkActor2D * extern_pedestrians_labels;
+extern vtkTensorGlyph * extern_glyphs_pedestrians;
+extern vtkTensorGlyph * extern_glyphs_pedestrians_3D;
+extern vtkTensorGlyph * extern_glyphs_directions;
+extern vtkActor * extern_glyphs_pedestrians_actor_2D;
+extern vtkActor * extern_glyphs_pedestrians_actor_3D;
+extern vtkActor * extern_glyphs_directions_actor;
+extern PointPlotter * extern_trail_plotter;
 
 extern SyncData extern_trajectories_firstSet;
 
 extern SyncData mysphere;
-extern std::map<std::string, std::shared_ptr<TrainType> > extern_trainTypes;
-extern std::map<int, std::shared_ptr<TrainTimeTable> > extern_trainTimeTables;
-//states if the datasets are loaded.
+extern std::map<std::string, std::shared_ptr<TrainType>> extern_trainTypes;
+extern std::map<int, std::shared_ptr<TrainTimeTable>> extern_trainTimeTables;
+// states if the datasets are loaded.
 extern bool extern_first_dataset_loaded;
 
-//states whether the loaded datasets are visible
+// states whether the loaded datasets are visible
 extern bool extern_first_dataset_visible;
 
 
-
-class TimerCallback :public QObject, public vtkCommand {
-
+class TimerCallback : public QObject, public vtkCommand
+{
     Q_OBJECT
 
 private:
     int RenderTimerId;
-    vtkWindowToImageFilter* windowToImageFilter;
-    vtkPNGWriter *pngWriter;
-    vtkTextActor* runningTime;
+    vtkWindowToImageFilter * windowToImageFilter;
+    vtkPNGWriter * pngWriter;
+    vtkTextActor * runningTime;
     char runningTimeText[50];
 
 #ifdef WIN32
-    vtkAVIWriter* pAVIWriter;
+    vtkAVIWriter * pAVIWriter;
 #endif
 
 #ifdef __linux__
-    vtkFFMPEGWriter* pAVIWriter;
+    vtkFFMPEGWriter * pAVIWriter;
 #endif
 
 
-
 public:
-    static TimerCallback *New();
+    static TimerCallback * New();
 
-    virtual void Execute(vtkObject *caller, unsigned long eventId, void *callData);
+    virtual void Execute(vtkObject * caller, unsigned long eventId, void * callData);
 
     void SetRenderTimerId(int tid);
 
-    void setTextActor(vtkTextActor* runningTime);
-     // vtkSmartPointer<vtkActor> setTrainActor(
-     //      Point trainStart, Point trainEnd, std::vector<Point> doorPoints);
+    void setTextActor(vtkTextActor * runningTime);
+    // vtkSmartPointer<vtkActor> setTrainActor(
+    //      Point trainStart, Point trainEnd, std::vector<Point> doorPoints);
 
-     vtkSmartPointer<vtkPolyData> getTrainData(
-           Point trainStart, Point trainEnd, std::vector<Point> doorPoints, double elevation);
+    vtkSmartPointer<vtkPolyData>
+    getTrainData(Point trainStart, Point trainEnd, std::vector<Point> doorPoints, double elevation);
 
 
 private:
-    ///updates system global changes, like fullscreen, ffw and soone
-    void updateSettings(vtkRenderWindow* renderWindow);
+    /// updates system global changes, like fullscreen, ffw and soone
+    void updateSettings(vtkRenderWindow * renderWindow);
 
     /// make a png screenshot of the renderwindows
-    void takeScreenshot(vtkRenderWindow* renderWindow);
+    void takeScreenshot(vtkRenderWindow * renderWindow);
 
     /// take png screenshots sequence
-    void takeScreenshotSequence(vtkRenderWindow* renderWindow);
+    void takeScreenshotSequence(vtkRenderWindow * renderWindow);
 
     /// extract from the
-    void getTrail(int datasetID,int frameNumber);
+    void getTrail(int datasetID, int frameNumber);
 
-    ///update the virtual camera
-    void updateVirtualCamera(Frame* frame, vtkRenderer *renderer);
+    /// update the virtual camera
+    void updateVirtualCamera(Frame * frame, vtkRenderer * renderer);
 
 
 Q_SIGNALS:
     void signalStatusMessage(QString msg);
-     void signalFrameNumber(unsigned long timems, unsigned long minframe);
+    void signalFrameNumber(unsigned long timems, unsigned long minframe);
     void signalRunningTime(unsigned long timems);
     void signalRenderingTime(int fps);
-
 };
 
 
@@ -170,8 +168,8 @@ Q_SIGNALS:
  * A callback for windows changes
  */
 
-//class WindowCallback: public vtkCommand{
-//public:
+// class WindowCallback: public vtkCommand{
+// public:
 //	static WindowCallback *New();
 //	virtual void Execute(vtkObject *caller, unsigned long eventId, void *callData);
 //};

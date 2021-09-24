@@ -1,7 +1,3 @@
 #pragma once
 
-enum class ApplicationState {
-    NoData,
-    Paused,
-    Playing
-};
+enum class ApplicationState { NoData, Paused, Playing };
