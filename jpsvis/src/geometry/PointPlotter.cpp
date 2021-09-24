@@ -21,7 +21,7 @@
 
 #include "JPoint.h"
 #include "PointPlotter.h"
-#include "./src/SystemSettings.h"
+#include "../SystemSettings.h"
 
 
 #define VTK_CREATE(type, name) \

@@ -35,7 +35,7 @@
 #include "geometry/JPoint.h"
 #include "geometry/PointPlotter.h"
 #include "geometry/LinePlotter.h"
-#include "forms/Settings.h"
+#include "../forms/Settings.h"
 #include "SystemSettings.h"
 #include "TrajectoryPoint.h"
 #include "general/Macros.h"

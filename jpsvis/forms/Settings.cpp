@@ -36,7 +36,7 @@
 #include <QColorDialog>
 #include "../src/Log.h"
 #include "Settings.h"
-#include "./src/geometry/LinePlotter.h"
+#include "../src/geometry/LinePlotter.h"
 
 using namespace std;
 

@@ -33,7 +33,7 @@
 #include "MainWindow.h"
 #include "SaxParser.h"
 #include "SystemSettings.h"
-#include "./forms/Settings.h"
+#include "../forms/Settings.h"
 #include <sstream>
 
 

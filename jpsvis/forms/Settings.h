@@ -34,7 +34,7 @@
 
 #include <QWidget>
 #include "ui_settings.h"
-#include "./src/SystemSettings.h"
+#include "SystemSettings.h"
 
 extern bool extern_force_system_update;
 

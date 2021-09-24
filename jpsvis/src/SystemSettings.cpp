@@ -38,7 +38,7 @@
 #include "Log.h"
 #include "QDateTime"
 #include "IO/OutputHandler.h"
-#include "./forms/Settings.h"
+#include "../forms/Settings.h"
 
 bool SystemSettings::showLegend=false;
 bool SystemSettings::pedColorProfileReadFromFile=true;

@@ -43,7 +43,7 @@
 
 
 #include "JPoint.h"
-#include "./src/SystemSettings.h"
+#include "../SystemSettings.h"
 #include "LinePlotter.h"
 
 int LinePlotter::m_allLineWidth = 2;
