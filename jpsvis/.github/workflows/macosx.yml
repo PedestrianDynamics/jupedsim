@@ -10,6 +10,7 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os:   [macos-10.15, macos-11]
         vtk:  ['@8.2', ''] # '' means latest version, currently 9.0
