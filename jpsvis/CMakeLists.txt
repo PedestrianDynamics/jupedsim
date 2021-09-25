@@ -98,6 +98,7 @@ target_link_libraries(jpsvis PUBLIC
         Qt5::Core
         ${VTK_LIBRARIES}
         git-info
+        tinyxml
 )
 
 # vtk_module_autoinit is needed
@@ -111,6 +112,19 @@ endif()
 #**************************************************************
 # SOURCES                                                     *
 #**************************************************************
+add_library(tinyxml STATIC
+    src/tinyxml/tinystr.cpp
+    src/tinyxml/tinystr.h
+    src/tinyxml/tinyxml.cpp
+    src/tinyxml/tinyxml.h
+    src/tinyxml/tinyxmlerror.cpp
+    src/tinyxml/tinyxmlparser.cpp
+)
+
+target_include_directories(tinyxml PUBLIC
+    src/tinyxml
+)
+
 target_include_directories(jpsvis PUBLIC "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/forms" ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 set(SRCS
     forms/Settings.cpp
@@ -150,10 +164,6 @@ set(SRCS
     src/geometry/Wall.cpp
     src/main.cpp
     src/myqtreeview.cpp
-    src/tinyxml/tinystr.cpp
-    src/tinyxml/tinyxml.cpp
-    src/tinyxml/tinyxmlerror.cpp
-    src/tinyxml/tinyxmlparser.cpp
 )
 
 set(HDR
@@ -197,8 +207,6 @@ set(HDR
     src/geometry/Transition.h
     src/geometry/Wall.h
     src/myqtreeview.h
-    src/tinyxml/tinystr.h
-    src/tinyxml/tinyxml.h
     src/train.h
 )
 
