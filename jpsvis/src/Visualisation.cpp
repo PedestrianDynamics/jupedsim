@@ -523,12 +523,6 @@ void Visualisation::setCameraPerspective(int mode, int degree)
             _topViewCamera->Elevation(degree);
             break;
         case 4: { // agent virtual reality
-            // vtkCamera *camera = renderer->GetActiveCamera();
-            // camera->SetRoll(-90);
-            // std::cout <<"roll       [ "<< camera->GetRoll()<<" ]"<<std::endl;
-            // double roll=camera->GetRoll();
-            // camera->Roll(-90-camera->GetRoll());
-            // camera->Modified();
         }
 
         break;

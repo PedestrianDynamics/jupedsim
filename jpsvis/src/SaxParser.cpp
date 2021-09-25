@@ -41,10 +41,16 @@
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 
+#include <QCoreApplication>
+#include <QDebug>
+#include <QDir>
+#include <QEventLoop>
+#include <QFile>
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QPushButton>
 #include <QString>
+#include <QTextStream>
 #include <cmath>
 #include <iostream>
 #include <limits>
@@ -72,584 +78,6 @@
 
 #define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
-
-using namespace std;
-
-/**
- * constructor
- *
- * @param geo
- * @param data
- * @param par 0=fps, 1=agents
- * @param roomCaption
- * @return
- */
-SaxParser::SaxParser(GeometryFactory & geoFac, SyncData & dataset, double * fps) :
-    _geoFactory(geoFac), _dataset(dataset)
-{
-    _para             = fps;
-    _parsingWalls     = false;
-    _parsingCrossings = false;
-    _color            = 0.0;
-    _dataset.clearFrames();
-
-    _geometry =
-        std::shared_ptr<FacilityGeometry>(new FacilityGeometry("No name", "No name", "No name"));
-    _geoFactory.AddElement(-1, -1, _geometry);
-
-    // default header
-    InitHeader(0, 0, 0);
-}
-
-SaxParser::~SaxParser() {}
-
-bool SaxParser::startElement(
-    const QString & /* namespaceURI */,
-    const QString & /* localName */,
-    const QString & qName,
-    const QXmlAttributes & at)
-{
-    if(qName == "header") {
-        for(int i = 0; i < at.length(); i++) {
-            if(at.localName(i) == "version") {
-                QStringList query = at.value(i).split(".");
-                int major         = 0;
-                int minor         = 0;
-                int patch         = 0;
-                switch(query.size()) {
-                    case 1:
-                        major = query.at(0).toInt();
-                        break;
-                    case 2:
-                        major = query.at(0).toInt();
-                        minor = query.at(1).toInt();
-                        break;
-                    case 3:
-                        major = query.at(0).toInt();
-                        minor = query.at(1).toInt();
-                        patch = query.at(2).toInt();
-                        break;
-                }
-                InitHeader(major, minor, patch);
-            }
-        }
-    } else if(qName == "file") {
-        for(int i = 0; i < at.length(); i++) {
-            if(at.localName(i) == "location") {
-                QString fileName = at.value(i);
-                if(!fileName.isEmpty()) {
-                    if(fileName.endsWith(".xml", Qt::CaseInsensitive)) {
-                        // SaxParser::parseGeometryJPS(fileName,geometry);
-                    } else if(fileName.endsWith(".trav", Qt::CaseInsensitive)) {
-                        SaxParser::parseGeometryTRAV(fileName, _geoFactory);
-                    }
-                }
-            }
-        }
-    } else if(qName == "source") {
-        double xmin, xmax, ymin, ymax;
-        double z = 0; // @todo read this some when we go 3D
-
-        string source_id = "";
-        for(int i = 0; i < at.length(); i++) {
-            if(at.localName(i) == "id") {
-                source_id = at.value(i).toStdString();
-            } else if(at.localName(i) == "x_min") {
-                xmin = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "x_max") {
-                xmax = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "y_min") {
-                ymin = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "y_max") {
-                ymax = at.value(i).toDouble() * FAKTOR;
-            }
-        }
-        _geometry->addRectangle(xmin, ymin, xmax, ymax, 0, 120.0, 150.0, source_id);
-        //@todo: here z=0. What about sources in the 2 floor?
-    }
-
-    else if(qName == "goal") {
-        double xmin, xmax, ymin, ymax;
-        double z        = 0; // @todo read this some when we go 3D
-        QString caption = "";
-        for(int i = 0; i < at.length(); i++) {
-            if(at.localName(i) == "caption") {
-                caption = at.value(i);
-            } else if(at.localName(i) == "x_min") {
-                xmin = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "x_max") {
-                xmax = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "y_min") {
-                ymin = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "y_max") {
-                ymax = at.value(i).toDouble() * FAKTOR;
-            }
-        }
-        _geometry->addRectangle(xmin, ymin, xmax, ymax, z, 90.0, 90.0, caption.toStdString());
-    } // goal
-    else if(qName == "floor") {
-        double xMin = 0, xMax = 0, yMin = 0, yMax = 0;
-
-        for(int i = 0; i < at.length(); i++) {
-            if(at.localName(i) == "xMin") {
-                xMin = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "xMax") {
-                xMax = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "yMin") {
-                yMin = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "yMax") {
-                yMax = at.value(i).toDouble() * FAKTOR;
-            }
-        }
-        _geometry->addFloor(xMin, yMin, xMax, yMax);
-    } else if(qName == "cuboid") {
-        double length = 0, height = 0, width = 0, color = 0;
-        double center[3] = {0, 0, 0};
-
-        for(int i = 0; i < at.length(); i++) {
-            if(at.localName(i) == "centerX") {
-                center[0] = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "centerY") {
-                center[1] = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "centerZ") {
-                center[2] = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "length") {
-                length = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "height") {
-                height = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "width") {
-                width = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "color") {
-                color = at.value(i).toDouble() * FAKTOR;
-            }
-        }
-        _geometry->addObjectBox(center, height, width, length, color);
-
-    } else if(qName == "sphere") {
-        double radius = 0, color = 0;
-        double center[3] = {0, 0, 0};
-
-        for(int i = 0; i < at.length(); i++) {
-            if(at.localName(i) == "centerX") {
-                center[0] = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "centerY") {
-                center[1] = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "centerZ") {
-                center[2] = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "radius") {
-                radius = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "color") {
-                color = at.value(i).toDouble();
-            }
-        }
-        _geometry->addObjectSphere(center, radius, color);
-    } else if(qName == "label") {
-        double color     = 0;
-        double center[3] = {0, 0, 0};
-        QString text;
-
-        for(int i = 0; i < at.length(); i++) {
-            if(at.localName(i) == "centerX") {
-                center[0] = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "centerY") {
-                center[1] = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "centerZ") {
-                center[2] = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "text") {
-                text = at.value(i);
-            } else if(at.localName(i) == "color") {
-                color = at.value(i).toDouble();
-            }
-        }
-        _geometry->addObjectLabel(center, center, text.toStdString(), color);
-    } else if(qName == "cylinder") {
-        double height = 0, radius = 0, color = 0;
-        double center[3]   = {0, 0, 0};
-        double rotation[3] = {0, 0, 0};
-
-        for(int i = 0; i < at.length(); i++) {
-            if(at.localName(i) == "centerX") {
-                center[0] = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "centerY") {
-                center[1] = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "centerZ") {
-                center[2] = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "height") {
-                height = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "radius") {
-                radius = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "color") {
-                color = at.value(i).toDouble();
-            } else if(at.localName(i) == "angleX") {
-                rotation[0] = at.value(i).toDouble();
-            } else if(at.localName(i) == "angleY") {
-                rotation[1] = at.value(i).toDouble();
-            } else if(at.localName(i) == "angleZ") {
-                rotation[2] = at.value(i).toDouble();
-            }
-        }
-        _geometry->addObjectCylinder(center, radius, height, rotation, color);
-    } else if(qName == "agents") {
-    } else if(qName == "roomCaption") {
-    } else if(qName == "frameRate") {
-    } else if(qName == "geometry") {
-    } else if(qName == "gradient_field") {
-        for(int i = 0; i < at.length(); i++) {
-            if(at.localName(i) == "filename") {
-                ParseGradientFieldVTK(at.value(i), _geoFactory);
-            }
-        }
-
-    } else if(qName == "wall") {
-        _parsingWalls = true;
-        _thickness    = 15;
-        _height       = 250;
-        _color        = 0;
-        _caption      = "";
-
-        for(int i = 0; i < at.length(); i++) {
-            if(at.localName(i) == "thickness") {
-                _thickness = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "height") {
-                _height = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "color") {
-                _color = at.value(i).toDouble();
-            } else if(at.localName(i) == "caption") {
-                _caption = at.value(i);
-            }
-        }
-
-    } else if(qName == "door") {
-        _parsingWalls = false;
-        _thickness    = 15;
-        _height       = 250;
-        _color        = 255;
-        _caption      = "";
-
-        for(int i = 0; i < at.length(); i++) {
-            if(at.localName(i) == "thickness") {
-                _thickness = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "height") {
-                _height = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "color") {
-                _color = at.value(i).toDouble();
-            } else if(at.localName(i) == "caption") {
-                _caption = at.value(i);
-            }
-        }
-    }
-    //     <event time="9" type="door" state="open" id="0" caption="door0" />
-    // call void GeometryFactory::ChangeExitsColor(double* color)
-    // _geoFactory.ChangeExitsColor(Qt::red);
-
-    // FIXME
-    else if(qName == "crossing") {
-        _parsingWalls     = false;
-        _parsingCrossings = true;
-        _thickness        = 15;
-        _height           = 250;
-        _color            = 255;
-        _caption          = "";
-
-        for(int i = 0; i < at.length(); i++) {
-            if(at.localName(i) == "thickness") {
-                _thickness = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "height") {
-                _height = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "color") {
-                _color = at.value(i).toDouble();
-            } else if(at.localName(i) == "caption") {
-                _caption = at.value(i);
-            }
-        }
-    } else if(qName == "hline") {
-        _parsingWalls     = false;
-        _parsingCrossings = true;
-        _thickness        = 15;
-        _height           = 250;
-        _color            = 255;
-        _caption          = "";
-        QString room_id, subroom_id;
-
-        for(int i = 0; i < at.length(); i++) {
-            if(at.localName(i) == "thickness") {
-                _thickness = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "height") {
-                _height = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "color") {
-                _color = at.value(i).toDouble();
-            } else if(at.localName(i) == "caption") {
-                _caption = at.value(i);
-            } else if(at.localName(i) == "room_id") {
-                room_id = at.value(i);
-            } else if(at.localName(i) == "subroom_id") {
-                subroom_id = at.value(i);
-            }
-        }
-        _caption = room_id + ":" + subroom_id + ":" + _caption;
-
-    } else if(qName == "timeFirstFrame") {
-        /*unsigned long timeFirstFrame_us=0;
-          unsigned long timeFirstFrame_s=0;
-
-          for(int i=0; i<at.length(); i++) {
-          if(at.localName(i)=="microsec") {
-          timeFirstFrame_us=at.value(i).toULong();
-          } else if(at.localName(i)=="sec") {
-          timeFirstFrame_s=at.value(i).toULong();
-          }
-          }
-          dataset->setDelayAbsolute(timeFirstFrame_s,timeFirstFrame_us);
-        */
-    } else if(qName == "point") {
-        double xPos = 0;
-        double yPos = 0;
-        double zPos = 0;
-
-        for(int i = 0; i < at.length(); i++) {
-            if(at.localName(i) == "xPos") {
-                xPos = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "yPos") {
-                yPos = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == "zPos") {
-                zPos = at.value(i).toDouble() * FAKTOR;
-            }
-        }
-        double CHT[3] = {_color, _height, _thickness};
-        JPoint * pt   = new JPoint(xPos, yPos, zPos);
-        pt->setColorHeightThicknes(CHT);
-        _currentPointsList.push_back(pt);
-
-    } else if(qName == "frame") {
-        for(int i = 0; i < at.length(); i++) {
-            if(at.localName(i) == "ID") {
-                _currentFrameID = at.value(i).toInt();
-            }
-        }
-
-    } else if(qName == "agent") {
-        int id      = 0;
-        double xPos = 0;
-        double yPos = 0;
-        double zPos = 0;
-        // double agent_color =std::numeric_limits<double>::quiet_NaN();
-        // double xVel=std::numeric_limits<double>::quiet_NaN();
-        // double yVel=std::numeric_limits<double>::quiet_NaN();
-        // double zVel=std::numeric_limits<double>::quiet_NaN();
-        double dia_a    = std::numeric_limits<double>::quiet_NaN();
-        double dia_b    = std::numeric_limits<double>::quiet_NaN();
-        double el_angle = std::numeric_limits<double>::quiet_NaN();
-        double el_color = std::numeric_limits<double>::quiet_NaN();
-        double el_x     = std::numeric_limits<double>::quiet_NaN();
-        double el_y     = std::numeric_limits<double>::quiet_NaN();
-        double el_z     = std::numeric_limits<double>::quiet_NaN();
-
-        for(int i = 0; i < at.length(); i++) {
-            if(at.localName(i) == "ID") {
-                id = at.value(i).toInt();
-                // TODO: maybe you should change ur format to take the ID 0 as first valid ID.
-                if(id == 0) {
-                    // slotErrorOutput("Person with ID=0 detected. ID should start with 1 !");
-                    return false;
-                }
-            } else if(at.localName(i) == _jps_xPos) {
-                xPos = at.value(i).toDouble() * FAKTOR;
-                // xPos=at.value(i).toDouble();
-            } else if(at.localName(i) == _jps_yPos) {
-                // yPos=at.value(i).toDouble();
-                yPos = at.value(i).toDouble() * FAKTOR;
-            } else if(at.localName(i) == _jps_zPos) {
-                zPos = at.value(i).toDouble() * FAKTOR;
-            }
-
-            else if(at.localName(i) == _jps_radiusA) {
-                dia_a = at.value(i).toDouble() * FAKTOR;
-                // dia_a=at.value(i).toDouble();
-            } else if(at.localName(i) == _jps_radiusB) {
-                dia_b = at.value(i).toDouble() * FAKTOR;
-                // dia_b=at.value(i).toDouble();
-            } else if(at.localName(i) == _jps_ellipseOrientation) {
-                el_angle = at.value(i).toDouble();
-            } else if(at.localName(i) == _jps_ellipseColor) {
-                el_color = at.value(i).toDouble();
-            } else if(at.localName(i) == "agentColor") {
-                // agent_color=at.value(i).toDouble();
-            } else if(at.localName(i) == _jps_xVel) {
-                // xVel=at.value(i).toDouble()*FAKTOR;
-            } else if(at.localName(i) == _jps_yVel) {
-                // yVel=at.value(i).toDouble()*FAKTOR;
-            } else if(at.localName(i) == _jps_zVel) {
-                // zVel=at.value(i).toDouble()*FAKTOR;
-            }
-        }
-        //        xml2txt
-
-        double pos[3]    = {xPos, yPos, zPos};
-        double angle[3]  = {0, 0, el_angle};
-        double radius[3] = {dia_a, dia_b, 30.0};
-
-        FrameElement * element = new FrameElement(id - 1);
-        element->SetPos(pos);
-        element->SetOrientation(angle);
-        element->SetRadius(radius);
-        element->SetColor(el_color);
-        _currentFrame.push_back(element);
-
-    } else if(qName == "agentInfo") {
-        double height = std::numeric_limits<double>::quiet_NaN();
-        double color  = std::numeric_limits<double>::quiet_NaN();
-        double id     = std::numeric_limits<double>::quiet_NaN();
-
-        for(int i = 0; i < at.length(); i++) {
-            if(at.localName(i) == "ID") {
-                id = at.value(i).toDouble();
-            }
-            if(at.localName(i) == "height") {
-                height = at.value(i).toDouble() * FAKTOR;
-            }
-            if(at.localName(i) == "color") {
-                color = at.value(i).toDouble();
-            }
-        }
-        if(std::isnan(id))
-            return true;
-
-        if(!std::isnan(height)) {
-            _initialPedestriansHeights.append(QString::number(int(id)));
-            _initialPedestriansHeights.append(QString::number(height));
-        }
-        if(!std::isnan(color)) {
-            _initialPedestriansColors.append(QString::number(int(id)));
-            _initialPedestriansColors.append(QString::number(int(color)));
-        }
-    }
-    return true;
-}
-
-bool SaxParser::characters(const QString & str)
-{
-    _currentText.append(str);
-    return true;
-}
-
-bool SaxParser::endElement(
-    const QString & /* namespaceURI */,
-    const QString & /* localName */,
-    const QString & qName)
-{
-    if(qName == "header") {
-    } else if(qName == "agents") {
-        _dataset.setNumberOfAgents(_currentText.toInt());
-    } else if(qName == "frameRate") {
-        _para[0] = _currentText.toFloat();
-    } else if(qName == "wall") {
-        if(_currentPointsList.size() > 1)
-            for(unsigned int i = 0; i < _currentPointsList.size() - 1; i++) {
-                _geometry->addWall(
-                    _currentPointsList[i], _currentPointsList[i + 1], _caption.toStdString());
-            }
-        clearPoints();
-    } else if(qName == "door") {
-        for(unsigned int i = 0; i < _currentPointsList.size() - 1; i++) {
-            _geometry->addDoor(
-                _currentPointsList[i], _currentPointsList[i + 1], _caption.toStdString());
-        }
-        clearPoints();
-    } else if(qName == "crossing") {
-        if(_currentPointsList.size() > 1) // hack
-            for(unsigned int i = 0; i < _currentPointsList.size() - 1; i++) {
-                _geometry->addNavLine(
-                    _currentPointsList[i], _currentPointsList[i + 1], _caption.toStdString());
-            }
-        clearPoints();
-    } else if(qName == "hline") {
-        if(_currentPointsList.size() > 1) {
-            for(unsigned int i = 0; i < _currentPointsList.size() - 1; i++) {
-                int room_id     = -1;
-                int subroom_id  = -1;
-                QStringList lst = _caption.split(":");
-                if(lst.length() > 2) {
-                    room_id    = lst[0].toInt();
-                    subroom_id = lst[1].toInt();
-                    _caption   = lst[2];
-                }
-                auto && geo = _geoFactory.GetElement(room_id, subroom_id);
-                if(geo != nullptr) {
-                    geo->addNavLine(
-                        _currentPointsList[i], _currentPointsList[i + 1], _caption.toStdString());
-                } else {
-                    _geometry->addNavLine(
-                        _currentPointsList[i], _currentPointsList[i + 1], _caption.toStdString());
-                }
-            }
-        }
-        clearPoints();
-    } else if(qName == "step") { // FIXME
-        for(unsigned int i = 0; i < _currentPointsList.size() - 1; i++) {
-            _geometry->addDoor(
-                _currentPointsList[i], _currentPointsList[i + 1], _caption.toStdString());
-        }
-        clearPoints();
-    } else if(qName == "frame") {
-        Frame * frame = new Frame(_currentFrameID);
-        while(!_currentFrame.empty()) {
-            frame->addElement(_currentFrame.back());
-            _currentFrame.pop_back();
-        }
-
-        // compute the polydata, might increase the runtime
-        frame->ComputePolyData();
-
-        _dataset.addFrame(frame);
-        // to be on the safe side
-        _currentFrame.clear();
-
-    } else if(qName == "agent") {
-    } else if(qName == "geometry") {
-    } else if(qName == "point") {
-    } else if(qName == "shape") {
-        _dataset.setInitialHeights(_initialPedestriansHeights);
-        _dataset.setInitialColors(_initialPedestriansColors);
-    } else if(qName == "gradient_field") {
-    }
-    _currentText.clear();
-    return true;
-}
-
-bool SaxParser::fatalError(const QXmlParseException & exception)
-{
-    QMessageBox::warning(
-        0,
-        QObject::tr("SAX Handler"),
-        QObject::tr("Parse error at line %1, column "
-                    "%2:\n%3.")
-            .arg(exception.lineNumber())
-            .arg(exception.columnNumber())
-            .arg(exception.message()));
-    return false;
-}
-
-bool SaxParser::attributeDecl(
-    const QString & eName,
-    const QString & aName,
-    const QString & type,
-    const QString & valueDefault,
-    const QString & value)
-{
-    QString dummy = eName + aName + type + valueDefault + value;
-    return (dummy == dummy);
-    // return true;
-}
-
-void SaxParser::clearPoints()
-{
-    while(!_currentPointsList.empty()) {
-        delete _currentPointsList.back();
-        _currentPointsList.pop_back();
-    }
-    _currentPointsList.clear();
-    return;
-}
 double SaxParser::GetElevation(QString geometryFile, int roomId, int subroomId)
 {
     double C_z;
@@ -720,10 +148,8 @@ std::tuple<Point, Point> SaxParser::GetTrackStartEnd(QString geometryFile, int t
         geometryFile = wd + QDir::separator() + s;
     }
 
-    // QString = QDir::cleanPath(wd + QDir::separator() + fileName);
     Log::Info("filename: <%s)", geometryFile.toStdString().c_str());
     Log::Info("wd: <%s>", wd.toStdString().c_str());
-
 
     std::vector<Point> end_points;
     Point start_point(0, 0);
@@ -817,11 +243,10 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory & geoFac)
         fileName  = wd + QDir::separator() + s;
     }
 
-    // QString = QDir::cleanPath(wd + QDir::separator() + fileName);
     Log::Info("filename: <%s)", fileName.toStdString().c_str());
     Log::Info("wd: <%s>", wd.toStdString().c_str());
-    Building * building = new Building();
-    string geometrypath = fileName.toStdString();
+    Building * building      = new Building();
+    std::string geometrypath = fileName.toStdString();
     building->SetProjectRootDir(wd.toStdString());
 
     // read the geometry
@@ -836,11 +261,11 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory & geoFac)
         room_id++;
         for(auto && itr_subroom : itr_room.second->GetAllSubRooms()) {
             subroom_id++;
-            string room_caption = itr_room.second->GetCaption() + "_RId_" +
-                                  QString::number(itr_room.first).toStdString();
-            string subroom_caption = itr_subroom.second->GetCaption() + "_RId_" +
-                                     QString::number(itr_room.first).toStdString();
-            auto geometry = shared_ptr<FacilityGeometry>(
+            std::string room_caption = itr_room.second->GetCaption() + "_RId_" +
+                                       QString::number(itr_room.first).toStdString();
+            std::string subroom_caption = itr_subroom.second->GetCaption() + "_RId_" +
+                                          QString::number(itr_room.first).toStdString();
+            auto geometry = std::shared_ptr<FacilityGeometry>(
                 new FacilityGeometry(itr_subroom.second->GetType(), room_caption, subroom_caption));
 
             int currentFloorPolyID = 0;
@@ -853,10 +278,9 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory & geoFac)
             VTK_CREATE(vtkCellArray, floor_polygons);
             VTK_CREATE(vtkCellArray, obstacles_polygons);
 
-            // string caption = r->GetCaption();
             SubRoom * sub = itr_subroom.second.get();
 
-            vector<Point> poly = sub->GetPolygon();
+            std::vector<Point> poly = sub->GetPolygon();
             if(sub->IsClockwise() == true) {
                 std::reverse(poly.begin(), poly.end());
             }
@@ -873,7 +297,7 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory & geoFac)
             floor_polygons->InsertNextCell(polygon);
 
             // plot the walls only for not stairs
-            const vector<Wall> & walls = sub->GetAllWalls();
+            const std::vector<Wall> & walls = sub->GetAllWalls();
             for(unsigned int w = 0; w < walls.size(); w++) {
                 Point p1  = walls[w].GetPoint1();
                 Point p2  = walls[w].GetPoint2();
@@ -900,8 +324,8 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory & geoFac)
             }
 
             // insert the subroom caption
-            string caption = itr_room.second->GetCaption() + " ( " +
-                             QString::number(sub->GetSubRoomID()).toStdString() + " ) ";
+            std::string caption = itr_room.second->GetCaption() + " ( " +
+                                  QString::number(sub->GetSubRoomID()).toStdString() + " ) ";
             const Point & p = sub->GetCentroid();
             double z        = sub->GetElevation(p);
             double pos[3]   = {p._x * FAKTOR, p._y * FAKTOR, z * FAKTOR};
@@ -930,10 +354,6 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory & geoFac)
 
                 // add a special texture to the obstacles
                 auto poly = obst->GetPolygon();
-                // if(obst->IsClockwise()==true) {
-                //  std::reverse(poly.begin(),poly.end());
-                //}
-
                 // Create the polygon
                 VTK_CREATE(vtkPolygon, polygon);
                 polygon->GetPointIds()->SetNumberOfIds(poly.size());
@@ -1040,7 +460,7 @@ void SaxParser::parseGeometryTRAV(QString content, GeometryFactory & geoFac, QDo
     QDomDocument doc("");
     QDomNode geoNode;
     auto geometry =
-        shared_ptr<FacilityGeometry>(new FacilityGeometry("no name", "no name", "no name"));
+        std::shared_ptr<FacilityGeometry>(new FacilityGeometry("no name", "no name", "no name"));
 
     // first try to open the file
     if(content.endsWith(".trav", Qt::CaseInsensitive)) {
@@ -1052,7 +472,6 @@ void SaxParser::parseGeometryTRAV(QString content, GeometryFactory & geoFac, QDo
         QString * errorCode = new QString();
         if(!doc.setContent(&file, errorCode)) {
             file.close();
-            // slotErrorOutput(*errorCode);
             Log::Error("error code: <%s>", errorCode->toStdString().c_str());
             return;
         }
@@ -1137,7 +556,6 @@ void SaxParser::parseGeometryTRAV(QString content, GeometryFactory & geoFac, QDo
                 // get the points defining each wall
                 // not that a wall is not necesarily defined by two points, could be more...
                 QDomNodeList points = el.elementsByTagName("point");
-                // Debug::Messages("found:  " << points.length() <<" for this wall" <<endl;
                 for(int i = 0; i < points.length() - 1; i++) {
                     double x1 =
                         points.item(i).toElement().attribute("xPos", "0").toDouble() * FAKTOR;
@@ -1165,8 +583,6 @@ void SaxParser::parseGeometryTRAV(QString content, GeometryFactory & geoFac, QDo
             double color = spheres.item(i).toElement().attribute("color", "0").toDouble() * FAKTOR;
             double radius =
                 spheres.item(i).toElement().attribute("radius", "0").toDouble() * FAKTOR;
-            // double width = spheres.item(i).toElement().attribute("width", "0").toDouble();
-            // double height= spheres.item(i).toElement().attribute("height", "0").toDouble();
 
             geometry->addObjectSphere(center, radius, color);
         }
@@ -1183,8 +599,6 @@ void SaxParser::parseGeometryTRAV(QString content, GeometryFactory & geoFac, QDo
             double height =
                 cuboids.item(i).toElement().attribute("height", "0").toDouble() * FAKTOR;
             geometry->addObjectBox(center, height, width, length, color);
-            //		Debug::Error("cuboids: "<<length<<" || " <<width << " || "<<height<<" ||
-            //"<<color<<endl;
         }
         // floors
         for(int i = 0; i < floors.length(); i++) {
@@ -1219,7 +633,7 @@ void SaxParser::parseGeometryTRAV(QString content, GeometryFactory & geoFac, QDo
             center[1]    = labels.item(i).toElement().attribute("centerY", "0").toDouble() * FAKTOR;
             center[2]    = labels.item(i).toElement().attribute("centerZ", "0").toDouble() * FAKTOR;
             double color = labels.item(i).toElement().attribute("color", "0").toDouble();
-            string caption = labels.item(i).toElement().attribute("text", "").toStdString();
+            std::string caption = labels.item(i).toElement().attribute("text", "").toStdString();
             geometry->addObjectLabel(center, center, caption, color);
         }
         // you should normally have only one geometry node, but one never knows...
@@ -1266,65 +680,8 @@ QString SaxParser::extractGeometryFilename(QString & filename)
         }
     }
 
-    // maybe this is already the geometry file itself ?
-    // do a rapid test
-    //    FacilityGeometry* geo = new FacilityGeometry();
-    //    QFileInfo fileInfoGeometry(filename);
-    //    extracted_geo_name=fileInfoGeometry.fileName();
-
-    //    //just check if it starts with geometry
-    //    //if(parseGeometryJPS(extracted_geo_name,geo)==true)
-    //    //{
-    //        return extracted_geo_name;
-    //    //}
-    //    delete geo;
-
     return "";
 }
-// not used yet!!
-bool SaxParser::getSourcesTXT(QString & filename)
-{
-    Log::Info("Enter getSourcesTXT with %s\n", filename.toStdString().c_str());
-
-    std::string sfilename = filename.toStdString();
-    TiXmlDocument docSource(sfilename);
-    if(!docSource.LoadFile()) {
-        Log::Error("%s", docSource.ErrorDesc());
-        Log::Error("could not parse the sources file.");
-        return false;
-    }
-
-    TiXmlElement * xRootNodeSource = docSource.RootElement();
-    if(!xRootNodeSource) {
-        Log::Error("Root element does not exist in source file.");
-        return false;
-    }
-    if(xRootNodeSource->ValueStr() != "JPScore") {
-        Log::Error("Root element value in source file is not 'JPScore'.");
-        return false;
-    }
-    TiXmlNode * xSourceF = xRootNodeSource->FirstChild("agents_sources");
-    if(!xSourceF) {
-        Log::Error("No agents_sources tag in file not found.");
-        return false;
-    }
-    Log::Info("Loading sources from file");
-    TiXmlNode * xSourceNodeF = xSourceF->FirstChild("source");
-    if(xSourceNodeF) {
-        for(TiXmlElement * e = xSourceF->FirstChildElement("source"); e;
-            e                = e->NextSiblingElement("source")) {
-            float xmin    = xmltof(e->Attribute("x_min"), 0);
-            float xmax    = xmltof(e->Attribute("x_max"), 0);
-            float ymin    = xmltof(e->Attribute("y_min"), 0);
-            float ymax    = xmltof(e->Attribute("y_max"), 0);
-            bool dont_add = (xmin == 0) && (xmax == 0) && (ymin == 0) && (ymax == 0);
-            // if(! dont_add)
-            // _geometry->addSource(xmin,ymin,xmax,ymax);
-        } // for
-    }
-    return true;
-}
-
 
 QString SaxParser::extractSourceFileTXT(QString & filename)
 {
@@ -1484,7 +841,8 @@ void SaxParser::parseGeometryXMLV04(QString filename, GeometryFactory & geoFac)
         return;
     }
 
-    auto geo = shared_ptr<FacilityGeometry>(new FacilityGeometry("no name", "no name", "no name"));
+    auto geo =
+        std::shared_ptr<FacilityGeometry>(new FacilityGeometry("no name", "no name", "no name"));
 
     // TODO: check if you can parse this with the building classes.
     // This should be a fall back option
@@ -1508,7 +866,7 @@ void SaxParser::parseGeometryXMLV04(QString filename, GeometryFactory & geoFac)
 
     double version = root.attribute("version", "-1").toDouble();
 
-    string unit        = root.attribute("unit", "cm").toStdString();
+    std::string unit   = root.attribute("unit", "cm").toStdString();
     double xToCmfactor = 100;
     if(unit == "cm")
         xToCmfactor = 1;
@@ -1565,10 +923,11 @@ void SaxParser::parseGeometryXMLV04(QString filename, GeometryFactory & geoFac)
         }
 
         // add the caption
-        string roomCaption =
+        std::string roomCaption =
             xSubRoomsNodeList.item(i).parentNode().toElement().attribute("caption").toStdString();
-        string subroomCaption = xSubRoomsNodeList.item(i).toElement().attribute("id").toStdString();
-        string caption        = roomCaption + " ( " + subroomCaption + " ) ";
+        std::string subroomCaption =
+            xSubRoomsNodeList.item(i).toElement().attribute("id").toStdString();
+        std::string caption = roomCaption + " ( " + subroomCaption + " ) ";
         position[0] /= pos_count;
         position[1] /= pos_count;
         position[2] /= pos_count;
@@ -1657,7 +1016,7 @@ void SaxParser::parseGeometryXMLV04(QString filename, GeometryFactory & geoFac)
         double z2 = xVertices.item(1).toElement().attribute("pz", "0").toDouble() * xToCmfactor;
         geo->addDoor(x1, y1, z1, x2, y2, z2, thickness, height, color);
 
-        string id        = xTransition.attribute("id", "-1").toStdString();
+        std::string id   = xTransition.attribute("id", "-1").toStdString();
         double center[3] = {(x1 + x2) / 2.0, (y1 + y2) / 2.0, (z2 + z1) / 2.0};
         geo->addObjectLabel(center, center, id, 21);
     }
@@ -1678,10 +1037,7 @@ bool SaxParser::ParseTxtFormat(const QString & fileName, SyncData * dataset, dou
         // initialize the process dialog
         QProgressDialog progressDialog("Simulation", "Cancel", 1, maxFrame, NULL);
         progressDialog.setModal(true);
-        //_progressDialog->setStyleSheet(stylesheet);
         progressDialog.setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
-        //_progressDialog->setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint |
-        // Qt::WindowTitleHint|Qt::WindowStaysOnTopHint);
         progressDialog.setFixedSize(400, 100);
         progressDialog.setLabelText("<h3>Loading...</h3>");
         QList<QPushButton *> buttons = progressDialog.findChildren<QPushButton *>();
@@ -1724,10 +1080,6 @@ bool SaxParser::ParseTxtFormat(const QString & fileName, SyncData * dataset, dou
                         minFrame = frameID;
                         once     = 0;
                     }
-
-
-                    // todo: for some reason when trajectories start
-                    // with frames bigger than 0, display is not correct
 
                     pos[0] = pieces[2].toDouble() * unitFactor;
                     pos[1] = pieces[3].toDouble() * unitFactor;
@@ -1810,74 +1162,6 @@ bool SaxParser::ParseTxtFormat(const QString & fileName, SyncData * dataset, dou
     }
     return true;
 }
-
-bool SaxParser::ParseGradientFieldVTK(QString fileName, GeometryFactory & geoFac)
-{
-    if(QFileInfo(fileName).isRelative()) {
-        QString wd;
-        SystemSettings::getWorkingDirectory(wd);
-        fileName = wd + "/" + fileName;
-    }
-
-    Log::Info("Opening the gradient field: %s", fileName.toStdString().c_str());
-    // Read the file
-    VTK_CREATE(vtkStructuredPointsReader, reader);
-    reader->SetFileName(fileName.toStdString().c_str());
-    reader->Update();
-    reader->SetLookupTableName("LOOKUP_TABLE default");
-
-    VTK_CREATE(vtkImageDataGeometryFilter, geometryFilter);
-    geometryFilter->SetInputConnection(reader->GetOutputPort());
-    geometryFilter->Update();
-
-    VTK_CREATE(vtkPolyDataMapper, mapper);
-    mapper->SetInputConnection(geometryFilter->GetOutputPort());
-
-    VTK_CREATE(vtkActor, actor);
-    actor->SetMapper(mapper);
-    // conversion from m to cm
-    actor->SetScale(100);
-
-    auto gradient_field =
-        shared_ptr<FacilityGeometry>(new FacilityGeometry("Gradient Field", "no name", "no name"));
-    gradient_field->addGradientField(actor);
-
-    geoFac.AddElement(-1, -1, gradient_field);
-    geoFac.AddElement(-2, -2, gradient_field);
-    return true;
-}
-
-void SaxParser::InitHeader(int major, int minor, int patch)
-{
-    if((minor == 6) || (minor == 5 && patch == 1)) {
-        _jps_xPos               = QString("x");
-        _jps_yPos               = QString("y");
-        _jps_zPos               = QString("z");
-        _jps_xVel               = QString("xV");
-        _jps_yVel               = QString("yV");
-        _jps_zVel               = QString("zV");
-        _jps_radiusA            = QString("rA");
-        _jps_radiusB            = QString("rB");
-        _jps_ellipseOrientation = QString("eO");
-        _jps_ellipseColor       = QString("eC");
-    } else {
-        _jps_xPos               = QString("xPos");
-        _jps_yPos               = QString("yPos");
-        _jps_zPos               = QString("zPos");
-        _jps_xVel               = QString("xVel");
-        _jps_yVel               = QString("yVel");
-        _jps_zVel               = QString("zVel");
-        _jps_radiusA            = QString("radiusA");
-        _jps_radiusB            = QString("radiusB");
-        _jps_ellipseOrientation = QString("ellipseOrientation");
-        _jps_ellipseColor       = QString("ellipseColor");
-    }
-    if(major != 0) {
-        Log::Info("unsupported header version: %d.%d.%d\n", major, minor, patch);
-        exit(EXIT_FAILURE);
-    }
-}
-
 
 bool SaxParser::LoadTrainTimetable(
     std::string Filename,
@@ -1981,7 +1265,6 @@ std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement 
     Log::Info("   train_offset: %.2f", train_offset);
     Log::Info("   arrival_time: %.2f", arrival_time);
     Log::Info("departure_time: %.2f", departure_time);
-    // Debug::Info("Reversed: {}", reversed);
     std::shared_ptr<TrainTimeTable> trainTimeTab = std::make_shared<TrainTimeTable>(TrainTimeTable{
         id,
         type,

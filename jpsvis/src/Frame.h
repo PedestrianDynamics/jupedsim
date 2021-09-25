@@ -28,9 +28,7 @@
  *  Created on: 10.07.2009
  *
  */
-
-#ifndef Frame_H_
-#define Frame_H_
+#pragma once
 
 #include <vector>
 
@@ -66,8 +64,6 @@ public:
     /// reset the position of the cursor for reading the data
     void resetCursor();
 
-    // vtkPolyData *GetSclarData();
-
     /// return the 3D polydata set
     vtkPolyData * GetPolyData3D();
 
@@ -99,5 +95,3 @@ private:
     // the frame id
     int _id;
 };
-
-#endif /* Frame_H_ */

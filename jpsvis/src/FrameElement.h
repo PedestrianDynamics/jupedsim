@@ -21,15 +21,8 @@
  * along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * @section DESCRIPTION
- *
- * \brief
- *
- *
  */
-
-
-#ifndef FRAME_ELEMENT_H_
-#define FRAME_ELEMENT_H_
+#pragma once
 
 class FrameElement
 {
@@ -43,7 +36,6 @@ public:
     int GetId();
     void SetMinFrame(int minframe);
     int GetMinFrame();
-
 
     /// set/get the position of the point/agent
     void GetPos(double pos[3]);
@@ -70,5 +62,3 @@ private:
     double _color;
     int _minFrame;
 };
-
-#endif /* FRAME_ELEMENT_H_ */

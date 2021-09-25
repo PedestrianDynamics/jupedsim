@@ -24,10 +24,7 @@
  *
  *
  **/
-
-
-#ifndef _LINE_H
-#define _LINE_H
+#pragma once
 
 #include "../IO/OutputHandler.h"
 #include "Point.h"
@@ -254,5 +251,3 @@ public:
      */
     Line Enlarge(double d) const;
 };
-
-#endif /* _LINE_H */

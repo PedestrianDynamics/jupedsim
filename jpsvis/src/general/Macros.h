@@ -25,10 +25,7 @@
  *
  *
  **/
-
-
-#ifndef _MACROS_H
-#define _MACROS_H
+#pragma once
 
 #include <algorithm>
 #include <cstdlib>
@@ -278,5 +275,3 @@ inline void _printDebugLine(const std::string & fileName, int lineNumber)
 #define dtrace(...) ((void) 0)
 #define derror(...) (fprintf(stderr, __VA_ARGS__))
 #endif /* TRACE_LOGGING */
-
-#endif /* _MACROS_H */

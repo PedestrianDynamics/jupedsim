@@ -24,10 +24,7 @@
  *
  *
  **/
-
-
-#ifndef _CROSSING_H
-#define _CROSSING_H
+#pragma once
 
 #include "Hline.h"
 #include "NavLine.h"
@@ -116,5 +113,3 @@ public:
      */
     virtual std::string GetDescription() const;
 };
-
-#endif /* _CROSSING_H */

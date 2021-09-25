@@ -29,9 +29,7 @@
  *  Created on: 11.05.2009
  *
  */
-
-#ifndef TRAVISTO_H
-#define TRAVISTO_H
+#pragma once
 
 #include "ApplicationState.h"
 #include "myqtreeview.h"
@@ -246,7 +244,6 @@ private:
     void startRendering();
     void stopRendering();
 
-
     /// load settings in the case the remember settings is checked.
     void loadAllSettings();
 
@@ -262,7 +259,6 @@ private:
     /// add a second/third dataset to the visualization data
     ///  groupID may be 2 or 3
     /// @return false if something went wrong.
-
     bool addPedestrianGroup(int groupID, QString fileName = "");
 
     /// return true if at least one dataset was loaded
@@ -295,5 +291,3 @@ private:
     // QTreeWidget _geoStructure;
     MyQTreeView _geoStructure;
 };
-
-#endif // TRAVISTO_H

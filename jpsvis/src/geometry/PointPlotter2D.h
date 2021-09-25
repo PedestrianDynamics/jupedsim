@@ -28,9 +28,7 @@
  *  Created on: 07.05.2009
  *
  */
-#ifndef MY_VTK_POINT_PLOTTER_H
-#define MY_VTK_POINT_PLOTTER_H
-
+#pragma once
 
 class vtkPoints;
 class vtkUnsignedCharArray;
@@ -61,5 +59,3 @@ private:
     double pt_radius;
     int pt_res;
 };
-
-#endif // MY_VTK_POINT_PLOTTER_H

@@ -28,10 +28,7 @@
  *  Created on: 17.05.2009
  *
  */
-
-
-#ifndef LINE_PLOTTER_H
-#define LINE_PLOTTER_H
+#pragma once
 
 class vtkLookupTable;
 class vtkPoints;
@@ -82,5 +79,3 @@ private:
     // vtkFloatArray* m_lineScalars ;
     vtkDataArray * m_scalars;
 };
-
-#endif // LINE_PLOTTER_H

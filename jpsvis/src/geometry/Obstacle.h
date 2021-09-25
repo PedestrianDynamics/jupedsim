@@ -24,10 +24,7 @@
  *
  *
  **/
-
-
-#ifndef OBSTACLE_H_
-#define OBSTACLE_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -147,5 +144,3 @@ private:
     // x-Koordinate der Linie von einer Eccke zur nächsten
     double Xintercept(const Point & point1, const Point & point2, double hitY) const;
 };
-
-#endif /* OBSTACLE_H_ */

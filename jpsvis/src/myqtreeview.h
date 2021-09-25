@@ -1,6 +1,4 @@
-#ifndef MYQTREEVIEW_H
-#define MYQTREEVIEW_H
-
+#pragma once
 #include <QTreeView>
 
 class MyQTreeView : public QTreeView
@@ -13,5 +11,3 @@ public:
 signals:
     void changeState();
 };
-
-#endif // MYQTREEVIEW_H

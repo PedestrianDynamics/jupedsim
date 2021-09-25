@@ -25,26 +25,20 @@ TrailPlotter::TrailPlotter()
     // speed the rendering using triangles stripers
     vtkTriangleFilter * tris = vtkTriangleFilter::New();
     tris->SetInputConnection(agentShape->GetOutputPort());
-    // tris->GetOutput()->ReleaseData();
 
     vtkStripper * strip = vtkStripper::New();
     strip->SetInputConnection(tris->GetOutputPort());
-    // strip->GetOutput()->ReleaseData();
-
 
     _appendFilter = vtkSmartPointer<vtkAppendPolyData>::New();
     _appendFilter->SetInputConnection(strip->GetOutputPort());
 
     // Remove any duplicate points.
     _cleanFilter = vtkSmartPointer<vtkCleanPolyData>::New();
-    //_cleanFilter->SetInputConnection(_appendFilter->GetOutputPort());
 
     // Create a mapper and actor
     vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-    // mapper->SetInputConnection(_cleanFilter->GetOutputPort());
 
     _trailActor = vtkSmartPointer<vtkActor>::New();
-    //_trailActor->SetMapper(mapper);
 }
 
 TrailPlotter::~TrailPlotter() {}

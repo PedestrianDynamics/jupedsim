@@ -24,11 +24,7 @@
  *
  *
  **/
-
-
-#ifndef _SUBROOM_H
-#define _SUBROOM_H
-
+#pragma once
 
 #include "Wall.h"
 
@@ -392,5 +388,3 @@ public:
     virtual bool ConvertLineToPoly(const std::vector<Line *> & goals);
     bool IsInSubRoom(const Point & ped) const;
 };
-
-#endif /* _SUBROOM_H */

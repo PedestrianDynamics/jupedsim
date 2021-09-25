@@ -23,10 +23,7 @@
  *
  *
  **/
-
-
-#ifndef _ROOM_H
-#define _ROOM_H
+#pragma once
 
 #include "../general/Macros.h"
 
@@ -163,5 +160,3 @@ public:
      */
     OutputHandler * GetOutputHandler() const;
 };
-
-#endif /* _ROOM_H */

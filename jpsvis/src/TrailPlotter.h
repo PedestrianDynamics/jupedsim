@@ -1,7 +1,5 @@
-#ifndef TRAILPLOTTER_H
-#define TRAILPLOTTER_H
+#pragma once
 
-// forwarded classes
 class vtkPolyData;
 class vtkActor;
 class vtkAppendPolyData;
@@ -34,5 +32,3 @@ private:
     // Remove any duplicate points.
     vtkCleanPolyData * _cleanFilter;
 };
-
-#endif // TRAILPLOTTER_H

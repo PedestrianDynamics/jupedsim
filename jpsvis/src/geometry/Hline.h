@@ -24,10 +24,7 @@
  *
  *
  **/
-
-
-#ifndef HLINE_H_
-#define HLINE_H_
+#pragma once
 
 #include "NavLine.h"
 #include "Room.h"
@@ -129,5 +126,3 @@ public:
      */
     virtual std::string GetDescription() const;
 };
-
-#endif /* HLINE_H_ */

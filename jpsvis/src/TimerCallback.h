@@ -30,9 +30,7 @@
  *  Created on: 11.05.2009
  *
  */
-
-#ifndef TIMERCALLBACK_H_
-#define TIMERCALLBACK_H_
+#pragma once
 
 #include "SyncData.h"
 
@@ -47,8 +45,6 @@ class vtkAVIWriter;
 class vtkFFMPEGWriter;
 #endif
 
-
-//#include <vtkGlyph3D.h>
 #include "trains/train.h"
 
 #include <vtkLineSource.h>
@@ -132,8 +128,6 @@ public:
     void SetRenderTimerId(int tid);
 
     void setTextActor(vtkTextActor * runningTime);
-    // vtkSmartPointer<vtkActor> setTrainActor(
-    //      Point trainStart, Point trainEnd, std::vector<Point> doorPoints);
 
     vtkSmartPointer<vtkPolyData>
     getTrainData(Point trainStart, Point trainEnd, std::vector<Point> doorPoints, double elevation);
@@ -162,17 +156,3 @@ Q_SIGNALS:
     void signalRunningTime(unsigned long timems);
     void signalRenderingTime(int fps);
 };
-
-
-/**
- * A callback for windows changes
- */
-
-// class WindowCallback: public vtkCommand{
-// public:
-//	static WindowCallback *New();
-//	virtual void Execute(vtkObject *caller, unsigned long eventId, void *callData);
-//};
-
-
-#endif /* TIMERCALLBACK_H_ */

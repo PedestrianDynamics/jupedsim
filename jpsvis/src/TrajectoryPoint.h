@@ -28,10 +28,7 @@
  *  Created on: 08.07.2009
  *
  */
-
-
-#ifndef TRAJECTORYPOINT_H_
-#define TRAJECTORYPOINT_H_
+#pragma once
 
 class TrajectoryPoint
 {
@@ -100,5 +97,3 @@ private:
     double ellipseRadiusB;
     double ellipseColor;
 };
-
-#endif /* TRAJECTORYPOINT_H_ */

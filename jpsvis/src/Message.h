@@ -28,9 +28,7 @@
  *  Created on: 24.08.2009
  *
  */
-
-#ifndef MESSAGE_H_
-#define MESSAGE_H_
+#pragma once
 
 class Message
 {
@@ -44,5 +42,3 @@ public:
 
     };
 };
-
-#endif /* MESSAGE_H_ */

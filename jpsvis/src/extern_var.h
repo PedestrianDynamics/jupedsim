@@ -26,21 +26,12 @@
  *
  *  Created on: 08.06.2009
  */
-
-#ifndef EXTERN_VAR_H_
-#define EXTERN_VAR_H_ 1
-
-
-// we don't need this when compiling with cmake
-// http://www.vtk.org/Wiki/VTK/VTK_6_Migration/Factories_now_require_defines
-/* #define vtkRenderingCore_AUTOINIT
- * 4(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingFreeTypeOpenGL,vtkRenderingOpenGL) */
-/* #define vtkRenderingVolume_AUTOINIT 1(vtkRenderingVolumeOpenGL) */
+#pragma once
 
 #include "Pedestrian.h"
 #include "SyncData.h"
 #include "TrailPlotter.h"
-#include "train.h"
+#include "trains/train.h"
 
 #include <vtkActor.h>
 #include <vtkActor2D.h>
@@ -84,11 +75,6 @@ Pedestrian ** extern_pedestrians_firstSet        = NULL;
 vtkSmartPointer<vtkSphereSource> extern_mysphere = nullptr;
 std::map<std::string, std::shared_ptr<TrainType>> extern_trainTypes;
 std::map<int, std::shared_ptr<TrainTimeTable>> extern_trainTimeTables;
-
-
-// vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians=NULL;
-// vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians_3D=NULL;
-
 vtkTensorGlyph * extern_glyphs_pedestrians    = NULL;
 vtkTensorGlyph * extern_glyphs_pedestrians_3D = NULL;
 vtkTensorGlyph * extern_glyphs_directions     = NULL;
@@ -96,13 +82,6 @@ vtkActor2D * extern_pedestrians_labels        = NULL;
 vtkActor * extern_glyphs_pedestrians_actor_2D = NULL;
 vtkActor * extern_glyphs_pedestrians_actor_3D = NULL;
 vtkActor * extern_glyphs_directions_actor     = NULL;
-
-// VTK_CREATE (vtkTensorGlyph, extern_glyphs_pedestrians);
-// VTK_CREATE (vtkTensorGlyph, extern_glyphs_pedestrians_3D);
-// VTK_CREATE (vtkActor2D, extern_pedestrians_labels);
-// VTK_CREATE (vtkActor, extern_glyphs_pedestrians_actor_2D);
-// VTK_CREATE (vtkActor, extern_glyphs_pedestrians_actor_3D);
-
 
 // and here the corresponding dataset
 /// The first dataset
@@ -113,6 +92,3 @@ bool extern_first_dataset_loaded = false;
 
 // states whether the loaded datasets are visible
 bool extern_first_dataset_visible = false;
-
-
-#endif /* EXTERN_VAR_H_ */

@@ -54,6 +54,7 @@
 #include <QInputDialog>
 #include <QListView>
 #include <QMessageBox>
+#include <QMimeData>
 #include <QSplitter>
 #include <QStandardItemModel>
 #include <QString>
@@ -61,8 +62,6 @@
 #include <QTemporaryFile>
 #include <QThread>
 #include <QTime>
-#include <QtXml/QDomDocument>
-#include <QtXml>
 #include <iostream>
 #include <limits>
 #include <sstream>
@@ -102,7 +101,6 @@ std::string true_cxx_ver1 =
 #else
     "";
 #endif
-//----------
 
 //////////////////////////////////////////////////////////////////////////////
 // Creation & Destruction
@@ -111,10 +109,6 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent)
 {
     ui.setupUi(this);
     this->setWindowTitle("JPSvis");
-
-    // disable the maximize Button
-    // setWindowFlags( Qt::Window | Qt::WindowMinimizeButtonHint |
-    // Qt::WindowCloseButtonHint);
 
     // used for saving the settings in a persistant way
     QCoreApplication::setOrganizationName("Forschungszentrum_Juelich_GmbH");
@@ -179,7 +173,6 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent)
     int group             = 1; // there are max 3 groups of pedestrians
     bool mayPlay          = false;
 
-    // arguments.append("-caption");
     arguments.append("-2D");
     // parse arguments list
     if(arguments.size() > 1)
@@ -199,7 +192,6 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent)
                 Log::Error("unknown options: %s", argument.toStdString().c_str());
                 Log::Error("Usage: jpsvis [file1] [-2D] [-caption]");
             } else if(addPedestrianGroup(group, argument)) {
-                // slotHelpAbout();
                 Log::Info("group: %d, arg: %s", group, argument.toStdString().c_str());
                 group++;
                 mayPlay = true;
@@ -400,10 +392,7 @@ void MainWindow::slotHelpAbout()
     // Change font
     QFont font("Tokyo");
     font.setPointSize(10);
-    // font.setWeight( QFont::Bold );
-    // font.setItalic( TRUE );
     msg.setFont(font);
-    // msg.setStandardButtons(0);
     msg.exec();
 }
 
@@ -476,10 +465,7 @@ bool MainWindow::addPedestrianGroup(int groupID, QString fileName)
                 // exit(EXIT_FAILURE);
                 return (false);
             }
-            // geometry_file =  check_file.fileName();
         }
-        // @todo: check xml file too, although probably xml files
-        // always have a geometry tag
     }
     Log::Info("---> geometry: %s \n", geometry_file.toStdString().c_str());
 
@@ -515,16 +501,6 @@ bool MainWindow::addPedestrianGroup(int groupID, QString fileName)
             // everything was fine. Delete the log file
             SystemSettings::DeleteLogfile();
         }
-
-        // SaxParser::parseGeometryXMLV04(fileName,geometry);
-        // slotLoadParseShowGeometry(fileName);
-        // return false;
-    }
-
-    // check if it is vtrk file containinf gradient
-    if(fileName.endsWith(".vtk", Qt::CaseInsensitive)) {
-        if(false == SaxParser::ParseGradientFieldVTK(fileName, geometry))
-            return false;
     }
 
     QFile file(fileName);
@@ -539,7 +515,6 @@ bool MainWindow::addPedestrianGroup(int groupID, QString fileName)
 
     vtkSmartPointer<vtkSphereSource> org = vtkSphereSource::New();
     org->SetRadius(10);
-    // extern_mysphere = org;
 
     switch(groupID) {
         case 1:
@@ -554,7 +529,6 @@ bool MainWindow::addPedestrianGroup(int groupID, QString fileName)
 
         default:
             Log::Error("Only one dataset can be loaded at a time");
-            // return false;
             break;
     }
 
@@ -562,25 +536,7 @@ bool MainWindow::addPedestrianGroup(int groupID, QString fileName)
     double frameRate = 16; // default frame rate
     statusBar()->showMessage(tr("parsing the file"));
 
-    // parsing the xml file
-    if(fileName.endsWith(".xml", Qt::CaseInsensitive)) {
-        QXmlInputSource source(&file);
-        QXmlSimpleReader reader;
-
-        SaxParser handler(geometry, *dataset, &frameRate);
-        reader.setContentHandler(&handler);
-        reader.parse(source);
-        file.close();
-    }
-    // parsing the vtk file
-    //    else if(fileName.endsWith(".vtk",Qt::CaseInsensitive))
-    //    {
-    //        if (false==SaxParser::ParseGradientFieldVTK(fileName,geometry))
-    //            return false;
-
-    //    }
-    // try to parse the txt file
-    else if(fileName.endsWith(".txt", Qt::CaseInsensitive)) {
+    if(fileName.endsWith(".txt", Qt::CaseInsensitive)) {
         QString source_file = wd + QDir::separator() + SaxParser::extractSourceFileTXT(fileName);
         QString ttt_file =
             wd + QDir::separator() + SaxParser::extractTrainTimeTableFileTXT(fileName);
@@ -592,8 +548,6 @@ bool MainWindow::addPedestrianGroup(int groupID, QString fileName)
         bool readTrainTypes     = true;
         bool readTrainTimeTable = true;
         if(!(check_file.exists() && check_file.isFile())) {
-            // Debug::Warning("MainWindow::addPedestrianGroup: source name: <%s>
-            // not found!", source_file.toStdString().c_str());
             readSource = false;
         } else
             Log::Info(
@@ -602,8 +556,6 @@ bool MainWindow::addPedestrianGroup(int groupID, QString fileName)
 
         check_file = goal_file;
         if(!(check_file.exists() && check_file.isFile())) {
-            // Debug::Warning("MainWindow::addPedestrianGroup: goal name: <%s>
-            // not found!", goal_file.toStdString().c_str());
             readGoal = false;
         } else
             Log::Info(
@@ -623,27 +575,6 @@ bool MainWindow::addPedestrianGroup(int groupID, QString fileName)
             Log::Info(
                 "MainWindow::addPedestrianGroup: tt name: <%s>", tt_file.toStdString().c_str());
 
-        QXmlSimpleReader reader;
-        SaxParser handler(geometry, *dataset, &frameRate);
-        reader.setContentHandler(&handler);
-        // ------ parsing sources
-        if(readSource) {
-            QFile file(source_file);
-            QXmlInputSource source(&file);
-            reader.parse(source);
-            file.close();
-        }
-        // -----
-        // // ---- parsing goals
-        // -----
-        if(readGoal) {
-            QFile file2(goal_file);
-            QXmlInputSource source2(&file2);
-            reader.parse(source2);
-            file2.close();
-        }
-        // parsing trains
-        // train type
         std::map<int, std::shared_ptr<TrainTimeTable>> trainTimeTable;
         std::map<std::string, std::shared_ptr<TrainType>> trainTypes;
         if(readTrainTypes) {
@@ -662,13 +593,7 @@ bool MainWindow::addPedestrianGroup(int groupID, QString fileName)
         for(auto tab : trainTimeTable) {
             int trackId   = tab.second->pid;
             trackStartEnd = SaxParser::GetTrackStartEnd(geofileName, trackId);
-            // todo:
-            // int roomId = SaxParser::GetRoomId(tab.second->pid)
-            // int subroomId = SaxParser::GetSubroomId(tab.second->pid)
-            // elevation = SaxParser::GetElevation(geofileName, roomId,
-            // subroomId);
-            //--------
-            elevation = 0;
+            elevation     = 0;
 
             Point trackStart = std::get<0>(trackStartEnd);
             Point trackEnd   = std::get<1>(trackStartEnd);
@@ -694,11 +619,8 @@ bool MainWindow::addPedestrianGroup(int groupID, QString fileName)
     }
 
     QString frameRateStr = QString::number(frameRate);
-    // set the visualisation window title
     _visualisationThread->setWindowTitle(fileName);
     _visualisationThread->slotSetFrameRate(frameRate);
-    // visualisationThread->setGeometry(geometry);
-    // visualisationThread->setWindowTitle(caption);
     labelFrameNumber->setText("fps: " + frameRateStr + "/" + frameRateStr);
 
     // shutdown the visio thread
@@ -731,7 +653,6 @@ void MainWindow::slotRecord()
     extern_launch_recording = true;
     ui.BtRecord->setToolTip("Stop Recording");
     labelRecording->setText(" rec: on ");
-    // labelCurrentAction->setText("   recording   ");
 }
 
 void MainWindow::slotReset()
@@ -770,7 +691,6 @@ void MainWindow::slotReset()
     waitForVisioThread();
 
     // reset all buttons
-    // anyDataLoaded = false;
     slotClearAllDataset();
     isPlaying = false;
     isPaused  = false;
@@ -781,9 +701,7 @@ void MainWindow::slotReset()
 void MainWindow::slotCurrentAction(QString msg)
 {
     msg = " " + msg + " ";
-    // labelCurrentAction->setText(msg);
     statusBar()->showMessage(msg);
-    //	labelMode->setText(msg);
 }
 
 void MainWindow::slotFrameNumber(unsigned long actualFrameCount, unsigned long minFrame)
@@ -988,9 +906,6 @@ void MainWindow::clearDataSet(int ID)
 
     if(numberOfDatasetLoaded < 0)
         numberOfDatasetLoaded = 0;
-
-    // finally clear the geometry
-    // slotClearGeometry();
 }
 
 void MainWindow::resetAllFrameCursor()
@@ -1065,7 +980,6 @@ void MainWindow::slotNextFrame()
     if(extern_first_dataset_loaded) {
         int newValue = extern_trajectories_firstSet.getFrameCursor() + 1;
         extern_trajectories_firstSet.setFrameCursorTo(newValue);
-        // HH
     }
 }
 
@@ -1097,14 +1011,7 @@ void MainWindow::slotToogleShowAxis()
 // todo: rename this to slotChangeSettting
 void MainWindow::slotChangePedestrianShape()
 {
-    //	Qt::WindowFlags flags = Qt::Window  | Qt::WindowCloseButtonHint;
-    //
-    //	Settings* travistoOptions = new Settings(this);
-    //	travistoOptions->setWindowFlags(flags);
-
     travistoOptions->show();
-
-    // shape->deleteLater();
 }
 
 void MainWindow::slotCaptionColorAuto()
@@ -1127,8 +1034,6 @@ void MainWindow::slotChangeBackgroundColor()
     if(col.isValid() == false)
         return;
 
-    // double  bkcolor[3]= {(double)col.red()/255.0 ,(double)col.green()/255.0
-    // ,(double)col.blue()/255.0};
     _visualisationThread->setBackgroundColor(col);
 
     QSettings settings;
@@ -1287,7 +1192,6 @@ void MainWindow::slotSetCameraPerspectiveToVirtualAgent()
     }
 }
 
-/// @todo does it work? mem check?
 void MainWindow::slotClearGeometry()
 {
     _visualisationThread->setGeometry(NULL);
@@ -1471,14 +1375,6 @@ void MainWindow::saveAllSettings()
     // options: the color settings are saved in the methods where they are used.
     settings.setValue("options/listeningPort", SystemSettings::getListeningPort());
     settings.setValue("options/rememberSettings", ui.actionRemember_Settings->isChecked());
-
-    // settings.setValue("options/bgColor",
-    // ui.actionBackground_Color->isChecked());
-    // NOT USED: settings.setValue("options/captionColor",
-    // ui.action3_D->isChecked());
-    // settings.setValue("options/floorColor", ui.action3_D->isChecked());
-    // settings.setValue("options/wallsColor", ui.action3_D->isChecked());
-    // settings.setValue("options/navLinesColor", ui.action3_D->isChecked());
 }
 
 /// start/stop the recording process als png images sequences
@@ -1554,8 +1450,6 @@ void MainWindow::slotShowHideGeometryCaptions()
     bool value = ui.actionShow_Geometry_Captions->isChecked();
     _visualisationThread->setGeometryLabelsVisibility(value);
     SystemSettings::setShowGeometryCaptions(value);
-    // SystemSettings::setShowCaptions(value);
-    // SystemSettings::setOnScreenInfos(value);
 }
 void MainWindow::slotShowHideObstacles()
 {
@@ -1572,10 +1466,6 @@ void MainWindow::slotShowHideGradientField()
 
 void MainWindow::slotShowGeometryStructure()
 {
-    // QListView list;
-    //_geoStructure.setVisible(! _geoStructure.isVisible());
-    //_geoStructure.showColumn(0);
-    //_geoStructure.show();
     _geoStructure.setHidden(!ui.actionShowGeometry_Structure->isChecked());
     if(_visualisationThread->getGeometry().RefreshView()) {
         _geoStructure.setWindowTitle("Geometry structure");

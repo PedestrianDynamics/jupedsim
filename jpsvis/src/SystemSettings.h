@@ -29,10 +29,7 @@
  *  Created on: 14.09.2009
  *
  */
-
-
-#ifndef SYSTEMSETTINGS_H_
-#define SYSTEMSETTINGS_H_
+#pragma once
 
 class QString;
 class QColor;
@@ -254,5 +251,3 @@ private:
     static QString filesPrefix;
     static bool onScreenInfos;
 };
-
-#endif /* SYSTEMSETTINGS_H_ */

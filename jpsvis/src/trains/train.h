@@ -1,5 +1,4 @@
-#ifndef TRAIN_VAR_H_
-#define TRAIN_VAR_H_ 1
+#pragma once
 
 #include "../geometry/Point.h"
 #include "../geometry/Transition.h"
@@ -53,6 +52,3 @@ struct TrainEventInfo {
     double trainStartOffset;
     bool reversed;
 };
-
-
-#endif /* TRAIN_H_ */

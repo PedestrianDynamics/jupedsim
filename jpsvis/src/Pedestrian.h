@@ -23,17 +23,12 @@
  * Created on: 05.05.2009
  *
  */
-
-
-#ifndef PEDESTRIAN_H_
-#define PEDESTRIAN_H_
+#pragma once
 
 #include <QColor>
 #include <QStack>
 
-
 // extern variables
-// TODO: pipe my through the setting class
 extern bool extern_tracking_enable;
 
 // forwarded classes
@@ -48,7 +43,6 @@ class JPoint;
 class vtkPoints;
 class TrajectoryPoint;
 class vtkCamera;
-// class QRgb;
 
 class Pedestrian
 {
@@ -81,14 +75,6 @@ public:
      * @param cam a vtkcamera object
      */
     static void setCamera(vtkCamera * cam);
-
-    /**
-     * set the agent id, whose eyes you want to see the scene through, -1
-     * will reset to world/scene camera
-     *
-     * @param agent, the ID of the agent you want to see the world through
-     */
-    // static void setVirtualRealityAgent(int agent);
 
     /// returns the pedestrian ID
     int getID();
@@ -158,7 +144,6 @@ public:
     /// 0 points, 1 polygon
     void setTrailGeometry(int type);
 
-    // tODO???? what is todo?
     void setColor(int color[3]);
     void setColor(int color);
 
@@ -203,9 +188,6 @@ private:
     /// the virtual reality camera
     static vtkCamera * virtualCam;
 
-    /// throug its eyes you will see the world
-    // static int virtualRealityAgent;
-
     /// define the pedestrian body;
     vtkActor * bodyActor;
 
@@ -236,5 +218,3 @@ private:
     PointPlotter * trailPlotterPoint;
     LinePlotter * trailPlotterLine;
 };
-
-#endif /* PEDESTRIAN_H_ */

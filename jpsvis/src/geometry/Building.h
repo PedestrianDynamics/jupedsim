@@ -24,10 +24,7 @@
  *
  *
  **/
-
-
-#ifndef _BUILDING_H
-#define _BUILDING_H
+#pragma once
 
 #include "../tinyxml/tinyxml.h"
 #include "Goal.h"
@@ -223,5 +220,3 @@ public:
 private:
     void StringExplode(std::string str, std::string separator, std::vector<std::string> * results);
 };
-
-#endif /* _BUILDING_H */

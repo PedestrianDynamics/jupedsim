@@ -24,10 +24,8 @@
  *
  *
  **/
+#pragma once
 
-
-#ifndef _POINT_H
-#define _POINT_H
 #include <string>
 
 class Point
@@ -114,5 +112,3 @@ public:
 const Point operator*(const Point & p, const double f);
 /// division
 const Point operator/(const Point & p, const double f);
-
-#endif /* _POINT_H */

@@ -28,10 +28,7 @@
  *  Created on: 07.05.2009
  *
  */
-
-
-#ifndef FACILITYGEOMETRY_H_
-#define FACILITYGEOMETRY_H_
+#pragma once
 
 #include <string>
 
@@ -250,5 +247,3 @@ private:
     std::string _subroomCaption;
     bool _visibility = true;
 };
-
-#endif /* FACILITYGEOMETRY_H_ */

@@ -144,7 +144,6 @@ set(SRCS
     src/Frame.cpp
     src/FrameElement.cpp
     src/IO/OutputHandler.cpp
-    src/IO/TraVisToClient.cpp
     src/InteractorStyle.cpp
     src/Log.cpp
     src/MainWindow.cpp
@@ -184,7 +183,6 @@ set(HDR
     src/Frame.h
     src/FrameElement.h
     src/IO/OutputHandler.h
-    src/IO/TraVisToClient.h
     src/InteractorStyle.h
     src/Log.h
     src/MainWindow.h
@@ -219,7 +217,7 @@ set(HDR
     src/geometry/Transition.h
     src/geometry/Wall.h
     src/myqtreeview.h
-    src/train.h
+    src/trains/train.h
 )
 
 set(UIS

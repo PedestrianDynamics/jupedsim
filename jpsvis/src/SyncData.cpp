@@ -58,12 +58,6 @@ SyncData::SyncData()
 
 SyncData::~SyncData()
 {
-    // while (!_frames.empty()) {
-    //    delete _frames.back();
-    //    _frames.pop_back();
-    //}
-    //
-
     for(auto itr = _frames.begin(); itr != _frames.end(); itr++) {
         // FIXME
         // delete itr->second;
@@ -72,39 +66,11 @@ SyncData::~SyncData()
 }
 
 
-void SyncData::add(std::string newData)
-{
-    //	mutex.lock();
-    //	trajectories.push_back(newData);
-    //	mutex.unlock();
-}
-
-
-// and the clearframe alternative for offline visualisation
-// void SyncData::clear(){
-//	//	mutex.lock();
-//	//	frameCursor=0;
-//	//	trajectories.clear();
-//	//	numberOfAgents=0;
-//	//	mutex.unlock();
-//}
+void SyncData::add(std::string newData) {}
 
 std::string SyncData::get()
 {
     std::string res;
-    //	mutex.lock();
-    //	if(trajectories.empty()) {
-    //		res="";
-    //		emit signal_controlSequences("CONTROL_STACK_EMPTY");
-    //	}
-    //	else{
-    //		res= trajectories.front();
-    //		trajectories.erase(trajectories.begin());
-    //	}
-    //#ifdef _DEBUG
-    //	std::cout<<"size: " <<trajectories.size()<<std::endl;
-    //#endif
-    //	mutex.unlock();
     return res;
 }
 
@@ -172,12 +138,9 @@ Frame * SyncData::getNextFrame()
         // otherwise retrun the first frame
         Frame * res = nullptr;
         if(_frameCursor > _frames.rbegin()->first) {
-            //_frameCursor-=extern_update_step;
             res          = _frames.rbegin()->second;
             _frameCursor = res->GetID();
         } else {
-            // res=_frames.begin()->second;
-            //_frameCursor=res->GetID();
         }
 
         _mutex.unlock();
@@ -190,39 +153,6 @@ Frame * SyncData::getNextFrame()
     return res;
 }
 
-/***
- * This method is for convenience only.
- * The normal way to get the previous frame is:
- *               1. either set the variable extern_update_step to a negative value;
- *               2. using the function getFrame(int frameNumber). one may first get
- * the current framecursor position using getFrameCursor()
- */
-// Frame* SyncData::getPreviousFrame()
-//{
-//    _mutex.lock();
-//    _frameCursor--;
-//    //FIXME: do I really need two variables to handle this?
-//    int cursor =_frameCursor+_frameCursorOffset;
-
-//    if(cursor<0) {
-//        //emit signal_controlSequences("STACK_REACHS_BEGINNING");
-//        //frameCursor=0;
-//        _mutex.unlock();
-//        return NULL;
-//    } else if((unsigned)cursor>=_frames.size() ) {
-//        //emit signal_controlSequences("CONTROL_STACK_EMPTY");
-//        _mutex.unlock();
-//        //frameCursor=frames.size()-1;
-//        return NULL;
-//    }
-
-//    Frame* res =_frames.at(cursor);
-
-//    _mutex.unlock();
-
-//    return res;
-//}
-
 void SyncData::clearFrames()
 {
     _mutex.lock();
@@ -233,19 +163,13 @@ void SyncData::clearFrames()
     _pedHeight.clear();
     _pedColor.clear();
 
-    //    while (!_frames.empty()) {
-    //        delete _frames.back();
-    //        _frames.pop_back();
-    //    }
     _frames.clear();
     _mutex.unlock();
 }
 
 int SyncData::getFramesNumber()
 {
-    // mutex.lock(); //FIXME
     return _frames.size();
-    // mutex.unlock();
 }
 
 void SyncData::resetFrameCursor()
@@ -265,10 +189,6 @@ void SyncData::setFrameCursorTo(int position)
 {
     _mutex.lock();
 
-    // TODO: check the unsigned
-    // if((unsigned)position>=frames.size())	frameCursor =frames.size()-1;
-    // else if (position<0) frameCursor =0;
-    // else
     _frameCursor = position;
 
     _mutex.unlock();
@@ -299,71 +219,3 @@ unsigned int SyncData::getSize()
     else
         return _frames.size();
 }
-
-
-// bool SyncData::writeToFile(char* fileName,int version){
-//	ofstream myfile (fileName);
-//		if (myfile.is_open())
-//		{
-//			//header
-//			myfile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"<<endl;
-//			myfile << "<trajectoriesDataset>"<<endl;
-//			myfile << "<header formatVersion= \""<<version<<"\">"<<endl;
-//			myfile << "       <roomCaption>"<<roomCaption<<"</roomCaption>"<<endl;
-//			myfile << "        <agents>"<<numberOfAgents<<"</agents>"<<endl;
-//			myfile << "       <frameRate>"<<frameRate<<"</frameRate> <!--per second-->"<<endl;
-//			myfile << "      <timeFirstFrame sec=\"\" microsec=\"\"/> "<<endl;
-//			myfile << "</header>"<<endl<<endl;
-//
-//			// shape
-//			myfile << "<shape>"<<endl;
-//			for(int i=0;i<pedHeight.size()-1;i+=2){
-//						bool ok=false;
-//						int id = pedHeight[i].toInt(&ok);
-//						if(!ok) {cerr<<"skipping size arguments" <<endl;continue;}
-//						double size= pedHeight[i+1].toDouble(&ok);
-//						if(!ok) {cerr<<"skipping size arguments" <<endl;continue;}
-//						myfile<<"<agentInfo ID=\""<<i<<" height=\""<<size<<"\" color =\"TBD\"
-//"<<endl;
-//			}
-//
-//			myfile << "</shape>"<<endl;
-//			// geometry
-//
-//			// trajectories
-//
-//			for (int i=0;i<getSize();i++){
-//						Frame* frame = getFrame(i);
-//						if(frame==NULL){
-//					//		cerr<<"Trajectory not available in getTrail(), first data set"<<endl;
-//						}else {
-//							myfile <<"frame ID=\""<<i<<"\"> "<< endl;
-//							TrajectoryPoint* point=NULL;
-//							while(NULL!=(point=frame->getNextElement())){
-//								if(version==1){
-//
-//								}else if (version==2){
-////									myfile <<"<agent ID=\""<<point->getIndex()<<"\"";
-////									myfile <<" xPos=\""<<1311.00<<" yPos=\""<<828.00<<"
-/// zPos=\""<<0.00<<"\""; /									myfile <<" agentOrientation
-///=\""<<10<<"\"";
-////									myfile <<" xVel=\""<<1311.00<<" yVel=\""<<828.00<<"
-/// zVel=\""<<0.00<<"\""; /									myfile <<" diameterA=\""<<1311.00<<"
-/// diameterB=\""<<828.00<<"\""; /									myfile <<"
-/// ellipseOrientation=\""<<1311.00<<" ellipseColor=\""<<828.00<<"\"";
-//
-//								}
-//							}
-//							frame->resetCursor();
-//							myfile <<"/frame>"<< endl;
-//						}
-//					}
-//
-//
-//			myfile << "</trajectoriesDataset>"<<endl;
-//			myfile.close();
-//			return true;
-//		}
-//		else return false;
-//
-//}

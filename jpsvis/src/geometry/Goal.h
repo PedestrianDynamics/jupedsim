@@ -24,10 +24,7 @@
  *
  *
  **/
-
-
-#ifndef GOAL_H_
-#define GOAL_H_
+#pragma once
 
 #include "Point.h"
 
@@ -130,5 +127,3 @@ private:
     // x-Koordinate der Linie von einer Eccke zur nächsten
     double Xintercept(const Point & point1, const Point & point2, double hitY) const;
 };
-
-#endif /* GOAL_H_ */

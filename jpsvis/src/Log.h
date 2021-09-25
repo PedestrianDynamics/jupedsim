@@ -30,8 +30,7 @@
  *
  */
 
-#ifndef DEBUG_H_
-#define DEBUG_H_
+#pragma once
 
 #include <fstream>
 
@@ -108,5 +107,3 @@ private:
     static int ERR_Count;
     static int WAR_Count;
 };
-
-#endif /* DEBUG_H_ */

@@ -27,10 +27,7 @@
  *  Created on: 22.05.2009
  *
  */
-
-
-#ifndef LINE_PLOTTER2D_H
-#define LINE_PLOTTER2D_H
+#pragma once
 
 class vtkLookupTable;
 class vtkPoints;
@@ -99,5 +96,3 @@ private:
     vtkPolyDataMapper * navline_mapper;
     vtkActor * navline_actor;
 };
-
-#endif // LINE_PLOTTER2D_H

@@ -28,10 +28,7 @@
  *  Created on: 17.05.2009
  *
  */
-
-
-#ifndef JPOINT_H_
-#define JPOINT_H_
+#pragma once
 
 class JPoint
 {
@@ -91,5 +88,3 @@ public:
 JPoint operator*(const JPoint & p, const double f);
 /// division
 JPoint operator/(const JPoint & p, const double f);
-
-#endif /* POINT_H_ */

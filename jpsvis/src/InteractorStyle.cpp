@@ -24,7 +24,6 @@
  *
  * @brief  Catch some mouse and keyboard events and redirect them (vtk stuff)
  *
- *
  *  Created on: Aug 18, 2009
  */
 
@@ -65,7 +64,6 @@ void InteractorStyle::SetSource() {}
 // forward the event only if not in 2d mode
 void InteractorStyle::Rotate()
 {
-    // if(!SystemSettings::get2D())
     vtkInteractorStyleTrackballCamera::Rotate();
 }
 
@@ -119,11 +117,7 @@ void InteractorStyle::OnMouseMove()
 void InteractorStyle::OnChar()
 {
     vtkRenderWindowInteractor * rwi = this->Interactor;
-    // this->Interactor->GetRenderWindow()->GetScreenSize();
-    // rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Print(std::cout);
-
-    char ch = rwi->GetKeyCode();
-
+    char ch                         = rwi->GetKeyCode();
 
     switch(ch) {
         case '+':
@@ -142,17 +136,6 @@ void InteractorStyle::OnChar()
             vtkCamera * cam =
                 rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera();
             cam->GetPosition(para);
-            // std::cout<<endl<<;
-            // cam->Roll(90-cam->GetRoll());
-            // cam->Yaw(0);
-            // cam->Pitch(0);
-            // cam->Roll(-90);
-            // cam->Elevation(0);
-            // cam->Azimuth(0);
-            // std::cout <<"roll       [ "<< cam->GetRoll()<<" ]"<<std::endl;
-            // std::cout <<"azimuth    [ "<< cam->GetRoll()<<" ]"<<std::endl;
-            // std::cout <<"elevation  [ "<< cam->GetRoll()<<" ]"<<std::endl;
-            // std::cout <<"roll       [ "<<para[0]<<" " <<para[1] <<" "<<para[2]<<" ]"<<std::endl;
         } break;
 
         // zoom in
@@ -223,7 +206,6 @@ void InteractorStyle::OnChar()
             rwi->GetRenderWindow()->Modified();
             rwi->Render();
             break;
-
         // Spin
         case 'm':
             rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Azimuth(
@@ -254,9 +236,8 @@ void InteractorStyle::OnChar()
             cam->GetViewPlaneNormal(para);
             std::cout << "viewplan norm  [ " << para[0] << " " << para[1] << " " << para[2] << " ]"
                       << std::endl;
-
-        } break;
-
+            break;
+        }
         default: {
             std::string key = rwi->GetKeySym();
             int sensitivity = 2;
@@ -266,9 +247,6 @@ void InteractorStyle::OnChar()
                 ->GetFirstRenderer()
                 ->GetActiveCamera()
                 ->GetPosition(pos);
-            //		printf("[%f,%f,%f]\n",pos[0],pos[1],pos[2]);
-
-
             if(key == "Up") {
                 pos[1] = pos[1] - sensitivity * 10;
                 rwi->GetRenderWindow()
@@ -276,13 +254,11 @@ void InteractorStyle::OnChar()
                     ->GetFirstRenderer()
                     ->GetActiveCamera()
                     ->SetPosition(pos);
-                ;
                 rwi->GetRenderWindow()
                     ->GetRenderers()
                     ->GetFirstRenderer()
                     ->GetActiveCamera()
                     ->SetFocalPoint(pos[0], pos[1], 1);
-
             } else if(key == "Down") {
                 pos[1] = pos[1] + sensitivity * 10;
                 rwi->GetRenderWindow()
@@ -290,13 +266,11 @@ void InteractorStyle::OnChar()
                     ->GetFirstRenderer()
                     ->GetActiveCamera()
                     ->SetPosition(pos);
-                ;
                 rwi->GetRenderWindow()
                     ->GetRenderers()
                     ->GetFirstRenderer()
                     ->GetActiveCamera()
                     ->SetFocalPoint(pos[0], pos[1], 1);
-
             } else if(key == "Left") {
                 pos[0] = pos[0] + sensitivity * 10;
                 rwi->GetRenderWindow()
@@ -304,13 +278,11 @@ void InteractorStyle::OnChar()
                     ->GetFirstRenderer()
                     ->GetActiveCamera()
                     ->SetPosition(pos);
-                ;
                 rwi->GetRenderWindow()
                     ->GetRenderers()
                     ->GetFirstRenderer()
                     ->GetActiveCamera()
                     ->SetFocalPoint(pos[0], pos[1], 10);
-
             } else if(key == "Right") {
                 pos[0] = pos[0] - sensitivity * 10;
                 rwi->GetRenderWindow()
@@ -318,13 +290,11 @@ void InteractorStyle::OnChar()
                     ->GetFirstRenderer()
                     ->GetActiveCamera()
                     ->SetPosition(pos);
-                ;
                 rwi->GetRenderWindow()
                     ->GetRenderers()
                     ->GetFirstRenderer()
                     ->GetActiveCamera()
                     ->SetFocalPoint(pos[0], pos[1], 10);
-
             } else if(key == "k") {
                 pos[0] = pos[0] - sensitivity * 10;
                 pos[1] = pos[1] - sensitivity * 10;
@@ -333,13 +303,11 @@ void InteractorStyle::OnChar()
                     ->GetFirstRenderer()
                     ->GetActiveCamera()
                     ->SetPosition(pos);
-                ;
                 rwi->GetRenderWindow()
                     ->GetRenderers()
                     ->GetFirstRenderer()
                     ->GetActiveCamera()
                     ->SetFocalPoint(pos[0], pos[1], 10);
-
             } else if(key == "K") {
                 pos[0] = pos[0] + sensitivity * 10;
                 pos[1] = pos[1] + sensitivity * 10;
@@ -348,13 +316,11 @@ void InteractorStyle::OnChar()
                     ->GetFirstRenderer()
                     ->GetActiveCamera()
                     ->SetPosition(pos);
-                ;
                 rwi->GetRenderWindow()
                     ->GetRenderers()
                     ->GetFirstRenderer()
                     ->GetActiveCamera()
                     ->SetFocalPoint(pos[0], pos[1], 10);
-
             } else if(key == "l") {
                 pos[0] = pos[0] - sensitivity * 10;
                 pos[1] = pos[1] + sensitivity * 10;
@@ -363,13 +329,11 @@ void InteractorStyle::OnChar()
                     ->GetFirstRenderer()
                     ->GetActiveCamera()
                     ->SetPosition(pos);
-                ;
                 rwi->GetRenderWindow()
                     ->GetRenderers()
                     ->GetFirstRenderer()
                     ->GetActiveCamera()
                     ->SetFocalPoint(pos[0], pos[1], 10);
-
             } else if(key == "L") {
                 pos[0] = pos[0] + sensitivity * 10;
                 pos[1] = pos[1] - sensitivity * 10;
@@ -378,14 +342,14 @@ void InteractorStyle::OnChar()
                     ->GetFirstRenderer()
                     ->GetActiveCamera()
                     ->SetPosition(pos);
-                ;
                 rwi->GetRenderWindow()
                     ->GetRenderers()
                     ->GetFirstRenderer()
                     ->GetActiveCamera()
                     ->SetFocalPoint(pos[0], pos[1], 10);
             }
-        } break;
+            break;
+        }
     }
 
     // forward events
@@ -422,13 +386,5 @@ void InteractorStyle::OnLeftButtonUp()
     std::cout << "\t screen: " << pos_x << " " << pos_y << endl;
     std::cout << "\t world : " << world[0] << " " << world[1] << " " << world[2] << std::endl;
     std::cout << "\t distance to last mouse position: " << dist << endl;
-    // vtkRenderer *ren =rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
-    // vtkCamera *cam = ren->GetActiveCamera();
-    // cam->SetFocalPoint(world[0],world[1],world[2]);
-    // cam->Zoom(1.05);
-    // cam->Modified();
-    // double p[2]={pos[0],pos[1]};
-    // rwi->FlyToImage(ren,p);
-    // forward events for who ever needs it
     vtkInteractorStyleTrackballCamera::OnLeftButtonUp();
 }

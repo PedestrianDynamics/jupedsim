@@ -30,8 +30,8 @@
  *  Created on: 22.05.2009
  *
  */
-
 #pragma once
+
 #include "InteractorStyle.h"
 #include "TimerCallback.h"
 #include "geometry/GeometryFactory.h"
@@ -189,7 +189,6 @@ private:
     void Create2dAgent();
 
 private:
-    // FacilityGeometry* _geometry;
     vtkRenderWindow * _renderWindow;
     GeometryFactory _geometry;
     vtkRenderer * _renderer;

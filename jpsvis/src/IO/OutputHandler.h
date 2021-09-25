@@ -24,20 +24,13 @@
  *
  *
  **/
-
-
-#ifndef OUTPUT_HANDLER_H_
-#define OUTPUT_HANDLER_H_
+#pragma once
 
 #include "../general/Macros.h"
 
 #include <fstream>
 #include <iostream>
 #include <vector>
-
-#ifdef _SIMULATOR
-#include "../IO/TraVisToClient.h"
-#endif
 
 
 class OutputHandler
@@ -81,23 +74,3 @@ public:
     void Write(const std::string & str);
     void Write(const char * string, ...);
 };
-
-#ifdef _SIMULATOR
-
-class SocketHandler : public OutputHandler
-{
-private:
-    TraVisToClient * client;
-
-public:
-    SocketHandler(const std::string & host, int port);
-    virtual ~SocketHandler();
-    void Write(const std::string & str);
-
-    // Some tags are broken
-    std::vector<std::string> brokentags;
-};
-
-#endif
-
-#endif /*OUTPUT_HANDLER_H_*/

@@ -1,5 +1,4 @@
-#ifndef GEOMETRYFACTORY_H
-#define GEOMETRYFACTORY_H
+#pragma once
 
 #include "FacilityGeometry.h"
 
@@ -47,5 +46,3 @@ private:
     std::map<int, std::map<int, std::shared_ptr<FacilityGeometry>>> _geometryFactory;
     QStandardItemModel _model;
 };
-
-#endif // GEOMETRYFACTORY_H

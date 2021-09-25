@@ -285,7 +285,6 @@ void TimerCallback::Execute(vtkObject * caller, unsigned long eventId, void * ca
     int * winSize       = renderWindow->GetSize();
     static int lastWinX = winSize[0] + 1; // +1 to trigger a first change
     static int lastWinY = winSize[1];
-    // HHHHHH
     sprintf(
         runningTimeText,
         "Pedestrians: %d      Time: %ld Sec",
@@ -372,7 +371,6 @@ void TimerCallback::updateSettings(vtkRenderWindow * renderWindow)
     // enable / disable full screen
     if(fullscreen != extern_fullscreen_enable) {
         renderWindow->SetFullScreen(extern_fullscreen_enable);
-        // renderWindow->GetRenderers()->GetFirstRenderer()->ResetCamera();
         fullscreen = extern_fullscreen_enable;
     }
 
@@ -408,21 +406,6 @@ void TimerCallback::getTrail(int datasetID, int frameNumber)
             tcMax = frameNumber + trailCount;
             break;
     }
-
-
-    for(int i = tcMin; i < tcMax; i++) {
-        Frame * frame = extern_trajectories_firstSet.getFrame(i);
-        if(frame == NULL) {
-            //		cerr<<"Trajectory not available in getTrail(), first data set"<<endl;
-        } else {
-            FrameElement * point = NULL;
-            while(NULL != (point = frame->getNextElement())) {
-                // extern_pedestrians_firstSet[point->getIndex()]->plotTrail(point->getX(),point->getY(),point->getZ());
-                // extern_pedestrians_firstSet[point->getIndex()]->setTrailGeometry(trailForm);
-            }
-            frame->resetCursor();
-        }
-    }
 }
 
 void TimerCallback::updateVirtualCamera(Frame * frame, vtkRenderer * renderer)
@@ -441,8 +424,6 @@ void TimerCallback::updateVirtualCamera(Frame * frame, vtkRenderer * renderer)
             el->GetOrientation(orien);
             double angle = vtkMath::RadiansFromDegrees(orien[2]);
 
-            // cout<<"new Pos: "<<pos[0]<<" " <<pos[1] <<" "<<pos[2]<<endl;
-
             vtkCamera * virtualCam = renderer->GetActiveCamera();
 
             virtualCam->Print(std::cout);
@@ -455,11 +436,7 @@ void TimerCallback::updateVirtualCamera(Frame * frame, vtkRenderer * renderer)
             double x = pos[0] + eyeRange * cos(angle);
             double y = pos[1] + eyeRange * sin(angle);
             double z = pos[2];
-            // virtualCam->SetFocalPoint(pos[0]+15,pos[1],pos[2]+pedSize+8);
             virtualCam->SetFocalPoint(x, y, z + pedSize + 8);
-            // virtualCam->Azimuth(pedestrianOrienation);
-            // virtualCam->Azimuth(pedestrianOrienation);
-            // virtualCam->Yaw(pedestrianOrienation);
 
             virtualCam->SetDistance(eyeRange);
             if(cam)
@@ -479,9 +456,6 @@ void TimerCallback::takeScreenshot(vtkRenderWindow * renderWindow)
     static int imageID                     = 0;
     vtkWindowToImageFilter * winToImFilter = vtkWindowToImageFilter::New();
     winToImFilter->SetInput(renderWindow);
-    // winToImFilter->SetMagnification(4);
-    // renderWindow->Delete();
-    // vtkPostScriptWriter * image  = vtkPostScriptWriter::New();
     vtkPNGWriter * image = vtkPNGWriter::New();
     image->SetInputConnection(winToImFilter->GetOutputPort());
     winToImFilter->Delete();
@@ -492,7 +466,6 @@ void TimerCallback::takeScreenshot(vtkRenderWindow * renderWindow)
     if(!QDir(screenshots).exists()) {
         QDir dir;
         if(!dir.mkpath(screenshots)) {
-            // Debug::Error("could not create directory: %s",screenshots.toStdString().c_str());
             // try with the current directory
             screenshots = "";
         }
@@ -500,8 +473,7 @@ void TimerCallback::takeScreenshot(vtkRenderWindow * renderWindow)
 
 
     char filename[256] = {0};
-    //	sprintf(filename,"travisto_video_%d.png",imageID++);
-    std::string date = QString(QDateTime::currentDateTime().toString("yyMMdd_hh")).toStdString();
+    std::string date   = QString(QDateTime::currentDateTime().toString("yyMMdd_hh")).toStdString();
 
     sprintf(filename, "travisto_snap_%sh_%d.png", date.c_str(), imageID++);
 
@@ -522,9 +494,7 @@ void TimerCallback::takeScreenshotSequence(vtkRenderWindow * renderWindow)
     static int imageID                     = 0;
     vtkWindowToImageFilter * winToImFilter = vtkWindowToImageFilter::New();
     winToImFilter->SetInput(renderWindow);
-    // renderWindow->Delete();
     vtkPNGWriter * image = vtkPNGWriter::New();
-    // vtkPostScriptWriter * image  = vtkPostScriptWriter::New();
     image->SetInputConnection(winToImFilter->GetOutputPort());
     winToImFilter->Delete();
 

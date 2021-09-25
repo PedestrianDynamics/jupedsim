@@ -28,9 +28,7 @@
  *  Created on: 07.05.2009
  *
  */
-
-#ifndef POINT_PLOTTER_H
-#define POINT_PLOTTER_H
+#pragma once
 
 #define MAX_POINTS 30;
 
@@ -82,5 +80,3 @@ private:
     double pt_radius;
     int pt_res;
 };
-
-#endif // POINT_PLOTTER_H

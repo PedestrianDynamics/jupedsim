@@ -31,9 +31,7 @@
  *  Created on: 02.06.2009
  *
  */
-
-#ifndef SYNCDATA_H_
-#define SYNCDATA_H_
+#pragma once
 
 #include <QMutex>
 #include <QObject>
@@ -163,5 +161,3 @@ private:
     // std::map<int, std::unique_ptr<Frame> > _frames;
     vtkSmartPointer<vtkSphereSource> _ttt;
 };
-
-#endif /* SYNCDATA_H_ */

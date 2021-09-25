@@ -123,11 +123,6 @@ Pedestrian::~Pedestrian()
     if(trailActor)
         trailActor->Delete();
 
-
-    //	int i=0;
-    // free all memory
-
-    // virtualCam->Delete();
     if(bodyActor)
         bodyActor->Delete();
     if(caption)
@@ -196,9 +191,6 @@ void Pedestrian::createTrailActor()
  */
 void Pedestrian::createActor()
 {
-    // createSnowMan();
-    // return;
-
     if(SystemSettings::get2D()) {
         CreateActor2D();
         pedestrianAssembly = assembly2D;
@@ -211,11 +203,6 @@ void Pedestrian::createActor()
 // create the 2D assembly
 void Pedestrian::CreateActor2D()
 {
-    // double headRadius = 10.0;
-    // double ambient=0.15;
-    // double diffuse=1;
-    // double specular=1;
-
     assembly2D = vtkAssembly::New();
 
     {
@@ -237,19 +224,14 @@ void Pedestrian::CreateActor2D()
         // set the ellipse a little bit higher than the ground to
         // eliminate interaction with the floor color.
         ellipseActor->SetPosition(0, 0, 7);
-        //		actor->GetProperty()->SetSpecular(specular);
-        //		actor->GetProperty()->SetDiffuse(diffuse);
-        //		actor->GetProperty()->SetAmbient(ambient);
 
         // this actor belongs to both 2D and 3D
         // assembly3D->AddPart(ellipseActor);
         assembly2D->AddPart(ellipseActor);
-        // ellipseActor->Delete();
 
         // lookup table
         vtkLookupTable * lut = vtkLookupTable::New();
         lut->SetHueRange(0.0, 0.470);
-        // lut->SetSaturationRange(0,0);
         lut->SetValueRange(1.0, 1.0);
         lut->SetNumberOfTableValues(256);
         lut->Build();
@@ -262,17 +244,13 @@ void Pedestrian::CreateActor2D()
         caption = vtkTextActor3D ::New();
         caption->SetVisibility(false);
         caption->SetInput(txt);
-        // set the properties of the caption
-        // FARBE
         vtkTextProperty * tprop = caption->GetTextProperty();
         tprop->SetFontFamilyToArial();
         tprop->BoldOn();
-        // tprop->ShadowOn();
         tprop->SetLineSpacing(1.0);
         tprop->SetFontSize(SystemSettings::getPedestrianCaptionSize());
 
         tprop->SetColor(0.0, 0.0, 0.0);
-        // tprop->SetShadowOffset(2,2);
 
         caption->SetPosition(0, 0, 20); // 20 cm on the ground
         assembly2D->AddPart(caption);
@@ -309,11 +287,9 @@ void Pedestrian::CreateActor3D()
         bodyActor->SetMapper(mapper);
         mapper->Delete();
         bodyActor->SetScale(er);
-        // bodyActor->GetProperty()->SetColor(pedsColors);
         bodyActor->GetProperty()->SetColor(
             pedsColors[0] / 255.0, pedsColors[1] / 255.0, pedsColors[2] / 255.0);
 
-        // actor->GetProperty()->SetLighting(true);
         bodyActor->GetProperty()->SetSpecular(specular);
         bodyActor->GetProperty()->SetDiffuse(diffuse);
         bodyActor->GetProperty()->SetAmbient(ambient);
@@ -345,14 +321,11 @@ void Pedestrian::CreateActor3D()
         head->SetStartTheta(270);
         head->SetEndTheta(90);
         head->SetRadius(headRadius);
-        // head->SetCenter(0,0,bodyRadius+2);
         head->SetCenter(0, 0, pedSize + 2);
         // create mapper
         vtkPolyDataMapper * mapper = vtkPolyDataMapper::New();
         mapper->SetInputConnection(head->GetOutputPort());
         head->Delete();
-        // mapper->SetColorModeToMapScalars();
-        // mapper->SetScalarModeToUsePointData();
 
         // create actor
         vtkActor * actor = vtkActor::New();
@@ -375,8 +348,6 @@ void Pedestrian::CreateActor3D()
         mapper = vtkPolyDataMapper::New();
         mapper->SetInputConnection(head->GetOutputPort());
         head->Delete();
-        // mapper->SetColorModeToMapScalars();
-        // mapper->SetScalarModeToUsePointData();
 
         // create actor
         actor = vtkActor::New();
@@ -421,7 +392,6 @@ void Pedestrian::setColor(int color[3])
     pedsColors[2] = color[2];
 
     if(bodyActor != NULL)
-        //		bodyActor->GetProperty()->SetColor(pedsColors);
         bodyActor->GetProperty()->SetColor(
             pedsColors[0] / 255.0, pedsColors[1] / 255.0, pedsColors[2] / 255.0);
 }
@@ -437,7 +407,6 @@ void Pedestrian::setColor(int color)
         // lookup table
         vtkLookupTable * lut = vtkLookupTable::New();
         lut->SetHueRange(0.0, 0.470);
-        // lut->SetSaturationRange(0,0);
         lut->SetValueRange(1.0, 1.0);
         lut->SetNumberOfTableValues(256);
         lut->Build();
@@ -455,7 +424,6 @@ vtkAssembly * Pedestrian::getActor()
 {
     if(pedestrianAssembly == NULL)
         createActor();
-    // if(pedestrianAssembly==NULL) createSnowMan();
     return pedestrianAssembly;
 }
 /// returns the actor to the pedestrians trail.
@@ -466,251 +434,6 @@ vtkAssembly * Pedestrian::getTrailActor()
         createTrailActor();
     return trailActor;
 }
-
-/**
- *
- * move the pedestrian to its new position
- */
-
-// void Pedestrian::moveTo(TrajectoryPoint *point) {
-/*
-    double xNew ;//= point->getX();
-    double yNew ;//= point->getY();
-    double zNew ;//= point->getZ();
-
-    double ellipse[7];
-    double agentColorAngle[2];
-
-    //point->getEllipse(ellipse);
-    //point->getAgentInfo(agentColorAngle);
-
-    // this are radius
-    double ellipseColor=1;	//red
-
-    // scaling the disk to an ellipse
-    // radiusA and radiusB are given
-    if( !( isnan(ellipse[3])|| isnan(ellipse[4])) ){
-
-        //TODO: this wont be necessary when they stop explode
-        // dont allow ellipse greater than 1 meter
-        ellipse[3]= (ellipse[3]>100)?100:ellipse[3];
-        ellipse[4]= (ellipse[4]>100)?100:ellipse[4];
-
-        double radius = spaceNeeded->GetOuterRadius();
-        double scale[3] = { ellipse[3] / radius, ellipse[4] / radius, 1 };
-        ellipseActor->SetScale(scale);
-
-        //color is not given
-        if( isnan(ellipse[6])){
-            double maxEllipseDiameter = 40;
-            double minEllipseDiameter = 1;
-
-            ellipseColor= (ellipse[4]+ellipse[3])/2.0;
-            ellipseColor = (ellipseColor - minEllipseDiameter) / (maxEllipseDiameter -
-   minEllipseDiameter); }else{ ellipseColor=ellipse[6]/255;
-        }
-    }
-
-    //todo: could make this variable global to use with trails
-    double *elColorRGB = ellipseActor->GetMapper()->GetLookupTable()->GetColor(ellipseColor);
-    ellipseActor->GetProperty()->SetColor(elColorRGB);
-
-
-    //default agent orientation
-    double pedestrianOrientation = vtkMath::DegreesFromRadians(atan2((yNew - posY), (xNew
-            - posX)));//-lastRotationAngle;
-    if (pedestrianOrientation < 0)
-        pedestrianOrientation += 360.0;
-
-    if(isnan(agentColorAngle[1])==false){ //agent orientation
-        pedestrianOrientation=agentColorAngle[1];
-    }
-
-    // this is useful when the system is paused.
-    // cuz moveTo is still called, just with the same coordinates
-    if ((posX != xNew) || (posY != yNew) ||  (posZ!=zNew)) {
-        double ori[3];
-        pedestrianAssembly->GetOrientation(ori);
-        pedestrianAssembly->RotateZ(pedestrianOrientation-ori[2]);
-
-        //adjust the caption
-        if(autoCaptionColorMode){
-            vtkTextProperty* tprop = caption->GetTextProperty();
-            tprop->SetColor(1-elColorRGB[0],1-elColorRGB[1],1-elColorRGB[2]);
-        }
-    }
-    //set the new position
-    pedestrianAssembly->SetPosition(xNew, yNew, zNew);
-
-    // ellipse are only available in 2D mode and the centre coordinates may be different
-    // from the head\s one
-    if(SystemSettings::get2D()){
-        //the ellipses are not "on" the floor, but slightly over , thats why +1 is added to z;
-        ellipseActor->SetPosition(ellipse[0]-xNew,ellipse[1]-yNew,ellipse[2]-zNew+2);
-    }
-
-
-
-    //adjust the camera
-    if(ID==SystemSettings::getVirtualAgent()){
-
-        static bool cam=true;
-        virtualCam->SetPosition(posX+15,posY,posZ+pedSize+8);
-
-        //new focal point
-        float eyeRange=150;//15m
-
-        //float angle=vtkMath::RadiansFromDegrees(pedestrianOrienation);
-        //float  x=posX+eyeRange*cos(angle);
-        //	float  y=posY+eyeRange*sin(angle);
-        virtualCam->SetFocalPoint(xNew+15,yNew,zNew+pedSize+8);
-        //virtualCam->SetFocalPoint(x,y,zNew+pedSize+8);
-        //virtualCam->Azimuth(pedestrianOrienation);
-        //virtualCam->Azimuth(pedestrianOrienation);
-        //virtualCam->Yaw(pedestrianOrienation);
-        virtualCam->SetDistance(eyeRange);
-        //virtualCam->SetDir
-        if(cam)virtualCam->SetRoll(90);
-        cam=false;
-        virtualCam->Modified();
-
-    }
-    // save the actual position
-    // needed for computing the rotation angle if missing
-    posX = xNew;
-    posY = yNew;
-    posZ = zNew;
-    pedestrianAssembly->SetVisibility(groupVisibilityStatus);
-
-    trailActor->SetVisibility(groupVisibilityStatus & extern_tracking_enable);
-    triggerPlotTrail();
-*/
-//}
-
-///**
-// *
-// * move the pedestrian to its new position
-// */
-//
-// void Pedestrian::moveTo(TrajectoryPoint *point) {
-//
-//	double xNew = point->getX();
-//	double yNew = point->getY();
-//	double zNew = point->getZ();
-//	double ellipse[7];
-//	double agentColorAngle[2];
-//
-//	point->getEllipse(ellipse);
-//	point->getAgentInfo(agentColorAngle);
-//
-//	// this are radius
-//	const double maxEllipseDiameter = 40;
-//	const double minEllipseDiameter = 1;
-//	double ellipseColor=1;	//red
-//
-//
-//	// scaling the disk to an ellipse
-//	// radiusA and radiusB are given
-//	if( !( isnan(ellipse[3])|| isnan(ellipse[4])) ){
-//
-//		//TODO: FIXME: this wont be necessary when they stop explode
-//		ellipse[3]= (ellipse[3]>100)?100:ellipse[3];
-//		ellipse[4]= (ellipse[4]>100)?100:ellipse[4];
-//
-//		double radius = spaceNeeded->GetOuterRadius();
-//		double scale[3] = { ellipse[3] / radius, ellipse[4] / radius, 1 };
-//		ellipseActor->SetScale(scale);
-//
-//		//color is not given
-//		if( isnan(ellipse[6])){
-//			ellipseColor= (ellipse[4]+ellipse[3])/2.0;
-//			ellipseColor = (ellipseColor - minEllipseDiameter) / (maxEllipseDiameter -
-// minEllipseDiameter); 		}else{ 			ellipseColor=ellipse[6]/255;
-//		}
-//	}
-//
-//	//todo: could make this variable global to use with trails
-//	double *elColorRGB = ellipseActor->GetMapper()->GetLookupTable()->GetColor(ellipseColor);
-//	ellipseActor->GetProperty()->SetColor(elColorRGB);
-//
-//
-//	//default agent orientation
-//	double defaultOrientation = vtkMath::DegreesFromRadians(atan2((yNew - posY), (xNew
-//			- posX)));//-lastRotationAngle;
-//	if (defaultOrientation < 0)
-//		defaultOrientation += 360.0;
-//
-//	double pedestrianOrienation=defaultOrientation-lastPedestrianOrientation;
-//	if(! isnan(agentColorAngle[1])) //agent orientation
-//		pedestrianOrienation=agentColorAngle[1];
-//
-//	double ellipseOrientation =pedestrianOrienation;//default
-//	if(!( isnan(ellipse[5]))) //ellipse orientation
-//		ellipseOrientation= ellipse[5];
-//
-//	// this is useful when the system is paused.
-//	// cuz moveTo is still called, just with the same coordinates
-//	if ((posX != xNew) || (posY != yNew) ||  (posZ!=zNew)) {
-//		pedestrianAssembly->RotateZ(pedestrianOrienation);
-//		//the ellipse should rotate independently to the agent
-//		lastPedestrianOrientation=defaultOrientation;
-//		ellipseActor->RotateZ(ellipseOrientation-pedestrianOrienation-lastEllipseOrientation);
-//		lastEllipseOrientation=ellipseOrientation;
-//
-//		//adjust the caption
-//		caption->RotateZ(-pedestrianOrienation);
-//		if(autoCaptionColorMode){
-//			vtkTextProperty* tprop = caption->GetTextProperty();
-//			tprop->SetColor(1-elColorRGB[0],1-elColorRGB[1],1-elColorRGB[2]);
-//		}
-//	}
-//	//set the new position
-//	pedestrianAssembly->SetPosition(xNew, yNew, zNew);
-//
-//	// ellipse are only available in 2D mode and the centre coordinates may be different
-//	// from the head\s one
-//	if(SystemSettings::get2D()){
-//		//the ellipses are not "on" the floor, but slightly over , thats why +1 is added to z;
-//		ellipseActor->SetPosition(ellipse[0]-xNew,ellipse[1]-yNew,ellipse[2]-zNew+2);
-//	}
-//
-//
-//
-//	//adjust the camera
-//	if(ID==SystemSettings::getVirtualAgent()){
-//
-//		static bool cam=true;
-//		virtualCam->SetPosition(posX+15,posY,posZ+pedSize+8);
-//
-//		//new focal point
-//		float eyeRange=150;//15m
-//
-//		//float angle=vtkMath::RadiansFromDegrees(pedestrianOrienation);
-//		//float  x=posX+eyeRange*cos(angle);
-//		//	float  y=posY+eyeRange*sin(angle);
-//		virtualCam->SetFocalPoint(xNew+15,yNew,zNew+pedSize+8);
-//		//virtualCam->SetFocalPoint(x,y,zNew+pedSize+8);
-//		//virtualCam->Azimuth(pedestrianOrienation);
-//		//virtualCam->Azimuth(pedestrianOrienation);
-//		//virtualCam->Yaw(pedestrianOrienation);
-//		virtualCam->SetDistance(eyeRange);
-//		//virtualCam->SetDir
-//		if(cam)virtualCam->SetRoll(90);
-//		cam=false;
-//		virtualCam->Modified();
-//
-//	}
-//	// save the actual position
-//	// needed for computing the rotation angle if missing
-//	posX = xNew;
-//	posY = yNew;
-//	posZ = zNew;
-//	pedestrianAssembly->SetVisibility(groupVisibilityStatus);
-//
-//	trailActor->SetVisibility(groupVisibilityStatus & extern_tracking_enable);
-//	triggerPlotTrail();
-//
-//}
 
 bool Pedestrian::isVisible()
 {
@@ -774,12 +497,10 @@ void Pedestrian::setTrailGeometry(int type)
 {
     switch(type) {
         case 0: // points
-            // trailPlotterLine->getActor()->SetVisibility(0);
             trailPlotterPoint->getActor()->SetVisibility(1);
             break;
 
         case 1: // polygone
-            // trailPlotterLine->getActor()->SetVisibility(1);
             trailPlotterPoint->getActor()->SetVisibility(0);
 
             break;
@@ -794,16 +515,8 @@ void Pedestrian::triggerPlotTrail()
     if(trailPoint.size() < 2)
         return;
 
-    // make color uniform and use only [0,255]
-    // double color[3]={pedsColors[0],255*pedsColors[1],255*pedsColors[2]};
-
     trailPlotterLine->clear();
     trailPlotterLine->SetNumberOfPoints(trailPoint.size());
-
-    //	Point * first = trailPoint.pop();
-    //	first->setColorRGB(color[0],color[1],color[2]);
-    //	trailPlotterPoint->PlotPoint(first);
-    //	trailPlotterLine->addVertex(first);
 
     while(!trailPoint.isEmpty()) {
         JPoint * next = trailPoint.pop();
@@ -820,11 +533,6 @@ void Pedestrian::triggerPlotTrail()
 void Pedestrian::setCaptionSize(int size)
 {
     vtkTextProperty * tprop = caption->GetTextProperty();
-    // tprop->SetFontFamilyToArial();
-    // tprop->BoldOn();
-    // tprop->ShadowOn();
-    // tprop->SetLineSpacing(1.0);
-    // tprop->SetColor(1.0,0.0,0.0);
     tprop->SetFontSize(size);
 }
 
@@ -841,12 +549,7 @@ void Pedestrian::setCaptionsColor(QColor & col)
     captionColors[1]        = (double) col.green() / 255;
     captionColors[2]        = (double) col.blue() / 255;
     vtkTextProperty * tprop = caption->GetTextProperty();
-    // tprop->SetFontFamilyToArial();
-    // tprop->BoldOn();
-    // tprop->ShadowOn();
-    // tprop->SetLineSpacing(1.0);
     tprop->SetColor(captionColors);
-    //	tprop->SetFontSize(size);
 }
 
 void Pedestrian::setCaptionsColorModeToAuto(bool status)
