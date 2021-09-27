@@ -30,6 +30,7 @@
 #include "InteractorStyle.h"
 
 #include "SystemSettings.h"
+#include "general/Macros.h"
 
 #include <QStringList>
 #include <iostream>
@@ -43,8 +44,6 @@
 #include <vtkSmartPointer.h>
 
 using namespace std;
-
-#define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 InteractorStyle::InteractorStyle() {}
 

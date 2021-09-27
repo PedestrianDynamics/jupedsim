@@ -9,6 +9,7 @@
 
 #include "../SystemSettings.h"
 #include "JPoint.h"
+#include "general/Macros.h"
 
 #include <vtkActor.h>
 #include <vtkDataArray.h>
@@ -24,8 +25,6 @@
 #include <vtkSmartPointer.h>
 #include <vtkUnsignedCharArray.h>
 
-
-#define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 PointPlotter::PointPlotter()
 {

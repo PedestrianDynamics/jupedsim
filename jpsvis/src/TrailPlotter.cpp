@@ -1,5 +1,7 @@
 #include "TrailPlotter.h"
 
+#include "general/Macros.h"
+
 #include <vtkActor.h>
 #include <vtkAppendPolyData.h>
 #include <vtkCleanPolyData.h>
@@ -9,10 +11,6 @@
 #include <vtkSmartPointer.h>
 #include <vtkStripper.h>
 #include <vtkTriangleFilter.h>
-
-
-#define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
-
 
 TrailPlotter::TrailPlotter()
 {

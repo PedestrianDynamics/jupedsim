@@ -34,6 +34,7 @@
 #include "../SystemSettings.h"
 #include "JPoint.h"
 #include "LinePlotter2D.h"
+#include "general/Macros.h"
 
 #include <vtkActor.h>
 #include <vtkActor2DCollection.h>
@@ -60,11 +61,7 @@
 #include <vtkTriangleFilter.h>
 
 
-#define PI 3.1415926535
-
 using namespace std;
-
-#define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 
 FacilityGeometry::FacilityGeometry(

@@ -33,6 +33,7 @@
 #include "LinePlotter2D.h"
 
 #include "../SystemSettings.h"
+#include "general/Macros.h"
 
 #include <QColor>
 #include <vtkActor.h>
@@ -47,7 +48,6 @@
 #include <vtkProperty.h>
 #include <vtkSmartPointer.h>
 
-#define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 bool LinePlotter2D::doorColorsToDefault = true;
 

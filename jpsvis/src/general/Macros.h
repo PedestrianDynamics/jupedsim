@@ -35,6 +35,7 @@
 #include <string.h>
 #include <vector>
 
+#define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 enum RoomState { ROOM_CLEAN = 0, ROOM_SMOKED = 1 };
 

@@ -86,9 +86,6 @@
 #include <vtkVectorText.h>
 #include <vtkWindowToImageFilter.h>
 
-
-#define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
-
 using namespace std;
 
 static int once = 1;

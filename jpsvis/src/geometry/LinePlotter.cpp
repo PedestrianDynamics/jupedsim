@@ -33,6 +33,7 @@
 
 #include "../SystemSettings.h"
 #include "JPoint.h"
+#include "general/Macros.h"
 
 #include <vtkActor.h>
 #include <vtkCellArray.h>
@@ -47,10 +48,6 @@
 #include <vtkSmartPointer.h>
 
 int LinePlotter::m_allLineWidth = 2;
-
-
-#define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
-
 
 LinePlotter::LinePlotter()
 {

@@ -34,6 +34,7 @@
 #include "SyncData.h"
 #include "SystemSettings.h"
 #include "TrajectoryPoint.h"
+#include "general/Macros.h"
 #include "geometry/Building.h"
 #include "geometry/FacilityGeometry.h"
 #include "geometry/GeometryFactory.h"
@@ -75,8 +76,6 @@
 #include <vtkTriangleFilter.h>
 #include <vtkVersion.h>
 
-
-#define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 double SaxParser::GetElevation(QString geometryFile, int roomId, int subroomId)
 {

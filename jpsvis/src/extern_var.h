@@ -38,7 +38,6 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkSmartPointer.h>
 #include <vtkTensorGlyph.h>
-#define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 // external variables
 /// define the speed/rate/pace at which  the trajectories are displayed.

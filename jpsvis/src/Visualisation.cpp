@@ -41,6 +41,7 @@
 #include "SystemSettings.h"
 #include "TimerCallback.h"
 #include "TrajectoryPoint.h"
+#include "general/Macros.h"
 #include "geometry/FacilityGeometry.h"
 #include "geometry/GeometryFactory.h"
 #include "geometry/LinePlotter2D.h"
@@ -84,9 +85,6 @@
 #include <vtkTextProperty.h>
 #include <vtkTriangleFilter.h>
 #include <vtkWindowToImageFilter.h>
-
-
-#define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 
 Visualisation::Visualisation(QObject * parent, vtkRenderWindow * renderWindow) : QObject(parent)
