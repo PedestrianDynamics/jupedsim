@@ -44,7 +44,6 @@ using namespace std;
 Room::Room()
 {
     _id         = -1;
-    _state      = ROOM_CLEAN; // smoke-free
     _egressTime = 0;
     _caption    = "no room caption";
     _zPos       = -1.0;
@@ -56,7 +55,6 @@ Room::Room(const Room & orig)
     _id         = orig.GetID();
     _caption    = orig.GetCaption();
     _zPos       = orig.GetZPos();
-    _state      = orig.GetState();
     _egressTime = orig.GetEgressTime();
     _outputFile = orig.GetOutputHandler();
 }
@@ -83,11 +81,6 @@ void Room::SetCaption(const string & s)
 void Room::SetZPos(double z)
 {
     _zPos = z;
-}
-
-void Room::SetState(RoomState state)
-{
-    _state = state;
 }
 
 void Room::SetEgressTime(double time)
@@ -138,17 +131,6 @@ SubRoom * Room::GetSubRoom(int index) const
     }
     return _subRooms.at(index).get();
 }
-
-
-#ifdef _SIMULATOR
-
-#endif // _SIMULATOR
-
-const RoomState & Room::GetState() const
-{
-    return _state;
-}
-
 
 /*************************************************************
  Sonstige Funktionen
