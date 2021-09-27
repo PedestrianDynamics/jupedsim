@@ -288,6 +288,5 @@ private:
     QLabel * labelFrameNumber;
     QLabel * labelRecording;
     QSplitter _splitter;
-    // QTreeWidget _geoStructure;
     MyQTreeView _geoStructure;
 };

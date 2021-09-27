@@ -150,8 +150,8 @@ set(SRCS
     src/InteractorStyle.cpp
     src/Log.cpp
     src/MainWindow.cpp
+    src/Parsing.cpp
     src/Pedestrian.cpp
-    src/SaxParser.cpp
     src/SyncData.cpp
     src/SystemSettings.cpp
     src/TimerCallback.cpp
@@ -189,8 +189,8 @@ set(HDR
     src/InteractorStyle.h
     src/Log.h
     src/MainWindow.h
+    src/Parsing.h
     src/Pedestrian.h
-    src/SaxParser.h
     src/SyncData.h
     src/SystemSettings.h
     src/TimerCallback.h

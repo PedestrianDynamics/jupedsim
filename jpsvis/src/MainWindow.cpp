@@ -35,7 +35,7 @@
 #include "ApplicationState.h"
 #include "Frame.h"
 #include "Log.h"
-#include "SaxParser.h"
+#include "Parsing.h"
 #include "SystemSettings.h"
 #include "TrajectoryPoint.h"
 #include "Visualisation.h"
@@ -434,10 +434,10 @@ bool MainWindow::addPedestrianGroup(int groupID, QString fileName)
     // try to get a geometry filename
     if(fileName.endsWith(".xml", Qt::CaseInsensitive)) {
         Log::Info("1. Extract geometry file from <%s>", fileName.toStdString().c_str());
-        geometry_file = SaxParser::extractGeometryFilename(fileName);
+        geometry_file = Parsing::extractGeometryFilename(fileName);
     } else {
         Log::Info("Extract geometry file from <%s>", fileName.toStdString().c_str());
-        geometry_file = SaxParser::extractGeometryFilenameTXT(fileName);
+        geometry_file = Parsing::extractGeometryFilenameTXT(fileName);
     }
 
     Log::Info(
@@ -475,7 +475,7 @@ bool MainWindow::addPedestrianGroup(int groupID, QString fileName)
         // fall back to this if it fails
         SystemSettings::CreateLogfile();
         Log::Info("Calling parseGeometryJPS with <%s>", geometry_file.toStdString().c_str());
-        if(!SaxParser::parseGeometryJPS(geometry_file, geometry)) {
+        if(!Parsing::parseGeometryJPS(geometry_file, geometry)) {
             int res = QMessageBox::warning(
                 this,
                 "Errors in Geometry. Continue Parsing?",
@@ -492,7 +492,7 @@ bool MainWindow::addPedestrianGroup(int groupID, QString fileName)
             if(res == QMessageBox::No) {
                 return false;
             }
-            SaxParser::parseGeometryXMLV04(
+            Parsing::parseGeometryXMLV04(
                 wd + "/" + geometry_file,
                 geometry); //@todo:
                            // use
@@ -537,11 +537,10 @@ bool MainWindow::addPedestrianGroup(int groupID, QString fileName)
     statusBar()->showMessage(tr("parsing the file"));
 
     if(fileName.endsWith(".txt", Qt::CaseInsensitive)) {
-        QString source_file = wd + QDir::separator() + SaxParser::extractSourceFileTXT(fileName);
-        QString ttt_file =
-            wd + QDir::separator() + SaxParser::extractTrainTimeTableFileTXT(fileName);
-        QString tt_file   = wd + QDir::separator() + SaxParser::extractTrainTypeFileTXT(fileName);
-        QString goal_file = wd + QDir::separator() + SaxParser::extractGoalFileTXT(fileName);
+        QString source_file = wd + QDir::separator() + Parsing::extractSourceFileTXT(fileName);
+        QString ttt_file = wd + QDir::separator() + Parsing::extractTrainTimeTableFileTXT(fileName);
+        QString tt_file  = wd + QDir::separator() + Parsing::extractTrainTypeFileTXT(fileName);
+        QString goal_file = wd + QDir::separator() + Parsing::extractGoalFileTXT(fileName);
         QFileInfo check_file(source_file);
         bool readSource         = true;
         bool readGoal           = true;
@@ -578,21 +577,21 @@ bool MainWindow::addPedestrianGroup(int groupID, QString fileName)
         std::map<int, std::shared_ptr<TrainTimeTable>> trainTimeTable;
         std::map<std::string, std::shared_ptr<TrainType>> trainTypes;
         if(readTrainTypes) {
-            SaxParser::LoadTrainType(tt_file.toStdString(), trainTypes);
+            Parsing::LoadTrainType(tt_file.toStdString(), trainTypes);
             extern_trainTypes = trainTypes;
         }
         if(readTrainTimeTable) {
-            bool ret = SaxParser::LoadTrainTimetable(ttt_file.toStdString(), trainTimeTable);
+            bool ret = Parsing::LoadTrainTimetable(ttt_file.toStdString(), trainTimeTable);
             extern_trainTimeTables = trainTimeTable;
         }
 
-        QString geofileName = SaxParser::extractGeometryFilenameTXT(fileName);
+        QString geofileName = Parsing::extractGeometryFilenameTXT(fileName);
 
         std::tuple<Point, Point> trackStartEnd;
         double elevation;
         for(auto tab : trainTimeTable) {
             int trackId   = tab.second->pid;
-            trackStartEnd = SaxParser::GetTrackStartEnd(geofileName, trackId);
+            trackStartEnd = Parsing::GetTrackStartEnd(geofileName, trackId);
             elevation     = 0;
 
             Point trackStart = std::get<0>(trackStartEnd);
@@ -614,7 +613,7 @@ bool MainWindow::addPedestrianGroup(int groupID, QString fileName)
         for(auto tab : trainTypes)
             Log::Info("type: %s\n", tab.first.c_str());
 
-        if(false == SaxParser::ParseTxtFormat(fileName, dataset, &frameRate))
+        if(false == Parsing::ParseTxtFormat(fileName, dataset, &frameRate))
             return false;
     }
 

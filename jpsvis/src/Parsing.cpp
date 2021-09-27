@@ -26,7 +26,7 @@
  *
  *
  */
-#include "SaxParser.h"
+#include "Parsing.h"
 
 #include "Frame.h"
 #include "FrameElement.h"
@@ -76,8 +76,9 @@
 #include <vtkTriangleFilter.h>
 #include <vtkVersion.h>
 
-
-double SaxParser::GetElevation(QString geometryFile, int roomId, int subroomId)
+namespace Parsing
+{
+double GetElevation(QString geometryFile, int roomId, int subroomId)
 {
     double C_z;
     QString wd;
@@ -136,7 +137,7 @@ double SaxParser::GetElevation(QString geometryFile, int roomId, int subroomId)
     }
     return C_z;
 }
-std::tuple<Point, Point> SaxParser::GetTrackStartEnd(QString geometryFile, int trackId)
+std::tuple<Point, Point> GetTrackStartEnd(QString geometryFile, int trackId)
 {
     QString wd;
     QDir dir(wd);
@@ -224,10 +225,9 @@ std::tuple<Point, Point> SaxParser::GetTrackStartEnd(QString geometryFile, int t
 }
 
 
-bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory & geoFac)
+bool parseGeometryJPS(QString fileName, GeometryFactory & geoFac)
 {
-    Log::Info(
-        "Enter SaxParser::parseGeometryJPS with filename <%s>", fileName.toStdString().c_str());
+    Log::Info("Enter parseGeometryJPS with filename <%s>", fileName.toStdString().c_str());
 
     double captionsColor = 0; // red
     QDir fileDir(fileName);
@@ -451,7 +451,7 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory & geoFac)
 }
 
 /// provided for convenience and will be removed in the next version
-void SaxParser::parseGeometryTRAV(QString content, GeometryFactory & geoFac, QDomNode geo)
+void parseGeometryTRAV(QString content, GeometryFactory & geoFac, QDomNode geo)
 {
     Log::Info("external geometry found");
     // creating am empty document
@@ -642,7 +642,7 @@ void SaxParser::parseGeometryTRAV(QString content, GeometryFactory & geoFac, QDo
     geoFac.AddElement(0, 0, geometry);
 }
 
-QString SaxParser::extractGeometryFilename(QString & filename)
+QString extractGeometryFilename(QString & filename)
 {
     QString extracted_geo_name = "";
     // first try to look at a string <file location="filename.xml"/>
@@ -682,7 +682,7 @@ QString SaxParser::extractGeometryFilename(QString & filename)
     return "";
 }
 
-QString SaxParser::extractSourceFileTXT(QString & filename)
+QString extractSourceFileTXT(QString & filename)
 {
     QString extracted_source_name = "";
     QFile file(filename);
@@ -710,7 +710,7 @@ QString SaxParser::extractSourceFileTXT(QString & filename)
     return extracted_source_name;
 }
 
-QString SaxParser::extractTrainTypeFileTXT(QString & filename)
+QString extractTrainTypeFileTXT(QString & filename)
 {
     QString extracted_tt_name = "";
     QFile file(filename);
@@ -738,7 +738,7 @@ QString SaxParser::extractTrainTypeFileTXT(QString & filename)
     return extracted_tt_name;
 }
 
-QString SaxParser::extractTrainTimeTableFileTXT(QString & filename)
+QString extractTrainTimeTableFileTXT(QString & filename)
 {
     QString extracted_ttt_name = "";
     QFile file(filename);
@@ -768,7 +768,7 @@ QString SaxParser::extractTrainTimeTableFileTXT(QString & filename)
 }
 
 
-QString SaxParser::extractGoalFileTXT(QString & filename)
+QString extractGoalFileTXT(QString & filename)
 {
     QString extracted_goal_name = "";
     QFile file(filename);
@@ -796,7 +796,7 @@ QString SaxParser::extractGoalFileTXT(QString & filename)
 }
 
 
-QString SaxParser::extractGeometryFilenameTXT(QString & filename)
+QString extractGeometryFilenameTXT(QString & filename)
 {
     QString extracted_geo_name = "";
     QFile file(filename);
@@ -826,7 +826,7 @@ QString SaxParser::extractGeometryFilenameTXT(QString & filename)
 }
 
 
-void SaxParser::parseGeometryXMLV04(QString filename, GeometryFactory & geoFac)
+void parseGeometryXMLV04(QString filename, GeometryFactory & geoFac)
 {
     Log::Info("Parsing XML v04");
     QDomDocument doc("");
@@ -1024,7 +1024,7 @@ void SaxParser::parseGeometryXMLV04(QString filename, GeometryFactory & geoFac)
     geoFac.AddElement(0, 0, geo);
 }
 
-bool SaxParser::ParseTxtFormat(const QString & fileName, SyncData * dataset, double * fps)
+bool ParseTxtFormat(const QString & fileName, SyncData * dataset, double * fps)
 {
     Log::Info("parsing txt trajectory <%s> ", fileName.toStdString().c_str());
     *fps = 16; // default value
@@ -1162,7 +1162,7 @@ bool SaxParser::ParseTxtFormat(const QString & fileName, SyncData * dataset, dou
     return true;
 }
 
-bool SaxParser::LoadTrainTimetable(
+bool LoadTrainTimetable(
     std::string Filename,
     std::map<int, std::shared_ptr<TrainTimeTable>> & trainTimeTables)
 {
@@ -1199,7 +1199,7 @@ bool SaxParser::LoadTrainTimetable(
 }
 
 
-bool SaxParser::LoadTrainType(
+bool LoadTrainType(
     std::string Filename,
     std::map<std::string, std::shared_ptr<TrainType>> & trainTypes)
 {
@@ -1231,7 +1231,7 @@ bool SaxParser::LoadTrainType(
 }
 
 
-std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement * e)
+std::shared_ptr<TrainTimeTable> parseTrainTimeTableNode(TiXmlElement * e)
 {
     Log::Info("Loading train time table NODE");
     // std::string caption = xmltoa(e->Attribute("caption"), "-1");
@@ -1288,7 +1288,7 @@ std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement 
 
     return trainTimeTab;
 }
-std::shared_ptr<TrainType> SaxParser::parseTrainTypeNode(TiXmlElement * node)
+std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement * node)
 {
     Log::Info("Loading train type");
 
@@ -1401,3 +1401,4 @@ std::shared_ptr<TrainType> SaxParser::parseTrainTypeNode(TiXmlElement * node)
     });
     return Type;
 }
+} // namespace Parsing

@@ -39,7 +39,7 @@
 #include <map>
 #include <memory>
 
-namespace SaxParser
+namespace Parsing
 {
 /// provided for convenience and will be removed in the next version
 bool parseGeometryJPS(QString content, GeometryFactory & geo);
@@ -82,4 +82,4 @@ bool LoadTrainType(
 double GetElevation(QString geometryFile, int roomId, int subroomId);
 
 std::tuple<Point, Point> GetTrackStartEnd(QString geometryFile, int trackId);
-}; // namespace SaxParser
+}; // namespace Parsing
