@@ -96,6 +96,9 @@ target_compile_options(jpsvis PRIVATE ${COMMON_COMPILE_OPTIONS})
 
 target_compile_definitions(jpsvis
     PRIVATE
+        # Qt will pull in wingdi.h which exposes among other things the ERROR macro.
+        # This clashes with our Log::ERROR enum value. However we can savely disable
+        # WINGDI macros because we are not using win32 gdi directly from our code.
         $<$<CXX_COMPILER_ID:MSVC>:NOGDI>
         $<$<CXX_COMPILER_ID:MSVC>:WIN32_LEAN_AND_MEAN>
 )
