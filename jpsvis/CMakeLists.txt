@@ -189,7 +189,6 @@ set(HDR
     src/InteractorStyle.h
     src/Log.h
     src/MainWindow.h
-    src/Message.h
     src/Pedestrian.h
     src/SaxParser.h
     src/SyncData.h

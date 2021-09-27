@@ -36,7 +36,6 @@
 
 #include "Frame.h"
 #include "Log.h"
-#include "Message.h"
 #include "TrajectoryPoint.h"
 
 #include <QMutex>
