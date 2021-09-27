@@ -39,7 +39,6 @@
 #include "SystemSettings.h"
 #include "TrajectoryPoint.h"
 #include "Visualisation.h"
-#include "VtkVersionSwitch.h"
 #include "extern_var.h"
 #include "geometry/FacilityGeometry.h"
 
@@ -115,7 +114,7 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent)
     QCoreApplication::setOrganizationDomain("jupedsim.org");
     QCoreApplication::setApplicationName("jupedsim");
 
-    _visualisationThread = new Visualisation(this, GetRenderWindow(ui.render_widget));
+    _visualisationThread = new Visualisation(this, ui.render_widget->renderWindow());
 
     travistoOptions = new Settings(this);
     travistoOptions->setWindowTitle("Settings");

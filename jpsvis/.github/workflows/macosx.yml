@@ -13,29 +13,19 @@ jobs:
       fail-fast: false
       matrix:
         os:   [macos-10.15, macos-11]
-        vtk:  ['@8.2', ''] # '' means latest version, currently 9.0
     steps:
       - uses: actions/checkout@v2
       - name: Install Dependencies
         run: |
           brew install qt@5
-          brew install vtk${{ matrix.vtk }}
+          brew install vtk
 
           echo 'export PATH="/usr/local/opt/qt@5/bin:$PATH"' >> /Users/runner/.bash_profile
-
-      - name: Setup deprecated vtk 8 and Qt kegs
-        run:
-          echo 'export PATH="/usr/local/opt/vtk@8.2/bin:$PATH"' >> /Users/runner/.bash_profile
-
-          echo 'export LDFLAGS="-L/usr/local/opt/qt@5/lib -L/usr/local/opt/vtk@8.2/lib"' >> /Users/runner/.bash_profile
-          echo 'export CPPFLAGS="-I/usr/local/opt/qt@5/include -I/usr/local/opt/vtk@8.2/include"' >> /Users/runner/.bash_profile
-        if: matrix.vtk == '@8.2'
 
       - name: Setup vtk 9 and Qt kegs
         run:
           echo 'export LDFLAGS="-L/usr/local/opt/qt@5/lib"' >> /Users/runner/.bash_profile
           echo 'export CPPFLAGS="-I/usr/local/opt/qt@5/include"' >> /Users/runner/.bash_profile
-        if: matrix.vtk == ''
 
       - name: Create Build Environment
         # Some projects don't allow in-source building, so create a separate build directory

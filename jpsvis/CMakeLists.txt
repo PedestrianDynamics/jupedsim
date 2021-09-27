@@ -60,12 +60,8 @@ message( STATUS "Generating  ................................... ${PROJECT_NAME}
 # Dependencies
 ################################################################################
 # VTK
-find_package(VTK 8.0 REQUIRED CONFIG)
+find_package(VTK 9.0 REQUIRED CONFIG)
 message(STATUS "Found VTK Version: ${VTK_VERSION}")
-
-if (VTK_VERSION VERSION_LESS "8.90.0")
-    include(${VTK_USE_FILE})
-endif()
 
 # Qt5
 find_package(
@@ -116,13 +112,10 @@ target_link_libraries(jpsvis PUBLIC
         tinyxml
 )
 
-# vtk_module_autoinit is needed
-if (VTK_VERSION VERSION_GREATER_EQUAL "8.90.0")
-    vtk_module_autoinit(
-            TARGETS jpsvis
-            MODULES ${VTK_LIBRARIES}
-    )
-endif()
+vtk_module_autoinit(
+        TARGETS jpsvis
+        MODULES ${VTK_LIBRARIES}
+)
 
 #**************************************************************
 # SOURCES                                                     *
@@ -196,7 +189,6 @@ set(HDR
     src/TimerCallback.h
     src/TrailPlotter.h
     src/Visualisation.h
-    src/VtkVersionSwitch.h
     src/extern_var.h
     src/general/Macros.h
     src/geometry/Building.h
