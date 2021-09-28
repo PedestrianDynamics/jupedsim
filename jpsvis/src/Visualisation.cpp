@@ -34,19 +34,18 @@
 #include "Visualisation.h"
 
 #include "Frame.h"
+#include "FrameElement.h"
 #include "InteractorStyle.h"
 #include "Log.h"
-#include "Pedestrian.h"
-#include "SyncData.h"
-#include "SystemSettings.h"
-#include "TimerCallback.h"
 #include "TrajectoryPoint.h"
 #include "general/Macros.h"
 #include "geometry/FacilityGeometry.h"
 #include "geometry/GeometryFactory.h"
 #include "geometry/LinePlotter2D.h"
+#include "geometry/Point.h"
 #include "geometry/PointPlotter.h"
 
+#include <MainWindow.h>
 #include <QMessageBox>
 #include <QObject>
 #include <QString>
@@ -67,6 +66,7 @@
 #include <vtkLabeledDataMapper.h>
 #include <vtkLight.h>
 #include <vtkLightKit.h>
+#include <vtkLine.h>
 #include <vtkLookupTable.h>
 #include <vtkOutputWindow.h>
 #include <vtkPolyData.h>
@@ -86,75 +86,45 @@
 #include <vtkTriangleFilter.h>
 #include <vtkWindowToImageFilter.h>
 
-
-Visualisation::Visualisation(QObject * parent, vtkRenderWindow * renderWindow) : QObject(parent)
+Visualisation::Visualisation(
+    QObject * parent,
+    vtkRenderWindow * renderWindow,
+    Settings * settings,
+    TrajectoryData * trajectories) :
+    QObject(parent),
+    _settings(settings),
+    _trajectories(trajectories),
+    _renderWindow(renderWindow),
+    _renderer(vtkRenderer::New()),
+    _runningTime(vtkTextActor::New())
 {
-    _renderWindow = renderWindow;
-    _renderer     = NULL;
-    _runningTime  = vtkTextActor::New();
-    ;
-    _framePerSecond = 25;
-    _axis           = NULL;
-    _winTitle       = "header without room caption";
+    _renderWindow->AddRenderer(_renderer);
+    _winTitle = "header without room caption";
+    _renderer->SetBackground(1.0, 1.0, 1.0);
 }
 
-Visualisation::~Visualisation()
-{
-    if(_axis)
-        _axis->Delete();
-
-    if(extern_glyphs_pedestrians_3D)
-        extern_glyphs_pedestrians_3D->Delete();
-    if(extern_glyphs_pedestrians_actor_3D)
-        extern_glyphs_pedestrians_actor_3D->Delete();
-    if(extern_glyphs_pedestrians)
-        extern_glyphs_pedestrians->Delete();
-    if(extern_glyphs_pedestrians_actor_2D)
-        extern_glyphs_pedestrians_actor_2D->Delete();
-    if(extern_pedestrians_labels)
-        extern_pedestrians_labels->Delete();
-    // show directions of movement
-    if(extern_glyphs_directions)
-        extern_glyphs_directions->Delete();
-    if(extern_glyphs_directions_actor)
-        extern_glyphs_directions_actor->Delete();
-
-    _runningTime->Delete();
-}
+Visualisation::~Visualisation() {}
 
 void Visualisation::setFullsreen(bool status) {}
 
-void Visualisation::slotSetFrameRate(float fps)
+void Visualisation::start()
 {
-    _framePerSecond = fps;
-}
-
-
-void Visualisation::run()
-{
-    // deactivate the output windows
-    vtkObject::GlobalWarningDisplayOff();
-
-    // Create the renderer
-    _renderer = vtkRenderer::New();
-    // set the background
-    _renderer->SetBackground(1.0, 1.0, 1.0);
-    // add the geometry
+    _renderer->RemoveAllViewProps();
+    _renderer->RemoveAllObservers();
     _geometry.Init(_renderer);
 
     initGlyphs2D();
     initGlyphs3D();
 
     // create the trails
-    extern_trail_plotter = new PointPlotter();
-    _renderer->AddActor(extern_trail_plotter->getActor());
+    _trail_plotter = std::make_unique<PointPlotter>();
+    _renderer->AddActor(_trail_plotter->getActor());
 
     // Create the render window
-    _renderWindow->AddRenderer(_renderer);
 
     // add the running time frame
     _runningTime->SetTextScaleModeToViewport();
-    _runningTime->SetVisibility(SystemSettings::getOnScreenInfos());
+    _runningTime->SetVisibility(_settings->showInfos);
 
     // set the properties of the caption
     vtkTextProperty * tprop = _runningTime->GetTextProperty();
@@ -165,99 +135,138 @@ void Visualisation::run()
 
     // Create an interactor
     auto * interactor = _renderWindow->GetInteractor();
-    interactor->SetInteractorStyle(&_interactorStyle);
+    vtkNew<InteractorStyle> myStyle;
+    myStyle->SetVisualisation(this);
+    interactor->SetInteractorStyle(myStyle);
 
-    if(SystemSettings::get2D()) {
+    if(_settings->mode == RenderMode::MODE_2D) {
         _renderer->GetActiveCamera()->OrthogonalizeViewUp();
         _renderer->GetActiveCamera()->ParallelProjectionOn();
-        _renderer->ResetCamera();
     }
 
     // create a timer for rendering the window
-    _timer_cb = std::make_unique<TimerCallback>();
-    _timer_id = interactor->CreateRepeatingTimer(1000.0 / _framePerSecond);
-    _timer_cb->SetRenderTimerId(_timer_id);
-    _timer_cb->setTextActor(_runningTime);
-    interactor->AddObserver(vtkCommand::TimerEvent, _timer_cb.get());
+    _timer_cb = vtkCallbackCommand::New();
+    _timer_cb->SetCallback(
+        [](vtkObject * caller, long unsigned int eventId, void * clientData, void * callData) {
+            reinterpret_cast<Visualisation *>(clientData)->onExecute();
+        });
+    _timer_cb->SetClientData(this);
+    if(_trajectories->getFrameCount() > 0) {
+        _timer_id = interactor->CreateRepeatingTimer(1000.0 / _trajectories->getFps());
+    }
+    runningTime = _runningTime;
+    interactor->AddObserver(vtkCommand::TimerEvent, _timer_cb);
 
 
     // create the necessary connections
     QObject::connect(
-        _timer_cb.get(),
-        SIGNAL(signalRunningTime(unsigned long)),
-        this->parent(),
-        SLOT(slotRunningTime(unsigned long)));
+        this,
+        &Visualisation::signalFrameNumber,
+        dynamic_cast<MainWindow *>(this->parent()),
+        &MainWindow::slotFrameNumber);
 
     QObject::connect(
-        _timer_cb.get(),
-        SIGNAL(signalFrameNumber(unsigned long, unsigned long)),
-        this->parent(),
-        SLOT(slotFrameNumber(unsigned long, unsigned long)));
+        this,
+        &Visualisation::signalMousePositionUpdated,
+        dynamic_cast<MainWindow *>(this->parent()),
+        &MainWindow::slotMousePositionUpdated);
 
     QObject::connect(
-        _timer_cb.get(),
-        SIGNAL(signalRenderingTime(int)),
-        this->parent(),
-        SLOT(slotRenderingTime(int)));
+        this,
+        &Visualisation::signalMaxFramesUpdated,
+        dynamic_cast<MainWindow *>(this->parent()),
+        &MainWindow::slotUpdateNumFrames);
+
+    emit signalMaxFramesUpdated(_trajectories->getFrameCount());
 
     // save the top view  camera
     _topViewCamera = vtkCamera::New();
     _topViewCamera->DeepCopy(_renderer->GetActiveCamera());
 
     // update all (restored) system settings
-    setGeometryVisibility2D(SystemSettings::get2D());
-    setGeometryVisibility3D(!SystemSettings::get2D());
-    setGeometryVisibility(SystemSettings::getShowGeometry());
-    setOnscreenInformationVisibility(SystemSettings::getOnScreenInfos());
-    showFloor(SystemSettings::getShowFloor());
-    showWalls(SystemSettings::getShowWalls());
-    showObstacle(SystemSettings::getShowObstacles());
-    showDoors(SystemSettings::getShowExits());
-    showNavLines(SystemSettings::getShowNavLines());
-    setGeometryLabelsVisibility(SystemSettings::getShowGeometryCaptions());
-    setBackgroundColor(SystemSettings::getBackgroundColor());
-    setWallsColor(SystemSettings::getWallsColor());
-    setObstacleColor(SystemSettings::getObstacleColor());
-    setFloorColor(SystemSettings::getFloorColor());
-    setExitsColor(SystemSettings::getExitsColor());
-    setNavLinesColor(SystemSettings::getNavLinesColor());
-    // FIXME:
-    showGradientField(SystemSettings::getShowGradientField());
-    interactor->Start();
-
-    emit signal_controlSequences("CONTROL_RESET");
+    setGeometryVisibility2D(_settings->mode == RenderMode::MODE_2D);
+    setGeometryVisibility3D(_settings->mode == RenderMode::MODE_3D);
+    setGeometryVisibility(_settings->showGeometry);
+    setOnscreenInformationVisibility(_settings->showInfos);
+    showFloor(_settings->showFloor);
+    showWalls(_settings->showWalls);
+    // showDoors(_settings->showDoors);
+    showDoors(true);
+    setGeometryLabelsVisibility(_settings->showGeometryCaptions);
+    setBackgroundColor(_settings->bgColor);
+    setWallsColor(_settings->wallsColor);
+    setFloorColor(_settings->floorColor);
+    setExitsColor(_settings->exitsColor);
+    _renderer->ResetCamera();
+    emit signalMaxFramesUpdated(_trajectories->getFrameCount());
+    emit signalFrameNumber(0);
+    _renderWindow->Render();
 }
 
 void Visualisation::stop()
 {
     QObject::disconnect(
-        _timer_cb.get(),
-        SIGNAL(signalRunningTime(unsigned long)),
-        this->parent(),
-        SLOT(slotRunningTime(unsigned long)));
+        this,
+        &Visualisation::signalFrameNumber,
+        dynamic_cast<MainWindow *>(this->parent()),
+        &MainWindow::slotFrameNumber);
 
     QObject::disconnect(
-        _timer_cb.get(),
-        SIGNAL(signalFrameNumber(unsigned long, unsigned long)),
-        this->parent(),
-        SLOT(slotFrameNumber(unsigned long, unsigned long)));
+        this,
+        &Visualisation::signalMousePositionUpdated,
+        dynamic_cast<MainWindow *>(this->parent()),
+        &MainWindow::slotMousePositionUpdated);
 
     QObject::disconnect(
-        _timer_cb.get(),
-        SIGNAL(signalRenderingTime(int)),
-        this->parent(),
-        SLOT(slotRenderingTime(int)));
+        this,
+        &Visualisation::signalMaxFramesUpdated,
+        dynamic_cast<MainWindow *>(this->parent()),
+        &MainWindow::slotUpdateNumFrames);
+
+    _trail_plotter.reset();
     _renderWindow->GetInteractor()->DestroyTimer(_timer_id);
     _renderWindow->GetInteractor()->RemoveAllObservers();
 }
 
+void Visualisation::update()
+{
+    auto * polyData2D = _trajectories->currentFrame()->GetPolyData2D();
+    _glyphs_pedestrians->SetInputData(polyData2D);
+    _glyphs_pedestrians->Update();
+    _pedestrians_labels->GetMapper()->SetInputDataObject(polyData2D);
+    _pedestrians_labels->GetMapper()->Update();
+    _glyphs_directions->SetInputData(polyData2D);
+    _glyphs_directions->Update();
+    auto * polyData3D = _trajectories->currentFrame()->GetPolyData3D();
+    _glyphs_pedestrians_3D->SetInputData(polyData3D);
+    _glyphs_pedestrians_3D->Update();
+}
+void Visualisation::renderFrame()
+{
+    // TODO(kkratz): Updating visibility from settings should probably be cached.
+    // TODO(kkratz): Updating visibility should be done from Update.
+    _glyphs_pedestrians_actor_2D->SetVisibility(_settings->mode == RenderMode::MODE_2D);
+    _glyphs_pedestrians_actor_3D->SetVisibility(_settings->mode == RenderMode::MODE_3D);
+    _pedestrians_labels->SetVisibility(_settings->showAgentsCaptions);
+    _glyphs_directions_actor->SetVisibility(_settings->showAgentDirections);
+    _trail_plotter->SetVisibility(_settings->showTrajectories);
+    _renderer->GetRenderWindow()->GetInteractor()->Render();
+}
+
 void Visualisation::setGeometryVisibility(bool status)
 {
-    if(SystemSettings::get2D()) {
+    if(_settings->mode == RenderMode::MODE_2D) {
         _geometry.Set2D(status);
     } else {
         _geometry.Set3D(status);
     }
+}
+void Visualisation::setTrainData(
+    std::map<std::string, std::shared_ptr<TrainType>> && trainTypes,
+    std::map<int, std::shared_ptr<TrainTimeTable>> && trainTimeTable)
+{
+    _trainTypes      = trainTypes;
+    _trainTimeTables = trainTimeTable;
 }
 
 /// show / hide the walls
@@ -292,23 +301,11 @@ void Visualisation::showGradientField(bool status)
 }
 void Visualisation::initGlyphs2D()
 {
-    if(extern_glyphs_pedestrians)
-        extern_glyphs_pedestrians->Delete();
-    if(extern_glyphs_pedestrians_actor_2D)
-        extern_glyphs_pedestrians_actor_2D->Delete();
-    if(extern_pedestrians_labels)
-        extern_pedestrians_labels->Delete();
-    // show directions of movement
-    if(extern_glyphs_directions)
-        extern_glyphs_directions->Delete();
-    if(extern_glyphs_directions_actor)
-        extern_glyphs_directions_actor->Delete();
-
-    extern_glyphs_pedestrians          = vtkTensorGlyph::New();
-    extern_glyphs_pedestrians_actor_2D = vtkActor::New();
-    extern_pedestrians_labels          = vtkActor2D::New();
-    extern_glyphs_directions           = vtkTensorGlyph::New();
-    extern_glyphs_directions_actor     = vtkActor::New();
+    _glyphs_pedestrians_actor_2D = vtkActor::New();
+    _pedestrians_labels          = vtkActor2D::New();
+    _glyphs_directions           = vtkTensorGlyph::New();
+    _glyphs_directions_actor     = vtkActor::New();
+    _glyphs_pedestrians          = vtkTensorGlyph::New();
 
     // now create the glyphs with ellipses
     VTK_CREATE(vtkDiskSource, agentShape);
@@ -323,27 +320,16 @@ void Visualisation::initGlyphs2D()
     VTK_CREATE(vtkStripper, strip);
     strip->SetInputConnection(tris->GetOutputPort());
 
-    extern_glyphs_pedestrians->SetSourceConnection(strip->GetOutputPort());
+    _glyphs_pedestrians->SetSourceConnection(strip->GetOutputPort());
 
     // first frame
-    auto && frames = extern_trajectories_firstSet.GetFrames();
-    if(frames.empty())
-        return;
 
-    Frame * frame       = frames.begin()->second;
-    vtkPolyData * pData = NULL;
-
-    if(frame)
-        pData = frame->GetPolyData2D();
-
-    extern_glyphs_pedestrians->SetInputConnection(agentShape->GetOutputPort());
-    if(frame)
-        extern_glyphs_pedestrians->SetInputData(pData);
-    extern_glyphs_pedestrians->ThreeGlyphsOff();
-    extern_glyphs_pedestrians->ExtractEigenvaluesOff();
+    _glyphs_pedestrians->SetInputConnection(agentShape->GetOutputPort());
+    _glyphs_pedestrians->ThreeGlyphsOff();
+    _glyphs_pedestrians->ExtractEigenvaluesOff();
 
     VTK_CREATE(vtkPolyDataMapper, mapper);
-    mapper->SetInputConnection(extern_glyphs_pedestrians->GetOutputPort());
+    mapper->SetInputConnection(_glyphs_pedestrians->GetOutputPort());
 
     VTK_CREATE(vtkLookupTable, lut);
     lut->SetHueRange(0.0, 0.470);
@@ -353,9 +339,9 @@ void Visualisation::initGlyphs2D()
     lut->Build();
     mapper->SetLookupTable(lut);
 
-    extern_glyphs_pedestrians_actor_2D->SetMapper(mapper);
+    _glyphs_pedestrians_actor_2D->SetMapper(mapper);
 
-    _renderer->AddActor(extern_glyphs_pedestrians_actor_2D);
+    _renderer->AddActor(_glyphs_pedestrians_actor_2D);
 
     // Show directions
     VTK_CREATE(vtkConeSource, agentDirection);
@@ -367,40 +353,33 @@ void Visualisation::initGlyphs2D()
     VTK_CREATE(vtkStripper, strip2);
     strip2->SetInputConnection(tris2->GetOutputPort());
 
-    extern_glyphs_directions->SetSourceConnection(strip2->GetOutputPort());
-    extern_glyphs_directions->SetInputConnection(agentDirection->GetOutputPort());
-    if(frame)
-        extern_glyphs_directions->SetInputData(pData);
-    extern_glyphs_directions->ThreeGlyphsOff();
-    extern_glyphs_directions->ExtractEigenvaluesOff();
+    _glyphs_directions->SetSourceConnection(strip2->GetOutputPort());
+    _glyphs_directions->SetInputConnection(agentDirection->GetOutputPort());
+    _glyphs_directions->ThreeGlyphsOff();
+    _glyphs_directions->ExtractEigenvaluesOff();
 
     VTK_CREATE(vtkPolyDataMapper, mapper2);
-    mapper2->SetInputConnection(extern_glyphs_directions->GetOutputPort());
+    mapper2->SetInputConnection(_glyphs_directions->GetOutputPort());
     mapper2->ScalarVisibilityOff(); // to set color
     mapper2->SetLookupTable(lut);
 
-    extern_glyphs_directions_actor->SetMapper(mapper2);
-    extern_glyphs_directions_actor->GetProperty()->SetColor(0, 0, 0); // black
-    _renderer->AddActor2D(extern_glyphs_directions_actor);
+    _glyphs_directions_actor->SetMapper(mapper2);
+    _glyphs_directions_actor->GetProperty()->SetColor(0, 0, 0); // black
+    _renderer->AddActor2D(_glyphs_directions_actor);
 
     // structure for the labels
     VTK_CREATE(vtkLabeledDataMapper, labelMapper);
-    extern_pedestrians_labels->SetMapper(labelMapper);
+    _pedestrians_labels->SetMapper(labelMapper);
     labelMapper->SetFieldDataName("labels");
     labelMapper->SetLabelModeToLabelFieldData();
-    _renderer->AddActor2D(extern_pedestrians_labels);
-    extern_pedestrians_labels->SetVisibility(false);
+    _renderer->AddActor2D(_pedestrians_labels);
+    _pedestrians_labels->SetVisibility(false);
 }
 
 void Visualisation::initGlyphs3D()
 {
-    if(extern_glyphs_pedestrians_3D)
-        extern_glyphs_pedestrians_3D->Delete();
-    if(extern_glyphs_pedestrians_actor_3D)
-        extern_glyphs_pedestrians_actor_3D->Delete();
-
-    extern_glyphs_pedestrians_3D       = vtkTensorGlyph::New();
-    extern_glyphs_pedestrians_actor_3D = vtkActor::New();
+    _glyphs_pedestrians_3D       = vtkTensorGlyph::New();
+    _glyphs_pedestrians_actor_3D = vtkActor::New();
 
     // now create the glyphs with zylinders
     VTK_CREATE(vtkCylinderSource, agentShape);
@@ -415,28 +394,13 @@ void Visualisation::initGlyphs3D()
     VTK_CREATE(vtkStripper, strip);
     strip->SetInputConnection(tris->GetOutputPort());
 
-    extern_glyphs_pedestrians_3D->SetSourceConnection(strip->GetOutputPort());
-
-    // first frame
-    auto && frames = extern_trajectories_firstSet.GetFrames();
-    if(frames.empty())
-        return;
-
-    Frame * frame = frames.begin()->second;
-
-    vtkPolyData * pData = NULL;
-    if(frame)
-        pData = frame->GetPolyData2D();
-
-    extern_glyphs_pedestrians_3D->SetInputConnection(strip->GetOutputPort());
-    if(frame)
-        extern_glyphs_pedestrians_3D->SetInputData(pData);
-
-    extern_glyphs_pedestrians_3D->ThreeGlyphsOff();
-    extern_glyphs_pedestrians_3D->ExtractEigenvaluesOff();
+    _glyphs_pedestrians_3D->SetSourceConnection(strip->GetOutputPort());
+    _glyphs_pedestrians_3D->SetInputConnection(strip->GetOutputPort());
+    _glyphs_pedestrians_3D->ThreeGlyphsOff();
+    _glyphs_pedestrians_3D->ExtractEigenvaluesOff();
 
     VTK_CREATE(vtkPolyDataMapper, mapper);
-    mapper->SetInputConnection(extern_glyphs_pedestrians_3D->GetOutputPort());
+    mapper->SetInputConnection(_glyphs_pedestrians_3D->GetOutputPort());
 
     VTK_CREATE(vtkLookupTable, lut);
     lut->SetHueRange(0.0, 0.470);
@@ -446,11 +410,11 @@ void Visualisation::initGlyphs3D()
     lut->Build();
     mapper->SetLookupTable(lut);
 
-    extern_glyphs_pedestrians_actor_3D->SetMapper(mapper);
-    extern_glyphs_pedestrians_actor_3D->GetProperty()->BackfaceCullingOn();
-    _renderer->AddActor(extern_glyphs_pedestrians_actor_3D);
+    _glyphs_pedestrians_actor_3D->SetMapper(mapper);
+    _glyphs_pedestrians_actor_3D->GetProperty()->BackfaceCullingOn();
+    _renderer->AddActor(_glyphs_pedestrians_actor_3D);
 
-    extern_glyphs_pedestrians_actor_3D->SetVisibility(false);
+    _glyphs_pedestrians_actor_3D->SetVisibility(false);
 }
 
 void Visualisation::init() {}
@@ -615,4 +579,316 @@ void Visualisation::setOnscreenInformationVisibility(bool show)
     _runningTime->SetVisibility(show);
 }
 
-void Visualisation::Create2dAgent() {}
+vtkSmartPointer<vtkPolyData>
+getTrainData(Point trainStart, Point trainEnd, std::vector<Point> doorPoints, double elevation)
+
+{
+    float factor = 100.0;
+
+    double pt[3] = {1.0, 0.0, 0.0}; // to convert from Point
+    // Create the polydata where we will store all the geometric data
+    vtkSmartPointer<vtkPolyData> linesPolyData = vtkSmartPointer<vtkPolyData>::New();
+
+    // Create a vtkPoints container and store the points in it
+    vtkSmartPointer<vtkPoints> pts = vtkSmartPointer<vtkPoints>::New();
+
+    pt[0] = factor * trainStart._x;
+    pt[1] = factor * trainStart._y;
+    pt[2] = factor * elevation;
+    pts->InsertNextPoint(pt);
+
+    for(auto p : doorPoints) {
+        pt[0] = factor * p._x;
+        pt[1] = factor * p._y;
+        pt[2] = factor * elevation;
+        pts->InsertNextPoint(pt);
+    }
+    pt[0] = factor * trainEnd._x;
+    pt[1] = factor * trainEnd._y;
+    pt[2] = factor * elevation;
+    pts->InsertNextPoint(pt);
+
+
+    // Add the points to the polydata container
+    linesPolyData->SetPoints(pts);
+
+
+    vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+
+
+    // Create the first line (between Origin and P0)
+    for(int i = 0; i <= doorPoints.size(); i += 2) {
+        vtkSmartPointer<vtkLine> line = vtkSmartPointer<vtkLine>::New();
+        line->GetPointIds()->SetId(0, i);
+        line->GetPointIds()->SetId(1, i + 1);
+
+        lines->InsertNextCell(line);
+        lines->InsertNextCell(line);
+        line = nullptr;
+    }
+
+    // Add the lines to the polydata container
+    linesPolyData->SetLines(lines);
+    return linesPolyData;
+}
+
+void Visualisation::onExecute()
+{
+    vtkRenderWindowInteractor * const iren = _renderWindow->GetInteractor();
+
+    int frameNumber         = 0;
+    int nPeds               = 0;
+    static bool isRecording = false;
+
+
+    if(_trajectories->getFrameCount() > 0) {
+        if(!is_pause) {
+            _trajectories->incrementFrame();
+        }
+        const auto * frame = _trajectories->currentFrame();
+
+        nPeds = frame->getSize();
+        update();
+        auto FrameElements = frame->GetFrameElements();
+
+        if(_settings->showTrajectories) {
+            const std::vector<FrameElement *> & elements = frame->GetFrameElements();
+
+            for(unsigned int i = 0; i < elements.size(); i++) {
+                FrameElement * el = elements[i];
+                glm::dvec3 pos    = el->pos;
+                double color      = el->color;
+                _trail_plotter->PlotPoint(pos, color);
+            }
+        }
+    }
+
+    frameNumber = _trajectories->currentIndex();
+    emit signalFrameNumber(frameNumber);
+
+    double now      = frameNumber * iren->GetTimerDuration(_timer_id) / 1000;
+    int countTrains = 0;
+    char label[100];
+
+    for(auto tab : _trainTimeTables) {
+        VTK_CREATE(vtkTextActor3D, textActor);
+        auto trainType = tab.second->type;
+        sprintf(label, "%s_%d", trainType.c_str(), tab.second->id);
+        auto trainId      = tab.second->id;
+        auto trackStart   = tab.second->pstart;
+        auto trackEnd     = tab.second->pend;
+        auto trainOffset  = tab.second->train_offset;
+        auto reversed     = tab.second->reversed;
+        auto train        = _trainTypes[trainType];
+        auto train_length = train->_length;
+        auto doors        = train->_doors;
+        std::vector<Point> doorPoints;
+        auto mapper         = tab.second->mapper;
+        auto actor          = tab.second->actor;
+        double elevation    = tab.second->elevation;
+        auto txtActor       = tab.second->textActor;
+        auto trackDirection = (reversed) ? (trackStart - trackEnd) : (trackEnd - trackStart);
+        trackDirection      = trackDirection.Normalized();
+        auto trainStart     = (reversed) ? trackEnd + trackDirection * trainOffset :
+                                           trackStart + trackDirection * trainOffset;
+        auto trainEnd = (reversed) ? trackEnd + trackDirection * (trainOffset + train_length) :
+                                     trackStart + trackDirection * (trainOffset + train_length);
+
+        for(auto door : doors) {
+            Point trainDirection = trainEnd - trainStart;
+            ;
+            trainDirection = trainDirection.Normalized();
+            Point point1   = trainStart + trainDirection * (door._distance);
+            Point point2   = trainStart + trainDirection * (door._distance + door._width);
+            doorPoints.push_back(point1);
+            doorPoints.push_back(point2);
+        } // doors
+        // FIXME(kkratz): This is broken!
+        static int once = 1;
+        if(once) {
+            auto data = getTrainData(trainStart, trainEnd, doorPoints, elevation);
+            mapper->SetInputData(data);
+            actor->SetMapper(mapper);
+            actor->GetProperty()->SetLineWidth(10);
+            actor->GetProperty()->SetOpacity(0.1); // feels cool!
+            if(trainType == "RE") {
+                actor->GetProperty()->SetColor(
+                    std::abs(0.0 - _renderer->GetBackground()[0]),
+                    std::abs(1.0 - _renderer->GetBackground()[1]),
+                    std::abs(1.0 - _renderer->GetBackground()[2]));
+            } else {
+                actor->GetProperty()->SetColor(
+                    std::abs(0.9 - _renderer->GetBackground()[0]),
+                    std::abs(0.9 - _renderer->GetBackground()[1]),
+                    std::abs(1.0 - _renderer->GetBackground()[2]));
+            }
+            // text
+            txtActor->GetTextProperty()->SetOpacity(0.7);
+            double pos_x = 50 * (trainStart._x + trainEnd._x + 0.5);
+            double pos_y = 50 * (trainStart._y + trainEnd._y + 0.5);
+
+            txtActor->SetPosition(pos_x, pos_y + 2, 20);
+            txtActor->SetInput(label);
+            txtActor->GetTextProperty()->SetFontSize(30);
+            txtActor->GetTextProperty()->SetBold(true);
+            if(trainType == "RE") {
+                txtActor->GetTextProperty()->SetColor(
+                    std::abs(0.0 - _renderer->GetBackground()[0]),
+                    std::abs(1.0 - _renderer->GetBackground()[1]),
+                    std::abs(1.0 - _renderer->GetBackground()[2]));
+            } else {
+                txtActor->GetTextProperty()->SetColor(
+                    std::abs(0.9 - _renderer->GetBackground()[0]),
+                    std::abs(0.9 - _renderer->GetBackground()[1]),
+                    std::abs(0.5 - _renderer->GetBackground()[2]));
+            }
+            txtActor->SetVisibility(false);
+        }
+        if((now >= tab.second->tin) && (now <= tab.second->tout)) {
+            actor->SetVisibility(true);
+            txtActor->SetVisibility(true);
+        } else {
+            actor->SetVisibility(false);
+            txtActor->SetVisibility(false);
+        }
+        if(once) {
+            _renderer->AddActor(actor);
+            _renderer->AddActor(txtActor);
+            if(countTrains == _trainTimeTables.size())
+                once = 0;
+        }
+
+        countTrains++;
+    } // time table
+
+
+    int * winSize       = _renderWindow->GetSize();
+    static int lastWinX = winSize[0] + 1; // +1 to trigger a first change
+    static int lastWinY = winSize[1];
+    sprintf(
+        runningTimeText,
+        "Pedestrians: %d      Time: %ld Sec",
+        nPeds,
+        frameNumber * iren->GetTimerDuration(_timer_id) / 1000);
+    runningTime->SetInput(runningTimeText);
+    runningTime->Modified();
+
+    if((lastWinX != winSize[0]) || (lastWinY != winSize[1]) /*|| (frameNumber<10)*/) {
+        static std::string winBaseName(_renderWindow->GetWindowName());
+        std::string winName = winBaseName;
+        std::string s;
+        winName.append(" [ ");
+        s = QString::number(winSize[0]).toStdString();
+        winName.append(s);
+        winName.append(" x ");
+        s = QString::number(winSize[1]).toStdString();
+        winName.append(s);
+        winName.append(" ] -->");
+
+        int posY = winSize[1] * (1.0 - 30.0 / 536.0);
+        int posX = winSize[0] * (1.0 - 450.0 / 720.0);
+        runningTime->SetPosition(posX, posY);
+        _renderWindow->SetWindowName(winName.c_str());
+
+        lastWinX = winSize[0];
+        lastWinY = winSize[1];
+    }
+
+    renderFrame();
+
+    if(_settings->recordPNGsequence) {
+        takeScreenshotSequence();
+    }
+}
+
+void Visualisation::onMouseMove(double x, double y, double z)
+{
+    emit signalMousePositionUpdated(x, y, z);
+}
+
+void Visualisation::takeScreenshot()
+{
+    static int imageID                     = 0;
+    vtkWindowToImageFilter * winToImFilter = vtkWindowToImageFilter::New();
+    winToImFilter->SetInput(_renderWindow);
+    vtkPNGWriter * image = vtkPNGWriter::New();
+    image->SetInputConnection(winToImFilter->GetOutputPort());
+    winToImFilter->Delete();
+
+    QString screenshots = QDir::homePath() + QDir::separator() + "Desktop" + QDir::separator() +
+                          "JPSvis_Files" + QDir::separator();
+    // create directory if not exits
+    if(!QDir(screenshots).exists()) {
+        QDir dir;
+        if(!dir.mkpath(screenshots)) {
+            // try with the current directory
+            screenshots = "";
+        }
+    }
+
+
+    char filename[256] = {0};
+    std::string date   = QString(QDateTime::currentDateTime().toString("yyMMdd_hh")).toStdString();
+
+    sprintf(filename, "travisto_snap_%sh_%d.png", date.c_str(), imageID++);
+
+    // append the prefix
+    screenshots += _settings->filesPrefix;
+    screenshots += QString(filename);
+    image->SetFileName(screenshots.toStdString().c_str());
+    winToImFilter->Modified();
+
+    image->Write();
+    image->Delete();
+}
+
+/// take png screenshot sequence
+void Visualisation::takeScreenshotSequence()
+{
+    static int imageID                     = 0;
+    vtkWindowToImageFilter * winToImFilter = vtkWindowToImageFilter::New();
+    winToImFilter->SetInput(_renderWindow);
+    vtkPNGWriter * image = vtkPNGWriter::New();
+    image->SetInputConnection(winToImFilter->GetOutputPort());
+    winToImFilter->Delete();
+
+    QString screenshots = QDir::homePath() + QDir::separator() + "Desktop" + QDir::separator() +
+                          "JPSvis_Files" + QDir::separator();
+
+    screenshots.append(
+        "./png_seq_" + QDateTime::currentDateTime().toString("yyMMddhh") + "_" +
+        _settings->filesPrefix);
+    screenshots.truncate(screenshots.size() - 1);
+
+    // create directory if not exits
+    if(!QDir(screenshots).exists()) {
+        QDir dir;
+        if(!dir.mkpath(screenshots)) {
+            cerr << "could not create directory: " << screenshots.toStdString();
+            // try with the current directory
+            screenshots = "./png_seq_" + QDateTime::currentDateTime().toString("yyMMdd") + "_" +
+                          _settings->filesPrefix;
+            screenshots.truncate(screenshots.size() - 1);
+        }
+    }
+
+
+    char filename[30] = {0};
+    sprintf(filename, "/tmp_%07d.png", imageID++);
+    screenshots.append(filename);
+    image->SetFileName(screenshots.toStdString().c_str());
+    winToImFilter->Modified();
+
+    image->Write();
+    image->Delete();
+}
+
+double Visualisation::trajectoryRecordingFps() const
+{
+    return _trajectories->getFps();
+}
+
+void Visualisation::pauseRendering(bool paused)
+{
+    is_pause = paused;
+}

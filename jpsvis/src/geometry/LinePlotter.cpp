@@ -31,8 +31,8 @@
 
 #include "LinePlotter.h"
 
-#include "../SystemSettings.h"
 #include "JPoint.h"
+#include "Settings.h"
 #include "general/Macros.h"
 
 #include <vtkActor.h>

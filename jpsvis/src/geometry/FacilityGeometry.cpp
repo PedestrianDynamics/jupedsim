@@ -31,9 +31,9 @@
 
 #include "FacilityGeometry.h"
 
-#include "../SystemSettings.h"
 #include "JPoint.h"
 #include "LinePlotter2D.h"
+#include "Settings.h"
 #include "general/Macros.h"
 
 #include <vtkActor.h>
@@ -154,11 +154,13 @@ void FacilityGeometry::CreateActors()
 
 void FacilityGeometry::setVisibility(bool status)
 {
-    if(SystemSettings::get2D()) {
-        assembly2D->SetVisibility(status);
-    } else {
-        assembly3D->SetVisibility(status);
-    }
+    // TODO(kkratz): Fix this :)
+    // if(Settings::get2D()) {
+    //     assembly2D->SetVisibility(status);
+    // } else {
+    //     assembly3D->SetVisibility(status);
+    // }
+    assembly2D->SetVisibility(status);
     _visibility = status;
 }
 
@@ -256,7 +258,6 @@ void FacilityGeometry::addWall(
     // all walls will have this parameters until changed
     wallColor = color;
 
-    //	if(SystemSettings::get2D()){
     double m[] = {x1, y1, z1};
     double n[] = {x2, y2, z2};
     linesPlotter2D->PlotWall(m, n, wallColor / 255.0);
@@ -290,7 +291,6 @@ void FacilityGeometry::addStair(
     // all walls will have this parameters until changed
     wallColor = color;
 
-    //	if(SystemSettings::get2D()){
     double m[] = {x1, y1, z1};
     double n[] = {x2, y2, z2};
     linesPlotter2D->PlotWall(m, n, wallColor / 255.0);
@@ -323,7 +323,6 @@ void FacilityGeometry::addDoor(
     // all doors will take this color upon changed
     doorColor = color;
     // constructing the 2D assembly
-    //	if(SystemSettings::get2D()){
     double m[] = {x1, y1, z1};
     double n[] = {x2, y2, z2};
 
@@ -357,7 +356,6 @@ void FacilityGeometry::addNavLine(
     // all doors will take this color upon changed
     navlineColor = color;
     // constructing the 2D assembly
-    //	if(SystemSettings::get2D()){
     double m[] = {x1, y1, z1};
     double n[] = {x2, y2, z2};
 
@@ -910,6 +908,7 @@ void FacilityGeometry::showObstacles(bool status)
 {
     obstaclesActor->SetVisibility(status);
 }
+
 void FacilityGeometry::addObjectLabel(
     double center[3],
     double orientation[3],
@@ -924,30 +923,16 @@ vtkActor2DCollection * FacilityGeometry::getCaptions()
     return captions;
 }
 
-
-// orientation and color ignored
 void FacilityGeometry::addNewElementText(
     double center[3],
     double orientation[3],
     string text,
     double color)
 {
-    // return ;
-
-    // caption
     VTK_CREATE(vtkTextActor3D, caption);
-    // caption = vtkTextActor3D ::New();
-
-    // caption->SetVisibility(false);
     caption->SetInput(text.c_str());
-    // set the properties of the caption
-    // FARBE
     vtkTextProperty * tprop = caption->GetTextProperty();
-    // tprop->SetFontFamilyToArial();
-    // tprop->BoldOn();
-    // tprop->ShadowOn();
-    // tprop->SetLineSpacing(1.0);
-    tprop->SetFontSize(SystemSettings::getPedestrianCaptionSize() / 2);
+    tprop->SetFontSize(15);
 
     double colorRGB[3];
     lookupTable->GetColor(color, colorRGB);

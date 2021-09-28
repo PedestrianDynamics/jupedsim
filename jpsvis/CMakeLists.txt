@@ -71,6 +71,10 @@ find_package(
 )
 message(STATUS "Found QT Version: ${Qt5_VERSION}")
 
+# GLM
+find_package(glm REQUIRED CONFIG)
+message(STATUS "Found GLM Version: ${GLM_VERSION}")
+
 #**********************************************************
 # Qt and Misc Stuff                                       *
 #**********************************************************
@@ -108,6 +112,7 @@ target_link_libraries(jpsvis PUBLIC
         Qt5::Xml
         Qt5::Core
         ${VTK_LIBRARIES}
+        glm::glm
         git-info
         tinyxml
 )
@@ -135,20 +140,16 @@ target_include_directories(tinyxml PUBLIC
 
 target_include_directories(jpsvis PUBLIC "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/forms" ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 set(SRCS
-    forms/Settings.cpp
     forms/jpsvis.rc
+    src/BuildInfo.cpp
     src/Frame.cpp
-    src/FrameElement.cpp
     src/IO/OutputHandler.cpp
     src/InteractorStyle.cpp
     src/Log.cpp
     src/MainWindow.cpp
     src/Parsing.cpp
-    src/Pedestrian.cpp
-    src/SyncData.cpp
-    src/SystemSettings.cpp
-    src/TimerCallback.cpp
     src/TrailPlotter.cpp
+    src/TrajectoryData.cpp
     src/Visualisation.cpp
     src/geometry/Building.cpp
     src/geometry/Crossing.cpp
@@ -171,11 +172,12 @@ set(SRCS
     src/geometry/Wall.cpp
     src/main.cpp
     src/myqtreeview.cpp
+    src/string_utils.cpp
 )
 
 set(HDR
-    forms/Settings.h
     src/ApplicationState.h
+    src/BuildInfo.h
     src/Frame.h
     src/FrameElement.h
     src/IO/OutputHandler.h
@@ -183,13 +185,11 @@ set(HDR
     src/Log.h
     src/MainWindow.h
     src/Parsing.h
-    src/Pedestrian.h
-    src/SyncData.h
-    src/SystemSettings.h
-    src/TimerCallback.h
+    src/RenderMode.h
+    src/Settings.h
     src/TrailPlotter.h
+    src/TrajectoryData.h
     src/Visualisation.h
-    src/extern_var.h
     src/general/Macros.h
     src/geometry/Building.h
     src/geometry/Crossing.h
@@ -211,12 +211,12 @@ set(HDR
     src/geometry/Transition.h
     src/geometry/Wall.h
     src/myqtreeview.h
+    src/string_utils.h
     src/trains/train.h
 )
 
 set(UIS
     forms/mainwindow.ui
-    forms/settings.ui
 )
 
 set(RCS

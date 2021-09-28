@@ -1,7 +1,4 @@
 /**
- * @headerfile FrameElement.h
- * @author   Ulrich Kemloh <kemlohulrich@gmail.com>
- * @version 0.5
  * Copyright (C) <2009-2014>
  *
  * @section LICENSE
@@ -20,45 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * @section DESCRIPTION
  */
 #pragma once
 
-class FrameElement
-{
-public:
-    FrameElement(int _id);
-    virtual ~FrameElement();
+#include <glm/vec3.hpp>
 
-    /// set/get the point ID
-    void SetId(int _id);
-    /// set/get the point ID
-    int GetId();
-    void SetMinFrame(int minframe);
-    int GetMinFrame();
-
-    /// set/get the position of the point/agent
-    void GetPos(double pos[3]);
-    /// set/get the position of the point/agent
-    void SetPos(double pos[3]);
-
-    /// Set/Get the agent scaling, semi axes of the ellipses
-    void SetRadius(double radius[3]);
-    void GetRadius(double radius[3]);
-
-    /// Set/Get the phisical orientation of the agent
-    void SetOrientation(double angle[3]);
-    void GetOrientation(double angle[3]);
-
-    /// Set/Get the color which codes the velocity
-    void SetColor(double color);
-    void GetColor(double * color);
-
-private:
-    int _id;
-    double _pos[3];
-    double _radius[3];
-    double _orientation[3];
-    double _color;
-    int _minFrame;
+/// Represents a single entry for a single agent in a frame
+struct FrameElement {
+    glm::dvec3 pos;
+    glm::dvec3 radius;
+    glm::dvec3 orientation;
+    double color;
+    int id;
 };

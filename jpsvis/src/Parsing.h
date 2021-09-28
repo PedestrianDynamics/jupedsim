@@ -28,39 +28,51 @@
  */
 #pragma once
 
-#include "SyncData.h"
+#include "TrajectoryData.h"
 #include "geometry/GeometryFactory.h"
 #include "geometry/Point.h"
 #include "tinyxml.h"
 #include "trains/train.h"
 
-#include <QDomNode>
 #include <QString>
+#include <filesystem>
 #include <map>
 #include <memory>
+#include <optional>
+#include <tuple>
 
 namespace Parsing
 {
-/// provided for convenience and will be removed in the next version
-bool parseGeometryJPS(QString content, GeometryFactory & geo);
+/// This enum describes all file types that can be selected via the OpenFile dialog.
+enum class InputFileType {
+    /// This is geometry data in XML format, this is the same format jpscore consumes
+    GEOMETRY_XML,
+    /// This is trajectory data in TXT format created by jpscore
+    TRAJECTORIES_TXT,
+    /// This is dummy type indicating that the file format is not recognised.
+    UNRECOGNIZED
+};
+
+/// Encapsulates paths to all additional inputs defined in a trajectory txt file.
+struct AdditionalInputs {
+    /// Path to the geometry file
+    std::optional<std::filesystem::path> geometry_path;
+    /// Path to the time table file
+    std::optional<std::filesystem::path> train_time_table_path;
+    /// Path to the train type file
+    std::optional<std::filesystem::path> train_type_path;
+};
+
+/// This function will return the detected file type, this may be 'UNRECOGNISED' if detection fails.
+/// @param path to the file
+/// @return InputFileType that was detected
+InputFileType detectFileType(const std::filesystem::path & path);
 
 /// provided for convenience and will be removed in the next version
-void parseGeometryXMLV04(QString content, GeometryFactory & geo);
-
-/// provided for convenience and will be removed in the next version
-void parseGeometryTRAV(QString fileName, GeometryFactory & geoFac, QDomNode geoNode = QDomNode());
-
-/// take a large file and find the geometry file location.
-QString extractGeometryFilename(QString & filename);
-
-QString extractGeometryFilenameTXT(QString & filename);
-
-QString extractSourceFileTXT(QString & filename);
-
-QString extractGoalFileTXT(QString & filename);
+bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & geo);
 
 /// parse the txt file format
-bool ParseTxtFormat(const QString & fileName, SyncData * dataset, double * fps);
+bool ParseTxtFormat(const QString & fileName, TrajectoryData * trajectories);
 
 /// Trains
 bool LoadTrainTimetable(
@@ -71,15 +83,17 @@ std::shared_ptr<TrainTimeTable> parseTrainTimeTableNode(TiXmlElement * e);
 
 std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement * e);
 
-QString extractTrainTypeFileTXT(QString & filename);
-
-QString extractTrainTimeTableFileTXT(QString & filename);
-
 bool LoadTrainType(
     std::string Filename,
     std::map<std::string, std::shared_ptr<TrainType>> & trainTypes);
 
-double GetElevation(QString geometryFile, int roomId, int subroomId);
-
 std::tuple<Point, Point> GetTrackStartEnd(QString geometryFile, int trackId);
+
+/// Extract additional input files from the trajectory txt file.
+/// All paths returned are absolute paths. If no entry has been found for a particular additional
+/// input the optional will be set to NONE.
+/// This functions does not do any constriant checking, i.e. all found paths are returned as is.
+/// @param path to the trajectory txt file, this file is expected to exist.
+/// @return AdditionalInputs that have been found.
+AdditionalInputs extractAdditionalInputFilePaths(const std::filesystem::path & path);
 }; // namespace Parsing

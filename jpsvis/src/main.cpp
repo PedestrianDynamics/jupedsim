@@ -20,12 +20,6 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * @section DESCRIPTION
- *
- * @brief This is what it does... :)
- *
- * Created on: 05.05.2009
- *
  */
 
 /**
@@ -47,6 +41,7 @@
  *
  */
 
+#include "BuildInfo.h"
 #include "Log.h"
 #include "MainWindow.h"
 
@@ -62,38 +57,6 @@
 #else
 #pragma comment(linker, "/SUBSYSTEM:CONSOLE")
 #endif
-#endif
-std::string ver_string(int a, int b, int c)
-{
-    std::ostringstream ss;
-    ss << a << '.' << b << '.' << c;
-    return ss.str();
-}
-
-std::string true_cxx =
-#ifdef __clang__
-    "clang++";
-#elif defined(__GNUC__)
-    "g++";
-#elif defined(__MINGW32__)
-    "MinGW";
-#elif defined(_MSC_VER)
-    "Visual Studio";
-#else
-    "Compiler not identified";
-#endif
-
-std::string true_cxx_ver =
-#ifdef __clang__
-    ver_string(__clang_major__, __clang_minor__, __clang_patchlevel__);
-#elif defined(__GNUC__)
-    ver_string(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
-#elif defined(__MINGW32__)
-    ver_string(__MINGW32__, __MINGW32_MAJOR_VERSION, __MINGW32_MINOR_VERSION);
-#elif defined(_MSC_VER)
-    ver_string(_MSC_VER, _MSC_FULL_VER, _MSC_BUILD);
-#else
-    "";
 #endif
 
 int main(int argc, char * argv[])

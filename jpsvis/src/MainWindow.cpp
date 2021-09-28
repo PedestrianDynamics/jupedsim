@@ -31,15 +31,13 @@
 
 #include "MainWindow.h"
 
-#include "../forms/Settings.h"
 #include "ApplicationState.h"
 #include "Frame.h"
 #include "Log.h"
 #include "Parsing.h"
-#include "SystemSettings.h"
+#include "Settings.h"
 #include "TrajectoryPoint.h"
 #include "Visualisation.h"
-#include "extern_var.h"
 #include "geometry/FacilityGeometry.h"
 
 #include <QApplication>
@@ -61,45 +59,12 @@
 #include <QTemporaryFile>
 #include <QThread>
 #include <QTime>
+#include <filesystem>
 #include <iostream>
 #include <limits>
 #include <sstream>
 #include <string>
 #include <vector>
-
-//----------- @todo: this part is copy/paste from main.cpp.
-std::string ver_string1(int a, int b, int c)
-{
-    std::ostringstream ss;
-    ss << a << '.' << b << '.' << c;
-    return ss.str();
-}
-
-std::string true_cxx1 =
-#ifdef __clang__
-    "clang++";
-#elif defined(__GNUC__)
-    "g++";
-#elif defined(__MINGW32__)
-    "MinGW";
-#elif defined(_MSC_VER)
-    "Visual Studio";
-#else
-    "Compiler not identified";
-#endif
-
-std::string true_cxx_ver1 =
-#ifdef __clang__
-    ver_string1(__clang_major__, __clang_minor__, __clang_patchlevel__);
-#elif defined(__GNUC__)
-    ver_string1(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
-#elif defined(__MINGW32__)
-    ver_string1(__MINGW32__, __MINGW32_MAJOR_VERSION, __MINGW32_MINOR_VERSION);
-#elif defined(_MSC_VER)
-    ver_string1(_MSC_VER, _MSC_FULL_VER, _MSC_BUILD);
-#else
-    "";
-#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // Creation & Destruction
@@ -114,22 +79,14 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent)
     QCoreApplication::setOrganizationDomain("jupedsim.org");
     QCoreApplication::setApplicationName("jupedsim");
 
-    _visualisationThread = new Visualisation(this, ui.render_widget->renderWindow());
-
-    travistoOptions = new Settings(this);
-    travistoOptions->setWindowTitle("Settings");
-    travistoOptions->setWindowFlags(Qt::Window | Qt::WindowCloseButtonHint);
+    _visualisation = std::make_unique<Visualisation>(
+        this, ui.render_widget->renderWindow(), &_settings, &_trajectories);
 
     QObject::connect(
-        &_visualisationThread->getGeometry().GetModel(),
+        &_visualisation->getGeometry().GetModel(),
         SIGNAL(itemChanged(QStandardItem *)),
         this,
         SLOT(slotOnGeometryItemChanged(QStandardItem *)));
-
-    isPlaying             = false;
-    isPaused              = false;
-    numberOfDatasetLoaded = 0;
-    frameSliderHold       = false;
 
     // some hand made stuffs
     // the state of actionShowGeometry_Structure connect the state of the
@@ -138,7 +95,6 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent)
         ui.actionShowGeometry_Structure->setChecked(false);
     });
     // connections
-    connect(ui.actionShow_Directions, &QAction::changed, this, &MainWindow::slotShowDirections);
     connect(
         ui.actionTop_Rotate,
         &QAction::triggered,
@@ -150,60 +106,24 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent)
         this,
         &MainWindow::slotSetCameraPerspectiveToSideRotate);
 
-    labelCurrentAction = new QLabel();
-    labelCurrentAction->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-    labelCurrentAction->setText("   Idle   ");
-    statusBar()->addPermanentWidget(labelCurrentAction);
+    labelCurrentAction.setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    labelCurrentAction.setText("   Idle   ");
+    statusBar()->addPermanentWidget(&labelCurrentAction);
 
-    labelFrameNumber = new QLabel();
-    labelFrameNumber->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-    labelFrameNumber->setText("fps:");
-    statusBar()->addPermanentWidget(labelFrameNumber);
+    labelFrameNumber.setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    labelFrameNumber.setText("fps:");
+    statusBar()->addPermanentWidget(&labelFrameNumber);
 
-    labelRecording = new QLabel();
-    labelRecording->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-    labelRecording->setText(" rec: off ");
-    statusBar()->addPermanentWidget(labelRecording);
+    labelRecording.setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    labelRecording.setText(" rec: off ");
+    statusBar()->addPermanentWidget(&labelRecording);
 
     // restore the settings
     loadAllSettings();
-
-    QStringList arguments = QApplication::arguments();
-    int group             = 1; // there are max 3 groups of pedestrians
-    bool mayPlay          = false;
-
-    arguments.append("-2D");
-    // parse arguments list
-    if(arguments.size() > 1)
-        for(int argCount = 1; argCount < arguments.size(); argCount++) {
-            QString argument = arguments[argCount];
-
-            if(argument.compare("help") == 0) {
-                Log::Info("Usage: jpsvis [file1] [-2D] [-caption]");
-                exit(0);
-            } else if(argument.compare("-2D") == 0) {
-                ui.action2_D->setChecked(true);
-                slotToogle2D();
-            } else if(argument.compare("-caption") == 0) {
-                ui.actionShow_Captions->setChecked(true);
-                slotShowPedestrianCaption();
-            } else if(argument.startsWith("-")) {
-                Log::Error("unknown options: %s", argument.toStdString().c_str());
-                Log::Error("Usage: jpsvis [file1] [-2D] [-caption]");
-            } else if(addPedestrianGroup(group, argument)) {
-                Log::Info("group: %d, arg: %s", group, argument.toStdString().c_str());
-                group++;
-                mayPlay = true;
-            }
-        }
-    Log::Info("MayPlay: %s", mayPlay ? "True" : "False");
 }
 
 MainWindow::~MainWindow()
 {
-    extern_shutdown_visual_thread = true;
-    extern_recording_enable       = false;
-
     // save all settings for the next session
     if(ui.actionRemember_Settings->isChecked()) {
         saveAllSettings();
@@ -216,18 +136,12 @@ MainWindow::~MainWindow()
         settings.setValue("options/rememberSettings", false);
         Log::Info("clearing all settings");
     }
-
-    delete _visualisationThread;
-    delete travistoOptions;
-    delete labelCurrentAction;
-    delete labelFrameNumber;
-    delete labelRecording;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // Public slots
 //////////////////////////////////////////////////////////////////////////////
-bool MainWindow::slotOpenFile()
+void MainWindow::slotOpenFile()
 {
     switch(_state) {
         case ApplicationState::Playing:
@@ -235,23 +149,26 @@ bool MainWindow::slotOpenFile()
         case ApplicationState::NoData:
             [[fallthrough]];
         case ApplicationState::Paused: {
-            stopRendering();
-            clearDataSet(1);
-            const bool could_load_data = addPedestrianGroup(1);
-            if(could_load_data) {
-                _state = ApplicationState::Paused;
-                enablePlayerControls();
-                startRendering();
-            } else {
-                _state = ApplicationState::NoData;
-                disablePlayerControls();
+            const auto path = selectFileToLoad();
+            if(path) {
+                stopRendering();
+                ui.BtStart->toggled(false);
+                unloadData();
+                const bool could_load_data = tryParseFile(path.value());
+                if(could_load_data) {
+                    _state = ApplicationState::Paused;
+                    enablePlayerControls();
+                    startRendering();
+                } else {
+                    _state = ApplicationState::NoData;
+                    disablePlayerControls();
+                }
             }
-            return could_load_data;
         }
     }
 }
 
-void MainWindow::slotToggleReplay(bool checked)
+void MainWindow::slotTogglePlayback(bool checked)
 {
     if(checked) {
         startReplay();
@@ -268,8 +185,13 @@ void MainWindow::slotRewindFramesToBegin()
         case ApplicationState::Paused:
             [[fallthrough]];
         case ApplicationState::Playing:
-            extern_trajectories_firstSet.resetFrameCursor();
+            _trajectories.resetFrameCursor();
     }
+}
+
+void MainWindow::slotUpdateNumFrames(int num_frames)
+{
+    ui.framesIndicatorSlider->setMaximum(num_frames - 1);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -284,11 +206,8 @@ void MainWindow::startReplay()
             break;
         case ApplicationState::Paused:
             _state = ApplicationState::Playing;
-            // TODO(kkz): remove those bools
-            isPlaying       = true;
-            isPaused        = false;
-            extern_is_pause = false;
-            labelCurrentAction->setText("   playing   ");
+            _visualisation->pauseRendering(false);
+            labelCurrentAction.setText("   playing   ");
             break;
     }
 }
@@ -297,11 +216,8 @@ void MainWindow::stopReplay()
 {
     switch(_state) {
         case ApplicationState::Playing:
-            // TODO(kkz): remove those bools
-            isPlaying       = false;
-            isPaused        = true;
-            extern_is_pause = true;
-            labelCurrentAction->setText("   paused   ");
+            _visualisation->pauseRendering(true);
+            labelCurrentAction.setText("   paused   ");
             _state = ApplicationState::Paused;
             break;
         case ApplicationState::NoData:
@@ -315,48 +231,59 @@ void MainWindow::enablePlayerControls()
 {
     ui.BtPreviousFrame->setEnabled(true);
     ui.BtStart->setEnabled(true);
-    ui.BtStart->setChecked(false);
     ui.BtNextFrame->setEnabled(true);
     ui.BtRecord->setEnabled(true);
-    ui.replaySpeed->setEnabled(true);
     ui.rewind->setEnabled(true);
+    ui.framesIndicatorSlider->setEnabled(true);
+    ui.actionTogglePlayback->setEnabled(true);
+    ui.actionTogglePlayback->setChecked(false);
+    ui.actionRewind->setEnabled(true);
 }
 
 void MainWindow::disablePlayerControls()
 {
     ui.BtPreviousFrame->setEnabled(false);
     ui.BtStart->setEnabled(false);
-    ui.BtStart->setChecked(false);
     ui.BtNextFrame->setEnabled(false);
     ui.BtRecord->setEnabled(false);
-    ui.replaySpeed->setEnabled(false);
     ui.rewind->setEnabled(false);
+    ui.framesIndicatorSlider->setEnabled(false);
+    ui.actionTogglePlayback->setEnabled(false);
+    ui.actionTogglePlayback->setChecked(false);
+    ui.actionRewind->setEnabled(false);
 }
 
 void MainWindow::startRendering()
 {
-    isPlaying       = false;
-    isPaused        = true;
-    extern_is_pause = true;
-    _visualisationThread->run();
+    _visualisation->start();
+    labelFrameNumber.setText(
+        QString("fps: %1").arg(QString::number(_visualisation->trajectoryRecordingFps())));
 }
 
 void MainWindow::stopRendering()
 {
-    _visualisationThread->stop();
-    extern_shutdown_visual_thread = true;
-    waitForVisioThread();
-
-    // reset all frames cursors
+    _visualisation->stop();
     resetAllFrameCursor();
-
-    // disable/reset all graphical elements
-    slotClearAllDataset();
-    isPlaying = false;
-    isPaused  = false;
+    unloadData();
     resetGraphicalElements();
-    labelCurrentAction->setText(" Idle ");
+    labelCurrentAction.setText(" Idle ");
 };
+
+std::optional<std::filesystem::path> MainWindow::selectFileToLoad()
+{
+    const auto fileName = QFileDialog::getOpenFileName(
+        this,
+        "Select the file containing the data to visualize",
+        QDir::currentPath(),
+        "JuPedSim Files (*.xml *.txt);;All Files (*.*)");
+
+    // the action was cancelled
+    if(fileName.isNull()) {
+        return {};
+    } else {
+        return {std::filesystem::path{fileName.toStdString()}};
+    }
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Old Code
@@ -395,341 +322,133 @@ void MainWindow::slotHelpAbout()
     msg.exec();
 }
 
-/// clear all datasets previously entered.
-void MainWindow::slotClearAllDataset()
+bool MainWindow::tryParseFile(const std::filesystem::path & path)
 {
-    clearDataSet(1);
-    numberOfDatasetLoaded = 0;
-}
-
-bool MainWindow::addPedestrianGroup(int groupID, QString fileName)
-{
-    Log::Info(
-        "Enter MainWindow::addPedestrianGroup with filename <%s>", fileName.toStdString().c_str());
-
-    statusBar()->showMessage(tr("Select a file"));
-    if(fileName.isEmpty())
-        fileName = QFileDialog::getOpenFileName(
-            this,
-            "Select the file containing the data to visualize",
-            QDir::currentPath(),
-            "JuPedSim Files (*.xml *.txt);;All Files (*.*)");
-
-    // the action was cancelled
-    if(fileName.isNull()) {
-        return false;
-    }
-
-    // get and set the working dir
-    QFileInfo fileInfo(fileName);
-    QString wd = fileInfo.absoluteDir().absolutePath();
-    Log::Info("MainWindow::addPedestrianGroup: wd:  <%s>", wd.toStdString().c_str());
-    SystemSettings::setWorkingDirectory(wd);
-    SystemSettings::setFilenamePrefix(QFileInfo(fileName).baseName() + "_");
-
-    // the geometry actor
-    GeometryFactory & geometry = _visualisationThread->getGeometry();
-    QString geometry_file;
-    // try to get a geometry filename
-    if(fileName.endsWith(".xml", Qt::CaseInsensitive)) {
-        Log::Info("1. Extract geometry file from <%s>", fileName.toStdString().c_str());
-        geometry_file = Parsing::extractGeometryFilename(fileName);
-    } else {
-        Log::Info("Extract geometry file from <%s>", fileName.toStdString().c_str());
-        geometry_file = Parsing::extractGeometryFilenameTXT(fileName);
-    }
-
-    Log::Info(
-        "MainWindow::addPedestrianGroup: geometry name: <%s>", geometry_file.toStdString().c_str());
-    if(geometry_file.isEmpty()) {
-        auto fileDir = fileInfo.path();
-        if(fileName.endsWith(".txt", Qt::CaseInsensitive)) {
-            int res = QMessageBox::warning(
-                this,
-                "Did not find geometry name in TXT file",
-                "Warning: Did not find geometry name in TXT file\nOpen "
-                "geometry file?",
-                QMessageBox::Yes | QMessageBox::No,
-                QMessageBox::Yes);
-            if(res == QMessageBox::No) {
-                exit(EXIT_FAILURE);
-                // return false;
-            }
-            geometry_file = QFileDialog::getOpenFileName(
-                this, "Select a geometry file", fileDir, "Geometry (*.xml)");
-            Log::Info("Got geometry file: <%s>", geometry_file.toStdString().c_str());
-            QFileInfo check_file(geometry_file);
-            if(!(check_file.exists() && check_file.isFile())) {
-                Log::Error("Geomery file does not exist.");
-                // exit(EXIT_FAILURE);
-                return (false);
-            }
-        }
-    }
-    Log::Info("---> geometry: %s \n", geometry_file.toStdString().c_str());
-
-    // if xml is detected, just load and show the geometry then exit
-    if(geometry_file.endsWith(".xml", Qt::CaseInsensitive)) {
-        // try to parse the correct way
-        // fall back to this if it fails
-        SystemSettings::CreateLogfile();
-        Log::Info("Calling parseGeometryJPS with <%s>", geometry_file.toStdString().c_str());
-        if(!Parsing::parseGeometryJPS(geometry_file, geometry)) {
-            int res = QMessageBox::warning(
-                this,
-                "Errors in Geometry. Continue Parsing?",
-                "JuPedSim has detected an error in the supplied geometry.\n"
-                "<" +
-                    geometry_file +
-                    ">"
-                    "The simulation will likely fail using this geometry.\n"
-                    "More information are provided in the log file:\n" +
-                    SystemSettings::getLogfile() +
-                    "\n\nShould I try to parse and display what I can?",
-                QMessageBox::Yes | QMessageBox::No,
-                QMessageBox::No);
-            if(res == QMessageBox::No) {
-                return false;
-            }
-            Parsing::parseGeometryXMLV04(
-                wd + "/" + geometry_file,
-                geometry); //@todo:
-                           // use
-                           // qt sep
-        } else {
-            // everything was fine. Delete the log file
-            SystemSettings::DeleteLogfile();
-        }
-    }
-
-    QFile file(fileName);
-    if(!file.open(QIODevice::ReadOnly)) {
-        Log::Error("parseGeometryJPS:  could not open the File: ", fileName.toStdString().c_str());
-        return false;
-    }
-
-    SyncData * dataset = NULL;
-
-    extern_trajectories_firstSet.clearFrames();
-
-    vtkSmartPointer<vtkSphereSource> org = vtkSphereSource::New();
-    org->SetRadius(10);
-
-    switch(groupID) {
-        case 1:
-            Log::Info("handling first set");
-            dataset                      = &extern_trajectories_firstSet;
-            extern_first_dataset_loaded  = true;
-            extern_first_dataset_visible = true;
-            ui.actionFirst_Group->setEnabled(true);
-            ui.actionFirst_Group->setChecked(true);
-            slotToggleFirstPedestrianGroup();
-            break;
-
-        default:
-            Log::Error("Only one dataset can be loaded at a time");
-            break;
-    }
-
-    // no other geometry format was detected
-    double frameRate = 16; // default frame rate
-    statusBar()->showMessage(tr("parsing the file"));
-
-    if(fileName.endsWith(".txt", Qt::CaseInsensitive)) {
-        QString source_file = wd + QDir::separator() + Parsing::extractSourceFileTXT(fileName);
-        QString ttt_file = wd + QDir::separator() + Parsing::extractTrainTimeTableFileTXT(fileName);
-        QString tt_file  = wd + QDir::separator() + Parsing::extractTrainTypeFileTXT(fileName);
-        QString goal_file = wd + QDir::separator() + Parsing::extractGoalFileTXT(fileName);
-        QFileInfo check_file(source_file);
-        bool readSource         = true;
-        bool readGoal           = true;
-        bool readTrainTypes     = true;
-        bool readTrainTimeTable = true;
-        if(!(check_file.exists() && check_file.isFile())) {
-            readSource = false;
-        } else
-            Log::Info(
-                "MainWindow::addPedestrianGroup: source name: <%s>",
-                source_file.toStdString().c_str());
-
-        check_file = goal_file;
-        if(!(check_file.exists() && check_file.isFile())) {
-            readGoal = false;
-        } else
-            Log::Info(
-                "MainWindow::addPedestrianGroup: goal name: <%s>", goal_file.toStdString().c_str());
-
-        check_file = ttt_file;
-        if(!(check_file.exists() && check_file.isFile())) {
-            readTrainTimeTable = false;
-        } else
-            Log::Info(
-                "MainWindow::addPedestrianGroup: ttt name: <%s>", ttt_file.toStdString().c_str());
-
-        check_file = tt_file;
-        if(!(check_file.exists() && check_file.isFile())) {
-            readTrainTypes = false;
-        } else
-            Log::Info(
-                "MainWindow::addPedestrianGroup: tt name: <%s>", tt_file.toStdString().c_str());
-
-        std::map<int, std::shared_ptr<TrainTimeTable>> trainTimeTable;
-        std::map<std::string, std::shared_ptr<TrainType>> trainTypes;
-        if(readTrainTypes) {
-            Parsing::LoadTrainType(tt_file.toStdString(), trainTypes);
-            extern_trainTypes = trainTypes;
-        }
-        if(readTrainTimeTable) {
-            bool ret = Parsing::LoadTrainTimetable(ttt_file.toStdString(), trainTimeTable);
-            extern_trainTimeTables = trainTimeTable;
-        }
-
-        QString geofileName = Parsing::extractGeometryFilenameTXT(fileName);
-
-        std::tuple<Point, Point> trackStartEnd;
-        double elevation;
-        for(auto tab : trainTimeTable) {
-            int trackId   = tab.second->pid;
-            trackStartEnd = Parsing::GetTrackStartEnd(geofileName, trackId);
-            elevation     = 0;
-
-            Point trackStart = std::get<0>(trackStartEnd);
-            Point trackEnd   = std::get<1>(trackStartEnd);
-
-            tab.second->pstart    = trackStart;
-            tab.second->pend      = trackEnd;
-            tab.second->elevation = elevation;
-
-            Log::Info("=======\n");
-            Log::Info("tab: %d\n", tab.first);
-            Log::Info("Track start: [%.2f, %.2f]\n", trackStart._x, trackStart._y);
-            Log::Info("Track end: [%.2f, %.2f]\n", trackEnd._x, trackEnd._y);
-            Log::Info("Room: %d\n", tab.second->rid);
-            Log::Info("Subroom %d\n", tab.second->sid);
-            Log::Info("Elevation %d\n", tab.second->elevation);
-            Log::Info("=======\n");
-        }
-        for(auto tab : trainTypes)
-            Log::Info("type: %s\n", tab.first.c_str());
-
-        if(false == Parsing::ParseTxtFormat(fileName, dataset, &frameRate))
+    Log::Info("Trying to parse %s", path.string().c_str());
+    const auto file_type = Parsing::detectFileType(path);
+    switch(file_type) {
+        case Parsing::InputFileType::GEOMETRY_XML:
+            return tryParseGeometry(path);
+        case Parsing::InputFileType::TRAJECTORIES_TXT:
+            return tryParseTrajectory(path);
+        case Parsing::InputFileType::UNRECOGNIZED:
             return false;
     }
+}
 
-    QString frameRateStr = QString::number(frameRate);
-    _visualisationThread->setWindowTitle(fileName);
-    _visualisationThread->slotSetFrameRate(frameRate);
-    labelFrameNumber->setText("fps: " + frameRateStr + "/" + frameRateStr);
+bool MainWindow::tryParseGeometry(const std::filesystem::path & path)
+{
+    return Parsing::readJpsGeometryXml(path, _visualisation->getGeometry());
+}
 
-    // shutdown the visio thread
-    extern_shutdown_visual_thread = true;
-    waitForVisioThread();
+bool MainWindow::tryParseTrajectory(const std::filesystem::path & path)
+{
+    const auto parent_path       = path.parent_path();
+    auto fileName                = QString::fromStdString(path.string());
+    const auto additional_inputs = Parsing::extractAdditionalInputFilePaths(path);
+
+    const bool readTrainTimeTable =
+        additional_inputs.train_time_table_path &&
+        std::filesystem::is_regular_file(additional_inputs.train_time_table_path.value());
+    if(readTrainTimeTable) {
+        Log::Info(
+            "Found train time table file: \"%s\"",
+            additional_inputs.train_time_table_path.value().string().c_str());
+    }
+
+    const bool readTrainTypes =
+        additional_inputs.train_type_path &&
+        std::filesystem::is_regular_file(additional_inputs.train_type_path.value());
+    if(readTrainTypes) {
+        Log::Info(
+            "Found train types file: \"%s\"",
+            additional_inputs.train_type_path.value().string().c_str());
+    }
+
+    std::map<std::string, std::shared_ptr<TrainType>> trainTypes;
+    if(readTrainTypes) {
+        // TODO(kkratz): This just continues on error, fixup impl.
+        Parsing::LoadTrainType(additional_inputs.train_type_path.value().string(), trainTypes);
+    }
+
+    std::map<int, std::shared_ptr<TrainTimeTable>> trainTimeTable;
+    if(readTrainTimeTable) {
+        // TODO(kkratz): This just continues on error, fixup impl.
+        bool ret = Parsing::LoadTrainTimetable(
+            additional_inputs.train_time_table_path.value().string(), trainTimeTable);
+    }
+    if(readTrainTimeTable && readTrainTypes) {
+        _visualisation->setTrainData(std::move(trainTypes), std::move(trainTimeTable));
+    }
+
+
+    if(additional_inputs.geometry_path) {
+        if(!tryParseGeometry(additional_inputs.geometry_path.value())) {
+            return false;
+        }
+    }
+
+    std::tuple<Point, Point> trackStartEnd;
+    double elevation;
+    for(auto tab : trainTimeTable) {
+        int trackId   = tab.second->pid;
+        trackStartEnd = Parsing::GetTrackStartEnd(
+            QString::fromStdString(additional_inputs.geometry_path.value().string()), trackId);
+        elevation = 0;
+
+        Point trackStart = std::get<0>(trackStartEnd);
+        Point trackEnd   = std::get<1>(trackStartEnd);
+
+        tab.second->pstart    = trackStart;
+        tab.second->pend      = trackEnd;
+        tab.second->elevation = elevation;
+
+        Log::Info("=======\n");
+        Log::Info("tab: %d\n", tab.first);
+        Log::Info("Track start: [%.2f, %.2f]\n", trackStart._x, trackStart._y);
+        Log::Info("Track end: [%.2f, %.2f]\n", trackEnd._x, trackEnd._y);
+        Log::Info("Room: %d\n", tab.second->rid);
+        Log::Info("Subroom %d\n", tab.second->sid);
+        Log::Info("Elevation %d\n", tab.second->elevation);
+        Log::Info("=======\n");
+    }
+    for(auto tab : trainTypes)
+        Log::Info("type: %s\n", tab.first.c_str());
+
+    _trajectories.clearFrames();
+    if(false == Parsing::ParseTxtFormat(fileName, &_trajectories)) {
+        return false;
+    }
 
     statusBar()->showMessage(tr("file loaded and parsed"));
 
     return true;
 }
 
-void MainWindow::slotRecord()
+void MainWindow::slotToggleRecording(bool checked)
 {
-    if(extern_recording_enable) {
-        int res = QMessageBox::warning(
-            this,
-            "action",
-            "JuPedSim is already recording a video\n"
-            "do you wish to stop the recording?",
-            QMessageBox::Yes | QMessageBox::No,
-            QMessageBox::No);
-        if(res == QMessageBox::Yes) {
-            extern_recording_enable = false;
-            ui.BtRecord->setToolTip("Start Recording");
-            labelCurrentAction->setText("   Playing   ");
-            labelRecording->setText(" rec: off ");
-            return;
-        }
+    if(checked) {
+        ui.BtRecord->setToolTip("Stop Recording");
+        labelRecording.setText(" rec: on ");
+        // TODO(kkratz): Call visualization to start recording. This is not yet implemented
+    } else {
+        ui.BtRecord->setToolTip("Start Recording");
+        labelRecording.setText(" rec: off ");
+        // TODO(kkratz): Call visualization to start recording. This is not yet implemented
     }
-    extern_launch_recording = true;
-    ui.BtRecord->setToolTip("Stop Recording");
-    labelRecording->setText(" rec: on ");
 }
 
-void MainWindow::slotReset()
+void MainWindow::slotFrameNumber(int frame)
 {
-    // stop any recording
-    if(extern_recording_enable) {
-        int res = QMessageBox::question(
-            this,
-            "action",
-            "do you wish to stop the recording?",
-            QMessageBox::Discard | QMessageBox::Yes,
-            QMessageBox::Yes);
-        if(res == QMessageBox::Yes) {
-            extern_recording_enable = false;
-            labelCurrentAction->setText("   Playing   ");
-        } else {
-            return;
-        }
-    }
-
-    if(anyDatasetLoaded()) {
-        int res = QMessageBox::question(
-            this,
-            "action",
-            "This will also clear any dataset if loaded.\n"
-            "Do you wish to continue?",
-            QMessageBox::Discard | QMessageBox::Yes,
-            QMessageBox::Yes);
-        if(res == QMessageBox::Discard) {
-            return;
-        }
-    }
-
-    // shutdown the visual thread
-    extern_shutdown_visual_thread = true;
-    waitForVisioThread();
-
-    // reset all buttons
-    slotClearAllDataset();
-    isPlaying = false;
-    isPaused  = false;
-    labelCurrentAction->setText("   Idle   ");
-    resetGraphicalElements();
+    ui.framesIndicatorSlider->setValue(frame);
+    int elapsed_time = frame * _visualisation->trajectoryRecordingFps();
+    ui.time->setText(QString("%1/%2 (%3ms)")
+                         .arg(
+                             QString::number(frame),
+                             QString::number(ui.framesIndicatorSlider->maximum()),
+                             QString::number(elapsed_time)));
 }
 
-void MainWindow::slotCurrentAction(QString msg)
-{
-    msg = " " + msg + " ";
-    statusBar()->showMessage(msg);
-}
-
-void MainWindow::slotFrameNumber(unsigned long actualFrameCount, unsigned long minFrame)
-{
-    // compute the  mamixum framenumber
-    int maxFrameCount = 1;
-    if(extern_first_dataset_loaded) {
-        maxFrameCount = extern_trajectories_firstSet.getFramesNumber();
-    }
-    maxFrameCount += minFrame;
-
-    if(actualFrameCount > maxFrameCount)
-        actualFrameCount = maxFrameCount;
-
-    if(!frameSliderHold)
-        if(maxFrameCount != 0) // TODO WTF, otherwise an arrymtic exeption arises
-            ui.framesIndicatorSlider->setValue(
-                (ui.framesIndicatorSlider->maximum() * actualFrameCount) / maxFrameCount);
-}
-
-void MainWindow::slotRunningTime(unsigned long timems)
-{
-    ui.time->setText(QString::fromStdString(std::to_string(timems)));
-}
-
-void MainWindow::slotRenderingTime(int fps)
-{
-    QString msg = labelFrameNumber->text().replace(QRegExp("[0-9]+/"), QString::number(fps) + "/");
-    labelFrameNumber->setText(msg);
-}
 void MainWindow::slotExit()
 {
     Log::Info("Exit jpsvis");
@@ -747,279 +466,167 @@ void MainWindow::closeEvent(QCloseEvent * event)
 
 void MainWindow::cleanUp()
 {
-    // stop the recording process
-    extern_recording_enable       = false;
-    extern_shutdown_visual_thread = true;
-
-    if(SystemSettings::getRecordPNGsequence())
+    if(_settings.recordPNGsequence) {
         slotRecordPNGsequence();
-
-    waitForVisioThread();
+    }
 }
 
 void MainWindow::resetGraphicalElements()
 {
     ui.BtRecord->setEnabled(false);
     ui.framesIndicatorSlider->setValue(ui.framesIndicatorSlider->minimum());
-    ui.actionShow_Legend->setEnabled(true);
     ui.actionShow_Trajectories->setEnabled(true);
     ui.action3_D->setEnabled(true);
     ui.action2_D->setEnabled(true);
 
-    labelRecording->setText("rec: off");
+    labelRecording.setText("rec: off");
     statusBar()->showMessage(tr("select a File"));
 
     // resetting the start/stop recording action
     // check whether the a png recording sequence was playing, stop if the case
-    if(SystemSettings::getRecordPNGsequence())
+    if(_settings.recordPNGsequence) {
         slotRecordPNGsequence();
-}
-
-void MainWindow::slotToggleFirstPedestrianGroup()
-{
-    if(ui.actionFirst_Group->isChecked()) {
-        extern_first_dataset_visible = true;
-    } else {
-        extern_first_dataset_visible = false;
     }
-    extern_force_system_update = true;
-}
-
-bool MainWindow::anyDatasetLoaded()
-{
-    return extern_first_dataset_loaded;
 }
 
 void MainWindow::slotShowTrajectoryOnly()
 {
-    SystemSettings::setShowTrajectories(ui.actionShow_Trajectories->isChecked());
-    extern_force_system_update = true;
+    _settings.showTrajectories = ui.actionShow_Trajectories->isChecked();
 }
 
 void MainWindow::slotShowPedestrianOnly()
 {
     if(ui.actionShow_Agents->isChecked()) {
-        SystemSettings::setShowAgents(true);
+        _settings.showAgents = true;
     } else {
-        SystemSettings::setShowAgents(false);
+        _settings.showAgents = false;
     }
-    extern_force_system_update = true;
 }
 
 void MainWindow::slotShowGeometry()
 {
     if(ui.actionShow_Geometry->isChecked()) {
-        _visualisationThread->setGeometryVisibility(true);
+        _visualisation->setGeometryVisibility(true);
         ui.actionShow_Exits->setEnabled(true);
         ui.actionShow_Walls->setEnabled(true);
         ui.actionShow_Geometry_Captions->setEnabled(true);
         ui.actionShow_Navigation_Lines->setEnabled(true);
         ui.actionShow_Floor->setEnabled(true);
-        SystemSettings::setShowGeometry(true);
+        _settings.showGeometry = true;
     } else {
-        _visualisationThread->setGeometryVisibility(false);
+        _visualisation->setGeometryVisibility(false);
         ui.actionShow_Exits->setEnabled(false);
         ui.actionShow_Walls->setEnabled(false);
         ui.actionShow_Geometry_Captions->setEnabled(false);
         ui.actionShow_Navigation_Lines->setEnabled(false);
         ui.actionShow_Floor->setEnabled(false);
-        SystemSettings::setShowGeometry(false);
+        _settings.showGeometry = false;
     }
-    extern_force_system_update = true;
 }
 
-/// shows/hide geometry
 void MainWindow::slotShowHideExits()
 {
     bool status = ui.actionShow_Exits->isChecked();
-    _visualisationThread->showDoors(status);
-    SystemSettings::setShowExits(status);
+    _visualisation->showDoors(status);
+    _settings.showExits = status;
 }
 
-/// shows/hide geometry
 void MainWindow::slotShowHideWalls()
 {
     bool status = ui.actionShow_Walls->isChecked();
-    _visualisationThread->showWalls(status);
-    SystemSettings::setShowWalls(status);
+    _visualisation->showWalls(status);
+    _settings.showWalls = status;
 }
 
-void MainWindow::slotShowHideNavLines()
-{
-    bool status = ui.actionShow_Navigation_Lines->isChecked();
-    _visualisationThread->showNavLines(status);
-    SystemSettings::setShowNavLines(status);
-}
-
-// todo: add to the system settings
 void MainWindow::slotShowHideFloor()
 {
     bool status = ui.actionShow_Floor->isChecked();
-    _visualisationThread->showFloor(status);
-    SystemSettings::setShowFloor(status);
+    _visualisation->showFloor(status);
+    _settings.showFloor = status;
 }
 
-/// update the position slider
 void MainWindow::slotUpdateFrameSlider(int newValue)
 {
-    // first get the correct position
-    int maxFrameCount = 1;
-    if(extern_first_dataset_loaded) {
-        int t = extern_trajectories_firstSet.getFramesNumber();
-        if(maxFrameCount < t)
-            maxFrameCount = t;
-    }
-
-    int update = ((maxFrameCount * newValue) / ui.framesIndicatorSlider->maximum());
-
-    // then set the correct position
-    if(extern_first_dataset_loaded) {
-        extern_trajectories_firstSet.setFrameCursorTo(update);
-    }
+    _trajectories.moveToFrame(newValue);
 }
 
-/// clear the corresponding dataset;
-void MainWindow::clearDataSet(int ID)
+void MainWindow::unloadData()
 {
-    switch(ID) {
-        case 1:
-            // extern_trajectories_firstSet.clear();
-            extern_trajectories_firstSet.clearFrames();
-            extern_trajectories_firstSet.resetFrameCursor();
-            extern_first_dataset_loaded  = false;
-            extern_first_dataset_visible = false;
-            ui.actionFirst_Group->setEnabled(false);
-            ui.actionFirst_Group->setChecked(false);
-            slotToggleFirstPedestrianGroup();
-            numberOfDatasetLoaded--;
-            _visualisationThread->getGeometry().Clear(); // also clear the geometry info
-            // close geometryStrucutre window
-            if(_geoStructure.isVisible())
-                _geoStructure.close();
-            break;
-
-        default:
-            break;
+    // extern_trajectories_firstSet.clear();
+    _trajectories.clearFrames();
+    _trajectories.resetFrameCursor();
+    _visualisation->getGeometry().Clear(); // also clear the geometry info
+    _visualisation->setTrainData({}, {});
+    // close geometryStrucutre window
+    if(_geoStructure.isVisible()) {
+        _geoStructure.close();
     }
-
-    if(numberOfDatasetLoaded < 0)
-        numberOfDatasetLoaded = 0;
 }
 
 void MainWindow::resetAllFrameCursor()
 {
-    extern_trajectories_firstSet.resetFrameCursor();
-}
-
-/// wait for visualisation thread to shutdown
-///@todo why two different threads shutdown procedure.
-void MainWindow::waitForVisioThread()
-{
-    extern_shutdown_visual_thread = false;
+    _trajectories.resetFrameCursor();
 }
 
 /// set visualisation mode to 2D
 void MainWindow::slotToogle2D()
 {
+    RenderMode mode{};
     if(ui.action2_D->isChecked()) {
-        extern_is_3D = false;
         ui.action3_D->setChecked(false);
-        SystemSettings::set2D(true);
+        mode = RenderMode::MODE_2D;
 
     } else {
-        extern_is_3D = true;
         ui.action3_D->setChecked(true);
-        SystemSettings::set2D(false);
+        mode = RenderMode::MODE_3D;
     }
-    bool status = SystemSettings::get2D() && SystemSettings::getShowGeometry();
-    _visualisationThread->setGeometryVisibility2D(status);
-    extern_force_system_update = true;
+    _settings.mode = mode;
+    bool status    = mode == RenderMode::MODE_2D && _settings.showGeometry;
+    _visualisation->setGeometryVisibility2D(status);
 }
 
 /// set visualisation mode to 3D
 void MainWindow::slotToogle3D()
 {
+    RenderMode mode{};
     if(ui.action3_D->isChecked()) {
-        extern_is_3D = true;
         ui.action2_D->setChecked(false);
-        SystemSettings::set2D(false);
+        mode = RenderMode::MODE_3D;
 
     } else {
-        extern_is_3D = false;
         ui.action2_D->setChecked(true);
-        SystemSettings::set2D(true);
+        mode = RenderMode::MODE_2D;
     }
-    bool status = !SystemSettings::get2D() && SystemSettings::getShowGeometry();
-    _visualisationThread->setGeometryVisibility3D(status);
-    extern_force_system_update = true;
-}
-
-void MainWindow::slotFrameSliderPressed()
-{
-    frameSliderHold = true;
-}
-
-void MainWindow::slotFrameSliderReleased()
-{
-    frameSliderHold = false;
-}
-
-void MainWindow::slotToogleShowLegend()
-{
-    if(ui.actionShow_Legend->isChecked()) {
-        SystemSettings::setShowLegend(true);
-    } else {
-        SystemSettings::setShowLegend(false);
-    }
+    _settings.mode = mode;
+    bool status    = mode == RenderMode::MODE_3D && _settings.showGeometry;
+    _visualisation->setGeometryVisibility3D(status);
 }
 
 void MainWindow::slotNextFrame()
 {
-    if(extern_first_dataset_loaded) {
-        int newValue = extern_trajectories_firstSet.getFrameCursor() + 1;
-        extern_trajectories_firstSet.setFrameCursorTo(newValue);
-    }
+    ui.BtStart->setChecked(false);
+    _trajectories.incrementFrame();
 }
 
 void MainWindow::slotPreviousFrame()
 {
-    if(extern_first_dataset_loaded) {
-        int newValue = extern_trajectories_firstSet.getFrameCursor() - 1;
-        extern_trajectories_firstSet.setFrameCursorTo(newValue);
-    }
+    ui.BtStart->setChecked(false);
+    _trajectories.decrementFrame();
 }
 
 void MainWindow::slotShowPedestrianCaption()
 {
-    SystemSettings::setShowAgentsCaptions(ui.actionShow_Captions->isChecked());
-    extern_force_system_update = true;
+    _settings.showAgentsCaptions = ui.actionShow_Captions->isChecked();
 }
 
-void MainWindow::slotShowDirections()
+void MainWindow::slotTogglePedestrianDirections(bool is_enabled)
 {
-    SystemSettings::setShowDirections(ui.actionShow_Directions->isChecked());
-    extern_force_system_update = true;
+    _settings.showAgentDirections = is_enabled;
 }
 
 void MainWindow::slotToogleShowAxis()
 {
-    _visualisationThread->setAxisVisible(ui.actionShow_Axis->isChecked());
-}
-
-// todo: rename this to slotChangeSettting
-void MainWindow::slotChangePedestrianShape()
-{
-    travistoOptions->show();
-}
-
-void MainWindow::slotCaptionColorAuto()
-{
-    emit signal_controlSequence("CAPTION_AUTO");
-}
-
-void MainWindow::slotCaptionColorCustom()
-{
-    emit signal_controlSequence("CAPTION_CUSTOM");
+    _visualisation->setAxisVisible(ui.actionShow_Axis->isChecked());
 }
 
 void MainWindow::slotChangeBackgroundColor()
@@ -1032,7 +639,7 @@ void MainWindow::slotChangeBackgroundColor()
     if(col.isValid() == false)
         return;
 
-    _visualisationThread->setBackgroundColor(col);
+    _visualisation->setBackgroundColor(col);
 
     QSettings settings;
     settings.setValue("options/bgColor", col);
@@ -1051,7 +658,7 @@ void MainWindow::slotChangeWallsColor()
     if(col.isValid() == false)
         return;
 
-    _visualisationThread->setWallsColor(col);
+    _visualisation->setWallsColor(col);
 
     QSettings settings;
     settings.setValue("options/wallsColor", col);
@@ -1070,7 +677,7 @@ void MainWindow::slotChangeExitsColor()
     if(col.isValid() == false)
         return;
 
-    _visualisationThread->setExitsColor(col);
+    _visualisation->setExitsColor(col);
 
     QSettings settings;
     settings.setValue("options/exitsColor", col);
@@ -1089,7 +696,7 @@ void MainWindow::slotChangeNavLinesColor()
     if(col.isValid() == false)
         return;
 
-    _visualisationThread->setNavLinesColor(col);
+    _visualisation->setNavLinesColor(col);
 
     QSettings settings;
     settings.setValue("options/navLinesColor", col);
@@ -1107,7 +714,7 @@ void MainWindow::slotChangeFloorColor()
     if(col.isValid() == false)
         return;
 
-    _visualisationThread->setFloorColor(col);
+    _visualisation->setFloorColor(col);
 
     QSettings settings;
     settings.setValue("options/floorColor", col);
@@ -1125,7 +732,7 @@ void MainWindow::slotChangeObstacleColor()
     if(col.isValid() == false)
         return;
 
-    _visualisationThread->setObstacleColor(col);
+    _visualisation->setObstacleColor(col);
 
     QSettings settings;
     settings.setValue("options/obstacle", col);
@@ -1136,10 +743,7 @@ void MainWindow::slotChangeObstacleColor()
 void MainWindow::slotSetCameraPerspectiveToTop()
 {
     int p = 1; // TOP
-
-    _visualisationThread->setCameraPerspective(p);
-    // disable the virtual agent view
-    SystemSettings::setVirtualAgent(-1);
+    _visualisation->setCameraPerspective(p);
 }
 
 void MainWindow::slotSetCameraPerspectiveToTopRotate()
@@ -1149,9 +753,7 @@ void MainWindow::slotSetCameraPerspectiveToTopRotate()
     int degree = QInputDialog::getInt(
         this, "Top rotate", "Rotation degrees [range:-180-->180]:", 0, -180, 180, 10, &ok);
     if(ok) {
-        _visualisationThread->setCameraPerspective(p, degree);
-        // disable the virtual agent view
-        SystemSettings::setVirtualAgent(-1);
+        _visualisation->setCameraPerspective(p, degree);
     }
 }
 
@@ -1162,37 +764,8 @@ void MainWindow::slotSetCameraPerspectiveToSideRotate()
     int degree = QInputDialog::getInt(
         this, "Side rotate", "Rotation degrees [range:-80-->80]:", 0, -80, 80, 10, &ok);
     if(ok) {
-        _visualisationThread->setCameraPerspective(p, degree);
-        // disable the virtual agent view
-        SystemSettings::setVirtualAgent(-1);
+        _visualisation->setCameraPerspective(p, degree);
     }
-}
-
-void MainWindow::slotSetCameraPerspectiveToVirtualAgent()
-{
-    bool ok   = false;
-    int agent = QInputDialog::getInt(
-        this,
-        tr("choose the agent you want to see the scene through"),
-        tr("agent ID(default to 1):"),
-        1,
-        1,
-        500,
-        1,
-        &ok);
-
-    if(ok) {
-        int p = 4; // virtual agent
-        _visualisationThread->setCameraPerspective(p);
-
-        // get the virtual agent ID
-        SystemSettings::setVirtualAgent(agent);
-    }
-}
-
-void MainWindow::slotClearGeometry()
-{
-    _visualisationThread->setGeometry(NULL);
 }
 
 void MainWindow::slotErrorOutput(QString err)
@@ -1207,8 +780,7 @@ void MainWindow::slotErrorOutput(QString err)
 
 void MainWindow::slotTakeScreenShot()
 {
-    // extern_take_screenshot=true;
-    extern_take_screenshot = !extern_take_screenshot;
+    _visualisation->takeScreenshot();
 }
 
 /// load settings, parsed from the project file
@@ -1222,87 +794,68 @@ void MainWindow::loadAllSettings()
         bool checked = settings.value("view/2d").toBool();
         ui.action2_D->setChecked(checked);
         ui.action3_D->setChecked(!checked);
-        SystemSettings::set2D(checked);
+        _settings.mode = RenderMode::MODE_2D;
         Log::Info("2D: %s", checked ? "Yes" : "No");
     }
     if(settings.contains("view/showAgents")) {
         bool checked = settings.value("view/showAgents").toBool();
         ui.actionShow_Agents->setChecked(checked);
-        SystemSettings::setShowAgents(checked);
+        _settings.showAgents = checked;
         Log::Info("show Agents: %s", checked ? "Yes" : "No");
     }
     if(settings.contains("view/showCaptions")) {
         bool checked = settings.value("view/showCaptions").toBool();
         ui.actionShow_Captions->setChecked(checked);
-        SystemSettings::setShowAgentsCaptions(checked);
+        _settings.showAgentsCaptions = checked;
         Log::Info("show Captions: %s", checked ? "Yes" : "No");
     }
     if(settings.contains("view/showDirections")) {
         bool checked = settings.value("view/showDirections").toBool();
         ui.actionShow_Directions->setChecked(checked);
-        SystemSettings::setShowDirections(checked);
+        _settings.showAgentDirections = checked;
         Log::Info("show Directions: %s", checked ? "Yes" : "No");
     }
     if(settings.contains("view/showTrajectories")) {
         bool checked = settings.value("view/showTrajectories").toBool();
         ui.actionShow_Trajectories->setChecked(checked);
-        SystemSettings::setShowTrajectories(checked);
+        _settings.showTrajectories = checked;
         Log::Info("show Trajectories: %s", checked ? "Yes" : "No");
     }
     if(settings.contains("view/showGeometry")) {
         bool checked = settings.value("view/showGeometry").toBool();
         ui.actionShow_Geometry->setChecked(checked);
-        slotShowGeometry(); // will take care of the others things like
-                            // enabling options
+        _settings.showGeometry = checked;
         Log::Info("show Geometry: %s", checked ? "Yes" : "No");
     }
     if(settings.contains("view/showFloor")) {
         bool checked = settings.value("view/showFloor").toBool();
         ui.actionShow_Floor->setChecked(checked);
-        slotShowHideFloor();
+        _settings.showFloor = checked;
         Log::Info("show Floor: %s", checked ? "Yes" : "No");
     }
     if(settings.contains("view/showExits")) {
         bool checked = settings.value("view/showExits").toBool();
         ui.actionShow_Exits->setChecked(checked);
-        slotShowHideExits();
+        _settings.showExits = checked;
         Log::Info("show Exits: %s", checked ? "Yes" : "No");
     }
     if(settings.contains("view/showWalls")) {
         bool checked = settings.value("view/showWalls").toBool();
         ui.actionShow_Walls->setChecked(checked);
-        slotShowHideWalls();
+        _settings.showWalls = checked;
         Log::Info("show Walls: %s", checked ? "Yes" : "No");
     }
     if(settings.contains("view/showGeoCaptions")) {
         bool checked = settings.value("view/showGeoCaptions").toBool();
         ui.actionShow_Geometry_Captions->setChecked(checked);
-        slotShowHideGeometryCaptions();
+        _settings.showGeometryCaptions = checked;
         Log::Info("show geometry Captions: %s", checked ? "Yes" : "No");
-    }
-    if(settings.contains("view/showNavLines")) {
-        bool checked = settings.value("view/showNavLines").toBool();
-        ui.actionShow_Navigation_Lines->setChecked(checked);
-        slotShowHideNavLines();
-        Log::Info("show Navlines: %s", checked ? "Yes" : "No");
-    }
-    if(settings.contains("view/showObstacles")) {
-        bool checked = settings.value("view/showObstacles").toBool();
-        ui.actionShow_Obstacles->setChecked(checked);
-        slotShowHideObstacles();
-        Log::Info("show showObstacles: %s", checked ? "Yes" : "No");
     }
     if(settings.contains("view/showOnScreensInfos")) {
         bool checked = settings.value("view/showOnScreensInfos").toBool();
         ui.actionShow_Onscreen_Infos->setChecked(checked);
-        slotShowOnScreenInfos();
+        _settings.showInfos = checked;
         Log::Info("show OnScreensInfos: %s", checked ? "Yes" : "No");
-    }
-    if(settings.contains("view/showGradientField")) {
-        bool checked = settings.value("view/showGradientField").toBool();
-        ui.actionShow_Gradient_Field->setChecked(checked);
-        slotShowHideGradientField();
-        Log::Info("show GradientField: %s", checked ? "Yes" : "No");
     }
     // options
     if(settings.contains("options/rememberSettings")) {
@@ -1312,41 +865,28 @@ void MainWindow::loadAllSettings()
     }
 
     if(settings.contains("options/bgColor")) {
-        QColor color = settings.value("options/bgColor").value<QColor>();
-        SystemSettings::setBackgroundColor(color);
+        QColor color      = settings.value("options/bgColor").value<QColor>();
+        _settings.bgColor = color;
         Log::Info("background color: %s", color.name().toStdString().c_str());
     }
 
     if(settings.contains("options/exitsColor")) {
-        QColor color = settings.value("options/exitsColor").value<QColor>();
-        SystemSettings::setExitsColor(color);
+        QColor color         = settings.value("options/exitsColor").value<QColor>();
+        _settings.exitsColor = color;
         Log::Info("Exit color: %s", color.name().toStdString().c_str());
     }
 
     if(settings.contains("options/floorColor")) {
-        QColor color = settings.value("options/floorColor").value<QColor>();
-        SystemSettings::setFloorColor(color);
+        QColor color         = settings.value("options/floorColor").value<QColor>();
+        _settings.floorColor = color;
         Log::Info("Floor color: %s", color.name().toStdString().c_str());
     }
 
     if(settings.contains("options/wallsColor")) {
-        QColor color = settings.value("options/wallsColor").value<QColor>();
-        SystemSettings::setWallsColor(color);
+        QColor color         = settings.value("options/wallsColor").value<QColor>();
+        _settings.wallsColor = color;
         Log::Info("Walls color: %s", color.name().toStdString().c_str());
     }
-
-    if(settings.contains("options/navLinesColor")) {
-        QColor color = settings.value("options/navLinesColor").value<QColor>();
-        SystemSettings::setNavLinesColor(color);
-        Log::Info("NavLines color: %s", color.name().toStdString().c_str());
-    }
-    if(settings.contains("options/obstaclesColor")) {
-        QColor color = settings.value("options/obstaclesColor").value<QColor>();
-        SystemSettings::setObstacleColor(color);
-        Log::Info("Obstacles color: %s", color.name().toStdString().c_str());
-    }
-
-    extern_force_system_update = true;
 }
 
 void MainWindow::saveAllSettings()
@@ -1355,23 +895,19 @@ void MainWindow::saveAllSettings()
     QSettings settings;
 
     // view
-    settings.setValue("view/2d", ui.action2_D->isChecked());
-    settings.setValue("view/showAgents", ui.actionShow_Agents->isChecked());
-    settings.setValue("view/showCaptions", ui.actionShow_Captions->isChecked());
-    settings.setValue("view/showDirections", ui.actionShow_Directions->isChecked());
-    settings.setValue("view/showTrajectories", ui.actionShow_Trajectories->isChecked());
-    settings.setValue("view/showGeometry", ui.actionShow_Geometry->isChecked());
-    settings.setValue("view/showFloor", ui.actionShow_Floor->isChecked());
-    settings.setValue("view/showWalls", ui.actionShow_Walls->isChecked());
-    settings.setValue("view/showExits", ui.actionShow_Exits->isChecked());
-    settings.setValue("view/showGeoCaptions", ui.actionShow_Geometry_Captions->isChecked());
-    settings.setValue("view/showNavLines", ui.actionShow_Navigation_Lines->isChecked());
-    settings.setValue("view/showOnScreensInfos", ui.actionShow_Onscreen_Infos->isChecked());
-    settings.setValue("view/showObstacles", ui.actionShow_Obstacles->isChecked());
-    settings.setValue("view/showGradientField", ui.actionShow_Gradient_Field->isChecked());
+    settings.setValue("view/2d", _settings.mode == RenderMode::MODE_2D);
+    settings.setValue("view/showAgents", _settings.showAgents);
+    settings.setValue("view/showCaptions", _settings.showAgentsCaptions);
+    settings.setValue("view/showDirections", _settings.showAgentDirections);
+    settings.setValue("view/showTrajectories", _settings.showTrajectories);
+    settings.setValue("view/showGeometry", _settings.showGeometry);
+    settings.setValue("view/showFloor", _settings.showFloor);
+    settings.setValue("view/showWalls", _settings.showWalls);
+    settings.setValue("view/showExits", _settings.showExits);
+    settings.setValue("view/showGeoCaptions", _settings.showGeometryCaptions);
+    settings.setValue("view/showOnScreensInfos", _settings.showInfos);
 
     // options: the color settings are saved in the methods where they are used.
-    settings.setValue("options/listeningPort", SystemSettings::getListeningPort());
     settings.setValue("options/rememberSettings", ui.actionRemember_Settings->isChecked());
 }
 
@@ -1384,7 +920,7 @@ void MainWindow::slotRecordPNGsequence()
     }
 
     // get the status from the system settings and toogle it
-    bool status = SystemSettings::getRecordPNGsequence();
+    bool status = _settings.recordPNGsequence;
 
     if(status) {
         ui.actionRecord_PNG_sequences->setText("Record PNG sequence");
@@ -1393,7 +929,7 @@ void MainWindow::slotRecordPNGsequence()
     }
 
     // toggle the status
-    SystemSettings::setRecordPNGsequence(!status);
+    _settings.recordPNGsequence = !status;
 }
 
 /// render a PNG image sequence to an AVI video
@@ -1408,37 +944,13 @@ void MainWindow::dragEnterEvent(QDragEnterEvent * event)
         event->acceptProposedAction();
 }
 
-void MainWindow::dropEvent(QDropEvent * event)
-{
-    QList<QUrl> urls = event->mimeData()->urls();
-    if(urls.isEmpty())
-        return;
-
-    // reset before load new file
-    slotReset(); // when choose Discard : anyDatasetLoaded()==true
-    if(anyDatasetLoaded()) {
-        return;
-    }
-
-    bool mayPlay = false;
-
-    for(int i = 0; i < urls.size(); i++) {
-        QString fileName = urls[i].toLocalFile();
-        if(fileName.isEmpty())
-            continue;
-        if(addPedestrianGroup(numberOfDatasetLoaded + i + 1, fileName)) {
-            mayPlay = true;
-        }
-    }
-}
-
 /// show/hide onscreen information
 /// information include Time and pedestrians left in the facility
 void MainWindow::slotShowOnScreenInfos()
 {
     bool value = ui.actionShow_Onscreen_Infos->isChecked();
-    _visualisationThread->setOnscreenInformationVisibility(value);
-    SystemSettings::setOnScreenInfos(value);
+    _visualisation->setOnscreenInformationVisibility(value);
+    _settings.showInfos = value;
     Log::Info("Show On Screen Infos: %s", value ? "On" : "Off");
 }
 
@@ -1446,28 +958,21 @@ void MainWindow::slotShowOnScreenInfos()
 void MainWindow::slotShowHideGeometryCaptions()
 {
     bool value = ui.actionShow_Geometry_Captions->isChecked();
-    _visualisationThread->setGeometryLabelsVisibility(value);
-    SystemSettings::setShowGeometryCaptions(value);
+    _visualisation->setGeometryLabelsVisibility(value);
+    _settings.showGeometryCaptions = value;
 }
+
 void MainWindow::slotShowHideObstacles()
 {
-    bool value = ui.actionShow_Obstacles->isChecked();
-    _visualisationThread->showObstacle(value);
-    SystemSettings::setShowObstacles(value);
-}
-void MainWindow::slotShowHideGradientField()
-{
-    bool value = ui.actionShow_Gradient_Field->isChecked();
-    _visualisationThread->showGradientField(value);
-    SystemSettings::setShowGradientField(value);
+    // TODO(kkratz): clarify this is required to keep
 }
 
 void MainWindow::slotShowGeometryStructure()
 {
     _geoStructure.setHidden(!ui.actionShowGeometry_Structure->isChecked());
-    if(_visualisationThread->getGeometry().RefreshView()) {
+    if(_visualisation->getGeometry().RefreshView()) {
         _geoStructure.setWindowTitle("Geometry structure");
-        _geoStructure.setModel(&_visualisationThread->getGeometry().GetModel());
+        _geoStructure.setModel(&_visualisation->getGeometry().GetModel());
     }
     Log::Info(
         "Show Geometry Structure: %s", ui.actionShowGeometry_Structure->isChecked() ? "On" : "Off");
@@ -1480,7 +985,7 @@ void MainWindow::slotOnGeometryItemChanged(QStandardItem * item)
         int room   = l[0].toInt();
         int subr   = l[1].toInt();
         bool state = item->checkState();
-        _visualisationThread->getGeometry().UpdateVisibility(room, subr, state);
+        _visualisation->getGeometry().UpdateVisibility(room, subr, state);
     } else {
         for(int i = 0; i < item->rowCount(); i++) {
             QStandardItem * child = item->child(i);
@@ -1488,4 +993,10 @@ void MainWindow::slotOnGeometryItemChanged(QStandardItem * item)
             slotOnGeometryItemChanged(child);
         }
     }
+}
+
+void MainWindow::slotMousePositionUpdated(double x, double y, double z)
+{
+    statusBar()->showMessage(
+        QString("x:%1 y:%2").arg(QString::number(x, 'f', 2), QString::number(y, 'f', 2)));
 }

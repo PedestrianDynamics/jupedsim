@@ -32,7 +32,7 @@
 
 #include "LinePlotter2D.h"
 
-#include "../SystemSettings.h"
+#include "Settings.h"
 #include "general/Macros.h"
 
 #include <QColor>
@@ -246,7 +246,8 @@ vtkAssembly * LinePlotter2D::createAssembly()
         // if default, then hide all doors
         // fixme: not working
         if(doorColorsToDefault) {
-            const QColor & bgcolor = SystemSettings::getBackgroundColor();
+            // TODO(kkratz): Use value from settings again
+            const QColor & bgcolor = Qt::white;
             double col[3]          = {
                 (double) bgcolor.red() / 255.0,
                 (double) bgcolor.green() / 255.0,

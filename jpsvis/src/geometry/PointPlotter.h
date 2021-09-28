@@ -30,9 +30,9 @@
  */
 #pragma once
 
-#define MAX_POINTS 30;
-
 #include "vtkSmartPointer.h"
+
+#include <glm/vec3.hpp>
 
 class vtkPoints;
 class vtkUnsignedCharArray;
@@ -42,41 +42,23 @@ class vtkDataArray;
 class vtkFloatArray;
 class JPoint;
 
-// for borrowing the lookup table
-extern vtkActor * extern_glyphs_pedestrians_actor_2D;
-
 class PointPlotter
 {
 public:
     PointPlotter();
-    ~PointPlotter();
 
-    void PlotPoint(
-        double x,
-        double y,
-        double z,
-        unsigned char r = 'a',
-        unsigned char g = 'b',
-        unsigned char b = 'c');
+    ~PointPlotter() = default;
 
-    void PlotPoint(JPoint * pt);
-    void PlotPoint(double Position[3], double colour);
-    void SetPointRadius(double radius = 1.0) { pt_radius = radius; }
-    void SetPointResolution(int res = 15) { pt_res = res; }
+    void PlotPoint(const glm::dvec3 & pos, double color);
 
-
-    /// return the actors
-    vtkActor * getActor();
+    vtkSmartPointer<vtkActor> getActor();
 
     void SetVisibility(bool status);
 
 private:
-    vtkActor * pointActor;
-    vtkPoints * pts;
-    vtkDataArray * scalars;
-    vtkFloatArray * colors;
-    vtkIdType nextPointID;
-    int scalar_mode;
-    double pt_radius;
-    int pt_res;
+    static constexpr double pt_radius{2};
+    vtkSmartPointer<vtkPoints> pts;
+    vtkSmartPointer<vtkFloatArray> colors;
+    vtkSmartPointer<vtkActor> pointActor;
+    vtkIdType nextPointID{0};
 };

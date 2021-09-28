@@ -57,7 +57,7 @@ public:
     void ComputePolyData();
 
     /// return the number of element in this frame
-    int getSize();
+    int getSize() const;
 
     int GetID() { return _id; }
 

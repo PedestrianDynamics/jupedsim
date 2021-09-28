@@ -187,7 +187,6 @@ flycheck_*.el
 .idea/*
 
 .vscode/
-build*
 
 # VIM
 .vim

@@ -35,6 +35,7 @@
 #include "FrameElement.h"
 #include "general/Macros.h"
 
+#include <glm/vec3.hpp>
 #include <iostream>
 #include <vector>
 #include <vtkFloatArray.h>
@@ -65,7 +66,7 @@ Frame::~Frame()
     _polydata3D->Delete();
 }
 
-int Frame::getSize()
+int Frame::getSize() const
 {
     return _framePoints.size();
 }
@@ -107,20 +108,16 @@ void Frame::ComputePolyData2D()
     labels->SetNumberOfComponents(1);
 
     for(unsigned int i = 0; i < _framePoints.size(); i++) {
-        double pos[3] = {0, 0, 0};
-        double rad[3] = {1.0, 1.0, 1.0};
-        double rot[3];
-        double color;
-        _framePoints[i]->GetPos(pos); // pos[2]=90;
-        _framePoints[i]->GetOrientation(rot);
-        _framePoints[i]->GetColor(&color);
-        _framePoints[i]->GetRadius(rad);
-        labels->InsertNextValue(_framePoints[i]->GetId() + 1);
+        glm::dvec3 pos = _framePoints[i]->pos;
+        glm::dvec3 rad = _framePoints[i]->radius;
+        glm::dvec3 rot = _framePoints[i]->orientation;
+        double color   = _framePoints[i]->color;
+        labels->InsertNextValue(_framePoints[i]->id + 1);
 
         rad[0] /= 30;
         rad[1] /= 30;
         rad[2] /= 120;
-        points->InsertNextPoint(pos);
+        points->InsertNextPoint(pos.x, pos.y, pos.z);
         rot[2] = vtkMath::RadiansFromDegrees(rot[2]);
 
         // scaling matrix
@@ -194,14 +191,10 @@ void Frame::ComputePolyData3D()
     tensors->SetNumberOfComponents(9);
 
     for(unsigned int i = 0; i < _framePoints.size(); i++) {
-        double pos[3] = {0, 0, 0};
-        double rad[3] = {1.0, 1.0, 1.0};
-        double rot[3];
-        double color;
-        _framePoints[i]->GetPos(pos); // pos[2]=90;
-        _framePoints[i]->GetOrientation(rot);
-        _framePoints[i]->GetColor(&color);
-        _framePoints[i]->GetRadius(rad);
+        glm::dvec3 pos = _framePoints[i]->pos;
+        glm::dvec3 rad = _framePoints[i]->radius;
+        glm::dvec3 rot = _framePoints[i]->orientation;
+        double color   = _framePoints[i]->color;
 
         // values for cylindar
         double height_i   = 170;
@@ -216,7 +209,7 @@ void Frame::ComputePolyData3D()
         rad[2] = 1;
         rad[1] = height_i / max_height;
 
-        points->InsertNextPoint(pos);
+        points->InsertNextPoint(pos.x, pos.y, pos.z);
         rot[2] = vtkMath::RadiansFromDegrees(rot[2] + angle_offset);
 
         // scaling matrix

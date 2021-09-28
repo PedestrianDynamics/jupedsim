@@ -31,32 +31,36 @@
 #pragma once
 #include <vtkInteractorStyleTrackballCamera.h>
 
-// Extern variables;
-extern bool extern_fullscreen_enable;
-extern bool extern_force_system_update;
+class Visualisation;
 
 /// This defines the interactions  between the user and the visualisation window.
-
 class InteractorStyle : public vtkInteractorStyleTrackballCamera
 {
+private:
+    Visualisation * _visualisation{nullptr};
+
 public:
-    InteractorStyle();
-    virtual ~InteractorStyle();
+    virtual ~InteractorStyle() = default;
 
     /// static constructor
     static InteractorStyle * New();
 
-    /// set the actor
-    void SetActor(/*vtkActor* actor*/);
-    /// set the source
-    void SetSource(/*some source*/);
+    void SetVisualisation(Visualisation * visualisation);
 
-    /// override
-    virtual void OnChar();
-    virtual void Rotate();
-    virtual void Spin();
-    virtual void Pan();
-    virtual void Dolly();
-    virtual void OnLeftButtonUp();
-    virtual void OnMouseMove();
+    void OnChar() override;
+
+    void Rotate() override;
+
+    void Spin() override;
+
+    void Pan() override;
+
+    void Dolly() override;
+
+    void OnLeftButtonUp() override;
+
+    void OnMouseMove() override;
+
+private:
+    InteractorStyle() = default;
 };

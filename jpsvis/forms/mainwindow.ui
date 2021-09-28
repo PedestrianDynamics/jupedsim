@@ -45,25 +45,7 @@
      <height>768</height>
     </size>
    </property>
-   <property name="sizeIncrement">
-    <size>
-     <width>3</width>
-     <height>3</height>
-    </size>
-   </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
-    <property name="leftMargin">
-     <number>0</number>
-    </property>
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <property name="rightMargin">
-     <number>0</number>
-    </property>
-    <property name="bottomMargin">
-     <number>0</number>
-    </property>
     <item>
      <widget class="QVTKOpenGLNativeWidget" name="render_widget" native="true">
       <property name="sizePolicy">
@@ -75,177 +57,134 @@
      </widget>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <property name="leftMargin">
-       <number>5</number>
+     <widget class="QSlider" name="framesIndicatorSlider">
+      <property name="enabled">
+       <bool>false</bool>
       </property>
-      <property name="topMargin">
-       <number>5</number>
+      <property name="maximum">
+       <number>60</number>
       </property>
-      <property name="rightMargin">
-       <number>5</number>
+      <property name="pageStep">
+       <number>1</number>
       </property>
-      <property name="bottomMargin">
-       <number>5</number>
+      <property name="tracking">
+       <bool>true</bool>
       </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QPushButton" name="BtPreviousFrame">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="text">
-           <string>Prev</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="BtStart">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="toolTip">
-           <string>Start Visualisation</string>
-          </property>
-          <property name="icon">
-           <iconset resource="icons.qrc">
-            <normaloff>:/new/iconsS/icons/Play1Hot.png</normaloff>
-            <normalon>:/new/iconsS/icons/PauseHot.png</normalon>:/new/iconsS/icons/Play1Hot.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>20</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="BtNextFrame">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="text">
-           <string>Next</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="rewind">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="text">
-           <string>Rewind</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="replaySpeed">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="currentText">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="BtRecord">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="toolTip">
-           <string>Start Recording</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="icons.qrc">
-            <normaloff>:/new/iconsS/icons/RecordPressed.png</normaloff>:/new/iconsS/icons/RecordPressed.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>20</width>
-            <height>20</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
+       <widget class="QPushButton" name="BtStart">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Start Visualisation</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/new/iconsS/icons/Play1Hot.png</normaloff>
+          <normalon>:/new/iconsS/icons/PauseHot.png</normalon>:/new/iconsS/icons/Play1Hot.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout" stretch="19,1">
-        <property name="sizeConstraint">
-         <enum>QLayout::SetFixedSize</enum>
+       <widget class="QPushButton" name="BtPreviousFrame">
+        <property name="enabled">
+         <bool>false</bool>
         </property>
-        <item>
-         <widget class="QSlider" name="framesIndicatorSlider">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="maximum">
-           <number>60</number>
-          </property>
-          <property name="pageStep">
-           <number>1</number>
-          </property>
-          <property name="tracking">
-           <bool>true</bool>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="tickPosition">
-           <enum>QSlider::TicksBelow</enum>
-          </property>
-          <property name="tickInterval">
-           <number>10</number>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="time">
-          <property name="text">
-           <string>Frame / Elapsed Time</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-       </layout>
+        <property name="text">
+         <string>Prev</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="BtNextFrame">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Next</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="rewind">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Rewind</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="BtRecord">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Start Recording</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/new/iconsS/icons/RecordPressed.png</normaloff>:/new/iconsS/icons/RecordPressed.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="time">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Frame / Elapsed Time</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -265,9 +204,6 @@
      <string>File</string>
     </property>
     <addaction name="actionOpenFile"/>
-    <addaction name="actionLoad_Geometry"/>
-    <addaction name="actionClear_Geometry"/>
-    <addaction name="actionClear_Trajectories_Files"/>
     <addaction name="actionOpen"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
@@ -276,17 +212,14 @@
     <property name="title">
      <string>Visualisation</string>
     </property>
-    <addaction name="actionReset"/>
-    <addaction name="actionStart"/>
+    <addaction name="actionTogglePlayback"/>
+    <addaction name="actionRewind"/>
     <addaction name="actionRecord"/>
-    <addaction name="actionStop"/>
-    <addaction name="actionPause_Resume"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionTutorial"/>
     <addaction name="separator"/>
     <addaction name="actionAbout"/>
     <addaction name="separator"/>
@@ -317,7 +250,6 @@
      <addaction name="actionTop_Rotate"/>
      <addaction name="actionSide_Rotate"/>
      <addaction name="separator"/>
-     <addaction name="actionCameraViewAgent"/>
     </widget>
     <addaction name="action2_D"/>
     <addaction name="action3_D"/>
@@ -332,7 +264,6 @@
     <addaction name="actionShow_Floor"/>
     <addaction name="actionShow_Exits"/>
     <addaction name="actionShow_Walls"/>
-    <addaction name="actionShow_Legend"/>
     <addaction name="actionShow_Axis"/>
     <addaction name="actionShow_Wall_Caption"/>
     <addaction name="actionShow_Room_Caption"/>
@@ -341,7 +272,6 @@
     <addaction name="actionShow_Navigation_Lines"/>
     <addaction name="actionShow_Gradient_Field"/>
     <addaction name="actionShow_Geometry_Captions"/>
-    <addaction name="actionFirst_Group"/>
     <addaction name="separator"/>
     <addaction name="actionShow_Onscreen_Infos"/>
     <addaction name="separator"/>
@@ -382,37 +312,10 @@
     <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="actionReset">
-   <property name="enabled">
-    <bool>false</bool>
+  <action name="actionTogglePlayback">
+   <property name="checkable">
+    <bool>true</bool>
    </property>
-   <property name="text">
-    <string>Reset</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+R</string>
-   </property>
-  </action>
-  <action name="actionStart">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Start</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+P</string>
-   </property>
-  </action>
-  <action name="actionStop">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Stop</string>
-   </property>
-  </action>
-  <action name="actionPause_Resume">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -429,17 +332,6 @@
    </property>
    <property name="shortcut">
     <string>F1</string>
-   </property>
-  </action>
-  <action name="actionTutorial">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Tutorial</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
    </property>
   </action>
   <action name="actionRecord">
@@ -489,28 +381,6 @@
     <string>Alt+A</string>
    </property>
   </action>
-  <action name="actionClear_Trajectories_Files">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Clear Trajectories Files</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+C</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
-   </property>
-  </action>
-  <action name="actionLoad_Geometry">
-   <property name="text">
-    <string>Load Geometry</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
-   </property>
-  </action>
   <action name="actionOpenFile">
    <property name="enabled">
     <bool>true</bool>
@@ -520,82 +390,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
-   </property>
-  </action>
-  <action name="actionClear_Geometry">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Clear Geometry</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
-   </property>
-  </action>
-  <action name="actionFirst_Group">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>First Group</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
-   </property>
-  </action>
-  <action name="actionSecond_Group">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Second Group</string>
-   </property>
-   <property name="visible">
-    <bool>true</bool>
-   </property>
-  </action>
-  <action name="actionThird_Group">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Third Group</string>
-   </property>
-   <property name="visible">
-    <bool>true</bool>
-   </property>
-  </action>
-  <action name="actionShow_Legend">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Show Legend</string>
-   </property>
-   <property name="statusTip">
-    <string>Add a legend to the plot</string>
-   </property>
-   <property name="shortcut">
-    <string>S, L</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
    </property>
   </action>
   <action name="action3_D">
@@ -658,14 +452,6 @@
    </property>
    <property name="shortcut">
     <string>S, G</string>
-   </property>
-  </action>
-  <action name="actionDEBUG_MODE">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>DEBUG MODE</string>
    </property>
   </action>
   <action name="actionShow_Captions">
@@ -768,17 +554,6 @@
    </property>
    <property name="visible">
     <bool>false</bool>
-   </property>
-  </action>
-  <action name="actionCameraViewAgent">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Agent View</string>
-   </property>
-   <property name="toolTip">
-    <string>to see the scene through the eyes of an agent. You will hve to select the ID of the agent next.</string>
    </property>
   </action>
   <action name="actionCaptionAuto">
@@ -992,6 +767,20 @@
     <string>Side Rotate</string>
    </property>
   </action>
+  <action name="actionRewind">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Rewind</string>
+   </property>
+   <property name="toolTip">
+    <string>Rewind</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1042,38 +831,6 @@
    <signal>triggered()</signal>
    <receiver>mainwindow</receiver>
    <slot>slotOpenFile()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>264</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionFirst_Group</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotToggleFirstPedestrianGroup()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>264</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionClear_Trajectories_Files</sender>
-   <signal>triggered()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotClearAllDataset()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1166,22 +923,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionShow_Legend</sender>
-   <signal>changed()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotToogleShowLegend()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>264</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionShow_Captions</sender>
    <signal>changed()</signal>
    <receiver>mainwindow</receiver>
@@ -1246,38 +987,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionPedestrian_Shape</sender>
-   <signal>triggered()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotChangePedestrianShape()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>224</x>
-     <y>199</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionClear_Geometry</sender>
-   <signal>triggered()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotClearGeometry()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>224</x>
-     <y>199</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionSnapshot</sender>
    <signal>triggered()</signal>
    <receiver>mainwindow</receiver>
@@ -1314,54 +1023,6 @@
    <signal>triggered()</signal>
    <receiver>mainwindow</receiver>
    <slot>slotRenderPNG2AVI()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>224</x>
-     <y>199</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionCameraViewAgent</sender>
-   <signal>triggered()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotSetCameraPerspectiveToVirtualAgent()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>224</x>
-     <y>199</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionCaptionAuto</sender>
-   <signal>triggered()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotCaptionColorAuto()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>224</x>
-     <y>199</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionCaptionCustom</sender>
-   <signal>triggered()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotCaptionColorCustom()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1486,22 +1147,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionShow_Navigation_Lines</sender>
-   <signal>changed()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotShowHideNavLines()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>224</x>
-     <y>199</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionShow_Floor</sender>
    <signal>changed()</signal>
    <receiver>mainwindow</receiver>
@@ -1582,22 +1227,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionShow_Gradient_Field</sender>
-   <signal>triggered()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotShowHideGradientField()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>224</x>
-     <y>199</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>BtNextFrame</sender>
    <signal>clicked()</signal>
    <receiver>mainwindow</receiver>
@@ -1631,9 +1260,9 @@
   </connection>
   <connection>
    <sender>BtRecord</sender>
-   <signal>clicked()</signal>
+   <signal>toggled(bool)</signal>
    <receiver>mainwindow</receiver>
-   <slot>slotRecord()</slot>
+   <slot>slotToggleRecording(bool)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>829</x>
@@ -1648,8 +1277,8 @@
   <connection>
    <sender>BtStart</sender>
    <signal>toggled(bool)</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotToggleReplay(bool)</slot>
+   <receiver>actionTogglePlayback</receiver>
+   <slot>setChecked(bool)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>500</x>
@@ -1658,6 +1287,38 @@
     <hint type="destinationlabel">
      <x>318</x>
      <y>261</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rewind</sender>
+   <signal>clicked()</signal>
+   <receiver>actionRewind</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>632</x>
+     <y>1078</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>957</x>
+     <y>1043</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShow_Directions</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>mainwindow</receiver>
+   <slot>slotTogglePedestrianDirections(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>599</x>
+     <y>581</y>
     </hint>
    </hints>
   </connection>
@@ -1678,50 +1339,34 @@
    </hints>
   </connection>
   <connection>
-   <sender>framesIndicatorSlider</sender>
-   <signal>sliderReleased()</signal>
+   <sender>actionTogglePlayback</sender>
+   <signal>toggled(bool)</signal>
    <receiver>mainwindow</receiver>
-   <slot>slotFrameSliderReleased()</slot>
+   <slot>slotTogglePlayback(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>309</x>
-     <y>1130</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>318</x>
-     <y>264</y>
+     <x>599</x>
+     <y>581</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>framesIndicatorSlider</sender>
-   <signal>sliderPressed()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotFrameSliderPressed()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>309</x>
-     <y>1130</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>264</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>rewind</sender>
-   <signal>clicked()</signal>
+   <sender>actionRewind</sender>
+   <signal>triggered()</signal>
    <receiver>mainwindow</receiver>
    <slot>slotRewindFramesToBegin()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>632</x>
-     <y>1078</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>957</x>
-     <y>1043</y>
+     <x>599</x>
+     <y>581</y>
     </hint>
    </hints>
   </connection>
@@ -1730,8 +1375,8 @@
   <slot>slotHelpAbout()</slot>
   <slot>slotExit()</slot>
   <slot>slotStartPlaying()</slot>
-  <slot>slotToggleReplay(bool)</slot>
-  <slot>slotRecord()</slot>
+  <slot>slotTogglePlayback(bool)</slot>
+  <slot>slotToggleRecording(bool)</slot>
   <slot>slotReset()</slot>
   <slot>slotFullScreen(bool)</slot>
   <slot>slotOpenFile()</slot>
@@ -1739,10 +1384,6 @@
   <slot>slotFrameNumber()</slot>
   <slot>slotRunningTime()</slot>
   <slot>slotLoadGeometry()</slot>
-  <slot>slotToggleFirstPedestrianGroup()</slot>
-  <slot>slotToggleSecondPedestrianGroup()</slot>
-  <slot>slotToggleThirdPedestrianGroup()</slot>
-  <slot>slotClearAllDataset()</slot>
   <slot>slotAddDataSet()</slot>
   <slot>slotShowTrajectoryOnly()</slot>
   <slot>slotShowPedestrianOnly()</slot>
@@ -1751,8 +1392,6 @@
   <slot>slotShowGeometry()</slot>
   <slot>slotToogle2D()</slot>
   <slot>slotToogle3D()</slot>
-  <slot>slotFrameSliderPressed()</slot>
-  <slot>slotFrameSliderReleased()</slot>
   <slot>slotFrameSliderChanged()</slot>
   <slot>slotToogleShowLegend()</slot>
   <slot>slotNextFrame()</slot>
@@ -1761,8 +1400,6 @@
   <slot>slotToogleShowAxis()</slot>
   <slot>slotSetCameraViewAngle(bool)</slot>
   <slot>slotPickBackgroundColor()</slot>
-  <slot>slotChangePedestrianShape()</slot>
-  <slot>slotUpdatePedestrianShape()</slot>
   <slot>slotSetCameraPerspectiveToTop()</slot>
   <slot>slotSetCameraPerspectiveToFront()</slot>
   <slot>slotSetCameraPerspectiveToSide()</slot>
@@ -1770,8 +1407,6 @@
   <slot>slotTakeScreenShot()</slot>
   <slot>slotRecordPNGsequence()</slot>
   <slot>slotRenderPNG2AVI()</slot>
-  <slot>slotSetCameraPerspectiveToVirtualAgent()</slot>
-  <slot>slotCaptionColorAuto()</slot>
   <slot>slotChangeBackgroundColor()</slot>
   <slot>slotChangeExitsColor()</slot>
   <slot>slotChangeWallsColor()</slot>
@@ -1779,14 +1414,13 @@
   <slot>slotShowHideExits()</slot>
   <slot>slotShowHideWalls()</slot>
   <slot>slotShowHideGeometryCaptions()</slot>
-  <slot>slotShowHideNavLines()</slot>
   <slot>slotChangeNavLinesColor()</slot>
   <slot>slotShowHideFloor()</slot>
   <slot>slotChangeFloorColor()</slot>
   <slot>slotShowGeometryStructure()</slot>
   <slot>slotChangeObstacleColor()</slot>
   <slot>slotShowHideObstacles()</slot>
-  <slot>slotShowHideGradientField()</slot>
   <slot>slotRewindFramesToBegin()</slot>
+  <slot>slotTogglePedestrianDirections(bool)</slot>
  </slots>
 </ui>

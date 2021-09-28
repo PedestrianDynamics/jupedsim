@@ -33,12 +33,18 @@
 #pragma once
 
 #include "InteractorStyle.h"
-#include "TimerCallback.h"
+#include "Settings.h"
+#include "TrajectoryData.h"
 #include "geometry/GeometryFactory.h"
+#include "geometry/PointPlotter.h"
+#include "trains/train.h"
 
+#include <QDateTime>
+#include <QDir>
 #include <QObject>
 #include <QThread>
 #include <vtkGlyph3D.h>
+#include <vtkPNGWriter.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkSmartPointer.h>
 #include <vtkTensorGlyph.h>
@@ -59,23 +65,10 @@ class vtkTextActor;
 class vtkObject;
 
 class Pedestrian;
-class SyncData;
+class TrajectoryData;
 class FacilityGeometry;
 class TrailPlotter;
 class PointPlotter;
-
-extern Pedestrian ** extern_pedestrians_firstSet;
-
-extern PointPlotter * extern_trail_plotter;
-
-extern vtkTensorGlyph * extern_glyphs_pedestrians;
-extern vtkTensorGlyph * extern_glyphs_pedestrians_3D;
-extern vtkTensorGlyph * extern_glyphs_directions;
-extern vtkActor * extern_glyphs_pedestrians_actor_2D;
-extern vtkActor * extern_glyphs_pedestrians_actor_3D;
-extern vtkActor * extern_glyphs_directions_actor;
-
-extern SyncData extern_trajectories_firstSet;
 
 
 class Visualisation : public QObject
@@ -83,10 +76,18 @@ class Visualisation : public QObject
     Q_OBJECT
 
 public:
-    Visualisation(QObject * parent, vtkRenderWindow * renderWindow);
+    Visualisation(
+        QObject * parent,
+        vtkRenderWindow * renderWindow,
+        Settings * _settings,
+        TrajectoryData * trajectories);
     virtual ~Visualisation();
-    void run();
+    void start();
     void stop();
+    void pauseRendering(bool paused);
+
+    void update();
+    void renderFrame();
 
     void setAxisVisible(bool status);
 
@@ -111,6 +112,10 @@ public:
 
     /// set geometry visibility
     void setGeometryVisibility(bool status);
+
+    void setTrainData(
+        std::map<std::string, std::shared_ptr<TrainType>> && trainTypes,
+        std::map<int, std::shared_ptr<TrainTimeTable>> && trainTimeTable);
 
     /// enable/disable 2D
     void setGeometryVisibility2D(bool status);
@@ -160,13 +165,22 @@ public:
 
     void setOnscreenInformationVisibility(bool show);
 
-public Q_SLOTS:
-    /// set the frame rate in frames per second
-    void slotSetFrameRate(float fps);
+    void onExecute();
 
+    void onMouseMove(double x, double y, double z);
 
-Q_SIGNALS:
-    void signal_controlSequences(const char * para);
+    /// make a png screenshot of the renderwindows
+    void takeScreenshot();
+
+    /// Returns the fps the trajectory data was recorded.
+    /// If no trajectory data was loaded, i.e. only geometry is rendered the will return 0
+    /// @return fps of the trajectory data.
+    double trajectoryRecordingFps() const;
+
+signals:
+    void signalFrameNumber(int frame);
+    void signalMaxFramesUpdated(int num_frames);
+    void signalMousePositionUpdated(double x, double y, double z);
 
 private:
     /// initialize the legend
@@ -186,19 +200,33 @@ private:
 
     void QcolorToDouble(const QColor & col, double * rgb);
 
-    void Create2dAgent();
+    /// take png screenshots sequence
+    void takeScreenshotSequence();
+
 
 private:
-    vtkRenderWindow * _renderWindow;
+    Settings * _settings;
+    TrajectoryData * _trajectories;
     GeometryFactory _geometry;
-    vtkRenderer * _renderer;
-    vtkAxesActor * _axis;
-    vtkTextActor * _runningTime;
-    vtkCamera * _topViewCamera;
+    std::map<std::string, std::shared_ptr<TrainType>> _trainTypes;
+    std::map<int, std::shared_ptr<TrainTimeTable>> _trainTimeTables;
+    vtkRenderWindow * _renderWindow;
+    vtkSmartPointer<vtkRenderer> _renderer;
+    vtkSmartPointer<vtkAxesActor> _axis;
+    vtkSmartPointer<vtkTextActor> _runningTime;
+    vtkSmartPointer<vtkCamera> _topViewCamera;
+    vtkSmartPointer<vtkTensorGlyph> _glyphs_pedestrians;
+    vtkSmartPointer<vtkActor> _glyphs_directions_actor;
+    vtkSmartPointer<vtkActor> _glyphs_pedestrians_actor_2D;
+    vtkSmartPointer<vtkActor2D> _pedestrians_labels;
+    vtkSmartPointer<vtkTensorGlyph> _glyphs_directions;
+    vtkSmartPointer<vtkTensorGlyph> _glyphs_pedestrians_3D;
+    vtkSmartPointer<vtkActor> _glyphs_pedestrians_actor_3D;
+    vtkSmartPointer<vtkTextActor> runningTime{};
+    char runningTimeText[50] = {};
     QString _winTitle;
-
-    float _framePerSecond;
-    InteractorStyle _interactorStyle{};
-    std::unique_ptr<TimerCallback> _timer_cb{nullptr};
+    vtkSmartPointer<vtkCallbackCommand> _timer_cb;
     int _timer_id = 1;
+    std::unique_ptr<PointPlotter> _trail_plotter{nullptr};
+    bool is_pause{true};
 };

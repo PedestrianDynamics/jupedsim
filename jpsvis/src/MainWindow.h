@@ -32,6 +32,9 @@
 #pragma once
 
 #include "ApplicationState.h"
+#include "Settings.h"
+#include "TrajectoryData.h"
+#include "Visualisation.h"
 #include "myqtreeview.h"
 #include "ui_mainwindow.h"
 
@@ -41,38 +44,15 @@
 #include <QSplitter>
 #include <QStandardItem>
 #include <QTreeWidget>
+#include <filesystem>
+#include <optional>
 #include <vector>
 
-class vtkWindowToImageFilter;
-class SyncData;
-class Visualisation;
 class QString;
 class QDomNode;
 class FacilityGeometry;
 class GeometryFactory;
 class Building;
-class Message;
-class Settings;
-
-
-extern int extern_update_step;
-extern int extern_screen_contrast;
-extern bool extern_is_pause;
-extern bool extern_launch_recording;
-extern bool extern_recording_enable;
-extern bool extern_shutdown_visual_thread;
-extern bool extern_fullscreen_enable;
-
-extern bool extern_pedestrians_firstSet_visible;
-
-extern SyncData extern_trajectories_firstSet;
-
-// states if the datasets are loaded.
-extern bool extern_first_dataset_loaded;
-
-// states whether the loaded datasets are visible
-extern bool extern_first_dataset_visible;
-
 
 class MainWindow : public QMainWindow
 {
@@ -82,21 +62,22 @@ public:
     MainWindow(QWidget * parent = 0);
     virtual ~MainWindow();
 
-
-public Q_SLOTS:
+public slots:
     /// NEW SLOTS
 
     /// Open a trajectory file
     /// @return file could be opened successfully
-    bool slotOpenFile();
+    void slotOpenFile();
 
     /// Toggles replay of loaded data.
     /// @param checked, this is true if the button is pressed otherwise false.
-    void slotToggleReplay(bool checked);
+    void slotTogglePlayback(bool checked);
 
     /// Resets frame index of currently active replay to zero
     void slotRewindFramesToBegin();
 
+    /// Update the number of total frames
+    void slotUpdateNumFrames(int num_frames);
 
     /// OLD SLOTS
     /// display the help modus
@@ -108,33 +89,17 @@ public Q_SLOTS:
     /// output an Error
     void slotErrorOutput(QString err);
 
-    /// clear all previously added/loaded datasets
-    void slotClearAllDataset();
-
     /// set the camera view angle to  TOP/FRONT/SIDE
-    // TODO: high priority
     void slotSetCameraPerspectiveToTop();
     void slotSetCameraPerspectiveToTopRotate();
     void slotSetCameraPerspectiveToSideRotate();
-    void slotSetCameraPerspectiveToVirtualAgent();
 
     // controls visualisation
-    void slotRecord();
-    void slotReset();
+    void slotToggleRecording(bool checked);
     /// take a screenshot of the rendering window
     void slotTakeScreenShot();
 
-    /// update the status message
-    void slotCurrentAction(QString msg);
-    void slotFrameNumber(unsigned long timems, unsigned long minFrame);
-    void slotRunningTime(unsigned long timems);
-    void slotRenderingTime(int fps);
-
-    /// load a geometry file and display it
-    void slotClearGeometry();
-
-    /// enable/disable the first pedestrian group
-    void slotToggleFirstPedestrianGroup();
+    void slotFrameNumber(int frame);
 
     /// show/hides trajectories (leaving a trail) only
     void slotShowTrajectoryOnly();
@@ -146,23 +111,17 @@ public Q_SLOTS:
     /// shows/hide geometry
     void slotShowHideWalls();
     /// shows/hide navigation lines
-    void slotShowHideNavLines();
-    /// shows/hide navigation lines
     void slotShowHideFloor();
     /// shows/hide geometry captions
     void slotShowHideGeometryCaptions();
     /// show hide the obstacles
     void slotShowHideObstacles();
-    /// show/hide the gradient field
-    void slotShowHideGradientField();
 
     /// show pedestrians only without trail
     void slotShowPedestrianOnly();
 
     /// update the position slider
     void slotUpdateFrameSlider(int newValue);
-    void slotFrameSliderPressed();
-    void slotFrameSliderReleased();
 
     /// handle the frame by frame navigation
     void slotNextFrame();
@@ -171,8 +130,9 @@ public Q_SLOTS:
     /// enable/disable the pedestrian captions
     void slotShowPedestrianCaption();
 
-    /// enable/disable the pedestrian Directions
-    void slotShowDirections();
+    /// Toggle rendering of pedestrian directions.
+    /// @param is_enabled
+    void slotTogglePedestrianDirections(bool is_enabled);
 
     /// set visualisation mode to 2D
     void slotToogle2D();
@@ -180,13 +140,7 @@ public Q_SLOTS:
     /// set visualisation mode to 3D
     void slotToogle3D();
 
-    /// show / hide the legend
-    void slotToogleShowLegend();
-
     void slotToogleShowAxis();
-
-    /// change, choose the pedestrian shape
-    void slotChangePedestrianShape();
 
     /// start/stop the recording process als png images sequences
     void slotRecordPNGsequence();
@@ -196,12 +150,6 @@ public Q_SLOTS:
 
     /// adjust the scene background color
     void slotChangeBackgroundColor();
-
-    /// change the pedestrian caption mode to automatic
-    void slotCaptionColorAuto();
-
-    /// change he pedestrian caption color to manual
-    void slotCaptionColorCustom();
 
     /// change the wall color
     void slotChangeWallsColor();
@@ -227,14 +175,11 @@ public Q_SLOTS:
 
     void slotOnGeometryItemChanged(QStandardItem * item);
 
-private:
-Q_SIGNALS:
-    void signal_controlSequence(QString);
+    void slotMousePositionUpdated(double x, double y, double z);
 
 protected:
     virtual void closeEvent(QCloseEvent * event);
     void dragEnterEvent(QDragEnterEvent * event);
-    void dropEvent(QDropEvent * event);
 
 private:
     void startReplay();
@@ -243,6 +188,7 @@ private:
     void disablePlayerControls();
     void startRendering();
     void stopRendering();
+    std::optional<std::filesystem::path> selectFileToLoad();
 
     /// load settings in the case the remember settings is checked.
     void loadAllSettings();
@@ -256,37 +202,30 @@ private:
     /// reset all graphic element to their initial(default) state
     void resetGraphicalElements();
 
-    /// add a second/third dataset to the visualization data
-    ///  groupID may be 2 or 3
     /// @return false if something went wrong.
-    bool addPedestrianGroup(int groupID, QString fileName = "");
+    bool tryParseFile(const std::filesystem::path & path = {});
+    bool tryParseGeometry(const std::filesystem::path & path);
+    bool tryParseTrajectory(const std::filesystem::path & path);
 
     /// return true if at least one dataset was loaded
     bool anyDatasetLoaded();
 
-    /// clear the corresponding dataset if it exists
-    void clearDataSet(int ID);
+    /// Unload all data
+    void unloadData();
 
     /// reset all dataset, to the beginning
     void resetAllFrameCursor();
 
-    /// wait for visualisation thread to terminate
-    void waitForVisioThread();
-
 private:
     Ui::mainwindow ui;
     ApplicationState _state{ApplicationState::NoData};
+    Settings _settings;
+    TrajectoryData _trajectories;
 
-    bool isPlaying;
-    bool isPaused;
-    bool frameSliderHold;
-    int numberOfDatasetLoaded;
-
-    Settings * travistoOptions;
-    Visualisation * _visualisationThread;
-    QLabel * labelCurrentAction;
-    QLabel * labelFrameNumber;
-    QLabel * labelRecording;
+    std::unique_ptr<Visualisation> _visualisation;
+    QLabel labelCurrentAction;
+    QLabel labelFrameNumber;
+    QLabel labelRecording;
     QSplitter _splitter;
     MyQTreeView _geoStructure;
 };

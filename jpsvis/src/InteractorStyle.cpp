@@ -29,7 +29,8 @@
 
 #include "InteractorStyle.h"
 
-#include "SystemSettings.h"
+#include "Settings.h"
+#include "Visualisation.h"
 #include "general/Macros.h"
 
 #include <QStringList>
@@ -37,6 +38,7 @@
 #include <vtkCamera.h>
 #include <vtkCoordinate.h>
 #include <vtkMath.h>
+#include <vtkObjectFactory.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
@@ -45,20 +47,13 @@
 
 using namespace std;
 
-InteractorStyle::InteractorStyle() {}
+// Macro to implement ::New() for subclasses of vtkObject()
+vtkStandardNewMacro(InteractorStyle);
 
-InteractorStyle::~InteractorStyle() {}
-
-/// static constructor
-InteractorStyle * InteractorStyle::New()
+void InteractorStyle::SetVisualisation(Visualisation * visulisation)
 {
-    return new InteractorStyle();
+    _visualisation = visulisation;
 }
-
-void InteractorStyle::SetActor() {}
-
-
-void InteractorStyle::SetSource() {}
 
 // forward the event only if not in 2d mode
 void InteractorStyle::Rotate()
@@ -83,32 +78,22 @@ void InteractorStyle::Dolly()
 
 void InteractorStyle::OnMouseMove()
 {
-    vtkRenderWindowInteractor * rwi = this->Interactor;
-    vtkRenderWindow * renderWindow  = rwi->GetRenderWindow();
+    if(_visualisation) {
+        vtkRenderWindowInteractor * rwi = this->Interactor;
+        vtkRenderWindow * renderWindow  = rwi->GetRenderWindow();
 
-    int pos[2] = {0, 0};
-    rwi->GetEventPosition(pos);
-    int pos_x = pos[0];
-    int pos_y = pos[1];
+        int pos[2] = {0, 0};
+        rwi->GetEventPosition(pos);
+        int pos_x = pos[0];
+        int pos_y = pos[1];
 
-    VTK_CREATE(vtkCoordinate, coordinate);
-    coordinate->SetCoordinateSystemToDisplay();
-    coordinate->SetValue(pos_x, pos_y, 0);
-    double * world =
-        coordinate->GetComputedWorldValue(renderWindow->GetRenderers()->GetFirstRenderer());
-    // conversion in metre
-    world[0] /= 100;
-    world[1] /= 100;
-    world[2] /= 100;
-
-    QString winName   = renderWindow->GetWindowName();
-    QStringList query = winName.split(" -->");
-
-    if(query.size() > 1) {
-        char tmp[50];
-        sprintf(tmp, "--> [ %.2f x %.2f x %.2f ]", world[0], world[1], world[2]);
-        winName = query[0] + " -->" + QString(tmp);
-        renderWindow->SetWindowName(winName.toStdString().c_str());
+        VTK_CREATE(vtkCoordinate, coordinate);
+        coordinate->SetCoordinateSystemToDisplay();
+        coordinate->SetValue(pos_x, pos_y, 0);
+        double * world =
+            coordinate->GetComputedWorldValue(renderWindow->GetRenderers()->GetFirstRenderer());
+        // Note: coordinates are converted to meters
+        _visualisation->onMouseMove(world[0] /= 100, world[1] /= 100, world[2] /= 100);
     }
     vtkInteractorStyleTrackballCamera::OnMouseMove();
 }
@@ -123,13 +108,6 @@ void InteractorStyle::OnChar()
         case '-':
             rwi->Render(); // render - update the screen
             break;
-
-        // escape
-        case 27:
-            extern_fullscreen_enable   = false;
-            extern_force_system_update = true;
-            break;
-
         case 'a': {
             double para[3];
             vtkCamera * cam =
