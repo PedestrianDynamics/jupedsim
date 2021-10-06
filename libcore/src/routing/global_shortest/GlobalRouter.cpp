@@ -269,7 +269,7 @@ bool GlobalRouter::Init(Building * building)
             // The penalty factor should discourage pedestrians to evacuation through rooms
             auto && sub    = (std::shared_ptr<SubRoom> &&) it_sub.second;
             double penalty = 1.0;
-            if((sub->GetType() != "floor") && (sub->GetType() != "dA")) {
+            if((sub->GetType() != SubroomType::FLOOR) && (sub->GetType() != SubroomType::DA)) {
                 penalty = _edgeCost;
             }
 

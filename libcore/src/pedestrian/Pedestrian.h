@@ -33,6 +33,7 @@
 #include "PedDistributor.h"
 #include "general/Macros.h"
 #include "geometry/NavLine.h"
+#include "geometry/SubroomType.h"
 #include "pedestrian/Knowledge.h"
 
 #include <map>
@@ -68,8 +69,14 @@ private:
     double _v0DownStairs;
     double _v0EscalatorUpStairs;
     double _v0EscalatorDownStairs;
-    double _v0IdleEscalatorUpStairs;
-    double _v0IdleEscalatorDownStairs;
+    /// c in f() and g() for v0 transition on stairs up
+    double _smoothFactorUpStairs;
+    /// c in f() and g() for v0 transition on stairs down
+    double _smoothFactorDownStairs;
+    /// c in f() and g() for v0 transition on escalators up
+    double _smoothFactorEscalatorUpStairs;
+    /// c in f() and g() for v0 transition on escalators down
+    double _smoothFactorEscalatorDownStairs;
     int _roomID;
     int _subRoomID;
     int _subRoomUID;
@@ -135,7 +142,26 @@ public:
     explicit Pedestrian(const StartDistribution & agentsParameters, Building & building);
     virtual ~Pedestrian();
 
-    // Setter-Funktionen
+    /** 
+     * Select desired speed based on the type of subroom
+     * where the agent is moving. 
+     * @param type, type of subroom
+     * @param delta, negative when moving downstairs and positiv otherwise. 
+     * Nearly zero for horizontal movement.
+     */
+    double SelectV0(SubroomType type, double delta) const;
+    /** 
+     * Select Smooth factor based on the type of subroom
+     * where the agent is moving. 
+     * @param type, type of subroom
+     * @param delta, negative when moving downstairs and positiv otherwise. 
+     * Nearly zero for horizontal movement.
+     */
+    double SelectSmoothFactor(SubroomType type, double delta) const;
+    void SetSmoothFactorUpStairs(double c);
+    void SetSmoothFactorDownStairs(double c);
+    void SetSmoothFactorEscalatorUpStairs(double c);
+    void SetSmoothFactorEscalatorDownStairs(double c);
     void SetID(int i);
     void SetRoomID(int i);
     void SetSubRoomID(int i);
@@ -165,9 +191,7 @@ public:
         double v0UpStairs,
         double v0DownStairs,
         double escalatorUp,
-        double escalatorDown,
-        double v0IdleEscalatorUp,
-        double v0IdleEscalatorDown);
+        double escalatorDown);
     void SetSmoothTurning(); // activate the smooth turning with a delay of 2 sec
     void SetPhiPed();
     void SetFinalDestination(int UID);
@@ -360,7 +384,6 @@ public:
       * and the  maximal count must be known in advance.
       */
     static int GetAgentsCreated();
-
 
     /**
       * Set the color mode for the pedestrians

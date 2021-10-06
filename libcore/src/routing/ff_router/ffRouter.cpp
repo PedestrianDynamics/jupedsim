@@ -303,8 +303,8 @@ void FFRouter::CalculateFloorFields()
         penaltyList.clear();
         for(const auto & room : _building->GetAllRooms()) {
             for(const auto & [_, subroom] : room.second->GetAllSubRooms()) {
-                if((subroom->GetType() == "escalator_up") ||
-                   (subroom->GetType() == "escalator_down")) {
+                if((subroom->GetType() == SubroomType::ESCALATOR_UP) ||
+                   (subroom->GetType() == SubroomType::ESCALATOR_DOWN)) {
                     _directionalEscalatorsUID.emplace_back(subroom->GetUID());
                 }
             }

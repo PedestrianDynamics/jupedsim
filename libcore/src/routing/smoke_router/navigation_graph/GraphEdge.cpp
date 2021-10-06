@@ -151,7 +151,7 @@ double GraphEdge::GetRoomToFloorFactor() const
     if(GetDest() == nullptr ||
        GetDest()->GetSubRoom()->GetType() == GetSrc()->GetSubRoom()->GetType())
         return 1.0;
-    if(GetDest()->GetSubRoom()->GetType() == "floor")
+    if(GetDest()->GetSubRoom()->GetType() == SubroomType::FLOOR)
         return 1.0;
     else
         return 5.0;

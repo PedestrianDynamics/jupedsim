@@ -110,7 +110,7 @@ public:
     void SetBounds(double xMin, double xMax, double yMin, double yMax);
     void Getbounds(double bounds[4]);
     void Setbounds(double bounds[4]);
-    AgentsParameters * GetGroupParameters();
+    AgentsParameters * GetGroupParameters() const;
     void SetGroupParameters(AgentsParameters * groupParameters);
     void InitPremovementTime(double mean, double stdv);
     double GetPremovementTime() const;

@@ -21,7 +21,6 @@ set(source_files
     src/geometry/Crossing.cpp
     src/geometry/Goal.cpp
     src/geometry/GoalManager.cpp
-    src/geometry/helper/CorrectGeometry.cpp
     src/geometry/Hline.cpp
     src/geometry/Line.cpp
     src/geometry/NavLine.cpp
@@ -29,9 +28,12 @@ set(source_files
     src/geometry/Point.cpp
     src/geometry/Room.cpp
     src/geometry/SubRoom.cpp
+    src/geometry/SubroomType.cpp
+    src/geometry/SubroomType.h
     src/geometry/Transition.cpp
     src/geometry/WaitingArea.cpp
     src/geometry/Wall.cpp
+    src/geometry/helper/CorrectGeometry.cpp
     src/IO/EventFileParser.cpp
     src/IO/GeoFileParser.cpp
     src/IO/IniFileParser.cpp

@@ -236,25 +236,31 @@ void VelocityModel::ComputeNextTimeStep(
     // update
     size_t counter = 0;
     for(auto & ped : allPeds) {
-        Point v_neu   = result_acc[counter];
-        Point pos_neu = ped->GetPos() + v_neu * deltaT;
+        SubRoom * subroom = building->GetRoom(ped->GetRoomID())->GetSubRoom(ped->GetSubRoomID());
+        double escalatorSpeed   = subroom->GetEscalatorSpeed();
+        Point escalatorVelocity = result_acc[counter].Normalized() * escalatorSpeed;
+        Point v_neu             = result_acc[counter] + escalatorVelocity;
+        Point pos_neu           = ped->GetPos() + v_neu * deltaT;
 
         //Jam is based on the current velocity
         if(v_neu.Norm() >= ped->GetV0Norm() * 0.5) {
-            ped->ResetTimeInJam();
-        } else {
-            ped->UpdateTimeInJam();
-        }
-        //only update the position if the velocity is above a threshold
-        if(v_neu.Norm() >= J_EPS_V) {
-            ped->SetPhiPed();
-        }
-        ped->SetPos(pos_neu);
-        if(periodic) {
-            if(ped->GetPos()._x >= xRight) {
-                ped->SetPos(Point(ped->GetPos()._x - (xRight - xLeft), ped->GetPos()._y));
-                //ped->SetID( ped->GetID() + 1);
+            if(v_neu.Norm() >= (ped->GetV0Norm() + escalatorSpeed) * 0.5) {
+                ped->ResetTimeInJam();
+            } else {
+                ped->UpdateTimeInJam();
             }
+            //only update the position if the velocity is above a threshold
+            if(v_neu.Norm() >= J_EPS_V) {
+                ped->SetPhiPed();
+            }
+            ped->SetPos(pos_neu);
+            if(periodic) {
+                if(ped->GetPos()._x >= xRight) {
+                    ped->SetPos(Point(ped->GetPos()._x - (xRight - xLeft), ped->GetPos()._y));
+                    //ped->SetID( ped->GetID() + 1);
+                }
+            }
+            ped->SetV(v_neu);
         }
         ped->SetV(v_neu);
         ++counter;
@@ -345,7 +351,8 @@ VelocityModel::GetSpacing(Pedestrian * ped1, Pedestrian * ped2, Point ei, int pe
         ep12 = distp12.Normalized();
     } else {
         LOG_WARNING(
-            "VelocityModel::GetSPacing() ep12 can not be calculated! Pedestrians are to close to "
+            "VelocityModel::GetSPacing() ep12 can not be calculated! Pedestrians are to close "
+            "to "
             "each other ({:f})",
             Distance);
         my_pair(FLT_MAX, ped2->GetID());
@@ -386,7 +393,8 @@ Point VelocityModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2, int perio
         ep12 = distp12.Normalized();
     } else {
         LOG_ERROR(
-            "VelocityModel::forcePedPed() ep12 can not be calculated! Pedestrians are too near to "
+            "VelocityModel::forcePedPed() ep12 can not be calculated! Pedestrians are too near "
+            "to "
             "each other (dist={:f}). Adjust <a> value in force_ped to counter this. Affected "
             "pedestrians ped1 {:d} at ({:f},{:f}) and ped2 {:d} at ({:f}, {:f})",
             Distance,

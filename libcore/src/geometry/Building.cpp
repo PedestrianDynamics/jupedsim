@@ -898,8 +898,10 @@ bool Building::SaveGeometry(const fs::path & filename) const
             auto && sub          = itr_sub.second;
             const double * plane = sub->GetPlaneEquation();
             geometry << "\t\t<subroom id =\"" << sub->GetSubRoomID() << "\" caption=\"dummy_caption"
-                     << "\" class=\"" << sub->GetType() << "\" A_x=\"" << plane[0] << "\" B_y=\""
-                     << plane[1] << "\" C_z=\"" << plane[2] << "\">" << std::endl;
+                     << "\" class=\""
+                     << "SUBROOM"
+                     << "\" A_x=\"" << plane[0] << "\" B_y=\"" << plane[1] << "\" C_z=\""
+                     << plane[2] << "\">" << std::endl;
 
             for(auto && wall : sub->GetAllWalls()) {
                 const Point & p1 = wall.GetPoint1();
@@ -914,7 +916,7 @@ bool Building::SaveGeometry(const fs::path & filename) const
                          << "\t\t\t</polygon>" << std::endl;
             }
 
-            if(sub->GetType() == "stair") {
+            if(sub->GetType() == SubroomType::STAIR) {
                 const Point & up   = ((Stair *) sub.get())->GetUp();
                 const Point & down = ((Stair *) sub.get())->GetDown();
                 geometry << "\t\t\t<up px=\"" << up._x << "\" py=\"" << up._y << "\"/>"
