@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <JPScore project="JPS-Project" version="0.8">
   <goals>
-    
     <goal id="3" final="true" caption="goal3">
       <polygon>
         <vertex px="3.2" py="12.0" />
