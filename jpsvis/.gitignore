@@ -141,7 +141,8 @@ _deps
 auto-save-list
 tramp
 .\#*
-
+.cache/
+.ccls-cache/
 # Org-mode
 .org-id-locations
 *_archive
