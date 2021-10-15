@@ -50,3 +50,16 @@ jobs:
         shell: bash
         # Execute the build.  You can specify a specific target with "--target <NAME>"
         run: cmake --build . --config $BUILD_TYPE
+
+      - name: Cpack
+        working-directory: ${{github.workspace}}/build
+        shell: bash
+        run: |
+          source /Users/runner/.bash_profile
+          cpack -C $BUILD_TYPE -G DragNDrop --verbose
+
+      - name: 'Upload installer'
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.os }}-installer
+          path: ${{github.workspace}}/build/jpsvis-installer-*.dmg
