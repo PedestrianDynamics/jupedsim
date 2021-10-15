@@ -60,7 +60,10 @@ message( STATUS "Generating  ................................... ${PROJECT_NAME}
 # Dependencies
 ################################################################################
 # VTK
-find_package(VTK 9.0 REQUIRED CONFIG)
+find_package(VTK 9.0
+    COMPONENTS CommonCore opengl RenderingQt RenderingCore GUISupportQt RenderingUI InteractionStyle RenderingAnnotation IOImage
+    REQUIRED CONFIG
+)
 message(STATUS "Found VTK Version: ${VTK_VERSION}")
 
 # Qt5
