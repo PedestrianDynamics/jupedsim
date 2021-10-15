@@ -25,6 +25,17 @@ include(helper_functions)
 check_prefix_path()
 enforce_build_type_is_set()
 
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+
+# when building, don't use the install RPATH already
+# (but later on when installing)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+set(CMAKE_INSTALL_RPATH @executable_path/../Frameworks)
+
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 
 ################################################################################
 # Compilation flags
@@ -233,12 +244,5 @@ configure_file(src/BuildInfo.cpp.in ${CMAKE_BINARY_DIR}/src/BuildInfo.cpp @ONLY)
 ################################################################################
 # Packaging with CPack
 ################################################################################
-#include(install_helper)
-#if(WIN32 AND NOT UNIX)
-#    cpack_write_windows_config()
-#endif()
-#if(APPLE)
-#    cpack_write_osx_config()
-#endif()
-#
-#cpack_write_config()
+include(install_helper)
+create_package()

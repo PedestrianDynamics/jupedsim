@@ -1,4 +1,4 @@
-name: jpsvis-macos-bigsur
+name: jpsvis-macos
 
 on: [pull_request, push]
 
