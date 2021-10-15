@@ -116,7 +116,6 @@ target_link_libraries(jpsvis PUBLIC
         Qt5::Core
         ${VTK_LIBRARIES}
         glm::glm
-        git-info
         tinyxml
 )
 
@@ -144,7 +143,7 @@ target_include_directories(tinyxml PUBLIC
 target_include_directories(jpsvis PUBLIC "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/forms" ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 set(SRCS
     forms/jpsvis.rc
-    src/BuildInfo.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/BuildInfo.cpp
     src/Frame.cpp
     src/IO/OutputHandler.cpp
     src/InteractorStyle.cpp
@@ -227,10 +226,7 @@ set(RCS
 )
 
 target_sources(jpsvis PRIVATE ${SRCS} ${HDR} ${UIS} ${HDR} ${RCS})
-
-target_compile_definitions(jpsvis PUBLIC
-    JPSVIS_VERSION="${PROJECT_VERSION}"
-)
+configure_file(src/BuildInfo.cpp.in ${CMAKE_BINARY_DIR}/src/BuildInfo.cpp @ONLY)
 
 ################################################################################
 # Packaging with CPack

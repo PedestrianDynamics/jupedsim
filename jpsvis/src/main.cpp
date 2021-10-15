@@ -63,11 +63,11 @@ int main(int argc, char * argv[])
 {
     Log::Info("\n----\nJuPedSim - JPSvis\n");
     Log::Info("Current date   : %s %s", __DATE__, __TIME__);
-    Log::Info("Version        : %s", JPSVIS_VERSION);
-    Log::Info("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
-    Log::Info("Commit hash    : %s", GIT_COMMIT_HASH);
-    Log::Info("Commit date    : %s", GIT_COMMIT_DATE);
-    Log::Info("Branch         : %s\n----\n", GIT_BRANCH);
+    Log::Info("Version        : %s", JPSVIS_VERSION.c_str());
+    Log::Info("Compiler       : %s (%s)", COMPILER.c_str(), COMPILER_VERSION.c_str());
+    Log::Info("Commit hash    : %s", GIT_COMMIT_HASH.c_str());
+    Log::Info("Commit date    : %s", GIT_COMMIT_DATE.c_str());
+    Log::Info("Branch         : %s\n----\n", GIT_BRANCH.c_str());
 
     QSurfaceFormat::setDefaultFormat(QVTKOpenGLNativeWidget::defaultFormat());
 

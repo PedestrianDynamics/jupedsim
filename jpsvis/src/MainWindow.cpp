@@ -32,6 +32,7 @@
 #include "MainWindow.h"
 
 #include "ApplicationState.h"
+#include "BuildInfo.h"
 #include "Frame.h"
 #include "Log.h"
 #include "Parsing.h"
@@ -300,10 +301,10 @@ void MainWindow::slotHelpAbout()
                         "%3</p>"
                         "<p  style=\"line-height:0.4\" style=\"color:Gray;\"><i>Branch</i> "
                         "%4</p><hr>")
-            .arg(JPSVIS_VERSION)
-            .arg(GIT_COMMIT_HASH)
-            .arg(GIT_COMMIT_DATE)
-            .arg(GIT_BRANCH);
+            .arg(JPSVIS_VERSION.c_str())
+            .arg(GIT_COMMIT_HASH.c_str())
+            .arg(GIT_COMMIT_DATE.c_str())
+            .arg(GIT_BRANCH.c_str());
 
     QString text =
         QMessageBox::tr("<p style=\"color:Gray;\"><small><i> &copy; 2009-2021  Ulrich Kemloh "

@@ -35,7 +35,7 @@ endmacro()
 # - GIT_TAG: current tag
 # - GIT_COMMIT_SUBJECT: subject of the latest commit
 # - GIT_BRANCH: current branch
-function(get_git_info)
+macro(get_git_info)
     find_package(Git QUIET)
 
     # Returns 0 if the given directory is a git repo
@@ -88,13 +88,4 @@ function(get_git_info)
         set(GIT_BRANCH "UNKNOWN")
         set(GIT_TAG "UNKNOWN")
     endif()
-
-    add_library(git-info INTERFACE)
-    target_compile_definitions(git-info INTERFACE
-            GIT_COMMIT_HASH="${GIT_SHA1}"
-            GIT_COMMIT_DATE="${GIT_DATE}"
-            GIT_TAG="${GIT_TAG}"
-            GIT_COMMIT_SUBJECT="${GIT_COMMIT_SUBJECT}"
-            GIT_BRANCH="${GIT_BRANCH}"
-            )
-endfunction()
+endmacro()
