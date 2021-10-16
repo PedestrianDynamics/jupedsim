@@ -442,12 +442,12 @@ void MainWindow::slotToggleRecording(bool checked)
 void MainWindow::slotFrameNumber(int frame)
 {
     ui.framesIndicatorSlider->setValue(frame);
-    int elapsed_time = frame * _visualisation->trajectoryRecordingFps();
-    ui.time->setText(QString("%1/%2 (%3ms)")
+    float elapsed_time = frame / _visualisation->trajectoryRecordingFps();
+    ui.time->setText(QString("%1/%2 (%3 s)")
                          .arg(
                              QString::number(frame),
                              QString::number(ui.framesIndicatorSlider->maximum()),
-                             QString::number(elapsed_time)));
+                             QString::number(elapsed_time, 'f', 2)));
 }
 
 void MainWindow::slotExit()
