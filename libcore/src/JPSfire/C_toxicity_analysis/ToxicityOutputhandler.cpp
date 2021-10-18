@@ -11,8 +11,8 @@ ToxicityOutputHandler::~ToxicityOutputHandler()
 void ToxicityOutputHandler::WriteToFileHeader()
 {
     std::string tmp;
-    tmp = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n"
-          "<ToxicityAnalysis>\n";
+    tmp               = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n"
+                        "<ToxicityAnalysis>\n";
     char agents[1024] = "";
     sprintf(agents, "\t<header version = \"0.8\">\n");
     tmp.append(agents);

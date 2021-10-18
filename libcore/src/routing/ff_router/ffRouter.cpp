@@ -251,12 +251,12 @@ void FFRouter::CalculateFloorFields()
 
             // if the two doors are not within the same subroom, do not consider (ar.graf)
             // should fix problems of oscillation caused by doorgaps in the distancegraph
-            int thisUID1 = (_doorByUID.at(doorUID1)->GetSubRoom1()) ?
-                               _doorByUID.at(doorUID1)->GetSubRoom1()->GetUID() :
-                               -10;
-            int thisUID2 = (_doorByUID.at(doorUID1)->GetSubRoom2()) ?
-                               _doorByUID.at(doorUID1)->GetSubRoom2()->GetUID() :
-                               -20;
+            int thisUID1  = (_doorByUID.at(doorUID1)->GetSubRoom1()) ?
+                                _doorByUID.at(doorUID1)->GetSubRoom1()->GetUID() :
+                                -10;
+            int thisUID2  = (_doorByUID.at(doorUID1)->GetSubRoom2()) ?
+                                _doorByUID.at(doorUID1)->GetSubRoom2()->GetUID() :
+                                -20;
             int otherUID1 = (_doorByUID.at(doorUID2)->GetSubRoom1()) ?
                                 _doorByUID.at(doorUID2)->GetSubRoom1()->GetUID() :
                                 -30;

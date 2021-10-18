@@ -168,11 +168,11 @@ inline DoorState StringToDoorState(std::string name)
 
 constexpr double magicnum(int i)
 {
-    return (i == UNKNOWN_DISTANCE) ?
-               -3.0 :
-               (i == UNKNOWN_COST) ?
-               -2.0 :
-               (i == WALL_ON_COSTARRAY) ? -7.0 : (i == TARGET_REGION) ? 0.0 : J_NAN;
+    return (i == UNKNOWN_DISTANCE)  ? -3.0 :
+           (i == UNKNOWN_COST)      ? -2.0 :
+           (i == WALL_ON_COSTARRAY) ? -7.0 :
+           (i == TARGET_REGION)     ? 0.0 :
+                                      J_NAN;
 }
 
 inline char xmltob(const char * t, char v = 0)
