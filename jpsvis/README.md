@@ -80,3 +80,9 @@ cmake --build . --target jpsvis
 
 For additional build options please see "Build Options" section in
 [CMakeLists.txt](CMakeLists.txt)
+
+## Contributing
+
+If you conttribute code you need to be aware that all code needs to be formated
+with clang-format-13. This is enforced by the CI.
+

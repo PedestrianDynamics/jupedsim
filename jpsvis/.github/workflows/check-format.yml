@@ -17,10 +17,12 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          apt-get update && apt-get install -y software-properties-common
+          apt-get update && apt-get install -y software-properties-common wget
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
+          apt-add-repository deb http://apt.llvm.org/hirsute/ llvm-toolchain-hirsute-13 main
           apt-get update && apt-get install -y \
               parallel \
-              clang-format-12 \
+              clang-format-13 \
 
       - name: Run clang format
         run: $GITHUB_WORKSPACE/scripts/check-format-cpp
