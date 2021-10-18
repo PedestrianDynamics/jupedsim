@@ -289,7 +289,7 @@ if(UNIX)
     find_program(CLANG_FORMAT
         NAMES
             clang-format
-            clang-format-10
+            clang-format-13
     )
     if(CLANG_FORMAT)
         execute_process(
@@ -305,7 +305,7 @@ if(UNIX)
                 version
                 "${version_string}"
             )
-            if(version MATCHES "^10.*")
+            if(version MATCHES "^13.*")
                 message(STATUS "Found clang-format ${version}, add format-check and reformat targets")
                 set(folders jpscore jpsreport libcore)
                 add_custom_target(check-format

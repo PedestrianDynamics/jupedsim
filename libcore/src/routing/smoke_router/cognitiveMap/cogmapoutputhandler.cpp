@@ -11,8 +11,8 @@ void CogMapOutputHandler::WriteToFileHeader(const int & id, const double & fps)
 {
     //nPeds=building->GetAllPedestrians().size();
     std::string tmp;
-    tmp = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n"
-          "<cognitiveMap>\n";
+    tmp               = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n"
+                        "<cognitiveMap>\n";
     char agents[1024] = "";
     sprintf(agents, "\t<header version = \"0.8\">\n");
     tmp.append(agents);
