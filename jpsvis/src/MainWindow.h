@@ -59,7 +59,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget * parent = 0);
+    MainWindow(QWidget * parent = 0, std::optional<std::filesystem::path> path = {});
     virtual ~MainWindow();
 
 public slots:
@@ -204,6 +204,7 @@ private:
 
     /// @return false if something went wrong.
     bool tryParseFile(const std::filesystem::path & path = {});
+    void tryLoadFile(const std::filesystem::path & path);
     bool tryParseGeometry(const std::filesystem::path & path);
     bool tryParseTrajectory(const std::filesystem::path & path);
 
@@ -215,13 +216,13 @@ private:
 
     /// reset all dataset, to the beginning
     void resetAllFrameCursor();
+    void SetAppInfos();
 
 private:
     Ui::mainwindow ui;
     ApplicationState _state{ApplicationState::NoData};
     Settings _settings;
     TrajectoryData _trajectories;
-
     std::unique_ptr<Visualisation> _visualisation;
     QLabel labelCurrentAction;
     QLabel labelFrameNumber;

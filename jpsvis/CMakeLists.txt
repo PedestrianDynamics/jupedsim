@@ -175,6 +175,7 @@ set(SRCS
     src/main.cpp
     src/myqtreeview.cpp
     src/string_utils.cpp
+    src/CLI.cpp
 )
 
 set(HDR
@@ -215,6 +216,7 @@ set(HDR
     src/myqtreeview.h
     src/string_utils.h
     src/trains/train.h
+    src/CLI.h
 )
 
 set(UIS

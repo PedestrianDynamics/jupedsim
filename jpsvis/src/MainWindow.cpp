@@ -70,15 +70,12 @@
 //////////////////////////////////////////////////////////////////////////////
 // Creation & Destruction
 //////////////////////////////////////////////////////////////////////////////
-MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent)
+MainWindow::MainWindow(QWidget * parent, std::optional<std::filesystem::path> path) :
+    QMainWindow(parent)
 {
     ui.setupUi(this);
-    this->setWindowTitle("JPSvis");
-
     // used for saving the settings in a persistant way
-    QCoreApplication::setOrganizationName("Forschungszentrum_Juelich_GmbH");
-    QCoreApplication::setOrganizationDomain("jupedsim.org");
-    QCoreApplication::setApplicationName("jupedsim");
+    SetAppInfos();
 
     _visualisation = std::make_unique<Visualisation>(
         this, ui.render_widget->renderWindow(), &_settings, &_trajectories);
@@ -118,9 +115,10 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent)
     labelRecording.setFrameStyle(QFrame::Panel | QFrame::Sunken);
     labelRecording.setText(" rec: off ");
     statusBar()->addPermanentWidget(&labelRecording);
-
     // restore the settings
     loadAllSettings();
+    if(path)
+        tryLoadFile(path.value());
 }
 
 MainWindow::~MainWindow()
@@ -155,15 +153,8 @@ void MainWindow::slotOpenFile()
                 stopRendering();
                 ui.BtStart->toggled(false);
                 unloadData();
-                const bool could_load_data = tryParseFile(path.value());
-                if(could_load_data) {
-                    _state = ApplicationState::Paused;
-                    enablePlayerControls();
-                    startRendering();
-                } else {
-                    _state = ApplicationState::NoData;
-                    disablePlayerControls();
-                }
+                if(path)
+                    tryLoadFile(path.value());
             }
         }
     }
@@ -325,7 +316,6 @@ void MainWindow::slotHelpAbout()
 
 bool MainWindow::tryParseFile(const std::filesystem::path & path)
 {
-    Log::Info("Trying to parse %s", path.string().c_str());
     const auto file_type = Parsing::detectFileType(path);
     switch(file_type) {
         case Parsing::InputFileType::GEOMETRY_XML:
@@ -334,6 +324,19 @@ bool MainWindow::tryParseFile(const std::filesystem::path & path)
             return tryParseTrajectory(path);
         case Parsing::InputFileType::UNRECOGNIZED:
             return false;
+    }
+}
+
+void MainWindow::tryLoadFile(const std::filesystem::path & path)
+{
+    const bool couldLoadData = tryParseFile(path);
+    if(couldLoadData) {
+        _state = ApplicationState::Paused;
+        enablePlayerControls();
+        startRendering();
+    } else {
+        _state = ApplicationState::NoData;
+        disablePlayerControls();
     }
 }
 
@@ -1000,4 +1003,13 @@ void MainWindow::slotMousePositionUpdated(double x, double y, double z)
 {
     statusBar()->showMessage(
         QString("x:%1 y:%2").arg(QString::number(x, 'f', 2), QString::number(y, 'f', 2)));
+}
+
+void MainWindow::SetAppInfos()
+{
+    this->setWindowTitle("JPSvis");
+    QCoreApplication::setOrganizationName("Forschungszentrum_Juelich_GmbH");
+    QCoreApplication::setOrganizationDomain("jupedsim.org");
+    QCoreApplication::setApplicationName("JuPedSim - JPSvis");
+    QCoreApplication::setApplicationVersion(QString::fromStdString(JPSVIS_VERSION));
 }
