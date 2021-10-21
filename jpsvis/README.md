@@ -41,7 +41,7 @@ To install the required libraries, we recommend using windows package manager [v
 git clone https://github.com/Microsoft/vcpkg
 cd vcpkg
 .\bootstrap-vcpkg.bat
-.\vcpkg.exe install qt:x64-windows vtk:x64-windows
+.\vcpkg.exe install qt5:x64-windows vtk:x64-windows
 ```
 
 ## Compiling from sources
