@@ -341,6 +341,7 @@ if (BUILD_TESTING)
   find_python_library(numpy)
   find_python_library(scipy)
   find_python_library(pandas)
+  find_python_library(matplotlib)
   add_subdirectory(systemtest)
 endif (BUILD_TESTING)
 
