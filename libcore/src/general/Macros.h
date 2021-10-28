@@ -82,7 +82,6 @@ enum OperativModels {
 
 enum AgentColorMode {
     BY_VELOCITY = 1,
-    BY_KNOWLEDGE,
     BY_ROUTE,
     BY_ROUTER,
     BY_SPOTLIGHT,

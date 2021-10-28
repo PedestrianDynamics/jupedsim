@@ -254,8 +254,6 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
             Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
         if(color_mode == "group")
             Pedestrian::SetColorMode(AgentColorMode::BY_GROUP);
-        if(color_mode == "knowledge")
-            Pedestrian::SetColorMode(AgentColorMode::BY_KNOWLEDGE);
         if(color_mode == "router")
             Pedestrian::SetColorMode(AgentColorMode::BY_ROUTER);
         if(color_mode == "final_goal")

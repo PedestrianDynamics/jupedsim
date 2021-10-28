@@ -83,9 +83,6 @@ private:
 
     Point _lastPosition;
 
-    ///state of doors with time stamps
-    std::map<int, Knowledge> _knownDoors;
-
     /// distance to nearest obstacle that blocks the sight of ped.
     double _distToBlockade;
     /// a new orientation starts after this time
@@ -211,12 +208,6 @@ public:
       * @return all previous destinations used by this pedestrian
       */
     const std::vector<int> & GetLastDestinations() const;
-
-    /**
-      * For convenience
-      * @return a string representation of the knowledge
-      */
-    std::string GetKnowledgeAsString() const;
 
     RoutingStrategy GetRoutingStrategy() const;
     int GetUniqueRoomID() const;
