@@ -1430,7 +1430,6 @@ void UnivFFviaFM::AddTarget(int uid, double * costarray, Point * gradarray)
         //             }
         //         }
     }
-#pragma omp critical(_uids)
     _uids.emplace_back(uid);
 }
 
@@ -1464,9 +1463,7 @@ void UnivFFviaFM::AddAllTargetsParallel()
     }
 
     //parallel region
-#pragma omp parallel default(none)
     {
-#pragma omp for
         for(size_t i = 0; i < _doors.size(); ++i) {
             auto doorPair = _doors.begin();
             std::advance(doorPair, i);
@@ -1501,10 +1498,7 @@ void UnivFFviaFM::AddTargetsParallel(std::vector<int> wantedDoors)
         }
     }
 
-    //parallel region
-#pragma omp parallel default(none) shared(wantedDoors)
     {
-#pragma omp for
         for(size_t i = 0; i < wantedDoors.size(); ++i) {
             auto doorUID = wantedDoors.begin();
             std::advance(doorUID, i);

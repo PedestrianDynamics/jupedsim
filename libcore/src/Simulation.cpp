@@ -35,7 +35,6 @@
 #include "IO/Trajectories.h"
 #include "SimulationHelper.h"
 #include "general/Filesystem.h"
-#include "general/OpenMP.h"
 #include "geometry/GoalManager.h"
 #include "geometry/WaitingArea.h"
 #include "geometry/Wall.h"

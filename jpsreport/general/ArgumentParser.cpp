@@ -44,14 +44,6 @@
 #include <sstream>
 #include <string>
 
-#ifdef _OPENMP
-#include <omp.h>
-#else
-#define omp_get_thread_num() 0
-#define omp_get_max_threads() 1
-#endif
-
-
 using namespace std;
 
 void Logs()
@@ -266,17 +258,6 @@ bool ArgumentParser::ParseInifile(const fs::path & inifile)
                 return false;
             }
         }
-    }
-
-    //max CPU
-    if(xMainNode->FirstChild("num_threads")) {
-        TiXmlNode * numthreads = xMainNode->FirstChild("num_threads")->FirstChild();
-        if(numthreads) {
-#ifdef _OPENMP
-            omp_set_num_threads(xmltoi(numthreads->Value(), omp_get_max_threads()));
-#endif
-        }
-        LOG_INFO("Using <{}> threads", omp_get_max_threads());
     }
 
     // output directory

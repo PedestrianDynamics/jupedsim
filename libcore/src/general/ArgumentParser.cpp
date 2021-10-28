@@ -22,7 +22,6 @@
 
 #include "IO/IniFileParser.h"
 #include "IO/OutputHandler.h"
-#include "general/OpenMP.h"
 #include "pedestrian/AgentsParameters.h"
 #include "routing/global_shortest/GlobalRouter.h"
 #include "routing/quickest/QuickestPathRouter.h"

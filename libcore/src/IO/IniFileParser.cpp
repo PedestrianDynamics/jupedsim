@@ -27,7 +27,6 @@
 #include "direction/waiting/WaitingStrategy.h"
 #include "direction/walking/DirectionStrategy.h"
 #include "general/Filesystem.h"
-#include "general/OpenMP.h"
 #include "math/GCFMModel.h"
 #include "math/VelocityModel.h"
 #include "pedestrian/Pedestrian.h"
@@ -192,23 +191,6 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         _config->SetGeometryFile(filename);
         LOG_INFO("Geometry file <{}>", filename);
     }
-
-
-    //max CPU
-    int max_threads = 1;
-#ifdef _OPENMP
-    max_threads = omp_get_max_threads();
-#endif
-    if(xHeader->FirstChild("num_threads")) {
-        TiXmlNode * numthreads = xHeader->FirstChild("num_threads")->FirstChild();
-        if(numthreads) {
-#ifdef _OPENMP
-            omp_set_num_threads(xmltoi(numthreads->Value()));
-#endif
-        }
-    }
-    _config->SetMaxOpenMPThreads(omp_get_max_threads());
-    LOG_INFO("Using {} OpenMP threads, {} available.", _config->GetMaxOpenMPThreads(), max_threads);
 
     //display statistics
     if(xHeader->FirstChild("show_statistics")) {
