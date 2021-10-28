@@ -73,10 +73,6 @@ typedef VD::cell_type::source_index_type source_index_type;
 #define VORO_LOCATION "Fundamental_Diagram/Classical_Voronoi/"
 #endif
 
-// should be true only when using this file in the simulation core
-//#define _SIMULATOR 1
-//#define _USE_PROTOCOL_BUFFER 1
-
 #define JPS_OLD_VERSION "0.7" // this version is still supported
 #define JPS_VERSION_MINOR "8"
 #define JPS_VERSION_MAJOR "0"

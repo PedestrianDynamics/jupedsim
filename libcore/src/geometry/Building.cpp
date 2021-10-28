@@ -72,8 +72,6 @@ Building::Building()
     _savePathway      = false;
 }
 
-#ifdef _SIMULATOR
-
 Building::Building(Configuration * configuration, PedDistributor & pedDistributor) :
     _configuration(configuration),
     _routingEngine(configuration->GetRoutingEngine()),
@@ -113,16 +111,12 @@ Building::Building(Configuration * configuration, PedDistributor & pedDistributo
     }
 }
 
-#endif
-
 Building::~Building()
 {
-#ifdef _SIMULATOR
     for(auto & pedestrian : _allPedestrians) {
         delete pedestrian;
     }
     _allPedestrians.clear();
-#endif
 
     if(_pathWayStream.is_open())
         _pathWayStream.close();
@@ -757,8 +751,6 @@ bool Building::SanityCheck()
     return status;
 }
 
-#ifdef _SIMULATOR
-
 void Building::UpdateGrid()
 {
     _neighborhoodSearch.Update(_allPedestrians);
@@ -1215,5 +1207,3 @@ std::optional<Point> Building::GetTrackStart(int trackID) const
 
     return std::nullopt;
 }
-
-#endif // _SIMULATOR
