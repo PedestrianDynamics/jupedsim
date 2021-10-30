@@ -67,7 +67,7 @@ private:
     /// writing the trajectories to file
     std::unique_ptr<Trajectories> _iod;
     std::unique_ptr<EventManager> _em;
-    AgentsSourcesManager _agentSrcManager;
+    std::unique_ptr<AgentsSourcesManager> _agentSrcManager{nullptr};
     int _periodic;
     int _maxSimTime;
     /// Will be set if pedestrian sources exist
@@ -175,11 +175,6 @@ public:
      */
     Building * GetBuilding();
 
-    /**
-     * Update the refresh ticks for all doors. they count up and measure the age of the tickvalue (ffRouter, quickest)
-     *
-     */
-    void UpdateDoorticks() const;
     int GetMaxSimTime() const;
     void incrementCountTraj();
 

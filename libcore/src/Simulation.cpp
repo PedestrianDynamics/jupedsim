@@ -39,12 +39,12 @@
 #include "geometry/WaitingArea.h"
 #include "geometry/Wall.h"
 #include "math/GCFMModel.h"
-#include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "pedestrian/Pedestrian.h"
 #include "routing/ff_router/ffRouter.h"
 
 #include <Logger.h>
+#include <memory>
 #include <tinyxml.h>
 
 // TODO: add these variables to class simulation
@@ -104,13 +104,13 @@ bool Simulation::InitArgs()
     _building = std::make_unique<Building>(_config, *distributor, &_agents);
 
     // Initialize the agents sources that have been collected in the pedestrians distributor
-    _agentSrcManager.SetBuilding(_building.get());
-    _agentSrcManager.SetMaxSimTime(GetMaxSimTime());
+    _agentSrcManager = std::make_unique<AgentsSourcesManager>(_building.get());
+    _agentSrcManager->SetMaxSimTime(GetMaxSimTime());
     _gotSources =
         !distributor->GetAgentsSources().empty(); // did we have any sources? false if no sources
 
     for(const auto & src : distributor->GetAgentsSources()) {
-        _agentSrcManager.AddSource(src);
+        _agentSrcManager->AddSource(src);
         src->Dump();
     }
 
@@ -178,7 +178,7 @@ bool Simulation::InitArgs()
 
 double Simulation::RunStandardSimulation(double maxSimTime)
 {
-    RunHeader(_nPeds + _agentSrcManager.GetMaxAgentNumber());
+    RunHeader(_nPeds + _agentSrcManager->GetMaxAgentNumber());
     double t = RunBody(maxSimTime);
     return t;
 }
@@ -342,8 +342,7 @@ void Simulation::RunHeader(long nPed)
     UpdateRoutesAndLocations();
 
     // KKZ: RunBody calls this as one of the firs things, hence this can be removed
-    _agentSrcManager.GenerateAgents();
-    AddNewAgents();
+    _agentSrcManager->GenerateAgents();
 }
 
 double Simulation::RunBody(double maxSimTime)
@@ -369,7 +368,7 @@ double Simulation::RunBody(double maxSimTime)
     std::string description = "Evacuation ";
     int initialnPeds        = _nPeds;
     // main program loop
-    while((_nPeds || (!_agentSrcManager.IsCompleted() && _gotSources)) && t < maxSimTime) {
+    while((_nPeds || (!_agentSrcManager->IsCompleted() && _gotSources)) && t < maxSimTime) {
         t = 0 + (frameNr - 1) * _deltaT;
         // Handle train traffic: coorect geometry
 
@@ -670,18 +669,13 @@ void Simulation::UpdateOutputGeometryFile()
 
 void Simulation::AddNewAgents()
 {
-    _agentSrcManager.ProcessAllSources();
-    std::vector<Pedestrian *> peds;
-    AgentsQueueIn::GetandClear(peds);
-    for(auto && ped : peds) {
-        _building->AddPedestrian(ped);
-    }
+    auto new_agents = _agentSrcManager->ProcessAllSources();
+    _agents.insert(
+        _agents.end(),
+        std::make_move_iterator(new_agents.begin()),
+        std::make_move_iterator(new_agents.end()));
     _building->UpdateGrid();
 }
-
-void Simulation::UpdateDoorticks() const {
-    //TODO KKZ If possible get rind of this function
-};
 
 void Simulation::incrementCountTraj()
 {
@@ -690,7 +684,7 @@ void Simulation::incrementCountTraj()
 
 AgentsSourcesManager & Simulation::GetAgentSrcManager()
 {
-    return _agentSrcManager;
+    return *_agentSrcManager;
 }
 
 Building * Simulation::GetBuilding()
