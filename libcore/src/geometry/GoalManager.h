@@ -54,7 +54,7 @@ public:
      * @param time Current in-simulation time
      * @param peds Vector of pedestrians which are currently in the simulation.
      */
-    void Process(double time, const std::vector<Pedestrian *> & peds);
+    void Process(double time, const std::vector<std::unique_ptr<Pedestrian>> & peds);
 
 private:
     /**

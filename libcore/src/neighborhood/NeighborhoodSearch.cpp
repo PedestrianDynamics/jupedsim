@@ -50,18 +50,18 @@ NeighborhoodSearch::NeighborhoodSearch(
 
 NeighborhoodSearch::~NeighborhoodSearch() {}
 
-void NeighborhoodSearch::Update(const std::vector<Pedestrian *> & peds)
+void NeighborhoodSearch::Update(const std::vector<std::unique_ptr<Pedestrian>> & peds)
 {
     std::unique_lock exclusive_lock(grid_mutex);
     _grid.clear();
 
-    for(auto & ped : peds) {
+    for(const auto & ped : peds) {
         // determine the cell coordinates of pedestrian i
         int ix =
             (int) ((ped->GetPos()._x - _gridXmin) / _cellSize) + 1; // +1 because of dummy cells
         int iy = (int) ((ped->GetPos()._y - _gridYmin) / _cellSize) + 1;
 
-        _grid[iy][ix].push_back(ped);
+        _grid[iy][ix].push_back(ped.get());
     }
 }
 

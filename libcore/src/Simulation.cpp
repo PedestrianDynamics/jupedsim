@@ -67,6 +67,8 @@ Simulation::Simulation(Configuration * args) : _config(args)
     _currentTrajectoriesFile = _config->GetTrajectoriesFile();
 }
 
+void Simulation::AddAgent(const Pedestrian & agent) {}
+
 size_t Simulation::GetPedsNumber() const
 {
     return _nPeds;
@@ -183,7 +185,7 @@ double Simulation::RunStandardSimulation(double maxSimTime)
 
 void Simulation::UpdateRoutesAndLocations()
 {
-    auto peds = _building->GetAllPedestrians();
+    const auto & peds = _building->GetAllPedestrians();
 
     auto [pedsChangedRoom, pedsNotRelocated] =
         SimulationHelper::UpdatePedestriansLocations(*_building, peds);
@@ -214,7 +216,7 @@ void Simulation::UpdateRoutesAndLocations()
 
 void Simulation::UpdateRoutes()
 {
-    for(auto ped : _building->GetAllPedestrians()) {
+    for(const auto & ped : _building->GetAllPedestrians()) {
         // set ped waiting, if no target is found
         int target = ped->FindRoute();
 
@@ -230,7 +232,7 @@ void Simulation::UpdateRoutes()
             int roomID         = ped->GetRoomID();
             int subRoomID      = ped->GetSubRoomID();
 
-            if(auto cross = dynamic_cast<const Crossing *>(door)) {
+            if(const auto * cross = dynamic_cast<const Crossing *>(door)) {
                 if(cross->IsInRoom(roomID) && cross->IsInSubRoom(subRoomID)) {
                     if(!ped->IsWaiting() && cross->IsTempClose()) {
                         ped->StartWaiting();

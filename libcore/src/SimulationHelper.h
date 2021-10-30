@@ -51,8 +51,9 @@ PedRelocation UpdatePedestrianRoomInformation(const Building & building, Pedestr
  * @deprecated
  * TODO discuss if needed, as we do not allow inside goals at the moment
  */
-std::vector<Pedestrian *>
-FindPedestriansReachedFinalGoal(const Building & building, const std::vector<Pedestrian *> & peds);
+std::vector<Pedestrian *> FindPedestriansReachedFinalGoal(
+    const Building & building,
+    const std::vector<std::unique_ptr<Pedestrian>> & peds);
 
 /**
  * Find pedestrians who have moved to outside of the geometry, and are no longer in the simulation
@@ -75,8 +76,9 @@ FindPedestriansOutside(const Building & building, std::vector<Pedestrian *> & pe
  * @return [list of pedestrian who have changed their room,
  * list of pedestrians who moved out of their assigned room but to none of the neighboring rooms]
  */
-std::tuple<std::vector<Pedestrian *>, std::vector<Pedestrian *>>
-UpdatePedestriansLocations(const Building & building, const std::vector<Pedestrian *> & peds);
+std::tuple<std::vector<Pedestrian *>, std::vector<Pedestrian *>> UpdatePedestriansLocations(
+    const Building & building,
+    const std::vector<std::unique_ptr<Pedestrian>> & peds);
 
 /**
  * Increments the door usage of the doors by the peds in \p pedsChangedRoom.

@@ -40,6 +40,7 @@
 #include "math/OperationalModel.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "pedestrian/PedDistributor.h"
+#include "pedestrian/Pedestrian.h"
 #include "routing/RoutingEngine.h"
 #include "routing/global_shortest/GlobalRouter.h"
 #include "routing/quickest/QuickestPathRouter.h"
@@ -90,6 +91,8 @@ public:
     Simulation(Simulation && other) = delete;
 
     Simulation & operator=(Simulation && other) = delete;
+
+    void AddAgent(const Pedestrian & agent);
 
     /**
      * Initialize the number of agents in the simulation

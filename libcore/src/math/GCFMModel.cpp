@@ -67,17 +67,13 @@ bool GCFMModel::Init(Building * building)
 {
     _direction->Init(building);
 
-    const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
-    size_t peds_size                          = allPeds.size();
-    for(unsigned int p = 0; p < peds_size; p++) {
-        Pedestrian * ped = allPeds[p];
+    const auto & allPeds = building->GetAllPedestrians();
+    std::vector<int> pedestrians_to_delete{};
+    for(const auto & ped : allPeds) {
         double cosPhi, sinPhi;
         //a destination could not be found for that pedestrian
         if(ped->FindRoute() == -1) {
-            building->DeletePedestrian(ped);
-            //TODO KKZ track deleted peds
-            p--;
-            peds_size--;
+            pedestrians_to_delete.emplace_back(ped->GetID());
             continue;
         }
 
@@ -97,6 +93,9 @@ bool GCFMModel::Init(Building * building)
         E.SetSinPhi(sinPhi);
         ped->SetEllipse(E);
     }
+    for(const auto & id : pedestrians_to_delete) {
+        building->DeletePedestrian(id);
+    }
     return true;
 }
 
@@ -109,13 +108,13 @@ void GCFMModel::ComputeNextTimeStep(
     double delta = 1.5;
 
     // collect all pedestrians in the simulation.
-    const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
+    const auto & allPeds = building->GetAllPedestrians();
 
     std::vector<Point> result_acc = std::vector<Point>();
     result_acc.reserve(allPeds.size());
 
-    for(size_t p = 0; p < allPeds.size(); ++p) {
-        Pedestrian * ped  = allPeds[p];
+    std::vector<int> pedestrians_to_delete{};
+    for(const auto & ped : allPeds) {
         Room * room       = building->GetRoom(ped->GetRoomID());
         SubRoom * subroom = room->GetSubRoom(ped->GetSubRoomID());
         double normVi     = ped->GetV().ScalarProduct(ped->GetV());
@@ -131,14 +130,14 @@ void GCFMModel::ComputeNextTimeStep(
                 current,
                 periodic);
             // remove the pedestrian and abort
-            building->DeletePedestrian(ped);
+            pedestrians_to_delete.emplace_back(ped->GetID());
             // TODO KKZ track deleted peds
             LOG_ERROR("One ped was removed due to high velocity");
         }
 
         Point F_rep;
         std::vector<Pedestrian *> neighbours =
-            building->GetNeighborhoodSearch().GetNeighbourhood(ped);
+            building->GetNeighborhoodSearch().GetNeighbourhood(ped.get());
         std::vector<SubRoom *> emptyVector;
 
         int neighborsSize = neighbours.size();
@@ -151,30 +150,35 @@ void GCFMModel::ComputeNextTimeStep(
                 continue;
             //if they are in the same subroom
             if(ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
-                F_rep = F_rep + ForceRepPed(ped, ped1);
+                F_rep = F_rep + ForceRepPed(ped.get(), ped1);
             } else {
                 // or in neighbour subrooms
                 SubRoom * sb2 =
                     building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
                 if(subroom->IsDirectlyConnectedWith(sb2)) {
-                    F_rep = F_rep + ForceRepPed(ped, ped1);
+                    F_rep = F_rep + ForceRepPed(ped.get(), ped1);
                 }
             }
         } //for peds
 
 
         //repulsive forces to the walls and transitions that are not my target
-        Point repwall = ForceRepRoom(allPeds[p], subroom);
-        Point fd      = ForceDriv(ped, room);
+        Point repwall = ForceRepRoom(ped.get(), subroom);
+        Point fd      = ForceDriv(ped.get(), room);
         Point acc     = (fd + F_rep + repwall) / ped->GetMass();
         result_acc.push_back(acc);
     }
 
+    for(const auto id : pedestrians_to_delete) {
+        building->DeletePedestrian(id);
+    }
+
     // update
-    for(size_t p = 0; p < allPeds.size(); ++p) {
-        Pedestrian * ped = allPeds[p];
-        Point v_neu      = ped->GetV() + result_acc[p] * deltaT;
-        Point pos_neu    = ped->GetPos() + v_neu * deltaT;
+    //TODO(kkz) replace with zip iterator
+    size_t counter = 0;
+    for(auto & ped : allPeds) {
+        Point v_neu   = ped->GetV() + result_acc[counter] * deltaT;
+        Point pos_neu = ped->GetPos() + v_neu * deltaT;
         //Jam is based on the current velocity
         if(v_neu.Norm() >= J_EPS_V) {
             ped->ResetTimeInJam();
@@ -185,6 +189,7 @@ void GCFMModel::ComputeNextTimeStep(
         ped->SetPos(pos_neu);
         ped->SetV(v_neu);
         ped->SetPhiPed();
+        ++counter;
     }
 }
 

@@ -113,9 +113,6 @@ Building::Building(Configuration * configuration, PedDistributor & pedDistributo
 
 Building::~Building()
 {
-    for(auto & pedestrian : _allPedestrians) {
-        delete pedestrian;
-    }
     _allPedestrians.clear();
 
     if(_pathWayStream.is_open())
@@ -814,18 +811,20 @@ void Building::InitGrid()
     LOG_INFO("Done with Initializing the grid");
 }
 
-void Building::DeletePedestrian(Pedestrian *& ped)
+void Building::DeletePedestrian(int id)
 {
-    std::vector<Pedestrian *>::iterator it;
-    it = find(_allPedestrians.begin(), _allPedestrians.end(), ped);
-    if(it == _allPedestrians.end()) {
-        LOG_ERROR("Pedestrian with ID {} not found.", ped->GetID());
+    const auto iter =
+        std::find_if(_allPedestrians.begin(), _allPedestrians.end(), [id](const auto & e) {
+            return e->GetID() == id;
+        });
+    if(iter == _allPedestrians.end()) {
+        LOG_ERROR("Pedestrian with ID {} not found.", id);
         return;
     } else {
         // save the path history for this pedestrian before removing from the simulation
         if(_savePathway) {
             // string results;
-            std::string path = (*it)->GetPath();
+            std::string path = (*iter)->GetPath();
             std::vector<std::string> brokenpaths;
             StringExplode(path, ">", &brokenpaths);
             for(unsigned int i = 0; i < brokenpaths.size(); i++) {
@@ -839,24 +838,22 @@ void Building::DeletePedestrian(Pedestrian *& ped)
             }
         }
     }
-    _allPedestrians.erase(it);
-    delete ped;
+    _allPedestrians.erase(iter);
 }
 
-const std::vector<Pedestrian *> & Building::GetAllPedestrians() const
+const std::vector<std::unique_ptr<Pedestrian>> & Building::GetAllPedestrians() const
 {
     return _allPedestrians;
 }
 
 void Building::AddPedestrian(Pedestrian * ped)
 {
-    if(std::find_if(
-           std::begin(_allPedestrians), std::end(_allPedestrians), [ped](const Pedestrian * other) {
-               return ped->GetID() == other->GetID();
-           }) != std::end(_allPedestrians)) {
+    if(std::find_if(std::begin(_allPedestrians), std::end(_allPedestrians), [ped](const auto & e) {
+           return ped->GetID() == e->GetID();
+       }) != std::end(_allPedestrians)) {
         LOG_WARNING("Pedestrian {} already in the room.", ped->GetID());
     } else {
-        _allPedestrians.push_back(ped);
+        _allPedestrians.emplace_back(std::unique_ptr<Pedestrian>(ped));
     }
 }
 
@@ -864,7 +861,7 @@ void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian *> &
 {
     for(auto && ped : _allPedestrians) {
         if((room == ped->GetRoomID()) && (subroom == ped->GetSubRoomID())) {
-            peds.push_back(ped);
+            peds.push_back(ped.get());
         }
     }
 }
@@ -907,13 +904,13 @@ void Building::StringExplode(
 
 Pedestrian * Building::GetPedestrian(int pedID) const
 {
-    for(unsigned int p = 0; p < _allPedestrians.size(); p++) {
-        Pedestrian * ped = _allPedestrians[p];
-        if(ped->GetID() == pedID) {
-            return ped;
-        }
+    const auto iter = std::find_if(
+        std::begin(_allPedestrians), std::end(_allPedestrians), [pedID](const auto & e) {
+            return e->GetID() == pedID;
+        });
+    if(iter != std::end(_allPedestrians)) {
+        return iter->get();
     }
-
     return nullptr;
 }
 

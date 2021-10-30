@@ -70,7 +70,7 @@ public:
     /**
       *Update the cells occupation
       */
-    void Update(const std::vector<Pedestrian *> & peds);
+    void Update(const std::vector<std::unique_ptr<Pedestrian>> & peds);
 
     /**
       * Returns neighbourhood of the pedestrians ped

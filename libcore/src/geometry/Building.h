@@ -62,7 +62,7 @@ private:
     std::string _caption;
     std::string _geometryFilename;
     NeighborhoodSearch _neighborhoodSearch;
-    std::vector<Pedestrian *> _allPedestrians;
+    std::vector<std::unique_ptr<Pedestrian>> _allPedestrians;
     std::map<int, std::shared_ptr<Room>> _rooms;
     std::map<int, Crossing *> _crossings;
     std::map<int, Transition *> _transitions;
@@ -105,7 +105,7 @@ public:
     void SetCaption(const std::string & s);
 
     /// delete the ped from the ped vector
-    void DeletePedestrian(Pedestrian *& ped);
+    void DeletePedestrian(int id);
 
     /// delete the ped from the simulation
     void AddPedestrian(Pedestrian * ped);
@@ -116,7 +116,7 @@ public:
 
     RoutingEngine * GetRoutingEngine() const;
     const std::map<int, std::shared_ptr<Room>> & GetAllRooms() const;
-    const std::vector<Pedestrian *> & GetAllPedestrians() const;
+    const std::vector<std::unique_ptr<Pedestrian>> & GetAllPedestrians() const;
 
     Pedestrian * GetPedestrian(int pedID) const;
 

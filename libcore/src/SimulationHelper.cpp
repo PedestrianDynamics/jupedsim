@@ -58,38 +58,37 @@ SimulationHelper::UpdatePedestrianRoomInformation(const Building & building, Ped
 
 std::vector<Pedestrian *> SimulationHelper::FindPedestriansReachedFinalGoal(
     const Building & building,
-    const std::vector<Pedestrian *> & peds)
+    const std::vector<std::unique_ptr<Pedestrian>> & peds)
 {
     std::vector<Pedestrian *> pedsAtFinalGoal;
     const auto & goals = building.GetAllGoals();
 
-    std::copy_if(
-        std::begin(peds),
-        std::end(peds),
-        std::inserter(pedsAtFinalGoal, std::end(pedsAtFinalGoal)),
-        [goals](const Pedestrian * ped) -> bool {
-            return ped->GetFinalDestination() != FINAL_DEST_OUT &&
-                   goals.at(ped->GetFinalDestination())->Contains(ped->GetPos()) &&
-                   goals.at(ped->GetFinalDestination())->GetIsFinalGoal();
-        });
+    for(const auto & ped : peds) {
+        if(ped->GetFinalDestination() != FINAL_DEST_OUT &&
+           goals.at(ped->GetFinalDestination())->Contains(ped->GetPos()) &&
+           goals.at(ped->GetFinalDestination())->GetIsFinalGoal()) {
+            pedsAtFinalGoal.emplace_back(ped.get());
+        }
+    }
+
     return pedsAtFinalGoal;
 }
 
 std::tuple<std::vector<Pedestrian *>, std::vector<Pedestrian *>>
 SimulationHelper::UpdatePedestriansLocations(
     const Building & building,
-    const std::vector<Pedestrian *> & peds)
+    const std::vector<std::unique_ptr<Pedestrian>> & peds)
 {
     std::vector<Pedestrian *> pedsNotRelocated;
     std::vector<Pedestrian *> pedsChangedRoom;
 
     // Check for peds, where relocation failed
-    for(auto const ped : peds) {
+    for(const auto & ped : peds) {
         auto relocated = UpdatePedestrianRoomInformation(building, *ped);
         if(relocated == PedRelocation::SUCCESSFUL && ped->ChangedRoom()) {
-            pedsChangedRoom.push_back(ped);
+            pedsChangedRoom.push_back(ped.get());
         } else if(relocated == PedRelocation::FAILED) {
-            pedsNotRelocated.push_back(ped);
+            pedsNotRelocated.push_back(ped.get());
         }
     }
 
@@ -274,7 +273,7 @@ void SimulationHelper::RemovePedestrians(Building & building, std::vector<Pedest
     peds.erase(unique(peds.begin(), peds.end()), peds.end());
 
     std::for_each(std::begin(peds), std::end(peds), [&building](Pedestrian * ped) {
-        building.DeletePedestrian(ped);
+        building.DeletePedestrian(ped->GetID());
     });
 
     peds.clear();
