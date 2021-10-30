@@ -69,7 +69,6 @@ Building::Building()
     _caption          = "no_caption";
     _geometryFilename = "";
     _routingEngine    = nullptr;
-    _savePathway      = false;
 }
 
 Building::Building(Configuration * configuration, PedDistributor & pedDistributor) :
@@ -77,8 +76,6 @@ Building::Building(Configuration * configuration, PedDistributor & pedDistributo
     _routingEngine(configuration->GetRoutingEngine()),
     _caption("no_caption")
 {
-    _savePathway = false;
-
     {
         std::unique_ptr<GeoFileParser> parser(new GeoFileParser(_configuration));
         parser->LoadBuilding(this);
@@ -113,11 +110,6 @@ Building::Building(Configuration * configuration, PedDistributor & pedDistributo
 
 Building::~Building()
 {
-    _allPedestrians.clear();
-
-    if(_pathWayStream.is_open())
-        _pathWayStream.close();
-
     for(std::map<int, Crossing *>::const_iterator iter = _crossings.begin();
         iter != _crossings.end();
         ++iter) {
@@ -820,23 +812,6 @@ void Building::DeletePedestrian(int id)
     if(iter == _allPedestrians.end()) {
         LOG_ERROR("Pedestrian with ID {} not found.", id);
         return;
-    } else {
-        // save the path history for this pedestrian before removing from the simulation
-        if(_savePathway) {
-            // string results;
-            std::string path = (*iter)->GetPath();
-            std::vector<std::string> brokenpaths;
-            StringExplode(path, ">", &brokenpaths);
-            for(unsigned int i = 0; i < brokenpaths.size(); i++) {
-                std::vector<std::string> tags;
-                StringExplode(brokenpaths[i], ":", &tags);
-                std::string room  = _rooms[atoi(tags[0].c_str())]->GetCaption();
-                std::string trans = GetTransition(atoi(tags[1].c_str()))->GetCaption();
-                //ignore crossings/hlines
-                if(trans != "")
-                    _pathWayStream << room << " " << trans << std::endl;
-            }
-        }
     }
     _allPedestrians.erase(iter);
 }
@@ -863,42 +838,6 @@ void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian *> &
         if((room == ped->GetRoomID()) && (subroom == ped->GetSubRoomID())) {
             peds.push_back(ped.get());
         }
-    }
-}
-
-//obsolete
-void Building::InitSavePedPathway(const std::string & filename)
-{
-    _pathWayStream.open(filename.c_str());
-    _savePathway = true;
-
-    if(_pathWayStream.is_open()) {
-        LOG_INFO("Saving pedestrian paths to [{}]", filename);
-        _pathWayStream << "##pedestrian ways" << std::endl;
-        _pathWayStream << "#nomenclature roomid  caption" << std::endl;
-        _pathWayStream << "#data room exit_id" << std::endl;
-    } else {
-        LOG_INFO("Unable to open [{}]", filename);
-        LOG_INFO("Writing to stdout instead.");
-    }
-}
-
-void Building::StringExplode(
-    std::string str,
-    std::string separator,
-    std::vector<std::string> * results)
-{
-    size_t found;
-    found = str.find_first_of(separator);
-    while(found != std::string::npos) {
-        if(found > 0) {
-            results->push_back(str.substr(0, found));
-        }
-        str   = str.substr(found + 1);
-        found = str.find_first_of(separator);
-    }
-    if(str.length() > 0) {
-        results->push_back(str);
     }
 }
 

@@ -68,9 +68,6 @@ private:
     std::map<int, Transition *> _transitions;
     std::map<int, Hline *> _hLines;
     std::map<int, Goal *> _goals;
-    /// pedestrians pathway
-    bool _savePathway;
-    std::ofstream _pathWayStream;
     std::map<int, TrainType> _trains;
 
     std::map<int, Track> _tracks;
@@ -200,8 +197,6 @@ public:
 
     void InitGrid();
 
-    void InitSavePedPathway(const std::string & filename);
-
     void AddRoom(Room * room);
 
     void UpdateGrid();
@@ -313,5 +308,4 @@ public:
 private:
     bool InitInsideGoals();
     void InitPlatforms();
-    void StringExplode(std::string str, std::string separator, std::vector<std::string> * results);
 };
