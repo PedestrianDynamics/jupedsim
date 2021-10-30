@@ -41,6 +41,7 @@
 #include "math/GCFMModel.h"
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
+#include "pedestrian/Pedestrian.h"
 #include "routing/ff_router/ffRouter.h"
 
 #include <Logger.h>
@@ -172,7 +173,6 @@ bool Simulation::InitArgs()
     }
 
     _em->ListEvents();
-    _goalManager.SetBuilding(_building.get());
     return true;
 }
 
@@ -416,7 +416,8 @@ double Simulation::RunBody(double maxSimTime)
 
             // Checks if position of pedestrians is inside waiting area and should be waiting or if
             // left waiting area and assign new goal
-            _goalManager.Process(Pedestrian::GetGlobalTime(), _building->GetAllPedestrians());
+            GoalManager gm{_building.get(), &_agents};
+            gm.update(Pedestrian::GetGlobalTime());
 
             //other updates
             //someone might have left the building

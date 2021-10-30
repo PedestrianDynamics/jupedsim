@@ -73,7 +73,6 @@ private:
     /// Will be set if pedestrian sources exist
     bool _gotSources;
 
-    GoalManager _goalManager;
     fs::path _currentTrajectoriesFile;
     int _countTraj = 0; // count number of TXT trajectories to produce
 
