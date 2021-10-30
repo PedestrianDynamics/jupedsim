@@ -67,14 +67,7 @@ Simulation::Simulation(Configuration * args) : _config(args)
     _currentTrajectoriesFile = _config->GetTrajectoriesFile();
 }
 
-Simulation::~Simulation()
-{
-    if(_iod) {
-        _iod.reset();
-    }
-}
-
-long Simulation::GetPedsNumber() const
+size_t Simulation::GetPedsNumber() const
 {
     return _nPeds;
 }

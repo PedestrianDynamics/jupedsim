@@ -45,13 +45,15 @@
 #include "routing/quickest/QuickestPathRouter.h"
 #include "routing/smoke_router/SmokeRouter.h"
 
+#include <cstddef>
+
 class Simulation
 {
 private:
     /// Max file size 16Mb
-    static const size_t _maxFileSize{1 << 24};
+    static const size_t _maxFileSize{1U << 24U};
     Configuration * _config;
-    long _nPeds;
+    size_t _nPeds;
     double _deltaT;
     /// frame rate for the trajectories
     double _fps;
@@ -77,20 +79,22 @@ private:
     std::vector<Pedestrian *> _pedsToRemove;
 
 public:
-    /**
-     * Constructor
-     */
-    Simulation(Configuration * args);
+    explicit Simulation(Configuration * args);
 
-    /**
-     * Destructor
-     */
-    virtual ~Simulation();
+    ~Simulation() = default;
+
+    Simulation(const Simulation & other) = delete;
+
+    Simulation & operator=(const Simulation & other) = delete;
+
+    Simulation(Simulation && other) = delete;
+
+    Simulation & operator=(Simulation && other) = delete;
 
     /**
      * Initialize the number of agents in the simulation
      */
-    long GetPedsNumber() const;
+    size_t GetPedsNumber() const;
 
     /**
      * Read parameters from config.
