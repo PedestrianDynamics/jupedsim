@@ -201,7 +201,6 @@ target_compile_definitions(core PUBLIC
 )
 target_link_libraries(core
     Boost::boost
-    $<$<BOOL:${USE_OPENMP}>:OpenMP::OpenMP_CXX>
     poly2tri
     tinyxml
     visilibity

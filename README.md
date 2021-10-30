@@ -47,18 +47,8 @@ cd build
 cmake -DCMAKE_BUILD_TYPE=Debug <path-to-cmakelists>
 make -j$(nproc)
 ```
-Note: If you do not want to use OpenMP you have to pass `-DUSE_OPENMP=OFF` to
-cmake on generation.
-```bash
-cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_OPENMP=OFF <path-to-cmakelists>
-```
 
 The following configuration flags are available:
-
-##### USE_OPENMP defaults to ON (Disabled on Windows)
-Build `jpscore` with OpenMP support, generation will fail if OpenMP cannot be
-found.
-MSVC only support OpenMP 2.0 Standard and is therefor disabled on Windows.
 
 ##### BUILD_DOC defaults to OFF
 Build internal Doxygen based documentation

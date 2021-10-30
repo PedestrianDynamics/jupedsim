@@ -99,16 +99,12 @@ int main(int argc, char ** argv)
     }
 
     if(sim.GetPedsNumber()) {
-        LOG_WARNING(
-            "Pedestrians not evacuated [{}] using [{}] threads",
-            sim.GetPedsNumber(),
-            config.GetMaxOpenMPThreads());
+        LOG_WARNING("Pedestrians not evacuated [{}]", sim.GetPedsNumber());
     }
 
     const double execTime = difftime(endtime, starttime);
     LOG_INFO("Exec Time {:.2f}s", execTime);
     LOG_INFO("Evac Time {:.2f}s", evacTime);
     LOG_INFO("Realtime Factor {:.2f}x", evacTime / execTime);
-    LOG_INFO("Number of Threads {}", config.GetMaxOpenMPThreads());
     return (EXIT_SUCCESS);
 }

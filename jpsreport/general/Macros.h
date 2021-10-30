@@ -85,7 +85,6 @@ typedef VD::cell_type::source_index_type source_index_type;
 
 // disable openmp in debug mode
 #ifdef _NDEBUG
-//#undef _OPENMP
 #endif
 
 // precision error

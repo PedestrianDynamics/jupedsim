@@ -49,15 +49,6 @@ print_var(BUILD_CPPUNIT_TEST)
 set(BUILD_DOC OFF CACHE BOOL "Build doxygen documentation")
 print_var(BUILD_DOC)
 
-# Due to old OpenMP implementation in MSVC we disable OpenMP on Windows for the moment.
-if(${CMAKE_SYSTEM} MATCHES "Windows")
-    set(USE_OPENMP Off)
-    message(WARNING "OpenMP is disabled on Windows")
-else()
-    set(USE_OPENMP ON CACHE BOOL "Build with OpenMP")
-endif()
-print_var(USE_OPENMP)
-
 if(POLICY CMP0069)
     cmake_policy(SET CMP0069 NEW)
     include(CheckIPOSupported)
@@ -113,62 +104,6 @@ add_library(fs INTERFACE)
 target_link_libraries(fs INTERFACE
     $<$<PLATFORM_ID:Linux>:stdc++fs>
 )
-
-# CMakes find module for openmp (FindOpenMP) is currently (cmake 1.15.1) broken
-# in several ways:
-# 1st. Version detection does only work on first cmake generation. E.g. if
-# version 3.1 is found but verison 4 required cmake generation will fail
-# rightfully on the first call but subsequent calls will pass, i.e. silently use
-# 3.1 even though 4 was strictly required.
-# See Issue: https://gitlab.kitware.com/cmake/cmake/issues/19150
-#
-# 2nd. FindOpenMP is broken on MacOS Mojave, it cannot find openmp at all
-# currently. See Issue:https://gitlab.kitware.com/cmake/cmake/issues/18520
-#
-# Due to the issues mentioned above we have to do some extra work to make sure
-# openmp is found. Note this does not do ANY version checking!
-if(USE_OPENMP)
-    if(${CMAKE_SYSTEM} MATCHES "Darwin" AND ${CMAKE_CXX_COMPILER_ID} MATCHES "AppleClang")
-        find_library(OpenMP_LIBRARY
-            NAMES omp
-            PATHS
-                /opt/local
-                /opt/local/lib/libomp
-        )
-        find_path(OpenMP_INCLUDE_DIR
-            omp.h
-            PATHS
-                /opt/local
-                /opt/local/include/libomp
-        )
-
-        mark_as_advanced(OpenMP_LIBRARY OpenMP_INCLUDE_DIR)
-
-        include(FindPackageHandleStandardArgs)
-        find_package_handle_standard_args(OpenMP DEFAULT_MSG
-            OpenMP_LIBRARY OpenMP_INCLUDE_DIR)
-
-        if (OpenMP_FOUND)
-            set(OpenMP_LIBRARIES ${OpenMP_LIBRARY})
-            set(OpenMP_INCLUDE_DIRS ${OpenMP_INCLUDE_DIR})
-            set(OpenMP_COMPILE_OPTIONS -Xpreprocessor -fopenmp)
-
-            add_library(OpenMP::OpenMP_CXX SHARED IMPORTED)
-            set_target_properties(OpenMP::OpenMP_CXX PROPERTIES
-                IMPORTED_LOCATION ${OpenMP_LIBRARIES}
-                INTERFACE_INCLUDE_DIRECTORIES "${OpenMP_INCLUDE_DIRS}"
-                INTERFACE_COMPILE_OPTIONS "${OpenMP_COMPILE_OPTIONS}"
-            )
-        endif()
-    else()
-        find_package(OpenMP REQUIRED)
-    endif()
-else()
-    list(APPEND COMMON_COMPILE_OPTIONS
-        # Disable warnigns about omp pragmas
-         $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-Wno-unknown-pragmas>
-    )
-endif()
 
 find_package(Threads REQUIRED)
 find_package(PythonInterp 3 REQUIRED)

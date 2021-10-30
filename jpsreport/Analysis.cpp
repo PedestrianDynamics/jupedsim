@@ -290,7 +290,6 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
             LOG_ERROR("Method A selected with no measurement area!");
             exit(EXIT_FAILURE);
         }
-#pragma omp parallel for
         for(int i = 0; i < int(_areasForMethodA.size()); i++) {
             Method_A method_A;
             method_A.SetMeasurementArea(_areasForMethodA[i]);
@@ -315,7 +314,6 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
             exit(EXIT_FAILURE);
         }
 
-#pragma omp parallel for
         for(int i = 0; i < int(_areasForMethodB.size()); i++) {
             Method_B method_B;
             method_B.SetMeasurementArea(_areasForMethodB[i]);
@@ -338,7 +336,6 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
             LOG_ERROR("Method C selected with no measurement area!");
             exit(EXIT_FAILURE);
         }
-#pragma omp parallel for
         for(int i = 0; i < int(_areasForMethodC.size()); i++) {
             Method_C method_C;
             method_C.SetMeasurementArea(_areasForMethodC[i]);
@@ -362,7 +359,6 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
             exit(EXIT_FAILURE);
         }
 
-#pragma omp parallel for
         for(int i = 0; i < int(_areasForMethodD.size()); i++) {
             Method_D method_D;
             // TODO: setting and processing should be restructured. constructor?

@@ -31,7 +31,6 @@
 #include "general/Configuration.h"
 #include "general/Filesystem.h"
 #include "general/Macros.h"
-#include "general/OpenMP.h"
 #include "geometry/Building.h"
 #include "geometry/Crossing.h"
 #include "geometry/Goal.h"

@@ -20,8 +20,6 @@ The header comprises the following elements:
 -   `<max_sim_time>t</max_sim_time>`
     the maximal simulation time in seconds.
 
--   `<num_threads>n</num_threads>` the number of used cores.
-
 -   `<geometry>geometry.xml</geometry>`
     The name and location of the geometry file. All file locations are relative
     to the actual location of the project file. See [specification](jpscore_geometry.html) of the geometry format.

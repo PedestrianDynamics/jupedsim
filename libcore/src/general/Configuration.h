@@ -45,7 +45,6 @@ public:
         _walkingSpeed     = nullptr;
         _ToxicityAnalysis = nullptr;
         _routingEngine    = std::shared_ptr<RoutingEngine>(new RoutingEngine());
-        _maxOpenMPThreads = 1;
         _seed             = 0;
         _fps              = 8;
         _precision        = 2;
@@ -121,10 +120,6 @@ public:
     {
         _routingEngine = routingEngine;
     };
-
-    int GetMaxOpenMPThreads() const { return _maxOpenMPThreads; };
-
-    void SetMaxOpenMPThreads(int maxOpenMPThreads) { _maxOpenMPThreads = maxOpenMPThreads; };
 
     unsigned int GetSeed() const { return _seed; };
 
@@ -392,7 +387,6 @@ private:
     std::shared_ptr<WalkingSpeed> _walkingSpeed;
     std::shared_ptr<ToxicityAnalysis> _ToxicityAnalysis;
     std::shared_ptr<RoutingEngine> _routingEngine;
-    int _maxOpenMPThreads;
     unsigned int _seed;
     double _fps;
     unsigned int _precision;
