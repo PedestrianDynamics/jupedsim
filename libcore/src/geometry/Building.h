@@ -62,7 +62,7 @@ private:
     std::string _caption;
     std::string _geometryFilename;
     NeighborhoodSearch _neighborhoodSearch;
-    std::vector<std::unique_ptr<Pedestrian>> _allPedestrians;
+    std::vector<std::unique_ptr<Pedestrian>> * _allPedestrians;
     std::map<int, std::shared_ptr<Room>> _rooms;
     std::map<int, Crossing *> _crossings;
     std::map<int, Transition *> _transitions;
@@ -92,7 +92,10 @@ public:
     /// constructor
     Building();
 
-    Building(Configuration * config, PedDistributor & pedDistributor);
+    Building(
+        Configuration * config,
+        PedDistributor & pedDistributor,
+        std::vector<std::unique_ptr<Pedestrian>> * agents);
 
     /// destructor
     virtual ~Building();

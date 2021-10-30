@@ -59,7 +59,7 @@ private:
     /// frame rate for the trajectories
     double _fps;
     unsigned int _seed;
-    std::shared_ptr<Building> _building;
+    std::unique_ptr<Building> _building;
     /// Force model to use
     std::shared_ptr<OperationalModel> _operationalModel;
     /// Manage all route choices algorithms
@@ -78,6 +78,7 @@ private:
     int _countTraj = 0; // count number of TXT trajectories to produce
 
     std::vector<Pedestrian *> _pedsToRemove;
+    std::vector<std::unique_ptr<Pedestrian>> _agents;
 
 public:
     explicit Simulation(Configuration * args);

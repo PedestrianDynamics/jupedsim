@@ -71,10 +71,14 @@ Building::Building()
     _routingEngine    = nullptr;
 }
 
-Building::Building(Configuration * configuration, PedDistributor & pedDistributor) :
+Building::Building(
+    Configuration * configuration,
+    PedDistributor & pedDistributor,
+    std::vector<std::unique_ptr<Pedestrian>> * agents) :
     _configuration(configuration),
     _routingEngine(configuration->GetRoutingEngine()),
-    _caption("no_caption")
+    _caption("no_caption"),
+    _allPedestrians(agents)
 {
     {
         std::unique_ptr<GeoFileParser> parser(new GeoFileParser(_configuration));
@@ -742,7 +746,7 @@ bool Building::SanityCheck()
 
 void Building::UpdateGrid()
 {
-    _neighborhoodSearch.Update(_allPedestrians);
+    _neighborhoodSearch.Update(*_allPedestrians);
 }
 
 void Building::InitGrid()
@@ -806,35 +810,36 @@ void Building::InitGrid()
 void Building::DeletePedestrian(int id)
 {
     const auto iter =
-        std::find_if(_allPedestrians.begin(), _allPedestrians.end(), [id](const auto & e) {
+        std::find_if(_allPedestrians->begin(), _allPedestrians->end(), [id](const auto & e) {
             return e->GetID() == id;
         });
-    if(iter == _allPedestrians.end()) {
+    if(iter == _allPedestrians->end()) {
         LOG_ERROR("Pedestrian with ID {} not found.", id);
         return;
     }
-    _allPedestrians.erase(iter);
+    _allPedestrians->erase(iter);
 }
 
 const std::vector<std::unique_ptr<Pedestrian>> & Building::GetAllPedestrians() const
 {
-    return _allPedestrians;
+    return *_allPedestrians;
 }
 
 void Building::AddPedestrian(Pedestrian * ped)
 {
-    if(std::find_if(std::begin(_allPedestrians), std::end(_allPedestrians), [ped](const auto & e) {
-           return ped->GetID() == e->GetID();
-       }) != std::end(_allPedestrians)) {
+    if(std::find_if(
+           std::begin(*_allPedestrians), std::end(*_allPedestrians), [ped](const auto & e) {
+               return ped->GetID() == e->GetID();
+           }) != std::end(*_allPedestrians)) {
         LOG_WARNING("Pedestrian {} already in the room.", ped->GetID());
     } else {
-        _allPedestrians.emplace_back(std::unique_ptr<Pedestrian>(ped));
+        _allPedestrians->emplace_back(std::unique_ptr<Pedestrian>(ped));
     }
 }
 
 void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const
 {
-    for(auto && ped : _allPedestrians) {
+    for(auto && ped : *_allPedestrians) {
         if((room == ped->GetRoomID()) && (subroom == ped->GetSubRoomID())) {
             peds.push_back(ped.get());
         }
@@ -844,10 +849,10 @@ void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian *> &
 Pedestrian * Building::GetPedestrian(int pedID) const
 {
     const auto iter = std::find_if(
-        std::begin(_allPedestrians), std::end(_allPedestrians), [pedID](const auto & e) {
+        std::begin(*_allPedestrians), std::end(*_allPedestrians), [pedID](const auto & e) {
             return e->GetID() == pedID;
         });
-    if(iter != std::end(_allPedestrians)) {
+    if(iter != std::end(*_allPedestrians)) {
         return iter->get();
     }
     return nullptr;
