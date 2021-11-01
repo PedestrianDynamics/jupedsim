@@ -54,8 +54,8 @@ private:
     /// Max file size 16Mb
     static const size_t _maxFileSize{1U << 24U};
     Configuration * _config;
-    size_t _nPeds;
     double _deltaT;
+    uint64_t _frame{0};
     /// frame rate for the trajectories
     double _fps;
     unsigned int _seed;
@@ -91,6 +91,8 @@ public:
     Simulation(Simulation && other) = delete;
 
     Simulation & operator=(Simulation && other) = delete;
+
+    void Iterate();
 
     void AddAgent(const Pedestrian & agent);
 

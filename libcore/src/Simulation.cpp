@@ -53,7 +53,6 @@ std::map<int, double> trainOutflow;
 Simulation::Simulation(Configuration * args) : _config(args)
 {
     _countTraj               = 0;
-    _nPeds                   = 0;
     _seed                    = 8091983;
     _deltaT                  = 0;
     _building                = nullptr;
@@ -68,11 +67,58 @@ Simulation::Simulation(Configuration * args) : _config(args)
     _currentTrajectoriesFile = _config->GetTrajectoriesFile();
 }
 
+void Simulation::Iterate()
+{
+    _building->UpdateGrid();
+    const auto t = Pedestrian::GetGlobalTime();
+    if(t > Pedestrian::GetMinPremovementTime()) {
+        // update the positions
+        _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get(), _periodic);
+
+        //update the events
+        bool eventProcessed = _em->ProcessEvents(Pedestrian::GetGlobalTime());
+        _routingEngine->setNeedUpdate(eventProcessed || _routingEngine->NeedsUpdate());
+
+        //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
+        //update quickestRouter
+        if(eventProcessed) {
+            LOG_INFO(
+                "Enter correctGeometry: Building Has {} Transitions.",
+                _building->GetAllTransitions().size());
+
+            _building->GetConfig()->GetDirectionManager()->GetDirectionStrategy()->Init(
+                _building.get());
+        } else { // quickest needs update even if NeedsUpdate() is false
+            auto * ffrouter =
+                dynamic_cast<FFRouter *>(_routingEngine->GetRouter(ROUTING_FF_QUICKEST));
+            if(ffrouter != nullptr)
+                if(ffrouter->MustReInit()) {
+                    ffrouter->ReInit();
+                    ffrouter->SetRecalc(t);
+                }
+        }
+
+        // here the used routers are update, when needed due to external changes
+        if(_routingEngine->NeedsUpdate()) {
+            LOG_INFO("Update router during simulation.");
+            _routingEngine->UpdateRouter();
+        }
+
+        //update the routes and locations
+        UpdateRoutesAndLocations();
+
+        // Checks if position of pedestrians is inside waiting area and should be waiting or if
+        // left waiting area and assign new goal
+        GoalManager gm{_building.get(), &_agents};
+        gm.update(Pedestrian::GetGlobalTime());
+    }
+}
+
 void Simulation::AddAgent(const Pedestrian & agent) {}
 
 size_t Simulation::GetPedsNumber() const
 {
-    return _nPeds;
+    return _agents.size();
 }
 
 bool Simulation::InitArgs()
@@ -132,8 +178,7 @@ bool Simulation::InitArgs()
     for(auto && ped : _building->GetAllPedestrians()) {
         ped->SetDeltaT(_deltaT);
     }
-    _nPeds = _building->GetAllPedestrians().size();
-    LOG_INFO("Number of peds received: {}", _nPeds);
+    LOG_INFO("Number of peds received: {}", _agents.size());
     _seed = _config->GetSeed();
 
     if(_config->GetDistEffMaxPed() > _config->GetLinkedCellSize()) {
@@ -178,7 +223,7 @@ bool Simulation::InitArgs()
 
 double Simulation::RunStandardSimulation(double maxSimTime)
 {
-    RunHeader(_nPeds + _agentSrcManager->GetMaxAgentNumber());
+    RunHeader(_agents.size() + _agentSrcManager->GetMaxAgentNumber());
     double t = RunBody(maxSimTime);
     return t;
 }
@@ -326,9 +371,6 @@ void Simulation::RunHeader(long nPed)
     CopyInputFilesToOutPath();
     UpdateOutputFiles();
 
-    // writing the header
-    if(nPed == -1)
-        nPed = _nPeds;
     _iod->WriteHeader(nPed, _fps, _building.get(), _seed, 0); // first trajectory
                                                               // count = 0
     _iod->WriteGeometry(_building.get());
@@ -360,71 +402,19 @@ double Simulation::RunBody(double maxSimTime)
     writeInterval     = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
     // ##########
 
-    //process the queue for incoming pedestrians
-    //important since the number of peds is used
-    //to break the main simulation loop
-    AddNewAgents();
-    _nPeds                  = _building->GetAllPedestrians().size();
     std::string description = "Evacuation ";
-    int initialnPeds        = _nPeds;
+    int initialnPeds        = _agents.size();
     // main program loop
-    while((_nPeds || (!_agentSrcManager->IsCompleted() && _gotSources)) && t < maxSimTime) {
+    while((!_agents.empty() || (!_agentSrcManager->IsCompleted() && _gotSources)) &&
+          t < maxSimTime) {
         t = 0 + (frameNr - 1) * _deltaT;
         // Handle train traffic: coorect geometry
 
+        Pedestrian::SetGlobalTime(t);
         AddNewAgents();
 
-        if(t > Pedestrian::GetMinPremovementTime()) {
-            //update the linked cells
-            _building->UpdateGrid();
-
-            // update the positions
-            _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get(), _periodic);
-
-            //update the events
-            bool eventProcessed = _em->ProcessEvents(Pedestrian::GetGlobalTime());
-            _routingEngine->setNeedUpdate(eventProcessed || _routingEngine->NeedsUpdate());
-
-            //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
-            //update quickestRouter
-            if(eventProcessed) {
-                LOG_INFO(
-                    "Enter correctGeometry: Building Has {} Transitions.",
-                    _building->GetAllTransitions().size());
-
-                _building->GetConfig()->GetDirectionManager()->GetDirectionStrategy()->Init(
-                    _building.get());
-            } else { // quickest needs update even if NeedsUpdate() is false
-                auto * ffrouter =
-                    dynamic_cast<FFRouter *>(_routingEngine->GetRouter(ROUTING_FF_QUICKEST));
-                if(ffrouter != nullptr)
-                    if(ffrouter->MustReInit()) {
-                        ffrouter->ReInit();
-                        ffrouter->SetRecalc(t);
-                    }
-            }
-
-            // here the used routers are update, when needed due to external changes
-            if(_routingEngine->NeedsUpdate()) {
-                LOG_INFO("Update router during simulation.");
-                _routingEngine->UpdateRouter();
-            }
-
-            //update the routes and locations
-            UpdateRoutesAndLocations();
-
-            // Checks if position of pedestrians is inside waiting area and should be waiting or if
-            // left waiting area and assign new goal
-            GoalManager gm{_building.get(), &_agents};
-            gm.update(Pedestrian::GetGlobalTime());
-
-            //other updates
-            //someone might have left the building
-            _nPeds = _building->GetAllPedestrians().size();
-        }
-
+        Iterate();
         // update the global time
-        Pedestrian::SetGlobalTime(t);
 
         // write the trajectories
         if(0 == frameNr % writeInterval) {
@@ -438,9 +428,9 @@ double Simulation::RunBody(double maxSimTime)
                 "time: {:6.2f} ({:4.0f}) | Agents: {:6d} / {:d} [{:4.1f}%]",
                 t,
                 maxSimTime,
-                _nPeds,
+                _agents.size(),
                 initialnPeds,
-                (double) (initialnPeds - _nPeds) / initialnPeds * 100.);
+                (double) (initialnPeds - _agents.size()) / initialnPeds * 100.);
         }
 
         ++frameNr;
@@ -482,7 +472,7 @@ void Simulation::RotateOutputFile()
         LOG_INFO("New trajectory file <{}>", _currentTrajectoriesFile.string());
         auto file = std::make_shared<FileHandler>(_currentTrajectoriesFile);
         _iod->SetOutputHandler(file);
-        _iod->WriteHeader(_nPeds, _fps, _building.get(), _seed, _countTraj);
+        _iod->WriteHeader(_agents.size(), _fps, _building.get(), _seed, _countTraj);
     }
 }
 
@@ -674,7 +664,6 @@ void Simulation::AddNewAgents()
         _agents.end(),
         std::make_move_iterator(new_agents.begin()),
         std::make_move_iterator(new_agents.end()));
-    _building->UpdateGrid();
 }
 
 void Simulation::incrementCountTraj()
