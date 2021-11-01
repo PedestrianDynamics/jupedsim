@@ -64,7 +64,7 @@
 #include <utility>
 #include <vector>
 
-Building::Building()
+Building::Building(std::vector<std::unique_ptr<Pedestrian>> * agents) : _allPedestrians(agents)
 {
     _caption          = "no_caption";
     _geometryFilename = "";

@@ -20,6 +20,7 @@
 #include "SimulationHelper.h"
 
 #include "general/Configuration.h"
+#include "geometry/Building.h"
 #include "geometry/Crossing.h"
 #include "geometry/Line.h"
 #include "geometry/Room.h"
@@ -29,6 +30,7 @@
 #include "pedestrian/Pedestrian.h"
 
 #include <catch2/catch.hpp>
+#include <memory>
 
 TEST_CASE(
     "SimulationHelper::UpdatePedestrianRoomInformation",
@@ -186,7 +188,8 @@ TEST_CASE(
     trans23->SetRoom2(room3);
     trans23->SetSubRoom2(sub31);
 
-    Building building;
+    std::vector<std::unique_ptr<Pedestrian>> peds{};
+    Building building(&peds);
     building.AddRoom(room1);
     building.AddRoom(room2);
     building.AddRoom(room3);
@@ -386,7 +389,8 @@ TEST_CASE(
     sub11->AddGoalID(1);
     sub11->AddGoalID(2);
 
-    Building building;
+    std::vector<std::unique_ptr<Pedestrian>> peds{};
+    Building building(&peds);
     building.AddRoom(room1);
     building.AddTransition(trans11);
     building.AddGoal(goalInside);
@@ -517,39 +521,55 @@ TEST_CASE(
     {
         SECTION("No peds reached final goal")
         {
-            auto pedsReachedFinalGoal = SimulationHelper::FindPedestriansReachedFinalGoal(
-                building,
-                {&pedInsideGoalOutsideInGoalFinal,
-                 &pedInsideGoalOutsideInGoalNotFinal,
-                 &pedInsideGoalOutsideInRoomLeft,
-                 &pedInsideGoalOutsideInRoomRight,
-                 &pedInsideNoGoalOutsideInGoalFinal,
-                 &pedInsideNoGoalOutsideInGoalNotFinal,
-                 &pedInsideNoGoalOutsideInRoomLeft,
-                 &pedInsideNoGoalOutsideInRoomRight,
-                 &pedInsideGoalFinalInsideInGoalNotFinal,
-                 &pedInsideGoalFinalInsideInRoomLeft,
-                 &pedInsideGoalFinalInsideInRoomRight,
-                 &pedInsideGoalNotFinalInsideInGoalFinal,
-                 &pedInsideGoalNotFinalInsideInRoomLeft,
-                 &pedInsideGoalNotFinalInsideInRoomRight});
+            std::vector<std::unique_ptr<Pedestrian>> pedestrians{};
+            pedestrians.emplace_back(std::make_unique<Pedestrian>(pedInsideGoalOutsideInGoalFinal));
+            pedestrians.emplace_back(
+                std::make_unique<Pedestrian>(pedInsideGoalOutsideInGoalNotFinal));
+            pedestrians.emplace_back(std::make_unique<Pedestrian>(pedInsideGoalOutsideInRoomLeft));
+            pedestrians.emplace_back(std::make_unique<Pedestrian>(pedInsideGoalOutsideInRoomRight));
+            pedestrians.emplace_back(
+                std::make_unique<Pedestrian>(pedInsideNoGoalOutsideInGoalFinal));
+            pedestrians.emplace_back(
+                std::make_unique<Pedestrian>(pedInsideNoGoalOutsideInGoalNotFinal));
+            pedestrians.emplace_back(
+                std::make_unique<Pedestrian>(pedInsideNoGoalOutsideInRoomLeft));
+            pedestrians.emplace_back(
+                std::make_unique<Pedestrian>(pedInsideNoGoalOutsideInRoomRight));
+            pedestrians.emplace_back(
+                std::make_unique<Pedestrian>(pedInsideGoalFinalInsideInGoalNotFinal));
+            pedestrians.emplace_back(
+                std::make_unique<Pedestrian>(pedInsideGoalFinalInsideInRoomLeft));
+            pedestrians.emplace_back(
+                std::make_unique<Pedestrian>(pedInsideGoalFinalInsideInRoomRight));
+            pedestrians.emplace_back(
+                std::make_unique<Pedestrian>(pedInsideGoalNotFinalInsideInGoalFinal));
+            pedestrians.emplace_back(
+                std::make_unique<Pedestrian>(pedInsideGoalNotFinalInsideInRoomLeft));
+            pedestrians.emplace_back(
+                std::make_unique<Pedestrian>(pedInsideGoalNotFinalInsideInRoomRight));
+            auto pedsReachedFinalGoal =
+                SimulationHelper::FindPedestriansReachedFinalGoal(building, pedestrians);
             REQUIRE(pedsReachedFinalGoal.empty());
         }
 
         SECTION("Multiple peds inside final goal, one wants to get there")
         {
-            auto pedsReachedFinalGoal = SimulationHelper::FindPedestriansReachedFinalGoal(
-                building,
-                {&pedInsideGoalOutsideInGoalFinal,
-                 &pedInsideNoGoalOutsideInGoalFinal,
-                 &pedInsideGoalFinalInsideInGoalFinal,
-                 &pedInsideGoalNotFinalInsideInGoalFinal});
+            std::vector<std::unique_ptr<Pedestrian>> pedestrians{};
+            pedestrians.emplace_back(std::make_unique<Pedestrian>(pedInsideGoalOutsideInGoalFinal));
+            pedestrians.emplace_back(
+                std::make_unique<Pedestrian>(pedInsideNoGoalOutsideInGoalFinal));
+            pedestrians.emplace_back(
+                std::make_unique<Pedestrian>(pedInsideGoalFinalInsideInGoalFinal));
+            pedestrians.emplace_back(
+                std::make_unique<Pedestrian>(pedInsideGoalNotFinalInsideInGoalFinal));
+            auto pedsReachedFinalGoal =
+                SimulationHelper::FindPedestriansReachedFinalGoal(building, pedestrians);
             REQUIRE(pedsReachedFinalGoal.size() == 1);
             REQUIRE(
                 std::find(
                     std::begin(pedsReachedFinalGoal),
                     std::end(pedsReachedFinalGoal),
-                    &pedInsideGoalFinalInsideInGoalFinal) != pedsReachedFinalGoal.end());
+                    pedestrians[2].get()) != pedsReachedFinalGoal.end());
         }
     }
 }
@@ -623,7 +643,8 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
     room2->AddSubRoom(sub21);
     room2->AddTransitionID(trans12->GetUniqueID());
 
-    Building building;
+    std::vector<std::unique_ptr<Pedestrian>> peds{};
+    Building building(&peds);
     building.AddRoom(room1);
     building.AddRoom(room2);
     building.AddTransition(trans11);
@@ -792,7 +813,8 @@ TEST_CASE("SimulationHelper::UpdateFlowAtDoors", "[SimulationHelper][UpdateFlowA
     room2->AddSubRoom(sub21);
     room2->AddTransitionID(trans12->GetUniqueID());
 
-    Building building;
+    std::vector<std::unique_ptr<Pedestrian>> peds{};
+    Building building(&peds);
     building.AddRoom(room1);
     building.AddRoom(room2);
     building.AddTransition(trans11);
@@ -995,7 +1017,8 @@ TEST_CASE("SimulationHelper::FindPassedDoor", "[SimulationHelper][FindPassedDoor
     trans23->SetRoom2(nullptr);
     trans23->SetSubRoom2(nullptr);
 
-    Building building;
+    std::vector<std::unique_ptr<Pedestrian>> peds{};
+    Building building(&peds);
     building.AddRoom(room1);
     building.AddRoom(room2);
     building.AddTransition(trans12);
@@ -1152,7 +1175,8 @@ TEST_CASE("SimulationHelper::RemovePedestrians", "[SimulationHelper][RemovePedes
     room1->SetID(1);
     room1->AddSubRoom(sub11);
 
-    Building building;
+    std::vector<std::unique_ptr<Pedestrian>> peds{};
+    Building building(&peds);
     building.AddRoom(room1);
     building.AddTransition(trans11);
 
@@ -1208,6 +1232,13 @@ TEST_CASE("SimulationHelper::RemovePedestrians", "[SimulationHelper][RemovePedes
         SimulationHelper::RemovePedestrians(building, pedsToRemove);
         REQUIRE(building.GetAllPedestrians().size() == 5);
         REQUIRE(pedsToRemove.empty());
-        REQUIRE_THAT(building.GetAllPedestrians(), Catch::Matchers::UnorderedEquals(pedsRemaining));
+        const auto & all_pedestrians = building.GetAllPedestrians();
+        std::vector<Pedestrian *> all_pedestrians_raw{};
+        std::transform(
+            std::begin(all_pedestrians),
+            std::end(all_pedestrians),
+            std::back_inserter(all_pedestrians_raw),
+            [](const auto & e) { return e.get(); });
+        REQUIRE_THAT(all_pedestrians_raw, Catch::Matchers::UnorderedEquals(pedsRemaining));
     }
 }

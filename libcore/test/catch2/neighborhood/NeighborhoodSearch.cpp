@@ -25,6 +25,8 @@
 #include <algorithm>
 #include <catch2/catch.hpp>
 #include <deque>
+#include <iterator>
+#include <memory>
 #include <vector>
 
 TEST_CASE("neighborhood/NeighborSearch", "[neighborhood][neightor-search]")
@@ -50,19 +52,19 @@ TEST_CASE("neighborhood/NeighborSearch", "[neighborhood][neightor-search]")
     {
         NeighborhoodSearch neighborhood_search(0, 10, 0, 10, 2.2);
 
-        std::vector<Pedestrian> pedestrians(10);
-        for(auto & ped : pedestrians) {
-            ped.SetPos(Point(0, 0));
+        std::vector<std::unique_ptr<Pedestrian>> pedestrians{};
+        for(int counter = 0; counter < 10; ++counter) {
+            pedestrians.emplace_back(std::make_unique<Pedestrian>());
+            pedestrians.back()->SetPos(Point(0, 0));
         }
-
-        std::vector<Pedestrian *> ped_pointers;
+        std::vector<Pedestrian *> pedestrians_as_raw{};
         std::transform(
-            pedestrians.begin(),
-            pedestrians.end(),
-            std::back_inserter(ped_pointers),
-            [](Pedestrian & ped) -> Pedestrian * { return &ped; });
+            std::begin(pedestrians),
+            std::end(pedestrians),
+            std::back_inserter(pedestrians_as_raw),
+            [](const auto & e) { return e.get(); });
 
-        neighborhood_search.Update(ped_pointers);
+        neighborhood_search.Update(pedestrians);
 
         std::vector<Pedestrian *> neighborhood;
 
@@ -70,7 +72,7 @@ TEST_CASE("neighborhood/NeighborSearch", "[neighborhood][neightor-search]")
         special_ped.SetPos(Point(0, 0));
 
         neighborhood = neighborhood_search.GetNeighbourhood(&special_ped);
-        REQUIRE_THAT(ped_pointers, Catch::Matchers::UnorderedEquals(neighborhood));
+        REQUIRE_THAT(pedestrians_as_raw, Catch::Matchers::UnorderedEquals(neighborhood));
 
         special_ped.SetPos(Point(10, 10));
         neighborhood = neighborhood_search.GetNeighbourhood(&special_ped);
@@ -82,6 +84,6 @@ TEST_CASE("neighborhood/NeighborSearch", "[neighborhood][neightor-search]")
 
         special_ped.SetPos(Point(0, 4.3));
         neighborhood = neighborhood_search.GetNeighbourhood(&special_ped);
-        REQUIRE_THAT(ped_pointers, Catch::Matchers::UnorderedEquals(neighborhood));
+        REQUIRE_THAT(pedestrians_as_raw, Catch::Matchers::UnorderedEquals(neighborhood));
     }
 }

@@ -90,7 +90,7 @@ private:
 
 public:
     /// constructor
-    Building();
+    Building(std::vector<std::unique_ptr<Pedestrian>> * agents);
 
     Building(
         Configuration * config,
