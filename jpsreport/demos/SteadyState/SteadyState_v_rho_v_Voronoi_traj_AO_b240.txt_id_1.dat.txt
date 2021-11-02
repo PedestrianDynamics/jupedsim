@@ -1,2 +1,0 @@
-# start end ratio mean std 
-202 938 72.83 0.7240 0.0323 
