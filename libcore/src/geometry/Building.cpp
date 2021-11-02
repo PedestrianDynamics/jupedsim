@@ -64,23 +64,22 @@
 #include <utility>
 #include <vector>
 
-Building::Building()
+Building::Building(std::vector<std::unique_ptr<Pedestrian>> * agents) : _allPedestrians(agents)
 {
     _caption          = "no_caption";
     _geometryFilename = "";
     _routingEngine    = nullptr;
-    _savePathway      = false;
 }
 
-#ifdef _SIMULATOR
-
-Building::Building(Configuration * configuration, PedDistributor & pedDistributor) :
+Building::Building(
+    Configuration * configuration,
+    PedDistributor & pedDistributor,
+    std::vector<std::unique_ptr<Pedestrian>> * agents) :
     _configuration(configuration),
     _routingEngine(configuration->GetRoutingEngine()),
-    _caption("no_caption")
+    _caption("no_caption"),
+    _allPedestrians(agents)
 {
-    _savePathway = false;
-
     {
         std::unique_ptr<GeoFileParser> parser(new GeoFileParser(_configuration));
         parser->LoadBuilding(this);
@@ -113,20 +112,8 @@ Building::Building(Configuration * configuration, PedDistributor & pedDistributo
     }
 }
 
-#endif
-
 Building::~Building()
 {
-#ifdef _SIMULATOR
-    for(auto & pedestrian : _allPedestrians) {
-        delete pedestrian;
-    }
-    _allPedestrians.clear();
-#endif
-
-    if(_pathWayStream.is_open())
-        _pathWayStream.close();
-
     for(std::map<int, Crossing *>::const_iterator iter = _crossings.begin();
         iter != _crossings.end();
         ++iter) {
@@ -757,11 +744,9 @@ bool Building::SanityCheck()
     return status;
 }
 
-#ifdef _SIMULATOR
-
 void Building::UpdateGrid()
 {
-    _neighborhoodSearch.Update(_allPedestrians);
+    _neighborhoodSearch.Update(*_allPedestrians);
 }
 
 void Building::InitGrid()
@@ -822,106 +807,54 @@ void Building::InitGrid()
     LOG_INFO("Done with Initializing the grid");
 }
 
-void Building::DeletePedestrian(Pedestrian *& ped)
+void Building::DeletePedestrian(int id)
 {
-    std::vector<Pedestrian *>::iterator it;
-    it = find(_allPedestrians.begin(), _allPedestrians.end(), ped);
-    if(it == _allPedestrians.end()) {
-        LOG_ERROR("Pedestrian with ID {} not found.", ped->GetID());
+    const auto iter =
+        std::find_if(_allPedestrians->begin(), _allPedestrians->end(), [id](const auto & e) {
+            return e->GetID() == id;
+        });
+    if(iter == _allPedestrians->end()) {
+        LOG_ERROR("Pedestrian with ID {} not found.", id);
         return;
-    } else {
-        // save the path history for this pedestrian before removing from the simulation
-        if(_savePathway) {
-            // string results;
-            std::string path = (*it)->GetPath();
-            std::vector<std::string> brokenpaths;
-            StringExplode(path, ">", &brokenpaths);
-            for(unsigned int i = 0; i < brokenpaths.size(); i++) {
-                std::vector<std::string> tags;
-                StringExplode(brokenpaths[i], ":", &tags);
-                std::string room  = _rooms[atoi(tags[0].c_str())]->GetCaption();
-                std::string trans = GetTransition(atoi(tags[1].c_str()))->GetCaption();
-                //ignore crossings/hlines
-                if(trans != "")
-                    _pathWayStream << room << " " << trans << std::endl;
-            }
-        }
     }
-    _allPedestrians.erase(it);
-    delete ped;
+    _allPedestrians->erase(iter);
 }
 
-const std::vector<Pedestrian *> & Building::GetAllPedestrians() const
+const std::vector<std::unique_ptr<Pedestrian>> & Building::GetAllPedestrians() const
 {
-    return _allPedestrians;
+    return *_allPedestrians;
 }
 
 void Building::AddPedestrian(Pedestrian * ped)
 {
     if(std::find_if(
-           std::begin(_allPedestrians), std::end(_allPedestrians), [ped](const Pedestrian * other) {
-               return ped->GetID() == other->GetID();
-           }) != std::end(_allPedestrians)) {
+           std::begin(*_allPedestrians), std::end(*_allPedestrians), [ped](const auto & e) {
+               return ped->GetID() == e->GetID();
+           }) != std::end(*_allPedestrians)) {
         LOG_WARNING("Pedestrian {} already in the room.", ped->GetID());
     } else {
-        _allPedestrians.push_back(ped);
+        _allPedestrians->emplace_back(std::unique_ptr<Pedestrian>(ped));
     }
 }
 
 void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const
 {
-    for(auto && ped : _allPedestrians) {
+    for(auto && ped : *_allPedestrians) {
         if((room == ped->GetRoomID()) && (subroom == ped->GetSubRoomID())) {
-            peds.push_back(ped);
+            peds.push_back(ped.get());
         }
-    }
-}
-
-//obsolete
-void Building::InitSavePedPathway(const std::string & filename)
-{
-    _pathWayStream.open(filename.c_str());
-    _savePathway = true;
-
-    if(_pathWayStream.is_open()) {
-        LOG_INFO("Saving pedestrian paths to [{}]", filename);
-        _pathWayStream << "##pedestrian ways" << std::endl;
-        _pathWayStream << "#nomenclature roomid  caption" << std::endl;
-        _pathWayStream << "#data room exit_id" << std::endl;
-    } else {
-        LOG_INFO("Unable to open [{}]", filename);
-        LOG_INFO("Writing to stdout instead.");
-    }
-}
-
-void Building::StringExplode(
-    std::string str,
-    std::string separator,
-    std::vector<std::string> * results)
-{
-    size_t found;
-    found = str.find_first_of(separator);
-    while(found != std::string::npos) {
-        if(found > 0) {
-            results->push_back(str.substr(0, found));
-        }
-        str   = str.substr(found + 1);
-        found = str.find_first_of(separator);
-    }
-    if(str.length() > 0) {
-        results->push_back(str);
     }
 }
 
 Pedestrian * Building::GetPedestrian(int pedID) const
 {
-    for(unsigned int p = 0; p < _allPedestrians.size(); p++) {
-        Pedestrian * ped = _allPedestrians[p];
-        if(ped->GetID() == pedID) {
-            return ped;
-        }
+    const auto iter = std::find_if(
+        std::begin(*_allPedestrians), std::end(*_allPedestrians), [pedID](const auto & e) {
+            return e->GetID() == pedID;
+        });
+    if(iter != std::end(*_allPedestrians)) {
+        return iter->get();
     }
-
     return nullptr;
 }
 
@@ -1215,5 +1148,3 @@ std::optional<Point> Building::GetTrackStart(int trackID) const
 
     return std::nullopt;
 }
-
-#endif // _SIMULATOR

@@ -52,7 +52,6 @@ set(source_files
     src/math/VelocityModel.cpp
     src/neighborhood/NeighborhoodSearch.cpp
     src/pedestrian/AgentsParameters.cpp
-    src/pedestrian/AgentsQueue.cpp
     src/pedestrian/AgentsSource.cpp
     src/pedestrian/AgentsSourcesManager.cpp
     src/pedestrian/Ellipse.cpp
@@ -144,7 +143,6 @@ set(header_files
     src/neighborhood/NeighborhoodSearch.h
     src/neighborhood/Grid2D.h
     src/pedestrian/AgentsParameters.h
-    src/pedestrian/AgentsQueue.h
     src/pedestrian/AgentsSource.h
     src/pedestrian/AgentsSourcesManager.h
     src/pedestrian/Ellipse.h
@@ -276,7 +274,6 @@ if (BUILD_CPPUNIT_TEST)
             test/catch2/pedestrian/EllipseTest.cpp
             test/catch2/pedestrian/PedestrianTest.cpp
             test/catch2/routing/UnivFFviaFMTest.cpp
-            test/catch2/geometry/CorrectGeometryTest.cpp
             )
 
     target_link_libraries(unittests PRIVATE

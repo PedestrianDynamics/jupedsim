@@ -397,25 +397,6 @@ const std::vector<int> & Pedestrian::GetLastDestinations() const
     return _destHistory;
 }
 
-std::string Pedestrian::GetKnowledgeAsString() const
-{
-    std::string key;
-    for(auto && knowledge : _knownDoors) {
-        //skip low quality information
-        if(knowledge.second.GetQuality() < 0.2) {
-            continue;
-        }
-
-        int door = knowledge.first;
-        if(key.empty()) {
-            key.append(std::to_string(door));
-        } else {
-            key.append(":" + std::to_string(door));
-        }
-    }
-    return key;
-}
-
 const Point & Pedestrian::GetPos() const
 {
     return _ellipse.GetCenter();
@@ -817,14 +798,6 @@ int Pedestrian::GetColor() const
             }
             return color;
         }
-
-        // Hash the knowledge represented as String
-        case BY_KNOWLEDGE: {
-            key = GetKnowledgeAsString();
-            if(key.empty()) {
-                return -1;
-            }
-        } break;
 
         case BY_ROUTER:
         case BY_ROUTE: {

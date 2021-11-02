@@ -33,10 +33,7 @@
 #include "Transition.h"
 #include "WaitingArea.h"
 #include "Wall.h"
-
-#ifdef _SIMULATOR
 #include "pedestrian/Pedestrian.h"
-#endif //_SIMULATOR
 
 #include <Logger.h>
 #include <cmath>
@@ -1339,8 +1336,6 @@ const std::string & SubRoom::GetType() const
     return _type;
 }
 
-#ifdef _SIMULATOR
-
 bool SubRoom::IsInSubRoom(Pedestrian * ped) const
 {
     const Point & pos = ped->GetPos();
@@ -1441,4 +1436,3 @@ bool Escalator::IsEscalatorDown() const
 {
     return !isEscalator_Up;
 }
-#endif // _SIMULATOR

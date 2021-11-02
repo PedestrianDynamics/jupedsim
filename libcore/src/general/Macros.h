@@ -38,9 +38,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-// should be true only when using this file in the simulation core
-#define _SIMULATOR 1
-
 #define JPS_OLD_VERSION "0.5" // this version is still supported
 
 // precision error
@@ -85,7 +82,6 @@ enum OperativModels {
 
 enum AgentColorMode {
     BY_VELOCITY = 1,
-    BY_KNOWLEDGE,
     BY_ROUTE,
     BY_ROUTER,
     BY_SPOTLIGHT,

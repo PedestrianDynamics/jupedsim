@@ -63,10 +63,9 @@ bool VelocityModel::Init(Building * building)
 {
     _direction->Init(building);
 
-    const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
-    size_t peds_size                          = allPeds.size();
-    for(unsigned int p = 0; p < peds_size; p++) {
-        Pedestrian * ped = allPeds[p];
+    std::vector<int> pedestrians_to_delete{};
+    const auto & allPeds = building->GetAllPedestrians();
+    for(const auto & ped : allPeds) {
         double cosPhi, sinPhi;
         //a destination could not be found for that pedestrian
         int ped_is_waiting = 1; // quick and dirty fix
@@ -81,17 +80,9 @@ bool VelocityModel::Init(Building * building)
                 ped->GetID(),
                 ped->GetRoomID(),
                 ped->GetSubRoomID());
-            building->DeletePedestrian(ped);
-            // TODO KKZ track deleted peds
-            p--;
-            peds_size--;
+            pedestrians_to_delete.emplace_back(ped->GetID());
             continue;
         }
-
-        // TODO
-        // HERE every ped should have a navline already
-        //
-
 
         Point target = Point(0, 0);
         if(ped->GetExitLine())
@@ -116,6 +107,11 @@ bool VelocityModel::Init(Building * building)
         E.SetSinPhi(sinPhi);
         ped->SetEllipse(E);
     }
+
+    for(const auto id : pedestrians_to_delete) {
+        building->DeletePedestrian(id);
+    }
+
     return true;
 }
 
@@ -126,23 +122,21 @@ void VelocityModel::ComputeNextTimeStep(
     int periodic)
 {
     // collect all pedestrians in the simulation.
-    const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
-    std::vector<Pedestrian *> pedsToRemove;
-    pedsToRemove.reserve(500);
-
+    const auto & allPeds          = building->GetAllPedestrians();
     std::vector<Point> result_acc = std::vector<Point>();
     result_acc.reserve(allPeds.size());
     std::vector<my_pair> spacings = std::vector<my_pair>();
     spacings.reserve(allPeds.size());    // larger than needed
     spacings.push_back(my_pair(100, 1)); // in case there are no neighbors
 
-    for(size_t p = 0; p < allPeds.size(); ++p) {
-        Pedestrian * ped  = allPeds[p];
+    std::vector<int> pedestrians_to_delete{};
+
+    for(const auto & ped : allPeds) {
         Room * room       = building->GetRoom(ped->GetRoomID());
         SubRoom * subroom = room->GetSubRoom(ped->GetSubRoomID());
         Point repPed      = Point(0, 0);
         std::vector<Pedestrian *> neighbours =
-            building->GetNeighborhoodSearch().GetNeighbourhood(ped);
+            building->GetNeighborhoodSearch().GetNeighbourhood(ped.get());
 
         int size = (int) neighbours.size();
         for(int i = 0; i < size; i++) {
@@ -160,33 +154,33 @@ void VelocityModel::ComputeNextTimeStep(
             if(!isVisible)
                 continue;
             if(ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
-                repPed += ForceRepPed(ped, ped1, periodic);
+                repPed += ForceRepPed(ped.get(), ped1, periodic);
             } else {
                 // or in neighbour subrooms
                 SubRoom * sb2 =
                     building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
                 if(subroom->IsDirectlyConnectedWith(sb2)) {
-                    repPed += ForceRepPed(ped, ped1, periodic);
+                    repPed += ForceRepPed(ped.get(), ped1, periodic);
                 }
             }
         } // for i
         //repulsive forces to walls and closed transitions that are not my target
-        Point repWall = ForceRepRoom(allPeds[p], subroom);
+        Point repWall = ForceRepRoom(ped.get(), subroom);
 
         // calculate new direction ei according to (6)
-        Point direction = e0(ped, room) + repPed + repWall;
+        Point direction = e0(ped.get(), room) + repPed + repWall;
         for(int i = 0; i < size; i++) {
             Pedestrian * ped1 = neighbours[i];
             // calculate spacing
             // my_pair spacing_winkel = GetSpacing(ped, ped1);
             if(ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
-                spacings.push_back(GetSpacing(ped, ped1, direction, periodic));
+                spacings.push_back(GetSpacing(ped.get(), ped1, direction, periodic));
             } else {
                 // or in neighbour subrooms
                 SubRoom * sb2 =
                     building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
                 if(subroom->IsDirectlyConnectedWith(sb2)) {
-                    spacings.push_back(GetSpacing(ped, ped1, direction, periodic));
+                    spacings.push_back(GetSpacing(ped.get(), ped1, direction, periodic));
                 }
             }
         }
@@ -201,7 +195,7 @@ void VelocityModel::ComputeNextTimeStep(
         if(0 && direction.NormSquare() < 0.5) {
             double pi_half = 1.57079663;
             double alpha   = pi_half * exp(-spacing);
-            direction      = e0(ped, room).Rotate(cos(alpha), sin(alpha));
+            direction      = e0(ped.get(), room).Rotate(cos(alpha), sin(alpha));
             printf(
                 "\nRotate %f, %f, norm = %f alpha = %f, spacing = %f\n",
                 direction._x,
@@ -212,7 +206,7 @@ void VelocityModel::ComputeNextTimeStep(
             getc(stdin);
         }
         //============================================================
-        Point speed = direction.Normalized() * OptimalSpeed(ped, spacing);
+        Point speed = direction.Normalized() * OptimalSpeed(ped.get(), spacing);
         result_acc.push_back(speed);
 
 
@@ -234,16 +228,15 @@ void VelocityModel::ComputeNextTimeStep(
                 ped->GetGlobalTime(),
                 current);
             //TODO KKZ track deleted peds
-            pedsToRemove.push_back(ped);
+            pedestrians_to_delete.emplace_back(ped->GetID());
         }
 
     } // for p
 
     // update
-    for(size_t p = 0; p < allPeds.size(); ++p) {
-        Pedestrian * ped = allPeds[p];
-
-        Point v_neu   = result_acc[p];
+    size_t counter = 0;
+    for(auto & ped : allPeds) {
+        Point v_neu   = result_acc[counter];
         Point pos_neu = ped->GetPos() + v_neu * deltaT;
 
         //Jam is based on the current velocity
@@ -264,13 +257,13 @@ void VelocityModel::ComputeNextTimeStep(
             }
         }
         ped->SetV(v_neu);
+        ++counter;
     }
 
     // remove the pedestrians that have left the building
-    for(unsigned int p = 0; p < pedsToRemove.size(); p++) {
-        building->DeletePedestrian(pedsToRemove[p]);
+    for(const auto id : pedestrians_to_delete) {
+        building->DeletePedestrian(id);
     }
-    pedsToRemove.clear();
 }
 
 Point VelocityModel::e0(Pedestrian * ped, Room * room) const

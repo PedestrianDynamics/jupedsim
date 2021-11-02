@@ -44,7 +44,7 @@ public:
     /**
       * Constructor
       */
-    AgentsSourcesManager();
+    AgentsSourcesManager(Building * building);
 
     /**
       * disable copying
@@ -54,22 +54,12 @@ public:
     /**
       * Destructor
       */
-    virtual ~AgentsSourcesManager();
+    ~AgentsSourcesManager() = default;
 
     /**
       *  Add a new agent source
       */
     void AddSource(std::shared_ptr<AgentsSource> src);
-
-    /**
-      * @return all sources
-      */
-    const std::vector<std::shared_ptr<AgentsSource>> & GetSources() const;
-
-    /**
-      * Set the building object
-      */
-    void SetBuilding(Building * building);
 
     /**
       * @return true if all agents have been generated
@@ -78,23 +68,10 @@ public:
     bool IsCompleted() const;
 
     /**
-      * @return true if the building is updated
-      *
-      */
-    bool IsBuildingUpdated() const;
-
-    void SetBuildingUpdated(bool update);
-
-    /**
-      * Return a pointer to the building object
-      */
-    Building * GetBuilding() const;
-
-    /**
       *Schedule the pedestrians for the simulation
       * @return true if all source are empty
       */
-    bool ProcessAllSources() const;
+    std::vector<std::unique_ptr<Pedestrian>> ProcessAllSources() const;
 
     /**
       * Trigger the sources to generate the specified
@@ -109,7 +86,6 @@ public:
       */
     long GetMaxAgentNumber() const;
 
-    int GetMaxSimTime() const;
     void SetMaxSimTime(int t);
 
 private:
@@ -144,12 +120,6 @@ private:
     void AdjustVelocityUsingWeidmann(Pedestrian * ped) const;
 
     /**
-      *
-      * @param ped adjust the velocity by using the mean velocity of the neighbor in front of me
-      */
-    void AdjustVelocityByNeighbour(Pedestrian * ped) const;
-
-    /**
       * Sort the given position vector by decreasing density
       * @param positions,
       * @param extra_position, an additional vector containing position to be considered in the density calculation
@@ -159,14 +129,9 @@ private:
 
 
 private:
-    /// contain the sources
-    std::vector<std::shared_ptr<AgentsSource>> _sources;
+    Building * _building;
+    std::vector<std::shared_ptr<AgentsSource>> _sources{};
     ///to control the trigger of the events
     long int _lastUpdateTime = 0;
     int maxSimTime           = 0;
-    /// building object
-    Building * _building = nullptr;
-    /// whether all agents have been dispatched
-    static bool _isCompleted;
-    bool _buildingUpdated;
 };

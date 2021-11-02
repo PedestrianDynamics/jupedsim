@@ -138,8 +138,8 @@ void TrajectoriesTXT::WriteGeometry(Building *) {}
 
 void TrajectoriesTXT::WriteFrame(int frameNr, Building * building)
 {
-    const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
-    for(auto ped : allPeds) {
+    const auto & allPeds = building->GetAllPedestrians();
+    for(const auto & ped : allPeds) {
         double x       = ped->GetPos()._x;
         double y       = ped->GetPos()._y;
         double z       = ped->GetElevation();
@@ -164,7 +164,7 @@ void TrajectoriesTXT::WriteFrame(int frameNr, Building * building)
             phi * RAD2DEG,
             color);
         for(const auto & option : _optionalOutputOptions) {
-            frame.append(_optionalOutput[option](ped));
+            frame.append(_optionalOutput[option](ped.get()));
         }
 
         Write(frame);

@@ -88,13 +88,13 @@ list(APPEND COMMON_COMPILE_OPTIONS
 add_subdirectory(third-party)
 
 # libfmt
-find_package(fmt 6.0 REQUIRED CONFIG)
+find_package(fmt 8.0 REQUIRED CONFIG)
 
 # spdlog
-find_package(spdlog 1.3 REQUIRED CONFIG)
+find_package(spdlog 1.9 REQUIRED CONFIG)
 
 # CLI11
-find_package(CLI11 1.8 REQUIRED CONFIG)
+find_package(CLI11 2.1 REQUIRED CONFIG)
 
 # Boost
 find_package(Boost 1.65 REQUIRED ${BOOST_COMPONENTS})

@@ -28,35 +28,24 @@
  **/
 #include "AgentsSourcesManager.h"
 
-#include "AgentsQueue.h"
 #include "Pedestrian.h"
+#include "geometry/Building.h"
 #include "neighborhood/NeighborhoodSearch.h"
 #include "voronoi-boost/VoronoiPositionGenerator.h"
 
 #include <Logger.h>
+#include <memory>
 #include <thread>
 
-bool AgentsSourcesManager::_isCompleted = true;
-
-AgentsSourcesManager::AgentsSourcesManager()
+AgentsSourcesManager::AgentsSourcesManager(Building * building) : _building(building)
 {
     //Generate all agents required for the complete simulation
     //It might be more efficient to generate at each frequency step
     GenerateAgents();
-    //first call ignoring the return value
-    ProcessAllSources();
-
-    //the loop is updated each x second.
-    //it might be better to use a timer
-    SetBuildingUpdated(false);
 }
 
-AgentsSourcesManager::~AgentsSourcesManager() {}
-
-
-bool AgentsSourcesManager::ProcessAllSources() const
+std::vector<std::unique_ptr<Pedestrian>> AgentsSourcesManager::ProcessAllSources() const
 {
-    bool empty          = true;
     double current_time = Pedestrian::GetGlobalTime();
     std::vector<Pedestrian *>
         source_peds; // we have to collect peds from all sources, so that we can consider them  while computing new positions
@@ -118,16 +107,14 @@ bool AgentsSourcesManager::ProcessAllSources() const
                 AdjustVelocityUsingWeidmann(ped);
             }
             source_peds.insert(source_peds.end(), peds.begin(), peds.end());
-            AgentsQueueIn::Add(peds);
-            empty = false;
         }
-        bool timeConstraint =
-            (src->GetPlanTime() > current_time) || (current_time < srcLifeSpan[1]);
-        if(timeConstraint) // for the case we still expect
-            // agents coming
-            empty = false;
     }
-    return empty;
+    std::vector<std::unique_ptr<Pedestrian>> result;
+    result.reserve(source_peds.size());
+    for(const auto agent : source_peds) {
+        result.emplace_back(std::unique_ptr<Pedestrian>{agent});
+    }
+    return result;
 }
 
 
@@ -136,54 +123,6 @@ void AgentsSourcesManager::InitFixedPosition(AgentsSource * src, std::vector<Ped
 {
     for(auto && ped : peds) {
         ped->SetPos(Point(src->GetStartX(), src->GetStartY()));
-    }
-}
-
-
-void AgentsSourcesManager::AdjustVelocityByNeighbour(Pedestrian * ped) const
-{
-    //get the density
-    std::vector<Pedestrian *> neighbours = _building->GetNeighborhoodSearch().GetNeighbourhood(ped);
-
-    double speed         = 0.0;
-    double radius_square = 0.56 * 0.56; //corresponding to an area of 1m3
-    int count            = 0;
-
-    for(const auto & p : neighbours) {
-        //only pedestrians in a specific range
-        if((ped->GetPos() - p->GetPos()).NormSquare() <= radius_square) {
-            //only peds with the same destination
-            if(ped->GetExitIndex() == p->GetExitIndex()) {
-                double dist1 = ped->GetDistanceToNextTarget();
-                double dist2 = p->GetDistanceToNextTarget();
-                //only peds in front of me
-                if(dist2 < dist1) {
-                    speed += p->GetV().Norm();
-                    count++;
-                }
-            }
-        }
-    }
-    //mean speed
-    if(count == 0) {
-        speed = ped->GetEllipse().GetV0(); // FIXME:  bad fix for: peds without navline (ar.graf)
-                                           //speed=ped->GetV0Norm();
-    } else {
-        speed = speed / count;
-    }
-
-    if(ped->FindRoute() != -1) {
-        //get the next destination point
-        Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos()) - ped->GetPos()).Normalized();
-        v       = v * speed;
-        ped->SetV(v);
-    } else {
-        LOG_ERROR(
-            "No route could be found for agent {:d} going to {:d}",
-            ped->GetID(),
-            ped->GetFinalDestination());
-        //that will be most probably be fixed in the next computation step.
-        // so do not abort
     }
 }
 
@@ -239,17 +178,6 @@ void AgentsSourcesManager::GenerateAgents()
 void AgentsSourcesManager::AddSource(std::shared_ptr<AgentsSource> src)
 {
     _sources.push_back(src);
-    _isCompleted = false; //at least one source was provided
-}
-
-const std::vector<std::shared_ptr<AgentsSource>> & AgentsSourcesManager::GetSources() const
-{
-    return _sources;
-}
-
-void AgentsSourcesManager::SetBuilding(Building * building)
-{
-    _building = building;
 }
 
 bool AgentsSourcesManager::IsCompleted() const
@@ -261,23 +189,6 @@ bool AgentsSourcesManager::IsCompleted() const
     return remaining_agents == 0;
 }
 
-
-bool AgentsSourcesManager::IsBuildingUpdated() const
-{
-    return _buildingUpdated;
-}
-
-void AgentsSourcesManager::SetBuildingUpdated(bool update)
-{
-    _buildingUpdated = update;
-}
-
-
-Building * AgentsSourcesManager::GetBuilding() const
-{
-    return _building;
-}
-
 long AgentsSourcesManager::GetMaxAgentNumber() const
 {
     long pop = 0;
@@ -287,11 +198,6 @@ long AgentsSourcesManager::GetMaxAgentNumber() const
     return pop;
 }
 
-
-int AgentsSourcesManager::GetMaxSimTime() const
-{
-    return maxSimTime;
-}
 void AgentsSourcesManager::SetMaxSimTime(int t)
 {
     maxSimTime = t;

@@ -25,36 +25,30 @@
  */
 #pragma once
 
+#include "Goal.h"
+#include "geometry/Building.h"
+#include "pedestrian/Pedestrian.h"
+
 #include <map>
 #include <vector>
 
-class Goal;
-class Pedestrian;
-class Building;
 
 class GoalManager
 {
 private:
-    /**
-     * Building which is observed by the GoalManager
-     */
     Building * _building;
+    std::vector<std::unique_ptr<Pedestrian>> * _agents;
 
 public:
-    /**
-     * Sets the building which should be managed by the GoalManager
-     * @param[in] building building which should be managed
-     */
-    void SetBuilding(Building * building);
+    GoalManager(Building * building, std::vector<std::unique_ptr<Pedestrian>> * agents);
 
     /**
      * Checks if the pedestrians have entered a goal/wa or if the waiting inside a waiting area is
      * over. Sets the pedestrian waiting if inside a `waiting` waiting area. Unset waiting if
      * waiting time is exceeded and update the goal of the pedestrian.
      * @param time Current in-simulation time
-     * @param peds Vector of pedestrians which are currently in the simulation.
      */
-    void Process(double time, const std::vector<Pedestrian *> & peds);
+    void update(double time);
 
 private:
     /**

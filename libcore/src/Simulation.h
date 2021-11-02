@@ -40,23 +40,26 @@
 #include "math/OperationalModel.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "pedestrian/PedDistributor.h"
+#include "pedestrian/Pedestrian.h"
 #include "routing/RoutingEngine.h"
 #include "routing/global_shortest/GlobalRouter.h"
 #include "routing/quickest/QuickestPathRouter.h"
 #include "routing/smoke_router/SmokeRouter.h"
 
+#include <cstddef>
+
 class Simulation
 {
 private:
     /// Max file size 16Mb
-    static const size_t _maxFileSize{1 << 24};
+    static const size_t _maxFileSize{1U << 24U};
     Configuration * _config;
-    long _nPeds;
     double _deltaT;
+    uint64_t _frame{0};
     /// frame rate for the trajectories
     double _fps;
     unsigned int _seed;
-    std::shared_ptr<Building> _building;
+    std::unique_ptr<Building> _building;
     /// Force model to use
     std::shared_ptr<OperationalModel> _operationalModel;
     /// Manage all route choices algorithms
@@ -64,33 +67,39 @@ private:
     /// writing the trajectories to file
     std::unique_ptr<Trajectories> _iod;
     std::unique_ptr<EventManager> _em;
-    AgentsSourcesManager _agentSrcManager;
+    std::unique_ptr<AgentsSourcesManager> _agentSrcManager{nullptr};
     int _periodic;
     int _maxSimTime;
     /// Will be set if pedestrian sources exist
     bool _gotSources;
 
-    GoalManager _goalManager;
     fs::path _currentTrajectoriesFile;
     int _countTraj = 0; // count number of TXT trajectories to produce
 
     std::vector<Pedestrian *> _pedsToRemove;
+    std::vector<std::unique_ptr<Pedestrian>> _agents;
 
 public:
-    /**
-     * Constructor
-     */
-    Simulation(Configuration * args);
+    explicit Simulation(Configuration * args);
 
-    /**
-     * Destructor
-     */
-    virtual ~Simulation();
+    ~Simulation() = default;
+
+    Simulation(const Simulation & other) = delete;
+
+    Simulation & operator=(const Simulation & other) = delete;
+
+    Simulation(Simulation && other) = delete;
+
+    Simulation & operator=(Simulation && other) = delete;
+
+    void Iterate();
+
+    void AddAgent(const Pedestrian & agent);
 
     /**
      * Initialize the number of agents in the simulation
      */
-    long GetPedsNumber() const;
+    size_t GetPedsNumber() const;
 
     /**
      * Read parameters from config.
@@ -153,16 +162,6 @@ public:
     void PrintStatistics(double time);
 
     /**
-     * In case the distance of <ped> to its actual transition is bigger than 0.5 m
-     * search in the the history of <ped> and pick up the nearest closest transition
-     * @param[in]:  Pedestrian <ped>
-     * @param[in]:  distance of <ped> to its actual transition
-     * @param[in]:  unique id of that transition
-     * @param[out]: nearest closest transition or nullptr if no correction was needed
-     **/
-    Transition * correctDoorStatistics(const Pedestrian & ped, double distance, int trans_id) const;
-
-    /**
      * @return the agents source manager
      */
     AgentsSourcesManager & GetAgentSrcManager();
@@ -178,11 +177,6 @@ public:
      */
     Building * GetBuilding();
 
-    /**
-     * Update the refresh ticks for all doors. they count up and measure the age of the tickvalue (ffRouter, quickest)
-     *
-     */
-    void UpdateDoorticks() const;
     int GetMaxSimTime() const;
     void incrementCountTraj();
 

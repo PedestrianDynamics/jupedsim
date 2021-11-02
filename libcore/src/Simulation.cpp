@@ -39,11 +39,12 @@
 #include "geometry/WaitingArea.h"
 #include "geometry/Wall.h"
 #include "math/GCFMModel.h"
-#include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
+#include "pedestrian/Pedestrian.h"
 #include "routing/ff_router/ffRouter.h"
 
 #include <Logger.h>
+#include <memory>
 #include <tinyxml.h>
 
 // TODO: add these variables to class simulation
@@ -52,7 +53,6 @@ std::map<int, double> trainOutflow;
 Simulation::Simulation(Configuration * args) : _config(args)
 {
     _countTraj               = 0;
-    _nPeds                   = 0;
     _seed                    = 8091983;
     _deltaT                  = 0;
     _building                = nullptr;
@@ -67,16 +67,58 @@ Simulation::Simulation(Configuration * args) : _config(args)
     _currentTrajectoriesFile = _config->GetTrajectoriesFile();
 }
 
-Simulation::~Simulation()
+void Simulation::Iterate()
 {
-    if(_iod) {
-        _iod.reset();
+    _building->UpdateGrid();
+    const auto t = Pedestrian::GetGlobalTime();
+    if(t > Pedestrian::GetMinPremovementTime()) {
+        // update the positions
+        _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get(), _periodic);
+
+        //update the events
+        bool eventProcessed = _em->ProcessEvents(Pedestrian::GetGlobalTime());
+        _routingEngine->setNeedUpdate(eventProcessed || _routingEngine->NeedsUpdate());
+
+        //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
+        //update quickestRouter
+        if(eventProcessed) {
+            LOG_INFO(
+                "Enter correctGeometry: Building Has {} Transitions.",
+                _building->GetAllTransitions().size());
+
+            _building->GetConfig()->GetDirectionManager()->GetDirectionStrategy()->Init(
+                _building.get());
+        } else { // quickest needs update even if NeedsUpdate() is false
+            auto * ffrouter =
+                dynamic_cast<FFRouter *>(_routingEngine->GetRouter(ROUTING_FF_QUICKEST));
+            if(ffrouter != nullptr)
+                if(ffrouter->MustReInit()) {
+                    ffrouter->ReInit();
+                    ffrouter->SetRecalc(t);
+                }
+        }
+
+        // here the used routers are update, when needed due to external changes
+        if(_routingEngine->NeedsUpdate()) {
+            LOG_INFO("Update router during simulation.");
+            _routingEngine->UpdateRouter();
+        }
+
+        //update the routes and locations
+        UpdateRoutesAndLocations();
+
+        // Checks if position of pedestrians is inside waiting area and should be waiting or if
+        // left waiting area and assign new goal
+        GoalManager gm{_building.get(), &_agents};
+        gm.update(Pedestrian::GetGlobalTime());
     }
 }
 
-long Simulation::GetPedsNumber() const
+void Simulation::AddAgent(const Pedestrian & agent) {}
+
+size_t Simulation::GetPedsNumber() const
 {
-    return _nPeds;
+    return _agents.size();
 }
 
 bool Simulation::InitArgs()
@@ -105,16 +147,16 @@ bool Simulation::InitArgs()
     _routingEngine   = _config->GetRoutingEngine();
     auto distributor = std::make_unique<PedDistributor>(PedDistributor(_config));
     // IMPORTANT: do not change the order in the following..
-    _building = std::make_shared<Building>(_config, *distributor);
+    _building = std::make_unique<Building>(_config, *distributor, &_agents);
 
     // Initialize the agents sources that have been collected in the pedestrians distributor
-    _agentSrcManager.SetBuilding(_building.get());
-    _agentSrcManager.SetMaxSimTime(GetMaxSimTime());
+    _agentSrcManager = std::make_unique<AgentsSourcesManager>(_building.get());
+    _agentSrcManager->SetMaxSimTime(GetMaxSimTime());
     _gotSources =
         !distributor->GetAgentsSources().empty(); // did we have any sources? false if no sources
 
     for(const auto & src : distributor->GetAgentsSources()) {
-        _agentSrcManager.AddSource(src);
+        _agentSrcManager->AddSource(src);
         src->Dump();
     }
 
@@ -136,8 +178,7 @@ bool Simulation::InitArgs()
     for(auto && ped : _building->GetAllPedestrians()) {
         ped->SetDeltaT(_deltaT);
     }
-    _nPeds = _building->GetAllPedestrians().size();
-    LOG_INFO("Number of peds received: {}", _nPeds);
+    LOG_INFO("Number of peds received: {}", _agents.size());
     _seed = _config->GetSeed();
 
     if(_config->GetDistEffMaxPed() > _config->GetLinkedCellSize()) {
@@ -177,20 +218,19 @@ bool Simulation::InitArgs()
     }
 
     _em->ListEvents();
-    _goalManager.SetBuilding(_building.get());
     return true;
 }
 
 double Simulation::RunStandardSimulation(double maxSimTime)
 {
-    RunHeader(_nPeds + _agentSrcManager.GetMaxAgentNumber());
+    RunHeader(_agents.size() + _agentSrcManager->GetMaxAgentNumber());
     double t = RunBody(maxSimTime);
     return t;
 }
 
 void Simulation::UpdateRoutesAndLocations()
 {
-    auto peds = _building->GetAllPedestrians();
+    const auto & peds = _building->GetAllPedestrians();
 
     auto [pedsChangedRoom, pedsNotRelocated] =
         SimulationHelper::UpdatePedestriansLocations(*_building, peds);
@@ -221,7 +261,7 @@ void Simulation::UpdateRoutesAndLocations()
 
 void Simulation::UpdateRoutes()
 {
-    for(auto ped : _building->GetAllPedestrians()) {
+    for(const auto & ped : _building->GetAllPedestrians()) {
         // set ped waiting, if no target is found
         int target = ped->FindRoute();
 
@@ -237,7 +277,7 @@ void Simulation::UpdateRoutes()
             int roomID         = ped->GetRoomID();
             int subRoomID      = ped->GetSubRoomID();
 
-            if(auto cross = dynamic_cast<const Crossing *>(door)) {
+            if(const auto * cross = dynamic_cast<const Crossing *>(door)) {
                 if(cross->IsInRoom(roomID) && cross->IsInSubRoom(subRoomID)) {
                     if(!ped->IsWaiting() && cross->IsTempClose()) {
                         ped->StartWaiting();
@@ -331,9 +371,6 @@ void Simulation::RunHeader(long nPed)
     CopyInputFilesToOutPath();
     UpdateOutputFiles();
 
-    // writing the header
-    if(nPed == -1)
-        nPed = _nPeds;
     _iod->WriteHeader(nPed, _fps, _building.get(), _seed, 0); // first trajectory
                                                               // count = 0
     _iod->WriteGeometry(_building.get());
@@ -347,8 +384,7 @@ void Simulation::RunHeader(long nPed)
     UpdateRoutesAndLocations();
 
     // KKZ: RunBody calls this as one of the firs things, hence this can be removed
-    _agentSrcManager.GenerateAgents();
-    AddNewAgents();
+    _agentSrcManager->GenerateAgents();
 }
 
 double Simulation::RunBody(double maxSimTime)
@@ -366,70 +402,19 @@ double Simulation::RunBody(double maxSimTime)
     writeInterval     = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
     // ##########
 
-    //process the queue for incoming pedestrians
-    //important since the number of peds is used
-    //to break the main simulation loop
-    AddNewAgents();
-    _nPeds                  = _building->GetAllPedestrians().size();
     std::string description = "Evacuation ";
-    int initialnPeds        = _nPeds;
+    int initialnPeds        = _agents.size();
     // main program loop
-    while((_nPeds || (!_agentSrcManager.IsCompleted() && _gotSources)) && t < maxSimTime) {
+    while((!_agents.empty() || (!_agentSrcManager->IsCompleted() && _gotSources)) &&
+          t < maxSimTime) {
         t = 0 + (frameNr - 1) * _deltaT;
         // Handle train traffic: coorect geometry
 
+        Pedestrian::SetGlobalTime(t);
         AddNewAgents();
 
-        if(t > Pedestrian::GetMinPremovementTime()) {
-            //update the linked cells
-            _building->UpdateGrid();
-
-            // update the positions
-            _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get(), _periodic);
-
-            //update the events
-            bool eventProcessed = _em->ProcessEvents(Pedestrian::GetGlobalTime());
-            _routingEngine->setNeedUpdate(eventProcessed || _routingEngine->NeedsUpdate());
-
-            //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
-            //update quickestRouter
-            if(eventProcessed) {
-                LOG_INFO(
-                    "Enter correctGeometry: Building Has {} Transitions.",
-                    _building->GetAllTransitions().size());
-
-                _building->GetConfig()->GetDirectionManager()->GetDirectionStrategy()->Init(
-                    _building.get());
-            } else { // quickest needs update even if NeedsUpdate() is false
-                auto * ffrouter =
-                    dynamic_cast<FFRouter *>(_routingEngine->GetRouter(ROUTING_FF_QUICKEST));
-                if(ffrouter != nullptr)
-                    if(ffrouter->MustReInit()) {
-                        ffrouter->ReInit();
-                        ffrouter->SetRecalc(t);
-                    }
-            }
-
-            // here the used routers are update, when needed due to external changes
-            if(_routingEngine->NeedsUpdate()) {
-                LOG_INFO("Update router during simulation.");
-                _routingEngine->UpdateRouter();
-            }
-
-            //update the routes and locations
-            UpdateRoutesAndLocations();
-
-            // Checks if position of pedestrians is inside waiting area and should be waiting or if
-            // left waiting area and assign new goal
-            _goalManager.Process(Pedestrian::GetGlobalTime(), _building->GetAllPedestrians());
-
-            //other updates
-            //someone might have left the building
-            _nPeds = _building->GetAllPedestrians().size();
-        }
-
+        Iterate();
         // update the global time
-        Pedestrian::SetGlobalTime(t);
 
         // write the trajectories
         if(0 == frameNr % writeInterval) {
@@ -443,9 +428,9 @@ double Simulation::RunBody(double maxSimTime)
                 "time: {:6.2f} ({:4.0f}) | Agents: {:6d} / {:d} [{:4.1f}%]",
                 t,
                 maxSimTime,
-                _nPeds,
+                _agents.size(),
                 initialnPeds,
-                (double) (initialnPeds - _nPeds) / initialnPeds * 100.);
+                (double) (initialnPeds - _agents.size()) / initialnPeds * 100.);
         }
 
         ++frameNr;
@@ -487,7 +472,7 @@ void Simulation::RotateOutputFile()
         LOG_INFO("New trajectory file <{}>", _currentTrajectoriesFile.string());
         auto file = std::make_shared<FileHandler>(_currentTrajectoriesFile);
         _iod->SetOutputHandler(file);
-        _iod->WriteHeader(_nPeds, _fps, _building.get(), _seed, _countTraj);
+        _iod->WriteHeader(_agents.size(), _fps, _building.get(), _seed, _countTraj);
     }
 }
 
@@ -674,18 +659,12 @@ void Simulation::UpdateOutputGeometryFile()
 
 void Simulation::AddNewAgents()
 {
-    _agentSrcManager.ProcessAllSources();
-    std::vector<Pedestrian *> peds;
-    AgentsQueueIn::GetandClear(peds);
-    for(auto && ped : peds) {
-        _building->AddPedestrian(ped);
-    }
-    _building->UpdateGrid();
+    auto new_agents = _agentSrcManager->ProcessAllSources();
+    _agents.insert(
+        _agents.end(),
+        std::make_move_iterator(new_agents.begin()),
+        std::make_move_iterator(new_agents.end()));
 }
-
-void Simulation::UpdateDoorticks() const {
-    //TODO KKZ If possible get rind of this function
-};
 
 void Simulation::incrementCountTraj()
 {
@@ -694,7 +673,7 @@ void Simulation::incrementCountTraj()
 
 AgentsSourcesManager & Simulation::GetAgentSrcManager()
 {
-    return _agentSrcManager;
+    return *_agentSrcManager;
 }
 
 Building * Simulation::GetBuilding()
@@ -705,44 +684,4 @@ Building * Simulation::GetBuilding()
 int Simulation::GetMaxSimTime() const
 {
     return _maxSimTime;
-}
-
-Transition *
-Simulation::correctDoorStatistics(const Pedestrian & ped, double distance, int trans_id) const
-{
-    if(distance <= 0.5)
-        return nullptr;
-    Transition * trans       = nullptr;
-    double smallest_distance = 0.3;
-    bool success             = false;
-    LOG_WARNING(
-        "Pedestrian [{}] left room/subroom [{}/{}] in an unusual way. Please check",
-        ped.GetID(),
-        ped.GetRoomID(),
-        ped.GetSubRoomID());
-    LOG_INFO(
-        "Distance to last door ({} | {}) is {}. That should be smaller.",
-        trans_id,
-        ped.GetExitIndex(),
-        distance);
-    LOG_INFO("Correcting the door statistics");
-    //checking the history and picking the nearest previous destination
-    for(const auto & dest : ped.GetLastDestinations()) {
-        if(dest == -1)
-            continue;
-        Transition * trans_tmp = _building->GetTransitionByUID(dest);
-        if(!trans_tmp)
-            continue;
-        if(auto tmp_distance = trans_tmp->DistTo(ped.GetPos()); tmp_distance < smallest_distance) {
-            smallest_distance = tmp_distance;
-            trans             = trans_tmp;
-            LOG_INFO("Best match found at door {}", dest);
-            success = true; //at least one door was found
-        }
-    }
-    if(!success) {
-        LOG_WARNING("Correcting the door statistics failed!");
-        //TODO we need to check if the ped is in a subroom neighboring the target. If so, no problems!
-    }
-    return trans;
 }

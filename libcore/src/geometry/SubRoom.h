@@ -43,10 +43,7 @@ class Line;
 class Point;
 class Wall;
 class WaitingArea;
-
-#ifdef _SIMULATOR
 class Pedestrian;
-#endif
 
 namespace bg = boost::geometry;
 typedef bg::model::polygon<Point, false, false> polygon_type;
@@ -401,11 +398,7 @@ public:
      */
     void Update();
 
-#ifdef _SIMULATOR
-
     virtual bool IsInSubRoom(Pedestrian * ped) const;
-
-#endif
 };
 
 class NormalSubRoom : public SubRoom

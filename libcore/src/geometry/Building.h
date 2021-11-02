@@ -62,15 +62,12 @@ private:
     std::string _caption;
     std::string _geometryFilename;
     NeighborhoodSearch _neighborhoodSearch;
-    std::vector<Pedestrian *> _allPedestrians;
+    std::vector<std::unique_ptr<Pedestrian>> * _allPedestrians;
     std::map<int, std::shared_ptr<Room>> _rooms;
     std::map<int, Crossing *> _crossings;
     std::map<int, Transition *> _transitions;
     std::map<int, Hline *> _hLines;
     std::map<int, Goal *> _goals;
-    /// pedestrians pathway
-    bool _savePathway;
-    std::ofstream _pathWayStream;
     std::map<int, TrainType> _trains;
 
     std::map<int, Track> _tracks;
@@ -93,9 +90,12 @@ private:
 
 public:
     /// constructor
-    Building();
+    Building(std::vector<std::unique_ptr<Pedestrian>> * agents);
 
-    Building(Configuration * config, PedDistributor & pedDistributor);
+    Building(
+        Configuration * config,
+        PedDistributor & pedDistributor,
+        std::vector<std::unique_ptr<Pedestrian>> * agents);
 
     /// destructor
     virtual ~Building();
@@ -105,7 +105,7 @@ public:
     void SetCaption(const std::string & s);
 
     /// delete the ped from the ped vector
-    void DeletePedestrian(Pedestrian *& ped);
+    void DeletePedestrian(int id);
 
     /// delete the ped from the simulation
     void AddPedestrian(Pedestrian * ped);
@@ -116,7 +116,7 @@ public:
 
     RoutingEngine * GetRoutingEngine() const;
     const std::map<int, std::shared_ptr<Room>> & GetAllRooms() const;
-    const std::vector<Pedestrian *> & GetAllPedestrians() const;
+    const std::vector<std::unique_ptr<Pedestrian>> & GetAllPedestrians() const;
 
     Pedestrian * GetPedestrian(int pedID) const;
 
@@ -199,8 +199,6 @@ public:
 
 
     void InitGrid();
-
-    void InitSavePedPathway(const std::string & filename);
 
     void AddRoom(Room * room);
 
@@ -313,5 +311,4 @@ public:
 private:
     bool InitInsideGoals();
     void InitPlatforms();
-    void StringExplode(std::string str, std::string separator, std::vector<std::string> * results);
 };

@@ -28,9 +28,9 @@
 #include "WaitingArea.h"
 #include "pedestrian/Pedestrian.h"
 
-void GoalManager::SetBuilding(Building * building)
+GoalManager::GoalManager(Building * building, std::vector<std::unique_ptr<Pedestrian>> * agents) :
+    _building(building), _agents(agents)
 {
-    _building = building;
 }
 
 void GoalManager::ProcessPedPosition(Pedestrian * ped)
@@ -114,10 +114,10 @@ void GoalManager::SetState(int goalID, bool state)
     }
 }
 
-void GoalManager::Process(double time, const std::vector<Pedestrian *> & peds)
+void GoalManager::update(double time)
 {
-    for(auto ped : peds) {
-        ProcessPedPosition(ped);
+    for(const auto & ped : *_agents) {
+        ProcessPedPosition(ped.get());
     }
     ProcessWaitingAreas(time);
 }
