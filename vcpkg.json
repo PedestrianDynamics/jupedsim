@@ -27,6 +27,10 @@
         {
             "name": "boost",
             "version>=": "1.77.0"
+        },
+        {
+            "name": "zlib",
+            "version>=": "1.2.11"
         }
     ],
     "builtin-baseline": "35443ee2753f46c52ac342fa6c9c48e9f5eb9105"
