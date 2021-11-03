@@ -51,8 +51,6 @@ StartDistribution::StartDistribution(int seed)
     _yMin               = -FLT_MAX;
     _yMax               = FLT_MAX;
     _groupParameters    = nullptr;
-    _positions_dir      = "";
-    _unit_traj          = "m";
     static bool _seeded = false; // seed only once, not every time
     if(!_seeded) {
         _generator = std::default_random_engine(seed);
@@ -357,22 +355,4 @@ double StartDistribution::GetRiskTolerance()
         LOG_WARNING("Distribution Type invalid or not set. Fallback to uniform distribution");
         return (double) rand_norm; // todo: ar.graf: check if this quick fix executes and why
     }
-}
-
-void StartDistribution::SetPositionsDir(const std::string & dir)
-{
-    _positions_dir = dir;
-}
-const std::string & StartDistribution::GetPositionsDir() const
-{
-    return _positions_dir;
-}
-
-void StartDistribution::SetUnitTraj(const std::string & unit)
-{
-    _unit_traj = unit;
-}
-const std::string & StartDistribution::GetUnitTraj() const
-{
-    return _unit_traj;
 }

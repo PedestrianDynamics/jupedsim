@@ -63,19 +63,17 @@ bool PedDistributionParser::LoadPedDistribution(
         int number        = xmltoi(e->Attribute("number"), 0);
         int agent_para_id = xmltoi(e->Attribute("agent_parameter_id"), -1);
 
-        int goal_id               = xmltoi(e->Attribute("goal_id"), FINAL_DEST_OUT);
-        int router_id             = xmltoi(e->Attribute("router_id"), -1);
-        int route_id              = xmltoi(e->Attribute("route_id"), -1);
-        double patience           = xmltof(e->Attribute("patience"), 5);
-        double premovement_mean   = xmltof(e->Attribute("pre_movement_mean"), 0);
-        double premovement_sigma  = xmltof(e->Attribute("pre_movement_sigma"), 0);
-        std::string positions_dir = xmltoa(e->Attribute("positions_dir"), "");
-        std::string unit_traj     = xmltoa(e->Attribute("unit"), "m");
-        double x_min              = xmltof(e->Attribute("x_min"), -FLT_MAX);
-        double x_max              = xmltof(e->Attribute("x_max"), FLT_MAX);
-        double y_min              = xmltof(e->Attribute("y_min"), -FLT_MAX);
-        double y_max              = xmltof(e->Attribute("y_max"), FLT_MAX);
-        double bounds[4]          = {x_min, x_max, y_min, y_max};
+        int goal_id              = xmltoi(e->Attribute("goal_id"), FINAL_DEST_OUT);
+        int router_id            = xmltoi(e->Attribute("router_id"), -1);
+        int route_id             = xmltoi(e->Attribute("route_id"), -1);
+        double patience          = xmltof(e->Attribute("patience"), 5);
+        double premovement_mean  = xmltof(e->Attribute("pre_movement_mean"), 0);
+        double premovement_sigma = xmltof(e->Attribute("pre_movement_sigma"), 0);
+        double x_min             = xmltof(e->Attribute("x_min"), -FLT_MAX);
+        double x_max             = xmltof(e->Attribute("x_max"), FLT_MAX);
+        double y_min             = xmltof(e->Attribute("y_min"), -FLT_MAX);
+        double y_max             = xmltof(e->Attribute("y_max"), FLT_MAX);
+        double bounds[4]         = {x_min, x_max, y_min, y_max};
 
         //sanity check
         if((x_max < x_min) || (y_max < y_min)) {
@@ -101,12 +99,7 @@ bool PedDistributionParser::LoadPedDistribution(
         dis->SetRouterId(router_id);
         dis->SetPatience(patience);
         dis->InitPremovementTime(premovement_mean, premovement_sigma);
-        dis->SetPositionsDir(positions_dir);
-        dis->SetUnitTraj(unit_traj);
 
-        if(dis->GetPositionsDir().length()) {
-            LOG_INFO("Positions_dir = <{}>", dis->GetPositionsDir());
-        }
         if(e->Attribute("risk_tolerance_mean") && e->Attribute("risk_tolerance_sigma")) {
             std::string distribution_type = "normal";
             double risk_tolerance_mean    = xmltof(e->Attribute("risk_tolerance_mean"), NAN);
