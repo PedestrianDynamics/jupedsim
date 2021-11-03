@@ -40,13 +40,9 @@ PedDistributor::PedDistributor(const Configuration * configuration) : _configura
     _start_dis         = std::vector<std::shared_ptr<StartDistribution>>();
     _start_dis_sub     = std::vector<std::shared_ptr<StartDistribution>>();
     _start_dis_sources = std::vector<std::shared_ptr<AgentsSource>>();
-    PedDistributionLoader * parser;
-    {
-        parser = new PedDistributionParser(_configuration);
-    }
 
-    parser->LoadPedDistribution(_start_dis, _start_dis_sub, _start_dis_sources);
-    delete parser;
+    PedDistributionParser parser(_configuration);
+    parser.LoadPedDistribution(_start_dis, _start_dis_sub, _start_dis_sources);
 }
 
 
