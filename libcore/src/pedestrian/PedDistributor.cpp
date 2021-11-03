@@ -38,8 +38,6 @@
 #include <boost/range/combine.hpp>
 #include <cmath>
 
-using namespace boost::lambda;
-
 PedDistributor::PedDistributor(const Configuration * configuration) : _configuration(configuration)
 {
     _start_dis         = std::vector<std::shared_ptr<StartDistribution>>();
@@ -96,8 +94,8 @@ bool PedDistributor::Distribute(Building * building) const
             std::string unit      = dist->GetUnitTraj();
             fs::path the_path(directory);
             if(fs::exists(directory) && fs::is_directory(directory)) {
-                fs::directory_iterator it(the_path), eod;
-                BOOST_FOREACH(fs::path const & p, std::make_pair(it, eod)) {
+                fs::directory_iterator it(the_path);
+                for(fs::path const & p : it) {
                     if(fs::is_regular_file(p)) {
                         std::string basename  = p.stem().string(); //
                         std::string extention = p.extension().string();
