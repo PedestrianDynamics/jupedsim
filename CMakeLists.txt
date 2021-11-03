@@ -186,20 +186,19 @@ if(BUILD_DOC)
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generating API documentation with Doxygen"
         VERBATIM
-        )
+    )
     # generate file titlepage.tex based on titlepage.tex.in
     configure_file(
-      ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide/titlepage.tex.in
-            ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide/titlepage.tex
-      @ONLY
-      )
+        ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide/titlepage.tex.in
+        ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide/titlepage.tex
+        @ONLY
+    )
     add_custom_target(guide
         "${PYTHON_EXECUTABLE}" ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide/make_guide.py
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide
         COMMENT "Generating guide"
         VERBATIM
-        )
-
+    )
 endif(BUILD_DOC)
 
 ################################################################################
@@ -215,7 +214,6 @@ endif()
 add_subdirectory(libshared)
 add_subdirectory(libcore)
 add_subdirectory(jpscore)
-add_subdirectory(jpsreport)
 
 ################################################################################
 # Code formating
