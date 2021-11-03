@@ -31,6 +31,7 @@
 
 #include "IO/OutputHandler.h"
 #include "IO/Trajectories.h"
+#include "SimulationTimer.h"
 #include "direction/walking/DirectionStrategy.h"
 #include "events/OldEventManager.h"
 #include "general/Configuration.h"
@@ -46,6 +47,7 @@
 #include "routing/quickest/QuickestPathRouter.h"
 #include "routing/smoke_router/SmokeRouter.h"
 
+#include <chrono>
 #include <cstddef>
 
 class Simulation
@@ -54,6 +56,7 @@ private:
     /// Max file size 16Mb
     static const size_t _maxFileSize{1U << 24U};
     Configuration * _config;
+    SimulationTimer _timer;
     double _deltaT;
     uint64_t _frame{0};
     /// frame rate for the trajectories
@@ -65,7 +68,7 @@ private:
     /// Manage all route choices algorithms
     std::shared_ptr<RoutingEngine> _routingEngine;
     /// writing the trajectories to file
-    std::unique_ptr<Trajectories> _iod;
+    std::unique_ptr<TrajectoryWriter> _iod;
     std::unique_ptr<OldEventManager> _em;
     std::unique_ptr<AgentsSourcesManager> _agentSrcManager{nullptr};
     int _periodic;
@@ -92,13 +95,11 @@ public:
 
     Simulation & operator=(Simulation && other) = delete;
 
+    /// Advances the simulation by one time step.
     void Iterate();
 
     void AddAgent(const Pedestrian & agent);
 
-    /**
-     * Initialize the number of agents in the simulation
-     */
     size_t GetPedsNumber() const;
 
     /**
@@ -179,10 +180,4 @@ public:
 
     int GetMaxSimTime() const;
     void incrementCountTraj();
-
-    /**
-     * Updates the output filename if the current file exceeds _maxFileSize.
-     * Works only for FileFormat::TXT.
-     */
-    void RotateOutputFile();
 };

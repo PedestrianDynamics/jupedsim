@@ -1,15 +1,15 @@
 #include "Trajectories.h"
 
-#include "geometry/SubRoom.h"
-#include "pedestrian/Pedestrian.h"
+#include "IO/OutputHandler.h"
+#include "general/Macros.h"
 
-#include <Logger.h>
-#include <tinyxml.h>
+#include <fmt/format.h>
 
-/**
- * TXT format implementation
- */
-TrajectoriesTXT::TrajectoriesTXT(unsigned int precision) : Trajectories{precision}
+TrajectoryWriter::TrajectoryWriter(
+    unsigned int precision,
+    std::set<OptionalOutput> options,
+    std::unique_ptr<OutputHandler> outputHandler) :
+    _precision(precision), _options(std::move(options)), _outputHandler(std::move(outputHandler))
 {
     // Add header, info and output for speed
     _optionalOutputHeader[OptionalOutput::speed] = "V\t";
@@ -55,7 +55,7 @@ TrajectoriesTXT::TrajectoriesTXT(unsigned int precision) : Trajectories{precisio
     _optionalOutputHeader[OptionalOutput::spotlight] = "SPOT\t";
     _optionalOutputInfo[OptionalOutput::spotlight]   = "#SPOT: ped is highlighted\n";
     _optionalOutput[OptionalOutput::spotlight]       = [](Pedestrian * ped) {
-        return fmt::format(FMT_STRING("{}\t"), (int) ped->GetSpotlight());
+        return fmt::format(FMT_STRING("{}\t"), static_cast<int>(ped->GetSpotlight()));
     };
 
     // Add header, info and output for router
@@ -74,44 +74,34 @@ TrajectoriesTXT::TrajectoriesTXT(unsigned int precision) : Trajectories{precisio
     };
 }
 
-void TrajectoriesTXT::WriteHeader(long nPeds, double fps, Building * building, int, int count)
+void TrajectoryWriter::WriteHeader(size_t nPeds, double fps, const Configuration & cfg, int count)
 {
-    const fs::path & projRoot(building->GetProjectRootDir());
-    const fs::path tmpGeo = projRoot / building->GetGeometryFilename();
-
     std::string header = fmt::format("#description: jpscore ({:s})\n", JPSCORE_VERSION);
     header.append(fmt::format("#agents: {:d}\n", nPeds));
     header.append(fmt::format("#count: {:d}\n", count));
     header.append(fmt::format("#framerate: {:0.2f}\n", fps));
-    header.append(fmt::format(
-        "#geometry: {:s}\n", building->GetConfig()->GetGeometryFile().filename().string()));
+    header.append(fmt::format("#geometry: {:s}\n", cfg.GetGeometryFile().filename().string()));
 
     // if used: add two necessary files time table and train types
-    if(!building->GetConfig()->GetTrainTimeTableFile().empty() &&
-       !building->GetConfig()->GetTrainTypeFile().empty()) {
+    if(!cfg.GetTrainTimeTableFile().empty() && !cfg.GetTrainTypeFile().empty()) {
         header.append(fmt::format(
-            "#trainTimeTable: {:s}\n",
-            building->GetConfig()->GetTrainTimeTableFile().filename().string()));
-
-        header.append(fmt::format(
-            "#trainType: {:s}\n", building->GetConfig()->GetTrainTypeFile().filename().string()));
+            "#trainTimeTable: {:s}\n", cfg.GetTrainTimeTableFile().filename().string()));
+        header.append(
+            fmt::format("#trainType: {:s}\n", cfg.GetTrainTypeFile().filename().string()));
     }
     // if used: add source file name
-    if(!building->GetConfig()->GetSourceFile().empty()) {
-        header.append(fmt::format(
-            "#sources: {:s}\n", building->GetConfig()->GetSourceFile().filename().string()));
+    if(!cfg.GetSourceFile().empty()) {
+        header.append(fmt::format("#sources: {:s}\n", cfg.GetSourceFile().filename().string()));
     }
 
     // if used: add goal file name
-    if(!building->GetConfig()->GetGoalFile().empty()) {
-        header.append(fmt::format(
-            "#goals: {:s}\n", building->GetConfig()->GetGoalFile().filename().string()));
+    if(!cfg.GetGoalFile().empty()) {
+        header.append(fmt::format("#goals: {:s}\n", cfg.GetGoalFile().filename().string()));
     }
 
     // if used: add event file name
-    if(!building->GetConfig()->GetEventFile().empty()) {
-        header.append(fmt::format(
-            "#events: {:s}\n", building->GetConfig()->GetEventFile().filename().string()));
+    if(!cfg.GetEventFile().empty()) {
+        header.append(fmt::format("#events: {:s}\n", cfg.GetEventFile().filename().string()));
     }
 
     header.append("#ID: the agent ID\n");
@@ -122,51 +112,49 @@ void TrajectoriesTXT::WriteHeader(long nPeds, double fps, Building * building, i
     header.append("#COLOR: color of the ellipse\n");
 
     // Add info for optional output options
-    for(const auto & option : _optionalOutputOptions) {
+    for(const auto & option : _options) {
         header.append(_optionalOutputInfo[option]);
     }
 
     header.append("\n#ID\tFR\tX\tY\tZ\tA\tB\tANGLE\tCOLOR\t");
     // Add header for optional output options
-    for(const auto & option : _optionalOutputOptions) {
+    for(const auto & option : _options) {
         header.append(_optionalOutputHeader[option]);
     }
-    Write(header);
+    _outputHandler->Write(header);
 }
 
-void TrajectoriesTXT::WriteGeometry(Building *) {}
-
-void TrajectoriesTXT::WriteFrame(int frameNr, Building * building)
+void TrajectoryWriter::WriteFrame(
+    int frameNr,
+    const std::vector<std::unique_ptr<Pedestrian>> & pedestrian)
 {
-    const auto & allPeds = building->GetAllPedestrians();
-    for(const auto & ped : allPeds) {
-        double x       = ped->GetPos()._x;
-        double y       = ped->GetPos()._y;
-        double z       = ped->GetElevation();
-        int color      = ped->GetColor();
-        double a       = ped->GetLargerAxis();
-        double b       = ped->GetSmallerAxis();
-        double phi     = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
-        double RAD2DEG = 180.0 / M_PI;
-        unsigned int precision = GetPrecision();
-        std::string frame      = fmt::format(
+    for(const auto & ped : pedestrian) {
+        double x          = ped->GetPos()._x;
+        double y          = ped->GetPos()._y;
+        double z          = ped->GetElevation();
+        int color         = ped->GetColor();
+        double a          = ped->GetLargerAxis();
+        double b          = ped->GetSmallerAxis();
+        double phi        = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
+        double RAD2DEG    = 180.0 / M_PI;
+        std::string frame = fmt::format(
             "{:d}\t{:d}\t{:0.{}f}\t{:0.{}f}\t{:0.{}f}\t{:0.2f}\t{:0.2f}\t{:0.2f}\t{:d}\t",
             ped->GetID(),
             frameNr,
             x,
-            precision,
+            _precision,
             y,
-            precision,
+            _precision,
             z,
-            precision,
+            _precision,
             a,
             b,
             phi * RAD2DEG,
             color);
-        for(const auto & option : _optionalOutputOptions) {
+        for(const auto & option : _options) {
             frame.append(_optionalOutput[option](ped.get()));
         }
 
-        Write(frame);
+        _outputHandler->Write(frame);
     }
 }
