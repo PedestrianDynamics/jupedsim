@@ -1,5 +1,5 @@
 #pragma once
-#include "Event.h"
+#include "OldEvent.h"
 #include "geometry/Building.h"
 #include "geometry/Point.h"
 
@@ -46,7 +46,7 @@ struct TrainEventInfo {
  * - add new doors, new walls, old walls to building fields (for restoring)
  * - update subroom
  */
-class TrainArrivalEvent : public Event
+class TrainArrivalEvent : public OldEvent
 {
 private:
     TrainEventInfo _info;
@@ -65,7 +65,7 @@ public:
  * - restore old walls
  * - update subroom
  */
-class TrainDepartureEvent : public Event
+class TrainDepartureEvent : public OldEvent
 {
 private:
     TrainEventInfo _info;

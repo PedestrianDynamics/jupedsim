@@ -7,7 +7,7 @@
 #include <fmt/format.h>
 
 TrainArrivalEvent::TrainArrivalEvent(double time, TrainEventInfo info) :
-    Event(time), _info(std::move(info))
+    OldEvent(time), _info(std::move(info))
 {
 }
 
@@ -54,7 +54,7 @@ std::string TrainArrivalEvent::ToString() const
 }
 
 TrainDepartureEvent::TrainDepartureEvent(double time, TrainEventInfo info) :
-    Event(time), _info(std::move(info))
+    OldEvent(time), _info(std::move(info))
 {
 }
 

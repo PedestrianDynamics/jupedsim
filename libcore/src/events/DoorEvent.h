@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Event.h"
+#include "OldEvent.h"
 
 #include <string>
 //============================================================================
 // DoorCloseEvent
 //============================================================================
-class DoorCloseEvent : public Event
+class DoorCloseEvent : public OldEvent
 {
 private:
     Building * _building;
@@ -21,7 +21,7 @@ public:
 //============================================================================
 // DoorTempCloseEvent
 //============================================================================
-class DoorTempCloseEvent : public Event
+class DoorTempCloseEvent : public OldEvent
 {
 private:
     Building * _building;
@@ -36,7 +36,7 @@ public:
 //============================================================================
 // DoorOpenEvent
 //============================================================================
-class DoorOpenEvent : public Event
+class DoorOpenEvent : public OldEvent
 {
 private:
     Building * _building;
@@ -51,7 +51,7 @@ public:
 //============================================================================
 // DoorResetEvent
 //============================================================================
-class DoorResetEvent : public Event
+class DoorResetEvent : public OldEvent
 {
 private:
     Building * _building;

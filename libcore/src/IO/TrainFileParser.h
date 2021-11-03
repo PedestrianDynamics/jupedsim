@@ -1,7 +1,7 @@
 #pragma once
 
-#include "events/Event.h"
-#include "events/EventManager.h"
+#include "events/OldEvent.h"
+#include "events/OldEventManager.h"
 #include "events/TrainEvent.h"
 #include "geometry/Building.h"
 
@@ -20,7 +20,7 @@ namespace TrainFileParser
  * @param trainTimeTableFile File containing information of arriving and departing trains
  */
 void ParseTrainTimeTable(
-    EventManager & eventManager,
+    OldEventManager & eventManager,
     Building & building,
     const std::map<std::string, TrainType> & trainTypes,
     const fs::path & trainTimeTableFile);
