@@ -33,8 +33,6 @@
 #include "pedestrian/Pedestrian.h"
 
 #include <Logger.h>
-#include <boost/lambda/bind.hpp>
-#include <boost/range/combine.hpp>
 #include <cmath>
 
 PedDistributor::PedDistributor(const Configuration * configuration) : _configuration(configuration)
@@ -84,55 +82,14 @@ bool PedDistributor::Distribute(Building * building) const
 
         auto & allFreePosRoom = allFreePos[roomID];
         // the positions were already computed
-        if(allFreePosRoom.count(subroomID) > 0)
+        if(allFreePosRoom.count(subroomID) > 0) {
             continue;
-        // check if we should read positions from some file
-        bool fromDirectory = false;
-        if(dist->GetPositionsDir().length()) {
-            std::string directory = dist->GetPositionsDir();
-            std::string unit      = dist->GetUnitTraj();
-            fs::path the_path(directory);
-            if(fs::exists(directory) && fs::is_directory(directory)) {
-                fs::directory_iterator it(the_path);
-                for(fs::path const & p : it) {
-                    if(fs::is_regular_file(p)) {
-                        std::string basename  = p.stem().string(); //
-                        std::string extention = p.extension().string();
-                        auto tmpPositions =
-                            GetPositionsFromFile(p.string(), dist->GetAgentsNumber(), unit);
-                        //check if positions are
-                        //empty. May happen if file
-                        //is misformed.
-                        if(tmpPositions.empty()) {
-                            LOG_ERROR("problems with file {}{}", basename, extention);
-                            return false; //maybe just ignore?
-                        } else
-                            allFreePosRoom[subroomID] = tmpPositions;
-                        fromDirectory = true;
-                        LOG_INFO(
-                            "Distributing {:d} pedestrians using file {}{}",
-                            dist->GetAgentsNumber(),
-                            basename,
-                            extention);
-                        break; //leave BOOST_FOREEACH
-                    }          //regular file
-                }              // for files
-                if(fromDirectory == false) {
-                    LOG_ERROR("Distributing pedestrians using file is not successful.");
-                    return false;
-                }
-            } // check if directory
-        }     //if we have a directoy
-
-        //------------------------------------- pack in function ------------
-        else {
-            auto possibleSubroomPositions = PossiblePositions(*sr);
-            shuffle(
-                possibleSubroomPositions.begin(),
-                possibleSubroomPositions.end(),
-                dist->GetGenerator());
-            allFreePosRoom[subroomID] = possibleSubroomPositions;
         }
+
+        auto possibleSubroomPositions = PossiblePositions(*sr);
+        shuffle(
+            possibleSubroomPositions.begin(), possibleSubroomPositions.end(), dist->GetGenerator());
+        allFreePosRoom[subroomID] = possibleSubroomPositions;
     } // for sub_dis
 
     //collect the available positions for that room
@@ -410,74 +367,6 @@ std::vector<Point> PedDistributor::PositionsOnFixY(
         }
         x += dx;
     }
-    return positions;
-}
-
-const std::vector<Point>
-PedDistributor::GetPositionsFromFile(std::string filename, int n, std::string unit) const
-{
-    float m2cm = 1.0;
-    if(unit == "cm")
-        m2cm = 100.0;
-
-    std::ifstream infile(filename);
-    // read all data from file in xpos, ypos, ids and frames
-    // @todo: need to read z too
-    std::vector<double> xpos;
-    std::vector<double> ypos;
-    std::vector<double> zpos;
-    std::vector<double> vx;
-    std::vector<double> vy;
-    std::vector<int> ids;
-    std::vector<int> frames;
-    // here we push_back only the first (x,y) of every id.
-    std::vector<Point> positions;
-    std::vector<int> first_ids;
-    if(infile.good()) {
-        std::string sLine;
-        std::vector<std::string> strs;
-        float x, y;
-        int id, fr;
-        while(getline(infile, sLine)) {
-            if(sLine[0] != '#' && !(sLine.empty())) {
-                boost::split(strs, sLine, boost::is_any_of("\t "));
-                id = atoi(strs[0].c_str());
-                fr = atoi(strs[1].c_str());
-                x  = atof(strs[2].c_str()) / m2cm;
-                y  = atof(strs[3].c_str()) / m2cm;
-                // @todo: check for z component. Some data don't have. Some do.
-                xpos.push_back(x);
-                ypos.push_back(y);
-                ids.push_back(id);
-                frames.push_back(fr);
-            }
-        }
-    }
-    infile.close();
-    // now extract the first coordinates
-    for(auto [id, fr, x, y] : boost::combine(ids, frames, xpos, ypos)) {
-        auto it = std::find(first_ids.begin(), first_ids.end(), id);
-
-        if(it == first_ids.end()) { // <id> is not yet in first_ids
-            Point pos(x, y);
-            positions.push_back(pos);
-            first_ids.push_back(id);
-        } else
-            continue;
-    }
-    if(first_ids.size() != (unsigned) n) {
-        LOG_ERROR(
-            "GetPositionsFromFile: number of peds {:d} does not match number of peds from file "
-            "{:d}",
-            n,
-            first_ids.size());
-
-        positions.clear();
-    } else
-        LOG_INFO(
-            "GetPositionsFromFile: number of peds {:d} in file. To simulate {:d}",
-            first_ids.size(),
-            n);
     return positions;
 }
 
