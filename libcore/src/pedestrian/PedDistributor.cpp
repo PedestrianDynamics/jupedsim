@@ -33,12 +33,9 @@
 #include "pedestrian/Pedestrian.h"
 
 #include <Logger.h>
-#include <boost/foreach.hpp>
 #include <boost/lambda/bind.hpp>
 #include <boost/range/combine.hpp>
 #include <cmath>
-
-using namespace boost::lambda;
 
 PedDistributor::PedDistributor(const Configuration * configuration) : _configuration(configuration)
 {
@@ -96,8 +93,8 @@ bool PedDistributor::Distribute(Building * building) const
             std::string unit      = dist->GetUnitTraj();
             fs::path the_path(directory);
             if(fs::exists(directory) && fs::is_directory(directory)) {
-                fs::directory_iterator it(the_path), eod;
-                BOOST_FOREACH(fs::path const & p, std::make_pair(it, eod)) {
+                fs::directory_iterator it(the_path);
+                for(fs::path const & p : it) {
                     if(fs::is_regular_file(p)) {
                         std::string basename  = p.stem().string(); //
                         std::string extention = p.extension().string();
@@ -458,11 +455,7 @@ PedDistributor::GetPositionsFromFile(std::string filename, int n, std::string un
     }
     infile.close();
     // now extract the first coordinates
-    for(auto tup : boost::combine(ids, frames, xpos, ypos)) {
-        float x, y;
-        int id, fr;
-        boost::tie(id, fr, x, y) = tup;
-
+    for(auto [id, fr, x, y] : boost::combine(ids, frames, xpos, ypos)) {
         auto it = std::find(first_ids.begin(), first_ids.end(), id);
 
         if(it == first_ids.end()) { // <id> is not yet in first_ids

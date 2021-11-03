@@ -260,21 +260,21 @@ if (BUILD_CPPUNIT_TEST)
     find_package(Catch2 REQUIRED)
 
     add_executable(unittests
-            test/catch2/geometry/GeometryHelperTest.cpp
-            test/catch2/geometry/LineTest.cpp
-            test/catch2/geometry/ObstacleTest.cpp
-            test/catch2/geometry/PointTest.cpp
-            test/catch2/geometry/RoomTest.cpp
-            test/catch2/geometry/SubRoomTest.cpp
-            test/catch2/neighborhood/NeighborhoodSearch.cpp
-            test/catch2/neighborhood/Grid2D.cpp
-            test/catch2/simulation/SimulationHelperTest.cpp
-            test/catch2/Main.cpp
-            test/catch2/math/MathematicsTest.cpp
-            test/catch2/pedestrian/EllipseTest.cpp
-            test/catch2/pedestrian/PedestrianTest.cpp
-            test/catch2/routing/UnivFFviaFMTest.cpp
-            )
+        test/catch2/geometry/GeometryHelperTest.cpp
+        test/catch2/geometry/LineTest.cpp
+        test/catch2/geometry/ObstacleTest.cpp
+        test/catch2/geometry/PointTest.cpp
+        test/catch2/geometry/RoomTest.cpp
+        test/catch2/geometry/SubRoomTest.cpp
+        test/catch2/neighborhood/NeighborhoodSearch.cpp
+        test/catch2/neighborhood/Grid2D.cpp
+        test/catch2/simulation/SimulationHelperTest.cpp
+        test/catch2/Main.cpp
+        test/catch2/math/MathematicsTest.cpp
+        test/catch2/pedestrian/EllipseTest.cpp
+        test/catch2/pedestrian/PedestrianTest.cpp
+        test/catch2/routing/UnivFFviaFMTest.cpp
+    )
 
     target_link_libraries(unittests PRIVATE
         Catch2::Catch2

@@ -25,7 +25,23 @@
             "version>=": "2.1.2"
         },
         {
-            "name": "boost",
+            "name": "boost-graph",
+            "version>=": "1.77.0"
+        },
+        {
+            "name": "boost-math",
+            "version>=": "1.77.0"
+        },
+        {
+            "name": "boost-algorithm",
+            "version>=": "1.77.0"
+        },
+        {
+            "name": "boost-polygon",
+            "version>=": "1.77.0"
+        },
+        {
+            "name": "boost-geometry",
             "version>=": "1.77.0"
         },
         {
