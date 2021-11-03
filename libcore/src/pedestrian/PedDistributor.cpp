@@ -33,7 +33,6 @@
 #include "pedestrian/Pedestrian.h"
 
 #include <Logger.h>
-#include <boost/foreach.hpp>
 #include <boost/lambda/bind.hpp>
 #include <boost/range/combine.hpp>
 #include <cmath>
@@ -456,11 +455,7 @@ PedDistributor::GetPositionsFromFile(std::string filename, int n, std::string un
     }
     infile.close();
     // now extract the first coordinates
-    for(auto tup : boost::combine(ids, frames, xpos, ypos)) {
-        float x, y;
-        int id, fr;
-        boost::tie(id, fr, x, y) = tup;
-
+    for(auto [id, fr, x, y] : boost::combine(ids, frames, xpos, ypos)) {
         auto it = std::find(first_ids.begin(), first_ids.end(), id);
 
         if(it == first_ids.end()) { // <id> is not yet in first_ids
