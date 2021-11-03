@@ -97,9 +97,7 @@ find_package(spdlog 1.9 REQUIRED CONFIG)
 find_package(CLI11 2.1 REQUIRED CONFIG)
 
 # Boost
-find_package(Boost 1.76 REQUIRED 
-    COMPONENTS graph
-)
+find_package(Boost 1.74 REQUIRED)
 
 # std::filesystem needs to be linked on gcc < 9
 add_library(fs INTERFACE)

@@ -198,8 +198,7 @@ target_compile_definitions(core PUBLIC
     JPSCORE_VERSION="${PROJECT_VERSION}"
 )
 target_link_libraries(core
-    Boost::headers
-    Boost::graph
+    Boost::boost
     poly2tri
     tinyxml
     visilibity
