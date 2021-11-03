@@ -27,7 +27,7 @@
 
 namespace
 {
-std::unique_ptr<Event>
+std::unique_ptr<OldEvent>
 MakeDoorEvent(Building * building, int doorID, double time, const std::string & type)
 {
     if(type == "open") {

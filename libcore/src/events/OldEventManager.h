@@ -25,7 +25,7 @@
  **/
 #pragma once
 
-#include "Event.h"
+#include "OldEvent.h"
 
 #include <memory>
 #include <string>
@@ -37,7 +37,7 @@ private:
     /**
      * List of all events processed by the OldEventManager.
      */
-    std::vector<std::unique_ptr<Event>> _events;
+    std::vector<std::unique_ptr<OldEvent>> _events;
 
     /**
      * Indicates if Events need to be sorted when calling ProcessEvent() 
@@ -80,7 +80,7 @@ public:
      * starts.
      * @param event Event which should be handled by the event manager
      */
-    void AddEvent(std::unique_ptr<Event> event);
+    void AddEvent(std::unique_ptr<OldEvent> event);
 
     /**
       * Print the events handled by OldEventManager.

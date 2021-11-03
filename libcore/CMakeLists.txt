@@ -13,7 +13,7 @@ set(source_files
     src/direction/walking/DirectionStrategy.cpp
     src/direction/walking/DirectionStrategy.h
     src/events/DoorEvent.cpp
-    src/events/Event.cpp
+    src/events/OldEvent.cpp
     src/events/OldEventManager.cpp
     src/events/TrainEvent.cpp
     src/general/ArgumentParser.cpp
@@ -97,7 +97,7 @@ set(source_files
 )
 set(header_files
     src/events/DoorEvent.h
-    src/events/Event.h
+    src/events/OldEvent.h
     src/events/OldEventManager.h
     src/events/TrainEvent.h
     src/general/ArgumentParser.h

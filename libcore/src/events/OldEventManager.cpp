@@ -28,7 +28,7 @@
 
 #include <Logger.h>
 
-void OldEventManager::AddEvent(std::unique_ptr<Event> event)
+void OldEventManager::AddEvent(std::unique_ptr<OldEvent> event)
 {
     _events.emplace_back(std::move(event));
     _needs_sorting = true;

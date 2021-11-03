@@ -7,7 +7,7 @@
 #include <iostream>
 #include <string>
 
-class Event
+class OldEvent
 {
 protected:
     /**
@@ -15,7 +15,7 @@ protected:
      * @param time when the event shall take place
      * @param action type of the event
      */
-    explicit Event(double time);
+    explicit OldEvent(double time);
 
     /**
      * Time the event is triggered
@@ -23,7 +23,7 @@ protected:
     double _time;
 
 public:
-    virtual ~Event() = default;
+    virtual ~OldEvent() = default;
 
     /**
      * Processes the given \a _action at \a time on \a _building.
@@ -41,4 +41,4 @@ public:
     [[nodiscard]] virtual std::string ToString() const = 0;
 };
 
-std::ostream & operator<<(std::ostream & out, const Event & event);
+std::ostream & operator<<(std::ostream & out, const OldEvent & event);

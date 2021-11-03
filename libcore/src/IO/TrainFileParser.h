@@ -1,6 +1,6 @@
 #pragma once
 
-#include "events/Event.h"
+#include "events/OldEvent.h"
 #include "events/OldEventManager.h"
 #include "events/TrainEvent.h"
 #include "geometry/Building.h"
