@@ -1,5 +1,5 @@
 /**
- * \file        EventManager.cpp
+ * \file        OldEventManager.cpp
  * \date        Jul 4, 2014
  * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
@@ -24,24 +24,24 @@
  *
  *
  **/
-#include "EventManager.h"
+#include "OldEventManager.h"
 
 #include <Logger.h>
 
-void EventManager::AddEvent(std::unique_ptr<Event> event)
+void OldEventManager::AddEvent(std::unique_ptr<Event> event)
 {
     _events.emplace_back(std::move(event));
     _needs_sorting = true;
 }
 
-void EventManager::ListEvents()
+void OldEventManager::ListEvents()
 {
     for(const auto & event : _events) {
         LOG_INFO("{}", *event);
     }
 }
 
-bool EventManager::ProcessEvents(double now)
+bool OldEventManager::ProcessEvents(double now)
 {
     if(_needs_sorting) {
         std::sort(std::begin(_events), std::end(_events), [](auto & event1, auto & event2) {
