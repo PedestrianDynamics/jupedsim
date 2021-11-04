@@ -236,36 +236,29 @@ void VelocityModel::ComputeNextTimeStep(
     // update
     size_t counter = 0;
     for(auto & ped : allPeds) {
-        SubRoom * subroom = building->GetRoom(ped->GetRoomID())->GetSubRoom(ped->GetSubRoomID());
-        double escalatorSpeed   = subroom->GetEscalatorSpeed();
-        Point escalatorVelocity = result_acc[counter].Normalized() * escalatorSpeed;
-        Point v_neu             = result_acc[counter] + escalatorVelocity;
-        Point pos_neu           = ped->GetPos() + v_neu * deltaT;
+        Point v_neu   = result_acc[counter];
+        Point pos_neu = ped->GetPos() + v_neu * deltaT;
 
         //Jam is based on the current velocity
         if(v_neu.Norm() >= ped->GetV0Norm() * 0.5) {
-            if(v_neu.Norm() >= (ped->GetV0Norm() + escalatorSpeed) * 0.5) {
-                ped->ResetTimeInJam();
-            } else {
-                ped->UpdateTimeInJam();
+            ped->ResetTimeInJam();
+        } else {
+            ped->UpdateTimeInJam();
+        }
+        //only update the position if the velocity is above a threshold
+        if(v_neu.Norm() >= J_EPS_V) {
+            ped->SetPhiPed();
+        }
+        ped->SetPos(pos_neu);
+        if(periodic) {
+            if(ped->GetPos()._x >= xRight) {
+                ped->SetPos(Point(ped->GetPos()._x - (xRight - xLeft), ped->GetPos()._y));
+                //ped->SetID( ped->GetID() + 1);
             }
-            //only update the position if the velocity is above a threshold
-            if(v_neu.Norm() >= J_EPS_V) {
-                ped->SetPhiPed();
-            }
-            ped->SetPos(pos_neu);
-            if(periodic) {
-                if(ped->GetPos()._x >= xRight) {
-                    ped->SetPos(Point(ped->GetPos()._x - (xRight - xLeft), ped->GetPos()._y));
-                    //ped->SetID( ped->GetID() + 1);
-                }
-            }
-            ped->SetV(v_neu);
         }
         ped->SetV(v_neu);
         ++counter;
     }
-
     // remove the pedestrians that have left the building
     for(const auto id : pedestrians_to_delete) {
         building->DeletePedestrian(id);
