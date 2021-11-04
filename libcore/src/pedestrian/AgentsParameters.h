@@ -65,43 +65,33 @@ public:
      * Initialize the desired velocity distribution walking up stairs
      * @param mean, mean value
      * @param stv, standard deviation
+     * @param smoothFactor, smooth factor for transition from v0 to v0Up and vice versa
      */
-    void InitV0UpStairs(double mean, double stv);
+    void InitV0UpStairs(double mean, double stv, double smoothFactor);
 
     /**
      * Initialize the desired velocity distribution walking downstairs
      * @param mean, mean value
      * @param stv, standard deviation
+     * @param smoothFactor, smooth factor for transition from v0 to v0Up and vice versa
      */
-    void InitV0DownStairs(double mean, double stv);
+    void InitV0DownStairs(double mean, double stv, double smoothFactor);
 
     /**
      * Initialize the speed distribution of escalators upstairs
      * @param mean, mean value
      * @param stv, standard deviation
+     * @param smoothFactor, smooth factor for transition from v0 to v0Up or vice versa
      */
-    void InitEscalatorUpStairs(double mean, double stv);
+    void InitEscalatorUpStairs(double mean, double stv, double smoothFactor);
 
     /**
      * Initialize the speed distribution of escalators downstairs
      * @param mean, mean value
      * @param stv, standard deviation
+     * @param smoothFactor, smooth factor for transition from v0 to v0Up or vice versa
      */
-    void InitEscalatorDownStairs(double mean, double stv);
-
-    /**
-     * Initialize the desired speed distribution walking idle escalators upstairs
-     * @param mean, mean value
-     * @param stv, standard deviation
-     */
-    void InitV0IdleEscalatorUpStairs(double mean, double stv);
-
-    /**
-     * Initialize the desired speed distribution walking idle escalators downstairs
-     * @param mean, mean value
-     * @param stv, standard deviation
-     */
-    void InitV0IdleEscalatorDownStairs(double mean, double stv);
+    void InitEscalatorDownStairs(double mean, double stv, double smoothFactor);
 
     /**
      * Initialize the maximal value if the major axis
@@ -176,16 +166,6 @@ public:
     /**
      * @return a random number following the distribution
      */
-    double GetV0IdleEscalatorUpStairs();
-
-    /**
-     * @return a random number following the distribution
-     */
-    double GetV0IdleEscalatorDownStairs();
-
-    /**
-     * @return a random number following the distribution
-     */
     double GetBmax();
 
     /**
@@ -245,6 +225,18 @@ private:
     std::normal_distribution<double> _Amin;
     std::normal_distribution<double> _Tau;
     std::normal_distribution<double> _T;
-
     const double judge = 10000;
+
+public:
+    /**
+     * this is the constant c in f and g in 
+     * \include ../../../docs/pages/jpscore/jpscore_desired_speed.md
+     * function for up- and downstairs is assumed to be symmetrical.     
+     */
+    double _smoothFactorUpStairs;
+    double _smoothFactorDownStairs;
+    double _smoothFactorEscalatorUpStairs;
+    double _smoothFactorEscalatorDownStairs;
+    double _smoothFactorIdleEscalatorUpStairs;
+    double _smoothFactorIdleEscalatorDownStairs;
 };

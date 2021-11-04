@@ -52,52 +52,40 @@ void AgentsParameters::InitV0(double mean, double stdv)
     _V0 = std::normal_distribution<double>(mean, stdv);
 }
 
-void AgentsParameters::InitV0UpStairs(double mean, double stdv)
+void AgentsParameters::InitV0UpStairs(double mean, double stdv, double smoothFactor)
 {
     if(stdv == 0) {
         stdv = judge;
     }
-    _V0UpStairs = std::normal_distribution<double>(mean, stdv);
+    _V0UpStairs           = std::normal_distribution<double>(mean, stdv);
+    _smoothFactorUpStairs = smoothFactor;
 }
 
-void AgentsParameters::InitV0DownStairs(double mean, double stdv)
+void AgentsParameters::InitV0DownStairs(double mean, double stdv, double smoothFactor)
 {
     if(stdv == 0) {
         stdv = judge;
     }
-    _V0DownStairs = std::normal_distribution<double>(mean, stdv);
+    _V0DownStairs           = std::normal_distribution<double>(mean, stdv);
+    _smoothFactorDownStairs = smoothFactor;
 }
 
-void AgentsParameters::InitEscalatorUpStairs(double mean, double stdv)
+void AgentsParameters::InitEscalatorUpStairs(double mean, double stdv, double smoothFactor)
 {
     if(stdv == 0) {
         stdv = judge;
     }
-    _EscalatorUpStairs = std::normal_distribution<double>(mean, stdv);
+    _EscalatorUpStairs             = std::normal_distribution<double>(mean, stdv);
+    _smoothFactorEscalatorUpStairs = smoothFactor;
 }
 
-void AgentsParameters::InitEscalatorDownStairs(double mean, double stdv)
+void AgentsParameters::InitEscalatorDownStairs(double mean, double stdv, double smoothFactor)
 {
     if(stdv == 0) {
         stdv = judge;
     }
-    _EscalatorDownStairs = std::normal_distribution<double>(mean, stdv);
-}
-
-void AgentsParameters::InitV0IdleEscalatorUpStairs(double mean, double stdv)
-{
-    if(stdv == 0) {
-        stdv = judge;
-    }
-    _V0IdleEscalatorUpStairs = std::normal_distribution<double>(mean, stdv);
-}
-
-void AgentsParameters::InitV0IdleEscalatorDownStairs(double mean, double stdv)
-{
-    if(stdv == 0) {
-        stdv = judge;
-    }
-    _V0IdleEscalatorDownStairs = std::normal_distribution<double>(mean, stdv);
+    _EscalatorDownStairs             = std::normal_distribution<double>(mean, stdv);
+    _smoothFactorEscalatorDownStairs = smoothFactor;
 }
 
 void AgentsParameters::InitBmax(double mean, double stdv)
@@ -199,26 +187,6 @@ double AgentsParameters::GetEscalatorDownStairs()
         return _EscalatorDownStairs(_generator);
     }
 }
-
-
-double AgentsParameters::GetV0IdleEscalatorUpStairs()
-{
-    if(_V0IdleEscalatorUpStairs.stddev() == judge) {
-        return _V0IdleEscalatorUpStairs.mean();
-    } else {
-        return _V0IdleEscalatorUpStairs(_generator);
-    }
-}
-
-double AgentsParameters::GetV0IdleEscalatorDownStairs()
-{
-    if(_V0IdleEscalatorDownStairs.stddev() == judge) {
-        return _V0IdleEscalatorDownStairs.mean();
-    } else {
-        return _V0IdleEscalatorDownStairs(_generator);
-    }
-}
-
 
 double AgentsParameters::GetBmax()
 {

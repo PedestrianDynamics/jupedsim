@@ -94,7 +94,7 @@ Each `subroom` is bounded by at least one `crossing`.
 Here a sample:
 
 ```xml
- <subroom id="1" class="stair" A_x="−1.2" B_y="0" C="0">
+ <subroom id="1" class="escalator" speed="0.7" A_x="−1.2" B_y="0" C="0">
      <polygon caption="wall">
          <vertex px="0.0" py="1.0"/>
          <vertex px="−5.0" py="1.0"/>
@@ -111,10 +111,10 @@ Here a sample:
 - `id` mandatory parameter, also referred by crossings and transitions.
 - `class` optional parameter defining the type of the subroom. At the moment three classes are defined:
   - `floor`
-  - `stairs` take additionally
+  - `stair` take additionally
     `<up px="-5.0" py="2" />` and   `<down px="0.0" py="2"/>`, which are
     used for visualisation purposes.
-  - `escalator_up` and `escalator_down` require `<up px="-5.0" py="2" />` and `<down px="0.0" py="2"/>` to initialise their directions. Used by the router.
+  - `escalator_up` and `escalator_down` require `<up px="-5.0" py="2" />` and `<down px="0.0" py="2"/>` to initialise their directions. Used by the router. Additionally, escalators have a *speed*.
   - `platform` needs additionally walls of type `track-n`, see also [here](jpscore_trains.html).
 - $$A\_x,\; B\_y,\text{and}\; C$$ are optional parameter for the explicit plane equation of the subroom,
    for the construction of a 3D environment and should be used to describe stairs.

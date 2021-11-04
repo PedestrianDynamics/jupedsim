@@ -259,7 +259,6 @@ void VelocityModel::ComputeNextTimeStep(
         ped->SetV(v_neu);
         ++counter;
     }
-
     // remove the pedestrians that have left the building
     for(const auto id : pedestrians_to_delete) {
         building->DeletePedestrian(id);
@@ -345,7 +344,8 @@ VelocityModel::GetSpacing(Pedestrian * ped1, Pedestrian * ped2, Point ei, int pe
         ep12 = distp12.Normalized();
     } else {
         LOG_WARNING(
-            "VelocityModel::GetSPacing() ep12 can not be calculated! Pedestrians are to close to "
+            "VelocityModel::GetSPacing() ep12 can not be calculated! Pedestrians are to close "
+            "to "
             "each other ({:f})",
             Distance);
         my_pair(FLT_MAX, ped2->GetID());
@@ -386,7 +386,8 @@ Point VelocityModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2, int perio
         ep12 = distp12.Normalized();
     } else {
         LOG_ERROR(
-            "VelocityModel::forcePedPed() ep12 can not be calculated! Pedestrians are too near to "
+            "VelocityModel::forcePedPed() ep12 can not be calculated! Pedestrians are too near "
+            "to "
             "each other (dist={:f}). Adjust <a> value in force_ped to counter this. Affected "
             "pedestrians ped1 {:d} at ({:f},{:f}) and ped2 {:d} at ({:f}, {:f})",
             Distance,

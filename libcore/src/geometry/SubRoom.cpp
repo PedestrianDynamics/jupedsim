@@ -826,6 +826,11 @@ NormalSubRoom::NormalSubRoom(const NormalSubRoom & orig) : SubRoom(orig) {}
 
 NormalSubRoom::~NormalSubRoom() {}
 
+double NormalSubRoom::GetEscalatorSpeed() const
+{
+    return 0.0;
+}
+
 std::string NormalSubRoom::WriteSubRoom() const
 {
     std::string s;
@@ -1122,6 +1127,12 @@ void Stair::SetDown(const Point & p)
     pDown = p;
 }
 
+double Stair::GetEscalatorSpeed() const
+{
+    return 0.0;
+}
+
+
 // Getter-Funktionen
 
 const Point & Stair::GetUp() const
@@ -1326,12 +1337,12 @@ bool Stair::ConvertLineToPoly(const std::vector<Line *> & goals)
 }
 
 
-void SubRoom::SetType(const std::string & type)
+void SubRoom::SetType(SubroomType type)
 {
     _type = type;
 }
 
-const std::string & SubRoom::GetType() const
+SubroomType SubRoom::GetType() const
 {
     return _type;
 }
@@ -1426,7 +1437,10 @@ void Escalator::SetEscalatorDown()
 {
     isEscalator_Up = false;
 }
-
+void Escalator::SetEscalatorSpeed(double speed)
+{
+    _speed = speed;
+}
 // Getter-Funktionen
 bool Escalator::IsEscalatorUp() const
 {
@@ -1435,4 +1449,9 @@ bool Escalator::IsEscalatorUp() const
 bool Escalator::IsEscalatorDown() const
 {
     return !isEscalator_Up;
+}
+
+double Escalator::GetEscalatorSpeed() const
+{
+    return _speed;
 }

@@ -17,7 +17,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 					<vertex px="0.0" py="3.0" />
 				</polygon>
 			</subroom>
-			<subroom id="1" closed="0" class="stair" A_x="-1.2" B_y="0" C_z="0">
+			<subroom id="1" closed="0" class="escalator_up" speed ="1" A_x="-1.2" B_y="0" C_z="0">
 				<polygon caption="wall">
 					<vertex px="0.0" py="1.0" />
 					<vertex px="-5.0" py="1.0" />

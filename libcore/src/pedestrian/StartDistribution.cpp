@@ -188,9 +188,12 @@ StartDistribution::GenerateAgent(Building * building, int * pid, std::vector<Poi
         _groupParameters->GetV0UpStairs(),
         _groupParameters->GetV0DownStairs(),
         _groupParameters->GetEscalatorUpStairs(),
-        _groupParameters->GetEscalatorDownStairs(),
-        _groupParameters->GetV0IdleEscalatorUpStairs(),
-        _groupParameters->GetV0IdleEscalatorDownStairs());
+        _groupParameters->GetEscalatorDownStairs());
+    ped->SetSmoothFactorEscalatorUpStairs(_groupParameters->_smoothFactorEscalatorUpStairs);
+    ped->SetSmoothFactorEscalatorDownStairs(_groupParameters->_smoothFactorEscalatorDownStairs);
+    ped->SetSmoothFactorUpStairs(_groupParameters->_smoothFactorUpStairs);
+    ped->SetSmoothFactorDownStairs(_groupParameters->_smoothFactorDownStairs);
+
     // first default Position
     int index = -1;
 
@@ -281,7 +284,7 @@ void StartDistribution::SetPatience(double patience)
     _patience = patience;
 }
 
-AgentsParameters * StartDistribution::GetGroupParameters()
+AgentsParameters * StartDistribution::GetGroupParameters() const
 {
     return _groupParameters;
 }

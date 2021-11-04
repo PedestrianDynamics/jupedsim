@@ -616,64 +616,47 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
             auto agentParameters = std::shared_ptr<AgentsParameters>(
                 new AgentsParameters(para_id, _config->GetSeed()));
             _config->AddAgentsParameters(agentParameters, para_id);
-
+            std::string attrib = "v0"; // avoid repetitions and evtl. typos
             //desired speed
-            if(xAgentPara->FirstChild("v0")) {
-                double mu    = xmltof(xAgentPara->FirstChildElement("v0")->Attribute("mu"));
-                double sigma = xmltof(xAgentPara->FirstChildElement("v0")->Attribute("sigma"));
+            if(xAgentPara->FirstChild(attrib)) {
+                double mu    = xmltof(xAgentPara->FirstChildElement(attrib)->Attribute("mu"));
+                double sigma = xmltof(xAgentPara->FirstChildElement(attrib)->Attribute("sigma"));
                 agentParameters->InitV0(mu, sigma);
-                agentParameters->InitV0DownStairs(mu, sigma);
-                agentParameters->InitV0UpStairs(mu, sigma);
                 LOG_INFO("Desired speed mu={} , sigma={}", mu, sigma);
             }
-
-            if(xAgentPara->FirstChild("v0_upstairs")) {
-                double mu = xmltof(xAgentPara->FirstChildElement("v0_upstairs")->Attribute("mu"));
-                double sigma =
-                    xmltof(xAgentPara->FirstChildElement("v0_upstairs")->Attribute("sigma"));
-                agentParameters->InitV0UpStairs(mu, sigma);
-                LOG_INFO("Desired speed upstairs mu={} , sigma={}", mu, sigma);
+            attrib = "v0_upstairs";
+            if(xAgentPara->FirstChild(attrib)) {
+                double mu    = xmltof(xAgentPara->FirstChildElement(attrib)->Attribute("mu"));
+                double sigma = xmltof(xAgentPara->FirstChildElement(attrib)->Attribute("sigma"));
+                double c     = xmltof(xAgentPara->FirstChildElement(attrib)->Attribute("c"), 15);
+                agentParameters->InitV0UpStairs(mu, sigma, c);
+                LOG_INFO("Desired speed upstairs mu={} , sigma={}, c={}", mu, sigma, c);
             }
-
-            if(xAgentPara->FirstChild("v0_downstairs")) {
-                double mu = xmltof(xAgentPara->FirstChildElement("v0_downstairs")->Attribute("mu"));
-                double sigma =
-                    xmltof(xAgentPara->FirstChildElement("v0_downstairs")->Attribute("sigma"));
-                agentParameters->InitV0DownStairs(mu, sigma);
-                LOG_INFO("Desired speed downstairs mu={} , sigma={}", mu, sigma);
+            attrib = "v0_downstairs";
+            if(xAgentPara->FirstChild(attrib)) {
+                double mu    = xmltof(xAgentPara->FirstChildElement(attrib)->Attribute("mu"));
+                double sigma = xmltof(xAgentPara->FirstChildElement(attrib)->Attribute("sigma"));
+                double c     = xmltof(xAgentPara->FirstChildElement(attrib)->Attribute("c"), 15);
+                agentParameters->InitV0DownStairs(mu, sigma, c);
+                LOG_INFO("Desired speed downstairs mu={} , sigma={}, c={}", mu, sigma, c);
             } //------------------------------------------------------------------------
-            if(xAgentPara->FirstChild("escalator_upstairs")) {
-                double mu =
-                    xmltof(xAgentPara->FirstChildElement("escalator_upstairs")->Attribute("mu"));
-                double sigma =
-                    xmltof(xAgentPara->FirstChildElement("escalator_upstairs")->Attribute("sigma"));
-                agentParameters->InitEscalatorUpStairs(mu, sigma);
-                LOG_INFO("speed of escalator upstairs mu={} , sigma={}", mu, sigma);
+            attrib = "escalator_upstairs";
+            if(xAgentPara->FirstChild(attrib)) {
+                double mu    = xmltof(xAgentPara->FirstChildElement(attrib)->Attribute("mu"));
+                double sigma = xmltof(xAgentPara->FirstChildElement(attrib)->Attribute("sigma"));
+                double c     = xmltof(xAgentPara->FirstChildElement(attrib)->Attribute("c"), 15);
+                agentParameters->InitEscalatorUpStairs(mu, sigma, c);
+                LOG_INFO("speed of escalator upstairs mu={} , sigma={}, c={}", mu, sigma, c);
             }
-            if(xAgentPara->FirstChild("escalator_downstairs")) {
-                double mu =
-                    xmltof(xAgentPara->FirstChildElement("escalator_downstairs")->Attribute("mu"));
-                double sigma = xmltof(
-                    xAgentPara->FirstChildElement("escalator_downstairs")->Attribute("sigma"));
-                agentParameters->InitEscalatorDownStairs(mu, sigma);
-                LOG_INFO("speed of escalator downstairs mu={} , sigma={}", mu, sigma);
+            attrib = "escalator_downstairs";
+            if(xAgentPara->FirstChild(attrib)) {
+                double mu    = xmltof(xAgentPara->FirstChildElement(attrib)->Attribute("mu"));
+                double sigma = xmltof(xAgentPara->FirstChildElement(attrib)->Attribute("sigma"));
+                double c     = xmltof(xAgentPara->FirstChildElement(attrib)->Attribute("c"), 15);
+                agentParameters->InitEscalatorDownStairs(mu, sigma, c);
+                LOG_INFO("speed of escalator downstairs mu={} , sigma={}, c={}", mu, sigma, c);
             }
-            if(xAgentPara->FirstChild("v0_idle_escalator_upstairs")) {
-                double mu = xmltof(
-                    xAgentPara->FirstChildElement("v0_idle_escalator_upstairs")->Attribute("mu"));
-                double sigma = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_upstairs")
-                                          ->Attribute("sigma"));
-                agentParameters->InitV0IdleEscalatorUpStairs(mu, sigma);
-                LOG_INFO("Desired speed idle escalator upstairs mu={} , sigma={}", mu, sigma);
-            }
-            if(xAgentPara->FirstChild("v0_idle_escalator_downstairs")) {
-                double mu = xmltof(
-                    xAgentPara->FirstChildElement("v0_idle_escalator_downstairs")->Attribute("mu"));
-                double sigma = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_downstairs")
-                                          ->Attribute("sigma"));
-                agentParameters->InitV0IdleEscalatorDownStairs(mu, sigma);
-                LOG_INFO("Desired speed idle escalator downstairs mu={} , sigma={}", mu, sigma);
-            }
+
             //bmax
             if(xAgentPara->FirstChild("bmax")) {
                 double mu    = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("mu"));

@@ -51,35 +51,37 @@ std::vector<int> colors                = {
 
 Pedestrian::Pedestrian()
 {
-    _id                        = _agentsCreated; //default id
-    _exitIndex                 = -1;
-    _group                     = -1;
-    _desiredFinalDestination   = FINAL_DEST_OUT;
-    _premovement               = 0;
-    _riskTolerance             = 0;
-    _mass                      = 1;
-    _tau                       = 0.5;
-    _t                         = 1.0;
-    _deltaT                    = 0.01;
-    _ellipse                   = JEllipse();
-    _v0                        = Point(0, 0);
-    _v0UpStairs                = 0.6;
-    _v0DownStairs              = 0.6;
-    _v0EscalatorUpStairs       = 0.8;
-    _v0EscalatorDownStairs     = 0.8;
-    _v0IdleEscalatorUpStairs   = 0.6;
-    _v0IdleEscalatorDownStairs = 0.6;
-    _roomID                    = -1;
-    _subRoomID                 = -1;
-    _subRoomUID                = -1;
-    _oldRoomID                 = std::numeric_limits<int>::min();
-    _oldSubRoomID              = std::numeric_limits<int>::min();
-    _lastE0                    = Point(0, 0);
-    _navLine                   = nullptr;
-    _mentalMap                 = std::map<int, int>();
-    _destHistory               = std::vector<int>();
-    _lastPosition              = Point(J_NAN, J_NAN);
-    _distToBlockade            = 0.0;
+    _id                              = _agentsCreated; //default id
+    _exitIndex                       = -1;
+    _group                           = -1;
+    _desiredFinalDestination         = FINAL_DEST_OUT;
+    _premovement                     = 0;
+    _riskTolerance                   = 0;
+    _mass                            = 1;
+    _tau                             = 0.5;
+    _t                               = 1.0;
+    _deltaT                          = 0.01;
+    _ellipse                         = JEllipse();
+    _v0                              = Point(0, 0);
+    _v0UpStairs                      = 0.6;
+    _v0DownStairs                    = 0.6;
+    _v0EscalatorUpStairs             = 0.8;
+    _v0EscalatorDownStairs           = 0.8;
+    _smoothFactorUpStairs            = 15;
+    _smoothFactorDownStairs          = 15;
+    _smoothFactorEscalatorUpStairs   = 15;
+    _smoothFactorEscalatorDownStairs = 15;
+    _roomID                          = -1;
+    _subRoomID                       = -1;
+    _subRoomUID                      = -1;
+    _oldRoomID                       = std::numeric_limits<int>::min();
+    _oldSubRoomID                    = std::numeric_limits<int>::min();
+    _lastE0                          = Point(0, 0);
+    _navLine                         = nullptr;
+    _mentalMap                       = std::map<int, int>();
+    _destHistory                     = std::vector<int>();
+    _lastPosition                    = Point(J_NAN, J_NAN);
+    _distToBlockade                  = 0.0;
     // new orientation after 10 seconds, value is incremented
     _timeBeforeRerouting = 0.0;
     _timeInJam           = 0.0;
@@ -129,28 +131,32 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _router              = nullptr;
     _building            = nullptr;
     // new orientation after 10 seconds, value is incremented
-    _timeBeforeRerouting       = 0.0;
-    _reroutingEnabled          = false;
-    _timeInJam                 = 0.0;
-    _patienceTime              = 5.0; // time after which the ped feels to be in jam
-    _desiredFinalDestination   = FINAL_DEST_OUT;
-    _mentalMap                 = std::map<int, int>();
-    _destHistory               = std::vector<int>();
-    _deltaT                    = 0.01;
-    _v0                        = Point(0, 0);
-    _lastPosition              = Point(0, 0);
-    _recordingTime             = 20; //seconds
-    _group                     = -1;
-    _spotlight                 = false;
-    _v0UpStairs                = 0.6;
-    _v0DownStairs              = 0.6;
-    _v0EscalatorUpStairs       = 0.8;
-    _v0EscalatorDownStairs     = 0.8;
-    _v0IdleEscalatorUpStairs   = 0.6;
-    _v0IdleEscalatorDownStairs = 0.6;
-    _distToBlockade            = 0.0;
-    _routingStrategy           = ROUTING_GLOBAL_SHORTEST;
-    _lastE0                    = Point(0, 0);
+    _timeBeforeRerouting     = 0.0;
+    _reroutingEnabled        = false;
+    _timeInJam               = 0.0;
+    _patienceTime            = 5.0; // time after which the ped feels to be in jam
+    _desiredFinalDestination = FINAL_DEST_OUT;
+    _mentalMap               = std::map<int, int>();
+    _destHistory             = std::vector<int>();
+    _deltaT                  = 0.01;
+    _v0                      = Point(0, 0);
+    _lastPosition            = Point(0, 0);
+    _recordingTime           = 20; //seconds
+    _group                   = -1;
+    _spotlight               = false;
+    _v0UpStairs              = 0.6;
+    _v0DownStairs            = 0.6;
+    _v0EscalatorUpStairs     = 0.8;
+    _v0EscalatorDownStairs   = 0.8;
+    _smoothFactorUpStairs    = agentsParameters.GetGroupParameters()->_smoothFactorUpStairs;
+    _smoothFactorDownStairs  = agentsParameters.GetGroupParameters()->_smoothFactorDownStairs;
+    _smoothFactorEscalatorUpStairs =
+        agentsParameters.GetGroupParameters()->_smoothFactorEscalatorUpStairs;
+    _smoothFactorEscalatorDownStairs =
+        agentsParameters.GetGroupParameters()->_smoothFactorEscalatorDownStairs;
+    _distToBlockade  = 0.0;
+    _routingStrategy = ROUTING_GLOBAL_SHORTEST;
+    _lastE0          = Point(0, 0);
     _agentsCreated++; //increase the number of object created
     _fedIn            = 0.0;
     _fedHeat          = 0.0;
@@ -165,6 +171,48 @@ Pedestrian::~Pedestrian()
     delete _navLine;
 }
 
+double Pedestrian::SelectV0(SubroomType type, double delta) const
+{
+    switch(type) {
+        case SubroomType::ESCALATOR_UP:
+            return _v0EscalatorUpStairs +
+                   _building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetEscalatorSpeed();
+        case SubroomType::ESCALATOR_DOWN:
+            return _v0EscalatorDownStairs +
+                   _building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetEscalatorSpeed();
+        case SubroomType::STAIR:
+            if(fabs(delta) < 1)
+                return std::max(0., _ellipse.GetV0());
+            else
+                return (delta < 0) ? _v0DownStairs : _v0UpStairs;
+
+        case SubroomType::FLOOR:
+        case SubroomType::CORRIDOR:
+        case SubroomType::ENTRANCE:
+        case SubroomType::LOBBY:
+        case SubroomType::DA:
+        case SubroomType::UNKNOWN:
+            return _ellipse.GetV0();
+    }
+}
+double Pedestrian::SelectSmoothFactor(SubroomType type, double delta) const
+{
+    switch(type) {
+        case SubroomType::ESCALATOR_UP:
+            return _smoothFactorEscalatorUpStairs;
+        case SubroomType::ESCALATOR_DOWN:
+            return _smoothFactorEscalatorDownStairs;
+        case SubroomType::STAIR:
+            return (delta < 0) ? _smoothFactorDownStairs : _smoothFactorUpStairs;
+        case SubroomType::FLOOR:
+        case SubroomType::CORRIDOR:
+        case SubroomType::ENTRANCE:
+        case SubroomType::LOBBY:
+        case SubroomType::DA:
+        case SubroomType::UNKNOWN:
+            return 15.0; /// magic number that works best so far!
+    }
+}
 
 void Pedestrian::SetID(int i)
 {
@@ -247,22 +295,38 @@ void Pedestrian::SetV(const Point & v)
     }
 }
 
+void Pedestrian::SetSmoothFactorUpStairs(double c)
+{
+    _smoothFactorUpStairs = c;
+}
+
+void Pedestrian::SetSmoothFactorDownStairs(double c)
+{
+    _smoothFactorDownStairs = c;
+}
+
+void Pedestrian::SetSmoothFactorEscalatorUpStairs(double c)
+{
+    _smoothFactorEscalatorUpStairs = c;
+}
+
+void Pedestrian::SetSmoothFactorEscalatorDownStairs(double c)
+{
+    _smoothFactorEscalatorDownStairs = c;
+}
+
 void Pedestrian::SetV0Norm(
     double v0,
     double v0UpStairs,
     double v0DownStairs,
     double escalatorUp,
-    double escalatorDown,
-    double v0IdleEscalatorUp,
-    double v0IdleEscalatorDown)
+    double escalatorDown)
 {
     _ellipse.SetV0(v0);
-    _v0DownStairs              = v0DownStairs;
-    _v0UpStairs                = v0UpStairs;
-    _v0EscalatorUpStairs       = escalatorUp;
-    _v0EscalatorDownStairs     = escalatorDown;
-    _v0IdleEscalatorUpStairs   = v0IdleEscalatorUp;
-    _v0IdleEscalatorDownStairs = v0IdleEscalatorDown;
+    _v0DownStairs          = v0DownStairs;
+    _v0UpStairs            = v0UpStairs;
+    _v0EscalatorUpStairs   = escalatorUp;
+    _v0EscalatorDownStairs = escalatorDown;
 }
 
 
@@ -419,78 +483,28 @@ double Pedestrian::GetV0Norm() const
     //detect the walking direction based on the elevation
     SubRoom * sub        = _building->GetRoom(_roomID)->GetSubRoom(_subRoomID);
     double ped_elevation = sub->GetElevation(_ellipse.GetCenter());
-    if(_navLine == nullptr) {
-        LOG_ERROR("ped {:d} has no navline", _id);
+    if(_navLine == nullptr) { // this might happen when agents are spawn by sources.
         return std::max(0., _ellipse.GetV0());
     }
     const Point & target = _navLine->GetCentre();
     double nav_elevation = sub->GetElevation(target);
     double delta         = nav_elevation - ped_elevation;
-    double walking_speed = 0;
-    // we are walking on an even plane
-    //TODO: move _ellipse.GetV0() to _V0Plane
-    if(fabs(delta) < J_EPS) {
-        //FIXME std::normal_distribution generated V0's that are very small or even < 0
-        //assume absolute v_min according to Weidmann
-        walking_speed = std::max(0., _ellipse.GetV0());
+    auto subType         = sub->GetType();
+    double smoothFactor  = SelectSmoothFactor(subType, delta);
+    double v0            = SelectV0(subType, delta);
+    double z1            = sub->GetMaxElevation();
+    double z0            = sub->GetMinElevation();
+    double alpha         = acos(sub->GetCosAngleWithHorizontal());
+    double f =
+        2.0 / (1 + exp(-smoothFactor * alpha * (z1 - ped_elevation) * (z1 - ped_elevation))) - 1;
+    double g =
+        2.0 / (1 + exp(-smoothFactor * alpha * (z0 - ped_elevation) * (z0 - ped_elevation))) - 1;
 
-    }
-    // we are walking downstairs
-    else {
-        double c = 15.0;
-        // c should be chosen so that the func grows fast (but smooth) from 0 to 1
-        // However we have to pay attention to tau. The velocity adaptation
-        // from v to v0 in the driven force takes tau time.
-        if(delta < 0) {
-            double maxSubElevation  = sub->GetMaxElevation();
-            double stairLength      = maxSubElevation - sub->GetMinElevation();
-            double stairInclination = acos(sub->GetCosAngleWithHorizontal());
-            double f = 2.0 / (1 + exp(-c * stairInclination * (maxSubElevation - ped_elevation) *
-                                      (maxSubElevation - ped_elevation))) -
-                       1;
-            double g = 2.0 / (1 + exp(-c * stairInclination *
-                                      (maxSubElevation - ped_elevation - stairLength) *
-                                      (maxSubElevation - ped_elevation - stairLength))) -
-                       1;
-            double speed_down = _v0DownStairs;
-            if(sub->GetType() == "escalator") {
-                speed_down = _v0EscalatorDownStairs;
-            } else if(sub->GetType() == "idle_escalator") {
-                speed_down = _v0IdleEscalatorDownStairs;
-            }
-            walking_speed = (1 - f * g) * _ellipse.GetV0() + f * g * speed_down;
-        }
-        //we are walking upstairs
-        else {
-            double minSubElevation  = sub->GetMinElevation();
-            double stairHeight      = sub->GetMaxElevation() - minSubElevation;
-            double stairInclination = acos(sub->GetCosAngleWithHorizontal());
-            double f = 2.0 / (1 + exp(-c * stairInclination * (minSubElevation - ped_elevation) *
-                                      (minSubElevation - ped_elevation))) -
-                       1;
-            double g = 2.0 / (1 + exp(-c * stairInclination *
-                                      (ped_elevation - minSubElevation - stairHeight) *
-                                      (ped_elevation - minSubElevation - stairHeight))) -
-                       1;
-
-            //FIXME std::normal_distribution generated V0's that are very small or even < 0
-            double speed_up = std::max(0.0, _v0UpStairs);
-
-            if(sub->GetType() == "escalator") {
-                speed_up = _v0EscalatorUpStairs;
-            } else if(sub->GetType() == "idle_escalator") {
-                speed_up = _v0IdleEscalatorUpStairs;
-            }
-            walking_speed = (1 - f * g) * _ellipse.GetV0() + f * g * speed_up;
-        }
-    }
-
+    double walking_speed = (1 - f * g) * _ellipse.GetV0() + f * g * v0;
     //IF execution of WalkingInSmoke depending on JPSfire section in INI file
     if(_walkingSpeed && _walkingSpeed->ReduceWalkingSpeed()) {
         walking_speed = _walkingSpeed->WalkingInSmoke(this, walking_speed);
     }
-    //WHERE should the call to that routine be placed properly?
-    //only executed every 3 seconds
     return walking_speed;
 }
 
@@ -791,7 +805,7 @@ int Pedestrian::GetColor() const
 
         case BY_VELOCITY: {
             int color = -1;
-            double v0 = GetV0Norm();
+            double v0 = _ellipse.GetV0();
             if(v0 != 0.0) {
                 double v = GetV().Norm();
                 color    = static_cast<int>(v / v0 * 255);

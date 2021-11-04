@@ -26,8 +26,10 @@
  **/
 #include "RoomToFloorSensor.h"
 
+#include "general/Macros.h"
 #include "geometry/Building.h"
 #include "geometry/SubRoom.h"
+#include "geometry/SubroomType.h"
 #include "pedestrian/Pedestrian.h"
 #include "routing/smoke_router/NavigationGraph.h"
 #include "routing/smoke_router/cognitiveMap/cognitivemap.h"
@@ -64,25 +66,36 @@ void RoomToFloorSensor::execute(const Pedestrian * pedestrian, CognitiveMap & co
     GraphVertex * vertex =
         cognitive_map.GetGraphNetwork()->GetNavigationGraph()->operator[](sub_room);
     const GraphVertex::EdgesContainer * edges = vertex->GetAllOutEdges();
-    for(GraphVertex::EdgesContainer::iterator it_edges = edges->begin(); it_edges != edges->end();
-        ++it_edges) {
-        if((*it_edges)->GetDest() == nullptr ||
-           (*it_edges)->GetDest()->GetSubRoom()->GetType() ==
-               (*it_edges)->GetSrc()->GetSubRoom()->GetType()) {
-            (*it_edges)->SetFactor(1.0, GetName());
+    for(auto * const edge : *edges) {
+        if(edge->GetDest() == nullptr ||
+           edge->GetDest()->GetSubRoom()->GetType() == edge->GetSrc()->GetSubRoom()->GetType()) {
+            edge->SetFactor(1.0, GetName());
         } else {
-            if((*it_edges)->GetDest()->GetSubRoom()->GetType() == "Corridor")
-                (*it_edges)->SetFactor(.3, GetName());
-            else if((*it_edges)->GetDest()->GetSubRoom()->GetType() == "stair")
-                (*it_edges)->SetFactor(.3, GetName());
-            else if((*it_edges)->GetDest()->GetSubRoom()->GetType() == "floor")
-                (*it_edges)->SetFactor(.3, GetName());
-            else if((*it_edges)->GetDest()->GetSubRoom()->GetType() == "Entrance")
-                (*it_edges)->SetFactor(.1, GetName());
-            else if((*it_edges)->GetDest()->GetSubRoom()->GetType() == "Lobby")
-                (*it_edges)->SetFactor(.2, GetName());
-            else
-                (*it_edges)->SetFactor(5.0, GetName());
+            const auto type = edge->GetDest()->GetSubRoom()->GetType();
+            switch(type) {
+                case SubroomType::CORRIDOR:
+                    [[fallthrough]];
+                case SubroomType::STAIR:
+                    [[fallthrough]];
+                case SubroomType::FLOOR:
+                    edge->SetFactor(.3, GetName());
+                    break;
+                case SubroomType::LOBBY:
+                    edge->SetFactor(.2, GetName());
+                    break;
+                case SubroomType::ENTRANCE:
+                    edge->SetFactor(.1, GetName());
+                    break;
+                case SubroomType::ESCALATOR_DOWN:
+                    [[fallthrough]];
+                case SubroomType::ESCALATOR_UP:
+                    [[fallthrough]];
+                case SubroomType::DA:
+                    [[fallthrough]];
+                case SubroomType::UNKNOWN:
+                    edge->SetFactor(5.0, GetName());
+                    break;
+            }
         }
     }
 

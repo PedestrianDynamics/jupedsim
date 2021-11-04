@@ -26,6 +26,7 @@
  **/
 #pragma once
 
+#include "SubroomType.h"
 #include "general/Macros.h"
 #include "routing/global_shortest/DTriangulation.h"
 
@@ -63,7 +64,7 @@ private:
     double _planeEquation[3];
     double _cosAngleWithHorizontalPlane;
     double _tanAngleWithHorizontalPlane;
-    std::string _type;
+    SubroomType _type;
     double _minElevation;
     double _maxElevation;
 
@@ -101,6 +102,11 @@ public:
       * Destructor
       */
     virtual ~SubRoom();
+    /**
+      * Get Escalator Speed.
+      * returns 0 for anything other than escalators
+      */
+    virtual double GetEscalatorSpeed() const = 0;
 
     /**
       * Set/Get the subroom id
@@ -181,14 +187,15 @@ public:
       * Possible types are: stairs, room and floor.
       * @return the type of the subroom.
       */
-    const std::string & GetType() const;
+    SubroomType GetType() const;
+
 
     /**
       * Set/Get the type of the subroom.
       * Possible types are: stairs, room and floor.
       * @return the type of the subroom.
       */
-    void SetType(const std::string & type);
+    void SetType(SubroomType type);
 
     /**
       * @return the status
@@ -425,6 +432,7 @@ public:
      * @return \p is inside subroom
      */
     bool IsInSubRoom(const Point & p) const;
+    double GetEscalatorSpeed() const;
 };
 
 class Stair : public NormalSubRoom
@@ -457,13 +465,14 @@ public:
     std::string WriteSubRoom() const;
     std::string WritePolyLine() const;
     virtual bool ConvertLineToPoly(const std::vector<Line *> & goals);
+    double GetEscalatorSpeed() const;
 };
 
 class Escalator : public Stair
 {
 private:
     bool isEscalator_Up;
-
+    double _speed; /// if speed is 0 then this is an IdleEscalator
 public:
     Escalator();
 
@@ -473,8 +482,10 @@ public:
     // Setter-Funktionen
     void SetEscalatorUp();
     void SetEscalatorDown();
+    void SetEscalatorSpeed(double speed);
 
     // Getter-Funktionen
     bool IsEscalatorUp() const;
     bool IsEscalatorDown() const;
+    double GetEscalatorSpeed() const;
 };
