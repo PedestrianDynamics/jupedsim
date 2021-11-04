@@ -3,7 +3,7 @@
 #include <Logger.h>
 
 void TrainFileParser::ParseTrainTimeTable(
-    EventManager & eventManager,
+    OldEventManager & eventManager,
     Building & building,
     const std::map<std::string, TrainType> & trainTypes,
     const fs::path & trainTimeTableFile)

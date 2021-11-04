@@ -19,8 +19,8 @@
  **/
 #pragma once
 
-#include "events/Event.h"
-#include "events/EventManager.h"
+#include "events/OldEvent.h"
+#include "events/OldEventManager.h"
 #include "general/Filesystem.h"
 
 #include <map>
@@ -34,7 +34,10 @@ namespace EventFileParser
   * @param building the events will operate on
   * @param eventFile File containing the events
   */
-void ParseDoorEvents(EventManager & eventManager, Building * building, const fs::path & eventFile);
+void ParseDoorEvents(
+    OldEventManager & eventManager,
+    Building * building,
+    const fs::path & eventFile);
 
 
 /**
@@ -43,7 +46,10 @@ void ParseDoorEvents(EventManager & eventManager, Building * building, const fs:
  * @param building the events will operate on
  * @param scheduleFile File containing the schedule
  */
-void ParseSchedule(EventManager & eventManager, Building * building, const fs::path & scheduleFile);
+void ParseSchedule(
+    OldEventManager & eventManager,
+    Building * building,
+    const fs::path & scheduleFile);
 
 /**
  * Reads the max agents defintions from the schedule file and returns them as a map of transition ID to maxAgents.

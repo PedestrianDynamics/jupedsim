@@ -7,7 +7,7 @@
 // DoorCloseEvent
 //============================================================================
 DoorCloseEvent::DoorCloseEvent(Building * building, int doorID, double time) :
-    Event(time), _building(building), _doorID(doorID)
+    OldEvent(time), _building(building), _doorID(doorID)
 {
 }
 
@@ -25,7 +25,7 @@ std::string DoorCloseEvent::ToString() const
 // DoorTempCloseEvent
 //============================================================================
 DoorTempCloseEvent::DoorTempCloseEvent(Building * building, int doorID, double time) :
-    Event(time), _building(building), _doorID(doorID)
+    OldEvent(time), _building(building), _doorID(doorID)
 {
 }
 
@@ -43,7 +43,7 @@ std::string DoorTempCloseEvent::ToString() const
 // DoorOpenEvent
 //============================================================================
 DoorOpenEvent::DoorOpenEvent(Building * building, int doorID, double time) :
-    Event(time), _building(building), _doorID(doorID)
+    OldEvent(time), _building(building), _doorID(doorID)
 {
 }
 
@@ -61,7 +61,7 @@ std::string DoorOpenEvent::ToString() const
 // DoorResetEvent
 //============================================================================
 DoorResetEvent::DoorResetEvent(Building * building, int doorID, double time) :
-    Event(time), _building(building), _doorID(doorID)
+    OldEvent(time), _building(building), _doorID(doorID)
 {
 }
 

@@ -189,7 +189,7 @@ bool Simulation::InitArgs()
         return false;
     }
 
-    _em = std::make_unique<EventManager>();
+    _em = std::make_unique<OldEventManager>();
     if(!_config->GetEventFile().empty()) {
         EventFileParser::ParseDoorEvents(*_em, _building.get(), _config->GetEventFile());
     }

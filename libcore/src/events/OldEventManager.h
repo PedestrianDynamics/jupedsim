@@ -1,5 +1,5 @@
 /**
- * \file        EventManager.h
+ * \file        OldEventManager.h
  * \date        Jul 4, 2014
  * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
@@ -21,23 +21,23 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * \section Description
- * The EventManager is responsible for handling events in the simulations.
+ * The OldEventManager is responsible for handling events in the simulations.
  **/
 #pragma once
 
-#include "Event.h"
+#include "OldEvent.h"
 
 #include <memory>
 #include <string>
 #include <vector>
 
-class EventManager
+class OldEventManager
 {
 private:
     /**
-     * List of all events processed by the EventManager.
+     * List of all events processed by the OldEventManager.
      */
-    std::vector<std::unique_ptr<Event>> _events;
+    std::vector<std::unique_ptr<OldEvent>> _events;
 
     /**
      * Indicates if Events need to be sorted when calling ProcessEvent() 
@@ -48,42 +48,42 @@ public:
     /**
       * Constructor.
       */
-    EventManager() = default;
+    OldEventManager() = default;
 
     /**
       * Destructor.
       */
-    ~EventManager() = default;
+    ~OldEventManager() = default;
 
     /**
      * Not copyable.
      */
-    EventManager(const EventManager &) = delete;
+    OldEventManager(const OldEventManager &) = delete;
 
     /**
      * Not copyable.
      */
-    EventManager & operator=(const EventManager &) & = delete;
+    OldEventManager & operator=(const OldEventManager &) & = delete;
 
     /**
      * Not movable.
      */
-    EventManager(EventManager &&) = delete;
+    OldEventManager(OldEventManager &&) = delete;
 
     /**
      * Not movable.
      */
-    EventManager & operator=(EventManager &&) = delete;
+    OldEventManager & operator=(OldEventManager &&) = delete;
 
     /**
-     * Adds \p event to the EventManager. This should be done before the simulation
+     * Adds \p event to the OldEventManager. This should be done before the simulation
      * starts.
      * @param event Event which should be handled by the event manager
      */
-    void AddEvent(std::unique_ptr<Event> event);
+    void AddEvent(std::unique_ptr<OldEvent> event);
 
     /**
-      * Print the events handled by EventManager.
+      * Print the events handled by OldEventManager.
       */
     void ListEvents();
 

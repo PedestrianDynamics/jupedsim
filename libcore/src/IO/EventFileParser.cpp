@@ -27,7 +27,7 @@
 
 namespace
 {
-std::unique_ptr<Event>
+std::unique_ptr<OldEvent>
 MakeDoorEvent(Building * building, int doorID, double time, const std::string & type)
 {
     if(type == "open") {
@@ -52,7 +52,7 @@ MakeDoorEvent(Building * building, int doorID, double time, const std::string & 
 } // namespace
 
 void EventFileParser::ParseDoorEvents(
-    EventManager & eventManager,
+    OldEventManager & eventManager,
     Building * building,
     const fs::path & eventFile)
 {
@@ -132,7 +132,7 @@ void EventFileParser::ParseDoorEvents(
 }
 
 void EventFileParser::ParseSchedule(
-    EventManager & eventManager,
+    OldEventManager & eventManager,
     Building * building,
     const fs::path & scheduleFile)
 {

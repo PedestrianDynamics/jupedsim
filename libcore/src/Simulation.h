@@ -32,7 +32,7 @@
 #include "IO/OutputHandler.h"
 #include "IO/Trajectories.h"
 #include "direction/walking/DirectionStrategy.h"
-#include "events/EventManager.h"
+#include "events/OldEventManager.h"
 #include "general/Configuration.h"
 #include "geometry/Building.h"
 #include "geometry/GoalManager.h"
@@ -66,7 +66,7 @@ private:
     std::shared_ptr<RoutingEngine> _routingEngine;
     /// writing the trajectories to file
     std::unique_ptr<Trajectories> _iod;
-    std::unique_ptr<EventManager> _em;
+    std::unique_ptr<OldEventManager> _em;
     std::unique_ptr<AgentsSourcesManager> _agentSrcManager{nullptr};
     int _periodic;
     int _maxSimTime;
