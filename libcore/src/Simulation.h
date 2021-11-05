@@ -69,7 +69,7 @@ private:
     std::shared_ptr<RoutingEngine> _routingEngine;
     /// writing the trajectories to file
     std::unique_ptr<TrajectoryWriter> _iod;
-    std::unique_ptr<OldEventManager> _em;
+    std::unique_ptr<OldEventManager> _old_em;
     std::unique_ptr<AgentsSourcesManager> _agentSrcManager{nullptr};
     int _periodic;
     int _maxSimTime;
