@@ -33,6 +33,7 @@
 #include "IO/Trajectories.h"
 #include "SimulationClock.h"
 #include "direction/walking/DirectionStrategy.h"
+#include "events/EventManager.h"
 #include "events/OldEventManager.h"
 #include "general/Configuration.h"
 #include "geometry/Building.h"
@@ -81,6 +82,8 @@ private:
 
     std::vector<Pedestrian *> _pedsToRemove;
     std::vector<std::unique_ptr<Pedestrian>> _agents;
+
+    EventManager _em;
 
 public:
     explicit Simulation(Configuration * args);

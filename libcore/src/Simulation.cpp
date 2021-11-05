@@ -35,6 +35,7 @@
 #include "IO/Trajectories.h"
 #include "SimulationClock.h"
 #include "SimulationHelper.h"
+#include "events/EventManager.h"
 #include "general/Filesystem.h"
 #include "geometry/GoalManager.h"
 #include "geometry/WaitingArea.h"
@@ -399,6 +400,7 @@ double Simulation::RunBody(double maxSimTime)
 
         Pedestrian::SetGlobalTime(t);
         AddNewAgents();
+        auto evnts = _em.NextEvents(_clock);
 
         Iterate();
         // write the trajectories
