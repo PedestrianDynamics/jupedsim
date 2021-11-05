@@ -40,16 +40,18 @@ RoutingEngine::~RoutingEngine()
     _routersCollection.clear();
 }
 
+void RoutingEngine::UpdateTime(double time)
+{
+    for(auto * r : _routersCollection) {
+        r->UpdateTime(time);
+    }
+}
+
 void RoutingEngine::AddFinalDestinationID(int id)
 {
     for(unsigned int r = 0; r < _routersCollection.size(); r++) {
         _routersCollection[r]->AddFinalDestinationID(id);
     }
-}
-
-void RoutingEngine::FindRoute(Pedestrian * ped)
-{
-    ped->FindRoute();
 }
 
 void RoutingEngine::AddRouter(Router * router)

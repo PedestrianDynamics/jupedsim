@@ -36,7 +36,6 @@
 #include <cassert>
 
 // initialize the static variables
-double Pedestrian::_globalTime         = 0.0;
 int Pedestrian::_agentsCreated         = 1;
 double Pedestrian::_minPremovementTime = std::numeric_limits<double>::max();
 AgentColorMode Pedestrian::_colorMode  = BY_VELOCITY;
@@ -171,6 +170,11 @@ Pedestrian::~Pedestrian()
     delete _navLine;
 }
 
+bool Pedestrian::InPremovement(double now)
+{
+    return _premovement >= now;
+}
+
 double Pedestrian::SelectV0(SubroomType type, double delta) const
 {
     switch(type) {
@@ -267,31 +271,27 @@ void Pedestrian::SetExitLine(const NavLine * l)
     }
 }
 
-void Pedestrian::SetPos(const Point & pos, bool initial)
+void Pedestrian::SetPos(const Point & pos)
 {
-    if((_globalTime >= _premovement) || initial) {
-        _lastPosition = _ellipse.GetCenter();
-        _ellipse.SetCenter(pos);
-        //save the last values for the records
-        _lastPositions.push(pos);
-        unsigned int max_size = _recordingTime / _deltaT;
-        if(_lastPositions.size() > max_size) {
-            _lastPositions.pop();
-        }
+    _lastPosition = _ellipse.GetCenter();
+    _ellipse.SetCenter(pos);
+    //save the last values for the records
+    _lastPositions.push(pos);
+    unsigned int max_size = _recordingTime / _deltaT;
+    if(_lastPositions.size() > max_size) {
+        _lastPositions.pop();
     }
 }
 
 void Pedestrian::SetV(const Point & v)
 {
-    if(_globalTime >= _premovement) {
-        _ellipse.SetV(v);
-        //save the last values for the records
-        _lastVelocites.push(v);
+    _ellipse.SetV(v);
+    //save the last values for the records
+    _lastVelocites.push(v);
 
-        unsigned int max_size = _recordingTime / _deltaT;
-        if(_lastVelocites.size() > max_size) {
-            _lastVelocites.pop();
-        }
+    unsigned int max_size = _recordingTime / _deltaT;
+    if(_lastVelocites.size() > max_size) {
+        _lastVelocites.pop();
     }
 }
 
@@ -676,11 +676,6 @@ std::string Pedestrian::GetPath()
     return path;
 }
 
-double Pedestrian::GetGlobalTime()
-{
-    return _globalTime;
-}
-
 void Pedestrian::SetRouter(Router * router)
 {
     _router          = router;
@@ -699,11 +694,6 @@ int Pedestrian::FindRoute()
 double Pedestrian::GetElevation() const
 {
     return _building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetElevation(GetPos());
-}
-
-void Pedestrian::SetGlobalTime(double time)
-{
-    _globalTime = time;
 }
 
 double Pedestrian::GetPatienceTime() const
@@ -847,14 +837,14 @@ int Pedestrian::GetLastGoalID() const
     return _lastGoalID;
 }
 
-bool Pedestrian::IsInsideWaitingAreaWaiting() const
+bool Pedestrian::IsInsideWaitingAreaWaiting(double time) const
 {
     if(_insideGoal) {
         auto itr = _building->GetAllGoals().find(_desiredFinalDestination);
         if(itr != _building->GetAllGoals().end()) {
             Goal * goal = itr->second;
             if(auto wa = dynamic_cast<WaitingArea *>(goal)) {
-                return wa->IsWaiting(Pedestrian::GetGlobalTime(), _building);
+                return wa->IsWaiting(time, _building);
             }
         }
     }

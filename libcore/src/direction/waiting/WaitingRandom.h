@@ -35,5 +35,5 @@ class WaitingRandom : public WaitingStrategy
 {
     void Init(Building *) override { std::srand(std::time(0)); };
 
-    Point GetWaitingPosition(Room * room, Pedestrian * ped) override;
+    Point GetWaitingPosition(Room * room, Pedestrian * ped, double time) override;
 };

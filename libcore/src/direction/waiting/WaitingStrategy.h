@@ -54,7 +54,7 @@ public:
      * @param ped Pedestrians, whose walking direction is determined
      * @return Desired walking direction of ped
      */
-    virtual Point GetTarget(Room * room, Pedestrian * ped);
+    virtual Point GetTarget(Room * room, Pedestrian * ped, double time);
 
     /**
       * Returns the desired waiting position of a pedestrian.
@@ -62,7 +62,7 @@ public:
       * @param ped Pedestrians, whose walking direction is determined
       * @return Desired waiting position of ped
       */
-    virtual Point GetWaitingPosition(Room * room, Pedestrian * ped) = 0;
+    virtual Point GetWaitingPosition(Room * room, Pedestrian * ped, double time) = 0;
 
     /**
      * Returns the desired walking direction of a pedestrian.

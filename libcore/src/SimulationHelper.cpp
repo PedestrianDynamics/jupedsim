@@ -184,7 +184,7 @@ SimulationHelper::FindPassedDoor(const Building & building, const Pedestrian & p
     }
 }
 
-bool SimulationHelper::UpdateFlowRegulation(Building & building)
+bool SimulationHelper::UpdateFlowRegulation(Building & building, double time)
 {
     bool stateChanged = false;
 
@@ -200,7 +200,7 @@ bool SimulationHelper::UpdateFlowRegulation(Building & building)
             // .. and maybe close the <trans>
             // need to be more than <dn> as multiple ped can pass a transition in one time step
             if(trans->GetPartialDoorUsage() >= trans->GetDN()) {
-                trans->RegulateFlow(Pedestrian::GetGlobalTime());
+                trans->RegulateFlow(time);
                 trans->ResetPartialDoorUsage();
             }
         }
@@ -210,7 +210,7 @@ bool SimulationHelper::UpdateFlowRegulation(Building & building)
     return stateChanged;
 }
 
-bool SimulationHelper::UpdateTrainFlowRegulation(Building & building)
+bool SimulationHelper::UpdateTrainFlowRegulation(Building & building, double time)
 {
     bool geometryChanged = false;
     for(auto const & [trainID, trainType] : building.GetTrains()) {
@@ -231,7 +231,7 @@ bool SimulationHelper::UpdateTrainFlowRegulation(Building & building)
                 std::for_each(
                     std::begin(trainDoors),
                     std::end(trainDoors),
-                    [&building, trainUsage, maxAgents](Transition trans) {
+                    [&building, trainUsage, maxAgents, time](Transition trans) {
                         if(!building.GetTransition(trans.GetID())->IsClose()) {
                             building.GetTransition(trans.GetID())->Close();
                             LOG_INFO(
@@ -239,7 +239,7 @@ bool SimulationHelper::UpdateTrainFlowRegulation(Building & building)
                                 "(Train Capacity {})",
                                 trans.GetType(),
                                 trans.GetID(),
-                                Pedestrian::GetGlobalTime(),
+                                time,
                                 trainUsage,
                                 maxAgents);
                         }

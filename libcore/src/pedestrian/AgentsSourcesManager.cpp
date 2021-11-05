@@ -44,9 +44,9 @@ AgentsSourcesManager::AgentsSourcesManager(Building * building) : _building(buil
     GenerateAgents();
 }
 
-std::vector<std::unique_ptr<Pedestrian>> AgentsSourcesManager::ProcessAllSources() const
+std::vector<std::unique_ptr<Pedestrian>>
+AgentsSourcesManager::ProcessAllSources(double current_time) const
 {
-    double current_time = Pedestrian::GetGlobalTime();
     std::vector<Pedestrian *>
         source_peds; // we have to collect peds from all sources, so that we can consider them  while computing new positions
     for(const auto & src : _sources) {

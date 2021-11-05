@@ -55,6 +55,8 @@ SmokeRouter::~SmokeRouter()
 
 int SmokeRouter::FindExit(Pedestrian * p)
 {
+    // TODO(kkratz): This is a hack.
+    sensor_manager->Update(_currentTime);
     //check for former goal.
     if((*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->HadNoDestination()) {
         sensor_manager->execute(p, SensorManager::INIT);
@@ -75,25 +77,8 @@ int SmokeRouter::FindExit(Pedestrian * p)
     // check if ped reached a hline
     if((*brain_storage)[p]->HlineReached()) {
         int status = FindDestination(p);
-
-        //(*cm_storage)[p]->UpdateSubRoom();
-
         return status;
     }
-
-    //std::cout << p->GetGlobalTime() << std::endl;
-    //    if (std::fmod(p->GetGlobalTime(),sensor_manager->GetIntVPeriodicUpdate())==0.0 && p->GetGlobalTime()>0)
-    //    {
-    //        //Log->Write(std::to_string(p->GetGlobalTime()));
-    //        sensor_manager->execute(p, SensorManager::PERIODIC);
-
-    //        int status = FindDestination(p);
-
-    //        //(*cm_storage)[p]->UpdateSubRoom();
-
-    //        return status;
-
-    //    }
     return 1;
 }
 

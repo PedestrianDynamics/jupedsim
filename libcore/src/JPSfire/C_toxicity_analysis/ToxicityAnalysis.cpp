@@ -45,8 +45,6 @@ ToxicityAnalysis::ToxicityAnalysis(const std::string & projectFileName, double f
     LoadJPSfireInfo(projectFileName);
 }
 
-ToxicityAnalysis::~ToxicityAnalysis() {}
-
 bool ToxicityAnalysis::LoadJPSfireInfo(const std::string projectFilename)
 {
     fs::path p(projectFilename);
@@ -99,8 +97,8 @@ double ToxicityAnalysis::GetFDSQuantity(const Pedestrian * pedestrian, std::stri
     //try to get gas components, 0 if gas component is not provided by JPSfire
     double concentration;
     try {
-        const FDSMesh & meshref = _FMStorage->GetFDSMesh(
-            pedestrian->GetGlobalTime(), pedestrian->GetElevation(), quantity);
+        const FDSMesh & meshref =
+            _FMStorage->GetFDSMesh(_currentTime, pedestrian->GetElevation(), quantity);
         concentration = (meshref.GetKnotValue(pedestrian->GetPos()._x, pedestrian->GetPos()._y));
         if(concentration != concentration) {
             concentration = 0.0;
@@ -230,19 +228,19 @@ void ToxicityAnalysis::WriteOutHazardAnalysis(
 {
     std::string data;
     char tmp[1024] = "";
-    int frameNr    = int(p->GetGlobalTime() / _fps);
+    int frameNr    = int(_currentTime / _fps);
 
 
     if(_t_prev == -1) {
         sprintf(tmp, "\t<frame ID=\"%i\">\n", frameNr);
         data.append(tmp);
-        _t_prev = p->GetGlobalTime();
+        _t_prev = _currentTime;
     }
 
-    else if(p->GetGlobalTime() > _t_prev) {
+    else if(_currentTime > _t_prev) {
         sprintf(tmp, "\t</frame>\n \t<frame ID=\"%i\">\n", frameNr);
         data.append(tmp);
-        _t_prev = p->GetGlobalTime();
+        _t_prev = _currentTime;
     }
 
     sprintf(
@@ -252,7 +250,7 @@ void ToxicityAnalysis::WriteOutHazardAnalysis(
         "CO=\"%.0f\"\tc_HCN=\"%.0f\"\tc_HCl=\"%.0f\"\tFED_In=\"%.4f\"\tFIC_Im=\"%.4f\"\tFIC_In=\"%."
         "4f\"\tT=\"%.1f\"\tFED_Heat=\"%.4f\"/>",
         p->GetID(),
-        p->GetGlobalTime(),
+        _currentTime,
         E,
         FEC_Smoke,
         O2,

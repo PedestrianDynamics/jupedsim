@@ -38,7 +38,7 @@ void DirectionManager::Init(Building * building)
 Point DirectionManager::GetTarget(Room * room, Pedestrian * ped)
 {
     if(ped->IsWaiting() && _waitingStrategy) {
-        return _waitingStrategy->GetTarget(room, ped);
+        return _waitingStrategy->GetTarget(room, ped, _currentTime);
     } else {
         return _directionStrategy->GetTarget(room, ped);
     }
