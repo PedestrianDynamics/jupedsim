@@ -2,13 +2,13 @@
 
 #include <chrono>
 
-class SimulationTimer
+class SimulationClock
 {
     uint64_t _iteration{0};
     double _dT;
 
 public:
-    explicit SimulationTimer(double dT);
+    explicit SimulationClock(double dT);
 
     void Advance();
 

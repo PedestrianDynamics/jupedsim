@@ -84,8 +84,12 @@ std::tuple<std::vector<Pedestrian *>, std::vector<Pedestrian *>> UpdatePedestria
  * Increments the door usage of the doors by the peds in \p pedsChangedRoom.
  * @param building geometry used in the simulation
  * @param pedsChangedRoom list of pedestrians who have changed their room
+ * @param time elapsed of the simulation
  */
-void UpdateFlowAtDoors(Building & building, const std::vector<Pedestrian *> & pedsChangedRoom);
+void UpdateFlowAtDoors(
+    Building & building,
+    const std::vector<Pedestrian *> & pedsChangedRoom,
+    double time);
 
 /**
  * Triggers the flow regulation, and closes/opens doors accordingly

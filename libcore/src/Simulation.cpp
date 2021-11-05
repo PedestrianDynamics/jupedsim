@@ -33,8 +33,8 @@
 #include "IO/EventFileParser.h"
 #include "IO/TrainFileParser.h"
 #include "IO/Trajectories.h"
+#include "SimulationClock.h"
 #include "SimulationHelper.h"
-#include "SimulationTimer.h"
 #include "general/Filesystem.h"
 #include "geometry/GoalManager.h"
 #include "geometry/WaitingArea.h"
@@ -52,7 +52,7 @@
 // TODO: add these variables to class simulation
 std::map<int, double> trainOutflow;
 
-Simulation::Simulation(Configuration * args) : _config(args), _timer(_config->Getdt())
+Simulation::Simulation(Configuration * args) : _config(args), _clock(_config->Getdt())
 {
     _countTraj               = 0;
     _seed                    = 8091983;
@@ -72,7 +72,7 @@ Simulation::Simulation(Configuration * args) : _config(args), _timer(_config->Ge
 void Simulation::Iterate()
 {
     _building->UpdateGrid();
-    const double t_in_sec = _timer.ElapsedTime();
+    const double t_in_sec = _clock.ElapsedTime();
     if(t_in_sec > Pedestrian::GetMinPremovementTime()) {
         // update the positions
         _operationalModel->ComputeNextTimeStep(t_in_sec, _deltaT, _building.get(), _periodic);
@@ -116,13 +116,13 @@ void Simulation::Iterate()
     //Trigger JPSfire Toxicity Analysis
     //only executed every 3 seconds
     //TODO(kkratz): This is not working as intendet if 3 is not a multiple of deltaT
-    if(fmod(_timer.ElapsedTime(), 3) == 0) {
+    if(fmod(_clock.ElapsedTime(), 3) == 0) {
         for(auto && ped : _building->GetAllPedestrians()) {
             ped->ConductToxicityAnalysis();
         }
     }
     ++_frame;
-    _timer.Advance();
+    _clock.Advance();
 }
 
 void Simulation::AddAgent(const Pedestrian & agent) {}
@@ -251,8 +251,8 @@ void Simulation::UpdateRoutesAndLocations()
     auto pedsOutside = SimulationHelper::FindPedestriansOutside(*_building, pedsNotRelocated);
     _pedsToRemove.insert(_pedsToRemove.end(), pedsOutside.begin(), pedsOutside.end());
 
-    SimulationHelper::UpdateFlowAtDoors(*_building, pedsChangedRoom);
-    SimulationHelper::UpdateFlowAtDoors(*_building, pedsOutside);
+    SimulationHelper::UpdateFlowAtDoors(*_building, pedsChangedRoom, _clock.ElapsedTime());
+    SimulationHelper::UpdateFlowAtDoors(*_building, pedsOutside, _clock.ElapsedTime());
 
     SimulationHelper::RemoveFaultyPedestrians(
         *_building, pedsNotRelocated, "Could not be properly relocated");
@@ -394,7 +394,7 @@ double Simulation::RunBody(double maxSimTime)
     const int writeInterval = static_cast<int>((1. / _fps) / _deltaT + 0.5);
 
     while((!_agents.empty() || (!_agentSrcManager->IsCompleted() && _gotSources)) &&
-          _timer.ElapsedTime() < maxSimTime) {
+          _clock.ElapsedTime() < maxSimTime) {
         const double t = _frame * _deltaT;
 
         Pedestrian::SetGlobalTime(t);
@@ -414,7 +414,7 @@ double Simulation::RunBody(double maxSimTime)
             }
         }
     }
-    return _timer.ElapsedTime();
+    return _clock.ElapsedTime();
 }
 
 void Simulation::CopyInputFilesToOutPath()

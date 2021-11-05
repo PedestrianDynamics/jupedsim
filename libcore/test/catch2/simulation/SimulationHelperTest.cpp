@@ -844,7 +844,7 @@ TEST_CASE("SimulationHelper::UpdateFlowAtDoors", "[SimulationHelper][UpdateFlowA
             ped.SetPos({-1.95, -1.}, false);
             ped.UpdateRoom(1, 1);
             std::vector<Pedestrian *> peds{&ped};
-            SimulationHelper::UpdateFlowAtDoors(building, peds);
+            SimulationHelper::UpdateFlowAtDoors(building, peds, 0.0);
             REQUIRE(trans11->GetDoorUsage() == 0);
             REQUIRE(trans11->GetPartialDoorUsage() == 0);
             REQUIRE(trans12->GetDoorUsage() == 1);
@@ -861,7 +861,7 @@ TEST_CASE("SimulationHelper::UpdateFlowAtDoors", "[SimulationHelper][UpdateFlowA
             ped.SetPos({-1.95, -1.}, false);
             ped.UpdateRoom(-1, -1);
             std::vector<Pedestrian *> peds{&ped};
-            SimulationHelper::UpdateFlowAtDoors(building, peds);
+            SimulationHelper::UpdateFlowAtDoors(building, peds, 0.0);
             REQUIRE(trans11->GetDoorUsage() == 0);
             REQUIRE(trans11->GetPartialDoorUsage() == 0);
             REQUIRE(trans12->GetDoorUsage() == 0);
@@ -881,7 +881,7 @@ TEST_CASE("SimulationHelper::UpdateFlowAtDoors", "[SimulationHelper][UpdateFlowA
             ped.SetPos({5.05, -1.}, false);
             ped.UpdateRoom(-1, -1);
             std::vector<Pedestrian *> peds{&ped};
-            SimulationHelper::UpdateFlowAtDoors(building, peds);
+            SimulationHelper::UpdateFlowAtDoors(building, peds, 0.0);
             REQUIRE(trans11->GetDoorUsage() == 1);
             REQUIRE(trans11->GetPartialDoorUsage() == 1);
             REQUIRE(trans12->GetDoorUsage() == 0);
