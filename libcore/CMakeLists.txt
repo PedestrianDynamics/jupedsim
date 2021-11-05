@@ -94,7 +94,7 @@ set(source_files
     src/routing/smoke_router/sensor/SensorManager.cpp
     src/routing/smoke_router/SmokeRouter.cpp
     src/Simulation.cpp
-    src/SimulationTimer.cpp
+    src/SimulationClock.cpp
     src/SimulationHelper.cpp
     src/voronoi-boost/VoronoiPositionGenerator.cpp
 )
@@ -187,7 +187,7 @@ set(header_files
     src/routing/smoke_router/sensor/SensorManager.h
     src/routing/smoke_router/SmokeRouter.h
     src/Simulation.h
-    src/SimulationTimer.h
+    src/SimulationClock.h
     src/SimulationHelper.h
     src/voronoi-boost/VoronoiPositionGenerator.h
 )

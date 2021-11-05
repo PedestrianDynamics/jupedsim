@@ -31,7 +31,7 @@
 
 #include "IO/OutputHandler.h"
 #include "IO/Trajectories.h"
-#include "SimulationTimer.h"
+#include "SimulationClock.h"
 #include "direction/walking/DirectionStrategy.h"
 #include "events/OldEventManager.h"
 #include "general/Configuration.h"
@@ -56,7 +56,7 @@ private:
     /// Max file size 16Mb
     static const size_t _maxFileSize{1U << 24U};
     Configuration * _config;
-    SimulationTimer _timer;
+    SimulationClock _clock;
     double _deltaT;
     uint64_t _frame{0};
     /// frame rate for the trajectories

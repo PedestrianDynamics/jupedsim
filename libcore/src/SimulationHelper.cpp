@@ -126,7 +126,8 @@ std::vector<Pedestrian *> SimulationHelper::FindPedestriansOutside(
 
 void SimulationHelper::UpdateFlowAtDoors(
     Building & building,
-    const std::vector<Pedestrian *> & pedsChangedRoom)
+    const std::vector<Pedestrian *> & pedsChangedRoom,
+    double time)
 {
     for(const auto ped : pedsChangedRoom) {
         auto closestTransition = SimulationHelper::FindPassedDoor(building, *ped);
@@ -148,7 +149,7 @@ void SimulationHelper::UpdateFlowAtDoors(
             return;
         }
 
-        closestTransition.value()->IncreaseDoorUsage(1, Pedestrian::GetGlobalTime(), ped->GetID());
+        closestTransition.value()->IncreaseDoorUsage(1, time, ped->GetID());
         closestTransition.value()->IncreasePartialDoorUsage(1);
     }
 }
