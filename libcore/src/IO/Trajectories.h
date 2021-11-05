@@ -17,60 +17,46 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * \section Description
- * Class handling the different output formats.
- *
- * TrajectoriesXML: xml output
- *
- * TrajectoriesTXT: txt output
  **/
 #pragma once
 
+#include "OutputHandler.h"
+#include "general/Configuration.h"
 #include "general/Macros.h"
-#include "geometry/Building.h"
-#include "pedestrian/AgentsSource.h"
+#include "pedestrian/Pedestrian.h"
 
-#include <functional>
+#include <map>
+#include <memory>
+#include <set>
+#include <string>
 #include <vector>
 
-class Trajectories
+class TrajectoryWriter
 {
-protected:
-    std::shared_ptr<OutputHandler> _outputHandler;
-    std::set<OptionalOutput> _optionalOutputOptions;
-    std::map<OptionalOutput, std::function<std::string(Pedestrian *)>> _optionalOutput;
-    std::map<OptionalOutput, std::string> _optionalOutputHeader;
-    std::map<OptionalOutput, std::string> _optionalOutputInfo;
-
-private:
     unsigned int _precision;
+    std::set<OptionalOutput> _options;
+    std::unique_ptr<OutputHandler> _outputHandler;
+    std::map<OptionalOutput, std::function<std::string(Pedestrian *)>> _optionalOutput{};
+    std::map<OptionalOutput, std::string> _optionalOutputHeader{};
+    std::map<OptionalOutput, std::string> _optionalOutputInfo{};
 
 public:
-    explicit Trajectories(unsigned int precision) : _precision{precision} {};
-    virtual ~Trajectories() = default;
-    virtual void WriteHeader(long nPeds, double fps, Building * building, int seed, int count) = 0;
-    virtual void WriteGeometry(Building * building)                                            = 0;
-    virtual void WriteFrame(int frameNr, Building * building)                                  = 0;
-    virtual void AddOptionalOutput(OptionalOutput option) { _optionalOutputOptions.insert(option); }
-    virtual void SetOptionalOutput(std::set<OptionalOutput> options)
-    {
-        _optionalOutputOptions = options;
-    }
+    TrajectoryWriter(
+        unsigned int precision,
+        std::set<OptionalOutput> options,
+        std::unique_ptr<OutputHandler> outputHandler);
 
-    virtual unsigned int GetPrecision() { return _precision; }
-    void Write(const std::string & str) { _outputHandler->Write(str); }
+    ~TrajectoryWriter() = default;
 
-    void SetOutputHandler(std::shared_ptr<OutputHandler> outputHandler)
-    {
-        _outputHandler = std::move(outputHandler);
-    }
-};
+    TrajectoryWriter(const TrajectoryWriter & other) = delete;
 
-class TrajectoriesTXT : public Trajectories
-{
-public:
-    explicit TrajectoriesTXT(unsigned precision);
-    void WriteHeader(long nPeds, double fps, Building * building, int seed, int count) override;
-    void WriteGeometry(Building * building) override;
-    void WriteFrame(int frameNr, Building * building) override;
+    TrajectoryWriter & operator=(const TrajectoryWriter & other) = delete;
+
+    TrajectoryWriter(TrajectoryWriter && other) = delete;
+
+    TrajectoryWriter & operator=(TrajectoryWriter && other) = delete;
+
+    void WriteHeader(size_t nPeds, double fps, const Configuration & cfg, int count);
+
+    void WriteFrame(int frameNr, const std::vector<std::unique_ptr<Pedestrian>> & pedestrians);
 };

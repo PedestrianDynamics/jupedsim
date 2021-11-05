@@ -34,6 +34,7 @@
 #include "IO/TrainFileParser.h"
 #include "IO/Trajectories.h"
 #include "SimulationHelper.h"
+#include "SimulationTimer.h"
 #include "general/Filesystem.h"
 #include "geometry/GoalManager.h"
 #include "geometry/WaitingArea.h"
@@ -44,13 +45,14 @@
 #include "routing/ff_router/ffRouter.h"
 
 #include <Logger.h>
+#include <chrono>
 #include <memory>
 #include <tinyxml.h>
 
 // TODO: add these variables to class simulation
 std::map<int, double> trainOutflow;
 
-Simulation::Simulation(Configuration * args) : _config(args)
+Simulation::Simulation(Configuration * args) : _config(args), _timer(_config->Getdt())
 {
     _countTraj               = 0;
     _seed                    = 8091983;
@@ -70,13 +72,13 @@ Simulation::Simulation(Configuration * args) : _config(args)
 void Simulation::Iterate()
 {
     _building->UpdateGrid();
-    const auto t = Pedestrian::GetGlobalTime();
-    if(t > Pedestrian::GetMinPremovementTime()) {
+    const double t_in_sec = _timer.ElapsedTime();
+    if(t_in_sec > Pedestrian::GetMinPremovementTime()) {
         // update the positions
-        _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get(), _periodic);
+        _operationalModel->ComputeNextTimeStep(t_in_sec, _deltaT, _building.get(), _periodic);
 
         //update the events
-        bool eventProcessed = _em->ProcessEvents(Pedestrian::GetGlobalTime());
+        bool eventProcessed = _em->ProcessEvents(t_in_sec);
         _routingEngine->setNeedUpdate(eventProcessed || _routingEngine->NeedsUpdate());
 
         //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
@@ -91,11 +93,10 @@ void Simulation::Iterate()
         } else { // quickest needs update even if NeedsUpdate() is false
             auto * ffrouter =
                 dynamic_cast<FFRouter *>(_routingEngine->GetRouter(ROUTING_FF_QUICKEST));
-            if(ffrouter != nullptr)
-                if(ffrouter->MustReInit()) {
-                    ffrouter->ReInit();
-                    ffrouter->SetRecalc(t);
-                }
+            if(ffrouter != nullptr && ffrouter->MustReInit()) {
+                ffrouter->ReInit();
+                ffrouter->SetRecalc(t_in_sec);
+            }
         }
 
         // here the used routers are update, when needed due to external changes
@@ -110,8 +111,18 @@ void Simulation::Iterate()
         // Checks if position of pedestrians is inside waiting area and should be waiting or if
         // left waiting area and assign new goal
         GoalManager gm{_building.get(), &_agents};
-        gm.update(Pedestrian::GetGlobalTime());
+        gm.update(t_in_sec);
     }
+    //Trigger JPSfire Toxicity Analysis
+    //only executed every 3 seconds
+    //TODO(kkratz): This is not working as intendet if 3 is not a multiple of deltaT
+    if(fmod(_timer.ElapsedTime(), 3) == 0) {
+        for(auto && ped : _building->GetAllPedestrians()) {
+            ped->ConductToxicityAnalysis();
+        }
+    }
+    ++_frame;
+    _timer.Advance();
 }
 
 void Simulation::AddAgent(const Pedestrian & agent) {}
@@ -123,19 +134,17 @@ size_t Simulation::GetPedsNumber() const
 
 bool Simulation::InitArgs()
 {
-    if(!_config->GetTrajectoriesFile().empty()) {
-        // At the moment we only support plain txt format
-        _iod = std::make_unique<TrajectoriesTXT>(TrajectoriesTXT(_config->GetPrecision()));
-    }
-
     const fs::path & trajPath(_config->GetTrajectoriesFile());
     const fs::path trajParentPath = trajPath.parent_path();
     if(!trajParentPath.empty()) {
         fs::create_directories(trajParentPath);
     }
-    auto file = std::make_shared<FileHandler>(trajPath.c_str());
-    _iod->SetOutputHandler(file);
-    _iod->SetOptionalOutput(_config->GetOptionalOutputOptions());
+    if(!_config->GetTrajectoriesFile().empty()) {
+        _iod = std::make_unique<TrajectoryWriter>(
+            _config->GetPrecision(),
+            _config->GetOptionalOutputOptions(),
+            std::make_unique<FileHandler>(trajPath));
+    }
 
 
     _operationalModel = _config->GetModel();
@@ -371,15 +380,8 @@ void Simulation::RunHeader(long nPed)
     CopyInputFilesToOutPath();
     UpdateOutputFiles();
 
-    _iod->WriteHeader(nPed, _fps, _building.get(), _seed, 0); // first trajectory
-                                                              // count = 0
-    _iod->WriteGeometry(_building.get());
-
-    int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
-    writeInterval     = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
-    int firstframe    = (Pedestrian::GetGlobalTime() / _deltaT) / writeInterval;
-
-    _iod->WriteFrame(firstframe, _building.get());
+    _iod->WriteHeader(nPed, _fps, *_config, 0); // first trajectory
+    _iod->WriteFrame(0, _agents);
     //first initialisation needed by the linked-cells
     UpdateRoutesAndLocations();
 
@@ -389,91 +391,30 @@ void Simulation::RunHeader(long nPed)
 
 double Simulation::RunBody(double maxSimTime)
 {
-    double t = Pedestrian::GetGlobalTime();
+    const int writeInterval = static_cast<int>((1. / _fps) / _deltaT + 0.5);
 
-    //frame number. This function can be called many times,
-    static int frameNr = (int) (1 + t / _deltaT); // Frame Number
-
-    //##########
-    //PROBLEMATIC: time when frame should be printed out
-    // possibly skipped when using the following lines
-    // TODO NEEDS TO BE FIXED!
-    int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
-    writeInterval     = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
-    // ##########
-
-    std::string description = "Evacuation ";
-    int initialnPeds        = _agents.size();
-    // main program loop
     while((!_agents.empty() || (!_agentSrcManager->IsCompleted() && _gotSources)) &&
-          t < maxSimTime) {
-        t = 0 + (frameNr - 1) * _deltaT;
-        // Handle train traffic: coorect geometry
+          _timer.ElapsedTime() < maxSimTime) {
+        const double t = _frame * _deltaT;
 
         Pedestrian::SetGlobalTime(t);
         AddNewAgents();
 
         Iterate();
-        // update the global time
-
         // write the trajectories
-        if(0 == frameNr % writeInterval) {
-            _iod->WriteFrame(frameNr / writeInterval, _building.get());
-            RotateOutputFile();
+        if(0 == _frame % writeInterval) {
+            _iod->WriteFrame(_frame / writeInterval, _agents);
         }
 
-        if((!_gotSources) &&
-           ((frameNr < 100 && frameNr % 10 == 0) || (frameNr > 100 && frameNr % 100 == 0))) {
-            LOG_INFO(
-                "time: {:6.2f} ({:4.0f}) | Agents: {:6d} / {:d} [{:4.1f}%]",
-                t,
-                maxSimTime,
-                _agents.size(),
-                initialnPeds,
-                (double) (initialnPeds - _agents.size()) / initialnPeds * 100.);
-        }
 
-        ++frameNr;
-
-        //Trigger JPSfire Toxicity Analysis
-        //only executed every 3 seconds
-        if(fmod(Pedestrian::GetGlobalTime(), 3) == 0) {
-            for(auto && ped : _building->GetAllPedestrians()) {
-                ped->ConductToxicityAnalysis();
-            }
-        }
-
-        if(frameNr % 1000 == 0) {
+        if(_frame % 1000 == 0) {
             if(_config->ShowStatistics()) {
                 LOG_INFO("Update door statistics at t={:.2f}", t);
                 PrintStatistics(t);
             }
         }
-    } // while time
-    return t;
-}
-
-void Simulation::RotateOutputFile()
-{
-    // FIXME ??????
-    if(_config->GetFileFormat() != FileFormat::TXT) {
-        return;
     }
-    static const fs::path & p       = _config->GetTrajectoriesFile();
-    static const fs::path stem      = p.stem();
-    static const fs::path extension = p.extension();
-    static const fs::path parent    = p.parent_path();
-
-    if(fs::file_size(_currentTrajectoriesFile) > _maxFileSize) {
-        incrementCountTraj();
-        _currentTrajectoriesFile =
-            parent / fs::path(fmt::format(
-                         FMT_STRING("{}_{:04d}{}"), stem.string(), _countTraj, extension.string()));
-        LOG_INFO("New trajectory file <{}>", _currentTrajectoriesFile.string());
-        auto file = std::make_shared<FileHandler>(_currentTrajectoriesFile);
-        _iod->SetOutputHandler(file);
-        _iod->WriteHeader(_agents.size(), _fps, _building.get(), _seed, _countTraj);
-    }
+    return _timer.ElapsedTime();
 }
 
 void Simulation::CopyInputFilesToOutPath()
