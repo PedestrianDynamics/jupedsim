@@ -33,6 +33,7 @@
 #include "IO/Trajectories.h"
 #include "SimulationClock.h"
 #include "direction/walking/DirectionStrategy.h"
+#include "events/EventManager.h"
 #include "events/OldEventManager.h"
 #include "general/Configuration.h"
 #include "geometry/Building.h"
@@ -69,7 +70,7 @@ private:
     std::shared_ptr<RoutingEngine> _routingEngine;
     /// writing the trajectories to file
     std::unique_ptr<TrajectoryWriter> _iod;
-    std::unique_ptr<OldEventManager> _em;
+    std::unique_ptr<OldEventManager> _old_em;
     std::unique_ptr<AgentsSourcesManager> _agentSrcManager{nullptr};
     int _periodic;
     int _maxSimTime;
@@ -81,6 +82,8 @@ private:
 
     std::vector<Pedestrian *> _pedsToRemove;
     std::vector<std::unique_ptr<Pedestrian>> _agents;
+
+    EventManager _em;
 
 public:
     explicit Simulation(Configuration * args);

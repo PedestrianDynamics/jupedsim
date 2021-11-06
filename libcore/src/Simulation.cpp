@@ -35,6 +35,7 @@
 #include "IO/Trajectories.h"
 #include "SimulationClock.h"
 #include "SimulationHelper.h"
+#include "events/EventManager.h"
 #include "general/Filesystem.h"
 #include "geometry/GoalManager.h"
 #include "geometry/WaitingArea.h"
@@ -60,10 +61,10 @@ Simulation::Simulation(Configuration * args) : _config(args), _clock(_config->Ge
     _building                = nullptr;
     _operationalModel        = nullptr;
     _fps                     = 1;
-    _em                      = nullptr;
+    _old_em                  = nullptr;
     _gotSources              = false;
     _fps                     = 1;
-    _em                      = nullptr;
+    _old_em                  = nullptr;
     _gotSources              = false;
     _maxSimTime              = 100;
     _currentTrajectoriesFile = _config->GetTrajectoriesFile();
@@ -78,7 +79,7 @@ void Simulation::Iterate()
         _operationalModel->ComputeNextTimeStep(t_in_sec, _deltaT, _building.get(), _periodic);
 
         //update the events
-        bool eventProcessed = _em->ProcessEvents(t_in_sec);
+        bool eventProcessed = _old_em->ProcessEvents(t_in_sec);
         _routingEngine->setNeedUpdate(eventProcessed || _routingEngine->NeedsUpdate());
 
         //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
@@ -198,12 +199,12 @@ bool Simulation::InitArgs()
         return false;
     }
 
-    _em = std::make_unique<OldEventManager>();
+    _old_em = std::make_unique<OldEventManager>();
     if(!_config->GetEventFile().empty()) {
-        EventFileParser::ParseDoorEvents(*_em, _building.get(), _config->GetEventFile());
+        EventFileParser::ParseDoorEvents(*_old_em, _building.get(), _config->GetEventFile());
     }
     if(!_config->GetScheduleFile().empty()) {
-        EventFileParser::ParseSchedule(*_em, _building.get(), _config->GetScheduleFile());
+        EventFileParser::ParseSchedule(*_old_em, _building.get(), _config->GetScheduleFile());
 
         // Read and set max door usage from schedule file
         auto groupMaxAgents = EventFileParser::ParseMaxAgents(_config->GetScheduleFile());
@@ -215,7 +216,7 @@ bool Simulation::InitArgs()
     if(!_config->GetTrainTypeFile().empty() && !_config->GetTrainTimeTableFile().empty()) {
         auto trainTypes = TrainFileParser::ParseTrainTypes(_config->GetTrainTypeFile());
         TrainFileParser::ParseTrainTimeTable(
-            *_em, *_building, trainTypes, _config->GetTrainTimeTableFile());
+            *_old_em, *_building, trainTypes, _config->GetTrainTimeTableFile());
     }
 
     LOG_INFO("Got {} Trains", _building->GetTrainTypes().size());
@@ -226,7 +227,7 @@ bool Simulation::InitArgs()
         LOG_INFO("Number of doors {}", TT._doors.size());
     }
 
-    _em->ListEvents();
+    _old_em->ListEvents();
     return true;
 }
 
@@ -399,6 +400,7 @@ double Simulation::RunBody(double maxSimTime)
 
         Pedestrian::SetGlobalTime(t);
         AddNewAgents();
+        auto evnts = _em.NextEvents(_clock);
 
         Iterate();
         // write the trajectories
