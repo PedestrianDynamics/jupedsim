@@ -100,6 +100,10 @@ getValues(const std::vector<std::string> & keys, std::ifstream & ifs)
                 result[key] = value;
             }
         }
+        if(line[0] != '#') {
+            // The end of the header section has been reached
+            break;
+        }
     }
     return result;
 }
@@ -422,24 +426,18 @@ bool ParseTxtFormat(const QString & fileName, TrajectoryData * trajectories)
         QTextStream in(&inputFile);
         int maxFrame = 1000;
         // initialize the process dialog
-        QProgressDialog progressDialog("Simulation", "Cancel", 1, maxFrame, NULL);
-        progressDialog.setModal(true);
-        progressDialog.setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
-        progressDialog.setFixedSize(400, 100);
-        progressDialog.setLabelText("<h3>Loading...</h3>");
-        QList<QPushButton *> buttons = progressDialog.findChildren<QPushButton *>();
-        buttons.at(0)->hide(); // that is the cancel button
-        progressDialog.setValue(1);
-        progressDialog.show();
 
         double unitFactor = FAKTOR; // @todo: use correct unit
         int frameOffset   = 0;
         int frameCounter  = 0;
         Frame * frame{nullptr};
+        QString sep("\t");
+        QString line{};
+
+        // Looking for framerate
         while(!in.atEnd()) {
-            QString line = in.readLine();
-            if(line.startsWith("#")) // looking for framerate
-            {
+            line = in.readLine();
+            if(line.startsWith("#")) {
                 if(line.split(":").size() == 2) {
                     if(line.split(":")[0].contains("framerate", Qt::CaseInsensitive)) {
                         fps = line.split(":")[1].toDouble();
@@ -447,11 +445,15 @@ bool ParseTxtFormat(const QString & fileName, TrajectoryData * trajectories)
                         trajectories->setFps(fps);
                     }
                 }
+            } else if(line.isEmpty()) {
                 continue;
+            } else {
+                break;
             }
-            line = line.trimmed(); // remove whitespaces from
-                                   // beginning and end
-            QStringList pieces = line.split(QRegExp("\\s+"));
+        }
+        while(!in.atEnd()) {
+            line              = in.readLine();
+            const auto pieces = line.splitRef(sep, Qt::SkipEmptyParts);
 
             glm::dvec3 pos;
             glm::dvec3 angle  = {0, 0, 30};
@@ -522,8 +524,6 @@ bool ParseTxtFormat(const QString & fileName, TrajectoryData * trajectories)
                 frame = new Frame(frameID - frameOffset);
                 trajectories->append(frame);
                 ++frameCounter;
-                progressDialog.setValue(trajectories->getSize());
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
             }
             frame->addElement(element);
         }
