@@ -32,7 +32,6 @@ cd spdlog-${SPDLOG_VER}
 mkdir build
 cd build
 cmake .. \
-    -DSPDLOG_BUILD_EXAMPLES=OFF \
     -DSPDLOG_BUILD_BENCH=OFF \
     -DSPDLOG_BUILD_TESTS=OFF \
     -DSPDLOG_FMT_EXTERNAL=ON \
@@ -72,3 +71,18 @@ cmake .. \
 cmake --build . --target install -- -j${CPUS}
 cd ../..
 rm -rf CLI11-${CLI11_VER} v${CLI11_VER}.tar.gz
+
+GTEST_VER="1.11.0"
+wget https://github.com/google/googletest/archive/refs/tags/release-${GTEST_VER}.tar.gz
+tar xf release-${GTEST_VER}.tar.gz
+cd googletest-release-${GTEST_VER}
+mkdir build
+cd build
+cmake .. \
+    -DCMAKE_PREFIX_PATH=${INSTALL_DIR} \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
+cmake --build . --target install -- -j${CPUS}
+cd ../..
+rm -rf release-${GTEST_VER}.tar.gz googletest-release-${GTEST_VER}
