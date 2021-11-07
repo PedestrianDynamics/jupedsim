@@ -263,7 +263,23 @@ endif()
 # libcore unit tests
 ################################################################################
 if (BUILD_CPPUNIT_TEST)
-    find_package(Catch2 REQUIRED)
+    add_executable(libcore-tests
+        test/TestSimulationClock.cpp
+    )
+
+    target_link_libraries(libcore-tests PRIVATE
+        GTest::gtest
+        GTest::gtest_main
+        core    
+    )
+    
+    target_compile_options(libcore-tests PRIVATE
+        ${COMMON_COMPILE_OPTIONS}
+    )
+    
+    set_property(TARGET libcore-tests PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
+    set_property(TARGET libcore-tests PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
+    gtest_discover_tests(libcore-tests)
 
     add_executable(unittests
         test/catch2/geometry/GeometryHelperTest.cpp
@@ -294,8 +310,6 @@ if (BUILD_CPPUNIT_TEST)
     set_property(TARGET unittests PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
     set_property(TARGET unittests PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 
-    include(CTest)
-    include(ParseAndAddCatchTests)
     set(PARSE_CATCH_TESTS_ADD_TARGET_IN_TEST_NAME Off)
     set(PARSE_CATCH_TESTS_ADD_TO_CONFIGURE_DEPENDS On)
     ParseAndAddCatchTests(unittests)
