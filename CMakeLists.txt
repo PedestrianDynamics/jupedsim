@@ -80,6 +80,7 @@ list(APPEND COMMON_COMPILE_OPTIONS
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-fdiagnostics-color=always>
     $<$<CXX_COMPILER_ID:MSVC>:/W2>
     $<$<CXX_COMPILER_ID:MSVC>:/EHsc>
+    $<$<CXX_COMPILER_ID:MSVC>:/MP>
 )
 
 ################################################################################
