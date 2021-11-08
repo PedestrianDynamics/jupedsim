@@ -80,34 +80,35 @@ list(APPEND COMMON_COMPILE_OPTIONS
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-fdiagnostics-color=always>
     $<$<CXX_COMPILER_ID:MSVC>:/W2>
     $<$<CXX_COMPILER_ID:MSVC>:/EHsc>
+    $<$<CXX_COMPILER_ID:MSVC>:/MP>
 )
 
 ################################################################################
 # Dependencies
 ################################################################################
-add_subdirectory(third-party)
-
-# libfmt
 find_package(fmt 8.0 REQUIRED CONFIG)
-
-# spdlog
 find_package(spdlog 1.9 REQUIRED CONFIG)
-
-# CLI11
 find_package(CLI11 2.1 REQUIRED CONFIG)
-
-# Boost
 find_package(Boost 1.74 REQUIRED)
-
 # std::filesystem needs to be linked on gcc < 9
 add_library(fs INTERFACE)
 target_link_libraries(fs INTERFACE
     $<$<PLATFORM_ID:Linux>:stdc++fs>
 )
 
+# ZLib needed for cpny
+find_package(ZLIB REQUIRED)
 find_package(Threads REQUIRED)
 find_package(PythonInterp 3 REQUIRED)
-
+if(BUILD_CPPUNIT_TEST)
+    find_package(Catch2 REQUIRED)
+    find_package(GTest 1.11 REQUIRED CONFIG)
+    include(CTest)
+    include(ParseAndAddCatchTests)
+    include(GoogleTest)
+endif()
+# remaining in-tree dependencies
+add_subdirectory(third-party)
 ################################################################################
 # VCS info
 ################################################################################
