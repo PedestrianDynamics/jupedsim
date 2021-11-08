@@ -101,7 +101,9 @@ public:
     /// Advances the simulation by one time step.
     void Iterate();
 
-    void AddAgent(const Pedestrian & agent);
+    void AddAgent(std::unique_ptr<Pedestrian> && agent);
+
+    void AddAgent(std::vector<std::unique_ptr<Pedestrian>> && agents);
 
     size_t GetPedsNumber() const;
 

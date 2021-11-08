@@ -147,7 +147,18 @@ void Simulation::Iterate()
     _clock.Advance();
 }
 
-void Simulation::AddAgent(const Pedestrian & agent) {}
+void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
+{
+    _agents.emplace_back(std::move(agent));
+}
+
+void Simulation::AddAgent(std::vector<std::unique_ptr<Pedestrian>> && agents)
+{
+    _agents.insert(
+        _agents.end(),
+        std::make_move_iterator(agents.begin()),
+        std::make_move_iterator(agents.end()));
+}
 
 size_t Simulation::GetPedsNumber() const
 {
@@ -625,11 +636,7 @@ void Simulation::UpdateOutputGeometryFile()
 
 void Simulation::AddNewAgents()
 {
-    auto new_agents = _agentSrcManager->ProcessAllSources(_clock.ElapsedTime());
-    _agents.insert(
-        _agents.end(),
-        std::make_move_iterator(new_agents.begin()),
-        std::make_move_iterator(new_agents.end()));
+    AddAgent(_agentSrcManager->ProcessAllSources(_clock.ElapsedTime()));
 }
 
 void Simulation::incrementCountTraj()
