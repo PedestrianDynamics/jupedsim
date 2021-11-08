@@ -63,7 +63,7 @@ private:
      * perform the corresponding actions
      * @param[in] ped pedestrian, which position is checked
      */
-    void ProcessPedPosition(Pedestrian * ped);
+    void ProcessPedPosition(Pedestrian * ped, double time);
 
     /**
      * Checks if pedestrian is inside a specific goal

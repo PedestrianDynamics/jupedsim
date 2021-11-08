@@ -40,7 +40,9 @@ class WalkingSpeed
 public:
     explicit WalkingSpeed(const std::string & projectFilename);
 
-    virtual ~WalkingSpeed();
+    ~WalkingSpeed() = default;
+
+    void Update(double time) { _currentTime = time; };
 
     double WalkingInSmoke(const Pedestrian *, double);
     double GetExtinction(const Pedestrian *);
@@ -57,4 +59,5 @@ public:
 
 private:
     std::shared_ptr<FDSMeshStorage> _FMStorage;
+    double _currentTime;
 };

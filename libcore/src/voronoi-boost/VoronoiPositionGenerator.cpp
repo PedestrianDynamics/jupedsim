@@ -141,10 +141,10 @@ bool ComputeBestPositionVoronoiBoost(
                          (new_pos._y <= BBymax) && (new_pos._y >= BBymin);
             if(subroom->IsInSubRoom(new_pos) && inBox) {
                 if(IsEnoughInSubroom(subroom, new_pos, radius)) {
-                    ped->SetPos(center_pos + random_pos, true);
+                    ped->SetPos(center_pos + random_pos);
                 }
             } else {
-                ped->SetPos(center_pos, true);
+                ped->SetPos(center_pos);
             }
             existing_peds.push_back(ped);
         }    //0
@@ -182,7 +182,7 @@ bool ComputeBestPositionVoronoiBoost(
             if(dis > 4 * radius * radius) {
                 Point pos(chosen_it->x() / factor, chosen_it->y() / factor); //check!
 
-                ped->SetPos(pos, true);
+                ped->SetPos(pos);
                 // proceed to the next pedestrian
                 existing_peds.push_back(ped);
                 ++iter_ped;

@@ -214,7 +214,7 @@ void VelocityModel::ComputeNextTimeStep(
 
         // stuck peds get removed. Warning is thrown. low speed due to jam is omitted.
         if(ped->GetTimeInJam() > ped->GetPatienceTime() &&
-           ped->GetGlobalTime() > 10000 + ped->GetPremovementTime() &&
+           _currentTime > 10000 + ped->GetPremovementTime() &&
            std::max(ped->GetMeanVelOverRecTime(), ped->GetV().Norm()) < 0.01 &&
            size == 0) // size length of peds neighbour vector
         {
@@ -225,7 +225,7 @@ void VelocityModel::ComputeNextTimeStep(
                 ped->GetMeanVelOverRecTime(),
                 ped->GetRoomID(),
                 ped->GetSubRoomID(),
-                ped->GetGlobalTime(),
+                _currentTime,
                 current);
             //TODO KKZ track deleted peds
             pedestrians_to_delete.emplace_back(ped->GetID());
@@ -249,14 +249,18 @@ void VelocityModel::ComputeNextTimeStep(
         if(v_neu.Norm() >= J_EPS_V) {
             ped->SetPhiPed();
         }
-        ped->SetPos(pos_neu);
-        if(periodic) {
-            if(ped->GetPos()._x >= xRight) {
-                ped->SetPos(Point(ped->GetPos()._x - (xRight - xLeft), ped->GetPos()._y));
-                //ped->SetID( ped->GetID() + 1);
+        if(!ped->InPremovement(current)) {
+            ped->SetPos(pos_neu);
+
+            if(periodic) {
+                if(ped->GetPos()._x >= xRight) {
+                    ped->SetPos(Point(ped->GetPos()._x - (xRight - xLeft), ped->GetPos()._y));
+                    //ped->SetID( ped->GetID() + 1);
+                }
             }
+
+            ped->SetV(v_neu);
         }
-        ped->SetV(v_neu);
         ++counter;
     }
     // remove the pedestrians that have left the building

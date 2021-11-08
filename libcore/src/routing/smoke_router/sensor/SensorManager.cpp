@@ -49,7 +49,7 @@ void SensorManager::execute(const Pedestrian * ped, EventType event_type)
     for(SensorContainer::iterator it = registered_sensors.begin(); it != registered_sensors.end();
         ++it) {
         if(event_type & it->second) {
-            it->first->execute(ped, (*cm_storage)[ped]->GetCognitiveMap());
+            it->first->execute(ped, (*cm_storage)[ped]->GetCognitiveMap(), _currentTime);
         }
     }
 }

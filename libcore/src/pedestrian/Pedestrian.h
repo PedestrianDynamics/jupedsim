@@ -112,7 +112,6 @@ private:
     bool _reroutingEnabled;
 
     // the current time in the simulation
-    static double _globalTime;
     static double _minPremovementTime;
     static AgentColorMode _colorMode;
     bool _spotlight;
@@ -141,6 +140,8 @@ public:
 
     explicit Pedestrian(const StartDistribution & agentsParameters, Building & building);
     virtual ~Pedestrian();
+
+    bool InPremovement(double now);
 
     /** 
      * Select desired speed based on the type of subroom
@@ -184,8 +185,8 @@ public:
     void SetDeltaT(double dt);
 
     // Eigenschaften der Ellipse
-    void SetPos(const Point & pos, bool initial = false); // setzt x und y-Koordinaten
-    void SetV(const Point & v); // setzt x und y-Koordinaten der Geschwindigkeit
+    void SetPos(const Point & pos); // setzt x und y-Koordinaten
+    void SetV(const Point & v);     // setzt x und y-Koordinaten der Geschwindigkeit
     void SetV0Norm(
         double v0,
         double v0UpStairs,
@@ -375,9 +376,6 @@ public:
     int GetGroup() const;
     void SetGroup(int group);
 
-    static double GetGlobalTime();
-    static void SetGlobalTime(double time);
-
     /**
       * @return the total number of pedestrians objects created.
       * This is useful for the linked-cells algorithm, since it uses the ID of the pedestrians
@@ -413,7 +411,7 @@ public:
 
     int GetLastGoalID() const;
 
-    bool IsInsideWaitingAreaWaiting() const;
+    bool IsInsideWaitingAreaWaiting(double time) const;
 
     const Point & GetWaitingPos() const;
 

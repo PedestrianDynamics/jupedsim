@@ -224,57 +224,9 @@ TEST_CASE("Pedestrian::SetPos", "[Pedestrian][SetPos]")
     double deltaT = 0.1;
     ped.SetDeltaT(deltaT);
 
-    SECTION("global timer larger premovement time and not initial")
-    {
-        Pedestrian::SetGlobalTime(10.);
-        ped.SetPremovementTime(Pedestrian::GetGlobalTime() - 1.);
-        ped.SetRecordingTime(10.);
-
-        Point p{-1, 5};
-        ped.SetPos(p, true);
-        REQUIRE(ped.GetLastPositions().size() == 1);
-        REQUIRE(ped.GetLastPositions().back() == p);
-    }
-
-    SECTION("global timer larger premovement time and initial")
-    {
-        Pedestrian::SetGlobalTime(10.);
-        ped.SetPremovementTime(Pedestrian::GetGlobalTime() - 1.);
-        ped.SetRecordingTime(10.);
-
-        Point p{-1, 5};
-        ped.SetPos(p, true);
-        REQUIRE(ped.GetLastPositions().size() == 1);
-        REQUIRE(ped.GetLastPositions().back() == p);
-    }
-
-    SECTION("global timer smaller premovement time and not initial")
-    {
-        Pedestrian::SetGlobalTime(10.);
-        ped.SetPremovementTime(Pedestrian::GetGlobalTime() + 1.);
-        ped.SetRecordingTime(10.);
-
-        Point p{-1, 5};
-        ped.SetPos(p, false);
-        REQUIRE(ped.GetLastPositions().empty());
-    }
-
-    SECTION("global timer smaller premovement time and initial")
-    {
-        Pedestrian::SetGlobalTime(10.);
-        ped.SetPremovementTime(Pedestrian::GetGlobalTime() + 1.);
-        ped.SetRecordingTime(10.);
-
-        Point p{-1, 5};
-        ped.SetPos(p, true);
-        REQUIRE(ped.GetLastPositions().size() == 1);
-        REQUIRE(ped.GetLastPositions().back() == p);
-    }
-
     SECTION("max size not exceeded")
     {
-        Pedestrian::SetGlobalTime(10.);
-        ped.SetPremovementTime(Pedestrian::GetGlobalTime() - 1.);
+        ped.SetPremovementTime(9.0);
         ped.SetRecordingTime(10.);
 
         double min   = -10;
@@ -284,7 +236,7 @@ TEST_CASE("Pedestrian::SetPos", "[Pedestrian][SetPos]")
 
         for(size_t i = 0; i < steps; ++i) {
             Point p{i * step, -1. * i * step};
-            ped.SetPos(p, false);
+            ped.SetPos(p);
             REQUIRE(ped.GetLastPositions().back() == p);
         }
 
@@ -293,8 +245,7 @@ TEST_CASE("Pedestrian::SetPos", "[Pedestrian][SetPos]")
 
     SECTION("max size reached")
     {
-        Pedestrian::SetGlobalTime(10.);
-        ped.SetPremovementTime(Pedestrian::GetGlobalTime() - 1.);
+        ped.SetPremovementTime(9.0);
         ped.SetRecordingTime(10.);
 
         size_t steps = std::floor(ped.GetRecordingTime() / deltaT);
@@ -304,7 +255,7 @@ TEST_CASE("Pedestrian::SetPos", "[Pedestrian][SetPos]")
 
         for(size_t i = 0; i < steps; ++i) {
             Point p{i * step, -1. * i * step};
-            ped.SetPos(p, false);
+            ped.SetPos(p);
             REQUIRE(ped.GetLastPositions().back() == p);
         }
 
@@ -313,8 +264,7 @@ TEST_CASE("Pedestrian::SetPos", "[Pedestrian][SetPos]")
 
     SECTION("max size exceeded")
     {
-        Pedestrian::SetGlobalTime(10.);
-        ped.SetPremovementTime(Pedestrian::GetGlobalTime() - 1.);
+        ped.SetPremovementTime(9.0);
         ped.SetRecordingTime(10.);
 
         size_t maxSize = std::floor(ped.GetRecordingTime() / deltaT);
@@ -325,7 +275,7 @@ TEST_CASE("Pedestrian::SetPos", "[Pedestrian][SetPos]")
 
         for(int i = 0; i < steps; ++i) {
             Point p{i * step, -1. * i * step};
-            ped.SetPos(p, false);
+            ped.SetPos(p);
             REQUIRE(ped.GetLastPositions().back() == p);
         }
 

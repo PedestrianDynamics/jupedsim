@@ -55,6 +55,8 @@ protected:
     /// routing strategy ID as defined in the Macros.h file
     RoutingStrategy _strategy;
 
+    double _currentTime{0.0};
+
 public:
     /**
       * Constructor
@@ -72,6 +74,8 @@ public:
       * Destructor
       */
     virtual ~Router();
+
+    void UpdateTime(double time) { _currentTime = time; }
 
     /**
       * Add a new final destination to this router
@@ -126,5 +130,5 @@ public:
       * Update the router, when geometry changed due to external changes.
       * Remark: Depends on router if needed!
       */
-    virtual void Update();
+    virtual void Update() = 0;
 };

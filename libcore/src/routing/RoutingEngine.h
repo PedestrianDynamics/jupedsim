@@ -44,7 +44,9 @@ public:
     /**
       * Destructor
       */
-    virtual ~RoutingEngine();
+    ~RoutingEngine();
+
+    void UpdateTime(double time);
 
     /**
       * Add a final destination in the system.
@@ -58,12 +60,6 @@ public:
       *
       */
     const std::vector<Router *> GetAvailableRouters() const;
-
-    /**
-      * Find the next destination using the appropriate router from
-      * the collection for the pedestrian ped.
-      */
-    void FindRoute(Pedestrian * ped);
 
     /**
       * Add a new router to the routing system

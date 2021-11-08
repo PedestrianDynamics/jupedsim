@@ -41,7 +41,10 @@ std::string RoomToFloorSensor::GetName() const
     return "RoomToFloorSensor";
 }
 
-void RoomToFloorSensor::execute(const Pedestrian * pedestrian, CognitiveMap & cognitive_map) const
+void RoomToFloorSensor::execute(
+    const Pedestrian * pedestrian,
+    CognitiveMap & cognitive_map,
+    double /*time*/) const
 {
     // NavigationGraph::VerticesContainer * vertices = cognitive_map->GetAllVertices();
 

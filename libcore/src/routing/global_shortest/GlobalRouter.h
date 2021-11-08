@@ -67,11 +67,13 @@ public:
     /**
       * Destructor
       */
-    virtual ~GlobalRouter();
+    ~GlobalRouter() override;
 
-    virtual bool Init(Building * building);
+    bool Init(Building * building) override;
 
-    virtual int FindExit(Pedestrian * p);
+    int FindExit(Pedestrian * p) override;
+
+    void Update() override{};
 
     /**
       * Performs a check of the geometry and fixes if possible.

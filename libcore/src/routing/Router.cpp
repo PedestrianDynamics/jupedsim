@@ -68,5 +68,3 @@ RoutingStrategy Router::GetStrategy() const
 {
     return _strategy;
 }
-
-void Router::Update() {}

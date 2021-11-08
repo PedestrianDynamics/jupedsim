@@ -40,7 +40,9 @@ class ToxicityAnalysis
 {
 public:
     ToxicityAnalysis(const std::string & projectFilename, double _fps);
-    virtual ~ToxicityAnalysis();
+    ~ToxicityAnalysis() = default;
+
+    void Update(double time) { _currentTime = time; }
 
     void HazardAnalysis(Pedestrian *);
     double GetFDSQuantity(const Pedestrian *, std::string);
@@ -78,5 +80,6 @@ private:
     double _dt;
     double _fps;
     double _t_prev;
+    double _currentTime{0.0};
     void InitializeWriteOut();
 };

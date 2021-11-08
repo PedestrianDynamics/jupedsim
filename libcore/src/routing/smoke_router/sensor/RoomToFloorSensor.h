@@ -35,8 +35,8 @@ public:
 
     virtual ~RoomToFloorSensor();
 
-    std::string GetName() const;
-    void execute(const Pedestrian *, CognitiveMap &) const;
+    std::string GetName() const override;
+    void execute(const Pedestrian *, CognitiveMap &, double time) const override;
 
 private:
 };

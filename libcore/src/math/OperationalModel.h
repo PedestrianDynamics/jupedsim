@@ -48,6 +48,7 @@ class OperationalModel
 protected:
     // define the strategy for crossing a door (used for calculating the driving force)
     std::shared_ptr<DirectionManager> _direction;
+    double _currentTime{0.0};
 
 public:
     /**
@@ -85,4 +86,6 @@ public:
     ComputeNextTimeStep(double current, double deltaT, Building * building, int periodic) = 0;
 
     std::shared_ptr<DirectionManager> GetDirection() { return _direction; };
+
+    void Update(double time) { _currentTime = time; }
 };
