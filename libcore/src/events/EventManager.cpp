@@ -1,8 +1,19 @@
 #include "EventManager.h"
 
+#include <chrono>
 
-std::pair<EventManager::ConstEventIteratorType, EventManager::ConstEventIteratorType>
-EventManager::NextEvents(SimulationClock x)
+
+IteratorPair<EventManager::ConstEventIteratorType> EventManager::NextEvents(SimulationClock _clock)
 {
-    return {_events.cbegin(), _events.cend()};
+    auto ub = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::duration<double>(_clock.ElapsedTime()));
+    auto lb = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::duration<double>(_clock.ElapsedTime() - _clock.dT()));
+
+    return {_events.lower_bound(lb), _events.upper_bound(ub)};
+}
+
+void EventManager::add(Event event)
+{
+    _events.insert({EventMinTime(event), event});
 }

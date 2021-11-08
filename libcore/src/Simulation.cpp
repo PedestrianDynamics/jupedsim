@@ -423,7 +423,10 @@ double Simulation::RunBody(double maxSimTime)
         const double t = _frame * _deltaT;
 
         AddNewAgents();
-        auto evnts = _em.NextEvents(_clock);
+        auto next_events = _em.NextEvents(_clock);
+        for(auto const & event : next_events) {
+            // Visit Event
+        }
 
         Iterate();
         // write the trajectories
