@@ -49,6 +49,7 @@
 #include <algorithm>
 #include <chrono>
 #include <memory>
+#include <stdexcept>
 #include <tinyxml.h>
 
 // TODO: add these variables to class simulation
@@ -132,7 +133,7 @@ void Simulation::Iterate()
 
         // Checks if position of pedestrians is inside waiting area and should be waiting or if
         // left waiting area and assign new goal
-        GoalManager gm{_building.get(), &_agents};
+        GoalManager gm{_building.get(), this};
         gm.update(t_in_sec);
     }
 
@@ -176,6 +177,16 @@ void Simulation::RemoveAgents(std::vector<int> ids)
         _agents.end());
 }
 
+Pedestrian & Simulation::Agent(int id) const
+{
+    const auto iter = std::find_if(
+        _agents.begin(), _agents.end(), [id](auto & ped) { return id == ped->GetID(); });
+    if(iter == _agents.end()) {
+        throw std::logic_error("Trying to access unknown Agent.");
+    }
+    return **iter;
+}
+
 const std::vector<std::unique_ptr<Pedestrian>> & Simulation::Agents() const
 {
     return _agents;
@@ -208,6 +219,7 @@ bool Simulation::InitArgs()
     _fps              = _config->GetFps();
 
     _routingEngine = _config->GetRoutingEngine();
+    _routingEngine->SetSimulation(this);
 
     // TOOD(kkratz) remove
     std::vector<std::unique_ptr<Pedestrian>> ignored;

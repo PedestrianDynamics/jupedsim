@@ -107,6 +107,8 @@ public:
 
     void RemoveAgents(std::vector<int> ids);
 
+    Pedestrian & Agent(int id) const;
+
     const std::vector<std::unique_ptr<Pedestrian>> & Agents() const;
 
     size_t GetPedsNumber() const;

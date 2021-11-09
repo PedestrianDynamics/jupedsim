@@ -25,11 +25,12 @@
  */
 #include "GoalManager.h"
 
+#include "Simulation.h"
 #include "WaitingArea.h"
 #include "pedestrian/Pedestrian.h"
 
-GoalManager::GoalManager(Building * building, std::vector<std::unique_ptr<Pedestrian>> * agents) :
-    _building(building), _agents(agents)
+GoalManager::GoalManager(Building * building, Simulation * simulation) :
+    _building(building), _simulation(simulation)
 {
 }
 
@@ -59,13 +60,13 @@ void GoalManager::ProcessWaitingAreas(double time)
                 if(!wa->IsWaiting(time, _building)) {
                     auto pedsInside = wa->GetPedInside();
                     for(auto p : pedsInside) {
-                        auto ped = _building->GetPedestrian(p);
+                        auto & ped = _simulation->Agent(p);
                         wa->RemovePed(p);
-                        ped->LeaveGoal();
+                        ped.LeaveGoal();
                         if(wa->IsOpen()) {
                             SetState(wa->GetId(), true);
                         }
-                        ped->SetFinalDestination(wa->GetNextGoal());
+                        ped.SetFinalDestination(wa->GetNextGoal());
                     }
                 }
             }
@@ -114,7 +115,7 @@ void GoalManager::SetState(int goalID, bool state)
 
 void GoalManager::update(double time)
 {
-    for(const auto & ped : *_agents) {
+    for(const auto & ped : _simulation->Agents()) {
         ProcessPedPosition(ped.get(), time);
     }
     ProcessWaitingAreas(time);

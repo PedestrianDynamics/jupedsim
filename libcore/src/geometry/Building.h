@@ -109,9 +109,6 @@ public:
 
     RoutingEngine * GetRoutingEngine() const;
     const std::map<int, std::shared_ptr<Room>> & GetAllRooms() const;
-    const std::vector<std::unique_ptr<Pedestrian>> & GetAllPedestrians() const;
-
-    Pedestrian * GetPedestrian(int pedID) const;
 
     int GetNumberOfRooms() const;
 

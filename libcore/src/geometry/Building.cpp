@@ -796,11 +796,6 @@ void Building::InitGrid()
     LOG_INFO("Done with Initializing the grid");
 }
 
-const std::vector<std::unique_ptr<Pedestrian>> & Building::GetAllPedestrians() const
-{
-    return *_allPedestrians;
-}
-
 void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const
 {
     for(auto && ped : *_allPedestrians) {
@@ -808,18 +803,6 @@ void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian *> &
             peds.push_back(ped.get());
         }
     }
-}
-
-Pedestrian * Building::GetPedestrian(int pedID) const
-{
-    const auto iter = std::find_if(
-        std::begin(*_allPedestrians), std::end(*_allPedestrians), [pedID](const auto & e) {
-            return e->GetID() == pedID;
-        });
-    if(iter != std::end(*_allPedestrians)) {
-        return iter->get();
-    }
-    return nullptr;
 }
 
 Transition * Building::GetTransitionByUID(int uid) const

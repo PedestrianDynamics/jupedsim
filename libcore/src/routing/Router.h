@@ -34,6 +34,7 @@
 
 class Building;
 class Pedestrian;
+class Simulation;
 
 class Router
 {
@@ -57,6 +58,8 @@ protected:
 
     double _currentTime{0.0};
 
+    Simulation * _simulation{nullptr};
+
 public:
     /**
       * Constructor
@@ -76,6 +79,8 @@ public:
     virtual ~Router();
 
     void UpdateTime(double time) { _currentTime = time; }
+
+    void SetSimulation(Simulation * simulation) { _simulation = simulation; }
 
     /**
       * Add a new final destination to this router
