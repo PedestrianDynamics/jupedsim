@@ -65,12 +65,15 @@ private:
         double dx) const;
 
     const Configuration * _configuration;
+    std::vector<std::unique_ptr<Pedestrian>> * _agents;
 
 public:
     /**
      * constructor
      */
-    PedDistributor(const Configuration * configuration);
+    PedDistributor(
+        const Configuration * configuration,
+        std::vector<std::unique_ptr<Pedestrian>> * agents);
 
     /**
      * desctructor

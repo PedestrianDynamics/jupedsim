@@ -44,7 +44,6 @@
 #include "geometry/Wall.h"
 #include "geometry/helper/CorrectGeometry.h"
 #include "neighborhood/NeighborhoodSearch.h"
-#include "pedestrian/PedDistributor.h"
 #include "pedestrian/Pedestrian.h"
 #include "routing/RoutingEngine.h"
 
@@ -73,7 +72,6 @@ Building::Building(std::vector<std::unique_ptr<Pedestrian>> * agents) : _allPede
 
 Building::Building(
     Configuration * configuration,
-    PedDistributor & pedDistributor,
     std::vector<std::unique_ptr<Pedestrian>> * agents) :
     _configuration(configuration),
     _routingEngine(configuration->GetRoutingEngine()),
@@ -90,15 +88,6 @@ Building::Building(
         exit(EXIT_FAILURE);
     }
 
-
-    //TODO: check whether traffic info can be loaded before InitGeometry if so call it in LoadBuilding instead and make
-    //TODO: LoadTrafficInfo private [gl march '16]
-
-
-    if(!pedDistributor.Distribute(this)) {
-        LOG_ERROR("Could not distribute the pedestrians");
-        exit(EXIT_FAILURE);
-    }
     InitGrid();
 
     if(!_routingEngine->Init(this)) {
@@ -823,18 +812,6 @@ void Building::DeletePedestrian(int id)
 const std::vector<std::unique_ptr<Pedestrian>> & Building::GetAllPedestrians() const
 {
     return *_allPedestrians;
-}
-
-void Building::AddPedestrian(Pedestrian * ped)
-{
-    if(std::find_if(
-           std::begin(*_allPedestrians), std::end(*_allPedestrians), [ped](const auto & e) {
-               return ped->GetID() == e->GetID();
-           }) != std::end(*_allPedestrians)) {
-        LOG_WARNING("Pedestrian {} already in the room.", ped->GetID());
-    } else {
-        _allPedestrians->emplace_back(std::unique_ptr<Pedestrian>(ped));
-    }
 }
 
 void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const

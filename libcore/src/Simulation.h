@@ -86,7 +86,7 @@ private:
     EventManager _em;
 
 public:
-    explicit Simulation(Configuration * args);
+    explicit Simulation(Configuration * args, std::unique_ptr<Building> && building);
 
     ~Simulation() = default;
 

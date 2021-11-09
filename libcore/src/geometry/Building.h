@@ -92,13 +92,12 @@ public:
     /// constructor
     Building(std::vector<std::unique_ptr<Pedestrian>> * agents);
 
-    Building(
-        Configuration * config,
-        PedDistributor & pedDistributor,
-        std::vector<std::unique_ptr<Pedestrian>> * agents);
+    Building(Configuration * config, std::vector<std::unique_ptr<Pedestrian>> * agents);
 
     /// destructor
     virtual ~Building();
+
+    void SetAgents(std::vector<std::unique_ptr<Pedestrian>> * agents) { _allPedestrians = agents; }
 
     Configuration * GetConfig() const;
 
@@ -106,9 +105,6 @@ public:
 
     /// delete the ped from the ped vector
     void DeletePedestrian(int id);
-
-    /// delete the ped from the simulation
-    void AddPedestrian(Pedestrian * ped);
 
     void GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const;
 

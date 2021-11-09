@@ -2,6 +2,7 @@
 # Build libcore
 ################################################################################
 set(source_files
+    src/agent-creation/AgentCreator.cpp
     src/direction/DirectionManager.cpp
     src/direction/DirectionManager.h
     src/direction/waiting/WaitingMiddle.cpp
@@ -101,6 +102,7 @@ set(source_files
 )
 
 set(header_files
+    src/agent-creation/AgentCreator.h
     src/events/DoorEvent.h
     src/events/OldEvent.h
     src/events/OldEventManager.h

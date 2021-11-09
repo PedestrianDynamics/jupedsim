@@ -35,7 +35,10 @@
 #include <Logger.h>
 #include <cmath>
 
-PedDistributor::PedDistributor(const Configuration * configuration) : _configuration(configuration)
+PedDistributor::PedDistributor(
+    const Configuration * configuration,
+    std::vector<std::unique_ptr<Pedestrian>> * agents) :
+    _configuration(configuration), _agents(agents)
 {
     _start_dis         = std::vector<std::shared_ptr<StartDistribution>>();
     _start_dis_sub     = std::vector<std::shared_ptr<StartDistribution>>();
@@ -515,7 +518,7 @@ void PedDistributor::DistributeInSubRoom(
         }
 
         Pedestrian * ped = para->GenerateAgent(building, pid, positions);
-        building->AddPedestrian(ped);
+        _agents->emplace_back(ped);
     }
 }
 

@@ -53,12 +53,12 @@
 // TODO: add these variables to class simulation
 std::map<int, double> trainOutflow;
 
-Simulation::Simulation(Configuration * args) : _config(args), _clock(_config->Getdt())
+Simulation::Simulation(Configuration * args, std::unique_ptr<Building> && building) :
+    _config(args), _clock(_config->Getdt()), _building(std::move(building))
 {
     _countTraj               = 0;
     _seed                    = 8091983;
     _deltaT                  = 0;
-    _building                = nullptr;
     _operationalModel        = nullptr;
     _fps                     = 1;
     _old_em                  = nullptr;
@@ -186,10 +186,17 @@ bool Simulation::InitArgs()
     _periodic         = _config->IsPeriodic();
     _fps              = _config->GetFps();
 
-    _routingEngine   = _config->GetRoutingEngine();
-    auto distributor = std::make_unique<PedDistributor>(PedDistributor(_config));
+    _routingEngine = _config->GetRoutingEngine();
+
+    // TOOD(kkratz) remove
+    std::vector<std::unique_ptr<Pedestrian>> ignored;
+    auto distributor = std::make_unique<PedDistributor>(_config, &ignored);
+    distributor->Distribute(_building.get());
+
+
     // IMPORTANT: do not change the order in the following..
-    _building = std::make_unique<Building>(_config, *distributor, &_agents);
+    _building->SetAgents(&_agents);
+
 
     // Initialize the agents sources that have been collected in the pedestrians distributor
     _agentSrcManager = std::make_unique<AgentsSourcesManager>(_building.get());
@@ -421,7 +428,6 @@ void Simulation::RunHeader(long nPed)
     //first initialisation needed by the linked-cells
     UpdateRoutesAndLocations();
 
-    // KKZ: RunBody calls this as one of the firs things, hence this can be removed
     _agentSrcManager->GenerateAgents();
 }
 
