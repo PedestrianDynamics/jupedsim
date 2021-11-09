@@ -4,10 +4,9 @@ sidebar: jupedsim_sidebar
 permalink: jupedsim_introduction.html
 summary: Open source framework for simulating, analyzing and visualizing  pedestrian dynamics.
 folder: jupedsim
-last_updated: Dec 20, 2019
+last_updated: Nov 09, 2021
 ---
 
-[![DOI](https://zenodo.org/badge/13744388.svg)](https://zenodo.org/badge/latestdoi/13744388)
 
 This software is platform independent, released under the LGPL license and is written in C++ and Python.
 
