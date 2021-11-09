@@ -87,7 +87,8 @@ std::string SmokeSensor::GetName() const
     return "SmokeSensor";
 }
 
-void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap & cognitive_map) const
+void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap & cognitive_map, double time)
+    const
 {
     SubRoom * sub_room =
         building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
@@ -108,10 +109,7 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap & cognitiv
         if(_FMStorage) {
             double SmokeFactor =
                 _FMStorage
-                    ->GetFDSMesh(
-                        pedestrian->GetElevation(),
-                        item->GetCrossing()->GetCentre(),
-                        pedestrian->GetGlobalTime())
+                    ->GetFDSMesh(pedestrian->GetElevation(), item->GetCrossing()->GetCentre(), time)
                     .GetKnotValue(pedestrian->GetPos()._x, pedestrian->GetPos()._y);
             weight = 1 + (1 - RiskTolerance) * SmokeFactor;
         }

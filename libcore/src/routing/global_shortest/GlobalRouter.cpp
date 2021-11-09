@@ -689,18 +689,6 @@ void GlobalRouter::FloydWarshall()
     }
 }
 
-//void GlobalRouter::DumpAccessPoints(int p)
-//{
-//     if (p != -1) {
-//          _accessPoints.at(p)->Dump();
-//     } else {
-//          for (const auto & itr: _accessPoints)
-//          {
-//               itr.second->Dump();
-//          }
-//     }
-//}
-
 int GlobalRouter::FindExit(Pedestrian * ped)
 {
     if(!_useMeshForLocalNavigation) {

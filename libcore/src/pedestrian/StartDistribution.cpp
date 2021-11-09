@@ -221,7 +221,7 @@ StartDistribution::GenerateAgent(Building * building, int * pid, std::vector<Poi
         }
     } else {
         Point pos = positions[index];
-        ped->SetPos(pos, true); //true for the initial position
+        ped->SetPos(pos); //true for the initial position
         positions.erase(positions.begin() + index);
 
         const Point & start_pos = Point(_startX, _startY);
@@ -243,7 +243,7 @@ StartDistribution::GenerateAgent(Building * building, int * pid, std::vector<Poi
                 exit(EXIT_FAILURE);
             }
 
-            ped->SetPos(start_pos, true); //true for the initial position
+            ped->SetPos(start_pos); //true for the initial position
             LOG_INFO(
                 "fixed position for ped {:d} in Room {:d} {}",
                 *pid,

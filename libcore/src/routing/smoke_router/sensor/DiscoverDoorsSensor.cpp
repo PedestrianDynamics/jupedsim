@@ -40,7 +40,10 @@ std::string DiscoverDoorsSensor::GetName() const
     return "DiscoverDoorsSensor";
 }
 
-void DiscoverDoorsSensor::execute(const Pedestrian * pedestrian, CognitiveMap & cognitive_map) const
+void DiscoverDoorsSensor::execute(
+    const Pedestrian * pedestrian,
+    CognitiveMap & cognitive_map,
+    double /*time*/) const
 {
     SubRoom * sub_room =
         building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());

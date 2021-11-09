@@ -39,8 +39,8 @@ public:
     SmokeSensor(const Building * b);
     virtual ~SmokeSensor();
 
-    std::string GetName() const;
-    void execute(const Pedestrian *, CognitiveMap &) const;
+    std::string GetName() const override;
+    void execute(const Pedestrian *, CognitiveMap &, double time) const override;
     void set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage);
     const std::shared_ptr<FDSMeshStorage> get_FMStorage();
 

@@ -32,7 +32,7 @@
 #include "geometry/SubRoom.h"
 #include "pedestrian/Pedestrian.h"
 
-Point WaitingStrategy::GetTarget(Room * room, Pedestrian * ped)
+Point WaitingStrategy::GetTarget(Room * room, Pedestrian * ped, double time)
 {
     Point waitingPos = ped->GetWaitingPos();
     Point target;
@@ -41,7 +41,7 @@ Point WaitingStrategy::GetTarget(Room * room, Pedestrian * ped)
     if(waitingPos._x == std::numeric_limits<double>::max() &&
        waitingPos._y == std::numeric_limits<double>::max()) {
         do {
-            target = GetWaitingPosition(room, ped);
+            target = GetWaitingPosition(room, ped, time);
         } while(!ped->GetBuilding()->GetSubRoomByUID(ped->GetSubRoomUID())->IsInSubRoom(target));
 
         ped->SetWaitingPos(target);

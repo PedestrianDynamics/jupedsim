@@ -33,7 +33,7 @@ GoalManager::GoalManager(Building * building, std::vector<std::unique_ptr<Pedest
 {
 }
 
-void GoalManager::ProcessPedPosition(Pedestrian * ped)
+void GoalManager::ProcessPedPosition(Pedestrian * ped, double time)
 {
     // Ped is in current waiting area
     if(CheckInsideWaitingArea(ped, ped->GetFinalDestination())) {
@@ -45,9 +45,7 @@ void GoalManager::ProcessPedPosition(Pedestrian * ped)
             SetState(wa->GetId(), false);
         }
 
-        double t = Pedestrian::GetGlobalTime();
-
-        if((wa->IsWaiting(t, ped->GetBuilding())) && (!ped->IsWaiting())) {
+        if((wa->IsWaiting(time, ped->GetBuilding())) && (!ped->IsWaiting())) {
             ped->StartWaiting();
         }
     }
@@ -117,7 +115,7 @@ void GoalManager::SetState(int goalID, bool state)
 void GoalManager::update(double time)
 {
     for(const auto & ped : *_agents) {
-        ProcessPedPosition(ped.get());
+        ProcessPedPosition(ped.get(), time);
     }
     ProcessWaitingAreas(time);
 }

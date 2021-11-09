@@ -205,7 +205,7 @@ TEST_CASE(
     SECTION("Pedestrian in same room")
     {
         Pedestrian ped;
-        ped.SetPos({-8, -1}, true);
+        ped.SetPos({-8, -1});
         ped.SetRoomID(sub11->GetRoomID());
         ped.SetSubRoomID(sub11->GetSubRoomID());
         ped.SetSubRoomUID(sub11->GetUID());
@@ -220,7 +220,7 @@ TEST_CASE(
     SECTION("Pedestrian in same room on crossing")
     {
         Pedestrian ped;
-        ped.SetPos({-6, -1}, true);
+        ped.SetPos({-6, -1});
         ped.SetRoomID(sub11->GetRoomID());
         ped.SetSubRoomID(sub11->GetSubRoomID());
         ped.SetSubRoomUID(sub11->GetUID());
@@ -235,7 +235,7 @@ TEST_CASE(
     SECTION("Pedestrian in same room on transition")
     {
         Pedestrian ped;
-        ped.SetPos({2, -1}, true);
+        ped.SetPos({2, -1});
         ped.SetRoomID(sub13->GetRoomID());
         ped.SetSubRoomID(sub13->GetSubRoomID());
         ped.SetSubRoomUID(sub13->GetUID());
@@ -250,7 +250,7 @@ TEST_CASE(
     SECTION("Pedestrian in neighboring subroom")
     {
         Pedestrian ped;
-        ped.SetPos({-8, -1}, true);
+        ped.SetPos({-8, -1});
         ped.SetRoomID(sub12->GetRoomID());
         ped.SetSubRoomID(sub12->GetSubRoomID());
         ped.SetSubRoomUID(sub12->GetUID());
@@ -265,7 +265,7 @@ TEST_CASE(
     SECTION("Pedestrian in neighboring room")
     {
         Pedestrian ped;
-        ped.SetPos({1, -1}, true);
+        ped.SetPos({1, -1});
         ped.SetRoomID(sub21->GetRoomID());
         ped.SetSubRoomID(sub21->GetSubRoomID());
         ped.SetSubRoomUID(sub21->GetUID());
@@ -281,7 +281,7 @@ TEST_CASE(
     SECTION("Pedestrian not in neighboring subroom")
     {
         Pedestrian ped;
-        ped.SetPos({-8, -1}, true);
+        ped.SetPos({-8, -1});
         ped.SetRoomID(sub13->GetRoomID());
         ped.SetSubRoomID(sub13->GetSubRoomID());
         ped.SetSubRoomUID(sub13->GetUID());
@@ -296,7 +296,7 @@ TEST_CASE(
     SECTION("Pedestrian not in neighboring room")
     {
         Pedestrian ped;
-        ped.SetPos({1, -1}, true);
+        ped.SetPos({1, -1});
         ped.SetRoomID(sub31->GetRoomID());
         ped.SetSubRoomID(sub31->GetSubRoomID());
         ped.SetSubRoomUID(sub31->GetUID());
@@ -663,8 +663,8 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
         Pedestrian ped;
         ped.SetRoomID(1);
         ped.SetSubRoomID(1);
-        ped.SetPos({-1.7, -1.}, false);
-        ped.SetPos({-2.2, -1.}, false);
+        ped.SetPos({-1.7, -1.});
+        ped.SetPos({-2.2, -1.});
         ped.UpdateRoom(-1, -1);
 
         std::vector<Pedestrian *> peds{&ped};
@@ -678,8 +678,8 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
         Pedestrian ped;
         ped.SetRoomID(1);
         ped.SetSubRoomID(1);
-        ped.SetPos({4., -1.}, false);
-        ped.SetPos({5.2, -1.}, false);
+        ped.SetPos({4., -1.});
+        ped.SetPos({5.2, -1.});
         ped.UpdateRoom(-1, -1);
 
         std::vector<Pedestrian *> peds{&ped};
@@ -696,8 +696,8 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
             auto ped = new Pedestrian();
             ped->SetRoomID(1);
             ped->SetSubRoomID(1);
-            ped->SetPos({4., -1.}, false);
-            ped->SetPos({5.2, -1.}, false);
+            ped->SetPos({4., -1.});
+            ped->SetPos({5.2, -1.});
             ped->UpdateRoom(-1, -1);
             peds.push_back(ped);
         }
@@ -718,8 +718,8 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
         Pedestrian ped;
         ped.SetRoomID(1);
         ped.SetSubRoomID(1);
-        ped.SetPos({4., -1.}, false);
-        ped.SetPos({4, -3.}, false);
+        ped.SetPos({4., -1.});
+        ped.SetPos({4, -3.});
         ped.UpdateRoom(-1, -1);
 
         std::vector<Pedestrian *> peds{&ped};
@@ -733,8 +733,8 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
         Pedestrian ped;
         ped.SetRoomID(1);
         ped.SetSubRoomID(1);
-        ped.SetPos({4., -1.}, false);
-        ped.SetPos({5.2, -1.}, false);
+        ped.SetPos({4., -1.});
+        ped.SetPos({5.2, -1.});
         ped.UpdateRoom(-1, -1);
         trans11->Close();
 
@@ -840,8 +840,8 @@ TEST_CASE("SimulationHelper::UpdateFlowAtDoors", "[SimulationHelper][UpdateFlowA
             ped.SetRoomID(2);
             ped.SetSubRoomID(1);
             ped.SetExitIndex(trans12->GetUniqueID());
-            ped.SetPos({-2.05, -1.}, false);
-            ped.SetPos({-1.95, -1.}, false);
+            ped.SetPos({-2.05, -1.});
+            ped.SetPos({-1.95, -1.});
             ped.UpdateRoom(1, 1);
             std::vector<Pedestrian *> peds{&ped};
             SimulationHelper::UpdateFlowAtDoors(building, peds, 0.0);
@@ -857,8 +857,8 @@ TEST_CASE("SimulationHelper::UpdateFlowAtDoors", "[SimulationHelper][UpdateFlowA
             ped.SetRoomID(1);
             ped.SetSubRoomID(1);
             ped.SetExitIndex(trans11->GetUniqueID());
-            ped.SetPos({-2.05, -1.}, false);
-            ped.SetPos({-1.95, -1.}, false);
+            ped.SetPos({-2.05, -1.});
+            ped.SetPos({-1.95, -1.});
             ped.UpdateRoom(-1, -1);
             std::vector<Pedestrian *> peds{&ped};
             SimulationHelper::UpdateFlowAtDoors(building, peds, 0.0);
@@ -877,8 +877,8 @@ TEST_CASE("SimulationHelper::UpdateFlowAtDoors", "[SimulationHelper][UpdateFlowA
             ped.SetRoomID(1);
             ped.SetSubRoomID(1);
             ped.SetExitIndex(trans11->GetUniqueID());
-            ped.SetPos({4.95, -1.}, false);
-            ped.SetPos({5.05, -1.}, false);
+            ped.SetPos({4.95, -1.});
+            ped.SetPos({5.05, -1.});
             ped.UpdateRoom(-1, -1);
             std::vector<Pedestrian *> peds{&ped};
             SimulationHelper::UpdateFlowAtDoors(building, peds, 0.0);
