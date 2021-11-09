@@ -32,6 +32,10 @@ entries:
       url: /jupedsim_introduction.html
       output: web, pdf
 
+    - title: Retrospective
+      url: /2021-11-04-jupedsim_blog.html
+      output: web, pdf
+
     - title: Tutorials
       url: /jupedsim_notebooks.html
       output: web, pdf
@@ -163,4 +167,4 @@ entries:
         # - title: Density/Velocity profiles
         #   url: /jpsreport_profiles.html
         #   output: web, pdf
-    
+
