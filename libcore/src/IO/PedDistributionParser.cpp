@@ -223,7 +223,6 @@ std::shared_ptr<AgentsSource> PedDistributionParser::parseSourceNode(TiXmlElemen
     float percent          = xmltof(e->Attribute("percent"), 1);
     float rate             = xmltof(e->Attribute("rate"), -1);
     double time            = xmltof(e->Attribute("time"), 0);
-    int agent_id           = xmltoi(e->Attribute("agent_id"), -1);
     float startx      = xmltof(e->Attribute("startX"), std::numeric_limits<float>::quiet_NaN());
     float starty      = xmltof(e->Attribute("startY"), std::numeric_limits<float>::quiet_NaN());
     bool greedy       = (str_greedy == "true") ? true : false;
@@ -262,10 +261,6 @@ std::shared_ptr<AgentsSource> PedDistributionParser::parseSourceNode(TiXmlElemen
             id,
             time);
     }
-    if(agent_id >= 0) {
-        agents_max = 1;
-        frequency  = 1;
-    }
     if(percent > 1) {
         LOG_WARNING("Source {}. Passed erronuous percent <{:.2f}>. Set percent=1.", id, percent);
         percent = 1.0;
@@ -288,7 +283,6 @@ std::shared_ptr<AgentsSource> PedDistributionParser::parseSourceNode(TiXmlElemen
         frequency,
         greedy,
         time,
-        agent_id,
         startx,
         starty,
         percent,

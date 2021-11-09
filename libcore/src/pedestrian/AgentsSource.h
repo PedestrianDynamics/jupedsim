@@ -51,7 +51,6 @@ public:
         int frequency,
         bool greedy,
         double time,
-        int agent_id,
         float startx,
         float starty,
         float percent,
@@ -148,7 +147,6 @@ private:
     bool _greedy         = false;
     int _agentsGenerated = 0;
     std::vector<float> _boundaries;
-    int _agent_id;
     double _time;  /// planned generation time. here \var _maxAgents = 1
     float _startx; /// \var _maxAgents = 1
     float _starty; /// \var _maxAgents = 1

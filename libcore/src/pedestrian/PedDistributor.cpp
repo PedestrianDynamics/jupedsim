@@ -117,8 +117,6 @@ bool PedDistributor::Distribute(Building * building) const
 
 
     // now proceed to the distribution
-    int pid = 1; // the pedID is being increased throughout...
-
     for(const auto & dist : _start_dis_sub) {
         int room_id = dist->GetRoomId();
         Room * r    = building->GetRoom(room_id);
@@ -157,7 +155,7 @@ bool PedDistributor::Distribute(Building * building) const
             roomID,
             subroomID,
             max_pos);
-        DistributeInSubRoom(N, allpos, &pid, dist.get(), building);
+        DistributeInSubRoom(N, allpos, dist.get(), building);
         LOG_INFO("Finished distributing pedestrians");
         nPeds_is += N;
     }
@@ -237,7 +235,7 @@ bool PedDistributor::Distribute(Building * building) const
             // might conflicts with sources
             dist->SetSubroomID(sr->GetSubRoomID());
             if(akt_anz[is] > 0) {
-                DistributeInSubRoom(akt_anz[is], allFreePosInRoom[is], &pid, dist.get(), building);
+                DistributeInSubRoom(akt_anz[is], allFreePosInRoom[is], dist.get(), building);
             }
         }
         nPeds_is += N;
@@ -500,24 +498,12 @@ std::vector<Point> PedDistributor::PossiblePositions(const SubRoom & r) const
 void PedDistributor::DistributeInSubRoom(
     int nAgents,
     std::vector<Point> & positions,
-    int * pid,
     StartDistribution * para,
     Building * building) const
 {
-    std::vector<int> reserved_ids;
-    for(const auto & source : _start_dis_sources) {
-        if(source->GetAgentId() >= 0)
-            reserved_ids.push_back(source->GetAgentId());
-    }
-
     // set the pedestrians
     for(int i = 0; i < nAgents; ++i) {
-        // look for a not reserved id.
-        while(std::find(reserved_ids.begin(), reserved_ids.end(), *pid) != reserved_ids.end()) {
-            *pid += 1;
-        }
-
-        Pedestrian * ped = para->GenerateAgent(building, pid, positions);
+        Pedestrian * ped = para->GenerateAgent(building, positions);
         _agents->emplace_back(ped);
     }
 }

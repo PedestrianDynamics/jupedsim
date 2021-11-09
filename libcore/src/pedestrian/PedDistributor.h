@@ -91,7 +91,6 @@ public:
     void DistributeInSubRoom(
         int N,
         std::vector<Point> & positions,
-        int * pid,
         StartDistribution * parameters,
         Building * building) const;
 

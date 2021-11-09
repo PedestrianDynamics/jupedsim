@@ -40,7 +40,6 @@ AgentsSource::AgentsSource(
     int frequency,
     bool greedy,
     double time,
-    int agent_id,
     float startx,
     float starty,
     float percent,
@@ -54,7 +53,6 @@ AgentsSource::AgentsSource(
     _groupID(group_id),
     _caption(std::move(caption)),
     _greedy(greedy),
-    _agent_id(agent_id),
     _time(time),
     _startx(startx),
     _starty(starty),
@@ -149,11 +147,6 @@ int AgentsSource::GetId() const
     return _id;
 }
 
-int AgentsSource::GetAgentId() const
-{
-    return _agent_id;
-}
-
 double AgentsSource::GetPlanTime() const
 {
     return _time;
@@ -226,13 +219,9 @@ void AgentsSource::GenerateAgents(std::vector<Pedestrian *> & peds, int count, B
     //       2. In a second step (in AgentsSourcesManager::ProcessAllSources())
     //          the positions will be calculated and initializes.
     // TODO: We should reverse the order of points 1 and 2.
-    int pid;
-    pid = (this->GetAgentId() >= 0) ?
-              this->GetAgentId() :
-              Pedestrian::GetAgentsCreated() + building->GetAllPedestrians().size();
     for(int i = 0; i < count; i++) {
         if(GetStartDistribution()) {
-            auto ped = GetStartDistribution()->GenerateAgent(building, &pid, emptyPositions);
+            auto ped = GetStartDistribution()->GenerateAgent(building, emptyPositions);
             peds.push_back(ped);
         } else {
             std::string message =
@@ -253,7 +242,7 @@ void AgentsSource::Dump() const
     auto tmpL = this->GetLifeSpan();
     LOG_DEBUG(
         "Dumping Source: Caption={} SourceID={:d}, GroupID={:d}, Frequency={:d}, AgentsMax={:d}, "
-        "AgentsPool={:d}, AgentID={:d}, Time={:.2f}, Pos=({:.2f},{:.2f}), Percent={:.2f}, "
+        "AgentsPool={:d}, Time={:.2f}, Pos=({:.2f},{:.2f}), Percent={:.2f}, "
         "Rate={:.2f}, N_create={:d}, Boundaries=(XAxis=({:.4f}, {:.4f}), YAxis=({:.4f},{:.4f})), "
         "LifeSpan=({:d},{:d})",
         this->GetCaption(),
@@ -262,7 +251,6 @@ void AgentsSource::Dump() const
         _frequency,
         _maxAgents,
         _agents.size(),
-        this->GetAgentId(),
         this->GetPlanTime(),
         this->GetStartX(),
         this->GetStartY(),

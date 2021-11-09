@@ -153,14 +153,12 @@ void StartDistribution::SetAgentsNumber(int N)
 }
 
 
-Pedestrian *
-StartDistribution::GenerateAgent(Building * building, int * pid, std::vector<Point> & positions)
+Pedestrian * StartDistribution::GenerateAgent(Building * building, std::vector<Point> & positions)
 {
     Pedestrian * ped = new Pedestrian();
     // PedIndex
     ped->SetWalkingSpeed(building->GetConfig()->GetWalkingSpeed());
     ped->SetTox(building->GetConfig()->GetToxicityAnalysis());
-    ped->SetID(*pid);
     ped->SetFinalDestination(GetGoalId());
     ped->SetGroup(GetGroupId());
     ped->SetRouter(building->GetRoutingEngine()->GetRouter(_routerID));
@@ -234,7 +232,7 @@ StartDistribution::GenerateAgent(Building * building, int * pid, std::vector<Poi
                     "StartDistribution::GenerateAgent cannot distribute pedestrian {:d} in "
                     "Room {:d} / Subroom {:d} at fixed position {}. Make sure the position is "
                     "inside the geometry and belongs to the specified room {:d} / subroom {:d}",
-                    *pid,
+                    ped->GetID(),
                     GetRoomId(),
                     GetSubroomID(),
                     start_pos.toString(),
@@ -246,14 +244,11 @@ StartDistribution::GenerateAgent(Building * building, int * pid, std::vector<Poi
             ped->SetPos(start_pos); //true for the initial position
             LOG_INFO(
                 "fixed position for ped {:d} in Room {:d} {}",
-                *pid,
+                ped->GetID(),
                 GetRoomId(),
                 start_pos.toString().c_str());
         }
     }
-
-    (*pid)++;
-
     return ped;
 }
 
