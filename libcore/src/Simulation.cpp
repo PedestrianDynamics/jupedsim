@@ -35,7 +35,9 @@
 #include "IO/Trajectories.h"
 #include "SimulationClock.h"
 #include "SimulationHelper.h"
+#include "events/Event.h"
 #include "events/EventManager.h"
+#include "events/EventVisitors.h"
 #include "general/Filesystem.h"
 #include "geometry/GoalManager.h"
 #include "geometry/WaitingArea.h"
@@ -49,6 +51,7 @@
 #include <chrono>
 #include <memory>
 #include <tinyxml.h>
+#include <variant>
 
 // TODO: add these variables to class simulation
 std::map<int, double> trainOutflow;
@@ -424,8 +427,10 @@ double Simulation::RunBody(double maxSimTime)
 
         AddNewAgents();
         auto next_events = _em.NextEvents(_clock);
-        for(auto const & event : next_events) {
-            // Visit Event
+        for(auto const & [_, event] : next_events) {
+            // lambda is used to bind additional function paramters to the visitor
+            auto visitor = [this](auto event) { ProcessEvent(event, *this); };
+            std::visit(visitor, event);
         }
 
         Iterate();

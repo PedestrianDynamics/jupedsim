@@ -18,11 +18,10 @@ class CreatePedestrianEvent : public BaseEvent
 {
 };
 
-using Event = std::variant<CreatePedestrianEvent>;
-
-
-inline std::chrono::nanoseconds EventMinTime(Event event)
+/// This is just a Dummy to avoid special solutions for a single type variant
+class DummyEvent : public BaseEvent
 {
-    auto call = [](auto const & obj) { return obj.MinTime(); };
-    return std::visit(call, event);
-}
+};
+
+
+using Event = std::variant<CreatePedestrianEvent, DummyEvent>;
