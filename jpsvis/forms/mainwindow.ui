@@ -196,7 +196,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -204,7 +204,6 @@
      <string>File</string>
     </property>
     <addaction name="actionOpenFile"/>
-    <addaction name="actionOpen"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -215,6 +214,8 @@
     <addaction name="actionTogglePlayback"/>
     <addaction name="actionRewind"/>
     <addaction name="actionRecord"/>
+    <addaction name="actionNextFrame"/>
+    <addaction name="actionPreviousFrame"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -345,17 +346,6 @@
     <string>Ctrl+L</string>
    </property>
   </action>
-  <action name="actionOpen">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Load Project</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
-   </property>
-  </action>
   <action name="action2_D">
    <property name="checkable">
     <bool>true</bool>
@@ -368,17 +358,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+2</string>
-   </property>
-  </action>
-  <action name="actionReset_All">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Reset All</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+A</string>
    </property>
   </action>
   <action name="actionOpenFile">
@@ -476,17 +455,6 @@
     <string>Ctrl+K</string>
    </property>
   </action>
-  <action name="actionFrames_Navigation">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Frames Navigation</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+U</string>
-   </property>
-  </action>
   <action name="actionShow_Axis">
    <property name="checkable">
     <bool>true</bool>
@@ -556,42 +524,12 @@
     <bool>false</bool>
    </property>
   </action>
-  <action name="actionCaptionAuto">
-   <property name="checkable">
-    <bool>false</bool>
-   </property>
-   <property name="checked">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Auto</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
-   </property>
-  </action>
-  <action name="actionCaptionCustom">
-   <property name="text">
-    <string>Choose...</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
-   </property>
-  </action>
   <action name="actionWalls_Color">
    <property name="text">
     <string>Walls Color</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+W</string>
-   </property>
-  </action>
-  <action name="actionExtColor">
-   <property name="text">
-    <string>Exits Color</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+E</string>
    </property>
   </action>
   <action name="actionShow_Onscreen_Infos">
@@ -779,6 +717,22 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionNextFrame">
+   <property name="text">
+    <string>NextFrame</string>
+   </property>
+   <property name="shortcut">
+    <string>Right</string>
+   </property>
+  </action>
+  <action name="actionPreviousFrame">
+   <property name="text">
+    <string>PreviousFrame</string>
+   </property>
+   <property name="shortcut">
+    <string>Left</string>
    </property>
   </action>
  </widget>
@@ -1051,22 +1005,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionExtColor</sender>
-   <signal>triggered()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotChangeExitsColor()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>224</x>
-     <y>199</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionShow_Onscreen_Infos</sender>
    <signal>triggered()</signal>
    <receiver>mainwindow</receiver>
@@ -1229,8 +1167,8 @@
   <connection>
    <sender>BtNextFrame</sender>
    <signal>clicked()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotNextFrame()</slot>
+   <receiver>actionNextFrame</receiver>
+   <slot>trigger()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>577</x>
@@ -1245,8 +1183,8 @@
   <connection>
    <sender>BtPreviousFrame</sender>
    <signal>clicked()</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotPreviousFrame()</slot>
+   <receiver>actionPreviousFrame</receiver>
+   <slot>trigger()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>436</x>
@@ -1285,8 +1223,8 @@
      <y>1092</y>
     </hint>
     <hint type="destinationlabel">
-     <x>318</x>
-     <y>261</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>
@@ -1301,8 +1239,8 @@
      <y>1078</y>
     </hint>
     <hint type="destinationlabel">
-     <x>957</x>
-     <y>1043</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>
@@ -1359,6 +1297,38 @@
    <signal>triggered()</signal>
    <receiver>mainwindow</receiver>
    <slot>slotRewindFramesToBegin()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>599</x>
+     <y>581</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionNextFrame</sender>
+   <signal>triggered()</signal>
+   <receiver>mainwindow</receiver>
+   <slot>slotNextFrame()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>599</x>
+     <y>581</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPreviousFrame</sender>
+   <signal>triggered()</signal>
+   <receiver>mainwindow</receiver>
+   <slot>slotPreviousFrame()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
