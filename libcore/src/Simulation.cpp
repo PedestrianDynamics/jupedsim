@@ -48,20 +48,22 @@
 #include "routing/ff_router/ffRouter.h"
 
 #include <Logger.h>
+#include <algorithm>
 #include <chrono>
 #include <memory>
+#include <stdexcept>
 #include <tinyxml.h>
 #include <variant>
 
 // TODO: add these variables to class simulation
 std::map<int, double> trainOutflow;
 
-Simulation::Simulation(Configuration * args) : _config(args), _clock(_config->Getdt())
+Simulation::Simulation(Configuration * args, std::unique_ptr<Building> && building) :
+    _config(args), _clock(_config->Getdt()), _building(std::move(building))
 {
     _countTraj               = 0;
     _seed                    = 8091983;
     _deltaT                  = 0;
-    _building                = nullptr;
     _operationalModel        = nullptr;
     _fps                     = 1;
     _old_em                  = nullptr;
@@ -134,7 +136,7 @@ void Simulation::Iterate()
 
         // Checks if position of pedestrians is inside waiting area and should be waiting or if
         // left waiting area and assign new goal
-        GoalManager gm{_building.get(), &_agents};
+        GoalManager gm{_building.get(), this};
         gm.update(t_in_sec);
     }
 
@@ -142,7 +144,7 @@ void Simulation::Iterate()
     //only executed every 3 seconds
     //TODO(kkratz): This is not working as intendet if 3 is not a multiple of deltaT
     if(fmod(_clock.ElapsedTime(), 3) == 0) {
-        for(auto && ped : _building->GetAllPedestrians()) {
+        for(auto && ped : _agents) {
             ped->ConductToxicityAnalysis();
         }
     }
@@ -155,12 +157,42 @@ void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
     _agents.emplace_back(std::move(agent));
 }
 
-void Simulation::AddAgent(std::vector<std::unique_ptr<Pedestrian>> && agents)
+void Simulation::AddAgents(std::vector<std::unique_ptr<Pedestrian>> && agents)
 {
     _agents.insert(
         _agents.end(),
         std::make_move_iterator(agents.begin()),
         std::make_move_iterator(agents.end()));
+}
+
+void Simulation::RemoveAgents(std::vector<int> ids)
+{
+    _agents.erase(
+        std::remove_if(
+            _agents.begin(),
+            _agents.end(),
+            [&ids](auto & agent) {
+                const int id = agent->GetID();
+                return std::find_if(ids.begin(), ids.end(), [id](int other) {
+                           return id == other;
+                       }) != ids.end();
+            }),
+        _agents.end());
+}
+
+Pedestrian & Simulation::Agent(int id) const
+{
+    const auto iter = std::find_if(
+        _agents.begin(), _agents.end(), [id](auto & ped) { return id == ped->GetID(); });
+    if(iter == _agents.end()) {
+        throw std::logic_error("Trying to access unknown Agent.");
+    }
+    return **iter;
+}
+
+const std::vector<std::unique_ptr<Pedestrian>> & Simulation::Agents() const
+{
+    return _agents;
 }
 
 size_t Simulation::GetPedsNumber() const
@@ -189,10 +221,18 @@ bool Simulation::InitArgs()
     _periodic         = _config->IsPeriodic();
     _fps              = _config->GetFps();
 
-    _routingEngine   = _config->GetRoutingEngine();
-    auto distributor = std::make_unique<PedDistributor>(PedDistributor(_config));
+    _routingEngine = _config->GetRoutingEngine();
+    _routingEngine->SetSimulation(this);
+
+    // TOOD(kkratz) remove
+    std::vector<std::unique_ptr<Pedestrian>> ignored;
+    auto distributor = std::make_unique<PedDistributor>(_config, &ignored);
+    distributor->Distribute(_building.get());
+
+
     // IMPORTANT: do not change the order in the following..
-    _building = std::make_unique<Building>(_config, *distributor, &_agents);
+    _building->SetAgents(&_agents);
+
 
     // Initialize the agents sources that have been collected in the pedestrians distributor
     _agentSrcManager = std::make_unique<AgentsSourcesManager>(_building.get());
@@ -209,7 +249,7 @@ bool Simulation::InitArgs()
     //this should be called after the routing engine has been initialised
     // because a direction is needed for this initialisation.
     LOG_INFO("Init Operational Model starting ...");
-    if(!_operationalModel->Init(_building.get())) {
+    if(!_operationalModel->Init(_building.get(), this)) {
         return false;
     }
     LOG_INFO("Init Operational Model done.");
@@ -220,7 +260,7 @@ bool Simulation::InitArgs()
     // has been called.
 
     //other initializations
-    for(auto && ped : _building->GetAllPedestrians()) {
+    for(auto && ped : _agents) {
         ped->SetDeltaT(_deltaT);
     }
     LOG_INFO("Number of peds received: {}", _agents.size());
@@ -275,13 +315,11 @@ double Simulation::RunStandardSimulation(double maxSimTime)
 
 void Simulation::UpdateRoutesAndLocations()
 {
-    const auto & peds = _building->GetAllPedestrians();
-
     auto [pedsChangedRoom, pedsNotRelocated] =
-        SimulationHelper::UpdatePedestriansLocations(*_building, peds);
+        SimulationHelper::UpdatePedestriansLocations(*_building, _agents);
 
     // not needed at the moment, as we do not have inside final goals yet
-    auto pedsAtFinalGoal = SimulationHelper::FindPedestriansReachedFinalGoal(*_building, peds);
+    auto pedsAtFinalGoal = SimulationHelper::FindPedestriansReachedFinalGoal(*_building, _agents);
     _pedsToRemove.insert(_pedsToRemove.end(), pedsAtFinalGoal.begin(), pedsAtFinalGoal.end());
 
     auto pedsOutside = SimulationHelper::FindPedestriansOutside(*_building, pedsNotRelocated);
@@ -291,8 +329,8 @@ void Simulation::UpdateRoutesAndLocations()
     SimulationHelper::UpdateFlowAtDoors(*_building, pedsOutside, _clock.ElapsedTime());
 
     SimulationHelper::RemoveFaultyPedestrians(
-        *_building, pedsNotRelocated, "Could not be properly relocated");
-    SimulationHelper::RemovePedestrians(*_building, _pedsToRemove);
+        *this, pedsNotRelocated, "Could not be properly relocated");
+    SimulationHelper::RemovePedestrians(*this, _pedsToRemove);
 
     //TODO discuss simulation flow -> better move to main loop, does not belong here
     bool geometryChangedFlow =
@@ -308,7 +346,7 @@ void Simulation::UpdateRoutesAndLocations()
 
 void Simulation::UpdateRoutes()
 {
-    for(const auto & ped : _building->GetAllPedestrians()) {
+    for(const auto & ped : _agents) {
         // set ped waiting, if no target is found
         int target = ped->FindRoute();
 
@@ -424,7 +462,6 @@ void Simulation::RunHeader(long nPed)
     //first initialisation needed by the linked-cells
     UpdateRoutesAndLocations();
 
-    // KKZ: RunBody calls this as one of the firs things, hence this can be removed
     _agentSrcManager->GenerateAgents();
 }
 
@@ -644,7 +681,7 @@ void Simulation::UpdateOutputGeometryFile()
 
 void Simulation::AddNewAgents()
 {
-    AddAgent(_agentSrcManager->ProcessAllSources(_clock.ElapsedTime()));
+    AddAgents(_agentSrcManager->ProcessAllSources(_clock.ElapsedTime()));
 }
 
 void Simulation::incrementCountTraj()

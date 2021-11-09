@@ -48,6 +48,8 @@ public:
 
     void UpdateTime(double time);
 
+    void SetSimulation(Simulation * simulation);
+
     /**
       * Add a final destination in the system.
       * The destinations are segments (@see Transitions @see Crossings)

@@ -115,5 +115,5 @@ public:
     void InitRiskTolerance(std::string distribution_type, double para1, double para2);
     double GetRiskTolerance();
 
-    Pedestrian * GenerateAgent(Building * building, int * pid, std::vector<Point> & positions);
+    Pedestrian * GenerateAgent(Building * building, std::vector<Point> & positions);
 };

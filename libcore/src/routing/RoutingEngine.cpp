@@ -47,6 +47,13 @@ void RoutingEngine::UpdateTime(double time)
     }
 }
 
+void RoutingEngine::SetSimulation(Simulation * simulation)
+{
+    for(auto && router : _routersCollection) {
+        router->SetSimulation(simulation);
+    }
+}
+
 void RoutingEngine::AddFinalDestinationID(int id)
 {
     for(unsigned int r = 0; r < _routersCollection.size(); r++) {

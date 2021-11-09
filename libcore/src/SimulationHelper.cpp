@@ -19,11 +19,13 @@
  **/
 #include "SimulationHelper.h"
 
+#include "Simulation.h"
 #include "geometry/Room.h"
 #include "geometry/SubRoom.h"
 
 #include <Logger.h>
 #include <algorithm>
+#include <iterator>
 
 PedRelocation
 SimulationHelper::UpdatePedestrianRoomInformation(const Building & building, Pedestrian & ped)
@@ -252,7 +254,7 @@ bool SimulationHelper::UpdateTrainFlowRegulation(Building & building, double tim
 }
 
 void SimulationHelper::RemoveFaultyPedestrians(
-    Building & building,
+    Simulation & simulation,
     std::vector<Pedestrian *> & pedsFaulty,
     std::string message)
 {
@@ -265,17 +267,17 @@ void SimulationHelper::RemoveFaultyPedestrians(
             message);
     });
 
-    SimulationHelper::RemovePedestrians(building, pedsFaulty);
+    SimulationHelper::RemovePedestrians(simulation, pedsFaulty);
 }
 
-void SimulationHelper::RemovePedestrians(Building & building, std::vector<Pedestrian *> & peds)
+void SimulationHelper::RemovePedestrians(Simulation & simulation, std::vector<Pedestrian *> & peds)
 {
-    sort(peds.begin(), peds.end());
-    peds.erase(unique(peds.begin(), peds.end()), peds.end());
-
-    std::for_each(std::begin(peds), std::end(peds), [&building](Pedestrian * ped) {
-        building.DeletePedestrian(ped->GetID());
-    });
-
+    std::vector<int> pedestrians_to_delete{};
+    pedestrians_to_delete.reserve(peds.size());
+    std::transform(
+        peds.begin(), peds.end(), std::back_inserter(pedestrians_to_delete), [](const auto * ped) {
+            return ped->GetID();
+        });
+    simulation.RemoveAgents(pedestrians_to_delete);
     peds.clear();
 }

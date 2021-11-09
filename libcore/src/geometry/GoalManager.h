@@ -26,6 +26,7 @@
 #pragma once
 
 #include "Goal.h"
+#include "Simulation.h"
 #include "geometry/Building.h"
 #include "pedestrian/Pedestrian.h"
 
@@ -37,10 +38,10 @@ class GoalManager
 {
 private:
     Building * _building;
-    std::vector<std::unique_ptr<Pedestrian>> * _agents;
+    Simulation * _simulation;
 
 public:
-    GoalManager(Building * building, std::vector<std::unique_ptr<Pedestrian>> * agents);
+    GoalManager(Building * building, Simulation * _simulation);
 
     /**
      * Checks if the pedestrians have entered a goal/wa or if the waiting inside a waiting area is

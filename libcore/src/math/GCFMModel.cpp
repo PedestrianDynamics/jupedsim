@@ -29,6 +29,7 @@
  **/
 #include "GCFMModel.h"
 
+#include "Simulation.h"
 #include "direction/DirectionManager.h"
 #include "direction/walking/DirectionStrategy.h"
 #include "geometry/SubRoom.h"
@@ -63,11 +64,12 @@ GCFMModel::GCFMModel(
 GCFMModel::~GCFMModel(void) {}
 
 
-bool GCFMModel::Init(Building * building)
+bool GCFMModel::Init(Building * building, Simulation * simulation)
 {
+    _simulation = simulation;
     _direction->Init(building);
 
-    const auto & allPeds = building->GetAllPedestrians();
+    const auto & allPeds = _simulation->Agents();
     std::vector<int> pedestrians_to_delete{};
     for(const auto & ped : allPeds) {
         double cosPhi, sinPhi;
@@ -93,9 +95,7 @@ bool GCFMModel::Init(Building * building)
         E.SetSinPhi(sinPhi);
         ped->SetEllipse(E);
     }
-    for(const auto & id : pedestrians_to_delete) {
-        building->DeletePedestrian(id);
-    }
+    _simulation->RemoveAgents(pedestrians_to_delete);
     return true;
 }
 
@@ -108,7 +108,7 @@ void GCFMModel::ComputeNextTimeStep(
     double delta = 1.5;
 
     // collect all pedestrians in the simulation.
-    const auto & allPeds = building->GetAllPedestrians();
+    const auto & allPeds = _simulation->Agents();
 
     std::vector<Point> result_acc = std::vector<Point>();
     result_acc.reserve(allPeds.size());
@@ -169,14 +169,12 @@ void GCFMModel::ComputeNextTimeStep(
         result_acc.push_back(acc);
     }
 
-    for(const auto id : pedestrians_to_delete) {
-        building->DeletePedestrian(id);
-    }
+    _simulation->RemoveAgents(pedestrians_to_delete);
 
     // update
     //TODO(kkz) replace with zip iterator
     size_t counter = 0;
-    for(auto & ped : allPeds) {
+    for(const auto & ped : allPeds) {
         Point v_neu   = ped->GetV() + result_acc[counter] * deltaT;
         Point pos_neu = ped->GetPos() + v_neu * deltaT;
         //Jam is based on the current velocity

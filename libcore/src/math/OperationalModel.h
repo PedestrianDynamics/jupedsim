@@ -42,6 +42,7 @@
 
 class Building;
 class DirectionManager;
+class Simulation;
 
 class OperationalModel
 {
@@ -49,6 +50,7 @@ protected:
     // define the strategy for crossing a door (used for calculating the driving force)
     std::shared_ptr<DirectionManager> _direction;
     double _currentTime{0.0};
+    Simulation * _simulation{nullptr};
 
 public:
     /**
@@ -67,7 +69,7 @@ public:
       * @param building, the building object
       * return the status of the initialisation
       */
-    virtual bool Init(Building * building) = 0;
+    virtual bool Init(Building * building, Simulation * simulation) = 0;
 
     /**
       * @return a description of the model possibly with all model parameters in a nicely formatted string

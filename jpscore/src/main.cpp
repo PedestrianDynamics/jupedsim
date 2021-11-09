@@ -27,6 +27,7 @@
  **/
 #include "IO/IniFileParser.h"
 #include "Simulation.h"
+#include "agent-creation/AgentCreator.h"
 #include "general/ArgumentParser.h"
 #include "general/Compiler.h"
 #include "general/Configuration.h"
@@ -71,7 +72,10 @@ int main(int argc, char ** argv)
         return EXIT_FAILURE;
     }
 
-    Simulation sim(&config);
+    auto building = std::make_unique<Building>(&config, nullptr);
+    auto agents   = CreateInitialPedestrians(config, building.get());
+    Simulation sim(&config, std::move(building));
+    sim.AddAgents(std::move(agents));
 
     if(!sim.InitArgs()) {
         LOG_ERROR("Could not start simulation. Check the log for prior errors");
