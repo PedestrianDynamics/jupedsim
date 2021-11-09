@@ -224,9 +224,9 @@ private:
     Settings _settings;
     TrajectoryData _trajectories;
     std::unique_ptr<Visualisation> _visualisation;
-    QLabel labelCurrentAction;
     QLabel labelFrameNumber;
     QLabel labelRecording;
+    QLabel labelCurrentFile;
     QSplitter _splitter;
     MyQTreeView _geoStructure;
 };

@@ -104,9 +104,9 @@ MainWindow::MainWindow(QWidget * parent, std::optional<std::filesystem::path> pa
         this,
         &MainWindow::slotSetCameraPerspectiveToSideRotate);
 
-    labelCurrentAction.setFrameStyle(QFrame::Panel | QFrame::Sunken);
-    labelCurrentAction.setText("   Idle   ");
-    statusBar()->addPermanentWidget(&labelCurrentAction);
+    labelCurrentFile.setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    labelCurrentFile.setText("File: -");
+    statusBar()->addPermanentWidget(&labelCurrentFile);
 
     labelFrameNumber.setFrameStyle(QFrame::Panel | QFrame::Sunken);
     labelFrameNumber.setText("fps:");
@@ -199,7 +199,6 @@ void MainWindow::startReplay()
         case ApplicationState::Paused:
             _state = ApplicationState::Playing;
             _visualisation->pauseRendering(false);
-            labelCurrentAction.setText("   playing   ");
             break;
     }
 }
@@ -209,7 +208,6 @@ void MainWindow::stopReplay()
     switch(_state) {
         case ApplicationState::Playing:
             _visualisation->pauseRendering(true);
-            labelCurrentAction.setText("   paused   ");
             _state = ApplicationState::Paused;
             break;
         case ApplicationState::NoData:
@@ -258,7 +256,6 @@ void MainWindow::stopRendering()
     resetAllFrameCursor();
     unloadData();
     resetGraphicalElements();
-    labelCurrentAction.setText(" Idle ");
 };
 
 std::optional<std::filesystem::path> MainWindow::selectFileToLoad()
@@ -334,9 +331,11 @@ void MainWindow::tryLoadFile(const std::filesystem::path & path)
         _state = ApplicationState::Paused;
         enablePlayerControls();
         startRendering();
+        labelCurrentFile.setText(QString("File: %1").arg(QString::fromStdString(path.string())));
     } else {
         _state = ApplicationState::NoData;
         disablePlayerControls();
+        labelCurrentFile.setText("File: -");
     }
 }
 
