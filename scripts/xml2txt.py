@@ -1,8 +1,8 @@
 """
 convert jpscore's trajectories from xml to txt format:
-id   fr   x   y   z
+id   fr   x   y   z  A  B angle  color
 input: xml file
-output: xml file
+output: txt file
 """
 
 import os
@@ -21,9 +21,9 @@ def write_header(o, fps, geometry_file):
     o.write("#ID: the agent ID\n")
     o.write("#FR: the current frame\n")
     o.write("#X,Y,Z: the agents coordinates (in meters)\n")
-    o.write("A, B: semi-axes of the ellipse")
-    o.write("ANGLE: orientation of the ellipse")
-    o.write("COLOR: color of the ellipse")
+    o.write("A, B: semi-axes of the ellipse\n")
+    o.write("ANGLE: orientation of the ellipse\n")
+    o.write("COLOR: color of the ellipse\n")
     o.write("\n")
     o.write("#ID\tFR\tX\tY\tZ\tA\tB\tANGLE\tCOLOR\n")
 
