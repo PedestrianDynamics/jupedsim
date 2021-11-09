@@ -40,7 +40,10 @@ std::string JamSensor::GetName() const
     return "JamSensor";
 }
 
-void JamSensor::execute(const Pedestrian * pedestrian, CognitiveMap & cognitive_map) const
+void JamSensor::execute(
+    const Pedestrian * pedestrian,
+    CognitiveMap & cognitive_map,
+    double /*time*/) const
 {
     SubRoom * sub_room =
         building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());

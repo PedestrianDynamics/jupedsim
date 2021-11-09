@@ -90,16 +90,18 @@ bool FFRouter::Init(Building * building)
 
     CalculateFloorFields();
 
-    if(_config->get_write_VTK_files()) {
-        for(auto const & [roomID, localFF] : _floorfieldByRoomID) {
-            localFF->WriteFF(
-                fmt::format(
-                    FMT_STRING("ffrouterRoom_{:d}_t_{:.2f}.vtk"),
-                    roomID,
-                    Pedestrian::GetGlobalTime()),
-                _allDoorUIDs);
-        }
-    }
+    // TODO(kkratz): Disabled writing of vtk files, we have to discuss if we want to keep this feature
+    // in any case however this needs to be placed into its own serialiser
+    // if(_config->get_write_VTK_files()) {
+    //     for(auto const & [roomID, localFF] : _floorfieldByRoomID) {
+    //         localFF->WriteFF(
+    //             fmt::format(
+    //                 FMT_STRING("ffrouterRoom_{:d}_t_{:.2f}.vtk"),
+    //                 roomID,
+    //                 Pedestrian::GetGlobalTime()),
+    //             _allDoorUIDs);
+    //     }
+    // }
 
     LOG_INFO("FF Router init done.");
     return true;
@@ -360,20 +362,19 @@ void FFRouter::CalculateFloorFields()
 int FFRouter::FindExit(Pedestrian * p)
 {
     if(_strategy == ROUTING_FF_QUICKEST) {
-        if(Pedestrian::GetGlobalTime() > _recalculationInterval &&
+        if(_currentTime > _recalculationInterval &&
            _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->IsInSubRoom(p) &&
            _floorfieldByRoomID[p->GetRoomID()]->GetCostToDestination(
                p->GetExitIndex(), p->GetPos()) > 3.0 &&
            p->GetExitIndex() != -1) {
             //delay possible
-            if((int) Pedestrian::GetGlobalTime() % 10 != p->GetID() % 10) {
+            if((int) _currentTime % 10 != p->GetID() % 10) {
                 return p->GetExitIndex(); //stay with old target
             }
         }
         //new version: recalc densityspeed every x seconds
-        if((Pedestrian::GetGlobalTime() > _timeToRecalculation) &&
-           (Pedestrian::GetGlobalTime() >
-            Pedestrian::GetMinPremovementTime() + _recalculationInterval)) {
+        if((_currentTime > _timeToRecalculation) &&
+           (_currentTime > p->GetPremovementTime() + _recalculationInterval)) {
             _needsRecalculation = true;
         }
     }
@@ -551,10 +552,7 @@ void FFRouter::Update()
     if(_config->get_write_VTK_files()) {
         for(auto const & [roomID, localFF] : _floorfieldByRoomID) {
             localFF->WriteFF(
-                fmt::format(
-                    FMT_STRING("ffrouterRoom_{:d}_t_{:.2f}.vtk"),
-                    roomID,
-                    Pedestrian::GetGlobalTime()),
+                fmt::format(FMT_STRING("ffrouterRoom_{:d}_t_{:.2f}.vtk"), roomID, _currentTime),
                 _allDoorUIDs);
         }
     }

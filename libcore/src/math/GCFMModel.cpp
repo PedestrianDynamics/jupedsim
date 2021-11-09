@@ -186,8 +186,10 @@ void GCFMModel::ComputeNextTimeStep(
             ped->UpdateTimeInJam();
         }
 
-        ped->SetPos(pos_neu);
-        ped->SetV(v_neu);
+        if(!ped->InPremovement(current)) {
+            ped->SetPos(pos_neu);
+            ped->SetV(v_neu);
+        }
         ped->SetPhiPed();
         ++counter;
     }

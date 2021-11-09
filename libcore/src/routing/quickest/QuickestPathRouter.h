@@ -58,11 +58,11 @@ public:
 
     QuickestPathRouter(int id, RoutingStrategy s) : GlobalRouter(id, s) {}
 
-    virtual ~QuickestPathRouter();
+    ~QuickestPathRouter() override;
 
-    virtual int FindExit(Pedestrian * ped);
+    int FindExit(Pedestrian * ped) override;
 
-    virtual bool Init(Building * building);
+    bool Init(Building * building) override;
 
 private:
     /**
@@ -204,15 +204,15 @@ private:
       * @param ped
       * @return
       */
-    virtual int GetBestDefaultRandomExit(Pedestrian * ped);
+    int GetBestDefaultRandomExit(Pedestrian * ped) override;
 
     /**
       * Parse extra routing information for the quickest path
       * @return
       */
-    virtual bool ParseAdditionalParameters();
+    bool ParseAdditionalParameters() override;
 
-private:
+
     // [m/s] maximum speed to be considered in a queue while looking for a reference in a new room
     double _queueVelocityNewRoom = 0.7;
     // [m/s] maximum speed to be considered in a queue while looking for a reference in a jam situation

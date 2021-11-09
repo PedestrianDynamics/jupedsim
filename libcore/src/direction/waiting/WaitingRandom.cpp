@@ -35,13 +35,13 @@ double fRand(double fMin, double fMax)
     return fMin + f * (fMax - fMin);
 }
 
-Point WaitingRandom::GetWaitingPosition(Room * room, Pedestrian * ped)
+Point WaitingRandom::GetWaitingPosition(Room * room, Pedestrian * ped, double time)
 {
     // Polygon of either subroom or waiting area
     std::vector<Point> polygon;
 
     // checks if ped is inside waiting area
-    if(ped->IsInsideWaitingAreaWaiting()) {
+    if(ped->IsInsideWaitingAreaWaiting(time)) {
         polygon = ped->GetBuilding()->GetFinalGoal(ped->GetLastGoalID())->GetPolygon();
     } else {
         SubRoom * subRoom = room->GetSubRoom(ped->GetSubRoomID());
@@ -63,7 +63,7 @@ Point WaitingRandom::GetWaitingPosition(Room * room, Pedestrian * ped)
     Point target;
 
     // generate random point inside subroom/waiting area
-    if(ped->IsInsideWaitingAreaWaiting()) {
+    if(ped->IsInsideWaitingAreaWaiting(time)) {
         auto goal = ped->GetBuilding()->GetFinalGoal(ped->GetLastGoalID());
 
         do {

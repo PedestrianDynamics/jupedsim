@@ -74,6 +74,26 @@ void Simulation::Iterate()
 {
     _building->UpdateGrid();
     const double t_in_sec = _clock.ElapsedTime();
+
+    auto toxAnalysis = _config->GetToxicityAnalysis();
+    if(toxAnalysis) {
+        toxAnalysis->Update(t_in_sec);
+    }
+
+    auto walkingSpeed = _config->GetWalkingSpeed();
+    if(walkingSpeed) {
+        walkingSpeed->Update(t_in_sec);
+    }
+
+    auto directionManager = _config->GetDirectionManager();
+    if(directionManager) {
+        directionManager->Update(t_in_sec);
+    }
+
+    _config->GetModel()->Update(t_in_sec);
+
+    _routingEngine->UpdateTime(t_in_sec);
+
     if(t_in_sec > Pedestrian::GetMinPremovementTime()) {
         // update the positions
         _operationalModel->ComputeNextTimeStep(t_in_sec, _deltaT, _building.get(), _periodic);
@@ -114,6 +134,7 @@ void Simulation::Iterate()
         GoalManager gm{_building.get(), &_agents};
         gm.update(t_in_sec);
     }
+
     //Trigger JPSfire Toxicity Analysis
     //only executed every 3 seconds
     //TODO(kkratz): This is not working as intendet if 3 is not a multiple of deltaT
@@ -126,7 +147,18 @@ void Simulation::Iterate()
     _clock.Advance();
 }
 
-void Simulation::AddAgent(const Pedestrian & agent) {}
+void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
+{
+    _agents.emplace_back(std::move(agent));
+}
+
+void Simulation::AddAgent(std::vector<std::unique_ptr<Pedestrian>> && agents)
+{
+    _agents.insert(
+        _agents.end(),
+        std::make_move_iterator(agents.begin()),
+        std::make_move_iterator(agents.end()));
+}
 
 size_t Simulation::GetPedsNumber() const
 {
@@ -260,8 +292,10 @@ void Simulation::UpdateRoutesAndLocations()
     SimulationHelper::RemovePedestrians(*_building, _pedsToRemove);
 
     //TODO discuss simulation flow -> better move to main loop, does not belong here
-    bool geometryChangedFlow  = SimulationHelper::UpdateFlowRegulation(*_building);
-    bool geometryChangedTrain = SimulationHelper::UpdateTrainFlowRegulation(*_building);
+    bool geometryChangedFlow =
+        SimulationHelper::UpdateFlowRegulation(*_building, _clock.ElapsedTime());
+    bool geometryChangedTrain =
+        SimulationHelper::UpdateTrainFlowRegulation(*_building, _clock.ElapsedTime());
 
     _routingEngine->setNeedUpdate(geometryChangedFlow || geometryChangedTrain);
 
@@ -278,7 +312,7 @@ void Simulation::UpdateRoutes()
         if(target == FINAL_DEST_OUT) {
             ped->StartWaiting();
         } else {
-            if(ped->IsWaiting() && !ped->IsInsideWaitingAreaWaiting()) {
+            if(ped->IsWaiting() && !ped->IsInsideWaitingAreaWaiting(_clock.ElapsedTime())) {
                 ped->EndWaiting();
             }
         }
@@ -293,7 +327,8 @@ void Simulation::UpdateRoutes()
                         ped->StartWaiting();
                     }
 
-                    if(ped->IsWaiting() && cross->IsOpen() && !ped->IsInsideWaitingAreaWaiting()) {
+                    if(ped->IsWaiting() && cross->IsOpen() &&
+                       !ped->IsInsideWaitingAreaWaiting(_clock.ElapsedTime())) {
                         ped->EndWaiting();
                     }
                 }
@@ -398,7 +433,6 @@ double Simulation::RunBody(double maxSimTime)
           _clock.ElapsedTime() < maxSimTime) {
         const double t = _frame * _deltaT;
 
-        Pedestrian::SetGlobalTime(t);
         AddNewAgents();
         auto evnts = _em.NextEvents(_clock);
 
@@ -602,11 +636,7 @@ void Simulation::UpdateOutputGeometryFile()
 
 void Simulation::AddNewAgents()
 {
-    auto new_agents = _agentSrcManager->ProcessAllSources();
-    _agents.insert(
-        _agents.end(),
-        std::make_move_iterator(new_agents.begin()),
-        std::make_move_iterator(new_agents.end()));
+    AddAgent(_agentSrcManager->ProcessAllSources(_clock.ElapsedTime()));
 }
 
 void Simulation::incrementCountTraj()

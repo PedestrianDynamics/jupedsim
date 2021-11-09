@@ -71,7 +71,7 @@ public:
       *Schedule the pedestrians for the simulation
       * @return true if all source are empty
       */
-    std::vector<std::unique_ptr<Pedestrian>> ProcessAllSources() const;
+    std::vector<std::unique_ptr<Pedestrian>> ProcessAllSources(double current_time) const;
 
     /**
       * Trigger the sources to generate the specified

@@ -52,11 +52,12 @@ class SmokeRouter : public Router
 public:
     SmokeRouter();
     SmokeRouter(int id, RoutingStrategy s);
-    virtual ~SmokeRouter();
+    ~SmokeRouter() override;
 
 
-    virtual int FindExit(Pedestrian * p);
-    virtual bool Init(Building * b);
+    int FindExit(Pedestrian * p) override;
+    bool Init(Building * b) override;
+    void Update() override{};
 
     /**
       * @return options involved in the routing algorithm

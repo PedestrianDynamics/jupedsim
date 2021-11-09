@@ -42,7 +42,8 @@ std::string LastDestinationsSensor::GetName() const
 
 void LastDestinationsSensor::execute(
     const Pedestrian * /*pedestrian*/,
-    CognitiveMap & cognitive_map) const
+    CognitiveMap & cognitive_map,
+    double /*time*/) const
 {
     NavigationGraph * ng = cognitive_map.GetGraphNetwork()->GetNavigationGraph();
     std::vector<const GraphEdge *> & destinations =

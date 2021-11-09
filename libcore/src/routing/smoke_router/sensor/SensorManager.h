@@ -70,11 +70,11 @@ public:
     void SetIntVPeriodicUpdate(const double & interval);
     const double & GetIntVPeriodicUpdate();
 
+    void Update(double time) { _currentTime = time; }
+
 private:
-    //const Building * const building; //@todo: unused.
     BrainStorage * cm_storage;
-
     SensorContainer registered_sensors;
-
     double _periodicUpdateInterval;
+    double _currentTime;
 };

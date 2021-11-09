@@ -96,14 +96,14 @@ void UpdateFlowAtDoors(
  * @param building geometry used in the simulation
  * @return a change to the geometry was made
  */
-bool UpdateFlowRegulation(Building & building);
+bool UpdateFlowRegulation(Building & building, double time);
 
 /**
  * Triggers the flow regulation for trains, and closes/opens doors accordingly
  * @param building geometry used in the simulation
  * @return a change to the geometry was made
  */
-bool UpdateTrainFlowRegulation(Building & building);
+bool UpdateTrainFlowRegulation(Building & building, double time);
 
 /**
  * Finds the transition that was passed by a pedestrian \p ped in the last time step.

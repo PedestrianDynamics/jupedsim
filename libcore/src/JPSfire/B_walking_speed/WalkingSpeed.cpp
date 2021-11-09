@@ -41,8 +41,6 @@ WalkingSpeed::WalkingSpeed(const std::string & projectFileName)
     LoadJPSfireInfo(projectFileName);
 }
 
-WalkingSpeed::~WalkingSpeed() = default;
-
 bool WalkingSpeed::LoadJPSfireInfo(const std::string & projectFilename)
 {
     fs::path p(projectFilename);
@@ -93,7 +91,7 @@ double WalkingSpeed::GetExtinction(const Pedestrian * pedestrian)
 {
     std::string quantity = "EXTINCTION_COEFFICIENT";
     double ExtinctionCoefficient =
-        _FMStorage->GetFDSMesh(pedestrian->GetGlobalTime(), pedestrian->GetElevation(), quantity)
+        _FMStorage->GetFDSMesh(_currentTime, pedestrian->GetElevation(), quantity)
             .GetKnotValue(pedestrian->GetPos()._x, pedestrian->GetPos()._y);
     return ExtinctionCoefficient;
 }

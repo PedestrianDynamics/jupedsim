@@ -42,12 +42,15 @@ class DirectionManager
 private:
     std::shared_ptr<WaitingStrategy> _waitingStrategy;
     std::shared_ptr<DirectionStrategy> _directionStrategy;
+    double _currentTime;
 
 public:
     /**
      * Inits the used strategies.
      */
     void Init(Building *);
+
+    void Update(double time) { _currentTime = time; };
 
     /**
      * Get the desired direction of the pedestrians at the current time step.
