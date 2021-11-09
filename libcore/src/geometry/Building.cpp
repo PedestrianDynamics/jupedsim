@@ -796,19 +796,6 @@ void Building::InitGrid()
     LOG_INFO("Done with Initializing the grid");
 }
 
-void Building::DeletePedestrian(int id)
-{
-    const auto iter =
-        std::find_if(_allPedestrians->begin(), _allPedestrians->end(), [id](const auto & e) {
-            return e->GetID() == id;
-        });
-    if(iter == _allPedestrians->end()) {
-        LOG_ERROR("Pedestrian with ID {} not found.", id);
-        return;
-    }
-    _allPedestrians->erase(iter);
-}
-
 const std::vector<std::unique_ptr<Pedestrian>> & Building::GetAllPedestrians() const
 {
     return *_allPedestrians;

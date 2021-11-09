@@ -49,6 +49,7 @@ struct sort_pred {
 //forward declaration
 class Pedestrian;
 class DirectionStrategy;
+class Simulation;
 
 /*!
  * \class VelocityModel
@@ -137,7 +138,7 @@ public:
         double Dped,
         double awall,
         double Dwall);
-    virtual ~VelocityModel(void);
+    ~VelocityModel(void) override;
 
     /**
       * @todo What is this parameter doing?
@@ -171,13 +172,13 @@ public:
     /**
       * @return all model parameters in a nicely formatted string
       */
-    virtual std::string GetDescription();
+    std::string GetDescription() override;
 
     /**
       * initialize the phi angle
       * @param building
       */
-    virtual bool Init(Building * building);
+    bool Init(Building * building, Simulation * simulation) override;
 
     /**
       * Compute the next simulation step
@@ -187,6 +188,6 @@ public:
       * @param building the geometry object
       * @param periodic: used in some utests for periodic scenarios (very specific)
       */
-    virtual void
-    ComputeNextTimeStep(double current, double deltaT, Building * building, int periodic);
+    void
+    ComputeNextTimeStep(double current, double deltaT, Building * building, int periodic) override;
 };

@@ -75,7 +75,7 @@ int main(int argc, char ** argv)
     auto building = std::make_unique<Building>(&config, nullptr);
     auto agents   = CreateInitialPedestrians(config, building.get());
     Simulation sim(&config, std::move(building));
-    sim.AddAgent(std::move(agents));
+    sim.AddAgents(std::move(agents));
 
     if(!sim.InitArgs()) {
         LOG_ERROR("Could not start simulation. Check the log for prior errors");

@@ -103,7 +103,11 @@ public:
 
     void AddAgent(std::unique_ptr<Pedestrian> && agent);
 
-    void AddAgent(std::vector<std::unique_ptr<Pedestrian>> && agents);
+    void AddAgents(std::vector<std::unique_ptr<Pedestrian>> && agents);
+
+    void RemoveAgents(std::vector<int> ids);
+
+    const std::vector<std::unique_ptr<Pedestrian>> & Agents() const;
 
     size_t GetPedsNumber() const;
 

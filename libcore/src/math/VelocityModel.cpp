@@ -28,6 +28,7 @@
  **/
 #include "VelocityModel.h"
 
+#include "Simulation.h"
 #include "direction/walking/DirectionStrategy.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
@@ -59,12 +60,13 @@ VelocityModel::VelocityModel(
 
 VelocityModel::~VelocityModel() {}
 
-bool VelocityModel::Init(Building * building)
+bool VelocityModel::Init(Building * building, Simulation * simulation)
 {
     _direction->Init(building);
+    _simulation = simulation;
 
     std::vector<int> pedestrians_to_delete{};
-    const auto & allPeds = building->GetAllPedestrians();
+    const auto & allPeds = simulation->Agents();
     for(const auto & ped : allPeds) {
         double cosPhi, sinPhi;
         //a destination could not be found for that pedestrian
@@ -108,9 +110,7 @@ bool VelocityModel::Init(Building * building)
         ped->SetEllipse(E);
     }
 
-    for(const auto id : pedestrians_to_delete) {
-        building->DeletePedestrian(id);
-    }
+    _simulation->RemoveAgents(pedestrians_to_delete);
 
     return true;
 }
@@ -122,7 +122,7 @@ void VelocityModel::ComputeNextTimeStep(
     int periodic)
 {
     // collect all pedestrians in the simulation.
-    const auto & allPeds          = building->GetAllPedestrians();
+    const auto & allPeds          = _simulation->Agents();
     std::vector<Point> result_acc = std::vector<Point>();
     result_acc.reserve(allPeds.size());
     std::vector<my_pair> spacings = std::vector<my_pair>();
@@ -263,10 +263,7 @@ void VelocityModel::ComputeNextTimeStep(
         }
         ++counter;
     }
-    // remove the pedestrians that have left the building
-    for(const auto id : pedestrians_to_delete) {
-        building->DeletePedestrian(id);
-    }
+    _simulation->RemoveAgents(pedestrians_to_delete);
 }
 
 Point VelocityModel::e0(Pedestrian * ped, Room * room) const

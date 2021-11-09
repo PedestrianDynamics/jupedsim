@@ -124,7 +124,7 @@ std::optional<Transition *> FindPassedDoor(const Building & building, const Pede
  * @param message error message to be displayed to add additional information to the user
  */
 void RemoveFaultyPedestrians(
-    Building & building,
+    Simulation & simulation,
     std::vector<Pedestrian *> & pedsFaulty,
     std::string message);
 
@@ -133,5 +133,5 @@ void RemoveFaultyPedestrians(
  * @param building geometry used in the simulation
  * @param peds list of faulty pedestrians, which should be deleted
  */
-void RemovePedestrians(Building & building, std::vector<Pedestrian *> & peds);
+void RemovePedestrians(Simulation & simulation, std::vector<Pedestrian *> & peds);
 } //namespace SimulationHelper

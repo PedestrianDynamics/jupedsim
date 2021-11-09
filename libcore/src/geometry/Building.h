@@ -103,9 +103,6 @@ public:
 
     void SetCaption(const std::string & s);
 
-    /// delete the ped from the ped vector
-    void DeletePedestrian(int id);
-
     void GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const;
 
     std::string GetCaption() const;

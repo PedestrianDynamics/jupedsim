@@ -46,6 +46,7 @@
 #include "routing/ff_router/ffRouter.h"
 
 #include <Logger.h>
+#include <algorithm>
 #include <chrono>
 #include <memory>
 #include <tinyxml.h>
@@ -152,12 +153,32 @@ void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
     _agents.emplace_back(std::move(agent));
 }
 
-void Simulation::AddAgent(std::vector<std::unique_ptr<Pedestrian>> && agents)
+void Simulation::AddAgents(std::vector<std::unique_ptr<Pedestrian>> && agents)
 {
     _agents.insert(
         _agents.end(),
         std::make_move_iterator(agents.begin()),
         std::make_move_iterator(agents.end()));
+}
+
+void Simulation::RemoveAgents(std::vector<int> ids)
+{
+    _agents.erase(
+        std::remove_if(
+            _agents.begin(),
+            _agents.end(),
+            [&ids](auto & agent) {
+                const int id = agent->GetID();
+                return std::find_if(ids.begin(), ids.end(), [id](int other) {
+                           return id == other;
+                       }) != ids.end();
+            }),
+        _agents.end());
+}
+
+const std::vector<std::unique_ptr<Pedestrian>> & Simulation::Agents() const
+{
+    return _agents;
 }
 
 size_t Simulation::GetPedsNumber() const
@@ -213,7 +234,7 @@ bool Simulation::InitArgs()
     //this should be called after the routing engine has been initialised
     // because a direction is needed for this initialisation.
     LOG_INFO("Init Operational Model starting ...");
-    if(!_operationalModel->Init(_building.get())) {
+    if(!_operationalModel->Init(_building.get(), this)) {
         return false;
     }
     LOG_INFO("Init Operational Model done.");
@@ -295,8 +316,8 @@ void Simulation::UpdateRoutesAndLocations()
     SimulationHelper::UpdateFlowAtDoors(*_building, pedsOutside, _clock.ElapsedTime());
 
     SimulationHelper::RemoveFaultyPedestrians(
-        *_building, pedsNotRelocated, "Could not be properly relocated");
-    SimulationHelper::RemovePedestrians(*_building, _pedsToRemove);
+        *this, pedsNotRelocated, "Could not be properly relocated");
+    SimulationHelper::RemovePedestrians(*this, _pedsToRemove);
 
     //TODO discuss simulation flow -> better move to main loop, does not belong here
     bool geometryChangedFlow =
@@ -642,7 +663,7 @@ void Simulation::UpdateOutputGeometryFile()
 
 void Simulation::AddNewAgents()
 {
-    AddAgent(_agentSrcManager->ProcessAllSources(_clock.ElapsedTime()));
+    AddAgents(_agentSrcManager->ProcessAllSources(_clock.ElapsedTime()));
 }
 
 void Simulation::incrementCountTraj()

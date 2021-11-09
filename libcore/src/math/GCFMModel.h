@@ -77,10 +77,10 @@ public:
      * @param deltaT the next timestep
      * @param building the geometry object
      */
-    virtual void
-    ComputeNextTimeStep(double current, double deltaT, Building * building, int periodic);
-    virtual std::string GetDescription();
-    virtual bool Init(Building * building);
+    void
+    ComputeNextTimeStep(double current, double deltaT, Building * building, int periodic) override;
+    std::string GetDescription() override;
+    bool Init(Building * building, Simulation * simulation) override;
 
 private:
     // Modellparameter
