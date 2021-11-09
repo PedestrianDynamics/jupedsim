@@ -1,14 +1,17 @@
 ---
 title: "JuPedSim Development"
 keywords: projects
+tags: blog
 sidebar: jupedsim_sidebar
-permalink: 2021_11_03.html
-summary:
+folder: posts
+permalink: 2021-11-04-jupedsim_blog.html
+summary: In this retrospective, we reflect on the journey of the development of this project, hoping to document our progress and learnings.
 last_updated: Nov 3rd, 2021
 toc: false
+last_updated: Nov 9rd, 2021
 ---
 
-# JuPedSim Development
+## Problem description
 
 JuPedSim has been actively developed since July 2012 and consists of
 several applications: `jpscore` to simulate pedestrians, `jpsvis` to visualize
@@ -32,6 +35,8 @@ they saw with JuPedSim:
 - Provide better support to reproduce results.
 
 - The software did crash or spuriously remove agents.
+
+## New beginnings
 
 At a certain point, it seemed that some of the JuPedSim tools had reached the
 end of their useful life. Hence, the decision was made to design and implement
@@ -76,6 +81,8 @@ lessons learned from this process, we have elaborated:
   easier with new algorithms.
 
 - Some utilities we missed in the old implementation, including tests.
+
+## Outlook 
 
 Looking back at what we had learned and gained in terms of code, directly
 portable into`jpscore`, it became clear that when considering rewriting vs.
