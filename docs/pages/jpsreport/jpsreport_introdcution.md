@@ -5,10 +5,10 @@ tags: [jpsreport, getting_started]
 sidebar: jupedsim_sidebar
 permalink: jpsreport_introduction.html
 summary: This module implements different measurement methods to analyze pedestrian movement in different aspects and scales.
-last_updated: 21, February 2020
+last_updated: Nov 09, 2021
 ---
 
-{%include note.html content="jpsreport has been integrated in the jpscore-repository, although it still can be used independently of jpscore."%}
+[![DOI](https://zenodo.org/badge/109670242.svg)](https://zenodo.org/badge/latestdoi/109670242)
 
 ## Get started with jpsreport
 
