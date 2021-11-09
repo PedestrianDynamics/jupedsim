@@ -1,12 +1,11 @@
 ---
 title: "JuPedSim Development"
 keywords: projects
-tags: blog
+tags: [blog]
 sidebar: jupedsim_sidebar
 folder: posts
 permalink: 2021-11-04-jupedsim_blog.html
 summary: In this retrospective, we reflect on the journey of the development of this project, hoping to document our progress and learnings.
-last_updated: Nov 3rd, 2021
 toc: false
 last_updated: Nov 9rd, 2021
 ---
