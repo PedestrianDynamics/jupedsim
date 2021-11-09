@@ -140,7 +140,7 @@ void Simulation::Iterate()
     //only executed every 3 seconds
     //TODO(kkratz): This is not working as intendet if 3 is not a multiple of deltaT
     if(fmod(_clock.ElapsedTime(), 3) == 0) {
-        for(auto && ped : _building->GetAllPedestrians()) {
+        for(auto && ped : _agents) {
             ped->ConductToxicityAnalysis();
         }
     }
@@ -245,7 +245,7 @@ bool Simulation::InitArgs()
     // has been called.
 
     //other initializations
-    for(auto && ped : _building->GetAllPedestrians()) {
+    for(auto && ped : _agents) {
         ped->SetDeltaT(_deltaT);
     }
     LOG_INFO("Number of peds received: {}", _agents.size());
@@ -300,13 +300,11 @@ double Simulation::RunStandardSimulation(double maxSimTime)
 
 void Simulation::UpdateRoutesAndLocations()
 {
-    const auto & peds = _building->GetAllPedestrians();
-
     auto [pedsChangedRoom, pedsNotRelocated] =
-        SimulationHelper::UpdatePedestriansLocations(*_building, peds);
+        SimulationHelper::UpdatePedestriansLocations(*_building, _agents);
 
     // not needed at the moment, as we do not have inside final goals yet
-    auto pedsAtFinalGoal = SimulationHelper::FindPedestriansReachedFinalGoal(*_building, peds);
+    auto pedsAtFinalGoal = SimulationHelper::FindPedestriansReachedFinalGoal(*_building, _agents);
     _pedsToRemove.insert(_pedsToRemove.end(), pedsAtFinalGoal.begin(), pedsAtFinalGoal.end());
 
     auto pedsOutside = SimulationHelper::FindPedestriansOutside(*_building, pedsNotRelocated);
@@ -333,7 +331,7 @@ void Simulation::UpdateRoutesAndLocations()
 
 void Simulation::UpdateRoutes()
 {
-    for(const auto & ped : _building->GetAllPedestrians()) {
+    for(const auto & ped : _agents) {
         // set ped waiting, if no target is found
         int target = ped->FindRoute();
 
