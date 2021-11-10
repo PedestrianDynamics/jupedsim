@@ -33,6 +33,7 @@
 #include "IO/Trajectories.h"
 #include "SimulationClock.h"
 #include "direction/walking/DirectionStrategy.h"
+#include "events/Event.h"
 #include "events/EventManager.h"
 #include "events/OldEventManager.h"
 #include "general/Configuration.h"
@@ -112,6 +113,10 @@ public:
     const std::vector<std::unique_ptr<Pedestrian>> & Agents() const;
 
     size_t GetPedsNumber() const;
+
+    void AddEvent(Event event);
+    void AddEvents(std::vector<Event> events);
+
 
     /**
      * Read parameters from config.

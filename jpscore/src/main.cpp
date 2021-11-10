@@ -28,6 +28,7 @@
 #include "IO/IniFileParser.h"
 #include "Simulation.h"
 #include "agent-creation/AgentCreator.h"
+#include "events/Event.h"
 #include "general/ArgumentParser.h"
 #include "general/Compiler.h"
 #include "general/Configuration.h"
@@ -75,6 +76,10 @@ int main(int argc, char ** argv)
     auto building = std::make_unique<Building>(&config, nullptr);
     auto agents   = CreateInitialPedestrians(config, building.get());
     Simulation sim(&config, std::move(building));
+
+    auto agent_events = CreateEventsFromAgents(agents, sim);
+    sim.AddEvents(agent_events);
+
     sim.AddAgents(std::move(agents));
 
     if(!sim.InitArgs()) {

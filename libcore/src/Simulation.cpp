@@ -200,6 +200,18 @@ size_t Simulation::GetPedsNumber() const
     return _agents.size();
 }
 
+void Simulation::AddEvent(Event event)
+{
+    _em.add(event);
+}
+
+void Simulation::AddEvents(std::vector<Event> events)
+{
+    for(auto e : events) {
+        AddEvent(e);
+    }
+}
+
 bool Simulation::InitArgs()
 {
     const fs::path & trajPath(_config->GetTrajectoriesFile());
