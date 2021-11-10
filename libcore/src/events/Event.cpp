@@ -7,13 +7,17 @@
 #include <memory>
 
 
+BaseEvent::BaseEvent(std::chrono::nanoseconds min_time) : _min_time(min_time) {}
+
+
 CreatePedestrianEvent::CreatePedestrianEvent(
     Pedestrian const * agent,
     std::chrono::nanoseconds min_time) :
+    BaseEvent(min_time),
     _position{agent->GetPos()},
     _final_destination{agent->GetFinalDestination()},
     _group_id{agent->GetGroup()},
-    _router_id{agent->GetRouterID()},
+    _router_id{agent->GetRouter()->GetID()},
     _room_id{agent->GetRoomID()},
     _subroom_id{agent->GetSubRoomID()},
     _patience_time{agent->GetPatienceTime()},

@@ -684,7 +684,7 @@ void Pedestrian::SetRouter(Router * router)
 
 int Pedestrian::GetRouterID() const
 {
-    return _router->GetID();
+    return _router_id;
 }
 
 

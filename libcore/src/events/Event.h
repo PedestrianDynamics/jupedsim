@@ -18,6 +18,7 @@ protected:
     std::chrono::nanoseconds _min_time;
 
 public:
+    explicit BaseEvent(std::chrono::nanoseconds min_time);
     std::chrono::nanoseconds MinTime() const { return _min_time; }
 };
 

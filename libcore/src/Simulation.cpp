@@ -152,14 +152,28 @@ void Simulation::Iterate()
 
 void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
 {
+    agent->SetWalkingSpeed(_building->GetConfig()->GetWalkingSpeed());
+    agent->SetTox(_building->GetConfig()->GetToxicityAnalysis());
+    agent->SetBuilding(_building.get());
+    agent->SetSubRoomUID(
+        _building->GetRoom(agent->GetRoomID())->GetSubRoom(agent->GetSubRoomID())->GetUID());
+    agent->SetRouter(_routingEngine->GetRouter(agent->GetRouterID()));
     agent->FindRoute();
+    agent->InitV0(Point(0.0, 0.0));
     _agents.emplace_back(std::move(agent));
 }
 
 void Simulation::AddAgents(std::vector<std::unique_ptr<Pedestrian>> && agents)
 {
     for(auto && agent : agents) {
+        agent->SetWalkingSpeed(_building->GetConfig()->GetWalkingSpeed());
+        agent->SetTox(_building->GetConfig()->GetToxicityAnalysis());
+        agent->SetBuilding(_building.get());
+        agent->SetSubRoomUID(
+            _building->GetRoom(agent->GetRoomID())->GetSubRoom(agent->GetSubRoomID())->GetUID());
+        agent->SetRouter(_routingEngine->GetRouter(agent->GetRouterID()));
         agent->FindRoute();
+        agent->InitV0(Point(0.0, 0.0));
     }
     _agents.insert(
         _agents.end(),

@@ -92,12 +92,6 @@ int main(int argc, char ** argv)
             manager.add(evt);
         }
     }
-    auto next_events = manager.NextEvents(sim.Clock());
-    for(auto const & [_, event] : next_events) {
-        // lambda is used to bind additional function paramters to the visitor
-        auto visitor = [&sim](auto event) { ProcessEvent(event, sim); };
-        std::visit(visitor, event);
-    }
     if(!sim.InitArgs()) {
         LOG_ERROR("Could not start simulation. Check the log for prior errors");
         return EXIT_FAILURE;
@@ -116,15 +110,13 @@ int main(int argc, char ** argv)
 
         const int writeInterval = static_cast<int>((1. / sim.Fps()) / sim.Clock().dT() + 0.5);
 
-        while((!sim.Agents().empty() || !agents.empty()) &&
+        while((!sim.Agents().empty() || manager.HasEventsAfter(sim.Clock())) &&
               sim.Clock().ElapsedTime() < config.GetTmax()) {
-            if(sim.Clock().Iteration() > 0) {
-                auto next_events = manager.NextEvents(sim.Clock());
-                for(auto const & [_, event] : next_events) {
-                    // lambda is used to bind additional function paramters to the visitor
-                    auto visitor = [&sim](auto event) { ProcessEvent(event, sim); };
-                    std::visit(visitor, event);
-                }
+            auto next_events = manager.NextEvents(sim.Clock());
+            for(auto const & [_, event] : next_events) {
+                // lambda is used to bind additional function paramters to the visitor
+                auto visitor = [&sim](auto event) { ProcessEvent(event, sim); };
+                std::visit(visitor, event);
             }
             sim.Iterate();
             // write the trajectories

@@ -82,6 +82,7 @@ private:
     int _subRoomUID;
     int _oldRoomID;
     int _oldSubRoomID;
+    int _router_id{0};
     Point _lastE0;
 
     NavLine * _navLine;            // current exit line
@@ -169,6 +170,10 @@ public:
     void SetSubRoomUID(int i);
     void SetTau(double tau);
     void SetEllipse(const JEllipse & e);
+
+    void SetRouterId(int id) { _router_id = id; }
+
+    const Router * GetRouter() const { return _router; }
 
     double GetT() const;
     void SetT(double T);

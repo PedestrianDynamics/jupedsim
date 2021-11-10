@@ -17,16 +17,10 @@ void ProcessEvent(CreatePedestrianEvent event, Simulation & sim)
 {
     std::unique_ptr<Pedestrian> ped = std::make_unique<Pedestrian>();
 
-    ped->SetWalkingSpeed(sim.GetBuilding()->GetConfig()->GetWalkingSpeed());
-    ped->SetTox(sim.GetBuilding()->GetConfig()->GetToxicityAnalysis());
     ped->SetFinalDestination(event._final_destination);
     ped->SetGroup(event._group_id);
-    ped->SetRouter(sim.GetBuilding()->GetRoutingEngine()->GetRouter(event._router_id));
-    ped->SetBuilding(sim.GetBuilding());
     ped->SetRoomID(event._room_id);
     ped->SetSubRoomID(event._subroom_id);
-    ped->SetSubRoomUID(
-        sim.GetBuilding()->GetRoom(event._room_id)->GetSubRoom(event._subroom_id)->GetUID());
     ped->SetPatienceTime(event._patience_time);
     ped->SetPremovementTime(event._premovement_time);
     ped->SetRiskTolerance(event._risk_tolerance);
@@ -52,6 +46,7 @@ void ProcessEvent(CreatePedestrianEvent event, Simulation & sim)
     ped->SetSmoothFactorUpStairs(event._smooth_factor_up_stairs);
     ped->SetSmoothFactorDownStairs(event._smooth_factor_down_stairs);
     ped->SetPos(event._position);
+    ped->SetRouterId(event._router_id);
 
     sim.AddAgent(std::move(ped));
 }
