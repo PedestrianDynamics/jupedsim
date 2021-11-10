@@ -28,6 +28,9 @@
 #include "IO/IniFileParser.h"
 #include "Simulation.h"
 #include "agent-creation/AgentCreator.h"
+#include "events/Event.h"
+#include "events/EventManager.h"
+#include "events/EventVisitors.h"
 #include "general/ArgumentParser.h"
 #include "general/Compiler.h"
 #include "general/Configuration.h"
@@ -36,15 +39,15 @@
 
 #include <Logger.h>
 #include <algorithm>
+#include <chrono>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
 #include <iomanip>
 #include <iterator>
 #include <memory>
 #include <ostream>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string>
-#include <thread>
-#include <time.h>
 
 int main(int argc, char ** argv)
 {
@@ -76,11 +79,25 @@ int main(int argc, char ** argv)
 
     auto building = std::make_unique<Building>(&config, nullptr);
     auto agents   = CreateAllPedestrians(&config, building.get());
-
-
     Simulation sim(&config, std::move(building));
-    sim.AddAgents(extract(agents, 0));
+    EventManager manager;
 
+    size_t frame = 0;
+    while(!agents.empty()) {
+        double now = sim.Clock().dT() * frame;
+        auto t     = std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::duration<double>(now));
+        auto events = CreateEventsFromAgents(extract(agents, frame), t);
+        for(auto && evt : events) {
+            manager.add(evt);
+        }
+    }
+    auto next_events = manager.NextEvents(sim.Clock());
+    for(auto const & [_, event] : next_events) {
+        // lambda is used to bind additional function paramters to the visitor
+        auto visitor = [&sim](auto event) { ProcessEvent(event, sim); };
+        std::visit(visitor, event);
+    }
     if(!sim.InitArgs()) {
         LOG_ERROR("Could not start simulation. Check the log for prior errors");
         return EXIT_FAILURE;
@@ -101,7 +118,14 @@ int main(int argc, char ** argv)
 
         while((!sim.Agents().empty() || !agents.empty()) &&
               sim.Clock().ElapsedTime() < config.GetTmax()) {
-            sim.AddAgents(extract(agents, sim.Clock().Iteration()));
+            if(sim.Clock().Iteration() > 0) {
+                auto next_events = manager.NextEvents(sim.Clock());
+                for(auto const & [_, event] : next_events) {
+                    // lambda is used to bind additional function paramters to the visitor
+                    auto visitor = [&sim](auto event) { ProcessEvent(event, sim); };
+                    std::visit(visitor, event);
+                }
+            }
             sim.Iterate();
             // write the trajectories
             if(0 == sim.Clock().Iteration() % writeInterval) {
