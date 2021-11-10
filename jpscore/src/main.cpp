@@ -80,7 +80,7 @@ int main(int argc, char ** argv)
     auto agent_events = CreateEventsFromAgents(agents, sim);
     sim.AddEvents(agent_events);
 
-    sim.AddAgents(std::move(agents));
+    //    sim.AddAgents(std::move(agents));
 
     if(!sim.InitArgs()) {
         LOG_ERROR("Could not start simulation. Check the log for prior errors");

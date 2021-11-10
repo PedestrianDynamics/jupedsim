@@ -52,7 +52,7 @@ void ProcessEvent(CreatePedestrianEvent event, Simulation & sim)
     ped->SetSmoothFactorUpStairs(event._smooth_factor_up_stairs);
     ped->SetSmoothFactorDownStairs(event._smooth_factor_down_stairs);
     ped->SetPos(event._position);
-
+    ped->FindRoute();
     sim.AddAgent(std::move(ped));
 }
 void ProcessEvent(DummyEvent event, Simulation & sim) {}
