@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<JPScore project="JPS-Project" version="0.8">
-  <agents_sources>
-    <source id="1" group_id="1" frequency="10" rate="4" percent="0.2" time_min="2" time_max="30" N_create="10" agents_max="300"/>
-    <source id="2" group_id="2" frequency="10" percent="0.5" rate="4" time_min="2" time_max="30" N_create="10" agents_max="300"/>
-
-  </agents_sources>
-</JPScore>

@@ -16,6 +16,7 @@ public:
     using ConstEventIteratorType = EventsContainerType::const_iterator;
     IteratorPair<ConstEventIteratorType> NextEvents(SimulationClock _clock);
     void add(Event event);
+    bool HasEventsAfter(const SimulationClock & clock);
 
 private:
     EventsContainerType _events;
