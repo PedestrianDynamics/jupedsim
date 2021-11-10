@@ -24,6 +24,7 @@ public:
 
 class CreatePedestrianEvent : public BaseEvent
 {
+public:
     Point _position;
 
     // general values from StartDistribution::GenerateAgent
@@ -32,7 +33,6 @@ class CreatePedestrianEvent : public BaseEvent
     int _router_id;
     int _room_id;
     int _subroom_id;
-    int _subroom_uid;
     double _patience_time;
     double _premovement_time;
     double _risk_tolerance;
@@ -58,7 +58,6 @@ class CreatePedestrianEvent : public BaseEvent
     double _smooth_factor_escalator_up;
     double _smooth_factor_escalator_down;
 
-public:
     CreatePedestrianEvent(Pedestrian const * agent, std::chrono::nanoseconds min_time);
 };
 

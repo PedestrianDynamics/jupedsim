@@ -16,7 +16,6 @@ CreatePedestrianEvent::CreatePedestrianEvent(
     _router_id{agent->GetRouterID()},
     _room_id{agent->GetRoomID()},
     _subroom_id{agent->GetSubRoomID()},
-    _subroom_uid{agent->GetSubRoomUID()},
     _patience_time{agent->GetPatienceTime()},
     _premovement_time{agent->GetPremovementTime()},
     _risk_tolerance{agent->GetRiskTolerance()},
