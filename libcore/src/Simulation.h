@@ -58,8 +58,6 @@ private:
     static const size_t _maxFileSize{1U << 24U};
     Configuration * _config;
     SimulationClock _clock;
-    double _deltaT;
-    uint64_t _frame{0};
     /// frame rate for the trajectories
     double _fps;
     unsigned int _seed;
@@ -69,9 +67,7 @@ private:
     /// Manage all route choices algorithms
     std::shared_ptr<RoutingEngine> _routingEngine;
     /// writing the trajectories to file
-    std::unique_ptr<TrajectoryWriter> _iod;
     std::unique_ptr<OldEventManager> _old_em;
-    std::unique_ptr<AgentsSourcesManager> _agentSrcManager{nullptr};
     int _periodic;
     int _maxSimTime;
     /// Will be set if pedestrian sources exist
@@ -97,6 +93,9 @@ public:
     Simulation(Simulation && other) = delete;
 
     Simulation & operator=(Simulation && other) = delete;
+
+    const SimulationClock & Clock() const { return _clock; }
+    double Fps() const { return _fps; }
 
     /// Advances the simulation by one time step.
     void Iterate();
@@ -129,18 +128,12 @@ public:
      */
     void UpdateRoutes();
 
-
     /**
      * Perform some initialisation for the simulation.
      * such as writing the headers for the trajectories.
      * @param the maximal number of pedestrian
      */
-    void RunHeader(long nPed = -1);
-
-    /**
-     * Run the main part of the simulation
-     */
-    double RunBody(double maxSimTime);
+    void RunHeader(long nPed, TrajectoryWriter & writer);
 
     /**
      * Copy all Input Files used to the output path.
@@ -162,32 +155,11 @@ public:
      * Updates the paths to external files in the ini and geometry file in output path.
      */
     void UpdateOutputFiles();
-    /**
-     * Run a standard simulation
-     * @return the total simulated/evacuation time
-     */
-    double RunStandardSimulation(double maxSimTime);
 
     /**
      * print some statistics about the simulation
      */
     void PrintStatistics(double time);
-
-    /**
-     * @return the agents source manager
-     */
-    AgentsSourcesManager & GetAgentSrcManager();
-
-    /**
-     * Check if any agents are waiting to enter the simulation
-     */
-    //TODO(KKZ) update doc
-    void AddNewAgents();
-
-    /**
-     * @return a pointer to the building object
-     */
-    Building * GetBuilding();
 
     int GetMaxSimTime() const;
     void incrementCountTraj();

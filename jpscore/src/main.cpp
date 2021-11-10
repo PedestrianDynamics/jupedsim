@@ -35,7 +35,9 @@
 #include "pedestrian/AgentsSourcesManager.h"
 
 #include <Logger.h>
+#include <algorithm>
 #include <iomanip>
+#include <iterator>
 #include <memory>
 #include <ostream>
 #include <stdio.h>
@@ -73,9 +75,10 @@ int main(int argc, char ** argv)
     }
 
     auto building = std::make_unique<Building>(&config, nullptr);
-    auto agents   = CreateInitialPedestrians(config, building.get());
+    auto agents   = CreateAllPedestrians(&config, building.get());
+
+
     Simulation sim(&config, std::move(building));
-    sim.AddAgents(std::move(agents));
 
     if(!sim.InitArgs()) {
         LOG_ERROR("Could not start simulation. Check the log for prior errors");
@@ -84,10 +87,36 @@ int main(int argc, char ** argv)
     time_t starttime{};
     time(&starttime);
 
-    double evacTime;
+    double evacTime{0};
     LOG_INFO("Simulation started with {} pedestrians", sim.GetPedsNumber());
     try {
-        evacTime = sim.RunStandardSimulation(config.GetTmax());
+        auto writer = std::make_unique<TrajectoryWriter>(
+            config.GetPrecision(),
+            config.GetOptionalOutputOptions(),
+            std::make_unique<FileHandler>(config.GetTrajectoriesFile()));
+        sim.RunHeader(agents.size(), *writer);
+
+        const int writeInterval = static_cast<int>((1. / sim.Fps()) / sim.Clock().dT() + 0.5);
+
+        while((!sim.Agents().empty() || !agents.empty()) &&
+              sim.Clock().ElapsedTime() < config.GetTmax()) {
+            sim.AddAgents(extract(agents, sim.Clock().Iteration()));
+            sim.Iterate();
+            // write the trajectories
+            if(0 == sim.Clock().Iteration() % writeInterval) {
+                writer->WriteFrame(sim.Clock().Iteration() / writeInterval, sim.Agents());
+            }
+
+
+            if(sim.Clock().Iteration() % 1000 == 0) {
+                if(config.ShowStatistics()) {
+                    LOG_INFO("Update door statistics at t={:.2f}", sim.Clock().ElapsedTime());
+                    sim.PrintStatistics(sim.Clock().ElapsedTime());
+                }
+            }
+        }
+        evacTime = sim.Clock().ElapsedTime();
+
     } catch(const std::exception & e) {
         LOG_ERROR("Exception in Simulation::RunStandardSimulation thrown, what: {}", e.what());
 
