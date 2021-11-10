@@ -152,11 +152,15 @@ void Simulation::Iterate()
 
 void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
 {
+    agent->FindRoute();
     _agents.emplace_back(std::move(agent));
 }
 
 void Simulation::AddAgents(std::vector<std::unique_ptr<Pedestrian>> && agents)
 {
+    for(auto && agent : agents) {
+        agent->FindRoute();
+    }
     _agents.insert(
         _agents.end(),
         std::make_move_iterator(agents.begin()),

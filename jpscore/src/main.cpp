@@ -79,6 +79,7 @@ int main(int argc, char ** argv)
 
 
     Simulation sim(&config, std::move(building));
+    sim.AddAgents(extract(agents, 0));
 
     if(!sim.InitArgs()) {
         LOG_ERROR("Could not start simulation. Check the log for prior errors");
