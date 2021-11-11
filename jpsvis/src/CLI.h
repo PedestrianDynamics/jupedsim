@@ -5,7 +5,7 @@
 #include <QCommandLineParser>
 #include <QStringList>
 #include <filesystem>
-
+#include <optional>
 
 enum class CLI {
     CommandLineOk,
