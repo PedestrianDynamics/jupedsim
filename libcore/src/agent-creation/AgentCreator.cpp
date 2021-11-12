@@ -12,7 +12,7 @@
 
 
 std::multimap<size_t, std::unique_ptr<Pedestrian>>
-CreateAllPedestrians(Configuration * configuration, Building * building)
+CreateAllPedestrians(Configuration * configuration, Building * building, double max_time)
 {
     using AgentVec = std::vector<std::unique_ptr<Pedestrian>>;
     AgentVec agents;
@@ -43,7 +43,7 @@ CreateAllPedestrians(Configuration * configuration, Building * building)
             result.emplace(std::make_pair(clock.Iteration(), std::move(ped)));
         }
         clock.Advance();
-    } while(!mgr.IsCompleted());
+    } while(!mgr.IsCompleted() && clock.ElapsedTime() < max_time);
 
     building->SetAgents(nullptr);
     return result;

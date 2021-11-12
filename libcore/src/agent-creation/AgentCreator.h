@@ -9,7 +9,7 @@
 #include <tuple>
 
 std::multimap<size_t, std::unique_ptr<Pedestrian>>
-CreateAllPedestrians(Configuration * configuration, Building * building);
+CreateAllPedestrians(Configuration * configuration, Building * building, double max_time);
 
 template <typename T>
 std::vector<typename T::mapped_type> extract(T & mm, typename T::key_type key)
