@@ -182,5 +182,4 @@ private:
     double _stepsize;
     double _wallAvoidDistance;
     bool _useDistancefield;
-    bool _wasInitialized{false};
 };

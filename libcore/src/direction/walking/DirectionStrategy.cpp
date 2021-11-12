@@ -117,9 +117,6 @@ double DirectionLocalFloorfield::GetDistance2Target(Pedestrian * ped, int UID) c
 
 void DirectionLocalFloorfield::Init(Building * building)
 {
-    if(_wasInitialized) {
-        return;
-    }
     _wasInitialized    = true;
     _building          = building;
     _stepsize          = building->GetConfig()->get_deltaH();
@@ -195,10 +192,6 @@ double DirectionSubLocalFloorfield::GetDistance2Target(Pedestrian * ped, int UID
 
 void DirectionSubLocalFloorfield::Init(Building * building)
 {
-    if(_wasInitialized) {
-        return;
-    }
-    _wasInitialized    = true;
     _building          = building;
     _stepsize          = building->GetConfig()->get_deltaH();
     _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
