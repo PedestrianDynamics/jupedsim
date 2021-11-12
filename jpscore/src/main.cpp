@@ -91,6 +91,7 @@ int main(int argc, char ** argv)
         for(auto && evt : events) {
             manager.add(evt);
         }
+        ++frame;
     }
     if(!sim.InitArgs()) {
         LOG_ERROR("Could not start simulation. Check the log for prior errors");
@@ -117,6 +118,9 @@ int main(int argc, char ** argv)
                 // lambda is used to bind additional function paramters to the visitor
                 auto visitor = [&sim](auto event) { ProcessEvent(event, sim); };
                 std::visit(visitor, event);
+            }
+            if(sim.Clock().Iteration() == 0) {
+                writer->WriteFrame(0, sim.Agents());
             }
             sim.Iterate();
             // write the trajectories
