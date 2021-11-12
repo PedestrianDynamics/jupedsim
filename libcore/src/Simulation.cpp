@@ -40,6 +40,7 @@
 #include "events/EventVisitors.h"
 #include "general/Filesystem.h"
 #include "geometry/GoalManager.h"
+#include "geometry/NavLine.h"
 #include "geometry/WaitingArea.h"
 #include "geometry/Wall.h"
 #include "math/GCFMModel.h"
@@ -158,27 +159,37 @@ void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
     agent->SetSubRoomUID(
         _building->GetRoom(agent->GetRoomID())->GetSubRoom(agent->GetSubRoomID())->GetUID());
     agent->SetRouter(_routingEngine->GetRouter(agent->GetRouterID()));
-    agent->FindRoute();
-    agent->InitV0(Point(0.0, 0.0));
+    const Point pos = agent->GetPos();
+    Point target    = Point{0.0, 0.0};
+    if(agent->FindRoute() == -1) {
+        Point p1 = agent->GetPos();
+        p1._x += 1;
+        p1._y -= 1;
+        Point p2 = agent->GetPos();
+        p2._x += 1;
+        p2._y += 1;
+        NavLine dummy(Line{p1, p2});
+        agent->SetExitLine(&dummy);
+    } else {
+        target = agent->GetExitLine()->ShortestPoint(pos);
+    }
+    // Compute orientation
+    const Point posToTarget = target - pos;
+    const Point orientation = posToTarget.Normalized();
+    agent->InitV0(target);
+
+    JEllipse E = agent->GetEllipse();
+    E.SetCosPhi(orientation._x);
+    E.SetSinPhi(orientation._y);
+    agent->SetEllipse(E);
     _agents.emplace_back(std::move(agent));
 }
 
 void Simulation::AddAgents(std::vector<std::unique_ptr<Pedestrian>> && agents)
 {
     for(auto && agent : agents) {
-        agent->SetWalkingSpeed(_building->GetConfig()->GetWalkingSpeed());
-        agent->SetTox(_building->GetConfig()->GetToxicityAnalysis());
-        agent->SetBuilding(_building.get());
-        agent->SetSubRoomUID(
-            _building->GetRoom(agent->GetRoomID())->GetSubRoom(agent->GetSubRoomID())->GetUID());
-        agent->SetRouter(_routingEngine->GetRouter(agent->GetRouterID()));
-        agent->FindRoute();
-        agent->InitV0(Point(0.0, 0.0));
+        AddAgent(std::move(agent));
     }
-    _agents.insert(
-        _agents.end(),
-        std::make_move_iterator(agents.begin()),
-        std::make_move_iterator(agents.end()));
 }
 
 void Simulation::RemoveAgents(std::vector<int> ids)
