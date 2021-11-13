@@ -15,6 +15,16 @@ For the visualization module (`jpsvis`) the following libraries are required.
 |------|---------|
 | Qt   | >= 5.12 |
 | VTK  | >= 9.0  |
+| GLM  | >=0.9.9 |
+
+### Optional Requirements [-DWITH\_BENCHMARKS]
+
+If you would like to create micro benchmarks during development you will
+additionally need google-benchmark.
+
+On MacOS this is available as `google-benchmark`, on Windows via vcpkg as
+`benchmark` and on Linux it is recommended to compile from source. See:
+<https://github.com/google/benchmark>
 
 ### Install requirements for Mac OS X (with Homebrew)
 
@@ -83,6 +93,5 @@ For additional build options please see "Build Options" section in
 
 ## Contributing
 
-If you conttribute code you need to be aware that all code needs to be formated
+If you contribute code you need to be aware that all code needs to be formatted
 with clang-format-13. This is enforced by the CI.
-
