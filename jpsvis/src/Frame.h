@@ -34,12 +34,10 @@
 class Frame
 {
     std::vector<FrameElement> _framePoints;
-    vtkSmartPointer<vtkPolyData> _polydata2D;
-    vtkSmartPointer<vtkPolyData> _polydata3D;
 
 public:
     /// Constructor
-    Frame();
+    Frame() = default;
 
     /// Destructor
     ~Frame() = default;
@@ -51,23 +49,13 @@ public:
     /// @return the number of element in this frame
     int Size() const;
 
-    /// Computes the polydata. Call this after all elements have been added.
-    void ComputePolyData();
+    /// @return the 2D polydata set
+    vtkSmartPointer<vtkPolyData> GetPolyData2D();
 
     /// @return the 3D polydata set
     vtkSmartPointer<vtkPolyData> GetPolyData3D();
 
-    /// @return the 2D polydata set
-    vtkSmartPointer<vtkPolyData> GetPolyData2D();
-
     /// Access Elements in this Frame
     /// @preturn vector of FrameElements
     const std::vector<FrameElement> & GetFrameElements() const;
-
-private:
-    /// compute the 2D polydata
-    void computePolyData2D();
-
-    /// compute the 3D polydata
-    void computePolyData3D();
 };

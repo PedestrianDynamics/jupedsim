@@ -499,7 +499,6 @@ bool ParseTxtFormat(const QString & fileName, TrajectoryData * trajectories)
     }
 
     inputFile.close();
-    trajectories->updatePolyDataForFrames();
     return true;
 }
 

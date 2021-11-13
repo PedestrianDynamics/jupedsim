@@ -39,8 +39,6 @@
 #include <vtkPointData.h>
 #include <vtkPolyData.h>
 
-Frame::Frame() : _polydata2D(vtkPolyData::New()), _polydata3D(vtkPolyData::New()) {}
-
 void Frame::InsertElement(FrameElement && element)
 {
     _framePoints.emplace_back(std::move(element));
@@ -51,29 +49,12 @@ int Frame::Size() const
     return _framePoints.size();
 }
 
-void Frame::ComputePolyData()
-{
-    computePolyData2D();
-    computePolyData3D();
-}
-
-
-vtkSmartPointer<vtkPolyData> Frame::GetPolyData2D()
-{
-    return _polydata2D;
-}
-
-vtkSmartPointer<vtkPolyData> Frame::GetPolyData3D()
-{
-    return _polydata3D;
-}
-
 const std::vector<FrameElement> & Frame::GetFrameElements() const
 {
     return _framePoints;
 }
 
-void Frame::computePolyData2D()
+vtkSmartPointer<vtkPolyData> Frame::GetPolyData2D()
 {
     vtkNew<vtkPoints> points;
     vtkNew<vtkFloatArray> colors;
@@ -147,20 +128,22 @@ void Frame::computePolyData2D()
         }
     }
 
+    vtkSmartPointer<vtkPolyData> polydata = vtkPolyData::New();
     // setting the colors
-    _polydata2D->SetPoints(points);
-    _polydata2D->GetPointData()->AddArray(colors);
-    _polydata2D->GetPointData()->SetActiveScalars("color");
+    polydata->SetPoints(points);
+    polydata->GetPointData()->AddArray(colors);
+    polydata->GetPointData()->SetActiveScalars("color");
 
     // setting the scaling and rotation
-    _polydata2D->GetPointData()->SetTensors(tensors);
-    _polydata2D->GetPointData()->SetActiveTensors("tensors");
+    polydata->GetPointData()->SetTensors(tensors);
+    polydata->GetPointData()->SetActiveTensors("tensors");
 
     // setting the labels
-    _polydata2D->GetPointData()->AddArray(labels);
+    polydata->GetPointData()->AddArray(labels);
+    return polydata;
 }
 
-void Frame::computePolyData3D()
+vtkSmartPointer<vtkPolyData> Frame::GetPolyData3D()
 {
     vtkNew<vtkPoints> points;
     vtkNew<vtkFloatArray> colors;
@@ -239,11 +222,13 @@ void Frame::computePolyData3D()
     }
 
     // setting the colors
-    _polydata3D->SetPoints(points);
-    _polydata3D->GetPointData()->AddArray(colors);
-    _polydata3D->GetPointData()->SetActiveScalars("color");
+    vtkSmartPointer<vtkPolyData> polydata = vtkPolyData::New();
+    polydata->SetPoints(points);
+    polydata->GetPointData()->AddArray(colors);
+    polydata->GetPointData()->SetActiveScalars("color");
 
     // setting the scaling and rotation
-    _polydata3D->GetPointData()->SetTensors(tensors);
-    _polydata3D->GetPointData()->SetActiveTensors("tensors");
+    polydata->GetPointData()->SetTensors(tensors);
+    polydata->GetPointData()->SetActiveTensors("tensors");
+    return polydata;
 }

@@ -48,6 +48,4 @@ public:
     void moveFrameBy(int count);
 
     Frame * currentFrame();
-
-    void updatePolyDataForFrames();
 };

@@ -67,10 +67,3 @@ Frame * TrajectoryData::currentFrame()
 {
     return _frames[_frameCursor].get();
 }
-
-void TrajectoryData::updatePolyDataForFrames()
-{
-    for(auto & frame : _frames) {
-        frame->ComputePolyData();
-    }
-}
