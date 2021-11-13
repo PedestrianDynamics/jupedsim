@@ -79,6 +79,11 @@ public slots:
     /// Update the number of total frames
     void slotUpdateNumFrames(int num_frames);
 
+    /// Sets the number of data frames that will be advanced per iteration on the renderer. I.e. a
+    /// replay speed of 6 means only every 6th data frame will be shown.
+    /// @frames_per_iteration number of frames that the data advances per render call.
+    void slotSetReplaySpeed(int frames_per_iteration);
+
     /// OLD SLOTS
     /// display the help modus
     void slotHelpAbout();
@@ -184,7 +189,7 @@ protected:
 private:
     void startReplay();
     void stopReplay();
-    void enablePlayerControls();
+    void setEnablePlayerControls(bool state);
     void disablePlayerControls();
     void startRendering();
     void stopRendering();

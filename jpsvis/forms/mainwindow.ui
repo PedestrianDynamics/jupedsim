@@ -158,6 +158,22 @@
        </widget>
       </item>
       <item>
+       <widget class="QSpinBox" name="replaySpeedSelector">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="prefix">
+         <string>x</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -196,7 +212,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>24</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -216,6 +232,8 @@
     <addaction name="actionRecord"/>
     <addaction name="actionNextFrame"/>
     <addaction name="actionPreviousFrame"/>
+    <addaction name="actionIncreaseReplaySpeed"/>
+    <addaction name="actionDecreaseReplaySpeed"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -315,7 +333,7 @@
   </action>
   <action name="actionTogglePlayback">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="enabled">
     <bool>false</bool>
@@ -720,19 +738,47 @@
    </property>
   </action>
   <action name="actionNextFrame">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
-    <string>NextFrame</string>
+    <string>Next Frame</string>
    </property>
    <property name="shortcut">
     <string>Right</string>
    </property>
   </action>
   <action name="actionPreviousFrame">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
-    <string>PreviousFrame</string>
+    <string>Previous Frame</string>
    </property>
    <property name="shortcut">
     <string>Left</string>
+   </property>
+  </action>
+  <action name="actionIncreaseReplaySpeed">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Increase Replay Speed</string>
+   </property>
+   <property name="shortcut">
+    <string>Up</string>
+   </property>
+  </action>
+  <action name="actionDecreaseReplaySpeed">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Decrease Replay Speed</string>
+   </property>
+   <property name="shortcut">
+    <string>Down</string>
    </property>
   </action>
  </widget>
@@ -1171,12 +1217,12 @@
    <slot>trigger()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>577</x>
-     <y>1090</y>
+     <x>222</x>
+     <y>1122</y>
     </hint>
     <hint type="destinationlabel">
-     <x>224</x>
-     <y>199</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>
@@ -1187,12 +1233,12 @@
    <slot>trigger()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>436</x>
-     <y>1090</y>
+     <x>149</x>
+     <y>1122</y>
     </hint>
     <hint type="destinationlabel">
-     <x>224</x>
-     <y>199</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>
@@ -1203,8 +1249,8 @@
    <slot>slotToggleRecording(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>829</x>
-     <y>1092</y>
+     <x>379</x>
+     <y>1124</y>
     </hint>
     <hint type="destinationlabel">
      <x>318</x>
@@ -1215,32 +1261,16 @@
   <connection>
    <sender>BtStart</sender>
    <signal>toggled(bool)</signal>
-   <receiver>actionTogglePlayback</receiver>
-   <slot>setChecked(bool)</slot>
+   <receiver>mainwindow</receiver>
+   <slot>slotTogglePlayback(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>500</x>
-     <y>1092</y>
+     <x>77</x>
+     <y>1124</y>
     </hint>
     <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>rewind</sender>
-   <signal>clicked()</signal>
-   <receiver>actionRewind</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>632</x>
-     <y>1078</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
+     <x>599</x>
+     <y>581</y>
     </hint>
    </hints>
   </connection>
@@ -1267,8 +1297,8 @@
    <slot>slotUpdateFrameSlider(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>309</x>
-     <y>1130</y>
+     <x>318</x>
+     <y>1076</y>
     </hint>
     <hint type="destinationlabel">
      <x>318</x>
@@ -1278,17 +1308,17 @@
   </connection>
   <connection>
    <sender>actionTogglePlayback</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotTogglePlayback(bool)</slot>
+   <signal>triggered()</signal>
+   <receiver>BtStart</receiver>
+   <slot>toggle()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>599</x>
-     <y>581</y>
+     <x>44</x>
+     <y>1106</y>
     </hint>
    </hints>
   </connection>
@@ -1337,6 +1367,54 @@
     <hint type="destinationlabel">
      <x>599</x>
      <y>581</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>replaySpeedSelector</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>mainwindow</receiver>
+   <slot>slotSetReplaySpeed(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>407</x>
+     <y>1107</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>748</x>
+     <y>1126</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionIncreaseReplaySpeed</sender>
+   <signal>triggered()</signal>
+   <receiver>replaySpeedSelector</receiver>
+   <slot>stepUp()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>408</x>
+     <y>1104</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDecreaseReplaySpeed</sender>
+   <signal>triggered()</signal>
+   <receiver>replaySpeedSelector</receiver>
+   <slot>stepDown()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>408</x>
+     <y>1104</y>
     </hint>
    </hints>
   </connection>
@@ -1392,5 +1470,6 @@
   <slot>slotShowHideObstacles()</slot>
   <slot>slotRewindFramesToBegin()</slot>
   <slot>slotTogglePedestrianDirections(bool)</slot>
+  <slot>slotSetReplaySpeed(int)</slot>
  </slots>
 </ui>

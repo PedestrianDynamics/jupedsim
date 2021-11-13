@@ -186,6 +186,12 @@ void MainWindow::slotUpdateNumFrames(int num_frames)
     ui.framesIndicatorSlider->setMaximum(num_frames - 1);
 }
 
+
+void MainWindow::slotSetReplaySpeed(int frames_per_iteration)
+{
+    _visualisation->ChangeReplaySpeed(frames_per_iteration);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Private methods
 //////////////////////////////////////////////////////////////////////////////
@@ -217,34 +223,22 @@ void MainWindow::stopReplay()
     }
 }
 
-void MainWindow::enablePlayerControls()
+void MainWindow::setEnablePlayerControls(bool state)
 {
-    ui.BtPreviousFrame->setEnabled(true);
-    ui.BtStart->setEnabled(true);
-    ui.BtNextFrame->setEnabled(true);
-    ui.BtRecord->setEnabled(true);
-    ui.rewind->setEnabled(true);
-    ui.framesIndicatorSlider->setEnabled(true);
-    ui.actionTogglePlayback->setEnabled(true);
+    ui.BtPreviousFrame->setEnabled(state);
+    ui.BtStart->setEnabled(state);
+    ui.BtNextFrame->setEnabled(state);
+    ui.BtRecord->setEnabled(state);
+    ui.rewind->setEnabled(state);
+    ui.framesIndicatorSlider->setEnabled(state);
+    ui.actionTogglePlayback->setEnabled(state);
     ui.actionTogglePlayback->setChecked(false);
-    ui.actionRewind->setEnabled(true);
-    ui.actionNextFrame->setEnabled(true);
-    ui.actionPreviousFrame->setEnabled(true);
-}
-
-void MainWindow::disablePlayerControls()
-{
-    ui.BtPreviousFrame->setEnabled(false);
-    ui.BtStart->setEnabled(false);
-    ui.BtNextFrame->setEnabled(false);
-    ui.BtRecord->setEnabled(false);
-    ui.rewind->setEnabled(false);
-    ui.framesIndicatorSlider->setEnabled(false);
-    ui.actionTogglePlayback->setEnabled(false);
-    ui.actionTogglePlayback->setChecked(false);
-    ui.actionRewind->setEnabled(false);
-    ui.actionNextFrame->setEnabled(false);
-    ui.actionPreviousFrame->setEnabled(false);
+    ui.actionRewind->setEnabled(state);
+    ui.actionNextFrame->setEnabled(state);
+    ui.actionPreviousFrame->setEnabled(state);
+    ui.actionIncreaseReplaySpeed->setEnabled(state);
+    ui.actionDecreaseReplaySpeed->setEnabled(state);
+    ui.replaySpeedSelector->setEnabled(state);
 }
 
 void MainWindow::startRendering()
@@ -333,12 +327,12 @@ void MainWindow::tryLoadFile(const std::filesystem::path & path)
     const bool couldLoadData = tryParseFile(path);
     if(couldLoadData) {
         _state = ApplicationState::Paused;
-        enablePlayerControls();
+        setEnablePlayerControls(true);
         startRendering();
         labelCurrentFile.setText(QString("File: %1").arg(QString::fromStdString(path.string())));
     } else {
         _state = ApplicationState::NoData;
-        disablePlayerControls();
+        setEnablePlayerControls(false);
         labelCurrentFile.setText("File: -");
     }
 }
@@ -494,6 +488,7 @@ void MainWindow::resetGraphicalElements()
     if(_settings.recordPNGsequence) {
         slotRecordPNGsequence();
     }
+    ui.replaySpeedSelector->setValue(1);
 }
 
 void MainWindow::slotShowTrajectoryOnly()
@@ -612,13 +607,13 @@ void MainWindow::slotToogle3D()
 void MainWindow::slotNextFrame()
 {
     ui.BtStart->setChecked(false);
-    _trajectories.incrementFrame();
+    _trajectories.moveFrameBy(_visualisation->replaySpeed());
 }
 
 void MainWindow::slotPreviousFrame()
 {
     ui.BtStart->setChecked(false);
-    _trajectories.decrementFrame();
+    _trajectories.moveFrameBy(-_visualisation->replaySpeed());
 }
 
 void MainWindow::slotShowPedestrianCaption()

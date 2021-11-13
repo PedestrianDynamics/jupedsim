@@ -1,5 +1,7 @@
 #include "TrajectoryData.h"
 
+#include <algorithm>
+
 void TrajectoryData::resetFrameCursor()
 {
     _frameCursor = 0;
@@ -53,20 +55,12 @@ void TrajectoryData::moveToFrame(int position)
     }
 }
 
-void TrajectoryData::incrementFrame()
+void TrajectoryData::moveFrameBy(int count)
 {
-    const auto nextIndex = _frameCursor + 1;
-    if(nextIndex < _frames.size()) {
-        _frameCursor = nextIndex;
-    }
-}
-
-void TrajectoryData::decrementFrame()
-{
-    const auto nextIndex = _frameCursor - 1;
-    if(nextIndex >= 0) {
-        _frameCursor = nextIndex;
-    }
+    const auto newIndex = _frameCursor + count;
+    const int low       = 0;
+    const int high      = _frames.empty() ? 0 : static_cast<int>(_frames.size() - 1);
+    _frameCursor        = std::clamp(newIndex, low, high);
 }
 
 Frame * TrajectoryData::currentFrame()

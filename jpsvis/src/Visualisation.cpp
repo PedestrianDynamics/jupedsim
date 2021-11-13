@@ -643,7 +643,7 @@ void Visualisation::onExecute()
 
     if(_trajectories->getFrameCount() > 0) {
         if(!is_pause) {
-            _trajectories->incrementFrame();
+            _trajectories->moveFrameBy(_replay_speed);
         }
         const auto * frame = _trajectories->currentFrame();
 
@@ -886,6 +886,11 @@ void Visualisation::takeScreenshotSequence()
 double Visualisation::trajectoryRecordingFps() const
 {
     return _trajectories->getFps();
+}
+
+void Visualisation::ChangeReplaySpeed(int frames)
+{
+    _replay_speed = frames;
 }
 
 void Visualisation::pauseRendering(bool paused)

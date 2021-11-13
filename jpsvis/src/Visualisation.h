@@ -177,6 +177,16 @@ public:
     /// @return fps of the trajectory data.
     double trajectoryRecordingFps() const;
 
+    /// Changes the replay speed, i.e. the numer of frames advaned per render call.
+    /// A negative number will make the animation play backwards.
+    /// @param frames to move per iteration.
+    void ChangeReplaySpeed(int frames);
+
+    /// Returns the current replay speed in flames. The number may be negative to indicate the
+    /// replay running backwards.
+    /// @return reply_speed in frames per iteration
+    int replaySpeed() const { return _replay_speed; }
+
 signals:
     void signalFrameNumber(int frame);
     void signalMaxFramesUpdated(int num_frames);
@@ -229,4 +239,5 @@ private:
     int _timer_id = 1;
     std::unique_ptr<PointPlotter> _trail_plotter{nullptr};
     bool is_pause{true};
+    int _replay_speed{1};
 };

@@ -38,9 +38,10 @@ public:
     /// set to cursor position
     void moveToFrame(int position);
 
-    void incrementFrame();
-
-    void decrementFrame();
+    /// Increment or decrement frame counter by 'count' frmaes. Movement is clamped to the number
+    /// actual of actual available frames.
+    /// @param count frames to move.
+    void moveFrameBy(int count);
 
     Frame * currentFrame();
 
