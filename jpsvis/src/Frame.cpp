@@ -32,71 +32,53 @@
 
 #include "Frame.h"
 
-#include "FrameElement.h"
-#include "general/Macros.h"
-
 #include <glm/vec3.hpp>
-#include <iostream>
-#include <vector>
 #include <vtkFloatArray.h>
 #include <vtkMath.h>
 #include <vtkMatrix3x3.h>
 #include <vtkPointData.h>
 #include <vtkPolyData.h>
-#include <vtkSmartPointer.h>
 
+Frame::Frame() : _polydata2D(vtkPolyData::New()), _polydata3D(vtkPolyData::New()) {}
 
-Frame::Frame(int id)
+void Frame::InsertElement(FrameElement && element)
 {
-    _elementCursor = 0;
-    _id            = id;
-    _polydata2D    = vtkPolyData::New();
-    _polydata3D    = vtkPolyData::New();
-    _framePoints.reserve(1500);
-}
-Frame::~Frame()
-{
-    while(!_framePoints.empty()) {
-        delete _framePoints.back();
-        _framePoints.pop_back();
-    }
-    _framePoints.clear();
-
-    _polydata2D->Delete();
-    _polydata3D->Delete();
+    _framePoints.emplace_back(std::move(element));
 }
 
-int Frame::getSize() const
+int Frame::Size() const
 {
     return _framePoints.size();
 }
 
-void Frame::addElement(FrameElement * point)
-{
-    _framePoints.push_back(point);
-}
-
-FrameElement * Frame::getNextElement()
-{
-    if(_elementCursor >= _framePoints.size()) {
-        return NULL;
-    } else {
-        return _framePoints[_elementCursor++];
-    }
-}
-
 void Frame::ComputePolyData()
 {
-    ComputePolyData2D();
-    ComputePolyData3D();
+    computePolyData2D();
+    computePolyData3D();
 }
 
-void Frame::ComputePolyData2D()
+
+vtkSmartPointer<vtkPolyData> Frame::GetPolyData2D()
 {
-    VTK_CREATE(vtkPoints, points);
-    VTK_CREATE(vtkFloatArray, colors);
-    VTK_CREATE(vtkFloatArray, tensors);
-    VTK_CREATE(vtkIntArray, labels);
+    return _polydata2D;
+}
+
+vtkSmartPointer<vtkPolyData> Frame::GetPolyData3D()
+{
+    return _polydata3D;
+}
+
+const std::vector<FrameElement> & Frame::GetFrameElements() const
+{
+    return _framePoints;
+}
+
+void Frame::computePolyData2D()
+{
+    vtkNew<vtkPoints> points;
+    vtkNew<vtkFloatArray> colors;
+    vtkNew<vtkFloatArray> tensors;
+    vtkNew<vtkIntArray> labels;
 
     colors->SetName("color");
     colors->SetNumberOfComponents(1);
@@ -108,11 +90,11 @@ void Frame::ComputePolyData2D()
     labels->SetNumberOfComponents(1);
 
     for(unsigned int i = 0; i < _framePoints.size(); i++) {
-        glm::dvec3 pos = _framePoints[i]->pos;
-        glm::dvec3 rad = _framePoints[i]->radius;
-        glm::dvec3 rot = _framePoints[i]->orientation;
-        double color   = _framePoints[i]->color;
-        labels->InsertNextValue(_framePoints[i]->id + 1);
+        glm::dvec3 pos = _framePoints[i].pos;
+        glm::dvec3 rad = _framePoints[i].radius;
+        glm::dvec3 rot = _framePoints[i].orientation;
+        double color   = _framePoints[i].color;
+        labels->InsertNextValue(_framePoints[i].id + 1);
 
         rad[0] /= 30;
         rad[1] /= 30;
@@ -178,11 +160,11 @@ void Frame::ComputePolyData2D()
     _polydata2D->GetPointData()->AddArray(labels);
 }
 
-void Frame::ComputePolyData3D()
+void Frame::computePolyData3D()
 {
-    VTK_CREATE(vtkPoints, points);
-    VTK_CREATE(vtkFloatArray, colors);
-    VTK_CREATE(vtkFloatArray, tensors);
+    vtkNew<vtkPoints> points;
+    vtkNew<vtkFloatArray> colors;
+    vtkNew<vtkFloatArray> tensors;
 
     colors->SetName("color");
     colors->SetNumberOfComponents(1);
@@ -191,10 +173,10 @@ void Frame::ComputePolyData3D()
     tensors->SetNumberOfComponents(9);
 
     for(unsigned int i = 0; i < _framePoints.size(); i++) {
-        glm::dvec3 pos = _framePoints[i]->pos;
-        glm::dvec3 rad = _framePoints[i]->radius;
-        glm::dvec3 rot = _framePoints[i]->orientation;
-        double color   = _framePoints[i]->color;
+        glm::dvec3 pos = _framePoints[i].pos;
+        glm::dvec3 rad = _framePoints[i].radius;
+        glm::dvec3 rot = _framePoints[i].orientation;
+        double color   = _framePoints[i].color;
 
         // values for cylindar
         double height_i   = 170;
@@ -264,30 +246,4 @@ void Frame::ComputePolyData3D()
     // setting the scaling and rotation
     _polydata3D->GetPointData()->SetTensors(tensors);
     _polydata3D->GetPointData()->SetActiveTensors("tensors");
-}
-
-
-vtkPolyData * Frame::GetPolyData2D()
-{
-    return _polydata2D;
-}
-
-vtkPolyData * Frame::GetPolyData3D()
-{
-    return _polydata3D;
-}
-
-const std::vector<FrameElement *> & Frame::GetFrameElements() const
-{
-    return _framePoints;
-}
-
-unsigned int Frame::getElementCursor()
-{
-    return _elementCursor;
-}
-
-void Frame::resetCursor()
-{
-    _elementCursor = 0;
 }

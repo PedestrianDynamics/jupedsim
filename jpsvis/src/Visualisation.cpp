@@ -230,14 +230,14 @@ void Visualisation::stop()
 
 void Visualisation::update()
 {
-    auto * polyData2D = _trajectories->currentFrame()->GetPolyData2D();
+    auto polyData2D = _trajectories->currentFrame()->GetPolyData2D();
     _glyphs_pedestrians->SetInputData(polyData2D);
     _glyphs_pedestrians->Update();
     _pedestrians_labels->GetMapper()->SetInputDataObject(polyData2D);
     _pedestrians_labels->GetMapper()->Update();
     _glyphs_directions->SetInputData(polyData2D);
     _glyphs_directions->Update();
-    auto * polyData3D = _trajectories->currentFrame()->GetPolyData3D();
+    auto polyData3D = _trajectories->currentFrame()->GetPolyData3D();
     _glyphs_pedestrians_3D->SetInputData(polyData3D);
     _glyphs_pedestrians_3D->Update();
 }
@@ -647,18 +647,14 @@ void Visualisation::onExecute()
         }
         const auto * frame = _trajectories->currentFrame();
 
-        nPeds = frame->getSize();
+        nPeds = frame->Size();
         update();
         auto FrameElements = frame->GetFrameElements();
 
         if(_settings->showTrajectories) {
-            const std::vector<FrameElement *> & elements = frame->GetFrameElements();
-
-            for(unsigned int i = 0; i < elements.size(); i++) {
-                FrameElement * el = elements[i];
-                glm::dvec3 pos    = el->pos;
-                double color      = el->color;
-                _trail_plotter->PlotPoint(pos, color);
+            const auto & elements = frame->GetFrameElements();
+            for(auto && e : elements) {
+                _trail_plotter->PlotPoint(e.pos, e.color);
             }
         }
     }

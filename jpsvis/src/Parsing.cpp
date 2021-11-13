@@ -1,4 +1,4 @@
-/**
+/*
  * @file    SaxParser.cpp
  * @author  Ulrich Kemloh <kemlohulrich@gmail.com>
  * @version 0.1
@@ -420,23 +420,25 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
 bool ParseTxtFormat(const QString & fileName, TrajectoryData * trajectories)
 {
     Log::Info("parsing txt trajectory <%s> ", fileName.toStdString().c_str());
-    double fps = 16; // default value
     QFile inputFile(fileName);
-    if(inputFile.open(QIODevice::ReadOnly)) {
-        QTextStream in(&inputFile);
-        int maxFrame = 1000;
-        // initialize the process dialog
+    if(!inputFile.open(QIODevice::ReadOnly)) {
+        Log::Error("could not open the file  <%s>", fileName.toStdString().c_str());
+        return false;
+    }
 
-        double unitFactor = FAKTOR; // @todo: use correct unit
-        int frameOffset   = 0;
-        int frameCounter  = 0;
-        Frame * frame{nullptr};
-        QString sep("\t");
-        QString line{};
+    double fps = 16;
+    QTextStream in(&inputFile);
+    QString line{};
 
-        // Looking for framerate
-        while(!in.atEnd()) {
-            line = in.readLine();
+    const double unitFactor = FAKTOR;
+    const QString sep("\t");
+    bool headerRead = false;
+    std::map<size_t, std::unique_ptr<Frame>> frames{};
+    unsigned int lineCount{0};
+    while(!in.atEnd()) {
+        line = in.readLine();
+        ++lineCount;
+        if(!headerRead) {
             if(line.startsWith("#")) {
                 if(line.split(":").size() == 2) {
                     if(line.split(":")[0].contains("framerate", Qt::CaseInsensitive)) {
@@ -445,97 +447,59 @@ bool ParseTxtFormat(const QString & fileName, TrajectoryData * trajectories)
                         trajectories->setFps(fps);
                     }
                 }
+                continue;
             } else if(line.isEmpty()) {
                 continue;
             } else {
-                break;
+                headerRead = true;
             }
         }
-        while(!in.atEnd()) {
-            line              = in.readLine();
-            const auto pieces = line.splitRef(sep, Qt::SkipEmptyParts);
+        const auto pieces = line.splitRef(sep, Qt::SkipEmptyParts);
+        glm::dvec3 pos;
+        glm::dvec3 angle     = {0, 0, 30};
+        glm::dvec3 radius    = {0.3 * FAKTOR, 0.3 * FAKTOR, 0.3 * FAKTOR};
+        int agentID          = -1;
+        int frameID          = -1;
+        double color         = 155;
+        const auto numPieces = pieces.size();
 
-            glm::dvec3 pos;
-            glm::dvec3 angle  = {0, 0, 30};
-            glm::dvec3 radius = {0.3 * FAKTOR, 0.3 * FAKTOR, 0.3 * FAKTOR};
-
-            int agentID     = -1;
-            int frameID     = -1;
-            double color    = 155;
-            static int once = 1;
-            switch(pieces.size()) {
-                case 5:
-                    agentID = pieces[0].toInt();
-                    frameID = pieces[1].toInt();
-                    if(once) // first frame we get
-                    {
-                        frameOffset = frameID;
-                        once        = 0;
-                    }
-
-                    pos[0] = pieces[2].toDouble() * unitFactor;
-                    pos[1] = pieces[3].toDouble() * unitFactor;
-                    pos[2] = pieces[4].toDouble() * unitFactor;
-                    break;
-
-                case 9:
-                case 10:
-                case 11:
-                case 12:
-                case 13:
-                case 14:
-                    agentID   = pieces[0].toInt();
-                    frameID   = pieces[1].toInt();
-                    color     = pieces[8].toDouble();
-                    pos[0]    = pieces[2].toDouble() * unitFactor;
-                    pos[1]    = pieces[3].toDouble() * unitFactor;
-                    pos[2]    = pieces[4].toDouble() * unitFactor;
-                    radius[0] = pieces[5].toDouble() * unitFactor;
-                    radius[1] = pieces[6].toDouble() * unitFactor;
-                    angle[2]  = pieces[7].toDouble();
-                    if(once) // first frame we get
-                    {
-                        frameOffset = frameID;
-                        Log::Info("minFrame =  %d\n", frameOffset);
-                        once = 0;
-                    }
-                    break;
-
-                default:
-                    // try to scan the line for the unit
-                    if(line.contains("centimeter", Qt::CaseInsensitive) ||
-                       line.contains("centimetre", Qt::CaseInsensitive)) {
-                        unitFactor = 0.01;
-                        Log::Info("unit centimetre detected");
-                    } else if(
-                        line.contains("meter", Qt::CaseInsensitive) ||
-                        line.contains("metre", Qt::CaseInsensitive)) {
-                        unitFactor = 1;
-                        Log::Info("unit metre detected");
-                    } else {
-                        Log::Warning("Ignoring line: <%s>", line.toStdString().c_str());
-                    }
-                    continue; // next line
-                    break;
-            }
-            FrameElement * element = new FrameElement{pos, radius, angle, color, agentID - 1};
-            if(frameID - frameOffset + 1 > frameCounter) {
-                // this is a new frame
-                frame = new Frame(frameID - frameOffset);
-                trajectories->append(frame);
-                ++frameCounter;
-            }
-            frame->addElement(element);
+        if(numPieces == 5) {
+            agentID = pieces[0].toInt();
+            frameID = pieces[1].toInt();
+            pos[0]  = pieces[2].toDouble() * unitFactor;
+            pos[1]  = pieces[3].toDouble() * unitFactor;
+            pos[2]  = pieces[4].toDouble() * unitFactor;
+        } else if(numPieces >= 9) {
+            agentID   = pieces[0].toInt();
+            frameID   = pieces[1].toInt();
+            pos[0]    = pieces[2].toDouble() * unitFactor;
+            pos[1]    = pieces[3].toDouble() * unitFactor;
+            pos[2]    = pieces[4].toDouble() * unitFactor;
+            radius[0] = pieces[5].toDouble() * unitFactor;
+            radius[1] = pieces[6].toDouble() * unitFactor;
+            angle[2]  = pieces[7].toDouble();
+            color     = pieces[8].toDouble();
+        } else {
+            Log::Error(
+                "Malformed input, skipping line %ul:%s", lineCount, line.toStdString().c_str());
+            continue;
         }
 
-        inputFile.close();
-        Log::Info("%d frames added!", trajectories->getFrameCount());
-        // construct the polydata
-        trajectories->updatePolyDataForFrames();
-    } else {
-        Log::Error("could not open the file  <%s>", fileName.toStdString().c_str());
-        return false;
+        auto element = FrameElement{pos, radius, angle, color, agentID - 1};
+        auto iter    = frames.find(frameID);
+        if(iter == frames.end()) {
+            auto [new_element, _] = frames.insert({frameID, std::make_unique<Frame>()});
+            iter                  = new_element;
+        }
+        iter->second->InsertElement(std::move(element));
     }
+
+    for(auto && [k, v] : frames) {
+        trajectories->append(std::move(v));
+    }
+
+    inputFile.close();
+    trajectories->updatePolyDataForFrames();
     return true;
 }
 
@@ -575,7 +539,6 @@ bool LoadTrainTimetable(
     return true;
 }
 
-
 bool LoadTrainType(
     std::string Filename,
     std::map<std::string, std::shared_ptr<TrainType>> & trainTypes)
@@ -606,7 +569,6 @@ bool LoadTrainType(
     }
     return true;
 }
-
 
 std::shared_ptr<TrainTimeTable> parseTrainTimeTableNode(TiXmlElement * e)
 {
@@ -779,7 +741,6 @@ std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement * node)
     });
     return Type;
 }
-
 
 AdditionalInputs extractAdditionalInputFilePaths(const std::filesystem::path & path)
 {

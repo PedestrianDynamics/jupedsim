@@ -20,78 +20,54 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * @section DESCRIPTION
- *
- * @brief contains the collection of all
- * pedestrians coordinates (trajectoryPoint) belonging to the same frame(i.e at the same time)
- *
- *  Created on: 10.07.2009
- *
  */
 #pragma once
 
+#include "FrameElement.h"
+
 #include <vector>
+#include <vtkPolyData.h>
+#include <vtkSmartPointer.h>
 
-class FrameElement;
-class vtkPolyData;
-
+/// Represents a single frame of the simulation
+/// TODO(kkratz): Split into FrameData / Frame2DModel / Frame3DModel
 class Frame
 {
+    std::vector<FrameElement> _framePoints;
+    vtkSmartPointer<vtkPolyData> _polydata2D;
+    vtkSmartPointer<vtkPolyData> _polydata3D;
+
 public:
-    /// constructor
-    Frame(int id);
-    /// destructor
-    virtual ~Frame();
+    /// Constructor
+    Frame();
 
-    /// add an element to the Frame
-    void addElement(FrameElement * point);
+    /// Destructor
+    ~Frame() = default;
 
-    /// clear all Points in the frame
-    void clear();
+    /// Insert an Element to the Frame.
+    /// @param element to add
+    void InsertElement(FrameElement && element);
 
-    /// return the next object in the frame
-    FrameElement * getNextElement();
+    /// @return the number of element in this frame
+    int Size() const;
 
-    /// compute the polydata.
-    /// Call this after all elements have been added.
+    /// Computes the polydata. Call this after all elements have been added.
     void ComputePolyData();
 
-    /// return the number of element in this frame
-    int getSize() const;
+    /// @return the 3D polydata set
+    vtkSmartPointer<vtkPolyData> GetPolyData3D();
 
-    int GetID() { return _id; }
+    /// @return the 2D polydata set
+    vtkSmartPointer<vtkPolyData> GetPolyData2D();
 
-    /// reset the position of the cursor for reading the data
-    void resetCursor();
-
-    /// return the 3D polydata set
-    vtkPolyData * GetPolyData3D();
-
-    /// return the 2D polydata set
-    vtkPolyData * GetPolyData2D();
-
-    /// return the pedestrians labels
-    vtkPolyData * GetPolyDataLabels();
-
-    const std::vector<FrameElement *> & GetFrameElements() const;
+    /// Access Elements in this Frame
+    /// @preturn vector of FrameElements
+    const std::vector<FrameElement> & GetFrameElements() const;
 
 private:
     /// compute the 2D polydata
-    void ComputePolyData2D();
+    void computePolyData2D();
+
     /// compute the 3D polydata
-    void ComputePolyData3D();
-
-    unsigned int getElementCursor();
-
-
-private:
-    std::vector<FrameElement *> _framePoints;
-    // vtkPolyData * _polydata;
-    vtkPolyData * _polydata2D;
-    vtkPolyData * _polydata3D;
-
-    /// points to the actual element in the frame
-    unsigned int _elementCursor;
-    // the frame id
-    int _id;
+    void computePolyData3D();
 };

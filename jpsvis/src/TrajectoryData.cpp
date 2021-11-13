@@ -15,9 +15,9 @@ unsigned int TrajectoryData::getSize()
         return _frames.size();
 }
 
-void TrajectoryData::append(Frame * frame)
+void TrajectoryData::append(std::unique_ptr<Frame> && frame)
 {
-    _frames.push_back(std::unique_ptr<Frame>{frame});
+    _frames.emplace_back(std::move(frame));
 }
 
 void TrajectoryData::clearFrames()

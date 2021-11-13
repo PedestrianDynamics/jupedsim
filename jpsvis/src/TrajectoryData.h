@@ -6,6 +6,10 @@
 
 class TrajectoryData
 {
+    std::vector<std::unique_ptr<Frame>> _frames{};
+    int _frameCursor{0};
+    double _fps{0};
+
 public:
     TrajectoryData()  = default;
     ~TrajectoryData() = default;
@@ -16,7 +20,7 @@ public:
     unsigned int getSize();
 
     /// add a frame to the synchronized data
-    void append(Frame * frame);
+    void append(std::unique_ptr<Frame> && frame);
 
     /// clears all frames
     void clearFrames();
@@ -46,9 +50,4 @@ public:
     Frame * currentFrame();
 
     void updatePolyDataForFrames();
-
-private:
-    std::vector<std::unique_ptr<Frame>> _frames{};
-    int _frameCursor{0};
-    double _fps{0};
 };
