@@ -12,11 +12,11 @@ __author__ = 'Oliver Schmidts'
 
 def runtest5(inifile, trajfile):
     fps, N, traj = parse_file(trajfile)
-    traj_1 = traj[traj[:, 0] == 1] # behind
+    traj_1 = traj[traj[:, 0] == 3] # behind
     x_1 = traj_1[:, 2]
     y_1 = traj_1[:, 3]
 
-    traj_2 = traj[traj[:, 0] == 2] # vorne
+    traj_2 = traj[traj[:, 0] == 4] # vorne
     x_2 = traj_2[:, 2]
     y_2 = traj_2[:, 3]
 
