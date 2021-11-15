@@ -82,7 +82,9 @@ int main(int argc, char ** argv)
     Simulation sim(&config, std::move(building));
     EventManager manager;
 
-    size_t frame = 0;
+    size_t frame   = 0;
+    int num_agents = agents.size();
+
     while(!agents.empty()) {
         double now = sim.Clock().dT() * frame;
         auto t     = std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -107,7 +109,7 @@ int main(int argc, char ** argv)
             config.GetPrecision(),
             config.GetOptionalOutputOptions(),
             std::make_unique<FileHandler>(config.GetTrajectoriesFile()));
-        sim.RunHeader(agents.size(), *writer);
+        sim.RunHeader(num_agents, *writer);
 
         const int writeInterval = static_cast<int>((1. / sim.Fps()) / sim.Clock().dT() + 0.5);
 
