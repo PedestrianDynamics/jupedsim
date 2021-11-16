@@ -71,3 +71,38 @@ target_include_directories(poly2tri PUBLIC
 )
 set_property(TARGET poly2tri PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
 set_property(TARGET poly2tri PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
+
+################################################################################
+# Build sqlite
+################################################################################
+add_library(sqlite STATIC
+    sqlite-amalgamation-3360000/sqlite3.c
+)
+target_include_directories(sqlite PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/sqlite-amalgamation-3360000
+)
+target_compile_definitions(sqlite PUBLIC
+    SQLITE_DQS=0
+    SQLITE_THREADSAFE=0
+    SQLITE_DEFAULT_MEMSTATUS=0
+    SQLITE_DEFAULT_WAL_SYNCHRONOUS=1
+    SQLITE_LIKE_DOESNT_MATCH_BLOBS
+    SQLITE_MAX_EXPR_DEPTH=0
+    SQLITE_OMIT_DECLTYPE
+    SQLITE_OMIT_DEPRECATED
+    SQLITE_OMIT_PROGRESS_CALLBACK
+    SQLITE_OMIT_SHARED_CACHE
+    SQLITE_USE_ALLOCA
+    SQLITE_OMIT_AUTOINIT
+)
+set_property(TARGET sqlite PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
+set_property(TARGET sqlite PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
+
+add_executable(sqlite3
+    sqlite-amalgamation-3360000/shell.c
+)
+target_link_libraries(sqlite3
+    sqlite
+)
+set_property(TARGET sqlite3 PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
+set_property(TARGET sqlite3 PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
