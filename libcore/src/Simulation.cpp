@@ -156,8 +156,11 @@ void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
     agent->SetWalkingSpeed(_building->GetConfig()->GetWalkingSpeed());
     agent->SetTox(_building->GetConfig()->GetToxicityAnalysis());
     agent->SetBuilding(_building.get());
-    agent->SetSubRoomUID(
-        _building->GetRoom(agent->GetRoomID())->GetSubRoom(agent->GetSubRoomID())->GetUID());
+
+    const auto [room, subroom] = _building->RoomAndSubroom(agent->GetPos());
+    agent->SetRoomID(room);
+    agent->SetSubRoomID(subroom);
+    agent->SetSubRoomUID(_building->GetRoom(room)->GetSubRoom(subroom)->GetUID());
     agent->SetRouter(_routingEngine->GetRouter(agent->GetRouterID()));
     const Point pos = agent->GetPos();
     Point target    = Point{0.0, 0.0};

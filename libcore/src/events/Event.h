@@ -32,8 +32,6 @@ public:
     int FinalDestination;
     int GroupId;
     int RouterId;
-    int RoomId;
-    int SubroomId;
     double PatienceTime;
     double PremovementTime;
     double RiskTolerance;

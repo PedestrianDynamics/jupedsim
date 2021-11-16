@@ -19,8 +19,6 @@ void ProcessEvent(CreatePedestrianEvent event, Simulation & sim)
 
     ped->SetFinalDestination(event.FinalDestination);
     ped->SetGroup(event.GroupId);
-    ped->SetRoomID(event.RoomId);
-    ped->SetSubRoomID(event.SubroomId);
     ped->SetPatienceTime(event.PatienceTime);
     ped->SetPremovementTime(event.PremovementTime);
     ped->SetRiskTolerance(event.RiskTolerance);

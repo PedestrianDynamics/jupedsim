@@ -59,6 +59,7 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -1096,4 +1097,17 @@ std::optional<Point> Building::GetTrackStart(int trackID) const
     }
 
     return std::nullopt;
+}
+
+
+std::tuple<int, int> Building::RoomAndSubroom(Point p) const
+{
+    for(auto && [room_id, room] : _rooms) {
+        for(auto && [subroom_id, subroom] : room->GetAllSubRooms()) {
+            if(subroom->IsInSubRoom(p)) {
+                return std::make_tuple(room_id, subroom_id);
+            }
+        }
+    }
+    throw std::runtime_error("point outside of geometry");
 }

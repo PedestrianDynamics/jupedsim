@@ -298,6 +298,8 @@ public:
 
     std::optional<Point> GetTrackStart(int trackID) const;
 
+    std::tuple<int, int> RoomAndSubroom(Point p) const;
+
 private:
     bool InitInsideGoals();
     void InitPlatforms();
