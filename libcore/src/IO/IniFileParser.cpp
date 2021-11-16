@@ -192,6 +192,12 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         LOG_INFO("Geometry file <{}>", filename);
     }
 
+    if(xHeader->FirstChild("pedestrian_events")) {
+        fs::path file{xHeader->FirstChild("pedestrian_events")->FirstChild()->Value()};
+        _config->SetPedestrianEventFile(file);
+        LOG_INFO("Pedestrian file <{}>", file);
+    }
+
     //display statistics
     if(xHeader->FirstChild("show_statistics")) {
         std::string value = xHeader->FirstChild("show_statistics")->FirstChild()->Value();

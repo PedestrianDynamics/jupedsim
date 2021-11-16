@@ -313,6 +313,10 @@ public:
 
     void SetGeometryFile(const fs::path & geometryFile) { _geometryFile = geometryFile; };
 
+    const fs::path & GetPedestrianEventFile() const { return _pedestrianEventFile; };
+
+    void SetPedestrianEventFile(const fs::path & file) { _pedestrianEventFile = file; };
+
     const fs::path & GetTransitionFile() const { return _transitionFile; }
 
     void SetTransitionFile(const fs::path & transitionFile) { _transitionFile = transitionFile; }
@@ -436,6 +440,7 @@ private:
     fs::path _scheduleFile;
     fs::path _trainTypeFile;
     fs::path _trainTimeTableFile;
+    fs::path _pedestrianEventFile;
 
 private:
     fs::path _projectRootDir;
