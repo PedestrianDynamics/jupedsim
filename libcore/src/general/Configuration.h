@@ -114,13 +114,6 @@ public:
 
     std::shared_ptr<RoutingEngine> GetRoutingEngine() const { return _routingEngine; };
 
-    // TODO: this is certainly not a config parameter but part of the model, we
-    // really should separate data and model [gl march '16]
-    void SetRoutingEngine(std::shared_ptr<RoutingEngine> routingEngine)
-    {
-        _routingEngine = routingEngine;
-    };
-
     unsigned int GetSeed() const { return _seed; };
 
     void SetSeed(unsigned int seed) { _seed = seed; };

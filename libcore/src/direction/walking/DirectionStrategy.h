@@ -147,12 +147,13 @@ public:
 
     double GetDistance2Target(Pedestrian * ped, int UID) const override;
 
-protected:
+private:
     std::map<int, UnivFFviaFM *> _locffviafm;
     Building * _building;
     double _stepsize;
     double _wallAvoidDistance;
     bool _useDistancefield;
+    bool _wasInitialized{false};
 };
 
 /**
@@ -175,7 +176,7 @@ public:
 
     double GetDistance2Target(Pedestrian * ped, int UID) const override;
 
-protected:
+private:
     std::map<int, UnivFFviaFM *> _locffviafm;
     Building * _building;
     double _stepsize;

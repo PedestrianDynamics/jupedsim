@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<JPScore project="JPS-Project" version="0.8">
-  <agents_sources>
-    <source id="1" group_id="1" time_min="0" time_max="3" N_create="5" agents_max="5"/>
-    <source id="2" group_id="2" time_min="3" time_max="4" N_create="5" agents_max="5"/>
-    <source id="3" group_id="3" time_min="5" time_max="8" N_create="5" agents_max="5"/>
-    <source id="4" group_id="4" time_min="10" time_max="9" N_create="5" agents_max="5"/>
-  </agents_sources>
-</JPScore>

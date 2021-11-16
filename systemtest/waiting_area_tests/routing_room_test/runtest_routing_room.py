@@ -24,15 +24,19 @@ def runtest(inifile, trajfile):
     fps, N, traj = parse_file(trajfile)
     waitingAreas = parse_waiting_areas(inifile)
 
-    trajPedDirect = traj[np.where(traj[:, 0] == 1)]
-    trajPedWaitingArea = traj[np.where(traj[:, 0] == 2)]
+    trajPedDirect = traj[np.where(traj[:, 0] == 3)]
+    trajPedWaitingArea = traj[np.where(traj[:, 0] == 4)]
 
     # ped on direct way should have walked through any waiting area
     pedDirectInWA = False
     for waitingArea in waitingAreas:
-        pedDirectInWA = pedDirectInWA or PassedPolygon(trajPedDirect, waitingArea.boundingBox[0],
-                                                       waitingArea.boundingBox[1], waitingArea.boundingBox[2],
-                                                       waitingArea.boundingBox[3])
+        pedDirectInWA = pedDirectInWA or PassedPolygon(
+            trajPedDirect,
+            waitingArea.boundingBox[0],
+            waitingArea.boundingBox[1],
+            waitingArea.boundingBox[2],
+            waitingArea.boundingBox[3],
+        )
     if pedDirectInWA:
         logging.critical("Ped on direct way walked through waiting area")
         success = False
@@ -40,9 +44,13 @@ def runtest(inifile, trajfile):
     # ped through waiting areas should have walked through all waiting areas
     pedWAInWA = True
     for waitingArea in waitingAreas:
-        pedWAInWA = pedWAInWA and PassedPolygon(trajPedWaitingArea, waitingArea.boundingBox[0],
-                                                waitingArea.boundingBox[1], waitingArea.boundingBox[2],
-                                                waitingArea.boundingBox[3])
+        pedWAInWA = pedWAInWA and PassedPolygon(
+            trajPedWaitingArea,
+            waitingArea.boundingBox[0],
+            waitingArea.boundingBox[1],
+            waitingArea.boundingBox[2],
+            waitingArea.boundingBox[3],
+        )
     if not pedWAInWA:
         logging.critical("Ped on way through waiting areas did miss at least one.")
         success = False
@@ -52,7 +60,9 @@ def runtest(inifile, trajfile):
 
 
 if __name__ == "__main__":
-    test = JPSRunTestDriver(1, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir, jpscore=argv[1])
+    test = JPSRunTestDriver(
+        1, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir, jpscore=argv[1]
+    )
     test.run_test(testfunction=runtest)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)

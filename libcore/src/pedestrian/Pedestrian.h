@@ -82,6 +82,7 @@ private:
     int _subRoomUID;
     int _oldRoomID;
     int _oldSubRoomID;
+    int _router_id{0};
     Point _lastE0;
 
     NavLine * _navLine;            // current exit line
@@ -170,6 +171,10 @@ public:
     void SetTau(double tau);
     void SetEllipse(const JEllipse & e);
 
+    void SetRouterId(int id) { _router_id = id; }
+
+    const Router * GetRouter() const { return _router; }
+
     double GetT() const;
     void SetT(double T);
     //TODO: merge this two functions
@@ -197,6 +202,17 @@ public:
     void SetPhiPed();
     void SetFinalDestination(int UID);
     void SetRouter(Router * router);
+    int GetRouterID() const;
+
+    double GetV0UpStairsNorm() const;
+    double GetV0DownStairsNorm() const;
+    double GetV0EscalatorUpNorm() const;
+    double GetV0EscalatorDownNorm() const;
+
+    double GetSmoothFactorUpStairs() const;
+    double GetSmoothFactorDownStairs() const;
+    double GetSmoothFactorUpEscalators() const;
+    double GetSmoothFactorDownEscalators() const;
 
     int GetID() const;
     int GetRoomID() const;

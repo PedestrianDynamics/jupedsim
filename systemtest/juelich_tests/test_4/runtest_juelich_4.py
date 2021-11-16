@@ -12,12 +12,12 @@ __author__ = 'Oliver Schmidts'
 
 def runtest4(inifile, trajfile):
     fps, N, traj = parse_file(trajfile)
-    traj_1 = traj[traj[:, 0] == 1]
+    traj_1 = traj[traj[:, 0] == 3]
     x_1 = traj_1[:, 2]
     y_1 = traj_1[:, 3]
 
-    x_2 = traj[traj[:, 0] == 2][:, 2]
-    y_2 = traj[traj[:, 0] == 2][:, 3]
+    x_2 = traj[traj[:, 0] == 4][:, 2]
+    y_2 = traj[traj[:, 0] == 4][:, 3]
 
     eps = 0.3 # 10 cm
     x_min = x_2[0] - eps

@@ -14,6 +14,7 @@ set(source_files
     src/direction/walking/DirectionStrategy.cpp
     src/direction/walking/DirectionStrategy.h
     src/events/DoorEvent.cpp
+    src/events/Event.cpp
     src/events/EventManager.cpp
     src/events/EventVisitors.cpp
     src/events/OldEvent.cpp

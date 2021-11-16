@@ -682,6 +682,48 @@ void Pedestrian::SetRouter(Router * router)
     _routingStrategy = router->GetStrategy();
 }
 
+int Pedestrian::GetRouterID() const
+{
+    return _router_id;
+}
+
+
+double Pedestrian::GetV0UpStairsNorm() const
+{
+    return _v0UpStairs;
+}
+double Pedestrian::GetV0DownStairsNorm() const
+{
+    return _v0DownStairs;
+}
+double Pedestrian::GetV0EscalatorUpNorm() const
+{
+    return _v0EscalatorUpStairs;
+}
+double Pedestrian::GetV0EscalatorDownNorm() const
+{
+    return _v0EscalatorDownStairs;
+}
+
+
+double Pedestrian::GetSmoothFactorUpStairs() const
+{
+    return _smoothFactorUpStairs;
+}
+double Pedestrian::GetSmoothFactorDownStairs() const
+{
+    return _smoothFactorDownStairs;
+}
+double Pedestrian::GetSmoothFactorUpEscalators() const
+{
+    return _smoothFactorEscalatorUpStairs;
+}
+double Pedestrian::GetSmoothFactorDownEscalators() const
+{
+    return _smoothFactorEscalatorDownStairs;
+}
+
+
 int Pedestrian::FindRoute()
 {
     if(_router == nullptr) {

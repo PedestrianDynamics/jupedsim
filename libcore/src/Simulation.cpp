@@ -40,6 +40,7 @@
 #include "events/EventVisitors.h"
 #include "general/Filesystem.h"
 #include "geometry/GoalManager.h"
+#include "geometry/NavLine.h"
 #include "geometry/WaitingArea.h"
 #include "geometry/Wall.h"
 #include "math/GCFMModel.h"
@@ -63,7 +64,6 @@ Simulation::Simulation(Configuration * args, std::unique_ptr<Building> && buildi
 {
     _countTraj               = 0;
     _seed                    = 8091983;
-    _deltaT                  = 0;
     _operationalModel        = nullptr;
     _fps                     = 1;
     _old_em                  = nullptr;
@@ -101,7 +101,7 @@ void Simulation::Iterate()
 
     if(t_in_sec > Pedestrian::GetMinPremovementTime()) {
         // update the positions
-        _operationalModel->ComputeNextTimeStep(t_in_sec, _deltaT, _building.get(), _periodic);
+        _operationalModel->ComputeNextTimeStep(t_in_sec, _clock.dT(), _building.get(), _periodic);
 
         //update the events
         bool eventProcessed = _old_em->ProcessEvents(t_in_sec);
@@ -148,21 +148,48 @@ void Simulation::Iterate()
             ped->ConductToxicityAnalysis();
         }
     }
-    ++_frame;
     _clock.Advance();
 }
 
 void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
 {
+    agent->SetWalkingSpeed(_building->GetConfig()->GetWalkingSpeed());
+    agent->SetTox(_building->GetConfig()->GetToxicityAnalysis());
+    agent->SetBuilding(_building.get());
+    agent->SetSubRoomUID(
+        _building->GetRoom(agent->GetRoomID())->GetSubRoom(agent->GetSubRoomID())->GetUID());
+    agent->SetRouter(_routingEngine->GetRouter(agent->GetRouterID()));
+    const Point pos = agent->GetPos();
+    Point target    = Point{0.0, 0.0};
+    if(agent->FindRoute() == -1) {
+        Point p1 = agent->GetPos();
+        p1._x += 1;
+        p1._y -= 1;
+        Point p2 = agent->GetPos();
+        p2._x += 1;
+        p2._y += 1;
+        NavLine dummy(Line{p1, p2});
+        agent->SetExitLine(&dummy);
+    } else {
+        target = agent->GetExitLine()->ShortestPoint(pos);
+    }
+    // Compute orientation
+    const Point posToTarget = target - pos;
+    const Point orientation = posToTarget.Normalized();
+    agent->InitV0(target);
+
+    JEllipse E = agent->GetEllipse();
+    E.SetCosPhi(orientation._x);
+    E.SetSinPhi(orientation._y);
+    agent->SetEllipse(E);
     _agents.emplace_back(std::move(agent));
 }
 
 void Simulation::AddAgents(std::vector<std::unique_ptr<Pedestrian>> && agents)
 {
-    _agents.insert(
-        _agents.end(),
-        std::make_move_iterator(agents.begin()),
-        std::make_move_iterator(agents.end()));
+    for(auto && agent : agents) {
+        AddAgent(std::move(agent));
+    }
 }
 
 void Simulation::RemoveAgents(std::vector<int> ids)
@@ -200,6 +227,18 @@ size_t Simulation::GetPedsNumber() const
     return _agents.size();
 }
 
+void Simulation::AddEvent(Event event)
+{
+    _em.add(event);
+}
+
+void Simulation::AddEvents(std::vector<Event> events)
+{
+    for(auto e : events) {
+        AddEvent(e);
+    }
+}
+
 bool Simulation::InitArgs()
 {
     const fs::path & trajPath(_config->GetTrajectoriesFile());
@@ -207,16 +246,9 @@ bool Simulation::InitArgs()
     if(!trajParentPath.empty()) {
         fs::create_directories(trajParentPath);
     }
-    if(!_config->GetTrajectoriesFile().empty()) {
-        _iod = std::make_unique<TrajectoryWriter>(
-            _config->GetPrecision(),
-            _config->GetOptionalOutputOptions(),
-            std::make_unique<FileHandler>(trajPath));
-    }
 
 
     _operationalModel = _config->GetModel();
-    _deltaT           = _config->Getdt();
     _maxSimTime       = _config->GetTmax();
     _periodic         = _config->IsPeriodic();
     _fps              = _config->GetFps();
@@ -224,26 +256,8 @@ bool Simulation::InitArgs()
     _routingEngine = _config->GetRoutingEngine();
     _routingEngine->SetSimulation(this);
 
-    // TOOD(kkratz) remove
-    std::vector<std::unique_ptr<Pedestrian>> ignored;
-    auto distributor = std::make_unique<PedDistributor>(_config, &ignored);
-    distributor->Distribute(_building.get());
-
-
     // IMPORTANT: do not change the order in the following..
     _building->SetAgents(&_agents);
-
-
-    // Initialize the agents sources that have been collected in the pedestrians distributor
-    _agentSrcManager = std::make_unique<AgentsSourcesManager>(_building.get());
-    _agentSrcManager->SetMaxSimTime(GetMaxSimTime());
-    _gotSources =
-        !distributor->GetAgentsSources().empty(); // did we have any sources? false if no sources
-
-    for(const auto & src : distributor->GetAgentsSources()) {
-        _agentSrcManager->AddSource(src);
-        src->Dump();
-    }
 
     //perform customs initialisation, like computing the phi for the gcfm
     //this should be called after the routing engine has been initialised
@@ -261,7 +275,7 @@ bool Simulation::InitArgs()
 
     //other initializations
     for(auto && ped : _agents) {
-        ped->SetDeltaT(_deltaT);
+        ped->SetDeltaT(_clock.dT());
     }
     LOG_INFO("Number of peds received: {}", _agents.size());
     _seed = _config->GetSeed();
@@ -304,13 +318,6 @@ bool Simulation::InitArgs()
 
     _old_em->ListEvents();
     return true;
-}
-
-double Simulation::RunStandardSimulation(double maxSimTime)
-{
-    RunHeader(_agents.size() + _agentSrcManager->GetMaxAgentNumber());
-    double t = RunBody(maxSimTime);
-    return t;
 }
 
 void Simulation::UpdateRoutesAndLocations()
@@ -451,51 +458,16 @@ void Simulation::PrintStatistics(double simTime)
     }
 }
 
-void Simulation::RunHeader(long nPed)
+void Simulation::RunHeader(long nPed, TrajectoryWriter & writer)
 {
     // Copy input files used for simulation to output folder for reproducibility
     CopyInputFilesToOutPath();
     UpdateOutputFiles();
 
-    _iod->WriteHeader(nPed, _fps, *_config, 0); // first trajectory
-    _iod->WriteFrame(0, _agents);
+    writer.WriteHeader(nPed, _fps, *_config, 0); // first trajectory
+    writer.WriteFrame(0, _agents);
     //first initialisation needed by the linked-cells
     UpdateRoutesAndLocations();
-
-    _agentSrcManager->GenerateAgents();
-}
-
-double Simulation::RunBody(double maxSimTime)
-{
-    const int writeInterval = static_cast<int>((1. / _fps) / _deltaT + 0.5);
-
-    while((!_agents.empty() || (!_agentSrcManager->IsCompleted() && _gotSources)) &&
-          _clock.ElapsedTime() < maxSimTime) {
-        const double t = _frame * _deltaT;
-
-        AddNewAgents();
-        auto next_events = _em.NextEvents(_clock);
-        for(auto const & [_, event] : next_events) {
-            // lambda is used to bind additional function paramters to the visitor
-            auto visitor = [this](auto event) { ProcessEvent(event, *this); };
-            std::visit(visitor, event);
-        }
-
-        Iterate();
-        // write the trajectories
-        if(0 == _frame % writeInterval) {
-            _iod->WriteFrame(_frame / writeInterval, _agents);
-        }
-
-
-        if(_frame % 1000 == 0) {
-            if(_config->ShowStatistics()) {
-                LOG_INFO("Update door statistics at t={:.2f}", t);
-                PrintStatistics(t);
-            }
-        }
-    }
-    return _clock.ElapsedTime();
 }
 
 void Simulation::CopyInputFilesToOutPath()
@@ -679,24 +651,9 @@ void Simulation::UpdateOutputGeometryFile()
     geoOutput.SaveFile(geoOutputPath.string());
 }
 
-void Simulation::AddNewAgents()
-{
-    AddAgents(_agentSrcManager->ProcessAllSources(_clock.ElapsedTime()));
-}
-
 void Simulation::incrementCountTraj()
 {
     _countTraj++;
-}
-
-AgentsSourcesManager & Simulation::GetAgentSrcManager()
-{
-    return *_agentSrcManager;
-}
-
-Building * Simulation::GetBuilding()
-{
-    return _building.get();
 }
 
 int Simulation::GetMaxSimTime() const
