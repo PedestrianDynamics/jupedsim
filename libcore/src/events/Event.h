@@ -26,38 +26,38 @@ public:
 class CreatePedestrianEvent : public BaseEvent
 {
 public:
-    Point _position;
+    Point Position;
 
     // general values from StartDistribution::GenerateAgent
-    int _final_destination;
-    int _group_id;
-    int _router_id;
-    int _room_id;
-    int _subroom_id;
-    double _patience_time;
-    double _premovement_time;
-    double _risk_tolerance;
+    int FinalDestination;
+    int GroupId;
+    int RouterId;
+    int RoomId;
+    int SubroomId;
+    double PatienceTime;
+    double PremovementTime;
+    double RiskTolerance;
 
     // Ellipse specific
-    double _ellipse_a_v;
-    double _ellipse_a_min;
-    double _ellipse_b_max;
-    double _ellipse_b_min;
-    bool _ellipse_do_stretch;
+    double EllipsisA_V;
+    double EllipsisAMin;
+    double EllipsisBMax;
+    double EllipsisBMin;
+    bool EllipsisDoStretch;
 
-    double _tau;
-    double _T;
+    double Tau;
+    double T;
 
-    double _v0;
-    double _v0_up_stairs;
-    double _v0_down_stairs;
-    double _v0_escalator_up;
-    double _v0_escalator_down;
+    double V0;
+    double V0UpStairs;
+    double V0DownStairs;
+    double V0EscalatorUp;
+    double V0EscalatorDown;
 
-    double _smooth_factor_up_stairs;
-    double _smooth_factor_down_stairs;
-    double _smooth_factor_escalator_up;
-    double _smooth_factor_escalator_down;
+    double SmoothFactorUpStairs;
+    double SmoothFactorDownStairs;
+    double SmoothFactorEscalatorUp;
+    double SmoothFactorEscalatorDown;
 
     CreatePedestrianEvent(Pedestrian const * agent, std::chrono::nanoseconds min_time);
 };

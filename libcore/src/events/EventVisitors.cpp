@@ -17,36 +17,32 @@ void ProcessEvent(CreatePedestrianEvent event, Simulation & sim)
 {
     std::unique_ptr<Pedestrian> ped = std::make_unique<Pedestrian>();
 
-    ped->SetFinalDestination(event._final_destination);
-    ped->SetGroup(event._group_id);
-    ped->SetRoomID(event._room_id);
-    ped->SetSubRoomID(event._subroom_id);
-    ped->SetPatienceTime(event._patience_time);
-    ped->SetPremovementTime(event._premovement_time);
-    ped->SetRiskTolerance(event._risk_tolerance);
+    ped->SetFinalDestination(event.FinalDestination);
+    ped->SetGroup(event.GroupId);
+    ped->SetRoomID(event.RoomId);
+    ped->SetSubRoomID(event.SubroomId);
+    ped->SetPatienceTime(event.PatienceTime);
+    ped->SetPremovementTime(event.PremovementTime);
+    ped->SetRiskTolerance(event.RiskTolerance);
 
     JEllipse E = JEllipse();
-    E.SetAv(event._ellipse_a_v);
-    E.SetAmin(event._ellipse_a_min);
-    E.SetBmax(event._ellipse_b_max);
-    E.SetBmin(event._ellipse_b_min);
-    E.DoStretch(event._ellipse_do_stretch);
+    E.SetAv(event.EllipsisA_V);
+    E.SetAmin(event.EllipsisAMin);
+    E.SetBmax(event.EllipsisBMax);
+    E.SetBmin(event.EllipsisBMin);
+    E.DoStretch(event.EllipsisDoStretch);
     ped->SetEllipse(E);
 
-    ped->SetTau(event._tau);
-    ped->SetT(event._T);
+    ped->SetTau(event.Tau);
+    ped->SetT(event.T);
     ped->SetV0Norm(
-        event._v0,
-        event._v0_up_stairs,
-        event._v0_down_stairs,
-        event._v0_escalator_up,
-        event._v0_escalator_down);
-    ped->SetSmoothFactorEscalatorUpStairs(event._smooth_factor_escalator_up);
-    ped->SetSmoothFactorEscalatorDownStairs(event._smooth_factor_escalator_down);
-    ped->SetSmoothFactorUpStairs(event._smooth_factor_up_stairs);
-    ped->SetSmoothFactorDownStairs(event._smooth_factor_down_stairs);
-    ped->SetPos(event._position);
-    ped->SetRouterId(event._router_id);
+        event.V0, event.V0UpStairs, event.V0DownStairs, event.V0EscalatorUp, event.V0EscalatorDown);
+    ped->SetSmoothFactorEscalatorUpStairs(event.SmoothFactorEscalatorUp);
+    ped->SetSmoothFactorEscalatorDownStairs(event.SmoothFactorEscalatorDown);
+    ped->SetSmoothFactorUpStairs(event.SmoothFactorUpStairs);
+    ped->SetSmoothFactorDownStairs(event.SmoothFactorDownStairs);
+    ped->SetPos(event.Position);
+    ped->SetRouterId(event.RouterId);
 
     sim.AddAgent(std::move(ped));
 }
