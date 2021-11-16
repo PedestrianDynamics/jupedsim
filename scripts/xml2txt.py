@@ -21,9 +21,9 @@ def write_header(o, fps, geometry_file):
     o.write("#ID: the agent ID\n")
     o.write("#FR: the current frame\n")
     o.write("#X,Y,Z: the agents coordinates (in meters)\n")
-    o.write("A, B: semi-axes of the ellipse")
-    o.write("ANGLE: orientation of the ellipse")
-    o.write("COLOR: color of the ellipse")
+    o.write("#A, B: semi-axes of the ellipse\n")
+    o.write("#ANGLE: orientation of the ellipse\n")
+    o.write("#COLOR: color of the ellipse\n")
     o.write("\n")
     o.write("#ID\tFR\tX\tY\tZ\tA\tB\tANGLE\tCOLOR\n")
 
@@ -38,7 +38,6 @@ if __name__ == "__main__":
         exit('ERROR: not an xml file')
 
     output = filename1 + ".txt"
-    o = open(output, "w")
     print(">> %s" % output)
 
     tree = ET.parse(filename)
@@ -64,21 +63,23 @@ if __name__ == "__main__":
         file_location = g.find('file').attrib
         location = file_location['location']
 
-    write_header(o, fps, location)
-    for node in root.iter():
-        tag = node.tag
-        if tag == "frame":
-            frame = node.attrib['ID']
-            for agent in list(node):
-                x = agent.attrib['x']
-                y = agent.attrib['y']
-                z = agent.attrib['z']
-                rA = agent.attrib['rA']
-                rB = agent.attrib['rB']
-                eO = agent.attrib['eO']
-                eC = agent.attrib['eC']
-                ID = agent.attrib['ID']
-                o.write("%d\t%d\t%.5f\t%.5f\t%.5f\t%.5f\t%.5f\t%.5f\t%d\n" %
+    with open(output, "w") as o:
+        write_header(o, fps, location)
+        for node in root.iter():
+            tag = node.tag
+            if tag == "frame":
+                frame = node.attrib['ID']
+                for agent in list(node):
+                    x = agent.attrib['x']
+                    y = agent.attrib['y']
+                    z = agent.attrib['z']
+                    rA = agent.attrib['rA']
+                    rB = agent.attrib['rB']
+                    eO = agent.attrib['eO']
+                    eC = agent.attrib['eC']
+                    ID = agent.attrib['ID']
+                    o.write(
+                        "%d\t%d\t%.5f\t%.5f\t%.5f\t%.5f\t%.5f\t%.5f\t%d\n" %
                         (int(ID),
                          int(frame),
                          float(x),
@@ -88,5 +89,3 @@ if __name__ == "__main__":
                          float(rB),
                          float(eO),
                          float(eC)))
-
-    o.close()
