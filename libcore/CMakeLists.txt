@@ -43,6 +43,7 @@ set(source_files
     src/IO/IniFileParser.cpp
     src/IO/OutputHandler.cpp
     src/IO/PedDistributionParser.cpp
+    src/IO/Sqlite3Binding.cpp
     src/IO/TrainFileParser.cpp
     src/IO/Trajectories.cpp
     src/JPSfire/A_smoke_sensor/SmokeSensor.cpp
@@ -139,6 +140,7 @@ set(header_files
     src/IO/IniFileParser.h
     src/IO/OutputHandler.h
     src/IO/PedDistributionParser.h
+    src/IO/Sqlite3Binding.h
     src/IO/TrainFileParser.h
     src/IO/Trajectories.h
     src/JPSfire/A_smoke_sensor/SmokeSensor.h
@@ -210,7 +212,7 @@ target_compile_options(core PRIVATE
 target_compile_definitions(core PUBLIC
     JPSCORE_VERSION="${PROJECT_VERSION}"
 )
-target_link_libraries(core
+target_link_libraries(core PUBLIC
     Boost::boost
     poly2tri
     tinyxml
@@ -222,6 +224,7 @@ target_link_libraries(core
     fmt::fmt
     git-info
     shared
+    sqlite
 )
 target_include_directories(core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -272,6 +275,7 @@ endif()
 if (BUILD_CPPUNIT_TEST)
     add_executable(libcore-tests
         test/TestSimulationClock.cpp
+        test/TestSqlite3.cpp
     )
 
     target_link_libraries(libcore-tests PRIVATE
