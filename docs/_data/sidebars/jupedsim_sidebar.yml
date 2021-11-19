@@ -76,9 +76,6 @@ entries:
   - title: Tests
     output: web, pdf
     folderitems:
-    - title: RiMEA
-      url: /jpscore_tests_rimea.html
-      output: web, pdf
 
     - title: Juelich
       url: /jpscore_tests_juelich.html
