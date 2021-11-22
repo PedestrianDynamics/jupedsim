@@ -525,20 +525,6 @@ bool GeoFileParser::LoadTrafficInfo(Building * building)
         return true;
     }
 
-    //processing the rooms node
-    TiXmlNode * xRoomsNode = xRootNode->FirstChild("rooms");
-    if(xRoomsNode) {
-        for(TiXmlElement * xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
-            xRoom                = xRoom->NextSiblingElement("room")) {
-            double id         = xmltof(xRoom->Attribute("room_id"), -1);
-            std::string state = xmltoa(xRoom->Attribute("state"), "good");
-            RoomState status  = (state == "good") ? ROOM_CLEAN : ROOM_SMOKED;
-            building->GetRoom(id)->SetState(status);
-        }
-    } else {
-        LOG_INFO("No room info found in inifile");
-    }
-
     //processing the doors node
     TiXmlNode * xDoorsNode = xRootNode->FirstChild("doors");
     if(xDoorsNode) {

@@ -55,9 +55,6 @@
 // Not-a-Number (NaN)
 #define J_NAN std::numeric_limits<double>::quiet_NaN()
 
-//TODO(KKZ) Move to appropriate
-enum RoomState { ROOM_CLEAN = 0, ROOM_SMOKED = 1 };
-
 enum class FileFormat { XML, TXT };
 
 enum RoutingStrategy {

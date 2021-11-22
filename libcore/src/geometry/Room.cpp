@@ -41,7 +41,6 @@
 Room::Room()
 {
     _id         = -1;
-    _state      = ROOM_CLEAN; //smoke-free
     _caption    = "no room caption";
     _zPos       = -1.0;
     _outputFile = nullptr;
@@ -51,7 +50,6 @@ Room::Room()
 Room::Room(const Room & orig)
 {
     _id         = orig.GetID();
-    _state      = orig.GetState();
     _caption    = orig.GetCaption();
     _zPos       = orig.GetZPos();
     _outputFile = orig.GetOutputHandler();
@@ -73,11 +71,6 @@ void Room::SetCaption(const std::string & s)
 void Room::SetZPos(double z)
 {
     _zPos = z;
-}
-
-void Room::SetState(RoomState state)
-{
-    _state = state;
 }
 
 void Room::SetEgressTime(double time)
@@ -124,12 +117,6 @@ SubRoom * Room::GetSubRoom(int index) const
     }
     return _subRooms.at(index).get();
 }
-
-const RoomState & Room::GetState() const
-{
-    return _state;
-}
-
 
 void Room::AddSubRoom(SubRoom * r)
 {

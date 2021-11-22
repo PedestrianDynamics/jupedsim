@@ -41,8 +41,6 @@ class Room
 private:
     /// room ID and index
     int _id;
-    /// room state
-    RoomState _state;
     /// room caption
     std::string _caption;
     /// room elevation
@@ -76,11 +74,6 @@ public:
       * Set/Get the elevation of the room
       */
     void SetZPos(double z);
-
-    /**
-      * Set/Get the state of the room as defined in the macro.h file
-      */
-    void SetState(RoomState state);
 
     /**
       * Set/Get the id of the room which is also used as index
@@ -126,11 +119,6 @@ public:
       * @return the Subroom with the corresponding index
       */
     SubRoom * GetSubRoom(int index) const;
-
-    /**
-      * @return the state for this room
-      */
-    const RoomState & GetState() const;
 
     /**
       * Push a new subroom in the vector
