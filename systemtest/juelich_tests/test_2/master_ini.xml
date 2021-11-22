@@ -48,7 +48,7 @@
   <!--persons information and distribution -->
   <agents operational_model_id="[1, 3]">
     <agents_distribution>
-      <group group_id="0"  agent_parameter_id="0" room_id="0" subroom_id="0" number="1" goal_id="-1" router_id="1" start_x="-0.7071" start_y="0.7071"/>
+      <group group_id="0"  agent_parameter_id="0" room_id="0" subroom_id="0" number="1" goal_id="-1" router_id="1" startX="-0.7071" startY="0.7071"/>
     </agents_distribution>
 
     <!-- frequency in persons/minute -->
@@ -95,11 +95,7 @@
   </operational_models>
 
   <route_choice_models>
-    <router router_id="1" description="local_shortest">
-      <parameters>
-        <!--<navigation_lines file="routing.xml" />-->
-      </parameters>
-    </router>
+      <router router_id="1" description="ff_global_shortest"/>
   </route_choice_models>
 
 </JuPedSim>

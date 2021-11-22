@@ -52,7 +52,6 @@
         </model>
     </operational_models>
     <route_choice_models>
-        <router router_id="1" description="ff_quickest" />
-        <router router_id="2" description="global_shortest" />
+        <router router_id="1" description="ff_global_shortest" />
     </route_choice_models>
 </JuPedSim>

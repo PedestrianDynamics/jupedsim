@@ -63,11 +63,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   </operational_models>
 
   <route_choice_models>
-    <router router_id="1" description="global_shortest">
-      <parameters>
-      </parameters>
-    </router>
-
+    <router router_id="1" description="ff_global_shortest"/>
   </route_choice_models>
 
 </JuPedSim>

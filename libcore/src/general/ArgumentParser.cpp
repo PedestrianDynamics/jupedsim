@@ -23,8 +23,6 @@
 #include "IO/IniFileParser.h"
 #include "IO/OutputHandler.h"
 #include "pedestrian/AgentsParameters.h"
-#include "routing/global_shortest/GlobalRouter.h"
-#include "routing/quickest/QuickestPathRouter.h"
 #include "routing/smoke_router/SmokeRouter.h"
 
 #include <Logger.h>

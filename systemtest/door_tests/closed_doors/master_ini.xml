@@ -91,11 +91,6 @@
         </model>
     </operational_models>
     <route_choice_models>
-        <router router_id="1" description="ff_global_shortest">
-            <parameters>
-                <write_VTK_files>true</write_VTK_files>
-                <!-- <navigation_lines file="routing.xml" /> -->
-            </parameters>
-        </router>
+        <router router_id="1" description="ff_global_shortest"/>
     </route_choice_models>
 </JuPedSim>

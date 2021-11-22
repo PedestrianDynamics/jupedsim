@@ -31,8 +31,6 @@
 #include "math/VelocityModel.h"
 #include "pedestrian/Pedestrian.h"
 #include "routing/ff_router/ffRouter.h"
-#include "routing/global_shortest/GlobalRouter.h"
-#include "routing/quickest/QuickestPathRouter.h"
 #include "routing/smoke_router/SmokeRouter.h"
 
 #include <Logger.h>
@@ -750,23 +748,8 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
         std::string strategy = e->Attribute("description");
         int id               = atoi(e->Attribute("router_id"));
 
-        if((strategy == "local_shortest") &&
+        if((strategy == "smoke") &&
            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            Router * r = new GlobalRouter(id, ROUTING_LOCAL_SHORTEST);
-            _config->GetRoutingEngine()->AddRouter(r);
-        } else if(
-            (strategy == "global_shortest") &&
-            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            Router * r = new GlobalRouter(id, ROUTING_GLOBAL_SHORTEST);
-            _config->GetRoutingEngine()->AddRouter(r);
-        } else if(
-            (strategy == "quickest") &&
-            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            Router * r = new QuickestPathRouter(id, ROUTING_QUICKEST);
-            _config->GetRoutingEngine()->AddRouter(r);
-        } else if(
-            (strategy == "smoke") &&
-            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
             Router * r = new SmokeRouter(id, ROUTING_SMOKE);
             _config->GetRoutingEngine()->AddRouter(r);
 
@@ -789,16 +772,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
 
             ///Parsing additional options
             if(!ParseFfRouterOps(e, ROUTING_FF_GLOBAL_SHORTEST)) {
-                return false;
-            }
-        } else if(
-            (strategy == "ff_quickest") &&
-            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            Router * r = new FFRouter(id, ROUTING_FF_QUICKEST, hasSpecificGoals, _config);
-            _config->GetRoutingEngine()->AddRouter(r);
-            LOG_INFO("Using FF Quickest Router");
-
-            if(!ParseFfRouterOps(e, ROUTING_FF_QUICKEST)) {
                 return false;
             }
         } else if(std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) {

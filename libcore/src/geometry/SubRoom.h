@@ -28,7 +28,7 @@
 
 #include "SubroomType.h"
 #include "general/Macros.h"
-#include "routing/global_shortest/DTriangulation.h"
+#include "geometry/DTriangulation.h"
 
 #include <boost/geometry.hpp>
 #include <boost/polygon/polygon.hpp>

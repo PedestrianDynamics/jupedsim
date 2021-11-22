@@ -45,8 +45,6 @@
 #include "pedestrian/PedDistributor.h"
 #include "pedestrian/Pedestrian.h"
 #include "routing/RoutingEngine.h"
-#include "routing/global_shortest/GlobalRouter.h"
-#include "routing/quickest/QuickestPathRouter.h"
 #include "routing/smoke_router/SmokeRouter.h"
 
 #include <chrono>
