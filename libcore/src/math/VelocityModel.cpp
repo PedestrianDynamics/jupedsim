@@ -74,9 +74,8 @@ void VelocityModel::ComputeNextTimeStep(
     std::vector<int> pedestrians_to_delete{};
 
     for(const auto & ped : allPeds) {
-        Room * room       = building->GetRoom(ped->GetRoomID());
-        SubRoom * subroom = room->GetSubRoom(ped->GetSubRoomID());
-        Point repPed      = Point(0, 0);
+        auto [room, subroom] = building->GetRoomAndSubRoom(ped->GetPos());
+        Point repPed         = Point(0, 0);
         std::vector<Pedestrian *> neighbours =
             building->GetNeighborhoodSearch().GetNeighbourhood(ped.get());
 
@@ -87,21 +86,20 @@ void VelocityModel::ComputeNextTimeStep(
             Point p1 = ped->GetPos();
 
             Point p2 = ped1->GetPos();
+
+            auto [room1, subroom1] = building->GetRoomAndSubRoom(ped1->GetPos());
             //subrooms to consider when looking for neighbour for the 3d visibility
             std::vector<SubRoom *> emptyVector;
             emptyVector.push_back(subroom);
-            emptyVector.push_back(
-                building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID()));
+            emptyVector.push_back(subroom1);
             bool isVisible = building->IsVisible(p1, p2, emptyVector, false);
             if(!isVisible)
                 continue;
-            if(ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
+            if(room == room1 && subroom == subroom1) {
                 repPed += ForceRepPed(ped.get(), ped1, periodic);
             } else {
                 // or in neighbour subrooms
-                SubRoom * sb2 =
-                    building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
-                if(subroom->IsDirectlyConnectedWith(sb2)) {
+                if(subroom->IsDirectlyConnectedWith(subroom1)) {
                     repPed += ForceRepPed(ped.get(), ped1, periodic);
                 }
             }
@@ -112,16 +110,15 @@ void VelocityModel::ComputeNextTimeStep(
         // calculate new direction ei according to (6)
         Point direction = e0(ped.get(), room) + repPed + repWall;
         for(int i = 0; i < size; i++) {
-            Pedestrian * ped1 = neighbours[i];
+            Pedestrian * ped1      = neighbours[i];
+            auto [room1, subroom1] = building->GetRoomAndSubRoom(ped1->GetPos());
             // calculate spacing
             // my_pair spacing_winkel = GetSpacing(ped, ped1);
-            if(ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
+            if(room == room1 && subroom == subroom1) {
                 spacings.push_back(GetSpacing(ped.get(), ped1, direction, periodic));
             } else {
                 // or in neighbour subrooms
-                SubRoom * sb2 =
-                    building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
-                if(subroom->IsDirectlyConnectedWith(sb2)) {
+                if(subroom->IsDirectlyConnectedWith(subroom1)) {
                     spacings.push_back(GetSpacing(ped.get(), ped1, direction, periodic));
                 }
             }
@@ -165,8 +162,8 @@ void VelocityModel::ComputeNextTimeStep(
                 "{:f}s (current={:f}",
                 ped->GetID(),
                 ped->GetMeanVelOverRecTime(),
-                ped->GetRoomID(),
-                ped->GetSubRoomID(),
+                room->GetID(),
+                subroom->GetSubRoomID(),
                 _currentTime,
                 current);
             //TODO KKZ track deleted peds
