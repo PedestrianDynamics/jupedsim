@@ -122,6 +122,8 @@ public:
 
     std::tuple<int, int, int> GetRoomAndSubRoomIDs(const Point position) const;
 
+    Room * GetRoom(const Point position) const;
+    SubRoom * GetSubRoom(const Point position) const;
 
     Transition * GetTransition(std::string caption) const;
 

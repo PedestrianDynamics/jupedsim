@@ -194,6 +194,15 @@ std::tuple<Room *, SubRoom *> Building::GetRoomAndSubRoom(const Point position) 
         FMT_STRING("Position {} could not be found in any subroom."), position.toString()));
 }
 
+Room * Building::GetRoom(const Point position) const
+{
+    return std::get<0>(GetRoomAndSubRoom(position));
+}
+
+SubRoom * Building::GetSubRoom(const Point position) const
+{
+    return std::get<1>(GetRoomAndSubRoom(position));
+}
 std::tuple<int, int, int> Building::GetRoomAndSubRoomIDs(const Point position) const
 {
     auto [room, subroom] = GetRoomAndSubRoom(position);
