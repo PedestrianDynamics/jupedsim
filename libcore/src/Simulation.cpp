@@ -100,6 +100,7 @@ void Simulation::Iterate()
     _routingEngine->UpdateTime(t_in_sec);
 
     if(t_in_sec > Pedestrian::GetMinPremovementTime()) {
+        UpdateRoutes();
         // update the positions
         _operationalModel->ComputeNextTimeStep(t_in_sec, _clock.dT(), _building.get(), _periodic);
 
@@ -132,7 +133,7 @@ void Simulation::Iterate()
         }
 
         //update the routes and locations
-        UpdateRoutesAndLocations();
+        UpdateLocations();
 
         // Checks if position of pedestrians is inside waiting area and should be waiting or if
         // left waiting area and assign new goal
@@ -318,7 +319,7 @@ bool Simulation::InitArgs()
     return true;
 }
 
-void Simulation::UpdateRoutesAndLocations()
+void Simulation::UpdateLocations()
 {
     auto [pedsChangedRoom, pedsNotRelocated] =
         SimulationHelper::UpdatePedestriansLocations(*_building, _agents);
@@ -344,9 +345,6 @@ void Simulation::UpdateRoutesAndLocations()
         SimulationHelper::UpdateTrainFlowRegulation(*_building, _clock.ElapsedTime());
 
     _routingEngine->setNeedUpdate(geometryChangedFlow || geometryChangedTrain);
-
-    //TODO check if better move to main loop, does not belong here
-    UpdateRoutes();
 }
 
 void Simulation::UpdateRoutes()
@@ -465,7 +463,7 @@ void Simulation::RunHeader(long nPed, TrajectoryWriter & writer)
     writer.WriteHeader(nPed, _fps, *_config, 0); // first trajectory
     writer.WriteFrame(0, _agents);
     //first initialisation needed by the linked-cells
-    UpdateRoutesAndLocations();
+    UpdateLocations();
 }
 
 void Simulation::CopyInputFilesToOutPath()
