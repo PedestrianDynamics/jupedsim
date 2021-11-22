@@ -536,25 +536,6 @@ void UnivFFviaFM::FinalizeTargetLine(
             xe   = iStart;
         }
         if(_gridCode[jDot * iMax + iDot] == uid) {
-            /* //find a good neighborvalue
-             neigh = _grid->GetNeighbors(jDot*_iMax + iDot);
-             if ((neigh.key[0] >= 0) && (_gridCode[neigh.key[0]] == INSIDE)) {
-                 goodneighbor = neigh.key[0];
-             } else if ((neigh.key[1] >= 0) && (_gridCode[neigh.key[1]] == INSIDE)) {
-                 goodneighbor = neigh.key[1];
-             } else if ((neigh.key[2] >= 0) && (_gridCode[neigh.key[2]] == INSIDE)) {
-                 goodneighbor = neigh.key[2];
-             } else if ((neigh.key[3] >= 0) && (_gridCode[neigh.key[3]] == INSIDE)) {
-                 goodneighbor = neigh.key[3];
-             } else {
-                 //ERROR - should have an inside neighbor
-                 Log->Write("ERROR:\t In finalizeTargetLine");
-             }
-             //write the value on targetline
-             if ((target[goodneighbor]._x == 0.) && (target[goodneighbor]._y == 0.)) {
-                 //ERROR - should have a true vector
-                 Log->Write("ERROR:\t (0;0) In FinalizeTargetLine");
-             }*/
             newArrayPt[jDot * iMax + iDot] = passvector;
         } else if(_gridCode[jDot * iMax + iDot] == WALL) {
             //do nothing
@@ -575,31 +556,11 @@ void UnivFFviaFM::FinalizeTargetLine(
                 px += 2 * (deltaY1 - deltaX1);
             }
             if(_gridCode[jDot * iMax + iDot] == uid) {
-                /*//find a good neighborvalue
-                neigh = _grid->GetNeighbors(jDot*_iMax + iDot);
-                if ((neigh.key[0] >= 0) && (_gridCode[neigh.key[0]] == INSIDE)) {
-                    goodneighbor = neigh.key[0];
-                } else if ((neigh.key[1] >= 0) && (_gridCode[neigh.key[1]] == INSIDE)) {
-                    goodneighbor = neigh.key[1];
-                } else if ((neigh.key[2] >= 0) && (_gridCode[neigh.key[2]] == INSIDE)) {
-                    goodneighbor = neigh.key[2];
-                } else if ((neigh.key[3] >= 0) && (_gridCode[neigh.key[3]] == INSIDE)) {
-                    goodneighbor = neigh.key[3];
-                } else {
-                    //ERROR - should have an inside neighbor
-                    Log->Write("ERROR:\t In finalizeTargetLine");
-                }
-                //write the value on targetline
-                if ((target[goodneighbor]._x == 0.) && (target[goodneighbor]._y == 0.)) {
-                    //ERROR - should have a true vector
-                    Log->Write("ERROR:\t (0;0) In FinalizeTargetLine");
-                }*/
                 newArrayPt[jDot * iMax + iDot] = passvector;
             } else if(_gridCode[jDot * iMax + iDot] == WALL) {
                 //do nothing
             } else {
                 newArrayPt[jDot * iMax + iDot] = passvector;
-                //Log->Write("ERROR:\t in finalizingTargetLine");
             }
         }
     } else {
@@ -613,25 +574,6 @@ void UnivFFviaFM::FinalizeTargetLine(
             ye   = jStart;
         }
         if(_gridCode[jDot * iMax + iDot] == uid) {
-            /*//find a good neighborvalue
-            neigh = _grid->GetNeighbors(jDot*_iMax + iDot);
-            if ((neigh.key[0] >= 0) && (_gridCode[neigh.key[0]] == INSIDE)) {
-                goodneighbor = neigh.key[0];
-            } else if ((neigh.key[1] >= 0) && (_gridCode[neigh.key[1]] == INSIDE)) {
-                goodneighbor = neigh.key[1];
-            } else if ((neigh.key[2] >= 0) && (_gridCode[neigh.key[2]] == INSIDE)) {
-                goodneighbor = neigh.key[2];
-            } else if ((neigh.key[3] >= 0) && (_gridCode[neigh.key[3]] == INSIDE)) {
-                goodneighbor = neigh.key[3];
-            } else {
-                //ERROR - should have an inside neighbor
-                Log->Write("ERROR:\t In finalizeTargetLine");
-            }
-            //write the value on targetline
-            if ((target[goodneighbor]._x == 0.) && (target[goodneighbor]._y == 0.)) {
-                //ERROR - should have a true vector
-                Log->Write("ERROR:\t (0;0) In FinalizeTargetLine");
-            }*/
             newArrayPt[jDot * iMax + iDot] = passvector;
         } else if(_gridCode[jDot * iMax + iDot] == WALL) {
             //do nothing
@@ -652,31 +594,11 @@ void UnivFFviaFM::FinalizeTargetLine(
                 py += 2 * (deltaX1 - deltaY1);
             }
             if(_gridCode[jDot * iMax + iDot] == uid) {
-                /*//find a good neighborvalue
-                neigh = _grid->GetNeighbors(jDot*_iMax + iDot);
-                if ((neigh.key[0] >= 0) && (_gridCode[neigh.key[0]] == INSIDE)) {
-                    goodneighbor = neigh.key[0];
-                } else if ((neigh.key[1] >= 0) && (_gridCode[neigh.key[1]] == INSIDE)) {
-                    goodneighbor = neigh.key[1];
-                } else if ((neigh.key[2] >= 0) && (_gridCode[neigh.key[2]] == INSIDE)) {
-                    goodneighbor = neigh.key[2];
-                } else if ((neigh.key[3] >= 0) && (_gridCode[neigh.key[3]] == INSIDE)) {
-                    goodneighbor = neigh.key[3];
-                } else {
-                    //ERROR - should have an inside neighbor
-                    Log->Write("ERROR:\t In finalizeTargetLine");
-                }
-                //write the value on targetline
-                if ((target[goodneighbor]._x == 0.) && (target[goodneighbor]._y == 0.)) {
-                    //ERROR - should have a true vector
-                    Log->Write("ERROR:\t (0;0) In FinalizeTargetLine");
-                }*/
                 newArrayPt[jDot * iMax + iDot] = passvector;
             } else if(_gridCode[jDot * iMax + iDot] == WALL) {
                 //do nothing
             } else {
                 newArrayPt[jDot * iMax + iDot] = passvector;
-                //Log->Write("ERROR:\t in finalizingTargetLine");
             }
         }
     }
@@ -1424,11 +1346,6 @@ void UnivFFviaFM::AddTarget(int uid, double * costarray, Point * gradarray)
         } else {
             LOG_ERROR("in AddTarget: calling FinalizeTargetLine");
         }
-        //         for (long int i = 0; i < _grid->GetnPoints(); ++i) {
-        //             if ((_gridCode[i] != OUTSIDE) && (_gridCode[i] != WALL) && (newArrayPt[i] == Point(0.0, 0.0) )) {
-        //                 Log->Write("Mist");
-        //             }
-        //         }
     }
     _uids.emplace_back(uid);
 }
