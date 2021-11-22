@@ -61,44 +61,6 @@ GCFMModel::GCFMModel(
     _distEffMaxWall = dist_effWall;
 }
 
-GCFMModel::~GCFMModel(void) {}
-
-
-bool GCFMModel::Init(Building * building, Simulation * simulation)
-{
-    _simulation = simulation;
-    _direction->Init(building);
-
-    const auto & allPeds = _simulation->Agents();
-    std::vector<int> pedestrians_to_delete{};
-    for(const auto & ped : allPeds) {
-        double cosPhi, sinPhi;
-        //a destination could not be found for that pedestrian
-        if(ped->FindRoute() == -1) {
-            pedestrians_to_delete.emplace_back(ped->GetID());
-            continue;
-        }
-
-        Point target = ped->GetExitLine()->LotPoint(ped->GetPos());
-        Point d      = target - ped->GetPos();
-        double dist  = d.Norm();
-        if(dist != 0.0) {
-            cosPhi = d._x / dist;
-            sinPhi = d._y / dist;
-        } else {
-            LOG_ERROR("allPeds::Init() cannot initialise phi! dist to target is 0");
-            return false;
-        }
-        ped->InitV0(target);
-        JEllipse E = ped->GetEllipse();
-        E.SetCosPhi(cosPhi);
-        E.SetSinPhi(sinPhi);
-        ped->SetEllipse(E);
-    }
-    _simulation->RemoveAgents(pedestrians_to_delete);
-    return true;
-}
-
 void GCFMModel::ComputeNextTimeStep(
     double current,
     double deltaT,
@@ -553,7 +515,7 @@ double GCFMModel::GetDistEffMaxWall() const
     return _distEffMaxWall;
 }
 
-std::string GCFMModel::GetDescription()
+std::string GCFMModel::GetDescription() const
 {
     std::string rueck;
     char tmp[1024];

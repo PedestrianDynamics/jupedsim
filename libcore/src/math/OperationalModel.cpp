@@ -29,6 +29,10 @@
  **/
 #include "OperationalModel.h"
 
-OperationalModel::OperationalModel() {}
+#include "direction/DirectionManager.h"
 
-OperationalModel::~OperationalModel() {}
+void OperationalModel::Init(Building * building, Simulation * simulation)
+{
+    _simulation = simulation;
+    _direction->Init(building);
+}

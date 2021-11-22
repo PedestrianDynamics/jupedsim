@@ -263,9 +263,7 @@ bool Simulation::InitArgs()
     //this should be called after the routing engine has been initialised
     // because a direction is needed for this initialisation.
     LOG_INFO("Init Operational Model starting ...");
-    if(!_operationalModel->Init(_building.get(), this)) {
-        return false;
-    }
+    _operationalModel->Init(_building.get(), this);
     LOG_INFO("Init Operational Model done.");
 
     // Give the DirectionStrategy the chance to perform some initialization.

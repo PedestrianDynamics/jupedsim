@@ -57,7 +57,7 @@ public:
         double intp_widthwall,
         double maxfped,
         double maxfwall);
-    virtual ~GCFMModel(void);
+    ~GCFMModel() override = default;
 
     // Getter
     double GetNuPed() const;
@@ -79,8 +79,7 @@ public:
      */
     void
     ComputeNextTimeStep(double current, double deltaT, Building * building, int periodic) override;
-    std::string GetDescription() override;
-    bool Init(Building * building, Simulation * simulation) override;
+    std::string GetDescription() const override;
 
 private:
     // Modellparameter

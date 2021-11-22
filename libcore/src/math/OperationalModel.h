@@ -56,25 +56,18 @@ public:
     /**
       * Constructor
       */
-    OperationalModel();
+    OperationalModel() = default;
 
     /**
       * Destructor
       */
-    virtual ~OperationalModel();
+    virtual ~OperationalModel() = default;
 
-    /**
-      * Performs whatever initialization is needed/required.
-      * This function is called at the beginning the simulation once.
-      * @param building, the building object
-      * return the status of the initialisation
-      */
-    virtual bool Init(Building * building, Simulation * simulation) = 0;
 
     /**
       * @return a description of the model possibly with all model parameters in a nicely formatted string
       */
-    virtual std::string GetDescription() = 0;
+    virtual std::string GetDescription() const = 0;
 
     /**
       * Computes and update the positions/velocities /... of the pedestrians for the next time steps.
@@ -88,6 +81,12 @@ public:
     ComputeNextTimeStep(double current, double deltaT, Building * building, int periodic) = 0;
 
     std::shared_ptr<DirectionManager> GetDirection() { return _direction; };
+    /**
+      * Performs whatever initialization is needed/required.
+      * This function is called at the beginning the simulation once.
+      * @param building, the building object
+      */
+    void Init(Building * building, Simulation * simulation);
 
     void Update(double time) { _currentTime = time; }
 };

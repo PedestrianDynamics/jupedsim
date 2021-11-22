@@ -57,64 +57,6 @@ VelocityModel::VelocityModel(
     _DWall = Dwall;
 }
 
-
-VelocityModel::~VelocityModel() {}
-
-bool VelocityModel::Init(Building * building, Simulation * simulation)
-{
-    _direction->Init(building);
-    _simulation = simulation;
-
-    std::vector<int> pedestrians_to_delete{};
-    const auto & allPeds = simulation->Agents();
-    for(const auto & ped : allPeds) {
-        double cosPhi, sinPhi;
-        //a destination could not be found for that pedestrian
-        int ped_is_waiting = 1; // quick and dirty fix
-        // we should maybe differentiate between pedestrians who did not find
-        // routs because of a bug in the router and these who simplyt just want
-        // to wait in waiting areas
-        int res = ped->FindRoute();
-        if(!ped_is_waiting && res == -1) {
-            LOG_ERROR(
-                "VelocityModel::Init() cannot initialise route. ped {:d} is deleted in Room "
-                "%d %d.\n",
-                ped->GetID(),
-                ped->GetRoomID(),
-                ped->GetSubRoomID());
-            pedestrians_to_delete.emplace_back(ped->GetID());
-            continue;
-        }
-
-        Point target = Point(0, 0);
-        if(ped->GetExitLine())
-            target = ped->GetExitLine()->ShortestPoint(ped->GetPos());
-        else {
-            LOG_WARNING("Ped {} has no exit line in INIT", ped->GetID());
-        }
-        Point d     = target - ped->GetPos();
-        double dist = d.Norm();
-        if(dist != 0.0) {
-            cosPhi = d._x / dist;
-            sinPhi = d._y / dist;
-        } else {
-            LOG_ERROR("allPeds::Init() cannot initialise phi! dist to target is 0");
-            return false;
-        }
-
-        ped->InitV0(target);
-
-        JEllipse E = ped->GetEllipse();
-        E.SetCosPhi(cosPhi);
-        E.SetSinPhi(sinPhi);
-        ped->SetEllipse(E);
-    }
-
-    _simulation->RemoveAgents(pedestrians_to_delete);
-
-    return true;
-}
-
 void VelocityModel::ComputeNextTimeStep(
     double current,
     double deltaT,
@@ -500,7 +442,7 @@ Point VelocityModel::ForceRepWall(
     return F_wrep;
 }
 
-std::string VelocityModel::GetDescription()
+std::string VelocityModel::GetDescription() const
 {
     std::string rueck;
     char tmp[1024];
