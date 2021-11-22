@@ -51,13 +51,6 @@ bool QuickestPathRouter::Init(Building * building)
     // activate the spotlight for tracking some pedestrians
     //Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
 
-    //vector<string> rooms;
-    //rooms.push_back("150");
-    //rooms.push_back("outside");
-    //WriteGraphGV("routing_graph.gv",FINAL_DEST_ROOM_040,rooms);
-    //WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms);
-    //DumpAccessPoints(1185);
-    //exit(0);
     LOG_INFO("Done with Quickest Path Router Engine!");
     return true;
 }
@@ -292,19 +285,6 @@ bool QuickestPathRouter::SelectReferencePedestrian(
 
     } while(!done);
 
-
-    //debug area
-    //     if(*myref) {
-    //           if(myself->GetID()==-488){
-    //            myself->SetSpotlight(true);
-    //               (*myref)->SetSpotlight(true);
-    //               (*myref)->Dump((*myref)->GetID());
-    //           }
-    //
-    //     } else {
-    //          cout<<"no ref ped found: " <<endl;
-    //          getc(stdin);
-    //     }
     return true;
 }
 
@@ -596,14 +576,6 @@ void QuickestPathRouter::Redirect(Pedestrian * ped)
 
     for(const auto & ap : relevantAPs) {
         int exitid = ap->GetID();
-        //              }
-        //
-        //              for(unsigned int g=0;g<goals.size();g++){
-        //                      int exitid=goals[g];
-        //                      AccessPoint* ap=_accessPoints[exitid];
-
-        //only final are accounted
-        //if(ap->GetFinalExitToOutside()==false) continue;
 
         //check if I can reach that exit, there should exits a direct line
         // segment connecting the two APs/goals
@@ -709,29 +681,6 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian * ped)
         double dist2 = ap->DistanceTo(posA._x, posA._y);
         double dist  = dist1 + dist2;
 
-        //        doorProb[ap->GetID()]= exp(-alpha*dist);
-        //        normFactor += doorProb[ap->GetID()];
-
-
-        //          if (dist < minDistGlobal) {
-        //               bestAPsID = ap->GetID();
-        //               minDistGlobal = dist;
-        //          }
-
-        // normalize the probs
-        //    double randomVar = _rdDistribution(_rdGenerator);
-        //
-        //    for (auto it = doorProb.begin(); it!=doorProb.end(); ++it){
-        //        it->second =  it->second / normFactor;
-        //    }
-        //
-        //    double cumProb= doorProb.begin()->second;
-        //    auto it = doorProb.begin();
-        //    while(cumProb<randomVar) {
-        //        it++;
-        //        cumProb+=it->second;
-        //    }
-        //    bestAPsID=it->first;
 
         //very useful for short term decisions
         // if two doors are feasible to the final destination without much differences

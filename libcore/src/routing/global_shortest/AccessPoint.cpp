@@ -178,7 +178,6 @@ void AccessPoint::setConnectingRooms(int r1, int r2)
 double AccessPoint::DistanceTo(double x, double y)
 {
     return sqrt((x - _center[0]) * (x - _center[0]) + (y - _center[1]) * (y - _center[1]));
-    //return _navLine->DistTo(Point(x,y));
 }
 
 

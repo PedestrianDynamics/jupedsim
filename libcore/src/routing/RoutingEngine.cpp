@@ -71,19 +71,6 @@ void RoutingEngine::AddRouter(Router * router)
     }
     _routersCollection.push_back(router);
 }
-//
-//const vector<string>& RoutingEngine::GetTrip(int index) const
-//{
-//     if ((index >= 0) && (index < (int) _tripsCollection.size()))
-//          return _tripsCollection[index];
-//     else {
-//          char tmp[CLENGTH];
-//          sprintf(tmp, "ERROR: \tWrong 'index' [%d] > [%d] in Routing::GetTrip()",
-//                  index, int(_tripsCollection.size()));
-//          Log->Write(tmp);
-//          exit(EXIT_FAILURE);
-//     }
-//}
 
 const std::vector<Router *> RoutingEngine::GetAvailableRouters() const
 {
@@ -97,7 +84,6 @@ Router * RoutingEngine::GetRouter(RoutingStrategy strategy) const
         if(router->GetStrategy() == strategy)
             return router;
     }
-    //Log->Write("ERROR: \t Could not Find any router with Strategy:  [%d].",strategy);
     return /*(Router*)*/ nullptr;
 }
 

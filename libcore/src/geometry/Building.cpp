@@ -59,6 +59,7 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -176,6 +177,36 @@ Room * Building::GetRoom(int index) const
         return nullptr;
     }
     return _rooms.at(index).get();
+}
+
+std::tuple<Room *, SubRoom *> Building::GetRoomAndSubRoom(const Point position) const
+{
+    for(auto const & [_, room] : _rooms) {
+        auto it = std::find_if(
+            room->GetAllSubRooms().begin(),
+            room->GetAllSubRooms().end(),
+            [position](const auto & val) { return val.second->IsInSubRoom(position); });
+        if(it != room->GetAllSubRooms().end()) {
+            return {room.get(), it->second.get()};
+        }
+    }
+    throw std::runtime_error(fmt::format(
+        FMT_STRING("Position {} could not be found in any subroom."), position.toString()));
+}
+
+Room * Building::GetRoom(const Point position) const
+{
+    return std::get<0>(GetRoomAndSubRoom(position));
+}
+
+SubRoom * Building::GetSubRoom(const Point position) const
+{
+    return std::get<1>(GetRoomAndSubRoom(position));
+}
+std::tuple<int, int, int> Building::GetRoomAndSubRoomIDs(const Point position) const
+{
+    auto [room, subroom] = GetRoomAndSubRoom(position);
+    return {room->GetID(), subroom->GetSubRoomID(), subroom->GetUID()};
 }
 
 const NeighborhoodSearch & Building::GetNeighborhoodSearch() const

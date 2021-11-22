@@ -138,7 +138,7 @@ public:
         double Dped,
         double awall,
         double Dwall);
-    ~VelocityModel(void) override;
+    ~VelocityModel() override = default;
 
     /**
       * @todo What is this parameter doing?
@@ -172,13 +172,7 @@ public:
     /**
       * @return all model parameters in a nicely formatted string
       */
-    std::string GetDescription() override;
-
-    /**
-      * initialize the phi angle
-      * @param building
-      */
-    bool Init(Building * building, Simulation * simulation) override;
+    std::string GetDescription() const override;
 
     /**
       * Compute the next simulation step

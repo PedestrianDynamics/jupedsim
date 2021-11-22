@@ -31,13 +31,11 @@ TEST_CASE("geometry/Room", "[geometry][Room]")
             R1.SetCaption("Room" + std::to_string(i));
             R1.SetZPos(10.0 / i);
             R1.SetEgressTime(i * 10.0 / 3);
-            R1.SetState(RoomState(i % 2));
             Room R2(R1);
             REQUIRE(R2.GetID() == i);
             REQUIRE(R2.GetCaption() == "Room" + std::to_string(i));
             REQUIRE(R2.GetZPos() == 10.0 / i);
             REQUIRE(R2.GetEgressTime() == i * 10.0 / 3);
-            REQUIRE(R2.GetState() == i % 2);
         }
     }
 }
