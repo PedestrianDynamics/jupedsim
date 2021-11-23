@@ -34,6 +34,7 @@
 #include "routing/smoke_router/SmokeRouter.h"
 
 #include <Logger.h>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <tinyxml.h>
@@ -936,136 +937,9 @@ bool IniFileParser::ParsePeriodic(TiXmlNode & Node)
 
 bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
 {
-    // Init DirectionManager
     _directionManager = std::shared_ptr<DirectionManager>(new DirectionManager);
-
-    std::string query = "exit_crossing_strategy";
-    if(!strategyNode.FirstChild(query.c_str())) {
-        query = "exitCrossingStrategy";
-        LOG_ERROR("The keyword exitCrossingStrategy is deprecated. Please consider using "
-                  "\"exit_crossing_strategy\" in the ini file");
-        return false;
-    }
-
-    if(strategyNode.FirstChild(query.c_str())) {
-        const char * tmp = strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
-        int pExitStrategy;
-        if(tmp) {
-            pExitStrategy = atoi(tmp);
-
-            //check for ff router to avoid exit strat <> router mismatch
-            const TiXmlNode * agentsDistri =
-                strategyNode.GetDocument()->RootElement()->FirstChild("agents")->FirstChild(
-                    "agents_distribution");
-            std::vector<int> usedRouter;
-            for(const TiXmlElement * e = agentsDistri->FirstChildElement("group"); e;
-                e                      = e->NextSiblingElement("group")) {
-                int router = -1;
-                if(e->Attribute("router_id")) {
-                    router = atoi(e->Attribute("router_id"));
-                    if(std::find(usedRouter.begin(), usedRouter.end(), router) ==
-                       usedRouter.end()) {
-                        usedRouter.emplace_back(router);
-                    }
-                }
-            }
-            //continue: check for ff router to avoid exit strat <> router mismatch
-            const TiXmlNode * routeChoice =
-                strategyNode.GetDocument()->RootElement()->FirstChild("route_choice_models");
-            for(const TiXmlElement * e = routeChoice->FirstChildElement("router"); e;
-                e                      = e->NextSiblingElement("router")) {
-                int router_id = atoi(e->Attribute("router_id"));
-                if(!(std::find(usedRouter.begin(), usedRouter.end(), router_id) ==
-                     usedRouter.end())) {
-                    std::string router_descr = e->Attribute("description");
-                    if((pExitStrategy != 9) && (pExitStrategy != 8) &&
-                       ((router_descr == "ff_global_shortest") ||
-                        (router_descr == "ff_local_shortest") || (router_descr == "ff_quickest"))) {
-                        pExitStrategy = 8;
-                        LOG_WARNING("Changing Exit Strategie to work with floorfield!");
-                    }
-                }
-            }
-            _exit_strat_number = pExitStrategy;
-
-            if(pExitStrategy == 8 || pExitStrategy == 9) {
-                _config->set_write_VTK_files_direction(false);
-                if(strategyNode.FirstChild("write_VTK_files")) {
-                    const char * tmp1 =
-                        strategyNode.FirstChild("write_VTK_files")->FirstChild()->Value();
-                    bool tmp_write_VTK = !std::strcmp(tmp1, "true");
-                    _config->set_write_VTK_files_direction(tmp_write_VTK);
-                }
-            }
-            switch(pExitStrategy) {
-                case 1:
-                    _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionMiddlePoint());
-                    break;
-                case 2:
-                    _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
-                    break;
-                case 3:
-                    _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionInRangeBottleneck());
-                    break;
-                case 6:
-                    // dead end -> not supported anymore (global ff needed, but not available in 3d)
-                    LOG_ERROR("Exit Strategy 6 is not supported any longer. Please refer to "
-                              "www.jupedsim.org");
-                    LOG_WARNING(
-                        "Changing Exit-Strategy to #9 (Floorfields with targets within subroom)");
-                    pExitStrategy      = 9;
-                    _exit_strat_number = 9;
-                    _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
-                    if(!ParseFfOpts(strategyNode)) {
-                        return false;
-                    };
-                    break;
-                case 7:
-                    // dead end -> not supported anymore (global ff needed, but not available in 3d)
-                    LOG_ERROR("Exit Strategy 7 is not supported any longer. Please refer to "
-                              "www.jupedsim.org");
-                    LOG_WARNING(
-                        "Changing Exit-Strategy to #9 (Floorfields with targets within subroom)");
-                    pExitStrategy      = 9;
-                    _exit_strat_number = 9;
-                    _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
-                    if(!ParseFfOpts(strategyNode)) {
-                        return false;
-                    };
-                    break;
-                case 8:
-                    _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());
-                    if(!ParseFfOpts(strategyNode)) {
-                        return false;
-                    };
-                    break;
-                case 9:
-                    _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
-                    if(!ParseFfOpts(strategyNode)) {
-                        return false;
-                    };
-                    break;
-                default:
-                    _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
-                    LOG_ERROR("Unknown exit_crossing_strategy <{}>", pExitStrategy);
-                    LOG_WARNING("The default exit_crossing_strategy <2> will be used");
-                    break;
-            }
-        } else {
-            return false;
-        }
-        LOG_INFO("exit_crossing_strategy <{}>", pExitStrategy);
-        _config->set_exit_strat(_exit_strat_number);
-        _directionManager->SetDirectionStrategy(_directionStrategy);
-    }
+    _config->set_exit_strat(8);
+    _directionManager->SetDirectionStrategy(std::make_shared<DirectionLocalFloorfield>());
 
     // Read waiting
     std::string queryWaiting = "waiting_strategy";
