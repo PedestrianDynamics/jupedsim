@@ -77,10 +77,9 @@ void GCFMModel::ComputeNextTimeStep(
 
     std::vector<int> pedestrians_to_delete{};
     for(const auto & ped : allPeds) {
-        Room * room       = building->GetRoom(ped->GetRoomID());
-        SubRoom * subroom = room->GetSubRoom(ped->GetSubRoomID());
-        double normVi     = ped->GetV().ScalarProduct(ped->GetV());
-        double tmp        = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta);
+        auto [room, subroom] = building->GetRoomAndSubRoom(ped->GetPos());
+        double normVi        = ped->GetV().ScalarProduct(ped->GetV());
+        double tmp           = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta);
         if(normVi > tmp && ped->GetV0Norm() > 0) {
             fprintf(
                 stderr,
@@ -115,8 +114,7 @@ void GCFMModel::ComputeNextTimeStep(
                 F_rep = F_rep + ForceRepPed(ped.get(), ped1);
             } else {
                 // or in neighbour subrooms
-                SubRoom * sb2 =
-                    building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
+                SubRoom * sb2 = building->GetSubRoom(ped1->GetPos());
                 if(subroom->IsDirectlyConnectedWith(sb2)) {
                     F_rep = F_rep + ForceRepPed(ped.get(), ped1);
                 }

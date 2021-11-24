@@ -179,11 +179,9 @@ double Pedestrian::SelectV0(SubroomType type, double delta) const
 {
     switch(type) {
         case SubroomType::ESCALATOR_UP:
-            return _v0EscalatorUpStairs +
-                   _building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetEscalatorSpeed();
+            return _v0EscalatorUpStairs + _building->GetSubRoom(GetPos())->GetEscalatorSpeed();
         case SubroomType::ESCALATOR_DOWN:
-            return _v0EscalatorDownStairs +
-                   _building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetEscalatorSpeed();
+            return _v0EscalatorDownStairs + _building->GetSubRoom(GetPos())->GetEscalatorSpeed();
         case SubroomType::STAIR:
             if(fabs(delta) < 1)
                 return std::max(0., _ellipse.GetV0());
@@ -735,7 +733,7 @@ int Pedestrian::FindRoute()
 
 double Pedestrian::GetElevation() const
 {
-    return _building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetElevation(GetPos());
+    return _building->GetSubRoom(GetPos())->GetElevation(GetPos());
 }
 
 double Pedestrian::GetPatienceTime() const

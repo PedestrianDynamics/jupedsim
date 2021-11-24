@@ -73,17 +73,14 @@ NavigationGraph * GraphNetwork::GetNavigationGraph() const
 }
 const GraphEdge * GraphNetwork::GetDestination() const
 {
-    SubRoom * sub_room =
-        building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
+    SubRoom * sub_room = building->GetSubRoom(pedestrian->GetPos());
 
     return (*navigation_graph)[sub_room]->GetCheapestDestinationByEdges(pedestrian->GetPos());
 }
 
 const GraphEdge * GraphNetwork::GetLocalDestination()
 {
-    SubRoom * sub_room =
-        building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
-
+    SubRoom * sub_room = building->GetSubRoom(pedestrian->GetPos());
     return (*navigation_graph)[sub_room]->GetLocalCheapestDestination(pedestrian->GetPos());
 }
 
@@ -105,12 +102,10 @@ std::vector<const GraphEdge *> & GraphNetwork::GetDestinations()
 
 bool GraphNetwork::ChangedSubRoom() const
 {
-    return current_subroom !=
-           building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
+    return current_subroom != building->GetSubRoom(pedestrian->GetPos());
 }
 
 void GraphNetwork::UpdateSubRoom()
 {
-    current_subroom =
-        building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
+    current_subroom = building->GetSubRoom(pedestrian->GetPos());
 }

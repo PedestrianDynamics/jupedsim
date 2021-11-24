@@ -683,7 +683,7 @@ int GlobalRouter::FindExit(Pedestrian * ped)
     if(!_useMeshForLocalNavigation) {
         std::vector<NavLine *> path;
         GetPath(ped, path);
-        SubRoom * sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(ped->GetSubRoomID());
+        SubRoom * sub = _building->GetSubRoom(ped->GetPos());
 
         //return the next path which is an exit
         for(const auto & navLine : path) {
@@ -696,14 +696,14 @@ int GlobalRouter::FindExit(Pedestrian * ped)
                 return nav_id;
             }
         }
-
+        auto [room_id, subroom_id, _] = _building->GetRoomAndSubRoomIDs(ped->GetPos());
         //something bad happens
         LOG_ERROR(
             "Cannot find a valid destination for ped {:d} located in room {:d} subroom {:d} going "
             "to destination {:d}",
             ped->GetID(),
-            ped->GetRoomID(),
-            ped->GetSubRoomID(),
+            room_id,
+            subroom_id,
             ped->GetFinalDestination());
         return -1;
     }
@@ -714,7 +714,7 @@ int GlobalRouter::FindExit(Pedestrian * ped)
         return GetBestDefaultRandomExit(ped);
 
     } else {
-        SubRoom * sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(ped->GetSubRoomID());
+        SubRoom * sub = _building->GetSubRoom(ped->GetPos());
 
         for(const auto & apID : sub->GetAllGoalIDs()) {
             AccessPoint * ap  = _accessPoints[apID];
@@ -782,7 +782,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian * ped)
     //double minDistLocal = FLT_MAX;
 
     // get the opened exits
-    SubRoom * sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(ped->GetSubRoomID());
+    SubRoom * sub = _building->GetSubRoom(ped->GetPos());
 
     for(unsigned int g = 0; g < relevantAPs.size(); g++) {
         AccessPoint * ap = relevantAPs[g];
@@ -823,16 +823,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian * ped)
         ped->SetExitLine(_accessPoints[bestAPsID]->GetNavLine());
         return bestAPsID;
     } else {
-        if(_building->GetRoom(ped->GetRoomID())->GetCaption() != "outside" &&
-           relevantAPs.size() > 0) {
-            //Log->Write(
-            //
-            //          "ERROR:\t GetBestDefaultRandomExit() \nCannot find valid destination for ped [%d] "
-            //          "located in room [%d] subroom [%d] going to destination [%d]",
-            //          ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID(),
-            //          ped->GetFinalDestination());
-
-
+        if(_building->GetRoom(ped->GetPos())->GetCaption() != "outside" && relevantAPs.size() > 0) {
             //FIXME: assign the nearest and not only a random one
             //{
 
@@ -851,8 +842,7 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(
     Pedestrian * ped,
     std::vector<AccessPoint *> & relevantAPS)
 {
-    Room * room   = _building->GetRoom(ped->GetRoomID());
-    SubRoom * sub = room->GetSubRoom(ped->GetSubRoomID());
+    auto [room, sub] = _building->GetRoomAndSubRoom(ped->GetPos());
 
     // This is best implemented by closing one door and checking if there is still a path to outside
     // and itereating over the others.

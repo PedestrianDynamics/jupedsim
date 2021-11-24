@@ -45,8 +45,7 @@ void JamSensor::execute(
     CognitiveMap & cognitive_map,
     double /*time*/) const
 {
-    SubRoom * sub_room =
-        building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
+    SubRoom * sub_room = building->GetSubRoom(pedestrian->GetPos());
     GraphVertex * vertex =
         cognitive_map.GetGraphNetwork()->GetNavigationGraph()->operator[](sub_room);
     const GraphVertex::EdgesContainer * edges = vertex->GetAllOutEdges();

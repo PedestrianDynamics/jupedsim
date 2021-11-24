@@ -224,23 +224,7 @@ Pedestrian * StartDistribution::GenerateAgent(Building * building, std::vector<P
 
         const Point & start_pos = Point(_startX, _startY);
 
-        if((std::isnan(start_pos._x) == 0) && (std::isnan(start_pos._y) == 0)) {
-            if(building->GetRoom(ped->GetRoomID())
-                   ->GetSubRoom(ped->GetSubRoomID())
-                   ->IsInSubRoom(start_pos) == false) {
-                LOG_ERROR(
-                    "StartDistribution::GenerateAgent cannot distribute pedestrian {:d} in "
-                    "Room {:d} / Subroom {:d} at fixed position {}. Make sure the position is "
-                    "inside the geometry and belongs to the specified room {:d} / subroom {:d}",
-                    ped->GetID(),
-                    GetRoomId(),
-                    GetSubroomID(),
-                    start_pos.toString(),
-                    ped->GetRoomID(),
-                    ped->GetSubRoomID());
-                exit(EXIT_FAILURE);
-            }
-
+        if(!std::isnan(start_pos._x) && !std::isnan(start_pos._y)) {
             ped->SetPos(start_pos); //true for the initial position
             LOG_INFO(
                 "fixed position for ped {:d} in Room {:d} {}",

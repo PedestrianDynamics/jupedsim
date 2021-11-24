@@ -830,7 +830,8 @@ void Building::InitGrid()
 void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const
 {
     for(auto && ped : *_allPedestrians) {
-        if((room == ped->GetRoomID()) && (subroom == ped->GetSubRoomID())) {
+        auto [ped_roomid, ped_subroomid, _] = GetRoomAndSubRoomIDs(ped->GetPos());
+        if((room == ped_roomid) && (subroom == ped_subroomid)) {
             peds.push_back(ped.get());
         }
     }
