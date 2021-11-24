@@ -118,7 +118,7 @@ int main(int argc, char ** argv)
             auto next_events = manager.NextEvents(sim.Clock());
             for(auto const & [_, event] : next_events) {
                 // lambda is used to bind additional function paramters to the visitor
-                auto visitor = [&sim](auto event) { ProcessEvent(event, sim); };
+                auto visitor = [&sim, &building](auto event) { ProcessEvent(event, sim); };
                 std::visit(visitor, event);
             }
             if(sim.Clock().Iteration() == 0) {

@@ -157,11 +157,10 @@ void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
     agent->SetWalkingSpeed(_building->GetConfig()->GetWalkingSpeed());
     agent->SetTox(_building->GetConfig()->GetToxicityAnalysis());
     agent->SetBuilding(_building.get());
-    agent->SetSubRoomUID(
-        _building->GetRoom(agent->GetRoomID())->GetSubRoom(agent->GetSubRoomID())->GetUID());
-    agent->SetRouter(_routingEngine->GetRouter(agent->GetRouterID()));
     const Point pos = agent->GetPos();
-    Point target    = Point{0.0, 0.0};
+    agent->SetSubRoomUID(_building->GetSubRoom(pos)->GetUID());
+    agent->SetRouter(_routingEngine->GetRouter(agent->GetRouterID()));
+    Point target = Point{0.0, 0.0};
     if(agent->FindRoute() == -1) {
         Point p1 = agent->GetPos();
         p1._x += 1;
@@ -361,9 +360,8 @@ void Simulation::UpdateRoutes()
             }
         }
         if(target != FINAL_DEST_OUT) {
-            const Hline * door = _building->GetTransOrCrossByUID(target);
-            int roomID         = ped->GetRoomID();
-            int subRoomID      = ped->GetSubRoomID();
+            const Hline * door          = _building->GetTransOrCrossByUID(target);
+            auto [roomID, subRoomID, _] = _building->GetRoomAndSubRoomIDs(ped->GetPos());
 
             if(const auto * cross = dynamic_cast<const Crossing *>(door)) {
                 if(cross->IsInRoom(roomID) && cross->IsInSubRoom(subRoomID)) {
