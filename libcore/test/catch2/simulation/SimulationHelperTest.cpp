@@ -214,7 +214,6 @@ TEST_CASE(
         REQUIRE(ret == PedRelocation::NOT_NEEDED);
         REQUIRE(ped.GetRoomID() == sub11->GetRoomID());
         REQUIRE(ped.GetSubRoomID() == sub11->GetSubRoomID());
-        REQUIRE(ped.GetSubRoomUID() == sub11->GetUID());
     }
 
     SECTION("Pedestrian in same room on crossing")
@@ -229,7 +228,6 @@ TEST_CASE(
         REQUIRE(ret == PedRelocation::NOT_NEEDED);
         REQUIRE(ped.GetRoomID() == sub11->GetRoomID());
         REQUIRE(ped.GetSubRoomID() == sub11->GetSubRoomID());
-        REQUIRE(ped.GetSubRoomUID() == sub11->GetUID());
     }
 
     SECTION("Pedestrian in same room on transition")
@@ -244,7 +242,6 @@ TEST_CASE(
         REQUIRE(ret == PedRelocation::NOT_NEEDED);
         REQUIRE(ped.GetRoomID() == sub13->GetRoomID());
         REQUIRE(ped.GetSubRoomID() == sub13->GetSubRoomID());
-        REQUIRE(ped.GetSubRoomUID() == sub13->GetUID());
     }
 
     SECTION("Pedestrian in neighboring subroom")
@@ -259,7 +256,6 @@ TEST_CASE(
         REQUIRE(ret == PedRelocation::SUCCESSFUL);
         REQUIRE(ped.GetRoomID() == sub11->GetRoomID());
         REQUIRE(ped.GetSubRoomID() == sub11->GetSubRoomID());
-        REQUIRE(ped.GetSubRoomUID() == sub11->GetUID());
     }
 
     SECTION("Pedestrian in neighboring room")
@@ -274,7 +270,6 @@ TEST_CASE(
         REQUIRE(ret == PedRelocation::SUCCESSFUL);
         REQUIRE(ped.GetRoomID() == sub13->GetRoomID());
         REQUIRE(ped.GetSubRoomID() == sub13->GetSubRoomID());
-        REQUIRE(ped.GetSubRoomUID() == sub13->GetUID());
         REQUIRE(ped.ChangedSubRoom());
     }
 
@@ -290,7 +285,6 @@ TEST_CASE(
         REQUIRE(ret == PedRelocation::FAILED);
         REQUIRE(ped.GetRoomID() == -1);
         REQUIRE(ped.GetSubRoomID() == -1);
-        REQUIRE(ped.GetSubRoomUID() == -1);
     }
 
     SECTION("Pedestrian not in neighboring room")
@@ -305,7 +299,6 @@ TEST_CASE(
         REQUIRE(ret == PedRelocation::FAILED);
         REQUIRE(ped.GetRoomID() == -1);
         REQUIRE(ped.GetSubRoomID() == -1);
-        REQUIRE(ped.GetSubRoomUID() == -1);
     }
 }
 

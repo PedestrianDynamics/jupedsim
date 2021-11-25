@@ -37,7 +37,7 @@ Point WaitingMiddle::GetWaitingPosition(Room * room, Pedestrian * ped, double ti
     if(ped->IsInsideWaitingAreaWaiting(time)) {
         return ped->GetBuilding()->GetFinalGoal(ped->GetLastGoalID())->GetCentroid();
     } else {
-        SubRoom * subRoom = room->GetSubRoom(ped->GetSubRoomID());
+        SubRoom * subRoom = room->GetSubRoom(ped->GetPos());
         return subRoom->GetCentroid();
     }
 }

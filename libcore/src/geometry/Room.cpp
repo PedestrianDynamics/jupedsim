@@ -108,6 +108,18 @@ const std::map<int, std::shared_ptr<SubRoom>> & Room::GetAllSubRooms() const
     return _subRooms;
 }
 
+SubRoom * Room::GetSubRoom(const Point position) const
+{
+    auto it = std::find_if(_subRooms.begin(), _subRooms.end(), [position](const auto & val) {
+        return val.second->IsInSubRoom(position);
+    });
+    if(it != _subRooms.end()) {
+        return it->second.get();
+    }
+    throw std::runtime_error(fmt::format(
+        FMT_STRING("Position {} could not be found in any subroom."), position.toString()));
+}
+
 SubRoom * Room::GetSubRoom(int index) const
 {
     //TODO the check is done in _subRooms.at(index);

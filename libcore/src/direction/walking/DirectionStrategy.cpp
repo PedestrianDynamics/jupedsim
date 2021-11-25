@@ -163,10 +163,10 @@ DirectionLocalFloorfield::~DirectionLocalFloorfield()
 }
 
 ///9
-Point DirectionSubLocalFloorfield::GetTarget(Room *, Pedestrian * ped) const
+Point DirectionSubLocalFloorfield::GetTarget(Room * room, Pedestrian * ped) const
 {
     Point p;
-    UnivFFviaFM * floorfield = _locffviafm.at(ped->GetSubRoomUID());
+    UnivFFviaFM * floorfield = _locffviafm.at(room->GetSubRoom(ped->GetPos())->GetUID());
 
     floorfield->GetDirectionToUID(ped->GetExitIndex(), ped->GetPos(), p);
     return (p + ped->GetPos());
@@ -175,19 +175,20 @@ Point DirectionSubLocalFloorfield::GetTarget(Room *, Pedestrian * ped) const
 Point DirectionSubLocalFloorfield::GetDir2Wall(Pedestrian * ped) const
 {
     Point p;
-    int key = ped->GetSubRoomUID();
+    int key = ped->GetBuilding()->GetSubRoom(ped->GetPos())->GetUID();
     _locffviafm.at(key)->GetDir2WallAt(ped->GetPos(), p);
     return p;
 }
 
 double DirectionSubLocalFloorfield::GetDistance2Wall(Pedestrian * ped) const
 {
-    return _locffviafm.at(ped->GetSubRoomUID())->GetDistance2WallAt(ped->GetPos());
+    return _locffviafm.at(ped->GetBuilding()->GetSubRoom(ped->GetPos())->GetUID())
+        ->GetDistance2WallAt(ped->GetPos());
 }
 
 double DirectionSubLocalFloorfield::GetDistance2Target(Pedestrian * ped, int UID) const
 {
-    int subroomUID = ped->GetSubRoomUID();
+    int subroomUID = ped->GetBuilding()->GetSubRoom(ped->GetPos())->GetUID();
     return _locffviafm.at(subroomUID)->GetCostToDestination(UID, ped->GetPos());
 }
 

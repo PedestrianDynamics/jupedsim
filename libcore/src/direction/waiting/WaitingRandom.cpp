@@ -44,7 +44,7 @@ Point WaitingRandom::GetWaitingPosition(Room * room, Pedestrian * ped, double ti
     if(ped->IsInsideWaitingAreaWaiting(time)) {
         polygon = ped->GetBuilding()->GetFinalGoal(ped->GetLastGoalID())->GetPolygon();
     } else {
-        SubRoom * subRoom = room->GetSubRoom(ped->GetSubRoomID());
+        SubRoom * subRoom = room->GetSubRoom(ped->GetPos());
         polygon           = subRoom->GetPolygon();
     }
 
@@ -72,7 +72,7 @@ Point WaitingRandom::GetWaitingPosition(Room * room, Pedestrian * ped, double ti
         } while(!goal->IsInsideGoal(target));
 
     } else {
-        SubRoom * subRoom = room->GetSubRoom(ped->GetSubRoomID());
+        SubRoom * subRoom = room->GetSubRoom(ped->GetPos());
 
         do {
             target._x = fRand(xMin, xMax);
