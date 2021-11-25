@@ -49,11 +49,9 @@ SimulationHelper::UpdatePedestrianRoomInformation(const Building & building, Ped
     // pedestrian is in one of the neighboring rooms/subrooms
     if(currentSubRoom != subroomsConnected.end()) {
         ped.UpdateRoom((*currentSubRoom)->GetRoomID(), (*currentSubRoom)->GetSubRoomID());
-        ped.SetSubRoomUID((*currentSubRoom)->GetUID());
         return PedRelocation::SUCCESSFUL;
     } else {
         ped.UpdateRoom(-1, -1);
-        ped.SetSubRoomUID(-1);
         return PedRelocation::FAILED;
     }
 }

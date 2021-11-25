@@ -158,7 +158,6 @@ void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
     agent->SetTox(_building->GetConfig()->GetToxicityAnalysis());
     agent->SetBuilding(_building.get());
     const Point pos = agent->GetPos();
-    agent->SetSubRoomUID(_building->GetSubRoom(pos)->GetUID());
     agent->SetRouter(_routingEngine->GetRouter(agent->GetRouterID()));
     Point target = Point{0.0, 0.0};
     if(agent->FindRoute() == -1) {

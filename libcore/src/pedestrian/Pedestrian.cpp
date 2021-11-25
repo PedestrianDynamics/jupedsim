@@ -72,7 +72,6 @@ Pedestrian::Pedestrian()
     _smoothFactorEscalatorDownStairs = 15;
     _roomID                          = -1;
     _subRoomID                       = -1;
-    _subRoomUID                      = -1;
     _oldRoomID                       = std::numeric_limits<int>::min();
     _oldSubRoomID                    = std::numeric_limits<int>::min();
     _lastE0                          = Point(0, 0);
@@ -107,7 +106,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _premovement(agentsParameters.GetPremovementTime()),
     _roomID(agentsParameters.GetRoomId()),
     _subRoomID(agentsParameters.GetSubroomID()),
-    _subRoomUID(building.GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetUID()),
     _lastPosition(),
 
     _patienceTime(agentsParameters.GetPatience()),
@@ -116,7 +114,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
 {
     _roomID              = -1;
     _subRoomID           = -1;
-    _subRoomUID          = -1;
     _oldRoomID           = -1;
     _oldSubRoomID        = -1;
     _exitIndex           = -1;
@@ -232,11 +229,6 @@ void Pedestrian::SetRoomID(int i)
 void Pedestrian::SetSubRoomID(int i)
 {
     _subRoomID = i;
-}
-
-void Pedestrian::SetSubRoomUID(int i)
-{
-    _subRoomUID = i;
 }
 
 void Pedestrian::SetTau(double tau)
@@ -374,11 +366,6 @@ int Pedestrian::GetOldRoomID() const
 int Pedestrian::GetOldSubRoomID() const
 {
     return _oldSubRoomID;
-}
-
-int Pedestrian::GetSubRoomUID() const
-{
-    return _subRoomUID;
 }
 
 double Pedestrian::GetMass() const
