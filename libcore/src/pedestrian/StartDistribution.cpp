@@ -165,7 +165,6 @@ Pedestrian * StartDistribution::GenerateAgent(Building * building, std::vector<P
     ped->SetBuilding(building);
     ped->SetRoomID(GetRoomId());
     ped->SetSubRoomID(GetSubroomID());
-    ped->SetSubRoomUID(building->GetRoom(GetRoomId())->GetSubRoom(GetSubroomID())->GetUID());
     ped->SetPatienceTime(GetPatience());
     ped->SetPremovementTime(GetPremovementTime());
     ped->SetRiskTolerance(GetRiskTolerance());

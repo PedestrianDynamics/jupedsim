@@ -229,7 +229,8 @@ bool QuickestPathRouter::SelectReferencePedestrian(
     do {
         std::vector<Pedestrian *> queue;
         queue.reserve(250);
-        GetQueueAtExit(crossing, jamThreshold, radius, queue, myself->GetSubRoomID());
+        auto [_1, subroom_id, _2] = _building->GetRoomAndSubRoomIDs(myself->GetPos());
+        GetQueueAtExit(crossing, jamThreshold, radius, queue, subroom_id);
 
         if(queue.size() == 0) {
             //check if I can see/reach the exit without much effort

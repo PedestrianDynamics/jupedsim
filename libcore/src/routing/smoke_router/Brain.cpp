@@ -22,7 +22,7 @@ CognitiveMap & Brain::GetCognitiveMap()
 
 const NavLine * Brain::GetNextNavLine(const NavLine * nextTarget)
 {
-    const SubRoom * currentSubRoom = _b->GetSubRoomByUID(_ped->GetSubRoomUID());
+    const SubRoom * currentSubRoom = _b->GetSubRoom(_ped->GetPos());
 
     _currentIntNetwork = *(_intNetworks->operator[](currentSubRoom));
 
@@ -31,7 +31,7 @@ const NavLine * Brain::GetNextNavLine(const NavLine * nextTarget)
 
 bool Brain::HlineReached() const
 {
-    const SubRoom * currentSubRoom = _b->GetSubRoomByUID(_ped->GetSubRoomUID());
+    const SubRoom * currentSubRoom = _b->GetSubRoom(_ped->GetPos());
 
     for(Hline * hline : currentSubRoom->GetAllHlines()) {
         // if distance hline to ped lower than 1 m

@@ -208,13 +208,11 @@ TEST_CASE(
         ped.SetPos({-8, -1});
         ped.SetRoomID(sub11->GetRoomID());
         ped.SetSubRoomID(sub11->GetSubRoomID());
-        ped.SetSubRoomUID(sub11->GetUID());
 
         auto ret = SimulationHelper::UpdatePedestrianRoomInformation(building, ped);
         REQUIRE(ret == PedRelocation::NOT_NEEDED);
         REQUIRE(ped.GetRoomID() == sub11->GetRoomID());
         REQUIRE(ped.GetSubRoomID() == sub11->GetSubRoomID());
-        REQUIRE(ped.GetSubRoomUID() == sub11->GetUID());
     }
 
     SECTION("Pedestrian in same room on crossing")
@@ -223,13 +221,11 @@ TEST_CASE(
         ped.SetPos({-6, -1});
         ped.SetRoomID(sub11->GetRoomID());
         ped.SetSubRoomID(sub11->GetSubRoomID());
-        ped.SetSubRoomUID(sub11->GetUID());
 
         auto ret = SimulationHelper::UpdatePedestrianRoomInformation(building, ped);
         REQUIRE(ret == PedRelocation::NOT_NEEDED);
         REQUIRE(ped.GetRoomID() == sub11->GetRoomID());
         REQUIRE(ped.GetSubRoomID() == sub11->GetSubRoomID());
-        REQUIRE(ped.GetSubRoomUID() == sub11->GetUID());
     }
 
     SECTION("Pedestrian in same room on transition")
@@ -238,13 +234,11 @@ TEST_CASE(
         ped.SetPos({2, -1});
         ped.SetRoomID(sub13->GetRoomID());
         ped.SetSubRoomID(sub13->GetSubRoomID());
-        ped.SetSubRoomUID(sub13->GetUID());
 
         auto ret = SimulationHelper::UpdatePedestrianRoomInformation(building, ped);
         REQUIRE(ret == PedRelocation::NOT_NEEDED);
         REQUIRE(ped.GetRoomID() == sub13->GetRoomID());
         REQUIRE(ped.GetSubRoomID() == sub13->GetSubRoomID());
-        REQUIRE(ped.GetSubRoomUID() == sub13->GetUID());
     }
 
     SECTION("Pedestrian in neighboring subroom")
@@ -253,13 +247,11 @@ TEST_CASE(
         ped.SetPos({-8, -1});
         ped.SetRoomID(sub12->GetRoomID());
         ped.SetSubRoomID(sub12->GetSubRoomID());
-        ped.SetSubRoomUID(sub12->GetUID());
 
         auto ret = SimulationHelper::UpdatePedestrianRoomInformation(building, ped);
         REQUIRE(ret == PedRelocation::SUCCESSFUL);
         REQUIRE(ped.GetRoomID() == sub11->GetRoomID());
         REQUIRE(ped.GetSubRoomID() == sub11->GetSubRoomID());
-        REQUIRE(ped.GetSubRoomUID() == sub11->GetUID());
     }
 
     SECTION("Pedestrian in neighboring room")
@@ -268,13 +260,11 @@ TEST_CASE(
         ped.SetPos({1, -1});
         ped.SetRoomID(sub21->GetRoomID());
         ped.SetSubRoomID(sub21->GetSubRoomID());
-        ped.SetSubRoomUID(sub21->GetUID());
 
         auto ret = SimulationHelper::UpdatePedestrianRoomInformation(building, ped);
         REQUIRE(ret == PedRelocation::SUCCESSFUL);
         REQUIRE(ped.GetRoomID() == sub13->GetRoomID());
         REQUIRE(ped.GetSubRoomID() == sub13->GetSubRoomID());
-        REQUIRE(ped.GetSubRoomUID() == sub13->GetUID());
         REQUIRE(ped.ChangedSubRoom());
     }
 
@@ -284,13 +274,11 @@ TEST_CASE(
         ped.SetPos({-8, -1});
         ped.SetRoomID(sub13->GetRoomID());
         ped.SetSubRoomID(sub13->GetSubRoomID());
-        ped.SetSubRoomUID(sub13->GetUID());
 
         auto ret = SimulationHelper::UpdatePedestrianRoomInformation(building, ped);
         REQUIRE(ret == PedRelocation::FAILED);
         REQUIRE(ped.GetRoomID() == -1);
         REQUIRE(ped.GetSubRoomID() == -1);
-        REQUIRE(ped.GetSubRoomUID() == -1);
     }
 
     SECTION("Pedestrian not in neighboring room")
@@ -299,13 +287,11 @@ TEST_CASE(
         ped.SetPos({1, -1});
         ped.SetRoomID(sub31->GetRoomID());
         ped.SetSubRoomID(sub31->GetSubRoomID());
-        ped.SetSubRoomUID(sub31->GetUID());
 
         auto ret = SimulationHelper::UpdatePedestrianRoomInformation(building, ped);
         REQUIRE(ret == PedRelocation::FAILED);
         REQUIRE(ped.GetRoomID() == -1);
         REQUIRE(ped.GetSubRoomID() == -1);
-        REQUIRE(ped.GetSubRoomUID() == -1);
     }
 }
 

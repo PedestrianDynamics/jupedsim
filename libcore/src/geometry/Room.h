@@ -120,6 +120,7 @@ public:
       */
     SubRoom * GetSubRoom(int index) const;
 
+    SubRoom * GetSubRoom(const Point position) const;
     /**
       * Push a new subroom in the vector
       */
