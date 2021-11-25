@@ -91,7 +91,7 @@ int QuickestPathRouter::FindNextExit(Pedestrian * ped)
         return GetBestDefaultRandomExit(ped);
 
     } else {
-        SubRoom * sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(ped->GetSubRoomID());
+        SubRoom * sub = _building->GetSubRoom(ped->GetPos());
 
         for(const auto & apID : sub->GetAllGoalIDs()) {
             AccessPoint * ap = _accessPoints[apID];
@@ -455,7 +455,8 @@ int QuickestPathRouter::isCongested(Pedestrian * ped)
 {
     //define as the ratio of people in front of me and behind me
     std::vector<Pedestrian *> allPeds;
-    _building->GetPedestrians(ped->GetRoomID(), ped->GetSubRoomID(), allPeds);
+    auto [room_id, subroom_id, _] = _building->GetRoomAndSubRoomIDs(ped->GetPos());
+    _building->GetPedestrians(room_id, subroom_id, allPeds);
 
     //in the case there are only few people in the room
     //revise this condition
@@ -560,8 +561,7 @@ void QuickestPathRouter::Redirect(Pedestrian * ped)
     // then no redirection is possible
 
     // collect the possible alternatives
-    Room * room   = _building->GetRoom(ped->GetRoomID());
-    SubRoom * sub = room->GetSubRoom(ped->GetSubRoomID());
+    auto [room, sub] = _building->GetRoomAndSubRoom(ped->GetPos());
 
     //const vector<int>& goals=room->GetAllTransitionsIDs();
     //filter to keep only the emergencies exits.
@@ -649,7 +649,7 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian * ped)
     double minDistLocal  = FLT_MAX;
 
     // get the opened exits
-    SubRoom * sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(ped->GetSubRoomID());
+    SubRoom * sub = _building->GetSubRoom(ped->GetPos());
 
 
     for(unsigned int g = 0; g < relevantAPs.size(); g++) {
@@ -723,15 +723,16 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian * ped)
         ped->SetExitLine(_accessPoints[bestAPsID]->GetNavLine());
         return bestAPsID;
     } else {
-        if(_building->GetRoom(ped->GetRoomID())->GetCaption() != "outside")
+        if(_building->GetRoom(ped->GetPos())->GetCaption() != "outside") {
+            auto [room_id, subroom_id, _] = _building->GetRoomAndSubRoomIDs(ped->GetPos());
             LOG_ERROR(
                 "Cannot find valid destination for ped {:d} located in room {:d} subroom {:d} "
                 "going to destination {:d}",
                 ped->GetID(),
-                ped->GetRoomID(),
-                ped->GetSubRoomID(),
+                room_id,
+                subroom_id,
                 ped->GetFinalDestination());
-
+        }
         return -1;
     }
 }

@@ -45,8 +45,7 @@ void DiscoverDoorsSensor::execute(
     CognitiveMap & cognitive_map,
     double /*time*/) const
 {
-    SubRoom * sub_room =
-        building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
+    SubRoom * sub_room = building->GetSubRoom(pedestrian->GetPos());
 
     const std::vector<Crossing *> & crossings = sub_room->GetAllCrossings();
     for(std::vector<Crossing *>::const_iterator it = crossings.begin(); it != crossings.end();

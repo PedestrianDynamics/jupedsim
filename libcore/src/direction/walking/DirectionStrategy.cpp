@@ -99,19 +99,20 @@ Point DirectionLocalFloorfield::GetTarget(Room * room, Pedestrian * ped) const
 Point DirectionLocalFloorfield::GetDir2Wall(Pedestrian * ped) const
 {
     Point p;
-    int roomID = ped->GetRoomID();
+    auto [roomID, _1, _2] = _building->GetRoomAndSubRoomIDs(ped->GetPos());
     _locffviafm.at(roomID)->GetDir2WallAt(ped->GetPos(), p);
     return p;
 }
 
 double DirectionLocalFloorfield::GetDistance2Wall(Pedestrian * ped) const
 {
-    return _locffviafm.at(ped->GetRoomID())->GetDistance2WallAt(ped->GetPos());
+    auto [roomID, _1, _2] = _building->GetRoomAndSubRoomIDs(ped->GetPos());
+    return _locffviafm.at(roomID)->GetDistance2WallAt(ped->GetPos());
 }
 
 double DirectionLocalFloorfield::GetDistance2Target(Pedestrian * ped, int UID) const
 {
-    int roomID = ped->GetRoomID();
+    auto [roomID, _1, _2] = _building->GetRoomAndSubRoomIDs(ped->GetPos());
     return _locffviafm.at(roomID)->GetCostToDestination(UID, ped->GetPos());
 }
 

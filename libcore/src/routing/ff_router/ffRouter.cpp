@@ -361,11 +361,11 @@ void FFRouter::CalculateFloorFields()
 
 int FFRouter::FindExit(Pedestrian * p)
 {
+    auto [ped_roomid, ped_subroomid, _] = _building->GetRoomAndSubRoomIDs(p->GetPos());
     if(_strategy == ROUTING_FF_QUICKEST) {
         if(_currentTime > _recalculationInterval &&
-           _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->IsInSubRoom(p) &&
-           _floorfieldByRoomID[p->GetRoomID()]->GetCostToDestination(
-               p->GetExitIndex(), p->GetPos()) > 3.0 &&
+           _floorfieldByRoomID[ped_roomid]->GetCostToDestination(p->GetExitIndex(), p->GetPos()) >
+               3.0 &&
            p->GetExitIndex() != -1) {
             //delay possible
             if((int) _currentTime % 10 != p->GetID() % 10) {
@@ -385,15 +385,15 @@ int FFRouter::FindExit(Pedestrian * p)
 
     if(auto * wa = dynamic_cast<WaitingArea *>(_building->GetFinalGoal(goalID))) {
         // if not subroom wise, check if correct room then direct to waiting area
-        if(!_targetWithinSubroom && wa->GetRoomID() == p->GetRoomID()) {
+        if(!_targetWithinSubroom && wa->GetRoomID() == ped_roomid) {
             bestDoor = wa->GetCentreCrossing()->GetUniqueID();
             p->SetExitIndex(bestDoor);
             p->SetExitLine(_doorByUID.at(bestDoor));
             return bestDoor;
         }
         // if subroom wise, check if correct subroom then direct to waiting area
-        if(_targetWithinSubroom && wa->GetRoomID() == p->GetRoomID() &&
-           wa->GetSubRoomID() == p->GetSubRoomID()) {
+        if(_targetWithinSubroom && wa->GetRoomID() == ped_roomid &&
+           wa->GetSubRoomID() == ped_subroomid) {
             bestDoor = wa->GetCentreCrossing()->GetUniqueID();
             p->SetExitIndex(bestDoor);
             p->SetExitLine(_doorByUID.at(bestDoor));
@@ -427,12 +427,12 @@ int FFRouter::FindExit(Pedestrian * p)
 
     if(!_targetWithinSubroom) {
         //candidates of current room (ID) (provided by Room)
-        for(auto transUID : _building->GetRoom(p->GetRoomID())->GetAllTransitionsIDs()) {
+        for(auto transUID : _building->GetRoom(ped_roomid)->GetAllTransitionsIDs()) {
             if(_doorByUID.count(transUID) != 0) {
                 DoorUIDsOfRoom.emplace_back(transUID);
             }
         }
-        for(auto & subIPair : _building->GetRoom(p->GetRoomID())->GetAllSubRooms()) {
+        for(auto & subIPair : _building->GetRoom(ped_roomid)->GetAllSubRooms()) {
             for(auto & crossI : subIPair.second->GetAllCrossings()) {
                 DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
             }
@@ -440,13 +440,12 @@ int FFRouter::FindExit(Pedestrian * p)
     } else {
         //candidates of current subroom only
         for(auto & crossI :
-            _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->GetAllCrossings()) {
+            _building->GetRoom(ped_roomid)->GetSubRoom(ped_subroomid)->GetAllCrossings()) {
             DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
         }
 
-        for(auto & transI : _building->GetRoom(p->GetRoomID())
-                                ->GetSubRoom(p->GetSubRoomID())
-                                ->GetAllTransitions()) {
+        for(auto & transI :
+            _building->GetRoom(ped_roomid)->GetSubRoom(ped_subroomid)->GetAllTransitions()) {
             if(transI->IsOpen() || transI->IsTempClose()) {
                 DoorUIDsOfRoom.emplace_back(transI->GetUniqueID());
             }
