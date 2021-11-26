@@ -6,7 +6,6 @@ The Winding Channel.
 - "Optimized Automatic Wayfinding for Pedestrian Simulations"
 
 Actually the following routers are tested: 
-- local_shortest
 - global_shortest
 - quickest
 - ff_global_shortest

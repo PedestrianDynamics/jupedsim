@@ -32,7 +32,6 @@
 #include "pedestrian/Pedestrian.h"
 #include "routing/ff_router/ffRouter.h"
 #include "routing/global_shortest/GlobalRouter.h"
-#include "routing/quickest/QuickestPathRouter.h"
 #include "routing/smoke_router/SmokeRouter.h"
 
 #include <Logger.h>
@@ -750,19 +749,9 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
         std::string strategy = e->Attribute("description");
         int id               = atoi(e->Attribute("router_id"));
 
-        if((strategy == "local_shortest") &&
+        if((strategy == "global_shortest") &&
            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            Router * r = new GlobalRouter(id, ROUTING_LOCAL_SHORTEST);
-            _config->GetRoutingEngine()->AddRouter(r);
-        } else if(
-            (strategy == "global_shortest") &&
-            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
             Router * r = new GlobalRouter(id, ROUTING_GLOBAL_SHORTEST);
-            _config->GetRoutingEngine()->AddRouter(r);
-        } else if(
-            (strategy == "quickest") &&
-            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            Router * r = new QuickestPathRouter(id, ROUTING_QUICKEST);
             _config->GetRoutingEngine()->AddRouter(r);
         } else if(
             (strategy == "smoke") &&

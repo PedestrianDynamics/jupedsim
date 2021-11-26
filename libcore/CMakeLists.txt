@@ -76,7 +76,6 @@ set(source_files
     src/routing/ff_router/ffRouter.cpp
     src/routing/global_shortest/AccessPoint.cpp
     src/routing/global_shortest/GlobalRouter.cpp
-    src/routing/quickest/QuickestPathRouter.cpp
     src/routing/smoke_router/Brain.cpp
     src/routing/smoke_router/BrainStorage.cpp
     src/routing/smoke_router/GraphNetwork.cpp
@@ -173,7 +172,6 @@ set(header_files
     src/routing/ff_router/mesh/RectGrid.h
     src/routing/global_shortest/AccessPoint.h
     src/routing/global_shortest/GlobalRouter.h
-    src/routing/quickest/QuickestPathRouter.h
     src/routing/smoke_router/Brain.h
     src/routing/smoke_router/BrainStorage.h
     src/routing/smoke_router/GraphNetwork.h

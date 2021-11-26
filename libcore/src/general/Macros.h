@@ -58,7 +58,6 @@
 enum class FileFormat { XML, TXT };
 
 enum RoutingStrategy {
-    ROUTING_LOCAL_SHORTEST = 1,
     ROUTING_GLOBAL_SHORTEST,
     ROUTING_QUICKEST,
     ROUTING_FROM_FILE,
