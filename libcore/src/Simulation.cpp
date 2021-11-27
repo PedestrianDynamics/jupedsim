@@ -62,7 +62,6 @@ std::map<int, double> trainOutflow;
 Simulation::Simulation(Configuration * args, std::unique_ptr<Building> && building) :
     _config(args), _clock(_config->Getdt()), _building(std::move(building))
 {
-    _countTraj               = 0;
     _seed                    = 8091983;
     _operationalModel        = nullptr;
     _fps                     = 1;
@@ -621,11 +620,6 @@ void Simulation::UpdateOutputGeometryFile()
     }
 
     geoOutput.SaveFile(geoOutputPath.string());
-}
-
-void Simulation::incrementCountTraj()
-{
-    _countTraj++;
 }
 
 int Simulation::GetMaxSimTime() const

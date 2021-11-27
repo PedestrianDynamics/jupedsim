@@ -73,7 +73,6 @@ private:
     bool _gotSources;
 
     fs::path _currentTrajectoriesFile;
-    int _countTraj = 0; // count number of TXT trajectories to produce
 
     std::vector<Pedestrian *> _pedsToRemove;
     std::vector<std::unique_ptr<Pedestrian>> _agents;
@@ -165,5 +164,4 @@ public:
     void PrintStatistics(double time);
 
     int GetMaxSimTime() const;
-    void incrementCountTraj();
 };
