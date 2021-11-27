@@ -26,7 +26,6 @@
  **/
 #include "Pedestrian.h"
 
-#include "JPSfire/generic/FDSMeshStorage.h"
 #include "Knowledge.h"
 #include "geometry/Building.h"
 #include "geometry/SubRoom.h"
@@ -93,10 +92,8 @@ Pedestrian::Pedestrian()
     _spotlight           = false;
 
     _agentsCreated++; //increase the number of object created
-    _fedIn            = 0.0;
-    _fedHeat          = 0.0;
-    _walkingSpeed     = nullptr;
-    _toxicityAnalysis = nullptr;
+    _fedIn      = 0.0;
+    _fedHeat    = 0.0;
     _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
 }
 
@@ -154,10 +151,8 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _routingStrategy = ROUTING_GLOBAL_SHORTEST;
     _lastE0          = Point(0, 0);
     _agentsCreated++; //increase the number of object created
-    _fedIn            = 0.0;
-    _fedHeat          = 0.0;
-    _toxicityAnalysis = nullptr;
-    _walkingSpeed     = nullptr;
+    _fedIn      = 0.0;
+    _fedHeat    = 0.0;
     _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
 }
 
@@ -486,18 +481,7 @@ double Pedestrian::GetV0Norm() const
         2.0 / (1 + exp(-smoothFactor * alpha * (z0 - ped_elevation) * (z0 - ped_elevation))) - 1;
 
     double walking_speed = (1 - f * g) * _ellipse.GetV0() + f * g * v0;
-    //IF execution of WalkingInSmoke depending on JPSfire section in INI file
-    if(_walkingSpeed && _walkingSpeed->ReduceWalkingSpeed()) {
-        walking_speed = _walkingSpeed->WalkingInSmoke(this, walking_speed);
-    }
     return walking_speed;
-}
-
-void Pedestrian::ConductToxicityAnalysis()
-{
-    if(_toxicityAnalysis->ConductToxicityAnalysis()) {
-        _toxicityAnalysis->HazardAnalysis(this);
-    }
 }
 
 // get axis in the walking direction
@@ -775,16 +759,6 @@ const Building * Pedestrian::GetBuilding()
 void Pedestrian::SetBuilding(Building * building)
 {
     _building = building;
-}
-
-void Pedestrian::SetWalkingSpeed(std::shared_ptr<WalkingSpeed> walkingSpeed)
-{
-    _walkingSpeed = walkingSpeed;
-}
-
-void Pedestrian::SetTox(std::shared_ptr<ToxicityAnalysis> toxicityAnalysis)
-{
-    _toxicityAnalysis = toxicityAnalysis;
 }
 
 void Pedestrian::SetSpotlight(bool spotlight)

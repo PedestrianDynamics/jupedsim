@@ -32,7 +32,6 @@
 #include "pedestrian/Pedestrian.h"
 #include "routing/ff_router/ffRouter.h"
 #include "routing/global_shortest/GlobalRouter.h"
-#include "routing/smoke_router/SmokeRouter.h"
 
 #include <Logger.h>
 #include <stdexcept>
@@ -92,13 +91,6 @@ void IniFileParser::Parse(const fs::path & iniFile)
         ParseHeader(xMainNode);
     } //else header
 
-
-    // read walkingspeed
-    std::shared_ptr<WalkingSpeed> W(new WalkingSpeed(iniFile.string()));
-    _config->SetWalkingSpeed(W);
-    // read  ToxicityAnalysis
-    std::shared_ptr<ToxicityAnalysis> T(new ToxicityAnalysis(iniFile.string(), _config->GetFps()));
-    _config->SetToxicityAnalysis(T);
 
     //pick up which model to use
     //get the wanted ped model id
@@ -754,16 +746,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
             Router * r = new GlobalRouter(id, ROUTING_GLOBAL_SHORTEST);
             _config->GetRoutingEngine()->AddRouter(r);
         } else if(
-            (strategy == "smoke") &&
-            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            Router * r = new SmokeRouter(id, ROUTING_SMOKE);
-            _config->GetRoutingEngine()->AddRouter(r);
-
-            LOG_INFO("Using SmokeRouter");
-            ///Parsing additional options
-            if(!ParseCogMapOpts(e))
-                return false;
-        } else if(
             (strategy == "ff_global_shortest") &&
             (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
             Router * r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals, _config);
@@ -821,53 +803,6 @@ bool IniFileParser::ParseFfRouterOps(TiXmlNode * routingNode, RoutingStrategy s)
             _config->set_write_VTK_files(tmp_write_VTK);
         }
     }
-    return true;
-}
-
-bool IniFileParser::ParseCogMapOpts(TiXmlNode * routingNode)
-{
-    TiXmlNode * sensorNode = routingNode->FirstChild();
-    if(!sensorNode) {
-        LOG_ERROR("No sensors found.\n");
-        return false;
-    }
-
-    /// static_cast to get access to the method 'addOption' of the SmokeRouter
-    SmokeRouter * r =
-        static_cast<SmokeRouter *>(_config->GetRoutingEngine()->GetAvailableRouters().back());
-
-    std::vector<std::string> sensorVec;
-    for(TiXmlElement * e = sensorNode->FirstChildElement("sensor"); e;
-        e                = e->NextSiblingElement("sensor")) {
-        std::string sensor = e->Attribute("description");
-        //adding Smoke Sensor specific parameters is executed in the class FDSFIreMeshStorage
-        sensorVec.push_back(sensor);
-
-        LOG_INFO("Sensor <{}> added.", sensor);
-    }
-
-    r->addOption("Sensors", sensorVec);
-
-    TiXmlElement * cogMap = routingNode->FirstChildElement("cognitive_map");
-
-    if(!cogMap) {
-        LOG_ERROR("Cognitive Map not specified.\n");
-        return false;
-    }
-
-    std::vector<std::string> cogMapStatus;
-    cogMapStatus.push_back(cogMap->Attribute("status"));
-    LOG_INFO("All pedestrian starting with a(n) {} cognitive maps", cogMapStatus[0]);
-    r->addOption("CognitiveMap", cogMapStatus);
-
-    std::vector<std::string> cogMapFiles;
-    if(!cogMap->Attribute("files")) {
-        LOG_WARNING("No input files for the cognitive map specified!");
-        return true;
-    }
-    cogMapFiles.push_back(cogMap->Attribute("files"));
-    r->addOption("CognitiveMapFiles", cogMapFiles);
-
     return true;
 }
 

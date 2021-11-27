@@ -46,7 +46,6 @@
 #include "pedestrian/Pedestrian.h"
 #include "routing/RoutingEngine.h"
 #include "routing/global_shortest/GlobalRouter.h"
-#include "routing/smoke_router/SmokeRouter.h"
 
 #include <chrono>
 #include <cstddef>

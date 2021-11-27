@@ -80,16 +80,6 @@ void Simulation::Iterate()
     _building->UpdateGrid();
     const double t_in_sec = _clock.ElapsedTime();
 
-    auto toxAnalysis = _config->GetToxicityAnalysis();
-    if(toxAnalysis) {
-        toxAnalysis->Update(t_in_sec);
-    }
-
-    auto walkingSpeed = _config->GetWalkingSpeed();
-    if(walkingSpeed) {
-        walkingSpeed->Update(t_in_sec);
-    }
-
     auto directionManager = _config->GetDirectionManager();
     if(directionManager) {
         directionManager->Update(t_in_sec);
@@ -140,22 +130,11 @@ void Simulation::Iterate()
         GoalManager gm{_building.get(), this};
         gm.update(t_in_sec);
     }
-
-    //Trigger JPSfire Toxicity Analysis
-    //only executed every 3 seconds
-    //TODO(kkratz): This is not working as intendet if 3 is not a multiple of deltaT
-    if(fmod(_clock.ElapsedTime(), 3) == 0) {
-        for(auto && ped : _agents) {
-            ped->ConductToxicityAnalysis();
-        }
-    }
     _clock.Advance();
 }
 
 void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
 {
-    agent->SetWalkingSpeed(_building->GetConfig()->GetWalkingSpeed());
-    agent->SetTox(_building->GetConfig()->GetToxicityAnalysis());
     agent->SetBuilding(_building.get());
     const Point pos = agent->GetPos();
     agent->SetRouter(_routingEngine->GetRouter(agent->GetRouterID()));

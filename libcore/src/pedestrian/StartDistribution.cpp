@@ -157,8 +157,6 @@ Pedestrian * StartDistribution::GenerateAgent(Building * building, std::vector<P
 {
     Pedestrian * ped = new Pedestrian();
     // PedIndex
-    ped->SetWalkingSpeed(building->GetConfig()->GetWalkingSpeed());
-    ped->SetTox(building->GetConfig()->GetToxicityAnalysis());
     ped->SetFinalDestination(GetGoalId());
     ped->SetGroup(GetGroupId());
     ped->SetRouter(building->GetRoutingEngine()->GetRouter(_routerID));

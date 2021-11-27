@@ -9,13 +9,6 @@ set(source_files
     src/IO/PedDistributionParser.cpp
     src/IO/TrainFileParser.cpp
     src/IO/Trajectories.cpp
-    src/JPSfire/A_smoke_sensor/SmokeSensor.cpp
-    src/JPSfire/B_walking_speed/WalkingSpeed.cpp
-    src/JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
-    src/JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
-    src/JPSfire/generic/FDSMesh.cpp
-    src/JPSfire/generic/FDSMeshStorage.cpp
-    src/JPSfire/generic/Knot.cpp
     src/Simulation.cpp
     src/SimulationClock.cpp
     src/SimulationHelper.cpp
@@ -76,29 +69,6 @@ set(source_files
     src/routing/ff_router/ffRouter.cpp
     src/routing/global_shortest/AccessPoint.cpp
     src/routing/global_shortest/GlobalRouter.cpp
-    src/routing/smoke_router/Brain.cpp
-    src/routing/smoke_router/BrainStorage.cpp
-    src/routing/smoke_router/GraphNetwork.cpp
-    src/routing/smoke_router/NavigationGraph.cpp
-    src/routing/smoke_router/SmokeRouter.cpp
-    src/routing/smoke_router/cognitiveMap/associations.cpp
-    src/routing/smoke_router/cognitiveMap/cogmapoutputhandler.cpp
-    src/routing/smoke_router/cognitiveMap/cognitivemap.cpp
-    src/routing/smoke_router/cognitiveMap/connection.cpp
-    src/routing/smoke_router/cognitiveMap/internnavigationnetwork.cpp
-    src/routing/smoke_router/cognitiveMap/landmark.cpp
-    src/routing/smoke_router/cognitiveMap/landmarknetwork.cpp
-    src/routing/smoke_router/cognitiveMap/region.cpp
-    src/routing/smoke_router/cognitiveMap/youareherepointer.cpp
-    src/routing/smoke_router/navigation_graph/GraphEdge.cpp
-    src/routing/smoke_router/navigation_graph/GraphVertex.cpp
-    src/routing/smoke_router/sensor/AbstractSensor.cpp
-    src/routing/smoke_router/sensor/DiscoverDoorsSensor.cpp
-    src/routing/smoke_router/sensor/JamSensor.cpp
-    src/routing/smoke_router/sensor/LastDestinationsSensor.cpp
-    src/routing/smoke_router/sensor/RoomToFloorSensor.cpp
-    src/routing/smoke_router/sensor/SensorManager.cpp
-    src/routing/smoke_router/sensor/locater.cpp
     src/voronoi-boost/VoronoiPositionGenerator.cpp
 )
 
@@ -110,13 +80,6 @@ set(header_files
     src/IO/PedDistributionParser.h
     src/IO/TrainFileParser.h
     src/IO/Trajectories.h
-    src/JPSfire/A_smoke_sensor/SmokeSensor.h
-    src/JPSfire/B_walking_speed/WalkingSpeed.h
-    src/JPSfire/C_toxicity_analysis/ToxicityAnalysis.h
-    src/JPSfire/C_toxicity_analysis/ToxicityOutputhandler.h
-    src/JPSfire/generic/FDSMesh.h
-    src/JPSfire/generic/FDSMeshStorage.h
-    src/JPSfire/generic/Knot.h
     src/Simulation.h
     src/SimulationClock.h
     src/SimulationHelper.h
@@ -172,29 +135,6 @@ set(header_files
     src/routing/ff_router/mesh/RectGrid.h
     src/routing/global_shortest/AccessPoint.h
     src/routing/global_shortest/GlobalRouter.h
-    src/routing/smoke_router/Brain.h
-    src/routing/smoke_router/BrainStorage.h
-    src/routing/smoke_router/GraphNetwork.h
-    src/routing/smoke_router/NavigationGraph.h
-    src/routing/smoke_router/SmokeRouter.h
-    src/routing/smoke_router/cognitiveMap/associations.h
-    src/routing/smoke_router/cognitiveMap/cogmapoutputhandler.h
-    src/routing/smoke_router/cognitiveMap/cognitivemap.h
-    src/routing/smoke_router/cognitiveMap/connection.cpp
-    src/routing/smoke_router/cognitiveMap/internnavigationnetwork.h
-    src/routing/smoke_router/cognitiveMap/landmark.h
-    src/routing/smoke_router/cognitiveMap/landmarknetwork.h
-    src/routing/smoke_router/cognitiveMap/region.h
-    src/routing/smoke_router/cognitiveMap/youareherepointer.h
-    src/routing/smoke_router/navigation_graph/GraphEdge.h
-    src/routing/smoke_router/navigation_graph/GraphVertex.h
-    src/routing/smoke_router/sensor/AbstractSensor.h
-    src/routing/smoke_router/sensor/DiscoverDoorsSensor.h
-    src/routing/smoke_router/sensor/JamSensor.h
-    src/routing/smoke_router/sensor/LastDestinationsSensor.h
-    src/routing/smoke_router/sensor/RoomToFloorSensor.h
-    src/routing/smoke_router/sensor/SensorManager.h
-    src/routing/smoke_router/sensor/locater.h
     src/voronoi-boost/VoronoiPositionGenerator.h
 )
 
