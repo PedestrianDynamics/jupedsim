@@ -51,8 +51,6 @@ private:
 
     bool ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * agentDistri);
 
-    bool ParseFfRouterOps(TiXmlNode * routingNode, RoutingStrategy s);
-
     bool ParseLinkedCells(const TiXmlNode & linkedCellNode);
 
     bool ParseStepSize(TiXmlNode & stepNode);

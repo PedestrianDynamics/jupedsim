@@ -35,10 +35,10 @@
     </routing>
     <agents operational_model_id="3">
         <agents_distribution>
-            <group agent_parameter_id="1" goal_id="-1" group_id="1" number="10" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" room_id="0" subroom_id="9" router_id="[2,4,5,6]" />
-            <group agent_parameter_id="1" goal_id="-1" group_id="1" number="10" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" room_id="0" subroom_id="3" router_id="[2,4,5,6]" />
-            <group agent_parameter_id="1" goal_id="-1" group_id="1" number="10" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" room_id="0" subroom_id="11" router_id="[2,4,5,6]" />
-            <group agent_parameter_id="1" goal_id="-1" group_id="1" number="10" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" room_id="0" subroom_id="5" router_id="[2,4,5,6]" />
+            <group agent_parameter_id="1" goal_id="-1" group_id="1" number="10" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" room_id="0" subroom_id="9" router_id="[1,2]" />
+            <group agent_parameter_id="1" goal_id="-1" group_id="1" number="10" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" room_id="0" subroom_id="3" router_id="[1,2]" />
+            <group agent_parameter_id="1" goal_id="-1" group_id="1" number="10" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" room_id="0" subroom_id="11" router_id="[1,2]" />
+            <group agent_parameter_id="1" goal_id="-1" group_id="1" number="10" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" room_id="0" subroom_id="5" router_id="[1,2]" />
         </agents_distribution>
     </agents>
     <operational_models>
@@ -66,10 +66,7 @@
     </operational_models>
 
     <route_choice_models>
-
-        <router router_id="2" description="global_shortest" />
-        <router router_id="4" description="ff_global_shortest" /> <!-- like global_shortest, without HLines -->
-        <router router_id="5" description="ff_local_shortest" /> <!-- like local_shortest, without HLines -->
-        <router router_id="6" description="ff_quickest" /> <!-- like global quickest -->
+        <router router_id="1" description="global_shortest" />
+        <router router_id="2" description="ff_global_shortest" /> <!-- like global_shortest, without HLines -->
     </route_choice_models>
 </JuPedSim>

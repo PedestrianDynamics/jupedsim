@@ -29,7 +29,7 @@
     <!--For First run-->
     <agents operational_model_id="3">
         <agents_distribution>
-            <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="67" router_id="[4, 5, 6]" />
+            <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="67" router_id="[1]" />
         </agents_distribution>
     </agents>
 
@@ -56,9 +56,7 @@
     </operational_models>
 
     <route_choice_models>
-        <router router_id="4" description="ff_global_shortest" /> <!-- like global_shortest, without HLines -->
-        <router router_id="5" description="ff_local_shortest" /> <!-- like local_shortest, without HLines -->
-        <router router_id="6" description="ff_quickest" /> <!-- like global quickest -->
+        <router router_id="1" description="ff_global_shortest" /> <!-- like global_shortest, without HLines -->
     </route_choice_models>
 
 </JuPedSim>

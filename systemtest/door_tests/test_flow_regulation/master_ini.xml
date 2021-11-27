@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <JuPedSim project="JPS-Project" version="0.7" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <!-- seed used for initialising random generator -->
     <header>
@@ -9,7 +9,7 @@
         <geometry>../geometry.xml</geometry>
         <!-- trajectories file and format -->
         <trajectories format="plain" fps="8">
-            <file location="traj.txt"/>
+            <file location="traj.txt" />
         </trajectories>
         <events_file>../events.xml</events_file>
         <show_statistics>true</show_statistics>
@@ -18,7 +18,7 @@
     <traffic_constraints>
         <doors>
             <!-- doors states are: close or open -->
-            <door trans_id="0" state="temp_close" dn="1" outflow="3" max_agents="10"/>
+            <door trans_id="0" state="temp_close" dn="1" outflow="3" max_agents="10" />
         </doors>
     </traffic_constraints>
     <!--persons information and distribution -->
@@ -52,7 +52,7 @@
         </model>
     </operational_models>
     <route_choice_models>
-        <router router_id="1" description="ff_quickest" />
+        <router router_id="1" description="ff_global_shortest" />
         <router router_id="2" description="global_shortest" />
     </route_choice_models>
 </JuPedSim>

@@ -106,13 +106,6 @@ void Simulation::Iterate()
 
             _building->GetConfig()->GetDirectionManager()->GetDirectionStrategy()->Init(
                 _building.get());
-        } else { // quickest needs update even if NeedsUpdate() is false
-            auto * ffrouter =
-                dynamic_cast<FFRouter *>(_routingEngine->GetRouter(ROUTING_FF_QUICKEST));
-            if(ffrouter != nullptr && ffrouter->MustReInit()) {
-                ffrouter->ReInit();
-                ffrouter->SetRecalc(t_in_sec);
-            }
         }
 
         // here the used routers are update, when needed due to external changes

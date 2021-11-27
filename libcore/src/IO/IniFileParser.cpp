@@ -757,50 +757,9 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
                 LOG_WARNING("Exit Strategy Number is not 8 or 9!!!");
                 // config object holds default values, so we omit any set operations
             }
-
-            ///Parsing additional options
-            if(!ParseFfRouterOps(e, ROUTING_FF_GLOBAL_SHORTEST)) {
-                return false;
-            }
-        } else if(
-            (strategy == "ff_quickest") &&
-            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            Router * r = new FFRouter(id, ROUTING_FF_QUICKEST, hasSpecificGoals, _config);
-            _config->GetRoutingEngine()->AddRouter(r);
-            LOG_INFO("Using FF Quickest Router");
-
-            if(!ParseFfRouterOps(e, ROUTING_FF_QUICKEST)) {
-                return false;
-            }
         } else if(std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) {
             LOG_ERROR("Wrong value for routing strategy [{}].", strategy);
             return false;
-        }
-    }
-    return true;
-}
-
-bool IniFileParser::ParseFfRouterOps(TiXmlNode * routingNode, RoutingStrategy s)
-{
-    //set defaults
-    if(s == ROUTING_FF_QUICKEST) {
-        //parse ini-file-information
-        if(routingNode->FirstChild("parameters")) {
-            TiXmlNode * pParameters = routingNode->FirstChild("parameters");
-            if(pParameters->FirstChild(
-                   "recalc_interval")) { //@todo: ar.graf: test ini file with recalc value
-                _config->set_recalc_interval(
-                    atof(pParameters->FirstChild("recalc_interval")->FirstChild()->Value()));
-            }
-        }
-    }
-    _config->set_write_VTK_files(false);
-    if(routingNode->FirstChild("parameters")) {
-        TiXmlNode * pParametersForAllFF = routingNode->FirstChild("parameters");
-        if(pParametersForAllFF->FirstChild("write_VTK_files")) {
-            bool tmp_write_VTK = !std::strcmp(
-                pParametersForAllFF->FirstChild("write_VTK_files")->FirstChild()->Value(), "true");
-            _config->set_write_VTK_files(tmp_write_VTK);
         }
     }
     return true;

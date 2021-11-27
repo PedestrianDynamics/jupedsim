@@ -25,7 +25,7 @@
     <!--persons information and distribution -->
     <agents operational_model_id="3">
         <agents_distribution>
-            <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="1" number="1" goal_id="-1" x_min="-19" x_max="-17" router_id="[2,4,5]" />
+            <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="1" number="1" goal_id="-1" x_min="-19" x_max="-17" router_id="[1,2]" />
         </agents_distribution>
     </agents>
 
@@ -49,10 +49,8 @@
             </agent_parameters>
         </model>
     </operational_models>
-
     <route_choice_models>
-        <router router_id="2" description="global_shortest" />
-        <router router_id="4" description="ff_global_shortest" />
-        <router router_id="5" description="ff_quickest" />
+        <router router_id="1" description="global_shortest" />
+        <router router_id="2" description="ff_global_shortest" />
     </route_choice_models>
 </JuPedSim>

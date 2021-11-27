@@ -30,7 +30,7 @@
 
     <agents operational_model_id="3">
         <agents_distribution>
-            <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="40" router_id="[2,4,5,6]" x_min="4.8" x_max="8.8" y_min="0.0" y_max="4.0" />
+            <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="40" router_id="[1,2]" x_min="4.8" x_max="8.8" y_min="0.0" y_max="4.0" />
             <!-- The number of participants should be (40, 38, 36) in 3 runs-->
         </agents_distribution>
     </agents>
@@ -55,12 +55,9 @@
             </agent_parameters>
         </model>
     </operational_models>
-
     <route_choice_models>
-        <router router_id="2" description="global_shortest" />
-        <router router_id="4" description="ff_global_shortest" /> <!-- like global_shortest, without HLines -->
-        <router router_id="5" description="ff_local_shortest" /> <!-- like local_shortest, without HLines -->
-        <router router_id="6" description="ff_quickest" /> <!-- like global quickest -->
+        <router router_id="1" description="global_shortest" />
+        <router router_id="2" description="ff_global_shortest" /> <!-- like global_shortest, without HLines -->
     </route_choice_models>
 
 </JuPedSim>
