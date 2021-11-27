@@ -50,4 +50,4 @@ void ProcessEvent(CreatePedestrianEvent event, Simulation & sim)
 
     sim.AddAgent(std::move(ped));
 }
-void ProcessEvent(DummyEvent event, Simulation & sim) {}
+void ProcessEvent(DummyEvent /*event*/, Simulation & /*sim*/) {}
