@@ -66,10 +66,8 @@ Simulation::Simulation(Configuration * args, std::unique_ptr<Building> && buildi
     _operationalModel        = nullptr;
     _fps                     = 1;
     _old_em                  = nullptr;
-    _gotSources              = false;
     _fps                     = 1;
     _old_em                  = nullptr;
-    _gotSources              = false;
     _maxSimTime              = 100;
     _currentTrajectoriesFile = _config->GetTrajectoriesFile();
 }

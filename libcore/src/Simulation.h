@@ -69,9 +69,6 @@ private:
     std::unique_ptr<OldEventManager> _old_em;
     int _periodic;
     int _maxSimTime;
-    /// Will be set if pedestrian sources exist
-    bool _gotSources;
-
     fs::path _currentTrajectoriesFile;
 
     std::vector<Pedestrian *> _pedsToRemove;
