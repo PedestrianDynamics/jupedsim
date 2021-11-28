@@ -920,44 +920,9 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                     _directionStrategy =
                         std::shared_ptr<DirectionStrategy>(new DirectionInRangeBottleneck());
                     break;
-                case 6:
-                    // dead end -> not supported anymore (global ff needed, but not available in 3d)
-                    LOG_ERROR("Exit Strategy 6 is not supported any longer. Please refer to "
-                              "www.jupedsim.org");
-                    LOG_WARNING(
-                        "Changing Exit-Strategy to #9 (Floorfields with targets within subroom)");
-                    pExitStrategy      = 9;
-                    _exit_strat_number = 9;
-                    _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
-                    if(!ParseFfOpts(strategyNode)) {
-                        return false;
-                    };
-                    break;
-                case 7:
-                    // dead end -> not supported anymore (global ff needed, but not available in 3d)
-                    LOG_ERROR("Exit Strategy 7 is not supported any longer. Please refer to "
-                              "www.jupedsim.org");
-                    LOG_WARNING(
-                        "Changing Exit-Strategy to #9 (Floorfields with targets within subroom)");
-                    pExitStrategy      = 9;
-                    _exit_strat_number = 9;
-                    _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
-                    if(!ParseFfOpts(strategyNode)) {
-                        return false;
-                    };
-                    break;
                 case 8:
                     _directionStrategy =
                         std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());
-                    if(!ParseFfOpts(strategyNode)) {
-                        return false;
-                    };
-                    break;
-                case 9:
-                    _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
                     if(!ParseFfOpts(strategyNode)) {
                         return false;
                     };

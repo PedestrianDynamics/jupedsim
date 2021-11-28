@@ -59,7 +59,7 @@ public:
     /**
      * Initialization method for DirectionStrategies.
      */
-    virtual void Init(Building *){};
+    virtual void Init(Building * /*building*/){};
 
     /**
      * Getter for the goal at the current time-step.
@@ -154,32 +154,4 @@ private:
     double _wallAvoidDistance;
     bool _useDistancefield;
     bool _wasInitialized{false};
-};
-
-/**
- * DirectionStrategy for exit_crossing_strategy 9
- *
- * Target is determinded by the underlying floorfield
- */
-class DirectionSubLocalFloorfield : public DirectionStrategy
-{
-public:
-    void Init(Building * building) override;
-
-    ~DirectionSubLocalFloorfield() override;
-
-    Point GetTarget(Room * room, Pedestrian * ped) const override;
-
-    Point GetDir2Wall(Pedestrian * ped) const override;
-
-    double GetDistance2Wall(Pedestrian * ped) const override;
-
-    double GetDistance2Target(Pedestrian * ped, int UID) const override;
-
-private:
-    std::map<int, UnivFFviaFM *> _locffviafm;
-    Building * _building;
-    double _stepsize;
-    double _wallAvoidDistance;
-    bool _useDistancefield;
 };
