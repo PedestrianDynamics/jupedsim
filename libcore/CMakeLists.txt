@@ -154,7 +154,6 @@ target_link_libraries(core
     tinyxml
     visilibity
     CLI11::CLI11
-    cnpy
     fs
     spdlog::spdlog
     fmt::fmt

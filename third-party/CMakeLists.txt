@@ -1,24 +1,4 @@
 ################################################################################
-# Build cnpy
-################################################################################
-add_library(cnpy STATIC
-    cnpy/cnpy.cpp
-)
-target_link_libraries(cnpy PUBLIC ZLIB::ZLIB)
-# cnpy emits a few warnings during their build
-target_compile_options(cnpy PRIVATE
-    # Currently (GCC9 vs Clang8) GCC is more specific and discerns
-    # unused vs. set-but-unused
-    $<$<CXX_COMPILER_ID:GNU>:-Wno-unused-but-set-variable>
-    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-Wno-unused-variable>
-)
-target_include_directories(cnpy PUBLIC
-    "${CMAKE_CURRENT_SOURCE_DIR}/cnpy"
-)
-set_property(TARGET cnpy PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
-set_property(TARGET cnpy PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
-
-################################################################################
 # Build tinyxml
 ################################################################################
 add_library(tinyxml STATIC
