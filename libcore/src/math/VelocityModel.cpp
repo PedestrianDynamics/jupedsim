@@ -147,30 +147,8 @@ void VelocityModel::ComputeNextTimeStep(
         //============================================================
         Point speed = direction.Normalized() * OptimalSpeed(ped.get(), spacing);
         result_acc.push_back(speed);
-
-
-        spacings.clear(); //clear for ped p
-
-        // stuck peds get removed. Warning is thrown. low speed due to jam is omitted.
-        if(ped->GetTimeInJam() > ped->GetPatienceTime() &&
-           _currentTime > 10000 + ped->GetPremovementTime() &&
-           std::max(ped->GetMeanVelOverRecTime(), ped->GetV().Norm()) < 0.01 &&
-           size == 0) // size length of peds neighbour vector
-        {
-            LOG_WARNING(
-                "ped {:d} with vmean {:f} has been deleted in room {:d}/{:d} after time "
-                "{:f}s (current={:f}",
-                ped->GetID(),
-                ped->GetMeanVelOverRecTime(),
-                room->GetID(),
-                subroom->GetSubRoomID(),
-                _currentTime,
-                current);
-            //TODO KKZ track deleted peds
-            pedestrians_to_delete.emplace_back(ped->GetID());
-        }
-
-    } // for p
+        spacings.clear();
+    }
 
     // update
     size_t counter = 0;

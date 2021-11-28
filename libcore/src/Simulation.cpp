@@ -56,20 +56,12 @@
 #include <tinyxml.h>
 #include <variant>
 
-// TODO: add these variables to class simulation
-std::map<int, double> trainOutflow;
-
 Simulation::Simulation(Configuration * args, std::unique_ptr<Building> && building) :
-    _config(args), _clock(_config->Getdt()), _building(std::move(building))
+    _config(args),
+    _clock(_config->Getdt()),
+    _building(std::move(building)),
+    _currentTrajectoriesFile(_config->GetTrajectoriesFile())
 {
-    _seed                    = 8091983;
-    _operationalModel        = nullptr;
-    _fps                     = 1;
-    _old_em                  = nullptr;
-    _fps                     = 1;
-    _old_em                  = nullptr;
-    _maxSimTime              = 100;
-    _currentTrajectoriesFile = _config->GetTrajectoriesFile();
 }
 
 void Simulation::Iterate()

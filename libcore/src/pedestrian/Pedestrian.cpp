@@ -260,24 +260,11 @@ void Pedestrian::SetPos(const Point & pos)
 {
     _lastPosition = _ellipse.GetCenter();
     _ellipse.SetCenter(pos);
-    //save the last values for the records
-    _lastPositions.push(pos);
-    unsigned int max_size = _recordingTime / _deltaT;
-    if(_lastPositions.size() > max_size) {
-        _lastPositions.pop();
-    }
 }
 
 void Pedestrian::SetV(const Point & v)
 {
     _ellipse.SetV(v);
-    //save the last values for the records
-    _lastVelocites.push(v);
-
-    unsigned int max_size = _recordingTime / _deltaT;
-    if(_lastVelocites.size() > max_size) {
-        _lastVelocites.pop();
-    }
 }
 
 void Pedestrian::SetSmoothFactorUpStairs(double c)
@@ -607,15 +594,6 @@ double Pedestrian::GetRecordingTime() const
     return _recordingTime;
 }
 
-double Pedestrian::GetMeanVelOverRecTime() const
-{
-    //just few position were saved
-    if(_lastPositions.size() < 2) {
-        return _ellipse.GetV().Norm();
-    }
-    return fabs((_lastPositions.back() - _lastPositions.front()).Norm() / _recordingTime);
-}
-
 double Pedestrian::GetDistanceToNextTarget() const
 {
     return (_navLine->DistTo(GetPos()));
@@ -896,11 +874,6 @@ void Pedestrian::UpdateRoom(int roomID, int subRoomID)
     _oldSubRoomID = _subRoomID;
     _roomID       = roomID;
     _subRoomID    = subRoomID;
-}
-
-const std::queue<Point> & Pedestrian::GetLastPositions() const
-{
-    return _lastPositions;
 }
 
 Point Pedestrian::GetLastPosition() const

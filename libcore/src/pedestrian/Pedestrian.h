@@ -98,10 +98,6 @@ private:
     double _patienceTime;
     /// data from the last <_recordingTime> seconds will be kept
     double _recordingTime;
-    /// store the last positions
-    std::queue<Point> _lastPositions;
-    /// store the last velocities
-    std::queue<Point> _lastVelocites;
     /// routing strategy followed
     RoutingStrategy _routingStrategy;
 
@@ -376,11 +372,6 @@ public:
       */
     double GetRecordingTime() const;
 
-    /**
-      * @return the average velocity over the recording period
-      */
-    double GetMeanVelOverRecTime() const;
-
     int GetGroup() const;
     void SetGroup(int group);
 
@@ -451,8 +442,6 @@ public:
      * @return ID of the former room the pedestrian was in
      */
     int GetOldSubRoomID() const;
-
-    const std::queue<Point> & GetLastPositions() const;
 
     Point GetLastPosition() const;
 };

@@ -54,21 +54,20 @@ class Simulation
 {
 private:
     /// Max file size 16Mb
-    static const size_t _maxFileSize{1U << 24U};
     Configuration * _config;
     SimulationClock _clock;
     /// frame rate for the trajectories
-    double _fps;
-    unsigned int _seed;
+    double _fps{1.0};
+    unsigned int _seed{8091983};
     std::unique_ptr<Building> _building;
     /// Force model to use
     std::shared_ptr<OperationalModel> _operationalModel;
     /// Manage all route choices algorithms
     std::shared_ptr<RoutingEngine> _routingEngine;
     /// writing the trajectories to file
-    std::unique_ptr<OldEventManager> _old_em;
+    std::unique_ptr<OldEventManager> _old_em{};
     int _periodic;
-    int _maxSimTime;
+    int _maxSimTime{100};
     fs::path _currentTrajectoriesFile;
 
     std::vector<Pedestrian *> _pedsToRemove;

@@ -239,7 +239,6 @@ if (BUILD_CPPUNIT_TEST)
         test/catch2/Main.cpp
         test/catch2/math/MathematicsTest.cpp
         test/catch2/pedestrian/EllipseTest.cpp
-        test/catch2/pedestrian/PedestrianTest.cpp
         test/catch2/routing/UnivFFviaFMTest.cpp
     )
 
