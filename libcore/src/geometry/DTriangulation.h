@@ -27,7 +27,7 @@
  **/
 #pragma once
 
-#include "../../geometry/Point.h"
+#include "Point.h"
 
 #include <algorithm>
 #include <cstdlib>

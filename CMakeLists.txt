@@ -96,8 +96,6 @@ target_link_libraries(fs INTERFACE
     $<$<PLATFORM_ID:Linux>:stdc++fs>
 )
 
-# ZLib needed for cpny
-find_package(ZLIB REQUIRED)
 find_package(Threads REQUIRED)
 find_package(PythonInterp 3 REQUIRED)
 if(BUILD_CPPUNIT_TEST)

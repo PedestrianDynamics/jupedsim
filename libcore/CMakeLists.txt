@@ -2,6 +2,16 @@
 # Build libcore
 ################################################################################
 set(source_files
+    src/IO/EventFileParser.cpp
+    src/IO/GeoFileParser.cpp
+    src/IO/IniFileParser.cpp
+    src/IO/OutputHandler.cpp
+    src/IO/PedDistributionParser.cpp
+    src/IO/TrainFileParser.cpp
+    src/IO/Trajectories.cpp
+    src/Simulation.cpp
+    src/SimulationClock.cpp
+    src/SimulationHelper.cpp
     src/agent-creation/AgentCreator.cpp
     src/direction/DirectionManager.cpp
     src/direction/DirectionManager.h
@@ -23,6 +33,7 @@ set(source_files
     src/general/ArgumentParser.cpp
     src/geometry/Building.cpp
     src/geometry/Crossing.cpp
+    src/geometry/DTriangulation.cpp
     src/geometry/Goal.cpp
     src/geometry/GoalManager.cpp
     src/geometry/Hline.cpp
@@ -38,20 +49,6 @@ set(source_files
     src/geometry/WaitingArea.cpp
     src/geometry/Wall.cpp
     src/geometry/helper/CorrectGeometry.cpp
-    src/IO/EventFileParser.cpp
-    src/IO/GeoFileParser.cpp
-    src/IO/IniFileParser.cpp
-    src/IO/OutputHandler.cpp
-    src/IO/PedDistributionParser.cpp
-    src/IO/TrainFileParser.cpp
-    src/IO/Trajectories.cpp
-    src/JPSfire/A_smoke_sensor/SmokeSensor.cpp
-    src/JPSfire/B_walking_speed/WalkingSpeed.cpp
-    src/JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
-    src/JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
-    src/JPSfire/generic/FDSMesh.cpp
-    src/JPSfire/generic/FDSMeshStorage.cpp
-    src/JPSfire/generic/Knot.cpp
     src/math/GCFMModel.cpp
     src/math/Mathematics.cpp
     src/math/OperationalModel.cpp
@@ -66,44 +63,26 @@ set(source_files
     src/pedestrian/Pedestrian.cpp
     src/pedestrian/Pedestrian.cpp
     src/pedestrian/StartDistribution.cpp
-    src/routing/ff_router/ffRouter.cpp
-    src/routing/ff_router/UnivFFviaFM.cpp
-    src/routing/global_shortest/AccessPoint.cpp
-    src/routing/global_shortest/DTriangulation.cpp
-    src/routing/global_shortest/GlobalRouter.cpp
-    src/routing/quickest/QuickestPathRouter.cpp
     src/routing/Router.cpp
     src/routing/RoutingEngine.cpp
-    src/routing/smoke_router/Brain.cpp
-    src/routing/smoke_router/BrainStorage.cpp
-    src/routing/smoke_router/cognitiveMap/associations.cpp
-    src/routing/smoke_router/cognitiveMap/cogmapoutputhandler.cpp
-    src/routing/smoke_router/cognitiveMap/cognitivemap.cpp
-    src/routing/smoke_router/cognitiveMap/connection.cpp
-    src/routing/smoke_router/cognitiveMap/internnavigationnetwork.cpp
-    src/routing/smoke_router/cognitiveMap/landmark.cpp
-    src/routing/smoke_router/cognitiveMap/landmarknetwork.cpp
-    src/routing/smoke_router/cognitiveMap/region.cpp
-    src/routing/smoke_router/cognitiveMap/youareherepointer.cpp
-    src/routing/smoke_router/GraphNetwork.cpp
-    src/routing/smoke_router/navigation_graph/GraphEdge.cpp
-    src/routing/smoke_router/navigation_graph/GraphVertex.cpp
-    src/routing/smoke_router/NavigationGraph.cpp
-    src/routing/smoke_router/sensor/AbstractSensor.cpp
-    src/routing/smoke_router/sensor/DiscoverDoorsSensor.cpp
-    src/routing/smoke_router/sensor/JamSensor.cpp
-    src/routing/smoke_router/sensor/LastDestinationsSensor.cpp
-    src/routing/smoke_router/sensor/locater.cpp
-    src/routing/smoke_router/sensor/RoomToFloorSensor.cpp
-    src/routing/smoke_router/sensor/SensorManager.cpp
-    src/routing/smoke_router/SmokeRouter.cpp
-    src/Simulation.cpp
-    src/SimulationClock.cpp
-    src/SimulationHelper.cpp
+    src/routing/ff_router/UnivFFviaFM.cpp
+    src/routing/ff_router/ffRouter.cpp
+    src/routing/global_shortest/AccessPoint.cpp
+    src/routing/global_shortest/GlobalRouter.cpp
     src/voronoi-boost/VoronoiPositionGenerator.cpp
 )
 
 set(header_files
+    src/IO/EventFileParser.h
+    src/IO/GeoFileParser.h
+    src/IO/IniFileParser.h
+    src/IO/OutputHandler.h
+    src/IO/PedDistributionParser.h
+    src/IO/TrainFileParser.h
+    src/IO/Trajectories.h
+    src/Simulation.h
+    src/SimulationClock.h
+    src/SimulationHelper.h
     src/agent-creation/AgentCreator.h
     src/events/DoorEvent.h
     src/events/Event.h
@@ -120,9 +99,9 @@ set(header_files
     src/general/randomnumbergenerator.h
     src/geometry/Building.h
     src/geometry/Crossing.h
+    src/geometry/DTriangulation.h
     src/geometry/Goal.h
     src/geometry/GoalManager.h
-    src/geometry/helper/CorrectGeometry.h
     src/geometry/Hline.h
     src/geometry/Line.h
     src/geometry/NavLine.h
@@ -134,26 +113,13 @@ set(header_files
     src/geometry/Transition.h
     src/geometry/WaitingArea.h
     src/geometry/Wall.h
-    src/IO/EventFileParser.h
-    src/IO/GeoFileParser.h
-    src/IO/IniFileParser.h
-    src/IO/OutputHandler.h
-    src/IO/PedDistributionParser.h
-    src/IO/TrainFileParser.h
-    src/IO/Trajectories.h
-    src/JPSfire/A_smoke_sensor/SmokeSensor.h
-    src/JPSfire/B_walking_speed/WalkingSpeed.h
-    src/JPSfire/C_toxicity_analysis/ToxicityAnalysis.h
-    src/JPSfire/C_toxicity_analysis/ToxicityOutputhandler.h
-    src/JPSfire/generic/FDSMesh.h
-    src/JPSfire/generic/FDSMeshStorage.h
-    src/JPSfire/generic/Knot.h
+    src/geometry/helper/CorrectGeometry.h
     src/math/GCFMModel.h
     src/math/Mathematics.h
     src/math/OperationalModel.h
     src/math/VelocityModel.h
-    src/neighborhood/NeighborhoodSearch.h
     src/neighborhood/Grid2D.h
+    src/neighborhood/NeighborhoodSearch.h
     src/pedestrian/AgentsParameters.h
     src/pedestrian/AgentsSource.h
     src/pedestrian/AgentsSourcesManager.h
@@ -162,41 +128,13 @@ set(header_files
     src/pedestrian/PedDistributor.h
     src/pedestrian/Pedestrian.h
     src/pedestrian/StartDistribution.h
-    src/routing/ff_router/ffRouter.h
-    src/routing/ff_router/mesh/RectGrid.h
-    src/routing/ff_router/UnivFFviaFM.h
-    src/routing/global_shortest/AccessPoint.h
-    src/routing/global_shortest/DTriangulation.h
-    src/routing/global_shortest/GlobalRouter.h
-    src/routing/quickest/QuickestPathRouter.h
     src/routing/Router.h
     src/routing/RoutingEngine.h
-    src/routing/smoke_router/Brain.h
-    src/routing/smoke_router/BrainStorage.h
-    src/routing/smoke_router/cognitiveMap/associations.h
-    src/routing/smoke_router/cognitiveMap/cogmapoutputhandler.h
-    src/routing/smoke_router/cognitiveMap/cognitivemap.h
-    src/routing/smoke_router/cognitiveMap/connection.cpp
-    src/routing/smoke_router/cognitiveMap/internnavigationnetwork.h
-    src/routing/smoke_router/cognitiveMap/landmark.h
-    src/routing/smoke_router/cognitiveMap/landmarknetwork.h
-    src/routing/smoke_router/cognitiveMap/region.h
-    src/routing/smoke_router/cognitiveMap/youareherepointer.h
-    src/routing/smoke_router/GraphNetwork.h
-    src/routing/smoke_router/navigation_graph/GraphEdge.h
-    src/routing/smoke_router/navigation_graph/GraphVertex.h
-    src/routing/smoke_router/NavigationGraph.h
-    src/routing/smoke_router/sensor/AbstractSensor.h
-    src/routing/smoke_router/sensor/DiscoverDoorsSensor.h
-    src/routing/smoke_router/sensor/JamSensor.h
-    src/routing/smoke_router/sensor/LastDestinationsSensor.h
-    src/routing/smoke_router/sensor/locater.h
-    src/routing/smoke_router/sensor/RoomToFloorSensor.h
-    src/routing/smoke_router/sensor/SensorManager.h
-    src/routing/smoke_router/SmokeRouter.h
-    src/Simulation.h
-    src/SimulationClock.h
-    src/SimulationHelper.h
+    src/routing/ff_router/UnivFFviaFM.h
+    src/routing/ff_router/ffRouter.h
+    src/routing/ff_router/mesh/RectGrid.h
+    src/routing/global_shortest/AccessPoint.h
+    src/routing/global_shortest/GlobalRouter.h
     src/voronoi-boost/VoronoiPositionGenerator.h
 )
 
@@ -216,7 +154,6 @@ target_link_libraries(core
     tinyxml
     visilibity
     CLI11::CLI11
-    cnpy
     fs
     spdlog::spdlog
     fmt::fmt
@@ -301,7 +238,6 @@ if (BUILD_CPPUNIT_TEST)
         test/catch2/Main.cpp
         test/catch2/math/MathematicsTest.cpp
         test/catch2/pedestrian/EllipseTest.cpp
-        test/catch2/pedestrian/PedestrianTest.cpp
         test/catch2/routing/UnivFFviaFMTest.cpp
     )
 

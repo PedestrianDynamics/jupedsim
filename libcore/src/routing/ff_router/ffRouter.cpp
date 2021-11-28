@@ -66,12 +66,8 @@ FFRouter::FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals, Configurati
     _targetWithinSubroom = (_config->get_exit_strat() == 9);
 
     // get extra values depending on routing strategy s
-    if(_strategy != ROUTING_FF_GLOBAL_SHORTEST && _strategy != ROUTING_FF_QUICKEST) {
+    if(_strategy != ROUTING_FF_GLOBAL_SHORTEST) {
         throw std::runtime_error("Wrong routing strategy for this router.");
-    }
-
-    if(_strategy == ROUTING_FF_QUICKEST) {
-        _recalculationInterval = _config->get_recalc_interval();
     }
 }
 
@@ -89,19 +85,6 @@ bool FFRouter::Init(Building * building)
     _building = building;
 
     CalculateFloorFields();
-
-    // TODO(kkratz): Disabled writing of vtk files, we have to discuss if we want to keep this feature
-    // in any case however this needs to be placed into its own serialiser
-    // if(_config->get_write_VTK_files()) {
-    //     for(auto const & [roomID, localFF] : _floorfieldByRoomID) {
-    //         localFF->WriteFF(
-    //             fmt::format(
-    //                 FMT_STRING("ffrouterRoom_{:d}_t_{:.2f}.vtk"),
-    //                 roomID,
-    //                 Pedestrian::GetGlobalTime()),
-    //             _allDoorUIDs);
-    //     }
-    // }
 
     LOG_INFO("FF Router init done.");
     return true;
@@ -362,24 +345,8 @@ void FFRouter::CalculateFloorFields()
 int FFRouter::FindExit(Pedestrian * p)
 {
     auto [ped_roomid, ped_subroomid, _] = _building->GetRoomAndSubRoomIDs(p->GetPos());
-    if(_strategy == ROUTING_FF_QUICKEST) {
-        if(_currentTime > _recalculationInterval &&
-           _floorfieldByRoomID[ped_roomid]->GetCostToDestination(p->GetExitIndex(), p->GetPos()) >
-               3.0 &&
-           p->GetExitIndex() != -1) {
-            //delay possible
-            if((int) _currentTime % 10 != p->GetID() % 10) {
-                return p->GetExitIndex(); //stay with old target
-            }
-        }
-        //new version: recalc densityspeed every x seconds
-        if((_currentTime > _timeToRecalculation) &&
-           (_currentTime > p->GetPremovementTime() + _recalculationInterval)) {
-            _needsRecalculation = true;
-        }
-    }
-    double minDist = std::numeric_limits<double>::infinity();
-    int bestDoor   = -1;
+    double minDist                      = std::numeric_limits<double>::infinity();
+    int bestDoor                        = -1;
 
     int goalID = p->GetFinalDestination();
 

@@ -6,12 +6,8 @@ The Winding Channel.
 - "Optimized Automatic Wayfinding for Pedestrian Simulations"
 
 Actually the following routers are tested: 
-- local_shortest
 - global_shortest
-- quickest
 - ff_global_shortest
-- ff_local_shortest
-- ff_quickest
 
 See also this issue: https://gitlab.version.fz-juelich.de/jupedsim/jpscore/issues/127
 """

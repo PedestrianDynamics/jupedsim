@@ -32,8 +32,6 @@
 #include "pedestrian/Pedestrian.h"
 #include "routing/ff_router/ffRouter.h"
 #include "routing/global_shortest/GlobalRouter.h"
-#include "routing/quickest/QuickestPathRouter.h"
-#include "routing/smoke_router/SmokeRouter.h"
 
 #include <Logger.h>
 #include <stdexcept>
@@ -93,13 +91,6 @@ void IniFileParser::Parse(const fs::path & iniFile)
         ParseHeader(xMainNode);
     } //else header
 
-
-    // read walkingspeed
-    std::shared_ptr<WalkingSpeed> W(new WalkingSpeed(iniFile.string()));
-    _config->SetWalkingSpeed(W);
-    // read  ToxicityAnalysis
-    std::shared_ptr<ToxicityAnalysis> T(new ToxicityAnalysis(iniFile.string(), _config->GetFps()));
-    _config->SetToxicityAnalysis(T);
 
     //pick up which model to use
     //get the wanted ped model id
@@ -750,30 +741,10 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
         std::string strategy = e->Attribute("description");
         int id               = atoi(e->Attribute("router_id"));
 
-        if((strategy == "local_shortest") &&
+        if((strategy == "global_shortest") &&
            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            Router * r = new GlobalRouter(id, ROUTING_LOCAL_SHORTEST);
-            _config->GetRoutingEngine()->AddRouter(r);
-        } else if(
-            (strategy == "global_shortest") &&
-            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
             Router * r = new GlobalRouter(id, ROUTING_GLOBAL_SHORTEST);
             _config->GetRoutingEngine()->AddRouter(r);
-        } else if(
-            (strategy == "quickest") &&
-            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            Router * r = new QuickestPathRouter(id, ROUTING_QUICKEST);
-            _config->GetRoutingEngine()->AddRouter(r);
-        } else if(
-            (strategy == "smoke") &&
-            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            Router * r = new SmokeRouter(id, ROUTING_SMOKE);
-            _config->GetRoutingEngine()->AddRouter(r);
-
-            LOG_INFO("Using SmokeRouter");
-            ///Parsing additional options
-            if(!ParseCogMapOpts(e))
-                return false;
         } else if(
             (strategy == "ff_global_shortest") &&
             (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
@@ -786,99 +757,11 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
                 LOG_WARNING("Exit Strategy Number is not 8 or 9!!!");
                 // config object holds default values, so we omit any set operations
             }
-
-            ///Parsing additional options
-            if(!ParseFfRouterOps(e, ROUTING_FF_GLOBAL_SHORTEST)) {
-                return false;
-            }
-        } else if(
-            (strategy == "ff_quickest") &&
-            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            Router * r = new FFRouter(id, ROUTING_FF_QUICKEST, hasSpecificGoals, _config);
-            _config->GetRoutingEngine()->AddRouter(r);
-            LOG_INFO("Using FF Quickest Router");
-
-            if(!ParseFfRouterOps(e, ROUTING_FF_QUICKEST)) {
-                return false;
-            }
         } else if(std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) {
             LOG_ERROR("Wrong value for routing strategy [{}].", strategy);
             return false;
         }
     }
-    return true;
-}
-
-bool IniFileParser::ParseFfRouterOps(TiXmlNode * routingNode, RoutingStrategy s)
-{
-    //set defaults
-    if(s == ROUTING_FF_QUICKEST) {
-        //parse ini-file-information
-        if(routingNode->FirstChild("parameters")) {
-            TiXmlNode * pParameters = routingNode->FirstChild("parameters");
-            if(pParameters->FirstChild(
-                   "recalc_interval")) { //@todo: ar.graf: test ini file with recalc value
-                _config->set_recalc_interval(
-                    atof(pParameters->FirstChild("recalc_interval")->FirstChild()->Value()));
-            }
-        }
-    }
-    _config->set_write_VTK_files(false);
-    if(routingNode->FirstChild("parameters")) {
-        TiXmlNode * pParametersForAllFF = routingNode->FirstChild("parameters");
-        if(pParametersForAllFF->FirstChild("write_VTK_files")) {
-            bool tmp_write_VTK = !std::strcmp(
-                pParametersForAllFF->FirstChild("write_VTK_files")->FirstChild()->Value(), "true");
-            _config->set_write_VTK_files(tmp_write_VTK);
-        }
-    }
-    return true;
-}
-
-bool IniFileParser::ParseCogMapOpts(TiXmlNode * routingNode)
-{
-    TiXmlNode * sensorNode = routingNode->FirstChild();
-    if(!sensorNode) {
-        LOG_ERROR("No sensors found.\n");
-        return false;
-    }
-
-    /// static_cast to get access to the method 'addOption' of the SmokeRouter
-    SmokeRouter * r =
-        static_cast<SmokeRouter *>(_config->GetRoutingEngine()->GetAvailableRouters().back());
-
-    std::vector<std::string> sensorVec;
-    for(TiXmlElement * e = sensorNode->FirstChildElement("sensor"); e;
-        e                = e->NextSiblingElement("sensor")) {
-        std::string sensor = e->Attribute("description");
-        //adding Smoke Sensor specific parameters is executed in the class FDSFIreMeshStorage
-        sensorVec.push_back(sensor);
-
-        LOG_INFO("Sensor <{}> added.", sensor);
-    }
-
-    r->addOption("Sensors", sensorVec);
-
-    TiXmlElement * cogMap = routingNode->FirstChildElement("cognitive_map");
-
-    if(!cogMap) {
-        LOG_ERROR("Cognitive Map not specified.\n");
-        return false;
-    }
-
-    std::vector<std::string> cogMapStatus;
-    cogMapStatus.push_back(cogMap->Attribute("status"));
-    LOG_INFO("All pedestrian starting with a(n) {} cognitive maps", cogMapStatus[0]);
-    r->addOption("CognitiveMap", cogMapStatus);
-
-    std::vector<std::string> cogMapFiles;
-    if(!cogMap->Attribute("files")) {
-        LOG_WARNING("No input files for the cognitive map specified!");
-        return true;
-    }
-    cogMapFiles.push_back(cogMap->Attribute("files"));
-    r->addOption("CognitiveMapFiles", cogMapFiles);
-
     return true;
 }
 
@@ -1037,44 +920,9 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                     _directionStrategy =
                         std::shared_ptr<DirectionStrategy>(new DirectionInRangeBottleneck());
                     break;
-                case 6:
-                    // dead end -> not supported anymore (global ff needed, but not available in 3d)
-                    LOG_ERROR("Exit Strategy 6 is not supported any longer. Please refer to "
-                              "www.jupedsim.org");
-                    LOG_WARNING(
-                        "Changing Exit-Strategy to #9 (Floorfields with targets within subroom)");
-                    pExitStrategy      = 9;
-                    _exit_strat_number = 9;
-                    _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
-                    if(!ParseFfOpts(strategyNode)) {
-                        return false;
-                    };
-                    break;
-                case 7:
-                    // dead end -> not supported anymore (global ff needed, but not available in 3d)
-                    LOG_ERROR("Exit Strategy 7 is not supported any longer. Please refer to "
-                              "www.jupedsim.org");
-                    LOG_WARNING(
-                        "Changing Exit-Strategy to #9 (Floorfields with targets within subroom)");
-                    pExitStrategy      = 9;
-                    _exit_strat_number = 9;
-                    _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
-                    if(!ParseFfOpts(strategyNode)) {
-                        return false;
-                    };
-                    break;
                 case 8:
                     _directionStrategy =
                         std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());
-                    if(!ParseFfOpts(strategyNode)) {
-                        return false;
-                    };
-                    break;
-                case 9:
-                    _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
                     if(!ParseFfOpts(strategyNode)) {
                         return false;
                     };

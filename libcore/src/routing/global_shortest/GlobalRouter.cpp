@@ -27,7 +27,7 @@
 #include "GlobalRouter.h"
 
 #include "AccessPoint.h"
-#include "DTriangulation.h"
+#include "geometry/DTriangulation.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 

@@ -46,8 +46,6 @@
 #include "pedestrian/Pedestrian.h"
 #include "routing/RoutingEngine.h"
 #include "routing/global_shortest/GlobalRouter.h"
-#include "routing/quickest/QuickestPathRouter.h"
-#include "routing/smoke_router/SmokeRouter.h"
 
 #include <chrono>
 #include <cstddef>
@@ -56,26 +54,21 @@ class Simulation
 {
 private:
     /// Max file size 16Mb
-    static const size_t _maxFileSize{1U << 24U};
     Configuration * _config;
     SimulationClock _clock;
     /// frame rate for the trajectories
-    double _fps;
-    unsigned int _seed;
+    double _fps{1.0};
+    unsigned int _seed{8091983};
     std::unique_ptr<Building> _building;
     /// Force model to use
     std::shared_ptr<OperationalModel> _operationalModel;
     /// Manage all route choices algorithms
     std::shared_ptr<RoutingEngine> _routingEngine;
     /// writing the trajectories to file
-    std::unique_ptr<OldEventManager> _old_em;
+    std::unique_ptr<OldEventManager> _old_em{};
     int _periodic;
-    int _maxSimTime;
-    /// Will be set if pedestrian sources exist
-    bool _gotSources;
-
+    int _maxSimTime{100};
     fs::path _currentTrajectoriesFile;
-    int _countTraj = 0; // count number of TXT trajectories to produce
 
     std::vector<Pedestrian *> _pedsToRemove;
     std::vector<std::unique_ptr<Pedestrian>> _agents;
@@ -167,5 +160,4 @@ public:
     void PrintStatistics(double time);
 
     int GetMaxSimTime() const;
-    void incrementCountTraj();
 };

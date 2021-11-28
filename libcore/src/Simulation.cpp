@@ -56,39 +56,18 @@
 #include <tinyxml.h>
 #include <variant>
 
-// TODO: add these variables to class simulation
-std::map<int, double> trainOutflow;
-
 Simulation::Simulation(Configuration * args, std::unique_ptr<Building> && building) :
-    _config(args), _clock(_config->Getdt()), _building(std::move(building))
+    _config(args),
+    _clock(_config->Getdt()),
+    _building(std::move(building)),
+    _currentTrajectoriesFile(_config->GetTrajectoriesFile())
 {
-    _countTraj               = 0;
-    _seed                    = 8091983;
-    _operationalModel        = nullptr;
-    _fps                     = 1;
-    _old_em                  = nullptr;
-    _gotSources              = false;
-    _fps                     = 1;
-    _old_em                  = nullptr;
-    _gotSources              = false;
-    _maxSimTime              = 100;
-    _currentTrajectoriesFile = _config->GetTrajectoriesFile();
 }
 
 void Simulation::Iterate()
 {
     _building->UpdateGrid();
     const double t_in_sec = _clock.ElapsedTime();
-
-    auto toxAnalysis = _config->GetToxicityAnalysis();
-    if(toxAnalysis) {
-        toxAnalysis->Update(t_in_sec);
-    }
-
-    auto walkingSpeed = _config->GetWalkingSpeed();
-    if(walkingSpeed) {
-        walkingSpeed->Update(t_in_sec);
-    }
 
     auto directionManager = _config->GetDirectionManager();
     if(directionManager) {
@@ -117,13 +96,6 @@ void Simulation::Iterate()
 
             _building->GetConfig()->GetDirectionManager()->GetDirectionStrategy()->Init(
                 _building.get());
-        } else { // quickest needs update even if NeedsUpdate() is false
-            auto * ffrouter =
-                dynamic_cast<FFRouter *>(_routingEngine->GetRouter(ROUTING_FF_QUICKEST));
-            if(ffrouter != nullptr && ffrouter->MustReInit()) {
-                ffrouter->ReInit();
-                ffrouter->SetRecalc(t_in_sec);
-            }
         }
 
         // here the used routers are update, when needed due to external changes
@@ -140,22 +112,11 @@ void Simulation::Iterate()
         GoalManager gm{_building.get(), this};
         gm.update(t_in_sec);
     }
-
-    //Trigger JPSfire Toxicity Analysis
-    //only executed every 3 seconds
-    //TODO(kkratz): This is not working as intendet if 3 is not a multiple of deltaT
-    if(fmod(_clock.ElapsedTime(), 3) == 0) {
-        for(auto && ped : _agents) {
-            ped->ConductToxicityAnalysis();
-        }
-    }
     _clock.Advance();
 }
 
 void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
 {
-    agent->SetWalkingSpeed(_building->GetConfig()->GetWalkingSpeed());
-    agent->SetTox(_building->GetConfig()->GetToxicityAnalysis());
     agent->SetBuilding(_building.get());
     const Point pos = agent->GetPos();
     agent->SetRouter(_routingEngine->GetRouter(agent->GetRouterID()));
@@ -642,11 +603,6 @@ void Simulation::UpdateOutputGeometryFile()
     }
 
     geoOutput.SaveFile(geoOutputPath.string());
-}
-
-void Simulation::incrementCountTraj()
-{
-    _countTraj++;
 }
 
 int Simulation::GetMaxSimTime() const

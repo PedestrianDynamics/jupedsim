@@ -28,8 +28,6 @@
 
 #include "AgentsParameters.h"
 #include "Ellipse.h"
-#include "JPSfire/B_walking_speed/WalkingSpeed.h"
-#include "JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
 #include "PedDistributor.h"
 #include "general/Macros.h"
 #include "geometry/NavLine.h"
@@ -100,10 +98,6 @@ private:
     double _patienceTime;
     /// data from the last <_recordingTime> seconds will be kept
     double _recordingTime;
-    /// store the last positions
-    std::queue<Point> _lastPositions;
-    /// store the last velocities
-    std::queue<Point> _lastVelocites;
     /// routing strategy followed
     RoutingStrategy _routingStrategy;
 
@@ -125,9 +119,6 @@ private:
 
     double _fedIn;
     double _fedHeat;
-
-    std::shared_ptr<WalkingSpeed> _walkingSpeed         = nullptr;
-    std::shared_ptr<ToxicityAnalysis> _toxicityAnalysis = nullptr;
 
     int _lastGoalID  = -1;
     bool _insideGoal = false;
@@ -381,11 +372,6 @@ public:
       */
     double GetRecordingTime() const;
 
-    /**
-      * @return the average velocity over the recording period
-      */
-    double GetMeanVelOverRecTime() const;
-
     int GetGroup() const;
     void SetGroup(int group);
 
@@ -411,12 +397,6 @@ public:
       * Set/Get the Building object
       */
     void SetBuilding(Building * building);
-
-    void SetWalkingSpeed(std::shared_ptr<WalkingSpeed> walkingSpeed);
-
-    void SetTox(std::shared_ptr<ToxicityAnalysis> toxicityAnalysis);
-
-    void ConductToxicityAnalysis();
 
     void EnterGoal();
 
@@ -462,8 +442,6 @@ public:
      * @return ID of the former room the pedestrian was in
      */
     int GetOldSubRoomID() const;
-
-    const std::queue<Point> & GetLastPositions() const;
 
     Point GetLastPosition() const;
 };

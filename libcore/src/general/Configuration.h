@@ -20,8 +20,6 @@
 //
 #pragma once
 
-#include "JPSfire/B_walking_speed/WalkingSpeed.h"
-#include "JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
 #include "Macros.h"
 #include "direction/DirectionManager.h"
 #include "general/Filesystem.h"
@@ -42,17 +40,15 @@ class Configuration
 public:
     Configuration()
     {
-        _walkingSpeed     = nullptr;
-        _ToxicityAnalysis = nullptr;
-        _routingEngine    = std::shared_ptr<RoutingEngine>(new RoutingEngine());
-        _seed             = 0;
-        _fps              = 8;
-        _precision        = 2;
-        _linkedCellSize   = 2.2;     // meter
-        _model            = nullptr; // std::shared_ptr<OperationalModel>(new OperationalModel());
-        _tMax             = 500;     // seconds
-        _dT               = 0.01;
-        _isPeriodic       = 0; // use only for Tordeux2015 with "trivial" geometries
+        _routingEngine  = std::shared_ptr<RoutingEngine>(new RoutingEngine());
+        _seed           = 0;
+        _fps            = 8;
+        _precision      = 2;
+        _linkedCellSize = 2.2;     // meter
+        _model          = nullptr; // std::shared_ptr<OperationalModel>(new OperationalModel());
+        _tMax           = 500;     // seconds
+        _dT             = 0.01;
+        _isPeriodic     = 0; // use only for Tordeux2015 with "trivial" geometries
         // ----------- GCFM repulsive force ------
         _nuPed  = 0.4;
         _nuWall = 0.2;
@@ -105,12 +101,6 @@ public:
         // for random numbers
         _rdGenerator = RandomNumberGenerator();
     }
-
-    std::shared_ptr<WalkingSpeed> GetWalkingSpeed() { return _walkingSpeed; };
-    void SetWalkingSpeed(std::shared_ptr<WalkingSpeed> & w) { _walkingSpeed = w; };
-
-    std::shared_ptr<ToxicityAnalysis> GetToxicityAnalysis() { return _ToxicityAnalysis; };
-    void SetToxicityAnalysis(std::shared_ptr<ToxicityAnalysis> & t) { _ToxicityAnalysis = t; };
 
     std::shared_ptr<RoutingEngine> GetRoutingEngine() const { return _routingEngine; };
 
@@ -377,8 +367,6 @@ public:
     std::set<OptionalOutput> GetOptionalOutputOptions() { return _optionalOutput; };
 
 private:
-    std::shared_ptr<WalkingSpeed> _walkingSpeed;
-    std::shared_ptr<ToxicityAnalysis> _ToxicityAnalysis;
     std::shared_ptr<RoutingEngine> _routingEngine;
     unsigned int _seed;
     double _fps;
@@ -437,7 +425,6 @@ private:
     fs::path _trainTypeFile;
     fs::path _trainTimeTableFile;
 
-private:
     fs::path _projectRootDir;
     fs::path _outputPath;
     bool _showStatistics;
