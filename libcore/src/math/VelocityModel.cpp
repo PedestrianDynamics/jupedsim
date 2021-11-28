@@ -36,6 +36,7 @@
 #include "pedestrian/Pedestrian.h"
 
 #include <Logger.h>
+#include <memory>
 
 double xRight = 26.0;
 double xLeft  = 0.0;
@@ -212,8 +213,7 @@ Point VelocityModel::e0(Pedestrian * ped, Room * room) const
     Point lastE0 = ped->GetLastE0();
     ped->SetLastE0(target - pos);
 
-    if((dynamic_cast<DirectionLocalFloorfield *>(_direction->GetDirectionStrategy().get())) ||
-       (dynamic_cast<DirectionSubLocalFloorfield *>(_direction->GetDirectionStrategy().get()))) {
+    if(std::dynamic_pointer_cast<DirectionLocalFloorfield>(_direction->GetDirectionStrategy())) {
         desired_direction = target - pos;
         if(desired_direction.NormSquare() < 0.25 && !ped->IsWaiting()) {
             desired_direction = lastE0;
