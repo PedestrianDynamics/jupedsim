@@ -100,27 +100,14 @@ std::vector<Pedestrian *> SimulationHelper::FindPedestriansOutside(
     std::vector<Pedestrian *> & peds)
 {
     std::vector<Pedestrian *> pedsOutside;
-    std::vector<Pedestrian *> newPeds;
-    double maxDistance = 0.5;
 
-    std::partition_copy(
+    std::copy_if(
         std::begin(peds),
         std::end(peds),
         std::back_inserter(pedsOutside),
-        std::back_inserter(newPeds),
-        [&building, maxDistance](const Pedestrian * ped) -> bool {
-            auto transPassed = SimulationHelper::FindPassedDoor(building, *ped);
-            if(!transPassed.has_value()) {
-                return false;
-            }
-
-            //TODO maxDistance should depend on vmax
-            bool passedExit     = transPassed.value()->IsExit();
-            bool passedOpenDoor = transPassed.value()->IsOpen();
-            bool doorIsClose    = transPassed.value()->DistTo(ped->GetPos()) < maxDistance;
-            return passedExit && passedOpenDoor && doorIsClose;
+        [&building](const Pedestrian * ped) -> bool {
+            return !building.IsInAnySubRoom(ped->GetPos());
         });
-    peds = std::move(newPeds);
     return pedsOutside;
 }
 

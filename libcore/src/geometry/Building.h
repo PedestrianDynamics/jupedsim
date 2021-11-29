@@ -116,6 +116,8 @@ public:
 
     std::tuple<int, int, int> GetRoomAndSubRoomIDs(const Point position) const;
 
+    bool IsInAnySubRoom(const Point pos) const;
+
     Room * GetRoom(const Point position) const;
     SubRoom * GetSubRoom(const Point position) const;
 

@@ -293,8 +293,6 @@ void Simulation::UpdateLocations()
     SimulationHelper::UpdateFlowAtDoors(*_building, pedsChangedRoom, _clock.ElapsedTime());
     SimulationHelper::UpdateFlowAtDoors(*_building, pedsOutside, _clock.ElapsedTime());
 
-    SimulationHelper::RemoveFaultyPedestrians(
-        *this, pedsNotRelocated, "Could not be properly relocated");
     SimulationHelper::RemovePedestrians(*this, _pedsToRemove);
 
     //TODO discuss simulation flow -> better move to main loop, does not belong here
