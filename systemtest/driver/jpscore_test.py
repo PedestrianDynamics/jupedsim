@@ -1,12 +1,14 @@
 import difflib
 import os
 import pathlib
+import platform
 import shutil
 import subprocess
 
 import pytest
 
 
+# class to store paths that are required for all tests
 class Environment:
     def __init__(self):
         self.jpscore_path = pathlib.Path(str(os.getenv("JPSCORE_EXECUTABLE_PATH")))
@@ -27,9 +29,6 @@ class JpsCoreDriver:
         self.result = None
         self.logfile = self.working_directory / "logfile.txt"
         self.traj_file = self.working_directory / "results/traj.txt"
-        # ... tbd
-
-        pass
 
     def run(self):
         with open(self.logfile, "w") as logfile:
@@ -49,33 +48,31 @@ class JpsCoreDriver:
         return self.traj_file
 
 
-# Creates a test directory where the test is executed and results are written
-# This test directory is temporary if tmp_path is used as parameter
-def copyAllFiles(*, src: pathlib.Path, dest: pathlib.Path):
+# Copies all files that exist in source to destination
+def copy_all_files(*, src: pathlib.Path, dest: pathlib.Path):
     if src == dest:
         return
 
-    # copy all xml files to temporary test directory
     for filename in os.listdir(src):
         pathname = src / filename
         if os.path.isfile(pathname):
             shutil.copy2(pathname, dest)
 
 
-def checkOutputFilesCreated(working_directory: pathlib.Path):
+def check_output_files_created(working_directory: pathlib.Path):
     # TODO: test if traj, ini and geo have been generated
     pass
 
 
-def getFileTextDiff(*, expected: pathlib.Path, actual: pathlib.Path):
+def get_file_text_diff(*, expected: pathlib.Path, actual: pathlib.Path):
     with open(expected) as expected_data:
         expected_text = expected_data.readlines()
-    with open(actual) as new_data:
-        new_text = new_data.readlines()
+    with open(actual) as actual_data:
+        actual_text = actual_data.readlines()
 
     diff_text = "".join(
         difflib.context_diff(
-            expected_text, new_text, fromfile=str(expected), tofile=str(actual)
+            expected_text, actual_text, fromfile=str(expected), tofile=str(actual)
         )
     )
 
@@ -91,7 +88,7 @@ def getFileTextDiff(*, expected: pathlib.Path, actual: pathlib.Path):
     ],
 )
 def test_reference_data(tmp_path, env, test_directory):
-    copyAllFiles(src=env.systemtest_path / test_directory / "input", dest=tmp_path)
+    copy_all_files(src=env.systemtest_path / test_directory / "input", dest=tmp_path)
 
     jpscore_driver = JpsCoreDriver(
         jpscore_path=env.jpscore_path, working_directory=tmp_path
@@ -100,10 +97,17 @@ def test_reference_data(tmp_path, env, test_directory):
     # checkOutputFilesCreated(test_directory)
 
     # check if there is no diff between expected and new output
-    # TODO check for different OS
-    expected = env.systemtest_path / test_directory / "expected_linux/traj.txt"
+    # use different files for different OS
+    operating_system = platform.system()
+    if operating_system == "Linux":
+        expected = env.systemtest_path / test_directory / "expected_linux/traj.txt"
+    elif operating_system == "Darwin":
+        expected = env.systemtest_path / test_directory / "expected_mac/traj.txt"
+    else:
+        raise NotImplementedError()
+
     actual = tmp_path / "results/traj.txt"
-    diff = getFileTextDiff(
+    diff = get_file_text_diff(
         expected=expected,
         actual=actual,
     )
