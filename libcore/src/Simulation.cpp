@@ -286,8 +286,7 @@ void Simulation::UpdateLocations()
     auto pedsOutside = SimulationHelper::FindPedestriansOutside(*_building, _agents);
     _pedsToRemove.insert(_pedsToRemove.end(), pedsOutside.begin(), pedsOutside.end());
 
-    SimulationHelper::UpdateFlowAtDoors(*_building, pedsChangedRoom, _clock.ElapsedTime());
-    SimulationHelper::UpdateFlowAtDoors(*_building, pedsOutside, _clock.ElapsedTime());
+    SimulationHelper::UpdateFlowAtDoors(*_building, _agents, _clock.ElapsedTime());
 
     SimulationHelper::RemovePedestrians(*this, _pedsToRemove);
 

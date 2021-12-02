@@ -20,6 +20,7 @@
 #pragma once
 
 #include "geometry/Building.h"
+#include "geometry/Transition.h"
 #include "pedestrian/Pedestrian.h"
 
 #include <memory>
@@ -78,7 +79,7 @@ std::tuple<std::vector<Pedestrian *>, std::vector<Pedestrian *>> UpdatePedestria
  */
 void UpdateFlowAtDoors(
     Building & building,
-    const std::vector<Pedestrian *> & pedsChangedRoom,
+    const std::vector<std::unique_ptr<Pedestrian>> & peds,
     double time);
 
 /**
@@ -99,11 +100,12 @@ bool UpdateTrainFlowRegulation(Building & building, double time);
  * Finds the transition that was passed by a pedestrian \p ped in the last time step.
  *
  * @pre ped._lastPosition is set, hence at least one time step was triggered before
- * @param building geometry used in the simulation
  * @param ped pedestrian to find the transition
  * @return transition passed by \p in the last time step, nullopt if no transition could be found
  */
-std::optional<Transition *> FindPassedDoor(const Building & building, const Pedestrian & ped);
+std::optional<Transition *>
+FindPassedDoor(const Pedestrian & ped, const std::vector<Transition *> & transitions);
+
 
 /**
  * Removes the pedestrians \p pedsFaulty from the simulation, e.g., the building. Additionally
