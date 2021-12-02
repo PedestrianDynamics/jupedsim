@@ -27,25 +27,9 @@
 #include <optional>
 #include <vector>
 
-enum class PedRelocation { SUCCESSFUL, NOT_NEEDED, FAILED };
 
 namespace SimulationHelper
 {
-/**
- * Checks whether the pedestrian \p ped is still in the assigned room. If not check if \p ped is
- * in an neighbouring room/subroom and update the information. If \p ped has moved to a
- * non-neighbouring room or to the outside, the information will be set to roomID = -1, and
- * subroomID = -1.
- * @param building geometry used in the simulation
- * @param ped Pedestrian, whose position is checked and information may be updated
- * @return PedRelocation::SUCCESSFUL if \p ped moved to a neighbouring room and the information was
- * updated accordingly, PedRelocation::NOT_NEEDED if the \p ped has not changed the room or subroom,
- * PEDRELOCATION::FAILED if \p moved to the outside or any room that is no neighbour of the current
- * one.
- */
-PedRelocation UpdatePedestrianRoomInformation(const Building & building, Pedestrian & ped);
-
-
 /**
  * Find pedestrians who have moved to outside of the geometry, and are no longer in the simulation
  * scope.
@@ -60,16 +44,6 @@ std::vector<Pedestrian *> FindPedestriansOutside(
     const Building & building,
     const std::vector<std::unique_ptr<Pedestrian>> & peds);
 
-/**
- * Updates the locations (room information) of the pedestrians.
- * @param building geometry used in the simulation
- * @param peds list of pedestrians
- * @return [list of pedestrian who have changed their room,
- * list of pedestrians who moved out of their assigned room but to none of the neighboring rooms]
- */
-std::tuple<std::vector<Pedestrian *>, std::vector<Pedestrian *>> UpdatePedestriansLocations(
-    const Building & building,
-    const std::vector<std::unique_ptr<Pedestrian>> & peds);
 
 /**
  * Increments the door usage of the doors by the peds in \p pedsChangedRoom.

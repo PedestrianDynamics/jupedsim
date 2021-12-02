@@ -339,16 +339,6 @@ int Pedestrian::GetSubRoomID() const
     return _subRoomID;
 }
 
-int Pedestrian::GetOldRoomID() const
-{
-    return _oldRoomID;
-}
-
-int Pedestrian::GetOldSubRoomID() const
-{
-    return _oldSubRoomID;
-}
-
 double Pedestrian::GetMass() const
 {
     return _mass;

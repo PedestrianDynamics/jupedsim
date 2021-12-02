@@ -280,9 +280,6 @@ bool Simulation::InitArgs()
 
 void Simulation::UpdateLocations()
 {
-    auto [pedsChangedRoom, pedsNotRelocated] =
-        SimulationHelper::UpdatePedestriansLocations(*_building, _agents);
-
     auto pedsOutside = SimulationHelper::FindPedestriansOutside(*_building, _agents);
     _pedsToRemove.insert(_pedsToRemove.end(), pedsOutside.begin(), pedsOutside.end());
 

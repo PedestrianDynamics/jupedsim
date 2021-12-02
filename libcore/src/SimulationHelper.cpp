@@ -28,56 +28,6 @@
 #include <iterator>
 #include <memory>
 
-PedRelocation
-SimulationHelper::UpdatePedestrianRoomInformation(const Building & building, Pedestrian & ped)
-{
-    // No relocation needed, ped is in its assigned room/subroom
-    // TODO add check if room/subroom really exist
-    auto oldSubRoom = building.GetRoom(ped.GetRoomID())->GetSubRoom(ped.GetSubRoomID());
-    if(oldSubRoom->IsInSubRoom(&ped)) {
-        return PedRelocation::NOT_NEEDED;
-    }
-
-    // relocation needed, look if pedestrian is in one of the neighboring rooms/subrooms
-    // get all connected directly connected rooms/subrooms
-    // TODO check for closed doors?
-    auto subroomsConnected = oldSubRoom->GetNeighbors();
-    auto currentSubRoom    = std::find_if(
-        std::begin(subroomsConnected),
-        std::end(subroomsConnected),
-        [&ped](auto const & subroom) -> bool { return subroom->IsInSubRoom(ped.GetPos()); });
-
-    // pedestrian is in one of the neighboring rooms/subrooms
-    if(currentSubRoom != subroomsConnected.end()) {
-        ped.UpdateRoom((*currentSubRoom)->GetRoomID(), (*currentSubRoom)->GetSubRoomID());
-        return PedRelocation::SUCCESSFUL;
-    } else {
-        ped.UpdateRoom(-1, -1);
-        return PedRelocation::FAILED;
-    }
-}
-
-std::tuple<std::vector<Pedestrian *>, std::vector<Pedestrian *>>
-SimulationHelper::UpdatePedestriansLocations(
-    const Building & building,
-    const std::vector<std::unique_ptr<Pedestrian>> & peds)
-{
-    std::vector<Pedestrian *> pedsNotRelocated;
-    std::vector<Pedestrian *> pedsChangedRoom;
-
-    // Check for peds, where relocation failed
-    for(const auto & ped : peds) {
-        auto relocated = UpdatePedestrianRoomInformation(building, *ped);
-        if(relocated == PedRelocation::SUCCESSFUL && ped->ChangedRoom()) {
-            pedsChangedRoom.push_back(ped.get());
-        } else if(relocated == PedRelocation::FAILED) {
-            pedsNotRelocated.push_back(ped.get());
-        }
-    }
-
-    return {pedsChangedRoom, pedsNotRelocated};
-}
-
 std::vector<Pedestrian *> SimulationHelper::FindPedestriansOutside(
     const Building & building,
     const std::vector<std::unique_ptr<Pedestrian>> & peds)

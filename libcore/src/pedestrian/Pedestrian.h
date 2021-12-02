@@ -430,18 +430,6 @@ public:
      */
     bool ChangedRoom() const;
 
-    /**
-     * Returns the ID of the room before the last call of 'UpdateRoom(int, int)'
-     * @return ID of the former room the pedestrian was in
-     */
-    int GetOldRoomID() const;
-
-    /**
-     * Returns the ID of the subroom before the last call of 'UpdateRoom(int, int)'
-     * @return ID of the former room the pedestrian was in
-     */
-    int GetOldSubRoomID() const;
-
     Point GetLastPosition() const;
 };
 
