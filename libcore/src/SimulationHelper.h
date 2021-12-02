@@ -22,6 +22,7 @@
 #include "geometry/Building.h"
 #include "pedestrian/Pedestrian.h"
 
+#include <memory>
 #include <optional>
 #include <vector>
 
@@ -51,12 +52,12 @@ PedRelocation UpdatePedestrianRoomInformation(const Building & building, Pedestr
  * SimulationHelper::UpdatePedestriansLocations. Meaning that the pedestrian could not be located to one of
  * the neighboring rooms.
  * @param building geometry used in the simulation
- * @param peds[in,out] in: list of all pedestrians that could not be relocated, out: list of
- *  pedestrians which moved in an unusual manner
+ * @param peds list of pedestrians to check
  * @return list of pedestrians who have moved to outside of the geometry
  */
-std::vector<Pedestrian *>
-FindPedestriansOutside(const Building & building, std::vector<Pedestrian *> & peds);
+std::vector<Pedestrian *> FindPedestriansOutside(
+    const Building & building,
+    const std::vector<std::unique_ptr<Pedestrian>> & peds);
 
 /**
  * Updates the locations (room information) of the pedestrians.

@@ -26,6 +26,7 @@
 #include <Logger.h>
 #include <algorithm>
 #include <iterator>
+#include <memory>
 
 PedRelocation
 SimulationHelper::UpdatePedestrianRoomInformation(const Building & building, Pedestrian & ped)
@@ -79,17 +80,14 @@ SimulationHelper::UpdatePedestriansLocations(
 
 std::vector<Pedestrian *> SimulationHelper::FindPedestriansOutside(
     const Building & building,
-    std::vector<Pedestrian *> & peds)
+    const std::vector<std::unique_ptr<Pedestrian>> & peds)
 {
     std::vector<Pedestrian *> pedsOutside;
-
-    std::copy_if(
-        std::begin(peds),
-        std::end(peds),
-        std::back_inserter(pedsOutside),
-        [&building](const Pedestrian * ped) -> bool {
-            return !building.IsInAnySubRoom(ped->GetPos());
-        });
+    for(const auto & ped : peds) {
+        if(!building.IsInAnySubRoom(ped->GetPos())) {
+            pedsOutside.push_back(ped.get());
+        }
+    }
     return pedsOutside;
 }
 
