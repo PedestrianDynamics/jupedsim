@@ -283,10 +283,6 @@ void Simulation::UpdateLocations()
     auto [pedsChangedRoom, pedsNotRelocated] =
         SimulationHelper::UpdatePedestriansLocations(*_building, _agents);
 
-    // not needed at the moment, as we do not have inside final goals yet
-    auto pedsAtFinalGoal = SimulationHelper::FindPedestriansReachedFinalGoal(*_building, _agents);
-    _pedsToRemove.insert(_pedsToRemove.end(), pedsAtFinalGoal.begin(), pedsAtFinalGoal.end());
-
     auto pedsOutside = SimulationHelper::FindPedestriansOutside(*_building, pedsNotRelocated);
     _pedsToRemove.insert(_pedsToRemove.end(), pedsOutside.begin(), pedsOutside.end());
 

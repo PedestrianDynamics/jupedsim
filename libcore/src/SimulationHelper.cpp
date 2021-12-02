@@ -56,24 +56,6 @@ SimulationHelper::UpdatePedestrianRoomInformation(const Building & building, Ped
     }
 }
 
-std::vector<Pedestrian *> SimulationHelper::FindPedestriansReachedFinalGoal(
-    const Building & building,
-    const std::vector<std::unique_ptr<Pedestrian>> & peds)
-{
-    std::vector<Pedestrian *> pedsAtFinalGoal;
-    const auto & goals = building.GetAllGoals();
-
-    for(const auto & ped : peds) {
-        if(ped->GetFinalDestination() != FINAL_DEST_OUT &&
-           goals.at(ped->GetFinalDestination())->Contains(ped->GetPos()) &&
-           goals.at(ped->GetFinalDestination())->GetIsFinalGoal()) {
-            pedsAtFinalGoal.emplace_back(ped.get());
-        }
-    }
-
-    return pedsAtFinalGoal;
-}
-
 std::tuple<std::vector<Pedestrian *>, std::vector<Pedestrian *>>
 SimulationHelper::UpdatePedestriansLocations(
     const Building & building,

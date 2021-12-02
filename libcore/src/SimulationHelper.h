@@ -43,17 +43,6 @@ namespace SimulationHelper
  */
 PedRelocation UpdatePedestrianRoomInformation(const Building & building, Pedestrian & ped);
 
-/**
- * Checks for pedestrians who have reached their final goal
- * @param building geometry used in the simulation
- * @param peds list of pedestrians to check
- * @return All pedestrians who have reached their final goal in the geometry
- * @deprecated
- * TODO discuss if needed, as we do not allow inside goals at the moment
- */
-std::vector<Pedestrian *> FindPedestriansReachedFinalGoal(
-    const Building & building,
-    const std::vector<std::unique_ptr<Pedestrian>> & peds);
 
 /**
  * Find pedestrians who have moved to outside of the geometry, and are no longer in the simulation
