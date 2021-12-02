@@ -11,9 +11,12 @@ import pytest
 # class to store paths that are required for all tests
 class Environment:
     def __init__(self):
-        self.jpscore_path = pathlib.Path(str(os.getenv("JPSCORE_EXECUTABLE_PATH")))
-        self.systemtest_path = (
-            pathlib.Path(str(os.getenv("JPSCORE_SOURCE_PATH"))) / "systemtest"
+        def cannonicalize(p:pathlib.Path):
+            return p.expanduser().absolute()
+
+        self.jpscore_path = cannonicalize(pathlib.Path(str(os.getenv("JPSCORE_EXECUTABLE_PATH"))))
+        self.systemtest_path = cannonicalize(
+            pathlib.Path((str(os.getenv("JPSCORE_SOURCE_PATH")))) / "systemtest"
         )
 
 
