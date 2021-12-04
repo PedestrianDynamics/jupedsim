@@ -15,6 +15,7 @@ target_link_libraries(jpscore
     Threads::Threads
     spdlog::spdlog
     fmt::fmt
+    core2
 )
 set_property(TARGET jpscore PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
 set_property(TARGET jpscore PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)

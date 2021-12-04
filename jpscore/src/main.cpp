@@ -37,6 +37,7 @@
 #include "general/Compiler.hpp"
 #include "general/Configuration.hpp"
 #include "geometry/Building.hpp"
+#include "libcore2.h"
 #include "pedestrian/AgentsSourcesManager.hpp"
 
 #include <Logger.hpp>
@@ -69,6 +70,7 @@ int main(int argc, char ** argv)
         LOG_INFO("Commit date {}", GIT_COMMIT_DATE);
         LOG_INFO("Build from branch {}", GIT_BRANCH);
         LOG_INFO("Build with {}({})", compiler_id, compiler_version);
+        LOG_INFO("{}", hello_rust());
 
         auto config         = ParseIniFile(a.IniFilePath());
         auto building       = std::make_unique<Building>(&config, nullptr);

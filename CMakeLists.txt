@@ -256,6 +256,7 @@ endif()
 add_subdirectory(jpscore)
 add_subdirectory(jpsvis)
 add_subdirectory(libcore)
+add_subdirectory(libcore2)
 add_subdirectory(libshared)
 
 ################################################################################
