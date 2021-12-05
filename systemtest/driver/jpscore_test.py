@@ -4,20 +4,41 @@ import pathlib
 import platform
 import shutil
 import subprocess
+from enum import Enum
 
 import pytest
 
 
-# class to store paths that are required for all tests
 class Environment:
+    """
+    Class to store paths and settings that are required for all tests.
+    """
+
+    class OS(Enum):
+        LINUX = 1
+        MAC = 2
+        WINDOWS = 3
+
     def __init__(self):
-        def cannonicalize(p:pathlib.Path):
+        def canonicalize(p: pathlib.Path):
             return p.expanduser().absolute()
 
-        self.jpscore_path = cannonicalize(pathlib.Path(str(os.getenv("JPSCORE_EXECUTABLE_PATH"))))
-        self.systemtest_path = cannonicalize(
+        self.jpscore_path = canonicalize(
+            pathlib.Path(str(os.getenv("JPSCORE_EXECUTABLE_PATH")))
+        )
+        self.systemtest_path = canonicalize(
             pathlib.Path((str(os.getenv("JPSCORE_SOURCE_PATH")))) / "systemtest"
         )
+
+        tmp_system = platform.system()
+        if tmp_system == "Linux":
+            self.operating_system = Environment.OS(1)
+        elif tmp_system == "Darwin":
+            self.operating_system = Environment.OS(2)
+        elif tmp_system == "Windows":
+            self.operating_system == Environment.OS(3)
+        else:
+            raise OSError("OS not supported")
 
 
 @pytest.fixture
@@ -26,6 +47,10 @@ def env():
 
 
 class JpsCoreDriver:
+    """
+    Class to store parameters regarding the execution of jpscore.
+    """
+
     def __init__(self, *, jpscore_path: pathlib.Path, working_directory: pathlib.Path):
         self.working_directory = working_directory
         self.jpscore_path = jpscore_path
@@ -51,8 +76,14 @@ class JpsCoreDriver:
         return self.traj_file
 
 
-# Copies all files that exist in source to destination
 def copy_all_files(*, src: pathlib.Path, dest: pathlib.Path):
+    """
+    Copies all files that exist in source directory to destination directory.
+    No directories are copied.
+
+    :param src: source directory
+    :param dest: destination directory
+    """
     if src == dest:
         return
 
@@ -62,12 +93,14 @@ def copy_all_files(*, src: pathlib.Path, dest: pathlib.Path):
             shutil.copy2(pathname, dest)
 
 
-def check_output_files_created(working_directory: pathlib.Path):
-    # TODO: test if traj, ini and geo have been generated
-    pass
-
-
 def get_file_text_diff(*, expected: pathlib.Path, actual: pathlib.Path):
+    """
+    Compares the actual with an expected text file and returns their difference.
+
+    :param expected: text file to expect
+    :param actual: actual text file
+    :return: string with differing text
+    """
     with open(expected) as expected_data:
         expected_text = expected_data.readlines()
     with open(actual) as actual_data:
@@ -82,7 +115,9 @@ def get_file_text_diff(*, expected: pathlib.Path, actual: pathlib.Path):
     return diff_text
 
 
-# Reference tests
+@pytest.mark.skipif(
+    platform.system() == "Windows", reason="No reference data for Windows available"
+)
 @pytest.mark.parametrize(
     "test_directory",
     [
@@ -90,26 +125,34 @@ def get_file_text_diff(*, expected: pathlib.Path, actual: pathlib.Path):
         (pathlib.Path("reference_tests/RT02_corridor_velocity_global-shortest/")),
     ],
 )
-def test_reference_data(tmp_path, env, test_directory):
+def test_reference_data(tmp_path, env, test_directory: pathlib.Path):
+    """
+    This tests ensures that the output of jpscore has not changed.
+
+    For this purpose reference trajectory files for Linux/Mac are compared with the actual genereated trajectory files.
+    The tests passes if there is no difference in the expected and actual trajectory files.
+    The test is skipped for Windows.
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    :param test_directory: directory of the test
+    """
+
     copy_all_files(src=env.systemtest_path / test_directory / "input", dest=tmp_path)
 
     jpscore_driver = JpsCoreDriver(
         jpscore_path=env.jpscore_path, working_directory=tmp_path
     )
     jpscore_driver.run()
-    # checkOutputFilesCreated(test_directory)
 
     # check if there is no diff between expected and new output
     # use different files for different OS
-    operating_system = platform.system()
-    if operating_system == "Linux":
+    if env.operating_system == Environment.OS.LINUX:
         expected = env.systemtest_path / test_directory / "expected_linux/traj.txt"
-    elif operating_system == "Darwin":
+    elif env.operating_system == Environment.OS.MAC:
         expected = env.systemtest_path / test_directory / "expected_mac/traj.txt"
-    else:
-        raise NotImplementedError()
 
-    actual = tmp_path / "results/traj.txt"
+    actual = jpscore_driver.traj_file()
     diff = get_file_text_diff(
         expected=expected,
         actual=actual,
