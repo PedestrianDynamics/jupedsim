@@ -8,6 +8,8 @@ from enum import Enum
 
 import pytest
 
+import utils
+
 
 class Environment:
     """
@@ -76,6 +78,27 @@ class JpsCoreDriver:
         return self.traj_file
 
 
+def setup_jpscore_driver(
+    *, env: Environment, working_directory: pathlib.Path, test_directory: pathlib.Path
+):
+    """
+    Sets up jpscore driver by preparing the working directory and creating a driver.
+
+    :param env: global environment object
+    :param working_directory: working directory where jpscore should be executed
+    :param test_directory: directory of the test
+    :return: JpsCoreDriver object
+    """
+    copy_all_files(
+        src=env.systemtest_path / test_directory / "input", dest=working_directory
+    )
+
+    jpscore_driver = JpsCoreDriver(
+        jpscore_path=env.jpscore_path, working_directory=working_directory
+    )
+    return jpscore_driver
+
+
 def copy_all_files(*, src: pathlib.Path, dest: pathlib.Path):
     """
     Copies all files that exist in source directory to destination directory.
@@ -127,7 +150,7 @@ def get_file_text_diff(*, expected: pathlib.Path, actual: pathlib.Path):
 )
 def test_reference_data(tmp_path, env, test_directory: pathlib.Path):
     """
-    This tests ensures that the output of jpscore has not changed.
+    Ensures that the output of jpscore has not changed.
 
     For this purpose reference trajectory files for Linux/Mac are compared with the actual genereated trajectory files.
     The tests passes if there is no difference in the expected and actual trajectory files.
@@ -138,10 +161,8 @@ def test_reference_data(tmp_path, env, test_directory: pathlib.Path):
     :param test_directory: directory of the test
     """
 
-    copy_all_files(src=env.systemtest_path / test_directory / "input", dest=tmp_path)
-
-    jpscore_driver = JpsCoreDriver(
-        jpscore_path=env.jpscore_path, working_directory=tmp_path
+    jpscore_driver = setup_jpscore_driver(
+        env=env, working_directory=tmp_path, test_directory=test_directory
     )
     jpscore_driver.run()
 
@@ -152,10 +173,43 @@ def test_reference_data(tmp_path, env, test_directory: pathlib.Path):
     elif env.operating_system == Environment.OS.MAC:
         expected = env.systemtest_path / test_directory / "expected_mac/traj.txt"
 
-    actual = jpscore_driver.traj_file()
+    actual = jpscore_driver.traj_file
     diff = get_file_text_diff(
         expected=expected,
         actual=actual,
     )
     # diff must be empty
     assert diff == ""
+
+
+@pytest.mark.parametrize(
+    "test_directory, expected_evac_time, tolerance",
+    [(pathlib.Path("juelich_tests/evacuation_time/single_ped_corridor"), 10.0, 0.5)],
+)
+def test_evac_time_single_ped(
+    tmp_path,
+    env,
+    test_directory: pathlib.Path,
+    expected_evac_time: float,
+    tolerance: float,
+):
+    """
+    Ensures that the evacuation for a single pedestrian in free flow lies withing an accepted range.
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    :param test_directory: directory of the test
+    :param expected_evac_time: expected evacuation time
+    :param tolerance: tolerated difference to actual evacuation time
+    """
+    jpscore_driver = setup_jpscore_driver(
+        env=env, working_directory=tmp_path, test_directory=test_directory
+    )
+    jpscore_driver.run()
+
+    fps, N, traj_data = utils.read_traj_file(jpscore_driver.traj_file)
+    actual_evac_time = (max(traj_data[:, 1]) - min(traj_data[:, 1])) / fps
+    diff_evac_times = abs(actual_evac_time - expected_evac_time)
+
+    # difference in evac times must be in tolerance range
+    assert diff_evac_times < tolerance
