@@ -434,12 +434,6 @@ const fs::path & Building::GetProjectRootDir() const
     return _configuration->GetProjectRootDir();
 }
 
-const fs::path & Building::GetGeometryFilename() const
-{
-    return _configuration->GetGeometryFile();
-}
-
-
 Room * Building::GetRoom(std::string caption) const
 {
     for(const auto & it : _rooms) {

@@ -241,8 +241,6 @@ public:
 
     const fs::path & GetProjectFilename() const;
 
-    const fs::path & GetGeometryFilename() const;
-
     /**
       * Write the geometry to the given file.
       * That will be useful in the geometry editor.
