@@ -293,13 +293,6 @@ void Building::AddSurroundingRoom()
 bool Building::InitGeometry()
 {
     Logging::Info("Init Geometry");
-    try {
-        geometry::helper::CorrectInputGeometry(*this);
-    } catch(const std::exception & e) {
-        LOG_ERROR("Exception in Building::correct: {}", e.what());
-        return false;
-    }
-
     for(auto && itr_room : _rooms) {
         for(auto && itr_subroom : itr_room.second->GetAllSubRooms()) {
             //create a close polyline out of everything
