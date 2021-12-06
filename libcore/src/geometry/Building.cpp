@@ -434,16 +434,6 @@ const fs::path & Building::GetProjectRootDir() const
     return _configuration->GetProjectRootDir();
 }
 
-Room * Building::GetRoom(std::string caption) const
-{
-    for(const auto & it : _rooms) {
-        if(it.second->GetCaption() == caption)
-            return it.second.get();
-    }
-    LOG_ERROR("Room not found with caption {}", caption);
-    exit(EXIT_FAILURE);
-}
-
 bool Building::AddCrossing(Crossing * line)
 {
     int IDRoom     = line->GetRoom1()->GetID();
@@ -530,19 +520,6 @@ const std::map<int, Hline *> & Building::GetAllHlines() const
 const std::map<int, Goal *> & Building::GetAllGoals() const
 {
     return _goals;
-}
-
-Transition * Building::GetTransition(std::string caption) const
-{
-    //eventually
-    std::map<int, Transition *>::const_iterator itr;
-    for(itr = _transitions.begin(); itr != _transitions.end(); ++itr) {
-        if(itr->second->GetCaption() == caption)
-            return itr->second;
-    }
-
-    LOG_WARNING("No Transition with Caption: {}", caption);
-    exit(EXIT_FAILURE);
 }
 
 Transition * Building::GetTransition(int ID) const //ar.graf: added const 2015-12-10

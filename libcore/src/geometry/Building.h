@@ -112,16 +112,12 @@ public:
 
     Room * GetRoom(int index) const;
 
-    Room * GetRoom(std::string caption) const;
-
     std::tuple<Room *, SubRoom *> GetRoomAndSubRoom(const Point position) const;
 
     std::tuple<int, int, int> GetRoomAndSubRoomIDs(const Point position) const;
 
     Room * GetRoom(const Point position) const;
     SubRoom * GetSubRoom(const Point position) const;
-
-    Transition * GetTransition(std::string caption) const;
 
     Transition * GetTransition(int id) const;
 
