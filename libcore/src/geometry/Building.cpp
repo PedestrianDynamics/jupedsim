@@ -137,16 +137,6 @@ Configuration * Building::GetConfig() const
     return _configuration;
 }
 
-void Building::SetCaption(const std::string & s)
-{
-    _caption = s;
-}
-
-std::string Building::GetCaption() const
-{
-    return _caption;
-}
-
 RoutingEngine * Building::GetRoutingEngine() const
 {
     return _configuration->GetRoutingEngine().get();

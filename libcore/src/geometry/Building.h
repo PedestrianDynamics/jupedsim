@@ -101,11 +101,7 @@ public:
 
     Configuration * GetConfig() const;
 
-    void SetCaption(const std::string & s);
-
     void GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const;
-
-    std::string GetCaption() const;
 
     RoutingEngine * GetRoutingEngine() const;
     const std::map<int, std::shared_ptr<Room>> & GetAllRooms() const;
