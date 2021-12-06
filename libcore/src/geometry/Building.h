@@ -242,14 +242,6 @@ public:
     const fs::path & GetProjectFilename() const;
 
     /**
-      * Write the geometry to the given file.
-      * That will be useful in the geometry editor.
-      * @param filename the relative location of the file
-      * @return true if everything went fine.
-      */
-    bool SaveGeometry(const fs::path & filename) const;
-
-    /**
       * Check the scenario for possible errors and
       * output user specific informations.
       */
