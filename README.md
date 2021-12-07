@@ -4,68 +4,97 @@
 
 ## Introduction
 
-This repository consists of two modules for simulating and anlyzing pedestrian dynamics. These are:
+This repository contains software for simulating pedestrian dynamics.
 
-1. `jpscore`: the core module computing the trajectories.
-2. `jpsreport`: a tool for analyzing the trajectories and measuring the density, flow and velocity.
+Analysis of results can be done with [jpsreport](https://github.com/JuPedSim/jpsreport)
+Visualization of results can be done with [jpsvis](https://github.com/JuPedSim/jpsvis)
 
 ## Building from source
 
-### Linux / macOS
-The build is tested on Ubuntu 18.04 with gcc-9.1 / clang-8 and on macOS Mojave
-10.14.5 with dependencies from Homebrew and Apple LLVM 10.
+It should be possible to build jpscore on all major platforms however, we only
+test a few:
 
-#### Requirements
-On Linux you will need a C++17 capable compiler and a standard library that
-supports `<filesystem>`. On macOS you will need the system compiler with C++17
-and filesystem from boost.
+Right now, we ensure a working Build for:
 
-Required:
-* boost (>= 1.65)
-* libomp (if you want to use OpenMP with Apple LLVm or Clang on Linux)
-* spdlog (libspdlog-dev on Ubuntu, spdlog on brew)
-* fmtlib (libfmt-dev on Ubuntu, fmt on brew)
-* cmake (>= 3.1)
+* Windows 10
+* MacOS Montery
+* MacOS BigSur
+* Ubuntu 21.10
 
-Recommended:
-* ninja-build
+### Linux / MacOS
 
-#### How to build
-Once you have installed all dependencies and cloned the repository continue
-with a ninja based build:
+We suggest to use the following layout for developing on jpscore:
+
+```txt
+.
+├── jpscore <- code repository
+├── jpscore-build <- build folder
+└── jpscore-deps <- install location of library dependencies
+
+```
+
+#### System Requirements
+
+* C++17 capable compiler
+* clang-format-13
+* wget
+
+Once the above-listed requirements are installed, build the library dependencies.
+
+#### Library Dependencies
+
+##### Linux MacOS
+
+On Linux and MacOS all library dependencies except boost are built from source,
+they are either part of the source tree and do not need any special attention or
+they are built with `scripts/setup-deps.sh`. To compile dependencies invoke the
+script from any path where you have write access. The script will create a
+folder called `deps`, download and compile required dependencies. The resulting
+`deps` folder should contain an install tree of all required library
+dependencies. Move / rename this folder to a convenient location, e.g. to
+`jpscore-deps` as outlined in the beginning.
+
+Additionally, you will need to install boost >= 1.74 development packages for
+your distribution.
+
+##### Windows
+
+On Windows dependencies are installed with `vcpkg`, get it from <vcpkg.io>.
+`vcpkg` will automatically download and install the dependencies listen in
+`vcpkg.json` if used with cmake.
+
+During the CMake invocation listed in the next section, add this to your invocation:
+
 ```bash
-mkdir build
-cd build
+-DCMAKE_TOOLCHAIN_FILE=<PATH-TO-VCPKG-INSTALLATION>/scripts/buildsystems/vcpkg.cmake
+```
+
+#### How to generate build files with CMake
+
+Now that you have all library dependencies, you need to generate build files
+with CMake.
+
+Note: We do not recommend in-tree builds.
+
+```bash
+mkdir jpscore-build
+cd jpscore-build
 cmake -GNinja -DCMAKE_BUILD_TYPE=Debug <path-to-cmakelists>
 ninja
 ```
 
 Alternatively you can generate a make based build with:
+
 ```bash
-mkdir build
-cd build
+mkdir jpscore-build
+cd jpscore-build
 cmake -DCMAKE_BUILD_TYPE=Debug <path-to-cmakelists>
 make -j$(nproc)
 ```
 
-The following configuration flags are available:
+### Build Options
 
-##### BUILD_DOC defaults to OFF
-Build internal Doxygen based documentation
-
-##### BUILD_CPPUNIT_TEST defaults to OFF
-Build unit tests and add them to ctest
-
-##### BUILD_TESTING defaults to OFF
-Build full system tests and add them to ctest
-
-##### BUILD_WITH_ASAN defaults to OFF (Does not support Windows)
-Build an additional target `jpscore_asan` with address and undefined behavior
-sanitizer enabled. Note there is an approx. 2x slowdown when using
-`jpscore_asan` over `jpscore`
-
-##### CODE_COVERAGE defaults to OFF (Does not support Windows)
-Build unittests with code coverage.
+For a list of build options, please see [CMakeLists.txt] directly.
 
 ## Quick start
 
@@ -73,15 +102,74 @@ See [Getting started with jupedsim](http://www.jupedsim.org/jpscore_introduction
 
 ## Showcase and tutorials
 
-To highlight some features of JuPedSim we have uploaded some videos on our [YouTube channel](https://www.youtube.com/channel/UCKS8w8CUClHEeN4K1SUSMBA).
-
+To highlight some features of JuPedSim, we have uploaded some videos on our
+[YouTube channel](https://www.youtube.com/channel/UCKS8w8CUClHEeN4K1SUSMBA).
 
 ## Support
 
-We are heavily working on this project which means that:
+If you got a question or a problem and need support from our team feel free to
+contact us. You can do this via [email](mailto:dev@jupedsim.org).
 
-- It's not done. We will be releasing new enhancements, bug fixes etc.
-- We love your support. If you find any errors or have suggestions, please write an issue in our [issue-tracker](https://github.com/JuPedSim/jpscore/issues). We will try hard to fix it.
-- Be patient. We are scientists and PhD/master students. Therefore, we primarily care about our research and theses.
+Please do not use the issue tracker for personal support requests.
 
-Enjoy!
+### Reporting bugs and requesting features
+
+If you find a bug in the source code, a mistake in the documentation or think
+there is functionality missing you can help us by submitting an issue.
+
+If you submit a bug please make sure to include:
+
+* What version / commit id you are using
+* What did you expect the software to do
+* What did the software do instead
+* A description of how to reproduce the issue if possible
+* Log output
+
+If you submit a feature request please help us by including:
+
+* Use a clear and descriptive title for the issue to identify the suggestion.
+* Provide a step-by-step description of the suggested enhancement in as many
+  details as possible.
+* Provide specific examples to demonstrate the steps.
+* Describe the current behavior and explain which behavior you expected to see
+  instead and why.
+
+## Contributing to JuPedSim
+
+This project is mainly developed by a small group of researchers and students
+from [Jülich Research Center](http://www.fz-juelich.de/en) and
+[BUW](http://www.uni-wuppertal.de/). However, you are kindly invited not only to
+use JuPedSim but also contributing to our open-source-project. It does not
+matter if you are a researcher, student or just interested in pedestrian
+dynamics. There are only a few rules and advices we want to give to you:
+
+### Workflow
+
+We use a fork based workflow for all development. If you want to contribute any
+modification we kindly ask you to fork this repository, create a branch with
+your changes on your fork and then open a Pull Request via GitHub.
+
+As part of our CI integration we run formatting checks so make sure your code
+is formatted with clang-format!
+
+If you want to support us by writing the enhancement yourself, consider what
+kind of change it is:
+
+* **Major changes** that you wish to contribute to the project should be
+  discussed first on our **dev mailing list** so that we can better coordinate
+  our efforts, prevent duplication of work, and help you to craft the change so
+  that it is successfully accepted into the project.
+* **Small changes** can be crafted and submitted to our repository as a **pull
+  or merge request**.
+
+Nevertheless, open an issue for documentation purposes with the following template:
+
+### Code formatting
+
+This has become very easy:
+
+* All code needs to be formatted with clang-format
+  (A build target for checking / formatting is available: `check-format` /
+  `reformat`)
+* Use only spaces in code
+
