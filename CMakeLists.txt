@@ -40,11 +40,8 @@ check_prefix_path()
 ################################################################################
 # Optional features
 ################################################################################
-set(BUILD_TESTING OFF CACHE BOOL "Build with integration tests")
-print_var(BUILD_TESTING)
-
-set(BUILD_CPPUNIT_TEST OFF CACHE BOOL "Build with unit tests")
-print_var(BUILD_CPPUNIT_TEST)
+set(BUILD_TESTS OFF CACHE BOOL "Build tests")
+print_var(BUILD_TESTS)
 
 set(BUILD_DOC OFF CACHE BOOL "Build doxygen documentation")
 print_var(BUILD_DOC)
@@ -98,12 +95,9 @@ target_link_libraries(fs INTERFACE
 
 find_package(Threads REQUIRED)
 find_package(PythonInterp 3 REQUIRED)
-if(BUILD_CPPUNIT_TEST)
+if(BUILD_TESTS)
     find_package(Catch2 REQUIRED)
     find_package(GTest 1.11 REQUIRED CONFIG)
-    include(CTest)
-    include(ParseAndAddCatchTests)
-    include(GoogleTest)
 endif()
 # remaining in-tree dependencies
 add_subdirectory(third-party)
@@ -203,7 +197,7 @@ endif(BUILD_DOC)
 ################################################################################
 # Testing
 ################################################################################
-if(BUILD_CPPUNIT_TEST OR BUILD_TESTING)
+if(BUILD_TESTS)
     enable_testing()
 endif()
 
@@ -268,14 +262,14 @@ endif()
 ################################################################################
 # Integration tests
 ################################################################################
-if (BUILD_TESTING)
+if (BUILD_TESTS)
   # Find libraries needed by python tests
   find_python_library(numpy)
   find_python_library(scipy)
   find_python_library(pandas)
   find_python_library(matplotlib)
   add_subdirectory(systemtest)
-endif (BUILD_TESTING)
+endif (BUILD_TESTS)
 
 ################################################################################
 # Packaging with CPack
