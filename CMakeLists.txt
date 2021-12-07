@@ -210,6 +210,7 @@ if(BUILD_TESTS)
     add_custom_target(systemtests
         COMMENT "Running system tests"
         COMMAND ${CMAKE_BINARY_DIR}/run-systemtests -vv -s --basetemp=${CMAKE_BINARY_DIR}/systemtest-out
+        DEPENDS jpscore
     )
     add_custom_target(unittests
         COMMENT "Running unit tests"
@@ -217,6 +218,7 @@ if(BUILD_TESTS)
         COMMAND $<TARGET_FILE:libcore-tests>
         COMMAND echo "Catch2"
         COMMAND $<TARGET_FILE:catch-unittests>
+        DEPENDS libcore-tests catch-unittests
     )
 endif()
 
