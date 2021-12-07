@@ -122,31 +122,11 @@ public:
     Transition * GetTransition(int id) const;
 
     /**
-      * Returns Crossing with a specified ID
-      *
-      * @param ID of Crossing: int
-      * @return Pointer of Crossing
-      */
-    Crossing * GetCrossing(int ID) const;
-
-    /**
-      * Not implemented
-      */
-    Hline * GetHline(int id);
-
-    /**
       * return the subroom with the corresponding unique identifier
       * @param uid ,the unique identifier
       * @return NULL if no exists with that identifier.
       */
     SubRoom * GetSubRoomByUID(int uid) const;
-
-    /**
-      * @return true if the two segments are visible from each other.
-      * Alls walls and transitions and crossings are used in this check.
-      * The use of hlines is optional, because they are not real, can can be considered transparent
-      */
-    //bool IsVisible(Line* l1, Line* l2, bool considerHlines=false);
 
     /**
       * @return true if the two points are visible from each other.

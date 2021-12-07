@@ -540,24 +540,6 @@ Transition * Building::GetTransition(int ID) const //ar.graf: added const 2015-1
     }
 }
 
-Crossing * Building::GetCrossing(int ID) const
-{
-    if(_crossings.count(ID) == 1) {
-        return _crossings.at(ID);
-    } else {
-        if(ID == -1)
-            return nullptr;
-        else {
-            LOG_ERROR(
-                "I could not find any crossing with the 'ID' [{}]. You have defined [{}] "
-                "transitions",
-                ID,
-                _crossings.size());
-            exit(EXIT_FAILURE);
-        }
-    }
-}
-
 Goal * Building::GetFinalGoal(int ID) const
 {
     if(_goals.count(ID) == 1) {
