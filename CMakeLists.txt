@@ -199,6 +199,25 @@ endif(BUILD_DOC)
 ################################################################################
 if(BUILD_TESTS)
     enable_testing()
+    configure_file(
+        ${CMAKE_SOURCE_DIR}/cmake_templates/run-systemtests.in
+        ${CMAKE_BINARY_DIR}/run-systemtests
+        @ONLY
+    )
+    add_custom_target(tests
+        DEPENDS systemtests unittests
+    )
+    add_custom_target(systemtests
+        COMMENT "Running system tests"
+        COMMAND ${CMAKE_BINARY_DIR}/run-systemtests -vv -s --basetemp=${CMAKE_BINARY_DIR}/systemtest-out
+    )
+    add_custom_target(unittests
+        COMMENT "Running unit tests"
+        COMMAND echo "GTest"
+        COMMAND $<TARGET_FILE:libcore-tests>
+        COMMAND echo "Catch2"
+        COMMAND $<TARGET_FILE:catch-unittests>
+    )
 endif()
 
 ################################################################################

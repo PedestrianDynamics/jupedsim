@@ -206,7 +206,7 @@ endif()
 ################################################################################
 # libcore unit tests
 ################################################################################
-if (BUILD_CPPUNIT_TEST)
+if (BUILD_TESTS)
     add_executable(libcore-tests
         test/TestSimulationClock.cpp
     )
@@ -223,9 +223,8 @@ if (BUILD_CPPUNIT_TEST)
     
     set_property(TARGET libcore-tests PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
     set_property(TARGET libcore-tests PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
-    gtest_discover_tests(libcore-tests)
 
-    add_executable(unittests
+    add_executable(catch-unittests
         test/catch2/geometry/GeometryHelperTest.cpp
         test/catch2/geometry/LineTest.cpp
         test/catch2/geometry/ObstacleTest.cpp
@@ -241,23 +240,19 @@ if (BUILD_CPPUNIT_TEST)
         test/catch2/routing/UnivFFviaFMTest.cpp
     )
 
-    target_link_libraries(unittests PRIVATE
+    target_link_libraries(catch-unittests PRIVATE
         Catch2::Catch2
         core
     )
 
-    target_compile_options(unittests PRIVATE
+    target_compile_options(catch-unittests PRIVATE
         ${COMMON_COMPILE_OPTIONS}
     )
 
-    set_property(TARGET unittests PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
-    set_property(TARGET unittests PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
-
-    set(PARSE_CATCH_TESTS_ADD_TARGET_IN_TEST_NAME Off)
-    set(PARSE_CATCH_TESTS_ADD_TO_CONFIGURE_DEPENDS On)
-    ParseAndAddCatchTests(unittests)
+    set_property(TARGET catch-unittests PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
+    set_property(TARGET catch-unittests PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 
     if (CODE_COVERAGE)
-        target_code_coverage(unittests)
+        target_code_coverage(catch-unittests)
     endif ()
 endif()
