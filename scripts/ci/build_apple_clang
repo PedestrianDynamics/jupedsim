@@ -1,0 +1,5 @@
+set -e
+mkdir build && cd build
+./../scripts/setup-deps.sh
+cmake .. -DCMAKE_PREFIX_PATH=$(pwd)/deps -DBUILD_TESTS=ON
+cmake --build . -- -j $(sysctl -n hw.logicalcpu)
