@@ -101,11 +101,7 @@ public:
 
     Configuration * GetConfig() const;
 
-    void SetCaption(const std::string & s);
-
     void GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const;
-
-    std::string GetCaption() const;
 
     RoutingEngine * GetRoutingEngine() const;
     const std::map<int, std::shared_ptr<Room>> & GetAllRooms() const;
@@ -116,8 +112,6 @@ public:
 
     Room * GetRoom(int index) const;
 
-    Room * GetRoom(std::string caption) const;
-
     std::tuple<Room *, SubRoom *> GetRoomAndSubRoom(const Point position) const;
 
     std::tuple<int, int, int> GetRoomAndSubRoomIDs(const Point position) const;
@@ -125,22 +119,7 @@ public:
     Room * GetRoom(const Point position) const;
     SubRoom * GetSubRoom(const Point position) const;
 
-    Transition * GetTransition(std::string caption) const;
-
     Transition * GetTransition(int id) const;
-
-    /**
-      * Returns Crossing with a specified ID
-      *
-      * @param ID of Crossing: int
-      * @return Pointer of Crossing
-      */
-    Crossing * GetCrossing(int ID) const;
-
-    /**
-      * Not implemented
-      */
-    Hline * GetHline(int id);
 
     /**
       * return the subroom with the corresponding unique identifier
@@ -148,13 +127,6 @@ public:
       * @return NULL if no exists with that identifier.
       */
     SubRoom * GetSubRoomByUID(int uid) const;
-
-    /**
-      * @return true if the two segments are visible from each other.
-      * Alls walls and transitions and crossings are used in this check.
-      * The use of hlines is optional, because they are not real, can can be considered transparent
-      */
-    //bool IsVisible(Line* l1, Line* l2, bool considerHlines=false);
 
     /**
       * @return true if the two points are visible from each other.
@@ -244,16 +216,6 @@ public:
     const fs::path & GetProjectRootDir() const;
 
     const fs::path & GetProjectFilename() const;
-
-    const fs::path & GetGeometryFilename() const;
-
-    /**
-      * Write the geometry to the given file.
-      * That will be useful in the geometry editor.
-      * @param filename the relative location of the file
-      * @return true if everything went fine.
-      */
-    bool SaveGeometry(const fs::path & filename) const;
 
     /**
       * Check the scenario for possible errors and

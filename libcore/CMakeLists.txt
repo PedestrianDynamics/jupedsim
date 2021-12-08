@@ -58,7 +58,6 @@ set(source_files
     src/pedestrian/AgentsSource.cpp
     src/pedestrian/AgentsSourcesManager.cpp
     src/pedestrian/Ellipse.cpp
-    src/pedestrian/Knowledge.cpp
     src/pedestrian/PedDistributor.cpp
     src/pedestrian/Pedestrian.cpp
     src/pedestrian/Pedestrian.cpp
@@ -124,7 +123,6 @@ set(header_files
     src/pedestrian/AgentsSource.h
     src/pedestrian/AgentsSourcesManager.h
     src/pedestrian/Ellipse.h
-    src/pedestrian/Knowledge.h
     src/pedestrian/PedDistributor.h
     src/pedestrian/Pedestrian.h
     src/pedestrian/StartDistribution.h

@@ -26,7 +26,6 @@
  **/
 #include "Pedestrian.h"
 
-#include "Knowledge.h"
 #include "geometry/Building.h"
 #include "geometry/SubRoom.h"
 #include "geometry/WaitingArea.h"

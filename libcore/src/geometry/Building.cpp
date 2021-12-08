@@ -137,16 +137,6 @@ Configuration * Building::GetConfig() const
     return _configuration;
 }
 
-void Building::SetCaption(const std::string & s)
-{
-    _caption = s;
-}
-
-std::string Building::GetCaption() const
-{
-    return _caption;
-}
-
 RoutingEngine * Building::GetRoutingEngine() const
 {
     return _configuration->GetRoutingEngine().get();
@@ -293,13 +283,6 @@ void Building::AddSurroundingRoom()
 bool Building::InitGeometry()
 {
     Logging::Info("Init Geometry");
-    try {
-        geometry::helper::CorrectInputGeometry(*this);
-    } catch(const std::exception & e) {
-        LOG_ERROR("Exception in Building::correct: {}", e.what());
-        return false;
-    }
-
     for(auto && itr_room : _rooms) {
         for(auto && itr_subroom : itr_room.second->GetAllSubRooms()) {
             //create a close polyline out of everything
@@ -451,22 +434,6 @@ const fs::path & Building::GetProjectRootDir() const
     return _configuration->GetProjectRootDir();
 }
 
-const fs::path & Building::GetGeometryFilename() const
-{
-    return _configuration->GetGeometryFile();
-}
-
-
-Room * Building::GetRoom(std::string caption) const
-{
-    for(const auto & it : _rooms) {
-        if(it.second->GetCaption() == caption)
-            return it.second.get();
-    }
-    LOG_ERROR("Room not found with caption {}", caption);
-    exit(EXIT_FAILURE);
-}
-
 bool Building::AddCrossing(Crossing * line)
 {
     int IDRoom     = line->GetRoom1()->GetID();
@@ -555,19 +522,6 @@ const std::map<int, Goal *> & Building::GetAllGoals() const
     return _goals;
 }
 
-Transition * Building::GetTransition(std::string caption) const
-{
-    //eventually
-    std::map<int, Transition *>::const_iterator itr;
-    for(itr = _transitions.begin(); itr != _transitions.end(); ++itr) {
-        if(itr->second->GetCaption() == caption)
-            return itr->second;
-    }
-
-    LOG_WARNING("No Transition with Caption: {}", caption);
-    exit(EXIT_FAILURE);
-}
-
 Transition * Building::GetTransition(int ID) const //ar.graf: added const 2015-12-10
 {
     if(_transitions.count(ID) == 1) {
@@ -581,24 +535,6 @@ Transition * Building::GetTransition(int ID) const //ar.graf: added const 2015-1
                 "transitions",
                 ID,
                 _transitions.size());
-            exit(EXIT_FAILURE);
-        }
-    }
-}
-
-Crossing * Building::GetCrossing(int ID) const
-{
-    if(_crossings.count(ID) == 1) {
-        return _crossings.at(ID);
-    } else {
-        if(ID == -1)
-            return nullptr;
-        else {
-            LOG_ERROR(
-                "I could not find any crossing with the 'ID' [{}]. You have defined [{}] "
-                "transitions",
-                ID,
-                _crossings.size());
             exit(EXIT_FAILURE);
         }
     }
@@ -853,125 +789,6 @@ Crossing * Building::GetCrossingByUID(int uid) const
             return cross.second;
     }
     return nullptr;
-}
-
-bool Building::SaveGeometry(const fs::path & filename) const
-{
-    std::stringstream geometry;
-
-    //write the header
-    geometry << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" << std::endl;
-    geometry << "<geometry version=\"0.8\" caption=\"second life\" unit=\"m\"\n "
-                " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n  "
-                " xsi:noNamespaceSchemaLocation=\"http://134.94.2.137/jps_geoemtry.xsd\">"
-             << std::endl
-             << std::endl;
-
-    //write the rooms
-    geometry << "<rooms>" << std::endl;
-    for(auto && itroom : _rooms) {
-        auto && room = itroom.second;
-        geometry << "\t<room id =\"" << room->GetID() << "\" caption =\"" << room->GetCaption()
-                 << "\">" << std::endl;
-        for(auto && itr_sub : room->GetAllSubRooms()) {
-            auto && sub          = itr_sub.second;
-            const double * plane = sub->GetPlaneEquation();
-            geometry << "\t\t<subroom id =\"" << sub->GetSubRoomID() << "\" caption=\"dummy_caption"
-                     << "\" class=\""
-                     << "SUBROOM"
-                     << "\" A_x=\"" << plane[0] << "\" B_y=\"" << plane[1] << "\" C_z=\""
-                     << plane[2] << "\">" << std::endl;
-
-            for(auto && wall : sub->GetAllWalls()) {
-                const Point & p1 = wall.GetPoint1();
-                const Point & p2 = wall.GetPoint2();
-
-                geometry << "\t\t\t<polygon caption=\"wall\" type=\"" << wall.GetType() << "\">"
-                         << std::endl
-                         << "\t\t\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>"
-                         << std::endl
-                         << "\t\t\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>"
-                         << std::endl
-                         << "\t\t\t</polygon>" << std::endl;
-            }
-
-            if(sub->GetType() == SubroomType::STAIR) {
-                const Point & up   = ((Stair *) sub.get())->GetUp();
-                const Point & down = ((Stair *) sub.get())->GetDown();
-                geometry << "\t\t\t<up px=\"" << up._x << "\" py=\"" << up._y << "\"/>"
-                         << std::endl;
-                geometry << "\t\t\t<down px=\"" << down._x << "\" py=\"" << down._y << "\"/>"
-                         << std::endl;
-            }
-
-            geometry << "\t\t</subroom>" << std::endl;
-        }
-
-        //write the crossings
-        geometry << "\t\t<crossings>" << std::endl;
-        for(auto const & mapcross : _crossings) {
-            Crossing * cross = mapcross.second;
-
-            //only write the crossings in this rooms
-            if(cross->GetRoom1()->GetID() != room->GetID())
-                continue;
-
-            const Point & p1 = cross->GetPoint1();
-            const Point & p2 = cross->GetPoint2();
-
-            geometry << "\t<crossing id =\"" << cross->GetID() << "\" subroom1_id=\""
-                     << cross->GetSubRoom1()->GetSubRoomID() << "\" subroom2_id=\""
-                     << cross->GetSubRoom2()->GetSubRoomID() << "\">" << std::endl;
-
-            geometry << "\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << std::endl
-                     << "\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << std::endl
-                     << "\t</crossing>" << std::endl;
-        }
-        geometry << "\t\t</crossings>" << std::endl;
-        geometry << "\t</room>" << std::endl;
-    }
-
-    geometry << "</rooms>" << std::endl;
-
-    //write the transitions
-    geometry << "<transitions>" << std::endl;
-
-    for(auto const & maptrans : _transitions) {
-        Transition * trans = maptrans.second;
-        const Point & p1   = trans->GetPoint1();
-        const Point & p2   = trans->GetPoint2();
-        int room2_id       = -1;
-        int subroom2_id    = -1;
-        if(trans->GetRoom2()) {
-            room2_id    = trans->GetRoom2()->GetID();
-            subroom2_id = trans->GetSubRoom2()->GetSubRoomID();
-        }
-
-        geometry << "\t<transition id =\"" << trans->GetID() << "\" caption=\""
-                 << trans->GetCaption() << "\" type=\"" << trans->GetType() << "\" room1_id=\""
-                 << trans->GetRoom1()->GetID() << "\" subroom1_id=\""
-                 << trans->GetSubRoom1()->GetSubRoomID() << "\" room2_id=\"" << room2_id
-                 << "\" subroom2_id=\"" << subroom2_id << "\">" << std::endl;
-
-        geometry << "\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << std::endl
-                 << "\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << std::endl
-                 << "\t</transition>" << std::endl;
-    }
-
-    geometry << "</transitions>" << std::endl;
-    geometry << "</geometry>" << std::endl;
-    //write the routing file
-
-    std::ofstream geofile(filename.string());
-    if(geofile.is_open()) {
-        geofile << geometry.str();
-        LOG_INFO("File saved to {}", filename.string());
-    } else {
-        LOG_ERROR("Unable to save the geometry to {}.", filename.string());
-        return false;
-    }
-
-    return true;
 }
 
 void Building::AddTrain(int trainID, TrainType type)

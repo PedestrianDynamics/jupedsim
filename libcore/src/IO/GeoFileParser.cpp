@@ -89,8 +89,6 @@ bool GeoFileParser::LoadGeometry(Building * building)
         return false;
     }
 
-    building->SetCaption(xmltoa(xRootNode->Attribute("caption"), "virtual building"));
-
     //processing the rooms node
     TiXmlNode * xRoomsNode = xRootNode->FirstChild("rooms");
     if(!xRoomsNode) {

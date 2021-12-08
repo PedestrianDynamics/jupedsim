@@ -32,7 +32,6 @@
 #include "general/Macros.h"
 #include "geometry/NavLine.h"
 #include "geometry/SubroomType.h"
-#include "pedestrian/Knowledge.h"
 
 #include <map>
 #include <queue>
