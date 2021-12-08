@@ -192,24 +192,23 @@ endif(BUILD_DOC)
 if(BUILD_TESTS)
     enable_testing()
     if(UNIX)
-        configure_file(
-            ${CMAKE_SOURCE_DIR}/cmake_templates/run-systemtests.unix.in
-            ${CMAKE_BINARY_DIR}/run-systemtests
-            @ONLY
-        )
-    elseif(WIN32)
-        configure_file(
-            ${CMAKE_SOURCE_DIR}/cmake_templates/run-systemtests.windows.in
-            ${CMAKE_BINARY_DIR}/run-systemtests
-            @ONLY
-        )
+        set(pytest-wrapper-in ${CMAKE_SOURCE_DIR}/cmake_templates/run-systemtests.unix.in)
+        set(pytest-wrapper-out ${CMAKE_BINARY_DIR}/run-systemtests)
+    else()
+        set(pytest-wrapper-in ${CMAKE_SOURCE_DIR}/cmake_templates/run-systemtests.windows.in)
+        set(pytest-wrapper-out ${CMAKE_BINARY_DIR}/run-systemtests.cmd)
     endif()
+    configure_file(
+        ${pytest-wrapper-in}
+        ${pytest-wrapper-out}
+        @ONLY
+    )
     add_custom_target(tests
         DEPENDS systemtests unittests
     )
     add_custom_target(systemtests
         COMMENT "Running system tests"
-        COMMAND ${CMAKE_BINARY_DIR}/run-systemtests -vv -s 
+        COMMAND ${pytest-wrapper-out} -vv -s 
                 --basetemp=${CMAKE_BINARY_DIR}/systemtest-out
                 --junit-xml=result-systemtests.xml
         COMMAND ctest -T test
