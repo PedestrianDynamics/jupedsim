@@ -1,0 +1,5 @@
+set JPSCORE_EXECUTABLE_PATH="@CMAKE_BINARY_DIR@/bin/Release/jpscore"
+set JPSCORE_SOURCE_PATH="@CMAKE_SOURCE_DIR@"
+
+pytest ${JPSCORE_SOURCE_PATH}/systemtest %*
+

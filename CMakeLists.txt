@@ -191,11 +191,19 @@ endif(BUILD_DOC)
 ################################################################################
 if(BUILD_TESTS)
     enable_testing()
-    configure_file(
-        ${CMAKE_SOURCE_DIR}/cmake_templates/run-systemtests.in
-        ${CMAKE_BINARY_DIR}/run-systemtests
-        @ONLY
-    )
+    if(UNIX)
+        configure_file(
+            ${CMAKE_SOURCE_DIR}/cmake_templates/run-systemtests.unix.in
+            ${CMAKE_BINARY_DIR}/run-systemtests
+            @ONLY
+        )
+    elseif(WIN32)
+        configure_file(
+            ${CMAKE_SOURCE_DIR}/cmake_templates/run-systemtests.windows.in
+            ${CMAKE_BINARY_DIR}/run-systemtests
+            @ONLY
+        )
+    endif()
     add_custom_target(tests
         DEPENDS systemtests unittests
     )
