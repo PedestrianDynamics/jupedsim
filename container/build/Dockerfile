@@ -19,7 +19,9 @@ RUN apt-get update && \
     python3-matplotlib \
     python3-numpy \
     python3-pandas \
-    python3-scipy
+    python3-scipy \
+    python3-pytest
+RUN cd /usr/bin && ln -s pytest-3 pytest
 
 COPY scripts/setup-deps.sh /opt/
 

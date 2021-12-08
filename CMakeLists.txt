@@ -1,11 +1,3 @@
-# Documentation: Some useful options:
-# -DCMAKE_CXX_COMPILER=clang++
-# -DCMAKE_BUILD_TYPE=Debug (default Release)
-# -DCMAKE_VERBOSE_MAKEFILE=ON (default OFF)
-# -DBUILD_TESTING=ON (default OFF) for python tests
-# -DBUILD_CPPUNIT_TEST=ON (default OFF) for unit tests
-# -D Boost_NO_SYSTEM_PATHS=true (default false) -D BOOST_ROOT=PATH_where_to_find_boost
-#--------------------------------------------------------------------------
 ################################################################################
 # Project setup
 ################################################################################
@@ -40,11 +32,8 @@ check_prefix_path()
 ################################################################################
 # Optional features
 ################################################################################
-set(BUILD_TESTING OFF CACHE BOOL "Build with integration tests")
-print_var(BUILD_TESTING)
-
-set(BUILD_CPPUNIT_TEST OFF CACHE BOOL "Build with unit tests")
-print_var(BUILD_CPPUNIT_TEST)
+set(BUILD_TESTS OFF CACHE BOOL "Build tests")
+print_var(BUILD_TESTS)
 
 set(BUILD_DOC OFF CACHE BOOL "Build doxygen documentation")
 print_var(BUILD_DOC)
@@ -98,12 +87,9 @@ target_link_libraries(fs INTERFACE
 
 find_package(Threads REQUIRED)
 find_package(PythonInterp 3 REQUIRED)
-if(BUILD_CPPUNIT_TEST)
+if(BUILD_TESTS)
     find_package(Catch2 REQUIRED)
     find_package(GTest 1.11 REQUIRED CONFIG)
-    include(CTest)
-    include(ParseAndAddCatchTests)
-    include(GoogleTest)
 endif()
 # remaining in-tree dependencies
 add_subdirectory(third-party)
@@ -203,8 +189,42 @@ endif(BUILD_DOC)
 ################################################################################
 # Testing
 ################################################################################
-if(BUILD_CPPUNIT_TEST OR BUILD_TESTING)
+if(BUILD_TESTS)
     enable_testing()
+    if(UNIX)
+        set(pytest-wrapper-in ${CMAKE_SOURCE_DIR}/cmake_templates/run-systemtests.unix.in)
+        set(pytest-wrapper-out ${CMAKE_BINARY_DIR}/run-systemtests)
+    else()
+        set(pytest-wrapper-in ${CMAKE_SOURCE_DIR}/cmake_templates/run-systemtests.windows.in)
+        set(pytest-wrapper-out ${CMAKE_BINARY_DIR}/run-systemtests.cmd)
+    endif()
+    configure_file(
+        ${pytest-wrapper-in}
+        ${pytest-wrapper-out}
+        @ONLY
+    )
+    add_custom_target(tests
+        DEPENDS systemtests unittests
+    )
+    add_custom_target(systemtests
+        COMMENT "Running system tests"
+        COMMAND ${pytest-wrapper-out} -vv -s 
+                --basetemp=${CMAKE_BINARY_DIR}/systemtest-out
+                --junit-xml=result-systemtests.xml
+        COMMAND ctest -T test
+        DEPENDS jpscore
+    )
+    add_custom_target(unittests
+        COMMENT "Running unit tests"
+        COMMAND echo "GTest"
+        COMMAND $<TARGET_FILE:libcore-tests> 
+                --gtest_output=xml:result-unittests.xml
+        COMMAND echo "Catch2"
+        COMMAND $<TARGET_FILE:catch-unittests>
+                --reporter junit
+                --out=result-unittests2.xml
+        DEPENDS libcore-tests catch-unittests
+    )
 endif()
 
 ################################################################################
@@ -268,14 +288,14 @@ endif()
 ################################################################################
 # Integration tests
 ################################################################################
-if (BUILD_TESTING)
+if (BUILD_TESTS)
   # Find libraries needed by python tests
   find_python_library(numpy)
   find_python_library(scipy)
   find_python_library(pandas)
   find_python_library(matplotlib)
   add_subdirectory(systemtest)
-endif (BUILD_TESTING)
+endif (BUILD_TESTS)
 
 ################################################################################
 # Packaging with CPack
