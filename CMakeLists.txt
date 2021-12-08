@@ -204,7 +204,7 @@ if(BUILD_TESTS)
         COMMAND ${CMAKE_BINARY_DIR}/run-systemtests -vv -s 
                 --basetemp=${CMAKE_BINARY_DIR}/systemtest-out
                 --junit-xml=result-systemtests.xml
-        COMMAND ctest
+        COMMAND ctest -T test
         DEPENDS jpscore
     )
     add_custom_target(unittests
