@@ -1,5 +1,5 @@
 set -e
-numcpus=$(sysctl -n hw.logicalcpu) 
+numcpus=$(sysctl -n hw.logicalcpu)
 mkdir build && cd build
 ./../scripts/setup-deps.sh
 cmake .. -DCMAKE_PREFIX_PATH=$(pwd)/deps -DBUILD_TESTS=ON

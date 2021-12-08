@@ -210,9 +210,12 @@ if(BUILD_TESTS)
     add_custom_target(unittests
         COMMENT "Running unit tests"
         COMMAND echo "GTest"
-        COMMAND $<TARGET_FILE:libcore-tests> --gtest_output=xml:result-unittests.xml
+        COMMAND $<TARGET_FILE:libcore-tests> 
+                --gtest_output=xml:result-unittests.xml
         COMMAND echo "Catch2"
-        COMMAND $<TARGET_FILE:catch-unittests> --output=result-unittests2.xml
+        COMMAND $<TARGET_FILE:catch-unittests>
+                --reporter junit
+                --out=result-unittests2.xml
         DEPENDS libcore-tests catch-unittests
     )
 endif()
