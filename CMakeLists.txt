@@ -201,16 +201,18 @@ if(BUILD_TESTS)
     )
     add_custom_target(systemtests
         COMMENT "Running system tests"
-        COMMAND ${CMAKE_BINARY_DIR}/run-systemtests -vv -s --basetemp=${CMAKE_BINARY_DIR}/systemtest-out
+        COMMAND ${CMAKE_BINARY_DIR}/run-systemtests -vv -s 
+                --basetemp=${CMAKE_BINARY_DIR}/systemtest-out
+                --junit-xml=result-systemtests.xml
         COMMAND ctest
         DEPENDS jpscore
     )
     add_custom_target(unittests
         COMMENT "Running unit tests"
         COMMAND echo "GTest"
-        COMMAND $<TARGET_FILE:libcore-tests>
+        COMMAND $<TARGET_FILE:libcore-tests> --gtest_output=xml:result-unittests.xml
         COMMAND echo "Catch2"
-        COMMAND $<TARGET_FILE:catch-unittests>
+        COMMAND $<TARGET_FILE:catch-unittests> --output=result-unittests2.xml
         DEPENDS libcore-tests catch-unittests
     )
 endif()
