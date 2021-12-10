@@ -32,8 +32,6 @@ public:
     int _final_destination;
     int _group_id;
     int _router_id;
-    int _room_id;
-    int _subroom_id;
     double _patience_time;
     double _premovement_time;
     double _risk_tolerance;

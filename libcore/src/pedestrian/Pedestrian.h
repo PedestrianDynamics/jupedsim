@@ -74,10 +74,6 @@ private:
     double _smoothFactorEscalatorUpStairs;
     /// c in f() and g() for v0 transition on escalators down
     double _smoothFactorEscalatorDownStairs;
-    int _roomID;
-    int _subRoomID;
-    int _oldRoomID;
-    int _oldSubRoomID;
     int _router_id{0};
     Point _lastE0;
 
@@ -154,8 +150,6 @@ public:
     void SetSmoothFactorEscalatorUpStairs(double c);
     void SetSmoothFactorEscalatorDownStairs(double c);
     void SetID(int i);
-    void SetRoomID(int i);
-    void SetSubRoomID(int i);
     void SetTau(double tau);
     void SetEllipse(const JEllipse & e);
 
@@ -203,8 +197,6 @@ public:
     double GetSmoothFactorDownEscalators() const;
 
     int GetID() const;
-    int GetRoomID() const;
-    int GetSubRoomID() const;
     double GetMass() const;
     double GetTau() const;
     const JEllipse & GetEllipse() const;
@@ -241,13 +233,6 @@ public:
     int GetUniqueRoomID() const;
     int GetNextDestination();
     double GetDistanceToNextTarget() const;
-
-    /**
-     * Checks if between the last two calls of 'UpdateRoom(int, int)' the Suboom of the pedestrian
-     * has changed. Changing the SubRoom means, the pedestrian has moved to a different SubRoom or Room.
-     * @return pedestrians has moved to a different SubRoom.
-     */
-    bool ChangedSubRoom() const;
 
     /**
       * The elevation is computed using the plane
@@ -413,22 +398,6 @@ public:
 
     void StartWaiting();
     void EndWaiting();
-
-    /**
-     * Updates the room information the pedestrian is located. The information the pedestrian was
-     * in before is saved in \m _oldRoomID, _oldSubRoomID
-     * @param roomID
-     * @param subRoomID
-     * @param
-     */
-    void UpdateRoom(int roomID, int subRoomID);
-
-    /**
-     * Checks if between the last two calls of 'UpdateRoom(int, int)' the Room of the pedestrian
-     * has changed.
-     * @return pedestrians has moved to a different Room.
-     */
-    bool ChangedRoom() const;
 
     Point GetLastPosition() const;
 };

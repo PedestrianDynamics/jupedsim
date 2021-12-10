@@ -18,8 +18,6 @@ CreatePedestrianEvent::CreatePedestrianEvent(
     _final_destination{agent->GetFinalDestination()},
     _group_id{agent->GetGroup()},
     _router_id{agent->GetRouter()->GetID()},
-    _room_id{agent->GetRoomID()},
-    _subroom_id{agent->GetSubRoomID()},
     _patience_time{agent->GetPatienceTime()},
     _premovement_time{agent->GetPremovementTime()},
     _risk_tolerance{agent->GetRiskTolerance()},
