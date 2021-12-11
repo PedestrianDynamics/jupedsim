@@ -128,7 +128,7 @@ void Visualisation::start()
 
     // set the properties of the caption
     vtkTextProperty * tprop = _runningTime->GetTextProperty();
-    tprop->SetFontSize(10);
+    tprop->SetFontSize(computeFontSize());
     tprop->SetColor(1.0, 0.0, 0.0);
 
     _renderer->AddActor2D(_runningTime);
@@ -836,6 +836,15 @@ void Visualisation::takeScreenshot()
 
     image->Write();
     image->Delete();
+}
+
+int Visualisation::computeFontSize()
+{
+    const double defaultDpi       = 96.0;
+    const double desiredFontSize  = 8.0;
+    const auto desiredScaleFactor = defaultDpi / desiredFontSize;
+    const auto dpi                = _renderWindow->GetDPI();
+    return dpi / desiredScaleFactor;
 }
 
 /// take png screenshot sequence

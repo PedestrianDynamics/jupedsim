@@ -213,6 +213,10 @@ private:
     /// take png screenshots sequence
     void takeScreenshotSequence();
 
+    /// Compute fontsize based on DPI
+    /// @return fontsize
+    int computeFontSize();
+
 
 private:
     Settings * _settings;
