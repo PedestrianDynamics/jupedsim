@@ -4,7 +4,7 @@
 add_executable(jpscore
     src/main.cpp
     forms/jpscore.rc
-    forms/JPScore.ico
+    forms/jpscore.ico
 )
 target_compile_options(jpscore PRIVATE
     ${COMMON_COMPILE_OPTIONS}
