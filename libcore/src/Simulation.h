@@ -69,8 +69,6 @@ private:
     int _periodic;
     int _maxSimTime{100};
     fs::path _currentTrajectoriesFile;
-
-    std::vector<Pedestrian *> _pedsToRemove;
     std::vector<std::unique_ptr<Pedestrian>> _agents;
 
     EventManager _em;

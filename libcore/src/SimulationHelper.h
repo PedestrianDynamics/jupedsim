@@ -40,7 +40,7 @@ namespace SimulationHelper
  * @param peds list of pedestrians to check
  * @return list of pedestrians who have moved to outside of the geometry
  */
-std::vector<Pedestrian *> FindPedestriansOutside(
+std::vector<int> FindPedestriansOutside(
     const Building & building,
     const std::vector<std::unique_ptr<Pedestrian>> & peds);
 
@@ -79,25 +79,4 @@ bool UpdateTrainFlowRegulation(Building & building, double time);
  */
 std::optional<Transition *>
 FindPassedDoor(const Pedestrian & ped, const std::vector<Transition *> & transitions);
-
-
-/**
- * Removes the pedestrians \p pedsFaulty from the simulation, e.g., the building. Additionally
- * prints an error message to the log, containing the pedestrians ID and a \p message.
- * @post pedsFaulty will be cleared
- * @param building geometry used in the simulation
- * @param pedsFaulty list of faulty pedestrians, which should be deleted
- * @param message error message to be displayed to add additional information to the user
- */
-void RemoveFaultyPedestrians(
-    Simulation & simulation,
-    std::vector<Pedestrian *> & pedsFaulty,
-    std::string message);
-
-/**
- * Removes the pedestrians \p pedsFaulty from the simulation, e.g., the building.
- * @param building geometry used in the simulation
- * @param peds list of faulty pedestrians, which should be deleted
- */
-void RemovePedestrians(Simulation & simulation, std::vector<Pedestrian *> & peds);
 } //namespace SimulationHelper

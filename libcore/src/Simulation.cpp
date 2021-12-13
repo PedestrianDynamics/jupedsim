@@ -280,12 +280,9 @@ bool Simulation::InitArgs()
 
 void Simulation::UpdateLocations()
 {
-    auto pedsOutside = SimulationHelper::FindPedestriansOutside(*_building, _agents);
-    _pedsToRemove.insert(_pedsToRemove.end(), pedsOutside.begin(), pedsOutside.end());
-
     SimulationHelper::UpdateFlowAtDoors(*_building, _agents, _clock.ElapsedTime());
-
-    SimulationHelper::RemovePedestrians(*this, _pedsToRemove);
+    auto pedsOutside = SimulationHelper::FindPedestriansOutside(*_building, _agents);
+    RemoveAgents(pedsOutside);
 
     //TODO discuss simulation flow -> better move to main loop, does not belong here
     bool geometryChangedFlow =

@@ -28,14 +28,14 @@
 #include <iterator>
 #include <memory>
 
-std::vector<Pedestrian *> SimulationHelper::FindPedestriansOutside(
+std::vector<int> SimulationHelper::FindPedestriansOutside(
     const Building & building,
     const std::vector<std::unique_ptr<Pedestrian>> & peds)
 {
-    std::vector<Pedestrian *> pedsOutside;
+    std::vector<int> pedsOutside;
     for(const auto & ped : peds) {
         if(!building.IsInAnySubRoom(ped->GetPos())) {
-            pedsOutside.push_back(ped.get());
+            pedsOutside.push_back(ped->GetID());
         }
     }
     return pedsOutside;
@@ -156,33 +156,4 @@ bool SimulationHelper::UpdateTrainFlowRegulation(Building & building, double tim
         }
     }
     return geometryChanged;
-}
-
-void SimulationHelper::RemoveFaultyPedestrians(
-    Simulation & simulation,
-    std::vector<Pedestrian *> & pedsFaulty,
-    std::string message)
-{
-    std::for_each(std::begin(pedsFaulty), std::end(pedsFaulty), [&message](Pedestrian * ped) {
-        LOG_ERROR(
-            "Pedestrian {} at ({:.3f} | {:.3f}): {}",
-            ped->GetID(),
-            ped->GetPos()._x,
-            ped->GetPos()._y,
-            message);
-    });
-
-    SimulationHelper::RemovePedestrians(simulation, pedsFaulty);
-}
-
-void SimulationHelper::RemovePedestrians(Simulation & simulation, std::vector<Pedestrian *> & peds)
-{
-    std::vector<int> pedestrians_to_delete{};
-    pedestrians_to_delete.reserve(peds.size());
-    std::transform(
-        peds.begin(), peds.end(), std::back_inserter(pedestrians_to_delete), [](const auto * ped) {
-            return ped->GetID();
-        });
-    simulation.RemoveAgents(pedestrians_to_delete);
-    peds.clear();
 }
