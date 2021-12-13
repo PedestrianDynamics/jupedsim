@@ -68,10 +68,6 @@ Pedestrian::Pedestrian()
     _smoothFactorDownStairs          = 15;
     _smoothFactorEscalatorUpStairs   = 15;
     _smoothFactorEscalatorDownStairs = 15;
-    _roomID                          = -1;
-    _subRoomID                       = -1;
-    _oldRoomID                       = std::numeric_limits<int>::min();
-    _oldSubRoomID                    = std::numeric_limits<int>::min();
     _lastE0                          = Point(0, 0);
     _navLine                         = nullptr;
     _mentalMap                       = std::map<int, int>();
@@ -100,18 +96,12 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _group(agentsParameters.GetGroupId()),
     _desiredFinalDestination(agentsParameters.GetGoalId()),
     _premovement(agentsParameters.GetPremovementTime()),
-    _roomID(agentsParameters.GetRoomId()),
-    _subRoomID(agentsParameters.GetSubroomID()),
     _lastPosition(),
 
     _patienceTime(agentsParameters.GetPatience()),
     _router(building.GetRoutingEngine()->GetRouter(agentsParameters.GetRouterId())),
     _building(&building)
 {
-    _roomID              = -1;
-    _subRoomID           = -1;
-    _oldRoomID           = -1;
-    _oldSubRoomID        = -1;
     _exitIndex           = -1;
     _id                  = _agentsCreated; //default id
     _mass                = 1;
@@ -213,16 +203,6 @@ void Pedestrian::SetID(int i)
     if(i <= 0) {
         throw std::logic_error("Invalid pedestrians ID: Pedestrian ID should be > 0.");
     }
-}
-
-void Pedestrian::SetRoomID(int i)
-{
-    _roomID = i;
-}
-
-void Pedestrian::SetSubRoomID(int i)
-{
-    _subRoomID = i;
 }
 
 void Pedestrian::SetTau(double tau)
@@ -329,26 +309,6 @@ int Pedestrian::GetID() const
     return _id;
 }
 
-int Pedestrian::GetRoomID() const
-{
-    return _roomID;
-}
-
-int Pedestrian::GetSubRoomID() const
-{
-    return _subRoomID;
-}
-
-int Pedestrian::GetOldRoomID() const
-{
-    return _oldRoomID;
-}
-
-int Pedestrian::GetOldSubRoomID() const
-{
-    return _oldSubRoomID;
-}
-
 double Pedestrian::GetMass() const
 {
     return _mass;
@@ -383,7 +343,8 @@ NavLine * Pedestrian::GetExitLine() const
 
 int Pedestrian::GetUniqueRoomID() const
 {
-    return _roomID * 1000 + _subRoomID;
+    auto [room_id, sub_room_id, _] = _building->GetRoomAndSubRoomIDs(GetPos());
+    return room_id * 1000 + sub_room_id;
 }
 
 RoutingStrategy Pedestrian::GetRoutingStrategy() const
@@ -411,17 +372,6 @@ void Pedestrian::SetLastE0(Point E0)
     _lastE0 = E0;
 }
 
-bool Pedestrian::ChangedSubRoom() const
-{
-    return (ChangedRoom() || _oldSubRoomID != _subRoomID) &&
-           _oldSubRoomID != std::numeric_limits<int>::min();
-}
-
-bool Pedestrian::ChangedRoom() const
-{
-    return _oldRoomID != _roomID && _oldRoomID != std::numeric_limits<int>::min();
-}
-
 const std::vector<int> & Pedestrian::GetLastDestinations() const
 {
     return _destHistory;
@@ -447,7 +397,7 @@ double Pedestrian::GetV0Norm() const
 {
     // @todo: we need to know the difference of the ped_elevation to the old_nav_elevation, and use this in the function f.
     //detect the walking direction based on the elevation
-    SubRoom * sub        = _building->GetRoom(_roomID)->GetSubRoom(_subRoomID);
+    SubRoom * sub        = _building->GetSubRoom(GetPos());
     double ped_elevation = sub->GetElevation(_ellipse.GetCenter());
     if(_navLine == nullptr) { // this might happen when agents are spawn by sources.
         return std::max(0., _ellipse.GetV0());
@@ -867,14 +817,6 @@ void Pedestrian::SetWaitingPos(const Point & waitingPos)
     _waitingPos = waitingPos;
 }
 
-void Pedestrian::UpdateRoom(int roomID, int subRoomID)
-{
-    _oldRoomID    = _roomID;
-    _oldSubRoomID = _subRoomID;
-    _roomID       = roomID;
-    _subRoomID    = subRoomID;
-}
-
 Point Pedestrian::GetLastPosition() const
 {
     return _lastPosition;
@@ -884,14 +826,11 @@ std::string Pedestrian::ToString() const
 {
     std::string message = fmt::format(
         FMT_STRING("------> ped {:d} <-------\n"
-                   ">> Room/Subroom [{:d} / {:d}]\n"
                    ">> Destination [ {:d} ]\n"
                    ">> Final Destination [ {:d} ]\n"
                    ">> Position [{:.2f}, {:.2f}]\n"
                    ">> Velocity [{:.2f}, {:.2f}]  Norm = [{:.2f}]\n"),
         _id,
-        _roomID,
-        _subRoomID,
         _exitIndex,
         _desiredFinalDestination,
         GetPos()._x,

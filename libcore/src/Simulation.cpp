@@ -280,22 +280,9 @@ bool Simulation::InitArgs()
 
 void Simulation::UpdateLocations()
 {
-    auto [pedsChangedRoom, pedsNotRelocated] =
-        SimulationHelper::UpdatePedestriansLocations(*_building, _agents);
-
-    // not needed at the moment, as we do not have inside final goals yet
-    auto pedsAtFinalGoal = SimulationHelper::FindPedestriansReachedFinalGoal(*_building, _agents);
-    _pedsToRemove.insert(_pedsToRemove.end(), pedsAtFinalGoal.begin(), pedsAtFinalGoal.end());
-
-    auto pedsOutside = SimulationHelper::FindPedestriansOutside(*_building, pedsNotRelocated);
-    _pedsToRemove.insert(_pedsToRemove.end(), pedsOutside.begin(), pedsOutside.end());
-
-    SimulationHelper::UpdateFlowAtDoors(*_building, pedsChangedRoom, _clock.ElapsedTime());
-    SimulationHelper::UpdateFlowAtDoors(*_building, pedsOutside, _clock.ElapsedTime());
-
-    SimulationHelper::RemoveFaultyPedestrians(
-        *this, pedsNotRelocated, "Could not be properly relocated");
-    SimulationHelper::RemovePedestrians(*this, _pedsToRemove);
+    SimulationHelper::UpdateFlowAtDoors(*_building, _agents, _clock.ElapsedTime());
+    auto pedsOutside = SimulationHelper::FindPedestriansOutside(*_building, _agents);
+    RemoveAgents(pedsOutside);
 
     //TODO discuss simulation flow -> better move to main loop, does not belong here
     bool geometryChangedFlow =

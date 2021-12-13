@@ -199,6 +199,21 @@ std::tuple<int, int, int> Building::GetRoomAndSubRoomIDs(const Point position) c
     return {room->GetID(), subroom->GetSubRoomID(), subroom->GetUID()};
 }
 
+
+bool Building::IsInAnySubRoom(const Point pos) const
+{
+    for(auto const & [_, room] : _rooms) {
+        auto it = std::find_if(
+            room->GetAllSubRooms().begin(), room->GetAllSubRooms().end(), [pos](const auto & val) {
+                return val.second->IsInSubRoom(pos);
+            });
+        if(it != room->GetAllSubRooms().end()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 const NeighborhoodSearch & Building::GetNeighborhoodSearch() const
 {
     return _neighborhoodSearch;

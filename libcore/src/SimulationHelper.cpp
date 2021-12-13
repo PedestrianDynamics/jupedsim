@@ -26,150 +26,58 @@
 #include <Logger.h>
 #include <algorithm>
 #include <iterator>
+#include <memory>
 
-PedRelocation
-SimulationHelper::UpdatePedestrianRoomInformation(const Building & building, Pedestrian & ped)
-{
-    // No relocation needed, ped is in its assigned room/subroom
-    // TODO add check if room/subroom really exist
-    auto oldSubRoom = building.GetRoom(ped.GetRoomID())->GetSubRoom(ped.GetSubRoomID());
-    if(oldSubRoom->IsInSubRoom(&ped)) {
-        return PedRelocation::NOT_NEEDED;
-    }
-
-    // relocation needed, look if pedestrian is in one of the neighboring rooms/subrooms
-    // get all connected directly connected rooms/subrooms
-    // TODO check for closed doors?
-    auto subroomsConnected = oldSubRoom->GetNeighbors();
-    auto currentSubRoom    = std::find_if(
-        std::begin(subroomsConnected),
-        std::end(subroomsConnected),
-        [&ped](auto const & subroom) -> bool { return subroom->IsInSubRoom(ped.GetPos()); });
-
-    // pedestrian is in one of the neighboring rooms/subrooms
-    if(currentSubRoom != subroomsConnected.end()) {
-        ped.UpdateRoom((*currentSubRoom)->GetRoomID(), (*currentSubRoom)->GetSubRoomID());
-        return PedRelocation::SUCCESSFUL;
-    } else {
-        ped.UpdateRoom(-1, -1);
-        return PedRelocation::FAILED;
-    }
-}
-
-std::vector<Pedestrian *> SimulationHelper::FindPedestriansReachedFinalGoal(
+std::vector<int> SimulationHelper::FindPedestriansOutside(
     const Building & building,
     const std::vector<std::unique_ptr<Pedestrian>> & peds)
 {
-    std::vector<Pedestrian *> pedsAtFinalGoal;
-    const auto & goals = building.GetAllGoals();
-
+    std::vector<int> pedsOutside;
     for(const auto & ped : peds) {
-        if(ped->GetFinalDestination() != FINAL_DEST_OUT &&
-           goals.at(ped->GetFinalDestination())->Contains(ped->GetPos()) &&
-           goals.at(ped->GetFinalDestination())->GetIsFinalGoal()) {
-            pedsAtFinalGoal.emplace_back(ped.get());
+        if(!building.IsInAnySubRoom(ped->GetPos())) {
+            pedsOutside.push_back(ped->GetID());
         }
     }
-
-    return pedsAtFinalGoal;
-}
-
-std::tuple<std::vector<Pedestrian *>, std::vector<Pedestrian *>>
-SimulationHelper::UpdatePedestriansLocations(
-    const Building & building,
-    const std::vector<std::unique_ptr<Pedestrian>> & peds)
-{
-    std::vector<Pedestrian *> pedsNotRelocated;
-    std::vector<Pedestrian *> pedsChangedRoom;
-
-    // Check for peds, where relocation failed
-    for(const auto & ped : peds) {
-        auto relocated = UpdatePedestrianRoomInformation(building, *ped);
-        if(relocated == PedRelocation::SUCCESSFUL && ped->ChangedRoom()) {
-            pedsChangedRoom.push_back(ped.get());
-        } else if(relocated == PedRelocation::FAILED) {
-            pedsNotRelocated.push_back(ped.get());
-        }
-    }
-
-    return {pedsChangedRoom, pedsNotRelocated};
-}
-
-std::vector<Pedestrian *> SimulationHelper::FindPedestriansOutside(
-    const Building & building,
-    std::vector<Pedestrian *> & peds)
-{
-    std::vector<Pedestrian *> pedsOutside;
-    std::vector<Pedestrian *> newPeds;
-    double maxDistance = 0.5;
-
-    std::partition_copy(
-        std::begin(peds),
-        std::end(peds),
-        std::back_inserter(pedsOutside),
-        std::back_inserter(newPeds),
-        [&building, maxDistance](const Pedestrian * ped) -> bool {
-            auto transPassed = SimulationHelper::FindPassedDoor(building, *ped);
-            if(!transPassed.has_value()) {
-                return false;
-            }
-
-            //TODO maxDistance should depend on vmax
-            bool passedExit     = transPassed.value()->IsExit();
-            bool passedOpenDoor = transPassed.value()->IsOpen();
-            bool doorIsClose    = transPassed.value()->DistTo(ped->GetPos()) < maxDistance;
-            return passedExit && passedOpenDoor && doorIsClose;
-        });
-    peds = std::move(newPeds);
     return pedsOutside;
 }
 
 void SimulationHelper::UpdateFlowAtDoors(
     Building & building,
-    const std::vector<Pedestrian *> & pedsChangedRoom,
+    const std::vector<std::unique_ptr<Pedestrian>> & peds,
     double time)
 {
-    for(const auto ped : pedsChangedRoom) {
-        auto closestTransition = SimulationHelper::FindPassedDoor(building, *ped);
+    for(const auto & ped : peds) {
+        const auto * subroom = building.IsInAnySubRoom(ped->GetPos()) ?
+                                   building.GetSubRoom(ped->GetPos()) :
+                                   building.GetSubRoom(ped->GetLastPosition());
 
-        if(!closestTransition.has_value()) {
-            LOG_WARNING("Ped {} did not cross any transition", ped->GetID());
-            return;
+
+        auto passedDoor = FindPassedDoor(*ped, subroom->GetAllTransitions());
+
+        if(!passedDoor.has_value()) {
+            continue;
         }
 
         if(ped->GetExitIndex() >= 0 &&
            (building.GetTransitionByUID(ped->GetExitIndex()) != nullptr) &&
-           closestTransition.value()->GetUniqueID() !=
+           passedDoor.value()->GetUniqueID() !=
                building.GetTransitionByUID(ped->GetExitIndex())->GetUniqueID()) {
             LOG_WARNING(
                 "Ped {}: used an unindented door {}, but wanted to go to {}.",
                 ped->GetID(),
-                closestTransition.value()->GetUniqueID(),
+                passedDoor.value()->GetUniqueID(),
                 ped->GetExitIndex());
-            return;
+            continue;
         }
-
-        closestTransition.value()->IncreaseDoorUsage(1, time, ped->GetID());
-        closestTransition.value()->IncreasePartialDoorUsage(1);
+        passedDoor.value()->IncreaseDoorUsage(1, time, ped->GetID());
+        passedDoor.value()->IncreasePartialDoorUsage(1);
     }
 }
 
-std::optional<Transition *>
-SimulationHelper::FindPassedDoor(const Building & building, const Pedestrian & ped)
+std::optional<Transition *> SimulationHelper::FindPassedDoor(
+    const Pedestrian & ped,
+    const std::vector<Transition *> & transitions)
 {
-    std::vector<Transition *> transitions;
-
-    // TODO check if room exists?
-    auto room = (ped.GetRoomID() != -1) ? (building.GetAllRooms().at(ped.GetRoomID())) :
-                                          (building.GetAllRooms().at(ped.GetOldRoomID()));
-
-    for(auto const & [subroomID, subroom] : room->GetAllSubRooms()) {
-        transitions.insert(
-            std::end(transitions),
-            std::begin(subroom->GetAllTransitions()),
-            std::end(subroom->GetAllTransitions()));
-    }
-
     Line step{ped.GetLastPosition(), ped.GetPos(), 0};
     // TODO check for closed doors and distance?
     auto passedTrans = std::find_if(
@@ -179,9 +87,8 @@ SimulationHelper::FindPassedDoor(const Building & building, const Pedestrian & p
 
     if(passedTrans == transitions.end() || (*passedTrans)->IsInLineSegment(ped.GetPos())) {
         return std::nullopt;
-    } else {
-        return *passedTrans;
     }
+    return *passedTrans;
 }
 
 bool SimulationHelper::UpdateFlowRegulation(Building & building, double time)
@@ -249,33 +156,4 @@ bool SimulationHelper::UpdateTrainFlowRegulation(Building & building, double tim
         }
     }
     return geometryChanged;
-}
-
-void SimulationHelper::RemoveFaultyPedestrians(
-    Simulation & simulation,
-    std::vector<Pedestrian *> & pedsFaulty,
-    std::string message)
-{
-    std::for_each(std::begin(pedsFaulty), std::end(pedsFaulty), [&message](Pedestrian * ped) {
-        LOG_ERROR(
-            "Pedestrian {} at ({:.3f} | {:.3f}): {}",
-            ped->GetID(),
-            ped->GetPos()._x,
-            ped->GetPos()._y,
-            message);
-    });
-
-    SimulationHelper::RemovePedestrians(simulation, pedsFaulty);
-}
-
-void SimulationHelper::RemovePedestrians(Simulation & simulation, std::vector<Pedestrian *> & peds)
-{
-    std::vector<int> pedestrians_to_delete{};
-    pedestrians_to_delete.reserve(peds.size());
-    std::transform(
-        peds.begin(), peds.end(), std::back_inserter(pedestrians_to_delete), [](const auto * ped) {
-            return ped->GetID();
-        });
-    simulation.RemoveAgents(pedestrians_to_delete);
-    peds.clear();
 }
