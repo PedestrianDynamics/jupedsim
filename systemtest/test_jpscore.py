@@ -5,6 +5,8 @@ from driver.fixtures import env
 from driver.utils import setup_jpscore_driver, get_file_text_diff
 from driver.trajectories import load_trajectory
 from driver.environment import Platform
+from driver.inifile import parse_waiting_areas
+from sympy.geometry import Point
 
 
 @pytest.mark.skipif(
@@ -100,3 +102,39 @@ def test_evac_time_single_ped(
 
     # difference in evac times must be in tolerance range
     assert diff_evac_times < tolerance
+
+
+@pytest.mark.parametrize(
+    "test_directory",
+    [
+        pathlib.Path("waiting_area_tests/routing_room_test"),
+        pathlib.Path("waiting_area_tests/routing_subroom_test"),
+    ],
+)
+def test_waiting_area_routing_room(tmp_path, env, test_directory):
+    jpscore_driver = setup_jpscore_driver(
+        env=env,
+        working_directory=tmp_path,
+        test_directory=test_directory,
+    )
+    jpscore_driver.run()
+
+    trajectories = load_trajectory(jpscore_driver.traj_file)
+    waiting_areas = parse_waiting_areas(
+        env.systemtest_path / test_directory / "input/inifile.xml"
+    )
+
+    direct_path = trajectories.path(3)
+    indirect_path = trajectories.path(4)
+
+    for area in waiting_areas:
+        if any([area.encloses_point(Point(e[2], e[3])) for e in direct_path]):
+            pytest.fail(
+                "Pedestrian ID=3 did pass trough a waiting area. This should not have happened."
+            )
+        if not any(
+            [area.encloses_point(Point(e[2], e[3])) for e in indirect_path]
+        ):
+            pytest.fail(
+                "Pedestrian ID=4 did not pass trough a waiting area. This should not have happened."
+            )

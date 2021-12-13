@@ -1,6 +1,6 @@
 import pathlib
 import re
-from numpy import ndarray
+from numpy import ndarray, where
 import pandas as pd
 from dataclasses import dataclass
 
@@ -10,6 +10,9 @@ class Trajectories:
     framerate: float
     count_agents: int
     data: ndarray
+
+    def path(self, id: int) -> ndarray:
+        return self.data[where(self.data[:, 0] == id)]
 
 
 def load_trajectory(traj_file: pathlib.Path):
