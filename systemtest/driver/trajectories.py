@@ -1,6 +1,6 @@
 import pathlib
 import re
-from numpy import ndarray, where
+from numpy import ndarray, where, max
 import pandas as pd
 from dataclasses import dataclass
 
@@ -13,6 +13,9 @@ class Trajectories:
 
     def path(self, id: int) -> ndarray:
         return self.data[where(self.data[:, 0] == id)]
+
+    def runtime(self):
+        return max(self.data[:, 1]) / self.framerate
 
 
 def load_trajectory(traj_file: pathlib.Path):

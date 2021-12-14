@@ -7,6 +7,8 @@ from driver.trajectories import load_trajectory
 from driver.environment import Platform
 from driver.inifile import parse_waiting_areas
 from sympy.geometry import Point
+from driver.driver import JpsCoreDriver
+from driver.utils import copy_all_files
 
 
 @pytest.mark.skipif(
@@ -112,6 +114,18 @@ def test_evac_time_single_ped(
     ],
 )
 def test_waiting_area_routing_room(tmp_path, env, test_directory):
+    """
+    In this test case 2 pedestrians walk to the exit. The first pedestrian
+    is taking the direct route, bypassing all waiting areas. The second
+    pedestrian is waiting at each waiting area for a moment.
+
+    This test is parametrized with the geometry type used, room bases vs
+    sub-room based construction.
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    :param test_directory: directory of the test
+    """
     jpscore_driver = setup_jpscore_driver(
         env=env,
         working_directory=tmp_path,
@@ -138,3 +152,22 @@ def test_waiting_area_routing_room(tmp_path, env, test_directory):
             pytest.fail(
                 "Pedestrian ID=4 did not pass trough a waiting area. This should not have happened."
             )
+
+
+def test_train_feature_basic_functionality(tmp_path, env):
+    """
+    Simple scenario with pedestrians heading for the train. It is expected that
+    all agents have left the simulation within 50 seconds.
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    """
+    input_location = env.systemtest_path / "train_tests" / "simple_train_test"
+    copy_all_files(src=input_location, dest=tmp_path)
+    jpscore_driver = JpsCoreDriver(
+        jpscore_path=env.jpscore_path, working_directory=tmp_path
+    )
+    jpscore_driver.run()
+
+    trajectories = load_trajectory(jpscore_driver.traj_file)
+    assert trajectories.runtime() <= 50.0
