@@ -171,3 +171,39 @@ def test_train_feature_basic_functionality(tmp_path, env):
 
     trajectories = load_trajectory(jpscore_driver.traj_file)
     assert trajectories.runtime() <= 50.0
+
+
+def test_train_capacity_feature(tmp_path, env):
+    """
+    The first train has a capacity of 15, the second train of 20. At the end of
+    the simulation only 15 agents should remain.
+
+    BUG: Currently the capacity can be exceeded if pedestrians enter in the
+    same frame, hence the remaining pedestrians are treated as an upper bound.
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    """
+    input_location = (
+        env.systemtest_path / "train_tests" / "train_test_max_agents"
+    )
+    copy_all_files(src=input_location, dest=tmp_path)
+    jpscore_driver = JpsCoreDriver(
+        jpscore_path=env.jpscore_path, working_directory=tmp_path
+    )
+    jpscore_driver.run()
+
+    trajectories = load_trajectory(jpscore_driver.traj_file)
+
+    # Check agent count after the first train left
+    first_train_leaving_index = int(trajectories.framerate * 15)
+    assert trajectories.agent_count_in_frame(first_train_leaving_index) <= 35
+
+    # Check agent count after the second train left
+    second_train_leaving_index = int(trajectories.framerate * 30)
+    assert trajectories.agent_count_in_frame(second_train_leaving_index) <= 15
+
+    # Check agent count at the end of the simulation
+    last_frame_index = trajectories.frame_count() - 1
+    print(f"HELLO:{last_frame_index}")
+    assert trajectories.agent_count_in_frame(last_frame_index) <= 15
