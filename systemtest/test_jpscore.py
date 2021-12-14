@@ -1,14 +1,15 @@
 import pathlib
 import platform
 import pytest
+import numpy
 from driver.fixtures import env
 from driver.utils import setup_jpscore_driver, get_file_text_diff
 from driver.trajectories import load_trajectory
 from driver.environment import Platform
-from driver.inifile import parse_waiting_areas
+from driver.inifile import parse_waiting_areas, instanciate_tempalte
 from sympy.geometry import Point
 from driver.driver import JpsCoreDriver
-from driver.utils import copy_all_files
+from driver.utils import copy_all_files, copy_files
 
 
 @pytest.mark.skipif(
@@ -207,3 +208,67 @@ def test_train_capacity_feature(tmp_path, env):
     last_frame_index = trajectories.frame_count() - 1
     print(f"HELLO:{last_frame_index}")
     assert trajectories.agent_count_in_frame(last_frame_index) <= 15
+
+
+def test_juelich_1_free_flow_movement_in_corridor(tmp_path, env):
+    """
+    A pedestrian that starts in the middle of a corridor (i.e. is not
+    influenced by the walls) should move with its free flow velocity towards
+    the exit.
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    """
+    input_location = env.systemtest_path / "juelich_tests" / "test_1"
+    copy_all_files(src=input_location, dest=tmp_path)
+    jpscore_driver = JpsCoreDriver(
+        jpscore_path=env.jpscore_path, working_directory=tmp_path
+    )
+    jpscore_driver.run()
+    trajectories = load_trajectory(jpscore_driver.traj_file)
+    expected_evac_time = 10.0
+    assert trajectories.runtime() <= expected_evac_time
+
+
+@pytest.mark.parametrize(
+    "operational_model_id",
+    [
+        1,
+        3,
+    ],
+)
+def test_juelich_2_single_pedestrian_moving_in_a_corridor(
+    tmp_path, env, operational_model_id
+):
+    """
+    Rotating the same geometry as in test 1 around the z−axis by an arbitrary angle e.g.
+    45deg should lead to the evacuation time of 10 s.
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    :param operational_model_id this test is parametrized for two models, the
+           ids have to match the model ids in the template file
+    """
+    input_location = env.systemtest_path / "juelich_tests" / "test_2"
+    template_path = input_location / "inifile.template"
+    inifile_path = tmp_path / "inifile.xml"
+    instanciate_tempalte(
+        src=template_path,
+        args={"operational_model_id": operational_model_id},
+        dest=inifile_path,
+    )
+
+    copy_files(sources=[input_location / "geometry.xml"], dest=tmp_path)
+    jpscore_driver = JpsCoreDriver(
+        jpscore_path=env.jpscore_path, working_directory=tmp_path
+    )
+    jpscore_driver.run()
+    trajectories = load_trajectory(jpscore_driver.traj_file)
+    agent_path = trajectories.path(2)
+
+    d_x = max(agent_path[:, 2]) - min(agent_path[:, 2])
+    d_y = max(agent_path[:, 3]) - min(agent_path[:, 3])
+    beeline_distance = numpy.sqrt(d_x ** 2 + d_y ** 2)
+    v_expected = 1.0
+    time_limit = (beeline_distance / v_expected) + 0.1
+    assert trajectories.runtime() <= time_limit
