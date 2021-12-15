@@ -378,3 +378,33 @@ def test_juelich_5_single_pedestrian_moving_in_a_very_narrow_corridor_with_an_ob
     )
 
     assert numpy.all(distances >= 0.4)
+
+
+def test_juelich_6_single_pedestrian_moving_in_a_corridor_with_more_than_one_target(
+    tmp_path, env
+):
+    """
+    A pedestrian is moving in a corridor with several intermediate goals.
+
+    Expected result: The pedestrian should move through the different targets
+    without a substantial change in its velocity i.e. with a desired speed of 1
+    m/s the distance of 10 m should be covered in 10 s.
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    """
+    input_location = env.systemtest_path / "juelich_tests" / "test_6"
+    copy_files(
+        sources=[
+            input_location / "geometry.xml",
+            input_location / "inifile.xml",
+        ],
+        dest=tmp_path,
+    )
+    jpscore_driver = JpsCoreDriver(
+        jpscore_path=env.jpscore_path, working_directory=tmp_path
+    )
+    jpscore_driver.run()
+    trajectories = load_trajectory(jpscore_driver.traj_file)
+    assert trajectories.runtime() <= 10.1
+    assert trajectories.runtime() >= 9.0
