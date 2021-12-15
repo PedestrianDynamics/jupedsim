@@ -408,3 +408,38 @@ def test_juelich_6_single_pedestrian_moving_in_a_corridor_with_more_than_one_tar
     trajectories = load_trajectory(jpscore_driver.traj_file)
     assert trajectories.runtime() <= 10.1
     assert trajectories.runtime() >= 9.0
+
+
+@pytest.mark.parametrize(
+    "operational_model_id",
+    [
+        1,
+        3,
+    ],
+)
+def test_juelich_8_obstacle_avoidance(tmp_path, env, operational_model_id):
+    """
+    Expected result: The pedestrian should avoid the obstacle and exit the room
+    without overlapping with the obstacle.
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    """
+    input_location = env.systemtest_path / "juelich_tests" / "test_8"
+    template_path = input_location / "inifile.template"
+    inifile_path = tmp_path / "inifile.xml"
+    instanciate_tempalte(
+        src=template_path,
+        args={"operational_model_id": operational_model_id},
+        dest=inifile_path,
+    )
+    copy_files(
+        sources=[input_location / "geometry.xml"],
+        dest=tmp_path,
+    )
+    jpscore_driver = JpsCoreDriver(
+        jpscore_path=env.jpscore_path, working_directory=tmp_path
+    )
+    jpscore_driver.run()
+    trajectories = load_trajectory(jpscore_driver.traj_file)
+    assert trajectories.runtime() <= 45.0
