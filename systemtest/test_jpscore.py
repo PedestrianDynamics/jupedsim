@@ -341,6 +341,63 @@ def test_juelich_3_single_pedestrian_moving_in_a_corridor_with_a_desired_directi
     assert numpy.any(agent_path[:, 2] > 8.5)
 
 
+@pytest.mark.parametrize(
+    "operational_model_id",
+    [
+        1,
+        3,
+    ],
+)
+def test_juelich_4_single_pedestrian_moving_in_a_corridor_with_obstacle(
+    tmp_path, env, operational_model_id
+):
+    """
+    Two pedestrians are aligned in the same room. The second pedestrian from left is standing and will not move during the test.
+    Expected result: Pedestrian left should be able to overtake the standing pedestrian.
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    :param operational_model_id this test is parametrized for two models, the
+           ids have to match the model ids in the template file
+    """
+    input_location = env.systemtest_path / "juelich_tests" / "test_4"
+    template_path = input_location / "inifile.template"
+    inifile_path = tmp_path / "inifile.xml"
+    instanciate_tempalte(
+        src=template_path,
+        args={"operational_model_id": operational_model_id},
+        dest=inifile_path,
+    )
+
+    copy_files(sources=[input_location / "geometry.xml"], dest=tmp_path)
+    jpscore_driver = JpsCoreDriver(
+        jpscore_path=env.jpscore_path, working_directory=tmp_path
+    )
+    jpscore_driver.run()
+    trajectories = load_trajectory(jpscore_driver.traj_file)
+
+    agent_path3 = trajectories.path(3)
+    agent_path4 = trajectories.path(4)
+
+    x_1 = agent_path3[:, 2]
+    y_1 = agent_path3[:, 3]
+
+    x_2 = agent_path4[:, 2]
+    y_2 = agent_path4[:, 3]
+
+    eps = 0.3  # 10 cm
+    x_min = x_2[0] - eps
+    x_max = x_2[0] + eps
+    y_min = y_2[0] - eps
+    y_max = y_2[0] + eps
+
+    lx = numpy.logical_and(x_1 > x_min, x_1 < x_max)
+    ly = numpy.logical_and(y_1 > y_min, y_1 < y_max)
+
+    overlap = (lx*ly).any()
+    assert not overlap
+
+
 def test_juelich_5_single_pedestrian_moving_in_a_very_narrow_corridor_with_an_obstacle(
     tmp_path, env
 ):
