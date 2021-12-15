@@ -338,4 +338,43 @@ def test_juelich_3_single_pedestrian_moving_in_a_corridor_with_a_desired_directi
     agent_path = trajectories.path(2)
 
     assert trajectories.runtime() < 10.0
-    assert numpy.any(numpy.where(agent_path[:, 2] > 8.5))
+    assert numpy.any(agent_path[:, 2] > 8.5)
+
+
+def test_juelich_5_single_pedestrian_moving_in_a_very_narrow_corridor_with_an_obstacle(
+    tmp_path, env
+):
+    """
+    This test is Similar to test 4. Two pedestrians are aligned in the same
+    room. The second pedestrian from left is standing and will not move during
+    the test. The corridor is narrow and does not allow passing of two
+    pedestians without serious overlapping.
+
+    Expected result: Pedestrian left should stop without overlapping with the
+    standing pedestrian.
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    """
+    input_location = env.systemtest_path / "juelich_tests" / "test_5"
+    copy_files(
+        sources=[
+            input_location / "geometry.xml",
+            input_location / "inifile.xml",
+        ],
+        dest=tmp_path,
+    )
+    jpscore_driver = JpsCoreDriver(
+        jpscore_path=env.jpscore_path, working_directory=tmp_path
+    )
+    jpscore_driver.run()
+    trajectories = load_trajectory(jpscore_driver.traj_file)
+    immobile_agent_path = trajectories.path(4)
+    agent_path = trajectories.path(3)
+
+    distances = numpy.sqrt(
+        (agent_path[:, 2] - immobile_agent_path[:, 2]) ** 2
+        + (agent_path[:, 3] - immobile_agent_path[:, 3]) ** 2
+    )
+
+    assert numpy.all(distances >= 0.4)
