@@ -272,3 +272,70 @@ def test_juelich_2_single_pedestrian_moving_in_a_corridor(
     v_expected = 1.0
     time_limit = (beeline_distance / v_expected) + 0.1
     assert trajectories.runtime() <= time_limit
+
+
+@pytest.mark.parametrize(
+    "exit_crossing_strategy",
+    [
+        1,
+        3,
+    ],
+)
+@pytest.mark.parametrize(
+    "seed",
+    [
+        1.0,
+        527.2631578947369,
+        1053.5263157894738,
+        1579.7894736842106,
+        2106.0526315789475,
+        2632.315789473684,
+        3158.5789473684213,
+        3684.8421052631584,
+        4211.105263157895,
+        4737.368421052632,
+        5263.631578947368,
+        5789.894736842106,
+        6316.1578947368425,
+        6842.421052631579,
+        7368.684210526317,
+        7894.947368421053,
+        8421.21052631579,
+        8947.473684210527,
+        9473.736842105263,
+        10000.0,
+    ],
+)
+def test_juelich_3_single_pedestrian_moving_in_a_corridor_with_a_desired_direction(
+    tmp_path, env, seed, exit_crossing_strategy
+):
+    """
+    A pedestrian is started from a random position in a holding area. This test
+    should be repeated with different initial positions. Expected result: The
+    pedestrians should be able to reach the marked goal in all repetitions of
+    the test.
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    :param seed: value to use for the simulation
+    :param exit_crossing_strategy: exit strategy id to use
+    """
+    input_location = env.systemtest_path / "juelich_tests" / "test_3"
+    template_path = input_location / "inifile.template"
+    inifile_path = tmp_path / "inifile.xml"
+    instanciate_tempalte(
+        src=template_path,
+        args={"seed": seed, "exit_crossing_strategy": exit_crossing_strategy},
+        dest=inifile_path,
+    )
+
+    copy_files(sources=[input_location / "geometry.xml"], dest=tmp_path)
+    jpscore_driver = JpsCoreDriver(
+        jpscore_path=env.jpscore_path, working_directory=tmp_path
+    )
+    jpscore_driver.run()
+    trajectories = load_trajectory(jpscore_driver.traj_file)
+    agent_path = trajectories.path(2)
+
+    assert trajectories.runtime() < 10.0
+    assert numpy.any(numpy.where(agent_path[:, 2] > 8.5))
