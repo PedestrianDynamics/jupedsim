@@ -394,7 +394,7 @@ def test_juelich_4_single_pedestrian_moving_in_a_corridor_with_obstacle(
     lx = numpy.logical_and(x_1 > x_min, x_1 < x_max)
     ly = numpy.logical_and(y_1 > y_min, y_1 < y_max)
 
-    overlap = (lx*ly).any()
+    overlap = (lx * ly).any()
     assert not overlap
 
 
@@ -500,3 +500,48 @@ def test_juelich_8_obstacle_avoidance(tmp_path, env, operational_model_id):
     jpscore_driver.run()
     trajectories = load_trajectory(jpscore_driver.traj_file)
     assert trajectories.runtime() <= 45.0
+
+
+@pytest.mark.parametrize(
+    "operational_model_id",
+    [
+        1,
+        3,
+    ],
+)
+def test_juelich_12_obstructed_visibility(tmp_path, env, operational_model_id):
+    """
+    Four pedestrians being simulated in a bottleneck. Pedestrians 0 and 1 have
+    zero desired speed i.e. they will not move during the simulation whereas
+    pedestrians 2 and 3 are heading towards the exit.
+    The visibility between pedestrians 2 resp. 3 and 0 resp. 2 is obstructed
+    by a wall resp. an obstacle.
+    Expected results: Pedestrians 2 and 3 should not deviate from
+    the horizontal dashed line.
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    """
+    input_location = env.systemtest_path / "juelich_tests" / "test_12"
+    template_path = input_location / "inifile.template"
+    inifile_path = tmp_path / "inifile.xml"
+    instanciate_tempalte(
+        src=template_path,
+        args={"operational_model_id": operational_model_id},
+        dest=inifile_path,
+    )
+    copy_files(
+        sources=[input_location / "geometry.xml"],
+        dest=tmp_path,
+    )
+    jpscore_driver = JpsCoreDriver(
+        jpscore_path=env.jpscore_path, working_directory=tmp_path
+    )
+    jpscore_driver.run()
+
+    trajectories = load_trajectory(jpscore_driver.traj_file)
+    agent_path = trajectories.path(2)
+    y = agent_path[:, 3]
+    dy = numpy.sum(numpy.abs(numpy.diff(y)))
+    tolerance = 0.005
+    assert dy < tolerance
