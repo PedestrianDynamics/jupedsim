@@ -509,6 +509,74 @@ def test_juelich_8_obstacle_avoidance(tmp_path, env, operational_model_id):
         3,
     ],
 )
+def test_juelich_11_geo_room_subroom_structure(
+    tmp_path, env, operational_model_id
+):
+    """
+    The same geometry is constructed differently The whole geometry is designed
+    as a rooms (i.e. utility space) The geometry is designed by dividing the
+    utility space in connected subrooms. Distribute randomly pedestrians in all
+    sub-rooms of the geometry and repeat the simulation to get a certain
+    statistical significance.
+    Expected results: The mean value of the evacuation times calculated from
+    both cases should not differ.
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    """
+    input_location = env.systemtest_path / "juelich_tests" / "test_11"
+    template_path_a = input_location / "inifile_a.template"
+    template_path_b = input_location / "inifile_b.template"
+    tmp_path_a = tmp_path / "a"
+    tmp_path_b = tmp_path / "b"
+    tmp_path_a.mkdir()
+    tmp_path_b.mkdir()
+
+    inifile_path_a = tmp_path_a / "inifile.xml"
+    instanciate_tempalte(
+        src=template_path_a,
+        args={"operational_model_id": operational_model_id},
+        dest=inifile_path_a,
+    )
+    copy_files(
+        sources=[input_location / "geometry_a.xml"],
+        dest=tmp_path_a,
+    )
+
+    inifile_path_b = tmp_path_b / "inifile.xml"
+    instanciate_tempalte(
+        src=template_path_b,
+        args={"operational_model_id": operational_model_id},
+        dest=inifile_path_b,
+    )
+    copy_files(
+        sources=[input_location / "geometry_b.xml"],
+        dest=tmp_path_b,
+    )
+
+    jpscore_driver_a = JpsCoreDriver(
+        jpscore_path=env.jpscore_path, working_directory=tmp_path_a
+    )
+    jpscore_driver_a.run()
+
+    jpscore_driver_b = JpsCoreDriver(
+        jpscore_path=env.jpscore_path, working_directory=tmp_path_b
+    )
+    jpscore_driver_b.run()
+
+    trajectories_a = load_trajectory(jpscore_driver_a.traj_file)
+    trajectories_b = load_trajectory(jpscore_driver_b.traj_file)
+
+    assert numpy.allclose(trajectories_a.data, trajectories_b.data, 0.001)
+
+
+@pytest.mark.parametrize(
+    "operational_model_id",
+    [
+        1,
+        3,
+    ],
+)
 def test_juelich_12_obstructed_visibility(tmp_path, env, operational_model_id):
     """
     Four pedestrians being simulated in a bottleneck. Pedestrians 0 and 1 have
