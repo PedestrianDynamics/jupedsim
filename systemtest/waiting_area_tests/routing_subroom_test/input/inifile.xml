@@ -1,15 +1,10 @@
-<JuPedSim xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" project="JPS-Project" version="0.7" xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
-
+<JuPedSim xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" project="JPS-Project" version="0.7">
     <header>
         <seed>1.0</seed>
         <max_sim_time>100</max_sim_time>
-        <geometry>../geometry.xml</geometry>
-        <trajectories format="plain" fps="10">
-            <file location="trajectories.xml" />
-        </trajectories>
+        <geometry>geometry.xml</geometry>
+        <trajectories format="plain" fps="10" />
     </header>
-
-
     <routing>
         <goals>
             <waiting_area caption="wa1" id="1" is_open="true" max_peds="1000" min_peds="1" room_id="0" subroom_id="2" waiting_time="0">
@@ -34,14 +29,12 @@
             </waiting_area>
         </goals>
     </routing>
-
     <agents operational_model_id="3">
         <agents_distribution>
             <group agent_parameter_id="1" goal_id="-1" group_id="0" number="1" room_id="0" router_id="1" subroom_id="0" />
             <group agent_parameter_id="1" goal_id="1" group_id="1" number="1" room_id="0" router_id="1" subroom_id="0" />
         </agents_distribution>
     </agents>
-
     <operational_models>
         <model description="Tordeux2015" operational_model_id="3">
             <model_parameters>
@@ -61,18 +54,9 @@
                 <atau mu="0.0" sigma="0.00000" />
                 <T mu="1" sigma="0.001" />
             </agent_parameters>
-
         </model>
     </operational_models>
-
     <route_choice_models>
-        <router description="ff_global_shortest" router_id="1">
-            <parameters>
-                <write_VTK_files>true</write_VTK_files>
-                <!-- <navigation_lines file="corner_routing.xml" /> -->
-            </parameters>
-        </router>
-
+        <router description="ff_global_shortest" router_id="1" />
     </route_choice_models>
-
 </JuPedSim>

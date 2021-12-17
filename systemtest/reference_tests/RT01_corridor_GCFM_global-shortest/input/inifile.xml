@@ -6,9 +6,7 @@
         <seed>1254</seed>
         <max_sim_time>400</max_sim_time>
         <geometry>corridor_geo.xml</geometry>
-        <trajectories format="plain" fps="8" color_mode="group">
-            <file location="traj.txt" />
-        </trajectories>
+        <trajectories format="plain" fps="8" color_mode="group" />
     </header>
     <agents operational_model_id="1">
         <agents_distribution>

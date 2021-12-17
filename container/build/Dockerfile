@@ -24,8 +24,8 @@ RUN apt-get update && \
 
 RUN cd /usr/bin && ln -s pytest-3 pytest
 
-COPY scripts/setup-deps.sh /opt/
+COPY scripts/setup-deps.sh requirements.txt /opt/
 
 RUN cd /opt && ./setup-deps.sh && ./setup-deps.sh --install-path /opt/windows-deps --compile-for-windows
 
-RUN pip3 install dataclasses
+RUN pip3 install -r /opt/requirements.txt

@@ -1,33 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JuPedSim project="Test3" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-
-    <!-- seed used for initialising random generator -->
     <seed>1</seed>
-    <!-- maximal simulation time -->
-    <num_threads>4</num_threads>
     <max_sim_time unit="sec">100</max_sim_time>
-    <!-- geometry file -->
-    <geometry>../geometry.xml</geometry>
-    <!-- traectories file and format -->
-    <trajectories format="plain" embed_mesh="false" fps="8">
-        <file location="Traj_test_11.txt" />
+    <geometry>geometry_b.xml</geometry>
+    <trajectories fps="8">
     </trajectories>
-    <!-- where to store the logs -->
-    <!--logfile>log</logfile-->
-
-    <!-- traffic information: e.g closed doors or smoked rooms -->
-    <traffic_constraints>
-        <!-- room states are: good or smoked -->
-        <rooms>
-            <room room_id="0" state="good" />
-        </rooms>
-
-        <!-- doors states are: close or open -->
-        <doors></doors>
-
-    </traffic_constraints>
-
     <routing>
         <goals>
             <goal id="0" final="true" caption="goal 0">
@@ -41,22 +19,16 @@
             </goal>
         </goals>
     </routing>
-
-
-    <!--persons information and distribution -->
-    <agents operational_model_id="[1,3]">
+    <agents operational_model_id="{{ operational_model_id }}">
         <agents_distribution>
             <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="0" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max="" />
-            <group group_id="1" agent_parameter_id="0" room_id="0" subroom_id="1" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max="" />
-            <group group_id="2" agent_parameter_id="0" room_id="0" subroom_id="2" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max="" />
-            <group group_id="3" agent_parameter_id="0" room_id="0" subroom_id="3" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max="" />
-            <group group_id="4" agent_parameter_id="0" room_id="0" subroom_id="4" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max="" />
-            <group group_id="5" agent_parameter_id="0" room_id="0" subroom_id="5" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max="" />
-            <group group_id="6" agent_parameter_id="0" room_id="0" subroom_id="6" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max="" />
+            <group group_id="1" agent_parameter_id="0" room_id="1" subroom_id="0" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max="" />
+            <group group_id="2" agent_parameter_id="0" room_id="2" subroom_id="0" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max="" />
+            <group group_id="3" agent_parameter_id="0" room_id="3" subroom_id="0" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max="" />
+            <group group_id="4" agent_parameter_id="0" room_id="4" subroom_id="0" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max="" />
+            <group group_id="5" agent_parameter_id="0" room_id="5" subroom_id="0" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max="" />
+            <group group_id="6" agent_parameter_id="0" room_id="6" subroom_id="0" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max="" />
         </agents_distribution>
-
-        <!-- frequency in persons/minute -->
-        <agents_sources />
     </agents>
 
     <operational_models>

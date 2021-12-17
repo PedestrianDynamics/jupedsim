@@ -14,7 +14,7 @@ class JpsCoreDriver:
         self.jpscore_path = jpscore_path
         self.result = None
         self.logfile = self.working_directory / "logfile.txt"
-        self.traj_file = self.working_directory / "results/traj.txt"
+        self.traj_file = self.working_directory / "results/trajectories.txt"
 
     def run(self):
         with open(self.logfile, "w") as logfile:

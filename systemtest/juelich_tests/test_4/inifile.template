@@ -1,31 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-
-    <max_sim_time>20</max_sim_time>
-    <!-- seed used for initialising random generator -->
-    <seed>1</seed>
-    <num_threads>8</num_threads>
-    <!-- geometry file -->
-    <geometry>../geometry.xml</geometry>
-    <!-- traectories file and format -->
-    <trajectories format="plain" embed_mesh="false" fps="33">
-        <file location="Traj_test_4.txt"/>
+  <max_sim_time>20</max_sim_time>
+  <seed>1</seed>
+  <geometry>geometry.xml</geometry>
+  <trajectories fps="33">
   </trajectories>
-  <!-- where to store the logs -->
-  <logfile>log</logfile>
-
-  <!-- traffic information: e.g closed doors or smoked rooms -->
-  <traffic_constraints>
-    <!-- room states are: good or smoked -->
-    <rooms>
-      <room room_id="0" state="good" />
-    </rooms>
-    <!-- doors states are: close or open -->
-    <doors>
-      <door trans_id="0" caption="" state="open" />
-    </doors>
-  </traffic_constraints>
   <routing>
     <goals>
       <goal id="0" final="true" caption="goal">
@@ -39,18 +19,13 @@
       </goal>
     </goals>
   </routing>
-
-  <!--persons information and distribution -->
-  <agents operational_model_id="[1,3]">
+  <agents operational_model_id="{{ operational_model_id }}">
     <agents_distribution>
-      <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="0" number="1" start_x="2" start_y="2.2"  goal_id="0" router_id="1" />
-      <group group_id="1"  agent_parameter_id="1"  room_id="0" subroom_id="0" number="1" start_x="4" start_y="2"  goal_id="0" router_id="1" />
+      <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="0" number="1" startX="2" startY="2.2"  goal_id="0" router_id="1" />
+      <group group_id="1"  agent_parameter_id="1"  room_id="0" subroom_id="0" number="1" startX="4" startY="2"  goal_id="0" router_id="1" />
     </agents_distribution>
-    <!-- frequency in persons/minute -->
     <agents_sources/>
   </agents>
-
-
   <operational_models >
     <model operational_model_id="3" description="Tordeux2015">
       <model_parameters>
@@ -69,17 +44,6 @@
         <atau mu="0.0" sigma="0.00000" />
         <T mu="1" sigma="0.001"/>
       </agent_parameters>
-
-      <agent_parameters agent_parameter_id="1">
-        <v0 mu="0" sigma="0.0" />
-        <bmax mu="0.15" sigma="0.00000" /> <!-- this is l, assuming peds are circles with constant radius-->
-        <bmin mu="0.15" sigma="0.00000" />
-        <amin mu="0.15" sigma="0.00000" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.0" sigma="0.00000" />
-        <T mu="1" sigma="0.001"/>
-      </agent_parameters>
-
       <agent_parameters agent_parameter_id="1">
         <v0 mu="0" sigma="0.0" />
         <bmax mu="0.15" sigma="0.00000" /> <!-- this is l, assuming peds are circles with constant radius-->
@@ -117,12 +81,8 @@
       </agent_parameters>
     </model>
   </operational_models>
-
   <route_choice_models>
     <router router_id="1" description="global_shortest">
-      <parameters>
-        <!-- <navigation_lines file="routing.xml" /> -->
-      </parameters>
     </router>
   </route_choice_models>
 

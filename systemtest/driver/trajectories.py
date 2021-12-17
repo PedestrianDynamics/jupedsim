@@ -1,6 +1,6 @@
 import pathlib
 import re
-from numpy import ndarray
+from numpy import ndarray, where, max, count_nonzero
 import pandas as pd
 from dataclasses import dataclass
 
@@ -10,6 +10,18 @@ class Trajectories:
     framerate: float
     count_agents: int
     data: ndarray
+
+    def path(self, id: int) -> ndarray:
+        return self.data[where(self.data[:, 0] == id)]
+
+    def runtime(self):
+        return max(self.data[:, 1]) / self.framerate
+
+    def frame_count(self):
+        return self.data[-1, 1] + 1
+
+    def agent_count_in_frame(self, frame_index: int):
+        return count_nonzero(self.data[:, 1] == frame_index - 1)
 
 
 def load_trajectory(traj_file: pathlib.Path):

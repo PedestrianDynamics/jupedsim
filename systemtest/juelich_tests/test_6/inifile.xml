@@ -1,25 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <max_sim_time>90</max_sim_time>
     <seed>1</seed>
-    <max_sim_time unit="sec">100</max_sim_time>
     <geometry>geometry.xml</geometry>
-    <trajectories format="plain" fps="20" />
+    <trajectories format="plain" fps="50" />
+    <traffic_constraints>
+        <doors>
+            <door trans_id="0" caption="" state="open" />
+        </doors>
+    </traffic_constraints>
     <routing>
         <goals>
-            <goal id="0" final="true" caption="goal 0">
+            <goal id="0" final="true" caption="goal">
                 <polygon>
-                    <vertex px="14.0" py="2.0" />
-                    <vertex px="14.0" py="3.0" />
-                    <vertex px="15.0" py="3.0" />
-                    <vertex px="15.0" py="2.0" />
-                    <vertex px="14.0" py="2.0" />
+                    <vertex px="14" py="4" />
+                    <vertex px="14" py="0" />
+                    <vertex px="13" py="0" />
+                    <vertex px="13" py="4" />
+                    <vertex px="14" py="4" />
                 </polygon>
             </goal>
         </goals>
     </routing>
     <agents operational_model_id="3">
         <agents_distribution>
-            <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="0" number="1" goal_id="-1" router_id="1" startX="2" startY="2" />
+            <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="0" number="1" startX="1" startY="2" goal_id="0" router_id="1" />
         </agents_distribution>
     </agents>
     <operational_models>
@@ -32,11 +37,11 @@
                 <force_wall a="5" D="0.02" />
             </model_parameters>
             <agent_parameters agent_parameter_id="0">
-                <v0 mu="1.0" sigma="0.001" />
+                <v0 mu="1." sigma="0.0" />
                 <bmax mu="0.15" sigma="0.00000" />
                 <bmin mu="0.15" sigma="0.00000" />
                 <amin mu="0.15" sigma="0.00000" />
-                <tau mu="0.8" sigma="0.001" />
+                <tau mu="0.5" sigma="0.001" />
                 <atau mu="0.0" sigma="0.00000" />
                 <T mu="1" sigma="0.001" />
             </agent_parameters>

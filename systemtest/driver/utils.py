@@ -2,6 +2,7 @@ import pathlib
 import os
 import shutil
 import difflib
+from typing import List
 
 from driver.environment import Environment
 from driver.driver import JpsCoreDriver
@@ -72,3 +73,21 @@ def copy_all_files(*, src: pathlib.Path, dest: pathlib.Path):
         pathname = src / filename
         if os.path.isfile(pathname):
             shutil.copy2(pathname, dest)
+
+
+def copy_files(*, sources: List[pathlib.Path], dest: pathlib.Path):
+    """
+    Copies all specified files to the destination folder.
+
+    NOTES:
+    If multiple input files have the same name the later ones will override the
+    previous one in the target destination.
+
+    Only files in 'sources' are copied. Folders are silently ignored.
+
+    :param sources a list of paths to copy
+    :param dest to copy to
+    """
+    for path in sources:
+        if path.is_file():
+            shutil.copy2(path, dest)
