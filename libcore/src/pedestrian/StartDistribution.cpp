@@ -163,7 +163,6 @@ Pedestrian * StartDistribution::GenerateAgent(Building * building, std::vector<P
     ped->SetBuilding(building);
     ped->SetPatienceTime(GetPatience());
     ped->SetPremovementTime(GetPremovementTime());
-    ped->SetRiskTolerance(GetRiskTolerance());
 
     // a und b setzen muss vor v0 gesetzt werden,
     // da sonst v0 mit Null überschrieben wird
@@ -312,24 +311,5 @@ void StartDistribution::InitRiskTolerance(std::string distribution_type, double 
     }
     if(distribution_type == "beta") {
         _risk_beta_dist = boost::math::beta_distribution<>(para1, para2);
-    }
-}
-
-double StartDistribution::GetRiskTolerance()
-{
-    if(_distribution_type == "normal") {
-        if(_riskTolerance.stddev() == judge) {
-            return _riskTolerance.mean();
-        } else {
-            return _riskTolerance(_generator);
-        }
-    } else {
-        std::uniform_real_distribution<float> normalize(0.0, 1.0);
-        float rand_norm = normalize(_generator);
-        if(_distribution_type == "beta") {
-            return quantile(_risk_beta_dist, rand_norm);
-        }
-        LOG_WARNING("Distribution Type invalid or not set. Fallback to uniform distribution");
-        return (double) rand_norm; // todo: ar.graf: check if this quick fix executes and why
     }
 }

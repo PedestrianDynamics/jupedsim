@@ -20,7 +20,6 @@ CreatePedestrianEvent::CreatePedestrianEvent(
     _router_id{agent->GetRouter()->GetID()},
     _patience_time{agent->GetPatienceTime()},
     _premovement_time{agent->GetPremovementTime()},
-    _risk_tolerance{agent->GetRiskTolerance()},
     _ellipse_a_v{agent->GetEllipse().GetAv()},
     _ellipse_a_min{agent->GetEllipse().GetAmin()},
     _ellipse_b_max{agent->GetEllipse().GetBmax()},

@@ -34,7 +34,6 @@ public:
     int _router_id;
     double _patience_time;
     double _premovement_time;
-    double _risk_tolerance;
 
     // Ellipse specific
     double _ellipse_a_v;

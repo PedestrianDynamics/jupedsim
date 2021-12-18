@@ -50,8 +50,7 @@ private:
     int _exitIndex; // current exit
     int _group;
     int _desiredFinalDestination;
-    double _premovement   = 0;
-    double _riskTolerance = 0;
+    double _premovement = 0;
 
     //gcfm specific parameters
     double _mass;      // Mass: 1
@@ -110,9 +109,6 @@ private:
 
     static int _agentsCreated;
 
-    double _fedIn;
-    double _fedHeat;
-
     int _lastGoalID  = -1;
     bool _insideGoal = false;
     bool _waiting    = false;
@@ -160,15 +156,7 @@ public:
     //TODO: merge this two functions
     void SetExitIndex(int i);
     void SetExitLine(const NavLine * l);
-
-    void SetFEDIn(double FED_In);
-    double GetFEDIn() const;
-
-    void SetFEDHeat(double FED_Heat);
-    double GetFEDHeat() const;
-
     void SetDeltaT(double dt);
-
     // Eigenschaften der Ellipse
     void SetPos(const Point & pos); // setzt x und y-Koordinaten
     void SetV(const Point & v);     // setzt x und y-Koordinaten der Geschwindigkeit
@@ -309,20 +297,6 @@ public:
       * Get min Premovement time of all pedestrians
       */
     static double GetMinPremovementTime();
-
-    /**
-      * Set/Get the risk tolerance of a pedestrians.
-      * The value should be in the interval [0 1].
-      * It will be truncated accordingly if not in that interval.
-      */
-    void SetRiskTolerance(double tol);
-
-    /**
-      * Set/Get the risk tolerance of a pedestrians.
-      * The value should be in the interval [0 1].
-      * It will be truncated accordingly if not in that interval.
-      */
-    double GetRiskTolerance() const;
 
     /**
       * return the pedestrian color used for visualiation.

@@ -53,7 +53,6 @@ Pedestrian::Pedestrian()
     _group                           = -1;
     _desiredFinalDestination         = FINAL_DEST_OUT;
     _premovement                     = 0;
-    _riskTolerance                   = 0;
     _mass                            = 1;
     _tau                             = 0.5;
     _t                               = 1.0;
@@ -86,8 +85,6 @@ Pedestrian::Pedestrian()
     _spotlight           = false;
 
     _agentsCreated++; //increase the number of object created
-    _fedIn      = 0.0;
-    _fedHeat    = 0.0;
     _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
 }
 
@@ -138,8 +135,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _routingStrategy = ROUTING_GLOBAL_SHORTEST;
     _lastE0          = Point(0, 0);
     _agentsCreated++; //increase the number of object created
-    _fedIn      = 0.0;
-    _fedHeat    = 0.0;
     _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
 }
 
@@ -276,25 +271,6 @@ void Pedestrian::SetV0Norm(
     _v0UpStairs            = v0UpStairs;
     _v0EscalatorUpStairs   = escalatorUp;
     _v0EscalatorDownStairs = escalatorDown;
-}
-
-
-void Pedestrian::SetFEDIn(double FED_In)
-{
-    _fedIn = FED_In;
-}
-double Pedestrian::GetFEDIn() const
-{
-    return _fedIn;
-}
-
-void Pedestrian::SetFEDHeat(double FED_Heat)
-{
-    _fedHeat = FED_Heat;
-}
-double Pedestrian::GetFEDHeat() const
-{
-    return _fedHeat;
 }
 
 void Pedestrian::SetDeltaT(double dt)
@@ -658,22 +634,6 @@ double Pedestrian::GetMinPremovementTime()
 double Pedestrian::GetPremovementTime() const
 {
     return _premovement;
-}
-
-void Pedestrian::SetRiskTolerance(double tol)
-{
-    if(tol > 1) {
-        tol = 1;
-    }
-    if(tol < 0) {
-        tol = 0;
-    }
-    _riskTolerance = tol;
-}
-
-double Pedestrian::GetRiskTolerance() const
-{
-    return _riskTolerance;
 }
 
 const Building * Pedestrian::GetBuilding()
