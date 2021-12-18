@@ -73,7 +73,6 @@ Pedestrian::Pedestrian()
     _mentalMap                       = std::map<int, int>();
     _destHistory                     = std::vector<int>();
     _lastPosition                    = Point(J_NAN, J_NAN);
-    _distToBlockade                  = 0.0;
     // new orientation after 10 seconds, value is incremented
     _timeBeforeRerouting = 0.0;
     _timeInJam           = 0.0;
@@ -136,7 +135,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
         agentsParameters.GetGroupParameters()->_smoothFactorEscalatorUpStairs;
     _smoothFactorEscalatorDownStairs =
         agentsParameters.GetGroupParameters()->_smoothFactorEscalatorDownStairs;
-    _distToBlockade  = 0.0;
     _routingStrategy = ROUTING_GLOBAL_SHORTEST;
     _lastE0          = Point(0, 0);
     _agentsCreated++; //increase the number of object created
@@ -467,7 +465,7 @@ const Point & Pedestrian::GetV0(const Point & target)
     Point delta       = target - pos;
     Point new_v0      = delta.Normalized();
 
-    double t = _newOrientationDelay++ * _deltaT / (1.0 + 100 * _distToBlockade);
+    double t = _newOrientationDelay++ * _deltaT;
 
     //Handover new target
     _v0 = _v0 + (new_v0 - _v0) * (1 - exp(-t / _tau));

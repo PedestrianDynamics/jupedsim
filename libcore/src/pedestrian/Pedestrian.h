@@ -83,8 +83,6 @@ private:
 
     Point _lastPosition;
 
-    /// distance to nearest obstacle that blocks the sight of ped.
-    double _distToBlockade;
     /// a new orientation starts after this time
     double _timeBeforeRerouting;
     /// actual time im Jam
