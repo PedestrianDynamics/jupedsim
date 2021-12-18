@@ -210,11 +210,6 @@ public:
     double GetTimeInJam() const;
     int GetFinalDestination() const;
 
-    /**
-      * @return all previous destinations used by this pedestrian
-      */
-    const std::vector<int> & GetLastDestinations() const;
-
     RoutingStrategy GetRoutingStrategy() const;
     int GetUniqueRoomID() const;
     int GetNextDestination();

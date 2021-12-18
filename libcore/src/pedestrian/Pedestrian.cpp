@@ -346,11 +346,6 @@ void Pedestrian::SetLastE0(Point E0)
     _lastE0 = E0;
 }
 
-const std::vector<int> & Pedestrian::GetLastDestinations() const
-{
-    return _destHistory;
-}
-
 const Point & Pedestrian::GetPos() const
 {
     return _ellipse.GetCenter();
