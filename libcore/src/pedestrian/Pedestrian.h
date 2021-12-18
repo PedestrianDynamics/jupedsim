@@ -100,7 +100,6 @@ private:
     // the current time in the simulation
     static double _minPremovementTime;
     static AgentColorMode _colorMode;
-    bool _spotlight;
 
     /// the router responsible for this pedestrian
     Router * _router;
@@ -263,20 +262,6 @@ public:
       * Small values will increase the frequency of looking for alternative
       */
     void SetPatienceTime(double patienceTime);
-
-    /**
-      * Set/Get the spotlight value. If true,
-      * this pedestrians will be coloured and all other grey out.
-      * @param spotlight true for enabling, false for disabling
-      */
-    [[maybe_unused]] void SetSpotlight(bool spotlight);
-
-    /**
-      * Set/Get the spotlight value. If true,
-      * this pedestrians will be coloured and all other grey out.
-      * @param spotlight true for enabling, false for disabling
-      */
-    bool GetSpotlight() const;
 
     /***
       * Set/Get the time after which this pedestrian will start taking actions.

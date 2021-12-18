@@ -82,8 +82,6 @@ Pedestrian::Pedestrian()
     _reroutingEnabled    = false;
     _router              = nullptr;
     _building            = nullptr;
-    _spotlight           = false;
-
     _agentsCreated++; //increase the number of object created
     _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
 }
@@ -121,7 +119,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _lastPosition            = Point(0, 0);
     _recordingTime           = 20; //seconds
     _group                   = -1;
-    _spotlight               = false;
     _v0UpStairs              = 0.6;
     _v0DownStairs            = 0.6;
     _v0EscalatorUpStairs     = 0.8;
@@ -641,16 +638,6 @@ void Pedestrian::SetBuilding(Building * building)
     _building = building;
 }
 
-void Pedestrian::SetSpotlight(bool spotlight)
-{
-    _spotlight = spotlight;
-}
-
-bool Pedestrian::GetSpotlight() const
-{
-    return _spotlight;
-}
-
 void Pedestrian::SetColorMode(AgentColorMode mode)
 {
     _colorMode = mode;
@@ -667,13 +654,6 @@ int Pedestrian::GetColor() const
     std::string key;
 
     switch(_colorMode) {
-        case BY_SPOTLIGHT: {
-            if(!_spotlight) {
-                return -1;
-            }
-            break;
-        }
-
         case BY_VELOCITY: {
             int color = -1;
             double v0 = _ellipse.GetV0();
