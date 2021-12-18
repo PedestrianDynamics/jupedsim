@@ -78,8 +78,6 @@ private:
 
     NavLine * _navLine;            // current exit line
     std::map<int, int> _mentalMap; // map the actual room to a destination
-    std::vector<int> _destHistory;
-
     Point _lastPosition;
 
     /// a new orientation starts after this time

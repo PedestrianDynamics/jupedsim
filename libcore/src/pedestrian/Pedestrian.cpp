@@ -70,7 +70,6 @@ Pedestrian::Pedestrian()
     _lastE0                          = Point(0, 0);
     _navLine                         = nullptr;
     _mentalMap                       = std::map<int, int>();
-    _destHistory                     = std::vector<int>();
     _lastPosition                    = Point(J_NAN, J_NAN);
     // new orientation after 10 seconds, value is incremented
     _timeBeforeRerouting = 0.0;
@@ -113,7 +112,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _patienceTime            = 5.0; // time after which the ped feels to be in jam
     _desiredFinalDestination = FINAL_DEST_OUT;
     _mentalMap               = std::map<int, int>();
-    _destHistory             = std::vector<int>();
     _deltaT                  = 0.01;
     _v0                      = Point(0, 0);
     _lastPosition            = Point(0, 0);
