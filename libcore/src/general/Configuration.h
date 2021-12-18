@@ -132,10 +132,6 @@ public:
 
     void Setdt(double dT) { _dT = dT; };
 
-    int IsPeriodic() const { return _isPeriodic; };
-
-    void SetIsPeriodic(int isPeriodic) { _isPeriodic = isPeriodic; };
-
     double GetNuPed() const { return _nuPed; };
 
     void SetNuPed(double nuPed) { _nuPed = nuPed; };

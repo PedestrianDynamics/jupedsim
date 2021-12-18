@@ -53,9 +53,7 @@ private:
 
     bool ParseLinkedCells(const TiXmlNode & linkedCellNode);
 
-    bool ParseStepSize(TiXmlNode & stepNode);
-
-    bool ParsePeriodic(TiXmlNode & Node);
+    bool ParseStepSize(const TiXmlNode & stepNode);
 
     bool ParseStrategyNodeToObject(const TiXmlNode & strategyNode);
 

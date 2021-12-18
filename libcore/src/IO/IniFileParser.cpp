@@ -525,10 +525,6 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement * xVelocity, TiXmlElement * 
     if(!ParseLinkedCells(*xModelPara))
         return false;
 
-    //periodic
-    if(!ParsePeriodic(*xModelPara))
-        return false;
-
     //force_ped
     if(xModelPara->FirstChild("force_ped")) {
         if(!xModelPara->FirstChildElement("force_ped")->Attribute("a"))
@@ -786,7 +782,7 @@ bool IniFileParser::ParseLinkedCells(const TiXmlNode & linkedCellNode)
     return false;
 }
 
-bool IniFileParser::ParseStepSize(TiXmlNode & stepNode)
+bool IniFileParser::ParseStepSize(const TiXmlNode & stepNode)
 {
     if(stepNode.FirstChild("stepsize")) {
         const char * stepsize = stepNode.FirstChild("stepsize")->FirstChild()->Value();
@@ -828,20 +824,6 @@ bool IniFileParser::ParseStepSize(TiXmlNode & stepNode)
         }
     }
     return false;
-}
-
-bool IniFileParser::ParsePeriodic(TiXmlNode & Node)
-{
-    if(Node.FirstChild("periodic")) {
-        const char * periodic = Node.FirstChild("periodic")->FirstChild()->Value();
-        if(periodic)
-            _config->SetIsPeriodic(atoi(periodic));
-        LOG_INFO("Periodic <{}>", _config->IsPeriodic());
-        return true;
-    } else {
-        _config->SetIsPeriodic(0);
-    }
-    return true; //default is periodic=0. If not specified than is OK
 }
 
 bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)

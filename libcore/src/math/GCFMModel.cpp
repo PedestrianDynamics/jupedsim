@@ -61,11 +61,7 @@ GCFMModel::GCFMModel(
     _distEffMaxWall = dist_effWall;
 }
 
-void GCFMModel::ComputeNextTimeStep(
-    double current,
-    double deltaT,
-    Building * building,
-    int periodic)
+void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building * building)
 {
     double delta = 1.5;
 
@@ -84,12 +80,11 @@ void GCFMModel::ComputeNextTimeStep(
             fprintf(
                 stderr,
                 "GCFMModel::calculateForce() WARNING: actual velocity (%f) of iped %d "
-                "is bigger than desired velocity (%f) at time: %fs (periodic=%d)\n",
+                "is bigger than desired velocity (%f) at time: %fs\n",
                 sqrt(normVi),
                 ped->GetID(),
                 ped->GetV0Norm(),
-                current,
-                periodic);
+                current);
             // remove the pedestrian and abort
             pedestrians_to_delete.emplace_back(ped->GetID());
             // TODO KKZ track deleted peds
