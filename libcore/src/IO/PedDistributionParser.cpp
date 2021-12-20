@@ -66,7 +66,6 @@ bool PedDistributionParser::LoadPedDistribution(
         int goal_id              = xmltoi(e->Attribute("goal_id"), FINAL_DEST_OUT);
         int router_id            = xmltoi(e->Attribute("router_id"), -1);
         int route_id             = xmltoi(e->Attribute("route_id"), -1);
-        double patience          = xmltof(e->Attribute("patience"), 5);
         double premovement_mean  = xmltof(e->Attribute("pre_movement_mean"), 0);
         double premovement_sigma = xmltof(e->Attribute("pre_movement_sigma"), 0);
         double x_min             = xmltof(e->Attribute("x_min"), -FLT_MAX);
@@ -97,7 +96,6 @@ bool PedDistributionParser::LoadPedDistribution(
         dis->SetGoalId(goal_id);
         dis->SetRouteId(route_id);
         dis->SetRouterId(router_id);
-        dis->SetPatience(patience);
         dis->InitPremovementTime(premovement_mean, premovement_sigma);
 
         if(e->Attribute("risk_tolerance_mean") && e->Attribute("risk_tolerance_sigma")) {

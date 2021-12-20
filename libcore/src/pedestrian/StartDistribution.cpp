@@ -45,7 +45,6 @@ StartDistribution::StartDistribution(int seed)
     _startX             = NAN;
     _startY             = NAN;
     _startZ             = NAN;
-    _patience           = 5;
     _xMin               = -FLT_MAX;
     _xMax               = FLT_MAX;
     _yMin               = -FLT_MAX;
@@ -161,7 +160,6 @@ Pedestrian * StartDistribution::GenerateAgent(Building * building, std::vector<P
     ped->SetGroup(GetGroupId());
     ped->SetRouter(building->GetRoutingEngine()->GetRouter(_routerID));
     ped->SetBuilding(building);
-    ped->SetPatienceTime(GetPatience());
     ped->SetPremovementTime(GetPremovementTime());
 
     // a und b setzen muss vor v0 gesetzt werden,
@@ -245,16 +243,6 @@ void StartDistribution::SetStartPosition(double x, double y, double z)
 Point StartDistribution::GetStartPosition() const
 {
     return Point(_startX, _startY);
-}
-
-double StartDistribution::GetPatience() const
-{
-    return _patience;
-}
-
-void StartDistribution::SetPatience(double patience)
-{
-    _patience = patience;
 }
 
 AgentsParameters * StartDistribution::GetGroupParameters() const

@@ -32,7 +32,6 @@ public:
     int _final_destination;
     int _group_id;
     int _router_id;
-    double _patience_time;
     double _premovement_time;
 
     // Ellipse specific

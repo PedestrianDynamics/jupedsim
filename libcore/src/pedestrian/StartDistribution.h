@@ -48,9 +48,6 @@ private:
     int _routeID;
     int _subroomID;
     int _subroomUID;
-    //demographic parameters
-    //TODO: should also follow a distribution, see _premovement
-    double _patience;
 
     //force model parameters
     AgentsParameters * _groupParameters;
@@ -103,8 +100,6 @@ public:
     void SetRouterId(int routerId);
     void SetStartPosition(double x, double y, double z);
     Point GetStartPosition() const;
-    double GetPatience() const;
-    void SetPatience(double patience);
     void SetBounds(double xMin, double xMax, double yMin, double yMax);
     void Getbounds(double bounds[4]);
     void Setbounds(double bounds[4]);

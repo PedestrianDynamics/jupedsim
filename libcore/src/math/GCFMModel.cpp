@@ -132,13 +132,6 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building * bu
     for(const auto & ped : allPeds) {
         Point v_neu   = ped->GetV() + result_acc[counter] * deltaT;
         Point pos_neu = ped->GetPos() + v_neu * deltaT;
-        //Jam is based on the current velocity
-        if(v_neu.Norm() >= J_EPS_V) {
-            ped->ResetTimeInJam();
-        } else {
-            ped->UpdateTimeInJam();
-        }
-
         if(!ped->InPremovement(current)) {
             ped->SetPos(pos_neu);
             ped->SetV(v_neu);

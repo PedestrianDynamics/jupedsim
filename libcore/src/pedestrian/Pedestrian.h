@@ -82,10 +82,6 @@ private:
 
     /// a new orientation starts after this time
     double _timeBeforeRerouting;
-    /// actual time im Jam
-    double _timeInJam;
-    /// time after which the ped feels to be in jam
-    double _patienceTime;
     /// data from the last <_recordingTime> seconds will be kept
     double _recordingTime;
     /// routing strategy followed
@@ -241,26 +237,6 @@ public:
       */
     std::string ToString() const;
 
-    /**
-      * @return true if the time spent in jam exceed the patience time
-      * @see GetPatienceTime
-      */
-    bool IsFeelingLikeInJam() const;
-
-    /**
-      * Set/Get the patience time.
-      * Higher value will cause the agent to almost never changes its current path.
-      * Small values will increase the frequency of looking for alternative
-      */
-    double GetPatienceTime() const;
-
-    /**
-      * Set/Get the patience time.
-      * Higher value will cause the agent to almost never changes its current path.
-      * Small values will increase the frequency of looking for alternative
-      */
-    void SetPatienceTime(double patienceTime);
-
     /***
       * Set/Get the time after which this pedestrian will start taking actions.
       */
@@ -283,8 +259,6 @@ public:
       */
     int GetColor() const;
 
-    void ResetTimeInJam();
-    void UpdateTimeInJam();
     void UpdateReroutingTime();
     void RerouteIn(double time);
     bool IsReadyForRerouting() const;

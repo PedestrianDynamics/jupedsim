@@ -73,9 +73,7 @@ Pedestrian::Pedestrian()
     _lastPosition                    = Point(J_NAN, J_NAN);
     // new orientation after 10 seconds, value is incremented
     _timeBeforeRerouting = 0.0;
-    _timeInJam           = 0.0;
-    _patienceTime        = 5.0; // time after which the ped feels to be in jam
-    _recordingTime       = 20;  //seconds
+    _recordingTime       = 20; //seconds
     _routingStrategy     = ROUTING_GLOBAL_SHORTEST;
     _newOrientationDelay = 0; //0 seconds, in steps
     _reroutingEnabled    = false;
@@ -91,7 +89,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _premovement(agentsParameters.GetPremovementTime()),
     _lastPosition(),
 
-    _patienceTime(agentsParameters.GetPatience()),
     _router(building.GetRoutingEngine()->GetRouter(agentsParameters.GetRouterId())),
     _building(&building)
 {
@@ -108,8 +105,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     // new orientation after 10 seconds, value is incremented
     _timeBeforeRerouting     = 0.0;
     _reroutingEnabled        = false;
-    _timeInJam               = 0.0;
-    _patienceTime            = 5.0; // time after which the ped feels to be in jam
     _desiredFinalDestination = FINAL_DEST_OUT;
     _mentalMap               = std::map<int, int>();
     _deltaT                  = 0.01;
@@ -438,30 +433,9 @@ const Point & Pedestrian::GetV0(const Point & target)
     return _v0;
 }
 
-double Pedestrian::GetTimeInJam() const
-{
-    return _timeInJam;
-}
-
 void Pedestrian::SetSmoothTurning()
 {
     _newOrientationDelay = 0;
-}
-
-bool Pedestrian::IsFeelingLikeInJam() const
-{
-    return (_patienceTime < _timeInJam);
-}
-
-//reduce the felt time in Jam by half
-void Pedestrian::ResetTimeInJam()
-{
-    _timeInJam = 0.0;
-}
-
-void Pedestrian::UpdateTimeInJam()
-{
-    _timeInJam += _deltaT;
 }
 
 void Pedestrian::UpdateReroutingTime()
@@ -596,16 +570,6 @@ int Pedestrian::FindRoute()
 double Pedestrian::GetElevation() const
 {
     return _building->GetSubRoom(GetPos())->GetElevation(GetPos());
-}
-
-double Pedestrian::GetPatienceTime() const
-{
-    return _patienceTime;
-}
-
-void Pedestrian::SetPatienceTime(double patienceTime)
-{
-    _patienceTime = patienceTime;
 }
 
 void Pedestrian::SetPremovementTime(double pretime)

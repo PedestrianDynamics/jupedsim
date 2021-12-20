@@ -152,13 +152,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building 
     for(auto & ped : allPeds) {
         Point v_neu   = result_acc[counter];
         Point pos_neu = ped->GetPos() + v_neu * deltaT;
-
-        //Jam is based on the current velocity
-        if(v_neu.Norm() >= ped->GetV0Norm() * 0.5) {
-            ped->ResetTimeInJam();
-        } else {
-            ped->UpdateTimeInJam();
-        }
         //only update the position if the velocity is above a threshold
         if(v_neu.Norm() >= J_EPS_V) {
             ped->SetPhiPed();
