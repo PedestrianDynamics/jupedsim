@@ -26,7 +26,6 @@
  **/
 #pragma once
 
-#include <boost/math/distributions.hpp>
 #include <random>
 #include <string>
 #include <vector>
@@ -65,11 +64,6 @@ private:
     //pre movement time distribution
     mutable std::normal_distribution<double> _premovementTime;
 
-    //risk tolerance distribution
-    std::string _distribution_type;
-    mutable std::normal_distribution<double> _riskTolerance;
-    mutable boost::math::beta_distribution<> _risk_beta_dist;
-
     static bool seeded;
     //random number generator engine
     mutable std::default_random_engine _generator;
@@ -107,8 +101,6 @@ public:
     void SetGroupParameters(AgentsParameters * groupParameters);
     void InitPremovementTime(double mean, double stdv);
     double GetPremovementTime() const;
-    void InitRiskTolerance(std::string distribution_type, double para1, double para2);
-    double GetRiskTolerance();
 
     Pedestrian * GenerateAgent(Building * building, std::vector<Point> & positions);
 };

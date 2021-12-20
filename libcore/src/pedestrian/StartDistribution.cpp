@@ -287,17 +287,3 @@ double StartDistribution::GetPremovementTime() const
         return _premovementTime(_generator);
     }
 }
-
-void StartDistribution::InitRiskTolerance(std::string distribution_type, double para1, double para2)
-{
-    _distribution_type = distribution_type;
-    if(distribution_type == "normal") {
-        if(para2 <= 0) {
-            para2 = judge;
-        }
-        _riskTolerance = std::normal_distribution<double>(para1, para2);
-    }
-    if(distribution_type == "beta") {
-        _risk_beta_dist = boost::math::beta_distribution<>(para1, para2);
-    }
-}
