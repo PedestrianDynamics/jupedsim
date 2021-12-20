@@ -73,7 +73,6 @@ Pedestrian::Pedestrian()
     _lastPosition                    = Point(J_NAN, J_NAN);
     // new orientation after 10 seconds, value is incremented
     _timeBeforeRerouting = 0.0;
-    _recordingTime       = 20; //seconds
     _routingStrategy     = ROUTING_GLOBAL_SHORTEST;
     _newOrientationDelay = 0; //0 seconds, in steps
     _reroutingEnabled    = false;
@@ -110,7 +109,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _deltaT                  = 0.01;
     _v0                      = Point(0, 0);
     _lastPosition            = Point(0, 0);
-    _recordingTime           = 20; //seconds
     _group                   = -1;
     _v0UpStairs              = 0.6;
     _v0DownStairs            = 0.6;
@@ -469,16 +467,6 @@ void Pedestrian::ResetRerouting()
 {
     _reroutingEnabled    = false;
     _timeBeforeRerouting = -1.00;
-}
-
-void Pedestrian::SetRecordingTime(double timeInSec)
-{
-    _recordingTime = timeInSec;
-}
-
-double Pedestrian::GetRecordingTime() const
-{
-    return _recordingTime;
 }
 
 double Pedestrian::GetDistanceToNextTarget() const

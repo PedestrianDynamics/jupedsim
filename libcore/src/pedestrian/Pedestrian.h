@@ -82,8 +82,6 @@ private:
 
     /// a new orientation starts after this time
     double _timeBeforeRerouting;
-    /// data from the last <_recordingTime> seconds will be kept
-    double _recordingTime;
     /// routing strategy followed
     RoutingStrategy _routingStrategy;
 
@@ -200,7 +198,6 @@ public:
     double GetLargerAxis() const;
     ///get axis in the shoulder direction = orthogonal to the walking direction
     double GetSmallerAxis() const;
-    double GetTimeInJam() const;
     int GetFinalDestination() const;
 
     RoutingStrategy GetRoutingStrategy() const;
@@ -267,18 +264,6 @@ public:
       * clear the parameter related to the re routing
       */
     void ResetRerouting();
-
-    /**
-      * Set/Get the time period for which the data of the pedestrian should be kept.
-      * The results are used by the quickest path router
-      */
-    void SetRecordingTime(double timeInSec);
-
-    /**
-      * Set/Get the time period for which the data of the pedestrian should be kept
-      * The results are used by the quickest path router
-      */
-    double GetRecordingTime() const;
 
     int GetGroup() const;
     void SetGroup(int group);
