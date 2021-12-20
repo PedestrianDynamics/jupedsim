@@ -73,7 +73,6 @@ Pedestrian::Pedestrian()
     _lastPosition                    = Point(J_NAN, J_NAN);
     // new orientation after 10 seconds, value is incremented
     _timeBeforeRerouting = 0.0;
-    _routingStrategy     = ROUTING_GLOBAL_SHORTEST;
     _newOrientationDelay = 0; //0 seconds, in steps
     _reroutingEnabled    = false;
     _router              = nullptr;
@@ -120,8 +119,7 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
         agentsParameters.GetGroupParameters()->_smoothFactorEscalatorUpStairs;
     _smoothFactorEscalatorDownStairs =
         agentsParameters.GetGroupParameters()->_smoothFactorEscalatorDownStairs;
-    _routingStrategy = ROUTING_GLOBAL_SHORTEST;
-    _lastE0          = Point(0, 0);
+    _lastE0 = Point(0, 0);
     _agentsCreated++; //increase the number of object created
     _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
 }
@@ -307,11 +305,6 @@ int Pedestrian::GetUniqueRoomID() const
 {
     auto [room_id, sub_room_id, _] = _building->GetRoomAndSubRoomIDs(GetPos());
     return room_id * 1000 + sub_room_id;
-}
-
-RoutingStrategy Pedestrian::GetRoutingStrategy() const
-{
-    return _routingStrategy;
 }
 
 // returns the exit Id corresponding to the
@@ -500,8 +493,7 @@ std::string Pedestrian::GetPath()
 
 void Pedestrian::SetRouter(Router * router)
 {
-    _router          = router;
-    _routingStrategy = router->GetStrategy();
+    _router = router;
 }
 
 int Pedestrian::GetRouterID() const
@@ -544,7 +536,6 @@ double Pedestrian::GetSmoothFactorDownEscalators() const
 {
     return _smoothFactorEscalatorDownStairs;
 }
-
 
 int Pedestrian::FindRoute()
 {
@@ -616,7 +607,7 @@ int Pedestrian::GetColor() const
 
         case BY_ROUTER:
         case BY_ROUTE: {
-            key = std::to_string(_routingStrategy);
+            key = std::to_string(_router_id);
         } break;
 
         case BY_GROUP: {

@@ -82,8 +82,6 @@ private:
 
     /// a new orientation starts after this time
     double _timeBeforeRerouting;
-    /// routing strategy followed
-    RoutingStrategy _routingStrategy;
 
     int _newOrientationDelay; //2 seconds, in steps
 
@@ -200,7 +198,6 @@ public:
     double GetSmallerAxis() const;
     int GetFinalDestination() const;
 
-    RoutingStrategy GetRoutingStrategy() const;
     int GetUniqueRoomID() const;
     int GetNextDestination();
     double GetDistanceToNextTarget() const;

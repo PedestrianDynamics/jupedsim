@@ -51,14 +51,6 @@ TrajectoryWriter::TrajectoryWriter(
             FMT_STRING("{:.2f}\t{:.2f}\t"), ped->GetLastE0()._x, ped->GetLastE0()._y);
     };
 
-    // Add header, info and output for router
-    _optionalOutputHeader[OptionalOutput::router] = "ROUTER\t";
-    _optionalOutputInfo[OptionalOutput::router] =
-        "#ROUTER: routing strategy used during simulation\n";
-    _optionalOutput[OptionalOutput::router] = [](const Pedestrian * ped) {
-        return fmt::format(FMT_STRING("{}\t"), ped->GetRoutingStrategy());
-    };
-
     // Add header, info and output for group
     _optionalOutputHeader[OptionalOutput::group] = "GROUP\t";
     _optionalOutputInfo[OptionalOutput::group]   = "#GROUP: group of the pedestrian\n";
