@@ -66,7 +66,6 @@ private:
     std::shared_ptr<RoutingEngine> _routingEngine;
     /// writing the trajectories to file
     std::unique_ptr<OldEventManager> _old_em{};
-    int _periodic;
     int _maxSimTime{100};
     fs::path _currentTrajectoriesFile;
     std::vector<std::unique_ptr<Pedestrian>> _agents;

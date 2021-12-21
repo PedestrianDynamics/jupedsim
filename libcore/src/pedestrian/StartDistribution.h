@@ -26,7 +26,6 @@
  **/
 #pragma once
 
-#include <boost/math/distributions.hpp>
 #include <random>
 #include <string>
 #include <vector>
@@ -48,9 +47,6 @@ private:
     int _routeID;
     int _subroomID;
     int _subroomUID;
-    //demographic parameters
-    //TODO: should also follow a distribution, see _premovement
-    double _patience;
 
     //force model parameters
     AgentsParameters * _groupParameters;
@@ -67,11 +63,6 @@ private:
     double _yMax;
     //pre movement time distribution
     mutable std::normal_distribution<double> _premovementTime;
-
-    //risk tolerance distribution
-    std::string _distribution_type;
-    mutable std::normal_distribution<double> _riskTolerance;
-    mutable boost::math::beta_distribution<> _risk_beta_dist;
 
     static bool seeded;
     //random number generator engine
@@ -103,8 +94,6 @@ public:
     void SetRouterId(int routerId);
     void SetStartPosition(double x, double y, double z);
     Point GetStartPosition() const;
-    double GetPatience() const;
-    void SetPatience(double patience);
     void SetBounds(double xMin, double xMax, double yMin, double yMax);
     void Getbounds(double bounds[4]);
     void Setbounds(double bounds[4]);
@@ -112,8 +101,6 @@ public:
     void SetGroupParameters(AgentsParameters * groupParameters);
     void InitPremovementTime(double mean, double stdv);
     double GetPremovementTime() const;
-    void InitRiskTolerance(std::string distribution_type, double para1, double para2);
-    double GetRiskTolerance();
 
     Pedestrian * GenerateAgent(Building * building, std::vector<Point> & positions);
 };

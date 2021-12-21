@@ -77,8 +77,7 @@ public:
      * @param deltaT the next timestep
      * @param building the geometry object
      */
-    void
-    ComputeNextTimeStep(double current, double deltaT, Building * building, int periodic) override;
+    void ComputeNextTimeStep(double current, double deltaT, Building * building) override;
     std::string GetDescription() const override;
 
 private:

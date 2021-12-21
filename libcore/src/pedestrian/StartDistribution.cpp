@@ -45,7 +45,6 @@ StartDistribution::StartDistribution(int seed)
     _startX             = NAN;
     _startY             = NAN;
     _startZ             = NAN;
-    _patience           = 5;
     _xMin               = -FLT_MAX;
     _xMax               = FLT_MAX;
     _yMin               = -FLT_MAX;
@@ -161,9 +160,7 @@ Pedestrian * StartDistribution::GenerateAgent(Building * building, std::vector<P
     ped->SetGroup(GetGroupId());
     ped->SetRouter(building->GetRoutingEngine()->GetRouter(_routerID));
     ped->SetBuilding(building);
-    ped->SetPatienceTime(GetPatience());
     ped->SetPremovementTime(GetPremovementTime());
-    ped->SetRiskTolerance(GetRiskTolerance());
 
     // a und b setzen muss vor v0 gesetzt werden,
     // da sonst v0 mit Null überschrieben wird
@@ -248,16 +245,6 @@ Point StartDistribution::GetStartPosition() const
     return Point(_startX, _startY);
 }
 
-double StartDistribution::GetPatience() const
-{
-    return _patience;
-}
-
-void StartDistribution::SetPatience(double patience)
-{
-    _patience = patience;
-}
-
 AgentsParameters * StartDistribution::GetGroupParameters() const
 {
     return _groupParameters;
@@ -298,38 +285,5 @@ double StartDistribution::GetPremovementTime() const
         return _premovementTime.mean();
     } else {
         return _premovementTime(_generator);
-    }
-}
-
-void StartDistribution::InitRiskTolerance(std::string distribution_type, double para1, double para2)
-{
-    _distribution_type = distribution_type;
-    if(distribution_type == "normal") {
-        if(para2 <= 0) {
-            para2 = judge;
-        }
-        _riskTolerance = std::normal_distribution<double>(para1, para2);
-    }
-    if(distribution_type == "beta") {
-        _risk_beta_dist = boost::math::beta_distribution<>(para1, para2);
-    }
-}
-
-double StartDistribution::GetRiskTolerance()
-{
-    if(_distribution_type == "normal") {
-        if(_riskTolerance.stddev() == judge) {
-            return _riskTolerance.mean();
-        } else {
-            return _riskTolerance(_generator);
-        }
-    } else {
-        std::uniform_real_distribution<float> normalize(0.0, 1.0);
-        float rand_norm = normalize(_generator);
-        if(_distribution_type == "beta") {
-            return quantile(_risk_beta_dist, rand_norm);
-        }
-        LOG_WARNING("Distribution Type invalid or not set. Fallback to uniform distribution");
-        return (double) rand_norm; // todo: ar.graf: check if this quick fix executes and why
     }
 }

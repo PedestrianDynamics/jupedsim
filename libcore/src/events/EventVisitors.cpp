@@ -19,9 +19,7 @@ void ProcessEvent(CreatePedestrianEvent event, Simulation & sim)
 
     ped->SetFinalDestination(event._final_destination);
     ped->SetGroup(event._group_id);
-    ped->SetPatienceTime(event._patience_time);
     ped->SetPremovementTime(event._premovement_time);
-    ped->SetRiskTolerance(event._risk_tolerance);
 
     JEllipse E = JEllipse();
     E.SetAv(event._ellipse_a_v);

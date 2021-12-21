@@ -61,11 +61,7 @@ GCFMModel::GCFMModel(
     _distEffMaxWall = dist_effWall;
 }
 
-void GCFMModel::ComputeNextTimeStep(
-    double current,
-    double deltaT,
-    Building * building,
-    int periodic)
+void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building * building)
 {
     double delta = 1.5;
 
@@ -84,12 +80,11 @@ void GCFMModel::ComputeNextTimeStep(
             fprintf(
                 stderr,
                 "GCFMModel::calculateForce() WARNING: actual velocity (%f) of iped %d "
-                "is bigger than desired velocity (%f) at time: %fs (periodic=%d)\n",
+                "is bigger than desired velocity (%f) at time: %fs\n",
                 sqrt(normVi),
                 ped->GetID(),
                 ped->GetV0Norm(),
-                current,
-                periodic);
+                current);
             // remove the pedestrian and abort
             pedestrians_to_delete.emplace_back(ped->GetID());
             // TODO KKZ track deleted peds
@@ -137,13 +132,6 @@ void GCFMModel::ComputeNextTimeStep(
     for(const auto & ped : allPeds) {
         Point v_neu   = ped->GetV() + result_acc[counter] * deltaT;
         Point pos_neu = ped->GetPos() + v_neu * deltaT;
-        //Jam is based on the current velocity
-        if(v_neu.Norm() >= J_EPS_V) {
-            ped->ResetTimeInJam();
-        } else {
-            ped->UpdateTimeInJam();
-        }
-
         if(!ped->InPremovement(current)) {
             ped->SetPos(pos_neu);
             ped->SetV(v_neu);

@@ -241,8 +241,6 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
             Pedestrian::SetColorMode(
                 AgentColorMode::
                     BY_VELOCITY); //TODO: config parameter! does not belong to the pedestrian model, we should create a pedestrian config instead. [gl march '16]
-        if(color_mode == "spotlight")
-            Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
         if(color_mode == "group")
             Pedestrian::SetColorMode(AgentColorMode::BY_GROUP);
         if(color_mode == "router")
@@ -351,19 +349,6 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
                     LOG_INFO("desired_direction added to output");
                 } else {
                     LOG_INFO("desired_direction not added to output");
-                }
-            }
-
-            //check if spotlight is wanted
-            if(const char * attribute = node->Attribute("spotlight"); attribute) {
-                std::string in = xmltoa(attribute, "false");
-                std::transform(in.begin(), in.end(), in.begin(), ::tolower);
-
-                if(in == "true") {
-                    _config->AddOptionalOutputOption(OptionalOutput::spotlight);
-                    LOG_INFO("spotlight added to output");
-                } else {
-                    LOG_INFO("spotlight not added to output");
                 }
             }
 
@@ -523,10 +508,6 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement * xVelocity, TiXmlElement * 
 
     //linked-cells
     if(!ParseLinkedCells(*xModelPara))
-        return false;
-
-    //periodic
-    if(!ParsePeriodic(*xModelPara))
         return false;
 
     //force_ped
@@ -786,7 +767,7 @@ bool IniFileParser::ParseLinkedCells(const TiXmlNode & linkedCellNode)
     return false;
 }
 
-bool IniFileParser::ParseStepSize(TiXmlNode & stepNode)
+bool IniFileParser::ParseStepSize(const TiXmlNode & stepNode)
 {
     if(stepNode.FirstChild("stepsize")) {
         const char * stepsize = stepNode.FirstChild("stepsize")->FirstChild()->Value();
@@ -828,20 +809,6 @@ bool IniFileParser::ParseStepSize(TiXmlNode & stepNode)
         }
     }
     return false;
-}
-
-bool IniFileParser::ParsePeriodic(TiXmlNode & Node)
-{
-    if(Node.FirstChild("periodic")) {
-        const char * periodic = Node.FirstChild("periodic")->FirstChild()->Value();
-        if(periodic)
-            _config->SetIsPeriodic(atoi(periodic));
-        LOG_INFO("Periodic <{}>", _config->IsPeriodic());
-        return true;
-    } else {
-        _config->SetIsPeriodic(0);
-    }
-    return true; //default is periodic=0. If not specified than is OK
 }
 
 bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)

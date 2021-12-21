@@ -77,8 +77,7 @@ public:
       * @param deltaT, the timestep
       * @param building, the representation of the building
       */
-    virtual void
-    ComputeNextTimeStep(double current, double deltaT, Building * building, int periodic) = 0;
+    virtual void ComputeNextTimeStep(double current, double deltaT, Building * building) = 0;
 
     std::shared_ptr<DirectionManager> GetDirection() { return _direction; };
     /**

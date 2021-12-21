@@ -53,7 +53,6 @@ Pedestrian::Pedestrian()
     _group                           = -1;
     _desiredFinalDestination         = FINAL_DEST_OUT;
     _premovement                     = 0;
-    _riskTolerance                   = 0;
     _mass                            = 1;
     _tau                             = 0.5;
     _t                               = 1.0;
@@ -71,24 +70,14 @@ Pedestrian::Pedestrian()
     _lastE0                          = Point(0, 0);
     _navLine                         = nullptr;
     _mentalMap                       = std::map<int, int>();
-    _destHistory                     = std::vector<int>();
     _lastPosition                    = Point(J_NAN, J_NAN);
-    _distToBlockade                  = 0.0;
     // new orientation after 10 seconds, value is incremented
     _timeBeforeRerouting = 0.0;
-    _timeInJam           = 0.0;
-    _patienceTime        = 5.0; // time after which the ped feels to be in jam
-    _recordingTime       = 20;  //seconds
-    _routingStrategy     = ROUTING_GLOBAL_SHORTEST;
     _newOrientationDelay = 0; //0 seconds, in steps
     _reroutingEnabled    = false;
     _router              = nullptr;
     _building            = nullptr;
-    _spotlight           = false;
-
     _agentsCreated++; //increase the number of object created
-    _fedIn      = 0.0;
-    _fedHeat    = 0.0;
     _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
 }
 
@@ -98,7 +87,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _premovement(agentsParameters.GetPremovementTime()),
     _lastPosition(),
 
-    _patienceTime(agentsParameters.GetPatience()),
     _router(building.GetRoutingEngine()->GetRouter(agentsParameters.GetRouterId())),
     _building(&building)
 {
@@ -115,17 +103,12 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     // new orientation after 10 seconds, value is incremented
     _timeBeforeRerouting     = 0.0;
     _reroutingEnabled        = false;
-    _timeInJam               = 0.0;
-    _patienceTime            = 5.0; // time after which the ped feels to be in jam
     _desiredFinalDestination = FINAL_DEST_OUT;
     _mentalMap               = std::map<int, int>();
-    _destHistory             = std::vector<int>();
     _deltaT                  = 0.01;
     _v0                      = Point(0, 0);
     _lastPosition            = Point(0, 0);
-    _recordingTime           = 20; //seconds
     _group                   = -1;
-    _spotlight               = false;
     _v0UpStairs              = 0.6;
     _v0DownStairs            = 0.6;
     _v0EscalatorUpStairs     = 0.8;
@@ -136,12 +119,8 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
         agentsParameters.GetGroupParameters()->_smoothFactorEscalatorUpStairs;
     _smoothFactorEscalatorDownStairs =
         agentsParameters.GetGroupParameters()->_smoothFactorEscalatorDownStairs;
-    _distToBlockade  = 0.0;
-    _routingStrategy = ROUTING_GLOBAL_SHORTEST;
-    _lastE0          = Point(0, 0);
+    _lastE0 = Point(0, 0);
     _agentsCreated++; //increase the number of object created
-    _fedIn      = 0.0;
-    _fedHeat    = 0.0;
     _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
 }
 
@@ -280,25 +259,6 @@ void Pedestrian::SetV0Norm(
     _v0EscalatorDownStairs = escalatorDown;
 }
 
-
-void Pedestrian::SetFEDIn(double FED_In)
-{
-    _fedIn = FED_In;
-}
-double Pedestrian::GetFEDIn() const
-{
-    return _fedIn;
-}
-
-void Pedestrian::SetFEDHeat(double FED_Heat)
-{
-    _fedHeat = FED_Heat;
-}
-double Pedestrian::GetFEDHeat() const
-{
-    return _fedHeat;
-}
-
 void Pedestrian::SetDeltaT(double dt)
 {
     _deltaT = dt;
@@ -347,11 +307,6 @@ int Pedestrian::GetUniqueRoomID() const
     return room_id * 1000 + sub_room_id;
 }
 
-RoutingStrategy Pedestrian::GetRoutingStrategy() const
-{
-    return _routingStrategy;
-}
-
 // returns the exit Id corresponding to the
 // unique subroom identifier
 
@@ -370,11 +325,6 @@ Point Pedestrian::GetLastE0() const
 void Pedestrian::SetLastE0(Point E0)
 {
     _lastE0 = E0;
-}
-
-const std::vector<int> & Pedestrian::GetLastDestinations() const
-{
-    return _destHistory;
 }
 
 const Point & Pedestrian::GetPos() const
@@ -467,37 +417,16 @@ const Point & Pedestrian::GetV0(const Point & target)
     Point delta       = target - pos;
     Point new_v0      = delta.Normalized();
 
-    double t = _newOrientationDelay++ * _deltaT / (1.0 + 100 * _distToBlockade);
+    double t = _newOrientationDelay++ * _deltaT;
 
     //Handover new target
     _v0 = _v0 + (new_v0 - _v0) * (1 - exp(-t / _tau));
     return _v0;
 }
 
-double Pedestrian::GetTimeInJam() const
-{
-    return _timeInJam;
-}
-
 void Pedestrian::SetSmoothTurning()
 {
     _newOrientationDelay = 0;
-}
-
-bool Pedestrian::IsFeelingLikeInJam() const
-{
-    return (_patienceTime < _timeInJam);
-}
-
-//reduce the felt time in Jam by half
-void Pedestrian::ResetTimeInJam()
-{
-    _timeInJam = 0.0;
-}
-
-void Pedestrian::UpdateTimeInJam()
-{
-    _timeInJam += _deltaT;
 }
 
 void Pedestrian::UpdateReroutingTime()
@@ -533,16 +462,6 @@ void Pedestrian::ResetRerouting()
     _timeBeforeRerouting = -1.00;
 }
 
-void Pedestrian::SetRecordingTime(double timeInSec)
-{
-    _recordingTime = timeInSec;
-}
-
-double Pedestrian::GetRecordingTime() const
-{
-    return _recordingTime;
-}
-
 double Pedestrian::GetDistanceToNextTarget() const
 {
     return (_navLine->DistTo(GetPos()));
@@ -574,8 +493,7 @@ std::string Pedestrian::GetPath()
 
 void Pedestrian::SetRouter(Router * router)
 {
-    _router          = router;
-    _routingStrategy = router->GetStrategy();
+    _router = router;
 }
 
 int Pedestrian::GetRouterID() const
@@ -619,7 +537,6 @@ double Pedestrian::GetSmoothFactorDownEscalators() const
     return _smoothFactorEscalatorDownStairs;
 }
 
-
 int Pedestrian::FindRoute()
 {
     if(_router == nullptr) {
@@ -632,16 +549,6 @@ int Pedestrian::FindRoute()
 double Pedestrian::GetElevation() const
 {
     return _building->GetSubRoom(GetPos())->GetElevation(GetPos());
-}
-
-double Pedestrian::GetPatienceTime() const
-{
-    return _patienceTime;
-}
-
-void Pedestrian::SetPatienceTime(double patienceTime)
-{
-    _patienceTime = patienceTime;
 }
 
 void Pedestrian::SetPremovementTime(double pretime)
@@ -662,22 +569,6 @@ double Pedestrian::GetPremovementTime() const
     return _premovement;
 }
 
-void Pedestrian::SetRiskTolerance(double tol)
-{
-    if(tol > 1) {
-        tol = 1;
-    }
-    if(tol < 0) {
-        tol = 0;
-    }
-    _riskTolerance = tol;
-}
-
-double Pedestrian::GetRiskTolerance() const
-{
-    return _riskTolerance;
-}
-
 const Building * Pedestrian::GetBuilding()
 {
     return _building;
@@ -686,16 +577,6 @@ const Building * Pedestrian::GetBuilding()
 void Pedestrian::SetBuilding(Building * building)
 {
     _building = building;
-}
-
-void Pedestrian::SetSpotlight(bool spotlight)
-{
-    _spotlight = spotlight;
-}
-
-bool Pedestrian::GetSpotlight() const
-{
-    return _spotlight;
 }
 
 void Pedestrian::SetColorMode(AgentColorMode mode)
@@ -714,13 +595,6 @@ int Pedestrian::GetColor() const
     std::string key;
 
     switch(_colorMode) {
-        case BY_SPOTLIGHT: {
-            if(!_spotlight) {
-                return -1;
-            }
-            break;
-        }
-
         case BY_VELOCITY: {
             int color = -1;
             double v0 = _ellipse.GetV0();
@@ -733,7 +607,7 @@ int Pedestrian::GetColor() const
 
         case BY_ROUTER:
         case BY_ROUTE: {
-            key = std::to_string(_routingStrategy);
+            key = std::to_string(_router_id);
         } break;
 
         case BY_GROUP: {

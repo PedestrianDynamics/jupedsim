@@ -81,7 +81,7 @@ void Simulation::Iterate()
     if(t_in_sec > Pedestrian::GetMinPremovementTime()) {
         UpdateRoutes();
         // update the positions
-        _operationalModel->ComputeNextTimeStep(t_in_sec, _clock.dT(), _building.get(), _periodic);
+        _operationalModel->ComputeNextTimeStep(t_in_sec, _clock.dT(), _building.get());
 
         //update the events
         bool eventProcessed = _old_em->ProcessEvents(t_in_sec);
@@ -210,7 +210,6 @@ bool Simulation::InitArgs()
 
     _operationalModel = _config->GetModel();
     _maxSimTime       = _config->GetTmax();
-    _periodic         = _config->IsPeriodic();
     _fps              = _config->GetFps();
 
     _routingEngine = _config->GetRoutingEngine();

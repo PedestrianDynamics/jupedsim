@@ -58,11 +58,7 @@ VelocityModel::VelocityModel(
     _DWall = Dwall;
 }
 
-void VelocityModel::ComputeNextTimeStep(
-    double current,
-    double deltaT,
-    Building * building,
-    int periodic)
+void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building * building)
 {
     // collect all pedestrians in the simulation.
     const auto & allPeds          = _simulation->Agents();
@@ -97,11 +93,11 @@ void VelocityModel::ComputeNextTimeStep(
             if(!isVisible)
                 continue;
             if(room == room1 && subroom == subroom1) {
-                repPed += ForceRepPed(ped.get(), ped1, periodic);
+                repPed += ForceRepPed(ped.get(), ped1);
             } else {
                 // or in neighbour subrooms
                 if(subroom->IsDirectlyConnectedWith(subroom1)) {
-                    repPed += ForceRepPed(ped.get(), ped1, periodic);
+                    repPed += ForceRepPed(ped.get(), ped1);
                 }
             }
         } // for i
@@ -116,11 +112,11 @@ void VelocityModel::ComputeNextTimeStep(
             // calculate spacing
             // my_pair spacing_winkel = GetSpacing(ped, ped1);
             if(room == room1 && subroom == subroom1) {
-                spacings.push_back(GetSpacing(ped.get(), ped1, direction, periodic));
+                spacings.push_back(GetSpacing(ped.get(), ped1, direction));
             } else {
                 // or in neighbour subrooms
                 if(subroom->IsDirectlyConnectedWith(subroom1)) {
-                    spacings.push_back(GetSpacing(ped.get(), ped1, direction, periodic));
+                    spacings.push_back(GetSpacing(ped.get(), ped1, direction));
                 }
             }
         }
@@ -156,27 +152,12 @@ void VelocityModel::ComputeNextTimeStep(
     for(auto & ped : allPeds) {
         Point v_neu   = result_acc[counter];
         Point pos_neu = ped->GetPos() + v_neu * deltaT;
-
-        //Jam is based on the current velocity
-        if(v_neu.Norm() >= ped->GetV0Norm() * 0.5) {
-            ped->ResetTimeInJam();
-        } else {
-            ped->UpdateTimeInJam();
-        }
         //only update the position if the velocity is above a threshold
         if(v_neu.Norm() >= J_EPS_V) {
             ped->SetPhiPed();
         }
         if(!ped->InPremovement(current)) {
             ped->SetPos(pos_neu);
-
-            if(periodic) {
-                if(ped->GetPos()._x >= xRight) {
-                    ped->SetPos(Point(ped->GetPos()._x - (xRight - xLeft), ped->GetPos()._y));
-                    //ped->SetID( ped->GetID() + 1);
-                }
-            }
-
             ped->SetV(v_neu);
         }
         ++counter;
@@ -243,18 +224,9 @@ double VelocityModel::OptimalSpeed(Pedestrian * ped, double spacing) const
 }
 
 // return spacing and id of the nearest pedestrian
-my_pair
-VelocityModel::GetSpacing(Pedestrian * ped1, Pedestrian * ped2, Point ei, int periodic) const
+my_pair VelocityModel::GetSpacing(Pedestrian * ped1, Pedestrian * ped2, Point ei) const
 {
-    Point distp12 = ped2->GetPos() - ped1->GetPos(); // inversed sign
-    if(periodic) {
-        double x   = ped1->GetPos()._x;
-        double x_j = ped2->GetPos()._x;
-
-        if((xRight - x) + (x_j - xLeft) <= cutoff) {
-            distp12._x = distp12._x + xRight - xLeft;
-        }
-    }
+    Point distp12   = ped2->GetPos() - ped1->GetPos(); // inversed sign
     double Distance = distp12.Norm();
     double l        = 2 * ped1->GetEllipse().GetBmax();
     Point ep12;
@@ -281,20 +253,11 @@ VelocityModel::GetSpacing(Pedestrian * ped1, Pedestrian * ped2, Point ei, int pe
     else
         return my_pair(FLT_MAX, ped2->GetID());
 }
-Point VelocityModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2, int periodic) const
+Point VelocityModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
 {
     Point F_rep(0.0, 0.0);
     // x- and y-coordinate of the distance between p1 and p2
-    Point distp12 = ped2->GetPos() - ped1->GetPos();
-
-    if(periodic) {
-        double x   = ped1->GetPos()._x;
-        double x_j = ped2->GetPos()._x;
-        if((xRight - x) + (x_j - xLeft) <= cutoff) {
-            distp12._x = distp12._x + xRight - xLeft;
-        }
-    }
-
+    Point distp12   = ped2->GetPos() - ped1->GetPos();
     double Distance = distp12.Norm();
     Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
     double R_ij;

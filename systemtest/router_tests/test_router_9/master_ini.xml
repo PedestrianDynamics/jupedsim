@@ -1,29 +1,17 @@
 <JuPedSim xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" project="JPS-Project" version="0.8">
-
-
     <seed>1586</seed>
     <max_sim_time>100</max_sim_time>
     <geometry>../geometry.xml</geometry>
-    <show_statistics>false</show_statistics>
-
-    <trajectories format="plain" fps="16">
-        <file location="traj_Test9.txt" />
-    </trajectories>
-
-    <logfile>log</logfile>
-    <num_threads>8</num_threads>
+    <trajectories format="plain" fps="16" />
     <agents operational_model_id="3">
         <agents_distribution>
-            <group agent_parameter_id="1" goal_id="-1" group_id="1" number="20" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" room_id="0" subroom_id="0" router_id="[1]" />
+            <group agent_parameter_id="1" goal_id="-1" group_id="1" number="20" pre_movement_mean="1" pre_movement_sigma="0" room_id="0" subroom_id="0" router_id="[1]" />
         </agents_distribution>
     </agents>
     <operational_models>
-
-
         <model description="Tordeux2015" operational_model_id="3">
             <model_parameters>
                 <stepsize>0.05</stepsize>
-                <periodic>0</periodic>
                 <exit_crossing_strategy>8</exit_crossing_strategy>
                 <linkedcells cell_size="2" enabled="true" />
                 <force_ped a="5" D="0.2" />
@@ -40,8 +28,7 @@
             </agent_parameters>
         </model>
     </operational_models>
-
     <route_choice_models>
-        <router router_id="1" description="ff_global_shortest" /> <!-- like global_shortest, without HLines -->
+        <router router_id="1" description="ff_global_shortest" />
     </route_choice_models>
 </JuPedSim>

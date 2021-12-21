@@ -50,8 +50,7 @@ private:
     int _exitIndex; // current exit
     int _group;
     int _desiredFinalDestination;
-    double _premovement   = 0;
-    double _riskTolerance = 0;
+    double _premovement = 0;
 
     //gcfm specific parameters
     double _mass;      // Mass: 1
@@ -79,22 +78,10 @@ private:
 
     NavLine * _navLine;            // current exit line
     std::map<int, int> _mentalMap; // map the actual room to a destination
-    std::vector<int> _destHistory;
-
     Point _lastPosition;
 
-    /// distance to nearest obstacle that blocks the sight of ped.
-    double _distToBlockade;
     /// a new orientation starts after this time
     double _timeBeforeRerouting;
-    /// actual time im Jam
-    double _timeInJam;
-    /// time after which the ped feels to be in jam
-    double _patienceTime;
-    /// data from the last <_recordingTime> seconds will be kept
-    double _recordingTime;
-    /// routing strategy followed
-    RoutingStrategy _routingStrategy;
 
     int _newOrientationDelay; //2 seconds, in steps
 
@@ -103,7 +90,6 @@ private:
     // the current time in the simulation
     static double _minPremovementTime;
     static AgentColorMode _colorMode;
-    bool _spotlight;
 
     /// the router responsible for this pedestrian
     Router * _router;
@@ -111,9 +97,6 @@ private:
     Building * _building;
 
     static int _agentsCreated;
-
-    double _fedIn;
-    double _fedHeat;
 
     int _lastGoalID  = -1;
     bool _insideGoal = false;
@@ -162,15 +145,7 @@ public:
     //TODO: merge this two functions
     void SetExitIndex(int i);
     void SetExitLine(const NavLine * l);
-
-    void SetFEDIn(double FED_In);
-    double GetFEDIn() const;
-
-    void SetFEDHeat(double FED_Heat);
-    double GetFEDHeat() const;
-
     void SetDeltaT(double dt);
-
     // Eigenschaften der Ellipse
     void SetPos(const Point & pos); // setzt x und y-Koordinaten
     void SetV(const Point & v);     // setzt x und y-Koordinaten der Geschwindigkeit
@@ -221,15 +196,8 @@ public:
     double GetLargerAxis() const;
     ///get axis in the shoulder direction = orthogonal to the walking direction
     double GetSmallerAxis() const;
-    double GetTimeInJam() const;
     int GetFinalDestination() const;
 
-    /**
-      * @return all previous destinations used by this pedestrian
-      */
-    const std::vector<int> & GetLastDestinations() const;
-
-    RoutingStrategy GetRoutingStrategy() const;
     int GetUniqueRoomID() const;
     int GetNextDestination();
     double GetDistanceToNextTarget() const;
@@ -263,40 +231,6 @@ public:
       */
     std::string ToString() const;
 
-    /**
-      * @return true if the time spent in jam exceed the patience time
-      * @see GetPatienceTime
-      */
-    bool IsFeelingLikeInJam() const;
-
-    /**
-      * Set/Get the patience time.
-      * Higher value will cause the agent to almost never changes its current path.
-      * Small values will increase the frequency of looking for alternative
-      */
-    double GetPatienceTime() const;
-
-    /**
-      * Set/Get the patience time.
-      * Higher value will cause the agent to almost never changes its current path.
-      * Small values will increase the frequency of looking for alternative
-      */
-    void SetPatienceTime(double patienceTime);
-
-    /**
-      * Set/Get the spotlight value. If true,
-      * this pedestrians will be coloured and all other grey out.
-      * @param spotlight true for enabling, false for disabling
-      */
-    [[maybe_unused]] void SetSpotlight(bool spotlight);
-
-    /**
-      * Set/Get the spotlight value. If true,
-      * this pedestrians will be coloured and all other grey out.
-      * @param spotlight true for enabling, false for disabling
-      */
-    bool GetSpotlight() const;
-
     /***
       * Set/Get the time after which this pedestrian will start taking actions.
       */
@@ -313,28 +247,12 @@ public:
     static double GetMinPremovementTime();
 
     /**
-      * Set/Get the risk tolerance of a pedestrians.
-      * The value should be in the interval [0 1].
-      * It will be truncated accordingly if not in that interval.
-      */
-    void SetRiskTolerance(double tol);
-
-    /**
-      * Set/Get the risk tolerance of a pedestrians.
-      * The value should be in the interval [0 1].
-      * It will be truncated accordingly if not in that interval.
-      */
-    double GetRiskTolerance() const;
-
-    /**
       * return the pedestrian color used for visualiation.
       * Default mode is coded by velocity.
       * @return a value in [-1 255]
       */
     int GetColor() const;
 
-    void ResetTimeInJam();
-    void UpdateTimeInJam();
     void UpdateReroutingTime();
     void RerouteIn(double time);
     bool IsReadyForRerouting() const;
@@ -343,18 +261,6 @@ public:
       * clear the parameter related to the re routing
       */
     void ResetRerouting();
-
-    /**
-      * Set/Get the time period for which the data of the pedestrian should be kept.
-      * The results are used by the quickest path router
-      */
-    void SetRecordingTime(double timeInSec);
-
-    /**
-      * Set/Get the time period for which the data of the pedestrian should be kept
-      * The results are used by the quickest path router
-      */
-    double GetRecordingTime() const;
 
     int GetGroup() const;
     void SetGroup(int group);
