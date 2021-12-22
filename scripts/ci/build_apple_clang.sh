@@ -1,7 +1,7 @@
 set -e
 numcpus=$(sysctl -n hw.logicalcpu)
 mkdir build && cd build
-./../scripts/setup-deps.sh
+./../scripts/setup-deps.sh --install-path deps
 python3 -m venv python-env
 source python-env/bin/activate
 pip install -r ../requirements.txt
