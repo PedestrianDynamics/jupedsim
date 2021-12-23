@@ -6,6 +6,7 @@ RUN apt-get update && \
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
     wget \
+    curl \
     git \
     g++ \
     cmake \
@@ -25,6 +26,10 @@ RUN apt-get update && \
     python3-pandas \
     python3-scipy \
     python3-pytest
+
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+
+ENV PATH="/root/.cargo/bin:${PATH}"
 
 RUN cd /usr/bin && ln -s pytest-3 pytest
 
