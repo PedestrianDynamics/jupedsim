@@ -142,12 +142,6 @@ public:
         bool considerHlines = false);
 
     /**
-      * @return a crossing or a transition matching the given caption.
-      * Return NULL if none is found
-      */
-    Crossing * GetTransOrCrossByName(std::string caption) const;
-
-    /**
       * @return a crossing or a transition or a hline matching the given uid.
       * Return NULL if none is found
       */

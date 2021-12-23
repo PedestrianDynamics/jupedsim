@@ -572,29 +572,6 @@ Goal * Building::GetFinalGoal(int ID) const
     }
 }
 
-Crossing * Building::GetTransOrCrossByName(std::string caption) const
-{
-    {
-        //eventually
-        std::map<int, Transition *>::const_iterator itr;
-        for(itr = _transitions.begin(); itr != _transitions.end(); ++itr) {
-            if(itr->second->GetCaption() == caption)
-                return itr->second;
-        }
-    }
-    {
-        //finally the  crossings
-        std::map<int, Crossing *>::const_iterator itr;
-        for(itr = _crossings.begin(); itr != _crossings.end(); ++itr) {
-            if(itr->second->GetCaption() == caption)
-                return itr->second;
-        }
-    }
-
-    LOG_WARNING("No Transition or Crossing with Caption: {}", caption);
-    return nullptr;
-}
-
 Hline * Building::GetTransOrCrossByUID(int id) const
 {
     {
