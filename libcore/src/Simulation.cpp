@@ -209,7 +209,6 @@ bool Simulation::InitArgs()
 
 
     _operationalModel = _config->GetModel();
-    _maxSimTime       = _config->GetTmax();
     _fps              = _config->GetFps();
 
     _routingEngine = _config->GetRoutingEngine();
@@ -590,9 +589,4 @@ void Simulation::UpdateOutputGeometryFile()
     }
 
     geoOutput.SaveFile(geoOutputPath.string());
-}
-
-int Simulation::GetMaxSimTime() const
-{
-    return _maxSimTime;
 }
