@@ -141,15 +141,6 @@ void DirectionLocalFloorfield::Init(Building * building)
         newfield->AddAllTargetsParallel();
     }
 
-    //TODO check writing of ff (TS)
-    if(_building->GetConfig()->get_write_VTK_files_direction()) {
-        for(auto locff : _locffviafm) {
-            int roomNr = locff.first;
-            locff.second->WriteFF(
-                "direction" + std::to_string(roomNr) + ".vtk", locff.second->GetKnownDoorUIDs());
-        }
-    }
-
     end                                           = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
     LOG_INFO("Time to construct FF in DirectionLocalFloorfield: {:.2f}", elapsed_seconds.count());
