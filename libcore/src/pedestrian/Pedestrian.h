@@ -91,8 +91,6 @@ private:
     static double _minPremovementTime;
     static AgentColorMode _colorMode;
 
-    /// the router responsible for this pedestrian
-    Router * _router;
     /// a pointer to the complete building
     Building * _building;
 
@@ -135,10 +133,7 @@ public:
     void SetID(int i);
     void SetTau(double tau);
     void SetEllipse(const JEllipse & e);
-
     void SetRouterId(int id) { _router_id = id; }
-
-    const Router * GetRouter() const { return _router; }
 
     double GetT() const;
     void SetT(double T);
@@ -158,7 +153,6 @@ public:
     void SetSmoothTurning(); // activate the smooth turning with a delay of 2 sec
     void SetPhiPed();
     void SetFinalDestination(int UID);
-    void SetRouter(Router * router);
     int GetRouterID() const;
 
     double GetV0UpStairsNorm() const;
@@ -209,16 +203,6 @@ public:
       */
 
     double GetElevation() const;
-
-    /**
-      * Compute and update the route.
-      * This method should be called at each time step;
-      *
-      * @return -1 if no route could be found. The ID of the
-      * next target is returned otherwise.
-      *
-      */
-    int FindRoute();
 
     ///write the pedestrian path (room and exit taken ) to file
     /// in the format room1:exit1>room2:exit2

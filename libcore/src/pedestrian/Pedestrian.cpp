@@ -75,7 +75,6 @@ Pedestrian::Pedestrian()
     _timeBeforeRerouting = 0.0;
     _newOrientationDelay = 0; //0 seconds, in steps
     _reroutingEnabled    = false;
-    _router              = nullptr;
     _building            = nullptr;
     _agentsCreated++; //increase the number of object created
     _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
@@ -86,8 +85,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _desiredFinalDestination(agentsParameters.GetGoalId()),
     _premovement(agentsParameters.GetPremovementTime()),
     _lastPosition(),
-
-    _router(building.GetRoutingEngine()->GetRouter(agentsParameters.GetRouterId())),
     _building(&building)
 {
     _exitIndex           = -1;
@@ -98,7 +95,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _newOrientationDelay = 0; //0 seconds, in steps
     _ellipse             = JEllipse();
     _navLine             = nullptr;
-    _router              = nullptr;
     _building            = nullptr;
     // new orientation after 10 seconds, value is incremented
     _timeBeforeRerouting     = 0.0;
@@ -491,29 +487,26 @@ std::string Pedestrian::GetPath()
     return path;
 }
 
-void Pedestrian::SetRouter(Router * router)
-{
-    _router = router;
-}
-
 int Pedestrian::GetRouterID() const
 {
     return _router_id;
 }
 
-
 double Pedestrian::GetV0UpStairsNorm() const
 {
     return _v0UpStairs;
 }
+
 double Pedestrian::GetV0DownStairsNorm() const
 {
     return _v0DownStairs;
 }
+
 double Pedestrian::GetV0EscalatorUpNorm() const
 {
     return _v0EscalatorUpStairs;
 }
+
 double Pedestrian::GetV0EscalatorDownNorm() const
 {
     return _v0EscalatorDownStairs;
@@ -535,15 +528,6 @@ double Pedestrian::GetSmoothFactorUpEscalators() const
 double Pedestrian::GetSmoothFactorDownEscalators() const
 {
     return _smoothFactorEscalatorDownStairs;
-}
-
-int Pedestrian::FindRoute()
-{
-    if(_router == nullptr) {
-        LOG_ERROR("One or more routers does not exist! Check your router_ids");
-        return -1;
-    }
-    return _router->FindExit(this);
 }
 
 double Pedestrian::GetElevation() const

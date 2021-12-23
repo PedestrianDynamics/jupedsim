@@ -119,9 +119,9 @@ void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
 {
     agent->SetBuilding(_building.get());
     const Point pos = agent->GetPos();
-    agent->SetRouter(_routingEngine->GetRouter(agent->GetRouterID()));
-    Point target = Point{0.0, 0.0};
-    if(agent->FindRoute() == -1) {
+    auto * router   = _routingEngine->GetRouter(agent->GetRouterID());
+    Point target    = Point{0.0, 0.0};
+    if(router->FindExit(agent.get()) == -1) {
         Point p1 = agent->GetPos();
         p1._x += 1;
         p1._y -= 1;
@@ -296,7 +296,8 @@ void Simulation::UpdateRoutes()
 {
     for(const auto & ped : _agents) {
         // set ped waiting, if no target is found
-        int target = ped->FindRoute();
+        auto * router = _routingEngine->GetRouter(ped->GetRouterID());
+        int target    = router->FindExit(ped.get());
 
         if(target == FINAL_DEST_OUT) {
             ped->StartWaiting();

@@ -105,19 +105,12 @@ private:
     void
     ComputeBestPositionCompleteRandom(AgentsSource * src, std::vector<Pedestrian *> & peds) const;
 
-
     /**
       * Position incoming pedestrians randomly
       * @param src
       * @param peds
       */
     void ComputeBestPositionRandom(AgentsSource * src, std::vector<Pedestrian *> & peds) const;
-
-
-    /**
-      * Adjust the velocity of the pedestrian using the weidmann fundamental diagram
-      */
-    void AdjustVelocityUsingWeidmann(Pedestrian * ped) const;
 
     /**
       * Sort the given position vector by decreasing density

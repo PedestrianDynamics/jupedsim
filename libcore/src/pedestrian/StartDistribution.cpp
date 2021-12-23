@@ -158,7 +158,7 @@ Pedestrian * StartDistribution::GenerateAgent(Building * building, std::vector<P
     // PedIndex
     ped->SetFinalDestination(GetGoalId());
     ped->SetGroup(GetGroupId());
-    ped->SetRouter(building->GetRoutingEngine()->GetRouter(_routerID));
+    ped->SetRouterId(_routerID);
     ped->SetBuilding(building);
     ped->SetPremovementTime(GetPremovementTime());
 

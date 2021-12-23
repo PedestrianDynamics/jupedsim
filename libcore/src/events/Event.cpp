@@ -17,7 +17,7 @@ CreatePedestrianEvent::CreatePedestrianEvent(
     _position{agent->GetPos()},
     _final_destination{agent->GetFinalDestination()},
     _group_id{agent->GetGroup()},
-    _router_id{agent->GetRouter()->GetID()},
+    _router_id{agent->GetRouterID()},
     _premovement_time{agent->GetPremovementTime()},
     _ellipse_a_v{agent->GetEllipse().GetAv()},
     _ellipse_a_min{agent->GetEllipse().GetAmin()},
