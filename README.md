@@ -45,17 +45,24 @@ Once the above-listed requirements are installed, build the library dependencies
 
 ##### Linux MacOS
 
-On Linux and MacOS all library dependencies except boost are built from source,
-they are either part of the source tree and do not need any special attention or
+On Linux and MacOS all library dependencies are built from source, they are
+either part of the source tree and do not need any special attention or
 they are built with `scripts/setup-deps.sh`. To compile dependencies invoke the
-script from any path where you have write access. The script will create a
-folder called `deps`, download and compile required dependencies. The resulting
-`deps` folder should contain an install tree of all required library
-dependencies. Move / rename this folder to a convenient location, e.g. to
-`jpscore-deps` as outlined in the beginning.
+script and specifiy the install path:
 
-Additionally, you will need to install boost >= 1.74 development packages for
-your distribution.
+```bash
+./scripts/setup-deps.sh --install-path ~/jspcore-deps
+```
+
+The resulting deps folder should contain an install tree of all required
+library dependencies. Move / rename this folder to a convenient location, e.g.
+to jpscore-deps as outlined in the beginning. It is usually a good idea to keep
+the dependencies in a folder outside of the source tree so that you do not need
+to rebuild the dependencies if you for example accidentally clean the
+repository.
+
+Note: If you do not specify a install path the script tries to install into
+`/usr/local`.
 
 ##### Windows
 
@@ -79,7 +86,9 @@ Note: We do not recommend in-tree builds.
 ```bash
 mkdir jpscore-build
 cd jpscore-build
-cmake -GNinja -DCMAKE_BUILD_TYPE=Debug <path-to-cmakelists>
+cmake -GNinja -DCMAKE_BUILD_TYPE=Debug \
+    -DCMAKE_PREFIX_PATH=<path-to-dependencies> \
+    <path-to-cmakelists>
 ninja
 ```
 
@@ -88,7 +97,9 @@ Alternatively you can generate a make based build with:
 ```bash
 mkdir jpscore-build
 cd jpscore-build
-cmake -DCMAKE_BUILD_TYPE=Debug <path-to-cmakelists>
+cmake -DCMAKE_BUILD_TYPE=Debug \
+    -DCMAKE_PREFIX_PATH=<path-to-dependencies> \
+    <path-to-cmakelists>
 make -j$(nproc)
 ```
 
