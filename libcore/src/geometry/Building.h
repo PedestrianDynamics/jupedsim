@@ -59,7 +59,6 @@ class Building
 private:
     Configuration * _configuration = nullptr;
     std::shared_ptr<RoutingEngine> _routingEngine;
-    std::string _caption;
     NeighborhoodSearch _neighborhoodSearch;
     std::vector<std::unique_ptr<Pedestrian>> * _allPedestrians;
     std::map<int, std::shared_ptr<Room>> _rooms;

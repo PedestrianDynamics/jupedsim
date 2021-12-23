@@ -66,7 +66,6 @@
 
 Building::Building(std::vector<std::unique_ptr<Pedestrian>> * agents) : _allPedestrians(agents)
 {
-    _caption       = "no_caption";
     _routingEngine = nullptr;
 }
 
@@ -75,7 +74,6 @@ Building::Building(
     std::vector<std::unique_ptr<Pedestrian>> * agents) :
     _configuration(configuration),
     _routingEngine(configuration->GetRoutingEngine()),
-    _caption("no_caption"),
     _allPedestrians(agents)
 {
     {
