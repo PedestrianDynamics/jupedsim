@@ -147,13 +147,13 @@ public:
       * Set/Get the navigation line.
       * The direction taken by the pedestrian strongly depends on this line.
       */
-    void SetNavLine(NavLine * line);
+    void SetNavLine(Line * line);
 
     /**
       * Set/Get the navigation line.
       * The direction taken by the pedestrian strongly depends on this line.
       */
-    NavLine * GetNavLine() const;
+    Line * GetNavLine() const;
 
     /**
       * True if this is a goal outside the building
@@ -198,7 +198,7 @@ private:
     int _room1ID;
     int _room2ID;
     Point pCentre;
-    NavLine * _navLine;
+    Line * _navLine;
     std::vector<Pedestrian *> _transitPedestrians;
     //     int _isClosed;
     std::string _friendlyName;

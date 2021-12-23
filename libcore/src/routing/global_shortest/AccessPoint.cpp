@@ -201,16 +201,12 @@ bool AccessPoint::IsInRange(double xPed, double yPed, int roomID)
     return false;
 }
 
-void AccessPoint::SetNavLine(NavLine * line)
+void AccessPoint::SetNavLine(Line * line)
 {
-    //todo: check this
-    //_navLine= line;
-    //_navLine->SetPoint1(line->GetPoint1());
-    //_navLine->SetPoint2(line->GetPoint2());
-    _navLine = new NavLine(*line);
+    _navLine = new Line(*line);
 }
 
-NavLine * AccessPoint::GetNavLine() const
+Line * AccessPoint::GetNavLine() const
 {
     return _navLine;
 }

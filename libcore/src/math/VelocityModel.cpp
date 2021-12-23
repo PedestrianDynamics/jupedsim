@@ -181,7 +181,7 @@ Point VelocityModel::e0(Pedestrian * ped, Room * room) const
         double random_y = dist(mt);
         Point P1        = Point(ped->GetPos()._x - random_x, ped->GetPos()._y - random_y);
         Point P2        = Point(ped->GetPos()._x + random_x, ped->GetPos()._y + random_y);
-        const NavLine L = Line(P1, P2);
+        const Line L(P1, P2);
         ped->SetExitLine(&L);
         target = P1;
     }

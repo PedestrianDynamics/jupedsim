@@ -28,6 +28,7 @@
 
 #include "AccessPoint.h"
 #include "geometry/DTriangulation.h"
+#include "geometry/Line.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 
@@ -338,10 +339,8 @@ bool GlobalRouter::Init(Building * building)
 
         AccessPoint * to_AP = new AccessPoint(line.GetUniqueID(), center);
         to_AP->SetFinalGoalOutside(true);
-        //NavLine* tmpline=new NavLine(line);
-        NavLine tmpline(line);
+        Line tmpline(line);
         to_AP->SetNavLine(&tmpline);
-        //delete tmpline;
 
         char friendlyName[1024];
         sprintf(friendlyName, "finalGoal_%d_located_outside", goal->GetId());
@@ -549,7 +548,7 @@ void GlobalRouter::GetPath(int i, int j)
     _tmpPedPath.push_back(j);
 }
 
-bool GlobalRouter::GetPath(Pedestrian * ped, std::vector<NavLine *> & path)
+bool GlobalRouter::GetPath(Pedestrian * ped, std::vector<Line *> & path)
 {
     std::vector<AccessPoint *> aps_path;
 
@@ -681,7 +680,7 @@ void GlobalRouter::FloydWarshall()
 int GlobalRouter::FindExit(Pedestrian * ped)
 {
     if(!_useMeshForLocalNavigation) {
-        std::vector<NavLine *> path;
+        std::vector<Line *> path;
         GetPath(ped, path);
         SubRoom * sub = _building->GetSubRoom(ped->GetPos());
 

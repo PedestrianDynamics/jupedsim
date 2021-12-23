@@ -27,7 +27,7 @@
 #include "Pedestrian.h"
 
 #include "geometry/Building.h"
-#include "geometry/NavLine.h"
+#include "geometry/Line.h"
 #include "geometry/SubRoom.h"
 #include "geometry/WaitingArea.h"
 
@@ -194,9 +194,9 @@ void Pedestrian::SetExitIndex(int i)
     _mentalMap[GetUniqueRoomID()] = i;
 }
 
-void Pedestrian::SetExitLine(const NavLine * l)
+void Pedestrian::SetExitLine(const Line * l)
 {
-    _navLine = NavLine(*l);
+    _navLine = Line(*l);
 }
 
 void Pedestrian::SetPos(const Point & pos)
@@ -279,7 +279,7 @@ int Pedestrian::GetExitIndex() const
     return _exitIndex;
 }
 
-const NavLine & Pedestrian::GetExitLine() const
+const Line & Pedestrian::GetExitLine() const
 {
     return _navLine;
 }

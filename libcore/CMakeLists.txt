@@ -38,7 +38,6 @@ set(source_files
     src/geometry/GoalManager.cpp
     src/geometry/Hline.cpp
     src/geometry/Line.cpp
-    src/geometry/NavLine.cpp
     src/geometry/Obstacle.cpp
     src/geometry/Point.cpp
     src/geometry/Room.cpp
@@ -103,7 +102,6 @@ set(header_files
     src/geometry/GoalManager.h
     src/geometry/Hline.h
     src/geometry/Line.h
-    src/geometry/NavLine.h
     src/geometry/Obstacle.h
     src/geometry/Point.h
     src/geometry/Room.h

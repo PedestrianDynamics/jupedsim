@@ -148,7 +148,7 @@ protected:
       * @param ped the pedestrian
       * @param path, the vector to store
       */
-    bool GetPath(Pedestrian * ped, std::vector<NavLine *> & path);
+    bool GetPath(Pedestrian * ped, std::vector<Line *> & path);
 
     /**
       * return the relevant aps that lead to the pedestrian final destination

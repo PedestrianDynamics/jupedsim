@@ -40,7 +40,7 @@
 #include "events/EventVisitors.h"
 #include "general/Filesystem.h"
 #include "geometry/GoalManager.h"
-#include "geometry/NavLine.h"
+#include "geometry/Line.h"
 #include "geometry/WaitingArea.h"
 #include "geometry/Wall.h"
 #include "math/GCFMModel.h"
@@ -128,7 +128,7 @@ void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
         Point p2 = agent->GetPos();
         p2._x += 1;
         p2._y += 1;
-        NavLine dummy(Line{p1, p2});
+        Line dummy(Line{p1, p2});
         agent->SetExitLine(&dummy);
     } else {
         target = agent->GetExitLine().ShortestPoint(pos);

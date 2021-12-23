@@ -28,7 +28,7 @@
 
 #include "Goal.h"
 #include "Hline.h"
-#include "NavLine.h"
+#include "Line.h"
 #include "Obstacle.h"
 #include "Room.h"
 #include "TrainGeometryInterface.h"

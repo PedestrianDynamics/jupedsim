@@ -30,13 +30,12 @@
 #include "Ellipse.h"
 #include "PedDistributor.h"
 #include "general/Macros.h"
-#include "geometry/NavLine.h"
+#include "geometry/Line.h"
 #include "geometry/SubroomType.h"
 
 #include <map>
 
 class Building;
-class NavLine;
 class Router;
 class WalkingSpeed;
 class Pedestrian
@@ -73,7 +72,7 @@ private:
     int _router_id{0};
     Point _lastE0;
 
-    NavLine _navLine;              // current exit line
+    Line _navLine;                 // current exit line
     std::map<int, int> _mentalMap; // map the actual room to a destination
     Point _lastPosition;
 
@@ -136,7 +135,7 @@ public:
     void SetT(double T);
     //TODO: merge this two functions
     void SetExitIndex(int i);
-    void SetExitLine(const NavLine * l);
+    void SetExitLine(const Line * l);
     void SetDeltaT(double dt);
     // Eigenschaften der Ellipse
     void SetPos(const Point & pos); // setzt x und y-Koordinaten
@@ -167,7 +166,7 @@ public:
     double GetTau() const;
     const JEllipse & GetEllipse() const;
     int GetExitIndex() const;
-    const NavLine & GetExitLine() const;
+    const Line & GetExitLine() const;
     Point GetLastE0() const;
     void SetLastE0(Point E0);
     // Eigenschaften der Ellipse
