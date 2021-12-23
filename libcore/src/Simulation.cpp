@@ -131,7 +131,7 @@ void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
         NavLine dummy(Line{p1, p2});
         agent->SetExitLine(&dummy);
     } else {
-        target = agent->GetExitLine()->ShortestPoint(pos);
+        target = agent->GetExitLine().ShortestPoint(pos);
     }
     // Compute orientation
     const Point posToTarget = target - pos;

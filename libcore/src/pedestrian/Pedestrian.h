@@ -34,9 +34,6 @@
 #include "geometry/SubroomType.h"
 
 #include <map>
-#include <queue>
-#include <set>
-#include <vector>
 
 class Building;
 class NavLine;
@@ -76,7 +73,7 @@ private:
     int _router_id{0};
     Point _lastE0;
 
-    NavLine * _navLine;            // current exit line
+    NavLine _navLine;              // current exit line
     std::map<int, int> _mentalMap; // map the actual room to a destination
     Point _lastPosition;
 
@@ -106,7 +103,7 @@ public:
     Pedestrian();
 
     explicit Pedestrian(const StartDistribution & agentsParameters, Building & building);
-    virtual ~Pedestrian();
+    ~Pedestrian() = default;
 
     bool InPremovement(double now);
 
@@ -170,7 +167,7 @@ public:
     double GetTau() const;
     const JEllipse & GetEllipse() const;
     int GetExitIndex() const;
-    NavLine * GetExitLine() const;
+    const NavLine & GetExitLine() const;
     Point GetLastE0() const;
     void SetLastE0(Point E0);
     // Eigenschaften der Ellipse

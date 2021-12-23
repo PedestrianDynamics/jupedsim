@@ -40,15 +40,15 @@
 /// 1
 Point DirectionMiddlePoint::GetTarget(Room * /*room*/, Pedestrian * ped) const
 {
-    return (ped->GetExitLine()->GetPoint1() + ped->GetExitLine()->GetPoint2()) * 0.5;
+    return (ped->GetExitLine().GetPoint1() + ped->GetExitLine().GetPoint2()) * 0.5;
 }
 
 /// 2
 Point DirectionMinSeperationShorterLine::GetTarget(Room * /*room*/, Pedestrian * ped) const
 {
     double d         = ped->GetEllipse().GetBmin() + 0.1; // shoulder//0.5;
-    const Point & p1 = ped->GetExitLine()->GetPoint1();
-    const Point & p2 = ped->GetExitLine()->GetPoint2();
+    const Point & p1 = ped->GetExitLine().GetPoint1();
+    const Point & p2 = ped->GetExitLine().GetPoint2();
 
     if(p1 == p2) {
         return p1;
@@ -68,8 +68,8 @@ Point DirectionMinSeperationShorterLine::GetTarget(Room * /*room*/, Pedestrian *
 /// 3
 Point DirectionInRangeBottleneck::GetTarget(Room * /*room*/, Pedestrian * ped) const
 {
-    const Point & p1 = ped->GetExitLine()->GetPoint1();
-    const Point & p2 = ped->GetExitLine()->GetPoint2();
+    const Point & p1 = ped->GetExitLine().GetPoint1();
+    const Point & p2 = ped->GetExitLine().GetPoint2();
     Line ExitLine    = Line(p1, p2, 0);
     Point Lot        = ExitLine.LotPoint(ped->GetPos());
     Point ExitMiddle = (p1 + p2) * 0.5;

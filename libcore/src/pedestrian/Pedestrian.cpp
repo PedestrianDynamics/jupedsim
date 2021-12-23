@@ -27,6 +27,7 @@
 #include "Pedestrian.h"
 
 #include "geometry/Building.h"
+#include "geometry/NavLine.h"
 #include "geometry/SubRoom.h"
 #include "geometry/WaitingArea.h"
 
@@ -68,7 +69,6 @@ Pedestrian::Pedestrian()
     _smoothFactorEscalatorUpStairs   = 15;
     _smoothFactorEscalatorDownStairs = 15;
     _lastE0                          = Point(0, 0);
-    _navLine                         = nullptr;
     _mentalMap                       = std::map<int, int>();
     _lastPosition                    = Point(J_NAN, J_NAN);
     // new orientation after 10 seconds, value is incremented
@@ -94,7 +94,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _t                   = 1.0;
     _newOrientationDelay = 0; //0 seconds, in steps
     _ellipse             = JEllipse();
-    _navLine             = nullptr;
     _building            = nullptr;
     // new orientation after 10 seconds, value is incremented
     _timeBeforeRerouting     = 0.0;
@@ -118,12 +117,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _lastE0 = Point(0, 0);
     _agentsCreated++; //increase the number of object created
     _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
-}
-
-
-Pedestrian::~Pedestrian()
-{
-    delete _navLine;
 }
 
 bool Pedestrian::InPremovement(double now)
@@ -203,11 +196,7 @@ void Pedestrian::SetExitIndex(int i)
 
 void Pedestrian::SetExitLine(const NavLine * l)
 {
-    if(_navLine != nullptr)
-        delete _navLine;
-    if(l != nullptr) {
-        _navLine = new NavLine(*l);
-    }
+    _navLine = NavLine(*l);
 }
 
 void Pedestrian::SetPos(const Point & pos)
@@ -290,7 +279,7 @@ int Pedestrian::GetExitIndex() const
     return _exitIndex;
 }
 
-NavLine * Pedestrian::GetExitLine() const
+const NavLine & Pedestrian::GetExitLine() const
 {
     return _navLine;
 }
@@ -345,10 +334,7 @@ double Pedestrian::GetV0Norm() const
     //detect the walking direction based on the elevation
     SubRoom * sub        = _building->GetSubRoom(GetPos());
     double ped_elevation = sub->GetElevation(_ellipse.GetCenter());
-    if(_navLine == nullptr) { // this might happen when agents are spawn by sources.
-        return std::max(0., _ellipse.GetV0());
-    }
-    const Point & target = _navLine->GetCentre();
+    const Point & target = _navLine.GetCentre();
     double nav_elevation = sub->GetElevation(target);
     double delta         = nav_elevation - ped_elevation;
     auto subType         = sub->GetType();
@@ -460,7 +446,7 @@ void Pedestrian::ResetRerouting()
 
 double Pedestrian::GetDistanceToNextTarget() const
 {
-    return (_navLine->DistTo(GetPos()));
+    return (_navLine.DistTo(GetPos()));
 }
 
 void Pedestrian::SetFinalDestination(int finale)

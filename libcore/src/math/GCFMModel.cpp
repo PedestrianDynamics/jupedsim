@@ -147,7 +147,7 @@ inline Point GCFMModel::ForceDriv(Pedestrian * ped, Room * room) const
     const Point & target = _direction->GetTarget(room, ped);
     Point F_driv;
     const Point & pos = ped->GetPos();
-    double dist       = ped->GetExitLine()->DistTo(pos);
+    double dist       = ped->GetExitLine().DistTo(pos);
     Point lastE0      = ped->GetLastE0();
     ped->SetLastE0(target - pos);
 

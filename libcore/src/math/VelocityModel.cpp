@@ -169,7 +169,7 @@ Point VelocityModel::e0(Pedestrian * ped, Room * room) const
 {
     Point target;
 
-    if(_direction && ped->GetExitLine()) {
+    if(_direction) {
         // target is where the ped wants to be after the next timestep
         target = _direction->GetTarget(room, ped);
     } else { //@todo: we need a model for waiting pedestrians
@@ -182,14 +182,12 @@ Point VelocityModel::e0(Pedestrian * ped, Room * room) const
         Point P1        = Point(ped->GetPos()._x - random_x, ped->GetPos()._y - random_y);
         Point P2        = Point(ped->GetPos()._x + random_x, ped->GetPos()._y + random_y);
         const NavLine L = Line(P1, P2);
-        ped->SetExitLine((const NavLine *) &L);
+        ped->SetExitLine(&L);
         target = P1;
     }
     Point desired_direction;
     const Point pos = ped->GetPos();
-    double dist     = 0.0;
-    if(ped->GetExitLine())
-        dist = ped->GetExitLine()->DistTo(pos);
+    const auto dist = ped->GetExitLine().DistTo(pos);
     // check if the molified version works
     Point lastE0 = ped->GetLastE0();
     ped->SetLastE0(target - pos);
@@ -366,10 +364,8 @@ Point VelocityModel::ForceRepWall(
     }
     //-------------------------
 
-    const Point & pos = ped->GetPos();
-    double distGoal   = 0.0;
-    if(ped->GetExitLine())
-        distGoal = ped->GetExitLine()->DistToSquare(pos);
+    const Point & pos   = ped->GetPos();
+    const auto distGoal = ped->GetExitLine().DistToSquare(pos);
 
     if(distGoal < J_EPS_GOAL * J_EPS_GOAL)
         return F_wrep;
