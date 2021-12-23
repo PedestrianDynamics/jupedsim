@@ -64,17 +64,12 @@
 #include <utility>
 #include <vector>
 
-Building::Building(std::vector<std::unique_ptr<Pedestrian>> * agents) : _allPedestrians(agents)
-{
-    _routingEngine = nullptr;
-}
+Building::Building(std::vector<std::unique_ptr<Pedestrian>> * agents) : _allPedestrians(agents) {}
 
 Building::Building(
     Configuration * configuration,
     std::vector<std::unique_ptr<Pedestrian>> * agents) :
-    _configuration(configuration),
-    _routingEngine(configuration->GetRoutingEngine()),
-    _allPedestrians(agents)
+    _configuration(configuration), _allPedestrians(agents)
 {
     {
         std::unique_ptr<GeoFileParser> parser(new GeoFileParser(_configuration));
@@ -87,11 +82,6 @@ Building::Building(
     }
 
     InitGrid();
-
-    if(!_routingEngine->Init(this)) {
-        LOG_ERROR("Could not initialize the routers!");
-        exit(EXIT_FAILURE);
-    }
 
     if(!SanityCheck()) {
         LOG_ERROR("There are sanity errors in the geometry file");
