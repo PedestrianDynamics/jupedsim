@@ -78,7 +78,8 @@ int main(int argc, char ** argv)
     }
 
     auto building = std::make_unique<Building>(&config, nullptr);
-    auto agents   = CreateAllPedestrians(&config, building.get(), config.GetTmax());
+    config.GetRoutingEngine()->Init(building.get());
+    auto agents = CreateAllPedestrians(&config, building.get(), config.GetTmax());
     Simulation sim(&config, std::move(building));
     EventManager manager;
 
