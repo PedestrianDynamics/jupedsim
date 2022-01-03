@@ -131,6 +131,7 @@ set(header_files
     src/routing/ff_router/mesh/RectGrid.h
     src/routing/global_shortest/AccessPoint.h
     src/routing/global_shortest/GlobalRouter.h
+    src/util/UniqueID.h
     src/voronoi-boost/VoronoiPositionGenerator.h
 )
 
@@ -205,6 +206,7 @@ endif()
 if (BUILD_TESTS)
     add_executable(libcore-tests
         test/TestSimulationClock.cpp
+        test/util/TestUniqueID.cpp
     )
 
     target_link_libraries(libcore-tests PRIVATE
