@@ -71,7 +71,7 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building * bu
     std::vector<Point> result_acc = std::vector<Point>();
     result_acc.reserve(allPeds.size());
 
-    std::vector<int> pedestrians_to_delete{};
+    std::vector<Pedestrian::UID> pedestrians_to_delete{};
     for(const auto & ped : allPeds) {
         auto [room, subroom] = building->GetRoomAndSubRoom(ped->GetPos());
         double normVi        = ped->GetV().ScalarProduct(ped->GetV());
@@ -85,7 +85,7 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building * bu
                 ped->GetV0Norm(),
                 current);
             // remove the pedestrian and abort
-            pedestrians_to_delete.emplace_back(ped->GetID());
+            pedestrians_to_delete.emplace_back(ped->GetUID());
             // TODO KKZ track deleted peds
             LOG_ERROR("One ped was removed due to high velocity");
         }

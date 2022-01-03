@@ -68,7 +68,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building 
     spacings.reserve(allPeds.size());    // larger than needed
     spacings.push_back(my_pair(100, 1)); // in case there are no neighbors
 
-    std::vector<int> pedestrians_to_delete{};
 
     for(const auto & ped : allPeds) {
         auto [room, subroom] = building->GetRoomAndSubRoom(ped->GetPos());
@@ -162,7 +161,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building 
         }
         ++counter;
     }
-    _simulation->RemoveAgents(pedestrians_to_delete);
 }
 
 Point VelocityModel::e0(Pedestrian * ped, Room * room) const

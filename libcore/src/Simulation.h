@@ -94,7 +94,7 @@ public:
 
     void AddAgents(std::vector<std::unique_ptr<Pedestrian>> && agents);
 
-    void RemoveAgents(std::vector<int> ids);
+    void RemoveAgents(std::vector<Pedestrian::UID> ids);
 
     Pedestrian & Agent(int id) const;
 

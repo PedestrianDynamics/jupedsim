@@ -22,20 +22,21 @@
 #include "Simulation.h"
 #include "geometry/Room.h"
 #include "geometry/SubRoom.h"
+#include "pedestrian/Pedestrian.h"
 
 #include <Logger.h>
 #include <algorithm>
 #include <iterator>
 #include <memory>
 
-std::vector<int> SimulationHelper::FindPedestriansOutside(
+std::vector<Pedestrian::UID> SimulationHelper::FindPedestriansOutside(
     const Building & building,
     const std::vector<std::unique_ptr<Pedestrian>> & peds)
 {
-    std::vector<int> pedsOutside;
+    std::vector<Pedestrian::UID> pedsOutside;
     for(const auto & ped : peds) {
         if(!building.IsInAnySubRoom(ped->GetPos())) {
-            pedsOutside.push_back(ped->GetID());
+            pedsOutside.push_back(ped->GetUID());
         }
     }
     return pedsOutside;

@@ -151,16 +151,16 @@ void Simulation::AddAgents(std::vector<std::unique_ptr<Pedestrian>> && agents)
     }
 }
 
-void Simulation::RemoveAgents(std::vector<int> ids)
+void Simulation::RemoveAgents(std::vector<Pedestrian::UID> ids)
 {
     _agents.erase(
         std::remove_if(
             _agents.begin(),
             _agents.end(),
             [&ids](auto & agent) {
-                const int id = agent->GetID();
-                return std::find_if(ids.begin(), ids.end(), [id](int other) {
-                           return id == other;
+                const auto uid = agent->GetUID();
+                return std::find_if(ids.begin(), ids.end(), [uid](Pedestrian::UID other) {
+                           return uid == other;
                        }) != ids.end();
             }),
         _agents.end());
