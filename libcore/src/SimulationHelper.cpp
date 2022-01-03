@@ -58,15 +58,15 @@ void SimulationHelper::UpdateFlowAtDoors(
             continue;
         }
 
-        if(ped->GetExitIndex() >= 0 &&
-           (building.GetTransitionByUID(ped->GetExitIndex()) != nullptr) &&
+        if(ped->GetDestination() >= 0 &&
+           (building.GetTransitionByUID(ped->GetDestination()) != nullptr) &&
            passedDoor.value()->GetUniqueID() !=
-               building.GetTransitionByUID(ped->GetExitIndex())->GetUniqueID()) {
+               building.GetTransitionByUID(ped->GetDestination())->GetUniqueID()) {
             LOG_WARNING(
                 "Ped {}: used an unindented door {}, but wanted to go to {}.",
                 ped->GetID(),
                 passedDoor.value()->GetUniqueID(),
-                ped->GetExitIndex());
+                ped->GetDestination());
             continue;
         }
         passedDoor.value()->IncreaseDoorUsage(1, time, ped->GetID());

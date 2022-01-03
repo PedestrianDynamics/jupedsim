@@ -354,7 +354,7 @@ int FFRouter::FindExit(Pedestrian * p)
         // if not subroom wise, check if correct room then direct to waiting area
         if(!_targetWithinSubroom && wa->GetRoomID() == ped_roomid) {
             bestDoor = wa->GetCentreCrossing()->GetUniqueID();
-            p->SetExitIndex(bestDoor);
+            p->SetDestination(bestDoor);
             p->SetExitLine(_doorByUID.at(bestDoor));
             return bestDoor;
         }
@@ -362,7 +362,7 @@ int FFRouter::FindExit(Pedestrian * p)
         if(_targetWithinSubroom && wa->GetRoomID() == ped_roomid &&
            wa->GetSubRoomID() == ped_subroomid) {
             bestDoor = wa->GetCentreCrossing()->GetUniqueID();
-            p->SetExitIndex(bestDoor);
+            p->SetDestination(bestDoor);
             p->SetExitLine(_doorByUID.at(bestDoor));
             return bestDoor;
         }
@@ -465,7 +465,7 @@ int FFRouter::FindExit(Pedestrian * p)
     }
 
     if(_doorByUID.count(bestDoor)) {
-        p->SetExitIndex(bestDoor);
+        p->SetDestination(bestDoor);
         p->SetExitLine(_doorByUID.at(bestDoor));
     }
     return bestDoor; //-1 if no way was found, doorUID of best, if path found

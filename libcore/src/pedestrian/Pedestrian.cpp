@@ -69,7 +69,6 @@ Pedestrian::Pedestrian()
     _smoothFactorEscalatorUpStairs   = 15;
     _smoothFactorEscalatorDownStairs = 15;
     _lastE0                          = Point(0, 0);
-    _mentalMap                       = std::map<int, int>();
     _lastPosition                    = Point(J_NAN, J_NAN);
     // new orientation after 10 seconds, value is incremented
     _timeBeforeRerouting = 0.0;
@@ -99,7 +98,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _timeBeforeRerouting     = 0.0;
     _reroutingEnabled        = false;
     _desiredFinalDestination = FINAL_DEST_OUT;
-    _mentalMap               = std::map<int, int>();
     _deltaT                  = 0.01;
     _v0                      = Point(0, 0);
     _lastPosition            = Point(0, 0);
@@ -188,10 +186,9 @@ void Pedestrian::SetEllipse(const JEllipse & e)
     _ellipse = e;
 }
 
-void Pedestrian::SetExitIndex(int i)
+void Pedestrian::SetDestination(int i)
 {
-    _exitIndex                    = i;
-    _mentalMap[GetUniqueRoomID()] = i;
+    _exitIndex = i;
 }
 
 void Pedestrian::SetExitLine(const Line * l)
@@ -274,7 +271,7 @@ const JEllipse & Pedestrian::GetEllipse() const
     return _ellipse;
 }
 
-int Pedestrian::GetExitIndex() const
+int Pedestrian::GetDestination() const
 {
     return _exitIndex;
 }
@@ -292,21 +289,11 @@ int Pedestrian::GetUniqueRoomID() const
     return room_id * 1000 + sub_room_id;
 }
 
-// returns the exit Id corresponding to the
-// unique subroom identifier
-
-int Pedestrian::GetNextDestination()
-{
-    if(_mentalMap.count(GetUniqueRoomID()) == 0) {
-        return -1;
-    }
-    return _mentalMap[GetUniqueRoomID()];
-}
-
 Point Pedestrian::GetLastE0() const
 {
     return _lastE0;
 }
+
 void Pedestrian::SetLastE0(Point E0)
 {
     _lastE0 = E0;

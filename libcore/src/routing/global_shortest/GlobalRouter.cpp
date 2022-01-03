@@ -553,7 +553,7 @@ bool GlobalRouter::GetPath(Pedestrian * ped, std::vector<Line *> & path)
     std::vector<AccessPoint *> aps_path;
 
     bool done          = false;
-    int currentNavLine = ped->GetNextDestination();
+    int currentNavLine = ped->GetDestination();
     if(currentNavLine == -1) {
         currentNavLine = GetBestDefaultRandomExit(ped);
     }
@@ -690,7 +690,7 @@ int GlobalRouter::FindExit(Pedestrian * ped)
             // cuz all lines are returned
             if(IsCrossing(*navLine, {sub}) || IsTransition(*navLine, {sub})) {
                 int nav_id = navLine->GetUniqueID();
-                ped->SetExitIndex(nav_id);
+                ped->SetDestination(nav_id);
                 ped->SetExitLine(navLine);
                 return nav_id;
             }
@@ -707,7 +707,7 @@ int GlobalRouter::FindExit(Pedestrian * ped)
         return -1;
     }
     // else proceed as usual and return the closest navigation line
-    int nextDestination = ped->GetNextDestination();
+    int nextDestination = ped->GetDestination();
 
     if(nextDestination == -1) {
         return GetBestDefaultRandomExit(ped);
@@ -724,7 +724,7 @@ int GlobalRouter::FindExit(Pedestrian * ped)
                 continue;
 
             //continue until my target is reached
-            if(apID != ped->GetExitIndex())
+            if(apID != ped->GetDestination())
                 continue;
 
             //one AP is near actualize destination:
@@ -734,23 +734,23 @@ int GlobalRouter::FindExit(Pedestrian * ped)
             if(nextDestination == -1) {
                 // we are almost at the exit
                 // so keep the last destination
-                return ped->GetNextDestination();
+                return ped->GetDestination();
             } else {
                 //check that the next destination is in the actual room of the pedestrian
                 if(!_accessPoints[nextDestination]->isInRange(sub->GetUID())) {
                     //return the last destination if defined
-                    int previousDestination = ped->GetNextDestination();
+                    int previousDestination = ped->GetDestination();
 
                     //we are still somewhere in the initialization phase
                     if(previousDestination == -1) {
-                        ped->SetExitIndex(apID);
+                        ped->SetDestination(apID);
                         ped->SetExitLine(_accessPoints[apID]->GetNavLine());
                         return apID;
                     } else { // we are still having a valid destination, don't change
                         return previousDestination;
                     }
                 } else { // we have reached the new room
-                    ped->SetExitIndex(nextDestination);
+                    ped->SetDestination(nextDestination);
                     ped->SetExitLine(_accessPoints[nextDestination]->GetNavLine());
                     return nextDestination;
                 }
@@ -771,7 +771,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian * ped)
     //save some computation
     if(relevantAPs.size() == 1) {
         auto && ap = (AccessPoint * &&) relevantAPs[0];
-        ped->SetExitIndex(ap->GetID());
+        ped->SetDestination(ap->GetID());
         ped->SetExitLine(ap->GetNavLine());
         return ap->GetID();
     }
@@ -818,7 +818,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian * ped)
     }
 
     if(bestAPsID != -1) {
-        ped->SetExitIndex(bestAPsID);
+        ped->SetDestination(bestAPsID);
         ped->SetExitLine(_accessPoints[bestAPsID]->GetNavLine());
         return bestAPsID;
     } else {
@@ -827,7 +827,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian * ped)
             //{
 
             relevantAPs[0]->GetID();
-            ped->SetExitIndex(relevantAPs[0]->GetID());
+            ped->SetDestination(relevantAPs[0]->GetID());
             ped->SetExitLine(relevantAPs[0]->GetNavLine());
             ped->RerouteIn(5);
             return relevantAPs[0]->GetID();

@@ -91,7 +91,7 @@ Point DirectionLocalFloorfield::GetTarget(Room * room, Pedestrian * ped) const
     Point p;
     UnivFFviaFM * floorfield = _locffviafm.at(room->GetID());
 
-    floorfield->GetDirectionToUID(ped->GetExitIndex(), ped->GetPos(), p);
+    floorfield->GetDirectionToUID(ped->GetDestination(), ped->GetPos(), p);
 
     return (p + ped->GetPos());
 }

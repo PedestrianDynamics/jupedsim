@@ -38,7 +38,7 @@ TrajectoryWriter::TrajectoryWriter(
     _optionalOutputHeader[OptionalOutput::intermediate_goal] = "CG\t";
     _optionalOutputInfo[OptionalOutput::intermediate_goal]   = "#CG: id of current goal\n";
     _optionalOutput[OptionalOutput::intermediate_goal]       = [](const Pedestrian * ped) {
-        return fmt::format(FMT_STRING("{}\t"), ped->GetExitIndex());
+        return fmt::format(FMT_STRING("{}\t"), ped->GetDestination());
     };
 
     // Add header, info and output for desired direction

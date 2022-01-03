@@ -72,8 +72,7 @@ private:
     int _router_id{0};
     Point _lastE0;
 
-    Line _navLine;                 // current exit line
-    std::map<int, int> _mentalMap; // map the actual room to a destination
+    Line _navLine; // current exit line
     Point _lastPosition;
 
     /// a new orientation starts after this time
@@ -134,7 +133,7 @@ public:
     double GetT() const;
     void SetT(double T);
     //TODO: merge this two functions
-    void SetExitIndex(int i);
+    void SetDestination(int i);
     void SetExitLine(const Line * l);
     void SetDeltaT(double dt);
     // Eigenschaften der Ellipse
@@ -165,7 +164,7 @@ public:
     double GetMass() const;
     double GetTau() const;
     const JEllipse & GetEllipse() const;
-    int GetExitIndex() const;
+    int GetDestination() const;
     const Line & GetExitLine() const;
     Point GetLastE0() const;
     void SetLastE0(Point E0);
@@ -189,7 +188,6 @@ public:
     int GetFinalDestination() const;
 
     int GetUniqueRoomID() const;
-    int GetNextDestination();
     double GetDistanceToNextTarget() const;
 
     /**
