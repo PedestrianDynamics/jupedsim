@@ -97,7 +97,7 @@ bool SimulationHelper::UpdateFlowRegulation(Building & building, double time)
 
     for(auto [transID, trans] : building.GetAllTransitions()) {
         DoorState state = trans->GetState();
-        trans->UpdateTemporaryState(building.GetConfig()->Getdt());
+        trans->UpdateTemporaryState(building.GetConfig()->dT);
 
         bool regulateFlow = trans->GetOutflowRate() < std::numeric_limits<double>::max() ||
                             trans->GetMaxDoorUsage() < std::numeric_limits<double>::max();

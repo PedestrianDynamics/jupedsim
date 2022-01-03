@@ -175,7 +175,7 @@ Point VelocityModel::e0(Pedestrian * ped, Room * room) const
     } else { //@todo: we need a model for waiting pedestrians
         LOG_WARNING("VelocityModel::e0 Ped {} has no navline.", ped->GetUID());
         // set random destination
-        std::mt19937 mt(ped->GetBuilding()->GetConfig()->GetSeed());
+        std::mt19937 mt(ped->GetBuilding()->GetConfig()->seed);
         std::uniform_real_distribution<double> dist(0, 1.0);
         double random_x = dist(mt);
         double random_y = dist(mt);
@@ -386,25 +386,4 @@ std::string VelocityModel::GetDescription() const
     sprintf(tmp, "\t\tD: \t\tPed: %f \tWall: %f\n", _DPed, _DWall);
     rueck.append(tmp);
     return rueck;
-}
-
-double VelocityModel::GetaPed() const
-{
-    return _aPed;
-}
-
-double VelocityModel::GetDPed() const
-{
-    return _DPed;
-}
-
-
-double VelocityModel::GetaWall() const
-{
-    return _aWall;
-}
-
-double VelocityModel::GetDWall() const
-{
-    return _DWall;
 }

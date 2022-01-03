@@ -510,10 +510,10 @@ void PedDistributor::DistributeInSubRoom(
 
 double PedDistributor::GetA_dist() const
 {
-    double A_dist = 0;
-    auto APS      = _configuration->GetAgentsParameters();
-    std::map<int, std::shared_ptr<AgentsParameters>>::iterator iter;
-    for(iter = APS.begin(); iter != APS.end(); iter++) {
+    double A_dist    = 0;
+    const auto & APS = _configuration->agentsParameters;
+    std::map<int, std::shared_ptr<AgentsParameters>>::const_iterator iter;
+    for(iter = APS.cbegin(); iter != APS.cend(); iter++) {
         auto AP = iter->second;
         A_dist  = A_dist > AP->GetAminMean() ? A_dist : AP->GetAminMean();
     }
@@ -522,10 +522,10 @@ double PedDistributor::GetA_dist() const
 
 double PedDistributor::GetB_dist() const
 {
-    double B_dist = 0;
-    auto APS      = _configuration->GetAgentsParameters();
-    std::map<int, std::shared_ptr<AgentsParameters>>::iterator iter;
-    for(iter = APS.begin(); iter != APS.end(); iter++) {
+    double B_dist    = 0;
+    const auto & APS = _configuration->agentsParameters;
+    std::map<int, std::shared_ptr<AgentsParameters>>::const_iterator iter;
+    for(iter = APS.cbegin(); iter != APS.cend(); iter++) {
         auto AP = iter->second;
         B_dist  = B_dist > AP->GetBmaxMean() ? B_dist : AP->GetBmaxMean();
     }

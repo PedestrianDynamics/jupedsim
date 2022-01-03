@@ -69,28 +69,27 @@ void TrajectoryWriter::WriteHeader(size_t nPeds, double fps, const Configuration
     header.append(fmt::format("#agents: {:d}\n", nPeds));
     header.append(fmt::format("#count: {:d}\n", count));
     header.append(fmt::format("#framerate: {:0.2f}\n", fps));
-    header.append(fmt::format("#geometry: {:s}\n", cfg.GetGeometryFile().filename().string()));
+    header.append(fmt::format("#geometry: {:s}\n", cfg.geometryFile.filename().string()));
 
     // if used: add two necessary files time table and train types
-    if(!cfg.GetTrainTimeTableFile().empty() && !cfg.GetTrainTypeFile().empty()) {
-        header.append(fmt::format(
-            "#trainTimeTable: {:s}\n", cfg.GetTrainTimeTableFile().filename().string()));
+    if(!cfg.trainTimeTableFile.empty() && !cfg.trainTypeFile.empty()) {
         header.append(
-            fmt::format("#trainType: {:s}\n", cfg.GetTrainTypeFile().filename().string()));
+            fmt::format("#trainTimeTable: {:s}\n", cfg.trainTimeTableFile.filename().string()));
+        header.append(fmt::format("#trainType: {:s}\n", cfg.trainTypeFile.filename().string()));
     }
     // if used: add source file name
-    if(!cfg.GetSourceFile().empty()) {
-        header.append(fmt::format("#sources: {:s}\n", cfg.GetSourceFile().filename().string()));
+    if(!cfg.sourceFile.empty()) {
+        header.append(fmt::format("#sources: {:s}\n", cfg.sourceFile.filename().string()));
     }
 
     // if used: add goal file name
-    if(!cfg.GetGoalFile().empty()) {
-        header.append(fmt::format("#goals: {:s}\n", cfg.GetGoalFile().filename().string()));
+    if(!cfg.goalFile.empty()) {
+        header.append(fmt::format("#goals: {:s}\n", cfg.goalFile.filename().string()));
     }
 
     // if used: add event file name
-    if(!cfg.GetEventFile().empty()) {
-        header.append(fmt::format("#events: {:s}\n", cfg.GetEventFile().filename().string()));
+    if(!cfg.eventFile.empty()) {
+        header.append(fmt::format("#events: {:s}\n", cfg.eventFile.filename().string()));
     }
 
     header.append("#ID: the agent ID\n");

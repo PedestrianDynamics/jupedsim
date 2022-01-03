@@ -126,7 +126,7 @@ Configuration * Building::GetConfig() const
 
 RoutingEngine * Building::GetRoutingEngine() const
 {
-    return _configuration->GetRoutingEngine().get();
+    return _configuration->routingEngine.get();
 }
 
 int Building::GetNumberOfRooms() const
@@ -428,12 +428,12 @@ bool Building::InitInsideGoals()
 
 const fs::path & Building::GetProjectFilename() const
 {
-    return _configuration->GetProjectFile();
+    return _configuration->iniFile;
 }
 
 const fs::path & Building::GetProjectRootDir() const
 {
-    return _configuration->GetProjectRootDir();
+    return _configuration->projectRootDir;
 }
 
 bool Building::AddCrossing(Crossing * line)
@@ -715,7 +715,7 @@ void Building::InitGrid()
         }
     }
 
-    double cellSize = _configuration->GetLinkedCellSize();
+    double cellSize = _configuration->linkedCellSize;
     //make the grid slightly larger.
     x_min = x_min - 1 * cellSize;
     x_max = x_max + 1 * cellSize;

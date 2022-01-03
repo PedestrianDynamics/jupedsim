@@ -78,8 +78,8 @@ int main(int argc, char ** argv)
     }
 
     auto building = std::make_unique<Building>(&config, nullptr);
-    config.GetRoutingEngine()->Init(building.get());
-    auto agents = CreateAllPedestrians(&config, building.get(), config.GetTmax());
+    config.routingEngine->Init(building.get());
+    auto agents = CreateAllPedestrians(&config, building.get(), config.tMax);
     Simulation sim(&config, std::move(building));
     EventManager manager;
 
@@ -107,16 +107,16 @@ int main(int argc, char ** argv)
     LOG_INFO("Simulation started with {} pedestrians", sim.GetPedsNumber());
     try {
         auto writer = std::make_unique<TrajectoryWriter>(
-            config.GetPrecision(),
-            config.GetOptionalOutputOptions(),
-            std::make_unique<FileHandler>(config.GetTrajectoriesFile()),
+            config.precision,
+            config.optionalOutput,
+            std::make_unique<FileHandler>(config.trajectoriesFile),
             config.agentColorMode);
         sim.RunHeader(num_agents, *writer);
 
         const int writeInterval = static_cast<int>((1. / sim.Fps()) / sim.Clock().dT() + 0.5);
 
         while((!sim.Agents().empty() || manager.HasEventsAfter(sim.Clock())) &&
-              sim.Clock().ElapsedTime() < config.GetTmax()) {
+              sim.Clock().ElapsedTime() < config.tMax) {
             auto next_events = manager.NextEvents(sim.Clock());
             for(auto const & [_, event] : next_events) {
                 // lambda is used to bind additional function paramters to the visitor
@@ -134,7 +134,7 @@ int main(int argc, char ** argv)
 
 
             if(sim.Clock().Iteration() % 1000 == 0) {
-                if(config.ShowStatistics()) {
+                if(config.showStatistics) {
                     LOG_INFO("Update door statistics at t={:.2f}", sim.Clock().ElapsedTime());
                     sim.PrintStatistics(sim.Clock().ElapsedTime());
                 }
@@ -152,7 +152,7 @@ int main(int argc, char ** argv)
     time(&endtime);
 
     // some statistics output
-    if(config.ShowStatistics()) {
+    if(config.showStatistics) {
         sim.PrintStatistics(evacTime); // negative means end of simulation
     }
 

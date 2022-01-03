@@ -120,9 +120,9 @@ void DirectionLocalFloorfield::Init(Building * building)
 {
     _wasInitialized    = true;
     _building          = building;
-    _stepsize          = building->GetConfig()->get_deltaH();
-    _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
-    _useDistancefield  = building->GetConfig()->get_use_wall_avoidance();
+    _stepsize          = building->GetConfig()->deltaH;
+    _wallAvoidDistance = building->GetConfig()->wallAvoidDistance;
+    _useDistancefield  = building->GetConfig()->useWallAvoidance;
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();

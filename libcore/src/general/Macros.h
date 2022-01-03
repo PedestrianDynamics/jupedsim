@@ -55,8 +55,6 @@
 // Not-a-Number (NaN)
 #define J_NAN std::numeric_limits<double>::quiet_NaN()
 
-enum class FileFormat { XML, TXT };
-
 enum RoutingStrategy {
     ROUTING_GLOBAL_SHORTEST,
     ROUTING_FF_GLOBAL_SHORTEST,

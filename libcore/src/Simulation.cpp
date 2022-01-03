@@ -58,9 +58,9 @@
 
 Simulation::Simulation(Configuration * args, std::unique_ptr<Building> && building) :
     _config(args),
-    _clock(_config->Getdt()),
+    _clock(_config->dT),
     _building(std::move(building)),
-    _currentTrajectoriesFile(_config->GetTrajectoriesFile())
+    _currentTrajectoriesFile(_config->trajectoriesFile)
 {
 }
 
@@ -69,12 +69,12 @@ void Simulation::Iterate()
     _building->UpdateGrid();
     const double t_in_sec = _clock.ElapsedTime();
 
-    auto directionManager = _config->GetDirectionManager();
+    auto directionManager = _config->directionManager;
     if(directionManager) {
         directionManager->Update(t_in_sec);
     }
 
-    _config->GetModel()->Update(t_in_sec);
+    _config->model->Update(t_in_sec);
 
     _routingEngine->UpdateTime(t_in_sec);
 
@@ -94,8 +94,7 @@ void Simulation::Iterate()
                 "Enter correctGeometry: Building Has {} Transitions.",
                 _building->GetAllTransitions().size());
 
-            _building->GetConfig()->GetDirectionManager()->GetDirectionStrategy()->Init(
-                _building.get());
+            _building->GetConfig()->directionManager->GetDirectionStrategy()->Init(_building.get());
         }
 
         // here the used routers are update, when needed due to external changes
@@ -201,17 +200,16 @@ void Simulation::AddEvents(std::vector<Event> events)
 
 bool Simulation::InitArgs()
 {
-    const fs::path & trajPath(_config->GetTrajectoriesFile());
+    const fs::path & trajPath     = _config->trajectoriesFile;
     const fs::path trajParentPath = trajPath.parent_path();
     if(!trajParentPath.empty()) {
         fs::create_directories(trajParentPath);
     }
 
+    _operationalModel = _config->model;
+    _fps              = _config->fps;
 
-    _operationalModel = _config->GetModel();
-    _fps              = _config->GetFps();
-
-    _routingEngine = _config->GetRoutingEngine();
+    _routingEngine = _config->routingEngine;
     _routingEngine->SetSimulation(this);
 
     // IMPORTANT: do not change the order in the following..
@@ -234,34 +232,34 @@ bool Simulation::InitArgs()
         ped->SetDeltaT(_clock.dT());
     }
     LOG_INFO("Number of peds received: {}", _agents.size());
-    _seed = _config->GetSeed();
+    _seed = _config->seed;
 
-    if(_config->GetDistEffMaxPed() > _config->GetLinkedCellSize()) {
+    if(_config->distEffMaxPed > _config->linkedCellSize) {
         LOG_ERROR(
             "The linked-cell size [{}] should be larger than the force range [{}]",
-            _config->GetLinkedCellSize(),
-            _config->GetDistEffMaxPed());
+            _config->linkedCellSize,
+            _config->distEffMaxPed);
         return false;
     }
 
     _old_em = std::make_unique<OldEventManager>();
-    if(!_config->GetEventFile().empty()) {
-        EventFileParser::ParseDoorEvents(*_old_em, _building.get(), _config->GetEventFile());
+    if(!_config->eventFile.empty()) {
+        EventFileParser::ParseDoorEvents(*_old_em, _building.get(), _config->eventFile);
     }
-    if(!_config->GetScheduleFile().empty()) {
-        EventFileParser::ParseSchedule(*_old_em, _building.get(), _config->GetScheduleFile());
+    if(!_config->scheduleFile.empty()) {
+        EventFileParser::ParseSchedule(*_old_em, _building.get(), _config->scheduleFile);
 
         // Read and set max door usage from schedule file
-        auto groupMaxAgents = EventFileParser::ParseMaxAgents(_config->GetScheduleFile());
+        auto groupMaxAgents = EventFileParser::ParseMaxAgents(_config->scheduleFile);
         for(auto const & [transID, maxAgents] : groupMaxAgents) {
             _building->GetTransition(transID)->SetMaxDoorUsage(maxAgents);
         }
     }
 
-    if(!_config->GetTrainTypeFile().empty() && !_config->GetTrainTimeTableFile().empty()) {
-        auto trainTypes = TrainFileParser::ParseTrainTypes(_config->GetTrainTypeFile());
+    if(!_config->trainTypeFile.empty() && !_config->trainTimeTableFile.empty()) {
+        auto trainTypes = TrainFileParser::ParseTrainTypes(_config->trainTypeFile);
         TrainFileParser::ParseTrainTimeTable(
-            *_old_em, *_building, trainTypes, _config->GetTrainTimeTableFile());
+            *_old_em, *_building, trainTypes, _config->trainTimeTableFile);
     }
 
     LOG_INFO("Got {} Trains", _building->GetTrainTypes().size());
@@ -354,9 +352,9 @@ void Simulation::PrintStatistics(double simTime)
                 statsfile += buffer.str();
                 statsfile += '_';
             }
-            statsfile += _config->GetOriginalTrajectoriesFile().filename().replace_extension("txt");
+            statsfile += _config->trajectoriesFile.filename().replace_extension("txt");
 
-            statsfile = _config->GetOutputPath() / statsfile;
+            statsfile = _config->outputPath / statsfile;
 
             LOG_INFO("More Information in the file: {}", statsfile.string());
             {
@@ -413,30 +411,29 @@ void Simulation::RunHeader(long nPed, TrajectoryWriter & writer)
 void Simulation::CopyInputFilesToOutPath()
 {
     // In the case we stored the corrected Geometry already in the output path we do not need to copy it again
-    if(_config->GetOutputPath() != _config->GetGeometryFile().parent_path()) {
+    if(_config->outputPath != _config->geometryFile.parent_path()) {
         fs::copy(
-            _config->GetProjectRootDir() / _config->GetGeometryFile(),
-            _config->GetOutputPath(),
+            _config->projectRootDir / _config->geometryFile,
+            _config->outputPath,
             fs::copy_options::overwrite_existing);
     }
 
-    fs::copy(
-        _config->GetProjectFile(), _config->GetOutputPath(), fs::copy_options::overwrite_existing);
+    fs::copy(_config->iniFile, _config->outputPath, fs::copy_options::overwrite_existing);
 
-    CopyInputFileToOutPath(_config->GetTrafficContraintFile());
-    CopyInputFileToOutPath(_config->GetGoalFile());
-    CopyInputFileToOutPath(_config->GetTransitionFile());
-    CopyInputFileToOutPath(_config->GetEventFile());
-    CopyInputFileToOutPath(_config->GetScheduleFile());
-    CopyInputFileToOutPath(_config->GetSourceFile());
-    CopyInputFileToOutPath(_config->GetTrainTimeTableFile());
-    CopyInputFileToOutPath(_config->GetTrainTypeFile());
+    CopyInputFileToOutPath(_config->trafficContraintFile);
+    CopyInputFileToOutPath(_config->goalFile);
+    CopyInputFileToOutPath(_config->transitionFile);
+    CopyInputFileToOutPath(_config->eventFile);
+    CopyInputFileToOutPath(_config->scheduleFile);
+    CopyInputFileToOutPath(_config->sourceFile);
+    CopyInputFileToOutPath(_config->trainTimeTableFile);
+    CopyInputFileToOutPath(_config->trainTypeFile);
 }
 
 void Simulation::CopyInputFileToOutPath(fs::path file)
 {
     if(!file.empty() && fs::exists(file)) {
-        fs::copy(file, _config->GetOutputPath(), fs::copy_options::overwrite_existing);
+        fs::copy(file, _config->outputPath, fs::copy_options::overwrite_existing);
     }
 }
 
@@ -448,7 +445,7 @@ void Simulation::UpdateOutputFiles()
 
 void Simulation::UpdateOutputIniFile()
 {
-    fs::path iniOutputPath = _config->GetOutputPath() / _config->GetProjectFile().filename();
+    fs::path iniOutputPath = _config->outputPath / _config->iniFile.filename();
 
     TiXmlDocument iniOutput(iniOutputPath.string());
 
@@ -462,28 +459,28 @@ void Simulation::UpdateOutputIniFile()
     if(mainNode->FirstChild("geometry")) {
         mainNode->FirstChild("geometry")
             ->FirstChild()
-            ->SetValue(_config->GetGeometryFile().filename().string());
+            ->SetValue(_config->geometryFile.filename().string());
     } else if(
         mainNode->FirstChild("header") && mainNode->FirstChild("header")->FirstChild("geometry")) {
         mainNode->FirstChild("header")
             ->FirstChild("geometry")
             ->FirstChild()
-            ->SetValue(_config->GetGeometryFile().filename().string());
+            ->SetValue(_config->geometryFile.filename().string());
     }
 
     // update new traffic constraint file name
-    if(!_config->GetTrafficContraintFile().empty()) {
+    if(!_config->trafficContraintFile.empty()) {
         if(mainNode->FirstChild("traffic_constraints") &&
            mainNode->FirstChild("traffic_constraints")->FirstChild("file")) {
             mainNode->FirstChild("traffic_constraints")
                 ->FirstChild("file")
                 ->FirstChild()
-                ->SetValue(_config->GetTrafficContraintFile().filename().string());
+                ->SetValue(_config->trafficContraintFile.filename().string());
         }
     }
 
     // update new goal file name
-    if(!_config->GetGoalFile().empty()) {
+    if(!_config->goalFile.empty()) {
         if(mainNode->FirstChild("routing") &&
            mainNode->FirstChild("routing")->FirstChild("goals") &&
            mainNode->FirstChild("routing")->FirstChild("goals")->FirstChild("file")) {
@@ -491,12 +488,12 @@ void Simulation::UpdateOutputIniFile()
                 ->FirstChild("goals")
                 ->FirstChild("file")
                 ->FirstChild()
-                ->SetValue(_config->GetGoalFile().filename().string());
+                ->SetValue(_config->goalFile.filename().string());
         }
     }
 
     // update new source file name
-    if(!_config->GetSourceFile().empty()) {
+    if(!_config->sourceFile.empty()) {
         if(mainNode->FirstChild("agents") &&
            mainNode->FirstChild("agents")->FirstChild("agents_sources") &&
            mainNode->FirstChild("agents")->FirstChild("agents_sources")->FirstChild("file")) {
@@ -504,32 +501,32 @@ void Simulation::UpdateOutputIniFile()
                 ->FirstChild("agents_sources")
                 ->FirstChild("file")
                 ->FirstChild()
-                ->SetValue(_config->GetSourceFile().filename().string());
+                ->SetValue(_config->sourceFile.filename().string());
         }
     }
 
     // update new event file name
-    if(!_config->GetEventFile().empty()) {
+    if(!_config->eventFile.empty()) {
         if(mainNode->FirstChild("events_file")) {
             mainNode->FirstChild("events_file")
                 ->FirstChild()
-                ->SetValue(_config->GetEventFile().filename().string());
+                ->SetValue(_config->eventFile.filename().string());
         } else if(
             mainNode->FirstChild("header") &&
             mainNode->FirstChild("header")->FirstChild("events_file")) {
             mainNode->FirstChild("header")
                 ->FirstChild("events_file")
                 ->FirstChild()
-                ->SetValue(_config->GetEventFile().filename().string());
+                ->SetValue(_config->eventFile.filename().string());
         }
     }
 
     // update new schedule file name
-    if(!_config->GetScheduleFile().empty()) {
+    if(!_config->scheduleFile.empty()) {
         if(mainNode->FirstChild("schedule_file")) {
             mainNode->FirstChild("schedule_file")
                 ->FirstChild()
-                ->SetValue(_config->GetScheduleFile().filename().string());
+                ->SetValue(_config->scheduleFile.filename().string());
 
         } else if(
             mainNode->FirstChild("header") &&
@@ -537,29 +534,29 @@ void Simulation::UpdateOutputIniFile()
             mainNode->FirstChild("header")
                 ->FirstChild("schedule_file")
                 ->FirstChild()
-                ->SetValue(_config->GetScheduleFile().filename().string());
+                ->SetValue(_config->scheduleFile.filename().string());
         }
     }
 
     // update new train time table file name
-    if(!_config->GetTrainTimeTableFile().empty()) {
+    if(!_config->trainTimeTableFile.empty()) {
         if(mainNode->FirstChild("train_constraints") &&
            mainNode->FirstChild("train_constraints")->FirstChild("train_time_table")) {
             mainNode->FirstChild("train_constraints")
                 ->FirstChild("train_time_table")
                 ->FirstChild()
-                ->SetValue(_config->GetTrainTimeTableFile().filename().string());
+                ->SetValue(_config->trainTimeTableFile.filename().string());
         }
     }
 
     // update new train types file name
-    if(!_config->GetTrainTypeFile().empty()) {
+    if(!_config->trainTypeFile.empty()) {
         if(mainNode->FirstChild("train_constraints") &&
            mainNode->FirstChild("train_constraints")->FirstChild("train_types")) {
             mainNode->FirstChild("train_constraints")
                 ->FirstChild("train_types")
                 ->FirstChild()
-                ->SetValue(_config->GetTrainTypeFile().filename().string());
+                ->SetValue(_config->trainTypeFile.filename().string());
         }
     }
 
@@ -568,7 +565,7 @@ void Simulation::UpdateOutputIniFile()
 
 void Simulation::UpdateOutputGeometryFile()
 {
-    fs::path geoOutputPath = _config->GetOutputPath() / _config->GetGeometryFile().filename();
+    fs::path geoOutputPath = _config->outputPath / _config->geometryFile.filename();
 
     TiXmlDocument geoOutput(geoOutputPath.string());
 
@@ -578,13 +575,13 @@ void Simulation::UpdateOutputGeometryFile()
     }
     TiXmlElement * mainNode = geoOutput.RootElement();
 
-    if(!_config->GetTransitionFile().empty()) {
+    if(!_config->transitionFile.empty()) {
         if(mainNode->FirstChild("transitions") &&
            mainNode->FirstChild("transitions")->FirstChild("file")) {
             mainNode->FirstChild("transitions")
                 ->FirstChild("file")
                 ->FirstChild()
-                ->SetValue(_config->GetTransitionFile().filename().string());
+                ->SetValue(_config->transitionFile.filename().string());
         }
     }
 

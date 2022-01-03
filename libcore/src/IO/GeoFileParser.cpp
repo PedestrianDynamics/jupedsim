@@ -51,9 +51,9 @@ void GeoFileParser::LoadBuilding(Building * building)
 
 bool GeoFileParser::LoadGeometry(Building * building)
 {
-    const fs::path & rootDir(_configuration->GetProjectRootDir());
+    const fs::path & rootDir(_configuration->projectRootDir);
 
-    const fs::path geoFilenameWithPath = rootDir / _configuration->GetGeometryFile();
+    const fs::path geoFilenameWithPath = rootDir / _configuration->geometryFile;
     LOG_INFO("LoadGeometry: file: {}", geoFilenameWithPath.string());
 
     TiXmlDocument docGeo(geoFilenameWithPath.string());
@@ -161,7 +161,7 @@ bool GeoFileParser::LoadGeometry(Building * building)
                 ((Escalator *) subroom)->SetDown(Point(down_x, down_y));
                 ((Escalator *) subroom)->SetEscalatorUp();
                 ((Escalator *) subroom)->SetEscalatorSpeed(speed_up);
-                _configuration->set_has_directional_escalators(true);
+                _configuration->hasDirectionalEscalators = true;
             } else if(type == "escalator_down") {
                 if(xSubRoom->FirstChildElement("up") == nullptr ||
                    xSubRoom->FirstChildElement("down") == nullptr) {
@@ -179,7 +179,7 @@ bool GeoFileParser::LoadGeometry(Building * building)
                 ((Escalator *) subroom)->SetDown(Point(down_x, down_y));
                 ((Escalator *) subroom)->SetEscalatorDown();
                 ((Escalator *) subroom)->SetEscalatorSpeed(speed_down);
-                _configuration->set_has_directional_escalators(true);
+                _configuration->hasDirectionalEscalators = true;
             } else {
                 //normal subroom or corridor
                 subroom = new NormalSubRoom();
@@ -310,7 +310,7 @@ bool GeoFileParser::LoadGeometry(Building * building)
         }
         TiXmlNode * xNodeFile = xTransNode->FirstChild("file");
         if(xNodeFile) {
-            fs::path p(_configuration->GetProjectRootDir());
+            fs::path p(_configuration->projectRootDir);
             std::string transFilename = xNodeFile->FirstChild()->ValueStr();
             p /= transFilename;
             transFilename = p.string();
@@ -358,7 +358,7 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
 {
     //TODO read schedule
 
-    TiXmlDocument docRouting(_configuration->GetProjectFile().string());
+    TiXmlDocument docRouting(_configuration->iniFile.string());
     if(!docRouting.LoadFile()) {
         LOG_ERROR("{:s}", docRouting.ErrorDesc());
         LOG_ERROR("Could not parse the routing file");
@@ -385,7 +385,7 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
             Goal * goal = parseGoalNode(e);
             if(goal) {
                 building->AddGoal(goal);
-                _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
+                _configuration->routingEngine->AddFinalDestinationID(goal->GetId());
             }
         }
 
@@ -395,13 +395,13 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
             Goal * goal = parseWaitingAreaNode(e);
             if(goal) {
                 building->AddGoal(goal);
-                _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
+                _configuration->routingEngine->AddFinalDestinationID(goal->GetId());
             }
         }
         // ---- parse goals/waiting areas from external file
         TiXmlNode * xGoalsNodeFile = xGoalsNode->FirstChild("file");
         if(xGoalsNodeFile) {
-            fs::path p(_configuration->GetProjectRootDir());
+            fs::path p(_configuration->projectRootDir);
             std::string goalFilename = xGoalsNodeFile->FirstChild()->ValueStr();
             p /= goalFilename;
             goalFilename = p.string();
@@ -431,7 +431,7 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
                 Goal * goal = parseGoalNode(e);
                 if(goal) {
                     building->AddGoal(goal);
-                    _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
+                    _configuration->routingEngine->AddFinalDestinationID(goal->GetId());
                 }
             }
 
@@ -440,7 +440,7 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
                 Goal * goal = parseWaitingAreaNode(e);
                 if(goal) {
                     building->AddGoal(goal);
-                    _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
+                    _configuration->routingEngine->AddFinalDestinationID(goal->GetId());
                 }
             }
 
@@ -510,7 +510,7 @@ bool GeoFileParser::LoadTrafficInfo(Building * building)
 {
     LOG_INFO("Loading the traffic info");
 
-    TiXmlDocument doc(_configuration->GetProjectFile().string());
+    TiXmlDocument doc(_configuration->iniFile.string());
     if(!doc.LoadFile()) {
         LOG_ERROR("{}", doc.ErrorDesc());
         LOG_ERROR("Could not parse the project file");
@@ -541,7 +541,7 @@ bool GeoFileParser::LoadTrafficInfo(Building * building)
     // processing file node
     TiXmlNode * xFileNode = xRootNode->FirstChild("file");
     if(xFileNode) {
-        fs::path p(_configuration->GetProjectRootDir());
+        fs::path p(_configuration->projectRootDir);
         std::string trafficFilename = xFileNode->FirstChild()->ValueStr();
         p /= trafficFilename;
         trafficFilename = p.string();
@@ -919,9 +919,9 @@ bool GeoFileParser::ParseExternalFiles(const TiXmlNode & mainNode)
     if(mainNode.FirstChild("transitions") &&
        mainNode.FirstChild("transitions")->FirstChild("file")) {
         fs::path transitionFile =
-            _configuration->GetProjectRootDir() /
+            _configuration->projectRootDir /
             mainNode.FirstChild("transitions")->FirstChild("file")->FirstChild()->Value();
-        _configuration->SetTransitionFile(fs::weakly_canonical(transitionFile));
+        _configuration->transitionFile = fs::weakly_canonical(transitionFile);
     }
 
     return true;

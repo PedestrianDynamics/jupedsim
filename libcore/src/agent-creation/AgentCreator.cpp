@@ -18,7 +18,7 @@ CreateAllPedestrians(Configuration * configuration, Building * building, double 
     AgentVec agents;
     building->SetAgents(&agents);
 
-    configuration->GetDirectionManager()->Init(building);
+    configuration->directionManager->Init(building);
 
     PedDistributor pd(configuration, &agents);
     pd.Distribute(building);
@@ -34,7 +34,7 @@ CreateAllPedestrians(Configuration * configuration, Building * building, double 
         mgr.AddSource(src);
     }
     mgr.GenerateAgents();
-    SimulationClock clock(configuration->Getdt());
+    SimulationClock clock(configuration->dT);
 
     do {
         building->SetAgents(&agents);

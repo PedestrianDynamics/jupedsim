@@ -141,35 +141,6 @@ public:
     ~VelocityModel() override = default;
 
     /**
-      * @todo What is this parameter doing?
-      *
-      * @return double
-      *
-      */
-    double GetaPed() const;
-
-    /**
-      * @todo What is this parameter doing?
-      *
-      * @return double
-      */
-    double GetDPed() const;
-
-    /**
-      * @todo What is this parameter doing?
-      *
-      * @return double
-      */
-    double GetaWall() const;
-
-    /**
-      * @todo What is this parameter doing?
-      *
-      * @return double
-      */
-    double GetDWall() const;
-
-    /**
       * @return all model parameters in a nicely formatted string
       */
     std::string GetDescription() const override;

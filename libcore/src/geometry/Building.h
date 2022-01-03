@@ -50,8 +50,6 @@ class Transition;
 
 class PedDistributor;
 
-class Configuration;
-
 class WaitingArea;
 
 class Building

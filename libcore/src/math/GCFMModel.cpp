@@ -445,49 +445,6 @@ Point GCFMModel::ForceInterpolation(
     return F_rep;
 }
 
-
-// Getter-Funktionen
-
-double GCFMModel::GetNuPed() const
-{
-    return _nuPed;
-}
-
-double GCFMModel::GetNuWall() const
-{
-    return _nuWall;
-}
-
-double GCFMModel::GetIntpWidthPed() const
-{
-    return _intp_widthPed;
-}
-
-double GCFMModel::GetIntpWidthWall() const
-{
-    return _intp_widthWall;
-}
-
-double GCFMModel::GetMaxFPed() const
-{
-    return _maxfPed;
-}
-
-double GCFMModel::GetMaxFWall() const
-{
-    return _maxfWall;
-}
-
-double GCFMModel::GetDistEffMaxPed() const
-{
-    return _distEffMaxPed;
-}
-
-double GCFMModel::GetDistEffMaxWall() const
-{
-    return _distEffMaxWall;
-}
-
 std::string GCFMModel::GetDescription() const
 {
     std::string rueck;

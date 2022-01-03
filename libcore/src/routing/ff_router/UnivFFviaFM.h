@@ -35,6 +35,7 @@
  **/
 #pragma once
 
+#include "general/Configuration.h"
 #include "general/Filesystem.h"
 #include "general/Macros.h"
 
@@ -46,7 +47,6 @@ class Pedestrian;
 class Room;
 class SubRoom;
 class Building;
-class Configuration;
 class Point;
 class RectGrid;
 class Line;
