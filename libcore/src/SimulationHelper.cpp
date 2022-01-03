@@ -64,7 +64,7 @@ void SimulationHelper::UpdateFlowAtDoors(
                building.GetTransitionByUID(ped->GetDestination())->GetUniqueID()) {
             LOG_WARNING(
                 "Ped {}: used an unindented door {}, but wanted to go to {}.",
-                ped->GetID(),
+                ped->GetUID(),
                 passedDoor.value()->GetUniqueID(),
                 ped->GetDestination());
             continue;

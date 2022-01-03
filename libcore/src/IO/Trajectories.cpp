@@ -127,8 +127,8 @@ void TrajectoryWriter::WriteFrame(
         double phi        = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
         double RAD2DEG    = 180.0 / M_PI;
         std::string frame = fmt::format(
-            "{:d}\t{:d}\t{:0.{}f}\t{:0.{}f}\t{:0.{}f}\t{:0.2f}\t{:0.2f}\t{:0.2f}\t{:d}\t",
-            ped->GetID(),
+            "{}\t{:d}\t{:0.{}f}\t{:0.{}f}\t{:0.{}f}\t{:0.2f}\t{:0.2f}\t{:0.2f}\t{:d}\t",
+            ped->GetUID(),
             frameNr,
             x,
             _precision,

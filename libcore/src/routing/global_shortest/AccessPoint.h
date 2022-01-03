@@ -113,11 +113,6 @@ public:
     const std::string GetFriendlyName();
 
     /**
-      * dump the class
-      */
-    void Dump();
-
-    /**
       * Set/Get the centre of the navigation line defining this access point
       */
     const Point & GetCentre() const;

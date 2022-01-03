@@ -164,7 +164,10 @@ void Pedestrian::SetDeltaT(double dt)
 {
     _deltaT = dt;
 }
-
+Pedestrian::UID Pedestrian::GetUID() const
+{
+    return _uid;
+}
 int Pedestrian::GetID() const
 {
     return _id;

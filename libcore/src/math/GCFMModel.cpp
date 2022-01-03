@@ -77,12 +77,11 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building * bu
         double normVi        = ped->GetV().ScalarProduct(ped->GetV());
         double tmp           = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta);
         if(normVi > tmp && ped->GetV0Norm() > 0) {
-            fprintf(
-                stderr,
+            LOG_ERROR(
                 "GCFMModel::calculateForce() WARNING: actual velocity (%f) of iped %d "
                 "is bigger than desired velocity (%f) at time: %fs\n",
                 sqrt(normVi),
-                ped->GetID(),
+                ped->GetUID(),
                 ped->GetV0Norm(),
                 current);
             // remove the pedestrian and abort
@@ -273,9 +272,9 @@ Point GCFMModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
     }
     if(F_rep._x != F_rep._x || F_rep._y != F_rep._y) {
         LOG_ERROR(
-            "NAN return p1{:d} p2 {:d} Frepx={:f} Frepy={:f} K_ij={:f}",
-            ped1->GetID(),
-            ped2->GetID(),
+            "NAN return p1{} p2 {} Frepx={:f} Frepy={:f} K_ij={:f}",
+            ped1->GetUID(),
+            ped2->GetUID(),
             F_rep._x,
             F_rep._y,
             K_ij);
@@ -302,8 +301,8 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const
     for(const auto & obst : subroom->GetAllObstacles()) {
         if(obst->Contains(ped->GetPos())) {
             LOG_ERROR(
-                "Agent {:d} is trapped in obstacle in room/subroom {:d}/{:d}",
-                ped->GetID(),
+                "Agent {} is trapped in obstacle in room/subroom {:d}/{:d}",
+                ped->GetUID(),
                 subroom->GetRoomID(),
                 subroom->GetSubRoomID());
             exit(EXIT_FAILURE);
@@ -342,17 +341,6 @@ inline Point GCFMModel::ForceRepWall(Pedestrian * ped, const Line & w) const
     double mind = 0.5; //for performance reasons this distance is assumed to be constant
     double vn   = w.NormalComp(ped->GetV()); //normal component of the velocity on the wall
     F           = ForceRepStatPoint(ped, pt, mind, vn);
-
-    if(ped->GetID() == -33) {
-        printf(
-            "wall = [%f, %f]--[%f, %f] F= [%f %f]\n",
-            w.GetPoint1()._x,
-            w.GetPoint1()._y,
-            w.GetPoint2()._x,
-            w.GetPoint2()._y,
-            F._x,
-            F._y);
-    }
 
     return F; //line --> l != 0
 }

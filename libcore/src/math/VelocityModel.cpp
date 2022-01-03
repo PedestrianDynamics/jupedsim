@@ -173,7 +173,7 @@ Point VelocityModel::e0(Pedestrian * ped, Room * room) const
         // target is where the ped wants to be after the next timestep
         target = _direction->GetTarget(room, ped);
     } else { //@todo: we need a model for waiting pedestrians
-        LOG_WARNING("VelocityModel::e0 Ped {} has no navline.", ped->GetID());
+        LOG_WARNING("VelocityModel::e0 Ped {} has no navline.", ped->GetUID());
         // set random destination
         std::mt19937 mt(ped->GetBuilding()->GetConfig()->GetSeed());
         std::uniform_real_distribution<double> dist(0, 1.0);
@@ -268,12 +268,12 @@ Point VelocityModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
             "VelocityModel::forcePedPed() ep12 can not be calculated! Pedestrians are too near "
             "to "
             "each other (dist={:f}). Adjust <a> value in force_ped to counter this. Affected "
-            "pedestrians ped1 {:d} at ({:f},{:f}) and ped2 {:d} at ({:f}, {:f})",
+            "pedestrians ped1 {} at ({:f},{:f}) and ped2 {} at ({:f}, {:f})",
             Distance,
-            ped1->GetID(),
+            ped1->GetUID(),
             ped1->GetPos()._x,
             ped1->GetPos()._y,
-            ped2->GetID(),
+            ped2->GetUID(),
             ped2->GetPos()._x,
             ped2->GetPos()._y);
         exit(EXIT_FAILURE); //TODO: quick and dirty fix for issue #158
@@ -306,8 +306,8 @@ Point VelocityModel::ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const
     for(const auto & obst : subroom->GetAllObstacles()) {
         if(obst->Contains(ped->GetPos())) {
             LOG_ERROR(
-                "Agent {:d} is trapped in obstacle in room/subroom {:d}/{:d}",
-                ped->GetID(),
+                "Agent {} is trapped in obstacle in room/subroom {:d}/{:d}",
+                ped->GetUID(),
                 subroom->GetRoomID(),
                 subroom->GetSubRoomID());
             exit(EXIT_FAILURE);
@@ -348,9 +348,9 @@ Point VelocityModel::ForceRepWall(
         e_iw = dist / Distance;
     } else {
         LOG_WARNING(
-            "Velocity: forceRepWall() ped {:d} [{:f}, {:f}] is too near to the wall [{:f}, "
+            "Velocity: forceRepWall() ped {} [{:f}, {:f}] is too near to the wall [{:f}, "
             "{:f}]-[{:f}, {:f}] (dist={:f})",
-            ped->GetID(),
+            ped->GetUID(),
             ped->GetPos()._y,
             ped->GetPos()._y,
             w.GetPoint1()._x,

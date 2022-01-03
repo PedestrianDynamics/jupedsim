@@ -32,6 +32,7 @@
 #include "general/Macros.h"
 #include "geometry/Line.h"
 #include "geometry/SubroomType.h"
+#include "util/UniqueID.h"
 
 #include <map>
 
@@ -40,7 +41,12 @@ class Router;
 class WalkingSpeed;
 class Pedestrian
 {
+public:
+    using UID = jps::UniqueID<Pedestrian>;
+
 private:
+    const UID _uid{};
+
     //generic parameters, independent from models
     int _id;                           //starting with 1
     int _exitIndex               = -1; // current exit
@@ -153,6 +159,7 @@ public:
     double GetSmoothFactorUpEscalators() const;
     double GetSmoothFactorDownEscalators() const;
 
+    UID GetUID() const;
     int GetID() const;
     double GetMass() const;
     double GetTau() const;

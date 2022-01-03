@@ -426,7 +426,6 @@ bool GlobalRouter::Init(Building * building)
                 "GlobalRouter: There is no visibility path from [{}] to the outside. You can "
                 "solve this by enabling triangulation.",
                 from_AP->GetFriendlyName());
-            from_AP->Dump();
             return false;
         }
 
@@ -445,7 +444,6 @@ bool GlobalRouter::Init(Building * building)
                     "GlobalRouter: There is no visibility path from {} to the outside. You can "
                     "solve this by enabling triangulation.",
                     from_AP->GetFriendlyName());
-                from_AP->Dump();
                 return false;
             }
         }
@@ -493,7 +491,6 @@ bool GlobalRouter::Init(Building * building)
                         "can solve this by enabling triangulation.",
                         from_AP->GetFriendlyName(),
                         _finalDestinations[p]);
-                    from_AP->Dump();
                     return false;
                 }
             }
@@ -582,9 +579,9 @@ bool GlobalRouter::GetPath(Pedestrian * ped, std::vector<Line *> & path)
         //work arround to detect a potential infinte loop.
         if(loop_count++ > 1000) {
             LOG_ERROR(
-                "A path could not be found for pedestrian [{:d}] going to destination [{:d}]. "
+                "A path could not be found for pedestrian [{}] going to destination [{:d}]. "
                 "Stuck in an infinite loop [{:d}]",
-                ped->GetID(),
+                ped->GetUID(),
                 ped->GetFinalDestination(),
                 loop_count);
             return false;
@@ -611,7 +608,7 @@ bool GlobalRouter::GetPath(Pedestrian * ped, int goalID, std::vector<SubRoom *> 
     //find the nearest APs and start from there
     int next = GetBestDefaultRandomExit(ped);
     if(next == -1) {
-        LOG_ERROR("Cannot get path for ped {:d} to goal {:d}", ped->GetID(), goalID);
+        LOG_ERROR("Cannot get path for ped {} to goal {:d}", ped->GetUID(), goalID);
         return false;
     }
 
@@ -698,9 +695,9 @@ int GlobalRouter::FindExit(Pedestrian * ped)
         auto [room_id, subroom_id, _] = _building->GetRoomAndSubRoomIDs(ped->GetPos());
         //something bad happens
         LOG_ERROR(
-            "Cannot find a valid destination for ped {:d} located in room {:d} subroom {:d} going "
+            "Cannot find a valid destination for ped {} located in room {:d} subroom {:d} going "
             "to destination {:d}",
-            ped->GetID(),
+            ped->GetUID(),
             room_id,
             subroom_id,
             ped->GetFinalDestination());
