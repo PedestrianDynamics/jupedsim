@@ -200,10 +200,6 @@ public:
 
     double GetElevation() const;
 
-    ///write the pedestrian path (room and exit taken ) to file
-    /// in the format room1:exit1>room2:exit2
-    std::string GetPath();
-
     /**
       * ToString the parameters of this pedestrians.
       * @param ID, the id of the pedestrian

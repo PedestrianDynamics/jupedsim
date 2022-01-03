@@ -459,20 +459,6 @@ int Pedestrian::GetFinalDestination() const
     return _desiredFinalDestination;
 }
 
-std::string Pedestrian::GetPath()
-{
-    std::map<int, int>::iterator iter;
-    std::string path;
-
-    for(iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
-        std::stringstream ss; //create a stringstream
-        ss << iter->first / 1000 << ":" << iter->second
-           << ">"; //@todo:ar.graf: has this to do with roomNr*1000+subroom and is now wrong?
-        path.append(ss.str());
-    }
-    return path;
-}
-
 int Pedestrian::GetRouterID() const
 {
     return _router_id;
