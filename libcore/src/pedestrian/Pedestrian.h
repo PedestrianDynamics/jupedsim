@@ -119,7 +119,6 @@ public:
     void SetSmoothFactorDownStairs(double c);
     void SetSmoothFactorEscalatorUpStairs(double c);
     void SetSmoothFactorEscalatorDownStairs(double c);
-    void SetID(int i);
     void SetTau(double tau);
     void SetEllipse(const JEllipse & e);
     void SetRouterId(int id) { _router_id = id; }

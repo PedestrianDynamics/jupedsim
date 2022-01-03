@@ -90,14 +90,6 @@ double Pedestrian::SelectSmoothFactor(SubroomType type, double delta) const
     }
 }
 
-void Pedestrian::SetID(int i)
-{
-    _id = i;
-    if(i <= 0) {
-        throw std::logic_error("Invalid pedestrians ID: Pedestrian ID should be > 0.");
-    }
-}
-
 void Pedestrian::SetTau(double tau)
 {
     _tau = tau;
