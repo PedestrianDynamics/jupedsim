@@ -79,7 +79,6 @@ private:
 
     // the current time in the simulation
     static double _minPremovementTime;
-    static AgentColorMode _colorMode;
 
     /// a pointer to the complete building
     Building * _building = nullptr;
@@ -215,14 +214,6 @@ public:
       */
     static double GetMinPremovementTime();
 
-    /**
-      * return the pedestrian color used for visualiation.
-      * Default mode is coded by velocity.
-      * @return a value in [-1 255]
-      */
-    int GetColor() const;
-
-
     int GetGroup() const;
     void SetGroup(int group);
 
@@ -232,12 +223,6 @@ public:
       * and the  maximal count must be known in advance.
       */
     static int GetAgentsCreated();
-
-    /**
-      * Set the color mode for the pedestrians
-      * @param mode
-      */
-    static void SetColorMode(AgentColorMode mode);
 
     /**
       * Set/Get the Building object

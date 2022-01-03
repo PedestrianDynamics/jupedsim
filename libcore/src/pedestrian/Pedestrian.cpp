@@ -37,15 +37,6 @@
 // initialize the static variables
 int Pedestrian::_agentsCreated         = 1;
 double Pedestrian::_minPremovementTime = std::numeric_limits<double>::max();
-AgentColorMode Pedestrian::_colorMode  = BY_VELOCITY;
-std::vector<int> colors                = {
-    0,
-    255,
-    35,
-    127,
-    90,
-};
-
 
 Pedestrian::Pedestrian()
 {
@@ -435,60 +426,10 @@ void Pedestrian::SetBuilding(Building * building)
     _building = building;
 }
 
-void Pedestrian::SetColorMode(AgentColorMode mode)
-{
-    _colorMode = mode;
-}
-
 int Pedestrian::GetAgentsCreated()
 {
     return _agentsCreated;
 }
-
-int Pedestrian::GetColor() const
-{
-    //default color is by velocity
-    std::string key;
-
-    switch(_colorMode) {
-        case BY_VELOCITY: {
-            int color = -1;
-            double v0 = _ellipse.GetV0();
-            if(v0 != 0.0) {
-                double v = GetV().Norm();
-                color    = static_cast<int>(v / v0 * 255);
-            }
-            return color;
-        }
-
-        case BY_ROUTER:
-        case BY_ROUTE: {
-            key = std::to_string(_router_id);
-        } break;
-
-        case BY_GROUP: {
-            key = std::to_string(_group); // @todo find a better solution to get
-                                          // colors clearly distinguishable form
-                                          // each other
-            return (colors[_group % colors.size()]);
-        }
-
-        case BY_FINAL_GOAL: {
-            key = std::to_string(_desiredFinalDestination);
-        } break;
-
-        case BY_INTERMEDIATE_GOAL: {
-            key = std::to_string(_exitIndex);
-        } break;
-
-        default:
-            break;
-    }
-
-    std::hash<std::string> hash_fn;
-    return hash_fn(key) % 255;
-}
-
 
 int Pedestrian::GetLastGoalID() const
 {

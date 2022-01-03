@@ -8,8 +8,12 @@
 TrajectoryWriter::TrajectoryWriter(
     unsigned int precision,
     std::set<OptionalOutput> options,
-    std::unique_ptr<OutputHandler> outputHandler) :
-    _precision(precision), _options(std::move(options)), _outputHandler(std::move(outputHandler))
+    std::unique_ptr<OutputHandler> outputHandler,
+    AgentColorMode colorMode) :
+    _precision(precision),
+    _options(std::move(options)),
+    _outputHandler(std::move(outputHandler)),
+    _colorMode(colorMode)
 {
     // Add header, info and output for speed
     _optionalOutputHeader[OptionalOutput::speed] = "V\t";
@@ -117,7 +121,7 @@ void TrajectoryWriter::WriteFrame(
         double x          = ped->GetPos()._x;
         double y          = ped->GetPos()._y;
         double z          = ped->GetElevation();
-        int color         = ped->GetColor();
+        int color         = computeColor(*ped);
         double a          = ped->GetLargerAxis();
         double b          = ped->GetSmallerAxis();
         double phi        = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
@@ -142,4 +146,44 @@ void TrajectoryWriter::WriteFrame(
 
         _outputHandler->Write(frame);
     }
+}
+
+int TrajectoryWriter::computeColor(const Pedestrian & ped) const
+{
+    static constexpr std::array colors{0, 255, 35, 127, 90};
+    std::string key;
+
+    switch(_colorMode) {
+        case BY_VELOCITY: {
+            int color = -1;
+            double v0 = ped.GetEllipse().GetV0();
+            if(v0 != 0.0) {
+                double v = ped.GetV().Norm();
+                color    = static_cast<int>(v / v0 * 255);
+            }
+            return color;
+        }
+
+        case BY_ROUTER: {
+            key = std::to_string(ped.GetRouterID());
+        } break;
+
+        case BY_GROUP: {
+            return (colors[ped.GetGroup() % colors.size()]);
+        }
+
+        case BY_FINAL_GOAL: {
+            key = std::to_string(ped.GetFinalDestination());
+        } break;
+
+        case BY_INTERMEDIATE_GOAL: {
+            key = std::to_string(ped.GetDestination());
+        } break;
+
+        default:
+            break;
+    }
+
+    std::hash<std::string> hash_fn;
+    return static_cast<int>(hash_fn(key)) % 255;
 }

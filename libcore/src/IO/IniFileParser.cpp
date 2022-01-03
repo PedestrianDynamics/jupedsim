@@ -27,9 +27,9 @@
 #include "direction/waiting/WaitingStrategy.h"
 #include "direction/walking/DirectionStrategy.h"
 #include "general/Filesystem.h"
+#include "general/Macros.h"
 #include "math/GCFMModel.h"
 #include "math/VelocityModel.h"
-#include "pedestrian/Pedestrian.h"
 #include "routing/ff_router/ffRouter.h"
 #include "routing/global_shortest/GlobalRouter.h"
 
@@ -237,18 +237,21 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
                 xHeader->FirstChildElement("trajectories")->Attribute("color_mode") :
                 "velocity";
 
-        if(color_mode == "velocity")
-            Pedestrian::SetColorMode(
-                AgentColorMode::
-                    BY_VELOCITY); //TODO: config parameter! does not belong to the pedestrian model, we should create a pedestrian config instead. [gl march '16]
-        if(color_mode == "group")
-            Pedestrian::SetColorMode(AgentColorMode::BY_GROUP);
-        if(color_mode == "router")
-            Pedestrian::SetColorMode(AgentColorMode::BY_ROUTER);
-        if(color_mode == "final_goal")
-            Pedestrian::SetColorMode(AgentColorMode::BY_FINAL_GOAL);
-        if(color_mode == "intermediate_goal")
-            Pedestrian::SetColorMode(AgentColorMode::BY_INTERMEDIATE_GOAL);
+        if(color_mode == "velocity") {
+            _config->agentColorMode = AgentColorMode::BY_VELOCITY;
+        }
+        if(color_mode == "group") {
+            _config->agentColorMode = AgentColorMode::BY_GROUP;
+        }
+        if(color_mode == "router") {
+            _config->agentColorMode = AgentColorMode::BY_ROUTER;
+        }
+        if(color_mode == "final_goal") {
+            _config->agentColorMode = AgentColorMode::BY_FINAL_GOAL;
+        }
+        if(color_mode == "intermediate_goal") {
+            _config->agentColorMode = AgentColorMode::BY_INTERMEDIATE_GOAL;
+        }
 
         fs::path trajectoryFile = _config->GetTrajectoriesFile();
         //a file descriptor was given

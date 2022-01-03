@@ -431,4 +431,7 @@ private:
     std::map<int, std::shared_ptr<AgentsParameters>> _agentsParameters;
 
     std::set<OptionalOutput> _optionalOutput;
+
+public:
+    AgentColorMode agentColorMode;
 };

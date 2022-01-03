@@ -109,7 +109,8 @@ int main(int argc, char ** argv)
         auto writer = std::make_unique<TrajectoryWriter>(
             config.GetPrecision(),
             config.GetOptionalOutputOptions(),
-            std::make_unique<FileHandler>(config.GetTrajectoriesFile()));
+            std::make_unique<FileHandler>(config.GetTrajectoriesFile()),
+            config.agentColorMode);
         sim.RunHeader(num_agents, *writer);
 
         const int writeInterval = static_cast<int>((1. / sim.Fps()) / sim.Clock().dT() + 0.5);
