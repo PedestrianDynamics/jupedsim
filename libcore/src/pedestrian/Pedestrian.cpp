@@ -49,72 +49,8 @@ std::vector<int> colors                = {
 
 Pedestrian::Pedestrian()
 {
-    _id                              = _agentsCreated; //default id
-    _exitIndex                       = -1;
-    _group                           = -1;
-    _desiredFinalDestination         = FINAL_DEST_OUT;
-    _premovement                     = 0;
-    _mass                            = 1;
-    _tau                             = 0.5;
-    _t                               = 1.0;
-    _deltaT                          = 0.01;
-    _ellipse                         = JEllipse();
-    _v0                              = Point(0, 0);
-    _v0UpStairs                      = 0.6;
-    _v0DownStairs                    = 0.6;
-    _v0EscalatorUpStairs             = 0.8;
-    _v0EscalatorDownStairs           = 0.8;
-    _smoothFactorUpStairs            = 15;
-    _smoothFactorDownStairs          = 15;
-    _smoothFactorEscalatorUpStairs   = 15;
-    _smoothFactorEscalatorDownStairs = 15;
-    _lastE0                          = Point(0, 0);
-    _lastPosition                    = Point(J_NAN, J_NAN);
-    // new orientation after 10 seconds, value is incremented
-    _timeBeforeRerouting = 0.0;
-    _newOrientationDelay = 0; //0 seconds, in steps
-    _reroutingEnabled    = false;
-    _building            = nullptr;
-    _agentsCreated++; //increase the number of object created
-    _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
-}
-
-Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & building) :
-    _group(agentsParameters.GetGroupId()),
-    _desiredFinalDestination(agentsParameters.GetGoalId()),
-    _premovement(agentsParameters.GetPremovementTime()),
-    _lastPosition(),
-    _building(&building)
-{
-    _exitIndex           = -1;
-    _id                  = _agentsCreated; //default id
-    _mass                = 1;
-    _tau                 = 0.5;
-    _t                   = 1.0;
-    _newOrientationDelay = 0; //0 seconds, in steps
-    _ellipse             = JEllipse();
-    _building            = nullptr;
-    // new orientation after 10 seconds, value is incremented
-    _timeBeforeRerouting     = 0.0;
-    _reroutingEnabled        = false;
-    _desiredFinalDestination = FINAL_DEST_OUT;
-    _deltaT                  = 0.01;
-    _v0                      = Point(0, 0);
-    _lastPosition            = Point(0, 0);
-    _group                   = -1;
-    _v0UpStairs              = 0.6;
-    _v0DownStairs            = 0.6;
-    _v0EscalatorUpStairs     = 0.8;
-    _v0EscalatorDownStairs   = 0.8;
-    _smoothFactorUpStairs    = agentsParameters.GetGroupParameters()->_smoothFactorUpStairs;
-    _smoothFactorDownStairs  = agentsParameters.GetGroupParameters()->_smoothFactorDownStairs;
-    _smoothFactorEscalatorUpStairs =
-        agentsParameters.GetGroupParameters()->_smoothFactorEscalatorUpStairs;
-    _smoothFactorEscalatorDownStairs =
-        agentsParameters.GetGroupParameters()->_smoothFactorEscalatorDownStairs;
-    _lastE0 = Point(0, 0);
-    _agentsCreated++; //increase the number of object created
-    _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
+    _id = _agentsCreated; //default id
+    _agentsCreated++;     //increase the number of object created
 }
 
 bool Pedestrian::InPremovement(double now)

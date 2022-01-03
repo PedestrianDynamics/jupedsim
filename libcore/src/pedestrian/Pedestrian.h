@@ -42,65 +42,65 @@ class Pedestrian
 {
 private:
     //generic parameters, independent from models
-    int _id;        //starting with 1
-    int _exitIndex; // current exit
-    int _group;
-    int _desiredFinalDestination;
-    double _premovement = 0;
+    int _id;                           //starting with 1
+    int _exitIndex               = -1; // current exit
+    int _group                   = -1;
+    int _desiredFinalDestination = FINAL_DEST_OUT;
+    double _premovement          = 0;
 
     //gcfm specific parameters
-    double _mass;      // Mass: 1
-    double _tau;       // Reaction time: 0.5
-    double _t;         // OV function
-    double _deltaT;    // step size
-    JEllipse _ellipse; // the shape of this pedestrian
-    Point _v0;         //vector V0
+    double _mass   = 1;      // Mass: 1
+    double _tau    = 0.5;    // Reaction time: 0.5
+    double _t      = 1.0;    // OV function
+    double _deltaT = 0.01;   // step size
+    JEllipse _ellipse{};     // the shape of this pedestrian
+    Point _v0 = Point(0, 0); //vector V0
 
 
-    double _v0UpStairs;
-    double _v0DownStairs;
-    double _v0EscalatorUpStairs;
-    double _v0EscalatorDownStairs;
+    double _v0UpStairs            = 0.6;
+    double _v0DownStairs          = 0.6;
+    double _v0EscalatorUpStairs   = 0.8;
+    double _v0EscalatorDownStairs = 0.8;
     /// c in f() and g() for v0 transition on stairs up
-    double _smoothFactorUpStairs;
+    double _smoothFactorUpStairs = 15;
     /// c in f() and g() for v0 transition on stairs down
-    double _smoothFactorDownStairs;
+    double _smoothFactorDownStairs = 15;
     /// c in f() and g() for v0 transition on escalators up
-    double _smoothFactorEscalatorUpStairs;
+    double _smoothFactorEscalatorUpStairs = 15;
     /// c in f() and g() for v0 transition on escalators down
-    double _smoothFactorEscalatorDownStairs;
+    double _smoothFactorEscalatorDownStairs = 15;
     int _router_id{0};
-    Point _lastE0;
+    Point _lastE0 = Point(0, 0);
 
     Line _navLine; // current exit line
-    Point _lastPosition;
+    Point _lastPosition = Point(J_NAN, J_NAN);
 
     /// a new orientation starts after this time
-    double _timeBeforeRerouting;
+    double _timeBeforeRerouting = 0.0;
 
-    int _newOrientationDelay; //2 seconds, in steps
+    int _newOrientationDelay = 0;
 
-    bool _reroutingEnabled;
+    bool _reroutingEnabled = false;
 
     // the current time in the simulation
     static double _minPremovementTime;
     static AgentColorMode _colorMode;
 
     /// a pointer to the complete building
-    Building * _building;
+    Building * _building = nullptr;
 
     static int _agentsCreated;
 
     int _lastGoalID  = -1;
     bool _insideGoal = false;
     bool _waiting    = false;
-    Point _waitingPos;
+    Point _waitingPos =
+        Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
 
 public:
     // constructors
     Pedestrian();
 
-    explicit Pedestrian(const StartDistribution & agentsParameters, Building & building);
     ~Pedestrian() = default;
 
     bool InPremovement(double now);
