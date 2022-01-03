@@ -334,23 +334,6 @@ void Pedestrian::SetSmoothTurning()
     _newOrientationDelay = 0;
 }
 
-void Pedestrian::UpdateReroutingTime()
-{
-    _timeBeforeRerouting -= _deltaT;
-}
-
-void Pedestrian::RerouteIn(double time)
-{
-    _reroutingEnabled    = true;
-    _timeBeforeRerouting = time;
-}
-
-bool Pedestrian::IsReadyForRerouting() const
-{
-    return (_reroutingEnabled && (_timeBeforeRerouting <= 0.0));
-}
-
-
 int Pedestrian::GetGroup() const
 {
     return _group;
@@ -359,12 +342,6 @@ int Pedestrian::GetGroup() const
 void Pedestrian::SetGroup(int group)
 {
     _group = group;
-}
-
-void Pedestrian::ResetRerouting()
-{
-    _reroutingEnabled    = false;
-    _timeBeforeRerouting = -1.00;
 }
 
 double Pedestrian::GetDistanceToNextTarget() const

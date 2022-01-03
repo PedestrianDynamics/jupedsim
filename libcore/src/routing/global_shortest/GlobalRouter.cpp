@@ -803,7 +803,6 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian * ped)
         //otherwise check all rooms at that level
         if(!_building->IsVisible(
                posA, posC, _subroomsAtElevation[sub->GetElevation(sub->GetCentroid())], true)) {
-            ped->RerouteIn(10);
             continue;
         }
         double dist1 = ap->GetDistanceTo(ped->GetFinalDestination());
@@ -829,7 +828,6 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian * ped)
             relevantAPs[0]->GetID();
             ped->SetDestination(relevantAPs[0]->GetID());
             ped->SetExitLine(relevantAPs[0]->GetNavLine());
-            ped->RerouteIn(5);
             return relevantAPs[0]->GetID();
         }
         return -1;

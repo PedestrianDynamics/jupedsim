@@ -75,12 +75,7 @@ private:
     Line _navLine; // current exit line
     Point _lastPosition = Point(J_NAN, J_NAN);
 
-    /// a new orientation starts after this time
-    double _timeBeforeRerouting = 0.0;
-
     int _newOrientationDelay = 0;
-
-    bool _reroutingEnabled = false;
 
     // the current time in the simulation
     static double _minPremovementTime;
@@ -227,14 +222,6 @@ public:
       */
     int GetColor() const;
 
-    void UpdateReroutingTime();
-    void RerouteIn(double time);
-    bool IsReadyForRerouting() const;
-
-    /**
-      * clear the parameter related to the re routing
-      */
-    void ResetRerouting();
 
     int GetGroup() const;
     void SetGroup(int group);
