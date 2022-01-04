@@ -28,6 +28,7 @@
 #pragma once
 
 #include "Goal.h"
+#include "pedestrian/Pedestrian.h"
 
 #include <cstdio>
 #include <map>
@@ -92,7 +93,7 @@ protected:
     /**
      * Set of pedestrians who are currently in waiting area
      */
-    std::set<int> _pedInside;
+    std::set<Pedestrian::UID> _pedInside;
 
 public:
     /**
@@ -166,13 +167,13 @@ public:
      * Adds ped to the pedestrians inside the waiting area
      * @param[in] ped ID of ped who entered waiting area
      */
-    void AddPed(int ped);
+    void AddPed(Pedestrian::UID ped);
 
     /**
      * Removes ped from the pedestrians inside the waiting area
      * @param[in] ped ID of ped who left waiting area
      */
-    void RemovePed(int ped);
+    void RemovePed(Pedestrian::UID ped);
 
     /**
      * Starts the timer for the waiting time
@@ -237,5 +238,5 @@ public:
      */
     std::string toString();
 
-    const std::set<int> & GetPedInside() const;
+    const std::set<Pedestrian::UID> & GetPedInside() const;
 };

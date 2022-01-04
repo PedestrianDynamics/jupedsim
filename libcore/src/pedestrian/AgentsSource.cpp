@@ -29,6 +29,7 @@
 #include "AgentsSource.h"
 
 #include "Pedestrian.h"
+#include "StartDistribution.h"
 
 #include <Logger.h>
 

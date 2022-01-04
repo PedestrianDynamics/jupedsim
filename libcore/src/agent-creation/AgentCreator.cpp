@@ -3,6 +3,7 @@
 #include "SimulationClock.h"
 #include "geometry/Building.h"
 #include "pedestrian/AgentsSourcesManager.h"
+#include "pedestrian/PedDistributor.h"
 #include "pedestrian/Pedestrian.h"
 
 #include <iterator>

@@ -70,7 +70,7 @@ void SimulationHelper::UpdateFlowAtDoors(
                 ped->GetDestination());
             continue;
         }
-        passedDoor.value()->IncreaseDoorUsage(1, time, ped->GetID());
+        passedDoor.value()->IncreaseDoorUsage(1, time, ped->GetUID());
         passedDoor.value()->IncreasePartialDoorUsage(1);
     }
 }

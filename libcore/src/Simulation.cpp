@@ -166,10 +166,10 @@ void Simulation::RemoveAgents(std::vector<Pedestrian::UID> ids)
         _agents.end());
 }
 
-Pedestrian & Simulation::Agent(int id) const
+Pedestrian & Simulation::Agent(Pedestrian::UID id) const
 {
     const auto iter = std::find_if(
-        _agents.begin(), _agents.end(), [id](auto & ped) { return id == ped->GetID(); });
+        _agents.begin(), _agents.end(), [id](auto & ped) { return id == ped->GetUID(); });
     if(iter == _agents.end()) {
         throw std::logic_error("Trying to access unknown Agent.");
     }

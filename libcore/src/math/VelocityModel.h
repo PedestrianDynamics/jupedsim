@@ -31,10 +31,11 @@
 
 #include "OperationalModel.h"
 #include "geometry/Building.h"
+#include "pedestrian/Pedestrian.h"
 
 #include <vector>
 
-typedef std::pair<double, double> my_pair;
+using my_pair = std::pair<double, Pedestrian::UID>;
 // sort with respect to first element (ascending).
 // In case of equality sort with respect to second element (descending)
 struct sort_pred {

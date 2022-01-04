@@ -28,7 +28,6 @@
 
 #include "AgentsParameters.h"
 #include "Ellipse.h"
-#include "PedDistributor.h"
 #include "general/Macros.h"
 #include "geometry/Line.h"
 #include "geometry/SubroomType.h"
@@ -160,7 +159,6 @@ public:
     double GetSmoothFactorDownEscalators() const;
 
     UID GetUID() const;
-    int GetID() const;
     double GetMass() const;
     double GetTau() const;
     const JEllipse & GetEllipse() const;

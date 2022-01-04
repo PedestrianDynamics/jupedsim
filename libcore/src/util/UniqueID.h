@@ -33,27 +33,29 @@ public:
     UniqueID(UniqueID const & p_other) = default;
 
     /// UniqueIds are copyable.
-    auto operator=(UniqueID const & p_other) -> UniqueID & = default;
+    UniqueID & operator=(UniqueID const & p_other) = default;
 
     /// UniqueIds are movable.
     UniqueID(UniqueID && p_other) noexcept = default;
 
     /// UniqueIds are movable.
-    auto operator=(UniqueID && p_other) noexcept -> UniqueID & = default;
+    UniqueID & operator=(UniqueID && p_other) noexcept = default;
 
     ~UniqueID() noexcept = default;
 
-    auto getID() const noexcept -> Integer { return m_value; }
+    Integer getID() const noexcept { return m_value; }
 
-    auto operator==(const UniqueID & p_other) const noexcept -> bool
-    {
-        return m_value == p_other.m_value;
-    };
+    bool operator==(const UniqueID & p_other) const noexcept { return m_value == p_other.m_value; };
 
-    auto operator!=(const UniqueID & p_other) const noexcept -> bool
-    {
-        return m_value != p_other.m_value;
-    };
+    bool operator!=(const UniqueID & p_other) const noexcept { return m_value != p_other.m_value; };
+
+    bool operator<(const UniqueID & p_other) const noexcept { return m_value < p_other.m_value; };
+
+    bool operator>(const UniqueID & p_other) const noexcept { return p_other < *this; };
+
+    bool operator<=(const UniqueID & p_other) const noexcept { return !(*this > p_other); };
+
+    bool operator>=(const UniqueID & p_other) const noexcept { return !(*this < p_other); };
 
     friend struct fmt::formatter<UniqueID<Tag>>;
 };

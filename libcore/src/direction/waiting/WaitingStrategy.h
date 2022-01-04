@@ -28,6 +28,7 @@
 #pragma once
 
 #include "general/Macros.h"
+#include "geometry/Building.h"
 
 class Room;
 
@@ -35,7 +36,6 @@ class Pedestrian;
 
 class Point;
 
-class Building;
 
 class WaitingStrategy
 {

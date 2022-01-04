@@ -65,9 +65,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building 
     std::vector<Point> result_acc = std::vector<Point>();
     result_acc.reserve(allPeds.size());
     std::vector<my_pair> spacings = std::vector<my_pair>();
-    spacings.reserve(allPeds.size());    // larger than needed
-    spacings.push_back(my_pair(100, 1)); // in case there are no neighbors
-
+    spacings.reserve(allPeds.size()); // larger than needed
 
     for(const auto & ped : allPeds) {
         auto [room, subroom] = building->GetRoomAndSubRoom(ped->GetPos());
@@ -75,7 +73,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building 
         std::vector<Pedestrian *> neighbours =
             building->GetNeighborhoodSearch().GetNeighbourhood(ped.get());
 
-        int size = (int) neighbours.size();
+        int size = static_cast<int>(neighbours.size());
         for(int i = 0; i < size; i++) {
             Pedestrian * ped1 = neighbours[i];
             //if they are in the same subroom
@@ -89,8 +87,9 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building 
             emptyVector.push_back(subroom);
             emptyVector.push_back(subroom1);
             bool isVisible = building->IsVisible(p1, p2, emptyVector, false);
-            if(!isVisible)
+            if(!isVisible) {
                 continue;
+            }
             if(room == room1 && subroom == subroom1) {
                 repPed += ForceRepPed(ped.get(), ped1);
             } else {
@@ -124,7 +123,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building 
 
         // calculate min spacing
         std::sort(spacings.begin(), spacings.end(), sort_pred());
-        double spacing = spacings[0].first;
+        double spacing = spacings.empty() ? 100.0 : spacings.front().first;
         //============================================================
         // TODO: Hack for Head on situations: ped1 x ------> | <------- x ped2
         if(0 && direction.NormSquare() < 0.5) {
@@ -234,7 +233,6 @@ my_pair VelocityModel::GetSpacing(Pedestrian * ped1, Pedestrian * ped2, Point ei
             "to "
             "each other ({:f})",
             Distance);
-        my_pair(FLT_MAX, ped2->GetID());
         exit(EXIT_FAILURE); //TODO
     }
 
@@ -243,11 +241,11 @@ my_pair VelocityModel::GetSpacing(Pedestrian * ped1, Pedestrian * ped2, Point ei
         ei.Rotate(0, 1).ScalarProduct(ep12); // theta = pi/2. condition2 should <= than l/Distance
     condition2 = (condition2 > 0) ? condition2 : -condition2; // abs
 
-    if((condition1 >= 0) && (condition2 <= l / Distance))
+    if((condition1 >= 0) && (condition2 <= l / Distance)) {
         // return a pair <dist, condition1>. Then take the smallest dist. In case of equality the biggest condition1
-        return my_pair(distp12.Norm(), ped2->GetID());
-    else
-        return my_pair(FLT_MAX, ped2->GetID());
+        return my_pair(distp12.Norm(), ped2->GetUID());
+    }
+    return my_pair(FLT_MAX, ped2->GetUID());
 }
 Point VelocityModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
 {

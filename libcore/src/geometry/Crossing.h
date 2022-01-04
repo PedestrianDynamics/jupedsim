@@ -27,6 +27,7 @@
 #pragma once
 
 #include "Hline.h"
+#include "pedestrian/Pedestrian.h"
 
 class SubRoom;
 
@@ -197,7 +198,7 @@ public:
      * @param time, at which time persons have passed.
      * @param ped_id, id of the person that has passed
      */
-    void IncreaseDoorUsage(int number, double time, int ped_id);
+    void IncreaseDoorUsage(int number, double time, Pedestrian::UID ped_id);
 
     /**
      * Increment the number of persons that used that crossing in time span \a _DT.

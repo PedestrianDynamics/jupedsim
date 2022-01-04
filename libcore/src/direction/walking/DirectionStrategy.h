@@ -22,6 +22,7 @@
  **/
 #pragma once
 
+#include "geometry/Building.h"
 #include "geometry/Point.h"
 
 #include <map>
@@ -29,8 +30,6 @@
 #include <vector>
 
 class Room;
-
-class Building;
 
 class Pedestrian;
 

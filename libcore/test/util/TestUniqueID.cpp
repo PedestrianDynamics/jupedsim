@@ -17,6 +17,40 @@ TEST(UniqueId, DefaultConstructedIDsAreNotIdentical)
     ASSERT_NE(second, third);
 }
 
+TEST(UniqueId, CanCompareLessThan)
+{
+    const auto id1 = jps::UniqueID<void>{};
+    const auto id2 = jps::UniqueID<void>{};
+    ASSERT_LT(id1, id2);
+    ASSERT_FALSE(id2 < id1);
+}
+
+TEST(UniqueId, CanCompareGreaterThan)
+{
+    const auto id1 = jps::UniqueID<void>{};
+    const auto id2 = jps::UniqueID<void>{};
+    ASSERT_GT(id2, id1);
+    ASSERT_FALSE(id1 > id2);
+}
+
+TEST(UniqueId, CanCompareLessOrEqual)
+{
+    const auto id1 = jps::UniqueID<void>{};
+    const auto id2 = jps::UniqueID<void>{};
+    ASSERT_LE(id1, id2);
+    ASSERT_LE(id1, id1);
+    ASSERT_FALSE(id2 <= id1);
+}
+
+TEST(UniqueId, CanCompareGreaterOrEqual)
+{
+    const auto id1 = jps::UniqueID<void>{};
+    const auto id2 = jps::UniqueID<void>{};
+    ASSERT_GT(id2, id1);
+    ASSERT_GE(id2, id2);
+    ASSERT_FALSE(id1 >= id2);
+}
+
 TEST(UniqueId, CanBeMovedAndCopied)
 {
     auto first               = jps::UniqueID<void>{};

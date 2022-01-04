@@ -168,10 +168,6 @@ Pedestrian::UID Pedestrian::GetUID() const
 {
     return _uid;
 }
-int Pedestrian::GetID() const
-{
-    return _id;
-}
 
 double Pedestrian::GetMass() const
 {

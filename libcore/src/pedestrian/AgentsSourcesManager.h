@@ -32,8 +32,9 @@
 #include <memory>
 #include <vector>
 
+#include "AgentsSource.h"
+
 //Forward declarations
-class AgentsSource;
 class Building;
 class Pedestrian;
 class Point;
