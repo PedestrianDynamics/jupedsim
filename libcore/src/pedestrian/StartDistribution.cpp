@@ -158,7 +158,7 @@ Pedestrian * StartDistribution::GenerateAgent(Building * building, std::vector<P
     // PedIndex
     ped->SetFinalDestination(GetGoalId());
     ped->SetGroup(GetGroupId());
-    ped->SetRouter(building->GetRoutingEngine()->GetRouter(_routerID));
+    ped->SetRouterId(_routerID);
     ped->SetBuilding(building);
     ped->SetPremovementTime(GetPremovementTime());
 
@@ -219,8 +219,8 @@ Pedestrian * StartDistribution::GenerateAgent(Building * building, std::vector<P
         if(!std::isnan(start_pos._x) && !std::isnan(start_pos._y)) {
             ped->SetPos(start_pos); //true for the initial position
             LOG_INFO(
-                "fixed position for ped {:d} in Room {:d} {}",
-                ped->GetID(),
+                "fixed position for ped {} in Room {:d} {}",
+                ped->GetUID(),
                 GetRoomId(),
                 start_pos.toString().c_str());
         }

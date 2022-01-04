@@ -110,7 +110,6 @@ double AccessPoint::GetDistanceTo(int UID)
     //this is probably a final destination
     if(_mapDestToDist.count(UID) == 0) {
         LOG_ERROR("No route to destination  [{:d}]", UID);
-        Dump();
         //return 0;
         exit(EXIT_FAILURE);
     }
@@ -138,7 +137,6 @@ int AccessPoint::GetNextApTo(int UID)
     //this is probably a final destination
     if(_mapDestToAp.count(UID) == 0) {
         LOG_ERROR("No route to destination  [{:d}]", UID);
-        Dump();
         exit(EXIT_FAILURE);
     }
     return _mapDestToAp[UID];
@@ -201,16 +199,12 @@ bool AccessPoint::IsInRange(double xPed, double yPed, int roomID)
     return false;
 }
 
-void AccessPoint::SetNavLine(NavLine * line)
+void AccessPoint::SetNavLine(Line * line)
 {
-    //todo: check this
-    //_navLine= line;
-    //_navLine->SetPoint1(line->GetPoint1());
-    //_navLine->SetPoint2(line->GetPoint2());
-    _navLine = new NavLine(*line);
+    _navLine = new Line(*line);
 }
 
-NavLine * AccessPoint::GetNavLine() const
+Line * AccessPoint::GetNavLine() const
 {
     return _navLine;
 }
@@ -266,62 +260,4 @@ void AccessPoint::SetState(DoorState state)
 DoorState AccessPoint::GetState() const
 {
     return _state;
-}
-
-
-void AccessPoint::Dump()
-{
-    std::stringstream dumpStream;
-    dumpStream << std::endl << "--------> Dumping AP <-----------" << std::endl << std::endl;
-    dumpStream << " Friendly ID: " << _friendlyName << " centre = [ " << _center[0] << ", "
-               << _center[1] << " ]" << std::endl;
-    dumpStream << " Real ID: " << _id << std::endl;
-    dumpStream << " Length:  " << _navLine->LengthSquare() << std::endl;
-
-    dumpStream << " Is final exit to outside :" << GetFinalExitToOutside() << std::endl;
-    dumpStream << " Distance to final goals" << std::endl;
-
-    for(std::map<int, double>::iterator p = _mapDestToDist.begin(); p != _mapDestToDist.end();
-        ++p) {
-        dumpStream << "\t [ " << p->first << ", " << p->second << " m ]";
-    }
-    dumpStream << std::endl << std::endl;
-
-    dumpStream << " transit to final goals:" << std::endl;
-    for(std::map<int, std::vector<AccessPoint *>>::iterator p = _navigationGraphTo.begin();
-        p != _navigationGraphTo.end();
-        ++p) {
-        dumpStream << std::endl << "\t to UID ---> [ " << p->first << " ]";
-
-        if(p->second.size() == 0) {
-            dumpStream << "\t ---> [ Nothing ]";
-        } else {
-            for(unsigned int i = 0; i < p->second.size(); i++) {
-                dumpStream << "\t distance ---> [ "
-                           << GetDistanceTo(p->second[i]) + p->second[i]->GetDistanceTo(p->first)
-                           << " m via " << p->second[i]->GetID() << " ]";
-            }
-        }
-    }
-
-    dumpStream << std::endl << std::endl;
-
-    dumpStream << " connected to aps : ";
-    for(unsigned int p = 0; p < _connectingAPs.size(); p++) {
-        dumpStream << std::endl
-                   << "\t [ " << _connectingAPs[p]->GetID() << "_"
-                   << _connectingAPs[p]->GetFriendlyName() << " , "
-                   << _connectingAPs[p]->GetDistanceTo(this) << " m ]";
-    }
-
-    dumpStream << std::endl << std::endl;
-    dumpStream << " queue [ ";
-    for(unsigned int p = 0; p < _transitPedestrians.size(); p++) {
-        dumpStream << " " << _transitPedestrians[p]->GetID();
-    }
-    dumpStream << " ]" << std::endl;
-
-    dumpStream << std::endl;
-    dumpStream << std::endl << "------------------------------" << std::endl << std::endl;
-    LOG_DEBUG("{}", dumpStream.str());
 }

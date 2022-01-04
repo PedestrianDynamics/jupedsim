@@ -90,7 +90,7 @@ std::vector<Pedestrian *> NeighborhoodSearch::GetNeighbourhood(const Pedestrian 
                 _grid[j][i].begin(),
                 _grid[j][i].end(),
                 std::back_inserter(neighbourhood),
-                [ped](auto & other_ped) { return other_ped->GetID() != ped->GetID(); });
+                [ped](auto & other_ped) { return other_ped->GetUID() != ped->GetUID(); });
         }
     }
 

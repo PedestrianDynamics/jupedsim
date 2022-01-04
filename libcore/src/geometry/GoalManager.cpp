@@ -40,7 +40,7 @@ void GoalManager::ProcessPedPosition(Pedestrian * ped, double time)
     if(CheckInsideWaitingArea(ped, ped->GetFinalDestination())) {
         WaitingArea * wa =
             dynamic_cast<WaitingArea *>(_building->GetAllGoals().at(ped->GetFinalDestination()));
-        wa->AddPed(ped->GetID());
+        wa->AddPed(ped->GetUID());
         ped->EnterGoal();
         if(!wa->IsOpen()) {
             SetState(wa->GetId(), false);

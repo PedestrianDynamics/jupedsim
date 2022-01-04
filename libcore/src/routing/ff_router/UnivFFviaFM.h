@@ -35,6 +35,7 @@
  **/
 #pragma once
 
+#include "general/Configuration.h"
 #include "general/Filesystem.h"
 #include "general/Macros.h"
 
@@ -46,7 +47,6 @@ class Pedestrian;
 class Room;
 class SubRoom;
 class Building;
-class Configuration;
 class Point;
 class RectGrid;
 class Line;
@@ -268,13 +268,6 @@ public:
      * @param[out] p direction of closest wall of point \p pos.
      */
     void GetDir2WallAt(const Point & pos, Point & p);
-
-    /**
-     * Writes the computed floor fields of all doors to file \p filename.
-     * @param filename file to which the floor fields should be written.
-     * @param targetID list of doors which should be written.
-     */
-    void WriteFF(const fs::path & filename, std::vector<int> targetID);
 
 private:
     /**

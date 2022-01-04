@@ -55,8 +55,6 @@
 // Not-a-Number (NaN)
 #define J_NAN std::numeric_limits<double>::quiet_NaN()
 
-enum class FileFormat { XML, TXT };
-
 enum RoutingStrategy {
     ROUTING_GLOBAL_SHORTEST,
     ROUTING_FF_GLOBAL_SHORTEST,
@@ -68,14 +66,7 @@ enum OperativModels {
     MODEL_VELOCITY = 3,
 };
 
-enum AgentColorMode {
-    BY_VELOCITY = 1,
-    BY_ROUTE,
-    BY_ROUTER,
-    BY_GROUP,
-    BY_FINAL_GOAL,
-    BY_INTERMEDIATE_GOAL
-};
+enum AgentColorMode { BY_VELOCITY = 1, BY_ROUTER, BY_GROUP, BY_FINAL_GOAL, BY_INTERMEDIATE_GOAL };
 
 enum LineIntersectType {
     NO_INTERSECTION = 0,

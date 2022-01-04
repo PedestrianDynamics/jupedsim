@@ -65,10 +65,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building 
     std::vector<Point> result_acc = std::vector<Point>();
     result_acc.reserve(allPeds.size());
     std::vector<my_pair> spacings = std::vector<my_pair>();
-    spacings.reserve(allPeds.size());    // larger than needed
-    spacings.push_back(my_pair(100, 1)); // in case there are no neighbors
-
-    std::vector<int> pedestrians_to_delete{};
+    spacings.reserve(allPeds.size()); // larger than needed
 
     for(const auto & ped : allPeds) {
         auto [room, subroom] = building->GetRoomAndSubRoom(ped->GetPos());
@@ -76,7 +73,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building 
         std::vector<Pedestrian *> neighbours =
             building->GetNeighborhoodSearch().GetNeighbourhood(ped.get());
 
-        int size = (int) neighbours.size();
+        int size = static_cast<int>(neighbours.size());
         for(int i = 0; i < size; i++) {
             Pedestrian * ped1 = neighbours[i];
             //if they are in the same subroom
@@ -90,8 +87,9 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building 
             emptyVector.push_back(subroom);
             emptyVector.push_back(subroom1);
             bool isVisible = building->IsVisible(p1, p2, emptyVector, false);
-            if(!isVisible)
+            if(!isVisible) {
                 continue;
+            }
             if(room == room1 && subroom == subroom1) {
                 repPed += ForceRepPed(ped.get(), ped1);
             } else {
@@ -125,7 +123,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building 
 
         // calculate min spacing
         std::sort(spacings.begin(), spacings.end(), sort_pred());
-        double spacing = spacings[0].first;
+        double spacing = spacings.empty() ? 100.0 : spacings.front().first;
         //============================================================
         // TODO: Hack for Head on situations: ped1 x ------> | <------- x ped2
         if(0 && direction.NormSquare() < 0.5) {
@@ -162,34 +160,31 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building 
         }
         ++counter;
     }
-    _simulation->RemoveAgents(pedestrians_to_delete);
 }
 
 Point VelocityModel::e0(Pedestrian * ped, Room * room) const
 {
     Point target;
 
-    if(_direction && ped->GetExitLine()) {
+    if(_direction) {
         // target is where the ped wants to be after the next timestep
         target = _direction->GetTarget(room, ped);
     } else { //@todo: we need a model for waiting pedestrians
-        LOG_WARNING("VelocityModel::e0 Ped {} has no navline.", ped->GetID());
+        LOG_WARNING("VelocityModel::e0 Ped {} has no navline.", ped->GetUID());
         // set random destination
-        std::mt19937 mt(ped->GetBuilding()->GetConfig()->GetSeed());
+        std::mt19937 mt(ped->GetBuilding()->GetConfig()->seed);
         std::uniform_real_distribution<double> dist(0, 1.0);
         double random_x = dist(mt);
         double random_y = dist(mt);
         Point P1        = Point(ped->GetPos()._x - random_x, ped->GetPos()._y - random_y);
         Point P2        = Point(ped->GetPos()._x + random_x, ped->GetPos()._y + random_y);
-        const NavLine L = Line(P1, P2);
-        ped->SetExitLine((const NavLine *) &L);
+        const Line L(P1, P2);
+        ped->SetExitLine(&L);
         target = P1;
     }
     Point desired_direction;
     const Point pos = ped->GetPos();
-    double dist     = 0.0;
-    if(ped->GetExitLine())
-        dist = ped->GetExitLine()->DistTo(pos);
+    const auto dist = ped->GetExitLine().DistTo(pos);
     // check if the molified version works
     Point lastE0 = ped->GetLastE0();
     ped->SetLastE0(target - pos);
@@ -238,7 +233,6 @@ my_pair VelocityModel::GetSpacing(Pedestrian * ped1, Pedestrian * ped2, Point ei
             "to "
             "each other ({:f})",
             Distance);
-        my_pair(FLT_MAX, ped2->GetID());
         exit(EXIT_FAILURE); //TODO
     }
 
@@ -247,11 +241,11 @@ my_pair VelocityModel::GetSpacing(Pedestrian * ped1, Pedestrian * ped2, Point ei
         ei.Rotate(0, 1).ScalarProduct(ep12); // theta = pi/2. condition2 should <= than l/Distance
     condition2 = (condition2 > 0) ? condition2 : -condition2; // abs
 
-    if((condition1 >= 0) && (condition2 <= l / Distance))
+    if((condition1 >= 0) && (condition2 <= l / Distance)) {
         // return a pair <dist, condition1>. Then take the smallest dist. In case of equality the biggest condition1
-        return my_pair(distp12.Norm(), ped2->GetID());
-    else
-        return my_pair(FLT_MAX, ped2->GetID());
+        return my_pair(distp12.Norm(), ped2->GetUID());
+    }
+    return my_pair(FLT_MAX, ped2->GetUID());
 }
 Point VelocityModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
 {
@@ -270,12 +264,12 @@ Point VelocityModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
             "VelocityModel::forcePedPed() ep12 can not be calculated! Pedestrians are too near "
             "to "
             "each other (dist={:f}). Adjust <a> value in force_ped to counter this. Affected "
-            "pedestrians ped1 {:d} at ({:f},{:f}) and ped2 {:d} at ({:f}, {:f})",
+            "pedestrians ped1 {} at ({:f},{:f}) and ped2 {} at ({:f}, {:f})",
             Distance,
-            ped1->GetID(),
+            ped1->GetUID(),
             ped1->GetPos()._x,
             ped1->GetPos()._y,
-            ped2->GetID(),
+            ped2->GetUID(),
             ped2->GetPos()._x,
             ped2->GetPos()._y);
         exit(EXIT_FAILURE); //TODO: quick and dirty fix for issue #158
@@ -308,8 +302,8 @@ Point VelocityModel::ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const
     for(const auto & obst : subroom->GetAllObstacles()) {
         if(obst->Contains(ped->GetPos())) {
             LOG_ERROR(
-                "Agent {:d} is trapped in obstacle in room/subroom {:d}/{:d}",
-                ped->GetID(),
+                "Agent {} is trapped in obstacle in room/subroom {:d}/{:d}",
+                ped->GetUID(),
                 subroom->GetRoomID(),
                 subroom->GetSubRoomID());
             exit(EXIT_FAILURE);
@@ -350,9 +344,9 @@ Point VelocityModel::ForceRepWall(
         e_iw = dist / Distance;
     } else {
         LOG_WARNING(
-            "Velocity: forceRepWall() ped {:d} [{:f}, {:f}] is too near to the wall [{:f}, "
+            "Velocity: forceRepWall() ped {} [{:f}, {:f}] is too near to the wall [{:f}, "
             "{:f}]-[{:f}, {:f}] (dist={:f})",
-            ped->GetID(),
+            ped->GetUID(),
             ped->GetPos()._y,
             ped->GetPos()._y,
             w.GetPoint1()._x,
@@ -366,10 +360,8 @@ Point VelocityModel::ForceRepWall(
     }
     //-------------------------
 
-    const Point & pos = ped->GetPos();
-    double distGoal   = 0.0;
-    if(ped->GetExitLine())
-        distGoal = ped->GetExitLine()->DistToSquare(pos);
+    const Point & pos   = ped->GetPos();
+    const auto distGoal = ped->GetExitLine().DistToSquare(pos);
 
     if(distGoal < J_EPS_GOAL * J_EPS_GOAL)
         return F_wrep;
@@ -390,25 +382,4 @@ std::string VelocityModel::GetDescription() const
     sprintf(tmp, "\t\tD: \t\tPed: %f \tWall: %f\n", _DPed, _DWall);
     rueck.append(tmp);
     return rueck;
-}
-
-double VelocityModel::GetaPed() const
-{
-    return _aPed;
-}
-
-double VelocityModel::GetDPed() const
-{
-    return _DPed;
-}
-
-
-double VelocityModel::GetaWall() const
-{
-    return _aWall;
-}
-
-double VelocityModel::GetDWall() const
-{
-    return _DWall;
 }

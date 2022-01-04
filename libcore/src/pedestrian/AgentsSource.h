@@ -28,11 +28,12 @@
  **/
 #pragma once
 
+#include "pedestrian/Pedestrian.h"
+
 #include <memory>
 #include <string>
 #include <vector>
 
-class Pedestrian;
 class OutputHandler;
 class StartDistribution;
 class Building;

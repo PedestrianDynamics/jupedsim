@@ -22,20 +22,21 @@
 #include "Simulation.h"
 #include "geometry/Room.h"
 #include "geometry/SubRoom.h"
+#include "pedestrian/Pedestrian.h"
 
 #include <Logger.h>
 #include <algorithm>
 #include <iterator>
 #include <memory>
 
-std::vector<int> SimulationHelper::FindPedestriansOutside(
+std::vector<Pedestrian::UID> SimulationHelper::FindPedestriansOutside(
     const Building & building,
     const std::vector<std::unique_ptr<Pedestrian>> & peds)
 {
-    std::vector<int> pedsOutside;
+    std::vector<Pedestrian::UID> pedsOutside;
     for(const auto & ped : peds) {
         if(!building.IsInAnySubRoom(ped->GetPos())) {
-            pedsOutside.push_back(ped->GetID());
+            pedsOutside.push_back(ped->GetUID());
         }
     }
     return pedsOutside;
@@ -58,18 +59,18 @@ void SimulationHelper::UpdateFlowAtDoors(
             continue;
         }
 
-        if(ped->GetExitIndex() >= 0 &&
-           (building.GetTransitionByUID(ped->GetExitIndex()) != nullptr) &&
+        if(ped->GetDestination() >= 0 &&
+           (building.GetTransitionByUID(ped->GetDestination()) != nullptr) &&
            passedDoor.value()->GetUniqueID() !=
-               building.GetTransitionByUID(ped->GetExitIndex())->GetUniqueID()) {
+               building.GetTransitionByUID(ped->GetDestination())->GetUniqueID()) {
             LOG_WARNING(
                 "Ped {}: used an unindented door {}, but wanted to go to {}.",
-                ped->GetID(),
+                ped->GetUID(),
                 passedDoor.value()->GetUniqueID(),
-                ped->GetExitIndex());
+                ped->GetDestination());
             continue;
         }
-        passedDoor.value()->IncreaseDoorUsage(1, time, ped->GetID());
+        passedDoor.value()->IncreaseDoorUsage(1, time, ped->GetUID());
         passedDoor.value()->IncreasePartialDoorUsage(1);
     }
 }
@@ -97,7 +98,7 @@ bool SimulationHelper::UpdateFlowRegulation(Building & building, double time)
 
     for(auto [transID, trans] : building.GetAllTransitions()) {
         DoorState state = trans->GetState();
-        trans->UpdateTemporaryState(building.GetConfig()->Getdt());
+        trans->UpdateTemporaryState(building.GetConfig()->dT);
 
         bool regulateFlow = trans->GetOutflowRate() < std::numeric_limits<double>::max() ||
                             trans->GetMaxDoorUsage() < std::numeric_limits<double>::max();

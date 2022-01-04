@@ -40,7 +40,7 @@ namespace SimulationHelper
  * @param peds list of pedestrians to check
  * @return list of pedestrians who have moved to outside of the geometry
  */
-std::vector<int> FindPedestriansOutside(
+std::vector<Pedestrian::UID> FindPedestriansOutside(
     const Building & building,
     const std::vector<std::unique_ptr<Pedestrian>> & peds);
 

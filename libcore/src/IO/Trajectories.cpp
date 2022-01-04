@@ -8,8 +8,12 @@
 TrajectoryWriter::TrajectoryWriter(
     unsigned int precision,
     std::set<OptionalOutput> options,
-    std::unique_ptr<OutputHandler> outputHandler) :
-    _precision(precision), _options(std::move(options)), _outputHandler(std::move(outputHandler))
+    std::unique_ptr<OutputHandler> outputHandler,
+    AgentColorMode colorMode) :
+    _precision(precision),
+    _options(std::move(options)),
+    _outputHandler(std::move(outputHandler)),
+    _colorMode(colorMode)
 {
     // Add header, info and output for speed
     _optionalOutputHeader[OptionalOutput::speed] = "V\t";
@@ -38,7 +42,7 @@ TrajectoryWriter::TrajectoryWriter(
     _optionalOutputHeader[OptionalOutput::intermediate_goal] = "CG\t";
     _optionalOutputInfo[OptionalOutput::intermediate_goal]   = "#CG: id of current goal\n";
     _optionalOutput[OptionalOutput::intermediate_goal]       = [](const Pedestrian * ped) {
-        return fmt::format(FMT_STRING("{}\t"), ped->GetExitIndex());
+        return fmt::format(FMT_STRING("{}\t"), ped->GetDestination());
     };
 
     // Add header, info and output for desired direction
@@ -65,28 +69,27 @@ void TrajectoryWriter::WriteHeader(size_t nPeds, double fps, const Configuration
     header.append(fmt::format("#agents: {:d}\n", nPeds));
     header.append(fmt::format("#count: {:d}\n", count));
     header.append(fmt::format("#framerate: {:0.2f}\n", fps));
-    header.append(fmt::format("#geometry: {:s}\n", cfg.GetGeometryFile().filename().string()));
+    header.append(fmt::format("#geometry: {:s}\n", cfg.geometryFile.filename().string()));
 
     // if used: add two necessary files time table and train types
-    if(!cfg.GetTrainTimeTableFile().empty() && !cfg.GetTrainTypeFile().empty()) {
-        header.append(fmt::format(
-            "#trainTimeTable: {:s}\n", cfg.GetTrainTimeTableFile().filename().string()));
+    if(!cfg.trainTimeTableFile.empty() && !cfg.trainTypeFile.empty()) {
         header.append(
-            fmt::format("#trainType: {:s}\n", cfg.GetTrainTypeFile().filename().string()));
+            fmt::format("#trainTimeTable: {:s}\n", cfg.trainTimeTableFile.filename().string()));
+        header.append(fmt::format("#trainType: {:s}\n", cfg.trainTypeFile.filename().string()));
     }
     // if used: add source file name
-    if(!cfg.GetSourceFile().empty()) {
-        header.append(fmt::format("#sources: {:s}\n", cfg.GetSourceFile().filename().string()));
+    if(!cfg.sourceFile.empty()) {
+        header.append(fmt::format("#sources: {:s}\n", cfg.sourceFile.filename().string()));
     }
 
     // if used: add goal file name
-    if(!cfg.GetGoalFile().empty()) {
-        header.append(fmt::format("#goals: {:s}\n", cfg.GetGoalFile().filename().string()));
+    if(!cfg.goalFile.empty()) {
+        header.append(fmt::format("#goals: {:s}\n", cfg.goalFile.filename().string()));
     }
 
     // if used: add event file name
-    if(!cfg.GetEventFile().empty()) {
-        header.append(fmt::format("#events: {:s}\n", cfg.GetEventFile().filename().string()));
+    if(!cfg.eventFile.empty()) {
+        header.append(fmt::format("#events: {:s}\n", cfg.eventFile.filename().string()));
     }
 
     header.append("#ID: the agent ID\n");
@@ -117,14 +120,14 @@ void TrajectoryWriter::WriteFrame(
         double x          = ped->GetPos()._x;
         double y          = ped->GetPos()._y;
         double z          = ped->GetElevation();
-        int color         = ped->GetColor();
+        int color         = computeColor(*ped);
         double a          = ped->GetLargerAxis();
         double b          = ped->GetSmallerAxis();
         double phi        = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
         double RAD2DEG    = 180.0 / M_PI;
         std::string frame = fmt::format(
-            "{:d}\t{:d}\t{:0.{}f}\t{:0.{}f}\t{:0.{}f}\t{:0.2f}\t{:0.2f}\t{:0.2f}\t{:d}\t",
-            ped->GetID(),
+            "{}\t{:d}\t{:0.{}f}\t{:0.{}f}\t{:0.{}f}\t{:0.2f}\t{:0.2f}\t{:0.2f}\t{:d}\t",
+            ped->GetUID(),
             frameNr,
             x,
             _precision,
@@ -142,4 +145,44 @@ void TrajectoryWriter::WriteFrame(
 
         _outputHandler->Write(frame);
     }
+}
+
+int TrajectoryWriter::computeColor(const Pedestrian & ped) const
+{
+    static constexpr std::array colors{0, 255, 35, 127, 90};
+    std::string key;
+
+    switch(_colorMode) {
+        case BY_VELOCITY: {
+            int color = -1;
+            double v0 = ped.GetEllipse().GetV0();
+            if(v0 != 0.0) {
+                double v = ped.GetV().Norm();
+                color    = static_cast<int>(v / v0 * 255);
+            }
+            return color;
+        }
+
+        case BY_ROUTER: {
+            key = std::to_string(ped.GetRouterID());
+        } break;
+
+        case BY_GROUP: {
+            return (colors[ped.GetGroup() % colors.size()]);
+        }
+
+        case BY_FINAL_GOAL: {
+            key = std::to_string(ped.GetFinalDestination());
+        } break;
+
+        case BY_INTERMEDIATE_GOAL: {
+            key = std::to_string(ped.GetDestination());
+        } break;
+
+        default:
+            break;
+    }
+
+    std::hash<std::string> hash_fn;
+    return static_cast<int>(hash_fn(key)) % 255;
 }

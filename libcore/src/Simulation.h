@@ -66,7 +66,6 @@ private:
     std::shared_ptr<RoutingEngine> _routingEngine;
     /// writing the trajectories to file
     std::unique_ptr<OldEventManager> _old_em{};
-    int _maxSimTime{100};
     fs::path _currentTrajectoriesFile;
     std::vector<std::unique_ptr<Pedestrian>> _agents;
 
@@ -95,9 +94,9 @@ public:
 
     void AddAgents(std::vector<std::unique_ptr<Pedestrian>> && agents);
 
-    void RemoveAgents(std::vector<int> ids);
+    void RemoveAgents(std::vector<Pedestrian::UID> ids);
 
-    Pedestrian & Agent(int id) const;
+    Pedestrian & Agent(Pedestrian::UID id) const;
 
     const std::vector<std::unique_ptr<Pedestrian>> & Agents() const;
 
@@ -155,6 +154,4 @@ public:
      * print some statistics about the simulation
      */
     void PrintStatistics(double time);
-
-    int GetMaxSimTime() const;
 };

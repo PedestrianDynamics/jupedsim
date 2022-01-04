@@ -40,7 +40,7 @@ bool PedDistributionParser::LoadPedDistribution(
 {
     LOG_INFO("Loading and parsing the persons attributes");
 
-    TiXmlDocument doc(_configuration->GetProjectFile().string());
+    TiXmlDocument doc(_configuration->iniFile.string());
 
     if(!doc.LoadFile()) {
         LOG_ERROR("Could not parse the project file");
@@ -86,8 +86,7 @@ bool PedDistributionParser::LoadPedDistribution(
                 group_id);
             return false;
         }
-        auto dis =
-            std::shared_ptr<StartDistribution>(new StartDistribution(_configuration->GetSeed()));
+        auto dis = std::shared_ptr<StartDistribution>(new StartDistribution(_configuration->seed));
         dis->SetRoomID(room_id);
         dis->SetSubroomID(subroom_id);
         dis->SetGroupId(group_id);
@@ -104,20 +103,18 @@ bool PedDistributionParser::LoadPedDistribution(
             startDisSub.push_back(dis);
         }
 
-        if(_configuration->GetAgentsParameters().count(agent_para_id) == 0) {
+        if(_configuration->agentsParameters.count(agent_para_id) == 0) {
             LOG_ERROR(
                 "Please specify which set of agents parameters (agent_parameter_id) to "
                 "use for the group [{}].",
                 group_id);
             LOG_ERROR("Default values are not implemented yet");
 
-            LOG_ERROR(
-                "Exit with failure. See <{}> for details",
-                _configuration->GetErrorLogFile().string());
+            LOG_ERROR("Exit with failure. See <{}> for details", _configuration->logFile.string());
             exit(EXIT_FAILURE);
             return false;
         }
-        dis->SetGroupParameters(_configuration->GetAgentsParameters().at(agent_para_id).get());
+        dis->SetGroupParameters(_configuration->agentsParameters.at(agent_para_id).get());
 
         if(e->Attribute("startX") && e->Attribute("startY")) {
             double startX = xmltof(e->Attribute("startX"), NAN);
@@ -139,7 +136,7 @@ bool PedDistributionParser::LoadPedDistribution(
         TiXmlNode * xFileNode = xSources->FirstChild("file");
         //------- parse sources from external file
         if(xFileNode) {
-            fs::path p(_configuration->GetProjectRootDir());
+            fs::path p(_configuration->projectRootDir);
             std::string sourceFilename = xFileNode->FirstChild()->ValueStr();
             p /= sourceFilename;
             sourceFilename = p.string();

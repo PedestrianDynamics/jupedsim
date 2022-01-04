@@ -71,22 +71,21 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building * bu
     std::vector<Point> result_acc = std::vector<Point>();
     result_acc.reserve(allPeds.size());
 
-    std::vector<int> pedestrians_to_delete{};
+    std::vector<Pedestrian::UID> pedestrians_to_delete{};
     for(const auto & ped : allPeds) {
         auto [room, subroom] = building->GetRoomAndSubRoom(ped->GetPos());
         double normVi        = ped->GetV().ScalarProduct(ped->GetV());
         double tmp           = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta);
         if(normVi > tmp && ped->GetV0Norm() > 0) {
-            fprintf(
-                stderr,
+            LOG_ERROR(
                 "GCFMModel::calculateForce() WARNING: actual velocity (%f) of iped %d "
                 "is bigger than desired velocity (%f) at time: %fs\n",
                 sqrt(normVi),
-                ped->GetID(),
+                ped->GetUID(),
                 ped->GetV0Norm(),
                 current);
             // remove the pedestrian and abort
-            pedestrians_to_delete.emplace_back(ped->GetID());
+            pedestrians_to_delete.emplace_back(ped->GetUID());
             // TODO KKZ track deleted peds
             LOG_ERROR("One ped was removed due to high velocity");
         }
@@ -147,7 +146,7 @@ inline Point GCFMModel::ForceDriv(Pedestrian * ped, Room * room) const
     const Point & target = _direction->GetTarget(room, ped);
     Point F_driv;
     const Point & pos = ped->GetPos();
-    double dist       = ped->GetExitLine()->DistTo(pos);
+    double dist       = ped->GetExitLine().DistTo(pos);
     Point lastE0      = ped->GetLastE0();
     ped->SetLastE0(target - pos);
 
@@ -273,9 +272,9 @@ Point GCFMModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
     }
     if(F_rep._x != F_rep._x || F_rep._y != F_rep._y) {
         LOG_ERROR(
-            "NAN return p1{:d} p2 {:d} Frepx={:f} Frepy={:f} K_ij={:f}",
-            ped1->GetID(),
-            ped2->GetID(),
+            "NAN return p1{} p2 {} Frepx={:f} Frepy={:f} K_ij={:f}",
+            ped1->GetUID(),
+            ped2->GetUID(),
             F_rep._x,
             F_rep._y,
             K_ij);
@@ -302,8 +301,8 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const
     for(const auto & obst : subroom->GetAllObstacles()) {
         if(obst->Contains(ped->GetPos())) {
             LOG_ERROR(
-                "Agent {:d} is trapped in obstacle in room/subroom {:d}/{:d}",
-                ped->GetID(),
+                "Agent {} is trapped in obstacle in room/subroom {:d}/{:d}",
+                ped->GetUID(),
                 subroom->GetRoomID(),
                 subroom->GetSubRoomID());
             exit(EXIT_FAILURE);
@@ -342,17 +341,6 @@ inline Point GCFMModel::ForceRepWall(Pedestrian * ped, const Line & w) const
     double mind = 0.5; //for performance reasons this distance is assumed to be constant
     double vn   = w.NormalComp(ped->GetV()); //normal component of the velocity on the wall
     F           = ForceRepStatPoint(ped, pt, mind, vn);
-
-    if(ped->GetID() == -33) {
-        printf(
-            "wall = [%f, %f]--[%f, %f] F= [%f %f]\n",
-            w.GetPoint1()._x,
-            w.GetPoint1()._y,
-            w.GetPoint2()._x,
-            w.GetPoint2()._y,
-            F._x,
-            F._y);
-    }
 
     return F; //line --> l != 0
 }
@@ -455,49 +443,6 @@ Point GCFMModel::ForceInterpolation(
         F_rep = e * px;
     }
     return F_rep;
-}
-
-
-// Getter-Funktionen
-
-double GCFMModel::GetNuPed() const
-{
-    return _nuPed;
-}
-
-double GCFMModel::GetNuWall() const
-{
-    return _nuWall;
-}
-
-double GCFMModel::GetIntpWidthPed() const
-{
-    return _intp_widthPed;
-}
-
-double GCFMModel::GetIntpWidthWall() const
-{
-    return _intp_widthWall;
-}
-
-double GCFMModel::GetMaxFPed() const
-{
-    return _maxfPed;
-}
-
-double GCFMModel::GetMaxFWall() const
-{
-    return _maxfWall;
-}
-
-double GCFMModel::GetDistEffMaxPed() const
-{
-    return _distEffMaxPed;
-}
-
-double GCFMModel::GetDistEffMaxWall() const
-{
-    return _distEffMaxWall;
 }
 
 std::string GCFMModel::GetDescription() const

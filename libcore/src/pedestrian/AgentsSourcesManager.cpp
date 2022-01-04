@@ -102,10 +102,6 @@ AgentsSourcesManager::ProcessAllSources(double current_time) const
             } else if(!ComputeBestPositionVoronoiBoost(src.get(), peds, _building, source_peds))
                 LOG_WARNING("There was no place for some pedestrians");
 
-            // Having set the positions, now we can set the velocity
-            for(auto ped : peds) {
-                AdjustVelocityUsingWeidmann(ped);
-            }
             source_peds.insert(source_peds.end(), peds.begin(), peds.end());
         }
     }
@@ -123,47 +119,6 @@ void AgentsSourcesManager::InitFixedPosition(AgentsSource * src, std::vector<Ped
 {
     for(auto && ped : peds) {
         ped->SetPos(Point(src->GetStartX(), src->GetStartY()));
-    }
-}
-
-void AgentsSourcesManager::AdjustVelocityUsingWeidmann(Pedestrian * ped) const
-{
-    //get the density
-    std::vector<Pedestrian *> neighbours = _building->GetNeighborhoodSearch().GetNeighbourhood(ped);
-
-    //density in pers per m2
-    double density = 1.0;
-    //radius corresponding to a surface of 1m2
-    double radius_square = 1.0;
-
-    for(const auto & p : neighbours) {
-        if((ped->GetPos() - p->GetPos()).NormSquare() <= radius_square)
-            density += 1.0;
-    }
-    density = density / (radius_square * M_PI);
-
-    //get the velocity
-    double density_max = 5.4;
-
-    //speed from taken from weidmann FD
-    double speed = 1.34 * (1 - exp(-1.913 * (1.0 / density - 1.0 / density_max)));
-    if(speed >= ped->GetV0Norm()) {
-        speed = ped->GetV0Norm();
-    }
-
-    //set the velocity vector
-    if(ped->FindRoute() != -1) {
-        //get the next destination point
-        Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos()) - ped->GetPos()).Normalized();
-        v       = v * speed;
-        ped->SetV(v);
-    } else {
-        LOG_WARNING(
-            "No route could be found for source-agent {:d} going to {:d}",
-            ped->GetID(),
-            ped->GetFinalDestination());
-        //that will be most probably be fixed in the next computation step.
-        // so do not abort
     }
 }
 

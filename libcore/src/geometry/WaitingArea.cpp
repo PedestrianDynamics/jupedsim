@@ -28,6 +28,7 @@
 #include "WaitingArea.h"
 
 #include "Building.h"
+#include "pedestrian/Pedestrian.h"
 
 #include <sstream>
 
@@ -167,7 +168,7 @@ int WaitingArea::GetNextGoal()
     }
 }
 
-void WaitingArea::AddPed(int ped)
+void WaitingArea::AddPed(Pedestrian::UID ped)
 {
     _pedInside.insert(ped);
     if(_pedInside.size() >= _maxNumPed) {
@@ -175,7 +176,7 @@ void WaitingArea::AddPed(int ped)
     }
 }
 
-void WaitingArea::RemovePed(int ped)
+void WaitingArea::RemovePed(Pedestrian::UID ped)
 {
     _pedInside.erase(ped);
     if(_pedInside.size() < _maxNumPed) {
@@ -245,7 +246,7 @@ void WaitingArea::SetTransitionID(int transitionID)
     WaitingArea::_transitionID = transitionID;
 }
 
-const std::set<int> & WaitingArea::GetPedInside() const
+const std::set<Pedestrian::UID> & WaitingArea::GetPedInside() const
 {
     return _pedInside;
 }

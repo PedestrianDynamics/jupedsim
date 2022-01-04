@@ -64,20 +64,12 @@
 #include <utility>
 #include <vector>
 
-Building::Building(std::vector<std::unique_ptr<Pedestrian>> * agents) : _allPedestrians(agents)
-{
-    _caption          = "no_caption";
-    _geometryFilename = "";
-    _routingEngine    = nullptr;
-}
+Building::Building(std::vector<std::unique_ptr<Pedestrian>> * agents) : _allPedestrians(agents) {}
 
 Building::Building(
     Configuration * configuration,
     std::vector<std::unique_ptr<Pedestrian>> * agents) :
-    _configuration(configuration),
-    _routingEngine(configuration->GetRoutingEngine()),
-    _caption("no_caption"),
-    _allPedestrians(agents)
+    _configuration(configuration), _allPedestrians(agents)
 {
     {
         std::unique_ptr<GeoFileParser> parser(new GeoFileParser(_configuration));
@@ -90,11 +82,6 @@ Building::Building(
     }
 
     InitGrid();
-
-    if(!_routingEngine->Init(this)) {
-        LOG_ERROR("Could not initialize the routers!");
-        exit(EXIT_FAILURE);
-    }
 
     if(!SanityCheck()) {
         LOG_ERROR("There are sanity errors in the geometry file");
@@ -139,7 +126,7 @@ Configuration * Building::GetConfig() const
 
 RoutingEngine * Building::GetRoutingEngine() const
 {
-    return _configuration->GetRoutingEngine().get();
+    return _configuration->routingEngine.get();
 }
 
 int Building::GetNumberOfRooms() const
@@ -441,12 +428,12 @@ bool Building::InitInsideGoals()
 
 const fs::path & Building::GetProjectFilename() const
 {
-    return _configuration->GetProjectFile();
+    return _configuration->iniFile;
 }
 
 const fs::path & Building::GetProjectRootDir() const
 {
-    return _configuration->GetProjectRootDir();
+    return _configuration->projectRootDir;
 }
 
 bool Building::AddCrossing(Crossing * line)
@@ -570,29 +557,6 @@ Goal * Building::GetFinalGoal(int ID) const
             exit(EXIT_FAILURE);
         }
     }
-}
-
-Crossing * Building::GetTransOrCrossByName(std::string caption) const
-{
-    {
-        //eventually
-        std::map<int, Transition *>::const_iterator itr;
-        for(itr = _transitions.begin(); itr != _transitions.end(); ++itr) {
-            if(itr->second->GetCaption() == caption)
-                return itr->second;
-        }
-    }
-    {
-        //finally the  crossings
-        std::map<int, Crossing *>::const_iterator itr;
-        for(itr = _crossings.begin(); itr != _crossings.end(); ++itr) {
-            if(itr->second->GetCaption() == caption)
-                return itr->second;
-        }
-    }
-
-    LOG_WARNING("No Transition or Crossing with Caption: {}", caption);
-    return nullptr;
 }
 
 Hline * Building::GetTransOrCrossByUID(int id) const
@@ -751,7 +715,7 @@ void Building::InitGrid()
         }
     }
 
-    double cellSize = _configuration->GetLinkedCellSize();
+    double cellSize = _configuration->linkedCellSize;
     //make the grid slightly larger.
     x_min = x_min - 1 * cellSize;
     x_max = x_max + 1 * cellSize;

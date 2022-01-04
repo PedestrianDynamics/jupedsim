@@ -63,7 +63,7 @@ FFRouter::FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals, Configurati
     _hasSpecificGoals = hasSpecificGoals;
 
     //depending on exit_strat 8 => false, depending on exit_strat 9 => true;
-    _targetWithinSubroom = (_config->get_exit_strat() == 9);
+    _targetWithinSubroom = (_config->exitStrat == 9);
 
     // get extra values depending on routing strategy s
     if(_strategy != ROUTING_FF_GLOBAL_SHORTEST) {
@@ -283,7 +283,7 @@ void FFRouter::CalculateFloorFields()
     // penalize directional escalators
     std::vector<std::pair<int, int>> penaltyList;
 
-    if(_config->get_has_directional_escalators()) {
+    if(_config->hasDirectionalEscalators) {
         _directionalEscalatorsUID.clear();
         penaltyList.clear();
         for(const auto & room : _building->GetAllRooms()) {
@@ -354,7 +354,7 @@ int FFRouter::FindExit(Pedestrian * p)
         // if not subroom wise, check if correct room then direct to waiting area
         if(!_targetWithinSubroom && wa->GetRoomID() == ped_roomid) {
             bestDoor = wa->GetCentreCrossing()->GetUniqueID();
-            p->SetExitIndex(bestDoor);
+            p->SetDestination(bestDoor);
             p->SetExitLine(_doorByUID.at(bestDoor));
             return bestDoor;
         }
@@ -362,7 +362,7 @@ int FFRouter::FindExit(Pedestrian * p)
         if(_targetWithinSubroom && wa->GetRoomID() == ped_roomid &&
            wa->GetSubRoomID() == ped_subroomid) {
             bestDoor = wa->GetCentreCrossing()->GetUniqueID();
-            p->SetExitIndex(bestDoor);
+            p->SetDestination(bestDoor);
             p->SetExitLine(_doorByUID.at(bestDoor));
             return bestDoor;
         }
@@ -425,8 +425,7 @@ int FFRouter::FindExit(Pedestrian * p)
         for(int doorUID : DoorUIDsOfRoom) {
             //double locDistToDoor = _locffviafm[p->GetRoomID()]->GetCostToDestination(doorUID, p->GetPos(), _mode);
             double locDistToDoor =
-                _config->GetDirectionManager()->GetDirectionStrategy()->GetDistance2Target(
-                    p, doorUID);
+                _config->directionManager->GetDirectionStrategy()->GetDistance2Target(p, doorUID);
 
             if(locDistToDoor <
                -J_EPS) { //for old ff: //this can happen, if the point is not reachable and therefore has init val -7
@@ -465,7 +464,7 @@ int FFRouter::FindExit(Pedestrian * p)
     }
 
     if(_doorByUID.count(bestDoor)) {
-        p->SetExitIndex(bestDoor);
+        p->SetDestination(bestDoor);
         p->SetExitLine(_doorByUID.at(bestDoor));
     }
     return bestDoor; //-1 if no way was found, doorUID of best, if path found
@@ -513,12 +512,5 @@ void FFRouter::SetRecalc(double t)
 
 void FFRouter::Update()
 {
-    this->CalculateFloorFields();
-    if(_config->get_write_VTK_files()) {
-        for(auto const & [roomID, localFF] : _floorfieldByRoomID) {
-            localFF->WriteFF(
-                fmt::format(FMT_STRING("ffrouterRoom_{:d}_t_{:.2f}.vtk"), roomID, _currentTime),
-                _allDoorUIDs);
-        }
-    }
+    CalculateFloorFields();
 }

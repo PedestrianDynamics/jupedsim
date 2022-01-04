@@ -26,13 +26,13 @@
  **/
 #pragma once
 
-#include "NavLine.h"
+#include "Line.h"
 
 class SubRoom;
 class Room;
 
 
-class Hline : public NavLine
+class Hline : public Line
 {
 protected:
     int _id;

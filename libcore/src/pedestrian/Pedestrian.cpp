@@ -27,6 +27,7 @@
 #include "Pedestrian.h"
 
 #include "geometry/Building.h"
+#include "geometry/Line.h"
 #include "geometry/SubRoom.h"
 #include "geometry/WaitingArea.h"
 
@@ -36,98 +37,11 @@
 // initialize the static variables
 int Pedestrian::_agentsCreated         = 1;
 double Pedestrian::_minPremovementTime = std::numeric_limits<double>::max();
-AgentColorMode Pedestrian::_colorMode  = BY_VELOCITY;
-std::vector<int> colors                = {
-    0,
-    255,
-    35,
-    127,
-    90,
-};
-
 
 Pedestrian::Pedestrian()
 {
-    _id                              = _agentsCreated; //default id
-    _exitIndex                       = -1;
-    _group                           = -1;
-    _desiredFinalDestination         = FINAL_DEST_OUT;
-    _premovement                     = 0;
-    _mass                            = 1;
-    _tau                             = 0.5;
-    _t                               = 1.0;
-    _deltaT                          = 0.01;
-    _ellipse                         = JEllipse();
-    _v0                              = Point(0, 0);
-    _v0UpStairs                      = 0.6;
-    _v0DownStairs                    = 0.6;
-    _v0EscalatorUpStairs             = 0.8;
-    _v0EscalatorDownStairs           = 0.8;
-    _smoothFactorUpStairs            = 15;
-    _smoothFactorDownStairs          = 15;
-    _smoothFactorEscalatorUpStairs   = 15;
-    _smoothFactorEscalatorDownStairs = 15;
-    _lastE0                          = Point(0, 0);
-    _navLine                         = nullptr;
-    _mentalMap                       = std::map<int, int>();
-    _lastPosition                    = Point(J_NAN, J_NAN);
-    // new orientation after 10 seconds, value is incremented
-    _timeBeforeRerouting = 0.0;
-    _newOrientationDelay = 0; //0 seconds, in steps
-    _reroutingEnabled    = false;
-    _router              = nullptr;
-    _building            = nullptr;
-    _agentsCreated++; //increase the number of object created
-    _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
-}
-
-Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & building) :
-    _group(agentsParameters.GetGroupId()),
-    _desiredFinalDestination(agentsParameters.GetGoalId()),
-    _premovement(agentsParameters.GetPremovementTime()),
-    _lastPosition(),
-
-    _router(building.GetRoutingEngine()->GetRouter(agentsParameters.GetRouterId())),
-    _building(&building)
-{
-    _exitIndex           = -1;
-    _id                  = _agentsCreated; //default id
-    _mass                = 1;
-    _tau                 = 0.5;
-    _t                   = 1.0;
-    _newOrientationDelay = 0; //0 seconds, in steps
-    _ellipse             = JEllipse();
-    _navLine             = nullptr;
-    _router              = nullptr;
-    _building            = nullptr;
-    // new orientation after 10 seconds, value is incremented
-    _timeBeforeRerouting     = 0.0;
-    _reroutingEnabled        = false;
-    _desiredFinalDestination = FINAL_DEST_OUT;
-    _mentalMap               = std::map<int, int>();
-    _deltaT                  = 0.01;
-    _v0                      = Point(0, 0);
-    _lastPosition            = Point(0, 0);
-    _group                   = -1;
-    _v0UpStairs              = 0.6;
-    _v0DownStairs            = 0.6;
-    _v0EscalatorUpStairs     = 0.8;
-    _v0EscalatorDownStairs   = 0.8;
-    _smoothFactorUpStairs    = agentsParameters.GetGroupParameters()->_smoothFactorUpStairs;
-    _smoothFactorDownStairs  = agentsParameters.GetGroupParameters()->_smoothFactorDownStairs;
-    _smoothFactorEscalatorUpStairs =
-        agentsParameters.GetGroupParameters()->_smoothFactorEscalatorUpStairs;
-    _smoothFactorEscalatorDownStairs =
-        agentsParameters.GetGroupParameters()->_smoothFactorEscalatorDownStairs;
-    _lastE0 = Point(0, 0);
-    _agentsCreated++; //increase the number of object created
-    _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
-}
-
-
-Pedestrian::~Pedestrian()
-{
-    delete _navLine;
+    _id = _agentsCreated; //default id
+    _agentsCreated++;     //increase the number of object created
 }
 
 bool Pedestrian::InPremovement(double now)
@@ -176,14 +90,6 @@ double Pedestrian::SelectSmoothFactor(SubroomType type, double delta) const
     }
 }
 
-void Pedestrian::SetID(int i)
-{
-    _id = i;
-    if(i <= 0) {
-        throw std::logic_error("Invalid pedestrians ID: Pedestrian ID should be > 0.");
-    }
-}
-
 void Pedestrian::SetTau(double tau)
 {
     _tau = tau;
@@ -199,19 +105,14 @@ void Pedestrian::SetEllipse(const JEllipse & e)
     _ellipse = e;
 }
 
-void Pedestrian::SetExitIndex(int i)
+void Pedestrian::SetDestination(int i)
 {
-    _exitIndex                    = i;
-    _mentalMap[GetUniqueRoomID()] = i;
+    _exitIndex = i;
 }
 
-void Pedestrian::SetExitLine(const NavLine * l)
+void Pedestrian::SetExitLine(const Line * l)
 {
-    if(_navLine != nullptr)
-        delete _navLine;
-    if(l != nullptr) {
-        _navLine = new NavLine(*l);
-    }
+    _navLine = Line(*l);
 }
 
 void Pedestrian::SetPos(const Point & pos)
@@ -263,10 +164,9 @@ void Pedestrian::SetDeltaT(double dt)
 {
     _deltaT = dt;
 }
-
-int Pedestrian::GetID() const
+Pedestrian::UID Pedestrian::GetUID() const
 {
-    return _id;
+    return _uid;
 }
 
 double Pedestrian::GetMass() const
@@ -289,12 +189,12 @@ const JEllipse & Pedestrian::GetEllipse() const
     return _ellipse;
 }
 
-int Pedestrian::GetExitIndex() const
+int Pedestrian::GetDestination() const
 {
     return _exitIndex;
 }
 
-NavLine * Pedestrian::GetExitLine() const
+const Line & Pedestrian::GetExitLine() const
 {
     return _navLine;
 }
@@ -307,21 +207,11 @@ int Pedestrian::GetUniqueRoomID() const
     return room_id * 1000 + sub_room_id;
 }
 
-// returns the exit Id corresponding to the
-// unique subroom identifier
-
-int Pedestrian::GetNextDestination()
-{
-    if(_mentalMap.count(GetUniqueRoomID()) == 0) {
-        return -1;
-    }
-    return _mentalMap[GetUniqueRoomID()];
-}
-
 Point Pedestrian::GetLastE0() const
 {
     return _lastE0;
 }
+
 void Pedestrian::SetLastE0(Point E0)
 {
     _lastE0 = E0;
@@ -349,10 +239,7 @@ double Pedestrian::GetV0Norm() const
     //detect the walking direction based on the elevation
     SubRoom * sub        = _building->GetSubRoom(GetPos());
     double ped_elevation = sub->GetElevation(_ellipse.GetCenter());
-    if(_navLine == nullptr) { // this might happen when agents are spawn by sources.
-        return std::max(0., _ellipse.GetV0());
-    }
-    const Point & target = _navLine->GetCentre();
+    const Point & target = _navLine.GetCentre();
     double nav_elevation = sub->GetElevation(target);
     double delta         = nav_elevation - ped_elevation;
     auto subType         = sub->GetType();
@@ -429,23 +316,6 @@ void Pedestrian::SetSmoothTurning()
     _newOrientationDelay = 0;
 }
 
-void Pedestrian::UpdateReroutingTime()
-{
-    _timeBeforeRerouting -= _deltaT;
-}
-
-void Pedestrian::RerouteIn(double time)
-{
-    _reroutingEnabled    = true;
-    _timeBeforeRerouting = time;
-}
-
-bool Pedestrian::IsReadyForRerouting() const
-{
-    return (_reroutingEnabled && (_timeBeforeRerouting <= 0.0));
-}
-
-
 int Pedestrian::GetGroup() const
 {
     return _group;
@@ -456,15 +326,9 @@ void Pedestrian::SetGroup(int group)
     _group = group;
 }
 
-void Pedestrian::ResetRerouting()
-{
-    _reroutingEnabled    = false;
-    _timeBeforeRerouting = -1.00;
-}
-
 double Pedestrian::GetDistanceToNextTarget() const
 {
-    return (_navLine->DistTo(GetPos()));
+    return (_navLine.DistTo(GetPos()));
 }
 
 void Pedestrian::SetFinalDestination(int finale)
@@ -477,43 +341,26 @@ int Pedestrian::GetFinalDestination() const
     return _desiredFinalDestination;
 }
 
-std::string Pedestrian::GetPath()
-{
-    std::map<int, int>::iterator iter;
-    std::string path;
-
-    for(iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
-        std::stringstream ss; //create a stringstream
-        ss << iter->first / 1000 << ":" << iter->second
-           << ">"; //@todo:ar.graf: has this to do with roomNr*1000+subroom and is now wrong?
-        path.append(ss.str());
-    }
-    return path;
-}
-
-void Pedestrian::SetRouter(Router * router)
-{
-    _router = router;
-}
-
 int Pedestrian::GetRouterID() const
 {
     return _router_id;
 }
 
-
 double Pedestrian::GetV0UpStairsNorm() const
 {
     return _v0UpStairs;
 }
+
 double Pedestrian::GetV0DownStairsNorm() const
 {
     return _v0DownStairs;
 }
+
 double Pedestrian::GetV0EscalatorUpNorm() const
 {
     return _v0EscalatorUpStairs;
 }
+
 double Pedestrian::GetV0EscalatorDownNorm() const
 {
     return _v0EscalatorDownStairs;
@@ -535,15 +382,6 @@ double Pedestrian::GetSmoothFactorUpEscalators() const
 double Pedestrian::GetSmoothFactorDownEscalators() const
 {
     return _smoothFactorEscalatorDownStairs;
-}
-
-int Pedestrian::FindRoute()
-{
-    if(_router == nullptr) {
-        LOG_ERROR("One or more routers does not exist! Check your router_ids");
-        return -1;
-    }
-    return _router->FindExit(this);
 }
 
 double Pedestrian::GetElevation() const
@@ -579,60 +417,10 @@ void Pedestrian::SetBuilding(Building * building)
     _building = building;
 }
 
-void Pedestrian::SetColorMode(AgentColorMode mode)
-{
-    _colorMode = mode;
-}
-
 int Pedestrian::GetAgentsCreated()
 {
     return _agentsCreated;
 }
-
-int Pedestrian::GetColor() const
-{
-    //default color is by velocity
-    std::string key;
-
-    switch(_colorMode) {
-        case BY_VELOCITY: {
-            int color = -1;
-            double v0 = _ellipse.GetV0();
-            if(v0 != 0.0) {
-                double v = GetV().Norm();
-                color    = static_cast<int>(v / v0 * 255);
-            }
-            return color;
-        }
-
-        case BY_ROUTER:
-        case BY_ROUTE: {
-            key = std::to_string(_router_id);
-        } break;
-
-        case BY_GROUP: {
-            key = std::to_string(_group); // @todo find a better solution to get
-                                          // colors clearly distinguishable form
-                                          // each other
-            return (colors[_group % colors.size()]);
-        }
-
-        case BY_FINAL_GOAL: {
-            key = std::to_string(_desiredFinalDestination);
-        } break;
-
-        case BY_INTERMEDIATE_GOAL: {
-            key = std::to_string(_exitIndex);
-        } break;
-
-        default:
-            break;
-    }
-
-    std::hash<std::string> hash_fn;
-    return hash_fn(key) % 255;
-}
-
 
 int Pedestrian::GetLastGoalID() const
 {

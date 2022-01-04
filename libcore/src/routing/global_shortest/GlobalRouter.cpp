@@ -28,6 +28,7 @@
 
 #include "AccessPoint.h"
 #include "geometry/DTriangulation.h"
+#include "geometry/Line.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 
@@ -338,10 +339,8 @@ bool GlobalRouter::Init(Building * building)
 
         AccessPoint * to_AP = new AccessPoint(line.GetUniqueID(), center);
         to_AP->SetFinalGoalOutside(true);
-        //NavLine* tmpline=new NavLine(line);
-        NavLine tmpline(line);
+        Line tmpline(line);
         to_AP->SetNavLine(&tmpline);
-        //delete tmpline;
 
         char friendlyName[1024];
         sprintf(friendlyName, "finalGoal_%d_located_outside", goal->GetId());
@@ -427,7 +426,6 @@ bool GlobalRouter::Init(Building * building)
                 "GlobalRouter: There is no visibility path from [{}] to the outside. You can "
                 "solve this by enabling triangulation.",
                 from_AP->GetFriendlyName());
-            from_AP->Dump();
             return false;
         }
 
@@ -446,7 +444,6 @@ bool GlobalRouter::Init(Building * building)
                     "GlobalRouter: There is no visibility path from {} to the outside. You can "
                     "solve this by enabling triangulation.",
                     from_AP->GetFriendlyName());
-                from_AP->Dump();
                 return false;
             }
         }
@@ -494,7 +491,6 @@ bool GlobalRouter::Init(Building * building)
                         "can solve this by enabling triangulation.",
                         from_AP->GetFriendlyName(),
                         _finalDestinations[p]);
-                    from_AP->Dump();
                     return false;
                 }
             }
@@ -549,12 +545,12 @@ void GlobalRouter::GetPath(int i, int j)
     _tmpPedPath.push_back(j);
 }
 
-bool GlobalRouter::GetPath(Pedestrian * ped, std::vector<NavLine *> & path)
+bool GlobalRouter::GetPath(Pedestrian * ped, std::vector<Line *> & path)
 {
     std::vector<AccessPoint *> aps_path;
 
     bool done          = false;
-    int currentNavLine = ped->GetNextDestination();
+    int currentNavLine = ped->GetDestination();
     if(currentNavLine == -1) {
         currentNavLine = GetBestDefaultRandomExit(ped);
     }
@@ -583,9 +579,9 @@ bool GlobalRouter::GetPath(Pedestrian * ped, std::vector<NavLine *> & path)
         //work arround to detect a potential infinte loop.
         if(loop_count++ > 1000) {
             LOG_ERROR(
-                "A path could not be found for pedestrian [{:d}] going to destination [{:d}]. "
+                "A path could not be found for pedestrian [{}] going to destination [{:d}]. "
                 "Stuck in an infinite loop [{:d}]",
-                ped->GetID(),
+                ped->GetUID(),
                 ped->GetFinalDestination(),
                 loop_count);
             return false;
@@ -612,7 +608,7 @@ bool GlobalRouter::GetPath(Pedestrian * ped, int goalID, std::vector<SubRoom *> 
     //find the nearest APs and start from there
     int next = GetBestDefaultRandomExit(ped);
     if(next == -1) {
-        LOG_ERROR("Cannot get path for ped {:d} to goal {:d}", ped->GetID(), goalID);
+        LOG_ERROR("Cannot get path for ped {} to goal {:d}", ped->GetUID(), goalID);
         return false;
     }
 
@@ -681,7 +677,7 @@ void GlobalRouter::FloydWarshall()
 int GlobalRouter::FindExit(Pedestrian * ped)
 {
     if(!_useMeshForLocalNavigation) {
-        std::vector<NavLine *> path;
+        std::vector<Line *> path;
         GetPath(ped, path);
         SubRoom * sub = _building->GetSubRoom(ped->GetPos());
 
@@ -691,7 +687,7 @@ int GlobalRouter::FindExit(Pedestrian * ped)
             // cuz all lines are returned
             if(IsCrossing(*navLine, {sub}) || IsTransition(*navLine, {sub})) {
                 int nav_id = navLine->GetUniqueID();
-                ped->SetExitIndex(nav_id);
+                ped->SetDestination(nav_id);
                 ped->SetExitLine(navLine);
                 return nav_id;
             }
@@ -699,16 +695,16 @@ int GlobalRouter::FindExit(Pedestrian * ped)
         auto [room_id, subroom_id, _] = _building->GetRoomAndSubRoomIDs(ped->GetPos());
         //something bad happens
         LOG_ERROR(
-            "Cannot find a valid destination for ped {:d} located in room {:d} subroom {:d} going "
+            "Cannot find a valid destination for ped {} located in room {:d} subroom {:d} going "
             "to destination {:d}",
-            ped->GetID(),
+            ped->GetUID(),
             room_id,
             subroom_id,
             ped->GetFinalDestination());
         return -1;
     }
     // else proceed as usual and return the closest navigation line
-    int nextDestination = ped->GetNextDestination();
+    int nextDestination = ped->GetDestination();
 
     if(nextDestination == -1) {
         return GetBestDefaultRandomExit(ped);
@@ -725,7 +721,7 @@ int GlobalRouter::FindExit(Pedestrian * ped)
                 continue;
 
             //continue until my target is reached
-            if(apID != ped->GetExitIndex())
+            if(apID != ped->GetDestination())
                 continue;
 
             //one AP is near actualize destination:
@@ -735,23 +731,23 @@ int GlobalRouter::FindExit(Pedestrian * ped)
             if(nextDestination == -1) {
                 // we are almost at the exit
                 // so keep the last destination
-                return ped->GetNextDestination();
+                return ped->GetDestination();
             } else {
                 //check that the next destination is in the actual room of the pedestrian
                 if(!_accessPoints[nextDestination]->isInRange(sub->GetUID())) {
                     //return the last destination if defined
-                    int previousDestination = ped->GetNextDestination();
+                    int previousDestination = ped->GetDestination();
 
                     //we are still somewhere in the initialization phase
                     if(previousDestination == -1) {
-                        ped->SetExitIndex(apID);
+                        ped->SetDestination(apID);
                         ped->SetExitLine(_accessPoints[apID]->GetNavLine());
                         return apID;
                     } else { // we are still having a valid destination, don't change
                         return previousDestination;
                     }
                 } else { // we have reached the new room
-                    ped->SetExitIndex(nextDestination);
+                    ped->SetDestination(nextDestination);
                     ped->SetExitLine(_accessPoints[nextDestination]->GetNavLine());
                     return nextDestination;
                 }
@@ -772,7 +768,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian * ped)
     //save some computation
     if(relevantAPs.size() == 1) {
         auto && ap = (AccessPoint * &&) relevantAPs[0];
-        ped->SetExitIndex(ap->GetID());
+        ped->SetDestination(ap->GetID());
         ped->SetExitLine(ap->GetNavLine());
         return ap->GetID();
     }
@@ -804,7 +800,6 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian * ped)
         //otherwise check all rooms at that level
         if(!_building->IsVisible(
                posA, posC, _subroomsAtElevation[sub->GetElevation(sub->GetCentroid())], true)) {
-            ped->RerouteIn(10);
             continue;
         }
         double dist1 = ap->GetDistanceTo(ped->GetFinalDestination());
@@ -819,7 +814,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian * ped)
     }
 
     if(bestAPsID != -1) {
-        ped->SetExitIndex(bestAPsID);
+        ped->SetDestination(bestAPsID);
         ped->SetExitLine(_accessPoints[bestAPsID]->GetNavLine());
         return bestAPsID;
     } else {
@@ -828,9 +823,8 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian * ped)
             //{
 
             relevantAPs[0]->GetID();
-            ped->SetExitIndex(relevantAPs[0]->GetID());
+            ped->SetDestination(relevantAPs[0]->GetID());
             ped->SetExitLine(relevantAPs[0]->GetNavLine());
-            ped->RerouteIn(5);
             return relevantAPs[0]->GetID();
         }
         return -1;

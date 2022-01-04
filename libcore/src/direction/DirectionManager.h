@@ -22,6 +22,7 @@
 #pragma once
 
 #include "general/Macros.h"
+#include "pedestrian/Pedestrian.h"
 
 #include <memory>
 
@@ -31,7 +32,6 @@ class DirectionStrategy;
 
 class Point;
 
-class Pedestrian;
 
 class Building;
 

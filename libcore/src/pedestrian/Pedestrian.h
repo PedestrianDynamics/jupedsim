@@ -28,87 +28,79 @@
 
 #include "AgentsParameters.h"
 #include "Ellipse.h"
-#include "PedDistributor.h"
 #include "general/Macros.h"
-#include "geometry/NavLine.h"
+#include "geometry/Line.h"
 #include "geometry/SubroomType.h"
+#include "util/UniqueID.h"
 
 #include <map>
-#include <queue>
-#include <set>
-#include <vector>
 
 class Building;
-class NavLine;
 class Router;
 class WalkingSpeed;
 class Pedestrian
 {
+public:
+    using UID = jps::UniqueID<Pedestrian>;
+
 private:
+    const UID _uid{};
+
     //generic parameters, independent from models
-    int _id;        //starting with 1
-    int _exitIndex; // current exit
-    int _group;
-    int _desiredFinalDestination;
-    double _premovement = 0;
+    int _id;                           //starting with 1
+    int _exitIndex               = -1; // current exit
+    int _group                   = -1;
+    int _desiredFinalDestination = FINAL_DEST_OUT;
+    double _premovement          = 0;
 
     //gcfm specific parameters
-    double _mass;      // Mass: 1
-    double _tau;       // Reaction time: 0.5
-    double _t;         // OV function
-    double _deltaT;    // step size
-    JEllipse _ellipse; // the shape of this pedestrian
-    Point _v0;         //vector V0
+    double _mass   = 1;      // Mass: 1
+    double _tau    = 0.5;    // Reaction time: 0.5
+    double _t      = 1.0;    // OV function
+    double _deltaT = 0.01;   // step size
+    JEllipse _ellipse{};     // the shape of this pedestrian
+    Point _v0 = Point(0, 0); //vector V0
 
 
-    double _v0UpStairs;
-    double _v0DownStairs;
-    double _v0EscalatorUpStairs;
-    double _v0EscalatorDownStairs;
+    double _v0UpStairs            = 0.6;
+    double _v0DownStairs          = 0.6;
+    double _v0EscalatorUpStairs   = 0.8;
+    double _v0EscalatorDownStairs = 0.8;
     /// c in f() and g() for v0 transition on stairs up
-    double _smoothFactorUpStairs;
+    double _smoothFactorUpStairs = 15;
     /// c in f() and g() for v0 transition on stairs down
-    double _smoothFactorDownStairs;
+    double _smoothFactorDownStairs = 15;
     /// c in f() and g() for v0 transition on escalators up
-    double _smoothFactorEscalatorUpStairs;
+    double _smoothFactorEscalatorUpStairs = 15;
     /// c in f() and g() for v0 transition on escalators down
-    double _smoothFactorEscalatorDownStairs;
+    double _smoothFactorEscalatorDownStairs = 15;
     int _router_id{0};
-    Point _lastE0;
+    Point _lastE0 = Point(0, 0);
 
-    NavLine * _navLine;            // current exit line
-    std::map<int, int> _mentalMap; // map the actual room to a destination
-    Point _lastPosition;
+    Line _navLine; // current exit line
+    Point _lastPosition = Point(J_NAN, J_NAN);
 
-    /// a new orientation starts after this time
-    double _timeBeforeRerouting;
-
-    int _newOrientationDelay; //2 seconds, in steps
-
-    bool _reroutingEnabled;
+    int _newOrientationDelay = 0;
 
     // the current time in the simulation
     static double _minPremovementTime;
-    static AgentColorMode _colorMode;
 
-    /// the router responsible for this pedestrian
-    Router * _router;
     /// a pointer to the complete building
-    Building * _building;
+    Building * _building = nullptr;
 
     static int _agentsCreated;
 
     int _lastGoalID  = -1;
     bool _insideGoal = false;
     bool _waiting    = false;
-    Point _waitingPos;
+    Point _waitingPos =
+        Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
 
 public:
     // constructors
     Pedestrian();
 
-    explicit Pedestrian(const StartDistribution & agentsParameters, Building & building);
-    virtual ~Pedestrian();
+    ~Pedestrian() = default;
 
     bool InPremovement(double now);
 
@@ -132,19 +124,15 @@ public:
     void SetSmoothFactorDownStairs(double c);
     void SetSmoothFactorEscalatorUpStairs(double c);
     void SetSmoothFactorEscalatorDownStairs(double c);
-    void SetID(int i);
     void SetTau(double tau);
     void SetEllipse(const JEllipse & e);
-
     void SetRouterId(int id) { _router_id = id; }
-
-    const Router * GetRouter() const { return _router; }
 
     double GetT() const;
     void SetT(double T);
     //TODO: merge this two functions
-    void SetExitIndex(int i);
-    void SetExitLine(const NavLine * l);
+    void SetDestination(int i);
+    void SetExitLine(const Line * l);
     void SetDeltaT(double dt);
     // Eigenschaften der Ellipse
     void SetPos(const Point & pos); // setzt x und y-Koordinaten
@@ -158,7 +146,6 @@ public:
     void SetSmoothTurning(); // activate the smooth turning with a delay of 2 sec
     void SetPhiPed();
     void SetFinalDestination(int UID);
-    void SetRouter(Router * router);
     int GetRouterID() const;
 
     double GetV0UpStairsNorm() const;
@@ -171,12 +158,12 @@ public:
     double GetSmoothFactorUpEscalators() const;
     double GetSmoothFactorDownEscalators() const;
 
-    int GetID() const;
+    UID GetUID() const;
     double GetMass() const;
     double GetTau() const;
     const JEllipse & GetEllipse() const;
-    int GetExitIndex() const;
-    NavLine * GetExitLine() const;
+    int GetDestination() const;
+    const Line & GetExitLine() const;
     Point GetLastE0() const;
     void SetLastE0(Point E0);
     // Eigenschaften der Ellipse
@@ -199,7 +186,6 @@ public:
     int GetFinalDestination() const;
 
     int GetUniqueRoomID() const;
-    int GetNextDestination();
     double GetDistanceToNextTarget() const;
 
     /**
@@ -209,20 +195,6 @@ public:
       */
 
     double GetElevation() const;
-
-    /**
-      * Compute and update the route.
-      * This method should be called at each time step;
-      *
-      * @return -1 if no route could be found. The ID of the
-      * next target is returned otherwise.
-      *
-      */
-    int FindRoute();
-
-    ///write the pedestrian path (room and exit taken ) to file
-    /// in the format room1:exit1>room2:exit2
-    std::string GetPath();
 
     /**
       * ToString the parameters of this pedestrians.
@@ -246,22 +218,6 @@ public:
       */
     static double GetMinPremovementTime();
 
-    /**
-      * return the pedestrian color used for visualiation.
-      * Default mode is coded by velocity.
-      * @return a value in [-1 255]
-      */
-    int GetColor() const;
-
-    void UpdateReroutingTime();
-    void RerouteIn(double time);
-    bool IsReadyForRerouting() const;
-
-    /**
-      * clear the parameter related to the re routing
-      */
-    void ResetRerouting();
-
     int GetGroup() const;
     void SetGroup(int group);
 
@@ -271,12 +227,6 @@ public:
       * and the  maximal count must be known in advance.
       */
     static int GetAgentsCreated();
-
-    /**
-      * Set the color mode for the pedestrians
-      * @param mode
-      */
-    static void SetColorMode(AgentColorMode mode);
 
     /**
       * Set/Get the Building object

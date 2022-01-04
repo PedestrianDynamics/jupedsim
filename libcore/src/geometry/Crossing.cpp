@@ -29,6 +29,7 @@
 #include "SubRoom.h"
 
 #include <Logger.h>
+#include <fmt/core.h>
 
 
 Crossing::Crossing()
@@ -185,13 +186,12 @@ int Crossing::CommonSubroomWith(Crossing * other, SubRoom *& subroom)
     return result;
 }
 
-void Crossing::IncreaseDoorUsage(int number, double time, int ped_id)
+void Crossing::IncreaseDoorUsage(int number, double time, Pedestrian::UID ped_id)
 {
     _doorUsage += number;
     _tempDoorUsage += number;
     _lastPassingTime = time;
-    _flowAtExit += std::to_string(time) + "  " + std::to_string(_doorUsage) + "  " +
-                   std::to_string(ped_id) + "\n";
+    _flowAtExit += fmt::format("{} {} {}\n", time, _doorUsage, ped_id);
 }
 
 void Crossing::IncreasePartialDoorUsage(int number)

@@ -40,15 +40,15 @@
 /// 1
 Point DirectionMiddlePoint::GetTarget(Room * /*room*/, Pedestrian * ped) const
 {
-    return (ped->GetExitLine()->GetPoint1() + ped->GetExitLine()->GetPoint2()) * 0.5;
+    return (ped->GetExitLine().GetPoint1() + ped->GetExitLine().GetPoint2()) * 0.5;
 }
 
 /// 2
 Point DirectionMinSeperationShorterLine::GetTarget(Room * /*room*/, Pedestrian * ped) const
 {
     double d         = ped->GetEllipse().GetBmin() + 0.1; // shoulder//0.5;
-    const Point & p1 = ped->GetExitLine()->GetPoint1();
-    const Point & p2 = ped->GetExitLine()->GetPoint2();
+    const Point & p1 = ped->GetExitLine().GetPoint1();
+    const Point & p2 = ped->GetExitLine().GetPoint2();
 
     if(p1 == p2) {
         return p1;
@@ -68,8 +68,8 @@ Point DirectionMinSeperationShorterLine::GetTarget(Room * /*room*/, Pedestrian *
 /// 3
 Point DirectionInRangeBottleneck::GetTarget(Room * /*room*/, Pedestrian * ped) const
 {
-    const Point & p1 = ped->GetExitLine()->GetPoint1();
-    const Point & p2 = ped->GetExitLine()->GetPoint2();
+    const Point & p1 = ped->GetExitLine().GetPoint1();
+    const Point & p2 = ped->GetExitLine().GetPoint2();
     Line ExitLine    = Line(p1, p2, 0);
     Point Lot        = ExitLine.LotPoint(ped->GetPos());
     Point ExitMiddle = (p1 + p2) * 0.5;
@@ -91,7 +91,7 @@ Point DirectionLocalFloorfield::GetTarget(Room * room, Pedestrian * ped) const
     Point p;
     UnivFFviaFM * floorfield = _locffviafm.at(room->GetID());
 
-    floorfield->GetDirectionToUID(ped->GetExitIndex(), ped->GetPos(), p);
+    floorfield->GetDirectionToUID(ped->GetDestination(), ped->GetPos(), p);
 
     return (p + ped->GetPos());
 }
@@ -120,9 +120,9 @@ void DirectionLocalFloorfield::Init(Building * building)
 {
     _wasInitialized    = true;
     _building          = building;
-    _stepsize          = building->GetConfig()->get_deltaH();
-    _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
-    _useDistancefield  = building->GetConfig()->get_use_wall_avoidance();
+    _stepsize          = building->GetConfig()->deltaH;
+    _wallAvoidDistance = building->GetConfig()->wallAvoidDistance;
+    _useDistancefield  = building->GetConfig()->useWallAvoidance;
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
@@ -139,15 +139,6 @@ void DirectionLocalFloorfield::Init(Building * building)
             newfield->SetSpeedMode(FF_HOMO_SPEED);
         }
         newfield->AddAllTargetsParallel();
-    }
-
-    //TODO check writing of ff (TS)
-    if(_building->GetConfig()->get_write_VTK_files_direction()) {
-        for(auto locff : _locffviafm) {
-            int roomNr = locff.first;
-            locff.second->WriteFF(
-                "direction" + std::to_string(roomNr) + ".vtk", locff.second->GetKnownDoorUIDs());
-        }
     }
 
     end                                           = std::chrono::system_clock::now();

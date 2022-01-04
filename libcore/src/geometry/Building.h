@@ -28,7 +28,7 @@
 
 #include "Goal.h"
 #include "Hline.h"
-#include "NavLine.h"
+#include "Line.h"
 #include "Obstacle.h"
 #include "Room.h"
 #include "TrainGeometryInterface.h"
@@ -50,17 +50,12 @@ class Transition;
 
 class PedDistributor;
 
-class Configuration;
-
 class WaitingArea;
 
 class Building
 {
 private:
     Configuration * _configuration = nullptr;
-    std::shared_ptr<RoutingEngine> _routingEngine;
-    std::string _caption;
-    std::string _geometryFilename;
     NeighborhoodSearch _neighborhoodSearch;
     std::vector<std::unique_ptr<Pedestrian>> * _allPedestrians;
     std::map<int, std::shared_ptr<Room>> _rooms;
@@ -140,12 +135,6 @@ public:
         const Point & p2,
         const std::vector<SubRoom *> & subrooms,
         bool considerHlines = false);
-
-    /**
-      * @return a crossing or a transition matching the given caption.
-      * Return NULL if none is found
-      */
-    Crossing * GetTransOrCrossByName(std::string caption) const;
 
     /**
       * @return a crossing or a transition or a hline matching the given uid.
