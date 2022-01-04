@@ -28,11 +28,11 @@
  **/
 #pragma once
 
+#include "AgentsSource.h"
+
 #include <atomic>
 #include <memory>
 #include <vector>
-
-#include "AgentsSource.h"
 
 //Forward declarations
 class Building;

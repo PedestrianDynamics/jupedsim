@@ -11,9 +11,9 @@ static int global_count = 0;
 
 #include "VoronoiPositionGenerator.h"
 //check if all includes are necessary
+#include "geometry/Building.h"
 #include "geometry/Transition.h"
 #include "geometry/Wall.h"
-#include "geometry/Building.h"
 #include "pedestrian/AgentsSource.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "pedestrian/Pedestrian.h"
