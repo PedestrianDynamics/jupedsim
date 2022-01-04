@@ -410,6 +410,7 @@ void Simulation::RunHeader(long nPed, TrajectoryWriter & writer)
 
 void Simulation::CopyInputFilesToOutPath()
 {
+    fs::create_directories(_config->outputPath);
     // In the case we stored the corrected Geometry already in the output path we do not need to copy it again
     if(_config->outputPath != _config->geometryFile.parent_path()) {
         fs::copy(
