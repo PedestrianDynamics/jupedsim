@@ -51,13 +51,6 @@ public:
     void SetSimulation(Simulation * simulation);
 
     /**
-      * Add a final destination in the system.
-      * The destinations are segments (@see Transitions @see Crossings)
-      * @param id
-      */
-    void AddFinalDestinationID(int id);
-
-    /**
       * @return all available routers
       *
       */

@@ -332,9 +332,8 @@ bool GlobalRouter::Init(Building * building)
     //complete the matrix with the final distances between the exits to the outside and the
     //final marked goals
 
-    for(int final_dest : _finalDestinations) {
-        Goal * goal       = _building->GetFinalGoal(final_dest);
-        const Wall & line = _building->GetFinalGoal(final_dest)->GetAllWalls()[0];
+    for(const auto & [_, goal] : _building->GetAllGoals()) {
+        const Wall & line = goal->GetAllWalls()[0];
         double center[2]  = {goal->GetCentroid()._x, goal->GetCentroid()._y};
 
         AccessPoint * to_AP = new AccessPoint(line.GetUniqueID(), center);
@@ -453,18 +452,17 @@ bool GlobalRouter::Init(Building * building)
     // set the configuration to reach the goals specified in the ini file
     // set the distances to alternative destinations
 
-    for(unsigned int p = 0; p < _finalDestinations.size(); p++) {
-        int to_door_uid =
-            _building->GetFinalGoal(_finalDestinations[p])->GetAllWalls()[0].GetUniqueID();
-        int to_door_matrix_index = _map_id_to_index[to_door_uid];
+    for(const auto & [id, goal] : _building->GetAllGoals()) {
+        int to_door_uid = goal->GetAllWalls()[0].GetUniqueID();
 
         // thats probably a goal located outside the geometry or not an exit from the geometry
         if(to_door_uid == -1) {
             LOG_ERROR(
-                "GlobalRouter: there is something wrong with the final destination [{:d}]",
-                _finalDestinations[p]);
+                "GlobalRouter: there is something wrong with the final destination [{:d}]", id);
             return false;
         }
+
+        int to_door_matrix_index = _map_id_to_index[to_door_uid];
 
         for(const auto & itr : _accessPoints) {
             AccessPoint * from_AP = itr.second;
@@ -476,21 +474,20 @@ bool GlobalRouter::Init(Building * building)
 
             //comment this if you want infinite as distance to unreachable destinations
             double dist = _distMatrix[from_door_matrix_index][to_door_matrix_index];
-            from_AP->AddFinalDestination(_finalDestinations[p], dist);
+            from_AP->AddFinalDestination(id, dist);
 
             // set the intermediate path
             // set the intermediate path to global final destination
             GetPath(from_door_matrix_index, to_door_matrix_index);
             if(_tmpPedPath.size() >= 2) {
-                from_AP->AddTransitAPsTo(
-                    _finalDestinations[p], _accessPoints[_map_index_to_id[_tmpPedPath[1]]]);
+                from_AP->AddTransitAPsTo(id, _accessPoints[_map_index_to_id[_tmpPedPath[1]]]);
             } else {
                 if(((!from_AP->IsClosed()))) {
                     LOG_ERROR(
                         "GlobalRouter: There is no visibility path from [{}] to goal [{:d}]. You "
                         "can solve this by enabling triangulation.",
                         from_AP->GetFriendlyName(),
-                        _finalDestinations[p]);
+                        id);
                     return false;
                 }
             }

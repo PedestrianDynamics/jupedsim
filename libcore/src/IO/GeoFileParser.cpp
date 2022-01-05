@@ -385,7 +385,6 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
             Goal * goal = parseGoalNode(e);
             if(goal) {
                 building->AddGoal(goal);
-                _configuration->routingEngine->AddFinalDestinationID(goal->GetId());
             }
         }
 
@@ -395,7 +394,6 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
             Goal * goal = parseWaitingAreaNode(e);
             if(goal) {
                 building->AddGoal(goal);
-                _configuration->routingEngine->AddFinalDestinationID(goal->GetId());
             }
         }
         // ---- parse goals/waiting areas from external file
@@ -431,7 +429,6 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
                 Goal * goal = parseGoalNode(e);
                 if(goal) {
                     building->AddGoal(goal);
-                    _configuration->routingEngine->AddFinalDestinationID(goal->GetId());
                 }
             }
 
@@ -440,7 +437,6 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
                 Goal * goal = parseWaitingAreaNode(e);
                 if(goal) {
                     building->AddGoal(goal);
-                    _configuration->routingEngine->AddFinalDestinationID(goal->GetId());
                 }
             }
 

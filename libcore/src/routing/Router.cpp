@@ -31,27 +31,14 @@
 
 Router::Router()
 {
-    _finalDestinations = std::vector<int>();
-    _id                = -1;
-    _strategy          = ROUTING_UNDEFINED;
+    _id       = -1;
+    _strategy = ROUTING_UNDEFINED;
 }
 
 Router::Router(int id, RoutingStrategy s)
 {
     _id       = id;
     _strategy = s;
-}
-
-Router::~Router() {}
-
-void Router::AddFinalDestinationID(int id)
-{
-    _finalDestinations.push_back(id);
-}
-
-const std::vector<int> Router::GetFinalDestinations() const
-{
-    return _finalDestinations;
 }
 
 int Router::GetID() const

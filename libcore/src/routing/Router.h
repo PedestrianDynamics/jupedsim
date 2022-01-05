@@ -50,9 +50,6 @@ private:
     int _id;
 
 protected:
-    /// All final destinations of the pedestrians
-    std::vector<int> _finalDestinations;
-
     /// routing strategy ID as defined in the Macros.h file
     RoutingStrategy _strategy;
 
@@ -76,22 +73,11 @@ public:
     /**
       * Destructor
       */
-    virtual ~Router();
+    virtual ~Router() = default;
 
     void UpdateTime(double time) { _currentTime = time; }
 
     void SetSimulation(Simulation * simulation) { _simulation = simulation; }
-
-    /**
-      * Add a new final destination to this router
-      * @param id of an intermediate destination as presented in the geometry/routing files
-      */
-    void AddFinalDestinationID(int id);
-
-    /**
-      * @return all final destinations
-      */
-    const std::vector<int> GetFinalDestinations() const;
 
     /**
       * @return the id of the router as defined in the person file

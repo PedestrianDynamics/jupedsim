@@ -54,13 +54,6 @@ void RoutingEngine::SetSimulation(Simulation * simulation)
     }
 }
 
-void RoutingEngine::AddFinalDestinationID(int id)
-{
-    for(unsigned int r = 0; r < _routersCollection.size(); r++) {
-        _routersCollection[r]->AddFinalDestinationID(id);
-    }
-}
-
 void RoutingEngine::AddRouter(Router * router)
 {
     for(unsigned int r = 0; r < _routersCollection.size(); r++) {
