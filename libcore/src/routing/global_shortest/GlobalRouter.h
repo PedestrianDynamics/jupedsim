@@ -59,7 +59,7 @@ class OutputHandler;
 class GlobalRouter : public Router
 {
 public:
-    GlobalRouter(int id, RoutingStrategy s);
+    GlobalRouter();
     /**
       * Destructor
       */

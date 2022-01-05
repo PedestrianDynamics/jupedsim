@@ -29,73 +29,47 @@
 #include "pedestrian/Pedestrian.h"
 
 #include <Logger.h>
-
-RoutingEngine::RoutingEngine() {}
-
-RoutingEngine::~RoutingEngine()
-{
-    for(unsigned int r = 0; r < _routersCollection.size(); r++) {
-        delete _routersCollection[r];
-    }
-    _routersCollection.clear();
-}
+#include <memory>
+#include <utility>
 
 void RoutingEngine::UpdateTime(double time)
 {
-    for(auto * r : _routersCollection) {
+    for(auto && [_, r] : _routers) {
         r->UpdateTime(time);
     }
 }
 
 void RoutingEngine::SetSimulation(Simulation * simulation)
 {
-    for(auto && router : _routersCollection) {
-        router->SetSimulation(simulation);
+    for(auto && [_, r] : _routers) {
+        r->SetSimulation(simulation);
     }
 }
 
-void RoutingEngine::AddRouter(Router * router)
+void RoutingEngine::AddRouter(int id, Router * router)
 {
-    for(unsigned int r = 0; r < _routersCollection.size(); r++) {
-        if(_routersCollection[r]->GetStrategy() == router->GetStrategy()) {
-            LOG_ERROR("Duplicate router found with 'id' [{:d}].", router->GetID());
-            exit(EXIT_FAILURE);
-        }
+    if(const auto [_, success] = _routers.try_emplace(id, std::unique_ptr<Router>(router));
+       !success) {
+        LOG_ERROR("Duplicate router found with 'id' [{:d}].", id);
+        exit(EXIT_FAILURE);
     }
-    _routersCollection.push_back(router);
-}
-
-const std::vector<Router *> RoutingEngine::GetAvailableRouters() const
-{
-    return _routersCollection;
-}
-
-
-Router * RoutingEngine::GetRouter(RoutingStrategy strategy) const
-{
-    for(Router * router : _routersCollection) {
-        if(router->GetStrategy() == strategy)
-            return router;
-    }
-    return /*(Router*)*/ nullptr;
 }
 
 Router * RoutingEngine::GetRouter(int id) const
 {
-    for(Router * router : _routersCollection) {
-        if(router->GetID() == id)
-            return router;
+    const auto iter = _routers.find(id);
+    if(iter == _routers.end()) {
+        LOG_ERROR("Could not Find any router with ID:  [{:d}].", id);
+        return nullptr;
     }
-    LOG_ERROR("Could not Find any router with ID:  [{:d}].", id);
-    return /*(Router*)*/ nullptr;
+    return iter->second.get();
 }
 
 bool RoutingEngine::Init(Building * building)
 {
-    bool status = true;
-    for(unsigned int r = 0; r < _routersCollection.size(); r++) {
-        if(_routersCollection[r]->Init(building) == false)
-            status = false;
+    bool status = false;
+    for(auto && [_, r] : _routers) {
+        status &= r->Init(building);
     }
     return status;
 }
@@ -112,8 +86,8 @@ void RoutingEngine::setNeedUpdate(bool needUpdate)
 
 void RoutingEngine::UpdateRouter()
 {
-    for(auto * router : _routersCollection) {
-        router->Update();
+    for(auto && [_, r] : _routers) {
+        r->Update();
     }
     _needUpdate = false;
 }

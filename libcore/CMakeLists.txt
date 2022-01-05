@@ -61,7 +61,6 @@ set(source_files
     src/pedestrian/Pedestrian.cpp
     src/pedestrian/Pedestrian.cpp
     src/pedestrian/StartDistribution.cpp
-    src/routing/Router.cpp
     src/routing/RoutingEngine.cpp
     src/routing/ff_router/UnivFFviaFM.cpp
     src/routing/ff_router/ffRouter.cpp

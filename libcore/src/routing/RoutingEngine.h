@@ -28,49 +28,25 @@
 
 #include "Router.h"
 
+#include <memory>
 #include <string>
 #include <vector>
-
-class Pedestrian;
 
 class RoutingEngine
 {
 public:
-    /**
-      * Constructor
-      */
-    RoutingEngine();
-
-    /**
-      * Destructor
-      */
-    ~RoutingEngine();
-
     void UpdateTime(double time);
 
     void SetSimulation(Simulation * simulation);
 
     /**
-      * @return all available routers
-      *
-      */
-    const std::vector<Router *> GetAvailableRouters() const;
-
-    /**
       * Add a new router to the routing system
       *
       */
-    void AddRouter(Router * router);
-
-    /**
-      * Return the router with the specified  strategy
-      */
-    Router * GetRouter(RoutingStrategy strategy) const;
+    void AddRouter(int id, Router * router);
 
     /**
       * Return the router with the specified  id
-      * TODO: Remove this method
-      * Should prefer etRouter(RoutingStrategy strategy)
       */
     Router * GetRouter(int id) const;
 
@@ -100,8 +76,8 @@ public:
 
 private:
     /// collections of all routers used
-    std::vector<Router *> _routersCollection;
+    std::map<int, std::unique_ptr<Router>> _routers{};
 
     /// states if the routers need to be updated
-    bool _needUpdate = false;
+    bool _needUpdate{false};
 };

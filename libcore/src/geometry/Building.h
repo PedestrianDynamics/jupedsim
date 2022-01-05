@@ -34,7 +34,6 @@
 #include "TrainGeometryInterface.h"
 #include "Transition.h"
 #include "Wall.h"
-#include "general/Configuration.h"
 #include "general/Filesystem.h"
 #include "neighborhood/NeighborhoodSearch.h"
 
@@ -43,12 +42,10 @@
 using PointWall = std::pair<Point, Wall>;
 
 class Pedestrian;
-
 class Transition;
-
 class PedDistributor;
-
 class WaitingArea;
+struct Configuration;
 
 class Building
 {

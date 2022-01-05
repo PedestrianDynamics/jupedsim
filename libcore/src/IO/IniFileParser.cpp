@@ -701,13 +701,13 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
 
         if((strategy == "global_shortest") &&
            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            Router * r = new GlobalRouter(id, ROUTING_GLOBAL_SHORTEST);
-            _config->routingEngine->AddRouter(r);
+            Router * r = new GlobalRouter();
+            _config->routingEngine->AddRouter(id, r);
         } else if(
             (strategy == "ff_global_shortest") &&
             (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            Router * r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals, _config);
-            _config->routingEngine->AddRouter(r);
+            Router * r = new FFRouter(hasSpecificGoals, _config);
+            _config->routingEngine->AddRouter(id, r);
 
             if((_exit_strat_number == 8) || (_exit_strat_number == 9)) {
                 LOG_INFO("Using FF Global Shortest Router");

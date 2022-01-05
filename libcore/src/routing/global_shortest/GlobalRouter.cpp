@@ -35,7 +35,7 @@
 #include <Logger.h>
 #include <tinyxml.h>
 
-GlobalRouter::GlobalRouter(int id, RoutingStrategy s) : Router(id, s)
+GlobalRouter::GlobalRouter()
 {
     _accessPoints    = std::map<int, AccessPoint *>();
     _map_id_to_index = std::map<int, int>();

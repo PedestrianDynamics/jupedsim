@@ -103,12 +103,11 @@ class FFRouter : public Router
 public:
     /**
      * Constructor for FFRouter.
-     * @param id id of router in simulation.
      * @param s routing strategy which should be used to find best way.
      * @param hasSpecificGoals specifies if the peds have specific goals (true) or head to the outside (false).
      * @param config configuration of simulation.
      */
-    FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals, Configuration * config);
+    FFRouter(bool hasSpecificGoals, Configuration * config);
 
     /**
       * Destructor for FFRouter.

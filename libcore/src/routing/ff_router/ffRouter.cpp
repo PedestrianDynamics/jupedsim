@@ -55,8 +55,7 @@
 #include <Logger.h>
 #include <stdexcept>
 
-FFRouter::FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals, Configuration * config) :
-    Router(id, s)
+FFRouter::FFRouter(bool hasSpecificGoals, Configuration * config)
 {
     _config           = config;
     _building         = nullptr;
@@ -64,11 +63,6 @@ FFRouter::FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals, Configurati
 
     //depending on exit_strat 8 => false, depending on exit_strat 9 => true;
     _targetWithinSubroom = (_config->exitStrat == 9);
-
-    // get extra values depending on routing strategy s
-    if(_strategy != ROUTING_FF_GLOBAL_SHORTEST) {
-        throw std::runtime_error("Wrong routing strategy for this router.");
-    }
 }
 
 FFRouter::~FFRouter()
