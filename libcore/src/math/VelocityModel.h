@@ -134,7 +134,7 @@ private:
 
 public:
     VelocityModel(
-        std::shared_ptr<DirectionManager> dir,
+        DirectionManager * directionManager,
         double aped,
         double Dped,
         double awall,

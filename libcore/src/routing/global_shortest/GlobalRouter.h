@@ -45,31 +45,14 @@ class Building;
 class OutputHandler;
 
 
-/*!
- * \class GlobalRouter
- *
- * \brief global router
- *
- *\ingroup Router
- *
- * We will derive from the <Router> class to fit the interface.
- *
- * \author Ulrich Kemloh
- */
 class GlobalRouter : public Router
 {
 public:
-    /**
-      * Constructor
-      */
-    GlobalRouter();
-    GlobalRouter(int id, RoutingStrategy s);
+    explicit GlobalRouter(Building * building);
     /**
       * Destructor
       */
     ~GlobalRouter() override;
-
-    bool Init(Building * building) override;
 
     int FindExit(Pedestrian * p) override;
 
@@ -108,7 +91,6 @@ public:
     double GetEdgeCost() const;
 
 
-protected:
     void DumpAccessPoints(int p = -1);
 
     /**
@@ -121,7 +103,7 @@ protected:
       * @obsolete
       * return a random exit
       */
-    virtual int GetBestDefaultRandomExit(Pedestrian * p);
+    int GetBestDefaultRandomExit(Pedestrian * p);
 
     /**
       * Generate a navigation mesh based on delauney triangulation
@@ -158,6 +140,7 @@ protected:
     GetRelevantRoutesTofinalDestination(Pedestrian * ped, std::vector<AccessPoint *> & relevantAPS);
 
 private:
+    bool init();
     /**
       * Compute the intermediate paths between the two given transitions IDs
       */
@@ -232,7 +215,6 @@ private:
     std::default_random_engine _rdGenerator;
     std::uniform_real_distribution<double> _rdDistribution;
 
-protected:
     // store all subrooms at the same elevation
     std::map<double, std::vector<SubRoom *>> _subroomsAtElevation;
     std::map<int, AccessPoint *> _accessPoints;

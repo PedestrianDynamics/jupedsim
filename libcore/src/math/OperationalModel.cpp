@@ -29,7 +29,39 @@
  **/
 #include "OperationalModel.h"
 
+#include "OperationalModelType.h"
 #include "direction/DirectionManager.h"
+#include "general/Configuration.h"
+#include "math/GCFMModel.h"
+#include "math/VelocityModel.h"
+
+std::unique_ptr<OperationalModel> OperationalModel::CreateFromType(
+    OperationalModelType type,
+    const Configuration & config,
+    DirectionManager * directionManager)
+{
+    switch(type) {
+        case OperationalModelType::GCFM:
+            return std::make_unique<GCFMModel>(
+                directionManager,
+                config.nuPed,
+                config.nuWall,
+                config.distEffMaxPed,
+                config.distEffMaxWall,
+                config.intPWidthPed,
+                config.intPWidthWall,
+                config.maxFPed,
+                config.maxFWall);
+        case OperationalModelType::VELOCITY:
+            return std::make_unique<VelocityModel>(
+                directionManager, config.aPed, config.dPed, config.aWall, config.dWall);
+    }
+}
+
+OperationalModel::OperationalModel(DirectionManager * directionManager) :
+    _direction(directionManager)
+{
+}
 
 void OperationalModel::Init(Building * building, Simulation * simulation)
 {

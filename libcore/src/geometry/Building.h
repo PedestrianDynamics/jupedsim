@@ -34,7 +34,6 @@
 #include "TrainGeometryInterface.h"
 #include "Transition.h"
 #include "Wall.h"
-#include "general/Configuration.h"
 #include "general/Filesystem.h"
 #include "neighborhood/NeighborhoodSearch.h"
 
@@ -42,15 +41,11 @@
 
 using PointWall = std::pair<Point, Wall>;
 
-class RoutingEngine;
-
 class Pedestrian;
-
 class Transition;
-
 class PedDistributor;
-
 class WaitingArea;
+struct Configuration;
 
 class Building
 {
@@ -98,7 +93,6 @@ public:
 
     void GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const;
 
-    RoutingEngine * GetRoutingEngine() const;
     const std::map<int, std::shared_ptr<Room>> & GetAllRooms() const;
 
     int GetNumberOfRooms() const;

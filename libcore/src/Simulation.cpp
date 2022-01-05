@@ -44,6 +44,7 @@
 #include "geometry/WaitingArea.h"
 #include "geometry/Wall.h"
 #include "math/GCFMModel.h"
+#include "math/OperationalModel.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "pedestrian/Pedestrian.h"
 #include "routing/ff_router/ffRouter.h"
@@ -56,12 +57,19 @@
 #include <tinyxml.h>
 #include <variant>
 
-Simulation::Simulation(Configuration * args, std::unique_ptr<Building> && building) :
+Simulation::Simulation(
+    Configuration * args,
+    std::unique_ptr<Building> && building,
+    std::unique_ptr<RoutingEngine> && routingEngine,
+    std::unique_ptr<OperationalModel> && operationalModel) :
     _config(args),
     _clock(_config->dT),
     _building(std::move(building)),
+    _routingEngine(std::move(routingEngine)),
+    _operationalModel(std::move(operationalModel)),
     _currentTrajectoriesFile(_config->trajectoriesFile)
 {
+    _routingEngine->SetSimulation(this);
 }
 
 void Simulation::Iterate()
@@ -74,7 +82,7 @@ void Simulation::Iterate()
         directionManager->Update(t_in_sec);
     }
 
-    _config->model->Update(t_in_sec);
+    _operationalModel->Update(t_in_sec);
 
     _routingEngine->UpdateTime(t_in_sec);
 
@@ -206,11 +214,8 @@ bool Simulation::InitArgs()
         fs::create_directories(trajParentPath);
     }
 
-    _operationalModel = _config->model;
-    _fps              = _config->fps;
+    _fps = _config->fps;
 
-    _routingEngine = _config->routingEngine;
-    _routingEngine->SetSimulation(this);
 
     // IMPORTANT: do not change the order in the following..
     _building->SetAgents(&_agents);

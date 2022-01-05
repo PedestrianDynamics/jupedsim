@@ -27,66 +27,38 @@
 #pragma once
 
 #include "Router.h"
+#include "geometry/Building.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 
-class Pedestrian;
-
 class RoutingEngine
 {
-public:
-    /**
-      * Constructor
-      */
-    RoutingEngine();
+    /// collections of all routers used
+    std::map<int, std::unique_ptr<Router>> _routers{};
 
-    /**
-      * Destructor
-      */
-    ~RoutingEngine();
+    /// states if the routers need to be updated
+    bool _needUpdate{false};
+
+public:
+    RoutingEngine(Configuration * config, Building * building);
+    ~RoutingEngine() = default;
+
+    RoutingEngine(const RoutingEngine &) = delete;
+    RoutingEngine & operator=(const RoutingEngine &) = delete;
+
+    RoutingEngine(RoutingEngine &&) = delete;
+    RoutingEngine & operator=(RoutingEngine &&) = delete;
 
     void UpdateTime(double time);
 
     void SetSimulation(Simulation * simulation);
 
     /**
-      * Add a final destination in the system.
-      * The destinations are segments (@see Transitions @see Crossings)
-      * @param id
-      */
-    void AddFinalDestinationID(int id);
-
-    /**
-      * @return all available routers
-      *
-      */
-    const std::vector<Router *> GetAvailableRouters() const;
-
-    /**
-      * Add a new router to the routing system
-      *
-      */
-    void AddRouter(Router * router);
-
-    /**
-      * Return the router with the specified  strategy
-      */
-    Router * GetRouter(RoutingStrategy strategy) const;
-
-    /**
       * Return the router with the specified  id
-      * TODO: Remove this method
-      * Should prefer etRouter(RoutingStrategy strategy)
       */
     Router * GetRouter(int id) const;
-
-    /**
-      * Initialize all routers with the current building object
-      * @param building
-      * @return the status of the initialisation
-      */
-    bool Init(Building * building);
 
     /**
       * Returns if routers need to be updated
@@ -104,11 +76,4 @@ public:
       * Updates all used routers
       */
     void UpdateRouter();
-
-private:
-    /// collections of all routers used
-    std::vector<Router *> _routersCollection;
-
-    /// states if the routers need to be updated
-    bool _needUpdate = false;
 };

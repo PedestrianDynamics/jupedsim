@@ -15,33 +15,30 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  **/
-//
-// Created by laemmel on 23.03.16.
-//
 #pragma once
 
 #include "Macros.h"
+#include "OperationalModelType.h"
 #include "direction/DirectionManager.h"
 #include "general/Filesystem.h"
 #include "math/OperationalModel.h"
 #include "pedestrian/AgentsParameters.h"
-#include "routing/RoutingEngine.h"
+#include "routing/RoutingStrategy.h"
 
 #include <cstdlib>
 #include <filesystem>
+#include <map>
 #include <memory>
-#include <set>
 #include <string>
-
 
 // This class provides a data container for all configuration parameters.
 struct Configuration {
-    std::shared_ptr<RoutingEngine> routingEngine{std::make_shared<RoutingEngine>()};
+    std::map<int, RoutingStrategy> routingStrategies{};
     unsigned int seed{0};
     double fps{8};
     unsigned int precision{2};
     double linkedCellSize{2.2};
-    std::shared_ptr<OperationalModel> model{};
+    OperationalModelType operationalModel{OperationalModelType::GCFM};
     double tMax{500};
     double dT{0.01};
     double nuPed{0.4};

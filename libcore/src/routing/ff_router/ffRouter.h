@@ -103,27 +103,16 @@ class FFRouter : public Router
 public:
     /**
      * Constructor for FFRouter.
-     * @param id id of router in simulation.
      * @param s routing strategy which should be used to find best way.
      * @param hasSpecificGoals specifies if the peds have specific goals (true) or head to the outside (false).
      * @param config configuration of simulation.
      */
-    FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals, Configuration * config);
+    FFRouter(Configuration * config, Building * building);
 
     /**
       * Destructor for FFRouter.
       */
     ~FFRouter() override;
-
-    /**
-      * \brief Init the router (must be called before use)
-      *
-      * Init() will construct the graph (nodes = doors, edges = costs) and
-      * find shortest paths via Floyd-Warshall. It needs the floor fields.
-      *  Will call CalculateFloorFields.
-      * @param building used geometry.
-      */
-    bool Init(Building * building) override;
 
     int FindExit(Pedestrian * p) override;
 
@@ -230,11 +219,6 @@ protected:
      * Router needs a recalculation when using \a _strategy=ROUTING_FF_QUICKEST.
      */
     bool _needsRecalculation = false;
-
-    /**
-     * The pedestrian head for specific goals (true) or just for the outside (false)
-     */
-    bool _hasSpecificGoals{};
 
     /**
      * Defines if the router is used room or subroom wise.

@@ -31,37 +31,23 @@
 #include "geometry/Line.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
+#include "pedestrian/Pedestrian.h"
 
 #include <Logger.h>
 #include <tinyxml.h>
 
-GlobalRouter::GlobalRouter() : Router()
+GlobalRouter::GlobalRouter(Building * building) : _building(building)
 {
     _accessPoints    = std::map<int, AccessPoint *>();
     _map_id_to_index = std::map<int, int>();
     _map_index_to_id = std::map<int, int>();
     _distMatrix      = nullptr;
     _pathsMatrix     = nullptr;
-    _building        = nullptr;
     _edgeCost        = 100;
     _exitsCnt        = -1;
-
-    //     _rdDistribution = uniform_real_distribution<double> (0,1);
-    //     _rdGenerator = default_random_engine(56);
-}
-
-GlobalRouter::GlobalRouter(int id, RoutingStrategy s) : Router(id, s)
-{
-    _accessPoints    = std::map<int, AccessPoint *>();
-    _map_id_to_index = std::map<int, int>();
-    _map_index_to_id = std::map<int, int>();
-    _distMatrix      = nullptr;
-    _pathsMatrix     = nullptr;
-    _building        = nullptr;
-    _edgeCost        = 100;
-    _exitsCnt        = -1;
-    //     _rdDistribution = uniform_real_distribution<double> (0,1);
-    //     _rdGenerator = default_random_engine(56);
+    if(const auto success = init(); !success) {
+        throw std::runtime_error("Error creating GlobalRouter");
+    }
 }
 
 GlobalRouter::~GlobalRouter()
@@ -83,14 +69,11 @@ GlobalRouter::~GlobalRouter()
     _accessPoints.clear();
 }
 
-bool GlobalRouter::Init(Building * building)
+bool GlobalRouter::init()
 {
     //necessary if the init is called several times during the simulation
     Reset();
     LOG_DEBUG("Init the Global Router Engine");
-    _building = building;
-    //only load the information if not previously loaded
-    //if(_building->GetNumberOfGoals()==0)
 
     //TODO: implement the ParseAdditionalParameter Interface
     LoadRoutingInfos(GetRoutingInfoFile());
@@ -305,16 +288,10 @@ bool GlobalRouter::Init(Building * building)
                     if(nav1->operator==(*nav2))
                         continue;
 
-                    //vector<SubRoom*> emptyVector;
-                    //emptyVector.push_back(sub.get());
-                    //add all subrooms at the same elevation
-                    //double elevation = sub->GetMaxElevation();
-
                     double elevation = sub->GetElevation(sub->GetCentroid());
                     // special case for stairs and for convex rooms
-                    //if()
 
-                    if(building->IsVisible(
+                    if(_building->IsVisible(
                            nav1->GetCentre(),
                            nav2->GetCentre(),
                            _subroomsAtElevation[elevation],
@@ -332,9 +309,8 @@ bool GlobalRouter::Init(Building * building)
     //complete the matrix with the final distances between the exits to the outside and the
     //final marked goals
 
-    for(int final_dest : _finalDestinations) {
-        Goal * goal       = _building->GetFinalGoal(final_dest);
-        const Wall & line = _building->GetFinalGoal(final_dest)->GetAllWalls()[0];
+    for(const auto & [_, goal] : _building->GetAllGoals()) {
+        const Wall & line = goal->GetAllWalls()[0];
         double center[2]  = {goal->GetCentroid()._x, goal->GetCentroid()._y};
 
         AccessPoint * to_AP = new AccessPoint(line.GetUniqueID(), center);
@@ -453,18 +429,17 @@ bool GlobalRouter::Init(Building * building)
     // set the configuration to reach the goals specified in the ini file
     // set the distances to alternative destinations
 
-    for(unsigned int p = 0; p < _finalDestinations.size(); p++) {
-        int to_door_uid =
-            _building->GetFinalGoal(_finalDestinations[p])->GetAllWalls()[0].GetUniqueID();
-        int to_door_matrix_index = _map_id_to_index[to_door_uid];
+    for(const auto & [id, goal] : _building->GetAllGoals()) {
+        int to_door_uid = goal->GetAllWalls()[0].GetUniqueID();
 
         // thats probably a goal located outside the geometry or not an exit from the geometry
         if(to_door_uid == -1) {
             LOG_ERROR(
-                "GlobalRouter: there is something wrong with the final destination [{:d}]",
-                _finalDestinations[p]);
+                "GlobalRouter: there is something wrong with the final destination [{:d}]", id);
             return false;
         }
+
+        int to_door_matrix_index = _map_id_to_index[to_door_uid];
 
         for(const auto & itr : _accessPoints) {
             AccessPoint * from_AP = itr.second;
@@ -476,21 +451,20 @@ bool GlobalRouter::Init(Building * building)
 
             //comment this if you want infinite as distance to unreachable destinations
             double dist = _distMatrix[from_door_matrix_index][to_door_matrix_index];
-            from_AP->AddFinalDestination(_finalDestinations[p], dist);
+            from_AP->AddFinalDestination(id, dist);
 
             // set the intermediate path
             // set the intermediate path to global final destination
             GetPath(from_door_matrix_index, to_door_matrix_index);
             if(_tmpPedPath.size() >= 2) {
-                from_AP->AddTransitAPsTo(
-                    _finalDestinations[p], _accessPoints[_map_index_to_id[_tmpPedPath[1]]]);
+                from_AP->AddTransitAPsTo(id, _accessPoints[_map_index_to_id[_tmpPedPath[1]]]);
             } else {
                 if(((!from_AP->IsClosed()))) {
                     LOG_ERROR(
                         "GlobalRouter: There is no visibility path from [{}] to goal [{:d}]. You "
                         "can solve this by enabling triangulation.",
                         from_AP->GetFriendlyName(),
-                        _finalDestinations[p]);
+                        id);
                     return false;
                 }
             }

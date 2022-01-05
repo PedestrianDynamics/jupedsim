@@ -20,6 +20,7 @@
 //
 #include "IniFileParser.h"
 
+#include "OperationalModelType.h"
 #include "OutputHandler.h"
 #include "direction/DirectionManager.h"
 #include "direction/waiting/WaitingMiddle.h"
@@ -30,6 +31,7 @@
 #include "general/Macros.h"
 #include "math/GCFMModel.h"
 #include "math/VelocityModel.h"
+#include "routing/RoutingStrategy.h"
 #include "routing/ff_router/ffRouter.h"
 #include "routing/global_shortest/GlobalRouter.h"
 
@@ -109,24 +111,28 @@ void IniFileParser::Parse(const fs::path & iniFile)
         std::string modelName = std::string(xModel->Attribute("description"));
         int model_id          = xmltoi(xModel->Attribute("operational_model_id"), -1);
 
-        if((_model == MODEL_GCFM) && (model_id == MODEL_GCFM)) {
+        if((_model == to_underlying(OperationalModelType::GCFM)) &&
+           (model_id == to_underlying(OperationalModelType::GCFM))) {
             if(modelName != "gcfm") {
                 throw std::logic_error("Mismatch model ID and description. Did you mean gcfm?");
             }
-            if(!ParseGCFMModel(xModel, xMainNode))
+            if(!ParseGCFMModel(xModel, xMainNode)) {
                 throw std::logic_error("Error parsing GCFM model parameters.");
+            }
 
             parsingModelSuccessful = true;
-            //only parsing one model
             break;
-        } else if((_model == MODEL_VELOCITY) && (model_id == MODEL_VELOCITY)) {
+        }
+        if((_model == to_underlying(OperationalModelType::VELOCITY)) &&
+           (model_id == to_underlying(OperationalModelType::VELOCITY))) {
             if(modelName != "Tordeux2015") {
                 throw std::logic_error(
                     "Mismatch model ID and description. Did you mean Tordeux2015?");
             }
             //only parsing one model
-            if(!ParseVelocityModel(xModel, xMainNode))
+            if(!ParseVelocityModel(xModel, xMainNode)) {
                 throw std::logic_error("Error parsing Velocity model parameters.");
+            }
             parsingModelSuccessful = true;
             break;
         }
@@ -452,17 +458,7 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement * xGCFM, TiXmlElement * xMainNod
     TiXmlNode * xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
     ParseAgentParameters(xGCFM, xAgentDistri);
 
-    //TODO: models do not belong in a configuration container [gl march '16]
-    _config->model = std::shared_ptr<OperationalModel>(new GCFMModel(
-        _directionManager,
-        _config->nuPed,
-        _config->nuWall,
-        _config->distEffMaxPed,
-        _config->distEffMaxWall,
-        _config->intPWidthPed,
-        _config->intPWidthWall,
-        _config->maxFPed,
-        _config->maxFWall));
+    _config->operationalModel = OperationalModelType::GCFM;
 
     return true;
 }
@@ -530,8 +526,7 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement * xVelocity, TiXmlElement * 
     //Parsing the agent parameters
     TiXmlNode * xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
     ParseAgentParameters(xVelocity, xAgentDistri);
-    _config->model = std::shared_ptr<OperationalModel>(new VelocityModel(
-        _directionManager, _config->aPed, _config->dPed, _config->aWall, _config->dWall));
+    _config->operationalModel = OperationalModelType::VELOCITY;
 
     return true;
 }
@@ -674,49 +669,46 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
         return false;
     }
     //first get list of actually used router
-    std::vector<int> usedRouter;
-    usedRouter.clear();
-    bool hasSpecificGoals = false;
+    std::set<int> usedRouter;
     for(TiXmlElement * e = agentsDistri->FirstChildElement("group"); e;
         e                = e->NextSiblingElement("group")) {
         int router = -1;
         if(e->Attribute("router_id")) {
             router = atoi(e->Attribute("router_id"));
             if(std::find(usedRouter.begin(), usedRouter.end(), router) == usedRouter.end()) {
-                usedRouter.emplace_back(router);
-            }
-        }
-        int goal = -1;
-        if(e->Attribute("goal_id")) {
-            goal = atoi(e->Attribute("goal_id"));
-            if(goal != -1) {
-                hasSpecificGoals = true;
+                usedRouter.insert(router);
             }
         }
     }
     for(TiXmlElement * e = routingNode->FirstChildElement("router"); e;
         e                = e->NextSiblingElement("router")) {
-        std::string strategy = e->Attribute("description");
-        int id               = atoi(e->Attribute("router_id"));
+        const auto * strategyAsString = e->Attribute("description");
+        const auto strategy           = from_string<RoutingStrategy>(strategyAsString);
+        const int id                  = atoi(e->Attribute("router_id"));
+        const std::set<int> exitStrategiesAllowedWithFFRouting{8, 9};
 
-        if((strategy == "global_shortest") &&
-           (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            Router * r = new GlobalRouter(id, ROUTING_GLOBAL_SHORTEST);
-            _config->routingEngine->AddRouter(r);
-        } else if(
-            (strategy == "ff_global_shortest") &&
-            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            Router * r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals, _config);
-            _config->routingEngine->AddRouter(r);
+        if(usedRouter.count(id) == 0) {
+            LOG_WARNING(
+                "Routing strategy {} with id {} will be skipped because it is unused.",
+                strategyAsString,
+                id);
+            continue;
+        }
 
-            if((_exit_strat_number == 8) || (_exit_strat_number == 9)) {
-                LOG_INFO("Using FF Global Shortest Router");
-            } else {
-                LOG_WARNING("Exit Strategy Number is not 8 or 9!!!");
-                // config object holds default values, so we omit any set operations
-            }
-        } else if(std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) {
-            LOG_ERROR("Wrong value for routing strategy [{}].", strategy);
+        if(strategy == RoutingStrategy::ROUTING_FF_GLOBAL_SHORTEST &&
+           exitStrategiesAllowedWithFFRouting.count(_exit_strat_number) == 0) {
+            LOG_WARNING("Routing strategy used is ff_gloabl_shortest. Using exit strategy 8 or 9 "
+                        "recommended!");
+        }
+
+        if(strategy == RoutingStrategy::UNKNOWN) {
+            LOG_ERROR("Unknown routing strategy: {}", strategyAsString);
+            return false;
+        }
+
+        if(const auto [_, success] = _config->routingStrategies.try_emplace(id, strategy);
+           !success) {
+            LOG_ERROR("Duplicated router id found: {}", id);
             return false;
         }
     }
@@ -833,8 +825,7 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                      usedRouter.end())) {
                     std::string router_descr = e->Attribute("description");
                     if((pExitStrategy != 9) && (pExitStrategy != 8) &&
-                       ((router_descr == "ff_global_shortest") ||
-                        (router_descr == "ff_local_shortest") || (router_descr == "ff_quickest"))) {
+                       router_descr == "ff_global_shortest") {
                         pExitStrategy = 8;
                         LOG_WARNING("Changing Exit Strategie to work with floorfield!");
                     }

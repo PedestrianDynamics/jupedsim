@@ -48,7 +48,7 @@ class GCFMModel : public OperationalModel
 {
 public:
     GCFMModel(
-        std::shared_ptr<DirectionManager> dir,
+        DirectionManager * dir,
         double nuped,
         double nuwall,
         double dist_effPed,
