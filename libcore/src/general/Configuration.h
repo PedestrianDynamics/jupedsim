@@ -18,6 +18,7 @@
 #pragma once
 
 #include "Macros.h"
+#include "OperationalModelType.h"
 #include "direction/DirectionManager.h"
 #include "general/Filesystem.h"
 #include "math/OperationalModel.h"
@@ -37,7 +38,7 @@ struct Configuration {
     double fps{8};
     unsigned int precision{2};
     double linkedCellSize{2.2};
-    std::shared_ptr<OperationalModel> model{};
+    OperationalModelType operationalModel{OperationalModelType::GCFM};
     double tMax{500};
     double dT{0.01};
     double nuPed{0.4};

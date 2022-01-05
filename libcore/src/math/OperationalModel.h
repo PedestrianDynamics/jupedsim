@@ -37,26 +37,35 @@
 /** @} */ // end of group
 #pragma once
 
+#include "OperationalModelType.h"
+#include "general/Configuration.h"
+
 #include <memory>
 #include <string>
+
 
 class Building;
 class DirectionManager;
 class Simulation;
+struct Configuration;
 
 class OperationalModel
 {
 protected:
     // define the strategy for crossing a door (used for calculating the driving force)
-    std::shared_ptr<DirectionManager> _direction;
+    DirectionManager * _direction{};
     double _currentTime{0.0};
-    Simulation * _simulation{nullptr};
+    Simulation * _simulation{};
 
 public:
+    static std::unique_ptr<OperationalModel> CreateFromType(
+        OperationalModelType type,
+        const Configuration & config,
+        DirectionManager * directionManager);
     /**
       * Constructor
       */
-    OperationalModel() = default;
+    explicit OperationalModel(DirectionManager * directionManager);
 
     /**
       * Destructor
@@ -79,7 +88,6 @@ public:
       */
     virtual void ComputeNextTimeStep(double current, double deltaT, Building * building) = 0;
 
-    std::shared_ptr<DirectionManager> GetDirection() { return _direction; };
     /**
       * Performs whatever initialization is needed/required.
       * This function is called at the beginning the simulation once.

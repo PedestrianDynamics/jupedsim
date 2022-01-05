@@ -20,6 +20,7 @@
 //
 #include "IniFileParser.h"
 
+#include "OperationalModelType.h"
 #include "OutputHandler.h"
 #include "direction/DirectionManager.h"
 #include "direction/waiting/WaitingMiddle.h"
@@ -110,24 +111,28 @@ void IniFileParser::Parse(const fs::path & iniFile)
         std::string modelName = std::string(xModel->Attribute("description"));
         int model_id          = xmltoi(xModel->Attribute("operational_model_id"), -1);
 
-        if((_model == MODEL_GCFM) && (model_id == MODEL_GCFM)) {
+        if((_model == to_underlying(OperationalModelType::GCFM)) &&
+           (model_id == to_underlying(OperationalModelType::GCFM))) {
             if(modelName != "gcfm") {
                 throw std::logic_error("Mismatch model ID and description. Did you mean gcfm?");
             }
-            if(!ParseGCFMModel(xModel, xMainNode))
+            if(!ParseGCFMModel(xModel, xMainNode)) {
                 throw std::logic_error("Error parsing GCFM model parameters.");
+            }
 
             parsingModelSuccessful = true;
-            //only parsing one model
             break;
-        } else if((_model == MODEL_VELOCITY) && (model_id == MODEL_VELOCITY)) {
+        }
+        if((_model == to_underlying(OperationalModelType::VELOCITY)) &&
+           (model_id == to_underlying(OperationalModelType::VELOCITY))) {
             if(modelName != "Tordeux2015") {
                 throw std::logic_error(
                     "Mismatch model ID and description. Did you mean Tordeux2015?");
             }
             //only parsing one model
-            if(!ParseVelocityModel(xModel, xMainNode))
+            if(!ParseVelocityModel(xModel, xMainNode)) {
                 throw std::logic_error("Error parsing Velocity model parameters.");
+            }
             parsingModelSuccessful = true;
             break;
         }
@@ -453,17 +458,7 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement * xGCFM, TiXmlElement * xMainNod
     TiXmlNode * xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
     ParseAgentParameters(xGCFM, xAgentDistri);
 
-    //TODO: models do not belong in a configuration container [gl march '16]
-    _config->model = std::shared_ptr<OperationalModel>(new GCFMModel(
-        _directionManager,
-        _config->nuPed,
-        _config->nuWall,
-        _config->distEffMaxPed,
-        _config->distEffMaxWall,
-        _config->intPWidthPed,
-        _config->intPWidthWall,
-        _config->maxFPed,
-        _config->maxFWall));
+    _config->operationalModel = OperationalModelType::GCFM;
 
     return true;
 }
@@ -531,8 +526,7 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement * xVelocity, TiXmlElement * 
     //Parsing the agent parameters
     TiXmlNode * xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
     ParseAgentParameters(xVelocity, xAgentDistri);
-    _config->model = std::shared_ptr<OperationalModel>(new VelocityModel(
-        _directionManager, _config->aPed, _config->dPed, _config->aWall, _config->dWall));
+    _config->operationalModel = OperationalModelType::VELOCITY;
 
     return true;
 }

@@ -34,13 +34,14 @@
 #include "direction/walking/DirectionStrategy.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
+#include "math/OperationalModel.h"
 #include "neighborhood/NeighborhoodSearch.h"
 #include "pedestrian/Pedestrian.h"
 
 #include <Logger.h>
 
 GCFMModel::GCFMModel(
-    std::shared_ptr<DirectionManager> dir,
+    DirectionManager * directionManager,
     double nuped,
     double nuwall,
     double dist_effPed,
@@ -48,17 +49,17 @@ GCFMModel::GCFMModel(
     double intp_widthped,
     double intp_widthwall,
     double maxfped,
-    double maxfwall)
+    double maxfwall) :
+    OperationalModel(directionManager),
+    _nuPed(nuped),
+    _nuWall(nuwall),
+    _intp_widthPed(intp_widthped),
+    _intp_widthWall(intp_widthwall),
+    _maxfPed(maxfped),
+    _maxfWall(maxfwall),
+    _distEffMaxPed(dist_effPed),
+    _distEffMaxWall(dist_effWall)
 {
-    _direction      = dir;
-    _nuPed          = nuped;
-    _nuWall         = nuwall;
-    _intp_widthPed  = intp_widthped;
-    _intp_widthWall = intp_widthwall;
-    _maxfPed        = maxfped;
-    _maxfWall       = maxfwall;
-    _distEffMaxPed  = dist_effPed;
-    _distEffMaxWall = dist_effWall;
 }
 
 void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building * building)

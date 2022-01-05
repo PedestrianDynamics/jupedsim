@@ -32,6 +32,7 @@
 #include "direction/walking/DirectionStrategy.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
+#include "math/OperationalModel.h"
 #include "neighborhood/NeighborhoodSearch.h"
 #include "pedestrian/Pedestrian.h"
 
@@ -43,19 +44,13 @@ double xLeft  = 0.0;
 double cutoff = 2.0;
 
 VelocityModel::VelocityModel(
-    std::shared_ptr<DirectionManager> dir,
+    DirectionManager * directionManager,
     double aped,
     double Dped,
     double awall,
-    double Dwall)
+    double Dwall) :
+    OperationalModel(directionManager), _aPed(aped), _DPed(Dped), _aWall(awall), _DWall(Dwall)
 {
-    _direction = dir;
-    // Force_rep_PED Parameter
-    _aPed = aped;
-    _DPed = Dped;
-    // Force_rep_WALL Parameter
-    _aWall = awall;
-    _DWall = Dwall;
 }
 
 void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building * building)

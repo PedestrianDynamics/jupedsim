@@ -63,7 +63,7 @@ private:
     /// Manage all route choices algorithms
     std::unique_ptr<RoutingEngine> _routingEngine;
     /// Force model to use
-    std::shared_ptr<OperationalModel> _operationalModel;
+    std::unique_ptr<OperationalModel> _operationalModel;
     /// writing the trajectories to file
     std::unique_ptr<OldEventManager> _old_em{};
     fs::path _currentTrajectoriesFile;
@@ -74,7 +74,8 @@ public:
     explicit Simulation(
         Configuration * args,
         std::unique_ptr<Building> && building,
-        std::unique_ptr<RoutingEngine> && routingEngine);
+        std::unique_ptr<RoutingEngine> && routingEngine,
+        std::unique_ptr<OperationalModel> && operationalModel);
 
     ~Simulation() = default;
 

@@ -22,3 +22,11 @@
 /// This is intentionally constrained to enums.
 template <typename Enum, typename = std::enable_if_t<std::is_enum_v<Enum>>>
 Enum from_string(const std::string &);
+
+/// Replacement for C++23 to underlying, see
+/// https://en.cppreference.com/w/cpp/utility/to_underlying
+template <typename Enum, typename = std::enable_if_t<std::is_enum_v<Enum>>>
+auto to_underlying(Enum e) -> typename std::underlying_type_t<Enum>
+{
+    return static_cast<std::underlying_type_t<Enum>>(e);
+};
