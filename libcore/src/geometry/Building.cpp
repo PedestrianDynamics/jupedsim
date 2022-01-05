@@ -124,11 +124,6 @@ Configuration * Building::GetConfig() const
     return _configuration;
 }
 
-RoutingEngine * Building::GetRoutingEngine() const
-{
-    return _configuration->routingEngine.get();
-}
-
 int Building::GetNumberOfRooms() const
 {
     return (int) _rooms.size();

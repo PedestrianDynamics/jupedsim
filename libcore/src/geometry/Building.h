@@ -42,8 +42,6 @@
 
 using PointWall = std::pair<Point, Wall>;
 
-class RoutingEngine;
-
 class Pedestrian;
 
 class Transition;
@@ -98,7 +96,6 @@ public:
 
     void GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const;
 
-    RoutingEngine * GetRoutingEngine() const;
     const std::map<int, std::shared_ptr<Room>> & GetAllRooms() const;
 
     int GetNumberOfRooms() const;

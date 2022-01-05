@@ -35,21 +35,6 @@
 #include <Logger.h>
 #include <tinyxml.h>
 
-GlobalRouter::GlobalRouter() : Router()
-{
-    _accessPoints    = std::map<int, AccessPoint *>();
-    _map_id_to_index = std::map<int, int>();
-    _map_index_to_id = std::map<int, int>();
-    _distMatrix      = nullptr;
-    _pathsMatrix     = nullptr;
-    _building        = nullptr;
-    _edgeCost        = 100;
-    _exitsCnt        = -1;
-
-    //     _rdDistribution = uniform_real_distribution<double> (0,1);
-    //     _rdGenerator = default_random_engine(56);
-}
-
 GlobalRouter::GlobalRouter(int id, RoutingStrategy s) : Router(id, s)
 {
     _accessPoints    = std::map<int, AccessPoint *>();

@@ -60,11 +60,6 @@ protected:
 public:
     /**
       * Constructor
-      */
-    Router();
-
-    /**
-      * Constructor
       * @param id
       * @param s
       */
