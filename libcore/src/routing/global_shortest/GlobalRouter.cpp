@@ -31,22 +31,23 @@
 #include "geometry/Line.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
+#include "pedestrian/Pedestrian.h"
 
 #include <Logger.h>
 #include <tinyxml.h>
 
-GlobalRouter::GlobalRouter()
+GlobalRouter::GlobalRouter(Building * building) : _building(building)
 {
     _accessPoints    = std::map<int, AccessPoint *>();
     _map_id_to_index = std::map<int, int>();
     _map_index_to_id = std::map<int, int>();
     _distMatrix      = nullptr;
     _pathsMatrix     = nullptr;
-    _building        = nullptr;
     _edgeCost        = 100;
     _exitsCnt        = -1;
-    //     _rdDistribution = uniform_real_distribution<double> (0,1);
-    //     _rdGenerator = default_random_engine(56);
+    if(const auto success = init(); !success) {
+        throw std::runtime_error("Error creating GlobalRouter");
+    }
 }
 
 GlobalRouter::~GlobalRouter()
@@ -68,14 +69,11 @@ GlobalRouter::~GlobalRouter()
     _accessPoints.clear();
 }
 
-bool GlobalRouter::Init(Building * building)
+bool GlobalRouter::init()
 {
     //necessary if the init is called several times during the simulation
     Reset();
     LOG_DEBUG("Init the Global Router Engine");
-    _building = building;
-    //only load the information if not previously loaded
-    //if(_building->GetNumberOfGoals()==0)
 
     //TODO: implement the ParseAdditionalParameter Interface
     LoadRoutingInfos(GetRoutingInfoFile());
@@ -290,16 +288,10 @@ bool GlobalRouter::Init(Building * building)
                     if(nav1->operator==(*nav2))
                         continue;
 
-                    //vector<SubRoom*> emptyVector;
-                    //emptyVector.push_back(sub.get());
-                    //add all subrooms at the same elevation
-                    //double elevation = sub->GetMaxElevation();
-
                     double elevation = sub->GetElevation(sub->GetCentroid());
                     // special case for stairs and for convex rooms
-                    //if()
 
-                    if(building->IsVisible(
+                    if(_building->IsVisible(
                            nav1->GetCentre(),
                            nav2->GetCentre(),
                            _subroomsAtElevation[elevation],

@@ -55,14 +55,12 @@
 #include <Logger.h>
 #include <stdexcept>
 
-FFRouter::FFRouter(bool hasSpecificGoals, Configuration * config)
+FFRouter::FFRouter(Configuration * config, Building * building) :
+    _config(config), _building(building)
 {
-    _config           = config;
-    _building         = nullptr;
-    _hasSpecificGoals = hasSpecificGoals;
-
     //depending on exit_strat 8 => false, depending on exit_strat 9 => true;
     _targetWithinSubroom = (_config->exitStrat == 9);
+    CalculateFloorFields();
 }
 
 FFRouter::~FFRouter()
@@ -72,16 +70,6 @@ FFRouter::~FFRouter()
     for(delIter = _floorfieldByRoomID.rbegin(); delIter != _floorfieldByRoomID.rend(); ++delIter) {
         delete(*delIter).second;
     }
-}
-
-bool FFRouter::Init(Building * building)
-{
-    _building = building;
-
-    CalculateFloorFields();
-
-    LOG_INFO("FF Router init done.");
-    return true;
 }
 
 bool FFRouter::ReInit()
@@ -130,55 +118,53 @@ void FFRouter::CalculateFloorFields()
         }
     }
 
-    if(_hasSpecificGoals) {
-        for(auto const & [goalID, goal] : _building->GetAllGoals()) {
-            // TODO add handling for doors with (almost) same distance
-            //  ========      =========      =========
-            //
-            //       ------------------------------
-            //       |           goal             |
-            //       ------------------------------
-            // if waiting area, add all transition and crossings (if needed)
-            if(auto * waitingArea = dynamic_cast<WaitingArea *>(goal); waitingArea != nullptr) {
-                auto * room = _building->GetRoom(waitingArea->GetRoomID());
-                std::set<int> doorUIDs;
+    for(auto const & [goalID, goal] : _building->GetAllGoals()) {
+        // TODO add handling for doors with (almost) same distance
+        //  ========      =========      =========
+        //
+        //       ------------------------------
+        //       |           goal             |
+        //       ------------------------------
+        // if waiting area, add all transition and crossings (if needed)
+        if(auto * waitingArea = dynamic_cast<WaitingArea *>(goal); waitingArea != nullptr) {
+            auto * room = _building->GetRoom(waitingArea->GetRoomID());
+            std::set<int> doorUIDs;
 
-                if(!_targetWithinSubroom) {
-                    //candidates of current room (ID) (provided by Room)
-                    for(auto transUID : room->GetAllTransitionsIDs()) {
-                        doorUIDs.emplace(transUID);
-                    }
-                    for(const auto & [_, subroom] : room->GetAllSubRooms()) {
-                        for(const auto * cross : subroom->GetAllCrossings()) {
-                            doorUIDs.emplace(cross->GetUniqueID());
-                        }
-                    }
-                } else {
-                    //candidates of current subroom only
-                    auto subroom = room->GetSubRoom(waitingArea->GetSubRoomID());
-                    for(const auto & crossing : subroom->GetAllCrossings()) {
-                        doorUIDs.emplace(crossing->GetUniqueID());
-                    }
-                    for(const auto & transition : subroom->GetAllTransitions()) {
-                        doorUIDs.emplace(transition->GetUniqueID());
+            if(!_targetWithinSubroom) {
+                //candidates of current room (ID) (provided by Room)
+                for(auto transUID : room->GetAllTransitionsIDs()) {
+                    doorUIDs.emplace(transUID);
+                }
+                for(const auto & [_, subroom] : room->GetAllSubRooms()) {
+                    for(const auto * cross : subroom->GetAllCrossings()) {
+                        doorUIDs.emplace(cross->GetUniqueID());
                     }
                 }
-
-                _doorsToGoalUID.emplace(goalID, doorUIDs);
             } else {
-                // if goal find only closest exit
-                double minDist = std::numeric_limits<double>::max();
-                int minID      = -1;
-
-                for(const auto & [exitID, exit] : _exitsByUID) {
-                    double dist = goal->GetDistance(exit->GetCentre());
-                    if(dist < minDist) {
-                        minDist = dist;
-                        minID   = exitID;
-                    }
+                //candidates of current subroom only
+                auto subroom = room->GetSubRoom(waitingArea->GetSubRoomID());
+                for(const auto & crossing : subroom->GetAllCrossings()) {
+                    doorUIDs.emplace(crossing->GetUniqueID());
                 }
-                _doorsToGoalUID.emplace(goalID, std::set<int>{minID}); // = minID;
+                for(const auto & transition : subroom->GetAllTransitions()) {
+                    doorUIDs.emplace(transition->GetUniqueID());
+                }
             }
+
+            _doorsToGoalUID.emplace(goalID, doorUIDs);
+        } else {
+            // if goal find only closest exit
+            double minDist = std::numeric_limits<double>::max();
+            int minID      = -1;
+
+            for(const auto & [exitID, exit] : _exitsByUID) {
+                double dist = goal->GetDistance(exit->GetCentre());
+                if(dist < minDist) {
+                    minDist = dist;
+                    minID   = exitID;
+                }
+            }
+            _doorsToGoalUID.emplace(goalID, std::set<int>{minID}); // = minID;
         }
     }
 

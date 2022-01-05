@@ -57,11 +57,6 @@ public:
     /// @return next suitable target, -1 in the case no destination could be found
     virtual int FindExit(Pedestrian * p) = 0;
 
-    /// Each implementation of this virtual class has the possibility to initialize
-    /// its Routing engine using the supplied building object.
-    /// @param b the building object
-    virtual bool Init(Building * b) = 0;
-
     /// Update the router, when geometry changed due to external changes.
     virtual void Update() = 0;
 };

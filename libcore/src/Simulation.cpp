@@ -56,12 +56,17 @@
 #include <tinyxml.h>
 #include <variant>
 
-Simulation::Simulation(Configuration * args, std::unique_ptr<Building> && building) :
+Simulation::Simulation(
+    Configuration * args,
+    std::unique_ptr<Building> && building,
+    std::unique_ptr<RoutingEngine> && routingEngine) :
     _config(args),
     _clock(_config->dT),
     _building(std::move(building)),
+    _routingEngine(std::move(routingEngine)),
     _currentTrajectoriesFile(_config->trajectoriesFile)
 {
+    _routingEngine->SetSimulation(this);
 }
 
 void Simulation::Iterate()
@@ -209,8 +214,6 @@ bool Simulation::InitArgs()
     _operationalModel = _config->model;
     _fps              = _config->fps;
 
-    _routingEngine = _config->routingEngine;
-    _routingEngine->SetSimulation(this);
 
     // IMPORTANT: do not change the order in the following..
     _building->SetAgents(&_agents);

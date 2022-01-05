@@ -27,6 +27,7 @@
 #pragma once
 
 #include "Router.h"
+#include "geometry/Building.h"
 
 #include <memory>
 #include <string>
@@ -34,28 +35,30 @@
 
 class RoutingEngine
 {
+    /// collections of all routers used
+    std::map<int, std::unique_ptr<Router>> _routers{};
+
+    /// states if the routers need to be updated
+    bool _needUpdate{false};
+
 public:
+    RoutingEngine(Configuration * config, Building * building);
+    ~RoutingEngine() = default;
+
+    RoutingEngine(const RoutingEngine &) = delete;
+    RoutingEngine & operator=(const RoutingEngine &) = delete;
+
+    RoutingEngine(RoutingEngine &&) = delete;
+    RoutingEngine & operator=(RoutingEngine &&) = delete;
+
     void UpdateTime(double time);
 
     void SetSimulation(Simulation * simulation);
 
     /**
-      * Add a new router to the routing system
-      *
-      */
-    void AddRouter(int id, Router * router);
-
-    /**
       * Return the router with the specified  id
       */
     Router * GetRouter(int id) const;
-
-    /**
-      * Initialize all routers with the current building object
-      * @param building
-      * @return the status of the initialisation
-      */
-    bool Init(Building * building);
 
     /**
       * Returns if routers need to be updated
@@ -73,11 +76,4 @@ public:
       * Updates all used routers
       */
     void UpdateRouter();
-
-private:
-    /// collections of all routers used
-    std::map<int, std::unique_ptr<Router>> _routers{};
-
-    /// states if the routers need to be updated
-    bool _needUpdate{false};
 };

@@ -49,30 +49,32 @@
 
 #include <chrono>
 #include <cstddef>
+#include <memory>
 
 class Simulation
 {
 private:
-    /// Max file size 16Mb
     Configuration * _config;
     SimulationClock _clock;
     /// frame rate for the trajectories
     double _fps{1.0};
     unsigned int _seed{8091983};
     std::unique_ptr<Building> _building;
+    /// Manage all route choices algorithms
+    std::unique_ptr<RoutingEngine> _routingEngine;
     /// Force model to use
     std::shared_ptr<OperationalModel> _operationalModel;
-    /// Manage all route choices algorithms
-    std::shared_ptr<RoutingEngine> _routingEngine;
     /// writing the trajectories to file
     std::unique_ptr<OldEventManager> _old_em{};
     fs::path _currentTrajectoriesFile;
     std::vector<std::unique_ptr<Pedestrian>> _agents;
-
     EventManager _em;
 
 public:
-    explicit Simulation(Configuration * args, std::unique_ptr<Building> && building);
+    explicit Simulation(
+        Configuration * args,
+        std::unique_ptr<Building> && building,
+        std::unique_ptr<RoutingEngine> && routingEngine);
 
     ~Simulation() = default;
 

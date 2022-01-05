@@ -26,11 +26,33 @@
  **/
 #include "RoutingEngine.h"
 
+#include "geometry/Building.h"
 #include "pedestrian/Pedestrian.h"
+#include "routing/RoutingStrategy.h"
+#include "routing/ff_router/ffRouter.h"
+#include "routing/global_shortest/GlobalRouter.h"
 
 #include <Logger.h>
 #include <memory>
+#include <stdexcept>
 #include <utility>
+
+RoutingEngine::RoutingEngine(Configuration * config, Building * building)
+{
+    auto buildRouter = [config, building](auto strategy) -> std::unique_ptr<Router> {
+        switch(strategy) {
+            case RoutingStrategy::ROUTING_FF_GLOBAL_SHORTEST:
+                return std::make_unique<FFRouter>(config, building);
+            case RoutingStrategy::ROUTING_GLOBAL_SHORTEST:
+                return std::make_unique<GlobalRouter>(building);
+            case RoutingStrategy::UNKNOWN:
+                throw std::logic_error("Unexpected RoutingStrategy encountered");
+        }
+    };
+    for(const auto [id, strategy] : config->routingStrategies) {
+        _routers.emplace(id, buildRouter(strategy));
+    }
+}
 
 void RoutingEngine::UpdateTime(double time)
 {
@@ -46,15 +68,6 @@ void RoutingEngine::SetSimulation(Simulation * simulation)
     }
 }
 
-void RoutingEngine::AddRouter(int id, Router * router)
-{
-    if(const auto [_, success] = _routers.try_emplace(id, std::unique_ptr<Router>(router));
-       !success) {
-        LOG_ERROR("Duplicate router found with 'id' [{:d}].", id);
-        exit(EXIT_FAILURE);
-    }
-}
-
 Router * RoutingEngine::GetRouter(int id) const
 {
     const auto iter = _routers.find(id);
@@ -63,15 +76,6 @@ Router * RoutingEngine::GetRouter(int id) const
         return nullptr;
     }
     return iter->second.get();
-}
-
-bool RoutingEngine::Init(Building * building)
-{
-    bool status = false;
-    for(auto && [_, r] : _routers) {
-        status &= r->Init(building);
-    }
-    return status;
 }
 
 bool RoutingEngine::NeedsUpdate() const
