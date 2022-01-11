@@ -58,6 +58,14 @@ int main(int argc, char ** argv)
        execution == ArgumentParser::Execution::ABORT) {
         return return_code;
     }
+    if(a.PrintVersionAndExit()) {
+        std::cout << fmt::format("Version {}\n", JPSCORE_VERSION)
+                  << fmt::format("Commit id {}\n", GIT_COMMIT_HASH)
+                  << fmt::format("Commit date {}\n", GIT_COMMIT_DATE)
+                  << fmt::format("Build from branch {}\n", GIT_BRANCH)
+                  << fmt::format("Build with {}({})", compiler_id, compiler_version) << std::endl;
+        return 0;
+    }
     Logging::Guard guard;
     Logging::SetLogLevel(a.LogLevel());
     LOG_INFO("Starting JuPedSim - JPScore");

@@ -37,6 +37,11 @@ Logging::Level ArgumentParser::LogLevel() const
     return logLevel;
 }
 
+bool ArgumentParser::PrintVersionAndExit() const
+{
+    return printVersionAndExit;
+}
+
 std::tuple<ArgumentParser::Execution, int> ArgumentParser::Parse(int argc, char * argv[])
 {
     // Silence warnigns about unused member. Opts are keept as class members
@@ -44,6 +49,7 @@ std::tuple<ArgumentParser::Execution, int> ArgumentParser::Parse(int argc, char 
     // file
     (void) iniFilePathOpt;
     (void) logLevelOpt;
+    (void) versionFlag;
     try {
         app.parse(argc, argv);
     } catch(const CLI::ParseError & e) {

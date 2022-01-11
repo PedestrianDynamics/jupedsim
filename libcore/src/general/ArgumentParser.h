@@ -27,6 +27,7 @@
 #include "general/Filesystem.h"
 
 #include <CLI/CLI.hpp>
+#include <CLI/Option.hpp>
 #include <Logger.h>
 #include <tuple>
 #include <vector>
@@ -43,6 +44,7 @@ private:
 
     fs::path iniFilePath{"ini.xml"};
     Logging::Level logLevel{Logging::Level::Info};
+    bool printVersionAndExit{false};
 
     CLI::App app{"JuPedSim"};
     CLI::Option * iniFilePathOpt =
@@ -54,6 +56,8 @@ private:
                logLevel,
                "Minimum level of log messages to show. Defaults to 'info'")
             ->transform(CLI::CheckedTransformer(logLevelMapping, CLI::ignore_case));
+    CLI::Option * versionFlag =
+        app.add_flag("--version", printVersionAndExit, "Prints version information and exits.");
 
 public:
     enum class Execution { CONTINUE, ABORT };
@@ -63,6 +67,9 @@ public:
 
     /// @return desired log level. If none was parsed this defauls to 'Info'
     Logging::Level LogLevel() const;
+
+    /// @return if version info shall be printed and then exited.
+    bool PrintVersionAndExit() const;
 
     /// Parses command line arguments
     /// Parsing ends in one of three states:
