@@ -78,7 +78,7 @@ list(APPEND COMMON_COMPILE_OPTIONS
 find_package(fmt 8.0 REQUIRED CONFIG)
 find_package(spdlog 1.9 REQUIRED CONFIG)
 find_package(CLI11 2.1 REQUIRED CONFIG)
-find_package(Boost 1.77 REQUIRED)
+find_package(Boost 1.76 REQUIRED)
 # std::filesystem needs to be linked on gcc < 9
 add_library(fs INTERFACE)
 target_link_libraries(fs INTERFACE
