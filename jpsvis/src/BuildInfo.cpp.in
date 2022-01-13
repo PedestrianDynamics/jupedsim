@@ -1,0 +1,10 @@
+#include "BuildInfo.h"
+
+const std::string JPSVIS_VERSION = "@CMAKE_PROJECT_VERSION@";
+
+const std::string GIT_COMMIT_HASH = "@GIT_SHA1@";
+const std::string GIT_COMMIT_DATE = "@GIT_DATE@";
+const std::string GIT_BRANCH = "@GIT_BRANCH@";
+
+const std::string COMPILER = "@CMAKE_CXX_COMPILER_ID@";
+const std::string COMPILER_VERSION = "@CMAKE_CXX_COMPILER_VERSION@";
