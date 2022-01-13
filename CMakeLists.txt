@@ -84,9 +84,31 @@ add_library(fs INTERFACE)
 target_link_libraries(fs INTERFACE
     $<$<PLATFORM_ID:Linux>:stdc++fs>
 )
-
 find_package(Threads REQUIRED)
 find_package(PythonInterp 3 REQUIRED)
+find_package(VTK 9.0
+    COMPONENTS
+        CommonCore
+        opengl
+        RenderingQt
+        RenderingCore
+        GUISupportQt
+        RenderingUI
+        InteractionStyle
+        RenderingAnnotation
+        IOImage
+    REQUIRED CONFIG
+)
+find_package(
+    Qt5 5.12
+    COMPONENTS Widgets Xml Core Gui
+    REQUIRED
+)
+list(APPEND CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_SOURCE_DIR}/forms")
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+find_package(glm REQUIRED CONFIG)
 if(BUILD_TESTS)
     find_package(Catch2 REQUIRED)
     find_package(GTest 1.11 REQUIRED CONFIG)
@@ -156,6 +178,7 @@ target_compile_definitions(git-info INTERFACE
     GIT_COMMIT_SUBJECT="${GIT_COMMIT_SUBJECT}"
     GIT_BRANCH="${GIT_BRANCH}"
 )
+configure_file(cmake_templates/BuildInfo.cpp.in ${CMAKE_BINARY_DIR}/generated/BuildInfo.cpp @ONLY)
 ################################################################################
 # Documentation
 ################################################################################
@@ -230,9 +253,10 @@ endif()
 ################################################################################
 # Add libraries / executables
 ################################################################################
-add_subdirectory(libshared)
-add_subdirectory(libcore)
 add_subdirectory(jpscore)
+add_subdirectory(jpsvis)
+add_subdirectory(libcore)
+add_subdirectory(libshared)
 
 ################################################################################
 # Code formating
