@@ -65,8 +65,6 @@ list(APPEND COMMON_COMPILE_OPTIONS
     $<$<CXX_COMPILER_ID:MSVC>:/EHsc>
 )
 
-
-
 message( STATUS "System ........................................ ${CMAKE_SYSTEM_NAME} (${CMAKE_SYSTEM_VERSION}, ${CMAKE_SYSTEM_PROCESSOR})" )
 message( STATUS "Generating  ................................... ${PROJECT_NAME} (${PROJECT_VERSION})")
 
