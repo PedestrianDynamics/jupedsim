@@ -48,7 +48,7 @@ int TrajectoryData::currentIndex()
 
 void TrajectoryData::moveToFrame(int position)
 {
-    if(position >= 0 && position < _frames.size()) {
+    if(position >= 0 && position < static_cast<int>(_frames.size())) {
         _frameCursor = position;
     } else {
         _frameCursor = 0;

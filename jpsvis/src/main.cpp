@@ -70,11 +70,7 @@ int main(int argc, char * argv[])
     // setlocale(LC_NUMERIC, "en_US" );
     setlocale(LC_NUMERIC, "C");
 
-    // force the application to first looks for privated libs
-    a.addLibraryPath(QApplication::applicationDirPath() + QDir::separator() + "lib");
-
     std::optional<std::filesystem::path> commandLinePath = handleParserArguments();
-
     MainWindow w(nullptr, commandLinePath);
     w.show();
     return a.exec();

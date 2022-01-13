@@ -103,10 +103,6 @@ Visualisation::Visualisation(
     _renderer->SetBackground(1.0, 1.0, 1.0);
 }
 
-Visualisation::~Visualisation() {}
-
-void Visualisation::setFullsreen(bool status) {}
-
 void Visualisation::start()
 {
     _renderer->RemoveAllViewProps();
@@ -146,10 +142,9 @@ void Visualisation::start()
 
     // create a timer for rendering the window
     _timer_cb = vtkCallbackCommand::New();
-    _timer_cb->SetCallback(
-        [](vtkObject * caller, long unsigned int eventId, void * clientData, void * callData) {
-            reinterpret_cast<Visualisation *>(clientData)->onExecute();
-        });
+    _timer_cb->SetCallback([](auto, auto, void * clientData, auto) {
+        reinterpret_cast<Visualisation *>(clientData)->onExecute();
+    });
     _timer_cb->SetClientData(this);
     if(_trajectories->getFrameCount() > 0) {
         _timer_id = interactor->CreateRepeatingTimer(1000.0 / _trajectories->getFps());
@@ -507,13 +502,6 @@ void Visualisation::setWindowTitle(QString title)
     _winTitle = title;
 }
 
-/// @todo check this construct
-void Visualisation::setGeometry(FacilityGeometry * geometry)
-{
-    cout << "dont call me" << endl;
-    exit(0);
-}
-
 GeometryFactory & Visualisation::getGeometry()
 {
     return _geometry;
@@ -617,7 +605,7 @@ getTrainData(Point trainStart, Point trainEnd, std::vector<Point> doorPoints, do
 
 
     // Create the first line (between Origin and P0)
-    for(int i = 0; i <= doorPoints.size(); i += 2) {
+    for(size_t i = 0; i <= doorPoints.size(); i += 2) {
         vtkSmartPointer<vtkLine> line = vtkSmartPointer<vtkLine>::New();
         line->GetPointIds()->SetId(0, i);
         line->GetPointIds()->SetId(1, i + 1);
@@ -636,11 +624,8 @@ void Visualisation::onExecute()
 {
     vtkRenderWindowInteractor * const iren = _renderWindow->GetInteractor();
 
-    int frameNumber         = 0;
-    int nPeds               = 0;
-    static bool isRecording = false;
-
-
+    int frameNumber = 0;
+    int nPeds       = 0;
     if(_trajectories->getFrameCount() > 0) {
         if(!is_pause) {
             _trajectories->moveFrameBy(_replay_speed);
@@ -670,7 +655,6 @@ void Visualisation::onExecute()
         VTK_CREATE(vtkTextActor3D, textActor);
         auto trainType = tab.second->type;
         sprintf(label, "%s_%d", trainType.c_str(), tab.second->id);
-        auto trainId      = tab.second->id;
         auto trackStart   = tab.second->pstart;
         auto trackEnd     = tab.second->pend;
         auto trainOffset  = tab.second->train_offset;
@@ -750,7 +734,7 @@ void Visualisation::onExecute()
         if(once) {
             _renderer->AddActor(actor);
             _renderer->AddActor(txtActor);
-            if(countTrains == _trainTimeTables.size())
+            if(countTrains == static_cast<int>(_trainTimeTables.size()))
                 once = 0;
         }
 

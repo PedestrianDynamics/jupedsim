@@ -1,6 +1,6 @@
 {
-    "name": "jpscore",
-    "version-string": "0.8.4",
+    "name": "jupedsim",
+    "version-string": "0.9.1",
     "maintainers": [
         "David Haensel <d.haensel@fz-juelich.de>"
     ],
@@ -51,6 +51,21 @@
         {
             "name": "gtest",
             "version>=": "1.11.0"
+        },
+        {
+            "name": "qt5",
+            "version>=": "5.15.2"
+        },
+        {
+            "name": "vtk",
+            "features": [
+                "qt"
+            ],
+            "version>=": "9.0.3-pv5.9.1#6"
+        },
+        {
+            "name": "glm",
+            "version>=": "0.9.9.8#1"
         }
     ],
     "builtin-baseline": "35443ee2753f46c52ac342fa6c9c48e9f5eb9105"

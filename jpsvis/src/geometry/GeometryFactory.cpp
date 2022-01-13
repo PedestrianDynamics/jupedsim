@@ -105,16 +105,6 @@ void GeometryFactory::ShowDoors(bool status)
     }
 }
 
-void GeometryFactory::ShowStairs(bool status)
-{
-    for(auto && room : _geometryFactory) {
-        for(auto && subroom : room.second) {
-            if(_geometryFactory[room.first][subroom.first]->getVisibility())
-                subroom.second->showStairs(status);
-        }
-    }
-}
-
 void GeometryFactory::ShowWalls(bool status)
 {
     for(auto && room : _geometryFactory) {

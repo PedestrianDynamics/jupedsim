@@ -54,8 +54,6 @@ public:
 private:
     vtkPoints * pts;
     vtkDataArray * scalars;
-    int scalar_mode;
-
     double pt_radius;
     int pt_res;
 };

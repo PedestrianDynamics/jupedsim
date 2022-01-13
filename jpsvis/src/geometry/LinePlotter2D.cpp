@@ -116,11 +116,6 @@ LinePlotter2D::~LinePlotter2D()
     navline_actor->Delete();
 }
 
-void LinePlotter2D::SetAllLineWidth(int width)
-{
-    // m_allLineWidth = width ;
-}
-
 void LinePlotter2D::PlotDoor(double m[3], double n[3], double scalar)
 {
     door_points->InsertNextPoint(m);

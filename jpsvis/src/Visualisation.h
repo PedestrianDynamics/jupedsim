@@ -81,7 +81,7 @@ public:
         vtkRenderWindow * renderWindow,
         Settings * _settings,
         TrajectoryData * trajectories);
-    virtual ~Visualisation();
+    ~Visualisation() override = default;
     void start();
     void stop();
     void pauseRendering(bool paused);

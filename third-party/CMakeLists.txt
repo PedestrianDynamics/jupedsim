@@ -32,7 +32,6 @@ set_property(TARGET visilibity PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 # Build poly2tri
 ################################################################################
 add_library(poly2tri STATIC
-
     poly2tri/common/shapes.cpp
     poly2tri/common/shapes.h
     poly2tri/common/utils.h

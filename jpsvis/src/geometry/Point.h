@@ -38,7 +38,6 @@ public:
     // constructors
     Point();
     Point(double x, double y);
-    Point(const Point & orig);
 
 
     /**

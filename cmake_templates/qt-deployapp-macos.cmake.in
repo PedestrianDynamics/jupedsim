@@ -1,5 +1,7 @@
 execute_process(
-    COMMAND "@DEPLOYQT_EXECUTABLE@" @DEPLOY_OPTIONS@
+    COMMAND @DEPLOYQT_EXECUTABLE@
+        @DEPLOY_OPTIONS@
+        -verbose=2
     RESULT_VARIABLE result
 )
 

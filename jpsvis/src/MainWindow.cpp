@@ -375,7 +375,7 @@ bool MainWindow::tryParseTrajectory(const std::filesystem::path & path)
     std::map<int, std::shared_ptr<TrainTimeTable>> trainTimeTable;
     if(readTrainTimeTable) {
         // TODO(kkratz): This just continues on error, fixup impl.
-        bool ret = Parsing::LoadTrainTimetable(
+        Parsing::LoadTrainTimetable(
             additional_inputs.train_time_table_path.value().string(), trainTimeTable);
     }
     if(readTrainTimeTable && readTrainTypes) {
@@ -997,7 +997,7 @@ void MainWindow::slotOnGeometryItemChanged(QStandardItem * item)
     }
 }
 
-void MainWindow::slotMousePositionUpdated(double x, double y, double z)
+void MainWindow::slotMousePositionUpdated(double x, double y, double /*z*/)
 {
     statusBar()->showMessage(
         QString("x:%1 y:%2").arg(QString::number(x, 'f', 2), QString::number(y, 'f', 2)));

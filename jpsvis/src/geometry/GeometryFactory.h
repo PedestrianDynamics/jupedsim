@@ -25,7 +25,6 @@ public:
     void Set2D(bool status);
     void Set3D(bool status);
     void ShowDoors(bool status);
-    void ShowStairs(bool status);
     void ShowWalls(bool status);
     void ShowNavLines(bool status);
     void ShowFloor(bool status);

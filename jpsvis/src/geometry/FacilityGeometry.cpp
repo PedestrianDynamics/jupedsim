@@ -251,8 +251,8 @@ void FacilityGeometry::addWall(
     double x2,
     double y2,
     double z2,
-    double thickness,
-    double height,
+    double /*thickness*/,
+    double /*height*/,
     double color)
 {
     // all walls will have this parameters until changed
@@ -284,8 +284,8 @@ void FacilityGeometry::addStair(
     double x2,
     double y2,
     double z2,
-    double thickness,
-    double height,
+    double /*thickness*/,
+    double /*height*/,
     double color)
 {
     // all walls will have this parameters until changed
@@ -316,8 +316,8 @@ void FacilityGeometry::addDoor(
     double x2,
     double y2,
     double z2,
-    double thickness,
-    double height,
+    double /*thickness*/,
+    double /*height*/,
     double color)
 {
     // all doors will take this color upon changed
@@ -349,8 +349,8 @@ void FacilityGeometry::addNavLine(
     double x2,
     double y2,
     double z2,
-    double thickness,
-    double height,
+    double /*thickness*/,
+    double /*height*/,
     double color)
 {
     // all doors will take this color upon changed
@@ -738,8 +738,8 @@ void FacilityGeometry::addObjectSphere(double center[3], double radius, double c
 void FacilityGeometry::addObjectCylinder(
     double center[3],
     double radius,
-    double height,
-    double orientation[3],
+    double /*height*/,
+    double /*orientation*/[3],
     double color)
 {
     double colorRGB[3];
@@ -767,7 +767,7 @@ void FacilityGeometry::addObjectCylinder(
 
 void FacilityGeometry::addObjectBox(
     double center[3],
-    double height,
+    double /*height*/,
     double width,
     double length,
     double color)
@@ -873,8 +873,6 @@ void FacilityGeometry::showDoors(bool status)
     assemblyDoors3D->Modified();
 }
 
-void FacilityGeometry::showStairs(bool status) {}
-
 void FacilityGeometry::showWalls(bool status)
 {
     linesPlotter2D->showWalls(status);
@@ -925,7 +923,7 @@ vtkActor2DCollection * FacilityGeometry::getCaptions()
 
 void FacilityGeometry::addNewElementText(
     double center[3],
-    double orientation[3],
+    double /*orientation*/[3],
     string text,
     double color)
 {

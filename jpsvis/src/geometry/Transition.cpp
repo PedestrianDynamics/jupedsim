@@ -94,7 +94,6 @@ Room * Transition::GetOtherRoom(int roomID) const
     } else if(GetRoom2() != NULL && GetRoom2()->GetID() == roomID) {
         return GetRoom1();
     } else {
-        char msg[CLENGTH];
         Log::Error("Transition::GetOtherRoom() wrong roomID [%d]", roomID);
         exit(EXIT_FAILURE);
     }
