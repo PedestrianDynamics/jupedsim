@@ -1,6 +1,6 @@
 mkdir build
 cd build
-cmake .. -DCMAKE_TOOLCHAIN_FILE=C:/Users/admin/vcpkg/scripts/buildsystems/vcpkg.cmake -DBUILD_TESTS=ON
-cmake --build . --config Release
+cmake .. -DCMAKE_PREFIX_PATH=C:/vcpkg/scripts/installed/x64-windows-release -DBUILD_TESTS=ON
+cmake --build . --config Release -j
 cmake --build . --config Release -t unittests 
 cmake --build . --config Release -t package
