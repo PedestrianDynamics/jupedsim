@@ -246,6 +246,9 @@ target_include_directories(${TARGET_NAME} INTERFACE
   $<BUILD_INTERFACE:${AUTOGEN_INCLUDE_DIR}>
 )
 
+set_property(TARGET vis PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
+set_property(TARGET vis PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
+
 ################################################################################
 # jpsvis
 ################################################################################
@@ -279,6 +282,9 @@ target_link_libraries(jpsvis PUBLIC
     vis
     Qt5::Core
 )
+
+set_property(TARGET jpsvis PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
+set_property(TARGET jpsvis PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 
 ################################################################################
 # Micro Benchmarks
