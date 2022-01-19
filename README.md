@@ -4,108 +4,10 @@
 
 ## Introduction
 
-This repository contains software for simulating pedestrian dynamics.
+This repository contains software for simulating pedestrian dynamics (jpscore)
+and visualizing the resulting trajectories (jpsvis).
 
 Analysis of results can be done with [jpsreport](https://github.com/JuPedSim/jpsreport)
-Visualization of results can be done with [jpsvis](https://github.com/JuPedSim/jpsvis)
-
-## Building from source
-
-It should be possible to build jpscore on all major platforms however, we only
-test a few:
-
-Right now, we ensure a working Build for:
-
-* Windows 10
-* MacOS Montery
-* MacOS BigSur
-* Ubuntu 21.10
-
-### Linux / MacOS
-
-We suggest to use the following layout for developing on jpscore:
-
-```txt
-.
-├── jpscore <- code repository
-├── jpscore-build <- build folder
-└── jpscore-deps <- install location of library dependencies
-
-```
-
-#### System Requirements
-
-* C++17 capable compiler
-* clang-format-13
-* wget
-
-Once the above-listed requirements are installed, build the library dependencies.
-
-#### Library Dependencies
-
-##### Linux MacOS
-
-On Linux and MacOS all library dependencies are built from source, they are
-either part of the source tree and do not need any special attention or
-they are built with `scripts/setup-deps.sh`. To compile dependencies invoke the
-script and specifiy the install path:
-
-```bash
-./scripts/setup-deps.sh --install-path ~/jspcore-deps
-```
-
-The resulting deps folder should contain an install tree of all required
-library dependencies. Move / rename this folder to a convenient location, e.g.
-to jpscore-deps as outlined in the beginning. It is usually a good idea to keep
-the dependencies in a folder outside of the source tree so that you do not need
-to rebuild the dependencies if you for example accidentally clean the
-repository.
-
-Note: If you do not specify a install path the script tries to install into
-`/usr/local`.
-
-##### Windows
-
-On Windows dependencies are installed with `vcpkg`, get it from <vcpkg.io>.
-`vcpkg` will automatically download and install the dependencies listen in
-`vcpkg.json` if used with cmake.
-
-During the CMake invocation listed in the next section, add this to your invocation:
-
-```bash
--DCMAKE_TOOLCHAIN_FILE=<PATH-TO-VCPKG-INSTALLATION>/scripts/buildsystems/vcpkg.cmake
-```
-
-#### How to generate build files with CMake
-
-Now that you have all library dependencies, you need to generate build files
-with CMake.
-
-Note: We do not recommend in-tree builds.
-
-```bash
-mkdir jpscore-build
-cd jpscore-build
-cmake -GNinja -DCMAKE_BUILD_TYPE=Debug \
-    -DCMAKE_PREFIX_PATH=<path-to-dependencies> \
-    <path-to-cmakelists>
-ninja
-```
-
-Alternatively you can generate a make based build with:
-
-```bash
-mkdir jpscore-build
-cd jpscore-build
-cmake -DCMAKE_BUILD_TYPE=Debug \
-    -DCMAKE_PREFIX_PATH=<path-to-dependencies> \
-    <path-to-cmakelists>
-make -j$(nproc)
-```
-
-### Build Options
-
-For a list of build options, please see [CMakeLists.txt] directly.
 
 ## Quick start
 
@@ -145,6 +47,178 @@ If you submit a feature request please help us by including:
 * Describe the current behavior and explain which behavior you expected to see
   instead and why.
 
+## Building from source
+
+It should be possible to build on all major platforms however, we only test a few:
+
+Right now, we ensure a working Build for:
+
+* Windows 10
+* MacOS Montery
+* Ubuntu 21.10
+
+### Build Options
+
+We support only a few settings. For a list of build options, please see
+[CMakeLists.txt] directly.
+
+### General Information
+
+All of the following descriptions assume the following layout on disk:
+
+```txt
+.
+├── jpscore <- code repository
+├── jpscore-build <- build folder
+└── jpscore-deps <- install location of library dependencies
+
+```
+
+### Build on Linux
+
+#### System Requirements
+
+Builds are only tested on the latest Ubuntu version (at this time 21.04). To
+compile from source you will need a couple of system dependencies.
+
+* C++17 capable compiler (default GCC will do)
+* wget
+* vtk9 with qt support
+* qt 5
+
+Recommended:
+
+* ninja
+
+For a exact list of ubuntu packages required to build please consult
+[container/build/Dockerfile]
+
+#### Library Dependencies
+
+On Linux and MacOS all dependencies except VTK & QT are built from source, they are
+either part of the source tree and do not need any special attention or
+they are built with `scripts/setup-deps.sh`. To compile dependencies invoke the
+script and specify the install path:
+
+```bash
+./scripts/setup-deps.sh --install-path ~/jspcore-deps
+```
+
+The output created in `~jpscore-deps` now contains an install tree of all required
+library dependencies.
+
+Warning: If you do not specify an install path the script tries to install into
+`/usr/local`.
+
+#### Compiling
+
+Now that you have all library dependencies, you need to generate build files
+with CMake and compile.
+
+```bash
+mkdir jpscore-build
+cd jpscore-build
+cmake -GNinja -DCMAKE_BUILD_TYPE=Debug \
+    -DCMAKE_PREFIX_PATH=<path-to-dependencies> \
+    <path-to-cmakelists>
+ninja
+```
+
+Alternatively you can generate a make based build with:
+
+```bash
+mkdir jpscore-build
+cd jpscore-build
+cmake -DCMAKE_BUILD_TYPE=Debug \
+    -DCMAKE_PREFIX_PATH=<path-to-dependencies> \
+    <path-to-cmakelists>
+make -j$(nproc)
+```
+
+You will find `jpscore` and `jpsvis` executables in `jpscore-build/bin` after
+the build.
+
+### Build on MacOS
+
+#### System Requirements
+
+* homebrew for qt / vtk packages
+* wget
+* vtk9 from homebrew
+* qt from homebrew
+
+Recommended:
+
+* ninja
+
+Once the above-listed requirements are installed, build the library dependencies.
+
+#### Library Dependencies
+
+On Linux and MacOS all dependencies except VTK & QT are built from source, they are
+either part of the source tree and do not need any special attention or
+they are built with `scripts/setup-deps.sh`. To compile dependencies invoke the
+script and specify the install path:
+
+```bash
+./scripts/setup-deps.sh --install-path ~/jspcore-deps
+```
+
+The output created in `~jpscore-deps` now contains an install tree of all required
+library dependencies.
+
+Warning: If you do not specify an install path the script tries to install into
+`/usr/local`.
+
+#### Compiling
+
+Now that you have all library dependencies, you need to generate build files
+with CMake and compile.
+
+```bash
+mkdir jpscore-build
+cd jpscore-build
+cmake -GNinja -DCMAKE_BUILD_TYPE=Debug \
+    -DCMAKE_PREFIX_PATH=<path-to-dependencies> \
+    <path-to-cmakelists>
+ninja
+```
+
+Alternatively you can generate a make based build with:
+
+```bash
+mkdir jpscore-build
+cd jpscore-build
+cmake -DCMAKE_BUILD_TYPE=Debug \
+    -DCMAKE_PREFIX_PATH=<path-to-dependencies> \
+    <path-to-cmakelists>
+make -j$(nproc)
+```
+
+You will find `jpscore` executable and `jpsvis.app` app bundle in
+`jpscore-build/bin` after the build. To start `jpsvis` either click on the
+bundle in `jpscore/bin` or run it from the command line with
+`./bin/jpsvis.app/Contents/MacOS/jpsvis`
+
+### Build on Windows
+
+#### System Dependencies
+
+* Visual Studio
+
+#### Library Dependencies
+
+On Windows dependencies are installed with `vcpkg`, get it from <vcpkg.io>.
+`vcpkg` will automatically download and install the dependencies listen in
+`vcpkg.json` if used with CMake.
+
+During the CMake invocation listed in the next section, add this to your invocation:
+
+```bash
+-DCMAKE_TOOLCHAIN_FILE=<PATH-TO-VCPKG-INSTALLATION>/scripts/buildsystems/vcpkg.cmake
+-DVCPKG_MANIFEST_DIR=<PATH-TO-SOURCE-FOLDER>/vcpkg.json
+```
+
 ## Contributing to JuPedSim
 
 This project is mainly developed by a small group of researchers and students
@@ -183,4 +257,3 @@ This has become very easy:
   (A build target for checking / formatting is available: `check-format` /
   `reformat`)
 * Use only spaces in code
-

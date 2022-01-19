@@ -4,7 +4,7 @@ RUN apt-get update && \
     apt-get install -y software-properties-common
 
 RUN apt-get update && \
-    apt-get install -y \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
     wget \
     git \
     g++ \
@@ -14,6 +14,11 @@ RUN apt-get update && \
     ninja-build \
     clang \
     clang-format \
+    libglm-dev \
+    qtbase5-dev \
+    libvtk9-dev \
+    libvtk9-qt-dev \
+    libopengl-dev \
     python3 \
     python3-pip \
     python3-matplotlib \

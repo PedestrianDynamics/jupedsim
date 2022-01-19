@@ -1,0 +1,10 @@
+execute_process(
+    COMMAND @DEPLOYQT_EXECUTABLE@
+        @DEPLOY_OPTIONS@
+        -verbose=2
+    RESULT_VARIABLE result
+)
+
+if(result)
+    message(FATAL_ERROR "Executing @DEPLOYQT_EXECUTABLE@ failed: ${result}")
+endif()
