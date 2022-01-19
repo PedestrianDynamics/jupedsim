@@ -7,7 +7,12 @@ spdlog_version="1.9.2"
 catch2_version="2.13.7"
 cli11_version="2.1.2"
 boost_version="1.78.0"
-
+# GLM has removed the cmake install target in 9.9.9.6 for unknown reasons
+# on master the install target has been reintroduced. Instead of manually
+# gatering the headers and static libs or maintaing a patch we will instead use
+# a known good build from master. This is api compatible with 9.9.9.8 so we
+# should(TM) have no issues with Windows.
+glm_version="6ad79aae3eb5bf809c30bf1168171e9e55857e45"
 install_path=/usr/local
 
 POSITIONAL=()
@@ -161,9 +166,33 @@ function setup_cli11 {
     rm -rf ${temp_folder}
 }
 
+function setup_glm {
+    root=$(pwd)
+    temp_folder=$(mktemp -d)
+    cd ${temp_folder}
+
+    wget https://github.com/g-truc/glm/archive/${glm_version}.zip
+    unzip ${glm_version}.zip
+    cd glm-${glm_version}
+    mkdir build
+    cd build
+    cmake .. \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_SHARED_LIBS=OFF \
+        -DBUILD_STATIC_LIBS=ON \
+        -DGLM_TEST_ENABLE=OFF \
+        -DCMAKE_INSTALL_PREFIX=${install_path}
+    cmake --build . --target install -- -j${CPUS}
+
+    cd ${root}
+    rm -rf ${temp_folder}
+
+}
+
 setup_boost
 setup_googletest
 setup_fmt
 setup_spdlog
 setup_catch2
 setup_cli11
+setup_glm
