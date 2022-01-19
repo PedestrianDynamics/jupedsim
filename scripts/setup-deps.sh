@@ -20,10 +20,6 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       shift # past value
       ;;
-    --compile-for-windows)
-      shift # past argument
-      compile_for_windows=1
-      ;;
     *)    # unknown option
       POSITIONAL+=("$1") # save it in an array for later
       shift # past argument
@@ -42,10 +38,6 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
     CPUS=$(nproc)
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     CPUS=$(sysctl -n hw.logicalcpu)
-fi
-
-if [[ ${compile_for_windows} ]]; then
-    cross_compile_cmake_settings="-DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc-posix -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-c++-posix"
 fi
 
 function setup_boost {
@@ -75,8 +67,7 @@ function setup_googletest {
     cd build
     cmake .. \
         -DCMAKE_INSTALL_PREFIX=${install_path} \
-        -DCMAKE_BUILD_TYPE=Release \
-        ${cross_compile_cmake_settings}
+        -DCMAKE_BUILD_TYPE=Release
     cmake --build . -j ${CPUS}
     cmake --install .
     cd ${root}
@@ -98,8 +89,7 @@ function setup_fmt {
         -DFMT_DOC=OFF \
         -DFMT_TEST=OFF \
         -DCMAKE_INSTALL_PREFIX=${install_path} \
-        -DCMAKE_BUILD_TYPE=Release \
-        ${cross_compile_cmake_settings}
+        -DCMAKE_BUILD_TYPE=Release
     cmake --build . -j ${CPUS}
     cmake --install .
     cd ${root}
@@ -122,8 +112,7 @@ function setup_spdlog {
         -DSPDLOG_FMT_EXTERNAL=ON \
         -DCMAKE_PREFIX_PATH=${install_path} \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=${install_path} \
-        ${cross_compile_cmake_settings}
+        -DCMAKE_INSTALL_PREFIX=${install_path}
     cmake --build . --target install -- -j${CPUS}
 
     cd ${root}
@@ -143,8 +132,7 @@ function setup_catch2 {
     cmake .. \
         -DBUILD_TESTING=OFF      \
         -DCMAKE_PREFIX_PATH=${install_path} \
-        -DCMAKE_INSTALL_PREFIX=${install_path} \
-        ${cross_compile_cmake_settings}
+        -DCMAKE_INSTALL_PREFIX=${install_path}
     cmake --build . --target install -- -j${CPUS}
 
     cd ${root}
@@ -166,8 +154,7 @@ function setup_cli11 {
         -DCMAKE_BUILD_TYPE=Release \
         -DCLI11_BUILD_TESTS=OFF \
         -DCMAKE_INSTALL_PREFIX=${install_path} \
-        -DCLI11_BUILD_EXAMPLES=OFF \
-        ${cross_compile_cmake_settings}
+        -DCLI11_BUILD_EXAMPLES=OFF
     cmake --build . --target install -- -j${CPUS}
 
     cd ${root}
@@ -180,4 +167,3 @@ setup_fmt
 setup_spdlog
 setup_catch2
 setup_cli11
-

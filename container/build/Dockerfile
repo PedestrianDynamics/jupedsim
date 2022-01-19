@@ -8,7 +8,6 @@ RUN apt-get update && \
     wget \
     git \
     g++ \
-    mingw-w64 \
     cmake \
     make \
     ninja-build \
@@ -31,6 +30,6 @@ RUN cd /usr/bin && ln -s pytest-3 pytest
 
 COPY scripts/setup-deps.sh requirements.txt /opt/
 
-RUN cd /opt && ./setup-deps.sh && ./setup-deps.sh --install-path /opt/windows-deps --compile-for-windows
+RUN cd /opt && ./setup-deps.sh
 
 RUN pip3 install -r /opt/requirements.txt
