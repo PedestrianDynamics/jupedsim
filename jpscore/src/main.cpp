@@ -121,7 +121,7 @@ int main(int argc, char** argv)
             CreateFromType(config.operationalModel, config),
             std::move(geometry.collisionGeometry),
             std::move(geometry.routingEngine),
-            config.areas,
+            std::make_unique<Areas>(std::move(config.areas)),
             config.dT);
         EventManager manager;
 
@@ -139,10 +139,6 @@ int main(int argc, char** argv)
             ++frame;
         }
 
-        if(!sim.InitArgs()) {
-            LOG_ERROR("Could not start simulation. Check the log for prior errors");
-            return EXIT_FAILURE;
-        }
         collectInputFilesIn(config.iniFile, "results");
         time_t starttime{};
         time(&starttime);

@@ -7,6 +7,18 @@
 using namespace fmt::literals;
 using ::jps::UniqueID;
 
+TEST(UniqueId, CanBeConstructedFromUnderlyingType)
+{
+    const jps::UniqueID<void> first_sentinel{};
+    const jps::UniqueID<void> a{666};
+    const jps::UniqueID<void> b{667};
+    const jps::UniqueID<void> second_sentinel{};
+    ASSERT_NE(a, b);
+    ASSERT_EQ(a.getID(), 666);
+    ASSERT_EQ(b.getID(), 667);
+    ASSERT_EQ(first_sentinel.getID() + 1, second_sentinel.getID());
+}
+
 TEST(UniqueId, DefaultConstructedIDsAreNotIdentical)
 {
     const auto first = jps::UniqueID<void>{};

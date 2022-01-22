@@ -6,6 +6,7 @@ add_library(simulator STATIC
     src/AABB.hpp
     src/AgentExitSystem.cpp
     src/AgentExitSystem.hpp
+    src/Area.cpp
     src/Area.hpp
     src/CGALPolygon.cpp
     src/CGALPolygon.hpp
@@ -62,8 +63,16 @@ target_compile_options(simulator PRIVATE
 target_compile_definitions(simulator PUBLIC
     JPSCORE_VERSION="${PROJECT_VERSION}"
 )
-target_link_libraries(simulator
+target_link_libraries(simulator PUBLIC
+    Boost::boost
+    poly2tri
+    tinyxml
+    visilibity
+    CLI11::CLI11
+    spdlog::spdlog
+    fmt::fmt
     shared
+    CGAL::CGAL
 )
 target_include_directories(simulator PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src

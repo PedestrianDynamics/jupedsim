@@ -30,6 +30,7 @@
 #pragma once
 
 #include "AgentExitSystem.hpp"
+#include "Area.hpp"
 #include "Geometry.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalDecisionSystem.hpp"
@@ -55,7 +56,8 @@ private:
     std::unique_ptr<RoutingEngine> _routingEngine;
     std::unique_ptr<CollisionGeometry> _geometry;
     std::vector<std::unique_ptr<Pedestrian>> _agents;
-    std::map<Area::Id, Area> _areas;
+    std::unique_ptr<Areas> _areas;
+    std::vector<uint64_t> _removedAgentsInLastIteration;
     bool _eventProcessed{false};
 
 public:
@@ -63,7 +65,7 @@ public:
         std::unique_ptr<OperationalModel> operationalModel,
         std::unique_ptr<CollisionGeometry>&& geometry,
         std::unique_ptr<RoutingEngine>&& routingEngine,
-        std::map<Area::Id, Area> areas,
+        std::unique_ptr<Areas>&& areas,
         double dT);
 
     ~Simulation() = default;
@@ -83,18 +85,31 @@ public:
 
     void AddAgent(std::unique_ptr<Pedestrian>&& agent);
 
+    uint64_t AddAgent(
+        const Point& position,
+        const Point& orientation,
+        double Av,
+        double AMin,
+        double BMax,
+        double BMin,
+        double Tau,
+        double T,
+        double v0,
+        uint16_t destinationAreaId);
+
     void AddAgents(std::vector<std::unique_ptr<Pedestrian>>&& agents);
 
+    void RemoveAgent(uint64_t id);
     void RemoveAgents(std::vector<Pedestrian::UID> ids);
 
     Pedestrian& Agent(Pedestrian::UID id) const;
+    Pedestrian* AgentPtr(Pedestrian::UID id) const;
 
     const std::vector<std::unique_ptr<Pedestrian>>& Agents() const;
 
+    const std::vector<uint64_t>& RemovedAgents() const;
+
     size_t AgentCount() const;
 
-    /**
-     * Read parameters from config.
-     */
-    bool InitArgs();
+    uint64_t Iteration() const { return _clock.Iteration(); }
 };

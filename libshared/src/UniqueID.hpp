@@ -29,6 +29,8 @@ class UniqueID
 public:
     UniqueID() = default;
 
+    UniqueID(Integer id) : m_value(id) {}
+
     /// UniqueIds are copyable.
     UniqueID(UniqueID const& p_other) = default;
 

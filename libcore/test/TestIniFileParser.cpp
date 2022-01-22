@@ -34,8 +34,8 @@ TEST_F(Fixture, TestA)
     const auto areas = ParseAreas(root);
     ASSERT_EQ(areas.size(), 1);
     const auto& area1 = areas.find(1)->second;
-    ASSERT_EQ(area1.lables.size(), 1);
-    ASSERT_EQ(area1.lables.count("exit"), 1);
+    ASSERT_EQ(area1.labels.size(), 1);
+    ASSERT_EQ(area1.labels.count("exit"), 1);
     const std::vector<Point> expectedPolygon = {{70, 101}, {70, 103}, {75, 103}, {75, 101}};
     ASSERT_EQ(area1.polygon.points[0], expectedPolygon[0]);
     ASSERT_EQ(area1.polygon.points[1], expectedPolygon[1]);

@@ -41,7 +41,7 @@ public:
     using UID = jps::UniqueID<Pedestrian>;
 
     // This is evaluated by the "strategic level"
-    std::optional<int> goal{};
+    std::optional<uint16_t> goal{};
 
     // This is evaluated by the "tactical level"
     // TODO(kkratz): this is the new yet unused waypoint list

@@ -18,5 +18,6 @@ public:
 
     void
     Run(const std::map<Area::Id, Area> areas,
-        std::vector<std::unique_ptr<Pedestrian>>& agents) const;
+        std::vector<std::unique_ptr<Pedestrian>>& agents,
+        std::vector<uint64_t>& removedAgentIds) const;
 };

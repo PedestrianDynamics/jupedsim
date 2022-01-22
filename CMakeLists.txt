@@ -259,11 +259,13 @@ if(BUILD_TESTS)
         COMMAND echo "GTest"
         COMMAND $<TARGET_FILE:libcore-tests>
                 --gtest_output=xml:result-libcore-unittests.xml
+        COMMAND $<TARGET_FILE:libjupedsim-tests>
+                --gtest_output=xml:result-libjupedsim-unittests.xml
         COMMAND $<TARGET_FILE:libsimulator-tests>
                 --gtest_output=xml:result-libsimulator-unittests.xml
         COMMAND $<TARGET_FILE:libshared-tests>
                 --gtest_output=xml:result-libshared-unittests.xml
-        DEPENDS libcore-tests libshared-tests libsimulator-tests
+        DEPENDS libcore-tests libshared-tests libsimulator-tests libjupedsim-tests
     )
 endif()
 
@@ -283,8 +285,9 @@ endif()
 add_subdirectory(jpscore)
 add_subdirectory(jpsvis)
 add_subdirectory(libcore)
-add_subdirectory(libsimulator)
+add_subdirectory(libjupedsim)
 add_subdirectory(libshared)
+add_subdirectory(libsimulator)
 
 ################################################################################
 # Code formating
@@ -312,7 +315,7 @@ if(UNIX)
             )
             if(version MATCHES "^${clang-format-version}.*")
                 message(STATUS "Found clang-format ${version}, add format-check and reformat targets")
-                set(folders jpscore jpsvis libcore libshared)
+                set(folders jpscore jpsvis libcore libshared libsimulator libjupedsim)
                 add_custom_target(check-format
                     COMMENT "Checking format with clang-format"
                     COMMAND find ${folders}
