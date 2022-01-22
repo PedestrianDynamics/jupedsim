@@ -26,9 +26,9 @@
  **/
 
 
-#include "Point.h"
+#include "Point.hpp"
 
-#include "../general/Macros.h"
+#include "../general/Macros.hpp"
 
 #include <cmath>
 #include <iostream>

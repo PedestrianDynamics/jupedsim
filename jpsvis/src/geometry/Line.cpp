@@ -26,12 +26,12 @@
  **/
 
 
-#include "Point.h"
-//#include "SubRoom.h"
-#include "../IO/OutputHandler.h"
-#include "../Log.h"
-#include "../general/Macros.h"
-#include "Line.h"
+#include "Point.hpp"
+//#include "SubRoom.hpp"
+#include "../IO/OutputHandler.hpp"
+#include "../Log.hpp"
+#include "../general/Macros.hpp"
+#include "Line.hpp"
 
 #include <cmath>
 #include <sstream>

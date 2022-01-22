@@ -27,18 +27,18 @@
  *
  *
  **/
-#include "GCFMModel.h"
+#include "GCFMModel.hpp"
 
-#include "Simulation.h"
-#include "direction/DirectionManager.h"
-#include "direction/walking/DirectionStrategy.h"
-#include "geometry/SubRoom.h"
-#include "geometry/Wall.h"
-#include "math/OperationalModel.h"
-#include "neighborhood/NeighborhoodSearch.h"
-#include "pedestrian/Pedestrian.h"
+#include "Simulation.hpp"
+#include "direction/DirectionManager.hpp"
+#include "direction/walking/DirectionStrategy.hpp"
+#include "geometry/SubRoom.hpp"
+#include "geometry/Wall.hpp"
+#include "math/OperationalModel.hpp"
+#include "neighborhood/NeighborhoodSearch.hpp"
+#include "pedestrian/Pedestrian.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 
 GCFMModel::GCFMModel(
     DirectionManager * directionManager,

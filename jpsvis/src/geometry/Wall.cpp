@@ -26,9 +26,9 @@
  **/
 
 
-#include "Wall.h"
+#include "Wall.hpp"
 
-#include "../Log.h"
+#include "../Log.hpp"
 using namespace std;
 
 /************************************************************

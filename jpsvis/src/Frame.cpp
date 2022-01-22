@@ -30,7 +30,7 @@
  *
  */
 
-#include "Frame.h"
+#include "Frame.hpp"
 
 #include <glm/vec3.hpp>
 #include <vtkFloatArray.h>

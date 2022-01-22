@@ -26,18 +26,18 @@
  **/
 
 
-#include "Building.h"
+#include "Building.hpp"
 
-#include "../Log.h"
-#include "../geometry/Room.h"
-#include "../geometry/SubRoom.h"
+#include "../Log.hpp"
+#include "../geometry/Room.hpp"
+#include "../geometry/SubRoom.hpp"
 
 #ifdef _SIMULATOR
-#include "../mpi/LCGrid.h"
-#include "../pedestrian/PedDistributor.h"
-#include "../pedestrian/Pedestrian.h"
-#include "../routing/RoutingEngine.h"
-#include "../routing/SafestPathRouter.h"
+#include "../mpi/LCGrid.hpp"
+#include "../pedestrian/PedDistributor.hpp"
+#include "../pedestrian/Pedestrian.hpp"
+#include "../routing/RoutingEngine.hpp"
+#include "../routing/SafestPathRouter.hpp"
 #endif
 
 //#undef _OPENMP

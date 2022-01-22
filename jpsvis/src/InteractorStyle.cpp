@@ -27,11 +27,11 @@
  *  Created on: Aug 18, 2009
  */
 
-#include "InteractorStyle.h"
+#include "InteractorStyle.hpp"
 
-#include "Settings.h"
-#include "Visualisation.h"
-#include "general/Macros.h"
+#include "Settings.hpp"
+#include "Visualisation.hpp"
+#include "general/Macros.hpp"
 
 #include <QStringList>
 #include <iostream>

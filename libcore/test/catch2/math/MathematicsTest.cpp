@@ -16,7 +16,7 @@
  *
  **/
 
-#include "math/Mathematics.h"
+#include "math/Mathematics.hpp"
 
 #include <catch2/catch.hpp>
 

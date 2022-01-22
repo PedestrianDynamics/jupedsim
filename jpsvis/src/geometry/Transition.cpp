@@ -26,12 +26,12 @@
  **/
 
 
-#include "Transition.h"
+#include "Transition.hpp"
 
-#include "../IO/OutputHandler.h"
-#include "../Log.h"
-#include "Room.h"
-#include "SubRoom.h"
+#include "../IO/OutputHandler.hpp"
+#include "../Log.hpp"
+#include "Room.hpp"
+#include "SubRoom.hpp"
 using namespace std;
 
 /************************************************************

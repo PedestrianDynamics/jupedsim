@@ -29,10 +29,10 @@
  *
  */
 
-#include "JPoint.h"
+#include "JPoint.hpp"
 
-#include "../Log.h"
-#include "../general/Macros.h"
+#include "../Log.hpp"
+#include "../general/Macros.hpp"
 
 #include <cstdio>
 #include <cstdlib>

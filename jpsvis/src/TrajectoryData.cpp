@@ -1,4 +1,4 @@
-#include "TrajectoryData.h"
+#include "TrajectoryData.hpp"
 
 #include <algorithm>
 

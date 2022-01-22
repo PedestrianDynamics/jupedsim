@@ -25,12 +25,12 @@
  *  - A desired walking direction at a certain time is computed
  *  - A desired waiting position is computed
  **/
-#include "WaitingStrategy.h"
+#include "WaitingStrategy.hpp"
 
-#include "geometry/Point.h"
-#include "geometry/Room.h"
-#include "geometry/SubRoom.h"
-#include "pedestrian/Pedestrian.h"
+#include "geometry/Point.hpp"
+#include "geometry/Room.hpp"
+#include "geometry/SubRoom.hpp"
+#include "pedestrian/Pedestrian.hpp"
 
 Point WaitingStrategy::GetTarget(Room * room, Pedestrian * ped, double time)
 {

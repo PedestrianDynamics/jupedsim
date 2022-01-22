@@ -17,10 +17,10 @@
  **/
 
 
-#include "neighborhood/NeighborhoodSearch.h"
+#include "neighborhood/NeighborhoodSearch.hpp"
 
-#include "geometry/Point.h"
-#include "pedestrian/Pedestrian.h"
+#include "geometry/Point.hpp"
+#include "pedestrian/Pedestrian.hpp"
 
 #include <algorithm>
 #include <catch2/catch.hpp>

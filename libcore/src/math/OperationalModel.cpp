@@ -27,13 +27,13 @@
  * the pedestrians.
  *
  **/
-#include "OperationalModel.h"
+#include "OperationalModel.hpp"
 
-#include "OperationalModelType.h"
-#include "direction/DirectionManager.h"
-#include "general/Configuration.h"
-#include "math/GCFMModel.h"
-#include "math/VelocityModel.h"
+#include "OperationalModelType.hpp"
+#include "direction/DirectionManager.hpp"
+#include "general/Configuration.hpp"
+#include "math/GCFMModel.hpp"
+#include "math/VelocityModel.hpp"
 
 std::unique_ptr<OperationalModel> OperationalModel::CreateFromType(
     OperationalModelType type,

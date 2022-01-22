@@ -25,10 +25,10 @@
  * within the geometry. Additionally the pedestrians may wait for a certain
  * time or till a transition opens inside the waiting area.
  */
-#include "WaitingArea.h"
+#include "WaitingArea.hpp"
 
-#include "Building.h"
-#include "pedestrian/Pedestrian.h"
+#include "Building.hpp"
+#include "pedestrian/Pedestrian.hpp"
 
 #include <sstream>
 

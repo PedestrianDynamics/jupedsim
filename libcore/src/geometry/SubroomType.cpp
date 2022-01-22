@@ -1,4 +1,4 @@
-#include "SubroomType.h"
+#include "SubroomType.hpp"
 
 template <>
 SubroomType from_string(const std::string & str)

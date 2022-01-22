@@ -19,20 +19,20 @@
  *
  **/
 
-#include "CorrectGeometry.h"
+#include "CorrectGeometry.hpp"
 
-#include "general/Configuration.h"
-#include "general/Filesystem.h"
-#include "geometry/Building.h"
-#include "geometry/Crossing.h"
-#include "geometry/Line.h"
-#include "geometry/Point.h"
-#include "geometry/Room.h"
-#include "geometry/SubRoom.h"
-#include "geometry/Transition.h"
-#include "geometry/Wall.h"
+#include "general/Configuration.hpp"
+#include "general/Filesystem.hpp"
+#include "geometry/Building.hpp"
+#include "geometry/Crossing.hpp"
+#include "geometry/Line.hpp"
+#include "geometry/Point.hpp"
+#include "geometry/Room.hpp"
+#include "geometry/SubRoom.hpp"
+#include "geometry/Transition.hpp"
+#include "geometry/Wall.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <algorithm>
 #include <cassert>
 #include <chrono>

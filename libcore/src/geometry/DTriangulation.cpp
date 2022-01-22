@@ -24,7 +24,7 @@
  *
  *
  **/
-#include "DTriangulation.h"
+#include "DTriangulation.hpp"
 
 DTriangulation::DTriangulation()
 {

@@ -29,17 +29,17 @@
  *
  */
 
-#include "MainWindow.h"
+#include "MainWindow.hpp"
 
-#include "ApplicationState.h"
-#include "BuildInfo.h"
-#include "Frame.h"
-#include "Log.h"
-#include "Parsing.h"
-#include "Settings.h"
-#include "TrajectoryPoint.h"
-#include "Visualisation.h"
-#include "geometry/FacilityGeometry.h"
+#include "ApplicationState.hpp"
+#include "BuildInfo.hpp"
+#include "Frame.hpp"
+#include "Log.hpp"
+#include "Parsing.hpp"
+#include "Settings.hpp"
+#include "TrajectoryPoint.hpp"
+#include "Visualisation.hpp"
+#include "geometry/FacilityGeometry.hpp"
 
 #include <QApplication>
 #include <QCloseEvent>

@@ -24,9 +24,9 @@
  *
  *
  **/
-#include "EventManager.h"
+#include "EventManager.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 
 void EventManager::AddEvent(std::unique_ptr<Event> event)
 {

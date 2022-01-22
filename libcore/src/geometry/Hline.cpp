@@ -24,10 +24,10 @@
  *
  *
  **/
-#include "Hline.h"
+#include "Hline.hpp"
 
-#include "Room.h"
-#include "SubRoom.h"
+#include "Room.hpp"
+#include "SubRoom.hpp"
 
 
 Hline::Hline()

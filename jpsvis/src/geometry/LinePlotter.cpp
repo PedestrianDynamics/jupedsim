@@ -29,11 +29,11 @@
  *
  */
 
-#include "LinePlotter.h"
+#include "LinePlotter.hpp"
 
-#include "JPoint.h"
-#include "Settings.h"
-#include "general/Macros.h"
+#include "JPoint.hpp"
+#include "Settings.hpp"
+#include "general/Macros.hpp"
 
 #include <vtkActor.h>
 #include <vtkCellArray.h>

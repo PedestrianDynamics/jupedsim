@@ -18,12 +18,12 @@
 //
 // Created by laemmel on 31.03.16.
 //
-#include "PedDistributionParser.h"
+#include "PedDistributionParser.hpp"
 
-#include "IO/OutputHandler.h"
-#include "general/Filesystem.h"
+#include "IO/OutputHandler.hpp"
+#include "general/Filesystem.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <cstdarg> // va_start and va_end
 
 PedDistributionParser::PedDistributionParser(const Configuration * configuration) :

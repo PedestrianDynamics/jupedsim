@@ -27,9 +27,9 @@
  *
  *
  **/
-#include "AgentsParameters.h"
+#include "AgentsParameters.hpp"
 
-#include "general/Macros.h"
+#include "general/Macros.hpp"
 
 AgentsParameters::AgentsParameters(int id, int seed)
 {

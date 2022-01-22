@@ -26,13 +26,13 @@
  **/
 
 
-#include "Obstacle.h"
+#include "Obstacle.hpp"
 
-#include "../IO/OutputHandler.h"
-#include "../Log.h"
-#include "Line.h"
-#include "Point.h"
-#include "Wall.h"
+#include "../IO/OutputHandler.hpp"
+#include "../Log.hpp"
+#include "Line.hpp"
+#include "Point.hpp"
+#include "Wall.hpp"
 
 #include <cmath>
 #include <cstdio>

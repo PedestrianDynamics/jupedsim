@@ -1,7 +1,7 @@
-#include "Trajectories.h"
+#include "Trajectories.hpp"
 
-#include "IO/OutputHandler.h"
-#include "general/Macros.h"
+#include "IO/OutputHandler.hpp"
+#include "general/Macros.hpp"
 
 #include <fmt/format.h>
 

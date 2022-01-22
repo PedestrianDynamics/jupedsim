@@ -26,12 +26,12 @@
  * the Voronoi algorithm or the Mitchell Best candidate algorithm.
  *
  **/
-#include "AgentsSource.h"
+#include "AgentsSource.hpp"
 
-#include "Pedestrian.h"
-#include "StartDistribution.h"
+#include "Pedestrian.hpp"
+#include "StartDistribution.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 
 AgentsSource::AgentsSource(
     int id,

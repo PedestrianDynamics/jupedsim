@@ -1,17 +1,17 @@
 //
 // Created by arne on 5/9/17.
 //
-#include "UnivFFviaFM.h"
+#include "UnivFFviaFM.hpp"
 
-#include "general/Filesystem.h"
-#include "geometry/Building.h"
-#include "geometry/Line.h"
-#include "geometry/SubRoom.h"
-#include "geometry/Wall.h"
-#include "pedestrian/Pedestrian.h"
-#include "routing/ff_router/mesh/RectGrid.h"
+#include "general/Filesystem.hpp"
+#include "geometry/Building.hpp"
+#include "geometry/Line.hpp"
+#include "geometry/SubRoom.hpp"
+#include "geometry/Wall.hpp"
+#include "pedestrian/Pedestrian.hpp"
+#include "routing/ff_router/mesh/RectGrid.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <stdexcept>
 #include <unordered_set>
 

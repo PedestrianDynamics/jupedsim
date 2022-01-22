@@ -24,15 +24,15 @@
  *
  *
  **/
-#include "RoutingEngine.h"
+#include "RoutingEngine.hpp"
 
-#include "geometry/Building.h"
-#include "pedestrian/Pedestrian.h"
-#include "routing/RoutingStrategy.h"
-#include "routing/ff_router/ffRouter.h"
-#include "routing/global_shortest/GlobalRouter.h"
+#include "geometry/Building.hpp"
+#include "pedestrian/Pedestrian.hpp"
+#include "routing/RoutingStrategy.hpp"
+#include "routing/ff_router/ffRouter.hpp"
+#include "routing/global_shortest/GlobalRouter.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <memory>
 #include <stdexcept>
 #include <utility>

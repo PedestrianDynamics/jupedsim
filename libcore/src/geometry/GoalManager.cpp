@@ -23,11 +23,11 @@
  * \section Description
  * Class managing pedestrians who enter/leave waiting areas
  */
-#include "GoalManager.h"
+#include "GoalManager.hpp"
 
-#include "Simulation.h"
-#include "WaitingArea.h"
-#include "pedestrian/Pedestrian.h"
+#include "Simulation.hpp"
+#include "WaitingArea.hpp"
+#include "pedestrian/Pedestrian.hpp"
 
 GoalManager::GoalManager(Building * building, Simulation * simulation) :
     _building(building), _simulation(simulation)

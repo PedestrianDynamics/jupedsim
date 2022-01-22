@@ -7,7 +7,7 @@ set(source_files
 )
 
 set(header_files
-   Logger.h
+   Logger.hpp
 )
 
 add_library(shared STATIC

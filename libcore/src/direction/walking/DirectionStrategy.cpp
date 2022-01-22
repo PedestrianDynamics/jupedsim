@@ -24,17 +24,17 @@
  *
  *
  **/
-#include "DirectionStrategy.h"
+#include "DirectionStrategy.hpp"
 
-#include "geometry/Line.h"
-#include "geometry/Point.h"
-#include "geometry/Room.h"
-#include "geometry/SubRoom.h"
-#include "geometry/Wall.h"
-#include "pedestrian/Pedestrian.h"
-#include "routing/ff_router/UnivFFviaFM.h"
+#include "geometry/Line.hpp"
+#include "geometry/Point.hpp"
+#include "geometry/Room.hpp"
+#include "geometry/SubRoom.hpp"
+#include "geometry/Wall.hpp"
+#include "pedestrian/Pedestrian.hpp"
+#include "routing/ff_router/UnivFFviaFM.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <chrono>
 
 /// 1

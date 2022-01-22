@@ -16,7 +16,7 @@
  *
  **/
 
-#include "geometry/Line.h"
+#include "geometry/Line.hpp"
 
 #include <catch2/catch.hpp>
 #include <cmath>

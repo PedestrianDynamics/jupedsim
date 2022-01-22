@@ -26,10 +26,10 @@
  **/
 
 
-#include "Hline.h"
+#include "Hline.hpp"
 
-#include "../Log.h"
-#include "SubRoom.h"
+#include "../Log.hpp"
+#include "SubRoom.hpp"
 using namespace std;
 
 Hline::Hline()

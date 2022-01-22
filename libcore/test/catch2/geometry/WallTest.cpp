@@ -16,7 +16,7 @@
  *
  **/
 
-#include "geometry/Wall.h"
+#include "geometry/Wall.hpp"
 
 #include <catch2/catch.hpp>
 

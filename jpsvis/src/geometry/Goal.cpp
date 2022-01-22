@@ -26,11 +26,11 @@
  **/
 
 
-#include "Goal.h"
+#include "Goal.hpp"
 
-#include "../Log.h"
-#include "Point.h"
-#include "Wall.h"
+#include "../Log.hpp"
+#include "Point.hpp"
+#include "Wall.hpp"
 
 using namespace std;
 

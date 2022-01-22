@@ -41,10 +41,10 @@
  *
  */
 
-#include "BuildInfo.h"
-#include "CLI.h"
-#include "Log.h"
-#include "MainWindow.h"
+#include "BuildInfo.hpp"
+#include "CLI.hpp"
+#include "Log.hpp"
+#include "MainWindow.hpp"
 
 #include <QApplication>
 #include <QDir>

@@ -1,4 +1,4 @@
-#include "Event.h"
+#include "Event.hpp"
 
 Event::Event(double time) : _time(time) {}
 

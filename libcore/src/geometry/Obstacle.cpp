@@ -24,14 +24,14 @@
  *
  *
  **/
-#include "Obstacle.h"
+#include "Obstacle.hpp"
 
-#include "IO/OutputHandler.h"
-#include "Line.h"
-#include "Point.h"
-#include "Wall.h"
+#include "IO/OutputHandler.hpp"
+#include "Line.hpp"
+#include "Point.hpp"
+#include "Wall.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <cstdlib>
 
 Obstacle::Obstacle()

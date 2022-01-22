@@ -30,10 +30,10 @@
  */
 
 
-#include "LinePlotter2D.h"
+#include "LinePlotter2D.hpp"
 
-#include "Settings.h"
-#include "general/Macros.h"
+#include "Settings.hpp"
+#include "general/Macros.hpp"
 
 #include <QColor>
 #include <vtkActor.h>

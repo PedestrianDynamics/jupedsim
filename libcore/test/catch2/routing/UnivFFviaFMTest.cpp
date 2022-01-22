@@ -15,15 +15,15 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  **/
-#include "routing/ff_router/UnivFFviaFM.h"
+#include "routing/ff_router/UnivFFviaFM.hpp"
 
-#include "general/Configuration.h"
-#include "geometry/Crossing.h"
-#include "geometry/Line.h"
-#include "geometry/Room.h"
-#include "geometry/SubRoom.h"
-#include "geometry/Transition.h"
-#include "geometry/Wall.h"
+#include "general/Configuration.hpp"
+#include "geometry/Crossing.hpp"
+#include "geometry/Line.hpp"
+#include "geometry/Room.hpp"
+#include "geometry/SubRoom.hpp"
+#include "geometry/Transition.hpp"
+#include "geometry/Wall.hpp"
 
 #include <catch2/catch.hpp>
 #include <cmath>

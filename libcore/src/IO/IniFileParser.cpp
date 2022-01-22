@@ -18,24 +18,24 @@
 //
 // Created by laemmel on 24.03.16.
 //
-#include "IniFileParser.h"
+#include "IniFileParser.hpp"
 
-#include "OperationalModelType.h"
-#include "OutputHandler.h"
-#include "direction/DirectionManager.h"
-#include "direction/waiting/WaitingMiddle.h"
-#include "direction/waiting/WaitingRandom.h"
-#include "direction/waiting/WaitingStrategy.h"
-#include "direction/walking/DirectionStrategy.h"
-#include "general/Filesystem.h"
-#include "general/Macros.h"
-#include "math/GCFMModel.h"
-#include "math/VelocityModel.h"
-#include "routing/RoutingStrategy.h"
-#include "routing/ff_router/ffRouter.h"
-#include "routing/global_shortest/GlobalRouter.h"
+#include "OperationalModelType.hpp"
+#include "OutputHandler.hpp"
+#include "direction/DirectionManager.hpp"
+#include "direction/waiting/WaitingMiddle.hpp"
+#include "direction/waiting/WaitingRandom.hpp"
+#include "direction/waiting/WaitingStrategy.hpp"
+#include "direction/walking/DirectionStrategy.hpp"
+#include "general/Filesystem.hpp"
+#include "general/Macros.hpp"
+#include "math/GCFMModel.hpp"
+#include "math/VelocityModel.hpp"
+#include "routing/RoutingStrategy.hpp"
+#include "routing/ff_router/ffRouter.hpp"
+#include "routing/global_shortest/GlobalRouter.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <filesystem>
 #include <stdexcept>
 #include <string>

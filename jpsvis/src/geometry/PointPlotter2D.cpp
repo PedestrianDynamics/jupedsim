@@ -29,17 +29,17 @@
  *
  */
 
-#include "PointPlotter2D.h"
+#include "PointPlotter2D.hpp"
 
-#include "vtkActor.h"
-#include "vtkDataArray.h"
-#include "vtkDiskSource.h"
-#include "vtkGlyph3D.h"
-#include "vtkPointData.h"
-#include "vtkPoints.h"
-#include "vtkPolyData.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkUnsignedCharArray.h"
+#include <vtkActor.h>
+#include <vtkDataArray.h>
+#include <vtkDiskSource.h>
+#include <vtkGlyph3D.h>
+#include <vtkPointData.h>
+#include <vtkPoints.h>
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkUnsignedCharArray.h>
 
 PointPlotter2D::PointPlotter2D()
 {

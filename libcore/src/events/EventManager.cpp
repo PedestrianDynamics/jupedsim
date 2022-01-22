@@ -1,6 +1,6 @@
-#include "EventManager.h"
+#include "EventManager.hpp"
 
-#include "events/EventVisitors.h"
+#include "events/EventVisitors.hpp"
 
 #include <chrono>
 

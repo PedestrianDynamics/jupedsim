@@ -24,10 +24,10 @@
  * Implementation of a waiting strategy:
  * Goal of this strategy is a random point of the subroom or waiting area the pedestrian is in.
  **/
-#include "WaitingRandom.h"
+#include "WaitingRandom.hpp"
 
-#include "geometry/SubRoom.h"
-#include "pedestrian/Pedestrian.h"
+#include "geometry/SubRoom.hpp"
+#include "pedestrian/Pedestrian.hpp"
 
 double fRand(double fMin, double fMax)
 {
