@@ -24,7 +24,7 @@
  *
  *
  **/
-#include "Wall.h"
+#include "Wall.hpp"
 
 Wall::Wall() : Line() {}
 

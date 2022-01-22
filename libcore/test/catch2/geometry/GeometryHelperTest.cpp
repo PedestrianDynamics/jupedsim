@@ -15,13 +15,13 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  **/
-#include "geometry/Building.h"
-#include "geometry/Crossing.h"
-#include "geometry/Line.h"
-#include "geometry/SubRoom.h"
-#include "geometry/Transition.h"
-#include "geometry/Wall.h"
-#include "geometry/helper/CorrectGeometry.h"
+#include "geometry/Building.hpp"
+#include "geometry/Crossing.hpp"
+#include "geometry/Line.hpp"
+#include "geometry/SubRoom.hpp"
+#include "geometry/Transition.hpp"
+#include "geometry/Wall.hpp"
+#include "geometry/helper/CorrectGeometry.hpp"
 
 #include <algorithm>
 #include <catch2/catch.hpp>

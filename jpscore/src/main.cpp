@@ -25,21 +25,21 @@
  *
  *
  **/
-#include "IO/IniFileParser.h"
-#include "Simulation.h"
-#include "agent-creation/AgentCreator.h"
-#include "events/Event.h"
-#include "events/EventManager.h"
-#include "events/EventVisitors.h"
-#include "general/ArgumentParser.h"
-#include "general/Compiler.h"
-#include "general/Configuration.h"
-#include "geometry/Building.h"
-#include "math/OperationalModel.h"
-#include "pedestrian/AgentsSourcesManager.h"
-#include "routing/RoutingEngine.h"
+#include "IO/IniFileParser.hpp"
+#include "Simulation.hpp"
+#include "agent-creation/AgentCreator.hpp"
+#include "events/Event.hpp"
+#include "events/EventManager.hpp"
+#include "events/EventVisitors.hpp"
+#include "general/ArgumentParser.hpp"
+#include "general/Compiler.hpp"
+#include "general/Configuration.hpp"
+#include "geometry/Building.hpp"
+#include "math/OperationalModel.hpp"
+#include "pedestrian/AgentsSourcesManager.hpp"
+#include "routing/RoutingEngine.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <algorithm>
 #include <chrono>
 #include <cstdio>

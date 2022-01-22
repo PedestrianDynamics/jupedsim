@@ -26,14 +26,14 @@
  * the Voronoi algorithm or the Mitchell Best candidate algorithm.
  *
  **/
-#include "AgentsSourcesManager.h"
+#include "AgentsSourcesManager.hpp"
 
-#include "Pedestrian.h"
-#include "geometry/Building.h"
-#include "neighborhood/NeighborhoodSearch.h"
-#include "voronoi-boost/VoronoiPositionGenerator.h"
+#include "Pedestrian.hpp"
+#include "geometry/Building.hpp"
+#include "neighborhood/NeighborhoodSearch.hpp"
+#include "voronoi-boost/VoronoiPositionGenerator.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <memory>
 #include <thread>
 

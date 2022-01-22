@@ -9,17 +9,17 @@
 static int global_count = 0;
 
 
-#include "VoronoiPositionGenerator.h"
+#include "VoronoiPositionGenerator.hpp"
 //check if all includes are necessary
-#include "geometry/Building.h"
-#include "geometry/Transition.h"
-#include "geometry/Wall.h"
-#include "pedestrian/AgentsSource.h"
-#include "pedestrian/AgentsSourcesManager.h"
-#include "pedestrian/Pedestrian.h"
-#include "pedestrian/StartDistribution.h"
+#include "geometry/Building.hpp"
+#include "geometry/Transition.hpp"
+#include "geometry/Wall.hpp"
+#include "pedestrian/AgentsSource.hpp"
+#include "pedestrian/AgentsSourcesManager.hpp"
+#include "pedestrian/Pedestrian.hpp"
+#include "pedestrian/StartDistribution.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <thread>
 
 using boost::polygon::high;

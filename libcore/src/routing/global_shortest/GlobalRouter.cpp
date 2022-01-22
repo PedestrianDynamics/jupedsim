@@ -24,16 +24,16 @@
  *
  *
  **/
-#include "GlobalRouter.h"
+#include "GlobalRouter.hpp"
 
-#include "AccessPoint.h"
-#include "geometry/DTriangulation.h"
-#include "geometry/Line.h"
-#include "geometry/SubRoom.h"
-#include "geometry/Wall.h"
-#include "pedestrian/Pedestrian.h"
+#include "AccessPoint.hpp"
+#include "geometry/DTriangulation.hpp"
+#include "geometry/Line.hpp"
+#include "geometry/SubRoom.hpp"
+#include "geometry/Wall.hpp"
+#include "pedestrian/Pedestrian.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <tinyxml.h>
 
 GlobalRouter::GlobalRouter(Building * building) : _building(building)

@@ -24,11 +24,11 @@
  *
  *
  **/
-#include "Point.h"
+#include "Point.hpp"
 
-#include "general/Macros.h"
+#include "general/Macros.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <sstream>
 /************************************************************
   Konstruktoren

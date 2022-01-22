@@ -26,7 +26,7 @@
  **/
 
 
-#include "OutputHandler.h"
+#include "OutputHandler.hpp"
 
 #include <cmath>
 #include <cstdlib>

@@ -30,7 +30,7 @@
  */
 
 
-#include "TrajectoryPoint.h"
+#include "TrajectoryPoint.hpp"
 
 #include <limits>
 

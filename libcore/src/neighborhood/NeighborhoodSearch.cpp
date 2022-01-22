@@ -22,9 +22,9 @@
  *
  *
  **/
-#include "NeighborhoodSearch.h"
+#include "NeighborhoodSearch.hpp"
 
-#include "pedestrian/Pedestrian.h"
+#include "pedestrian/Pedestrian.hpp"
 
 #include <algorithm>
 #include <iterator>

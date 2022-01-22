@@ -24,18 +24,18 @@
  *
  *
  **/
-#include "SubRoom.h"
+#include "SubRoom.hpp"
 
-#include "Hline.h"
-#include "Line.h"
-#include "Obstacle.h"
-#include "Point.h"
-#include "Transition.h"
-#include "WaitingArea.h"
-#include "Wall.h"
-#include "pedestrian/Pedestrian.h"
+#include "Hline.hpp"
+#include "Line.hpp"
+#include "Obstacle.hpp"
+#include "Point.hpp"
+#include "Transition.hpp"
+#include "WaitingArea.hpp"
+#include "Wall.hpp"
+#include "pedestrian/Pedestrian.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <cmath>
 
 int SubRoom::_static_uid = 1; //must be positive (sideeffect for FloorfieldViaFM::isInside())

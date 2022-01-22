@@ -5,11 +5,11 @@
  *      Author: Ulrich  Kemloh
  */
 
-#include "PointPlotter.h"
+#include "PointPlotter.hpp"
 
-#include "JPoint.h"
-#include "Settings.h"
-#include "general/Macros.h"
+#include "JPoint.hpp"
+#include "Settings.hpp"
+#include "general/Macros.hpp"
 
 #include <vtkActor.h>
 #include <vtkDataArray.h>

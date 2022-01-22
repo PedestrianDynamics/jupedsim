@@ -18,14 +18,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  **/
-#include "ArgumentParser.h"
+#include "ArgumentParser.hpp"
 
-#include "IO/IniFileParser.h"
-#include "IO/OutputHandler.h"
-#include "pedestrian/AgentsParameters.h"
-#include "routing/global_shortest/GlobalRouter.h"
+#include "IO/IniFileParser.hpp"
+#include "IO/OutputHandler.hpp"
+#include "pedestrian/AgentsParameters.hpp"
+#include "routing/global_shortest/GlobalRouter.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 
 const fs::path & ArgumentParser::IniFilePath() const
 {

@@ -17,9 +17,9 @@
  **/
 
 
-#include "neighborhood/Grid2D.h"
+#include "neighborhood/Grid2D.hpp"
 
-#include "pedestrian/Pedestrian.h"
+#include "pedestrian/Pedestrian.hpp"
 
 #include <catch2/catch.hpp>
 #include <deque>

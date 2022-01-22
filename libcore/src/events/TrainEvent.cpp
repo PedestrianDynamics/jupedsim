@@ -1,8 +1,8 @@
-#include "TrainEvent.h"
+#include "TrainEvent.hpp"
 
-#include "geometry/SubRoom.h"
-#include "geometry/Wall.h"
-#include "geometry/helper/CorrectGeometry.h"
+#include "geometry/SubRoom.hpp"
+#include "geometry/Wall.hpp"
+#include "geometry/helper/CorrectGeometry.hpp"
 
 #include <fmt/format.h>
 

@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  **/
-#include "SimulationHelper.h"
+#include "SimulationHelper.hpp"
 
-#include "Simulation.h"
-#include "geometry/Room.h"
-#include "geometry/SubRoom.h"
-#include "pedestrian/Pedestrian.h"
+#include "Simulation.hpp"
+#include "geometry/Room.hpp"
+#include "geometry/SubRoom.hpp"
+#include "pedestrian/Pedestrian.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <algorithm>
 #include <iterator>
 #include <memory>

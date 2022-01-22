@@ -1,7 +1,7 @@
-#include "EventVisitors.h"
+#include "EventVisitors.hpp"
 
-#include "events/Event.h"
-#include "pedestrian/Pedestrian.h"
+#include "events/Event.hpp"
+#include "pedestrian/Pedestrian.hpp"
 
 #include <memory>
 #include <variant>

@@ -24,13 +24,13 @@
  *
  *
  **/
-#include "Goal.h"
+#include "Goal.hpp"
 
-#include "Crossing.h"
-#include "Point.h"
-#include "Wall.h"
+#include "Crossing.hpp"
+#include "Point.hpp"
+#include "Wall.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <boost/geometry/algorithms/distance.hpp>
 
 Goal::Goal()

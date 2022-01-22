@@ -26,18 +26,18 @@
  **/
 
 
-#include "SubRoom.h"
+#include "SubRoom.hpp"
 
-#include "../Log.h"
-#include "Hline.h"
-#include "Line.h"
-#include "Obstacle.h"
-#include "Point.h"
-#include "Transition.h"
-#include "Wall.h"
+#include "../Log.hpp"
+#include "Hline.hpp"
+#include "Line.hpp"
+#include "Obstacle.hpp"
+#include "Point.hpp"
+#include "Transition.hpp"
+#include "Wall.hpp"
 
 #ifdef _SIMULATOR
-#include "../pedestrian/Pedestrian.h"
+#include "../pedestrian/Pedestrian.hpp"
 #endif //_SIMULATOR
 
 #include <cmath>

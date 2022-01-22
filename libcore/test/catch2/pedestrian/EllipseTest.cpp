@@ -16,9 +16,9 @@
  *
  **/
 
-#include "pedestrian/Ellipse.h"
+#include "pedestrian/Ellipse.hpp"
 
-#include "math/Mathematics.h"
+#include "math/Mathematics.hpp"
 
 #include <catch2/catch.hpp>
 #include <cmath>

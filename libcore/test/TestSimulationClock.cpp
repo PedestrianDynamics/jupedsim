@@ -1,4 +1,4 @@
-#include "SimulationClock.h"
+#include "SimulationClock.hpp"
 
 #include <gtest/gtest.h>
 

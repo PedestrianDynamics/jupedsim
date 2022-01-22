@@ -16,15 +16,15 @@
  *
  **/
 
-#include "geometry/SubRoom.h"
+#include "geometry/SubRoom.hpp"
 
-#include "IO/OutputHandler.h"
-#include "geometry/Crossing.h"
-#include "geometry/Line.h"
-#include "geometry/Obstacle.h"
-#include "geometry/Point.h"
-#include "geometry/Transition.h"
-#include "geometry/Wall.h"
+#include "IO/OutputHandler.hpp"
+#include "geometry/Crossing.hpp"
+#include "geometry/Line.hpp"
+#include "geometry/Obstacle.hpp"
+#include "geometry/Point.hpp"
+#include "geometry/Transition.hpp"
+#include "geometry/Wall.hpp"
 
 #include <catch2/catch.hpp>
 #include <vector>

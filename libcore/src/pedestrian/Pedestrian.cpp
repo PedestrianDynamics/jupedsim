@@ -24,14 +24,14 @@
  *
  *
  **/
-#include "Pedestrian.h"
+#include "Pedestrian.hpp"
 
-#include "geometry/Building.h"
-#include "geometry/Line.h"
-#include "geometry/SubRoom.h"
-#include "geometry/WaitingArea.h"
+#include "geometry/Building.hpp"
+#include "geometry/Line.hpp"
+#include "geometry/SubRoom.hpp"
+#include "geometry/WaitingArea.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <cassert>
 
 // initialize the static variables

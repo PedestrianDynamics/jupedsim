@@ -31,21 +31,21 @@
  *
  */
 
-#include "Visualisation.h"
+#include "Visualisation.hpp"
 
-#include "Frame.h"
-#include "FrameElement.h"
-#include "InteractorStyle.h"
-#include "Log.h"
-#include "TrajectoryPoint.h"
-#include "general/Macros.h"
-#include "geometry/FacilityGeometry.h"
-#include "geometry/GeometryFactory.h"
-#include "geometry/LinePlotter2D.h"
-#include "geometry/Point.h"
-#include "geometry/PointPlotter.h"
+#include "Frame.hpp"
+#include "FrameElement.hpp"
+#include "InteractorStyle.hpp"
+#include "Log.hpp"
+#include "TrajectoryPoint.hpp"
+#include "general/Macros.hpp"
+#include "geometry/FacilityGeometry.hpp"
+#include "geometry/GeometryFactory.hpp"
+#include "geometry/LinePlotter2D.hpp"
+#include "geometry/Point.hpp"
+#include "geometry/PointPlotter.hpp"
+#include "MainWindow.hpp"
 
-#include <MainWindow.h>
 #include <QMessageBox>
 #include <QObject>
 #include <QString>

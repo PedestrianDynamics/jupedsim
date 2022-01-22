@@ -1,4 +1,4 @@
-#include "myqtreeview.h"
+#include "myqtreeview.hpp"
 
 MyQTreeView::MyQTreeView(QWidget * parent) : QTreeView(parent) {}
 

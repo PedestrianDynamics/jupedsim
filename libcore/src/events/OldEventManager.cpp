@@ -24,9 +24,9 @@
  *
  *
  **/
-#include "OldEventManager.h"
+#include "OldEventManager.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 
 void OldEventManager::AddEvent(std::unique_ptr<OldEvent> event)
 {

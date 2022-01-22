@@ -24,7 +24,7 @@
  *
  *
  **/
-#include "Ellipse.h"
+#include "Ellipse.hpp"
 
 #define _USE_MATH_DEFINES
 #ifndef M_PI

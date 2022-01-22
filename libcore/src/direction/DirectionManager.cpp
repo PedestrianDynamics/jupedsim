@@ -19,13 +19,13 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include "DirectionManager.h"
+#include "DirectionManager.hpp"
 
-#include "direction/waiting/WaitingStrategy.h"
-#include "direction/walking/DirectionStrategy.h"
-#include "geometry/Building.h"
-#include "geometry/Point.h"
-#include "pedestrian/Pedestrian.h"
+#include "direction/waiting/WaitingStrategy.hpp"
+#include "direction/walking/DirectionStrategy.hpp"
+#include "geometry/Building.hpp"
+#include "geometry/Point.hpp"
+#include "pedestrian/Pedestrian.hpp"
 
 void DirectionManager::Init(Building * building)
 {

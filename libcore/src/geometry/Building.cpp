@@ -24,30 +24,30 @@
  *
  *
  **/
-#include "Building.h"
+#include "Building.hpp"
 
-#include "IO/GeoFileParser.h"
-#include "IO/TrainFileParser.h"
-#include "general/Configuration.h"
-#include "general/Filesystem.h"
-#include "general/Macros.h"
-#include "geometry/Building.h"
-#include "geometry/Crossing.h"
-#include "geometry/Goal.h"
-#include "geometry/Hline.h"
-#include "geometry/Line.h"
-#include "geometry/Obstacle.h"
-#include "geometry/Point.h"
-#include "geometry/Room.h"
-#include "geometry/SubRoom.h"
-#include "geometry/Transition.h"
-#include "geometry/Wall.h"
-#include "geometry/helper/CorrectGeometry.h"
-#include "neighborhood/NeighborhoodSearch.h"
-#include "pedestrian/Pedestrian.h"
-#include "routing/RoutingEngine.h"
+#include "IO/GeoFileParser.hpp"
+#include "IO/TrainFileParser.hpp"
+#include "general/Configuration.hpp"
+#include "general/Filesystem.hpp"
+#include "general/Macros.hpp"
+#include "geometry/Building.hpp"
+#include "geometry/Crossing.hpp"
+#include "geometry/Goal.hpp"
+#include "geometry/Hline.hpp"
+#include "geometry/Line.hpp"
+#include "geometry/Obstacle.hpp"
+#include "geometry/Point.hpp"
+#include "geometry/Room.hpp"
+#include "geometry/SubRoom.hpp"
+#include "geometry/Transition.hpp"
+#include "geometry/Wall.hpp"
+#include "geometry/helper/CorrectGeometry.hpp"
+#include "neighborhood/NeighborhoodSearch.hpp"
+#include "pedestrian/Pedestrian.hpp"
+#include "routing/RoutingEngine.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <algorithm>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/constants.hpp>

@@ -25,11 +25,11 @@
  *
  **/
 
-#include "Crossing.h"
+#include "Crossing.hpp"
 
-#include "../Log.h"
-#include "Room.h"
-#include "SubRoom.h"
+#include "../Log.hpp"
+#include "Room.hpp"
+#include "SubRoom.hpp"
 
 using namespace std;
 

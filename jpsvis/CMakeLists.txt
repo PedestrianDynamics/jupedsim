@@ -2,75 +2,75 @@ add_library(vis STATIC
     ${CMAKE_BINARY_DIR}/generated/BuildInfo.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/forms/icons.qrc
     ${CMAKE_CURRENT_SOURCE_DIR}/forms/jpsvis.rc
-    src/ApplicationState.h
-    src/BuildInfo.h
+    src/ApplicationState.hpp
+    src/BuildInfo.hpp
     src/CLI.cpp
-    src/CLI.h
+    src/CLI.hpp
     src/Frame.cpp
-    src/Frame.h
-    src/FrameElement.h
+    src/Frame.hpp
+    src/FrameElement.hpp
     src/IO/OutputHandler.cpp
-    src/IO/OutputHandler.h
+    src/IO/OutputHandler.hpp
     src/InteractorStyle.cpp
-    src/InteractorStyle.h
+    src/InteractorStyle.hpp
     src/Log.cpp
-    src/Log.h
+    src/Log.hpp
     src/MainWindow.cpp
-    src/MainWindow.h
+    src/MainWindow.hpp
     src/Parsing.cpp
-    src/Parsing.h
-    src/RenderMode.h
-    src/Settings.h
+    src/Parsing.hpp
+    src/RenderMode.hpp
+    src/Settings.hpp
     src/TrailPlotter.cpp
-    src/TrailPlotter.h
+    src/TrailPlotter.hpp
     src/TrajectoryData.cpp
-    src/TrajectoryData.h
+    src/TrajectoryData.hpp
     src/Visualisation.cpp
-    src/Visualisation.h
-    src/general/Macros.h
+    src/Visualisation.hpp
+    src/general/Macros.hpp
     src/geometry/Building.cpp
-    src/geometry/Building.h
+    src/geometry/Building.hpp
     src/geometry/Crossing.cpp
-    src/geometry/Crossing.h
+    src/geometry/Crossing.hpp
     src/geometry/FacilityGeometry.cpp
-    src/geometry/FacilityGeometry.h
+    src/geometry/FacilityGeometry.hpp
     src/geometry/GeometryFactory.cpp
-    src/geometry/GeometryFactory.h
+    src/geometry/GeometryFactory.hpp
     src/geometry/Goal.cpp
-    src/geometry/Goal.h
+    src/geometry/Goal.hpp
     src/geometry/Hline.cpp
-    src/geometry/Hline.h
+    src/geometry/Hline.hpp
     src/geometry/JPoint.cpp
-    src/geometry/JPoint.h
+    src/geometry/JPoint.hpp
     src/geometry/Line.cpp
-    src/geometry/Line.h
+    src/geometry/Line.hpp
     src/geometry/LinePlotter.cpp
-    src/geometry/LinePlotter.h
+    src/geometry/LinePlotter.hpp
     src/geometry/LinePlotter2D.cpp
-    src/geometry/LinePlotter2D.h
+    src/geometry/LinePlotter2D.hpp
     src/geometry/NavLine.cpp
-    src/geometry/NavLine.h
+    src/geometry/NavLine.hpp
     src/geometry/Obstacle.cpp
-    src/geometry/Obstacle.h
+    src/geometry/Obstacle.hpp
     src/geometry/Point.cpp
-    src/geometry/Point.h
+    src/geometry/Point.hpp
     src/geometry/PointPlotter.cpp
-    src/geometry/PointPlotter.h
+    src/geometry/PointPlotter.hpp
     src/geometry/PointPlotter2D.cpp
-    src/geometry/PointPlotter2D.h
+    src/geometry/PointPlotter2D.hpp
     src/geometry/Room.cpp
-    src/geometry/Room.h
+    src/geometry/Room.hpp
     src/geometry/SubRoom.cpp
-    src/geometry/SubRoom.h
+    src/geometry/SubRoom.hpp
     src/geometry/Transition.cpp
-    src/geometry/Transition.h
+    src/geometry/Transition.hpp
     src/geometry/Wall.cpp
-    src/geometry/Wall.h
+    src/geometry/Wall.hpp
     src/myqtreeview.cpp
-    src/myqtreeview.h
+    src/myqtreeview.hpp
     src/string_utils.cpp
-    src/string_utils.h
-    src/trains/train.h
+    src/string_utils.hpp
+    src/trains/train.hpp
 )
 
 target_include_directories(vis PUBLIC

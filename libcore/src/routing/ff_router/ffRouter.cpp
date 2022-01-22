@@ -44,15 +44,15 @@
  * We will derive from the <Router> class to fit the interface.
  *
  **/
-#include "ffRouter.h"
+#include "ffRouter.hpp"
 
-#include "direction/walking/DirectionStrategy.h"
-#include "geometry/SubRoom.h"
-#include "geometry/WaitingArea.h"
-#include "pedestrian/Pedestrian.h"
-#include "routing/ff_router/mesh/RectGrid.h"
+#include "direction/walking/DirectionStrategy.hpp"
+#include "geometry/SubRoom.hpp"
+#include "geometry/WaitingArea.hpp"
+#include "pedestrian/Pedestrian.hpp"
+#include "routing/ff_router/mesh/RectGrid.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <stdexcept>
 
 FFRouter::FFRouter(Configuration * config, Building * building) :

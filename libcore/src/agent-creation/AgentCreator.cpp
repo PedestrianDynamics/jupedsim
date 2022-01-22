@@ -1,10 +1,10 @@
-#include "AgentCreator.h"
+#include "AgentCreator.hpp"
 
-#include "SimulationClock.h"
-#include "geometry/Building.h"
-#include "pedestrian/AgentsSourcesManager.h"
-#include "pedestrian/PedDistributor.h"
-#include "pedestrian/Pedestrian.h"
+#include "SimulationClock.hpp"
+#include "geometry/Building.hpp"
+#include "pedestrian/AgentsSourcesManager.hpp"
+#include "pedestrian/PedDistributor.hpp"
+#include "pedestrian/Pedestrian.hpp"
 
 #include <iterator>
 #include <map>

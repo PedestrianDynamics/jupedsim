@@ -24,13 +24,13 @@
  *
  *
  **/
-#include "Line.h"
+#include "Line.hpp"
 
-#include "Wall.h"
-#include "general/Macros.h"
-#include "math/Mathematics.h"
+#include "Wall.hpp"
+#include "general/Macros.hpp"
+#include "math/Mathematics.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <vector>
 
 int Line::_static_UID = 0;

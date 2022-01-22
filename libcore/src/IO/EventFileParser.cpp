@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  **/
-#include "EventFileParser.h"
+#include "EventFileParser.hpp"
 
-#include "events/DoorEvent.h"
-#include "general/Macros.h"
+#include "events/DoorEvent.hpp"
+#include "general/Macros.hpp"
 #include "tinyxml.h"
 
-#include <Logger.h>
+#include <Logger.hpp>
 
 namespace
 {

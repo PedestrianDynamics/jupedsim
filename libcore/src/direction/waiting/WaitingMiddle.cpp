@@ -25,12 +25,12 @@
  * Goal of this strategy is always the middle of the subroom or waiting area the pedestrian is in.
  **/
 
-#include "WaitingMiddle.h"
+#include "WaitingMiddle.hpp"
 
-#include "geometry/Point.h"
-#include "geometry/Room.h"
-#include "geometry/SubRoom.h"
-#include "pedestrian/Pedestrian.h"
+#include "geometry/Point.hpp"
+#include "geometry/Room.hpp"
+#include "geometry/SubRoom.hpp"
+#include "pedestrian/Pedestrian.hpp"
 
 Point WaitingMiddle::GetWaitingPosition(Room * room, Pedestrian * ped, double time)
 {

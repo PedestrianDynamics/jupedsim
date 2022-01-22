@@ -14,15 +14,15 @@ set(source_files
     src/SimulationHelper.cpp
     src/agent-creation/AgentCreator.cpp
     src/direction/DirectionManager.cpp
-    src/direction/DirectionManager.h
+    src/direction/DirectionManager.hpp
     src/direction/waiting/WaitingMiddle.cpp
-    src/direction/waiting/WaitingMiddle.h
+    src/direction/waiting/WaitingMiddle.hpp
     src/direction/waiting/WaitingRandom.cpp
-    src/direction/waiting/WaitingRandom.h
+    src/direction/waiting/WaitingRandom.hpp
     src/direction/waiting/WaitingStrategy.cpp
-    src/direction/waiting/WaitingStrategy.h
+    src/direction/waiting/WaitingStrategy.hpp
     src/direction/walking/DirectionStrategy.cpp
-    src/direction/walking/DirectionStrategy.h
+    src/direction/walking/DirectionStrategy.hpp
     src/events/DoorEvent.cpp
     src/events/Event.cpp
     src/events/EventManager.cpp
@@ -43,7 +43,7 @@ set(source_files
     src/geometry/Room.cpp
     src/geometry/SubRoom.cpp
     src/geometry/SubroomType.cpp
-    src/geometry/SubroomType.h
+    src/geometry/SubroomType.hpp
     src/geometry/Transition.cpp
     src/geometry/WaitingArea.cpp
     src/geometry/Wall.cpp
@@ -71,69 +71,69 @@ set(source_files
 )
 
 set(header_files
-    src/IO/EventFileParser.h
-    src/IO/GeoFileParser.h
-    src/IO/IniFileParser.h
-    src/IO/OutputHandler.h
-    src/IO/PedDistributionParser.h
-    src/IO/TrainFileParser.h
-    src/IO/Trajectories.h
-    src/Simulation.h
-    src/SimulationClock.h
-    src/SimulationHelper.h
-    src/agent-creation/AgentCreator.h
-    src/events/DoorEvent.h
-    src/events/Event.h
-    src/events/EventManager.h
-    src/events/EventVisitors.h
-    src/events/OldEvent.h
-    src/events/OldEventManager.h
-    src/events/TrainEvent.h
-    src/general/ArgumentParser.h
-    src/general/Compiler.h
-    src/general/Configuration.h
-    src/general/Filesystem.h
-    src/general/Macros.h
-    src/general/randomnumbergenerator.h
-    src/geometry/Building.h
-    src/geometry/Crossing.h
-    src/geometry/DTriangulation.h
-    src/geometry/Goal.h
-    src/geometry/GoalManager.h
-    src/geometry/Hline.h
-    src/geometry/Line.h
-    src/geometry/Obstacle.h
-    src/geometry/Point.h
-    src/geometry/Room.h
-    src/geometry/SubRoom.h
-    src/geometry/TrainGeometryInterface.h
-    src/geometry/Transition.h
-    src/geometry/WaitingArea.h
-    src/geometry/Wall.h
-    src/geometry/helper/CorrectGeometry.h
-    src/math/GCFMModel.h
-    src/math/Mathematics.h
-    src/math/OperationalModel.h
-    src/math/VelocityModel.h
-    src/neighborhood/Grid2D.h
-    src/neighborhood/NeighborhoodSearch.h
-    src/pedestrian/AgentsParameters.h
-    src/pedestrian/AgentsSource.h
-    src/pedestrian/AgentsSourcesManager.h
-    src/pedestrian/Ellipse.h
-    src/pedestrian/PedDistributor.h
-    src/pedestrian/Pedestrian.h
-    src/pedestrian/StartDistribution.h
-    src/routing/Router.h
-    src/routing/RoutingEngine.h
-    src/routing/RoutingStrategy.h
-    src/routing/ff_router/UnivFFviaFM.h
-    src/routing/ff_router/ffRouter.h
-    src/routing/ff_router/mesh/RectGrid.h
-    src/routing/global_shortest/AccessPoint.h
-    src/routing/global_shortest/GlobalRouter.h
-    src/util/UniqueID.h
-    src/voronoi-boost/VoronoiPositionGenerator.h
+    src/IO/EventFileParser.hpp
+    src/IO/GeoFileParser.hpp
+    src/IO/IniFileParser.hpp
+    src/IO/OutputHandler.hpp
+    src/IO/PedDistributionParser.hpp
+    src/IO/TrainFileParser.hpp
+    src/IO/Trajectories.hpp
+    src/Simulation.hpp
+    src/SimulationClock.hpp
+    src/SimulationHelper.hpp
+    src/agent-creation/AgentCreator.hpp
+    src/events/DoorEvent.hpp
+    src/events/Event.hpp
+    src/events/EventManager.hpp
+    src/events/EventVisitors.hpp
+    src/events/OldEvent.hpp
+    src/events/OldEventManager.hpp
+    src/events/TrainEvent.hpp
+    src/general/ArgumentParser.hpp
+    src/general/Compiler.hpp
+    src/general/Configuration.hpp
+    src/general/Filesystem.hpp
+    src/general/Macros.hpp
+    src/general/randomnumbergenerator.hpp
+    src/geometry/Building.hpp
+    src/geometry/Crossing.hpp
+    src/geometry/DTriangulation.hpp
+    src/geometry/Goal.hpp
+    src/geometry/GoalManager.hpp
+    src/geometry/Hline.hpp
+    src/geometry/Line.hpp
+    src/geometry/Obstacle.hpp
+    src/geometry/Point.hpp
+    src/geometry/Room.hpp
+    src/geometry/SubRoom.hpp
+    src/geometry/TrainGeometryInterface.hpp
+    src/geometry/Transition.hpp
+    src/geometry/WaitingArea.hpp
+    src/geometry/Wall.hpp
+    src/geometry/helper/CorrectGeometry.hpp
+    src/math/GCFMModel.hpp
+    src/math/Mathematics.hpp
+    src/math/OperationalModel.hpp
+    src/math/VelocityModel.hpp
+    src/neighborhood/Grid2D.hpp
+    src/neighborhood/NeighborhoodSearch.hpp
+    src/pedestrian/AgentsParameters.hpp
+    src/pedestrian/AgentsSource.hpp
+    src/pedestrian/AgentsSourcesManager.hpp
+    src/pedestrian/Ellipse.hpp
+    src/pedestrian/PedDistributor.hpp
+    src/pedestrian/Pedestrian.hpp
+    src/pedestrian/StartDistribution.hpp
+    src/routing/Router.hpp
+    src/routing/RoutingEngine.hpp
+    src/routing/RoutingStrategy.hpp
+    src/routing/ff_router/UnivFFviaFM.hpp
+    src/routing/ff_router/ffRouter.hpp
+    src/routing/ff_router/mesh/RectGrid.hpp
+    src/routing/global_shortest/AccessPoint.hpp
+    src/routing/global_shortest/GlobalRouter.hpp
+    src/util/UniqueID.hpp
+    src/voronoi-boost/VoronoiPositionGenerator.hpp
 )
 
 add_library(core STATIC

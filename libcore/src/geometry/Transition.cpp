@@ -24,12 +24,12 @@
  *
  *
  **/
-#include "Transition.h"
+#include "Transition.hpp"
 
-#include "Room.h"
-#include "SubRoom.h"
+#include "Room.hpp"
+#include "SubRoom.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 
 Transition::Transition() : Crossing()
 {

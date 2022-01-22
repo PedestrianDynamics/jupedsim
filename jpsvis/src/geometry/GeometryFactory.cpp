@@ -1,6 +1,6 @@
-#include "GeometryFactory.h"
+#include "GeometryFactory.hpp"
 
-#include "FacilityGeometry.h"
+#include "FacilityGeometry.hpp"
 
 #include <vtkAssembly.h>
 #include <vtkRenderer.h>

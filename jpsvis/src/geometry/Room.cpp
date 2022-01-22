@@ -26,11 +26,11 @@
  **/
 
 
-#include "Room.h"
+#include "Room.hpp"
 
-#include "../IO/OutputHandler.h"
-#include "../Log.h"
-#include "SubRoom.h"
+#include "../IO/OutputHandler.hpp"
+#include "../Log.hpp"
+#include "SubRoom.hpp"
 
 #include <memory>
 #include <sstream>

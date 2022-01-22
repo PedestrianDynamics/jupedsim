@@ -16,10 +16,10 @@
  *
  **/
 
-#include "geometry/Obstacle.h"
+#include "geometry/Obstacle.hpp"
 
-#include "geometry/Point.h"
-#include "geometry/Wall.h"
+#include "geometry/Point.hpp"
+#include "geometry/Wall.hpp"
 
 #include <catch2/catch.hpp>
 #include <cmath>

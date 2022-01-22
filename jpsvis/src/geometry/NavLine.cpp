@@ -26,7 +26,7 @@
  **/
 
 
-#include "NavLine.h"
+#include "NavLine.hpp"
 
 
 NavLine::NavLine() {}

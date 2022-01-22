@@ -16,7 +16,7 @@
  *
  **/
 
-#include "geometry/Room.h"
+#include "geometry/Room.hpp"
 
 #include <catch2/catch.hpp>
 #include <string>

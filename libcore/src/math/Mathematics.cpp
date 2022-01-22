@@ -24,7 +24,7 @@
  * This class is used to define mathematical parameters, constants and functions.
  *
  **/
-#include "Mathematics.h"
+#include "Mathematics.hpp"
 
 #include <cassert>
 

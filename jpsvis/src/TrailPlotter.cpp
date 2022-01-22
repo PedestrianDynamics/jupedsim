@@ -1,6 +1,6 @@
-#include "TrailPlotter.h"
+#include "TrailPlotter.hpp"
 
-#include "general/Macros.h"
+#include "general/Macros.hpp"
 
 #include <vtkActor.h>
 #include <vtkAppendPolyData.h>

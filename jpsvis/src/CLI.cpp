@@ -1,4 +1,4 @@
-#include "CLI.h"
+#include "CLI.hpp"
 
 #include <iostream>
 CLI parseCommandLine(

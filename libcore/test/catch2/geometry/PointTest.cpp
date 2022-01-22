@@ -16,7 +16,7 @@
  *
  **/
 
-#include "geometry/Point.h"
+#include "geometry/Point.hpp"
 
 #include <catch2/catch.hpp>
 #include <cmath>

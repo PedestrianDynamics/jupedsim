@@ -28,28 +28,28 @@
  *
  **/
 
-#include "Simulation.h"
+#include "Simulation.hpp"
 
-#include "IO/EventFileParser.h"
-#include "IO/TrainFileParser.h"
-#include "IO/Trajectories.h"
-#include "SimulationClock.h"
-#include "SimulationHelper.h"
-#include "events/Event.h"
-#include "events/EventManager.h"
-#include "events/EventVisitors.h"
-#include "general/Filesystem.h"
-#include "geometry/GoalManager.h"
-#include "geometry/Line.h"
-#include "geometry/WaitingArea.h"
-#include "geometry/Wall.h"
-#include "math/GCFMModel.h"
-#include "math/OperationalModel.h"
-#include "pedestrian/AgentsSourcesManager.h"
-#include "pedestrian/Pedestrian.h"
-#include "routing/ff_router/ffRouter.h"
+#include "IO/EventFileParser.hpp"
+#include "IO/TrainFileParser.hpp"
+#include "IO/Trajectories.hpp"
+#include "SimulationClock.hpp"
+#include "SimulationHelper.hpp"
+#include "events/Event.hpp"
+#include "events/EventManager.hpp"
+#include "events/EventVisitors.hpp"
+#include "general/Filesystem.hpp"
+#include "geometry/GoalManager.hpp"
+#include "geometry/Line.hpp"
+#include "geometry/WaitingArea.hpp"
+#include "geometry/Wall.hpp"
+#include "math/GCFMModel.hpp"
+#include "math/OperationalModel.hpp"
+#include "pedestrian/AgentsSourcesManager.hpp"
+#include "pedestrian/Pedestrian.hpp"
+#include "routing/ff_router/ffRouter.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <algorithm>
 #include <chrono>
 #include <memory>

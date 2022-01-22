@@ -24,11 +24,11 @@
  *
  *
  **/
-#include "Crossing.h"
+#include "Crossing.hpp"
 
-#include "SubRoom.h"
+#include "SubRoom.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <fmt/core.h>
 
 

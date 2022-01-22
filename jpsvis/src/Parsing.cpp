@@ -26,19 +26,19 @@
  *
  *
  */
-#include "Parsing.h"
+#include "Parsing.hpp"
 
-#include "Frame.h"
-#include "FrameElement.h"
-#include "Log.h"
-#include "TrajectoryPoint.h"
-#include "geometry/Building.h"
-#include "geometry/FacilityGeometry.h"
-#include "geometry/GeometryFactory.h"
-#include "geometry/JPoint.h"
-#include "geometry/SubRoom.h"
-#include "geometry/Wall.h"
-#include "string_utils.h"
+#include "Frame.hpp"
+#include "FrameElement.hpp"
+#include "Log.hpp"
+#include "TrajectoryPoint.hpp"
+#include "geometry/Building.hpp"
+#include "geometry/FacilityGeometry.hpp"
+#include "geometry/GeometryFactory.hpp"
+#include "geometry/JPoint.hpp"
+#include "geometry/SubRoom.hpp"
+#include "geometry/Wall.hpp"
+#include "string_utils.hpp"
 
 #include <QCoreApplication>
 #include <QDir>

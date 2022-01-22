@@ -29,12 +29,12 @@
  *
  */
 
-#include "FacilityGeometry.h"
+#include "FacilityGeometry.hpp"
 
-#include "JPoint.h"
-#include "LinePlotter2D.h"
-#include "Settings.h"
-#include "general/Macros.h"
+#include "JPoint.hpp"
+#include "LinePlotter2D.hpp"
+#include "Settings.hpp"
+#include "general/Macros.hpp"
 
 #include <vtkActor.h>
 #include <vtkActor2DCollection.h>

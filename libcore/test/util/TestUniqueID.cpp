@@ -1,4 +1,4 @@
-#include "util/UniqueID.h"
+#include "util/UniqueID.hpp"
 
 #include <fmt/format.h>
 #include <gtest/gtest.h>

@@ -18,15 +18,15 @@
 //
 // Created by laemmel on 30.03.16.
 //
-#include "GeoFileParser.h"
+#include "GeoFileParser.hpp"
 
-#include "general/Filesystem.h"
-#include "geometry/SubRoom.h"
-#include "geometry/SubroomType.h"
-#include "geometry/WaitingArea.h"
-#include "geometry/Wall.h"
+#include "general/Filesystem.hpp"
+#include "geometry/SubRoom.hpp"
+#include "geometry/SubroomType.hpp"
+#include "geometry/WaitingArea.hpp"
+#include "geometry/Wall.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <tinyxml.h>
 
 GeoFileParser::GeoFileParser(Configuration * configuration) : _configuration(configuration) {}

@@ -24,15 +24,15 @@
  *
  *
  **/
-#include "PedDistributor.h"
+#include "PedDistributor.hpp"
 
-#include "IO/PedDistributionParser.h"
-#include "general/Filesystem.h"
-#include "geometry/SubRoom.h"
-#include "geometry/Wall.h"
-#include "pedestrian/Pedestrian.h"
+#include "IO/PedDistributionParser.hpp"
+#include "general/Filesystem.hpp"
+#include "geometry/SubRoom.hpp"
+#include "geometry/Wall.hpp"
+#include "pedestrian/Pedestrian.hpp"
 
-#include <Logger.h>
+#include <Logger.hpp>
 #include <cmath>
 
 PedDistributor::PedDistributor(
