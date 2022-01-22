@@ -890,7 +890,7 @@ std::map<Area::Id, Area> ParseAreas(const TiXmlElement* areasNode)
         if(const auto labelsNode = areaNode->FirstChildElement("lables"); labelsNode != nullptr) {
             for(auto labelNode = labelsNode->FirstChildElement("label"); labelNode != nullptr;
                 labelNode = labelNode->NextSiblingElement("label")) {
-                area.lables.insert(labelNode->GetText());
+                area.labels.insert(labelNode->GetText());
             }
         }
         std::vector<Point> polygonBuffer;

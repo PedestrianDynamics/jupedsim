@@ -49,7 +49,7 @@ Simulation::Simulation(
     std::unique_ptr<OperationalModel> operationalModel,
     std::unique_ptr<CollisionGeometry>&& geometry,
     std::unique_ptr<RoutingEngine>&& routingEngine,
-    std::map<Area::Id, Area> areas,
+    std::unique_ptr<Areas>&& areas,
     double dT)
     : _clock(dT)
     , _operationalDecisionSystem(std::move(operationalModel))
@@ -64,9 +64,9 @@ Simulation::Simulation(
 void Simulation::Iterate()
 {
     _neighborhoodSearch.Update(_agents);
-    _agentExitSystem.Run(_areas, _agents);
-    _stategicalDecisionSystem.Run(_areas, _agents);
-    _tacticalDecisionSystem.Run(_areas, *_routingEngine, _agents);
+    _agentExitSystem.Run(*_areas, _agents, _removedAgentsInLastIteration);
+    _stategicalDecisionSystem.Run(*_areas, _agents);
+    _tacticalDecisionSystem.Run(*_areas, *_routingEngine, _agents);
     _operationalDecisionSystem.Run(
         _clock.dT(), _clock.ElapsedTime(), _neighborhoodSearch, *_geometry, _agents);
 
@@ -93,11 +93,56 @@ void Simulation::AddAgent(std::unique_ptr<Pedestrian>&& agent)
     _agents.emplace_back(std::move(agent));
 }
 
+uint64_t Simulation::AddAgent(
+    const Point& position,
+    const Point& orientation,
+    double Av,
+    double AMin,
+    double BMax,
+    double BMin,
+    double Tau,
+    double T,
+    double v0,
+    uint16_t destinationAreaId)
+{
+    auto agent = std::make_unique<Pedestrian>();
+    agent->SetDeltaT(_clock.dT());
+
+    const auto orientationNormalised = orientation.Normalized();
+
+    JEllipse e{};
+    e.SetAv(Av);
+    e.SetAmin(AMin);
+    e.SetBmax(BMax);
+    e.SetBmin(BMin);
+    e.SetCosPhi(orientationNormalised.x);
+    e.SetSinPhi(orientationNormalised.y);
+    agent->SetEllipse(e);
+    agent->SetT(T);
+    agent->SetPos(position);
+    agent->SetV0Norm(v0, 0, 0, 0, 0);
+    agent->SetTau(Tau);
+    agent->goal = destinationAreaId;
+    _agents.emplace_back(std::move(agent));
+    return _agents.back()->GetUID().getID();
+}
+
 void Simulation::AddAgents(std::vector<std::unique_ptr<Pedestrian>>&& agents)
 {
     for(auto&& agent : agents) {
         AddAgent(std::move(agent));
     }
+}
+
+void Simulation::RemoveAgent(uint64_t id)
+{
+    const auto iter = std::remove_if(std::begin(_agents), std::end(_agents), [id](auto& agent) {
+        return agent->GetUID().getID() == id;
+    });
+    if(iter == std::end(_agents)) {
+        throw std::runtime_error(fmt::format("Unknown agent id {}", id));
+    }
+    _agents.erase(iter, std::end(_agents));
 }
 
 void Simulation::RemoveAgents(std::vector<Pedestrian::UID> ids)
@@ -125,17 +170,27 @@ Pedestrian& Simulation::Agent(Pedestrian::UID id) const
     return **iter;
 }
 
+Pedestrian* Simulation::AgentPtr(Pedestrian::UID id) const
+{
+    const auto iter = std::find_if(
+        _agents.begin(), _agents.end(), [id](auto& ped) { return id == ped->GetUID(); });
+    if(iter == _agents.end()) {
+        throw std::logic_error("Trying to access unknown Agent.");
+    }
+    return iter->get();
+}
+
 const std::vector<std::unique_ptr<Pedestrian>>& Simulation::Agents() const
 {
     return _agents;
 }
 
+const std::vector<uint64_t>& Simulation::RemovedAgents() const
+{
+    return _removedAgentsInLastIteration;
+}
+
 size_t Simulation::AgentCount() const
 {
     return _agents.size();
-}
-
-bool Simulation::InitArgs()
-{
-    return true;
 }

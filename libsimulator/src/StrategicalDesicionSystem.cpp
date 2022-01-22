@@ -9,7 +9,7 @@ void StrategicalDecisionSystem::Run(
     // TODO(kkratz): Right now we just pick the first exit area and tell all agents to go there
     auto find_first_exit = [](const auto& areas) {
         for(const auto& [k, v] : areas) {
-            if(v.lables.count("exit") == 1) {
+            if(v.labels.count("exit") == 1) {
                 return k;
             }
         }
