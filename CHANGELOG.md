@@ -1,9 +1,50 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## v0.9.1
+
+This is the first release in over 2 years. Several features have been removed
+because we did not have the capacity to maintain them properly.
+
+The following features have been removed / changed:
+
+* JPSFire support / toxicity analysis has been removed
+* Parallel execution with OpenMP has been removed
+* TraVisTo support has been removed.
+* Automatic geometry correction has been removed
+* Support for periodic geometries, i.e. cylinder worlds and torus worlds, has
+  been removed
+* Trajectories can now only be exported in txt format
+* Only 'Global Shortest Path' and 'Floorfield
+  Shortest Path' routers remain
+* Only 'Velocity' and 'GCFM' models remain
+* Trajectories are no longer split into multiple files
+* All vtk output has been removed
+* Progressbar display has been removed
+* Logging to file has been removed, all log messages are written to stdout
+* Changed output behaviour: When running jpscore all output will now be copied to
+  `<current-working-directory>/results` before the simulation starts and the
+  trajectory file will be written to this location progressively.
+
+New experimental feature:
+
+* Simulating Trains
+
+`jpsvis` is now released from the same source code repository as jpscore and will
+track the same version.
+
+### Changes affecting jpsvis
+
+* jpsvis can now load multiple GB trajectory files within seconds.
+* jpsvis UI reworked to be single window
+* Frames can be move forward / backward with LEFT / RIGHT keys
+* Speed up can be increased / decreased with UP / DOWN keys
+* Playback can be started / stopped with SPACE
+
 ## v0.8.5 [2019-07-12]
 
 ### Added
+
 - Added option for additional/optional output for speed, velocity(x,y),
 final goal, intermediate goal, desired direction(x,y), spotlight, router,
 group. Thus, there is no need to run multiple simulation to obtain those
