@@ -97,89 +97,6 @@ public:
         bool useWallDistances);
 
     /**
-     * Constructs the floor field in a specific subroom.
-     * @param subroom subroom in which the floor field should be created.
-     * @param building geometry used in simulation.
-     * @param hx grid size for floor fields.
-     * @param wallAvoid wall avoidance distance.
-     * @param useWallDistances should wall avoidance be considered in floor field.
-     */
-    UnivFFviaFM(
-        SubRoom * subroom,
-        Building * building,
-        double hx,
-        double wallAvoid,
-        bool useWallDistances);
-
-    /**
-     * Constructs the floor field in a specific room.
-     * @param room room in which the floor field should be created.
-     * @param config configuration used in simulation.
-     * @param hx grid size for floor fields.
-     * @param wallAvoid wall avoidance distance.
-     * @param useWallDistances should wall avoidance be considered in floor field.
-     */
-    UnivFFviaFM(
-        Room * room,
-        Configuration * config,
-        double hx,
-        double wallAvoid,
-        bool useWallDistances);
-
-    /**
-     * Constructs the floor field in a specific room.
-     * @param room room in which the floor field should be created.
-     * @param config configuration used in simulation.
-     * @param hx grid size for floor fields.
-     * @param wallAvoid wall avoidance distance.
-     * @param useWallDistances should wall avoidance be considered in floor field.
-     * @param wantedDoors doors which should be considered
-     *
-     * @todo check if this is really needed, wantedDoors always set to empty vector.
-     */
-    UnivFFviaFM(
-        Room * room,
-        Configuration * config,
-        double hx,
-        double wallAvoid,
-        bool useWallDistances,
-        const std::vector<int> & wantedDoors);
-
-    /**
-     * Constructs the floor field in a specific subroom.
-     * @param subroom subroom in which the floor field should be created.
-     * @param config configuration used in simulation.
-     * @param hx grid size for floor fields.
-     * @param wallAvoid wall avoidance distance.
-     * @param useWallDistances should wall avoidance be considered in floor field.
-     */
-    UnivFFviaFM(
-        SubRoom * subroom,
-        Configuration * config,
-        double hx,
-        double wallAvoid,
-        bool useWallDistances);
-
-    /**
-     * Constructs the floor field in a specific room.
-     * @param subroom subroom in which the floor field should be created.
-     * @param config configuration used in simulation.
-     * @param hx grid size for floor fields.
-     * @param wallAvoid wall avoidance distance.
-     * @param useWallDistances should wall avoidance be considered in floor field.
-     * @param wantedDoors doors which should be considered
-     *
-     * @todo check if this is really needed, wantedDoors always set to empty vector.
-     */
-    UnivFFviaFM(
-        SubRoom * subroom,
-        Configuration * config,
-        double hx,
-        double wallAvoid,
-        bool useWallDistances,
-        const std::vector<int> & wantedDoors);
-
-    /**
      * Disable default constructor.
      */
     UnivFFviaFM() = delete;
@@ -479,11 +396,6 @@ private:
      * Geometry used for simulation.
      */
     Building * _building = nullptr;
-
-    /**
-     * Configuration used for simulation.
-     */
-    Configuration * _configuration = nullptr;
 
     /**
      * ID of room for which this floor field is computed.

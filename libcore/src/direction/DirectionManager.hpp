@@ -22,6 +22,7 @@
 #pragma once
 
 #include "general/Macros.hpp"
+#include "math/OperationalModel.hpp"
 #include "pedestrian/Pedestrian.hpp"
 
 #include <memory>
@@ -31,7 +32,6 @@ class WaitingStrategy;
 class DirectionStrategy;
 
 class Point;
-
 
 class Building;
 
@@ -48,7 +48,7 @@ public:
     /**
      * Inits the used strategies.
      */
-    void Init(Building *);
+    void Init(Building *, const Configuration & config);
 
     void Update(double time) { _currentTime = time; };
 

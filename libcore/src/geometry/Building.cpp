@@ -119,11 +119,6 @@ Building::~Building()
     }
 }
 
-Configuration * Building::GetConfig() const
-{
-    return _configuration;
-}
-
 int Building::GetNumberOfRooms() const
 {
     return (int) _rooms.size();

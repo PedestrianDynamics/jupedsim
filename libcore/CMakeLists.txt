@@ -235,7 +235,6 @@ if (BUILD_TESTS)
         test/catch2/Main.cpp
         test/catch2/math/MathematicsTest.cpp
         test/catch2/pedestrian/EllipseTest.cpp
-        test/catch2/routing/UnivFFviaFMTest.cpp
     )
 
     target_link_libraries(catch-unittests PRIVATE

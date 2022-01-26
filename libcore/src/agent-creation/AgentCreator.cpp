@@ -19,7 +19,7 @@ CreateAllPedestrians(Configuration * configuration, Building * building, double 
     AgentVec agents;
     building->SetAgents(&agents);
 
-    configuration->directionManager->Init(building);
+    configuration->directionManager->Init(building, *configuration);
 
     PedDistributor pd(configuration, &agents);
     pd.Distribute(building);

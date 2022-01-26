@@ -24,6 +24,7 @@
 
 #include "geometry/Building.hpp"
 #include "geometry/Point.hpp"
+#include "math/OperationalModel.hpp"
 
 #include <map>
 #include <string>
@@ -58,7 +59,7 @@ public:
     /**
      * Initialization method for DirectionStrategies.
      */
-    virtual void Init(Building * /*building*/){};
+    virtual void Init(Building * /*building*/, const Configuration & /*config*/){};
 
     /**
      * Getter for the goal at the current time-step.
@@ -134,7 +135,7 @@ public:
 class DirectionLocalFloorfield : public DirectionStrategy
 {
 public:
-    void Init(Building * building) override;
+    void Init(Building * building, const Configuration & config) override;
 
     ~DirectionLocalFloorfield() override;
 

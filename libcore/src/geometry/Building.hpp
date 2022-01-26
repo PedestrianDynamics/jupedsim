@@ -89,8 +89,6 @@ public:
 
     void SetAgents(std::vector<std::unique_ptr<Pedestrian>> * agents) { _allPedestrians = agents; }
 
-    Configuration * GetConfig() const;
-
     void GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const;
 
     const std::map<int, std::shared_ptr<Room>> & GetAllRooms() const;

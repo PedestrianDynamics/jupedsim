@@ -48,8 +48,14 @@ VelocityModel::VelocityModel(
     double aped,
     double Dped,
     double awall,
-    double Dwall) :
-    OperationalModel(directionManager), _aPed(aped), _DPed(Dped), _aWall(awall), _DWall(Dwall)
+    double Dwall,
+    unsigned int seed) :
+    OperationalModel(directionManager),
+    _aPed(aped),
+    _DPed(Dped),
+    _aWall(awall),
+    _DWall(Dwall),
+    _seed(seed)
 {
 }
 
@@ -167,7 +173,7 @@ Point VelocityModel::e0(Pedestrian * ped, Room * room) const
     } else { //@todo: we need a model for waiting pedestrians
         LOG_WARNING("VelocityModel::e0 Ped {} has no navline.", ped->GetUID());
         // set random destination
-        std::mt19937 mt(ped->GetBuilding()->GetConfig()->seed);
+        std::mt19937 mt(_seed);
         std::uniform_real_distribution<double> dist(0, 1.0);
         double random_x = dist(mt);
         double random_y = dist(mt);
