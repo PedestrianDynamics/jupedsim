@@ -71,6 +71,8 @@ private:
     double _aWall;
     double _DWall;
 
+    unsigned int _seed;
+
     /**
       * Optimal velocity function \f$ V(spacing) =\min{v_0, \max{0, (s-l)/T}}  \f$
       *
@@ -138,7 +140,8 @@ public:
         double aped,
         double Dped,
         double awall,
-        double Dwall);
+        double Dwall,
+        unsigned int seed);
     ~VelocityModel() override = default;
 
     /**

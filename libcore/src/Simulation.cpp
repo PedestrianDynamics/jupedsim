@@ -102,7 +102,7 @@ void Simulation::Iterate()
                 "Enter correctGeometry: Building Has {} Transitions.",
                 _building->GetAllTransitions().size());
 
-            _building->GetConfig()->directionManager->GetDirectionStrategy()->Init(_building.get());
+            directionManager->GetDirectionStrategy()->Init(_building.get(), *_config);
         }
 
         // here the used routers are update, when needed due to external changes
@@ -224,7 +224,7 @@ bool Simulation::InitArgs()
     //this should be called after the routing engine has been initialised
     // because a direction is needed for this initialisation.
     LOG_INFO("Init Operational Model starting ...");
-    _operationalModel->Init(_building.get(), this);
+    _operationalModel->Init(_building.get(), this, *_config);
     LOG_INFO("Init Operational Model done.");
 
     // Give the DirectionStrategy the chance to perform some initialization.
@@ -286,8 +286,7 @@ void Simulation::UpdateLocations()
     RemoveAgents(pedsOutside);
 
     //TODO discuss simulation flow -> better move to main loop, does not belong here
-    bool geometryChangedFlow =
-        SimulationHelper::UpdateFlowRegulation(*_building, _clock.ElapsedTime());
+    bool geometryChangedFlow = SimulationHelper::UpdateFlowRegulation(*_building, _clock);
     bool geometryChangedTrain =
         SimulationHelper::UpdateTrainFlowRegulation(*_building, _clock.ElapsedTime());
 
