@@ -1,6 +1,13 @@
 from sympy.geometry import Point, Segment
 from numpy import ndarray
-import itertools
+from itertools import tee
+
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
+
 
 def check_traj_path_cross_line(path: ndarray, crossing_segment: Segment):
     """
@@ -11,7 +18,7 @@ def check_traj_path_cross_line(path: ndarray, crossing_segment: Segment):
     :return (bool) weather agent crosses line
 
     """
-    for p1, p2 in itertools.pairwise(path):
+    for p1, p2 in pairwise(path):
         point1, point2 = Point(p1[2], p1[3]), Point(p2[2], p2[3])
         segment = Segment(point1, point2)
         intersections = segment.intersection(crossing_segment)
