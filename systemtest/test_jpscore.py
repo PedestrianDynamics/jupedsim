@@ -649,3 +649,24 @@ def test_router_corridor_close(tmp_path, env, router_id):
     trajectories = load_trajectory(jpscore_driver.traj_file)
     agent_path = trajectories.path(2)
     assert check_traj_path_cross_line(agent_path, Segment(Point(9.5, -5), Point(9.5, 5)))
+
+
+def test_router_10(tmp_path, env):
+    """
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    """
+    input_location = env.systemtest_path / "router_tests" / "test_router_10"
+    copy_files(
+        sources=[input_location / "geometry.xml", input_location / "inifile.xml"],
+        dest=tmp_path,
+    )
+    jpscore_driver = JpsCoreDriver(
+        jpscore_path=env.jpscore_path, working_directory=tmp_path
+    )
+    jpscore_driver.run()
+
+    trajectories = load_trajectory(jpscore_driver.traj_file)
+    agent_path = trajectories.path(2)
+    assert check_traj_path_cross_line(agent_path, Segment(Point(90.1, -104), Point(90.1, -102)))
