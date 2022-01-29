@@ -233,8 +233,8 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
                                        QString::number(itr_room.first).toStdString();
             std::string subroom_caption = itr_subroom.second->GetCaption() + "_RId_" +
                                           QString::number(itr_room.first).toStdString();
-            auto geometry = std::shared_ptr<FacilityGeometry>(
-                new FacilityGeometry(itr_subroom.second->GetType(), room_caption, subroom_caption));
+            auto geometry = std::make_shared<FacilityGeometry>(
+                itr_subroom.second->GetType(), room_caption, subroom_caption);
 
             int currentFloorPolyID = 0;
             int currentObstPolyID  = 0;

@@ -560,8 +560,7 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
            usedAgentParams.end()) {
             LOG_INFO("Parsing the group parameter id [{}]", para_id);
 
-            auto agentParameters =
-                std::shared_ptr<AgentsParameters>(new AgentsParameters(para_id, _config->seed));
+            auto agentParameters = std::make_shared<AgentsParameters>(para_id, _config->seed);
             _config->agentsParameters[para_id] = agentParameters;
             std::string attrib                 = "v0"; // avoid repetitions and evtl. typos
             //desired speed
@@ -786,8 +785,7 @@ bool IniFileParser::ParseStepSize(const TiXmlNode & stepNode)
 
 bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
 {
-    // Init DirectionManager
-    _directionManager = std::shared_ptr<DirectionManager>(new DirectionManager);
+    _directionManager = std::make_shared<DirectionManager>();
 
     std::string query = "exit_crossing_strategy";
     if(!strategyNode.FirstChild(query.c_str())) {

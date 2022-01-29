@@ -86,7 +86,7 @@ bool PedDistributionParser::LoadPedDistribution(
                 group_id);
             return false;
         }
-        auto dis = std::shared_ptr<StartDistribution>(new StartDistribution(_configuration->seed));
+        auto dis = std::make_shared<StartDistribution>(_configuration->seed);
         dis->SetRoomID(room_id);
         dis->SetSubroomID(subroom_id);
         dis->SetGroupId(group_id);
@@ -241,7 +241,7 @@ std::shared_ptr<AgentsSource> PedDistributionParser::parseSourceNode(TiXmlElemen
     if(rate < 0) {
         rate = frequency;
     }
-    auto source = std::shared_ptr<AgentsSource>(new AgentsSource(
+    auto source = std::make_shared<AgentsSource>(
         id,
         caption,
         agents_max,
@@ -255,7 +255,7 @@ std::shared_ptr<AgentsSource> PedDistributionParser::parseSourceNode(TiXmlElemen
         rate,
         chunkAgents,
         boundaries,
-        lifeSpan));
+        lifeSpan);
 
     LOG_INFO("Source with id {} will be parsed (greedy = {}).", id, greedy);
     return source;
