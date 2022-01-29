@@ -9,7 +9,7 @@ add_library(tinyxml STATIC
     tinyxml/tinyxml.h
     tinyxml/tinystr.h
 )
-target_include_directories(tinyxml PUBLIC
+target_include_directories(tinyxml SYSTEM PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/tinyxml"
 )
 set_property(TARGET tinyxml PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
@@ -22,7 +22,7 @@ add_library(visilibity STATIC
     visiLibity/source_code/visilibity.cpp
     visiLibity/source_code/visilibity.hpp
 )
-target_include_directories(visilibity PUBLIC
+target_include_directories(visilibity SYSTEM PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/visiLibity/source_code"
 )
 set_property(TARGET visilibity PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
@@ -45,7 +45,7 @@ add_library(poly2tri STATIC
     poly2tri/sweep/sweep_context.cpp
     poly2tri/sweep/sweep_context.h
 )
-target_include_directories(poly2tri PUBLIC
+target_include_directories(poly2tri SYSTEM PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/poly2tri"
 )
 set_property(TARGET poly2tri PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
