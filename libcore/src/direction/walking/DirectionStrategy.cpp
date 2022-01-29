@@ -118,8 +118,8 @@ double DirectionLocalFloorfield::GetDistance2Target(Pedestrian * ped, int UID) c
 
 void DirectionLocalFloorfield::Init(Building * building, const Configuration & config)
 {
-    _wasInitialized    = true;
     _building          = building;
+    _wasInitialized    = true;
     _stepsize          = config.deltaH;
     _wallAvoidDistance = config.wallAvoidDistance;
     _useDistancefield  = config.useWallAvoidance;
@@ -129,7 +129,7 @@ void DirectionLocalFloorfield::Init(Building * building, const Configuration & c
 
     for(auto & roomPair : _building->GetAllRooms()) {
         auto newfield = new UnivFFviaFM(
-            roomPair.second.get(), _building, _stepsize, _wallAvoidDistance, _useDistancefield);
+            roomPair.second.get(), _stepsize, _wallAvoidDistance, _useDistancefield);
         _locffviafm[roomPair.first] = newfield;
         newfield->SetUser(DISTANCE_AND_DIRECTIONS_USED);
         newfield->SetMode(LINESEGMENT);

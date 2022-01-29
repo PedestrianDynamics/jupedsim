@@ -39,18 +39,25 @@
 
 RoutingEngine::RoutingEngine(Configuration * config, Building * building)
 {
-    auto buildRouter = [config, building](auto strategy) -> std::unique_ptr<Router> {
+    auto buildRouter = [config, building](const auto & strategy_info) -> std::unique_ptr<Router> {
+        const auto & [strategy, parameters] = strategy_info;
         switch(strategy) {
             case RoutingStrategy::ROUTING_FF_GLOBAL_SHORTEST:
                 return std::make_unique<FFRouter>(config, building);
             case RoutingStrategy::ROUTING_GLOBAL_SHORTEST:
-                return std::make_unique<GlobalRouter>(building);
+                return std::make_unique<GlobalRouter>(building, *parameters);
             case RoutingStrategy::UNKNOWN:
                 throw std::logic_error("Unexpected RoutingStrategy encountered");
         }
     };
-    for(const auto [id, strategy] : config->routingStrategies) {
-        _routers.emplace(id, buildRouter(strategy));
+    for(const auto & [id, strategy_info] : config->routingStrategies) {
+        if(const auto & [strategy, parameters] = strategy_info;
+           strategy == RoutingStrategy::ROUTING_GLOBAL_SHORTEST) {
+            for(auto && l : (*parameters).optionalNavLines) {
+                building->AddHline(l);
+            }
+        }
+        _routers.emplace(id, buildRouter(strategy_info));
     }
 }
 

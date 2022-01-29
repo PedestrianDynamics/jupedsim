@@ -84,17 +84,11 @@ public:
     /**
      * Constructs the floor field in a specific room.
      * @param room room in which the floor field should be created.
-     * @param building geometry used in simulation.
      * @param hx grid size for floor fields.
      * @param wallAvoid wall avoidance distance.
      * @param useWallDistances should wall avoidance be considered in floor field.
      */
-    UnivFFviaFM(
-        Room * room,
-        Building * building,
-        double hx,
-        double wallAvoid,
-        bool useWallDistances);
+    UnivFFviaFM(Room * room, double hx, double wallAvoid, bool useWallDistances);
 
     /**
      * Disable default constructor.
@@ -392,11 +386,6 @@ private:
     inline double TwosidedCalc(double x, double y, double hDivF);
 
 private:
-    /**
-     * Geometry used for simulation.
-     */
-    Building * _building = nullptr;
-
     /**
      * ID of room for which this floor field is computed.
      */

@@ -5,6 +5,8 @@ set(source_files
     src/IO/EventFileParser.cpp
     src/IO/GeoFileParser.cpp
     src/IO/IniFileParser.cpp
+    src/IO/NavLineFileParser.cpp
+    src/IO/NavLineFileParser.hpp
     src/IO/OutputHandler.cpp
     src/IO/PedDistributionParser.cpp
     src/IO/TrainFileParser.cpp

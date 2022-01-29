@@ -23,17 +23,20 @@
 #include "general/Filesystem.hpp"
 #include "math/OperationalModel.hpp"
 #include "pedestrian/AgentsParameters.hpp"
+#include "routing/GlobalRouterParameters.hpp"
 #include "routing/RoutingStrategy.hpp"
 
 #include <cstdlib>
 #include <filesystem>
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 
 // This class provides a data container for all configuration parameters.
 struct Configuration {
-    std::map<int, RoutingStrategy> routingStrategies{};
+    std::map<int, std::tuple<RoutingStrategy, std::optional<GlobalRouterParameters>>>
+        routingStrategies{};
     unsigned int seed{0};
     double fps{8};
     unsigned int precision{2};

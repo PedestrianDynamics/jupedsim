@@ -39,13 +39,8 @@ UnivFFviaFM::~UnivFFviaFM()
     }
 }
 
-UnivFFviaFM::UnivFFviaFM(
-    Room * roomArg,
-    Building * building,
-    double hx,
-    double wallAvoid,
-    bool useWallDistances) :
-    _building(building), _room(roomArg->GetID())
+UnivFFviaFM::UnivFFviaFM(Room * roomArg, double hx, double wallAvoid, bool useWallDistances) :
+    _room(roomArg->GetID())
 {
     //build the vector with walls(wall or obstacle), the map with <UID, Door(Cross or Trans)>, the vector with targets(UIDs)
     //then call other constructor including the mode
