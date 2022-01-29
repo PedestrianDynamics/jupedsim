@@ -28,6 +28,7 @@
 
 #include "IO/GeoFileParser.hpp"
 #include "IO/TrainFileParser.hpp"
+#include "NavLineParameters.hpp"
 #include "general/Configuration.hpp"
 #include "general/Filesystem.hpp"
 #include "general/Macros.hpp"
@@ -64,8 +65,6 @@
 #include <utility>
 #include <vector>
 
-Building::Building(std::vector<std::unique_ptr<Pedestrian>> * agents) : _allPedestrians(agents) {}
-
 Building::Building(
     Configuration * configuration,
     std::vector<std::unique_ptr<Pedestrian>> * agents) :
@@ -85,6 +84,11 @@ Building::Building(
 
     if(!SanityCheck()) {
         LOG_ERROR("There are sanity errors in the geometry file");
+        exit(EXIT_FAILURE);
+    }
+
+    if(!Triangulate()) {
+        LOG_ERROR("Cannot triangulate geometry");
         exit(EXIT_FAILURE);
     }
 }
@@ -479,6 +483,28 @@ bool Building::AddHline(Hline * line)
     }
     _hLines[line->GetID()] = line;
     return true;
+}
+
+void Building::AddHline(const NavLineParameters & params)
+{
+    auto * l = new Hline();
+    l->SetID(params.id);
+    l->SetPoint1(Point(params.x1, params.y1));
+    l->SetPoint2(Point(params.x2, params.y2));
+    auto * room    = GetRoom(params.roomId);
+    auto * subroom = room->GetSubRoom(params.subroomId);
+    l->SetRoom1(room);
+    l->SetSubRoom1(subroom);
+    const auto [_, success] = _hLines.try_emplace(params.id, l);
+    if(!success) {
+        LOG_ERROR(
+            "Duplicate index for hlines found [{}] in Routing::AddHline(). You have "
+            "[{}] hlines",
+            l->GetID(),
+            _hLines.size());
+        exit(EXIT_FAILURE);
+    }
+    subroom->AddHline(l);
 }
 
 bool Building::AddGoal(Goal * goal)

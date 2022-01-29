@@ -20,6 +20,7 @@
 //
 #include "IniFileParser.hpp"
 
+#include "NavLineFileParser.hpp"
 #include "OperationalModelType.hpp"
 #include "OutputHandler.hpp"
 #include "direction/DirectionManager.hpp"
@@ -37,6 +38,7 @@
 
 #include <Logger.hpp>
 #include <filesystem>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <tinyxml.h>
@@ -706,7 +708,9 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
             return false;
         }
 
-        if(const auto [_, success] = _config->routingStrategies.try_emplace(id, strategy);
+        const auto params = ParseGlobalRouterParmeters(e);
+        if(const auto [_, success] =
+               _config->routingStrategies.try_emplace(id, std::make_tuple(strategy, params));
            !success) {
             LOG_ERROR("Duplicated router id found: {}", id);
             return false;
@@ -1041,4 +1045,43 @@ bool IniFileParser::ParseExternalFiles(const TiXmlNode & mainNode)
     }
 
     return true;
+}
+
+
+std::optional<GlobalRouterParameters>
+IniFileParser::ParseGlobalRouterParmeters(const TiXmlElement * e)
+{
+    const std::string strategy = e->Attribute("description");
+    if(strategy != "global_shortest") {
+        return std::nullopt;
+    }
+
+    GlobalRouterParameters result{};
+    if(const auto * parameters = e->FirstChild("parameters")) {
+        if(const auto * navigation_lines = parameters->FirstChildElement("navigation_lines")) {
+            const std::filesystem::path navLineFile = navigation_lines->Attribute("file");
+            result.optionalNavLines                 = parseNavLines(navLineFile);
+        }
+
+        if(const auto * navigation_mesh = parameters->FirstChildElement("navigation_mesh")) {
+            const std::string local_planing =
+                xmltoa(navigation_mesh->Attribute("use_for_local_planning"), "false");
+            result.useMeshForLocalNavigation = local_planing == "true";
+
+            std::string method = xmltoa(navigation_mesh->Attribute("method"), "");
+            if(method == "triangulation") {
+                result.generateNavigationMesh = true;
+            } else {
+                LOG_WARNING(
+                    "only triangulation is supported for the mesh. You supplied "
+                    "[{}]",
+                    method);
+            }
+            result.minDistanceBetweenTriangleEdges =
+                xmltof(navigation_mesh->Attribute("minimum_distance_between_edges"), -FLT_MAX);
+            result.minAngleInTriangles =
+                xmltof(navigation_mesh->Attribute("minimum_angle_in_triangles"), -FLT_MAX);
+        }
+    }
+    return result;
 }

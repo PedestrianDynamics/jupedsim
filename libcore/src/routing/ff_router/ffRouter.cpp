@@ -189,7 +189,7 @@ void FFRouter::CalculateFloorFields()
     //prepare all room-floor-fields-objects (one room = one instance)
     _floorfieldByRoomID.clear();
     for(const auto & [id, room] : _building->GetAllRooms()) {
-        UnivFFviaFM * floorfield = new UnivFFviaFM{room.get(), _building, 0.125, 0.0, false};
+        UnivFFviaFM * floorfield = new UnivFFviaFM{room.get(), 0.125, 0.0, false};
 
         floorfield->SetUser(DISTANCE_MEASUREMENTS_ONLY);
         floorfield->SetMode(CENTERPOINT);
