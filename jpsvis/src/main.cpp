@@ -48,7 +48,7 @@
 
 #include <QApplication>
 #include <QDir>
-#include <locale.h>
+#include <clocale>
 #include <sstream>
 
 // for compiling a standalone windows exe with VS

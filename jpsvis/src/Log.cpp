@@ -36,8 +36,8 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <stdarg.h>
-#include <stdio.h>
+#include <cstdarg>
+#include <cstdio>
 
 using namespace std;
 
