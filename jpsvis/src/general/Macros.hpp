@@ -32,7 +32,7 @@
 #include <iostream>
 #include <map>
 #include <sstream>
-#include <string.h>
+#include <cstring>
 #include <vector>
 
 #define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()

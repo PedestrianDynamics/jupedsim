@@ -31,8 +31,8 @@
 
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/register/point.hpp>
+#include <cmath>
 #include <iostream>
-#include <math.h>
 #include <string>
 
 class Point

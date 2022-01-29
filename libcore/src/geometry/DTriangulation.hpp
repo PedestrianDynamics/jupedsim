@@ -31,13 +31,13 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <ctime>
 #include <fstream>
 #include <iostream>
 #include <iterator>
 #include <poly2tri.h>
 #include <sstream>
 #include <string>
-#include <time.h>
 #include <vector>
 
 class DTriangulation

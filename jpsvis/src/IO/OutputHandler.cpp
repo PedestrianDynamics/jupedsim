@@ -30,8 +30,8 @@
 
 #include <cmath>
 #include <cstdlib>
-#include <stdarg.h>
-#include <stdio.h>
+#include <cstdarg>
+#include <cstdio>
 
 using namespace std;
 

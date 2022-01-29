@@ -22,9 +22,9 @@
 
 #include <catch2/catch.hpp>
 #include <cmath>
+#include <cstdio>
 #include <cstdlib>
-#include <stdio.h>
-#include <time.h>
+#include <ctime>
 
 TEST_CASE("pedestrian/Ellipse", "[pedestrian][Ellipse]")
 {
