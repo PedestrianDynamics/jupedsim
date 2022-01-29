@@ -31,9 +31,7 @@ using boost::polygon::y;
 
 
 //wrapping the boost objects (just the point object)
-namespace boost
-{
-namespace polygon
+namespace boost::polygon
 {
 template <>
 struct geometry_concept<Point> {
@@ -49,8 +47,7 @@ struct point_traits<Point> {
         return (orient == HORIZONTAL) ? point._x : point._y;
     }
 };
-} // namespace polygon
-} // namespace boost
+} // namespace boost::polygon
 
 
 //functions
