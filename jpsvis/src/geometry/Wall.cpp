@@ -37,7 +37,8 @@ using namespace std;
 
 Wall::Wall() : Line() {}
 
-Wall::Wall(const Point & p1, const Point & p2, const std::string & type) : Line(p1, p2), _type(type)
+Wall::Wall(const Point & p1, const Point & p2, std::string type) :
+    Line(p1, p2), _type(std::move(type))
 {
 }
 
