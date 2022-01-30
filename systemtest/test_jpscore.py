@@ -7,7 +7,9 @@ from driver.utils import setup_jpscore_driver, get_file_text_diff
 from driver.trajectories import load_trajectory
 from driver.environment import Platform
 from driver.inifile import parse_waiting_areas, instanciate_tempalte
-from sympy.geometry import Point
+from driver.geometry import check_traj_path_cross_line
+from driver.flow import read_max_agents, read_flow, read_num_agents, check_max_agents, check_door_usage
+from sympy.geometry import Point, Segment
 from driver.driver import JpsCoreDriver
 from driver.utils import copy_all_files, copy_files
 
@@ -613,3 +615,88 @@ def test_juelich_12_obstructed_visibility(tmp_path, env, operational_model_id):
     dy = numpy.sum(numpy.abs(numpy.diff(y)))
     tolerance = 0.005
     assert dy < tolerance
+
+
+@pytest.mark.parametrize(
+    "router_id",
+    [
+        1,
+        2,
+    ],
+)
+def test_router_corridor_close(tmp_path, env, router_id):
+    """
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    """
+    input_location = env.systemtest_path / "router_tests" / "test_corridor_close"
+    template_path = input_location / "inifile.template"
+    inifile_path = tmp_path / "inifile.xml"
+    instanciate_tempalte(
+        src=template_path,
+        args={"router_id": router_id},
+        dest=inifile_path,
+    )
+    copy_files(
+        sources=[input_location / "geometry.xml"],
+        dest=tmp_path,
+    )
+    jpscore_driver = JpsCoreDriver(
+        jpscore_path=env.jpscore_path, working_directory=tmp_path
+    )
+    jpscore_driver.run()
+
+    trajectories = load_trajectory(jpscore_driver.traj_file)
+    agent_path = trajectories.path(2)
+    assert check_traj_path_cross_line(agent_path, Segment(Point(9.5, -5), Point(9.5, 5)))
+
+
+def test_router_10(tmp_path, env):
+    """
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    """
+    input_location = env.systemtest_path / "router_tests" / "test_router_10"
+    copy_files(
+        sources=[input_location / "geometry.xml", input_location / "inifile.xml"],
+        dest=tmp_path,
+    )
+    jpscore_driver = JpsCoreDriver(
+        jpscore_path=env.jpscore_path, working_directory=tmp_path
+    )
+    jpscore_driver.run()
+
+    trajectories = load_trajectory(jpscore_driver.traj_file)
+    agent_path = trajectories.path(2)
+    assert check_traj_path_cross_line(agent_path, Segment(Point(90.1, -104), Point(90.1, -102)))
+
+
+def test_door_closes_after_max_agents(tmp_path, env):
+    """
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    """
+    input_location = env.systemtest_path / "door_tests" / "closed_doors"
+    copy_files(
+        sources=[input_location / "geometry.xml", input_location / "inifile.xml"],
+        dest=tmp_path,
+    )
+    jpscore_driver = JpsCoreDriver(
+        jpscore_path=env.jpscore_path, working_directory=tmp_path
+    )
+    jpscore_driver.run()
+
+    # success = True
+
+    max_agents_dict = read_max_agents(tmp_path / "inifile.xml")
+    flow_dict = read_flow(tmp_path)
+    num_agents = read_num_agents(tmp_path / "inifile.xml")
+
+    [max_agents_correct, measured_agents] = check_max_agents(flow_dict, max_agents_dict)
+    assert max_agents_correct, "Wrong number of pedestrians passing the door"
+    assert measured_agents == max_agents_dict
+
+    assert check_door_usage(flow_dict, num_agents), "Wrong door usage."
