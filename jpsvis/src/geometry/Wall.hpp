@@ -39,7 +39,7 @@ public:
     /**
      * Constructor
      */
-    Wall(const Point & p1, const Point & p2, const std::string & type = "internal");
+    Wall(const Point & p1, const Point & p2, std::string type = "internal");
 
     /**
      * Constructor
