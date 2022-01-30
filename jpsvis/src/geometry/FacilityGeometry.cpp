@@ -611,8 +611,8 @@ void FacilityGeometry::addRectangle(
     vtkDataArray * pData = vtkUnsignedCharArray::New();
     pData->SetNumberOfComponents(3);
     double color[2][3] = {{color1, color1, color1}, {color2, color2, color2}};
-    bool idx           = 0;
-    bool lastColorUsed = 0;
+    bool idx           = false;
+    bool lastColorUsed = false;
     for(int i = 0; i < dimY - 1; i++) {
         if(idx == lastColorUsed) {
             lastColorUsed = !lastColorUsed;
@@ -671,8 +671,8 @@ void FacilityGeometry::addFloor(double x1, double y1, double x2, double y2, doub
     pData->SetNumberOfComponents(3);
 
     double color[2][3] = {{100, 100, 100}, {150, 150, 150}};
-    bool idx           = 0;
-    bool lastColorUsed = 0;
+    bool idx           = false;
+    bool lastColorUsed = false;
     for(int i = 0; i < dimY - 1; i++) {
         if(idx == lastColorUsed) {
             lastColorUsed = !lastColorUsed;
