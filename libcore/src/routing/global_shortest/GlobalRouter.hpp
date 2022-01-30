@@ -29,6 +29,7 @@
 
 #include "general/Filesystem.hpp"
 #include "geometry/Building.hpp"
+#include "routing/GlobalRouterParameters.hpp"
 #include "routing/Router.hpp"
 
 #include <cfloat>
@@ -48,7 +49,7 @@ class OutputHandler;
 class GlobalRouter : public Router
 {
 public:
-    explicit GlobalRouter(Building * building);
+    GlobalRouter(Building * building, const GlobalRouterParameters & parameters);
     /**
       * Destructor
       */
@@ -150,17 +151,6 @@ private:
       * Perform the FloydWahrshal algorithm
       */
     void FloydWarshall();
-
-    /**
-      * Load extra routing information e.g navigation lines
-      */
-    bool LoadRoutingInfos(const fs::path & filename);
-
-    /**
-      * Each router is responsible of getting the correct filename
-      * and doing other initializations
-      */
-    virtual fs::path GetRoutingInfoFile();
 
     /**
       * @return true if the supplied line is a wall.

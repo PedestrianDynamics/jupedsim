@@ -61,6 +61,8 @@ private:
 
     bool ParseExternalFiles(const TiXmlNode & xMain);
 
+    std::optional<GlobalRouterParameters> ParseGlobalRouterParmeters(const TiXmlElement * e);
+
     Configuration * _config;
     int _model;
     std::shared_ptr<DirectionStrategy> _directionStrategy;

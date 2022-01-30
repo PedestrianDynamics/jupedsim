@@ -90,7 +90,7 @@ function setup_fmt {
     mkdir build
     cd build
     cmake .. \
-        -DCMAKE_CXX_FLAGS="-fPIC" \
+        -DCMAKE_CXX_FLAGS="-fPIC -fvisibility=hidden" \
         -DFMT_DOC=OFF \
         -DFMT_TEST=OFF \
         -DCMAKE_INSTALL_PREFIX=${install_path} \
@@ -112,6 +112,7 @@ function setup_spdlog {
     mkdir build
     cd build
     cmake .. \
+        -DCMAKE_CXX_FLAGS="-fPIC -fvisibility=hidden" \
         -DSPDLOG_BUILD_BENCH=OFF \
         -DSPDLOG_BUILD_TESTS=OFF \
         -DSPDLOG_FMT_EXTERNAL=ON \
@@ -177,6 +178,7 @@ function setup_glm {
     mkdir build
     cd build
     cmake .. \
+        -DCMAKE_CXX_FLAGS="-fPIC -fvisibility=hidden" \
         -DCMAKE_BUILD_TYPE=Release \
         -DBUILD_SHARED_LIBS=OFF \
         -DBUILD_STATIC_LIBS=ON \

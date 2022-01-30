@@ -20,6 +20,7 @@
 #include "SimulationHelper.hpp"
 
 #include "Simulation.hpp"
+#include "SimulationClock.hpp"
 #include "geometry/Room.hpp"
 #include "geometry/SubRoom.hpp"
 #include "pedestrian/Pedestrian.hpp"
@@ -92,13 +93,13 @@ std::optional<Transition *> SimulationHelper::FindPassedDoor(
     return *passedTrans;
 }
 
-bool SimulationHelper::UpdateFlowRegulation(Building & building, double time)
+bool SimulationHelper::UpdateFlowRegulation(Building & building, const SimulationClock & clock)
 {
     bool stateChanged = false;
 
     for(auto [transID, trans] : building.GetAllTransitions()) {
         DoorState state = trans->GetState();
-        trans->UpdateTemporaryState(building.GetConfig()->dT);
+        trans->UpdateTemporaryState(clock.dT());
 
         bool regulateFlow = trans->GetOutflowRate() < std::numeric_limits<double>::max() ||
                             trans->GetMaxDoorUsage() < std::numeric_limits<double>::max();
@@ -108,7 +109,7 @@ bool SimulationHelper::UpdateFlowRegulation(Building & building, double time)
             // .. and maybe close the <trans>
             // need to be more than <dn> as multiple ped can pass a transition in one time step
             if(trans->GetPartialDoorUsage() >= trans->GetDN()) {
-                trans->RegulateFlow(time);
+                trans->RegulateFlow(clock.ElapsedTime());
                 trans->ResetPartialDoorUsage();
             }
         }

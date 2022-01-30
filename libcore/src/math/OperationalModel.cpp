@@ -54,7 +54,12 @@ std::unique_ptr<OperationalModel> OperationalModel::CreateFromType(
                 config.maxFWall);
         case OperationalModelType::VELOCITY:
             return std::make_unique<VelocityModel>(
-                directionManager, config.aPed, config.dPed, config.aWall, config.dWall);
+                directionManager,
+                config.aPed,
+                config.dPed,
+                config.aWall,
+                config.dWall,
+                config.seed);
     }
 }
 
@@ -63,8 +68,11 @@ OperationalModel::OperationalModel(DirectionManager * directionManager) :
 {
 }
 
-void OperationalModel::Init(Building * building, Simulation * simulation)
+void OperationalModel::Init(
+    Building * building,
+    Simulation * simulation,
+    const Configuration & config)
 {
     _simulation = simulation;
-    _direction->Init(building);
+    _direction->Init(building, config);
 }

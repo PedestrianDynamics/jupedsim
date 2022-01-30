@@ -19,6 +19,7 @@
  **/
 #pragma once
 
+#include "SimulationClock.hpp"
 #include "geometry/Building.hpp"
 #include "geometry/Transition.hpp"
 #include "pedestrian/Pedestrian.hpp"
@@ -61,7 +62,7 @@ void UpdateFlowAtDoors(
  * @param building geometry used in the simulation
  * @return a change to the geometry was made
  */
-bool UpdateFlowRegulation(Building & building, double time);
+bool UpdateFlowRegulation(Building & building, const SimulationClock & clock);
 
 /**
  * Triggers the flow regulation for trains, and closes/opens doors accordingly

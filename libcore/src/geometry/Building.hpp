@@ -29,6 +29,7 @@
 #include "Goal.hpp"
 #include "Hline.hpp"
 #include "Line.hpp"
+#include "NavLineParameters.hpp"
 #include "Obstacle.hpp"
 #include "Room.hpp"
 #include "TrainGeometryInterface.hpp"
@@ -79,17 +80,12 @@ private:
     std::map<int, std::vector<Transition>> _trainDoorsAdded;
 
 public:
-    /// constructor
-    Building(std::vector<std::unique_ptr<Pedestrian>> * agents);
-
     Building(Configuration * config, std::vector<std::unique_ptr<Pedestrian>> * agents);
 
     /// destructor
-    virtual ~Building();
+    ~Building();
 
     void SetAgents(std::vector<std::unique_ptr<Pedestrian>> * agents) { _allPedestrians = agents; }
-
-    Configuration * GetConfig() const;
 
     void GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const;
 
@@ -195,6 +191,8 @@ public:
     bool AddTransition(Transition * line);
 
     bool AddHline(Hline * line);
+
+    void AddHline(const NavLineParameters & params);
 
     bool AddGoal(Goal * goal);
 

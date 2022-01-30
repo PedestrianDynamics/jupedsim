@@ -5,6 +5,8 @@ set(source_files
     src/IO/EventFileParser.cpp
     src/IO/GeoFileParser.cpp
     src/IO/IniFileParser.cpp
+    src/IO/NavLineFileParser.cpp
+    src/IO/NavLineFileParser.hpp
     src/IO/OutputHandler.cpp
     src/IO/PedDistributionParser.cpp
     src/IO/TrainFileParser.cpp
@@ -235,7 +237,6 @@ if (BUILD_TESTS)
         test/catch2/Main.cpp
         test/catch2/math/MathematicsTest.cpp
         test/catch2/pedestrian/EllipseTest.cpp
-        test/catch2/routing/UnivFFviaFMTest.cpp
     )
 
     target_link_libraries(catch-unittests PRIVATE

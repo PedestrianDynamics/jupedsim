@@ -116,20 +116,20 @@ double DirectionLocalFloorfield::GetDistance2Target(Pedestrian * ped, int UID) c
     return _locffviafm.at(roomID)->GetCostToDestination(UID, ped->GetPos());
 }
 
-void DirectionLocalFloorfield::Init(Building * building)
+void DirectionLocalFloorfield::Init(Building * building, const Configuration & config)
 {
-    _wasInitialized    = true;
     _building          = building;
-    _stepsize          = building->GetConfig()->deltaH;
-    _wallAvoidDistance = building->GetConfig()->wallAvoidDistance;
-    _useDistancefield  = building->GetConfig()->useWallAvoidance;
+    _wasInitialized    = true;
+    _stepsize          = config.deltaH;
+    _wallAvoidDistance = config.wallAvoidDistance;
+    _useDistancefield  = config.useWallAvoidance;
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
 
     for(auto & roomPair : _building->GetAllRooms()) {
         auto newfield = new UnivFFviaFM(
-            roomPair.second.get(), _building, _stepsize, _wallAvoidDistance, _useDistancefield);
+            roomPair.second.get(), _stepsize, _wallAvoidDistance, _useDistancefield);
         _locffviafm[roomPair.first] = newfield;
         newfield->SetUser(DISTANCE_AND_DIRECTIONS_USED);
         newfield->SetMode(LINESEGMENT);

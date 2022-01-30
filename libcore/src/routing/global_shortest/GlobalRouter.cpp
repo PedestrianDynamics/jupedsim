@@ -36,7 +36,12 @@
 #include <Logger.hpp>
 #include <tinyxml.h>
 
-GlobalRouter::GlobalRouter(Building * building) : _building(building)
+GlobalRouter::GlobalRouter(Building * building, const GlobalRouterParameters & parameters) :
+    _useMeshForLocalNavigation(parameters.useMeshForLocalNavigation),
+    _generateNavigationMesh(parameters.generateNavigationMesh),
+    _minDistanceBetweenTriangleEdges(parameters.minDistanceBetweenTriangleEdges),
+    _minAngleInTriangles(parameters.minAngleInTriangles),
+    _building(building)
 {
     _accessPoints    = std::map<int, AccessPoint *>();
     _map_id_to_index = std::map<int, int>();
@@ -75,13 +80,9 @@ bool GlobalRouter::init()
     Reset();
     LOG_DEBUG("Init the Global Router Engine");
 
-    //TODO: implement the ParseAdditionalParameter Interface
-    LoadRoutingInfos(GetRoutingInfoFile());
 
     if(_generateNavigationMesh) {
-        //GenerateNavigationMesh();
         TriangulateGeometry();
-        //return true;
     }
 
     // initialize the distances matrix for the floydwahrshall
@@ -966,150 +967,6 @@ void GlobalRouter::TriangulateGeometry()
 
 bool GlobalRouter::GenerateNavigationMesh()
 {
-    return true;
-}
-
-fs::path GlobalRouter::GetRoutingInfoFile()
-{
-    TiXmlDocument doc(_building->GetProjectFilename().string());
-    if(!doc.LoadFile()) {
-        LOG_ERROR("GlobalRouter, could not parse project file: {}", doc.ErrorDesc());
-        return "";
-    }
-
-    // everything is fine. proceed with parsing
-    TiXmlElement * xMainNode  = doc.RootElement();
-    TiXmlNode * xRouters      = xMainNode->FirstChild("route_choice_models");
-    std::string nav_line_file = "";
-
-    for(TiXmlElement * e = xRouters->FirstChildElement("router"); e;
-        e                = e->NextSiblingElement("router")) {
-        std::string strategy             = e->Attribute("description");
-        std::vector<std::string> routers = {
-            "local_shortest", "global_shortest", "global_safest", "dynamic", "quickest"};
-
-        if(std::find(routers.begin(), routers.end(), strategy) != routers.end()) {
-            if(e->FirstChild("parameters")) {
-                if(e->FirstChild("parameters")->FirstChildElement("navigation_lines")) //fixme:
-                                                                                       //this
-                                                                                       //reads
-                                                                                       //the
-                                                                                       //wronf
-                    //router section
-                    nav_line_file = e->FirstChild("parameters")
-                                        ->FirstChildElement("navigation_lines")
-                                        ->Attribute("file");
-
-                TiXmlElement * para =
-                    e->FirstChild("parameters")->FirstChildElement("navigation_mesh");
-                if(para) {
-                    //triangulate the geometry
-                    if(!_building->Triangulate()) {
-                        LOG_ERROR("could not triangulate the geometry!");
-                        exit(EXIT_FAILURE);
-                    }
-
-                    std::string local_planing =
-                        xmltoa(para->Attribute("use_for_local_planning"), "false");
-                    if(local_planing == "true") {
-                        _useMeshForLocalNavigation = 1;
-                    } else {
-                        _useMeshForLocalNavigation = 0;
-                    }
-
-                    std::string method = xmltoa(para->Attribute("method"), "");
-                    if(method == "triangulation") {
-                        _generateNavigationMesh = true;
-                    } else {
-                        LOG_WARNING(
-                            "only triangulation is supported for the mesh. You supplied "
-                            "[{}]",
-                            method);
-                    }
-                    _minDistanceBetweenTriangleEdges =
-                        xmltof(para->Attribute("minimum_distance_between_edges"), -FLT_MAX);
-                    _minAngleInTriangles =
-                        xmltof(para->Attribute("minimum_angle_in_triangles"), -FLT_MAX);
-                }
-            }
-        }
-    }
-    if(nav_line_file == "")
-        return nav_line_file;
-    else
-        return _building->GetProjectRootDir() / nav_line_file;
-}
-
-
-bool GlobalRouter::LoadRoutingInfos(const fs::path & filename)
-{
-    if(filename.empty())
-        return true;
-
-    LOG_INFO(
-        "Loading extra routing information for the global/quickest path routeri from file {}",
-        filename.string());
-
-    TiXmlDocument docRouting(filename.string());
-    if(!docRouting.LoadFile()) {
-        LOG_ERROR("GlobalRouter, could not parse routing file: {}", docRouting.ErrorDesc());
-        return false;
-    }
-
-    TiXmlElement * xRootNode = docRouting.RootElement();
-    if(!xRootNode) {
-        LOG_ERROR("GlobalRouter, could not parse routing file: No root element found");
-        return false;
-    }
-
-    if(xRootNode->ValueStr() != "routing") {
-        LOG_ERROR(
-            "GlobalRouter, could not parse routing file: Expected root element <routing>, found {} "
-            "instead",
-            xRootNode->ValueStr());
-        return false;
-    }
-
-    std::string version = xRootNode->Attribute("version");
-    if(version < JPS_OLD_VERSION) {
-        LOG_ERROR("Only version greater than {} supported", JPS_OLD_VERSION);
-        return false;
-    }
-    int HlineCount = 0;
-    for(TiXmlElement * xHlinesNode = xRootNode->FirstChildElement("Hlines"); xHlinesNode;
-        xHlinesNode                = xHlinesNode->NextSiblingElement("Hlines")) {
-        for(TiXmlElement * hline = xHlinesNode->FirstChildElement("Hline"); hline;
-            hline                = hline->NextSiblingElement("Hline")) {
-            double id      = xmltof(hline->Attribute("id"), -1);
-            int room_id    = xmltoi(hline->Attribute("room_id"), -1);
-            int subroom_id = xmltoi(hline->Attribute("subroom_id"), -1);
-
-            double x1 = xmltof(hline->FirstChildElement("vertex")->Attribute("px"));
-            double y1 = xmltof(hline->FirstChildElement("vertex")->Attribute("py"));
-            double x2 = xmltof(hline->LastChild("vertex")->ToElement()->Attribute("px"));
-            double y2 = xmltof(hline->LastChild("vertex")->ToElement()->Attribute("py"));
-
-            Room * room       = _building->GetRoom(room_id);
-            SubRoom * subroom = room->GetSubRoom(subroom_id);
-
-            //new implementation
-            Hline * h = new Hline();
-            h->SetID(id);
-            h->SetPoint1(Point(x1, y1));
-            h->SetPoint2(Point(x2, y2));
-            h->SetRoom1(room);
-            h->SetSubRoom1(subroom);
-
-            if(_building->AddHline(h)) {
-                subroom->AddHline(h);
-                HlineCount++;
-                //h is freed in building
-            } else {
-                delete h;
-            }
-        }
-    }
-    LOG_INFO("Done loading extra routing information. Loaded {:d} Hlines", HlineCount);
     return true;
 }
 

@@ -27,9 +27,9 @@
 #include "geometry/Point.hpp"
 #include "pedestrian/Pedestrian.hpp"
 
-void DirectionManager::Init(Building * building)
+void DirectionManager::Init(Building * building, const Configuration & config)
 {
-    _directionStrategy->Init(building);
+    _directionStrategy->Init(building, config);
     if(_waitingStrategy) {
         _waitingStrategy->Init(building);
     }

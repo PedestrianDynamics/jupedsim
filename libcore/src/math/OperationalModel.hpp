@@ -38,7 +38,6 @@
 #pragma once
 
 #include "OperationalModelType.hpp"
-#include "general/Configuration.hpp"
 
 #include <memory>
 #include <string>
@@ -93,7 +92,7 @@ public:
       * This function is called at the beginning the simulation once.
       * @param building, the building object
       */
-    void Init(Building * building, Simulation * simulation);
+    void Init(Building * building, Simulation * simulation, const Configuration & config);
 
     void Update(double time) { _currentTime = time; }
 };
