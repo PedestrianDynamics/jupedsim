@@ -74,17 +74,17 @@ public:
     /**
      * Set/Get the first end point of the line
      */
-    const Point & GetPoint1(void) const;
+    const Point & GetPoint1() const;
 
     /**
      * Set/Get the second end point of the line
      */
-    const Point & GetPoint2(void) const;
+    const Point & GetPoint2() const;
 
     /**
      * Return the center of the line
      */
-    const Point & GetCentre(void) const;
+    const Point & GetCentre() const;
 
     /**
      * @return a normal vector to this line
