@@ -8,7 +8,7 @@ from driver.trajectories import load_trajectory
 from driver.environment import Platform
 from driver.inifile import parse_waiting_areas, instanciate_tempalte
 from driver.geometry import check_traj_path_cross_line
-from driver.flow import read_max_agents, read_flow, read_num_agents, check_max_agents, check_door_usage
+from driver.flow import read_max_agents, read_flow, read_num_agents, check_max_agents, check_door_usage, read_outflow_from_inifile, read_starting_times
 from sympy.geometry import Point, Segment
 from driver.driver import JpsCoreDriver
 from driver.utils import copy_all_files, copy_files
@@ -689,14 +689,56 @@ def test_door_closes_after_max_agents(tmp_path, env):
     )
     jpscore_driver.run()
 
-    # success = True
-
     max_agents_dict = read_max_agents(tmp_path / "inifile.xml")
     flow_dict = read_flow(tmp_path)
-    num_agents = read_num_agents(tmp_path / "inifile.xml")
-
+    print(flow_dict)
     [max_agents_correct, measured_agents] = check_max_agents(flow_dict, max_agents_dict)
     assert max_agents_correct, "Wrong number of pedestrians passing the door"
     assert measured_agents == max_agents_dict
 
-    assert check_door_usage(flow_dict, num_agents), "Wrong door usage."
+    assert len(flow_dict[1].index) == 80
+    assert len(flow_dict[2].index) == 20 # trans id 2 is limited to 20 pedestrians
+    assert len(flow_dict[3].index) == 100 # all pedestrians should use main exit
+
+
+def test_door_flow_regulation(tmp_path, env):
+    """
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    """
+    input_location = env.systemtest_path / "door_tests" / "test_flow_regulation"
+    copy_files(
+        sources=[input_location / "geometry.xml", input_location / "inifile.xml", input_location / "events.xml" ],
+        dest=tmp_path,
+    )
+    jpscore_driver = JpsCoreDriver(
+        jpscore_path=env.jpscore_path, working_directory=tmp_path
+    )
+    jpscore_driver.run()
+
+    max_agents_dict = read_max_agents(tmp_path / "inifile.xml")
+    outflow_dict = read_outflow_from_inifile(tmp_path / "inifile.xml")
+    starting_times = read_starting_times(tmp_path / "events.xml")
+    data = read_flow(tmp_path)
+
+    # [flowCorrect, measuredFlow] = checkFlow(data, maxAgents, startingTimes, outflow)
+    # if not flowCorrect:
+    #     success = False
+    #     logging.error('Outflow rate is not as expected. Expected {}, but are {}.'.format(outflow, measuredFlow))
+
+    # [startCorrect, measuredStart] = checkStart(data, maxAgents, startingTimes)
+    # if not startCorrect:
+    #     success = False
+    #     logging.error(
+    #         'Wrong times for opening the doors. Should be {}, but are {}.'.format(startingTimes, measuredStart))
+
+    # [maxAgentsCorrect, measuredAgents] = checkMaxAgents(data, maxAgents, startingTimes)
+    # if not maxAgentsCorrect:
+    #     success = False
+    #     logging.error(
+    #         'Wrong number of pedestrians passing the door. Should be max {}, but are {}.'.format(maxAgents,
+    #                                                                                              measuredAgents))
+
+    # if not success:
+    #     exit(FAILURE)

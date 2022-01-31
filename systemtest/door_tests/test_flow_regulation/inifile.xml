@@ -1,17 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <JuPedSim project="JPS-Project" version="0.7" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <!-- seed used for initialising random generator -->
     <header>
         <seed>1254</seed>
         <max_sim_time>40</max_sim_time>
-        <num_threads>1</num_threads>
-        <!-- geometry file -->
-        <geometry>../geometry.xml</geometry>
-        <!-- trajectories file and format -->
-        <trajectories format="plain" fps="8">
-            <file location="traj.txt" />
+        <geometry>geometry.xml</geometry>
+        <trajectories fps="8">
         </trajectories>
-        <events_file>../events.xml</events_file>
+        <events_file>events.xml</events_file>
         <show_statistics>true</show_statistics>
     </header>
     <routing />
