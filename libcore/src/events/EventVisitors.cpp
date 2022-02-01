@@ -6,14 +6,14 @@
 #include <memory>
 #include <variant>
 
-std::chrono::nanoseconds EventMinTime(Event event)
+std::chrono::nanoseconds EventMinTime(const Event & event)
 {
-    auto call = [](auto const & obj) { return obj.MinTime(); };
+    auto call = [](auto const & obj) { return obj.execute_at; };
     return std::visit(call, event);
 }
 
 
-void ProcessEvent(CreatePedestrianEvent event, Simulation & sim)
+void ProcessEvent(const CreatePedestrianEvent & event, Simulation & sim)
 {
     std::unique_ptr<Pedestrian> ped = std::make_unique<Pedestrian>();
 
@@ -46,4 +46,21 @@ void ProcessEvent(CreatePedestrianEvent event, Simulation & sim)
 
     sim.AddAgent(std::move(ped));
 }
-void ProcessEvent(DummyEvent /*event*/, Simulation & /*sim*/) {}
+
+void ProcessEvent(const DoorEvent & event, Simulation & sim)
+{
+    switch(event.type) {
+        case DoorEvent::Type::OPEN:
+            sim.OpenDoor(event.doorId);
+            break;
+        case DoorEvent::Type::TEMP_CLOSE:
+            sim.TempCloseDoor(event.doorId);
+            break;
+        case DoorEvent::Type::CLOSE:
+            sim.CloseDoor(event.doorId);
+            break;
+        case DoorEvent::Type::RESET:
+            sim.ResetDoor(event.doorId);
+            break;
+    }
+}

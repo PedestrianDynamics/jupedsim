@@ -25,6 +25,7 @@
  *
  *
  **/
+#include "IO/EventFileParser.hpp"
 #include "IO/IniFileParser.hpp"
 #include "Simulation.hpp"
 #include "agent-creation/AgentCreator.hpp"
@@ -83,7 +84,6 @@ int main(int argc, char ** argv)
         iniFileParser.Parse(a.IniFilePath());
     } catch(const std::exception & e) {
         LOG_ERROR("Exception in IniFileParser::Parse thrown, what: {}", e.what());
-
         return EXIT_FAILURE;
     }
 
@@ -108,6 +108,35 @@ int main(int argc, char ** argv)
             manager.add(evt);
         }
         ++frame;
+    }
+
+    if(config.eventFile) {
+        try {
+            const auto door_events = EventFileParser::ParseDoorEvents(*config.eventFile);
+            for(auto && evt : door_events) {
+                manager.add(evt);
+            }
+        } catch(const std::exception & e) {
+            LOG_ERROR("Error parsing events: {}", e.what());
+            return EXIT_FAILURE;
+        }
+    }
+    if(config.scheduleFile) {
+        try {
+            const auto train_door_events =
+                EventFileParser::ParseSchedule(config.scheduleFile.value());
+            for(auto && evt : train_door_events) {
+                manager.add(evt);
+            }
+            const auto groupMaxAgents =
+                EventFileParser::ParseMaxAgents(config.scheduleFile.value());
+            for(auto const & [transID, maxAgents] : groupMaxAgents) {
+                building->GetTransition(transID)->SetMaxDoorUsage(maxAgents);
+            }
+        } catch(const std::exception & e) {
+            LOG_ERROR("Error parsing train schedule file: {}", e.what());
+            return EXIT_FAILURE;
+        }
     }
     if(!sim.InitArgs()) {
         LOG_ERROR("Could not start simulation. Check the log for prior errors");
