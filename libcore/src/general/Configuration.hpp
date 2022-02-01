@@ -71,8 +71,8 @@ struct Configuration {
     fs::path goalFile{};
     fs::path sourceFile{};
     fs::path trafficContraintFile{};
-    fs::path eventFile{};
-    fs::path scheduleFile{};
+    std::optional<fs::path> eventFile{};
+    std::optional<fs::path> scheduleFile{};
     fs::path trainTypeFile{};
     fs::path trainTimeTableFile{};
     fs::path projectRootDir{"."};

@@ -19,153 +19,125 @@
  **/
 #include "EventFileParser.hpp"
 
-#include "events/DoorEvent.hpp"
 #include "general/Macros.hpp"
 #include "tinyxml.h"
 
 #include <Logger.hpp>
+#include <chrono>
+#include <iterator>
+#include <stdexcept>
 
-namespace
+namespace EventFileParser
 {
-std::unique_ptr<OldEvent>
-MakeDoorEvent(Building * building, int doorID, double time, const std::string & type)
-{
-    if(type == "open") {
-        return std::make_unique<DoorOpenEvent>(building, doorID, time);
-    }
+ParsingError::ParsingError(const char * msg) : std::runtime_error(msg){};
+ParsingError::ParsingError(const std::string & msg) : std::runtime_error(msg){};
+} // namespace EventFileParser
 
-    if(type == "temp_close") {
-        return std::make_unique<DoorTempCloseEvent>(building, doorID, time);
-    }
-
-    if(type == "close") {
-        return std::make_unique<DoorCloseEvent>(building, doorID, time);
-    }
-
-    if(type == "reset") {
-        return std::make_unique<DoorResetEvent>(building, doorID, time);
-    }
-
-    throw std::runtime_error(
-        fmt::format(FMT_STRING("Error parsing events. Unknown door event type {:s}"), type));
-}
-} // namespace
-
-void EventFileParser::ParseDoorEvents(
-    OldEventManager & eventManager,
-    Building * building,
-    const fs::path & eventFile)
+std::vector<DoorEvent> EventFileParser::ParseDoorEvents(const fs::path & eventFile)
 {
     LOG_INFO("Parsing event file");
     TiXmlDocument docEvent(eventFile.string());
     if(!docEvent.LoadFile()) {
-        LOG_ERROR("Cannot parse event file: {}", docEvent.ErrorDesc());
-        return;
+        throw ParsingError(fmt::format(
+            "Error parsing xml({},{}): {}",
+            docEvent.ErrorRow(),
+            docEvent.ErrorCol(),
+            docEvent.ErrorDesc()));
     }
 
     TiXmlElement * xRootNode = docEvent.RootElement();
     if(!xRootNode) {
-        LOG_ERROR("DoorEvent file root element missing");
-        return;
+        throw ParsingError("<DoorEvent> root element not present xml");
     }
 
     if(xRootNode->ValueStr() != "JPScore") {
-        LOG_ERROR("DoorEvent file root element should be 'JPScore'");
-        return;
+        throw ParsingError("DoorEvent file root element should be 'JPScore'");
     }
 
-    TiXmlNode * xEvents = xRootNode->FirstChild("events");
-    if(!xEvents) {
-        LOG_ERROR("No events found");
-        return;
+    std::vector<DoorEvent> events{};
+    const auto * xml_events = xRootNode->FirstChild("events");
+    if(xml_events == nullptr) {
+        return events;
     }
 
-    for(TiXmlElement * e = xEvents->FirstChildElement("event"); e;
-        e                = e->NextSiblingElement("event")) {
+    for(const auto * xml_event = xml_events->FirstChildElement("event"); xml_event != nullptr;
+        xml_event              = xml_event->NextSiblingElement("event")) {
         // Read id and check for correct value
         int id;
-        if(const char * attribute = e->Attribute("id"); attribute) {
+        if(const auto * attribute = xml_event->Attribute("id"); attribute) {
             if(int value = xmltoi(attribute, -1);
                value > -1 && attribute == std::to_string(value)) {
                 id = value;
             } else {
-                LOG_ERROR("event: id is set but no integer");
-                continue;
+                throw ParsingError("Event: Attribute 'id' not a positive integer");
             }
         } else {
-            LOG_ERROR("event: id required");
-            continue;
+            throw ParsingError("Event: Attribute 'id' required");
         }
 
         // Read time of events
         double time;
-        if(const char * attribute = e->Attribute("time"); attribute) {
+        if(const auto * attribute = xml_event->Attribute("time"); attribute) {
             if(double value = xmltof(attribute, std::numeric_limits<double>::min()); value >= 0.) {
                 time = value;
             } else {
-                LOG_ERROR("event {:d}: time not set properly", id);
-                continue;
+                throw ParsingError("Event: Attribute 'time' not a positive floating point value");
             }
         } else {
-            LOG_ERROR("event {:d}: time required", id);
-            continue;
+            throw ParsingError("Event: Attribute 'time' required");
         }
 
         // Read state
-        std::string state;
-        if(const char * attribute = e->Attribute("state"); attribute) {
+        DoorEvent::Type event_type{};
+        if(const auto * attribute = xml_event->Attribute("state"); attribute) {
             std::string in = xmltoa(attribute, "");
-            if(!in.empty()) {
-                state = in;
-            } else {
-                LOG_ERROR("event {:d}: state not set properly", id);
-                continue;
+            try {
+                event_type = from_string<DoorEvent::Type>(in);
+            } catch(const std::exception & ex) {
+                throw ParsingError("Event: Attribute 'state' is not a valid value");
             }
         } else {
-            LOG_ERROR("event {:d}: state required", id);
-            continue;
+            throw ParsingError("Event: Attribute 'state' required");
         }
-
-        eventManager.AddEvent(MakeDoorEvent(building, id, time, state));
+        events.push_back(
+            {std::chrono::duration_cast<std::chrono::nanoseconds>(
+                 std::chrono::duration<double>(time)),
+             id,
+             event_type});
     }
-    LOG_INFO("Events have been initialized");
+    return events;
 }
 
-void EventFileParser::ParseSchedule(
-    OldEventManager & eventManager,
-    Building * building,
-    const fs::path & scheduleFile)
+std::vector<DoorEvent> EventFileParser::ParseSchedule(const fs::path & scheduleFile)
 {
     LOG_INFO("Parsing schedule file");
-    TiXmlDocument docSchedule(scheduleFile.string());
-    if(!docSchedule.LoadFile()) {
-        LOG_ERROR("Cannot parse schedule file: {}", docSchedule.ErrorDesc());
-        return;
+    TiXmlDocument doc(scheduleFile.string());
+    if(!doc.LoadFile()) {
+        throw ParsingError(fmt::format(
+            "Error parsing xml({},{}): {}", doc.ErrorRow(), doc.ErrorCol(), doc.ErrorDesc()));
     }
 
-    TiXmlElement * xRootNode = docSchedule.RootElement();
+    const auto * xRootNode = doc.RootElement();
     if(!xRootNode) {
-        LOG_ERROR("Schedule file root element missing");
-        return;
+        throw ParsingError("Schedule file root element missing");
     }
 
     if(xRootNode->ValueStr() != "JPScore") {
-        LOG_ERROR("Schedule file root element is not 'JPScore'");
-        return;
+        throw ParsingError("Schedule file root element is not 'JPScore'");
     }
 
     // Read groups
-    TiXmlNode * xGroups = xRootNode->FirstChild("groups");
+    const auto * xGroups = xRootNode->FirstChild("groups");
     if(!xGroups) {
-        LOG_ERROR("No groups found in schedule file");
-        return;
+        throw ParsingError("No groups found in schedule file");
     }
 
     std::map<int, int> groupMaxAgents;
     std::map<int, std::vector<int>> groupDoor;
+    std::vector<DoorEvent> events;
 
-    for(TiXmlElement * e = xGroups->FirstChildElement("group"); e;
-        e                = e->NextSiblingElement("group")) {
+    for(const auto * e = xGroups->FirstChildElement("group"); e;
+        e              = e->NextSiblingElement("group")) {
         // Read id and check for correct value
         int id;
         if(const char * attribute = e->Attribute("id"); attribute) {
@@ -173,17 +145,15 @@ void EventFileParser::ParseSchedule(
                value > -1 && attribute == std::to_string(value)) {
                 id = value;
             } else {
-                LOG_ERROR("schedule group: id is set but no integer");
-                continue;
+                throw ParsingError("schedule group: id is set but no integer");
             }
         } else {
-            LOG_ERROR("schedule group: id required");
-            continue;
+            throw ParsingError("schedule group: id required");
         }
 
         std::vector<int> member;
-        for(TiXmlElement * xmember = e->FirstChildElement("member"); xmember;
-            xmember                = xmember->NextSiblingElement("member")) {
+        for(const auto * xmember = e->FirstChildElement("member"); xmember;
+            xmember              = xmember->NextSiblingElement("member")) {
             int tId = std::stoi(xmember->Attribute("t_id"));
             member.push_back(tId);
         }
@@ -191,14 +161,12 @@ void EventFileParser::ParseSchedule(
     }
 
     // Read times
-    TiXmlNode * xTimes = xRootNode->FirstChild("times");
+    const auto * xTimes = xRootNode->FirstChild("times");
     if(!xTimes) {
-        LOG_ERROR("No times found");
-        return;
+        throw ParsingError("No times found");
     }
 
-    for(TiXmlElement * e = xTimes->FirstChildElement("time"); e;
-        e                = e->NextSiblingElement("time")) {
+    for(const auto * e = xTimes->FirstChildElement("time"); e; e = e->NextSiblingElement("time")) {
         // Read id and check for correct value
         int id;
         if(const char * attribute = e->Attribute("group_id"); attribute) {
@@ -206,29 +174,26 @@ void EventFileParser::ParseSchedule(
                value > -1 && attribute == std::to_string(value)) {
                 id = value;
             } else {
-                LOG_ERROR("schedule times: group_id is set but no integer");
-                continue;
+                throw ParsingError("schedule times: group_id is set but no integer");
             }
         } else {
-            LOG_ERROR("schedule times: group_id required");
-            continue;
+            throw ParsingError("schedule times: group_id required");
         }
 
         int closingTime;
-        if(const char * attribute = e->Attribute("closing_time"); attribute) {
+        if(const auto * attribute = e->Attribute("closing_time"); attribute) {
             if(int value = xmltoi(attribute, -1); value > 0 && attribute == std::to_string(value)) {
                 closingTime = value;
             } else {
-                LOG_ERROR("schedule times {:d}: closing_time is not set properly", id);
-                continue;
+                throw ParsingError(
+                    fmt::format("schedule times {:d}: closing_time is not set properly", id));
             }
         } else {
-            LOG_ERROR("schedule times {:d}: closing_time required", id);
-            continue;
+            throw ParsingError(fmt::format("schedule times {:d}: closing_time required", id));
         }
 
         bool resetDoor = false;
-        if(const char * attribute = e->Attribute("reset"); attribute) {
+        if(const auto * attribute = e->Attribute("reset"); attribute) {
             std::string in = xmltoa(attribute, "");
             if(!in.empty()) {
                 std::string resetString = in;
@@ -236,7 +201,8 @@ void EventFileParser::ParseSchedule(
                     resetString.begin(), resetString.end(), resetString.begin(), ::tolower);
                 resetDoor = (resetString == "true");
             } else {
-                LOG_ERROR("schedule times {:d}: reset has no proper input, set to false", id);
+                throw ParsingError(fmt::format(
+                    "schedule times {:d}: reset has no proper input, set to false", id));
             }
         }
 
@@ -244,12 +210,11 @@ void EventFileParser::ParseSchedule(
         std::vector<double> timeClose;
         std::vector<double> timeReset;
 
-        for(TiXmlElement * time = e->FirstChildElement("t"); time;
-            time                = time->NextSiblingElement("t")) {
+        for(const auto * time = e->FirstChildElement("t"); time;
+            time              = time->NextSiblingElement("t")) {
             double openingTime = xmltof(time->Attribute("t"), -1.);
             if(openingTime < 0) {
-                LOG_ERROR("schedule times {:d}: t has no proper input", id);
-                continue;
+                throw ParsingError(fmt::format("schedule times {:d}: t has no proper input", id));
             }
             if(resetDoor) {
                 timeReset.push_back(openingTime);
@@ -261,19 +226,32 @@ void EventFileParser::ParseSchedule(
         }
 
         for(auto door : groupDoor[id]) {
-            for(auto open : timeOpen) {
-                eventManager.AddEvent(std::make_unique<DoorOpenEvent>(building, door, open));
+            for(auto time : timeOpen) {
+                events.push_back(
+                    {std::chrono::duration_cast<std::chrono::nanoseconds>(
+                         std::chrono::duration<double>(time)),
+                     door,
+                     DoorEvent::Type::OPEN});
             }
 
-            for(auto close : timeClose) {
-                eventManager.AddEvent(std::make_unique<DoorTempCloseEvent>(building, door, close));
+            for(auto time : timeClose) {
+                events.push_back(
+                    {std::chrono::duration_cast<std::chrono::nanoseconds>(
+                         std::chrono::duration<double>(time)),
+                     door,
+                     DoorEvent::Type::CLOSE});
             }
 
-            for(auto reset : timeReset) {
-                eventManager.AddEvent(std::make_unique<DoorResetEvent>(building, door, reset));
+            for(auto time : timeReset) {
+                events.push_back(
+                    {std::chrono::duration_cast<std::chrono::nanoseconds>(
+                         std::chrono::duration<double>(time)),
+                     door,
+                     DoorEvent::Type::RESET});
             }
         }
     }
+    return events;
 }
 
 std::map<int, int> EventFileParser::ParseMaxAgents(const fs::path & scheduleFile)

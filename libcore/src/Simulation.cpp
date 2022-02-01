@@ -92,12 +92,12 @@ void Simulation::Iterate()
         _operationalModel->ComputeNextTimeStep(t_in_sec, _clock.dT(), _building.get());
 
         //update the events
-        bool eventProcessed = _old_em->ProcessEvents(t_in_sec);
-        _routingEngine->setNeedUpdate(eventProcessed || _routingEngine->NeedsUpdate());
+        _eventProcessed |= _old_em->ProcessEvents(t_in_sec);
+        _routingEngine->setNeedUpdate(_eventProcessed || _routingEngine->NeedsUpdate());
 
         //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
         //update quickestRouter
-        if(eventProcessed) {
+        if(_eventProcessed) {
             LOG_INFO(
                 "Enter correctGeometry: Building Has {} Transitions.",
                 _building->GetAllTransitions().size());
@@ -119,6 +119,7 @@ void Simulation::Iterate()
         GoalManager gm{_building.get(), this};
         gm.update(t_in_sec);
     }
+    _eventProcessed = false;
     _clock.Advance();
 }
 
@@ -206,6 +207,30 @@ void Simulation::AddEvents(std::vector<Event> events)
     }
 }
 
+void Simulation::OpenDoor(int doorId)
+{
+    _eventProcessed = true;
+    _building->GetTransition(doorId)->Open(true);
+}
+
+void Simulation::TempCloseDoor(int doorId)
+{
+    _eventProcessed = true;
+    _building->GetTransition(doorId)->TempClose(true);
+}
+
+void Simulation::CloseDoor(int doorId)
+{
+    _eventProcessed = true;
+    _building->GetTransition(doorId)->Close(true);
+}
+
+void Simulation::ResetDoor(int doorId)
+{
+    _eventProcessed = true;
+    _building->GetTransition(doorId)->ResetDoorUsage();
+}
+
 bool Simulation::InitArgs()
 {
     const fs::path & trajPath     = _config->trajectoriesFile;
@@ -248,19 +273,6 @@ bool Simulation::InitArgs()
     }
 
     _old_em = std::make_unique<OldEventManager>();
-    if(!_config->eventFile.empty()) {
-        EventFileParser::ParseDoorEvents(*_old_em, _building.get(), _config->eventFile);
-    }
-    if(!_config->scheduleFile.empty()) {
-        EventFileParser::ParseSchedule(*_old_em, _building.get(), _config->scheduleFile);
-
-        // Read and set max door usage from schedule file
-        auto groupMaxAgents = EventFileParser::ParseMaxAgents(_config->scheduleFile);
-        for(auto const & [transID, maxAgents] : groupMaxAgents) {
-            _building->GetTransition(transID)->SetMaxDoorUsage(maxAgents);
-        }
-    }
-
     if(!_config->trainTypeFile.empty() && !_config->trainTimeTableFile.empty()) {
         auto trainTypes = TrainFileParser::ParseTrainTypes(_config->trainTypeFile);
         TrainFileParser::ParseTrainTimeTable(
@@ -428,8 +440,12 @@ void Simulation::CopyInputFilesToOutPath()
     CopyInputFileToOutPath(_config->trafficContraintFile);
     CopyInputFileToOutPath(_config->goalFile);
     CopyInputFileToOutPath(_config->transitionFile);
-    CopyInputFileToOutPath(_config->eventFile);
-    CopyInputFileToOutPath(_config->scheduleFile);
+    if(_config->eventFile) {
+        CopyInputFileToOutPath(_config->eventFile.value());
+    }
+    if(_config->scheduleFile) {
+        CopyInputFileToOutPath(_config->scheduleFile.value());
+    }
     CopyInputFileToOutPath(_config->sourceFile);
     CopyInputFileToOutPath(_config->trainTimeTableFile);
     CopyInputFileToOutPath(_config->trainTypeFile);
@@ -511,27 +527,27 @@ void Simulation::UpdateOutputIniFile()
     }
 
     // update new event file name
-    if(!_config->eventFile.empty()) {
+    if(_config->eventFile) {
         if(mainNode->FirstChild("events_file")) {
             mainNode->FirstChild("events_file")
                 ->FirstChild()
-                ->SetValue(_config->eventFile.filename().string());
+                ->SetValue(_config->eventFile.value().filename().string());
         } else if(
             mainNode->FirstChild("header") &&
             mainNode->FirstChild("header")->FirstChild("events_file")) {
             mainNode->FirstChild("header")
                 ->FirstChild("events_file")
                 ->FirstChild()
-                ->SetValue(_config->eventFile.filename().string());
+                ->SetValue(_config->eventFile.value().filename().string());
         }
     }
 
     // update new schedule file name
-    if(!_config->scheduleFile.empty()) {
+    if(_config->scheduleFile) {
         if(mainNode->FirstChild("schedule_file")) {
             mainNode->FirstChild("schedule_file")
                 ->FirstChild()
-                ->SetValue(_config->scheduleFile.filename().string());
+                ->SetValue(_config->scheduleFile.value().filename().string());
 
         } else if(
             mainNode->FirstChild("header") &&
@@ -539,7 +555,7 @@ void Simulation::UpdateOutputIniFile()
             mainNode->FirstChild("header")
                 ->FirstChild("schedule_file")
                 ->FirstChild()
-                ->SetValue(_config->scheduleFile.filename().string());
+                ->SetValue(_config->scheduleFile.value().filename().string());
         }
     }
 

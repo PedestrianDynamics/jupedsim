@@ -1,12 +1,13 @@
-import os
-from sys import argv
 import logging
-import pandas as pd
+import os
+import re
+import xml.etree.cElementTree as ET
+from pathlib import Path
+from sys import argv
+
 import matplotlib.pyplot as plt
 import numpy as np
-import xml.etree.cElementTree as ET
-import re
-from pathlib import Path
+import pandas as pd
 
 
 def read_flow(tmp_path: Path):

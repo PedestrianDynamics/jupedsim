@@ -25,7 +25,6 @@ set(source_files
     src/direction/waiting/WaitingStrategy.hpp
     src/direction/walking/DirectionStrategy.cpp
     src/direction/walking/DirectionStrategy.hpp
-    src/events/DoorEvent.cpp
     src/events/Event.cpp
     src/events/EventManager.cpp
     src/events/EventVisitors.cpp
@@ -84,7 +83,6 @@ set(header_files
     src/SimulationClock.hpp
     src/SimulationHelper.hpp
     src/agent-creation/AgentCreator.hpp
-    src/events/DoorEvent.hpp
     src/events/Event.hpp
     src/events/EventManager.hpp
     src/events/EventVisitors.hpp

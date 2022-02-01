@@ -1,31 +1,21 @@
 #pragma once
 
 
+#include "Enum.hpp"
 #include "geometry/Point.hpp"
 
 #include <chrono>
+#include <fmt/format.h>
 #include <memory>
 #include <variant>
 #include <vector>
 
-class Simulation;
 class Pedestrian;
 
-class BaseEvent
-{
-protected:
-    /// (min) time to trigger event
-    std::chrono::nanoseconds _min_time;
-
-public:
-    explicit BaseEvent(std::chrono::nanoseconds min_time);
-    std::chrono::nanoseconds MinTime() const { return _min_time; }
-};
-
-
-class CreatePedestrianEvent : public BaseEvent
+class CreatePedestrianEvent
 {
 public:
+    std::chrono::nanoseconds execute_at;
     Point _position;
 
     // general values from StartDistribution::GenerateAgent
@@ -58,14 +48,17 @@ public:
     CreatePedestrianEvent(Pedestrian const * agent, std::chrono::nanoseconds min_time);
 };
 
-/// This is just a Dummy to avoid special solutions for a single type variant
-class DummyEvent : public BaseEvent
-{
+struct DoorEvent {
+    enum class Type { OPEN, CLOSE, TEMP_CLOSE, RESET };
+    std::chrono::nanoseconds execute_at;
+    int doorId;
+    Type type;
 };
 
+template <>
+DoorEvent::Type from_string<DoorEvent::Type>(const std::string & str);
 
-using Event = std::variant<CreatePedestrianEvent, DummyEvent>;
-
+using Event = std::variant<CreatePedestrianEvent, DoorEvent>;
 
 std::vector<Event> CreateEventsFromAgents(
     std::vector<std::unique_ptr<Pedestrian>> const & agents,

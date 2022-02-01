@@ -1,9 +1,9 @@
 import pathlib
-import sympy.geometry
-import jinja2
 from typing import Dict
-
 from xml.dom.minidom import parse
+
+import jinja2
+import sympy.geometry
 
 
 def parse_waiting_areas(filename: pathlib.Path):

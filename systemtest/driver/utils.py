@@ -1,11 +1,11 @@
-import pathlib
-import os
-import shutil
 import difflib
+import os
+import pathlib
+import shutil
 from typing import List
 
-from driver.environment import Environment
 from driver.driver import JpsCoreDriver
+from driver.environment import Environment
 
 
 def setup_jpscore_driver(

@@ -15,7 +15,7 @@ IteratorPair<EventManager::ConstEventIteratorType> EventManager::NextEvents(Simu
     return {_events.upper_bound(lb_exclusive), _events.upper_bound(ub)};
 }
 
-void EventManager::add(Event event)
+void EventManager::add(const Event & event)
 {
     _events.insert({EventMinTime(event), event});
 }
