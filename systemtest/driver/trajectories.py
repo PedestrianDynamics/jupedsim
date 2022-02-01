@@ -1,8 +1,9 @@
 import pathlib
 import re
-from numpy import ndarray, where, max, count_nonzero
-import pandas as pd
 from dataclasses import dataclass
+
+import pandas as pd
+from numpy import count_nonzero, max, ndarray, where
 
 
 @dataclass()
