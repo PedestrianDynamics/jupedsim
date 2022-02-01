@@ -69,6 +69,7 @@ private:
     fs::path _currentTrajectoriesFile;
     std::vector<std::unique_ptr<Pedestrian>> _agents;
     EventManager _em;
+    bool _eventProcessed{false};
 
 public:
     explicit Simulation(
@@ -106,7 +107,16 @@ public:
     size_t GetPedsNumber() const;
 
     void AddEvent(Event event);
+
     void AddEvents(std::vector<Event> events);
+
+    void OpenDoor(int doorId);
+
+    void TempCloseDoor(int doorId);
+
+    void CloseDoor(int doorId);
+
+    void ResetDoor(int doorId);
 
 
     /**

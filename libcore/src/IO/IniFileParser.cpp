@@ -987,7 +987,7 @@ bool IniFileParser::ParseExternalFiles(const TiXmlNode & mainNode)
 
     if(!eventFile.empty()) {
         _config->eventFile = fs::weakly_canonical(_config->projectRootDir / eventFile);
-        LOG_INFO("Events are read from: <{}>", _config->eventFile.string());
+        LOG_INFO("Events are read from: <{}>", _config->eventFile.value().string());
     }
 
     // read external schedule file name
@@ -1006,7 +1006,7 @@ bool IniFileParser::ParseExternalFiles(const TiXmlNode & mainNode)
 
     if(!scheduleFile.empty()) {
         _config->scheduleFile = fs::weakly_canonical(_config->projectRootDir / scheduleFile);
-        LOG_INFO("Schedule is read from: <{}>", _config->scheduleFile.string());
+        LOG_INFO("Schedule is read from: <{}>", _config->scheduleFile.value().string());
     }
 
     // read train type

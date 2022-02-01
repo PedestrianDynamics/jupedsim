@@ -88,8 +88,8 @@ void TrajectoryWriter::WriteHeader(size_t nPeds, double fps, const Configuration
     }
 
     // if used: add event file name
-    if(!cfg.eventFile.empty()) {
-        header.append(fmt::format("#events: {:s}\n", cfg.eventFile.filename().string()));
+    if(cfg.eventFile) {
+        header.append(fmt::format("#events: {:s}\n", cfg.eventFile.value().filename().string()));
     }
 
     header.append("#ID: the agent ID\n");
