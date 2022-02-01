@@ -1,6 +1,8 @@
-from sympy.geometry import Point, Segment
-from numpy import ndarray
 from itertools import tee
+
+from numpy import ndarray
+from sympy.geometry import Point, Segment
+
 
 def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."

@@ -1,5 +1,5 @@
-import pathlib
 import os
+import pathlib
 import platform
 from enum import Enum, auto
 
