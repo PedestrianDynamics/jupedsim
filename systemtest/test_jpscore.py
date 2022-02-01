@@ -8,7 +8,7 @@ from driver.trajectories import load_trajectory
 from driver.environment import Platform
 from driver.inifile import parse_waiting_areas, instanciate_tempalte
 from driver.geometry import check_traj_path_cross_line
-from driver.flow import read_max_agents, read_flow, read_num_agents, check_max_agents, check_door_usage, read_outflow_from_inifile, read_starting_times
+from driver.flow import read_max_agents, read_flow, read_num_agents, check_max_agents, read_outflow_from_inifile, read_starting_times, check_flow
 from sympy.geometry import Point, Segment
 from driver.driver import JpsCoreDriver
 from driver.utils import copy_all_files, copy_files
@@ -691,7 +691,6 @@ def test_door_closes_after_max_agents(tmp_path, env):
 
     max_agents_dict = read_max_agents(tmp_path / "inifile.xml")
     flow_dict = read_flow(tmp_path)
-    print(flow_dict)
     [max_agents_correct, measured_agents] = check_max_agents(flow_dict, max_agents_dict)
     assert max_agents_correct, "Wrong number of pedestrians passing the door"
     assert measured_agents == max_agents_dict
@@ -719,26 +718,7 @@ def test_door_flow_regulation(tmp_path, env):
 
     max_agents_dict = read_max_agents(tmp_path / "inifile.xml")
     outflow_dict = read_outflow_from_inifile(tmp_path / "inifile.xml")
-    starting_times = read_starting_times(tmp_path / "events.xml")
-    data = read_flow(tmp_path)
+    starting_times_dict = read_starting_times(tmp_path / "events.xml")
+    data_dict = read_flow(tmp_path)
 
-    # [flowCorrect, measuredFlow] = checkFlow(data, maxAgents, startingTimes, outflow)
-    # if not flowCorrect:
-    #     success = False
-    #     logging.error('Outflow rate is not as expected. Expected {}, but are {}.'.format(outflow, measuredFlow))
-
-    # [startCorrect, measuredStart] = checkStart(data, maxAgents, startingTimes)
-    # if not startCorrect:
-    #     success = False
-    #     logging.error(
-    #         'Wrong times for opening the doors. Should be {}, but are {}.'.format(startingTimes, measuredStart))
-
-    # [maxAgentsCorrect, measuredAgents] = checkMaxAgents(data, maxAgents, startingTimes)
-    # if not maxAgentsCorrect:
-    #     success = False
-    #     logging.error(
-    #         'Wrong number of pedestrians passing the door. Should be max {}, but are {}.'.format(maxAgents,
-    #                                                                                              measuredAgents))
-
-    # if not success:
-    #     exit(FAILURE)
+    check_flow(data_dict, max_agents_dict, starting_times_dict, outflow_dict)

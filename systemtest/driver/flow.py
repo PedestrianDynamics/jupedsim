@@ -40,7 +40,7 @@ def read_outflow_from_inifile(inifile: Path):
     root = tree.getroot()
     for tc in root.iter("traffic_constraints"):
         outflow_dict = {
-            door.attrib["trans_id"]: door.attrib["outflow"]
+            int(door.attrib["trans_id"]): float(door.attrib["outflow"])
             for door in tc.iter("door")
         }
 
@@ -92,40 +92,58 @@ def check_max_agents(flow_dict, max_agents_dict):
     return success, agents
 
 
-def check_door_usage(flow_dict, num_agents):
-    success = True
-
-    # All pedestrian should leave through the main exit
-    exit_usage = max(flow_dict.values())  # maximum value
-    if exit_usage != num_agents:
-        success = False
-        logging.error(
-            "Number of agents exiting the simulation ({}) does not match number of agents in the simulation ({})".format(
-                exit_usage, num_agents
-            )
-        )
-
-    # All pedestirans should pass one of the other doors
-    other_door_usage = sum(flow_dict.values()) - exit_usage
-    if other_door_usage != num_agents:
-        success = False
-        logging.error(
-            "Number of agents using other doors ({}) does not match number of agents in the simulation ({})".format(
-                other_door_usage, num_agents
-            )
-        )
-
-    return success
-
-
 def read_starting_times(events_file: Path):
     tree = ET.parse(events_file)
     root = tree.getroot()
-    starting_times = [
-        event.attrib["time"]
-        for event in root.iter("event")
-        if event.attrib["state"] == "open" or event.attrib["state"] == "reset"
-    ]
+    starting_times = {}
+    for event in root.iter("event"):
+        if event.attrib["state"] == "open" or event.attrib["state"] == "reset":
+            starting_times.setdefault(int(event.attrib["id"]), []).append(
+                float(event.attrib["time"])
+            )
 
     assert starting_times, "Could not read starting times from events file"
     return starting_times
+
+
+def check_flow(
+    data_dict: dict,
+    max_agents_dict: dict,
+    starting_times_dict: dict,
+    outflow_dict: dict,
+):
+    flowError = 0.3
+    timeError = 0.2  # in seconds, a little time is between opening of door and first ped passing
+
+    for door_id, data in data_dict.items():
+        max_agents = max_agents_dict[door_id]
+        starting_times = starting_times_dict[door_id]
+        outflow = outflow_dict[door_id]
+
+        relativeError = flowError * outflow
+
+        for i, startTime in enumerate(starting_times, start=0):
+            if i + 1 < len(starting_times):
+                endTime = starting_times[i + 1]
+                first = data[data.time.between(startTime, endTime)].iloc[0]
+                last = data[data.time.between(startTime, endTime)].iloc[-1]
+                num_agents = len(data[data.time.between(startTime, endTime)])
+            else:
+                first = data[startTime < data.time].iloc[0]
+                last = data[startTime < data.time].iloc[-1]
+                num_agents = len(data[startTime < data.time])
+
+            # Check if number of agents passing through door exceeds max agents for this door
+            assert (
+                num_agents <= max_agents
+            ), "Agents passing door are more than max agents allowed"
+
+            # Check flow through door
+            time = last.time - first.time
+            flow = num_agents / time
+            assert (
+                np.abs(flow - outflow) <= relativeError
+            ), "Door flow is not as expected"
+
+            # Check starting time
+            assert np.abs(first.time - starting_times[i]) < timeError
