@@ -11,7 +11,6 @@ from driver.flow import (
     check_flow,
     read_flow,
     read_max_agents,
-    read_num_agents,
     read_outflow_from_inifile,
     read_starting_times,
 )

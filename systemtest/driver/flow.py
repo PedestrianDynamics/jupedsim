@@ -66,17 +66,6 @@ def read_max_agents(inifile: Path):
     return max_agents_dict
 
 
-def read_num_agents(inifile: Path):
-    tree = ET.parse(inifile)
-    root = tree.getroot()
-
-    number = 0
-    for group in root.iter("group"):
-        number += int(group.attrib["number"])
-
-    return number
-
-
 def check_max_agents(flow_dict, max_agents_dict):
     success = True
 
