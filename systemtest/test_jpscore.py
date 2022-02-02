@@ -7,8 +7,8 @@ from driver.driver import JpsCoreDriver
 from driver.environment import Platform
 from driver.fixtures import env
 from driver.flow import (
-    check_max_agents,
     check_flow,
+    check_max_agents,
     read_flow,
     read_max_agents,
     read_outflow_from_inifile,
@@ -722,8 +722,12 @@ def test_door_closes_after_max_agents(tmp_path, env):
     assert measured_agents == max_agents_dict
 
     assert len(flow_dict[1].index) == 80
-    assert len(flow_dict[2].index) == 20 # trans id 2 is limited to 20 pedestrians
-    assert len(flow_dict[3].index) == 100 # all pedestrians should use main exit
+    assert (
+        len(flow_dict[2].index) == 20
+    )  # trans id 2 is limited to 20 pedestrians
+    assert (
+        len(flow_dict[3].index) == 100
+    )  # all pedestrians should use main exit
 
 
 def test_door_flow_regulation(tmp_path, env):
@@ -732,9 +736,15 @@ def test_door_flow_regulation(tmp_path, env):
     :param tmp_path: working directory of test execution
     :param env: global environment object
     """
-    input_location = env.systemtest_path / "door_tests" / "test_flow_regulation"
+    input_location = (
+        env.systemtest_path / "door_tests" / "test_flow_regulation"
+    )
     copy_files(
-        sources=[input_location / "geometry.xml", input_location / "inifile.xml", input_location / "events.xml" ],
+        sources=[
+            input_location / "geometry.xml",
+            input_location / "inifile.xml",
+            input_location / "events.xml",
+        ],
         dest=tmp_path,
     )
     jpscore_driver = JpsCoreDriver(
