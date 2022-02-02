@@ -14,7 +14,7 @@ from driver.flow import (
     read_outflow_from_inifile,
     read_starting_times,
 )
-from driver.geometry import check_traj_path_cross_line
+from driver.geometry import get_intersetions_path_segment
 from driver.inifile import instanciate_tempalte, parse_waiting_areas
 from driver.trajectories import load_trajectory
 from driver.utils import (
@@ -663,7 +663,7 @@ def test_router_corridor_close(tmp_path, env, router_id):
 
     trajectories = load_trajectory(jpscore_driver.traj_file)
     agent_path = trajectories.path(2)
-    assert check_traj_path_cross_line(
+    assert get_intersetions_path_segment(
         agent_path, Segment(Point(9.5, -5), Point(9.5, 5))
     )
 
@@ -689,7 +689,7 @@ def test_router_10(tmp_path, env):
 
     trajectories = load_trajectory(jpscore_driver.traj_file)
     agent_path = trajectories.path(2)
-    assert check_traj_path_cross_line(
+    assert get_intersetions_path_segment(
         agent_path, Segment(Point(90.1, -104), Point(90.1, -102))
     )
 
