@@ -126,7 +126,7 @@ def check_flow(
             # Check if number of agents passing through door exceeds max agents for this door
             assert (
                 num_agents <= max_agents
-            ), "Agents passing door are more than max agents allowed"
+            ), f"Agents passing door ({num_agents}) are more than max agents ({max_agents}) allowed"
 
             # Check flow through door
             time = last.time - first.time
