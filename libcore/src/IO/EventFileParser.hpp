@@ -20,8 +20,6 @@
 #pragma once
 
 #include "events/Event.hpp"
-#include "events/OldEvent.hpp"
-#include "events/OldEventManager.hpp"
 #include "general/Filesystem.hpp"
 
 #include <map>

@@ -64,3 +64,19 @@ void ProcessEvent(const DoorEvent & event, Simulation & sim)
             break;
     }
 }
+void ProcessEvent(const TrainEvent & event, Simulation & sim)
+{
+    switch(event.type) {
+        case TrainEvent::Type::ARRIVAL:
+            sim.ActivateTrain(
+                event.trainID,
+                event.trackID,
+                event.trainType,
+                event.trainStartOffset,
+                event.reversed);
+            break;
+        case TrainEvent::Type::DEPARTURE:
+            sim.DeactivateTrain(event.trainID, event.trackID);
+            break;
+    }
+}

@@ -27,6 +27,7 @@
  **/
 #include "IO/EventFileParser.hpp"
 #include "IO/IniFileParser.hpp"
+#include "IO/TrainFileParser.hpp"
 #include "Simulation.hpp"
 #include "agent-creation/AgentCreator.hpp"
 #include "events/Event.hpp"
@@ -88,6 +89,7 @@ int main(int argc, char ** argv)
     }
 
     auto building         = std::make_unique<Building>(&config, nullptr);
+    auto * building_ptr   = building.get();
     auto routingEngine    = std::make_unique<RoutingEngine>(&config, building.get());
     auto operationalModel = OperationalModel::CreateFromType(
         config.operationalModel, config, config.directionManager.get());
@@ -105,7 +107,7 @@ int main(int argc, char ** argv)
             std::chrono::duration<double>(now));
         auto events = CreateEventsFromAgents(extract(agents, frame), t);
         for(auto && evt : events) {
-            manager.add(evt);
+            manager.AddEvent(evt);
         }
         ++frame;
     }
@@ -114,7 +116,7 @@ int main(int argc, char ** argv)
         try {
             const auto door_events = EventFileParser::ParseDoorEvents(*config.eventFile);
             for(auto && evt : door_events) {
-                manager.add(evt);
+                manager.AddEvent(evt);
             }
         } catch(const std::exception & e) {
             LOG_ERROR("Error parsing events: {}", e.what());
@@ -126,15 +128,32 @@ int main(int argc, char ** argv)
             const auto train_door_events =
                 EventFileParser::ParseSchedule(config.scheduleFile.value());
             for(auto && evt : train_door_events) {
-                manager.add(evt);
+                manager.AddEvent(evt);
             }
             const auto groupMaxAgents =
                 EventFileParser::ParseMaxAgents(config.scheduleFile.value());
             for(auto const & [transID, maxAgents] : groupMaxAgents) {
-                building->GetTransition(transID)->SetMaxDoorUsage(maxAgents);
+                building_ptr->GetTransition(transID)->SetMaxDoorUsage(maxAgents);
             }
         } catch(const std::exception & e) {
-            LOG_ERROR("Error parsing train schedule file: {}", e.what());
+            LOG_ERROR("Error parsing schedule file {}", e.what());
+            return EXIT_FAILURE;
+        }
+    }
+    if(!config.trainTimeTableFile.empty() && !config.trainTypeFile.empty()) {
+        try {
+            //TODO(kkratz) Have another look at the error handling
+            auto trainTypes = TrainFileParser::ParseTrainTypes(config.trainTypeFile);
+            const auto timeTableContents =
+                TrainFileParser::ParseTrainTimeTable(trainTypes, config.trainTimeTableFile);
+            for(auto && evt : timeTableContents.events) {
+                manager.AddEvent(evt);
+            }
+            for(auto && [k, v] : timeTableContents.trains) {
+                building_ptr->AddTrainType(k, v);
+            }
+        } catch(const std::exception & e) {
+            LOG_ERROR("Error parsing train files: {}", e.what());
             return EXIT_FAILURE;
         }
     }

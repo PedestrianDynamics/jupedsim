@@ -2,9 +2,6 @@
 
 #include "events/EventVisitors.hpp"
 
-#include <chrono>
-
-
 IteratorPair<EventManager::ConstEventIteratorType> EventManager::NextEvents(SimulationClock _clock)
 {
     auto ub = std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -15,7 +12,7 @@ IteratorPair<EventManager::ConstEventIteratorType> EventManager::NextEvents(Simu
     return {_events.upper_bound(lb_exclusive), _events.upper_bound(ub)};
 }
 
-void EventManager::add(const Event & event)
+void EventManager::AddEvent(const Event & event)
 {
     _events.insert({EventMinTime(event), event});
 }
