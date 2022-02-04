@@ -102,8 +102,8 @@ std::vector<DoorEvent> EventFileParser::ParseDoorEvents(const fs::path & eventFi
         events.push_back(
             {std::chrono::duration_cast<std::chrono::nanoseconds>(
                  std::chrono::duration<double>(time)),
-             id,
-             event_type});
+             event_type,
+             id});
     }
     return events;
 }
@@ -230,24 +230,24 @@ std::vector<DoorEvent> EventFileParser::ParseSchedule(const fs::path & scheduleF
                 events.push_back(
                     {std::chrono::duration_cast<std::chrono::nanoseconds>(
                          std::chrono::duration<double>(time)),
-                     door,
-                     DoorEvent::Type::OPEN});
+                     DoorEvent::Type::OPEN,
+                     door});
             }
 
             for(auto time : timeClose) {
                 events.push_back(
                     {std::chrono::duration_cast<std::chrono::nanoseconds>(
                          std::chrono::duration<double>(time)),
-                     door,
-                     DoorEvent::Type::CLOSE});
+                     DoorEvent::Type::CLOSE,
+                     door});
             }
 
             for(auto time : timeReset) {
                 events.push_back(
                     {std::chrono::duration_cast<std::chrono::nanoseconds>(
                          std::chrono::duration<double>(time)),
-                     door,
-                     DoorEvent::Type::RESET});
+                     DoorEvent::Type::RESET,
+                     door});
             }
         }
     }
