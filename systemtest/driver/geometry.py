@@ -25,6 +25,6 @@ def get_intersetions_path_segment(path: ndarray, crossing_segment: Segment):
         segment = Segment(point1, point2)
         intersections = segment.intersection(crossing_segment)
         if intersections:
-            return {'frame': p1[1], 'intersections': intersections}
+            return {"frame": p1[1], "intersections": intersections}
 
     return False
