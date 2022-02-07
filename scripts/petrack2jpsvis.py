@@ -7,20 +7,21 @@ from pathlib import Path
 import numpy as np
 from pandas import read_csv
 
-log.basicConfig(level=log.DEBUG,
-                format='%(levelname)s : %(message)s')
+log.basicConfig(
+    level=log.DEBUG, format="%(levelname)s : %(message)s")
 
 
 def check_positive_int(value):
     ivalue = int(value)
     if ivalue <= 0:
         raise argparse.ArgumentTypeError(
-            f"{value} is an invalid value. Positive value required.")
+            f"{value} is an invalid value. Positive value required."
+        )
     return ivalue
 
 
 parser = argparse.ArgumentParser(
-    description='''Modify trajectory-files to be
+    description="""Modify trajectory-files to be
     visualized with jpsvis.
     New columns 'A', 'B' representing ellipses major axis (Agent Ellipsis),
     'ANGLE' representing the Agent's orientation and
@@ -30,33 +31,50 @@ parser = argparse.ArgumentParser(
     a maximal speed of v0=1.5m/s (color = v/v0*255).
     The name of the output file is the name of the input file
     prefixed with 'jps_' and ends with '.txt'
-    '''
+    """
 )
-parser.add_argument('file', type=str,
-                    help='Petrack trajectory file')
-parser.add_argument("-u", "--unit", type=str,
-                    choices=["m", "cm"],
-                    help="""Specify the length unit used to represent agent
+parser.add_argument("file", type=str, help="Petrack trajectory file")
+parser.add_argument(
+    "-u",
+    "--unit",
+    type=str,
+    choices=["m", "cm"],
+    help="""Specify the length unit used to represent agent
                     positions in the input PedTrack file.
                     Note: This argument information maybe important when
-                    passing PeTrack-files without header.""")
+                    passing PeTrack-files without header.""",
+)
 
-parser.add_argument("-d", "--df", default="10", dest='df',
-                    type=check_positive_int,
-                    help='''number of frames forward
-                    to calculate the speed (default: 10)''')
-parser.add_argument("-a", default="0.2",
-                    type=float,
-                    help='''Semi-axis in moving direction (default: 0.2 m)''')
-parser.add_argument("-b", default="0.3",
-                    type=float,
-                    help='''Semi-axis in shoulder direction (default: 0.3m)''')
+parser.add_argument(
+    "-d",
+    "--df",
+    default="10",
+    dest="df",
+    type=check_positive_int,
+    help="""number of frames forward
+                    to calculate the speed (default: 10)""",
+)
+parser.add_argument(
+    "-a",
+    default="0.2",
+    type=float,
+    help="""Semi-axis in moving direction (default: 0.2 m)""",
+)
+parser.add_argument(
+    "-b",
+    default="0.3",
+    type=float,
+    help="""Semi-axis in shoulder direction (default: 0.3m)""",
+)
 
-parser.add_argument("-f", "--fps",
-                    type=int,
-                    help='''Specify the frames per seconds (default: 16).
+parser.add_argument(
+    "-f",
+    "--fps",
+    type=int,
+    help="""Specify the frames per seconds (default: 16).
                     Note: This argument information maybe important when
-                    passing PeTrack-files without header.''')
+                    passing PeTrack-files without header.""",
+)
 
 
 args = parser.parse_args()
@@ -130,15 +148,16 @@ def extract_info(file_obj):
             log.warning("did not find unit in header. Assuming unit=cm")
     else:  # found unit in header
         if args.unit is not None and args.unit != unit:
-            log.warning(f"""Unit passed: {args.unit}
+            log.warning(
+                f"""Unit passed: {args.unit}
             but unit detected in header {unit}.
-            Using: {unit}""")
+            Using: {unit}"""
+            )
 
     try:
         fps = int(fps)
     except ValueError:
-        log.error(
-            f"fps <{fps}> in header can not be converted to int")
+        log.error(f"fps <{fps}> in header can not be converted to int")
 
         sys.exit()
 
@@ -177,21 +196,21 @@ def speed_angle(traj, df, fps):
     if size < df:
         log.warning(
             f"""The number of frames used to calculate the speed {df}
-            exceeds the total amount of frames ({size}) in this trajectory.""")
+            exceeds the total amount of frames ({size}) in this trajectory."""
+        )
         return (speed, angle)
 
-    delta = traj[df:, :] - traj[:size-df, :]
+    delta = traj[df:, :] - traj[: size - df, :]
     delta_x = delta[:, 0]
     delta_y = delta[:, 1]
     delta_square = np.square(delta)
     delta_x_square = delta_square[:, 0]
     delta_y_square = delta_square[:, 1]
-    angle[: size-df] = np.arctan2(delta_y,
-                                  delta_x)*180/np.pi
+    angle[: size - df] = np.arctan2(delta_y, delta_x) * 180 / np.pi
     s = np.sqrt(delta_x_square + delta_y_square)
-    speed[: size-df] = s / df * fps
-    speed[size-df:] = speed[size-df-1]
-    angle[size-df:] = angle[size-df-1]
+    speed[: size - df] = s / df * fps
+    speed[size - df:] = speed[size - df - 1]
+    angle[size - df:] = angle[size - df - 1]
     return (speed, angle)
 
 
@@ -210,56 +229,56 @@ def write_geometry(data, Unit, geo_file):
     xmax = np.max(data[:, 2]) + Delta
     ymin = np.min(data[:, 3]) - Delta
     ymax = np.max(data[:, 3]) + Delta
-    data = ET.Element('geometry')
-    data.set('version', '0.8')
-    data.set('caption', 'experiment')
-    data.set('unit', 'm')  # jpsvis does not support another unit!
-    rooms = ET.SubElement(data, 'rooms')
-    room = ET.SubElement(rooms, 'room')
-    room.set('id', '0')
-    room.set('caption', 'room')
-    subroom = ET.SubElement(room, 'subroom')
-    subroom.set('id', '0')
-    subroom.set('caption', 'subroom')
-    subroom.set('class', 'subroom')
-    subroom.set('A_x', '0')
-    subroom.set('B_y', '0')
-    subroom.set('C_z', '0')
+    data = ET.Element("geometry")
+    data.set("version", "0.8")
+    data.set("caption", "experiment")
+    data.set("unit", "m")  # jpsvis does not support another unit!
+    rooms = ET.SubElement(data, "rooms")
+    room = ET.SubElement(rooms, "room")
+    room.set("id", "0")
+    room.set("caption", "room")
+    subroom = ET.SubElement(room, "subroom")
+    subroom.set("id", "0")
+    subroom.set("caption", "subroom")
+    subroom.set("class", "subroom")
+    subroom.set("A_x", "0")
+    subroom.set("B_y", "0")
+    subroom.set("C_z", "0")
     # poly1
-    polygon = ET.SubElement(subroom, 'polygon')
-    polygon.set('caption', 'wall')
-    polygon.set('type', 'internal')
-    vertex = ET.SubElement(polygon, 'vertex')
-    vertex.set('px', f'{xmin}')
-    vertex.set('py', f'{ymin}')
-    vertex = ET.SubElement(polygon, 'vertex')
-    vertex.set('px', f'{xmax}')
-    vertex.set('py', f'{ymin}')
+    polygon = ET.SubElement(subroom, "polygon")
+    polygon.set("caption", "wall")
+    polygon.set("type", "internal")
+    vertex = ET.SubElement(polygon, "vertex")
+    vertex.set("px", f"{xmin}")
+    vertex.set("py", f"{ymin}")
+    vertex = ET.SubElement(polygon, "vertex")
+    vertex.set("px", f"{xmax}")
+    vertex.set("py", f"{ymin}")
     # poly2
-    polygon = ET.SubElement(subroom, 'polygon')
-    vertex = ET.SubElement(polygon, 'vertex')
-    vertex.set('px', f'{xmax}')
-    vertex.set('py', f'{ymin}')
-    vertex = ET.SubElement(polygon, 'vertex')
-    vertex.set('px', f'{xmax}')
-    vertex.set('py', f'{ymax}')
+    polygon = ET.SubElement(subroom, "polygon")
+    vertex = ET.SubElement(polygon, "vertex")
+    vertex.set("px", f"{xmax}")
+    vertex.set("py", f"{ymin}")
+    vertex = ET.SubElement(polygon, "vertex")
+    vertex.set("px", f"{xmax}")
+    vertex.set("py", f"{ymax}")
     # poly3
-    polygon = ET.SubElement(subroom, 'polygon')
-    vertex = ET.SubElement(polygon, 'vertex')
-    vertex.set('px', f'{xmax}')
-    vertex.set('py', f'{ymax}')
-    vertex = ET.SubElement(polygon, 'vertex')
-    vertex.set('px', f'{xmin}')
-    vertex.set('py', f'{ymax}')
+    polygon = ET.SubElement(subroom, "polygon")
+    vertex = ET.SubElement(polygon, "vertex")
+    vertex.set("px", f"{xmax}")
+    vertex.set("py", f"{ymax}")
+    vertex = ET.SubElement(polygon, "vertex")
+    vertex.set("px", f"{xmin}")
+    vertex.set("py", f"{ymax}")
     # poly4
-    polygon = ET.SubElement(subroom, 'polygon')
-    vertex = ET.SubElement(polygon, 'vertex')
-    vertex.set('px', f'{xmin}')
-    vertex.set('py', f'{ymax}')
-    vertex = ET.SubElement(polygon, 'vertex')
-    vertex.set('px', f'{xmin}')
-    vertex.set('py', f'{ymin}')
-    b_xml = ET.tostring(data, encoding='utf8', method='xml')
+    polygon = ET.SubElement(subroom, "polygon")
+    vertex = ET.SubElement(polygon, "vertex")
+    vertex.set("px", f"{xmin}")
+    vertex.set("py", f"{ymax}")
+    vertex = ET.SubElement(polygon, "vertex")
+    vertex.set("px", f"{xmin}")
+    vertex.set("py", f"{ymin}")
+    b_xml = ET.tostring(data, encoding="utf8", method="xml")
     with open(geo_file, "wb") as f:
         f.write(b_xml)
 
@@ -283,8 +302,12 @@ def extend_data(data, _unit):
     """
     rows, cols = data.shape
     h = 1.5 * np.ones((rows, 1)) * _unit  # height
-    a = args.a * np.ones((rows, 1)) * _unit  # semi-axis of ellipse in moving direction
-    b = args.b * np.ones((rows, 1)) * _unit  # semi-axis of ellipse in shoulder direction
+    a = (
+        args.a * np.ones((rows, 1)) * _unit
+    )  # semi-axis of ellipse in moving direction
+    b = (
+        args.b * np.ones((rows, 1)) * _unit
+    )  # semi-axis of ellipse in shoulder direction
     angle = np.zeros((rows, 1))  # angle in degree
     color = 100 * np.ones((rows, 1))  # will be set wrt. speed
     if cols == 4:  # some trajectories do not have Z
@@ -308,23 +331,31 @@ def write_trajectories(result, header, file_path):
 
     """
     filename = file_path.parent.joinpath("jps_" + file_path.stem + ".txt")
-    np.savetxt(filename, result[1:, :],
-               # skip the first line (initialization)
-               fmt=["%d", "%d",  # id frame
-                    "%1.2f", "%1.2f", "%1.2f",  # x, y, z
-                    "%1.2f", "%1.2f",  # A, B
-                    "%1.2f",  # Angle
-                    "%d"],  # Color
-               header=header,
-               comments='#',
-               delimiter='\t')
-    size_mb = Path(filename).stat().st_size/1024/1024
-    log.info(
-        f"output: {filename} ({size_mb:,.2f} MB)")
+    np.savetxt(
+        filename,
+        result[1:, :],
+        # skip the first line (initialization)
+        fmt=[
+            "%d",
+            "%d",  # id frame
+            "%1.2f",
+            "%1.2f",
+            "%1.2f",  # x, y, z
+            "%1.2f",
+            "%1.2f",  # A, B
+            "%1.2f",  # Angle
+            "%d",
+        ],  # Color
+        header=header,
+        comments="#",
+        delimiter="\t",
+    )
+    size_mb = Path(filename).stat().st_size / 1024 / 1024
+    log.info(f"output: {filename} ({size_mb:,.2f} MB)")
 
 
 def write_debug_msg(traj_file, fps, df, unit_s):
-    size_mb = traj_file.stat().st_size/1024/1024
+    size_mb = traj_file.stat().st_size / 1024 / 1024
     log.info(f"input : {traj_file} ({size_mb:,.2f} MB)")
     log.info(f"fps   : {fps}")
     log.info(f"df    : {df}")
@@ -343,10 +374,9 @@ def main():
             v0 = 1.5 * unit  # max. speed (assumed) [unit/s]
             write_debug_msg(input_file, fps, df, unit_s)
             try:
-                data = read_csv(input_file,
-                                sep=r"\s+",
-                                dtype=np.float64,
-                                comment="#").values
+                data = read_csv(
+                    input_file, sep=r"\s+", dtype=np.float64, comment="#"
+                ).values
 
             except Exception as err:
                 log.error(f"Trajectory is malformed: {err}")
@@ -364,20 +394,21 @@ def main():
             geometry_file = input_file.parent.joinpath("geometry.xml")
             write_geometry(data, unit_s, geometry_file)
             agents = np.unique(data[:, 0]).astype(int)
-            log.info(
-                f"Got {agents.size} pedestrians and {nframes} frames.")
+            log.info(f"Got {agents.size} pedestrians and {nframes} frames.")
             for agent in agents:
                 ped = data[data[:, 0] == agent]
                 speed, angle = speed_angle(ped[:, 2:4], df, fps)
-                data[data[:, 0] == agent, -1] = speed/v0*255
+                data[data[:, 0] == agent, -1] = speed / v0 * 255
                 data[data[:, 0] == agent, -2] = angle
 
             write_trajectories(data, header, input_file)
 
     except OSError as err:
-        log.error(f"""trying to open file
-        {err.filename}: {err. strerror}""")
+        log.error(
+            f"""trying to open file
+        {err.filename}: {err. strerror}"""
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
