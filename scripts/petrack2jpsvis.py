@@ -38,7 +38,7 @@ parser.add_argument("-u", "--unit", type=str,
                     choices=["m", "cm"],
                     help="""Specify the length unit used to represent agent
                     positions in the input PedTrack file.
-                    Note: This argument information  maybe important when
+                    Note: This argument information maybe important when
                     passing PeTrack-files without header.""")
 
 parser.add_argument("-d", "--df", default="10", dest='df',
@@ -50,7 +50,14 @@ parser.add_argument("-a", default="0.2",
                     help='''Semi-axis in moving direction (default: 0.2 m)''')
 parser.add_argument("-b", default="0.3",
                     type=float,
-                    help='''Semi-axis in shoulder direction (default: 0.3 m)''')
+                    help='''Semi-axis in shoulder direction (default: 0.3m)''')
+
+parser.add_argument("-f", "--fps",
+                    type=int,
+                    help='''Specify the frames per seconds (default: 16).
+                    Note: This argument information maybe important when
+                    passing PeTrack-files without header.''')
+
 
 args = parser.parse_args()
 
@@ -102,14 +109,18 @@ def extract_info(file_obj):
                 fps = line.split("fps")[0].split()[-1]
                 has_fps = True
     # jpsvis part
+    if not has_fps:
+        if args.fps is not None:
+            log.info(f"fps passed: {args.fps}")
+            fps = args.fps
+        else:
+            log.warning("did not find fps in header. Assuming fps=16")
+
     header += f"\nframerate: {fps}"
     header += "\ngeometry: geometry.xml\n"
     header += "ID\tFR\tX\tY\tZ\tA\tB\tANGLE\tCOLOR"
     if not has_petrack_header:
         log.warning("Trajectory file does not have header.")
-
-    if not has_fps:
-        log.warning("did not find fps in header. Assuming fps=16")
 
     if not has_unit:  # did not find unit in header
         if args.unit is not None:
