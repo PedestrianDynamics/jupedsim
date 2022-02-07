@@ -1,11 +1,11 @@
-import sys
-from pathlib import Path
 import argparse
-import xml.etree.ElementTree as ET
 import logging as log
+import sys
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
 import numpy as np
 from pandas import read_csv
-
 
 log.basicConfig(level=log.DEBUG,
                 format='%(levelname)s : %(message)s')
