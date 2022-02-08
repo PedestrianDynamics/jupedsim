@@ -55,6 +55,17 @@ def check_max_agents(flow_dict, traffic_constraints):
 def check_flow(
     data_dict: dict, starting_times_dict: dict, traffic_constraints: dict
 ):
+    """
+    This method compares the configured traffic constraints (e.g. max_agents and outflow) against the actual flow and data.
+    For this, the number of agents passing the door in a certain timeperiod is computed.
+    The computed number is compared with the expected flow and maximum agents.
+    This is done using an allowed error since the simulation might exceed the flow as well as the maximum agents.
+    It is possible, that more then one agent crosses the door in a single
+
+    :param data_dict:
+    :param starting_times_dict:
+    :param traffic_constraints:
+    """
     flowError = 0.3
     timeError = 0.2  # in seconds, a little time is between opening of door and first ped passing
 
