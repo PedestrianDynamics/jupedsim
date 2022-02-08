@@ -10,8 +10,8 @@ from driver.flow import (
     check_flow,
     check_max_agents,
     read_flow,
-    read_starting_times,
 )
+from driver.events import read_starting_times
 from driver.geometry import get_intersetions_path_segment
 from driver.inifile import (
     instanciate_tempalte,

@@ -52,20 +52,6 @@ def check_max_agents(flow_dict, traffic_constraints):
     return agents
 
 
-def read_starting_times(events_file: Path):
-    tree = ET.parse(events_file)
-    root = tree.getroot()
-    starting_times = {}
-    for event in root.iter("event"):
-        if event.attrib["state"] == "open" or event.attrib["state"] == "reset":
-            starting_times.setdefault(int(event.attrib["id"]), []).append(
-                float(event.attrib["time"])
-            )
-
-    assert starting_times, "Could not read starting times from events file"
-    return starting_times
-
-
 def check_flow(
     data_dict: dict, starting_times_dict: dict, traffic_constraints: dict
 ):
