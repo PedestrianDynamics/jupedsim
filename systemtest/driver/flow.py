@@ -36,19 +36,6 @@ def read_flow(tmp_path: Path):
     return flow_dict
 
 
-def read_outflow_from_inifile(inifile: Path):
-    tree = ET.parse(inifile)
-    root = tree.getroot()
-    for tc in root.iter("traffic_constraints"):
-        outflow_dict = {
-            int(door.attrib["trans_id"]): float(door.attrib["outflow"])
-            for door in tc.iter("door")
-        }
-
-    assert outflow_dict, "Could not read outflow from inifile"
-    return outflow_dict
-
-
 def read_max_agents(inifile: Path):
     tree = ET.parse(inifile)
     root = tree.getroot()

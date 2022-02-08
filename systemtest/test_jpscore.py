@@ -11,11 +11,10 @@ from driver.flow import (
     check_max_agents,
     read_flow,
     read_max_agents,
-    read_outflow_from_inifile,
     read_starting_times,
 )
 from driver.geometry import get_intersetions_path_segment
-from driver.inifile import instanciate_tempalte, parse_waiting_areas
+from driver.inifile import instanciate_tempalte, parse_waiting_areas, parse_door_outflow
 from driver.trajectories import load_trajectory
 from driver.utils import (
     copy_all_files,
@@ -753,7 +752,7 @@ def test_door_flow_regulation(tmp_path, env):
     jpscore_driver.run()
 
     max_agents_dict = read_max_agents(tmp_path / "inifile.xml")
-    outflow_dict = read_outflow_from_inifile(tmp_path / "inifile.xml")
+    outflow_dict = parse_door_outflow(tmp_path / "inifile.xml")
     starting_times_dict = read_starting_times(tmp_path / "events.xml")
     data_dict = read_flow(tmp_path)
 

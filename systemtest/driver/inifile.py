@@ -1,4 +1,5 @@
 import pathlib
+import xml.etree.cElementTree as ET
 from typing import Dict
 from xml.dom.minidom import parse
 
@@ -37,3 +38,16 @@ def instanciate_tempalte(*, src: pathlib.Path, args: Dict, dest: pathlib.Path):
     tpl = jinja2.Template(src.read_text())
     content = tpl.render(args)
     dest.write_text(content)
+
+
+def parse_door_outflow(inifile: pathlib.Path):
+    tree = ET.parse(inifile)
+    root = tree.getroot()
+    for tc in root.iter("traffic_constraints"):
+        outflow_dict = {
+            int(door.attrib["trans_id"]): float(door.attrib["outflow"])
+            for door in tc.iter("door")
+        }
+
+    assert outflow_dict, "Could not read outflow from inifile"
+    return outflow_dict
