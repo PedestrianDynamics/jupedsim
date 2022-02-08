@@ -10,11 +10,15 @@ from driver.flow import (
     check_flow,
     check_max_agents,
     read_flow,
-    read_max_agents,
     read_starting_times,
 )
 from driver.geometry import get_intersetions_path_segment
-from driver.inifile import instanciate_tempalte, parse_waiting_areas, parse_door_outflow
+from driver.inifile import (
+    instanciate_tempalte,
+    parse_door_outflow,
+    parse_waiting_areas,
+    read_max_agents,
+)
 from driver.trajectories import load_trajectory
 from driver.utils import (
     copy_all_files,

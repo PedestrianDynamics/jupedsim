@@ -51,3 +51,20 @@ def parse_door_outflow(inifile: pathlib.Path):
 
     assert outflow_dict, "Could not read outflow from inifile"
     return outflow_dict
+
+
+def read_max_agents(inifile: pathlib.Path):
+    tree = ET.parse(inifile)
+    root = tree.getroot()
+    max_agents_dict = {}
+    for tc in root.iter("traffic_constraints"):
+        for door in tc.iter("door"):
+            id = int(door.attrib["trans_id"])
+            if "max_agents" in door.attrib:
+                max_agents = int(door.attrib["max_agents"])
+                max_agents_dict[id] = max_agents
+
+    assert (
+        len(max_agents_dict.keys()) > 0
+    ), "Could not read inifile for max agents"
+    return max_agents_dict
