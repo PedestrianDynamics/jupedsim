@@ -7,8 +7,7 @@ from pathlib import Path
 import numpy as np
 from pandas import read_csv
 
-log.basicConfig(
-    level=log.DEBUG, format="%(levelname)s : %(message)s")
+log.basicConfig(level=log.DEBUG, format="%(levelname)s : %(message)s")
 
 
 def check_positive_int(value):
@@ -37,14 +36,25 @@ parser.add_argument("file", type=str, help="Petrack trajectory file")
 parser.add_argument(
     "-u",
     "--unit",
+    default="m",
     type=str,
     choices=["m", "cm"],
     help="""Specify the length unit used to represent agent
-                    positions in the input PedTrack file.
-                    Note: This argument information maybe important when
-                    passing PeTrack-files without header.""",
+    positions in the input PedTrack file (default: m).
+    If PeTrack-file has no header,
+    you might want to specify a unit.
+                    """
 )
-
+parser.add_argument(
+    "-f",
+    "--fps",
+    default=16,
+    type=int,
+    help="""Specify the frames per seconds (default: 16).
+    If PeTrack-file has no header,
+    you might want to specify a fps.
+    """
+)
 parser.add_argument(
     "-d",
     "--df",
@@ -52,31 +62,20 @@ parser.add_argument(
     dest="df",
     type=check_positive_int,
     help="""number of frames forward
-                    to calculate the speed (default: 10)""",
+    to calculate the speed (default: 10)"""
 )
 parser.add_argument(
     "-a",
     default="0.2",
     type=float,
-    help="""Semi-axis in moving direction (default: 0.2 m)""",
+    help="""Semi-axis in moving direction (default: 0.2m)"""
 )
 parser.add_argument(
     "-b",
     default="0.3",
     type=float,
-    help="""Semi-axis in shoulder direction (default: 0.3m)""",
+    help="""Semi-axis in shoulder direction (default: 0.3m)"""
 )
-
-parser.add_argument(
-    "-f",
-    "--fps",
-    type=int,
-    help="""Specify the frames per seconds (default: 16).
-                    Note: This argument information maybe important when
-                    passing PeTrack-files without header.""",
-)
-
-
 args = parser.parse_args()
 
 
@@ -100,11 +99,9 @@ def extract_info(file_obj):
 
     """
     header = f"description: trajectories converted by {sys.argv[0]}\n"
-    fps = 16
-    unit = "cm"
     has_petrack_header = False
-    has_fps = False
-    has_unit = False
+    unit = args.unit
+    fps = args.fps
     for line in file_obj:
         if "PeTrack" in line or "<number>" in line:
             has_petrack_header = True
@@ -116,49 +113,25 @@ def extract_info(file_obj):
             header += line
             if "x/" in line:
                 unit = line.split("x/")[-1].split()[0]
-                has_unit = True
 
             if "<x>" in line:
                 # <number> <frame> <x> [in m] <y> [in m] <z> [in m]
                 unit = line.split("<x>")[-1].split()[1].strip("]")
-                has_unit = True
 
             if "framerate" in line:
                 fps = line.split("fps")[0].split()[-1]
-                has_fps = True
-    # jpsvis part
-    if not has_fps:
-        if args.fps is not None:
-            log.info(f"fps passed: {args.fps}")
-            fps = args.fps
-        else:
-            log.warning("did not find fps in header. Assuming fps=16")
 
+    # jpsvis part
     header += f"\nframerate: {fps}"
     header += "\ngeometry: geometry.xml\n"
     header += "ID\tFR\tX\tY\tZ\tA\tB\tANGLE\tCOLOR"
     if not has_petrack_header:
         log.warning("Trajectory file does not have header.")
 
-    if not has_unit:  # did not find unit in header
-        if args.unit is not None:
-            log.info(f"Unit passed: {args.unit}")
-            unit = args.unit
-        else:
-            log.warning("did not find unit in header. Assuming unit=cm")
-    else:  # found unit in header
-        if args.unit is not None and args.unit != unit:
-            log.warning(
-                f"""Unit passed: {args.unit}
-            but unit detected in header {unit}.
-            Using: {unit}"""
-            )
-
     try:
         fps = int(fps)
     except ValueError:
         log.error(f"fps <{fps}> in header can not be converted to int")
-
         sys.exit()
 
     return (header, fps, unit)
@@ -357,11 +330,11 @@ def write_trajectories(result, header, file_path):
 def write_debug_msg(traj_file, fps, df, unit_s):
     size_mb = traj_file.stat().st_size / 1024 / 1024
     log.info(f"input : {traj_file} ({size_mb:,.2f} MB)")
+    log.info(f"unit  : {unit_s}")
     log.info(f"fps   : {fps}")
     log.info(f"df    : {df}")
-    log.info(f"a     : {args.a} m")
-    log.info(f"b     : {args.b} m")
-    log.info(f"unit  : {unit_s}")
+    log.info(f"a     : {args.a} {unit_s}")
+    log.info(f"b     : {args.b} {unit_s}")
 
 
 def main():
