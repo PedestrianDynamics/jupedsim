@@ -36,20 +36,20 @@ def read_flow(tmp_path: Path):
     return flow_dict
 
 
-def check_max_agents(flow_dict, max_agents_dict):
-    success = True
-
+def check_max_agents(flow_dict, traffic_constraints):
     agents = {}
     agents_error = 1  # Needed if the door is too wide, as multiple pedestrian can walk through in one time step
 
-    for door_id, max_agents in max_agents_dict.items():
+    for door_id, tc in traffic_constraints.items():
         agent_count = len(flow_dict[door_id].index)
-        if np.abs(agent_count - max_agents) > agents_error:
-            success = False
+        if tc.max_agents != -1:
+            assert (
+                np.abs(agent_count - tc.max_agents) <= agents_error
+            ), f"agent count ({agent_count}) is higher then max agents ({tc.max_agents})"
 
         agents[door_id] = agent_count
 
-    return success, agents
+    return agents
 
 
 def read_starting_times(events_file: Path):
@@ -67,18 +67,15 @@ def read_starting_times(events_file: Path):
 
 
 def check_flow(
-    data_dict: dict,
-    max_agents_dict: dict,
-    starting_times_dict: dict,
-    outflow_dict: dict,
+    data_dict: dict, starting_times_dict: dict, traffic_constraints: dict
 ):
     flowError = 0.3
     timeError = 0.2  # in seconds, a little time is between opening of door and first ped passing
 
     for door_id, data in data_dict.items():
-        max_agents = max_agents_dict[door_id]
+        max_agents = traffic_constraints[door_id].max_agents
         starting_times = starting_times_dict[door_id]
-        outflow = outflow_dict[door_id]
+        outflow = traffic_constraints[door_id].outflow
 
         relativeError = flowError * outflow
 

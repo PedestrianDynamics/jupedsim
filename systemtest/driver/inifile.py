@@ -1,6 +1,6 @@
 import pathlib
 import xml.etree.cElementTree as ET
-from typing import Dict
+from typing import Dict, NamedTuple
 from xml.dom.minidom import parse
 
 import jinja2
@@ -40,31 +40,25 @@ def instanciate_tempalte(*, src: pathlib.Path, args: Dict, dest: pathlib.Path):
     dest.write_text(content)
 
 
-def parse_door_outflow(inifile: pathlib.Path):
+class TrafficConstraint(NamedTuple):
+    door_id: int
+    outflow: int
+    max_agents: int
+
+
+def parse_traffic_constraints(inifile: pathlib.Path):
     tree = ET.parse(inifile)
     root = tree.getroot()
-    for tc in root.iter("traffic_constraints"):
-        outflow_dict = {
-            int(door.attrib["trans_id"]): float(door.attrib["outflow"])
-            for door in tc.iter("door")
-        }
-
-    assert outflow_dict, "Could not read outflow from inifile"
-    return outflow_dict
-
-
-def read_max_agents(inifile: pathlib.Path):
-    tree = ET.parse(inifile)
-    root = tree.getroot()
-    max_agents_dict = {}
+    traffic_constraints = {}
     for tc in root.iter("traffic_constraints"):
         for door in tc.iter("door"):
-            id = int(door.attrib["trans_id"])
-            if "max_agents" in door.attrib:
-                max_agents = int(door.attrib["max_agents"])
-                max_agents_dict[id] = max_agents
+            traffic_constraints[
+                int(door.attrib["trans_id"])
+            ] = TrafficConstraint(
+                int(door.attrib["trans_id"]),
+                int(door.get("outflow", -1)),
+                int(door.get("max_agents", -1)),
+            )
 
-    assert (
-        len(max_agents_dict.keys()) > 0
-    ), "Could not read inifile for max agents"
-    return max_agents_dict
+    assert traffic_constraints, "Could not parse traffic constraints"
+    return traffic_constraints

@@ -15,9 +15,8 @@ from driver.flow import (
 from driver.geometry import get_intersetions_path_segment
 from driver.inifile import (
     instanciate_tempalte,
-    parse_door_outflow,
+    parse_traffic_constraints,
     parse_waiting_areas,
-    read_max_agents,
 )
 from driver.trajectories import load_trajectory
 from driver.utils import (
@@ -716,13 +715,12 @@ def test_door_closes_after_max_agents(tmp_path, env):
     )
     jpscore_driver.run()
 
-    max_agents_dict = read_max_agents(tmp_path / "inifile.xml")
+    traffic_constraints = parse_traffic_constraints(tmp_path / "inifile.xml")
     flow_dict = read_flow(tmp_path)
     [max_agents_correct, measured_agents] = check_max_agents(
-        flow_dict, max_agents_dict
+        flow_dict, traffic_constraints
     )
     assert max_agents_correct, "Wrong number of pedestrians passing the door"
-    assert measured_agents == max_agents_dict
 
     assert len(flow_dict[1].index) == 80
     assert (
@@ -755,9 +753,7 @@ def test_door_flow_regulation(tmp_path, env):
     )
     jpscore_driver.run()
 
-    max_agents_dict = read_max_agents(tmp_path / "inifile.xml")
-    outflow_dict = parse_door_outflow(tmp_path / "inifile.xml")
     starting_times_dict = read_starting_times(tmp_path / "events.xml")
     data_dict = read_flow(tmp_path)
-
-    check_flow(data_dict, max_agents_dict, starting_times_dict, outflow_dict)
+    traffic_constraints = parse_traffic_constraints(tmp_path / "inifile.xml")
+    check_flow(data_dict, starting_times_dict, traffic_constraints)
