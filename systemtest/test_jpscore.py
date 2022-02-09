@@ -5,13 +5,9 @@ import numpy
 import pytest
 from driver.driver import JpsCoreDriver
 from driver.environment import Platform
-from driver.fixtures import env
-from driver.flow import (
-    check_flow,
-    check_max_agents,
-    read_flow,
-)
 from driver.events import read_starting_times
+from driver.fixtures import env
+from driver.flow import check_flow, read_flow
 from driver.geometry import get_intersetions_path_segment
 from driver.inifile import (
     instanciate_tempalte,
@@ -23,6 +19,7 @@ from driver.utils import (
     copy_all_files,
     copy_files,
     get_file_text_diff,
+    pairwise,
     setup_jpscore_driver,
 )
 from sympy.geometry import Point, Segment
@@ -715,20 +712,21 @@ def test_door_closes_after_max_agents(tmp_path, env):
     )
     jpscore_driver.run()
 
-    traffic_constraints = parse_traffic_constraints(tmp_path / "inifile.xml")
-    flow_dict = read_flow(tmp_path)
-    [max_agents_correct, measured_agents] = check_max_agents(
-        flow_dict, traffic_constraints
-    )
-    assert max_agents_correct, "Wrong number of pedestrians passing the door"
+    flow_dict = {1: 0, 2: 0}
+    # here the flow through the doors is computed.
+    # The two doors are parallel to the X-axis, therefore the computation of the door taken by each pedestrian is simplyfied.
+    trajectories = load_trajectory(jpscore_driver.traj_file)
+    for ped_id in numpy.unique(trajectories.data[:, 0]):
+        path = trajectories.path(ped_id)
+        for p1, p2 in pairwise(path):
+            if p1[3] < 30 and p2[3] >= 30:
+                if 20 <= p1[2] <= 22:
+                    flow_dict[1] += 1
+                if 28 <= p1[2] <= 30:
+                    flow_dict[2] += 1
 
-    assert len(flow_dict[1].index) == 80
-    assert (
-        len(flow_dict[2].index) == 20
-    )  # trans id 2 is limited to 20 pedestrians
-    assert (
-        len(flow_dict[3].index) == 100
-    )  # all pedestrians should use main exit
+    assert flow_dict[1] == 80
+    assert flow_dict[2] == 20
 
 
 def test_door_flow_regulation(tmp_path, env):

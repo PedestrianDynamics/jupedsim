@@ -36,22 +36,6 @@ def read_flow(tmp_path: Path):
     return flow_dict
 
 
-def check_max_agents(flow_dict, traffic_constraints):
-    agents = {}
-    agents_error = 1  # Needed if the door is too wide, as multiple pedestrian can walk through in one time step
-
-    for door_id, tc in traffic_constraints.items():
-        agent_count = len(flow_dict[door_id].index)
-        if tc.max_agents != -1:
-            assert (
-                np.abs(agent_count - tc.max_agents) <= agents_error
-            ), f"agent count ({agent_count}) is higher then max agents ({tc.max_agents})"
-
-        agents[door_id] = agent_count
-
-    return agents
-
-
 def check_flow(
     data_dict: dict, starting_times_dict: dict, traffic_constraints: dict
 ):
