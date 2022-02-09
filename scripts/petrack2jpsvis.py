@@ -34,47 +34,41 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument("file", type=str, help="Petrack trajectory file")
 parser.add_argument(
-    "-u",
     "--unit",
-    default="m",
     type=str,
     choices=["m", "cm"],
-    help="""Specify the length unit used to represent agent
-    positions in the input PedTrack file (default: m).
-    If PeTrack-file has no header,
-    you might want to specify a unit.
-                    """
+    help="""unit of the coordinates and size of pedestrians.
+    Specify a unit for trajectories with no header.
+    Specifying this option for an input file with a valid header is an error.
+    """,
 )
 parser.add_argument(
-    "-f",
     "--fps",
-    default=16,
-    type=int,
-    help="""Specify the frames per seconds (default: 16).
-    If PeTrack-file has no header,
-    you might want to specify a fps.
-    """
+    type=check_positive_int,
+    help="""frames per seconds.
+    specify fps information for trajectories with no header.
+    Specifying this option for an input file with a valid header is an error.
+    """,
 )
 parser.add_argument(
-    "-d",
     "--df",
     default="10",
     dest="df",
     type=check_positive_int,
     help="""number of frames forward
-    to calculate the speed (default: 10)"""
+    to calculate the speed (default: 10)""",
 )
 parser.add_argument(
     "-a",
     default="0.2",
     type=float,
-    help="""Semi-axis in moving direction (default: 0.2m)"""
+    help="""Semi-axis in moving direction (default: 0.2m)""",
 )
 parser.add_argument(
     "-b",
     default="0.3",
     type=float,
-    help="""Semi-axis in shoulder direction (default: 0.3m)"""
+    help="""Semi-axis in shoulder direction (default: 0.3m)""",
 )
 args = parser.parse_args()
 
@@ -94,50 +88,49 @@ def extract_info(file_obj):
     # ---------------------------------------
     :param file_obj: file object
     :returns: header,
-              fps (default: 16)
-              and unit (default: cm)
+              fps,
+              and unit
 
     """
     header = f"description: trajectories converted by {sys.argv[0]}\n"
-    has_petrack_header = False
     unit = args.unit
     fps = args.fps
     for line in file_obj:
-        if "PeTrack" in line or "<number>" in line:
-            has_petrack_header = True
+        if not line.startswith("#"):  # now the trajectories start
+            break
 
-        if has_petrack_header:
-            if not line.startswith("#"):  # now the trajectories start
-                break
+        header += line
+        if "x/" in line:
+            unit = line.split("x/")[-1].split()[0]
 
-            header += line
-            if "x/" in line:
-                unit = line.split("x/")[-1].split()[0]
+        if "<x>" in line:
+            # <number> <frame> <x> [in m] <y> [in m] <z> [in m]
+            unit = line.split("<x>")[-1].split()[1].strip("]")
 
-            if "<x>" in line:
-                # <number> <frame> <x> [in m] <y> [in m] <z> [in m]
-                unit = line.split("<x>")[-1].split()[1].strip("]")
+        if "framerate" in line:
+            fps = line.split("fps")[0].split()[-1]
+            try:
+                fps = int(float(fps))  # in some files we get float like 2.0
+            except ValueError:
+                log.error(f"fps <{fps}> in header can not be converted to int")
+                sys.exit()
 
-            if "framerate" in line:
-                fps = line.split("fps")[0].split()[-1]
+    if args.unit is not None and args.unit != unit:
+        log.error(f"""Unit mismatch! (passed: {args.unit}, detected {unit})""")
+        sys.exit()
+
+    if args.fps is not None and args.fps != fps:
+        log.error(f"""fps mismatch! (passed: {args.fps}, detected {fps})""")
+        sys.exit()
 
     # jpsvis part
     header += f"\nframerate: {fps}"
     header += "\ngeometry: geometry.xml\n"
     header += "ID\tFR\tX\tY\tZ\tA\tB\tANGLE\tCOLOR"
-    if not has_petrack_header:
-        log.warning("Trajectory file does not have header.")
-
-    try:
-        fps = int(fps)
-    except ValueError:
-        log.error(f"fps <{fps}> in header can not be converted to int")
-        sys.exit()
-
     return (header, fps, unit)
 
 
-def speed_angle(traj, df, fps):
+def compute_speed_and_angle(traj, df, fps):
     """Calculates the speed and the angle from the trajectory points.
 
     Using the forward formula
@@ -182,12 +175,12 @@ def speed_angle(traj, df, fps):
     angle[: size - df] = np.arctan2(delta_y, delta_x) * 180 / np.pi
     s = np.sqrt(delta_x_square + delta_y_square)
     speed[: size - df] = s / df * fps
-    speed[size - df:] = speed[size - df - 1]
-    angle[size - df:] = angle[size - df - 1]
+    speed[size - df :] = speed[size - df - 1]
+    angle[size - df :] = angle[size - df - 1]
     return (speed, angle)
 
 
-def write_geometry(data, Unit, geo_file):
+def write_geometry(data, _unit, geo_file):
     """Creates a bounding box around the trajectories
 
     :param data: 2D-array
@@ -196,16 +189,20 @@ def write_geometry(data, Unit, geo_file):
     :returns: geometry file names geometry.xml
 
     """
-    Delta = 100 if Unit == "cm" else 1
+    # ----------
+    delta = 100 if _unit == "cm" else 1
     # 1 m around to better contain the trajectories
-    xmin = np.min(data[:, 2]) - Delta
-    xmax = np.max(data[:, 2]) + Delta
-    ymin = np.min(data[:, 3]) - Delta
-    ymax = np.max(data[:, 3]) + Delta
+    xmin = np.min(data[:, 2]) - delta
+    xmax = np.max(data[:, 2]) + delta
+    ymin = np.min(data[:, 3]) - delta
+    ymax = np.max(data[:, 3]) + delta
+    # --------
+    # create_geo_header
     data = ET.Element("geometry")
     data.set("version", "0.8")
     data.set("caption", "experiment")
     data.set("unit", "m")  # jpsvis does not support another unit!
+    # make room/subroom
     rooms = ET.SubElement(data, "rooms")
     room = ET.SubElement(rooms, "room")
     room.set("id", "0")
@@ -309,16 +306,16 @@ def write_trajectories(result, header, file_path):
         result[1:, :],
         # skip the first line (initialization)
         fmt=[
-            "%d",
-            "%d",  # id frame
-            "%1.2f",
-            "%1.2f",
-            "%1.2f",  # x, y, z
-            "%1.2f",
-            "%1.2f",  # A, B
+            "%d",  # id
+            "%d",  # frame
+            "%1.2f",  # x
+            "%1.2f",  # y
+            "%1.2f",  # z
+            "%1.2f",  # A
+            "%1.2f",  # B
             "%1.2f",  # Angle
-            "%d",
-        ],  # Color
+            "%d",  # Color
+        ],
         header=header,
         comments="#",
         delimiter="\t",
@@ -327,7 +324,7 @@ def write_trajectories(result, header, file_path):
     log.info(f"output: {filename} ({size_mb:,.2f} MB)")
 
 
-def write_debug_msg(traj_file, fps, df, unit_s):
+def write_info_msg(traj_file, fps, df, unit_s):
     size_mb = traj_file.stat().st_size / 1024 / 1024
     log.info(f"input : {traj_file} ({size_mb:,.2f} MB)")
     log.info(f"unit  : {unit_s}")
@@ -343,9 +340,21 @@ def main():
     try:
         with open(input_file, encoding="utf8") as finput:
             header, fps, unit_s = extract_info(finput)
+            if unit_s is None:
+                log.error(
+                    "Unit is not set. Consider passing unit as an argument."
+                )
+                sys.exit()
+
+            if fps is None:
+                log.error(
+                    "fps is not set. Consider passing fps as an argument."
+                )
+                sys.exit()
+
             unit = 100 if unit_s == "cm" else 1
             v0 = 1.5 * unit  # max. speed (assumed) [unit/s]
-            write_debug_msg(input_file, fps, df, unit_s)
+            write_info_msg(input_file, fps, df, unit_s)
             try:
                 data = read_csv(
                     input_file, sep=r"\s+", dtype=np.float64, comment="#"
@@ -359,7 +368,8 @@ def main():
             log.info(f"Got {columns} columns")
             nframes = np.unique(data[:, 1]).size
             if columns > 5:
-                # keep the following cols: id fr x y z
+                # keep just the following cols: id fr x y z
+                # and ignore the rest.
                 data = data[:, :5]
 
             data = data[data[:, 1].argsort()]  # sort data by frame
@@ -370,7 +380,7 @@ def main():
             log.info(f"Got {agents.size} pedestrians and {nframes} frames.")
             for agent in agents:
                 ped = data[data[:, 0] == agent]
-                speed, angle = speed_angle(ped[:, 2:4], df, fps)
+                speed, angle = compute_speed_and_angle(ped[:, 2:4], df, fps)
                 data[data[:, 0] == agent, -1] = speed / v0 * 255
                 data[data[:, 0] == agent, -2] = angle
 
