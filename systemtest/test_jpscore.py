@@ -7,7 +7,7 @@ from driver.driver import JpsCoreDriver
 from driver.environment import Platform
 from driver.events import read_starting_times
 from driver.fixtures import env
-from driver.flow import check_flow, read_flow
+from driver.flow import check_flow
 from driver.geometry import get_intersetions_path_segment
 from driver.inifile import (
     instanciate_tempalte,
@@ -752,6 +752,9 @@ def test_door_flow_regulation(tmp_path, env):
     jpscore_driver.run()
 
     starting_times_dict = read_starting_times(tmp_path / "events.xml")
-    data_dict = read_flow(tmp_path)
     traffic_constraints = parse_traffic_constraints(tmp_path / "inifile.xml")
-    check_flow(data_dict, starting_times_dict, traffic_constraints)
+    check_flow(
+        load_trajectory(jpscore_driver.traj_file),
+        starting_times_dict,
+        traffic_constraints,
+    )
