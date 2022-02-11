@@ -1,19 +1,24 @@
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("merge", type=str,  help="Merge the given Trajectories together", nargs='+')
-parser.add_argument('-o', type=str, required=False, default="src/outputfile.txt", help="define outputfile", dest="output")
+parser.add_argument("merge", type=str, help="Merge the given Trajectories together", nargs='+')
+parser.add_argument('-o', type=str, required=False, default="src/outputfile.txt", help="define outputfile",
+                    dest="output")
+parser.add_argument('-d', action="store_true", help="activates debugmode", dest="debug")
 args = parser.parse_args()
+
+
 def FramefromLine(line):
     frame = line.split("	")
-    return (int(frame[1]))
+    return int(frame[1])
 
 
-def addData(trajec1, trajec2): # merges Data for exactly two files (will be removed later)
-    inputfile1 = open(trajec1, "r")
-    lines1 = inputfile1.readlines()
-    inputfile2 = open(trajec2, "r")
-    lines2 = inputfile2.readlines()
+# merges Data for exactly two files (will be removed later)
+def addData(trajec1, trajec2):
+    input_file1 = open(trajec1, "r")
+    lines1 = input_file1.readlines()
+    input_file2 = open(trajec2, "r")
+    lines2 = input_file2.readlines()
     count1 = 14
     count2 = 14
     output_file = open('src/newtesttabelle.txt', 'w')
@@ -36,51 +41,60 @@ def addData(trajec1, trajec2): # merges Data for exactly two files (will be remo
     output_file.close()
 
 
-def addDatas(trajecs, output):  # will merge all data into the output-file
-    lines = [[], []]        # lines[i][j] | i - index of file | j - row number
+# will merge all data into the output-file
+# "trajecs" is a list of all Trajectory files
+def addDatas(trajecs, output, debug):
+    lines = [[], []]  # lines[i][j] | i - index of file | j - row number
     index = 0
-    while (index < len(trajecs)):
-        temptrajec = open(trajecs[index], "r")
-        templine = temptrajec.readlines()
+    while index < len(trajecs):
+        temp_trajec = open(trajecs[index], "r")
+        temp_line = temp_trajec.readlines()
         lines += []
-        lines[index] += templine
-        temptrajec.close()
+        lines[index] += temp_line
+        temp_trajec.close()
         index = index + 1
 
+    # determines in which line the header ends
     head_end = 0
     for line in lines[0]:
         if line.startswith("#") or line == "\n":
             head_end += 1
-        else: # now the trajectories start
+        else:  # now the trajectories start
             break
+
+    # creates as many counters as files starting from row where trajec starts
     counts = []
     output_file = open(output, 'w')
     index = 0
-    while index < len(trajecs): # creates as many counters as files starting from row where trajec starts
+    while index < len(trajecs):
         counts += [head_end]
         index = index + 1
 
+    # searches next frame
     while len(lines) > 0:
         found = False
-        currentframes = []
+        current_frames = []
         index = 0
-        while index < len(lines):   # searches next frame
-            currentframes += [FramefromLine(lines[index][(counts[index])])]
+        while index < len(lines):
+            current_frames += [FramefromLine(lines[index][(counts[index])])]
             index = index + 1
-        nextframe = min(currentframes)
-        print(f"der aktuelle Frame : {nextframe} verbleibende Dateien: {len(lines)}")
+        next_frame = min(current_frames)
+        if debug:
+            print(f"current Frame : {next_frame} remaining Files: {len(lines)}")
         index = 0
-        while index < len(lines): # adds row with next frame
-            if FramefromLine(lines[index][(counts[index])]) == nextframe and found is False:
+        # adds row with next frame to the output file
+        while index < len(lines):
+            if FramefromLine(lines[index][(counts[index])]) == next_frame and found is False:
                 output_file.write(lines[index][counts[index]])
                 counts[index] += 1
                 found = True
-                if ((counts[index] >= len(lines[index]))): # removes file and counter from lines if end has been reached
+                # removes file and counter from lines if end has been reached
+                if counts[index] >= len(lines[index]):
                     counts.pop(index)
                     lines.pop(index)
             index = index + 1
     output_file.close()
-    print(f"neue Datei {output} wurde erstellt.")
+    print(f'new File "{output}" was created.')
 
-addDatas(args.merge, args.output)
 
+addDatas(args.merge, args.output, args.debug)

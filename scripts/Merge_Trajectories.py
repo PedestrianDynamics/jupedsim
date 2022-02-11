@@ -1,77 +1,88 @@
 import numpy as np
 
-def splitinfo(textdatei):
-    datei1 = open(textdatei, 'r')
-    totalInfo = datei1.read().split("\n\n")
-    datei1.close()
-    infolines = totalInfo[0].split("\n")
-    info = []
-    for i in infolines:
-        info += i.split(": ")
-    return (info)
+
+# checks if frame rate and geometries match
+def checkhead(trajecs):
+    # reads all framerates and geometries from the trajectories
+    index = 0
+    while index < len(trajecs):
+        frame_rates = []
+        geometries = []
+        temp_trajec = open(trajecs[index], "r")
+        lines = temp_trajec.readlines()
+        counter = 0
+        temp_line = lines[counter]
+        while temp_line.startswith("#"):
+            if temp_line.startswith("#framerate"):
+                split_line = temp_line.split(": ")
+                frame_rates += [split_line[1]]
+            if temp_line.startswith("#geometry"):
+                split_line = temp_line.split(": ")
+                geometries += [split_line[1]]
+            counter += 1
+            temp_line = lines[counter]
+        temp_trajec.close()
+        index = index + 1
+    # compares if the are identical
+    first_rate = frame_rates[0]
+    first_geo = geometries[0]
+    for rate in frame_rates:
+        if rate != first_rate:
+            return False
+    for geo in geometries:
+        if geo != first_geo:
+            return False
+    return True
 
 
-testinfo1 = splitinfo("testtabelle.txt")
-testinfo2 = splitinfo("testtabelle2.txt")
-print(testinfo1)
-print(testinfo2)
-
-
-def compareinfo(info1, info2):
-    if info1[7] != info2[7]: return 0  # framerate
-    if info1[9] != info2[9]: return 0  # geometry
-    return 1
-
-
-if compareinfo(testinfo1, testinfo2) == 1:
-    print("information of the tables are equal")
-else:
-    print("information of the tables are not equal")
-
-a = np.loadtxt('testtabelle2.txt')
-print(a[0][1]) # erster Frame
-print(a[-1][1]) # letzter Frame
-
-
-def testframes(textdatei):  # test if all frames are included
-    a = np.loadtxt(textdatei)
+# test if all frames are included
+def checkcomplete(file):
+    data = np.loadtxt(file)
     i = 0
-    frame = a[0][1]
-    while a[i][1] < a[-1][1]:
-        if frame == a[i][1]:
+    frame = data[0][1]
+    while data[i][1] < data[-1][1]:
+        if frame == data[i][1]:
             frame = frame + 1
         else:
-            if frame < a[i][1]:
-                return 0
+            if frame < data[i][1]:
+                return True
         i = i + 1
-    if frame == a[-1][1]:
-        return 1
-    return frame
+    if frame == data[-1][1]:
+        return True
+    return False
 
 
-if testframes("testtabelle2.txt") == 1:
-    print("all frames are included")
+def startingFrame(file):
+    data = np.loadtxt(file)
+    return data[0][1]
+
+
+def endingFrame(file):
+    data = np.loadtxt(file)
+    return data[-1][1]
+
+
+# checks if files are matching one Trajectory
+def checkdata(files):
+    end_frames = []
+    start_frames = []
+    for file in files:
+        if not checkcomplete(file):
+            return False
+        start_frames += [startingFrame(file)]
+        end_frames += [endingFrame(file)]
+    for start_frame in start_frames:
+        if start_frame != min(start_frames) and start_frame - 1 not in end_frames:
+            return False
+    return True
+
+
+test = ["src/traj_stairs_0001.txt", "src/traj_stairs_0002.txt"]
+if checkhead(test):
+    print("information match")
 else:
-    print("not all frames are included")
-
-infotogether = testinfo1[0] + ": " + testinfo1[1] + "\n" + testinfo1[2] + ":  >=" + max(testinfo1[3], testinfo2[3])
-infotogether += "\n" + testinfo1[4] + ": " + testinfo2[5] + "\n" + testinfo1[6] + ": " + testinfo1[7]
-i = 8
-while i < len(testinfo1) :
-    infotogether += "\n" + testinfo1[i] + ": " + testinfo1[i+1]
-    i = i+2
-infotogether += "\n \n"
-print(infotogether)
-
-def addData(trajec1, trajec2):
-    a = np.loadtxt(trajec1)
-    data = np.array_str(a,precision=5,suppress_small=True)
-    data += "\n"
-    b = np.loadtxt(trajec2)
-    data += np.array_str(b,precision=5,suppress_small=True)
-    return data
-
-output_file = open('newtesttabelle.txt','w') # diese Datei wird immer geschrieben, auch wenn die Trajectories nicht zusammengehören
-output_file.write(infotogether)
-output_file.write(addData("testtabelle.txt","testtabelle2.txt"))
-output_file.close()
+    print("information don´t match")
+if checkdata(test):
+    print("data match")
+else:
+    print("data don´t match")
