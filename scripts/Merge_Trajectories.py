@@ -5,9 +5,9 @@ import numpy as np
 def checkhead(trajecs):
     # reads all framerates and geometries from the trajectories
     index = 0
+    frame_rates = []
+    geometries = []
     while index < len(trajecs):
-        frame_rates = []
-        geometries = []
         temp_trajec = open(trajecs[index], "r")
         lines = temp_trajec.readlines()
         counter = 0
@@ -77,7 +77,7 @@ def checkdata(files):
     return True
 
 
-test = ["src/traj_stairs_0001.txt", "src/traj_stairs_0002.txt"]
+test = ["src/traj_stairs_1copy.txt", "src/traj_stairs_2copy.txt"]
 if checkhead(test):
     print("information match")
 else:
