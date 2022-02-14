@@ -1,6 +1,6 @@
 # Juelich Tests
 Note that a detailed description of the test cases can be found at
-<http://www.jupedsim.org/jpscore/2016-11-02-juelich>
+<https://www.jupedsim.org/jpscore_tests_juelich.html>
 
 While most full system tests in the jpscore test suite contain geometry / ini
 files to run `jpscore` several test cases in this part of the test suite
