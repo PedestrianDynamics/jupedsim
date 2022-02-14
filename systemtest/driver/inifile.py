@@ -1,6 +1,7 @@
 import pathlib
 import xml.etree.cElementTree as ET
-from typing import Dict, NamedTuple
+from dataclasses import dataclass
+from typing import Dict, NamedTuple, Optional
 from xml.dom.minidom import parse
 
 import jinja2
@@ -40,10 +41,11 @@ def instanciate_tempalte(*, src: pathlib.Path, args: Dict, dest: pathlib.Path):
     dest.write_text(content)
 
 
-class TrafficConstraint(NamedTuple):
+@dataclass
+class TrafficConstraint:
     door_id: int
-    outflow: int
-    max_agents: int
+    outflow: Optional[int]
+    max_agents: Optional[int]
 
 
 def parse_traffic_constraints(inifile: pathlib.Path):
@@ -56,8 +58,8 @@ def parse_traffic_constraints(inifile: pathlib.Path):
                 int(door.attrib["trans_id"])
             ] = TrafficConstraint(
                 int(door.attrib["trans_id"]),
-                int(door.get("outflow", -1)),
-                int(door.get("max_agents", -1)),
+                int(door.get("outflow", None)),
+                int(door.get("max_agents", None)),
             )
 
     if not traffic_constraints:
