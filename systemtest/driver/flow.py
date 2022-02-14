@@ -4,11 +4,11 @@ import re
 import xml.etree.cElementTree as ET
 from pathlib import Path
 from sys import argv
-from driver.trajectories import Trajectories
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from driver.trajectories import Trajectories
 
 
 def check_flow(

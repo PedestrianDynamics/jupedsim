@@ -60,5 +60,7 @@ def parse_traffic_constraints(inifile: pathlib.Path):
                 int(door.get("max_agents", -1)),
             )
 
-    assert traffic_constraints, "Could not parse traffic constraints"
+    if not traffic_constraints:
+        raise RuntimeError("Could not parse traffic constraints")
+
     return traffic_constraints

@@ -20,4 +20,4 @@ def get_intersetions_path_segment(path: ndarray, crossing_segment: Segment):
         if intersections:
             return {"frame": p1[1], "intersections": intersections}
 
-    return False
+    return None

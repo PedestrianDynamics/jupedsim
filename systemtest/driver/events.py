@@ -12,5 +12,7 @@ def read_starting_times(events_file: Path):
                 float(event.attrib["time"])
             )
 
-    assert starting_times, "Could not read starting times from events file"
+    if not starting_times:
+        raise RuntimeError("Could not read starting times from events file")
+
     return starting_times
