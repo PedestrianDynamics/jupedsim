@@ -1,16 +1,21 @@
 cff-version: 1.2.0
-title: jpscore
+title: "JuPedSim - jpscore"
 message: >-
   If you use this software, please cite it using the
   metadata from this file.
 type: software
 authors:
-  - given-names: JuPedSim Development Core Team
+  - given-names: "JuPedSim Development Core Team"
+  - affiliation: "Forschungszentrum Juelich GmbH"
   - email: dev@jupedsim.org
-title: JuPedSim - jpscore
+
+repository-code: "https://github.com/JuPedSim/jpscore"
+url: "https://jupedsim.org"
+
 keywords:
   - "pedestrian dynamics"
   - "pedestrian analysis"
   - simulation 
   - modeling
+  - visualisatoin
   
