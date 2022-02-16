@@ -74,5 +74,4 @@ void OperationalModel::Init(
     const Configuration & config)
 {
     _simulation = simulation;
-    _direction->Init(building, config);
 }

@@ -46,20 +46,25 @@
  **/
 #include "ffRouter.hpp"
 
+#include "direction/DirectionManager.hpp"
 #include "direction/walking/DirectionStrategy.hpp"
 #include "geometry/SubRoom.hpp"
 #include "geometry/WaitingArea.hpp"
+#include "math/OperationalModel.hpp"
 #include "pedestrian/Pedestrian.hpp"
 #include "routing/ff_router/mesh/RectGrid.hpp"
 
 #include <Logger.hpp>
 #include <stdexcept>
 
-FFRouter::FFRouter(Configuration * config, Building * building) :
-    _config(config), _building(building)
+FFRouter::FFRouter(
+    Configuration * config,
+    Building * building,
+    DirectionManager * directionManager) :
+    _config(config), _directionManager(directionManager), _building(building)
 {
     //depending on exit_strat 8 => false, depending on exit_strat 9 => true;
-    _targetWithinSubroom = (_config->exitStrat == 9);
+    _targetWithinSubroom = (false);
     CalculateFloorFields();
 }
 
@@ -403,16 +408,14 @@ int FFRouter::FindExit(Pedestrian * p)
     for(int finalDoor : validFinalDoor) {
         //with UIDs, we can ask for shortest path
         for(int doorUID : DoorUIDsOfRoom) {
-            //double locDistToDoor = _locffviafm[p->GetRoomID()]->GetCostToDestination(doorUID, p->GetPos(), _mode);
             double locDistToDoor =
-                _config->directionManager->GetDirectionStrategy()->GetDistance2Target(p, doorUID);
+                _directionManager->GetDirectionStrategy().GetDistance2Target(p, doorUID);
 
             if(locDistToDoor <
                -J_EPS) { //for old ff: //this can happen, if the point is not reachable and therefore has init val -7
                 continue;
             }
             std::pair<int, int> key = std::make_pair(doorUID, finalDoor);
-            //auto subroomDoors = _building->GetSubRoomByUID(p->GetSubRoomUID())->GetAllGoalIDs();
             //only consider, if paths exists
             if(_pathsMatrix.count(key) == 0) {
                 LOG_ERROR("ffRouter: no key for {:d} {:d}", key.first, key.second);

@@ -35,6 +35,7 @@
 #include "IO/Trajectories.hpp"
 #include "SimulationClock.hpp"
 #include "SimulationHelper.hpp"
+#include "direction/DirectionManager.hpp"
 #include "general/Filesystem.hpp"
 #include "geometry/GoalManager.hpp"
 #include "geometry/Line.hpp"
@@ -56,16 +57,14 @@
 #include <tinyxml.h>
 #include <variant>
 
-Simulation::Simulation(
-    Configuration * args,
-    std::unique_ptr<Building> && building,
-    std::unique_ptr<RoutingEngine> && routingEngine,
-    std::unique_ptr<OperationalModel> && operationalModel) :
+Simulation::Simulation(Configuration * args, std::unique_ptr<Building> && building) :
     _config(args),
     _clock(_config->dT),
     _building(std::move(building)),
-    _routingEngine(std::move(routingEngine)),
-    _operationalModel(std::move(operationalModel)),
+    _directionManager(DirectionManager::Create(*args, _building.get())),
+    _routingEngine(std::make_unique<RoutingEngine>(args, _building.get(), _directionManager.get())),
+    _operationalModel(
+        OperationalModel::CreateFromType(args->operationalModel, *args, _directionManager.get())),
     _currentTrajectoriesFile(_config->trajectoriesFile)
 {
     _routingEngine->SetSimulation(this);
@@ -76,13 +75,8 @@ void Simulation::Iterate()
     _building->UpdateGrid();
     const double t_in_sec = _clock.ElapsedTime();
 
-    auto directionManager = _config->directionManager;
-    if(directionManager) {
-        directionManager->Update(t_in_sec);
-    }
-
+    _directionManager->Update(t_in_sec);
     _operationalModel->Update(t_in_sec);
-
     _routingEngine->UpdateTime(t_in_sec);
 
     if(t_in_sec > Pedestrian::GetMinPremovementTime()) {
@@ -100,7 +94,7 @@ void Simulation::Iterate()
                 "Enter correctGeometry: Building Has {} Transitions.",
                 _building->GetAllTransitions().size());
 
-            directionManager->GetDirectionStrategy()->Init(_building.get(), *_config);
+            _directionManager->GetDirectionStrategy().ReInit();
         }
 
         // here the used routers are update, when needed due to external changes

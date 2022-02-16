@@ -28,6 +28,7 @@
 
 #include "Router.hpp"
 #include "geometry/Building.hpp"
+#include "math/OperationalModel.hpp"
 
 #include <memory>
 #include <string>
@@ -42,7 +43,7 @@ class RoutingEngine
     bool _needUpdate{false};
 
 public:
-    RoutingEngine(Configuration * config, Building * building);
+    RoutingEngine(Configuration * config, Building * building, DirectionManager * directionManager);
     ~RoutingEngine() = default;
 
     RoutingEngine(const RoutingEngine &) = delete;

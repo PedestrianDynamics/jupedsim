@@ -15,9 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  **/
-//
-// Created by laemmel on 24.03.16.
-//
 #pragma once
 
 #include "direction/walking/DirectionStrategy.hpp"
@@ -65,8 +62,4 @@ private:
 
     Configuration * _config;
     int _model;
-    std::shared_ptr<DirectionStrategy> _directionStrategy;
-    std::shared_ptr<WaitingStrategy> _waitingStrategy;
-    std::shared_ptr<DirectionManager> _directionManager;
-    int _exit_strat_number;
 };

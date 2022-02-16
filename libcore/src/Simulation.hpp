@@ -57,6 +57,7 @@ private:
     double _fps{1.0};
     unsigned int _seed{8091983};
     std::unique_ptr<Building> _building;
+    std::unique_ptr<DirectionManager> _directionManager;
     /// Manage all route choices algorithms
     std::unique_ptr<RoutingEngine> _routingEngine;
     /// Force model to use
@@ -67,11 +68,7 @@ private:
     bool _eventProcessed{false};
 
 public:
-    explicit Simulation(
-        Configuration * args,
-        std::unique_ptr<Building> && building,
-        std::unique_ptr<RoutingEngine> && routingEngine,
-        std::unique_ptr<OperationalModel> && operationalModel);
+    Simulation(Configuration * args, std::unique_ptr<Building> && building);
 
     ~Simulation() = default;
 

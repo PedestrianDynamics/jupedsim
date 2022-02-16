@@ -27,13 +27,16 @@
 #pragma once
 
 #include "WaitingStrategy.hpp"
+#include "geometry/Building.hpp"
 
 #include <cstdlib>
 #include <ctime>
 
 class WaitingRandom : public WaitingStrategy
 {
-    void Init(Building *) override { std::srand(std::time(0)); };
+public:
+    WaitingRandom() { std::srand(std::time(0)); }
 
+private:
     Point GetWaitingPosition(Room * room, Pedestrian * ped, double time) override;
 };

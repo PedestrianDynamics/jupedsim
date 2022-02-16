@@ -26,6 +26,7 @@
  **/
 #include "DirectionStrategy.hpp"
 
+#include "general/Configuration.hpp"
 #include "geometry/Line.hpp"
 #include "geometry/Point.hpp"
 #include "geometry/Room.hpp"
@@ -89,7 +90,7 @@ Point DirectionInRangeBottleneck::GetTarget(Room * /*room*/, Pedestrian * ped) c
 Point DirectionLocalFloorfield::GetTarget(Room * room, Pedestrian * ped) const
 {
     Point p;
-    UnivFFviaFM * floorfield = _locffviafm.at(room->GetID());
+    auto * floorfield = _locffviafm.at(room->GetID()).get();
 
     floorfield->GetDirectionToUID(ped->GetDestination(), ped->GetPos(), p);
 
@@ -116,21 +117,11 @@ double DirectionLocalFloorfield::GetDistance2Target(Pedestrian * ped, int UID) c
     return _locffviafm.at(roomID)->GetCostToDestination(UID, ped->GetPos());
 }
 
-void DirectionLocalFloorfield::Init(Building * building, const Configuration & config)
+void DirectionLocalFloorfield::ReInit()
 {
-    _building          = building;
-    _wasInitialized    = true;
-    _stepsize          = config.deltaH;
-    _wallAvoidDistance = config.wallAvoidDistance;
-    _useDistancefield  = config.useWallAvoidance;
-
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
-
     for(auto & roomPair : _building->GetAllRooms()) {
-        auto newfield = new UnivFFviaFM(
+        auto newfield = std::make_unique<UnivFFviaFM>(
             roomPair.second.get(), _stepsize, _wallAvoidDistance, _useDistancefield);
-        _locffviafm[roomPair.first] = newfield;
         newfield->SetUser(DISTANCE_AND_DIRECTIONS_USED);
         newfield->SetMode(LINESEGMENT);
         if(_useDistancefield) {
@@ -139,16 +130,17 @@ void DirectionLocalFloorfield::Init(Building * building, const Configuration & c
             newfield->SetSpeedMode(FF_HOMO_SPEED);
         }
         newfield->AddAllTargetsParallel();
+        _locffviafm[roomPair.first] = std::move(newfield);
     }
+};
 
-    end                                           = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    LOG_INFO("Time to construct FF in DirectionLocalFloorfield: {:.2f}", elapsed_seconds.count());
-}
-
-DirectionLocalFloorfield::~DirectionLocalFloorfield()
+DirectionLocalFloorfield::DirectionLocalFloorfield(
+    const Configuration & config,
+    Building * building) :
+    _building(building),
+    _stepsize(config.deltaH),
+    _wallAvoidDistance(config.wallAvoidDistance),
+    _useDistancefield(config.useWallAvoidance)
 {
-    for(auto pair : _locffviafm) {
-        delete pair.second;
-    }
+    ReInit();
 }

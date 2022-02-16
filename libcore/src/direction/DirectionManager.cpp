@@ -21,18 +21,66 @@
 
 #include "DirectionManager.hpp"
 
+#include "direction/waiting/WaitingMiddle.hpp"
+#include "direction/waiting/WaitingRandom.hpp"
 #include "direction/waiting/WaitingStrategy.hpp"
+#include "direction/waiting/WaitingStrategyType.hpp"
 #include "direction/walking/DirectionStrategy.hpp"
+#include "direction/walking/DirectionStrategyType.hpp"
 #include "geometry/Building.hpp"
 #include "geometry/Point.hpp"
+#include "math/OperationalModel.hpp"
 #include "pedestrian/Pedestrian.hpp"
 
-void DirectionManager::Init(Building * building, const Configuration & config)
+#include <memory>
+
+static std::unique_ptr<DirectionStrategy> make_direction_strategy(
+    DirectionStrategyType type,
+    const Configuration & config,
+    Building * building)
 {
-    _directionStrategy->Init(building, config);
-    if(_waitingStrategy) {
-        _waitingStrategy->Init(building);
+    switch(type) {
+        case DirectionStrategyType::IN_RANGE_BOTTLENECK:
+            return std::make_unique<DirectionInRangeBottleneck>();
+        case DirectionStrategyType::LOCAL_FLOORFIELD:
+            return std::make_unique<DirectionLocalFloorfield>(config, building);
+        case DirectionStrategyType::MIDDLE_POINT:
+            return std::make_unique<DirectionMiddlePoint>();
+        case DirectionStrategyType::MIN_SEPERATION_SHORTER_LINE:
+            return std::make_unique<DirectionMinSeperationShorterLine>();
     }
+}
+
+static std::unique_ptr<WaitingStrategy>
+make_waiting_strategy(std::optional<WaitingStrategyType> type)
+{
+    if(type) {
+        switch(*type) {
+            case WaitingStrategyType::RANDOM:
+                return std::make_unique<WaitingRandom>();
+            case WaitingStrategyType::MIDDLE:
+                return std::make_unique<WaitingMiddle>();
+        }
+    }
+    return nullptr;
+}
+
+std::unique_ptr<DirectionManager>
+DirectionManager::Create(const Configuration & config, Building * building)
+{
+    auto directionStrategy =
+        make_direction_strategy(config.directionStrategyType, config, building);
+    auto waitingStrategy = make_waiting_strategy(config.waitingStrategyType);
+
+    return std::make_unique<DirectionManager>(
+        std::move(directionStrategy), std::move(waitingStrategy));
+}
+
+DirectionManager::DirectionManager(
+    std::unique_ptr<DirectionStrategy> directionStrategy,
+    std::unique_ptr<WaitingStrategy> waitingStrategy) :
+    _directionStrategy(std::move(directionStrategy)), _waitingStrategy(std::move(waitingStrategy))
+{
 }
 
 Point DirectionManager::GetTarget(Room * room, Pedestrian * ped)
@@ -44,23 +92,12 @@ Point DirectionManager::GetTarget(Room * room, Pedestrian * ped)
     }
 }
 
-const std::shared_ptr<WaitingStrategy> & DirectionManager::GetWaitingStrategy() const
+WaitingStrategy & DirectionManager::GetWaitingStrategy() const
 {
-    return _waitingStrategy;
+    return *_waitingStrategy;
 }
 
-void DirectionManager::SetWaitingStrategy(const std::shared_ptr<WaitingStrategy> & waitingStrategy)
+DirectionStrategy & DirectionManager::GetDirectionStrategy() const
 {
-    DirectionManager::_waitingStrategy = waitingStrategy;
-}
-
-const std::shared_ptr<DirectionStrategy> & DirectionManager::GetDirectionStrategy() const
-{
-    return _directionStrategy;
-}
-
-void DirectionManager::SetDirectionStrategy(
-    const std::shared_ptr<DirectionStrategy> & directionStrategy)
-{
-    DirectionManager::_directionStrategy = directionStrategy;
+    return *_directionStrategy;
 }
