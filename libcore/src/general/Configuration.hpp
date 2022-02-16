@@ -19,9 +19,9 @@
 
 #include "Macros.hpp"
 #include "OperationalModelType.hpp"
-#include "direction/DirectionManager.hpp"
+#include "direction/waiting/WaitingStrategyType.hpp"
+#include "direction/walking/DirectionStrategyType.hpp"
 #include "general/Filesystem.hpp"
-#include "math/OperationalModel.hpp"
 #include "pedestrian/AgentsParameters.hpp"
 #include "routing/GlobalRouterParameters.hpp"
 #include "routing/RoutingStrategy.hpp"
@@ -31,6 +31,7 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <set>
 #include <string>
 
 // This class provides a data container for all configuration parameters.
@@ -60,8 +61,8 @@ struct Configuration {
     double wallAvoidDistance{0.4};
     bool useWallAvoidance{true};
     bool hasDirectionalEscalators{false};
-    int exitStrat{9};
-    std::shared_ptr<DirectionManager> directionManager{};
+    std::optional<WaitingStrategyType> waitingStrategyType{};
+    DirectionStrategyType directionStrategyType{DirectionStrategyType::MIN_SEPERATION_SHORTER_LINE};
     fs::path trajectoriesFile{"trajectories.txt"};
     fs::path originalTrajectoriesFile{"trajectories.txt"};
     fs::path logFile{"log.txt"};

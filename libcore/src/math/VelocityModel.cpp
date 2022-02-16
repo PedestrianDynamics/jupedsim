@@ -29,6 +29,7 @@
 #include "VelocityModel.hpp"
 
 #include "Simulation.hpp"
+#include "direction/DirectionManager.hpp"
 #include "direction/walking/DirectionStrategy.hpp"
 #include "geometry/SubRoom.hpp"
 #include "geometry/Wall.hpp"
@@ -174,7 +175,9 @@ Point VelocityModel::e0(Pedestrian * ped, Room * room) const
     Point lastE0 = ped->GetLastE0();
     ped->SetLastE0(target - pos);
 
-    if(std::dynamic_pointer_cast<DirectionLocalFloorfield>(_direction->GetDirectionStrategy())) {
+    // TODO(kkratz): Fix this hack
+    const auto * strategy = &_direction->GetDirectionStrategy();
+    if(dynamic_cast<const DirectionLocalFloorfield *>(strategy)) {
         desired_direction = target - pos;
         if(desired_direction.NormSquare() < 0.25 && !ped->IsWaiting()) {
             desired_direction = lastE0;

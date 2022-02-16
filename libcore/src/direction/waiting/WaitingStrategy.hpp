@@ -36,17 +36,10 @@ class Pedestrian;
 
 class Point;
 
-
 class WaitingStrategy
 {
 public:
     virtual ~WaitingStrategy() = default;
-
-    /**
-     * Inits the waiting strategy.
-     * @param building Reference to the Building used in the simulation
-     */
-    virtual void Init(Building *){};
 
     /**
      * Returns the desired walking direction of a pedestrian.

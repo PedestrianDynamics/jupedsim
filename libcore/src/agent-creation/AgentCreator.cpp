@@ -19,8 +19,6 @@ CreateAllPedestrians(Configuration * configuration, Building * building, double 
     AgentVec agents;
     building->SetAgents(&agents);
 
-    configuration->directionManager->Init(building, *configuration);
-
     PedDistributor pd(configuration, &agents);
     pd.Distribute(building);
     std::multimap<size_t, std::unique_ptr<Pedestrian>> result{};

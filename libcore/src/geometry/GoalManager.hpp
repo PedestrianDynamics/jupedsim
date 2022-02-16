@@ -33,6 +33,7 @@
 #include <map>
 #include <vector>
 
+class Simulation;
 
 class GoalManager
 {

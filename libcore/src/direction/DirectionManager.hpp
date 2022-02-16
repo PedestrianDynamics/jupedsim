@@ -21,34 +21,31 @@
 
 #pragma once
 
+#include "direction/waiting/WaitingStrategy.hpp"
+#include "direction/walking/DirectionStrategy.hpp"
+#include "general/Configuration.hpp"
 #include "general/Macros.hpp"
-#include "math/OperationalModel.hpp"
 #include "pedestrian/Pedestrian.hpp"
 
 #include <memory>
 
-class WaitingStrategy;
-
-class DirectionStrategy;
-
-class Point;
-
 class Building;
-
-class Room;
 
 class DirectionManager
 {
 private:
-    std::shared_ptr<WaitingStrategy> _waitingStrategy;
-    std::shared_ptr<DirectionStrategy> _directionStrategy;
+    std::unique_ptr<DirectionStrategy> _directionStrategy;
+    std::unique_ptr<WaitingStrategy> _waitingStrategy;
     double _currentTime;
 
 public:
-    /**
-     * Inits the used strategies.
-     */
-    void Init(Building *, const Configuration & config);
+    static std::unique_ptr<DirectionManager>
+    Create(const Configuration & config, Building * building);
+
+    DirectionManager(
+        std::unique_ptr<DirectionStrategy> directionStrategy,
+        std::unique_ptr<WaitingStrategy> waitingStrategy);
+    ~DirectionManager() = default;
 
     void Update(double time) { _currentTime = time; };
 
@@ -64,23 +61,11 @@ public:
      * Getter for the waiting strategy.
      * @return the waiting strategy used in the simulation
      */
-    const std::shared_ptr<WaitingStrategy> & GetWaitingStrategy() const;
-
-    /**
-     * Setter for the waiting strategy.
-     * @param waitingStrategy the waiting strategy which is used in the simulation
-     */
-    void SetWaitingStrategy(const std::shared_ptr<WaitingStrategy> & waitingStrategy);
+    WaitingStrategy & GetWaitingStrategy() const;
 
     /**
      * Getter for the direction/walking strategy.
      * @return the direction/walking strategy used in the simulation
      */
-    const std::shared_ptr<DirectionStrategy> & GetDirectionStrategy() const;
-
-    /**
-     * Setter for the direction/walking strategy.
-     * @param directionStrategy the direction/walking strategy which is used in the simulation
-     */
-    void SetDirectionStrategy(const std::shared_ptr<DirectionStrategy> & directionStrategy);
+    DirectionStrategy & GetDirectionStrategy() const;
 };

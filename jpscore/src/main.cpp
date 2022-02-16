@@ -88,14 +88,10 @@ int main(int argc, char ** argv)
         return EXIT_FAILURE;
     }
 
-    auto building         = std::make_unique<Building>(&config, nullptr);
-    auto * building_ptr   = building.get();
-    auto routingEngine    = std::make_unique<RoutingEngine>(&config, building.get());
-    auto operationalModel = OperationalModel::CreateFromType(
-        config.operationalModel, config, config.directionManager.get());
-    auto agents = CreateAllPedestrians(&config, building.get(), config.tMax);
-    Simulation sim(
-        &config, std::move(building), std::move(routingEngine), std::move(operationalModel));
+    auto building       = std::make_unique<Building>(&config, nullptr);
+    auto * building_ptr = building.get();
+    auto agents         = CreateAllPedestrians(&config, building.get(), config.tMax);
+    Simulation sim(&config, std::move(building));
     EventManager manager;
 
     size_t frame   = 0;

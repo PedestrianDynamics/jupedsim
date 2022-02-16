@@ -23,11 +23,8 @@
 #include "NavLineFileParser.hpp"
 #include "OperationalModelType.hpp"
 #include "OutputHandler.hpp"
-#include "direction/DirectionManager.hpp"
-#include "direction/waiting/WaitingMiddle.hpp"
-#include "direction/waiting/WaitingRandom.hpp"
-#include "direction/waiting/WaitingStrategy.hpp"
-#include "direction/walking/DirectionStrategy.hpp"
+#include "direction/waiting/WaitingStrategyType.hpp"
+#include "direction/walking/DirectionStrategyType.hpp"
 #include "general/Filesystem.hpp"
 #include "general/Macros.hpp"
 #include "math/GCFMModel.hpp"
@@ -686,7 +683,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
         const auto * strategyAsString = e->Attribute("description");
         const auto strategy           = from_string<RoutingStrategy>(strategyAsString);
         const int id                  = atoi(e->Attribute("router_id"));
-        const std::set<int> exitStrategiesAllowedWithFFRouting{8, 9};
 
         if(usedRouter.count(id) == 0) {
             LOG_WARNING(
@@ -696,9 +692,11 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
             continue;
         }
 
+        // TODO(kkratz) this code is senitive for the order in which sections are parsed.
+        // This is a hidden dependency and needs to be addressed
         if(strategy == RoutingStrategy::ROUTING_FF_GLOBAL_SHORTEST &&
-           exitStrategiesAllowedWithFFRouting.count(_exit_strat_number) == 0) {
-            LOG_WARNING("Routing strategy used is ff_gloabl_shortest. Using exit strategy 8 or 9 "
+           _config->directionStrategyType != DirectionStrategyType::LOCAL_FLOORFIELD) {
+            LOG_WARNING("Routing strategy used is ff_gloabl_shortest. Using exit strategy 8 "
                         "recommended!");
         }
 
@@ -785,8 +783,6 @@ bool IniFileParser::ParseStepSize(const TiXmlNode & stepNode)
 
 bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
 {
-    _directionManager = std::make_shared<DirectionManager>();
-
     std::string query = "exit_crossing_strategy";
     if(!strategyNode.FirstChild(query.c_str())) {
         query = "exitCrossingStrategy";
@@ -833,31 +829,25 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                     }
                 }
             }
-            _exit_strat_number = pExitStrategy;
 
             switch(pExitStrategy) {
                 case 1:
-                    _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionMiddlePoint());
+                    _config->directionStrategyType = DirectionStrategyType::MIDDLE_POINT;
                     break;
                 case 2:
-                    _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
+                    _config->directionStrategyType =
+                        DirectionStrategyType::MIN_SEPERATION_SHORTER_LINE;
                     break;
                 case 3:
-                    _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionInRangeBottleneck());
+                    _config->directionStrategyType = DirectionStrategyType::IN_RANGE_BOTTLENECK;
                     break;
                 case 8:
-                    _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());
+                    _config->directionStrategyType = DirectionStrategyType::LOCAL_FLOORFIELD;
                     if(!ParseFfOpts(strategyNode)) {
                         return false;
                     };
                     break;
                 default:
-                    _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
                     LOG_ERROR("Unknown exit_crossing_strategy <{}>", pExitStrategy);
                     LOG_WARNING("The default exit_crossing_strategy <2> will be used");
                     break;
@@ -866,8 +856,6 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
             return false;
         }
         LOG_INFO("exit_crossing_strategy <{}>", pExitStrategy);
-        _config->exitStrat = _exit_strat_number;
-        _directionManager->SetDirectionStrategy(_directionStrategy);
     }
 
     // Read waiting
@@ -881,30 +869,19 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                waitingStrategyIndex > -1 && attribute == std::to_string(waitingStrategyIndex)) {
                 switch(waitingStrategyIndex) {
                     case 1:
-                        _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingMiddle());
+                        _config->waitingStrategyType = WaitingStrategyType::MIDDLE;
                         break;
                     case 2:
-                        _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
+                        _config->waitingStrategyType = WaitingStrategyType::RANDOM;
                         break;
                     default:
-                        _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
+                        _config->waitingStrategyType = WaitingStrategyType::RANDOM;
                         LOG_ERROR("Unknown waiting_strategy <{}>", waitingStrategyIndex);
                         LOG_WARNING("The default waiting_strategy <2> will be used");
                 }
             }
         }
     }
-
-    if(waitingStrategyIndex < 0) {
-        _waitingStrategy = nullptr;
-        LOG_INFO("Could not parse waiting_strategy, no waiting_strategy is used.");
-    } else {
-        LOG_INFO("Waiting_strategy <{:d}>", waitingStrategyIndex);
-    }
-
-    _directionManager->SetWaitingStrategy(_waitingStrategy);
-    _config->directionManager = _directionManager;
-
     return true;
 }
 

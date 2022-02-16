@@ -60,6 +60,7 @@
 #include "UnivFFviaFM.hpp"
 #include "general/Macros.hpp"
 #include "geometry/Building.hpp"
+#include "math/OperationalModel.hpp"
 #include "routing/Router.hpp"
 
 class Building;
@@ -107,7 +108,7 @@ public:
      * @param hasSpecificGoals specifies if the peds have specific goals (true) or head to the outside (false).
      * @param config configuration of simulation.
      */
-    FFRouter(Configuration * config, Building * building);
+    FFRouter(Configuration * config, Building * building, DirectionManager * directionManager);
 
     /**
       * Destructor for FFRouter.
@@ -164,6 +165,8 @@ protected:
      * Configuration used during simulation.
      */
     Configuration * _config{};
+
+    DirectionManager * _directionManager{};
 
     /**
      * Distance matrix: _distMatrix[<door1, door2>] returns the distance from door1 to door2.
