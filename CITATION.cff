@@ -11,7 +11,7 @@ authors:
 
 repository-code: "https://github.com/JuPedSim/jpscore"
 url: "https://jupedsim.org"
-
+version: v0.9.1
 keywords:
   - "pedestrian dynamics"
   - "pedestrian analysis"
