@@ -33,9 +33,6 @@
 #include "IO/Trajectories.hpp"
 #include "SimulationClock.hpp"
 #include "direction/walking/DirectionStrategy.hpp"
-#include "events/Event.hpp"
-#include "events/EventManager.hpp"
-#include "events/OldEventManager.hpp"
 #include "general/Configuration.hpp"
 #include "geometry/Building.hpp"
 #include "geometry/GoalManager.hpp"
@@ -60,23 +57,18 @@ private:
     double _fps{1.0};
     unsigned int _seed{8091983};
     std::unique_ptr<Building> _building;
+    std::unique_ptr<DirectionManager> _directionManager;
     /// Manage all route choices algorithms
     std::unique_ptr<RoutingEngine> _routingEngine;
     /// Force model to use
     std::unique_ptr<OperationalModel> _operationalModel;
     /// writing the trajectories to file
-    std::unique_ptr<OldEventManager> _old_em{};
     fs::path _currentTrajectoriesFile;
     std::vector<std::unique_ptr<Pedestrian>> _agents;
-    EventManager _em;
     bool _eventProcessed{false};
 
 public:
-    explicit Simulation(
-        Configuration * args,
-        std::unique_ptr<Building> && building,
-        std::unique_ptr<RoutingEngine> && routingEngine,
-        std::unique_ptr<OperationalModel> && operationalModel);
+    Simulation(Configuration * args, std::unique_ptr<Building> && building);
 
     ~Simulation() = default;
 
@@ -106,10 +98,6 @@ public:
 
     size_t GetPedsNumber() const;
 
-    void AddEvent(Event event);
-
-    void AddEvents(std::vector<Event> events);
-
     void OpenDoor(int doorId);
 
     void TempCloseDoor(int doorId);
@@ -117,6 +105,15 @@ public:
     void CloseDoor(int doorId);
 
     void ResetDoor(int doorId);
+
+    void ActivateTrain(
+        int trainId,
+        int trackId,
+        const TrainType & type,
+        double startOffset,
+        bool reversed);
+
+    void DeactivateTrain(int trainId, int trackId);
 
 
     /**

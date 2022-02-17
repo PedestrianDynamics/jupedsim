@@ -28,9 +28,6 @@ set(source_files
     src/events/Event.cpp
     src/events/EventManager.cpp
     src/events/EventVisitors.cpp
-    src/events/OldEvent.cpp
-    src/events/OldEventManager.cpp
-    src/events/TrainEvent.cpp
     src/general/ArgumentParser.cpp
     src/geometry/Building.cpp
     src/geometry/Crossing.cpp
@@ -86,9 +83,6 @@ set(header_files
     src/events/Event.hpp
     src/events/EventManager.hpp
     src/events/EventVisitors.hpp
-    src/events/OldEvent.hpp
-    src/events/OldEventManager.hpp
-    src/events/TrainEvent.hpp
     src/general/ArgumentParser.hpp
     src/general/Compiler.hpp
     src/general/Configuration.hpp

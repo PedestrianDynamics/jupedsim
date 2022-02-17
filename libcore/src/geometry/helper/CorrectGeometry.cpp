@@ -191,21 +191,28 @@ std::map<int, std::pair<Point, Point>> ComputeTrainDoorCoordinates(
 }
 
 void AddTrainDoors(
-    int trainID,
+    int trainId,
+    int trackId,
     Building & building,
-    SubRoom & subroom,
     const TrainType & train,
-    const Track & track,
     double trainStartOffset,
     bool fromEnd)
 {
-    static int transition_id = 10000; // randomly high number
+    static int transition_id = 100000; // randomly high number
+
+    const auto track = building.GetTrack(trackId);
+    if(!track) {
+        throw std::runtime_error(
+            fmt::format(FMT_STRING("Could not find track with ID {:d}"), trackId));
+    }
+
+    auto * room    = building.GetRoom(track->_roomID);
+    auto * subroom = room->GetSubRoom(track->_subRoomID);
 
     // Get the door coordinates
     auto wallDoorIntersectionPoints =
-        geometry::helper::ComputeTrainDoorCoordinates(train, track, trainStartOffset, fromEnd);
+        geometry::helper::ComputeTrainDoorCoordinates(train, *track, trainStartOffset, fromEnd);
 
-    auto room = building.GetRoom(subroom.GetRoomID());
 
     // Create train doors at the computed locations
     std::vector<Transition> trainDoors;
@@ -220,10 +227,10 @@ void AddTrainDoors(
             trainDoor->SetPoint1(trainDoorCoordinates.first);
             trainDoor->SetPoint2(trainDoorCoordinates.second);
         }
-        std::string transType = "Train_" + std::to_string(trainID);
+        std::string transType = "Train_" + std::to_string(trainId);
         trainDoor->SetType(transType);
         trainDoor->SetRoom1(room);
-        trainDoor->SetSubRoom1(&subroom);
+        trainDoor->SetSubRoom1(subroom);
 
         // Set outflow rate of train door
         trainDoor->SetDN(1);
@@ -232,38 +239,38 @@ void AddTrainDoors(
     }
 
     // Add/remove walls to create a valid geometry
-    auto [addedWalls, removedWalls] = SplitWalls(track._walls, trainDoors);
+    auto [addedWalls, removedWalls] = SplitWalls(track->_walls, trainDoors);
 
     std::for_each(
         std::begin(addedWalls),
         std::end(addedWalls),
-        [trainID, &building, &subroom](const Wall & wall) {
-            building.AddTrainWallAdded(trainID, wall);
-            subroom.AddWall(wall);
+        [trainId, &building, &subroom](const Wall & wall) {
+            building.AddTrainWallAdded(trainId, wall);
+            subroom->AddWall(wall);
         });
 
     std::for_each(
         std::begin(removedWalls),
         std::end(removedWalls),
-        [trainID, &building, &subroom](const Wall & wall) {
-            building.AddTrainWallRemoved(trainID, wall);
-            subroom.RemoveWall(wall);
+        [trainId, &building, &subroom](const Wall & wall) {
+            building.AddTrainWallRemoved(trainId, wall);
+            subroom->RemoveWall(wall);
         });
 
     // Add doors to geometry
     std::for_each(
         std::begin(trainDoors),
         std::end(trainDoors),
-        [trainID, &building, &room, &subroom](const Transition & door) {
+        [trainId, &building, &room, &subroom](const Transition & door) {
             auto trainDoor = new Transition(door);
-            building.AddTrainDoorAdded(trainID, door);
+            building.AddTrainDoorAdded(trainId, door);
             // Important: Door needs to be added to room, subroom, and building!
             room->AddTransitionID(trainDoor->GetUniqueID());
-            subroom.AddTransition(trainDoor);
+            subroom->AddTransition(trainDoor);
             building.AddTransition(trainDoor);
         });
 
-    subroom.Update();
+    subroom->Update();
 }
 
 std::tuple<std::vector<Wall>, std::vector<Wall>>

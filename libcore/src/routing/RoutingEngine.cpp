@@ -27,6 +27,7 @@
 #include "RoutingEngine.hpp"
 
 #include "geometry/Building.hpp"
+#include "math/OperationalModel.hpp"
 #include "pedestrian/Pedestrian.hpp"
 #include "routing/RoutingStrategy.hpp"
 #include "routing/ff_router/ffRouter.hpp"
@@ -37,13 +38,17 @@
 #include <stdexcept>
 #include <utility>
 
-RoutingEngine::RoutingEngine(Configuration * config, Building * building)
+RoutingEngine::RoutingEngine(
+    Configuration * config,
+    Building * building,
+    DirectionManager * directionManager)
 {
-    auto buildRouter = [config, building](const auto & strategy_info) -> std::unique_ptr<Router> {
+    auto buildRouter = [config, building, directionManager](
+                           const auto & strategy_info) -> std::unique_ptr<Router> {
         const auto & [strategy, parameters] = strategy_info;
         switch(strategy) {
             case RoutingStrategy::ROUTING_FF_GLOBAL_SHORTEST:
-                return std::make_unique<FFRouter>(config, building);
+                return std::make_unique<FFRouter>(config, building, directionManager);
             case RoutingStrategy::ROUTING_GLOBAL_SHORTEST:
                 return std::make_unique<GlobalRouter>(building, *parameters);
             case RoutingStrategy::UNKNOWN:

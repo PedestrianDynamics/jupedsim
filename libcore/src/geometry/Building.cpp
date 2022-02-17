@@ -443,7 +443,7 @@ bool Building::AddCrossing(Crossing * line)
     return true;
 }
 
-bool Building::RemoveTransition(Transition * line)
+bool Building::RemoveTransition(const Transition * line)
 {
     if(_transitions.count(line->GetID()) != 0) {
         _transitions.erase(line->GetID());
@@ -786,36 +786,15 @@ Crossing * Building::GetCrossingByUID(int uid) const
     return nullptr;
 }
 
-void Building::AddTrain(int trainID, TrainType type)
+void Building::AddTrainType(int trainID, TrainType type)
 {
     _trains.emplace(trainID, type);
 }
 
-TrainType Building::GetTrain(int trainID)
-{
-    return _trains.at(trainID);
-}
 
 std::map<int, TrainType> Building::GetTrains() const
 {
     return _trains;
-}
-
-std::vector<TrainType> Building::GetTrainTypes()
-{
-    std::vector<TrainType> trainTypes;
-    trainTypes.reserve(_trains.size());
-
-    for(auto const & [trainID, trainType] : _trains) {
-        trainTypes.emplace_back(trainType);
-    }
-
-    std::unique(
-        std::begin(trainTypes), std::end(trainTypes), [](const TrainType & a, const TrainType & b) {
-            return a._type == b._type;
-        });
-
-    return trainTypes;
 }
 
 void Building::AddTrainWallAdded(int trainID, Wall trainAddedWall)

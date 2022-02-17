@@ -1,13 +1,4 @@
-import logging
-import os
-import re
-import xml.etree.cElementTree as ET
-from pathlib import Path
-from sys import argv
-
-import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 from driver.trajectories import Trajectories
 
 
@@ -28,7 +19,6 @@ def check_flow(
     :param traffic_constraints:
     """
     flowError = 0.3
-    timeError = 0.2  # in seconds, a little time is between opening of door and first ped passing
 
     for door_id, tc in traffic_constraints.items():
         max_agents = tc.max_agents
@@ -65,4 +55,4 @@ def check_flow(
             flow = num_agents / time
             assert (
                 np.abs(flow - outflow) <= relativeError
-            ), "Door flow is not as expected"
+            ), f"Door flow is not as expected! expected flow {outflow}, actual {flow}, tolerated error {relativeError}"

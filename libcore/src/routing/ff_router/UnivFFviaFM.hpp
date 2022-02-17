@@ -35,7 +35,6 @@
  **/
 #pragma once
 
-#include "general/Configuration.hpp"
 #include "general/Filesystem.hpp"
 #include "general/Macros.hpp"
 

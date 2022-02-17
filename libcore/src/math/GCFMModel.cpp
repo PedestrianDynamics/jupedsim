@@ -151,7 +151,9 @@ inline Point GCFMModel::ForceDriv(Pedestrian * ped, Room * room) const
     Point lastE0      = ped->GetLastE0();
     ped->SetLastE0(target - pos);
 
-    if(std::dynamic_pointer_cast<DirectionLocalFloorfield>(_direction->GetDirectionStrategy())) {
+    // TODO(kkratz) fix this hack
+    const auto * strategy = &_direction->GetDirectionStrategy();
+    if(dynamic_cast<const DirectionLocalFloorfield *>(strategy)) {
         if(dist > 50 * J_EPS_GOAL) {
             const Point & v0 = ped->GetV0(target);
             F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
