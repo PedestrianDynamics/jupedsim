@@ -17,49 +17,8 @@
  **/
 #pragma once
 
-#include "direction/walking/DirectionStrategy.hpp"
 #include "general/Configuration.hpp"
-#include "general/Filesystem.hpp"
 
-#include <string>
+#include <filesystem>
 
-class OutputHandler;
-
-class TiXmlElement;
-
-class TiXmlNode;
-
-class IniFileParser
-{
-public:
-    IniFileParser(Configuration * config);
-    ~IniFileParser(){};
-
-    void Parse(const fs::path & iniFile);
-
-private:
-    bool ParseHeader(TiXmlNode * xHeader);
-
-    bool ParseGCFMModel(TiXmlElement * xGCFM, TiXmlElement * xMain);
-
-    bool ParseVelocityModel(TiXmlElement * xVelocity, TiXmlElement * xMain);
-
-    void ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode * agentDistri);
-
-    bool ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * agentDistri);
-
-    bool ParseLinkedCells(const TiXmlNode & linkedCellNode);
-
-    bool ParseStepSize(const TiXmlNode & stepNode);
-
-    bool ParseStrategyNodeToObject(const TiXmlNode & strategyNode);
-
-    bool ParseFfOpts(const TiXmlNode & strategyNode);
-
-    bool ParseExternalFiles(const TiXmlNode & xMain);
-
-    std::optional<GlobalRouterParameters> ParseGlobalRouterParmeters(const TiXmlElement * e);
-
-    Configuration * _config;
-    int _model;
-};
+Configuration ParseIniFile(const std::filesystem::path & path);
