@@ -202,6 +202,7 @@ if (BUILD_TESTS)
     add_executable(libcore-tests
         test/TestSimulationClock.cpp
         test/util/TestUniqueID.cpp
+        test/neighborhood/TestGrid2D.cpp
     )
 
     target_link_libraries(libcore-tests PRIVATE

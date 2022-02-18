@@ -21,21 +21,58 @@
 
 #pragma once
 
+#include "IteratorPair.hpp"
+
+#include <algorithm>
 #include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <unordered_map>
+#include <utility>
 #include <vector>
+
+
+struct Grid2DIndex {
+    std::int32_t idx, idy;
+
+    bool operator<(const Grid2DIndex & other) const
+    {
+        return idx < other.idx || (idx == other.idx && idy < other.idy);
+    }
+
+    bool operator==(const Grid2DIndex & other) const
+    {
+        return idx == other.idx && idy == other.idy;
+    }
+};
+template <>
+struct std::hash<Grid2DIndex> {
+    std::size_t operator()(const Grid2DIndex & id) const noexcept
+    {
+        return std::hash<std::int32_t>{}(id.idx);
+    }
+};
 
 template <typename T>
 class Grid2D
 {
-private:
-    template <typename element_type>
-    using container_type = std::vector<element_type>;
+public:
+    struct IndexValuePair {
+        Grid2DIndex id;
+        T value;
+
+        bool operator<(const IndexValuePair & other) const { return id < other.id; }
+        bool operator==(const IndexValuePair & other) const
+        {
+            return id == other.id && value == other.value;
+        }
+    };
 
 public:
-    using size_type          = std::size_t;
-    using value_type         = T;
-    using row_type           = container_type<value_type>;
-    using row_container_type = container_type<row_type>;
+    using value_type     = T;
+    using size_type      = std::size_t;
+    using container_type = std::vector<IndexValuePair>;
+    using it_pair        = IteratorPair<typename container_type::const_iterator>;
 
     Grid2D() = default;
 
@@ -45,34 +82,42 @@ public:
     Grid2D & operator=(const Grid2D &) = default;
     Grid2D & operator=(Grid2D &&) = default;
 
-    Grid2D(size_type num_rows, size_type num_columns) : _rows(num_rows, row_type(num_columns)) {}
-
-    row_type const & operator[](size_type row) const { return _rows[row]; }
-    row_type & operator[](size_type row)
+    Grid2D(container_type data) : _data(data)
     {
-        return const_cast<row_type &>(const_cast<const Grid2D *>(this)->operator[](row));
-    }
+        // sort data
+        std::sort(_data.begin(), _data.end());
 
-    void clear()
-    {
-        for(auto & row : _rows) {
-            for(auto & elem : row) {
-                elem.clear();
+        // create mapping
+        if(!_data.empty()) {
+            auto last_it = _data.cbegin();
+            _data_mapping.emplace(last_it->id, it_pair(last_it, _data.cend()));
+            for(auto it = _data.cbegin(); it != _data.cend(); ++it) {
+                if(last_it->id == it->id) {
+                    continue;
+                }
+                _data_mapping.erase(last_it->id);
+                _data_mapping.emplace(last_it->id, it_pair(last_it, it));
+                _data_mapping.emplace(it->id, it_pair(it, _data.cend()));
+                last_it = it;
             }
         }
     }
 
-    size_type num_rows() const { return _rows.size(); }
-    size_type num_columns() const
+    size_type size() const { return _data.size(); }
+
+    bool empty() const { return _data.empty(); }
+
+    it_pair get(Grid2DIndex index) const
     {
-        if(_rows.empty()) {
-            return 0;
-        } else {
-            return _rows.front().size();
+        auto it = _data_mapping.find(index);
+
+        if(it != _data_mapping.cend()) {
+            return it->second;
         }
+        return {_data.cend(), _data.cend()};
     }
 
-
 private:
-    row_container_type _rows;
+    container_type _data;
+    std::unordered_map<Grid2DIndex, it_pair> _data_mapping;
 };
