@@ -5,9 +5,7 @@ message: >-
   metadata from this file.
 type: software
 authors:
-  - given-names: "JuPedSim Development Core Team"
-  - affiliation: "Forschungszentrum Juelich GmbH"
-  - email: dev@jupedsim.org
+  - name: "Development Core Team"
 
 repository-code: "https://github.com/JuPedSim/jpscore"
 url: "https://jupedsim.org"
