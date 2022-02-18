@@ -28,6 +28,7 @@
 #include "IO/EventFileParser.hpp"
 #include "IO/IniFileParser.hpp"
 #include "IO/TrainFileParser.hpp"
+#include "ResultHandling.hpp"
 #include "Simulation.hpp"
 #include "agent-creation/AgentCreator.hpp"
 #include "events/EventManager.hpp"
@@ -124,6 +125,7 @@ int main(int argc, char ** argv)
             LOG_ERROR("Could not start simulation. Check the log for prior errors");
             return EXIT_FAILURE;
         }
+        collectInputFilesIn(config.iniFile, "result");
         time_t starttime{};
         time(&starttime);
 
