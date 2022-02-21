@@ -28,24 +28,21 @@
 
 #include <Logger.hpp>
 
-AccessPoint::AccessPoint(int id, double center[2], double radius)
+AccessPoint::AccessPoint(int id, double center[2])
 {
     _id                = id;
     _center[0]         = center[0];
     _center[1]         = center[1];
-    _radius            = radius;
     _finaExitToOutside = false;
     _finalGoalOutside  = false;
     _room1ID           = -1;
     _room2ID           = -1;
     _connectingAPs.clear();
     _mapDestToDist.clear();
-    pCentre             = Point(center[0], center[1]);
-    _transitPedestrians = std::vector<Pedestrian *>();
-    _connectingAPs      = std::vector<AccessPoint *>();
-    //     _isClosed=0
-    _navLine = nullptr;
-    _state   = DoorState::OPEN;
+    pCentre        = Point(center[0], center[1]);
+    _connectingAPs = std::vector<AccessPoint *>();
+    _navLine       = nullptr;
+    _state         = DoorState::OPEN;
 }
 
 AccessPoint::~AccessPoint()
@@ -63,11 +60,6 @@ bool AccessPoint::IsClosed()
 {
     return _state == DoorState::CLOSE;
 }
-
-//void AccessPoint::SetClosed(int isClosed)
-//{
-//     _isClosed=isClosed;
-//}
 
 void AccessPoint::SetFinalExitToOutside(bool isFinal)
 {
@@ -92,12 +84,6 @@ void AccessPoint::SetFinalGoalOutside(bool isFinal)
 bool AccessPoint::GetFinalGoalOutside()
 {
     return _finalGoalOutside;
-}
-
-//TODO: possibly remove
-void AccessPoint::AddIntermediateDest(int final, int inter)
-{
-    _mapDestToAp[final] = inter;
 }
 
 void AccessPoint::AddFinalDestination(int UID, double distance)
@@ -129,17 +115,6 @@ void AccessPoint::AddConnectingAP(AccessPoint * ap)
             return;
     }
     _connectingAPs.push_back(ap);
-}
-
-//TODO: remove this one
-int AccessPoint::GetNextApTo(int UID)
-{
-    //this is probably a final destination
-    if(_mapDestToAp.count(UID) == 0) {
-        LOG_ERROR("No route to destination  [{:d}]", UID);
-        exit(EXIT_FAILURE);
-    }
-    return _mapDestToAp[UID];
 }
 
 int AccessPoint::GetNearestTransitAPTO(int UID)
@@ -187,18 +162,6 @@ bool AccessPoint::isInRange(int roomID)
     return true;
 }
 
-bool AccessPoint::IsInRange(double xPed, double yPed, int roomID)
-{
-    if((roomID != _room1ID) && (roomID != _room2ID)) {
-        return false;
-    }
-    if(((xPed - _center[0]) * (xPed - _center[0]) + (yPed - _center[1]) * (yPed - _center[1])) <=
-       _radius * _radius)
-        return true;
-
-    return false;
-}
-
 void AccessPoint::SetNavLine(Line * line)
 {
     _navLine = new Line(*line);
@@ -209,37 +172,10 @@ Line * AccessPoint::GetNavLine() const
     return _navLine;
 }
 
-const std::vector<AccessPoint *> & AccessPoint::GetConnectingAPs()
-{
-    return _connectingAPs;
-}
-
-void AccessPoint::RemoveConnectingAP(AccessPoint * ap)
-{
-    std::vector<AccessPoint *>::iterator it;
-    it = find(_connectingAPs.begin(), _connectingAPs.end(), ap);
-    if(it == _connectingAPs.end()) {
-        LOG_WARNING("AP {} RemoveConnection: There is no connection to AP {}", _id, ap->GetID());
-    } else {
-        _connectingAPs.erase(it);
-    }
-}
-
-const std::vector<AccessPoint *> & AccessPoint::GetTransitAPsTo(int UID)
-{
-    return _navigationGraphTo[UID];
-}
-
 void AccessPoint::AddTransitAPsTo(int UID, AccessPoint * ap)
 {
     _navigationGraphTo[UID].push_back(ap);
 }
-
-void AccessPoint::Reset(int UID)
-{
-    _navigationGraphTo[UID].clear();
-}
-
 
 void AccessPoint::SetFriendlyName(const std::string & name)
 {
@@ -255,9 +191,4 @@ const std::string AccessPoint::GetFriendlyName()
 void AccessPoint::SetState(DoorState state)
 {
     _state = state;
-}
-
-DoorState AccessPoint::GetState() const
-{
-    return _state;
 }

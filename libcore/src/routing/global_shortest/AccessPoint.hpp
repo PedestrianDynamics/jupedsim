@@ -40,35 +40,10 @@
 class AccessPoint
 {
 public:
-    /**
-      * create a new access point with the provided data
-      *
-      * @param id
-      * @param center
-      * @param radius
-      */
+    AccessPoint(int id, double center[2]);
+    ~AccessPoint();
 
-    AccessPoint(int id, double center[2], double radius = 0.30);
-
-    /**
-      *
-      * destroy the access point
-      */
-    virtual ~AccessPoint();
-
-    /**
-      * @return the Id of the access point
-      */
     int GetID();
-
-    /**
-      * determines if the given coordinates (x ,y) are in the range of that Aps.
-      *
-      * @param x
-      * @param y
-      * @return
-      */
-    bool IsInRange(double xPed, double yPed, int roomID);
 
     /**
       * given the actual room of the pedestrian
@@ -83,10 +58,6 @@ public:
       * @param r1
       */
     void setConnectingRooms(int r1, int r2);
-
-    int GetConnectingRoom1() { return _room1ID; }
-
-    int GetConnectingRoom2() { return _room2ID; }
 
     /**
       * return the distance to the point x ,y
@@ -131,12 +102,6 @@ public:
       * @return true if the door is closed
       */
     bool IsClosed();
-    //
-    //     /**
-    //      * Close the door
-    //      * @param isClosed
-    //      */
-    //     void  SetClosed(int isClosed);
 
     /**
       * Set/Get the navigation line.
@@ -160,32 +125,20 @@ public:
       */
     bool GetFinalGoalOutside();
 
-    void AddIntermediateDest(int final, int inter);
     void AddFinalDestination(int UID, double distance);
     double GetDistanceTo(int UID);
     double GetDistanceTo(AccessPoint * ap);
-    void RemoveConnectingAP(AccessPoint * ap);
-
-    // reset all setting relative to the destination
-    void Reset(int UID = FINAL_DEST_OUT);
-
-    //FIXME: remove those functions
     void AddConnectingAP(AccessPoint * ap);
-    int GetNextApTo(int UID = FINAL_DEST_OUT); //default is the shortest path to the outside ( -1 )
-    const std::vector<AccessPoint *> & GetConnectingAPs();
 
 
-    const std::vector<AccessPoint *> & GetTransitAPsTo(int UID = FINAL_DEST_OUT);
     int GetNearestTransitAPTO(int UID = FINAL_DEST_OUT);
     void AddTransitAPsTo(int UID, AccessPoint * ap);
 
     void SetState(DoorState state);
-    DoorState GetState() const;
 
 private:
     int _id;
     double _center[2];
-    double _radius;
     /// true if this exit leads to outside
     bool _finaExitToOutside;
     /// true if this a goal outside the building
@@ -194,8 +147,6 @@ private:
     int _room2ID;
     Point pCentre;
     Line * _navLine;
-    std::vector<Pedestrian *> _transitPedestrians;
-    //     int _isClosed;
     std::string _friendlyName;
 
     // stores the connecting APs
