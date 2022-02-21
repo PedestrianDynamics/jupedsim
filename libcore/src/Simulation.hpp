@@ -63,7 +63,6 @@ private:
     /// Force model to use
     std::unique_ptr<OperationalModel> _operationalModel;
     /// writing the trajectories to file
-    fs::path _currentTrajectoriesFile;
     std::vector<std::unique_ptr<Pedestrian>> _agents;
     bool _eventProcessed{false};
 
@@ -122,6 +121,12 @@ public:
     bool InitArgs();
 
     /**
+     * print some statistics about the simulation
+     */
+    void PrintStatistics(double time);
+
+private:
+    /**
      * Update the route of the pedestrians and reassign rooms, in the case a room change happens
      */
     void UpdateLocations();
@@ -131,16 +136,4 @@ public:
      * Based on the route choice algorithm used, the next doors or the next decision points is set.
      */
     void UpdateRoutes();
-
-    /**
-     * Perform some initialisation for the simulation.
-     * such as writing the headers for the trajectories.
-     * @param the maximal number of pedestrian
-     */
-    void RunHeader(long nPed, TrajectoryWriter & writer);
-
-    /**
-     * print some statistics about the simulation
-     */
-    void PrintStatistics(double time);
 };

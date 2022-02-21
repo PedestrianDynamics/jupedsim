@@ -18,6 +18,8 @@
 
 #include "geometry/Line.hpp"
 
+#include "general/Macros.hpp"
+
 #include <catch2/catch.hpp>
 #include <cmath>
 

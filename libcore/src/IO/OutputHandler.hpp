@@ -27,7 +27,6 @@
 #pragma once
 
 #include "general/Filesystem.hpp"
-#include "general/Macros.hpp"
 
 #include <fstream>
 #include <string>
@@ -35,9 +34,8 @@
 class OutputHandler
 {
 public:
-    virtual ~OutputHandler()                     = default;
-    virtual void Write(const std::string & str)  = 0;
-    virtual void Write(const char * string, ...) = 0;
+    virtual ~OutputHandler()                    = default;
+    virtual void Write(const std::string & str) = 0;
 };
 
 
@@ -50,5 +48,4 @@ public:
     FileHandler(const fs::path & path);
     ~FileHandler() override;
     void Write(const std::string & str) override;
-    void Write(const char * string, ...) override;
 };

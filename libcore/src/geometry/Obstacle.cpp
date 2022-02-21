@@ -30,6 +30,7 @@
 #include "Line.hpp"
 #include "Point.hpp"
 #include "Wall.hpp"
+#include "general/Macros.hpp"
 
 #include <Logger.hpp>
 #include <cstdlib>

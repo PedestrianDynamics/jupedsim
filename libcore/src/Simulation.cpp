@@ -52,6 +52,7 @@
 #include <Logger.hpp>
 #include <algorithm>
 #include <chrono>
+#include <fmt/core.h>
 #include <memory>
 #include <stdexcept>
 #include <tinyxml.h>
@@ -64,8 +65,7 @@ Simulation::Simulation(Configuration * args, std::unique_ptr<Building> && buildi
     _directionManager(DirectionManager::Create(*args, _building.get())),
     _routingEngine(std::make_unique<RoutingEngine>(args, _building.get(), _directionManager.get())),
     _operationalModel(
-        OperationalModel::CreateFromType(args->operationalModel, *args, _directionManager.get())),
-    _currentTrajectoriesFile(_config->trajectoriesFile)
+        OperationalModel::CreateFromType(args->operationalModel, *args, _directionManager.get()))
 {
     _routingEngine->SetSimulation(this);
 }
@@ -85,8 +85,6 @@ void Simulation::Iterate()
         // update the positions
         _operationalModel->ComputeNextTimeStep(t_in_sec, _clock.dT(), _building.get());
 
-        //update the events
-
         //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
         //update quickestRouter
         if(_eventProcessed) {
@@ -96,9 +94,6 @@ void Simulation::Iterate()
 
             _directionManager->GetDirectionStrategy().ReInit();
         }
-
-        // here the used routers are update, when needed due to external changes
-
         //update the routes and locations
         UpdateLocations();
 
@@ -272,12 +267,6 @@ void Simulation::DeactivateTrain(int trainId, int trackId)
 
 bool Simulation::InitArgs()
 {
-    const fs::path & trajPath     = _config->trajectoriesFile;
-    const fs::path trajParentPath = trajPath.parent_path();
-    if(!trajParentPath.empty()) {
-        fs::create_directories(trajParentPath);
-    }
-
     _fps = _config->fps;
 
 
@@ -403,7 +392,7 @@ void Simulation::PrintStatistics(double simTime)
             LOG_INFO("More Information in the file: {}", statsfile.string());
             {
                 FileHandler statOutput(statsfile);
-                statOutput.Write("#Simulation time: %.2f", simTime);
+                statOutput.Write(fmt::format(FMT_STRING("#Simulation time: :.2f"), simTime));
                 statOutput.Write(
                     "#Flow at exit " + goal->GetCaption() + "( ID " +
                     std::to_string(goal->GetID()) + " )");
@@ -429,7 +418,7 @@ void Simulation::PrintStatistics(double simTime)
                                  std::to_string(itr.first % 1000) + ".dat";
             LOG_INFO("More Information in the file: {}", statsfile.string());
             FileHandler output(statsfile);
-            output.Write("#Simulation time: %.2f", simTime);
+            output.Write(fmt::format(FMT_STRING("#Simulation time: :.2f"), simTime));
             output.Write(
                 "#Flow at crossing " + goal->GetCaption() + "( ID " +
                 std::to_string(goal->GetID()) + " ) in Room ( ID " +
@@ -438,10 +427,4 @@ void Simulation::PrintStatistics(double simTime)
             output.Write(goal->GetFlowCurve());
         }
     }
-}
-
-void Simulation::RunHeader(long nPed, TrajectoryWriter & writer)
-{
-    writer.WriteHeader(nPed, _fps, *_config, 0); // first trajectory
-    writer.WriteFrame(0, _agents);
 }
