@@ -355,7 +355,6 @@ bool GlobalRouter::init()
     //run the floyd warshall algorithm
     FloydWarshall();
 
-
     // set the configuration for reaching the outside
     // set the distances to all final APs
 
@@ -500,17 +499,6 @@ void GlobalRouter::Reset()
     _mapIdToFinalDestination.clear();
 }
 
-
-void GlobalRouter::SetEdgeCost(double cost)
-{
-    _edgeCost = cost;
-}
-
-double GlobalRouter::GetEdgeCost() const
-{
-    return _edgeCost;
-}
-
 void GlobalRouter::GetPath(int i, int j)
 {
     if(_distMatrix[i][j] == FLT_MAX)
@@ -569,62 +557,6 @@ bool GlobalRouter::GetPath(Pedestrian * ped, std::vector<Line *> & path)
     for(const auto & aps : aps_path)
         path.push_back(aps->GetNavLine());
 
-    return true;
-}
-
-bool GlobalRouter::GetPath(Pedestrian * ped, int goalID, std::vector<SubRoom *> & path)
-{
-    //clear the global variable holding the paths
-    _tmpPedPath.clear();
-
-    int tmpFinalDest = ped->GetFinalDestination();
-    ped->SetFinalDestination(goalID);
-
-    //find the nearest APs and start from there
-    int next = GetBestDefaultRandomExit(ped);
-    if(next == -1) {
-        LOG_ERROR("Cannot get path for ped {} to goal {:d}", ped->GetUID(), goalID);
-        return false;
-    }
-
-    // get the transformed goal_id
-    int to_door_uid            = _building->GetFinalGoal(goalID)->GetAllWalls()[0].GetUniqueID();
-    int to_door_matrix_index   = _map_id_to_index[to_door_uid];
-    int from_door_matrix_index = _map_id_to_index[next];
-
-    // thats probably a goal located outside the geometry or not an exit from the geometry
-    if(to_door_uid == -1) {
-        LOG_ERROR("GlobalRouter: there is something wrong with final destination {:d}", goalID);
-        return false;
-    }
-
-    //populate the line unique id to cross
-    GetPath(from_door_matrix_index, to_door_matrix_index);
-
-    for(unsigned int i = 0; i < _tmpPedPath.size(); i++) {
-        int ap_id       = _map_index_to_id[_tmpPedPath[i]];
-        int subroom_uid = _accessPoints[ap_id]->GetConnectingRoom1();
-        if(subroom_uid == -1)
-            continue;
-        SubRoom * sub = _building->GetSubRoomByUID(subroom_uid);
-        if(sub && !IsElementInVector(path, sub))
-            path.push_back(sub);
-    }
-
-    for(unsigned int i = 0; i < _tmpPedPath.size(); i++) {
-        int ap_id       = _map_index_to_id[_tmpPedPath[i]];
-        int subroom_uid = _accessPoints[ap_id]->GetConnectingRoom2();
-        if(subroom_uid == -1)
-            continue;
-        SubRoom * sub = _building->GetSubRoomByUID(subroom_uid);
-        if(sub && !IsElementInVector(path, sub))
-            path.push_back(sub);
-    }
-
-    //clear the global variable holding the paths
-    _tmpPedPath.clear();
-
-    ped->SetFinalDestination(tmpFinalDest);
     return true;
 }
 
@@ -963,11 +895,6 @@ void GlobalRouter::TriangulateGeometry()
         }
     }
     LOG_INFO("INFO:\tDone...");
-}
-
-bool GlobalRouter::GenerateNavigationMesh()
-{
-    return true;
 }
 
 bool GlobalRouter::IsWall(const Line & line, const std::vector<SubRoom *> & subrooms) const

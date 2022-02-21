@@ -27,15 +27,11 @@
  **/
 #pragma once
 
-#include "general/Filesystem.hpp"
 #include "geometry/Building.hpp"
 #include "routing/GlobalRouterParameters.hpp"
 #include "routing/Router.hpp"
 
 #include <cfloat>
-#include <fstream>
-#include <random>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -50,9 +46,6 @@ class GlobalRouter : public Router
 {
 public:
     GlobalRouter(Building * building, const GlobalRouterParameters & parameters);
-    /**
-      * Destructor
-      */
     ~GlobalRouter() override;
 
     int FindExit(Pedestrian * p) override;
@@ -60,45 +53,9 @@ public:
     void Update() override{};
 
     /**
-      * Performs a check of the geometry and fixes if possible.
-      * NOT IMPLEMENTED
-      */
-    void CheckInconsistencies();
-
-    /**
-      * write the graph as GV format to be used with graphviz
-      * @param filename
-      */
-    void WriteGraphGV(
-        std::string filename,
-        int finalDestination,
-        const std::vector<std::string> rooms = std::vector<std::string>());
-
-    /**
       * Reset the routing engine and clear all pre-computed paths
       */
     void Reset();
-
-    /**
-      * Set/Get the edge cost for certain paths.
-      * prefer the use of paths through floors instead of rooms
-      */
-    void SetEdgeCost(double cost);
-
-    /**
-      * Set/Get the edge cost for certain paths.
-      * prefer the use of paths through floors instead of rooms
-      */
-    double GetEdgeCost() const;
-
-
-    void DumpAccessPoints(int p = -1);
-
-    /**
-      * @return true if the two points are in the visibility range of each other
-      * @note based on http://alienryderflex.com/intersect/
-      */
-    bool CanSeeEachother(const Point & pt1, const Point & pt2);
 
     /**
       * @obsolete
@@ -107,24 +64,9 @@ public:
     int GetBestDefaultRandomExit(Pedestrian * p);
 
     /**
-      * Generate a navigation mesh based on delauney triangulation
-      */
-    bool GenerateNavigationMesh();
-
-
-    /**
       * Triangulate the geometry and generate the navigation lines
       */
     void TriangulateGeometry();
-
-
-    /**
-      *
-      * @param ped the pedestrian
-      * @param goalID, the goal ID.
-      * @param path vector to store the intermediate destination
-      */
-    bool GetPath(Pedestrian * ped, int goalID, std::vector<SubRoom *> & path);
 
     /**
       * Populates the navigations line to cross in the vector path
@@ -201,9 +143,6 @@ private:
     ///map the internal crossings/transition id to
     ///the global ID (description) for that final destination
     std::map<int, int> _mapIdToFinalDestination;
-    // normalize the probs
-    std::default_random_engine _rdGenerator;
-    std::uniform_real_distribution<double> _rdDistribution;
 
     // store all subrooms at the same elevation
     std::map<double, std::vector<SubRoom *>> _subroomsAtElevation;
