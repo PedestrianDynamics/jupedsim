@@ -33,7 +33,6 @@ class NullOutputHandler : public OutputHandler
 {
 public:
     void Write(const std::string &) override{};
-    void Write(const char *, ...) override{};
 };
 
 NullOutputHandler handler{};

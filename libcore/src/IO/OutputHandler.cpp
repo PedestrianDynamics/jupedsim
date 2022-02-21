@@ -26,15 +26,18 @@
  **/
 #include "OutputHandler.hpp"
 
-#include <Logger.hpp>
-#include <cstdarg> // va_start and va_end
+#include <filesystem>
+#include <fmt/format.h>
+#include <stdexcept>
 
 FileHandler::FileHandler(const fs::path & path)
 {
+    if(path.has_parent_path()) {
+        fs::create_directories(path.parent_path());
+    }
     _pfp.open(path.string());
-    if(!_pfp.is_open()) {
-        LOG_ERROR("Cannot open file {}", path.string());
-        exit(0);
+    if(!_pfp.good()) {
+        throw std::runtime_error(fmt::format(FMT_STRING("Cannot open {:s}"), path.string()));
     }
 }
 
@@ -45,17 +48,8 @@ FileHandler::~FileHandler()
 
 void FileHandler::Write(const std::string & str)
 {
+    if(!_pfp.good()) {
+        throw std::runtime_error("Error writing trajectories");
+    }
     _pfp << str << std::endl;
-    _pfp.flush();
-}
-
-void FileHandler::Write(const char * str_msg, ...)
-{
-    char msg[1024] = "";
-    va_list ap;
-    va_start(ap, str_msg);
-    vsprintf(msg, str_msg, ap);
-    va_end(ap);
-    _pfp << msg << std::endl;
-    _pfp.flush();
 }

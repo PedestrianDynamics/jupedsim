@@ -52,6 +52,7 @@
 #include <Logger.hpp>
 #include <algorithm>
 #include <chrono>
+#include <fmt/core.h>
 #include <memory>
 #include <stdexcept>
 #include <tinyxml.h>
@@ -268,6 +269,7 @@ bool Simulation::InitArgs()
 {
     _fps = _config->fps;
 
+
     // IMPORTANT: do not change the order in the following..
     _building->SetAgents(&_agents);
 
@@ -390,7 +392,7 @@ void Simulation::PrintStatistics(double simTime)
             LOG_INFO("More Information in the file: {}", statsfile.string());
             {
                 FileHandler statOutput(statsfile);
-                statOutput.Write("#Simulation time: %.2f", simTime);
+                statOutput.Write(fmt::format(FMT_STRING("#Simulation time: :.2f"), simTime));
                 statOutput.Write(
                     "#Flow at exit " + goal->GetCaption() + "( ID " +
                     std::to_string(goal->GetID()) + " )");
@@ -416,7 +418,7 @@ void Simulation::PrintStatistics(double simTime)
                                  std::to_string(itr.first % 1000) + ".dat";
             LOG_INFO("More Information in the file: {}", statsfile.string());
             FileHandler output(statsfile);
-            output.Write("#Simulation time: %.2f", simTime);
+            output.Write(fmt::format(FMT_STRING("#Simulation time: :.2f"), simTime));
             output.Write(
                 "#Flow at crossing " + goal->GetCaption() + "( ID " +
                 std::to_string(goal->GetID()) + " ) in Room ( ID " +
