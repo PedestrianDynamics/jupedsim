@@ -77,8 +77,8 @@ int main(int argc, char ** argv)
         Simulation sim(&config, std::move(building));
         EventManager manager;
 
-        size_t frame   = 0;
-        int num_agents = agents.size();
+        size_t frame                        = 0;
+        const auto num_agents_in_simulation = agents.size();
 
         while(!agents.empty()) {
             double now = sim.Clock().dT() * frame;
@@ -136,7 +136,7 @@ int main(int argc, char ** argv)
             config.optionalOutput,
             std::make_unique<FileHandler>(config.trajectoriesFile),
             config.agentColorMode);
-        sim.RunHeader(num_agents, *writer);
+        writer->WriteHeader(num_agents_in_simulation, sim.Fps(), config, 0);
 
         const int writeInterval = static_cast<int>((1. / sim.Fps()) / sim.Clock().dT() + 0.5);
 

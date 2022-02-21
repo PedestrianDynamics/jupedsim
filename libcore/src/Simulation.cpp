@@ -64,8 +64,7 @@ Simulation::Simulation(Configuration * args, std::unique_ptr<Building> && buildi
     _directionManager(DirectionManager::Create(*args, _building.get())),
     _routingEngine(std::make_unique<RoutingEngine>(args, _building.get(), _directionManager.get())),
     _operationalModel(
-        OperationalModel::CreateFromType(args->operationalModel, *args, _directionManager.get())),
-    _currentTrajectoriesFile(_config->trajectoriesFile)
+        OperationalModel::CreateFromType(args->operationalModel, *args, _directionManager.get()))
 {
     _routingEngine->SetSimulation(this);
 }
@@ -85,8 +84,6 @@ void Simulation::Iterate()
         // update the positions
         _operationalModel->ComputeNextTimeStep(t_in_sec, _clock.dT(), _building.get());
 
-        //update the events
-
         //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
         //update quickestRouter
         if(_eventProcessed) {
@@ -96,9 +93,6 @@ void Simulation::Iterate()
 
             _directionManager->GetDirectionStrategy().ReInit();
         }
-
-        // here the used routers are update, when needed due to external changes
-
         //update the routes and locations
         UpdateLocations();
 
@@ -272,14 +266,7 @@ void Simulation::DeactivateTrain(int trainId, int trackId)
 
 bool Simulation::InitArgs()
 {
-    const fs::path & trajPath     = _config->trajectoriesFile;
-    const fs::path trajParentPath = trajPath.parent_path();
-    if(!trajParentPath.empty()) {
-        fs::create_directories(trajParentPath);
-    }
-
     _fps = _config->fps;
-
 
     // IMPORTANT: do not change the order in the following..
     _building->SetAgents(&_agents);
@@ -438,10 +425,4 @@ void Simulation::PrintStatistics(double simTime)
             output.Write(goal->GetFlowCurve());
         }
     }
-}
-
-void Simulation::RunHeader(long nPed, TrajectoryWriter & writer)
-{
-    writer.WriteHeader(nPed, _fps, *_config, 0); // first trajectory
-    writer.WriteFrame(0, _agents);
 }
