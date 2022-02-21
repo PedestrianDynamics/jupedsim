@@ -37,7 +37,6 @@ class Transition;
 
 namespace geometry::helper
 {
-
 /**
   * @brief Computes the train door coordinates by finding the points with the distance and width given by
   * \p train on \p track, considering \p trainStartOffset and \p fromEnd.
@@ -63,19 +62,17 @@ std::map<int, std::pair<Point, Point>> ComputeTrainDoorCoordinates(
  * walls and added doors will be saved with \p trainID as identifier.
  *
  * @param trainID ID of the arriving train
+ * @param trackID ID where the train should be
  * @param building simulation geometry
- * @param subroom subroom containing the platform the train is arriving
  * @param train train to be added to geometry
- * @param track track at which the train should be added
  * @param trainStartOffset distance the train start has from the track start
  * @param fromEnd train should be added from end or beginning of track walls
  */
 void AddTrainDoors(
-    int trainID,
+    int trainId,
+    int trackId,
     Building & building,
-    SubRoom & subroom,
     const TrainType & train,
-    const Track & track,
     double trainStartOffset,
     bool fromEnd);
 

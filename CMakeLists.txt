@@ -2,7 +2,7 @@
 # Project setup
 ################################################################################
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
-project(JuPedSim VERSION 0.9.2 LANGUAGES CXX)
+project(JuPedSim VERSION 0.9.4 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -205,7 +205,6 @@ endif(BUILD_DOC)
 # Testing
 ################################################################################
 if(BUILD_TESTS)
-    enable_testing()
     if(UNIX)
         set(pytest-wrapper-in ${CMAKE_SOURCE_DIR}/cmake_templates/run-systemtests.unix.in)
         set(pytest-wrapper-out ${CMAKE_BINARY_DIR}/run-systemtests)
@@ -226,7 +225,6 @@ if(BUILD_TESTS)
         COMMAND ${pytest-wrapper-out} -vv -s
                 --basetemp=${CMAKE_BINARY_DIR}/systemtest-out
                 --junit-xml=result-systemtests.xml
-        COMMAND ctest -T test
         DEPENDS jpscore
     )
     add_custom_target(unittests
@@ -310,7 +308,6 @@ if (BUILD_TESTS)
   find_python_library(scipy)
   find_python_library(pandas)
   find_python_library(matplotlib)
-  add_subdirectory(systemtest)
 endif (BUILD_TESTS)
 
 ################################################################################

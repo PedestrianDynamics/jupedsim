@@ -27,30 +27,23 @@
  **/
 #include "IO/EventFileParser.hpp"
 #include "IO/IniFileParser.hpp"
+#include "IO/TrainFileParser.hpp"
+#include "ResultHandling.hpp"
 #include "Simulation.hpp"
 #include "agent-creation/AgentCreator.hpp"
-#include "events/Event.hpp"
 #include "events/EventManager.hpp"
 #include "events/EventVisitors.hpp"
 #include "general/ArgumentParser.hpp"
 #include "general/Compiler.hpp"
 #include "general/Configuration.hpp"
 #include "geometry/Building.hpp"
-#include "math/OperationalModel.hpp"
 #include "pedestrian/AgentsSourcesManager.hpp"
-#include "routing/RoutingEngine.hpp"
 
 #include <Logger.hpp>
-#include <algorithm>
-#include <chrono>
-#include <cstdio>
 #include <cstdlib>
-#include <ctime>
-#include <iomanip>
-#include <iterator>
-#include <memory>
-#include <ostream>
-#include <string>
+#include <exception>
+#include <fmt/format.h>
+#include <iostream>
 
 int main(int argc, char ** argv)
 {
@@ -68,86 +61,76 @@ int main(int argc, char ** argv)
         return 0;
     }
     Logging::Guard guard;
-    Logging::SetLogLevel(a.LogLevel());
-    LOG_INFO("Starting JuPedSim - JPScore");
-    LOG_INFO("Version {}", JPSCORE_VERSION);
-    LOG_INFO("Commit id {}", GIT_COMMIT_HASH);
-    LOG_INFO("Commit date {}", GIT_COMMIT_DATE);
-    LOG_INFO("Build from branch {}", GIT_BRANCH);
-    LOG_INFO("Build with {}({})", compiler_id, compiler_version);
-
-    Configuration config;
-    // TODO remove me in refactoring
-    IniFileParser iniFileParser(&config);
-
     try {
-        iniFileParser.Parse(a.IniFilePath());
-    } catch(const std::exception & e) {
-        LOG_ERROR("Exception in IniFileParser::Parse thrown, what: {}", e.what());
-        return EXIT_FAILURE;
-    }
+        Logging::SetLogLevel(a.LogLevel());
+        LOG_INFO("Starting JuPedSim - JPScore");
+        LOG_INFO("Version {}", JPSCORE_VERSION);
+        LOG_INFO("Commit id {}", GIT_COMMIT_HASH);
+        LOG_INFO("Commit date {}", GIT_COMMIT_DATE);
+        LOG_INFO("Build from branch {}", GIT_BRANCH);
+        LOG_INFO("Build with {}({})", compiler_id, compiler_version);
 
-    auto building         = std::make_unique<Building>(&config, nullptr);
-    auto routingEngine    = std::make_unique<RoutingEngine>(&config, building.get());
-    auto operationalModel = OperationalModel::CreateFromType(
-        config.operationalModel, config, config.directionManager.get());
-    auto agents = CreateAllPedestrians(&config, building.get(), config.tMax);
-    Simulation sim(
-        &config, std::move(building), std::move(routingEngine), std::move(operationalModel));
-    EventManager manager;
+        auto config         = ParseIniFile(a.IniFilePath());
+        auto building       = std::make_unique<Building>(&config, nullptr);
+        auto * building_ptr = building.get();
+        auto agents         = CreateAllPedestrians(&config, building.get(), config.tMax);
+        Simulation sim(&config, std::move(building));
+        EventManager manager;
 
-    size_t frame   = 0;
-    int num_agents = agents.size();
+        size_t frame   = 0;
+        int num_agents = agents.size();
 
-    while(!agents.empty()) {
-        double now = sim.Clock().dT() * frame;
-        auto t     = std::chrono::duration_cast<std::chrono::nanoseconds>(
-            std::chrono::duration<double>(now));
-        auto events = CreateEventsFromAgents(extract(agents, frame), t);
-        for(auto && evt : events) {
-            manager.add(evt);
+        while(!agents.empty()) {
+            double now = sim.Clock().dT() * frame;
+            auto t     = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                std::chrono::duration<double>(now));
+            auto events = CreateEventsFromAgents(extract(agents, frame), t);
+            for(auto && evt : events) {
+                manager.AddEvent(evt);
+            }
+            ++frame;
         }
-        ++frame;
-    }
 
-    if(config.eventFile) {
-        try {
+        if(config.eventFile) {
             const auto door_events = EventFileParser::ParseDoorEvents(*config.eventFile);
             for(auto && evt : door_events) {
-                manager.add(evt);
+                manager.AddEvent(evt);
             }
-        } catch(const std::exception & e) {
-            LOG_ERROR("Error parsing events: {}", e.what());
-            return EXIT_FAILURE;
         }
-    }
-    if(config.scheduleFile) {
-        try {
+        if(config.scheduleFile) {
             const auto train_door_events =
                 EventFileParser::ParseSchedule(config.scheduleFile.value());
             for(auto && evt : train_door_events) {
-                manager.add(evt);
+                manager.AddEvent(evt);
             }
             const auto groupMaxAgents =
                 EventFileParser::ParseMaxAgents(config.scheduleFile.value());
             for(auto const & [transID, maxAgents] : groupMaxAgents) {
-                building->GetTransition(transID)->SetMaxDoorUsage(maxAgents);
+                building_ptr->GetTransition(transID)->SetMaxDoorUsage(maxAgents);
             }
-        } catch(const std::exception & e) {
-            LOG_ERROR("Error parsing train schedule file: {}", e.what());
+        }
+        if(!config.trainTimeTableFile.empty() && !config.trainTypeFile.empty()) {
+            //TODO(kkratz) Have another look at the error handling
+            auto trainTypes = TrainFileParser::ParseTrainTypes(config.trainTypeFile);
+            const auto timeTableContents =
+                TrainFileParser::ParseTrainTimeTable(trainTypes, config.trainTimeTableFile);
+            for(auto && evt : timeTableContents.events) {
+                manager.AddEvent(evt);
+            }
+            for(auto && [k, v] : timeTableContents.trains) {
+                building_ptr->AddTrainType(k, v);
+            }
+        }
+        if(!sim.InitArgs()) {
+            LOG_ERROR("Could not start simulation. Check the log for prior errors");
             return EXIT_FAILURE;
         }
-    }
-    if(!sim.InitArgs()) {
-        LOG_ERROR("Could not start simulation. Check the log for prior errors");
-        return EXIT_FAILURE;
-    }
-    time_t starttime{};
-    time(&starttime);
+        collectInputFilesIn(config.iniFile, "result");
+        time_t starttime{};
+        time(&starttime);
 
-    double evacTime{0};
-    LOG_INFO("Simulation started with {} pedestrians", sim.GetPedsNumber());
-    try {
+        double evacTime{0};
+        LOG_INFO("Simulation started with {} pedestrians", sim.GetPedsNumber());
         auto writer = std::make_unique<TrajectoryWriter>(
             config.precision,
             config.optionalOutput,
@@ -184,27 +167,28 @@ int main(int argc, char ** argv)
         }
         evacTime = sim.Clock().ElapsedTime();
 
-    } catch(const std::exception & e) {
-        LOG_ERROR("Exception in Simulation::RunStandardSimulation thrown, what: {}", e.what());
+        LOG_INFO("Simulation completed");
+        time_t endtime{};
+        time(&endtime);
 
-        return EXIT_FAILURE;
+        // some statistics output
+        if(config.showStatistics) {
+            sim.PrintStatistics(evacTime); // negative means end of simulation
+        }
+
+        if(sim.GetPedsNumber()) {
+            LOG_WARNING("Pedestrians not evacuated [{}]", sim.GetPedsNumber());
+        }
+
+        const double execTime = difftime(endtime, starttime);
+        LOG_INFO("Exec Time {:.2f}s", execTime);
+        LOG_INFO("Evac Time {:.2f}s", evacTime);
+        LOG_INFO("Realtime Factor {:.2f}x", evacTime / execTime);
+        return (EXIT_SUCCESS);
+    } catch(const std::exception & ex) {
+        LOG_ERROR("{:s}", ex.what());
+    } catch(...) {
+        LOG_ERROR("Unknown exception encountered!");
     }
-    LOG_INFO("Simulation completed");
-    time_t endtime{};
-    time(&endtime);
-
-    // some statistics output
-    if(config.showStatistics) {
-        sim.PrintStatistics(evacTime); // negative means end of simulation
-    }
-
-    if(sim.GetPedsNumber()) {
-        LOG_WARNING("Pedestrians not evacuated [{}]", sim.GetPedsNumber());
-    }
-
-    const double execTime = difftime(endtime, starttime);
-    LOG_INFO("Exec Time {:.2f}s", execTime);
-    LOG_INFO("Evac Time {:.2f}s", evacTime);
-    LOG_INFO("Realtime Factor {:.2f}x", evacTime / execTime);
-    return (EXIT_SUCCESS);
+    return EXIT_FAILURE;
 }

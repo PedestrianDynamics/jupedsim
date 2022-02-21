@@ -1,17 +1,10 @@
-from itertools import tee
 
+from driver.utils import pairwise
 from numpy import ndarray
 from sympy.geometry import Point, Segment
 
 
-def pairwise(iterable):
-    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
-    a, b = tee(iterable)
-    next(b, None)
-    return zip(a, b)
-
-
-def check_traj_path_cross_line(path: ndarray, crossing_segment: Segment):
+def get_intersetions_path_segment(path: ndarray, crossing_segment: Segment):
     """
     checks, weather the trajetory path of an agent crosses a line (for example: a door).
 
@@ -25,6 +18,6 @@ def check_traj_path_cross_line(path: ndarray, crossing_segment: Segment):
         segment = Segment(point1, point2)
         intersections = segment.intersection(crossing_segment)
         if intersections:
-            return True
+            return {"frame": p1[1], "intersections": intersections}
 
-    return False
+    return None

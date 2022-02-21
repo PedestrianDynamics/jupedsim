@@ -5,21 +5,21 @@ import numpy
 import pytest
 from driver.driver import JpsCoreDriver
 from driver.environment import Platform
+from driver.events import read_starting_times
 from driver.fixtures import env
-from driver.flow import (
-    check_door_usage,
-    check_max_agents,
-    read_flow,
-    read_max_agents,
-    read_num_agents,
+from driver.flow import check_flow
+from driver.geometry import get_intersetions_path_segment
+from driver.inifile import (
+    instanciate_tempalte,
+    parse_traffic_constraints,
+    parse_waiting_areas,
 )
-from driver.geometry import check_traj_path_cross_line
-from driver.inifile import instanciate_tempalte, parse_waiting_areas
 from driver.trajectories import load_trajectory
 from driver.utils import (
     copy_all_files,
     copy_files,
     get_file_text_diff,
+    pairwise,
     setup_jpscore_driver,
 )
 from sympy.geometry import Point, Segment
@@ -662,7 +662,7 @@ def test_router_corridor_close(tmp_path, env, router_id):
 
     trajectories = load_trajectory(jpscore_driver.traj_file)
     agent_path = trajectories.path(2)
-    assert check_traj_path_cross_line(
+    assert get_intersetions_path_segment(
         agent_path, Segment(Point(9.5, -5), Point(9.5, 5))
     )
 
@@ -688,7 +688,7 @@ def test_router_10(tmp_path, env):
 
     trajectories = load_trajectory(jpscore_driver.traj_file)
     agent_path = trajectories.path(2)
-    assert check_traj_path_cross_line(
+    assert get_intersetions_path_segment(
         agent_path, Segment(Point(90.1, -104), Point(90.1, -102))
     )
 
@@ -712,16 +712,49 @@ def test_door_closes_after_max_agents(tmp_path, env):
     )
     jpscore_driver.run()
 
-    # success = True
+    flow_dict = {1: 0, 2: 0}
+    # here the flow through the doors is computed.
+    # The two doors are parallel to the X-axis, therefore the computation of the door taken by each pedestrian is simplyfied.
+    trajectories = load_trajectory(jpscore_driver.traj_file)
+    for ped_id in numpy.unique(trajectories.data[:, 0]):
+        path = trajectories.path(ped_id)
+        for p1, p2 in pairwise(path):
+            if p1[3] < 30 and p2[3] >= 30:
+                if 20 <= p1[2] <= 22:
+                    flow_dict[1] += 1
+                if 28 <= p1[2] <= 30:
+                    flow_dict[2] += 1
 
-    max_agents_dict = read_max_agents(tmp_path / "inifile.xml")
-    flow_dict = read_flow(tmp_path)
-    num_agents = read_num_agents(tmp_path / "inifile.xml")
+    assert flow_dict[1] == 80
+    assert flow_dict[2] == 20
 
-    [max_agents_correct, measured_agents] = check_max_agents(
-        flow_dict, max_agents_dict
+
+def test_door_flow_regulation(tmp_path, env):
+    """
+
+    :param tmp_path: working directory of test execution
+    :param env: global environment object
+    """
+    input_location = (
+        env.systemtest_path / "door_tests" / "test_flow_regulation"
     )
-    assert max_agents_correct, "Wrong number of pedestrians passing the door"
-    assert measured_agents == max_agents_dict
+    copy_files(
+        sources=[
+            input_location / "geometry.xml",
+            input_location / "inifile.xml",
+            input_location / "events.xml",
+        ],
+        dest=tmp_path,
+    )
+    jpscore_driver = JpsCoreDriver(
+        jpscore_path=env.jpscore_path, working_directory=tmp_path
+    )
+    jpscore_driver.run()
 
-    assert check_door_usage(flow_dict, num_agents), "Wrong door usage."
+    starting_times_dict = read_starting_times(tmp_path / "events.xml")
+    traffic_constraints = parse_traffic_constraints(tmp_path / "inifile.xml")
+    check_flow(
+        load_trajectory(jpscore_driver.traj_file),
+        starting_times_dict,
+        traffic_constraints,
+    )

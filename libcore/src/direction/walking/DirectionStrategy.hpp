@@ -24,7 +24,7 @@
 
 #include "geometry/Building.hpp"
 #include "geometry/Point.hpp"
-#include "math/OperationalModel.hpp"
+#include "routing/ff_router/UnivFFviaFM.hpp"
 
 #include <map>
 #include <string>
@@ -35,8 +35,6 @@ class Room;
 class Pedestrian;
 
 class Point;
-
-class UnivFFviaFM;
 
 /**
  * Interface of a direction strategy.
@@ -56,10 +54,7 @@ public:
      */
     virtual ~DirectionStrategy() = default;
 
-    /**
-     * Initialization method for DirectionStrategies.
-     */
-    virtual void Init(Building * /*building*/, const Configuration & /*config*/){};
+    virtual void ReInit(){};
 
     /**
      * Getter for the goal at the current time-step.
@@ -135,23 +130,19 @@ public:
 class DirectionLocalFloorfield : public DirectionStrategy
 {
 public:
-    void Init(Building * building, const Configuration & config) override;
+    DirectionLocalFloorfield(const Configuration & config, Building * building);
+    ~DirectionLocalFloorfield() override = default;
 
-    ~DirectionLocalFloorfield() override;
-
+    void ReInit() override;
     Point GetTarget(Room * room, Pedestrian * ped) const override;
-
     Point GetDir2Wall(Pedestrian * ped) const override;
-
     double GetDistance2Wall(Pedestrian * ped) const override;
-
     double GetDistance2Target(Pedestrian * ped, int UID) const override;
 
 private:
-    std::map<int, UnivFFviaFM *> _locffviafm;
+    std::map<int, std::unique_ptr<UnivFFviaFM>> _locffviafm;
     Building * _building;
     double _stepsize;
     double _wallAvoidDistance;
     bool _useDistancefield;
-    bool _wasInitialized{false};
 };

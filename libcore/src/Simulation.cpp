@@ -35,14 +35,14 @@
 #include "IO/Trajectories.hpp"
 #include "SimulationClock.hpp"
 #include "SimulationHelper.hpp"
-#include "events/Event.hpp"
-#include "events/EventManager.hpp"
-#include "events/EventVisitors.hpp"
+#include "direction/DirectionManager.hpp"
 #include "general/Filesystem.hpp"
 #include "geometry/GoalManager.hpp"
 #include "geometry/Line.hpp"
+#include "geometry/TrainGeometryInterface.hpp"
 #include "geometry/WaitingArea.hpp"
 #include "geometry/Wall.hpp"
+#include "geometry/helper/CorrectGeometry.hpp"
 #include "math/GCFMModel.hpp"
 #include "math/OperationalModel.hpp"
 #include "pedestrian/AgentsSourcesManager.hpp"
@@ -57,16 +57,14 @@
 #include <tinyxml.h>
 #include <variant>
 
-Simulation::Simulation(
-    Configuration * args,
-    std::unique_ptr<Building> && building,
-    std::unique_ptr<RoutingEngine> && routingEngine,
-    std::unique_ptr<OperationalModel> && operationalModel) :
+Simulation::Simulation(Configuration * args, std::unique_ptr<Building> && building) :
     _config(args),
     _clock(_config->dT),
     _building(std::move(building)),
-    _routingEngine(std::move(routingEngine)),
-    _operationalModel(std::move(operationalModel)),
+    _directionManager(DirectionManager::Create(*args, _building.get())),
+    _routingEngine(std::make_unique<RoutingEngine>(args, _building.get(), _directionManager.get())),
+    _operationalModel(
+        OperationalModel::CreateFromType(args->operationalModel, *args, _directionManager.get())),
     _currentTrajectoriesFile(_config->trajectoriesFile)
 {
     _routingEngine->SetSimulation(this);
@@ -77,23 +75,17 @@ void Simulation::Iterate()
     _building->UpdateGrid();
     const double t_in_sec = _clock.ElapsedTime();
 
-    auto directionManager = _config->directionManager;
-    if(directionManager) {
-        directionManager->Update(t_in_sec);
-    }
-
+    _directionManager->Update(t_in_sec);
     _operationalModel->Update(t_in_sec);
-
     _routingEngine->UpdateTime(t_in_sec);
 
     if(t_in_sec > Pedestrian::GetMinPremovementTime()) {
+        _routingEngine->setNeedUpdate(_eventProcessed || _routingEngine->NeedsUpdate());
         UpdateRoutes();
         // update the positions
         _operationalModel->ComputeNextTimeStep(t_in_sec, _clock.dT(), _building.get());
 
         //update the events
-        _eventProcessed |= _old_em->ProcessEvents(t_in_sec);
-        _routingEngine->setNeedUpdate(_eventProcessed || _routingEngine->NeedsUpdate());
 
         //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
         //update quickestRouter
@@ -102,14 +94,10 @@ void Simulation::Iterate()
                 "Enter correctGeometry: Building Has {} Transitions.",
                 _building->GetAllTransitions().size());
 
-            directionManager->GetDirectionStrategy()->Init(_building.get(), *_config);
+            _directionManager->GetDirectionStrategy().ReInit();
         }
 
         // here the used routers are update, when needed due to external changes
-        if(_routingEngine->NeedsUpdate()) {
-            LOG_INFO("Update router during simulation.");
-            _routingEngine->UpdateRouter();
-        }
 
         //update the routes and locations
         UpdateLocations();
@@ -195,18 +183,6 @@ size_t Simulation::GetPedsNumber() const
     return _agents.size();
 }
 
-void Simulation::AddEvent(Event event)
-{
-    _em.add(event);
-}
-
-void Simulation::AddEvents(std::vector<Event> events)
-{
-    for(auto e : events) {
-        AddEvent(e);
-    }
-}
-
 void Simulation::OpenDoor(int doorId)
 {
     _eventProcessed = true;
@@ -230,6 +206,69 @@ void Simulation::ResetDoor(int doorId)
     _eventProcessed = true;
     _building->GetTransition(doorId)->ResetDoorUsage();
 }
+
+void Simulation::ActivateTrain(
+    int trainId,
+    int trackId,
+    const TrainType & type,
+    double startOffset,
+    bool reversed)
+{
+    geometry::helper::AddTrainDoors(trainId, trackId, *_building, type, startOffset, reversed);
+    _eventProcessed = true;
+};
+
+void Simulation::DeactivateTrain(int trainId, int trackId)
+{
+    const auto track = _building->GetTrack(trackId);
+    if(!track) {
+        throw std::runtime_error(
+            fmt::format(FMT_STRING("Could not find track with ID {:d}"), trackId));
+    }
+
+    const auto roomID    = track->_roomID;
+    const auto subroomID = track->_subRoomID;
+    auto * subroom       = _building->GetRoom(roomID)->GetSubRoom(subroomID);
+
+    // remove temp added walls
+    const auto tempAddedWalls = _building->GetTrainWallsAdded(trainId);
+    if(tempAddedWalls) {
+        std::for_each(
+            std::begin(tempAddedWalls.value()),
+            std::end(tempAddedWalls.value()),
+            [&subroom](const Wall & wall) { subroom->RemoveWall(wall); });
+
+        _building->ClearTrainWallsAdded(trainId);
+    }
+
+    // add removed walls
+    const auto tempRemovedWalls = _building->GetTrainWallsRemoved(trainId);
+    if(tempRemovedWalls) {
+        std::for_each(
+            std::begin(tempRemovedWalls.value()),
+            std::end(tempRemovedWalls.value()),
+            [&subroom](const Wall & wall) { subroom->AddWall(wall); });
+
+        _building->ClearTrainWallsRemoved(trainId);
+    }
+
+    // remove added doors
+    const auto tempDoors = _building->GetTrainDoorsAdded(trainId);
+    if(tempDoors) {
+        std::for_each(
+            std::begin(tempDoors.value()),
+            std::end(tempDoors.value()),
+            [&subroom, this](const Transition & door) {
+                subroom->RemoveTransitionByUID(door.GetUniqueID());
+                _building->RemoveTransition(&door);
+            });
+
+        _building->ClearTrainDoorsAdded(trainId);
+    }
+
+    subroom->Update();
+    _eventProcessed = true;
+};
 
 bool Simulation::InitArgs()
 {
@@ -271,23 +310,8 @@ bool Simulation::InitArgs()
             _config->distEffMaxPed);
         return false;
     }
+    UpdateLocations();
 
-    _old_em = std::make_unique<OldEventManager>();
-    if(!_config->trainTypeFile.empty() && !_config->trainTimeTableFile.empty()) {
-        auto trainTypes = TrainFileParser::ParseTrainTypes(_config->trainTypeFile);
-        TrainFileParser::ParseTrainTimeTable(
-            *_old_em, *_building, trainTypes, _config->trainTimeTableFile);
-    }
-
-    LOG_INFO("Got {} Trains", _building->GetTrainTypes().size());
-
-    for(auto && TT : _building->GetTrainTypes()) {
-        LOG_INFO("Type {}", TT._type);
-        LOG_INFO("Max {}", TT._maxAgents);
-        LOG_INFO("Number of doors {}", TT._doors.size());
-    }
-
-    _old_em->ListEvents();
     return true;
 }
 
@@ -307,6 +331,10 @@ void Simulation::UpdateLocations()
 
 void Simulation::UpdateRoutes()
 {
+    if(_routingEngine->NeedsUpdate()) {
+        LOG_INFO("Update router during simulation.");
+        _routingEngine->UpdateRouter();
+    }
     for(const auto & ped : _agents) {
         // set ped waiting, if no target is found
         auto * router = _routingEngine->GetRouter(ped->GetRouterID());
@@ -414,197 +442,6 @@ void Simulation::PrintStatistics(double simTime)
 
 void Simulation::RunHeader(long nPed, TrajectoryWriter & writer)
 {
-    // Copy input files used for simulation to output folder for reproducibility
-    CopyInputFilesToOutPath();
-    UpdateOutputFiles();
-
     writer.WriteHeader(nPed, _fps, *_config, 0); // first trajectory
     writer.WriteFrame(0, _agents);
-    //first initialisation needed by the linked-cells
-    UpdateLocations();
-}
-
-void Simulation::CopyInputFilesToOutPath()
-{
-    fs::create_directories(_config->outputPath);
-    // In the case we stored the corrected Geometry already in the output path we do not need to copy it again
-    if(_config->outputPath != _config->geometryFile.parent_path()) {
-        fs::copy(
-            _config->projectRootDir / _config->geometryFile,
-            _config->outputPath,
-            fs::copy_options::overwrite_existing);
-    }
-
-    fs::copy(_config->iniFile, _config->outputPath, fs::copy_options::overwrite_existing);
-
-    CopyInputFileToOutPath(_config->trafficContraintFile);
-    CopyInputFileToOutPath(_config->goalFile);
-    CopyInputFileToOutPath(_config->transitionFile);
-    if(_config->eventFile) {
-        CopyInputFileToOutPath(_config->eventFile.value());
-    }
-    if(_config->scheduleFile) {
-        CopyInputFileToOutPath(_config->scheduleFile.value());
-    }
-    CopyInputFileToOutPath(_config->sourceFile);
-    CopyInputFileToOutPath(_config->trainTimeTableFile);
-    CopyInputFileToOutPath(_config->trainTypeFile);
-}
-
-void Simulation::CopyInputFileToOutPath(fs::path file)
-{
-    if(!file.empty() && fs::exists(file)) {
-        fs::copy(file, _config->outputPath, fs::copy_options::overwrite_existing);
-    }
-}
-
-void Simulation::UpdateOutputFiles()
-{
-    UpdateOutputIniFile();
-    UpdateOutputGeometryFile();
-}
-
-void Simulation::UpdateOutputIniFile()
-{
-    fs::path iniOutputPath = _config->outputPath / _config->iniFile.filename();
-
-    TiXmlDocument iniOutput(iniOutputPath.string());
-
-    if(!iniOutput.LoadFile()) {
-        LOG_ERROR("Could not parse the ini file.");
-        LOG_ERROR("{}", iniOutput.ErrorDesc());
-    }
-    TiXmlElement * mainNode = iniOutput.RootElement();
-
-    // update geometry file name
-    if(mainNode->FirstChild("geometry")) {
-        mainNode->FirstChild("geometry")
-            ->FirstChild()
-            ->SetValue(_config->geometryFile.filename().string());
-    } else if(
-        mainNode->FirstChild("header") && mainNode->FirstChild("header")->FirstChild("geometry")) {
-        mainNode->FirstChild("header")
-            ->FirstChild("geometry")
-            ->FirstChild()
-            ->SetValue(_config->geometryFile.filename().string());
-    }
-
-    // update new traffic constraint file name
-    if(!_config->trafficContraintFile.empty()) {
-        if(mainNode->FirstChild("traffic_constraints") &&
-           mainNode->FirstChild("traffic_constraints")->FirstChild("file")) {
-            mainNode->FirstChild("traffic_constraints")
-                ->FirstChild("file")
-                ->FirstChild()
-                ->SetValue(_config->trafficContraintFile.filename().string());
-        }
-    }
-
-    // update new goal file name
-    if(!_config->goalFile.empty()) {
-        if(mainNode->FirstChild("routing") &&
-           mainNode->FirstChild("routing")->FirstChild("goals") &&
-           mainNode->FirstChild("routing")->FirstChild("goals")->FirstChild("file")) {
-            mainNode->FirstChild("routing")
-                ->FirstChild("goals")
-                ->FirstChild("file")
-                ->FirstChild()
-                ->SetValue(_config->goalFile.filename().string());
-        }
-    }
-
-    // update new source file name
-    if(!_config->sourceFile.empty()) {
-        if(mainNode->FirstChild("agents") &&
-           mainNode->FirstChild("agents")->FirstChild("agents_sources") &&
-           mainNode->FirstChild("agents")->FirstChild("agents_sources")->FirstChild("file")) {
-            mainNode->FirstChild("agents")
-                ->FirstChild("agents_sources")
-                ->FirstChild("file")
-                ->FirstChild()
-                ->SetValue(_config->sourceFile.filename().string());
-        }
-    }
-
-    // update new event file name
-    if(_config->eventFile) {
-        if(mainNode->FirstChild("events_file")) {
-            mainNode->FirstChild("events_file")
-                ->FirstChild()
-                ->SetValue(_config->eventFile.value().filename().string());
-        } else if(
-            mainNode->FirstChild("header") &&
-            mainNode->FirstChild("header")->FirstChild("events_file")) {
-            mainNode->FirstChild("header")
-                ->FirstChild("events_file")
-                ->FirstChild()
-                ->SetValue(_config->eventFile.value().filename().string());
-        }
-    }
-
-    // update new schedule file name
-    if(_config->scheduleFile) {
-        if(mainNode->FirstChild("schedule_file")) {
-            mainNode->FirstChild("schedule_file")
-                ->FirstChild()
-                ->SetValue(_config->scheduleFile.value().filename().string());
-
-        } else if(
-            mainNode->FirstChild("header") &&
-            mainNode->FirstChild("header")->FirstChild("schedule_file")) {
-            mainNode->FirstChild("header")
-                ->FirstChild("schedule_file")
-                ->FirstChild()
-                ->SetValue(_config->scheduleFile.value().filename().string());
-        }
-    }
-
-    // update new train time table file name
-    if(!_config->trainTimeTableFile.empty()) {
-        if(mainNode->FirstChild("train_constraints") &&
-           mainNode->FirstChild("train_constraints")->FirstChild("train_time_table")) {
-            mainNode->FirstChild("train_constraints")
-                ->FirstChild("train_time_table")
-                ->FirstChild()
-                ->SetValue(_config->trainTimeTableFile.filename().string());
-        }
-    }
-
-    // update new train types file name
-    if(!_config->trainTypeFile.empty()) {
-        if(mainNode->FirstChild("train_constraints") &&
-           mainNode->FirstChild("train_constraints")->FirstChild("train_types")) {
-            mainNode->FirstChild("train_constraints")
-                ->FirstChild("train_types")
-                ->FirstChild()
-                ->SetValue(_config->trainTypeFile.filename().string());
-        }
-    }
-
-    iniOutput.SaveFile(iniOutputPath.string());
-}
-
-void Simulation::UpdateOutputGeometryFile()
-{
-    fs::path geoOutputPath = _config->outputPath / _config->geometryFile.filename();
-
-    TiXmlDocument geoOutput(geoOutputPath.string());
-
-    if(!geoOutput.LoadFile()) {
-        LOG_ERROR("Could not parse the ini file.");
-        LOG_ERROR("{}", geoOutput.ErrorDesc());
-    }
-    TiXmlElement * mainNode = geoOutput.RootElement();
-
-    if(!_config->transitionFile.empty()) {
-        if(mainNode->FirstChild("transitions") &&
-           mainNode->FirstChild("transitions")->FirstChild("file")) {
-            mainNode->FirstChild("transitions")
-                ->FirstChild("file")
-                ->FirstChild()
-                ->SetValue(_config->transitionFile.filename().string());
-        }
-    }
-
-    geoOutput.SaveFile(geoOutputPath.string());
 }

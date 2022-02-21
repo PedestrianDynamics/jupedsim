@@ -38,13 +38,13 @@
 #pragma once
 
 #include "OperationalModelType.hpp"
+#include "direction/DirectionManager.hpp"
 
 #include <memory>
 #include <string>
 
 
 class Building;
-class DirectionManager;
 class Simulation;
 struct Configuration;
 

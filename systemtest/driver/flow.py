@@ -1,106 +1,58 @@
-import logging
-import os
-import re
-import xml.etree.cElementTree as ET
-from pathlib import Path
-from sys import argv
-
-import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+from driver.trajectories import Trajectories
 
 
-def read_flow(tmp_path: Path):
-    regexString = r"flow_exit_id_\d+_trajectories.txt"
-    regex = re.compile(regexString)
+def check_flow(
+    trajectories: Trajectories,
+    starting_times_dict: dict,
+    traffic_constraints: dict,
+):
+    """
+    This method compares the configured traffic constraints (e.g. max_agents and outflow) against the actual flow and data.
+    For this, the number of agents passing the door in a certain timeperiod is computed.
+    The computed number is compared with the expected flow and maximum agents.
+    This is done using an allowed error since the simulation might exceed the flow as well as the maximum agents.
+    It is possible, that more then one agent crosses the door in a single
 
-    flow_dict = {}
-    results_path = tmp_path / "results"
-    flow_files = results_path.glob("flow_exit_id_*_trajectories.txt")
-    for file in flow_files:
-        door_id = int(re.search(r"\d+", file.name).group())
-        flow = pd.read_csv(
-            file,
-            comment="#",
-            sep=r"\s+",
-            skip_blank_lines=True,
-            header=None,
-            engine="python",
-        )
-        flow.columns = ["time", "peds", "pedIDs"]
-        flow_dict[door_id] = flow.shape[0]
+    :param data_dict:
+    :param starting_times_dict:
+    :param traffic_constraints:
+    """
+    flowError = 0.3
 
-    assert (
-        len(flow_dict.keys()) > 0
-    ), "Could not find flow file to expected flow"
-    return flow_dict
+    for door_id, tc in traffic_constraints.items():
+        max_agents = tc.max_agents
+        starting_times = starting_times_dict[door_id]
+        outflow = tc.outflow
 
+        relativeError = flowError * outflow
 
-def read_max_agents(inifile: Path):
-    tree = ET.parse(inifile)
-    root = tree.getroot()
-    max_agents_dict = {}
-    for tc in root.iter("traffic_constraints"):
-        for door in tc.iter("door"):
-            id = int(door.attrib["trans_id"])
-            if "max_agents" in door.attrib:
-                max_agents = int(door.attrib["max_agents"])
-                max_agents_dict[id] = max_agents
-
-    assert (
-        len(max_agents_dict.keys()) > 0
-    ), "Could not read inifile for max agents"
-    return max_agents_dict
-
-
-def read_num_agents(inifile: Path):
-    tree = ET.parse(inifile)
-    root = tree.getroot()
-
-    number = 0
-    for group in root.iter("group"):
-        number += int(group.attrib["number"])
-
-    return number
-
-
-def check_max_agents(flow_dict, max_agents_dict):
-    success = True
-
-    agents = {}
-    agents_error = 1  # Needed if the door is too wide, as multiple pedestrian can walk through in one time step
-
-    for door_id, max_agents in max_agents_dict.items():
-        agent_count = flow_dict[door_id]
-        if np.abs(agent_count - max_agents) > agents_error:
-            success = False
-
-        agents[door_id] = agent_count
-
-    return success, agents
-
-
-def check_door_usage(flow_dict, num_agents):
-    success = True
-
-    # All pedestrian should leave through the main exit
-    exit_usage = max(flow_dict.values())  # maximum value
-    if exit_usage != num_agents:
-        success = False
-        logging.error(
-            "Number of agents exiting the simulation ({}) does not match number of agents in the simulation ({})".format(
-                exit_usage, num_agents
+        for i, startTime in enumerate(starting_times, start=0):
+            firstFrame = startTime * trajectories.framerate
+            lastFrame = (
+                trajectories.frame_count()
+                if i + 1 >= len(starting_times)
+                else starting_times[i + 1] * trajectories.framerate
             )
-        )
+            num_agents = trajectories.agent_count_in_frame(
+                firstFrame
+            ) - trajectories.agent_count_in_frame(lastFrame)
+            last_agent_exit_frame = lastFrame
+            while trajectories.agent_count_in_frame(
+                last_agent_exit_frame
+            ) == trajectories.agent_count_in_frame(lastFrame):
+                last_agent_exit_frame -= 1
 
-    # All pedestirans should pass one of the other doors
-    other_door_usage = sum(flow_dict.values()) - exit_usage
-    if other_door_usage != num_agents:
-        success = False
-        logging.error(
-            "Number of agents using other doors ({}) does not match number of agents in the simulation ({})".format(
-                other_door_usage, num_agents
-            )
-        )
+            time = last_agent_exit_frame / trajectories.framerate - startTime
 
-    return success
+            # Check if number of agents passing through door exceeds max agents for this door
+            assert (
+                num_agents
+                <= max_agents
+                + 2  # We add a tolerance of 2 since currently agents could go through the door in one time step
+            ), f"Agents passing door ({num_agents}) are more than max agents ({max_agents}) allowed"
+            # Check flow through door
+            flow = num_agents / time
+            assert (
+                np.abs(flow - outflow) <= relativeError
+            ), f"Door flow is not as expected! expected flow {outflow}, actual {flow}, tolerated error {relativeError}"

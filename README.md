@@ -1,13 +1,14 @@
-[![GitHub license](https://img.shields.io/badge/license-LGPL-blue.svg)](https://raw.githubusercontent.com/JuPedSim/jpscore/master/LICENSE)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6144559.svg)](https://doi.org/10.5281/zenodo.6144559) [![GitHub license](https://img.shields.io/badge/license-LGPL-blue.svg)](https://raw.githubusercontent.com/JuPedSim/jpscore/master/LICENSE)
 
-[**documentation**](http://www.jupedsim.org) | [**jpscore**](http://www.jupedsim.org/jpscore_introduction.html) | [**jpsreport**](http://www.jupedsim.org/jpsreport_introduction.html)
+
+[**documentation**](http://www.jupedsim.org) | [**jpscore**](http://www.jupedsim.org/jpscore_introduction.html) | [**jpsreport**](http://www.jupedsim.org/jpsreport_introduction.html) | [**jpsvis**](https://www.jupedsim.org/jpsvis_introduction.html)
 
 ## Introduction
 
 This repository contains software for simulating pedestrian dynamics (jpscore)
 and visualizing the resulting trajectories (jpsvis).
 
-Analysis of results can be done with [jpsreport](https://github.com/JuPedSim/jpsreport)
+Analysis of results can be done with jpsreport.
 
 ## Quick start
 
