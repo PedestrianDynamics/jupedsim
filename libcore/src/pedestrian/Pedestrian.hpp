@@ -47,7 +47,6 @@ private:
     const UID _uid{};
 
     //generic parameters, independent from models
-    int _id;                           //starting with 1
     int _exitIndex               = -1; // current exit
     int _group                   = -1;
     int _desiredFinalDestination = FINAL_DEST_OUT;
@@ -88,8 +87,6 @@ private:
     /// a pointer to the complete building
     Building * _building = nullptr;
 
-    static int _agentsCreated;
-
     int _lastGoalID  = -1;
     bool _insideGoal = false;
     bool _waiting    = false;
@@ -97,9 +94,7 @@ private:
         Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
 
 public:
-    // constructors
-    Pedestrian();
-
+    Pedestrian()  = default;
     ~Pedestrian() = default;
 
     bool InPremovement(double now);
@@ -220,13 +215,6 @@ public:
 
     int GetGroup() const;
     void SetGroup(int group);
-
-    /**
-      * @return the total number of pedestrians objects created.
-      * This is useful for the linked-cells algorithm, since it uses the ID of the pedestrians
-      * and the  maximal count must be known in advance.
-      */
-    static int GetAgentsCreated();
 
     /**
       * Set/Get the Building object
