@@ -79,7 +79,7 @@ GCFMModel::ComputeNewPosition(double dT, const Pedestrian & ped, Building * buil
     }
 
     Point F_rep;
-    std::vector<Pedestrian *> neighbours = building->GetNeighborhoodSearch().GetNeighbourhood(&ped);
+    std::vector<Pedestrian *> neighbours = building->GetNeighborhoodSearch().GetNeighborhood(&ped);
     std::vector<SubRoom *> emptyVector;
 
     int neighborsSize = neighbours.size();

@@ -42,11 +42,11 @@ private:
     Grid2D<Pedestrian *> _grid{};
 
 public:
-    NeighborhoodSearch()                           = default;
-    NeighborhoodSearch(const NeighborhoodSearch &) = default;
-    NeighborhoodSearch(NeighborhoodSearch &&)      = default;
+    NeighborhoodSearch()                                       = default;
+    NeighborhoodSearch(const NeighborhoodSearch &)             = default;
+    NeighborhoodSearch(NeighborhoodSearch &&)                  = default;
     NeighborhoodSearch & operator=(const NeighborhoodSearch &) = default;
-    NeighborhoodSearch & operator=(NeighborhoodSearch &&) = default;
+    NeighborhoodSearch & operator=(NeighborhoodSearch &&)      = default;
 
     /**
       * Constructor
@@ -71,5 +71,5 @@ public:
       * @param ped
       * @return neighbourhood
       */
-    std::vector<Pedestrian *> GetNeighbourhood(const Pedestrian * ped) const;
+    std::vector<Pedestrian *> GetNeighborhood(const Pedestrian * ped) const;
 };

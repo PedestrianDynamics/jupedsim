@@ -55,7 +55,7 @@ void NeighborhoodSearch::Update(const std::vector<std::unique_ptr<Pedestrian>> &
 }
 
 
-std::vector<Pedestrian *> NeighborhoodSearch::GetNeighbourhood(const Pedestrian * ped) const
+std::vector<Pedestrian *> NeighborhoodSearch::GetNeighborhood(const Pedestrian * ped) const
 {
     std::vector<Pedestrian *> neighbourhood;
 
