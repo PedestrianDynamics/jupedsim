@@ -4,7 +4,7 @@
 #include <iterator>
 #include <vector>
 
-TEST(Grid2D, EmptyDefaultConstruction)
+TEST(Grid2D, EmptyDefauneighborhood_searchorhood_searchtruction)
 {
     Grid2D<int> grid;
 
