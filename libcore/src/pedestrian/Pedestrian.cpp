@@ -34,15 +34,7 @@
 #include <Logger.hpp>
 #include <cassert>
 
-// initialize the static variables
-int Pedestrian::_agentsCreated         = 1;
 double Pedestrian::_minPremovementTime = std::numeric_limits<double>::max();
-
-Pedestrian::Pedestrian()
-{
-    _id = _agentsCreated; //default id
-    _agentsCreated++;     //increase the number of object created
-}
 
 bool Pedestrian::InPremovement(double now)
 {
@@ -417,11 +409,6 @@ void Pedestrian::SetBuilding(Building * building)
     _building = building;
 }
 
-int Pedestrian::GetAgentsCreated()
-{
-    return _agentsCreated;
-}
-
 int Pedestrian::GetLastGoalID() const
 {
     return _lastGoalID;
@@ -487,12 +474,12 @@ Point Pedestrian::GetLastPosition() const
 std::string Pedestrian::ToString() const
 {
     std::string message = fmt::format(
-        FMT_STRING("------> ped {:d} <-------\n"
+        FMT_STRING("------> ped {} <-------\n"
                    ">> Destination [ {:d} ]\n"
                    ">> Final Destination [ {:d} ]\n"
                    ">> Position [{:.2f}, {:.2f}]\n"
                    ">> Velocity [{:.2f}, {:.2f}]  Norm = [{:.2f}]\n"),
-        _id,
+        _uid,
         _exitIndex,
         _desiredFinalDestination,
         GetPos()._x,
