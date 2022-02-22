@@ -114,11 +114,11 @@ void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
     Point target    = Point{0.0, 0.0};
     if(router->FindExit(agent.get()) == -1) {
         Point p1 = agent->GetPos();
-        p1._x += 1;
-        p1._y -= 1;
+        p1.x += 1;
+        p1.y -= 1;
         Point p2 = agent->GetPos();
-        p2._x += 1;
-        p2._y += 1;
+        p2.x += 1;
+        p2.y += 1;
         Line dummy(Line{p1, p2});
         agent->SetExitLine(&dummy);
     } else {
@@ -130,8 +130,8 @@ void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
     agent->InitV0(target);
 
     JEllipse E = agent->GetEllipse();
-    E.SetCosPhi(orientation._x);
-    E.SetSinPhi(orientation._y);
+    E.SetCosPhi(orientation.x);
+    E.SetSinPhi(orientation.y);
     agent->SetEllipse(E);
     _agents.emplace_back(std::move(agent));
 }

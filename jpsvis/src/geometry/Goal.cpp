@@ -267,6 +267,6 @@ void Goal::ComputeControid()
     px /= (6 * signedArea);
     py /= (6 * signedArea);
 
-    _centroid._x = px;
-    _centroid._y = py;
+    _centroid.x = px;
+    _centroid.y = py;
 }

@@ -53,11 +53,11 @@ Point WaitingRandom::GetWaitingPosition(Room * room, Pedestrian * ped, double ti
 
     // get the bounding box of subroom/waiting area
     for(const auto & poly : polygon) {
-        xMin = (xMin <= poly._x) ? (xMin) : (poly._x);
-        xMax = (xMax >= poly._x) ? (xMax) : (poly._x);
+        xMin = (xMin <= poly.x) ? (xMin) : (poly.x);
+        xMax = (xMax >= poly.x) ? (xMax) : (poly.x);
 
-        yMin = (yMin <= poly._y) ? (yMin) : (poly._y);
-        yMax = (yMax >= poly._y) ? (yMax) : (poly._y);
+        yMin = (yMin <= poly.y) ? (yMin) : (poly.y);
+        yMax = (yMax >= poly.y) ? (yMax) : (poly.y);
     }
 
     Point target;
@@ -67,16 +67,16 @@ Point WaitingRandom::GetWaitingPosition(Room * room, Pedestrian * ped, double ti
         auto goal = ped->GetBuilding()->GetFinalGoal(ped->GetLastGoalID());
 
         do {
-            target._x = fRand(xMin, xMax);
-            target._y = fRand(yMin, yMax);
+            target.x = fRand(xMin, xMax);
+            target.y = fRand(yMin, yMax);
         } while(!goal->IsInsideGoal(target));
 
     } else {
         SubRoom * subRoom = room->GetSubRoom(ped->GetPos());
 
         do {
-            target._x = fRand(xMin, xMax);
-            target._y = fRand(yMin, yMax);
+            target.x = fRand(xMin, xMax);
+            target.y = fRand(yMin, yMax);
         } while(!subRoom->IsInSubRoom(target));
     }
 

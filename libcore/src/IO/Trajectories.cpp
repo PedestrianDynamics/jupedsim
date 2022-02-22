@@ -28,7 +28,7 @@ TrajectoryWriter::TrajectoryWriter(
         "#Vx: x component of the pedestrian's velocity\n"
         "#Vy: y component of the pedestrian's velocity\n";
     _optionalOutput[OptionalOutput::velocity] = [](const Pedestrian * ped) {
-        return fmt::format(FMT_STRING("{:.2f}\t{:.2f}\t"), ped->GetV()._x, ped->GetV()._y);
+        return fmt::format(FMT_STRING("{:.2f}\t{:.2f}\t"), ped->GetV().x, ped->GetV().y);
     };
 
     // Add header, info and output for final_goal
@@ -51,8 +51,7 @@ TrajectoryWriter::TrajectoryWriter(
         "#Dx: x component of the pedestrian's desired direction\n"
         "#Dy: y component of the pedestrian's desired direction\n";
     _optionalOutput[OptionalOutput::desired_direction] = [](const Pedestrian * ped) {
-        return fmt::format(
-            FMT_STRING("{:.2f}\t{:.2f}\t"), ped->GetLastE0()._x, ped->GetLastE0()._y);
+        return fmt::format(FMT_STRING("{:.2f}\t{:.2f}\t"), ped->GetLastE0().x, ped->GetLastE0().y);
     };
 
     // Add header, info and output for group
@@ -117,8 +116,8 @@ void TrajectoryWriter::WriteFrame(
     const std::vector<std::unique_ptr<Pedestrian>> & pedestrian)
 {
     for(const auto & ped : pedestrian) {
-        double x          = ped->GetPos()._x;
-        double y          = ped->GetPos()._y;
+        double x          = ped->GetPos().x;
+        double y          = ped->GetPos().y;
         double z          = ped->GetElevation();
         int color         = computeColor(*ped);
         double a          = ped->GetLargerAxis();

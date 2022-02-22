@@ -190,7 +190,7 @@ Pedestrian * StartDistribution::GenerateAgent(Building * building, std::vector<P
     //in the case a range was specified
     for(unsigned int a = 0; a < positions.size(); a++) {
         Point pos = positions[a];
-        if((_xMin <= pos._x) && (pos._x <= _xMax) && (_yMin <= pos._y) && (pos._y < _yMax)) {
+        if((_xMin <= pos.x) && (pos.x <= _xMax) && (_yMin <= pos.y) && (pos.y < _yMax)) {
             index = a;
             break;
         }
@@ -216,7 +216,7 @@ Pedestrian * StartDistribution::GenerateAgent(Building * building, std::vector<P
 
         const Point & start_pos = Point(_startX, _startY);
 
-        if(!std::isnan(start_pos._x) && !std::isnan(start_pos._y)) {
+        if(!std::isnan(start_pos.x) && !std::isnan(start_pos.y)) {
             ped->SetPos(start_pos); //true for the initial position
             LOG_INFO(
                 "fixed position for ped {} in Room {:d} {}",

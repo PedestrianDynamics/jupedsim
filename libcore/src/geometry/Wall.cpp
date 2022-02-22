@@ -38,11 +38,9 @@ std::string Wall::Write() const
     std::string geometry;
     char wall[500] = "";
     geometry.append("\t\t<wall>\n");
-    sprintf(
-        wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", (GetPoint1()._x), (GetPoint1()._y));
+    sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", (GetPoint1().x), (GetPoint1().y));
     geometry.append(wall);
-    sprintf(
-        wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", (GetPoint2()._x), (GetPoint2()._y));
+    sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", (GetPoint2().x), (GetPoint2().y));
     geometry.append(wall);
     geometry.append("\t\t</wall>\n");
     return geometry;

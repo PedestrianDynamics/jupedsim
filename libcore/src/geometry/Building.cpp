@@ -219,10 +219,10 @@ void Building::AddSurroundingRoom()
     for(auto && itr_room : _rooms) {
         for(auto && itr_subroom : itr_room.second->GetAllSubRooms()) {
             for(auto && wall : itr_subroom.second->GetAllWalls()) {
-                double x1 = wall.GetPoint1()._x;
-                double y1 = wall.GetPoint1()._y;
-                double x2 = wall.GetPoint2()._x;
-                double y2 = wall.GetPoint2()._y;
+                double x1 = wall.GetPoint1().x;
+                double y1 = wall.GetPoint1().y;
+                double x2 = wall.GetPoint2().x;
+                double y2 = wall.GetPoint2().y;
 
                 double xmax = (x1 > x2) ? x1 : x2;
                 double xmin = (x1 > x2) ? x2 : x1;
@@ -239,10 +239,10 @@ void Building::AddSurroundingRoom()
 
     for(auto && itr_goal : _goals) {
         for(auto && wall : itr_goal.second->GetAllWalls()) {
-            double x1 = wall.GetPoint1()._x;
-            double y1 = wall.GetPoint1()._y;
-            double x2 = wall.GetPoint2()._x;
-            double y2 = wall.GetPoint2()._y;
+            double x1 = wall.GetPoint1().x;
+            double y1 = wall.GetPoint1().y;
+            double x2 = wall.GetPoint2().x;
+            double y2 = wall.GetPoint2().y;
 
             double xmax = (x1 > x2) ? x1 : x2;
             double xmin = (x1 > x2) ? x2 : x1;
@@ -664,14 +664,14 @@ std::vector<Point> Building::GetBoundaryVertices() const
             const std::vector<Point> vertices = itr_subroom.second->GetPolygon();
 
             for(Point point : vertices) {
-                if(point._x > xMax)
-                    xMax = point._x;
-                else if(point._x < xMin)
-                    xMin = point._x;
-                if(point._y > yMax)
-                    yMax = point._y;
-                else if(point._y < yMin)
-                    yMin = point._y;
+                if(point.x > xMax)
+                    xMax = point.x;
+                else if(point.x < xMin)
+                    xMin = point.x;
+                if(point.y > yMax)
+                    yMax = point.y;
+                else if(point.y < yMin)
+                    yMin = point.y;
             }
         }
     }
@@ -713,10 +713,10 @@ void Building::InitGrid()
     for(auto && itr_room : _rooms) {
         for(auto && itr_subroom : itr_room.second->GetAllSubRooms()) {
             for(auto && wall : itr_subroom.second->GetAllWalls()) {
-                double x1 = wall.GetPoint1()._x;
-                double y1 = wall.GetPoint1()._y;
-                double x2 = wall.GetPoint2()._x;
-                double y2 = wall.GetPoint2()._y;
+                double x1 = wall.GetPoint1().x;
+                double y1 = wall.GetPoint1().y;
+                double x2 = wall.GetPoint2().x;
+                double y2 = wall.GetPoint2().y;
 
                 double xmax = (x1 > x2) ? x1 : x2;
                 double xmin = (x1 > x2) ? x2 : x1;

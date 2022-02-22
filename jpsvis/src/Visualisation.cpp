@@ -37,6 +37,7 @@
 #include "FrameElement.hpp"
 #include "InteractorStyle.hpp"
 #include "Log.hpp"
+#include "MainWindow.hpp"
 #include "TrajectoryPoint.hpp"
 #include "general/Macros.hpp"
 #include "geometry/FacilityGeometry.hpp"
@@ -44,7 +45,6 @@
 #include "geometry/LinePlotter2D.hpp"
 #include "geometry/Point.hpp"
 #include "geometry/PointPlotter.hpp"
-#include "MainWindow.hpp"
 
 #include <QMessageBox>
 #include <QObject>
@@ -580,19 +580,19 @@ getTrainData(Point trainStart, Point trainEnd, std::vector<Point> doorPoints, do
     // Create a vtkPoints container and store the points in it
     vtkSmartPointer<vtkPoints> pts = vtkSmartPointer<vtkPoints>::New();
 
-    pt[0] = factor * trainStart._x;
-    pt[1] = factor * trainStart._y;
+    pt[0] = factor * trainStart.x;
+    pt[1] = factor * trainStart.y;
     pt[2] = factor * elevation;
     pts->InsertNextPoint(pt);
 
     for(auto p : doorPoints) {
-        pt[0] = factor * p._x;
-        pt[1] = factor * p._y;
+        pt[0] = factor * p.x;
+        pt[1] = factor * p.y;
         pt[2] = factor * elevation;
         pts->InsertNextPoint(pt);
     }
-    pt[0] = factor * trainEnd._x;
-    pt[1] = factor * trainEnd._y;
+    pt[0] = factor * trainEnd.x;
+    pt[1] = factor * trainEnd.y;
     pt[2] = factor * elevation;
     pts->InsertNextPoint(pt);
 
@@ -704,8 +704,8 @@ void Visualisation::onExecute()
             }
             // text
             txtActor->GetTextProperty()->SetOpacity(0.7);
-            double pos_x = 50 * (trainStart._x + trainEnd._x + 0.5);
-            double pos_y = 50 * (trainStart._y + trainEnd._y + 0.5);
+            double pos_x = 50 * (trainStart.x + trainEnd.x + 0.5);
+            double pos_y = 50 * (trainStart.y + trainEnd.y + 0.5);
 
             txtActor->SetPosition(pos_x, pos_y + 2, 20);
             txtActor->SetInput(label);

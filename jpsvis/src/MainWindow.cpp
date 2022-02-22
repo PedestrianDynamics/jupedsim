@@ -406,8 +406,8 @@ bool MainWindow::tryParseTrajectory(const std::filesystem::path & path)
 
         Log::Info("=======\n");
         Log::Info("tab: %d\n", tab.first);
-        Log::Info("Track start: [%.2f, %.2f]\n", trackStart._x, trackStart._y);
-        Log::Info("Track end: [%.2f, %.2f]\n", trackEnd._x, trackEnd._y);
+        Log::Info("Track start: [%.2f, %.2f]\n", trackStart.x, trackStart.y);
+        Log::Info("Track end: [%.2f, %.2f]\n", trackEnd.x, trackEnd.y);
         Log::Info("Room: %d\n", tab.second->rid);
         Log::Info("Subroom %d\n", tab.second->sid);
         Log::Info("Elevation %d\n", tab.second->elevation);

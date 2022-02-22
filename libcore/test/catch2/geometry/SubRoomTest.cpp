@@ -377,8 +377,8 @@ TEST_CASE("geometry/SubRoom/IsInSubRoom", "[geometry][SubRoom][IsInSubRoom]")
                 REQUIRE(subRoom.IsInSubRoom({wall.GetPoint2()}));
                 for(int i = 0; i < 10; ++i) {
                     Point line(
-                        {wall.GetPoint2()._x - wall.GetPoint1()._x,
-                         wall.GetPoint2()._y - wall.GetPoint1()._y});
+                        {wall.GetPoint2().x - wall.GetPoint1().x,
+                         wall.GetPoint2().y - wall.GetPoint1().y});
                     Point p = wall.GetPoint1() + (line * dist(mt));
                     REQUIRE(wall.IsInLineSegment(p));
                     REQUIRE_FALSE(subRoom.IsInSubRoom(p));
@@ -397,8 +397,8 @@ TEST_CASE("geometry/SubRoom/IsInSubRoom", "[geometry][SubRoom][IsInSubRoom]")
                 REQUIRE(subRoom.IsInSubRoom({trans->GetCentre()}));
                 for(int i = 0; i < 10; ++i) {
                     Point line(
-                        {trans->GetPoint2()._x - trans->GetPoint1()._x,
-                         trans->GetPoint2()._y - trans->GetPoint1()._y});
+                        {trans->GetPoint2().x - trans->GetPoint1().x,
+                         trans->GetPoint2().y - trans->GetPoint1().y});
                     Point p = trans->GetPoint1() + (line * dist(mt));
                     REQUIRE(trans->IsInLineSegment(p));
                     REQUIRE(subRoom.IsInSubRoom(p));
@@ -416,8 +416,8 @@ TEST_CASE("geometry/SubRoom/IsInSubRoom", "[geometry][SubRoom][IsInSubRoom]")
                 REQUIRE(subRoom.IsInSubRoom({cross->GetCentre()}));
                 for(int i = 0; i < 10; ++i) {
                     Point line(
-                        {cross->GetPoint2()._x - cross->GetPoint1()._x,
-                         cross->GetPoint2()._y - cross->GetPoint1()._y});
+                        {cross->GetPoint2().x - cross->GetPoint1().x,
+                         cross->GetPoint2().y - cross->GetPoint1().y});
                     Point p = cross->GetPoint1() + (line * dist(mt));
                     REQUIRE(cross->IsInLineSegment(p));
                     REQUIRE(subRoom.IsInSubRoom(p));
@@ -487,8 +487,8 @@ TEST_CASE("geometry/SubRoom/IsInSubRoom", "[geometry][SubRoom][IsInSubRoom]")
                     REQUIRE_FALSE(subRoom.IsInSubRoom({wall.GetPoint2()}));
                     for(int i = 0; i < 10; ++i) {
                         Point line(
-                            {wall.GetPoint2()._x - wall.GetPoint1()._x,
-                             wall.GetPoint2()._y - wall.GetPoint1()._y});
+                            {wall.GetPoint2().x - wall.GetPoint1().x,
+                             wall.GetPoint2().y - wall.GetPoint1().y});
                         Point p = wall.GetPoint1() + (line * dist(mt));
                         REQUIRE(wall.IsInLineSegment(p));
                         REQUIRE_FALSE(subRoom.IsInSubRoom(p));
@@ -522,8 +522,8 @@ TEST_CASE("geometry/SubRoom/IsInSubRoom", "[geometry][SubRoom][IsInSubRoom]")
                 REQUIRE(subRoom.IsInSubRoom({wall.GetPoint2()}));
                 for(int i = 0; i < 10; ++i) {
                     Point line(
-                        {wall.GetPoint2()._x - wall.GetPoint1()._x,
-                         wall.GetPoint2()._y - wall.GetPoint1()._y});
+                        {wall.GetPoint2().x - wall.GetPoint1().x,
+                         wall.GetPoint2().y - wall.GetPoint1().y});
                     Point p = wall.GetPoint1() + (line * dist(mt));
                     REQUIRE(wall.IsInLineSegment(p));
                     REQUIRE_FALSE(subRoom.IsInSubRoom(p));
@@ -542,8 +542,8 @@ TEST_CASE("geometry/SubRoom/IsInSubRoom", "[geometry][SubRoom][IsInSubRoom]")
                 REQUIRE(subRoom.IsInSubRoom({trans->GetCentre()}));
                 for(int i = 0; i < 10; ++i) {
                     Point line(
-                        {trans->GetPoint2()._x - trans->GetPoint1()._x,
-                         trans->GetPoint2()._y - trans->GetPoint1()._y});
+                        {trans->GetPoint2().x - trans->GetPoint1().x,
+                         trans->GetPoint2().y - trans->GetPoint1().y});
                     Point p = trans->GetPoint1() + (line * dist(mt));
                     REQUIRE(trans->IsInLineSegment(p));
                     REQUIRE(subRoom.IsInSubRoom(p));
@@ -561,8 +561,8 @@ TEST_CASE("geometry/SubRoom/IsInSubRoom", "[geometry][SubRoom][IsInSubRoom]")
                 REQUIRE(subRoom.IsInSubRoom({cross->GetCentre()}));
                 for(int i = 0; i < 10; ++i) {
                     Point line(
-                        {cross->GetPoint2()._x - cross->GetPoint1()._x,
-                         cross->GetPoint2()._y - cross->GetPoint1()._y});
+                        {cross->GetPoint2().x - cross->GetPoint1().x,
+                         cross->GetPoint2().y - cross->GetPoint1().y});
                     Point p = cross->GetPoint1() + (line * dist(mt));
                     REQUIRE(cross->IsInLineSegment(p));
                     REQUIRE(subRoom.IsInSubRoom(p));

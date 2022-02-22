@@ -161,14 +161,14 @@ std::vector<Point> Room::GetBoundaryVertices() const
         const std::vector<Point> vertices = itr_subroom.second->GetPolygon();
 
         for(Point point : vertices) {
-            if(point._x > xMax)
-                xMax = point._x;
-            if(point._x < xMin)
-                xMin = point._x;
-            if(point._y > yMax)
-                yMax = point._y;
-            if(point._y < yMin)
-                yMin = point._y;
+            if(point.x > xMax)
+                xMax = point.x;
+            if(point.x < xMin)
+                xMin = point.x;
+            if(point.y > yMax)
+                yMax = point.y;
+            if(point.y < yMin)
+                yMin = point.y;
         }
     }
 

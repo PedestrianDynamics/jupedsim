@@ -259,7 +259,7 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
 
             for(unsigned int s = 0; s < poly.size(); s++) {
                 floor_points->InsertNextPoint(
-                    poly[s]._x * FAKTOR, poly[s]._y * FAKTOR, sub->GetElevation(poly[s]) * FAKTOR);
+                    poly[s].x * FAKTOR, poly[s].y * FAKTOR, sub->GetElevation(poly[s]) * FAKTOR);
                 polygon->GetPointIds()->SetId(s, currentFloorPolyID++);
             }
             floor_polygons->InsertNextCell(polygon);
@@ -274,19 +274,19 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
 
                 if(sub->GetType() == "stair") {
                     geometry->addStair(
-                        p1._x * FAKTOR,
-                        p1._y * FAKTOR,
+                        p1.x * FAKTOR,
+                        p1.y * FAKTOR,
                         z1 * FAKTOR,
-                        p2._x * FAKTOR,
-                        p2._y * FAKTOR,
+                        p2.x * FAKTOR,
+                        p2.y * FAKTOR,
                         z2 * FAKTOR);
                 } else {
                     geometry->addWall(
-                        p1._x * FAKTOR,
-                        p1._y * FAKTOR,
+                        p1.x * FAKTOR,
+                        p1.y * FAKTOR,
                         z1 * FAKTOR,
-                        p2._x * FAKTOR,
-                        p2._y * FAKTOR,
+                        p2.x * FAKTOR,
+                        p2.y * FAKTOR,
                         z2 * FAKTOR);
                 }
             }
@@ -296,7 +296,7 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
                                   QString::number(sub->GetSubRoomID()).toStdString() + " ) ";
             const Point & p = sub->GetCentroid();
             double z        = sub->GetElevation(p);
-            double pos[3]   = {p._x * FAKTOR, p._y * FAKTOR, z * FAKTOR};
+            double pos[3]   = {p.x * FAKTOR, p.y * FAKTOR, z * FAKTOR};
             geometry->addObjectLabel(pos, pos, caption, captionsColor);
 
             // plot the obstacles
@@ -307,17 +307,17 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
                     double z1 = sub->GetElevation(p1);
                     double z2 = sub->GetElevation(p2);
                     geometry->addWall(
-                        p1._x * FAKTOR,
-                        p1._y * FAKTOR,
+                        p1.x * FAKTOR,
+                        p1.y * FAKTOR,
                         z1 * FAKTOR,
-                        p2._x * FAKTOR,
-                        p2._y * FAKTOR,
+                        p2.x * FAKTOR,
+                        p2.y * FAKTOR,
                         z2 * FAKTOR);
                 }
                 // add the obstacle caption
                 const Point & p = obst->GetCentroid();
                 double z        = sub->GetElevation(p);
-                double pos[3]   = {p._x * FAKTOR, p._y * FAKTOR, z * FAKTOR};
+                double pos[3]   = {p.x * FAKTOR, p.y * FAKTOR, z * FAKTOR};
                 geometry->addObjectLabel(pos, pos, obst->GetCaption(), captionsColor);
 
                 // add a special texture to the obstacles
@@ -328,8 +328,8 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
 
                 for(unsigned int s = 0; s < poly.size(); s++) {
                     obstacles_points->InsertNextPoint(
-                        poly[s]._x * FAKTOR,
-                        poly[s]._y * FAKTOR,
+                        poly[s].x * FAKTOR,
+                        poly[s].y * FAKTOR,
                         sub->GetElevation(poly[s]) * FAKTOR);
                     polygon->GetPointIds()->SetId(s, currentObstPolyID++);
                 }
@@ -355,15 +355,15 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
                 double z1 = cr->GetSubRoom1()->GetElevation(p1);
                 double z2 = cr->GetSubRoom1()->GetElevation(p2);
                 geometry->addNavLine(
-                    p1._x * FAKTOR,
-                    p1._y * FAKTOR,
+                    p1.x * FAKTOR,
+                    p1.y * FAKTOR,
                     z1 * FAKTOR,
-                    p2._x * FAKTOR,
-                    p2._y * FAKTOR,
+                    p2.x * FAKTOR,
+                    p2.y * FAKTOR,
                     z2 * FAKTOR);
 
                 const Point & p = cr->GetCentre();
-                double pos[3]   = {p._x * FAKTOR, p._y * FAKTOR, z1 * FAKTOR};
+                double pos[3]   = {p.x * FAKTOR, p.y * FAKTOR, z1 * FAKTOR};
                 geometry->addObjectLabel(
                     pos,
                     pos,
@@ -394,15 +394,15 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
                         tr->GetCaption().c_str());
 
                 geometry->addDoor(
-                    p1._x * FAKTOR,
-                    p1._y * FAKTOR,
+                    p1.x * FAKTOR,
+                    p1.y * FAKTOR,
                     z1 * FAKTOR,
-                    p2._x * FAKTOR,
-                    p2._y * FAKTOR,
+                    p2.x * FAKTOR,
+                    p2.y * FAKTOR,
                     z2 * FAKTOR);
 
                 const Point & p = tr->GetCentre();
-                double pos[3]   = {p._x * FAKTOR, p._y * FAKTOR, z1 * FAKTOR};
+                double pos[3]   = {p.x * FAKTOR, p.y * FAKTOR, z1 * FAKTOR};
                 geometry->addObjectLabel(
                     pos,
                     pos,

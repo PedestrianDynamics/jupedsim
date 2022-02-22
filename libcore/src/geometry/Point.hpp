@@ -38,8 +38,8 @@
 class Point
 {
 public:
-    double _x = 0.; //*<x-coordinate of a 2-d point*/
-    double _y = 0.; //*<y-coordinate of a 2-d point*/
+    double x = 0.; //*<x-coordinate of a 2-d point*/
+    double y = 0.; //*<y-coordinate of a 2-d point*/
 
 public:
     /**
@@ -49,7 +49,7 @@ public:
       * @param [in] x: x-coordinate as double
       * @param [in] y: y-coordinate as double
       */
-    Point(double x = 0, double y = 0) : _x(x), _y(y){};
+    Point(double x = 0, double y = 0) : x(x), y(y){};
 
     /// Norm
     double Norm() const;
@@ -64,7 +64,7 @@ public:
     /// normalized vector usinf NormMolified
     Point NormalizedMolified() const;
     /// dot product
-    inline double ScalarProduct(const Point & v) const { return _x * v._x + _y * v._y; }
+    inline double ScalarProduct(const Point & v) const { return x * v.x + y * v.y; }
 
     /**
       * since we have only 2D vectors (may be changed in the future), this function returns a scalar
@@ -75,7 +75,7 @@ public:
 
 
     /// determinant of the square matrix formed by the vectors [ this, v]
-    inline double Determinant(const Point & v) const { return _x * v._y - _y * v._x; }
+    inline double Determinant(const Point & v) const { return x * v.y - y * v.x; }
 
 
     Point TransformToEllipseCoordinates(const Point & center, double cphi, double sphi) const;
@@ -114,7 +114,7 @@ public:
     std::ostream & SaveToXml(std::ostream &) const;
 };
 
-BOOST_GEOMETRY_REGISTER_POINT_2D(Point, double, cs::cartesian, _x, _y);
+BOOST_GEOMETRY_REGISTER_POINT_2D(Point, double, cs::cartesian, x, y);
 
 
 /**

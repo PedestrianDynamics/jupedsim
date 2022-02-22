@@ -57,9 +57,8 @@ void NeighborhoodSearch::Update(const std::vector<std::unique_ptr<Pedestrian>> &
 
     for(const auto & ped : peds) {
         // determine the cell coordinates of pedestrian i
-        int ix =
-            (int) ((ped->GetPos()._x - _gridXmin) / _cellSize) + 1; // +1 because of dummy cells
-        int iy = (int) ((ped->GetPos()._y - _gridYmin) / _cellSize) + 1;
+        int ix = (int) ((ped->GetPos().x - _gridXmin) / _cellSize) + 1; // +1 because of dummy cells
+        int iy = (int) ((ped->GetPos().y - _gridYmin) / _cellSize) + 1;
 
         _grid[iy][ix].push_back(ped.get());
     }
@@ -70,8 +69,8 @@ std::vector<Pedestrian *> NeighborhoodSearch::GetNeighbourhood(const Pedestrian 
 {
     std::vector<Pedestrian *> neighbourhood;
 
-    double xPed = ped->GetPos()._x;
-    double yPed = ped->GetPos()._y;
+    double xPed = ped->GetPos().x;
+    double yPed = ped->GetPos().y;
 
     int l = (int) ((xPed - _gridXmin) / _cellSize) + 1; // +1 because of dummy cells
     int k = (int) ((yPed - _gridYmin) / _cellSize) + 1;

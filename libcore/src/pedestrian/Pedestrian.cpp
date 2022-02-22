@@ -264,8 +264,8 @@ void Pedestrian::SetPhiPed()
 {
     double cosPhi;
     double sinPhi;
-    double vx = GetV()._x;
-    double vy = GetV()._y;
+    double vx = GetV().x;
+    double vy = GetV().y;
 
     if(fabs(vx) > J_EPS || fabs(vy) > J_EPS) {
         double normv = sqrt(vx * vx + vy * vy);
@@ -451,9 +451,9 @@ void Pedestrian::StartWaiting()
 
 void Pedestrian::EndWaiting()
 {
-    _waiting       = false;
-    _waitingPos._x = std::numeric_limits<double>::max();
-    _waitingPos._y = std::numeric_limits<double>::max();
+    _waiting      = false;
+    _waitingPos.x = std::numeric_limits<double>::max();
+    _waitingPos.y = std::numeric_limits<double>::max();
 }
 
 const Point & Pedestrian::GetWaitingPos() const
@@ -482,10 +482,10 @@ std::string Pedestrian::ToString() const
         _uid,
         _exitIndex,
         _desiredFinalDestination,
-        GetPos()._x,
-        GetPos()._y,
-        GetV()._x,
-        GetV()._y,
+        GetPos().x,
+        GetPos().y,
+        GetV().x,
+        GetV().y,
         GetV().Norm());
 
     return message;

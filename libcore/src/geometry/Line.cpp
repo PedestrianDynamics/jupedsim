@@ -114,11 +114,9 @@ std::string Line::Write() const
     std::string geometry;
     char wall[500] = "";
     geometry.append("\t\t<wall color=\"100\">\n");
-    sprintf(
-        wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", (GetPoint1()._x), (GetPoint1()._y));
+    sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", (GetPoint1().x), (GetPoint1().y));
     geometry.append(wall);
-    sprintf(
-        wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", (GetPoint2()._x), (GetPoint2()._y));
+    sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", (GetPoint2().x), (GetPoint2().y));
     geometry.append(wall);
     geometry.append("\t\t</wall>\n");
     return geometry;
@@ -135,12 +133,12 @@ Point Line::NormalVec() const
     double nx, ny;
     Point r = GetPoint2() - GetPoint1();
 
-    if(r._x == 0.0) {
+    if(r.x == 0.0) {
         nx = 1;
         ny = 0;
     } else {
         double norm;
-        nx = -r._y / r._x;
+        nx = -r.y / r.x;
         ny = 1;
         /* Normieren */
         norm = sqrt(nx * nx + ny * ny);
@@ -164,10 +162,10 @@ double Line::NormalComp(const Point & v) const
 
     double alpha;
 
-    if(fabs(l._x) < J_EPS) {
-        alpha = v._x / n._x;
-    } else if(fabs(l._y) < J_EPS) {
-        alpha = v._y / n._y;
+    if(fabs(l.x) < J_EPS) {
+        alpha = v.x / n.x;
+    } else if(fabs(l.y) < J_EPS) {
+        alpha = v.y / n.y;
     } else {
         alpha = l.CrossProduct(v) / n.CrossProduct(l);
     }
@@ -325,8 +323,8 @@ bool Line::Overlapp(const Line & l) const
 //from http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
 int Line::IntersectionWith(const Point & p1, const Point & p2, Point & p3) const
 {
-    p3._x   = J_NAN;
-    p3._y   = J_NAN;
+    p3.x    = J_NAN;
+    p3.y    = J_NAN;
     Point r = p2 - p1;
     Point s = _point2 - _point1;
 
@@ -397,12 +395,12 @@ Line Line::Enlarge(double d) const
 
 bool Line::IsHorizontal()
 {
-    return fabs(_point1._y - _point2._y) <= J_EPS;
+    return fabs(_point1.y - _point2.y) <= J_EPS;
 }
 
 bool Line::IsVertical()
 {
-    return fabs(_point1._x - _point2._x) <= J_EPS;
+    return fabs(_point1.x - _point2.x) <= J_EPS;
 }
 
 int Line::WichSide(const Point & pt)
@@ -500,9 +498,9 @@ std::vector<Point> Line::IntersectionPointsWithCircle(const Point & centre, doub
     // substitute  x and y into circle equation and solve for t yields:
     // [(x1-x2)^2 + (y1-y2)^2] t^2 + 2 * [x2 (x1-x2) + y2 (y1-y2)] t + x2^2 +y2^2 - radius ^2 = 0
     // solve quadratic equation: a * t^2 + t * x + c = 0
-    double a            = std::pow(p1._x - p2._x, 2.) + std::pow(p1._y - p2._y, 2.);
-    double b            = 2. * (p2._x * (p1._x - p2._x) + p2._y * (p1._y - p2._y));
-    double c            = std::pow(p2._x, 2.) + std::pow(p2._y, 2.) - std::pow(radius, 2.);
+    double a            = std::pow(p1.x - p2.x, 2.) + std::pow(p1.y - p2.y, 2.);
+    double b            = 2. * (p2.x * (p1.x - p2.x) + p2.y * (p1.y - p2.y));
+    double c            = std::pow(p2.x, 2.) + std::pow(p2.y, 2.) - std::pow(radius, 2.);
     double discriminant = std::pow(b, 2.) - 4 * a * c;
 
     // no real intersection points of line segment and circle exist
@@ -513,8 +511,8 @@ std::vector<Point> Line::IntersectionPointsWithCircle(const Point & centre, doub
     // only one intersection exists
     if(std::fabs(discriminant) < J_EPS) {
         double t = -b / (2. * a);
-        double x = t * p1._x + (1. - t) * p2._x;
-        double y = t * p1._y + (1. - t) * p2._y;
+        double x = t * p1.x + (1. - t) * p2.x;
+        double y = t * p1.y + (1. - t) * p2.y;
 
         Point intersection{x, y};
         intersection += centre;
@@ -525,8 +523,8 @@ std::vector<Point> Line::IntersectionPointsWithCircle(const Point & centre, doub
     // Check if first intersection is in line segment, if so add to intersection points
     if(double t = (-b + std::sqrt(std::pow(b, 2.) - 4. * a * c)) / (2. * a);
        (t >= 0.) && (t <= 1.)) {
-        double x = t * p1._x + (1. - t) * p2._x;
-        double y = t * p1._y + (1. - t) * p2._y;
+        double x = t * p1.x + (1. - t) * p2.x;
+        double y = t * p1.y + (1. - t) * p2.y;
 
         Point intersection{x, y};
         intersection += centre;
@@ -536,8 +534,8 @@ std::vector<Point> Line::IntersectionPointsWithCircle(const Point & centre, doub
     // Check if second intersection is in line segment, if so add to intersection points
     if(double t = (-b - std::sqrt(std::pow(b, 2.) - 4. * a * c)) / (2. * a);
        (t >= 0.) && (t <= 1.)) {
-        double x = t * p1._x + (1. - t) * p2._x;
-        double y = t * p1._y + (1. - t) * p2._y;
+        double x = t * p1.x + (1. - t) * p2.x;
+        double y = t * p1.y + (1. - t) * p2.y;
 
         Point intersection{x, y};
         intersection += centre;
@@ -552,8 +550,8 @@ std::vector<Point> Line::IntersectionPointsWithCircle(const Point & centre, doub
 // Returns true if pt is on the left side ( from point1 toward point2)
 bool Line::IsLeft(const Point & pt)
 {
-    double test = (_point2._x - _point1._x) * (pt._y - _point1._y) -
-                  (_point2._y - _point1._y) * (pt._x - _point1._x);
+    double test =
+        (_point2.x - _point1.x) * (pt.y - _point1.y) - (_point2.y - _point1.y) * (pt.x - _point1.x);
     return test > 0.0;
 }
 

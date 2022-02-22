@@ -36,7 +36,7 @@
 std::string Point::toString() const
 {
     std::stringstream tmp;
-    tmp << "( " << _x << " : " << _y << " )";
+    tmp << "( " << x << " : " << y << " )";
     return tmp.str();
 }
 
@@ -55,7 +55,7 @@ Point Point::NormalizedMolified() const
 {
     double norm = NormMolified();
     if(norm > J_EPS_GOAL)
-        return (Point(_x, _y) / norm);
+        return (Point(x, y) / norm);
     else
         return Point(0.0, 0.0);
 }
@@ -65,7 +65,7 @@ Point Point::Normalized() const
 {
     double norm = Norm();
     if(norm > J_EPS)
-        return (Point(_x, _y) / norm);
+        return (Point(x, y) / norm);
     else
         return Point(0.0, 0.0);
 }
@@ -132,7 +132,7 @@ xnew = -xc + x
 */
 Point Point::TransformToEllipseCoordinates(const Point & center, double cphi, double sphi) const
 {
-    Point p = Point(_x, _y);
+    Point p = Point(x, y);
     return (p - center).Rotate(cphi, -sphi);
 }
 
@@ -157,7 +157,7 @@ where the coord. of a point are transformated to cart. coord.
 
 Point Point::TransformToCartesianCoordinates(const Point & center, double cphi, double sphi) const
 {
-    Point p = Point(_x, _y);
+    Point p = Point(x, y);
     return (p.Rotate(cphi, sphi) + center);
 }
 
@@ -169,46 +169,46 @@ Rotation-matrix=[cos(theta)  -sin(theta)]
 */
 Point Point::Rotate(double ctheta, double stheta) const
 {
-    return Point(_x * ctheta - _y * stheta, _x * stheta + _y * ctheta);
+    return Point(x * ctheta - y * stheta, x * stheta + y * ctheta);
 }
 
 //  sum
 const Point Point::operator+(const Point & p) const
 {
-    return Point(_x + p._x, _y + p._y);
+    return Point(x + p.x, y + p.y);
 }
 
 // sub
 const Point Point::operator-(const Point & p) const
 {
-    return Point(_x - p._x, _y - p._y);
+    return Point(x - p.x, y - p.y);
 }
 
 // equal
 bool Point::operator==(const Point & p) const
 {
-    return (fabs(_x - p._x) < J_EPS && fabs(_y - p._y) < J_EPS);
+    return (fabs(x - p.x) < J_EPS && fabs(y - p.y) < J_EPS);
 }
 
 // not equal
 bool Point::operator!=(const Point & p) const
 {
-    return (fabs(_x - p._x) > J_EPS || fabs(_y - p._y) > J_EPS);
+    return (fabs(x - p.x) > J_EPS || fabs(y - p.y) > J_EPS);
 }
 
 
 // multiplication with scalar
 const Point operator*(const Point & p, double f)
 {
-    return Point(p._x * f, p._y * f);
+    return Point(p.x * f, p.y * f);
 }
 
 
 // Assignment
 Point & Point::operator+=(const Point & p)
 {
-    _x += p._x;
-    _y += p._y;
+    x += p.x;
+    y += p.y;
     return *this;
 }
 
@@ -217,16 +217,16 @@ Point & Point::operator+=(const Point & p)
 const Point operator/(const Point & p, double f)
 {
     if(f > J_EPS * J_EPS)
-        return Point(p._x / f, p._y / f);
+        return Point(p.x / f, p.y / f);
     else {
         LOG_WARNING("Point::operator/ dividend {} is too small. Using 1 instead.", f);
-        return Point(p._x, p._y);
+        return Point(p.x, p.y);
     }
 }
 
 std::ostream & Point::SaveToXml(std::ostream & ostream) const
 {
-    ostream << "<vertex px=" << _x << " py=" << _y << " />" << std::endl;
+    ostream << "<vertex px=" << x << " py=" << y << " />" << std::endl;
     return ostream;
 }
 
@@ -234,9 +234,9 @@ bool Point::operator<(const Point & rhs) const
 {
     if(*this != *this || rhs != rhs)
         return false;
-    if(_x < rhs._x)
+    if(x < rhs.x)
         return true;
-    else if((_x == rhs._x) && (_y < rhs._y))
+    else if((x == rhs.x) && (y < rhs.y))
         return true;
     return false;
 }

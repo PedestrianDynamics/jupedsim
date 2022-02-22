@@ -30,10 +30,10 @@ TEST_CASE("geometry/Line", "[geometry][Line]")
     SECTION("Default ctor")
     {
         Line L1;
-        REQUIRE(L1.GetPoint1()._x == 0);
-        REQUIRE(L1.GetPoint1()._y == 0);
-        REQUIRE(L1.GetPoint2()._x == 0);
-        REQUIRE(L1.GetPoint2()._y == 0);
+        REQUIRE(L1.GetPoint1().x == 0);
+        REQUIRE(L1.GetPoint1().y == 0);
+        REQUIRE(L1.GetPoint2().x == 0);
+        REQUIRE(L1.GetPoint2().y == 0);
     }
 
     SECTION("Non Default ctor")
@@ -169,8 +169,8 @@ TEST_CASE("geometry/Line", "[geometry][Line]")
         REQUIRE(L1.IntersectionWith(Point(-1, 1), Point(-1, 0), P3) == true);
         REQUIRE(P3 == Point(-1, 0));
         REQUIRE_FALSE(L1.IntersectionWith(Point(-1.04, 1), Point(-1.04, -1), P3));
-        REQUIRE(std::isnan(P3._x));
-        REQUIRE(std::isnan(P3._y));
+        REQUIRE(std::isnan(P3.x));
+        REQUIRE(std::isnan(P3.y));
     }
 
     SECTION("Line Horizontal Vertical")
@@ -238,8 +238,7 @@ TEST_CASE("geometry/Line/IsInLineSegment", "[geometry][Line][IsInLineSegment]")
         std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
         for(int i = 0; i < 100; ++i) {
             Point connection(
-                {line.GetPoint2()._x - line.GetPoint1()._x,
-                 line.GetPoint2()._y - line.GetPoint1()._y});
+                {line.GetPoint2().x - line.GetPoint1().x, line.GetPoint2().y - line.GetPoint1().y});
             Point p = line.GetPoint1() + (connection * dist(mt));
             REQUIRE(line.IsInLineSegment(p));
         }
@@ -250,11 +249,10 @@ TEST_CASE("geometry/Line/IsInLineSegment", "[geometry][Line][IsInLineSegment]")
         std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
         for(int i = 0; i < 100; ++i) {
             Point connection(
-                {line.GetPoint2()._x - line.GetPoint1()._x,
-                 line.GetPoint2()._y - line.GetPoint1()._y});
+                {line.GetPoint2().x - line.GetPoint1().x, line.GetPoint2().y - line.GetPoint1().y});
             Point p = line.GetPoint1() + (connection * dist(mt));
-            p._x += J_EPS / 5.;
-            p._y += J_EPS / 5.;
+            p.x += J_EPS / 5.;
+            p.y += J_EPS / 5.;
 
             REQUIRE_FALSE(line.IsInLineSegment(p));
         }
