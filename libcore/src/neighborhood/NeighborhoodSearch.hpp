@@ -42,11 +42,11 @@ private:
     Grid2D<Pedestrian *> _grid{};
 
 public:
-    NeighborhoodSearch()                                       = default;
-    NeighborhoodSearch(const NeighborhoodSearch &)             = default;
-    NeighborhoodSearch(NeighborhoodSearch &&)                  = default;
+    NeighborhoodSearch()                           = default;
+    NeighborhoodSearch(const NeighborhoodSearch &) = default;
+    NeighborhoodSearch(NeighborhoodSearch &&)      = default;
     NeighborhoodSearch & operator=(const NeighborhoodSearch &) = default;
-    NeighborhoodSearch & operator=(NeighborhoodSearch &&)      = default;
+    NeighborhoodSearch & operator=(NeighborhoodSearch &&) = default;
 
     /**
       * Constructor
