@@ -69,7 +69,7 @@ std::optional<Point> ComputeSplitPoint(const Wall & wall, const Line & line)
     }
 
     // Intersection points with NAN cannot be split, this means lines are parallel
-    if(std::isnan(intersectionPoint._x) || std::isnan(intersectionPoint._y)) {
+    if(std::isnan(intersectionPoint.x) || std::isnan(intersectionPoint.y)) {
         return std::nullopt;
     }
 

@@ -392,8 +392,8 @@ std::vector<Point> PedDistributor::PossiblePositions(const SubRoom & r) const
     std::vector<double> ys;
 
     for(int p = 0; p < (int) poly.size(); ++p) {
-        xs.push_back(poly[p]._x);
-        ys.push_back(poly[p]._y);
+        xs.push_back(poly[p].x);
+        ys.push_back(poly[p].y);
     }
 
     min_x = min_element(xs.begin(), xs.end());

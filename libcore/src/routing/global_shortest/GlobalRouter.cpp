@@ -112,7 +112,7 @@ bool GlobalRouter::init()
         int door         = itr.second->GetUniqueID();
         Hline * cross    = itr.second;
         Point centre     = cross->GetCentre();
-        double center[2] = {centre._x, centre._y};
+        double center[2] = {centre.x, centre.y};
 
         AccessPoint * ap = new AccessPoint(door, center);
         ap->SetNavLine(cross);
@@ -144,7 +144,7 @@ bool GlobalRouter::init()
         int door             = itr.second->GetUniqueID();
         Crossing * cross     = itr.second;
         const Point & centre = cross->GetCentre();
-        double center[2]     = {centre._x, centre._y};
+        double center[2]     = {centre.x, centre.y};
 
         AccessPoint * ap = new AccessPoint(door, center);
         ap->SetNavLine(cross);
@@ -184,7 +184,7 @@ bool GlobalRouter::init()
         int door             = itr.second->GetUniqueID();
         Transition * cross   = itr.second;
         const Point & centre = cross->GetCentre();
-        double center[2]     = {centre._x, centre._y};
+        double center[2]     = {centre.x, centre.y};
 
         AccessPoint * ap = new AccessPoint(door, center);
         ap->SetNavLine(cross);
@@ -312,7 +312,7 @@ bool GlobalRouter::init()
 
     for(const auto & [_, goal] : _building->GetAllGoals()) {
         const Wall & line = goal->GetAllWalls()[0];
-        double center[2]  = {goal->GetCentroid()._x, goal->GetCentroid()._y};
+        double center[2]  = {goal->GetCentroid().x, goal->GetCentroid().y};
 
         AccessPoint * to_AP = new AccessPoint(line.GetUniqueID(), center);
         to_AP->SetFinalGoalOutside(true);
@@ -710,7 +710,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian * ped)
             continue;
         }
         double dist1 = ap->GetDistanceTo(ped->GetFinalDestination());
-        double dist2 = ap->DistanceTo(posA._x, posA._y);
+        double dist2 = ap->DistanceTo(posA.x, posA.y);
         double dist  = dist1 + dist2;
 
         if(dist < minDistGlobal) {

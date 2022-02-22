@@ -189,44 +189,44 @@ void UnivFFviaFM::CreateRectGrid(
     double y_max = std::numeric_limits<double>::min();
 
     for(auto & wall : walls) {
-        if(wall.GetPoint1()._x < x_min)
-            x_min = wall.GetPoint1()._x;
-        if(wall.GetPoint1()._y < y_min)
-            y_min = wall.GetPoint1()._y;
-        if(wall.GetPoint2()._x < x_min)
-            x_min = wall.GetPoint2()._x;
-        if(wall.GetPoint2()._y < y_min)
-            y_min = wall.GetPoint2()._y;
+        if(wall.GetPoint1().x < x_min)
+            x_min = wall.GetPoint1().x;
+        if(wall.GetPoint1().y < y_min)
+            y_min = wall.GetPoint1().y;
+        if(wall.GetPoint2().x < x_min)
+            x_min = wall.GetPoint2().x;
+        if(wall.GetPoint2().y < y_min)
+            y_min = wall.GetPoint2().y;
 
-        if(wall.GetPoint1()._x > x_max)
-            x_max = wall.GetPoint1()._x;
-        if(wall.GetPoint1()._y > y_max)
-            y_max = wall.GetPoint1()._y;
-        if(wall.GetPoint2()._x > x_max)
-            x_max = wall.GetPoint2()._x;
-        if(wall.GetPoint2()._y > y_max)
-            y_max = wall.GetPoint2()._y;
+        if(wall.GetPoint1().x > x_max)
+            x_max = wall.GetPoint1().x;
+        if(wall.GetPoint1().y > y_max)
+            y_max = wall.GetPoint1().y;
+        if(wall.GetPoint2().x > x_max)
+            x_max = wall.GetPoint2().x;
+        if(wall.GetPoint2().y > y_max)
+            y_max = wall.GetPoint2().y;
     }
 
     for(auto & doorPair : doors) {
         Line & door = doorPair.second;
-        if(door.GetPoint1()._x < x_min)
-            x_min = door.GetPoint1()._x;
-        if(door.GetPoint1()._y < y_min)
-            y_min = door.GetPoint1()._y;
-        if(door.GetPoint2()._x < x_min)
-            x_min = door.GetPoint2()._x;
-        if(door.GetPoint2()._y < y_min)
-            y_min = door.GetPoint2()._y;
+        if(door.GetPoint1().x < x_min)
+            x_min = door.GetPoint1().x;
+        if(door.GetPoint1().y < y_min)
+            y_min = door.GetPoint1().y;
+        if(door.GetPoint2().x < x_min)
+            x_min = door.GetPoint2().x;
+        if(door.GetPoint2().y < y_min)
+            y_min = door.GetPoint2().y;
 
-        if(door.GetPoint1()._x > x_max)
-            x_max = door.GetPoint1()._x;
-        if(door.GetPoint1()._y > y_max)
-            y_max = door.GetPoint1()._y;
-        if(door.GetPoint2()._x > x_max)
-            x_max = door.GetPoint2()._x;
-        if(door.GetPoint2()._y > y_max)
-            y_max = door.GetPoint2()._y;
+        if(door.GetPoint1().x > x_max)
+            x_max = door.GetPoint1().x;
+        if(door.GetPoint1().y > y_max)
+            y_max = door.GetPoint1().y;
+        if(door.GetPoint2().x > x_max)
+            x_max = door.GetPoint2().x;
+        if(door.GetPoint2().y > y_max)
+            y_max = door.GetPoint2().y;
     }
 
     x_min -= 0.5;
@@ -848,11 +848,11 @@ void UnivFFviaFM::CalcCost(long int key, double * cost, Point * dir, const doubl
             return;
         }
         if(pointsRight) {
-            dir[key]._x = (-(cost[key + 1] - cost[key]) / _grid->Gethx());
-            dir[key]._y = (0.);
+            dir[key].x = (-(cost[key + 1] - cost[key]) / _grid->Gethx());
+            dir[key].y = (0.);
         } else {
-            dir[key]._x = (-(cost[key] - cost[key - 1]) / _grid->Gethx());
-            dir[key]._y = (0.);
+            dir[key].x = (-(cost[key] - cost[key - 1]) / _grid->Gethx());
+            dir[key].y = (0.);
         }
         dir[key] = dir[key].Normalized();
         return;
@@ -865,11 +865,11 @@ void UnivFFviaFM::CalcCost(long int key, double * cost, Point * dir, const doubl
             return;
         }
         if(pointsUp) {
-            dir[key]._x = (0.);
-            dir[key]._y = (-(cost[key + (_grid->GetiMax())] - cost[key]) / _grid->Gethy());
+            dir[key].x = (0.);
+            dir[key].y = (-(cost[key + (_grid->GetiMax())] - cost[key]) / _grid->Gethy());
         } else {
-            dir[key]._x = (0.);
-            dir[key]._y = (-(cost[key] - cost[key - (_grid->GetiMax())]) / _grid->Gethy());
+            dir[key].x = (0.);
+            dir[key].y = (-(cost[key] - cost[key - (_grid->GetiMax())]) / _grid->Gethy());
         }
         dir[key] = dir[key].Normalized();
         return;
@@ -884,20 +884,20 @@ void UnivFFviaFM::CalcCost(long int key, double * cost, Point * dir, const doubl
             return;
         }
         if(pointsUp && pointsRight) {
-            dir[key]._x = (-(cost[key + 1] - cost[key]) / _grid->Gethx());
-            dir[key]._y = (-(cost[key + (_grid->GetiMax())] - cost[key]) / _grid->Gethy());
+            dir[key].x = (-(cost[key + 1] - cost[key]) / _grid->Gethx());
+            dir[key].y = (-(cost[key + (_grid->GetiMax())] - cost[key]) / _grid->Gethy());
         }
         if(pointsUp && !pointsRight) {
-            dir[key]._x = (-(cost[key] - cost[key - 1]) / _grid->Gethx());
-            dir[key]._y = (-(cost[key + (_grid->GetiMax())] - cost[key]) / _grid->Gethy());
+            dir[key].x = (-(cost[key] - cost[key - 1]) / _grid->Gethx());
+            dir[key].y = (-(cost[key + (_grid->GetiMax())] - cost[key]) / _grid->Gethy());
         }
         if(!pointsUp && pointsRight) {
-            dir[key]._x = (-(cost[key + 1] - cost[key]) / _grid->Gethx());
-            dir[key]._y = (-(cost[key] - cost[key - (_grid->GetiMax())]) / _grid->Gethy());
+            dir[key].x = (-(cost[key + 1] - cost[key]) / _grid->Gethx());
+            dir[key].y = (-(cost[key] - cost[key - (_grid->GetiMax())]) / _grid->Gethy());
         }
         if(!pointsUp && !pointsRight) {
-            dir[key]._x = (-(cost[key] - cost[key - 1]) / _grid->Gethx());
-            dir[key]._y = (-(cost[key] - cost[key - (_grid->GetiMax())]) / _grid->Gethy());
+            dir[key].x = (-(cost[key] - cost[key - 1]) / _grid->Gethx());
+            dir[key].y = (-(cost[key] - cost[key - (_grid->GetiMax())]) / _grid->Gethy());
         }
     } else {
         LOG_ERROR("else in twosided Dist");
@@ -1054,11 +1054,11 @@ void UnivFFviaFM::CalcDist(long int key, double * cost, Point * dir, const doubl
             return;
         }
         if(pointsRight) {
-            dir[key]._x = (-(cost[key + 1] - cost[key]) / _grid->Gethx());
-            dir[key]._y = (0.);
+            dir[key].x = (-(cost[key + 1] - cost[key]) / _grid->Gethx());
+            dir[key].y = (0.);
         } else {
-            dir[key]._x = (-(cost[key] - cost[key - 1]) / _grid->Gethx());
-            dir[key]._y = (0.);
+            dir[key].x = (-(cost[key] - cost[key - 1]) / _grid->Gethx());
+            dir[key].y = (0.);
         }
         dir[key] = dir[key].Normalized();
         return;
@@ -1071,11 +1071,11 @@ void UnivFFviaFM::CalcDist(long int key, double * cost, Point * dir, const doubl
             return;
         }
         if(pointsUp) {
-            dir[key]._x = (0.);
-            dir[key]._y = (-(cost[key + (_grid->GetiMax())] - cost[key]) / _grid->Gethy());
+            dir[key].x = (0.);
+            dir[key].y = (-(cost[key + (_grid->GetiMax())] - cost[key]) / _grid->Gethy());
         } else {
-            dir[key]._x = (0.);
-            dir[key]._y = (-(cost[key] - cost[key - (_grid->GetiMax())]) / _grid->Gethy());
+            dir[key].x = (0.);
+            dir[key].y = (-(cost[key] - cost[key - (_grid->GetiMax())]) / _grid->Gethy());
         }
         dir[key] = dir[key].Normalized();
         return;
@@ -1090,20 +1090,20 @@ void UnivFFviaFM::CalcDist(long int key, double * cost, Point * dir, const doubl
             return;
         }
         if(pointsUp && pointsRight) {
-            dir[key]._x = (-(cost[key + 1] - cost[key]) / _grid->Gethx());
-            dir[key]._y = (-(cost[key + (_grid->GetiMax())] - cost[key]) / _grid->Gethy());
+            dir[key].x = (-(cost[key + 1] - cost[key]) / _grid->Gethx());
+            dir[key].y = (-(cost[key + (_grid->GetiMax())] - cost[key]) / _grid->Gethy());
         }
         if(pointsUp && !pointsRight) {
-            dir[key]._x = (-(cost[key] - cost[key - 1]) / _grid->Gethx());
-            dir[key]._y = (-(cost[key + (_grid->GetiMax())] - cost[key]) / _grid->Gethy());
+            dir[key].x = (-(cost[key] - cost[key - 1]) / _grid->Gethx());
+            dir[key].y = (-(cost[key + (_grid->GetiMax())] - cost[key]) / _grid->Gethy());
         }
         if(!pointsUp && pointsRight) {
-            dir[key]._x = (-(cost[key + 1] - cost[key]) / _grid->Gethx());
-            dir[key]._y = (-(cost[key] - cost[key - (_grid->GetiMax())]) / _grid->Gethy());
+            dir[key].x = (-(cost[key + 1] - cost[key]) / _grid->Gethx());
+            dir[key].y = (-(cost[key] - cost[key - (_grid->GetiMax())]) / _grid->Gethy());
         }
         if(!pointsUp && !pointsRight) {
-            dir[key]._x = (-(cost[key] - cost[key - 1]) / _grid->Gethx());
-            dir[key]._y = (-(cost[key] - cost[key - (_grid->GetiMax())]) / _grid->Gethy());
+            dir[key].x = (-(cost[key] - cost[key - 1]) / _grid->Gethx());
+            dir[key].y = (-(cost[key] - cost[key - (_grid->GetiMax())]) / _grid->Gethy());
         }
     } else {
         LOG_ERROR("else in twosided Dist");
@@ -1488,8 +1488,8 @@ void UnivFFviaFM::GetDirectionToUID(int destID, long int key, Point & direction)
 {
     //assert(key > 0 && key < _nPoints);
     if(key <= 0 || key >= _nPoints) {
-        direction._x = 0.;
-        direction._y = 0.;
+        direction.x = 0.;
+        direction.y = 0.;
         return;
     }
     if((_gridCode[key] == OUTSIDE) || (_gridCode[key] == WALL)) {

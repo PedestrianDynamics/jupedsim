@@ -157,15 +157,15 @@ std::string Crossing::GetDescription() const
     sprintf(
         tmp,
         "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\" />\n",
-        (GetPoint1()._x),
-        (GetPoint1()._y),
+        (GetPoint1().x),
+        (GetPoint1().y),
         _subRoom1->GetElevation(GetPoint1()));
     geometry.append(tmp);
     sprintf(
         tmp,
         "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\" />\n",
-        (GetPoint2()._x),
-        (GetPoint2()._y),
+        (GetPoint2().x),
+        (GetPoint2().y),
         _subRoom1->GetElevation(GetPoint2()));
     geometry.append(tmp);
     geometry.append("\t\t</crossing>\n");
@@ -401,10 +401,10 @@ struct formatter<Crossing> {
             ctx.out(),
             "CROSS: {} ({}, {}) -- ({}, {}) -- Subroom {} <--> Subroom {}",
             cross.GetID(),
-            cross.GetPoint1()._x,
-            cross.GetPoint1()._y,
-            cross.GetPoint2()._x,
-            cross.GetPoint2()._y,
+            cross.GetPoint1().x,
+            cross.GetPoint1().y,
+            cross.GetPoint2().x,
+            cross.GetPoint2().y,
             cross.GetSubRoom1()->GetSubRoomID(),
             cross.GetSubRoom2()->GetSubRoomID());
     }

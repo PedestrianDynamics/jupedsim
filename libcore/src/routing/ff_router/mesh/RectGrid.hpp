@@ -222,7 +222,7 @@ public:
      * @param p Point in grid.
      * @return Key of \p p in grid, if \p p not in grid key of closest point inside grid.
      */
-    [[nodiscard]] long int GetKeyAtPoint(const Point p) const { return GetKeyAtXY(p._x, p._y); }
+    [[nodiscard]] long int GetKeyAtPoint(const Point p) const { return GetKeyAtXY(p.x, p.y); }
 
     /**
      * Sets the boundaries of the grid if not already set.
@@ -282,15 +282,15 @@ public:
     {
         if(!IncludesPoint(currPoint)) {
             LOG_ERROR("ERROR 3 in RectGrid::GetKeyAtPoint with:");
-            LOG_ERROR("Point: {:.2f} {:.2f}", currPoint._x, currPoint._y);
+            LOG_ERROR("Point: {:.2f} {:.2f}", currPoint.x, currPoint.y);
             LOG_ERROR("_xMin, _yMin: {:.2f} {:.2f}", _xMin, _yMin);
             LOG_ERROR("_xMax, _yMax: {:.2f} {:.2f}", _xMax, _yMax);
             LOG_ERROR("Point is out of Grid-Scope, Tip: check if correct Floorfield is called");
 
             return Point(-7, -7);
         }
-        long int i = std::lround((currPoint._x - _xMin) / _cellsizeX);
-        long int j = std::lround((currPoint._y - _yMin) / _cellsizeY);
+        long int i = std::lround((currPoint.x - _xMin) / _cellsizeX);
+        long int j = std::lround((currPoint.y - _yMin) / _cellsizeY);
 
         return Point(
             static_cast<double>(i) * _cellsizeX + _xMin,
@@ -341,8 +341,8 @@ public:
     [[nodiscard]] bool IncludesPoint(const Point & point) const
     {
         return !(
-            (point._x < (_xMin - _cellsizeX / 2)) || (point._x > (_xMax + _cellsizeX / 2)) ||
-            (point._y < (_yMin - _cellsizeY / 2)) || (point._y > (_yMax + _cellsizeY / 2)));
+            (point.x < (_xMin - _cellsizeX / 2)) || (point.x > (_xMax + _cellsizeX / 2)) ||
+            (point.y < (_yMin - _cellsizeY / 2)) || (point.y > (_yMax + _cellsizeY / 2)));
     }
 
 private:

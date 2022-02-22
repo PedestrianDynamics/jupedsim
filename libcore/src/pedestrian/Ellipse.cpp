@@ -221,7 +221,7 @@ double JEllipse::EffectiveDistanceToEllipse(const JEllipse & E2, double * dist) 
 // if P approx equal to Center of ellipse return cartesian coordinats of the point (a,0)/ellipse
 Point JEllipse::PointOnEllipse(const Point & P) const
 {
-    double x = P._x, y = P._y;
+    double x = P.x, y = P.y;
     double r = x * x + y * y;
     if(r < J_EPS * J_EPS) {
         Point CP(this->GetEA(), 0);
@@ -235,8 +235,8 @@ Point JEllipse::PointOnEllipse(const Point & P) const
     double a        = GetEA();
     double b        = GetEB();
     Point S;
-    S._x = a * cosTheta;
-    S._y = b * sinTheta;
+    S.x = a * cosTheta;
+    S.y = b * sinTheta;
     return S.TransformToCartesianCoordinates(_center, _cosPhi, _sinPhi);
 }
 
@@ -253,8 +253,8 @@ bool JEllipse::IsInside(const Point & p) const
 {
     double a         = GetEA();
     double b         = GetEB();
-    double x         = p._x;
-    double y         = p._y;
+    double x         = p.x;
+    double y         = p.y;
     double condition = (x * x) / (a * a) + (y * y) / (b * b) - 1;
     return condition < 0;
 }
@@ -264,8 +264,8 @@ bool JEllipse::IsOutside(const Point & p) const
 {
     double a         = GetEA();
     double b         = GetEB();
-    double x         = p._x;
-    double y         = p._y;
+    double x         = p.x;
+    double y         = p.y;
     double condition = (x * x) / (a * a) + (y * y) / (b * b) - 1;
     return condition > 0;
 }
@@ -275,8 +275,8 @@ bool JEllipse::IsOn(const Point & p) const
 {
     double a         = GetEA();
     double b         = GetEB();
-    double x         = p._x;
-    double y         = p._y;
+    double x         = p.x;
+    double y         = p.y;
     double condition = (x * x) / (a * a) + (y * y) / (b * b) - 1;
     return (-J_EPS_DIST < condition) && (condition < J_EPS_DIST);
 }

@@ -139,15 +139,15 @@ std::string Transition::GetDescription() const
     sprintf(
         tmp,
         "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-        (GetPoint1()._x),
-        (GetPoint1()._y),
+        (GetPoint1().x),
+        (GetPoint1().y),
         GetSubRoom1()->GetElevation(GetPoint1()));
     geometry.append(tmp);
     sprintf(
         tmp,
         "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-        (GetPoint2()._x),
-        (GetPoint2()._y),
+        (GetPoint2().x),
+        (GetPoint2().y),
         GetSubRoom1()->GetElevation(GetPoint2()));
     geometry.append(tmp);
     geometry.append("\t\t</door>\n");

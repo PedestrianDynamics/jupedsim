@@ -358,7 +358,7 @@ void SubRoom::CalculateArea()
     double sum = 0;
     int n      = (int) _poly.size();
     for(int i = 0; i < n; i++) {
-        sum += (_poly[i]._y + _poly[(i + 1) % n]._y) * (_poly[i]._x - _poly[(i + 1) % n]._x);
+        sum += (_poly[i].y + _poly[(i + 1) % n].y) * (_poly[i].x - _poly[(i + 1) % n].x);
     }
     _area = (0.5 * fabs(sum));
 }
@@ -378,10 +378,10 @@ Point SubRoom::GetCentroid() const
     // For all vertices except last
     unsigned int i = 0;
     for(i = 0; i < _poly.size() - 1; ++i) {
-        x0 = _poly[i]._x;
-        y0 = _poly[i]._y;
-        x1 = _poly[i + 1]._x;
-        y1 = _poly[i + 1]._y;
+        x0 = _poly[i].x;
+        y0 = _poly[i].y;
+        x1 = _poly[i + 1].x;
+        y1 = _poly[i + 1].y;
         a  = x0 * y1 - x1 * y0;
         signedArea += a;
         px += (x0 + x1) * a;
@@ -389,10 +389,10 @@ Point SubRoom::GetCentroid() const
     }
 
     // Do last vertex
-    x0 = _poly[i]._x;
-    y0 = _poly[i]._y;
-    x1 = _poly[0]._x;
-    y1 = _poly[0]._y;
+    x0 = _poly[i].x;
+    y0 = _poly[i].y;
+    x1 = _poly[0].x;
+    y1 = _poly[0].y;
     a  = x0 * y1 - x1 * y0;
     signedArea += a;
     px += (x0 + x1) * a;
@@ -505,7 +505,7 @@ const double * SubRoom::GetPlaneEquation() const
 
 double SubRoom::GetElevation(const Point & p) const
 {
-    return _planeEquation[0] * p._x + _planeEquation[1] * p._y + _planeEquation[2];
+    return _planeEquation[0] * p.x + _planeEquation[1] * p.y + _planeEquation[2];
 }
 
 double SubRoom::GetCosAngleWithHorizontal() const
@@ -565,17 +565,17 @@ bool SubRoom::Overlapp(const std::vector<Line *> & goals) const
             if(wall.IntersectionWith(*goal) == LineIntersectType::OVERLAP) {
                 LOG_INFO(
                     "Wall: ({}, {}) -- ({}, {})",
-                    wall.GetPoint1()._x,
-                    wall.GetPoint1()._y,
-                    wall.GetPoint2()._x,
-                    wall.GetPoint2()._y);
+                    wall.GetPoint1().x,
+                    wall.GetPoint1().y,
+                    wall.GetPoint2().x,
+                    wall.GetPoint2().y);
 
                 LOG_INFO(
                     "Goal ({}, {}) - ({}, {})",
-                    goal->GetPoint1()._x,
-                    goal->GetPoint1()._y,
-                    goal->GetPoint2()._x,
-                    goal->GetPoint2()._y);
+                    goal->GetPoint1().x,
+                    goal->GetPoint1().y,
+                    goal->GetPoint2().x,
+                    goal->GetPoint2().y);
 
                 return true;
             }
@@ -758,11 +758,11 @@ bool SubRoom::IsClockwise()
     for(unsigned int i = 0; i < _poly.size() - 1; ++i) {
         Point a = _poly[i];
         Point b = _poly[i + 1];
-        sum += (b._x - a._x) * (b._y + a._y);
+        sum += (b.x - a.x) * (b.y + a.y);
     }
     Point first = _poly[0];
     Point last  = _poly[_poly.size() - 1];
-    sum += (first._x - last._x) * (first._y + last._y);
+    sum += (first.x - last.x) * (first.y + last.y);
 
     return (sum > 0.);
 }
@@ -841,15 +841,15 @@ std::string NormalSubRoom::WriteSubRoom() const
         sprintf(
             wall,
             "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-            (w.GetPoint1()._x),
-            (w.GetPoint1()._y),
+            (w.GetPoint1().x),
+            (w.GetPoint1().y),
             GetElevation(w.GetPoint1()));
         geometry.append(wall);
         sprintf(
             wall,
             "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-            (w.GetPoint2()._x),
-            (w.GetPoint2()._y),
+            (w.GetPoint2().x),
+            (w.GetPoint2().y),
             GetElevation(w.GetPoint2()));
         geometry.append(wall);
         geometry.append("\t\t</wall>\n");
@@ -864,8 +864,8 @@ std::string NormalSubRoom::WriteSubRoom() const
         tmp,
         "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" text=\"%d\" color=\"100\" "
         "/>\n",
-        pos._x,
-        pos._y,
+        pos.x,
+        pos.y,
         GetElevation(pos),
         GetSubRoomID());
     s.append(tmp);
@@ -878,15 +878,15 @@ std::string NormalSubRoom::WriteSubRoom() const
             sprintf(
                 wall,
                 "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-                (w.GetPoint1()._x),
-                (w.GetPoint1()._y),
+                (w.GetPoint1().x),
+                (w.GetPoint1().y),
                 GetElevation(w.GetPoint1()));
             s.append(wall);
             sprintf(
                 wall,
                 "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-                (w.GetPoint2()._x),
-                (w.GetPoint2()._y),
+                (w.GetPoint2().x),
+                (w.GetPoint2().y),
                 GetElevation(w.GetPoint2()));
             s.append(wall);
             s.append("\t\t</wall>\n");
@@ -900,8 +900,8 @@ std::string NormalSubRoom::WriteSubRoom() const
             tmp1,
             "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" text=\"%d\" "
             "color=\"100\" />\n",
-            obst_pos._x,
-            obst_pos._y,
+            obst_pos.x,
+            obst_pos.y,
             GetElevation(obst_pos),
             obst->GetId());
         s.append(tmp1);
@@ -916,7 +916,7 @@ std::string NormalSubRoom::WritePolyLine() const
     std::string s;
     s.append("\t<Obstacle closed=\"1\" boundingbox=\"0\" class=\"1\">\n");
     for(const auto & p : _poly) {
-        sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n", p._x, p._y);
+        sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n", p.x, p.y);
         s.append(tmp);
     }
     s.append("\t</Obstacle>\n");
@@ -1009,10 +1009,10 @@ bool NormalSubRoom::ConvertLineToPoly(const std::vector<Line *> & goals)
             "({}, {}) != ({}, {}), distance = {}",
             GetSubRoomID(),
             GetRoomID(),
-            tmpPoly[0]._x,
-            tmpPoly[0]._y,
-            point._x,
-            point._y,
+            tmpPoly[0].x,
+            tmpPoly[0].y,
+            point.x,
+            point.y,
             (tmpPoly[0] - point).Norm());
 
         return false;
@@ -1057,15 +1057,15 @@ bool NormalSubRoom::ConvertLineToPoly(const std::vector<Line *> & goals)
 
 short NormalSubRoom::WhichQuad(const Point & vertex, const Point & hitPos) const
 {
-    return (vertex._x > hitPos._x) ? ((vertex._y > hitPos._y) ? 1 : 4) :
-                                     ((vertex._y > hitPos._y) ? 2 : 3);
+    return (vertex.x > hitPos.x) ? ((vertex.y > hitPos.y) ? 1 : 4) :
+                                   ((vertex.y > hitPos.y) ? 2 : 3);
 }
 
 // x-Koordinate der Linie von einer Eccke zur nächsten
 
 double NormalSubRoom::Xintercept(const Point & point1, const Point & point2, double hitY) const
 {
-    return (point2._x - (((point2._y - hitY) * (point1._x - point2._x)) / (point1._y - point2._y)));
+    return (point2.x - (((point2.y - hitY) * (point1.x - point2.x)) / (point1.y - point2.y)));
 }
 
 
@@ -1155,15 +1155,15 @@ std::string Stair::WriteSubRoom() const
         sprintf(
             wall,
             "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-            (w.GetPoint1()._x),
-            (w.GetPoint1()._y),
+            (w.GetPoint1().x),
+            (w.GetPoint1().y),
             GetElevation(w.GetPoint1()));
         geometry.append(wall);
         sprintf(
             wall,
             "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-            (w.GetPoint2()._x),
-            (w.GetPoint2()._y),
+            (w.GetPoint2().x),
+            (w.GetPoint2().y),
             GetElevation(w.GetPoint2()));
         geometry.append(wall);
         geometry.append("\t\t</wall>\n");
@@ -1176,8 +1176,8 @@ std::string Stair::WriteSubRoom() const
         tmp_c,
         "\t\t<sphere centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" radius=\"%.2f\" "
         "color=\"100\" />\n",
-        GetUp()._x,
-        GetUp()._y,
+        GetUp().x,
+        GetUp().y,
         GetElevation(GetUp()),
         0.2);
     s.append(tmp_c);
@@ -1187,8 +1187,8 @@ std::string Stair::WriteSubRoom() const
         tmp_c,
         "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" text=\"%d\" color=\"100\" "
         "/>\n",
-        pos._x,
-        pos._y,
+        pos.x,
+        pos.y,
         GetElevation(pos),
         GetSubRoomID());
     s.append(tmp_c);
@@ -1203,7 +1203,7 @@ std::string Stair::WritePolyLine() const
 
     s.append("\t<Obstacle closed=\"1\" boundingbox=\"0\" class=\"1\">\n");
     for(unsigned int j = 0; j < _poly.size(); j++) {
-        sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n", _poly[j]._x, _poly[j]._y);
+        sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n", _poly[j].x, _poly[j].y);
         s.append(tmp);
     }
     s.append("\t</Obstacle>\n");
@@ -1293,10 +1293,10 @@ bool Stair::ConvertLineToPoly(const std::vector<Line *> & goals)
             "!= ({}, {})",
             GetSubRoomID(),
             GetRoomID(),
-            firstOtherPoint->_x,
-            firstOtherPoint->_y,
-            aktPoint->_x,
-            aktPoint->_y);
+            firstOtherPoint->x,
+            firstOtherPoint->y,
+            aktPoint->x,
+            aktPoint->y);
 
         return false;
     }
@@ -1364,8 +1364,8 @@ std::vector<Point> SubRoom::StartLLCorner(const std::vector<Point> & polygon)
     size_t id_start     = 0;
 
     for(size_t i = 1; i < polygon.size(); ++i) {
-        if(polygon[i]._x <= startingpoint._x) {
-            if(polygon[i]._y <= startingpoint._y) {
+        if(polygon[i].x <= startingpoint.x) {
+            if(polygon[i].y <= startingpoint.y) {
                 startingpoint = polygon[i];
                 id_start      = i;
             }

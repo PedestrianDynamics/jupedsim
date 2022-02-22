@@ -162,8 +162,8 @@ Point VelocityModel::e0(Pedestrian * ped, Room * room) const
         std::uniform_real_distribution<double> dist(0, 1.0);
         double random_x = dist(mt);
         double random_y = dist(mt);
-        Point P1        = Point(ped->GetPos()._x - random_x, ped->GetPos()._y - random_y);
-        Point P2        = Point(ped->GetPos()._x + random_x, ped->GetPos()._y + random_y);
+        Point P1        = Point(ped->GetPos().x - random_x, ped->GetPos().y - random_y);
+        Point P2        = Point(ped->GetPos().x + random_x, ped->GetPos().y + random_y);
         const Line L(P1, P2);
         ped->SetExitLine(&L);
         target = P1;
@@ -255,11 +255,11 @@ Point VelocityModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
             "pedestrians ped1 {} at ({:f},{:f}) and ped2 {} at ({:f}, {:f})",
             Distance,
             ped1->GetUID(),
-            ped1->GetPos()._x,
-            ped1->GetPos()._y,
+            ped1->GetPos().x,
+            ped1->GetPos().y,
             ped2->GetUID(),
-            ped2->GetPos()._x,
-            ped2->GetPos()._y);
+            ped2->GetPos().x,
+            ped2->GetPos().y);
         exit(EXIT_FAILURE); //TODO: quick and dirty fix for issue #158
                             // (sometimes sources create peds on the same location)
     }
@@ -335,12 +335,12 @@ Point VelocityModel::ForceRepWall(
             "Velocity: forceRepWall() ped {} [{:f}, {:f}] is too near to the wall [{:f}, "
             "{:f}]-[{:f}, {:f}] (dist={:f})",
             ped->GetUID(),
-            ped->GetPos()._y,
-            ped->GetPos()._y,
-            w.GetPoint1()._x,
-            w.GetPoint1()._y,
-            w.GetPoint2()._x,
-            w.GetPoint2()._y,
+            ped->GetPos().y,
+            ped->GetPos().y,
+            w.GetPoint1().x,
+            w.GetPoint1().y,
+            w.GetPoint2().x,
+            w.GetPoint2().y,
             Distance);
         Point new_dist = centroid - ped->GetPos();
         new_dist       = new_dist / new_dist.Norm();

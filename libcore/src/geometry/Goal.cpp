@@ -97,8 +97,8 @@ std::string Goal::Write()
     sprintf(
         tmp,
         "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" text=\"%s\" color=\"100\" />\n",
-        pos._x,
-        pos._y,
+        pos.x,
+        pos.y,
         _caption.c_str());
     s.append(tmp);
 
@@ -112,8 +112,8 @@ const std::vector<Wall> & Goal::GetAllWalls() const
 
 int Goal::WhichQuad(const Point & vertex, const Point & hitPos) const
 {
-    return (vertex._x > hitPos._x) ? ((vertex._y > hitPos._y) ? 1 : 4) :
-                                     ((vertex._y > hitPos._y) ? 2 : 3);
+    return (vertex.x > hitPos.x) ? ((vertex.y > hitPos.y) ? 1 : 4) :
+                                   ((vertex.y > hitPos.y) ? 2 : 3);
 }
 
 int Goal::GetIsFinalGoal() const
@@ -129,7 +129,7 @@ void Goal::SetIsFinalGoal(int isFinalGoal)
 // x-Koordinate der Linie von einer Eccke zur nächsten
 double Goal::Xintercept(const Point & point1, const Point & point2, double hitY) const
 {
-    return (point2._x - (((point2._y - hitY) * (point1._x - point2._x)) / (point1._y - point2._y)));
+    return (point2.x - (((point2.y - hitY) * (point1.x - point2.x)) / (point1.y - point2.y)));
 }
 
 
@@ -156,7 +156,7 @@ bool Goal::Contains(const Point & ped) const
                      //WAS CLOCKWISE OR COUNTER
             case -2: // US THE X POSITION AT THE HIT POINT TO
                 // DETERMINE WHICH WAY AROUND
-                if(Xintercept(_poly[edge], _poly[next], ped._y) > ped._x)
+                if(Xintercept(_poly[edge], _poly[next], ped.y) > ped.x)
                     delta = -(delta);
                 break;
             case 3: // MOVING 3 QUADS IS LIKE MOVING BACK 1
@@ -266,10 +266,10 @@ void Goal::ComputeCentroid()
     // For all vertices except last
     unsigned int i = 0;
     for(i = 0; i < _poly.size() - 1; ++i) {
-        x0 = _poly[i]._x;
-        y0 = _poly[i]._y;
-        x1 = _poly[i + 1]._x;
-        y1 = _poly[i + 1]._y;
+        x0 = _poly[i].x;
+        y0 = _poly[i].y;
+        x1 = _poly[i + 1].x;
+        y1 = _poly[i + 1].y;
         a  = x0 * y1 - x1 * y0;
         signedArea += a;
         px += (x0 + x1) * a;
@@ -277,10 +277,10 @@ void Goal::ComputeCentroid()
     }
 
     // Do last vertex
-    x0 = _poly[i]._x;
-    y0 = _poly[i]._y;
-    x1 = _poly[0]._x;
-    y1 = _poly[0]._y;
+    x0 = _poly[i].x;
+    y0 = _poly[i].y;
+    x1 = _poly[0].x;
+    y1 = _poly[0].y;
     a  = x0 * y1 - x1 * y0;
     signedArea += a;
     px += (x0 + x1) * a;
@@ -290,8 +290,8 @@ void Goal::ComputeCentroid()
     px /= (6 * signedArea);
     py /= (6 * signedArea);
 
-    _centroid._x = px;
-    _centroid._y = py;
+    _centroid.x = px;
+    _centroid.y = py;
 }
 
 Crossing * Goal::GetCentreCrossing()
@@ -329,11 +329,11 @@ bool Goal::IsClockwise()
     for(unsigned int i = 0; i < _poly.size() - 1; ++i) {
         Point a = _poly[i];
         Point b = _poly[i + 1];
-        sum += (b._x - a._x) * (b._y + a._y);
+        sum += (b.x - a.x) * (b.y + a.y);
     }
     Point first = _poly[0];
     Point last  = _poly[_poly.size() - 1];
-    sum += (first._x - last._x) * (first._y + last._y);
+    sum += (first.x - last.x) * (first.y + last.y);
 
     return (sum > 0.);
 }

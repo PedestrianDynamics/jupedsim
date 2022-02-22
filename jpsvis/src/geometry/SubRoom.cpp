@@ -462,7 +462,7 @@ const double * SubRoom::GetPlaneEquation() const
 
 double SubRoom::GetElevation(const Point & p) const
 {
-    return _planeEquation[0] * p._x + _planeEquation[1] * p._y + _planeEquation[2];
+    return _planeEquation[0] * p.x + _planeEquation[1] * p.y + _planeEquation[2];
 }
 
 double SubRoom::GetCosAngleWithHorizontal() const
@@ -939,7 +939,7 @@ bool NormalSubRoom::IsInSubRoom(const Point & ped) const
                      // WAS CLOCKWISE OR COUNTER
             case -2: // US THE X POSITION AT THE HIT POINT TO
                 // DETERMINE WHICH WAY AROUND
-                if(Xintercept(_poly[edge], _poly[next], ped._y) > ped._x)
+                if(Xintercept(_poly[edge], _poly[next], ped.y) > ped.x)
                     delta = -(delta);
                 break;
             case 3: // MOVING 3 QUADS IS LIKE MOVING BACK 1

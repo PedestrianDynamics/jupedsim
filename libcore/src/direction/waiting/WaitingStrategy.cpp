@@ -38,8 +38,8 @@ Point WaitingStrategy::GetTarget(Room * room, Pedestrian * ped, double time)
     Point target;
 
     // check if waiting pos is set
-    if(waitingPos._x == std::numeric_limits<double>::max() &&
-       waitingPos._y == std::numeric_limits<double>::max()) {
+    if(waitingPos.x == std::numeric_limits<double>::max() &&
+       waitingPos.y == std::numeric_limits<double>::max()) {
         SubRoom * subroom = ped->GetBuilding()->GetSubRoom(ped->GetPos());
         do {
             target = GetWaitingPosition(room, ped, time);

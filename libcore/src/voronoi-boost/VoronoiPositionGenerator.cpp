@@ -44,7 +44,7 @@ struct point_traits<Point> {
 
     static inline coordinate_type get(const Point & point, orientation_2d orient)
     {
-        return (orient == HORIZONTAL) ? point._x : point._y;
+        return (orient == HORIZONTAL) ? point.x : point.y;
     }
 };
 } // namespace boost::polygon
@@ -107,14 +107,14 @@ bool ComputeBestPositionVoronoiBoost(
         for(auto vert : subroom->GetPolygon()) //room vertices
         {
             const Point & center_pos = subroom->GetCentroid();
-            temp._x                  = (center_pos._x - vert._x);
-            temp._y                  = (center_pos._y - vert._y);
+            temp.x                   = (center_pos.x - vert.x);
+            temp.y                   = (center_pos.y - vert.y);
             temp                     = temp / temp.Norm();
             temp                     = temp * (radius *
                            1.4); //now the norm of the vector is ~r*sqrt(2), pointing to the center
             temp                     = temp + vert;
-            temp._x                  = (int) (temp._x * factor);
-            temp._y                  = (int) (temp._y * factor);
+            temp.x                   = (int) (temp.x * factor);
+            temp.y                   = (int) (temp.y * factor);
             fake_peds.push_back(temp);
         }
     else {
@@ -138,8 +138,8 @@ bool ComputeBestPositionVoronoiBoost(
             Point random_pos(x_coor, y_coor);
             Point new_pos = center_pos + random_pos;
             //this could be better, but needs to work with any polygon - random point inside a polygon?
-            bool inBox = (new_pos._x <= BBxmax) && (new_pos._x >= BBxmin) &&
-                         (new_pos._y <= BBymax) && (new_pos._y >= BBymin);
+            bool inBox = (new_pos.x <= BBxmax) && (new_pos.x >= BBxmin) && (new_pos.y <= BBymax) &&
+                         (new_pos.y >= BBymin);
             if(subroom->IsInSubRoom(new_pos) && inBox) {
                 if(IsEnoughInSubroom(subroom, new_pos, radius)) {
                     ped->SetPos(center_pos + random_pos);
@@ -156,8 +156,8 @@ bool ComputeBestPositionVoronoiBoost(
             //points from double to integer
             for(const auto & eped : existing_peds) {
                 const Point & pos = eped->GetPos();
-                tmp._x            = (int) (pos._x * factor);
-                tmp._y            = (int) (pos._y * factor);
+                tmp.x             = (int) (pos.x * factor);
+                tmp.y             = (int) (pos.y * factor);
                 discrete_positions.push_back(tmp);
             }
             //adding fake people to the vector for constructing voronoi diagram
@@ -243,8 +243,8 @@ void VoronoiBestVertexRandMax(
         float BBxmax   = src->GetBoundaries()[1];
         float BBymin   = src->GetBoundaries()[2];
         float BBymax   = src->GetBoundaries()[3];
-        bool inBox     = (vert_pos._x <= BBxmax) && (vert_pos._x >= BBxmin) &&
-                     (vert_pos._y <= BBymax) && (vert_pos._y >= BBymin);
+        bool inBox = (vert_pos.x <= BBxmax) && (vert_pos.x >= BBxmin) && (vert_pos.y <= BBymax) &&
+                     (vert_pos.y >= BBymin);
         if(subroom->IsInSubRoom(vert_pos) && inBox)
             if(IsEnoughInSubroom(subroom, vert_pos, radius)) {
                 const voronoi_diagram<double>::vertex_type & vertex = *it;
@@ -252,7 +252,7 @@ void VoronoiBestVertexRandMax(
                 std::size_t index = (edge->cell())->source_index();
                 Point p           = discrete_positions[index];
 
-                dis = (p._x - it->x()) * (p._x - it->x()) + (p._y - it->y()) * (p._y - it->y());
+                dis = (p.x - it->x()) * (p.x - it->x()) + (p.y - it->y()) * (p.y - it->y());
                 dis = dis / factor / factor;
                 possible_vertices.push_back(it);
                 partial_sums.push_back(dis);
@@ -327,15 +327,15 @@ void VoronoiBestVertexGreedy(
         float BBxmax   = src->GetBoundaries()[1];
         float BBymin   = src->GetBoundaries()[2];
         float BBymax   = src->GetBoundaries()[3];
-        bool inBox     = (vert_pos._x <= BBxmax) && (vert_pos._x >= BBxmin) &&
-                     (vert_pos._y <= BBymax) && (vert_pos._y >= BBymin);
+        bool inBox = (vert_pos.x <= BBxmax) && (vert_pos.x >= BBxmin) && (vert_pos.y <= BBymax) &&
+                     (vert_pos.y >= BBymin);
         if(subroom->IsInSubRoom(vert_pos) && inBox)
             if(IsEnoughInSubroom(subroom, vert_pos, radius)) {
                 const voronoi_diagram<double>::vertex_type & vertex = *it;
                 const voronoi_diagram<double>::edge_type * edge     = vertex.incident_edge();
                 std::size_t index = (edge->cell())->source_index();
                 Point p           = discrete_positions[index];
-                dis = (p._x - it->x()) * (p._x - it->x()) + (p._y - it->y()) * (p._y - it->y());
+                dis = (p.x - it->x()) * (p.x - it->x()) + (p.y - it->y()) * (p.y - it->y());
                 dis = dis / factor / factor;
                 possible_vertices.push_back(it);
                 distances.push_back(dis);
@@ -370,7 +370,7 @@ void plotVoronoi(
     fprintf(f, "import matplotlib.pyplot as plt\n");
     //  plot seeds
     for(auto pos : discrete_positions) {
-        fprintf(f, "plt.plot([%f], [%f], \"or\")\n", pos._x / factor, pos._y / factor);
+        fprintf(f, "plt.plot([%f], [%f], \"or\")\n", pos.x / factor, pos.y / factor);
     }
     // plot cells
     for(auto it = vd.cells().begin(); it != vd.cells().end(); ++it) {
@@ -396,14 +396,14 @@ void plotVoronoi(
     const std::vector<Point> polygon = subroom->GetPolygon();
     for(auto it = polygon.begin(); it != polygon.end();) {
         Point gpoint = *(it++);
-        if(gpoint._x > max_x)
-            max_x = gpoint._x;
-        if(gpoint._y > max_y)
-            max_y = gpoint._y;
-        if(gpoint._x < min_x)
-            min_x = gpoint._x;
-        if(gpoint._y < min_y)
-            min_y = gpoint._y;
+        if(gpoint.x > max_x)
+            max_x = gpoint.x;
+        if(gpoint.y > max_y)
+            max_y = gpoint.y;
+        if(gpoint.x < min_x)
+            min_x = gpoint.x;
+        if(gpoint.y < min_y)
+            min_y = gpoint.y;
 
         if(it == polygon.end()) {
             break;

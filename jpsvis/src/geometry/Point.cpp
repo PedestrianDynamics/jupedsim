@@ -38,35 +38,25 @@
 /************************************************************
   Konstruktoren
  ************************************************************/
-Point::Point() : _x(0), _y(0) {}
+Point::Point() : x(0), y(0) {}
 
-Point::Point(double x, double y) : _x(x), _y(y) {}
+Point::Point(double x, double y) : x(x), y(y) {}
 
 std::string Point::toString() const
 {
     std::stringstream tmp;
-    tmp << "( " << _x << " : " << _y << " )";
+    tmp << "( " << x << " : " << y << " )";
     return tmp.str();
-}
-
-void Point::SetX(double x)
-{
-    _x = x;
-}
-
-void Point::SetY(double y)
-{
-    _y = y;
 }
 
 double Point::GetX() const
 {
-    return _x;
+    return x;
 }
 
 double Point::GetY() const
 {
-    return _y;
+    return y;
 }
 
 double Point::Norm() const
@@ -84,7 +74,7 @@ Point Point::NormalizedMolified() const
 {
     double norm = NormMolified();
     if(norm > J_EPS_GOAL)
-        return (Point(_x, _y) / norm);
+        return (Point(x, y) / norm);
     else
         return Point(0.0, 0.0);
 }
@@ -94,7 +84,7 @@ Point Point::Normalized() const
 {
     double norm = Norm();
     if(norm > J_EPS)
-        return (Point(_x, _y) / norm);
+        return (Point(x, y) / norm);
     else
         return Point(0.0, 0.0);
 }
@@ -162,7 +152,7 @@ xnew = -xc + x
 */
 Point Point::TransformToEllipseCoordinates(const Point & center, double cphi, double sphi) const
 {
-    Point p = Point(_x, _y);
+    Point p = Point(x, y);
     return (p - center).Rotate(cphi, -sphi);
 }
 
@@ -187,7 +177,7 @@ where the coord. of a point are transformated to cart. coord.
 
 Point Point::TransformToCartesianCoordinates(const Point & center, double cphi, double sphi) const
 {
-    Point p = Point(_x, _y);
+    Point p = Point(x, y);
     return (p.Rotate(cphi, sphi) + center);
 }
 
@@ -199,35 +189,35 @@ Rotation-matrix=[cos(theta)  -sin(theta)]
 */
 Point Point::Rotate(double ctheta, double stheta) const
 {
-    return Point(_x * ctheta - _y * stheta, _x * stheta + _y * ctheta);
+    return Point(x * ctheta - y * stheta, x * stheta + y * ctheta);
 }
 
 //  sum
 const Point Point::operator+(const Point & p) const
 {
     // return Point(_x + p.GetX(), _y + p.GetY());
-    return Point(_x + p._x, _y + p._y);
+    return Point(x + p.x, y + p.y);
 }
 
 // sub
 const Point Point::operator-(const Point & p) const
 {
     // return Point(_x - p.GetX(), _y - p.GetY());
-    return Point(_x - p._x, _y - p._y);
+    return Point(x - p.x, y - p.y);
 }
 
 // equal
 bool Point::operator==(const Point & p) const
 {
     //    return (fabs(_x - p.GetX()) < J_EPS && fabs(_y - p.GetY()) < J_EPS);
-    return (fabs(_x - p._x) < J_EPS && fabs(_y - p._y) < J_EPS);
+    return (fabs(x - p.x) < J_EPS && fabs(y - p.y) < J_EPS);
 }
 
 // not equal
 bool Point::operator!=(const Point & p) const
 {
     // return (fabs(_x - p.GetX()) > J_EPS || fabs(_y - p.GetY()) > J_EPS);
-    return (fabs(_x - p._x) > J_EPS || fabs(_y - p._y) > J_EPS);
+    return (fabs(x - p.x) > J_EPS || fabs(y - p.y) > J_EPS);
 }
 
 
@@ -235,15 +225,15 @@ bool Point::operator!=(const Point & p) const
 const Point operator*(const Point & p, double f)
 {
     // return Point(p.GetX() * f, p.GetY() * f);
-    return Point(p._x * f, p._y * f);
+    return Point(p.x * f, p.y * f);
 }
 
 
 // Assignment
 Point & Point::operator+=(const Point & p)
 {
-    _x += p._x;
-    _y += p._y;
+    x += p.x;
+    y += p.y;
     return *this;
 }
 
@@ -252,11 +242,11 @@ Point & Point::operator+=(const Point & p)
 const Point operator/(const Point & p, double f)
 {
     if(f > J_EPS * J_EPS)
-        return Point(p._x / f, p._y / f);
+        return Point(p.x / f, p.y / f);
     else {
         std::cout << "Warning: Point::/operator. dividand " << f
                   << " is to small. Set it to 1 instead" << std::endl;
-        return Point(p._x, p._y);
+        return Point(p.x, p.y);
     }
     // return Point(p.GetX() / f, p.GetY() / f);
 }
