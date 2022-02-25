@@ -121,8 +121,8 @@ def addData(trajec1, trajec2):
 def addDatas(trajecs, output, debug):
     lines = [[], []]  # lines[i][j] | i - index of file | j - row number
     index = 0
-    while index < len(trajecs):
-        temp_trajec = open(trajecs[index], "r")
+    for trajec in trajecs:
+        temp_trajec = open(trajec, "r")
         temp_line = temp_trajec.readlines()
         lines += []
         lines[index] += temp_line
@@ -140,10 +140,8 @@ def addDatas(trajecs, output, debug):
     # creates as many counters as files starting from row where trajec starts
     counts = []
     output_file = open(output, 'a')
-    index = 0
-    while index < len(trajecs):
-        counts += [head_end]
-        index = index + 1
+    for each in trajecs:
+        counts.append(head_end)
 
     # searches next frame
     while len(lines) > 0:
