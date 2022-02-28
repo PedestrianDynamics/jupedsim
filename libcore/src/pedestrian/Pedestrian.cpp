@@ -289,18 +289,22 @@ void Pedestrian::InitV0(const Point & target)
 }
 
 
-const Point & Pedestrian::GetV0(const Point & target)
+Point Pedestrian::GetV0(const Point & target) const
 {
     // Molification around the targets makes little sense
     const Point & pos = GetPos();
     Point delta       = target - pos;
     Point new_v0      = delta.Normalized();
 
-    double t = _newOrientationDelay++ * _deltaT;
+    double t = _newOrientationDelay * _deltaT;
 
     //Handover new target
-    _v0 = _v0 + (new_v0 - _v0) * (1 - exp(-t / _tau));
-    return _v0;
+    return _v0 + (new_v0 - _v0) * (1 - exp(-t / _tau));
+}
+
+void Pedestrian::IncrementOrientationDelay()
+{
+    ++_newOrientationDelay;
 }
 
 void Pedestrian::SetSmoothTurning()
@@ -399,7 +403,7 @@ double Pedestrian::GetPremovementTime() const
     return _premovement;
 }
 
-const Building * Pedestrian::GetBuilding()
+const Building * Pedestrian::GetBuilding() const
 {
     return _building;
 }

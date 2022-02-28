@@ -62,7 +62,7 @@ public:
      * @param ped Pedestrian whos goal is determined
      * @return Goal at the current time-step of \p ped
      */
-    virtual Point GetTarget(Room * room, Pedestrian * ped) const = 0;
+    virtual Point GetTarget(const Room * room, const Pedestrian * ped) const = 0;
 
     /**
      * Returns the distance to the wall of a pedestrian.
@@ -70,7 +70,7 @@ public:
      * @return the distance to the wall of a pedestrian
      * TODO restructuring (TS)
      */
-    virtual double GetDistance2Wall(Pedestrian *) const { return -1.; };
+    virtual double GetDistance2Wall(const Pedestrian *) const { return -1.; };
 
     /**
      * Returns the distance to the target of a pedestrian.
@@ -78,7 +78,7 @@ public:
      * @return the distance to the target of a pedestrian
      * TODO restructuring (TS)
      */
-    virtual double GetDistance2Target(Pedestrian *, int) const { return -1.; };
+    virtual double GetDistance2Target(const Pedestrian *, int) const { return -1.; };
 
     /**
      * Returns the direction of the closest wall of a pedestrian.
@@ -86,7 +86,7 @@ public:
      * @return the direction to the wall of a pedestrian
      * TODO restructuring (TS)
      */
-    virtual Point GetDir2Wall(Pedestrian *) const { return Point(); };
+    virtual Point GetDir2Wall(const Pedestrian *) const { return Point(); };
 };
 
 /**
@@ -97,7 +97,7 @@ public:
 class DirectionMiddlePoint : public DirectionStrategy
 {
 public:
-    Point GetTarget(Room * room, Pedestrian * ped) const override;
+    Point GetTarget(const Room * room, const Pedestrian * ped) const override;
 };
 
 /**
@@ -108,7 +108,7 @@ public:
 class DirectionMinSeperationShorterLine : public DirectionStrategy
 {
 public:
-    Point GetTarget(Room * room, Pedestrian * ped) const override;
+    Point GetTarget(const Room * room, const Pedestrian * ped) const override;
 };
 
 /**
@@ -119,7 +119,7 @@ public:
 class DirectionInRangeBottleneck : public DirectionStrategy
 {
 public:
-    Point GetTarget(Room * room, Pedestrian * ped) const override;
+    Point GetTarget(const Room * room, const Pedestrian * ped) const override;
 };
 
 /**
@@ -134,10 +134,10 @@ public:
     ~DirectionLocalFloorfield() override = default;
 
     void ReInit() override;
-    Point GetTarget(Room * room, Pedestrian * ped) const override;
-    Point GetDir2Wall(Pedestrian * ped) const override;
-    double GetDistance2Wall(Pedestrian * ped) const override;
-    double GetDistance2Target(Pedestrian * ped, int UID) const override;
+    Point GetTarget(const Room * room, const Pedestrian * ped) const override;
+    Point GetDir2Wall(const Pedestrian * ped) const override;
+    double GetDistance2Wall(const Pedestrian * ped) const override;
+    double GetDistance2Target(const Pedestrian * ped, int UID) const override;
 
 private:
     std::map<int, std::unique_ptr<UnivFFviaFM>> _locffviafm;

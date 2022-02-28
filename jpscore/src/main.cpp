@@ -125,7 +125,7 @@ int main(int argc, char ** argv)
             LOG_ERROR("Could not start simulation. Check the log for prior errors");
             return EXIT_FAILURE;
         }
-        collectInputFilesIn(config.iniFile, "result");
+        collectInputFilesIn(config.iniFile, "results");
         time_t starttime{};
         time(&starttime);
 

@@ -219,7 +219,6 @@ def test_train_capacity_feature(tmp_path, env):
 
     # Check agent count at the end of the simulation
     last_frame_index = trajectories.frame_count() - 1
-    print(f"HELLO:{last_frame_index}")
     assert trajectories.agent_count_in_frame(last_frame_index) <= 15
 
 

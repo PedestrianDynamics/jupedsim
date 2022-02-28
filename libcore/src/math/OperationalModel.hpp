@@ -48,6 +48,16 @@ class Building;
 class Simulation;
 struct Configuration;
 
+struct PedestrianUpdate {
+    std::optional<Point> position{};
+    std::optional<Point> velocity{};
+    std::optional<Point> lastE0{};
+    std::optional<Point> waitingPos{};
+    Point v0{};
+    bool resetTurning{false};
+    bool resetPhi{false};
+};
+
 class OperationalModel
 {
 protected:
@@ -61,31 +71,18 @@ public:
         OperationalModelType type,
         const Configuration & config,
         DirectionManager * directionManager);
-    /**
-      * Constructor
-      */
     explicit OperationalModel(DirectionManager * directionManager);
-
-    /**
-      * Destructor
-      */
     virtual ~OperationalModel() = default;
-
 
     /**
       * @return a description of the model possibly with all model parameters in a nicely formatted string
       */
     virtual std::string GetDescription() const = 0;
 
-    /**
-      * Computes and update the positions/velocities /... of the pedestrians for the next time steps.
-      * The pedestrians are stored in the Building object.
-      *
-      * @param current, the elapsed time since the begin of the simulation
-      * @param deltaT, the timestep
-      * @param building, the representation of the building
-      */
-    virtual void ComputeNextTimeStep(double current, double deltaT, Building * building) = 0;
+    virtual PedestrianUpdate
+    ComputeNewPosition(double dT, const Pedestrian & ped, Building * building) const = 0;
+
+    virtual void ApplyUpdate(const PedestrianUpdate & update, Pedestrian & agent) const = 0;
 
     /**
       * Performs whatever initialization is needed/required.

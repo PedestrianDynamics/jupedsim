@@ -35,7 +35,7 @@ double fRand(double fMin, double fMax)
     return fMin + f * (fMax - fMin);
 }
 
-Point WaitingRandom::GetWaitingPosition(Room * room, Pedestrian * ped, double time)
+Point WaitingRandom::GetWaitingPosition(const Room * room, const Pedestrian * ped, double time)
 {
     // Polygon of either subroom or waiting area
     std::vector<Point> polygon;

@@ -32,7 +32,7 @@
 #include "geometry/SubRoom.hpp"
 #include "pedestrian/Pedestrian.hpp"
 
-Point WaitingStrategy::GetTarget(Room * room, Pedestrian * ped, double time)
+Point WaitingStrategy::GetTarget(const Room * room, const Pedestrian * ped, double time)
 {
     Point waitingPos = ped->GetWaitingPos();
     Point target;
@@ -44,23 +44,15 @@ Point WaitingStrategy::GetTarget(Room * room, Pedestrian * ped, double time)
         do {
             target = GetWaitingPosition(room, ped, time);
         } while(!subroom->IsInSubRoom(target));
-
-        ped->SetWaitingPos(target);
     }
     // check if in close range to desired position, hard coded!
     else if((ped->GetWaitingPos() - ped->GetPos()).Norm() <= 0.1 && ped->GetV0Norm() < 0.5) {
         target = ped->GetPos();
-        ped->SetWaitingPos(target);
     }
     // head to desired waiting position
     else {
-        target = GetPath(ped);
+        target = ped->GetWaitingPos();
     }
 
     return target;
-}
-
-Point WaitingStrategy::GetPath(Pedestrian * ped)
-{
-    return ped->GetWaitingPos();
 }
