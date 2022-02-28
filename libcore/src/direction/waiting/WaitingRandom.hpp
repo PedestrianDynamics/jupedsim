@@ -38,5 +38,5 @@ public:
     WaitingRandom() { std::srand(std::time(0)); }
 
 private:
-    Point GetWaitingPosition(Room * room, Pedestrian * ped, double time) override;
+    Point GetWaitingPosition(const Room * room, const Pedestrian * ped, double time) override;
 };

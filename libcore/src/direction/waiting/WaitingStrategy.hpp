@@ -47,7 +47,7 @@ public:
      * @param ped Pedestrians, whose walking direction is determined
      * @return Desired walking direction of ped
      */
-    virtual Point GetTarget(Room * room, Pedestrian * ped, double time);
+    Point GetTarget(const Room * room, const Pedestrian * ped, double time);
 
     /**
       * Returns the desired waiting position of a pedestrian.
@@ -55,13 +55,5 @@ public:
       * @param ped Pedestrians, whose walking direction is determined
       * @return Desired waiting position of ped
       */
-    virtual Point GetWaitingPosition(Room * room, Pedestrian * ped, double time) = 0;
-
-    /**
-     * Returns the desired walking direction of a pedestrian.
-     * Needed for non-convex rooms! Hopefully removed soon.
-     * @param ped Pedestrians, whose walking direction is determined
-     * @return Desired walking direction of ped along path
-     */
-    virtual Point GetPath(Pedestrian * ped);
+    virtual Point GetWaitingPosition(const Room * room, const Pedestrian * ped, double time) = 0;
 };

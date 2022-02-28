@@ -39,13 +39,14 @@
 #include <chrono>
 
 /// 1
-Point DirectionMiddlePoint::GetTarget(Room * /*room*/, Pedestrian * ped) const
+Point DirectionMiddlePoint::GetTarget(const Room * /*room*/, const Pedestrian * ped) const
 {
     return (ped->GetExitLine().GetPoint1() + ped->GetExitLine().GetPoint2()) * 0.5;
 }
 
 /// 2
-Point DirectionMinSeperationShorterLine::GetTarget(Room * /*room*/, Pedestrian * ped) const
+Point DirectionMinSeperationShorterLine::GetTarget(const Room * /*room*/, const Pedestrian * ped)
+    const
 {
     double d         = ped->GetEllipse().GetBmin() + 0.1; // shoulder//0.5;
     const Point & p1 = ped->GetExitLine().GetPoint1();
@@ -67,7 +68,7 @@ Point DirectionMinSeperationShorterLine::GetTarget(Room * /*room*/, Pedestrian *
 }
 
 /// 3
-Point DirectionInRangeBottleneck::GetTarget(Room * /*room*/, Pedestrian * ped) const
+Point DirectionInRangeBottleneck::GetTarget(const Room * /*room*/, const Pedestrian * ped) const
 {
     const Point & p1 = ped->GetExitLine().GetPoint1();
     const Point & p2 = ped->GetExitLine().GetPoint2();
@@ -87,7 +88,7 @@ Point DirectionInRangeBottleneck::GetTarget(Room * /*room*/, Pedestrian * ped) c
 }
 
 /// 8
-Point DirectionLocalFloorfield::GetTarget(Room * room, Pedestrian * ped) const
+Point DirectionLocalFloorfield::GetTarget(const Room * room, const Pedestrian * ped) const
 {
     Point p;
     auto * floorfield = _locffviafm.at(room->GetID()).get();
@@ -97,7 +98,7 @@ Point DirectionLocalFloorfield::GetTarget(Room * room, Pedestrian * ped) const
     return (p + ped->GetPos());
 }
 
-Point DirectionLocalFloorfield::GetDir2Wall(Pedestrian * ped) const
+Point DirectionLocalFloorfield::GetDir2Wall(const Pedestrian * ped) const
 {
     Point p;
     auto [roomID, _1, _2] = _building->GetRoomAndSubRoomIDs(ped->GetPos());
@@ -105,13 +106,13 @@ Point DirectionLocalFloorfield::GetDir2Wall(Pedestrian * ped) const
     return p;
 }
 
-double DirectionLocalFloorfield::GetDistance2Wall(Pedestrian * ped) const
+double DirectionLocalFloorfield::GetDistance2Wall(const Pedestrian * ped) const
 {
     auto [roomID, _1, _2] = _building->GetRoomAndSubRoomIDs(ped->GetPos());
     return _locffviafm.at(roomID)->GetDistance2WallAt(ped->GetPos());
 }
 
-double DirectionLocalFloorfield::GetDistance2Target(Pedestrian * ped, int UID) const
+double DirectionLocalFloorfield::GetDistance2Target(const Pedestrian * ped, int UID) const
 {
     auto [roomID, _1, _2] = _building->GetRoomAndSubRoomIDs(ped->GetPos());
     return _locffviafm.at(roomID)->GetCostToDestination(UID, ped->GetPos());

@@ -53,9 +53,10 @@ private:
     double _premovement          = 0;
 
     //gcfm specific parameters
-    double _mass   = 1;      // Mass: 1
-    double _tau    = 0.5;    // Reaction time: 0.5
-    double _t      = 1.0;    // OV function
+    double _mass = 1;   // Mass: 1
+    double _tau  = 0.5; // Reaction time: 0.5
+    double _t    = 1.0; // OV function
+
     double _deltaT = 0.01;   // step size
     JEllipse _ellipse{};     // the shape of this pedestrian
     Point _v0 = Point(0, 0); //vector V0
@@ -138,7 +139,9 @@ public:
         double v0DownStairs,
         double escalatorUp,
         double escalatorDown);
-    void SetSmoothTurning(); // activate the smooth turning with a delay of 2 sec
+    void SetV0(const Point & p) { _v0 = p; }
+    void SetSmoothTurning();
+    void IncrementOrientationDelay();
     void SetPhiPed();
     void SetFinalDestination(int UID);
     int GetRouterID() const;
@@ -165,7 +168,7 @@ public:
     const Point & GetPos() const;
     const Point & GetV() const;
     const Point & GetV0() const;
-    const Point & GetV0(const Point & target);
+    Point GetV0(const Point & target) const;
     void InitV0(const Point & target);
 
     /**
@@ -219,7 +222,7 @@ public:
     /**
       * Set/Get the Building object
       */
-    const Building * GetBuilding();
+    const Building * GetBuilding() const;
 
     /**
       * Set/Get the Building object

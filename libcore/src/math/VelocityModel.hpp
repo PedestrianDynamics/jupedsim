@@ -82,7 +82,7 @@ private:
       *
       * @return double
       */
-    double OptimalSpeed(Pedestrian * ped, double spacing) const;
+    double OptimalSpeed(const Pedestrian * ped, double spacing) const;
 
     /**
       * The desired direction of pedestrian
@@ -92,7 +92,7 @@ private:
       *
       * @return Point
       */
-    Point e0(Pedestrian * ped, Room * room) const;
+    void e0(const Pedestrian * ped, const Room * room, PedestrianUpdate & update) const;
     /**
       * Get the spacing between ped1 and ped2
       *
@@ -103,7 +103,7 @@ private:
       * and should be calculated *before* calling OptimalSpeed
       * @return Point
       */
-    my_pair GetSpacing(Pedestrian * ped1, Pedestrian * ped2, Point ei) const;
+    my_pair GetSpacing(const Pedestrian * ped1, const Pedestrian * ped2, Point ei) const;
     /**
       * Repulsive force between two pedestrians ped1 and ped2 according to
       * the Velocity model (to be published in TGF15)
@@ -113,7 +113,7 @@ private:
       *
       * @return Point
       */
-    Point ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const;
+    Point ForceRepPed(const Pedestrian * ped1, const Pedestrian * ped2) const;
     /**
       * Repulsive force acting on pedestrian <ped> from the walls in
       * <subroom>. The sum of all repulsive forces of the walls in <subroom> is calculated
@@ -123,7 +123,7 @@ private:
       *
       * @return Point
       */
-    Point ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const;
+    Point ForceRepRoom(const Pedestrian * ped, const SubRoom * subroom) const;
     /**
       * Repulsive force between pedestrian <ped> and wall <l>
       *
@@ -132,7 +132,8 @@ private:
       *
       * @return Point
       */
-    Point ForceRepWall(Pedestrian * ped, const Line & l, const Point & centroid, bool inside) const;
+    Point
+    ForceRepWall(const Pedestrian * ped, const Line & l, const Point & centroid, bool inside) const;
 
 public:
     VelocityModel(
@@ -149,12 +150,8 @@ public:
       */
     std::string GetDescription() const override;
 
-    /**
-      * Compute the next simulation step
-      * Solve the differential equations and update the positions and velocities
-      * @param current the actual time
-      * @param deltaT the next timestep
-      * @param building the geometry object
-      */
-    void ComputeNextTimeStep(double current, double deltaT, Building * building) override;
+    PedestrianUpdate
+    ComputeNewPosition(double dT, const Pedestrian & ped, Building * building) const override;
+
+    void ApplyUpdate(const PedestrianUpdate & update, Pedestrian & agent) const override;
 };

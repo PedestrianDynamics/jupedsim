@@ -60,140 +60,125 @@ VelocityModel::VelocityModel(
 {
 }
 
-void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building * building)
+PedestrianUpdate
+VelocityModel::ComputeNewPosition(double dT, const Pedestrian & ped, Building * building) const
 {
-    // collect all pedestrians in the simulation.
-    const auto & allPeds          = _simulation->Agents();
-    std::vector<Point> result_acc = std::vector<Point>();
-    result_acc.reserve(allPeds.size());
-    std::vector<my_pair> spacings = std::vector<my_pair>();
-    spacings.reserve(allPeds.size()); // larger than needed
+    auto [room, subroom]                 = building->GetRoomAndSubRoom(ped.GetPos());
+    Point repPed                         = Point(0, 0);
+    std::vector<Pedestrian *> neighbours = building->GetNeighborhoodSearch().GetNeighbourhood(&ped);
 
-    for(const auto & ped : allPeds) {
-        auto [room, subroom] = building->GetRoomAndSubRoom(ped->GetPos());
-        Point repPed         = Point(0, 0);
-        std::vector<Pedestrian *> neighbours =
-            building->GetNeighborhoodSearch().GetNeighbourhood(ped.get());
+    int size = static_cast<int>(neighbours.size());
+    for(int i = 0; i < size; i++) {
+        Pedestrian * ped1 = neighbours[i];
+        //if they are in the same subroom
+        Point p1 = ped.GetPos();
 
-        int size = static_cast<int>(neighbours.size());
-        for(int i = 0; i < size; i++) {
-            Pedestrian * ped1 = neighbours[i];
-            //if they are in the same subroom
-            Point p1 = ped->GetPos();
+        Point p2 = ped1->GetPos();
 
-            Point p2 = ped1->GetPos();
-
-            auto [room1, subroom1] = building->GetRoomAndSubRoom(ped1->GetPos());
-            //subrooms to consider when looking for neighbour for the 3d visibility
-            std::vector<SubRoom *> emptyVector;
-            emptyVector.push_back(subroom);
-            emptyVector.push_back(subroom1);
-            bool isVisible = building->IsVisible(p1, p2, emptyVector, false);
-            if(!isVisible) {
-                continue;
-            }
-            if(room == room1 && subroom == subroom1) {
-                repPed += ForceRepPed(ped.get(), ped1);
-            } else {
-                // or in neighbour subrooms
-                if(subroom->IsDirectlyConnectedWith(subroom1)) {
-                    repPed += ForceRepPed(ped.get(), ped1);
-                }
-            }
-        } // for i
-        //repulsive forces to walls and closed transitions that are not my target
-        Point repWall = ForceRepRoom(ped.get(), subroom);
-
-        // calculate new direction ei according to (6)
-        Point direction = e0(ped.get(), room) + repPed + repWall;
-        for(int i = 0; i < size; i++) {
-            Pedestrian * ped1      = neighbours[i];
-            auto [room1, subroom1] = building->GetRoomAndSubRoom(ped1->GetPos());
-            // calculate spacing
-            // my_pair spacing_winkel = GetSpacing(ped, ped1);
-            if(room == room1 && subroom == subroom1) {
-                spacings.push_back(GetSpacing(ped.get(), ped1, direction));
-            } else {
-                // or in neighbour subrooms
-                if(subroom->IsDirectlyConnectedWith(subroom1)) {
-                    spacings.push_back(GetSpacing(ped.get(), ped1, direction));
-                }
+        auto [room1, subroom1] = building->GetRoomAndSubRoom(ped1->GetPos());
+        //subrooms to consider when looking for neighbour for the 3d visibility
+        std::vector<SubRoom *> emptyVector;
+        emptyVector.push_back(subroom);
+        emptyVector.push_back(subroom1);
+        bool isVisible = building->IsVisible(p1, p2, emptyVector, false);
+        if(!isVisible) {
+            continue;
+        }
+        if(room == room1 && subroom == subroom1) {
+            repPed += ForceRepPed(&ped, ped1);
+        } else {
+            // or in neighbour subrooms
+            if(subroom->IsDirectlyConnectedWith(subroom1)) {
+                repPed += ForceRepPed(&ped, ped1);
             }
         }
-        //TODO get spacing to walls
-        //TODO update direction every DT?
+    } // for i
+    //repulsive forces to walls and closed transitions that are not my target
+    Point repWall = ForceRepRoom(&ped, subroom);
 
-        // calculate min spacing
-        std::sort(spacings.begin(), spacings.end(), sort_pred());
-        double spacing = spacings.empty() ? 100.0 : spacings.front().first;
-        Point speed    = direction.Normalized() * OptimalSpeed(ped.get(), spacing);
-        result_acc.push_back(speed);
-        spacings.clear();
+    double min_spacing = 100.0;
+    // calculate new direction ei according to (6)
+    PedestrianUpdate update{};
+    e0(&ped, room, update);
+    const Point direction = update.v0 + repPed + repWall;
+    for(int i = 0; i < size; i++) {
+        Pedestrian * ped1      = neighbours[i];
+        auto [room1, subroom1] = building->GetRoomAndSubRoom(ped1->GetPos());
+        // calculate spacing
+        // my_pair spacing_winkel = GetSpacing(ped, ped1);
+        if(room == room1 && subroom == subroom1) {
+            double spaceing = GetSpacing(&ped, ped1, direction).first;
+            min_spacing     = std::min(min_spacing, spaceing);
+        } else {
+            // or in neighbour subrooms
+            if(subroom->IsDirectlyConnectedWith(subroom1)) {
+                double spaceing = GetSpacing(&ped, ped1, direction).first;
+                min_spacing     = std::min(min_spacing, spaceing);
+            }
+        }
     }
 
-    // update
-    size_t counter = 0;
-    for(auto & ped : allPeds) {
-        Point v_neu   = result_acc[counter];
-        Point pos_neu = ped->GetPos() + v_neu * deltaT;
-        //only update the position if the velocity is above a threshold
-        if(v_neu.Norm() >= J_EPS_V) {
-            ped->SetPhiPed();
-        }
-        if(!ped->InPremovement(current)) {
-            ped->SetPos(pos_neu);
-            ped->SetV(v_neu);
-        }
-        ++counter;
+    update.velocity = direction.Normalized() * OptimalSpeed(&ped, min_spacing);
+    update.position = ped.GetPos() + *update.velocity * dT;
+    if(update.velocity->Norm() >= J_EPS_V) {
+        update.resetPhi = true;
+    }
+    return update;
+};
+
+void VelocityModel::ApplyUpdate(const PedestrianUpdate & update, Pedestrian & agent) const
+{
+    if(update.resetTurning) {
+        agent.SetSmoothTurning();
+    } else {
+        agent.IncrementOrientationDelay();
+    }
+    if(update.lastE0) {
+        agent.SetLastE0(*update.lastE0);
+    }
+    agent.SetV0(update.v0);
+    if(update.resetPhi) {
+        agent.SetPhiPed();
+    }
+    if(update.position) {
+        agent.SetPos(*update.position);
+    }
+    if(update.velocity) {
+        agent.SetV(*update.velocity);
     }
 }
 
-Point VelocityModel::e0(Pedestrian * ped, Room * room) const
+void VelocityModel::e0(const Pedestrian * ped, const Room * room, PedestrianUpdate & update) const
 {
-    Point target;
-
-    if(_direction) {
-        // target is where the ped wants to be after the next timestep
-        target = _direction->GetTarget(room, ped);
-    } else { //@todo: we need a model for waiting pedestrians
-        LOG_WARNING("VelocityModel::e0 Ped {} has no navline.", ped->GetUID());
-        // set random destination
-        std::mt19937 mt(_seed);
-        std::uniform_real_distribution<double> dist(0, 1.0);
-        double random_x = dist(mt);
-        double random_y = dist(mt);
-        Point P1        = Point(ped->GetPos().x - random_x, ped->GetPos().y - random_y);
-        Point P2        = Point(ped->GetPos().x + random_x, ped->GetPos().y + random_y);
-        const Line L(P1, P2);
-        ped->SetExitLine(&L);
-        target = P1;
+    const Point target = _direction->GetTarget(room, ped);
+    if(ped->IsWaiting()) {
+        update.waitingPos = target;
     }
+
     Point desired_direction;
     const Point pos = ped->GetPos();
     const auto dist = ped->GetExitLine().DistTo(pos);
-    // check if the molified version works
-    Point lastE0 = ped->GetLastE0();
-    ped->SetLastE0(target - pos);
 
     // TODO(kkratz): Fix this hack
     const auto * strategy = &_direction->GetDirectionStrategy();
     if(dynamic_cast<const DirectionLocalFloorfield *>(strategy)) {
+        Point lastE0      = ped->GetLastE0();
+        update.lastE0     = target - pos;
         desired_direction = target - pos;
         if(desired_direction.NormSquare() < 0.25 && !ped->IsWaiting()) {
             desired_direction = lastE0;
-            ped->SetLastE0(lastE0);
+            update.lastE0     = lastE0;
         }
     } else if(dist > J_EPS_GOAL) {
         desired_direction = ped->GetV0(target);
     } else {
-        ped->SetSmoothTurning();
-        desired_direction = ped->GetV0();
+        update.resetTurning = true;
+        desired_direction   = ped->GetV0();
     }
-    return desired_direction;
+    update.v0 = desired_direction;
 }
 
-
-double VelocityModel::OptimalSpeed(Pedestrian * ped, double spacing) const
+double VelocityModel::OptimalSpeed(const Pedestrian * ped, double spacing) const
 {
     double v0    = ped->GetV0Norm();
     double T     = ped->GetT();
@@ -207,7 +192,7 @@ double VelocityModel::OptimalSpeed(Pedestrian * ped, double spacing) const
 }
 
 // return spacing and id of the nearest pedestrian
-my_pair VelocityModel::GetSpacing(Pedestrian * ped1, Pedestrian * ped2, Point ei) const
+my_pair VelocityModel::GetSpacing(const Pedestrian * ped1, const Pedestrian * ped2, Point ei) const
 {
     Point distp12   = ped2->GetPos() - ped1->GetPos(); // inversed sign
     double Distance = distp12.Norm();
@@ -235,7 +220,7 @@ my_pair VelocityModel::GetSpacing(Pedestrian * ped1, Pedestrian * ped2, Point ei
     }
     return my_pair(FLT_MAX, ped2->GetUID());
 }
-Point VelocityModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
+Point VelocityModel::ForceRepPed(const Pedestrian * ped1, const Pedestrian * ped2) const
 {
     Point F_rep(0.0, 0.0);
     // x- and y-coordinate of the distance between p1 and p2
@@ -274,9 +259,9 @@ Point VelocityModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
     F_rep = ep12 * R_ij;
 
     return F_rep;
-} //END Velocity:ForceRepPed()
+}
 
-Point VelocityModel::ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const
+Point VelocityModel::ForceRepRoom(const Pedestrian * ped, const SubRoom * subroom) const
 {
     Point f(0., 0.);
     const Point & centroid = subroom->GetCentroid();
@@ -312,7 +297,7 @@ Point VelocityModel::ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const
 }
 
 Point VelocityModel::ForceRepWall(
-    Pedestrian * ped,
+    const Pedestrian * ped,
     const Line & w,
     const Point & centroid,
     bool inside) const

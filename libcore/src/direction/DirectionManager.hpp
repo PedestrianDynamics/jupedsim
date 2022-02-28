@@ -55,7 +55,7 @@ public:
      * @param ped pedestrian whose desired direction is computed
      * @return desired direction of ped
      */
-    Point GetTarget(Room * room, Pedestrian * ped);
+    Point GetTarget(const Room * room, const Pedestrian * ped);
 
     /**
      * Getter for the waiting strategy.

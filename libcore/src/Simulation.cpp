@@ -53,7 +53,9 @@
 #include <algorithm>
 #include <chrono>
 #include <fmt/core.h>
+#include <iterator>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <tinyxml.h>
 #include <variant>
@@ -82,8 +84,25 @@ void Simulation::Iterate()
     if(t_in_sec > Pedestrian::GetMinPremovementTime()) {
         _routingEngine->setNeedUpdate(_eventProcessed || _routingEngine->NeedsUpdate());
         UpdateRoutes();
-        // update the positions
-        _operationalModel->ComputeNextTimeStep(t_in_sec, _clock.dT(), _building.get());
+        std::vector<std::optional<PedestrianUpdate>> updates(_agents.size(), std::nullopt);
+        std::transform(
+            _agents.begin(),
+            _agents.end(),
+            updates.begin(),
+            [this](auto && agent) -> std::optional<PedestrianUpdate> {
+                if(agent->InPremovement(_clock.ElapsedTime())) {
+                    return std::nullopt;
+                }
+                return _operationalModel->ComputeNewPosition(_clock.dT(), *agent, _building.get());
+            });
+
+        auto agent_iter = _agents.begin();
+        std::for_each(updates.begin(), updates.end(), [this, &agent_iter](auto && update) {
+            if(update) {
+                _operationalModel->ApplyUpdate(*update, **agent_iter);
+            }
+            ++agent_iter;
+        });
 
         //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
         //update quickestRouter
