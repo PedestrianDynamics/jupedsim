@@ -22,9 +22,14 @@ class Environment:
         self.jpscore_path = canonicalize(
             pathlib.Path(str(os.getenv("JPSCORE_EXECUTABLE_PATH")))
         )
+
         self.systemtest_path = canonicalize(
             pathlib.Path((str(os.getenv("JPSCORE_SOURCE_PATH"))))
             / "systemtest"
+        )
+
+        self.performancetests_path = canonicalize(
+            pathlib.Path(str(os.getenv("JPSCORE_PERFORMACETESTS_PATH")))
         )
 
         tmp_system = platform.system()

@@ -2,6 +2,7 @@
 export JPSCORE_EXECUTABLE_PATH="@CMAKE_BINARY_DIR@/bin/jpscore"
 export JPSCORE_SOURCE_PATH="@CMAKE_SOURCE_DIR@"
 export PYTHONPATH="@CMAKE_SOURCE_DIR@/python_modules"
+export JPSCORE_PERFORMACETESTS_PATH="@CMAKE_SOURCE_DIR@/performancetest"
 
-pytest  ${JPSCORE_SOURCE_PATH}/systemtest "$@"
+${JPSCORE_PERFORMACETESTS_PATH}/performancetests.py
 
