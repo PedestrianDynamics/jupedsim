@@ -27,53 +27,43 @@
 #include "pedestrian/Pedestrian.hpp"
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <iterator>
 #include <shared_mutex>
 
 
 std::shared_mutex grid_mutex;
 
-NeighborhoodSearch::NeighborhoodSearch(
-    double gridXmin,
-    double gridXmax,
-    double gridYmin,
-    double gridYmax,
-    double cellSize) :
-    _gridXmin(gridXmin),
-    _gridYmin(gridYmin),
-    _cellSize(cellSize),
-    _gridSizeX((int) ((gridXmax - _gridXmin) / _cellSize) + 1 + 2), // 1 dummy cell on each side
-    _gridSizeY((int) ((gridYmax - _gridYmin) / _cellSize) + 1 + 2), // 1 dummy cell on each side
-    _grid(_gridSizeY, _gridSizeX)
-{
-}
+NeighborhoodSearch::NeighborhoodSearch(double cellSize) : _cellSize(cellSize) {}
 
 NeighborhoodSearch::~NeighborhoodSearch() {}
 
 void NeighborhoodSearch::Update(const std::vector<std::unique_ptr<Pedestrian>> & peds)
 {
     std::unique_lock exclusive_lock(grid_mutex);
-    _grid.clear();
 
+    std::vector<Grid2D<Pedestrian *>::IndexValuePair> values;
+    values.reserve(peds.size());
     for(const auto & ped : peds) {
         // determine the cell coordinates of pedestrian i
-        int ix = (int) ((ped->GetPos().x - _gridXmin) / _cellSize) + 1; // +1 because of dummy cells
-        int iy = (int) ((ped->GetPos().y - _gridYmin) / _cellSize) + 1;
-
-        _grid[iy][ix].push_back(ped.get());
+        std::int32_t ix = static_cast<std::int32_t>(ped->GetPos().x / _cellSize);
+        std::int32_t iy = static_cast<std::int32_t>(ped->GetPos().y / _cellSize);
+        values.push_back({{ix, iy}, ped.get()});
     }
+    _grid = Grid2D<Pedestrian *>(values);
 }
 
 
-std::vector<Pedestrian *> NeighborhoodSearch::GetNeighbourhood(const Pedestrian * ped) const
+std::vector<Pedestrian *> NeighborhoodSearch::GetNeighborhood(const Pedestrian * ped) const
 {
     std::vector<Pedestrian *> neighbourhood;
 
     double xPed = ped->GetPos().x;
     double yPed = ped->GetPos().y;
 
-    int l = (int) ((xPed - _gridXmin) / _cellSize) + 1; // +1 because of dummy cells
-    int k = (int) ((yPed - _gridYmin) / _cellSize) + 1;
+    std::int32_t l = static_cast<std::int32_t>(xPed / _cellSize);
+    std::int32_t k = static_cast<std::int32_t>(yPed / _cellSize);
 
     /**
      * We only aquire a shared lock here for reading data in the grid.
@@ -83,13 +73,13 @@ std::vector<Pedestrian *> NeighborhoodSearch::GetNeighbourhood(const Pedestrian 
     std::shared_lock shared_lock(grid_mutex);
 
     // all neighbor cells
-    for(int i = l - 1; i <= l + 1; ++i) {
-        for(int j = k - 1; j <= k + 1; ++j) {
-            std::copy_if(
-                _grid[j][i].begin(),
-                _grid[j][i].end(),
-                std::back_inserter(neighbourhood),
-                [ped](auto & other_ped) { return other_ped->GetUID() != ped->GetUID(); });
+    for(std::int32_t i = l - 1; i <= l + 1; ++i) {
+        for(std::int32_t j = k - 1; j <= k + 1; ++j) {
+            for(auto & other_ped : _grid.get({i, j})) {
+                if(other_ped.value->GetUID() != ped->GetUID()) {
+                    neighbourhood.push_back(other_ped.value);
+                }
+            }
         }
     }
 

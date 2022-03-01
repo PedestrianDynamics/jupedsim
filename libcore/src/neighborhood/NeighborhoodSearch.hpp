@@ -37,10 +37,9 @@ class Building;
 class NeighborhoodSearch
 {
 private:
-    double _gridXmin, _gridYmin, _cellSize;
-    int _gridSizeX, _gridSizeY;
+    double _cellSize;
 
-    Grid2D<std::deque<Pedestrian *>> _grid;
+    Grid2D<Pedestrian *> _grid{};
 
 public:
     NeighborhoodSearch()                           = default;
@@ -55,12 +54,7 @@ public:
       * @param cellsize the cell size
       * @param nPeds the number of pedestrians
       */
-    NeighborhoodSearch(
-        double gridXmin,
-        double gridXmax,
-        double gridYmin,
-        double gridYmax,
-        double cellSize);
+    NeighborhoodSearch(double cellSize);
 
     /**
       * Desctructor
@@ -77,5 +71,5 @@ public:
       * @param ped
       * @return neighbourhood
       */
-    std::vector<Pedestrian *> GetNeighbourhood(const Pedestrian * ped) const;
+    std::vector<Pedestrian *> GetNeighborhood(const Pedestrian * ped) const;
 };

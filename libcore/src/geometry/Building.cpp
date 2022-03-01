@@ -753,7 +753,7 @@ void Building::InitGrid()
         LOG_INFO("Initializing the grid with cell size: {}.", cellSize);
     }
 
-    _neighborhoodSearch = NeighborhoodSearch(x_min, x_max, y_min, y_max, cellSize);
+    _neighborhoodSearch = NeighborhoodSearch(cellSize);
 
     LOG_INFO("Done with Initializing the grid");
 }

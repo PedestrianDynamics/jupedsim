@@ -65,14 +65,13 @@ VelocityModel::ComputeNewPosition(double dT, const Pedestrian & ped, Building * 
 {
     auto [room, subroom]                 = building->GetRoomAndSubRoom(ped.GetPos());
     Point repPed                         = Point(0, 0);
-    std::vector<Pedestrian *> neighbours = building->GetNeighborhoodSearch().GetNeighbourhood(&ped);
+    std::vector<Pedestrian *> neighbours = building->GetNeighborhoodSearch().GetNeighborhood(&ped);
 
     int size = static_cast<int>(neighbours.size());
     for(int i = 0; i < size; i++) {
         Pedestrian * ped1 = neighbours[i];
         //if they are in the same subroom
         Point p1 = ped.GetPos();
-
         Point p2 = ped1->GetPos();
 
         auto [room1, subroom1] = building->GetRoomAndSubRoom(ped1->GetPos());
