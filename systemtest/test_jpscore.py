@@ -6,7 +6,7 @@ import pytest
 from driver.driver import JpsCoreDriver
 from driver.environment import Platform
 from driver.events import read_starting_times
-from driver.fixtures import env
+from fixtures import env
 from driver.flow import check_flow
 from driver.geometry import get_intersetions_path_segment
 from driver.inifile import (
