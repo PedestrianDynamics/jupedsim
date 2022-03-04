@@ -22,6 +22,7 @@
 #pragma once
 
 #include "IteratorPair.hpp"
+#include "util/HashCombine.hpp"
 
 #include <algorithm>
 #include <cstddef>
@@ -49,7 +50,8 @@ template <>
 struct std::hash<Grid2DIndex> {
     std::size_t operator()(const Grid2DIndex & id) const noexcept
     {
-        return std::hash<std::int32_t>{}(id.idx);
+        std::hash<std::int32_t> hasher{};
+        return jps::hash_combine(hasher(id.idx), hasher(id.idy));
     }
 };
 
