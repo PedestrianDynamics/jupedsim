@@ -127,6 +127,7 @@ set(header_files
     src/routing/global_shortest/AccessPoint.hpp
     src/routing/global_shortest/GlobalRouter.hpp
     src/util/UniqueID.hpp
+    src/util/HashCombine.hpp
     src/voronoi-boost/VoronoiPositionGenerator.hpp
 )
 
