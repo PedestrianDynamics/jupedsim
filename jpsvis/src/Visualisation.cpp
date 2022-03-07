@@ -37,6 +37,7 @@
 #include "FrameElement.hpp"
 #include "InteractorStyle.hpp"
 #include "Log.hpp"
+#include "MainWindow.hpp"
 #include "TrajectoryPoint.hpp"
 #include "general/Macros.hpp"
 #include "geometry/FacilityGeometry.hpp"
@@ -44,7 +45,6 @@
 #include "geometry/LinePlotter2D.hpp"
 #include "geometry/Point.hpp"
 #include "geometry/PointPlotter.hpp"
-#include "MainWindow.hpp"
 
 #include <QMessageBox>
 #include <QObject>
@@ -98,6 +98,7 @@ Visualisation::Visualisation(
     _renderer(vtkRenderer::New()),
     _runningTime(vtkTextActor::New())
 {
+    vtkObject::GlobalWarningDisplayOff();
     _renderWindow->AddRenderer(_renderer);
     _winTitle = "header without room caption";
     _renderer->SetBackground(1.0, 1.0, 1.0);

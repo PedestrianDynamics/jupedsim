@@ -2,7 +2,7 @@
 # Project setup
 ################################################################################
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
-project(JuPedSim VERSION 0.9.3 LANGUAGES CXX)
+project(JuPedSim VERSION 0.9.4 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -321,6 +321,8 @@ set(CPACK_PACKAGE_DESCRIPTION "JuPedSim")
 set(CPACK_PACKAGE_HOMEPAGE_URL "http://jupedsim.org")
 set(CPACK_MONOLITHIC_INSTALL ON)
 set(CPACK_PACKAGE_EXECUTABLES "jpscore;JuPedSim Simulator;jpsvis;JuPedSim Visualization")
+set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE)
+set(JPSCORE_INSTALLER_LOCATION ".")
 
 if(APPLE)
     set(CPACK_GENERATOR "DragNDrop")
@@ -340,8 +342,8 @@ elseif(WIN32)
     set(CPACK_GENERATOR "NSIS")
     set(CPACK_NSIS_HELP_LINK "www.jupedsim.org")
     set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/jpsvis/forms/jpsvis.ico")
-    set(CPACK_NSIS_DISPLAY_NAME "JPSvis")
-    set(CPACK_NSIS_PACKAGE_NAME "JPSvis")
+    set(CPACK_NSIS_DISPLAY_NAME "JuPedSim")
+    set(CPACK_NSIS_PACKAGE_NAME "JuPedSim")
     set(CPACK_NSIS_INSTALLED_ICON_NAME "${CMAKE_SOURCE_DIR}/jpsvis/forms/jpsvis.ico")
     set(CPACK_NSIS_URL_INFO_ABOUT ${CPACK_NSIS_HELP_LINK})
     set(CPACK_NSIS_MENU_LINKS
@@ -355,10 +357,11 @@ elseif(WIN32)
     set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS
       "Delete '$DESKTOP\\\\JPSvis.lnk'"
     )
+    set(JPSCORE_INSTALLER_LOCATION "bin")
 endif()
 
 install(TARGETS jpscore
-    DESTINATION .
+    DESTINATION ${JPSCORE_INSTALLER_LOCATION}
 )
 
 install(TARGETS jpsvis
