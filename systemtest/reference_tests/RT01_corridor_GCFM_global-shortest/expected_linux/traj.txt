@@ -1,4 +1,4 @@
-#description: jpscore (0.9.4)
+#description: jpscore (0.10.0)
 #agents: 40
 #count: 0
 #framerate: 8.00
