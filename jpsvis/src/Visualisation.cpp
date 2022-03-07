@@ -98,6 +98,7 @@ Visualisation::Visualisation(
     _renderer(vtkRenderer::New()),
     _runningTime(vtkTextActor::New())
 {
+    vtkObject::GlobalWarningDisplayOff();
     _renderWindow->AddRenderer(_renderer);
     _winTitle = "header without room caption";
     _renderer->SetBackground(1.0, 1.0, 1.0);
