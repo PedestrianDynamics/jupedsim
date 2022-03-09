@@ -1,4 +1,5 @@
 import argparse
+
 import numpy as np
 
 parser = argparse.ArgumentParser()
@@ -10,17 +11,18 @@ args = parser.parse_args()
 
 
 def FramefromLine(line):
-    frame = line.split("	")
+    frame = line.split("\t")
     return int(frame[1])
 
-# checks if frame rate and geometries match
+
 def checkhead(trajecs):
+    """checks if frame rate and geometries match"""
     # reads all framerates and geometries from the trajectories
     index = 0
     frame_rates = []
     geometries = []
-    while index < len(trajecs):
-        temp_trajec = open(trajecs[index], "r")
+    for trajec in trajecs:
+        temp_trajec = open(trajec, "r")
         lines = temp_trajec.readlines()
         counter = 0
         temp_line = lines[counter]
@@ -34,7 +36,7 @@ def checkhead(trajecs):
             counter += 1
             temp_line = lines[counter]
         temp_trajec.close()
-        index = index + 1
+
     # compares if the are identical
     first_rate = frame_rates[0]
     first_geo = geometries[0]
@@ -47,8 +49,8 @@ def checkhead(trajecs):
     return True
 
 
-# test if all frames are included
-def checkcomplete(file):
+def isComplete(file):
+    """test if all frames are included"""
     data = np.loadtxt(file)
     i = 0
     frame = data[0][1]
@@ -57,7 +59,7 @@ def checkcomplete(file):
             frame = frame + 1
         else:
             if frame < data[i][1]:
-                return True
+                return False
         i = i + 1
     if frame == data[-1][1]:
         return True
@@ -74,62 +76,35 @@ def endingFrame(file):
     return data[-1][1]
 
 
-# checks if files are matching one Trajectory
 def checkdata(files):
+    """checks if files are matching one Trajectory"""
     end_frames = []
     start_frames = []
     for file in files:
-        if not checkcomplete(file):
+        if not isComplete(file):
             return False
-        start_frames += [startingFrame(file)]
-        end_frames += [endingFrame(file)]
+        start_frames.append(startingFrame(file))
+        end_frames.append(endingFrame(file))
     for start_frame in start_frames:
+        # a starting frame is considered valid if it is the first frame of the given trajectories
+        # a starting frame is considered valid if it comes after an end frame
         if start_frame != min(start_frames) and start_frame - 1 not in end_frames:
             return False
     return True
 
-# merges Data for exactly two files (will be removed later)
-def addData(trajec1, trajec2):
-    input_file1 = open(trajec1, "r")
-    lines1 = input_file1.readlines()
-    input_file2 = open(trajec2, "r")
-    lines2 = input_file2.readlines()
-    count1 = 14
-    count2 = 14
-    output_file = open('src/newtesttabelle.txt', 'w')
-    while count1 < len(lines1) - 1 and count2 < len(lines2) - 1:
-        if (FramefromLine(lines1[count1])) < (FramefromLine(lines2[count2])):
-            output_file.write(lines1[count1])
-            count1 = count1 + 1
-        if (FramefromLine(lines1[count1])) > (FramefromLine(lines2[count2])):
-            output_file.write(lines2[count2])
-            count2 = count2 + 1
-        if (FramefromLine(lines1[count1])) == (FramefromLine(lines2[count2])):
-            print("that did not work out")
-            return
-    while count1 < len(lines1) - 1:
-        output_file.write(lines1[count1])
-        count1 = count1 + 1
-    while count2 < len(lines2) - 1:
-        output_file.write(lines2[count2])
-        count2 = count2 + 1
-    output_file.close()
 
-
-# will merge all data into the output-file
-# "trajecs" is a list of all Trajectory files
 def addDatas(trajecs, output, debug):
-    lines = [[], []]  # lines[i][j] | i - index of file | j - row number
-    index = 0
+    """will merge all data into the output-file
+      "trajecs" is a list of all Trajectory files"""
+    lines = []  # lines[i][j] | i - file | j - rows from that file
     for trajec in trajecs:
         temp_trajec = open(trajec, "r")
         temp_line = temp_trajec.readlines()
-        lines += []
-        lines[index] += temp_line
+        lines.append(temp_line)
         temp_trajec.close()
-        index = index + 1
 
     # determines in which line the header ends
+    # asumes that all trajectory heads start at the same line
     head_end = 0
     for line in lines[0]:
         if line.startswith("#") or line == "\n":
@@ -143,13 +118,12 @@ def addDatas(trajecs, output, debug):
     for each in trajecs:
         counts.append(head_end)
 
-    # searches next frame
     while len(lines) > 0:
         found = False
         current_frames = []
         index = 0
         while index < len(lines):
-            current_frames += [FramefromLine(lines[index][(counts[index])])]
+            current_frames.append(FramefromLine(lines[index][(counts[index])]))
             index = index + 1
         next_frame = min(current_frames)
         if debug:
@@ -169,6 +143,7 @@ def addDatas(trajecs, output, debug):
     output_file.close()
     print(f'new File "{output}" was created.')
 
+
 def addInfos(trajecs, output):
     temp_trajec = open(trajecs[0], "r")
     lines = temp_trajec.readlines()
@@ -177,16 +152,18 @@ def addInfos(trajecs, output):
     temp_line = lines[counter]
     while temp_line.startswith("#") or temp_line == "\n":
         if temp_line.startswith("#description:"):
-            output_file.write(temp_line.strip('\n')+" merged with MergeTool\n")
+            output_file.write(temp_line.strip('\n') + " merged with MergeTool\n")
         else:
             output_file.write(temp_line)
         counter += 1
         temp_line = lines[counter]
     temp_trajec.close()
     output_file.close()
+
+
 if args.debug:
     print("it will be checked if the Trajectories match")
-if not checkhead(args.merge) :
+if not checkhead(args.merge):
     print("the Trajectories do not have matching Framerate or Geometry")
     exit()
 if not checkdata(args.merge):
