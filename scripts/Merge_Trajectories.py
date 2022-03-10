@@ -22,20 +22,19 @@ def checkhead(trajecs):
     frame_rates = []
     geometries = []
     for trajec in trajecs:
-        temp_trajec = open(trajec, "r")
-        lines = temp_trajec.readlines()
-        counter = 0
-        temp_line = lines[counter]
-        while temp_line.startswith("#"):
-            if temp_line.startswith("#framerate"):
-                split_line = temp_line.split(": ")
-                frame_rates += [split_line[1]]
-            if temp_line.startswith("#geometry"):
-                split_line = temp_line.split(": ")
-                geometries += [split_line[1]]
-            counter += 1
+        with open(trajec, "r") as temp_trajec:
+            lines = temp_trajec.readlines()
+            counter = 0
             temp_line = lines[counter]
-        temp_trajec.close()
+            while temp_line.startswith("#"):
+                if temp_line.startswith("#framerate"):
+                    split_line = temp_line.split(": ")
+                    frame_rates += [split_line[1]]
+                if temp_line.startswith("#geometry"):
+                    split_line = temp_line.split(": ")
+                    geometries += [split_line[1]]
+                counter += 1
+                temp_line = lines[counter]
 
     # compares if the are identical
     first_rate = frame_rates[0]
@@ -98,10 +97,9 @@ def addDatas(trajecs, output, debug):
       "trajecs" is a list of all Trajectory files"""
     lines = []  # lines[i][j] | i - file | j - rows from that file
     for trajec in trajecs:
-        temp_trajec = open(trajec, "r")
-        temp_line = temp_trajec.readlines()
-        lines.append(temp_line)
-        temp_trajec.close()
+        with open(trajec, "r") as temp_trajec:
+            temp_line = temp_trajec.readlines()
+            lines.append(temp_line)
 
     # determines in which line the header ends
     # asumes that all trajectory heads start at the same line
@@ -114,51 +112,48 @@ def addDatas(trajecs, output, debug):
 
     # creates as many counters as files starting from row where trajec starts
     counts = []
-    output_file = open(output, 'a')
     for each in trajecs:
         counts.append(head_end)
 
-    while len(lines) > 0:
-        found = False
-        current_frames = []
-        index = 0
-        while index < len(lines):
-            current_frames.append(FramefromLine(lines[index][(counts[index])]))
-            index = index + 1
-        next_frame = min(current_frames)
-        if debug:
-            print(f"current Frame : {next_frame} remaining Files: {len(lines)}")
-        index = 0
-        # adds row with next frame to the output file
-        while index < len(lines):
-            if FramefromLine(lines[index][(counts[index])]) == next_frame and found is False:
-                output_file.write(lines[index][counts[index]])
-                counts[index] += 1
-                found = True
-                # removes file and counter from lines if end has been reached
-                if counts[index] >= len(lines[index]):
-                    counts.pop(index)
-                    lines.pop(index)
-            index = index + 1
-    output_file.close()
+    with open(output, 'a') as output_file:
+        while len(lines) > 0:
+            found = False
+            current_frames = []
+            index = 0
+            while index < len(lines):
+                current_frames.append(FramefromLine(lines[index][(counts[index])]))
+                index = index + 1
+            next_frame = min(current_frames)
+            if debug:
+                print(f"current Frame : {next_frame} remaining Files: {len(lines)}")
+            index = 0
+            # adds row with next frame to the output file
+            while index < len(lines):
+                if FramefromLine(lines[index][(counts[index])]) == next_frame and found is False:
+                    output_file.write(lines[index][counts[index]])
+                    counts[index] += 1
+                    found = True
+                    # removes file and counter from lines if end has been reached
+                    if counts[index] >= len(lines[index]):
+                        counts.pop(index)
+                        lines.pop(index)
+                index = index + 1
     print(f'new File "{output}" was created.')
 
 
 def addInfos(trajecs, output):
-    temp_trajec = open(trajecs[0], "r")
-    lines = temp_trajec.readlines()
-    counter = 0
-    output_file = open(output, "w")
-    temp_line = lines[counter]
-    while temp_line.startswith("#") or temp_line == "\n":
-        if temp_line.startswith("#description:"):
-            output_file.write(temp_line.strip('\n') + " merged with MergeTool\n")
-        else:
-            output_file.write(temp_line)
-        counter += 1
-        temp_line = lines[counter]
-    temp_trajec.close()
-    output_file.close()
+    with open(trajecs[0], "r") as temp_trajec:
+        lines = temp_trajec.readlines()
+        counter = 0
+        with open(output, "w") as output_file:
+            temp_line = lines[counter]
+            while temp_line.startswith("#") or temp_line == "\n":
+                if temp_line.startswith("#description:"):
+                    output_file.write(temp_line.strip('\n') + " merged with MergeTool\n")
+                else:
+                    output_file.write(temp_line)
+                counter += 1
+                temp_line = lines[counter]
 
 
 if args.debug:
