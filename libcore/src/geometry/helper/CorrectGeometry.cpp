@@ -196,7 +196,8 @@ void AddTrainDoors(
     Building & building,
     const TrainType & train,
     double trainStartOffset,
-    bool fromEnd)
+    bool fromEnd,
+    Geometry & geometry)
 {
     static int transition_id = 100000; // randomly high number
 
@@ -244,17 +245,19 @@ void AddTrainDoors(
     std::for_each(
         std::begin(addedWalls),
         std::end(addedWalls),
-        [trainId, &building, &subroom](const Wall & wall) {
+        [trainId, &building, &subroom, &geometry](const Wall & wall) {
             building.AddTrainWallAdded(trainId, wall);
             subroom->AddWall(wall);
+            geometry.AddLineSegment(wall);
         });
 
     std::for_each(
         std::begin(removedWalls),
         std::end(removedWalls),
-        [trainId, &building, &subroom](const Wall & wall) {
+        [trainId, &building, &subroom, &geometry](const Wall & wall) {
             building.AddTrainWallRemoved(trainId, wall);
             subroom->RemoveWall(wall);
+            geometry.RemoveLineSegment(wall);
         });
 
     // Add doors to geometry

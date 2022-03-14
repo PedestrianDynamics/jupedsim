@@ -60,11 +60,15 @@
 #include <tinyxml.h>
 #include <variant>
 
-Simulation::Simulation(Configuration * args, std::unique_ptr<Building> && building) :
+Simulation::Simulation(
+    Configuration * args,
+    std::unique_ptr<Building> && building,
+    std::unique_ptr<Geometry> && geometry) :
     _config(args),
     _clock(_config->dT),
     _building(std::move(building)),
     _directionManager(DirectionManager::Create(*args, _building.get())),
+    _geometry(std::move(geometry)),
     _routingEngine(std::make_unique<RoutingEngine>(args, _building.get(), _directionManager.get())),
     _operationalModel(
         OperationalModel::CreateFromType(args->operationalModel, *args, _directionManager.get()))
@@ -81,6 +85,15 @@ void Simulation::Iterate()
     _operationalModel->Update(t_in_sec);
     _routingEngine->UpdateTime(t_in_sec);
 
+    // TODO(kkratz): This currently mirrors the door state of the
+    // old representation into the new one.
+    // Intercepting external door events is not an issue, what is
+    // problematic however is that our old door models (Crossings/Transitions)
+    // implement flow control and close themselves.
+    for(const auto & [id, t] : _building->GetAllTransitions()) {
+        _geometry->UpdateDoorState(id, t->GetState());
+    }
+
     if(t_in_sec > Pedestrian::GetMinPremovementTime()) {
         _routingEngine->setNeedUpdate(_eventProcessed || _routingEngine->NeedsUpdate());
         UpdateRoutes();
@@ -93,7 +106,8 @@ void Simulation::Iterate()
                 if(agent->InPremovement(_clock.ElapsedTime())) {
                     return std::nullopt;
                 }
-                return _operationalModel->ComputeNewPosition(_clock.dT(), *agent, _building.get());
+                return _operationalModel->ComputeNewPosition(
+                    _clock.dT(), *agent, *_building, *_geometry);
             });
 
         auto agent_iter = _agents.begin();
@@ -104,20 +118,11 @@ void Simulation::Iterate()
             ++agent_iter;
         });
 
-        //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
-        //update quickestRouter
         if(_eventProcessed) {
-            LOG_INFO(
-                "Enter correctGeometry: Building Has {} Transitions.",
-                _building->GetAllTransitions().size());
-
             _directionManager->GetDirectionStrategy().ReInit();
         }
-        //update the routes and locations
         UpdateLocations();
 
-        // Checks if position of pedestrians is inside waiting area and should be waiting or if
-        // left waiting area and assign new goal
         GoalManager gm{_building.get(), this};
         gm.update(t_in_sec);
     }
@@ -228,7 +233,8 @@ void Simulation::ActivateTrain(
     double startOffset,
     bool reversed)
 {
-    geometry::helper::AddTrainDoors(trainId, trackId, *_building, type, startOffset, reversed);
+    geometry::helper::AddTrainDoors(
+        trainId, trackId, *_building, type, startOffset, reversed, *_geometry);
     _eventProcessed = true;
 };
 
@@ -250,7 +256,10 @@ void Simulation::DeactivateTrain(int trainId, int trackId)
         std::for_each(
             std::begin(tempAddedWalls.value()),
             std::end(tempAddedWalls.value()),
-            [&subroom](const Wall & wall) { subroom->RemoveWall(wall); });
+            [&subroom, this](const Wall & wall) {
+                subroom->RemoveWall(wall);
+                _geometry->RemoveLineSegment(wall);
+            });
 
         _building->ClearTrainWallsAdded(trainId);
     }
@@ -261,7 +270,10 @@ void Simulation::DeactivateTrain(int trainId, int trackId)
         std::for_each(
             std::begin(tempRemovedWalls.value()),
             std::end(tempRemovedWalls.value()),
-            [&subroom](const Wall & wall) { subroom->AddWall(wall); });
+            [&subroom, this](const Wall & wall) {
+                subroom->AddWall(wall);
+                _geometry->AddLineSegment(wall);
+            });
 
         _building->ClearTrainWallsRemoved(trainId);
     }
@@ -296,7 +308,7 @@ bool Simulation::InitArgs()
     //this should be called after the routing engine has been initialised
     // because a direction is needed for this initialisation.
     LOG_INFO("Init Operational Model starting ...");
-    _operationalModel->Init(_building.get(), this, *_config);
+    _operationalModel->Init(this);
     LOG_INFO("Init Operational Model done.");
 
     // Give the DirectionStrategy the chance to perform some initialization.

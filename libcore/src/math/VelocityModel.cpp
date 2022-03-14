@@ -39,6 +39,7 @@
 
 #include <Logger.hpp>
 #include <memory>
+#include <numeric>
 
 double xRight = 26.0;
 double xLeft  = 0.0;
@@ -49,71 +50,45 @@ VelocityModel::VelocityModel(
     double aped,
     double Dped,
     double awall,
-    double Dwall,
-    unsigned int seed) :
-    OperationalModel(directionManager),
-    _aPed(aped),
-    _DPed(Dped),
-    _aWall(awall),
-    _DWall(Dwall),
-    _seed(seed)
+    double Dwall) :
+    OperationalModel(directionManager), _aPed(aped), _DPed(Dped), _aWall(awall), _DWall(Dwall)
 {
 }
 
-PedestrianUpdate
-VelocityModel::ComputeNewPosition(double dT, const Pedestrian & ped, Building * building) const
+PedestrianUpdate VelocityModel::ComputeNewPosition(
+    double dT,
+    const Pedestrian & ped,
+    const Building & building,
+    const Geometry & geometry) const
 {
-    auto [room, subroom]                 = building->GetRoomAndSubRoom(ped.GetPos());
-    Point repPed                         = Point(0, 0);
-    std::vector<Pedestrian *> neighbours = building->GetNeighborhoodSearch().GetNeighborhood(&ped);
-
-    int size = static_cast<int>(neighbours.size());
-    for(int i = 0; i < size; i++) {
-        Pedestrian * ped1 = neighbours[i];
-        //if they are in the same subroom
-        Point p1 = ped.GetPos();
-        Point p2 = ped1->GetPos();
-
-        auto [room1, subroom1] = building->GetRoomAndSubRoom(ped1->GetPos());
-        //subrooms to consider when looking for neighbour for the 3d visibility
-        std::vector<SubRoom *> emptyVector;
-        emptyVector.push_back(subroom);
-        emptyVector.push_back(subroom1);
-        bool isVisible = building->IsVisible(p1, p2, emptyVector, false);
-        if(!isVisible) {
+    const auto neighborhood =
+        building.GetNeighborhoodSearch().GetNeighboringAgents(ped.GetPos(), 4);
+    double min_spacing = 100.0;
+    Point repPed       = Point(0, 0);
+    const Point p1     = ped.GetPos();
+    for(const auto * other : neighborhood) {
+        if(other->GetUID() == ped.GetUID()) {
             continue;
         }
-        if(room == room1 && subroom == subroom1) {
-            repPed += ForceRepPed(&ped, ped1);
-        } else {
-            // or in neighbour subrooms
-            if(subroom->IsDirectlyConnectedWith(subroom1)) {
-                repPed += ForceRepPed(&ped, ped1);
-            }
+        if(!geometry.IntersectsAny(Line(p1, other->GetPos()))) {
+            repPed += ForceRepPed(&ped, other);
         }
-    } // for i
+    }
     //repulsive forces to walls and closed transitions that are not my target
-    Point repWall = ForceRepRoom(&ped, subroom);
+    Point repWall = ForceRepRoom(&ped, geometry);
 
-    double min_spacing = 100.0;
     // calculate new direction ei according to (6)
     PedestrianUpdate update{};
-    e0(&ped, room, update);
+    const auto [room, _] = building.GetRoomAndSubRoom(ped.GetPos());
+    e0(&ped, _direction->GetTarget(room, &ped), update);
     const Point direction = update.v0 + repPed + repWall;
-    for(int i = 0; i < size; i++) {
-        Pedestrian * ped1      = neighbours[i];
-        auto [room1, subroom1] = building->GetRoomAndSubRoom(ped1->GetPos());
-        // calculate spacing
-        // my_pair spacing_winkel = GetSpacing(ped, ped1);
-        if(room == room1 && subroom == subroom1) {
-            double spaceing = GetSpacing(&ped, ped1, direction).first;
+    for(const auto * other : neighborhood) {
+        if(other->GetUID() == ped.GetUID()) {
+            continue;
+        }
+        if(!geometry.IntersectsAny(Line(p1, other->GetPos()))) {
+            double spaceing = GetSpacing(&ped, other, direction).first;
             min_spacing     = std::min(min_spacing, spaceing);
-        } else {
-            // or in neighbour subrooms
-            if(subroom->IsDirectlyConnectedWith(subroom1)) {
-                double spaceing = GetSpacing(&ped, ped1, direction).first;
-                min_spacing     = std::min(min_spacing, spaceing);
-            }
         }
     }
 
@@ -147,9 +122,8 @@ void VelocityModel::ApplyUpdate(const PedestrianUpdate & update, Pedestrian & ag
     }
 }
 
-void VelocityModel::e0(const Pedestrian * ped, const Room * room, PedestrianUpdate & update) const
+void VelocityModel::e0(const Pedestrian * ped, Point target, PedestrianUpdate & update) const
 {
-    const Point target = _direction->GetTarget(room, ped);
     if(ped->IsWaiting()) {
         update.waitingPos = target;
     }
@@ -260,98 +234,43 @@ Point VelocityModel::ForceRepPed(const Pedestrian * ped1, const Pedestrian * ped
     return F_rep;
 }
 
-Point VelocityModel::ForceRepRoom(const Pedestrian * ped, const SubRoom * subroom) const
+Point VelocityModel::ForceRepRoom(const Pedestrian * ped, const Geometry & geometry) const
 {
-    Point f(0., 0.);
-    const Point & centroid = subroom->GetCentroid();
-    bool inside            = subroom->IsInSubRoom(centroid);
-    //first the walls
-    for(const auto & wall : subroom->GetAllWalls()) {
-        f += ForceRepWall(ped, wall, centroid, inside);
-    }
+    auto walls = geometry.LineSegmentsInDistanceTo(5.0, ped->GetPos());
+    auto f     = std::accumulate(
+        walls.begin(),
+        walls.end(),
+        Point(0, 0),
+        [this, &ped](const auto & acc, const auto & element) {
+            return acc + ForceRepWall(ped, element);
+        });
 
-    //then the obstacles
-    for(const auto & obst : subroom->GetAllObstacles()) {
-        if(obst->Contains(ped->GetPos())) {
-            LOG_ERROR(
-                "Agent {} is trapped in obstacle in room/subroom {:d}/{:d}",
-                ped->GetUID(),
-                subroom->GetRoomID(),
-                subroom->GetSubRoomID());
-            exit(EXIT_FAILURE);
-        } else
-            for(const auto & wall : obst->GetAllWalls()) {
-                f += ForceRepWall(ped, wall, centroid, inside);
+    auto doors = geometry.DoorsInDistanceTo(5.0, ped->GetPos());
+    f          = std::accumulate(
+        doors.begin(), doors.end(), f, [this, &ped](const auto & acc, const auto & door) {
+            switch(door.state) {
+                case DoorState::OPEN:
+                    return acc + Point(0, 0);
+                case DoorState::CLOSE:
+                case DoorState::TEMP_CLOSE:
+                    return acc + ForceRepWall(ped, door.linesegment);
             }
-    }
-
-    // and finally the closed doors
-    for(const auto & trans : subroom->GetAllTransitions()) {
-        if(!trans->IsOpen()) {
-            f += ForceRepWall(ped, *(static_cast<Line *>(trans)), centroid, inside);
-        }
-    }
-
+        });
     return f;
 }
 
-Point VelocityModel::ForceRepWall(
-    const Pedestrian * ped,
-    const Line & w,
-    const Point & centroid,
-    bool inside) const
+Point VelocityModel::ForceRepWall(const Pedestrian * ped, const Line & w) const
 {
-    Point F_wrep = Point(0.0, 0.0);
-    Point pt     = w.ShortestPoint(ped->GetPos());
-
-    Point dist       = pt - ped->GetPos(); // x- and y-coordinate of the distance between ped and p
-    const double EPS = 0.000;              // molified see Koester2013
-    double Distance  = dist.Norm() + EPS;  // distance between the centre of ped and point p
-    Point e_iw; // x- and y-coordinate of the normalized vector between ped and pt
-    double l = ped->GetEllipse().GetBmax();
-    double R_iw;
-    double min_distance_to_wall = 0.001; // 10 cm
-
-    if(Distance > min_distance_to_wall) {
-        e_iw = dist / Distance;
-    } else {
-        LOG_WARNING(
-            "Velocity: forceRepWall() ped {} [{:f}, {:f}] is too near to the wall [{:f}, "
-            "{:f}]-[{:f}, {:f}] (dist={:f})",
-            ped->GetUID(),
-            ped->GetPos().y,
-            ped->GetPos().y,
-            w.GetPoint1().x,
-            w.GetPoint1().y,
-            w.GetPoint2().x,
-            w.GetPoint2().y,
-            Distance);
-        Point new_dist = centroid - ped->GetPos();
-        new_dist       = new_dist / new_dist.Norm();
-        e_iw           = (inside ? new_dist : new_dist * -1);
+    if(const auto distGoal = ped->GetExitLine().DistTo(ped->GetPos()); distGoal < J_EPS_GOAL) {
+        return Point{0, 0};
     }
-    //-------------------------
 
-    const Point & pos   = ped->GetPos();
-    const auto distGoal = ped->GetExitLine().DistToSquare(pos);
+    const Point pt       = w.ShortestPoint(ped->GetPos());
+    const Point dist_vec = pt - ped->GetPos();
+    const double dist    = dist_vec.Norm();
+    const Point e_iw     = dist_vec / dist;
 
-    if(distGoal < J_EPS_GOAL * J_EPS_GOAL)
-        return F_wrep;
-    //-------------------------
-    R_iw   = -_aWall * exp((l - Distance) / _DWall);
-    F_wrep = e_iw * R_iw;
-
-    return F_wrep;
-}
-
-std::string VelocityModel::GetDescription() const
-{
-    std::string rueck;
-    char tmp[1024];
-
-    sprintf(tmp, "\t\ta: \t\tPed: %f \tWall: %f\n", _aPed, _aWall);
-    rueck.append(tmp);
-    sprintf(tmp, "\t\tD: \t\tPed: %f \tWall: %f\n", _DPed, _DWall);
-    rueck.append(tmp);
-    return rueck;
+    const double l    = ped->GetEllipse().GetBmax();
+    const double R_iw = -_aWall * exp((l - dist) / _DWall);
+    return e_iw * R_iw;
 }

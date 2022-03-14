@@ -68,13 +68,6 @@ public:
       */
     void Update(const std::vector<std::unique_ptr<Pedestrian>> & peds);
 
-    /**
-      * Returns neighbourhood of the pedestrians ped
-      * @param ped
-      * @return neighbourhood
-      */
-    std::vector<Pedestrian *> GetNeighborhood(const Pedestrian * ped) const;
-
     IteratorPair<NeighborhoodIterator, NeighborhoodEndIterator>
     GetNeighboringAgents(Point pos, double radius) const;
 };

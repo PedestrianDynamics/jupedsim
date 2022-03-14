@@ -59,10 +59,12 @@ public:
         double maxfwall);
     ~GCFMModel() override = default;
 
-    PedestrianUpdate
-    ComputeNewPosition(double dT, const Pedestrian & ped, Building * building) const override;
+    PedestrianUpdate ComputeNewPosition(
+        double dT,
+        const Pedestrian & ped,
+        const Building & building,
+        const Geometry & geometry) const override;
     void ApplyUpdate(const PedestrianUpdate & upate, Pedestrian & agent) const override;
-    std::string GetDescription() const override;
 
 private:
     // Modellparameter
@@ -84,7 +86,7 @@ private:
      *
      * @return Point
      */
-    Point ForceDriv(const Pedestrian * ped, const Room * room, PedestrianUpdate & update) const;
+    Point ForceDriv(const Pedestrian * ped, Point target, PedestrianUpdate & update) const;
     /**
      * Repulsive force between two pedestrians ped1 and ped2 according to
      * the Generalized Centrifugal Force Model (chraibi2010a)
@@ -104,7 +106,7 @@ private:
      *
      * @return
      */
-    Point ForceRepRoom(const Pedestrian * ped, const SubRoom * subroom) const;
+    Point ForceRepRoom(const Pedestrian * ped, const Geometry & geometry) const;
     Point ForceRepWall(const Pedestrian * ped, const Line & l) const;
     Point ForceRepStatPoint(const Pedestrian * ped, const Point & p, double l, double vn) const;
     Point ForceInterpolation(

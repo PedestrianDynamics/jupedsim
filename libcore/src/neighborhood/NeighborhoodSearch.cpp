@@ -58,38 +58,6 @@ void NeighborhoodSearch::Update(const std::vector<std::unique_ptr<Pedestrian>> &
 }
 
 
-std::vector<Pedestrian *> NeighborhoodSearch::GetNeighborhood(const Pedestrian * ped) const
-{
-    std::vector<Pedestrian *> neighbourhood;
-
-    double xPed = ped->GetPos().x;
-    double yPed = ped->GetPos().y;
-
-    std::int32_t l = static_cast<std::int32_t>(xPed / _cellSize);
-    std::int32_t k = static_cast<std::int32_t>(yPed / _cellSize);
-
-    /**
-     * We only aquire a shared lock here for reading data in the grid.
-     * It is not allowed to write data using a shared lock.
-     * Otherwise thread safety is lost.
-     */
-    std::shared_lock shared_lock(grid_mutex);
-
-    // all neighbor cells
-    for(std::int32_t i = l - 1; i <= l + 1; ++i) {
-        for(std::int32_t j = k - 1; j <= k + 1; ++j) {
-            for(auto & other_ped : _grid.get({i, j})) {
-                if(other_ped.value->GetUID() != ped->GetUID()) {
-                    neighbourhood.push_back(other_ped.value);
-                }
-            }
-        }
-    }
-
-    return neighbourhood;
-}
-
-
 IteratorPair<NeighborhoodIterator, NeighborhoodEndIterator>
 NeighborhoodSearch::GetNeighboringAgents(Point pos, double radius) const
 {

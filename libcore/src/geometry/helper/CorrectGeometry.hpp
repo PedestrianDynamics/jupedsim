@@ -29,6 +29,7 @@ class Line;
 class Point;
 class Transition;
 
+#include "Geometry.hpp"
 #include "geometry/TrainGeometryInterface.hpp"
 
 #include <optional>
@@ -74,7 +75,8 @@ void AddTrainDoors(
     Building & building,
     const TrainType & train,
     double trainStartOffset,
-    bool fromEnd);
+    bool fromEnd,
+    Geometry & geometry);
 
 /**
  * Splits the given \p trackWalls with the \p doors. The new line segments to create a closed

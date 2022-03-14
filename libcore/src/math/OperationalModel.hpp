@@ -37,6 +37,7 @@
 /** @} */ // end of group
 #pragma once
 
+#include "Geometry.hpp"
 #include "OperationalModelType.hpp"
 #include "direction/DirectionManager.hpp"
 
@@ -74,13 +75,11 @@ public:
     explicit OperationalModel(DirectionManager * directionManager);
     virtual ~OperationalModel() = default;
 
-    /**
-      * @return a description of the model possibly with all model parameters in a nicely formatted string
-      */
-    virtual std::string GetDescription() const = 0;
-
-    virtual PedestrianUpdate
-    ComputeNewPosition(double dT, const Pedestrian & ped, Building * building) const = 0;
+    virtual PedestrianUpdate ComputeNewPosition(
+        double dT,
+        const Pedestrian & ped,
+        const Building & building,
+        const Geometry & geometry) const = 0;
 
     virtual void ApplyUpdate(const PedestrianUpdate & update, Pedestrian & agent) const = 0;
 
@@ -89,7 +88,7 @@ public:
       * This function is called at the beginning the simulation once.
       * @param building, the building object
       */
-    void Init(Building * building, Simulation * simulation, const Configuration & config);
+    void Init(Simulation * simulation);
 
     void Update(double time) { _currentTime = time; }
 };

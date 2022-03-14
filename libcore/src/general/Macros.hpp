@@ -106,27 +106,6 @@ enum class OptionalOutput {
     group             = 7,
 }; // enum class
 
-// Describes the door
-enum class DoorState { OPEN, CLOSE, TEMP_CLOSE, Error };
-
-inline DoorState StringToDoorState(std::string name)
-{
-    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-
-    if(name.compare("open") == 0) {
-        return DoorState::OPEN;
-    }
-
-    if(name.compare("temp_close") == 0) {
-        return DoorState::TEMP_CLOSE;
-    }
-
-    if(name.compare("close") == 0) {
-        return DoorState::CLOSE;
-    }
-
-    return DoorState::Error;
-};
 
 constexpr double magicnum(int i)
 {

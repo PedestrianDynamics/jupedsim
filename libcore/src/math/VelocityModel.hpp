@@ -29,6 +29,7 @@
  **/
 #pragma once
 
+#include "Geometry.hpp"
 #include "OperationalModel.hpp"
 #include "geometry/Building.hpp"
 #include "pedestrian/Pedestrian.hpp"
@@ -67,11 +68,8 @@ private:
     /// Modellparameter
     double _aPed;
     double _DPed;
-
     double _aWall;
     double _DWall;
-
-    unsigned int _seed;
 
     /**
       * Optimal velocity function \f$ V(spacing) =\min{v_0, \max{0, (s-l)/T}}  \f$
@@ -92,7 +90,7 @@ private:
       *
       * @return Point
       */
-    void e0(const Pedestrian * ped, const Room * room, PedestrianUpdate & update) const;
+    void e0(const Pedestrian * ped, Point target, PedestrianUpdate & update) const;
     /**
       * Get the spacing between ped1 and ped2
       *
@@ -123,7 +121,7 @@ private:
       *
       * @return Point
       */
-    Point ForceRepRoom(const Pedestrian * ped, const SubRoom * subroom) const;
+    Point ForceRepRoom(const Pedestrian * ped, const Geometry & geometry) const;
     /**
       * Repulsive force between pedestrian <ped> and wall <l>
       *
@@ -132,8 +130,7 @@ private:
       *
       * @return Point
       */
-    Point
-    ForceRepWall(const Pedestrian * ped, const Line & l, const Point & centroid, bool inside) const;
+    Point ForceRepWall(const Pedestrian * ped, const Line & l) const;
 
 public:
     VelocityModel(
@@ -141,17 +138,14 @@ public:
         double aped,
         double Dped,
         double awall,
-        double Dwall,
-        unsigned int seed);
+        double Dwall);
     ~VelocityModel() override = default;
 
-    /**
-      * @return all model parameters in a nicely formatted string
-      */
-    std::string GetDescription() const override;
-
-    PedestrianUpdate
-    ComputeNewPosition(double dT, const Pedestrian & ped, Building * building) const override;
+    PedestrianUpdate ComputeNewPosition(
+        double dT,
+        const Pedestrian & ped,
+        const Building & building,
+        const Geometry & geometry) const override;
 
     void ApplyUpdate(const PedestrianUpdate & update, Pedestrian & agent) const override;
 };
