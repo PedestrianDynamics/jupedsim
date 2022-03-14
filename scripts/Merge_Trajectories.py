@@ -36,7 +36,7 @@ def checkhead(trajecs):
                 counter += 1
                 temp_line = lines[counter]
 
-    # compares if the are identical
+    # compares if they are identical
     first_rate = frame_rates[0]
     first_geo = geometries[0]
     for rate in frame_rates:
@@ -53,16 +53,21 @@ def isComplete(file):
     data = np.loadtxt(file)
     i = 0
     frame = data[0][1]
-    while data[i][1] < data[-1][1]:
+    endFrame = data[-1][1]
+    while data[i][1] < endFrame:
         if frame == data[i][1]:
             frame = frame + 1
         else:
             if frame < data[i][1]:
                 return False
         i = i + 1
-    if frame == data[-1][1]:
-        return True
-    return False
+    if frame != data[-1][1]:
+        return False
+    while i < len(data):
+        if data[i][1] != endFrame:
+            return False
+        i = i+1
+    return True
 
 
 def startingFrame(file):
@@ -89,6 +94,9 @@ def checkdata(files):
         # a starting frame is considered valid if it comes after an end frame
         if start_frame != min(start_frames) and start_frame - 1 not in end_frames:
             return False
+        # a starting frame is invalid if it appears more than once
+        if start_frames.count(start_frame) > 1:
+            return False
     return True
 
 
@@ -102,7 +110,7 @@ def addDatas(trajecs, output, debug):
             lines.append(temp_line)
 
     # determines in which line the header ends
-    # asumes that all trajectory heads start at the same line
+    # assumes that all trajectory heads start at the same line
     head_end = 0
     for line in lines[0]:
         if line.startswith("#") or line == "\n":
