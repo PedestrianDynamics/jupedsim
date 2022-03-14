@@ -74,7 +74,8 @@ public:
     using value_type     = T;
     using size_type      = std::size_t;
     using container_type = std::vector<IndexValuePair>;
-    using it_pair        = IteratorPair<typename container_type::const_iterator>;
+    using it_type        = typename container_type::const_iterator;
+    using it_pair        = IteratorPair<it_type>;
 
     Grid2D() = default;
 
