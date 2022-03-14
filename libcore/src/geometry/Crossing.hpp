@@ -26,6 +26,7 @@
  **/
 #pragma once
 
+#include "DoorState.hpp"
 #include "Hline.hpp"
 #include "pedestrian/Pedestrian.hpp"
 

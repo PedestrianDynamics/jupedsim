@@ -62,13 +62,16 @@ GCFMModel::GCFMModel(
 {
 }
 
-PedestrianUpdate
-GCFMModel::ComputeNewPosition(double dT, const Pedestrian & ped, Building * building) const
+PedestrianUpdate GCFMModel::ComputeNewPosition(
+    double dT,
+    const Pedestrian & ped,
+    const Building & building,
+    const Geometry & geometry) const
 {
-    const double delta         = 1.5;
-    const auto [room, subroom] = building->GetRoomAndSubRoom(ped.GetPos());
-    const double normVi        = ped.GetV().ScalarProduct(ped.GetV());
-    const double tmp           = (ped.GetV0Norm() + delta) * (ped.GetV0Norm() + delta);
+    const double delta   = 1.5;
+    const auto [room, _] = building.GetRoomAndSubRoom(ped.GetPos());
+    const double normVi  = ped.GetV().ScalarProduct(ped.GetV());
+    const double tmp     = (ped.GetV0Norm() + delta) * (ped.GetV0Norm() + delta);
     if(normVi > tmp && ped.GetV0Norm() > 0) {
         LOG_ERROR(
             "GCFMModel::calculateForce() WARNING: actual velocity (%f) of iped %d "
@@ -78,34 +81,23 @@ GCFMModel::ComputeNewPosition(double dT, const Pedestrian & ped, Building * buil
             ped.GetV0Norm());
     }
 
+    const auto neighborhood =
+        building.GetNeighborhoodSearch().GetNeighboringAgents(ped.GetPos(), 4);
+    const auto p1 = ped.GetPos();
     Point F_rep;
-    std::vector<Pedestrian *> neighbours = building->GetNeighborhoodSearch().GetNeighborhood(&ped);
-    std::vector<SubRoom *> emptyVector;
-
-    int neighborsSize = neighbours.size();
-    for(int i = 0; i < neighborsSize; i++) {
-        Pedestrian * ped1   = neighbours[i];
-        Point p1            = ped.GetPos();
-        Point p2            = ped1->GetPos();
-        bool ped_is_visible = building->IsVisible(p1, p2, emptyVector, false);
-        if(!ped_is_visible)
+    for(const auto * other : neighborhood) {
+        if(other->GetUID() == ped.GetUID()) {
             continue;
-        //if they are in the same subroom
-        if(ped.GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
-            F_rep = F_rep + ForceRepPed(&ped, ped1);
-        } else {
-            // or in neighbour subrooms
-            SubRoom * sb2 = building->GetSubRoom(ped1->GetPos());
-            if(subroom->IsDirectlyConnectedWith(sb2)) {
-                F_rep = F_rep + ForceRepPed(&ped, ped1);
-            }
         }
-    } //for peds
+        if(!geometry.IntersectsAny(Line(p1, other->GetPos()))) {
+            F_rep += ForceRepPed(&ped, other);
+        }
+    }
 
     PedestrianUpdate update{};
     //repulsive forces to the walls and transitions that are not my target
-    Point repwall = ForceRepRoom(&ped, subroom);
-    Point fd      = ForceDriv(&ped, room, update);
+    Point repwall = ForceRepRoom(&ped, geometry);
+    Point fd      = ForceDriv(&ped, _direction->GetTarget(room, &ped), update);
     Point acc     = (fd + F_rep + repwall) / ped.GetMass();
 
     update.velocity = ped.GetV() + acc * dT;
@@ -130,9 +122,8 @@ void GCFMModel::ApplyUpdate(const PedestrianUpdate & update, Pedestrian & agent)
 }
 
 inline Point
-GCFMModel::ForceDriv(const Pedestrian * ped, const Room * room, PedestrianUpdate & update) const
+GCFMModel::ForceDriv(const Pedestrian * ped, Point target, PedestrianUpdate & update) const
 {
-    const Point & target = _direction->GetTarget(room, ped);
     if(ped->IsWaiting()) {
         update.waitingPos = target;
     }
@@ -285,35 +276,28 @@ Point GCFMModel::ForceRepPed(const Pedestrian * ped1, const Pedestrian * ped2) c
  *   - Vektor(x,y) mit Summe aller abstoßenden Kräfte im SubRoom
  * */
 
-inline Point GCFMModel::ForceRepRoom(const Pedestrian * ped, const SubRoom * subroom) const
+inline Point GCFMModel::ForceRepRoom(const Pedestrian * ped, const Geometry & geometry) const
 {
-    Point f(0., 0.);
-    //first the walls
-    for(const auto & wall : subroom->GetAllWalls()) {
-        f += ForceRepWall(ped, wall);
-    }
-    //then the obstacles
-    for(const auto & obst : subroom->GetAllObstacles()) {
-        if(obst->Contains(ped->GetPos())) {
-            LOG_ERROR(
-                "Agent {} is trapped in obstacle in room/subroom {:d}/{:d}",
-                ped->GetUID(),
-                subroom->GetRoomID(),
-                subroom->GetSubRoomID());
-            exit(EXIT_FAILURE);
-        } else
-            for(const auto & wall : obst->GetAllWalls()) {
-                f += ForceRepWall(ped, wall);
+    auto walls = geometry.LineSegmentsInDistanceTo(5.0, ped->GetPos());
+    auto f     = std::accumulate(
+        walls.begin(),
+        walls.end(),
+        Point(0, 0),
+        [this, &ped](const auto & acc, const auto & element) {
+            return acc + ForceRepWall(ped, element);
+        });
+
+    auto doors = geometry.DoorsInDistanceTo(5.0, ped->GetPos());
+    f          = std::accumulate(
+        doors.begin(), doors.end(), f, [this, &ped](const auto & acc, const auto & door) {
+            switch(door.state) {
+                case DoorState::OPEN:
+                    return acc + Point(0, 0);
+                case DoorState::CLOSE:
+                case DoorState::TEMP_CLOSE:
+                    return acc + ForceRepWall(ped, door.linesegment);
             }
-    }
-
-    // and finally the closed doors
-    for(auto & goal : subroom->GetAllTransitions()) {
-        if(!goal->IsOpen()) {
-            f += ForceRepWall(ped, *(static_cast<Line *>(goal)));
-        }
-    }
-
+        });
     return f;
 }
 
@@ -439,21 +423,4 @@ Point GCFMModel::ForceInterpolation(
         F_rep = e * px;
     }
     return F_rep;
-}
-
-std::string GCFMModel::GetDescription() const
-{
-    std::string rueck;
-    char tmp[1024];
-
-    sprintf(tmp, "\t\tNu: \t\tPed: %f \tWall: %f\n", _nuPed, _nuWall);
-    rueck.append(tmp);
-    sprintf(tmp, "\t\tInterp. Width: \tPed: %f \tWall: %f\n", _intp_widthPed, _intp_widthWall);
-    rueck.append(tmp);
-    sprintf(tmp, "\t\tMaxF: \t\tPed: %f \tWall: %f\n", _maxfPed, _maxfWall);
-    rueck.append(tmp);
-    sprintf(tmp, "\t\tDistEffMax: \tPed: %f \tWall: %f\n", _distEffMaxPed, _distEffMaxWall);
-    rueck.append(tmp);
-
-    return rueck;
 }

@@ -26,11 +26,13 @@
  *
  **/
 #include "IO/EventFileParser.hpp"
+#include "IO/GeoFileParser.hpp"
 #include "IO/IniFileParser.hpp"
 #include "IO/TrainFileParser.hpp"
 #include "ResultHandling.hpp"
 #include "Simulation.hpp"
 #include "agent-creation/AgentCreator.hpp"
+#include "events/Event.hpp"
 #include "events/EventManager.hpp"
 #include "events/EventVisitors.hpp"
 #include "general/ArgumentParser.hpp"
@@ -40,6 +42,7 @@
 #include "pedestrian/AgentsSourcesManager.hpp"
 
 #include <Logger.hpp>
+#include <chrono>
 #include <cstdlib>
 #include <exception>
 #include <fmt/format.h>
@@ -74,7 +77,8 @@ int main(int argc, char ** argv)
         auto building       = std::make_unique<Building>(&config, nullptr);
         auto * building_ptr = building.get();
         auto agents         = CreateAllPedestrians(&config, building.get(), config.tMax);
-        Simulation sim(&config, std::move(building));
+        auto geometry       = ParseGeometryXml(config.projectRootDir / config.geometryFile);
+        Simulation sim(&config, std::move(building), std::move(geometry));
         EventManager manager;
 
         size_t frame                        = 0;
@@ -89,6 +93,22 @@ int main(int argc, char ** argv)
                 manager.AddEvent(evt);
             }
             ++frame;
+        }
+
+        // TODO(kkratz): Right now door state is simply copied over from the buildings
+        // state because initial door state is described in the inifile.
+        // I want to redesign this so that all specified doors are open and can be closed
+        // before frame 0 with an event that takes place at t0.
+        // (e.g. what the code below is already doing)
+        for(const auto & [id, t] : building_ptr->GetAllTransitions()) {
+            auto type = DoorEvent::Type::OPEN;
+            if(t->IsClose()) {
+                type = DoorEvent::Type::CLOSE;
+            }
+            if(t->IsTempClose()) {
+                type = DoorEvent::Type::TEMP_CLOSE;
+            }
+            manager.AddEvent(DoorEvent{std::chrono::nanoseconds(0), type, id});
         }
 
         if(config.eventFile) {

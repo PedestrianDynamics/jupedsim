@@ -29,6 +29,7 @@
  **/
 #pragma once
 
+#include "Geometry.hpp"
 #include "IO/OutputHandler.hpp"
 #include "IO/Trajectories.hpp"
 #include "SimulationClock.hpp"
@@ -58,6 +59,7 @@ private:
     unsigned int _seed{8091983};
     std::unique_ptr<Building> _building;
     std::unique_ptr<DirectionManager> _directionManager;
+    std::unique_ptr<Geometry> _geometry;
     /// Manage all route choices algorithms
     std::unique_ptr<RoutingEngine> _routingEngine;
     /// Force model to use
@@ -67,7 +69,10 @@ private:
     bool _eventProcessed{false};
 
 public:
-    Simulation(Configuration * args, std::unique_ptr<Building> && building);
+    Simulation(
+        Configuration * args,
+        std::unique_ptr<Building> && building,
+        std::unique_ptr<Geometry> && geometry);
 
     ~Simulation() = default;
 

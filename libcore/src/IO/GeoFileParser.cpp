@@ -21,12 +21,14 @@
 #include "GeoFileParser.hpp"
 
 #include "general/Filesystem.hpp"
+#include "geometry/GeometryReader.hpp"
 #include "geometry/SubRoom.hpp"
 #include "geometry/SubroomType.hpp"
 #include "geometry/WaitingArea.hpp"
 #include "geometry/Wall.hpp"
 
 #include <Logger.hpp>
+#include <stdexcept>
 #include <tinyxml.h>
 
 GeoFileParser::GeoFileParser(Configuration * configuration) : _configuration(configuration) {}
@@ -457,7 +459,8 @@ bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building * build
     LOG_INFO(">> ID: {}", id);
     //------------------ state
     std::string stateStr = xmltoa(xDoor->Attribute("state"), "open");
-    DoorState state      = StringToDoorState(stateStr);
+    DoorState state      = from_string<DoorState>(stateStr);
+
     //store transition in a map and call getTransition/getCrossing
     switch(state) {
         case DoorState::OPEN:
@@ -468,11 +471,6 @@ bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building * build
             break;
         case DoorState::TEMP_CLOSE:
             building->GetTransition(id)->TempClose(true);
-            break;
-        case DoorState::Error:
-            LOG_WARNING(
-                "Unknown door state: <{}>. open, close or temp_close. Default: open", stateStr);
-            building->GetTransition(id)->Open(true);
             break;
     }
 
@@ -924,3 +922,88 @@ bool GeoFileParser::ParseExternalFiles(const TiXmlNode & mainNode)
 }
 
 GeoFileParser::~GeoFileParser() {}
+
+std::unique_ptr<Geometry> ParseGeometryXml(const std::filesystem::path & geometry_file)
+{
+    GeometryBuilder builder{};
+    TiXmlDocument doc(geometry_file.c_str());
+    if(!doc.LoadFile()) {
+        throw std::runtime_error(
+            fmt::format("Cannot parse {}, error: {}", geometry_file, doc.ErrorDesc()));
+    }
+    const auto * root = doc.RootElement();
+    if(root == nullptr || root->ValueStr() != "geometry") {
+        throw std::runtime_error(fmt::format("No root element found in {}", geometry_file));
+    }
+    const auto * rooms = root->FirstChild("rooms");
+    if(rooms == nullptr) {
+        throw std::runtime_error(fmt::format("No rooms element found in {}", geometry_file));
+    }
+
+
+    auto parsePolygon = [](auto & e, auto & builder) {
+        for(const auto * xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
+            xPolyVertices              = xPolyVertices->NextSiblingElement("polygon")) {
+            for(const auto * vertex1 = xPolyVertices->FirstChildElement("vertex");
+                vertex1 != nullptr;
+                vertex1 = vertex1->NextSiblingElement("vertex")) {
+                const auto * vertex2 = vertex1->NextSiblingElement("vertex");
+                if(vertex2 == nullptr) {
+                    break;
+                }
+                const double x1 = xmltof(vertex1->Attribute("px"));
+                const double y1 = xmltof(vertex1->Attribute("py"));
+                const double x2 = xmltof(vertex2->Attribute("px"));
+                const double y2 = xmltof(vertex2->Attribute("py"));
+                builder.AddLineSegment(x1, y1, x2, y2);
+            }
+        }
+    };
+
+    for(const auto * room = rooms->FirstChild("room"); room != nullptr;
+        room              = room->NextSiblingElement("room")) {
+        for(const auto * subroom = room->FirstChild("subroom"); subroom != nullptr;
+            subroom              = subroom->NextSiblingElement("subroom")) {
+            parsePolygon(subroom, builder);
+            for(const auto * obstacle = subroom->FirstChild("obstacle"); obstacle != nullptr;
+                obstacle              = obstacle->NextSiblingElement("obstacle")) {
+                parsePolygon(obstacle, builder);
+            }
+        }
+    }
+
+    auto parseDoor = [](auto & e, auto & builder) {
+        const auto * id_attribute = e.Attribute("id");
+        if(id_attribute == nullptr) {
+            throw std::runtime_error("transition id attribute missing");
+        }
+        const auto id = xmltoi(id_attribute, -1);
+        if(id == -1) {
+            throw std::runtime_error("transition id attribute not an integer");
+        }
+        const auto * vertex1 = e.FirstChildElement("vertex");
+        if(vertex1 == nullptr) {
+            return;
+        }
+        const auto * vertex2 = vertex1->NextSiblingElement("vertex");
+        if(vertex2 == nullptr) {
+            return;
+        }
+        const double x1 = xmltof(vertex1->Attribute("px"));
+        const double y1 = xmltof(vertex1->Attribute("py"));
+        const double x2 = xmltof(vertex2->Attribute("px"));
+        const double y2 = xmltof(vertex2->Attribute("py"));
+
+        builder.AddDoor(x1, y1, x2, y2, id);
+    };
+
+    if(const auto * transitions = root->FirstChild("transitions"); transitions != nullptr) {
+        for(const auto * transition = transitions->FirstChildElement("transition");
+            transition != nullptr;
+            transition = transition->NextSiblingElement("transition")) {
+            parseDoor(*transition, builder);
+        }
+    }
+
+    return std::make_unique<Geometry>(builder.Build());
+}

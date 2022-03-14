@@ -37,8 +37,9 @@ Crossing::Crossing()
     _id            = -1;
     _doorUsage     = 0;
     _tempDoorUsage = 0;
-    _maxDoorUsage = (std::numeric_limits<int>::max)(); //avoid name conflicts in windows winmindef.h
-    _outflowRate  = (std::numeric_limits<double>::max)();
+    _maxDoorUsage =
+        (std::numeric_limits<int>::max) (); //avoid name conflicts in windows winmindef.h
+    _outflowRate         = (std::numeric_limits<double>::max) ();
     _lastPassingTime     = 0;
     _lastFlowMeasurement = 0;
     _DT                  = 1;
@@ -376,9 +377,6 @@ std::string Crossing::toString() const
             break;
         case DoorState::TEMP_CLOSE:
             tmp << " temp_close";
-            break;
-        case DoorState::Error:
-            tmp << " Error";
             break;
     }
     return tmp.str();
