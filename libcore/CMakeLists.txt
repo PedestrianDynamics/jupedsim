@@ -111,6 +111,7 @@ set(header_files
     src/math/VelocityModel.hpp
     src/neighborhood/Grid2D.hpp
     src/neighborhood/NeighborhoodSearch.hpp
+    src/neighborhood/NeighborhoodIterator.hpp
     src/pedestrian/AgentsParameters.hpp
     src/pedestrian/AgentsSource.hpp
     src/pedestrian/AgentsSourcesManager.hpp

@@ -5,17 +5,20 @@
 ///
 /// Provides begin and end method required for range based for loops.
 /// _it_second must be reachable by _it_first.
-template <typename Iterator>
+template <typename IteratorFirst, typename IteratorSecond = IteratorFirst>
 class IteratorPair
 {
-    Iterator _it_first, _it_second;
+    IteratorFirst _it_first;
+    IteratorSecond _it_second;
 
 public:
-    IteratorPair(Iterator it1, Iterator it2) : _it_first(it1), _it_second(it2) {}
+    IteratorPair(IteratorFirst it1, IteratorSecond it2) : _it_first(it1), _it_second(it2) {}
 
-    Iterator first() const { return _it_first; }
-    Iterator second() const { return _it_second; }
+    IteratorFirst first() const { return _it_first; }
+    IteratorSecond second() const { return _it_second; }
 
-    Iterator begin() const { return first(); }
-    Iterator end() const { return second(); }
+    IteratorFirst begin() const { return first(); }
+    IteratorSecond end() const { return second(); }
+
+    bool empty() const { return _it_first == _it_second; }
 };

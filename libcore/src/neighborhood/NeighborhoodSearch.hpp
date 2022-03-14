@@ -24,6 +24,8 @@
 #pragma once
 
 #include "Grid2D.hpp"
+#include "IteratorPair.hpp"
+#include "NeighborhoodIterator.hpp"
 #include "geometry/Point.hpp"
 
 #include <deque>
@@ -72,4 +74,7 @@ public:
       * @return neighbourhood
       */
     std::vector<Pedestrian *> GetNeighborhood(const Pedestrian * ped) const;
+
+    IteratorPair<NeighborhoodIterator, NeighborhoodEndIterator>
+    GetNeighboringAgents(Point pos, double radius) const;
 };

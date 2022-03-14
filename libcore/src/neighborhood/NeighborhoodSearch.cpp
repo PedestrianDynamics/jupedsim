@@ -24,9 +24,12 @@
  **/
 #include "NeighborhoodSearch.hpp"
 
+#include "geometry/Point.hpp"
+#include "neighborhood/NeighborhoodIterator.hpp"
 #include "pedestrian/Pedestrian.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
@@ -84,4 +87,25 @@ std::vector<Pedestrian *> NeighborhoodSearch::GetNeighborhood(const Pedestrian *
     }
 
     return neighbourhood;
+}
+
+
+IteratorPair<NeighborhoodIterator, NeighborhoodEndIterator>
+NeighborhoodSearch::GetNeighboringAgents(Point pos, double radius) const
+{
+    std::int32_t pos_idx = static_cast<std::int32_t>(pos.x / _cellSize);
+    std::int32_t pos_idy = static_cast<std::int32_t>(pos.y / _cellSize);
+
+    std::int32_t nh_level = static_cast<std::int32_t>(std::ceil(radius / _cellSize));
+
+    auto filter = [pos, radius](Point other_pos) { return Distance(pos, other_pos) < radius; };
+
+    return {
+        {_grid,
+         pos_idx - nh_level,
+         pos_idy - nh_level,
+         pos_idx + nh_level,
+         pos_idy + nh_level,
+         filter},
+        {}};
 }
