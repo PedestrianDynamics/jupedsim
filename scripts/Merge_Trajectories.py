@@ -4,7 +4,7 @@ import numpy as np
 
 parser = argparse.ArgumentParser()
 parser.add_argument("merge", type=str, help="Merge the given Trajectories together", nargs='+')
-parser.add_argument('-o', type=str, required=False, default="src/outputfile.txt", help="define outputfile",
+parser.add_argument('-o', type=str, required=False, default="outputfile.txt", help="define outputfile",
                     dest="output")
 parser.add_argument('-d', action="store_true", help="activates debugmode", dest="debug")
 args = parser.parse_args()
@@ -18,7 +18,6 @@ def FramefromLine(line):
 def checkhead(trajecs):
     """checks if frame rate and geometries match"""
     # reads all framerates and geometries from the trajectories
-    index = 0
     frame_rates = []
     geometries = []
     for trajec in trajecs:
@@ -53,8 +52,8 @@ def isComplete(file):
     data = np.loadtxt(file)
     i = 0
     frame = data[0][1]
-    endFrame = data[-1][1]
-    while data[i][1] < endFrame:
+    end_frame = data[-1][1]
+    while data[i][1] < end_frame:
         if frame == data[i][1]:
             frame = frame + 1
         else:
@@ -64,9 +63,9 @@ def isComplete(file):
     if frame != data[-1][1]:
         return False
     while i < len(data):
-        if data[i][1] != endFrame:
+        if data[i][1] != end_frame:
             return False
-        i = i+1
+        i = i + 1
     return True
 
 
@@ -109,44 +108,48 @@ def addDatas(trajecs, output, debug):
             temp_line = temp_trajec.readlines()
             lines.append(temp_line)
 
-    # determines in which line the header ends
+    # determines in which line the header ends and the data start
     # assumes that all trajectory heads start at the same line
-    head_end = 0
+    start_row = 0
     for line in lines[0]:
         if line.startswith("#") or line == "\n":
-            head_end += 1
+            start_row += 1
         else:  # now the trajectories start
             break
 
-    # creates as many counters as files starting from row where trajec starts
-    counts = []
-    for each in trajecs:
-        counts.append(head_end)
+    # creates a list with all first Frames
+    first_frames = []
+    for file in lines:
+        first_frames.append(FramefromLine(file[start_row]))
 
-    with open(output, 'a') as output_file:
-        while len(lines) > 0:
-            found = False
-            current_frames = []
-            index = 0
-            while index < len(lines):
-                current_frames.append(FramefromLine(lines[index][(counts[index])]))
-                index = index + 1
-            next_frame = min(current_frames)
-            if debug:
-                print(f"current Frame : {next_frame} remaining Files: {len(lines)}")
-            index = 0
-            # adds row with next frame to the output file
-            while index < len(lines):
-                if FramefromLine(lines[index][(counts[index])]) == next_frame and found is False:
-                    output_file.write(lines[index][counts[index]])
-                    counts[index] += 1
-                    found = True
-                    # removes file and counter from lines if end has been reached
-                    if counts[index] >= len(lines[index]):
-                        counts.pop(index)
-                        lines.pop(index)
-                index = index + 1
+    debug_counter = 1
+    debug_length = len(first_frames)
+    # until all files are written
+    while first_frames:
+        # determines the lowest starting frame
+        next_frame = min(first_frames)
+        for i, frame in enumerate(first_frames):
+            # adds all data from the file with next frame to the output file
+            if frame == next_frame:
+                if debug:
+                    print(f"writing file {debug_counter}/{debug_length}")
+                write(lines[i], output)
+                # removes file and the first line from the lists after the data has been written
+                lines.pop(i)
+                first_frames.pop(i)
+                debug_counter += 1
+                break
+
     print(f'new File "{output}" was created.')
+
+
+def write(inputdata, output):
+    """writes all data from the inputfile onto the output file"""
+    # "inputdata" is expected to be a list of rows
+    with open(output, "a") as output_file:
+        for line in inputdata:
+            if line != "\n" and not line.startswith("#"):
+                output_file.write(line)
 
 
 def addInfos(trajecs, output):
