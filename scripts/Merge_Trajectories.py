@@ -70,13 +70,21 @@ def isComplete(file):
 
 
 def startingFrame(file):
-    data = np.loadtxt(file)
-    return data[0][1]
+    with open(file, "r") as opened_file:
+        temp_line = opened_file.readlines()
+    for line in temp_line:
+        if line != "\n" and not line.startswith("#"):
+            return FramefromLine(line)
 
 
 def endingFrame(file):
-    data = np.loadtxt(file)
-    return data[-1][1]
+    with open(file, "r") as opened_file:
+        lines = opened_file.readlines()
+        lines.reverse()
+
+    for line in lines:
+        if line != "\n" and not line.startswith("#"):
+            return FramefromLine(line)
 
 
 def checkdata(files):
