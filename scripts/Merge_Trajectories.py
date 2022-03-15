@@ -105,25 +105,12 @@ def checkdata(files):
 def addDatas(trajecs, output, debug):
     """will merge all data into the output-file
       "trajecs" is a list of all Trajectory files"""
-    lines = []  # lines[i][j] | i - file | j - rows from that file
-    for trajec in trajecs:
-        with open(trajec, "r") as temp_trajec:
-            temp_line = temp_trajec.readlines()
-            lines.append(temp_line)
-
-    # determines in which line the header ends and the data start
-    # assumes that all trajectory heads start at the same line
-    start_row = 0
-    for line in lines[0]:
-        if line.startswith("#") or line == "\n":
-            start_row += 1
-        else:  # now the trajectories start
-            break
+    files = trajecs
 
     # creates a list with all first Frames
     first_frames = []
-    for file in lines:
-        first_frames.append(FramefromLine(file[start_row]))
+    for file in files:
+        first_frames.append(startingFrame(file))
 
     debug_counter = 1
     debug_length = len(first_frames)
@@ -136,9 +123,9 @@ def addDatas(trajecs, output, debug):
             if frame == next_frame:
                 if debug:
                     print(f"writing file {debug_counter}/{debug_length}")
-                write(lines[i], output)
+                write(files[i], output)
                 # removes file and the first line from the lists after the data has been written
-                lines.pop(i)
+                files.pop(i)
                 first_frames.pop(i)
                 debug_counter += 1
                 break
@@ -146,9 +133,10 @@ def addDatas(trajecs, output, debug):
     print(f'new File "{output}" was created.')
 
 
-def write(inputdata, output):
+def write(inputfile, output):
     """writes all data from the inputfile onto the output file"""
-    # "inputdata" is expected to be a list of rows
+    with open (inputfile, "r") as input:
+        inputdata = input.readlines()
     with open(output, "a") as output_file:
         for line in inputdata:
             if line != "\n" and not line.startswith("#"):
