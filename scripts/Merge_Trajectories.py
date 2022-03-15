@@ -1,7 +1,5 @@
 import argparse
 
-import numpy as np
-
 parser = argparse.ArgumentParser()
 parser.add_argument("merge", type=str, help="Merge the given Trajectories together", nargs='+')
 parser.add_argument('-o', type=str, required=False, default="outputfile.txt", help="define outputfile",
@@ -49,23 +47,20 @@ def checkhead(trajecs):
 
 def isComplete(file):
     """test if all frames are included"""
-    data = np.loadtxt(file)
-    i = 0
-    frame = data[0][1]
-    end_frame = data[-1][1]
-    while data[i][1] < end_frame:
-        if frame == data[i][1]:
-            frame = frame + 1
-        else:
-            if frame < data[i][1]:
+    with open(file, "r") as opened_file:
+        lines = opened_file.readlines()
+    not_yet_found = -5
+    last_frame = not_yet_found
+    for line in lines:
+        if line != "\n" and not line.startswith("#"):
+            current_frame = FramefromLine(line)
+            if last_frame == not_yet_found:
+                last_frame = current_frame
+            elif last_frame != current_frame and last_frame + 1 != current_frame:
+                print(f"{last_frame} & {current_frame}")
                 return False
-        i = i + 1
-    if frame != data[-1][1]:
-        return False
-    while i < len(data):
-        if data[i][1] != end_frame:
-            return False
-        i = i + 1
+            else:
+                last_frame = current_frame
     return True
 
 
@@ -137,7 +132,7 @@ def addDatas(trajecs, output, debug):
         # determines the lowest starting frame
         next_frame = min(first_frames)
         for i, frame in enumerate(first_frames):
-            # adds all data from the file with next frame to the output file
+            # adds all data from that file to the output file
             if frame == next_frame:
                 if debug:
                     print(f"writing file {debug_counter}/{debug_length}")
