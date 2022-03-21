@@ -130,26 +130,8 @@ std::string Line::Write() const
 
 Point Line::NormalVec() const
 {
-    double nx, ny;
-    Point r = GetPoint2() - GetPoint1();
-
-    if(r.x == 0.0) {
-        nx = 1;
-        ny = 0;
-    } else {
-        double norm;
-        nx = -r.y / r.x;
-        ny = 1;
-        /* Normieren */
-        norm = sqrt(nx * nx + ny * ny);
-        if(fabs(norm) < J_EPS) {
-            LOG_ERROR("Line::NormalVec() norm==0");
-            exit(0);
-        }
-        nx /= norm;
-        ny /= norm;
-    }
-    return Point(nx, ny);
+    const Point r = (GetPoint2() - GetPoint1());
+    return Point(-r.y, r.x).Normalized();
 }
 
 // Normale Komponente von v auf l
@@ -323,51 +305,22 @@ bool Line::Overlapp(const Line & l) const
 //from http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
 int Line::IntersectionWith(const Point & p1, const Point & p2, Point & p3) const
 {
-    p3.x    = J_NAN;
-    p3.y    = J_NAN;
-    Point r = p2 - p1;
-    Point s = _point2 - _point1;
-
-    double denom = r.CrossProduct(s);
-    double numer = (_point1 - p1).CrossProduct(r);
-
-    if(denom == 0.) {
-        if(numer == 0.) {
-            if(this->ShareCommonPointWith(Line(p1, p2), p3)) {
-                return LineIntersectType::INTERSECTION;
-            }
-            double t0 = (_point1 - p1).ScalarProduct(r) / r.ScalarProduct(r);
-            double t1 = t0 + s.ScalarProduct(r) / r.ScalarProduct(r);
-            bool intersec;
-            if(s.ScalarProduct(r) < 0) {
-                intersec = IntervalsIntersect(t1, t0, 1, 0);
-            } else {
-                intersec = IntervalsIntersect(t0, t1, 1, 0);
-            }
-            if(intersec) {
-                return LineIntersectType::OVERLAP;
-            } else {
-                return LineIntersectType::NO_INTERSECTION; //colinear and disjoint
-            }
-        } else { // the lines are just parallel and do not share a common poin
+    boost::geometry::model::segment<Point> line(_point1, _point2);
+    boost::geometry::model::segment<Point> foo(p1, p2);
+    std::vector<Point> output;
+    boost::geometry::intersection(line, foo, output);
+    switch(output.size()) {
+        case 0:
+            p3 = Point(J_NAN, J_NAN);
             return LineIntersectType::NO_INTERSECTION;
-        }
+        case 1:
+            p3 = output[0];
+            return LineIntersectType::INTERSECTION;
+        case 2:
+            p3 = Point(J_NAN, J_NAN);
+            return LineIntersectType::OVERLAP;
     }
-    double t = (_point1 - p1).CrossProduct(s) / (r.CrossProduct(s));
-    double u = (_point1 - p1).CrossProduct(r) / (r.CrossProduct(s));
-
-
-    if(-0.05 > t || t > 1) {
-        return LineIntersectType::NO_INTERSECTION;
-    }
-
-    if(0 > u || u > 1) {
-        return LineIntersectType::NO_INTERSECTION;
-    }
-
-    p3 = p1 + (r * t);
-
-    return LineIntersectType::INTERSECTION;
+    throw std::runtime_error("Not reachable...");
 }
 
 int Line::IntersectionWith(const Line & L, Point & p3) const
