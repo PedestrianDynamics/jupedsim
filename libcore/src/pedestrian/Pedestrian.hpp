@@ -95,6 +95,7 @@ private:
     bool _waiting    = false;
     Point _waitingPos =
         Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
+    std::map<int, int> _mentalMap{};
 
 public:
     // constructors
@@ -130,9 +131,8 @@ public:
 
     double GetT() const;
     void SetT(double T);
-    //TODO: merge this two functions
-    void SetDestination(int i);
     void SetExitLine(const Line * l);
+    void SetExitIndex(int index);
     void SetDeltaT(double dt);
     // Eigenschaften der Ellipse
     void SetPos(const Point & pos); // setzt x und y-Koordinaten
@@ -163,6 +163,7 @@ public:
     double GetTau() const;
     const JEllipse & GetEllipse() const;
     int GetDestination() const;
+    int GetExitIndex() const;
     const Line & GetExitLine() const;
     Point GetLastE0() const;
     void SetLastE0(Point E0);

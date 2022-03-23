@@ -662,7 +662,7 @@ int GlobalRouter::FindExit(Pedestrian * ped)
             // cuz all lines are returned
             if(IsCrossing(*navLine, {sub}) || IsTransition(*navLine, {sub})) {
                 int nav_id = navLine->GetUniqueID();
-                ped->SetDestination(nav_id);
+                ped->SetExitIndex(nav_id);
                 ped->SetExitLine(navLine);
                 return nav_id;
             }
@@ -696,7 +696,7 @@ int GlobalRouter::FindExit(Pedestrian * ped)
                 continue;
 
             //continue until my target is reached
-            if(apID != ped->GetDestination())
+            if(apID != ped->GetExitIndex())
                 continue;
 
             //one AP is near actualize destination:
@@ -715,14 +715,14 @@ int GlobalRouter::FindExit(Pedestrian * ped)
 
                     //we are still somewhere in the initialization phase
                     if(previousDestination == -1) {
-                        ped->SetDestination(apID);
+                        ped->SetExitIndex(apID);
                         ped->SetExitLine(_accessPoints[apID]->GetNavLine());
                         return apID;
                     } else { // we are still having a valid destination, don't change
                         return previousDestination;
                     }
                 } else { // we have reached the new room
-                    ped->SetDestination(nextDestination);
+                    ped->SetExitIndex(nextDestination);
                     ped->SetExitLine(_accessPoints[nextDestination]->GetNavLine());
                     return nextDestination;
                 }
@@ -743,7 +743,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian * ped)
     //save some computation
     if(relevantAPs.size() == 1) {
         auto && ap = (AccessPoint * &&) relevantAPs[0];
-        ped->SetDestination(ap->GetID());
+        ped->SetExitIndex(ap->GetID());
         ped->SetExitLine(ap->GetNavLine());
         return ap->GetID();
     }
@@ -789,7 +789,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian * ped)
     }
 
     if(bestAPsID != -1) {
-        ped->SetDestination(bestAPsID);
+        ped->SetExitIndex(bestAPsID);
         ped->SetExitLine(_accessPoints[bestAPsID]->GetNavLine());
         return bestAPsID;
     } else {
@@ -798,7 +798,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian * ped)
             //{
 
             relevantAPs[0]->GetID();
-            ped->SetDestination(relevantAPs[0]->GetID());
+            ped->SetExitIndex(relevantAPs[0]->GetID());
             ped->SetExitLine(relevantAPs[0]->GetNavLine());
             return relevantAPs[0]->GetID();
         }

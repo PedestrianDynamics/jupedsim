@@ -90,6 +90,17 @@ double Pedestrian::SelectSmoothFactor(SubroomType type, double delta) const
     }
 }
 
+void Pedestrian::SetExitIndex(int index)
+{
+    _exitIndex                    = index;
+    _mentalMap[GetUniqueRoomID()] = index;
+}
+
+int Pedestrian::GetExitIndex() const
+{
+    return _exitIndex;
+}
+
 void Pedestrian::SetTau(double tau)
 {
     _tau = tau;
@@ -103,11 +114,6 @@ void Pedestrian::SetT(double T)
 void Pedestrian::SetEllipse(const JEllipse & e)
 {
     _ellipse = e;
-}
-
-void Pedestrian::SetDestination(int i)
-{
-    _exitIndex = i;
 }
 
 void Pedestrian::SetExitLine(const Line * l)
@@ -191,7 +197,10 @@ const JEllipse & Pedestrian::GetEllipse() const
 
 int Pedestrian::GetDestination() const
 {
-    return _exitIndex;
+    if(const auto iter = _mentalMap.find(GetUniqueRoomID()); iter != _mentalMap.end()) {
+        return iter->second;
+    }
+    return -1;
 }
 
 const Line & Pedestrian::GetExitLine() const
