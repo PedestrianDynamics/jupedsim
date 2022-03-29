@@ -90,10 +90,6 @@ void Simulation::Iterate()
         //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
         //update quickestRouter
         if(_eventProcessed) {
-            LOG_INFO(
-                "Enter correctGeometry: Building Has {} Transitions.",
-                _building->GetAllTransitions().size());
-
             _directionManager->GetDirectionStrategy().ReInit();
         }
 
@@ -300,7 +296,6 @@ bool Simulation::InitArgs()
     for(auto && ped : _agents) {
         ped->SetDeltaT(_clock.dT());
     }
-    LOG_INFO("Number of peds received: {}", _agents.size());
     _seed = _config->seed;
 
     if(_config->distEffMaxPed > _config->linkedCellSize) {
@@ -368,15 +363,6 @@ void Simulation::UpdateRoutes()
 
 void Simulation::PrintStatistics(double simTime)
 {
-    LOG_INFO("Rooms Egress. Simulation Time: {:.2f}", simTime);
-    LOG_INFO("id\tcaption\tegress time (s)");
-
-    for(const auto & it : _building->GetAllRooms()) {
-        auto && room = it.second;
-        if(room->GetCaption() != "outside")
-            LOG_INFO("{:d}\t{}\t{:.2f}", room->GetID(), room->GetCaption(), room->GetEgressTime());
-    }
-
     LOG_INFO("Usage of Exits");
     for(const auto & itr : _building->GetAllTransitions()) {
         Transition * goal = itr.second;
