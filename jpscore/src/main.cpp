@@ -150,7 +150,6 @@ int main(int argc, char ** argv)
         time(&starttime);
 
         double evacTime{0};
-        LOG_INFO("Simulation started with {} pedestrians", sim.GetPedsNumber());
         auto writer = std::make_unique<TrajectoryWriter>(
             config.precision,
             config.optionalOutput,
