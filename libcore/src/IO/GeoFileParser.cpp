@@ -926,7 +926,7 @@ GeoFileParser::~GeoFileParser() {}
 std::unique_ptr<Geometry> ParseGeometryXml(const std::filesystem::path & geometry_file)
 {
     GeometryBuilder builder{};
-    TiXmlDocument doc(geometry_file.c_str());
+    TiXmlDocument doc(geometry_file.string());
     if(!doc.LoadFile()) {
         throw std::runtime_error(
             fmt::format("Cannot parse {}, error: {}", geometry_file, doc.ErrorDesc()));
