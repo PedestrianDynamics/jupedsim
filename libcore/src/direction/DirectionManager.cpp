@@ -73,18 +73,22 @@ DirectionManager::Create(const Configuration & config, Building * building)
     auto waitingStrategy = make_waiting_strategy(config.waitingStrategyType);
 
     return std::make_unique<DirectionManager>(
-        std::move(directionStrategy), std::move(waitingStrategy));
+        std::move(directionStrategy), std::move(waitingStrategy), building);
 }
 
 DirectionManager::DirectionManager(
     std::unique_ptr<DirectionStrategy> directionStrategy,
-    std::unique_ptr<WaitingStrategy> waitingStrategy) :
-    _directionStrategy(std::move(directionStrategy)), _waitingStrategy(std::move(waitingStrategy))
+    std::unique_ptr<WaitingStrategy> waitingStrategy,
+    const Building * building) :
+    _directionStrategy(std::move(directionStrategy)),
+    _waitingStrategy(std::move(waitingStrategy)),
+    _building(building)
 {
 }
 
-Point DirectionManager::GetTarget(const Room * room, const Pedestrian * ped)
+Point DirectionManager::GetTarget(const Pedestrian * ped)
 {
+    const auto * room = _building->GetRoom(ped->GetPos());
     if(ped->IsWaiting() && _waitingStrategy) {
         return _waitingStrategy->GetTarget(room, ped, _currentTime);
     } else {

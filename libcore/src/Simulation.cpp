@@ -66,6 +66,7 @@ Simulation::Simulation(
     std::unique_ptr<Geometry> && geometry) :
     _config(args),
     _clock(_config->dT),
+    _neighborhoodSearch(_config->linkedCellSize),
     _building(std::move(building)),
     _directionManager(DirectionManager::Create(*args, _building.get())),
     _geometry(std::move(geometry)),
@@ -78,8 +79,8 @@ Simulation::Simulation(
 
 void Simulation::Iterate()
 {
-    _building->UpdateGrid();
     const double t_in_sec = _clock.ElapsedTime();
+    _neighborhoodSearch.Update(_agents);
 
     _directionManager->Update(t_in_sec);
     _operationalModel->Update(t_in_sec);
@@ -107,7 +108,7 @@ void Simulation::Iterate()
                     return std::nullopt;
                 }
                 return _operationalModel->ComputeNewPosition(
-                    _clock.dT(), *agent, *_building, *_geometry);
+                    _clock.dT(), *agent, *_geometry, _neighborhoodSearch);
             });
 
         auto agent_iter = _agents.begin();

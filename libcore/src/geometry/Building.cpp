@@ -195,11 +195,6 @@ bool Building::IsInAnySubRoom(const Point pos) const
     return false;
 }
 
-const NeighborhoodSearch & Building::GetNeighborhoodSearch() const
-{
-    return _neighborhoodSearch;
-}
-
 void Building::AddRoom(Room * room)
 {
     _rooms[room->GetID()] = std::shared_ptr<Room>(room);
@@ -695,11 +690,6 @@ bool Building::SanityCheck()
     return status;
 }
 
-void Building::UpdateGrid()
-{
-    _neighborhoodSearch.Update(*_allPedestrians);
-}
-
 void Building::InitGrid()
 {
     // first look for the geometry boundaries
@@ -752,8 +742,6 @@ void Building::InitGrid()
     } else {
         LOG_INFO("Initializing the grid with cell size: {}.", cellSize);
     }
-
-    _neighborhoodSearch = NeighborhoodSearch(cellSize);
 
     LOG_INFO("Done with Initializing the grid");
 }

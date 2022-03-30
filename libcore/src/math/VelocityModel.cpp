@@ -58,14 +58,13 @@ VelocityModel::VelocityModel(
 PedestrianUpdate VelocityModel::ComputeNewPosition(
     double dT,
     const Pedestrian & ped,
-    const Building & building,
-    const Geometry & geometry) const
+    const Geometry & geometry,
+    const NeighborhoodSearch & neighborhoodSearch) const
 {
-    const auto neighborhood =
-        building.GetNeighborhoodSearch().GetNeighboringAgents(ped.GetPos(), 4);
-    double min_spacing = 100.0;
-    Point repPed       = Point(0, 0);
-    const Point p1     = ped.GetPos();
+    const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.GetPos(), 4);
+    double min_spacing      = 100.0;
+    Point repPed            = Point(0, 0);
+    const Point p1          = ped.GetPos();
     for(const auto * other : neighborhood) {
         if(other->GetUID() == ped.GetUID()) {
             continue;
@@ -79,8 +78,7 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
 
     // calculate new direction ei according to (6)
     PedestrianUpdate update{};
-    const auto [room, _] = building.GetRoomAndSubRoom(ped.GetPos());
-    e0(&ped, _direction->GetTarget(room, &ped), update);
+    e0(&ped, _direction->GetTarget(&ped), update);
     const Point direction = update.v0 + repPed + repWall;
     for(const auto * other : neighborhood) {
         if(other->GetUID() == ped.GetUID()) {
@@ -237,7 +235,8 @@ Point VelocityModel::ForceRepPed(const Pedestrian * ped1, const Pedestrian * ped
 Point VelocityModel::ForceRepRoom(const Pedestrian * ped, const Geometry & geometry) const
 {
     auto walls = geometry.LineSegmentsInDistanceTo(5.0, ped->GetPos());
-    auto f     = std::accumulate(
+
+    auto f = std::accumulate(
         walls.begin(),
         walls.end(),
         Point(0, 0),
@@ -246,7 +245,8 @@ Point VelocityModel::ForceRepRoom(const Pedestrian * ped, const Geometry & geome
         });
 
     auto doors = geometry.DoorsInDistanceTo(5.0, ped->GetPos());
-    f          = std::accumulate(
+
+    f = std::accumulate(
         doors.begin(), doors.end(), f, [this, &ped](const auto & acc, const auto & door) {
             switch(door.state) {
                 case DoorState::OPEN:

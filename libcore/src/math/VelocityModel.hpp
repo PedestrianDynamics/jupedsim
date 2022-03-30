@@ -32,6 +32,7 @@
 #include "Geometry.hpp"
 #include "OperationalModel.hpp"
 #include "geometry/Building.hpp"
+#include "neighborhood/NeighborhoodSearch.hpp"
 #include "pedestrian/Pedestrian.hpp"
 
 #include <vector>
@@ -144,8 +145,8 @@ public:
     PedestrianUpdate ComputeNewPosition(
         double dT,
         const Pedestrian & ped,
-        const Building & building,
-        const Geometry & geometry) const override;
+        const Geometry & geometry,
+        const NeighborhoodSearch & neighborhoodSearch) const override;
 
     void ApplyUpdate(const PedestrianUpdate & update, Pedestrian & agent) const override;
 };
