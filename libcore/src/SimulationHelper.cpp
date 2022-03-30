@@ -60,6 +60,13 @@ void SimulationHelper::UpdateFlowAtDoors(
             continue;
         }
 
+        if(ped->GetDestination() >= 0 &&
+           (building.GetTransitionByUID(ped->GetDestination()) != nullptr) &&
+           passedDoor.value()->GetUniqueID() !=
+               building.GetTransitionByUID(ped->GetDestination())->GetUniqueID()) {
+            continue;
+        }
+
         passedDoor.value()->IncreaseDoorUsage(1, time, ped->GetUID());
         passedDoor.value()->IncreasePartialDoorUsage(1);
     }
