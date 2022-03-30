@@ -52,7 +52,6 @@ class Building
 {
 private:
     Configuration * _configuration = nullptr;
-    NeighborhoodSearch _neighborhoodSearch;
     std::vector<std::unique_ptr<Pedestrian>> * _allPedestrians;
     std::map<int, std::shared_ptr<Room>> _rooms;
     std::map<int, Crossing *> _crossings;
@@ -151,8 +150,6 @@ public:
     void InitGrid();
 
     void AddRoom(Room * room);
-
-    void UpdateGrid();
 
     void
     AddSurroundingRoom(); // add a final room (outside or world), that encompasses the complete geometry

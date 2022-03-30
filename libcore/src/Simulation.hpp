@@ -39,6 +39,7 @@
 #include "geometry/GoalManager.hpp"
 #include "geometry/SubRoom.hpp"
 #include "math/OperationalModel.hpp"
+#include "neighborhood/NeighborhoodSearch.hpp"
 #include "pedestrian/AgentsSourcesManager.hpp"
 #include "pedestrian/PedDistributor.hpp"
 #include "pedestrian/Pedestrian.hpp"
@@ -57,14 +58,12 @@ private:
     /// frame rate for the trajectories
     double _fps{1.0};
     unsigned int _seed{8091983};
+    NeighborhoodSearch _neighborhoodSearch;
     std::unique_ptr<Building> _building;
     std::unique_ptr<DirectionManager> _directionManager;
     std::unique_ptr<Geometry> _geometry;
-    /// Manage all route choices algorithms
     std::unique_ptr<RoutingEngine> _routingEngine;
-    /// Force model to use
     std::unique_ptr<OperationalModel> _operationalModel;
-    /// writing the trajectories to file
     std::vector<std::unique_ptr<Pedestrian>> _agents;
     bool _eventProcessed{false};
 

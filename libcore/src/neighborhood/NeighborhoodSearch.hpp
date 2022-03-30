@@ -28,40 +28,18 @@
 #include "NeighborhoodIterator.hpp"
 #include "geometry/Point.hpp"
 
-#include <deque>
-#include <string>
-#include <vector>
-
-//forwarded classes
-class Pedestrian;
-class Building;
-
 class NeighborhoodSearch
 {
-private:
     double _cellSize;
-
     Grid2D<Pedestrian *> _grid{};
 
 public:
-    NeighborhoodSearch()                           = default;
+    explicit NeighborhoodSearch(double cellSize);
+    ~NeighborhoodSearch();
     NeighborhoodSearch(const NeighborhoodSearch &) = default;
     NeighborhoodSearch(NeighborhoodSearch &&)      = default;
     NeighborhoodSearch & operator=(const NeighborhoodSearch &) = default;
     NeighborhoodSearch & operator=(NeighborhoodSearch &&) = default;
-
-    /**
-      * Constructor
-      * @param boundaries the boundaries of the grid [xmin xmax ymin ymax]
-      * @param cellsize the cell size
-      * @param nPeds the number of pedestrians
-      */
-    NeighborhoodSearch(double cellSize);
-
-    /**
-      * Desctructor
-      */
-    ~NeighborhoodSearch();
 
     /**
       *Update the cells occupation

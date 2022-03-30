@@ -40,6 +40,7 @@
 #include "Geometry.hpp"
 #include "OperationalModelType.hpp"
 #include "direction/DirectionManager.hpp"
+#include "neighborhood/NeighborhoodSearch.hpp"
 
 #include <memory>
 #include <string>
@@ -78,8 +79,8 @@ public:
     virtual PedestrianUpdate ComputeNewPosition(
         double dT,
         const Pedestrian & ped,
-        const Building & building,
-        const Geometry & geometry) const = 0;
+        const Geometry & geometry,
+        const NeighborhoodSearch & neighborhoodSearch) const = 0;
 
     virtual void ApplyUpdate(const PedestrianUpdate & update, Pedestrian & agent) const = 0;
 

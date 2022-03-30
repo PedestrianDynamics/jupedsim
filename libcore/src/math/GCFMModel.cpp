@@ -65,13 +65,12 @@ GCFMModel::GCFMModel(
 PedestrianUpdate GCFMModel::ComputeNewPosition(
     double dT,
     const Pedestrian & ped,
-    const Building & building,
-    const Geometry & geometry) const
+    const Geometry & geometry,
+    const NeighborhoodSearch & neighborhoodSearch) const
 {
-    const double delta   = 1.5;
-    const auto [room, _] = building.GetRoomAndSubRoom(ped.GetPos());
-    const double normVi  = ped.GetV().ScalarProduct(ped.GetV());
-    const double tmp     = (ped.GetV0Norm() + delta) * (ped.GetV0Norm() + delta);
+    const double delta  = 1.5;
+    const double normVi = ped.GetV().ScalarProduct(ped.GetV());
+    const double tmp    = (ped.GetV0Norm() + delta) * (ped.GetV0Norm() + delta);
     if(normVi > tmp && ped.GetV0Norm() > 0) {
         LOG_ERROR(
             "GCFMModel::calculateForce() WARNING: actual velocity (%f) of iped %d "
@@ -81,9 +80,8 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
             ped.GetV0Norm());
     }
 
-    const auto neighborhood =
-        building.GetNeighborhoodSearch().GetNeighboringAgents(ped.GetPos(), 4);
-    const auto p1 = ped.GetPos();
+    const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.GetPos(), 4);
+    const auto p1           = ped.GetPos();
     Point F_rep;
     for(const auto * other : neighborhood) {
         if(other->GetUID() == ped.GetUID()) {
@@ -97,7 +95,7 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
     PedestrianUpdate update{};
     //repulsive forces to the walls and transitions that are not my target
     Point repwall = ForceRepRoom(&ped, geometry);
-    Point fd      = ForceDriv(&ped, _direction->GetTarget(room, &ped), update);
+    Point fd      = ForceDriv(&ped, _direction->GetTarget(&ped), update);
     Point acc     = (fd + F_rep + repwall) / ped.GetMass();
 
     update.velocity = ped.GetV() + acc * dT;
@@ -279,7 +277,8 @@ Point GCFMModel::ForceRepPed(const Pedestrian * ped1, const Pedestrian * ped2) c
 inline Point GCFMModel::ForceRepRoom(const Pedestrian * ped, const Geometry & geometry) const
 {
     auto walls = geometry.LineSegmentsInDistanceTo(5.0, ped->GetPos());
-    auto f     = std::accumulate(
+
+    auto f = std::accumulate(
         walls.begin(),
         walls.end(),
         Point(0, 0),
@@ -288,7 +287,8 @@ inline Point GCFMModel::ForceRepRoom(const Pedestrian * ped, const Geometry & ge
         });
 
     auto doors = geometry.DoorsInDistanceTo(5.0, ped->GetPos());
-    f          = std::accumulate(
+
+    f = std::accumulate(
         doors.begin(), doors.end(), f, [this, &ped](const auto & acc, const auto & door) {
             switch(door.state) {
                 case DoorState::OPEN:
