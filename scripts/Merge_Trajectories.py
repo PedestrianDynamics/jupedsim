@@ -1,10 +1,10 @@
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("merge", type=str, help="Merge the given Trajectories together", nargs='+')
-parser.add_argument('-o', type=str, required=False, default="outputfile.txt", help="define outputfile",
-                    dest="output")
-parser.add_argument('-d', action="store_true", help="activates debugmode", dest="debug")
+parser.add_argument("file_location", type=str, help="Merge the given Trajectory files together", nargs='+')
+parser.add_argument('-o', type=str, required=False, default="src/outputfile.txt", help="define outputfile, default path is outputfile.txt",
+                    dest="output_path")
+parser.add_argument('-d', action="store_true", help="activates debugmode and shows how many files remain", dest="debug")
 args = parser.parse_args()
 
 
@@ -48,28 +48,25 @@ def checkhead(trajecs):
 def isComplete(file):
     """test if all frames are included"""
     with open(file, "r") as opened_file:
-        lines = opened_file.readlines()
-    not_yet_found = -5
-    last_frame = not_yet_found
-    for line in lines:
-        if line != "\n" and not line.startswith("#"):
-            current_frame = FramefromLine(line)
-            if last_frame == not_yet_found:
-                last_frame = current_frame
-            elif last_frame != current_frame and last_frame + 1 != current_frame:
-                print(f"{last_frame} & {current_frame}")
-                return False
-            else:
-                last_frame = current_frame
+        not_yet_found = -5
+        last_frame = not_yet_found
+        for line in opened_file:
+            if line != "\n" and not line.startswith("#"):
+                current_frame = FramefromLine(line)
+                if last_frame == not_yet_found:
+                    last_frame = current_frame
+                elif last_frame != current_frame and last_frame + 1 != current_frame:
+                    return False
+                else:
+                    last_frame = current_frame
     return True
 
 
 def startingFrame(file):
     with open(file, "r") as opened_file:
-        temp_line = opened_file.readlines()
-    for line in temp_line:
-        if line != "\n" and not line.startswith("#"):
-            return FramefromLine(line)
+        for line in opened_file:
+            if line != "\n" and not line.startswith("#"):
+                return FramefromLine(line)
 
 
 def endingFrame(file):
@@ -160,13 +157,13 @@ def addInfos(trajecs, output):
 
 if args.debug:
     print("it will be checked if the Trajectories match")
-if not checkhead(args.merge):
+if not checkhead(args.file_location):
     print("the Trajectories do not have matching Framerate or Geometry")
     exit()
-if not checkdata(args.merge):
+if not checkdata(args.file_location):
     print("the Trajectories do not have matching frames")
     exit()
 if args.debug:
     print("Trajectories match")
-addInfos(args.merge, args.output)
-addDatas(args.merge, args.output, args.debug)
+addInfos(args.file_location, args.output_path)
+addDatas(args.file_location, args.output_path, args.debug)
