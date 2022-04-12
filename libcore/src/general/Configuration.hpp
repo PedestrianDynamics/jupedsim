@@ -17,14 +17,11 @@
  **/
 #pragma once
 
+#include "Area.hpp"
 #include "Macros.hpp"
 #include "OperationalModelType.hpp"
-#include "direction/waiting/WaitingStrategyType.hpp"
-#include "direction/walking/DirectionStrategyType.hpp"
 #include "general/Filesystem.hpp"
 #include "pedestrian/AgentsParameters.hpp"
-#include "routing/GlobalRouterParameters.hpp"
-#include "routing/RoutingStrategy.hpp"
 
 #include <cstdlib>
 #include <filesystem>
@@ -36,8 +33,6 @@
 
 // This class provides a data container for all configuration parameters.
 struct Configuration {
-    std::map<int, std::tuple<RoutingStrategy, std::optional<GlobalRouterParameters>>>
-        routingStrategies{};
     unsigned int seed{0};
     double fps{8};
     unsigned int precision{2};
@@ -61,8 +56,6 @@ struct Configuration {
     double wallAvoidDistance{0.4};
     bool useWallAvoidance{true};
     bool hasDirectionalEscalators{false};
-    std::optional<WaitingStrategyType> waitingStrategyType{};
-    DirectionStrategyType directionStrategyType{DirectionStrategyType::MIN_SEPERATION_SHORTER_LINE};
     fs::path trajectoriesFile{"trajectories.txt"};
     fs::path originalTrajectoriesFile{"trajectories.txt"};
     fs::path logFile{"log.txt"};
@@ -82,4 +75,5 @@ struct Configuration {
     std::map<int, std::shared_ptr<AgentsParameters>> agentsParameters{};
     std::set<OptionalOutput> optionalOutput{};
     AgentColorMode agentColorMode{AgentColorMode::BY_VELOCITY};
+    std::map<Area::Id, Area> areas{};
 };

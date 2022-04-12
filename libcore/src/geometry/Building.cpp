@@ -46,7 +46,6 @@
 #include "geometry/helper/CorrectGeometry.hpp"
 #include "neighborhood/NeighborhoodSearch.hpp"
 #include "pedestrian/Pedestrian.hpp"
-#include "routing/RoutingEngine.hpp"
 
 #include <Logger.hpp>
 #include <algorithm>
@@ -83,11 +82,6 @@ Building::Building(Configuration* configuration) : _configuration(configuration)
         LOG_ERROR("There are sanity errors in the geometry file");
         exit(EXIT_FAILURE);
     }
-
-    if(!Triangulate()) {
-        LOG_ERROR("Cannot triangulate geometry");
-        exit(EXIT_FAILURE);
-    }
 }
 
 Building::~Building()
@@ -120,31 +114,9 @@ Building::~Building()
     }
 }
 
-int Building::GetNumberOfRooms() const
-{
-    return (int) _rooms.size();
-}
-
-int Building::GetNumberOfGoals() const
-{
-    return (int) (_transitions.size() + _hLines.size() + _crossings.size());
-}
-
 const std::map<int, std::shared_ptr<Room>>& Building::GetAllRooms() const
 {
     return _rooms;
-}
-
-Room* Building::GetRoom(int index) const
-{
-    // TODO: obsolete since the check is done by .at()
-    if(_rooms.count(index) == 0) {
-        LOG_ERROR(
-            "Wrong 'index' in CBuiling::GetRoom() Room ID: {} size: {}", index, _rooms.size());
-        LOG_INFO("Control your rooms ID and make sure they are in the order 0, 1, 2,.. ");
-        return nullptr;
-    }
-    return _rooms.at(index).get();
 }
 
 std::tuple<Room*, SubRoom*> Building::GetRoomAndSubRoom(const Point position) const
@@ -160,11 +132,6 @@ std::tuple<Room*, SubRoom*> Building::GetRoomAndSubRoom(const Point position) co
     }
     throw std::runtime_error(fmt::format(
         FMT_STRING("Position {} could not be found in any subroom."), position.toString()));
-}
-
-Room* Building::GetRoom(const Point position) const
-{
-    return std::get<0>(GetRoomAndSubRoom(position));
 }
 
 SubRoom* Building::GetSubRoom(const Point position) const
@@ -194,77 +161,6 @@ bool Building::IsInAnySubRoom(const Point pos) const
 void Building::AddRoom(Room* room)
 {
     _rooms[room->GetID()] = std::shared_ptr<Room>(room);
-}
-
-void Building::AddSurroundingRoom()
-{
-    LOG_INFO("Adding the room 'outside' ");
-    // first look for the geometry boundaries
-    double x_min = FLT_MAX;
-    double x_max = -FLT_MAX;
-    double y_min = FLT_MAX;
-    double y_max = -FLT_MAX;
-    // finding the bounding of the grid
-    //  and collect the pedestrians
-
-    for(auto&& itr_room : _rooms) {
-        for(auto&& itr_subroom : itr_room.second->GetAllSubRooms()) {
-            for(auto&& wall : itr_subroom.second->GetAllWalls()) {
-                double x1 = wall.GetPoint1().x;
-                double y1 = wall.GetPoint1().y;
-                double x2 = wall.GetPoint2().x;
-                double y2 = wall.GetPoint2().y;
-
-                double xmax = (x1 > x2) ? x1 : x2;
-                double xmin = (x1 > x2) ? x2 : x1;
-                double ymax = (y1 > y2) ? y1 : y2;
-                double ymin = (y1 > y2) ? y2 : y1;
-
-                x_min = (xmin <= x_min) ? xmin : x_min;
-                x_max = (xmax >= x_max) ? xmax : x_max;
-                y_max = (ymax >= y_max) ? ymax : y_max;
-                y_min = (ymin <= y_min) ? ymin : y_min;
-            }
-        }
-    }
-
-    for(auto&& itr_goal : _goals) {
-        for(auto&& wall : itr_goal.second->GetAllWalls()) {
-            double x1 = wall.GetPoint1().x;
-            double y1 = wall.GetPoint1().y;
-            double x2 = wall.GetPoint2().x;
-            double y2 = wall.GetPoint2().y;
-
-            double xmax = (x1 > x2) ? x1 : x2;
-            double xmin = (x1 > x2) ? x2 : x1;
-            double ymax = (y1 > y2) ? y1 : y2;
-            double ymin = (y1 > y2) ? y2 : y1;
-
-            x_min = (xmin <= x_min) ? xmin : x_min;
-            x_max = (xmax >= x_max) ? xmax : x_max;
-            y_max = (ymax >= y_max) ? ymax : y_max;
-            y_min = (ymin <= y_min) ? ymin : y_min;
-        }
-    }
-    // make the grid slightly larger.
-    x_min = x_min - 10.0;
-    x_max = x_max + 10.0;
-    y_min = y_min - 10.0;
-    y_max = y_max + 10.0;
-
-    SubRoom* bigSubroom = new NormalSubRoom();
-    bigSubroom->SetRoomID((int) _rooms.size());
-    bigSubroom->SetSubRoomID(0); // should be the single subroom
-    bigSubroom->AddWall(Wall(Point(x_min, y_min), Point(x_min, y_max)));
-    bigSubroom->AddWall(Wall(Point(x_min, y_max), Point(x_max, y_max)));
-    bigSubroom->AddWall(Wall(Point(x_max, y_max), Point(x_max, y_min)));
-    bigSubroom->AddWall(Wall(Point(x_max, y_min), Point(x_min, y_min)));
-
-    Room* bigRoom = new Room();
-    bigRoom->AddSubRoom(bigSubroom);
-    bigRoom->SetCaption("outside");
-    bigRoom->SetID((int) _rooms.size());
-    AddRoom(bigRoom);
 }
 
 bool Building::InitGeometry()
@@ -411,16 +307,6 @@ bool Building::InitInsideGoals()
     return true;
 }
 
-const fs::path& Building::GetProjectFilename() const
-{
-    return _configuration->iniFile;
-}
-
-const fs::path& Building::GetProjectRootDir() const
-{
-    return _configuration->projectRootDir;
-}
-
 bool Building::AddCrossing(Crossing* line)
 {
     int IDRoom = line->GetRoom1()->GetID();
@@ -455,49 +341,6 @@ bool Building::AddTransition(Transition* line)
     return true;
 }
 
-bool Building::AddHline(Hline* line)
-{
-    if(_hLines.count(line->GetID()) != 0) {
-        // check if the lines are identical
-        Hline* ori = _hLines[line->GetID()];
-        if(ori->operator==(*line)) {
-            LOG_INFO("Skipping identical hlines with ID [{}]", line->GetID());
-            return false;
-        } else {
-            LOG_ERROR(
-                "Duplicate index for hlines found [{}] in Routing::AddHline(). You have "
-                "[{}] hlines",
-                line->GetID(),
-                _hLines.size());
-            exit(EXIT_FAILURE);
-        }
-    }
-    _hLines[line->GetID()] = line;
-    return true;
-}
-
-void Building::AddHline(const NavLineParameters& params)
-{
-    auto* l = new Hline();
-    l->SetID(params.id);
-    l->SetPoint1(Point(params.x1, params.y1));
-    l->SetPoint2(Point(params.x2, params.y2));
-    auto* room = GetRoom(params.roomId);
-    auto* subroom = room->GetSubRoom(params.subroomId);
-    l->SetRoom1(room);
-    l->SetSubRoom1(subroom);
-    const auto [_, success] = _hLines.try_emplace(params.id, l);
-    if(!success) {
-        LOG_ERROR(
-            "Duplicate index for hlines found [{}] in Routing::AddHline(). You have "
-            "[{}] hlines",
-            l->GetID(),
-            _hLines.size());
-        exit(EXIT_FAILURE);
-    }
-    subroom->AddHline(l);
-}
-
 bool Building::AddGoal(Goal* goal)
 {
     if(_goals.count(goal->GetId()) != 0) {
@@ -517,11 +360,6 @@ const std::map<int, Crossing*>& Building::GetAllCrossings() const
 const std::map<int, Transition*>& Building::GetAllTransitions() const
 {
     return _transitions;
-}
-
-const std::map<int, Hline*>& Building::GetAllHlines() const
-{
-    return _hLines;
 }
 
 const std::map<int, Goal*>& Building::GetAllGoals() const
@@ -547,125 +385,25 @@ Transition* Building::GetTransition(int ID) const // ar.graf: added const 2015-1
     }
 }
 
-Goal* Building::GetFinalGoal(int ID) const
+Room* Building::GetRoom(int index) const
 {
-    if(_goals.count(ID) == 1) {
-        return _goals.at(ID);
-    } else {
-        if(ID == -1)
-            return nullptr;
-        else {
-            LOG_ERROR(
-                "I could not find any goal with the 'ID' [{}]. You have defined [{}] goals",
-                ID,
-                _goals.size());
-            exit(EXIT_FAILURE);
-        }
+    // TODO: obsolete since the check is done by .at()
+    if(_rooms.count(index) == 0) {
+        LOG_ERROR(
+            "Wrong 'index' in CBuiling::GetRoom() Room ID: {} size: {}", index, _rooms.size());
+        LOG_INFO("Control your rooms ID and make sure they are in the order 0, 1, 2,.. ");
+        return nullptr;
     }
+    return _rooms.at(index).get();
 }
 
-Hline* Building::GetTransOrCrossByUID(int id) const
+Transition* Building::GetTransitionByUID(int uid) const
 {
-    {
-        // eventually transitions
-        std::map<int, Transition*>::const_iterator itr;
-        for(itr = _transitions.begin(); itr != _transitions.end(); ++itr) {
-            if(itr->second->GetUniqueID() == id)
-                return itr->second;
-        }
+    for(auto&& trans : _transitions) {
+        if(trans.second->GetUniqueID() == uid)
+            return trans.second;
     }
-    {
-        // then the  crossings
-        std::map<int, Crossing*>::const_iterator itr;
-        for(itr = _crossings.begin(); itr != _crossings.end(); ++itr) {
-            if(itr->second->GetUniqueID() == id)
-                return itr->second;
-        }
-    }
-    {
-        // finally the  hlines
-        for(auto itr = _hLines.begin(); itr != _hLines.end(); ++itr) {
-            if(itr->second->GetUniqueID() == id)
-                return itr->second;
-        }
-    }
-    LOG_ERROR("No Transition, Crossing or hline with ID {} found.", id);
     return nullptr;
-}
-
-SubRoom* Building::GetSubRoomByUID(int uid) const
-{
-    for(auto&& itr_room : _rooms) {
-        for(auto&& itr_subroom : itr_room.second->GetAllSubRooms()) {
-            if(itr_subroom.second->GetUID() == uid)
-                return itr_subroom.second.get();
-        }
-    }
-    LOG_ERROR("No subroom exits with the unique id {}", uid);
-    return nullptr;
-}
-
-bool Building::IsVisible(
-    const Point& p1,
-    const Point& p2,
-    const std::vector<SubRoom*>& subrooms,
-    bool considerHlines)
-{
-    // loop over all subrooms if none is provided
-    if(subrooms.empty()) {
-        for(auto&& itr_room : _rooms) {
-            for(auto&& itr_subroom : itr_room.second->GetAllSubRooms()) {
-                if(!itr_subroom.second->IsVisible(p1, p2, considerHlines))
-                    return false;
-            }
-        }
-    } else {
-        for(auto&& sub : subrooms) {
-            if(sub && !sub->IsVisible(p1, p2, considerHlines))
-                return false;
-        }
-    }
-
-    return true;
-}
-
-bool Building::Triangulate()
-{
-    LOG_INFO("Triangulating the geometry.");
-    for(auto&& itr_room : _rooms) {
-        for(auto&& itr_subroom : itr_room.second->GetAllSubRooms()) {
-            if(!itr_subroom.second->Triangulate())
-                return false;
-        }
-    }
-    LOG_INFO("Done.");
-    return true;
-}
-
-std::vector<Point> Building::GetBoundaryVertices() const
-{
-    double xMin = FLT_MAX;
-    double yMin = FLT_MAX;
-    double xMax = -FLT_MAX;
-    double yMax = -FLT_MAX;
-    for(auto&& itr_room : _rooms) {
-        for(auto&& itr_subroom : itr_room.second->GetAllSubRooms()) {
-            const std::vector<Point> vertices = itr_subroom.second->GetPolygon();
-
-            for(Point point : vertices) {
-                if(point.x > xMax)
-                    xMax = point.x;
-                else if(point.x < xMin)
-                    xMin = point.x;
-                if(point.y > yMax)
-                    yMax = point.y;
-                else if(point.y < yMin)
-                    yMin = point.y;
-            }
-        }
-    }
-    return std::vector<Point>{
-        Point(xMin, yMin), Point(xMin, yMax), Point(xMax, yMax), Point(xMax, yMin)};
 }
 
 bool Building::SanityCheck()
@@ -737,24 +475,6 @@ void Building::InitGrid()
     }
 
     LOG_INFO("Done with Initializing the grid");
-}
-
-Transition* Building::GetTransitionByUID(int uid) const
-{
-    for(auto&& trans : _transitions) {
-        if(trans.second->GetUniqueID() == uid)
-            return trans.second;
-    }
-    return nullptr;
-}
-
-Crossing* Building::GetCrossingByUID(int uid) const
-{
-    for(auto&& cross : _crossings) {
-        if(cross.second->GetUniqueID() == uid)
-            return cross.second;
-    }
-    return nullptr;
 }
 
 void Building::AddTrainType(int trainID, TrainType type)

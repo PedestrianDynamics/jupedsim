@@ -29,8 +29,6 @@
 #include "VelocityModel.hpp"
 
 #include "Simulation.hpp"
-#include "direction/DirectionManager.hpp"
-#include "direction/walking/DirectionStrategy.hpp"
 #include "geometry/SubRoom.hpp"
 #include "geometry/Wall.hpp"
 #include "math/OperationalModel.hpp"
@@ -45,13 +43,8 @@ double xRight = 26.0;
 double xLeft = 0.0;
 double cutoff = 2.0;
 
-VelocityModel::VelocityModel(
-    DirectionManager* directionManager,
-    double aped,
-    double Dped,
-    double awall,
-    double Dwall)
-    : OperationalModel(directionManager), _aPed(aped), _DPed(Dped), _aWall(awall), _DWall(Dwall)
+VelocityModel::VelocityModel(double aped, double Dped, double awall, double Dwall)
+    : _aPed(aped), _DPed(Dped), _aWall(awall), _DWall(Dwall)
 {
 }
 
@@ -78,7 +71,7 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
 
     // calculate new direction ei according to (6)
     PedestrianUpdate update{};
-    e0(&ped, _direction->GetTarget(&ped), update);
+    e0(&ped, ped.destination, update);
     const Point direction = update.v0 + repPed + repWall;
     for(const auto* other : neighborhood) {
         if(other->GetUID() == ped.GetUID()) {
@@ -129,18 +122,7 @@ void VelocityModel::e0(const Pedestrian* ped, Point target, PedestrianUpdate& up
     Point desired_direction;
     const Point pos = ped->GetPos();
     const auto dist = ped->GetExitLine().DistTo(pos);
-
-    // TODO(kkratz): Fix this hack
-    const auto* strategy = &_direction->GetDirectionStrategy();
-    if(dynamic_cast<const DirectionLocalFloorfield*>(strategy)) {
-        Point lastE0 = ped->GetLastE0();
-        update.lastE0 = target - pos;
-        desired_direction = target - pos;
-        if(desired_direction.NormSquare() < 0.25 && !ped->IsWaiting()) {
-            desired_direction = lastE0;
-            update.lastE0 = lastE0;
-        }
-    } else if(dist > J_EPS_GOAL) {
+    if(dist > J_EPS_GOAL) {
         desired_direction = ped->GetV0(target);
     } else {
         update.resetTurning = true;

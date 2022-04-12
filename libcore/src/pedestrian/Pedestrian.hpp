@@ -27,6 +27,7 @@
 #pragma once
 
 #include "AgentsParameters.hpp"
+#include "Destination.hpp"
 #include "Ellipse.hpp"
 #include "general/Macros.hpp"
 #include "geometry/Line.hpp"
@@ -42,6 +43,16 @@ class Pedestrian
 {
 public:
     using UID = jps::UniqueID<Pedestrian>;
+
+    // This is evaluated by the "strategic level"
+    std::optional<int> goal{};
+
+    // This is evaluated by the "tactical level"
+    // TODO(kkratz): this is the new yet unused waypoint list
+    std::vector<Point> waypoints{};
+
+    // This is evaluated by the "operational level"
+    Point destination{};
 
 private:
     const UID _uid{};
@@ -182,7 +193,6 @@ public:
     double GetSmallerAxis() const;
     int GetFinalDestination() const;
 
-    int GetUniqueRoomID() const;
     double GetDistanceToNextTarget() const;
 
     /**

@@ -30,7 +30,6 @@
 #include "AgentsSource.hpp"
 #include "StartDistribution.hpp"
 #include "geometry/Building.hpp"
-#include "routing/Router.hpp"
 
 #include <memory>
 #include <string>

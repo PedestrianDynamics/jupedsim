@@ -30,20 +30,16 @@
 #include "OperationalModel.hpp"
 
 #include "OperationalModelType.hpp"
-#include "direction/DirectionManager.hpp"
 #include "general/Configuration.hpp"
 #include "math/GCFMModel.hpp"
 #include "math/VelocityModel.hpp"
 
-std::unique_ptr<OperationalModel> OperationalModel::CreateFromType(
-    OperationalModelType type,
-    const Configuration& config,
-    DirectionManager* directionManager)
+std::unique_ptr<OperationalModel>
+OperationalModel::CreateFromType(OperationalModelType type, const Configuration& config)
 {
     switch(type) {
         case OperationalModelType::GCFM:
             return std::make_unique<GCFMModel>(
-                directionManager,
                 config.nuPed,
                 config.nuWall,
                 config.distEffMaxPed,
@@ -54,16 +50,6 @@ std::unique_ptr<OperationalModel> OperationalModel::CreateFromType(
                 config.maxFWall);
         case OperationalModelType::VELOCITY:
             return std::make_unique<VelocityModel>(
-                directionManager, config.aPed, config.dPed, config.aWall, config.dWall);
+                config.aPed, config.dPed, config.aWall, config.dWall);
     }
-}
-
-OperationalModel::OperationalModel(DirectionManager* directionManager)
-    : _direction(directionManager)
-{
-}
-
-void OperationalModel::Init(Simulation* simulation)
-{
-    _simulation = simulation;
 }

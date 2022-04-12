@@ -20,18 +20,14 @@
 //
 #include "IniFileParser.hpp"
 
+#include "ConvexPolygon.hpp"
 #include "NavLineFileParser.hpp"
 #include "OperationalModelType.hpp"
 #include "OutputHandler.hpp"
-#include "direction/waiting/WaitingStrategyType.hpp"
-#include "direction/walking/DirectionStrategyType.hpp"
 #include "general/Filesystem.hpp"
 #include "general/Macros.hpp"
 #include "math/GCFMModel.hpp"
 #include "math/VelocityModel.hpp"
-#include "routing/RoutingStrategy.hpp"
-#include "routing/ff_router/ffRouter.hpp"
-#include "routing/global_shortest/GlobalRouter.hpp"
 
 #include <Logger.hpp>
 #include <filesystem>
@@ -57,19 +53,13 @@ private:
 
     void ParseAgentParameters(TiXmlElement* operativModel, TiXmlNode* agentDistri);
 
-    bool ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* agentDistri);
-
     bool ParseLinkedCells(const TiXmlNode& linkedCellNode);
 
     bool ParseStepSize(const TiXmlNode& stepNode);
 
-    bool ParseStrategyNodeToObject(const TiXmlNode& strategyNode);
-
     bool ParseFfOpts(const TiXmlNode& strategyNode);
 
     bool ParseExternalFiles(const TiXmlNode& xMain);
-
-    std::optional<GlobalRouterParameters> ParseGlobalRouterParmeters(const TiXmlElement* e);
 
     Configuration* _config;
     int _model;
@@ -142,7 +132,7 @@ void IniFileParser::Parse(const fs::path& iniFile)
         }
 
         std::string modelName = std::string(xModel->Attribute("description"));
-        int model_id = xmltoi(xModel->Attribute("operational_model_id"), -1);
+        int model_id = xmltoi(xModel->Attribute("operational_model_id"), 0);
 
         if((_model == to_underlying(OperationalModelType::GCFM)) &&
            (model_id == to_underlying(OperationalModelType::GCFM))) {
@@ -179,14 +169,10 @@ void IniFileParser::Parse(const fs::path& iniFile)
         throw std::logic_error("Parsing Model Failed.");
     }
 
-    // route choice strategy
-    TiXmlNode* xRouters = xMainNode->FirstChild("route_choice_models");
-    TiXmlNode* xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
-
-    if(!ParseRoutingStrategies(xRouters, xAgentDistri))
-        throw std::logic_error("Error while parsing routing strategies.");
-
     ParseExternalFiles(*xMainNode);
+    if(const auto areas = xMainNode->FirstChildElement("areas"); areas != nullptr) {
+        _config->areas = ParseAreas(areas);
+    }
     LOG_INFO("Parsing the project file completed");
 }
 
@@ -433,10 +419,6 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
     if(!ParseStepSize(*xModelPara))
         return false;
 
-    // exit crossing strategy
-    if(!ParseStrategyNodeToObject(*xModelPara))
-        return false;
-
     // linked-cells
     if(!ParseLinkedCells(*xModelPara))
         return false;
@@ -517,10 +499,6 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement* xVelocity, TiXmlElement* xM
 
     // stepsize
     if(!ParseStepSize(*xModelPara))
-        return false;
-
-    // exit crossing strategy
-    if(!ParseStrategyNodeToObject(*xModelPara))
         return false;
 
     // linked-cells
@@ -686,67 +664,6 @@ void IniFileParser::ParseAgentParameters(TiXmlElement* operativModel, TiXmlNode*
     }
 }
 
-bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* agentsDistri)
-{
-    if(!routingNode) {
-        LOG_ERROR("Route_choice_models section is missing");
-        return false;
-    }
-
-    if(!agentsDistri) {
-        LOG_ERROR("Agent Distribution section is missing");
-        return false;
-    }
-    // first get list of actually used router
-    std::set<int> usedRouter;
-    for(TiXmlElement* e = agentsDistri->FirstChildElement("group"); e;
-        e = e->NextSiblingElement("group")) {
-        int router = -1;
-        if(e->Attribute("router_id")) {
-            router = atoi(e->Attribute("router_id"));
-            if(std::find(usedRouter.begin(), usedRouter.end(), router) == usedRouter.end()) {
-                usedRouter.insert(router);
-            }
-        }
-    }
-    for(TiXmlElement* e = routingNode->FirstChildElement("router"); e;
-        e = e->NextSiblingElement("router")) {
-        const auto* strategyAsString = e->Attribute("description");
-        const auto strategy = from_string<RoutingStrategy>(strategyAsString);
-        const int id = atoi(e->Attribute("router_id"));
-
-        if(usedRouter.count(id) == 0) {
-            LOG_WARNING(
-                "Routing strategy {} with id {} will be skipped because it is unused.",
-                strategyAsString,
-                id);
-            continue;
-        }
-
-        // TODO(kkratz) this code is senitive for the order in which sections are parsed.
-        // This is a hidden dependency and needs to be addressed
-        if(strategy == RoutingStrategy::ROUTING_FF_GLOBAL_SHORTEST &&
-           _config->directionStrategyType != DirectionStrategyType::LOCAL_FLOORFIELD) {
-            LOG_WARNING("Routing strategy used is ff_gloabl_shortest. Using exit strategy 8 "
-                        "recommended!");
-        }
-
-        if(strategy == RoutingStrategy::UNKNOWN) {
-            LOG_ERROR("Unknown routing strategy: {}", strategyAsString);
-            return false;
-        }
-
-        const auto params = ParseGlobalRouterParmeters(e);
-        if(const auto [_, success] =
-               _config->routingStrategies.try_emplace(id, std::make_tuple(strategy, params));
-           !success) {
-            LOG_ERROR("Duplicated router id found: {}", id);
-            return false;
-        }
-    }
-    return true;
-}
-
 bool IniFileParser::ParseLinkedCells(const TiXmlNode& linkedCellNode)
 {
     if(linkedCellNode.FirstChild("linkedcells")) {
@@ -810,110 +727,6 @@ bool IniFileParser::ParseStepSize(const TiXmlNode& stepNode)
         }
     }
     return false;
-}
-
-bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
-{
-    std::string query = "exit_crossing_strategy";
-    if(!strategyNode.FirstChild(query.c_str())) {
-        query = "exitCrossingStrategy";
-        LOG_ERROR("The keyword exitCrossingStrategy is deprecated. Please consider using "
-                  "\"exit_crossing_strategy\" in the ini file");
-        return false;
-    }
-
-    if(strategyNode.FirstChild(query.c_str())) {
-        const char* tmp = strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
-        int pExitStrategy;
-        if(tmp) {
-            pExitStrategy = atoi(tmp);
-
-            // check for ff router to avoid exit strat <> router mismatch
-            const TiXmlNode* agentsDistri =
-                strategyNode.GetDocument()->RootElement()->FirstChild("agents")->FirstChild(
-                    "agents_distribution");
-            std::vector<int> usedRouter;
-            for(const TiXmlElement* e = agentsDistri->FirstChildElement("group"); e;
-                e = e->NextSiblingElement("group")) {
-                int router = -1;
-                if(e->Attribute("router_id")) {
-                    router = atoi(e->Attribute("router_id"));
-                    if(std::find(usedRouter.begin(), usedRouter.end(), router) ==
-                       usedRouter.end()) {
-                        usedRouter.emplace_back(router);
-                    }
-                }
-            }
-            // continue: check for ff router to avoid exit strat <> router mismatch
-            const TiXmlNode* routeChoice =
-                strategyNode.GetDocument()->RootElement()->FirstChild("route_choice_models");
-            for(const TiXmlElement* e = routeChoice->FirstChildElement("router"); e;
-                e = e->NextSiblingElement("router")) {
-                int router_id = atoi(e->Attribute("router_id"));
-                if(!(std::find(usedRouter.begin(), usedRouter.end(), router_id) ==
-                     usedRouter.end())) {
-                    std::string router_descr = e->Attribute("description");
-                    if((pExitStrategy != 9) && (pExitStrategy != 8) &&
-                       router_descr == "ff_global_shortest") {
-                        pExitStrategy = 8;
-                        LOG_WARNING("Changing Exit Strategie to work with floorfield!");
-                    }
-                }
-            }
-
-            switch(pExitStrategy) {
-                case 1:
-                    _config->directionStrategyType = DirectionStrategyType::MIDDLE_POINT;
-                    break;
-                case 2:
-                    _config->directionStrategyType =
-                        DirectionStrategyType::MIN_SEPERATION_SHORTER_LINE;
-                    break;
-                case 3:
-                    _config->directionStrategyType = DirectionStrategyType::IN_RANGE_BOTTLENECK;
-                    break;
-                case 8:
-                    _config->directionStrategyType = DirectionStrategyType::LOCAL_FLOORFIELD;
-                    if(!ParseFfOpts(strategyNode)) {
-                        return false;
-                    };
-                    break;
-                default:
-                    LOG_ERROR("Unknown exit_crossing_strategy <{}>", pExitStrategy);
-                    LOG_WARNING("The default exit_crossing_strategy <2> will be used");
-                    break;
-            }
-        } else {
-            return false;
-        }
-        LOG_INFO("exit_crossing_strategy <{}>", pExitStrategy);
-    }
-
-    // Read waiting
-    std::string queryWaiting = "waiting_strategy";
-    int waitingStrategyIndex = -1;
-    if(strategyNode.FirstChild(queryWaiting) &&
-       strategyNode.FirstChild(queryWaiting)->FirstChild()) {
-        if(const char* attribute = strategyNode.FirstChild(queryWaiting)->FirstChild()->Value();
-           attribute) {
-            if(waitingStrategyIndex = xmltoi(attribute, -1);
-               waitingStrategyIndex > -1 && attribute == std::to_string(waitingStrategyIndex)) {
-                switch(waitingStrategyIndex) {
-                    case 1:
-                        _config->waitingStrategyType = WaitingStrategyType::MIDDLE;
-                        break;
-                    case 2:
-                        _config->waitingStrategyType = WaitingStrategyType::RANDOM;
-                        break;
-                    default:
-                        _config->waitingStrategyType = WaitingStrategyType::RANDOM;
-                        LOG_ERROR("Unknown waiting_strategy <{}>", waitingStrategyIndex);
-                        LOG_WARNING("The default waiting_strategy <2> will be used");
-                }
-            }
-        }
-    }
-    return true;
 }
 
 bool IniFileParser::ParseFfOpts(const TiXmlNode& strategyNode)
@@ -1053,48 +866,50 @@ bool IniFileParser::ParseExternalFiles(const TiXmlNode& mainNode)
     return true;
 }
 
-std::optional<GlobalRouterParameters>
-IniFileParser::ParseGlobalRouterParmeters(const TiXmlElement* e)
-{
-    const std::string strategy = e->Attribute("description");
-    if(strategy != "global_shortest") {
-        return std::nullopt;
-    }
-
-    GlobalRouterParameters result{};
-    if(const auto* parameters = e->FirstChild("parameters")) {
-        if(const auto* navigation_lines = parameters->FirstChildElement("navigation_lines")) {
-            const std::filesystem::path navLineFile = navigation_lines->Attribute("file");
-            result.optionalNavLines = parseNavLines(navLineFile);
-        }
-
-        if(const auto* navigation_mesh = parameters->FirstChildElement("navigation_mesh")) {
-            const std::string local_planing =
-                xmltoa(navigation_mesh->Attribute("use_for_local_planning"), "false");
-            result.useMeshForLocalNavigation = local_planing == "true";
-
-            std::string method = xmltoa(navigation_mesh->Attribute("method"), "");
-            if(method == "triangulation") {
-                result.generateNavigationMesh = true;
-            } else {
-                LOG_WARNING(
-                    "only triangulation is supported for the mesh. You supplied "
-                    "[{}]",
-                    method);
-            }
-            result.minDistanceBetweenTriangleEdges =
-                xmltof(navigation_mesh->Attribute("minimum_distance_between_edges"), -FLT_MAX);
-            result.minAngleInTriangles =
-                xmltof(navigation_mesh->Attribute("minimum_angle_in_triangles"), -FLT_MAX);
-        }
-    }
-    return result;
-}
-
 Configuration ParseIniFile(const std::filesystem::path& path)
 {
     Configuration config{};
     IniFileParser p(&config);
     p.Parse(path);
     return config;
+}
+
+std::map<Area::Id, Area> ParseAreas(const TiXmlElement* areasNode)
+{
+    if(areasNode == nullptr || areasNode->Value() != std::string("areas")) {
+        throw std::runtime_error("Not an 'areas' node");
+    }
+    std::map<Area::Id, Area> areas{};
+    for(auto areaNode = areasNode->FirstChildElement("area"); areaNode != nullptr;
+        areaNode = areaNode->NextSiblingElement("area")) {
+        const int area_id = xmltoi(areaNode->Attribute("id"));
+        if(const auto iter = areas.find(area_id); iter != areas.end()) {
+            throw std::runtime_error("Duplicated area id found");
+        }
+        auto& area = areas[area_id];
+        if(const auto labelsNode = areaNode->FirstChildElement("lables"); labelsNode != nullptr) {
+            for(auto labelNode = labelsNode->FirstChildElement("label"); labelNode != nullptr;
+                labelNode = labelNode->NextSiblingElement("label")) {
+                area.lables.insert(labelNode->GetText());
+            }
+        }
+        std::vector<Point> polygonBuffer;
+        if(const auto polygonNode = areaNode->FirstChildElement("polygon");
+           polygonNode != nullptr) {
+            polygonBuffer.clear();
+            for(auto vertexNode = polygonNode->FirstChildElement("vertex"); vertexNode != nullptr;
+                vertexNode = vertexNode->NextSiblingElement("vertex")) {
+                // TODO(kkratz): Missing error handling on non double px/py values or if attributes
+                // do not exist
+                const double x = xmltof(vertexNode->Attribute("px"));
+                const double y = xmltof(vertexNode->Attribute("py"));
+                polygonBuffer.emplace_back(x, y);
+            }
+            if(polygonBuffer.size() < 3) {
+                throw std::runtime_error("A polygon needs at least 3 vertices");
+            }
+            area.polygon = ConvexPolygon(polygonBuffer);
+        }
+    }
+    return areas;
 }

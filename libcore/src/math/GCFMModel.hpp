@@ -33,22 +33,11 @@
 
 // forward declaration
 class Pedestrian;
-class DirectionManager;
 
-/*!
- * \class GCFMModel
- *
- * \brief @todo
- *
- *\ingroup OperationalModels
- *
- * \author Mohcine Chraibi
- */
 class GCFMModel : public OperationalModel
 {
 public:
     GCFMModel(
-        DirectionManager* dir,
         double nuped,
         double nuwall,
         double dist_effPed,

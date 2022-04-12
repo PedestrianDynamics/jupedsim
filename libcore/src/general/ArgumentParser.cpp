@@ -23,7 +23,6 @@
 #include "IO/IniFileParser.hpp"
 #include "IO/OutputHandler.hpp"
 #include "pedestrian/AgentsParameters.hpp"
-#include "routing/global_shortest/GlobalRouter.hpp"
 
 #include <Logger.hpp>
 

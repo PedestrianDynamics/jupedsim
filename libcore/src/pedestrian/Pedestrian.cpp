@@ -191,14 +191,6 @@ const Line& Pedestrian::GetExitLine() const
     return _navLine;
 }
 
-// return the unique subroom Identifier
-
-int Pedestrian::GetUniqueRoomID() const
-{
-    auto [room_id, sub_room_id, _] = _building->GetRoomAndSubRoomIDs(GetPos());
-    return room_id * 1000 + sub_room_id;
-}
-
 Point Pedestrian::GetLastE0() const
 {
     return _lastE0;
