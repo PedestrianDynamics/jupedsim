@@ -38,7 +38,7 @@
 
 #include "Geometry.hpp"
 #include "OperationalModelType.hpp"
-#include "direction/DirectionManager.hpp"
+#include "RoutingEngine.hpp"
 #include "neighborhood/NeighborhoodSearch.hpp"
 
 #include <memory>
@@ -46,6 +46,7 @@
 
 class Building;
 class Simulation;
+class RoutingEngine;
 struct Configuration;
 
 struct PedestrianUpdate {
@@ -60,18 +61,11 @@ struct PedestrianUpdate {
 
 class OperationalModel
 {
-protected:
-    // define the strategy for crossing a door (used for calculating the driving force)
-    DirectionManager* _direction{};
-    double _currentTime{0.0};
-    Simulation* _simulation{};
-
 public:
-    static std::unique_ptr<OperationalModel> CreateFromType(
-        OperationalModelType type,
-        const Configuration& config,
-        DirectionManager* directionManager);
-    explicit OperationalModel(DirectionManager* directionManager);
+    static std::unique_ptr<OperationalModel>
+    CreateFromType(OperationalModelType type, const Configuration& config);
+
+    OperationalModel() = default;
     virtual ~OperationalModel() = default;
 
     virtual PedestrianUpdate ComputeNewPosition(
@@ -81,13 +75,4 @@ public:
         const NeighborhoodSearch& neighborhoodSearch) const = 0;
 
     virtual void ApplyUpdate(const PedestrianUpdate& update, Pedestrian& agent) const = 0;
-
-    /**
-     * Performs whatever initialization is needed/required.
-     * This function is called at the beginning the simulation once.
-     * @param building, the building object
-     */
-    void Init(Simulation* simulation);
-
-    void Update(double time) { _currentTime = time; }
 };

@@ -26,45 +26,46 @@
  **/
 #include "DTriangulation.hpp"
 
-DTriangulation::DTriangulation()
+static std::vector<p2t::Point*> ConvertPointVector(const std::vector<Point>& vec)
 {
-    _cdt = nullptr;
+    std::vector<p2t::Point*> result{};
+    result.resize(vec.size());
+    std::transform(vec.begin(), vec.end(), result.begin(), [](const auto& p) {
+        return new p2t::Point(p.x, p.y);
+    });
+    return result;
 }
 
-DTriangulation::~DTriangulation()
+template <class C>
+static void FreeCollection(C& collection)
 {
-    for(unsigned int i = 0; i < _holesPolylines.size(); i++) {
-        std::vector<p2t::Point*> poly = _holesPolylines[i];
-        FreeClear(poly);
+    for(auto& item : collection) {
+        delete item;
     }
-
-    FreeClear(_outerConstraintsPolyline);
-    delete _cdt;
+    collection.clear();
 }
 
-void DTriangulation::Triangulate()
+DTriangulation::DTriangulation(
+    const std::vector<Point>& outerBoundary,
+    const std::vector<std::vector<Point>>& holes)
 {
-    _cdt = new p2t::CDT(_outerConstraintsPolyline);
+    _outerConstraintsPolyline = ConvertPointVector(outerBoundary);
 
-    for(unsigned int h = 0; h < _holesPolylines.size(); h++) {
-        _cdt->AddHole(_holesPolylines[h]);
+    for(const auto& hole : holes) {
+        _holesPolylines.push_back(ConvertPointVector(hole));
+    }
+    _cdt = std::make_unique<p2t::CDT>(_outerConstraintsPolyline);
+
+    for(const auto& hole : _holesPolylines) {
+        _cdt->AddHole(hole);
     }
     _cdt->Triangulate();
 }
 
-void DTriangulation::SetOuterPolygone(const std::vector<Point>& outPoly)
+DTriangulation::~DTriangulation()
 {
-    for(unsigned int i = 0; i < outPoly.size(); i++) {
-        _outerConstraintsPolyline.push_back(new p2t::Point(outPoly[i].x, outPoly[i].y));
+    for(auto& v : _holesPolylines) {
+        FreeCollection(v);
     }
-}
-
-void DTriangulation::AddHole(const std::vector<Point>& hole)
-{
-    std::vector<p2t::Point*> newHole;
-
-    for(unsigned int i = 0; i < hole.size(); i++) {
-        newHole.push_back(new p2t::Point(hole[i].x, hole[i].y));
-    }
-    _holesPolylines.push_back(newHole);
+    FreeCollection(_outerConstraintsPolyline);
 }

@@ -13,6 +13,8 @@ boost_version="1.78.0"
 # a known good build from master. This is api compatible with 9.9.9.8 so we
 # should(TM) have no issues with Windows.
 glm_version="6ad79aae3eb5bf809c30bf1168171e9e55857e45"
+poly2tri_version="3380f5c805dd25a06de21f7dacd4db529dbe07e7"
+cgal_version="5.4"
 install_path=/usr/local
 
 POSITIONAL=()
@@ -188,7 +190,55 @@ function setup_glm {
 
     cd ${root}
     rm -rf ${temp_folder}
+}
 
+function setup_poly2tri {
+    root=$(pwd)
+    temp_folder=$(mktemp -d)
+    cd ${temp_folder}
+
+    wget https://github.com/jhasse/poly2tri/archive/${poly2tri_version}.zip
+    unzip ${poly2tri_version}.zip
+    cd poly2tri-${poly2tri_version}
+    mkdir build
+    cd build
+    cmake .. \
+        -DCMAKE_CXX_FLAGS="-fPIC" \
+        -DCMAKE_BUILD_TYPE=Release
+    cmake --build . -- -j${CPUS}
+
+    # Manual install since poly2tri cmake has no install target
+    cp libpoly2tri.a ${install_path}/lib
+
+    header_path=${install_path}/include/poly2tri
+    mkdir -p ${header_path}/{common,sweep}
+    cp ../poly2tri/poly2tri.h ${header_path}
+    cp ../poly2tri/common/*.h ${header_path}/common
+    cp ../poly2tri/sweep/*.h ${header_path}/sweep
+
+    cd ${root}
+    rm -rf ${temp_folder}
+}
+
+function setup_cgal {
+    root=$(pwd)
+    temp_folder=$(mktemp -d)
+    cd ${temp_folder}
+
+    wget https://github.com/CGAL/cgal/releases/download/v${cgal_version}/CGAL-${cgal_version}-library.tar.xz
+    tar xf CGAL-${cgal_version}-library.tar.xz
+    cd CGAL-${cgal_version}
+    mkdir build
+    cd build
+    cmake .. \
+        -DCMAKE_INSTALL_PREFIX=${install_path} \
+        -DWITH_CGAL_Qt5=OFF \
+        -DWITH_CGAL_ImageIO=OFF \
+        -DCMAKE_BUILD_TYPE=Release
+    cmake --build . --target install -- -j${CPUS}
+
+    cd ${root}
+    rm -rf ${temp_folder}
 }
 
 setup_boost
@@ -198,3 +248,5 @@ setup_spdlog
 setup_catch2
 setup_cli11
 setup_glm
+setup_poly2tri
+setup_cgal

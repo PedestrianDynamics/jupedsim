@@ -17,8 +17,28 @@
  **/
 #pragma once
 
+#include "Area.hpp"
 #include "general/Configuration.hpp"
+#include "geometry/Point.hpp"
+
+#include <tinyxml.h>
 
 #include <filesystem>
+#include <vector>
 
 Configuration ParseIniFile(const std::filesystem::path& path);
+
+// <areas>
+//     <area id="1">
+//         <lables>
+//             <label>exit</label>
+//         </lables>
+//         <polygon>
+//             <vertex px="70" py="101" />
+//             <vertex px="70" py="103" />
+//             <vertex px="75" py="103" />
+//             <vertex px="75" py="101" />
+//         </polygon>
+//     </area>
+// </areas>
+std::map<Area::Id, Area> ParseAreas(const TiXmlElement* node);

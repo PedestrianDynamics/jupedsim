@@ -30,8 +30,6 @@
 #include "GCFMModel.hpp"
 
 #include "Simulation.hpp"
-#include "direction/DirectionManager.hpp"
-#include "direction/walking/DirectionStrategy.hpp"
 #include "geometry/SubRoom.hpp"
 #include "geometry/Wall.hpp"
 #include "math/OperationalModel.hpp"
@@ -41,7 +39,6 @@
 #include <Logger.hpp>
 
 GCFMModel::GCFMModel(
-    DirectionManager* directionManager,
     double nuped,
     double nuwall,
     double dist_effPed,
@@ -50,8 +47,7 @@ GCFMModel::GCFMModel(
     double intp_widthwall,
     double maxfped,
     double maxfwall)
-    : OperationalModel(directionManager)
-    , _nuPed(nuped)
+    : _nuPed(nuped)
     , _nuWall(nuwall)
     , _intp_widthPed(intp_widthped)
     , _intp_widthWall(intp_widthwall)
@@ -95,7 +91,7 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
     PedestrianUpdate update{};
     // repulsive forces to the walls and transitions that are not my target
     Point repwall = ForceRepRoom(&ped, geometry);
-    Point fd = ForceDriv(&ped, _direction->GetTarget(&ped), update);
+    Point fd = ForceDriv(&ped, ped.destination, update);
     Point acc = (fd + F_rep + repwall) / ped.GetMass();
 
     update.velocity = ped.GetV() + acc * dT;
@@ -128,21 +124,8 @@ GCFMModel::ForceDriv(const Pedestrian* ped, Point target, PedestrianUpdate& upda
     Point F_driv;
     const Point& pos = ped->GetPos();
     const double dist = ped->GetExitLine().DistTo(pos);
-    const Point lastE0 = ped->GetLastE0();
     update.lastE0 = target - pos;
-
-    // TODO(kkratz) fix this hack
-    const auto* strategy = &_direction->GetDirectionStrategy();
-    if(dynamic_cast<const DirectionLocalFloorfield*>(strategy)) {
-        if(dist > 50 * J_EPS_GOAL) {
-            const Point v0 = ped->GetV0(target);
-            update.v0 = v0;
-            F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
-        } else {
-            F_driv = ((lastE0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
-            update.lastE0 = lastE0;
-        }
-    } else if(dist > J_EPS_GOAL) {
+    if(dist > J_EPS_GOAL) {
         const Point v0 = ped->GetV0(target);
         update.v0 = v0;
         F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();

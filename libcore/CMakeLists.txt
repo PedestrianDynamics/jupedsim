@@ -2,11 +2,18 @@
 # Build libcore
 ################################################################################
 add_library(core STATIC
+    src/AABB.cpp
+    src/AABB.hpp
+    src/AgentExitSystem.cpp
+    src/AgentExitSystem.hpp
+    src/CGALPolygon.cpp
+    src/CGALPolygon.hpp
+    src/ConvexPolygon.cpp
+    src/ConvexPolygon.hpp
     src/DoorState.cpp
     src/DoorState.hpp
     src/Geometry.cpp
     src/Geometry.hpp
-    src/Graph.cpp
     src/Graph.hpp
     src/IO/EventFileParser.cpp
     src/IO/EventFileParser.hpp
@@ -24,24 +31,24 @@ add_library(core STATIC
     src/IO/TrainFileParser.hpp
     src/IO/Trajectories.cpp
     src/IO/Trajectories.hpp
+    src/OperationalDecisionSystem.cpp
+    src/OperationalDecisionSystem.hpp
+    src/RoutingEngine.cpp
+    src/RoutingEngine.hpp
     src/Simulation.cpp
     src/Simulation.hpp
     src/SimulationClock.cpp
     src/SimulationClock.hpp
     src/SimulationHelper.cpp
     src/SimulationHelper.hpp
+    src/StrategicalDesicionSystem.cpp
+    src/StrategicalDesicionSystem.hpp
+    src/TacticalDecisionSystem.cpp
+    src/TacticalDecisionSystem.hpp
+    src/Triangle.cpp
+    src/Triangle.hpp
     src/agent-creation/AgentCreator.cpp
     src/agent-creation/AgentCreator.hpp
-    src/direction/DirectionManager.cpp
-    src/direction/DirectionManager.hpp
-    src/direction/waiting/WaitingMiddle.cpp
-    src/direction/waiting/WaitingMiddle.hpp
-    src/direction/waiting/WaitingRandom.cpp
-    src/direction/waiting/WaitingRandom.hpp
-    src/direction/waiting/WaitingStrategy.cpp
-    src/direction/waiting/WaitingStrategy.hpp
-    src/direction/walking/DirectionStrategy.cpp
-    src/direction/walking/DirectionStrategy.hpp
     src/events/Event.cpp
     src/events/Event.hpp
     src/events/EventManager.cpp
@@ -116,20 +123,6 @@ add_library(core STATIC
     src/pedestrian/Pedestrian.hpp
     src/pedestrian/StartDistribution.cpp
     src/pedestrian/StartDistribution.hpp
-    src/routing/Router.hpp
-    src/routing/RoutingEngine.cpp
-    src/routing/RoutingEngine.hpp
-    src/routing/RoutingStrategy.cpp
-    src/routing/RoutingStrategy.hpp
-    src/routing/ff_router/UnivFFviaFM.cpp
-    src/routing/ff_router/UnivFFviaFM.hpp
-    src/routing/ff_router/ffRouter.cpp
-    src/routing/ff_router/ffRouter.hpp
-    src/routing/ff_router/mesh/RectGrid.hpp
-    src/routing/global_shortest/AccessPoint.cpp
-    src/routing/global_shortest/AccessPoint.hpp
-    src/routing/global_shortest/GlobalRouter.cpp
-    src/routing/global_shortest/GlobalRouter.hpp
     src/util/HashCombine.hpp
     src/util/UniqueID.hpp
     src/voronoi-boost/VoronoiPositionGenerator.cpp
@@ -201,8 +194,10 @@ endif()
 ################################################################################
 if (BUILD_TESTS)
     add_executable(libcore-tests
+        test/TestBasicPrimitiveTests.cpp
         test/TestGeometry.cpp
         test/TestGraph.cpp
+        test/TestIniFileParser.cpp
         test/TestSimulationClock.cpp
         test/neighborhood/TestGrid2D.cpp
         test/neighborhood/TestNeighborhoodSearch.cpp

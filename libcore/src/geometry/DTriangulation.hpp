@@ -29,61 +29,31 @@
 
 #include "Point.hpp"
 
-#include <algorithm>
-#include <cstdlib>
-#include <ctime>
-#include <fstream>
-#include <iostream>
-#include <iterator>
-#include <poly2tri.h>
-#include <sstream>
-#include <string>
+#include <poly2tri/poly2tri.h>
+
 #include <vector>
 
 class DTriangulation
 {
 public:
-    DTriangulation();
+    DTriangulation(
+        const std::vector<Point>& outerBoundary,
+        const std::vector<std::vector<Point>>& holes);
+    ~DTriangulation();
+    DTriangulation(const DTriangulation& other) = delete;
+    DTriangulation& operator=(const DTriangulation& other) = delete;
+    DTriangulation(DTriangulation&& other) = default;
+    DTriangulation& operator=(DTriangulation&& other) = default;
 
-    virtual ~DTriangulation();
-
-    /**
-     * Triangulate the specified domain
-     * \see SetOuterPolygone
-     * \see AddHole
-     */
-    void Triangulate();
-
-    /**
-     * @return the triangles resulting from the triangulation
-     */
+    /// @return the triangles resulting from the triangulation
     std::vector<p2t::Triangle*> GetTriangles() { return _cdt->GetTriangles(); }
 
-    /**
-     * Set the boundaries of the domain
-     * @param outerConstraints
-     */
-    void SetOuterPolygone(const std::vector<Point>& outerConstraints);
-
-    /**
-     * Add a new hole
-     * A domain can contains holes.
-     * They should fully be inside the domain.
-     */
-    void AddHole(const std::vector<Point>& hole);
-
-    // templates for freeing and clearing a vector of pointers
-    template <class C>
-    void FreeClear(C& cntr)
-    {
-        for(typename C::iterator it = cntr.begin(); it != cntr.end(); ++it) {
-            delete *it;
-        }
-        cntr.clear();
-    }
-
 private:
-    std::vector<std::vector<p2t::Point*>> _holesPolylines;
-    std::vector<p2t::Point*> _outerConstraintsPolyline;
-    p2t::CDT* _cdt;
+    /// Poly2Tri does not take ownership of any p2t::Point* and requires the caller to keep them
+    /// alive until p2t::CDT livetime ends
+    std::vector<p2t::Point*> _outerConstraintsPolyline{};
+    /// Poly2Tri does not take ownership of any p2t::Point* and requires the caller to keep them
+    /// alive until p2t::CDT livetime ends
+    std::vector<std::vector<p2t::Point*>> _holesPolylines{};
+    std::unique_ptr<p2t::CDT> _cdt{};
 };

@@ -133,12 +133,7 @@ private:
     Point ForceRepWall(const Pedestrian* ped, const Line& l) const;
 
 public:
-    VelocityModel(
-        DirectionManager* directionManager,
-        double aped,
-        double Dped,
-        double awall,
-        double Dwall);
+    VelocityModel(double aped, double Dped, double awall, double Dwall);
     ~VelocityModel() override = default;
 
     PedestrianUpdate ComputeNewPosition(

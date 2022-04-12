@@ -29,7 +29,9 @@
 #include "IO/GeoFileParser.hpp"
 #include "IO/IniFileParser.hpp"
 #include "IO/TrainFileParser.hpp"
+#include "IteratorPair.hpp"
 #include "ResultHandling.hpp"
+#include "RoutingEngine.hpp"
 #include "Simulation.hpp"
 #include "agent-creation/AgentCreator.hpp"
 #include "events/Event.hpp"
@@ -42,11 +44,13 @@
 #include "pedestrian/AgentsSourcesManager.hpp"
 
 #include <Logger.hpp>
+
 #include <chrono>
 #include <cstdlib>
 #include <exception>
 #include <fmt/format.h>
 #include <iostream>
+#include <iterator>
 
 int main(int argc, char** argv)
 {
@@ -78,7 +82,12 @@ int main(int argc, char** argv)
         auto* building_ptr = building.get();
         auto agents = CreateAllPedestrians(&config, building.get(), config.tMax);
         auto geometry = ParseGeometryXml(config.projectRootDir / config.geometryFile);
-        Simulation sim(&config, std::move(building), std::move(geometry));
+        Simulation sim(
+            &config,
+            std::move(building),
+            std::move(geometry),
+            std::make_unique<NavMeshRoutingEngine>(
+                NavMeshRoutingEngine::MakeFromBuilding(*building_ptr)));
         EventManager manager;
 
         size_t frame = 0;
@@ -158,7 +167,7 @@ int main(int argc, char** argv)
         writer->WriteHeader(num_agents_in_simulation, sim.Fps(), config, 0);
 
         const int writeInterval = static_cast<int>((1. / sim.Fps()) / sim.Clock().dT() + 0.5);
-
+        LOG_INFO("Starting simulation");
         while((!sim.Agents().empty() || manager.HasEventsAfter(sim.Clock())) &&
               sim.Clock().ElapsedTime() < config.tMax) {
             auto next_events = manager.NextEvents(sim.Clock());

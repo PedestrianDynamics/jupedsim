@@ -29,11 +29,15 @@
  **/
 #pragma once
 
+#include "AgentExitSystem.hpp"
 #include "Geometry.hpp"
 #include "IO/OutputHandler.hpp"
 #include "IO/Trajectories.hpp"
+#include "OperationalDecisionSystem.hpp"
+#include "RoutingEngine.hpp"
 #include "SimulationClock.hpp"
-#include "direction/walking/DirectionStrategy.hpp"
+#include "StrategicalDesicionSystem.hpp"
+#include "TacticalDecisionSystem.hpp"
 #include "general/Configuration.hpp"
 #include "geometry/Building.hpp"
 #include "geometry/GoalManager.hpp"
@@ -43,8 +47,6 @@
 #include "pedestrian/AgentsSourcesManager.hpp"
 #include "pedestrian/PedDistributor.hpp"
 #include "pedestrian/Pedestrian.hpp"
-#include "routing/RoutingEngine.hpp"
-#include "routing/global_shortest/GlobalRouter.hpp"
 
 #include <chrono>
 #include <cstddef>
@@ -55,23 +57,28 @@ class Simulation
 private:
     Configuration* _config;
     SimulationClock _clock;
+    StrategicalDecisionSystem _stategicalDecisionSystem{};
+    TacticalDecisionSystem _tacticalDecisionSystem{};
+    OperationalDecisionSystem _operationalDecisionSystem;
+    AgentExitSystem _agentExitSystem{};
+
     /// frame rate for the trajectories
     double _fps{1.0};
     unsigned int _seed{8091983};
     NeighborhoodSearch _neighborhoodSearch;
     std::unique_ptr<Building> _building;
-    std::unique_ptr<DirectionManager> _directionManager;
-    std::unique_ptr<Geometry> _geometry;
     std::unique_ptr<RoutingEngine> _routingEngine;
-    std::unique_ptr<OperationalModel> _operationalModel;
+    std::unique_ptr<Geometry> _geometry;
     std::vector<std::unique_ptr<Pedestrian>> _agents;
+    std::map<Area::Id, Area> _areas;
     bool _eventProcessed{false};
 
 public:
     Simulation(
         Configuration* args,
         std::unique_ptr<Building>&& building,
-        std::unique_ptr<Geometry>&& geometry);
+        std::unique_ptr<Geometry>&& geometry,
+        std::unique_ptr<RoutingEngine>&& routingEngine);
 
     ~Simulation() = default;
 
@@ -133,10 +140,4 @@ private:
      * Update the route of the pedestrians and reassign rooms, in the case a room change happens
      */
     void UpdateLocations();
-
-    /**
-     * Update the routes (intermediate destinations) of the pedestrians.
-     * Based on the route choice algorithm used, the next doors or the next decision points is set.
-     */
-    void UpdateRoutes();
 };

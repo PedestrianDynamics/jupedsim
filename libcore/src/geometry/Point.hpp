@@ -67,11 +67,6 @@ public:
     /// dot product
     inline double ScalarProduct(const Point& v) const { return x * v.x + y * v.y; }
 
-    /**
-     * since we have only 2D vectors (may be changed in the future), this function returns a scalar
-     * basically the third component of the vector (0,0,z) )
-     *
-     */
     inline double CrossProduct(const Point& p) const { return Determinant(p); }
 
     /// determinant of the square matrix formed by the vectors [ this, v]
@@ -128,3 +123,5 @@ double Distance(const Point&, const Point&);
 const Point operator*(const Point& p, const double f);
 /// division
 const Point operator/(const Point& p, const double f);
+
+std::ostream& operator<<(std::ostream& out, const Point& p);

@@ -101,6 +101,27 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 find_package(glm REQUIRED CONFIG)
+# Silence CGAL CMake warning. No example data for CGAL will be loaded anyways
+set(CGAL_DATA_DIR "none")
+find_package(CGAL 5.4 REQUIRED)
+find_library(POLY2TRI_LIB poly2tri)
+if(POLY2TRI_LIB-NOTFOUND)
+    message(FATAL_ERROR "Cannot find libpoly2tri.a")
+endif()
+find_path(POLY2TRI_HEADER poly2tri.h
+    PATH_SUFFIXES poly2tri
+)
+if(POLY2TRI_HEADER-NOTFOUND)
+    message(FATAL_ERROR "Cannot find poly2tri header")
+endif()
+add_library(poly2tri UNKNOWN IMPORTED)
+set_target_properties(poly2tri PROPERTIES
+    IMPORTED_LOCATION ${POLY2TRI_LIB}
+)
+target_include_directories(poly2tri INTERFACE
+    ${POLY2TRI_HEADER}/..
+)
+
 if(BUILD_TESTS)
     find_package(Catch2 REQUIRED)
     find_package(GTest 1.11 REQUIRED CONFIG)

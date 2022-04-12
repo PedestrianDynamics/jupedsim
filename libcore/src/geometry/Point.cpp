@@ -255,3 +255,8 @@ double Distance(const Point& point1, const Point& point2)
 {
     return boost::geometry::distance(point1, point2);
 }
+
+std::ostream& operator<<(std::ostream& out, const Point& p)
+{
+    return out << "[" << p.x << ", " << p.y << "]";
+}

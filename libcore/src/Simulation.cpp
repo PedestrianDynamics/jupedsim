@@ -35,7 +35,6 @@
 #include "IO/Trajectories.hpp"
 #include "SimulationClock.hpp"
 #include "SimulationHelper.hpp"
-#include "direction/DirectionManager.hpp"
 #include "general/Filesystem.hpp"
 #include "geometry/GoalManager.hpp"
 #include "geometry/Line.hpp"
@@ -47,7 +46,6 @@
 #include "math/OperationalModel.hpp"
 #include "pedestrian/AgentsSourcesManager.hpp"
 #include "pedestrian/Pedestrian.hpp"
-#include "routing/ff_router/ffRouter.hpp"
 
 #include <Logger.hpp>
 #include <algorithm>
@@ -63,29 +61,25 @@
 Simulation::Simulation(
     Configuration* args,
     std::unique_ptr<Building>&& building,
-    std::unique_ptr<Geometry>&& geometry)
+    std::unique_ptr<Geometry>&& geometry,
+    std::unique_ptr<RoutingEngine>&& routingEngine)
     : _config(args)
     , _clock(_config->dT)
+    , _operationalDecisionSystem(OperationalModel::CreateFromType(args->operationalModel, *args))
     , _neighborhoodSearch(_config->linkedCellSize)
     , _building(std::move(building))
-    , _directionManager(DirectionManager::Create(*args, _building.get()))
+    , _routingEngine(std::move(routingEngine))
     , _geometry(std::move(geometry))
-    , _routingEngine(
-          std::make_unique<RoutingEngine>(args, _building.get(), _directionManager.get()))
-    , _operationalModel(
-          OperationalModel::CreateFromType(args->operationalModel, *args, _directionManager.get()))
+    , _areas(std::move(_config->areas))
 {
-    _routingEngine->SetSimulation(this);
+    // TODO(kkratz): Ensure all areas are fully contained inside the walkable area. Otherwise an
+    // agent may try to navigate to a point outside the navigation mesh, resulting in an exception.
 }
 
 void Simulation::Iterate()
 {
-    const double t_in_sec = _clock.ElapsedTime();
     _neighborhoodSearch.Update(_agents);
-
-    _directionManager->Update(t_in_sec);
-    _operationalModel->Update(t_in_sec);
-    _routingEngine->UpdateTime(t_in_sec);
+    _agentExitSystem.Run(_areas, _agents);
 
     // TODO(kkratz): This currently mirrors the door state of the
     // old representation into the new one.
@@ -96,60 +90,25 @@ void Simulation::Iterate()
         _geometry->UpdateDoorState(id, t->GetState());
     }
 
-    if(t_in_sec > Pedestrian::GetMinPremovementTime()) {
-        _routingEngine->setNeedUpdate(_eventProcessed || _routingEngine->NeedsUpdate());
-        UpdateRoutes();
-        std::vector<std::optional<PedestrianUpdate>> updates(_agents.size(), std::nullopt);
-        std::transform(
-            _agents.begin(),
-            _agents.end(),
-            updates.begin(),
-            [this](auto&& agent) -> std::optional<PedestrianUpdate> {
-                if(agent->InPremovement(_clock.ElapsedTime())) {
-                    return std::nullopt;
-                }
-                return _operationalModel->ComputeNewPosition(
-                    _clock.dT(), *agent, *_geometry, _neighborhoodSearch);
-            });
+    _stategicalDecisionSystem.Run(_areas, _agents);
+    _tacticalDecisionSystem.Run(_areas, *_routingEngine, _agents);
+    _operationalDecisionSystem.Run(
+        _clock.dT(), _clock.ElapsedTime(), _neighborhoodSearch, *_geometry, _agents);
 
-        auto agent_iter = _agents.begin();
-        std::for_each(updates.begin(), updates.end(), [this, &agent_iter](auto&& update) {
-            if(update) {
-                _operationalModel->ApplyUpdate(*update, **agent_iter);
-            }
-            ++agent_iter;
-        });
-
-        if(_eventProcessed) {
-            _directionManager->GetDirectionStrategy().ReInit();
-        }
+    if(_clock.ElapsedTime() > Pedestrian::GetMinPremovementTime()) {
         UpdateLocations();
-
-        GoalManager gm{_building.get(), this};
-        gm.update(t_in_sec);
     }
     _eventProcessed = false;
     _clock.Advance();
+    LOG_DEBUG("Iteration done.");
 }
 
 void Simulation::AddAgent(std::unique_ptr<Pedestrian>&& agent)
 {
     agent->SetBuilding(_building.get());
+    // TODO(kkratz): this should be done by the tac-lvl
+    const Point target{};
     const Point pos = agent->GetPos();
-    auto* router = _routingEngine->GetRouter(agent->GetRouterID());
-    Point target = Point{0.0, 0.0};
-    if(router->FindExit(agent.get()) == -1) {
-        Point p1 = agent->GetPos();
-        p1.x += 1;
-        p1.y -= 1;
-        Point p2 = agent->GetPos();
-        p2.x += 1;
-        p2.y += 1;
-        Line dummy(Line{p1, p2});
-        agent->SetExitLine(&dummy);
-    } else {
-        target = agent->GetExitLine().ShortestPoint(pos);
-    }
     // Compute orientation
     const Point posToTarget = target - pos;
     const Point orientation = posToTarget.Normalized();
@@ -302,13 +261,6 @@ bool Simulation::InitArgs()
 {
     _fps = _config->fps;
 
-    // perform customs initialisation, like computing the phi for the gcfm
-    // this should be called after the routing engine has been initialised
-    //  because a direction is needed for this initialisation.
-    LOG_INFO("Init Operational Model starting ...");
-    _operationalModel->Init(this);
-    LOG_INFO("Init Operational Model done.");
-
     // Give the DirectionStrategy the chance to perform some initialization.
     // This should be done after the initialization of the operationalModel
     // because then, invalid pedestrians have been deleted and FindExit()
@@ -339,49 +291,13 @@ void Simulation::UpdateLocations()
     RemoveAgents(pedsOutside);
 
     // TODO discuss simulation flow -> better move to main loop, does not belong here
+    //  TODO(kkratz): Notify new routing engine of potential updates / need to rebuild navigation
+    //  graph
     bool geometryChangedFlow = SimulationHelper::UpdateFlowRegulation(*_building, _clock);
     bool geometryChangedTrain =
         SimulationHelper::UpdateTrainFlowRegulation(*_building, _clock.ElapsedTime());
-
-    _routingEngine->setNeedUpdate(geometryChangedFlow || geometryChangedTrain);
-}
-
-void Simulation::UpdateRoutes()
-{
-    if(_routingEngine->NeedsUpdate()) {
-        LOG_INFO("Update router during simulation.");
-        _routingEngine->UpdateRouter();
-    }
-    for(const auto& ped : _agents) {
-        // set ped waiting, if no target is found
-        auto* router = _routingEngine->GetRouter(ped->GetRouterID());
-        int target = router->FindExit(ped.get());
-
-        if(target == FINAL_DEST_OUT) {
-            ped->StartWaiting();
-        } else {
-            if(ped->IsWaiting() && !ped->IsInsideWaitingAreaWaiting(_clock.ElapsedTime())) {
-                ped->EndWaiting();
-            }
-        }
-        if(target != FINAL_DEST_OUT) {
-            const Hline* door = _building->GetTransOrCrossByUID(target);
-            auto [roomID, subRoomID, _] = _building->GetRoomAndSubRoomIDs(ped->GetPos());
-
-            if(const auto* cross = dynamic_cast<const Crossing*>(door)) {
-                if(cross->IsInRoom(roomID) && cross->IsInSubRoom(subRoomID)) {
-                    if(!ped->IsWaiting() && cross->IsTempClose()) {
-                        ped->StartWaiting();
-                    }
-
-                    if(ped->IsWaiting() && cross->IsOpen() &&
-                       !ped->IsInsideWaitingAreaWaiting(_clock.ElapsedTime())) {
-                        ped->EndWaiting();
-                    }
-                }
-            }
-        }
-    }
+    (void) geometryChangedFlow;
+    (void) geometryChangedTrain;
 }
 
 void Simulation::PrintStatistics(double simTime)
