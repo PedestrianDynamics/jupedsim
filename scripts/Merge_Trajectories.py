@@ -1,5 +1,9 @@
 import argparse
+import logging
+import sys
+import logging as log
 
+log.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 parser = argparse.ArgumentParser()
 parser.add_argument("file_location", type=str, help="Merge the given Trajectory files together", nargs='+')
 parser.add_argument('-o', type=str, required=False, default="src/outputfile.txt",
@@ -135,7 +139,7 @@ def addDatas(trajecs, output, debug):
             # adds all data from that file to the output file
             if frame == next_frame:
                 if debug:
-                    print(f"writing file {debug_counter}/{debug_length}")
+                    log.debug(f"writing file {debug_counter}/{debug_length}")
                 write(files[i], output)
                 # removes file and the first line from the lists after the data has been written
                 files.pop(i)
@@ -143,7 +147,7 @@ def addDatas(trajecs, output, debug):
                 debug_counter += 1
                 break
 
-    print(f'new File "{output}" was created.')
+    log.info(f'new File "{output}" was created.')
 
 
 def write(inputfile, output):
@@ -172,15 +176,15 @@ def addInfos(trajecs, output):
 
 try:
     if args.debug:
-        print("it will be checked if the Trajectories match")
+        log.debug("it will be checked if the Trajectories match")
     checkhead(args.file_location)
     checkdata(args.file_location)
     if args.debug:
-        print("Trajectories match")
+        log.debug("Trajectories match")
 except IncorrectTrajectoryException as error:
-    print(error.message)
-    print("Use -h for more info on how to use the Skript")
-    exit()
+    log.error(error)
+    log.info("Use -h for more info on how to use the Skript")
+    sys.exit(1)
 
 addInfos(args.file_location, args.output_path)
 addDatas(args.file_location, args.output_path, args.debug)
