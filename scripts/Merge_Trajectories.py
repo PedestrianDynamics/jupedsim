@@ -43,7 +43,6 @@ def checkhead(trajecs):
         except FileNotFoundError as error:
             raise IncorrectTrajectoryException(f"the file {error.filename} can not be found")
 
-    # todo should this be a try except or just a regular if ?
     if len(frame_rates) != len(trajecs):
         raise IncorrectTrajectoryException("One file is missing a frame rate in the Header")
     if len(geometries) != len(trajecs):
