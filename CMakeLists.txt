@@ -357,6 +357,7 @@ elseif(WIN32)
     set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS
       "Delete '$DESKTOP\\\\JPSvis.lnk'"
     )
+    set(CPACK_NSIS_MODIFY_PATH ON)
     set(JPSCORE_INSTALLER_LOCATION "bin")
 endif()
 
