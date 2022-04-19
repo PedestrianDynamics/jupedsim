@@ -74,7 +74,7 @@ int main(int argc, char ** argv)
         LOG_INFO("Build with {}({})", compiler_id, compiler_version);
 
         auto config         = ParseIniFile(a.IniFilePath());
-        auto building       = std::make_unique<Building>(&config, nullptr);
+        auto building       = std::make_unique<Building>(&config);
         auto * building_ptr = building.get();
         auto agents         = CreateAllPedestrians(&config, building.get(), config.tMax);
         auto geometry       = ParseGeometryXml(config.projectRootDir / config.geometryFile);

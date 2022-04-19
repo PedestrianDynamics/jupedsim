@@ -65,10 +65,7 @@
 #include <utility>
 #include <vector>
 
-Building::Building(
-    Configuration * configuration,
-    std::vector<std::unique_ptr<Pedestrian>> * agents) :
-    _configuration(configuration), _allPedestrians(agents)
+Building::Building(Configuration * configuration) : _configuration(configuration)
 {
     {
         std::unique_ptr<GeoFileParser> parser(new GeoFileParser(_configuration));
@@ -744,16 +741,6 @@ void Building::InitGrid()
     }
 
     LOG_INFO("Done with Initializing the grid");
-}
-
-void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const
-{
-    for(auto && ped : *_allPedestrians) {
-        auto [ped_roomid, ped_subroomid, _] = GetRoomAndSubRoomIDs(ped->GetPos());
-        if((room == ped_roomid) && (subroom == ped_subroomid)) {
-            peds.push_back(ped.get());
-        }
-    }
 }
 
 Transition * Building::GetTransitionByUID(int uid) const
