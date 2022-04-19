@@ -17,7 +17,6 @@ CreateAllPedestrians(Configuration * configuration, Building * building, double 
 {
     using AgentVec = std::vector<std::unique_ptr<Pedestrian>>;
     AgentVec agents;
-    building->SetAgents(&agents);
 
     PedDistributor pd(configuration, &agents);
     pd.Distribute(building);
@@ -36,14 +35,11 @@ CreateAllPedestrians(Configuration * configuration, Building * building, double 
     SimulationClock clock(configuration->dT);
 
     do {
-        building->SetAgents(&agents);
         auto agents = mgr.ProcessAllSources(clock.ElapsedTime());
         for(auto && ped : agents) {
             result.emplace(std::make_pair(clock.Iteration(), std::move(ped)));
         }
         clock.Advance();
     } while(!mgr.IsCompleted() && clock.ElapsedTime() < max_time);
-
-    building->SetAgents(nullptr);
     return result;
 }
