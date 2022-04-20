@@ -49,7 +49,7 @@ jpscore.exe .\02_bottleneck\bottleneck_ini.xml
 
 ![Windows: run simulation 2]({{ site.baseurl }}/images/win/run_sim2.png)
 
-To run this demo on OSX open the terminal and type:
+To run this demo on OSX open the terminal in the JuPedSim directory and type:
 
 ```bash
 ./jpscore.exe ./examples/jpscore/02_bottleneck/bottleneck_ini.xml
@@ -85,6 +85,6 @@ To visualize the trajectory file produced in the simulation, `jpsvis` can be use
 In `JPSvis` click on File -> Open file and choose the trajectory file that was created previously.
 The result should look like in the following screenshot
 
-TODO
+![Jpsvis screenshot]({{ site.baseurl }}/images/jpsvis.png)
 
 {% include links.html %}
