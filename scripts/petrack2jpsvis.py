@@ -63,10 +63,11 @@ def extract_info(file_obj):
     return fps, unit
 
 
-def build_header(program_name, fps):
+def build_header(program_name, fps, unit):
     return (
         f"description: trajectories converted by {program_name}\n"
         + f"framerate: {fps}\n"
+        + f"unit: {unit}\n"
         + "geometry: geometry.xml\n"
         + "ID\tFR\tX\tY\tZ\tA\tB\tANGLE\tCOLOR"
     )
@@ -370,7 +371,7 @@ def main():
             if not unit_s:
                 unit_s = args.unit
 
-            header = build_header(sys.argv[0], fps)
+            header = build_header(sys.argv[0], fps, unit_s)
 
             unit = 100 if unit_s == "cm" else 1
             v0 = 1.5 * unit  # max. speed (assumed) [unit/s]
