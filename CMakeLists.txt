@@ -257,6 +257,7 @@ add_subdirectory(jpscore)
 add_subdirectory(jpsvis)
 add_subdirectory(libcore)
 add_subdirectory(libshared)
+add_subdirectory(tools)
 
 ################################################################################
 # Code formating
