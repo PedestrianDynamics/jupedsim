@@ -72,8 +72,7 @@ The following elements must be defined in the header:
   geometry file are updated. Resulting in a folder with the results and everything to reproduce a specific simulation.
   If no output path is given the folder is named `results`.
 
-- The `trajectory` file with its location to configure output as described [here](jpscore_trajectory#txt). The settings
-  are listed below.
+- The `trajectory` file with its location to configure output as described below.
 
 ### Trajectory settings
 
@@ -104,6 +103,80 @@ The following elements must be defined in the header:
     <optional_output speed="FALSE" velocity="TRUE" final_goal="NoOutputWrongValue" intermediate_goal="false"
                      desired_direction="true" group="TRUE" router="TRUE" spotlight="TRUE"/>
 </trajectories>
+```
+
+### Trajectory Output File
+
+The results of jpscore simulation are written to files in TXT format. This format can be used by other JuPedSim modules.
+
+The provided output format is `plain` (a flat format, just numbers).
+
+{%include note.html content="If a file size of 16Mb is exceeded, `jpscore` automatically splits the output into several files. The files are numbered in ascending order and contain the information of consecutive frames. If you wish to analyze the data with `jpsreport` the output data need to be merged. "%}
+
+#### Default Output
+
+A sample trajectory in the plain format is as follows:
+
+```xml
+#description: jpscore (0.8.4)
+#count: 0
+#framerate: 16.00
+#geometry: geometry.xml
+#sources: sources.xml
+#goals: goals.xml
+#ID: the agent ID
+#FR: the current frame
+#X,Y,Z: the agents coordinates (in metres)
+#A, B: semi-axes of the ellipse
+#ANGLE: orientation of the ellipse
+#COLOR: color of the ellipse
+
+#ID	FR	X	Y	Z	A	B	ANGLE	COLOR
+1	0	3.30	3.33	0.00	0.18	0.25	-90.00	0
+2	0	4.50	4.44	0.00	0.18	0.25	-90.00	0
+3	0	3.60	3.70	0.00	0.18	0.25	180.00	0
+4	0	3.60	4.07	0.00	0.18	0.25	180.00	0
+5	0	4.50	4.07	0.00	0.18	0.25	-90.00	0
+6	0	4.20	3.33	0.00	0.18	0.25	-90.00	0
+```
+`count` is a running number. Handy when big simulations are splitted into small 10 MB large files.
+
+{%include note.html content="Other files can be included as well. For example events.xml or schedule.xml"%}
+
+#### Additional Output
+```xml
+#description: jpscore (0.8.4)
+#count: 0
+#framerate: 8.00
+#geometry: [absolute path to file]/bottleneck_geo.xml
+#ID: the agent ID
+#FR: the current frame
+#X,Y,Z: the agents coordinates (in metres)
+#A, B: semi-axes of the ellipse
+#ANGLE: orientation of the ellipse
+#COLOR: color of the ellipse
+#V: speed of the pedestrian (in m/s)
+#Vx: x component of the pedestrian's velocity
+#Vy: y component of the pedestrian's velocity
+#FG: id of final goal
+#CG: id of current goal
+#Dx: x component of the pedestrian's desired direction
+#Dy: y component of the pedestrian's desired direction
+#SPOT: ped is highlighted
+#ROUTER: routing strategy used during simulation
+#GROUP: group of the pedestrian
+
+
+#ID	FR	X	Y	Z	A	B	ANGLE	COLOR	V	Vx	Vy	FG	CG	Dx	Dy	SPOT	ROUTER	GROUP
+1	0	55.70	103.00	0.00	0.15	0.15	0.00	0	0.00	0.00	0.00	0	16	0.00	0.00	0	2	1
+2	0	52.70	102.10	0.00	0.15	0.15	0.00	0	0.00	0.00	0.00	0	16	0.00	0.00	0	2	1
+3	0	54.80	100.60	0.00	0.15	0.15	0.00	0	0.00	0.00	0.00	0	16	0.00	0.00	0	2	1
+4	0	53.60	102.70	0.00	0.15	0.15	0.00	0	0.00	0.00	0.00	0	16	0.00	0.00	0	2	1
+5	0	50.30	102.70	0.00	0.15	0.15	0.00	0	0.00	0.00	0.00	0	16	0.00	0.00	0	2	1
+6	0	54.20	100.30	0.00	0.15	0.15	0.00	0	0.00	0.00	0.00	0	16	0.00	0.00	0	2	1
+7	0	55.40	102.10	0.00	0.15	0.15	0.00	0	0.00	0.00	0.00	0	16	0.00	0.00	0	2	1
+8	0	52.70	100.60	0.00	0.15	0.15	0.00	0	0.00	0.00	0.00	0	16	0.00	0.00	0	2	1
+9	0	53.00	103.30	0.00	0.15	0.15	0.00	0	0.00	0.00	0.00	0	16	0.00	0.00	0	2	1
 ```
 
 ## Optional Header Settings
@@ -519,7 +592,7 @@ The definition of any model parameter is composed of two different sections:
 
 ### Direction strategies
 
-The chosen model the direction strategy should be specified in the [inifile](jpscore_inifile.html) as follows
+The chosen model the direction strategy should be specified as follows
 
 ```xml
 
@@ -630,9 +703,6 @@ The parameters that can be specified in this section are Gauss distributed (defa
   - Speed of agents on escalators downstairs
   - Unit: m/s
 
-{%include important.html content="The desired speed changes *smoothly* from one plane to another. See
-this [documentation](jpscore_desired_speed.html) for more details."%}
-
 The reduced speed on stairs (up) is according to Tab 1 in [Burghardt2014][#Burghardt2014].
 
 | Handbook | Speed Stair Up |
@@ -641,6 +711,52 @@ The reduced speed on stairs (up) is according to Tab 1 in [Burghardt2014][#Burgh
 | WM       | 0.61 m/s       |
 | NM       | 0.8 m/s        |
 | FM       | 0.55 m/s       |
+
+#### Modeling the change of the desired speed
+
+Pedestrians may have a different desired speed on a stair than on a horizontal plan.  Therefore, it is necessary to calculate a "smooth" transition in the desired speed, when pedestrians move on planes with a different inclination. In this way "jumpy" changes in the desired speed are avoided.
+
+{% include note.html content="This modelling of the desired speed in the transition area of planes and stairs is not validated, since experimental data are missing."%}
+
+##### Definitions
+
+Assume the following scenario, with two horizontal planes and a stair, where
+$$z_0<z_1$$ and the inclination of the stair $$\alpha$$.
+
+![Speed curve in the transition area between levels and stairs]({{ site.baseurl }}/images/desired_speed.png)
+
+The agent has a desired speed on the horizontal plane $$v^0_{\text{horizontal}}$$ and a *different* desired speed on the stair $$v^0_{\text{stair}}$$.
+
+Given a stair connecting two horizontal floors, we define the following functions:
+
+$$
+f(z) = \frac{2}{1 + \exp\Big(-c\cdot \alpha (z-z_1)^2)\Big)} - 1,
+$$
+
+and
+
+$$
+g(z) =  \frac{2}{1 + \exp\Big(-c\cdot \alpha ((z-z_0)^2)\Big)} - 1.
+$$
+
+![Increasing function $$f(z)$$ and decreasing function $$g(z)]({{ site.baseurl }}/images/desired_speed_f_g.png)
+
+##### Function of the desired speed
+
+Taking the previously introduced quantities into consideration, we can define the desired speed of the agent with respect to its $$z-$$component as
+
+$$
+v^0(z) = v^0_{\text{horizontal}}\cdot\Big(1 − f(z)\cdot g(z)\Big)   + v^0_{\text{stair}}\cdot f(z)\cdot g(z),
+$$
+
+$$c$$ is a constant.
+
+The following figure shows the changes of the desired speed with respect to the inclination of the stair $$\alpha$$. The steeper the inclination of the stair, the faster is the change of the desired speed.
+
+![Transition area of levels and stairs]({{ site.baseurl }}/images/desired_speed2.png)
+
+{%include note.html content="The value of *c* should be chosen so that the function grows fast (but smooth) from 0 to 1. However, in force-based models the speed is adapted exponentially from zero to the desired speed.  Therefore, the parameter tau must be taken into consideration."%}
+
 
 ### Shape of pedestrians
 
@@ -853,11 +969,48 @@ with any walls or be inside rooms."%}
 It is recommended to position them near the exits.
 
 - Goals are defined with close polygons, with  *the last vertex is equal to the first one*.
-- `file` file containing further goals.
+- `file` file containing further goals as defined below.
+
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<JPScore project="JPS-Project" version="0.8">
+  <goals>
+    <goal id="1" final="true" caption="goal1" x_min="3.6" x_max="5.2" y_min="-4" y_max="-3">
+      <polygon>
+        <vertex px="3.6" py="-3.0" />
+        <vertex px="3.6" py="-4.0" />
+        <vertex px="5.2" py="-4.0" />
+        <vertex px="5.2" py="-3.0" />
+        <vertex px="3.6" py="-3.0" />
+      </polygon>
+    </goal>
+    <goal id="4" final="true" caption="goal4" x_min="-4" x_max="-3" y_min="2.8" y_max="6.4">
+      <polygon>
+        <vertex px="-3.0" py="2.8" />
+        <vertex px="-4.0" py="2.8" />
+        <vertex px="-4.0" py="6.4" />
+        <vertex px="-3.0" py="6.4" />
+        <vertex px="-3.0" py="2.8" />
+      </polygon>
+    </goal>
+    <waiting_area caption="wa1" id="5" waiting_time="20" max_peds="10" is_open="true" room_id="0" subroom_id="1" global_timer="false" >
+      <polygon>
+        <vertex px="11" py="1" />
+        <vertex px="14" py="1" />
+        <vertex px="14" py="4" />
+        <vertex px="11" py="4" />
+        <vertex px="11" py="1" />
+      </polygon>
+      <next_wa id="2" p="0.75"/>
+      <next_wa id="3" p="0.25"/>
+    </waiting_area>
+  </goals>
+</JPScore>
+```
 
 ### Waiting Area
 
-Addional goals, which are defined **inside** the geometry.
+Additional goals, which are defined **inside** the geometry.
 
 {%include note.html content="Waiting areas should _NOT_ overlap with any walls or be outside rooms."%}
 
@@ -872,7 +1025,7 @@ Here are some use cases:
 
 - Waiting areas are defined as closed polygons, with  *the last vertex is equal to the first one*.
 
-- `file`: file containing further goals/waiting areas. See [goals.xml](jpscore_goal.html)
+- `file`: file containing further goals/waiting areas.
 - `waiting_time`: the time pedestrians wait inside the waiting area
 - `min_peds`: the number of pedestrians needed in the waiting area to start the timer (if `global_timer` = false)
 - `max_peds`: the max number of pedestrians allowed inside the waiting area. {%include note.html content="to avoid
