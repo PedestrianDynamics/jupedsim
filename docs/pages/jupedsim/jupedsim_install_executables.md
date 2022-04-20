@@ -23,8 +23,6 @@ After copying open `jpscore` from Terminal and `jpsvis` by **right-click** on th
 Your system will warn you that the developer cannot be verified.
 Go ahead an open it anyway!
 
-{% include note.html content="For the very first execution of `jpscore`, open it via right-click and explicitly allow it to run."%}
-
 ### Windows
 
 Double-click the `jpscore` installer and click on `next` a couple of times.
