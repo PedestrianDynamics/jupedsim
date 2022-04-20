@@ -346,23 +346,6 @@ Above is an example how to define agent's characteristics with different number 
 
 - `pre_movement_mean` and `pre_movement_sigma`: premovement time is Gauss-distributed $$\mathcal{N}(\mu, \sigma^2)$$.
 
-- Risk tolerance can be Gauss-distributed, or beta-distributed. If not specified then it is defined as $$\mathcal{N}(1,
-  0)$$:
-
-  - `risk_tolerance_mean` and `risk_tolerance_sigma`: $$\mathcal{N}(\mu, \sigma^2)$$.
-
-  - `risk_tolerance_alpha` and `risk_tolerance_beta`: $$Beta(\alpha, \beta)$$.
-
-- `patience`:  this parameter influences the route choice behavior when using the quickest path router. It basically
-  defines how long a pedestrian stays in jams before attempting a rerouting.
-
-- `age`: not yet used by any of the [operational](#operational-models) models.
-
-- `gender`: not yet used.
-
-- `height`: not yet used.
--
-
 ## Sources
 
 Besides distributing agents randomly before the simulation starts, it is possible to define sources in order to "inject"
@@ -534,20 +517,6 @@ Following snippet is a definition example of the routing information:
 </route_choice_models>
 ```
 
-## Global quickest path
-
-Route choice based on the estimated travel time. This router takes traffic into consideration.
-
-```xml
-
-<route_choice_models>
-    <router router_id="1" description="quickest">
-        <parameters>
-        </parameters>
-    </router>
-</route_choice_models>
-```
-
 [^str_8_9]: If convex subrooms are provided, any exit strategy will work. In these special cases, global router will be
 faster in computation time.
 
@@ -582,7 +551,7 @@ The definition of any model parameter is composed of two different sections:
   - Unit: s
 
 - `<exit_crossing_strategy>3</exit_crossing_strategy>`
-  - Positive values in $$[1, 9]$$. See below.
+  - Positive value of 1, 2, 3 or 8. See below.
 
 - `<linkedcells enabled="true" cell_size="2"/>`
   - Defines the size of the cells. This is important to get the neighbors of a pedestrians, which are all pedestrians
@@ -661,20 +630,6 @@ intermediate targets for every agent, the target being in the same room.
 
 {%include warning.html content="The projection of the room onto the ($$x,\, y$$)-plane must be non-overlapping!"%}
 {%include warning.html content="do not use in multi-storage buildings!"%}
-
-#### Strategy 9
-
-This strategy uses a floor field collection for each subroom. (__broken__)
-
-{% include note.html content="For this to work properly the [floor field router](#floorfield-router)
-has to be used"%}
-
-Thus the floor fields are again smaller but cannot steer to targets in a different subroom. The router **must** provide
-intermediate targets for every agent, that target being in the same subroom.
-
-{%include warning.html content="The projection of the room onto the ($$x,\, y$$)-plane must be non-overlapping!"%}
-{%include warning.html content="do not use in multi-storage buildings!"%}
-
 ---
 
 [#Chraibi2011]: http://aimsciences.org/journals/displayPaper.jsp?paperID=6440 "Chraibi el al. Force-based models of pedestrian dynamics.  Pages: 425 - 442, Volume 6, Issue 3, September 2011"
