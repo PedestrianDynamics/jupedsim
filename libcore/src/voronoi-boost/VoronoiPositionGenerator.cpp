@@ -82,7 +82,6 @@ bool ComputeBestPositionVoronoiBoost(
 
     std::vector<Pedestrian *> existing_peds;
     std::vector<Pedestrian *> peds_without_place;
-    building->GetPedestrians(roomID, subroomID, existing_peds);
     existing_peds.insert(existing_peds.end(), peds_queue.begin(), peds_queue.end());
 
     double radius =

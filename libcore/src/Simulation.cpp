@@ -301,10 +301,6 @@ bool Simulation::InitArgs()
 {
     _fps = _config->fps;
 
-
-    // IMPORTANT: do not change the order in the following..
-    _building->SetAgents(&_agents);
-
     //perform customs initialisation, like computing the phi for the gcfm
     //this should be called after the routing engine has been initialised
     // because a direction is needed for this initialisation.

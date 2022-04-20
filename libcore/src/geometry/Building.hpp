@@ -52,7 +52,6 @@ class Building
 {
 private:
     Configuration * _configuration = nullptr;
-    std::vector<std::unique_ptr<Pedestrian>> * _allPedestrians;
     std::map<int, std::shared_ptr<Room>> _rooms;
     std::map<int, Crossing *> _crossings;
     std::map<int, Transition *> _transitions;
@@ -79,14 +78,10 @@ private:
     std::map<int, std::vector<Transition>> _trainDoorsAdded;
 
 public:
-    Building(Configuration * config, std::vector<std::unique_ptr<Pedestrian>> * agents);
+    explicit Building(Configuration * config);
 
     /// destructor
     ~Building();
-
-    void SetAgents(std::vector<std::unique_ptr<Pedestrian>> * agents) { _allPedestrians = agents; }
-
-    void GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const;
 
     const std::map<int, std::shared_ptr<Room>> & GetAllRooms() const;
 
