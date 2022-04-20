@@ -7,6 +7,7 @@ folder: jpscore
 permalink: jpscore_sources.html
 summary: Sources are used to inject agents in a running simulation.
 last_updated: Dec 31, 2019
+published: false
 ---
 
 ## Parameter of a source

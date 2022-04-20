@@ -7,6 +7,7 @@ folder: jpscore
 permalink: jpscore_trajectory.html
 summary: The results of jpscore simulation are written to files in TXT format. This format can be used by other JuPedSim modules.
 last_updated: April 17, 2020
+published: false
 ---
 
 Possible formats are:

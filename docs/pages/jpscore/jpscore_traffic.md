@@ -7,6 +7,7 @@ folder: jpscore
 permalink: jpscore_traffic.html
 summary: Properties of doors can be defined before the start of a simulation. Doors have different statuses, which may change during the simulation.
 last_updated: Dec 20, 2019
+published: false
 ---
 
 ## Definitions

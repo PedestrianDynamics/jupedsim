@@ -7,6 +7,7 @@ folder: jpscore
 permalink: jpscore_routing.html
 summary: In order to navigate in (complex) buildings a router is needed to assign pedestrians exits. Different algorithms are implemented and explained briefly in this page
 last_updated: Jul 22, 2020
+published: false 
 ---
 
 ## Floorfield Router

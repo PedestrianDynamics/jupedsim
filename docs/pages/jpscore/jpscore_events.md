@@ -7,6 +7,7 @@ folder: jpscore
 permalink: jpscore_events.html
 summary: Definition of the event's file. Events occure in time and trigger certain actions on doors and crossings.
 last_updated: Jan 25, 2020
+published: false
 ---
 
 ## Definition

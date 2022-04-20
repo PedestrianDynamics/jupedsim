@@ -7,6 +7,7 @@ folder: jpscore
 permalink: jpscore_goals.html
 summary: The desired direction of a pedestrian is defined following different algorithms.
 last_updated: Dec 20, 2019
+published: false
 ---
 
 

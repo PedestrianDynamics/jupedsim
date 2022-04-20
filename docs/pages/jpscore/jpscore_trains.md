@@ -7,6 +7,7 @@ folder: jpscore
 permalink: jpscore_trains.html
 summary: The interaction with trains is modeled with an event-based deleting and creating of doors. When a train arrives on the platform, doors are created and again deleted when the train departs.
 last_updated: Jul 03, 2020
+published: false
 ---
 
 

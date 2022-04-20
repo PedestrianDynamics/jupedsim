@@ -7,6 +7,7 @@ folder: jpscore
 permalink: jpscore_direction.html
 summary: Once the targeted door is defined in a previous step by the router, the pedestrian aims at a specific point on the door. This point defines the desired direction of the pedestrian. This pages shows different methods how to define this point.
 last_updated: Dec 31, 2019
+published: false
 ---
 
 ## Introduction

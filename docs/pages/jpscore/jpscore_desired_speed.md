@@ -7,6 +7,7 @@ folder: jpscore
 permalink: jpscore_desired_speed.html
 summary: Pedestrians may have a different desired speed on a stair than on a horizontal plan.  Therefore, it is necessary to calculate a "smooth" transition in the desired speed, when pedestrians move on planes with a different inclination. In this way "jumpy" changes in the desired speed are avoided.
 last_updated: Dec 25, 2019
+published: false
 ---
 {% include note.html content="This modelling of the desired speed in the transition area of planes and stairs is not validated, since experimental data are missing."%}
 

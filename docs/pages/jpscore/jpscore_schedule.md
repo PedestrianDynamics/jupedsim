@@ -7,6 +7,7 @@ folder: jpscore
 permalink: jpscore_schedule.html
 summary: Schedules are events that can be used to group doors and trigger events groupwise at certain points of time.
 last_updated: Dec 31, 2019
+published: false
 ---
 
 ## Definition
