@@ -6,6 +6,8 @@ add_library(core STATIC
     src/DoorState.hpp
     src/Geometry.cpp
     src/Geometry.hpp
+    src/Graph.cpp
+    src/Graph.hpp
     src/IO/EventFileParser.cpp
     src/IO/EventFileParser.hpp
     src/IO/GeoFileParser.cpp
@@ -200,6 +202,7 @@ endif()
 if (BUILD_TESTS)
     add_executable(libcore-tests
         test/TestGeometry.cpp
+        test/TestGraph.cpp
         test/TestSimulationClock.cpp
         test/neighborhood/TestGrid2D.cpp
         test/neighborhood/TestNeighborhoodSearch.cpp
