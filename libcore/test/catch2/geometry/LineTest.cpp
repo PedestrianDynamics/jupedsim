@@ -53,7 +53,6 @@ TEST_CASE("geometry/Line", "[geometry][Line]")
         }
     }
 
-
     SECTION("Line Normal Vec")
     {
         for(int i : {-5, -4, -3, -2, -1, 1, 2, 3, 4}) {
@@ -61,7 +60,7 @@ TEST_CASE("geometry/Line", "[geometry][Line]")
             Point P2(i, std::sin(PI / i));
             Line L1(P1, P2);
             Point normal = L1.NormalVec();
-            Point diff   = P2 - P1;
+            Point diff = P2 - P1;
             REQUIRE(normal.ScalarProduct(diff) == Approx(0).margin(1E-12));
         }
     }
@@ -71,11 +70,11 @@ TEST_CASE("geometry/Line", "[geometry][Line]")
         Point PA(-2, 4);
         Point PB(14, 9);
         Line L1(PA, PB);
-        const Point & DPAB = PA - PB;
+        const Point& DPAB = PA - PB;
         for(float i = -20; i < 20; ++i) {
             i = (i == 0) ? 0.5 : i;
             Point P1(i, std::sin(PI / i));
-            Point P2      = L1.ShortestPoint(P1);
+            Point P2 = L1.ShortestPoint(P1);
             double lambda = (P1 - PB).ScalarProduct(DPAB) / DPAB.ScalarProduct(DPAB);
             if(lambda > 1) {
                 REQUIRE(P2 == PA);
@@ -86,7 +85,6 @@ TEST_CASE("geometry/Line", "[geometry][Line]")
             }
         }
     }
-
 
     SECTION("Line Dist To")
     {
@@ -162,7 +160,6 @@ TEST_CASE("geometry/Line", "[geometry][Line]")
         REQUIRE_FALSE(L1.IntersectionWith(Point(-1.0005, -1), Point(-1.0005, 1)));
         REQUIRE_FALSE(L1.IntersectionWith(Point(-1, 0.00005), Point(1, 0.00005)));
 
-
         Point P3;
         REQUIRE(L1.IntersectionWith(Point(0.5, 1), Point(0.5, -1), P3));
         REQUIRE(P3 == Point(0.5, 0));
@@ -192,7 +189,6 @@ TEST_CASE("geometry/Line", "[geometry][Line]")
     {
         Point Pleft(-2, 2);
         Point Pright(2, -2);
-
 
         REQUIRE(Line(Point(0, -2), Point(0, 1)).WichSide(Pleft) == 0);
         REQUIRE(Line(Point(0, -2), Point(0, 1)).IsLeft(Pleft));

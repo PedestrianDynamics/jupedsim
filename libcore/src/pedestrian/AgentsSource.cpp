@@ -21,9 +21,9 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * \section Description
- * This class is responsible for materialising agent in a given location at a given frequency up to a maximum number.
- * The optimal position where to put the agents is given by various algorithms, for instance
- * the Voronoi algorithm or the Mitchell Best candidate algorithm.
+ * This class is responsible for materialising agent in a given location at a given frequency up to
+ *a maximum number. The optimal position where to put the agents is given by various algorithms, for
+ *instance the Voronoi algorithm or the Mitchell Best candidate algorithm.
  *
  **/
 #include "AgentsSource.hpp"
@@ -47,38 +47,40 @@ AgentsSource::AgentsSource(
     float rate,
     int chunkAgents,
     std::vector<float> boundaries,
-    std::vector<int> lifeSpan) :
-    _id(id),
-    _frequency(frequency),
-    _maxAgents(max_agents),
-    _groupID(group_id),
-    _caption(std::move(caption)),
-    _greedy(greedy),
-    _time(time),
-    _startx(startx),
-    _starty(starty),
-    _chunkAgents(chunkAgents),
-    _percent(percent),
-    _rate(rate)
+    std::vector<int> lifeSpan)
+    : _id(id)
+    , _frequency(frequency)
+    , _maxAgents(max_agents)
+    , _groupID(group_id)
+    , _caption(std::move(caption))
+    , _greedy(greedy)
+    , _time(time)
+    , _startx(startx)
+    , _starty(starty)
+    , _chunkAgents(chunkAgents)
+    , _percent(percent)
+    , _rate(rate)
 {
     _remainingAgents = _chunkAgents;
     _agentsGenerated = 0;
-    _boundaries      = boundaries;
-    _lifeSpan        = lifeSpan;
+    _boundaries = boundaries;
+    _lifeSpan = lifeSpan;
     _agents.clear();
 }
 
-AgentsSource::~AgentsSource() {}
-
-void AgentsSource::GenerateAgentsAndAddToPool(int count, Building * building)
+AgentsSource::~AgentsSource()
 {
-    std::vector<Pedestrian *> peds;
+}
+
+void AgentsSource::GenerateAgentsAndAddToPool(int count, Building* building)
+{
+    std::vector<Pedestrian*> peds;
     GenerateAgents(peds, count, building);
     _agents.insert(_agents.begin(), peds.begin(), peds.end());
     _agentsGenerated += count;
 }
 
-void AgentsSource::RemoveAgentsFromPool(std::vector<Pedestrian *> & ped, int count)
+void AgentsSource::RemoveAgentsFromPool(std::vector<Pedestrian*>& ped, int count)
 {
     if((int) _agents.size() >= count) {
         ped.insert(ped.begin(), _agents.begin(), _agents.begin() + count);
@@ -89,7 +91,7 @@ void AgentsSource::RemoveAgentsFromPool(std::vector<Pedestrian *> & ped, int cou
     }
 }
 
-void AgentsSource::AddAgentsToPool(std::vector<Pedestrian *> & peds)
+void AgentsSource::AddAgentsToPool(std::vector<Pedestrian*>& peds)
 {
     _agents.insert(_agents.begin(), peds.begin(), peds.end());
 }
@@ -103,7 +105,7 @@ int AgentsSource::GetPoolSize() const
     return (int) _agents.size();
 }
 
-void AgentsSource::AddToPool(Pedestrian * ped)
+void AgentsSource::AddToPool(Pedestrian* ped)
 {
     _agents.push_back(ped);
 }
@@ -128,7 +130,7 @@ void AgentsSource::Setboundaries(std::vector<float> bounds)
     _boundaries = bounds;
 }
 
-const std::string & AgentsSource::GetCaption() const
+const std::string& AgentsSource::GetCaption() const
 {
     return _caption;
 }
@@ -152,7 +154,6 @@ double AgentsSource::GetPlanTime() const
 {
     return _time;
 }
-
 
 int AgentsSource::GetMaxAgents() const
 {
@@ -201,7 +202,6 @@ float AgentsSource::GetStartY() const
     return _starty;
 }
 
-
 void AgentsSource::SetStartDistribution(std::shared_ptr<StartDistribution> startDistribution)
 {
     _startDistribution = startDistribution;
@@ -212,7 +212,7 @@ const std::shared_ptr<StartDistribution> AgentsSource::GetStartDistribution() co
     return _startDistribution;
 }
 
-void AgentsSource::GenerateAgents(std::vector<Pedestrian *> & peds, int count, Building * building)
+void AgentsSource::GenerateAgents(std::vector<Pedestrian*>& peds, int count, Building* building)
 {
     std::vector<Point> emptyPositions;
     // TODO: this vector is empty with purpose!
@@ -235,7 +235,6 @@ void AgentsSource::GenerateAgents(std::vector<Pedestrian *> & peds, int count, B
         }
     }
 }
-
 
 void AgentsSource::Dump() const
 {

@@ -1,7 +1,7 @@
 #include "SubroomType.hpp"
 
 template <>
-SubroomType from_string(const std::string & str)
+SubroomType from_string(const std::string& str)
 {
     if(str == "escalator_up") {
         return SubroomType::ESCALATOR_UP;

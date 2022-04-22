@@ -66,26 +66,26 @@ struct AdditionalInputs {
 /// This function will return the detected file type, this may be 'UNRECOGNISED' if detection fails.
 /// @param path to the file
 /// @return InputFileType that was detected
-InputFileType detectFileType(const std::filesystem::path & path);
+InputFileType detectFileType(const std::filesystem::path& path);
 
 /// provided for convenience and will be removed in the next version
-bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & geo);
+bool readJpsGeometryXml(const std::filesystem::path& path, GeometryFactory& geo);
 
 /// parse the txt file format
-bool ParseTxtFormat(const QString & fileName, TrajectoryData * trajectories);
+bool ParseTxtFormat(const QString& fileName, TrajectoryData* trajectories);
 
 /// Trains
 bool LoadTrainTimetable(
     std::string filename,
-    std::map<int, std::shared_ptr<TrainTimeTable>> & trainTimeTables);
+    std::map<int, std::shared_ptr<TrainTimeTable>>& trainTimeTables);
 
-std::shared_ptr<TrainTimeTable> parseTrainTimeTableNode(TiXmlElement * e);
+std::shared_ptr<TrainTimeTable> parseTrainTimeTableNode(TiXmlElement* e);
 
-std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement * e);
+std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement* e);
 
 bool LoadTrainType(
     std::string Filename,
-    std::map<std::string, std::shared_ptr<TrainType>> & trainTypes);
+    std::map<std::string, std::shared_ptr<TrainType>>& trainTypes);
 
 std::tuple<Point, Point> GetTrackStartEnd(QString geometryFile, int trackId);
 
@@ -95,5 +95,5 @@ std::tuple<Point, Point> GetTrackStartEnd(QString geometryFile, int trackId);
 /// This functions does not do any constriant checking, i.e. all found paths are returned as is.
 /// @param path to the trajectory txt file, this file is expected to exist.
 /// @return AdditionalInputs that have been found.
-AdditionalInputs extractAdditionalInputFilePaths(const std::filesystem::path & path);
+AdditionalInputs extractAdditionalInputFilePaths(const std::filesystem::path& path);
 }; // namespace Parsing

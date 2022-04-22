@@ -13,16 +13,16 @@ TEST(NeighborhoodSearch, GetNeighboringAgents)
         pedestrians.emplace_back(std::make_unique<Pedestrian>());
         pedestrians.back()->SetPos(Point(0, 0));
     }
-    std::vector<Pedestrian *> pedestrians_as_raw{};
+    std::vector<Pedestrian*> pedestrians_as_raw{};
     std::transform(
         std::begin(pedestrians),
         std::end(pedestrians),
         std::back_inserter(pedestrians_as_raw),
-        [](const auto & e) { return e.get(); });
+        [](const auto& e) { return e.get(); });
 
     neighborhood_search.Update(pedestrians);
 
-    std::vector<Pedestrian *> neighborhood;
+    std::vector<Pedestrian*> neighborhood;
 
     Pedestrian special_ped;
     special_ped.SetPos(Point(0, 0));
@@ -54,7 +54,6 @@ TEST(NeighborhoodSearch, GetNeighboringAgents)
     EXPECT_EQ(pedestrians_as_raw, neighborhood);
     neighborhood.clear();
 
-
     for(auto neighbor :
         neighborhood_search.GetNeighboringAgents(pedestrians_as_raw.front()->GetPos(), 2.2)) {
         neighborhood.push_back(neighbor);
@@ -62,7 +61,6 @@ TEST(NeighborhoodSearch, GetNeighboringAgents)
     EXPECT_EQ(pedestrians_as_raw, neighborhood);
     neighborhood.clear();
 }
-
 
 TEST(NeighborhoodSearch, GetNeighboringAgentsRadius)
 {
@@ -72,16 +70,16 @@ TEST(NeighborhoodSearch, GetNeighboringAgentsRadius)
     pedestrians.emplace_back(std::make_unique<Pedestrian>());
     pedestrians.back()->SetPos(Point(0, 0));
 
-    std::vector<Pedestrian *> pedestrians_as_raw{};
+    std::vector<Pedestrian*> pedestrians_as_raw{};
     std::transform(
         std::begin(pedestrians),
         std::end(pedestrians),
         std::back_inserter(pedestrians_as_raw),
-        [](const auto & e) { return e.get(); });
+        [](const auto& e) { return e.get(); });
 
     neighborhood_search.Update(pedestrians);
 
-    std::vector<Pedestrian *> neighborhood;
+    std::vector<Pedestrian*> neighborhood;
     Pedestrian special_ped;
     // one level radius
     special_ped.SetPos(Point(2.5, 2.3));

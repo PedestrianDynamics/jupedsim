@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "Enum.hpp"
 #include "geometry/Point.hpp"
 #include "geometry/TrainGeometryInterface.hpp"
@@ -46,7 +45,7 @@ public:
     double _smooth_factor_escalator_up;
     double _smooth_factor_escalator_down;
 
-    CreatePedestrianEvent(Pedestrian const * agent, std::chrono::nanoseconds min_time);
+    CreatePedestrianEvent(Pedestrian const* agent, std::chrono::nanoseconds min_time);
 };
 
 struct DoorEvent {
@@ -57,7 +56,7 @@ struct DoorEvent {
 };
 
 template <>
-DoorEvent::Type from_string<DoorEvent::Type>(const std::string & str);
+DoorEvent::Type from_string<DoorEvent::Type>(const std::string& str);
 
 struct TrainEvent {
     enum class Type { ARRIVAL, DEPARTURE };
@@ -73,5 +72,5 @@ struct TrainEvent {
 using Event = std::variant<CreatePedestrianEvent, DoorEvent, TrainEvent>;
 
 std::vector<Event> CreateEventsFromAgents(
-    std::vector<std::unique_ptr<Pedestrian>> const & agents,
+    std::vector<std::unique_ptr<Pedestrian>> const& agents,
     std::chrono::nanoseconds t);

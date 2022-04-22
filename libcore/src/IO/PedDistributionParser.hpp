@@ -25,19 +25,17 @@
 
 #include <tinyxml.h>
 
-
 class PedDistributionParser : public PedDistributionLoader
 {
 public:
-    PedDistributionParser(const Configuration * configuration);
+    PedDistributionParser(const Configuration* configuration);
     ~PedDistributionParser();
     virtual bool LoadPedDistribution(
-        std::vector<std::shared_ptr<StartDistribution>> & startDis,
-        std::vector<std::shared_ptr<StartDistribution>> & startDisSub,
-        std::vector<std::shared_ptr<AgentsSource>> & startDisSources) override;
-    std::shared_ptr<AgentsSource> parseSourceNode(TiXmlElement * e);
-
+        std::vector<std::shared_ptr<StartDistribution>>& startDis,
+        std::vector<std::shared_ptr<StartDistribution>>& startDisSub,
+        std::vector<std::shared_ptr<AgentsSource>>& startDisSources) override;
+    std::shared_ptr<AgentsSource> parseSourceNode(TiXmlElement* e);
 
 private:
-    const Configuration * _configuration;
+    const Configuration* _configuration;
 };

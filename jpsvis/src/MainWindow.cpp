@@ -70,8 +70,8 @@
 //////////////////////////////////////////////////////////////////////////////
 // Creation & Destruction
 //////////////////////////////////////////////////////////////////////////////
-MainWindow::MainWindow(QWidget * parent, std::optional<std::filesystem::path> path) :
-    QMainWindow(parent)
+MainWindow::MainWindow(QWidget* parent, std::optional<std::filesystem::path> path)
+    : QMainWindow(parent)
 {
     ui.setupUi(this);
     // used for saving the settings in a persistant way
@@ -82,9 +82,9 @@ MainWindow::MainWindow(QWidget * parent, std::optional<std::filesystem::path> pa
 
     QObject::connect(
         &_visualisation->getGeometry().GetModel(),
-        SIGNAL(itemChanged(QStandardItem *)),
+        SIGNAL(itemChanged(QStandardItem*)),
         this,
-        SLOT(slotOnGeometryItemChanged(QStandardItem *)));
+        SLOT(slotOnGeometryItemChanged(QStandardItem*)));
 
     // some hand made stuffs
     // the state of actionShowGeometry_Structure connect the state of the
@@ -185,7 +185,6 @@ void MainWindow::slotUpdateNumFrames(int num_frames)
 {
     ui.framesIndicatorSlider->setMaximum(num_frames - 1);
 }
-
 
 void MainWindow::slotSetReplaySpeed(int frames_per_iteration)
 {
@@ -309,7 +308,7 @@ void MainWindow::slotHelpAbout()
     msg.exec();
 }
 
-bool MainWindow::tryParseFile(const std::filesystem::path & path)
+bool MainWindow::tryParseFile(const std::filesystem::path& path)
 {
     const auto file_type = Parsing::detectFileType(path);
     switch(file_type) {
@@ -322,7 +321,7 @@ bool MainWindow::tryParseFile(const std::filesystem::path & path)
     }
 }
 
-void MainWindow::tryLoadFile(const std::filesystem::path & path)
+void MainWindow::tryLoadFile(const std::filesystem::path& path)
 {
     const bool couldLoadData = tryParseFile(path);
     if(couldLoadData) {
@@ -337,15 +336,15 @@ void MainWindow::tryLoadFile(const std::filesystem::path & path)
     }
 }
 
-bool MainWindow::tryParseGeometry(const std::filesystem::path & path)
+bool MainWindow::tryParseGeometry(const std::filesystem::path& path)
 {
     return Parsing::readJpsGeometryXml(path, _visualisation->getGeometry());
 }
 
-bool MainWindow::tryParseTrajectory(const std::filesystem::path & path)
+bool MainWindow::tryParseTrajectory(const std::filesystem::path& path)
 {
-    const auto parent_path       = path.parent_path();
-    auto fileName                = QString::fromStdString(path.string());
+    const auto parent_path = path.parent_path();
+    auto fileName = QString::fromStdString(path.string());
     const auto additional_inputs = Parsing::extractAdditionalInputFilePaths(path);
 
     const bool readTrainTimeTable =
@@ -382,7 +381,6 @@ bool MainWindow::tryParseTrajectory(const std::filesystem::path & path)
         _visualisation->setTrainData(std::move(trainTypes), std::move(trainTimeTable));
     }
 
-
     if(additional_inputs.geometry_path) {
         if(!tryParseGeometry(additional_inputs.geometry_path.value())) {
             return false;
@@ -392,16 +390,16 @@ bool MainWindow::tryParseTrajectory(const std::filesystem::path & path)
     std::tuple<Point, Point> trackStartEnd;
     double elevation;
     for(auto tab : trainTimeTable) {
-        int trackId   = tab.second->pid;
+        int trackId = tab.second->pid;
         trackStartEnd = Parsing::GetTrackStartEnd(
             QString::fromStdString(additional_inputs.geometry_path.value().string()), trackId);
         elevation = 0;
 
         Point trackStart = std::get<0>(trackStartEnd);
-        Point trackEnd   = std::get<1>(trackStartEnd);
+        Point trackEnd = std::get<1>(trackStartEnd);
 
-        tab.second->pstart    = trackStart;
-        tab.second->pend      = trackEnd;
+        tab.second->pstart = trackStart;
+        tab.second->pend = trackEnd;
         tab.second->elevation = elevation;
 
         Log::Info("=======\n");
@@ -458,7 +456,7 @@ void MainWindow::slotExit()
     qApp->exit();
 }
 
-void MainWindow::closeEvent(QCloseEvent * event)
+void MainWindow::closeEvent(QCloseEvent* event)
 {
     hide();
     cleanUp();
@@ -583,7 +581,7 @@ void MainWindow::slotToogle2D()
         mode = RenderMode::MODE_3D;
     }
     _settings.mode = mode;
-    bool status    = mode == RenderMode::MODE_2D && _settings.showGeometry;
+    bool status = mode == RenderMode::MODE_2D && _settings.showGeometry;
     _visualisation->setGeometryVisibility2D(status);
 }
 
@@ -600,7 +598,7 @@ void MainWindow::slotToogle3D()
         mode = RenderMode::MODE_2D;
     }
     _settings.mode = mode;
-    bool status    = mode == RenderMode::MODE_3D && _settings.showGeometry;
+    bool status = mode == RenderMode::MODE_3D && _settings.showGeometry;
     _visualisation->setGeometryVisibility3D(status);
 }
 
@@ -633,7 +631,7 @@ void MainWindow::slotToogleShowAxis()
 
 void MainWindow::slotChangeBackgroundColor()
 {
-    QColorDialog * colorDialog = new QColorDialog(this);
+    QColorDialog* colorDialog = new QColorDialog(this);
     colorDialog->setToolTip("Choose a new color for the background");
     QColor col = colorDialog->getColor(Qt::white, this, "Select new background color");
 
@@ -652,7 +650,7 @@ void MainWindow::slotChangeBackgroundColor()
 /// change the wall color
 void MainWindow::slotChangeWallsColor()
 {
-    QColorDialog * colorDialog = new QColorDialog(this);
+    QColorDialog* colorDialog = new QColorDialog(this);
     colorDialog->setToolTip("Choose a new color for walls");
     QColor col = colorDialog->getColor(Qt::white, this, "Select new wall color");
 
@@ -671,7 +669,7 @@ void MainWindow::slotChangeWallsColor()
 /// change the exits color
 void MainWindow::slotChangeExitsColor()
 {
-    QColorDialog * colorDialog = new QColorDialog(this);
+    QColorDialog* colorDialog = new QColorDialog(this);
     colorDialog->setToolTip("Choose a new color for the exits");
     QColor col = colorDialog->getColor(Qt::white, this, "Select new exit color");
 
@@ -690,7 +688,7 @@ void MainWindow::slotChangeExitsColor()
 /// change the navigation lines colors
 void MainWindow::slotChangeNavLinesColor()
 {
-    QColorDialog * colorDialog = new QColorDialog(this);
+    QColorDialog* colorDialog = new QColorDialog(this);
     colorDialog->setToolTip("Choose a new color for walls");
     QColor col = colorDialog->getColor(Qt::white, this, "Select new navigation lines color");
 
@@ -708,7 +706,7 @@ void MainWindow::slotChangeNavLinesColor()
 
 void MainWindow::slotChangeFloorColor()
 {
-    QColorDialog * colorDialog = new QColorDialog(this);
+    QColorDialog* colorDialog = new QColorDialog(this);
     colorDialog->setToolTip("Choose a new color for the floor");
     QColor col = colorDialog->getColor(Qt::white, this, "Select new floor color");
 
@@ -726,7 +724,7 @@ void MainWindow::slotChangeFloorColor()
 
 void MainWindow::slotChangeObstacleColor()
 {
-    QColorDialog * colorDialog = new QColorDialog(this);
+    QColorDialog* colorDialog = new QColorDialog(this);
     colorDialog->setToolTip("Choose a new color for the obstacles");
     QColor col = colorDialog->getColor(Qt::white, this, "Select new obstalce color");
 
@@ -750,8 +748,8 @@ void MainWindow::slotSetCameraPerspectiveToTop()
 
 void MainWindow::slotSetCameraPerspectiveToTopRotate()
 {
-    int p      = 2; // TOP rotate
-    bool ok    = false;
+    int p = 2; // TOP rotate
+    bool ok = false;
     int degree = QInputDialog::getInt(
         this, "Top rotate", "Rotation degrees [range:-180-->180]:", 0, -180, 180, 10, &ok);
     if(ok) {
@@ -761,8 +759,8 @@ void MainWindow::slotSetCameraPerspectiveToTopRotate()
 
 void MainWindow::slotSetCameraPerspectiveToSideRotate()
 {
-    int p      = 3; // SIDE rotate
-    bool ok    = false;
+    int p = 3; // SIDE rotate
+    bool ok = false;
     int degree = QInputDialog::getInt(
         this, "Side rotate", "Rotation degrees [range:-80-->80]:", 0, -80, 80, 10, &ok);
     if(ok) {
@@ -867,25 +865,25 @@ void MainWindow::loadAllSettings()
     }
 
     if(settings.contains("options/bgColor")) {
-        QColor color      = settings.value("options/bgColor").value<QColor>();
+        QColor color = settings.value("options/bgColor").value<QColor>();
         _settings.bgColor = color;
         Log::Info("background color: %s", color.name().toStdString().c_str());
     }
 
     if(settings.contains("options/exitsColor")) {
-        QColor color         = settings.value("options/exitsColor").value<QColor>();
+        QColor color = settings.value("options/exitsColor").value<QColor>();
         _settings.exitsColor = color;
         Log::Info("Exit color: %s", color.name().toStdString().c_str());
     }
 
     if(settings.contains("options/floorColor")) {
-        QColor color         = settings.value("options/floorColor").value<QColor>();
+        QColor color = settings.value("options/floorColor").value<QColor>();
         _settings.floorColor = color;
         Log::Info("Floor color: %s", color.name().toStdString().c_str());
     }
 
     if(settings.contains("options/wallsColor")) {
-        QColor color         = settings.value("options/wallsColor").value<QColor>();
+        QColor color = settings.value("options/wallsColor").value<QColor>();
         _settings.wallsColor = color;
         Log::Info("Walls color: %s", color.name().toStdString().c_str());
     }
@@ -940,7 +938,7 @@ void MainWindow::slotRenderPNG2AVI()
     slotErrorOutput("Not Implemented yet, sorry !");
 }
 
-void MainWindow::dragEnterEvent(QDragEnterEvent * event)
+void MainWindow::dragEnterEvent(QDragEnterEvent* event)
 {
     if(event->mimeData()->hasFormat("text/uri-list"))
         event->acceptProposedAction();
@@ -980,17 +978,17 @@ void MainWindow::slotShowGeometryStructure()
         "Show Geometry Structure: %s", ui.actionShowGeometry_Structure->isChecked() ? "On" : "Off");
 }
 
-void MainWindow::slotOnGeometryItemChanged(QStandardItem * item)
+void MainWindow::slotOnGeometryItemChanged(QStandardItem* item)
 {
     QStringList l = item->data().toString().split(":");
     if(l.length() > 1) {
-        int room   = l[0].toInt();
-        int subr   = l[1].toInt();
+        int room = l[0].toInt();
+        int subr = l[1].toInt();
         bool state = item->checkState();
         _visualisation->getGeometry().UpdateVisibility(room, subr, state);
     } else {
         for(int i = 0; i < item->rowCount(); i++) {
-            QStandardItem * child = item->child(i);
+            QStandardItem* child = item->child(i);
             child->setCheckState(item->checkState());
             slotOnGeometryItemChanged(child);
         }

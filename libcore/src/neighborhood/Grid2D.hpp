@@ -32,23 +32,19 @@
 #include <utility>
 #include <vector>
 
-
 struct Grid2DIndex {
     std::int32_t idx, idy;
 
-    bool operator<(const Grid2DIndex & other) const
+    bool operator<(const Grid2DIndex& other) const
     {
         return idx < other.idx || (idx == other.idx && idy < other.idy);
     }
 
-    bool operator==(const Grid2DIndex & other) const
-    {
-        return idx == other.idx && idy == other.idy;
-    }
+    bool operator==(const Grid2DIndex& other) const { return idx == other.idx && idy == other.idy; }
 };
 template <>
 struct std::hash<Grid2DIndex> {
-    std::size_t operator()(const Grid2DIndex & id) const noexcept
+    std::size_t operator()(const Grid2DIndex& id) const noexcept
     {
         std::hash<std::int32_t> hasher{};
         return jps::hash_combine(hasher(id.idx), hasher(id.idy));
@@ -63,27 +59,27 @@ public:
         Grid2DIndex id;
         T value;
 
-        bool operator<(const IndexValuePair & other) const { return id < other.id; }
-        bool operator==(const IndexValuePair & other) const
+        bool operator<(const IndexValuePair& other) const { return id < other.id; }
+        bool operator==(const IndexValuePair& other) const
         {
             return id == other.id && value == other.value;
         }
     };
 
 public:
-    using value_type     = T;
-    using size_type      = std::size_t;
+    using value_type = T;
+    using size_type = std::size_t;
     using container_type = std::vector<IndexValuePair>;
-    using it_type        = typename container_type::const_iterator;
-    using it_pair        = IteratorPair<it_type>;
+    using it_type = typename container_type::const_iterator;
+    using it_pair = IteratorPair<it_type>;
 
     Grid2D() = default;
 
-    Grid2D(const Grid2D &) = default;
-    Grid2D(Grid2D &&)      = default;
+    Grid2D(const Grid2D&) = default;
+    Grid2D(Grid2D&&) = default;
 
-    Grid2D & operator=(const Grid2D &) = default;
-    Grid2D & operator=(Grid2D &&)      = default;
+    Grid2D& operator=(const Grid2D&) = default;
+    Grid2D& operator=(Grid2D&&) = default;
 
     Grid2D(container_type data) : _data(data)
     {

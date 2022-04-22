@@ -31,11 +31,11 @@
 #include <memory>
 
 std::vector<Pedestrian::UID> SimulationHelper::FindPedestriansOutside(
-    const Building & building,
-    const std::vector<std::unique_ptr<Pedestrian>> & peds)
+    const Building& building,
+    const std::vector<std::unique_ptr<Pedestrian>>& peds)
 {
     std::vector<Pedestrian::UID> pedsOutside;
-    for(const auto & ped : peds) {
+    for(const auto& ped : peds) {
         if(!building.IsInAnySubRoom(ped->GetPos())) {
             pedsOutside.push_back(ped->GetUID());
         }
@@ -44,15 +44,14 @@ std::vector<Pedestrian::UID> SimulationHelper::FindPedestriansOutside(
 }
 
 void SimulationHelper::UpdateFlowAtDoors(
-    Building & building,
-    const std::vector<std::unique_ptr<Pedestrian>> & peds,
+    Building& building,
+    const std::vector<std::unique_ptr<Pedestrian>>& peds,
     double time)
 {
-    for(const auto & ped : peds) {
-        const auto * subroom = building.IsInAnySubRoom(ped->GetPos()) ?
-                                   building.GetSubRoom(ped->GetPos()) :
-                                   building.GetSubRoom(ped->GetLastPosition());
-
+    for(const auto& ped : peds) {
+        const auto* subroom = building.IsInAnySubRoom(ped->GetPos()) ?
+                                  building.GetSubRoom(ped->GetPos()) :
+                                  building.GetSubRoom(ped->GetLastPosition());
 
         auto passedDoor = FindPassedDoor(*ped, subroom->GetAllTransitions());
 
@@ -71,14 +70,13 @@ void SimulationHelper::UpdateFlowAtDoors(
     }
 }
 
-std::optional<Transition *> SimulationHelper::FindPassedDoor(
-    const Pedestrian & ped,
-    const std::vector<Transition *> & transitions)
+std::optional<Transition*>
+SimulationHelper::FindPassedDoor(const Pedestrian& ped, const std::vector<Transition*>& transitions)
 {
     Line step{ped.GetLastPosition(), ped.GetPos(), 0};
     // TODO check for closed doors and distance?
     auto passedTrans = std::find_if(
-        std::begin(transitions), std::end(transitions), [&step](const Transition * trans) -> bool {
+        std::begin(transitions), std::end(transitions), [&step](const Transition* trans) -> bool {
             return trans->IntersectionWith(step) == 1;
         });
 
@@ -88,7 +86,7 @@ std::optional<Transition *> SimulationHelper::FindPassedDoor(
     return *passedTrans;
 }
 
-bool SimulationHelper::UpdateFlowRegulation(Building & building, const SimulationClock & clock)
+bool SimulationHelper::UpdateFlowRegulation(Building& building, const SimulationClock& clock)
 {
     bool stateChanged = false;
 
@@ -114,10 +112,10 @@ bool SimulationHelper::UpdateFlowRegulation(Building & building, const Simulatio
     return stateChanged;
 }
 
-bool SimulationHelper::UpdateTrainFlowRegulation(Building & building, double time)
+bool SimulationHelper::UpdateTrainFlowRegulation(Building& building, double time)
 {
     bool geometryChanged = false;
-    for(auto const & [trainID, trainType] : building.GetTrains()) {
+    for(auto const& [trainID, trainType] : building.GetTrains()) {
         auto trainAddedDoors = building.GetTrainDoorsAdded(trainID);
         if(trainAddedDoors.has_value()) {
             auto trainDoors = trainAddedDoors.value();
@@ -126,7 +124,7 @@ bool SimulationHelper::UpdateTrainFlowRegulation(Building & building, double tim
                 std::begin(trainDoors),
                 std::end(trainDoors),
                 0,
-                [&building](int i, const Transition & trans) {
+                [&building](int i, const Transition& trans) {
                     return building.GetTransition(trans.GetID())->GetDoorUsage() + i;
                 });
 

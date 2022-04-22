@@ -27,7 +27,7 @@
 
 #include <Logger.hpp>
 
-const fs::path & ArgumentParser::IniFilePath() const
+const fs::path& ArgumentParser::IniFilePath() const
 {
     return iniFilePath;
 }
@@ -42,7 +42,7 @@ bool ArgumentParser::PrintVersionAndExit() const
     return printVersionAndExit;
 }
 
-std::tuple<ArgumentParser::Execution, int> ArgumentParser::Parse(int argc, char * argv[])
+std::tuple<ArgumentParser::Execution, int> ArgumentParser::Parse(int argc, char* argv[])
 {
     // Silence warnigns about unused member. Opts are keept as class members
     // so that declaration of all comand line options can be done in the header
@@ -52,7 +52,7 @@ std::tuple<ArgumentParser::Execution, int> ArgumentParser::Parse(int argc, char 
     (void) versionFlag;
     try {
         app.parse(argc, argv);
-    } catch(const CLI::ParseError & e) {
+    } catch(const CLI::ParseError& e) {
         return {Execution::ABORT, app.exit(e)};
     }
     return {Execution::CONTINUE, 0};

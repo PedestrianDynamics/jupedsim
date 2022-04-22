@@ -30,50 +30,49 @@ public:
     UniqueID() = default;
 
     /// UniqueIds are copyable.
-    UniqueID(UniqueID const & p_other) = default;
+    UniqueID(UniqueID const& p_other) = default;
 
     /// UniqueIds are copyable.
-    UniqueID & operator=(UniqueID const & p_other) = default;
+    UniqueID& operator=(UniqueID const& p_other) = default;
 
     /// UniqueIds are movable.
-    UniqueID(UniqueID && p_other) noexcept = default;
+    UniqueID(UniqueID&& p_other) noexcept = default;
 
     /// UniqueIds are movable.
-    UniqueID & operator=(UniqueID && p_other) noexcept = default;
+    UniqueID& operator=(UniqueID&& p_other) noexcept = default;
 
     ~UniqueID() noexcept = default;
 
     Integer getID() const noexcept { return m_value; }
 
-    bool operator==(const UniqueID & p_other) const noexcept { return m_value == p_other.m_value; };
+    bool operator==(const UniqueID& p_other) const noexcept { return m_value == p_other.m_value; };
 
-    bool operator!=(const UniqueID & p_other) const noexcept { return m_value != p_other.m_value; };
+    bool operator!=(const UniqueID& p_other) const noexcept { return m_value != p_other.m_value; };
 
-    bool operator<(const UniqueID & p_other) const noexcept { return m_value < p_other.m_value; };
+    bool operator<(const UniqueID& p_other) const noexcept { return m_value < p_other.m_value; };
 
-    bool operator>(const UniqueID & p_other) const noexcept { return p_other < *this; };
+    bool operator>(const UniqueID& p_other) const noexcept { return p_other < *this; };
 
-    bool operator<=(const UniqueID & p_other) const noexcept { return !(*this > p_other); };
+    bool operator<=(const UniqueID& p_other) const noexcept { return !(*this > p_other); };
 
-    bool operator>=(const UniqueID & p_other) const noexcept { return !(*this < p_other); };
+    bool operator>=(const UniqueID& p_other) const noexcept { return !(*this < p_other); };
 
     friend struct fmt::formatter<UniqueID<Tag>>;
 };
 } // namespace jps
-
 
 namespace fmt
 {
 template <typename Tag>
 struct formatter<::jps::UniqueID<Tag>> {
     template <typename ParseContext>
-    constexpr auto parse(ParseContext & p_ctx)
+    constexpr auto parse(ParseContext& p_ctx)
     {
         return p_ctx.begin();
     }
 
     template <typename FormatContext>
-    auto format(::jps::UniqueID<Tag> const & p_id, FormatContext & p_ctx)
+    auto format(::jps::UniqueID<Tag> const& p_id, FormatContext& p_ctx)
     {
         return format_to(p_ctx.out(), "{}", p_id.m_value);
     }

@@ -92,7 +92,7 @@ void Pedestrian::SetT(double T)
     _t = T;
 }
 
-void Pedestrian::SetEllipse(const JEllipse & e)
+void Pedestrian::SetEllipse(const JEllipse& e)
 {
     _ellipse = e;
 }
@@ -102,18 +102,18 @@ void Pedestrian::SetDestination(int i)
     _exitIndex = i;
 }
 
-void Pedestrian::SetExitLine(const Line * l)
+void Pedestrian::SetExitLine(const Line* l)
 {
     _navLine = Line(*l);
 }
 
-void Pedestrian::SetPos(const Point & pos)
+void Pedestrian::SetPos(const Point& pos)
 {
     _lastPosition = _ellipse.GetCenter();
     _ellipse.SetCenter(pos);
 }
 
-void Pedestrian::SetV(const Point & v)
+void Pedestrian::SetV(const Point& v)
 {
     _ellipse.SetV(v);
 }
@@ -146,9 +146,9 @@ void Pedestrian::SetV0Norm(
     double escalatorDown)
 {
     _ellipse.SetV0(v0);
-    _v0DownStairs          = v0DownStairs;
-    _v0UpStairs            = v0UpStairs;
-    _v0EscalatorUpStairs   = escalatorUp;
+    _v0DownStairs = v0DownStairs;
+    _v0UpStairs = v0UpStairs;
+    _v0EscalatorUpStairs = escalatorUp;
     _v0EscalatorDownStairs = escalatorDown;
 }
 
@@ -176,7 +176,7 @@ double Pedestrian::GetT() const
     return _t;
 }
 
-const JEllipse & Pedestrian::GetEllipse() const
+const JEllipse& Pedestrian::GetEllipse() const
 {
     return _ellipse;
 }
@@ -186,7 +186,7 @@ int Pedestrian::GetDestination() const
     return _exitIndex;
 }
 
-const Line & Pedestrian::GetExitLine() const
+const Line& Pedestrian::GetExitLine() const
 {
     return _navLine;
 }
@@ -209,37 +209,37 @@ void Pedestrian::SetLastE0(Point E0)
     _lastE0 = E0;
 }
 
-const Point & Pedestrian::GetPos() const
+const Point& Pedestrian::GetPos() const
 {
     return _ellipse.GetCenter();
 }
 
-const Point & Pedestrian::GetV() const
+const Point& Pedestrian::GetV() const
 {
     return _ellipse.GetV();
 }
 
-const Point & Pedestrian::GetV0() const
+const Point& Pedestrian::GetV0() const
 {
     return _v0;
 }
 
-
 double Pedestrian::GetV0Norm() const
 {
-    // @todo: we need to know the difference of the ped_elevation to the old_nav_elevation, and use this in the function f.
-    //detect the walking direction based on the elevation
-    SubRoom * sub        = _building->GetSubRoom(GetPos());
+    // @todo: we need to know the difference of the ped_elevation to the old_nav_elevation, and use
+    // this in the function f.
+    // detect the walking direction based on the elevation
+    SubRoom* sub = _building->GetSubRoom(GetPos());
     double ped_elevation = sub->GetElevation(_ellipse.GetCenter());
-    const Point & target = _navLine.GetCentre();
+    const Point& target = _navLine.GetCentre();
     double nav_elevation = sub->GetElevation(target);
-    double delta         = nav_elevation - ped_elevation;
-    auto subType         = sub->GetType();
-    double smoothFactor  = SelectSmoothFactor(subType, delta);
-    double v0            = SelectV0(subType, delta);
-    double z1            = sub->GetMaxElevation();
-    double z0            = sub->GetMinElevation();
-    double alpha         = acos(sub->GetCosAngleWithHorizontal());
+    double delta = nav_elevation - ped_elevation;
+    auto subType = sub->GetType();
+    double smoothFactor = SelectSmoothFactor(subType, delta);
+    double v0 = SelectV0(subType, delta);
+    double z1 = sub->GetMaxElevation();
+    double z0 = sub->GetMinElevation();
+    double alpha = acos(sub->GetCosAngleWithHorizontal());
     double f =
         2.0 / (1 + exp(-smoothFactor * alpha * (z1 - ped_elevation) * (z1 - ped_elevation))) - 1;
     double g =
@@ -269,8 +269,8 @@ void Pedestrian::SetPhiPed()
 
     if(fabs(vx) > J_EPS || fabs(vy) > J_EPS) {
         double normv = sqrt(vx * vx + vy * vy);
-        cosPhi       = vx / normv;
-        sinPhi       = vy / normv;
+        cosPhi = vx / normv;
+        sinPhi = vy / normv;
     } else {
         cosPhi = GetEllipse().GetCosPhi();
         sinPhi = GetEllipse().GetSinPhi();
@@ -279,26 +279,24 @@ void Pedestrian::SetPhiPed()
     _ellipse.SetSinPhi(sinPhi);
 }
 
-
-void Pedestrian::InitV0(const Point & target)
+void Pedestrian::InitV0(const Point& target)
 {
-    const Point & pos = GetPos();
-    Point delta       = target - pos;
+    const Point& pos = GetPos();
+    Point delta = target - pos;
 
     _v0 = delta.Normalized();
 }
 
-
-Point Pedestrian::GetV0(const Point & target) const
+Point Pedestrian::GetV0(const Point& target) const
 {
     // Molification around the targets makes little sense
-    const Point & pos = GetPos();
-    Point delta       = target - pos;
-    Point new_v0      = delta.Normalized();
+    const Point& pos = GetPos();
+    Point delta = target - pos;
+    Point new_v0 = delta.Normalized();
 
     double t = _newOrientationDelay * _deltaT;
 
-    //Handover new target
+    // Handover new target
     return _v0 + (new_v0 - _v0) * (1 - exp(-t / _tau));
 }
 
@@ -362,7 +360,6 @@ double Pedestrian::GetV0EscalatorDownNorm() const
     return _v0EscalatorDownStairs;
 }
 
-
 double Pedestrian::GetSmoothFactorUpStairs() const
 {
     return _smoothFactorUpStairs;
@@ -403,12 +400,12 @@ double Pedestrian::GetPremovementTime() const
     return _premovement;
 }
 
-const Building * Pedestrian::GetBuilding() const
+const Building* Pedestrian::GetBuilding() const
 {
     return _building;
 }
 
-void Pedestrian::SetBuilding(Building * building)
+void Pedestrian::SetBuilding(Building* building)
 {
     _building = building;
 }
@@ -423,8 +420,8 @@ bool Pedestrian::IsInsideWaitingAreaWaiting(double time) const
     if(_insideGoal) {
         auto itr = _building->GetAllGoals().find(_desiredFinalDestination);
         if(itr != _building->GetAllGoals().end()) {
-            Goal * goal = itr->second;
-            if(auto wa = dynamic_cast<WaitingArea *>(goal)) {
+            Goal* goal = itr->second;
+            if(auto wa = dynamic_cast<WaitingArea*>(goal)) {
                 return wa->IsWaiting(time, _building);
             }
         }
@@ -455,17 +452,17 @@ void Pedestrian::StartWaiting()
 
 void Pedestrian::EndWaiting()
 {
-    _waiting      = false;
+    _waiting = false;
     _waitingPos.x = std::numeric_limits<double>::max();
     _waitingPos.y = std::numeric_limits<double>::max();
 }
 
-const Point & Pedestrian::GetWaitingPos() const
+const Point& Pedestrian::GetWaitingPos() const
 {
     return _waitingPos;
 }
 
-void Pedestrian::SetWaitingPos(const Point & waitingPos)
+void Pedestrian::SetWaitingPos(const Point& waitingPos)
 {
     _waitingPos = waitingPos;
 }
@@ -495,7 +492,7 @@ std::string Pedestrian::ToString() const
     return message;
 }
 
-std::ostream & operator<<(std::ostream & out, const Pedestrian & pedestrian)
+std::ostream& operator<<(std::ostream& out, const Pedestrian& pedestrian)
 {
     return out << pedestrian.ToString();
 }

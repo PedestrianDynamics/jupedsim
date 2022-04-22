@@ -30,7 +30,7 @@
 #include <string>
 #include <vector>
 
-//Forward declarations
+// Forward declarations
 class AgentsParameters;
 class Pedestrian;
 class Building;
@@ -48,27 +48,27 @@ private:
     int _subroomID;
     int _subroomUID;
 
-    //force model parameters
-    AgentsParameters * _groupParameters;
+    // force model parameters
+    AgentsParameters* _groupParameters;
 
-    //string motivation;// low, normal, high
-    double _startX; //only valid when _nPeds=1
-    double _startY; //only valid when _nPeds=1
-    double _startZ; //only valid when _nPeds=1
+    // string motivation;// low, normal, high
+    double _startX; // only valid when _nPeds=1
+    double _startY; // only valid when _nPeds=1
+    double _startZ; // only valid when _nPeds=1
 
-    //bounds for distributing in a square
+    // bounds for distributing in a square
     double _xMin;
     double _xMax;
     double _yMin;
     double _yMax;
-    //pre movement time distribution
+    // pre movement time distribution
     mutable std::normal_distribution<double> _premovementTime;
 
     static bool seeded;
-    //random number generator engine
+    // random number generator engine
     mutable std::default_random_engine _generator;
 
-    //judge whether sigma>0
+    // judge whether sigma>0
     const double judge = 10000;
 
 public:
@@ -97,10 +97,10 @@ public:
     void SetBounds(double xMin, double xMax, double yMin, double yMax);
     void Getbounds(double bounds[4]);
     void Setbounds(double bounds[4]);
-    AgentsParameters * GetGroupParameters() const;
-    void SetGroupParameters(AgentsParameters * groupParameters);
+    AgentsParameters* GetGroupParameters() const;
+    void SetGroupParameters(AgentsParameters* groupParameters);
     void InitPremovementTime(double mean, double stdv);
     double GetPremovementTime() const;
 
-    Pedestrian * GenerateAgent(Building * building, std::vector<Point> & positions);
+    Pedestrian* GenerateAgent(Building* building, std::vector<Point>& positions);
 };

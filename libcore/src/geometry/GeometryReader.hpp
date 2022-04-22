@@ -9,8 +9,8 @@ class Building;
 class GeometryReader
 {
 public:
-    virtual void LoadBuilding(Building * building) = 0;
+    virtual void LoadBuilding(Building* building) = 0;
 
-    virtual bool LoadTrafficInfo(Building * building) = 0;
+    virtual bool LoadTrafficInfo(Building* building) = 0;
     virtual ~GeometryReader(){};
 };

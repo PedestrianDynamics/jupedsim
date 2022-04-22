@@ -35,8 +35,7 @@
 class OutputHandler;
 
 // external variables
-extern OutputHandler * Log;
-
+extern OutputHandler* Log;
 
 class Line
 {
@@ -51,8 +50,8 @@ private:
 
 public:
     Line();
-    Line(const Point & p1, const Point & p2);
-    Line(const Line & orig);
+    Line(const Point& p1, const Point& p2);
+    Line(const Line& orig);
     virtual ~Line();
 
     /**
@@ -64,27 +63,27 @@ public:
     /**
      * Set/Get the first end point of the line
      */
-    void SetPoint1(const Point & p);
+    void SetPoint1(const Point& p);
 
     /**
      * Set/Get the second end point of the line
      */
-    void SetPoint2(const Point & p);
+    void SetPoint2(const Point& p);
 
     /**
      * Set/Get the first end point of the line
      */
-    const Point & GetPoint1() const;
+    const Point& GetPoint1() const;
 
     /**
      * Set/Get the second end point of the line
      */
-    const Point & GetPoint2() const;
+    const Point& GetPoint2() const;
 
     /**
      * Return the center of the line
      */
-    const Point & GetCentre() const;
+    const Point& GetCentre() const;
 
     /**
      * @return a normal vector to this line
@@ -94,39 +93,39 @@ public:
     /**
      *TODO: FIXME
      */
-    double NormalComp(const Point & v) const; // Normale Komponente von v auf l
+    double NormalComp(const Point& v) const; // Normale Komponente von v auf l
 
     /**
      * Note that that result must not lie on the segment
      * @return the orthogonal projection of p on the line defined by the segment points.
      */
-    Point LotPoint(const Point & p) const;
+    Point LotPoint(const Point& p) const;
 
     /**
      * @return the point on the segment with the minimum distance to p
      */
-    Point ShortestPoint(const Point & p) const;
+    Point ShortestPoint(const Point& p) const;
 
     /**
      * @return true if the point p lies on the line defined by the first and the second point
      */
-    bool IsInLine(const Point & p) const;
+    bool IsInLine(const Point& p) const;
 
     /**
      * @see IsInLine
      * @return true if the point p is within the line segment defined the line end points
      */
-    bool IsInLineSegment(const Point & p) const;
+    bool IsInLineSegment(const Point& p) const;
 
     /**
      * @return the distance from the line to the point p
      */
-    double DistTo(const Point & p) const;
+    double DistTo(const Point& p) const;
 
     /**
      * @return the distance square from the line to the point p
      */
-    double DistToSquare(const Point & p) const;
+    double DistToSquare(const Point& p) const;
 
     /**
      * @return the length (Norm) of the line
@@ -142,19 +141,19 @@ public:
      *
      * @return true if both lines overlapp
      */
-    bool Overlapp(const Line & l) const;
+    bool Overlapp(const Line& l) const;
 
     /**
      * @return true if both segments are equal. The end points must be in the range of J_EPS.
      * @see Macro.h
      */
-    bool operator==(const Line & l) const;
+    bool operator==(const Line& l) const;
 
     /**
      * @return true if both segments are not equal. The end points must be in the range of J_EPS.
      * @see Macro.h
      */
-    bool operator!=(const Line & l) const;
+    bool operator!=(const Line& l) const;
 
     /**
      * @see http://alienryderflex.com/intersect/
@@ -162,7 +161,7 @@ public:
      * http://social.msdn.microsoft.com/Forums/en-US/csharpgeneral/thread/e5993847-c7a9-46ec-8edc-bfb86bd689e3/
      * @return true if both segments intersect
      */
-    bool IntersectionWith(const Line & l) const; // check two segments for intersections
+    bool IntersectionWith(const Line& l) const; // check two segments for intersections
 
     /**
      * @see http://alienryderflex.com/intersect/
@@ -170,30 +169,29 @@ public:
      * http://social.msdn.microsoft.com/Forums/en-US/csharpgeneral/thread/e5993847-c7a9-46ec-8edc-bfb86bd689e3/
      * @return true if both segments intersect
      */
-    bool IntersectionWith(const Point & p1, const Point & p2) const;
+    bool IntersectionWith(const Point& p1, const Point& p2) const;
 
     /**
      * @return the distance squared between the first point and the intersection
      * point with line l. This is exactly the same function
      * as @see IntersectionWith() but returns a double insteed.
      */
-    double GetIntersectionDistance(const Line & l) const;
+    double GetIntersectionDistance(const Line& l) const;
 
     /**
      * @return true if the segment intersects with the circle of radius r
      */
-    bool IntersectionWithCircle(const Point & centre, double radius = 0.30 /*m for pedestrians*/);
-
+    bool IntersectionWithCircle(const Point& centre, double radius = 0.30 /*m for pedestrians*/);
 
     /**
      * @return true if both segments share at least one common point
      */
-    bool ShareCommonPointWith(const Line & line) const;
+    bool ShareCommonPointWith(const Line& line) const;
 
     /**
      * @return true if the given point is one end point of the segment
      */
-    bool HasEndPoint(const Point & point) const;
+    bool HasEndPoint(const Point& point) const;
 
     /**
      * Determine on which side the point is located on of the line directed from (_point1 to
@@ -201,13 +199,13 @@ public:
      * @return 0 (Left) or 1 (Right) depending on which side of the line the point is located.
      * The return value is undefined if the points are colinear.
      */
-    int WichSide(const Point & pt);
+    int WichSide(const Point& pt);
 
     /**
      * @return true if the point is located in the left hand side of the line directed from (_point1
      * to _point2).
      */
-    bool IsLeft(const Point & pt);
+    bool IsLeft(const Point& pt);
 
     /**
      * @return true for horizontal lines
@@ -222,12 +220,12 @@ public:
     /**
      * @return left point wrt. the point pt
      */
-    const Point & GetLeft(const Point & pt);
+    const Point& GetLeft(const Point& pt);
 
     /**
      * @return left point wrt. the point pt
      */
-    const Point & GetRight(const Point & pt);
+    const Point& GetRight(const Point& pt);
 
     /**
      * @return a nice formated string describing the line
@@ -242,7 +240,7 @@ public:
     /**
      * @return the angle between two lines
      */
-    double GetDeviationAngle(const Line & l) const;
+    double GetDeviationAngle(const Line& l) const;
 
     /**
      * ???

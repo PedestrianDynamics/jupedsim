@@ -25,7 +25,6 @@
  *
  **/
 
-
 #include "Transition.hpp"
 
 #include "../IO/OutputHandler.hpp"
@@ -40,14 +39,15 @@ using namespace std;
 
 Transition::Transition() : Crossing()
 {
-    _isOpen          = true;
-    _doorUsage       = 0;
+    _isOpen = true;
+    _doorUsage = 0;
     _lastPassingTime = 0;
-    _room2           = nullptr;
+    _room2 = nullptr;
 }
 
-Transition::~Transition() {}
-
+Transition::~Transition()
+{
+}
 
 void Transition::Close()
 {
@@ -64,7 +64,7 @@ void Transition::SetType(string type)
     _type = type;
 }
 
-void Transition::SetRoom2(Room * r)
+void Transition::SetRoom2(Room* r)
 {
     _room2 = r;
 }
@@ -74,8 +74,7 @@ bool Transition::IsOpen() const
     return _isOpen;
 }
 
-
-Room * Transition::GetRoom2() const
+Room* Transition::GetRoom2() const
 {
     return _room2;
 }
@@ -87,7 +86,7 @@ string Transition::GetType() const
 // Sonstiges
 
 // gibt den ANDEREN room != roomID zurück
-Room * Transition::GetOtherRoom(int roomID) const
+Room* Transition::GetOtherRoom(int roomID) const
 {
     if(GetRoom1() != NULL && GetRoom1()->GetID() == roomID) {
         return GetRoom2();
@@ -125,11 +124,10 @@ bool Transition::IsTransition() const
     return true;
 }
 
-
 /* gibt den ANDEREN Subroom mit GetRoomID() != roomID zurück
  * subroomID wird hier nicht benötigt, aber in Crossings::GetOtherSubRoom()
  * (virtuelle Funktion) */
-SubRoom * Transition::GetOtherSubRoom(int roomID, int subroomID) const
+SubRoom* Transition::GetOtherSubRoom(int roomID, int subroomID) const
 {
     if((GetRoom1() != NULL) && (GetRoom1()->GetID() == roomID))
         return GetSubRoom2();
@@ -238,7 +236,7 @@ double Transition::GetLastPassingTime() const
     return _lastPassingTime;
 }
 
-const std::string & Transition::GetFlowCurve() const
+const std::string& Transition::GetFlowCurve() const
 {
     return _flowAtExit;
 }

@@ -6,15 +6,15 @@
 #include <tinyxml.h>
 
 std::unique_ptr<TiXmlDocument>
-buildTestDoc(const std::vector<std::string> & path, const std::optional<std::string> text)
+buildTestDoc(const std::vector<std::string>& path, const std::optional<std::string> text)
 {
     std::unique_ptr<TiXmlDocument> doc = std::make_unique<TiXmlDocument>();
     doc->LinkEndChild(new TiXmlDeclaration("1.0", "", ""));
 
-    TiXmlNode * node = doc.get();
+    TiXmlNode* node = doc.get();
 
-    for(const auto & path_element : path) {
-        auto * new_node = new TiXmlElement(path_element);
+    for(const auto& path_element : path) {
+        auto* new_node = new TiXmlElement(path_element);
         node->LinkEndChild(new_node);
         node = new_node;
     }
@@ -25,16 +25,16 @@ buildTestDoc(const std::vector<std::string> & path, const std::optional<std::str
 }
 
 void assertTextValueAtPath(
-    const TiXmlDocument & doc,
-    const std::vector<std::string> & path,
-    const std::string & value)
+    const TiXmlDocument& doc,
+    const std::vector<std::string>& path,
+    const std::string& value)
 {
-    const TiXmlNode * node = &doc;
-    for(const auto & p : path) {
+    const TiXmlNode* node = &doc;
+    for(const auto& p : path) {
         node = node->FirstChild(p);
         ASSERT_NE(node, nullptr);
     }
-    const auto * text = node->FirstChild();
+    const auto* text = node->FirstChild();
     ASSERT_EQ(text->ValueStr(), value);
 }
 
@@ -62,7 +62,7 @@ TEST(PatchPath, DoesNotChangePathIfAlreadyJustAFileName)
 TEST(ExtractPath, CanExtract)
 {
     const std::filesystem::path expected_path{"file.txt"};
-    const auto doc            = buildTestDoc({"a", "b"}, expected_path.string());
+    const auto doc = buildTestDoc({"a", "b"}, expected_path.string());
     const auto extracted_path = detail::extractPath(*doc, {"a", "b"});
     ASSERT_TRUE(extracted_path.has_value());
     ASSERT_EQ(expected_path, *extracted_path);
@@ -70,7 +70,7 @@ TEST(ExtractPath, CanExtract)
 
 TEST(ExtractPath, ReturnNulloptOnInvalidPath)
 {
-    const auto doc            = buildTestDoc({"a", "b"}, "file.txt");
+    const auto doc = buildTestDoc({"a", "b"}, "file.txt");
     const auto extracted_path = detail::extractPath(
         *doc,
         {
@@ -81,7 +81,7 @@ TEST(ExtractPath, ReturnNulloptOnInvalidPath)
 
 TEST(ExtractPath, ReturnNulloptOnMissingTextNode)
 {
-    const auto doc            = buildTestDoc({"a", "b"}, std::nullopt);
+    const auto doc = buildTestDoc({"a", "b"}, std::nullopt);
     const auto extracted_path = detail::extractPath(
         *doc,
         {
@@ -92,7 +92,7 @@ TEST(ExtractPath, ReturnNulloptOnMissingTextNode)
 
 TEST(ExtractPath, ReturnNulloptIfTextIsEmptyString)
 {
-    const auto doc            = buildTestDoc({"a", "b"}, "");
+    const auto doc = buildTestDoc({"a", "b"}, "");
     const auto extracted_path = detail::extractPath(
         *doc,
         {

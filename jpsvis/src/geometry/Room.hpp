@@ -35,9 +35,8 @@
 class OutputHandler;
 class SubRoom;
 
-
 // external variables
-extern OutputHandler * Log;
+extern OutputHandler* Log;
 
 class Room
 {
@@ -53,13 +52,13 @@ private:
     /// all transitions ids
     std::vector<int> _transitionsIDs;
     /// needed if the trajectories for this room are to be write in a special way
-    OutputHandler * _outputFile;
+    OutputHandler* _outputFile;
     /// egress time for this room
     double _egressTime;
 
 public:
     Room();
-    Room(const Room & orig);
+    Room(const Room& orig);
 
     virtual ~Room();
 
@@ -71,7 +70,7 @@ public:
     /**
      * Set/Get the caption of the room
      */
-    void SetCaption(const std::string & s);
+    void SetCaption(const std::string& s);
 
     /**
      * Set/Get the elevation of the room
@@ -86,7 +85,7 @@ public:
     /**
      * Set/Get the caption of the room
      */
-    const std::string & GetCaption() const;
+    const std::string& GetCaption() const;
 
     /**
      * Set/Get the elevation of the room
@@ -111,22 +110,22 @@ public:
     /**
      * @return a vector containing all subrooms
      */
-    const std::map<int, std::unique_ptr<SubRoom>> & GetAllSubRooms() const;
+    const std::map<int, std::unique_ptr<SubRoom>>& GetAllSubRooms() const;
 
     /**
      * @return a vector containing all transitions Ids
      */
-    const std::vector<int> & GetAllTransitionsIDs() const;
+    const std::vector<int>& GetAllTransitionsIDs() const;
 
     /**
      * @return the Subroom with the corresponding index
      */
-    SubRoom * GetSubRoom(int index) const;
+    SubRoom* GetSubRoom(int index) const;
 
     /**
      * Push a new subroom in the vector
      */
-    void AddSubRoom(SubRoom * r);
+    void AddSubRoom(SubRoom* r);
 
     /**
      * Add a new transition id
@@ -141,10 +140,10 @@ public:
     /**
      * Used by MPI in the case each room should be written in a specific file
      */
-    void SetOutputHandler(OutputHandler * oh);
+    void SetOutputHandler(OutputHandler* oh);
 
     /**
      * Used by MPI in the case each room should be written in a specific file
      */
-    OutputHandler * GetOutputHandler() const;
+    OutputHandler* GetOutputHandler() const;
 };

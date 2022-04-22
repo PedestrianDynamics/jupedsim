@@ -47,13 +47,13 @@ public:
      * @param ped Pedestrians, whose walking direction is determined
      * @return Desired walking direction of ped
      */
-    Point GetTarget(const Room * room, const Pedestrian * ped, double time);
+    Point GetTarget(const Room* room, const Pedestrian* ped, double time);
 
     /**
-      * Returns the desired waiting position of a pedestrian.
-      * @param room Room the pedestrian is in
-      * @param ped Pedestrians, whose walking direction is determined
-      * @return Desired waiting position of ped
-      */
-    virtual Point GetWaitingPosition(const Room * room, const Pedestrian * ped, double time) = 0;
+     * Returns the desired waiting position of a pedestrian.
+     * @param room Room the pedestrian is in
+     * @param ped Pedestrians, whose walking direction is determined
+     * @return Desired waiting position of ped
+     */
+    virtual Point GetWaitingPosition(const Room* room, const Pedestrian* ped, double time) = 0;
 };

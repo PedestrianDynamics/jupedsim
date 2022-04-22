@@ -2,9 +2,8 @@
 
 #include <stdexcept>
 
-
 template <>
-RoutingStrategy from_string<RoutingStrategy>(const std::string & string)
+RoutingStrategy from_string<RoutingStrategy>(const std::string& string)
 {
     if(string == "global_shortest") {
         return RoutingStrategy::ROUTING_GLOBAL_SHORTEST;

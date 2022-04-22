@@ -36,7 +36,7 @@ class TrajectoryWriter
     unsigned int _precision;
     std::set<OptionalOutput> _options;
     std::unique_ptr<OutputHandler> _outputHandler;
-    std::map<OptionalOutput, std::function<std::string(Pedestrian *)>> _optionalOutput{};
+    std::map<OptionalOutput, std::function<std::string(Pedestrian*)>> _optionalOutput{};
     std::map<OptionalOutput, std::string> _optionalOutputHeader{};
     std::map<OptionalOutput, std::string> _optionalOutputInfo{};
     AgentColorMode _colorMode{AgentColorMode::BY_VELOCITY};
@@ -50,18 +50,18 @@ public:
 
     ~TrajectoryWriter() = default;
 
-    TrajectoryWriter(const TrajectoryWriter & other) = delete;
+    TrajectoryWriter(const TrajectoryWriter& other) = delete;
 
-    TrajectoryWriter & operator=(const TrajectoryWriter & other) = delete;
+    TrajectoryWriter& operator=(const TrajectoryWriter& other) = delete;
 
-    TrajectoryWriter(TrajectoryWriter && other) = delete;
+    TrajectoryWriter(TrajectoryWriter&& other) = delete;
 
-    TrajectoryWriter & operator=(TrajectoryWriter && other) = delete;
+    TrajectoryWriter& operator=(TrajectoryWriter&& other) = delete;
 
-    void WriteHeader(size_t nPeds, double fps, const Configuration & cfg, int count);
+    void WriteHeader(size_t nPeds, double fps, const Configuration& cfg, int count);
 
-    void WriteFrame(int frameNr, const std::vector<std::unique_ptr<Pedestrian>> & pedestrians);
+    void WriteFrame(int frameNr, const std::vector<std::unique_ptr<Pedestrian>>& pedestrians);
 
 private:
-    int computeColor(const Pedestrian & ped) const;
+    int computeColor(const Pedestrian& ped) const;
 };

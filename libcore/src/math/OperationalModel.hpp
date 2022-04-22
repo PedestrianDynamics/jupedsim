@@ -23,11 +23,10 @@
  *
  * \section Description
  *
- * This class defines the interface for operational models, which aim is to compute the next positions of
- * the pedestrians.
+ * This class defines the interface for operational models, which aim is to compute the next
+ *positions of the pedestrians.
  *
  **/
-
 
 /** @defgroup OperationalModels
  * Collection of different operational models
@@ -44,7 +43,6 @@
 
 #include <memory>
 #include <string>
-
 
 class Building;
 class Simulation;
@@ -64,32 +62,32 @@ class OperationalModel
 {
 protected:
     // define the strategy for crossing a door (used for calculating the driving force)
-    DirectionManager * _direction{};
+    DirectionManager* _direction{};
     double _currentTime{0.0};
-    Simulation * _simulation{};
+    Simulation* _simulation{};
 
 public:
     static std::unique_ptr<OperationalModel> CreateFromType(
         OperationalModelType type,
-        const Configuration & config,
-        DirectionManager * directionManager);
-    explicit OperationalModel(DirectionManager * directionManager);
+        const Configuration& config,
+        DirectionManager* directionManager);
+    explicit OperationalModel(DirectionManager* directionManager);
     virtual ~OperationalModel() = default;
 
     virtual PedestrianUpdate ComputeNewPosition(
         double dT,
-        const Pedestrian & ped,
-        const Geometry & geometry,
-        const NeighborhoodSearch & neighborhoodSearch) const = 0;
+        const Pedestrian& ped,
+        const Geometry& geometry,
+        const NeighborhoodSearch& neighborhoodSearch) const = 0;
 
-    virtual void ApplyUpdate(const PedestrianUpdate & update, Pedestrian & agent) const = 0;
+    virtual void ApplyUpdate(const PedestrianUpdate& update, Pedestrian& agent) const = 0;
 
     /**
-      * Performs whatever initialization is needed/required.
-      * This function is called at the beginning the simulation once.
-      * @param building, the building object
-      */
-    void Init(Simulation * simulation);
+     * Performs whatever initialization is needed/required.
+     * This function is called at the beginning the simulation once.
+     * @param building, the building object
+     */
+    void Init(Simulation* simulation);
 
     void Update(double time) { _currentTime = time; }
 };

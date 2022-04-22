@@ -20,7 +20,6 @@
 
 #include <catch2/catch.hpp>
 
-
 TEST_CASE("geometry/Wall", "[geometry][Wall]")
 {
     SECTION("ctor")

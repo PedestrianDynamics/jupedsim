@@ -25,7 +25,6 @@
  *
  **/
 
-
 #include "Goal.hpp"
 
 #include "../Log.hpp"
@@ -34,19 +33,20 @@
 
 using namespace std;
 
-
 Goal::Goal()
 {
-    _id          = -1;
-    _caption     = "Goal";
+    _id = -1;
+    _caption = "Goal";
     _isFinalGoal = 0;
-    _walls       = vector<Wall>();
-    _poly        = vector<Point>();
+    _walls = vector<Wall>();
+    _poly = vector<Point>();
 }
 
-Goal::~Goal() {}
+Goal::~Goal()
+{
+}
 
-void Goal::AddWall(const Wall & w)
+void Goal::AddWall(const Wall& w)
 {
     _walls.push_back(w);
 }
@@ -71,7 +71,7 @@ void Goal::SetId(int id)
     _id = id;
 }
 
-const vector<Point> & Goal::GetPolygon() const
+const vector<Point>& Goal::GetPolygon() const
 {
     return _poly;
 }
@@ -82,7 +82,7 @@ string Goal::Write()
     Point pos;
 
     for(unsigned int j = 0; j < _walls.size(); j++) {
-        const Wall & w = _walls[j];
+        const Wall& w = _walls[j];
         s.append(w.Write());
         pos = pos + w.GetPoint1() + w.GetPoint2();
     }
@@ -106,12 +106,12 @@ string Goal::Write()
     return s;
 }
 
-const vector<Wall> & Goal::GetAllWalls() const
+const vector<Wall>& Goal::GetAllWalls() const
 {
     return _walls;
 }
 
-int Goal::WhichQuad(const Point & vertex, const Point & hitPos) const
+int Goal::WhichQuad(const Point& vertex, const Point& hitPos) const
 {
     return (vertex.GetX() > hitPos.GetX()) ? ((vertex.GetY() > hitPos.GetY()) ? 1 : 4) :
                                              ((vertex.GetY() > hitPos.GetY()) ? 2 : 3);
@@ -128,35 +128,34 @@ void Goal::SetIsFinalGoal(int isFinalGoal)
 }
 
 // x-Koordinate der Linie von einer Eccke zur nächsten
-double Goal::Xintercept(const Point & point1, const Point & point2, double hitY) const
+double Goal::Xintercept(const Point& point1, const Point& point2, double hitY) const
 {
     return (
         point2.GetX() - (((point2.GetY() - hitY) * (point1.GetX() - point2.GetX())) /
                          (point1.GetY() - point2.GetY())));
 }
 
-
-bool Goal::Contains(const Point & ped) const
+bool Goal::Contains(const Point& ped) const
 {
     short edge, first, next;
     short quad, next_quad, delta, total;
 
     /////////////////////////////////////////////////////////////
     edge = first = 0;
-    quad         = WhichQuad(_poly[edge], ped);
-    total        = 0; // COUNT OF ABSOLUTE SECTORS CROSSED
+    quad = WhichQuad(_poly[edge], ped);
+    total = 0; // COUNT OF ABSOLUTE SECTORS CROSSED
     /* LOOP THROUGH THE VERTICES IN A SECTOR */
     do {
-        next      = (edge + 1) % _poly.size();
+        next = (edge + 1) % _poly.size();
         next_quad = WhichQuad(_poly[next], ped);
-        delta     = next_quad - quad; // HOW MANY QUADS HAVE I MOVED
+        delta = next_quad - quad; // HOW MANY QUADS HAVE I MOVED
 
         // SPECIAL CASES TO HANDLE CROSSINGS OF MORE THEN ONE
         // QUAD
 
         switch(delta) {
-            case 2:  // IF WE CROSSED THE MIDDLE, FIGURE OUT IF IT
-                     // WAS CLOCKWISE OR COUNTER
+            case 2: // IF WE CROSSED THE MIDDLE, FIGURE OUT IF IT
+                    // WAS CLOCKWISE OR COUNTER
             case -2: // US THE X POSITION AT THE HIT POINT TO
                 // DETERMINE WHICH WAY AROUND
                 if(Xintercept(_poly[edge], _poly[next], ped.GetY()) > ped.GetX())
@@ -184,10 +183,10 @@ bool Goal::Contains(const Point & ped) const
 
 bool Goal::ConvertLineToPoly()
 {
-    vector<Line *> copy;
+    vector<Line*> copy;
     vector<Point> tmpPoly;
     Point point;
-    Line * line;
+    Line* line;
     // Alle Linienelemente in copy speichern
     for(unsigned int i = 0; i < _walls.size(); i++) {
         copy.push_back(&_walls[i]);
@@ -225,7 +224,7 @@ bool Goal::ConvertLineToPoly()
     return true;
 }
 
-const Point & Goal::GetCentroid() const
+const Point& Goal::GetCentroid() const
 {
     return _centroid;
 }
@@ -234,11 +233,11 @@ void Goal::ComputeControid()
 {
     double px = 0, py = 0;
     double signedArea = 0.0;
-    double x0         = 0.0; // Current vertex X
-    double y0         = 0.0; // Current vertex Y
-    double x1         = 0.0; // Next vertex X
-    double y1         = 0.0; // Next vertex Y
-    double a          = 0.0; // Partial signed area
+    double x0 = 0.0; // Current vertex X
+    double y0 = 0.0; // Current vertex Y
+    double x1 = 0.0; // Next vertex X
+    double y1 = 0.0; // Next vertex Y
+    double a = 0.0; // Partial signed area
 
     // For all vertices except last
     unsigned int i = 0;
@@ -247,7 +246,7 @@ void Goal::ComputeControid()
         y0 = _poly[i].GetY();
         x1 = _poly[i + 1].GetX();
         y1 = _poly[i + 1].GetY();
-        a  = x0 * y1 - x1 * y0;
+        a = x0 * y1 - x1 * y0;
         signedArea += a;
         px += (x0 + x1) * a;
         py += (y0 + y1) * a;
@@ -258,7 +257,7 @@ void Goal::ComputeControid()
     y0 = _poly[i].GetY();
     x1 = _poly[0].GetX();
     y1 = _poly[0].GetY();
-    a  = x0 * y1 - x1 * y0;
+    a = x0 * y1 - x1 * y0;
     signedArea += a;
     px += (x0 + x1) * a;
     py += (y0 + y1) * a;

@@ -32,33 +32,33 @@ class Wall : public Line
 {
 public:
     /**
-      * Constructor
-      */
+     * Constructor
+     */
     Wall();
 
     /**
-      * Constructor
-      */
-    Wall(const Point & p1, const Point & p2, std::string Type = "internal");
+     * Constructor
+     */
+    Wall(const Point& p1, const Point& p2, std::string Type = "internal");
 
     /**
-      * Destructor
-      */
+     * Destructor
+     */
     ~Wall() override = default;
 
     /**
-      * set/get the wall type. Values are external and internal
-      */
-    const std::string & GetType() const;
+     * set/get the wall type. Values are external and internal
+     */
+    const std::string& GetType() const;
 
     /**
-      * set/get the wall type. Values are external and internal
-      */
-    void SetType(const std::string & type);
+     * set/get the wall type. Values are external and internal
+     */
+    void SetType(const std::string& type);
 
     /**
-      * @return a nicely formated string of the object
-      */
+     * @return a nicely formated string of the object
+     */
     std::string Write() const override;
 
 private:

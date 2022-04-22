@@ -41,15 +41,14 @@ using my_pair = std::pair<double, Pedestrian::UID>;
 // sort with respect to first element (ascending).
 // In case of equality sort with respect to second element (descending)
 struct sort_pred {
-    bool operator()(const my_pair & left, const my_pair & right)
+    bool operator()(const my_pair& left, const my_pair& right)
     {
         return (left.first == right.first) ? (left.second > right.second) :
                                              (left.first < right.first);
     }
 };
 
-
-//forward declaration
+// forward declaration
 class Pedestrian;
 class DirectionStrategy;
 class Simulation;
@@ -73,69 +72,69 @@ private:
     double _DWall;
 
     /**
-      * Optimal velocity function \f$ V(spacing) =\min{v_0, \max{0, (s-l)/T}}  \f$
-      *
-      * @param ped: Pointer to Pedestrians
-      * @param spacing: minimum spacing to the neighbors
-      * @param winkel: angle between <ped> and the nearest neighbor. Is not yet used!
-      *
-      * @return double
-      */
-    double OptimalSpeed(const Pedestrian * ped, double spacing) const;
+     * Optimal velocity function \f$ V(spacing) =\min{v_0, \max{0, (s-l)/T}}  \f$
+     *
+     * @param ped: Pointer to Pedestrians
+     * @param spacing: minimum spacing to the neighbors
+     * @param winkel: angle between <ped> and the nearest neighbor. Is not yet used!
+     *
+     * @return double
+     */
+    double OptimalSpeed(const Pedestrian* ped, double spacing) const;
 
     /**
-      * The desired direction of pedestrian
-      *
-      * @param ped: Pointer to Pedestrians
-      * @param room: Pointer to room
-      *
-      * @return Point
-      */
-    void e0(const Pedestrian * ped, Point target, PedestrianUpdate & update) const;
+     * The desired direction of pedestrian
+     *
+     * @param ped: Pointer to Pedestrians
+     * @param room: Pointer to room
+     *
+     * @return Point
+     */
+    void e0(const Pedestrian* ped, Point target, PedestrianUpdate& update) const;
     /**
-      * Get the spacing between ped1 and ped2
-      *
-      * @param ped1 Pointer to Pedestrian: First pedestrian
-      * @param ped2 Pointer to Pedestrian: Second pedestrian
-      * @param ei the direction of pedestrian.
-      * This direction is: \f$ e_0 + \sum_j{R(spacing_{ij})*e_{ij}}\f$
-      * and should be calculated *before* calling OptimalSpeed
-      * @return Point
-      */
-    my_pair GetSpacing(const Pedestrian * ped1, const Pedestrian * ped2, Point ei) const;
+     * Get the spacing between ped1 and ped2
+     *
+     * @param ped1 Pointer to Pedestrian: First pedestrian
+     * @param ped2 Pointer to Pedestrian: Second pedestrian
+     * @param ei the direction of pedestrian.
+     * This direction is: \f$ e_0 + \sum_j{R(spacing_{ij})*e_{ij}}\f$
+     * and should be calculated *before* calling OptimalSpeed
+     * @return Point
+     */
+    my_pair GetSpacing(const Pedestrian* ped1, const Pedestrian* ped2, Point ei) const;
     /**
-      * Repulsive force between two pedestrians ped1 and ped2 according to
-      * the Velocity model (to be published in TGF15)
-      *
-      * @param ped1 Pointer to Pedestrian: First pedestrian
-      * @param ped2 Pointer to Pedestrian: Second pedestrian
-      *
-      * @return Point
-      */
-    Point ForceRepPed(const Pedestrian * ped1, const Pedestrian * ped2) const;
+     * Repulsive force between two pedestrians ped1 and ped2 according to
+     * the Velocity model (to be published in TGF15)
+     *
+     * @param ped1 Pointer to Pedestrian: First pedestrian
+     * @param ped2 Pointer to Pedestrian: Second pedestrian
+     *
+     * @return Point
+     */
+    Point ForceRepPed(const Pedestrian* ped1, const Pedestrian* ped2) const;
     /**
-      * Repulsive force acting on pedestrian <ped> from the walls in
-      * <subroom>. The sum of all repulsive forces of the walls in <subroom> is calculated
-      * @see ForceRepWall
-      * @param ped Pointer to Pedestrian
-      * @param subroom Pointer to SubRoom
-      *
-      * @return Point
-      */
-    Point ForceRepRoom(const Pedestrian * ped, const Geometry & geometry) const;
+     * Repulsive force acting on pedestrian <ped> from the walls in
+     * <subroom>. The sum of all repulsive forces of the walls in <subroom> is calculated
+     * @see ForceRepWall
+     * @param ped Pointer to Pedestrian
+     * @param subroom Pointer to SubRoom
+     *
+     * @return Point
+     */
+    Point ForceRepRoom(const Pedestrian* ped, const Geometry& geometry) const;
     /**
-      * Repulsive force between pedestrian <ped> and wall <l>
-      *
-      * @param ped Pointer to Pedestrian
-      * @param l reference to Wall
-      *
-      * @return Point
-      */
-    Point ForceRepWall(const Pedestrian * ped, const Line & l) const;
+     * Repulsive force between pedestrian <ped> and wall <l>
+     *
+     * @param ped Pointer to Pedestrian
+     * @param l reference to Wall
+     *
+     * @return Point
+     */
+    Point ForceRepWall(const Pedestrian* ped, const Line& l) const;
 
 public:
     VelocityModel(
-        DirectionManager * directionManager,
+        DirectionManager* directionManager,
         double aped,
         double Dped,
         double awall,
@@ -144,9 +143,9 @@ public:
 
     PedestrianUpdate ComputeNewPosition(
         double dT,
-        const Pedestrian & ped,
-        const Geometry & geometry,
-        const NeighborhoodSearch & neighborhoodSearch) const override;
+        const Pedestrian& ped,
+        const Geometry& geometry,
+        const NeighborhoodSearch& neighborhoodSearch) const override;
 
-    void ApplyUpdate(const PedestrianUpdate & update, Pedestrian & agent) const override;
+    void ApplyUpdate(const PedestrianUpdate& update, Pedestrian& agent) const override;
 };

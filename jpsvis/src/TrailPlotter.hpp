@@ -6,7 +6,6 @@ class vtkAppendPolyData;
 class vtkAppendPolyData;
 class vtkCleanPolyData;
 
-
 class TrailPlotter
 {
 public:
@@ -17,18 +16,18 @@ public:
     virtual ~TrailPlotter();
 
     /// add a dataset to plot
-    void AddDataSet(vtkPolyData * _polydata);
+    void AddDataSet(vtkPolyData* _polydata);
 
     /// return the actor responsible for the plotting
-    vtkActor * getActor();
+    vtkActor* getActor();
 
     /// set the visibility satus of the trails
     void SetVisibility(bool status);
 
 private:
-    vtkActor * _trailActor;
+    vtkActor* _trailActor;
     // combine polydatas sets
-    vtkAppendPolyData * _appendFilter;
+    vtkAppendPolyData* _appendFilter;
     // Remove any duplicate points.
-    vtkCleanPolyData * _cleanFilter;
+    vtkCleanPolyData* _cleanFilter;
 };

@@ -49,28 +49,28 @@ public:
      * Building element types that are actually supported
      */
     enum ELEMENT_TYPE {
-        DOOR,     //!< DOOR defined by two coordinates points are needed.
-        STEP,     //!< STEP @todo not fully implemented
-        WALL,     //!< WALL defined by two coordinates points are needed.
-        SPHERE,   //!< SPHERE defined by centre[x,y,z] and radius.
-        CONE,     //!< CONE defined by centre, radius and height
+        DOOR, //!< DOOR defined by two coordinates points are needed.
+        STEP, //!< STEP @todo not fully implemented
+        WALL, //!< WALL defined by two coordinates points are needed.
+        SPHERE, //!< SPHERE defined by centre[x,y,z] and radius.
+        CONE, //!< CONE defined by centre, radius and height
         CYLINDER, //!< CYLINDER defined by centre ,radius and height
-        BOX       //!< BOX defined by centre, length, width and height
+        BOX //!< BOX defined by centre, length, width and height
     };
 
     FacilityGeometry(
-        const std::string & description,
-        const std::string & roomCaption,
-        const std::string & subroomCaption);
+        const std::string& description,
+        const std::string& roomCaption,
+        const std::string& subroomCaption);
     virtual ~FacilityGeometry();
 
-    vtkAssembly * getActor2D();
+    vtkAssembly* getActor2D();
 
-    vtkAssembly * getActor3D();
+    vtkAssembly* getActor3D();
 
-    vtkAssembly * getCaptionsActor();
+    vtkAssembly* getCaptionsActor();
 
-    vtkActor2DCollection * getCaptions();
+    vtkActor2DCollection* getCaptions();
 
     void CreateActors();
 
@@ -83,10 +83,10 @@ public:
         double y2,
         double z2,
         double thickness = 15,
-        double height    = 250,
-        double col       = 255);
+        double height = 250,
+        double col = 255);
     // void addWall(double center[3], double width, double orientation);
-    void addWall(JPoint * p1, JPoint * p2, std::string caption = "");
+    void addWall(JPoint* p1, JPoint* p2, std::string caption = "");
 
     /// draw a stair
     void addStair(
@@ -97,11 +97,10 @@ public:
         double y2,
         double z2,
         double thickness = 15,
-        double height    = 250,
-        double col       = 255);
+        double height = 250,
+        double col = 255);
     // void addWall(double center[3], double width, double orientation);
-    void addStair(JPoint * p1, JPoint * p2, std::string caption = "");
-
+    void addStair(JPoint* p1, JPoint* p2, std::string caption = "");
 
     /// draw a door
     void addDoor(
@@ -112,10 +111,10 @@ public:
         double y2,
         double z2,
         double thickness = 17,
-        double height    = 250,
-        double col       = 30);
+        double height = 250,
+        double col = 30);
     // void addDoor(double center[3], double width, double orientation);
-    void addDoor(JPoint * p1, JPoint * p2, std::string caption = "");
+    void addDoor(JPoint* p1, JPoint* p2, std::string caption = "");
 
     /// draw a step
     /// todo: implement thickness and color
@@ -127,7 +126,7 @@ public:
         double y2,
         double z2 = 0 /*, double thickness=30, double height=10,double col=50*/);
     // void addStep(double center[3], double width, double orientation);
-    void addStep(JPoint * p1, JPoint * p2);
+    void addStep(JPoint* p1, JPoint* p2);
 
     /// draw a navigation line
     void addNavLine(
@@ -138,9 +137,9 @@ public:
         double y2,
         double z2,
         double thickness = 2,
-        double height    = 250,
-        double color     = 95);
-    void addNavLine(JPoint * p1, JPoint * p2, std::string caption = "");
+        double height = 250,
+        double color = 95);
+    void addNavLine(JPoint* p1, JPoint* p2, std::string caption = "");
 
     /// draw a floor, divided in cells,
     void addFloor(double x1, double y1, double x2, double y2, double z = 0);
@@ -149,21 +148,21 @@ public:
         double y1,
         double x2,
         double y2,
-        double z         = 0,
-        double c1        = 120,
-        double c2        = 150,
+        double z = 0,
+        double c1 = 120,
+        double c2 = 150,
         std::string text = "");
-    void addFloor(vtkPolyData * polygonPolyData);
+    void addFloor(vtkPolyData* polygonPolyData);
 
     /// draw obstacles
-    void addObstacles(vtkPolyData * polygonPolyData);
+    void addObstacles(vtkPolyData* polygonPolyData);
 
     /// add the gradient field
-    void addGradientField(vtkActor * gradientField);
+    void addGradientField(vtkActor* gradientField);
 
-    const std::string & GetDescription() const;
-    const std::string & GetRoomCaption() const;
-    const std::string & GetSubRoomCaption() const;
+    const std::string& GetDescription() const;
+    const std::string& GetRoomCaption() const;
+    const std::string& GetSubRoomCaption() const;
     void SetRoomCaption(std::string s);
     void SetSubRoomCaption(std::string s);
     /// draw other kinds of objects
@@ -179,11 +178,11 @@ public:
     addObjectBox(double center[3], double height, double width, double length, double couleur = 4);
     void addObjectLabel(double center[3], double orientation[3], std::string caption, double color);
 
-    void changeWallsColor(double * color);
-    void changeExitsColor(double * color);
-    void changeNavLinesColor(double * color);
-    void changeFloorColor(double * color);
-    void changeObstaclesColor(double * color);
+    void changeWallsColor(double* color);
+    void changeExitsColor(double* color);
+    void changeNavLinesColor(double* color);
+    void changeFloorColor(double* color);
+    void changeObstaclesColor(double* color);
 
     void set2D(bool status);
     void set3D(bool status);
@@ -200,13 +199,12 @@ public:
     void setVisibility(bool status);
     bool getVisibility() const;
 
-
 private:
     // TODO Check if this function is really necessary
     // vtkActor* MapToActor(vtkDataSet *ds); //for drawing floor
-    vtkLookupTable * lookupTable;
-    void drawWall(JPoint * p1, JPoint * p2);
-    void drawDoor(JPoint * p1, JPoint * p2);
+    vtkLookupTable* lookupTable;
+    void drawWall(JPoint* p1, JPoint* p2);
+    void drawDoor(JPoint* p1, JPoint* p2);
     void addNewElement(double center[3], double orientation, double width, ELEMENT_TYPE type);
     void addNewElementText(double center[3], double orientation[3], std::string text, double color);
 
@@ -222,25 +220,25 @@ private:
     double navlineColor;
 
     // geometry assembly
-    vtkAssembly * assembly;
+    vtkAssembly* assembly;
 
     // 2-d parts
-    LinePlotter2D * linesPlotter2D;
-    vtkAssembly * assembly2D;
+    LinePlotter2D* linesPlotter2D;
+    vtkAssembly* assembly2D;
 
     // 3-d parts
     // vtkAssembly* assemblyObjects;
-    vtkAssembly * assemblyWalls3D;
-    vtkAssembly * assemblyDoors3D;
-    vtkAssembly * assembly3D;
+    vtkAssembly* assemblyWalls3D;
+    vtkAssembly* assemblyDoors3D;
+    vtkAssembly* assembly3D;
 
-    vtkActor * floorActor;
-    vtkActor * obstaclesActor;
-    vtkActor * gradientFieldActor;
+    vtkActor* floorActor;
+    vtkActor* obstaclesActor;
+    vtkActor* gradientFieldActor;
 
     // other parts
-    vtkAssembly * assemblyCaptions;
-    vtkActor2DCollection * captions;
+    vtkAssembly* assemblyCaptions;
+    vtkActor2DCollection* captions;
 
     std::string _description;
     std::string _roomCaption;

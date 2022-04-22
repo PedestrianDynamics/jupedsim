@@ -25,9 +25,8 @@
 #include <vtkSmartPointer.h>
 #include <vtkUnsignedCharArray.h>
 
-
-PointPlotter::PointPlotter() :
-    pts(vtkPoints::New()), colors(vtkFloatArray::New()), pointActor(vtkActor::New())
+PointPlotter::PointPlotter()
+    : pts(vtkPoints::New()), colors(vtkFloatArray::New()), pointActor(vtkActor::New())
 {
     vtkNew<vtkPolyData> polyData;
     polyData->SetPoints(pts);
@@ -43,7 +42,6 @@ PointPlotter::PointPlotter() :
     glyph->SetColorModeToColorByScalar();
     glyph->SetScaleModeToDataScalingOff();
 
-
     vtkNew<vtkLookupTable> lut;
     lut->SetHueRange(0.0, 0.470);
     lut->SetValueRange(1.0, 1.0);
@@ -58,7 +56,7 @@ PointPlotter::PointPlotter() :
     pointActor->SetMapper(mapper);
 }
 
-void PointPlotter::PlotPoint(const glm::dvec3 & pos, double color)
+void PointPlotter::PlotPoint(const glm::dvec3& pos, double color)
 {
     nextPointID++;
     if(color == -1) {

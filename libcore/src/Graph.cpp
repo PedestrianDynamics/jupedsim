@@ -3,7 +3,9 @@
 #include <boost/graph/detail/adjacency_list.hpp>
 #include <fmt/format.h>
 
-Graph::Graph(Graph::Type && graph) : _graph(std::move(graph)) {}
+Graph::Graph(Graph::Type&& graph) : _graph(std::move(graph))
+{
+}
 
 Graph::VertexId Graph::NextVertexTo(Graph::VertexId from, Graph::VertexId to)
 {
@@ -32,7 +34,7 @@ Graph::VertexValue Graph::Value(Graph::VertexId id) const
 Graph Graph::Builder::Build()
 {
     auto g = Graph{std::move(_g)};
-    _g     = Type{};
+    _g = Type{};
     return g;
 }
 

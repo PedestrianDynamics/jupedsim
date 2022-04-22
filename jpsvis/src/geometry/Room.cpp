@@ -25,7 +25,6 @@
  *
  **/
 
-
 #include "Room.hpp"
 
 #include "../IO/OutputHandler.hpp"
@@ -43,18 +42,18 @@ using namespace std;
 
 Room::Room()
 {
-    _id         = -1;
+    _id = -1;
     _egressTime = 0;
-    _caption    = "no room caption";
-    _zPos       = -1.0;
+    _caption = "no room caption";
+    _zPos = -1.0;
     _outputFile = NULL;
 }
 
-Room::Room(const Room & orig)
+Room::Room(const Room& orig)
 {
-    _id         = orig.GetID();
-    _caption    = orig.GetCaption();
-    _zPos       = orig.GetZPos();
+    _id = orig.GetID();
+    _caption = orig.GetCaption();
+    _zPos = orig.GetZPos();
     _egressTime = orig.GetEgressTime();
     _outputFile = orig.GetOutputHandler();
 }
@@ -73,7 +72,7 @@ void Room::SetID(int ID)
     _id = ID;
 }
 
-void Room::SetCaption(const string & s)
+void Room::SetCaption(const string& s)
 {
     _caption = s;
 }
@@ -96,7 +95,7 @@ int Room::GetID() const
     return _id;
 }
 
-const string & Room::GetCaption() const
+const string& Room::GetCaption() const
 {
     return _caption;
 }
@@ -117,12 +116,12 @@ int Room::GetNumberOfSubRooms() const
     return _subRooms.size();
 }
 
-const std::map<int, std::unique_ptr<SubRoom>> & Room::GetAllSubRooms() const
+const std::map<int, std::unique_ptr<SubRoom>>& Room::GetAllSubRooms() const
 {
     return _subRooms;
 }
 
-SubRoom * Room::GetSubRoom(int index) const
+SubRoom* Room::GetSubRoom(int index) const
 {
     // todo: the check is done in _subRooms.at(index);
     if(_subRooms.count(index) == 0) {
@@ -135,7 +134,7 @@ SubRoom * Room::GetSubRoom(int index) const
 /*************************************************************
  Sonstige Funktionen
  ************************************************************/
-void Room::AddSubRoom(SubRoom * r)
+void Room::AddSubRoom(SubRoom* r)
 {
     //_subRooms.push_back(r);
     _subRooms[r->GetSubRoomID()] = std::unique_ptr<SubRoom>(r);
@@ -145,19 +144,18 @@ void Room::AddSubRoom(SubRoom * r)
  Ein-Ausgabe
  ************************************************************/
 
-
 void Room::WriteToErrorLog() const
 {
     Log::Info("Raum: %d [%s]:\n", _id, _caption.c_str());
 
     // SubRooms
     for(int i = 0; i < GetNumberOfSubRooms(); i++) {
-        SubRoom * sub = GetSubRoom(i);
+        SubRoom* sub = GetSubRoom(i);
         sub->WriteToErrorLog();
     }
 }
 
-const vector<int> & Room::GetAllTransitionsIDs() const
+const vector<int>& Room::GetAllTransitionsIDs() const
 {
     return _transitionsIDs;
 }
@@ -167,12 +165,12 @@ void Room::AddTransitionID(int ID)
     _transitionsIDs.push_back(ID);
 }
 
-void Room::SetOutputHandler(OutputHandler * oh)
+void Room::SetOutputHandler(OutputHandler* oh)
 {
     _outputFile = oh;
 }
 
-OutputHandler * Room::GetOutputHandler() const
+OutputHandler* Room::GetOutputHandler() const
 {
     return _outputFile;
 }

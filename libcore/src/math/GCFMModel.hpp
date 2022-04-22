@@ -31,7 +31,7 @@
 
 #include <vector>
 
-//forward declaration
+// forward declaration
 class Pedestrian;
 class DirectionManager;
 
@@ -48,7 +48,7 @@ class GCFMModel : public OperationalModel
 {
 public:
     GCFMModel(
-        DirectionManager * dir,
+        DirectionManager* dir,
         double nuped,
         double nuwall,
         double dist_effPed,
@@ -61,20 +61,20 @@ public:
 
     PedestrianUpdate ComputeNewPosition(
         double dT,
-        const Pedestrian & ped,
-        const Geometry & geometry,
-        const NeighborhoodSearch & neighborhoodSearch) const override;
-    void ApplyUpdate(const PedestrianUpdate & upate, Pedestrian & agent) const override;
+        const Pedestrian& ped,
+        const Geometry& geometry,
+        const NeighborhoodSearch& neighborhoodSearch) const override;
+    void ApplyUpdate(const PedestrianUpdate& upate, Pedestrian& agent) const override;
 
 private:
     // Modellparameter
-    double _nuPed;          /**< strength of the pedestrian repulsive force */
-    double _nuWall;         /**< strength of the wall repulsive force */
-    double _intp_widthPed;  /**< Interpolation cutoff radius (in cm) */
+    double _nuPed; /**< strength of the pedestrian repulsive force */
+    double _nuWall; /**< strength of the wall repulsive force */
+    double _intp_widthPed; /**< Interpolation cutoff radius (in cm) */
     double _intp_widthWall; /**< Interpolation cutoff radius (in cm) */
     double _maxfPed;
     double _maxfWall;
-    double _distEffMaxPed;  // maximal effective distance
+    double _distEffMaxPed; // maximal effective distance
     double _distEffMaxWall; // maximal effective distance
 
     // Private Funktionen
@@ -86,7 +86,7 @@ private:
      *
      * @return Point
      */
-    Point ForceDriv(const Pedestrian * ped, Point target, PedestrianUpdate & update) const;
+    Point ForceDriv(const Pedestrian* ped, Point target, PedestrianUpdate& update) const;
     /**
      * Repulsive force between two pedestrians ped1 and ped2 according to
      * the Generalized Centrifugal Force Model (chraibi2010a)
@@ -96,7 +96,7 @@ private:
      *
      * @return Point
      */
-    Point ForceRepPed(const Pedestrian * ped1, const Pedestrian * ped2) const;
+    Point ForceRepPed(const Pedestrian* ped1, const Pedestrian* ped2) const;
     /**
      * Repulsive force acting on pedestrian <ped> from the walls in
      * <subroom>. The sum of all repulsive forces of the walls in <subroom> is calculated
@@ -106,13 +106,13 @@ private:
      *
      * @return
      */
-    Point ForceRepRoom(const Pedestrian * ped, const Geometry & geometry) const;
-    Point ForceRepWall(const Pedestrian * ped, const Line & l) const;
-    Point ForceRepStatPoint(const Pedestrian * ped, const Point & p, double l, double vn) const;
+    Point ForceRepRoom(const Pedestrian* ped, const Geometry& geometry) const;
+    Point ForceRepWall(const Pedestrian* ped, const Line& l) const;
+    Point ForceRepStatPoint(const Pedestrian* ped, const Point& p, double l, double vn) const;
     Point ForceInterpolation(
         double v0,
         double K_ij,
-        const Point & e,
+        const Point& e,
         double v,
         double d,
         double r,

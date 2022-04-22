@@ -36,17 +36,17 @@ class DirectionManager
 private:
     std::unique_ptr<DirectionStrategy> _directionStrategy;
     std::unique_ptr<WaitingStrategy> _waitingStrategy;
-    const Building * _building;
+    const Building* _building;
     double _currentTime;
 
 public:
     static std::unique_ptr<DirectionManager>
-    Create(const Configuration & config, Building * building);
+    Create(const Configuration& config, Building* building);
 
     DirectionManager(
         std::unique_ptr<DirectionStrategy> directionStrategy,
         std::unique_ptr<WaitingStrategy> waitingStrategy,
-        const Building * building);
+        const Building* building);
     ~DirectionManager() = default;
 
     void Update(double time) { _currentTime = time; };
@@ -57,17 +57,17 @@ public:
      * @param ped pedestrian whose desired direction is computed
      * @return desired direction of ped
      */
-    Point GetTarget(const Pedestrian * ped);
+    Point GetTarget(const Pedestrian* ped);
 
     /**
      * Getter for the waiting strategy.
      * @return the waiting strategy used in the simulation
      */
-    WaitingStrategy & GetWaitingStrategy() const;
+    WaitingStrategy& GetWaitingStrategy() const;
 
     /**
      * Getter for the direction/walking strategy.
      * @return the direction/walking strategy used in the simulation
      */
-    DirectionStrategy & GetDirectionStrategy() const;
+    DirectionStrategy& GetDirectionStrategy() const;
 };

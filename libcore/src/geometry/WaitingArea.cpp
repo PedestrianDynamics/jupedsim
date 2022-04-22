@@ -72,18 +72,18 @@ void WaitingArea::SetGlobalTimer(bool timer)
     WaitingArea::_globalTimer = timer;
 }
 
-const std::map<int, double> & WaitingArea::GetNextGoals() const
+const std::map<int, double>& WaitingArea::GetNextGoals() const
 {
     return _nextGoals;
 }
 
-bool WaitingArea::SetNextGoals(const std::map<int, double> & nextGoals)
+bool WaitingArea::SetNextGoals(const std::map<int, double>& nextGoals)
 {
     WaitingArea::_nextGoals = nextGoals;
 
     // Check for open waiting areas
     _nextGoalsOpen.clear();
-    for(auto & goalItr : nextGoals) {
+    for(auto& goalItr : nextGoals) {
         _nextGoalsOpen[goalItr.first] = true;
     }
 
@@ -135,7 +135,7 @@ void WaitingArea::SetWaitingTime(int waitingTime)
 
 int WaitingArea::GetNextGoal()
 {
-    //TODO create global util for random numbers
+    // TODO create global util for random numbers
     std::mt19937_64 gen(_rd());
     // probability of the next goals
     std::vector<double> weights;
@@ -143,7 +143,7 @@ int WaitingArea::GetNextGoal()
     bool open = false;
 
     // get weights of open goals
-    for(auto & nextGoal : _nextGoals) {
+    for(auto& nextGoal : _nextGoals) {
         if(_nextGoalsOpen[nextGoal.first]) {
             weights.push_back(nextGoal.second);
             open = true;
@@ -192,9 +192,9 @@ void WaitingArea::StartTimer(double time)
     _startTime = time;
 }
 
-bool WaitingArea::IsWaiting(double time, const Building * building)
+bool WaitingArea::IsWaiting(double time, const Building* building)
 {
-    Transition * trans = nullptr;
+    Transition* trans = nullptr;
 
     // check if transition id is set
     if(_transitionID >= 0) {
@@ -246,7 +246,7 @@ void WaitingArea::SetTransitionID(int transitionID)
     WaitingArea::_transitionID = transitionID;
 }
 
-const std::set<Pedestrian::UID> & WaitingArea::GetPedInside() const
+const std::set<Pedestrian::UID>& WaitingArea::GetPedInside() const
 {
     return _pedInside;
 }

@@ -21,9 +21,9 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * \section Description
- * This class is responsible for materialising agent in a given location at a given frequency up to a maximum number.
- * The optimal position where to put the agents is given by various algorithms, for instance
- * the Voronoi algorithm or the Mitchell Best candidate algorithm.
+ * This class is responsible for materialising agent in a given location at a given frequency up to
+ *a maximum number. The optimal position where to put the agents is given by various algorithms, for
+ *instance the Voronoi algorithm or the Mitchell Best candidate algorithm.
  *
  **/
 #include "AgentsSourcesManager.hpp"
@@ -37,21 +37,21 @@
 #include <memory>
 #include <thread>
 
-AgentsSourcesManager::AgentsSourcesManager(Building * building) : _building(building)
+AgentsSourcesManager::AgentsSourcesManager(Building* building) : _building(building)
 {
-    //Generate all agents required for the complete simulation
-    //It might be more efficient to generate at each frequency step
+    // Generate all agents required for the complete simulation
+    // It might be more efficient to generate at each frequency step
     GenerateAgents();
 }
 
 std::vector<std::unique_ptr<Pedestrian>>
 AgentsSourcesManager::ProcessAllSources(double current_time) const
 {
-    std::vector<Pedestrian *>
-        source_peds; // we have to collect peds from all sources, so that we can consider them  while computing new positions
-    for(const auto & src : _sources) {
+    std::vector<Pedestrian*> source_peds; // we have to collect peds from all sources, so that we
+                                          // can consider them  while computing new positions
+    for(const auto& src : _sources) {
         auto srcLifeSpan = src->GetLifeSpan();
-        bool inTime      = (current_time >= srcLifeSpan[0]) && (current_time <= srcLifeSpan[1]);
+        bool inTime = (current_time >= srcLifeSpan[0]) && (current_time <= srcLifeSpan[1]);
         // inTime is always true if src got some PlanTime (default values
         // if src has no PlanTime, then this is set to 0. In this case inTime
         // is important in the following condition
@@ -59,7 +59,7 @@ AgentsSourcesManager::ProcessAllSources(double current_time) const
                              0; // time of creation wrt frequency
         bool newCycle = almostEqual(current_time, srcLifeSpan[0], 1.e-5) || frequencyTime;
         bool subCycle;
-        int quotient      = (int) (current_time - srcLifeSpan[0]) / (int) src->GetFrequency();
+        int quotient = (int) (current_time - srcLifeSpan[0]) / (int) src->GetFrequency();
         int timeReference = src->GetFrequency() * quotient;
         subCycle =
             (current_time > srcLifeSpan[0]) ?
@@ -81,7 +81,7 @@ AgentsSourcesManager::ProcessAllSources(double current_time) const
         if(timeToCreate && src->GetPoolSize() && (src->GetPlanTime() <= current_time) && inTime &&
            src->GetRemainingAgents()) // maybe diff<eps
         {
-            std::vector<Pedestrian *> peds;
+            std::vector<Pedestrian*> peds;
             src->RemoveAgentsFromPool(peds, src->GetChunkAgents() * src->GetPercent());
             src->UpdateRemainingAgents(src->GetChunkAgents() * src->GetPercent());
             source_peds.reserve(source_peds.size() + peds.size());
@@ -113,18 +113,17 @@ AgentsSourcesManager::ProcessAllSources(double current_time) const
     return result;
 }
 
-
-void AgentsSourcesManager::InitFixedPosition(AgentsSource * src, std::vector<Pedestrian *> & peds)
+void AgentsSourcesManager::InitFixedPosition(AgentsSource* src, std::vector<Pedestrian*>& peds)
     const
 {
-    for(auto && ped : peds) {
+    for(auto&& ped : peds) {
         ped->SetPos(Point(src->GetStartX(), src->GetStartY()));
     }
 }
 
 void AgentsSourcesManager::GenerateAgents()
 {
-    for(const auto & src : _sources) {
+    for(const auto& src : _sources) {
         LOG_INFO("Generate src: {}", src->GetId());
         src->GenerateAgentsAndAddToPool(src->GetMaxAgents(), _building);
     }
@@ -147,7 +146,7 @@ bool AgentsSourcesManager::IsCompleted() const
 long AgentsSourcesManager::GetMaxAgentNumber() const
 {
     long pop = 0;
-    for(const auto & src : _sources) {
+    for(const auto& src : _sources) {
         pop += src->GetMaxAgents();
     }
     return pop;

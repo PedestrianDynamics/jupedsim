@@ -25,7 +25,6 @@
  *
  **/
 
-
 #include "Obstacle.hpp"
 
 #include "../IO/OutputHandler.hpp"
@@ -41,23 +40,22 @@
 #include <string>
 #include <vector>
 
-
 using namespace std;
-
 
 Obstacle::Obstacle()
 {
-    _height  = 0.0;
-    _id      = -1;
+    _height = 0.0;
+    _id = -1;
     _caption = "obstacle";
-    _walls   = vector<Wall>();
-    _poly    = vector<Point>();
+    _walls = vector<Wall>();
+    _poly = vector<Point>();
 }
 
-Obstacle::~Obstacle() {}
+Obstacle::~Obstacle()
+{
+}
 
-
-void Obstacle::AddWall(const Wall & w)
+void Obstacle::AddWall(const Wall& w)
 {
     _walls.push_back(w);
 }
@@ -92,7 +90,7 @@ void Obstacle::SetId(int id)
     _id = id;
 }
 
-const vector<Point> & Obstacle::GetPolygon() const
+const vector<Point>& Obstacle::GetPolygon() const
 {
     return _poly;
 }
@@ -102,7 +100,7 @@ string Obstacle::Write()
     string s;
 
     for(unsigned int j = 0; j < _walls.size(); j++) {
-        const Wall & w = _walls[j];
+        const Wall& w = _walls[j];
         s.append(w.Write());
         // pos = pos + w.GetPoint1() + w.GetPoint2();
     }
@@ -127,12 +125,12 @@ string Obstacle::Write()
     return s;
 }
 
-const vector<Wall> & Obstacle::GetAllWalls() const
+const vector<Wall>& Obstacle::GetAllWalls() const
 {
     return _walls;
 }
 
-int Obstacle::WhichQuad(const Point & vertex, const Point & hitPos) const
+int Obstacle::WhichQuad(const Point& vertex, const Point& hitPos) const
 {
     return (vertex.GetX() > hitPos.GetX()) ? ((vertex.GetY() > hitPos.GetY()) ? 1 : 4) :
                                              ((vertex.GetY() > hitPos.GetY()) ? 2 : 3);
@@ -160,21 +158,20 @@ int Obstacle::WhichQuad(const Point & vertex, const Point & hitPos) const
 }
 
 // x-Koordinate der Linie von einer Eccke zur nächsten
-double Obstacle::Xintercept(const Point & point1, const Point & point2, double hitY) const
+double Obstacle::Xintercept(const Point& point1, const Point& point2, double hitY) const
 {
     return (
         point2.GetX() - (((point2.GetY() - hitY) * (point1.GetX() - point2.GetX())) /
                          (point1.GetY() - point2.GetY())));
 }
 
-
-bool Obstacle::Contains(const Point & ped) const
+bool Obstacle::Contains(const Point& ped) const
 {
     // case when the point is on an edge
     // todo: this affect the runtime, and do we really need that
     // If we do not d othis check, then for a square for instance, half the points located on the
     // edge will be inside and the other half will be outside the polygon.
-    for(auto & w : _walls) {
+    for(auto& w : _walls) {
         if(w.IsInLineSegment(ped))
             return true;
     }
@@ -186,20 +183,20 @@ bool Obstacle::Contains(const Point & ped) const
 
     /////////////////////////////////////////////////////////////
     edge = first = 0;
-    quad         = WhichQuad(_poly[edge], ped);
-    total        = 0; // COUNT OF ABSOLUTE SECTORS CROSSED
+    quad = WhichQuad(_poly[edge], ped);
+    total = 0; // COUNT OF ABSOLUTE SECTORS CROSSED
     /* LOOP THROUGH THE VERTICES IN A SECTOR */
     do {
-        next      = (edge + 1) % _poly.size();
+        next = (edge + 1) % _poly.size();
         next_quad = WhichQuad(_poly[next], ped);
-        delta     = next_quad - quad; // HOW MANY QUADS HAVE I MOVED
+        delta = next_quad - quad; // HOW MANY QUADS HAVE I MOVED
 
         // SPECIAL CASES TO HANDLE CROSSINGS OF MORE THEN ONE
         // QUAD
 
         switch(delta) {
-            case 2:  // IF WE CROSSED THE MIDDLE, FIGURE OUT IF IT
-                     // WAS CLOCKWISE OR COUNTER
+            case 2: // IF WE CROSSED THE MIDDLE, FIGURE OUT IF IT
+                    // WAS CLOCKWISE OR COUNTER
             case -2: // US THE X POSITION AT THE HIT POINT TO
                 // DETERMINE WHICH WAY AROUND
                 if(Xintercept(_poly[edge], _poly[next], ped.GetY()) > ped.GetX())
@@ -225,15 +222,14 @@ bool Obstacle::Contains(const Point & ped) const
         return false;
 }
 
-
 bool Obstacle::ConvertLineToPoly()
 {
-    vector<Line *> copy;
+    vector<Line*> copy;
     vector<Point> tmpPoly;
     Point point;
-    Line * line;
+    Line* line;
     // Alle Linienelemente in copy speichern
-    for(auto & w : _walls) {
+    for(auto& w : _walls) {
         copy.push_back(&w);
     }
 
@@ -265,10 +261,9 @@ bool Obstacle::ConvertLineToPoly()
     }
     _poly = tmpPoly;
 
-
     // check if all walls and goals were used in the polygon
-    for(const auto & w : _walls) {
-        for(const auto & ptw : {w.GetPoint1(), w.GetPoint2()}) {
+    for(const auto& w : _walls) {
+        for(const auto& ptw : {w.GetPoint1(), w.GetPoint2()}) {
             if(IsPartOfPolygon(ptw) == false) {
                 Log::Error(
                     "Edge was not used during polygon creation for obstacle: %s",
@@ -284,11 +279,11 @@ const Point Obstacle::GetCentroid() const
 {
     double px = 0, py = 0;
     double signedArea = 0.0;
-    double x0         = 0.0; // Current vertex X
-    double y0         = 0.0; // Current vertex Y
-    double x1         = 0.0; // Next vertex X
-    double y1         = 0.0; // Next vertex Y
-    double a          = 0.0; // Partial signed area
+    double x0 = 0.0; // Current vertex X
+    double y0 = 0.0; // Current vertex Y
+    double x1 = 0.0; // Next vertex X
+    double y1 = 0.0; // Next vertex Y
+    double a = 0.0; // Partial signed area
 
     // For all vertices except last
     unsigned int i = 0;
@@ -297,7 +292,7 @@ const Point Obstacle::GetCentroid() const
         y0 = _poly[i].GetY();
         x1 = _poly[i + 1].GetX();
         y1 = _poly[i + 1].GetY();
-        a  = x0 * y1 - x1 * y0;
+        a = x0 * y1 - x1 * y0;
         signedArea += a;
         px += (x0 + x1) * a;
         py += (y0 + y1) * a;
@@ -308,7 +303,7 @@ const Point Obstacle::GetCentroid() const
     y0 = _poly[i].GetY();
     x1 = _poly[0].GetX();
     y1 = _poly[0].GetY();
-    a  = x0 * y1 - x1 * y0;
+    a = x0 * y1 - x1 * y0;
     signedArea += a;
     px += (x0 + x1) * a;
     py += (y0 + y1) * a;
@@ -337,7 +332,7 @@ bool Obstacle::IsClockwise() const
     return (det <= 0.0);
 }
 
-bool Obstacle::IntersectWithLine(const Line & line) const
+bool Obstacle::IntersectWithLine(const Line& line) const
 {
     for(unsigned int i = 0; i < _walls.size(); i++) {
         if(_walls[i].IntersectionWith(line))
@@ -347,13 +342,13 @@ bool Obstacle::IntersectWithLine(const Line & line) const
     return false;
 }
 
-bool Obstacle::IsPartOfPolygon(const Point & ptw)
+bool Obstacle::IsPartOfPolygon(const Point& ptw)
 {
     if(false == IsElementInVector(_poly, ptw)) {
         // maybe the point was too closed to other points and got replaced
         // check that eventuality
         bool near = false;
-        for(const auto & pt : _poly) {
+        for(const auto& pt : _poly) {
             if((pt - ptw).Norm() < J_TOLERANZ) {
                 near = true;
                 break;

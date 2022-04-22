@@ -101,7 +101,7 @@ public:
     /**
      * @return the other subroom not matching the data
      */
-    virtual SubRoom * GetOtherSubRoom(int roomID, int subroomID) const;
+    virtual SubRoom* GetOtherSubRoom(int roomID, int subroomID) const;
 
     /**
      * Debug output

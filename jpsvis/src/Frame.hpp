@@ -44,7 +44,7 @@ public:
 
     /// Insert an Element to the Frame.
     /// @param element to add
-    void InsertElement(FrameElement && element);
+    void InsertElement(FrameElement&& element);
 
     /// @return the number of element in this frame
     int Size() const;
@@ -57,5 +57,5 @@ public:
 
     /// Access Elements in this Frame
     /// @preturn vector of FrameElements
-    const std::vector<FrameElement> & GetFrameElements() const;
+    const std::vector<FrameElement>& GetFrameElements() const;
 };

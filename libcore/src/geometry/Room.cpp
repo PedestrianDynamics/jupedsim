@@ -33,37 +33,38 @@
 #include <memory>
 #include <sstream>
 
-
 /************************************************************
   Konstruktoren
  ************************************************************/
 
 Room::Room()
 {
-    _id         = -1;
-    _caption    = "no room caption";
-    _zPos       = -1.0;
+    _id = -1;
+    _caption = "no room caption";
+    _zPos = -1.0;
     _outputFile = nullptr;
     _egressTime = 0;
 }
 
-Room::Room(const Room & orig)
+Room::Room(const Room& orig)
 {
-    _id         = orig.GetID();
-    _caption    = orig.GetCaption();
-    _zPos       = orig.GetZPos();
+    _id = orig.GetID();
+    _caption = orig.GetCaption();
+    _zPos = orig.GetZPos();
     _outputFile = orig.GetOutputHandler();
     _egressTime = orig.GetEgressTime();
 }
 
-Room::~Room() {}
+Room::~Room()
+{
+}
 
 void Room::SetID(int ID)
 {
     _id = ID;
 }
 
-void Room::SetCaption(const std::string & s)
+void Room::SetCaption(const std::string& s)
 {
     _caption = s;
 }
@@ -83,7 +84,7 @@ int Room::GetID() const
     return _id;
 }
 
-const std::string & Room::GetCaption() const
+const std::string& Room::GetCaption() const
 {
     return _caption;
 }
@@ -103,14 +104,14 @@ int Room::GetNumberOfSubRooms() const
     return _subRooms.size();
 }
 
-const std::map<int, std::shared_ptr<SubRoom>> & Room::GetAllSubRooms() const
+const std::map<int, std::shared_ptr<SubRoom>>& Room::GetAllSubRooms() const
 {
     return _subRooms;
 }
 
-SubRoom * Room::GetSubRoom(const Point position) const
+SubRoom* Room::GetSubRoom(const Point position) const
 {
-    auto it = std::find_if(_subRooms.begin(), _subRooms.end(), [position](const auto & val) {
+    auto it = std::find_if(_subRooms.begin(), _subRooms.end(), [position](const auto& val) {
         return val.second->IsInSubRoom(position);
     });
     if(it != _subRooms.end()) {
@@ -120,9 +121,9 @@ SubRoom * Room::GetSubRoom(const Point position) const
         FMT_STRING("Position {} could not be found in any subroom."), position.toString()));
 }
 
-SubRoom * Room::GetSubRoom(int index) const
+SubRoom* Room::GetSubRoom(int index) const
 {
-    //TODO the check is done in _subRooms.at(index);
+    // TODO the check is done in _subRooms.at(index);
     if(_subRooms.count(index) == 0) {
         LOG_ERROR("Room::GetSubRoom() No subroom id [{}] present in room id [{}].", index, _id);
         return nullptr;
@@ -130,12 +131,12 @@ SubRoom * Room::GetSubRoom(int index) const
     return _subRooms.at(index).get();
 }
 
-void Room::AddSubRoom(SubRoom * r)
+void Room::AddSubRoom(SubRoom* r)
 {
     _subRooms[r->GetSubRoomID()] = std::shared_ptr<SubRoom>(r);
 }
 
-const std::vector<int> & Room::GetAllTransitionsIDs() const
+const std::vector<int>& Room::GetAllTransitionsIDs() const
 {
     return _transitionsIDs;
 }
@@ -145,7 +146,7 @@ void Room::AddTransitionID(int ID)
     _transitionsIDs.push_back(ID);
 }
 
-void Room::SetOutputHandler(OutputHandler * oh)
+void Room::SetOutputHandler(OutputHandler* oh)
 {
     _outputFile = oh;
 }
@@ -157,7 +158,7 @@ std::vector<Point> Room::GetBoundaryVertices() const
     double xMax = -FLT_MAX;
     double yMax = -FLT_MAX;
 
-    for(auto && itr_subroom : this->GetAllSubRooms()) {
+    for(auto&& itr_subroom : this->GetAllSubRooms()) {
         const std::vector<Point> vertices = itr_subroom.second->GetPolygon();
 
         for(Point point : vertices) {
@@ -176,8 +177,7 @@ std::vector<Point> Room::GetBoundaryVertices() const
         Point(xMin, yMin), Point(xMin, yMax), Point(xMax, yMax), Point(xMax, yMin)};
 }
 
-
-OutputHandler * Room::GetOutputHandler() const
+OutputHandler* Room::GetOutputHandler() const
 {
     return _outputFile;
 }

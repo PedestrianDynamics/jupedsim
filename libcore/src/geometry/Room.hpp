@@ -32,7 +32,7 @@
 #include <memory>
 #include <string>
 
-//forward declarations
+// forward declarations
 class OutputHandler;
 class SubRoom;
 
@@ -50,102 +50,100 @@ private:
     /// all transitions ids
     std::vector<int> _transitionsIDs;
     /// needed if the trajectories for this room are to be write in a special way
-    OutputHandler * _outputFile;
+    OutputHandler* _outputFile;
     /// egress time for this room
     double _egressTime;
 
 public:
     Room();
-    Room(const Room & orig);
+    Room(const Room& orig);
 
     virtual ~Room();
 
     /**
-      * Set/Get the id of the room which is also used as index
-      */
+     * Set/Get the id of the room which is also used as index
+     */
     void SetID(int ID);
 
     /**
-      * Set/Get the caption of the room
-      */
-    void SetCaption(const std::string & s);
+     * Set/Get the caption of the room
+     */
+    void SetCaption(const std::string& s);
 
     /**
-      * Set/Get the elevation of the room
-      */
+     * Set/Get the elevation of the room
+     */
     void SetZPos(double z);
 
     /**
-      * Set/Get the id of the room which is also used as index
-      */
+     * Set/Get the id of the room which is also used as index
+     */
     int GetID() const;
 
     /**
-      * Set/Get the caption of the room
-      */
-    const std::string & GetCaption() const;
+     * Set/Get the caption of the room
+     */
+    const std::string& GetCaption() const;
 
     /**
-      * Set/Get the elevation of the room
-      */
+     * Set/Get the elevation of the room
+     */
     double GetZPos() const;
 
     /**
-      * Set/Get the egress time for this room
-      */
+     * Set/Get the egress time for this room
+     */
     double GetEgressTime() const;
 
     /**
-      * Set/Get the egress time for this room
-      */
+     * Set/Get the egress time for this room
+     */
     void SetEgressTime(double time);
 
     /**
-      * @return the number of subrooms
-      */
+     * @return the number of subrooms
+     */
     int GetNumberOfSubRooms() const;
 
     /**
-      * @return a vector containing all subrooms
-      */
-    const std::map<int, std::shared_ptr<SubRoom>> & GetAllSubRooms() const;
+     * @return a vector containing all subrooms
+     */
+    const std::map<int, std::shared_ptr<SubRoom>>& GetAllSubRooms() const;
 
     /**
-      * @return a vector containing all transitions Ids
-      */
-    const std::vector<int> & GetAllTransitionsIDs() const;
+     * @return a vector containing all transitions Ids
+     */
+    const std::vector<int>& GetAllTransitionsIDs() const;
 
     /**
-      * @return the Subroom with the corresponding index
-      */
-    SubRoom * GetSubRoom(int index) const;
+     * @return the Subroom with the corresponding index
+     */
+    SubRoom* GetSubRoom(int index) const;
 
-    SubRoom * GetSubRoom(const Point position) const;
+    SubRoom* GetSubRoom(const Point position) const;
     /**
-      * Push a new subroom in the vector
-      */
-    void AddSubRoom(SubRoom * r);
+     * Push a new subroom in the vector
+     */
+    void AddSubRoom(SubRoom* r);
 
     /**
-      * Add a new transition id
-      */
+     * Add a new transition id
+     */
     void AddTransitionID(int ID);
 
-
     /**
-      * @return Vector with the vertices of the geometry's outer boundary rect
-      */
+     * @return Vector with the vertices of the geometry's outer boundary rect
+     */
 
     std::vector<Point> GetBoundaryVertices() const;
 
+    /**
+     * Used by MPI in the case each room should be written in a specific file
+     */
+    void SetOutputHandler(OutputHandler* oh);
 
     /**
-      * Used by MPI in the case each room should be written in a specific file
-      */
-    void SetOutputHandler(OutputHandler * oh);
-
-    /**
-      * Used by MPI in the case each room should be written in a specific file
-      */
-    OutputHandler * GetOutputHandler() const;
+     * Used by MPI in the case each room should be written in a specific file
+     */
+    OutputHandler* GetOutputHandler() const;
 };

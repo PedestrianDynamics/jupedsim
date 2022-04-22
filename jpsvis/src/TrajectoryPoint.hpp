@@ -77,7 +77,6 @@ public:
     double getY();
     double getZ();
 
-
 private:
     int index;
     double x;

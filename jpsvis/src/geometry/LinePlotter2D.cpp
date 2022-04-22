@@ -29,7 +29,6 @@
  *
  */
 
-
 #include "LinePlotter2D.hpp"
 
 #include "Settings.hpp"
@@ -48,38 +47,37 @@
 #include <vtkProperty.h>
 #include <vtkSmartPointer.h>
 
-
 bool LinePlotter2D::doorColorsToDefault = true;
 
 LinePlotter2D::LinePlotter2D()
 {
     assembly = vtkAssembly::New();
 
-    door_mapper      = vtkPolyDataMapper::New();
-    door_actor       = vtkActor::New();
-    door_points      = vtkPoints::New();
-    door_lines       = vtkCellArray::New();
+    door_mapper = vtkPolyDataMapper::New();
+    door_actor = vtkActor::New();
+    door_points = vtkPoints::New();
+    door_lines = vtkCellArray::New();
     door_lineScalars = vtkFloatArray::New();
-    door_curPointID  = 0;
+    door_curPointID = 0;
     //    door_width=3.5;
     door_width = 2;
 
-    wall_mapper      = vtkPolyDataMapper::New();
-    wall_actor       = vtkActor::New();
-    wall_points      = vtkPoints::New();
-    wall_lines       = vtkCellArray::New();
+    wall_mapper = vtkPolyDataMapper::New();
+    wall_actor = vtkActor::New();
+    wall_points = vtkPoints::New();
+    wall_lines = vtkCellArray::New();
     wall_lineScalars = vtkFloatArray::New();
-    wall_curPointID  = 0;
+    wall_curPointID = 0;
     //    wall_width=4;
     wall_width = 2;
 
-    navline_curPointID  = 0;
-    navline_width       = 2;
-    navline_points      = vtkPoints::New();
-    navline_lines       = vtkCellArray::New();
+    navline_curPointID = 0;
+    navline_width = 2;
+    navline_points = vtkPoints::New();
+    navline_lines = vtkCellArray::New();
     navline_lineScalars = vtkFloatArray::New();
-    navline_mapper      = vtkPolyDataMapper::New();
-    navline_actor       = vtkActor::New();
+    navline_mapper = vtkPolyDataMapper::New();
+    navline_actor = vtkActor::New();
 
     // create a color lookup table
     m_lookupTable = vtkLookupTable::New();
@@ -134,7 +132,7 @@ void LinePlotter2D::PlotDoor(double m[3], double n[3], double scalar)
     }
 }
 
-void LinePlotter2D::changeWallsColor(double * col)
+void LinePlotter2D::changeWallsColor(double* col)
 {
     // first switch off the automatic mapping
     wall_mapper->SetScalarVisibility(0);
@@ -156,7 +154,7 @@ void LinePlotter2D::PlotNavLine(double m[], double n[], double scalar)
     navline_curPointID += 2;
 }
 
-void LinePlotter2D::changeNavLinesColor(double * col)
+void LinePlotter2D::changeNavLinesColor(double* col)
 {
     // first switch off the automatic mapping
     navline_mapper->SetScalarVisibility(0);
@@ -164,7 +162,7 @@ void LinePlotter2D::changeNavLinesColor(double * col)
     navline_actor->GetProperty()->SetColor(col);
 }
 
-void LinePlotter2D::changeDoorsColor(double * col)
+void LinePlotter2D::changeDoorsColor(double* col)
 {
     // first switch off the automatic mapping
     door_mapper->SetScalarVisibility(0);
@@ -216,7 +214,7 @@ void LinePlotter2D::PlotWall(double m[3], double n[3], double scalar)
 //	return actor ;
 //}
 
-vtkAssembly * LinePlotter2D::createAssembly()
+vtkAssembly* LinePlotter2D::createAssembly()
 {
     // doors
     {
@@ -242,11 +240,11 @@ vtkAssembly * LinePlotter2D::createAssembly()
         // fixme: not working
         if(doorColorsToDefault) {
             // TODO(kkratz): Use value from settings again
-            const QColor & bgcolor = Qt::white;
-            double col[3]          = {
-                         (double) bgcolor.red() / 255.0,
-                         (double) bgcolor.green() / 255.0,
-                         (double) bgcolor.blue() / 255.0};
+            const QColor& bgcolor = Qt::white;
+            double col[3] = {
+                (double) bgcolor.red() / 255.0,
+                (double) bgcolor.green() / 255.0,
+                (double) bgcolor.blue() / 255.0};
             door_actor->GetProperty()->SetColor(col);
             door_actor->Modified();
         }

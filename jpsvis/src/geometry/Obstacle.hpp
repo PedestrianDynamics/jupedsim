@@ -89,18 +89,18 @@ public:
     /**
      * construct the obstacle by adding more walls
      */
-    void AddWall(const Wall & w);
+    void AddWall(const Wall& w);
 
     /**
      * @return All walls that constitute the obstacle
      */
-    const std::vector<Wall> & GetAllWalls() const;
+    const std::vector<Wall>& GetAllWalls() const;
 
     /**
      * @return true if the point p is contained within the Closed Obstacle
      * @see Setclose
      */
-    bool Contains(const Point & p) const;
+    bool Contains(const Point& p) const;
 
     /**
      * Create the obstacles polygonal structure from the walls
@@ -110,7 +110,7 @@ public:
     /**
      * @return the obstacle as a polygon
      */
-    const std::vector<Point> & GetPolygon() const;
+    const std::vector<Point>& GetPolygon() const;
 
     /**
      * @return the centroid of the obstacle
@@ -121,7 +121,7 @@ public:
      * return true if the given line intersects
      * or share common vertex with the obstacle
      */
-    bool IntersectWithLine(const Line & line) const;
+    bool IntersectWithLine(const Line& line) const;
 
     /**
      * @return a nicely formatted string representation of the obstacle
@@ -136,11 +136,11 @@ public:
     /**
      * @return true if the point is part of the polygon, also considering the geometry precision.
      */
-    bool IsPartOfPolygon(const Point & ptw);
+    bool IsPartOfPolygon(const Point& ptw);
 
 private:
-    int WhichQuad(const Point & vertex, const Point & hitPos) const;
+    int WhichQuad(const Point& vertex, const Point& hitPos) const;
 
     // x-Koordinate der Linie von einer Eccke zur nächsten
-    double Xintercept(const Point & point1, const Point & point2, double hitY) const;
+    double Xintercept(const Point& point1, const Point& point2, double hitY) const;
 };

@@ -52,7 +52,7 @@ public:
      * Set the ID of the parameter set
      * @param id
      */
-    void SetID(int id); //not implemented
+    void SetID(int id); // not implemented
 
     /**
      * Initialize the desired velocity distribution
@@ -137,7 +137,6 @@ public:
 
     void EnableStretch(bool stretch);
 
-
     /**
      * @return a random number following the distribution
      */
@@ -172,7 +171,6 @@ public:
      * @return a random number following the distribution
      */
     double GetBmin();
-
 
     /**
      * @return a random number following the distribution
@@ -229,9 +227,9 @@ private:
 
 public:
     /**
-     * this is the constant c in f and g in 
+     * this is the constant c in f and g in
      * \include ../../../docs/pages/jpscore/jpscore_desired_speed.md
-     * function for up- and downstairs is assumed to be symmetrical.     
+     * function for up- and downstairs is assumed to be symmetrical.
      */
     double _smoothFactorUpStairs;
     double _smoothFactorDownStairs;

@@ -33,13 +33,14 @@
 
 using namespace std;
 
-
 Crossing::Crossing()
 {
     _id = -1;
 }
 
-Crossing::~Crossing() {}
+Crossing::~Crossing()
+{
+}
 
 void Crossing::SetID(int ID)
 {
@@ -64,12 +65,10 @@ int Crossing::GetID() const
 //}
 // Sonstiges
 
-
 bool Crossing::IsExit() const
 {
     return false;
 }
-
 
 bool Crossing::IsOpen() const
 {
@@ -98,7 +97,7 @@ bool Crossing::IsInSubRoom(int subroomID) const
 /* gibt den ANDEREN Subroom != subroomID zurück
  * roomID wird hier nicht benötigt, aber in Transition::GetOtherSubRoom()
  * (virtuelle Funktion) */
-SubRoom * Crossing::GetOtherSubRoom(int roomID, int subroomID) const
+SubRoom* Crossing::GetOtherSubRoom(int roomID, int subroomID) const
 {
     if(_subRoom1->GetSubRoomID() == subroomID)
         return _subRoom2;
@@ -114,7 +113,6 @@ SubRoom * Crossing::GetOtherSubRoom(int roomID, int subroomID) const
         return NULL;
     }
 }
-
 
 // Ausgabe
 void Crossing::WriteToErrorLog() const

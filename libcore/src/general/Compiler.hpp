@@ -14,7 +14,7 @@ std::string ver_string(int major, int minor, int patch)
 
 // Taken from:
 // https://sourceforge.net/p/predef/wiki/Compilers/
-constexpr const char * compiler_id{
+constexpr const char* compiler_id{
 #ifdef __clang__
     "clang++"
 #elif defined(__GNUC__)

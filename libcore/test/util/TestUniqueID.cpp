@@ -9,9 +9,9 @@ using ::jps::UniqueID;
 
 TEST(UniqueId, DefaultConstructedIDsAreNotIdentical)
 {
-    const auto first  = jps::UniqueID<void>{};
+    const auto first = jps::UniqueID<void>{};
     const auto second = jps::UniqueID<void>{};
-    const auto third  = jps::UniqueID<void>{};
+    const auto third = jps::UniqueID<void>{};
     ASSERT_NE(first, second);
     ASSERT_NE(first, third);
     ASSERT_NE(second, third);
@@ -53,9 +53,9 @@ TEST(UniqueId, CanCompareGreaterOrEqual)
 
 TEST(UniqueId, CanBeMovedAndCopied)
 {
-    auto first               = jps::UniqueID<void>{};
+    auto first = jps::UniqueID<void>{};
     const auto copy_of_first = first;
-    const auto second        = jps::UniqueID<void>{};
+    const auto second = jps::UniqueID<void>{};
     ASSERT_NE(first, second);
     ASSERT_NE(copy_of_first, second);
     ASSERT_EQ(first, copy_of_first);

@@ -3,7 +3,7 @@
 #include <exception>
 
 template <>
-DoorState from_string(const std::string & name)
+DoorState from_string(const std::string& name)
 {
     if(name == "open") {
         return DoorState::OPEN;

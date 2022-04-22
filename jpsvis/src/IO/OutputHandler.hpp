@@ -32,7 +32,6 @@
 #include <iostream>
 #include <vector>
 
-
 class OutputHandler
 {
 protected:
@@ -43,7 +42,7 @@ public:
     OutputHandler()
     {
         _nWarnings = 0;
-        _nErrors   = 0;
+        _nErrors = 0;
     };
     virtual ~OutputHandler(){};
 
@@ -53,14 +52,14 @@ public:
     void incrementErrors();
     void ProgressBar(double TotalPeds, double NowPeds);
 
-    virtual void Write(const std::string & str);
-    virtual void Write(const char * string, ...);
+    virtual void Write(const std::string& str);
+    virtual void Write(const char* string, ...);
 };
 
 class STDIOHandler : public OutputHandler
 {
 public:
-    void Write(const std::string & str);
+    void Write(const std::string& str);
 };
 
 class FileHandler : public OutputHandler
@@ -69,8 +68,8 @@ private:
     std::ofstream _pfp;
 
 public:
-    FileHandler(const char * fn);
+    FileHandler(const char* fn);
     virtual ~FileHandler();
-    void Write(const std::string & str);
-    void Write(const char * string, ...);
+    void Write(const std::string& str);
+    void Write(const char* string, ...);
 };

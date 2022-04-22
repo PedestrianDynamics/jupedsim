@@ -32,12 +32,12 @@
 #include "geometry/SubRoom.hpp"
 #include "pedestrian/Pedestrian.hpp"
 
-Point WaitingMiddle::GetWaitingPosition(const Room * room, const Pedestrian * ped, double time)
+Point WaitingMiddle::GetWaitingPosition(const Room* room, const Pedestrian* ped, double time)
 {
     if(ped->IsInsideWaitingAreaWaiting(time)) {
         return ped->GetBuilding()->GetFinalGoal(ped->GetLastGoalID())->GetCentroid();
     } else {
-        SubRoom * subRoom = room->GetSubRoom(ped->GetPos());
+        SubRoom* subRoom = room->GetSubRoom(ped->GetPos());
         return subRoom->GetCentroid();
     }
 }

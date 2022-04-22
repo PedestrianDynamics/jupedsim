@@ -30,7 +30,7 @@
 #include <fmt/format.h>
 #include <stdexcept>
 
-FileHandler::FileHandler(const fs::path & path)
+FileHandler::FileHandler(const fs::path& path)
 {
     if(path.has_parent_path()) {
         fs::create_directories(path.parent_path());
@@ -46,7 +46,7 @@ FileHandler::~FileHandler()
     _pfp.close();
 }
 
-void FileHandler::Write(const std::string & str)
+void FileHandler::Write(const std::string& str)
 {
     if(!_pfp.good()) {
         throw std::runtime_error("Error writing trajectories");

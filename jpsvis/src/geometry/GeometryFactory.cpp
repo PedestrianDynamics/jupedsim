@@ -5,12 +5,14 @@
 #include <vtkAssembly.h>
 #include <vtkRenderer.h>
 
-GeometryFactory::GeometryFactory() {}
-
-void GeometryFactory::Init(vtkRenderer * renderer)
+GeometryFactory::GeometryFactory()
 {
-    for(auto && rooms : _geometryFactory) {
-        for(auto && subroom : rooms.second) {
+}
+
+void GeometryFactory::Init(vtkRenderer* renderer)
+{
+    for(auto&& rooms : _geometryFactory) {
+        for(auto&& subroom : rooms.second) {
             subroom.second->CreateActors();
             renderer->AddActor(subroom.second->getActor2D());
             renderer->AddActor(subroom.second->getActor3D());
@@ -20,8 +22,8 @@ void GeometryFactory::Init(vtkRenderer * renderer)
 
 void GeometryFactory::Set2D(bool status)
 {
-    for(auto && room : _geometryFactory) {
-        for(auto && subroom : room.second) {
+    for(auto&& room : _geometryFactory) {
+        for(auto&& subroom : room.second) {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
                 subroom.second->set2D(status);
         }
@@ -30,8 +32,8 @@ void GeometryFactory::Set2D(bool status)
 
 void GeometryFactory::Set3D(bool status)
 {
-    for(auto && room : _geometryFactory) {
-        for(auto && subroom : room.second) {
+    for(auto&& room : _geometryFactory) {
+        for(auto&& subroom : room.second) {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
                 subroom.second->set3D(status);
         }
@@ -45,50 +47,50 @@ void GeometryFactory::Clear()
     _model.setObjectName("");
 }
 
-void GeometryFactory::ChangeWallsColor(double * color)
+void GeometryFactory::ChangeWallsColor(double* color)
 {
-    for(auto && room : _geometryFactory) {
-        for(auto && subroom : room.second) {
+    for(auto&& room : _geometryFactory) {
+        for(auto&& subroom : room.second) {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
                 subroom.second->changeWallsColor(color);
         }
     }
 }
 
-void GeometryFactory::ChangeExitsColor(double * color)
+void GeometryFactory::ChangeExitsColor(double* color)
 {
-    for(auto && room : _geometryFactory) {
-        for(auto && subroom : room.second) {
+    for(auto&& room : _geometryFactory) {
+        for(auto&& subroom : room.second) {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
                 subroom.second->changeExitsColor(color);
         }
     }
 }
 
-void GeometryFactory::ChangeNavLinesColor(double * color)
+void GeometryFactory::ChangeNavLinesColor(double* color)
 {
-    for(auto && room : _geometryFactory) {
-        for(auto && subroom : room.second) {
+    for(auto&& room : _geometryFactory) {
+        for(auto&& subroom : room.second) {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
                 subroom.second->changeNavLinesColor(color);
         }
     }
 }
 
-void GeometryFactory::ChangeFloorColor(double * color)
+void GeometryFactory::ChangeFloorColor(double* color)
 {
-    for(auto && room : _geometryFactory) {
-        for(auto && subroom : room.second) {
+    for(auto&& room : _geometryFactory) {
+        for(auto&& subroom : room.second) {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
                 subroom.second->changeFloorColor(color);
         }
     }
 }
 
-void GeometryFactory::ChangeObstaclesColor(double * color)
+void GeometryFactory::ChangeObstaclesColor(double* color)
 {
-    for(auto && room : _geometryFactory) {
-        for(auto && subroom : room.second) {
+    for(auto&& room : _geometryFactory) {
+        for(auto&& subroom : room.second) {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
                 subroom.second->changeObstaclesColor(color);
         }
@@ -97,8 +99,8 @@ void GeometryFactory::ChangeObstaclesColor(double * color)
 
 void GeometryFactory::ShowDoors(bool status)
 {
-    for(auto && room : _geometryFactory) {
-        for(auto && subroom : room.second) {
+    for(auto&& room : _geometryFactory) {
+        for(auto&& subroom : room.second) {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
                 subroom.second->showDoors(status);
         }
@@ -107,8 +109,8 @@ void GeometryFactory::ShowDoors(bool status)
 
 void GeometryFactory::ShowWalls(bool status)
 {
-    for(auto && room : _geometryFactory) {
-        for(auto && subroom : room.second) {
+    for(auto&& room : _geometryFactory) {
+        for(auto&& subroom : room.second) {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
                 subroom.second->showWalls(status);
         }
@@ -117,8 +119,8 @@ void GeometryFactory::ShowWalls(bool status)
 
 void GeometryFactory::ShowNavLines(bool status)
 {
-    for(auto && room : _geometryFactory) {
-        for(auto && subroom : room.second) {
+    for(auto&& room : _geometryFactory) {
+        for(auto&& subroom : room.second) {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
                 subroom.second->showNavLines(status);
         }
@@ -127,8 +129,8 @@ void GeometryFactory::ShowNavLines(bool status)
 
 void GeometryFactory::ShowFloor(bool status)
 {
-    for(auto && room : _geometryFactory) {
-        for(auto && subroom : room.second) {
+    for(auto&& room : _geometryFactory) {
+        for(auto&& subroom : room.second) {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
                 subroom.second->showFloor(status);
         }
@@ -136,19 +138,18 @@ void GeometryFactory::ShowFloor(bool status)
 }
 void GeometryFactory::ShowObstacles(bool status)
 {
-    for(auto && room : _geometryFactory) {
-        for(auto && subroom : room.second) {
+    for(auto&& room : _geometryFactory) {
+        for(auto&& subroom : room.second) {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
                 subroom.second->showObstacles(status);
         }
     }
 }
 
-
 void GeometryFactory::ShowGradientField(bool status)
 {
-    for(auto && room : _geometryFactory) {
-        for(auto && subroom : room.second) {
+    for(auto&& room : _geometryFactory) {
+        for(auto&& subroom : room.second) {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
                 subroom.second->showGradientField(status);
         }
@@ -157,8 +158,8 @@ void GeometryFactory::ShowGradientField(bool status)
 
 void GeometryFactory::ShowGeometryLabels(int status)
 {
-    for(auto && room : _geometryFactory) {
-        for(auto && subroom : room.second) {
+    for(auto&& room : _geometryFactory) {
+        for(auto&& subroom : room.second) {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
                 subroom.second->showGeometryLabels(status);
         }
@@ -172,7 +173,7 @@ bool GeometryFactory::RefreshView()
         _model.setObjectName("initialized");
         _model.setHorizontalHeaderItem(0, new QStandardItem("Entity"));
         //_model.setHorizontalHeaderItem( 1, new QStandardItem( "Description" ) );
-        for(auto && room : _geometryFactory) {
+        for(auto&& room : _geometryFactory) {
             count++;
             // room caption
             // QStandardItem *roomcaption = new QStandardItem( QString("R %0").arg(room.first));
@@ -184,7 +185,7 @@ bool GeometryFactory::RefreshView()
                     (_geometryFactory[room.first].begin())->second->GetRoomCaption());
             else
                 roomCaption = "empty";
-            QStandardItem * item =
+            QStandardItem* item =
                 new QStandardItem(QString("Room: %0 (%1)").arg(room.first).arg(roomCaption));
             //                                                   .arg(QString::fromStdString(
             //   _geometryFactory[room.first][0]->GetRoomCaption()
@@ -193,8 +194,8 @@ bool GeometryFactory::RefreshView()
             item->setCheckable(true);
             item->setCheckState(Qt::Checked);
 
-            for(auto && subroom : room.second) {
-                QStandardItem * child = new QStandardItem(
+            for(auto&& subroom : room.second) {
+                QStandardItem* child = new QStandardItem(
                     QString("%2: %0 (%1)")
                         .arg(subroom.first)
                         .arg(QString::fromStdString(subroom.second->GetSubRoomCaption()))
@@ -217,7 +218,7 @@ bool GeometryFactory::RefreshView()
     return false;
 }
 
-const std::map<int, std::map<int, std::shared_ptr<FacilityGeometry>>> &
+const std::map<int, std::map<int, std::shared_ptr<FacilityGeometry>>>&
 GeometryFactory::GetGeometry() const
 {
     return _geometryFactory;
@@ -247,7 +248,7 @@ void GeometryFactory::UpdateVisibility(int room, int subroom, bool status)
     }
 }
 
-QStandardItemModel & GeometryFactory::GetModel()
+QStandardItemModel& GeometryFactory::GetModel()
 {
     return _model;
 }

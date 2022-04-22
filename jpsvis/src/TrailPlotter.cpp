@@ -21,10 +21,10 @@ TrailPlotter::TrailPlotter()
     agentShape->SetOuterRadius(30);
 
     // speed the rendering using triangles stripers
-    vtkTriangleFilter * tris = vtkTriangleFilter::New();
+    vtkTriangleFilter* tris = vtkTriangleFilter::New();
     tris->SetInputConnection(agentShape->GetOutputPort());
 
-    vtkStripper * strip = vtkStripper::New();
+    vtkStripper* strip = vtkStripper::New();
     strip->SetInputConnection(tris->GetOutputPort());
 
     _appendFilter = vtkSmartPointer<vtkAppendPolyData>::New();
@@ -39,16 +39,18 @@ TrailPlotter::TrailPlotter()
     _trailActor = vtkSmartPointer<vtkActor>::New();
 }
 
-TrailPlotter::~TrailPlotter() {}
+TrailPlotter::~TrailPlotter()
+{
+}
 
-void TrailPlotter::AddDataSet(vtkPolyData * _polydata)
+void TrailPlotter::AddDataSet(vtkPolyData* _polydata)
 {
     _appendFilter->AddInputData(_polydata);
     _appendFilter->Update();
     _cleanFilter->Update();
 }
 
-vtkActor * TrailPlotter::getActor()
+vtkActor* TrailPlotter::getActor()
 {
     return _trailActor;
 }

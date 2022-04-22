@@ -21,7 +21,7 @@
 /// Foo my_enum = from_string<Foo>("a");
 /// This is intentionally constrained to enums.
 template <typename Enum, typename = std::enable_if_t<std::is_enum_v<Enum>>>
-Enum from_string(const std::string &);
+Enum from_string(const std::string&);
 
 /// Replacement for C++23 to underlying, see
 /// https://en.cppreference.com/w/cpp/utility/to_underlying

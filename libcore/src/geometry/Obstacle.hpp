@@ -29,7 +29,7 @@
 #include <string>
 #include <vector>
 
-//forward declarations
+// forward declarations
 class Point;
 class Wall;
 class Line;
@@ -45,102 +45,102 @@ private:
 
 public:
     /**
-      * Constructor
-      */
+     * Constructor
+     */
     Obstacle();
 
     /**
-      * Destructor
-      */
+     * Destructor
+     */
     virtual ~Obstacle();
 
     /**
-      * Set/Get the obstacles' caption
-      */
+     * Set/Get the obstacles' caption
+     */
     std::string GetCaption() const;
 
     /**
-      * Set/Get the obstacles' caption
-      */
+     * Set/Get the obstacles' caption
+     */
     void SetCaption(std::string caption);
 
     /**
-      * Set/Get the height of the obstacle.
-      * Is used for computing visibility
-      */
+     * Set/Get the height of the obstacle.
+     * Is used for computing visibility
+     */
     double GetHeight() const;
 
     /**
-      * Set/Get the height of the obstacle.
-      * Is used for computing visibility
-      */
+     * Set/Get the height of the obstacle.
+     * Is used for computing visibility
+     */
     void SetHeight(double height);
 
     /**
-      * Set/Get the id of the obstacle
-      */
+     * Set/Get the id of the obstacle
+     */
     int GetId() const;
 
     /**
-      * Set/Get the id of the obstacle
-      */
+     * Set/Get the id of the obstacle
+     */
     void SetId(int id);
 
     /**
-      * construct the obstacle by adding more walls
-      */
-    void AddWall(const Wall & w);
+     * construct the obstacle by adding more walls
+     */
+    void AddWall(const Wall& w);
 
     /**
-      * @return All walls that constitute the obstacle
-      */
-    const std::vector<Wall> & GetAllWalls() const;
+     * @return All walls that constitute the obstacle
+     */
+    const std::vector<Wall>& GetAllWalls() const;
 
     /**
-      * @return true if the point p is contained within the Closed Obstacle
-      * @see Setclose
-      */
-    bool Contains(const Point & p) const;
+     * @return true if the point p is contained within the Closed Obstacle
+     * @see Setclose
+     */
+    bool Contains(const Point& p) const;
 
     /**
-      * Create the obstacles polygonal structure from the walls
-      */
+     * Create the obstacles polygonal structure from the walls
+     */
     bool ConvertLineToPoly();
 
     /**
-      * @return the obstacle as a polygon
-      */
-    const std::vector<Point> & GetPolygon() const;
+     * @return the obstacle as a polygon
+     */
+    const std::vector<Point>& GetPolygon() const;
 
     /**
-      * @return the centroid of the obstacle
-      */
+     * @return the centroid of the obstacle
+     */
     const Point GetCentroid() const;
 
     /**
-      * return true if the given line intersects
-      * or share common vertex with the obstacle
-      */
-    bool IntersectWithLine(const Line & line) const;
+     * return true if the given line intersects
+     * or share common vertex with the obstacle
+     */
+    bool IntersectWithLine(const Line& line) const;
 
     /**
-      * @return a nicely formatted string representation of the obstacle
-      */
+     * @return a nicely formatted string representation of the obstacle
+     */
     std::string Write();
 
     /**
-      * @return true if the polygon is clockwise oriented
-      */
+     * @return true if the polygon is clockwise oriented
+     */
     bool IsClockwise() const;
 
     /**
-      * @return true if the point is part of the polygon, also considering the geometry precision.
-      */
-    bool IsPartOfPolygon(const Point & ptw);
+     * @return true if the point is part of the polygon, also considering the geometry precision.
+     */
+    bool IsPartOfPolygon(const Point& ptw);
 
 private:
-    int WhichQuad(const Point & vertex, const Point & hitPos) const;
+    int WhichQuad(const Point& vertex, const Point& hitPos) const;
 
     // x-Koordinate der Linie von einer Eccke zur nächsten
-    double Xintercept(const Point & point1, const Point & point2, double hitY) const;
+    double Xintercept(const Point& point1, const Point& point2, double hitY) const;
 };

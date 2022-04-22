@@ -21,4 +21,4 @@
 
 #include <filesystem>
 
-Configuration ParseIniFile(const std::filesystem::path & path);
+Configuration ParseIniFile(const std::filesystem::path& path);

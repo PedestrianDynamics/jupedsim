@@ -29,20 +29,21 @@
 #include "Room.hpp"
 #include "SubRoom.hpp"
 
-
 Hline::Hline()
 {
     _id = -1;
 }
 
-Hline::~Hline() {}
+Hline::~Hline()
+{
+}
 
 void Hline::SetID(int ID)
 {
     _id = ID;
 }
 
-void Hline::SetRoom1(Room * r)
+void Hline::SetRoom1(Room* r)
 {
     _room1 = r;
 }
@@ -52,7 +53,7 @@ void Hline::SetCaption(std::string s)
     _caption = s;
 }
 
-void Hline::SetSubRoom1(SubRoom * s)
+void Hline::SetSubRoom1(SubRoom* s)
 {
     _subRoom1 = s;
 }
@@ -67,23 +68,22 @@ std::string Hline::GetCaption() const
     return _caption;
 }
 
-Room * Hline::GetRoom1() const
+Room* Hline::GetRoom1() const
 {
     return _room1;
 }
 
-SubRoom * Hline::GetSubRoom1() const
+SubRoom* Hline::GetSubRoom1() const
 {
     return _subRoom1;
 }
 
-void Hline::SetSubRoom2(SubRoom * r2)
+void Hline::SetSubRoom2(SubRoom* r2)
 {
     _subRoom2 = r2;
 }
 
-
-SubRoom * Hline::GetSubRoom2() const
+SubRoom* Hline::GetSubRoom2() const
 {
     return _subRoom2;
 }

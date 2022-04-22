@@ -7,7 +7,7 @@
 #include <tinyxml.h>
 #include <vector>
 
-std::vector<NavLineParameters> parseNavLines(const std::filesystem::path & filename)
+std::vector<NavLineParameters> parseNavLines(const std::filesystem::path& filename)
 {
     LOG_INFO(
         "Loading extra routing information for the global/quickest path routeri from file {}",
@@ -19,7 +19,7 @@ std::vector<NavLineParameters> parseNavLines(const std::filesystem::path & filen
         return {};
     }
 
-    TiXmlElement * xRootNode = docRouting.RootElement();
+    TiXmlElement* xRootNode = docRouting.RootElement();
     if(!xRootNode) {
         LOG_ERROR("Error parsing {}: No root element found", filename);
         return {};
@@ -35,12 +35,12 @@ std::vector<NavLineParameters> parseNavLines(const std::filesystem::path & filen
 
     std::vector<NavLineParameters> lines{};
 
-    for(TiXmlElement * xHlinesNode = xRootNode->FirstChildElement("Hlines"); xHlinesNode;
-        xHlinesNode                = xHlinesNode->NextSiblingElement("Hlines")) {
-        for(TiXmlElement * hline = xHlinesNode->FirstChildElement("Hline"); hline;
-            hline                = hline->NextSiblingElement("Hline")) {
-            int id        = xmltoi(hline->Attribute("id"), -1);
-            int roomId    = xmltoi(hline->Attribute("room_id"), -1);
+    for(TiXmlElement* xHlinesNode = xRootNode->FirstChildElement("Hlines"); xHlinesNode;
+        xHlinesNode = xHlinesNode->NextSiblingElement("Hlines")) {
+        for(TiXmlElement* hline = xHlinesNode->FirstChildElement("Hline"); hline;
+            hline = hline->NextSiblingElement("Hline")) {
+            int id = xmltoi(hline->Attribute("id"), -1);
+            int roomId = xmltoi(hline->Attribute("room_id"), -1);
             int subroomId = xmltoi(hline->Attribute("subroom_id"), -1);
 
             double x1 = xmltof(hline->FirstChildElement("vertex")->Attribute("px"));

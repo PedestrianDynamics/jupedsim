@@ -43,38 +43,38 @@ class RoutingEngine
     bool _needUpdate{false};
 
 public:
-    RoutingEngine(Configuration * config, Building * building, DirectionManager * directionManager);
+    RoutingEngine(Configuration* config, Building* building, DirectionManager* directionManager);
     ~RoutingEngine() = default;
 
-    RoutingEngine(const RoutingEngine &)             = delete;
-    RoutingEngine & operator=(const RoutingEngine &) = delete;
+    RoutingEngine(const RoutingEngine&) = delete;
+    RoutingEngine& operator=(const RoutingEngine&) = delete;
 
-    RoutingEngine(RoutingEngine &&)             = delete;
-    RoutingEngine & operator=(RoutingEngine &&) = delete;
+    RoutingEngine(RoutingEngine&&) = delete;
+    RoutingEngine& operator=(RoutingEngine&&) = delete;
 
     void UpdateTime(double time);
 
-    void SetSimulation(Simulation * simulation);
+    void SetSimulation(Simulation* simulation);
 
     /**
-      * Return the router with the specified  id
-      */
-    Router * GetRouter(int id) const;
+     * Return the router with the specified  id
+     */
+    Router* GetRouter(int id) const;
 
     /**
-      * Returns if routers need to be updated
-      * @return routers need to be updated
-      */
+     * Returns if routers need to be updated
+     * @return routers need to be updated
+     */
     bool NeedsUpdate() const;
 
     /**
-      * Set if routers need to be updated
-      * @param needUpdate
-      */
+     * Set if routers need to be updated
+     * @param needUpdate
+     */
     void setNeedUpdate(bool needUpdate);
 
     /**
-      * Updates all used routers
-      */
+     * Updates all used routers
+     */
     void UpdateRouter();
 };

@@ -36,20 +36,21 @@ Transition::Transition() : Crossing()
     _room2 = nullptr;
 }
 
-Transition::~Transition() {}
-
+Transition::~Transition()
+{
+}
 
 void Transition::SetType(std::string type)
 {
     _type = type;
 }
 
-void Transition::SetRoom2(Room * r)
+void Transition::SetRoom2(Room* r)
 {
     _room2 = r;
 }
 
-Room * Transition::GetRoom2() const
+Room* Transition::GetRoom2() const
 {
     return _room2;
 }
@@ -61,7 +62,7 @@ std::string Transition::GetType() const
 // Sonstiges
 
 // gibt den ANDEREN room != roomID zurück
-Room * Transition::GetOtherRoom(int roomID) const
+Room* Transition::GetOtherRoom(int roomID) const
 {
     if(GetRoom1() != nullptr && GetRoom1()->GetID() == roomID) {
         return GetRoom2();
@@ -100,11 +101,10 @@ bool Transition::IsTransition() const
     return true;
 }
 
-
 /* gibt den ANDEREN Subroom mit GetRoomID() != roomID zurück
  * subroomID wird hier nicht benötigt, aber in Crossings::GetOtherSubRoom()
  * (virtuelle Funktion) */
-SubRoom * Transition::GetOtherSubRoom(int roomID, int subroomID) const
+SubRoom* Transition::GetOtherSubRoom(int roomID, int subroomID) const
 {
     if((GetRoom1() != nullptr) && (GetRoom1()->GetID() == roomID))
         return GetSubRoom2();
@@ -120,7 +120,6 @@ SubRoom * Transition::GetOtherSubRoom(int roomID, int subroomID) const
         exit(EXIT_FAILURE);
     }
 }
-
 
 // TraVisTo Ausgabe
 std::string Transition::GetDescription() const

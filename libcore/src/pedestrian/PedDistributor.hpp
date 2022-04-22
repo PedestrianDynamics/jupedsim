@@ -36,20 +36,19 @@
 #include <string>
 #include <vector>
 
-
 class PedDistributor
 {
 private:
-    std::vector<std::shared_ptr<StartDistribution>> _start_dis;     // ID startraum, subroom und Anz
+    std::vector<std::shared_ptr<StartDistribution>> _start_dis; // ID startraum, subroom und Anz
     std::vector<std::shared_ptr<StartDistribution>> _start_dis_sub; // ID startraum, subroom und Anz
-    std::vector<std::shared_ptr<AgentsSource>> _start_dis_sources;  // contain the sources
+    std::vector<std::shared_ptr<AgentsSource>> _start_dis_sources; // contain the sources
 
     std::vector<Point> PositionsOnFixX(
         double max_x,
         double min_x,
         double max_y,
         double min_y,
-        const SubRoom & r,
+        const SubRoom& r,
         double bufx,
         double bufy,
         double dy) const;
@@ -59,21 +58,21 @@ private:
         double min_x,
         double max_y,
         double min_y,
-        const SubRoom & r,
+        const SubRoom& r,
         double bufx,
         double bufy,
         double dx) const;
 
-    const Configuration * _configuration;
-    std::vector<std::unique_ptr<Pedestrian>> * _agents;
+    const Configuration* _configuration;
+    std::vector<std::unique_ptr<Pedestrian>>* _agents;
 
 public:
     /**
      * constructor
      */
     PedDistributor(
-        const Configuration * configuration,
-        std::vector<std::unique_ptr<Pedestrian>> * agents);
+        const Configuration* configuration,
+        std::vector<std::unique_ptr<Pedestrian>>* agents);
 
     /**
      * desctructor
@@ -83,29 +82,29 @@ public:
     /**
      * Return the possible positions for distributing the agents in the subroom
      */
-    std::vector<Point> PossiblePositions(const SubRoom & r) const;
+    std::vector<Point> PossiblePositions(const SubRoom& r) const;
 
     /**
      * Distribute the pedestrians in the Subroom with the given parameters
      */
     void DistributeInSubRoom(
         int N,
-        std::vector<Point> & positions,
-        StartDistribution * parameters,
-        Building * building) const;
+        std::vector<Point>& positions,
+        StartDistribution* parameters,
+        Building* building) const;
 
     /**
      *
      *Distribute all agents based on the configuration (ini) file
      * @return true if everything went fine
      */
-    bool Distribute(Building * building) const;
+    bool Distribute(Building* building) const;
 
     /**
      * provided for convenience
      */
 
-    const std::vector<std::shared_ptr<AgentsSource>> & GetAgentsSources() const;
+    const std::vector<std::shared_ptr<AgentsSource>>& GetAgentsSources() const;
 
     double GetA_dist() const;
 

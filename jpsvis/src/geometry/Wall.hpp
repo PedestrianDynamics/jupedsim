@@ -39,22 +39,22 @@ public:
     /**
      * Constructor
      */
-    Wall(const Point & p1, const Point & p2, std::string type = "internal");
+    Wall(const Point& p1, const Point& p2, std::string type = "internal");
 
     /**
      * Constructor
      */
-    Wall(const Wall & orig);
+    Wall(const Wall& orig);
 
     /**
      * set/get the wall type. Values are external and internal
      */
-    const std::string & GetType() const;
+    const std::string& GetType() const;
 
     /**
      * set/get the wall type. Values are external and internal
      */
-    void SetType(const std::string & type);
+    void SetType(const std::string& type);
 
     /**
      *  Debug output from the object

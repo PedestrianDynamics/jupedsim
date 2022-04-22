@@ -53,7 +53,7 @@
 class Simulation
 {
 private:
-    Configuration * _config;
+    Configuration* _config;
     SimulationClock _clock;
     /// frame rate for the trajectories
     double _fps{1.0};
@@ -69,35 +69,35 @@ private:
 
 public:
     Simulation(
-        Configuration * args,
-        std::unique_ptr<Building> && building,
-        std::unique_ptr<Geometry> && geometry);
+        Configuration* args,
+        std::unique_ptr<Building>&& building,
+        std::unique_ptr<Geometry>&& geometry);
 
     ~Simulation() = default;
 
-    Simulation(const Simulation & other) = delete;
+    Simulation(const Simulation& other) = delete;
 
-    Simulation & operator=(const Simulation & other) = delete;
+    Simulation& operator=(const Simulation& other) = delete;
 
-    Simulation(Simulation && other) = delete;
+    Simulation(Simulation&& other) = delete;
 
-    Simulation & operator=(Simulation && other) = delete;
+    Simulation& operator=(Simulation&& other) = delete;
 
-    const SimulationClock & Clock() const { return _clock; }
+    const SimulationClock& Clock() const { return _clock; }
     double Fps() const { return _fps; }
 
     /// Advances the simulation by one time step.
     void Iterate();
 
-    void AddAgent(std::unique_ptr<Pedestrian> && agent);
+    void AddAgent(std::unique_ptr<Pedestrian>&& agent);
 
-    void AddAgents(std::vector<std::unique_ptr<Pedestrian>> && agents);
+    void AddAgents(std::vector<std::unique_ptr<Pedestrian>>&& agents);
 
     void RemoveAgents(std::vector<Pedestrian::UID> ids);
 
-    Pedestrian & Agent(Pedestrian::UID id) const;
+    Pedestrian& Agent(Pedestrian::UID id) const;
 
-    const std::vector<std::unique_ptr<Pedestrian>> & Agents() const;
+    const std::vector<std::unique_ptr<Pedestrian>>& Agents() const;
 
     size_t GetPedsNumber() const;
 
@@ -112,12 +112,11 @@ public:
     void ActivateTrain(
         int trainId,
         int trackId,
-        const TrainType & type,
+        const TrainType& type,
         double startOffset,
         bool reversed);
 
     void DeactivateTrain(int trainId, int trackId);
-
 
     /**
      * Read parameters from config.

@@ -31,11 +31,13 @@
 #include <stdexcept>
 #include <tinyxml.h>
 
-GeoFileParser::GeoFileParser(Configuration * configuration) : _configuration(configuration) {}
-
-void GeoFileParser::LoadBuilding(Building * building)
+GeoFileParser::GeoFileParser(Configuration* configuration) : _configuration(configuration)
 {
-    //TODO what happens if any of these  methods failed (return false)? throw exception ?
+}
+
+void GeoFileParser::LoadBuilding(Building* building)
+{
+    // TODO what happens if any of these  methods failed (return false)? throw exception ?
     if(!LoadGeometry(building)) {
         LOG_ERROR("Could not load the geometry!");
         exit(EXIT_FAILURE);
@@ -51,9 +53,9 @@ void GeoFileParser::LoadBuilding(Building * building)
     }
 }
 
-bool GeoFileParser::LoadGeometry(Building * building)
+bool GeoFileParser::LoadGeometry(Building* building)
 {
-    const fs::path & rootDir(_configuration->projectRootDir);
+    const fs::path& rootDir(_configuration->projectRootDir);
 
     const fs::path geoFilenameWithPath = rootDir / _configuration->geometryFile;
     LOG_INFO("LoadGeometry: file: {}", geoFilenameWithPath.string());
@@ -65,7 +67,7 @@ bool GeoFileParser::LoadGeometry(Building * building)
         return false;
     }
 
-    TiXmlElement * xRootNode = docGeo.RootElement();
+    TiXmlElement* xRootNode = docGeo.RootElement();
     if(!xRootNode) {
         LOG_ERROR("Root element does not exist");
         return false;
@@ -91,16 +93,16 @@ bool GeoFileParser::LoadGeometry(Building * building)
         return false;
     }
 
-    //processing the rooms node
-    TiXmlNode * xRoomsNode = xRootNode->FirstChild("rooms");
+    // processing the rooms node
+    TiXmlNode* xRoomsNode = xRootNode->FirstChild("rooms");
     if(!xRoomsNode) {
         LOG_ERROR("The geometry should have at least one room and one subroom");
         return false;
     }
 
-    for(TiXmlElement * xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
-        xRoom                = xRoom->NextSiblingElement("room")) {
-        Room * room = new Room();
+    for(TiXmlElement* xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
+        xRoom = xRoom->NextSiblingElement("room")) {
+        Room* room = new Room();
 
         std::string room_id = xmltoa(xRoom->Attribute("id"), "-1");
         room->SetID(xmltoi(room_id.c_str(), -1));
@@ -112,22 +114,22 @@ bool GeoFileParser::LoadGeometry(Building * building)
 
         room->SetZPos(position);
 
-        for(TiXmlElement * xSubRoom = xRoom->FirstChildElement("subroom"); xSubRoom;
-            xSubRoom                = xSubRoom->NextSiblingElement("subroom")) {
+        for(TiXmlElement* xSubRoom = xRoom->FirstChildElement("subroom"); xSubRoom;
+            xSubRoom = xSubRoom->NextSiblingElement("subroom")) {
             int subroom_id = xmltoi(xSubRoom->Attribute("id"), -1);
 
             std::string SubroomClosed = xmltoa(xSubRoom->Attribute("closed"), "0");
-            std::string type          = xmltoa(xSubRoom->Attribute("class"), "subroom");
+            std::string type = xmltoa(xSubRoom->Attribute("class"), "subroom");
 
-            //get the equation of the plane if any
+            // get the equation of the plane if any
             double A_x = xmltof(xSubRoom->Attribute("A_x"), 0.0);
             double B_y = xmltof(xSubRoom->Attribute("B_y"), 0.0);
 
             // assume either the old "C_z" or the new "C"
             double C_z = xmltof(xSubRoom->Attribute("C_z"), 0.0);
-            C_z        = xmltof(xSubRoom->Attribute("C"), C_z);
+            C_z = xmltof(xSubRoom->Attribute("C"), C_z);
 
-            SubRoom * subroom = nullptr;
+            SubRoom* subroom = nullptr;
 
             if(type == "stair" || type == "escalator" || type == "idle_escalator") {
                 if(xSubRoom->FirstChildElement("up") == nullptr) {
@@ -139,13 +141,13 @@ bool GeoFileParser::LoadGeometry(Building * building)
                     LOG_WARNING(
                         "class: escalator and idle_escalator are deprecated. use escalator_up "
                         "or escalator_down and specify the speed of the escalator");
-                double up_x   = xmltof(xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
-                double up_y   = xmltof(xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
+                double up_x = xmltof(xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
+                double up_y = xmltof(xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
                 double down_x = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
                 double down_y = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
-                subroom       = new Stair();
-                ((Stair *) subroom)->SetUp(Point(up_x, up_y));
-                ((Stair *) subroom)->SetDown(Point(down_x, down_y));
+                subroom = new Stair();
+                ((Stair*) subroom)->SetUp(Point(up_x, up_y));
+                ((Stair*) subroom)->SetDown(Point(down_x, down_y));
             } else if(type == "escalator_up") {
                 if(xSubRoom->FirstChildElement("up") == nullptr ||
                    xSubRoom->FirstChildElement("down") == nullptr) {
@@ -154,15 +156,15 @@ bool GeoFileParser::LoadGeometry(Building * building)
                     return false;
                 }
                 double speed_up = xmltof(xSubRoom->Attribute("speed"), 0.0);
-                double up_x     = xmltof(xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
-                double up_y     = xmltof(xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
-                double down_x   = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
-                double down_y   = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
-                subroom         = new Escalator();
-                ((Escalator *) subroom)->SetUp(Point(up_x, up_y));
-                ((Escalator *) subroom)->SetDown(Point(down_x, down_y));
-                ((Escalator *) subroom)->SetEscalatorUp();
-                ((Escalator *) subroom)->SetEscalatorSpeed(speed_up);
+                double up_x = xmltof(xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
+                double up_y = xmltof(xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
+                double down_x = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
+                double down_y = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
+                subroom = new Escalator();
+                ((Escalator*) subroom)->SetUp(Point(up_x, up_y));
+                ((Escalator*) subroom)->SetDown(Point(down_x, down_y));
+                ((Escalator*) subroom)->SetEscalatorUp();
+                ((Escalator*) subroom)->SetEscalatorSpeed(speed_up);
                 _configuration->hasDirectionalEscalators = true;
             } else if(type == "escalator_down") {
                 if(xSubRoom->FirstChildElement("up") == nullptr ||
@@ -172,18 +174,18 @@ bool GeoFileParser::LoadGeometry(Building * building)
                     return false;
                 }
                 double speed_down = xmltof(xSubRoom->Attribute("speed"), 0.0);
-                double up_x       = xmltof(xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
-                double up_y       = xmltof(xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
+                double up_x = xmltof(xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
+                double up_y = xmltof(xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
                 double down_x = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
                 double down_y = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
-                subroom       = new Escalator();
-                ((Escalator *) subroom)->SetUp(Point(up_x, up_y));
-                ((Escalator *) subroom)->SetDown(Point(down_x, down_y));
-                ((Escalator *) subroom)->SetEscalatorDown();
-                ((Escalator *) subroom)->SetEscalatorSpeed(speed_down);
+                subroom = new Escalator();
+                ((Escalator*) subroom)->SetUp(Point(up_x, up_y));
+                ((Escalator*) subroom)->SetDown(Point(down_x, down_y));
+                ((Escalator*) subroom)->SetEscalatorDown();
+                ((Escalator*) subroom)->SetEscalatorSpeed(speed_down);
                 _configuration->hasDirectionalEscalators = true;
             } else {
-                //normal subroom or corridor
+                // normal subroom or corridor
                 subroom = new NormalSubRoom();
             }
             subroom->SetType(from_string<SubroomType>(type));
@@ -191,12 +193,11 @@ bool GeoFileParser::LoadGeometry(Building * building)
             subroom->SetRoomID(room->GetID());
             subroom->SetSubRoomID(subroom_id);
 
-            //looking for polygons (walls)
-            for(TiXmlElement * xPolyVertices = xSubRoom->FirstChildElement("polygon");
-                xPolyVertices;
+            // looking for polygons (walls)
+            for(TiXmlElement* xPolyVertices = xSubRoom->FirstChildElement("polygon"); xPolyVertices;
                 xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
                 std::string wall_type = xmltoa(xPolyVertices->Attribute("type"), "wall");
-                for(TiXmlElement * xVertex = xPolyVertices->FirstChildElement("vertex");
+                for(TiXmlElement* xVertex = xPolyVertices->FirstChildElement("vertex");
                     xVertex && xVertex != xPolyVertices->LastChild("vertex");
                     xVertex = xVertex->NextSiblingElement("vertex")) {
                     double x1 = xmltof(xVertex->Attribute("px"));
@@ -222,14 +223,13 @@ bool GeoFileParser::LoadGeometry(Building * building)
                         }
                         building->AddTrackWall(trackID, room->GetID(), subroom_id, wall);
 
-
                         std::string input;
-                        if(const char * attribute = xVertex->Attribute("start"); attribute) {
+                        if(const char* attribute = xVertex->Attribute("start"); attribute) {
                             input = attribute;
                             if(input == "true") {
                                 building->AddTrackStart(trackID, p1);
                             }
-                        } else if(const char * attribute =
+                        } else if(const char* attribute =
                                       xVertex->NextSiblingElement("vertex")->Attribute("start");
                                   attribute) {
                             input = attribute;
@@ -241,23 +241,23 @@ bool GeoFileParser::LoadGeometry(Building * building)
                 }
             }
 
-            //looking for obstacles
-            for(TiXmlElement * xObstacle = xSubRoom->FirstChildElement("obstacle"); xObstacle;
-                xObstacle                = xObstacle->NextSiblingElement("obstacle")) {
-                int id                  = xmltoi(xObstacle->Attribute("id"), -1);
-                double height           = xmltof(xObstacle->Attribute("height"), 0);
+            // looking for obstacles
+            for(TiXmlElement* xObstacle = xSubRoom->FirstChildElement("obstacle"); xObstacle;
+                xObstacle = xObstacle->NextSiblingElement("obstacle")) {
+                int id = xmltoi(xObstacle->Attribute("id"), -1);
+                double height = xmltof(xObstacle->Attribute("height"), 0);
                 std::string ObstCaption = xmltoa(xObstacle->Attribute("caption"), "-1");
 
-                Obstacle * obstacle = new Obstacle();
+                Obstacle* obstacle = new Obstacle();
                 obstacle->SetId(id);
                 obstacle->SetCaption(ObstCaption);
                 obstacle->SetHeight(height);
 
-                //looking for polygons (walls)
-                for(TiXmlElement * xPolyVertices = xObstacle->FirstChildElement("polygon");
+                // looking for polygons (walls)
+                for(TiXmlElement* xPolyVertices = xObstacle->FirstChildElement("polygon");
                     xPolyVertices;
                     xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
-                    for(TiXmlElement * xVertex = xPolyVertices->FirstChildElement("vertex");
+                    for(TiXmlElement* xVertex = xPolyVertices->FirstChildElement("vertex");
                         xVertex && xVertex != xPolyVertices->LastChild("vertex");
                         xVertex = xVertex->NextSiblingElement("vertex")) {
                         double x1 = xmltof(xVertex->Attribute("px"));
@@ -271,12 +271,12 @@ bool GeoFileParser::LoadGeometry(Building * building)
             }
             room->AddSubRoom(subroom);
         }
-        //parsing the crossings
-        TiXmlNode * xCrossingsNode = xRoom->FirstChild("crossings");
+        // parsing the crossings
+        TiXmlNode* xCrossingsNode = xRoom->FirstChild("crossings");
         if(xCrossingsNode)
-            for(TiXmlElement * xCrossing = xCrossingsNode->FirstChildElement("crossing"); xCrossing;
-                xCrossing                = xCrossing->NextSiblingElement("crossing")) {
-                int id      = xmltoi(xCrossing->Attribute("id"), -1);
+            for(TiXmlElement* xCrossing = xCrossingsNode->FirstChildElement("crossing"); xCrossing;
+                xCrossing = xCrossing->NextSiblingElement("crossing")) {
+                int id = xmltoi(xCrossing->Attribute("id"), -1);
                 int sub1_id = xmltoi(xCrossing->Attribute("subroom1_id"), -1);
                 int sub2_id = xmltoi(xCrossing->Attribute("subroom2_id"), -1);
 
@@ -285,7 +285,7 @@ bool GeoFileParser::LoadGeometry(Building * building)
                 double x2 = xmltof(xCrossing->LastChild("vertex")->ToElement()->Attribute("px"));
                 double y2 = xmltof(xCrossing->LastChild("vertex")->ToElement()->Attribute("py"));
 
-                Crossing * c = new Crossing();
+                Crossing* c = new Crossing();
                 c->SetID(id);
                 c->SetPoint1(Point(x1, y1));
                 c->SetPoint2(Point(x2, y2));
@@ -303,14 +303,14 @@ bool GeoFileParser::LoadGeometry(Building * building)
     }
 
     // all rooms are read, now proceed with transitions
-    TiXmlNode * xTransNode = xRootNode->FirstChild("transitions");
+    TiXmlNode* xTransNode = xRootNode->FirstChild("transitions");
     if(xTransNode) {
-        for(TiXmlElement * xTrans = xTransNode->FirstChildElement("transition"); xTrans;
-            xTrans                = xTrans->NextSiblingElement("transition")) {
-            Transition * t = parseTransitionNode(xTrans, building);
+        for(TiXmlElement* xTrans = xTransNode->FirstChildElement("transition"); xTrans;
+            xTrans = xTrans->NextSiblingElement("transition")) {
+            Transition* t = parseTransitionNode(xTrans, building);
             building->AddTransition(t);
         }
-        TiXmlNode * xNodeFile = xTransNode->FirstChild("file");
+        TiXmlNode* xNodeFile = xTransNode->FirstChild("file");
         if(xNodeFile) {
             fs::path p(_configuration->projectRootDir);
             std::string transFilename = xNodeFile->FirstChild()->ValueStr();
@@ -324,7 +324,7 @@ bool GeoFileParser::LoadGeometry(Building * building)
                 LOG_ERROR("{:s}", docTrans.ErrorDesc());
                 return false;
             }
-            TiXmlElement * xRootNodeTrans = docTrans.RootElement();
+            TiXmlElement* xRootNodeTrans = docTrans.RootElement();
             if(!xRootNodeTrans) {
                 LOG_ERROR("Root element does not exist in transitions file.");
                 return false;
@@ -333,14 +333,14 @@ bool GeoFileParser::LoadGeometry(Building * building)
                 LOG_ERROR("Parsing transitions file. Root element value is not 'JPScore'.");
                 return false;
             }
-            TiXmlNode * xTransNodeFile = xRootNodeTrans->FirstChild("transitions");
+            TiXmlNode* xTransNodeFile = xRootNodeTrans->FirstChild("transitions");
             if(!xTransNodeFile) {
                 LOG_ERROR("No Transitions in file found.");
                 return false;
             }
-            for(TiXmlElement * xTrans = xTransNodeFile->FirstChildElement("transition"); xTrans;
-                xTrans                = xTrans->NextSiblingElement("transition")) {
-                Transition * t = parseTransitionNode(xTrans, building);
+            for(TiXmlElement* xTrans = xTransNodeFile->FirstChildElement("transition"); xTrans;
+                xTrans = xTrans->NextSiblingElement("transition")) {
+                Transition* t = parseTransitionNode(xTrans, building);
                 building->AddTransition(t);
             }
         } else {
@@ -352,13 +352,13 @@ bool GeoFileParser::LoadGeometry(Building * building)
     LOG_INFO("Loading building file successful.");
 
     ParseExternalFiles(*xRootNode);
-    //everything went fine
+    // everything went fine
     return true;
 }
 
-bool GeoFileParser::LoadRoutingInfo(Building * building)
+bool GeoFileParser::LoadRoutingInfo(Building* building)
 {
-    //TODO read schedule
+    // TODO read schedule
 
     TiXmlDocument docRouting(_configuration->iniFile.string());
     if(!docRouting.LoadFile()) {
@@ -367,7 +367,7 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
         return false;
     }
 
-    TiXmlElement * xRootNode = docRouting.RootElement();
+    TiXmlElement* xRootNode = docRouting.RootElement();
     if(!xRootNode) {
         LOG_ERROR("Root element does not exist");
         return false;
@@ -377,29 +377,28 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
         return true; // no extra routing information
     }
 
-
-    //load goals and routes
-    TiXmlNode * xGoalsNode = xRootNode->FirstChild("routing")->FirstChild("goals");
+    // load goals and routes
+    TiXmlNode* xGoalsNode = xRootNode->FirstChild("routing")->FirstChild("goals");
     if(xGoalsNode) {
         // ---- parse goals from inifile
-        for(TiXmlElement * e = xGoalsNode->FirstChildElement("goal"); e;
-            e                = e->NextSiblingElement("goal")) {
-            Goal * goal = parseGoalNode(e);
+        for(TiXmlElement* e = xGoalsNode->FirstChildElement("goal"); e;
+            e = e->NextSiblingElement("goal")) {
+            Goal* goal = parseGoalNode(e);
             if(goal) {
                 building->AddGoal(goal);
             }
         }
 
         // ---- parse waiting areas from inifile
-        for(TiXmlElement * e = xGoalsNode->FirstChildElement("waiting_area"); e;
-            e                = e->NextSiblingElement("waiting_area")) {
-            Goal * goal = parseWaitingAreaNode(e);
+        for(TiXmlElement* e = xGoalsNode->FirstChildElement("waiting_area"); e;
+            e = e->NextSiblingElement("waiting_area")) {
+            Goal* goal = parseWaitingAreaNode(e);
             if(goal) {
                 building->AddGoal(goal);
             }
         }
         // ---- parse goals/waiting areas from external file
-        TiXmlNode * xGoalsNodeFile = xGoalsNode->FirstChild("file");
+        TiXmlNode* xGoalsNodeFile = xGoalsNode->FirstChild("file");
         if(xGoalsNodeFile) {
             fs::path p(_configuration->projectRootDir);
             std::string goalFilename = xGoalsNodeFile->FirstChild()->ValueStr();
@@ -412,7 +411,7 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
                 LOG_ERROR("Could not parse the goal file.");
                 return false;
             }
-            TiXmlElement * xRootNodeGoal = docGoal.RootElement();
+            TiXmlElement* xRootNodeGoal = docGoal.RootElement();
             if(!xRootNodeGoal) {
                 LOG_ERROR("Root element does not exist in goal file.");
                 return false;
@@ -421,37 +420,36 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
                 LOG_ERROR("Parsing goal file. Root element value is not 'JPScore'.");
                 return false;
             }
-            TiXmlNode * xGoal = xRootNodeGoal->FirstChild("goals");
+            TiXmlNode* xGoal = xRootNodeGoal->FirstChild("goals");
             if(!xGoal) {
                 LOG_ERROR("No Goals in file found.");
                 return false;
             }
-            for(TiXmlElement * e = xGoal->FirstChildElement("goal"); e;
-                e                = e->NextSiblingElement("goal")) {
-                Goal * goal = parseGoalNode(e);
+            for(TiXmlElement* e = xGoal->FirstChildElement("goal"); e;
+                e = e->NextSiblingElement("goal")) {
+                Goal* goal = parseGoalNode(e);
                 if(goal) {
                     building->AddGoal(goal);
                 }
             }
 
-            for(TiXmlElement * e = xGoal->FirstChildElement("waiting_area"); e;
-                e                = e->NextSiblingElement("waiting_area")) {
-                Goal * goal = parseWaitingAreaNode(e);
+            for(TiXmlElement* e = xGoal->FirstChildElement("waiting_area"); e;
+                e = e->NextSiblingElement("waiting_area")) {
+                Goal* goal = parseWaitingAreaNode(e);
                 if(goal) {
                     building->AddGoal(goal);
                 }
             }
-
 
         } else
             LOG_INFO("Goal file not parsed");
-    } //xgoalsNode
+    } // xgoalsNode
 
     LOG_INFO("Done with loading extra routing information");
     return true;
 }
 
-bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building * building)
+bool GeoFileParser::parseDoorNode(TiXmlElement* xDoor, int id, Building* building)
 {
     bool result = false; // this return value is not needed.
                          // maybe in the future it might be...
@@ -459,9 +457,9 @@ bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building * build
     LOG_INFO(">> ID: {}", id);
     //------------------ state
     std::string stateStr = xmltoa(xDoor->Attribute("state"), "open");
-    DoorState state      = from_string<DoorState>(stateStr);
+    DoorState state = from_string<DoorState>(stateStr);
 
-    //store transition in a map and call getTransition/getCrossing
+    // store transition in a map and call getTransition/getCrossing
     switch(state) {
         case DoorState::OPEN:
             building->GetTransition(id)->Open(true);
@@ -500,7 +498,7 @@ bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building * build
     return result;
 }
 
-bool GeoFileParser::LoadTrafficInfo(Building * building)
+bool GeoFileParser::LoadTrafficInfo(Building* building)
 {
     LOG_INFO("Loading the traffic info");
 
@@ -511,29 +509,29 @@ bool GeoFileParser::LoadTrafficInfo(Building * building)
         return false;
     }
 
-    TiXmlNode * xRootNode = doc.RootElement()->FirstChild("traffic_constraints");
+    TiXmlNode* xRootNode = doc.RootElement()->FirstChild("traffic_constraints");
     if(!xRootNode) {
         LOG_WARNING("Could not find any traffic information");
         return true;
     }
 
-    //processing the doors node
-    TiXmlNode * xDoorsNode = xRootNode->FirstChild("doors");
+    // processing the doors node
+    TiXmlNode* xDoorsNode = xRootNode->FirstChild("doors");
     if(xDoorsNode) {
         bool res_parseDoor;
-        for(TiXmlElement * xDoor = xDoorsNode->FirstChildElement("door"); xDoor;
-            xDoor                = xDoor->NextSiblingElement("door")) {
+        for(TiXmlElement* xDoor = xDoorsNode->FirstChildElement("door"); xDoor;
+            xDoor = xDoor->NextSiblingElement("door")) {
             int id = xmltoi(xDoor->Attribute("trans_id"), -1);
             if(id != -1 && building->GetTransition(id)) {
                 res_parseDoor = parseDoorNode(xDoor, id, building);
                 if(!res_parseDoor)
                     return false;
             }
-        } //for xDoor
+        } // for xDoor
     } else
         LOG_INFO("No door info found in inifile.");
     // processing file node
-    TiXmlNode * xFileNode = xRootNode->FirstChild("file");
+    TiXmlNode* xFileNode = xRootNode->FirstChild("file");
     if(xFileNode) {
         fs::path p(_configuration->projectRootDir);
         std::string trafficFilename = xFileNode->FirstChild()->ValueStr();
@@ -546,7 +544,7 @@ bool GeoFileParser::LoadTrafficInfo(Building * building)
             LOG_ERROR("Could not parse the traffic file.");
             return false;
         }
-        TiXmlElement * xRootNodeTraffic = docTraffic.RootElement();
+        TiXmlElement* xRootNodeTraffic = docTraffic.RootElement();
         if(!xRootNodeTraffic) {
             LOG_ERROR("Root element does not exist.");
             return false;
@@ -556,23 +554,23 @@ bool GeoFileParser::LoadTrafficInfo(Building * building)
             LOG_ERROR("Root element value is not 'JPScore'.");
             return false;
         }
-        TiXmlNode * xTraffic = xRootNodeTraffic->FirstChild("traffic_constraints");
+        TiXmlNode* xTraffic = xRootNodeTraffic->FirstChild("traffic_constraints");
         if(!xTraffic) {
             LOG_ERROR("No traffic constraints in file found.");
             return false;
         }
-        TiXmlNode * xDoorsNodeF = xTraffic->FirstChild("doors");
+        TiXmlNode* xDoorsNodeF = xTraffic->FirstChild("doors");
         if(xDoorsNodeF) {
             bool res_parseDoor;
-            for(TiXmlElement * xDoor = xDoorsNodeF->FirstChildElement("door"); xDoor;
-                xDoor                = xDoor->NextSiblingElement("door")) {
+            for(TiXmlElement* xDoor = xDoorsNodeF->FirstChildElement("door"); xDoor;
+                xDoor = xDoor->NextSiblingElement("door")) {
                 int id = xmltoi(xDoor->Attribute("trans_id"), -1);
                 if(id != -1 && building->GetTransition(id)) {
                     res_parseDoor = parseDoorNode(xDoor, id, building);
                     if(!res_parseDoor)
                         return false;
                 }
-            } //for xDoor
+            } // for xDoor
         } else
             LOG_INFO("No door info found in traffic file");
     } else
@@ -582,17 +580,17 @@ bool GeoFileParser::LoadTrafficInfo(Building * building)
     return true;
 }
 
-Transition * GeoFileParser::parseTransitionNode(TiXmlElement * xTrans, Building * building)
+Transition* GeoFileParser::parseTransitionNode(TiXmlElement* xTrans, Building* building)
 {
     int id = xmltoi(xTrans->Attribute("id"), -1);
     // string caption = "door " + id;
     std::string caption = "door ";
     caption += std::to_string(id);
-    caption          = xmltoa(xTrans->Attribute("caption"), caption.c_str());
-    int room1_id     = xmltoi(xTrans->Attribute("room1_id"), -1);
-    int room2_id     = xmltoi(xTrans->Attribute("room2_id"), -1);
-    int subroom1_id  = xmltoi(xTrans->Attribute("subroom1_id"), -1);
-    int subroom2_id  = xmltoi(xTrans->Attribute("subroom2_id"), -1);
+    caption = xmltoa(xTrans->Attribute("caption"), caption.c_str());
+    int room1_id = xmltoi(xTrans->Attribute("room1_id"), -1);
+    int room2_id = xmltoi(xTrans->Attribute("room2_id"), -1);
+    int subroom1_id = xmltoi(xTrans->Attribute("subroom1_id"), -1);
+    int subroom2_id = xmltoi(xTrans->Attribute("subroom2_id"), -1);
     std::string type = xmltoa(xTrans->Attribute("type"), "normal");
 
     double x1 = xmltof(xTrans->FirstChildElement("vertex")->Attribute("px"));
@@ -601,7 +599,7 @@ Transition * GeoFileParser::parseTransitionNode(TiXmlElement * xTrans, Building 
     double x2 = xmltof(xTrans->LastChild("vertex")->ToElement()->Attribute("px"));
     double y2 = xmltof(xTrans->LastChild("vertex")->ToElement()->Attribute("py"));
 
-    Transition * t = new Transition();
+    Transition* t = new Transition();
     t->SetID(id);
     t->SetCaption(caption);
     t->SetPoint1(Point(x1, y1));
@@ -609,52 +607,52 @@ Transition * GeoFileParser::parseTransitionNode(TiXmlElement * xTrans, Building 
     t->SetType(type);
     //--- danger area
     if(room1_id != -1 && subroom1_id != -1) {
-        Room * room       = building->GetRoom(room1_id);
-        SubRoom * subroom = room->GetSubRoom(subroom1_id);
+        Room* room = building->GetRoom(room1_id);
+        SubRoom* subroom = room->GetSubRoom(subroom1_id);
 
         room->AddTransitionID(t->GetUniqueID());
         t->SetRoom1(room);
         t->SetSubRoom1(subroom);
 
-        //new implementation
+        // new implementation
         subroom->AddTransition(t);
     }
     if(room2_id != -1 && subroom2_id != -1) {
-        Room * room       = building->GetRoom(room2_id);
-        SubRoom * subroom = room->GetSubRoom(subroom2_id);
+        Room* room = building->GetRoom(room2_id);
+        SubRoom* subroom = room->GetSubRoom(subroom2_id);
         room->AddTransitionID(t->GetUniqueID());
         t->SetRoom2(room);
         t->SetSubRoom2(subroom);
 
-        //new implementation
+        // new implementation
         subroom->AddTransition(t);
     }
     return t;
 }
 
-Goal * GeoFileParser::parseGoalNode(TiXmlElement * e)
+Goal* GeoFileParser::parseGoalNode(TiXmlElement* e)
 {
     LOG_INFO("Loading goal");
-    int id              = xmltoi(e->Attribute("id"), -1);
-    int isFinal         = std::string(e->Attribute("final")) == "true" ? true : false;
+    int id = xmltoi(e->Attribute("id"), -1);
+    int isFinal = std::string(e->Attribute("final")) == "true" ? true : false;
     std::string caption = xmltoa(e->Attribute("caption"), "-1");
-    int room_id         = xmltoi(e->Attribute("room_id"), -1);
-    int subroom_id      = xmltoi(e->Attribute("subroom_id"), -1);
+    int room_id = xmltoi(e->Attribute("room_id"), -1);
+    int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
     LOG_INFO("Goal id: {}", id);
     LOG_INFO("Goal caption: {}", caption);
     LOG_INFO("Goal room_id: {}", room_id);
     LOG_INFO("Goal subroom_id: {}", subroom_id);
-    Goal * goal = new Goal();
+    Goal* goal = new Goal();
     goal->SetId(id);
     goal->SetCaption(caption);
     goal->SetIsFinalGoal(isFinal);
     goal->SetRoomID(room_id);
     goal->SetSubRoomID(subroom_id);
 
-    //looking for polygons (walls)
-    for(TiXmlElement * xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
-        xPolyVertices                = xPolyVertices->NextSiblingElement("polygon")) {
-        for(TiXmlElement * xVertex = xPolyVertices->FirstChildElement("vertex");
+    // looking for polygons (walls)
+    for(TiXmlElement* xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
+        xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
+        for(TiXmlElement* xVertex = xPolyVertices->FirstChildElement("vertex");
             xVertex && xVertex != xPolyVertices->LastChild("vertex");
             xVertex = xVertex->NextSiblingElement("vertex")) {
             double x1 = xmltof(xVertex->Attribute("px"));
@@ -673,15 +671,15 @@ Goal * GeoFileParser::parseGoalNode(TiXmlElement * e)
     return goal;
 }
 
-Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
+Goal* GeoFileParser::parseWaitingAreaNode(TiXmlElement* e)
 {
     LOG_INFO("Loading Waiting Area");
 
-    WaitingArea * wa = new WaitingArea();
+    WaitingArea* wa = new WaitingArea();
 
     // Read mandatory values and check for valid values, on fail write error
     // Read id and check for correct value
-    if(const char * attribute = e->Attribute("id"); attribute) {
+    if(const char* attribute = e->Attribute("id"); attribute) {
         if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
             wa->SetId(value);
         } else {
@@ -696,7 +694,7 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
     }
 
     // Read room_id and check for correct value
-    if(const char * attribute = e->Attribute("room_id"); attribute) {
+    if(const char* attribute = e->Attribute("room_id"); attribute) {
         if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
             wa->SetRoomID(value);
         } else {
@@ -711,7 +709,7 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
     }
 
     // Read subroom_id and check for correct value
-    if(const char * attribute = e->Attribute("subroom_id"); attribute) {
+    if(const char* attribute = e->Attribute("subroom_id"); attribute) {
         if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
             wa->SetSubRoomID(value);
         } else {
@@ -726,7 +724,7 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
     }
 
     // Read caption and check if correct value
-    if(const char * attribute = e->Attribute("caption"); attribute) {
+    if(const char* attribute = e->Attribute("caption"); attribute) {
         if(std::string value = xmltoa(attribute, ""); !value.empty()) {
             wa->SetCaption(value);
         } else {
@@ -741,7 +739,7 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
 
     // Read optional values and check for valid values, on fail write error
     // Read min_peds and check if correct value
-    if(const char * attribute = e->Attribute("min_peds"); attribute) {
+    if(const char* attribute = e->Attribute("min_peds"); attribute) {
         if(int value = xmltoi(attribute, -1); value > 0 && attribute == std::to_string(value)) {
             wa->SetMinNumPed(value);
         } else {
@@ -751,7 +749,7 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
     }
 
     // Read max_peds and check if correct value
-    if(const char * attribute = e->Attribute("max_peds"); attribute) {
+    if(const char* attribute = e->Attribute("max_peds"); attribute) {
         if(int value = xmltoi(attribute, -1); value > 0 && attribute == std::to_string(value)) {
             wa->SetMaxNumPed(value);
         } else {
@@ -761,7 +759,7 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
     }
 
     // Read waiting_time and check if correct value
-    if(const char * attribute = e->Attribute("waiting_time"); attribute) {
+    if(const char* attribute = e->Attribute("waiting_time"); attribute) {
         if(int value = xmltoi(attribute, -1); value >= 0 && attribute == std::to_string(value)) {
             wa->SetWaitingTime(value);
         } else {
@@ -772,7 +770,7 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
     }
 
     // Read transition_id and check if correct value
-    if(const char * attribute = e->Attribute("transition_id"); attribute) {
+    if(const char* attribute = e->Attribute("transition_id"); attribute) {
         if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
             wa->SetTransitionID(value);
         } else {
@@ -783,7 +781,7 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
     }
 
     // Read is_open and check if correct value
-    if(const char * attribute = e->Attribute("is_open"); attribute) {
+    if(const char* attribute = e->Attribute("is_open"); attribute) {
         std::string in = xmltoa(attribute, "false");
         std::transform(in.begin(), in.end(), in.begin(), ::tolower);
 
@@ -801,7 +799,7 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
     }
 
     // Read global_timer and check if correct value
-    if(const char * attribute = e->Attribute("global_timer"); attribute) {
+    if(const char* attribute = e->Attribute("global_timer"); attribute) {
         std::string in = xmltoa(attribute, "false");
         std::transform(in.begin(), in.end(), in.begin(), ::tolower);
 
@@ -821,7 +819,7 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
     // Additional checks:
     const bool usesMinPedWaitingTime =
         (wa->GetMinNumPed() > 0 && wa->GetMaxNumPed() > 0 && wa->GetWaitingTime() >= 0.);
-    const bool usesTransition  = (wa->GetTransitionID() > 0);
+    const bool usesTransition = (wa->GetTransitionID() > 0);
     const bool usesGlobalTimer = (wa->IsGlobalTimer() && wa->GetWaitingTime() >= 0.);
 
     if(!usesMinPedWaitingTime && !usesTransition && !usesGlobalTimer) {
@@ -846,10 +844,10 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
     // Read the succeeding goals of waiting area
     std::map<int, double> nextGoals;
 
-    //looking for next_wa
-    for(TiXmlElement * nextWa = e->FirstChildElement("next_wa"); nextWa;
-        nextWa                = nextWa->NextSiblingElement("next_wa")) {
-        int nextWaId   = xmltoi(nextWa->Attribute("id"), std::numeric_limits<int>::min());
+    // looking for next_wa
+    for(TiXmlElement* nextWa = e->FirstChildElement("next_wa"); nextWa;
+        nextWa = nextWa->NextSiblingElement("next_wa")) {
+        int nextWaId = xmltoi(nextWa->Attribute("id"), std::numeric_limits<int>::min());
         double nextWaP = xmltof(nextWa->Attribute("p"), std::numeric_limits<double>::min());
 
         if(nextWaId == std::numeric_limits<int>::min() ||
@@ -882,10 +880,10 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
         return nullptr;
     }
 
-    //Read boundaries of waiting area
-    for(TiXmlElement * xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
-        xPolyVertices                = xPolyVertices->NextSiblingElement("polygon")) {
-        for(TiXmlElement * xVertex = xPolyVertices->FirstChildElement("vertex");
+    // Read boundaries of waiting area
+    for(TiXmlElement* xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
+        xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
+        for(TiXmlElement* xVertex = xPolyVertices->FirstChildElement("vertex");
             xVertex && xVertex != xPolyVertices->LastChild("vertex");
             xVertex = xVertex->NextSiblingElement("vertex")) {
             double x1 = xmltof(xVertex->Attribute("px"));
@@ -907,7 +905,7 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
     return wa;
 }
 
-bool GeoFileParser::ParseExternalFiles(const TiXmlNode & mainNode)
+bool GeoFileParser::ParseExternalFiles(const TiXmlNode& mainNode)
 {
     // read external transition file
     if(mainNode.FirstChild("transitions") &&
@@ -921,9 +919,11 @@ bool GeoFileParser::ParseExternalFiles(const TiXmlNode & mainNode)
     return true;
 }
 
-GeoFileParser::~GeoFileParser() {}
+GeoFileParser::~GeoFileParser()
+{
+}
 
-std::unique_ptr<Geometry> ParseGeometryXml(const std::filesystem::path & geometry_file)
+std::unique_ptr<Geometry> ParseGeometryXml(const std::filesystem::path& geometry_file)
 {
     GeometryBuilder builder{};
     TiXmlDocument doc(geometry_file.string());
@@ -931,23 +931,22 @@ std::unique_ptr<Geometry> ParseGeometryXml(const std::filesystem::path & geometr
         throw std::runtime_error(
             fmt::format("Cannot parse {}, error: {}", geometry_file, doc.ErrorDesc()));
     }
-    const auto * root = doc.RootElement();
+    const auto* root = doc.RootElement();
     if(root == nullptr || root->ValueStr() != "geometry") {
         throw std::runtime_error(fmt::format("No root element found in {}", geometry_file));
     }
-    const auto * rooms = root->FirstChild("rooms");
+    const auto* rooms = root->FirstChild("rooms");
     if(rooms == nullptr) {
         throw std::runtime_error(fmt::format("No rooms element found in {}", geometry_file));
     }
 
-
-    auto parsePolygon = [](auto & e, auto & builder) {
-        for(const auto * xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
-            xPolyVertices              = xPolyVertices->NextSiblingElement("polygon")) {
-            for(const auto * vertex1 = xPolyVertices->FirstChildElement("vertex");
+    auto parsePolygon = [](auto& e, auto& builder) {
+        for(const auto* xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
+            xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
+            for(const auto* vertex1 = xPolyVertices->FirstChildElement("vertex");
                 vertex1 != nullptr;
                 vertex1 = vertex1->NextSiblingElement("vertex")) {
-                const auto * vertex2 = vertex1->NextSiblingElement("vertex");
+                const auto* vertex2 = vertex1->NextSiblingElement("vertex");
                 if(vertex2 == nullptr) {
                     break;
                 }
@@ -960,20 +959,20 @@ std::unique_ptr<Geometry> ParseGeometryXml(const std::filesystem::path & geometr
         }
     };
 
-    for(const auto * room = rooms->FirstChild("room"); room != nullptr;
-        room              = room->NextSiblingElement("room")) {
-        for(const auto * subroom = room->FirstChild("subroom"); subroom != nullptr;
-            subroom              = subroom->NextSiblingElement("subroom")) {
+    for(const auto* room = rooms->FirstChild("room"); room != nullptr;
+        room = room->NextSiblingElement("room")) {
+        for(const auto* subroom = room->FirstChild("subroom"); subroom != nullptr;
+            subroom = subroom->NextSiblingElement("subroom")) {
             parsePolygon(subroom, builder);
-            for(const auto * obstacle = subroom->FirstChild("obstacle"); obstacle != nullptr;
-                obstacle              = obstacle->NextSiblingElement("obstacle")) {
+            for(const auto* obstacle = subroom->FirstChild("obstacle"); obstacle != nullptr;
+                obstacle = obstacle->NextSiblingElement("obstacle")) {
                 parsePolygon(obstacle, builder);
             }
         }
     }
 
-    auto parseDoor = [](auto & e, auto & builder) {
-        const auto * id_attribute = e.Attribute("id");
+    auto parseDoor = [](auto& e, auto& builder) {
+        const auto* id_attribute = e.Attribute("id");
         if(id_attribute == nullptr) {
             throw std::runtime_error("transition id attribute missing");
         }
@@ -981,11 +980,11 @@ std::unique_ptr<Geometry> ParseGeometryXml(const std::filesystem::path & geometr
         if(id == -1) {
             throw std::runtime_error("transition id attribute not an integer");
         }
-        const auto * vertex1 = e.FirstChildElement("vertex");
+        const auto* vertex1 = e.FirstChildElement("vertex");
         if(vertex1 == nullptr) {
             return;
         }
-        const auto * vertex2 = vertex1->NextSiblingElement("vertex");
+        const auto* vertex2 = vertex1->NextSiblingElement("vertex");
         if(vertex2 == nullptr) {
             return;
         }
@@ -997,8 +996,8 @@ std::unique_ptr<Geometry> ParseGeometryXml(const std::filesystem::path & geometr
         builder.AddDoor(x1, y1, x2, y2, id);
     };
 
-    if(const auto * transitions = root->FirstChild("transitions"); transitions != nullptr) {
-        for(const auto * transition = transitions->FirstChildElement("transition");
+    if(const auto* transitions = root->FirstChild("transitions"); transitions != nullptr) {
+        for(const auto* transition = transitions->FirstChildElement("transition");
             transition != nullptr;
             transition = transition->NextSiblingElement("transition")) {
             parseDoor(*transition, builder);

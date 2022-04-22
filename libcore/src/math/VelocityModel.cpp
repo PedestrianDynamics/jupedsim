@@ -42,30 +42,30 @@
 #include <numeric>
 
 double xRight = 26.0;
-double xLeft  = 0.0;
+double xLeft = 0.0;
 double cutoff = 2.0;
 
 VelocityModel::VelocityModel(
-    DirectionManager * directionManager,
+    DirectionManager* directionManager,
     double aped,
     double Dped,
     double awall,
-    double Dwall) :
-    OperationalModel(directionManager), _aPed(aped), _DPed(Dped), _aWall(awall), _DWall(Dwall)
+    double Dwall)
+    : OperationalModel(directionManager), _aPed(aped), _DPed(Dped), _aWall(awall), _DWall(Dwall)
 {
 }
 
 PedestrianUpdate VelocityModel::ComputeNewPosition(
     double dT,
-    const Pedestrian & ped,
-    const Geometry & geometry,
-    const NeighborhoodSearch & neighborhoodSearch) const
+    const Pedestrian& ped,
+    const Geometry& geometry,
+    const NeighborhoodSearch& neighborhoodSearch) const
 {
     const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.GetPos(), 4);
-    double min_spacing      = 100.0;
-    Point repPed            = Point(0, 0);
-    const Point p1          = ped.GetPos();
-    for(const auto * other : neighborhood) {
+    double min_spacing = 100.0;
+    Point repPed = Point(0, 0);
+    const Point p1 = ped.GetPos();
+    for(const auto* other : neighborhood) {
         if(other->GetUID() == ped.GetUID()) {
             continue;
         }
@@ -73,20 +73,20 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
             repPed += ForceRepPed(&ped, other);
         }
     }
-    //repulsive forces to walls and closed transitions that are not my target
+    // repulsive forces to walls and closed transitions that are not my target
     Point repWall = ForceRepRoom(&ped, geometry);
 
     // calculate new direction ei according to (6)
     PedestrianUpdate update{};
     e0(&ped, _direction->GetTarget(&ped), update);
     const Point direction = update.v0 + repPed + repWall;
-    for(const auto * other : neighborhood) {
+    for(const auto* other : neighborhood) {
         if(other->GetUID() == ped.GetUID()) {
             continue;
         }
         if(!geometry.IntersectsAny(Line(p1, other->GetPos()))) {
             double spaceing = GetSpacing(&ped, other, direction).first;
-            min_spacing     = std::min(min_spacing, spaceing);
+            min_spacing = std::min(min_spacing, spaceing);
         }
     }
 
@@ -98,7 +98,7 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
     return update;
 };
 
-void VelocityModel::ApplyUpdate(const PedestrianUpdate & update, Pedestrian & agent) const
+void VelocityModel::ApplyUpdate(const PedestrianUpdate& update, Pedestrian& agent) const
 {
     if(update.resetTurning) {
         agent.SetSmoothTurning();
@@ -120,7 +120,7 @@ void VelocityModel::ApplyUpdate(const PedestrianUpdate & update, Pedestrian & ag
     }
 }
 
-void VelocityModel::e0(const Pedestrian * ped, Point target, PedestrianUpdate & update) const
+void VelocityModel::e0(const Pedestrian* ped, Point target, PedestrianUpdate& update) const
 {
     if(ped->IsWaiting()) {
         update.waitingPos = target;
@@ -131,43 +131,43 @@ void VelocityModel::e0(const Pedestrian * ped, Point target, PedestrianUpdate & 
     const auto dist = ped->GetExitLine().DistTo(pos);
 
     // TODO(kkratz): Fix this hack
-    const auto * strategy = &_direction->GetDirectionStrategy();
-    if(dynamic_cast<const DirectionLocalFloorfield *>(strategy)) {
-        Point lastE0      = ped->GetLastE0();
-        update.lastE0     = target - pos;
+    const auto* strategy = &_direction->GetDirectionStrategy();
+    if(dynamic_cast<const DirectionLocalFloorfield*>(strategy)) {
+        Point lastE0 = ped->GetLastE0();
+        update.lastE0 = target - pos;
         desired_direction = target - pos;
         if(desired_direction.NormSquare() < 0.25 && !ped->IsWaiting()) {
             desired_direction = lastE0;
-            update.lastE0     = lastE0;
+            update.lastE0 = lastE0;
         }
     } else if(dist > J_EPS_GOAL) {
         desired_direction = ped->GetV0(target);
     } else {
         update.resetTurning = true;
-        desired_direction   = ped->GetV0();
+        desired_direction = ped->GetV0();
     }
     update.v0 = desired_direction;
 }
 
-double VelocityModel::OptimalSpeed(const Pedestrian * ped, double spacing) const
+double VelocityModel::OptimalSpeed(const Pedestrian* ped, double spacing) const
 {
-    double v0    = ped->GetV0Norm();
-    double T     = ped->GetT();
-    double l     = 2 * ped->GetEllipse().GetBmax(); //assume peds are circles with const radius
+    double v0 = ped->GetV0Norm();
+    double T = ped->GetT();
+    double l = 2 * ped->GetEllipse().GetBmax(); // assume peds are circles with const radius
     double speed = (spacing - l) / T;
-    speed        = (speed > 0) ? speed : 0;
-    speed        = (speed < v0) ? speed : v0;
+    speed = (speed > 0) ? speed : 0;
+    speed = (speed < v0) ? speed : v0;
     //      (1-winkel)*speed;
-    //todo use winkel
+    // todo use winkel
     return speed;
 }
 
 // return spacing and id of the nearest pedestrian
-my_pair VelocityModel::GetSpacing(const Pedestrian * ped1, const Pedestrian * ped2, Point ei) const
+my_pair VelocityModel::GetSpacing(const Pedestrian* ped1, const Pedestrian* ped2, Point ei) const
 {
-    Point distp12   = ped2->GetPos() - ped1->GetPos(); // inversed sign
+    Point distp12 = ped2->GetPos() - ped1->GetPos(); // inversed sign
     double Distance = distp12.Norm();
-    double l        = 2 * ped1->GetEllipse().GetBmax();
+    double l = 2 * ped1->GetEllipse().GetBmax();
     Point ep12;
     if(Distance >= J_EPS) {
         ep12 = distp12.Normalized();
@@ -177,7 +177,7 @@ my_pair VelocityModel::GetSpacing(const Pedestrian * ped1, const Pedestrian * pe
             "to "
             "each other ({:f})",
             Distance);
-        exit(EXIT_FAILURE); //TODO
+        exit(EXIT_FAILURE); // TODO
     }
 
     double condition1 = ei.ScalarProduct(ep12); // < e_i , e_ij > should be positive
@@ -186,16 +186,17 @@ my_pair VelocityModel::GetSpacing(const Pedestrian * ped1, const Pedestrian * pe
     condition2 = (condition2 > 0) ? condition2 : -condition2; // abs
 
     if((condition1 >= 0) && (condition2 <= l / Distance)) {
-        // return a pair <dist, condition1>. Then take the smallest dist. In case of equality the biggest condition1
+        // return a pair <dist, condition1>. Then take the smallest dist. In case of equality the
+        // biggest condition1
         return my_pair(distp12.Norm(), ped2->GetUID());
     }
     return my_pair(FLT_MAX, ped2->GetUID());
 }
-Point VelocityModel::ForceRepPed(const Pedestrian * ped1, const Pedestrian * ped2) const
+Point VelocityModel::ForceRepPed(const Pedestrian* ped1, const Pedestrian* ped2) const
 {
     Point F_rep(0.0, 0.0);
     // x- and y-coordinate of the distance between p1 and p2
-    Point distp12   = ped2->GetPos() - ped1->GetPos();
+    Point distp12 = ped2->GetPos() - ped1->GetPos();
     double Distance = distp12.Norm();
     Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
     double R_ij;
@@ -216,23 +217,23 @@ Point VelocityModel::ForceRepPed(const Pedestrian * ped1, const Pedestrian * ped
             ped2->GetUID(),
             ped2->GetPos().x,
             ped2->GetPos().y);
-        exit(EXIT_FAILURE); //TODO: quick and dirty fix for issue #158
-                            // (sometimes sources create peds on the same location)
+        exit(EXIT_FAILURE); // TODO: quick and dirty fix for issue #158
+                            //  (sometimes sources create peds on the same location)
     }
     Point ei = ped1->GetV().Normalized();
     if(ped1->GetV().NormSquare() < 0.01) {
         ei = ped1->GetV0().Normalized();
     }
-    double condition1 = ei.ScalarProduct(ep12);            // < e_i , e_ij > should be positive
-    condition1        = (condition1 > 0) ? condition1 : 0; // abs
+    double condition1 = ei.ScalarProduct(ep12); // < e_i , e_ij > should be positive
+    condition1 = (condition1 > 0) ? condition1 : 0; // abs
 
-    R_ij  = -_aPed * exp((l - Distance) / _DPed);
+    R_ij = -_aPed * exp((l - Distance) / _DPed);
     F_rep = ep12 * R_ij;
 
     return F_rep;
 }
 
-Point VelocityModel::ForceRepRoom(const Pedestrian * ped, const Geometry & geometry) const
+Point VelocityModel::ForceRepRoom(const Pedestrian* ped, const Geometry& geometry) const
 {
     auto walls = geometry.LineSegmentsInDistanceTo(5.0, ped->GetPos());
 
@@ -240,14 +241,14 @@ Point VelocityModel::ForceRepRoom(const Pedestrian * ped, const Geometry & geome
         walls.begin(),
         walls.end(),
         Point(0, 0),
-        [this, &ped](const auto & acc, const auto & element) {
+        [this, &ped](const auto& acc, const auto& element) {
             return acc + ForceRepWall(ped, element);
         });
 
     auto doors = geometry.DoorsInDistanceTo(5.0, ped->GetPos());
 
     f = std::accumulate(
-        doors.begin(), doors.end(), f, [this, &ped](const auto & acc, const auto & door) {
+        doors.begin(), doors.end(), f, [this, &ped](const auto& acc, const auto& door) {
             switch(door.state) {
                 case DoorState::OPEN:
                     return acc + Point(0, 0);
@@ -259,18 +260,18 @@ Point VelocityModel::ForceRepRoom(const Pedestrian * ped, const Geometry & geome
     return f;
 }
 
-Point VelocityModel::ForceRepWall(const Pedestrian * ped, const Line & w) const
+Point VelocityModel::ForceRepWall(const Pedestrian* ped, const Line& w) const
 {
     if(const auto distGoal = ped->GetExitLine().DistTo(ped->GetPos()); distGoal < J_EPS_GOAL) {
         return Point{0, 0};
     }
 
-    const Point pt       = w.ShortestPoint(ped->GetPos());
+    const Point pt = w.ShortestPoint(ped->GetPos());
     const Point dist_vec = pt - ped->GetPos();
-    const double dist    = dist_vec.Norm();
-    const Point e_iw     = dist_vec / dist;
+    const double dist = dist_vec.Norm();
+    const Point e_iw = dist_vec / dist;
 
-    const double l    = ped->GetEllipse().GetBmax();
+    const double l = ped->GetEllipse().GetBmax();
     const double R_iw = -_aWall * exp((l - dist) / _DWall);
     return e_iw * R_iw;
 }

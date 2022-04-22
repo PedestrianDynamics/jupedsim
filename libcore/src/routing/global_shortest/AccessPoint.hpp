@@ -47,93 +47,92 @@ public:
     int GetID();
 
     /**
-      * given the actual room of the pedestrian
-      * determine if that AP is 'visible'
-      */
+     * given the actual room of the pedestrian
+     * determine if that AP is 'visible'
+     */
 
     bool isInRange(int roomID);
 
     /**
-      * each AP is connected to at most 2 rooms
-      * @param r1
-      * @param r1
-      */
+     * each AP is connected to at most 2 rooms
+     * @param r1
+     * @param r1
+     */
     void setConnectingRooms(int r1, int r2);
 
     /**
-      * return the distance to the point x ,y
-      * @param x
-      * @param y
-      * @return
-      */
+     * return the distance to the point x ,y
+     * @param x
+     * @param y
+     * @return
+     */
     double DistanceTo(double x, double y);
 
     /**
-      *  set/get a human readable name for this points.
-      *  t23 means Transition with id 23
-      *  c23 means Crossing with id 23
-      *  h23 means Hlines with id 23
-      */
-    void SetFriendlyName(const std::string & name);
+     *  set/get a human readable name for this points.
+     *  t23 means Transition with id 23
+     *  c23 means Crossing with id 23
+     *  h23 means Hlines with id 23
+     */
+    void SetFriendlyName(const std::string& name);
 
     /**
-      *  set/get a human readable name for this points.
-      *  t23 means Transition with id 23
-      *  c23 means Crossing with id 23
-      *  h23 means Hlines with id 23
-      */
+     *  set/get a human readable name for this points.
+     *  t23 means Transition with id 23
+     *  c23 means Crossing with id 23
+     *  h23 means Hlines with id 23
+     */
     const std::string GetFriendlyName();
 
     /**
-      * Set/Get the centre of the navigation line defining this access point
-      */
-    const Point & GetCentre() const;
+     * Set/Get the centre of the navigation line defining this access point
+     */
+    const Point& GetCentre() const;
 
     /**
-      * True if this is the last exit that leads to the outside
-      */
+     * True if this is the last exit that leads to the outside
+     */
     void SetFinalExitToOutside(bool isFinal);
 
     /**
-      * True if this is the last exit that leads to the outside
-      */
+     * True if this is the last exit that leads to the outside
+     */
     bool GetFinalExitToOutside();
 
     /**
-      * @return true if the door is closed
-      */
+     * @return true if the door is closed
+     */
     bool IsClosed();
 
     /**
-      * Set/Get the navigation line.
-      * The direction taken by the pedestrian strongly depends on this line.
-      */
-    void SetNavLine(Line * line);
+     * Set/Get the navigation line.
+     * The direction taken by the pedestrian strongly depends on this line.
+     */
+    void SetNavLine(Line* line);
 
     /**
-      * Set/Get the navigation line.
-      * The direction taken by the pedestrian strongly depends on this line.
-      */
-    Line * GetNavLine() const;
+     * Set/Get the navigation line.
+     * The direction taken by the pedestrian strongly depends on this line.
+     */
+    Line* GetNavLine() const;
 
     /**
-      * True if this is a goal outside the building
-      */
+     * True if this is a goal outside the building
+     */
     void SetFinalGoalOutside(bool isFinal);
 
     /**
-      * True if this is a goal outside the building
-      */
+     * True if this is a goal outside the building
+     */
     bool GetFinalGoalOutside();
 
     void AddFinalDestination(int UID, double distance);
     double GetDistanceTo(int UID);
-    double GetDistanceTo(AccessPoint * ap);
-    void AddConnectingAP(AccessPoint * ap);
-
+    double GetDistanceTo(AccessPoint* ap);
+    void AddConnectingAP(AccessPoint* ap);
 
     int GetNearestTransitAPTO(int UID = FINAL_DEST_OUT);
-    void AddTransitAPsTo(int UID, AccessPoint * ap);
+    void AddTransitAPsTo(int UID, AccessPoint* ap);
 
     void SetState(DoorState state);
 
@@ -147,11 +146,11 @@ private:
     int _room1ID;
     int _room2ID;
     Point pCentre;
-    Line * _navLine;
+    Line* _navLine;
     std::string _friendlyName;
 
     // stores the connecting APs
-    std::vector<AccessPoint *> _connectingAPs;
+    std::vector<AccessPoint*> _connectingAPs;
 
     // store part of a graph
     // map a final destination to the next ap to reach it
@@ -162,8 +161,8 @@ private:
     // store the total distance to the destination int
     std::map<int, double> _mapDestToDist;
 
-    //store the navigation graph
-    std::map<int, std::vector<AccessPoint *>> _navigationGraphTo;
+    // store the navigation graph
+    std::map<int, std::vector<AccessPoint*>> _navigationGraphTo;
 
     DoorState _state;
 };

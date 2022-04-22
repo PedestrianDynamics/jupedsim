@@ -193,7 +193,7 @@ public:
      * @param[in] building information of the surrounding
      * @return the waiting area is waiting
      */
-    bool IsWaiting(double time, const Building * building);
+    bool IsWaiting(double time, const Building* building);
 
     /**
      * Sets the state of waiting area (id) to isOpen
@@ -218,13 +218,14 @@ public:
      * Returns the map with the following waitings areas and their corresponding probabilities
      * @return map with the following waitings areas and their corresponding probabilities
      */
-    const std::map<int, double> & GetNextGoals() const;
+    const std::map<int, double>& GetNextGoals() const;
 
     /**
      * Sets the map with the following waitings areas and their corresponding probabilities
-     * @param[in] nextGoals map with the following waitings areas and their corresponding probabilities
+     * @param[in] nextGoals map with the following waitings areas and their corresponding
+     * probabilities
      */
-    bool SetNextGoals(const std::map<int, double> & nextGoals);
+    bool SetNextGoals(const std::map<int, double>& nextGoals);
 
     /**
      * Checks if probabilities combined are 100 percent (1.)
@@ -238,5 +239,5 @@ public:
      */
     std::string toString();
 
-    const std::set<Pedestrian::UID> & GetPedInside() const;
+    const std::set<Pedestrian::UID>& GetPedInside() const;
 };

@@ -39,13 +39,13 @@
 #include <utility>
 
 RoutingEngine::RoutingEngine(
-    Configuration * config,
-    Building * building,
-    DirectionManager * directionManager)
+    Configuration* config,
+    Building* building,
+    DirectionManager* directionManager)
 {
-    auto buildRouter = [config, building, directionManager](
-                           const auto & strategy_info) -> std::unique_ptr<Router> {
-        const auto & [strategy, parameters] = strategy_info;
+    auto buildRouter =
+        [config, building, directionManager](const auto& strategy_info) -> std::unique_ptr<Router> {
+        const auto& [strategy, parameters] = strategy_info;
         switch(strategy) {
             case RoutingStrategy::ROUTING_FF_GLOBAL_SHORTEST:
                 return std::make_unique<FFRouter>(config, building, directionManager);
@@ -55,10 +55,10 @@ RoutingEngine::RoutingEngine(
                 throw std::logic_error("Unexpected RoutingStrategy encountered");
         }
     };
-    for(const auto & [id, strategy_info] : config->routingStrategies) {
-        if(const auto & [strategy, parameters] = strategy_info;
+    for(const auto& [id, strategy_info] : config->routingStrategies) {
+        if(const auto& [strategy, parameters] = strategy_info;
            strategy == RoutingStrategy::ROUTING_GLOBAL_SHORTEST) {
-            for(auto && l : (*parameters).optionalNavLines) {
+            for(auto&& l : (*parameters).optionalNavLines) {
                 building->AddHline(l);
             }
         }
@@ -68,19 +68,19 @@ RoutingEngine::RoutingEngine(
 
 void RoutingEngine::UpdateTime(double time)
 {
-    for(auto && [_, r] : _routers) {
+    for(auto&& [_, r] : _routers) {
         r->UpdateTime(time);
     }
 }
 
-void RoutingEngine::SetSimulation(Simulation * simulation)
+void RoutingEngine::SetSimulation(Simulation* simulation)
 {
-    for(auto && [_, r] : _routers) {
+    for(auto&& [_, r] : _routers) {
         r->SetSimulation(simulation);
     }
 }
 
-Router * RoutingEngine::GetRouter(int id) const
+Router* RoutingEngine::GetRouter(int id) const
 {
     const auto iter = _routers.find(id);
     if(iter == _routers.end()) {
@@ -102,7 +102,7 @@ void RoutingEngine::setNeedUpdate(bool needUpdate)
 
 void RoutingEngine::UpdateRouter()
 {
-    for(auto && [_, r] : _routers) {
+    for(auto&& [_, r] : _routers) {
         r->Update();
     }
     _needUpdate = false;

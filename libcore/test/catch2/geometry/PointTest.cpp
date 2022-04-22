@@ -119,7 +119,7 @@ TEST_CASE("geometry/Point", "[geometry][Point]")
         for(double i = 0, j = -10; i < 5; ++i, ++j) {
             p1.x = (i);
             p1.y = (j);
-            p2   = p1.Normalized();
+            p2 = p1.Normalized();
             REQUIRE(p2.x == Approx(i / p1.Norm()));
             REQUIRE(p2.y == Approx(j / p1.Norm()));
 
