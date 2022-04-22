@@ -34,10 +34,10 @@
 #include "../Log.hpp"
 #include "../general/Macros.hpp"
 
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
-#include <cmath>
 #include <vtkMath.h>
 
 JPoint::JPoint(double xyz[3], const char * color /*="abc"*/)

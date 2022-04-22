@@ -40,8 +40,8 @@ public:
         _end(end)
     {
     }
-    ~DistanceQueryIterator()                                   = default;
-    DistanceQueryIterator(const DistanceQueryIterator & other) = default;
+    ~DistanceQueryIterator()                                               = default;
+    DistanceQueryIterator(const DistanceQueryIterator & other)             = default;
     DistanceQueryIterator & operator=(const DistanceQueryIterator & other) = default;
 
     bool operator==(const DistanceQueryIterator & other) const

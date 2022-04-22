@@ -46,10 +46,10 @@ public:
     RoutingEngine(Configuration * config, Building * building, DirectionManager * directionManager);
     ~RoutingEngine() = default;
 
-    RoutingEngine(const RoutingEngine &) = delete;
+    RoutingEngine(const RoutingEngine &)             = delete;
     RoutingEngine & operator=(const RoutingEngine &) = delete;
 
-    RoutingEngine(RoutingEngine &&) = delete;
+    RoutingEngine(RoutingEngine &&)             = delete;
     RoutingEngine & operator=(RoutingEngine &&) = delete;
 
     void UpdateTime(double time);

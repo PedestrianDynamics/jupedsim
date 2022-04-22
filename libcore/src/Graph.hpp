@@ -39,12 +39,12 @@ public:
     class Exception;
     /// Do not construct a graph directly use the Graph::Builder instead.
     explicit Graph(Type && graph);
-    Graph()                    = default;
-    ~Graph()                   = default;
-    Graph(const Graph & other) = default;
+    Graph()                                = default;
+    ~Graph()                               = default;
+    Graph(const Graph & other)             = default;
     Graph & operator=(const Graph & other) = default;
     Graph(Graph && other)                  = default;
-    Graph & operator=(Graph && other) = default;
+    Graph & operator=(Graph && other)      = default;
     /// Returns the next node on the path to the desired node.
     /// WARNING: Be aware that NO BOUNDS checks are done. Using an unknown id will
     /// result in a out of bounds read.
@@ -66,12 +66,12 @@ class Graph::Builder
     Type _g{};
 
 public:
-    Builder()                      = default;
-    ~Builder()                     = default;
-    Builder(const Builder & other) = default;
+    Builder()                                  = default;
+    ~Builder()                                 = default;
+    Builder(const Builder & other)             = default;
     Builder & operator=(const Builder & other) = default;
     Builder(Builder && other)                  = default;
-    Builder & operator=(Builder && other) = default;
+    Builder & operator=(Builder && other)      = default;
     /// Builds a Graph instance.
     /// The Builder can be reused and is equivallent to a newly constructed Builder
     /// @return the new Graph

@@ -56,7 +56,7 @@ Right now, we ensure a working Build for:
 
 * Windows 10
 * MacOS Montery
-* Ubuntu 21.10
+* Ubuntu 22.04
 
 ### Build Options
 
@@ -236,7 +236,7 @@ modification we kindly ask you to fork this repository, create a branch with
 your changes on your fork and then open a Pull Request via GitHub.
 
 As part of our CI integration we run formatting checks so make sure your code
-is formatted with clang-format!
+is formatted with clang-format-14!
 
 If you want to support us by writing the enhancement yourself, consider what
 kind of change it is:
@@ -254,7 +254,7 @@ Nevertheless, open an issue for documentation purposes with the following templa
 
 This has become very easy:
 
-* All code needs to be formatted with clang-format
+* All code needs to be formatted with clang-format-14
   (A build target for checking / formatting is available: `check-format` /
   `reformat`)
 * Use only spaces in code

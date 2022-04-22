@@ -36,10 +36,10 @@ class NeighborhoodSearch
 public:
     explicit NeighborhoodSearch(double cellSize);
     ~NeighborhoodSearch();
-    NeighborhoodSearch(const NeighborhoodSearch &) = default;
-    NeighborhoodSearch(NeighborhoodSearch &&)      = default;
+    NeighborhoodSearch(const NeighborhoodSearch &)             = default;
+    NeighborhoodSearch(NeighborhoodSearch &&)                  = default;
     NeighborhoodSearch & operator=(const NeighborhoodSearch &) = default;
-    NeighborhoodSearch & operator=(NeighborhoodSearch &&) = default;
+    NeighborhoodSearch & operator=(NeighborhoodSearch &&)      = default;
 
     /**
       *Update the cells occupation

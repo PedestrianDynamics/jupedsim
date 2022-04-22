@@ -244,9 +244,9 @@ vtkAssembly * LinePlotter2D::createAssembly()
             // TODO(kkratz): Use value from settings again
             const QColor & bgcolor = Qt::white;
             double col[3]          = {
-                (double) bgcolor.red() / 255.0,
-                (double) bgcolor.green() / 255.0,
-                (double) bgcolor.blue() / 255.0};
+                         (double) bgcolor.red() / 255.0,
+                         (double) bgcolor.green() / 255.0,
+                         (double) bgcolor.blue() / 255.0};
             door_actor->GetProperty()->SetColor(col);
             door_actor->Modified();
         }
