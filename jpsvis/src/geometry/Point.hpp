@@ -62,40 +62,38 @@ public:
     /// normalized vector usinf NormMolified
     Point NormalizedMolified() const;
     /// dot product
-    inline double ScalarProduct(const Point & v) const { return x * v.x + y * v.y; }
+    inline double ScalarProduct(const Point& v) const { return x * v.x + y * v.y; }
 
     // since we have only 2D vectors (may be changed in the future), this function returns a scalar
     // (basically the third component of the vector (0,0,z) )
-    inline double CrossProduct(const Point & p) const { return Determinant(p); }
-
+    inline double CrossProduct(const Point& p) const { return Determinant(p); }
 
     /// determinant of the square matrix formed by the vectors [ this, v]
-    inline double Determinant(const Point & v) const { return x * v.y - y * v.x; }
+    inline double Determinant(const Point& v) const { return x * v.y - y * v.x; }
 
     /// translation and rotation in Ellipse coordinate system
-    Point TransformToEllipseCoordinates(const Point & center, double cphi, double sphi) const;
+    Point TransformToEllipseCoordinates(const Point& center, double cphi, double sphi) const;
     /// translation and rotation in cartesian system
-    Point TransformToCartesianCoordinates(const Point & center, double cphi, double sphi) const;
+    Point TransformToCartesianCoordinates(const Point& center, double cphi, double sphi) const;
     /// rotate the vector by theta
     Point Rotate(double ctheta, double stheta) const;
 
-
     // operators
     /// addition
-    const Point operator+(const Point & p) const;
+    const Point operator+(const Point& p) const;
     /// substraction
-    const Point operator-(const Point & p) const;
+    const Point operator-(const Point& p) const;
     /// equal
-    bool operator==(const Point & p) const;
+    bool operator==(const Point& p) const;
     /// not equal
-    bool operator!=(const Point & p) const;
+    bool operator!=(const Point& p) const;
     /// Assignement
-    Point & operator+=(const Point & p);
+    Point& operator+=(const Point& p);
     /// nice formating of the point
     std::string toString() const;
 };
 
 /// multiplication
-const Point operator*(const Point & p, const double f);
+const Point operator*(const Point& p, const double f);
 /// division
-const Point operator/(const Point & p, const double f);
+const Point operator/(const Point& p, const double f);

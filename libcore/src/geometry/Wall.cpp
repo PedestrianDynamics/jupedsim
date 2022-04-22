@@ -26,10 +26,12 @@
  **/
 #include "Wall.hpp"
 
-Wall::Wall() : Line() {}
+Wall::Wall() : Line()
+{
+}
 
-Wall::Wall(const Point & p1, const Point & p2, std::string type) :
-    Line(p1, p2), _type(std::move(type))
+Wall::Wall(const Point& p1, const Point& p2, std::string type)
+    : Line(p1, p2), _type(std::move(type))
 {
 }
 
@@ -46,12 +48,12 @@ std::string Wall::Write() const
     return geometry;
 }
 
-const std::string & Wall::GetType() const
+const std::string& Wall::GetType() const
 {
     return _type;
 }
 
-void Wall::SetType(const std::string & type)
+void Wall::SetType(const std::string& type)
 {
     _type = type;
 }

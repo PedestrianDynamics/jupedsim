@@ -6,20 +6,20 @@
 enum class DoorState { OPEN, CLOSE, TEMP_CLOSE };
 
 template <>
-DoorState from_string(const std::string &);
+DoorState from_string(const std::string&);
 
 namespace fmt
 {
 template <>
 struct formatter<DoorState> {
     template <typename ParseContext>
-    constexpr auto parse(ParseContext & ctx)
+    constexpr auto parse(ParseContext& ctx)
     {
         return ctx.begin();
     }
 
     template <typename FormatContext>
-    auto format(DoorState state, FormatContext & ctx)
+    auto format(DoorState state, FormatContext& ctx)
     {
         switch(state) {
             case DoorState::OPEN:

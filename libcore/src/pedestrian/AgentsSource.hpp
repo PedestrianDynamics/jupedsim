@@ -42,8 +42,8 @@ class AgentsSource
 {
 public:
     /**
-      * Constructor
-      */
+     * Constructor
+     */
     AgentsSource(
         int id,
         std::string caption,
@@ -61,65 +61,65 @@ public:
         std::vector<int> lifeSpan);
 
     /**
-      * Destructor
-      */
+     * Destructor
+     */
     virtual ~AgentsSource();
 
     /**
-      * Add a new agent to this source
-      * @param ped
-      */
-    void AddToPool(Pedestrian * ped);
+     * Add a new agent to this source
+     * @param ped
+     */
+    void AddToPool(Pedestrian* ped);
 
     /**
-      * Generate a number of agents, based on the frequency given in the constructor.
-      * No agents are generated if the maximum (_maxAgents) is reached.
-      * @see _maxAgents
-      * @param ped
-      */
-    void GenerateAgentsAndAddToPool(int count, Building * building);
+     * Generate a number of agents, based on the frequency given in the constructor.
+     * No agents are generated if the maximum (_maxAgents) is reached.
+     * @see _maxAgents
+     * @param ped
+     */
+    void GenerateAgentsAndAddToPool(int count, Building* building);
 
     /**
-      * Generate agents, but do not add them to the pool.
-      *
-      * @attention Positions and velocities of pedestrians are not set within this function.
-      *
-      * @see AgentsSourcesManager::ProcessAllSources()
-      * @param ped: the container for the agents
-      * @param count: the number of agents to generate
-      * @param building: a pointer to the building object
-      */
-    void GenerateAgents(std::vector<Pedestrian *> & peds, int count, Building * building);
+     * Generate agents, but do not add them to the pool.
+     *
+     * @attention Positions and velocities of pedestrians are not set within this function.
+     *
+     * @see AgentsSourcesManager::ProcessAllSources()
+     * @param ped: the container for the agents
+     * @param count: the number of agents to generate
+     * @param building: a pointer to the building object
+     */
+    void GenerateAgents(std::vector<Pedestrian*>& peds, int count, Building* building);
 
     /**
-      * Generate count agents and save them in the vector
-      * @param ped: the container for the agents
-      * @param count: the number of agents to generate
-      */
-    void RemoveAgentsFromPool(std::vector<Pedestrian *> & peds, int count);
+     * Generate count agents and save them in the vector
+     * @param ped: the container for the agents
+     * @param count: the number of agents to generate
+     */
+    void RemoveAgentsFromPool(std::vector<Pedestrian*>& peds, int count);
 
     /**
-      * Add the agents to the pool. This might be important in the case the removed agents could not
-      * be placed correctly. They can be requeued using this function.
-      * @param peds
-      */
-    void AddAgentsToPool(std::vector<Pedestrian *> & peds);
+     * Add the agents to the pool. This might be important in the case the removed agents could not
+     * be placed correctly. They can be requeued using this function.
+     * @param peds
+     */
+    void AddAgentsToPool(std::vector<Pedestrian*>& peds);
 
     /**
-      * @return the number of agents remaining
-      */
+     * @return the number of agents remaining
+     */
     int GetPoolSize() const;
 
     /**
-      * Print relevant information
-      */
+     * Print relevant information
+     */
     void Dump() const;
 
     int GetAgentsGenerated() const;
     void SetAgentsGenerated(int agentsGenerated);
     const std::vector<float> GetBoundaries() const;
     void Setboundaries(std::vector<float> bounds);
-    const std::string & GetCaption() const;
+    const std::string& GetCaption() const;
     int GetFrequency() const;
     int GetGroupId() const;
     int GetId() const;
@@ -140,26 +140,26 @@ public:
     const std::shared_ptr<StartDistribution> GetStartDistribution() const;
 
 private:
-    int _id              = -1;
-    int _frequency       = 1; /// create \var _chunkAgents every \var _frequency seconds
-    int _maxAgents       = 0;
-    int _groupID         = -1;
+    int _id = -1;
+    int _frequency = 1; /// create \var _chunkAgents every \var _frequency seconds
+    int _maxAgents = 0;
+    int _groupID = -1;
     std::string _caption = "no caption";
-    bool _greedy         = false;
+    bool _greedy = false;
     int _agentsGenerated = 0;
     std::vector<float> _boundaries;
-    double _time;  /// planned generation time. here \var _maxAgents = 1
+    double _time; /// planned generation time. here \var _maxAgents = 1
     float _startx; /// \var _maxAgents = 1
     float _starty; /// \var _maxAgents = 1
     std::vector<int> _lifeSpan;
 
-    int _chunkAgents;     /// generate \var chunk_agents per \var frequency seconds
+    int _chunkAgents; /// generate \var chunk_agents per \var frequency seconds
     int _remainingAgents; /// After generating \var chunk_agents \time \var
                           /// _percent per \var frequency seconds, this is the
                           /// remaining of agents still to be produced
     float _percent = 1.0; /// generate \var _percent * \var _chunkAgents
-    float _rate    = 1.0;
+    float _rate = 1.0;
 
-    std::vector<Pedestrian *> _agents;
+    std::vector<Pedestrian*> _agents;
     std::shared_ptr<StartDistribution> _startDistribution;
 };

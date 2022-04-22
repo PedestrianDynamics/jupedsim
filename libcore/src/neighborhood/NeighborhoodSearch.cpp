@@ -35,28 +35,30 @@
 #include <iterator>
 #include <shared_mutex>
 
-
 std::shared_mutex grid_mutex;
 
-NeighborhoodSearch::NeighborhoodSearch(double cellSize) : _cellSize(cellSize) {}
+NeighborhoodSearch::NeighborhoodSearch(double cellSize) : _cellSize(cellSize)
+{
+}
 
-NeighborhoodSearch::~NeighborhoodSearch() {}
+NeighborhoodSearch::~NeighborhoodSearch()
+{
+}
 
-void NeighborhoodSearch::Update(const std::vector<std::unique_ptr<Pedestrian>> & peds)
+void NeighborhoodSearch::Update(const std::vector<std::unique_ptr<Pedestrian>>& peds)
 {
     std::unique_lock exclusive_lock(grid_mutex);
 
-    std::vector<Grid2D<Pedestrian *>::IndexValuePair> values;
+    std::vector<Grid2D<Pedestrian*>::IndexValuePair> values;
     values.reserve(peds.size());
-    for(const auto & ped : peds) {
+    for(const auto& ped : peds) {
         // determine the cell coordinates of pedestrian i
         std::int32_t ix = static_cast<std::int32_t>(ped->GetPos().x / _cellSize);
         std::int32_t iy = static_cast<std::int32_t>(ped->GetPos().y / _cellSize);
         values.push_back({{ix, iy}, ped.get()});
     }
-    _grid = Grid2D<Pedestrian *>(values);
+    _grid = Grid2D<Pedestrian*>(values);
 }
-
 
 IteratorPair<NeighborhoodIterator, NeighborhoodEndIterator>
 NeighborhoodSearch::GetNeighboringAgents(Point pos, double radius) const

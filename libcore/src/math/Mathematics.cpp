@@ -28,10 +28,11 @@
 
 #include <cassert>
 
-// ok that is not perfect. For a profound discussion see http://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+// ok that is not perfect. For a profound discussion see
+// http://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
 bool almostEqual(double a, double b, double eps)
 {
-    return fabs(a - b) < eps; //std::numeric_limits<double>::epsilon();
+    return fabs(a - b) < eps; // std::numeric_limits<double>::epsilon();
 }
 
 /*
@@ -58,18 +59,17 @@ double hermite_interp(double t, double x1, double x2, double y1, double y2, doub
     assert(x2 > x1 && "Intervals must be defined as x1 < x2");
 
     double scale = x2 - x1;
-    t            = (t - x1) / scale;
-    double t2    = t * t;
-    double t3    = t2 * t;
-    double h1    = 2 * t3 - 3 * t2 + 1;
-    double h2    = -2 * t3 + 3 * t2;
-    double h3    = t3 - 2 * t2 + t;
-    double h4    = t3 - t2;
-    double left  = y1 * h1 + dy1 * h3 * scale;
+    t = (t - x1) / scale;
+    double t2 = t * t;
+    double t3 = t2 * t;
+    double h1 = 2 * t3 - 3 * t2 + 1;
+    double h2 = -2 * t3 + 3 * t2;
+    double h3 = t3 - 2 * t2 + t;
+    double h4 = t3 - t2;
+    double left = y1 * h1 + dy1 * h3 * scale;
     double right = y2 * h2 + dy2 * h4 * scale;
     return left + right;
 }
-
 
 /* Principal cubic root of a complex number */
 std::complex<double> c_cbrt(std::complex<double> x)
@@ -85,6 +85,6 @@ std::complex<double> c_cbrt(std::complex<double> x)
     phi = atan2(b, a);
     phi /= 3.0;
     rn = cbrt(r);
-    s  = sin(phi);
+    s = sin(phi);
     return rn * cos(phi) + I * rn * s;
 }

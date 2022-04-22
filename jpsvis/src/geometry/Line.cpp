@@ -25,7 +25,6 @@
  *
  **/
 
-
 #include "Point.hpp"
 //#include "SubRoom.hpp"
 #include "../IO/OutputHandler.hpp"
@@ -50,7 +49,7 @@ Line::Line()
     _uid = _static_UID++;
 }
 
-Line::Line(const Point & p1, const Point & p2)
+Line::Line(const Point& p1, const Point& p2)
 {
     SetPoint1(p1);
     SetPoint2(p2);
@@ -62,26 +61,28 @@ int Line::GetUniqueID() const
     return _uid;
 }
 
-Line::Line(const Line & orig)
+Line::Line(const Line& orig)
 {
     _point1 = orig.GetPoint1();
     _point2 = orig.GetPoint2();
     _centre = orig.GetCentre();
-    _uid    = orig.GetUniqueID();
+    _uid = orig.GetUniqueID();
 }
 
-Line::~Line() {}
+Line::~Line()
+{
+}
 
 /*************************************************************
  Setter-Funktionen
  ************************************************************/
-void Line::SetPoint1(const Point & p)
+void Line::SetPoint1(const Point& p)
 {
     _point1 = p;
     _centre = (_point1 + _point2) * 0.5;
 }
 
-void Line::SetPoint2(const Point & p)
+void Line::SetPoint2(const Point& p)
 {
     _point2 = p;
     _centre = (_point1 + _point2) * 0.5;
@@ -90,17 +91,17 @@ void Line::SetPoint2(const Point & p)
 /*************************************************************
  Getter-Funktionen
  ************************************************************/
-const Point & Line::GetPoint1() const
+const Point& Line::GetPoint1() const
 {
     return _point1;
 }
 
-const Point & Line::GetPoint2() const
+const Point& Line::GetPoint2() const
 {
     return _point2;
 }
 
-const Point & Line::GetCentre() const
+const Point& Line::GetCentre() const
 {
     return _centre;
 }
@@ -128,7 +129,6 @@ string Line::Write() const
     geometry.append("\t\t</wall>\n");
     return geometry;
 }
-
 
 /*************************************************************
  Sonstige Funktionen
@@ -160,12 +160,11 @@ Point Line::NormalVec() const
 
 // Normale Komponente von v auf l
 
-double Line::NormalComp(const Point & v) const
+double Line::NormalComp(const Point& v) const
 {
     // Normierte Vectoren
-    Point l         = (GetPoint2() - GetPoint1()).Normalized();
-    const Point & n = NormalVec();
-
+    Point l = (GetPoint2() - GetPoint1()).Normalized();
+    const Point& n = NormalVec();
 
     double lx = l.GetX();
     double ly = l.GetY();
@@ -186,16 +185,16 @@ double Line::NormalComp(const Point & v) const
 // Lotfußpunkt zur Geraden Line
 // Muss nicht im Segment liegen
 
-Point Line::LotPoint(const Point & p) const
+Point Line::LotPoint(const Point& p) const
 {
-    const Point & r = GetPoint1();
-    const Point & s = GetPoint2();
-    const Point & t = r - s;
+    const Point& r = GetPoint1();
+    const Point& s = GetPoint2();
+    const Point& t = r - s;
     Point tmp;
     double lambda;
 
-    tmp     = p - s;
-    lambda  = tmp.ScalarProduct(t) / t.ScalarProduct(t);
+    tmp = p - s;
+    lambda = tmp.ScalarProduct(t) / t.ScalarProduct(t);
     Point f = s + t * lambda;
     return f;
 }
@@ -204,14 +203,14 @@ Point Line::LotPoint(const Point & p) const
  * In der Regel Lotfußpunkt, Ist der Lotfußpunkt nicht im Segment
  * wird der entsprechende Eckpunkt der Line genommen
  * */
-Point Line::ShortestPoint(const Point & p) const
+Point Line::ShortestPoint(const Point& p) const
 {
-    const Point & t = _point1 - _point2;
+    const Point& t = _point1 - _point2;
     if(_point1 == _point2)
         return _point1;
-    Point tmp     = p - _point2;
+    Point tmp = p - _point2;
     double lambda = tmp.ScalarProduct(t) / t.ScalarProduct(t);
-    Point f       = _point2 + t * lambda;
+    Point f = _point2 + t * lambda;
 
     /* Prüfen ob Punkt in der Linie,sonst entsprechenden Eckpunkt zurückgeben */
     if(lambda < 0)
@@ -228,7 +227,7 @@ Point Line::ShortestPoint(const Point & p) const
  * http://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
  *
  * */
-bool Line::IsInLineSegment(const Point & p) const
+bool Line::IsInLineSegment(const Point& p) const
 {
     return fabs((_point1 - p).Norm() + (_point2 - p).Norm() - (_point2 - _point1).Norm()) < J_EPS;
 }
@@ -237,12 +236,12 @@ bool Line::IsInLineSegment(const Point & p) const
  * dazu wird die Funktion Line::ShortestPoint()
  * benuzt
  * */
-double Line::DistTo(const Point & p) const
+double Line::DistTo(const Point& p) const
 {
     return (p - ShortestPoint(p)).Norm();
 }
 
-double Line::DistToSquare(const Point & p) const
+double Line::DistToSquare(const Point& p) const
 {
     return DistTo(p) * DistTo(p);
 }
@@ -252,11 +251,10 @@ double Line::DistToSquare(const Point & p) const
 //                      (_point2 == l.GetPoint1() && _point1 == l.GetPoint2()));
 // }
 
-
 /* Zwei Linien sind gleich, wenn ihre beiden Punkte
  * gleich sind
  * */
-bool Line::operator==(const Line & l) const
+bool Line::operator==(const Line& l) const
 {
     return (
         (_point1 == l.GetPoint1() && _point2 == l.GetPoint2()) ||
@@ -266,7 +264,7 @@ bool Line::operator==(const Line & l) const
 /* Zwei Linien sind ungleich, wenn ihre beiden Punkte
  * ungleich sind.
  * */
-bool Line::operator!=(const Line & l) const
+bool Line::operator!=(const Line& l) const
 {
     return (!(*this == l));
 }
@@ -282,7 +280,7 @@ double Line::LengthSquare() const
 }
 
 // TODO unit  test
-bool Line::Overlapp(const Line & l) const
+bool Line::Overlapp(const Line& l) const
 {
     // first check if they are colinear
     Point vecAB = l.GetPoint2() - l.GetPoint1();
@@ -300,13 +298,13 @@ bool Line::Overlapp(const Line & l) const
 }
 
 // FIXME no equals check with == on double or float bring in an epsilon
-bool Line::IntersectionWith(const Point & p1, const Point & p2) const
+bool Line::IntersectionWith(const Point& p1, const Point& p2) const
 {
-    Point AC           = _point1 - p1;
-    Point DC           = p2 - p1;
-    Point BA           = _point2 - _point1;
+    Point AC = _point1 - p1;
+    Point DC = p2 - p1;
+    Point BA = _point2 - _point1;
     double denominator = BA.CrossProduct(DC);
-    double numerator   = DC.CrossProduct(AC);
+    double numerator = DC.CrossProduct(AC);
 
     if(denominator == 0.0) {
         // the lines are superposed
@@ -333,16 +331,16 @@ bool Line::IntersectionWith(const Point & p1, const Point & p2) const
     return true;
 }
 
-bool Line::IntersectionWith(const Line & l) const
+bool Line::IntersectionWith(const Line& l) const
 {
     return IntersectionWith(l._point1, l._point2);
 }
 
 Line Line::Enlarge(double d) const
 {
-    const Point & p1 = _point1;
-    const Point & p2 = _point2;
-    Point diff       = (p1 - p2).Normalized() * d;
+    const Point& p1 = _point1;
+    const Point& p2 = _point2;
+    Point diff = (p1 - p2).Normalized() * d;
 
     return Line(p1 + diff, p2 - diff);
 }
@@ -357,15 +355,14 @@ bool Line::IsVertical()
     return fabs(_point1.x - _point2.x) <= J_EPS;
 }
 
-int Line::WichSide(const Point & pt)
+int Line::WichSide(const Point& pt)
 {
     if(IsLeft(pt))
         return 0;
     return 1;
 }
 
-
-bool Line::ShareCommonPointWith(const Line & line) const
+bool Line::ShareCommonPointWith(const Line& line) const
 {
     if(line.GetPoint1() == _point1)
         return true;
@@ -377,16 +374,16 @@ bool Line::ShareCommonPointWith(const Line & line) const
     return line.GetPoint2() == _point2;
 }
 
-bool Line::HasEndPoint(const Point & point) const
+bool Line::HasEndPoint(const Point& point) const
 {
     if(_point1 == point)
         return true;
     return _point2 == point;
 }
 
-bool Line::IntersectionWithCircle(const Point & centre, double radius /*cm for pedestrians*/)
+bool Line::IntersectionWithCircle(const Point& centre, double radius /*cm for pedestrians*/)
 {
-    double r  = radius;
+    double r = radius;
     double x1 = _point1.GetX();
     double y1 = _point1.GetY();
 
@@ -406,13 +403,12 @@ bool Line::IntersectionWithCircle(const Point & centre, double radius /*cm for p
 
     // we first check the intersection of the circle and the  infinite line defined by the segment
     double dr2 = ((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-    double D2  = (x1 * y2 - x2 * y1) * (x1 * y2 - x2 * y1);
-    double r2  = radius * radius;
+    double D2 = (x1 * y2 - x2 * y1) * (x1 * y2 - x2 * y1);
+    double r2 = radius * radius;
 
     double delta = r2 * dr2 - D2;
     if(delta <= 0.0)
         return false;
-
 
     double a = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
     double b = 2 * ((x1 * (x2 - x1)) + y1 * (y2 - y1));
@@ -442,14 +438,14 @@ bool Line::IntersectionWithCircle(const Point & centre, double radius /*cm for p
 
 // TODO: Consider numerical stability and special case pt is on line
 // Returns true if pt is on the left side ( from point1 toward point2)
-bool Line::IsLeft(const Point & pt)
+bool Line::IsLeft(const Point& pt)
 {
     double test = (_point2.x - _point1.x) * (pt.GetY() - _point1.y) -
                   (_point2.y - _point1.y) * (pt.GetX() - _point1.x);
     return test > 0.0;
 }
 
-const Point & Line::GetLeft(const Point & pt)
+const Point& Line::GetLeft(const Point& pt)
 {
     if(IsLeft(pt)) {
         return _point2;
@@ -458,7 +454,7 @@ const Point & Line::GetLeft(const Point & pt)
     }
 }
 
-const Point & Line::GetRight(const Point & pt)
+const Point& Line::GetRight(const Point& pt)
 {
     if(!IsLeft(pt)) {
         return _point2;
@@ -478,7 +474,7 @@ std::string Line::toString() const
 // if no intersection return infinity
 // this function is exactly the same as GetIntersection(), but returns the distance squared
 // insteed of a boolian
-double Line::GetIntersectionDistance(const Line & l) const
+double Line::GetIntersectionDistance(const Line& l) const
 {
 #define DEBUG 0
     double deltaACy = _point1.GetY() - l.GetPoint1().GetY();
@@ -489,8 +485,8 @@ double Line::GetIntersectionDistance(const Line & l) const
     double deltaBAy = _point2.GetY() - _point1.GetY();
 
     double denominator = deltaBAx * deltaDCy - deltaBAy * deltaDCx;
-    double numerator   = deltaACy * deltaDCx - deltaACx * deltaDCy;
-    double infinity    = 100000;
+    double numerator = deltaACy * deltaDCx - deltaACx * deltaDCy;
+    double infinity = 100000;
     // the lines are parallel
     if(denominator == 0.0) {
         // the lines are superposed
@@ -545,11 +541,11 @@ double Line::GetIntersectionDistance(const Line & l) const
 //           /
 //          o Goal
 
-double Line::GetDeviationAngle(const Line & l) const
+double Line::GetDeviationAngle(const Line& l) const
 {
     // const double PI = 3.14159258;
 #define DEBUG 0
-    Point P    = _point1;
+    Point P = _point1;
     Point Goal = _point2;
 
     Point L = l._point1;

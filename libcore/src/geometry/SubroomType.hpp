@@ -17,4 +17,4 @@ enum class SubroomType {
 };
 
 template <>
-SubroomType from_string(const std::string & str);
+SubroomType from_string(const std::string& str);

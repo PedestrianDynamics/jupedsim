@@ -21,14 +21,14 @@ struct TimeTableContents {
  * @param trainTimeTableFile File containing information of arriving and departing trains
  */
 TimeTableContents ParseTrainTimeTable(
-    const std::map<std::string, TrainType> & trainTypes,
-    const fs::path & trainTimeTableFile);
+    const std::map<std::string, TrainType>& trainTypes,
+    const fs::path& trainTimeTableFile);
 
 /**
  * Parses the train types from a specific file: \p trainTypeFile.
  * @param trainTypeFile File containing information of the train
  * @return map of parsed TrainTypes with the _type as key
  */
-std::map<std::string, TrainType> ParseTrainTypes(const fs::path & trainTypeFile);
+std::map<std::string, TrainType> ParseTrainTypes(const fs::path& trainTypeFile);
 
 }; // namespace TrainFileParser

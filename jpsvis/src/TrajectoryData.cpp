@@ -15,7 +15,7 @@ unsigned int TrajectoryData::getSize()
         return _frames.size();
 }
 
-void TrajectoryData::append(std::unique_ptr<Frame> && frame)
+void TrajectoryData::append(std::unique_ptr<Frame>&& frame)
 {
     _frames.emplace_back(std::move(frame));
 }
@@ -58,12 +58,12 @@ void TrajectoryData::moveToFrame(int position)
 void TrajectoryData::moveFrameBy(int count)
 {
     const auto newIndex = _frameCursor + count;
-    const int low       = 0;
-    const int high      = _frames.empty() ? 0 : static_cast<int>(_frames.size() - 1);
-    _frameCursor        = std::clamp(newIndex, low, high);
+    const int low = 0;
+    const int high = _frames.empty() ? 0 : static_cast<int>(_frames.size() - 1);
+    _frameCursor = std::clamp(newIndex, low, high);
 }
 
-Frame * TrajectoryData::currentFrame()
+Frame* TrajectoryData::currentFrame()
 {
     return _frames[_frameCursor].get();
 }

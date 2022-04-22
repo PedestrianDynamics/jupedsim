@@ -4,15 +4,14 @@
 #include <tinyxml.h>
 #include <vector>
 
-
 /// Copies required files (inifile / geometry) and optional files to 'outPath'.
 /// Additionally all references to the files get patched so that / the copied
 /// inifile points to the copied files in 'outPath'.
 /// E.g. if inifile pointed to 'foo/bar/geometry.xml' the copied ini file will
 /// just point to 'geometry.xml'
 void collectInputFilesIn(
-    const std::filesystem::path & iniFile,
-    const std::filesystem::path & outPath);
+    const std::filesystem::path& iniFile,
+    const std::filesystem::path& outPath);
 
 // Do not use any function from this namespace directly,
 // this is only exposed to allow unit tests to be written.
@@ -46,7 +45,7 @@ namespace detail
 /// ```
 /// @param doc XmlDocument to work on.
 /// @param xmlPathToPatch vector of strings representing the paath to the node to modify
-void patchPath(TiXmlDocument & doc, const std::vector<std::string> & xmlPathToPatch);
+void patchPath(TiXmlDocument& doc, const std::vector<std::string>& xmlPathToPatch);
 
 /// Only public for testing.
 /// Creates a 'Path' object from the test found at the specified xml path. It
@@ -56,5 +55,5 @@ void patchPath(TiXmlDocument & doc, const std::vector<std::string> & xmlPathToPa
 /// @param doc TiXmlDocument to search in
 /// @param xmlPath to search
 std::optional<std::filesystem::path>
-extractPath(const TiXmlDocument & doc, const std::vector<std::string> & xmlPath);
+extractPath(const TiXmlDocument& doc, const std::vector<std::string>& xmlPath);
 } // namespace detail

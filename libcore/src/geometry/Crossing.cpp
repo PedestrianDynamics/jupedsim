@@ -31,20 +31,20 @@
 #include <Logger.hpp>
 #include <fmt/core.h>
 
-
 Crossing::Crossing()
 {
-    _id            = -1;
-    _doorUsage     = 0;
+    _id = -1;
+    _doorUsage = 0;
     _tempDoorUsage = 0;
-    _maxDoorUsage = (std::numeric_limits<int>::max)(); //avoid name conflicts in windows winmindef.h
-    _outflowRate  = (std::numeric_limits<double>::max)();
-    _lastPassingTime     = 0;
+    _maxDoorUsage = (std::numeric_limits<int>::max)(); // avoid name conflicts in windows
+                                                       // winmindef.h
+    _outflowRate = (std::numeric_limits<double>::max)();
+    _lastPassingTime = 0;
     _lastFlowMeasurement = 0;
-    _DT                  = 1;
-    _DN                  = 1;
-    _partialDoorUsage    = 0;
-    _closingTime         = 0;
+    _DT = 1;
+    _DN = 1;
+    _partialDoorUsage = 0;
+    _closingTime = 0;
 
     _state = DoorState::OPEN;
 }
@@ -77,7 +77,7 @@ bool Crossing::IsTransition() const
 void Crossing::Close(bool event)
 {
     if(_state != DoorState::CLOSE) {
-        _state        = DoorState::CLOSE;
+        _state = DoorState::CLOSE;
         _closeByEvent = event;
     } else {
         _closeByEvent = (event || _closeByEvent);
@@ -87,7 +87,7 @@ void Crossing::Close(bool event)
 void Crossing::TempClose(bool event)
 {
     if(_state != DoorState::TEMP_CLOSE) {
-        _state        = DoorState::TEMP_CLOSE;
+        _state = DoorState::TEMP_CLOSE;
         _closeByEvent = event;
     } else {
         _closeByEvent = (event || _closeByEvent);
@@ -96,7 +96,7 @@ void Crossing::TempClose(bool event)
 
 void Crossing::Open(bool)
 {
-    _state        = DoorState::OPEN;
+    _state = DoorState::OPEN;
     _closeByEvent = false;
 }
 
@@ -117,7 +117,7 @@ bool Crossing::IsInSubRoom(int subroomID) const
 /* gibt den ANDEREN Subroom != subroomID zurück
  * roomID wird hier nicht benötigt, aber in Transition::GetOtherSubRoom()
  * (virtuelle Funktion) */
-SubRoom * Crossing::GetOtherSubRoom(int roomID, int subroomID) const
+SubRoom* Crossing::GetOtherSubRoom(int roomID, int subroomID) const
 {
     if(_subRoom1->GetSubRoomID() == subroomID)
         return _subRoom2;
@@ -134,7 +134,6 @@ SubRoom * Crossing::GetOtherSubRoom(int roomID, int subroomID) const
     }
 }
 
-
 // Ausgabe
 void Crossing::WriteToErrorLog() const
 {
@@ -144,7 +143,7 @@ void Crossing::WriteToErrorLog() const
 // TraVisTo Ausgabe
 std::string Crossing::GetDescription() const
 {
-    //return "";
+    // return "";
     std::string geometry;
     char tmp[1024] = "";
     sprintf(
@@ -172,7 +171,7 @@ std::string Crossing::GetDescription() const
     return geometry;
 }
 
-int Crossing::CommonSubroomWith(Crossing * other, SubRoom *& subroom)
+int Crossing::CommonSubroomWith(Crossing* other, SubRoom*& subroom)
 {
     int result = 0;
     if(_subRoom1 && (_subRoom1 == other->_subRoom1 || _subRoom1 == other->_subRoom2)) {
@@ -229,19 +228,17 @@ int Crossing::GetMaxDoorUsage() const
     return _maxDoorUsage;
 }
 
-
 double Crossing::GetOutflowRate() const
 {
     return _outflowRate;
 }
-
 
 double Crossing::GetLastPassingTime() const
 {
     return _lastPassingTime;
 }
 
-const std::string & Crossing::GetFlowCurve() const
+const std::string& Crossing::GetFlowCurve() const
 {
     return _flowAtExit;
 }
@@ -287,10 +284,10 @@ void Crossing::SetDN(int dn)
 
 bool Crossing::RegulateFlow(double time)
 {
-    bool change   = false;
+    bool change = false;
     double number = GetPartialDoorUsage();
-    double T      = time - _lastFlowMeasurement;
-    double flow   = number / T;
+    double T = time - _lastFlowMeasurement;
+    double flow = number / T;
     if(_outflowRate != std::numeric_limits<double>::max()) {
         if(flow > _outflowRate) {
             _closingTime = number / _outflowRate - T; //[1]
@@ -386,13 +383,13 @@ namespace fmt
 template <>
 struct formatter<Crossing> {
     template <typename ParseContext>
-    constexpr auto parse(ParseContext & ctx)
+    constexpr auto parse(ParseContext& ctx)
     {
         return ctx.begin();
     }
 
     template <typename FormatContext>
-    auto format(const Crossing & cross, FormatContext & ctx)
+    auto format(const Crossing& cross, FormatContext& ctx)
     {
         return format_to(
             ctx.out(),

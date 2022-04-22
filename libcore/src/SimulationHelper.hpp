@@ -28,23 +28,21 @@
 #include <optional>
 #include <vector>
 
-
 namespace SimulationHelper
 {
 /**
  * Find pedestrians who have moved to outside of the geometry, and are no longer in the simulation
  * scope.
  * @pre For each ped in peds at least once UpdateRoom(-1,-1) is called, should be done by
- * SimulationHelper::UpdatePedestriansLocations. Meaning that the pedestrian could not be located to one of
- * the neighboring rooms.
+ * SimulationHelper::UpdatePedestriansLocations. Meaning that the pedestrian could not be located to
+ * one of the neighboring rooms.
  * @param building geometry used in the simulation
  * @param peds list of pedestrians to check
  * @return list of pedestrians who have moved to outside of the geometry
  */
 std::vector<Pedestrian::UID> FindPedestriansOutside(
-    const Building & building,
-    const std::vector<std::unique_ptr<Pedestrian>> & peds);
-
+    const Building& building,
+    const std::vector<std::unique_ptr<Pedestrian>>& peds);
 
 /**
  * Increments the door usage of the doors by the peds in \p pedsChangedRoom.
@@ -53,8 +51,8 @@ std::vector<Pedestrian::UID> FindPedestriansOutside(
  * @param time elapsed of the simulation
  */
 void UpdateFlowAtDoors(
-    Building & building,
-    const std::vector<std::unique_ptr<Pedestrian>> & peds,
+    Building& building,
+    const std::vector<std::unique_ptr<Pedestrian>>& peds,
     double time);
 
 /**
@@ -62,14 +60,14 @@ void UpdateFlowAtDoors(
  * @param building geometry used in the simulation
  * @return a change to the geometry was made
  */
-bool UpdateFlowRegulation(Building & building, const SimulationClock & clock);
+bool UpdateFlowRegulation(Building& building, const SimulationClock& clock);
 
 /**
  * Triggers the flow regulation for trains, and closes/opens doors accordingly
  * @param building geometry used in the simulation
  * @return a change to the geometry was made
  */
-bool UpdateTrainFlowRegulation(Building & building, double time);
+bool UpdateTrainFlowRegulation(Building& building, double time);
 
 /**
  * Finds the transition that was passed by a pedestrian \p ped in the last time step.
@@ -78,6 +76,6 @@ bool UpdateTrainFlowRegulation(Building & building, double time);
  * @param ped pedestrian to find the transition
  * @return transition passed by \p in the last time step, nullopt if no transition could be found
  */
-std::optional<Transition *>
-FindPassedDoor(const Pedestrian & ped, const std::vector<Transition *> & transitions);
-} //namespace SimulationHelper
+std::optional<Transition*>
+FindPassedDoor(const Pedestrian& ped, const std::vector<Transition*>& transitions);
+} // namespace SimulationHelper

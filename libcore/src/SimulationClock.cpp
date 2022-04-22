@@ -2,7 +2,9 @@
 
 #include <chrono>
 
-SimulationClock::SimulationClock(double dT) : _dT(dT) {}
+SimulationClock::SimulationClock(double dT) : _dT(dT)
+{
+}
 
 void SimulationClock::Advance()
 {

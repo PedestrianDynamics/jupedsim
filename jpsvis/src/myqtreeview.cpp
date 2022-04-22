@@ -1,8 +1,10 @@
 #include "myqtreeview.hpp"
 
-MyQTreeView::MyQTreeView(QWidget * parent) : QTreeView(parent) {}
+MyQTreeView::MyQTreeView(QWidget* parent) : QTreeView(parent)
+{
+}
 
-void MyQTreeView::closeEvent(QCloseEvent * event)
+void MyQTreeView::closeEvent(QCloseEvent* event)
 {
     emit changeState();
     QTreeView::closeEvent(event);

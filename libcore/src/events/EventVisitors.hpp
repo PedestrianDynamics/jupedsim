@@ -5,8 +5,8 @@
 
 #include <chrono>
 
-std::chrono::nanoseconds EventMinTime(const Event & event);
+std::chrono::nanoseconds EventMinTime(const Event& event);
 
-void ProcessEvent(const CreatePedestrianEvent & event, Simulation & sim);
-void ProcessEvent(const DoorEvent & event, Simulation & sim);
-void ProcessEvent(const TrainEvent & event, Simulation & sim);
+void ProcessEvent(const CreatePedestrianEvent& event, Simulation& sim);
+void ProcessEvent(const DoorEvent& event, Simulation& sim);
+void ProcessEvent(const TrainEvent& event, Simulation& sim);

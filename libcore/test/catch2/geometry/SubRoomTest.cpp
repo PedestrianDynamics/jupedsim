@@ -32,12 +32,11 @@
 class NullOutputHandler : public OutputHandler
 {
 public:
-    void Write(const std::string &) override{};
+    void Write(const std::string&) override{};
 };
 
 NullOutputHandler handler{};
-OutputHandler * Log = &handler;
-
+OutputHandler* Log = &handler;
 
 TEST_CASE("geometry/SubRoom", "[geometry][SubRoom]")
 {
@@ -75,9 +74,8 @@ TEST_CASE("geometry/SubRoom", "[geometry][SubRoom]")
 
         Line exit(P14, P13);
 
-        std::vector<Line *> goal; // (Line(Point(10, 5), Point(10, 0)));
+        std::vector<Line*> goal; // (Line(Point(10, 5), Point(10, 0)));
         goal.push_back(&exit);
-
 
         if(sub1.ConvertLineToPoly(goal) == true) {
             std::vector<Point> poly = sub1.GetPolygon();
@@ -101,7 +99,6 @@ TEST_CASE("geometry/SubRoom", "[geometry][SubRoom]")
         Point P5(10, 10);
         Point P6(10, 5);
         Point P7(10, 0);
-
 
         REQUIRE(sub.AddWall(Wall(P1, P2)));
         REQUIRE(sub.AddWall(Wall(P2, P3)));
@@ -131,7 +128,7 @@ TEST_CASE("geometry/SubRoom", "[geometry][SubRoom]")
         sub.AddWall(Wall(P5, P6));
 
         Line exit(P6, P4);
-        std::vector<Line *> door; // door overlaps with the wall
+        std::vector<Line*> door; // door overlaps with the wall
         door.push_back(&exit);
 
         REQUIRE_FALSE(sub.ConvertLineToPoly(door));
@@ -164,7 +161,7 @@ TEST_CASE("geometry/SubRoom", "[geometry][SubRoom]")
         sub1.AddWall(Wall(P3, P4));
 
         Line exit(P1, P4);
-        std::vector<Line *> door;
+        std::vector<Line*> door;
         door.push_back(&exit);
 
         REQUIRE_FALSE(sub1.ConvertLineToPoly(door));
@@ -314,7 +311,7 @@ TEST_CASE(
 
 TEST_CASE("geometry/SubRoom/IsInSubRoom", "[geometry][SubRoom][IsInSubRoom]")
 {
-    //Subroom
+    // Subroom
     Wall wall1;
     wall1.SetPoint1(Point{-2., -2.});
     wall1.SetPoint2(Point{2., -2.});
@@ -335,7 +332,7 @@ TEST_CASE("geometry/SubRoom/IsInSubRoom", "[geometry][SubRoom][IsInSubRoom]")
     subRoom.AddTransition(transition);
     subRoom.AddWall(wall1);
     subRoom.AddWall(wall2);
-    subRoom.ConvertLineToPoly(std::vector<Line *>{crossing, transition});
+    subRoom.ConvertLineToPoly(std::vector<Line*>{crossing, transition});
     subRoom.CreateBoostPoly();
 
     std::random_device rd;
@@ -372,7 +369,7 @@ TEST_CASE("geometry/SubRoom/IsInSubRoom", "[geometry][SubRoom][IsInSubRoom]")
         {
             std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
 
-            for(auto & wall : subRoom.GetAllWalls()) {
+            for(auto& wall : subRoom.GetAllWalls()) {
                 REQUIRE(subRoom.IsInSubRoom({wall.GetPoint1()}));
                 REQUIRE(subRoom.IsInSubRoom({wall.GetPoint2()}));
                 for(int i = 0; i < 10; ++i) {
@@ -391,7 +388,7 @@ TEST_CASE("geometry/SubRoom/IsInSubRoom", "[geometry][SubRoom][IsInSubRoom]")
         {
             std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
 
-            for(auto & trans : subRoom.GetAllTransitions()) {
+            for(auto& trans : subRoom.GetAllTransitions()) {
                 REQUIRE(subRoom.IsInSubRoom({trans->GetPoint1()}));
                 REQUIRE(subRoom.IsInSubRoom({trans->GetPoint2()}));
                 REQUIRE(subRoom.IsInSubRoom({trans->GetCentre()}));
@@ -410,7 +407,7 @@ TEST_CASE("geometry/SubRoom/IsInSubRoom", "[geometry][SubRoom][IsInSubRoom]")
         {
             std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
 
-            for(auto & cross : subRoom.GetAllCrossings()) {
+            for(auto& cross : subRoom.GetAllCrossings()) {
                 REQUIRE(subRoom.IsInSubRoom({cross->GetPoint1()}));
                 REQUIRE(subRoom.IsInSubRoom({cross->GetPoint2()}));
                 REQUIRE(subRoom.IsInSubRoom({cross->GetCentre()}));
@@ -440,7 +437,6 @@ TEST_CASE("geometry/SubRoom/IsInSubRoom", "[geometry][SubRoom][IsInSubRoom]")
         Wall obs4;
         obs4.SetPoint1({1., -1.});
         obs4.SetPoint2({-1., -1.});
-
 
         auto obstacle = new Obstacle();
         obstacle->AddWall(obs1);
@@ -481,8 +477,8 @@ TEST_CASE("geometry/SubRoom/IsInSubRoom", "[geometry][SubRoom][IsInSubRoom]")
         {
             std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
 
-            for(auto & obs : subRoom.GetAllObstacles()) {
-                for(auto & wall : obs->GetAllWalls()) {
+            for(auto& obs : subRoom.GetAllObstacles()) {
+                for(auto& wall : obs->GetAllWalls()) {
                     REQUIRE_FALSE(subRoom.IsInSubRoom({wall.GetPoint1()}));
                     REQUIRE_FALSE(subRoom.IsInSubRoom({wall.GetPoint2()}));
                     for(int i = 0; i < 10; ++i) {
@@ -517,7 +513,7 @@ TEST_CASE("geometry/SubRoom/IsInSubRoom", "[geometry][SubRoom][IsInSubRoom]")
         {
             std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
 
-            for(auto & wall : subRoom.GetAllWalls()) {
+            for(auto& wall : subRoom.GetAllWalls()) {
                 REQUIRE(subRoom.IsInSubRoom({wall.GetPoint1()}));
                 REQUIRE(subRoom.IsInSubRoom({wall.GetPoint2()}));
                 for(int i = 0; i < 10; ++i) {
@@ -536,7 +532,7 @@ TEST_CASE("geometry/SubRoom/IsInSubRoom", "[geometry][SubRoom][IsInSubRoom]")
         {
             std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
 
-            for(auto & trans : subRoom.GetAllTransitions()) {
+            for(auto& trans : subRoom.GetAllTransitions()) {
                 REQUIRE(subRoom.IsInSubRoom({trans->GetPoint1()}));
                 REQUIRE(subRoom.IsInSubRoom({trans->GetPoint2()}));
                 REQUIRE(subRoom.IsInSubRoom({trans->GetCentre()}));
@@ -555,7 +551,7 @@ TEST_CASE("geometry/SubRoom/IsInSubRoom", "[geometry][SubRoom][IsInSubRoom]")
         {
             std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
 
-            for(auto & cross : subRoom.GetAllCrossings()) {
+            for(auto& cross : subRoom.GetAllCrossings()) {
                 REQUIRE(subRoom.IsInSubRoom({cross->GetPoint1()}));
                 REQUIRE(subRoom.IsInSubRoom({cross->GetPoint2()}));
                 REQUIRE(subRoom.IsInSubRoom({cross->GetCentre()}));

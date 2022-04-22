@@ -36,7 +36,7 @@ class Subroom;
 class Transition : public Crossing
 {
 private:
-    Room * _room2;
+    Room* _room2;
     bool _isOpen;
     std::string _type;
     // number of agents that passed that exit
@@ -74,7 +74,7 @@ public:
      * Set/Get the second room associated with this transition.
      * The first one is set in the crossing class.
      */
-    void SetRoom2(Room * ID);
+    void SetRoom2(Room* ID);
 
     /**
      * Increment the number of persons that used that exit
@@ -88,11 +88,10 @@ public:
      */
     int GetDoorUsage() const;
 
-
     /**
      * @return the flow curve for this exit
      */
-    const std::string & GetFlowCurve() const;
+    const std::string& GetFlowCurve() const;
 
     /**
      * @return the last time this door was crossed
@@ -108,21 +107,19 @@ public:
      * Set/Get the second room associated with this transition.
      * The first one is set in the crossing class.
      */
-    Room * GetRoom2() const;
-
+    Room* GetRoom2() const;
 
     /**
      * @return the other room.
      */
-    Room * GetOtherRoom(int room_id) const;
+    Room* GetOtherRoom(int room_id) const;
 
     // virtual functions
     virtual bool IsOpen() const;
     virtual bool IsExit() const;
     virtual bool IsTransition() const;
     virtual bool IsInRoom(int roomID) const;
-    virtual SubRoom * GetOtherSubRoom(int roomID, int subroomID) const;
-
+    virtual SubRoom* GetOtherSubRoom(int roomID, int subroomID) const;
 
     virtual void WriteToErrorLog() const;
     virtual std::string GetDescription() const; // TraVisTo Ausgabe

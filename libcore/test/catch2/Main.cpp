@@ -3,7 +3,7 @@
 #include <Logger.hpp>
 #include <catch2/catch.hpp>
 
-int main(int argc, char * argv[])
+int main(int argc, char* argv[])
 {
     Logging::Guard guard;
 

@@ -59,7 +59,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget * parent = 0, std::optional<std::filesystem::path> path = {});
+    MainWindow(QWidget* parent = 0, std::optional<std::filesystem::path> path = {});
     virtual ~MainWindow();
 
 public slots:
@@ -178,13 +178,13 @@ public slots:
     /// show the detailed structure of the geometry
     void slotShowGeometryStructure();
 
-    void slotOnGeometryItemChanged(QStandardItem * item);
+    void slotOnGeometryItemChanged(QStandardItem* item);
 
     void slotMousePositionUpdated(double x, double y, double z);
 
 protected:
-    virtual void closeEvent(QCloseEvent * event);
-    void dragEnterEvent(QDragEnterEvent * event);
+    virtual void closeEvent(QCloseEvent* event);
+    void dragEnterEvent(QDragEnterEvent* event);
 
 private:
     void startReplay();
@@ -208,10 +208,10 @@ private:
     void resetGraphicalElements();
 
     /// @return false if something went wrong.
-    bool tryParseFile(const std::filesystem::path & path = {});
-    void tryLoadFile(const std::filesystem::path & path);
-    bool tryParseGeometry(const std::filesystem::path & path);
-    bool tryParseTrajectory(const std::filesystem::path & path);
+    bool tryParseFile(const std::filesystem::path& path = {});
+    void tryLoadFile(const std::filesystem::path& path);
+    bool tryParseGeometry(const std::filesystem::path& path);
+    bool tryParseTrajectory(const std::filesystem::path& path);
 
     /// return true if at least one dataset was loaded
     bool anyDatasetLoaded();

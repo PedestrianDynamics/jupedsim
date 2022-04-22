@@ -34,10 +34,8 @@
 
 #include <memory>
 
-static std::unique_ptr<DirectionStrategy> make_direction_strategy(
-    DirectionStrategyType type,
-    const Configuration & config,
-    Building * building)
+static std::unique_ptr<DirectionStrategy>
+make_direction_strategy(DirectionStrategyType type, const Configuration& config, Building* building)
 {
     switch(type) {
         case DirectionStrategyType::IN_RANGE_BOTTLENECK:
@@ -66,7 +64,7 @@ make_waiting_strategy(std::optional<WaitingStrategyType> type)
 }
 
 std::unique_ptr<DirectionManager>
-DirectionManager::Create(const Configuration & config, Building * building)
+DirectionManager::Create(const Configuration& config, Building* building)
 {
     auto directionStrategy =
         make_direction_strategy(config.directionStrategyType, config, building);
@@ -79,16 +77,16 @@ DirectionManager::Create(const Configuration & config, Building * building)
 DirectionManager::DirectionManager(
     std::unique_ptr<DirectionStrategy> directionStrategy,
     std::unique_ptr<WaitingStrategy> waitingStrategy,
-    const Building * building) :
-    _directionStrategy(std::move(directionStrategy)),
-    _waitingStrategy(std::move(waitingStrategy)),
-    _building(building)
+    const Building* building)
+    : _directionStrategy(std::move(directionStrategy))
+    , _waitingStrategy(std::move(waitingStrategy))
+    , _building(building)
 {
 }
 
-Point DirectionManager::GetTarget(const Pedestrian * ped)
+Point DirectionManager::GetTarget(const Pedestrian* ped)
 {
-    const auto * room = _building->GetRoom(ped->GetPos());
+    const auto* room = _building->GetRoom(ped->GetPos());
     if(ped->IsWaiting() && _waitingStrategy) {
         return _waitingStrategy->GetTarget(room, ped, _currentTime);
     } else {
@@ -96,12 +94,12 @@ Point DirectionManager::GetTarget(const Pedestrian * ped)
     }
 }
 
-WaitingStrategy & DirectionManager::GetWaitingStrategy() const
+WaitingStrategy& DirectionManager::GetWaitingStrategy() const
 {
     return *_waitingStrategy;
 }
 
-DirectionStrategy & DirectionManager::GetDirectionStrategy() const
+DirectionStrategy& DirectionManager::GetDirectionStrategy() const
 {
     return *_directionStrategy;
 }

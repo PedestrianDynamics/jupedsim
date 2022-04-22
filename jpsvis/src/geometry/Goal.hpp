@@ -34,7 +34,6 @@
 // forward declarations
 class Wall;
 
-
 class Goal
 {
 private:
@@ -72,17 +71,17 @@ public:
     /**
      * construct the Goal by adding more walls
      */
-    void AddWall(const Wall & w);
+    void AddWall(const Wall& w);
 
     /**
      * @return All walls that constitute the Goal
      */
-    const std::vector<Wall> & GetAllWalls() const;
+    const std::vector<Wall>& GetAllWalls() const;
 
     /**
      * @return true if the point p is contained within the Closed Goal
      */
-    bool Contains(const Point & p) const;
+    bool Contains(const Point& p) const;
 
     /**
      * Create the obstacles polygonal structure from the walls
@@ -92,7 +91,7 @@ public:
     /**
      * @return the Goal as a polygon
      */
-    const std::vector<Point> & GetPolygon() const;
+    const std::vector<Point>& GetPolygon() const;
 
     /**
      * agents are remove from the simulation when they reached a final goal
@@ -114,7 +113,7 @@ public:
      * @return the centroid of the goal
      * @see ComputeControid
      */
-    const Point & GetCentroid() const;
+    const Point& GetCentroid() const;
 
     /**
      * @return a nicely formatted string representation of the Goal
@@ -122,8 +121,8 @@ public:
     std::string Write();
 
 private:
-    int WhichQuad(const Point & vertex, const Point & hitPos) const;
+    int WhichQuad(const Point& vertex, const Point& hitPos) const;
 
     // x-Koordinate der Linie von einer Eccke zur nächsten
-    double Xintercept(const Point & point1, const Point & point2, double hitY) const;
+    double Xintercept(const Point& point1, const Point& point2, double hitY) const;
 };

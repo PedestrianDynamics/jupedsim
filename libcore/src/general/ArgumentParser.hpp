@@ -47,23 +47,23 @@ private:
     bool printVersionAndExit{false};
 
     CLI::App app{"JuPedSim"};
-    CLI::Option * iniFilePathOpt =
+    CLI::Option* iniFilePathOpt =
         app.add_option("inifile", iniFilePath, "Path to your inifile. Defaults to 'ini.xml'")
             ->check(CLI::ExistingFile);
-    CLI::Option * logLevelOpt =
+    CLI::Option* logLevelOpt =
         app.add_option(
                "--log-level",
                logLevel,
                "Minimum level of log messages to show. Defaults to 'info'")
             ->transform(CLI::CheckedTransformer(logLevelMapping, CLI::ignore_case));
-    CLI::Option * versionFlag =
+    CLI::Option* versionFlag =
         app.add_flag("--version", printVersionAndExit, "Prints version information and exits.");
 
 public:
     enum class Execution { CONTINUE, ABORT };
 
     /// @return inifile argument. If none was parsed this defaults to 'ini.xml'
-    const fs::path & IniFilePath() const;
+    const fs::path& IniFilePath() const;
 
     /// @return desired log level. If none was parsed this defauls to 'Info'
     Logging::Level LogLevel() const;
@@ -84,5 +84,5 @@ public:
     /// @return [Execution, ReturnCode] state after parsing. Excution describes
     ///         if the program shall continue or abort. In case 'Execution' is
     ///         ABORT returncode contains the to-be-used returncode.
-    std::tuple<Execution, int> Parse(int argc, char * argv[]);
+    std::tuple<Execution, int> Parse(int argc, char* argv[]);
 };

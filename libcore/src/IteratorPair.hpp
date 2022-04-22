@@ -1,6 +1,5 @@
 #pragma once
 
-
 /// Pair of Iterators for range based for loops
 ///
 /// Provides begin and end method required for range based for loops.

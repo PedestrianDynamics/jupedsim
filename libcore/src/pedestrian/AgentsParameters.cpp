@@ -33,11 +33,13 @@
 
 AgentsParameters::AgentsParameters(int id, int seed)
 {
-    _id        = id;
+    _id = id;
     _generator = std::default_random_engine(seed);
 }
 
-AgentsParameters::~AgentsParameters() {}
+AgentsParameters::~AgentsParameters()
+{
+}
 
 int AgentsParameters::GetID()
 {
@@ -57,7 +59,7 @@ void AgentsParameters::InitV0UpStairs(double mean, double stdv, double smoothFac
     if(stdv == 0) {
         stdv = judge;
     }
-    _V0UpStairs           = std::normal_distribution<double>(mean, stdv);
+    _V0UpStairs = std::normal_distribution<double>(mean, stdv);
     _smoothFactorUpStairs = smoothFactor;
 }
 
@@ -66,7 +68,7 @@ void AgentsParameters::InitV0DownStairs(double mean, double stdv, double smoothF
     if(stdv == 0) {
         stdv = judge;
     }
-    _V0DownStairs           = std::normal_distribution<double>(mean, stdv);
+    _V0DownStairs = std::normal_distribution<double>(mean, stdv);
     _smoothFactorDownStairs = smoothFactor;
 }
 
@@ -75,7 +77,7 @@ void AgentsParameters::InitEscalatorUpStairs(double mean, double stdv, double sm
     if(stdv == 0) {
         stdv = judge;
     }
-    _EscalatorUpStairs             = std::normal_distribution<double>(mean, stdv);
+    _EscalatorUpStairs = std::normal_distribution<double>(mean, stdv);
     _smoothFactorEscalatorUpStairs = smoothFactor;
 }
 
@@ -84,7 +86,7 @@ void AgentsParameters::InitEscalatorDownStairs(double mean, double stdv, double 
     if(stdv == 0) {
         stdv = judge;
     }
-    _EscalatorDownStairs             = std::normal_distribution<double>(mean, stdv);
+    _EscalatorDownStairs = std::normal_distribution<double>(mean, stdv);
     _smoothFactorEscalatorDownStairs = smoothFactor;
 }
 
@@ -136,12 +138,10 @@ void AgentsParameters::InitT(double mean, double stdv)
     _T = std::normal_distribution<double>(mean, stdv);
 }
 
-
 void AgentsParameters::EnableStretch(bool stretch)
 {
     _enableStretch = stretch;
 }
-
 
 double AgentsParameters::GetV0()
 {

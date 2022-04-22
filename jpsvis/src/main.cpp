@@ -60,7 +60,7 @@
 #endif
 #endif
 
-int main(int argc, char * argv[])
+int main(int argc, char* argv[])
 {
     QSurfaceFormat::setDefaultFormat(QVTKOpenGLNativeWidget::defaultFormat());
 

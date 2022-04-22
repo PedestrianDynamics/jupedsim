@@ -87,16 +87,16 @@
 #include <vtkWindowToImageFilter.h>
 
 Visualisation::Visualisation(
-    QObject * parent,
-    vtkRenderWindow * renderWindow,
-    Settings * settings,
-    TrajectoryData * trajectories) :
-    QObject(parent),
-    _settings(settings),
-    _trajectories(trajectories),
-    _renderWindow(renderWindow),
-    _renderer(vtkRenderer::New()),
-    _runningTime(vtkTextActor::New())
+    QObject* parent,
+    vtkRenderWindow* renderWindow,
+    Settings* settings,
+    TrajectoryData* trajectories)
+    : QObject(parent)
+    , _settings(settings)
+    , _trajectories(trajectories)
+    , _renderWindow(renderWindow)
+    , _renderer(vtkRenderer::New())
+    , _runningTime(vtkTextActor::New())
 {
     vtkObject::GlobalWarningDisplayOff();
     _renderWindow->AddRenderer(_renderer);
@@ -124,14 +124,14 @@ void Visualisation::start()
     _runningTime->SetVisibility(_settings->showInfos);
 
     // set the properties of the caption
-    vtkTextProperty * tprop = _runningTime->GetTextProperty();
+    vtkTextProperty* tprop = _runningTime->GetTextProperty();
     tprop->SetFontSize(computeFontSize());
     tprop->SetColor(1.0, 0.0, 0.0);
 
     _renderer->AddActor2D(_runningTime);
 
     // Create an interactor
-    auto * interactor = _renderWindow->GetInteractor();
+    auto* interactor = _renderWindow->GetInteractor();
     vtkNew<InteractorStyle> myStyle;
     myStyle->SetVisualisation(this);
     interactor->SetInteractorStyle(myStyle);
@@ -143,8 +143,8 @@ void Visualisation::start()
 
     // create a timer for rendering the window
     _timer_cb = vtkCallbackCommand::New();
-    _timer_cb->SetCallback([](auto, auto, void * clientData, auto) {
-        reinterpret_cast<Visualisation *>(clientData)->onExecute();
+    _timer_cb->SetCallback([](auto, auto, void* clientData, auto) {
+        reinterpret_cast<Visualisation*>(clientData)->onExecute();
     });
     _timer_cb->SetClientData(this);
     if(_trajectories->getFrameCount() > 0) {
@@ -153,24 +153,23 @@ void Visualisation::start()
     runningTime = _runningTime;
     interactor->AddObserver(vtkCommand::TimerEvent, _timer_cb);
 
-
     // create the necessary connections
     QObject::connect(
         this,
         &Visualisation::signalFrameNumber,
-        dynamic_cast<MainWindow *>(this->parent()),
+        dynamic_cast<MainWindow*>(this->parent()),
         &MainWindow::slotFrameNumber);
 
     QObject::connect(
         this,
         &Visualisation::signalMousePositionUpdated,
-        dynamic_cast<MainWindow *>(this->parent()),
+        dynamic_cast<MainWindow*>(this->parent()),
         &MainWindow::slotMousePositionUpdated);
 
     QObject::connect(
         this,
         &Visualisation::signalMaxFramesUpdated,
-        dynamic_cast<MainWindow *>(this->parent()),
+        dynamic_cast<MainWindow*>(this->parent()),
         &MainWindow::slotUpdateNumFrames);
 
     emit signalMaxFramesUpdated(_trajectories->getFrameCount());
@@ -204,19 +203,19 @@ void Visualisation::stop()
     QObject::disconnect(
         this,
         &Visualisation::signalFrameNumber,
-        dynamic_cast<MainWindow *>(this->parent()),
+        dynamic_cast<MainWindow*>(this->parent()),
         &MainWindow::slotFrameNumber);
 
     QObject::disconnect(
         this,
         &Visualisation::signalMousePositionUpdated,
-        dynamic_cast<MainWindow *>(this->parent()),
+        dynamic_cast<MainWindow*>(this->parent()),
         &MainWindow::slotMousePositionUpdated);
 
     QObject::disconnect(
         this,
         &Visualisation::signalMaxFramesUpdated,
-        dynamic_cast<MainWindow *>(this->parent()),
+        dynamic_cast<MainWindow*>(this->parent()),
         &MainWindow::slotUpdateNumFrames);
 
     _trail_plotter.reset();
@@ -258,10 +257,10 @@ void Visualisation::setGeometryVisibility(bool status)
     }
 }
 void Visualisation::setTrainData(
-    std::map<std::string, std::shared_ptr<TrainType>> && trainTypes,
-    std::map<int, std::shared_ptr<TrainTimeTable>> && trainTimeTable)
+    std::map<std::string, std::shared_ptr<TrainType>>&& trainTypes,
+    std::map<int, std::shared_ptr<TrainTimeTable>>&& trainTimeTable)
 {
-    _trainTypes      = trainTypes;
+    _trainTypes = trainTypes;
     _trainTimeTables = trainTimeTable;
 }
 
@@ -298,10 +297,10 @@ void Visualisation::showGradientField(bool status)
 void Visualisation::initGlyphs2D()
 {
     _glyphs_pedestrians_actor_2D = vtkActor::New();
-    _pedestrians_labels          = vtkActor2D::New();
-    _glyphs_directions           = vtkTensorGlyph::New();
-    _glyphs_directions_actor     = vtkActor::New();
-    _glyphs_pedestrians          = vtkTensorGlyph::New();
+    _pedestrians_labels = vtkActor2D::New();
+    _glyphs_directions = vtkTensorGlyph::New();
+    _glyphs_directions_actor = vtkActor::New();
+    _glyphs_pedestrians = vtkTensorGlyph::New();
 
     // now create the glyphs with ellipses
     VTK_CREATE(vtkDiskSource, agentShape);
@@ -374,7 +373,7 @@ void Visualisation::initGlyphs2D()
 
 void Visualisation::initGlyphs3D()
 {
-    _glyphs_pedestrians_3D       = vtkTensorGlyph::New();
+    _glyphs_pedestrians_3D = vtkTensorGlyph::New();
     _glyphs_pedestrians_actor_3D = vtkActor::New();
 
     // now create the glyphs with zylinders
@@ -413,11 +412,15 @@ void Visualisation::initGlyphs3D()
     _glyphs_pedestrians_actor_3D->SetVisibility(false);
 }
 
-void Visualisation::init() {}
+void Visualisation::init()
+{
+}
 
-void Visualisation::finalize() {}
+void Visualisation::finalize()
+{
+}
 
-void Visualisation::QcolorToDouble(const QColor & col, double * rgb)
+void Visualisation::QcolorToDouble(const QColor& col, double* rgb)
 {
     rgb[0] = (double) col.red() / 255.0;
     rgb[1] = (double) col.green() / 255.0;
@@ -427,19 +430,19 @@ void Visualisation::QcolorToDouble(const QColor & col, double * rgb)
 void Visualisation::initLegend(/*std::vector scalars*/)
 {
     // lookup table
-    vtkLookupTable * lut = vtkLookupTable::New();
+    vtkLookupTable* lut = vtkLookupTable::New();
     lut->SetHueRange(0.0, 0.566);
     lut->SetTableRange(20.0, 50.0);
     lut->SetNumberOfTableValues(50);
     lut->Build();
 
-    vtkTextProperty * titleProp = vtkTextProperty::New();
+    vtkTextProperty* titleProp = vtkTextProperty::New();
     titleProp->SetFontSize(14);
 
-    vtkTextProperty * labelProp = vtkTextProperty::New();
+    vtkTextProperty* labelProp = vtkTextProperty::New();
     labelProp->SetFontSize(10);
 
-    vtkScalarBarActor * scalarBar = vtkScalarBarActor::New();
+    vtkScalarBarActor* scalarBar = vtkScalarBarActor::New();
     scalarBar->SetLookupTable(lut);
     scalarBar->SetTitle("Velocities ( cm/s )");
     scalarBar->SetTitleTextProperty(titleProp);
@@ -454,7 +457,6 @@ void Visualisation::initLegend(/*std::vector scalars*/)
     _renderer->AddActor2D(scalarBar);
     _renderer->Render();
 }
-
 
 void Visualisation::setAxisVisible(bool status)
 {
@@ -488,7 +490,7 @@ void Visualisation::setCameraPerspective(int mode, int degree)
     _renderer->ResetCamera();
 }
 
-void Visualisation::setBackgroundColor(const QColor & col)
+void Visualisation::setBackgroundColor(const QColor& col)
 {
     double bgcolor[3];
     QcolorToDouble(col, bgcolor);
@@ -503,26 +505,26 @@ void Visualisation::setWindowTitle(QString title)
     _winTitle = title;
 }
 
-GeometryFactory & Visualisation::getGeometry()
+GeometryFactory& Visualisation::getGeometry()
 {
     return _geometry;
 }
 
-void Visualisation::setWallsColor(const QColor & color)
+void Visualisation::setWallsColor(const QColor& color)
 {
     double rbgColor[3];
     QcolorToDouble(color, rbgColor);
     _geometry.ChangeWallsColor(rbgColor);
 }
 
-void Visualisation::setFloorColor(const QColor & color)
+void Visualisation::setFloorColor(const QColor& color)
 {
     double rbgColor[3];
     QcolorToDouble(color, rbgColor);
     _geometry.ChangeFloorColor(rbgColor);
 }
 
-void Visualisation::setObstacleColor(const QColor & color)
+void Visualisation::setObstacleColor(const QColor& color)
 {
     double rbgColor[3];
     QcolorToDouble(color, rbgColor);
@@ -534,7 +536,7 @@ void Visualisation::setGeometryLabelsVisibility(int v)
     _geometry.ShowGeometryLabels(v);
 }
 
-void Visualisation::setExitsColor(const QColor & color)
+void Visualisation::setExitsColor(const QColor& color)
 {
     double rbgColor[3];
     QcolorToDouble(color, rbgColor);
@@ -542,7 +544,7 @@ void Visualisation::setExitsColor(const QColor & color)
     _geometry.ChangeExitsColor(rbgColor);
 }
 
-void Visualisation::setNavLinesColor(const QColor & color)
+void Visualisation::setNavLinesColor(const QColor& color)
 {
     double rbgColor[3];
     QcolorToDouble(color, rbgColor);
@@ -597,13 +599,10 @@ getTrainData(Point trainStart, Point trainEnd, std::vector<Point> doorPoints, do
     pt[2] = factor * elevation;
     pts->InsertNextPoint(pt);
 
-
     // Add the points to the polydata container
     linesPolyData->SetPoints(pts);
 
-
     vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
-
 
     // Create the first line (between Origin and P0)
     for(size_t i = 0; i <= doorPoints.size(); i += 2) {
@@ -623,23 +622,23 @@ getTrainData(Point trainStart, Point trainEnd, std::vector<Point> doorPoints, do
 
 void Visualisation::onExecute()
 {
-    vtkRenderWindowInteractor * const iren = _renderWindow->GetInteractor();
+    vtkRenderWindowInteractor* const iren = _renderWindow->GetInteractor();
 
     int frameNumber = 0;
-    int nPeds       = 0;
+    int nPeds = 0;
     if(_trajectories->getFrameCount() > 0) {
         if(!is_pause) {
             _trajectories->moveFrameBy(_replay_speed);
         }
-        const auto * frame = _trajectories->currentFrame();
+        const auto* frame = _trajectories->currentFrame();
 
         nPeds = frame->Size();
         update();
         auto FrameElements = frame->GetFrameElements();
 
         if(_settings->showTrajectories) {
-            const auto & elements = frame->GetFrameElements();
-            for(auto && e : elements) {
+            const auto& elements = frame->GetFrameElements();
+            for(auto&& e : elements) {
                 _trail_plotter->PlotPoint(e.pos, e.color);
             }
         }
@@ -648,7 +647,7 @@ void Visualisation::onExecute()
     frameNumber = _trajectories->currentIndex();
     emit signalFrameNumber(frameNumber);
 
-    double now      = frameNumber * iren->GetTimerDuration(_timer_id) / 1000;
+    double now = frameNumber * iren->GetTimerDuration(_timer_id) / 1000;
     int countTrains = 0;
     char label[100];
 
@@ -656,22 +655,22 @@ void Visualisation::onExecute()
         VTK_CREATE(vtkTextActor3D, textActor);
         auto trainType = tab.second->type;
         sprintf(label, "%s_%d", trainType.c_str(), tab.second->id);
-        auto trackStart   = tab.second->pstart;
-        auto trackEnd     = tab.second->pend;
-        auto trainOffset  = tab.second->train_offset;
-        auto reversed     = tab.second->reversed;
-        auto train        = _trainTypes[trainType];
+        auto trackStart = tab.second->pstart;
+        auto trackEnd = tab.second->pend;
+        auto trainOffset = tab.second->train_offset;
+        auto reversed = tab.second->reversed;
+        auto train = _trainTypes[trainType];
         auto train_length = train->_length;
-        auto doors        = train->_doors;
+        auto doors = train->_doors;
         std::vector<Point> doorPoints;
-        auto mapper         = tab.second->mapper;
-        auto actor          = tab.second->actor;
-        double elevation    = tab.second->elevation;
-        auto txtActor       = tab.second->textActor;
+        auto mapper = tab.second->mapper;
+        auto actor = tab.second->actor;
+        double elevation = tab.second->elevation;
+        auto txtActor = tab.second->textActor;
         auto trackDirection = (reversed) ? (trackStart - trackEnd) : (trackEnd - trackStart);
-        trackDirection      = trackDirection.Normalized();
-        auto trainStart     = (reversed) ? trackEnd + trackDirection * trainOffset :
-                                           trackStart + trackDirection * trainOffset;
+        trackDirection = trackDirection.Normalized();
+        auto trainStart = (reversed) ? trackEnd + trackDirection * trainOffset :
+                                       trackStart + trackDirection * trainOffset;
         auto trainEnd = (reversed) ? trackEnd + trackDirection * (trainOffset + train_length) :
                                      trackStart + trackDirection * (trainOffset + train_length);
 
@@ -679,8 +678,8 @@ void Visualisation::onExecute()
             Point trainDirection = trainEnd - trainStart;
             ;
             trainDirection = trainDirection.Normalized();
-            Point point1   = trainStart + trainDirection * (door._distance);
-            Point point2   = trainStart + trainDirection * (door._distance + door._width);
+            Point point1 = trainStart + trainDirection * (door._distance);
+            Point point2 = trainStart + trainDirection * (door._distance + door._width);
             doorPoints.push_back(point1);
             doorPoints.push_back(point2);
         } // doors
@@ -742,8 +741,7 @@ void Visualisation::onExecute()
         countTrains++;
     } // time table
 
-
-    int * winSize       = _renderWindow->GetSize();
+    int* winSize = _renderWindow->GetSize();
     static int lastWinX = winSize[0] + 1; // +1 to trigger a first change
     static int lastWinY = winSize[1];
     sprintf(
@@ -789,10 +787,10 @@ void Visualisation::onMouseMove(double x, double y, double z)
 
 void Visualisation::takeScreenshot()
 {
-    static int imageID                     = 0;
-    vtkWindowToImageFilter * winToImFilter = vtkWindowToImageFilter::New();
+    static int imageID = 0;
+    vtkWindowToImageFilter* winToImFilter = vtkWindowToImageFilter::New();
     winToImFilter->SetInput(_renderWindow);
-    vtkPNGWriter * image = vtkPNGWriter::New();
+    vtkPNGWriter* image = vtkPNGWriter::New();
     image->SetInputConnection(winToImFilter->GetOutputPort());
     winToImFilter->Delete();
 
@@ -807,9 +805,8 @@ void Visualisation::takeScreenshot()
         }
     }
 
-
     char filename[256] = {0};
-    std::string date   = QString(QDateTime::currentDateTime().toString("yyMMdd_hh")).toStdString();
+    std::string date = QString(QDateTime::currentDateTime().toString("yyMMdd_hh")).toStdString();
 
     sprintf(filename, "travisto_snap_%sh_%d.png", date.c_str(), imageID++);
 
@@ -825,20 +822,20 @@ void Visualisation::takeScreenshot()
 
 int Visualisation::computeFontSize()
 {
-    const double defaultDpi       = 96.0;
-    const double desiredFontSize  = 8.0;
+    const double defaultDpi = 96.0;
+    const double desiredFontSize = 8.0;
     const auto desiredScaleFactor = defaultDpi / desiredFontSize;
-    const auto dpi                = _renderWindow->GetDPI();
+    const auto dpi = _renderWindow->GetDPI();
     return dpi / desiredScaleFactor;
 }
 
 /// take png screenshot sequence
 void Visualisation::takeScreenshotSequence()
 {
-    static int imageID                     = 0;
-    vtkWindowToImageFilter * winToImFilter = vtkWindowToImageFilter::New();
+    static int imageID = 0;
+    vtkWindowToImageFilter* winToImFilter = vtkWindowToImageFilter::New();
     winToImFilter->SetInput(_renderWindow);
-    vtkPNGWriter * image = vtkPNGWriter::New();
+    vtkPNGWriter* image = vtkPNGWriter::New();
     image->SetInputConnection(winToImFilter->GetOutputPort());
     winToImFilter->Delete();
 
@@ -861,7 +858,6 @@ void Visualisation::takeScreenshotSequence()
             screenshots.truncate(screenshots.size() - 1);
         }
     }
-
 
     char filename[30] = {0};
     sprintf(filename, "/tmp_%07d.png", imageID++);

@@ -23,8 +23,8 @@
  *
  * \section Description
  *
- * This class defines the interface for operational models, which aim is to compute the next positions of
- * the pedestrians.
+ * This class defines the interface for operational models, which aim is to compute the next
+ *positions of the pedestrians.
  *
  **/
 #include "OperationalModel.hpp"
@@ -37,8 +37,8 @@
 
 std::unique_ptr<OperationalModel> OperationalModel::CreateFromType(
     OperationalModelType type,
-    const Configuration & config,
-    DirectionManager * directionManager)
+    const Configuration& config,
+    DirectionManager* directionManager)
 {
     switch(type) {
         case OperationalModelType::GCFM:
@@ -58,12 +58,12 @@ std::unique_ptr<OperationalModel> OperationalModel::CreateFromType(
     }
 }
 
-OperationalModel::OperationalModel(DirectionManager * directionManager) :
-    _direction(directionManager)
+OperationalModel::OperationalModel(DirectionManager* directionManager)
+    : _direction(directionManager)
 {
 }
 
-void OperationalModel::Init(Simulation * simulation)
+void OperationalModel::Init(Simulation* simulation)
 {
     _simulation = simulation;
 }

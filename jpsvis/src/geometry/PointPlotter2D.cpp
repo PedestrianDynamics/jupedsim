@@ -43,7 +43,7 @@
 
 PointPlotter2D::PointPlotter2D()
 {
-    pts     = NULL;
+    pts = NULL;
     scalars = NULL;
 
     SetPointRadius();
@@ -78,40 +78,38 @@ void PointPlotter2D::PlotPoint(
     scalars->InsertNextTuple3(r, g, b);
 }
 
-vtkPolyData * PointPlotter2D::CreatePolyData()
+vtkPolyData* PointPlotter2D::CreatePolyData()
 {
-    vtkDiskSource * src = vtkDiskSource::New();
+    vtkDiskSource* src = vtkDiskSource::New();
     src->SetRadialResolution(1);
     src->SetCircumferentialResolution(pt_res);
 
     src->SetInnerRadius(0.0);
     src->SetOuterRadius(pt_radius);
 
-
-    vtkPolyData * polyData = vtkPolyData::New();
+    vtkPolyData* polyData = vtkPolyData::New();
     polyData->SetPoints(pts);
     polyData->GetPointData()->SetScalars(scalars);
 
-    vtkGlyph3D * glyph = vtkGlyph3D::New();
+    vtkGlyph3D* glyph = vtkGlyph3D::New();
     glyph->SetSourceConnection(src->GetOutputPort());
     glyph->SetInputData(polyData);
 
     glyph->SetColorModeToColorByScalar();
     glyph->SetScaleModeToDataScalingOff();
 
-
-    vtkPolyData * output = glyph->GetOutput();
+    vtkPolyData* output = glyph->GetOutput();
     return output;
 }
 
-vtkActor * PointPlotter2D::CreateActor()
+vtkActor* PointPlotter2D::CreateActor()
 {
-    vtkPolyData * polyData = CreatePolyData();
+    vtkPolyData* polyData = CreatePolyData();
 
-    vtkPolyDataMapper * mapper = vtkPolyDataMapper::New();
+    vtkPolyDataMapper* mapper = vtkPolyDataMapper::New();
     mapper->SetInputData(polyData);
 
-    vtkActor * actor = vtkActor::New();
+    vtkActor* actor = vtkActor::New();
     actor->SetMapper(mapper);
 
     return actor;

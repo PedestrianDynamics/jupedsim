@@ -32,7 +32,7 @@ TEST_CASE("pedestrian/Ellipse", "[pedestrian][Ellipse]")
     {
         double dist, effdist;
         double a = 2.0, // semi-axis
-            b    = 1.5; // orthogonal semi-axis
+            b = 1.5; // orthogonal semi-axis
         JEllipse E1, E2;
         double x2, y2; // E2 center
 
@@ -207,7 +207,6 @@ TEST_CASE("pedestrian/Ellipse", "[pedestrian][Ellipse]")
             REQUIRE(dist == fabs(x2));
         }
 
-
         SECTION("total overlap 2")
         {
             x2 = 0.001;
@@ -224,11 +223,10 @@ TEST_CASE("pedestrian/Ellipse", "[pedestrian][Ellipse]")
         }
     }
 
-
     SECTION("Effective Distance between Ellipse and Line")
     {
         double a = 2.0, // semi-axis
-            b    = 1.5; // orthogonal semi-axis
+            b = 1.5; // orthogonal semi-axis
 
         JEllipse E;
         E.SetCenter(Point(0, 0));
@@ -373,7 +371,6 @@ TEST_CASE("pedestrian/Ellipse", "[pedestrian][Ellipse]")
         E.SetV(Point(0, 0));
         E.SetAmin(a);
         E.SetBmax(b);
-
 
         SECTION("Point Inside")
         {

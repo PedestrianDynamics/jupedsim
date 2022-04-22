@@ -105,31 +105,31 @@ public:
     /**
      * Constructor for FFRouter.
      * @param s routing strategy which should be used to find best way.
-     * @param hasSpecificGoals specifies if the peds have specific goals (true) or head to the outside (false).
+     * @param hasSpecificGoals specifies if the peds have specific goals (true) or head to the
+     * outside (false).
      * @param config configuration of simulation.
      */
-    FFRouter(Configuration * config, Building * building, DirectionManager * directionManager);
+    FFRouter(Configuration* config, Building* building, DirectionManager* directionManager);
 
     /**
-      * Destructor for FFRouter.
-      */
+     * Destructor for FFRouter.
+     */
     ~FFRouter() override;
 
-    int FindExit(Pedestrian * p) override;
+    int FindExit(Pedestrian* p) override;
 
     void Update() override;
 
     /**
-      * \brief ReInit the router if quickest router is used. Current position of agents is
-      * considered.
-      *
-      * ReInit() will reconstruct the graph (nodes = doors, edges = costs) and
-      * find shortest paths via Floyd-Warshall. It will reconstruct the floorfield to
-      * evaluate the best doors to certain goals as they could change.
-      * Will call CalculateFloorFields.
-      */
+     * \brief ReInit the router if quickest router is used. Current position of agents is
+     * considered.
+     *
+     * ReInit() will reconstruct the graph (nodes = doors, edges = costs) and
+     * find shortest paths via Floyd-Warshall. It will reconstruct the floorfield to
+     * evaluate the best doors to certain goals as they could change.
+     * Will call CalculateFloorFields.
+     */
     bool ReInit();
-
 
     /**
      * Returns if the router needs an update if \a _mode == "quickest".
@@ -139,7 +139,8 @@ public:
     bool MustReInit();
 
     /**
-     * Sets the time the floor field needs to be updated the next time, needed if \a _mode == "quickest".
+     * Sets the time the floor field needs to be updated the next time, needed if \a _mode ==
+     * "quickest".
      * @param t current time in simulation.
      */
     void SetRecalc(double t);
@@ -148,8 +149,10 @@ private:
     /**
      * \brief Performs the Floyd-Warshall algorithm.
      *
-     * Computes the distances depending on the costs and the corresponding paths with the Floyd-Warshall algoritm.
-     * @post \a _distMatrix contains the actual distance (cost dependent), _pathMatrix contains the corresponding paths.
+     * Computes the distances depending on the costs and the corresponding paths with the
+     * Floyd-Warshall algoritm.
+     * @post \a _distMatrix contains the actual distance (cost dependent), _pathMatrix contains the
+     * corresponding paths.
      */
     void FloydWarshall();
 
@@ -164,9 +167,9 @@ protected:
     /**
      * Configuration used during simulation.
      */
-    Configuration * _config{};
+    Configuration* _config{};
 
-    DirectionManager * _directionManager{};
+    DirectionManager* _directionManager{};
 
     /**
      * Distance matrix: _distMatrix[<door1, door2>] returns the distance from door1 to door2.
@@ -174,7 +177,8 @@ protected:
     std::map<std::pair<int, int>, double> _distMatrix;
 
     /**
-     * Path matrix: _pathsMatrix[<door1, door2>] returns the next target on the way from door1 to door2.
+     * Path matrix: _pathsMatrix[<door1, door2>] returns the next target on the way from door1 to
+     * door2.
      */
     std::map<std::pair<int, int>, int> _pathsMatrix;
 
@@ -191,22 +195,22 @@ protected:
     /**
      * Geometry used during the simulation.
      */
-    Building * _building{};
+    Building* _building{};
 
     /**
      * Map of the underlying floorfields. _locffviafm[id] gives the floorfield in room with ID==id.
      */
-    std::map<int, UnivFFviaFM *> _floorfieldByRoomID;
+    std::map<int, UnivFFviaFM*> _floorfieldByRoomID;
 
     /**
      * Map containing all the exits from the geometry.
      */
-    std::map<int, Transition *> _exitsByUID;
+    std::map<int, Transition*> _exitsByUID;
 
     /**
      * Map containing all doors in geometry.
      */
-    std::map<int, Crossing *> _doorByUID;
+    std::map<int, Crossing*> _doorByUID;
 
     /**
      * Time when the next recalculation is needed when using \a _strategy=ROUTING_FF_QUICKEST.

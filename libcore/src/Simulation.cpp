@@ -61,18 +61,19 @@
 #include <variant>
 
 Simulation::Simulation(
-    Configuration * args,
-    std::unique_ptr<Building> && building,
-    std::unique_ptr<Geometry> && geometry) :
-    _config(args),
-    _clock(_config->dT),
-    _neighborhoodSearch(_config->linkedCellSize),
-    _building(std::move(building)),
-    _directionManager(DirectionManager::Create(*args, _building.get())),
-    _geometry(std::move(geometry)),
-    _routingEngine(std::make_unique<RoutingEngine>(args, _building.get(), _directionManager.get())),
-    _operationalModel(
-        OperationalModel::CreateFromType(args->operationalModel, *args, _directionManager.get()))
+    Configuration* args,
+    std::unique_ptr<Building>&& building,
+    std::unique_ptr<Geometry>&& geometry)
+    : _config(args)
+    , _clock(_config->dT)
+    , _neighborhoodSearch(_config->linkedCellSize)
+    , _building(std::move(building))
+    , _directionManager(DirectionManager::Create(*args, _building.get()))
+    , _geometry(std::move(geometry))
+    , _routingEngine(
+          std::make_unique<RoutingEngine>(args, _building.get(), _directionManager.get()))
+    , _operationalModel(
+          OperationalModel::CreateFromType(args->operationalModel, *args, _directionManager.get()))
 {
     _routingEngine->SetSimulation(this);
 }
@@ -91,7 +92,7 @@ void Simulation::Iterate()
     // Intercepting external door events is not an issue, what is
     // problematic however is that our old door models (Crossings/Transitions)
     // implement flow control and close themselves.
-    for(const auto & [id, t] : _building->GetAllTransitions()) {
+    for(const auto& [id, t] : _building->GetAllTransitions()) {
         _geometry->UpdateDoorState(id, t->GetState());
     }
 
@@ -103,7 +104,7 @@ void Simulation::Iterate()
             _agents.begin(),
             _agents.end(),
             updates.begin(),
-            [this](auto && agent) -> std::optional<PedestrianUpdate> {
+            [this](auto&& agent) -> std::optional<PedestrianUpdate> {
                 if(agent->InPremovement(_clock.ElapsedTime())) {
                     return std::nullopt;
                 }
@@ -112,7 +113,7 @@ void Simulation::Iterate()
             });
 
         auto agent_iter = _agents.begin();
-        std::for_each(updates.begin(), updates.end(), [this, &agent_iter](auto && update) {
+        std::for_each(updates.begin(), updates.end(), [this, &agent_iter](auto&& update) {
             if(update) {
                 _operationalModel->ApplyUpdate(*update, **agent_iter);
             }
@@ -131,12 +132,12 @@ void Simulation::Iterate()
     _clock.Advance();
 }
 
-void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
+void Simulation::AddAgent(std::unique_ptr<Pedestrian>&& agent)
 {
     agent->SetBuilding(_building.get());
     const Point pos = agent->GetPos();
-    auto * router   = _routingEngine->GetRouter(agent->GetRouterID());
-    Point target    = Point{0.0, 0.0};
+    auto* router = _routingEngine->GetRouter(agent->GetRouterID());
+    Point target = Point{0.0, 0.0};
     if(router->FindExit(agent.get()) == -1) {
         Point p1 = agent->GetPos();
         p1.x += 1;
@@ -161,9 +162,9 @@ void Simulation::AddAgent(std::unique_ptr<Pedestrian> && agent)
     _agents.emplace_back(std::move(agent));
 }
 
-void Simulation::AddAgents(std::vector<std::unique_ptr<Pedestrian>> && agents)
+void Simulation::AddAgents(std::vector<std::unique_ptr<Pedestrian>>&& agents)
 {
-    for(auto && agent : agents) {
+    for(auto&& agent : agents) {
         AddAgent(std::move(agent));
     }
 }
@@ -174,7 +175,7 @@ void Simulation::RemoveAgents(std::vector<Pedestrian::UID> ids)
         std::remove_if(
             _agents.begin(),
             _agents.end(),
-            [&ids](auto & agent) {
+            [&ids](auto& agent) {
                 const auto uid = agent->GetUID();
                 return std::find_if(ids.begin(), ids.end(), [uid](Pedestrian::UID other) {
                            return uid == other;
@@ -183,17 +184,17 @@ void Simulation::RemoveAgents(std::vector<Pedestrian::UID> ids)
         _agents.end());
 }
 
-Pedestrian & Simulation::Agent(Pedestrian::UID id) const
+Pedestrian& Simulation::Agent(Pedestrian::UID id) const
 {
     const auto iter = std::find_if(
-        _agents.begin(), _agents.end(), [id](auto & ped) { return id == ped->GetUID(); });
+        _agents.begin(), _agents.end(), [id](auto& ped) { return id == ped->GetUID(); });
     if(iter == _agents.end()) {
         throw std::logic_error("Trying to access unknown Agent.");
     }
     return **iter;
 }
 
-const std::vector<std::unique_ptr<Pedestrian>> & Simulation::Agents() const
+const std::vector<std::unique_ptr<Pedestrian>>& Simulation::Agents() const
 {
     return _agents;
 }
@@ -230,7 +231,7 @@ void Simulation::ResetDoor(int doorId)
 void Simulation::ActivateTrain(
     int trainId,
     int trackId,
-    const TrainType & type,
+    const TrainType& type,
     double startOffset,
     bool reversed)
 {
@@ -247,9 +248,9 @@ void Simulation::DeactivateTrain(int trainId, int trackId)
             fmt::format(FMT_STRING("Could not find track with ID {:d}"), trackId));
     }
 
-    const auto roomID    = track->_roomID;
+    const auto roomID = track->_roomID;
     const auto subroomID = track->_subRoomID;
-    auto * subroom       = _building->GetRoom(roomID)->GetSubRoom(subroomID);
+    auto* subroom = _building->GetRoom(roomID)->GetSubRoom(subroomID);
 
     // remove temp added walls
     const auto tempAddedWalls = _building->GetTrainWallsAdded(trainId);
@@ -257,7 +258,7 @@ void Simulation::DeactivateTrain(int trainId, int trackId)
         std::for_each(
             std::begin(tempAddedWalls.value()),
             std::end(tempAddedWalls.value()),
-            [&subroom, this](const Wall & wall) {
+            [&subroom, this](const Wall& wall) {
                 subroom->RemoveWall(wall);
                 _geometry->RemoveLineSegment(wall);
             });
@@ -271,7 +272,7 @@ void Simulation::DeactivateTrain(int trainId, int trackId)
         std::for_each(
             std::begin(tempRemovedWalls.value()),
             std::end(tempRemovedWalls.value()),
-            [&subroom, this](const Wall & wall) {
+            [&subroom, this](const Wall& wall) {
                 subroom->AddWall(wall);
                 _geometry->AddLineSegment(wall);
             });
@@ -285,7 +286,7 @@ void Simulation::DeactivateTrain(int trainId, int trackId)
         std::for_each(
             std::begin(tempDoors.value()),
             std::end(tempDoors.value()),
-            [&subroom, this](const Transition & door) {
+            [&subroom, this](const Transition& door) {
                 subroom->RemoveTransitionByUID(door.GetUniqueID());
                 _building->RemoveTransition(&door);
             });
@@ -301,9 +302,9 @@ bool Simulation::InitArgs()
 {
     _fps = _config->fps;
 
-    //perform customs initialisation, like computing the phi for the gcfm
-    //this should be called after the routing engine has been initialised
-    // because a direction is needed for this initialisation.
+    // perform customs initialisation, like computing the phi for the gcfm
+    // this should be called after the routing engine has been initialised
+    //  because a direction is needed for this initialisation.
     LOG_INFO("Init Operational Model starting ...");
     _operationalModel->Init(this);
     LOG_INFO("Init Operational Model done.");
@@ -313,8 +314,8 @@ bool Simulation::InitArgs()
     // because then, invalid pedestrians have been deleted and FindExit()
     // has been called.
 
-    //other initializations
-    for(auto && ped : _agents) {
+    // other initializations
+    for(auto&& ped : _agents) {
         ped->SetDeltaT(_clock.dT());
     }
     _seed = _config->seed;
@@ -337,7 +338,7 @@ void Simulation::UpdateLocations()
     auto pedsOutside = SimulationHelper::FindPedestriansOutside(*_building, _agents);
     RemoveAgents(pedsOutside);
 
-    //TODO discuss simulation flow -> better move to main loop, does not belong here
+    // TODO discuss simulation flow -> better move to main loop, does not belong here
     bool geometryChangedFlow = SimulationHelper::UpdateFlowRegulation(*_building, _clock);
     bool geometryChangedTrain =
         SimulationHelper::UpdateTrainFlowRegulation(*_building, _clock.ElapsedTime());
@@ -351,10 +352,10 @@ void Simulation::UpdateRoutes()
         LOG_INFO("Update router during simulation.");
         _routingEngine->UpdateRouter();
     }
-    for(const auto & ped : _agents) {
+    for(const auto& ped : _agents) {
         // set ped waiting, if no target is found
-        auto * router = _routingEngine->GetRouter(ped->GetRouterID());
-        int target    = router->FindExit(ped.get());
+        auto* router = _routingEngine->GetRouter(ped->GetRouterID());
+        int target = router->FindExit(ped.get());
 
         if(target == FINAL_DEST_OUT) {
             ped->StartWaiting();
@@ -364,10 +365,10 @@ void Simulation::UpdateRoutes()
             }
         }
         if(target != FINAL_DEST_OUT) {
-            const Hline * door          = _building->GetTransOrCrossByUID(target);
+            const Hline* door = _building->GetTransOrCrossByUID(target);
             auto [roomID, subRoomID, _] = _building->GetRoomAndSubRoomIDs(ped->GetPos());
 
-            if(const auto * cross = dynamic_cast<const Crossing *>(door)) {
+            if(const auto* cross = dynamic_cast<const Crossing*>(door)) {
                 if(cross->IsInRoom(roomID) && cross->IsInSubRoom(subRoomID)) {
                     if(!ped->IsWaiting() && cross->IsTempClose()) {
                         ped->StartWaiting();
@@ -386,8 +387,8 @@ void Simulation::UpdateRoutes()
 void Simulation::PrintStatistics(double simTime)
 {
     LOG_INFO("Usage of Exits");
-    for(const auto & itr : _building->GetAllTransitions()) {
-        Transition * goal = itr.second;
+    for(const auto& itr : _building->GetAllTransitions()) {
+        Transition* goal = itr.second;
         if(goal->GetDoorUsage()) {
             LOG_INFO(
                 "Exit ID [{}] used by [{}] pedestrians. Last passing time [{:.2f}] s",
@@ -421,8 +422,8 @@ void Simulation::PrintStatistics(double simTime)
     }
 
     LOG_INFO("Usage of Crossings");
-    for(const auto & itr : _building->GetAllCrossings()) {
-        Crossing * goal = itr.second;
+    for(const auto& itr : _building->GetAllCrossings()) {
+        Crossing* goal = itr.second;
         if(goal->GetDoorUsage()) {
             LOG_INFO(
                 "Crossing ID [{}] in Room ID [{}] used by [{}] pedestrians. Last passing "

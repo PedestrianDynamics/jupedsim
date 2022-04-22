@@ -26,17 +26,19 @@
 #include <Logger.hpp>
 #include <cstdarg> // va_start and va_end
 
-PedDistributionParser::PedDistributionParser(const Configuration * configuration) :
-    _configuration(configuration)
+PedDistributionParser::PedDistributionParser(const Configuration* configuration)
+    : _configuration(configuration)
 {
 }
 
-PedDistributionParser::~PedDistributionParser() {}
+PedDistributionParser::~PedDistributionParser()
+{
+}
 
 bool PedDistributionParser::LoadPedDistribution(
-    std::vector<std::shared_ptr<StartDistribution>> & startDis,
-    std::vector<std::shared_ptr<StartDistribution>> & startDisSub,
-    std::vector<std::shared_ptr<AgentsSource>> & startDisSources)
+    std::vector<std::shared_ptr<StartDistribution>>& startDis,
+    std::vector<std::shared_ptr<StartDistribution>>& startDisSub,
+    std::vector<std::shared_ptr<AgentsSource>>& startDisSources)
 {
     LOG_INFO("Loading and parsing the persons attributes");
 
@@ -48,33 +50,33 @@ bool PedDistributionParser::LoadPedDistribution(
         return false;
     }
 
-    TiXmlNode * xRootNode = doc.RootElement()->FirstChild("agents");
+    TiXmlNode* xRootNode = doc.RootElement()->FirstChild("agents");
     if(!xRootNode) {
         LOG_ERROR("Could not load persons attributes");
         return false;
     }
 
-    TiXmlNode * xDist = xRootNode->FirstChild("agents_distribution");
-    for(TiXmlElement * e = xDist->FirstChildElement("group"); e;
-        e                = e->NextSiblingElement("group")) {
-        int room_id       = xmltoi(e->Attribute("room_id"));
-        int group_id      = xmltoi(e->Attribute("group_id"));
-        int subroom_id    = xmltoi(e->Attribute("subroom_id"), -1);
-        int number        = xmltoi(e->Attribute("number"), 0);
+    TiXmlNode* xDist = xRootNode->FirstChild("agents_distribution");
+    for(TiXmlElement* e = xDist->FirstChildElement("group"); e;
+        e = e->NextSiblingElement("group")) {
+        int room_id = xmltoi(e->Attribute("room_id"));
+        int group_id = xmltoi(e->Attribute("group_id"));
+        int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
+        int number = xmltoi(e->Attribute("number"), 0);
         int agent_para_id = xmltoi(e->Attribute("agent_parameter_id"), -1);
 
-        int goal_id              = xmltoi(e->Attribute("goal_id"), FINAL_DEST_OUT);
-        int router_id            = xmltoi(e->Attribute("router_id"), -1);
-        int route_id             = xmltoi(e->Attribute("route_id"), -1);
-        double premovement_mean  = xmltof(e->Attribute("pre_movement_mean"), 0);
+        int goal_id = xmltoi(e->Attribute("goal_id"), FINAL_DEST_OUT);
+        int router_id = xmltoi(e->Attribute("router_id"), -1);
+        int route_id = xmltoi(e->Attribute("route_id"), -1);
+        double premovement_mean = xmltof(e->Attribute("pre_movement_mean"), 0);
         double premovement_sigma = xmltof(e->Attribute("pre_movement_sigma"), 0);
-        double x_min             = xmltof(e->Attribute("x_min"), -FLT_MAX);
-        double x_max             = xmltof(e->Attribute("x_max"), FLT_MAX);
-        double y_min             = xmltof(e->Attribute("y_min"), -FLT_MAX);
-        double y_max             = xmltof(e->Attribute("y_max"), FLT_MAX);
-        double bounds[4]         = {x_min, x_max, y_min, y_max};
+        double x_min = xmltof(e->Attribute("x_min"), -FLT_MAX);
+        double x_max = xmltof(e->Attribute("x_max"), FLT_MAX);
+        double y_min = xmltof(e->Attribute("y_min"), -FLT_MAX);
+        double y_max = xmltof(e->Attribute("y_max"), FLT_MAX);
+        double bounds[4] = {x_min, x_max, y_min, y_max};
 
-        //sanity check
+        // sanity check
         if((x_max < x_min) || (y_max < y_min)) {
             LOG_ERROR(
                 "Invalid bounds [{:.2f}, {:.2f}, {:.2f}, {:.2f}] of the group [{}]. Max "
@@ -124,16 +126,16 @@ bool PedDistributionParser::LoadPedDistribution(
         }
     }
 
-    //Parse the sources
-    TiXmlNode * xSources = xRootNode->FirstChild("agents_sources");
+    // Parse the sources
+    TiXmlNode* xSources = xRootNode->FirstChild("agents_sources");
     if(xSources) {
         LOG_INFO("Loading sources");
         // ------ parse sources from inifile
-        for(TiXmlElement * e = xSources->FirstChildElement("source"); e;
-            e                = e->NextSiblingElement("source")) {
+        for(TiXmlElement* e = xSources->FirstChildElement("source"); e;
+            e = e->NextSiblingElement("source")) {
             startDisSources.push_back(parseSourceNode(e));
-        } //for
-        TiXmlNode * xFileNode = xSources->FirstChild("file");
+        } // for
+        TiXmlNode* xFileNode = xSources->FirstChild("file");
         //------- parse sources from external file
         if(xFileNode) {
             fs::path p(_configuration->projectRootDir);
@@ -147,7 +149,7 @@ bool PedDistributionParser::LoadPedDistribution(
                 LOG_ERROR("{}", docSource.ErrorDesc());
                 return false;
             }
-            TiXmlElement * xRootNodeSource = docSource.RootElement();
+            TiXmlElement* xRootNodeSource = docSource.RootElement();
             if(!xRootNodeSource) {
                 LOG_ERROR("Root element does not exist in source file.");
                 return false;
@@ -157,52 +159,52 @@ bool PedDistributionParser::LoadPedDistribution(
                 LOG_ERROR("Root element value in source file is not 'JPScore'.");
                 return false;
             }
-            TiXmlNode * xSourceF = xRootNodeSource->FirstChild("agents_sources");
+            TiXmlNode* xSourceF = xRootNodeSource->FirstChild("agents_sources");
             if(!xSourceF) {
                 LOG_ERROR("No agents_sources tag in file not found.");
                 return false;
             }
             LOG_INFO("Loading sources from file");
-            TiXmlNode * xSourceNodeF = xSourceF->FirstChild("source");
+            TiXmlNode* xSourceNodeF = xSourceF->FirstChild("source");
             if(xSourceNodeF) {
-                for(TiXmlElement * e = xSourceF->FirstChildElement("source"); e;
-                    e                = e->NextSiblingElement("source")) {
+                for(TiXmlElement* e = xSourceF->FirstChildElement("source"); e;
+                    e = e->NextSiblingElement("source")) {
                     startDisSources.push_back(parseSourceNode(e));
-                } //for
+                } // for
             } else
                 LOG_INFO("No source info found in source file");
         } // source file found
-    }     //sources
+    } // sources
 
     LOG_INFO("Done loading pedestrian distribution.");
     return true;
 }
 
-std::shared_ptr<AgentsSource> PedDistributionParser::parseSourceNode(TiXmlElement * e)
+std::shared_ptr<AgentsSource> PedDistributionParser::parseSourceNode(TiXmlElement* e)
 {
-    int id                 = xmltoi(e->Attribute("id"), -1);
-    int frequency          = xmltoi(e->Attribute("frequency"), 1);
-    int agents_max         = xmltoi(e->Attribute("agents_max"), 10);
-    int group_id           = xmltoi(e->Attribute("group_id"), -1);
-    std::string caption    = xmltoa(e->Attribute("caption"), "no caption");
+    int id = xmltoi(e->Attribute("id"), -1);
+    int frequency = xmltoi(e->Attribute("frequency"), 1);
+    int agents_max = xmltoi(e->Attribute("agents_max"), 10);
+    int group_id = xmltoi(e->Attribute("group_id"), -1);
+    std::string caption = xmltoa(e->Attribute("caption"), "no caption");
     std::string str_greedy = xmltoa(e->Attribute("greedy"), "false");
-    float percent          = xmltof(e->Attribute("percent"), 1);
-    float rate             = xmltof(e->Attribute("rate"), -1);
-    double time            = xmltof(e->Attribute("time"), 0);
-    float startx      = xmltof(e->Attribute("startX"), std::numeric_limits<float>::quiet_NaN());
-    float starty      = xmltof(e->Attribute("startY"), std::numeric_limits<float>::quiet_NaN());
-    bool greedy       = (str_greedy == "true") ? true : false;
-    float xmin        = xmltof(e->Attribute("x_min"), std::numeric_limits<float>::lowest());
-    float xmax        = xmltof(e->Attribute("x_max"), FLT_MAX);
-    float ymin        = xmltof(e->Attribute("y_min"), std::numeric_limits<float>::lowest());
-    float ymax        = xmltof(e->Attribute("y_max"), FLT_MAX);
+    float percent = xmltof(e->Attribute("percent"), 1);
+    float rate = xmltof(e->Attribute("rate"), -1);
+    double time = xmltof(e->Attribute("time"), 0);
+    float startx = xmltof(e->Attribute("startX"), std::numeric_limits<float>::quiet_NaN());
+    float starty = xmltof(e->Attribute("startY"), std::numeric_limits<float>::quiet_NaN());
+    bool greedy = (str_greedy == "true") ? true : false;
+    float xmin = xmltof(e->Attribute("x_min"), std::numeric_limits<float>::lowest());
+    float xmax = xmltof(e->Attribute("x_max"), FLT_MAX);
+    float ymin = xmltof(e->Attribute("y_min"), std::numeric_limits<float>::lowest());
+    float ymax = xmltof(e->Attribute("y_max"), FLT_MAX);
     float chunkAgents = xmltof(e->Attribute("N_create"), 1);
-    int timeMin       = xmltof(e->Attribute("time_min"), std::numeric_limits<int>::min());
-    int timeMax       = xmltof(e->Attribute("time_max"), std::numeric_limits<int>::max());
+    int timeMin = xmltof(e->Attribute("time_min"), std::numeric_limits<int>::min());
+    int timeMax = xmltof(e->Attribute("time_max"), std::numeric_limits<int>::max());
     std::vector<float> boundaries = {xmin, xmax, ymin, ymax};
-    std::vector<int> lifeSpan     = {timeMin, timeMax};
-    float SizeBB                  = 1;
-    bool isBigEnough              = (abs(xmin - xmax) > SizeBB) && (abs(ymin - ymax) > SizeBB);
+    std::vector<int> lifeSpan = {timeMin, timeMax};
+    float SizeBB = 1;
+    bool isBigEnough = (abs(xmin - xmax) > SizeBB) && (abs(ymin - ymax) > SizeBB);
     if(!isBigEnough) {
         LOG_WARNING("Source {} got too small bounding box.", id);
         LOG_WARNING(

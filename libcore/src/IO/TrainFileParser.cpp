@@ -3,7 +3,7 @@
 #include <Logger.hpp>
 #include <chrono>
 
-static std::optional<TrainType> ParseTrainTypeNode(TiXmlElement * node)
+static std::optional<TrainType> ParseTrainTypeNode(TiXmlElement* node)
 {
     LOG_INFO("Loading train type");
 
@@ -21,7 +21,7 @@ static std::optional<TrainType> ParseTrainTypeNode(TiXmlElement * node)
 
     // Read length and check if correct value
     double length = -std::numeric_limits<double>::infinity();
-    if(const char * attribute = node->Attribute("length"); attribute) {
+    if(const char* attribute = node->Attribute("length"); attribute) {
         if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
            value >= 0.) {
             length = value;
@@ -36,11 +36,11 @@ static std::optional<TrainType> ParseTrainTypeNode(TiXmlElement * node)
     LOG_INFO("length: {}", length);
 
     std::map<int, TrainDoor> doors;
-    for(TiXmlElement * xDoor = node->FirstChildElement("door"); xDoor != nullptr;
-        xDoor                = xDoor->NextSiblingElement("door")) {
+    for(TiXmlElement* xDoor = node->FirstChildElement("door"); xDoor != nullptr;
+        xDoor = xDoor->NextSiblingElement("door")) {
         // Read ID and check if correct value
         int id = -std::numeric_limits<int>::infinity();
-        if(const char * attribute = xDoor->Attribute("id"); attribute) {
+        if(const char* attribute = xDoor->Attribute("id"); attribute) {
             if(int value = xmltoi(attribute, -std::numeric_limits<int>::infinity()); value >= 0) {
                 id = value;
             } else {
@@ -54,7 +54,7 @@ static std::optional<TrainType> ParseTrainTypeNode(TiXmlElement * node)
 
         // Read distance and check if correct value
         double distance = -std::numeric_limits<double>::infinity();
-        if(const char * attribute = xDoor->Attribute("distance"); attribute) {
+        if(const char* attribute = xDoor->Attribute("distance"); attribute) {
             if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
                value >= 0.) {
                 distance = value;
@@ -70,7 +70,7 @@ static std::optional<TrainType> ParseTrainTypeNode(TiXmlElement * node)
 
         // Read width and check if correct value
         double width = -std::numeric_limits<double>::infinity();
-        if(const char * attribute = xDoor->Attribute("width"); attribute) {
+        if(const char* attribute = xDoor->Attribute("width"); attribute) {
             if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
                value > 0.) {
                 width = value;
@@ -86,7 +86,7 @@ static std::optional<TrainType> ParseTrainTypeNode(TiXmlElement * node)
 
         // Read flow and check if correct value
         double flow = -std::numeric_limits<double>::infinity();
-        if(const char * attribute = xDoor->Attribute("outflow"); attribute) {
+        if(const char* attribute = xDoor->Attribute("outflow"); attribute) {
             if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
                value > 0.) {
                 flow = value;
@@ -106,7 +106,7 @@ static std::optional<TrainType> ParseTrainTypeNode(TiXmlElement * node)
     }
 
     LOG_INFO("number of doors: {}", doors.size());
-    for(const auto & [_, d] : doors) {
+    for(const auto& [_, d] : doors) {
         LOG_INFO(
             "Door:\tdistance: {:5.2f}\twidth: {:5.2f}\toutflow: {:5.2f}",
             d._distance,
@@ -126,11 +126,11 @@ struct TrainEventInfo {
 };
 
 static std::optional<TrainEventInfo>
-ParseTrainTimeTableNode(TiXmlElement * node, const std::map<std::string, TrainType> & trainTypes)
+ParseTrainTimeTableNode(TiXmlElement* node, const std::map<std::string, TrainType>& trainTypes)
 {
     // Read ID and check if correct value
     int id = std::numeric_limits<int>::min();
-    if(const char * attribute = node->Attribute("id"); attribute) {
+    if(const char* attribute = node->Attribute("id"); attribute) {
         if(int value = xmltoi(attribute, std::numeric_limits<int>::min());
            value > -1 && attribute == std::to_string(value)) {
             id = value;
@@ -145,7 +145,7 @@ ParseTrainTimeTableNode(TiXmlElement * node, const std::map<std::string, TrainTy
 
     // Read track_id and check if correct value
     int trackID = std::numeric_limits<int>::min();
-    if(const char * attribute = node->Attribute("track_id"); attribute) {
+    if(const char* attribute = node->Attribute("track_id"); attribute) {
         if(int value = xmltoi(attribute, std::numeric_limits<int>::min());
            value > -1 && attribute == std::to_string(value)) {
             trackID = value;
@@ -163,7 +163,7 @@ ParseTrainTimeTableNode(TiXmlElement * node, const std::map<std::string, TrainTy
 
     // Read train type and check if correct value
     std::string type;
-    if(const char * attribute = node->Attribute("type"); attribute) {
+    if(const char* attribute = node->Attribute("type"); attribute) {
         if(std::string value = xmltoa(attribute, ""); !value.empty()) {
             type = value;
         } else {
@@ -187,7 +187,7 @@ ParseTrainTimeTableNode(TiXmlElement * node, const std::map<std::string, TrainTy
 
     // Read train type and check if correct value
     double trainOffset = -std::numeric_limits<double>::infinity();
-    if(const char * attribute = node->Attribute("train_offset"); attribute) {
+    if(const char* attribute = node->Attribute("train_offset"); attribute) {
         if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
            value >= 0.) {
             trainOffset = value;
@@ -203,7 +203,7 @@ ParseTrainTimeTableNode(TiXmlElement * node, const std::map<std::string, TrainTy
 
     // Read from_end and check if correct value
     bool reversed = false;
-    if(const char * attribute = node->Attribute("reversed"); attribute) {
+    if(const char* attribute = node->Attribute("reversed"); attribute) {
         std::string in = xmltoa(attribute, "false");
         std::transform(in.begin(), in.end(), in.begin(), ::tolower);
 
@@ -227,11 +227,11 @@ ParseTrainTimeTableNode(TiXmlElement * node, const std::map<std::string, TrainTy
 }
 
 static std::optional<std::tuple<double, double>>
-ParseTrainTimeTableTimes(TiXmlElement * node, int trainID)
+ParseTrainTimeTableTimes(TiXmlElement* node, int trainID)
 {
     // Read arrival_time and check if correct value
     double arrivalTime = -std::numeric_limits<double>::infinity();
-    if(const char * attribute = node->Attribute("arrival_time"); attribute) {
+    if(const char* attribute = node->Attribute("arrival_time"); attribute) {
         if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
            value >= 0.) {
             arrivalTime = value;
@@ -249,7 +249,7 @@ ParseTrainTimeTableTimes(TiXmlElement * node, int trainID)
 
     // Read departure_time and check if correct value
     double departureTime = -std::numeric_limits<double>::infinity();
-    if(const char * attribute = node->Attribute("departure_time"); attribute) {
+    if(const char* attribute = node->Attribute("departure_time"); attribute) {
         if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
            value >= 0.) {
             departureTime = value;
@@ -277,15 +277,15 @@ ParseTrainTimeTableTimes(TiXmlElement * node, int trainID)
 }
 
 TrainFileParser::TimeTableContents TrainFileParser::ParseTrainTimeTable(
-    const std::map<std::string, TrainType> & trainTypes,
-    const fs::path & trainTimeTableFile)
+    const std::map<std::string, TrainType>& trainTypes,
+    const fs::path& trainTimeTableFile)
 {
     TiXmlDocument docTTT(trainTimeTableFile.string());
     if(!docTTT.LoadFile()) {
         LOG_ERROR("{}", docTTT.ErrorDesc());
         LOG_ERROR("Could not parse the train timetable file.");
     }
-    TiXmlElement * xTTT = docTTT.RootElement();
+    TiXmlElement* xTTT = docTTT.RootElement();
     if(!xTTT) {
         LOG_ERROR("Root element does not exist in TTT file.");
     }
@@ -294,8 +294,7 @@ TrainFileParser::TimeTableContents TrainFileParser::ParseTrainTimeTable(
     }
 
     TimeTableContents result;
-    for(TiXmlElement * e = xTTT->FirstChildElement("train"); e;
-        e                = e->NextSiblingElement("train")) {
+    for(TiXmlElement* e = xTTT->FirstChildElement("train"); e; e = e->NextSiblingElement("train")) {
         auto trainInfo = ParseTrainTimeTableNode(e, trainTypes);
         if(trainInfo.has_value()) {
             auto trainTimes = ParseTrainTimeTableTimes(e, trainInfo.value().trainID);
@@ -311,7 +310,7 @@ TrainFileParser::TimeTableContents TrainFileParser::ParseTrainTimeTable(
                 LOG_INFO("arrival_time: {}", arrivalTime);
                 LOG_INFO("departure_time: {}", departureTime);
 
-                const auto & trainType = trainTypes.at(trainInfo.value().trainType._type);
+                const auto& trainType = trainTypes.at(trainInfo.value().trainType._type);
                 const TrainEventInfo eventInfo{
                     trainInfo.value().trainID,
                     trainInfo.value().trackID,
@@ -347,7 +346,7 @@ TrainFileParser::TimeTableContents TrainFileParser::ParseTrainTimeTable(
     return result;
 }
 
-std::map<std::string, TrainType> TrainFileParser::ParseTrainTypes(const fs::path & trainTypeFile)
+std::map<std::string, TrainType> TrainFileParser::ParseTrainTypes(const fs::path& trainTypeFile)
 {
     std::map<std::string, TrainType> trainTypes;
     TiXmlDocument docTT(trainTypeFile.string());
@@ -356,7 +355,7 @@ std::map<std::string, TrainType> TrainFileParser::ParseTrainTypes(const fs::path
         LOG_ERROR("Could not parse the train type file.");
         return trainTypes;
     }
-    TiXmlElement * xTT = docTT.RootElement();
+    TiXmlElement* xTT = docTT.RootElement();
     if(!xTT) {
         LOG_ERROR("Root element does not exist in TT file.");
         return trainTypes;
@@ -365,7 +364,7 @@ std::map<std::string, TrainType> TrainFileParser::ParseTrainTypes(const fs::path
         LOG_ERROR("Parsing train type file. Root element value is not 'train_type'.");
         return trainTypes;
     }
-    for(TiXmlElement * e = xTT->FirstChildElement("train"); e; e = e->NextSiblingElement("train")) {
+    for(TiXmlElement* e = xTT->FirstChildElement("train"); e; e = e->NextSiblingElement("train")) {
         auto trainType = ParseTrainTypeNode(e);
         if(trainType.has_value()) {
             if(trainTypes.find(trainType.value()._type) != std::end(trainTypes)) {

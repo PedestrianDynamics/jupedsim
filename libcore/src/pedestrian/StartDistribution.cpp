@@ -34,31 +34,32 @@
 
 StartDistribution::StartDistribution(int seed)
 {
-    _roomID             = -1;
-    _subroomID          = -1;
-    _subroomUID         = -1;
-    _nPeds              = -1;
-    _groupID            = -1;
-    _goalID             = -1;
-    _routerID           = -1;
-    _routeID            = -1;
-    _startX             = NAN;
-    _startY             = NAN;
-    _startZ             = NAN;
-    _xMin               = -FLT_MAX;
-    _xMax               = FLT_MAX;
-    _yMin               = -FLT_MAX;
-    _yMax               = FLT_MAX;
-    _groupParameters    = nullptr;
+    _roomID = -1;
+    _subroomID = -1;
+    _subroomUID = -1;
+    _nPeds = -1;
+    _groupID = -1;
+    _goalID = -1;
+    _routerID = -1;
+    _routeID = -1;
+    _startX = NAN;
+    _startY = NAN;
+    _startZ = NAN;
+    _xMin = -FLT_MAX;
+    _xMax = FLT_MAX;
+    _yMin = -FLT_MAX;
+    _yMax = FLT_MAX;
+    _groupParameters = nullptr;
     static bool _seeded = false; // seed only once, not every time
     if(!_seeded) {
         _generator = std::default_random_engine(seed);
-        _seeded    = true;
+        _seeded = true;
     }
 }
 
-StartDistribution::~StartDistribution() {}
-
+StartDistribution::~StartDistribution()
+{
+}
 
 std::default_random_engine StartDistribution::GetGenerator()
 {
@@ -125,7 +126,6 @@ void StartDistribution::SetSubroomUID(int subroomUId)
     _subroomUID = subroomUId;
 }
 
-
 int StartDistribution::GetRouteId() const
 {
     return _routeID;
@@ -151,10 +151,9 @@ void StartDistribution::SetAgentsNumber(int N)
     _nPeds = N;
 }
 
-
-Pedestrian * StartDistribution::GenerateAgent(Building * building, std::vector<Point> & positions)
+Pedestrian* StartDistribution::GenerateAgent(Building* building, std::vector<Point>& positions)
 {
-    Pedestrian * ped = new Pedestrian();
+    Pedestrian* ped = new Pedestrian();
     // PedIndex
     ped->SetFinalDestination(GetGoalId());
     ped->SetGroup(GetGroupId());
@@ -187,7 +186,7 @@ Pedestrian * StartDistribution::GenerateAgent(Building * building, std::vector<P
     // first default Position
     int index = -1;
 
-    //in the case a range was specified
+    // in the case a range was specified
     for(unsigned int a = 0; a < positions.size(); a++) {
         Point pos = positions[a];
         if((_xMin <= pos.x) && (pos.x <= _xMax) && (_yMin <= pos.y) && (pos.y < _yMax)) {
@@ -211,13 +210,13 @@ Pedestrian * StartDistribution::GenerateAgent(Building * building, std::vector<P
         }
     } else {
         Point pos = positions[index];
-        ped->SetPos(pos); //true for the initial position
+        ped->SetPos(pos); // true for the initial position
         positions.erase(positions.begin() + index);
 
-        const Point & start_pos = Point(_startX, _startY);
+        const Point& start_pos = Point(_startX, _startY);
 
         if(!std::isnan(start_pos.x) && !std::isnan(start_pos.y)) {
-            ped->SetPos(start_pos); //true for the initial position
+            ped->SetPos(start_pos); // true for the initial position
             LOG_INFO(
                 "fixed position for ped {} in Room {:d} {}",
                 ped->GetUID(),
@@ -245,12 +244,12 @@ Point StartDistribution::GetStartPosition() const
     return Point(_startX, _startY);
 }
 
-AgentsParameters * StartDistribution::GetGroupParameters() const
+AgentsParameters* StartDistribution::GetGroupParameters() const
 {
     return _groupParameters;
 }
 
-void StartDistribution::SetGroupParameters(AgentsParameters * groupParameters)
+void StartDistribution::SetGroupParameters(AgentsParameters* groupParameters)
 {
     _groupParameters = groupParameters;
 }

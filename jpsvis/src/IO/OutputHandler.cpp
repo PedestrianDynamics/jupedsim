@@ -25,7 +25,6 @@
  *
  **/
 
-
 #include "OutputHandler.hpp"
 
 #include <cmath>
@@ -55,7 +54,7 @@ int OutputHandler::GetErrors()
     return _nErrors;
 }
 
-void OutputHandler::Write(const string & str)
+void OutputHandler::Write(const string& str)
 {
     cout << str << endl;
 }
@@ -65,7 +64,7 @@ void OutputHandler::ProgressBar(double TotalPeds, double NowPeds)
     // based on this answer:
     // https://stackoverflow.com/questions/1637587/c-libcurl-console-progress-bar
     // how wide you want the progress meter to be
-    int totaldotz   = 40;
+    int totaldotz = 40;
     double fraction = NowPeds / TotalPeds;
     // part of the progressmeter that's already "full"
     int dotz = round(fraction * totaldotz);
@@ -87,7 +86,7 @@ void OutputHandler::ProgressBar(double TotalPeds, double NowPeds)
     fflush(stdout);
 }
 
-void OutputHandler::Write(const char * message, ...)
+void OutputHandler::Write(const char* message, ...)
 {
     char msg[CLENGTH] = "";
     va_list ap;
@@ -111,7 +110,7 @@ void OutputHandler::Write(const char * message, ...)
     }
 }
 
-void STDIOHandler::Write(const string & str)
+void STDIOHandler::Write(const string& str)
 {
     if(str.find("ERROR") != string::npos) {
         cerr << str << endl;
@@ -127,7 +126,7 @@ void STDIOHandler::Write(const string & str)
     }
 }
 
-FileHandler::FileHandler(const char * fn)
+FileHandler::FileHandler(const char* fn)
 {
     _pfp.open(fn);
     if(!_pfp.is_open()) {
@@ -143,7 +142,7 @@ FileHandler::~FileHandler()
     _pfp.close();
 }
 
-void FileHandler::Write(const string & str)
+void FileHandler::Write(const string& str)
 {
     // if (this != NULL) {
     _pfp << str << endl;
@@ -157,7 +156,7 @@ void FileHandler::Write(const string & str)
     }
 }
 
-void FileHandler::Write(const char * str_msg, ...)
+void FileHandler::Write(const char* str_msg, ...)
 {
     char msg[CLENGTH] = "";
     va_list ap;

@@ -38,7 +38,6 @@ class vtkAssembly;
 class vtkPolyData;
 class vtkPolyDataMapper;
 
-
 class LinePlotter2D
 {
 public:
@@ -48,51 +47,49 @@ public:
     void SetAllLineWidth(int width = 1);
 
     void PlotDoor(double m[3], double n[3], double scalar);
-    void changeDoorsColor(double * col);
+    void changeDoorsColor(double* col);
 
     void PlotWall(double m[3], double n[3], double scalar);
-    void changeWallsColor(double * col);
-
+    void changeWallsColor(double* col);
 
     void PlotNavLine(double m[3], double n[3], double scalar);
-    void changeNavLinesColor(double * col);
+    void changeNavLinesColor(double* col);
 
     void showDoors(bool status);
     void showWalls(bool status);
     void showNavLines(bool status);
 
-    vtkAssembly * createAssembly();
+    vtkAssembly* createAssembly();
     static bool doorColorsToDefault;
 
 private:
-    vtkLookupTable * m_lookupTable;
-    vtkAssembly * assembly;
-
+    vtkLookupTable* m_lookupTable;
+    vtkAssembly* assembly;
 
     /// doors parameters
     int door_curPointID;
     double door_width;
-    vtkPoints * door_points;
-    vtkCellArray * door_lines;
-    vtkFloatArray * door_lineScalars;
-    vtkPolyDataMapper * door_mapper;
-    vtkActor * door_actor;
+    vtkPoints* door_points;
+    vtkCellArray* door_lines;
+    vtkFloatArray* door_lineScalars;
+    vtkPolyDataMapper* door_mapper;
+    vtkActor* door_actor;
 
     /// walls parameters
     int wall_curPointID;
     double wall_width;
-    vtkPoints * wall_points;
-    vtkCellArray * wall_lines;
-    vtkFloatArray * wall_lineScalars;
-    vtkPolyDataMapper * wall_mapper;
-    vtkActor * wall_actor;
+    vtkPoints* wall_points;
+    vtkCellArray* wall_lines;
+    vtkFloatArray* wall_lineScalars;
+    vtkPolyDataMapper* wall_mapper;
+    vtkActor* wall_actor;
 
     /// navigation lines parameters
     int navline_curPointID;
     double navline_width;
-    vtkPoints * navline_points;
-    vtkCellArray * navline_lines;
-    vtkFloatArray * navline_lineScalars;
-    vtkPolyDataMapper * navline_mapper;
-    vtkActor * navline_actor;
+    vtkPoints* navline_points;
+    vtkCellArray* navline_lines;
+    vtkFloatArray* navline_lineScalars;
+    vtkPolyDataMapper* navline_mapper;
+    vtkActor* navline_actor;
 };

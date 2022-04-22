@@ -21,9 +21,9 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * \section Description
- * This class is responsible for materialising agent in a given location at a given frequency up to a maximum number.
- * The optimal position where to put the agents is given by various algorithms, for instance
- * the Voronoi algorithm or the Mitchell Best candidate algorithm.
+ * This class is responsible for materialising agent in a given location at a given frequency up to
+ *a maximum number. The optimal position where to put the agents is given by various algorithms, for
+ *instance the Voronoi algorithm or the Mitchell Best candidate algorithm.
  *
  **/
 #pragma once
@@ -34,7 +34,7 @@
 #include <memory>
 #include <vector>
 
-//Forward declarations
+// Forward declarations
 class Building;
 class Pedestrian;
 class Point;
@@ -43,89 +43,87 @@ class AgentsSourcesManager
 {
 public:
     /**
-      * Constructor
-      */
-    AgentsSourcesManager(Building * building);
+     * Constructor
+     */
+    AgentsSourcesManager(Building* building);
 
     /**
-      * disable copying
-      */
-    AgentsSourcesManager(const AgentsSourcesManager &) = delete;
+     * disable copying
+     */
+    AgentsSourcesManager(const AgentsSourcesManager&) = delete;
 
     /**
-      * Destructor
-      */
+     * Destructor
+     */
     ~AgentsSourcesManager() = default;
 
     /**
-      *  Add a new agent source
-      */
+     *  Add a new agent source
+     */
     void AddSource(std::shared_ptr<AgentsSource> src);
 
     /**
-      * @return true if all agents have been generated
-      * and the class is ready to leave
-      */
+     * @return true if all agents have been generated
+     * and the class is ready to leave
+     */
     bool IsCompleted() const;
 
     /**
-      *Schedule the pedestrians for the simulation
-      * @return true if all source are empty
-      */
+     *Schedule the pedestrians for the simulation
+     * @return true if all source are empty
+     */
     std::vector<std::unique_ptr<Pedestrian>> ProcessAllSources(double current_time) const;
 
     /**
-      * Trigger the sources to generate the specified
-      * number of agents for this frequency
-      */
+     * Trigger the sources to generate the specified
+     * number of agents for this frequency
+     */
     void GenerateAgents();
 
     /**
-      * Return the total number of agents that will be generated.
-      * used by visualisation to allocate space
-      *
-      */
+     * Return the total number of agents that will be generated.
+     * used by visualisation to allocate space
+     *
+     */
     long GetMaxAgentNumber() const;
 
     void SetMaxSimTime(int t);
 
 private:
     /**
-      * Position incoming pedestrian using voronoi methods
-      * @param src
-      * @param agent
-      */
-    void ComputeBestPositionVoronoi(AgentsSource * src, Pedestrian * agent) const;
+     * Position incoming pedestrian using voronoi methods
+     * @param src
+     * @param agent
+     */
+    void ComputeBestPositionVoronoi(AgentsSource* src, Pedestrian* agent) const;
 
-
-    void InitFixedPosition(AgentsSource * src, std::vector<Pedestrian *> & peds) const;
+    void InitFixedPosition(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
 
     /**
-      * Position incoming pedestrians completely random
-      */
+     * Position incoming pedestrians completely random
+     */
+    void ComputeBestPositionCompleteRandom(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
+
+    /**
+     * Position incoming pedestrians randomly
+     * @param src
+     * @param peds
+     */
+    void ComputeBestPositionRandom(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
+
+    /**
+     * Sort the given position vector by decreasing density
+     * @param positions,
+     * @param extra_position, an additional vector containing position to be considered in the
+     * density calculation
+     */
     void
-    ComputeBestPositionCompleteRandom(AgentsSource * src, std::vector<Pedestrian *> & peds) const;
-
-    /**
-      * Position incoming pedestrians randomly
-      * @param src
-      * @param peds
-      */
-    void ComputeBestPositionRandom(AgentsSource * src, std::vector<Pedestrian *> & peds) const;
-
-    /**
-      * Sort the given position vector by decreasing density
-      * @param positions,
-      * @param extra_position, an additional vector containing position to be considered in the density calculation
-      */
-    void SortPositionByDensity(std::vector<Point> & positions, std::vector<Point> & extra_positions)
-        const;
-
+    SortPositionByDensity(std::vector<Point>& positions, std::vector<Point>& extra_positions) const;
 
 private:
-    Building * _building;
+    Building* _building;
     std::vector<std::shared_ptr<AgentsSource>> _sources{};
-    ///to control the trigger of the events
+    /// to control the trigger of the events
     long int _lastUpdateTime = 0;
-    int maxSimTime           = 0;
+    int maxSimTime = 0;
 };

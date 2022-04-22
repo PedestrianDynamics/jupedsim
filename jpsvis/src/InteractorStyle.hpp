@@ -37,15 +37,15 @@ class Visualisation;
 class InteractorStyle : public vtkInteractorStyleTrackballCamera
 {
 private:
-    Visualisation * _visualisation{nullptr};
+    Visualisation* _visualisation{nullptr};
 
 public:
     virtual ~InteractorStyle() = default;
 
     /// static constructor
-    static InteractorStyle * New();
+    static InteractorStyle* New();
 
-    void SetVisualisation(Visualisation * visualisation);
+    void SetVisualisation(Visualisation* visualisation);
 
     void OnChar() override;
 

@@ -60,7 +60,7 @@ public:
      * Constructor.
      * @param costarray costs at each cell of grid.
      */
-    CompareCostTrips(double * costarray) : _costarray(costarray) {}
+    CompareCostTrips(double* costarray) : _costarray(costarray) {}
 
     /**
      * Comparison operator, returns if cost of a is larger than cost of b.
@@ -74,7 +74,7 @@ private:
     /**
      * cost (distances) of grid cells.
      */
-    double * _costarray = nullptr;
+    double* _costarray = nullptr;
 };
 
 class UnivFFviaFM
@@ -87,7 +87,7 @@ public:
      * @param wallAvoid wall avoidance distance.
      * @param useWallDistances should wall avoidance be considered in floor field.
      */
-    UnivFFviaFM(Room * room, double hx, double wallAvoid, bool useWallDistances);
+    UnivFFviaFM(Room* room, double hx, double wallAvoid, bool useWallDistances);
 
     /**
      * Disable default constructor.
@@ -97,13 +97,12 @@ public:
     /**
      * Disable copy constructor.
      */
-    UnivFFviaFM(UnivFFviaFM &) = delete;
+    UnivFFviaFM(UnivFFviaFM&) = delete;
 
     /**
      * Deconstructor.
      */
     virtual ~UnivFFviaFM();
-
 
     /**
      * Computes floor fields for all doors.
@@ -141,7 +140,7 @@ public:
      * @param position position from which the cost should be returned.
      * @return cost from \p position to \p destID with \p mode
      */
-    double GetCostToDestination(int destID, const Point & position);
+    double GetCostToDestination(int destID, const Point& position);
 
     /**
      * Returns the distance between doors with IDs \p door1ID and \p door2ID.
@@ -155,7 +154,7 @@ public:
      * Returns the grid used for computing the floor fields.
      * @return grid used for computing the floor fields.
      */
-    RectGrid * GetGrid();
+    RectGrid* GetGrid();
 
     /**
      * Gives the direction to go from \p pos to door with \p destID.
@@ -163,21 +162,21 @@ public:
      * @param pos position from which the direction is computed.
      * @param[out] direction direction for next step to go from \p pos to door with \p destID.
      */
-    void GetDirectionToUID(int destID, const Point & pos, Point & direction);
+    void GetDirectionToUID(int destID, const Point& pos, Point& direction);
 
     /**
      * Returns the distance to the closest wall of point \p pos.
      * @param pos position from which the wall distance should be returned.
      * @return distance to the closest wall of point \p pos.
      */
-    double GetDistance2WallAt(const Point & pos);
+    double GetDistance2WallAt(const Point& pos);
 
     /**
      * Gives the direction to the closest wall of point \p pos.
      * @param pos position from which the wall direction should be returned.
      * @param[out] p direction of closest wall of point \p pos.
      */
-    void GetDir2WallAt(const Point & pos, Point & p);
+    void GetDir2WallAt(const Point& pos, Point& p);
 
 private:
     /**
@@ -191,9 +190,9 @@ private:
      * @param useWallDistances should wall avoidance be considered.
      */
     void Create(
-        std::vector<Line> & walls,
-        std::map<int, Line> & doors,
-        const std::vector<int> & targetUIDs,
+        std::vector<Line>& walls,
+        std::map<int, Line>& doors,
+        const std::vector<int>& targetUIDs,
         int mode,
         double spacing,
         double wallAvoidDist,
@@ -207,7 +206,7 @@ private:
      * @param mode mode used to compute cost.
      * @return cost from \p position to \p destID with \p mode
      */
-    double GetCostToDestination(int destID, const Point & position, int mode);
+    double GetCostToDestination(int destID, const Point& position, int mode);
 
     /**
      * Returns the direction to move from \p position to \p destID with \p mode.
@@ -216,7 +215,7 @@ private:
      * @param direction
      * @param mode mode used to compute direction.
      */
-    void GetDirectionToUID(int destID, long int key, Point & direction, int mode);
+    void GetDirectionToUID(int destID, long int key, Point& direction, int mode);
 
     /**
      * Returns the direction to go from \p position to \p destID.
@@ -225,7 +224,7 @@ private:
      * @param key grid key to a specific position.
      * @param[out] direction direction for next step to go from \p pos to door with \p destID.
      */
-    void GetDirectionToUID(int destID, long int key, Point & direction);
+    void GetDirectionToUID(int destID, long int key, Point& direction);
 
     /**
      * Set up grid for computing the floor fields.
@@ -233,14 +232,14 @@ private:
      * @param doors doors which should be considered.
      * @param spacing grid size.
      */
-    void CreateRectGrid(std::vector<Line> & walls, std::map<int, Line> & doors, double spacing);
+    void CreateRectGrid(std::vector<Line>& walls, std::map<int, Line>& doors, double spacing);
 
     /**
      * Process the geometry. Marks doors and walls on \a _grid.
      * @param walls walls which should be considered.
      * @param doors doors which should be considered.
      */
-    void ProcessGeometry(std::vector<Line> & walls, std::map<int, Line> & doors);
+    void ProcessGeometry(std::vector<Line>& walls, std::map<int, Line>& doors);
 
     /**
      * Add a target and compute the corresponding floor field.
@@ -248,7 +247,7 @@ private:
      * @param costarray array containing the costs.
      * @param gradarray array containing the gradients.
      */
-    void AddTarget(int uid, double * costarray = nullptr, Point * gradarray = nullptr);
+    void AddTarget(int uid, double* costarray = nullptr, Point* gradarray = nullptr);
 
     /**
      * Add targets and compute the corresponding floor fields.
@@ -261,7 +260,7 @@ private:
      * @param insidePoint some point inside subroom \p subroom.
      * @param subroom subroom which should be marked.
      */
-    void MarkSubroom(const Point & insidePoint, SubRoom * subroom);
+    void MarkSubroom(const Point& insidePoint, SubRoom* subroom);
 
     /**
      * Computes the speed reduced close to walls.
@@ -269,7 +268,7 @@ private:
      *
      * @todo check if really needed.
      */
-    void CreateReduWallSpeed(double * reduWallSpeed);
+    void CreateReduWallSpeed(double* reduWallSpeed);
 
     /**
      * Marks a line in grid.
@@ -280,18 +279,15 @@ private:
      *
      * @todo check if really needed.
      */
-    void FinalizeTargetLine(
-        int uid,
-        const Line & tempTargetLine,
-        Point * newArrayPt,
-        Point & passvector);
+    void
+    FinalizeTargetLine(int uid, const Line& tempTargetLine, Point* newArrayPt, Point& passvector);
 
     /**
      * Draw lines on grid.
      * @param doors doors which should be drawn to grid.
      * @param[out] grid grid on which the lines are drawn.
      */
-    void DrawLinesOnGrid(std::map<int, Line> & doors, int * grid);
+    void DrawLinesOnGrid(std::map<int, Line>& doors, int* grid);
 
     /**
      * Draws lines on grid.
@@ -301,7 +297,7 @@ private:
      * @param value value which should be used for points on line.
      */
     template <typename T>
-    void DrawLinesOnGrid(std::vector<Line> & wallArg, T * target, T value);
+    void DrawLinesOnGrid(std::vector<Line>& wallArg, T* target, T value);
 
     /**
      * Draw a line on grid.
@@ -311,7 +307,7 @@ private:
      * @param value value which should be used for points on line.
      */
     template <typename T>
-    void DrawLinesOnGrid(Line & line, T * target, T value);
+    void DrawLinesOnGrid(Line& line, T* target, T value);
 
     /**
      * Draws lines on wall, e.g. doors.
@@ -321,7 +317,7 @@ private:
      * @param value value which should be used for points on line.
      */
     template <typename T>
-    void DrawLinesOnWall(std::vector<Line> & wallArg, T * target, T value);
+    void DrawLinesOnWall(std::vector<Line>& wallArg, T* target, T value);
 
     /**
      * Draw a line on wall, e.g. door.
@@ -331,7 +327,7 @@ private:
      * @param value value which should be used for points on line.
      */
     template <typename T>
-    void DrawLinesOnWall(Line & line, T * target, T value);
+    void DrawLinesOnWall(Line& line, T* target, T value);
 
     /**
      * Computes the floor field.
@@ -339,7 +335,7 @@ private:
      * @param[out] directionOutput direction corresponding to floor field.
      * @param speed speed field used for computing floor field.
      */
-    void CalcFF(double * costOutput, Point * directionOutput, const double * speed);
+    void CalcFF(double* costOutput, Point* directionOutput, const double* speed);
 
     /**
      * Compute cost floor field.
@@ -348,7 +344,7 @@ private:
      * @param[out] dir direction corresponding to floor field.
      * @param speed speed field used for computing floor field.
      */
-    void CalcCost(long int key, double * cost, Point * dir, const double * speed);
+    void CalcCost(long int key, double* cost, Point* dir, const double* speed);
 
     /**
      * Compute distance floor field.
@@ -356,7 +352,7 @@ private:
      * @param[out] directionOutput direction corresponding to floor field.
      * @param speed speed field used for computing floor field.
      */
-    void CalcDF(double * costOutput, Point * directionOutput, const double * speed);
+    void CalcDF(double* costOutput, Point* directionOutput, const double* speed);
 
     /**
      * Compute distances.
@@ -365,7 +361,7 @@ private:
      * @param[out] dir direction corresponding to floor field.
      * @param speed speed field used for computing floor field.
      */
-    void CalcDist(long int key, double * cost, Point * dir, const double * speed);
+    void CalcDist(long int key, double* cost, Point* dir, const double* speed);
 
     /**
      * Computes cell distance for von Neumann neighborhood.
@@ -393,22 +389,22 @@ private:
     /**
      * Mode for computing the floor field.
      */
-    int _mode = LINESEGMENT; //default
+    int _mode = LINESEGMENT; // default
 
     /**
      * Usage for floor field.
      */
-    int _user = DISTANCE_AND_DIRECTIONS_USED; //default
+    int _user = DISTANCE_AND_DIRECTIONS_USED; // default
 
     /**
      * Speedmode for computing the floor field.
      */
-    int _speedmode = FF_HOMO_SPEED; //default
+    int _speedmode = FF_HOMO_SPEED; // default
 
     /**
      * Grid used for computing the floor field.
      */
-    RectGrid * _grid = nullptr;
+    RectGrid* _grid = nullptr;
 
     /**
      * Number of cells in \a _grid.
@@ -421,18 +417,18 @@ private:
      * [1] reduced wall speed
      * [2] standing agents reduce speed, so that jams will be considered in ff
      */
-    std::vector<double *> _speedFieldSelector;
+    std::vector<double*> _speedFieldSelector;
 
     /**
      * Grid marking the geometrical properties of the room.
      */
-    int * _gridCode = nullptr;
+    int* _gridCode = nullptr;
 
     /**
      * List of subrooms in room.
      * Remark: this is an array (first asterisk) of pointers (second asterisk)
      */
-    SubRoom ** _subrooms = nullptr;
+    SubRoom** _subrooms = nullptr;
 
     /**
      * Wall avoidance distance.
@@ -445,16 +441,16 @@ private:
      */
     bool _useWallDistances = false;
 
-    //the following maps are responsible for dealloc the arrays
+    // the following maps are responsible for dealloc the arrays
     /**
      * Map containing the cost field for the corresponding door.
      */
-    std::map<int, double *> _costFieldWithKey;
+    std::map<int, double*> _costFieldWithKey;
 
     /**
      * Map containing the direction fields for the corresponding door.
      */
-    std::map<int, Point *> _directionFieldWithKey;
+    std::map<int, Point*> _directionFieldWithKey;
 
     /**
      * List of door UIDs.
@@ -469,5 +465,5 @@ private:
     /**
      * Map containing a inside point to each subroom.
      */
-    std::map<SubRoom *, Point> _subRoomPtrTOinsidePoint;
+    std::map<SubRoom*, Point> _subRoomPtrTOinsidePoint;
 };

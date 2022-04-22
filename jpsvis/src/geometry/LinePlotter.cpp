@@ -56,7 +56,7 @@ LinePlotter::LinePlotter()
     m_scalars = vtkUnsignedCharArray::New();
     m_scalars->SetNumberOfComponents(3);
     m_points = vtkPoints::New();
-    m_lines  = vtkCellArray::New();
+    m_lines = vtkCellArray::New();
 
     // m_lineScalars = vtkFloatArray::New();
     // create a color lookup table
@@ -108,8 +108,7 @@ void LinePlotter::SetNumberOfPoints(int nPoints)
     m_lines->InsertNextCell(nPoints);
 }
 
-
-void LinePlotter::PlotLine(JPoint * pt1, JPoint * pt2)
+void LinePlotter::PlotLine(JPoint* pt1, JPoint* pt2)
 {
     double m[3], n[3];
     unsigned char col[3];
@@ -128,8 +127,7 @@ void LinePlotter::PlotLine(JPoint * pt1, JPoint * pt2)
     PlotLine(m, n, col);
 }
 
-
-void LinePlotter::addVertex(JPoint * pt1)
+void LinePlotter::addVertex(JPoint* pt1)
 {
     double m[3];
     unsigned char col[3];
@@ -161,7 +159,7 @@ void LinePlotter::addVertex(JPoint * pt1)
 
 void LinePlotter::addVertex(double vertex[3], double col[3])
 {
-    JPoint * pts = new JPoint();
+    JPoint* pts = new JPoint();
     pts->setColorRGB(col[0], col[1], col[2]);
     pts->setXYZ(vertex);
     addVertex(pts);
@@ -209,7 +207,7 @@ void LinePlotter::PlotLine(
     PlotLine(m, n, color);
 }
 
-vtkActor * LinePlotter::getActor()
+vtkActor* LinePlotter::getActor()
 {
     return m_lineActors;
 }

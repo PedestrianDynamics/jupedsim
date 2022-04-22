@@ -60,7 +60,6 @@ Point Point::NormalizedMolified() const
         return Point(0.0, 0.0);
 }
 
-
 Point Point::Normalized() const
 {
     double norm = Norm();
@@ -70,14 +69,12 @@ Point Point::Normalized() const
         return Point(0.0, 0.0);
 }
 
-
 /* Transformiert die "normalen" Koordinaten in Koordinaten der Ellipse
  * dazu verschieben des Koordinaten Ursprungs in Center und anschliessend drehen um phi
  * alle Punkte müssen in "normalen" Koordinaten gegeben sein
  * center: Center der Ellipse in deren System transformiert werden soll
  * phi: Winkel der Ellipse in deren System transformiert werden soll
  * */
-
 
 /*coordinate transformation of the point P(x,y) expressed in coord system S1 to a new coord. sys S2
 
@@ -112,7 +109,8 @@ S_1 is cartesian coordinate system!!
 
 OA = OO1 + O1A
 
- [x ; y] = [xc ; yc] +  [x_3 ; y_3]   : (1) ( with [x_i ; y_i] coordinats of P in S_i and i in {1,2,3} )
+ [x ; y] = [xc ; yc] +  [x_3 ; y_3]   : (1) ( with [x_i ; y_i] coordinats of P in S_i and i in
+{1,2,3} )
 
 [x_2 ; y_2] = M(phi) * [x_3 ; y_3]  : (2)
 
@@ -130,7 +128,7 @@ OC  = -O1O +O1C
 xnew = -xc + x
 
 */
-Point Point::TransformToEllipseCoordinates(const Point & center, double cphi, double sphi) const
+Point Point::TransformToEllipseCoordinates(const Point& center, double cphi, double sphi) const
 {
     Point p = Point(x, y);
     return (p - center).Rotate(cphi, -sphi);
@@ -155,7 +153,7 @@ where the coord. of a point are transformated to cart. coord.
 
 */
 
-Point Point::TransformToCartesianCoordinates(const Point & center, double cphi, double sphi) const
+Point Point::TransformToCartesianCoordinates(const Point& center, double cphi, double sphi) const
 {
     Point p = Point(x, y);
     return (p.Rotate(cphi, sphi) + center);
@@ -173,48 +171,45 @@ Point Point::Rotate(double ctheta, double stheta) const
 }
 
 //  sum
-const Point Point::operator+(const Point & p) const
+const Point Point::operator+(const Point& p) const
 {
     return Point(x + p.x, y + p.y);
 }
 
 // sub
-const Point Point::operator-(const Point & p) const
+const Point Point::operator-(const Point& p) const
 {
     return Point(x - p.x, y - p.y);
 }
 
 // equal
-bool Point::operator==(const Point & p) const
+bool Point::operator==(const Point& p) const
 {
     return (fabs(x - p.x) < J_EPS && fabs(y - p.y) < J_EPS);
 }
 
 // not equal
-bool Point::operator!=(const Point & p) const
+bool Point::operator!=(const Point& p) const
 {
     return (fabs(x - p.x) > J_EPS || fabs(y - p.y) > J_EPS);
 }
 
-
 // multiplication with scalar
-const Point operator*(const Point & p, double f)
+const Point operator*(const Point& p, double f)
 {
     return Point(p.x * f, p.y * f);
 }
 
-
 // Assignment
-Point & Point::operator+=(const Point & p)
+Point& Point::operator+=(const Point& p)
 {
     x += p.x;
     y += p.y;
     return *this;
 }
 
-
 // divition with scalar
-const Point operator/(const Point & p, double f)
+const Point operator/(const Point& p, double f)
 {
     if(f > J_EPS * J_EPS)
         return Point(p.x / f, p.y / f);
@@ -224,13 +219,13 @@ const Point operator/(const Point & p, double f)
     }
 }
 
-std::ostream & Point::SaveToXml(std::ostream & ostream) const
+std::ostream& Point::SaveToXml(std::ostream& ostream) const
 {
     ostream << "<vertex px=" << x << " py=" << y << " />" << std::endl;
     return ostream;
 }
 
-bool Point::operator<(const Point & rhs) const
+bool Point::operator<(const Point& rhs) const
 {
     if(*this != *this || rhs != rhs)
         return false;
@@ -241,22 +236,22 @@ bool Point::operator<(const Point & rhs) const
     return false;
 }
 
-bool Point::operator>(const Point & rhs) const
+bool Point::operator>(const Point& rhs) const
 {
     return rhs < *this;
 }
 
-bool Point::operator<=(const Point & rhs) const
+bool Point::operator<=(const Point& rhs) const
 {
     return !(rhs < *this);
 }
 
-bool Point::operator>=(const Point & rhs) const
+bool Point::operator>=(const Point& rhs) const
 {
     return !(*this < rhs);
 }
 
-double Distance(const Point & point1, const Point & point2)
+double Distance(const Point& point1, const Point& point2)
 {
     return boost::geometry::distance(point1, point2);
 }

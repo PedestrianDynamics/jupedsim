@@ -58,22 +58,22 @@ public:
     /**
      * Not copyable.
      */
-    EventManager(const EventManager &) = delete;
+    EventManager(const EventManager&) = delete;
 
     /**
      * Not copyable.
      */
-    EventManager & operator=(const EventManager &) & = delete;
+    EventManager& operator=(const EventManager&) & = delete;
 
     /**
      * Not movable.
      */
-    EventManager(EventManager &&) = delete;
+    EventManager(EventManager&&) = delete;
 
     /**
      * Not movable.
      */
-    EventManager & operator=(EventManager &&) = delete;
+    EventManager& operator=(EventManager&&) = delete;
 
     /**
      * Adds \p event to the EventManager. This should be done before the simulation

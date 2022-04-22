@@ -25,7 +25,6 @@
  *
  **/
 
-
 #include "Building.hpp"
 
 #include "../Log.hpp"
@@ -51,28 +50,27 @@
 
 using namespace std;
 
-
 Building::Building()
 {
-    _caption          = "no_caption";
-    _projectFilename  = "";
+    _caption = "no_caption";
+    _projectFilename = "";
     _geometryFilename = "";
-    _routingEngine    = nullptr;
-    _linkedCellGrid   = nullptr;
-    _savePathway      = false;
+    _routingEngine = nullptr;
+    _linkedCellGrid = nullptr;
+    _savePathway = false;
 }
 
 #ifdef _SIMULATOR
 Building::Building(
-    const std::string & filename,
-    const std::string & rootDir,
-    RoutingEngine & engine,
-    PedDistributor & distributor,
-    double linkedCellSize) :
-    _projectFilename(filename), _projectRootDir(rootDir), _routingEngine(&engine)
+    const std::string& filename,
+    const std::string& rootDir,
+    RoutingEngine& engine,
+    PedDistributor& distributor,
+    double linkedCellSize)
+    : _projectFilename(filename), _projectRootDir(rootDir), _routingEngine(&engine)
 {
-    _caption        = "no_caption";
-    _savePathway    = false;
+    _caption = "no_caption";
+    _savePathway = false;
     _linkedCellGrid = nullptr;
 
     // todo: what happens if any of these  methods failed (return false)? throw exception ?
@@ -87,7 +85,6 @@ Building::Building(
     this->SanityCheck();
 }
 #endif
-
 
 Building::~Building()
 {
@@ -106,20 +103,19 @@ Building::~Building()
     if(_pathWayStream.is_open())
         _pathWayStream.close();
 
-
-    for(map<int, Crossing *>::const_iterator iter = _crossings.begin(); iter != _crossings.end();
+    for(map<int, Crossing*>::const_iterator iter = _crossings.begin(); iter != _crossings.end();
         ++iter) {
         delete iter->second;
     }
-    for(map<int, Transition *>::const_iterator iter = _transitions.begin();
+    for(map<int, Transition*>::const_iterator iter = _transitions.begin();
         iter != _transitions.end();
         ++iter) {
         delete iter->second;
     }
-    for(map<int, Hline *>::const_iterator iter = _hLines.begin(); iter != _hLines.end(); ++iter) {
+    for(map<int, Hline*>::const_iterator iter = _hLines.begin(); iter != _hLines.end(); ++iter) {
         delete iter->second;
     }
-    for(map<int, Goal *>::const_iterator iter = _goals.begin(); iter != _goals.end(); ++iter) {
+    for(map<int, Goal*>::const_iterator iter = _goals.begin(); iter != _goals.end(); ++iter) {
         delete iter->second;
     }
 }
@@ -127,12 +123,12 @@ Building::~Building()
 /************************************************************
  Setter-Funktionen
  ************************************************************/
-void Building::SetCaption(const std::string & s)
+void Building::SetCaption(const std::string& s)
 {
     _caption = s;
 }
 
-void Building::SetRoutingEngine(RoutingEngine * r)
+void Building::SetRoutingEngine(RoutingEngine* r)
 {
     _routingEngine = r;
 }
@@ -146,7 +142,7 @@ string Building::GetCaption() const
     return _caption;
 }
 
-RoutingEngine * Building::GetRoutingEngine() const
+RoutingEngine* Building::GetRoutingEngine() const
 {
     return _routingEngine;
 }
@@ -161,12 +157,12 @@ int Building::GetNumberOfGoals() const
     return _transitions.size() + _hLines.size() + _crossings.size();
 }
 
-const std::map<int, std::unique_ptr<Room>> & Building::GetAllRooms() const
+const std::map<int, std::unique_ptr<Room>>& Building::GetAllRooms() const
 {
     return _rooms;
 }
 
-Room * Building::GetRoom(int index) const
+Room* Building::GetRoom(int index) const
 {
     // todo: obsolete since the check is done by .at()
     if(_rooms.count(index) == 0) {
@@ -179,13 +175,12 @@ Room * Building::GetRoom(int index) const
     return _rooms.at(index).get();
 }
 
-
-LCGrid * Building::GetGrid() const
+LCGrid* Building::GetGrid() const
 {
     return _linkedCellGrid;
 }
 
-void Building::AddRoom(Room * room)
+void Building::AddRoom(Room* room)
 {
     _rooms[room->GetID()] = std::unique_ptr<Room>(room);
 }
@@ -201,9 +196,9 @@ void Building::AddSurroundingRoom()
     // finding the bounding of the grid
     // and collect the pedestrians
 
-    for(auto && itr_room : _rooms) {
-        for(auto && itr_subroom : itr_room.second->GetAllSubRooms()) {
-            for(auto && wall : itr_subroom.second->GetAllWalls()) {
+    for(auto&& itr_room : _rooms) {
+        for(auto&& itr_subroom : itr_room.second->GetAllSubRooms()) {
+            for(auto&& wall : itr_subroom.second->GetAllWalls()) {
                 double x1 = wall.GetPoint1().GetX();
                 double y1 = wall.GetPoint1().GetY();
                 double x2 = wall.GetPoint2().GetX();
@@ -222,8 +217,8 @@ void Building::AddSurroundingRoom()
         }
     }
 
-    for(auto && itr_goal : _goals) {
-        for(auto && wall : itr_goal.second->GetAllWalls()) {
+    for(auto&& itr_goal : _goals) {
+        for(auto&& wall : itr_goal.second->GetAllWalls()) {
             double x1 = wall.GetPoint1().GetX();
             double y1 = wall.GetPoint1().GetY();
             double x2 = wall.GetPoint2().GetX();
@@ -246,7 +241,7 @@ void Building::AddSurroundingRoom()
     y_min = y_min - 10.0;
     y_max = y_max + 10.0;
 
-    SubRoom * bigSubroom = new NormalSubRoom();
+    SubRoom* bigSubroom = new NormalSubRoom();
     bigSubroom->SetRoomID(_rooms.size());
     bigSubroom->SetSubRoomID(0); // should be the single subroom
     bigSubroom->AddWall(Wall(Point(x_min, y_min), Point(x_min, y_max)));
@@ -254,29 +249,28 @@ void Building::AddSurroundingRoom()
     bigSubroom->AddWall(Wall(Point(x_max, y_max), Point(x_max, y_min)));
     bigSubroom->AddWall(Wall(Point(x_max, y_min), Point(x_min, y_min)));
 
-    Room * bigRoom = new Room();
+    Room* bigRoom = new Room();
     bigRoom->AddSubRoom(bigSubroom);
     bigRoom->SetCaption("outside");
     bigRoom->SetID(_rooms.size());
     AddRoom(bigRoom);
 }
 
-
 bool Building::InitGeometry()
 {
     Log::Info("Init Geometry");
 
-    for(auto && itr_room : _rooms) {
-        for(auto && itr_subroom : itr_room.second->GetAllSubRooms()) {
+    for(auto&& itr_room : _rooms) {
+        for(auto&& itr_subroom : itr_room.second->GetAllSubRooms()) {
             // create a close polyline out of everything
-            vector<Line *> goals = vector<Line *>();
+            vector<Line*> goals = vector<Line*>();
 
             //  collect all crossings
-            for(auto && cros : itr_subroom.second->GetAllCrossings()) {
+            for(auto&& cros : itr_subroom.second->GetAllCrossings()) {
                 goals.push_back(cros);
             }
             // collect all transitions
-            for(auto && trans : itr_subroom.second->GetAllTransitions()) {
+            for(auto&& trans : itr_subroom.second->GetAllTransitions()) {
                 goals.push_back(trans);
             }
             // initialize the poly
@@ -285,7 +279,7 @@ bool Building::InitGeometry()
             itr_subroom.second->CalculateArea();
 
             // do the same for the obstacles that are closed
-            for(auto && obst : itr_subroom.second->GetAllObstacles()) {
+            for(auto&& obst : itr_subroom.second->GetAllObstacles()) {
                 // if (obst->GetClosed() == 1)
                 if(!obst->ConvertLineToPoly())
                     return false;
@@ -296,18 +290,18 @@ bool Building::InitGeometry()
     // look and save the neighbor subroom for improving the runtime
     // that information is already present in the crossing/transitions
 
-    for(const auto & cross : _crossings) {
-        SubRoom * s1 = cross.second->GetSubRoom1();
-        SubRoom * s2 = cross.second->GetSubRoom2();
+    for(const auto& cross : _crossings) {
+        SubRoom* s1 = cross.second->GetSubRoom1();
+        SubRoom* s2 = cross.second->GetSubRoom2();
         if(s1)
             s1->AddNeighbor(s2);
         if(s2)
             s2->AddNeighbor(s1);
     }
 
-    for(const auto & trans : _transitions) {
-        SubRoom * s1 = trans.second->GetSubRoom1();
-        SubRoom * s2 = trans.second->GetSubRoom2();
+    for(const auto& trans : _transitions) {
+        SubRoom* s1 = trans.second->GetSubRoom1();
+        SubRoom* s2 = trans.second->GetSubRoom2();
         if(s1)
             s1->AddNeighbor(s2);
         if(s2)
@@ -319,32 +313,31 @@ bool Building::InitGeometry()
     return true;
 }
 
-
-const string & Building::GetProjectFilename() const
+const string& Building::GetProjectFilename() const
 {
     return _projectFilename;
 }
 
-void Building::SetProjectFilename(const std::string & filename)
+void Building::SetProjectFilename(const std::string& filename)
 {
     _projectFilename = filename;
 }
 
-void Building::SetProjectRootDir(const std::string & filename)
+void Building::SetProjectRootDir(const std::string& filename)
 {
     _projectRootDir = filename;
 }
 
-const string & Building::GetProjectRootDir() const
+const string& Building::GetProjectRootDir() const
 {
     return _projectRootDir;
 }
-const std::string & Building::GetGeometryFilename() const
+const std::string& Building::GetGeometryFilename() const
 {
     return _geometryFilename;
 }
 
-bool Building::LoadGeometry(const std::string & geometryfile)
+bool Building::LoadGeometry(const std::string& geometryfile)
 {
     // get the geometry filename from the project file
     string geoFilenameWithPath = geometryfile; //_projectRootDir +
@@ -362,11 +355,11 @@ bool Building::LoadGeometry(const std::string & geometryfile)
         }
 
         Log::Info("Parsing the geometry file");
-        TiXmlElement * xMainNode = doc.RootElement();
+        TiXmlElement* xMainNode = doc.RootElement();
 
         if(xMainNode->FirstChild("geometry")) {
             std::cout << "geometry file found.\n";
-            _geometryFilename   = xMainNode->FirstChild("geometry")->FirstChild()->Value();
+            _geometryFilename = xMainNode->FirstChild("geometry")->FirstChild()->Value();
             geoFilenameWithPath = _projectRootDir + _geometryFilename;
             Log::Info("LoadGeometry: Root Dir: <%s>", _projectRootDir.c_str());
             Log::Info("LoadGeometry: geometryfile: <%s>", geometryfile.c_str());
@@ -383,7 +376,7 @@ bool Building::LoadGeometry(const std::string & geometryfile)
         return false;
     }
 
-    TiXmlElement * xRootNode = docGeo.RootElement();
+    TiXmlElement* xRootNode = docGeo.RootElement();
     if(!xRootNode) {
         Log::Error("Root element does not exist");
         return false;
@@ -401,21 +394,20 @@ bool Building::LoadGeometry(const std::string & geometryfile)
             return false;
         }
 
-
     _caption = xmltoa(xRootNode->Attribute("caption"), "virtual building");
     // The file has two main nodes
     //<rooms> and <transitions>
 
     // processing the rooms node
-    TiXmlNode * xRoomsNode = xRootNode->FirstChild("rooms");
+    TiXmlNode* xRoomsNode = xRootNode->FirstChild("rooms");
     if(!xRoomsNode) {
         Log::Error("The geometry should have at least one room and one subroom");
         return false;
     }
 
-    for(TiXmlElement * xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
-        xRoom                = xRoom->NextSiblingElement("room")) {
-        Room * room = new Room();
+    for(TiXmlElement* xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
+        xRoom = xRoom->NextSiblingElement("room")) {
+        Room* room = new Room();
         // make_unique<Song>
 
         string room_id = xmltoa(xRoom->Attribute("id"), "-1");
@@ -433,12 +425,12 @@ bool Building::LoadGeometry(const std::string & geometryfile)
         // processing the rooms node
         // TiXmlNode*  xSubroomsNode = xRoom->FirstChild("subroom");
 
-        for(TiXmlElement * xSubRoom = xRoom->FirstChildElement("subroom"); xSubRoom;
-            xSubRoom                = xSubRoom->NextSiblingElement("subroom")) {
+        for(TiXmlElement* xSubRoom = xRoom->FirstChildElement("subroom"); xSubRoom;
+            xSubRoom = xSubRoom->NextSiblingElement("subroom")) {
             string subroom_caption = xmltoa(xSubRoom->Attribute("caption"), "no Caption");
-            string subroom_id      = xmltoa(xSubRoom->Attribute("id"), "-1");
-            string SubroomClosed   = xmltoa(xSubRoom->Attribute("closed"), "0");
-            string type            = xmltoa(xSubRoom->Attribute("class"), "subroom");
+            string subroom_id = xmltoa(xSubRoom->Attribute("id"), "-1");
+            string SubroomClosed = xmltoa(xSubRoom->Attribute("closed"), "0");
+            string type = xmltoa(xSubRoom->Attribute("class"), "subroom");
 
             // get the equation of the plane if any
             double A_x = xmltof(xSubRoom->Attribute("A_x"), 0.0);
@@ -446,9 +438,9 @@ bool Building::LoadGeometry(const std::string & geometryfile)
 
             // assume either the old "C_z" or the new "C"
             double C_z = xmltof(xSubRoom->Attribute("C_z"), 0.0);
-            C_z        = xmltof(xSubRoom->Attribute("C"), C_z);
+            C_z = xmltof(xSubRoom->Attribute("C"), C_z);
 
-            SubRoom * subroom = NULL;
+            SubRoom* subroom = NULL;
 
             if(type == "stair") {
                 if(xSubRoom->FirstChildElement("up") == NULL) {
@@ -456,13 +448,13 @@ bool Building::LoadGeometry(const std::string & geometryfile)
                     Log::Error("check your geometry file");
                     return false;
                 }
-                double up_x   = xmltof(xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
-                double up_y   = xmltof(xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
+                double up_x = xmltof(xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
+                double up_y = xmltof(xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
                 double down_x = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
                 double down_y = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
-                subroom       = new Stair();
-                ((Stair *) subroom)->SetUp(Point(up_x, up_y));
-                ((Stair *) subroom)->SetDown(Point(down_x, down_y));
+                subroom = new Stair();
+                ((Stair*) subroom)->SetUp(Point(up_x, up_y));
+                ((Stair*) subroom)->SetDown(Point(down_x, down_y));
             } else {
                 // normal subroom or corridor
                 subroom = new NormalSubRoom();
@@ -476,10 +468,9 @@ bool Building::LoadGeometry(const std::string & geometryfile)
             // static int p_id=1;
             // cout<<endl<<"wall polygon: "<< p_id++<<endl;
             // looking for polygons (walls)
-            for(TiXmlElement * xPolyVertices = xSubRoom->FirstChildElement("polygon");
-                xPolyVertices;
+            for(TiXmlElement* xPolyVertices = xSubRoom->FirstChildElement("polygon"); xPolyVertices;
                 xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
-                for(TiXmlElement * xVertex = xPolyVertices->FirstChildElement("vertex");
+                for(TiXmlElement* xVertex = xPolyVertices->FirstChildElement("vertex");
                     xVertex && xVertex != xPolyVertices->LastChild("vertex");
                     xVertex = xVertex->NextSiblingElement("vertex")) {
                     double x1 = xmltof(xVertex->Attribute("px"));
@@ -492,24 +483,24 @@ bool Building::LoadGeometry(const std::string & geometryfile)
             }
 
             // looking for obstacles
-            for(TiXmlElement * xObstacle = xSubRoom->FirstChildElement("obstacle"); xObstacle;
-                xObstacle                = xObstacle->NextSiblingElement("obstacle")) {
-                int id     = xmltof(xObstacle->Attribute("id"), -1);
+            for(TiXmlElement* xObstacle = xSubRoom->FirstChildElement("obstacle"); xObstacle;
+                xObstacle = xObstacle->NextSiblingElement("obstacle")) {
+                int id = xmltof(xObstacle->Attribute("id"), -1);
                 int height = xmltof(xObstacle->Attribute("height"), 0);
                 // double ObstClosed = xmltof(xObstacle->Attribute("closed"), 0);
                 string ObstCaption = xmltoa(xObstacle->Attribute("caption"), "-1");
 
-                Obstacle * obstacle = new Obstacle();
+                Obstacle* obstacle = new Obstacle();
                 obstacle->SetId(id);
                 obstacle->SetCaption(ObstCaption);
                 // obstacle->SetClosed(ObstClosed);
                 obstacle->SetHeight(height);
 
                 // looking for polygons (walls)
-                for(TiXmlElement * xPolyVertices = xObstacle->FirstChildElement("polygon");
+                for(TiXmlElement* xPolyVertices = xObstacle->FirstChildElement("polygon");
                     xPolyVertices;
                     xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
-                    for(TiXmlElement * xVertex = xPolyVertices->FirstChildElement("vertex");
+                    for(TiXmlElement* xVertex = xPolyVertices->FirstChildElement("vertex");
                         xVertex && xVertex != xPolyVertices->LastChild("vertex");
                         xVertex = xVertex->NextSiblingElement("vertex")) {
                         double x1 = xmltof(xVertex->Attribute("px"));
@@ -525,11 +516,11 @@ bool Building::LoadGeometry(const std::string & geometryfile)
         }
 
         // parsing the crossings
-        TiXmlNode * xCrossingsNode = xRoom->FirstChild("crossings");
+        TiXmlNode* xCrossingsNode = xRoom->FirstChild("crossings");
         if(xCrossingsNode)
-            for(TiXmlElement * xCrossing = xCrossingsNode->FirstChildElement("crossing"); xCrossing;
-                xCrossing                = xCrossing->NextSiblingElement("crossing")) {
-                int id      = xmltoi(xCrossing->Attribute("id"), -1);
+            for(TiXmlElement* xCrossing = xCrossingsNode->FirstChildElement("crossing"); xCrossing;
+                xCrossing = xCrossing->NextSiblingElement("crossing")) {
+                int id = xmltoi(xCrossing->Attribute("id"), -1);
                 int sub1_id = xmltoi(xCrossing->Attribute("subroom1_id"), -1);
                 int sub2_id = xmltoi(xCrossing->Attribute("subroom2_id"), -1);
 
@@ -538,7 +529,7 @@ bool Building::LoadGeometry(const std::string & geometryfile)
                 double x2 = xmltof(xCrossing->LastChild("vertex")->ToElement()->Attribute("px"));
                 double y2 = xmltof(xCrossing->LastChild("vertex")->ToElement()->Attribute("py"));
 
-                Crossing * c = new Crossing();
+                Crossing* c = new Crossing();
                 c->SetID(id);
                 c->SetPoint1(Point(x1, y1));
                 c->SetPoint2(Point(x2, y2));
@@ -557,15 +548,15 @@ bool Building::LoadGeometry(const std::string & geometryfile)
     // exit(0);
 
     // all rooms are read, now proceed with transitions
-    TiXmlNode * xTransNode = xRootNode->FirstChild("transitions");
+    TiXmlNode* xTransNode = xRootNode->FirstChild("transitions");
     if(xTransNode) {
-        for(TiXmlElement * xTrans = xTransNode->FirstChildElement("transition"); xTrans;
-            xTrans                = xTrans->NextSiblingElement("transition")) {
-            Transition * t = ParseTransitionNode(xTrans);
+        for(TiXmlElement* xTrans = xTransNode->FirstChildElement("transition"); xTrans;
+            xTrans = xTrans->NextSiblingElement("transition")) {
+            Transition* t = ParseTransitionNode(xTrans);
             this->AddTransition(t);
         }
         // ------ file
-        TiXmlNode * xNodeFile = xTransNode->FirstChild("file");
+        TiXmlNode* xNodeFile = xTransNode->FirstChild("file");
         if(xNodeFile) {
             std::string transFilename = _projectRootDir + "/" + xNodeFile->FirstChild()->ValueStr();
             Log::Info("Parsing transition from file <%s>", transFilename.c_str());
@@ -575,7 +566,7 @@ bool Building::LoadGeometry(const std::string & geometryfile)
                 Log::Error("could not parse the transitions file.");
                 return false;
             }
-            TiXmlElement * xRootNodeTrans = docTrans.RootElement();
+            TiXmlElement* xRootNodeTrans = docTrans.RootElement();
             if(!xRootNodeTrans) {
                 Log::Error("Root element does not exist in transitions file.");
                 return false;
@@ -584,14 +575,14 @@ bool Building::LoadGeometry(const std::string & geometryfile)
                 Log::Error("Parsing transitions file. Root element value is not 'JPScore'.");
                 return false;
             }
-            TiXmlNode * xTransNodeFile = xRootNodeTrans->FirstChild("transitions");
+            TiXmlNode* xTransNodeFile = xRootNodeTrans->FirstChild("transitions");
             if(!xTransNodeFile) {
                 Log::Error("No Transitions in file found.");
                 return false;
             }
-            for(TiXmlElement * xTrans = xTransNodeFile->FirstChildElement("transition"); xTrans;
-                xTrans                = xTrans->NextSiblingElement("transition")) {
-                Transition * t = ParseTransitionNode(xTrans);
+            for(TiXmlElement* xTrans = xTransNodeFile->FirstChildElement("transition"); xTrans;
+                xTrans = xTrans->NextSiblingElement("transition")) {
+                Transition* t = ParseTransitionNode(xTrans);
                 this->AddTransition(t);
             }
         } else {
@@ -605,19 +596,18 @@ bool Building::LoadGeometry(const std::string & geometryfile)
     return true;
 }
 
-
-Transition * Building::ParseTransitionNode(TiXmlElement * xTrans)
+Transition* Building::ParseTransitionNode(TiXmlElement* xTrans)
 {
     int id = xmltoi(xTrans->Attribute("id"), -1);
     // string caption = "door " + id;
     string caption = "door ";
     caption += to_string(id);
-    caption         = xmltoa(xTrans->Attribute("caption"), caption.c_str());
-    int room1_id    = xmltoi(xTrans->Attribute("room1_id"), -1);
-    int room2_id    = xmltoi(xTrans->Attribute("room2_id"), -1);
+    caption = xmltoa(xTrans->Attribute("caption"), caption.c_str());
+    int room1_id = xmltoi(xTrans->Attribute("room1_id"), -1);
+    int room2_id = xmltoi(xTrans->Attribute("room2_id"), -1);
     int subroom1_id = xmltoi(xTrans->Attribute("subroom1_id"), -1);
     int subroom2_id = xmltoi(xTrans->Attribute("subroom2_id"), -1);
-    string type     = xmltoa(xTrans->Attribute("type"), "normal");
+    string type = xmltoa(xTrans->Attribute("type"), "normal");
 
     double x1 = xmltof(xTrans->FirstChildElement("vertex")->Attribute("px"));
     double y1 = xmltof(xTrans->FirstChildElement("vertex")->Attribute("py"));
@@ -625,8 +615,7 @@ Transition * Building::ParseTransitionNode(TiXmlElement * xTrans)
     double x2 = xmltof(xTrans->LastChild("vertex")->ToElement()->Attribute("px"));
     double y2 = xmltof(xTrans->LastChild("vertex")->ToElement()->Attribute("py"));
 
-
-    Transition * t = new Transition();
+    Transition* t = new Transition();
     t->SetID(id);
     t->SetCaption(caption);
     t->SetPoint1(Point(x1, y1));
@@ -635,8 +624,8 @@ Transition * Building::ParseTransitionNode(TiXmlElement * xTrans)
 
     if(room1_id != -1 && subroom1_id != -1) {
         // Room* room = _rooms[room1_id];
-        Room * room       = GetRoom(room1_id);
-        SubRoom * subroom = room->GetSubRoom(subroom1_id);
+        Room* room = GetRoom(room1_id);
+        SubRoom* subroom = room->GetSubRoom(subroom1_id);
 
         // subroom->AddGoalID(t->GetUniqueID());
         // MPI
@@ -648,8 +637,8 @@ Transition * Building::ParseTransitionNode(TiXmlElement * xTrans)
         subroom->AddTransition(t);
     }
     if(room2_id != -1 && subroom2_id != -1) {
-        auto && room      = _rooms[room2_id];
-        SubRoom * subroom = room->GetSubRoom(subroom2_id);
+        auto&& room = _rooms[room2_id];
+        SubRoom* subroom = room->GetSubRoom(subroom2_id);
         // subroom->AddGoalID(t->GetUniqueID());
         // MPI
         room->AddTransitionID(t->GetUniqueID());
@@ -666,28 +655,28 @@ void Building::WriteToErrorLog() const
 {
     Log::Info("GEOMETRY: ");
     for(int i = 0; i < GetNumberOfRooms(); i++) {
-        Room * r = GetRoom(i);
+        Room* r = GetRoom(i);
         r->WriteToErrorLog();
     }
     Log::Info("ROUTING: ");
 
-    for(map<int, Crossing *>::const_iterator iter = _crossings.begin(); iter != _crossings.end();
+    for(map<int, Crossing*>::const_iterator iter = _crossings.begin(); iter != _crossings.end();
         ++iter) {
         iter->second->WriteToErrorLog();
     }
-    for(map<int, Transition *>::const_iterator iter = _transitions.begin();
+    for(map<int, Transition*>::const_iterator iter = _transitions.begin();
         iter != _transitions.end();
         ++iter) {
         iter->second->WriteToErrorLog();
     }
-    for(map<int, Hline *>::const_iterator iter = _hLines.begin(); iter != _hLines.end(); ++iter) {
+    for(map<int, Hline*>::const_iterator iter = _hLines.begin(); iter != _hLines.end(); ++iter) {
         iter->second->WriteToErrorLog();
     }
 }
 
-Room * Building::GetRoom(string caption) const
+Room* Building::GetRoom(string caption) const
 {
-    for(const auto & it : _rooms) {
+    for(const auto& it : _rooms) {
         if(it.second->GetCaption() == caption)
             return it.second.get();
     }
@@ -696,10 +685,10 @@ Room * Building::GetRoom(string caption) const
     exit(EXIT_FAILURE);
 }
 
-bool Building::AddCrossing(Crossing * line)
+bool Building::AddCrossing(Crossing* line)
 {
-    int IDRoom     = line->GetRoom1()->GetID();
-    int IDLine     = line->GetID();
+    int IDRoom = line->GetRoom1()->GetID();
+    int IDLine = line->GetID();
     int IDCrossing = 1000 * IDRoom + IDLine;
     if(_crossings.count(IDCrossing) != 0) {
         Log::Error("Duplicate index for crossing found [%d] in Routing::AddCrossing()", IDCrossing);
@@ -709,7 +698,7 @@ bool Building::AddCrossing(Crossing * line)
     return true;
 }
 
-void Building::AddTransition(Transition * line)
+void Building::AddTransition(Transition* line)
 {
     if(_transitions.count(line->GetID()) != 0) {
         Log::Error(
@@ -719,11 +708,11 @@ void Building::AddTransition(Transition * line)
     _transitions[line->GetID()] = line;
 }
 
-void Building::AddHline(Hline * line)
+void Building::AddHline(Hline* line)
 {
     if(_hLines.count(line->GetID()) != 0) {
         // check if the lines are identical
-        Hline * ori = _hLines[line->GetID()];
+        Hline* ori = _hLines[line->GetID()];
         if(ori->operator==(*line)) {
             Log::Info("Skipping identical hlines with ID [%d]", line->GetID());
             return;
@@ -739,7 +728,7 @@ void Building::AddHline(Hline * line)
     _hLines[line->GetID()] = line;
 }
 
-void Building::AddGoal(Goal * goal)
+void Building::AddGoal(Goal* goal)
 {
     if(_goals.count(goal->GetId()) != 0) {
         Log::Error("Duplicate index for goal found [%d] in Routing::AddGoal()", goal->GetId());
@@ -748,30 +737,30 @@ void Building::AddGoal(Goal * goal)
     _goals[goal->GetId()] = goal;
 }
 
-const map<int, Crossing *> & Building::GetAllCrossings() const
+const map<int, Crossing*>& Building::GetAllCrossings() const
 {
     return _crossings;
 }
 
-const map<int, Transition *> & Building::GetAllTransitions() const
+const map<int, Transition*>& Building::GetAllTransitions() const
 {
     return _transitions;
 }
 
-const map<int, Hline *> & Building::GetAllHlines() const
+const map<int, Hline*>& Building::GetAllHlines() const
 {
     return _hLines;
 }
 
-const map<int, Goal *> & Building::GetAllGoals() const
+const map<int, Goal*>& Building::GetAllGoals() const
 {
     return _goals;
 }
 
-Transition * Building::GetTransition(string caption) const
+Transition* Building::GetTransition(string caption) const
 {
     // eventually
-    map<int, Transition *>::const_iterator itr;
+    map<int, Transition*>::const_iterator itr;
     for(itr = _transitions.begin(); itr != _transitions.end(); ++itr) {
         if(itr->second->GetCaption() == caption)
             return itr->second;
@@ -781,7 +770,7 @@ Transition * Building::GetTransition(string caption) const
     exit(EXIT_FAILURE);
 }
 
-Transition * Building::GetTransition(int ID)
+Transition* Building::GetTransition(int ID)
 {
     if(_transitions.count(ID) == 1) {
         return _transitions[ID];
@@ -799,7 +788,7 @@ Transition * Building::GetTransition(int ID)
     }
 }
 
-Goal * Building::GetFinalGoal(int ID)
+Goal* Building::GetFinalGoal(int ID)
 {
     if(_goals.count(ID) == 1) {
         return _goals[ID];
@@ -816,11 +805,11 @@ Goal * Building::GetFinalGoal(int ID)
     }
 }
 
-Crossing * Building::GetTransOrCrossByName(string caption) const
+Crossing* Building::GetTransOrCrossByName(string caption) const
 {
     {
         // eventually
-        map<int, Transition *>::const_iterator itr;
+        map<int, Transition*>::const_iterator itr;
         for(itr = _transitions.begin(); itr != _transitions.end(); ++itr) {
             if(itr->second->GetCaption() == caption)
                 return itr->second;
@@ -828,7 +817,7 @@ Crossing * Building::GetTransOrCrossByName(string caption) const
     }
     {
         // finally the  crossings
-        map<int, Crossing *>::const_iterator itr;
+        map<int, Crossing*>::const_iterator itr;
         for(itr = _crossings.begin(); itr != _crossings.end(); ++itr) {
             if(itr->second->GetCaption() == caption)
                 return itr->second;
@@ -839,11 +828,11 @@ Crossing * Building::GetTransOrCrossByName(string caption) const
     return NULL;
 }
 
-Hline * Building::GetTransOrCrossByUID(int id) const
+Hline* Building::GetTransOrCrossByUID(int id) const
 {
     {
         // eventually transitions
-        map<int, Transition *>::const_iterator itr;
+        map<int, Transition*>::const_iterator itr;
         for(itr = _transitions.begin(); itr != _transitions.end(); ++itr) {
             if(itr->second->GetUniqueID() == id)
                 return itr->second;
@@ -851,7 +840,7 @@ Hline * Building::GetTransOrCrossByUID(int id) const
     }
     {
         // then the  crossings
-        map<int, Crossing *>::const_iterator itr;
+        map<int, Crossing*>::const_iterator itr;
         for(itr = _crossings.begin(); itr != _crossings.end(); ++itr) {
             if(itr->second->GetUniqueID() == id)
                 return itr->second;
@@ -868,10 +857,10 @@ Hline * Building::GetTransOrCrossByUID(int id) const
     return NULL;
 }
 
-SubRoom * Building::GetSubRoomByUID(int uid)
+SubRoom* Building::GetSubRoomByUID(int uid)
 {
-    for(auto && itr_room : _rooms) {
-        for(auto && itr_subroom : itr_room.second->GetAllSubRooms()) {
+    for(auto&& itr_room : _rooms) {
+        for(auto&& itr_subroom : itr_room.second->GetAllSubRooms()) {
             if(itr_subroom.second->GetUID() == uid)
                 return itr_subroom.second.get();
         }
@@ -880,23 +869,22 @@ SubRoom * Building::GetSubRoomByUID(int uid)
     return NULL;
 }
 
-
 bool Building::IsVisible(
-    const Point & p1,
-    const Point & p2,
-    const std::vector<SubRoom *> & subrooms,
+    const Point& p1,
+    const Point& p2,
+    const std::vector<SubRoom*>& subrooms,
     bool considerHlines)
 {
     // loop over all subrooms if none is provided
     if(subrooms.empty()) {
-        for(auto && itr_room : _rooms) {
-            for(auto && itr_subroom : itr_room.second->GetAllSubRooms()) {
+        for(auto&& itr_room : _rooms) {
+            for(auto&& itr_subroom : itr_room.second->GetAllSubRooms()) {
                 if(itr_subroom.second->IsVisible(p1, p2, considerHlines) == false)
                     return false;
             }
         }
     } else {
-        for(auto && sub : subrooms) {
+        for(auto&& sub : subrooms) {
             if(sub && sub->IsVisible(p1, p2, considerHlines) == false)
                 return false;
         }
@@ -910,8 +898,8 @@ bool Building::SanityCheck()
     Log::Info("Checking the geometry for artifacts");
     bool status = true;
 
-    for(auto && itr_room : _rooms) {
-        for(auto && itr_subroom : itr_room.second->GetAllSubRooms()) {
+    for(auto&& itr_room : _rooms) {
+        for(auto&& itr_subroom : itr_room.second->GetAllSubRooms()) {
             if(!itr_subroom.second->SanityCheck())
                 status = false;
         }
@@ -921,9 +909,7 @@ bool Building::SanityCheck()
     return status;
 }
 
-
 #ifdef _SIMULATOR
-
 
 void Building::UpdateGrid()
 {
@@ -940,9 +926,9 @@ void Building::InitGrid(double cellSize)
 
     // finding the bounding of the grid
     // and collect the pedestrians
-    for(auto && itr_room : _rooms) {
-        for(auto && itr_subroom : itr_room.second->GetAllSubRooms()) {
-            for(auto && wall : itr_subroom.second->GetAllWalls()) {
+    for(auto&& itr_room : _rooms) {
+        for(auto&& itr_subroom : itr_room.second->GetAllSubRooms()) {
+            for(auto&& wall : itr_subroom.second->GetAllWalls()) {
                 double x1 = wall.GetPoint1().GetX();
                 double y1 = wall.GetPoint1().GetY();
                 double x2 = wall.GetPoint2().GetX();
@@ -990,7 +976,7 @@ void Building::InitGrid(double cellSize)
     Debug::Info("Done with Initializing the grid ");
 }
 
-bool Building::LoadRoutingInfo(const string & filename)
+bool Building::LoadRoutingInfo(const string& filename)
 {
     Debug::Info("Loading extra routing information");
     if(filename == "") {
@@ -1005,7 +991,7 @@ bool Building::LoadRoutingInfo(const string & filename)
         return false;
     }
 
-    TiXmlElement * xRootNode = docRouting.RootElement();
+    TiXmlElement* xRootNode = docRouting.RootElement();
     if(!xRootNode) {
         Debug::Error("tRoot element does not exist");
         return false;
@@ -1015,25 +1001,24 @@ bool Building::LoadRoutingInfo(const string & filename)
         return true; // no extra routing information
     }
     // load goals and routes
-    TiXmlNode * xGoalsNode = xRootNode->FirstChild("routing")->FirstChild("goals");
-
+    TiXmlNode* xGoalsNode = xRootNode->FirstChild("routing")->FirstChild("goals");
 
     if(xGoalsNode)
-        for(TiXmlElement * e = xGoalsNode->FirstChildElement("goal"); e;
-            e                = e->NextSiblingElement("goal")) {
-            int id         = xmltof(e->Attribute("id"), -1);
-            int isFinal    = string(e->Attribute("final")) == "true" ? true : false;
+        for(TiXmlElement* e = xGoalsNode->FirstChildElement("goal"); e;
+            e = e->NextSiblingElement("goal")) {
+            int id = xmltof(e->Attribute("id"), -1);
+            int isFinal = string(e->Attribute("final")) == "true" ? true : false;
             string caption = xmltoa(e->Attribute("caption"), "-1");
 
-            Goal * goal = new Goal();
+            Goal* goal = new Goal();
             goal->SetId(id);
             goal->SetCaption(caption);
             goal->SetIsFinalGoal(isFinal);
 
             // looking for polygons (walls)
-            for(TiXmlElement * xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
-                xPolyVertices                = xPolyVertices->NextSiblingElement("polygon")) {
-                for(TiXmlElement * xVertex = xPolyVertices->FirstChildElement("vertex");
+            for(TiXmlElement* xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
+                xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
+                for(TiXmlElement* xVertex = xPolyVertices->FirstChildElement("vertex");
                     xVertex && xVertex != xPolyVertices->LastChild("vertex");
                     xVertex = xVertex->NextSiblingElement("vertex")) {
                     double x1 = xmltof(xVertex->Attribute("px"));
@@ -1052,11 +1037,11 @@ bool Building::LoadRoutingInfo(const string & filename)
         }
 
     // load routes
-    TiXmlNode * xTripsNode = xRootNode->FirstChild("routing")->FirstChild("routes");
+    TiXmlNode* xTripsNode = xRootNode->FirstChild("routing")->FirstChild("routes");
 
     if(xTripsNode)
-        for(TiXmlElement * trip = xTripsNode->FirstChildElement("route"); trip;
-            trip                = trip->NextSiblingElement("route")) {
+        for(TiXmlElement* trip = xTripsNode->FirstChildElement("route"); trip;
+            trip = trip->NextSiblingElement("route")) {
             double id = xmltof(trip->Attribute("id"), -1);
             if(id == -1) {
                 Debug::Error("id missing for trip");
@@ -1066,8 +1051,8 @@ bool Building::LoadRoutingInfo(const string & filename)
             vector<string> vTrip;
             vTrip.clear();
 
-            char * str = (char *) sTrip.c_str();
-            char * p   = strtok(str, ":");
+            char* str = (char*) sTrip.c_str();
+            char* p = strtok(str, ":");
             while(p) {
                 vTrip.push_back(xmltoa(p));
                 p = strtok(NULL, ":");
@@ -1090,29 +1075,29 @@ bool Building::LoadTrafficInfo()
         return false;
     }
 
-    TiXmlNode * xRootNode = doc.RootElement()->FirstChild("traffic_constraints");
+    TiXmlNode* xRootNode = doc.RootElement()->FirstChild("traffic_constraints");
     if(!xRootNode) {
         Debug::Warning("could not find any traffic information");
         return true;
     }
 
     // processing the rooms node
-    TiXmlNode * xRoomsNode = xRootNode->FirstChild("rooms");
+    TiXmlNode* xRoomsNode = xRootNode->FirstChild("rooms");
     if(xRoomsNode)
-        for(TiXmlElement * xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
-            xRoom                = xRoom->NextSiblingElement("room")) {
-            double id        = xmltof(xRoom->Attribute("room_id"), -1);
-            string state     = xmltoa(xRoom->Attribute("state"), "good");
+        for(TiXmlElement* xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
+            xRoom = xRoom->NextSiblingElement("room")) {
+            double id = xmltof(xRoom->Attribute("room_id"), -1);
+            string state = xmltoa(xRoom->Attribute("state"), "good");
             RoomState status = (state == "good") ? ROOM_CLEAN : ROOM_SMOKED;
             GetRoom(id)->SetState(status);
         }
 
     // processing the doors node
-    TiXmlNode * xDoorsNode = xRootNode->FirstChild("doors");
+    TiXmlNode* xDoorsNode = xRootNode->FirstChild("doors");
     if(xDoorsNode)
-        for(TiXmlElement * xDoor = xDoorsNode->FirstChildElement("door"); xDoor;
-            xDoor                = xDoor->NextSiblingElement("door")) {
-            int id       = xmltoi(xDoor->Attribute("trans_id"), -1);
+        for(TiXmlElement* xDoor = xDoorsNode->FirstChildElement("door"); xDoor;
+            xDoor = xDoor->NextSiblingElement("door")) {
+            int id = xmltoi(xDoor->Attribute("trans_id"), -1);
             string state = xmltoa(xDoor->Attribute("state"), "open");
 
             // store transition in a map and call getTransition/getCrossin
@@ -1128,10 +1113,9 @@ bool Building::LoadTrafficInfo()
     return true;
 }
 
-
-void Building::DeletePedestrian(Pedestrian *& ped)
+void Building::DeletePedestrian(Pedestrian*& ped)
 {
-    vector<Pedestrian *>::iterator it;
+    vector<Pedestrian*>::iterator it;
     it = find(_allPedestians.begin(), _allPedestians.end(), ped);
     if(it == _allPedestians.end()) {
         Debug::Error("Ped not found with ID %d ", ped->GetID());
@@ -1147,7 +1131,7 @@ void Building::DeletePedestrian(Pedestrian *& ped)
             for(unsigned int i = 0; i < brokenpaths.size(); i++) {
                 vector<string> tags;
                 StringExplode(brokenpaths[i], ":", &tags);
-                string room  = _rooms[atoi(tags[0].c_str())]->GetCaption();
+                string room = _rooms[atoi(tags[0].c_str())]->GetCaption();
                 string trans = GetTransition(atoi(tags[1].c_str()))->GetCaption();
                 // ignore crossings/hlines
                 if(trans != "")
@@ -1162,22 +1146,22 @@ void Building::DeletePedestrian(Pedestrian *& ped)
         Log->ProgressBar(totalPeds, totalPeds - nowPeds);
     }
     // update the stats before deleting
-    Transition * trans = GetTransitionByUID(ped->GetExitIndex());
+    Transition* trans = GetTransitionByUID(ped->GetExitIndex());
     if(trans) {
         trans->IncreaseDoorUsage(1, ped->GetGlobalTime());
     }
     delete ped;
 }
 
-const vector<Pedestrian *> & Building::GetAllPedestrians() const
+const vector<Pedestrian*>& Building::GetAllPedestrians() const
 {
     return _allPedestians;
 }
 
-void Building::AddPedestrian(Pedestrian * ped)
+void Building::AddPedestrian(Pedestrian* ped)
 {
     for(unsigned int p = 0; p < _allPedestians.size(); p++) {
-        Pedestrian * ped1 = _allPedestians[p];
+        Pedestrian* ped1 = _allPedestians[p];
         if(ped->GetID() == ped1->GetID()) {
             Debug::Warning("Pedestrian already in the room %d? ", ped->GetID());
             return;
@@ -1186,12 +1170,12 @@ void Building::AddPedestrian(Pedestrian * ped)
     _allPedestians.push_back(ped);
 }
 
-void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const
+void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds) const
 {
     // for(unsigned int p = 0;p<_allPedestians.size();p++){
     //     Pedestrian* ped=_allPedestians[p];
 
-    for(auto && ped : _allPedestians) {
+    for(auto&& ped : _allPedestians) {
         if((room == ped->GetRoomID()) && (subroom == ped->GetSubRoomID())) {
             peds.push_back(ped);
         }
@@ -1199,7 +1183,7 @@ void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian *> &
 }
 
 // obsolete
-void Building::InitSavePedPathway(const string & filename)
+void Building::InitSavePedPathway(const string& filename)
 {
     _pathWayStream.open(filename.c_str());
     _savePathway = true;
@@ -1217,8 +1201,7 @@ void Building::InitSavePedPathway(const string & filename)
     }
 }
 
-
-void Building::StringExplode(string str, string separator, vector<string> * results)
+void Building::StringExplode(string str, string separator, vector<string>* results)
 {
     size_t found;
     found = str.find_first_of(separator);
@@ -1226,7 +1209,7 @@ void Building::StringExplode(string str, string separator, vector<string> * resu
         if(found > 0) {
             results->push_back(str.substr(0, found));
         }
-        str   = str.substr(found + 1);
+        str = str.substr(found + 1);
         found = str.find_first_of(separator);
     }
     if(str.length() > 0) {
@@ -1234,10 +1217,10 @@ void Building::StringExplode(string str, string separator, vector<string> * resu
     }
 }
 
-Pedestrian * Building::GetPedestrian(int pedID) const
+Pedestrian* Building::GetPedestrian(int pedID) const
 {
     for(unsigned int p = 0; p < _allPedestians.size(); p++) {
-        Pedestrian * ped = _allPedestians[p];
+        Pedestrian* ped = _allPedestians[p];
         if(ped->GetID() == pedID) {
             return ped;
         }
@@ -1246,10 +1229,10 @@ Pedestrian * Building::GetPedestrian(int pedID) const
     return NULL;
 }
 
-Transition * Building::GetTransitionByUID(int uid) const
+Transition* Building::GetTransitionByUID(int uid) const
 {
     // eventually
-    map<int, Transition *>::const_iterator itr;
+    map<int, Transition*>::const_iterator itr;
     for(itr = _transitions.begin(); itr != _transitions.end(); ++itr) {
         if(itr->second->GetUniqueID() == uid)
             return itr->second;
@@ -1257,8 +1240,7 @@ Transition * Building::GetTransitionByUID(int uid) const
     return NULL;
 }
 
-
-bool Building::SaveGeometry(const std::string & filename)
+bool Building::SaveGeometry(const std::string& filename)
 {
     std::stringstream geometry;
 
@@ -1272,21 +1254,20 @@ bool Building::SaveGeometry(const std::string & filename)
 
     // write the rooms
     geometry << "<rooms>" << endl;
-    for(auto && itroom : _rooms) {
-        auto && room = itroom.second;
+    for(auto&& itroom : _rooms) {
+        auto&& room = itroom.second;
         geometry << "\t<room id =\"" << room->GetID() << "\" caption =\"" << room->GetCaption()
                  << "\">" << endl;
-        for(auto && itr_sub : room->GetAllSubRooms()) {
-            auto && sub          = itr_sub.second;
-            const double * plane = sub->GetPlaneEquation();
+        for(auto&& itr_sub : room->GetAllSubRooms()) {
+            auto&& sub = itr_sub.second;
+            const double* plane = sub->GetPlaneEquation();
             geometry << "\t\t<subroom id =\"" << sub->GetSubRoomID() << "\" closed=\"" << 0
                      << "\" class=\"" << sub->GetType() << "\" A_x=\"" << plane[0] << "\" B_y=\""
                      << plane[1] << "\" C_z=\"" << plane[2] << "\">" << endl;
 
-
-            for(auto && wall : sub->GetAllWalls()) {
-                const Point & p1 = wall.GetPoint1();
-                const Point & p2 = wall.GetPoint2();
+            for(auto&& wall : sub->GetAllWalls()) {
+                const Point& p1 = wall.GetPoint1();
+                const Point& p2 = wall.GetPoint2();
 
                 geometry << "\t\t\t<polygon caption=\"wall\" type=\"" << wall.GetType() << "\">"
                          << endl
@@ -1298,8 +1279,8 @@ bool Building::SaveGeometry(const std::string & filename)
             }
 
             if(sub->GetType() == "stair") {
-                const Point & up   = ((Stair *) sub.get())->GetUp();
-                const Point & down = ((Stair *) sub.get())->GetDown();
+                const Point& up = ((Stair*) sub.get())->GetUp();
+                const Point& down = ((Stair*) sub.get())->GetDown();
                 geometry << "\t\t\t<up px=\"" << up._x << "\" py=\"" << up._y << "\"/>" << endl;
                 geometry << "\t\t\t<down px=\"" << down._x << "\" py=\"" << down._y << "\"/>"
                          << endl;
@@ -1310,15 +1291,15 @@ bool Building::SaveGeometry(const std::string & filename)
 
         // write the crossings
         geometry << "\t\t<crossings>" << endl;
-        for(auto const & mapcross : _crossings) {
-            Crossing * cross = mapcross.second;
+        for(auto const& mapcross : _crossings) {
+            Crossing* cross = mapcross.second;
 
             // only write the crossings in this rooms
             if(cross->GetRoom1()->GetID() != room->GetID())
                 continue;
 
-            const Point & p1 = cross->GetPoint1();
-            const Point & p2 = cross->GetPoint2();
+            const Point& p1 = cross->GetPoint1();
+            const Point& p2 = cross->GetPoint2();
 
             geometry << "\t<crossing id =\"" << cross->GetID() << "\" subroom1_id=\""
                      << cross->GetSubRoom1()->GetSubRoomID() << "\" subroom2_id=\""
@@ -1337,14 +1318,14 @@ bool Building::SaveGeometry(const std::string & filename)
     // write the transitions
     geometry << "<transitions>" << endl;
 
-    for(auto const & maptrans : _transitions) {
-        Transition * trans = maptrans.second;
-        const Point & p1   = trans->GetPoint1();
-        const Point & p2   = trans->GetPoint2();
-        int room2_id       = -1;
-        int subroom2_id    = -1;
+    for(auto const& maptrans : _transitions) {
+        Transition* trans = maptrans.second;
+        const Point& p1 = trans->GetPoint1();
+        const Point& p2 = trans->GetPoint2();
+        int room2_id = -1;
+        int subroom2_id = -1;
         if(trans->GetRoom2()) {
-            room2_id    = trans->GetRoom2()->GetID();
+            room2_id = trans->GetRoom2()->GetID();
             subroom2_id = trans->GetSubRoom2()->GetSubRoomID();
         }
 

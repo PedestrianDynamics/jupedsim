@@ -48,7 +48,7 @@
 #include <fmt/format.h>
 #include <iostream>
 
-int main(int argc, char ** argv)
+int main(int argc, char** argv)
 {
     ArgumentParser a;
     if(auto [execution, return_code] = a.Parse(argc, argv);
@@ -73,23 +73,23 @@ int main(int argc, char ** argv)
         LOG_INFO("Build from branch {}", GIT_BRANCH);
         LOG_INFO("Build with {}({})", compiler_id, compiler_version);
 
-        auto config         = ParseIniFile(a.IniFilePath());
-        auto building       = std::make_unique<Building>(&config);
-        auto * building_ptr = building.get();
-        auto agents         = CreateAllPedestrians(&config, building.get(), config.tMax);
-        auto geometry       = ParseGeometryXml(config.projectRootDir / config.geometryFile);
+        auto config = ParseIniFile(a.IniFilePath());
+        auto building = std::make_unique<Building>(&config);
+        auto* building_ptr = building.get();
+        auto agents = CreateAllPedestrians(&config, building.get(), config.tMax);
+        auto geometry = ParseGeometryXml(config.projectRootDir / config.geometryFile);
         Simulation sim(&config, std::move(building), std::move(geometry));
         EventManager manager;
 
-        size_t frame                        = 0;
+        size_t frame = 0;
         const auto num_agents_in_simulation = agents.size();
 
         while(!agents.empty()) {
             double now = sim.Clock().dT() * frame;
-            auto t     = std::chrono::duration_cast<std::chrono::nanoseconds>(
+            auto t = std::chrono::duration_cast<std::chrono::nanoseconds>(
                 std::chrono::duration<double>(now));
             auto events = CreateEventsFromAgents(extract(agents, frame), t);
-            for(auto && evt : events) {
+            for(auto&& evt : events) {
                 manager.AddEvent(evt);
             }
             ++frame;
@@ -100,7 +100,7 @@ int main(int argc, char ** argv)
         // I want to redesign this so that all specified doors are open and can be closed
         // before frame 0 with an event that takes place at t0.
         // (e.g. what the code below is already doing)
-        for(const auto & [id, t] : building_ptr->GetAllTransitions()) {
+        for(const auto& [id, t] : building_ptr->GetAllTransitions()) {
             auto type = DoorEvent::Type::OPEN;
             if(t->IsClose()) {
                 type = DoorEvent::Type::CLOSE;
@@ -113,31 +113,31 @@ int main(int argc, char ** argv)
 
         if(config.eventFile) {
             const auto door_events = EventFileParser::ParseDoorEvents(*config.eventFile);
-            for(auto && evt : door_events) {
+            for(auto&& evt : door_events) {
                 manager.AddEvent(evt);
             }
         }
         if(config.scheduleFile) {
             const auto train_door_events =
                 EventFileParser::ParseSchedule(config.scheduleFile.value());
-            for(auto && evt : train_door_events) {
+            for(auto&& evt : train_door_events) {
                 manager.AddEvent(evt);
             }
             const auto groupMaxAgents =
                 EventFileParser::ParseMaxAgents(config.scheduleFile.value());
-            for(auto const & [transID, maxAgents] : groupMaxAgents) {
+            for(auto const& [transID, maxAgents] : groupMaxAgents) {
                 building_ptr->GetTransition(transID)->SetMaxDoorUsage(maxAgents);
             }
         }
         if(!config.trainTimeTableFile.empty() && !config.trainTypeFile.empty()) {
-            //TODO(kkratz) Have another look at the error handling
+            // TODO(kkratz) Have another look at the error handling
             auto trainTypes = TrainFileParser::ParseTrainTypes(config.trainTypeFile);
             const auto timeTableContents =
                 TrainFileParser::ParseTrainTimeTable(trainTypes, config.trainTimeTableFile);
-            for(auto && evt : timeTableContents.events) {
+            for(auto&& evt : timeTableContents.events) {
                 manager.AddEvent(evt);
             }
-            for(auto && [k, v] : timeTableContents.trains) {
+            for(auto&& [k, v] : timeTableContents.trains) {
                 building_ptr->AddTrainType(k, v);
             }
         }
@@ -162,7 +162,7 @@ int main(int argc, char ** argv)
         while((!sim.Agents().empty() || manager.HasEventsAfter(sim.Clock())) &&
               sim.Clock().ElapsedTime() < config.tMax) {
             auto next_events = manager.NextEvents(sim.Clock());
-            for(auto const & [_, event] : next_events) {
+            for(auto const& [_, event] : next_events) {
                 // lambda is used to bind additional function paramters to the visitor
                 auto visitor = [&sim](auto event) { ProcessEvent(event, sim); };
                 std::visit(visitor, event);
@@ -175,7 +175,6 @@ int main(int argc, char ** argv)
             if(0 == sim.Clock().Iteration() % writeInterval) {
                 writer->WriteFrame(sim.Clock().Iteration() / writeInterval, sim.Agents());
             }
-
 
             if(sim.Clock().Iteration() % 1000 == 0) {
                 if(config.showStatistics) {
@@ -204,7 +203,7 @@ int main(int argc, char ** argv)
         LOG_INFO("Evac Time {:.2f}s", evacTime);
         LOG_INFO("Realtime Factor {:.2f}x", evacTime / execTime);
         return (EXIT_SUCCESS);
-    } catch(const std::exception & ex) {
+    } catch(const std::exception& ex) {
         LOG_ERROR("{:s}", ex.what());
     } catch(...) {
         LOG_ERROR("Unknown exception encountered!");

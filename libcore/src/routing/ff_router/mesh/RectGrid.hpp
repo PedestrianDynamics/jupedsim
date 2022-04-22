@@ -43,7 +43,6 @@ typedef struct directNeighbor_t {
     long int key[4];
 } directNeighbor;
 
-
 class RectGrid
 {
 public:
@@ -56,17 +55,17 @@ public:
      * Copy constructor.
      * @param other RectGrid to copy.
      */
-    RectGrid(const RectGrid & other)
+    RectGrid(const RectGrid& other)
     {
-        _nPoints     = other._nPoints;
-        _xMin        = other._xMin;
-        _yMin        = other._yMin;
-        _xMax        = other._xMax;
-        _yMax        = other._yMax;
-        _cellsizeX   = other._cellsizeX;
-        _cellsizeY   = other._cellsizeY;
-        _iMax        = other._iMax;
-        _jMax        = other._jMax;
+        _nPoints = other._nPoints;
+        _xMin = other._xMin;
+        _yMin = other._yMin;
+        _xMax = other._xMax;
+        _yMax = other._yMax;
+        _cellsizeX = other._cellsizeX;
+        _cellsizeY = other._cellsizeY;
+        _iMax = other._iMax;
+        _jMax = other._jMax;
         _initialized = other._initialized;
     }
 
@@ -95,15 +94,15 @@ public:
         long int jMaxArg,
         bool isInitializedArg)
     {
-        _nPoints     = nPointsArg;
-        _xMin        = xMinArg;
-        _yMin        = yMinArg;
-        _xMax        = xMaxArg;
-        _yMax        = yMaxArg;
-        _cellsizeX   = hxArg;
-        _cellsizeY   = hyArg;
-        _iMax        = iMaxArg;
-        _jMax        = jMaxArg;
+        _nPoints = nPointsArg;
+        _xMin = xMinArg;
+        _yMin = yMinArg;
+        _xMax = xMaxArg;
+        _yMax = yMaxArg;
+        _cellsizeX = hxArg;
+        _cellsizeY = hyArg;
+        _iMax = iMaxArg;
+        _jMax = jMaxArg;
         _initialized = isInitializedArg;
     }
 
@@ -260,15 +259,15 @@ public:
      * @post \a _iMax, \a _jMax, \a _nPoints are set.
      */
     void CreateGrid()
-    { //what if cast chops off float, if any changes: GetXFromKey still correct?
+    { // what if cast chops off float, if any changes: GetXFromKey still correct?
         if(!_initialized) {
             _iMax = (long int) ((_xMax - _xMin) / _cellsizeX) +
-                    2; //check plus 2 (one for ceil, one for starting point)
-            _jMax    = (long int) ((_yMax - _yMin) / _cellsizeY) + 2;
+                    2; // check plus 2 (one for ceil, one for starting point)
+            _jMax = (long int) ((_yMax - _yMin) / _cellsizeY) + 2;
             _nPoints = _iMax * _jMax;
             //@todo: see if necessary to align _xMax/_yMax
-            _xMax        = _xMin + _iMax * _cellsizeX;
-            _yMax        = _yMin + _jMax * _cellsizeY;
+            _xMax = _xMin + _iMax * _cellsizeX;
+            _yMax = _yMin + _jMax * _cellsizeY;
             _initialized = true;
         }
     }
@@ -278,7 +277,7 @@ public:
      * @param currPoint Point of which the closest grid point is desired.
      * @return Closest grid point to \p currPoint.
      */
-    [[nodiscard]] Point GetNearestGridPoint(const Point & currPoint) const
+    [[nodiscard]] Point GetNearestGridPoint(const Point& currPoint) const
     {
         if(!IncludesPoint(currPoint)) {
             LOG_ERROR("ERROR 3 in RectGrid::GetKeyAtPoint with:");
@@ -305,7 +304,7 @@ public:
     [[nodiscard]] Point GetPointFromKey(const long int key) const
     {
         long int i = key % _iMax;
-        long int j = key / _iMax; //integer division
+        long int j = key / _iMax; // integer division
 
         return Point(i * _cellsizeX + _xMin, j * _cellsizeY + _yMin);
     }
@@ -317,17 +316,17 @@ public:
      */
     [[nodiscard]] directNeighbor GetNeighbors(const long int key) const
     {
-        directNeighbor neighbors = {{-1, -1, -1, -1}}; //curleybrackets for struct, then for int[4]
-        long int i               = GetIFromKey(key);
-        long int j               = GetJFromKey(key);
+        directNeighbor neighbors = {{-1, -1, -1, -1}}; // curleybrackets for struct, then for int[4]
+        long int i = GetIFromKey(key);
+        long int j = GetJFromKey(key);
 
-        //right                       //-2 marks invalid neighbor
+        // right                       //-2 marks invalid neighbor
         neighbors.key[0] = (i == (_iMax - 1)) ? -2 : (j * _iMax + i + 1);
-        //upper
+        // upper
         neighbors.key[1] = (j == (_jMax - 1)) ? -2 : ((j + 1) * _iMax + i);
-        //left
+        // left
         neighbors.key[2] = (i == 0) ? -2 : (j * _iMax + i - 1);
-        //lower
+        // lower
         neighbors.key[3] = (j == 0) ? -2 : ((j - 1) * _iMax + i);
 
         return neighbors;
@@ -338,7 +337,7 @@ public:
      * @param point Point to check.
      * @return \p point is included in grid.
      */
-    [[nodiscard]] bool IncludesPoint(const Point & point) const
+    [[nodiscard]] bool IncludesPoint(const Point& point) const
     {
         return !(
             (point.x < (_xMin - _cellsizeX / 2)) || (point.x > (_xMax + _cellsizeX / 2)) ||

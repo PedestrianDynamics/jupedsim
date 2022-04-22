@@ -70,17 +70,16 @@ class FacilityGeometry;
 class TrailPlotter;
 class PointPlotter;
 
-
 class Visualisation : public QObject
 {
     Q_OBJECT
 
 public:
     Visualisation(
-        QObject * parent,
-        vtkRenderWindow * renderWindow,
-        Settings * _settings,
-        TrajectoryData * trajectories);
+        QObject* parent,
+        vtkRenderWindow* renderWindow,
+        Settings* _settings,
+        TrajectoryData* trajectories);
     ~Visualisation() override = default;
     void start();
     void stop();
@@ -98,9 +97,9 @@ public:
 
     /// load and display the geometry where
     /// the pedestrians will move
-    void setGeometry(FacilityGeometry * _geometry);
+    void setGeometry(FacilityGeometry* _geometry);
 
-    GeometryFactory & getGeometry();
+    GeometryFactory& getGeometry();
 
     /// this is for convenience and will be delete later
     void setWindowTitle(QString title);
@@ -114,8 +113,8 @@ public:
     void setGeometryVisibility(bool status);
 
     void setTrainData(
-        std::map<std::string, std::shared_ptr<TrainType>> && trainTypes,
-        std::map<int, std::shared_ptr<TrainTimeTable>> && trainTimeTable);
+        std::map<std::string, std::shared_ptr<TrainType>>&& trainTypes,
+        std::map<int, std::shared_ptr<TrainTimeTable>>&& trainTimeTable);
 
     /// enable/disable 2D
     void setGeometryVisibility2D(bool status);
@@ -124,22 +123,22 @@ public:
     void setGeometryVisibility3D(bool status);
 
     /// change the background color of the rendering windows
-    void setBackgroundColor(const QColor & col);
+    void setBackgroundColor(const QColor& col);
 
     /// change the walls color
-    void setWallsColor(const QColor & color);
+    void setWallsColor(const QColor& color);
 
     /// change the floor color
-    void setFloorColor(const QColor & color);
+    void setFloorColor(const QColor& color);
 
     /// change the obstacle color
-    void setObstacleColor(const QColor & color);
+    void setObstacleColor(const QColor& color);
 
     /// change the exits color.
-    void setExitsColor(const QColor & color);
+    void setExitsColor(const QColor& color);
 
     /// change the exits color.
-    void setNavLinesColor(const QColor & color);
+    void setNavLinesColor(const QColor& color);
 
     /// show / hide the walls
     void showWalls(bool status);
@@ -208,7 +207,7 @@ private:
     // finalize the datasets
     void finalize();
 
-    void QcolorToDouble(const QColor & col, double * rgb);
+    void QcolorToDouble(const QColor& col, double* rgb);
 
     /// take png screenshots sequence
     void takeScreenshotSequence();
@@ -217,14 +216,13 @@ private:
     /// @return fontsize
     int computeFontSize();
 
-
 private:
-    Settings * _settings;
-    TrajectoryData * _trajectories;
+    Settings* _settings;
+    TrajectoryData* _trajectories;
     GeometryFactory _geometry;
     std::map<std::string, std::shared_ptr<TrainType>> _trainTypes;
     std::map<int, std::shared_ptr<TrainTimeTable>> _trainTimeTables;
-    vtkRenderWindow * _renderWindow;
+    vtkRenderWindow* _renderWindow;
     vtkSmartPointer<vtkRenderer> _renderer;
     vtkSmartPointer<vtkAxesActor> _axis;
     vtkSmartPointer<vtkTextActor> _runningTime;

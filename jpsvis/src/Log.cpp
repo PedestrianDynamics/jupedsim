@@ -30,7 +30,6 @@
  *
  */
 
-
 #include "Log.hpp"
 
 #include <cstdarg>
@@ -41,18 +40,21 @@
 
 using namespace std;
 
-std::ostream & Log::os     = std::cerr;
+std::ostream& Log::os = std::cerr;
 Log::LEVEL Log::debugLevel = Log::ALL;
-int Log::INFO_Count        = 0;
-int Log::ERR_Count         = 0;
-int Log::WAR_Count         = 0;
+int Log::INFO_Count = 0;
+int Log::ERR_Count = 0;
+int Log::WAR_Count = 0;
 
-Log::Log() {}
+Log::Log()
+{
+}
 
-Log::~Log() {}
+Log::~Log()
+{
+}
 
-
-void Log::setOutputStream(std::ostream & osl)
+void Log::setOutputStream(std::ostream& osl)
 {
     os.rdbuf(osl.rdbuf());
 }
@@ -62,7 +64,7 @@ void Log::setDebugLevel(Log::LEVEL level)
     debugLevel = level;
 }
 
-void Log::Messages(const char * format, ...)
+void Log::Messages(const char* format, ...)
 {
     switch(debugLevel) {
         case ALL:
@@ -83,7 +85,7 @@ void Log::Messages(const char * format, ...)
     }
 }
 
-void Log::Info(const char * format, ...)
+void Log::Info(const char* format, ...)
 {
     switch(debugLevel) {
         case ALL:
@@ -105,7 +107,7 @@ void Log::Info(const char * format, ...)
     }
 }
 
-void Log::Warning(const char * format, ...)
+void Log::Warning(const char* format, ...)
 {
     switch(debugLevel) {
         case WARNING:
@@ -126,8 +128,7 @@ void Log::Warning(const char * format, ...)
     }
 }
 
-
-void Log::Error(const char * format, ...)
+void Log::Error(const char* format, ...)
 {
     switch(debugLevel) {
         case WARNING:

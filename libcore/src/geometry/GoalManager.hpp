@@ -38,11 +38,11 @@ class Simulation;
 class GoalManager
 {
 private:
-    Building * _building;
-    Simulation * _simulation;
+    Building* _building;
+    Simulation* _simulation;
 
 public:
-    GoalManager(Building * building, Simulation * _simulation);
+    GoalManager(Building* building, Simulation* _simulation);
 
     /**
      * Checks if the pedestrians have entered a goal/wa or if the waiting inside a waiting area is
@@ -65,7 +65,7 @@ private:
      * perform the corresponding actions
      * @param[in] ped pedestrian, which position is checked
      */
-    void ProcessPedPosition(Pedestrian * ped, double time);
+    void ProcessPedPosition(Pedestrian* ped, double time);
 
     /**
      * Checks if pedestrian is inside a specific goal
@@ -73,7 +73,7 @@ private:
      * @param[in] goalID ID of the goal
      * @return ped is inside goalID
      */
-    bool CheckInside(Pedestrian * ped, int goalID);
+    bool CheckInside(Pedestrian* ped, int goalID);
 
     /**
      * Checks if pedestrian is inside a specific waiting area
@@ -81,7 +81,7 @@ private:
      * @param[in] goalID ID of the waiting area
      * @return ped is inside goalID
      */
-    bool CheckInsideWaitingArea(Pedestrian * ped, int goalID);
+    bool CheckInsideWaitingArea(Pedestrian* ped, int goalID);
 
     /**
      * Sets the state of a specific goal and informs the other goals of changes

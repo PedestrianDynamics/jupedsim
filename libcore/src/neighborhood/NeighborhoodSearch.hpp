@@ -31,20 +31,20 @@
 class NeighborhoodSearch
 {
     double _cellSize;
-    Grid2D<Pedestrian *> _grid{};
+    Grid2D<Pedestrian*> _grid{};
 
 public:
     explicit NeighborhoodSearch(double cellSize);
     ~NeighborhoodSearch();
-    NeighborhoodSearch(const NeighborhoodSearch &)             = default;
-    NeighborhoodSearch(NeighborhoodSearch &&)                  = default;
-    NeighborhoodSearch & operator=(const NeighborhoodSearch &) = default;
-    NeighborhoodSearch & operator=(NeighborhoodSearch &&)      = default;
+    NeighborhoodSearch(const NeighborhoodSearch&) = default;
+    NeighborhoodSearch(NeighborhoodSearch&&) = default;
+    NeighborhoodSearch& operator=(const NeighborhoodSearch&) = default;
+    NeighborhoodSearch& operator=(NeighborhoodSearch&&) = default;
 
     /**
-      *Update the cells occupation
-      */
-    void Update(const std::vector<std::unique_ptr<Pedestrian>> & peds);
+     *Update the cells occupation
+     */
+    void Update(const std::vector<std::unique_ptr<Pedestrian>>& peds);
 
     IteratorPair<NeighborhoodIterator, NeighborhoodEndIterator>
     GetNeighboringAgents(Point pos, double radius) const;

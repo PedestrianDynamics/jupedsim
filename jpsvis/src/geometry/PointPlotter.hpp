@@ -48,7 +48,7 @@ public:
 
     ~PointPlotter() = default;
 
-    void PlotPoint(const glm::dvec3 & pos, double color);
+    void PlotPoint(const glm::dvec3& pos, double color);
 
     vtkSmartPointer<vtkActor> getActor();
 

@@ -11,7 +11,7 @@ class TrajectoryData
     double _fps{0};
 
 public:
-    TrajectoryData()  = default;
+    TrajectoryData() = default;
     ~TrajectoryData() = default;
 
     void resetFrameCursor();
@@ -20,7 +20,7 @@ public:
     unsigned int getSize();
 
     /// add a frame to the synchronized data
-    void append(std::unique_ptr<Frame> && frame);
+    void append(std::unique_ptr<Frame>&& frame);
 
     /// clears all frames
     void clearFrames();
@@ -47,5 +47,5 @@ public:
     /// @param count frames to move.
     void moveFrameBy(int count);
 
-    Frame * currentFrame();
+    Frame* currentFrame();
 };

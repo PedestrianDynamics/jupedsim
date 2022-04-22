@@ -84,16 +84,16 @@
 /// @param values vector of keys to look up in the trajectories header.
 /// @return map of key -> optional<string>
 static std::map<std::string, std::optional<std::string>>
-getValues(const std::vector<std::string> & keys, std::ifstream & ifs)
+getValues(const std::vector<std::string>& keys, std::ifstream& ifs)
 {
     std::string line{};
     std::map<std::string, std::optional<std::string>> result{};
-    for(auto & key : keys) {
+    for(auto& key : keys) {
         result[key] = {};
     }
 
     while(getline(ifs, line)) {
-        for(const auto & key : keys) {
+        for(const auto& key : keys) {
             if(line.rfind(key, 0) == 0) {
                 auto value = line.substr(key.length());
                 trim(value);
@@ -110,7 +110,7 @@ getValues(const std::vector<std::string> & keys, std::ifstream & ifs)
 
 namespace Parsing
 {
-InputFileType detectFileType(const std::filesystem::path & path)
+InputFileType detectFileType(const std::filesystem::path& path)
 {
     // Ok this is really stupid, but for now it is good enough
     // The detection is just looking at the file extension
@@ -143,7 +143,7 @@ std::tuple<Point, Point> GetTrackStartEnd(QString geometryFile, int trackId)
             "GetTrackStartEnd: could not open the file: %s\n", geometryFile.toStdString().c_str());
         exit(EXIT_FAILURE);
     }
-    QString * errorCode = new QString();
+    QString* errorCode = new QString();
     if(!doc.setContent(&file, errorCode)) {
         file.close();
         Log::Error(">> ErrorCode: %d\n", errorCode);
@@ -157,15 +157,14 @@ std::tuple<Point, Point> GetTrackStartEnd(QString geometryFile, int trackId)
         return ret;
     }
 
-
     // parsing the subrooms
     QDomNodeList xSubRoomsNodeList = doc.elementsByTagName("subroom");
     // parsing the walls
     for(int i = 0; i < xSubRoomsNodeList.length(); i++) {
         QDomElement xPoly = xSubRoomsNodeList.item(i).firstChildElement("polygon");
         while(!xPoly.isNull()) {
-            auto Type          = xPoly.attribute("type", "notype").toStdString();
-            auto Caption       = xPoly.attribute("caption", "nocaption").toStdString();
+            auto Type = xPoly.attribute("type", "notype").toStdString();
+            auto Caption = xPoly.attribute("caption", "nocaption").toStdString();
             int parsed_trackId = xPoly.attribute("track_id", "-1").toInt();
             if(Type != "track") {
                 xPoly = xPoly.nextSiblingElement("polygon");
@@ -190,7 +189,7 @@ std::tuple<Point, Point> GetTrackStartEnd(QString geometryFile, int trackId)
             }
             xPoly = xPoly.nextSiblingElement("polygon");
         } // poly
-    }     // sub
+    } // sub
 
     double min_d = -10000;
     // find the track point with the biggest distance to start.
@@ -198,15 +197,14 @@ std::tuple<Point, Point> GetTrackStartEnd(QString geometryFile, int trackId)
         double d = (p - start_point).NormSquare();
         if(d > min_d) {
             end_point = p;
-            min_d     = d;
+            min_d = d;
         }
     }
     std::tuple<Point, Point> ret = std::make_tuple(start_point, end_point);
     return ret;
 }
 
-
-bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & geoFac)
+bool readJpsGeometryXml(const std::filesystem::path& path, GeometryFactory& geoFac)
 {
     Log::Info("Reading JPS geometry from \"%s\"", path.string().c_str());
     const auto jps_project_root_path = path.parent_path();
@@ -223,11 +221,11 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
     }
 
     double captionsColor = 0; // red
-    int room_id          = -1;
-    int subroom_id       = -1;
-    for(auto && itr_room : building->GetAllRooms()) {
+    int room_id = -1;
+    int subroom_id = -1;
+    for(auto&& itr_room : building->GetAllRooms()) {
         room_id++;
-        for(auto && itr_subroom : itr_room.second->GetAllSubRooms()) {
+        for(auto&& itr_subroom : itr_room.second->GetAllSubRooms()) {
             subroom_id++;
             std::string room_caption = itr_room.second->GetCaption() + "_RId_" +
                                        QString::number(itr_room.first).toStdString();
@@ -237,7 +235,7 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
                 itr_subroom.second->GetType(), room_caption, subroom_caption);
 
             int currentFloorPolyID = 0;
-            int currentObstPolyID  = 0;
+            int currentObstPolyID = 0;
 
             // Setup the points
             VTK_CREATE(vtkPoints, floor_points);
@@ -246,7 +244,7 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
             VTK_CREATE(vtkCellArray, floor_polygons);
             VTK_CREATE(vtkCellArray, obstacles_polygons);
 
-            SubRoom * sub = itr_subroom.second.get();
+            SubRoom* sub = itr_subroom.second.get();
 
             std::vector<Point> poly = sub->GetPolygon();
             if(sub->IsClockwise() == true) {
@@ -265,10 +263,10 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
             floor_polygons->InsertNextCell(polygon);
 
             // plot the walls only for not stairs
-            const std::vector<Wall> & walls = sub->GetAllWalls();
+            const std::vector<Wall>& walls = sub->GetAllWalls();
             for(unsigned int w = 0; w < walls.size(); w++) {
-                Point p1  = walls[w].GetPoint1();
-                Point p2  = walls[w].GetPoint2();
+                Point p1 = walls[w].GetPoint1();
+                Point p2 = walls[w].GetPoint2();
                 double z1 = sub->GetElevation(p1);
                 double z2 = sub->GetElevation(p2);
 
@@ -294,16 +292,16 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
             // insert the subroom caption
             std::string caption = itr_room.second->GetCaption() + " ( " +
                                   QString::number(sub->GetSubRoomID()).toStdString() + " ) ";
-            const Point & p = sub->GetCentroid();
-            double z        = sub->GetElevation(p);
-            double pos[3]   = {p.x * FAKTOR, p.y * FAKTOR, z * FAKTOR};
+            const Point& p = sub->GetCentroid();
+            double z = sub->GetElevation(p);
+            double pos[3] = {p.x * FAKTOR, p.y * FAKTOR, z * FAKTOR};
             geometry->addObjectLabel(pos, pos, caption, captionsColor);
 
             // plot the obstacles
             for(auto obst : sub->GetAllObstacles()) {
                 for(auto wall : obst->GetAllWalls()) {
-                    Point p1  = wall.GetPoint1();
-                    Point p2  = wall.GetPoint2();
+                    Point p1 = wall.GetPoint1();
+                    Point p2 = wall.GetPoint2();
                     double z1 = sub->GetElevation(p1);
                     double z2 = sub->GetElevation(p2);
                     geometry->addWall(
@@ -315,9 +313,9 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
                         z2 * FAKTOR);
                 }
                 // add the obstacle caption
-                const Point & p = obst->GetCentroid();
-                double z        = sub->GetElevation(p);
-                double pos[3]   = {p.x * FAKTOR, p.y * FAKTOR, z * FAKTOR};
+                const Point& p = obst->GetCentroid();
+                double z = sub->GetElevation(p);
+                double pos[3] = {p.x * FAKTOR, p.y * FAKTOR, z * FAKTOR};
                 geometry->addObjectLabel(pos, pos, obst->GetCaption(), captionsColor);
 
                 // add a special texture to the obstacles
@@ -349,9 +347,9 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
             geometry->addObstacles(obstPolygonPolyData);
 
             // add the crossings
-            for(auto && cr : itr_subroom.second->GetAllCrossings()) {
-                Point p1  = cr->GetPoint1();
-                Point p2  = cr->GetPoint2();
+            for(auto&& cr : itr_subroom.second->GetAllCrossings()) {
+                Point p1 = cr->GetPoint1();
+                Point p2 = cr->GetPoint2();
                 double z1 = cr->GetSubRoom1()->GetElevation(p1);
                 double z2 = cr->GetSubRoom1()->GetElevation(p2);
                 geometry->addNavLine(
@@ -362,8 +360,8 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
                     p2.y * FAKTOR,
                     z2 * FAKTOR);
 
-                const Point & p = cr->GetCentre();
-                double pos[3]   = {p.x * FAKTOR, p.y * FAKTOR, z1 * FAKTOR};
+                const Point& p = cr->GetCentre();
+                double pos[3] = {p.x * FAKTOR, p.y * FAKTOR, z1 * FAKTOR};
                 geometry->addObjectLabel(
                     pos,
                     pos,
@@ -373,9 +371,9 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
             }
 
             // add the exits
-            for(auto && tr : itr_subroom.second->GetAllTransitions()) {
-                Point p1  = tr->GetPoint1();
-                Point p2  = tr->GetPoint2();
+            for(auto&& tr : itr_subroom.second->GetAllTransitions()) {
+                Point p1 = tr->GetPoint1();
+                Point p2 = tr->GetPoint2();
                 double z1 = 0;
                 double z2 = 0;
 
@@ -401,8 +399,8 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
                     p2.y * FAKTOR,
                     z2 * FAKTOR);
 
-                const Point & p = tr->GetCentre();
-                double pos[3]   = {p.x * FAKTOR, p.y * FAKTOR, z1 * FAKTOR};
+                const Point& p = tr->GetCentre();
+                double pos[3] = {p.x * FAKTOR, p.y * FAKTOR, z1 * FAKTOR};
                 geometry->addObjectLabel(
                     pos,
                     pos,
@@ -417,7 +415,7 @@ bool readJpsGeometryXml(const std::filesystem::path & path, GeometryFactory & ge
     return true;
 }
 
-bool ParseTxtFormat(const QString & fileName, TrajectoryData * trajectories)
+bool ParseTxtFormat(const QString& fileName, TrajectoryData* trajectories)
 {
     Log::Info("parsing txt trajectory <%s> ", fileName.toStdString().c_str());
     QFile inputFile(fileName);
@@ -456,29 +454,29 @@ bool ParseTxtFormat(const QString & fileName, TrajectoryData * trajectories)
         }
         const auto pieces = line.splitRef(sep, Qt::SkipEmptyParts);
         glm::dvec3 pos;
-        glm::dvec3 angle     = {0, 0, 30};
-        glm::dvec3 radius    = {0.3 * FAKTOR, 0.3 * FAKTOR, 0.3 * FAKTOR};
-        int agentID          = -1;
-        int frameID          = -1;
-        double color         = 155;
+        glm::dvec3 angle = {0, 0, 30};
+        glm::dvec3 radius = {0.3 * FAKTOR, 0.3 * FAKTOR, 0.3 * FAKTOR};
+        int agentID = -1;
+        int frameID = -1;
+        double color = 155;
         const auto numPieces = pieces.size();
 
         if(numPieces == 5) {
             agentID = pieces[0].toInt();
             frameID = pieces[1].toInt();
-            pos[0]  = pieces[2].toDouble() * unitFactor;
-            pos[1]  = pieces[3].toDouble() * unitFactor;
-            pos[2]  = pieces[4].toDouble() * unitFactor;
+            pos[0] = pieces[2].toDouble() * unitFactor;
+            pos[1] = pieces[3].toDouble() * unitFactor;
+            pos[2] = pieces[4].toDouble() * unitFactor;
         } else if(numPieces >= 9) {
-            agentID   = pieces[0].toInt();
-            frameID   = pieces[1].toInt();
-            pos[0]    = pieces[2].toDouble() * unitFactor;
-            pos[1]    = pieces[3].toDouble() * unitFactor;
-            pos[2]    = pieces[4].toDouble() * unitFactor;
+            agentID = pieces[0].toInt();
+            frameID = pieces[1].toInt();
+            pos[0] = pieces[2].toDouble() * unitFactor;
+            pos[1] = pieces[3].toDouble() * unitFactor;
+            pos[2] = pieces[4].toDouble() * unitFactor;
             radius[0] = pieces[5].toDouble() * unitFactor;
             radius[1] = pieces[6].toDouble() * unitFactor;
-            angle[2]  = pieces[7].toDouble();
-            color     = pieces[8].toDouble();
+            angle[2] = pieces[7].toDouble();
+            color = pieces[8].toDouble();
         } else {
             Log::Error(
                 "Malformed input, skipping line %ul:%s", lineCount, line.toStdString().c_str());
@@ -486,15 +484,15 @@ bool ParseTxtFormat(const QString & fileName, TrajectoryData * trajectories)
         }
 
         auto element = FrameElement{pos, radius, angle, color, agentID - 1};
-        auto iter    = frames.find(frameID);
+        auto iter = frames.find(frameID);
         if(iter == frames.end()) {
             auto [new_element, _] = frames.insert({frameID, std::make_unique<Frame>()});
-            iter                  = new_element;
+            iter = new_element;
         }
         iter->second->InsertElement(std::move(element));
     }
 
-    for(auto && [k, v] : frames) {
+    for(auto&& [k, v] : frames) {
         trajectories->append(std::move(v));
     }
 
@@ -504,7 +502,7 @@ bool ParseTxtFormat(const QString & fileName, TrajectoryData * trajectories)
 
 bool LoadTrainTimetable(
     std::string Filename,
-    std::map<int, std::shared_ptr<TrainTimeTable>> & trainTimeTables)
+    std::map<int, std::shared_ptr<TrainTimeTable>>& trainTimeTables)
 {
     TiXmlDocument docTTT(Filename);
     if(!docTTT.LoadFile()) {
@@ -512,7 +510,7 @@ bool LoadTrainTimetable(
         Log::Error("could not parse the train timetable file.");
         return false;
     }
-    TiXmlElement * xTTT = docTTT.RootElement();
+    TiXmlElement* xTTT = docTTT.RootElement();
     if(!xTTT) {
         Log::Error("Root element does not exist in TTT file.");
         return false;
@@ -521,8 +519,7 @@ bool LoadTrainTimetable(
         Log::Error("Parsing train timetable file. Root element value is not 'train_time_table'.");
         return false;
     }
-    for(TiXmlElement * e = xTTT->FirstChildElement("train"); e;
-        e                = e->NextSiblingElement("train")) {
+    for(TiXmlElement* e = xTTT->FirstChildElement("train"); e; e = e->NextSiblingElement("train")) {
         std::shared_ptr<TrainTimeTable> TTT = parseTrainTimeTableNode(e);
         if(TTT) { // todo: maybe get pointer to train
             if(trainTimeTables.count(TTT->id) != 0) {
@@ -540,7 +537,7 @@ bool LoadTrainTimetable(
 
 bool LoadTrainType(
     std::string Filename,
-    std::map<std::string, std::shared_ptr<TrainType>> & trainTypes)
+    std::map<std::string, std::shared_ptr<TrainType>>& trainTypes)
 {
     TiXmlDocument docTT(Filename);
     if(!docTT.LoadFile()) {
@@ -548,7 +545,7 @@ bool LoadTrainType(
         Log::Error("could not parse the train type file.");
         return false;
     }
-    TiXmlElement * xTT = docTT.RootElement();
+    TiXmlElement* xTT = docTT.RootElement();
     if(!xTT) {
         Log::Error("Root element does not exist in TT file.");
         return false;
@@ -557,7 +554,7 @@ bool LoadTrainType(
         Log::Error("Parsing train type file. Root element value is not 'train_type'.");
         return false;
     }
-    for(TiXmlElement * e = xTT->FirstChildElement("train"); e; e = e->NextSiblingElement("train")) {
+    for(TiXmlElement* e = xTT->FirstChildElement("train"); e; e = e->NextSiblingElement("train")) {
         std::shared_ptr<TrainType> TT = parseTrainTypeNode(e);
         if(TT) {
             if(trainTypes.count(TT->_type.c_str()) != 0) {
@@ -569,16 +566,16 @@ bool LoadTrainType(
     return true;
 }
 
-std::shared_ptr<TrainTimeTable> parseTrainTimeTableNode(TiXmlElement * e)
+std::shared_ptr<TrainTimeTable> parseTrainTimeTableNode(TiXmlElement* e)
 {
     Log::Info("Loading train time table NODE");
     // std::string caption = xmltoa(e->Attribute("caption"), "-1");
-    int id              = xmltoi(e->Attribute("id"), -1);
-    int track_id        = xmltoi(e->Attribute("track_id"), -1);
+    int id = xmltoi(e->Attribute("id"), -1);
+    int track_id = xmltoi(e->Attribute("track_id"), -1);
     double train_offset = xmltof(e->Attribute("train_offset"), -1);
-    bool reversed       = false;
-    double elevation    = 5; // dummy default value
-    std::string in      = xmltoa(e->Attribute("reversed"), "false");
+    bool reversed = false;
+    double elevation = 5; // dummy default value
+    std::string in = xmltoa(e->Attribute("reversed"), "false");
     std::transform(in.begin(), in.end(), in.begin(), ::tolower);
     if(in == "false") {
         reversed = false;
@@ -587,10 +584,10 @@ std::shared_ptr<TrainTimeTable> parseTrainTimeTableNode(TiXmlElement * e)
     } else {
         reversed = false;
     }
-    std::string type     = xmltoa(e->Attribute("type"), "-1");
-    int room_id          = xmltoi(e->Attribute("room_id"), -1);
-    int subroom_id       = xmltoi(e->Attribute("subroom_id"), -1);
-    float arrival_time   = xmltof(e->Attribute("arrival_time"), -1);
+    std::string type = xmltoa(e->Attribute("type"), "-1");
+    int room_id = xmltoi(e->Attribute("room_id"), -1);
+    int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
+    float arrival_time = xmltof(e->Attribute("arrival_time"), -1);
     float departure_time = xmltof(e->Attribute("departure_time"), -1);
     // @todo: check these values for correctness e.g. arrival < departure
     Log::Info("Train time table:");
@@ -627,7 +624,7 @@ std::shared_ptr<TrainTimeTable> parseTrainTimeTableNode(TiXmlElement * e)
     return trainTimeTab;
 }
 
-std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement * node)
+std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement* node)
 {
     Log::Info("Loading train type");
 
@@ -645,7 +642,7 @@ std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement * node)
 
     // Read and check if correct value
     double length = -std::numeric_limits<double>::infinity();
-    if(const char * attribute = node->Attribute("length"); attribute) {
+    if(const char* attribute = node->Attribute("length"); attribute) {
         if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
            value >= 0.) {
             length = value;
@@ -660,13 +657,12 @@ std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement * node)
     }
     Log::Info("length: {}", length);
 
-
     std::vector<TrainDoor> doors;
-    for(TiXmlElement * xDoor = node->FirstChildElement("door"); xDoor != nullptr;
-        xDoor                = xDoor->NextSiblingElement("door")) {
+    for(TiXmlElement* xDoor = node->FirstChildElement("door"); xDoor != nullptr;
+        xDoor = xDoor->NextSiblingElement("door")) {
         // Read distance and check if correct value
         double distance = -std::numeric_limits<double>::infinity();
-        if(const char * attribute = xDoor->Attribute("distance"); attribute) {
+        if(const char* attribute = xDoor->Attribute("distance"); attribute) {
             if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
                value >= 0.) {
                 distance = value;
@@ -684,7 +680,7 @@ std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement * node)
 
         // Read width and check if correct value
         double width = -std::numeric_limits<double>::infinity();
-        if(const char * attribute = xDoor->Attribute("width"); attribute) {
+        if(const char* attribute = xDoor->Attribute("width"); attribute) {
             if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
                value > 0.) {
                 width = value;
@@ -702,7 +698,7 @@ std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement * node)
 
         // Read flow and check if correct value
         double flow = -std::numeric_limits<double>::infinity();
-        if(const char * attribute = xDoor->Attribute("flow"); attribute) {
+        if(const char* attribute = xDoor->Attribute("flow"); attribute) {
             if(double value = xmltof(attribute, -std::numeric_limits<double>::infinity());
                value > 0.) {
                 flow = value;
@@ -724,7 +720,7 @@ std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement * node)
     }
 
     Log::Info("number of doors: {}", doors.size());
-    for(const auto & d : doors) {
+    for(const auto& d : doors) {
         Log::Info(
             "Door:\tdistance: {%5.2f}\twidth: {%5.2f}\toutflow: {%5.2f}",
             d._distance,
@@ -741,7 +737,7 @@ std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement * node)
     return Type;
 }
 
-AdditionalInputs extractAdditionalInputFilePaths(const std::filesystem::path & path)
+AdditionalInputs extractAdditionalInputFilePaths(const std::filesystem::path& path)
 {
     static const std::string geometry_tag{"#geometry:"};
     static const std::string train_types_tag{"#trainType:"};
@@ -750,7 +746,7 @@ AdditionalInputs extractAdditionalInputFilePaths(const std::filesystem::path & p
 
     const auto value_map = getValues({geometry_tag, train_types_tag, train_time_table_tag}, file);
 
-    auto cannonicalize = [&path](const auto & opt) -> std::optional<std::filesystem::path> {
+    auto cannonicalize = [&path](const auto& opt) -> std::optional<std::filesystem::path> {
         if(opt) {
             return path.parent_path() / opt.value();
         } else

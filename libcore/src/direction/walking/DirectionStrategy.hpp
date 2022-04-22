@@ -62,7 +62,7 @@ public:
      * @param ped Pedestrian whos goal is determined
      * @return Goal at the current time-step of \p ped
      */
-    virtual Point GetTarget(const Room * room, const Pedestrian * ped) const = 0;
+    virtual Point GetTarget(const Room* room, const Pedestrian* ped) const = 0;
 
     /**
      * Returns the distance to the wall of a pedestrian.
@@ -70,7 +70,7 @@ public:
      * @return the distance to the wall of a pedestrian
      * TODO restructuring (TS)
      */
-    virtual double GetDistance2Wall(const Pedestrian *) const { return -1.; };
+    virtual double GetDistance2Wall(const Pedestrian*) const { return -1.; };
 
     /**
      * Returns the distance to the target of a pedestrian.
@@ -78,7 +78,7 @@ public:
      * @return the distance to the target of a pedestrian
      * TODO restructuring (TS)
      */
-    virtual double GetDistance2Target(const Pedestrian *, int) const { return -1.; };
+    virtual double GetDistance2Target(const Pedestrian*, int) const { return -1.; };
 
     /**
      * Returns the direction of the closest wall of a pedestrian.
@@ -86,7 +86,7 @@ public:
      * @return the direction to the wall of a pedestrian
      * TODO restructuring (TS)
      */
-    virtual Point GetDir2Wall(const Pedestrian *) const { return Point(); };
+    virtual Point GetDir2Wall(const Pedestrian*) const { return Point(); };
 };
 
 /**
@@ -97,29 +97,31 @@ public:
 class DirectionMiddlePoint : public DirectionStrategy
 {
 public:
-    Point GetTarget(const Room * room, const Pedestrian * ped) const override;
+    Point GetTarget(const Room* room, const Pedestrian* ped) const override;
 };
 
 /**
  * DirectionStrategy for exit_crossing_strategy 2
  *
- * The direction is given by the nearest point on L to the position of the pedestrian. L is shorten by 20 cm.
+ * The direction is given by the nearest point on L to the position of the pedestrian. L is shorten
+ * by 20 cm.
  */
 class DirectionMinSeperationShorterLine : public DirectionStrategy
 {
 public:
-    Point GetTarget(const Room * room, const Pedestrian * ped) const override;
+    Point GetTarget(const Room* room, const Pedestrian* ped) const override;
 };
 
 /**
  * DirectionStrategy for exit_crossing_strategy 3
  *
- * If the nearest point of the pedestrian on the segment line L is outside the segment, then chose the middle point as target. Otherwise the nearest point is chosen.
+ * If the nearest point of the pedestrian on the segment line L is outside the segment, then chose
+ * the middle point as target. Otherwise the nearest point is chosen.
  */
 class DirectionInRangeBottleneck : public DirectionStrategy
 {
 public:
-    Point GetTarget(const Room * room, const Pedestrian * ped) const override;
+    Point GetTarget(const Room* room, const Pedestrian* ped) const override;
 };
 
 /**
@@ -130,18 +132,18 @@ public:
 class DirectionLocalFloorfield : public DirectionStrategy
 {
 public:
-    DirectionLocalFloorfield(const Configuration & config, Building * building);
+    DirectionLocalFloorfield(const Configuration& config, Building* building);
     ~DirectionLocalFloorfield() override = default;
 
     void ReInit() override;
-    Point GetTarget(const Room * room, const Pedestrian * ped) const override;
-    Point GetDir2Wall(const Pedestrian * ped) const override;
-    double GetDistance2Wall(const Pedestrian * ped) const override;
-    double GetDistance2Target(const Pedestrian * ped, int UID) const override;
+    Point GetTarget(const Room* room, const Pedestrian* ped) const override;
+    Point GetDir2Wall(const Pedestrian* ped) const override;
+    double GetDistance2Wall(const Pedestrian* ped) const override;
+    double GetDistance2Target(const Pedestrian* ped, int UID) const override;
 
 private:
     std::map<int, std::unique_ptr<UnivFFviaFM>> _locffviafm;
-    Building * _building;
+    Building* _building;
     double _stepsize;
     double _wallAvoidDistance;
     bool _useDistancefield;

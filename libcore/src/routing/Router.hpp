@@ -34,28 +34,28 @@ class Router
 {
 protected:
     double _currentTime{0.0};
-    Simulation * _simulation{nullptr};
+    Simulation* _simulation{nullptr};
 
     Router() = default;
 
-    Router(const Router &)             = default;
-    Router & operator=(const Router &) = default;
+    Router(const Router&) = default;
+    Router& operator=(const Router&) = default;
 
-    Router(Router &&)             = default;
-    Router & operator=(Router &&) = default;
+    Router(Router&&) = default;
+    Router& operator=(Router&&) = default;
 
 public:
     virtual ~Router() = default;
 
     void UpdateTime(double time) { _currentTime = time; }
 
-    void SetSimulation(Simulation * simulation) { _simulation = simulation; }
+    void SetSimulation(Simulation* simulation) { _simulation = simulation; }
 
     /// Find the next suitable target for Pedestrian p.
     /// @post (*p).exitline/.exitindex are set (important!)
     /// @param p the Pedestrian
     /// @return next suitable target, -1 in the case no destination could be found
-    virtual int FindExit(Pedestrian * p) = 0;
+    virtual int FindExit(Pedestrian* p) = 0;
 
     /// Update the router, when geometry changed due to external changes.
     virtual void Update() = 0;

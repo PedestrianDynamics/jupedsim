@@ -36,7 +36,7 @@ void EventManager::AddEvent(std::unique_ptr<Event> event)
 
 void EventManager::ListEvents()
 {
-    for(const auto & event : _events) {
+    for(const auto& event : _events) {
         LOG_INFO("{}", *event);
     }
 }
@@ -44,7 +44,7 @@ void EventManager::ListEvents()
 bool EventManager::ProcessEvents(double now)
 {
     if(_needs_sorting) {
-        std::sort(std::begin(_events), std::end(_events), [](auto & event1, auto & event2) {
+        std::sort(std::begin(_events), std::end(_events), [](auto& event1, auto& event2) {
             return event1->GetTime() > event2->GetTime();
         });
         _needs_sorting = false;

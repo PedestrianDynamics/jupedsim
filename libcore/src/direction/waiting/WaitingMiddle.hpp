@@ -30,5 +30,5 @@
 
 class WaitingMiddle : public WaitingStrategy
 {
-    Point GetWaitingPosition(const Room * room, const Pedestrian * ped, double time) override;
+    Point GetWaitingPosition(const Room* room, const Pedestrian* ped, double time) override;
 };

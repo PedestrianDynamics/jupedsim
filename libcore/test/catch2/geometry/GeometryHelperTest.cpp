@@ -56,9 +56,9 @@ TEST_CASE(
                 int doorID = 0;
                 for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls);
                     ++wallItr) {
-                    double width    = 0.5 * wallItr->GetLength();
+                    double width = 0.5 * wallItr->GetLength();
                     double distance = std::accumulate(
-                        std::begin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                        std::begin(trackWalls), wallItr, 0., [](double& sum, const Wall& wall) {
                             return sum + wall.GetLength();
                         });
                     distance += 0.25 * wallItr->GetLength();
@@ -73,18 +73,18 @@ TEST_CASE(
                 REQUIRE(doorCoordinates.size() == trainDoors.size());
                 for(size_t i = 0; i < doorCoordinates.size(); ++i) {
                     // check distance to start
-                    auto doorCoordinate   = doorCoordinates[i];
+                    auto doorCoordinate = doorCoordinates[i];
                     auto wallDoorStartItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     double distanceShould = std::accumulate(
                         std::begin(trackWalls),
                         wallDoorStartItr,
                         trainStartOffSet,
-                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                        [](double& sum, const Wall& wall) { return sum + wall.GetLength(); });
                     distanceShould += Distance(wallDoorStartItr->GetPoint1(), doorCoordinate.first);
                     REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
 
@@ -97,7 +97,7 @@ TEST_CASE(
                     auto wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -105,7 +105,7 @@ TEST_CASE(
                     wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.second);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -121,7 +121,7 @@ TEST_CASE(
                 for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls) - 1;
                     ++wallItr) {
                     double distance = std::accumulate(
-                        std::begin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                        std::begin(trackWalls), wallItr, 0., [](double& sum, const Wall& wall) {
                             return sum + wall.GetLength();
                         });
                     distance += 0.25 * wallItr->GetLength();
@@ -129,7 +129,7 @@ TEST_CASE(
                         std::begin(trackWalls),
                         std::next(wallItr),
                         0.,
-                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                        [](double& sum, const Wall& wall) { return sum + wall.GetLength(); });
                     distanceDoorEnd += 0.25 * std::next(wallItr)->GetLength();
                     double width = distanceDoorEnd - distance;
                     trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
@@ -143,18 +143,18 @@ TEST_CASE(
                 REQUIRE(doorCoordinates.size() == trainDoors.size());
                 for(size_t i = 0; i < doorCoordinates.size(); ++i) {
                     // check distance to start
-                    auto doorCoordinate   = doorCoordinates[i];
+                    auto doorCoordinate = doorCoordinates[i];
                     auto wallDoorStartItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     double distanceShould = std::accumulate(
                         std::begin(trackWalls),
                         wallDoorStartItr,
                         trainStartOffSet,
-                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                        [](double& sum, const Wall& wall) { return sum + wall.GetLength(); });
                     distanceShould += Distance(wallDoorStartItr->GetPoint1(), doorCoordinate.first);
                     REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
 
@@ -167,7 +167,7 @@ TEST_CASE(
                     auto wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -175,7 +175,7 @@ TEST_CASE(
                     wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.second);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -192,14 +192,14 @@ TEST_CASE(
                     auto wallItr = std::begin(trackWalls);
                     std::advance(wallItr, i);
                     double distance = std::accumulate(
-                        std::begin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                        std::begin(trackWalls), wallItr, 0., [](double& sum, const Wall& wall) {
                             return sum + wall.GetLength();
                         });
                     distance += 0.5 * wallItr->GetLength();
                     std::advance(wallItr, 2);
 
                     double distanceDoorEnd = std::accumulate(
-                        std::begin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                        std::begin(trackWalls), wallItr, 0., [](double& sum, const Wall& wall) {
                             return sum + wall.GetLength();
                         });
                     distanceDoorEnd += 0.5 * wallItr->GetLength();
@@ -215,18 +215,18 @@ TEST_CASE(
                 REQUIRE(doorCoordinates.size() == trainDoors.size());
                 for(size_t i = 0; i < doorCoordinates.size(); ++i) {
                     // check distance to start
-                    auto doorCoordinate   = doorCoordinates[i];
+                    auto doorCoordinate = doorCoordinates[i];
                     auto wallDoorStartItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     double distanceShould = std::accumulate(
                         std::begin(trackWalls),
                         wallDoorStartItr,
                         trainStartOffSet,
-                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                        [](double& sum, const Wall& wall) { return sum + wall.GetLength(); });
                     distanceShould += Distance(wallDoorStartItr->GetPoint1(), doorCoordinate.first);
                     REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
 
@@ -239,7 +239,7 @@ TEST_CASE(
                     auto wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -247,7 +247,7 @@ TEST_CASE(
                     wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.second);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -264,7 +264,7 @@ TEST_CASE(
                     auto wallItr = std::begin(trackWalls);
                     std::advance(wallItr, i);
                     double distance = std::accumulate(
-                        std::begin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                        std::begin(trackWalls), wallItr, 0., [](double& sum, const Wall& wall) {
                             return sum + wall.GetLength();
                         });
                     distance += wallItr->GetLength();
@@ -281,18 +281,18 @@ TEST_CASE(
                 REQUIRE(doorCoordinates.size() == trainDoors.size());
                 for(size_t i = 0; i < doorCoordinates.size(); ++i) {
                     // check distance to start
-                    auto doorCoordinate   = doorCoordinates[i];
+                    auto doorCoordinate = doorCoordinates[i];
                     auto wallDoorStartItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     double distanceShould = std::accumulate(
                         std::begin(trackWalls),
                         wallDoorStartItr,
                         trainStartOffSet,
-                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                        [](double& sum, const Wall& wall) { return sum + wall.GetLength(); });
                     distanceShould += Distance(wallDoorStartItr->GetPoint1(), doorCoordinate.first);
                     REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
 
@@ -305,7 +305,7 @@ TEST_CASE(
                     auto wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -313,7 +313,7 @@ TEST_CASE(
                     wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.second);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -327,19 +327,19 @@ TEST_CASE(
                 double flow = std::numeric_limits<double>::max();
 
                 std::map<int, TrainDoor> trainDoors;
-                int doorID      = 0;
+                int doorID = 0;
                 double distance = 0;
-                double width    = 0.25 * trackWall2.GetLength();
+                double width = 0.25 * trackWall2.GetLength();
                 trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
                 doorID++;
 
                 distance = distance + width + 0.25 * trackWall2.GetLength();
-                width    = 0.25 * trackWall2.GetLength() + 0.25 * trackWall3.GetLength();
+                width = 0.25 * trackWall2.GetLength() + 0.25 * trackWall3.GetLength();
                 trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
                 doorID++;
 
                 distance = distance + width + 0.5 * trackWall3.GetLength();
-                width    = 0.25 * trackWall3.GetLength() + trackWall4.GetLength() +
+                width = 0.25 * trackWall3.GetLength() + trackWall4.GetLength() +
                         0.25 * trackWall5.GetLength();
                 trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
                 doorID++;
@@ -352,18 +352,18 @@ TEST_CASE(
                 REQUIRE(doorCoordinates.size() == trainDoors.size());
                 for(size_t i = 0; i < doorCoordinates.size(); ++i) {
                     // check distance to start
-                    auto doorCoordinate   = doorCoordinates[i];
+                    auto doorCoordinate = doorCoordinates[i];
                     auto wallDoorStartItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     double distanceIs = std::accumulate(
                         std::begin(trackWalls),
                         wallDoorStartItr,
                         0.,
-                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                        [](double& sum, const Wall& wall) { return sum + wall.GetLength(); });
                     distanceIs += Distance(wallDoorStartItr->GetPoint1(), doorCoordinate.first);
                     double distanceShould = trainDoors[i]._distance + trainStartOffSet;
                     REQUIRE(distanceIs == Approx(distanceShould));
@@ -377,7 +377,7 @@ TEST_CASE(
                     auto wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -385,7 +385,7 @@ TEST_CASE(
                     wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.second);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -400,9 +400,9 @@ TEST_CASE(
                 int doorID = 0;
                 for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls);
                     ++wallItr) {
-                    double width    = 0.3 * wallItr->GetLength();
+                    double width = 0.3 * wallItr->GetLength();
                     double distance = std::accumulate(
-                        std::begin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                        std::begin(trackWalls), wallItr, 0., [](double& sum, const Wall& wall) {
                             return sum + wall.GetLength();
                         });
                     trainDoors.emplace(
@@ -423,18 +423,18 @@ TEST_CASE(
                 REQUIRE(doorCoordinates.size() == trainDoors.size());
                 for(size_t i = 0; i < doorCoordinates.size(); ++i) {
                     // check distance to start
-                    auto doorCoordinate   = doorCoordinates[i];
+                    auto doorCoordinate = doorCoordinates[i];
                     auto wallDoorStartItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     double distanceShould = std::accumulate(
                         std::begin(trackWalls),
                         wallDoorStartItr,
                         trainStartOffSet,
-                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                        [](double& sum, const Wall& wall) { return sum + wall.GetLength(); });
                     distanceShould += Distance(wallDoorStartItr->GetPoint1(), doorCoordinate.first);
                     REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
 
@@ -447,7 +447,7 @@ TEST_CASE(
                     auto wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -455,7 +455,7 @@ TEST_CASE(
                     wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.second);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -470,9 +470,9 @@ TEST_CASE(
                 int doorID = 0;
                 for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls);
                     ++wallItr) {
-                    double width    = 0.5 * wallItr->GetLength();
+                    double width = 0.5 * wallItr->GetLength();
                     double distance = std::accumulate(
-                        std::begin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                        std::begin(trackWalls), wallItr, 0., [](double& sum, const Wall& wall) {
                             return sum + wall.GetLength();
                         });
                     distance += 0.25 * wallItr->GetLength();
@@ -486,7 +486,7 @@ TEST_CASE(
                         std::begin(trackWalls),
                         std::end(trackWalls),
                         0.,
-                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); }) +
+                        [](double& sum, const Wall& wall) { return sum + wall.GetLength(); }) +
                     1.;
                 double width = 1.;
                 trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
@@ -500,18 +500,18 @@ TEST_CASE(
                 REQUIRE(doorCoordinates.size() == trainDoors.size() - 1);
                 for(size_t i = 0; i < doorCoordinates.size(); ++i) {
                     // check distance to start
-                    auto doorCoordinate   = doorCoordinates[i];
+                    auto doorCoordinate = doorCoordinates[i];
                     auto wallDoorStartItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     double distanceShould = std::accumulate(
                         std::begin(trackWalls),
                         wallDoorStartItr,
                         trainStartOffSet,
-                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                        [](double& sum, const Wall& wall) { return sum + wall.GetLength(); });
                     distanceShould += Distance(wallDoorStartItr->GetPoint1(), doorCoordinate.first);
                     REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
 
@@ -524,7 +524,7 @@ TEST_CASE(
                     auto wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -532,7 +532,7 @@ TEST_CASE(
                     wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.second);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -550,9 +550,9 @@ TEST_CASE(
                 int doorID = 0;
                 for(auto wallItr = std::rbegin(trackWalls); wallItr != std::rend(trackWalls);
                     ++wallItr) {
-                    double width    = 0.5 * wallItr->GetLength();
+                    double width = 0.5 * wallItr->GetLength();
                     double distance = std::accumulate(
-                        std::rbegin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                        std::rbegin(trackWalls), wallItr, 0., [](double& sum, const Wall& wall) {
                             return sum + wall.GetLength();
                         });
                     distance += 0.25 * wallItr->GetLength();
@@ -567,18 +567,18 @@ TEST_CASE(
                 REQUIRE(doorCoordinates.size() == trainDoors.size());
                 for(size_t i = 0; i < doorCoordinates.size(); ++i) {
                     // check distance to start
-                    auto doorCoordinate   = doorCoordinates[i];
+                    auto doorCoordinate = doorCoordinates[i];
                     auto wallDoorStartItr = std::find_if(
                         std::rbegin(trackWalls),
                         std::rend(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     double distanceShould = std::accumulate(
                         std::rbegin(trackWalls),
                         wallDoorStartItr,
                         trainStartOffSet,
-                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                        [](double& sum, const Wall& wall) { return sum + wall.GetLength(); });
                     distanceShould += Distance(wallDoorStartItr->GetPoint2(), doorCoordinate.first);
                     REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
 
@@ -591,7 +591,7 @@ TEST_CASE(
                     auto wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -599,7 +599,7 @@ TEST_CASE(
                     wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.second);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -615,7 +615,7 @@ TEST_CASE(
                 for(auto wallItr = std::rbegin(trackWalls); wallItr != std::rend(trackWalls) - 1;
                     ++wallItr) {
                     double distance = std::accumulate(
-                        std::rbegin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                        std::rbegin(trackWalls), wallItr, 0., [](double& sum, const Wall& wall) {
                             return sum + wall.GetLength();
                         });
                     distance += 0.25 * wallItr->GetLength();
@@ -623,7 +623,7 @@ TEST_CASE(
                         std::rbegin(trackWalls),
                         std::next(wallItr),
                         0.,
-                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                        [](double& sum, const Wall& wall) { return sum + wall.GetLength(); });
                     distanceDoorEnd += 0.25 * std::next(wallItr)->GetLength();
                     double width = distanceDoorEnd - distance;
                     trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
@@ -637,18 +637,18 @@ TEST_CASE(
                 REQUIRE(doorCoordinates.size() == trainDoors.size());
                 for(size_t i = 0; i < doorCoordinates.size(); ++i) {
                     // check distance to start
-                    auto doorCoordinate   = doorCoordinates[i];
+                    auto doorCoordinate = doorCoordinates[i];
                     auto wallDoorStartItr = std::find_if(
                         std::rbegin(trackWalls),
                         std::rend(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     double distanceShould = std::accumulate(
                         std::rbegin(trackWalls),
                         wallDoorStartItr,
                         trainStartOffSet,
-                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                        [](double& sum, const Wall& wall) { return sum + wall.GetLength(); });
                     distanceShould += Distance(wallDoorStartItr->GetPoint2(), doorCoordinate.first);
                     REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
 
@@ -661,7 +661,7 @@ TEST_CASE(
                     auto wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -669,7 +669,7 @@ TEST_CASE(
                     wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.second);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -686,14 +686,14 @@ TEST_CASE(
                     auto wallItr = std::rbegin(trackWalls);
                     std::advance(wallItr, i);
                     double distance = std::accumulate(
-                        std::rbegin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                        std::rbegin(trackWalls), wallItr, 0., [](double& sum, const Wall& wall) {
                             return sum + wall.GetLength();
                         });
                     distance += 0.5 * wallItr->GetLength();
                     std::advance(wallItr, 2);
 
                     double distanceDoorEnd = std::accumulate(
-                        std::rbegin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                        std::rbegin(trackWalls), wallItr, 0., [](double& sum, const Wall& wall) {
                             return sum + wall.GetLength();
                         });
                     distanceDoorEnd += 0.5 * wallItr->GetLength();
@@ -709,18 +709,18 @@ TEST_CASE(
                 REQUIRE(doorCoordinates.size() == trainDoors.size());
                 for(size_t i = 0; i < doorCoordinates.size(); ++i) {
                     // check distance to start
-                    auto doorCoordinate   = doorCoordinates[i];
+                    auto doorCoordinate = doorCoordinates[i];
                     auto wallDoorStartItr = std::find_if(
                         std::rbegin(trackWalls),
                         std::rend(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     double distanceShould = std::accumulate(
                         std::rbegin(trackWalls),
                         wallDoorStartItr,
                         trainStartOffSet,
-                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                        [](double& sum, const Wall& wall) { return sum + wall.GetLength(); });
                     distanceShould += Distance(wallDoorStartItr->GetPoint2(), doorCoordinate.first);
                     REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
 
@@ -733,7 +733,7 @@ TEST_CASE(
                     auto wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -741,7 +741,7 @@ TEST_CASE(
                     wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.second);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -758,7 +758,7 @@ TEST_CASE(
                     auto wallItr = std::rbegin(trackWalls);
                     std::advance(wallItr, i);
                     double distance = std::accumulate(
-                        std::rbegin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                        std::rbegin(trackWalls), wallItr, 0., [](double& sum, const Wall& wall) {
                             return sum + wall.GetLength();
                         });
                     distance += wallItr->GetLength();
@@ -775,18 +775,18 @@ TEST_CASE(
                 REQUIRE(doorCoordinates.size() == trainDoors.size());
                 for(size_t i = 0; i < doorCoordinates.size(); ++i) {
                     // check distance to start
-                    auto doorCoordinate   = doorCoordinates[i];
+                    auto doorCoordinate = doorCoordinates[i];
                     auto wallDoorStartItr = std::find_if(
                         std::rbegin(trackWalls),
                         std::rend(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     double distanceShould = std::accumulate(
                         std::rbegin(trackWalls),
                         wallDoorStartItr,
                         trainStartOffSet,
-                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                        [](double& sum, const Wall& wall) { return sum + wall.GetLength(); });
                     distanceShould += Distance(wallDoorStartItr->GetPoint2(), doorCoordinate.first);
                     REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
 
@@ -799,7 +799,7 @@ TEST_CASE(
                     auto wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -807,7 +807,7 @@ TEST_CASE(
                     wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.second);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -824,17 +824,17 @@ TEST_CASE(
                 int doorID = 0;
 
                 double distance = 0;
-                double width    = 0.25 * trackWall4.GetLength();
+                double width = 0.25 * trackWall4.GetLength();
                 trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
                 doorID++;
 
                 distance = distance + width + 0.25 * trackWall4.GetLength();
-                width    = 0.25 * trackWall4.GetLength() + 0.25 * trackWall3.GetLength();
+                width = 0.25 * trackWall4.GetLength() + 0.25 * trackWall3.GetLength();
                 trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
                 doorID++;
 
                 distance = distance + width + 0.5 * trackWall3.GetLength();
-                width    = 0.25 * trackWall3.GetLength() + trackWall2.GetLength() +
+                width = 0.25 * trackWall3.GetLength() + trackWall2.GetLength() +
                         0.25 * trackWall1.GetLength();
                 trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
                 doorID++;
@@ -847,18 +847,18 @@ TEST_CASE(
                 REQUIRE(doorCoordinates.size() == trainDoors.size());
                 for(size_t i = 0; i < doorCoordinates.size(); ++i) {
                     // check distance to start
-                    auto doorCoordinate   = doorCoordinates[i];
+                    auto doorCoordinate = doorCoordinates[i];
                     auto wallDoorStartItr = std::find_if(
                         std::rbegin(trackWalls),
                         std::rend(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     double distanceIs = std::accumulate(
                         std::rbegin(trackWalls),
                         wallDoorStartItr,
                         0.,
-                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                        [](double& sum, const Wall& wall) { return sum + wall.GetLength(); });
                     distanceIs += Distance(wallDoorStartItr->GetPoint2(), doorCoordinate.first);
                     double distanceShould = trainDoors[i]._distance + trainStartOffSet;
                     REQUIRE(distanceIs == Approx(distanceShould));
@@ -872,7 +872,7 @@ TEST_CASE(
                     auto wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -880,7 +880,7 @@ TEST_CASE(
                     wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.second);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -895,9 +895,9 @@ TEST_CASE(
                 int doorID = 0;
                 for(auto wallItr = std::rbegin(trackWalls); wallItr != std::rend(trackWalls);
                     ++wallItr) {
-                    double width    = 0.3 * wallItr->GetLength();
+                    double width = 0.3 * wallItr->GetLength();
                     double distance = std::accumulate(
-                        std::rbegin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                        std::rbegin(trackWalls), wallItr, 0., [](double& sum, const Wall& wall) {
                             return sum + wall.GetLength();
                         });
                     trainDoors.emplace(
@@ -918,18 +918,18 @@ TEST_CASE(
                 REQUIRE(doorCoordinates.size() == trainDoors.size());
                 for(size_t i = 0; i < doorCoordinates.size(); ++i) {
                     // check distance to start
-                    auto doorCoordinate   = doorCoordinates[i];
+                    auto doorCoordinate = doorCoordinates[i];
                     auto wallDoorStartItr = std::find_if(
                         std::rbegin(trackWalls),
                         std::rend(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     double distanceShould = std::accumulate(
                         std::rbegin(trackWalls),
                         wallDoorStartItr,
                         trainStartOffSet,
-                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                        [](double& sum, const Wall& wall) { return sum + wall.GetLength(); });
                     distanceShould += Distance(wallDoorStartItr->GetPoint2(), doorCoordinate.first);
                     REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
 
@@ -942,7 +942,7 @@ TEST_CASE(
                     auto wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -950,7 +950,7 @@ TEST_CASE(
                     wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.second);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -965,9 +965,9 @@ TEST_CASE(
                 int doorID = 0;
                 for(auto wallItr = std::rbegin(trackWalls); wallItr != std::rend(trackWalls);
                     ++wallItr) {
-                    double width    = 0.5 * wallItr->GetLength();
+                    double width = 0.5 * wallItr->GetLength();
                     double distance = std::accumulate(
-                        std::rbegin(trackWalls), wallItr, 0., [](double & sum, const Wall & wall) {
+                        std::rbegin(trackWalls), wallItr, 0., [](double& sum, const Wall& wall) {
                             return sum + wall.GetLength();
                         });
                     distance += 0.25 * wallItr->GetLength();
@@ -981,7 +981,7 @@ TEST_CASE(
                         std::rbegin(trackWalls),
                         std::rend(trackWalls),
                         0.,
-                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); }) +
+                        [](double& sum, const Wall& wall) { return sum + wall.GetLength(); }) +
                     1.;
                 double width = 1.;
                 trainDoors.emplace(doorID, TrainDoor{doorID, distance, width, flow});
@@ -995,18 +995,18 @@ TEST_CASE(
                 REQUIRE(doorCoordinates.size() == trainDoors.size() - 1);
                 for(size_t i = 0; i < doorCoordinates.size(); ++i) {
                     // check distance to start
-                    auto doorCoordinate   = doorCoordinates[i];
+                    auto doorCoordinate = doorCoordinates[i];
                     auto wallDoorStartItr = std::find_if(
                         std::rbegin(trackWalls),
                         std::rend(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     double distanceShould = std::accumulate(
                         std::rbegin(trackWalls),
                         wallDoorStartItr,
                         trainStartOffSet,
-                        [](double & sum, const Wall & wall) { return sum + wall.GetLength(); });
+                        [](double& sum, const Wall& wall) { return sum + wall.GetLength(); });
                     distanceShould += Distance(wallDoorStartItr->GetPoint2(), doorCoordinate.first);
                     REQUIRE(trainDoors[i]._distance == Approx(distanceShould));
 
@@ -1019,7 +1019,7 @@ TEST_CASE(
                     auto wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.first);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -1027,7 +1027,7 @@ TEST_CASE(
                     wallPointItr = std::find_if(
                         std::begin(trackWalls),
                         std::end(trackWalls),
-                        [&doorCoordinate](const Wall & wall) {
+                        [&doorCoordinate](const Wall& wall) {
                             return wall.IsInLineSegment(doorCoordinate.second);
                         });
                     REQUIRE_FALSE(wallPointItr == std::end(trackWalls));
@@ -1072,7 +1072,6 @@ TEST_CASE("geometry/helper/SortTrackWalls", "[geometry][helper][SortWalls]")
                 ++wallItr) {
                 REQUIRE(wallItr->GetPoint2() == std::next(wallItr)->GetPoint1());
             }
-
 
             std::vector<Wall> trackWallsReversed{
                 trackWall5, trackWall4, trackWall3, trackWall2, trackWall1};
@@ -1217,9 +1216,9 @@ TEST_CASE(
             auto point = result.value();
             REQUIRE(trackWall4.IsInLineSegment(point));
             double computedDistance = 0.;
-            Point startPoint        = start;
-            auto startItr           = std::find_if(
-                std::begin(trackWalls), std::end(trackWalls), [&start](const Wall & wall) {
+            Point startPoint = start;
+            auto startItr = std::find_if(
+                std::begin(trackWalls), std::end(trackWalls), [&start](const Wall& wall) {
                     return wall.IsInLineSegment(start) && wall.GetPoint2() != start;
                 });
 
@@ -1247,9 +1246,9 @@ TEST_CASE(
             REQUIRE(trackWall5.IsInLineSegment(point));
 
             double computedDistance = 0.;
-            Point startPoint        = start;
-            auto startItr           = std::find_if(
-                std::begin(trackWalls), std::end(trackWalls), [&start](const Wall & wall) {
+            Point startPoint = start;
+            auto startItr = std::find_if(
+                std::begin(trackWalls), std::end(trackWalls), [&start](const Wall& wall) {
                     return wall.IsInLineSegment(start) && wall.GetPoint2() != start;
                 });
             for(auto wallItr = startItr; wallItr != std::end(trackWalls); ++wallItr) {
@@ -1296,9 +1295,9 @@ TEST_CASE(
             auto point = result.value();
             REQUIRE(trackWall4.IsInLineSegment(point));
             double computedDistance = 0.;
-            Point startPoint        = start;
-            auto startItr           = std::find_if(
-                std::begin(trackWalls), std::end(trackWalls), [&start](const Wall & wall) {
+            Point startPoint = start;
+            auto startItr = std::find_if(
+                std::begin(trackWalls), std::end(trackWalls), [&start](const Wall& wall) {
                     return wall.IsInLineSegment(start) && wall.GetPoint2() != start;
                 });
             for(auto wallItr = startItr; wallItr != std::end(trackWalls); ++wallItr) {
@@ -1325,9 +1324,9 @@ TEST_CASE(
             REQUIRE(trackWall5.IsInLineSegment(point));
 
             double computedDistance = 0.;
-            Point startPoint        = start;
-            auto startItr           = std::find_if(
-                std::begin(trackWalls), std::end(trackWalls), [&start](const Wall & wall) {
+            Point startPoint = start;
+            auto startItr = std::find_if(
+                std::begin(trackWalls), std::end(trackWalls), [&start](const Wall& wall) {
                     return wall.IsInLineSegment(start) && wall.GetPoint2() != start;
                 });
             for(auto wallItr = startItr; wallItr != std::end(trackWalls); ++wallItr) {
@@ -1516,7 +1515,7 @@ TEST_CASE("geometry/helper/SplitWalls", "[geometry][helper][SplitWalls]")
         {
             std::vector<Wall> wallSplit;
             std::vector<Transition> trainDoors;
-            for(const auto & wall : trackWalls) {
+            for(const auto& wall : trackWalls) {
                 Transition door;
                 door.SetPoint1(wall.GetCentre());
                 door.SetPoint2(wall.GetPoint2());

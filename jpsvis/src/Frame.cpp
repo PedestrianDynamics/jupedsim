@@ -39,7 +39,7 @@
 #include <vtkPointData.h>
 #include <vtkPolyData.h>
 
-void Frame::InsertElement(FrameElement && element)
+void Frame::InsertElement(FrameElement&& element)
 {
     _framePoints.emplace_back(std::move(element));
 }
@@ -49,7 +49,7 @@ int Frame::Size() const
     return _framePoints.size();
 }
 
-const std::vector<FrameElement> & Frame::GetFrameElements() const
+const std::vector<FrameElement>& Frame::GetFrameElements() const
 {
     return _framePoints;
 }
@@ -74,7 +74,7 @@ vtkSmartPointer<vtkPolyData> Frame::GetPolyData2D()
         glm::dvec3 pos = _framePoints[i].pos;
         glm::dvec3 rad = _framePoints[i].radius;
         glm::dvec3 rot = _framePoints[i].orientation;
-        double color   = _framePoints[i].color;
+        double color = _framePoints[i].color;
         labels->InsertNextValue(_framePoints[i].id + 1);
 
         rad[0] /= 30;
@@ -85,7 +85,6 @@ vtkSmartPointer<vtkPolyData> Frame::GetPolyData2D()
 
         // scaling matrix
         double sc[3][3] = {{rad[0], 0, 0}, {0, rad[1], 0}, {0, 0, rad[2]}};
-
 
         // rotation matrix around x-axis
         double roX[3][3] = {
@@ -98,7 +97,6 @@ vtkSmartPointer<vtkPolyData> Frame::GetPolyData2D()
         // rotation matrix around z-axis
         double roZ[3][3] = {
             {cos(rot[2]), sin(rot[2]), 0.0}, {-sin(rot[2]), cos(rot[2]), 0.0}, {0.0, 0.0, 1.0}};
-
 
         // final rotation matrix
         double ro[3][3];
@@ -119,7 +117,6 @@ vtkSmartPointer<vtkPolyData> Frame::GetPolyData2D()
             rs[2][0],
             rs[2][1],
             rs[2][2]);
-
 
         if(color == -1) {
             colors->InsertNextValue(NAN);
@@ -159,14 +156,14 @@ vtkSmartPointer<vtkPolyData> Frame::GetPolyData3D()
         glm::dvec3 pos = _framePoints[i].pos;
         glm::dvec3 rad = _framePoints[i].radius;
         glm::dvec3 rot = _framePoints[i].orientation;
-        double color   = _framePoints[i].color;
+        double color = _framePoints[i].color;
 
         // values for cylindar
-        double height_i   = 170;
+        double height_i = 170;
         double max_height = 160;
-        rot[0]            = vtkMath::RadiansFromDegrees(90.0);
-        rot[1]            = vtkMath::RadiansFromDegrees(00.0);
-        int angle_offset  = 0;
+        rot[0] = vtkMath::RadiansFromDegrees(90.0);
+        rot[1] = vtkMath::RadiansFromDegrees(00.0);
+        int angle_offset = 0;
         pos[2] += height_i / 2.0 - 30; // slightly above ground
         rad[0] /= 20;
         rad[0] = 1;
@@ -192,7 +189,6 @@ vtkSmartPointer<vtkPolyData> Frame::GetPolyData3D()
         double roZ[3][3] = {
             {cos(rot[2]), sin(rot[2]), 0.0}, {-sin(rot[2]), cos(rot[2]), 0.0}, {0.0, 0.0, 1.0}};
 
-
         // final rotation matrix
         double ro[3][3];
         vtkMath::Multiply3x3(roX, roY, ro);
@@ -212,7 +208,6 @@ vtkSmartPointer<vtkPolyData> Frame::GetPolyData3D()
             rs[2][0],
             rs[2][1],
             rs[2][2]);
-
 
         if(color == -1) {
             colors->InsertNextValue(NAN);

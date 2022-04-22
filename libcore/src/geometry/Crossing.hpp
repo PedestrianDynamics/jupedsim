@@ -155,9 +155,9 @@ public:
     [[nodiscard]] virtual bool IsClose() const;
 
     /**
-      * @return true if the crossing is an exit/transition. (Transitions are derived from this class)
-      * @see Transition
-      */
+     * @return true if the crossing is an exit/transition. (Transitions are derived from this class)
+     * @see Transition
+     */
     [[nodiscard]] virtual bool IsExit() const;
 
     /**
@@ -167,12 +167,13 @@ public:
     [[nodiscard]] virtual bool IsTransition() const;
 
     /**
-     * Returns the second SubRoom the door is connected to, which is not matching \p roomID and \p subroomID.
+     * Returns the second SubRoom the door is connected to, which is not matching \p roomID and \p
+     * subroomID.
      * @param roomID ID of one of the rooms the door is connecting.
      * @param subroomID ID of one of the rooms the door is connecting.
      * @return the other subroom not matching the data
      */
-    [[nodiscard]] virtual SubRoom * GetOtherSubRoom(int roomID, int subroomID) const;
+    [[nodiscard]] virtual SubRoom* GetOtherSubRoom(int roomID, int subroomID) const;
 
     /**
      * Dump to error log.
@@ -191,7 +192,7 @@ public:
      * @param[out] subroom returns one of the common subrooms.
      * @return the number of subrooms this has in common with  \p other (0, 1, 2)
      */
-    virtual int CommonSubroomWith(Crossing * other, SubRoom *& subroom);
+    virtual int CommonSubroomWith(Crossing* other, SubRoom*& subroom);
 
     /**
      * Increment the number of persons that used that crossing.
@@ -258,7 +259,7 @@ public:
      * Returns the time stamps and number of pedestrians passing the door.
      * @return the time stamps and number of pedestrians passing the door.
      */
-    [[nodiscard]] const std::string & GetFlowCurve() const;
+    [[nodiscard]] const std::string& GetFlowCurve() const;
 
     /**
      * Returns the last time a ped used the door.
@@ -311,8 +312,8 @@ public:
     void SetDN(int dn);
 
     /**
-     * Regulates the flow at a crossing. To assure a specific flow at a door the door may need to closes
-     * temporarily.
+     * Regulates the flow at a crossing. To assure a specific flow at a door the door may need to
+     * closes temporarily.
      *
      * If _outFlowRate is set by user:
      *  - If the current flow between the last measurement and now is greater than _outflowRate

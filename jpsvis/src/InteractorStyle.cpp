@@ -50,7 +50,7 @@ using namespace std;
 // Macro to implement ::New() for subclasses of vtkObject()
 vtkStandardNewMacro(InteractorStyle);
 
-void InteractorStyle::SetVisualisation(Visualisation * visulisation)
+void InteractorStyle::SetVisualisation(Visualisation* visulisation)
 {
     _visualisation = visulisation;
 }
@@ -79,8 +79,8 @@ void InteractorStyle::Dolly()
 void InteractorStyle::OnMouseMove()
 {
     if(_visualisation) {
-        vtkRenderWindowInteractor * rwi = this->Interactor;
-        vtkRenderWindow * renderWindow  = rwi->GetRenderWindow();
+        vtkRenderWindowInteractor* rwi = this->Interactor;
+        vtkRenderWindow* renderWindow = rwi->GetRenderWindow();
 
         int pos[2] = {0, 0};
         rwi->GetEventPosition(pos);
@@ -90,7 +90,7 @@ void InteractorStyle::OnMouseMove()
         VTK_CREATE(vtkCoordinate, coordinate);
         coordinate->SetCoordinateSystemToDisplay();
         coordinate->SetValue(pos_x, pos_y, 0);
-        double * world =
+        double* world =
             coordinate->GetComputedWorldValue(renderWindow->GetRenderers()->GetFirstRenderer());
         // Note: coordinates are converted to meters
         _visualisation->onMouseMove(world[0] /= 100, world[1] /= 100, world[2] /= 100);
@@ -100,8 +100,8 @@ void InteractorStyle::OnMouseMove()
 
 void InteractorStyle::OnChar()
 {
-    vtkRenderWindowInteractor * rwi = this->Interactor;
-    char ch                         = rwi->GetKeyCode();
+    vtkRenderWindowInteractor* rwi = this->Interactor;
+    char ch = rwi->GetKeyCode();
 
     switch(ch) {
         case '+':
@@ -110,7 +110,7 @@ void InteractorStyle::OnChar()
             break;
         case 'a': {
             double para[3];
-            vtkCamera * cam =
+            vtkCamera* cam =
                 rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera();
             cam->GetPosition(para);
         } break;
@@ -195,10 +195,9 @@ void InteractorStyle::OnChar()
             rwi->GetRenderWindow()->Modified();
             break;
 
-
         case 'h': { // display camera settings
             double para[3];
-            vtkCamera * cam =
+            vtkCamera* cam =
                 rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera();
             cam->GetPosition(para);
             std::cout << endl << endl;
@@ -336,10 +335,10 @@ void InteractorStyle::OnChar()
 // http://vtk.1045678.n5.nabble.com/Coordinate-conversions-World-Display-td2808312.html
 void InteractorStyle::OnLeftButtonUp()
 {
-    vtkRenderWindowInteractor * rwi = this->Interactor;
+    vtkRenderWindowInteractor* rwi = this->Interactor;
 
     static double last_pos[3] = {0, 0, 0};
-    int pos[2]                = {0, 0};
+    int pos[2] = {0, 0};
     rwi->GetEventPosition(pos);
     int pos_x = pos[0];
     int pos_y = pos[1];
@@ -347,7 +346,7 @@ void InteractorStyle::OnLeftButtonUp()
     VTK_CREATE(vtkCoordinate, coordinate);
     coordinate->SetCoordinateSystemToDisplay();
     coordinate->SetValue(pos_x, pos_y, 0);
-    double * world = coordinate->GetComputedWorldValue(
+    double* world = coordinate->GetComputedWorldValue(
         this->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer());
 
     world[0] /= 100;

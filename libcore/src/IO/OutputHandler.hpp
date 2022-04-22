@@ -34,10 +34,9 @@
 class OutputHandler
 {
 public:
-    virtual ~OutputHandler()                    = default;
-    virtual void Write(const std::string & str) = 0;
+    virtual ~OutputHandler() = default;
+    virtual void Write(const std::string& str) = 0;
 };
-
 
 class FileHandler : public OutputHandler
 {
@@ -45,7 +44,7 @@ private:
     std::ofstream _pfp;
 
 public:
-    FileHandler(const fs::path & path);
+    FileHandler(const fs::path& path);
     ~FileHandler() override;
-    void Write(const std::string & str) override;
+    void Write(const std::string& str) override;
 };

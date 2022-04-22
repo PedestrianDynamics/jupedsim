@@ -41,12 +41,12 @@ public:
      *  different debug levels
      */
     enum LEVEL {
-        NONE,    //!< NONE The logger is switched off
-        INFO,    //!< INFO debug messages only are output
+        NONE, //!< NONE The logger is switched off
+        INFO, //!< INFO debug messages only are output
         WARNING, //!< WARNING warning and Errors are output
         // CRITICAL,//!< CRITICAL
         ERROR, //!< ERROR Only errors are output
-        ALL    //!< ALL Performs a full logging
+        ALL //!< ALL Performs a full logging
     };
 
     /**
@@ -66,7 +66,7 @@ public:
      *
      * @param os, the output stream
      */
-    static void setOutputStream(std::ostream & os);
+    static void setOutputStream(std::ostream& os);
 
     /**
      * set the desired debug level.
@@ -77,31 +77,30 @@ public:
      */
     static void setDebugLevel(Log::LEVEL level);
 
-    static void Info(const char * string, ...);
+    static void Info(const char* string, ...);
     /**
      * send a message (information) to the output stream
      *
      * @param string, the message
      */
-    static void Messages(const char * string, ...);
+    static void Messages(const char* string, ...);
 
     /**
      * add a warning to the output stream
      *
      * @param string, the warning message
      */
-    static void Warning(const char * string, ...);
-
+    static void Warning(const char* string, ...);
 
     /**
      * add an error message to the output stream
      *
      * @param string, the error message
      */
-    static void Error(const char * string, ...);
+    static void Error(const char* string, ...);
 
 private:
-    static std::ostream & os;
+    static std::ostream& os;
     static Log::LEVEL debugLevel;
     static int INFO_Count;
     static int ERR_Count;

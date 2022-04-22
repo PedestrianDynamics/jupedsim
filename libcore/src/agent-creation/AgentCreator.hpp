@@ -9,16 +9,16 @@
 #include <tuple>
 
 std::multimap<size_t, std::unique_ptr<Pedestrian>>
-CreateAllPedestrians(Configuration * configuration, Building * building, double max_time);
+CreateAllPedestrians(Configuration* configuration, Building* building, double max_time);
 
 template <typename T>
-std::vector<typename T::mapped_type> extract(T & mm, typename T::key_type key)
+std::vector<typename T::mapped_type> extract(T& mm, typename T::key_type key)
 {
     auto [from, to] = mm.equal_range(key);
     std::vector<typename T::mapped_type> values{};
     values.reserve(std::distance(from, to));
     std::transform(
-        from, to, std::back_inserter(values), [](auto && kv) { return std::move(kv.second); });
+        from, to, std::back_inserter(values), [](auto&& kv) { return std::move(kv.second); });
     mm.erase(from, to);
     return values;
 }

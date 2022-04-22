@@ -5,9 +5,9 @@ class MyQTreeView : public QTreeView
 {
     Q_OBJECT
 public:
-    explicit MyQTreeView(QWidget * parent = nullptr);
+    explicit MyQTreeView(QWidget* parent = nullptr);
 
-    void closeEvent(QCloseEvent *) override;
+    void closeEvent(QCloseEvent*) override;
 signals:
     void changeState();
 };

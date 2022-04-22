@@ -25,7 +25,6 @@
  *
  **/
 
-
 #include "Point.hpp"
 
 #include "../general/Macros.hpp"
@@ -34,13 +33,16 @@
 #include <iostream>
 #include <sstream>
 
-
 /************************************************************
   Konstruktoren
  ************************************************************/
-Point::Point() : x(0), y(0) {}
+Point::Point() : x(0), y(0)
+{
+}
 
-Point::Point(double x, double y) : x(x), y(y) {}
+Point::Point(double x, double y) : x(x), y(y)
+{
+}
 
 std::string Point::toString() const
 {
@@ -79,7 +81,6 @@ Point Point::NormalizedMolified() const
         return Point(0.0, 0.0);
 }
 
-
 Point Point::Normalized() const
 {
     double norm = Norm();
@@ -89,14 +90,12 @@ Point Point::Normalized() const
         return Point(0.0, 0.0);
 }
 
-
 /* Transformiert die "normalen" Koordinaten in Koordinaten der Ellipse
  * dazu verschieben des Koordinaten Ursprungs in Center und anschliessend drehen um phi
  * alle Punkte müssen in "normalen" Koordinaten gegeben sein
  * center: Center der Ellipse in deren System transformiert werden soll
  * phi: Winkel der Ellipse in deren System transformiert werden soll
  * */
-
 
 /*coordinate transformation of the point P(x,y) expressed in coord system S1 to a new coord. sys S2
 
@@ -150,7 +149,7 @@ OC  = -O1O +O1C
 xnew = -xc + x
 
 */
-Point Point::TransformToEllipseCoordinates(const Point & center, double cphi, double sphi) const
+Point Point::TransformToEllipseCoordinates(const Point& center, double cphi, double sphi) const
 {
     Point p = Point(x, y);
     return (p - center).Rotate(cphi, -sphi);
@@ -175,7 +174,7 @@ where the coord. of a point are transformated to cart. coord.
 
 */
 
-Point Point::TransformToCartesianCoordinates(const Point & center, double cphi, double sphi) const
+Point Point::TransformToCartesianCoordinates(const Point& center, double cphi, double sphi) const
 {
     Point p = Point(x, y);
     return (p.Rotate(cphi, sphi) + center);
@@ -193,53 +192,50 @@ Point Point::Rotate(double ctheta, double stheta) const
 }
 
 //  sum
-const Point Point::operator+(const Point & p) const
+const Point Point::operator+(const Point& p) const
 {
     // return Point(_x + p.GetX(), _y + p.GetY());
     return Point(x + p.x, y + p.y);
 }
 
 // sub
-const Point Point::operator-(const Point & p) const
+const Point Point::operator-(const Point& p) const
 {
     // return Point(_x - p.GetX(), _y - p.GetY());
     return Point(x - p.x, y - p.y);
 }
 
 // equal
-bool Point::operator==(const Point & p) const
+bool Point::operator==(const Point& p) const
 {
     //    return (fabs(_x - p.GetX()) < J_EPS && fabs(_y - p.GetY()) < J_EPS);
     return (fabs(x - p.x) < J_EPS && fabs(y - p.y) < J_EPS);
 }
 
 // not equal
-bool Point::operator!=(const Point & p) const
+bool Point::operator!=(const Point& p) const
 {
     // return (fabs(_x - p.GetX()) > J_EPS || fabs(_y - p.GetY()) > J_EPS);
     return (fabs(x - p.x) > J_EPS || fabs(y - p.y) > J_EPS);
 }
 
-
 // multiplication with scalar
-const Point operator*(const Point & p, double f)
+const Point operator*(const Point& p, double f)
 {
     // return Point(p.GetX() * f, p.GetY() * f);
     return Point(p.x * f, p.y * f);
 }
 
-
 // Assignment
-Point & Point::operator+=(const Point & p)
+Point& Point::operator+=(const Point& p)
 {
     x += p.x;
     y += p.y;
     return *this;
 }
 
-
 // divition with scalar
-const Point operator/(const Point & p, double f)
+const Point operator/(const Point& p, double f)
 {
     if(f > J_EPS * J_EPS)
         return Point(p.x / f, p.y / f);

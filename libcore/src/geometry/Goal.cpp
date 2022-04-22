@@ -35,16 +35,16 @@
 
 Goal::Goal()
 {
-    _id          = -1;
-    _caption     = "Goal";
+    _id = -1;
+    _caption = "Goal";
     _isFinalGoal = 0;
-    _walls       = std::vector<Wall>();
-    _poly        = std::vector<Point>();
-    _roomID      = -1;
-    _subRoomID   = -1;
+    _walls = std::vector<Wall>();
+    _poly = std::vector<Point>();
+    _roomID = -1;
+    _subRoomID = -1;
 }
 
-void Goal::AddWall(const Wall & w)
+void Goal::AddWall(const Wall& w)
 {
     _walls.push_back(w);
 }
@@ -70,7 +70,7 @@ void Goal::SetId(int id)
     _crossing.SetID(id);
 }
 
-const std::vector<Point> & Goal::GetPolygon() const
+const std::vector<Point>& Goal::GetPolygon() const
 {
     return _poly;
 }
@@ -81,7 +81,7 @@ std::string Goal::Write()
     Point pos;
 
     for(unsigned int j = 0; j < _walls.size(); j++) {
-        const Wall & w = _walls[j];
+        const Wall& w = _walls[j];
         s.append(w.Write());
         pos = pos + w.GetPoint1() + w.GetPoint2();
     }
@@ -92,7 +92,7 @@ std::string Goal::Write()
         s.append(Wall(_poly[0], _poly[2]).Write());
         s.append(Wall(_poly[1], _poly[3]).Write());
     }
-    //add the Goal caption
+    // add the Goal caption
     char tmp[1024];
     sprintf(
         tmp,
@@ -105,12 +105,12 @@ std::string Goal::Write()
     return s;
 }
 
-const std::vector<Wall> & Goal::GetAllWalls() const
+const std::vector<Wall>& Goal::GetAllWalls() const
 {
     return _walls;
 }
 
-int Goal::WhichQuad(const Point & vertex, const Point & hitPos) const
+int Goal::WhichQuad(const Point& vertex, const Point& hitPos) const
 {
     return (vertex.x > hitPos.x) ? ((vertex.y > hitPos.y) ? 1 : 4) :
                                    ((vertex.y > hitPos.y) ? 2 : 3);
@@ -127,33 +127,32 @@ void Goal::SetIsFinalGoal(int isFinalGoal)
 }
 
 // x-Koordinate der Linie von einer Eccke zur nächsten
-double Goal::Xintercept(const Point & point1, const Point & point2, double hitY) const
+double Goal::Xintercept(const Point& point1, const Point& point2, double hitY) const
 {
     return (point2.x - (((point2.y - hitY) * (point1.x - point2.x)) / (point1.y - point2.y)));
 }
 
-
-bool Goal::Contains(const Point & ped) const
+bool Goal::Contains(const Point& ped) const
 {
     short edge, first, next;
     short quad, next_quad, delta, total;
 
     /////////////////////////////////////////////////////////////
     edge = first = 0;
-    quad         = WhichQuad(_poly[edge], ped);
-    total        = 0; // COUNT OF ABSOLUTE SECTORS CROSSED
+    quad = WhichQuad(_poly[edge], ped);
+    total = 0; // COUNT OF ABSOLUTE SECTORS CROSSED
     /* LOOP THROUGH THE VERTICES IN A SECTOR */
     do {
-        next      = (edge + 1) % _poly.size();
+        next = (edge + 1) % _poly.size();
         next_quad = WhichQuad(_poly[next], ped);
-        delta     = next_quad - quad; // HOW MANY QUADS HAVE I MOVED
+        delta = next_quad - quad; // HOW MANY QUADS HAVE I MOVED
 
         // SPECIAL CASES TO HANDLE CROSSINGS OF MORE THEN ONE
-        //QUAD
+        // QUAD
 
         switch(delta) {
-            case 2:  // IF WE CROSSED THE MIDDLE, FIGURE OUT IF IT
-                     //WAS CLOCKWISE OR COUNTER
+            case 2: // IF WE CROSSED THE MIDDLE, FIGURE OUT IF IT
+                    // WAS CLOCKWISE OR COUNTER
             case -2: // US THE X POSITION AT THE HIT POINT TO
                 // DETERMINE WHICH WAY AROUND
                 if(Xintercept(_poly[edge], _poly[next], ped.y) > ped.x)
@@ -181,10 +180,10 @@ bool Goal::Contains(const Point & ped) const
 
 bool Goal::ConvertLineToPoly()
 {
-    std::vector<Line *> copy;
+    std::vector<Line*> copy;
     std::vector<Point> tmpPoly;
     Point point;
-    Line * line;
+    Line* line;
     // Alle Linienelemente in copy speichern
     for(unsigned int i = 0; i < _walls.size(); i++) {
         copy.push_back(&_walls[i]);
@@ -219,12 +218,12 @@ bool Goal::ConvertLineToPoly()
     CreateBoostPoly();
     ComputeCentroid();
 
-    //compute dummy crossing in the middle
+    // compute dummy crossing in the middle
     Point point1, point2, tmp, diff, diff1, diff2;
     if(_poly.size() % 2 == 0) {
         point1 = _poly[0];
-        tmp    = _poly[_poly.size() / 2];
-        diff   = point1 - tmp;
+        tmp = _poly[_poly.size() / 2];
+        diff = point1 - tmp;
 
         point1 = tmp + diff * 0.51;
         point2 = tmp + diff * 0.49;
@@ -235,7 +234,7 @@ bool Goal::ConvertLineToPoly()
         point1 = _poly[0];
         Line tmp_line(_poly[_poly.size() / 2], _poly[(_poly.size() / 2) + 1], 0);
 
-        tmp  = tmp_line.GetCentre();
+        tmp = tmp_line.GetCentre();
         diff = point1 - tmp;
 
         point1 = tmp + diff * 0.51;
@@ -248,7 +247,7 @@ bool Goal::ConvertLineToPoly()
     return true;
 }
 
-const Point & Goal::GetCentroid() const
+const Point& Goal::GetCentroid() const
 {
     return _centroid;
 }
@@ -257,11 +256,11 @@ void Goal::ComputeCentroid()
 {
     double px = 0, py = 0;
     double signedArea = 0.0;
-    double x0         = 0.0; // Current vertex X
-    double y0         = 0.0; // Current vertex Y
-    double x1         = 0.0; // Next vertex X
-    double y1         = 0.0; // Next vertex Y
-    double a          = 0.0; // Partial signed area
+    double x0 = 0.0; // Current vertex X
+    double y0 = 0.0; // Current vertex Y
+    double x1 = 0.0; // Next vertex X
+    double y1 = 0.0; // Next vertex Y
+    double a = 0.0; // Partial signed area
 
     // For all vertices except last
     unsigned int i = 0;
@@ -270,7 +269,7 @@ void Goal::ComputeCentroid()
         y0 = _poly[i].y;
         x1 = _poly[i + 1].x;
         y1 = _poly[i + 1].y;
-        a  = x0 * y1 - x1 * y0;
+        a = x0 * y1 - x1 * y0;
         signedArea += a;
         px += (x0 + x1) * a;
         py += (y0 + y1) * a;
@@ -281,7 +280,7 @@ void Goal::ComputeCentroid()
     y0 = _poly[i].y;
     x1 = _poly[0].x;
     y1 = _poly[0].y;
-    a  = x0 * y1 - x1 * y0;
+    a = x0 * y1 - x1 * y0;
     signedArea += a;
     px += (x0 + x1) * a;
     py += (y0 + y1) * a;
@@ -294,12 +293,12 @@ void Goal::ComputeCentroid()
     _centroid.y = py;
 }
 
-Crossing * Goal::GetCentreCrossing()
+Crossing* Goal::GetCentreCrossing()
 {
     return &_crossing;
 }
 
-bool Goal::IsInsideGoal(const Point & point) const
+bool Goal::IsInsideGoal(const Point& point) const
 {
     return boost::geometry::within(point, _boostPoly);
 }
@@ -320,7 +319,7 @@ bool Goal::CreateBoostPoly()
 
 bool Goal::IsClockwise()
 {
-    //http://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order
+    // http://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order
     if(_poly.size() < 3) {
         LOG_ERROR("You need at least 3 vertices to check for orientation. Obstacle ID [{}]", _id);
         return false;
@@ -332,7 +331,7 @@ bool Goal::IsClockwise()
         sum += (b.x - a.x) * (b.y + a.y);
     }
     Point first = _poly[0];
-    Point last  = _poly[_poly.size() - 1];
+    Point last = _poly[_poly.size() - 1];
     sum += (first.x - last.x) * (first.y + last.y);
 
     return (sum > 0.);
@@ -358,7 +357,7 @@ void Goal::SetSubRoomID(int subRoomID)
     _subRoomID = subRoomID;
 }
 
-double Goal::GetDistance(const Point & point) const
+double Goal::GetDistance(const Point& point) const
 {
     return boost::geometry::distance(point, _boostPoly);
 }

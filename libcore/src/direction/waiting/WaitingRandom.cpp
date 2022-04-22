@@ -35,7 +35,7 @@ double fRand(double fMin, double fMax)
     return fMin + f * (fMax - fMin);
 }
 
-Point WaitingRandom::GetWaitingPosition(const Room * room, const Pedestrian * ped, double time)
+Point WaitingRandom::GetWaitingPosition(const Room* room, const Pedestrian* ped, double time)
 {
     // Polygon of either subroom or waiting area
     std::vector<Point> polygon;
@@ -44,15 +44,15 @@ Point WaitingRandom::GetWaitingPosition(const Room * room, const Pedestrian * pe
     if(ped->IsInsideWaitingAreaWaiting(time)) {
         polygon = ped->GetBuilding()->GetFinalGoal(ped->GetLastGoalID())->GetPolygon();
     } else {
-        SubRoom * subRoom = room->GetSubRoom(ped->GetPos());
-        polygon           = subRoom->GetPolygon();
+        SubRoom* subRoom = room->GetSubRoom(ped->GetPos());
+        polygon = subRoom->GetPolygon();
     }
 
     double xMin = std::numeric_limits<double>::max(), xMax = std::numeric_limits<double>::min(),
            yMin = std::numeric_limits<double>::max(), yMax = std::numeric_limits<double>::min();
 
     // get the bounding box of subroom/waiting area
-    for(const auto & poly : polygon) {
+    for(const auto& poly : polygon) {
         xMin = (xMin <= poly.x) ? (xMin) : (poly.x);
         xMax = (xMax >= poly.x) ? (xMax) : (poly.x);
 
@@ -72,7 +72,7 @@ Point WaitingRandom::GetWaitingPosition(const Room * room, const Pedestrian * pe
         } while(!goal->IsInsideGoal(target));
 
     } else {
-        SubRoom * subRoom = room->GetSubRoom(ped->GetPos());
+        SubRoom* subRoom = room->GetSubRoom(ped->GetPos());
 
         do {
             target.x = fRand(xMin, xMax);

@@ -41,4 +41,4 @@ public:
     [[nodiscard]] virtual std::string ToString() const = 0;
 };
 
-std::ostream & operator<<(std::ostream & out, const Event & event);
+std::ostream& operator<<(std::ostream& out, const Event& event);

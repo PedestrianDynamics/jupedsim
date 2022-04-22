@@ -7,7 +7,7 @@ namespace fs = std::filesystem;
 using detail::extractPath;
 using detail::patchPath;
 
-static void patchIniFileAfterCopy(TiXmlDocument & doc)
+static void patchIniFileAfterCopy(TiXmlDocument& doc)
 {
     patchPath(doc, {"JuPedSim", "geometry"});
     patchPath(doc, {"JuPedSim", "header", "geometry"});
@@ -21,15 +21,12 @@ static void patchIniFileAfterCopy(TiXmlDocument & doc)
     patchPath(doc, {"JuPedSim", "train_constraints", "train_types"});
 }
 
-static void patchGeometryFileAfterCopy(TiXmlDocument & doc)
+static void patchGeometryFileAfterCopy(TiXmlDocument& doc)
 {
     patchPath(doc, {"geometry", "transitions", "file"});
 }
 
-
-void collectInputFilesIn(
-    const std::filesystem::path & iniFile,
-    const std::filesystem::path & outPath)
+void collectInputFilesIn(const std::filesystem::path& iniFile, const std::filesystem::path& outPath)
 {
     fs::create_directories(outPath);
     fs::copy(iniFile, outPath, fs::copy_options::overwrite_existing);
@@ -93,7 +90,6 @@ void collectInputFilesIn(
     }
     patchIniFileAfterCopy(iniFileXmlDoc);
 
-
     if(const auto file = extractPath(geometryFileXmlDoc, {"geometry", "transitions", "file"})) {
         fs::copy(*file, outPath, fs::copy_options::overwrite_existing);
     }
@@ -102,16 +98,16 @@ void collectInputFilesIn(
 
 namespace detail
 {
-void patchPath(TiXmlDocument & doc, const std::vector<std::string> & xmlPathToPatch)
+void patchPath(TiXmlDocument& doc, const std::vector<std::string>& xmlPathToPatch)
 {
-    TiXmlNode * node = &doc;
-    for(const auto & p : xmlPathToPatch) {
+    TiXmlNode* node = &doc;
+    for(const auto& p : xmlPathToPatch) {
         node = node->FirstChild(p);
         if(node == nullptr) {
             return;
         }
     }
-    auto * text = node->FirstChild();
+    auto* text = node->FirstChild();
     if(text == nullptr) {
         return;
     }
@@ -120,16 +116,16 @@ void patchPath(TiXmlDocument & doc, const std::vector<std::string> & xmlPathToPa
 }
 
 std::optional<fs::path>
-extractPath(const TiXmlDocument & doc, const std::vector<std::string> & xmlPath)
+extractPath(const TiXmlDocument& doc, const std::vector<std::string>& xmlPath)
 {
-    const TiXmlNode * node = &doc;
-    for(const auto & p : xmlPath) {
+    const TiXmlNode* node = &doc;
+    for(const auto& p : xmlPath) {
         node = node->FirstChild(p);
         if(node == nullptr) {
             return std::nullopt;
         }
     }
-    auto * text = node->FirstChild();
+    auto* text = node->FirstChild();
     if(text == nullptr) {
         return std::nullopt;
     }

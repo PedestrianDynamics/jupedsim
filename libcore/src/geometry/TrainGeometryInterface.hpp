@@ -29,9 +29,9 @@
  * Information where a specific track is located, and which walls describe the platform edges.
  */
 struct Track {
-    int _id;                  /** ID of track, used for describing where a train arrives/departs. */
-    int _roomID;              /** ID of room, where the track is located. */
-    int _subRoomID;           /** ID of subroom, where the track is located. */
+    int _id; /** ID of track, used for describing where a train arrives/departs. */
+    int _roomID; /** ID of room, where the track is located. */
+    int _subRoomID; /** ID of subroom, where the track is located. */
     std::vector<Wall> _walls; /** Platform edges. */
 };
 
@@ -39,10 +39,10 @@ struct Track {
  * Information of train doors, as position, width, and allowed flow.
  */
 struct TrainDoor {
-    int _id;          /** ID of the train door. */
+    int _id; /** ID of the train door. */
     double _distance; /** Distance to start of train. */
-    double _width;    /** Width of train door. */
-    double _flow;     /** Max. allowed flow at train door. */
+    double _width; /** Width of train door. */
+    double _flow; /** Max. allowed flow at train door. */
 };
 
 /**
@@ -50,7 +50,7 @@ struct TrainDoor {
  */
 struct TrainType {
     std::string _type; /** Name of the train type, used for stating which train arrives/deptarts. */
-    int _maxAgents;    /** Max. number of agents allowed in the train. */
-    double _length;    /** Length of the train. */
+    int _maxAgents; /** Max. number of agents allowed in the train. */
+    double _length; /** Length of the train. */
     std::map<int, TrainDoor> _doors; /** Doors of the train. */
 };

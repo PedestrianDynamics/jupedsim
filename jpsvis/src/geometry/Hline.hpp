@@ -32,7 +32,6 @@
 class SubRoom;
 class Room;
 
-
 class Hline : public NavLine
 {
 private:
@@ -42,9 +41,9 @@ private:
     // TODO: these should be redesigned as private
     // and accessed via functions in the derived classes.
 protected:
-    Room * _room1       = nullptr;
-    SubRoom * _subRoom1 = nullptr;
-    SubRoom * _subRoom2 = nullptr;
+    Room* _room1 = nullptr;
+    SubRoom* _subRoom1 = nullptr;
+    SubRoom* _subRoom2 = nullptr;
 
 public:
     /**
@@ -65,7 +64,7 @@ public:
     /**
      * Set/Get the Room containing this line
      */
-    void SetRoom1(Room * r);
+    void SetRoom1(Room* r);
 
     /**
      * Set/Get the line caption
@@ -75,11 +74,11 @@ public:
     /**
      * Set/Get the subroom containing this line
      */
-    void SetSubRoom1(SubRoom * r);
+    void SetSubRoom1(SubRoom* r);
     /**
      * Set/Get the second subroom
      */
-    void SetSubRoom2(SubRoom * r2);
+    void SetSubRoom2(SubRoom* r2);
 
     /**
      * Set/Get the id of the line
@@ -94,17 +93,17 @@ public:
     /**
      * Set/Get the Room containing this line
      */
-    Room * GetRoom1() const;
+    Room* GetRoom1() const;
 
     /**
      * Set/Get the subroom containing this line
      */
-    SubRoom * GetSubRoom1() const;
+    SubRoom* GetSubRoom1() const;
 
     /**
      * Set/Get the second subroom
      */
-    SubRoom * GetSubRoom2() const;
+    SubRoom* GetSubRoom2() const;
 
     /**
      * @return true if the line is in the given subroom

@@ -29,11 +29,11 @@
 
 namespace EventFileParser
 {
-ParsingError::ParsingError(const char * msg) : std::runtime_error(msg){};
-ParsingError::ParsingError(const std::string & msg) : std::runtime_error(msg){};
+ParsingError::ParsingError(const char* msg) : std::runtime_error(msg){};
+ParsingError::ParsingError(const std::string& msg) : std::runtime_error(msg){};
 } // namespace EventFileParser
 
-std::vector<DoorEvent> EventFileParser::ParseDoorEvents(const fs::path & eventFile)
+std::vector<DoorEvent> EventFileParser::ParseDoorEvents(const fs::path& eventFile)
 {
     LOG_INFO("Parsing event file");
     TiXmlDocument docEvent(eventFile.string());
@@ -45,7 +45,7 @@ std::vector<DoorEvent> EventFileParser::ParseDoorEvents(const fs::path & eventFi
             docEvent.ErrorDesc()));
     }
 
-    TiXmlElement * xRootNode = docEvent.RootElement();
+    TiXmlElement* xRootNode = docEvent.RootElement();
     if(!xRootNode) {
         throw ParsingError("<DoorEvent> root element not present xml");
     }
@@ -55,16 +55,16 @@ std::vector<DoorEvent> EventFileParser::ParseDoorEvents(const fs::path & eventFi
     }
 
     std::vector<DoorEvent> events{};
-    const auto * xml_events = xRootNode->FirstChild("events");
+    const auto* xml_events = xRootNode->FirstChild("events");
     if(xml_events == nullptr) {
         return events;
     }
 
-    for(const auto * xml_event = xml_events->FirstChildElement("event"); xml_event != nullptr;
-        xml_event              = xml_event->NextSiblingElement("event")) {
+    for(const auto* xml_event = xml_events->FirstChildElement("event"); xml_event != nullptr;
+        xml_event = xml_event->NextSiblingElement("event")) {
         // Read id and check for correct value
         int id;
-        if(const auto * attribute = xml_event->Attribute("id"); attribute) {
+        if(const auto* attribute = xml_event->Attribute("id"); attribute) {
             if(int value = xmltoi(attribute, -1);
                value > -1 && attribute == std::to_string(value)) {
                 id = value;
@@ -77,7 +77,7 @@ std::vector<DoorEvent> EventFileParser::ParseDoorEvents(const fs::path & eventFi
 
         // Read time of events
         double time;
-        if(const auto * attribute = xml_event->Attribute("time"); attribute) {
+        if(const auto* attribute = xml_event->Attribute("time"); attribute) {
             if(double value = xmltof(attribute, std::numeric_limits<double>::min()); value >= 0.) {
                 time = value;
             } else {
@@ -89,11 +89,11 @@ std::vector<DoorEvent> EventFileParser::ParseDoorEvents(const fs::path & eventFi
 
         // Read state
         DoorEvent::Type event_type{};
-        if(const auto * attribute = xml_event->Attribute("state"); attribute) {
+        if(const auto* attribute = xml_event->Attribute("state"); attribute) {
             std::string in = xmltoa(attribute, "");
             try {
                 event_type = from_string<DoorEvent::Type>(in);
-            } catch(const std::exception & ex) {
+            } catch(const std::exception& ex) {
                 throw ParsingError("Event: Attribute 'state' is not a valid value");
             }
         } else {
@@ -108,7 +108,7 @@ std::vector<DoorEvent> EventFileParser::ParseDoorEvents(const fs::path & eventFi
     return events;
 }
 
-std::vector<DoorEvent> EventFileParser::ParseSchedule(const fs::path & scheduleFile)
+std::vector<DoorEvent> EventFileParser::ParseSchedule(const fs::path& scheduleFile)
 {
     LOG_INFO("Parsing schedule file");
     TiXmlDocument doc(scheduleFile.string());
@@ -117,7 +117,7 @@ std::vector<DoorEvent> EventFileParser::ParseSchedule(const fs::path & scheduleF
             "Error parsing xml({},{}): {}", doc.ErrorRow(), doc.ErrorCol(), doc.ErrorDesc()));
     }
 
-    const auto * xRootNode = doc.RootElement();
+    const auto* xRootNode = doc.RootElement();
     if(!xRootNode) {
         throw ParsingError("Schedule file root element missing");
     }
@@ -127,7 +127,7 @@ std::vector<DoorEvent> EventFileParser::ParseSchedule(const fs::path & scheduleF
     }
 
     // Read groups
-    const auto * xGroups = xRootNode->FirstChild("groups");
+    const auto* xGroups = xRootNode->FirstChild("groups");
     if(!xGroups) {
         throw ParsingError("No groups found in schedule file");
     }
@@ -136,11 +136,11 @@ std::vector<DoorEvent> EventFileParser::ParseSchedule(const fs::path & scheduleF
     std::map<int, std::vector<int>> groupDoor;
     std::vector<DoorEvent> events;
 
-    for(const auto * e = xGroups->FirstChildElement("group"); e;
-        e              = e->NextSiblingElement("group")) {
+    for(const auto* e = xGroups->FirstChildElement("group"); e;
+        e = e->NextSiblingElement("group")) {
         // Read id and check for correct value
         int id;
-        if(const char * attribute = e->Attribute("id"); attribute) {
+        if(const char* attribute = e->Attribute("id"); attribute) {
             if(int value = xmltoi(attribute, -1);
                value > -1 && attribute == std::to_string(value)) {
                 id = value;
@@ -152,8 +152,8 @@ std::vector<DoorEvent> EventFileParser::ParseSchedule(const fs::path & scheduleF
         }
 
         std::vector<int> member;
-        for(const auto * xmember = e->FirstChildElement("member"); xmember;
-            xmember              = xmember->NextSiblingElement("member")) {
+        for(const auto* xmember = e->FirstChildElement("member"); xmember;
+            xmember = xmember->NextSiblingElement("member")) {
             int tId = std::stoi(xmember->Attribute("t_id"));
             member.push_back(tId);
         }
@@ -161,15 +161,15 @@ std::vector<DoorEvent> EventFileParser::ParseSchedule(const fs::path & scheduleF
     }
 
     // Read times
-    const auto * xTimes = xRootNode->FirstChild("times");
+    const auto* xTimes = xRootNode->FirstChild("times");
     if(!xTimes) {
         throw ParsingError("No times found");
     }
 
-    for(const auto * e = xTimes->FirstChildElement("time"); e; e = e->NextSiblingElement("time")) {
+    for(const auto* e = xTimes->FirstChildElement("time"); e; e = e->NextSiblingElement("time")) {
         // Read id and check for correct value
         int id;
-        if(const char * attribute = e->Attribute("group_id"); attribute) {
+        if(const char* attribute = e->Attribute("group_id"); attribute) {
             if(int value = xmltoi(attribute, -1);
                value > -1 && attribute == std::to_string(value)) {
                 id = value;
@@ -181,7 +181,7 @@ std::vector<DoorEvent> EventFileParser::ParseSchedule(const fs::path & scheduleF
         }
 
         int closingTime;
-        if(const auto * attribute = e->Attribute("closing_time"); attribute) {
+        if(const auto* attribute = e->Attribute("closing_time"); attribute) {
             if(int value = xmltoi(attribute, -1); value > 0 && attribute == std::to_string(value)) {
                 closingTime = value;
             } else {
@@ -193,7 +193,7 @@ std::vector<DoorEvent> EventFileParser::ParseSchedule(const fs::path & scheduleF
         }
 
         bool resetDoor = false;
-        if(const auto * attribute = e->Attribute("reset"); attribute) {
+        if(const auto* attribute = e->Attribute("reset"); attribute) {
             std::string in = xmltoa(attribute, "");
             if(!in.empty()) {
                 std::string resetString = in;
@@ -210,8 +210,8 @@ std::vector<DoorEvent> EventFileParser::ParseSchedule(const fs::path & scheduleF
         std::vector<double> timeClose;
         std::vector<double> timeReset;
 
-        for(const auto * time = e->FirstChildElement("t"); time;
-            time              = time->NextSiblingElement("t")) {
+        for(const auto* time = e->FirstChildElement("t"); time;
+            time = time->NextSiblingElement("t")) {
             double openingTime = xmltof(time->Attribute("t"), -1.);
             if(openingTime < 0) {
                 throw ParsingError(fmt::format("schedule times {:d}: t has no proper input", id));
@@ -254,7 +254,7 @@ std::vector<DoorEvent> EventFileParser::ParseSchedule(const fs::path & scheduleF
     return events;
 }
 
-std::map<int, int> EventFileParser::ParseMaxAgents(const fs::path & scheduleFile)
+std::map<int, int> EventFileParser::ParseMaxAgents(const fs::path& scheduleFile)
 {
     LOG_INFO("Parsing schedule file for max agents");
     TiXmlDocument docSchedule(scheduleFile.string());
@@ -263,7 +263,7 @@ std::map<int, int> EventFileParser::ParseMaxAgents(const fs::path & scheduleFile
         return std::map<int, int>();
     }
 
-    TiXmlElement * xRootNode = docSchedule.RootElement();
+    TiXmlElement* xRootNode = docSchedule.RootElement();
     if(!xRootNode) {
         LOG_ERROR("Schedule file root element missing");
         return std::map<int, int>();
@@ -275,7 +275,7 @@ std::map<int, int> EventFileParser::ParseMaxAgents(const fs::path & scheduleFile
     }
 
     // Read groups
-    TiXmlNode * xGroups = xRootNode->FirstChild("groups");
+    TiXmlNode* xGroups = xRootNode->FirstChild("groups");
     if(!xGroups) {
         LOG_ERROR("No groups found in schedule file");
         return std::map<int, int>();
@@ -283,10 +283,10 @@ std::map<int, int> EventFileParser::ParseMaxAgents(const fs::path & scheduleFile
 
     std::map<int, int> doorMaxAgents;
 
-    for(TiXmlElement * e = xGroups->FirstChildElement("group"); e;
-        e                = e->NextSiblingElement("group")) {
+    for(TiXmlElement* e = xGroups->FirstChildElement("group"); e;
+        e = e->NextSiblingElement("group")) {
         int maxAgents;
-        if(const char * attribute = e->Attribute("max_agents"); attribute) {
+        if(const char* attribute = e->Attribute("max_agents"); attribute) {
             if(int value = xmltoi(attribute, -1); value > 0 && attribute == std::to_string(value)) {
                 maxAgents = value;
             } else {
@@ -298,10 +298,10 @@ std::map<int, int> EventFileParser::ParseMaxAgents(const fs::path & scheduleFile
             continue;
         }
 
-        for(TiXmlElement * xmember = e->FirstChildElement("member"); xmember;
-            xmember                = xmember->NextSiblingElement("member")) {
+        for(TiXmlElement* xmember = e->FirstChildElement("member"); xmember;
+            xmember = xmember->NextSiblingElement("member")) {
             int transID;
-            if(const char * attribute = e->Attribute("t"); attribute) {
+            if(const char* attribute = e->Attribute("t"); attribute) {
                 if(int value = xmltoi(attribute, -1);
                    value >= 0 && attribute == std::to_string(value)) {
                     transID = value;

@@ -33,29 +33,29 @@ namespace EventFileParser
 class ParsingError : public std::runtime_error
 {
 public:
-    explicit ParsingError(const char * msg);
-    explicit ParsingError(const std::string & msg);
+    explicit ParsingError(const char* msg);
+    explicit ParsingError(const std::string& msg);
 };
 
 /**
-  * Reads the events from a specific file and adds them directly to \p eventManager
-  * @param eventFile File containing the events
-  * @throws ParsingError on parsing error
-  */
-std::vector<DoorEvent> ParseDoorEvents(const fs::path & eventFile);
-
+ * Reads the events from a specific file and adds them directly to \p eventManager
+ * @param eventFile File containing the events
+ * @throws ParsingError on parsing error
+ */
+std::vector<DoorEvent> ParseDoorEvents(const fs::path& eventFile);
 
 /**
  * Reads the events from a specific schedule file and adds them directly to \p eventManager
  * @param eventManager Manager for handling the events
  * @throws ParsingError on parsing error
  */
-std::vector<DoorEvent> ParseSchedule(const fs::path & scheduleFile);
+std::vector<DoorEvent> ParseSchedule(const fs::path& scheduleFile);
 
 /**
- * Reads the max agents defintions from the schedule file and returns them as a map of transition ID to maxAgents.
+ * Reads the max agents defintions from the schedule file and returns them as a map of transition ID
+ * to maxAgents.
  * @param scheduleFile File containing the schedule
  * @return Map of max agents defintion which could be parsed from \p scheduleFile (ID to maxAgents)
  */
-std::map<int, int> ParseMaxAgents(const fs::path & scheduleFile);
+std::map<int, int> ParseMaxAgents(const fs::path& scheduleFile);
 }; // namespace EventFileParser
