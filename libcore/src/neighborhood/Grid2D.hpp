@@ -83,7 +83,7 @@ public:
     Grid2D(Grid2D &&)      = default;
 
     Grid2D & operator=(const Grid2D &) = default;
-    Grid2D & operator=(Grid2D &&) = default;
+    Grid2D & operator=(Grid2D &&)      = default;
 
     Grid2D(container_type data) : _data(data)
     {

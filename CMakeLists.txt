@@ -262,10 +262,11 @@ add_subdirectory(libshared)
 # Code formating
 ################################################################################
 if(UNIX)
+    set(clang-format-version 14)
     find_program(CLANG_FORMAT
         NAMES
+            clang-format-${clang-format-version}
             clang-format
-            clang-format-13
     )
     if(CLANG_FORMAT)
         execute_process(
@@ -281,9 +282,9 @@ if(UNIX)
                 version
                 "${version_string}"
             )
-            if(version MATCHES "^13.*")
+            if(version MATCHES "^${clang-format-version}.*")
                 message(STATUS "Found clang-format ${version}, add format-check and reformat targets")
-                set(folders jpscore jpsreport libcore)
+                set(folders jpscore jpsvis libcore libshared)
                 add_custom_target(check-format
                     COMMENT "Checking format with clang-format"
                     COMMAND find ${folders}

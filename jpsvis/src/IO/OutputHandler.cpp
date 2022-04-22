@@ -29,9 +29,9 @@
 #include "OutputHandler.hpp"
 
 #include <cmath>
-#include <cstdlib>
 #include <cstdarg>
 #include <cstdio>
+#include <cstdlib>
 
 using namespace std;
 

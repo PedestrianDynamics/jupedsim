@@ -1,4 +1,4 @@
-FROM ubuntu:21.10
+FROM ubuntu:22.04
 
 RUN apt-get update && \
     apt-get install -y software-properties-common
@@ -6,13 +6,14 @@ RUN apt-get update && \
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
     wget \
+    unzip \
     git \
     g++ \
     cmake \
     make \
     ninja-build \
     clang \
-    clang-format \
+    clang-format-14 \
     libglm-dev \
     qtbase5-dev \
     libvtk9-dev \
