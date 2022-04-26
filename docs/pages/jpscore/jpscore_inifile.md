@@ -1,13 +1,10 @@
 ---
-title: jpscore inifile
-keywords: simulation
-tags: [jpscore, file]
-sidebar: jupedsim_sidebar
-folder: jpscore
-permalink: jpscore_inifile.html
-summary:  The project file where the settings for a jpscore simulation are defined. Within this file properties of pedestrians, model parameters, etc can be given.
+title: jpscore inifile keywords: simulation tags: [jpscore, file]
+sidebar: jupedsim_sidebar folder: jpscore permalink: jpscore_inifile.html summary:  The project file where the settings
+for a jpscore simulation are defined. Within this file properties of pedestrians, model parameters, etc can be given.
 last_updated: April 6, 2022
 ---
+
 # Configuration File
 
 ## Basic Structure
@@ -51,17 +48,13 @@ The basic structure of the inifile is as follows:
 
 ## Header
 
-### Required Header Settings
+### Required Header Attributes
 
 The following elements must be defined in the header:
 
-- `<seed>seed</seed>`
-
-  Set the  `seed` value of the random number generator to `s`. If the tag is empty or missing, the current
-  time (`time(NULL)`) is used i.e. random initial conditions.
-
 - `<max_sim_time>t</max_sim_time>`
-  the maximal simulation time in seconds.
+  the maximal simulation time in seconds. The simulation will run to `max_sim_time` unless all agents defined
+  in [distributions](#agents_distribution) and [sources](#sources) have left the simulation earlier.
 
 - `<geometry>geometry.xml</geometry>`
   The name and location of the geometry file. All file locations are relative to the actual location of the project
@@ -73,29 +66,11 @@ The following elements must be defined in the header:
   geometry file are updated. Resulting in a folder with the results and everything to reproduce a specific simulation.
   If no output path is given the folder is named `results`.
 
-- The `trajectory` file with its location to configure output as described below.
+- The `trajectory` file with its location. See details below.
 
-#### Trajectory settings
+#### Trajectory Attributes
 
-- `fps`: defines the frame rate per second for the trajectories.
-- `precision`: define the precision of the trajectories' points. Value can be between 1 and 6. (default: 2).
-- `color_mode`: coloring agents in the trajectories. Options are:
-  - `velocity` (default): color is proportional to speed (slow --> red).
-  - `spotlight`
-  - `group`: color by group
-  - `router`
-  - `final_goal`
-  - `intermediate_goal`
-- `file location` defines the location of the trajectories. All paths are relative to the location of the project file.
-- `optional_output`: possibility to give additional output. Set any of these values to `TRUE` (not case sensitive) to
-  get the according value. `FALSE`, any other value and ignoring the option will lead to no output.
-  - `speed`: speed of the pedestrian
-  - `velocity`: x,y components of the pedestrians's velocity
-  - `final_goal`: id of the final goal the pedestrian is heading to
-  - `intermediate_goal`: id of the current goal the pedestrian is heading to (usually a door)
-  - `desired_direction`: x,y components of the pedestrians's desired directions - `group`: group of the pedestrian
-  - `router`: router used by the pedestrian (id accoriding to ini-file)
-  - `spotlight`: pedestrian is highlighted.
+The trajectory file and its attributes can be defined as follows:
 
 ```xml
 
@@ -106,21 +81,39 @@ The following elements must be defined in the header:
 </trajectories>
 ```
 
+Available attributes are:
+
+- `fps`: defines the frame rate per second for the trajectories. The simulation runs at a specified interval, however
+  not every frame will be written to the trajectory file. Instead, trajectories are written out with `fps` many frames
+  per second.
+- `precision`: define the precision of the trajectories' points. Value can be between 1 and 6. (default: 2).
+- `color_mode`: coloring agents in the trajectories. Options are:
+    - `velocity` (default): color is proportional to speed (slow --> red).
+    - `group`: color by group
+    - `router`
+    - `final_goal`
+    - `intermediate_goal`
+- `file location` defines the location of the trajectories. All paths are relative to the location of the project file.
+- `optional_output`: possibility to give additional output. Set any of these values to `TRUE` (not case sensitive) to
+  get the according value. `FALSE`, any other value and ignoring the option will lead to no output.
+    - `speed`: speed of the pedestrian
+    - `velocity`: x,y components of the pedestrians's velocity
+    - `final_goal`: id of the final goal the pedestrian is heading to
+    - `intermediate_goal`: id of the current goal the pedestrian is heading to (usually a door)
+    - `desired_direction`: x,y components of the pedestrians's desired directions - `group`: group of the pedestrian
+    - `router`: router used by the pedestrian (id accoriding to ini-file)
+
 #### Trajectory Output File
 
-The results of jpscore simulation are written to files in TXT format. This format can be used by other JuPedSim modules.
-
-The provided output format is `plain` (a flat format, just numbers).
-
-{%include note.html content="If a file size of 16Mb is exceeded, `jpscore` automatically splits the output into several files. The files are numbered in ascending order and contain the information of consecutive frames. If you wish to analyze the data with `jpsreport` the output data need to be merged. "%}
+The results of jpscore simulation are written to files in a plain TXT format. This format can be used by other JuPedSim
+modules.
 
 ##### Default Output
 
 A sample trajectory in the plain format is as follows:
 
-```xml
-#description: jpscore (0.8.4)
-#count: 0
+```text
+#description: jpscore (0.9.6)
 #framerate: 16.00
 #geometry: geometry.xml
 #sources: sources.xml
@@ -132,22 +125,21 @@ A sample trajectory in the plain format is as follows:
 #ANGLE: orientation of the ellipse
 #COLOR: color of the ellipse
 
-#ID	FR	X	Y	Z	A	B	ANGLE	COLOR
-1	0	3.30	3.33	0.00	0.18	0.25	-90.00	0
-2	0	4.50	4.44	0.00	0.18	0.25	-90.00	0
-3	0	3.60	3.70	0.00	0.18	0.25	180.00	0
-4	0	3.60	4.07	0.00	0.18	0.25	180.00	0
-5	0	4.50	4.07	0.00	0.18	0.25	-90.00	0
-6	0	4.20	3.33	0.00	0.18	0.25	-90.00	0
+#ID    FR    X    Y    Z    A    B    ANGLE    COLOR
+1    0    3.30    3.33    0.00    0.18    0.25    -90.00    0
+2    0    4.50    4.44    0.00    0.18    0.25    -90.00    0
+3    0    3.60    3.70    0.00    0.18    0.25    180.00    0
+4    0    3.60    4.07    0.00    0.18    0.25    180.00    0
+5    0    4.50    4.07    0.00    0.18    0.25    -90.00    0
+6    0    4.20    3.33    0.00    0.18    0.25    -90.00    0
 ```
-`count` is a running number. Handy when big simulations are splitted into small 10 MB large files.
 
-{%include note.html content="Other files can be included as well. For example events.xml or schedule.xml"%}
+{%include note.html content="Other files can be included as well. For example events.xml."%}
 
 ##### Additional Output
-```xml
-#description: jpscore (0.8.4)
-#count: 0
+
+```text
+#description: jpscore (0.9.6)
 #framerate: 8.00
 #geometry: [absolute path to file]/bottleneck_geo.xml
 #ID: the agent ID
@@ -168,30 +160,31 @@ A sample trajectory in the plain format is as follows:
 #GROUP: group of the pedestrian
 
 
-#ID	FR	X	Y	Z	A	B	ANGLE	COLOR	V	Vx	Vy	FG	CG	Dx	Dy	SPOT	ROUTER	GROUP
-1	0	55.70	103.00	0.00	0.15	0.15	0.00	0	0.00	0.00	0.00	0	16	0.00	0.00	0	2	1
-2	0	52.70	102.10	0.00	0.15	0.15	0.00	0	0.00	0.00	0.00	0	16	0.00	0.00	0	2	1
-3	0	54.80	100.60	0.00	0.15	0.15	0.00	0	0.00	0.00	0.00	0	16	0.00	0.00	0	2	1
-4	0	53.60	102.70	0.00	0.15	0.15	0.00	0	0.00	0.00	0.00	0	16	0.00	0.00	0	2	1
-5	0	50.30	102.70	0.00	0.15	0.15	0.00	0	0.00	0.00	0.00	0	16	0.00	0.00	0	2	1
-6	0	54.20	100.30	0.00	0.15	0.15	0.00	0	0.00	0.00	0.00	0	16	0.00	0.00	0	2	1
-7	0	55.40	102.10	0.00	0.15	0.15	0.00	0	0.00	0.00	0.00	0	16	0.00	0.00	0	2	1
-8	0	52.70	100.60	0.00	0.15	0.15	0.00	0	0.00	0.00	0.00	0	16	0.00	0.00	0	2	1
-9	0	53.00	103.30	0.00	0.15	0.15	0.00	0	0.00	0.00	0.00	0	16	0.00	0.00	0	2	1
+#ID    FR    X    Y    Z    A    B    ANGLE    COLOR    V    Vx    Vy    FG    CG    Dx    Dy    SPOT    ROUTER    GROUP
+1    0    55.70    103.00    0.00    0.15    0.15    0.00    0    0.00    0.00    0.00    0    16    0.00    0.00    0    2    1
+2    0    52.70    102.10    0.00    0.15    0.15    0.00    0    0.00    0.00    0.00    0    16    0.00    0.00    0    2    1
+3    0    54.80    100.60    0.00    0.15    0.15    0.00    0    0.00    0.00    0.00    0    16    0.00    0.00    0    2    1
+4    0    53.60    102.70    0.00    0.15    0.15    0.00    0    0.00    0.00    0.00    0    16    0.00    0.00    0    2    1
+5    0    50.30    102.70    0.00    0.15    0.15    0.00    0    0.00    0.00    0.00    0    16    0.00    0.00    0    2    1
+6    0    54.20    100.30    0.00    0.15    0.15    0.00    0    0.00    0.00    0.00    0    16    0.00    0.00    0    2    1
+7    0    55.40    102.10    0.00    0.15    0.15    0.00    0    0.00    0.00    0.00    0    16    0.00    0.00    0    2    1
+8    0    52.70    100.60    0.00    0.15    0.15    0.00    0    0.00    0.00    0.00    0    16    0.00    0.00    0    2    1
+9    0    53.00    103.30    0.00    0.15    0.15    0.00    0    0.00    0.00    0.00    0    16    0.00    0.00    0    2    1
 ```
 
-### Optional Header Settings
+### Optional Header Attributes
 
 The following elements can be defined optionally in the header.
 
-- `<show_statistics>true</show_statistics>` Show different aggregate statistics e.g. the usage of the doors. (default:
-  false)
+- `<seed>seed</seed>`
+  Set the  `seed` value of the random number generator to `s`. If the tag is empty or missing, the current
+  time (`time(NULL)`) is used i.e. random initial conditions.
+
+- `<show_statistics>true</show_statistics>` Creates additional files with information on aggregate statistics e.g. the
+  usage of the doors. (default:false)
+
 - `<events_file>events.xml</events_file>` The name and location of the event file. Events can be used to open or close
   doors at a certain point of time. For details see below.
--
-- `<schedule_file>schedule.xml</schedule_file>`
-  The name and location of the schedule file. Schedules can be used to group doors and open or close this groups of door
-  at certain points of time. For details see below.
 
 #### Events
 
@@ -199,7 +192,7 @@ Events occur in time and trigger certain actions on doors and crossings. Followi
 
 - `id` (int): unique id of the specific door (transition) as defined in the geometry file.
   See [geometry](jpscore_geometry.html).
-- `time` (double): time of an event
+- `time` (double): time of an event in seconds
 - `state` can be `close`, `temp_close`, `open` or `reset`: defines what event will be applied to the door
 
 Example of an event file:
@@ -217,85 +210,6 @@ Example of an event file:
 </JPScore>
 ```
 
-#### Schedule
-
-Schedules are events that can be used to group doors and trigger events groupwise at certain points of time. In general
-a definition of a valid schedule is composed of two parts:
-
-- **groups**: collection of doors
-- and **times** of events that apply to the different groups.
-
-In detail the following attributes are defined:
-
-- `groups`: groups with all doors, which should open or close at the same time.
-  - a group has an unique `id`.
-  - member defined by a unique id `t_id`  of the specific door as defined in the geometry file.
-    See [geometry](jpscore_geometry.html).
-  - `max_agents`: sets the maximum number of agents which can pass a transition until it is closed.
-
-- `times`: schedule times for every group.
-  - `reset` (default "false"): Instead of opening the transition, the counter of passed pedestrians is reset to 0 and
-    the door opens again at time `t`.
-  - `group_id`: unique id of the specific group of doors as defined above in `groups`.
-  - `closing_time`: time after which the doors of the group will be closed after the doors were opened.
-  - `t`: time when the doors of the group will be open again. The door will be closed again at `t + closing_time` or
-    when max_agents is reached.
-
-In this example a schedule defining four different groups
-
-```xml
- <?xml version="1.0" encoding="UTF-8" ?>
-<JPScore project="JPS-Project" version="0.6">
-    <groups>
-        <group id="0">
-            <member t_id="0"/>
-            <member t_id="2"/>
-            <member t_id="4"/>
-        </group>
-        <group id="1">
-            <member t_id="1"/>
-            <member t_id="3"/>
-            <member t_id="5"/>
-        </group>
-        <group id="2" max_agents="20">
-            <member t_id="7"/>
-            <member t_id="9"/>
-        </group>
-        <group id="3" max_agents="25">
-            <member t_id="6"/>
-            <member t_id="8"/>
-        </group>
-    </groups>
-
-    <times>
-        <time group_id="0" closing_time="20">
-            <t t="30"/>
-            <t t="80"/>
-        </time>
-        <time group_id="1" closing_time="20">
-            <t t="35"/>
-            <t t="85"/>
-        </time>
-        <time group_id="2" closing_time="5" reset="true">
-            <t t="2"/>
-            <t t="50"/>
-            <t t="90"/>
-        </time>
-        <time group_id="3" closing_time="10" reset="true">
-            <t t="10"/>
-            <t t="60"/>
-            <t t="90"/>
-        </time>
-    </times>
-</JPScore>
-```
-
-In this example the doors of group 3 will **open** at 10, 60 and 90
-
-and **closed** at 20, 70 and 100.
-
-{% include note.html content="all times are in seconds."%}
-
 ## Agents
 
 There are two ways to distribute agents for a simulation:
@@ -304,7 +218,6 @@ There are two ways to distribute agents for a simulation:
 - distribution by means of [sources](#sources) *during* the simulation.
 
 ```xml
-
 <agents>
     <agents_distribution>
         <group group_id="1" room_id="0" number="10"/>
@@ -365,7 +278,7 @@ An example of usage:
         percent="0.1" rate="2"/>
 ```
 
-#### Parameters
+#### Source Attributes
 
 - `id` (int): id of the source
 - `caption` (str): caption (default: "no caption")
@@ -437,7 +350,7 @@ instead of 3).
 
 ![Generation of agents with percent=0.2.]({{ site.baseurl }}/images/sources_p05.gif)
 
-#### File sample
+#### File Sample
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -498,7 +411,7 @@ Following snippet is a definition example of the routing information:
 </route_choice_models>
 ```
 
-### Global shortest path
+### Global Shortest Path
 
 At the beginning of the simulation, the Dijkstra algorithm is used to build a network which is then cached and used
 through the simulation life time.
@@ -524,7 +437,7 @@ faster in computation time.
 [#KemlohWagoum2012a]: https://doi.org/10.1142/S0219525912500294 "Kemloh et al "Modeling the dynamic route choice of
 pedestrians to assess the criticality of building evacuation. Advances in Complex Systems. 2012"
 
-## Operational models
+## Operational Models
 
 Several operational models are implemented in jpscore. An operational model defines how pedestrians interact with each
 other and with their environment.
@@ -542,25 +455,25 @@ The definition of any model parameter is composed of two different sections:
 - **agent_parameters**: These parameter are mainly specific for the shape of pedestrians or other pedestrian properties
   like desired speed, reaction time etc.
 
-### Model parameters (in general)
+### Model Parameters (in general)
 
 - `<stepsize>0.001</stepsize>`:
-  - The time step for the solver. This should be choosed with care. For force-based model it is recommended to take a
-    value between $$ 10^{-2} $$ and $$10^{-3}$$ s. For first-order models, a value of 0.05 s should be OK. A larger
-    time step leads to faster simulations, however it is too risky and can lead to numerical instabilities, collisions
-    and overlapping among pedestrians.
-  - Unit: s
+    - The time step for the solver. This should be choosed with care. For force-based model it is recommended to take a
+      value between $$ 10^{-2} $$ and $$10^{-3}$$ s. For first-order models, a value of 0.05 s should be OK. A larger
+      time step leads to faster simulations, however it is too risky and can lead to numerical instabilities, collisions
+      and overlapping among pedestrians.
+    - Unit: s
 
 - `<exit_crossing_strategy>3</exit_crossing_strategy>`
-  - Positive value of 1, 2, 3 or 8. See below.
+    - Positive value of 1, 2, 3 or 8. See below.
 
 - `<linkedcells enabled="true" cell_size="2"/>`
-  - Defines the size of the cells. This is important to get the neighbors of a pedestrians, which are all pedestrians
-    within the eight neighboring cells. Larger cells, lead to slower simulations, since more pedestrian-pedestrian
-    interactions need to be calculated.
-  - Unit: m
+    - Defines the size of the cells. This is important to get the neighbors of a pedestrians, which are all pedestrians
+      within the eight neighboring cells. Larger cells, lead to slower simulations, since more pedestrian-pedestrian
+      interactions need to be calculated.
+    - Unit: m
 
-#### Direction strategies
+#### Direction Strategies
 
 The chosen model the direction strategy should be specified as follows
 
@@ -635,29 +548,29 @@ intermediate targets for every agent, the target being in the same room.
 
 [#Chraibi2011]: http://aimsciences.org/journals/displayPaper.jsp?paperID=6440 "Chraibi el al. Force-based models of pedestrian dynamics.  Pages: 425 - 442, Volume 6, Issue 3, September 2011"
 
-### Agent's parameter (in general)
+### Agent's Parameter (in general)
 
 The *agent parameters* are mostly identical for all models. Exceptions will be mentioned explicitly.
 
 The parameters that can be specified in this section are Gauss distributed (default value are given).
 
-#### Desired speed
+#### Desired Speed
 
 - `<v0 mu="1.2" sigma="0.0" />`
-  - Desired speed
-  - Unit: m/s
+    - Desired speed
+    - Unit: m/s
 - `<v0_upstairs mu="0.6" sigma="0.167" />`
-  - Desired speed upstairs
-  - Unit: m/s
+    - Desired speed upstairs
+    - Unit: m/s
 - `<v0_downstairs mu="0.6" sigma="0.188" />`
-  - Desired speed downstairs
-  - Unit: m/s
+    - Desired speed downstairs
+    - Unit: m/s
 - `<escalator_upstairs mu="0.6" sigma="0.0" />`
-  - Desired speed of agents on escalators upstairs
-  - Unit: m/s
+    - Desired speed of agents on escalators upstairs
+    - Unit: m/s
 - `<escalator_downstairs mu="0.6" sigma="0.0" />`
-  - Speed of agents on escalators downstairs
-  - Unit: m/s
+    - Speed of agents on escalators downstairs
+    - Unit: m/s
 
 The reduced speed on stairs (up) is according to Tab 1 in [Burghardt2014][#Burghardt2014].
 
@@ -668,53 +581,54 @@ The reduced speed on stairs (up) is according to Tab 1 in [Burghardt2014][#Burgh
 | NM       | 0.8 m/s        |
 | FM       | 0.55 m/s       |
 
-##### Modeling the change of the desired speed
+##### Modeling the Change of the Desired Speed
 
-Pedestrians may have a different desired speed on a stair than on a horizontal plan.  Therefore, it is necessary to calculate a "smooth" transition in the desired speed, when pedestrians move on planes with a different inclination. In this way "jumpy" changes in the desired speed are avoided.
+Pedestrians may have a different desired speed on a stair than on a horizontal plan. Therefore, it is necessary to
+calculate a "smooth" transition in the desired speed, when pedestrians move on planes with a different inclination. In
+this way "jumpy" changes in the desired speed are avoided.
 
-{% include note.html content="This modelling of the desired speed in the transition area of planes and stairs is not validated, since experimental data are missing."%}
+{% include note.html content="This modelling of the desired speed in the transition area of planes and stairs is not
+validated, since experimental data are missing."%}
 
 ###### Definitions
 
-Assume the following scenario, with two horizontal planes and a stair, where
-$$z_0<z_1$$ and the inclination of the stair $$\alpha$$.
+Assume the following scenario, with two horizontal planes and a stair, where $$z_0<z_1$$ and the inclination of the
+stair $$\alpha$$.
 
 ![Speed curve in the transition area between levels and stairs]({{ site.baseurl }}/images/desired_speed.png)
 
-The agent has a desired speed on the horizontal plane $$v^0_{\text{horizontal}}$$ and a *different* desired speed on the stair $$v^0_{\text{stair}}$$.
+The agent has a desired speed on the horizontal plane $$v^0_{\text{horizontal}}$$ and a *different* desired speed on the
+stair $$v^0_{\text{stair}}$$.
 
 Given a stair connecting two horizontal floors, we define the following functions:
 
-$$
-f(z) = \frac{2}{1 + \exp\Big(-c\cdot \alpha (z-z_1)^2)\Big)} - 1,
-$$
+$$ f(z) = \frac{2}{1 + \exp\Big(-c\cdot \alpha (z-z_1)^2)\Big)} - 1, $$
 
 and
 
-$$
-g(z) =  \frac{2}{1 + \exp\Big(-c\cdot \alpha ((z-z_0)^2)\Big)} - 1.
-$$
+$$ g(z) = \frac{2}{1 + \exp\Big(-c\cdot \alpha ((z-z_0)^2)\Big)} - 1. $$
 
 ![Increasing function $$f(z)$$ and decreasing function $$g(z)]({{ site.baseurl }}/images/desired_speed_f_g.png)
 
-###### Function of the desired speed
+###### Function of the Desired Speed
 
-Taking the previously introduced quantities into consideration, we can define the desired speed of the agent with respect to its $$z-$$component as
+Taking the previously introduced quantities into consideration, we can define the desired speed of the agent with
+respect to its $$z-$$component as
 
-$$
-v^0(z) = v^0_{\text{horizontal}}\cdot\Big(1 − f(z)\cdot g(z)\Big)   + v^0_{\text{stair}}\cdot f(z)\cdot g(z),
-$$
+$$ v^0(z) = v^0_{\text{horizontal}}\cdot\Big(1 − f(z)\cdot g(z)\Big)   + v^0_{\text{stair}}\cdot f(z)\cdot g(z), $$
 
 $$c$$ is a constant.
 
-The following figure shows the changes of the desired speed with respect to the inclination of the stair $$\alpha$$. The steeper the inclination of the stair, the faster is the change of the desired speed.
+The following figure shows the changes of the desired speed with respect to the inclination of the stair $$\alpha$$. The
+steeper the inclination of the stair, the faster is the change of the desired speed.
 
 ![Transition area of levels and stairs]({{ site.baseurl }}/images/desired_speed2.png)
 
-{%include note.html content="The value of *c* should be chosen so that the function grows fast (but smooth) from 0 to 1. However, in force-based models the speed is adapted exponentially from zero to the desired speed.  Therefore, the parameter tau must be taken into consideration."%}
+{%include note.html content="The value of *c* should be chosen so that the function grows fast (but smooth) from 0 to 1.
+However, in force-based models the speed is adapted exponentially from zero to the desired speed. Therefore, the
+parameter tau must be taken into consideration."%}
 
-
-#### Shape of pedestrians
+#### Shape of Pedestrians
 
 Pedestrians are modeled as ellipses with two semi-axes: $$a$$ and $$b$$, where
 
@@ -727,17 +641,17 @@ $$ b = b_{max} - (b_{max}-b_{min})\frac{v}{v^0}. $$
 $$v$$ is the speed of a pedestrian.
 
 - `<bmax mu="0.15" sigma="0.0" />`
-  - Maximal length of the shoulder semi-axis
-  - Unit: m
+    - Maximal length of the shoulder semi-axis
+    - Unit: m
 - `<bmin mu="0.15" sigma="0.0" />`
-  - Minimal length of the shoulder semi-axis
-  - Unit: m
+    - Minimal length of the shoulder semi-axis
+    - Unit: m
 - `<amin mu="0.15" sigma="0.0" />`
-  - Minimal length of the movement semi-axis. This is the case when $$v=0$$.
-  - Unit: m
+    - Minimal length of the movement semi-axis. This is the case when $$v=0$$.
+    - Unit: m
 - `<atau mu="0." sigma="0.0" />`
-  - (Linear) speed-dependency of the movement semi-axis
-  - Unit: s
+    - (Linear) speed-dependency of the movement semi-axis
+    - Unit: s
 
 ### Generalized Centrifugal Force Model
 
@@ -750,15 +664,15 @@ Usage:
 <model operational_model_id="1" description="gcfm">
 ```
 
-#### Model parameters (GCFM)
+#### Model Parameters (GCFM)
 
 - `<force_ped nu="0.6" dist_max="3" disteff_max="2" interpolation_width="0.1" />`
   The repulsive force between two agents. See [Fig. 7](https://arxiv.org/pdf/1008.4297.pdf).
-  - `nu` is the strength of the force ($$\nu$$ in Eq. (19)).
-  - `dist_max` is the maximum force at contact ($$f_m$$)
-  - `disteff_max`: cut-off radius ($$r_c$$). Note this value should be smaller than `cell_size` of the linkedcells.
-    See [Model parameters (in general)](#model-parameters-in-general).
-  - `interpolation_width` ($$r_{eps}$$)
+    - `nu` is the strength of the force ($$\nu$$ in Eq. (19)).
+    - `dist_max` is the maximum force at contact ($$f_m$$)
+    - `disteff_max`: cut-off radius ($$r_c$$). Note this value should be smaller than `cell_size` of the linkedcells.
+      See [Model parameters (in general)](#model-parameters-in-general).
+    - `interpolation_width` ($$r_{eps}$$)
 - `<force_wall nu="0.1" dist_max="1" disteff_max="2" interpolation_width="0.1" />`
   The parameters for the repulsive force between a wall and an agent are defined in analogy to the agent-agent repulsive
   force.
@@ -798,25 +712,25 @@ Usage:
 <model operational_model_id="3" description="Tordeux2015">
 ```
 
-#### Model parameters (Tordeux2015)
+#### Model Parameters (Tordeux2015)
 
 Besides the options defined in [Model parameters](#model-parameters-in-general) the following options are necessary for
 this model:
 
 - `<force_ped  a="5" D="0.2"/>`
-  - The influence of other pedestrians is triggered by $$a$$ and $$D$$ where $$a$$ is the strength of the interaction
-    and $$D$$ gives its range. The naming may be misleading, since the model is **not** force-based, but
-    velocity-based.
-  - Unit: m
+    - The influence of other pedestrians is triggered by $$a$$ and $$D$$ where $$a$$ is the strength of the interaction
+      and $$D$$ gives its range. The naming may be misleading, since the model is **not** force-based, but
+      velocity-based.
+    - Unit: m
 - `<force_wall a="5" D="0.02"/>`:
-  - The influence of walls is triggered by $$a$$ and $$D$$ where $$a$$ is the strength of the interaction and $$D$$
-    gives its range. A larger value of $$D$$ may lead to blockades, especially when passing narrow bottlenecks.
-  - Unit: m
+    - The influence of walls is triggered by $$a$$ and $$D$$ where $$a$$ is the strength of the interaction and $$D$$
+      gives its range. A larger value of $$D$$ may lead to blockades, especially when passing narrow bottlenecks.
+    - Unit: m
 
 The names of the aforementioned parameters might be misleading, since the model is *not* force-based. The naming will be
 changed in the future.
 
-#### Agent parameters (Tordeux2015)
+#### Agent Parameters (Tordeux2015)
 
 Actually, this model assumes circular pedestrian's shape, therefore the parameter for the semi-axes should be chosen,
 such that circles with constant radius can be obtained. For example:
@@ -834,7 +748,7 @@ This defines circles with radius 15 cm.
 Other parameters in this section are:
 
 - `<T mu="1" sigma="0.0" />`
-  - Specific parameter for model 3 (Tordeux2015). Defines the slope of the speed function.
+    - Specific parameter for model 3 (Tordeux2015). Defines the slope of the speed function.
 
 In summary the relevant section for this model could look like:
 
@@ -880,7 +794,7 @@ different values.
 
 [#Burghardt2014]: http://link.springer.com/chapter/10.1007%2F978-3-319-02447-9_27 "Burghardt, Sebastian and Seyfried, Armin and Klingsch, Wolfram. Fundamental diagram of stairs: Critical review and topographical measurements. Pedestrian and Evacuation Dynamics 2012"
 
-## Optional Settings for an Advanced Simulation
+## Optional Attributes for an Advanced Simulation
 
 ### Routing
 
@@ -930,37 +844,38 @@ It is recommended to position them near the exits.
 ```xml
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <JPScore project="JPS-Project" version="0.8">
-  <goals>
-    <goal id="1" final="true" caption="goal1" x_min="3.6" x_max="5.2" y_min="-4" y_max="-3">
-      <polygon>
-        <vertex px="3.6" py="-3.0" />
-        <vertex px="3.6" py="-4.0" />
-        <vertex px="5.2" py="-4.0" />
-        <vertex px="5.2" py="-3.0" />
-        <vertex px="3.6" py="-3.0" />
-      </polygon>
-    </goal>
-    <goal id="4" final="true" caption="goal4" x_min="-4" x_max="-3" y_min="2.8" y_max="6.4">
-      <polygon>
-        <vertex px="-3.0" py="2.8" />
-        <vertex px="-4.0" py="2.8" />
-        <vertex px="-4.0" py="6.4" />
-        <vertex px="-3.0" py="6.4" />
-        <vertex px="-3.0" py="2.8" />
-      </polygon>
-    </goal>
-    <waiting_area caption="wa1" id="5" waiting_time="20" max_peds="10" is_open="true" room_id="0" subroom_id="1" global_timer="false" >
-      <polygon>
-        <vertex px="11" py="1" />
-        <vertex px="14" py="1" />
-        <vertex px="14" py="4" />
-        <vertex px="11" py="4" />
-        <vertex px="11" py="1" />
-      </polygon>
-      <next_wa id="2" p="0.75"/>
-      <next_wa id="3" p="0.25"/>
-    </waiting_area>
-  </goals>
+    <goals>
+        <goal id="1" final="true" caption="goal1" x_min="3.6" x_max="5.2" y_min="-4" y_max="-3">
+            <polygon>
+                <vertex px="3.6" py="-3.0"/>
+                <vertex px="3.6" py="-4.0"/>
+                <vertex px="5.2" py="-4.0"/>
+                <vertex px="5.2" py="-3.0"/>
+                <vertex px="3.6" py="-3.0"/>
+            </polygon>
+        </goal>
+        <goal id="4" final="true" caption="goal4" x_min="-4" x_max="-3" y_min="2.8" y_max="6.4">
+            <polygon>
+                <vertex px="-3.0" py="2.8"/>
+                <vertex px="-4.0" py="2.8"/>
+                <vertex px="-4.0" py="6.4"/>
+                <vertex px="-3.0" py="6.4"/>
+                <vertex px="-3.0" py="2.8"/>
+            </polygon>
+        </goal>
+        <waiting_area caption="wa1" id="5" waiting_time="20" max_peds="10" is_open="true" room_id="0" subroom_id="1"
+                      global_timer="false">
+            <polygon>
+                <vertex px="11" py="1"/>
+                <vertex px="14" py="1"/>
+                <vertex px="14" py="4"/>
+                <vertex px="11" py="4"/>
+                <vertex px="11" py="1"/>
+            </polygon>
+            <next_wa id="2" p="0.75"/>
+            <next_wa id="3" p="0.25"/>
+        </waiting_area>
+    </goals>
 </JPScore>
 ```
 
@@ -995,11 +910,11 @@ Here are some use cases:
 - `transition_id`: waits till the specific door opens. **Important:** `waiting_time` is neglected in this case!
 
 - `next_wa`: Next waiting area or goal where pedestrians are heading for
-  - `id`: ID of next waiting area/goal, -1 for next exit
-  - `p`: probability of pedestrians being led to the specific next waiting area. During simulation if `max_ped` of the
-    particular waiting is reached it will not be considered.
+    - `id`: ID of next waiting area/goal, -1 for next exit
+    - `p`: probability of pedestrians being led to the specific next waiting area. During simulation if `max_ped` of the
+      particular waiting is reached it will not be considered.
 
-### Traffic constraints
+### Traffic Constraints
 
 This section defines constraints related to doors.
 
@@ -1046,7 +961,7 @@ Following properties of `transitions` can be defined before the start of the sim
 </JPScore>
 ```
 
-#### Changes of door's status
+#### Changes of Door's Status
 
 Doors have three statuses:
 
@@ -1067,7 +982,7 @@ Here are the rules governing the changes from one status to another:
 
 ![Changes of door's status]({{ site.baseurl }}/images/door_states.png)
 
-### Train constraints
+### Train Constraints
 
 Information regarding trains are organized in two different files:
 
@@ -1083,7 +998,7 @@ Information regarding trains are organized in two different files:
 </train_constraints>
 ```
 
-#### Train types
+#### Train Types
 
 ##### Definition
 
@@ -1093,10 +1008,10 @@ A train is defined through the following information:
 - `length` (float): length of the train
 - `agents_max` (int): maximal number of passengers
 - door:
-  - `id` (int): id of the train door
-  - `distance` (float): distance to train start
-  - `width` (float): width of the door
-  - (optional) `outflow` (float): maximum flow at the specific train door (persons per second).
+    - `id` (int): id of the train door
+    - `distance` (float): distance to train start
+    - `width` (float): width of the door
+    - (optional) `outflow` (float): maximum flow at the specific train door (persons per second).
 
 {%include note.html content="The parameter `length` is not used yet. In future it will be used for sanity checks and for
 avoiding overlapping trains."%}
@@ -1121,14 +1036,14 @@ avoiding overlapping trains."%}
 
 ![Schematic overview of train type definition.]({{ site.baseurl }}/images/trains/traintype.png)
 
-##### Capacity of a train
+##### Capacity of a Train
 
 The number of agents in a train is calculated every time step as the sum of all agents passing through the train's
 doors.
 
 When this number exceeds the `agents_max` parameter, all train's doors are closed.
 
-#### Train timetable
+#### Train Timetable
 
 ##### Definition
 
@@ -1167,7 +1082,7 @@ A train is defined through the following information:
 With the train defined as above, this would lead to the positioning of the train doors as seen here:
 ![Schematic overview of train arrival on platform.]({{ site.baseurl }}/images/trains/traintimetable.png)
 
-#### Geometry definition
+#### Geometry Definition
 
 For using trains in the simulation, tracks need to be defined in the geometry. A track is a consecutive line sequence,
 marked by the type `type="track"`. For each track, one point needs to be marked as a starting point with `start="true"`,
@@ -1194,19 +1109,19 @@ in [Train timetable](#train-timetable)).
 </room>
 ```
 
-#### Geometry adaptation
+#### Geometry Adaptation
 
 For realizing trains in the simulation, doors need to be added or removed dynamically during the simulation when trains
 are arriving or departing.
 
-##### Calculation of train door positions
+##### Calculation of Train Door Positions
 
 For calculating the train door coordinates, the following rules apply:
 
 - Distance between train start and door start is calculated along the track walls
 - Distance between door start and door end is calculated as direct connection (see below)
 
-##### Splitting of the track walls
+##### Splitting of the Track Walls
 
 ###### Case 1: Door on one single wall element
 
