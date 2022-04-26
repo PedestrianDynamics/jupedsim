@@ -33,3 +33,5 @@ COPY scripts/setup-deps.sh requirements.txt /opt/
 RUN cd /opt && ./setup-deps.sh
 
 RUN pip3 install -r /opt/requirements.txt
+
+RUN git config --global --add safe.directory '*'
