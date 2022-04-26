@@ -1,8 +1,12 @@
 ---
-title: jpscore inifile keywords: simulation tags: [jpscore, file]
-sidebar: jupedsim_sidebar folder: jpscore permalink: jpscore_inifile.html summary:  The project file where the settings
-for a jpscore simulation are defined. Within this file properties of pedestrians, model parameters, etc can be given.
-last_updated: April 6, 2022
+title: jpscore inifile 
+keywords: simulation 
+tags: [jpscore, file]
+sidebar: jupedsim_sidebar 
+folder: jpscore 
+permalink: jpscore_inifile.html 
+summary: The project file where the settings for a jpscore simulation are defined. Within this file properties of pedestrians, model parameters, etc can be given.
+last_updated: April 26, 2022
 ---
 
 # Configuration File
@@ -980,7 +984,7 @@ Here are the rules governing the changes from one status to another:
 * If a door status is _close_, the agents should look for another door and **not** wait in front of the closed door. And
   if there is no other open door, the agents should wait inside the room.
 
-![Changes of door's status]({{ site.baseurl }}/images/door_states.png)
+<!-- ![Changes of door's status]({{ site.baseurl }}/images/door_states.png) -->
 
 ### Train Constraints
 
