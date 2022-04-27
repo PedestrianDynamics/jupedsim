@@ -103,25 +103,8 @@ entries:
         - title: Geometry
           url: /jpscore_geometry.html
           output: web, pdf
-        - title: Trajectory
-          url: /jpscore_trajectory.html
-          output: web, pdf
-
-      - title: Models
-        output: web, pdf
-        subfolderitems:
-        - title: Operational models
-          url: /jpscore_operativ.html
-          output: web, pdf
-
-        - title: Routing
-          url: /jpscore_routing.html
-          output: web, pdf
-
-        - title: Direction strategies
-          url: /jpscore_direction.html
-          output: web, pdf
-
+        
+      
   - title: Analysis
     output: web, pdf
     folderitems:
