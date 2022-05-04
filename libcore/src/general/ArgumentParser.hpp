@@ -42,14 +42,15 @@ private:
         {"error", Logging::Level::Error},
         {"off", Logging::Level::Off}};
 
-    fs::path iniFilePath{"ini.xml"};
+    fs::path iniFilePath{};
     Logging::Level logLevel{Logging::Level::Info};
     bool printVersionAndExit{false};
 
     CLI::App app{"JuPedSim"};
     CLI::Option * iniFilePathOpt =
-        app.add_option("inifile", iniFilePath, "Path to your inifile. Defaults to 'ini.xml'")
-            ->check(CLI::ExistingFile);
+        app.add_option("inifile", iniFilePath, "Path to your simulation inifile")
+            ->check(CLI::ExistingFile)
+            ->required();
     CLI::Option * logLevelOpt =
         app.add_option(
                "--log-level",
