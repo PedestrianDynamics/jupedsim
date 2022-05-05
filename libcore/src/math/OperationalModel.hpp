@@ -52,7 +52,6 @@ struct Configuration;
 struct PedestrianUpdate {
     std::optional<Point> position{};
     std::optional<Point> velocity{};
-    std::optional<Point> lastE0{};
     std::optional<Point> waitingPos{};
     Point v0{};
     bool resetTurning{false};

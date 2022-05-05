@@ -15,8 +15,6 @@ add_library(core STATIC
     src/Geometry.cpp
     src/Geometry.hpp
     src/Graph.hpp
-    src/IO/EventFileParser.cpp
-    src/IO/EventFileParser.hpp
     src/IO/GeoFileParser.cpp
     src/IO/GeoFileParser.hpp
     src/IO/IniFileParser.cpp
@@ -27,8 +25,6 @@ add_library(core STATIC
     src/IO/OutputHandler.hpp
     src/IO/PedDistributionParser.cpp
     src/IO/PedDistributionParser.hpp
-    src/IO/TrainFileParser.cpp
-    src/IO/TrainFileParser.hpp
     src/IO/Trajectories.cpp
     src/IO/Trajectories.hpp
     src/OperationalDecisionSystem.cpp
@@ -39,8 +35,6 @@ add_library(core STATIC
     src/Simulation.hpp
     src/SimulationClock.cpp
     src/SimulationClock.hpp
-    src/SimulationHelper.cpp
-    src/SimulationHelper.hpp
     src/StrategicalDesicionSystem.cpp
     src/StrategicalDesicionSystem.hpp
     src/TacticalDecisionSystem.cpp
@@ -70,8 +64,6 @@ add_library(core STATIC
     src/geometry/DTriangulation.hpp
     src/geometry/Goal.cpp
     src/geometry/Goal.hpp
-    src/geometry/GoalManager.cpp
-    src/geometry/GoalManager.hpp
     src/geometry/Hline.cpp
     src/geometry/Hline.hpp
     src/geometry/Line.cpp
@@ -86,15 +78,12 @@ add_library(core STATIC
     src/geometry/SubRoom.hpp
     src/geometry/SubroomType.cpp
     src/geometry/SubroomType.hpp
-    src/geometry/TrainGeometryInterface.hpp
     src/geometry/Transition.cpp
     src/geometry/Transition.hpp
     src/geometry/WaitingArea.cpp
     src/geometry/WaitingArea.hpp
     src/geometry/Wall.cpp
     src/geometry/Wall.hpp
-    src/geometry/helper/CorrectGeometry.cpp
-    src/geometry/helper/CorrectGeometry.hpp
     src/math/GCFMModel.cpp
     src/math/GCFMModel.hpp
     src/math/Mathematics.cpp
@@ -218,7 +207,6 @@ if (BUILD_TESTS)
     set_property(TARGET libcore-tests PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 
     add_executable(catch-unittests
-        test/catch2/geometry/GeometryHelperTest.cpp
         test/catch2/geometry/LineTest.cpp
         test/catch2/geometry/ObstacleTest.cpp
         test/catch2/geometry/PointTest.cpp

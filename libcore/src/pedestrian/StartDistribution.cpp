@@ -151,15 +151,12 @@ void StartDistribution::SetAgentsNumber(int N)
     _nPeds = N;
 }
 
-Pedestrian* StartDistribution::GenerateAgent(Building* building, std::vector<Point>& positions)
+Pedestrian* StartDistribution::GenerateAgent(std::vector<Point>& positions)
 {
     Pedestrian* ped = new Pedestrian();
     // PedIndex
-    ped->SetFinalDestination(GetGoalId());
     ped->SetGroup(GetGroupId());
-    ped->SetRouterId(_routerID);
-    ped->SetBuilding(building);
-    ped->SetPremovementTime(GetPremovementTime());
+    ped->premovementTime = GetPremovementTime();
 
     // a und b setzen muss vor v0 gesetzt werden,
     // da sonst v0 mit Null überschrieben wird

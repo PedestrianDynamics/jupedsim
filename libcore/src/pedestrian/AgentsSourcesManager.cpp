@@ -125,7 +125,7 @@ void AgentsSourcesManager::GenerateAgents()
 {
     for(const auto& src : _sources) {
         LOG_INFO("Generate src: {}", src->GetId());
-        src->GenerateAgentsAndAddToPool(src->GetMaxAgents(), _building);
+        src->GenerateAgentsAndAddToPool(src->GetMaxAgents());
     }
 }
 

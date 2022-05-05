@@ -1324,15 +1324,6 @@ SubroomType SubRoom::GetType() const
     return _type;
 }
 
-bool SubRoom::IsInSubRoom(Pedestrian* ped) const
-{
-    const Point& pos = ped->GetPos();
-    if(ped->GetExitLine().DistTo(pos) <= J_EPS_GOAL)
-        return IsInSubRoom(pos);
-    else
-        return IsInSubRoom(pos);
-}
-
 std::vector<Point> SubRoom::StartLLCorner(const std::vector<Point>& polygon)
 {
     // detecting point which is in the lower left corner

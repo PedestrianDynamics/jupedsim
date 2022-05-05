@@ -391,8 +391,6 @@ public:
      * Recomputation of the are as well as the polygons describing the subroom.
      */
     void Update();
-
-    virtual bool IsInSubRoom(Pedestrian* ped) const;
 };
 
 class NormalSubRoom : public SubRoom

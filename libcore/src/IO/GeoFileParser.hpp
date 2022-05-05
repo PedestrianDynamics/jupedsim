@@ -37,10 +37,10 @@ class GeoFileParser : public GeometryReader
 {
 public:
     GeoFileParser(Configuration* configuration);
-    ~GeoFileParser();
-    virtual void LoadBuilding(Building* building) override;
+    ~GeoFileParser() override;
+    void LoadBuilding(Building* building) override;
 
-    virtual bool LoadTrafficInfo(Building* building) override;
+    bool LoadTrafficInfo(Building* building) override;
     bool parseDoorNode(TiXmlElement* xDoor, int id, Building* building);
     Goal* parseGoalNode(TiXmlElement* e);
     Transition* parseTransitionNode(TiXmlElement* xTrans, Building* building);

@@ -31,29 +31,6 @@ TrajectoryWriter::TrajectoryWriter(
         return fmt::format(FMT_STRING("{:.2f}\t{:.2f}\t"), ped->GetV().x, ped->GetV().y);
     };
 
-    // Add header, info and output for final_goal
-    _optionalOutputHeader[OptionalOutput::final_goal] = "FG\t";
-    _optionalOutputInfo[OptionalOutput::final_goal] = "#FG: id of final goal\n";
-    _optionalOutput[OptionalOutput::final_goal] = [](const Pedestrian* ped) {
-        return fmt::format(FMT_STRING("{}\t"), ped->GetFinalDestination());
-    };
-
-    // Add header, info and output for intermediate_goal
-    _optionalOutputHeader[OptionalOutput::intermediate_goal] = "CG\t";
-    _optionalOutputInfo[OptionalOutput::intermediate_goal] = "#CG: id of current goal\n";
-    _optionalOutput[OptionalOutput::intermediate_goal] = [](const Pedestrian* ped) {
-        return fmt::format(FMT_STRING("{}\t"), ped->GetDestination());
-    };
-
-    // Add header, info and output for desired direction
-    _optionalOutputHeader[OptionalOutput::desired_direction] = "Dx\tDy\t";
-    _optionalOutputInfo[OptionalOutput::desired_direction] =
-        "#Dx: x component of the pedestrian's desired direction\n"
-        "#Dy: y component of the pedestrian's desired direction\n";
-    _optionalOutput[OptionalOutput::desired_direction] = [](const Pedestrian* ped) {
-        return fmt::format(FMT_STRING("{:.2f}\t{:.2f}\t"), ped->GetLastE0().x, ped->GetLastE0().y);
-    };
-
     // Add header, info and output for group
     _optionalOutputHeader[OptionalOutput::group] = "GROUP\t";
     _optionalOutputInfo[OptionalOutput::group] = "#GROUP: group of the pedestrian\n";
@@ -118,7 +95,7 @@ void TrajectoryWriter::WriteFrame(
     for(const auto& ped : pedestrian) {
         double x = ped->GetPos().x;
         double y = ped->GetPos().y;
-        double z = ped->GetElevation();
+        double z = 0;
         int color = computeColor(*ped);
         double a = ped->GetLargerAxis();
         double b = ped->GetSmallerAxis();
@@ -162,21 +139,9 @@ int TrajectoryWriter::computeColor(const Pedestrian& ped) const
             return color;
         }
 
-        case BY_ROUTER: {
-            key = std::to_string(ped.GetRouterID());
-        } break;
-
         case BY_GROUP: {
             return (colors[ped.GetGroup() % colors.size()]);
         }
-
-        case BY_FINAL_GOAL: {
-            key = std::to_string(ped.GetFinalDestination());
-        } break;
-
-        case BY_INTERMEDIATE_GOAL: {
-            key = std::to_string(ped.GetDestination());
-        } break;
 
         default:
             break;

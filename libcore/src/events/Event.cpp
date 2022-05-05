@@ -11,10 +11,8 @@ CreatePedestrianEvent::CreatePedestrianEvent(
     std::chrono::nanoseconds min_time)
     : execute_at(min_time)
     , _position{agent->GetPos()}
-    , _final_destination{agent->GetFinalDestination()}
     , _group_id{agent->GetGroup()}
-    , _router_id{agent->GetRouterID()}
-    , _premovement_time{agent->GetPremovementTime()}
+    , _premovement_time{agent->premovementTime}
     , _ellipse_a_v{agent->GetEllipse().GetAv()}
     , _ellipse_a_min{agent->GetEllipse().GetAmin()}
     , _ellipse_b_max{agent->GetEllipse().GetBmax()}
@@ -44,29 +42,4 @@ std::vector<Event> CreateEventsFromAgents(
         events.emplace_back(CreatePedestrianEvent(agent.get(), t));
     }
     return events;
-}
-
-template <>
-DoorEvent::Type from_string<DoorEvent::Type>(const std::string& str)
-{
-    if(str == "open") {
-        return DoorEvent::Type::OPEN;
-    }
-
-    if(str == "close") {
-        return DoorEvent::Type::CLOSE;
-    }
-
-    if(str == "temp_close") {
-        return DoorEvent::Type::TEMP_CLOSE;
-    }
-
-    if(str == "reset") {
-        return DoorEvent::Type::RESET;
-    }
-
-    throw std::logic_error(fmt::format(
-        FMT_STRING(
-            "Error converting string to enum. Unknown string value for DoorEventNew::Type {:s}"),
-        str));
 }
