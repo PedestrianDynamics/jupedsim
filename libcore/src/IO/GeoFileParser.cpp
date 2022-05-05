@@ -210,34 +210,6 @@ bool GeoFileParser::LoadGeometry(Building* building)
 
                     Wall wall{p1, p2, wall_type};
                     subroom->AddWall(wall);
-
-                    if(wall_type == "track") {
-                        int trackID = xmltoi(
-                            xPolyVertices->Attribute("track_id"), std::numeric_limits<int>::min());
-                        if(trackID < 0) {
-                            LOG_WARNING(
-                                "Track ID should be non-negative integer value but is {}. This "
-                                "track will be ignored.",
-                                trackID);
-                            continue;
-                        }
-                        building->AddTrackWall(trackID, room->GetID(), subroom_id, wall);
-
-                        std::string input;
-                        if(const char* attribute = xVertex->Attribute("start"); attribute) {
-                            input = attribute;
-                            if(input == "true") {
-                                building->AddTrackStart(trackID, p1);
-                            }
-                        } else if(const char* attribute =
-                                      xVertex->NextSiblingElement("vertex")->Attribute("start");
-                                  attribute) {
-                            input = attribute;
-                            if(input == "true") {
-                                building->AddTrackStart(trackID, p2);
-                            }
-                        }
-                    }
                 }
             }
 

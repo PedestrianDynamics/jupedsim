@@ -32,7 +32,6 @@
 #include "NavLineParameters.hpp"
 #include "Obstacle.hpp"
 #include "Room.hpp"
-#include "TrainGeometryInterface.hpp"
 #include "Transition.hpp"
 #include "Wall.hpp"
 #include "general/Filesystem.hpp"
@@ -57,8 +56,6 @@ private:
     std::map<int, Transition*> _transitions;
     std::map<int, Hline*> _hLines;
     std::map<int, Goal*> _goals;
-    std::map<int, TrainType> _trains;
-    std::map<int, Track> _tracks;
     std::map<int, Point> _trackStarts;
     /// Map of walls added temporarily for a specific train
     std::map<int, std::vector<Wall>> _trainWallsAdded;
@@ -105,18 +102,6 @@ public:
 
     const std::map<int, Goal*>& GetAllGoals() const;
 
-    void AddTrainWallAdded(int trainID, Wall trainAddedWall);
-    void ClearTrainWallsAdded(int trainID);
-    std::optional<std::vector<Wall>> GetTrainWallsAdded(int trainID);
-
-    void AddTrainWallRemoved(int trainID, Wall trainRemovedWall);
-    void ClearTrainWallsRemoved(int trainID);
-    std::optional<std::vector<Wall>> GetTrainWallsRemoved(int trainID);
-
-    void AddTrainDoorAdded(int trainID, Transition trainAddedDoor);
-    void ClearTrainDoorsAdded(int trainID);
-    std::optional<std::vector<Transition>> GetTrainDoorsAdded(int trainID);
-
     // ------------------------------------
     bool AddCrossing(Crossing* line);
 
@@ -132,28 +117,6 @@ public:
      */
     bool SanityCheck();
 
-    /**
-     * Adds a train to the building
-     * @param trainID ID of the added train
-     * @param type type of the train
-     */
-    void AddTrainType(int trainID, TrainType type);
-
-    /**
-     * Get the train types as map
-     * @return train types of the building with trainID as key
-     */
-    std::map<int, TrainType> GetTrains() const;
-
-    void AddTrackWall(int trackID, int roomID, int subRoomID, Wall trackWall);
-
-    std::optional<Track> GetTrack(int track) const;
-
-    void AddTrackStart(int trackID, Point trackStart);
-
-    std::optional<Point> GetTrackStart(int trackID) const;
-
 private:
     bool InitInsideGoals();
-    void InitPlatforms();
 };

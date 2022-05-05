@@ -98,9 +98,6 @@ void VelocityModel::ApplyUpdate(const PedestrianUpdate& update, Pedestrian& agen
     } else {
         agent.IncrementOrientationDelay();
     }
-    if(update.lastE0) {
-        agent.SetLastE0(*update.lastE0);
-    }
     agent.SetV0(update.v0);
     if(update.resetPhi) {
         agent.SetPhiPed();
@@ -115,13 +112,10 @@ void VelocityModel::ApplyUpdate(const PedestrianUpdate& update, Pedestrian& agen
 
 void VelocityModel::e0(const Pedestrian* ped, Point target, PedestrianUpdate& update) const
 {
-    if(ped->IsWaiting()) {
-        update.waitingPos = target;
-    }
-
     Point desired_direction;
-    const Point pos = ped->GetPos();
-    const auto dist = ped->GetExitLine().DistTo(pos);
+    const auto pos = ped->GetPos();
+    const auto dest = ped->destination;
+    const auto dist = (dest - pos).Norm();
     if(dist > J_EPS_GOAL) {
         desired_direction = ped->GetV0(target);
     } else {
@@ -244,7 +238,7 @@ Point VelocityModel::ForceRepRoom(const Pedestrian* ped, const Geometry& geometr
 
 Point VelocityModel::ForceRepWall(const Pedestrian* ped, const Line& w) const
 {
-    if(const auto distGoal = ped->GetExitLine().DistTo(ped->GetPos()); distGoal < J_EPS_GOAL) {
+    if(const auto distGoal = (ped->destination - ped->GetPos()).Norm(); distGoal < J_EPS_GOAL) {
         return Point{0, 0};
     }
 

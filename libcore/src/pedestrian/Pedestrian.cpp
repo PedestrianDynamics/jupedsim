@@ -34,20 +34,14 @@
 #include <Logger.hpp>
 #include <cassert>
 
-double Pedestrian::_minPremovementTime = std::numeric_limits<double>::max();
-
-bool Pedestrian::InPremovement(double now)
-{
-    return _premovement >= now;
-}
-
 double Pedestrian::SelectV0(SubroomType type, double delta) const
 {
     switch(type) {
         case SubroomType::ESCALATOR_UP:
-            return _v0EscalatorUpStairs + _building->GetSubRoom(GetPos())->GetEscalatorSpeed();
         case SubroomType::ESCALATOR_DOWN:
-            return _v0EscalatorDownStairs + _building->GetSubRoom(GetPos())->GetEscalatorSpeed();
+            // TODO(kkratz): This needs to be reimplemented with areas, This should not be in
+            // Pedestrian.
+            assert(false);
         case SubroomType::STAIR:
             if(fabs(delta) < 1)
                 return std::max(0., _ellipse.GetV0());
@@ -97,19 +91,8 @@ void Pedestrian::SetEllipse(const JEllipse& e)
     _ellipse = e;
 }
 
-void Pedestrian::SetDestination(int i)
-{
-    _exitIndex = i;
-}
-
-void Pedestrian::SetExitLine(const Line* l)
-{
-    _navLine = Line(*l);
-}
-
 void Pedestrian::SetPos(const Point& pos)
 {
-    _lastPosition = _ellipse.GetCenter();
     _ellipse.SetCenter(pos);
 }
 
@@ -181,26 +164,6 @@ const JEllipse& Pedestrian::GetEllipse() const
     return _ellipse;
 }
 
-int Pedestrian::GetDestination() const
-{
-    return _exitIndex;
-}
-
-const Line& Pedestrian::GetExitLine() const
-{
-    return _navLine;
-}
-
-Point Pedestrian::GetLastE0() const
-{
-    return _lastE0;
-}
-
-void Pedestrian::SetLastE0(Point E0)
-{
-    _lastE0 = E0;
-}
-
 const Point& Pedestrian::GetPos() const
 {
     return _ellipse.GetCenter();
@@ -218,24 +181,10 @@ const Point& Pedestrian::GetV0() const
 
 double Pedestrian::GetV0Norm() const
 {
-    // @todo: we need to know the difference of the ped_elevation to the old_nav_elevation, and use
-    // this in the function f.
-    // detect the walking direction based on the elevation
-    SubRoom* sub = _building->GetSubRoom(GetPos());
-    double ped_elevation = sub->GetElevation(_ellipse.GetCenter());
-    const Point& target = _navLine.GetCentre();
-    double nav_elevation = sub->GetElevation(target);
-    double delta = nav_elevation - ped_elevation;
-    auto subType = sub->GetType();
-    double smoothFactor = SelectSmoothFactor(subType, delta);
-    double v0 = SelectV0(subType, delta);
-    double z1 = sub->GetMaxElevation();
-    double z0 = sub->GetMinElevation();
-    double alpha = acos(sub->GetCosAngleWithHorizontal());
-    double f =
-        2.0 / (1 + exp(-smoothFactor * alpha * (z1 - ped_elevation) * (z1 - ped_elevation))) - 1;
-    double g =
-        2.0 / (1 + exp(-smoothFactor * alpha * (z0 - ped_elevation) * (z0 - ped_elevation))) - 1;
+    double smoothFactor = SelectSmoothFactor(SubroomType::FLOOR, 0);
+    double v0 = SelectV0(SubroomType::FLOOR, 0);
+    double f = 2.0 / (1 + exp(-smoothFactor)) - 1;
+    double g = 2.0 / (1 + exp(-smoothFactor)) - 1;
 
     double walking_speed = (1 - f * g) * _ellipse.GetV0() + f * g * v0;
     return walking_speed;
@@ -312,26 +261,6 @@ void Pedestrian::SetGroup(int group)
     _group = group;
 }
 
-double Pedestrian::GetDistanceToNextTarget() const
-{
-    return (_navLine.DistTo(GetPos()));
-}
-
-void Pedestrian::SetFinalDestination(int finale)
-{
-    _desiredFinalDestination = finale;
-}
-
-int Pedestrian::GetFinalDestination() const
-{
-    return _desiredFinalDestination;
-}
-
-int Pedestrian::GetRouterID() const
-{
-    return _router_id;
-}
-
 double Pedestrian::GetV0UpStairsNorm() const
 {
     return _v0UpStairs;
@@ -369,122 +298,8 @@ double Pedestrian::GetSmoothFactorDownEscalators() const
     return _smoothFactorEscalatorDownStairs;
 }
 
-double Pedestrian::GetElevation() const
-{
-    return _building->GetSubRoom(GetPos())->GetElevation(GetPos());
-}
-
-void Pedestrian::SetPremovementTime(double pretime)
-{
-    if(pretime < _minPremovementTime) {
-        _minPremovementTime = pretime;
-    }
-    _premovement = pretime;
-}
-
-double Pedestrian::GetMinPremovementTime()
-{
-    return _minPremovementTime;
-}
-
-double Pedestrian::GetPremovementTime() const
-{
-    return _premovement;
-}
-
-const Building* Pedestrian::GetBuilding() const
-{
-    return _building;
-}
-
-void Pedestrian::SetBuilding(Building* building)
-{
-    _building = building;
-}
-
-int Pedestrian::GetLastGoalID() const
-{
-    return _lastGoalID;
-}
-
-bool Pedestrian::IsInsideWaitingAreaWaiting(double time) const
-{
-    if(_insideGoal) {
-        auto itr = _building->GetAllGoals().find(_desiredFinalDestination);
-        if(itr != _building->GetAllGoals().end()) {
-            Goal* goal = itr->second;
-            if(auto wa = dynamic_cast<WaitingArea*>(goal)) {
-                return wa->IsWaiting(time, _building);
-            }
-        }
-    }
-    return false;
-}
-
-void Pedestrian::EnterGoal()
-{
-    _insideGoal = true;
-    _lastGoalID = _desiredFinalDestination;
-}
-
-void Pedestrian::LeaveGoal()
-{
-    _insideGoal = false;
-}
-
-bool Pedestrian::IsWaiting() const
-{
-    return _waiting;
-}
-
-void Pedestrian::StartWaiting()
-{
-    _waiting = true;
-}
-
-void Pedestrian::EndWaiting()
-{
-    _waiting = false;
-    _waitingPos.x = std::numeric_limits<double>::max();
-    _waitingPos.y = std::numeric_limits<double>::max();
-}
-
-const Point& Pedestrian::GetWaitingPos() const
-{
-    return _waitingPos;
-}
-
-void Pedestrian::SetWaitingPos(const Point& waitingPos)
-{
-    _waitingPos = waitingPos;
-}
-
-Point Pedestrian::GetLastPosition() const
-{
-    return _lastPosition;
-}
-
-std::string Pedestrian::ToString() const
-{
-    std::string message = fmt::format(
-        FMT_STRING("------> ped {} <-------\n"
-                   ">> Destination [ {:d} ]\n"
-                   ">> Final Destination [ {:d} ]\n"
-                   ">> Position [{:.2f}, {:.2f}]\n"
-                   ">> Velocity [{:.2f}, {:.2f}]  Norm = [{:.2f}]\n"),
-        _uid,
-        _exitIndex,
-        _desiredFinalDestination,
-        GetPos().x,
-        GetPos().y,
-        GetV().x,
-        GetV().y,
-        GetV().Norm());
-
-    return message;
-}
-
 std::ostream& operator<<(std::ostream& out, const Pedestrian& pedestrian)
 {
-    return out << pedestrian.ToString();
+    // TODO(kkratz) Fix
+    return out << "";
 }

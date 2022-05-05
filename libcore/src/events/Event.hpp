@@ -2,7 +2,6 @@
 
 #include "Enum.hpp"
 #include "geometry/Point.hpp"
-#include "geometry/TrainGeometryInterface.hpp"
 
 #include <chrono>
 #include <fmt/format.h>
@@ -48,28 +47,7 @@ public:
     CreatePedestrianEvent(Pedestrian const* agent, std::chrono::nanoseconds min_time);
 };
 
-struct DoorEvent {
-    enum class Type { OPEN, CLOSE, TEMP_CLOSE, RESET };
-    std::chrono::nanoseconds execute_at;
-    Type type;
-    int doorId;
-};
-
-template <>
-DoorEvent::Type from_string<DoorEvent::Type>(const std::string& str);
-
-struct TrainEvent {
-    enum class Type { ARRIVAL, DEPARTURE };
-    std::chrono::nanoseconds execute_at;
-    Type type;
-    TrainType trainType;
-    double trainStartOffset;
-    int trainID;
-    int trackID;
-    bool reversed;
-};
-
-using Event = std::variant<CreatePedestrianEvent, DoorEvent, TrainEvent>;
+using Event = std::variant<CreatePedestrianEvent>;
 
 std::vector<Event> CreateEventsFromAgents(
     std::vector<std::unique_ptr<Pedestrian>> const& agents,

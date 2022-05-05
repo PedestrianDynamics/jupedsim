@@ -17,13 +17,6 @@ void TacticalDecisionSystem::Run(
             const auto vecB = (waypoints[2] - waypoints[1]).Normalized();
             const auto adjustment = (vecA + vecB).Normalized() * -1.2;
             agent->destination = agent->destination + adjustment;
-            // std::cout << "Adjustment " << adjustment << std::endl;
-            // std::cout << "Corner adjusted from " << waypoints[1] << " to " << agent->destination
-            //           << std::endl;
-            // std::cout << "Waypoints:" << std::endl;
-            // for(const auto& p : waypoints) {
-            //     std::cout << p << std::endl;
-            // }
         }
     }
 }

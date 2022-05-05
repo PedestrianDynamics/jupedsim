@@ -102,5 +102,5 @@ public:
     void InitPremovementTime(double mean, double stdv);
     double GetPremovementTime() const;
 
-    Pedestrian* GenerateAgent(Building* building, std::vector<Point>& positions);
+    Pedestrian* GenerateAgent(std::vector<Point>& positions);
 };

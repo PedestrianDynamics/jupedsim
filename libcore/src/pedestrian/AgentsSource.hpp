@@ -77,7 +77,7 @@ public:
      * @see _maxAgents
      * @param ped
      */
-    void GenerateAgentsAndAddToPool(int count, Building* building);
+    void GenerateAgentsAndAddToPool(int count);
 
     /**
      * Generate agents, but do not add them to the pool.
@@ -89,7 +89,7 @@ public:
      * @param count: the number of agents to generate
      * @param building: a pointer to the building object
      */
-    void GenerateAgents(std::vector<Pedestrian*>& peds, int count, Building* building);
+    void GenerateAgents(std::vector<Pedestrian*>& peds, int count);
 
     /**
      * Generate count agents and save them in the vector

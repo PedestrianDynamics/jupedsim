@@ -40,7 +40,6 @@
 #include "TacticalDecisionSystem.hpp"
 #include "general/Configuration.hpp"
 #include "geometry/Building.hpp"
-#include "geometry/GoalManager.hpp"
 #include "geometry/SubRoom.hpp"
 #include "math/OperationalModel.hpp"
 #include "neighborhood/NeighborhoodSearch.hpp"
@@ -66,7 +65,6 @@ private:
     double _fps{1.0};
     unsigned int _seed{8091983};
     NeighborhoodSearch _neighborhoodSearch;
-    std::unique_ptr<Building> _building;
     std::unique_ptr<RoutingEngine> _routingEngine;
     std::unique_ptr<Geometry> _geometry;
     std::vector<std::unique_ptr<Pedestrian>> _agents;
@@ -76,7 +74,6 @@ private:
 public:
     Simulation(
         Configuration* args,
-        std::unique_ptr<Building>&& building,
         std::unique_ptr<Geometry>&& geometry,
         std::unique_ptr<RoutingEngine>&& routingEngine);
 
@@ -106,38 +103,10 @@ public:
 
     const std::vector<std::unique_ptr<Pedestrian>>& Agents() const;
 
-    size_t GetPedsNumber() const;
-
-    void OpenDoor(int doorId);
-
-    void TempCloseDoor(int doorId);
-
-    void CloseDoor(int doorId);
-
-    void ResetDoor(int doorId);
-
-    void ActivateTrain(
-        int trainId,
-        int trackId,
-        const TrainType& type,
-        double startOffset,
-        bool reversed);
-
-    void DeactivateTrain(int trainId, int trackId);
+    size_t AgentCount() const;
 
     /**
      * Read parameters from config.
      */
     bool InitArgs();
-
-    /**
-     * print some statistics about the simulation
-     */
-    void PrintStatistics(double time);
-
-private:
-    /**
-     * Update the route of the pedestrians and reassign rooms, in the case a room change happens
-     */
-    void UpdateLocations();
 };

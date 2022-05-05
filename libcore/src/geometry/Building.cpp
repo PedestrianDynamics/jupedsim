@@ -27,7 +27,6 @@
 #include "Building.hpp"
 
 #include "IO/GeoFileParser.hpp"
-#include "IO/TrainFileParser.hpp"
 #include "NavLineParameters.hpp"
 #include "general/Configuration.hpp"
 #include "general/Filesystem.hpp"
@@ -43,7 +42,6 @@
 #include "geometry/SubRoom.hpp"
 #include "geometry/Transition.hpp"
 #include "geometry/Wall.hpp"
-#include "geometry/helper/CorrectGeometry.hpp"
 #include "neighborhood/NeighborhoodSearch.hpp"
 #include "pedestrian/Pedestrian.hpp"
 
@@ -242,22 +240,9 @@ bool Building::InitGeometry()
     }
 
     InitInsideGoals();
-    InitPlatforms();
     LOG_INFO("Init Geometry successful!!!");
 
     return true;
-}
-
-void Building::InitPlatforms()
-{
-    for(auto& [trackID, track] : _tracks) {
-        LOG_INFO("track {}:", trackID);
-        geometry::helper::SortWalls(track._walls, _trackStarts.at(trackID));
-        for(const auto& wall : track._walls) {
-            LOG_INFO("wall: {}", wall.toString());
-        }
-        LOG_INFO("track start: {}", _trackStarts.at(trackID).toString());
-    }
 }
 
 bool Building::InitInsideGoals()
@@ -475,138 +460,4 @@ void Building::InitGrid()
     }
 
     LOG_INFO("Done with Initializing the grid");
-}
-
-void Building::AddTrainType(int trainID, TrainType type)
-{
-    _trains.emplace(trainID, type);
-}
-
-std::map<int, TrainType> Building::GetTrains() const
-{
-    return _trains;
-}
-
-void Building::AddTrainWallAdded(int trainID, Wall trainAddedWall)
-{
-    auto iter = _trainWallsAdded.find(trainID);
-
-    if(iter != _trainWallsAdded.end()) {
-        iter->second.emplace_back(trainAddedWall);
-    } else {
-        _trainWallsAdded.emplace(trainID, std::vector<Wall>{trainAddedWall});
-    }
-}
-
-void Building::ClearTrainWallsAdded(int trainID)
-{
-    _trainWallsAdded.erase(trainID);
-}
-
-std::optional<std::vector<Wall>> Building::GetTrainWallsAdded(int trainID)
-{
-    auto iter = _trainWallsAdded.find(trainID);
-
-    if(iter != _trainWallsAdded.end()) {
-        return iter->second;
-    }
-
-    return std::nullopt;
-}
-
-void Building::AddTrainWallRemoved(int trainID, Wall trainRemovedWall)
-{
-    auto iter = _trainWallsRemoved.find(trainID);
-
-    if(iter != _trainWallsRemoved.end()) {
-        iter->second.emplace_back(trainRemovedWall);
-    } else {
-        _trainWallsRemoved.emplace(trainID, std::vector<Wall>{trainRemovedWall});
-    }
-}
-
-void Building::ClearTrainWallsRemoved(int trainID)
-{
-    _trainWallsRemoved.erase(trainID);
-}
-
-std::optional<std::vector<Wall>> Building::GetTrainWallsRemoved(int trainID)
-{
-    auto iter = _trainWallsRemoved.find(trainID);
-
-    if(iter != _trainWallsRemoved.end()) {
-        return iter->second;
-    }
-
-    return std::nullopt;
-}
-
-void Building::AddTrainDoorAdded(int trainID, Transition trainAddedDoor)
-{
-    auto iter = _trainDoorsAdded.find(trainID);
-
-    if(iter != _trainDoorsAdded.end()) {
-        iter->second.emplace_back(trainAddedDoor);
-    } else {
-        _trainDoorsAdded.emplace(trainID, std::vector<Transition>{trainAddedDoor});
-    }
-}
-
-void Building::ClearTrainDoorsAdded(int trainID)
-{
-    _trainDoorsAdded.erase(trainID);
-}
-
-std::optional<std::vector<Transition>> Building::GetTrainDoorsAdded(int trainID)
-{
-    auto iter = _trainDoorsAdded.find(trainID);
-
-    if(iter != _trainDoorsAdded.end()) {
-        return iter->second;
-    }
-
-    return std::nullopt;
-}
-
-void Building::AddTrackWall(int trackID, int roomID, int subRoomID, Wall trackWall)
-{
-    auto iter = _tracks.find(trackID);
-
-    if(iter != _tracks.end()) {
-        iter->second._walls.emplace_back(trackWall);
-    } else {
-        Track track{trackID, roomID, subRoomID, std::vector<Wall>{trackWall}};
-        _tracks.emplace(trackID, track);
-    }
-}
-
-std::optional<Track> Building::GetTrack(int trackID) const
-{
-    auto iter = _tracks.find(trackID);
-
-    if(iter != _tracks.end()) {
-        return iter->second;
-    }
-
-    return std::nullopt;
-}
-
-void Building::AddTrackStart(int trackID, Point trackStart)
-{
-    if(_trackStarts.find(trackID) != _trackStarts.end()) {
-        LOG_WARNING("Track start already exist, will be overwritten.");
-    }
-
-    _trackStarts[trackID] = trackStart;
-}
-
-std::optional<Point> Building::GetTrackStart(int trackID) const
-{
-    auto iter = _trackStarts.find(trackID);
-
-    if(iter != _trackStarts.end()) {
-        return iter->second;
-    }
-
-    return std::nullopt;
 }

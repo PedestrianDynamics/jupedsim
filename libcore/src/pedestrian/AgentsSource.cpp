@@ -72,10 +72,10 @@ AgentsSource::~AgentsSource()
 {
 }
 
-void AgentsSource::GenerateAgentsAndAddToPool(int count, Building* building)
+void AgentsSource::GenerateAgentsAndAddToPool(int count)
 {
     std::vector<Pedestrian*> peds;
-    GenerateAgents(peds, count, building);
+    GenerateAgents(peds, count);
     _agents.insert(_agents.begin(), peds.begin(), peds.end());
     _agentsGenerated += count;
 }
@@ -212,7 +212,7 @@ const std::shared_ptr<StartDistribution> AgentsSource::GetStartDistribution() co
     return _startDistribution;
 }
 
-void AgentsSource::GenerateAgents(std::vector<Pedestrian*>& peds, int count, Building* building)
+void AgentsSource::GenerateAgents(std::vector<Pedestrian*>& peds, int count)
 {
     std::vector<Point> emptyPositions;
     // TODO: this vector is empty with purpose!
@@ -222,7 +222,7 @@ void AgentsSource::GenerateAgents(std::vector<Pedestrian*>& peds, int count, Bui
     // TODO: We should reverse the order of points 1 and 2.
     for(int i = 0; i < count; i++) {
         if(GetStartDistribution()) {
-            auto ped = GetStartDistribution()->GenerateAgent(building, emptyPositions);
+            auto ped = GetStartDistribution()->GenerateAgent(emptyPositions);
             peds.push_back(ped);
         } else {
             std::string message =

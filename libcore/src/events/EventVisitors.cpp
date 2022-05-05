@@ -16,9 +16,8 @@ void ProcessEvent(const CreatePedestrianEvent& event, Simulation& sim)
 {
     std::unique_ptr<Pedestrian> ped = std::make_unique<Pedestrian>();
 
-    ped->SetFinalDestination(event._final_destination);
     ped->SetGroup(event._group_id);
-    ped->SetPremovementTime(event._premovement_time);
+    ped->premovementTime = event._premovement_time;
 
     JEllipse E = JEllipse();
     E.SetAv(event._ellipse_a_v);
@@ -41,41 +40,6 @@ void ProcessEvent(const CreatePedestrianEvent& event, Simulation& sim)
     ped->SetSmoothFactorUpStairs(event._smooth_factor_up_stairs);
     ped->SetSmoothFactorDownStairs(event._smooth_factor_down_stairs);
     ped->SetPos(event._position);
-    ped->SetRouterId(event._router_id);
 
     sim.AddAgent(std::move(ped));
-}
-
-void ProcessEvent(const DoorEvent& event, Simulation& sim)
-{
-    switch(event.type) {
-        case DoorEvent::Type::OPEN:
-            sim.OpenDoor(event.doorId);
-            break;
-        case DoorEvent::Type::TEMP_CLOSE:
-            sim.TempCloseDoor(event.doorId);
-            break;
-        case DoorEvent::Type::CLOSE:
-            sim.CloseDoor(event.doorId);
-            break;
-        case DoorEvent::Type::RESET:
-            sim.ResetDoor(event.doorId);
-            break;
-    }
-}
-void ProcessEvent(const TrainEvent& event, Simulation& sim)
-{
-    switch(event.type) {
-        case TrainEvent::Type::ARRIVAL:
-            sim.ActivateTrain(
-                event.trainID,
-                event.trackID,
-                event.trainType,
-                event.trainStartOffset,
-                event.reversed);
-            break;
-        case TrainEvent::Type::DEPARTURE:
-            sim.DeactivateTrain(event.trainID, event.trackID);
-            break;
-    }
 }

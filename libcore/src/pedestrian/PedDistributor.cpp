@@ -154,7 +154,7 @@ bool PedDistributor::Distribute(Building* building) const
             roomID,
             subroomID,
             max_pos);
-        DistributeInSubRoom(N, allpos, dist.get(), building);
+        DistributeInSubRoom(N, allpos, dist.get());
         LOG_INFO("Finished distributing pedestrians");
         nPeds_is += N;
     }
@@ -234,7 +234,7 @@ bool PedDistributor::Distribute(Building* building) const
             //  might conflicts with sources
             dist->SetSubroomID(sr->GetSubRoomID());
             if(akt_anz[is] > 0) {
-                DistributeInSubRoom(akt_anz[is], allFreePosInRoom[is], dist.get(), building);
+                DistributeInSubRoom(akt_anz[is], allFreePosInRoom[is], dist.get());
             }
         }
         nPeds_is += N;
@@ -495,12 +495,11 @@ std::vector<Point> PedDistributor::PossiblePositions(const SubRoom& r) const
 void PedDistributor::DistributeInSubRoom(
     int nAgents,
     std::vector<Point>& positions,
-    StartDistribution* para,
-    Building* building) const
+    StartDistribution* para) const
 {
     // set the pedestrians
     for(int i = 0; i < nAgents; ++i) {
-        Pedestrian* ped = para->GenerateAgent(building, positions);
+        Pedestrian* ped = para->GenerateAgent(positions);
         _agents->emplace_back(ped);
     }
 }

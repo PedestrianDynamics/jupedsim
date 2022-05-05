@@ -86,11 +86,8 @@ public:
     /**
      * Distribute the pedestrians in the Subroom with the given parameters
      */
-    void DistributeInSubRoom(
-        int N,
-        std::vector<Point>& positions,
-        StartDistribution* parameters,
-        Building* building) const;
+    void
+    DistributeInSubRoom(int N, std::vector<Point>& positions, StartDistribution* parameters) const;
 
     /**
      *

@@ -54,14 +54,14 @@ public:
     // This is evaluated by the "operational level"
     Point destination{};
 
+    /// Point in time after this agent gets active.
+    /// TODO(kkratz): Document premovement concept
+    double premovementTime = 0;
+
 private:
     const UID _uid{};
 
-    // generic parameters, independent from models
-    int _exitIndex = -1; // current exit
     int _group = -1;
-    int _desiredFinalDestination = FINAL_DEST_OUT;
-    double _premovement = 0;
 
     // gcfm specific parameters
     double _mass = 1; // Mass: 1
@@ -84,31 +84,12 @@ private:
     double _smoothFactorEscalatorUpStairs = 15;
     /// c in f() and g() for v0 transition on escalators down
     double _smoothFactorEscalatorDownStairs = 15;
-    int _router_id{0};
-    Point _lastE0 = Point(0, 0);
-
-    Line _navLine; // current exit line
-    Point _lastPosition = Point(J_NAN, J_NAN);
 
     int _newOrientationDelay = 0;
-
-    // the current time in the simulation
-    static double _minPremovementTime;
-
-    /// a pointer to the complete building
-    Building* _building = nullptr;
-
-    int _lastGoalID = -1;
-    bool _insideGoal = false;
-    bool _waiting = false;
-    Point _waitingPos =
-        Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
 
 public:
     Pedestrian() = default;
     ~Pedestrian() = default;
-
-    bool InPremovement(double now);
 
     /**
      * Select desired speed based on the type of subroom
@@ -132,13 +113,9 @@ public:
     void SetSmoothFactorEscalatorDownStairs(double c);
     void SetTau(double tau);
     void SetEllipse(const JEllipse& e);
-    void SetRouterId(int id) { _router_id = id; }
 
     double GetT() const;
     void SetT(double T);
-    // TODO: merge this two functions
-    void SetDestination(int i);
-    void SetExitLine(const Line* l);
     void SetDeltaT(double dt);
     // Eigenschaften der Ellipse
     void SetPos(const Point& pos); // setzt x und y-Koordinaten
@@ -153,8 +130,6 @@ public:
     void SetSmoothTurning();
     void IncrementOrientationDelay();
     void SetPhiPed();
-    void SetFinalDestination(int UID);
-    int GetRouterID() const;
 
     double GetV0UpStairsNorm() const;
     double GetV0DownStairsNorm() const;
@@ -170,10 +145,6 @@ public:
     double GetMass() const;
     double GetTau() const;
     const JEllipse& GetEllipse() const;
-    int GetDestination() const;
-    const Line& GetExitLine() const;
-    Point GetLastE0() const;
-    void SetLastE0(Point E0);
     // Eigenschaften der Ellipse
     const Point& GetPos() const;
     const Point& GetV() const;
@@ -191,71 +162,9 @@ public:
     double GetLargerAxis() const;
     /// get axis in the shoulder direction = orthogonal to the walking direction
     double GetSmallerAxis() const;
-    int GetFinalDestination() const;
-
-    double GetDistanceToNextTarget() const;
-
-    /**
-     * The elevation is computed using the plane
-     * equation given in the subroom.
-     * @return the z coordinate of the pedestrian.
-     */
-
-    double GetElevation() const;
-
-    /**
-     * ToString the parameters of this pedestrians.
-     * @param ID, the id of the pedestrian
-     * @param pa, the parameter to display (0 for all parameters)
-     */
-    std::string ToString() const;
-
-    /***
-     * Set/Get the time after which this pedestrian will start taking actions.
-     */
-    void SetPremovementTime(double time);
-
-    /***
-     * Set/Get the time after which this pedestrian will start taking actions.
-     */
-    double GetPremovementTime() const;
-
-    /**
-     * Get min Premovement time of all pedestrians
-     */
-    static double GetMinPremovementTime();
 
     int GetGroup() const;
     void SetGroup(int group);
-
-    /**
-     * Set/Get the Building object
-     */
-    const Building* GetBuilding() const;
-
-    /**
-     * Set/Get the Building object
-     */
-    void SetBuilding(Building* building);
-
-    void EnterGoal();
-
-    void LeaveGoal();
-
-    int GetLastGoalID() const;
-
-    bool IsInsideWaitingAreaWaiting(double time) const;
-
-    const Point& GetWaitingPos() const;
-
-    void SetWaitingPos(const Point& waitingPos);
-
-    bool IsWaiting() const;
-
-    void StartWaiting();
-    void EndWaiting();
-
-    Point GetLastPosition() const;
 };
 
 std::ostream& operator<<(std::ostream& out, const Pedestrian& pedestrian);

@@ -25,10 +25,8 @@
  *
  *
  **/
-#include "IO/EventFileParser.hpp"
 #include "IO/GeoFileParser.hpp"
 #include "IO/IniFileParser.hpp"
-#include "IO/TrainFileParser.hpp"
 #include "IteratorPair.hpp"
 #include "ResultHandling.hpp"
 #include "RoutingEngine.hpp"
@@ -79,15 +77,13 @@ int main(int argc, char** argv)
 
         auto config = ParseIniFile(a.IniFilePath());
         auto building = std::make_unique<Building>(&config);
-        auto* building_ptr = building.get();
         auto agents = CreateAllPedestrians(&config, building.get(), config.tMax);
         auto geometry = ParseGeometryXml(config.projectRootDir / config.geometryFile);
         Simulation sim(
             &config,
-            std::move(building),
             std::move(geometry),
             std::make_unique<NavMeshRoutingEngine>(
-                NavMeshRoutingEngine::MakeFromBuilding(*building_ptr)));
+                NavMeshRoutingEngine::MakeFromBuilding(*building)));
         EventManager manager;
 
         size_t frame = 0;
@@ -104,52 +100,6 @@ int main(int argc, char** argv)
             ++frame;
         }
 
-        // TODO(kkratz): Right now door state is simply copied over from the buildings
-        // state because initial door state is described in the inifile.
-        // I want to redesign this so that all specified doors are open and can be closed
-        // before frame 0 with an event that takes place at t0.
-        // (e.g. what the code below is already doing)
-        for(const auto& [id, t] : building_ptr->GetAllTransitions()) {
-            auto type = DoorEvent::Type::OPEN;
-            if(t->IsClose()) {
-                type = DoorEvent::Type::CLOSE;
-            }
-            if(t->IsTempClose()) {
-                type = DoorEvent::Type::TEMP_CLOSE;
-            }
-            manager.AddEvent(DoorEvent{std::chrono::nanoseconds(0), type, id});
-        }
-
-        if(config.eventFile) {
-            const auto door_events = EventFileParser::ParseDoorEvents(*config.eventFile);
-            for(auto&& evt : door_events) {
-                manager.AddEvent(evt);
-            }
-        }
-        if(config.scheduleFile) {
-            const auto train_door_events =
-                EventFileParser::ParseSchedule(config.scheduleFile.value());
-            for(auto&& evt : train_door_events) {
-                manager.AddEvent(evt);
-            }
-            const auto groupMaxAgents =
-                EventFileParser::ParseMaxAgents(config.scheduleFile.value());
-            for(auto const& [transID, maxAgents] : groupMaxAgents) {
-                building_ptr->GetTransition(transID)->SetMaxDoorUsage(maxAgents);
-            }
-        }
-        if(!config.trainTimeTableFile.empty() && !config.trainTypeFile.empty()) {
-            // TODO(kkratz) Have another look at the error handling
-            auto trainTypes = TrainFileParser::ParseTrainTypes(config.trainTypeFile);
-            const auto timeTableContents =
-                TrainFileParser::ParseTrainTimeTable(trainTypes, config.trainTimeTableFile);
-            for(auto&& evt : timeTableContents.events) {
-                manager.AddEvent(evt);
-            }
-            for(auto&& [k, v] : timeTableContents.trains) {
-                building_ptr->AddTrainType(k, v);
-            }
-        }
         if(!sim.InitArgs()) {
             LOG_ERROR("Could not start simulation. Check the log for prior errors");
             return EXIT_FAILURE;
@@ -184,13 +134,6 @@ int main(int argc, char** argv)
             if(0 == sim.Clock().Iteration() % writeInterval) {
                 writer->WriteFrame(sim.Clock().Iteration() / writeInterval, sim.Agents());
             }
-
-            if(sim.Clock().Iteration() % 1000 == 0) {
-                if(config.showStatistics) {
-                    LOG_INFO("Update door statistics at t={:.2f}", sim.Clock().ElapsedTime());
-                    sim.PrintStatistics(sim.Clock().ElapsedTime());
-                }
-            }
         }
         evacTime = sim.Clock().ElapsedTime();
 
@@ -198,13 +141,8 @@ int main(int argc, char** argv)
         time_t endtime{};
         time(&endtime);
 
-        // some statistics output
-        if(config.showStatistics) {
-            sim.PrintStatistics(evacTime); // negative means end of simulation
-        }
-
-        if(sim.GetPedsNumber()) {
-            LOG_WARNING("Pedestrians not evacuated [{}]", sim.GetPedsNumber());
+        if(sim.AgentCount()) {
+            LOG_WARNING("Pedestrians not evacuated [{}]", sim.AgentCount());
         }
 
         const double execTime = difftime(endtime, starttime);

@@ -103,9 +103,6 @@ void GCFMModel::ApplyUpdate(const PedestrianUpdate& update, Pedestrian& agent) c
 {
     agent.SetV0(update.v0);
     agent.IncrementOrientationDelay();
-    if(update.lastE0) {
-        agent.SetLastE0(*update.lastE0);
-    }
     if(update.position) {
         agent.SetPos(*update.position);
     }
@@ -118,13 +115,10 @@ void GCFMModel::ApplyUpdate(const PedestrianUpdate& update, Pedestrian& agent) c
 inline Point
 GCFMModel::ForceDriv(const Pedestrian* ped, Point target, PedestrianUpdate& update) const
 {
-    if(ped->IsWaiting()) {
-        update.waitingPos = target;
-    }
     Point F_driv;
-    const Point& pos = ped->GetPos();
-    const double dist = ped->GetExitLine().DistTo(pos);
-    update.lastE0 = target - pos;
+    const auto pos = ped->GetPos();
+    const auto dest = ped->destination;
+    const auto dist = (dest - pos).Norm();
     if(dist > J_EPS_GOAL) {
         const Point v0 = ped->GetV0(target);
         update.v0 = v0;
