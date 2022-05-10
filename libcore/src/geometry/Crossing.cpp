@@ -45,59 +45,51 @@ Crossing::Crossing()
     _DN = 1;
     _partialDoorUsage = 0;
     _closingTime = 0;
-
-    _state = DoorState::OPEN;
 }
 
 bool Crossing::IsExit() const
 {
+    assert(false);
     return false;
 }
 
 bool Crossing::IsOpen() const
 {
-    return _state == DoorState::OPEN;
+    assert(false);
+    return false;
 }
 
 bool Crossing::IsClose() const
 {
-    return _state == DoorState::CLOSE;
+    assert(false);
+    return false;
 }
 
 bool Crossing::IsTempClose() const
 {
-    return _state == DoorState::TEMP_CLOSE;
+    assert(false);
+    return false;
 }
 
 bool Crossing::IsTransition() const
 {
+    assert(false);
     return false;
 }
 
 void Crossing::Close(bool event)
 {
-    if(_state != DoorState::CLOSE) {
-        _state = DoorState::CLOSE;
-        _closeByEvent = event;
-    } else {
-        _closeByEvent = (event || _closeByEvent);
-    }
+    assert(false);
 }
 
 void Crossing::TempClose(bool event)
 {
-    if(_state != DoorState::TEMP_CLOSE) {
-        _state = DoorState::TEMP_CLOSE;
-        _closeByEvent = event;
-    } else {
-        _closeByEvent = (event || _closeByEvent);
-    }
+    assert(false);
 }
 
 void Crossing::Open(bool)
 {
-    _state = DoorState::OPEN;
-    _closeByEvent = false;
+    assert(false);
 }
 
 bool Crossing::IsInSubRoom(int subroomID) const
@@ -349,32 +341,10 @@ void Crossing::UpdateTemporaryState(double dt)
     }
 }
 
-DoorState Crossing::GetState() const
-{
-    return _state;
-}
-
-void Crossing::SetState(DoorState state)
-{
-    Crossing::_state = state;
-}
-
 std::string Crossing::toString() const
 {
     std::stringstream tmp;
-
     tmp << this->GetPoint1().toString() << "--" << this->GetPoint2().toString();
-    switch(_state) {
-        case DoorState::OPEN:
-            tmp << " open";
-            break;
-        case DoorState::CLOSE:
-            tmp << " close";
-            break;
-        case DoorState::TEMP_CLOSE:
-            tmp << " temp_close";
-            break;
-    }
     return tmp.str();
 }
 

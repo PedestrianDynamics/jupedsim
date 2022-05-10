@@ -28,9 +28,9 @@
  **/
 #include "AgentsSourcesManager.hpp"
 
+#include "NeighborhoodSearch.hpp"
 #include "Pedestrian.hpp"
 #include "geometry/Building.hpp"
-#include "neighborhood/NeighborhoodSearch.hpp"
 #include "voronoi-boost/VoronoiPositionGenerator.hpp"
 
 #include <Logger.hpp>

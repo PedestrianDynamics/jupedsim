@@ -21,13 +21,11 @@
 #include "IniFileParser.hpp"
 
 #include "ConvexPolygon.hpp"
-#include "NavLineFileParser.hpp"
+#include "GCFMModel.hpp"
+#include "Macros.hpp"
 #include "OperationalModelType.hpp"
 #include "OutputHandler.hpp"
-#include "general/Filesystem.hpp"
-#include "general/Macros.hpp"
-#include "math/GCFMModel.hpp"
-#include "math/VelocityModel.hpp"
+#include "VelocityModel.hpp"
 
 #include <Logger.hpp>
 #include <filesystem>
@@ -35,6 +33,8 @@
 #include <stdexcept>
 #include <string>
 #include <tinyxml.h>
+
+namespace fs = std::filesystem;
 
 class IniFileParser
 {

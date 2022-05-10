@@ -103,10 +103,17 @@ set(CMAKE_AUTORCC ON)
 find_package(glm REQUIRED CONFIG)
 # Silence CGAL CMake warning. No example data for CGAL will be loaded anyways
 set(CGAL_DATA_DIR "none")
+set(WITH_CGAL_ImageIO OFF)
+set(WITH_CGAL_Qt5 OFF)
+if(UNIX)
+    set(CGAL_DISABLE_GMP ON)
+endif()
 find_package(CGAL 5.4 REQUIRED)
 find_library(POLY2TRI_LIB poly2tri)
 if(POLY2TRI_LIB-NOTFOUND)
     message(FATAL_ERROR "Cannot find libpoly2tri.a")
+else()
+    message(STATUS "Found poly2tri: ${POLY2TRI_LIB}")
 endif()
 find_path(POLY2TRI_HEADER poly2tri.h
     PATH_SUFFIXES poly2tri
@@ -123,7 +130,6 @@ target_include_directories(poly2tri INTERFACE
 )
 
 if(BUILD_TESTS)
-    find_package(Catch2 REQUIRED)
     find_package(GTest 1.11 REQUIRED CONFIG)
 endif()
 # remaining in-tree dependencies
@@ -252,12 +258,12 @@ if(BUILD_TESTS)
         COMMENT "Running unit tests"
         COMMAND echo "GTest"
         COMMAND $<TARGET_FILE:libcore-tests>
-                --gtest_output=xml:result-unittests.xml
-        COMMAND echo "Catch2"
-        COMMAND $<TARGET_FILE:catch-unittests>
-                --reporter junit
-                --out=result-unittests2.xml
-        DEPENDS libcore-tests catch-unittests
+                --gtest_output=xml:result-libcore-unittests.xml
+        COMMAND $<TARGET_FILE:libsimulator-tests>
+                --gtest_output=xml:result-libsimulator-unittests.xml
+        COMMAND $<TARGET_FILE:libshared-tests>
+                --gtest_output=xml:result-libshared-unittests.xml
+        DEPENDS libcore-tests libshared-tests libsimulator-tests
     )
 endif()
 
@@ -277,6 +283,7 @@ endif()
 add_subdirectory(jpscore)
 add_subdirectory(jpsvis)
 add_subdirectory(libcore)
+add_subdirectory(libsimulator)
 add_subdirectory(libshared)
 
 ################################################################################

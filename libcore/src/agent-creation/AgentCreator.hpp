@@ -1,8 +1,8 @@
 #pragma once
 
+#include "Pedestrian.hpp"
 #include "general/Configuration.hpp"
 #include "geometry/Building.hpp"
-#include "pedestrian/Pedestrian.hpp"
 
 #include <map>
 #include <memory>

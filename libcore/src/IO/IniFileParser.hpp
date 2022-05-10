@@ -18,8 +18,8 @@
 #pragma once
 
 #include "Area.hpp"
+#include "Point.hpp"
 #include "general/Configuration.hpp"
-#include "geometry/Point.hpp"
 
 #include <tinyxml.h>
 

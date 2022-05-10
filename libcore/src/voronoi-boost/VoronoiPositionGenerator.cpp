@@ -10,12 +10,12 @@ static int global_count = 0;
 
 #include "VoronoiPositionGenerator.hpp"
 // check if all includes are necessary
+#include "Pedestrian.hpp"
 #include "geometry/Building.hpp"
 #include "geometry/Transition.hpp"
 #include "geometry/Wall.hpp"
 #include "pedestrian/AgentsSource.hpp"
 #include "pedestrian/AgentsSourcesManager.hpp"
-#include "pedestrian/Pedestrian.hpp"
 #include "pedestrian/StartDistribution.hpp"
 
 #include <Logger.hpp>

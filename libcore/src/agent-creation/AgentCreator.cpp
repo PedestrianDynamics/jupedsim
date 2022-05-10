@@ -1,10 +1,10 @@
 #include "AgentCreator.hpp"
 
+#include "Pedestrian.hpp"
 #include "SimulationClock.hpp"
 #include "geometry/Building.hpp"
 #include "pedestrian/AgentsSourcesManager.hpp"
 #include "pedestrian/PedDistributor.hpp"
-#include "pedestrian/Pedestrian.hpp"
 
 #include <iterator>
 #include <map>

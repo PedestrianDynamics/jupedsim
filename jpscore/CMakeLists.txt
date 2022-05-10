@@ -12,6 +12,7 @@ target_compile_options(jpscore PRIVATE
 target_link_libraries(jpscore
     core
     shared
+    simulator
     Threads::Threads
     spdlog::spdlog
     fmt::fmt

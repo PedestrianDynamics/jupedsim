@@ -26,8 +26,7 @@
  **/
 #pragma once
 
-#include "general/Filesystem.hpp"
-
+#include <filesystem>
 #include <fstream>
 #include <string>
 
@@ -44,7 +43,7 @@ private:
     std::ofstream _pfp;
 
 public:
-    FileHandler(const fs::path& path);
+    FileHandler(const std::filesystem::path& path);
     ~FileHandler() override;
     void Write(const std::string& str) override;
 };

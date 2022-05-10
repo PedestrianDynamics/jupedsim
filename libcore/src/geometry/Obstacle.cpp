@@ -28,9 +28,9 @@
 
 #include "IO/OutputHandler.hpp"
 #include "Line.hpp"
+#include "Macros.hpp"
 #include "Point.hpp"
 #include "Wall.hpp"
-#include "general/Macros.hpp"
 
 #include <Logger.hpp>
 #include <cstdlib>

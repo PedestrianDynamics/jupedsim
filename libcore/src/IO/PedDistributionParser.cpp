@@ -21,10 +21,11 @@
 #include "PedDistributionParser.hpp"
 
 #include "IO/OutputHandler.hpp"
-#include "general/Filesystem.hpp"
 
 #include <Logger.hpp>
 #include <cstdarg> // va_start and va_end
+
+namespace fs = std::filesystem;
 
 PedDistributionParser::PedDistributionParser(const Configuration* configuration)
     : _configuration(configuration)

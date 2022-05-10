@@ -25,8 +25,8 @@
  **/
 #pragma once
 
-#include "general/Macros.hpp"
-#include "geometry/Point.hpp"
+#include "Macros.hpp"
+#include "Point.hpp"
 
 #include <algorithm>
 #include <memory>
