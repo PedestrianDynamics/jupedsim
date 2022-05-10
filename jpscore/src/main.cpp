@@ -25,12 +25,17 @@
  *
  *
  **/
+#include "GCFMModel.hpp"
 #include "IO/GeoFileParser.hpp"
 #include "IO/IniFileParser.hpp"
+#include "IO/Trajectories.hpp"
 #include "IteratorPair.hpp"
+#include "NavMeshRoutingFactory.hpp"
+#include "OperationalModel.hpp"
 #include "ResultHandling.hpp"
 #include "RoutingEngine.hpp"
 #include "Simulation.hpp"
+#include "VelocityModel.hpp"
 #include "agent-creation/AgentCreator.hpp"
 #include "events/Event.hpp"
 #include "events/EventManager.hpp"
@@ -49,6 +54,27 @@
 #include <fmt/format.h>
 #include <iostream>
 #include <iterator>
+#include <memory>
+
+std::unique_ptr<OperationalModel>
+CreateFromType(OperationalModelType type, const Configuration& config)
+{
+    switch(type) {
+        case OperationalModelType::GCFM:
+            return std::make_unique<GCFMModel>(
+                config.nuPed,
+                config.nuWall,
+                config.distEffMaxPed,
+                config.distEffMaxWall,
+                config.intPWidthPed,
+                config.intPWidthWall,
+                config.maxFPed,
+                config.maxFWall);
+        case OperationalModelType::VELOCITY:
+            return std::make_unique<VelocityModel>(
+                config.aPed, config.dPed, config.aWall, config.dWall);
+    }
+}
 
 int main(int argc, char** argv)
 {
@@ -80,10 +106,11 @@ int main(int argc, char** argv)
         auto agents = CreateAllPedestrians(&config, building.get(), config.tMax);
         auto geometry = ParseGeometryXml(config.projectRootDir / config.geometryFile);
         Simulation sim(
-            &config,
+            CreateFromType(config.operationalModel, config),
             std::move(geometry),
-            std::make_unique<NavMeshRoutingEngine>(
-                NavMeshRoutingEngine::MakeFromBuilding(*building)));
+            std::make_unique<NavMeshRoutingEngine>(MakeFromBuilding(*building)),
+            config.areas,
+            config.dT);
         EventManager manager;
 
         size_t frame = 0;
@@ -114,9 +141,9 @@ int main(int argc, char** argv)
             config.optionalOutput,
             std::make_unique<FileHandler>(config.trajectoriesFile),
             config.agentColorMode);
-        writer->WriteHeader(num_agents_in_simulation, sim.Fps(), config, 0);
+        writer->WriteHeader(num_agents_in_simulation, config.fps, config, 0);
 
-        const int writeInterval = static_cast<int>((1. / sim.Fps()) / sim.Clock().dT() + 0.5);
+        const int writeInterval = static_cast<int>((1. / config.fps) / sim.Clock().dT() + 0.5);
         LOG_INFO("Starting simulation");
         while((!sim.Agents().empty() || manager.HasEventsAfter(sim.Clock())) &&
               sim.Clock().ElapsedTime() < config.tMax) {

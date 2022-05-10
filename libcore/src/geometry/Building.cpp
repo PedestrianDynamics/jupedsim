@@ -27,23 +27,21 @@
 #include "Building.hpp"
 
 #include "IO/GeoFileParser.hpp"
-#include "NavLineParameters.hpp"
+#include "Line.hpp"
+#include "Macros.hpp"
+#include "NeighborhoodSearch.hpp"
+#include "Pedestrian.hpp"
+#include "Point.hpp"
 #include "general/Configuration.hpp"
-#include "general/Filesystem.hpp"
-#include "general/Macros.hpp"
 #include "geometry/Building.hpp"
 #include "geometry/Crossing.hpp"
 #include "geometry/Goal.hpp"
 #include "geometry/Hline.hpp"
-#include "geometry/Line.hpp"
 #include "geometry/Obstacle.hpp"
-#include "geometry/Point.hpp"
 #include "geometry/Room.hpp"
 #include "geometry/SubRoom.hpp"
 #include "geometry/Transition.hpp"
 #include "geometry/Wall.hpp"
-#include "neighborhood/NeighborhoodSearch.hpp"
-#include "pedestrian/Pedestrian.hpp"
 
 #include <Logger.hpp>
 #include <algorithm>

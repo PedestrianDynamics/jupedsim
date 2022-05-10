@@ -26,9 +26,8 @@
  **/
 #pragma once
 
-#include "DoorState.hpp"
 #include "Hline.hpp"
-#include "pedestrian/Pedestrian.hpp"
+#include "Pedestrian.hpp"
 
 class SubRoom;
 
@@ -90,11 +89,6 @@ private:
      * Timestamp and number of pedestrians who have passed the door.
      */
     std::string _flowAtExit;
-
-    /**
-     * Current state of the door.
-     */
-    DoorState _state;
 
     /**
      * The closing operations was conducted by an event which always has priority.
@@ -328,18 +322,6 @@ public:
      * @return true, if a change to door state was made.
      */
     bool RegulateFlow(double time);
-
-    /**
-     * Returns the state of the door.
-     * @return state of the door.
-     */
-    [[nodiscard]] DoorState GetState() const;
-
-    /**
-     * Sets the state of the door.
-     * @param state state the door should be set to.
-     */
-    void SetState(DoorState state);
 
     /**
      * Returns a std::string representation of the door.

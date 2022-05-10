@@ -27,10 +27,9 @@
 #include "PedDistributor.hpp"
 
 #include "IO/PedDistributionParser.hpp"
-#include "general/Filesystem.hpp"
+#include "Pedestrian.hpp"
 #include "geometry/SubRoom.hpp"
 #include "geometry/Wall.hpp"
-#include "pedestrian/Pedestrian.hpp"
 
 #include <Logger.hpp>
 #include <cmath>

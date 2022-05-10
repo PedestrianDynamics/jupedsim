@@ -1,7 +1,7 @@
 #include "Event.hpp"
 
+#include "Pedestrian.hpp"
 #include "Simulation.hpp"
-#include "pedestrian/Pedestrian.hpp"
 
 #include <chrono>
 #include <memory>

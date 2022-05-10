@@ -28,7 +28,7 @@
 #pragma once
 
 #include "Goal.hpp"
-#include "pedestrian/Pedestrian.hpp"
+#include "Pedestrian.hpp"
 
 #include <cstdio>
 #include <map>

@@ -112,7 +112,7 @@ void patchPath(TiXmlDocument& doc, const std::vector<std::string>& xmlPathToPatc
         return;
     }
     const fs::path p{text->Value()};
-    text->SetValue(p.string().c_str());
+    text->SetValue(p.filename().string().c_str());
 }
 
 std::optional<fs::path>

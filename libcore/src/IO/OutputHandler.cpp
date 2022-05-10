@@ -26,14 +26,13 @@
  **/
 #include "OutputHandler.hpp"
 
-#include <filesystem>
 #include <fmt/format.h>
 #include <stdexcept>
 
-FileHandler::FileHandler(const fs::path& path)
+FileHandler::FileHandler(const std::filesystem::path& path)
 {
     if(path.has_parent_path()) {
-        fs::create_directories(path.parent_path());
+        std::filesystem::create_directories(path.parent_path());
     }
     _pfp.open(path.string());
     if(!_pfp.good()) {

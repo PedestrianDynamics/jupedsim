@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Enum.hpp"
-#include "geometry/Point.hpp"
+#include "Point.hpp"
 
 #include <chrono>
 #include <fmt/format.h>

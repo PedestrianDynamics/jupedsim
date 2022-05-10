@@ -29,13 +29,11 @@
 #include "Goal.hpp"
 #include "Hline.hpp"
 #include "Line.hpp"
-#include "NavLineParameters.hpp"
+#include "NeighborhoodSearch.hpp"
 #include "Obstacle.hpp"
 #include "Room.hpp"
 #include "Transition.hpp"
 #include "Wall.hpp"
-#include "general/Filesystem.hpp"
-#include "neighborhood/NeighborhoodSearch.hpp"
 
 #include <optional>
 

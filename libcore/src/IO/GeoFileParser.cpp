@@ -20,7 +20,6 @@
 //
 #include "GeoFileParser.hpp"
 
-#include "general/Filesystem.hpp"
 #include "geometry/GeometryReader.hpp"
 #include "geometry/SubRoom.hpp"
 #include "geometry/SubroomType.hpp"
@@ -28,8 +27,11 @@
 #include "geometry/Wall.hpp"
 
 #include <Logger.hpp>
+#include <filesystem>
 #include <stdexcept>
 #include <tinyxml.h>
+
+namespace fs = std::filesystem;
 
 GeoFileParser::GeoFileParser(Configuration* configuration) : _configuration(configuration)
 {
@@ -429,20 +431,6 @@ bool GeoFileParser::parseDoorNode(TiXmlElement* xDoor, int id, Building* buildin
     LOG_INFO(">> ID: {}", id);
     //------------------ state
     std::string stateStr = xmltoa(xDoor->Attribute("state"), "open");
-    DoorState state = from_string<DoorState>(stateStr);
-
-    // store transition in a map and call getTransition/getCrossing
-    switch(state) {
-        case DoorState::OPEN:
-            building->GetTransition(id)->Open(true);
-            break;
-        case DoorState::CLOSE:
-            building->GetTransition(id)->Close(true);
-            break;
-        case DoorState::TEMP_CLOSE:
-            building->GetTransition(id)->TempClose(true);
-            break;
-    }
 
     LOG_INFO(">> state: {}", stateStr);
 
@@ -943,36 +931,10 @@ std::unique_ptr<Geometry> ParseGeometryXml(const std::filesystem::path& geometry
         }
     }
 
-    auto parseDoor = [](auto& e, auto& builder) {
-        const auto* id_attribute = e.Attribute("id");
-        if(id_attribute == nullptr) {
-            throw std::runtime_error("transition id attribute missing");
-        }
-        const auto id = xmltoi(id_attribute, -1);
-        if(id == -1) {
-            throw std::runtime_error("transition id attribute not an integer");
-        }
-        const auto* vertex1 = e.FirstChildElement("vertex");
-        if(vertex1 == nullptr) {
-            return;
-        }
-        const auto* vertex2 = vertex1->NextSiblingElement("vertex");
-        if(vertex2 == nullptr) {
-            return;
-        }
-        const double x1 = xmltof(vertex1->Attribute("px"));
-        const double y1 = xmltof(vertex1->Attribute("py"));
-        const double x2 = xmltof(vertex2->Attribute("px"));
-        const double y2 = xmltof(vertex2->Attribute("py"));
-
-        builder.AddDoor(x1, y1, x2, y2, id);
-    };
-
     if(const auto* transitions = root->FirstChild("transitions"); transitions != nullptr) {
         for(const auto* transition = transitions->FirstChildElement("transition");
             transition != nullptr;
             transition = transition->NextSiblingElement("transition")) {
-            parseDoor(*transition, builder);
         }
     }
 

@@ -20,10 +20,10 @@
  **/
 #pragma once
 
+#include "Macros.hpp"
 #include "OutputHandler.hpp"
+#include "Pedestrian.hpp"
 #include "general/Configuration.hpp"
-#include "general/Macros.hpp"
-#include "pedestrian/Pedestrian.hpp"
 
 #include <map>
 #include <memory>

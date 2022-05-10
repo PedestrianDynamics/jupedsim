@@ -26,9 +26,9 @@
  **/
 #pragma once
 
+#include "DTriangulation.hpp"
+#include "Macros.hpp"
 #include "SubroomType.hpp"
-#include "general/Macros.hpp"
-#include "geometry/DTriangulation.hpp"
 
 #include <boost/geometry.hpp>
 #include <boost/polygon/polygon.hpp>

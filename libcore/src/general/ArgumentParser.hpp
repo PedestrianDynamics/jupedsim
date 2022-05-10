@@ -24,11 +24,12 @@
  **/
 #pragma once
 
-#include "general/Filesystem.hpp"
+#include <Logger.hpp>
 
 #include <CLI/CLI.hpp>
 #include <CLI/Option.hpp>
-#include <Logger.hpp>
+
+#include <filesystem>
 #include <tuple>
 #include <vector>
 
@@ -42,7 +43,7 @@ private:
         {"error", Logging::Level::Error},
         {"off", Logging::Level::Off}};
 
-    fs::path iniFilePath{"ini.xml"};
+    std::filesystem::path iniFilePath{"ini.xml"};
     Logging::Level logLevel{Logging::Level::Info};
     bool printVersionAndExit{false};
 
@@ -63,7 +64,7 @@ public:
     enum class Execution { CONTINUE, ABORT };
 
     /// @return inifile argument. If none was parsed this defaults to 'ini.xml'
-    const fs::path& IniFilePath() const;
+    const std::filesystem::path& IniFilePath() const;
 
     /// @return desired log level. If none was parsed this defauls to 'Info'
     Logging::Level LogLevel() const;

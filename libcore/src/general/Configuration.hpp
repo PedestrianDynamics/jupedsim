@@ -20,7 +20,6 @@
 #include "Area.hpp"
 #include "Macros.hpp"
 #include "OperationalModelType.hpp"
-#include "general/Filesystem.hpp"
 #include "pedestrian/AgentsParameters.hpp"
 
 #include <cstdlib>
@@ -56,21 +55,21 @@ struct Configuration {
     double wallAvoidDistance{0.4};
     bool useWallAvoidance{true};
     bool hasDirectionalEscalators{false};
-    fs::path trajectoriesFile{"trajectories.txt"};
-    fs::path originalTrajectoriesFile{"trajectories.txt"};
-    fs::path logFile{"log.txt"};
-    fs::path iniFile{};
-    fs::path geometryFile{};
-    fs::path transitionFile{};
-    fs::path goalFile{};
-    fs::path sourceFile{};
-    fs::path trafficContraintFile{};
-    std::optional<fs::path> eventFile{};
-    std::optional<fs::path> scheduleFile{};
-    fs::path trainTypeFile{};
-    fs::path trainTimeTableFile{};
-    fs::path projectRootDir{"."};
-    fs::path outputPath{fs::absolute("results")};
+    std::filesystem::path trajectoriesFile{"trajectories.txt"};
+    std::filesystem::path originalTrajectoriesFile{"trajectories.txt"};
+    std::filesystem::path logFile{"log.txt"};
+    std::filesystem::path iniFile{};
+    std::filesystem::path geometryFile{};
+    std::filesystem::path transitionFile{};
+    std::filesystem::path goalFile{};
+    std::filesystem::path sourceFile{};
+    std::filesystem::path trafficContraintFile{};
+    std::optional<std::filesystem::path> eventFile{};
+    std::optional<std::filesystem::path> scheduleFile{};
+    std::filesystem::path trainTypeFile{};
+    std::filesystem::path trainTimeTableFile{};
+    std::filesystem::path projectRootDir{"."};
+    std::filesystem::path outputPath{std::filesystem::absolute("results")};
     bool showStatistics{false};
     std::map<int, std::shared_ptr<AgentsParameters>> agentsParameters{};
     std::set<OptionalOutput> optionalOutput{};

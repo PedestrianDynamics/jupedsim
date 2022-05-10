@@ -28,7 +28,7 @@
 #include "WaitingArea.hpp"
 
 #include "Building.hpp"
-#include "pedestrian/Pedestrian.hpp"
+#include "Pedestrian.hpp"
 
 #include <sstream>
 

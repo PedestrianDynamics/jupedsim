@@ -29,7 +29,7 @@
  **/
 #include "AgentsParameters.hpp"
 
-#include "general/Macros.hpp"
+#include "Macros.hpp"
 
 AgentsParameters::AgentsParameters(int id, int seed)
 {

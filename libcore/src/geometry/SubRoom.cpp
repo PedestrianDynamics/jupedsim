@@ -29,11 +29,11 @@
 #include "Hline.hpp"
 #include "Line.hpp"
 #include "Obstacle.hpp"
+#include "Pedestrian.hpp"
 #include "Point.hpp"
 #include "Transition.hpp"
 #include "WaitingArea.hpp"
 #include "Wall.hpp"
-#include "pedestrian/Pedestrian.hpp"
 
 #include <Logger.hpp>
 #include <cmath>

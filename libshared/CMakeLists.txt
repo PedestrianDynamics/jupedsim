@@ -2,10 +2,15 @@
 # Build lib
 ################################################################################
 add_library(shared STATIC
+    src/IteratorPair.hpp
     src/Logger.cpp
     src/Logger.hpp
     src/ResultHandling.cpp
     src/ResultHandling.hpp
+    src/UniqueID.hpp
+    src/Macros.hpp
+    src/Enum.hpp
+    src/HashCombine.hpp
 )
 
 target_link_libraries(shared PUBLIC
@@ -31,6 +36,7 @@ set_property(TARGET shared PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 if(BUILD_TESTS)
     add_executable(libshared-tests
         test/ResultHandlingTest.cpp
+        test/TestUniqueID.cpp
     )
     target_link_libraries(libshared-tests PRIVATE
         GTest::gtest

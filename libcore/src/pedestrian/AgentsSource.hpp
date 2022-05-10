@@ -28,7 +28,7 @@
  **/
 #pragma once
 
-#include "pedestrian/Pedestrian.hpp"
+#include "Pedestrian.hpp"
 
 #include <memory>
 #include <string>

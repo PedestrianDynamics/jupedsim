@@ -26,7 +26,7 @@
 
 #include <Logger.hpp>
 
-const fs::path& ArgumentParser::IniFilePath() const
+const std::filesystem::path& ArgumentParser::IniFilePath() const
 {
     return iniFilePath;
 }

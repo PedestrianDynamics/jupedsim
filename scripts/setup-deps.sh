@@ -4,7 +4,6 @@ set -ex
 googletest_version="1.11.0"
 fmt_version="8.0.1"
 spdlog_version="1.9.2"
-catch2_version="2.13.7"
 cli11_version="2.1.2"
 boost_version="1.78.0"
 # GLM has removed the cmake install target in 9.9.9.6 for unknown reasons
@@ -127,26 +126,6 @@ function setup_spdlog {
     rm -rf ${temp_folder}
 }
 
-function setup_catch2 {
-    root=$(pwd)
-    temp_folder=$(mktemp -d)
-    cd ${temp_folder}
-
-    wget https://github.com/catchorg/Catch2/archive/v${catch2_version}.tar.gz
-    tar xf v${catch2_version}.tar.gz
-    cd Catch2-${catch2_version}
-    mkdir build
-    cd build
-    cmake .. \
-        -DBUILD_TESTING=OFF      \
-        -DCMAKE_PREFIX_PATH=${install_path} \
-        -DCMAKE_INSTALL_PREFIX=${install_path}
-    cmake --build . --target install -- -j${CPUS}
-
-    cd ${root}
-    rm -rf ${temp_folder}
-}
-
 function setup_cli11 {
     root=$(pwd)
     temp_folder=$(mktemp -d)
@@ -245,7 +224,6 @@ setup_boost
 setup_googletest
 setup_fmt
 setup_spdlog
-setup_catch2
 setup_cli11
 setup_glm
 setup_poly2tri
