@@ -1,3 +1,4 @@
+#! /usr/bin/env python3
 import argparse
 import logging
 import sys
@@ -9,117 +10,160 @@ parser.add_argument("file_location", type=str, help="Merge the given Trajectory 
 parser.add_argument('-o', type=str, required=False, default="src/outputfile.txt",
                     help="define outputfile, default path is outputfile.txt",
                     dest="output_path")
-parser.add_argument('-d', action="store_true", help="activates debugmode and shows how many files remain", dest="debug")
+parser.add_argument('-v', action="store_true", help="activates verbosemode and shows how many files remain",
+                    dest="verbose")
 args = parser.parse_args()
 
 
-class IncorrectTrajectoryException(Exception):
+class IncorrectTrajectory(Exception):
 
     def __init__(self, message):
         self.message = message
 
 
-def FramefromLine(line):
+class Trajectory:
+
+    def __init__(self, path):
+        self.path = path
+        self.start_frame = starting_Frame(path)
+        self.end_frame = ending_Frame(path)
+        self.framerate = ""
+        self.geometry = ""
+        self.setup()
+
+    def setup(self):
+        frame_rates = []
+        geometries = []
+        try:
+            with open(self.path, "r") as trajec:
+                frame_found = False
+                geometry_found = False
+                for line in trajec:
+                    if line.startswith("#framerate"):
+                        split_line = line.split(": ")
+                        self.framerate = [split_line[1]]
+                        frame_found = True
+                    if line.startswith("#geometry"):
+                        split_line = line.split(": ")
+                        self.geometry = [split_line[1]]
+                        geometry_found = True
+                    if geometry_found and frame_found:
+                        break
+            if not frame_found:
+                raise IncorrectTrajectory(f"file named '{trajec}' is missing a frame rate in the Header")
+            if not geometry_found:
+                raise IncorrectTrajectory(f"file named '{trajec}' is missing a Geometry in the Header")
+
+
+
+        except FileNotFoundError as error:
+            raise IncorrectTrajectory(f"the file {error.filename} can not be found")
+
+
+def Frame_from_Line(line):
     frame = line.split("\t")
     return int(frame[1])
 
 
-def checkhead(trajecs):
+def check_header(trajecs):
     """checks if frame rate and geometries match"""
-    # reads all framerates and geometries from the trajectories
+    # reads all frame rates and geometries from the trajectories
     frame_rates = []
     geometries = []
     for trajec in trajecs:
         try:
             with open(trajec, "r") as temp_trajec:
-                lines = temp_trajec.readlines()
-                counter = 0
-                temp_line = lines[counter]
-                while temp_line.startswith("#"):
-                    if temp_line.startswith("#framerate"):
-                        split_line = temp_line.split(": ")
+                rate_found = False
+                geometry_found = False
+                for line in temp_trajec:
+                    if not line.startswith('#'):
+                        break
+                    if line.startswith("#framerate"):
+                        split_line = line.split(": ")
                         frame_rates += [split_line[1]]
-                    if temp_line.startswith("#geometry"):
-                        split_line = temp_line.split(": ")
+                        rate_found = True
+                    if line.startswith("#geometry"):
+                        split_line = line.split(": ")
                         geometries += [split_line[1]]
-                    counter += 1
-                    temp_line = lines[counter]
+                        geometry_found = True
+                if not rate_found:
+                    raise IncorrectTrajectory(f"file named '{trajec}' is missing a frame rate in the Header")
+                if not geometry_found:
+                    raise IncorrectTrajectory(f"file named '{trajec}' is missing a Geometry in the Header")
+
         except FileNotFoundError as error:
-            raise IncorrectTrajectoryException(f"the file {error.filename} can not be found")
+            raise IncorrectTrajectory(f"the file {error.filename} can not be found")
 
-    if len(frame_rates) != len(trajecs):
-        raise IncorrectTrajectoryException("One file is missing a frame rate in the Header")
-    if len(geometries) != len(trajecs):
-        raise IncorrectTrajectoryException("One file is missing a Geometry path in the Header")
-
-    # compares if they are identical
-    first_rate = frame_rates[0]
-    first_geo = geometries[0]
-    for i, rate in enumerate(frame_rates):
-        if rate != first_rate:
-            raise IncorrectTrajectoryException(f"the framerate in file {trajecs[i]} is not matching")
-    for i, geo in enumerate(geometries):
-        if geo != first_geo:
-            raise IncorrectTrajectoryException(f"the Geometry path in file {trajecs[i]} is not matching")
+    # compares if the values are identical
+    values = zip(trajecs, frame_rates, geometries)
+    # Since all geometry filenames and fps values have to be the same we just pick the first one
+    _, expected_frame_rate, expected_geometry_file = next(values)
+    for trajectory_file, frame_rate, geometry_file in values:
+        if frame_rate != expected_frame_rate:
+            raise IncorrectTrajectory(f"the frame rate in file {trajectory_file} is not matching")
+        if geometry_file != expected_geometry_file:
+            raise IncorrectTrajectory(f"the Geometry path in file {trajectory_file} is not matching")
     return True
 
 
-def isComplete(file):
+def is_complete(file):  # todo two separate for-loops won´t work
     """test if all frames are included"""
-    with open(file, "r") as opened_file:
-        not_yet_found = -5
-        last_frame = not_yet_found
-        for line in opened_file:
-            if line != "\n" and not line.startswith("#"):
-                current_frame = FramefromLine(line)
-                if last_frame == not_yet_found:
-                    last_frame = current_frame
-                elif last_frame != current_frame and last_frame + 1 != current_frame:
-                    raise IncorrectTrajectoryException(
-                        f"file {file} has missing frames ~ missed frame {last_frame+1}")
-                else:
-                    last_frame = current_frame
+    last_frame = None
+    count = 0
+    with open(file, 'r') as f:
+        for line in f:
+            if line == "\n" or line.startswith("#"):
+                # skip header and empty lines
+                continue
+            count += 1
+            current_frame = Frame_from_Line(line)
+            if last_frame is None:
+                last_frame = current_frame
+                continue
+            if current_frame != last_frame and current_frame != (last_frame + 1):
+                raise IncorrectTrajectory(f"file {file} has missing frames ~ missed frame {last_frame + 1}")
+            last_frame = current_frame
     return True
 
 
-def startingFrame(file):
+def starting_Frame(file):
     with open(file, "r") as opened_file:
         for line in opened_file:
             if line != "\n" and not line.startswith("#"):
-                return FramefromLine(line)
+                return Frame_from_Line(line)
 
 
-def endingFrame(file):
+def ending_Frame(file):  # todo maybe iterate through instead
     with open(file, "r") as opened_file:
         lines = opened_file.readlines()
         lines.reverse()
 
     for line in lines:
         if line != "\n" and not line.startswith("#"):
-            return FramefromLine(line)
+            return Frame_from_Line(line)
 
 
-def checkdata(files):
+def check_data(files):
     """checks if files are matching one Trajectory"""
     end_frames = []
     start_frames = []
     for file in files:
-        if not isComplete(file):
+        if not is_complete(file):
             return False
-        start_frames.append(startingFrame(file))
-        end_frames.append(endingFrame(file))
+        start_frames.append(starting_Frame(file))
+        end_frames.append(ending_Frame(file))
     for start_frame in start_frames:
         # a starting frame is considered valid if it is the first frame of the given trajectories
         # a starting frame is considered valid if it comes after an end frame
         if start_frame != min(start_frames) and start_frame - 1 not in end_frames:
-            raise IncorrectTrajectoryException(f"the starting frame {start_frame} is not matching the other files")
+            raise IncorrectTrajectory(f"the starting frame {start_frame} is not matching the other files")
         # a starting frame is invalid if it appears more than once
         if start_frames.count(start_frame) > 1:
-            raise IncorrectTrajectoryException(f"multiple files start with the frame {start_frame}")
+            raise IncorrectTrajectory(f"multiple files start with the frame {start_frame}")
     return True
 
 
-def addDatas(trajecs, output, debug):
+def merge_trajectories(trajecs, output, verbose):  # todo needs class-implementation
     """will merge all data into the output-file
       "trajecs" is a list of all Trajectory files"""
     files = trajecs
@@ -127,7 +171,7 @@ def addDatas(trajecs, output, debug):
     # creates a list with all first Frames
     first_frames = []
     for file in files:
-        first_frames.append(startingFrame(file))
+        first_frames.append(starting_Frame(file))
 
     debug_counter = 1
     debug_length = len(first_frames)
@@ -138,9 +182,9 @@ def addDatas(trajecs, output, debug):
         for i, frame in enumerate(first_frames):
             # adds all data from that file to the output file
             if frame == next_frame:
-                if debug:
+                if verbose:
                     log.debug(f"writing file {debug_counter}/{debug_length}")
-                write(files[i], output)
+                append_to_output(files[i], output)
                 # removes file and the first line from the lists after the data has been written
                 files.pop(i)
                 first_frames.pop(i)
@@ -150,9 +194,9 @@ def addDatas(trajecs, output, debug):
     log.info(f'new File "{output}" was created.')
 
 
-def write(inputfile, output):
-    """writes all data from the inputfile onto the output file"""
-    with open(inputfile, "r") as input:
+def append_to_output(input_file, output):  # todo readlines() could be removed
+    """writes all data from the input-file onto the output-file"""
+    with open(input_file, "r") as input:
         inputdata = input.readlines()
     with open(output, "a") as output_file:
         for line in inputdata:
@@ -160,31 +204,33 @@ def write(inputfile, output):
                 output_file.write(line)
 
 
-def addInfos(trajecs, output):
-    with open(trajecs[0], "r") as temp_trajec:
+def add_Header(trajecs, output):  # todo: change header
+    with open(trajecs[0], "r") as temp_trajec, open(output, "w") as output_file:
         lines = temp_trajec.readlines()
         counter = 0
-        with open(output, "w") as output_file:
+        temp_line = lines[counter]
+        while temp_line.startswith("#") or temp_line == "\n":
+            if temp_line.startswith("#description:"):
+                output_file.write(temp_line.strip('\n') + " merged with MergeTool\n")
+            else:
+                output_file.write(temp_line)
+            counter += 1
             temp_line = lines[counter]
-            while temp_line.startswith("#") or temp_line == "\n":
-                if temp_line.startswith("#description:"):
-                    output_file.write(temp_line.strip('\n') + " merged with MergeTool\n")
-                else:
-                    output_file.write(temp_line)
-                counter += 1
-                temp_line = lines[counter]
+
 
 try:
-    if args.debug:
+    if args.verbose:
         log.debug("it will be checked if the Trajectories match")
-    checkhead(args.file_location)
-    checkdata(args.file_location)
-    if args.debug:
+    check_header(args.file_location)
+    check_data(args.file_location)
+    if args.verbose:
         log.debug("Trajectories match")
-except IncorrectTrajectoryException as error:
+except IncorrectTrajectory as error:
     log.error(error)
-    log.info("Use -h for more info on how to use the Skript")
+    log.info("Use -h for more info on how to use the Script")
     sys.exit(1)
 
-addInfos(args.file_location, args.output_path)
-addDatas(args.file_location, args.output_path, args.debug)
+add_Header(args.file_location, args.output_path)
+merge_trajectories(args.file_location, args.output_path, args.verbose)
+
+# todo if __name__ == __main__
