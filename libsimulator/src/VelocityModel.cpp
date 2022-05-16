@@ -49,7 +49,7 @@ VelocityModel::VelocityModel(double aped, double Dped, double awall, double Dwal
 PedestrianUpdate VelocityModel::ComputeNewPosition(
     double dT,
     const Pedestrian& ped,
-    const Geometry& geometry,
+    const CollisionGeometry& geometry,
     const NeighborhoodSearch& neighborhoodSearch) const
 {
     const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.GetPos(), 4);
@@ -207,7 +207,7 @@ Point VelocityModel::ForceRepPed(const Pedestrian* ped1, const Pedestrian* ped2)
     return F_rep;
 }
 
-Point VelocityModel::ForceRepRoom(const Pedestrian* ped, const Geometry& geometry) const
+Point VelocityModel::ForceRepRoom(const Pedestrian* ped, const CollisionGeometry& geometry) const
 {
     auto walls = geometry.LineSegmentsInDistanceTo(5.0, ped->GetPos());
 

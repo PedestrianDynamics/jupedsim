@@ -30,7 +30,7 @@
 
 #pragma once
 
-#include "Geometry.hpp"
+#include "CollisionGeometry.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "Pedestrian.hpp"
 #include "Point.hpp"
@@ -55,7 +55,7 @@ public:
     virtual PedestrianUpdate ComputeNewPosition(
         double dT,
         const Pedestrian& ped,
-        const Geometry& geometry,
+        const CollisionGeometry& geometry,
         const NeighborhoodSearch& neighborhoodSearch) const = 0;
 
     virtual void ApplyUpdate(const PedestrianUpdate& update, Pedestrian& agent) const = 0;

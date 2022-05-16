@@ -20,7 +20,7 @@
 //
 #pragma once
 
-#include "Geometry.hpp"
+#include "CollisionGeometry.hpp"
 #include "general/Configuration.hpp"
 #include "geometry/Building.hpp"
 #include "geometry/GeometryReader.hpp"
@@ -54,5 +54,3 @@ private:
 
     bool LoadRoutingInfo(Building* filename);
 };
-
-std::unique_ptr<Geometry> ParseGeometryXml(const std::filesystem::path& geometry_file);

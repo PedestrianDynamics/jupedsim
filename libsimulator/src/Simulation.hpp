@@ -53,7 +53,7 @@ private:
     AgentExitSystem _agentExitSystem{};
     NeighborhoodSearch _neighborhoodSearch{2.2};
     std::unique_ptr<RoutingEngine> _routingEngine;
-    std::unique_ptr<Geometry> _geometry;
+    std::unique_ptr<CollisionGeometry> _geometry;
     std::vector<std::unique_ptr<Pedestrian>> _agents;
     std::map<Area::Id, Area> _areas;
     bool _eventProcessed{false};
@@ -61,7 +61,7 @@ private:
 public:
     Simulation(
         std::unique_ptr<OperationalModel> operationalModel,
-        std::unique_ptr<Geometry>&& geometry,
+        std::unique_ptr<CollisionGeometry>&& geometry,
         std::unique_ptr<RoutingEngine>&& routingEngine,
         std::map<Area::Id, Area> areas,
         double dT);

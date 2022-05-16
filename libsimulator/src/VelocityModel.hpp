@@ -29,7 +29,7 @@
  **/
 #pragma once
 
-#include "Geometry.hpp"
+#include "CollisionGeometry.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "Pedestrian.hpp"
@@ -120,7 +120,7 @@ private:
      *
      * @return Point
      */
-    Point ForceRepRoom(const Pedestrian* ped, const Geometry& geometry) const;
+    Point ForceRepRoom(const Pedestrian* ped, const CollisionGeometry& geometry) const;
     /**
      * Repulsive force between pedestrian <ped> and wall <l>
      *
@@ -138,7 +138,7 @@ public:
     PedestrianUpdate ComputeNewPosition(
         double dT,
         const Pedestrian& ped,
-        const Geometry& geometry,
+        const CollisionGeometry& geometry,
         const NeighborhoodSearch& neighborhoodSearch) const override;
 
     void ApplyUpdate(const PedestrianUpdate& update, Pedestrian& agent) const override;

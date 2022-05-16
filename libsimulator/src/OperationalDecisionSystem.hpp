@@ -24,6 +24,6 @@ public:
     Run(double dT,
         double t_in_sec,
         const NeighborhoodSearch& neighborhoodSearch,
-        const Geometry& geometry,
+        const CollisionGeometry& geometry,
         std::vector<std::unique_ptr<Pedestrian>>& agents) const;
 };

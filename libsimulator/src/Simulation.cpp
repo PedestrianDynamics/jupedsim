@@ -47,7 +47,7 @@
 
 Simulation::Simulation(
     std::unique_ptr<OperationalModel> operationalModel,
-    std::unique_ptr<Geometry>&& geometry,
+    std::unique_ptr<CollisionGeometry>&& geometry,
     std::unique_ptr<RoutingEngine>&& routingEngine,
     std::map<Area::Id, Area> areas,
     double dT)
