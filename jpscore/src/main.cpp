@@ -26,11 +26,11 @@
  *
  **/
 #include "GCFMModel.hpp"
+#include "GeometryBuilder.hpp"
 #include "IO/GeoFileParser.hpp"
 #include "IO/IniFileParser.hpp"
 #include "IO/Trajectories.hpp"
 #include "IteratorPair.hpp"
-#include "NavMeshRoutingFactory.hpp"
 #include "OperationalModel.hpp"
 #include "ResultHandling.hpp"
 #include "RoutingEngine.hpp"
@@ -44,6 +44,7 @@
 #include "general/Compiler.hpp"
 #include "general/Configuration.hpp"
 #include "geometry/Building.hpp"
+#include "geometry/SubRoom.hpp"
 #include "pedestrian/AgentsSourcesManager.hpp"
 
 #include <Logger.hpp>
@@ -104,11 +105,22 @@ int main(int argc, char** argv)
         auto config = ParseIniFile(a.IniFilePath());
         auto building = std::make_unique<Building>(&config);
         auto agents = CreateAllPedestrians(&config, building.get(), config.tMax);
-        auto geometry = ParseGeometryXml(config.projectRootDir / config.geometryFile);
+
+        GeometryBuilder geometryBuilder{};
+        for(const auto& [_, room] : building->GetAllRooms()) {
+            for(const auto& [_, sub_room] : room->GetAllSubRooms()) {
+                geometryBuilder.AddAccessibleArea(sub_room->GetPolygon());
+                for(const auto& o : sub_room->GetAllObstacles()) {
+                    geometryBuilder.ExcludeFromAccessibleArea(o->GetPolygon());
+                }
+            }
+        }
+        auto geometry = geometryBuilder.Build();
+
         Simulation sim(
             CreateFromType(config.operationalModel, config),
-            std::move(geometry),
-            std::make_unique<NavMeshRoutingEngine>(MakeFromBuilding(*building)),
+            std::move(geometry.collisionGeometry),
+            std::move(geometry.routingEngine),
             config.areas,
             config.dT);
         EventManager manager;

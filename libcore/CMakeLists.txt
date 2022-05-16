@@ -2,8 +2,6 @@
 # Build libcore
 ################################################################################
 add_library(core STATIC
-    src/NavMeshRoutingFactory.cpp
-    src/NavMeshRoutingFactory.hpp
     src/IO/GeoFileParser.cpp
     src/IO/GeoFileParser.hpp
     src/IO/IniFileParser.cpp

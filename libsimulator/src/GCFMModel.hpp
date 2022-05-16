@@ -50,7 +50,7 @@ public:
     PedestrianUpdate ComputeNewPosition(
         double dT,
         const Pedestrian& ped,
-        const Geometry& geometry,
+        const CollisionGeometry& geometry,
         const NeighborhoodSearch& neighborhoodSearch) const override;
     void ApplyUpdate(const PedestrianUpdate& upate, Pedestrian& agent) const override;
 
@@ -94,7 +94,7 @@ private:
      *
      * @return
      */
-    Point ForceRepRoom(const Pedestrian* ped, const Geometry& geometry) const;
+    Point ForceRepRoom(const Pedestrian* ped, const CollisionGeometry& geometry) const;
     Point ForceRepWall(const Pedestrian* ped, const Line& l) const;
     Point ForceRepStatPoint(const Pedestrian* ped, const Point& p, double l, double vn) const;
     Point ForceInterpolation(

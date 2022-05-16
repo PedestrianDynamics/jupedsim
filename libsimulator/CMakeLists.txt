@@ -9,6 +9,8 @@ add_library(simulator STATIC
     src/Area.hpp
     src/CGALPolygon.cpp
     src/CGALPolygon.hpp
+    src/CollisionGeometry.cpp
+    src/CollisionGeometry.hpp
     src/ConvexPolygon.cpp
     src/ConvexPolygon.hpp
     src/DTriangulation.cpp
@@ -20,6 +22,8 @@ add_library(simulator STATIC
     src/GeometricFunctions.hpp
     src/Geometry.cpp
     src/Geometry.hpp
+    src/GeometryBuilder.cpp
+    src/GeometryBuilder.hpp
     src/Graph.hpp
     src/Grid2D.hpp
     src/Line.cpp
@@ -110,7 +114,7 @@ endif()
 if (BUILD_TESTS)
     add_executable(libsimulator-tests
         test/TestBasicPrimitiveTests.cpp
-        test/TestGeometry.cpp
+        test/TestCollisionGeometry.cpp
         test/TestGraph.cpp
         test/TestGrid2D.cpp
         test/TestLine.cpp

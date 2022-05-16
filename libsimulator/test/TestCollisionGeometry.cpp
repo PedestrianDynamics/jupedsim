@@ -1,49 +1,49 @@
-#include "Geometry.hpp"
+#include "CollisionGeometry.hpp"
 #include "Line.hpp"
 #include "Point.hpp"
 
 #include <deque>
 #include <gtest/gtest.h>
 
-TEST(Geometry, CanBuildEmpty)
+TEST(CollisionGeometry, CanBuildEmpty)
 {
-    GeometryBuilder geo{};
+    CollisionGeometryBuilder geo{};
     ASSERT_NO_THROW(geo.Build());
 }
 
 TEST(Geometry, CanIterate)
 {
-    GeometryBuilder builder{};
+    CollisionGeometryBuilder builder{};
     const auto geo = builder.Build();
     for(const auto& line : geo.LineSegmentsInDistanceTo(5, Point(0, 0))) {
         (void) line;
     }
 }
 
-class GeometryFilterByDistance : public ::testing::Test
+class CollisionGeometryFilterByDistance : public ::testing::Test
 {
 public:
-    GeometryFilterByDistance() : geometry(build()){};
+    CollisionGeometryFilterByDistance() : geometry(build()){};
 
 protected:
-    Geometry geometry;
+    CollisionGeometry geometry;
 
 private:
-    static Geometry build()
+    static CollisionGeometry build()
     {
-        GeometryBuilder b{};
+        CollisionGeometryBuilder b{};
         b.AddLineSegment(-1, 0, 1, 0).AddLineSegment(-1, 1, 1, 1);
         return b.Build();
     }
 };
 
-TEST_F(GeometryFilterByDistance, NoneAreInRange)
+TEST_F(CollisionGeometryFilterByDistance, NoneAreInRange)
 {
     const auto range = geometry.LineSegmentsInDistanceTo(1, Point{0, -2});
     ASSERT_EQ(range.begin(), range.end());
 }
 
-TEST_F(GeometryFilterByDistance, SomeAreInRange)
+TEST_F(CollisionGeometryFilterByDistance, SomeAreInRange)
 {
     const auto range = geometry.LineSegmentsInDistanceTo(2, Point{0, -2});
     for(const auto& line : range) {
@@ -51,7 +51,7 @@ TEST_F(GeometryFilterByDistance, SomeAreInRange)
     }
 }
 
-TEST_F(GeometryFilterByDistance, AllAreInRange)
+TEST_F(CollisionGeometryFilterByDistance, AllAreInRange)
 {
     const auto range = geometry.LineSegmentsInDistanceTo(1, Point{0, -2});
     std::deque<Line> expected{Line(Point(-1, 0), Point(1, 0)), Line(Point(-1, 1), Point(1, 1))};

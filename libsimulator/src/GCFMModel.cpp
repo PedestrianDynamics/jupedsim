@@ -59,7 +59,7 @@ GCFMModel::GCFMModel(
 PedestrianUpdate GCFMModel::ComputeNewPosition(
     double dT,
     const Pedestrian& ped,
-    const Geometry& geometry,
+    const CollisionGeometry& geometry,
     const NeighborhoodSearch& neighborhoodSearch) const
 {
     const double delta = 1.5;
@@ -248,7 +248,7 @@ Point GCFMModel::ForceRepPed(const Pedestrian* ped1, const Pedestrian* ped2) con
  *   - Vektor(x,y) mit Summe aller abstoßenden Kräfte im SubRoom
  * */
 
-inline Point GCFMModel::ForceRepRoom(const Pedestrian* ped, const Geometry& geometry) const
+inline Point GCFMModel::ForceRepRoom(const Pedestrian* ped, const CollisionGeometry& geometry) const
 {
     auto walls = geometry.LineSegmentsInDistanceTo(5.0, ped->GetPos());
 

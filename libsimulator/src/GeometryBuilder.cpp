@@ -1,15 +1,17 @@
-#include "NavMeshRoutingFactory.hpp"
+#include "GeometryBuilder.hpp"
 
+#include "CollisionGeometry.hpp"
 #include "DTriangulation.hpp"
+#include "Geometry.hpp"
 #include "Graph.hpp"
-#include "Point.hpp"
+#include "Line.hpp"
 #include "RoutingEngine.hpp"
-#include "geometry/SubRoom.hpp"
 
+#include <CGAL/Boolean_set_operations_2/difference.h>
 #include <CGAL/number_utils.h>
+#include <memory>
 #include <poly2tri/common/shapes.h>
 
-#include <algorithm>
 #include <stdexcept>
 
 static Point centroid(p2t::Triangle* t)
@@ -47,39 +49,60 @@ static Line edgeIndex(p2t::Triangle* from, p2t::Triangle* to)
     throw std::logic_error("Triangles have to share an edge");
 }
 
-NavMeshRoutingEngine MakeFromBuilding(const Building& building)
+GeometryBuilder& GeometryBuilder::AddAccessibleArea(const std::vector<Point>& lineLoop)
+{
+    _accessibleAreas.emplace_back(lineLoop);
+    return *this;
+}
+
+GeometryBuilder& GeometryBuilder::ExcludeFromAccessibleArea(const std::vector<Point>& lineLoop)
+{
+    _exclusions.emplace_back(lineLoop);
+    return *this;
+}
+
+Geometry GeometryBuilder::Build()
 {
     using Kernel = CGAL::Exact_predicates_exact_constructions_kernel;
     using Poly = CGAL::Polygon_2<Kernel>;
     using PolyWithHoles = CGAL::Polygon_with_holes_2<Kernel>;
     using PolyWithHolesList = std::list<PolyWithHoles>;
+    using PolyList = std::list<Poly>;
     using GraphType = NavMeshRoutingEngine::GraphType;
 
-    PolyWithHolesList input_pl{};
-    for(const auto& [_, room] : building.GetAllRooms()) {
-        for(const auto& [_, sub_room] : room->GetAllSubRooms()) {
-            Poly poly;
-            for(const auto& p : sub_room->GetPolygon()) {
-                poly.push_back({p.x, p.y});
-            }
-            PolyWithHoles poly_with_holes{poly};
-            for(const auto& o : sub_room->GetAllObstacles()) {
-                Poly hole;
-                for(const auto& p : o->GetPolygon()) {
-                    hole.push_back({p.x, p.y});
-                }
-                poly_with_holes.add_hole(hole);
-            }
-            input_pl.emplace_back(poly_with_holes);
+    auto convertPolygons = [](const auto& polygons) {
+        PolyList polyList;
+        std::transform(
+            std::begin(polygons),
+            std::end(polygons),
+            std::back_inserter(polyList),
+            [](const auto& loop) {
+                Poly poly;
+                std::transform(
+                    std::begin(loop), std::end(loop), std::back_inserter(poly), [](const auto& p) {
+                        return Poly::Point_2{p.x, p.y};
+                    });
+                return poly;
+            });
+        PolyWithHolesList union_pl{};
+        CGAL::join(std::begin(polyList), std::end(polyList), std::back_inserter(union_pl));
+        return union_pl;
+    };
+    const auto accessibleList = convertPolygons(_accessibleAreas);
+    if(accessibleList.size() != 1) {
+        throw std::runtime_error("accesisble area not connected");
+    }
+    auto accessibleArea = *accessibleList.begin();
+    const auto exclusionList = convertPolygons(_exclusions);
+    for(const auto& ex : exclusionList) {
+        PolyWithHolesList res{};
+        CGAL::difference(accessibleArea, ex, std::back_inserter(res));
+        if(res.size() != 1) {
+            throw std::runtime_error("Exclusion splits accessibleArea");
         }
+        accessibleArea = *res.begin();
     }
-    PolyWithHolesList union_pl{};
-    CGAL::join(std::begin(input_pl), std::end(input_pl), std::back_inserter(union_pl));
 
-    if(union_pl.size() != 1) {
-        // TODO (kkratz): throw custom exception
-        throw std::runtime_error("Walkable area needs to be a single polygon");
-    }
     auto Convert = [](const auto& begin, const auto& end) {
         std::vector<Point> result{};
         result.reserve(end - begin);
@@ -89,18 +112,34 @@ NavMeshRoutingEngine MakeFromBuilding(const Building& building)
         return result;
     };
     const auto boundary = Convert(
-        union_pl.begin()->outer_boundary().vertices_begin(),
-        union_pl.begin()->outer_boundary().vertices_end());
+        accessibleArea.outer_boundary().vertices_begin(),
+        accessibleArea.outer_boundary().vertices_end());
 
     std::vector<std::vector<Point>> holes{};
-    holes.reserve(union_pl.begin()->number_of_holes());
+    holes.reserve(accessibleArea.number_of_holes());
     std::transform(
-        union_pl.begin()->holes_begin(),
-        union_pl.begin()->holes_end(),
+        accessibleArea.holes_begin(),
+        accessibleArea.holes_end(),
         std::back_inserter(holes),
         [Convert](const auto& hole) {
             return Convert(hole.vertices_begin(), hole.vertices_end());
         });
+    CollisionGeometryBuilder collisionGeometryBuilder{};
+    for(size_t index = 1; index < boundary.size(); ++index) {
+        collisionGeometryBuilder.AddLineSegment(
+            boundary[index - 1].x, boundary[index - 1].y, boundary[index].x, boundary[index].y);
+    }
+    collisionGeometryBuilder.AddLineSegment(
+        boundary.back().x, boundary.back().y, boundary.front().x, boundary.front().y);
+    for(const auto& hole : holes) {
+        for(size_t index = 1; index < hole.size(); ++index) {
+            collisionGeometryBuilder.AddLineSegment(
+                hole[index - 1].x, hole[index - 1].y, hole[index].x, hole[index].y);
+        }
+        collisionGeometryBuilder.AddLineSegment(
+            hole.back().x, hole.back().y, hole.front().x, hole.front().y);
+    }
+
     DTriangulation triangulation(boundary, holes);
     std::stack<std::tuple<p2t::Triangle*, GraphType::VertexId>> toVisit{};
     std::set<p2t::Triangle*> known{};
@@ -128,6 +167,7 @@ NavMeshRoutingEngine MakeFromBuilding(const Building& building)
             toVisit.push({neighbor, neighbor_id});
         }
     }
-
-    return NavMeshRoutingEngine{builder.Build()};
+    return {
+        std::make_unique<CollisionGeometry>(collisionGeometryBuilder.Build()),
+        std::make_unique<NavMeshRoutingEngine>(builder.Build())};
 }
