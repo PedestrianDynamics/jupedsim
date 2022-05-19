@@ -79,7 +79,7 @@ TEST(Simulation, CanSimulate)
     std::vector<double> box2{10, 4, 20, 4, 20, 6, 10, 6};
     JPS_GeometryBuilder_AddAccessibleArea(geo_builder, box2.data(), box2.size() / 2);
 
-    auto geometry = JPS_GeometryBuilder_Build(geo_builder);
+    auto geometry = JPS_GeometryBuilder_Build(geo_builder, nullptr);
     ASSERT_NE(geometry, nullptr);
 
     auto areas_builder = JPS_AreasBuilder_Create();
@@ -91,13 +91,13 @@ TEST(Simulation, CanSimulate)
     JPS_AreasBuilder_AddArea(
         areas_builder, destinationId, box.data(), box.size() / 2, labels.data(), labels.size());
 
-    auto areas = JPS_AreasBuilder_Build(areas_builder);
+    auto areas = JPS_AreasBuilder_Build(areas_builder, nullptr);
     ASSERT_NE(areas, nullptr);
 
-    auto model = JPS_OperationalModel_Create_VelocityModel(8, 0.1, 5, 0.02);
+    auto model = JPS_OperationalModel_Create_VelocityModel(8, 0.1, 5, 0.02, nullptr);
     ASSERT_NE(model, nullptr);
 
-    auto simulation = JPS_Simulation_Create(model, geometry, areas, 0.01);
+    auto simulation = JPS_Simulation_Create(model, geometry, areas, 0.01, nullptr);
     ASSERT_NE(simulation, nullptr);
 
     JPS_AgentParameters agent_parameters{};
@@ -118,10 +118,10 @@ TEST(Simulation, CanSimulate)
     for(const auto& p : positions) {
         agent_parameters.positionX = p.x;
         agent_parameters.positionY = p.y;
-        JPS_Simulation_AddAgent(simulation, agent_parameters);
+        JPS_Simulation_AddAgent(simulation, agent_parameters, nullptr);
     }
     while(JPS_Simulation_AgentCount(simulation) > 0) {
-        JPS_Simulation_Iterate(simulation);
+        ASSERT_TRUE(JPS_Simulation_Iterate(simulation, nullptr));
     }
     ASSERT_LT(JPS_Simulation_IterationCount(simulation), 2000);
 }
