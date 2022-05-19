@@ -4,17 +4,6 @@ import logging
 import sys
 import logging as log
 
-log.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
-parser = argparse.ArgumentParser()
-parser.add_argument("file_location", type=str, help="Merge the given Trajectory files together", nargs='+')
-parser.add_argument('-o', type=str, required=False, default="src/outputfile.txt",
-                    help="define outputfile, default path is outputfile.txt",
-                    dest="output_path")
-parser.add_argument('-v', action="store_true", help="activates verbosemode and shows how many files remain",
-                    dest="verbose")
-args = parser.parse_args()
-
-
 class IncorrectTrajectory(Exception):
 
     def __init__(self, message):
@@ -32,8 +21,6 @@ class Trajectory:
         self.setup()
 
     def setup(self):
-        frame_rates = []
-        geometries = []
         try:
             with open(self.path, "r") as trajec:
                 frame_found = False
@@ -53,8 +40,6 @@ class Trajectory:
                 raise IncorrectTrajectory(f"file named '{trajec}' is missing a frame rate in the Header")
             if not geometry_found:
                 raise IncorrectTrajectory(f"file named '{trajec}' is missing a Geometry in the Header")
-
-
 
         except FileNotFoundError as error:
             raise IncorrectTrajectory(f"the file {error.filename} can not be found")
@@ -106,20 +91,20 @@ def check_header(trajecs):
     return True
 
 
-def is_complete(file):  # todo two separate for-loops won´t work
+def is_complete(file):
     """test if all frames are included"""
     last_frame = None
-    count = 0
     with open(file, 'r') as f:
         for line in f:
-            if line == "\n" or line.startswith("#"):
+            if line != "\n" or not line.startswith("#"):
                 # skip header and empty lines
                 continue
-            count += 1
+            last_frame = Frame_from_Line(line)
+            break
+        # this will continue iteration where we left off the last time
+        # All headers and empty lines are skipped only frame lines remain
+        for line in f:
             current_frame = Frame_from_Line(line)
-            if last_frame is None:
-                last_frame = current_frame
-                continue
             if current_frame != last_frame and current_frame != (last_frame + 1):
                 raise IncorrectTrajectory(f"file {file} has missing frames ~ missed frame {last_frame + 1}")
             last_frame = current_frame
@@ -163,7 +148,7 @@ def check_data(files):
     return True
 
 
-def merge_trajectories(trajecs, output, verbose):  # todo needs class-implementation
+def merge_trajectories(trajecs, output, verbose):  # todo needs class-implementation, sort after start frame
     """will merge all data into the output-file
       "trajecs" is a list of all Trajectory files"""
     files = trajecs
@@ -218,19 +203,33 @@ def add_Header(trajecs, output):  # todo: change header
             temp_line = lines[counter]
 
 
-try:
-    if args.verbose:
-        log.debug("it will be checked if the Trajectories match")
-    check_header(args.file_location)
-    check_data(args.file_location)
-    if args.verbose:
-        log.debug("Trajectories match")
-except IncorrectTrajectory as error:
-    log.error(error)
-    log.info("Use -h for more info on how to use the Script")
-    sys.exit(1)
+def main():
+    log.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("file", type=str, help="Merge the given Trajectory files together",
+                        nargs='+')  # todo "file"
+    parser.add_argument('-o', type=str, required=False, default="src/outputfile.txt",
+                        help="define output file, default path is outputfile.txt",
+                        dest="output_path")
+    parser.add_argument('-v', action="store_true", help="activates verbose mode and shows how many files remain",
+                        dest="verbose")
+    args = parser.parse_args()
 
-add_Header(args.file_location, args.output_path)
-merge_trajectories(args.file_location, args.output_path, args.verbose)
+    try:
+        if args.verbose:
+            log.debug("it will be checked if the Trajectories match")
+        check_header(args.file)
+        check_data(args.file)
+        if args.verbose:
+            log.debug("Trajectories match")
+    except IncorrectTrajectory as error:
+        log.error(error)
+        log.info("Use -h for more info on how to use the Script")
+        sys.exit(1)
 
-# todo if __name__ == __main__
+    add_Header(args.file, args.output_path)
+    merge_trajectories(args.file, args.output_path, args.verbose)
+
+
+if __name__ == '__main__':
+    main()
