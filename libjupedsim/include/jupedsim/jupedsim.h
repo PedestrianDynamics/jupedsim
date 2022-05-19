@@ -55,7 +55,7 @@ JPS_OperationalModel JPS_OperationalModel_Create_VelocityModel(
     double D_Ped,
     double a_Wall,
     double D_Wall,
-    JPS_ErrorMessage* errorMessage = NULL);
+    JPS_ErrorMessage* errorMessage);
 /**
  * Creates GCFM model.
  * @param nu_Ped
@@ -78,7 +78,7 @@ JPS_OperationalModel JPS_OperationalModel_Create_GCFMModel(
     double intp_width_Wall,
     double maxf_Ped,
     double maxf_Wall,
-    JPS_ErrorMessage* errorMessage = NULL);
+    JPS_ErrorMessage* errorMessage);
 /**
  * Frees a JPS_OperationalModel
  * @param handle to the JPS_OperationalModel to free.
@@ -146,8 +146,7 @@ void JPS_GeometryBuilder_ExcludeFromAccessibleArea(
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return a JPS_Geometry handle on success or NULL on any error.
  */
-JPS_Geometry
-JPS_GeometryBuilder_Build(JPS_GeometryBuilder handle, JPS_ErrorMessage* errorMessage = NULL);
+JPS_Geometry JPS_GeometryBuilder_Build(JPS_GeometryBuilder handle, JPS_ErrorMessage* errorMessage);
 
 /**
  * Frees a JPS_GeometryBuilder.
@@ -206,7 +205,7 @@ void JPS_AreasBuilder_AddArea(
  * @param handle of the builder to operate on
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  */
-JPS_Areas JPS_AreasBuilder_Build(JPS_AreasBuilder handle, JPS_ErrorMessage* errorMessage = NULL);
+JPS_Areas JPS_AreasBuilder_Build(JPS_AreasBuilder handle, JPS_ErrorMessage* errorMessage);
 
 /**
  * Frees a JPS_AreasBuilder.
@@ -312,7 +311,7 @@ JPS_Simulation JPS_Simulation_Create(
     JPS_Geometry geometry,
     JPS_Areas areas,
     double dT,
-    JPS_ErrorMessage* errorMessage = NULL);
+    JPS_ErrorMessage* errorMessage);
 
 /**
  * Adds a new agent to the simulation.
@@ -327,7 +326,7 @@ JPS_Simulation JPS_Simulation_Create(
 JPS_AgentId JPS_Simulation_AddAgent(
     JPS_Simulation handle,
     JPS_AgentParameters parameters,
-    JPS_ErrorMessage* errorMessage = NULL);
+    JPS_ErrorMessage* errorMessage);
 /*
  * Access the agent data.
  * @param handle to the simulation object
@@ -335,10 +334,8 @@ JPS_AgentId JPS_Simulation_AddAgent(
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return handle to the agent, the handle will be valid until the next iteration is started.
  */
-JPS_Agent JPS_Simulation_ReadAgent(
-    JPS_Simulation handle,
-    JPS_AgentId id,
-    JPS_ErrorMessage* errorMessage = NULL);
+JPS_Agent
+JPS_Simulation_ReadAgent(JPS_Simulation handle, JPS_AgentId id, JPS_ErrorMessage* errorMessage);
 
 /*
  * Returns the ids of all agents that exited the simulation in the last iteration.
@@ -354,7 +351,7 @@ size_t JPS_Simulation_RemovedAgents(JPS_Simulation handle, const JPS_AgentId** d
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return true if no errors occured
  */
-bool JPS_Simulation_Iterate(JPS_Simulation handle, JPS_ErrorMessage* errorMessage = NULL);
+bool JPS_Simulation_Iterate(JPS_Simulation handle, JPS_ErrorMessage* errorMessage);
 
 /**
  * How many agents are in the simulation.
