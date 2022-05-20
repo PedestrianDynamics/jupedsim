@@ -1,7 +1,7 @@
 ################################################################################
 # libjupedsim
 ################################################################################
-add_library(jupedsim STATIC
+add_library(jupedsim SHARED
     include/jupedsim/jupedsim.h
     src/jupedsim.cpp
 )
@@ -9,15 +9,21 @@ add_library(jupedsim STATIC
 target_compile_options(jupedsim PRIVATE
     ${COMMON_COMPILE_OPTIONS}
 )
+target_compile_definitions(jupedsim
+    PRIVATE
+        JUPEDSIM_API_EXPORTS
+)
 target_include_directories(jupedsim
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
+        $<INSTALL_INTERFACE:include>
+    PRIVATE src
 )
 
 target_link_libraries(jupedsim
-    PUBLIC 
+    PRIVATE
         simulator
-) 
+)
 set_property(TARGET jupedsim PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
 set_property(TARGET jupedsim PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 
@@ -33,6 +39,7 @@ if (BUILD_TESTS)
         GTest::gtest
         GTest::gtest_main
         jupedsim
+        simulator
     )
 
     target_compile_options(libjupedsim-tests PRIVATE
@@ -48,3 +55,34 @@ if (BUILD_TESTS)
     set_property(TARGET libjupedsim-tests PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
     set_property(TARGET libjupedsim-tests PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 endif()
+
+################################################################################
+# Installation
+################################################################################
+install(TARGETS jupedsim
+    EXPORT jupedsimTargets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
+)
+
+install(
+    FILES
+        include/jupedsim/jupedsim.h
+    DESTINATION include/jupedsim
+)
+
+install(EXPORT jupedsimTargets
+    FILE jupedsimTargets.cmake
+    NAMESPACE jupedsim::
+    DESTINATION lib/cmake/jupedsim)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    "jupedsimConfigVersion.cmake"
+    VERSION ${CMAKE_PROJECT_VERSION}
+    COMPATIBILITY AnyNewerVersion)
+
+install(FILES "jupedsimConfig.cmake" "${CMAKE_CURRENT_BINARY_DIR}/jupedsimConfigVersion.cmake"
+    DESTINATION lib/cmake/jupedsim)
