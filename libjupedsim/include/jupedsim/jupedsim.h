@@ -1,8 +1,18 @@
 #pragma once
 
+#ifdef _WIN32
+#ifdef JUPEDSIM_API_EXPORTS
+#define JUPEDSIM_API __declspec(dllexport)
+#else
+#define JUPEDSIM_API __declspec(dllimport)
+#endif
+#else
+#define JUPEDSIM_API
+#endif
+
+#include <stdbool.h> /*NOLINT(modernize-deprecated-headers)*/
 #include <stddef.h> /*NOLINT(modernize-deprecated-headers)*/
 #include <stdint.h> /*NOLINT(modernize-deprecated-headers)*/
-
 /// C-Wrapper for JuPedSim simulation capabilities
 
 #ifdef __cplusplus
@@ -29,13 +39,13 @@ typedef struct JPS_ErrorMessage_t* JPS_ErrorMessage;
  * @return Error message as null terminated c string. This pointer is valid until
  * JPS_ErrorMessage_Free is called on this handle.
  */
-const char* JPS_ErrorMessage_GetMessage(JPS_ErrorMessage handle);
+JUPEDSIM_API const char* JPS_ErrorMessage_GetMessage(JPS_ErrorMessage handle);
 
 /**
  * Frees a JPS_ErrorMessage
  * @param handle to the JPS_ErrorMessage to free.
  */
-void JPS_ErrorMessage_Free(JPS_ErrorMessage handle);
+JUPEDSIM_API void JPS_ErrorMessage_Free(JPS_ErrorMessage handle);
 
 /**
  * Opaque type for operational models describing how agents interact in the simulation.
@@ -50,7 +60,7 @@ typedef struct JPS_OperationalModel_t* JPS_OperationalModel;
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return the new model or NULL if an error occured during construction
  */
-JPS_OperationalModel JPS_OperationalModel_Create_VelocityModel(
+JUPEDSIM_API JPS_OperationalModel JPS_OperationalModel_Create_VelocityModel(
     double a_Ped,
     double D_Ped,
     double a_Wall,
@@ -69,7 +79,7 @@ JPS_OperationalModel JPS_OperationalModel_Create_VelocityModel(
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return the new model or NULL if an error occured during construction
  */
-JPS_OperationalModel JPS_OperationalModel_Create_GCFMModel(
+JUPEDSIM_API JPS_OperationalModel JPS_OperationalModel_Create_GCFMModel(
     double nu_Ped,
     double nu_Wall,
     double dist_eff_Ped,
@@ -83,7 +93,7 @@ JPS_OperationalModel JPS_OperationalModel_Create_GCFMModel(
  * Frees a JPS_OperationalModel
  * @param handle to the JPS_OperationalModel to free.
  */
-void JPS_OperationalModel_Free(JPS_OperationalModel handle);
+JUPEDSIM_API void JPS_OperationalModel_Free(JPS_OperationalModel handle);
 
 /**
  * Opaque type that represents the geometry the simulation acts on.
@@ -95,7 +105,7 @@ typedef struct JPS_Geometry_t* JPS_Geometry;
  * Frees a JPS_Geometry
  * @param handle to the JPS_Geometry to free.
  */
-void JPS_Geometry_Free(JPS_Geometry geometry);
+JUPEDSIM_API void JPS_Geometry_Free(JPS_Geometry geometry);
 
 /**
  * Opaque type that is used to build geometry for the simulation.
@@ -106,7 +116,7 @@ typedef struct JPS_GeometryBuilder_t* JPS_GeometryBuilder;
  * Creates a new GeometryBuilder
  * @return the new builder.
  */
-JPS_GeometryBuilder JPS_GeometryBuilder_Create();
+JUPEDSIM_API JPS_GeometryBuilder JPS_GeometryBuilder_Create();
 
 /**
  * Adds an accessible area to the geometry.
@@ -118,7 +128,7 @@ JPS_GeometryBuilder JPS_GeometryBuilder_Create();
  *        double values in this array is expected to be 2*pointCount!
  * @param pointCount number of points the polygon consists of.
  */
-void JPS_GeometryBuilder_AddAccessibleArea(
+JUPEDSIM_API void JPS_GeometryBuilder_AddAccessibleArea(
     JPS_GeometryBuilder handle,
     double* points,
     size_t pointCount);
@@ -134,7 +144,7 @@ void JPS_GeometryBuilder_AddAccessibleArea(
  *        double values in this array is expected to be 2*pointCount!
  * @param pointCount number of points the polygon consists of.
  */
-void JPS_GeometryBuilder_ExcludeFromAccessibleArea(
+JUPEDSIM_API void JPS_GeometryBuilder_ExcludeFromAccessibleArea(
     JPS_GeometryBuilder handle,
     double* lineSegments,
     size_t lineSegmentsCount);
@@ -146,13 +156,14 @@ void JPS_GeometryBuilder_ExcludeFromAccessibleArea(
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return a JPS_Geometry handle on success or NULL on any error.
  */
-JPS_Geometry JPS_GeometryBuilder_Build(JPS_GeometryBuilder handle, JPS_ErrorMessage* errorMessage);
+JUPEDSIM_API JPS_Geometry
+JPS_GeometryBuilder_Build(JPS_GeometryBuilder handle, JPS_ErrorMessage* errorMessage);
 
 /**
  * Frees a JPS_GeometryBuilder.
  * @param handle to the JPS_GeometryBuilder to free.
  */
-void JPS_GeometryBuilder_Free(JPS_GeometryBuilder handle);
+JUPEDSIM_API void JPS_GeometryBuilder_Free(JPS_GeometryBuilder handle);
 
 /**
  * Opaque type that describes convex areas that agents navigate to / can be influced from.
@@ -165,7 +176,7 @@ typedef struct JPS_Areas_t* JPS_Areas;
  * Frees a JPS_Areas.
  * @param handle to the JPS_Areas to free.
  */
-void JPS_Areas_Free(JPS_Areas handle);
+JUPEDSIM_API void JPS_Areas_Free(JPS_Areas handle);
 
 /**
  * Opaque type that builds a JPS_Areas object.
@@ -175,7 +186,7 @@ typedef struct JPS_AreasBuilder_t* JPS_AreasBuilder;
 /**
  * Creates a JPS_AreasBuilder.
  */
-JPS_AreasBuilder JPS_AreasBuilder_Create();
+JUPEDSIM_API JPS_AreasBuilder JPS_AreasBuilder_Create();
 
 /**
  * Adds a area with lables to the builder.
@@ -192,7 +203,7 @@ JPS_AreasBuilder JPS_AreasBuilder_Create();
  * @param tags lables to attach to this area
  * @param tagCount number of lables
  */
-void JPS_AreasBuilder_AddArea(
+JUPEDSIM_API void JPS_AreasBuilder_AddArea(
     JPS_AreasBuilder handle,
     uint64_t id,
     double* points,
@@ -205,13 +216,14 @@ void JPS_AreasBuilder_AddArea(
  * @param handle of the builder to operate on
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  */
-JPS_Areas JPS_AreasBuilder_Build(JPS_AreasBuilder handle, JPS_ErrorMessage* errorMessage);
+JUPEDSIM_API JPS_Areas
+JPS_AreasBuilder_Build(JPS_AreasBuilder handle, JPS_ErrorMessage* errorMessage);
 
 /**
  * Frees a JPS_AreasBuilder.
  * @param handle to the JPS_AreasBuilder to free.
  */
-void JPS_AreasBuilder_Free(JPS_AreasBuilder handle);
+JUPEDSIM_API void JPS_AreasBuilder_Free(JPS_AreasBuilder handle);
 
 /**
  * Id of an agent.
@@ -228,28 +240,28 @@ typedef struct JPS_Agent_t* JPS_Agent;
  * @param handle of the agent.
  * @return x position
  */
-double JPS_Agent_PositionX(JPS_Agent handle);
+JUPEDSIM_API double JPS_Agent_PositionX(JPS_Agent handle);
 
 /*
  * Access the agents positions y value.
  * @param handle of the agent.
  * @return y position
  */
-double JPS_Agent_PositionY(JPS_Agent handle);
+JUPEDSIM_API double JPS_Agent_PositionY(JPS_Agent handle);
 
 /*
  * Access the agents orientation x value.
  * @param handle of the agent.
  * @return x orientation
  */
-double JPS_Agent_OrientationX(JPS_Agent handle);
+JUPEDSIM_API double JPS_Agent_OrientationX(JPS_Agent handle);
 
 /*
  * Access the agents orientation y value.
  * @param handle of the agent.
  * @return y orientation
  */
-double JPS_Agent_OrientationY(JPS_Agent handle);
+JUPEDSIM_API double JPS_Agent_OrientationY(JPS_Agent handle);
 
 /**
  * Describe all the parameters required to initialize an agent.
@@ -288,7 +300,7 @@ typedef struct JPS_AgentParameters {
      * NOTE: This field will change at some point before the next release
      */
     uint16_t destinationAreaId;
-} AgentParameters;
+} JPS_AgentParameters;
 
 /*
  * Opaque type to a Simulator object.
@@ -306,7 +318,7 @@ typedef struct JPS_Simulation_t* JPS_Simulation;
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return the Simulation
  */
-JPS_Simulation JPS_Simulation_Create(
+JUPEDSIM_API JPS_Simulation JPS_Simulation_Create(
     JPS_OperationalModel model,
     JPS_Geometry geometry,
     JPS_Areas areas,
@@ -323,7 +335,7 @@ JPS_Simulation JPS_Simulation_Create(
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return id of the new agent or 0 if the agent could not be added due to an error.
  */
-JPS_AgentId JPS_Simulation_AddAgent(
+JUPEDSIM_API JPS_AgentId JPS_Simulation_AddAgent(
     JPS_Simulation handle,
     JPS_AgentParameters parameters,
     JPS_ErrorMessage* errorMessage);
@@ -334,7 +346,7 @@ JPS_AgentId JPS_Simulation_AddAgent(
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return handle to the agent, the handle will be valid until the next iteration is started.
  */
-JPS_Agent
+JUPEDSIM_API JPS_Agent
 JPS_Simulation_ReadAgent(JPS_Simulation handle, JPS_AgentId id, JPS_ErrorMessage* errorMessage);
 
 /*
@@ -343,7 +355,7 @@ JPS_Simulation_ReadAgent(JPS_Simulation handle, JPS_AgentId id, JPS_ErrorMessage
  * @param[out] data pointer to the ids
  * @return numer of agents that have been removed in the last iteration
  */
-size_t JPS_Simulation_RemovedAgents(JPS_Simulation handle, const JPS_AgentId** data);
+JUPEDSIM_API size_t JPS_Simulation_RemovedAgents(JPS_Simulation handle, const JPS_AgentId** data);
 
 /*
  * Advances the simulation by one step.
@@ -351,27 +363,27 @@ size_t JPS_Simulation_RemovedAgents(JPS_Simulation handle, const JPS_AgentId** d
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return true if no errors occured
  */
-bool JPS_Simulation_Iterate(JPS_Simulation handle, JPS_ErrorMessage* errorMessage);
+JUPEDSIM_API bool JPS_Simulation_Iterate(JPS_Simulation handle, JPS_ErrorMessage* errorMessage);
 
 /**
  * How many agents are in the simulation.
  * @param handle of the simulation
  * @return count agents in the simulation
  */
-size_t JPS_Simulation_AgentCount(JPS_Simulation handle);
+JUPEDSIM_API size_t JPS_Simulation_AgentCount(JPS_Simulation handle);
 
 /**
  * Returns how many iterations have been simulated.
  * @param handle of the simulation
  * @return count of elapsed iterations
  */
-uint64_t JPS_Simulation_IterationCount(JPS_Simulation handle);
+JUPEDSIM_API uint64_t JPS_Simulation_IterationCount(JPS_Simulation handle);
 
 /**
  * Frees a JPS_Simulation.
  * @param handle to the JPS_Simulation to free.
  */
-void JPS_Simulation_Free(JPS_Simulation handle);
+JUPEDSIM_API void JPS_Simulation_Free(JPS_Simulation handle);
 
 #ifdef __cplusplus
 }

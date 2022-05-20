@@ -61,3 +61,14 @@ if(BUILD_WITH_ASAN)
   set_property(TARGET jpscore_asan PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
   set_property(TARGET jpscore_asan PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 endif()
+
+################################################################################
+# Installation
+################################################################################
+install(TARGETS jpscore
+    DESTINATION ${JPSCORE_INSTALLER_LOCATION}
+)
+install(DIRECTORY
+    ${CMAKE_SOURCE_DIR}/examples/jpscore
+    DESTINATION .
+)
