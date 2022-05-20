@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <utility>
 
 class NeighborhoodEndIterator
 {
@@ -27,7 +28,7 @@ public:
         , _max_idy(max_idy)
         , _cur_idx(idx)
         , _cur_idy(idy)
-        , _filter(filter)
+        , _filter(std::move(filter))
         , _cur_grid_it(_grid.get({idx, idy}).begin())
         , _cur_grid_end(_grid.get({idx, idy}).end())
     {

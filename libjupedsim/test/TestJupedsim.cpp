@@ -85,7 +85,6 @@ TEST(Simulation, CanSimulate)
     auto areas_builder = JPS_AreasBuilder_Create();
 
     const uint16_t destinationId = 1;
-    ;
     std::vector<double> box{18, 4, 20, 4, 20, 6, 18, 6};
     std::vector<const char*> labels{"exit"};
     JPS_AreasBuilder_AddArea(
