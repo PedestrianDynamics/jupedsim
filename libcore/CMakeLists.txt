@@ -69,9 +69,7 @@ target_link_libraries(core
     Boost::boost
     poly2tri
     tinyxml
-    visilibity
     CLI11::CLI11
-    fs
     spdlog::spdlog
     fmt::fmt
     git-info

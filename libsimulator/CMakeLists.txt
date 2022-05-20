@@ -66,10 +66,6 @@ target_compile_definitions(simulator PUBLIC
 target_link_libraries(simulator PUBLIC
     Boost::boost
     poly2tri
-    tinyxml
-    visilibity
-    CLI11::CLI11
-    spdlog::spdlog
     fmt::fmt
     shared
     CGAL::CGAL

@@ -44,7 +44,7 @@ if(BUILD_TESTS)
         shared
     )
 
-    target_compile_options(libcore-tests PRIVATE
+    target_compile_options(libshared-tests PRIVATE
         ${COMMON_COMPILE_OPTIONS}
     )
 
