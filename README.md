@@ -102,7 +102,7 @@ they are built with `scripts/setup-deps.sh`. To compile dependencies invoke the
 script and specify the install path:
 
 ```bash
-./scripts/setup-deps.sh --install-path ~/jspcore-deps
+./scripts/setup-deps.sh --install-path ~/jpscore-deps
 ```
 
 The output created in `~jpscore-deps` now contains an install tree of all required
