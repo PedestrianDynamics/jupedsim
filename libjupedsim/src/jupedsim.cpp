@@ -1,5 +1,6 @@
 #include "jupedsim/jupedsim.h"
 
+#include "CollisionGeometry.hpp"
 #include "ErrorMessage.hpp"
 
 #include <Area.hpp>
@@ -163,7 +164,6 @@ JPS_Geometry JPS_GeometryBuilder_Build(JPS_GeometryBuilder handle, JPS_ErrorMess
 
 void JPS_GeometryBuilder_Free(JPS_GeometryBuilder handle)
 {
-    assert(handle != nullptr);
     delete reinterpret_cast<GeometryBuilder*>(handle);
 }
 
@@ -172,7 +172,6 @@ void JPS_GeometryBuilder_Free(JPS_GeometryBuilder handle)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void JPS_Geometry_Free(JPS_Geometry handle)
 {
-    assert(handle != nullptr);
     delete reinterpret_cast<Geometry*>(handle);
 }
 
@@ -229,7 +228,6 @@ JPS_Areas JPS_AreasBuilder_Build(JPS_AreasBuilder handle, JPS_ErrorMessage* erro
 
 void JPS_AreasBuilder_Free(JPS_AreasBuilder handle)
 {
-    assert(handle != nullptr);
     delete reinterpret_cast<AreasBuilder*>(handle);
 }
 
@@ -238,7 +236,6 @@ void JPS_AreasBuilder_Free(JPS_AreasBuilder handle)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void JPS_Areas_Free(JPS_Areas handle)
 {
-    assert(handle != nullptr);
     delete reinterpret_cast<Areas*>(handle);
 }
 
@@ -289,13 +286,21 @@ JPS_Simulation JPS_Simulation_Create(
     JPS_Simulation result{};
     try {
         auto geometryInternal = reinterpret_cast<Geometry*>(geometry);
+        auto collisionGeometry =
+            std::make_unique<CollisionGeometry>(*geometryInternal->collisionGeometry);
+        auto routingEngine = geometryInternal->routingEngine->Clone();
+
         auto modelInternal = reinterpret_cast<OperationalModel*>(model);
+        auto model = modelInternal->Clone();
+
         auto areasInternal = reinterpret_cast<Areas*>(areas);
+        auto areas = std::make_unique<Areas>(*areasInternal);
+
         result = reinterpret_cast<JPS_Simulation>(new Simulation(
-            std::unique_ptr<OperationalModel>(modelInternal),
-            std::move(geometryInternal->collisionGeometry),
-            std::move(geometryInternal->routingEngine),
-            std::unique_ptr<Areas>(areasInternal),
+            std::move(model),
+            std::move(collisionGeometry),
+            std::move(routingEngine),
+            std::move(areas),
             dT));
     } catch(const std::exception& ex) {
         if(errorMessage) {
@@ -410,6 +415,5 @@ uint64_t JPS_Simulation_IterationCount(JPS_Simulation handle)
 
 void JPS_Simulation_Free(JPS_Simulation handle)
 {
-    assert(handle);
     delete reinterpret_cast<Simulation*>(handle);
 }

@@ -9,6 +9,11 @@ NavMeshRoutingEngine::NavMeshRoutingEngine(GraphType&& graph) : _graph(graph)
 {
 }
 
+std::unique_ptr<RoutingEngine> NavMeshRoutingEngine::Clone() const
+{
+    return std::make_unique<NavMeshRoutingEngine>(*this);
+}
+
 std::vector<Point> NavMeshRoutingEngine::ComputeWaypoint(Point currentPosition, Point destination)
 {
     GraphType::VertexId from = findVertex(currentPosition);

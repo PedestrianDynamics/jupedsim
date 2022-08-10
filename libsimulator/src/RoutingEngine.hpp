@@ -19,6 +19,8 @@ public:
     // TODO(kkratz): input sources missing
     virtual void Update() = 0;
 
+    virtual std::unique_ptr<RoutingEngine> Clone() const = 0;
+
 protected:
     RoutingEngine(const RoutingEngine&) = default;
     RoutingEngine& operator=(const RoutingEngine&) = default;
@@ -49,12 +51,13 @@ public:
     explicit NavMeshRoutingEngine(GraphType&& graph);
     ~NavMeshRoutingEngine() override = default;
 
-    NavMeshRoutingEngine(const NavMeshRoutingEngine& other) = delete;
-    NavMeshRoutingEngine& operator=(const NavMeshRoutingEngine& other) = delete;
+    NavMeshRoutingEngine(const NavMeshRoutingEngine& other) = default;
+    NavMeshRoutingEngine& operator=(const NavMeshRoutingEngine& other) = default;
 
     NavMeshRoutingEngine(NavMeshRoutingEngine&& other) = default;
     NavMeshRoutingEngine& operator=(NavMeshRoutingEngine&& other) = default;
 
+    std::unique_ptr<RoutingEngine> Clone() const override;
     std::vector<Point> ComputeWaypoint(Point currentPosition, Point destination) override;
     void Update() override;
 

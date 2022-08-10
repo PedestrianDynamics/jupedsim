@@ -103,6 +103,8 @@ set_target_properties(poly2tri PROPERTIES
 target_include_directories(poly2tri INTERFACE
     ${POLY2TRI_HEADER}/..
 )
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
+find_package(pybind11 REQUIRED CONFIG)
 
 if(BUILD_JPSCORE)
     find_package(CLI11 2.1 REQUIRED CONFIG)
@@ -316,6 +318,7 @@ endif()
 add_subdirectory(libjupedsim)
 add_subdirectory(libshared)
 add_subdirectory(libsimulator)
+add_subdirectory(python_bindings_jupedsim)
 
 ################################################################################
 # Code formating

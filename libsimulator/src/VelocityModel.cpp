@@ -108,6 +108,11 @@ void VelocityModel::ApplyUpdate(const PedestrianUpdate& update, Pedestrian& agen
     }
 }
 
+std::unique_ptr<OperationalModel> VelocityModel::Clone() const
+{
+    return std::make_unique<VelocityModel>(*this);
+}
+
 void VelocityModel::e0(const Pedestrian* ped, Point target, PedestrianUpdate& update) const
 {
     Point desired_direction;

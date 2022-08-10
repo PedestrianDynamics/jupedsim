@@ -53,6 +53,7 @@ public:
         const CollisionGeometry& geometry,
         const NeighborhoodSearch& neighborhoodSearch) const override;
     void ApplyUpdate(const PedestrianUpdate& upate, Pedestrian& agent) const override;
+    std::unique_ptr<OperationalModel> Clone() const override;
 
 private:
     // Modellparameter
