@@ -311,9 +311,12 @@ typedef struct JPS_Simulation_t* JPS_Simulation;
  * Creates a new JPS_Simulation object.
  * NOTE: JPS_Simulation_Create will take ownership of all indicated parameters even in case an error
  * occured.
- * @param model to use. Will take ownership.
- * @param geometry to use. Will take ownership.
- * @param areas to use. Will take ownership.
+ * @param model to use. Will copy 'model', 'model' can be freed after this call or reused for
+ * another simulation.
+ * @param geometry to use. Will copy 'geometry', 'geometry' can be freed after this call or reused
+ * for another simulation.
+ * @param areas to use. Will copy 'areas', 'areas' can be freed after this call or reused for
+ * another simulation.
  * @param dT simulation timestep in seconds
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return the Simulation

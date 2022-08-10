@@ -65,13 +65,13 @@ public:
     explicit CollisionGeometry(std::vector<Line>&& segments);
     /// Default destructor
     ~CollisionGeometry() = default;
-    /// Non-copyable
-    CollisionGeometry(const CollisionGeometry& other) = delete;
-    /// Non-copyable
-    CollisionGeometry& operator=(const CollisionGeometry& other) = delete;
-    /// Non-movable
+    /// Copyable
+    CollisionGeometry(const CollisionGeometry& other) = default;
+    /// Copyable
+    CollisionGeometry& operator=(const CollisionGeometry& other) = default;
+    /// Movable
     CollisionGeometry(CollisionGeometry&& other) = default;
-    /// Non-moveable
+    /// Moveable
     CollisionGeometry& operator=(CollisionGeometry&& other) = default;
     /// Returns an iterator pair to all linesegments <= 'distance' away from 'p'
     /// @param distance from reference point

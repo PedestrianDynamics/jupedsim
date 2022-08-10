@@ -110,6 +110,11 @@ void GCFMModel::ApplyUpdate(const PedestrianUpdate& update, Pedestrian& agent) c
     agent.SetPhiPed();
 }
 
+std::unique_ptr<OperationalModel> GCFMModel::Clone() const
+{
+    return std::make_unique<GCFMModel>(*this);
+}
+
 inline Point
 GCFMModel::ForceDriv(const Pedestrian* ped, Point target, PedestrianUpdate& update) const
 {

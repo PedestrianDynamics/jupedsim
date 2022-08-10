@@ -14,6 +14,7 @@ boost_version="1.78.0"
 glm_version="6ad79aae3eb5bf809c30bf1168171e9e55857e45"
 poly2tri_version="3380f5c805dd25a06de21f7dacd4db529dbe07e7"
 cgal_version="5.4"
+pybind11_version="2.10.0"
 install_path=/usr/local
 
 POSITIONAL=()
@@ -220,6 +221,26 @@ function setup_cgal {
     rm -rf ${temp_folder}
 }
 
+function setup_pybind11 {
+    root=$(pwd)
+    temp_folder=$(mktemp -d)
+    cd ${temp_folder}
+
+    wget https://github.com/pybind/pybind11/archive/refs/tags/v${pybind11_version}.tar.gz
+    tar xf v${pybind11_version}.tar.gz
+    cd pybind11-${pybind11_version}
+    mkdir build
+    cd build
+    cmake .. \
+        -DCMAKE_INSTALL_PREFIX=${install_path} \
+        -DPYBIND11_TEST=OFF \
+        -DCMAKE_BUILD_TYPE=Release
+    cmake --build . --target install -- -j${CPUS}
+
+    cd ${root}
+    rm -rf ${temp_folder}
+}
+
 setup_boost
 setup_googletest
 setup_fmt
@@ -228,3 +249,4 @@ setup_cli11
 setup_glm
 setup_poly2tri
 setup_cgal
+setup_pybind11

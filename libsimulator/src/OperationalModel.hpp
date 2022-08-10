@@ -59,4 +59,6 @@ public:
         const NeighborhoodSearch& neighborhoodSearch) const = 0;
 
     virtual void ApplyUpdate(const PedestrianUpdate& update, Pedestrian& agent) const = 0;
+
+    virtual std::unique_ptr<OperationalModel> Clone() const = 0;
 };
