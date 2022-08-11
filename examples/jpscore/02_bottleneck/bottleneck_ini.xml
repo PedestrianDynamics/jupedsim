@@ -20,10 +20,10 @@
                 <label>exit</label>
             </lables>
             <polygon>
-                <vertex px="62" py="104" />
-                <vertex px="62" py="103" />
-                <vertex px="65" py="103" />
-                <vertex px="65" py="104" />
+                <vertex px="64.5" py="102.6" />
+                <vertex px="64.5" py="101.4" />
+                <vertex px="65" py="101.4" />
+                <vertex px="65" py="102.6" />
             </polygon>
         </area>
     </areas>

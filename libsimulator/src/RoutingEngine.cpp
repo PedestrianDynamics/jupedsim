@@ -44,8 +44,21 @@ std::vector<Point> NavMeshRoutingEngine::ComputeWaypoint(Point currentPosition, 
     size_t index_right{0};
 
     for(size_t index_portal = 0; index_portal < portals.size(); ++index_portal) {
-        const auto candidate_left = portals[index_portal].GetPoint2();
-        const auto candidate_right = portals[index_portal].GetPoint1();
+        // TODO(kkratz): Revisit this code.
+        // Currently we constrain the portal size by 20cm on both ends to
+        // avoid agents coming to cose to corners.
+        // Alternatively this can be adresse by shrining the nav mesh, this would have the added
+        // benefit of disconnecting parts of the nav mesh that are connected by a gap that is
+        // narrower than a agents size.
+        // Hard coded 0.2 value could / should become a input parameter
+        const auto line_segment_left = portals[index_portal].GetPoint2();
+        const auto line_segment_right = portals[index_portal].GetPoint1();
+        const auto line_segment_direction = (line_segment_right - line_segment_left).Normalized();
+        const auto candidate_left =
+            portals[index_portal].GetPoint2() + (line_segment_direction * 0.2);
+        const auto candidate_right =
+            portals[index_portal].GetPoint1() - (line_segment_direction * 0.2);
+
         if(triarea2d(apex, portal_right, candidate_right) <= 0.0) {
             if(apex == portal_right || triarea2d(apex, portal_left, candidate_right) > 0.0) {
                 portal_right = candidate_right;
