@@ -1,12 +1,6 @@
-
+import py_jupedsim as jps
 
 def main():
-    try: 
-        import py_jupedsim as jps
-        print(jps)
-    except Exception as e:
-        print(e)
-
     geo_builder = jps.GeometryBuilder()
     geo_builder.add_accessible_area([0, 0, 10, 0, 10, 10, 0, 10])
     geo_builder.add_accessible_area([10, 4, 20, 4, 20, 6, 10, 6])
