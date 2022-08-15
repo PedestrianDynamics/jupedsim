@@ -404,8 +404,8 @@ def configuration():
     parser = argparse.ArgumentParser()
     parser.add_argument("file", type=str, help="Merge the given Trajectory files together",
                         nargs='+')
-    parser.add_argument('-o', type=str, required=False, default="src/outputfile.txt",
-                        help="define output file, default path is outputfile.txt",
+    parser.add_argument('-o', type=str, required=False, default="merged_Trajectories.txt",
+                        help="define output file, default path is merged_Trajectories.txt",
                         dest="output_path")
     parser.add_argument('-v', action="store_true", help="activates verbose mode and shows how many files remain",
                         dest="verbose")
