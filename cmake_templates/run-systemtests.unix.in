@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 export JPSCORE_EXECUTABLE_PATH="@CMAKE_BINARY_DIR@/bin/jpscore"
 export JPSCORE_SOURCE_PATH="@CMAKE_SOURCE_DIR@"
-export PYTHONPATH="@CMAKE_SOURCE_DIR@/python_modules"
+export PYTHONPATH="@CMAKE_SOURCE_DIR@/systemtest/test_support"
 
 pytest  ${JPSCORE_SOURCE_PATH}/systemtest "$@"
 
