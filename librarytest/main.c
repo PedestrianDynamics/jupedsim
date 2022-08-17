@@ -13,10 +13,34 @@ typedef struct Point {
  * TODO(kkratz): Extend example with error handling
  */
 
+void handle_message(const char* prefix, const char * msg) {
+    printf("%s MESSAGE: \"%s\"\n", prefix, msg);
+}
+
+void handle_debug_message(const char* msg) {
+    handle_message("DEBUG", msg);
+}
+
+void handle_info_message(const char* msg) {
+    handle_message("INFO", msg);
+}
+
+void handle_warning_message(const char* msg) {
+    handle_message("WARNING", msg);
+}
+
+void handle_error_message(const char* msg) {
+    handle_message("ERROR", msg);
+}
+
 int main(int argc, char** argv)
 {
     /* Disable output buffering */
     setbuf(stdout, NULL);
+    /*JPS_Logging_SetDebugCallback(handle_debug_message);*/
+    JPS_Logging_SetInfoCallback(handle_info_message);
+    JPS_Logging_SetWarningCallback(handle_warning_message);
+    JPS_Logging_SetErrorCallback(handle_error_message);
     JPS_GeometryBuilder geo_builder = JPS_GeometryBuilder_Create();
 
     double box1[] = {0, 0, 10, 0, 10, 10, 0, 10};

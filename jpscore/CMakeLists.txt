@@ -13,6 +13,7 @@ target_link_libraries(jpscore
     core
     shared
     simulator
+    spdlog::spdlog
     Threads::Threads
 )
 set_property(TARGET jpscore PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})

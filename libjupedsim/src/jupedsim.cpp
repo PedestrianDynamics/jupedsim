@@ -2,11 +2,13 @@
 
 #include "CollisionGeometry.hpp"
 #include "ErrorMessage.hpp"
+#include "Logger.hpp"
 
 #include <Area.hpp>
 #include <GCFMModel.hpp>
 #include <Geometry.hpp>
 #include <GeometryBuilder.hpp>
+#include <Logger.hpp>
 #include <OperationalModel.hpp>
 #include <OperationalModelType.hpp>
 #include <Pedestrian.hpp>
@@ -20,6 +22,50 @@
 #include <memory>
 #include <string>
 #include <vector>
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Logging
+////////////////////////////////////////////////////////////////////////////////////////////////////
+JUPEDSIM_API void JPS_Logging_SetDebugCallback(JPS_LoggingCallBack callback)
+{
+    if(callback) {
+        Logging::Logger::Instance().SetDebugCallback(
+            [callback](const std::string& msg) { callback(msg.c_str()); });
+    } else {
+        Logging::Logger::Instance().ClearDebugCallback();
+    }
+}
+
+JUPEDSIM_API void JPS_Logging_SetInfoCallback(JPS_LoggingCallBack callback)
+{
+    if(callback) {
+        Logging::Logger::Instance().SetInfoCallback(
+            [callback](const std::string& msg) { callback(msg.c_str()); });
+    } else {
+        Logging::Logger::Instance().ClearInfoCallback();
+    }
+}
+
+JUPEDSIM_API void JPS_Logging_SetWarningCallback(JPS_LoggingCallBack callback)
+{
+    if(callback) {
+        Logging::Logger::Instance().SetWarningCallback(
+            [callback](const std::string& msg) { callback(msg.c_str()); });
+    } else {
+        Logging::Logger::Instance().ClearWarningCallback();
+    }
+}
+
+JUPEDSIM_API void JPS_Logging_SetErrorCallback(JPS_LoggingCallBack callback)
+{
+    if(callback) {
+        Logging::Logger::Instance().SetErrorCallback(
+            [callback](const std::string& msg) { callback(msg.c_str()); });
+    } else {
+        Logging::Logger::Instance().ClearErrorCallback();
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// ErrorMessage
 ////////////////////////////////////////////////////////////////////////////////////////////////////

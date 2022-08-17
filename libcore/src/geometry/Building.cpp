@@ -161,7 +161,7 @@ void Building::AddRoom(Room* room)
 
 bool Building::InitGeometry()
 {
-    Logging::Info("Init Geometry");
+    LOG_INFO("Init Geometry");
     for(auto&& itr_room : _rooms) {
         for(auto&& itr_subroom : itr_room.second->GetAllSubRooms()) {
             // create a close polyline out of everything

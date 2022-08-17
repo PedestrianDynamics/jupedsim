@@ -70,7 +70,6 @@ target_link_libraries(core
     poly2tri
     tinyxml
     CLI11::CLI11
-    spdlog::spdlog
     fmt::fmt
     git-info
     shared

@@ -14,7 +14,6 @@ add_library(shared STATIC
 )
 
 target_link_libraries(shared PUBLIC
-    spdlog::spdlog
     fmt::fmt
     tinyxml
 )
