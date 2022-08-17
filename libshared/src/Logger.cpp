@@ -1,68 +1,90 @@
 #include "Logger.hpp"
 
-#include <spdlog/spdlog.h>
+#include <memory>
 
 namespace Logging
 {
-void Setup()
+
+Logger& Logger::Instance()
 {
-    spdlog::set_level(spdlog::level::trace);
+    static Logger logger;
+    return logger;
 }
 
-void Teardown()
+void Logger::SetDebugCallback(LogCalback&& cb)
 {
-    spdlog::shutdown();
+    debug_msg_cb = cb;
 }
 
-void Debug(std::string_view msg)
+void Logger::ClearDebugCallback()
 {
-    spdlog::debug(msg);
+    debug_msg_cb = {};
 }
 
-void Info(std::string_view msg)
+void Logger::LogDebugMessage(const std::string& msg)
 {
-    spdlog::info(msg);
-}
-
-void Warning(std::string_view msg)
-{
-    spdlog::warn(msg);
-}
-
-void Error(std::string_view msg)
-{
-    spdlog::error(msg);
-}
-
-void SetLogLevel(Level level)
-{
-    switch(level) {
-        case Level::Debug:
-            spdlog::set_level(spdlog::level::debug);
-            break;
-        case Level::Info:
-            spdlog::set_level(spdlog::level::info);
-            break;
-        case Level::Warning:
-            spdlog::set_level(spdlog::level::warn);
-            break;
-        case Level::Error:
-            spdlog::set_level(spdlog::level::err);
-            break;
-        case Level::Off:
-            spdlog::set_level(spdlog::level::off);
-            break;
+    if(debug_msg_cb) {
+        debug_msg_cb(msg);
     }
 }
 
-Guard::Guard()
+void Logger::SetInfoCallback(LogCalback&& cb)
 {
-    Setup();
+    info_msg_cb = cb;
 }
 
-Guard::~Guard()
+void Logger::ClearInfoCallback()
 {
-    Teardown();
+    info_msg_cb = {};
+}
+
+void Logger::LogInfoMessage(const std::string& msg)
+{
+    if(info_msg_cb) {
+        info_msg_cb(msg);
+    }
+}
+
+void Logger::SetWarningCallback(LogCalback&& cb)
+{
+    warning_msg_cb = cb;
+}
+
+void Logger::ClearWarningCallback()
+{
+    warning_msg_cb = {};
+}
+
+void Logger::LogWarningMessage(const std::string& msg)
+{
+    if(warning_msg_cb) {
+        warning_msg_cb(msg);
+    }
+}
+
+void Logger::SetErrorCallback(LogCalback&& cb)
+{
+    error_msg_cb = cb;
+}
+
+void Logger::ClearErrorCallback()
+{
+    error_msg_cb = {};
+}
+
+void Logger::LogErrorMessage(const std::string& msg)
+{
+    if(error_msg_cb) {
+        error_msg_cb(msg);
+    }
+}
+
+void Logger::ClearAllCallbacks()
+{
+    ClearDebugCallback();
+    ClearInfoCallback();
+    ClearWarningCallback();
+    ClearErrorCallback();
 }
 
 } // namespace Logging

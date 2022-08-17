@@ -49,10 +49,12 @@
 
 #include <Logger.hpp>
 
+#include <fmt/format.h>
+#include <spdlog/spdlog.h>
+
 #include <chrono>
 #include <cstdlib>
 #include <exception>
-#include <fmt/format.h>
 #include <iostream>
 #include <iterator>
 #include <memory>
@@ -77,6 +79,46 @@ CreateFromType(OperationalModelType type, const Configuration& config)
     }
 }
 
+class ApplicationLogging
+{
+public:
+    ApplicationLogging()
+    {
+        spdlog::set_level(spdlog::level::trace);
+        auto& logger = Logging::Logger::Instance();
+        logger.SetDebugCallback([](auto msg) { spdlog::debug(msg); });
+        logger.SetInfoCallback([](auto msg) { spdlog::info(msg); });
+        logger.SetWarningCallback([](auto msg) { spdlog::warn(msg); });
+        logger.SetErrorCallback([](auto msg) { spdlog::error(msg); });
+    }
+    ~ApplicationLogging()
+    {
+        Logging::Logger::Instance().ClearAllCallbacks();
+        spdlog::shutdown();
+    }
+    void SetLogLevel(Logging::Level level)
+    {
+        using Logging::Level;
+        switch(level) {
+            case Level::Debug:
+                spdlog::set_level(spdlog::level::debug);
+                break;
+            case Level::Info:
+                spdlog::set_level(spdlog::level::info);
+                break;
+            case Level::Warning:
+                spdlog::set_level(spdlog::level::warn);
+                break;
+            case Level::Error:
+                spdlog::set_level(spdlog::level::err);
+                break;
+            case Level::Off:
+                spdlog::set_level(spdlog::level::off);
+                break;
+        }
+    }
+};
+
 int main(int argc, char** argv)
 {
     ArgumentParser a;
@@ -92,9 +134,9 @@ int main(int argc, char** argv)
                   << fmt::format("Build with {}({})", compiler_id, compiler_version) << std::endl;
         return 0;
     }
-    Logging::Guard guard;
+    ApplicationLogging logging;
     try {
-        Logging::SetLogLevel(a.LogLevel());
+        logging.SetLogLevel(a.LogLevel());
         LOG_INFO("Starting JuPedSim - JPScore");
         LOG_INFO("Version {}", JPSCORE_VERSION);
         LOG_INFO("Commit id {}", GIT_COMMIT_HASH);

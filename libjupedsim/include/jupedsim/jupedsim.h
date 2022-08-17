@@ -19,10 +19,39 @@
 extern "C" {
 #endif
 
-/// Logging
-// enum JPS_LogLevel { NONE, ERROR, WARNING, INFO, DEBUG };
+/**
+ * Callback type for logging
+ */
+typedef void (*JPS_LoggingCallBack)(const char*);
 
-// typedef void (*JPS_log_callback)(JPS_LogLevel level, const char* msg);
+/**
+ * Register callback to receive debug level log messages.
+ * To unregsiter a callback supply a NULL pointer.
+ * @param callback to call with debug message
+ */
+JUPEDSIM_API void JPS_Logging_SetDebugCallback(JPS_LoggingCallBack callback);
+
+/**
+ * Register callback to receive info level log messages.
+ * To unregsiter a callback supply a NULL pointer.
+ * @param callback to call with info message
+ */
+JUPEDSIM_API void JPS_Logging_SetInfoCallback(JPS_LoggingCallBack callback);
+
+/**
+ * Register callback to receive warning level log messages.
+ * To unregsiter a callback supply a NULL pointer.
+ * @param callback to call with warning message
+ */
+
+JUPEDSIM_API void JPS_Logging_SetWarningCallback(JPS_LoggingCallBack callback);
+
+/**
+ * Register callback to receive error level log messages.
+ * To unregsiter a callback supply a NULL pointer.
+ * @param callback to call with error message
+ */
+JUPEDSIM_API void JPS_Logging_SetErrorCallback(JPS_LoggingCallBack callback);
 
 /**
  * Opaque type for error messages.
