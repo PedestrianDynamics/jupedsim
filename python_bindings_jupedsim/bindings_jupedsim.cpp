@@ -6,6 +6,7 @@
 #include <memory>
 #include <vector>
 
+#include <pybind11/functional.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -38,8 +39,54 @@ OWNED_WRAPPER(JPS_AreasBuilder);
 WRAPPER(JPS_Agent);
 OWNED_WRAPPER(JPS_Simulation);
 
+class LogCallbackOwner
+{
+public:
+    using LogCallback = std::function<void(const std::string&)>;
+
+    LogCallback debug{};
+    LogCallback info{};
+    LogCallback warning{};
+    LogCallback error{};
+
+public:
+    static LogCallbackOwner& Instance()
+    {
+        static LogCallbackOwner instance;
+        return instance;
+    }
+};
+
 PYBIND11_MODULE(py_jupedsim, m)
 {
+    auto atexit = py::module_::import("atexit");
+    atexit.attr("register")(py::cpp_function([]() {
+        auto& owner = LogCallbackOwner::Instance();
+        owner.debug = {};
+        owner.info = {};
+        owner.warning = {};
+        owner.error = {};
+    }));
+    m.def("set_debug_callback", [](LogCallbackOwner::LogCallback callback) {
+        LogCallbackOwner::Instance().debug = callback;
+        JPS_Logging_SetDebugCallback(
+            [](const char* msg, void*) { LogCallbackOwner::Instance().debug(msg); });
+    });
+    m.def("set_info_callback", [](LogCallbackOwner::LogCallback callback) {
+        LogCallbackOwner::Instance().info = callback;
+        JPS_Logging_SetInfoCallback(
+            [](const char* msg, void*) { LogCallbackOwner::Instance().info(msg); });
+    });
+    m.def("set_warning_callback", [](LogCallbackOwner::LogCallback callback) {
+        LogCallbackOwner::Instance().warning = callback;
+        JPS_Logging_SetWarningCallback(
+            [](const char* msg, void*) { LogCallbackOwner::Instance().warning(msg); });
+    });
+    m.def("set_error_callback", [](LogCallbackOwner::LogCallback callback) {
+        LogCallbackOwner::Instance().error = callback;
+        JPS_Logging_SetErrorCallback(
+            [](const char* msg, void*) { LogCallbackOwner::Instance().error(msg); });
+    });
     py::class_<JPS_Geometry_Wrapper>(m, "Geometry");
     py::class_<JPS_GeometryBuilder_Wrapper>(m, "GeometryBuilder")
         .def(py::init([]() {
