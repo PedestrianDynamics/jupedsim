@@ -253,7 +253,7 @@ double Pedestrian::GetSmoothFactorDownEscalators() const
     return _smoothFactorEscalatorDownStairs;
 }
 
-std::ostream& operator<<(std::ostream& out, const Pedestrian& pedestrian)
+std::ostream& operator<<(std::ostream& out, const Pedestrian&)
 {
     // TODO(kkratz) Fix
     return out << "";
