@@ -257,7 +257,7 @@ if(BUILD_TESTS)
         COMMAND ${pytest-wrapper-out} -vv -s
                 --basetemp=${CMAKE_BINARY_DIR}/systemtest-out
                 --junit-xml=result-systemtests.xml
-        DEPENDS jpscore
+        DEPENDS jpscore py_jupedsim
     )
     set(unittests_dependency_list libjupedsim-unittests libsimulator-unittests libshared-unittests)
     if(BUILD_JPSCORE)
