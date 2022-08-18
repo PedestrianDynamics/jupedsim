@@ -33,7 +33,13 @@ check_prefix_path()
 # Optional features
 ################################################################################
 set(BUILD_JPSCORE ON CACHE BOOL "Build jpscore cli application")
+print_var(BUILD_JPSCORE)
+
+set(WERROR OFF CACHE BOOL "Build wth -Werror enabled. Not supported on Windows")
+print_var(WERROR)
+
 set(BUILD_JPSVIS ON CACHE BOOL "Build jpsvis gui application")
+print_var(BUILD_JPSVIS)
 
 set(BUILD_TESTS OFF CACHE BOOL "Build tests")
 print_var(BUILD_TESTS)
@@ -59,6 +65,7 @@ endif()
 #          CMake will enclose multiple flags in '' which the compiler then
 #          treats as a single flag and does not understand.
 list(APPEND COMMON_COMPILE_OPTIONS
+    $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>,$<BOOL:${WERROR}>>:-Werror>
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-Wall>
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-Wextra>
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-fdiagnostics-color=always>
