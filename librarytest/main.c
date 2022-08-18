@@ -13,6 +13,9 @@ typedef struct Point {
  * TODO(kkratz): Extend example with error handling
  */
 
+/*
+ * If you want to enable logging in libjupedsim you will need to provide handler functions for each log level. 
+ */
 void handle_message(const char* prefix, const char * msg) {
     printf("%s MESSAGE: \"%s\"\n", prefix, msg);
 }
@@ -37,6 +40,8 @@ int main(int argc, char** argv)
 {
     /* Disable output buffering */
     setbuf(stdout, NULL);
+    
+    /* Register log message handlers with libjupedsim */
     /*JPS_Logging_SetDebugCallback(handle_debug_message);*/
     JPS_Logging_SetInfoCallback(handle_info_message);
     JPS_Logging_SetWarningCallback(handle_warning_message);

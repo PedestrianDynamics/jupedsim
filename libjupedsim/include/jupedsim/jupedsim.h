@@ -22,36 +22,45 @@ extern "C" {
 /**
  * Callback type for logging
  */
-typedef void (*JPS_LoggingCallBack)(const char*);
+typedef void (*JPS_LoggingCallBack)(const char*, void*);
 
 /**
  * Register callback to receive debug level log messages.
- * To unregsiter a callback supply a NULL pointer.
+ * To unregsiter a callback supply a NULL pointer as callback.
+ * The optional userdata parameter is stored (non-owning) and always passed to the callback.
  * @param callback to call with debug message
+ * @param userdata optional pointer to state needed by the callback
  */
-JUPEDSIM_API void JPS_Logging_SetDebugCallback(JPS_LoggingCallBack callback);
+JUPEDSIM_API void JPS_Logging_SetDebugCallback(JPS_LoggingCallBack callback, void* userdata = NULL);
 
 /**
  * Register callback to receive info level log messages.
  * To unregsiter a callback supply a NULL pointer.
- * @param callback to call with info message
+ * The optional userdata parameter is stored (non-owning) and always passed to the callback.
+ * @param callback to call with debug message
+ * @param userdata optional pointer to state needed by the callback
  */
-JUPEDSIM_API void JPS_Logging_SetInfoCallback(JPS_LoggingCallBack callback);
+JUPEDSIM_API void JPS_Logging_SetInfoCallback(JPS_LoggingCallBack callback, void* userdata = NULL);
 
 /**
  * Register callback to receive warning level log messages.
  * To unregsiter a callback supply a NULL pointer.
- * @param callback to call with warning message
+ * The optional userdata parameter is stored (non-owning) and always passed to the callback.
+ * @param callback to call with debug message
+ * @param userdata optional pointer to state needed by the callback
  */
 
-JUPEDSIM_API void JPS_Logging_SetWarningCallback(JPS_LoggingCallBack callback);
+JUPEDSIM_API void
+JPS_Logging_SetWarningCallback(JPS_LoggingCallBack callback, void* userdata = NULL);
 
 /**
  * Register callback to receive error level log messages.
  * To unregsiter a callback supply a NULL pointer.
- * @param callback to call with error message
+ * The optional userdata parameter is stored (non-owning) and always passed to the callback.
+ * @param callback to call with debug message
+ * @param userdata optional pointer to state needed by the callback
  */
-JUPEDSIM_API void JPS_Logging_SetErrorCallback(JPS_LoggingCallBack callback);
+JUPEDSIM_API void JPS_Logging_SetErrorCallback(JPS_LoggingCallBack callback, void* userdata = NULL);
 
 /**
  * Opaque type for error messages.
