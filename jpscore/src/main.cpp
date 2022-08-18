@@ -58,6 +58,7 @@
 #include <iostream>
 #include <iterator>
 #include <memory>
+#include <stdexcept>
 
 std::unique_ptr<OperationalModel>
 CreateFromType(OperationalModelType type, const Configuration& config)
@@ -77,6 +78,7 @@ CreateFromType(OperationalModelType type, const Configuration& config)
             return std::make_unique<VelocityModel>(
                 config.aPed, config.dPed, config.aWall, config.dWall);
     }
+    throw std::runtime_error("Unknown OperationalModelType found");
 }
 
 class ApplicationLogging

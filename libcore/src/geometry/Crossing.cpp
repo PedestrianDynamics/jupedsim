@@ -77,12 +77,12 @@ bool Crossing::IsTransition() const
     return false;
 }
 
-void Crossing::Close(bool event)
+void Crossing::Close(bool)
 {
     assert(false);
 }
 
-void Crossing::TempClose(bool event)
+void Crossing::TempClose(bool)
 {
     assert(false);
 }
