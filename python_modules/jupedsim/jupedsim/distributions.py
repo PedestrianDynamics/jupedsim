@@ -1,3 +1,4 @@
+import argparse
 import random
 from math import sqrt
 import matplotlib.pyplot as plt
@@ -292,11 +293,10 @@ def distance_to_segment(a, b, e):
     return req_ans
 
 
-def heatmap(all):
-    a_r = 1
-    w_d = 1
+def heatmap(all, agent_radius, wall_distance, polygon):
+    a_r = agent_radius
+    w_d = wall_distance
     x = y = []
-    polygon = [(0, 0), (0, 10), (5, 10), (5, 0)]
     # determines all x and y values to draw the polygon
     for point in polygon:
         x.append(point[0])
@@ -308,7 +308,7 @@ def heatmap(all):
     total = 100
     max_persons = 50
     if all:
-        alpha = 1 / 4 * np.pi * (a_r ** 2)
+        alpha = (25 * (a_r ** 2)) / total
 
     else:
         width = max(x) - min(x)
@@ -469,7 +469,7 @@ def create_points_everywhere(polygon, agent_radius, wall_distance):
     active = nsamples = samples = None
     while True:
         pt = np.random.uniform(borders[0], borders[1]), np.random.uniform(borders[2], borders[3])
-        if is_inside_polygon(polygon, pt):
+        if is_inside_polygon(polygon, pt) and min_distance_to_polygon(pt, polygon) > wall_distance:
             samples = [pt]
             # Our first sample is indexed at 0 in the samples list...
             cells[get_cell_coords(pt, c_s_l, borders)] = 0
@@ -547,5 +547,31 @@ def main2():
     show_points(polygon, points, a_r)
 
 
+def set_up():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('a_r', type=float, help="first argument: minimal radius among agents")
+    parser.add_argument('w_d', type=float, help="second argument: minimal radius between agents and polygon segments")
+    parser.add_argument('-agents', type=int, help="number of agents placed, default value=10", default=10)
+    # todo find a good way to parse Polygons this one doesn´t work
+    parser.add_argument('-p', type=tuple, help="define the Polygon with it´s corner Points", nargs="+")
+    parser.add_argument('-a', action="store_true",
+                        help="-a for as many agents as possible with bridson´s poisson-disk algorithm", dest="all")
+    parser.add_argument('-heatmap', type=int,  action="store_true",
+                        help="creates a heatmap regarding as many iterations as selected")
+    # parser.add_argument("--self-test", action="store_true", help="Will run self tests, print the results and exit.")
+    args = parser.parse_args()
+
+
 if __name__ == '__main__':
-    heatmap(True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('a_r', type=float, help="first argument: minimal radius among agents")
+    parser.add_argument('w_d', type=float, help="second argument: minimal radius between agents and polygon segments")
+    parser.add_argument('-agents', type=int, help="number of agents placed, default value=10", default=10)
+    # todo find a good way to parse Polygons this one doesn´t work
+    parser.add_argument('-p', type=tuple, help="define the Polygon with it´s corner Points", nargs="+")
+    parser.add_argument('-a', action="store_true",
+                        help="-a for as many agents as possible with bridson´s poisson-disk algorithm", dest="all")
+    parser.add_argument('-heatmap', type=int, default=None,
+                        help="creates a heatmap regarding as many iterations as selected")
+    # parser.add_argument("--self-test", action="store_true", help="Will run self tests, print the results and exit.")
+    args = parser.parse_args()
