@@ -2,7 +2,6 @@ import argparse
 import random
 from math import sqrt
 import matplotlib.pyplot as plt
-import numpy
 import numpy as np
 
 # Define Infinite
@@ -154,7 +153,6 @@ def test_if_inside():
 
     p = (8, 1)
     assert is_inside_polygon(points=polygon2, p=p) is False
-    polygon3 = [(0, 0), (10, 0), (10, 10), (0, 10)]
 
     p = (-1, 10)
     assert is_inside_polygon(points=polygon1, p=p) is False
@@ -293,7 +291,7 @@ def distance_to_segment(a, b, e):
     return req_ans
 
 
-def heatmap(all, agent_radius, wall_distance, polygon):
+def heatmap(all, agent_radius, wall_distance, polygon, iterations, max_persons=50):
     a_r = agent_radius
     w_d = wall_distance
     x = y = []
@@ -305,15 +303,14 @@ def heatmap(all, agent_radius, wall_distance, polygon):
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
 
-    total = 100
-    max_persons = 50
+    total = iterations
     if all:
         alpha = (25 * (a_r ** 2)) / total
 
     else:
         width = max(x) - min(x)
         height = max(y) - min(y)
-        alpha = (25 * width * height) / (total * max_persons * numpy.pi)
+        alpha = (25 * width * height) / (total * max_persons * np.pi)
     if alpha < 0.01:
         alpha = 0.01
     elif alpha > 1:
@@ -347,9 +344,21 @@ def heatmap(all, agent_radius, wall_distance, polygon):
     plt.show()
 
 
+def make_polygon(string_list):
+    points = []
+    for elem in string_list:
+        elem = elem.strip("(")
+        elem = elem.strip(")")
+        numbers = elem.split(",")
+        x = int(numbers[0])
+        y = int(numbers[1])
+        points.append((x, y))
+    return points
+
+
 def get_borders(polygon):
     """returns a list containing the minimal/maximal x and y values
-    formated like : [min(x_values), max(x_values), min(y_values), max(y_values)]"""
+    formatted like : [min(x_values), max(x_values), min(y_values), max(y_values)]"""
     x_values = y_values = []
     for point in polygon:
         x_values.append(point[0])
@@ -403,7 +412,7 @@ def get_neighbours(coords, nxny, cells):
                                     ooooo
                                     ooXoo
                                     ooooo
-                                     ooo                                                                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                     ooo
 
     """
     nx, ny = nxny[0], nxny[1]
@@ -501,18 +510,6 @@ def create_points_everywhere(polygon, agent_radius, wall_distance):
     return samples
 
 
-def main():
-    a_r = 1
-    w_d = 0.5
-    polygon = [(0, 0), (0, 10), (5, 10), (5, 0)]
-    # creates the random points
-    samples = create_random_points(polygon, 50, a_r, w_d)
-    # debug print to see how many points have been created
-    print(f"number of points:  {len(samples)}")
-
-    show_points(polygon, samples, a_r)
-
-
 def show_points(polygon, points, radius):
     samples = points
     borders = get_borders(polygon)
@@ -540,38 +537,38 @@ def show_points(polygon, points, radius):
     plt.show()
 
 
-def main2():
-    polygon = [(3, 0), (6, 0), (9, 3), (9, 6), (6, 9), (3, 9), (0, 6), (0, 3)]
-    a_r, w_d = 0.25, 1
-    points = create_points_everywhere(polygon, a_r, w_d)
-    show_points(polygon, points, a_r)
-
-
 def set_up():
     parser = argparse.ArgumentParser()
     parser.add_argument('a_r', type=float, help="first argument: minimal radius among agents")
     parser.add_argument('w_d', type=float, help="second argument: minimal radius between agents and polygon segments")
     parser.add_argument('-agents', type=int, help="number of agents placed, default value=10", default=10)
-    # todo find a good way to parse Polygons this one doesn´t work
-    parser.add_argument('-p', type=tuple, help="define the Polygon with it´s corner Points", nargs="+")
-    parser.add_argument('-a', action="store_true",
-                        help="-a for as many agents as possible with bridson´s poisson-disk algorithm", dest="all")
-    parser.add_argument('-heatmap', type=int,  action="store_true",
-                        help="creates a heatmap regarding as many iterations as selected")
-    # parser.add_argument("--self-test", action="store_true", help="Will run self tests, print the results and exit.")
-    args = parser.parse_args()
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('a_r', type=float, help="first argument: minimal radius among agents")
-    parser.add_argument('w_d', type=float, help="second argument: minimal radius between agents and polygon segments")
-    parser.add_argument('-agents', type=int, help="number of agents placed, default value=10", default=10)
-    # todo find a good way to parse Polygons this one doesn´t work
-    parser.add_argument('-p', type=tuple, help="define the Polygon with it´s corner Points", nargs="+")
+    parser.add_argument('-point', '-p', type=str, nargs="+",
+                        help="define the Polygon with it´s corner Points, formatted like '(0,0)' '(0,1)'")
     parser.add_argument('-a', action="store_true",
                         help="-a for as many agents as possible with bridson´s poisson-disk algorithm", dest="all")
     parser.add_argument('-heatmap', type=int, default=None,
                         help="creates a heatmap regarding as many iterations as selected")
     # parser.add_argument("--self-test", action="store_true", help="Will run self tests, print the results and exit.")
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def main():
+    args = set_up()
+    polygon = make_polygon(args.point)
+    samples = None
+    if args.heatmap is not None:
+        print("heatmap")
+        heatmap(args.all, args.a_r, args.w_d, polygon, args.heatmap, args.agents)
+        exit(0)
+    elif args.all:
+        print("all")
+        samples = create_points_everywhere(polygon, args.a_r, args.w_d)
+    else:
+        print("random")
+        samples = create_random_points(polygon, args.agents, args.a_r, args.w_d)
+
+    show_points(polygon, samples, args.a_r)
+
+
+if __name__ == '__main__':
+    main()
