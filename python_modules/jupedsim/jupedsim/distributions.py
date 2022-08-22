@@ -557,14 +557,11 @@ def main():
     polygon = make_polygon(args.point)
     samples = None
     if args.heatmap is not None:
-        print("heatmap")
         heatmap(args.all, args.a_r, args.w_d, polygon, args.heatmap, args.agents)
         exit(0)
     elif args.all:
-        print("all")
         samples = create_points_everywhere(polygon, args.a_r, args.w_d)
     else:
-        print("random")
         samples = create_random_points(polygon, args.agents, args.a_r, args.w_d)
 
     show_points(polygon, samples, args.a_r)
