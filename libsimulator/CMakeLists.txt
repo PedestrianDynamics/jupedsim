@@ -10,6 +10,7 @@ add_library(simulator STATIC
     src/Area.hpp
     src/CGALPolygon.cpp
     src/CGALPolygon.hpp
+    src/Clonable.hpp
     src/CollisionGeometry.cpp
     src/CollisionGeometry.hpp
     src/ConvexPolygon.cpp

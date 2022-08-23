@@ -30,6 +30,7 @@
 
 #pragma once
 
+#include "Clonable.hpp"
 #include "CollisionGeometry.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "Pedestrian.hpp"
@@ -46,7 +47,7 @@ struct PedestrianUpdate {
     bool resetPhi{false};
 };
 
-class OperationalModel
+class OperationalModel : public Clonable<OperationalModel>
 {
 public:
     OperationalModel() = default;
@@ -59,6 +60,4 @@ public:
         const NeighborhoodSearch& neighborhoodSearch) const = 0;
 
     virtual void ApplyUpdate(const PedestrianUpdate& update, Pedestrian& agent) const = 0;
-
-    virtual std::unique_ptr<OperationalModel> Clone() const = 0;
 };
