@@ -5,8 +5,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Define Infinite
+import pytest
+
 INT_MAX = 10000
 FOREVER = 10000
+
+
+class IncorrectPolygon(Exception):
+
+    def __init__(self, message):
+        self.message = message
 
 
 # Given three collinear points p, q, r,
@@ -19,6 +27,13 @@ def on_segment(p: tuple, q: tuple, r: tuple) -> bool:
         return True
 
     return False
+
+
+def test_on_segment():
+    p1, p2, p3 = (15, 0), (20, 10), (25, 20)
+    assert on_segment(p1, p2, p3) is True
+    p1, p2, p3 = (0, 0), (20, 5), (10, 10)
+    assert on_segment(p1, p2, p3) is False
 
 
 # To find orientation of ordered triplet (p, q, r).
@@ -38,6 +53,15 @@ def orientation(p: tuple, q: tuple, r: tuple) -> int:
         return 1  # Clockwise
     else:
         return 2  # Counterclockwise
+
+
+def test_orientation():
+    p1, p2, p3 = (15, 0), (20, 10), (25, 20)
+    assert orientation(p1, p2, p3) == 0  # collinear
+    p1, p2, p3 = (0, 0), (20, 5), (10, 10)
+    assert orientation(p1, p2, p3) == 2  # Counterclockwise
+    p1, p2, p3 = (10, 10), (20, 5), (0, 0)
+    assert orientation(p1, p2, p3) == 1  # Clockwise
 
 
 def do_intersect(p1, q1, p2, q2):
@@ -76,9 +100,19 @@ def do_intersect(p1, q1, p2, q2):
     return False
 
 
-# Returns true if the point p lies
-# inside the polygon[] with n vertices
+def test_if_intersect_correctly():
+    p1, p2, p3, p4 = (0, 0), (2, 3), (0, 1), (3, 1)
+    assert do_intersect(p1, p2, p3, p4) is True
+    p1, p2, p3, p4 = (0, 0), (3, 0), (0, 1), (3, 1)
+    assert do_intersect(p1, p2, p3, p4) is False
+    p1, p2, p3, p4 = (1, 1), (2, 1), (0, 1), (3, 1)
+    assert do_intersect(p1, p2, p3, p4) is True
+    p1, p2, p3, p4 = (0, 1), (8, 1), (5, 5), (5, 5)
+    assert do_intersect(p1, p2, p3, p4) is False
+
+
 def is_inside_polygon(points: list, p: tuple) -> bool:
+    """ Returns true if the point p lies inside the polygon[] with n vertices """
     n = len(points)
 
     # There must be at least 3 vertices
@@ -157,6 +191,10 @@ def test_if_inside():
     p = (-1, 10)
     assert is_inside_polygon(points=polygon1, p=p) is False
 
+    polygon3 = [(1, 0), (2, 1)]
+    p = (1.5, 0.5)
+    assert is_inside_polygon(polygon3, p) is False
+
 
 def distance_between(pt1, pt2):
     dx = pt2[0] - pt1[0]
@@ -191,7 +229,12 @@ def pt_has_distance_to_others(n_point, existing_points, radius):
     return True
 
 
-def test_has_enough_distance():
+def test_pt_has_distance_to_every_other():
+    points = [(6.67, 1.2), (6.6, 2.3), (8.8, 4.7), (11.05, 7.45), (5.35, 2.9)]
+    n_point, radius = (4.5, 9.2), 0.75
+    assert pt_has_distance_to_others(n_point, points, radius) is True
+    n_point = (9, 5)
+    assert pt_has_distance_to_others(n_point, points, radius) is False
     n_point = (0, 0)
     existing_points = [(2, 0), (0, 2), (5, 3)]
     radius = 1.5
@@ -326,7 +369,6 @@ def heatmap(all, agent_radius, wall_distance, polygon, iterations, max_persons=5
 
         for elem in samples:
             ax.add_patch(plt.Circle(radius=0.1, xy=elem, color="r", alpha=alpha))
-    print(alpha)
     n = len(polygon)
     i = 0
     while True:
@@ -346,24 +388,44 @@ def heatmap(all, agent_radius, wall_distance, polygon, iterations, max_persons=5
 
 def make_polygon(string_list):
     points = []
-    for elem in string_list:
-        elem = elem.strip("(")
-        elem = elem.strip(")")
-        numbers = elem.split(",")
-        x = int(numbers[0])
-        y = int(numbers[1])
-        points.append((x, y))
+    try:
+        for elem in string_list:
+            elem = elem.strip("()")
+            elem = elem.strip(" ")
+            numbers = elem.split(",")
+            x = float(numbers[0])
+            y = float(numbers[1])
+            points.append((x, y))
+    except Exception:
+        raise IncorrectPolygon("The given Polygon was not correct. Please format your Points like this: '(0,0)'")
     return points
+
+
+def test_polygon_creation():
+    input_list = ["(0,0)", "(0, 1)", "( 1, 2 ", "(5, 3", ")(3, 4)", "8,9"]
+    expected_polygon = [(0, 0), (0, 1), (1, 2), (5, 3), (3, 4), (8, 9)]
+    assert make_polygon(input_list) == expected_polygon
+    input_list = ["novalue"]
+    with pytest.raises(IncorrectPolygon):
+        make_polygon(input_list)
 
 
 def get_borders(polygon):
     """returns a list containing the minimal/maximal x and y values
     formatted like : [min(x_values), max(x_values), min(y_values), max(y_values)]"""
-    x_values = y_values = []
+    x_values, y_values = [], []
     for point in polygon:
         x_values.append(point[0])
         y_values.append(point[1])
+
     return [min(x_values), max(x_values), min(y_values), max(y_values)]
+
+
+def test_border_determination():
+    polygon = [(6, 0), (9, 2), (11, 4), (12, 7), (11.5, 9.5), (9.5, 10.5), (7.5, 10),
+               (6, 9), (4.5, 10), (2.5, 10.5), (0.6, 9.5), (0, 7), (1, 4), (3, 2)]
+    expected_borders = [0, 12, 0, 10.5]
+    assert get_borders(polygon) == expected_borders
 
 
 def get_cell_coords(pt, cell_side_length, borders):
@@ -535,37 +597,3 @@ def show_points(polygon, points, radius):
     plt.ylim(borders[2], borders[3])
     plt.axis('equal')
     plt.show()
-
-
-def set_up():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('a_r', type=float, help="first argument: minimal radius among agents")
-    parser.add_argument('w_d', type=float, help="second argument: minimal radius between agents and polygon segments")
-    parser.add_argument('-agents', type=int, help="number of agents placed, default value=10", default=10)
-    parser.add_argument('-point', '-p', type=str, nargs="+",
-                        help="define the Polygon with it´s corner Points, formatted like '(0,0)' '(0,1)'")
-    parser.add_argument('-a', action="store_true",
-                        help="-a for as many agents as possible with bridson´s poisson-disk algorithm", dest="all")
-    parser.add_argument('-heatmap', type=int, default=None,
-                        help="creates a heatmap regarding as many iterations as selected")
-    # parser.add_argument("--self-test", action="store_true", help="Will run self tests, print the results and exit.")
-    return parser.parse_args()
-
-
-def main():
-    args = set_up()
-    polygon = make_polygon(args.point)
-    samples = None
-    if args.heatmap is not None:
-        heatmap(args.all, args.a_r, args.w_d, polygon, args.heatmap, args.agents)
-        exit(0)
-    elif args.all:
-        samples = create_points_everywhere(polygon, args.a_r, args.w_d)
-    else:
-        samples = create_random_points(polygon, args.agents, args.a_r, args.w_d)
-
-    show_points(polygon, samples, args.a_r)
-
-
-if __name__ == '__main__':
-    main()
