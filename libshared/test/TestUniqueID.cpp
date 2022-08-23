@@ -85,3 +85,9 @@ TEST(UniqueId, CanBeFormatted)
     jps::UniqueID<Foo> id;
     ASSERT_EQ("1", "{}"_format(id));
 }
+
+TEST(UniqueId, CanBeHashed)
+{
+    auto hasher = std::hash<jps::UniqueID<void>>{};
+    ASSERT_NO_FATAL_FAILURE(hasher(jps::UniqueID<void>{}));
+}

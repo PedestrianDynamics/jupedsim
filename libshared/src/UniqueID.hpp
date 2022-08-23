@@ -63,6 +63,17 @@ public:
 };
 } // namespace jps
 
+namespace std
+{
+template <typename Tag, typename Integer>
+struct hash<jps::UniqueID<Tag, Integer>> {
+    size_t operator()(const jps::UniqueID<Tag, Integer>& x) const
+    {
+        return std::hash<Integer>{}(x.getID());
+    }
+};
+} // namespace std
+
 namespace fmt
 {
 template <typename Tag>
