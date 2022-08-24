@@ -27,6 +27,9 @@ class UniqueID
     Integer m_value{++uid_counter};
 
 public:
+    /// Represents an invalid id
+    static UniqueID<Tag, Integer> Invalid;
+
     UniqueID() = default;
 
     UniqueID(Integer id) : m_value(id) {}
@@ -61,6 +64,10 @@ public:
 
     friend struct fmt::formatter<UniqueID<Tag>>;
 };
+
+template <typename Tag, typename Integer>
+UniqueID<Tag, Integer> UniqueID<Tag, Integer>::Invalid{0};
+
 } // namespace jps
 
 namespace std

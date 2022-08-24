@@ -91,3 +91,21 @@ TEST(UniqueId, CanBeHashed)
     auto hasher = std::hash<jps::UniqueID<void>>{};
     ASSERT_NO_FATAL_FAILURE(hasher(jps::UniqueID<void>{}));
 }
+
+TEST(UniqueId, InvalidValueIsNotFirstID)
+{
+    struct InvalidValueIsNotFirstID_Type {
+    };
+    using UID = UniqueID<InvalidValueIsNotFirstID_Type>;
+    auto first = UID{};
+    ASSERT_NE(UID::Invalid, first);
+}
+
+TEST(UniqueId, InvalidValueComparesToItself)
+{
+    struct InvalidValueComparesToItself_Type {
+    };
+    using UID = UniqueID<InvalidValueComparesToItself_Type>;
+    auto first = UID{};
+    ASSERT_EQ(UID::Invalid, UID::Invalid);
+}
