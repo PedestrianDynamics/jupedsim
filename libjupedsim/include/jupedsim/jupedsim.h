@@ -31,7 +31,7 @@ typedef void (*JPS_LoggingCallBack)(const char*, void*);
  * @param callback to call with debug message
  * @param userdata optional pointer to state needed by the callback
  */
-JUPEDSIM_API void JPS_Logging_SetDebugCallback(JPS_LoggingCallBack callback, void* userdata = NULL);
+JUPEDSIM_API void JPS_Logging_SetDebugCallback(JPS_LoggingCallBack callback, void* userdata);
 
 /**
  * Register callback to receive info level log messages.
@@ -40,7 +40,7 @@ JUPEDSIM_API void JPS_Logging_SetDebugCallback(JPS_LoggingCallBack callback, voi
  * @param callback to call with debug message
  * @param userdata optional pointer to state needed by the callback
  */
-JUPEDSIM_API void JPS_Logging_SetInfoCallback(JPS_LoggingCallBack callback, void* userdata = NULL);
+JUPEDSIM_API void JPS_Logging_SetInfoCallback(JPS_LoggingCallBack callback, void* userdata);
 
 /**
  * Register callback to receive warning level log messages.
@@ -50,8 +50,7 @@ JUPEDSIM_API void JPS_Logging_SetInfoCallback(JPS_LoggingCallBack callback, void
  * @param userdata optional pointer to state needed by the callback
  */
 
-JUPEDSIM_API void
-JPS_Logging_SetWarningCallback(JPS_LoggingCallBack callback, void* userdata = NULL);
+JUPEDSIM_API void JPS_Logging_SetWarningCallback(JPS_LoggingCallBack callback, void* userdata);
 
 /**
  * Register callback to receive error level log messages.
@@ -60,7 +59,7 @@ JPS_Logging_SetWarningCallback(JPS_LoggingCallBack callback, void* userdata = NU
  * @param callback to call with debug message
  * @param userdata optional pointer to state needed by the callback
  */
-JUPEDSIM_API void JPS_Logging_SetErrorCallback(JPS_LoggingCallBack callback, void* userdata = NULL);
+JUPEDSIM_API void JPS_Logging_SetErrorCallback(JPS_LoggingCallBack callback, void* userdata);
 
 /**
  * Opaque type for error messages.

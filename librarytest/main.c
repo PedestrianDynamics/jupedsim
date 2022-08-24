@@ -20,19 +20,19 @@ void handle_message(const char* prefix, const char * msg) {
     printf("%s MESSAGE: \"%s\"\n", prefix, msg);
 }
 
-void handle_debug_message(const char* msg) {
+void handle_debug_message(const char* msg, void* userdata) {
     handle_message("DEBUG", msg);
 }
 
-void handle_info_message(const char* msg) {
+void handle_info_message(const char* msg, void* userdata) {
     handle_message("INFO", msg);
 }
 
-void handle_warning_message(const char* msg) {
+void handle_warning_message(const char* msg, void* userdata) {
     handle_message("WARNING", msg);
 }
 
-void handle_error_message(const char* msg) {
+void handle_error_message(const char* msg, void* userdata) {
     handle_message("ERROR", msg);
 }
 
@@ -42,10 +42,10 @@ int main(int argc, char** argv)
     setbuf(stdout, NULL);
     
     /* Register log message handlers with libjupedsim */
-    /*JPS_Logging_SetDebugCallback(handle_debug_message);*/
-    JPS_Logging_SetInfoCallback(handle_info_message);
-    JPS_Logging_SetWarningCallback(handle_warning_message);
-    JPS_Logging_SetErrorCallback(handle_error_message);
+    /*JPS_Logging_SetDebugCallback(handle_debug_message, NULL);*/
+    JPS_Logging_SetInfoCallback(handle_info_message, NULL);
+    JPS_Logging_SetWarningCallback(handle_warning_message, NULL);
+    JPS_Logging_SetErrorCallback(handle_error_message, NULL);
     JPS_GeometryBuilder geo_builder = JPS_GeometryBuilder_Create();
 
     double box1[] = {0, 0, 10, 0, 10, 10, 0, 10};

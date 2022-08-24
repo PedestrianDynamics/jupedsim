@@ -70,22 +70,22 @@ PYBIND11_MODULE(py_jupedsim, m)
     m.def("set_debug_callback", [](LogCallbackOwner::LogCallback callback) {
         LogCallbackOwner::Instance().debug = callback;
         JPS_Logging_SetDebugCallback(
-            [](const char* msg, void*) { LogCallbackOwner::Instance().debug(msg); });
+            [](const char* msg, void*) { LogCallbackOwner::Instance().debug(msg); }, nullptr);
     });
     m.def("set_info_callback", [](LogCallbackOwner::LogCallback callback) {
         LogCallbackOwner::Instance().info = callback;
         JPS_Logging_SetInfoCallback(
-            [](const char* msg, void*) { LogCallbackOwner::Instance().info(msg); });
+            [](const char* msg, void*) { LogCallbackOwner::Instance().info(msg); }, nullptr);
     });
     m.def("set_warning_callback", [](LogCallbackOwner::LogCallback callback) {
         LogCallbackOwner::Instance().warning = callback;
         JPS_Logging_SetWarningCallback(
-            [](const char* msg, void*) { LogCallbackOwner::Instance().warning(msg); });
+            [](const char* msg, void*) { LogCallbackOwner::Instance().warning(msg); }, nullptr);
     });
     m.def("set_error_callback", [](LogCallbackOwner::LogCallback callback) {
         LogCallbackOwner::Instance().error = callback;
         JPS_Logging_SetErrorCallback(
-            [](const char* msg, void*) { LogCallbackOwner::Instance().error(msg); });
+            [](const char* msg, void*) { LogCallbackOwner::Instance().error(msg); }, nullptr);
     });
     py::class_<JPS_Geometry_Wrapper>(m, "Geometry");
     py::class_<JPS_GeometryBuilder_Wrapper>(m, "GeometryBuilder")
