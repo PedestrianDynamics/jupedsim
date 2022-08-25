@@ -1,5 +1,9 @@
 import py_jupedsim as jps
 import logging
+import pathlib
+
+from jupedsim.serialization import JpsCoreStyleTrajectoryWriter
+
 
 def log_debug(msg):
     logging.debug(msg)
@@ -42,7 +46,7 @@ def main():
 
     simulation = jps.Simulation(model, geometry, areas, 0.01)
 
-    journey = jps.Journey.make_waypoint_journey([((19,5), 0.5)])
+    journey = jps.Journey.make_waypoint_journey([((19, 5), 0.5)])
 
     journey_id = simulation.add_journey(journey)
 
@@ -67,15 +71,14 @@ def main():
 
     print("Running simulation")
 
-    agent_id = simulation.add_agent(agent_parameters)
-    simulation.remove_agent(agent_id)
+    writer = JpsCoreStyleTrajectoryWriter(pathlib.Path("out.txt"))
+    writer.begin_writing(10)
 
     while simulation.agent_count() > 0:
         simulation.iterate()
-        if simulation.iteration_count() % 100 == 0:
-            print(f"Iteration: {simulation.iteration_count()}")
-            for agent in simulation.agents():
-                print(f"({agent.x}, {agent.y}) ({agent.orientation_x}, {agent.orientation_y})")
+        if simulation.iteration_count() % 10 == 0:
+            writer.write_iteration_state(simulation)
+    writer.end_writing()
     print(
         f"Simulation completed after {simulation.iteration_count()} iterations"
     )
