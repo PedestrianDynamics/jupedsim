@@ -279,6 +279,7 @@ def test_all_random_points_valid_placed():
         assert pt_has_distance_to_others(sample, sample_copy, agentradius) is True
         assert min_distance_to_polygon(sample, polygon) > walldistance
 
+
 def min_distance_to_polygon(pt, polygon):
     distances = []
     n = len(polygon)
@@ -293,16 +294,14 @@ def min_distance_to_polygon(pt, polygon):
     return min(distances)
 
 
-
 def test_minimal_distance_to_polygon():
     polygon = [(0, 0), (4, 1), (5, 3), (4, 5), (2, 5), (0, 3)]
     pt = (3, 3)
     expected_result = min([2.182820625326997, 1.7888543819998317, 1.7888543819998317, 2.0, 2.1213203435596424, 3.0])
     acceptance_rate = 0.01
     actual_result = min_distance_to_polygon(pt, polygon)
-    difference = actual_result-expected_result
+    difference = actual_result - expected_result
     assert abs(difference) < acceptance_rate
-
 
 
 def distance_to_segment(a, b, e):
@@ -363,27 +362,27 @@ def test_distance_determination_point_line_segment():
     acception_rate = 0.01
     pt1, pt2 = (0, 0), (4, 1)
     actual, expected = distance_to_segment(pt1, pt2, pt), 2.182820625326997
-    differance = actual-expected
+    differance = actual - expected
     assert abs(differance) < acception_rate
     pt1, pt2 = (4, 1), (5, 3)
     actual, expected = distance_to_segment(pt1, pt2, pt), 1.7888543819998317
-    differance = actual-expected
+    differance = actual - expected
     assert abs(differance) < acception_rate
     pt1, pt2 = (5, 3), (4, 5)
     actual, expected = distance_to_segment(pt1, pt2, pt), 1.7888543819998317
-    differance = actual-expected
+    differance = actual - expected
     assert abs(differance) < acception_rate
     pt1, pt2 = (4, 5), (2, 5)
-    actual, expected = distance_to_segment(pt1, pt2, pt),  2.0
-    differance = actual-expected
+    actual, expected = distance_to_segment(pt1, pt2, pt), 2.0
+    differance = actual - expected
     assert abs(differance) < acception_rate
     pt1, pt2 = (2, 5), (0, 3)
-    actual, expected = distance_to_segment(pt1, pt2, pt),  2.1213203435596424
-    differance = actual-expected
+    actual, expected = distance_to_segment(pt1, pt2, pt), 2.1213203435596424
+    differance = actual - expected
     assert abs(differance) < acception_rate
     pt1, pt2 = (0, 3), (0, 0)
-    actual, expected = distance_to_segment(pt1, pt2, pt),  3.0
-    differance = actual-expected
+    actual, expected = distance_to_segment(pt1, pt2, pt), 3.0
+    differance = actual - expected
     assert abs(differance) < acception_rate
 
 
@@ -485,6 +484,13 @@ def get_cell_coords(pt, cell_side_length, borders):
     """Get the coordinates of the cell that pt = (x,y) falls in."""
 
     return int((pt[0] - borders[0]) // cell_side_length), int((pt[1] - borders[2]) // cell_side_length)
+
+
+def test_cell_coord_determination():
+    pt = (5, 5)
+    borders = [0, 10, 0, 10]
+    c_s_l = 0.7071067811865475  # 1/√2
+    assert (7, 7) == get_cell_coords(pt, c_s_l, borders)
 
 
 def get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nxny, cells):
