@@ -99,6 +99,10 @@ TEST(Simulation, CanSimulate)
     auto simulation = JPS_Simulation_Create(model, geometry, areas, 0.01, nullptr);
     ASSERT_NE(simulation, nullptr);
 
+    JPS_Waypoint waypoints[] = {{{19, 5}, 1}};
+    auto journey = JPS_Journey_Create_SimpleJourney(waypoints, sizeof(waypoints));
+    auto journeyId = JPS_Simulation_AddJourney(simulation, journey, nullptr);
+
     JPS_AgentParameters agent_parameters{};
     agent_parameters.v0 = 1.0;
     agent_parameters.AMin = 0.15;
@@ -107,7 +111,7 @@ TEST(Simulation, CanSimulate)
     agent_parameters.Av = 0.53;
     agent_parameters.T = 1;
     agent_parameters.Tau = 0.5;
-    agent_parameters.destinationAreaId = destinationId;
+    agent_parameters.journeyId = journeyId;
     agent_parameters.orientationX = 1.0;
     agent_parameters.orientationY = 0.0;
     agent_parameters.positionX = 0.0;

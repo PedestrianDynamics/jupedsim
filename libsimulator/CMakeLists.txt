@@ -28,6 +28,8 @@ add_library(simulator STATIC
     src/GeometryBuilder.hpp
     src/Graph.hpp
     src/Grid2D.hpp
+    src/Journey.cpp
+    src/Journey.hpp
     src/Line.cpp
     src/Line.hpp
     src/Mathematics.cpp

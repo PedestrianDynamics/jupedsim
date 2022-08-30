@@ -13,11 +13,26 @@
 #include <stdbool.h> /*NOLINT(modernize-deprecated-headers)*/
 #include <stddef.h> /*NOLINT(modernize-deprecated-headers)*/
 #include <stdint.h> /*NOLINT(modernize-deprecated-headers)*/
-/// C-Wrapper for JuPedSim simulation capabilities
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef struct JPS_Point {
+    double x;
+    double y;
+} JPS_Point;
+
+/**
+ * Describes a waypoint.
+ */
+typedef struct JPS_Waypoint {
+    JPS_Point position;
+    /**
+     * Distance in meters at which this waypoint is considered to be reached.
+     */
+    double distance;
+} JPS_Waypoint;
 
 /**
  * Callback type for logging
@@ -263,6 +278,30 @@ JPS_AreasBuilder_Build(JPS_AreasBuilder handle, JPS_ErrorMessage* errorMessage);
 JUPEDSIM_API void JPS_AreasBuilder_Free(JPS_AreasBuilder handle);
 
 /**
+ * Opaque type that describes a journey
+ */
+typedef struct JPS_Journey_t* JPS_Journey;
+
+/**
+ * Creates a simple waypoint based journey.
+ * @param waypoints waypoint data
+ * @param count_waypoints number of waypoints in data
+ */
+JUPEDSIM_API JPS_Journey
+JPS_Journey_Create_SimpleJourney(const JPS_Waypoint* waypoints, size_t count_waypoints);
+
+/**
+ * Frees a JPS_Journey.
+ * @param handle to the JPS_Journey to free.
+ */
+JUPEDSIM_API void JPS_Journey_Free(JPS_Journey handle);
+
+/**
+ * Id of a journey.
+ */
+typedef uint64_t JPS_JourneyId;
+
+/**
  * Id of an agent.
  */
 typedef uint64_t JPS_AgentId;
@@ -332,11 +371,7 @@ typedef struct JPS_AgentParameters {
     double AMin;
     double BMax;
     double BMin;
-    /*
-     * Id of the area the agent wants to reach.
-     * NOTE: This field will change at some point before the next release
-     */
-    uint16_t destinationAreaId;
+    JPS_JourneyId journeyId;
 } JPS_AgentParameters;
 
 /*
@@ -363,6 +398,18 @@ JUPEDSIM_API JPS_Simulation JPS_Simulation_Create(
     JPS_Geometry geometry,
     JPS_Areas areas,
     double dT,
+    JPS_ErrorMessage* errorMessage);
+
+/**
+ * Populates the Simulation with a Journey for agents to use.
+ * @param handle to the simulation to act on
+ * @param journey to add. Will copy 'journey', 'journey' needs to be freed after this call.
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return Id of the journey
+ */
+JUPEDSIM_API JPS_JourneyId JPS_Simulation_AddJourney(
+    JPS_Simulation handle,
+    JPS_Journey journey,
     JPS_ErrorMessage* errorMessage);
 
 /**

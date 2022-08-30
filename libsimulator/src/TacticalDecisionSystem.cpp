@@ -9,7 +9,7 @@ void TacticalDecisionSystem::Run(
 {
 
     for(auto& agent : agents) {
-        const auto dest = areas.at(*agent->goal).polygon.Centroid();
+        const auto dest = agent->waypoint;
         const auto waypoints = routingEngine.ComputeWaypoint(agent->GetPos(), dest);
         agent->destination = waypoints[1];
         if(waypoints.size() > 2) {

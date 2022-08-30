@@ -32,6 +32,7 @@
 #include "AgentExitSystem.hpp"
 #include "Area.hpp"
 #include "Geometry.hpp"
+#include "Journey.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalDecisionSystem.hpp"
 #include "OperationalModel.hpp"
@@ -43,6 +44,7 @@
 #include <chrono>
 #include <cstddef>
 #include <memory>
+#include <unordered_map>
 
 class Simulation
 {
@@ -58,6 +60,7 @@ private:
     std::vector<std::unique_ptr<Pedestrian>> _agents;
     std::unique_ptr<Areas> _areas;
     std::vector<uint64_t> _removedAgentsInLastIteration;
+    std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;
     bool _eventProcessed{false};
 
 public:
@@ -83,6 +86,10 @@ public:
     /// Advances the simulation by one time step.
     void Iterate();
 
+    // TODO(kkratz): doc
+    Journey::ID AddJourney(std::unique_ptr<Journey>&& journey);
+
+    // TODO(kkratz): Remove from interface
     void AddAgent(std::unique_ptr<Pedestrian>&& agent);
 
     uint64_t AddAgent(
@@ -95,16 +102,19 @@ public:
         double Tau,
         double T,
         double v0,
-        uint16_t destinationAreaId);
+        Journey::ID journeyId);
 
+    // TODO(kkratz): Remove from interface
     void AddAgents(std::vector<std::unique_ptr<Pedestrian>>&& agents);
 
     void RemoveAgent(uint64_t id);
+
+    // TODO(kkratz): Remove from interface
     void RemoveAgents(std::vector<Pedestrian::UID> ids);
 
-    Pedestrian& Agent(Pedestrian::UID id) const;
     Pedestrian* AgentPtr(Pedestrian::UID id) const;
 
+    // TODO(kkratz): Remove from interface, this should no longer be directly exposed
     const std::vector<std::unique_ptr<Pedestrian>>& Agents() const;
 
     const std::vector<uint64_t>& RemovedAgents() const;

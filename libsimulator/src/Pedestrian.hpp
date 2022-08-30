@@ -27,6 +27,7 @@
 #pragma once
 
 #include "Ellipse.hpp"
+#include "Journey.hpp"
 #include "Line.hpp"
 #include "Macros.hpp"
 #include "UniqueID.hpp"
@@ -41,7 +42,7 @@ public:
     using UID = jps::UniqueID<Pedestrian>;
 
     // This is evaluated by the "strategic level"
-    std::optional<uint16_t> goal{};
+    std::unique_ptr<Behaviour> behaviour{};
 
     // This is evaluated by the "tactical level"
     // TODO(kkratz): this is the new yet unused waypoint list
@@ -49,6 +50,7 @@ public:
 
     // This is evaluated by the "operational level"
     Point destination{};
+    Point waypoint{};
 
     /// Point in time after this agent gets active.
     /// TODO(kkratz): Document premovement concept

@@ -6,7 +6,7 @@ def test_can_run_simulation():
     def log_msg_handler(msg):
         messages.append(msg)
 
-    jps.set_debug_callback(log_msg_handler)
+    #jps.set_debug_callback(log_msg_handler)
     jps.set_info_callback(log_msg_handler)
     jps.set_warning_callback(log_msg_handler)
     jps.set_error_callback(log_msg_handler)
@@ -27,6 +27,10 @@ def test_can_run_simulation():
 
     simulation = jps.Simulation(model, geometry, areas, 0.01)
 
+    journey = jps.Journey.make_waypoint_journey([((19,5), 0.5)])
+
+    journey_id = simulation.add_journey(journey)
+
     agent_parameters = jps.AgentParameters()
     agent_parameters.v0 = 1.0
     agent_parameters.a_min = 0.15
@@ -35,7 +39,7 @@ def test_can_run_simulation():
     agent_parameters.a_v = 0.53
     agent_parameters.t = 1
     agent_parameters.tau = 0.5
-    agent_parameters.destination_area_id = destination
+    agent_parameters.journey_id = journey_id
     agent_parameters.orientation_x = 1.0
     agent_parameters.orientation_y = 0.0
     agent_parameters.x = 0.0

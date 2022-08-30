@@ -4,6 +4,8 @@
 #include <exception>
 #include <iterator>
 #include <memory>
+#include <pybind11/pytypes.h>
+#include <stdexcept>
 #include <vector>
 
 #include <pybind11/functional.h>
@@ -36,6 +38,7 @@ OWNED_WRAPPER(JPS_GeometryBuilder);
 OWNED_WRAPPER(JPS_OperationalModel);
 OWNED_WRAPPER(JPS_Areas);
 OWNED_WRAPPER(JPS_AreasBuilder);
+OWNED_WRAPPER(JPS_Journey);
 WRAPPER(JPS_Agent);
 OWNED_WRAPPER(JPS_Simulation);
 
@@ -200,6 +203,19 @@ PYBIND11_MODULE(py_jupedsim, m)
                 throw std::runtime_error{msg};
             },
             "");
+    py::class_<JPS_Journey_Wrapper>(m, "Journey")
+        .def_static(
+            "make_waypoint_journey",
+            [](const std::vector<std::tuple<std::tuple<double, double>, double>>& list) {
+                std::vector<JPS_Waypoint> waypoints{};
+                waypoints.reserve(list.size());
+                for(const auto [pt, distance] : list) {
+                    const auto [x, y] = pt;
+                    waypoints.push_back(JPS_Waypoint{{x, y}, distance});
+                }
+                auto journey = JPS_Journey_Create_SimpleJourney(waypoints.data(), waypoints.size());
+                return std::make_unique<JPS_Journey_Wrapper>(journey);
+            });
     py::class_<JPS_Agent_Wrapper>(m, "Agent")
         .def_property_readonly(
             "x", [](const JPS_Agent_Wrapper& w) { return JPS_Agent_PositionX(w.handle); })
@@ -224,7 +240,7 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def_readwrite("a_min", &JPS_AgentParameters::AMin)
         .def_readwrite("b_max", &JPS_AgentParameters::BMax)
         .def_readwrite("b_min", &JPS_AgentParameters::BMin)
-        .def_readwrite("destination_area_id", &JPS_AgentParameters::destinationAreaId);
+        .def_readwrite("journey_id", &JPS_AgentParameters::journeyId);
     py::class_<JPS_Simulation_Wrapper>(m, "Simulation")
         .def(py::init([](JPS_OperationalModel_Wrapper& model,
                          JPS_Geometry_Wrapper& geometry,
@@ -240,6 +256,19 @@ PYBIND11_MODULE(py_jupedsim, m)
             JPS_ErrorMessage_Free(errorMsg);
             throw std::runtime_error{msg};
         }))
+        .def(
+            "add_journey",
+            [](JPS_Simulation_Wrapper& simulation, JPS_Journey_Wrapper& journey) {
+                JPS_ErrorMessage errorMsg{};
+                const auto result =
+                    JPS_Simulation_AddJourney(simulation.handle, journey.handle, &errorMsg);
+                if(result != 0) {
+                    return result;
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
+            })
         .def(
             "add_agent",
             [](JPS_Simulation_Wrapper& simulation, JPS_AgentParameters& parameters) {

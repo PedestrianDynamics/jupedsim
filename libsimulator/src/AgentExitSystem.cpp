@@ -12,17 +12,16 @@ void AgentExitSystem::Run(
         std::begin(agents),
         std::end(agents),
         [&areas, &removedAgentIds](const std::unique_ptr<Pedestrian>& agent) {
-            if(!agent->goal) {
-                return false;
-            }
-            if(const auto area_iter = areas.find(*agent->goal); area_iter != std::end(areas)) {
-                auto inside = area_iter->second.polygon.Inside(agent->GetPos());
-                if(inside) {
-                    removedAgentIds.emplace_back(agent->GetUID().getID());
+            for(const auto& [k, v] : areas) {
+                if(v.labels.find("exit") != v.labels.end()) {
+                    auto inside = v.polygon.Inside(agent->GetPos());
+                    if(inside) {
+                        removedAgentIds.emplace_back(agent->GetUID().getID());
+                        return true;
+                    }
                 }
-                return inside;
             }
-            throw std::runtime_error("Invalid goal id in Pedestrian found");
+            return false;
         });
     agents.erase(iter, std::end(agents));
 }
