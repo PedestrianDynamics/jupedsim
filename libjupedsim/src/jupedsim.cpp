@@ -2,6 +2,7 @@
 
 #include "CollisionGeometry.hpp"
 #include "ErrorMessage.hpp"
+#include "Journey.hpp"
 #include "Logger.hpp"
 
 #include <Area.hpp>
@@ -317,6 +318,24 @@ double JPS_Agent_OrientationY(JPS_Agent handle)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Journey
+////////////////////////////////////////////////////////////////////////////////////////////////////
+JPS_Journey JPS_Journey_Create_SimpleJourney(const JPS_Waypoint* waypoints, size_t count_waypoints)
+{
+    auto* journey = new SimpleJourney{};
+    for(size_t index = 0; index < count_waypoints; ++index) {
+        const auto& waypoint = waypoints[index];
+        journey->AddWaypoint({waypoint.position.x, waypoint.position.y}, waypoint.distance);
+    }
+    return reinterpret_cast<JPS_Journey>(journey);
+}
+
+void JPS_Journey_Free(JPS_Journey handle)
+{
+    delete reinterpret_cast<Journey*>(handle);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Simulation
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 JPS_Simulation JPS_Simulation_Create(
@@ -361,6 +380,32 @@ JPS_Simulation JPS_Simulation_Create(
     return result;
 }
 
+JPS_JourneyId JPS_Simulation_AddJourney(
+    JPS_Simulation handle,
+    JPS_Journey journey,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    assert(journey);
+
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    auto journeyInternal = reinterpret_cast<Journey*>(journey);
+    auto result = Journey::ID::Invalid.getID();
+    try {
+        result = simulation->AddJourney(std::unique_ptr<Journey>(journeyInternal->Clone())).getID();
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return result;
+}
+
 JPS_AgentId JPS_Simulation_AddAgent(
     JPS_Simulation handle,
     JPS_AgentParameters parameters,
@@ -380,7 +425,7 @@ JPS_AgentId JPS_Simulation_AddAgent(
             parameters.Tau,
             parameters.T,
             parameters.v0,
-            parameters.destinationAreaId);
+            parameters.journeyId);
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});

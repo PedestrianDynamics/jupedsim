@@ -30,6 +30,7 @@
 
 #include "Simulation.hpp"
 
+#include "Journey.hpp"
 #include "OperationalModel.hpp"
 #include "Pedestrian.hpp"
 #include "SimulationClock.hpp"
@@ -75,6 +76,13 @@ void Simulation::Iterate()
     LOG_DEBUG("Iteration done.");
 }
 
+Journey::ID Simulation::AddJourney(std::unique_ptr<Journey>&& journey)
+{
+    const auto id = journey->Id();
+    _journeys.emplace(id, std::move(journey));
+    return id;
+}
+
 void Simulation::AddAgent(std::unique_ptr<Pedestrian>&& agent)
 {
     // TODO(kkratz): this should be done by the tac-lvl
@@ -103,7 +111,7 @@ uint64_t Simulation::AddAgent(
     double Tau,
     double T,
     double v0,
-    uint16_t destinationAreaId)
+    Journey::ID journeyId)
 {
     auto agent = std::make_unique<Pedestrian>();
     agent->SetDeltaT(_clock.dT());
@@ -122,7 +130,14 @@ uint64_t Simulation::AddAgent(
     agent->SetPos(position);
     agent->SetV0Norm(v0, 0, 0, 0, 0);
     agent->SetTau(Tau);
-    agent->goal = destinationAreaId;
+
+    if(const auto& iter = _journeys.find(journeyId); iter != _journeys.end()) {
+        agent->behaviour = std::make_unique<FollowWaypointsBehaviour>(
+            dynamic_cast<SimpleJourney*>(iter->second.get()));
+    } else {
+        throw std::runtime_error(fmt::format("Unknown journey id: {}", journeyId));
+    }
+
     _agents.emplace_back(std::move(agent));
     return _agents.back()->GetUID().getID();
 }
@@ -158,16 +173,6 @@ void Simulation::RemoveAgents(std::vector<Pedestrian::UID> ids)
                        }) != ids.end();
             }),
         _agents.end());
-}
-
-Pedestrian& Simulation::Agent(Pedestrian::UID id) const
-{
-    const auto iter = std::find_if(
-        _agents.begin(), _agents.end(), [id](auto& ped) { return id == ped->GetUID(); });
-    if(iter == _agents.end()) {
-        throw std::logic_error("Trying to access unknown Agent.");
-    }
-    return **iter;
 }
 
 Pedestrian* Simulation::AgentPtr(Pedestrian::UID id) const
