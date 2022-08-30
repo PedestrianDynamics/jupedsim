@@ -3,8 +3,6 @@ set -ex
 
 googletest_version="1.11.0"
 fmt_version="8.0.1"
-spdlog_version="1.9.2"
-cli11_version="2.1.2"
 boost_version="1.78.0"
 # GLM has removed the cmake install target in 9.9.9.6 for unknown reasons
 # on master the install target has been reintroduced. Instead of manually
@@ -99,52 +97,6 @@ function setup_fmt {
         -DCMAKE_BUILD_TYPE=Release
     cmake --build . -j ${CPUS}
     cmake --install .
-    cd ${root}
-    rm -rf ${temp_folder}
-}
-
-function setup_spdlog {
-    root=$(pwd)
-    temp_folder=$(mktemp -d)
-    cd ${temp_folder}
-
-    wget https://github.com/gabime/spdlog/archive/v${spdlog_version}.tar.gz
-    tar xf v${spdlog_version}.tar.gz
-    cd spdlog-${spdlog_version}
-    mkdir build
-    cd build
-    cmake .. \
-        -DCMAKE_CXX_FLAGS="-fPIC -fvisibility=hidden" \
-        -DSPDLOG_BUILD_BENCH=OFF \
-        -DSPDLOG_BUILD_TESTS=OFF \
-        -DSPDLOG_FMT_EXTERNAL=ON \
-        -DCMAKE_PREFIX_PATH=${install_path} \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=${install_path}
-    cmake --build . --target install -- -j${CPUS}
-
-    cd ${root}
-    rm -rf ${temp_folder}
-}
-
-function setup_cli11 {
-    root=$(pwd)
-    temp_folder=$(mktemp -d)
-    cd ${temp_folder}
-
-    wget https://github.com/CLIUtils/CLI11/archive/v${cli11_version}.tar.gz
-    tar xf v${cli11_version}.tar.gz
-    cd CLI11-${cli11_version}
-    mkdir build
-    cd build
-    cmake .. \
-        -DCMAKE_PREFIX_PATH=${install_path} \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCLI11_BUILD_TESTS=OFF \
-        -DCMAKE_INSTALL_PREFIX=${install_path} \
-        -DCLI11_BUILD_EXAMPLES=OFF
-    cmake --build . --target install -- -j${CPUS}
-
     cd ${root}
     rm -rf ${temp_folder}
 }
@@ -244,8 +196,6 @@ function setup_pybind11 {
 setup_boost
 setup_googletest
 setup_fmt
-setup_spdlog
-setup_cli11
 setup_glm
 setup_poly2tri
 setup_cgal

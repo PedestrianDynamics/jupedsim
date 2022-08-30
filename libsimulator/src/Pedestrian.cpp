@@ -56,38 +56,9 @@ void Pedestrian::SetV(const Point& v)
     _ellipse.SetV(v);
 }
 
-void Pedestrian::SetSmoothFactorUpStairs(double c)
-{
-    _smoothFactorUpStairs = c;
-}
-
-void Pedestrian::SetSmoothFactorDownStairs(double c)
-{
-    _smoothFactorDownStairs = c;
-}
-
-void Pedestrian::SetSmoothFactorEscalatorUpStairs(double c)
-{
-    _smoothFactorEscalatorUpStairs = c;
-}
-
-void Pedestrian::SetSmoothFactorEscalatorDownStairs(double c)
-{
-    _smoothFactorEscalatorDownStairs = c;
-}
-
-void Pedestrian::SetV0Norm(
-    double v0,
-    double v0UpStairs,
-    double v0DownStairs,
-    double escalatorUp,
-    double escalatorDown)
+void Pedestrian::SetV0Norm(double v0)
 {
     _ellipse.SetV0(v0);
-    _v0DownStairs = v0DownStairs;
-    _v0UpStairs = v0UpStairs;
-    _v0EscalatorUpStairs = escalatorUp;
-    _v0EscalatorDownStairs = escalatorDown;
 }
 
 void Pedestrian::SetDeltaT(double dt)
@@ -145,17 +116,6 @@ double Pedestrian::GetV0Norm() const
     return walking_speed;
 }
 
-// get axis in the walking direction
-double Pedestrian::GetLargerAxis() const
-{
-    return _ellipse.GetEA();
-}
-// get axis in the shoulder direction = orthogonal to the walking direction
-double Pedestrian::GetSmallerAxis() const
-{
-    return _ellipse.GetEB();
-}
-
 void Pedestrian::SetPhiPed()
 {
     double cosPhi;
@@ -204,53 +164,6 @@ void Pedestrian::IncrementOrientationDelay()
 void Pedestrian::SetSmoothTurning()
 {
     _newOrientationDelay = 0;
-}
-
-int Pedestrian::GetGroup() const
-{
-    return _group;
-}
-
-void Pedestrian::SetGroup(int group)
-{
-    _group = group;
-}
-
-double Pedestrian::GetV0UpStairsNorm() const
-{
-    return _v0UpStairs;
-}
-
-double Pedestrian::GetV0DownStairsNorm() const
-{
-    return _v0DownStairs;
-}
-
-double Pedestrian::GetV0EscalatorUpNorm() const
-{
-    return _v0EscalatorUpStairs;
-}
-
-double Pedestrian::GetV0EscalatorDownNorm() const
-{
-    return _v0EscalatorDownStairs;
-}
-
-double Pedestrian::GetSmoothFactorUpStairs() const
-{
-    return _smoothFactorUpStairs;
-}
-double Pedestrian::GetSmoothFactorDownStairs() const
-{
-    return _smoothFactorDownStairs;
-}
-double Pedestrian::GetSmoothFactorUpEscalators() const
-{
-    return _smoothFactorEscalatorUpStairs;
-}
-double Pedestrian::GetSmoothFactorDownEscalators() const
-{
-    return _smoothFactorEscalatorDownStairs;
 }
 
 std::ostream& operator<<(std::ostream& out, const Pedestrian&)

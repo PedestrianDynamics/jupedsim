@@ -3,7 +3,7 @@
 ################################################################################
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 project(JuPedSim VERSION 0.10.0 LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
@@ -32,9 +32,6 @@ check_prefix_path()
 ################################################################################
 # Optional features
 ################################################################################
-set(BUILD_JPSCORE ON CACHE BOOL "Build jpscore cli application")
-print_var(BUILD_JPSCORE)
-
 set(WERROR OFF CACHE BOOL "Build wth -Werror enabled. Not supported on Windows")
 print_var(WERROR)
 
@@ -79,7 +76,6 @@ list(APPEND COMMON_COMPILE_OPTIONS
 # Dependencies
 ################################################################################
 find_package(fmt 8.0 REQUIRED CONFIG)
-find_package(spdlog 1.9 REQUIRED CONFIG)
 find_package(Boost 1.76 REQUIRED)
 find_package(Threads REQUIRED)
 find_package(glm REQUIRED CONFIG)
@@ -113,9 +109,6 @@ target_include_directories(poly2tri INTERFACE
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11 REQUIRED CONFIG)
 
-if(BUILD_JPSCORE)
-    find_package(CLI11 2.1 REQUIRED CONFIG)
-endif()
 if(BUILD_JPSVIS)
     find_package(VTK 9.0
         COMPONENTS
@@ -141,8 +134,7 @@ if(BUILD_JPSVIS)
     set(CMAKE_AUTORCC ON)
 endif()
 if(BUILD_TESTS)
-    find_package(PythonInterp 3 REQUIRED)
-    find_package(GTest 1.11 REQUIRED CONFIG)
+    find_package(GTest REQUIRED CONFIG)
 endif()
 # remaining in-tree dependencies
 add_subdirectory(third-party)
@@ -264,24 +256,13 @@ if(BUILD_TESTS)
         COMMAND ${pytest-wrapper-out} -vv -s
                 --basetemp=${CMAKE_BINARY_DIR}/systemtest-out
                 --junit-xml=result-systemtests.xml
-        DEPENDS jpscore py_jupedsim
+        DEPENDS py_jupedsim
     )
     set(unittests_dependency_list libjupedsim-unittests libsimulator-unittests libshared-unittests)
-    if(BUILD_JPSCORE)
-        list(APPEND unittests_dependency_list libcore-unittests)
-    endif()
     add_custom_target(unittests
         DEPENDS ${unittests_dependency_list}
     )
 
-    if(BUILD_JPSCORE)
-        add_custom_target(libcore-unittests
-            COMMENT "Running libcore unittests"
-            COMMAND $<TARGET_FILE:libcore-tests>
-                    --gtest_output=xml:result-libcore-unittests.xml
-            DEPENDS libcore-tests
-        )
-    endif()
     add_custom_target(libjupedsim-unittests
         COMMENT "Running libjupedsim unittests"
         COMMAND $<TARGET_FILE:libjupedsim-tests>
@@ -315,10 +296,6 @@ endif()
 ################################################################################
 # Add libraries / executables
 ################################################################################
-if(BUILD_JPSCORE)
-    add_subdirectory(jpscore)
-    add_subdirectory(libcore)
-endif()
 if(BUILD_JPSVIS)
     add_subdirectory(jpsvis)
 endif()
@@ -353,7 +330,7 @@ if(UNIX)
             )
             if(version MATCHES "^${clang-format-version}.*")
                 message(STATUS "Found clang-format ${version}, add format-check and reformat targets")
-                set(folders jpscore jpsvis libcore libshared libsimulator libjupedsim)
+                set(folders jpsvis libcore libshared libsimulator libjupedsim)
                 add_custom_target(check-format
                     COMMENT "Checking format with clang-format"
                     COMMAND find ${folders}
@@ -400,15 +377,13 @@ set(CPACK_PACKAGE_VENDOR "Forschungszentrum Juelich GmbH")
 set(CPACK_PACKAGE_DESCRIPTION "JuPedSim")
 set(CPACK_PACKAGE_HOMEPAGE_URL "http://jupedsim.org")
 set(CPACK_MONOLITHIC_INSTALL ON)
-set(CPACK_PACKAGE_EXECUTABLES "jpscore;JuPedSim Simulator;jpsvis;JuPedSim Visualization")
+set(CPACK_PACKAGE_EXECUTABLES "jpsvis;JuPedSim Visualization")
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE)
 set(JPSCORE_INSTALLER_LOCATION ".")
 
 if(APPLE)
     set(CPACK_GENERATOR "DragNDrop")
-    set(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_SOURCE_DIR}/jpscore/forms/background.png")
     set(CPACK_DMG_VOLUME_NAME "${PROJECT_NAME}")
-    set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/jpscore/forms/jpscore.ico")
     # MacOS PList settings
     set(MACOSX_BUNDLE_BUNDLE_NAME "JuPedSim")
     set(MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}")

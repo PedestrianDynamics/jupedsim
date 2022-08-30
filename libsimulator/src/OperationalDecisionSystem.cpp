@@ -9,7 +9,7 @@ OperationalDecisionSystem::OperationalDecisionSystem(std::unique_ptr<Operational
 
 void OperationalDecisionSystem::Run(
     double dT,
-    double t_in_sec,
+    double /*t_in_sec*/,
     const NeighborhoodSearch& neighborhoodSearch,
     const CollisionGeometry& geometry,
     std::vector<std::unique_ptr<Pedestrian>>& agents) const
@@ -20,11 +20,8 @@ void OperationalDecisionSystem::Run(
         agents.begin(),
         agents.end(),
         updates.begin(),
-        [this, dT, t_in_sec, &neighborhoodSearch, &geometry](
+        [this, dT, &neighborhoodSearch, &geometry](
             auto&& agent) -> std::optional<PedestrianUpdate> {
-            if(agent->premovementTime > t_in_sec) {
-                return std::nullopt;
-            }
             return _model->ComputeNewPosition(dT, *agent, geometry, neighborhoodSearch);
         });
 

@@ -83,24 +83,6 @@ Journey::ID Simulation::AddJourney(std::unique_ptr<Journey>&& journey)
     return id;
 }
 
-void Simulation::AddAgent(std::unique_ptr<Pedestrian>&& agent)
-{
-    // TODO(kkratz): this should be done by the tac-lvl
-    const Point target{};
-    const Point pos = agent->GetPos();
-    // Compute orientation
-    const Point posToTarget = target - pos;
-    const Point orientation = posToTarget.Normalized();
-    agent->InitV0(target);
-    agent->SetDeltaT(_clock.dT());
-
-    JEllipse E = agent->GetEllipse();
-    E.SetCosPhi(orientation.x);
-    E.SetSinPhi(orientation.y);
-    agent->SetEllipse(E);
-    _agents.emplace_back(std::move(agent));
-}
-
 uint64_t Simulation::AddAgent(
     const Point& position,
     const Point& orientation,
@@ -128,7 +110,7 @@ uint64_t Simulation::AddAgent(
     agent->SetEllipse(e);
     agent->SetT(T);
     agent->SetPos(position);
-    agent->SetV0Norm(v0, 0, 0, 0, 0);
+    agent->SetV0Norm(v0);
     agent->SetTau(Tau);
 
     if(const auto& iter = _journeys.find(journeyId); iter != _journeys.end()) {
@@ -142,13 +124,6 @@ uint64_t Simulation::AddAgent(
     return _agents.back()->GetUID().getID();
 }
 
-void Simulation::AddAgents(std::vector<std::unique_ptr<Pedestrian>>&& agents)
-{
-    for(auto&& agent : agents) {
-        AddAgent(std::move(agent));
-    }
-}
-
 void Simulation::RemoveAgent(uint64_t id)
 {
     const auto iter = std::remove_if(std::begin(_agents), std::end(_agents), [id](auto& agent) {
@@ -160,21 +135,6 @@ void Simulation::RemoveAgent(uint64_t id)
     _agents.erase(iter, std::end(_agents));
 }
 
-void Simulation::RemoveAgents(std::vector<Pedestrian::UID> ids)
-{
-    _agents.erase(
-        std::remove_if(
-            _agents.begin(),
-            _agents.end(),
-            [&ids](auto& agent) {
-                const auto uid = agent->GetUID();
-                return std::find_if(ids.begin(), ids.end(), [uid](Pedestrian::UID other) {
-                           return uid == other;
-                       }) != ids.end();
-            }),
-        _agents.end());
-}
-
 Pedestrian* Simulation::AgentPtr(Pedestrian::UID id) const
 {
     const auto iter = std::find_if(
@@ -183,11 +143,6 @@ Pedestrian* Simulation::AgentPtr(Pedestrian::UID id) const
         throw std::logic_error("Trying to access unknown Agent.");
     }
     return iter->get();
-}
-
-const std::vector<std::unique_ptr<Pedestrian>>& Simulation::Agents() const
-{
-    return _agents;
 }
 
 const std::vector<uint64_t>& Simulation::RemovedAgents() const
