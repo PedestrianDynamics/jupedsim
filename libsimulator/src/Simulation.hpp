@@ -89,9 +89,6 @@ public:
     // TODO(kkratz): doc
     Journey::ID AddJourney(std::unique_ptr<Journey>&& journey);
 
-    // TODO(kkratz): Remove from interface
-    void AddAgent(std::unique_ptr<Pedestrian>&& agent);
-
     uint64_t AddAgent(
         const Point& position,
         const Point& orientation,
@@ -104,18 +101,9 @@ public:
         double v0,
         Journey::ID journeyId);
 
-    // TODO(kkratz): Remove from interface
-    void AddAgents(std::vector<std::unique_ptr<Pedestrian>>&& agents);
-
     void RemoveAgent(uint64_t id);
 
-    // TODO(kkratz): Remove from interface
-    void RemoveAgents(std::vector<Pedestrian::UID> ids);
-
     Pedestrian* AgentPtr(Pedestrian::UID id) const;
-
-    // TODO(kkratz): Remove from interface, this should no longer be directly exposed
-    const std::vector<std::unique_ptr<Pedestrian>>& Agents() const;
 
     const std::vector<uint64_t>& RemovedAgents() const;
 
