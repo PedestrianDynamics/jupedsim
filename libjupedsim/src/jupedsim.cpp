@@ -439,6 +439,30 @@ JPS_AgentId JPS_Simulation_AddAgent(
     return result;
 }
 
+JUPEDSIM_API bool JPS_Simulation_RemoveAgent(
+    JPS_Simulation handle,
+    JPS_AgentId agentId,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    bool result{false};
+    try {
+        simulation->RemoveAgent(agentId);
+        result = true;
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return result;
+}
+
 JPS_Agent
 JPS_Simulation_ReadAgent(JPS_Simulation handle, JPS_AgentId id, JPS_ErrorMessage* errorMessage)
 {

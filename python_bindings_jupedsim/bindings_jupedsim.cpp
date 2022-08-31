@@ -282,6 +282,18 @@ PYBIND11_MODULE(py_jupedsim, m)
                 throw std::runtime_error{msg};
             })
         .def(
+            "remove_agent",
+            [](JPS_Simulation_Wrapper& simulation, JPS_AgentId id) {
+                JPS_ErrorMessage errorMsg{};
+                auto result = JPS_Simulation_RemoveAgent(simulation.handle, id, &errorMsg);
+                if(result) {
+                    return result;
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
+            })
+        .def(
             "read_agent",
             [](JPS_Simulation_Wrapper& simulation, JPS_AgentId id) {
                 JPS_ErrorMessage errorMsg{};

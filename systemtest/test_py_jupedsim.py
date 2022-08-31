@@ -50,6 +50,11 @@ def test_can_run_simulation():
         agent_parameters.y = y
         simulation.add_agent(agent_parameters)
 
+    agent_id = simulation.add_agent(agent_parameters)
+    assert simulation.remove_agent(agent_id)
+    with pytest.raises(RuntimeError, match=r"Unknown agent id \d+"):
+        assert simulation.remove_agent(agent_id)
+
     while simulation.agent_count() > 0:
         simulation.iterate()
         assert simulation.iteration_count() < 2000
