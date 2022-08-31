@@ -426,6 +426,19 @@ JUPEDSIM_API JPS_AgentId JPS_Simulation_AddAgent(
     JPS_Simulation handle,
     JPS_AgentParameters parameters,
     JPS_ErrorMessage* errorMessage);
+
+/**
+ * Removes an agent from the simuation.
+ * @param handle to the simulation to act on
+ * @param agentID to remove
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return bool true if the agent existed and was removed otherwise false
+ */
+JUPEDSIM_API bool JPS_Simulation_RemoveAgent(
+    JPS_Simulation handle,
+    JPS_AgentId agentId,
+    JPS_ErrorMessage* errorMessage);
+
 /*
  * Access the agent data.
  * @param handle to the simulation object

@@ -67,6 +67,9 @@ def main():
 
     print("Running simulation")
 
+    agent_id = simulation.add_agent(agent_parameters)
+    simulation.remove_agent(agent_id)
+
     while simulation.agent_count() > 0:
         simulation.iterate()
         if simulation.iteration_count() % 100 == 0:
