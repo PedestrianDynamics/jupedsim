@@ -1,12 +1,10 @@
-import argparse
-import random
 from math import sqrt
 import matplotlib.pyplot as plt
 import numpy as np
+import pytest
+import shapely.geometry as shply
 
 # Define Infinite
-import pytest
-
 INT_MAX = 10000
 FOREVER = 10000
 
@@ -17,102 +15,169 @@ class IncorrectPolygon(Exception):
         self.message = message
 
 
-# Given three collinear points p, q, r,
-# the function checks if point q lies on line segment 'p->r'
-def on_segment(p: tuple, q: tuple, r: tuple) -> bool:
-    if ((q[0] <= max(p[0], r[0])) &
-            (q[0] >= min(p[0], r[0])) &
-            (q[1] <= max(p[1], r[1])) &
-            (q[1] >= min(p[1], r[1]))):
-        return True
-
-    return False
+class AgentCount(Exception):
+    def __init__(self, message):
+        self.message = message
 
 
-def test_on_segment():
-    p1, p2, p3 = (15, 0), (20, 10), (25, 20)
-    assert on_segment(p1, p2, p3) is True
-    p1, p2, p3 = (0, 0), (20, 5), (10, 10)
-    assert on_segment(p1, p2, p3) is False
+class Overlapping(Exception):
+    def __init__(self, message):
+        self.message = message
 
 
-# To find orientation of ordered triplet (p, q, r).
-# The function returns following values
-# 0 --> p, q and r are collinear
-# 1 --> Clockwise
-# 2 --> Counterclockwise
-def orientation(p: tuple, q: tuple, r: tuple) -> int:
-    val = (((q[1] - p[1]) *
-            (r[0] - q[0])) -
-           ((q[0] - p[0]) *
-            (r[1] - q[1])))
-
-    if val == 0:
-        return 0  # Collinear
-    if val > 0:
-        return 1  # Clockwise
-    else:
-        return 2  # Counterclockwise
+class NegativeNumber(Exception):
+    def __init__(self, message):
+        self.message = message
 
 
-def test_orientation():
-    p1, p2, p3 = (15, 0), (20, 10), (25, 20)
-    assert orientation(p1, p2, p3) == 0  # collinear
-    p1, p2, p3 = (0, 0), (20, 5), (10, 10)
-    assert orientation(p1, p2, p3) == 2  # Counterclockwise
-    p1, p2, p3 = (10, 10), (20, 5), (0, 0)
-    assert orientation(p1, p2, p3) == 1  # Clockwise
+class Distribution:
+    def __init__(self, mid):
+        self.circles = []
+        self.mid_point = mid
+
+    def create_circle(self, min_radius, max_radius, number=None, density=None):
+        """creates a circle segment around the mid point of the object
+            - reaching from min_radius to max_radius
+            - either state a number of agents or a density for this circle segment
+            - if a set number is given density will be ignored
+            - if another circle around this object intersects with the new circle the method will raise an Exception
+        """
+        if number is None and density is None:
+            raise AgentCount(f"no number of agents and no density given when"
+                             f" creating a Circle from {min_radius} to {max_radius} with center at {self.mid_point}")
+        if min_radius < 0 or max_radius < 0:
+            raise NegativeNumber("a new created Circle contained a negative radius")
+        for circle in self.circles:
+            if min_radius < max_radius <= circle[0] or circle[1] <= min_radius < max_radius:
+                continue
+            else:
+                raise Overlapping(f"the new Circle would overlap with"
+                                  f" the existing circle from {circle[0]} to {circle[1]}")
+        self.circles.append((min_radius, max_radius, number, density))
+
+    def remove_circle(self, min_radius, max_radius):
+        """removes a circle segment from min_radius to max_radius
+            if no segment is found with the exact radius nothing will happen"""
+        for circle in self.circles:
+            if circle[0] == min_radius and circle[1] == max_radius:
+                self.circles.remove(circle)
+                break
+
+    def place_in_Polygon(self, polygon, agent_radius, wall_distance, seed=None):
+        """returns points inside each circle segment
+            points have an agent_radius within which no other point may be placed.
+            points will not be placed with less than wall_distance to the polygon
+            points will be placed inside the polygon and inside the circle segment
+            points are placed first in the segment that was created first
+            if more that 10000 tries are needed to placed a valid point an Exception will be thrown"""
+        if seed is not None:
+            np.random.seed(seed)
+        samples = []
+        for circle in self.circles:
+            # if for the circle no exact number of agents is set it will be determined with the density
+            if circle[2] is None:
+                density = circle[3]
+                big_circle_area = intersecting_area_polygon_circle(self.mid_point, circle[1], polygon)
+                small_circle_area = intersecting_area_polygon_circle(self.mid_point, circle[0], polygon)
+                possible_area = big_circle_area - small_circle_area
+                targeted_count = round(density * possible_area)
+            else:
+                targeted_count = circle[2]
+            for placed_count in range(targeted_count + 1):
+                i = 0
+                while i < INT_MAX:
+                    i += 1
+                    # determines a random radius within the circle segment
+                    rho = np.sqrt(np.random.uniform(circle[0] ** 2, circle[1] ** 2))
+                    # determines a random degree
+                    theta = np.random.uniform(0, 2 * np.pi)
+                    pt = self.mid_point[0] + rho * np.cos(theta), self.mid_point[1] + rho * np.sin(theta)
+                    if point_is_valid(pt, polygon, agent_radius, wall_distance, samples):
+                        samples.append(pt)
+                        break
+
+                if i >= INT_MAX and placed_count != targeted_count:
+                    message = f"the desired amount of agents in the Circle from {circle[0]} to {circle[1]} " \
+                              f"could not be achieved.\nOnly {placed_count} of {targeted_count}  could be placed."
+                    if circle[2] is None:
+                        # if the circle has no number of agents
+                        # the expected and actual density will be added to the exception message
+                        big_circle_area = intersecting_area_polygon_circle(self.mid_point, circle[1], polygon)
+                        small_circle_area = intersecting_area_polygon_circle(self.mid_point, circle[0], polygon)
+                        area = big_circle_area - small_circle_area
+                        message += f"\nexpected density: {circle[3]} p/m², " \
+                                   f"actual density: {round(placed_count / area, 2)} p/m²"
+                    raise AgentCount(message)
+        return samples
+
+    def show_points(self, polygon, points, radius):
+        """illustrates the polygon, circle segments and points"""
+        samples = points
+        borders = get_borders(polygon)
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1)
+        for circle in self.circles:
+            ax.add_patch(plt.Circle(radius=circle[0], xy=self.mid_point, fill=False))
+            ax.add_patch(plt.Circle(radius=circle[1], xy=self.mid_point, fill=False))
+        for elem in samples:
+            ax.add_patch(plt.Circle(radius=radius / 2, xy=elem, fill=False))
+            ax.add_patch(plt.Circle(radius=0.1, xy=elem, color="r"))
+
+        n = len(polygon)
+        i = 0
+        while True:
+            next = (i + 1) % n
+            x_value = [polygon[i][0], polygon[next][0]]
+            y_value = [polygon[i][1], polygon[next][1]]
+            plt.plot(x_value, y_value, color='blue')
+
+            i += 1
+            if next == 0:
+                break
+
+        plt.xlim(borders[0], borders[1])
+        plt.ylim(borders[2], borders[3])
+        plt.axis('equal')
+        plt.show()
 
 
-def do_intersect(p1, q1, p2, q2):
-    # Find the four orientations needed for
-    # general and special cases
-    o1 = orientation(p1, q1, p2)
-    o2 = orientation(p1, q1, q2)
-    o3 = orientation(p2, q2, p1)
-    o4 = orientation(p2, q2, q1)
-
-    # General case
-    if (o1 != o2) and (o3 != o4):
-        return True
-
-    # Special Cases
-    # p1, q1 and p2 are collinear and
-    # p2 lies on segment p1q1
-    if (o1 == 0) and (on_segment(p1, p2, q1)):
-        return True
-
-    # p1, q1 and p2 are collinear and
-    # q2 lies on segment p1q1
-    if (o2 == 0) and (on_segment(p1, q2, q1)):
-        return True
-
-    # p2, q2 and p1 are collinear and
-    # p1 lies on segment p2q2
-    if (o3 == 0) and (on_segment(p2, p1, q2)):
-        return True
-
-    # p2, q2 and q1 are collinear and
-    # q1 lies on segment p2q2
-    if (o4 == 0) and (on_segment(p2, q1, q2)):
-        return True
-
-    return False
+def intersecting_area_polygon_circle(mid_point, radius, polygon):
+    """returns the intersecting area of circle and polygon"""
+    # creates a point
+    point = shply.Point(mid_point)
+    # creates a layer with the size of the radius all around this point
+    circle = point.buffer(radius)
+    # creates a polygon in shapely
+    poly = shply.Polygon(polygon)
+    # returns the size of the intersecting area
+    return poly.intersection(circle).area
 
 
-def test_if_intersect_correctly():
-    p1, p2, p3, p4 = (0, 0), (2, 3), (0, 1), (3, 1)
-    assert do_intersect(p1, p2, p3, p4) is True
-    p1, p2, p3, p4 = (0, 0), (3, 0), (0, 1), (3, 1)
-    assert do_intersect(p1, p2, p3, p4) is False
-    p1, p2, p3, p4 = (1, 1), (2, 1), (0, 1), (3, 1)
-    assert do_intersect(p1, p2, p3, p4) is True
-    p1, p2, p3, p4 = (0, 1), (8, 1), (5, 5), (5, 5)
-    assert do_intersect(p1, p2, p3, p4) is False
+# currently unused
+def area_of_polygon(polygon):
+    """returns the area of the polygon"""
+    n = len(polygon)
+    area = 0
+    i = 0
+    while True:
+        next = (i + 1) % n
+        area += polygon[i][0] * polygon[next][1]
+        area -= polygon[i][1] * polygon[next][0]
+
+        i += 1
+        if next == 0:
+            break
+    return abs(area) / 2
+
+
+def point_is_valid(pt, polygon, agent_radius, wall_distance, other_points):
+    return is_inside_polygon(polygon, pt) \
+           and min_distance_to_polygon(pt, polygon) > wall_distance \
+           and pt_has_distance_to_others(pt, other_points, agent_radius)
 
 
 def is_inside_polygon(points: list, p: tuple) -> bool:
-    """ Returns true if the point p lies inside the polygon[] with n vertices """
+    """ Returns true if the point p lies inside the polygon with n vertices """
     n = len(points)
 
     # There must be at least 3 vertices
@@ -168,119 +233,86 @@ def is_inside_polygon(points: list, p: tuple) -> bool:
     return count % 2 == 1
 
 
-def test_if_inside():
-    polygon1 = [(0, 0), (10, 0), (10, 10), (0, 10)]
+def do_intersect(p1, q1, p2, q2):
+    """returns if the lines intersect"""
+    # Find the four orientations needed for
+    # general and special cases
+    o1 = orientation(p1, q1, p2)
+    o2 = orientation(p1, q1, q2)
+    o3 = orientation(p2, q2, p1)
+    o4 = orientation(p2, q2, q1)
 
-    p = (20, 20)
-    assert is_inside_polygon(points=polygon1, p=p) is False
+    # General case
+    if (o1 != o2) and (o3 != o4):
+        return True
 
-    p = (5, 5)
-    assert is_inside_polygon(points=polygon1, p=p) is True
+    # Special Cases
+    # p1, q1 and p2 are collinear and
+    # p2 lies on segment p1q1
+    if (o1 == 0) and (on_segment(p1, p2, q1)):
+        return True
 
-    polygon2 = [(0, 0), (5, 0), (5, 5), (3, 3)]
+    # p1, q1 and p2 are collinear and
+    # q2 lies on segment p1q1
+    if (o2 == 0) and (on_segment(p1, q2, q1)):
+        return True
 
-    p = (3, 3)
-    assert is_inside_polygon(points=polygon2, p=p) is True
+    # p2, q2 and p1 are collinear and
+    # p1 lies on segment p2q2
+    if (o3 == 0) and (on_segment(p2, p1, q2)):
+        return True
 
-    p = (5, 1)
-    assert is_inside_polygon(points=polygon2, p=p) is True
+    # p2, q2 and q1 are collinear and
+    # q1 lies on segment p2q2
+    if (o4 == 0) and (on_segment(p2, q1, q2)):
+        return True
 
-    p = (8, 1)
-    assert is_inside_polygon(points=polygon2, p=p) is False
-
-    p = (-1, 10)
-    assert is_inside_polygon(points=polygon1, p=p) is False
-
-    polygon3 = [(1, 0), (2, 1)]
-    p = (1.5, 0.5)
-    assert is_inside_polygon(polygon3, p) is False
-
-
-def distance_between(pt1, pt2):
-    dx = pt2[0] - pt1[0]
-    dy = pt2[1] - pt1[1]
-    return sqrt(dx ** 2 + dy ** 2)
-
-
-def test_distance_determination():
-    pt1 = (0, 0)
-    pt2 = (2, 0)
-    expected_result = 2.0
-    exception_rate = 0.01
-    actual_result = distance_between(pt1, pt2)
-    difference = expected_result - actual_result
-    assert difference == 0 or exception_rate > difference > 0 or -exception_rate < difference < 0
-    pt1 = (0, 0)
-    pt2 = (1, 1)
-    expected_result = 1.41421
-    exception_rate = 0.01
-    actual_result = distance_between(pt1, pt2)
-    difference = expected_result - actual_result
-    assert difference == 0 or exception_rate > difference > 0 or -exception_rate < difference < 0
+    return False
 
 
-def pt_has_distance_to_others(n_point, existing_points, radius):
-    i = 0
-    for current_point in existing_points:
-        distance = distance_between(n_point, current_point)
-        i += 1
-        if distance < radius:
-            return False
-    return True
+def orientation(p: tuple, q: tuple, r: tuple) -> int:
+    """The function returns orientation of ordered triplet (p, q, r) with following values
+    0 --> p, q and r are collinear
+    1 --> Clockwise
+    2 --> Counterclockwise """
+    val = (((q[1] - p[1]) *
+            (r[0] - q[0])) -
+           ((q[0] - p[0]) *
+            (r[1] - q[1])))
+
+    if val == 0:
+        return 0  # Collinear
+    if val > 0:
+        return 1  # Clockwise
+    else:
+        return 2  # Counterclockwise
 
 
-def test_pt_has_distance_to_every_other():
-    points = [(6.67, 1.2), (6.6, 2.3), (8.8, 4.7), (11.05, 7.45), (5.35, 2.9)]
-    n_point, radius = (4.5, 9.2), 0.75
-    assert pt_has_distance_to_others(n_point, points, radius) is True
-    n_point = (9, 5)
-    assert pt_has_distance_to_others(n_point, points, radius) is False
-    n_point = (0, 0)
-    existing_points = [(2, 0), (0, 2), (5, 3)]
-    radius = 1.5
-    assert pt_has_distance_to_others(n_point, existing_points, radius) is True
-    existing_points = [(1, 0), (0, 1)]
-    assert pt_has_distance_to_others(n_point, existing_points, radius) is False
+def on_segment(p: tuple, q: tuple, r: tuple) -> bool:
+    """ Given three collinear points p, q, r,
+    the function checks if point q lies on line segment 'p->r'"""
+    if ((q[0] <= max(p[0], r[0])) &
+            (q[0] >= min(p[0], r[0])) &
+            (q[1] <= max(p[1], r[1])) &
+            (q[1] >= min(p[1], r[1]))):
+        return True
+
+    return False
 
 
-def point_is_valid(pt, polygon, agent_radius, wall_distance, other_points):
-    return is_inside_polygon(polygon, pt) \
-           and min_distance_to_polygon(pt, polygon) > wall_distance \
-           and pt_has_distance_to_others(pt, other_points, agent_radius)
+def get_borders(polygon):
+    """returns a list containing the minimal/maximal x and y values
+    formatted like : [min(x_values), max(x_values), min(y_values), max(y_values)]"""
+    x_values, y_values = [], []
+    for point in polygon:
+        x_values.append(point[0])
+        y_values.append(point[1])
 
-
-def create_random_points(polygon, count, agent_radius, wall_distance):
-    borders = get_borders(polygon)
-    samples = []
-    created_points = 0
-    iterations = 0
-    while created_points < count:
-        if iterations > FOREVER:
-            return samples
-        temp_point = (random.uniform(borders[0], borders[1]), random.uniform(borders[2], borders[3]))
-        if point_is_valid(temp_point, polygon, agent_radius, wall_distance, samples):
-            samples.append(temp_point)
-            iterations = 0
-            created_points += 1
-        else:
-            iterations += 1
-    return samples
-
-
-def test_all_random_points_valid_placed():
-    polygon = [(0, 0), (8, 2), (10, 6), (8, 10), (4, 10), (0, 6)]
-    walldistance, agentradius = 0.5, 1
-    wanted_amount = 25
-    samples = create_random_points(polygon, wanted_amount, agentradius, walldistance)
-    assert len(samples) == wanted_amount
-    for sample in samples:
-        sample_copy = samples[:]
-        sample_copy.remove(sample)
-        assert pt_has_distance_to_others(sample, sample_copy, agentradius) is True
-        assert min_distance_to_polygon(sample, polygon) > walldistance
+    return [min(x_values), max(x_values), min(y_values), max(y_values)]
 
 
 def min_distance_to_polygon(pt, polygon):
+    """returns the minimal distance between a point and every line segment of a polygon"""
     distances = []
     n = len(polygon)
     i = 0
@@ -294,17 +326,8 @@ def min_distance_to_polygon(pt, polygon):
     return min(distances)
 
 
-def test_minimal_distance_to_polygon():
-    polygon = [(0, 0), (4, 1), (5, 3), (4, 5), (2, 5), (0, 3)]
-    pt = (3, 3)
-    expected_result = min([2.182820625326997, 1.7888543819998317, 1.7888543819998317, 2.0, 2.1213203435596424, 3.0])
-    acceptance_rate = 0.01
-    actual_result = min_distance_to_polygon(pt, polygon)
-    difference = actual_result - expected_result
-    assert abs(difference) < acceptance_rate
-
-
 def distance_to_segment(a, b, e):
+    """returns the minimal distance between point e and the line segment from a to b"""
     # vector AB
     ab = [None, None]
     ab[0] = b[0] - a[0]
@@ -357,33 +380,222 @@ def distance_to_segment(a, b, e):
     return req_ans
 
 
-def test_distance_determination_point_line_segment():
-    pt = (3, 3)
-    acception_rate = 0.01
-    pt1, pt2 = (0, 0), (4, 1)
-    actual, expected = distance_to_segment(pt1, pt2, pt), 2.182820625326997
-    differance = actual - expected
-    assert abs(differance) < acception_rate
-    pt1, pt2 = (4, 1), (5, 3)
-    actual, expected = distance_to_segment(pt1, pt2, pt), 1.7888543819998317
-    differance = actual - expected
-    assert abs(differance) < acception_rate
-    pt1, pt2 = (5, 3), (4, 5)
-    actual, expected = distance_to_segment(pt1, pt2, pt), 1.7888543819998317
-    differance = actual - expected
-    assert abs(differance) < acception_rate
-    pt1, pt2 = (4, 5), (2, 5)
-    actual, expected = distance_to_segment(pt1, pt2, pt), 2.0
-    differance = actual - expected
-    assert abs(differance) < acception_rate
-    pt1, pt2 = (2, 5), (0, 3)
-    actual, expected = distance_to_segment(pt1, pt2, pt), 2.1213203435596424
-    differance = actual - expected
-    assert abs(differance) < acception_rate
-    pt1, pt2 = (0, 3), (0, 0)
-    actual, expected = distance_to_segment(pt1, pt2, pt), 3.0
-    differance = actual - expected
-    assert abs(differance) < acception_rate
+def pt_has_distance_to_others(n_point, existing_points, radius):
+    """ returns true if in a circle around n_point with the given radius no already placed point exists"""
+    i = 0
+    for current_point in existing_points:
+        distance = distance_between(n_point, current_point)
+        i += 1
+        if distance < radius:
+            return False
+    return True
+
+
+def distance_between(pt1, pt2):
+    """returns the distance between point1 and point2"""
+    dx = pt2[0] - pt1[0]
+    dy = pt2[1] - pt1[1]
+    return sqrt(dx ** 2 + dy ** 2)
+
+
+def create_random_points(polygon, count, agent_radius, wall_distance, seed=None):
+    """returns points randomly placed inside the polygon
+        :param polygon: List of corner points given as tuples
+        :param count: number of points placed
+        :param agent_radius: minimal distance between points
+        :param wall_distance: minimal distance between points and the polygon
+        :param seed: define a seed for random generation
+        :return: list of created points
+        if more that 10000 tries are needed to placed a valid point an Exception will be thrown
+    """
+    if seed is not None:
+        np.random.seed(seed)
+    borders = get_borders(polygon)
+    samples = []
+    created_points = 0
+    iterations = 0
+    while created_points < count:
+        if iterations > FOREVER:
+            raise AgentCount(f"Only {created_points} of {count}  could be placed.")
+        temp_point = (np.random.uniform(borders[0], borders[1]), np.random.uniform(borders[2], borders[3]))
+        if point_is_valid(temp_point, polygon, agent_radius, wall_distance, samples):
+            samples.append(temp_point)
+            iterations = 0
+            created_points += 1
+        else:
+            iterations += 1
+    return samples
+
+
+def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None):
+    """creates points all over the polygon with bridson´s poisson-disk algorithm
+        :param polygon: List of corner points given as tuples
+        :param agent_radius: minimal distance between points
+        :param wall_distance: minimal distance between points and the polygon
+        :param seed: define a seed for random generation
+        :return: list of created points
+    """
+    if seed is not None:
+        np.random.seed(seed)
+    # Choose up to k points around each reference point as candidates for a new sample point
+    k = 30
+    borders = get_borders(polygon)
+    width, height = borders[1] - borders[0], borders[3] - borders[2]
+    # Cell side length
+    c_s_l = agent_radius / np.sqrt(2)
+    # Number of cells in the x- and y-directions of the grid
+    nx, ny = int(width / c_s_l) + 1, int(height / c_s_l) + 1
+    nxny = nx, ny
+    # A list of coordinates in the grid of cells
+    coords_list = [(ix, iy) for ix in range(nx) for iy in range(ny)]
+    # Initialize the dictionary of cells: each key is a cell's coordinates, the
+    # corresponding value is the index of that cell's point's coordinates in the
+    # samples list (or None if the cell is empty).
+    cells = {coords: None for coords in coords_list}
+
+    # Pick a random point to start with.
+    active = nsamples = samples = None
+    while True:
+        pt = np.random.uniform(borders[0], borders[1]), np.random.uniform(borders[2], borders[3])
+        if is_inside_polygon(polygon, pt) and min_distance_to_polygon(pt, polygon) > wall_distance:
+            samples = [pt]
+            # Our first sample is indexed at 0 in the samples list...
+            cells[get_cell_coords(pt, c_s_l, borders)] = 0
+            # ... and it is active, in the sense that we're going to look for more points
+            # in its neighbourhood.
+            active = [0]
+            nsamples = 1
+            break
+        else:
+            continue
+
+    while active:
+        # choose a random "reference" point from the active list.
+        idx = np.random.choice(active)
+        refpt = samples[idx]
+        # Try to pick a new point relative to the reference point.
+        pt = get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nxny, cells, seed)
+        if pt:
+            # Point pt is valid: add it to the samples list and mark it as active
+            samples.append(pt)
+            nsamples += 1
+            active.append(len(samples) - 1)
+            cells[get_cell_coords(pt, c_s_l, borders)] = len(samples) - 1
+        else:
+            # We had to give up looking for valid points near ref.pt, so remove it
+            # from the list of "active" points.
+            active.remove(idx)
+
+    return samples
+
+
+def get_cell_coords(pt, cell_side_length, borders):
+    """ Get the coordinates of the cell that pt = (x,y) falls in.
+        borders is list containing the minimal/maximal x and y values"""
+
+    return int((pt[0] - borders[0]) // cell_side_length), int((pt[1] - borders[2]) // cell_side_length)
+
+
+def get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nxny, cells, seed=None):
+    """Try to find a candidate point relative to refpt to emit in the sample.
+
+    We draw up to k points from the annulus of inner radius r, outer radius 2r
+    around the reference point, refpt. If none of them are suitable (because
+    they're too close to existing points in the sample), return False.
+    Otherwise, return the pt.
+
+    :param k: up to k points are drawn until a reference point is declared as inactive
+    :param refpt: points are drawn around this reference point
+    :param polygon: Polygon in which the points must lie
+    :param agent_radius: minimal distance between points
+    :param wall_distance: minimal distance between points and the polygon
+    :param samples: already placed points
+    :param c_s_l: Cell side length of the grid
+    :param nxny: Number of cells in the x- and y-direction as Tuple: (nx, ny)
+    :param cells: dictionary with key: cell, value: point
+    :param seed: define a seed for random generation
+    """
+    if seed is not None:
+        np.random.seed(seed)
+    borders = get_borders(polygon)
+
+    width, height = borders[1] - borders[0], borders[3] - borders[2]
+
+    i = 0
+    while i < k:
+        i += 1
+        rho = np.sqrt(np.random.uniform(agent_radius ** 2, 4 * agent_radius ** 2))
+        theta = np.random.uniform(0, 2 * np.pi)
+        pt = refpt[0] + rho * np.cos(theta), refpt[1] + rho * np.sin(theta)
+        if not (0 <= pt[0] < width and 0 <= pt[1] < height):
+            # This point falls outside the domain, so try again.
+            continue
+        if point_valid(pt, agent_radius, wall_distance, c_s_l, polygon, samples, nxny, cells):
+            return pt
+
+    # We failed to find a suitable point in the vicinity of refpt. The Point will be declared as inactive
+    return False
+
+
+def point_valid(pt, agent_radius, wall_distance, cell_side_length, polygon, samples, nxny, cells):
+    """ Determines if a point is valid by using a Grid to determine neighbours
+    :param pt: point that is being checked
+    :param agent_radius:minimal distance between points
+    :param wall_distance: minimal distance between point and the polygon
+    :param cell_side_length: Cell side length of the Grid
+    :param polygon: Polygon in which the points must lie
+    :param samples: already placed points
+    :param nxny: Number of cells in the x- and y-direction as Tuple: (nx, ny)
+    :param cells: Dictionary with key: cell, value: point
+    :return: if valid: True else: False
+    """
+
+    cell_coords = get_cell_coords(pt, cell_side_length, get_borders(polygon))
+    if not is_inside_polygon(polygon, pt):
+        return False
+    if min_distance_to_polygon(pt, polygon) < wall_distance:
+        return False
+    for idx in get_neighbours(cell_coords, nxny, cells):
+        nearby_pt = samples[idx]
+        # Squared distance between or candidate point, pt, and this nearby_pt.
+        distance2 = (nearby_pt[0] - pt[0]) ** 2 + (nearby_pt[1] - pt[1]) ** 2
+        if distance2 < agent_radius ** 2:
+            # The points are too close, so pt is not a candidate.
+            return False
+    # All points tested: if we're here, pt is valid
+    return True
+
+
+def get_neighbours(coords, nxny, cells):
+    """Return the indexes of points in cells neighbouring cell at coords.
+
+    For the cell at coords = (x,y), return the indexes of points in the cells
+    with neighbouring coordinates illustrated below: I.e. those cells that could
+    contain points closer than r.
+
+                                     ooo
+                                    ooooo
+                                    ooXoo
+                                    ooooo
+                                     ooo
+
+    """
+    nx, ny = nxny[0], nxny[1]
+    dxdy = [(-1, -2), (0, -2), (1, -2), (-2, -1), (-1, -1), (0, -1), (1, -1), (2, -1),
+            (-2, 0), (-1, 0), (1, 0), (2, 0), (-2, 1), (-1, 1), (0, 1), (1, 1), (2, 1),
+            (-1, 2), (0, 2), (1, 2), (0, 0)]
+    neighbours = []
+    for dx, dy in dxdy:
+        neighbour_coords = coords[0] + dx, coords[1] + dy
+        if not (0 <= neighbour_coords[0] < nx and
+                0 <= neighbour_coords[1] < ny):
+            # We're off the grid: no neighbours here.
+            continue
+        neighbour_cell = cells[neighbour_coords]
+        if neighbour_cell is not None:
+            # This cell is occupied: store this index of the contained point.
+            neighbours.append(neighbour_cell)
+    return neighbours
 
 
 def heatmap(all, agent_radius, wall_distance, polygon, iterations, max_persons=50):
@@ -438,210 +650,6 @@ def heatmap(all, agent_radius, wall_distance, polygon, iterations, max_persons=5
     plt.show()
 
 
-def make_polygon(string_list):
-    points = []
-    try:
-        for elem in string_list:
-            elem = elem.strip("()")
-            elem = elem.strip(" ")
-            numbers = elem.split(",")
-            x = float(numbers[0])
-            y = float(numbers[1])
-            points.append((x, y))
-    except Exception:
-        raise IncorrectPolygon("The given Polygon was not correct. Please format your Points like this: '(0,0)'")
-    return points
-
-
-def test_polygon_creation():
-    input_list = ["(0,0)", "(0, 1)", "( 1, 2 ", "(5, 3", ")(3, 4)", "8,9"]
-    expected_polygon = [(0, 0), (0, 1), (1, 2), (5, 3), (3, 4), (8, 9)]
-    assert make_polygon(input_list) == expected_polygon
-    input_list = ["novalue"]
-    with pytest.raises(IncorrectPolygon):
-        make_polygon(input_list)
-
-
-def get_borders(polygon):
-    """returns a list containing the minimal/maximal x and y values
-    formatted like : [min(x_values), max(x_values), min(y_values), max(y_values)]"""
-    x_values, y_values = [], []
-    for point in polygon:
-        x_values.append(point[0])
-        y_values.append(point[1])
-
-    return [min(x_values), max(x_values), min(y_values), max(y_values)]
-
-
-def test_border_determination():
-    polygon = [(6, 0), (9, 2), (11, 4), (12, 7), (11.5, 9.5), (9.5, 10.5), (7.5, 10),
-               (6, 9), (4.5, 10), (2.5, 10.5), (0.6, 9.5), (0, 7), (1, 4), (3, 2)]
-    expected_borders = [0, 12, 0, 10.5]
-    assert get_borders(polygon) == expected_borders
-
-
-def get_cell_coords(pt, cell_side_length, borders):
-    """Get the coordinates of the cell that pt = (x,y) falls in."""
-
-    return int((pt[0] - borders[0]) // cell_side_length), int((pt[1] - borders[2]) // cell_side_length)
-
-
-def test_cell_coord_determination():
-    pt = (5, 5)
-    borders = [0, 10, 0, 10]
-    c_s_l = 0.7071067811865475  # 1/√2
-    assert (7, 7) == get_cell_coords(pt, c_s_l, borders)
-
-
-def get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nxny, cells):
-    """Try to find a candidate point relative to refpt to emit in the sample.
-
-    We draw up to k points from the annulus of inner radius r, outer radius 2r
-    around the reference point, refpt. If none of them are suitable (because
-    they're too close to existing points in the sample), return False.
-    Otherwise, return the pt.
-
-    """
-    borders = get_borders(polygon)
-
-    width, height = borders[1] - borders[0], borders[3] - borders[2]
-
-    i = 0
-    while i < k:
-        i += 1
-        rho = np.sqrt(np.random.uniform(agent_radius ** 2, 4 * agent_radius ** 2))
-        theta = np.random.uniform(0, 2 * np.pi)
-        pt = refpt[0] + rho * np.cos(theta), refpt[1] + rho * np.sin(theta)
-        if not (0 <= pt[0] < width and 0 <= pt[1] < height):
-            # This point falls outside the domain, so try again.
-            continue
-        if point_valid(pt, agent_radius, wall_distance, c_s_l, polygon, samples, nxny, cells):
-            return pt
-
-    # We failed to find a suitable point in the vicinity of refpt.
-    return False
-
-
-def get_neighbours(coords, nxny, cells):
-    """Return the indexes of points in cells neighbouring cell at coords.
-
-    For the cell at coords = (x,y), return the indexes of points in the cells
-    with neighbouring coordinates illustrated below: ie those cells that could
-    contain points closer than r.
-
-                                     ooo
-                                    ooooo
-                                    ooXoo
-                                    ooooo
-                                     ooo
-
-    """
-    nx, ny = nxny[0], nxny[1]
-    dxdy = [(-1, -2), (0, -2), (1, -2), (-2, -1), (-1, -1), (0, -1), (1, -1), (2, -1),
-            (-2, 0), (-1, 0), (1, 0), (2, 0), (-2, 1), (-1, 1), (0, 1), (1, 1), (2, 1),
-            (-1, 2), (0, 2), (1, 2), (0, 0)]
-    neighbours = []
-    for dx, dy in dxdy:
-        neighbour_coords = coords[0] + dx, coords[1] + dy
-        if not (0 <= neighbour_coords[0] < nx and
-                0 <= neighbour_coords[1] < ny):
-            # We're off the grid: no neighbours here.
-            continue
-        neighbour_cell = cells[neighbour_coords]
-        if neighbour_cell is not None:
-            # This cell is occupied: store this index of the contained point.
-            neighbours.append(neighbour_cell)
-    return neighbours
-
-
-def point_valid(pt, agent_radius, wall_distance, cell_side_length, polygon, samples, nxny, cells):
-    """Is pt a valid point to emit as a sample?
-
-    It must be no closer than r from any other point: check the cells in its
-    immediate neighbourhood.
-
-    """
-
-    cell_coords = get_cell_coords(pt, cell_side_length, get_borders(polygon))
-    if not is_inside_polygon(polygon, pt):
-        return False
-    if min_distance_to_polygon(pt, polygon) < wall_distance:
-        return False
-    for idx in get_neighbours(cell_coords, nxny, cells):
-        nearby_pt = samples[idx]
-        # Squared distance between or candidate point, pt, and this nearby_pt.
-        distance2 = (nearby_pt[0] - pt[0]) ** 2 + (nearby_pt[1] - pt[1]) ** 2
-        if distance2 < agent_radius ** 2:
-            # The points are too close, so pt is not a candidate.
-            return False
-    # All points tested: if we're here, pt is valid
-    return True
-
-
-def create_points_everywhere(polygon, agent_radius, wall_distance):
-    # Choose up to k points around each reference point as candidates for a new sample point
-    k = 30
-    borders = get_borders(polygon)
-    width, height = borders[1] - borders[0], borders[3] - borders[2]
-    # Cell side length
-    c_s_l = agent_radius / np.sqrt(2)
-    # Number of cells in the x- and y-directions of the grid
-    nx, ny = int(width / c_s_l) + 1, int(height / c_s_l) + 1
-    nxny = nx, ny
-    # A list of coordinates in the grid of cells
-    coords_list = [(ix, iy) for ix in range(nx) for iy in range(ny)]
-    # Initialize the dictionary of cells: each key is a cell's coordinates, the
-    # corresponding value is the index of that cell's point's coordinates in the
-    # samples list (or None if the cell is empty).
-    cells = {coords: None for coords in coords_list}
-
-    # Pick a random point to start with.
-    active = nsamples = samples = None
-    while True:
-        pt = np.random.uniform(borders[0], borders[1]), np.random.uniform(borders[2], borders[3])
-        if is_inside_polygon(polygon, pt) and min_distance_to_polygon(pt, polygon) > wall_distance:
-            samples = [pt]
-            # Our first sample is indexed at 0 in the samples list...
-            cells[get_cell_coords(pt, c_s_l, borders)] = 0
-            # ... and it is active, in the sense that we're going to look for more points
-            # in its neighbourhood.
-            active = [0]
-            nsamples = 1
-            break
-        else:
-            continue
-
-    while active:
-        # choose a random "reference" point from the active list.
-        idx = np.random.choice(active)
-        refpt = samples[idx]
-        # Try to pick a new point relative to the reference point.
-        pt = get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nxny, cells)
-        if pt:
-            # Point pt is valid: add it to the samples list and mark it as active
-            samples.append(pt)
-            nsamples += 1
-            active.append(len(samples) - 1)
-            cells[get_cell_coords(pt, c_s_l, borders)] = len(samples) - 1
-        else:
-            # We had to give up looking for valid points near ref.pt, so remove it
-            # from the list of "active" points.
-            active.remove(idx)
-
-    return samples
-
-
-def test_all_points_valid_placed_poisson_disc():
-    polygon = [(0, 0), (8, 2), (10, 6), (8, 10), (4, 10), (0, 6)]
-    walldistance, agentradius = 0.5, 1
-    samples = create_points_everywhere(polygon, agentradius, walldistance)
-    for sample in samples:
-        sample_copy = samples[:]
-        sample_copy.remove(sample)
-        assert pt_has_distance_to_others(sample, sample_copy, agentradius) is True
-        assert min_distance_to_polygon(sample, polygon) > walldistance
-
-
 def show_points(polygon, points, radius):
     samples = points
     borders = get_borders(polygon)
@@ -667,3 +675,205 @@ def show_points(polygon, points, radius):
     plt.ylim(borders[2], borders[3])
     plt.axis('equal')
     plt.show()
+
+
+# BEGINNING TESTS
+def test_seed_works_correct_for_poisson_disc():
+    polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
+    set_seed = 1337
+    samples1 = create_random_points(polygon, 100, agent_radius=0.3, wall_distance=0.3, seed=set_seed)
+    samples2 = create_random_points(polygon, 100, agent_radius=0.3, wall_distance=0.3, seed=set_seed)
+    assert samples1 == samples2
+
+
+def test_cell_coord_determination():
+    pt = (5, 5)
+    borders = [0, 10, 0, 10]
+    c_s_l = 0.7071067811865475  # 1/√2
+    assert (7, 7) == get_cell_coords(pt, c_s_l, borders)
+
+
+def test_border_determination():
+    polygon = [(6, 0), (9, 2), (11, 4), (12, 7), (11.5, 9.5), (9.5, 10.5), (7.5, 10),
+               (6, 9), (4.5, 10), (2.5, 10.5), (0.6, 9.5), (0, 7), (1, 4), (3, 2)]
+    expected_borders = [0, 12, 0, 10.5]
+    assert get_borders(polygon) == expected_borders
+
+
+def test_distance_determination_point_line_segment():
+    pt = (3, 3)
+    acception_rate = 0.01
+    pt1, pt2 = (0, 0), (4, 1)
+    actual, expected = distance_to_segment(pt1, pt2, pt), 2.182820625326997
+    differance = actual - expected
+    assert abs(differance) < acception_rate
+    pt1, pt2 = (4, 1), (5, 3)
+    actual, expected = distance_to_segment(pt1, pt2, pt), 1.7888543819998317
+    differance = actual - expected
+    assert abs(differance) < acception_rate
+    pt1, pt2 = (5, 3), (4, 5)
+    actual, expected = distance_to_segment(pt1, pt2, pt), 1.7888543819998317
+    differance = actual - expected
+    assert abs(differance) < acception_rate
+    pt1, pt2 = (4, 5), (2, 5)
+    actual, expected = distance_to_segment(pt1, pt2, pt), 2.0
+    differance = actual - expected
+    assert abs(differance) < acception_rate
+    pt1, pt2 = (2, 5), (0, 3)
+    actual, expected = distance_to_segment(pt1, pt2, pt), 2.1213203435596424
+    differance = actual - expected
+    assert abs(differance) < acception_rate
+    pt1, pt2 = (0, 3), (0, 0)
+    actual, expected = distance_to_segment(pt1, pt2, pt), 3.0
+    differance = actual - expected
+    assert abs(differance) < acception_rate
+
+
+def test_minimal_distance_to_polygon():
+    polygon = [(0, 0), (4, 1), (5, 3), (4, 5), (2, 5), (0, 3)]
+    pt = (3, 3)
+    expected_result = min([2.182820625326997, 1.7888543819998317, 1.7888543819998317, 2.0, 2.1213203435596424, 3.0])
+    acceptance_rate = 0.01
+    actual_result = min_distance_to_polygon(pt, polygon)
+    difference = actual_result - expected_result
+    assert abs(difference) < acceptance_rate
+
+
+def test_seed_works_correct_for_random_points():
+    polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
+    set_seed = 1337
+    samples1 = create_random_points(polygon, 100, agent_radius=0.3, wall_distance=0.3, seed=set_seed)
+    samples2 = create_random_points(polygon, 100, agent_radius=0.3, wall_distance=0.3, seed=set_seed)
+    assert samples1 == samples2
+
+
+def test_pt_has_distance_to_every_other():
+    points = [(6.67, 1.2), (6.6, 2.3), (8.8, 4.7), (11.05, 7.45), (5.35, 2.9)]
+    n_point, radius = (4.5, 9.2), 0.75
+    assert pt_has_distance_to_others(n_point, points, radius) is True
+    n_point = (9, 5)
+    assert pt_has_distance_to_others(n_point, points, radius) is False
+    n_point = (0, 0)
+    existing_points = [(2, 0), (0, 2), (5, 3)]
+    radius = 1.5
+    assert pt_has_distance_to_others(n_point, existing_points, radius) is True
+    existing_points = [(1, 0), (0, 1)]
+    assert pt_has_distance_to_others(n_point, existing_points, radius) is False
+
+
+def test_distance_determination():
+    pt1 = (0, 0)
+    pt2 = (2, 0)
+    expected_result = 2.0
+    exception_rate = 0.01
+    actual_result = distance_between(pt1, pt2)
+    difference = expected_result - actual_result
+    assert difference == 0 or exception_rate > difference > 0 or -exception_rate < difference < 0
+    pt1 = (0, 0)
+    pt2 = (1, 1)
+    expected_result = 1.41421
+    exception_rate = 0.01
+    actual_result = distance_between(pt1, pt2)
+    difference = expected_result - actual_result
+    assert difference == 0 or exception_rate > difference > 0 or -exception_rate < difference < 0
+
+
+def test_if_inside():
+    polygon1 = [(0, 0), (10, 0), (10, 10), (0, 10)]
+
+    p = (20, 20)
+    assert is_inside_polygon(points=polygon1, p=p) is False
+
+    p = (5, 5)
+    assert is_inside_polygon(points=polygon1, p=p) is True
+
+    polygon2 = [(0, 0), (5, 0), (5, 5), (3, 3)]
+
+    p = (3, 3)
+    assert is_inside_polygon(points=polygon2, p=p) is True
+
+    p = (5, 1)
+    assert is_inside_polygon(points=polygon2, p=p) is True
+
+    p = (8, 1)
+    assert is_inside_polygon(points=polygon2, p=p) is False
+
+    p = (-1, 10)
+    assert is_inside_polygon(points=polygon1, p=p) is False
+
+    polygon3 = [(1, 0), (2, 1)]
+    p = (1.5, 0.5)
+    assert is_inside_polygon(polygon3, p) is False
+
+
+def test_if_intersect_correctly():
+    p1, p2, p3, p4 = (0, 0), (2, 3), (0, 1), (3, 1)
+    assert do_intersect(p1, p2, p3, p4) is True
+    p1, p2, p3, p4 = (0, 0), (3, 0), (0, 1), (3, 1)
+    assert do_intersect(p1, p2, p3, p4) is False
+    p1, p2, p3, p4 = (1, 1), (2, 1), (0, 1), (3, 1)
+    assert do_intersect(p1, p2, p3, p4) is True
+    p1, p2, p3, p4 = (0, 1), (8, 1), (5, 5), (5, 5)
+    assert do_intersect(p1, p2, p3, p4) is False
+
+
+def test_orientation():
+    p1, p2, p3 = (15, 0), (20, 10), (25, 20)
+    assert orientation(p1, p2, p3) == 0  # collinear
+    p1, p2, p3 = (0, 0), (20, 5), (10, 10)
+    assert orientation(p1, p2, p3) == 2  # Counterclockwise
+    p1, p2, p3 = (10, 10), (20, 5), (0, 0)
+    assert orientation(p1, p2, p3) == 1  # Clockwise
+
+
+def test_on_segment():
+    p1, p2, p3 = (15, 0), (20, 10), (25, 20)
+    assert on_segment(p1, p2, p3) is True
+    p1, p2, p3 = (0, 0), (20, 5), (10, 10)
+    assert on_segment(p1, p2, p3) is False
+
+
+def test_placing_Circles():
+    distribution = Distribution((0, 1))
+    distribution.create_circle(0, 1, 2)
+    assert distribution.mid_point == (0, 1)
+    assert distribution.circles == [(0, 1, 2, None)]
+    with pytest.raises(Overlapping):
+        distribution.create_circle(0.5, 3, 5)
+    with pytest.raises(NegativeNumber):
+        distribution.create_circle(-1, -2, 5)
+    distribution.create_circle(2, 3, 2)
+    assert distribution.circles == [(0, 1, 2, None), (2, 3, 2, None)]
+    with pytest.raises(Overlapping):
+        distribution.create_circle(1.5, 2.5, 5)
+    distribution.create_circle(1, 2, 2)
+    assert distribution.circles == [(0, 1, 2, None), (2, 3, 2, None), (1, 2, 2, None)]
+    distribution = Distribution((0, 1))
+    distribution.create_circle(0, 1, density=1)
+    assert distribution.circles == [(0, 1, None, 1)]
+
+
+def test_seed_works_correct_for_Circles():
+    distibution = Distribution((5, 5))
+    polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
+    set_seed = 1337
+    distibution.create_circle(0, 5, number=5)
+    samples1 = distibution.place_in_Polygon(polygon, agent_radius=0.3, wall_distance=0.3, seed=set_seed)
+    samples2 = distibution.place_in_Polygon(polygon, agent_radius=0.3, wall_distance=0.3, seed=set_seed)
+    assert samples2 is not []
+    assert samples1 == samples2
+
+
+def test_removing_Circles():
+    distribution = Distribution("no mid point")
+    distribution.circles = [(0, 1, 2, None), (2, 3, 2, None)]
+    distribution.remove_circle(0, 1)
+    assert distribution.circles == [(2, 3, 2, None)]
+
+
+# unused method tested:
+def test_area_determination_single_polygon():
+    polygon = [(0, 0), (30, 0), (25, 5), (20, 5), (17.5, 15), (25, 15), (15, 25), (5, 15), (12.5, 15), (10, 5), (5, 5)]
+    assert area_of_polygon(polygon) == 300
+
+# TESTS END

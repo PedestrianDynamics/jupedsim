@@ -1,5 +1,36 @@
 import distributions
+import pytest
 import argparse
+
+
+class IncorrectPolygon(Exception):
+
+    def __init__(self, message):
+        self.message = message
+
+
+def make_polygon(string_list):
+    points = []
+    try:
+        for elem in string_list:
+            elem = elem.strip("()")
+            elem = elem.strip(" ")
+            numbers = elem.split(",")
+            x = float(numbers[0])
+            y = float(numbers[1])
+            points.append((x, y))
+    except Exception:
+        raise IncorrectPolygon("The given Polygon was not correct. Please format your Points like this: '(0,0)'")
+    return points
+
+
+def test_polygon_creation():
+    input_list = ["(0,0)", "(0, 1)", "( 1, 2 ", "(5, 3", ")(3, 4)", "8,9"]
+    expected_polygon = [(0, 0), (0, 1), (1, 2), (5, 3), (3, 4), (8, 9)]
+    assert make_polygon(input_list) == expected_polygon
+    input_list = ["novalue"]
+    with pytest.raises(IncorrectPolygon):
+        make_polygon(input_list)
 
 
 def main():
@@ -13,8 +44,9 @@ def main():
                         help="-a for as many agents as possible with bridson´s poisson-disk algorithm", dest="all")
     parser.add_argument('-heatmap', type=int, default=None,
                         help="creates a heatmap regarding as many iterations as selected")
+    # parser.add_argument("--self-test", action="store_true", help="Will run self tests, print the results and exit.")
     args = parser.parse_args()
-    polygon = distributions.make_polygon(args.point)
+    polygon = make_polygon(args.point)
     samples = None
     if args.heatmap is not None:
         distributions.heatmap(args.all, args.a_r, args.w_d, polygon, args.heatmap, args.agents)
