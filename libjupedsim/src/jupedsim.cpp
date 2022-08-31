@@ -1,14 +1,14 @@
 #include "jupedsim/jupedsim.h"
 
-#include "CollisionGeometry.hpp"
+#include "AgentIterator.hpp"
 #include "ErrorMessage.hpp"
-#include "Journey.hpp"
-#include "Logger.hpp"
 
 #include <Area.hpp>
+#include <CollisionGeometry.hpp>
 #include <GCFMModel.hpp>
 #include <Geometry.hpp>
 #include <GeometryBuilder.hpp>
+#include <Journey.hpp>
 #include <Logger.hpp>
 #include <OperationalModel.hpp>
 #include <OperationalModelType.hpp>
@@ -292,29 +292,44 @@ void JPS_Areas_Free(JPS_Areas handle)
 double JPS_Agent_PositionX(JPS_Agent handle)
 {
     assert(handle != nullptr);
-    const auto agent = reinterpret_cast<Pedestrian*>(handle);
+    const auto agent = reinterpret_cast<const Pedestrian*>(handle);
     return agent->GetPos().x;
 }
 
 double JPS_Agent_PositionY(JPS_Agent handle)
 {
     assert(handle != nullptr);
-    const auto agent = reinterpret_cast<Pedestrian*>(handle);
+    const auto agent = reinterpret_cast<const Pedestrian*>(handle);
     return agent->GetPos().y;
 }
 
 double JPS_Agent_OrientationX(JPS_Agent handle)
 {
     assert(handle != nullptr);
-    const auto agent = reinterpret_cast<Pedestrian*>(handle);
+    const auto agent = reinterpret_cast<const Pedestrian*>(handle);
     return agent->GetEllipse().GetCosPhi();
 }
 
 double JPS_Agent_OrientationY(JPS_Agent handle)
 {
     assert(handle != nullptr);
-    const auto agent = reinterpret_cast<Pedestrian*>(handle);
+    const auto agent = reinterpret_cast<const Pedestrian*>(handle);
     return agent->GetEllipse().GetSinPhi();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// AgentIterator
+////////////////////////////////////////////////////////////////////////////////////////////////////
+JPS_Agent JPS_AgentIterator_Next(JPS_AgentIterator handle)
+{
+    assert(handle);
+    auto iterator = reinterpret_cast<AgentIterator*>(handle);
+    return reinterpret_cast<JPS_Agent>(iterator->Next());
+}
+
+void JPS_AgentIterator_Free(JPS_AgentIterator handle)
+{
+    delete reinterpret_cast<AgentIterator*>(handle);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -526,6 +541,13 @@ uint64_t JPS_Simulation_IterationCount(JPS_Simulation handle)
     assert(handle);
     auto simulation = reinterpret_cast<Simulation*>(handle);
     return simulation->Iteration();
+}
+
+JPS_AgentIterator JPS_Simulation_AgentIterator(JPS_Simulation handle)
+{
+    assert(handle);
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    return reinterpret_cast<JPS_AgentIterator>(new AgentIterator(simulation->Agents()));
 }
 
 void JPS_Simulation_Free(JPS_Simulation handle)

@@ -4,6 +4,7 @@
 #include <exception>
 #include <iterator>
 #include <memory>
+#include <pybind11/detail/common.h>
 #include <pybind11/pytypes.h>
 #include <stdexcept>
 #include <vector>
@@ -24,13 +25,21 @@ namespace py = pybind11;
         cls handle;                                                                                \
         cls##_Wrapper(cls h) : handle(h) {}                                                        \
         ~cls##_Wrapper() { cls##_Free(handle); }                                                   \
+        cls##_Wrapper(const cls##_Wrapper&) = delete;                                              \
+        cls##_Wrapper& operator=(const cls##_Wrapper&) = delete;                                   \
+        cls##_Wrapper(cls##_Wrapper&&) = delete;                                                   \
+        cls##_Wrapper& operator=(cls##_Wrapper&&) = delete;                                        \
     }
 
 #define WRAPPER(cls)                                                                               \
     struct cls##_Wrapper {                                                                         \
         cls handle;                                                                                \
         cls##_Wrapper(cls h) : handle(h) {}                                                        \
-        ~cls##_Wrapper() {}                                                                        \
+        ~cls##_Wrapper() = default;                                                                \
+        cls##_Wrapper(const cls##_Wrapper&) = delete;                                              \
+        cls##_Wrapper& operator=(const cls##_Wrapper&) = delete;                                   \
+        cls##_Wrapper(cls##_Wrapper&&) = delete;                                                   \
+        cls##_Wrapper& operator=(cls##_Wrapper&&) = delete;                                        \
     }
 
 OWNED_WRAPPER(JPS_Geometry);
@@ -41,6 +50,7 @@ OWNED_WRAPPER(JPS_AreasBuilder);
 OWNED_WRAPPER(JPS_Journey);
 WRAPPER(JPS_Agent);
 OWNED_WRAPPER(JPS_Simulation);
+OWNED_WRAPPER(JPS_AgentIterator);
 
 class LogCallbackOwner
 {
@@ -227,6 +237,17 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def_property_readonly("orientation_y", [](const JPS_Agent_Wrapper& w) {
             return JPS_Agent_OrientationY(w.handle);
         });
+    py::class_<JPS_AgentIterator_Wrapper>(m, "AgentIterator")
+        .def(
+            "__iter__",
+            [](JPS_AgentIterator_Wrapper& w) -> JPS_AgentIterator_Wrapper& { return w; })
+        .def("__next__", [](JPS_AgentIterator_Wrapper& w) {
+            const auto result = JPS_AgentIterator_Next(w.handle);
+            if(result) {
+                return std::make_unique<JPS_Agent_Wrapper>(result);
+            }
+            throw py::stop_iteration{};
+        });
     py::class_<JPS_AgentParameters>(m, "AgentParameters")
         .def(py::init<>())
         .def_readwrite("x", &JPS_AgentParameters::positionX)
@@ -329,7 +350,13 @@ PYBIND11_MODULE(py_jupedsim, m)
             [](JPS_Simulation_Wrapper& simulation) {
                 return JPS_Simulation_AgentCount(simulation.handle);
             })
-        .def("iteration_count", [](JPS_Simulation_Wrapper& simulation) {
-            return JPS_Simulation_IterationCount(simulation.handle);
+        .def(
+            "iteration_count",
+            [](JPS_Simulation_Wrapper& simulation) {
+                return JPS_Simulation_IterationCount(simulation.handle);
+            })
+        .def("agents", [](const JPS_Simulation_Wrapper& simulation) {
+            return std::make_unique<JPS_AgentIterator_Wrapper>(
+                JPS_Simulation_AgentIterator(simulation.handle));
         });
 }

@@ -308,8 +308,10 @@ typedef uint64_t JPS_AgentId;
 
 /**
  * Opaque type of a agent in the simulation.
+ * Agents never need to be freed and their lifetime is always managed by the simulation.
+ * Agents get invalidated if they are removed by the simulation.
  */
-typedef struct JPS_Agent_t* JPS_Agent;
+typedef const struct JPS_Agent_t* JPS_Agent;
 
 /*
  * Access the agents positions x value.
@@ -338,6 +340,25 @@ JUPEDSIM_API double JPS_Agent_OrientationX(JPS_Agent handle);
  * @return y orientation
  */
 JUPEDSIM_API double JPS_Agent_OrientationY(JPS_Agent handle);
+
+/**
+ * Opaque type of an iterator over agents
+ */
+typedef struct JPS_AgentIterator_t* JPS_AgentIterator;
+
+/**
+ * Access the next element in the iterator.
+ * Calling JPS_AgentIterator_Next repeatedly on a finished iterator is save.
+ * @param handle of the iterator to advance and access
+ * @return an agent or NULL if the iterator is at the end
+ */
+JUPEDSIM_API JPS_Agent JPS_AgentIterator_Next(JPS_AgentIterator handle);
+
+/**
+ * Free the iterator.
+ * @param handle to the JPS_AgentIterator to free.
+ */
+JUPEDSIM_API void JPS_AgentIterator_Free(JPS_AgentIterator handle);
 
 /**
  * Describe all the parameters required to initialize an agent.
@@ -478,6 +499,16 @@ JUPEDSIM_API size_t JPS_Simulation_AgentCount(JPS_Simulation handle);
  * @return count of elapsed iterations
  */
 JUPEDSIM_API uint64_t JPS_Simulation_IterationCount(JPS_Simulation handle);
+
+/**
+ * Returns an iterator over all agents in the simulation.
+ * Notes:
+ *   The iterator will be invalidated once JPS_Simulation_Iterate is called.
+ *   The iterator needs to be freed after use.
+ * @param handle of the simulation
+ * @return iterator over agents in the simulation
+ */
+JUPEDSIM_API JPS_AgentIterator JPS_Simulation_AgentIterator(JPS_Simulation handle);
 
 /**
  * Frees a JPS_Simulation.

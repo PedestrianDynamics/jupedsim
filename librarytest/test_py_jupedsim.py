@@ -74,6 +74,8 @@ def main():
         simulation.iterate()
         if simulation.iteration_count() % 100 == 0:
             print(f"Iteration: {simulation.iteration_count()}")
+            for agent in simulation.agents():
+                print(f"({agent.x}, {agent.y}) ({agent.orientation_x}, {agent.orientation_y})")
     print(
         f"Simulation completed after {simulation.iteration_count()} iterations"
     )

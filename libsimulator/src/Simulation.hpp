@@ -110,4 +110,6 @@ public:
     size_t AgentCount() const;
 
     uint64_t Iteration() const { return _clock.Iteration(); }
+
+    const std::vector<std::unique_ptr<Pedestrian>>& Agents() const { return _agents; };
 };
