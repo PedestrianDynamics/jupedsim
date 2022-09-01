@@ -341,6 +341,13 @@ JUPEDSIM_API double JPS_Agent_OrientationX(JPS_Agent handle);
  */
 JUPEDSIM_API double JPS_Agent_OrientationY(JPS_Agent handle);
 
+/*
+ * Access the agents id
+ * @param handle of the agent.
+ * @return id
+ */
+JUPEDSIM_API JPS_AgentId JPS_Agent_Id(JPS_Agent handle);
+
 /**
  * Opaque type of an iterator over agents
  */

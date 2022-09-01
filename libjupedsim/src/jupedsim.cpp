@@ -291,30 +291,37 @@ void JPS_Areas_Free(JPS_Areas handle)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 double JPS_Agent_PositionX(JPS_Agent handle)
 {
-    assert(handle != nullptr);
+    assert(handle);
     const auto agent = reinterpret_cast<const Pedestrian*>(handle);
     return agent->GetPos().x;
 }
 
 double JPS_Agent_PositionY(JPS_Agent handle)
 {
-    assert(handle != nullptr);
+    assert(handle);
     const auto agent = reinterpret_cast<const Pedestrian*>(handle);
     return agent->GetPos().y;
 }
 
 double JPS_Agent_OrientationX(JPS_Agent handle)
 {
-    assert(handle != nullptr);
+    assert(handle);
     const auto agent = reinterpret_cast<const Pedestrian*>(handle);
     return agent->GetEllipse().GetCosPhi();
 }
 
 double JPS_Agent_OrientationY(JPS_Agent handle)
 {
-    assert(handle != nullptr);
+    assert(handle);
     const auto agent = reinterpret_cast<const Pedestrian*>(handle);
     return agent->GetEllipse().GetSinPhi();
+}
+
+JPS_AgentId JPS_Agent_Id(JPS_Agent handle)
+{
+    assert(handle);
+    const auto agent = reinterpret_cast<const Pedestrian*>(handle);
+    return agent->GetUID().getID();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
