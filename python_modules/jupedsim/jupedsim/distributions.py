@@ -63,13 +63,14 @@ class Distribution:
                 self.circles.remove(circle)
                 break
 
-    def place_in_Polygon(self, polygon, agent_radius, wall_distance, seed=None):
+    def place_in_Polygon(self, polygon, agent_radius, wall_distance, seed=None, obstacles=None):
         """returns points inside each circle segment
             points have an agent_radius within which no other point may be placed.
             points will not be placed with less than wall_distance to the polygon
             points will be placed inside the polygon and inside the circle segment
             points are placed first in the segment that was created first
-            if more that 10000 tries are needed to placed a valid point an Exception will be thrown"""
+            if more that 10000 tries are needed to placed a valid point an Exception will be thrown
+            no points may lay within an obstacle"""
         if seed is not None:
             np.random.seed(seed)
         samples = []
@@ -92,7 +93,7 @@ class Distribution:
                     # determines a random degree
                     theta = np.random.uniform(0, 2 * np.pi)
                     pt = self.mid_point[0] + rho * np.cos(theta), self.mid_point[1] + rho * np.sin(theta)
-                    if point_is_valid(pt, polygon, agent_radius, wall_distance, samples):
+                    if point_is_valid(pt, polygon, agent_radius, wall_distance, samples, obstacles):
                         samples.append(pt)
                         break
 
@@ -110,7 +111,7 @@ class Distribution:
                     raise AgentCount(message)
         return samples
 
-    def show_points(self, polygon, points, radius):
+    def show_points(self, polygon, points, radius, obstacles):
         """illustrates the polygon, circle segments and points"""
         samples = points
         borders = get_borders(polygon)
@@ -134,6 +135,19 @@ class Distribution:
             i += 1
             if next == 0:
                 break
+
+        for obstacle in obstacles:
+            n = len(obstacle)
+            i = 0
+            while True:
+                next = (i + 1) % n
+                x_value = [obstacle[i][0], obstacle[next][0]]
+                y_value = [obstacle[i][1], obstacle[next][1]]
+                plt.plot(x_value, y_value, color='red')
+
+                i += 1
+                if next == 0:
+                    break
 
         plt.xlim(borders[0], borders[1])
         plt.ylim(borders[2], borders[3])
@@ -170,10 +184,15 @@ def area_of_polygon(polygon):
     return abs(area) / 2
 
 
-def point_is_valid(pt, polygon, agent_radius, wall_distance, other_points):
+def point_is_valid(pt, polygon, agent_radius, wall_distance, other_points, obstacles=None):
+    if obstacles is None:
+        obstacles = []
+    for obstacle in obstacles:
+        if is_inside_polygon(obstacle, pt):
+            return False
     return is_inside_polygon(polygon, pt) \
-           and min_distance_to_polygon(pt, polygon) > wall_distance \
-           and pt_has_distance_to_others(pt, other_points, agent_radius)
+        and min_distance_to_polygon(pt, polygon) > wall_distance \
+        and pt_has_distance_to_others(pt, other_points, agent_radius)
 
 
 def is_inside_polygon(points: list, p: tuple) -> bool:
@@ -398,13 +417,15 @@ def distance_between(pt1, pt2):
     return sqrt(dx ** 2 + dy ** 2)
 
 
-def create_random_points(polygon, count, agent_radius, wall_distance, seed=None):
+def create_random_points(polygon, count, agent_radius, wall_distance, seed=None, obstacles=None):
     """returns points randomly placed inside the polygon
+
         :param polygon: List of corner points given as tuples
         :param count: number of points placed
         :param agent_radius: minimal distance between points
         :param wall_distance: minimal distance between points and the polygon
         :param seed: define a seed for random generation
+        :param obstacles: polygon in which an obstacle must not be placed
         :return: list of created points
         if more that 10000 tries are needed to placed a valid point an Exception will be thrown
     """
@@ -418,7 +439,7 @@ def create_random_points(polygon, count, agent_radius, wall_distance, seed=None)
         if iterations > FOREVER:
             raise AgentCount(f"Only {created_points} of {count}  could be placed.")
         temp_point = (np.random.uniform(borders[0], borders[1]), np.random.uniform(borders[2], borders[3]))
-        if point_is_valid(temp_point, polygon, agent_radius, wall_distance, samples):
+        if point_is_valid(temp_point, polygon, agent_radius, wall_distance, samples, obstacles):
             samples.append(temp_point)
             iterations = 0
             created_points += 1
@@ -427,7 +448,7 @@ def create_random_points(polygon, count, agent_radius, wall_distance, seed=None)
     return samples
 
 
-def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None):
+def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, obstacles=None):
     """creates points all over the polygon with bridson´s poisson-disk algorithm
         :param polygon: List of corner points given as tuples
         :param agent_radius: minimal distance between points
@@ -437,6 +458,8 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None):
     """
     if seed is not None:
         np.random.seed(seed)
+    if obstacles is None:
+        obstacles = []
     # Choose up to k points around each reference point as candidates for a new sample point
     k = 30
     borders = get_borders(polygon)
@@ -457,6 +480,9 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None):
     active = nsamples = samples = None
     while True:
         pt = np.random.uniform(borders[0], borders[1]), np.random.uniform(borders[2], borders[3])
+        for obstacle in obstacles:
+            if is_inside_polygon(obstacle, pt):
+                continue
         if is_inside_polygon(polygon, pt) and min_distance_to_polygon(pt, polygon) > wall_distance:
             samples = [pt]
             # Our first sample is indexed at 0 in the samples list...
@@ -474,7 +500,7 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None):
         idx = np.random.choice(active)
         refpt = samples[idx]
         # Try to pick a new point relative to the reference point.
-        pt = get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nxny, cells, seed)
+        pt = get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nxny, cells, seed, obstacles)
         if pt:
             # Point pt is valid: add it to the samples list and mark it as active
             samples.append(pt)
@@ -496,7 +522,7 @@ def get_cell_coords(pt, cell_side_length, borders):
     return int((pt[0] - borders[0]) // cell_side_length), int((pt[1] - borders[2]) // cell_side_length)
 
 
-def get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nxny, cells, seed=None):
+def get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nxny, cells, seed=None, obstacles=None):
     """Try to find a candidate point relative to refpt to emit in the sample.
 
     We draw up to k points from the annulus of inner radius r, outer radius 2r
@@ -514,6 +540,7 @@ def get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nx
     :param nxny: Number of cells in the x- and y-direction as Tuple: (nx, ny)
     :param cells: dictionary with key: cell, value: point
     :param seed: define a seed for random generation
+    :param obstacles: list of polygons, no points can be inside the obstacle
     """
     if seed is not None:
         np.random.seed(seed)
@@ -530,14 +557,14 @@ def get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nx
         if not (0 <= pt[0] < width and 0 <= pt[1] < height):
             # This point falls outside the domain, so try again.
             continue
-        if point_valid(pt, agent_radius, wall_distance, c_s_l, polygon, samples, nxny, cells):
+        if point_valid(pt, agent_radius, wall_distance, c_s_l, polygon, samples, nxny, cells, obstacles):
             return pt
 
     # We failed to find a suitable point in the vicinity of refpt. The Point will be declared as inactive
     return False
 
 
-def point_valid(pt, agent_radius, wall_distance, cell_side_length, polygon, samples, nxny, cells):
+def point_valid(pt, agent_radius, wall_distance, cell_side_length, polygon, samples, nxny, cells, obstacles=None):
     """ Determines if a point is valid by using a Grid to determine neighbours
     :param pt: point that is being checked
     :param agent_radius:minimal distance between points
@@ -547,12 +574,17 @@ def point_valid(pt, agent_radius, wall_distance, cell_side_length, polygon, samp
     :param samples: already placed points
     :param nxny: Number of cells in the x- and y-direction as Tuple: (nx, ny)
     :param cells: Dictionary with key: cell, value: point
+    :param obstacles: list of polygons point must not lay within a polygon
     :return: if valid: True else: False
     """
-
+    if obstacles is None:
+        obstacles = []
     cell_coords = get_cell_coords(pt, cell_side_length, get_borders(polygon))
     if not is_inside_polygon(polygon, pt):
         return False
+    for obstacle in obstacles:
+        if is_inside_polygon(obstacle, pt):
+            return False
     if min_distance_to_polygon(pt, polygon) < wall_distance:
         return False
     for idx in get_neighbours(cell_coords, nxny, cells):
@@ -650,7 +682,9 @@ def heatmap(all, agent_radius, wall_distance, polygon, iterations, max_persons=5
     plt.show()
 
 
-def show_points(polygon, points, radius):
+def show_points(polygon, points, radius, obstacles=None):
+    if obstacles is None:
+        obstacles = []
     samples = points
     borders = get_borders(polygon)
     fig = plt.figure()
@@ -670,6 +704,19 @@ def show_points(polygon, points, radius):
         i += 1
         if next == 0:
             break
+
+    for obstacle in obstacles:
+        n = len(obstacle)
+        i = 0
+        while True:
+            next = (i + 1) % n
+            x_value = [obstacle[i][0], obstacle[next][0]]
+            y_value = [obstacle[i][1], obstacle[next][1]]
+            plt.plot(x_value, y_value, color='red')
+
+            i += 1
+            if next == 0:
+                break
 
     plt.xlim(borders[0], borders[1])
     plt.ylim(borders[2], borders[3])
@@ -775,7 +822,7 @@ def test_distance_determination():
     exception_rate = 0.01
     actual_result = distance_between(pt1, pt2)
     difference = expected_result - actual_result
-    assert difference == 0 or exception_rate > difference > 0 or -exception_rate < difference < 0
+    assert abs(difference) < exception_rate
 
 
 def test_if_inside():
