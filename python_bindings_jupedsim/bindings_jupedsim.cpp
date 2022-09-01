@@ -234,9 +234,11 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def_property_readonly(
             "orientation_x",
             [](const JPS_Agent_Wrapper& w) { return JPS_Agent_OrientationX(w.handle); })
-        .def_property_readonly("orientation_y", [](const JPS_Agent_Wrapper& w) {
-            return JPS_Agent_OrientationY(w.handle);
-        });
+        .def_property_readonly(
+            "orientation_y",
+            [](const JPS_Agent_Wrapper& w) { return JPS_Agent_OrientationY(w.handle); })
+        .def_property_readonly(
+            "id", [](const JPS_Agent_Wrapper& w) { return JPS_Agent_Id(w.handle); });
     py::class_<JPS_AgentIterator_Wrapper>(m, "AgentIterator")
         .def(
             "__iter__",

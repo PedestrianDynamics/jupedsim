@@ -49,10 +49,16 @@ def test_can_run_simulation():
 
     initial_agent_positions = [(7, 7), (1, 3), (1, 5), (1, 7), (2, 7)]
 
+    expected_agent_ids = set()
+
     for x, y in initial_agent_positions:
         agent_parameters.x = x
         agent_parameters.y = y
-        simulation.add_agent(agent_parameters)
+        expected_agent_ids.add(simulation.add_agent(agent_parameters))
+
+    actual_agent_ids = {agent.id for agent in simulation.agents()}
+
+    assert actual_agent_ids == expected_agent_ids
 
     agent_id = simulation.add_agent(agent_parameters)
     assert simulation.remove_agent(agent_id)

@@ -1,8 +1,10 @@
+#include "AgentIterator.hpp"
 #include "Point.hpp"
 #include <ErrorMessage.hpp>
 #include <jupedsim/jupedsim.h>
 
 #include <gtest/gtest.h>
+#include <vector>
 
 TEST(ErrorMessage, CanGetMessage)
 {
@@ -127,4 +129,109 @@ TEST(Simulation, CanSimulate)
         ASSERT_TRUE(JPS_Simulation_Iterate(simulation, nullptr));
     }
     ASSERT_LT(JPS_Simulation_IterationCount(simulation), 2000);
+}
+
+struct SimulationTest : public ::testing::Test {
+    JPS_Simulation simulation{};
+    JPS_JourneyId journey_id{};
+
+    void SetUp() override
+    {
+        auto geo_builder = JPS_GeometryBuilder_Create();
+        std::vector<double> box1{0, 0, 10, 0, 10, 10, 0, 10};
+        JPS_GeometryBuilder_AddAccessibleArea(geo_builder, box1.data(), box1.size() / 2);
+        auto geometry = JPS_GeometryBuilder_Build(geo_builder, nullptr);
+        ASSERT_NE(geometry, nullptr);
+        JPS_GeometryBuilder_Free(geo_builder);
+
+        auto areas_builder = JPS_AreasBuilder_Create();
+
+        const uint16_t destinationId = 1;
+        std::vector<double> box{18, 4, 20, 4, 20, 6, 18, 6};
+        std::vector<const char*> labels{"exit"};
+        JPS_AreasBuilder_AddArea(
+            areas_builder, destinationId, box.data(), box.size() / 2, labels.data(), labels.size());
+
+        auto areas = JPS_AreasBuilder_Build(areas_builder, nullptr);
+        ASSERT_NE(areas, nullptr);
+        JPS_AreasBuilder_Free(areas_builder);
+
+        auto model = JPS_OperationalModel_Create_VelocityModel(8, 0.1, 5, 0.02, nullptr);
+        ASSERT_NE(model, nullptr);
+
+        simulation = JPS_Simulation_Create(model, geometry, areas, 0.01, nullptr);
+        ASSERT_NE(simulation, nullptr);
+
+        const std::vector<JPS_Waypoint> waypoints{{{1, 1}, 1}};
+        auto journey = JPS_Journey_Create_SimpleJourney(waypoints.data(), waypoints.size());
+        journey_id = JPS_Simulation_AddJourney(simulation, journey, nullptr);
+        ASSERT_NE(journey_id, 0);
+
+        JPS_OperationalModel_Free(model);
+        JPS_Geometry_Free(geometry);
+        JPS_Areas_Free(areas);
+    }
+
+    void TearDown() override { JPS_Simulation_Free(simulation); }
+};
+
+TEST_F(SimulationTest, AgentIteratorIsEmptyForNewSimulation)
+{
+    ASSERT_EQ(JPS_Simulation_AgentCount(simulation), 0);
+    auto iter = JPS_Simulation_AgentIterator(simulation);
+    ASSERT_NE(iter, nullptr);
+    ASSERT_EQ(JPS_AgentIterator_Next(iter), nullptr);
+}
+
+TEST_F(SimulationTest, AgentIteratorCanIterate)
+{
+    std::vector<JPS_AgentParameters> agent_parameters{
+        {1.0, 1.0, 1.0, 1.0, 1.0, 1, 0.5, 0.53, 0.15, 0.15, 0.15, journey_id},
+        {2.0, 1.0, 1.0, 1.0, 1.0, 1, 0.5, 0.53, 0.15, 0.15, 0.15, journey_id},
+        {3.0, 1.0, 1.0, 1.0, 1.0, 1, 0.5, 0.53, 0.15, 0.15, 0.15, journey_id}};
+    for(const auto& agent_params : agent_parameters) {
+        ASSERT_NE(JPS_Simulation_AddAgent(simulation, agent_params, nullptr), 0);
+    }
+    ASSERT_EQ(JPS_Simulation_AgentCount(simulation), 3);
+    auto iter = JPS_Simulation_AgentIterator(simulation);
+    ASSERT_NE(iter, nullptr);
+    ASSERT_NE(JPS_AgentIterator_Next(iter), nullptr);
+    ASSERT_NE(JPS_AgentIterator_Next(iter), nullptr);
+    ASSERT_NE(JPS_AgentIterator_Next(iter), nullptr);
+    ASSERT_EQ(JPS_AgentIterator_Next(iter), nullptr);
+}
+
+TEST_F(SimulationTest, CanQueryAgentProperties)
+{
+    const double pos_x = 1.123;
+    const double pos_y = 0.999;
+    const double orientation_x = 1;
+    const double orientation_y = 0;
+    JPS_AgentParameters agent_params{
+        pos_x,
+        pos_y,
+        orientation_x,
+        orientation_y,
+        1.0,
+        1,
+        0.5,
+        0.53,
+        0.15,
+        0.15,
+        0.15,
+        journey_id};
+    const auto agent_id = JPS_Simulation_AddAgent(simulation, agent_params, nullptr);
+    ASSERT_NE(agent_id, 0);
+    ASSERT_EQ(JPS_Simulation_AgentCount(simulation), 1);
+    auto iter = JPS_Simulation_AgentIterator(simulation);
+    ASSERT_NE(iter, nullptr);
+    const auto agent = JPS_AgentIterator_Next(iter);
+    ASSERT_NE(agent, nullptr);
+    ASSERT_EQ(JPS_AgentIterator_Next(iter), nullptr);
+
+    ASSERT_EQ(JPS_Agent_Id(agent), agent_id);
+    ASSERT_EQ(JPS_Agent_PositionX(agent), pos_x);
+    ASSERT_EQ(JPS_Agent_PositionY(agent), pos_y);
+    ASSERT_EQ(JPS_Agent_OrientationX(agent), orientation_x);
+    ASSERT_EQ(JPS_Agent_OrientationY(agent), orientation_y);
 }
