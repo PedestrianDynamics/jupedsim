@@ -71,48 +71,84 @@ class Distribution:
             points are placed first in the segment that was created first
             if more that 10000 tries are needed to placed a valid point an Exception will be thrown
             no points may lay within an obstacle"""
+        if obstacles is None:
+            obstacles = []
         if seed is not None:
             np.random.seed(seed)
         samples = []
         for circle in self.circles:
             # if for the circle no exact number of agents is set it will be determined with the density
+            big_circle_area = intersecting_area_polygon_circle(self.mid_point, circle[1], polygon)
+            small_circle_area = intersecting_area_polygon_circle(self.mid_point, circle[0], polygon)
+            placeable_area = big_circle_area - small_circle_area
+            # it is expected that the entire obstacle intersects with the area
+            for obstacle in obstacles:
+                placeable_area -= area_of_polygon(obstacle)
             if circle[2] is None:
                 density = circle[3]
-                big_circle_area = intersecting_area_polygon_circle(self.mid_point, circle[1], polygon)
-                small_circle_area = intersecting_area_polygon_circle(self.mid_point, circle[0], polygon)
-                possible_area = big_circle_area - small_circle_area
-                targeted_count = round(density * possible_area)
+                targeted_count = round(density * placeable_area)
             else:
                 targeted_count = circle[2]
-            for placed_count in range(targeted_count + 1):
-                i = 0
-                while i < INT_MAX:
-                    i += 1
-                    # determines a random radius within the circle segment
-                    rho = np.sqrt(np.random.uniform(circle[0] ** 2, circle[1] ** 2))
-                    # determines a random degree
-                    theta = np.random.uniform(0, 2 * np.pi)
-                    pt = self.mid_point[0] + rho * np.cos(theta), self.mid_point[1] + rho * np.sin(theta)
-                    if point_is_valid(pt, polygon, agent_radius, wall_distance, samples, obstacles):
-                        samples.append(pt)
-                        break
 
-                if i >= INT_MAX and placed_count != targeted_count:
-                    message = f"the desired amount of agents in the Circle from {circle[0]} to {circle[1]} " \
-                              f"could not be achieved.\nOnly {placed_count} of {targeted_count}  could be placed."
-                    if circle[2] is None:
-                        # if the circle has no number of agents
-                        # the expected and actual density will be added to the exception message
-                        big_circle_area = intersecting_area_polygon_circle(self.mid_point, circle[1], polygon)
-                        small_circle_area = intersecting_area_polygon_circle(self.mid_point, circle[0], polygon)
-                        area = big_circle_area - small_circle_area
-                        message += f"\nexpected density: {circle[3]} p/m², " \
-                                   f"actual density: {round(placed_count / area, 2)} p/m²"
-                    raise AgentCount(message)
+            # it is being checked whether to place points inside the circle segment or around the polygon
+            # determine the entire area of the circle segment
+            entire_circle_area = np.pi * (circle[1] ** 2 - circle[0] ** 2)
+            # determine the area where a point might be placed around the polygon
+            borders = get_borders(polygon)
+            dif_x, dif_y = borders[1] - borders[0], borders[3] - borders[2]
+            entire_polygon_area = dif_x * dif_y
+            if entire_circle_area < entire_polygon_area:
+                # inside the circle it is more likely to find a random point that is inside the polygon
+                for placed_count in range(targeted_count + 1):
+                    i = 0
+                    while i < INT_MAX:
+                        i += 1
+                        # determines a random radius within the circle segment
+                        rho = np.sqrt(np.random.uniform(circle[0] ** 2, circle[1] ** 2))
+                        # determines a random degree
+                        theta = np.random.uniform(0, 2 * np.pi)
+                        pt = self.mid_point[0] + rho * np.cos(theta), self.mid_point[1] + rho * np.sin(theta)
+                        if point_is_valid(pt, polygon, agent_radius, wall_distance, samples, obstacles):
+                            samples.append(pt)
+                            break
+
+                    if i >= INT_MAX and placed_count != targeted_count:
+                        message = f"the desired amount of agents in the Circle from {circle[0]} to {circle[1]} " \
+                                  f"could not be achieved.\nOnly {placed_count} of {targeted_count}  could be placed."
+                        if circle[2] is None:
+                            # if the circle has no number of agents
+                            # the expected and actual density will be added to the exception message
+                            message += f"\nexpected density: {circle[3]} p/m², " \
+                                       f"actual density: {round(placed_count / placeable_area, 2)} p/m²"
+                        raise AgentCount(message)
+            else:
+                # placing points around the polygon is more likely to find a random point that is inside the circle
+                placed_count = 0
+                iterations = 0
+                while placed_count < targeted_count:
+                    if iterations > FOREVER:
+                        message = f"the desired amount of agents in the Circle from {circle[0]} to {circle[1]} " \
+                                  f"could not be achieved.\nOnly {placed_count} of {targeted_count}  could be placed."
+                        if circle[2] is None:
+                            # if the circle has no number of agents
+                            # the expected and actual density will be added to the exception message
+                            message += f"\nexpected density: {circle[3]} p/m², " \
+                                       f"actual density: {round(placed_count / placeable_area, 2)} p/m²"
+                        raise AgentCount(message)
+                    temp_point = (np.random.uniform(borders[0], borders[1]), np.random.uniform(borders[2], borders[3]))
+                    if is_inside_circle(temp_point, self.mid_point, circle[0], circle[1]) \
+                            and point_is_valid(temp_point, polygon, agent_radius, wall_distance, samples, obstacles):
+                        samples.append(temp_point)
+                        iterations = 0
+                        placed_count += 1
+                    else:
+                        iterations += 1
         return samples
 
-    def show_points(self, polygon, points, radius, obstacles):
+    def show_points(self, polygon, points, radius, obstacles=None):
         """illustrates the polygon, circle segments and points"""
+        if obstacles is None:
+            obstacles = []
         samples = points
         borders = get_borders(polygon)
         fig = plt.figure()
@@ -167,7 +203,14 @@ def intersecting_area_polygon_circle(mid_point, radius, polygon):
     return poly.intersection(circle).area
 
 
-# currently unused
+def is_inside_circle(point, mid, min_r, max_r):
+    """checks if a point is inside a Circle segment reaching from minimum radius to maximum radius"""
+    dif_x = point[0] - mid[0]
+    dif_y = point[1] - mid[1]
+    circle_equation = dif_x ** 2 + dif_y ** 2
+    return min_r ** 2 <= circle_equation <= max_r ** 2
+
+
 def area_of_polygon(polygon):
     """returns the area of the polygon"""
     n = len(polygon)
@@ -191,12 +234,18 @@ def point_is_valid(pt, polygon, agent_radius, wall_distance, other_points, obsta
         if is_inside_polygon(obstacle, pt):
             return False
     return is_inside_polygon(polygon, pt) \
-        and min_distance_to_polygon(pt, polygon) > wall_distance \
-        and pt_has_distance_to_others(pt, other_points, agent_radius)
+           and min_distance_to_polygon(pt, polygon) > wall_distance \
+           and pt_has_distance_to_others(pt, other_points, agent_radius)
 
 
 def is_inside_polygon(points: list, p: tuple) -> bool:
     """ Returns true if the point p lies inside the polygon with n vertices """
+    # gets borders around the obstacle
+    borders = get_borders(points)
+    if not borders[0] < p[0] < borders[1] and not borders[2] < p[1] < borders[3]:
+        return False
+
+    # the point lies within the borders of the obstacle
     n = len(points)
 
     # There must be at least 3 vertices
@@ -417,11 +466,13 @@ def distance_between(pt1, pt2):
     return sqrt(dx ** 2 + dy ** 2)
 
 
-def create_random_points(polygon, count, agent_radius, wall_distance, seed=None, obstacles=None):
+def create_random_points(polygon, count, agent_radius, wall_distance, seed=None, obstacles=None, density=None):
     """returns points randomly placed inside the polygon
+
 
         :param polygon: List of corner points given as tuples
         :param count: number of points placed
+        :param density: select a density: number of agents will be calculated and count will not be used
         :param agent_radius: minimal distance between points
         :param wall_distance: minimal distance between points and the polygon
         :param seed: define a seed for random generation
@@ -429,15 +480,27 @@ def create_random_points(polygon, count, agent_radius, wall_distance, seed=None,
         :return: list of created points
         if more that 10000 tries are needed to placed a valid point an Exception will be thrown
     """
+    if obstacles is None:
+        obstacles = []
     if seed is not None:
         np.random.seed(seed)
+    if density is not None:
+        area = area_of_polygon(polygon)
+        # it is expected that the entire obstacle intersects with the area
+        for obstacle in obstacles:
+            area -= area_of_polygon(obstacle)
+        count = round(density * area)
     borders = get_borders(polygon)
     samples = []
     created_points = 0
     iterations = 0
     while created_points < count:
         if iterations > FOREVER:
-            raise AgentCount(f"Only {created_points} of {count}  could be placed.")
+            msg = f"Only {created_points} of {count}  could be placed."
+            if density is not None:
+                msg += f"\nexpected density: {density} p/m², " \
+                               f"actual density: {round(created_points / area, 2)} p/m²"
+            raise AgentCount(msg)
         temp_point = (np.random.uniform(borders[0], borders[1]), np.random.uniform(borders[2], borders[3]))
         if point_is_valid(temp_point, polygon, agent_radius, wall_distance, samples, obstacles):
             samples.append(temp_point)
@@ -496,11 +559,18 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, ob
             continue
 
     while active:
+        temp_seed = None
         # choose a random "reference" point from the active list.
         idx = np.random.choice(active)
         refpt = samples[idx]
         # Try to pick a new point relative to the reference point.
-        pt = get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nxny, cells, seed, obstacles)
+        if seed is not None:
+            # the function can not be called with the same seed every time
+            # a random seed will be chosen every time
+            temp_seed = np.random.randint(0, 50000)
+            print(temp_seed)
+        pt = get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nxny, cells, temp_seed,
+                       obstacles)
         if pt:
             # Point pt is valid: add it to the samples list and mark it as active
             samples.append(pt)
@@ -740,6 +810,17 @@ def test_cell_coord_determination():
     assert (7, 7) == get_cell_coords(pt, c_s_l, borders)
 
 
+def test_point_in_circle():
+    mid = (0, 0)
+    min_radius, max_radius = 5, 10
+    test_point = (2, 2)
+    assert is_inside_circle(test_point, mid, min_radius, max_radius) is False
+    test_point = (10, 10)
+    assert is_inside_circle(test_point, mid, min_radius, max_radius) is False
+    test_point = (7, 7)
+    assert is_inside_circle(test_point, mid, min_radius, max_radius) is True
+
+
 def test_border_determination():
     polygon = [(6, 0), (9, 2), (11, 4), (12, 7), (11.5, 9.5), (9.5, 10.5), (7.5, 10),
                (6, 9), (4.5, 10), (2.5, 10.5), (0.6, 9.5), (0, 7), (1, 4), (3, 2)]
@@ -749,31 +830,31 @@ def test_border_determination():
 
 def test_distance_determination_point_line_segment():
     pt = (3, 3)
-    acception_rate = 0.01
+    acceptation_rate = 0.01
     pt1, pt2 = (0, 0), (4, 1)
     actual, expected = distance_to_segment(pt1, pt2, pt), 2.182820625326997
     differance = actual - expected
-    assert abs(differance) < acception_rate
+    assert abs(differance) < acceptation_rate
     pt1, pt2 = (4, 1), (5, 3)
     actual, expected = distance_to_segment(pt1, pt2, pt), 1.7888543819998317
     differance = actual - expected
-    assert abs(differance) < acception_rate
+    assert abs(differance) < acceptation_rate
     pt1, pt2 = (5, 3), (4, 5)
     actual, expected = distance_to_segment(pt1, pt2, pt), 1.7888543819998317
     differance = actual - expected
-    assert abs(differance) < acception_rate
+    assert abs(differance) < acceptation_rate
     pt1, pt2 = (4, 5), (2, 5)
     actual, expected = distance_to_segment(pt1, pt2, pt), 2.0
     differance = actual - expected
-    assert abs(differance) < acception_rate
+    assert abs(differance) < acceptation_rate
     pt1, pt2 = (2, 5), (0, 3)
     actual, expected = distance_to_segment(pt1, pt2, pt), 2.1213203435596424
     differance = actual - expected
-    assert abs(differance) < acception_rate
+    assert abs(differance) < acceptation_rate
     pt1, pt2 = (0, 3), (0, 0)
     actual, expected = distance_to_segment(pt1, pt2, pt), 3.0
     differance = actual - expected
-    assert abs(differance) < acception_rate
+    assert abs(differance) < acceptation_rate
 
 
 def test_minimal_distance_to_polygon():
@@ -918,9 +999,8 @@ def test_removing_Circles():
     assert distribution.circles == [(2, 3, 2, None)]
 
 
-# unused method tested:
 def test_area_determination_single_polygon():
     polygon = [(0, 0), (30, 0), (25, 5), (20, 5), (17.5, 15), (25, 15), (15, 25), (5, 15), (12.5, 15), (10, 5), (5, 5)]
     assert area_of_polygon(polygon) == 300
-
 # TESTS END
+
