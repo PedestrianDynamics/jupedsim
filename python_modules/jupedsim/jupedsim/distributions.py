@@ -9,12 +9,6 @@ INT_MAX = 10000
 FOREVER = 10000
 
 
-class IncorrectPolygon(Exception):
-
-    def __init__(self, message):
-        self.message = message
-
-
 class AgentCount(Exception):
     def __init__(self, message):
         self.message = message
@@ -455,17 +449,6 @@ def distance_to_segment(a, b, e):
     return req_ans
 
 
-def pt_has_distance_to_others(n_point, existing_points, radius):
-    """ returns true if in a circle around n_point with the given radius no already placed point exists"""
-    i = 0
-    for current_point in existing_points:
-        distance = distance_between(n_point, current_point)
-        i += 1
-        if distance < radius:
-            return False
-    return True
-
-
 def distance_between(pt1, pt2):
     """returns the distance between point1 and point2"""
     dx = pt2[0] - pt1[0]
@@ -741,9 +724,8 @@ def heatmap(all, agent_radius, wall_distance, polygon, iterations, max_persons=5
         alpha = (25 * (a_r ** 2)) / total
 
     else:
-        width = max(x) - min(x)
-        height = max(y) - min(y)
-        alpha = (25 * width * height) / (total * max_persons * np.pi)
+        area = area_of_polygon(polygon)
+        alpha = (25 * area) / (total * max_persons * np.pi)
     if alpha < 0.01:
         alpha = 0.01
     elif alpha > 1:
@@ -897,20 +879,6 @@ def test_seed_works_correct_for_random_points():
     samples1 = create_random_points(polygon, 100, agent_radius=0.3, wall_distance=0.3, seed=set_seed)
     samples2 = create_random_points(polygon, 100, agent_radius=0.3, wall_distance=0.3, seed=set_seed)
     assert samples1 == samples2
-
-
-def test_pt_has_distance_to_every_other():
-    points = [(6.67, 1.2), (6.6, 2.3), (8.8, 4.7), (11.05, 7.45), (5.35, 2.9)]
-    n_point, radius = (4.5, 9.2), 0.75
-    assert pt_has_distance_to_others(n_point, points, radius) is True
-    n_point = (9, 5)
-    assert pt_has_distance_to_others(n_point, points, radius) is False
-    n_point = (0, 0)
-    existing_points = [(2, 0), (0, 2), (5, 3)]
-    radius = 1.5
-    assert pt_has_distance_to_others(n_point, existing_points, radius) is True
-    existing_points = [(1, 0), (0, 1)]
-    assert pt_has_distance_to_others(n_point, existing_points, radius) is False
 
 
 def test_distance_determination():
