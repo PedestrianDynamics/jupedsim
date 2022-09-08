@@ -1,5 +1,5 @@
 import streamlit as st
-import distribution
+import distributions
 import matplotlib.pyplot as plt
 
 
