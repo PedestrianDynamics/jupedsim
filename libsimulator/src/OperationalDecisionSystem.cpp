@@ -12,7 +12,7 @@ void OperationalDecisionSystem::Run(
     double /*t_in_sec*/,
     const NeighborhoodSearch& neighborhoodSearch,
     const CollisionGeometry& geometry,
-    std::vector<std::unique_ptr<Pedestrian>>& agents) const
+    std::vector<std::unique_ptr<Agent>>& agents) const
 {
 
     std::vector<std::optional<PedestrianUpdate>> updates(agents.size(), std::nullopt);
@@ -32,4 +32,13 @@ void OperationalDecisionSystem::Run(
         }
         ++agent_iter;
     });
+}
+
+void OperationalDecisionSystem::ValidateAgentParameterProfileId(
+    OperationalModel::ParametersID id) const
+{
+    if(!_model->ParameterProfileExists(id)) {
+        throw new std::runtime_error(
+            fmt::format("Unknown parameters profile id \"{}\" supplied", id.getID()));
+    }
 }

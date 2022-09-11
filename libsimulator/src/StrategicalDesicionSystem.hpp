@@ -1,7 +1,7 @@
 #pragma once
 
+#include "Agent.hpp"
 #include "Area.hpp"
-#include "Pedestrian.hpp"
 
 #include <vector>
 
@@ -16,6 +16,5 @@ public:
     StrategicalDecisionSystem& operator=(StrategicalDecisionSystem&& other) = delete;
 
     void
-    Run(const std::map<Area::Id, Area>& areas,
-        std::vector<std::unique_ptr<Pedestrian>>& agents) const;
+    Run(const std::map<Area::Id, Area>& areas, std::vector<std::unique_ptr<Agent>>& agents) const;
 };

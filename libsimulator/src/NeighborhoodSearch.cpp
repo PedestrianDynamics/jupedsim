@@ -24,8 +24,8 @@
  **/
 #include "NeighborhoodSearch.hpp"
 
+#include "Agent.hpp"
 #include "NeighborhoodIterator.hpp"
-#include "Pedestrian.hpp"
 #include "Point.hpp"
 
 #include <algorithm>
@@ -45,11 +45,11 @@ NeighborhoodSearch::~NeighborhoodSearch()
 {
 }
 
-void NeighborhoodSearch::Update(const std::vector<std::unique_ptr<Pedestrian>>& peds)
+void NeighborhoodSearch::Update(const std::vector<std::unique_ptr<Agent>>& peds)
 {
     std::unique_lock exclusive_lock(grid_mutex);
 
-    std::vector<Grid2D<Pedestrian*>::IndexValuePair> values;
+    std::vector<Grid2D<Agent*>::IndexValuePair> values;
     values.reserve(peds.size());
     for(const auto& ped : peds) {
         // determine the cell coordinates of pedestrian i
@@ -57,7 +57,7 @@ void NeighborhoodSearch::Update(const std::vector<std::unique_ptr<Pedestrian>>& 
         std::int32_t iy = static_cast<std::int32_t>(ped->GetPos().y / _cellSize);
         values.push_back({{ix, iy}, ped.get()});
     }
-    _grid = Grid2D<Pedestrian*>(values);
+    _grid = Grid2D<Agent*>(values);
 }
 
 IteratorPair<NeighborhoodIterator, NeighborhoodEndIterator>

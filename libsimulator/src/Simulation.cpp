@@ -30,9 +30,9 @@
 
 #include "Simulation.hpp"
 
+#include "Agent.hpp"
 #include "Journey.hpp"
 #include "OperationalModel.hpp"
-#include "Pedestrian.hpp"
 #include "SimulationClock.hpp"
 
 #include <Logger.hpp>
@@ -90,12 +90,11 @@ uint64_t Simulation::AddAgent(
     double AMin,
     double BMax,
     double BMin,
-    double Tau,
-    double T,
     double v0,
-    Journey::ID journeyId)
+    Journey::ID journeyId,
+    OperationalModel::ParametersID profileId)
 {
-    auto agent = std::make_unique<Pedestrian>();
+    auto agent = std::make_unique<Agent>();
     agent->SetDeltaT(_clock.dT());
 
     const auto orientationNormalised = orientation.Normalized();
@@ -108,10 +107,9 @@ uint64_t Simulation::AddAgent(
     e.SetCosPhi(orientationNormalised.x);
     e.SetSinPhi(orientationNormalised.y);
     agent->SetEllipse(e);
-    agent->SetT(T);
     agent->SetPos(position);
     agent->SetV0Norm(v0);
-    agent->SetTau(Tau);
+    agent->_parametersId = profileId;
 
     if(const auto& iter = _journeys.find(journeyId); iter != _journeys.end()) {
         agent->behaviour = std::make_unique<FollowWaypointsBehaviour>(
@@ -135,7 +133,7 @@ void Simulation::RemoveAgent(uint64_t id)
     _agents.erase(iter, std::end(_agents));
 }
 
-Pedestrian* Simulation::AgentPtr(Pedestrian::UID id) const
+Agent* Simulation::AgentPtr(Agent::UID id) const
 {
     const auto iter = std::find_if(
         _agents.begin(), _agents.end(), [id](auto& ped) { return id == ped->GetUID(); });

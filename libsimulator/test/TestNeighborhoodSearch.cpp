@@ -1,5 +1,6 @@
 #include "NeighborhoodSearch.hpp"
-#include "Pedestrian.hpp"
+
+#include "Agent.hpp"
 
 #include <gtest/gtest.h>
 #include <iostream>
@@ -8,12 +9,12 @@ TEST(NeighborhoodSearch, GetNeighboringAgents)
 {
     NeighborhoodSearch neighborhood_search(2.2);
 
-    std::vector<std::unique_ptr<Pedestrian>> pedestrians{};
+    std::vector<std::unique_ptr<Agent>> pedestrians{};
     for(int counter = 0; counter < 10; ++counter) {
-        pedestrians.emplace_back(std::make_unique<Pedestrian>());
+        pedestrians.emplace_back(std::make_unique<Agent>());
         pedestrians.back()->SetPos(Point(0, 0));
     }
-    std::vector<Pedestrian*> pedestrians_as_raw{};
+    std::vector<Agent*> pedestrians_as_raw{};
     std::transform(
         std::begin(pedestrians),
         std::end(pedestrians),
@@ -22,9 +23,9 @@ TEST(NeighborhoodSearch, GetNeighboringAgents)
 
     neighborhood_search.Update(pedestrians);
 
-    std::vector<Pedestrian*> neighborhood;
+    std::vector<Agent*> neighborhood;
 
-    Pedestrian special_ped;
+    Agent special_ped;
     special_ped.SetPos(Point(0, 0));
 
     for(auto neighbor : neighborhood_search.GetNeighboringAgents(special_ped.GetPos(), 2.2)) {
@@ -66,11 +67,11 @@ TEST(NeighborhoodSearch, GetNeighboringAgentsRadius)
 {
     NeighborhoodSearch neighborhood_search(2);
 
-    std::vector<std::unique_ptr<Pedestrian>> pedestrians{};
-    pedestrians.emplace_back(std::make_unique<Pedestrian>());
+    std::vector<std::unique_ptr<Agent>> pedestrians{};
+    pedestrians.emplace_back(std::make_unique<Agent>());
     pedestrians.back()->SetPos(Point(0, 0));
 
-    std::vector<Pedestrian*> pedestrians_as_raw{};
+    std::vector<Agent*> pedestrians_as_raw{};
     std::transform(
         std::begin(pedestrians),
         std::end(pedestrians),
@@ -79,8 +80,8 @@ TEST(NeighborhoodSearch, GetNeighboringAgentsRadius)
 
     neighborhood_search.Update(pedestrians);
 
-    std::vector<Pedestrian*> neighborhood;
-    Pedestrian special_ped;
+    std::vector<Agent*> neighborhood;
+    Agent special_ped;
     // one level radius
     special_ped.SetPos(Point(2.5, 2.3));
     for(auto neighbor : neighborhood_search.GetNeighboringAgents(special_ped.GetPos(), 4)) {

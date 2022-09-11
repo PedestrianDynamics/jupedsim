@@ -30,14 +30,15 @@
 #include "Journey.hpp"
 #include "Line.hpp"
 #include "Macros.hpp"
+#include "OperationalModel.hpp"
 #include "UniqueID.hpp"
 
 #include <memory>
 
-class Pedestrian
+class Agent
 {
 public:
-    using UID = jps::UniqueID<Pedestrian>;
+    using UID = jps::UniqueID<Agent>;
 
     // This is evaluated by the "strategic level"
     std::unique_ptr<Behaviour> behaviour{};
@@ -46,29 +47,21 @@ public:
     Point destination{};
     Point waypoint{};
 
+    OperationalModel::ParametersID _parametersId;
+
 private:
     UID _uid{};
-
-    // gcfm specific parameters
-    double _mass = 1; // Mass: 1
-    double _tau = 0.5; // Reaction time: 0.5
-    double _t = 1.0; // OV function
-
     double _deltaT = 0.01; // step size
     JEllipse _ellipse{}; // the shape of this pedestrian
     Point _v0 = Point(0, 0); // vector V0
-
     int _newOrientationDelay = 0;
 
 public:
-    Pedestrian() = default;
-    ~Pedestrian() = default;
+    Agent() = default;
+    ~Agent() = default;
 
-    void SetTau(double tau);
     void SetEllipse(const JEllipse& e);
 
-    double GetT() const;
-    void SetT(double T);
     void SetDeltaT(double dt);
     void SetPos(const Point& pos);
     void SetV(const Point& v);
@@ -79,13 +72,11 @@ public:
     void SetPhiPed();
 
     UID GetUID() const;
-    double GetMass() const;
-    double GetTau() const;
     const JEllipse& GetEllipse() const;
     const Point& GetPos() const;
     const Point& GetV() const;
     const Point& GetV0() const;
-    Point GetV0(const Point& target) const;
+    Point GetV0(const Point& target, double tau) const;
     void InitV0(const Point& target);
 
     /**
@@ -95,4 +86,4 @@ public:
     double GetV0Norm() const;
 };
 
-std::ostream& operator<<(std::ostream& out, const Pedestrian& pedestrian);
+std::ostream& operator<<(std::ostream& out, const Agent& pedestrian);

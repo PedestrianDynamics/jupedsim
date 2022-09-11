@@ -1,9 +1,9 @@
 #pragma once
 
+#include "Agent.hpp"
 #include "Geometry.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
-#include "Pedestrian.hpp"
 
 #include <memory>
 #include <vector>
@@ -25,5 +25,7 @@ public:
         double t_in_sec,
         const NeighborhoodSearch& neighborhoodSearch,
         const CollisionGeometry& geometry,
-        std::vector<std::unique_ptr<Pedestrian>>& agents) const;
+        std::vector<std::unique_ptr<Agent>>& agents) const;
+
+    void ValidateAgentParameterProfileId(OperationalModel::ParametersID id) const;
 };

@@ -5,7 +5,7 @@
 void TacticalDecisionSystem::Run(
     const std::map<Area::Id, Area> areas,
     RoutingEngine& routingEngine,
-    std::vector<std::unique_ptr<Pedestrian>>& agents) const
+    std::vector<std::unique_ptr<Agent>>& agents) const
 {
 
     for(auto& agent : agents) {

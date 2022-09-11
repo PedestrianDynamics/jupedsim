@@ -29,14 +29,15 @@
  **/
 #pragma once
 
+#include "Agent.hpp"
 #include "CollisionGeometry.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
-#include "Pedestrian.hpp"
 
+#include <unordered_map>
 #include <vector>
 
-using my_pair = std::pair<double, Pedestrian::UID>;
+using my_pair = std::pair<double, Agent::UID>;
 // sort with respect to first element (ascending).
 // In case of equality sort with respect to second element (descending)
 struct sort_pred {
@@ -48,9 +49,15 @@ struct sort_pred {
 };
 
 // forward declaration
-class Pedestrian;
+class Agent;
 class DirectionStrategy;
 class Simulation;
+
+struct VelocityModelAgentParameters {
+    OperationalModel::ParametersID id;
+    double t;
+    double tau;
+};
 
 /*!
  * \class VelocityModel
@@ -69,7 +76,32 @@ private:
     double _DPed;
     double _aWall;
     double _DWall;
+    std::unordered_map<OperationalModel::ParametersID, VelocityModelAgentParameters>
+        _parameterProfiles{};
 
+public:
+    VelocityModel(
+        double aped,
+        double Dped,
+        double awall,
+        double Dwall,
+        const std::vector<VelocityModelAgentParameters> profiles);
+    ~VelocityModel() override = default;
+
+    PedestrianUpdate ComputeNewPosition(
+        double dT,
+        const Agent& ped,
+        const CollisionGeometry& geometry,
+        const NeighborhoodSearch& neighborhoodSearch) const override;
+
+    void ApplyUpdate(const PedestrianUpdate& update, Agent& agent) const override;
+    bool ParameterProfileExists(ParametersID id) const override
+    {
+        return _parameterProfiles.count(id) > 0;
+    };
+    std::unique_ptr<OperationalModel> Clone() const override;
+
+private:
     /**
      * Optimal velocity function \f$ V(spacing) =\min{v_0, \max{0, (s-l)/T}}  \f$
      *
@@ -79,7 +111,7 @@ private:
      *
      * @return double
      */
-    double OptimalSpeed(const Pedestrian* ped, double spacing) const;
+    double OptimalSpeed(const Agent* ped, double spacing, double t) const;
 
     /**
      * The desired direction of pedestrian
@@ -89,7 +121,7 @@ private:
      *
      * @return Point
      */
-    void e0(const Pedestrian* ped, Point target, PedestrianUpdate& update) const;
+    void e0(const Agent* ped, Point target, double tau, PedestrianUpdate& update) const;
     /**
      * Get the spacing between ped1 and ped2
      *
@@ -100,7 +132,7 @@ private:
      * and should be calculated *before* calling OptimalSpeed
      * @return Point
      */
-    my_pair GetSpacing(const Pedestrian* ped1, const Pedestrian* ped2, Point ei) const;
+    my_pair GetSpacing(const Agent* ped1, const Agent* ped2, Point ei) const;
     /**
      * Repulsive force between two pedestrians ped1 and ped2 according to
      * the Velocity model (to be published in TGF15)
@@ -110,7 +142,7 @@ private:
      *
      * @return Point
      */
-    Point ForceRepPed(const Pedestrian* ped1, const Pedestrian* ped2) const;
+    Point ForceRepPed(const Agent* ped1, const Agent* ped2) const;
     /**
      * Repulsive force acting on pedestrian <ped> from the walls in
      * <subroom>. The sum of all repulsive forces of the walls in <subroom> is calculated
@@ -120,7 +152,7 @@ private:
      *
      * @return Point
      */
-    Point ForceRepRoom(const Pedestrian* ped, const CollisionGeometry& geometry) const;
+    Point ForceRepRoom(const Agent* ped, const CollisionGeometry& geometry) const;
     /**
      * Repulsive force between pedestrian <ped> and wall <l>
      *
@@ -129,18 +161,5 @@ private:
      *
      * @return Point
      */
-    Point ForceRepWall(const Pedestrian* ped, const Line& l) const;
-
-public:
-    VelocityModel(double aped, double Dped, double awall, double Dwall);
-    ~VelocityModel() override = default;
-
-    PedestrianUpdate ComputeNewPosition(
-        double dT,
-        const Pedestrian& ped,
-        const CollisionGeometry& geometry,
-        const NeighborhoodSearch& neighborhoodSearch) const override;
-
-    void ApplyUpdate(const PedestrianUpdate& update, Pedestrian& agent) const override;
-    std::unique_ptr<OperationalModel> Clone() const override;
+    Point ForceRepWall(const Agent* ped, const Line& l) const;
 };

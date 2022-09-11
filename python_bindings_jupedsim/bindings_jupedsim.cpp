@@ -45,6 +45,8 @@ namespace py = pybind11;
 OWNED_WRAPPER(JPS_Geometry);
 OWNED_WRAPPER(JPS_GeometryBuilder);
 OWNED_WRAPPER(JPS_OperationalModel);
+OWNED_WRAPPER(JPS_VelocityModelBuilder);
+OWNED_WRAPPER(JPS_GCFMModelBuilder);
 OWNED_WRAPPER(JPS_Areas);
 OWNED_WRAPPER(JPS_AreasBuilder);
 OWNED_WRAPPER(JPS_Journey);
@@ -131,48 +133,67 @@ PYBIND11_MODULE(py_jupedsim, m)
                 throw std::runtime_error{msg};
             },
             "");
-    py::class_<JPS_OperationalModel_Wrapper>(m, "OperationalModel")
-        .def_static(
-            "make_velocity_model",
-            [](double a_Ped, double D_Ped, double a_Wall, double D_Wall) {
-                JPS_ErrorMessage errorMsg{};
-                auto result = JPS_OperationalModel_Create_VelocityModel(
-                    a_Ped, D_Ped, a_Wall, D_Wall, &errorMsg);
-                if(result) {
-                    return std::make_unique<JPS_OperationalModel_Wrapper>(result);
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
+    py::class_<JPS_OperationalModel_Wrapper>(m, "OperationalModel");
+    py::class_<JPS_VelocityModelBuilder_Wrapper>(m, "VelocityModelBuilder")
+        .def(py::init([](double aPed, double DPed, double aWall, double DWall) {
+            return std::make_unique<JPS_VelocityModelBuilder_Wrapper>(
+                JPS_VelocityModelBuilder_Create(aPed, DPed, aWall, DWall));
+        }))
+        .def(
+            "add_parameter_profile",
+            [](JPS_VelocityModelBuilder_Wrapper& w,
+               JPS_ModelParameterProfileId id,
+               double t,
+               double tau) { JPS_VelocityModelBuilder_AddParameterProfile(w.handle, id, t, tau); })
+        .def("build", [](JPS_VelocityModelBuilder_Wrapper& w) {
+            JPS_ErrorMessage errorMsg{};
+            auto result = JPS_VelocityModelBuilder_Build(w.handle, &errorMsg);
+            if(result) {
+                return std::make_unique<JPS_OperationalModel_Wrapper>(result);
+            }
+            auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+            JPS_ErrorMessage_Free(errorMsg);
+            throw std::runtime_error{msg};
+        });
+    py::class_<JPS_GCFMModelBuilder_Wrapper>(m, "GCFMModelBuilder")
+        .def(py::init([](double nu_Ped,
+                         double nu_Wall,
+                         double dist_eff_Ped,
+                         double dist_eff_Wall,
+                         double intp_width_Ped,
+                         double intp_width_Wall,
+                         double maxf_Ped,
+                         double maxf_Wall) {
+            return std::make_unique<JPS_GCFMModelBuilder_Wrapper>(JPS_GCFMModelBuilder_Create(
+                nu_Ped,
+                nu_Wall,
+                dist_eff_Ped,
+                dist_eff_Wall,
+                intp_width_Ped,
+                intp_width_Wall,
+                maxf_Ped,
+                maxf_Wall));
+        }))
+        .def(
+            "add_parameter_profile",
+            [](JPS_GCFMModelBuilder_Wrapper& w,
+               JPS_ModelParameterProfileId id,
+               double mass,
+               double t,
+               double tau) {
+                JPS_GCFMModelBuilder_AddParameterProfile(w.handle, id, t, tau, mass);
             })
-        .def_static(
-            "make_gcfm_model",
-            [](double nu_Ped,
-               double nu_Wall,
-               double dist_eff_Ped,
-               double dist_eff_Wall,
-               double intp_width_Ped,
-               double intp_width_Wall,
-               double maxf_Ped,
-               double maxf_Wall) {
-                JPS_ErrorMessage errorMsg{};
-                auto result = JPS_OperationalModel_Create_GCFMModel(
-                    nu_Ped,
-                    nu_Wall,
-                    dist_eff_Ped,
-                    dist_eff_Wall,
-                    intp_width_Ped,
-                    intp_width_Wall,
-                    maxf_Ped,
-                    maxf_Wall,
-                    &errorMsg);
-                if(result) {
-                    return std::make_unique<JPS_OperationalModel_Wrapper>(result);
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
-            });
+        .def("build", [](JPS_GCFMModelBuilder_Wrapper& w) {
+            JPS_ErrorMessage errorMsg{};
+            auto result = JPS_GCFMModelBuilder_Build(w.handle, &errorMsg);
+            if(result) {
+                return std::make_unique<JPS_OperationalModel_Wrapper>(result);
+            }
+            auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+            JPS_ErrorMessage_Free(errorMsg);
+            throw std::runtime_error{msg};
+        });
+
     py::class_<JPS_Areas_Wrapper>(m, "Areas");
     py::class_<JPS_AreasBuilder_Wrapper>(m, "AreasBuilder")
         .def(py::init(
@@ -257,13 +278,12 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def_readwrite("orientation_x", &JPS_AgentParameters::orientationX)
         .def_readwrite("orientation_y", &JPS_AgentParameters::orientationY)
         .def_readwrite("v0", &JPS_AgentParameters::v0)
-        .def_readwrite("t", &JPS_AgentParameters::T)
-        .def_readwrite("tau", &JPS_AgentParameters::Tau)
         .def_readwrite("a_v", &JPS_AgentParameters::Av)
         .def_readwrite("a_min", &JPS_AgentParameters::AMin)
         .def_readwrite("b_max", &JPS_AgentParameters::BMax)
         .def_readwrite("b_min", &JPS_AgentParameters::BMin)
-        .def_readwrite("journey_id", &JPS_AgentParameters::journeyId);
+        .def_readwrite("journey_id", &JPS_AgentParameters::journeyId)
+        .def_readwrite("profile_id", &JPS_AgentParameters::profileId);
     py::class_<JPS_Simulation_Wrapper>(m, "Simulation")
         .def(py::init([](JPS_OperationalModel_Wrapper& model,
                          JPS_Geometry_Wrapper& geometry,

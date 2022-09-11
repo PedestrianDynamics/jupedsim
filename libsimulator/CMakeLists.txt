@@ -4,6 +4,8 @@
 add_library(simulator STATIC
     src/AABB.cpp
     src/AABB.hpp
+    src/Agent.cpp
+    src/Agent.hpp
     src/AgentExitSystem.cpp
     src/AgentExitSystem.hpp
     src/Area.cpp
@@ -21,6 +23,8 @@ add_library(simulator STATIC
     src/Ellipse.hpp
     src/GCFMModel.cpp
     src/GCFMModel.hpp
+    src/GCFMModelBuilder.cpp
+    src/GCFMModelBuilder.hpp
     src/GeometricFunctions.hpp
     src/Geometry.cpp
     src/Geometry.hpp
@@ -34,15 +38,13 @@ add_library(simulator STATIC
     src/Line.hpp
     src/Mathematics.cpp
     src/Mathematics.hpp
-    src/NeighborhoodIterator.hpp
+    src/NeighborhoodIterator.cpp
     src/NeighborhoodIterator.hpp
     src/NeighborhoodSearch.cpp
     src/NeighborhoodSearch.hpp
     src/OperationalDecisionSystem.cpp
     src/OperationalDecisionSystem.hpp
     src/OperationalModel.hpp
-    src/Pedestrian.cpp
-    src/Pedestrian.hpp
     src/Point.cpp
     src/Point.hpp
     src/RoutingEngine.cpp
@@ -59,6 +61,8 @@ add_library(simulator STATIC
     src/Triangle.hpp
     src/VelocityModel.cpp
     src/VelocityModel.hpp
+    src/VelocityModelBuilder.cpp
+    src/VelocityModelBuilder.hpp
 )
 target_compile_options(simulator PRIVATE
     ${COMMON_COMPILE_OPTIONS}

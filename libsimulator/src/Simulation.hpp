@@ -29,6 +29,7 @@
  **/
 #pragma once
 
+#include "Agent.hpp"
 #include "AgentExitSystem.hpp"
 #include "Area.hpp"
 #include "Geometry.hpp"
@@ -36,7 +37,6 @@
 #include "NeighborhoodSearch.hpp"
 #include "OperationalDecisionSystem.hpp"
 #include "OperationalModel.hpp"
-#include "Pedestrian.hpp"
 #include "SimulationClock.hpp"
 #include "StrategicalDesicionSystem.hpp"
 #include "TacticalDecisionSystem.hpp"
@@ -57,7 +57,7 @@ private:
     NeighborhoodSearch _neighborhoodSearch{2.2};
     std::unique_ptr<RoutingEngine> _routingEngine;
     std::unique_ptr<CollisionGeometry> _geometry;
-    std::vector<std::unique_ptr<Pedestrian>> _agents;
+    std::vector<std::unique_ptr<Agent>> _agents;
     std::unique_ptr<Areas> _areas;
     std::vector<uint64_t> _removedAgentsInLastIteration;
     std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;
@@ -96,14 +96,13 @@ public:
         double AMin,
         double BMax,
         double BMin,
-        double Tau,
-        double T,
         double v0,
-        Journey::ID journeyId);
+        Journey::ID journeyId,
+        OperationalModel::ParametersID profileId);
 
     void RemoveAgent(uint64_t id);
 
-    Pedestrian* AgentPtr(Pedestrian::UID id) const;
+    Agent* AgentPtr(Agent::UID id) const;
 
     const std::vector<uint64_t>& RemovedAgents() const;
 
@@ -111,5 +110,5 @@ public:
 
     uint64_t Iteration() const { return _clock.Iteration(); }
 
-    const std::vector<std::unique_ptr<Pedestrian>>& Agents() const { return _agents; };
+    const std::vector<std::unique_ptr<Agent>>& Agents() const { return _agents; };
 };
