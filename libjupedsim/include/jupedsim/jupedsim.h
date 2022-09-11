@@ -18,8 +18,13 @@
 extern "C" {
 #endif
 
+/**
+ * A 2D coordinate. Units are 'meters'
+ */
 typedef struct JPS_Point {
+    /** x component in 'meters' */
     double x;
+    /** y component in 'meters' */
     double y;
 } JPS_Point;
 
@@ -29,7 +34,7 @@ typedef struct JPS_Point {
 typedef struct JPS_Waypoint {
     JPS_Point position;
     /**
-     * Distance in meters at which this waypoint is considered to be reached.
+     * Distance in 'meters' at which this waypoint is considered to be reached.
      */
     double distance;
 } JPS_Waypoint;
@@ -64,7 +69,6 @@ JUPEDSIM_API void JPS_Logging_SetInfoCallback(JPS_LoggingCallBack callback, void
  * @param callback to call with debug message
  * @param userdata optional pointer to state needed by the callback
  */
-
 JUPEDSIM_API void JPS_Logging_SetWarningCallback(JPS_LoggingCallBack callback, void* userdata);
 
 /**
@@ -103,23 +107,26 @@ JUPEDSIM_API void JPS_ErrorMessage_Free(JPS_ErrorMessage handle);
  * Opaque type for operational models describing how agents interact in the simulation.
  */
 typedef struct JPS_OperationalModel_t* JPS_OperationalModel;
+
 /**
- * Creates velocity model.
- * @param a_Ped
- * @param D_Ped
- * @param a_Wall
- * @param D_Wall
- * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
- * @return the new model or NULL if an error occured during construction
+ * Id of a model parameter profile.
+ * Zero represents an invlaid id.
  */
-JUPEDSIM_API JPS_OperationalModel JPS_OperationalModel_Create_VelocityModel(
-    double a_Ped,
-    double D_Ped,
-    double a_Wall,
-    double D_Wall,
-    JPS_ErrorMessage* errorMessage);
+typedef uint64_t JPS_ModelParameterProfileId;
+
 /**
- * Creates GCFM model.
+ * Frees a JPS_OperationalModel
+ * @param handle to the JPS_OperationalModel to free.
+ */
+JUPEDSIM_API void JPS_OperationalModel_Free(JPS_OperationalModel handle);
+
+/**
+ * Opaque type for a GCFM Model Builder
+ */
+typedef struct JPS_GCFMModelBuilder_t* JPS_GCFMModelBuilder;
+
+/**
+ * Creates a GCFM model builder.
  * @param nu_Ped
  * @param nu_Wall
  * @param dist_eff_Ped
@@ -128,10 +135,9 @@ JUPEDSIM_API JPS_OperationalModel JPS_OperationalModel_Create_VelocityModel(
  * @param intp_width_Wall
  * @param maxf_Ped
  * @param maxf_Wall
- * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
- * @return the new model or NULL if an error occured during construction
+ * @return the GCFM model builder
  */
-JUPEDSIM_API JPS_OperationalModel JPS_OperationalModel_Create_GCFMModel(
+JUPEDSIM_API JPS_GCFMModelBuilder JPS_GCFMModelBuilder_Create(
     double nu_Ped,
     double nu_Wall,
     double dist_eff_Ped,
@@ -139,13 +145,85 @@ JUPEDSIM_API JPS_OperationalModel JPS_OperationalModel_Create_GCFMModel(
     double intp_width_Ped,
     double intp_width_Wall,
     double maxf_Ped,
-    double maxf_Wall,
-    JPS_ErrorMessage* errorMessage);
+    double maxf_Wall);
+
 /**
- * Frees a JPS_OperationalModel
- * @param handle to the JPS_OperationalModel to free.
+ * Registeres a parameter profile for this model.
+ * There has to be at least one model registered for the model to be considered valid.
+ * @param handle of builder to operate on
+ * @param id desired id of the parameter profile. If the id is already used by the model and
+ *        previously added profile will be overwritten.
+ * @param mass of the agents using this profile
+ * @param t of the agents using this profile
+ * @param tau of the agents using this profile
  */
-JUPEDSIM_API void JPS_OperationalModel_Free(JPS_OperationalModel handle);
+JUPEDSIM_API void JPS_GCFMModelBuilder_AddParameterProfile(
+    JPS_GCFMModelBuilder handle,
+    JPS_ModelParameterProfileId id,
+    double mass,
+    double t,
+    double tau);
+
+/**
+ * Creates a JPS_OperationalModel of type GCFM Model from the JPS_GCFMModelBuilder.
+ * @param handle the builder to operate on
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error
+ * @return a JPS_GCFMModel or NULL if an error occured.
+ */
+JUPEDSIM_API JPS_OperationalModel
+JPS_GCFMModelBuilder_Build(JPS_GCFMModelBuilder handle, JPS_ErrorMessage* errorMessage);
+
+/**
+ * Frees a JPS_GCFMModelBuilder
+ * @param handle to the JPS_GCFMModelBuilder to free.
+ */
+JUPEDSIM_API void JPS_GCFMModelBuilder_Free(JPS_GCFMModelBuilder handle);
+
+/**
+ * Opaque type for a Velocity Model Builder
+ */
+typedef struct JPS_VelocityModelBuilder_t* JPS_VelocityModelBuilder;
+
+/**
+ * Creates a Velocity Model builder.
+ * @param aPed
+ * @param DPed
+ * @param aWall
+ * @param DWall
+ * @return the builder
+ */
+JUPEDSIM_API JPS_VelocityModelBuilder
+JPS_VelocityModelBuilder_Create(double aPed, double DPed, double aWall, double DWall);
+
+/**
+ * Registeres a parameter profile for this model.
+ * There has to be at least one model registered for the model to be considered valid.
+ * @param handle of builder to operate on
+ * @param id desired id of the parameter profile. If the id is already used by the model and
+ *        previously added profile will be overwritten.
+ * @param t of the agents using this profile
+ * @param tau of the agents using this profile
+ */
+JUPEDSIM_API void JPS_VelocityModelBuilder_AddParameterProfile(
+    JPS_VelocityModelBuilder handle,
+    JPS_ModelParameterProfileId id,
+    double t,
+    double tau);
+
+/**
+ * Creates a JPS_OperationalModel of type Velocity Model from the JPS_GCFMModelBuilder.
+ * @param handle the builder to operate on
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error
+ * @return a JPS_GCFMModel or NULL if an error occured.
+ */
+JUPEDSIM_API JPS_OperationalModel
+JPS_VelocityModelBuilder_Build(JPS_VelocityModelBuilder handle, JPS_ErrorMessage* errorMessage);
+
+/**
+ * Frees a JPS_VelocityModelBuilder
+ * @param handle to the JPS_VelocityModelBuilder to free.
+ */
+JUPEDSIM_API void JPS_VelocityModelBuilder_Free(JPS_VelocityModelBuilder handle);
 
 /**
  * Opaque type that represents the geometry the simulation acts on.
@@ -298,6 +376,7 @@ JUPEDSIM_API void JPS_Journey_Free(JPS_Journey handle);
 
 /**
  * Id of a journey.
+ * Zero represents an invlaid id.
  */
 typedef uint64_t JPS_JourneyId;
 
@@ -372,12 +451,12 @@ JUPEDSIM_API void JPS_AgentIterator_Free(JPS_AgentIterator handle);
  * See the individual fields for more information.
  */
 typedef struct JPS_AgentParameters {
-    /*
+    /**
      * positionX forms together with positionY the positional vector of the agent.
      * The position needs to inside the accessible area.
      */
     double positionX;
-    /*
+    /**
      * positionY forms together with positionX the positional vector of the agent.
      * The position needs to inside the accessible area.
      */
@@ -387,19 +466,24 @@ typedef struct JPS_AgentParameters {
      * The orientation vector will internally be normalized.
      */
     double orientationX;
-    /*
+    /**
      * orientationY forms together with orientationX the orientation vector of the agent.
      * The orientation vector will internally be normalized.
      */
     double orientationY;
     double v0;
-    double T;
-    double Tau;
     double Av;
     double AMin;
     double BMax;
     double BMin;
+    /**
+     * Defines the journey this agent will take use
+     */
     JPS_JourneyId journeyId;
+    /**
+     * Defines the paramter profile this agents uses during the simulation
+     */
+    JPS_ModelParameterProfileId profileId;
 } JPS_AgentParameters;
 
 /*

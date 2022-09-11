@@ -31,7 +31,7 @@
 class NeighborhoodSearch
 {
     double _cellSize;
-    Grid2D<Pedestrian*> _grid{};
+    Grid2D<Agent*> _grid{};
 
 public:
     explicit NeighborhoodSearch(double cellSize);
@@ -44,7 +44,7 @@ public:
     /**
      *Update the cells occupation
      */
-    void Update(const std::vector<std::unique_ptr<Pedestrian>>& peds);
+    void Update(const std::vector<std::unique_ptr<Agent>>& peds);
 
     IteratorPair<NeighborhoodIterator, NeighborhoodEndIterator>
     GetNeighboringAgents(Point pos, double radius) const;

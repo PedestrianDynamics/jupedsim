@@ -29,12 +29,13 @@
  **/
 #include "GCFMModel.hpp"
 
+#include "Agent.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
-#include "Pedestrian.hpp"
 #include "Simulation.hpp"
 
 #include <Logger.hpp>
+#include <stdexcept>
 
 GCFMModel::GCFMModel(
     double nuped,
@@ -44,7 +45,8 @@ GCFMModel::GCFMModel(
     double intp_widthped,
     double intp_widthwall,
     double maxfped,
-    double maxfwall)
+    double maxfwall,
+    const std::vector<GCFMModelAgentParameters>& profiles)
     : _nuPed(nuped)
     , _nuWall(nuwall)
     , _intp_widthPed(intp_widthped)
@@ -54,50 +56,58 @@ GCFMModel::GCFMModel(
     , _distEffMaxPed(dist_effPed)
     , _distEffMaxWall(dist_effWall)
 {
+    _parameterProfiles.reserve(profiles.size());
+    for(auto&& p : profiles) {
+        auto [_, success] = _parameterProfiles.try_emplace(p.id, p);
+        if(!success) {
+            throw std::runtime_error("Duplicate agent profile id supplied");
+        }
+    }
 }
 
 PedestrianUpdate GCFMModel::ComputeNewPosition(
     double dT,
-    const Pedestrian& ped,
+    const Agent& agent,
     const CollisionGeometry& geometry,
     const NeighborhoodSearch& neighborhoodSearch) const
 {
+    const auto parameters = _parameterProfiles.at(agent._parametersId);
     const double delta = 1.5;
-    const double normVi = ped.GetV().ScalarProduct(ped.GetV());
-    const double tmp = (ped.GetV0Norm() + delta) * (ped.GetV0Norm() + delta);
-    if(normVi > tmp && ped.GetV0Norm() > 0) {
+    const double normVi = agent.GetV().ScalarProduct(agent.GetV());
+    const double tmp = (agent.GetV0Norm() + delta) * (agent.GetV0Norm() + delta);
+    if(normVi > tmp && agent.GetV0Norm() > 0) {
         LOG_ERROR(
             "GCFMModel::calculateForce() WARNING: actual velocity (%f) of iped %d "
             "is bigger than desired velocity (%f)\n",
             sqrt(normVi),
-            ped.GetUID(),
-            ped.GetV0Norm());
+            agent.GetUID(),
+            agent.GetV0Norm());
     }
 
-    const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.GetPos(), 4);
-    const auto p1 = ped.GetPos();
+    const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(agent.GetPos(), 4);
+    const auto p1 = agent.GetPos();
     Point F_rep;
     for(const auto* other : neighborhood) {
-        if(other->GetUID() == ped.GetUID()) {
+        if(other->GetUID() == agent.GetUID()) {
             continue;
         }
         if(!geometry.IntersectsAny(Line(p1, other->GetPos()))) {
-            F_rep += ForceRepPed(&ped, other);
+            F_rep += ForceRepPed(&agent, other);
         }
     }
 
     PedestrianUpdate update{};
     // repulsive forces to the walls and transitions that are not my target
-    Point repwall = ForceRepRoom(&ped, geometry);
-    Point fd = ForceDriv(&ped, ped.destination, update);
-    Point acc = (fd + F_rep + repwall) / ped.GetMass();
+    Point repwall = ForceRepRoom(&agent, geometry);
+    Point fd = ForceDriv(&agent, agent.destination, parameters.mass, parameters.tau, update);
+    Point acc = (fd + F_rep + repwall) / parameters.mass;
 
-    update.velocity = ped.GetV() + acc * dT;
-    update.position = ped.GetPos() + *update.velocity * dT;
+    update.velocity = agent.GetV() + acc * dT;
+    update.position = agent.GetPos() + *update.velocity * dT;
     return update;
 }
 
-void GCFMModel::ApplyUpdate(const PedestrianUpdate& update, Pedestrian& agent) const
+void GCFMModel::ApplyUpdate(const PedestrianUpdate& update, Agent& agent) const
 {
     agent.SetV0(update.v0);
     agent.IncrementOrientationDelay();
@@ -115,25 +125,29 @@ std::unique_ptr<OperationalModel> GCFMModel::Clone() const
     return std::make_unique<GCFMModel>(*this);
 }
 
-inline Point
-GCFMModel::ForceDriv(const Pedestrian* ped, Point target, PedestrianUpdate& update) const
+inline Point GCFMModel::ForceDriv(
+    const Agent* ped,
+    Point target,
+    double mass,
+    double tau,
+    PedestrianUpdate& update) const
 {
     Point F_driv;
     const auto pos = ped->GetPos();
     const auto dest = ped->destination;
     const auto dist = (dest - pos).Norm();
     if(dist > J_EPS_GOAL) {
-        const Point v0 = ped->GetV0(target);
+        const Point v0 = ped->GetV0(target, tau);
         update.v0 = v0;
-        F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
+        F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * mass) / tau;
     } else {
         const Point v0 = ped->GetV0();
-        F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
+        F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * mass) / tau;
     }
     return F_driv;
 }
 
-Point GCFMModel::ForceRepPed(const Pedestrian* ped1, const Pedestrian* ped2) const
+Point GCFMModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
 {
     Point F_rep;
     // x- and y-coordinate of the distance between p1 and p2
@@ -150,6 +164,7 @@ Point GCFMModel::ForceRepPed(const Pedestrian* ped1, const Pedestrian* ped2) con
     const JEllipse& E2 = ped2->GetEllipse();
     double distsq;
     double dist_eff = E1.EffectiveDistanceToEllipse(E2, &distsq);
+    const auto agent1_mass = _parameterProfiles.at(ped1->_parametersId).mass;
 
     //          smax    dist_intpol_left      dist_intpol_right       dist_eff_max
     //       ----|-------------|--------------------------|--------------|----
@@ -210,7 +225,7 @@ Point GCFMModel::ForceRepPed(const Pedestrian* ped1, const Pedestrian* ped2) con
 
     K_ij = sqrt(K_ij);
     if(dist_eff <= smax) { // 5
-        f = -ped1->GetMass() * K_ij * nom / dist_intpol_left;
+        f = -agent1_mass * K_ij * nom / dist_intpol_left;
         F_rep = ep12 * _maxfPed * f;
         return F_rep;
     }
@@ -220,15 +235,15 @@ Point GCFMModel::ForceRepPed(const Pedestrian* ped1, const Pedestrian* ped2) con
     //           5   |     4       |            3             |      2       | 1
 
     if(dist_eff >= dist_intpol_right) { // 2
-        f = -ped1->GetMass() * K_ij * nom / dist_intpol_right; // abs(NR-Dv(i)+Sa)
+        f = -agent1_mass * K_ij * nom / dist_intpol_right; // abs(NR-Dv(i)+Sa)
         f1 = -f / dist_intpol_right;
         px = hermite_interp(dist_eff, dist_intpol_right, _distEffMaxPed, f, 0, f1, 0);
         F_rep = ep12 * px;
     } else if(dist_eff >= dist_intpol_left) { // 3
-        f = -ped1->GetMass() * K_ij * nom / fabs(dist_eff); // abs(NR-Dv(i)+Sa)
+        f = -agent1_mass * K_ij * nom / fabs(dist_eff); // abs(NR-Dv(i)+Sa)
         F_rep = ep12 * f;
     } else { // 4
-        f = -ped1->GetMass() * K_ij * nom / dist_intpol_left;
+        f = -agent1_mass * K_ij * nom / dist_intpol_left;
         f1 = -f / dist_intpol_left;
         px = hermite_interp(dist_eff, smax, dist_intpol_left, _maxfPed * f, f, 0, f1);
         F_rep = ep12 * px;
@@ -253,7 +268,7 @@ Point GCFMModel::ForceRepPed(const Pedestrian* ped1, const Pedestrian* ped2) con
  *   - Vektor(x,y) mit Summe aller abstoßenden Kräfte im SubRoom
  * */
 
-inline Point GCFMModel::ForceRepRoom(const Pedestrian* ped, const CollisionGeometry& geometry) const
+inline Point GCFMModel::ForceRepRoom(const Agent* ped, const CollisionGeometry& geometry) const
 {
     auto walls = geometry.LineSegmentsInDistanceTo(5.0, ped->GetPos());
 
@@ -267,7 +282,7 @@ inline Point GCFMModel::ForceRepRoom(const Pedestrian* ped, const CollisionGeome
     return f;
 }
 
-inline Point GCFMModel::ForceRepWall(const Pedestrian* ped, const Line& w) const
+inline Point GCFMModel::ForceRepWall(const Agent* ped, const Line& w) const
 {
     Point F = Point(0.0, 0.0);
     Point pt = w.ShortestPoint(ped->GetPos());
@@ -299,7 +314,7 @@ inline Point GCFMModel::ForceRepWall(const Pedestrian* ped, const Line& w) const
  *   - Vektor(x,y) mit abstoßender Kraft
  * */
 // TODO: use effective DistanceToEllipse and simplify this function.
-Point GCFMModel::ForceRepStatPoint(const Pedestrian* ped, const Point& p, double l, double vn) const
+Point GCFMModel::ForceRepStatPoint(const Agent* ped, const Point& p, double l, double vn) const
 {
     Point F_rep = Point(0.0, 0.0);
     const Point& v = ped->GetV();

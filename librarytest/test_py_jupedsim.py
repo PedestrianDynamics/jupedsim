@@ -42,7 +42,11 @@ def main():
     )
     areas = areas_builder.build()
 
-    model = jps.OperationalModel.make_velocity_model(8, 0.1, 5, 0.02)
+    model_builder = jps.VelocityModelBuilder(8, 0.1, 5, 0.02)
+    profile_id = 3
+    model_builder.add_parameter_profile(profile_id, 1, 0.5)
+
+    model = model_builder.build()
 
     simulation = jps.Simulation(model, geometry, areas, 0.01)
 
@@ -56,13 +60,12 @@ def main():
     agent_parameters.b_max = 0.15
     agent_parameters.b_min = 0.15
     agent_parameters.a_v = 0.53
-    agent_parameters.t = 1
-    agent_parameters.tau = 0.5
     agent_parameters.journey_id = journey_id
     agent_parameters.orientation_x = 1.0
     agent_parameters.orientation_y = 0.0
     agent_parameters.x = 0.0
     agent_parameters.y = 0.0
+    agent_parameters.profile_id = profile_id
 
     for x, y in [(7, 7), (1, 3), (1, 5), (1, 7), (2, 7)]:
         agent_parameters.x = x

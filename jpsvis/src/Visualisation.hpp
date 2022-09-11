@@ -64,7 +64,7 @@ class vtkCamera;
 class vtkTextActor;
 class vtkObject;
 
-class Pedestrian;
+class Agent;
 class TrajectoryData;
 class FacilityGeometry;
 class TrailPlotter;

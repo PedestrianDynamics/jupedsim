@@ -3,20 +3,22 @@
 #include "AgentIterator.hpp"
 #include "ErrorMessage.hpp"
 
+#include <Agent.hpp>
 #include <Area.hpp>
 #include <CollisionGeometry.hpp>
 #include <GCFMModel.hpp>
+#include <GCFMModelBuilder.hpp>
 #include <Geometry.hpp>
 #include <GeometryBuilder.hpp>
 #include <Journey.hpp>
 #include <Logger.hpp>
 #include <OperationalModel.hpp>
 #include <OperationalModelType.hpp>
-#include <Pedestrian.hpp>
 #include <Point.hpp>
 #include <RoutingEngine.hpp>
 #include <Simulation.hpp>
 #include <VelocityModel.hpp>
+#include <VelocityModelBuilder.hpp>
 
 #include <cassert>
 #include <exception>
@@ -84,31 +86,15 @@ void JPS_ErrorMessage_Free(JPS_ErrorMessage handle)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Operational Model
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-JPS_OperationalModel JPS_OperationalModel_Create_VelocityModel(
-    double a_Ped,
-    double D_Ped,
-    double a_Wall,
-    double D_Wall,
-    JPS_ErrorMessage* errorMessage)
+void JPS_OperationalModel_Free(JPS_OperationalModel handle)
 {
-    JPS_OperationalModel model{};
-    try {
-        model =
-            reinterpret_cast<JPS_OperationalModel>(new VelocityModel(a_Ped, D_Ped, a_Wall, D_Wall));
-    } catch(const std::exception& ex) {
-        if(errorMessage) {
-            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
-        }
-    } catch(...) {
-        if(errorMessage) {
-            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
-                new JPS_ErrorMessage_t{"Unknown internal error."});
-        }
-    }
-    return model;
+    delete reinterpret_cast<OperationalModel*>(handle);
 }
 
-JPS_OperationalModel JPS_OperationalModel_Create_GCFMModel(
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// GCFM Model Builder
+////////////////////////////////////////////////////////////////////////////////////////////////////
+JPS_GCFMModelBuilder JPS_GCFMModelBuilder_Create(
     double nu_Ped,
     double nu_Wall,
     double dist_eff_Ped,
@@ -116,20 +102,39 @@ JPS_OperationalModel JPS_OperationalModel_Create_GCFMModel(
     double intp_width_Ped,
     double intp_width_Wall,
     double maxf_Ped,
-    double maxf_Wall,
-    JPS_ErrorMessage* errorMessage)
+    double maxf_Wall)
 {
-    JPS_OperationalModel model{};
+    return reinterpret_cast<JPS_GCFMModelBuilder>(new GCFMModelBuilder(
+        nu_Ped,
+        nu_Wall,
+        dist_eff_Ped,
+        dist_eff_Wall,
+        intp_width_Ped,
+        intp_width_Wall,
+        maxf_Ped,
+        maxf_Wall));
+}
+
+void JPS_GCFMModelBuilder_AddParameterProfile(
+    JPS_GCFMModelBuilder handle,
+    uint64_t id,
+    double mass,
+    double t,
+    double tau)
+{
+    assert(handle != nullptr);
+    auto builder = reinterpret_cast<GCFMModelBuilder*>(handle);
+    builder->AddAgentParameterProfile({id, mass, t, tau});
+}
+
+JPS_OperationalModel
+JPS_GCFMModelBuilder_Build(JPS_GCFMModelBuilder handle, JPS_ErrorMessage* errorMessage)
+{
+    assert(handle != nullptr);
+    auto builder = reinterpret_cast<GCFMModelBuilder*>(handle);
+    JPS_OperationalModel result{};
     try {
-        model = reinterpret_cast<JPS_OperationalModel>(new GCFMModel(
-            nu_Ped,
-            nu_Wall,
-            dist_eff_Ped,
-            dist_eff_Wall,
-            intp_width_Ped,
-            intp_width_Wall,
-            maxf_Ped,
-            maxf_Wall));
+        result = reinterpret_cast<JPS_OperationalModel>(new GCFMModel(builder->Build()));
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
@@ -140,12 +145,59 @@ JPS_OperationalModel JPS_OperationalModel_Create_GCFMModel(
                 new JPS_ErrorMessage_t{"Unknown internal error."});
         }
     }
-    return model;
+    return result;
 }
 
-void JPS_OperationalModel_Free(JPS_OperationalModel handle)
+void JPS_GCFMModelBuilder_Free(JPS_GCFMModelBuilder handle)
 {
-    delete reinterpret_cast<OperationalModel*>(handle);
+    delete reinterpret_cast<GCFMModelBuilder*>(handle);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Velocity Model Builder
+////////////////////////////////////////////////////////////////////////////////////////////////////
+JUPEDSIM_API JPS_VelocityModelBuilder
+JPS_VelocityModelBuilder_Create(double aPed, double DPed, double aWall, double DWall)
+{
+    return reinterpret_cast<JPS_VelocityModelBuilder>(
+        new VelocityModelBuilder(aPed, DPed, aWall, DWall));
+}
+
+JUPEDSIM_API void JPS_VelocityModelBuilder_AddParameterProfile(
+    JPS_VelocityModelBuilder handle,
+    uint64_t id,
+    double t,
+    double tau)
+{
+    assert(handle);
+    auto builder = reinterpret_cast<VelocityModelBuilder*>(handle);
+    builder->AddAgentParameterProfile({id, t, tau});
+}
+
+JUPEDSIM_API JPS_OperationalModel
+JPS_VelocityModelBuilder_Build(JPS_VelocityModelBuilder handle, JPS_ErrorMessage* errorMessage)
+{
+    assert(handle != nullptr);
+    auto builder = reinterpret_cast<VelocityModelBuilder*>(handle);
+    JPS_OperationalModel result{};
+    try {
+        result = reinterpret_cast<JPS_OperationalModel>(new VelocityModel(builder->Build()));
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return result;
+}
+
+JUPEDSIM_API void JPS_VelocityModelBuilder_Free(JPS_VelocityModelBuilder handle)
+{
+    delete reinterpret_cast<VelocityModelBuilder*>(handle);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -292,35 +344,35 @@ void JPS_Areas_Free(JPS_Areas handle)
 double JPS_Agent_PositionX(JPS_Agent handle)
 {
     assert(handle);
-    const auto agent = reinterpret_cast<const Pedestrian*>(handle);
+    const auto agent = reinterpret_cast<const Agent*>(handle);
     return agent->GetPos().x;
 }
 
 double JPS_Agent_PositionY(JPS_Agent handle)
 {
     assert(handle);
-    const auto agent = reinterpret_cast<const Pedestrian*>(handle);
+    const auto agent = reinterpret_cast<const Agent*>(handle);
     return agent->GetPos().y;
 }
 
 double JPS_Agent_OrientationX(JPS_Agent handle)
 {
     assert(handle);
-    const auto agent = reinterpret_cast<const Pedestrian*>(handle);
+    const auto agent = reinterpret_cast<const Agent*>(handle);
     return agent->GetEllipse().GetCosPhi();
 }
 
 double JPS_Agent_OrientationY(JPS_Agent handle)
 {
     assert(handle);
-    const auto agent = reinterpret_cast<const Pedestrian*>(handle);
+    const auto agent = reinterpret_cast<const Agent*>(handle);
     return agent->GetEllipse().GetSinPhi();
 }
 
 JPS_AgentId JPS_Agent_Id(JPS_Agent handle)
 {
     assert(handle);
-    const auto agent = reinterpret_cast<const Pedestrian*>(handle);
+    const auto agent = reinterpret_cast<const Agent*>(handle);
     return agent->GetUID().getID();
 }
 
@@ -444,10 +496,9 @@ JPS_AgentId JPS_Simulation_AddAgent(
             parameters.AMin,
             parameters.BMax,
             parameters.BMin,
-            parameters.Tau,
-            parameters.T,
             parameters.v0,
-            parameters.journeyId);
+            parameters.journeyId,
+            parameters.profileId);
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});

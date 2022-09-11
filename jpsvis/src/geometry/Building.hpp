@@ -44,7 +44,7 @@
 // train schedules: Trains get deleted and added.
 
 class RoutingEngine;
-class Pedestrian;
+class Agent;
 class Transition;
 class LCGrid;
 class ForceModel;
@@ -59,7 +59,7 @@ private:
     std::string _geometryFilename;
     RoutingEngine* _routingEngine;
     LCGrid* _linkedCellGrid;
-    std::vector<Pedestrian*> _allPedestians;
+    std::vector<Agent*> _allPedestians;
 
     std::map<int, std::unique_ptr<Room>> _rooms;
     std::map<int, Crossing*> _crossings;
@@ -82,16 +82,16 @@ public:
     void SetRoutingEngine(RoutingEngine* r);
 
     /// delete the ped from the ped vector
-    void DeletePedestrian(Pedestrian*& ped);
+    void DeletePedestrian(Agent*& ped);
     /// delete the ped from the simulation
-    void AddPedestrian(Pedestrian* ped);
-    void GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds) const;
+    void AddPedestrian(Agent* ped);
+    void GetPedestrians(int room, int subroom, std::vector<Agent*>& peds) const;
 
     std::string GetCaption() const;
     RoutingEngine* GetRoutingEngine() const;
     const std::map<int, std::unique_ptr<Room>>& GetAllRooms() const;
-    const std::vector<Pedestrian*>& GetAllPedestrians() const;
-    Pedestrian* GetPedestrian(int pedID) const;
+    const std::vector<Agent*>& GetAllPedestrians() const;
+    Agent* GetPedestrian(int pedID) const;
     int GetNumberOfRooms() const;
     int GetNumberOfGoals() const;
     Room* GetRoom(int index) const;

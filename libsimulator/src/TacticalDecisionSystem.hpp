@@ -1,7 +1,7 @@
 #pragma once
 
+#include "Agent.hpp"
 #include "Area.hpp"
-#include "Pedestrian.hpp"
 #include "RoutingEngine.hpp"
 
 #include <vector>
@@ -19,5 +19,5 @@ public:
     void
     Run(const std::map<Area::Id, Area> areas,
         RoutingEngine& routingEngine,
-        std::vector<std::unique_ptr<Pedestrian>>& agents) const;
+        std::vector<std::unique_ptr<Agent>>& agents) const;
 };

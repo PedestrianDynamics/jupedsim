@@ -24,88 +24,63 @@
  *
  *
  **/
-#include "Pedestrian.hpp"
+#include "Agent.hpp"
 
 #include "Line.hpp"
 
 #include <Logger.hpp>
 #include <cassert>
 
-void Pedestrian::SetTau(double tau)
-{
-    _tau = tau;
-}
-
-void Pedestrian::SetT(double T)
-{
-    _t = T;
-}
-
-void Pedestrian::SetEllipse(const JEllipse& e)
+void Agent::SetEllipse(const JEllipse& e)
 {
     _ellipse = e;
 }
 
-void Pedestrian::SetPos(const Point& pos)
+void Agent::SetPos(const Point& pos)
 {
     _ellipse.SetCenter(pos);
 }
 
-void Pedestrian::SetV(const Point& v)
+void Agent::SetV(const Point& v)
 {
     _ellipse.SetV(v);
 }
 
-void Pedestrian::SetV0Norm(double v0)
+void Agent::SetV0Norm(double v0)
 {
     _ellipse.SetV0(v0);
 }
 
-void Pedestrian::SetDeltaT(double dt)
+void Agent::SetDeltaT(double dt)
 {
     _deltaT = dt;
 }
-Pedestrian::UID Pedestrian::GetUID() const
+Agent::UID Agent::GetUID() const
 {
     return _uid;
 }
 
-double Pedestrian::GetMass() const
-{
-    return _mass;
-}
-
-double Pedestrian::GetTau() const
-{
-    return _tau;
-}
-
-double Pedestrian::GetT() const
-{
-    return _t;
-}
-
-const JEllipse& Pedestrian::GetEllipse() const
+const JEllipse& Agent::GetEllipse() const
 {
     return _ellipse;
 }
 
-const Point& Pedestrian::GetPos() const
+const Point& Agent::GetPos() const
 {
     return _ellipse.GetCenter();
 }
 
-const Point& Pedestrian::GetV() const
+const Point& Agent::GetV() const
 {
     return _ellipse.GetV();
 }
 
-const Point& Pedestrian::GetV0() const
+const Point& Agent::GetV0() const
 {
     return _v0;
 }
 
-double Pedestrian::GetV0Norm() const
+double Agent::GetV0Norm() const
 {
     double smoothFactor = 15;
     double v0 = _ellipse.GetV0();
@@ -116,7 +91,7 @@ double Pedestrian::GetV0Norm() const
     return walking_speed;
 }
 
-void Pedestrian::SetPhiPed()
+void Agent::SetPhiPed()
 {
     double cosPhi;
     double sinPhi;
@@ -135,7 +110,7 @@ void Pedestrian::SetPhiPed()
     _ellipse.SetSinPhi(sinPhi);
 }
 
-void Pedestrian::InitV0(const Point& target)
+void Agent::InitV0(const Point& target)
 {
     const Point& pos = GetPos();
     Point delta = target - pos;
@@ -143,7 +118,7 @@ void Pedestrian::InitV0(const Point& target)
     _v0 = delta.Normalized();
 }
 
-Point Pedestrian::GetV0(const Point& target) const
+Point Agent::GetV0(const Point& target, double tau) const
 {
     // Molification around the targets makes little sense
     const Point& pos = GetPos();
@@ -153,20 +128,20 @@ Point Pedestrian::GetV0(const Point& target) const
     double t = _newOrientationDelay * _deltaT;
 
     // Handover new target
-    return _v0 + (new_v0 - _v0) * (1 - exp(-t / _tau));
+    return _v0 + (new_v0 - _v0) * (1 - exp(-t / tau));
 }
 
-void Pedestrian::IncrementOrientationDelay()
+void Agent::IncrementOrientationDelay()
 {
     ++_newOrientationDelay;
 }
 
-void Pedestrian::SetSmoothTurning()
+void Agent::SetSmoothTurning()
 {
     _newOrientationDelay = 0;
 }
 
-std::ostream& operator<<(std::ostream& out, const Pedestrian&)
+std::ostream& operator<<(std::ostream& out, const Agent&)
 {
     // TODO(kkratz) Fix
     return out << "";

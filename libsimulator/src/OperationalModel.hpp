@@ -33,10 +33,12 @@
 #include "Clonable.hpp"
 #include "CollisionGeometry.hpp"
 #include "NeighborhoodSearch.hpp"
-#include "Pedestrian.hpp"
 #include "Point.hpp"
+#include "UniqueID.hpp"
 
 #include <optional>
+
+class Agent;
 
 struct PedestrianUpdate {
     std::optional<Point> position{};
@@ -49,15 +51,20 @@ struct PedestrianUpdate {
 
 class OperationalModel : public Clonable<OperationalModel>
 {
+    struct Parameters {
+    };
+
 public:
+    using ParametersID = jps::UniqueID<OperationalModel::Parameters>;
     OperationalModel() = default;
     virtual ~OperationalModel() = default;
 
     virtual PedestrianUpdate ComputeNewPosition(
         double dT,
-        const Pedestrian& ped,
+        const Agent& ped,
         const CollisionGeometry& geometry,
         const NeighborhoodSearch& neighborhoodSearch) const = 0;
 
-    virtual void ApplyUpdate(const PedestrianUpdate& update, Pedestrian& agent) const = 0;
+    virtual void ApplyUpdate(const PedestrianUpdate& update, Agent& agent) const = 0;
+    virtual bool ParameterProfileExists(ParametersID id) const = 0;
 };
