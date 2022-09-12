@@ -77,7 +77,8 @@ class Distribution:
             placeable_area = big_circle_area - small_circle_area
             # it is expected that the entire obstacle intersects with the area
             for obstacle in obstacles:
-                placeable_area -= area_of_polygon(obstacle)
+                placeable_area -= intersecting_area_polygon_circle(self.mid_point, circle[1], obstacle)
+                placeable_area += intersecting_area_polygon_circle(self.mid_point, circle[0], obstacle)
             if circle[2] is None:
                 density = circle[3]
                 targeted_count = round(density * placeable_area)
@@ -191,7 +192,7 @@ class Distribution:
                 following = (i + 1) % n
                 x_value = [obstacle[i][0], obstacle[following][0]]
                 y_value = [obstacle[i][1], obstacle[following][1]]
-                plt.plot(x_value, y_value, color='red')
+                plt.plot(x_value, y_value, color='black')
 
                 i += 1
                 if following == 0:
@@ -549,11 +550,19 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, ob
 
     # Pick a random point to start with.
     active = nsamples = samples = None
+    i = 0
     while True:
+        if i > FOREVER:
+            raise AgentCount("No Agents could be placed inside the polygon")
+        flag = False
         pt = np.random.uniform(borders[0], borders[1]), np.random.uniform(borders[2], borders[3])
         for obstacle in obstacles:
             if is_inside_polygon(obstacle, pt):
-                continue
+                flag = True
+                break
+        if flag:
+            i += 1
+            continue
         if is_inside_polygon(polygon, pt) and min_distance_to_polygon(pt, polygon) > wall_distance:
             samples = [pt]
             # Our first sample is indexed at 0 in the samples list...
@@ -564,6 +573,7 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, ob
             nsamples = 1
             break
         else:
+            i += 1
             continue
 
     while active:
@@ -623,15 +633,13 @@ def get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nx
         np.random.seed(seed)
     borders = get_borders(polygon)
 
-    width, height = borders[1] - borders[0], borders[3] - borders[2]
-
     i = 0
     while i < k:
         i += 1
         rho = np.sqrt(np.random.uniform(agent_radius ** 2, 4 * agent_radius ** 2))
         theta = np.random.uniform(0, 2 * np.pi)
         pt = refpt[0] + rho * np.cos(theta), refpt[1] + rho * np.sin(theta)
-        if not (0 <= pt[0] < width and 0 <= pt[1] < height):
+        if not (borders[0] <= pt[0] < borders[1] and borders[2] <= pt[1] < borders[3]):
             # This point falls outside the domain, so try again.
             continue
         if point_valid(pt, agent_radius, wall_distance, c_s_l, polygon, samples, nxny, cells, obstacles):
@@ -788,7 +796,7 @@ def show_points(polygon, points, radius, obstacles=None):
             following = (i + 1) % n
             x_value = [obstacle[i][0], obstacle[following][0]]
             y_value = [obstacle[i][1], obstacle[following][1]]
-            plt.plot(x_value, y_value, color='red')
+            plt.plot(x_value, y_value, color='black')
 
             i += 1
             if following == 0:

@@ -1,9 +1,9 @@
 import streamlit as st
-import distributions as distribution
+import distribution
 import matplotlib.pyplot as plt
 
 
-def show_points(polygon, samples, radius, obstacles=None):
+def show_points(polygon, samples, radius, obstacles=None, distributer=None):
     if obstacles is None:
         obstacles = []
     borders = distribution.get_borders(polygon)
@@ -12,6 +12,12 @@ def show_points(polygon, samples, radius, obstacles=None):
     for elem in samples:
         ax.add_patch(plt.Circle(radius=radius / 2, xy=elem, fill=False))
         ax.add_patch(plt.Circle(radius=0.1, xy=elem, color="r"))
+
+    if distributer is not None:
+        center = distributer.mid_point
+        for circle in distributer.circles:
+            ax.add_patch(plt.Circle(radius=circle[0], xy=center, fill=False))
+            ax.add_patch(plt.Circle(radius=circle[1], xy=center, fill=False))
 
     n = len(polygon)
     i = 0
@@ -32,7 +38,50 @@ def show_points(polygon, samples, radius, obstacles=None):
             following = (i + 1) % n
             x_value = [obstacle[i][0], obstacle[following][0]]
             y_value = [obstacle[i][1], obstacle[following][1]]
-            plt.plot(x_value, y_value, color='red')
+            plt.plot(x_value, y_value, color='black')
+
+            i += 1
+            if following == 0:
+                break
+
+    plt.xlim(borders[0], borders[1])
+    plt.ylim(borders[2], borders[3])
+    plt.axis('equal')
+    st.pyplot(fig)
+
+
+def show_polygon(polygon, distributer=None, obstacles=None):
+    if obstacles is None:
+        obstacles = []
+    borders = distribution.get_borders(polygon)
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    if distributer is not None:
+        center = distributer.mid_point
+        for circle in distributer.circles:
+            ax.add_patch(plt.Circle(radius=circle[0], xy=center, fill=False))
+            ax.add_patch(plt.Circle(radius=circle[1], xy=center, fill=False))
+
+    n = len(polygon)
+    i = 0
+    while True:
+        following = (i + 1) % n
+        x_value = [polygon[i][0], polygon[following][0]]
+        y_value = [polygon[i][1], polygon[following][1]]
+        plt.plot(x_value, y_value, color='blue')
+
+        i += 1
+        if following == 0:
+            break
+
+    for obstacle in obstacles:
+        n = len(obstacle)
+        i = 0
+        while True:
+            following = (i + 1) % n
+            x_value = [obstacle[i][0], obstacle[following][0]]
+            y_value = [obstacle[i][1], obstacle[following][1]]
+            plt.plot(x_value, y_value, color='black')
 
             i += 1
             if following == 0:
@@ -54,7 +103,6 @@ def main():
         st.text("Polygon settings")
         corners = st.number_input("number of corner points in polygon", 3, value=len(default_polygon))
         col1, col2 = st.columns(2)
-        # polygon
         x_values, y_values = [], []
         with col1:
             for i in range(corners):
@@ -105,14 +153,15 @@ def main():
         col1, col2, col3 = st.columns(3)
         min_values, max_values = [], []
         densities, agents = [], []
+        default_center = (5.0, 5.0)
         with col1:
-            mid_x = st.number_input("Middle -> x value")
+            mid_x = st.number_input("Center -> x value", value=default_center[0], step=1.0)
             for i in range(circle_count):
-                min_values.append(st.number_input(f"minimum radius for Circle {i + 1}"))
+                min_values.append(st.number_input(f"minimum radius for Circle {i + 1}", step=1.0))
         with col2:
-            mid_y = st.number_input("Middle -> y value")
+            mid_y = st.number_input("Center -> y value", value=default_center[1], step=1.0)
             for i in range(circle_count):
-                max_values.append(st.number_input(f"maximum radius for Circle {i + 1}"))
+                max_values.append(st.number_input(f"maximum radius for Circle {i + 1}", step=1.0))
         with col3:
             for i in range(circle_count):
                 style = (st.radio(f"how to choose number of agents for Circle {i}", ("density", "number")))
@@ -130,7 +179,9 @@ def main():
         if button_clicked:
             samples = distributer.place_in_Polygon(polygon, a_r, w_d, obstacles=obstacles, seed=seed)
             st.text('below should be a plot')
-            show_points(polygon, samples, a_r, obstacles=obstacles)
+            show_points(polygon, samples, a_r, obstacles, distributer)
+        else:
+            show_polygon(polygon, distributer, obstacles)
 
     if distribution_type == "place random":
         style = st.radio("how to choose number of agents?", ("density", "number"))
@@ -147,6 +198,8 @@ def main():
             samples = distribution.create_random_points(polygon, agents, a_r, w_d, seed, obstacles, density)
             st.text('below should be a plot')
             show_points(polygon, samples, a_r, obstacles=obstacles)
+        else:
+            show_polygon(polygon, obstacles=obstacles)
 
     if distribution_type == "place everywhere":
         button_clicked = st.button('distribute agents')
@@ -155,6 +208,8 @@ def main():
             samples = distribution.create_points_everywhere(polygon, a_r, w_d, obstacles=obstacles, seed=seed)
             st.text('below should be a plot')
             show_points(polygon, samples, a_r, obstacles=obstacles)
+        else:
+            show_polygon(polygon, obstacles=obstacles)
 
 
 if __name__ == "__main__":
