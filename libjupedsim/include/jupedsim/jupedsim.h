@@ -602,6 +602,20 @@ JUPEDSIM_API uint64_t JPS_Simulation_IterationCount(JPS_Simulation handle);
 JUPEDSIM_API JPS_AgentIterator JPS_Simulation_AgentIterator(JPS_Simulation handle);
 
 /**
+ * Switches the operational model parameter profile for an agent
+ * @param handle of the Simulation to operate on
+ * @param agentId id of the agent to modify
+ * @param profileId to use from now on
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return true on success, false on any error, e.g. unknown agent id or profile id
+ */
+JUPEDSIM_API bool JPS_Simulation_SwitchAgentProfile(
+    JPS_Simulation handle,
+    JPS_AgentId agentId,
+    JPS_ModelParameterProfileId profileId,
+    JPS_ErrorMessage* errorMessage);
+
+/**
  * Frees a JPS_Simulation.
  * @param handle to the JPS_Simulation to free.
  */

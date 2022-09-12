@@ -108,6 +108,8 @@ public:
 
     size_t AgentCount() const;
 
+    void SwitchAgentProfile(Agent::UID agent_id, OperationalModel::ParametersID profile_id) const;
+
     uint64_t Iteration() const { return _clock.Iteration(); }
 
     const std::vector<std::unique_ptr<Agent>>& Agents() const { return _agents; };
