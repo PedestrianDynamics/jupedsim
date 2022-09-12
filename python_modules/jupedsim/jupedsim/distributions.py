@@ -40,7 +40,12 @@ class Distribution:
             raise AgentCount(f"no number of agents and no density given when"
                              f" creating a Circle from {min_radius} to {max_radius} with center at {self.mid_point}")
         if min_radius < 0 or max_radius < 0:
-            raise NegativeNumber("a new created Circle contained a negative radius")
+            raise NegativeNumber(f"It is not possible to create a Circle with a negativ radius:"
+                                 f" creating a Circle from {min_radius} to {max_radius} was not possible")
+        if min_radius > max_radius:
+            raise Overlapping(f"minimum radius bigger than maximum radius"
+                              f" creating a Circle from {min_radius} to {max_radius} was not possible")
+
         for circle in self.circles:
             if min_radius < max_radius <= circle[0] or circle[1] <= min_radius < max_radius:
                 continue
@@ -979,6 +984,8 @@ def test_placing_Circles():
     distribution = Distribution((0, 1))
     distribution.create_circle(0, 1, density=1)
     assert distribution.circles == [(0, 1, None, 1)]
+    with pytest.raises(Overlapping):
+        distribution.create_circle(5, 3, 6)
 
 
 def test_seed_works_correct_for_Circles():
