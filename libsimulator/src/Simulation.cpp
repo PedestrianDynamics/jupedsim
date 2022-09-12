@@ -152,3 +152,14 @@ size_t Simulation::AgentCount() const
 {
     return _agents.size();
 }
+
+void Simulation::SwitchAgentProfile(Agent::UID agent_id, OperationalModel::ParametersID profile_id)
+    const
+{
+    _operationalDecisionSystem.ValidateAgentParameterProfileId(profile_id);
+    if(auto agent = AgentPtr(agent_id); agent != nullptr) {
+        agent->_parametersId = profile_id;
+    } else {
+        throw std::runtime_error(fmt::format("Unknown agent id={} supplied", agent_id.getID()));
+    }
+}

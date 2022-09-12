@@ -350,16 +350,31 @@ PYBIND11_MODULE(py_jupedsim, m)
             })
         .def(
             "removed_agents",
-            [](JPS_Simulation_Wrapper& simulation) {
+            [](const JPS_Simulation_Wrapper& simulation) {
                 const JPS_AgentId* ids{};
                 const auto count = JPS_Simulation_RemovedAgents(simulation.handle, &ids);
                 return std::vector<std::unique_ptr<JPS_Agent_Wrapper>>{};
             })
         .def(
             "iterate",
-            [](JPS_Simulation_Wrapper& simulation) {
+            [](const JPS_Simulation_Wrapper& simulation) {
                 JPS_ErrorMessage errorMsg{};
                 auto result = JPS_Simulation_Iterate(simulation.handle, &errorMsg);
+                if(result) {
+                    return;
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
+            })
+        .def(
+            "switch_agent_profile",
+            [](const JPS_Simulation_Wrapper& w,
+               JPS_AgentId agentId,
+               JPS_ModelParameterProfileId profileId) {
+                JPS_ErrorMessage errorMsg{};
+                auto result =
+                    JPS_Simulation_SwitchAgentProfile(w.handle, agentId, profileId, &errorMsg);
                 if(result) {
                     return;
                 }

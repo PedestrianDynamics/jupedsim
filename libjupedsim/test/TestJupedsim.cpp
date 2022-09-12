@@ -145,7 +145,7 @@ TEST(Simulation, CanSimulate)
 struct SimulationTest : public ::testing::Test {
     JPS_Simulation simulation{};
     JPS_JourneyId journey_id{};
-    JPS_ModelParameterProfileId model_paramater_profile_id{1};
+    std::array<JPS_ModelParameterProfileId, 2> model_paramater_profile_id{1, 2};
 
     void SetUp() override
     {
@@ -170,7 +170,9 @@ struct SimulationTest : public ::testing::Test {
 
         auto modelBuilder = JPS_VelocityModelBuilder_Create(9, 0.1, 5, 0.02);
         JPS_VelocityModelBuilder_AddParameterProfile(
-            modelBuilder, model_paramater_profile_id, 1, 1);
+            modelBuilder, model_paramater_profile_id[0], 1, 1);
+        JPS_VelocityModelBuilder_AddParameterProfile(
+            modelBuilder, model_paramater_profile_id[1], 1, 1);
         auto model = JPS_VelocityModelBuilder_Build(modelBuilder, nullptr);
 
         ASSERT_NE(model, nullptr);
@@ -202,9 +204,9 @@ TEST_F(SimulationTest, AgentIteratorIsEmptyForNewSimulation)
 TEST_F(SimulationTest, AgentIteratorCanIterate)
 {
     std::vector<JPS_AgentParameters> agent_parameters{
-        {1.0, 1.0, 1.0, 1.0, 1.0, 1, 0.5, 0.53, 0.15, journey_id, model_paramater_profile_id},
-        {2.0, 1.0, 1.0, 1.0, 1.0, 1, 0.5, 0.53, 0.15, journey_id, model_paramater_profile_id},
-        {3.0, 1.0, 1.0, 1.0, 1.0, 1, 0.5, 0.53, 0.15, journey_id, model_paramater_profile_id}};
+        {1.0, 1.0, 1.0, 1.0, 1.0, 1, 0.5, 0.53, 0.15, journey_id, model_paramater_profile_id[0]},
+        {2.0, 1.0, 1.0, 1.0, 1.0, 1, 0.5, 0.53, 0.15, journey_id, model_paramater_profile_id[0]},
+        {3.0, 1.0, 1.0, 1.0, 1.0, 1, 0.5, 0.53, 0.15, journey_id, model_paramater_profile_id[0]}};
     for(const auto& agent_params : agent_parameters) {
         ASSERT_NE(JPS_Simulation_AddAgent(simulation, agent_params, nullptr), 0);
     }
@@ -234,7 +236,7 @@ TEST_F(SimulationTest, CanQueryAgentProperties)
         0.53,
         0.15,
         journey_id,
-        model_paramater_profile_id};
+        model_paramater_profile_id[0]};
     const auto agent_id = JPS_Simulation_AddAgent(simulation, agent_params, nullptr);
     ASSERT_NE(agent_id, 0);
     ASSERT_EQ(JPS_Simulation_AgentCount(simulation), 1);
@@ -249,4 +251,19 @@ TEST_F(SimulationTest, CanQueryAgentProperties)
     ASSERT_EQ(JPS_Agent_PositionY(agent), pos_y);
     ASSERT_EQ(JPS_Agent_OrientationX(agent), orientation_x);
     ASSERT_EQ(JPS_Agent_OrientationY(agent), orientation_y);
+}
+
+TEST_F(SimulationTest, CanChangeModelParameterProfiles)
+{
+    JPS_AgentParameters agent_params{
+        1, 1, 1, 0, 1.0, 1, 0.5, 0.53, 0.15, journey_id, model_paramater_profile_id[0]};
+    const auto agent_id = JPS_Simulation_AddAgent(simulation, agent_params, nullptr);
+    ASSERT_NE(agent_id, 0);
+    ASSERT_EQ(JPS_Simulation_AgentCount(simulation), 1);
+    ASSERT_EQ(JPS_Simulation_Iterate(simulation, nullptr), true);
+    ASSERT_EQ(
+        JPS_Simulation_SwitchAgentProfile(
+            simulation, agent_id, model_paramater_profile_id[1], nullptr),
+        true);
+    ASSERT_EQ(JPS_Simulation_Iterate(simulation, nullptr), true);
 }
