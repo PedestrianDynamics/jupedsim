@@ -50,49 +50,6 @@ def show_points(polygon, samples, radius, obstacles=None, distributer=None):
     st.pyplot(fig)
 
 
-def show_polygon(polygon, distributer=None, obstacles=None):
-    if obstacles is None:
-        obstacles = []
-    box = distributions.get_bounding_box(polygon)
-    fig = plt.figure()
-    ax = fig.add_subplot(1, 1, 1)
-    if distributer is not None:
-        center = distributer.mid_point
-        for circle in distributer.circles:
-            ax.add_patch(plt.Circle(radius=circle[0], xy=center, fill=False))
-            ax.add_patch(plt.Circle(radius=circle[1], xy=center, fill=False))
-
-    n = len(polygon)
-    i = 0
-    while True:
-        following = (i + 1) % n
-        x_value = [polygon[i][0], polygon[following][0]]
-        y_value = [polygon[i][1], polygon[following][1]]
-        plt.plot(x_value, y_value, color='blue')
-
-        i += 1
-        if following == 0:
-            break
-
-    for obstacle in obstacles:
-        n = len(obstacle)
-        i = 0
-        while True:
-            following = (i + 1) % n
-            x_value = [obstacle[i][0], obstacle[following][0]]
-            y_value = [obstacle[i][1], obstacle[following][1]]
-            plt.plot(x_value, y_value, color='black')
-
-            i += 1
-            if following == 0:
-                break
-
-    plt.xlim(box[0][0], box[1][0])
-    plt.ylim(box[0][1], box[1][1])
-    plt.axis('equal')
-    st.pyplot(fig)
-
-
 def main():
     default_polygon = [(0.0, 0.0), (10.0, 0.0), (10.0, 10.0), (0.0, 10.0)]
     agents = density = 0
@@ -181,7 +138,7 @@ def main():
             st.text('below should be a plot')
             show_points(polygon, samples, a_r, obstacles, distributer)
         else:
-            show_polygon(polygon, distributer, obstacles)
+            show_points(polygon, [], a_r, obstacles, distributer)
 
     if distribution_type == "place random":
         style = st.radio("how to choose number of agents?", ("density", "number"))
@@ -199,7 +156,7 @@ def main():
             st.text('below should be a plot')
             show_points(polygon, samples, a_r, obstacles=obstacles)
         else:
-            show_polygon(polygon, obstacles=obstacles)
+            show_points(polygon, [], a_r, obstacles)
 
     if distribution_type == "place everywhere":
         button_clicked = st.button('distribute agents')
@@ -209,7 +166,7 @@ def main():
             st.text('below should be a plot')
             show_points(polygon, samples, a_r, obstacles=obstacles)
         else:
-            show_polygon(polygon, obstacles=obstacles)
+            show_points(polygon, [], a_r, obstacles)
 
 
 if __name__ == "__main__":

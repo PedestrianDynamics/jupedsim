@@ -1,11 +1,5 @@
-from math import sqrt
-import matplotlib.pyplot as plt
 import numpy as np
 import shapely.geometry as shply
-
-# Define Infinite
-INT_MAX = 10000
-FOREVER = 10000
 
 
 class AgentCount(Exception):
@@ -61,7 +55,7 @@ class Distribution:
                 self.circles.remove(circle)
                 break
 
-    def place_in_Polygon(self, polygon, agent_radius, wall_distance, seed=None, obstacles=None):
+    def place_in_Polygon(self, polygon, agent_radius, wall_distance, seed=None, obstacles=None, max_iterations=10_000):
         """returns points inside each circle segment
             points have an agent_radius within which no other point may be placed.
             points will not be placed with less than wall_distance to the polygon
@@ -114,7 +108,7 @@ class Distribution:
                 # inside the circle it is more likely to find a random point that is inside the polygon
                 for placed_count in range(targeted_count + 1):
                     i = 0
-                    while i < INT_MAX:
+                    while i < max_iterations:
                         i += 1
                         # determines a random radius within the circle segment
                         rho = np.sqrt(np.random.uniform(circle[0] ** 2, circle[1] ** 2))
@@ -127,7 +121,7 @@ class Distribution:
                             cells[get_cell_coords(pt, c_s_l, box)] = len(samples) - 1
                             break
 
-                    if i >= INT_MAX and placed_count != targeted_count:
+                    if i >= max_iterations and placed_count != targeted_count:
                         message = f"the desired amount of agents in the Circle from {circle[0]} to {circle[1]} " \
                                   f"could not be achieved.\nOnly {placed_count} of {targeted_count}  could be placed."
                         if circle[2] is None:
@@ -141,7 +135,7 @@ class Distribution:
                 placed_count = 0
                 iterations = 0
                 while placed_count < targeted_count:
-                    if iterations > FOREVER:
+                    if iterations > max_iterations:
                         message = f"the desired amount of agents in the Circle from {circle[0]} to {circle[1]} " \
                                   f"could not be achieved.\nOnly {placed_count} of {targeted_count}  could be placed."
                         if circle[2] is None:
@@ -161,51 +155,6 @@ class Distribution:
                     else:
                         iterations += 1
         return samples
-
-    def show_points(self, polygon, points, radius, obstacles=None):
-        """illustrates the polygon, circle segments and points"""
-        if obstacles is None:
-            obstacles = []
-        samples = points
-        box = get_bounding_box(polygon)
-        fig = plt.figure()
-        ax = fig.add_subplot(1, 1, 1)
-        for circle in self.circles:
-            ax.add_patch(plt.Circle(radius=circle[0], xy=self.mid_point, fill=False))
-            ax.add_patch(plt.Circle(radius=circle[1], xy=self.mid_point, fill=False))
-        for elem in samples:
-            ax.add_patch(plt.Circle(radius=radius / 2, xy=elem, fill=False))
-            ax.add_patch(plt.Circle(radius=0.1, xy=elem, color="r"))
-
-        n = len(polygon)
-        i = 0
-        while True:
-            following = (i + 1) % n
-            x_value = [polygon[i][0], polygon[following][0]]
-            y_value = [polygon[i][1], polygon[following][1]]
-            plt.plot(x_value, y_value, color='blue')
-
-            i += 1
-            if following == 0:
-                break
-
-        for obstacle in obstacles:
-            n = len(obstacle)
-            i = 0
-            while True:
-                following = (i + 1) % n
-                x_value = [obstacle[i][0], obstacle[following][0]]
-                y_value = [obstacle[i][1], obstacle[following][1]]
-                plt.plot(x_value, y_value, color='black')
-
-                i += 1
-                if following == 0:
-                    break
-
-        plt.xlim(box[0][0], box[1][0])
-        plt.ylim(box[0][1], box[1][1])
-        plt.axis('equal')
-        plt.show()
 
 
 def intersecting_area_polygon_circle(mid_point, radius, polygon):
@@ -246,7 +195,8 @@ def min_distance_to_polygon(pt, polygon):
     return shply.LineString(shapely_polygon).distance(shply.Point(pt))
 
 
-def create_random_points(polygon, count, agent_radius, wall_distance, seed=None, obstacles=None, density=None):
+def create_random_points(polygon, count, agent_radius, wall_distance,
+                         seed=None, obstacles=None, density=None, max_iterations=10000):
     """returns points randomly placed inside the polygon
 
         :param polygon: List of corner points given as tuples
@@ -256,8 +206,8 @@ def create_random_points(polygon, count, agent_radius, wall_distance, seed=None,
         :param wall_distance: minimal distance between points and the polygon
         :param seed: define a seed for random generation
         :param obstacles: list of polygons, no points can be inside the obstacle
+        :param max_iterations: no more than max_iterations must find a point inside the polygon
         :return: list of created points
-        if more that 10000 tries are needed to placed a valid point an Exception will be thrown
     """
     if obstacles is None:
         obstacles = []
@@ -289,7 +239,7 @@ def create_random_points(polygon, count, agent_radius, wall_distance, seed=None,
     created_points = 0
     iterations = 0
     while created_points < count:
-        if iterations > FOREVER:
+        if iterations > max_iterations:
             msg = f"Only {created_points} of {count}  could be placed."
             if density is not None:
                 msg += f"\nexpected density: {density} p/m², " \
@@ -308,13 +258,14 @@ def create_random_points(polygon, count, agent_radius, wall_distance, seed=None,
     return samples
 
 
-def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, obstacles=None):
+def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, obstacles=None, max_iterations=10000):
     """creates points all over the polygon with bridson´s poisson-disk algorithm
         :param polygon: List of corner points given as tuples
         :param agent_radius: minimal distance between points
         :param wall_distance: minimal distance between points and the polygon
         :param seed: define a seed for random generation
         :param obstacles: list of polygons, no points can be inside the obstacle
+        :param max_iterations: there will be max_iterations to find a point inside the polygon
         :return: list of created points
     """
     if seed is not None:
@@ -340,7 +291,7 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, ob
     active = nsamples = samples = None
     i = 0
     while True:
-        if i > FOREVER:
+        if i > max_iterations:
             raise AgentCount("No Agents could be placed inside the polygon")
         flag = False
 
@@ -502,96 +453,3 @@ def get_neighbours(coords, nxny, cells):
             # This cell is occupied: store this index of the contained point.
             neighbours.append(neighbour_cell)
     return neighbours
-
-
-def heatmap(all, agent_radius, wall_distance, polygon, iterations, max_persons=50):
-    a_r = agent_radius
-    w_d = wall_distance
-    x = y = []
-    # determines all x and y values to draw the polygon
-    for point in polygon:
-        x.append(point[0])
-        y.append(point[1])
-
-    fig = plt.figure()
-    ax = fig.add_subplot(1, 1, 1)
-
-    total = iterations
-    if all:
-        alpha = (25 * (a_r ** 2)) / total
-
-    else:
-        area = shply.Polygon(polygon).area
-        alpha = (25 * area) / (total * max_persons * np.pi)
-    if alpha < 0.01:
-        alpha = 0.01
-    elif alpha > 1:
-        alpha = 1
-
-    for temp in range(total):
-        print(f"{temp / total * 100}%")
-        # creates the random points
-        if all:
-            samples = create_points_everywhere(polygon, a_r, w_d)
-        else:
-            samples = create_random_points(polygon, max_persons, a_r, w_d)
-
-        for elem in samples:
-            ax.add_patch(plt.Circle(radius=0.1, xy=elem, color="r", alpha=alpha))
-    n = len(polygon)
-    i = 0
-    while True:
-        following = (i + 1) % n
-        x_value = [polygon[i][0], polygon[following][0]]
-        y_value = [polygon[i][1], polygon[following][1]]
-        plt.plot(x_value, y_value, color='blue')
-
-        i += 1
-        if following == 0:
-            break
-    plt.xlim(min(x) - 1, max(x) + 1)
-    plt.ylim(min(y) - 1, max(y) + 1)
-    plt.axis('on')
-    plt.show()
-
-
-def show_points(polygon, points, radius, obstacles=None):
-    if obstacles is None:
-        obstacles = []
-    samples = points
-    box = get_bounding_box(polygon)
-    fig = plt.figure()
-    ax = fig.add_subplot(1, 1, 1)
-    for elem in samples:
-        ax.add_patch(plt.Circle(radius=radius / 2, xy=elem, fill=False))
-        ax.add_patch(plt.Circle(radius=0.1, xy=elem, color="r"))
-
-    n = len(polygon)
-    i = 0
-    while True:
-        following = (i + 1) % n
-        x_value = [polygon[i][0], polygon[following][0]]
-        y_value = [polygon[i][1], polygon[following][1]]
-        plt.plot(x_value, y_value, color='blue')
-
-        i += 1
-        if following == 0:
-            break
-
-    for obstacle in obstacles:
-        n = len(obstacle)
-        i = 0
-        while True:
-            following = (i + 1) % n
-            x_value = [obstacle[i][0], obstacle[following][0]]
-            y_value = [obstacle[i][1], obstacle[following][1]]
-            plt.plot(x_value, y_value, color='black')
-
-            i += 1
-            if following == 0:
-                break
-
-    plt.xlim(box[0][0], box[1][0])
-    plt.ylim(box[0][1], box[1][1])
-    plt.axis('equal')
-    plt.show()
