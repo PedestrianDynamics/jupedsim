@@ -1,5 +1,7 @@
-from ..jupedsim import distributions
+from jupedsim import distributions
 import pytest
+# tests can be called from \python_modules\jupedsim
+# command to call test: python -m pytest -vv .\tests\test_distributions.py
 
 
 def test_seed_works_correct_for_poisson_disc():
