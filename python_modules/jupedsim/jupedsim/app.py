@@ -1,12 +1,12 @@
 import streamlit as st
-import distributions as distribution
+import distributions
 import matplotlib.pyplot as plt
 
 
 def show_points(polygon, samples, radius, obstacles=None, distributer=None):
     if obstacles is None:
         obstacles = []
-    borders = distribution.get_borders(polygon)
+    borders = distributions.get_borders(polygon)
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
     for elem in samples:
@@ -53,7 +53,7 @@ def show_points(polygon, samples, radius, obstacles=None, distributer=None):
 def show_polygon(polygon, distributer=None, obstacles=None):
     if obstacles is None:
         obstacles = []
-    borders = distribution.get_borders(polygon)
+    borders = distributions.get_borders(polygon)
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
     if distributer is not None:
@@ -145,7 +145,7 @@ def main():
     polygon = []
     for x, y in zip(x_values, y_values):
         polygon.append((x, y))
-    area = distribution.area_of_polygon(polygon)
+    area = distributions.shply.Polygon(polygon).area
     distribution_type = st.radio("how to destribute agents?", ("place random", "place everywhere", "place in Circle"))
 
     if distribution_type == "place in Circle":
@@ -171,7 +171,7 @@ def main():
                 elif style == "number":
                     agents.append(st.slider("agents", 1, round(area * 5), key=i))
                     densities.append(None)
-        distributer = distribution.Distribution((mid_x, mid_y))
+        distributer = distributions.Distribution((mid_x, mid_y))
         for i in range(circle_count):
             distributer.create_circle(min_values[i], max_values[i], number=agents[i], density=densities[i])
 
@@ -195,7 +195,7 @@ def main():
         button_clicked = st.button('distribute agents')
 
         if button_clicked:
-            samples = distribution.create_random_points(polygon, agents, a_r, w_d, seed, obstacles, density)
+            samples = distributions.create_random_points(polygon, agents, a_r, w_d, seed, obstacles, density)
             st.text('below should be a plot')
             show_points(polygon, samples, a_r, obstacles=obstacles)
         else:
@@ -205,7 +205,7 @@ def main():
         button_clicked = st.button('distribute agents')
 
         if button_clicked:
-            samples = distribution.create_points_everywhere(polygon, a_r, w_d, obstacles=obstacles, seed=seed)
+            samples = distributions.create_points_everywhere(polygon, a_r, w_d, obstacles=obstacles, seed=seed)
             st.text('below should be a plot')
             show_points(polygon, samples, a_r, obstacles=obstacles)
         else:

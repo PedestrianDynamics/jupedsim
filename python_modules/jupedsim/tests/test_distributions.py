@@ -1,7 +1,5 @@
-from jupedsim import distributions
+import distributions
 import pytest
-# tests can be called from \python_modules\jupedsim
-# command to call test: python -m pytest -vv .\tests\test_distributions.py
 
 
 def test_seed_works_correct_for_poisson_disc():
@@ -194,8 +192,3 @@ def test_removing_Circles():
     distribution.circles = [(0, 1, 2, None), (2, 3, 2, None)]
     distribution.remove_circle(0, 1)
     assert distribution.circles == [(2, 3, 2, None)]
-
-
-def test_area_determination_single_polygon():
-    polygon = [(0, 0), (30, 0), (25, 5), (20, 5), (17.5, 15), (25, 15), (15, 25), (5, 15), (12.5, 15), (10, 5), (5, 5)]
-    assert distributions.area_of_polygon(polygon) == 300

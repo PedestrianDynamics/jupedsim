@@ -228,22 +228,6 @@ def is_inside_circle(point, mid, min_r, max_r):
     return min_r ** 2 <= circle_equation <= max_r ** 2
 
 
-def area_of_polygon(polygon):
-    """returns the area of the polygon"""
-    n = len(polygon)
-    area = 0
-    i = 0
-    while True:
-        following = (i + 1) % n
-        area += polygon[i][0] * polygon[following][1]
-        area -= polygon[i][1] * polygon[following][0]
-
-        i += 1
-        if following == 0:
-            break
-    return abs(area) / 2
-
-
 def is_inside_polygon(points: list, p: tuple) -> bool:
     """ Returns true if the point p lies inside the polygon with n vertices """
     # gets borders around the obstacle
@@ -479,10 +463,10 @@ def create_random_points(polygon, count, agent_radius, wall_distance, seed=None,
     if seed is not None:
         np.random.seed(seed)
     if density is not None:
-        area = area_of_polygon(polygon)
+        area = shply.Polygon(polygon).area
         # it is expected that the entire obstacle intersects with the area
         for obstacle in obstacles:
-            area -= area_of_polygon(obstacle)
+            area -= shply.Polygon(obstacle).area
         count = round(density * area)
 
     # creates a grid
@@ -736,7 +720,7 @@ def heatmap(all, agent_radius, wall_distance, polygon, iterations, max_persons=5
         alpha = (25 * (a_r ** 2)) / total
 
     else:
-        area = area_of_polygon(polygon)
+        area = shply.Polygon(polygon).area
         alpha = (25 * area) / (total * max_persons * np.pi)
     if alpha < 0.01:
         alpha = 0.01
