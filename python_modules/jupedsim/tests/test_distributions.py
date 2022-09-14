@@ -15,7 +15,7 @@ def test_seed_works_correct_for_poisson_disc():
 
 def test_cell_coord_determination():
     pt = (5, 5)
-    box = [(0, 10), (0, 10)]
+    box = [(0, 0), (10, 10)]
     c_s_l = 0.7071067811865475  # 1/√2
     assert (7, 7) == distributions.get_cell_coords(pt, c_s_l, box)
 
@@ -34,7 +34,7 @@ def test_point_in_circle():
 def test_bounding_box_determination():
     polygon = [(6, 0), (9, 2), (11, 4), (12, 7), (11.5, 9.5), (9.5, 10.5), (7.5, 10),
                (6, 9), (4.5, 10), (2.5, 10.5), (0.6, 9.5), (0, 7), (1, 4), (3, 2)]
-    expected_box = [(0, 12), (0, 10.5)]
+    expected_box = [(0, 0), (12, 10.5)]
     assert distributions.get_bounding_box(polygon) == expected_box
 
 

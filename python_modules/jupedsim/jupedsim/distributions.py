@@ -94,11 +94,11 @@ class Distribution:
             entire_circle_area = np.pi * (circle[1] ** 2 - circle[0] ** 2)
             # determine the area where a point might be placed around the polygon
             box = get_bounding_box(polygon)
-            dif_x, dif_y = box[0][1] - box[0][0], box[1][1] - box[1][0]
+            dif_x, dif_y = box[1][0] - box[0][0], box[1][1] - box[0][1]
             entire_polygon_area = dif_x * dif_y
 
             # creates a grid
-            width, height = box[0][1] - box[0][0], box[1][1] - box[1][0]
+            width, height = box[1][0] - box[0][0], box[1][1] - box[0][1]
             # Cell side length
             c_s_l = agent_radius / np.sqrt(2)
             # Number of cells in the x- and y-directions of the grid
@@ -150,7 +150,7 @@ class Distribution:
                             message += f"\nexpected density: {circle[3]} p/m², " \
                                        f"actual density: {round(placed_count / placeable_area, 2)} p/m²"
                         raise AgentCount(message)
-                    temp_point = (np.random.uniform(box[0][0], box[0][1]), np.random.uniform(box[1][0], box[1][1]))
+                    temp_point = (np.random.uniform(box[0][0], box[1][0]), np.random.uniform(box[0][1], box[1][1]))
                     if is_inside_circle(temp_point, self.mid_point, circle[0], circle[1]) \
                             and point_valid(temp_point, agent_radius, wall_distance, c_s_l, polygon, samples, nxny,
                                             cells, obstacles):
@@ -202,8 +202,8 @@ class Distribution:
                 if following == 0:
                     break
 
-        plt.xlim(box[0][0], box[0][1])
-        plt.ylim(box[1][0], box[1][0])
+        plt.xlim(box[0][0], box[1][0])
+        plt.ylim(box[0][1], box[1][1])
         plt.axis('equal')
         plt.show()
 
@@ -230,13 +230,13 @@ def is_inside_circle(point, mid, min_r, max_r):
 
 def get_bounding_box(polygon):
     """returns an Axis Aligned Bounding Box containing the minimal/maximal x and y values
-    formatted like : [(min(x_values), max(x_values)), (min(y_values), max(y_values))]"""
+    formatted like : [(min(x_values), min(y_values)), (max(x_values), max(y_values))]"""
     x_values, y_values = [], []
     for point in polygon:
         x_values.append(point[0])
         y_values.append(point[1])
 
-    return [(min(x_values), max(x_values)), (min(y_values), max(y_values))]
+    return [(min(x_values), min(y_values)), ((max(x_values)), max(y_values))]
 
 
 def min_distance_to_polygon(pt, polygon):
@@ -341,7 +341,7 @@ def create_random_points(polygon, count, agent_radius, wall_distance, seed=None,
 
     # creates a grid
     box = get_bounding_box(polygon)
-    width, height = box[0][1] - box[0][0], box[1][1] - box[1][0]
+    width, height = box[1][0] - box[0][0], box[1][1] - box[0][1]
     # Cell side length
     c_s_l = agent_radius / np.sqrt(2)
     # Number of cells in the x- and y-directions of the grid
@@ -364,7 +364,7 @@ def create_random_points(polygon, count, agent_radius, wall_distance, seed=None,
                 msg += f"\nexpected density: {density} p/m², " \
                        f"actual density: {round(created_points / area, 2)} p/m²"
             raise AgentCount(msg)
-        temp_point = (np.random.uniform(box[0][0], box[0][1]), np.random.uniform(box[1][0], box[1][1]))
+        temp_point = (np.random.uniform(box[0][0], box[1][0]), np.random.uniform(box[0][1], box[1][1]))
         if point_valid(temp_point, agent_radius, wall_distance, c_s_l, polygon, samples, nxny, cells, obstacles):
             samples.append(temp_point)
             cells[get_cell_coords(temp_point, c_s_l, box)] = len(samples) - 1
@@ -393,7 +393,7 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, ob
     # Choose up to k points around each reference point as candidates for a new sample point
     k = 30
     box = get_bounding_box(polygon)
-    width, height = box[0][1] - box[0][0], box[1][1] - box[1][0]
+    width, height = box[1][0] - box[0][0], box[1][1] - box[0][1]
     # Cell side length
     c_s_l = agent_radius / np.sqrt(2)
     # Number of cells in the x- and y-directions of the grid
@@ -413,7 +413,7 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, ob
             raise AgentCount("No Agents could be placed inside the polygon")
         flag = False
 
-        pt = np.random.uniform(box[0][0], box[0][1]), np.random.uniform(box[1][0], box[1][1])
+        pt = np.random.uniform(box[0][0], box[1][0]), np.random.uniform(box[0][1], box[1][1])
         for obstacle in obstacles:
             if shply.Polygon(obstacle).contains(shply.Point(pt)):
                 flag = True
@@ -464,7 +464,7 @@ def get_cell_coords(pt, cell_side_length, box):
     """ Get the coordinates of the cell that pt = (x,y) falls in.
         box is bounding box containing the minimal/maximal x and y values"""
 
-    return int((pt[0] - box[0][0]) // cell_side_length), int((pt[1] - box[1][0]) // cell_side_length)
+    return int((pt[0] - box[0][0]) // cell_side_length), int((pt[1] - box[0][1]) // cell_side_length)
 
 
 def get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nxny, cells, seed=None, obstacles=None):
@@ -497,7 +497,7 @@ def get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nx
         rho = np.sqrt(np.random.uniform(agent_radius ** 2, 4 * agent_radius ** 2))
         theta = np.random.uniform(0, 2 * np.pi)
         pt = refpt[0] + rho * np.cos(theta), refpt[1] + rho * np.sin(theta)
-        if not (box[0][0] <= pt[0] < box[0][1] and box[1][0] <= pt[1] < box[1][1]):
+        if not (box[0][0] <= pt[0] < box[1][0] and box[0][1] <= pt[1] < box[1][1]):
             # This point falls outside the domain, so try again.
             continue
         if point_valid(pt, agent_radius, wall_distance, c_s_l, polygon, samples, nxny, cells, obstacles):
@@ -660,7 +660,7 @@ def show_points(polygon, points, radius, obstacles=None):
             if following == 0:
                 break
 
-    plt.xlim(box[0][0], box[0][1])
-    plt.ylim(box[1][0], box[1][1])
+    plt.xlim(box[0][0], box[1][0])
+    plt.ylim(box[0][1], box[1][1])
     plt.axis('equal')
     plt.show()

@@ -44,8 +44,8 @@ def show_points(polygon, samples, radius, obstacles=None, distributer=None):
             if following == 0:
                 break
 
-    plt.xlim(box[0][0], box[0][1])
-    plt.ylim(box[1][0], box[1][1])
+    plt.xlim(box[0][0], box[1][0])
+    plt.ylim(box[0][1], box[1][1])
     plt.axis('equal')
     st.pyplot(fig)
 
@@ -87,8 +87,8 @@ def show_polygon(polygon, distributer=None, obstacles=None):
             if following == 0:
                 break
 
-    plt.xlim(box[0][0], box[0][1])
-    plt.ylim(box[1][0], box[1][1])
+    plt.xlim(box[0][0], box[1][0])
+    plt.ylim(box[0][1], box[1][1])
     plt.axis('equal')
     st.pyplot(fig)
 
