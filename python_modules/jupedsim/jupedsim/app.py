@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 def show_points(polygon, samples, radius, obstacles=None, distributer=None):
     if obstacles is None:
         obstacles = []
-    borders = distributions.get_borders(polygon)
+    box = distributions.get_bounding_box(polygon)
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
     for elem in samples:
@@ -44,8 +44,8 @@ def show_points(polygon, samples, radius, obstacles=None, distributer=None):
             if following == 0:
                 break
 
-    plt.xlim(borders[0], borders[1])
-    plt.ylim(borders[2], borders[3])
+    plt.xlim(box[0][0], box[0][1])
+    plt.ylim(box[1][0], box[1][1])
     plt.axis('equal')
     st.pyplot(fig)
 
@@ -53,7 +53,7 @@ def show_points(polygon, samples, radius, obstacles=None, distributer=None):
 def show_polygon(polygon, distributer=None, obstacles=None):
     if obstacles is None:
         obstacles = []
-    borders = distributions.get_borders(polygon)
+    box = distributions.get_bounding_box(polygon)
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
     if distributer is not None:
@@ -87,8 +87,8 @@ def show_polygon(polygon, distributer=None, obstacles=None):
             if following == 0:
                 break
 
-    plt.xlim(borders[0], borders[1])
-    plt.ylim(borders[2], borders[3])
+    plt.xlim(box[0][0], box[0][1])
+    plt.ylim(box[1][0], box[1][1])
     plt.axis('equal')
     st.pyplot(fig)
 

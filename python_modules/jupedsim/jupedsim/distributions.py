@@ -93,12 +93,12 @@ class Distribution:
             # determine the entire area of the circle segment
             entire_circle_area = np.pi * (circle[1] ** 2 - circle[0] ** 2)
             # determine the area where a point might be placed around the polygon
-            borders = get_borders(polygon)
-            dif_x, dif_y = borders[1] - borders[0], borders[3] - borders[2]
+            box = get_bounding_box(polygon)
+            dif_x, dif_y = box[0][1] - box[0][0], box[1][1] - box[1][0]
             entire_polygon_area = dif_x * dif_y
 
             # creates a grid
-            width, height = borders[1] - borders[0], borders[3] - borders[2]
+            width, height = box[0][1] - box[0][0], box[1][1] - box[1][0]
             # Cell side length
             c_s_l = agent_radius / np.sqrt(2)
             # Number of cells in the x- and y-directions of the grid
@@ -124,7 +124,7 @@ class Distribution:
                         if point_valid(pt, agent_radius, wall_distance, c_s_l, polygon, samples, nxny, cells,
                                        obstacles):
                             samples.append(pt)
-                            cells[get_cell_coords(pt, c_s_l, borders)] = len(samples) - 1
+                            cells[get_cell_coords(pt, c_s_l, box)] = len(samples) - 1
                             break
 
                     if i >= INT_MAX and placed_count != targeted_count:
@@ -150,12 +150,12 @@ class Distribution:
                             message += f"\nexpected density: {circle[3]} p/m², " \
                                        f"actual density: {round(placed_count / placeable_area, 2)} p/m²"
                         raise AgentCount(message)
-                    temp_point = (np.random.uniform(borders[0], borders[1]), np.random.uniform(borders[2], borders[3]))
+                    temp_point = (np.random.uniform(box[0][0], box[0][1]), np.random.uniform(box[1][0], box[1][1]))
                     if is_inside_circle(temp_point, self.mid_point, circle[0], circle[1]) \
                             and point_valid(temp_point, agent_radius, wall_distance, c_s_l, polygon, samples, nxny,
                                             cells, obstacles):
                         samples.append(temp_point)
-                        cells[get_cell_coords(temp_point, c_s_l, borders)] = len(samples) - 1
+                        cells[get_cell_coords(temp_point, c_s_l, box)] = len(samples) - 1
                         iterations = 0
                         placed_count += 1
                     else:
@@ -167,7 +167,7 @@ class Distribution:
         if obstacles is None:
             obstacles = []
         samples = points
-        borders = get_borders(polygon)
+        box = get_bounding_box(polygon)
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
         for circle in self.circles:
@@ -202,8 +202,8 @@ class Distribution:
                 if following == 0:
                     break
 
-        plt.xlim(borders[0], borders[1])
-        plt.ylim(borders[2], borders[3])
+        plt.xlim(box[0][0], box[0][1])
+        plt.ylim(box[1][0], box[1][0])
         plt.axis('equal')
         plt.show()
 
@@ -228,15 +228,15 @@ def is_inside_circle(point, mid, min_r, max_r):
     return min_r ** 2 <= circle_equation <= max_r ** 2
 
 
-def get_borders(polygon):
-    """returns a list containing the minimal/maximal x and y values
-    formatted like : [min(x_values), max(x_values), min(y_values), max(y_values)]"""
+def get_bounding_box(polygon):
+    """returns an Axis Aligned Bounding Box containing the minimal/maximal x and y values
+    formatted like : [(min(x_values), max(x_values)), (min(y_values), max(y_values))]"""
     x_values, y_values = [], []
     for point in polygon:
         x_values.append(point[0])
         y_values.append(point[1])
 
-    return [min(x_values), max(x_values), min(y_values), max(y_values)]
+    return [(min(x_values), max(x_values)), (min(y_values), max(y_values))]
 
 
 def min_distance_to_polygon(pt, polygon):
@@ -340,8 +340,8 @@ def create_random_points(polygon, count, agent_radius, wall_distance, seed=None,
         count = round(density * area)
 
     # creates a grid
-    borders = get_borders(polygon)
-    width, height = borders[1] - borders[0], borders[3] - borders[2]
+    box = get_bounding_box(polygon)
+    width, height = box[0][1] - box[0][0], box[1][1] - box[1][0]
     # Cell side length
     c_s_l = agent_radius / np.sqrt(2)
     # Number of cells in the x- and y-directions of the grid
@@ -364,10 +364,10 @@ def create_random_points(polygon, count, agent_radius, wall_distance, seed=None,
                 msg += f"\nexpected density: {density} p/m², " \
                        f"actual density: {round(created_points / area, 2)} p/m²"
             raise AgentCount(msg)
-        temp_point = (np.random.uniform(borders[0], borders[1]), np.random.uniform(borders[2], borders[3]))
+        temp_point = (np.random.uniform(box[0][0], box[0][1]), np.random.uniform(box[1][0], box[1][1]))
         if point_valid(temp_point, agent_radius, wall_distance, c_s_l, polygon, samples, nxny, cells, obstacles):
             samples.append(temp_point)
-            cells[get_cell_coords(temp_point, c_s_l, borders)] = len(samples) - 1
+            cells[get_cell_coords(temp_point, c_s_l, box)] = len(samples) - 1
 
             iterations = 0
             created_points += 1
@@ -392,8 +392,8 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, ob
         obstacles = []
     # Choose up to k points around each reference point as candidates for a new sample point
     k = 30
-    borders = get_borders(polygon)
-    width, height = borders[1] - borders[0], borders[3] - borders[2]
+    box = get_bounding_box(polygon)
+    width, height = box[0][1] - box[0][0], box[1][1] - box[1][0]
     # Cell side length
     c_s_l = agent_radius / np.sqrt(2)
     # Number of cells in the x- and y-directions of the grid
@@ -405,7 +405,6 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, ob
     # corresponding value is the index of that cell's point's coordinates in the
     # samples list (or None if the cell is empty).
     cells = {coords: None for coords in coords_list}
-
     # Pick a random point to start with.
     active = nsamples = samples = None
     i = 0
@@ -413,7 +412,8 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, ob
         if i > FOREVER:
             raise AgentCount("No Agents could be placed inside the polygon")
         flag = False
-        pt = np.random.uniform(borders[0], borders[1]), np.random.uniform(borders[2], borders[3])
+
+        pt = np.random.uniform(box[0][0], box[0][1]), np.random.uniform(box[1][0], box[1][1])
         for obstacle in obstacles:
             if shply.Polygon(obstacle).contains(shply.Point(pt)):
                 flag = True
@@ -424,7 +424,7 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, ob
         if shply.Polygon(polygon).contains(shply.Point(pt)) and min_distance_to_polygon(pt, polygon) > wall_distance:
             samples = [pt]
             # Our first sample is indexed at 0 in the samples list...
-            cells[get_cell_coords(pt, c_s_l, borders)] = 0
+            cells[get_cell_coords(pt, c_s_l, box)] = 0
             # ... and it is active, in the sense that we're going to look for more points
             # in its neighbourhood.
             active = [0]
@@ -451,7 +451,7 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, ob
             samples.append(pt)
             nsamples += 1
             active.append(len(samples) - 1)
-            cells[get_cell_coords(pt, c_s_l, borders)] = len(samples) - 1
+            cells[get_cell_coords(pt, c_s_l, box)] = len(samples) - 1
         else:
             # We had to give up looking for valid points near ref.pt, so remove it
             # from the list of "active" points.
@@ -460,11 +460,11 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, ob
     return samples
 
 
-def get_cell_coords(pt, cell_side_length, borders):
+def get_cell_coords(pt, cell_side_length, box):
     """ Get the coordinates of the cell that pt = (x,y) falls in.
-        borders is list containing the minimal/maximal x and y values"""
+        box is bounding box containing the minimal/maximal x and y values"""
 
-    return int((pt[0] - borders[0]) // cell_side_length), int((pt[1] - borders[2]) // cell_side_length)
+    return int((pt[0] - box[0][0]) // cell_side_length), int((pt[1] - box[1][0]) // cell_side_length)
 
 
 def get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nxny, cells, seed=None, obstacles=None):
@@ -489,7 +489,7 @@ def get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nx
     """
     if seed is not None:
         np.random.seed(seed)
-    borders = get_borders(polygon)
+    box = get_bounding_box(polygon)
 
     i = 0
     while i < k:
@@ -497,7 +497,7 @@ def get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nx
         rho = np.sqrt(np.random.uniform(agent_radius ** 2, 4 * agent_radius ** 2))
         theta = np.random.uniform(0, 2 * np.pi)
         pt = refpt[0] + rho * np.cos(theta), refpt[1] + rho * np.sin(theta)
-        if not (borders[0] <= pt[0] < borders[1] and borders[2] <= pt[1] < borders[3]):
+        if not (box[0][0] <= pt[0] < box[0][1] and box[1][0] <= pt[1] < box[1][1]):
             # This point falls outside the domain, so try again.
             continue
         if point_valid(pt, agent_radius, wall_distance, c_s_l, polygon, samples, nxny, cells, obstacles):
@@ -522,7 +522,7 @@ def point_valid(pt, agent_radius, wall_distance, cell_side_length, polygon, samp
     """
     if obstacles is None:
         obstacles = []
-    cell_coords = get_cell_coords(pt, cell_side_length, get_borders(polygon))
+    cell_coords = get_cell_coords(pt, cell_side_length, get_bounding_box(polygon))
     if not shply.Polygon(polygon).contains(shply.Point(pt)):
         return False
     for obstacle in obstacles:
@@ -628,7 +628,7 @@ def show_points(polygon, points, radius, obstacles=None):
     if obstacles is None:
         obstacles = []
     samples = points
-    borders = get_borders(polygon)
+    box = get_bounding_box(polygon)
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
     for elem in samples:
@@ -660,7 +660,7 @@ def show_points(polygon, points, radius, obstacles=None):
             if following == 0:
                 break
 
-    plt.xlim(borders[0], borders[1])
-    plt.ylim(borders[2], borders[3])
+    plt.xlim(box[0][0], box[0][1])
+    plt.ylim(box[1][0], box[1][1])
     plt.axis('equal')
     plt.show()
