@@ -38,35 +38,6 @@ def test_bounding_box_determination():
     assert distributions.get_bounding_box(polygon) == expected_box
 
 
-def test_distance_determination_point_line_segment():
-    pt = (3, 3)
-    acceptation_rate = 0.01
-    pt1, pt2 = (0, 0), (4, 1)
-    actual, expected = distributions.distance_to_segment(pt1, pt2, pt), 2.182820625326997
-    differance = actual - expected
-    assert abs(differance) < acceptation_rate
-    pt1, pt2 = (4, 1), (5, 3)
-    actual, expected = distributions.distance_to_segment(pt1, pt2, pt), 1.7888543819998317
-    differance = actual - expected
-    assert abs(differance) < acceptation_rate
-    pt1, pt2 = (5, 3), (4, 5)
-    actual, expected = distributions.distance_to_segment(pt1, pt2, pt), 1.7888543819998317
-    differance = actual - expected
-    assert abs(differance) < acceptation_rate
-    pt1, pt2 = (4, 5), (2, 5)
-    actual, expected = distributions.distance_to_segment(pt1, pt2, pt), 2.0
-    differance = actual - expected
-    assert abs(differance) < acceptation_rate
-    pt1, pt2 = (2, 5), (0, 3)
-    actual, expected = distributions.distance_to_segment(pt1, pt2, pt), 2.1213203435596424
-    differance = actual - expected
-    assert abs(differance) < acceptation_rate
-    pt1, pt2 = (0, 3), (0, 0)
-    actual, expected = distributions.distance_to_segment(pt1, pt2, pt), 3.0
-    differance = actual - expected
-    assert abs(differance) < acceptation_rate
-
-
 def test_minimal_distance_to_polygon():
     polygon = [(0, 0), (4, 1), (5, 3), (4, 5), (2, 5), (0, 3)]
     pt = (3, 3)
@@ -83,23 +54,6 @@ def test_seed_works_correct_for_random_points():
     samples1 = distributions.create_random_points(polygon, 100, agent_radius=0.3, wall_distance=0.3, seed=set_seed)
     samples2 = distributions.create_random_points(polygon, 100, agent_radius=0.3, wall_distance=0.3, seed=set_seed)
     assert samples1 == samples2
-
-
-def test_distance_determination():
-    pt1 = (0, 0)
-    pt2 = (2, 0)
-    expected_result = 2.0
-    exception_rate = 0.01
-    actual_result = distributions.distance_between(pt1, pt2)
-    difference = expected_result - actual_result
-    assert abs(difference) < exception_rate
-    pt1 = (0, 0)
-    pt2 = (1, 1)
-    expected_result = 1.41421
-    exception_rate = 0.01
-    actual_result = distributions.distance_between(pt1, pt2)
-    difference = expected_result - actual_result
-    assert abs(difference) < exception_rate
 
 
 def test_placing_Circles():

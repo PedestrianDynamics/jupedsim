@@ -241,78 +241,9 @@ def get_bounding_box(polygon):
 
 def min_distance_to_polygon(pt, polygon):
     """returns the minimal distance between a point and every line segment of a polygon"""
-    distances = []
-    n = len(polygon)
-    i = 0
-    while True:
-        # find the number of the next line segment
-        following = (i + 1) % n
-        distances.append(distance_to_segment(polygon[i], polygon[following], pt))
-        i = following
-        if i == 0:
-            break
-    return min(distances)
-
-
-def distance_to_segment(a, b, e):
-    """returns the minimal distance between point e and the line segment from a to b"""
-    # vector AB
-    ab = [None, None]
-    ab[0] = b[0] - a[0]
-    ab[1] = b[1] - a[1]
-
-    # vector BP
-    be = [None, None]
-    be[0] = e[0] - b[0]
-    be[1] = e[1] - b[1]
-
-    # vector AP
-    ae = [None, None]
-    ae[0] = e[0] - a[0]
-    ae[1] = e[1] - a[1]
-
-    # Variables to store dot product
-
-    # Calculating the dot product
-    ab_be = ab[0] * be[0] + ab[1] * be[1]
-    ab_ae = ab[0] * ae[0] + ab[1] * ae[1]
-
-    # Minimum distance from
-    # point E to the line segment
-
-    # Case 1
-    if ab_be > 0:
-
-        # Finding the magnitude
-        y = e[1] - b[1]
-        x = e[0] - b[0]
-        req_ans = sqrt(x * x + y * y)
-
-    # Case 2
-    elif ab_ae < 0:
-        y = e[1] - a[1]
-        x = e[0] - a[0]
-        req_ans = sqrt(x * x + y * y)
-
-    # Case 3
-    else:
-
-        # Finding the perpendicular distance
-        x1 = ab[0]
-        y1 = ab[1]
-        x2 = ae[0]
-        y2 = ae[1]
-        mod = sqrt(x1 * x1 + y1 * y1)
-        req_ans = abs(x1 * y2 - y1 * x2) / mod
-
-    return req_ans
-
-
-def distance_between(pt1, pt2):
-    """returns the distance between point1 and point2"""
-    dx = pt2[0] - pt1[0]
-    dy = pt2[1] - pt1[1]
-    return sqrt(dx ** 2 + dy ** 2)
+    shapely_polygon = polygon[:]
+    shapely_polygon.append(polygon[0])
+    return shply.LineString(shapely_polygon).distance(shply.Point(pt))
 
 
 def create_random_points(polygon, count, agent_radius, wall_distance, seed=None, obstacles=None, density=None):
