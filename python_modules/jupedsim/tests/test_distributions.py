@@ -1,5 +1,8 @@
-import distributions
+from jupedsim import distributions
 import pytest
+# tests can be called from \python_modules\jupedsim
+# command to call test: python -m pytest -vv .\tests\test_distributions.py
+
 
 
 def test_seed_works_correct_for_poisson_disc():
@@ -97,61 +100,6 @@ def test_distance_determination():
     actual_result = distributions.distance_between(pt1, pt2)
     difference = expected_result - actual_result
     assert abs(difference) < exception_rate
-
-
-def test_if_inside():
-    polygon1 = [(0, 0), (10, 0), (10, 10), (0, 10)]
-
-    p = (20, 20)
-    assert distributions.is_inside_polygon(points=polygon1, p=p) is False
-
-    p = (5, 5)
-    assert distributions.is_inside_polygon(points=polygon1, p=p) is True
-
-    polygon2 = [(0, 0), (5, 0), (5, 5), (3, 3)]
-
-    p = (3, 3)
-    assert distributions.is_inside_polygon(points=polygon2, p=p) is True
-
-    p = (5, 1)
-    assert distributions.is_inside_polygon(points=polygon2, p=p) is True
-
-    p = (8, 1)
-    assert distributions.is_inside_polygon(points=polygon2, p=p) is False
-
-    p = (-1, 10)
-    assert distributions.is_inside_polygon(points=polygon1, p=p) is False
-
-    polygon3 = [(1, 0), (2, 1)]
-    p = (1.5, 0.5)
-    assert distributions.is_inside_polygon(polygon3, p) is False
-
-
-def test_if_intersect_correctly():
-    p1, p2, p3, p4 = (0, 0), (2, 3), (0, 1), (3, 1)
-    assert distributions.do_intersect(p1, p2, p3, p4) is True
-    p1, p2, p3, p4 = (0, 0), (3, 0), (0, 1), (3, 1)
-    assert distributions.do_intersect(p1, p2, p3, p4) is False
-    p1, p2, p3, p4 = (1, 1), (2, 1), (0, 1), (3, 1)
-    assert distributions.do_intersect(p1, p2, p3, p4) is True
-    p1, p2, p3, p4 = (0, 1), (8, 1), (5, 5), (5, 5)
-    assert distributions.do_intersect(p1, p2, p3, p4) is False
-
-
-def test_orientation():
-    p1, p2, p3 = (15, 0), (20, 10), (25, 20)
-    assert distributions.orientation(p1, p2, p3) == 0  # collinear
-    p1, p2, p3 = (0, 0), (20, 5), (10, 10)
-    assert distributions.orientation(p1, p2, p3) == 2  # Counterclockwise
-    p1, p2, p3 = (10, 10), (20, 5), (0, 0)
-    assert distributions.orientation(p1, p2, p3) == 1  # Clockwise
-
-
-def test_on_segment():
-    p1, p2, p3 = (15, 0), (20, 10), (25, 20)
-    assert distributions.on_segment(p1, p2, p3) is True
-    p1, p2, p3 = (0, 0), (20, 5), (10, 10)
-    assert distributions.on_segment(p1, p2, p3) is False
 
 
 def test_placing_Circles():

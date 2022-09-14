@@ -228,136 +228,6 @@ def is_inside_circle(point, mid, min_r, max_r):
     return min_r ** 2 <= circle_equation <= max_r ** 2
 
 
-def is_inside_polygon(points: list, p: tuple) -> bool:
-    """ Returns true if the point p lies inside the polygon with n vertices """
-    # gets borders around the obstacle
-    borders = get_borders(points)
-    if not borders[0] < p[0] < borders[1] and not borders[2] < p[1] < borders[3]:
-        return False
-
-    # the point lies within the borders of the obstacle
-    n = len(points)
-
-    # There must be at least 3 vertices
-    # in polygon
-    if n < 3:
-        return False
-
-    # Create a point for line segment
-    # from p to infinite
-    extreme = (INT_MAX, p[1])
-
-    # To count number of points in polygon
-    # whose y-coordinate is equal to
-    # y-coordinate of the point
-    decrease = 0
-    count = i = 0
-
-    while True:
-        # find the number of the next line segment
-        following = (i + 1) % n
-
-        if points[i][1] == p[1]:
-            decrease += 1
-
-        # Check if the line segment from 'p' to
-        # 'extreme' intersects with the line
-        # segment from 'polygon[i]' to 'polygon[next]'
-        if (do_intersect(points[i],
-                         points[following],
-                         p, extreme)):
-
-            # If the point 'p' is collinear with line
-            # segment 'i-next', then check if it lies
-            # on segment. If it lies, return true, otherwise false
-            if orientation(points[i], p,
-                           points[following]) == 0:
-                return on_segment(points[i], p,
-                                  points[following])
-
-            count += 1
-
-        i = following
-
-        if i == 0:
-            # if i is back at 0 every segment has been checked
-            break
-
-    # Reduce the count by decrease amount
-    # as these points would have been added twice
-    count -= decrease
-
-    # Return true if count is odd, false otherwise
-    return count % 2 == 1
-
-
-def do_intersect(p1, q1, p2, q2):
-    """returns if the lines intersect"""
-    # Find the four orientations needed for
-    # general and special cases
-    o1 = orientation(p1, q1, p2)
-    o2 = orientation(p1, q1, q2)
-    o3 = orientation(p2, q2, p1)
-    o4 = orientation(p2, q2, q1)
-
-    # General case
-    if (o1 != o2) and (o3 != o4):
-        return True
-
-    # Special Cases
-    # p1, q1 and p2 are collinear and
-    # p2 lies on segment p1q1
-    if (o1 == 0) and (on_segment(p1, p2, q1)):
-        return True
-
-    # p1, q1 and p2 are collinear and
-    # q2 lies on segment p1q1
-    if (o2 == 0) and (on_segment(p1, q2, q1)):
-        return True
-
-    # p2, q2 and p1 are collinear and
-    # p1 lies on segment p2q2
-    if (o3 == 0) and (on_segment(p2, p1, q2)):
-        return True
-
-    # p2, q2 and q1 are collinear and
-    # q1 lies on segment p2q2
-    if (o4 == 0) and (on_segment(p2, q1, q2)):
-        return True
-
-    return False
-
-
-def orientation(p: tuple, q: tuple, r: tuple) -> int:
-    """The function returns orientation of ordered triplet (p, q, r) with following values
-    0 --> p, q and r are collinear
-    1 --> Clockwise
-    2 --> Counterclockwise """
-    val = (((q[1] - p[1]) *
-            (r[0] - q[0])) -
-           ((q[0] - p[0]) *
-            (r[1] - q[1])))
-
-    if val == 0:
-        return 0  # Collinear
-    if val > 0:
-        return 1  # Clockwise
-    else:
-        return 2  # Counterclockwise
-
-
-def on_segment(p: tuple, q: tuple, r: tuple) -> bool:
-    """ Given three collinear points p, q, r,
-    the function checks if point q lies on line segment 'p->r'"""
-    if ((q[0] <= max(p[0], r[0])) &
-            (q[0] >= min(p[0], r[0])) &
-            (q[1] <= max(p[1], r[1])) &
-            (q[1] >= min(p[1], r[1]))):
-        return True
-
-    return False
-
-
 def get_borders(polygon):
     """returns a list containing the minimal/maximal x and y values
     formatted like : [min(x_values), max(x_values), min(y_values), max(y_values)]"""
@@ -545,13 +415,13 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, ob
         flag = False
         pt = np.random.uniform(borders[0], borders[1]), np.random.uniform(borders[2], borders[3])
         for obstacle in obstacles:
-            if is_inside_polygon(obstacle, pt):
+            if shply.Polygon(obstacle).contains(shply.Point(pt)):
                 flag = True
                 break
         if flag:
             i += 1
             continue
-        if is_inside_polygon(polygon, pt) and min_distance_to_polygon(pt, polygon) > wall_distance:
+        if shply.Polygon(polygon).contains(shply.Point(pt)) and min_distance_to_polygon(pt, polygon) > wall_distance:
             samples = [pt]
             # Our first sample is indexed at 0 in the samples list...
             cells[get_cell_coords(pt, c_s_l, borders)] = 0
@@ -653,10 +523,10 @@ def point_valid(pt, agent_radius, wall_distance, cell_side_length, polygon, samp
     if obstacles is None:
         obstacles = []
     cell_coords = get_cell_coords(pt, cell_side_length, get_borders(polygon))
-    if not is_inside_polygon(polygon, pt):
+    if not shply.Polygon(polygon).contains(shply.Point(pt)):
         return False
     for obstacle in obstacles:
-        if is_inside_polygon(obstacle, pt):
+        if shply.Polygon(obstacle).contains(shply.Point(pt)):
             return False
     if min_distance_to_polygon(pt, polygon) < wall_distance:
         return False
