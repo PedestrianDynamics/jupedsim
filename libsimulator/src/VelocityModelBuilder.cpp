@@ -1,3 +1,5 @@
+/// Copyright © 2012-2022 Forschungszentrum Jülich GmbH
+/// SPDX-License-Identifier: LGPL-3.0-or-later
 #include "VelocityModelBuilder.hpp"
 
 VelocityModelBuilder::VelocityModelBuilder(double aPed, double DPed, double aWall, double DWall)

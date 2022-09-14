@@ -1,3 +1,5 @@
+/// Copyright © 2012-2022 Forschungszentrum Jülich GmbH
+/// SPDX-License-Identifier: LGPL-3.0-or-later
 #include "AgentExitSystem.hpp"
 #include "IteratorPair.hpp"
 #include <memory>

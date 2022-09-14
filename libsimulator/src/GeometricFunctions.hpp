@@ -1,3 +1,5 @@
+/// Copyright © 2012-2022 Forschungszentrum Jülich GmbH
+/// SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
 /// Computes the cross product 2D of vectors apex->a (A) and apex->b (B)
