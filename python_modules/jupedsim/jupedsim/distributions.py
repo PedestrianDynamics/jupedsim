@@ -157,6 +157,70 @@ class Distribution:
         return samples
 
 
+class Grid:
+    def __init__(self, box, agent_radius):
+        self.box = box
+        width, height = box[1][0] - box[0][0], box[1][1] - box[0][1]
+        # Cell side length
+        self.c_s_l = agent_radius / np.sqrt(2)
+        # Number of cells in the x- and y-directions of the grid
+        self.nx, self.ny = int(width / self.c_s_l) + 1, int(height / self.c_s_l) + 1
+        # A list of coordinates in the grid of cells
+        self.coords_list = [(ix, iy) for ix in range(self.nx) for iy in range(self.ny)]
+        # Initialize the dictionary of cells: each key is a cell's coordinates, the
+        # corresponding value is the index of that cell's point's coordinates in the
+        # samples list (or None if the cell is empty).
+        self.cells = {coords: None for coords in self.coords_list}
+
+    def append_point(self, pt, sample_number):
+        cell_coords = self.get_cell_coords(pt)
+        self.cells[cell_coords] = sample_number
+
+    def get_cell_coords(self, pt):
+        """ Get the coordinates of the cell that pt = (x,y) falls in.
+            box is bounding box containing the minimal/maximal x and y values"""
+        return int((pt[0] - self.box[0][0]) // self.c_s_l), int((pt[1] - self.box[0][1]) // self.c_s_l)
+
+    def determine_neighbours(self, coords):
+        """Return the indexes of points in cells neighbouring cell at coords.
+
+        For the cell at coords = (x,y), return the indexes of points in the cells
+        with neighbouring coordinates illustrated below: I.e. those cells that could
+        contain points closer than r.
+
+                                         ooo
+                                        ooooo
+                                        ooXoo
+                                        ooooo
+                                         ooo
+
+        """
+        dxdy = [(-1, -2), (0, -2), (1, -2), (-2, -1), (-1, -1), (0, -1), (1, -1), (2, -1),
+                (-2, 0), (-1, 0), (1, 0), (2, 0), (-2, 1), (-1, 1), (0, 1), (1, 1), (2, 1),
+                (-1, 2), (0, 2), (1, 2), (0, 0)]
+        neighbours = []
+        for dx, dy in dxdy:
+            neighbour_coords = coords[0] + dx, coords[1] + dy
+            if not (0 <= neighbour_coords[0] < self.nx and
+                    0 <= neighbour_coords[1] < self.ny):
+                # We're off the grid: no neighbours here.
+                continue
+            neighbour_cell = self.cells[neighbour_coords]
+            if neighbour_cell is not None:
+                # This cell is occupied: store this index of the contained point.
+                neighbours.append(neighbour_cell)
+        return neighbours
+
+    def get_neighbours(self, pt):
+        coords = self.get_cell_coords(pt)
+        return self.determine_neighbours(coords)
+
+
+class GridMock(Grid):
+    def __init__(self):
+        pass
+
+
 def intersecting_area_polygon_circle(mid_point, radius, polygon):
     """returns the intersecting area of circle and polygon"""
     # creates a point
@@ -220,21 +284,8 @@ def create_random_points(polygon, count, agent_radius, wall_distance,
             area -= shply.Polygon(obstacle).area
         count = round(density * area)
 
-    # creates a grid
     box = get_bounding_box(polygon)
-    width, height = box[1][0] - box[0][0], box[1][1] - box[0][1]
-    # Cell side length
-    c_s_l = agent_radius / np.sqrt(2)
-    # Number of cells in the x- and y-directions of the grid
-    nx, ny = int(width / c_s_l) + 1, int(height / c_s_l) + 1
-    nxny = nx, ny
-    # A list of coordinates in the grid of cells
-    coords_list = [(ix, iy) for ix in range(nx) for iy in range(ny)]
-    # Initialize the dictionary of cells: each key is a cell's coordinates, the
-    # corresponding value is the index of that cell's point's coordinates in the
-    # samples list (or None if the cell is empty).
-    cells = {coords: None for coords in coords_list}
-
+    grid = Grid(box, agent_radius)
     samples = []
     created_points = 0
     iterations = 0
@@ -246,9 +297,9 @@ def create_random_points(polygon, count, agent_radius, wall_distance,
                        f"actual density: {round(created_points / area, 2)} p/m²"
             raise AgentCount(msg)
         temp_point = (np.random.uniform(box[0][0], box[1][0]), np.random.uniform(box[0][1], box[1][1]))
-        if point_valid(temp_point, agent_radius, wall_distance, c_s_l, polygon, samples, nxny, cells, obstacles):
+        if point_valid_new(temp_point, agent_radius, wall_distance, grid, polygon, samples, obstacles):
             samples.append(temp_point)
-            cells[get_cell_coords(temp_point, c_s_l, box)] = len(samples) - 1
+            grid.append_point(temp_point, len(samples) - 1)
 
             iterations = 0
             created_points += 1
@@ -453,3 +504,34 @@ def get_neighbours(coords, nxny, cells):
             # This cell is occupied: store this index of the contained point.
             neighbours.append(neighbour_cell)
     return neighbours
+
+
+def point_valid_new(pt, agent_radius, wall_distance, grid, polygon, samples, obstacles=None):
+    """ Determines if a point is valid by using a Grid to determine neighbours
+    :param grid: the grid of the polygon
+    :param pt: point that is being checked
+    :param agent_radius:minimal distance between points
+    :param wall_distance: minimal distance between point and the polygon
+    :param polygon: Polygon in which the points must lie
+    :param samples: already placed points
+    :param obstacles: list of polygons, point must not lay within a polygon
+    :return: if valid: True else: False
+    """
+    if obstacles is None:
+        obstacles = []
+    if not shply.Polygon(polygon).contains(shply.Point(pt)):
+        return False
+    for obstacle in obstacles:
+        if shply.Polygon(obstacle).contains(shply.Point(pt)):
+            return False
+    if min_distance_to_polygon(pt, polygon) < wall_distance:
+        return False
+    for idx in grid.get_neighbours(pt):
+        nearby_pt = samples[idx]
+        # Squared distance between or candidate point, pt, and this nearby_pt.
+        distance2 = (nearby_pt[0] - pt[0]) ** 2 + (nearby_pt[1] - pt[1]) ** 2
+        if distance2 < agent_radius ** 2:
+            # The points are too close, so pt is not a candidate.
+            return False
+    # All points tested: if we're here, pt is valid
+    return True

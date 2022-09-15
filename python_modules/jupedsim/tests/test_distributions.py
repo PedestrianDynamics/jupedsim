@@ -4,7 +4,6 @@ import pytest
 # command to call test: python -m pytest -vv .\tests\test_distributions.py
 
 
-
 def test_seed_works_correct_for_poisson_disc():
     polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
     set_seed = 1337
@@ -14,10 +13,34 @@ def test_seed_works_correct_for_poisson_disc():
 
 
 def test_cell_coord_determination():
+    mock = distributions.GridMock()
     pt = (5, 5)
-    box = [(0, 0), (10, 10)]
-    c_s_l = 0.7071067811865475  # 1/√2
-    assert (7, 7) == distributions.get_cell_coords(pt, c_s_l, box)
+    mock.box = [(0, 0), (10, 10)]
+    mock.c_s_l = 0.7071067811865475  # 1/√2
+    assert (7, 7) == mock.get_cell_coords(pt)
+
+
+def test_grid_creation():
+    box = [(0, 0), (3, 3)]
+    agent_radius = 0.3
+    grid = distributions.Grid(box, agent_radius)
+    acceptance_rate = 0.01
+    assert grid.box == box
+    assert abs(grid.c_s_l - 0.21213203435596423) < acceptance_rate
+    assert grid.nx == 15
+    assert grid.ny == 15
+    assert grid.coords_list
+    assert grid.cells
+
+
+def test_neighbour_determination():
+    mock = distributions.GridMock()
+    mock.nx, mock.ny = 15, 15
+    mock.coords_list = [(ix, iy) for ix in range(mock.nx) for iy in range(mock.ny)]
+    mock.cells = {coords: None for coords in mock.coords_list}
+    for i in range(15):
+        mock.cells[(i, i)] = i
+    assert mock.determine_neighbours((7, 7)) == [6, 8, 7]
 
 
 def test_point_in_circle():
