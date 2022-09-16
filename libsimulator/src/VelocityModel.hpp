@@ -55,7 +55,7 @@ class Simulation;
 
 struct VelocityModelAgentParameters {
     OperationalModel::ParametersID id;
-    double t;
+    double timeGap;
     double tau;
 };
 

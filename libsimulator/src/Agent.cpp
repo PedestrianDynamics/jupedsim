@@ -46,7 +46,7 @@ void Agent::SetV(const Point& v)
     _ellipse.SetV(v);
 }
 
-void Agent::SetV0Norm(double v0)
+void Agent::SetV0(double v0)
 {
     _ellipse.SetV0(v0);
 }
@@ -75,12 +75,12 @@ const Point& Agent::GetV() const
     return _ellipse.GetV();
 }
 
-const Point& Agent::GetV0() const
+const Point& Agent::GetE0() const
 {
-    return _v0;
+    return _e0;
 }
 
-double Agent::GetV0Norm() const
+double Agent::GetV0() const
 {
     double smoothFactor = 15;
     double v0 = _ellipse.GetV0();
@@ -110,25 +110,25 @@ void Agent::SetPhiPed()
     _ellipse.SetSinPhi(sinPhi);
 }
 
-void Agent::InitV0(const Point& target)
+void Agent::InitE0(const Point& target)
 {
     const Point& pos = GetPos();
     Point delta = target - pos;
 
-    _v0 = delta.Normalized();
+    _e0 = delta.Normalized();
 }
 
-Point Agent::GetV0(const Point& target, double tau) const
+Point Agent::GetE0(const Point& target, double tau) const
 {
-    // Molification around the targets makes little sense
+    // TODO(MC) remove input parameter tau
+    double _tau = 0.5;
     const Point& pos = GetPos();
     Point delta = target - pos;
-    Point new_v0 = delta.Normalized();
-
+    Point new_e0 = delta.Normalized();
     double t = _newOrientationDelay * _deltaT;
 
     // Handover new target
-    return _v0 + (new_v0 - _v0) * (1 - exp(-t / tau));
+    return _e0 + (new_e0 - _e0) * (1 - exp(-t / _tau));
 }
 
 void Agent::IncrementOrientationDelay()
