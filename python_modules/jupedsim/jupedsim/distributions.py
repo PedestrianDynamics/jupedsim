@@ -91,19 +91,7 @@ class Distribution:
             dif_x, dif_y = box[1][0] - box[0][0], box[1][1] - box[0][1]
             entire_polygon_area = dif_x * dif_y
 
-            # creates a grid
-            width, height = box[1][0] - box[0][0], box[1][1] - box[0][1]
-            # Cell side length
-            c_s_l = agent_radius / np.sqrt(2)
-            # Number of cells in the x- and y-directions of the grid
-            nx, ny = int(width / c_s_l) + 1, int(height / c_s_l) + 1
-            nxny = nx, ny
-            # A list of coordinates in the grid of cells
-            coords_list = [(ix, iy) for ix in range(nx) for iy in range(ny)]
-            # Initialize the dictionary of cells: each key is a cell's coordinates, the
-            # corresponding value is the index of that cell's point's coordinates in the
-            # samples list (or None if the cell is empty).
-            cells = {coords: None for coords in coords_list}
+            grid = Grid(box, agent_radius)
             if entire_circle_area < entire_polygon_area:
                 # inside the circle it is more likely to find a random point that is inside the polygon
                 for placed_count in range(targeted_count + 1):
@@ -115,10 +103,9 @@ class Distribution:
                         # determines a random degree
                         theta = np.random.uniform(0, 2 * np.pi)
                         pt = self.mid_point[0] + rho * np.cos(theta), self.mid_point[1] + rho * np.sin(theta)
-                        if point_valid(pt, agent_radius, wall_distance, c_s_l, polygon, samples, nxny, cells,
-                                       obstacles):
+                        if point_valid(pt, agent_radius, wall_distance, grid, polygon, samples, obstacles):
                             samples.append(pt)
-                            cells[get_cell_coords(pt, c_s_l, box)] = len(samples) - 1
+                            grid.append_point(pt, len(samples) - 1)
                             break
 
                     if i >= max_iterations and placed_count != targeted_count:
@@ -146,10 +133,10 @@ class Distribution:
                         raise AgentCount(message)
                     temp_point = (np.random.uniform(box[0][0], box[1][0]), np.random.uniform(box[0][1], box[1][1]))
                     if is_inside_circle(temp_point, self.mid_point, circle[0], circle[1]) \
-                            and point_valid(temp_point, agent_radius, wall_distance, c_s_l, polygon, samples, nxny,
-                                            cells, obstacles):
+                            and point_valid(temp_point, agent_radius, wall_distance, grid, polygon, samples,
+                                            obstacles):
                         samples.append(temp_point)
-                        cells[get_cell_coords(temp_point, c_s_l, box)] = len(samples) - 1
+                        grid.append_point(temp_point, len(samples) - 1)
                         iterations = 0
                         placed_count += 1
                     else:
@@ -173,6 +160,7 @@ class Grid:
         self.cells = {coords: None for coords in self.coords_list}
 
     def append_point(self, pt, sample_number):
+        """adds the point´s sample number to the corresponding cell in the dictionary"""
         cell_coords = self.get_cell_coords(pt)
         self.cells[cell_coords] = sample_number
 
@@ -297,7 +285,7 @@ def create_random_points(polygon, count, agent_radius, wall_distance,
                        f"actual density: {round(created_points / area, 2)} p/m²"
             raise AgentCount(msg)
         temp_point = (np.random.uniform(box[0][0], box[1][0]), np.random.uniform(box[0][1], box[1][1]))
-        if point_valid_new(temp_point, agent_radius, wall_distance, grid, polygon, samples, obstacles):
+        if point_valid(temp_point, agent_radius, wall_distance, grid, polygon, samples, obstacles):
             samples.append(temp_point)
             grid.append_point(temp_point, len(samples) - 1)
 
@@ -326,18 +314,7 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, ob
     # Choose up to k points around each reference point as candidates for a new sample point
     k = 30
     box = get_bounding_box(polygon)
-    width, height = box[1][0] - box[0][0], box[1][1] - box[0][1]
-    # Cell side length
-    c_s_l = agent_radius / np.sqrt(2)
-    # Number of cells in the x- and y-directions of the grid
-    nx, ny = int(width / c_s_l) + 1, int(height / c_s_l) + 1
-    nxny = nx, ny
-    # A list of coordinates in the grid of cells
-    coords_list = [(ix, iy) for ix in range(nx) for iy in range(ny)]
-    # Initialize the dictionary of cells: each key is a cell's coordinates, the
-    # corresponding value is the index of that cell's point's coordinates in the
-    # samples list (or None if the cell is empty).
-    cells = {coords: None for coords in coords_list}
+    grid = Grid(box, agent_radius)
     # Pick a random point to start with.
     active = nsamples = samples = None
     i = 0
@@ -354,10 +331,10 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, ob
         if flag:
             i += 1
             continue
-        if shply.Polygon(polygon).contains(shply.Point(pt)) and min_distance_to_polygon(pt, polygon) > wall_distance:
+        if point_valid(pt, agent_radius, wall_distance, grid, polygon, [], obstacles):
             samples = [pt]
             # Our first sample is indexed at 0 in the samples list...
-            cells[get_cell_coords(pt, c_s_l, box)] = 0
+            grid.append_point(pt, 0)
             # ... and it is active, in the sense that we're going to look for more points
             # in its neighbourhood.
             active = [0]
@@ -377,14 +354,13 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, ob
             # the function can not be called with the same seed every time
             # a random seed will be chosen every time
             temp_seed = np.random.randint(0, 50000)
-        pt = get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nxny, cells, temp_seed,
-                       obstacles)
+        pt = get_point(k, refpt, polygon, agent_radius, wall_distance, grid, samples, temp_seed, obstacles)
         if pt:
             # Point pt is valid: add it to the samples list and mark it as active
             samples.append(pt)
             nsamples += 1
             active.append(len(samples) - 1)
-            cells[get_cell_coords(pt, c_s_l, box)] = len(samples) - 1
+            grid.append_point(pt, len(samples) - 1)
         else:
             # We had to give up looking for valid points near ref.pt, so remove it
             # from the list of "active" points.
@@ -393,14 +369,7 @@ def create_points_everywhere(polygon, agent_radius, wall_distance, seed=None, ob
     return samples
 
 
-def get_cell_coords(pt, cell_side_length, box):
-    """ Get the coordinates of the cell that pt = (x,y) falls in.
-        box is bounding box containing the minimal/maximal x and y values"""
-
-    return int((pt[0] - box[0][0]) // cell_side_length), int((pt[1] - box[0][1]) // cell_side_length)
-
-
-def get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nxny, cells, seed=None, obstacles=None):
+def get_point(k, refpt, polygon, agent_radius, wall_distance, grid, samples, seed=None, obstacles=None):
     """Try to find a candidate point relative to refpt to emit in the sample.
 
     We draw up to k points from the annulus of inner radius r, outer radius 2r
@@ -433,80 +402,14 @@ def get_point(k, refpt, polygon, agent_radius, wall_distance, c_s_l, samples, nx
         if not (box[0][0] <= pt[0] < box[1][0] and box[0][1] <= pt[1] < box[1][1]):
             # This point falls outside the domain, so try again.
             continue
-        if point_valid(pt, agent_radius, wall_distance, c_s_l, polygon, samples, nxny, cells, obstacles):
+        if point_valid(pt, agent_radius, wall_distance, grid, polygon, samples, obstacles):
             return pt
 
     # We failed to find a suitable point in the vicinity of refpt. The Point will be declared as inactive
     return False
 
 
-def point_valid(pt, agent_radius, wall_distance, cell_side_length, polygon, samples, nxny, cells, obstacles=None):
-    """ Determines if a point is valid by using a Grid to determine neighbours
-    :param pt: point that is being checked
-    :param agent_radius:minimal distance between points
-    :param wall_distance: minimal distance between point and the polygon
-    :param cell_side_length: Cell side length of the Grid
-    :param polygon: Polygon in which the points must lie
-    :param samples: already placed points
-    :param nxny: Number of cells in the x- and y-direction as Tuple: (nx, ny)
-    :param cells: Dictionary with key: cell, value: point
-    :param obstacles: list of polygons, point must not lay within a polygon
-    :return: if valid: True else: False
-    """
-    if obstacles is None:
-        obstacles = []
-    cell_coords = get_cell_coords(pt, cell_side_length, get_bounding_box(polygon))
-    if not shply.Polygon(polygon).contains(shply.Point(pt)):
-        return False
-    for obstacle in obstacles:
-        if shply.Polygon(obstacle).contains(shply.Point(pt)):
-            return False
-    if min_distance_to_polygon(pt, polygon) < wall_distance:
-        return False
-    for idx in get_neighbours(cell_coords, nxny, cells):
-        nearby_pt = samples[idx]
-        # Squared distance between or candidate point, pt, and this nearby_pt.
-        distance2 = (nearby_pt[0] - pt[0]) ** 2 + (nearby_pt[1] - pt[1]) ** 2
-        if distance2 < agent_radius ** 2:
-            # The points are too close, so pt is not a candidate.
-            return False
-    # All points tested: if we're here, pt is valid
-    return True
-
-
-def get_neighbours(coords, nxny, cells):
-    """Return the indexes of points in cells neighbouring cell at coords.
-
-    For the cell at coords = (x,y), return the indexes of points in the cells
-    with neighbouring coordinates illustrated below: I.e. those cells that could
-    contain points closer than r.
-
-                                     ooo
-                                    ooooo
-                                    ooXoo
-                                    ooooo
-                                     ooo
-
-    """
-    nx, ny = nxny[0], nxny[1]
-    dxdy = [(-1, -2), (0, -2), (1, -2), (-2, -1), (-1, -1), (0, -1), (1, -1), (2, -1),
-            (-2, 0), (-1, 0), (1, 0), (2, 0), (-2, 1), (-1, 1), (0, 1), (1, 1), (2, 1),
-            (-1, 2), (0, 2), (1, 2), (0, 0)]
-    neighbours = []
-    for dx, dy in dxdy:
-        neighbour_coords = coords[0] + dx, coords[1] + dy
-        if not (0 <= neighbour_coords[0] < nx and
-                0 <= neighbour_coords[1] < ny):
-            # We're off the grid: no neighbours here.
-            continue
-        neighbour_cell = cells[neighbour_coords]
-        if neighbour_cell is not None:
-            # This cell is occupied: store this index of the contained point.
-            neighbours.append(neighbour_cell)
-    return neighbours
-
-
-def point_valid_new(pt, agent_radius, wall_distance, grid, polygon, samples, obstacles=None):
+def point_valid(pt, agent_radius, wall_distance, grid, polygon, samples, obstacles=None):
     """ Determines if a point is valid by using a Grid to determine neighbours
     :param grid: the grid of the polygon
     :param pt: point that is being checked
