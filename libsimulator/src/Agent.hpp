@@ -29,7 +29,7 @@ private:
     UID _uid{};
     double _deltaT = 0.01; // step size
     JEllipse _ellipse{}; // the shape of this pedestrian
-    Point _v0 = Point(0, 0); // vector V0
+    Point _e0 = Point(0, 0); // desired direction
     int _newOrientationDelay = 0;
 
 public:
@@ -41,8 +41,8 @@ public:
     void SetDeltaT(double dt);
     void SetPos(const Point& pos);
     void SetV(const Point& v);
-    void SetV0Norm(double v0);
-    void SetV0(const Point& p) { _v0 = p; }
+    void SetV0(double v0);
+    void SetE0(const Point& p) { _e0 = p; }
     void SetSmoothTurning();
     void IncrementOrientationDelay();
     void SetPhiPed();
@@ -51,15 +51,15 @@ public:
     const JEllipse& GetEllipse() const;
     const Point& GetPos() const;
     const Point& GetV() const;
-    const Point& GetV0() const;
-    Point GetV0(const Point& target, double tau) const;
-    void InitV0(const Point& target);
+    const Point& GetE0() const;
+    Point GetE0(const Point& target, double tau) const;
+    void InitE0(const Point& target);
 
     /**
      * the desired speed is the projection of the speed on the horizontal plane.
      * @return the norm of the desired speed.
      */
-    double GetV0Norm() const;
+    double GetV0() const;
 };
 
 std::ostream& operator<<(std::ostream& out, const Agent& pedestrian);

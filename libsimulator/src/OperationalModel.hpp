@@ -16,7 +16,7 @@ struct PedestrianUpdate {
     std::optional<Point> position{};
     std::optional<Point> velocity{};
     std::optional<Point> waitingPos{};
-    Point v0{};
+    Point e0{}; // desired direction
     bool resetTurning{false};
     bool resetPhi{false};
 };

@@ -203,13 +203,13 @@ JPS_VelocityModelBuilder_Create(double aPed, double DPed, double aWall, double D
  * @param handle of builder to operate on
  * @param id desired id of the parameter profile. If the id is already used by the model and
  *        previously added profile will be overwritten.
- * @param t of the agents using this profile
+ * @param timeGap of the agents using this profile (T in the OV-function)
  * @param tau of the agents using this profile
  */
 JUPEDSIM_API void JPS_VelocityModelBuilder_AddParameterProfile(
     JPS_VelocityModelBuilder handle,
     JPS_ModelParameterProfileId id,
-    double t,
+    double timeGap,
     double tau);
 
 /**

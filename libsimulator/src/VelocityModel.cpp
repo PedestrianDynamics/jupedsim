@@ -39,7 +39,8 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
     const CollisionGeometry& geometry,
     const NeighborhoodSearch& neighborhoodSearch) const
 {
-    const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.GetPos(), 4);
+    const double radius = 4.0;
+    const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.GetPos(), radius);
     const auto parameters = _parameterProfiles.at(ped._parametersId);
     double min_spacing = 100.0;
     Point repPed = Point(0, 0);
@@ -58,18 +59,18 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
     // calculate new direction ei according to (6)
     PedestrianUpdate update{};
     e0(&ped, ped.destination, parameters.tau, update);
-    const Point direction = update.v0 + repPed + repWall;
+    const Point direction = update.e0 + repPed + repWall;
     for(const auto* other : neighborhood) {
         if(other->GetUID() == ped.GetUID()) {
             continue;
         }
         if(!geometry.IntersectsAny(Line(p1, other->GetPos()))) {
-            double spaceing = GetSpacing(&ped, other, direction).first;
-            min_spacing = std::min(min_spacing, spaceing);
+            double spacing = GetSpacing(&ped, other, direction).first;
+            min_spacing = std::min(min_spacing, spacing);
         }
     }
 
-    update.velocity = direction.Normalized() * OptimalSpeed(&ped, min_spacing, parameters.t);
+    update.velocity = direction.Normalized() * OptimalSpeed(&ped, min_spacing, parameters.timeGap);
     update.position = ped.GetPos() + *update.velocity * dT;
     if(update.velocity->Norm() >= J_EPS_V) {
         update.resetPhi = true;
@@ -84,7 +85,7 @@ void VelocityModel::ApplyUpdate(const PedestrianUpdate& update, Agent& agent) co
     } else {
         agent.IncrementOrientationDelay();
     }
-    agent.SetV0(update.v0);
+    agent.SetE0(update.e0);
     if(update.resetPhi) {
         agent.SetPhiPed();
     }
@@ -108,17 +109,17 @@ void VelocityModel::e0(const Agent* ped, Point target, double tau, PedestrianUpd
     const auto dest = ped->destination;
     const auto dist = (dest - pos).Norm();
     if(dist > J_EPS_GOAL) {
-        desired_direction = ped->GetV0(target, tau);
+        desired_direction = ped->GetE0(target, tau);
     } else {
         update.resetTurning = true;
-        desired_direction = ped->GetV0();
+        desired_direction = ped->GetE0();
     }
-    update.v0 = desired_direction;
+    update.e0 = desired_direction;
 }
 
 double VelocityModel::OptimalSpeed(const Agent* ped, double spacing, double t) const
 {
-    double v0 = ped->GetV0Norm();
+    double v0 = ped->GetV0();
     double l = 2 * ped->GetEllipse().GetBmax(); // assume peds are circles with const radius
     double speed = (spacing - l) / t;
     speed = (speed > 0) ? speed : 0;
@@ -188,7 +189,7 @@ Point VelocityModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
     }
     Point ei = ped1->GetV().Normalized();
     if(ped1->GetV().NormSquare() < 0.01) {
-        ei = ped1->GetV0().Normalized();
+        ei = ped1->GetE0().Normalized();
     }
     double condition1 = ei.ScalarProduct(ep12); // < e_i , e_ij > should be positive
     condition1 = (condition1 > 0) ? condition1 : 0; // abs

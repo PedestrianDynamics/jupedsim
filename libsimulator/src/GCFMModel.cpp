@@ -47,17 +47,19 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
     const auto parameters = _parameterProfiles.at(agent._parametersId);
     const double delta = 1.5;
     const double normVi = agent.GetV().ScalarProduct(agent.GetV());
-    const double tmp = (agent.GetV0Norm() + delta) * (agent.GetV0Norm() + delta);
-    if(normVi > tmp && agent.GetV0Norm() > 0) {
+    const double v0 = agent.GetV0();
+    const double tmp = (v0 + delta) * (v0 + delta);
+    if(normVi > tmp && v0 > 0) {
         LOG_ERROR(
-            "GCFMModel::calculateForce() WARNING: actual velocity (%f) of iped %d "
+            "GCFMModel::calculateForce() actual velocity (%f) of iped %d "
             "is bigger than desired velocity (%f)\n",
             sqrt(normVi),
             agent.GetUID(),
-            agent.GetV0Norm());
+            v0);
     }
 
-    const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(agent.GetPos(), 4);
+    const double radius = 4.0; // TODO (MC) check this free parameter
+    const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(agent.GetPos(), radius);
     const auto p1 = agent.GetPos();
     Point F_rep;
     for(const auto* other : neighborhood) {
@@ -82,7 +84,7 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
 
 void GCFMModel::ApplyUpdate(const PedestrianUpdate& update, Agent& agent) const
 {
-    agent.SetV0(update.v0);
+    agent.SetE0(update.e0);
     agent.IncrementOrientationDelay();
     if(update.position) {
         agent.SetPos(*update.position);
@@ -110,12 +112,12 @@ inline Point GCFMModel::ForceDriv(
     const auto dest = ped->destination;
     const auto dist = (dest - pos).Norm();
     if(dist > J_EPS_GOAL) {
-        const Point v0 = ped->GetV0(target, tau);
-        update.v0 = v0;
-        F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * mass) / tau;
+        const Point e0 = ped->GetE0(target, tau);
+        update.e0 = e0;
+        F_driv = ((e0 * ped->GetV0() - ped->GetV()) * mass) / tau;
     } else {
-        const Point v0 = ped->GetV0();
-        F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * mass) / tau;
+        const Point e0 = ped->GetE0();
+        F_driv = ((e0 * ped->GetV0() - ped->GetV()) * mass) / tau;
     }
     return F_driv;
 }
@@ -193,7 +195,7 @@ Point GCFMModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
             return F_rep;
         }
     }
-    nom = _nuPed * ped1->GetV0Norm() + v_ij; // Nu: 0=CFM, 0.28=modifCFM;
+    nom = _nuPed * ped1->GetV0() + v_ij; // Nu: 0=CFM, 0.28=modifCFM;
     nom *= nom;
 
     K_ij = sqrt(K_ij);
@@ -317,7 +319,7 @@ Point GCFMModel::ForceRepStatPoint(const Agent* ped, const Point& p, double l, d
     // Punkt auf der Ellipse
     r = E.PointOnEllipse(pinE);
     // interpolierte Kraft
-    F_rep = ForceInterpolation(ped->GetV0Norm(), K_ij, e_ij, vn, d, (r - E.GetCenter()).Norm(), l);
+    F_rep = ForceInterpolation(ped->GetV0(), K_ij, e_ij, vn, d, (r - E.GetCenter()).Norm(), l);
     return F_rep;
 }
 
