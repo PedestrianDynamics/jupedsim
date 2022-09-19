@@ -217,7 +217,7 @@ During the CMake invocation listed in the next section, add this to your invocat
 
 ```bash
 -DCMAKE_TOOLCHAIN_FILE=<PATH-TO-VCPKG-INSTALLATION>/scripts/buildsystems/vcpkg.cmake
--DVCPKG_MANIFEST_DIR=<PATH-TO-SOURCE-FOLDER>/vcpkg.json
+-DVCPKG_MANIFEST_DIR=<PATH-TO-SOURCE-FOLDER>/vcpkg
 ```
 
 ## Contributing to JuPedSim
