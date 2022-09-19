@@ -3,9 +3,7 @@ import distributions
 import matplotlib.pyplot as plt
 
 
-def show_points(polygon, samples, radius, obstacles=None, distributer=None):
-    if obstacles is None:
-        obstacles = []
+def show_points(polygon, samples, radius, distributer=None):
     box = distributions.get_bounding_box(polygon)
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
@@ -30,19 +28,6 @@ def show_points(polygon, samples, radius, obstacles=None, distributer=None):
         i += 1
         if following == 0:
             break
-
-    for obstacle in obstacles:
-        n = len(obstacle)
-        i = 0
-        while True:
-            following = (i + 1) % n
-            x_value = [obstacle[i][0], obstacle[following][0]]
-            y_value = [obstacle[i][1], obstacle[following][1]]
-            plt.plot(x_value, y_value, color='black')
-
-            i += 1
-            if following == 0:
-                break
 
     plt.xlim(box[0][0], box[1][0])
     plt.ylim(box[0][1], box[1][1])
@@ -74,36 +59,12 @@ def main():
         seed = st.number_input("set a seed. 0 = random seed", 0)
         if seed == 0:
             seed = None
-        st.text("Obstacle settings")
-        obstacle_count = st.number_input("number of obstacles", 0, value=0)
-        obstacle_corners = []
-        obstacle_values = []
-        for i in range(obstacle_count):
-            obstacle_corners.append(st.number_input(f"number of corner points in obstacle {i + 1}", 3, value=4))
-        col3, col4 = st.columns(2)
-        with col3:
-            for i in range(obstacle_count):
-                obstacle_values.append([])
-                for j in range(obstacle_corners[i]):
-                    obstacle_values[i].append([st.number_input(f"x value {j + 1} for obstacle{i + 1}",
-                                                               value=0.0, step=1.0)])
-        with col4:
-            for i in range(obstacle_count):
-                for j in range(obstacle_corners[i]):
-                    obstacle_values[i][j].append(st.number_input(f"y value {j + 1} for obstacle{i + 1}",
-                                                                 value=0.0, step=1.0))
 
-        obstacles = []
-        for i in range(obstacle_count):
-            obstacles.append([])
-            for j in range(obstacle_corners[i]):
-                obstacles[i].append((obstacle_values[i][j][0], obstacle_values[i][j][1]))
-
-    polygon = []
+        polygon = []
     for x, y in zip(x_values, y_values):
         polygon.append((x, y))
     area = distributions.shply.Polygon(polygon).area
-    distribution_type = st.radio("how to destribute agents?", ("place random", "place everywhere", "place in Circle"))
+    distribution_type = st.radio("how to distribute agents?", ("place random", "place in Circle"))
 
     if distribution_type == "place in Circle":
         circle_count = st.number_input("number of circles", 1)
@@ -134,11 +95,11 @@ def main():
 
         button_clicked = st.button('distribute agents')
         if button_clicked:
-            samples = distributer.place_in_Polygon(polygon, a_r, w_d, obstacles=obstacles, seed=seed)
+            samples = distributer.place_in_Polygon(polygon, a_r, w_d, seed=seed)
             st.text('below should be a plot')
-            show_points(polygon, samples, a_r, obstacles, distributer)
+            show_points(polygon, samples, a_r, distributer)
         else:
-            show_points(polygon, [], a_r, obstacles, distributer)
+            show_points(polygon, [], a_r, distributer)
 
     if distribution_type == "place random":
         style = st.radio("how to choose number of agents?", ("density", "number"))
@@ -152,21 +113,11 @@ def main():
         button_clicked = st.button('distribute agents')
 
         if button_clicked:
-            samples = distributions.create_random_points(polygon, agents, a_r, w_d, seed, obstacles, density)
+            samples = distributions.create_random_points(polygon, agents, a_r, w_d, seed, density)
             st.text('below should be a plot')
-            show_points(polygon, samples, a_r, obstacles=obstacles)
+            show_points(polygon, samples, a_r)
         else:
-            show_points(polygon, [], a_r, obstacles)
-
-    if distribution_type == "place everywhere":
-        button_clicked = st.button('distribute agents')
-
-        if button_clicked:
-            samples = distributions.create_points_everywhere(polygon, a_r, w_d, obstacles=obstacles, seed=seed)
-            st.text('below should be a plot')
-            show_points(polygon, samples, a_r, obstacles=obstacles)
-        else:
-            show_points(polygon, [], a_r, obstacles)
+            show_points(polygon, [], a_r)
 
 
 if __name__ == "__main__":

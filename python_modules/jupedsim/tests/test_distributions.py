@@ -1,16 +1,16 @@
 from jupedsim import distributions
 import pytest
+# tests can be called from \python_modules\jupedsim
+# command to call test: python -m pytest -vv .\tests\test_distributions.py
 
-def test_seed_works_correct_for_poisson_disc():
-    polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
-    set_seed = 1337
-    samples1 = distributions.create_points_everywhere(polygon, agent_radius=0.5, wall_distance=0.5, seed=set_seed)
-    samples2 = distributions.create_points_everywhere(polygon, agent_radius=0.5, wall_distance=0.5, seed=set_seed)
-    assert samples1 == samples2
+
+class GridMock(distributions.Grid):
+    def __init__(self):
+        pass
 
 
 def test_cell_coord_determination():
-    mock = distributions.GridMock()
+    mock = GridMock()
     pt = (5, 5)
     mock.box = [(0, 0), (10, 10)]
     mock.c_s_l = 0.7071067811865475  # 1/√2
@@ -31,13 +31,14 @@ def test_grid_creation():
 
 
 def test_neighbour_determination():
-    mock = distributions.GridMock()
+    mock = GridMock()
+    mock.a_r = 0.3
     mock.nx, mock.ny = 15, 15
     mock.coords_list = [(ix, iy) for ix in range(mock.nx) for iy in range(mock.ny)]
     mock.cells = {coords: None for coords in mock.coords_list}
     for i in range(15):
-        mock.cells[(i, i)] = i
-    assert mock.determine_neighbours((7, 7)) == [6, 8, 7]
+        mock.cells[(i, i)] = (i+0.5, i+0.5)
+    assert mock.has_neighbour_in_distance((7, 7), (7, 7)) is False
 
 
 def test_point_in_circle():
