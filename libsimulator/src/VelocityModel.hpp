@@ -30,6 +30,7 @@ struct VelocityModelAgentParameters {
     OperationalModel::ParametersID id;
     double timeGap;
     double tau;
+    double v0;
 };
 
 /*!
@@ -41,7 +42,7 @@ struct VelocityModelAgentParameters {
  *
  * \author Mohcine Chraibi
  */
-class VelocityModel : public OperationalModel
+class VelocityModel : public OperationalModelBase<VelocityModelAgentParameters>
 {
 private:
     /// Modellparameter
@@ -49,8 +50,6 @@ private:
     double _DPed;
     double _aWall;
     double _DWall;
-    std::unordered_map<OperationalModel::ParametersID, VelocityModelAgentParameters>
-        _parameterProfiles{};
 
 public:
     VelocityModel(
@@ -58,7 +57,7 @@ public:
         double Dped,
         double awall,
         double Dwall,
-        const std::vector<VelocityModelAgentParameters> profiles);
+        const std::vector<VelocityModelAgentParameters>& profiles);
     ~VelocityModel() override = default;
 
     PedestrianUpdate ComputeNewPosition(
@@ -68,10 +67,6 @@ public:
         const NeighborhoodSearch& neighborhoodSearch) const override;
 
     void ApplyUpdate(const PedestrianUpdate& update, Agent& agent) const override;
-    bool ParameterProfileExists(ParametersID id) const override
-    {
-        return _parameterProfiles.count(id) > 0;
-    };
     std::unique_ptr<OperationalModel> Clone() const override;
 
 private:

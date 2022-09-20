@@ -27,7 +27,7 @@ def test_can_run_simulation():
 
     model_builder = jps.VelocityModelBuilder(8, 0.1, 5, 0.02)
     profile_id = 3
-    model_builder.add_parameter_profile(profile_id, 1, 0.5)
+    model_builder.add_parameter_profile(profile_id, 1, 0.5, 1.2)
 
     model = model_builder.build()
 
@@ -38,7 +38,6 @@ def test_can_run_simulation():
     journey_id = simulation.add_journey(journey)
 
     agent_parameters = jps.AgentParameters()
-    agent_parameters.v0 = 1.0
     agent_parameters.a_min = 0.15
     agent_parameters.b_max = 0.15
     agent_parameters.b_min = 0.15

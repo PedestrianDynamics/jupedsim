@@ -30,11 +30,6 @@ public:
     Point orientation;
 
     // TODO(kkratz): this cannot be changed by the model, this is an external parameter -> move to
-    // parameter profile
-    /// Desired speed of agent
-    double v0;
-
-    // TODO(kkratz): this cannot be changed by the model, this is an external parameter -> move to
     // parameter profile VelocityModel ONLY fields
     double radius; // constant
 
@@ -50,17 +45,11 @@ private:
     int _newOrientationDelay = 0;
 
 public:
-    Agent() = default;
-    ~Agent() = default;
-
     void SetE0(const Point& p) { _e0 = p; }
     void SetSmoothTurning();
     void IncrementOrientationDelay();
-
     const Point& GetE0() const;
     Point GetE0(const Point& target, double deltaT) const;
-    void InitE0(const Point& target);
-    double GetV0() const;
 };
 
 std::ostream& operator<<(std::ostream& out, const Agent& pedestrian);
