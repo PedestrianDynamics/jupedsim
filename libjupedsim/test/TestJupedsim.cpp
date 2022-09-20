@@ -45,14 +45,15 @@ TEST(GeometryBuilder, CanConstruct)
 {
     auto builder = JPS_GeometryBuilder_Create();
 
-    std::vector<double> box1{0, 0, 1, 0, 1, 1, 0, 1};
-    JPS_GeometryBuilder_AddAccessibleArea(builder, box1.data(), box1.size() / 2);
+    std::vector<std::vector<double>> data{
+        {0, 0, 1, 0, 1, 1, 0, 1},
+        {0, 0, 0, -1, 1, -1, 1, 0},
+        {0, 0, -1, 0, -1, -1, 0, -1},
+        {0, 0, 0, 1, -1, 1, -1, 0}};
 
-    std::vector<double> box2{1, 0, 2, 0, 2, 1, 1, 1};
-    JPS_GeometryBuilder_AddAccessibleArea(builder, box2.data(), box2.size() / 2);
-
-    std::vector<double> box3{0, 0.25, 2, 0.25, 2, 0.75, 0, 0.75};
-    JPS_GeometryBuilder_AddAccessibleArea(builder, box3.data(), box3.size() / 2);
+    for(auto& poly : data) {
+        JPS_GeometryBuilder_AddAccessibleArea(builder, poly.data(), poly.size() / 2);
+    }
 
     std::vector<double> box4{0, 0, 0.2, 0, 0.2, 0.2, 0, 0.2};
     JPS_GeometryBuilder_ExcludeFromAccessibleArea(builder, box4.data(), box4.size() / 2);
@@ -268,4 +269,24 @@ TEST_F(SimulationTest, CanChangeModelParameterProfiles)
             simulation, agent_id, model_paramater_profile_id[1], nullptr),
         true);
     ASSERT_EQ(JPS_Simulation_Iterate(simulation, nullptr), true);
+}
+
+TEST(Regression, Bug1028)
+{
+
+    std::vector<std::vector<double>> data{// CW ordered polygons
+                                          {103.2, 96.8, 105.2, 96.8, 105.2, 94.8, 103.2, 92.8},
+                                          {100, 96.8, 100, 92.8, 98, 94.8, 98, 96.8},
+                                          // CCW ordered polygons
+                                          {100.0, 96.8, 100.0, 92.8, 103.2, 92.8, 103.2, 96.8},
+                                          {0, 96.8, 0, 94.8, 98, 94.8, 98, 96.8},
+                                          {105.2, 96.8, 105.2, 94.8, 200, 94.8, 200, 96.8}};
+    auto geo_builder = JPS_GeometryBuilder_Create();
+
+    for(auto& poly : data) {
+        JPS_GeometryBuilder_AddAccessibleArea(geo_builder, poly.data(), poly.size() / 2);
+    }
+    auto geometry = JPS_GeometryBuilder_Build(geo_builder, nullptr);
+    ASSERT_NE(geometry, nullptr);
+    JPS_GeometryBuilder_Free(geo_builder);
 }
