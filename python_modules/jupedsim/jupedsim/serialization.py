@@ -92,7 +92,8 @@ class JpsCoreStyleTrajectoryWriter(TrajectoryWriter):
         self._out.writelines(
             [
                 "# written by JpsCoreStyleTrajectoryWriter\n",
-                f"#framerate:{fps}\n",
+                f"#framerate: {fps}\n",
+                "#unit: m\n",
             ]
         )
         self._out.flush()
