@@ -20,7 +20,8 @@ GCFMModel::GCFMModel(
     double maxfped,
     double maxfwall,
     const std::vector<GCFMModelAgentParameters>& profiles)
-    : _nuPed(nuped)
+    : OperationalModelBase(profiles)
+    , _nuPed(nuped)
     , _nuWall(nuwall)
     , _intp_widthPed(intp_widthped)
     , _intp_widthWall(intp_widthwall)
@@ -29,13 +30,6 @@ GCFMModel::GCFMModel(
     , _distEffMaxPed(dist_effPed)
     , _distEffMaxWall(dist_effWall)
 {
-    _parameterProfiles.reserve(profiles.size());
-    for(auto&& p : profiles) {
-        auto [_, success] = _parameterProfiles.try_emplace(p.id, p);
-        if(!success) {
-            throw std::runtime_error("Duplicate agent profile id supplied");
-        }
-    }
 }
 
 PedestrianUpdate GCFMModel::ComputeNewPosition(
@@ -44,7 +38,7 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
     const CollisionGeometry& geometry,
     const NeighborhoodSearch& neighborhoodSearch) const
 {
-    const auto parameters = _parameterProfiles.at(agent.parameterProfileId);
+    const auto& parameters = parameterProfile(agent.parameterProfileId);
     // const double delta = 1.5;
     // const double normVi = agent.GetV().ScalarProduct(agent.GetV());
     // const double v0 = agent.GetV0();
@@ -112,13 +106,14 @@ inline Point GCFMModel::ForceDriv(
     const auto pos = ped->pos;
     const auto dest = ped->destination;
     const auto dist = (dest - pos).Norm();
+    const auto v0 = parameterProfile(ped->parameterProfileId).v0;
     if(dist > J_EPS_GOAL) {
         const Point e0 = ped->GetE0(target, deltaT);
         update.e0 = e0;
-        F_driv = ((e0 * ped->GetV0() - (ped->orientation * ped->speed)) * mass) / tau;
+        F_driv = ((e0 * v0 - (ped->orientation * ped->speed)) * mass) / tau;
     } else {
         const Point e0 = ped->GetE0();
-        F_driv = ((e0 * ped->GetV0() - (ped->orientation * ped->speed)) * mass) / tau;
+        F_driv = ((e0 * v0 - (ped->orientation * ped->speed)) * mass) / tau;
     }
     return F_driv;
 }
@@ -138,17 +133,19 @@ Point GCFMModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
     double px; // hermite Interpolation value
     const Ellipse& E1 = ped1->ellipse;
     const Ellipse& E2 = ped2->ellipse;
+    const auto v0_1 = parameterProfile(ped1->parameterProfileId).v0;
+    const auto v0_2 = parameterProfile(ped2->parameterProfileId).v0;
     const double dist_eff = E1.EffectiveDistanceToEllipse(
         E2,
         ped1->pos,
         ped2->pos,
-        ped1->speed / ped1->v0,
-        ped2->speed / ped2->v0,
+        ped1->speed / v0_1,
+        ped2->speed / v0_2,
         ped1->speed,
         ped2->speed,
         ped1->orientation,
         ped2->orientation);
-    const auto agent1_mass = _parameterProfiles.at(ped1->parameterProfileId).mass;
+    const auto agent1_mass = parameterProfile(ped1->parameterProfileId).mass;
 
     //          smax    dist_intpol_left      dist_intpol_right       dist_eff_max
     //       ----|-------------|--------------------------|--------------|----
@@ -198,7 +195,7 @@ Point GCFMModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
             return F_rep;
         }
     }
-    nom = _nuPed * ped1->GetV0() + v_ij; // Nu: 0=CFM, 0.28=modifCFM;
+    nom = _nuPed * v0_1 + v_ij; // Nu: 0=CFM, 0.28=modifCFM;
     nom *= nom;
 
     K_ij = sqrt(K_ij);
@@ -322,10 +319,11 @@ Point GCFMModel::ForceRepStatPoint(const Agent* ped, const Point& p, double l, d
     K_ij = 0.5 * bla / v.Norm(); // K_ij
     // Punkt auf der Ellipse
     pinE = p.TransformToEllipseCoordinates(ped->pos, ped->orientation.x, ped->orientation.y);
+    const auto v0 = parameterProfile(ped->parameterProfileId).v0;
     // Punkt auf der Ellipse
-    r = E.PointOnEllipse(pinE, ped->speed / ped->v0, ped->pos, ped->speed, ped->orientation);
+    r = E.PointOnEllipse(pinE, ped->speed / v0, ped->pos, ped->speed, ped->orientation);
     // interpolierte Kraft
-    F_rep = ForceInterpolation(ped->GetV0(), K_ij, e_ij, vn, d, (r - ped->pos).Norm(), l);
+    F_rep = ForceInterpolation(v0, K_ij, e_ij, vn, d, (r - ped->pos).Norm(), l);
     return F_rep;
 }
 

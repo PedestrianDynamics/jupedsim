@@ -146,7 +146,10 @@ PYBIND11_MODULE(py_jupedsim, m)
             [](JPS_VelocityModelBuilder_Wrapper& w,
                JPS_ModelParameterProfileId id,
                double t,
-               double tau) { JPS_VelocityModelBuilder_AddParameterProfile(w.handle, id, t, tau); })
+               double tau,
+               double v0) {
+                JPS_VelocityModelBuilder_AddParameterProfile(w.handle, id, t, tau, v0);
+            })
         .def("build", [](JPS_VelocityModelBuilder_Wrapper& w) {
             JPS_ErrorMessage errorMsg{};
             auto result = JPS_VelocityModelBuilder_Build(w.handle, &errorMsg);
@@ -181,9 +184,9 @@ PYBIND11_MODULE(py_jupedsim, m)
             [](JPS_GCFMModelBuilder_Wrapper& w,
                JPS_ModelParameterProfileId id,
                double mass,
-               double t,
-               double tau) {
-                JPS_GCFMModelBuilder_AddParameterProfile(w.handle, id, t, tau, mass);
+               double tau,
+               double v0) {
+                JPS_GCFMModelBuilder_AddParameterProfile(w.handle, id, mass, tau, v0);
             })
         .def("build", [](JPS_GCFMModelBuilder_Wrapper& w) {
             JPS_ErrorMessage errorMsg{};
@@ -279,7 +282,6 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def_readwrite("y", &JPS_AgentParameters::positionY)
         .def_readwrite("orientation_x", &JPS_AgentParameters::orientationX)
         .def_readwrite("orientation_y", &JPS_AgentParameters::orientationY)
-        .def_readwrite("v0", &JPS_AgentParameters::v0)
         .def_readwrite("a_v", &JPS_AgentParameters::Av)
         .def_readwrite("a_min", &JPS_AgentParameters::AMin)
         .def_readwrite("b_max", &JPS_AgentParameters::BMax)

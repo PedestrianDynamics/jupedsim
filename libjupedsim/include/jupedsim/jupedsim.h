@@ -156,15 +156,15 @@ JUPEDSIM_API JPS_GCFMModelBuilder JPS_GCFMModelBuilder_Create(
  * @param id desired id of the parameter profile. If the id is already used by the model and
  *        previously added profile will be overwritten.
  * @param mass of the agents using this profile
- * @param t of the agents using this profile
  * @param tau of the agents using this profile
+ * @param v0 of the agents using this profile
  */
 JUPEDSIM_API void JPS_GCFMModelBuilder_AddParameterProfile(
     JPS_GCFMModelBuilder handle,
     JPS_ModelParameterProfileId id,
     double mass,
-    double t,
-    double tau);
+    double tau,
+    double v0);
 
 /**
  * Creates a JPS_OperationalModel of type GCFM Model from the JPS_GCFMModelBuilder.
@@ -205,12 +205,14 @@ JPS_VelocityModelBuilder_Create(double aPed, double DPed, double aWall, double D
  *        previously added profile will be overwritten.
  * @param timeGap of the agents using this profile (T in the OV-function)
  * @param tau of the agents using this profile
+ * @param v0 of the agents using this profile (desired speed)
  */
 JUPEDSIM_API void JPS_VelocityModelBuilder_AddParameterProfile(
     JPS_VelocityModelBuilder handle,
     JPS_ModelParameterProfileId id,
     double timeGap,
-    double tau);
+    double tau,
+    double v0);
 
 /**
  * Creates a JPS_OperationalModel of type Velocity Model from the JPS_GCFMModelBuilder.
@@ -475,7 +477,6 @@ typedef struct JPS_AgentParameters {
      * The orientation vector will internally be normalized.
      */
     double orientationY;
-    double v0;
     double Av;
     double AMin;
     double BMax;

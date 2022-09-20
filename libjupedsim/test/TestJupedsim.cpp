@@ -21,7 +21,7 @@ TEST(OperationalModel, CanConstructVelocityModel)
 {
     JPS_ErrorMessage errorMsg{};
     auto builder = JPS_VelocityModelBuilder_Create(1, 1, 1, 1);
-    JPS_VelocityModelBuilder_AddParameterProfile(builder, 1, 1, 1);
+    JPS_VelocityModelBuilder_AddParameterProfile(builder, 1, 1, 1, 1);
     auto model = JPS_VelocityModelBuilder_Build(builder, &errorMsg);
     EXPECT_NE(model, nullptr);
     EXPECT_EQ(errorMsg, nullptr);
@@ -33,7 +33,7 @@ TEST(OperationalModel, CanConstructGCFMModel)
 {
     JPS_ErrorMessage errorMsg{};
     auto builder = JPS_GCFMModelBuilder_Create(1, 1, 1, 1, 1, 1, 1, 1);
-    JPS_GCFMModelBuilder_AddParameterProfile(builder, 1, 1, 1, 1);
+    JPS_GCFMModelBuilder_AddParameterProfile(builder, 1, 1, 0.5, 1.2);
     auto model = JPS_GCFMModelBuilder_Build(builder, &errorMsg);
     EXPECT_NE(model, nullptr);
     EXPECT_EQ(errorMsg, nullptr);
@@ -108,7 +108,7 @@ TEST(Simulation, CanSimulate)
 
     auto modelBuilder = JPS_VelocityModelBuilder_Create(8, 0.1, 5, 0.02);
     const JPS_ModelParameterProfileId profile_id = 1;
-    JPS_VelocityModelBuilder_AddParameterProfile(modelBuilder, profile_id, 1, 0.5);
+    JPS_VelocityModelBuilder_AddParameterProfile(modelBuilder, profile_id, 1, 0.5, 1.2);
 
     auto model = JPS_VelocityModelBuilder_Build(modelBuilder, nullptr);
     ASSERT_NE(model, nullptr);
@@ -121,7 +121,6 @@ TEST(Simulation, CanSimulate)
     auto journeyId = JPS_Simulation_AddJourney(simulation, journey, nullptr);
 
     JPS_AgentParameters agent_parameters{};
-    agent_parameters.v0 = 1.0;
     agent_parameters.AMin = 0.15;
     agent_parameters.BMax = 0.15;
     agent_parameters.BMin = 0.15;
@@ -173,9 +172,9 @@ struct SimulationTest : public ::testing::Test {
 
         auto modelBuilder = JPS_VelocityModelBuilder_Create(9, 0.1, 5, 0.02);
         JPS_VelocityModelBuilder_AddParameterProfile(
-            modelBuilder, model_paramater_profile_id[0], 1, 1);
+            modelBuilder, model_paramater_profile_id[0], 1, 0.5, 1.5);
         JPS_VelocityModelBuilder_AddParameterProfile(
-            modelBuilder, model_paramater_profile_id[1], 1, 1);
+            modelBuilder, model_paramater_profile_id[1], 1, 0.3, 1.2);
         auto model = JPS_VelocityModelBuilder_Build(modelBuilder, nullptr);
 
         ASSERT_NE(model, nullptr);
@@ -207,9 +206,9 @@ TEST_F(SimulationTest, AgentIteratorIsEmptyForNewSimulation)
 TEST_F(SimulationTest, AgentIteratorCanIterate)
 {
     std::vector<JPS_AgentParameters> agent_parameters{
-        {1.0, 1.0, 1.0, 1.0, 1.0, 1, 0.5, 0.53, 0.15, journey_id, model_paramater_profile_id[0]},
-        {2.0, 1.0, 1.0, 1.0, 1.0, 1, 0.5, 0.53, 0.15, journey_id, model_paramater_profile_id[0]},
-        {3.0, 1.0, 1.0, 1.0, 1.0, 1, 0.5, 0.53, 0.15, journey_id, model_paramater_profile_id[0]}};
+        {1.0, 1.0, 1.0, 1.0, 1, 0.5, 0.53, 0.15, journey_id, model_paramater_profile_id[0]},
+        {2.0, 1.0, 1.0, 1.0, 1, 0.5, 0.53, 0.15, journey_id, model_paramater_profile_id[0]},
+        {3.0, 1.0, 1.0, 1.0, 1, 0.5, 0.53, 0.15, journey_id, model_paramater_profile_id[0]}};
     for(const auto& agent_params : agent_parameters) {
         ASSERT_NE(JPS_Simulation_AddAgent(simulation, agent_params, nullptr), 0);
     }
@@ -233,7 +232,6 @@ TEST_F(SimulationTest, CanQueryAgentProperties)
         pos_y,
         orientation_x,
         orientation_y,
-        1.0,
         1,
         0.5,
         0.53,
@@ -259,7 +257,7 @@ TEST_F(SimulationTest, CanQueryAgentProperties)
 TEST_F(SimulationTest, CanChangeModelParameterProfiles)
 {
     JPS_AgentParameters agent_params{
-        1, 1, 1, 0, 1.0, 1, 0.5, 0.53, 0.15, journey_id, model_paramater_profile_id[0]};
+        1, 1, 1, 0, 1, 0.5, 0.53, 0.15, journey_id, model_paramater_profile_id[0]};
     const auto agent_id = JPS_Simulation_AddAgent(simulation, agent_params, nullptr);
     ASSERT_NE(agent_id, 0);
     ASSERT_EQ(JPS_Simulation_AgentCount(simulation), 1);

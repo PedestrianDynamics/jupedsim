@@ -69,7 +69,6 @@ public:
         double AMin,
         double BMax,
         double BMin,
-        double v0,
         Journey::ID journeyId,
         OperationalModel::ParametersID profileId);
 

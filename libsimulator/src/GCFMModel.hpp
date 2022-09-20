@@ -13,17 +13,12 @@ class Agent;
 struct GCFMModelAgentParameters {
     OperationalModel::ParametersID id{};
     double mass;
-    double t;
     double tau;
-    GCFMModelAgentParameters(OperationalModel::ParametersID id, double mass, double t, double tau)
-        : id(id), mass(mass), t(t), tau(tau)
-    {
-    }
+    double v0;
 };
 
-class GCFMModel : public OperationalModel
+class GCFMModel : public OperationalModelBase<GCFMModelAgentParameters>
 {
-    std::unordered_map<OperationalModel::ParametersID, GCFMModelAgentParameters> _parameterProfiles;
     double _nuPed; /**< strength of the pedestrian repulsive force */
     double _nuWall; /**< strength of the wall repulsive force */
     double _intp_widthPed; /**< Interpolation cutoff radius (in cm) */
@@ -51,10 +46,6 @@ public:
         const CollisionGeometry& geometry,
         const NeighborhoodSearch& neighborhoodSearch) const override;
     void ApplyUpdate(const PedestrianUpdate& upate, Agent& agent) const override;
-    bool ParameterProfileExists(ParametersID id) const override
-    {
-        return _parameterProfiles.count(id) > 0;
-    };
     std::unique_ptr<OperationalModel> Clone() const override;
     OperationalModel::ParametersID AddParameterProfile(GCFMModelAgentParameters parameters);
 

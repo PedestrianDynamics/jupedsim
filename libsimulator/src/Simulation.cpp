@@ -62,7 +62,6 @@ uint64_t Simulation::AddAgent(
     double AMin,
     double BMax,
     double BMin,
-    double v0,
     Journey::ID journeyId,
     OperationalModel::ParametersID profileId)
 {
@@ -77,7 +76,6 @@ uint64_t Simulation::AddAgent(
     agent->orientation = orientationNormalised;
     agent->ellipse = e;
     agent->pos = position;
-    agent->v0 = v0;
     agent->parameterProfileId = profileId;
     // TODO(kkratz): Replace later
     agent->radius = BMax;
@@ -109,7 +107,7 @@ Agent* Simulation::AgentPtr(Agent::ID id) const
     const auto iter =
         std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped->id; });
     if(iter == _agents.end()) {
-        throw std::logic_error("Trying to access unknown Agent.");
+        throw std::logic_error(fmt::format("Trying to access unknown Agent {}", id));
     }
     return iter->get();
 }

@@ -21,16 +21,9 @@ VelocityModel::VelocityModel(
     double Dped,
     double awall,
     double Dwall,
-    const std::vector<VelocityModelAgentParameters> profiles)
-    : _aPed(aped), _DPed(Dped), _aWall(awall), _DWall(Dwall)
+    const std::vector<VelocityModelAgentParameters>& profiles)
+    : OperationalModelBase(profiles), _aPed(aped), _DPed(Dped), _aWall(awall), _DWall(Dwall)
 {
-    _parameterProfiles.reserve(profiles.size());
-    for(auto&& p : profiles) {
-        auto [_, success] = _parameterProfiles.try_emplace(p.id, p);
-        if(!success) {
-            throw std::runtime_error("Duplicate agent profile id supplied");
-        }
-    }
 }
 
 PedestrianUpdate VelocityModel::ComputeNewPosition(
@@ -41,7 +34,7 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
 {
     const double radius = 4.0;
     const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.pos, radius);
-    const auto parameters = _parameterProfiles.at(ped.parameterProfileId);
+    const auto& parameters = parameterProfile(ped.parameterProfileId);
     double min_spacing = 100.0;
     Point repPed = Point(0, 0);
     const Point p1 = ped.pos;
@@ -115,8 +108,8 @@ void VelocityModel::e0(const Agent* ped, Point target, double deltaT, Pedestrian
 
 double VelocityModel::OptimalSpeed(const Agent* ped, double spacing, double t) const
 {
-    double v0 = ped->GetV0();
-    double l = 2 * ped->radius;
+    const auto v0 = parameterProfile(ped->parameterProfileId).v0;
+    const double l = 2 * ped->radius;
     double speed = (spacing - l) / t;
     speed = (speed > 0) ? speed : 0;
     speed = (speed < v0) ? speed : v0;
