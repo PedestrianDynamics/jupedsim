@@ -57,21 +57,27 @@ class Distribution:
                 self.circles.remove(circle)
                 break
 
-    def place_in_Polygon(self, polygon, agent_radius, wall_distance, seed=None, max_iterations=10_000):
+    def place_in_Polygon(self, polygon, agent_radius, wall_distance, seed=None, max_iterations=10_000, obstacles=None):
         """returns points inside each circle segment
             points have an agent_radius within which no other point may be placed.
             points will not be placed with less than wall_distance to the polygon
             points will be placed inside the polygon and inside the circle segment
             points are placed first in the segment that was created first
             if more that 10000 tries are needed to placed a valid point an Exception will be thrown
-            no points may lay within an obstacle"""
+            obstacles are holes inside the polygon"""
         if seed is not None:
             np.random.seed(seed)
-        samples = []
+        box = get_bounding_box(polygon)
+        if obstacles is None:
+            holes = []
+        else:
+            holes = obstacles
+        s_polygon = shply.Polygon(polygon, holes)
+        grid = Grid(box, agent_radius)
         for circle in self.circles:
             # if for the circle no exact number of agents is set it will be determined with the density
-            big_circle_area = intersecting_area_polygon_circle(self.mid_point, circle[1], polygon)
-            small_circle_area = intersecting_area_polygon_circle(self.mid_point, circle[0], polygon)
+            big_circle_area = intersecting_area_polygon_circle(self.mid_point, circle[1], s_polygon)
+            small_circle_area = intersecting_area_polygon_circle(self.mid_point, circle[0], s_polygon)
             placeable_area = big_circle_area - small_circle_area
             if circle[2] is None:
                 density = circle[3]
@@ -83,14 +89,12 @@ class Distribution:
             # determine the entire area of the circle segment
             entire_circle_area = np.pi * (circle[1] ** 2 - circle[0] ** 2)
             # determine the area where a point might be placed around the polygon
-            box = get_bounding_box(polygon)
             dif_x, dif_y = box[1][0] - box[0][0], box[1][1] - box[0][1]
             entire_polygon_area = dif_x * dif_y
 
-            grid = Grid(box, agent_radius)
             if entire_circle_area < entire_polygon_area:
                 # inside the circle it is more likely to find a random point that is inside the polygon
-                for placed_count in range(targeted_count + 1):
+                for placed_count in range(targeted_count):
                     i = 0
                     while i < max_iterations:
                         i += 1
@@ -99,8 +103,7 @@ class Distribution:
                         # determines a random degree
                         theta = np.random.uniform(0, 2 * np.pi)
                         pt = self.mid_point[0] + rho * np.cos(theta), self.mid_point[1] + rho * np.sin(theta)
-                        if check_distance_constraints(pt, wall_distance, grid, polygon):
-                            samples.append(pt)
+                        if check_distance_constraints(pt, wall_distance, grid, s_polygon):
                             grid.append_point(pt)
                             break
 
@@ -129,14 +132,13 @@ class Distribution:
                         raise AgentCount(message)
                     temp_point = (np.random.uniform(box[0][0], box[1][0]), np.random.uniform(box[0][1], box[1][1]))
                     if is_inside_circle(temp_point, self.mid_point, circle[0], circle[1]) \
-                            and check_distance_constraints(temp_point, wall_distance,grid, polygon):
-                        samples.append(temp_point)
+                            and check_distance_constraints(temp_point, wall_distance, grid, s_polygon):
                         grid.append_point(temp_point)
                         iterations = 0
                         placed_count += 1
                     else:
                         iterations += 1
-        return samples
+        return grid.get_samples()
 
 
 class Grid:
@@ -154,10 +156,16 @@ class Grid:
         # corresponding value is the index of that cell's point's coordinates in the
         # samples list (or None if the cell is empty).
         self.cells = {coords: None for coords in self.coords_list}
+        self.samples = []
 
     def append_point(self, pt):
         cell_coords = self.get_cell_coords(pt)
         self.cells[cell_coords] = pt
+        self.samples.append(pt)
+
+    def get_samples(self):
+        """returns a copy of the samples saved"""
+        return self.samples[:]
 
     def get_cell_coords(self, pt):
         """ Get the coordinates of the cell that pt = (x,y) falls in.
@@ -195,10 +203,8 @@ def intersecting_area_polygon_circle(mid_point, radius, polygon):
     point = shply.Point(mid_point)
     # creates a layer with the size of the radius all around this point
     circle = point.buffer(radius)
-    # creates a polygon in shapely
-    poly = shply.Polygon(polygon)
     # returns the size of the intersecting area
-    return poly.intersection(circle).area
+    return polygon.intersection(circle).area
 
 
 def is_inside_circle(point, mid, min_r, max_r):
@@ -223,7 +229,6 @@ def get_bounding_box(polygon):
 def min_distance_to_polygon(pt, polygon):
     """returns the minimal distance between a point and every line segment of a polygon"""
     pt = shply.Point(pt)
-    polygon = shply.Polygon(polygon)
     min_dist = polygon.exterior.distance(pt)
     for hole in polygon.interiors:
         candidate_dist = hole.distance(pt)
@@ -231,40 +236,40 @@ def min_distance_to_polygon(pt, polygon):
     return min_dist
 
 
-def create_random_points(polygon, count, agent_radius, wall_distance,
-                         seed=None, density=None, max_iterations=10000):
+def create_random_points_number(polygon, count, agent_radius, wall_distance,
+                                seed=None, obstacles=None, max_iterations=10000):
     """returns points randomly placed inside the polygon
 
         :param polygon: List of corner points given as tuples
         :param count: number of points placed
-        :param density: select a density: number of agents will be calculated and param count will not be used
         :param agent_radius: minimal distance between points
         :param wall_distance: minimal distance between points and the polygon
         :param seed: define a seed for random generation
+        :param obstacles: holes inside the polygon given as a List of Lists of Corner points as tuples
         :param max_iterations: no more than max_iterations must find a point inside the polygon
         :return: list of created points
     """
+    box = get_bounding_box(polygon)
+
     if seed is not None:
         np.random.seed(seed)
-    if density is not None:
-        area = shply.Polygon(polygon).area
-        count = round(density * area)
 
-    box = get_bounding_box(polygon)
+    if obstacles is None:
+        holes = []
+    else:
+        holes = obstacles
+
+    s_polygon = shply.Polygon(polygon, holes)
     grid = Grid(box, agent_radius)
-    samples = []
     created_points = 0
     iterations = 0
     while created_points < count:
         if iterations > max_iterations:
-            msg = f"Only {created_points} of {count}  could be placed."
-            if density is not None:
-                msg += f"\nexpected density: {density} p/m², " \
-                       f"actual density: {round(created_points / area, 2)} p/m²"
+            msg = f"Only {created_points} of {count}  could be placed." \
+                  f" density: {round(created_points / s_polygon.area, 2)} p/m²"
             raise AgentCount(msg)
         temp_point = (np.random.uniform(box[0][0], box[1][0]), np.random.uniform(box[0][1], box[1][1]))
-        if check_distance_constraints(temp_point, wall_distance, grid, polygon):
-            samples.append(temp_point)
+        if check_distance_constraints(temp_point, wall_distance, grid, s_polygon):
             grid.append_point(temp_point)
 
             iterations = 0
@@ -272,7 +277,16 @@ def create_random_points(polygon, count, agent_radius, wall_distance,
         else:
             iterations += 1
 
-    return samples
+    return grid.get_samples()
+
+
+def create_random_points_density(polygon, density, agent_radius, wall_distance, seed=None, max_iterations=10000,
+                                 obstacles=None):
+    if obstacles is None:
+        obstacles = []
+    area = shply.Polygon(polygon, obstacles).area
+    number = round(density * area)
+    return create_random_points_number(polygon, number, agent_radius, wall_distance, seed, obstacles, max_iterations)
 
 
 def check_distance_constraints(pt, wall_distance, grid, polygon):
@@ -281,11 +295,9 @@ def check_distance_constraints(pt, wall_distance, grid, polygon):
     :param grid: the grid of the polygon
     :param pt: point that is being checked
     :param wall_distance: minimal distance between point and the polygon
-    :param polygon: Polygon in which the points must lie
-    :return: if valid: True else: False
-    """
-
-    if not shply.Polygon(polygon).contains(shply.Point(pt)):
+    :param polygon: shapely Polygon in which the points must lie
+    :return:True or False"""
+    if not polygon.contains(shply.Point(pt)):
         return False
     if min_distance_to_polygon(pt, polygon) < wall_distance:
         return False

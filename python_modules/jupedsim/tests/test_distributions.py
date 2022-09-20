@@ -1,7 +1,5 @@
 from jupedsim import distributions
 import pytest
-# tests can be called from \python_modules\jupedsim
-# command to call test: python -m pytest -vv .\tests\test_distributions.py
 
 
 class GridMock(distributions.Grid):
@@ -32,13 +30,14 @@ def test_grid_creation():
 
 def test_neighbour_determination():
     mock = GridMock()
-    mock.a_r = 0.3
+    mock.a_r = 1.414213562
     mock.nx, mock.ny = 15, 15
     mock.coords_list = [(ix, iy) for ix in range(mock.nx) for iy in range(mock.ny)]
     mock.cells = {coords: None for coords in mock.coords_list}
     for i in range(15):
         mock.cells[(i, i)] = (i+0.5, i+0.5)
-    assert mock.has_neighbour_in_distance((7, 7), (7, 7)) is False
+    assert mock.has_neighbour_in_distance((7, 7), (7, 7)) is True
+    assert mock.has_neighbour_in_distance((10, 0), (10, 0)) is False
 
 
 def test_point_in_circle():
@@ -60,7 +59,7 @@ def test_bounding_box_determination():
 
 
 def test_minimal_distance_to_polygon():
-    polygon = [(0, 0), (4, 1), (5, 3), (4, 5), (2, 5), (0, 3)]
+    polygon = distributions.shply.Polygon([(0, 0), (4, 1), (5, 3), (4, 5), (2, 5), (0, 3)])
     pt = (3, 3)
     expected_result = min([2.182820625326997, 1.7888543819998317, 1.7888543819998317, 2.0, 2.1213203435596424, 3.0])
     acceptance_rate = 0.01
@@ -71,9 +70,10 @@ def test_minimal_distance_to_polygon():
 
 def test_seed_works_correct_for_random_points():
     polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
+    agent_radius, wall_distance = 0.3, 0.3
     set_seed = 1337
-    samples1 = distributions.create_random_points(polygon, 100, agent_radius=0.3, wall_distance=0.3, seed=set_seed)
-    samples2 = distributions.create_random_points(polygon, 100, agent_radius=0.3, wall_distance=0.3, seed=set_seed)
+    samples1 = distributions.create_random_points_number(polygon, 100, agent_radius, wall_distance, seed=set_seed)
+    samples2 = distributions.create_random_points_number(polygon, 100, agent_radius, wall_distance, seed=set_seed)
     assert samples1 == samples2
 
 
