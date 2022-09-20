@@ -252,10 +252,11 @@ JUPEDSIM_API JPS_GeometryBuilder JPS_GeometryBuilder_Create();
 
 /**
  * Adds an accessible area to the geometry.
- * The polygon described by points and pointCount must be simple convex polygon. The polygon my be
+ * The polygon described by points and pointCount must be a simple polygon. The polygon my be
  * specified in clockwise or counter-clockwise order.
  * Multiple accessible areas may overlap, the final accessible area is created by forming the union
  * over all accessible areas.
+ * The Union over all accessible areas minus exclusions must form one polygon.
  * @param points pointer to the x/y coordinates for the points describing the polygon. The number of
  *        double values in this array is expected to be 2*pointCount!
  * @param pointCount number of points the polygon consists of.
@@ -267,11 +268,12 @@ JUPEDSIM_API void JPS_GeometryBuilder_AddAccessibleArea(
 
 /**
  * Adds an accessible area to the geometry.
- * The polygon described by points and pointCount must be simple convex polygon. The polygon my be
+ * The polygon described by points and pointCount must be a simple polygon. The polygon my be
  * specified in clockwise or counter-clockwise order.
  * Multiple exclusion areas may overlap, the final exclusion area is created by forming the union
  * over all exclusion areas.
  * Exclusion areas are subtracted from accessible areas.
+ * The Union over all accessible areas minus exclusions must form a single polygon.
  * @param points pointer to the x/y coordinates for the points describing the polygon. The number of
  *        double values in this array is expected to be 2*pointCount!
  * @param pointCount number of points the polygon consists of.

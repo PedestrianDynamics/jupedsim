@@ -11,10 +11,18 @@
 
 #include <CGAL/Boolean_set_operations_2/difference.h>
 #include <CGAL/number_utils.h>
+#include <iterator>
 #include <memory>
 #include <poly2tri/common/shapes.h>
 
 #include <stdexcept>
+#include <vector>
+
+using Kernel = CGAL::Exact_predicates_exact_constructions_kernel;
+using Poly = CGAL::Polygon_2<Kernel>;
+using PolyWithHoles = CGAL::Polygon_with_holes_2<Kernel>;
+using PolyWithHolesList = std::list<PolyWithHoles>;
+using PolyList = std::list<Poly>;
 
 static Point centroid(p2t::Triangle* t)
 {
@@ -51,6 +59,22 @@ static Line edgeIndex(p2t::Triangle* from, p2t::Triangle* to)
     throw std::logic_error("Triangles have to share an edge");
 }
 
+enum class Ordering { CW, CCW };
+
+static Poly intoCGALPolygon(const std::vector<Point>& ring, Ordering ordering)
+{
+    Poly poly{};
+    for(const auto& p : ring) {
+        poly.push_back(Poly::Point_2{p.x, p.y});
+    }
+    const bool needsReversal = (ordering == Ordering::CW && poly.is_counterclockwise_oriented()) ||
+                               (ordering == Ordering::CCW && poly.is_clockwise_oriented());
+    if(needsReversal) {
+        poly.reverse_orientation();
+    }
+    return poly;
+}
+
 GeometryBuilder& GeometryBuilder::AddAccessibleArea(const std::vector<Point>& lineLoop)
 {
     _accessibleAreas.emplace_back(lineLoop);
@@ -65,38 +89,42 @@ GeometryBuilder& GeometryBuilder::ExcludeFromAccessibleArea(const std::vector<Po
 
 Geometry GeometryBuilder::Build()
 {
-    using Kernel = CGAL::Exact_predicates_exact_constructions_kernel;
-    using Poly = CGAL::Polygon_2<Kernel>;
-    using PolyWithHoles = CGAL::Polygon_with_holes_2<Kernel>;
-    using PolyWithHolesList = std::list<PolyWithHoles>;
-    using PolyList = std::list<Poly>;
     using GraphType = NavMeshRoutingEngine::GraphType;
 
-    auto convertPolygons = [](const auto& polygons) {
-        PolyList polyList;
-        std::transform(
-            std::begin(polygons),
-            std::end(polygons),
-            std::back_inserter(polyList),
-            [](const auto& loop) {
-                Poly poly;
-                std::transform(
-                    std::begin(loop), std::end(loop), std::back_inserter(poly), [](const auto& p) {
-                        return Poly::Point_2{p.x, p.y};
-                    });
-                return poly;
-            });
-        PolyWithHolesList union_pl{};
-        CGAL::join(std::begin(polyList), std::end(polyList), std::back_inserter(union_pl));
-        return union_pl;
-    };
-    const auto accessibleList = convertPolygons(_accessibleAreas);
+    std::vector<Poly> accessibleAreaInput{};
+    accessibleAreaInput.reserve(_accessibleAreas.size());
+    std::transform(
+        std::begin(_accessibleAreas),
+        std::end(_accessibleAreas),
+        std::back_inserter(accessibleAreaInput),
+        [](const auto& p) { return intoCGALPolygon(p, Ordering::CCW); });
+    std::for_each(
+        std::begin(accessibleAreaInput), std::end(accessibleAreaInput), [](const auto& p) {
+            if(!p.is_simple()) {
+                throw std::runtime_error("Supplied non simple accessible area.");
+            }
+        });
+    PolyWithHolesList accessibleList{};
+    CGAL::join(
+        std::begin(accessibleAreaInput),
+        std::end(accessibleAreaInput),
+        std::back_inserter(accessibleList));
+
     if(accessibleList.size() != 1) {
         throw std::runtime_error("accesisble area not connected");
     }
+
     auto accessibleArea = *accessibleList.begin();
-    const auto exclusionList = convertPolygons(_exclusions);
-    for(const auto& ex : exclusionList) {
+
+    std::vector<Poly> exclusionAreaInput{};
+    exclusionAreaInput.reserve(_exclusions.size());
+    std::transform(
+        std::begin(_exclusions),
+        std::end(_exclusions),
+        std::back_inserter(exclusionAreaInput),
+        [](const auto& p) { return intoCGALPolygon(p, Ordering::CCW); });
+
+    for(const auto& ex : exclusionAreaInput) {
         PolyWithHolesList res{};
         CGAL::difference(accessibleArea, ex, std::back_inserter(res));
         if(res.size() != 1) {
