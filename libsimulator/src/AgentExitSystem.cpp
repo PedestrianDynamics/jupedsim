@@ -18,7 +18,7 @@ void AgentExitSystem::Run(
                 if(v.labels.find("exit") != v.labels.end()) {
                     auto inside = v.polygon.Inside(agent->GetPos());
                     if(inside) {
-                        removedAgentIds.emplace_back(agent->GetUID().getID());
+                        removedAgentIds.emplace_back(agent->id.getID());
                         return true;
                     }
                 }

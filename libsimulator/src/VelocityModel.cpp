@@ -46,7 +46,7 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
     Point repPed = Point(0, 0);
     const Point p1 = ped.GetPos();
     for(const auto* other : neighborhood) {
-        if(other->GetUID() == ped.GetUID()) {
+        if(other->id == ped.id) {
             continue;
         }
         if(!geometry.IntersectsAny(Line(p1, other->GetPos()))) {
@@ -61,7 +61,7 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
     e0(&ped, ped.destination, parameters.tau, update);
     const Point direction = update.e0 + repPed + repWall;
     for(const auto* other : neighborhood) {
-        if(other->GetUID() == ped.GetUID()) {
+        if(other->id == ped.id) {
             continue;
         }
         if(!geometry.IntersectsAny(Line(p1, other->GetPos()))) {
@@ -155,9 +155,9 @@ my_pair VelocityModel::GetSpacing(const Agent* ped1, const Agent* ped2, Point ei
     if((condition1 >= 0) && (condition2 <= l / Distance)) {
         // return a pair <dist, condition1>. Then take the smallest dist. In case of equality the
         // biggest condition1
-        return my_pair(distp12.Norm(), ped2->GetUID());
+        return my_pair(distp12.Norm(), ped2->id);
     }
-    return my_pair(FLT_MAX, ped2->GetUID());
+    return my_pair(FLT_MAX, ped2->id);
 }
 Point VelocityModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
 {
@@ -178,10 +178,10 @@ Point VelocityModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
             "each other (dist={:f}). Adjust <a> value in force_ped to counter this. Affected "
             "pedestrians ped1 {} at ({:f},{:f}) and ped2 {} at ({:f}, {:f})",
             Distance,
-            ped1->GetUID(),
+            ped1->id,
             ped1->GetPos().x,
             ped1->GetPos().y,
-            ped2->GetUID(),
+            ped2->id,
             ped2->GetPos().x,
             ped2->GetPos().y);
         exit(EXIT_FAILURE); // TODO: quick and dirty fix for issue #158

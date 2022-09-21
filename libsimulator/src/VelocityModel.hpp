@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <vector>
 
-using my_pair = std::pair<double, Agent::UID>;
+using my_pair = std::pair<double, Agent::ID>;
 // sort with respect to first element (ascending).
 // In case of equality sort with respect to second element (descending)
 struct sort_pred {
