@@ -44,7 +44,7 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
     const CollisionGeometry& geometry,
     const NeighborhoodSearch& neighborhoodSearch) const
 {
-    const auto parameters = _parameterProfiles.at(agent._parametersId);
+    const auto parameters = _parameterProfiles.at(agent.parameterProfileId);
     const double delta = 1.5;
     const double normVi = agent.GetV().ScalarProduct(agent.GetV());
     const double v0 = agent.GetV0();
@@ -139,7 +139,7 @@ Point GCFMModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
     const JEllipse& E2 = ped2->GetEllipse();
     double distsq;
     double dist_eff = E1.EffectiveDistanceToEllipse(E2, &distsq);
-    const auto agent1_mass = _parameterProfiles.at(ped1->_parametersId).mass;
+    const auto agent1_mass = _parameterProfiles.at(ped1->parameterProfileId).mass;
 
     //          smax    dist_intpol_left      dist_intpol_right       dist_eff_max
     //       ----|-------------|--------------------------|--------------|----

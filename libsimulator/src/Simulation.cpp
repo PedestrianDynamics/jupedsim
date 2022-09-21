@@ -81,7 +81,7 @@ uint64_t Simulation::AddAgent(
     agent->SetEllipse(e);
     agent->SetPos(position);
     agent->SetV0(v0);
-    agent->_parametersId = profileId;
+    agent->parameterProfileId = profileId;
 
     if(const auto& iter = _journeys.find(journeyId); iter != _journeys.end()) {
         agent->behaviour = std::make_unique<FollowWaypointsBehaviour>(
@@ -130,7 +130,7 @@ void Simulation::SwitchAgentProfile(Agent::UID agent_id, OperationalModel::Param
 {
     _operationalDecisionSystem.ValidateAgentParameterProfileId(profile_id);
     if(auto agent = AgentPtr(agent_id); agent != nullptr) {
-        agent->_parametersId = profile_id;
+        agent->parameterProfileId = profile_id;
     } else {
         throw std::runtime_error(fmt::format("Unknown agent id={} supplied", agent_id.getID()));
     }
