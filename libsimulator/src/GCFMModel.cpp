@@ -74,7 +74,7 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
     PedestrianUpdate update{};
     // repulsive forces to the walls and transitions that are not my target
     Point repwall = ForceRepRoom(&agent, geometry);
-    Point fd = ForceDriv(&agent, agent.destination, parameters.mass, parameters.tau, update);
+    Point fd = ForceDriv(&agent, agent.destination, parameters.mass, parameters.tau, dT, update);
     Point acc = (fd + F_rep + repwall) / parameters.mass;
 
     update.velocity = agent.GetV() + acc * dT;
@@ -105,6 +105,7 @@ inline Point GCFMModel::ForceDriv(
     Point target,
     double mass,
     double tau,
+    double deltaT,
     PedestrianUpdate& update) const
 {
     Point F_driv;
@@ -112,7 +113,7 @@ inline Point GCFMModel::ForceDriv(
     const auto dest = ped->destination;
     const auto dist = (dest - pos).Norm();
     if(dist > J_EPS_GOAL) {
-        const Point e0 = ped->GetE0(target, tau);
+        const Point e0 = ped->GetE0(target, deltaT);
         update.e0 = e0;
         F_driv = ((e0 * ped->GetV0() - ped->GetV()) * mass) / tau;
     } else {

@@ -67,8 +67,6 @@ uint64_t Simulation::AddAgent(
     OperationalModel::ParametersID profileId)
 {
     auto agent = std::make_unique<Agent>();
-    agent->SetDeltaT(_clock.dT());
-
     const auto orientationNormalised = orientation.Normalized();
 
     JEllipse e{};

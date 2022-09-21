@@ -67,9 +67,13 @@ private:
      *
      * @return Point
      */
-    Point
-    ForceDriv(const Agent* ped, Point target, double mass, double tau, PedestrianUpdate& update)
-        const;
+    Point ForceDriv(
+        const Agent* ped,
+        Point target,
+        double mass,
+        double tau,
+        double deltaT,
+        PedestrianUpdate& update) const;
     /**
      * Repulsive force between two pedestrians ped1 and ped2 according to
      * the Generalized Centrifugal Force Model (chraibi2010a)

@@ -58,7 +58,7 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
 
     // calculate new direction ei according to (6)
     PedestrianUpdate update{};
-    e0(&ped, ped.destination, parameters.tau, update);
+    e0(&ped, ped.destination, dT, update);
     const Point direction = update.e0 + repPed + repWall;
     for(const auto* other : neighborhood) {
         if(other->id == ped.id) {
@@ -102,14 +102,15 @@ std::unique_ptr<OperationalModel> VelocityModel::Clone() const
     return std::make_unique<VelocityModel>(*this);
 }
 
-void VelocityModel::e0(const Agent* ped, Point target, double tau, PedestrianUpdate& update) const
+void VelocityModel::e0(const Agent* ped, Point target, double deltaT, PedestrianUpdate& update)
+    const
 {
     Point desired_direction;
     const auto pos = ped->GetPos();
     const auto dest = ped->destination;
     const auto dist = (dest - pos).Norm();
     if(dist > J_EPS_GOAL) {
-        desired_direction = ped->GetE0(target, tau);
+        desired_direction = ped->GetE0(target, deltaT);
     } else {
         update.resetTurning = true;
         desired_direction = ped->GetE0();

@@ -27,11 +27,6 @@ void Agent::SetV0(double v0)
     _ellipse.SetV0(v0);
 }
 
-void Agent::SetDeltaT(double dt)
-{
-    _deltaT = dt;
-}
-
 const JEllipse& Agent::GetEllipse() const
 {
     return _ellipse;
@@ -90,14 +85,13 @@ void Agent::InitE0(const Point& target)
     _e0 = delta.Normalized();
 }
 
-Point Agent::GetE0(const Point& target, double tau) const
+Point Agent::GetE0(const Point& target, double deltaT) const
 {
-    // TODO(MC) remove input parameter tau
-    double _tau = 0.5;
+    constexpr double _tau = 0.5;
     const Point& pos = GetPos();
-    Point delta = target - pos;
-    Point new_e0 = delta.Normalized();
-    double t = _newOrientationDelay * _deltaT;
+    const Point delta = target - pos;
+    const Point new_e0 = delta.Normalized();
+    const double t = _newOrientationDelay * deltaT;
 
     // Handover new target
     return _e0 + (new_e0 - _e0) * (1 - exp(-t / _tau));
