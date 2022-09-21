@@ -54,7 +54,7 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
             "GCFMModel::calculateForce() actual velocity (%f) of iped %d "
             "is bigger than desired velocity (%f)\n",
             sqrt(normVi),
-            agent.GetUID(),
+            agent.id,
             v0);
     }
 
@@ -63,7 +63,7 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
     const auto p1 = agent.GetPos();
     Point F_rep;
     for(const auto* other : neighborhood) {
-        if(other->GetUID() == agent.GetUID()) {
+        if(other->id == agent.id) {
             continue;
         }
         if(!geometry.IntersectsAny(Line(p1, other->GetPos()))) {
@@ -226,8 +226,8 @@ Point GCFMModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
     if(F_rep.x != F_rep.x || F_rep.y != F_rep.y) {
         LOG_ERROR(
             "NAN return p1{} p2 {} Frepx={:f} Frepy={:f} K_ij={:f}",
-            ped1->GetUID(),
-            ped2->GetUID(),
+            ped1->id,
+            ped2->id,
             F_rep.x,
             F_rep.y,
             K_ij);

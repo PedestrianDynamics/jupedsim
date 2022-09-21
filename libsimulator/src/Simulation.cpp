@@ -91,13 +91,13 @@ uint64_t Simulation::AddAgent(
     }
 
     _agents.emplace_back(std::move(agent));
-    return _agents.back()->GetUID().getID();
+    return _agents.back()->id.getID();
 }
 
 void Simulation::RemoveAgent(uint64_t id)
 {
     const auto iter = std::remove_if(std::begin(_agents), std::end(_agents), [id](auto& agent) {
-        return agent->GetUID().getID() == id;
+        return agent->id.getID() == id;
     });
     if(iter == std::end(_agents)) {
         throw std::runtime_error(fmt::format("Unknown agent id {}", id));
@@ -105,10 +105,10 @@ void Simulation::RemoveAgent(uint64_t id)
     _agents.erase(iter, std::end(_agents));
 }
 
-Agent* Simulation::AgentPtr(Agent::UID id) const
+Agent* Simulation::AgentPtr(Agent::ID id) const
 {
-    const auto iter = std::find_if(
-        _agents.begin(), _agents.end(), [id](auto& ped) { return id == ped->GetUID(); });
+    const auto iter =
+        std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped->id; });
     if(iter == _agents.end()) {
         throw std::logic_error("Trying to access unknown Agent.");
     }
@@ -125,7 +125,7 @@ size_t Simulation::AgentCount() const
     return _agents.size();
 }
 
-void Simulation::SwitchAgentProfile(Agent::UID agent_id, OperationalModel::ParametersID profile_id)
+void Simulation::SwitchAgentProfile(Agent::ID agent_id, OperationalModel::ParametersID profile_id)
     const
 {
     _operationalDecisionSystem.ValidateAgentParameterProfileId(profile_id);

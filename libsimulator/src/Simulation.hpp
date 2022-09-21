@@ -75,13 +75,13 @@ public:
 
     void RemoveAgent(uint64_t id);
 
-    Agent* AgentPtr(Agent::UID id) const;
+    Agent* AgentPtr(Agent::ID id) const;
 
     const std::vector<uint64_t>& RemovedAgents() const;
 
     size_t AgentCount() const;
 
-    void SwitchAgentProfile(Agent::UID agent_id, OperationalModel::ParametersID profile_id) const;
+    void SwitchAgentProfile(Agent::ID agent_id, OperationalModel::ParametersID profile_id) const;
 
     uint64_t Iteration() const { return _clock.Iteration(); }
 

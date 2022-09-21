@@ -375,7 +375,7 @@ JPS_AgentId JPS_Agent_Id(JPS_Agent handle)
 {
     assert(handle);
     const auto agent = reinterpret_cast<const Agent*>(handle);
-    return agent->GetUID().getID();
+    return agent->id.getID();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

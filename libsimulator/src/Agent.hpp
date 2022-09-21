@@ -14,7 +14,8 @@
 class Agent
 {
 public:
-    using UID = jps::UniqueID<Agent>;
+    using ID = jps::UniqueID<Agent>;
+    ID id{};
 
     // This is evaluated by the "strategic level"
     std::unique_ptr<Behaviour> behaviour{};
@@ -26,7 +27,6 @@ public:
     OperationalModel::ParametersID parameterProfileId;
 
 private:
-    UID _uid{};
     double _deltaT = 0.01; // step size
     JEllipse _ellipse{}; // the shape of this pedestrian
     Point _e0 = Point(0, 0); // desired direction
@@ -47,7 +47,6 @@ public:
     void IncrementOrientationDelay();
     void SetPhiPed();
 
-    UID GetUID() const;
     const JEllipse& GetEllipse() const;
     const Point& GetPos() const;
     const Point& GetV() const;

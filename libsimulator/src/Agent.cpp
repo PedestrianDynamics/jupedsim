@@ -31,10 +31,6 @@ void Agent::SetDeltaT(double dt)
 {
     _deltaT = dt;
 }
-Agent::UID Agent::GetUID() const
-{
-    return _uid;
-}
 
 const JEllipse& Agent::GetEllipse() const
 {
