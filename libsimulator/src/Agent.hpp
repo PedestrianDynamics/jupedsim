@@ -23,11 +23,9 @@ public:
     // This is evaluated by the "operational level"
     Point destination{};
     Point waypoint{};
-
     OperationalModel::ParametersID parameterProfileId;
 
 private:
-    double _deltaT = 0.01; // step size
     JEllipse _ellipse{}; // the shape of this pedestrian
     Point _e0 = Point(0, 0); // desired direction
     int _newOrientationDelay = 0;
@@ -38,7 +36,6 @@ public:
 
     void SetEllipse(const JEllipse& e);
 
-    void SetDeltaT(double dt);
     void SetPos(const Point& pos);
     void SetV(const Point& v);
     void SetV0(double v0);
@@ -51,7 +48,7 @@ public:
     const Point& GetPos() const;
     const Point& GetV() const;
     const Point& GetE0() const;
-    Point GetE0(const Point& target, double tau) const;
+    Point GetE0(const Point& target, double deltaT) const;
     void InitE0(const Point& target);
 
     /**

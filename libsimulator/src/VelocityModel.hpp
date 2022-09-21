@@ -94,7 +94,7 @@ private:
      *
      * @return Point
      */
-    void e0(const Agent* ped, Point target, double tau, PedestrianUpdate& update) const;
+    void e0(const Agent* ped, Point target, double deltaT, PedestrianUpdate& update) const;
     /**
      * Get the spacing between ped1 and ped2
      *
