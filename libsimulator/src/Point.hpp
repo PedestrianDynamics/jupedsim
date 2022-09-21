@@ -4,6 +4,8 @@
 
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/register/point.hpp>
+#include <fmt/format.h>
+
 #include <cmath>
 #include <iostream>
 #include <string>
@@ -97,3 +99,27 @@ const Point operator*(const Point& p, const double f);
 const Point operator/(const Point& p, const double f);
 
 std::ostream& operator<<(std::ostream& out, const Point& p);
+
+template <>
+struct fmt::formatter<Point> {
+    char presentation{'f'};
+
+    constexpr auto parse(format_parse_context& ctx)
+    {
+        auto it = ctx.begin(), end = ctx.end();
+        if(it != end && (*it == 'f' || *it == 'e')) {
+            presentation = *it++;
+        }
+        if(it != end && *it != '}') {
+            throw format_error("invalid format");
+        }
+        return it;
+    }
+
+    template <typename FormatContext>
+    auto format(const Point& p, FormatContext& ctx)
+    {
+        return presentation == 'f' ? fmt::format_to(ctx.out(), "({:.1f}, {:.1f})", p.x, p.y) :
+                                     fmt::format_to(ctx.out(), "({:.1e}, {:.1e})", p.x, p.y);
+    }
+};
