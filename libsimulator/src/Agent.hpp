@@ -23,7 +23,7 @@ public:
     Point destination{};
     Point waypoint{};
 
-    OperationalModel::ParametersID _parametersId;
+    OperationalModel::ParametersID parameterProfileId;
 
 private:
     UID _uid{};

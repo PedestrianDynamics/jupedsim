@@ -41,7 +41,7 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
 {
     const double radius = 4.0;
     const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.GetPos(), radius);
-    const auto parameters = _parameterProfiles.at(ped._parametersId);
+    const auto parameters = _parameterProfiles.at(ped.parameterProfileId);
     double min_spacing = 100.0;
     Point repPed = Point(0, 0);
     const Point p1 = ped.GetPos();
