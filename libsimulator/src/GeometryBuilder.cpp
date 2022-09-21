@@ -7,14 +7,16 @@
 #include "Geometry.hpp"
 #include "Graph.hpp"
 #include "Line.hpp"
+#include "Point.hpp"
 #include "RoutingEngine.hpp"
 
 #include <CGAL/Boolean_set_operations_2/difference.h>
 #include <CGAL/number_utils.h>
-#include <iterator>
-#include <memory>
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <poly2tri/common/shapes.h>
 
+#include <memory>
 #include <stdexcept>
 #include <vector>
 
@@ -67,6 +69,10 @@ static Poly intoCGALPolygon(const std::vector<Point>& ring, Ordering ordering)
     for(const auto& p : ring) {
         poly.push_back(Poly::Point_2{p.x, p.y});
     }
+
+    if(!poly.is_simple()) {
+        throw std::runtime_error(fmt::format("Polygon is not simple: {}", ring));
+    }
     const bool needsReversal = (ordering == Ordering::CW && poly.is_counterclockwise_oriented()) ||
                                (ordering == Ordering::CCW && poly.is_clockwise_oriented());
     if(needsReversal) {
@@ -98,12 +104,6 @@ Geometry GeometryBuilder::Build()
         std::end(_accessibleAreas),
         std::back_inserter(accessibleAreaInput),
         [](const auto& p) { return intoCGALPolygon(p, Ordering::CCW); });
-    std::for_each(
-        std::begin(accessibleAreaInput), std::end(accessibleAreaInput), [](const auto& p) {
-            if(!p.is_simple()) {
-                throw std::runtime_error("Supplied non simple accessible area.");
-            }
-        });
     PolyWithHolesList accessibleList{};
     CGAL::join(
         std::begin(accessibleAreaInput),
