@@ -9,8 +9,6 @@
 class Ellipse
 {
 public:
-    /// cartesian-coord of the centre
-    Point center{};
     /// velocity vector
     Point vel{};
     double cosPhi{1};
@@ -26,7 +24,6 @@ private:
 
 public:
     void SetV(const Point& v);
-    void SetCenter(Point pos);
     void SetCosPhi(double c);
     void SetSinPhi(double s);
     void SetAmin(double a_min);
@@ -37,8 +34,12 @@ public:
     // ellipse semi-axis in the orthogonal direction of the velocity
     double GetEB(double scale) const;
     // Effective distance between two ellipses
-    double
-    EffectiveDistanceToEllipse(const Ellipse& other, double scale_first, double scale_second) const;
+    double EffectiveDistanceToEllipse(
+        const Ellipse& other,
+        Point center_first,
+        Point center_second,
+        double scale_first,
+        double scale_second) const;
     // Schnittpunkt der Ellipse mit der Gerade durch P und AP (=ActionPoint von E)
-    Point PointOnEllipse(const Point& p, double scale) const;
+    Point PointOnEllipse(const Point& p, double scale, const Point& center) const;
 };

@@ -16,7 +16,7 @@ void AgentExitSystem::Run(
         [&areas, &removedAgentIds](const std::unique_ptr<Agent>& agent) {
             for(const auto& [k, v] : areas) {
                 if(v.labels.find("exit") != v.labels.end()) {
-                    auto inside = v.polygon.Inside(agent->GetPos());
+                    auto inside = v.polygon.Inside(agent->pos);
                     if(inside) {
                         removedAgentIds.emplace_back(agent->id.getID());
                         return true;

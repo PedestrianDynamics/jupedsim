@@ -27,6 +27,7 @@ public:
 
     /// Desired speed of agent
     double v0;
+    Point pos;
 
 private:
     Ellipse _ellipse{}; // the shape of this pedestrian
@@ -39,7 +40,6 @@ public:
 
     void SetEllipse(const Ellipse& e);
 
-    void SetPos(const Point& pos);
     void SetV(const Point& v);
     void SetE0(const Point& p) { _e0 = p; }
     void SetSmoothTurning();
@@ -47,7 +47,6 @@ public:
     void SetPhiPed();
 
     const Ellipse& GetEllipse() const;
-    const Point& GetPos() const;
     const Point& GetV() const;
     const Point& GetE0() const;
     Point GetE0(const Point& target, double deltaT) const;

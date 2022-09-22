@@ -59,14 +59,14 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
     }
 
     const double radius = 4.0; // TODO (MC) check this free parameter
-    const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(agent.GetPos(), radius);
-    const auto p1 = agent.GetPos();
+    const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(agent.pos, radius);
+    const auto p1 = agent.pos;
     Point F_rep;
     for(const auto* other : neighborhood) {
         if(other->id == agent.id) {
             continue;
         }
-        if(!geometry.IntersectsAny(Line(p1, other->GetPos()))) {
+        if(!geometry.IntersectsAny(Line(p1, other->pos))) {
             F_rep += ForceRepPed(&agent, other);
         }
     }
@@ -78,7 +78,7 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
     Point acc = (fd + F_rep + repwall) / parameters.mass;
 
     update.velocity = agent.GetV() + acc * dT;
-    update.position = agent.GetPos() + *update.velocity * dT;
+    update.position = agent.pos + *update.velocity * dT;
     return update;
 }
 
@@ -87,7 +87,7 @@ void GCFMModel::ApplyUpdate(const PedestrianUpdate& update, Agent& agent) const
     agent.SetE0(update.e0);
     agent.IncrementOrientationDelay();
     if(update.position) {
-        agent.SetPos(*update.position);
+        agent.pos = *update.position;
     }
     if(update.velocity) {
         agent.SetV(*update.velocity);
@@ -109,7 +109,7 @@ inline Point GCFMModel::ForceDriv(
     PedestrianUpdate& update) const
 {
     Point F_driv;
-    const auto pos = ped->GetPos();
+    const auto pos = ped->pos;
     const auto dest = ped->destination;
     const auto dist = (dest - pos).Norm();
     if(dist > J_EPS_GOAL) {
@@ -127,7 +127,7 @@ Point GCFMModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
 {
     Point F_rep;
     // x- and y-coordinate of the distance between p1 and p2
-    Point distp12 = ped2->GetPos() - ped1->GetPos();
+    Point distp12 = ped2->pos - ped1->pos;
     const Point& vp1 = ped1->GetV(); // v Ped1
     const Point& vp2 = ped2->GetV(); // v Ped2
     Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
@@ -138,8 +138,8 @@ Point GCFMModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
     double px; // hermite Interpolation value
     const Ellipse& E1 = ped1->GetEllipse();
     const Ellipse& E2 = ped2->GetEllipse();
-    const double dist_eff =
-        E1.EffectiveDistanceToEllipse(E2, E1.vel.Norm() / ped1->v0, E2.vel.Norm() / ped2->v0);
+    const double dist_eff = E1.EffectiveDistanceToEllipse(
+        E2, ped1->pos, ped2->pos, E1.vel.Norm() / ped1->v0, E2.vel.Norm() / ped2->v0);
     const auto agent1_mass = _parameterProfiles.at(ped1->parameterProfileId).mass;
 
     //          smax    dist_intpol_left      dist_intpol_right       dist_eff_max
@@ -240,7 +240,7 @@ Point GCFMModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
 
 inline Point GCFMModel::ForceRepRoom(const Agent* ped, const CollisionGeometry& geometry) const
 {
-    auto walls = geometry.LineSegmentsInDistanceTo(5.0, ped->GetPos());
+    auto walls = geometry.LineSegmentsInDistanceTo(5.0, ped->pos);
 
     auto f = std::accumulate(
         walls.begin(),
@@ -255,7 +255,7 @@ inline Point GCFMModel::ForceRepRoom(const Agent* ped, const CollisionGeometry& 
 inline Point GCFMModel::ForceRepWall(const Agent* ped, const Line& w) const
 {
     Point F = Point(0.0, 0.0);
-    Point pt = w.ShortestPoint(ped->GetPos());
+    Point pt = w.ShortestPoint(ped->pos);
     double wlen = w.LengthSquare();
 
     if(wlen < 0.01) { // ignore walls smaller than 10 cm
@@ -263,7 +263,7 @@ inline Point GCFMModel::ForceRepWall(const Agent* ped, const Line& w) const
     }
     // Kraft soll nur orthgonal wirken
     // ???
-    if(fabs((w.GetPoint1() - w.GetPoint2()).ScalarProduct(ped->GetPos() - pt)) > J_EPS) {
+    if(fabs((w.GetPoint1() - w.GetPoint2()).ScalarProduct(ped->pos - pt)) > J_EPS) {
         return F;
     }
     // double mind = ped->GetEllipse().MinimumDistanceToLine(w);
@@ -288,7 +288,7 @@ Point GCFMModel::ForceRepStatPoint(const Agent* ped, const Point& p, double l, d
 {
     Point F_rep = Point(0.0, 0.0);
     const Point& v = ped->GetV();
-    Point dist = p - ped->GetPos(); // x- and y-coordinate of the distance between ped and p
+    Point dist = p - ped->pos; // x- and y-coordinate of the distance between ped and p
     double d = dist.Norm(); // distance between the centre of ped and point p
     Point e_ij; // x- and y-coordinate of the normalized vector between ped and p
 
@@ -310,11 +310,11 @@ Point GCFMModel::ForceRepStatPoint(const Agent* ped, const Point& p, double l, d
     double K_ij;
     K_ij = 0.5 * bla / v.Norm(); // K_ij
     // Punkt auf der Ellipse
-    pinE = p.TransformToEllipseCoordinates(E.center, E.cosPhi, E.sinPhi);
+    pinE = p.TransformToEllipseCoordinates(ped->pos, E.cosPhi, E.sinPhi);
     // Punkt auf der Ellipse
-    r = E.PointOnEllipse(pinE, E.vel.Norm() / ped->v0);
+    r = E.PointOnEllipse(pinE, E.vel.Norm() / ped->v0, ped->pos);
     // interpolierte Kraft
-    F_rep = ForceInterpolation(ped->GetV0(), K_ij, e_ij, vn, d, (r - E.center).Norm(), l);
+    F_rep = ForceInterpolation(ped->GetV0(), K_ij, e_ij, vn, d, (r - ped->pos).Norm(), l);
     return F_rep;
 }
 

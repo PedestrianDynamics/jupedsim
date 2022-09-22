@@ -12,11 +12,6 @@ void Agent::SetEllipse(const Ellipse& e)
     _ellipse = e;
 }
 
-void Agent::SetPos(const Point& pos)
-{
-    _ellipse.SetCenter(pos);
-}
-
 void Agent::SetV(const Point& v)
 {
     _ellipse.SetV(v);
@@ -25,11 +20,6 @@ void Agent::SetV(const Point& v)
 const Ellipse& Agent::GetEllipse() const
 {
     return _ellipse;
-}
-
-const Point& Agent::GetPos() const
-{
-    return _ellipse.center;
 }
 
 const Point& Agent::GetV() const
@@ -71,16 +61,13 @@ void Agent::SetPhiPed()
 
 void Agent::InitE0(const Point& target)
 {
-    const Point& pos = GetPos();
-    Point delta = target - pos;
-
+    const Point delta = target - pos;
     _e0 = delta.Normalized();
 }
 
 Point Agent::GetE0(const Point& target, double deltaT) const
 {
     constexpr double _tau = 0.5;
-    const Point& pos = GetPos();
     const Point delta = target - pos;
     const Point new_e0 = delta.Normalized();
     const double t = _newOrientationDelay * deltaT;
