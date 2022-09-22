@@ -42,11 +42,6 @@ void Ellipse::SetBmax(double b_max)
     Bmax = b_max;
 }
 
-void Ellipse::SetV0(double v0)
-{
-    vel0 = v0;
-}
-
 // ellipse  semi-axis in the direction of the velocity
 double Ellipse::GetEA() const
 {
@@ -54,13 +49,16 @@ double Ellipse::GetEA() const
 }
 
 // ellipse semi-axis in the orthogonal direction of the velocity
-double Ellipse::GetEB() const
+double Ellipse::GetEB(double scale) const
 {
-    double x = (vel0 <= 0.001) ? 0 : (Bmax - _Bmin) / vel0;
-    return Bmax - vel.Norm() * x;
+    const double deltaB = Bmax - _Bmin;
+    return Bmax - deltaB * scale;
 }
 
-double Ellipse::EffectiveDistanceToEllipse(const Ellipse& E2, double* dist) const
+double Ellipse::EffectiveDistanceToEllipse(
+    const Ellipse& E2,
+    double scale_first,
+    double scale_second) const
 {
     Point R1, R2;
     Point E1inE2, // center of E1 in coordinate system of E2
@@ -68,18 +66,18 @@ double Ellipse::EffectiveDistanceToEllipse(const Ellipse& E2, double* dist) cons
     E2inE1 = E2.center.TransformToEllipseCoordinates(center, this->cosPhi, this->sinPhi);
     E1inE2 = center.TransformToEllipseCoordinates(E2.center, E2.cosPhi, E2.sinPhi);
     // distance between centers of E1 and E2
-    *dist = (center - E2.center).Norm();
-    R1 = this->PointOnEllipse(E2inE1);
-    R2 = E2.PointOnEllipse(E1inE2);
+    const auto dist = (center - E2.center).Norm();
+    R1 = this->PointOnEllipse(E2inE1, scale_first);
+    R2 = E2.PointOnEllipse(E1inE2, scale_second);
     // effective distance
-    return *dist - (center - R1).Norm() - (E2.center - R2).Norm();
+    return dist - (center - R1).Norm() - (E2.center - R2).Norm();
 }
 
 // input: P is a point in the ellipse world.
 // output: The point on the ellipse (in cartesian coord) that lays on the same line OP
 // O being the center of the ellipse
 // if P approx equal to Center of ellipse return cartesian coordinats of the point (a,0)/ellipse
-Point Ellipse::PointOnEllipse(const Point& P) const
+Point Ellipse::PointOnEllipse(const Point& P, double scale) const
 {
     double x = P.x, y = P.y;
     double r = x * x + y * y;
@@ -92,7 +90,7 @@ Point Ellipse::PointOnEllipse(const Point& P) const
     double cosTheta = x / r;
     double sinTheta = y / r;
     double a = GetEA();
-    double b = GetEB();
+    double b = GetEB(scale);
     Point S;
     S.x = a * cosTheta;
     S.y = b * sinTheta;
