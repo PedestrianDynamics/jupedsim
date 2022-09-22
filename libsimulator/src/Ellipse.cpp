@@ -2,205 +2,90 @@
 /// SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Ellipse.hpp"
 
-#define _USE_MATH_DEFINES
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
-/************************************************************
- Konstruktoren
- ************************************************************/
-
-JEllipse::JEllipse()
+void Ellipse::SetV(const Point& v)
 {
-    _vel = Point(); // velocity vector
-    _center = Point(); // cartesian coordinates of the center
-    _cosPhi = 1; // = cos(0)
-    _sinPhi = 0; // = sin(0)
-    _Xp = 0; // x Ellipse-coord of the centre (Center in (xc,yc) )
-    _Amin = 0.18; // Semi-axis in direction of motion:  pAmin + V * pAv
-    _Av = 0.53;
-    _Bmin = 0.20; // Semi-axis in direction of shoulders: pBmax - V *[(pBmax - pBmin) / V0]
-    _Bmax = 0.25;
-    _do_stretch = true;
-    _vel0 = 0; // desired speed
+    vel = v;
 }
 
-/*************************************************************
- Setter-Funktionen
- ************************************************************/
-
-void JEllipse::SetV(const Point& v)
+void Ellipse::SetCenter(Point pos)
 {
-    _vel = v;
+    center = pos;
 }
 
-void JEllipse::SetCenter(Point pos)
+void Ellipse::SetCosPhi(double c)
 {
-    _center = pos;
+    cosPhi = c;
 }
 
-void JEllipse::SetCosPhi(double c)
+void Ellipse::SetSinPhi(double s)
 {
-    _cosPhi = c;
+    sinPhi = s;
 }
 
-void JEllipse::SetSinPhi(double s)
-{
-    _sinPhi = s;
-}
-
-void JEllipse::SetXp(double xp)
-{
-    _Xp = xp;
-}
-
-void JEllipse::SetAmin(double a_min)
+void Ellipse::SetAmin(double a_min)
 {
     _Amin = a_min;
 }
 
-void JEllipse::SetAv(double a_v)
+void Ellipse::SetAv(double a_v)
 {
     _Av = a_v;
 }
 
-void JEllipse::SetBmin(double b_min)
+void Ellipse::SetBmin(double b_min)
 {
     _Bmin = b_min;
 }
 
-void JEllipse::SetBmax(double b_max)
+void Ellipse::SetBmax(double b_max)
 {
-    _Bmax = b_max;
+    Bmax = b_max;
 }
 
-void JEllipse::SetV0(double v0)
+void Ellipse::SetV0(double v0)
 {
-    _vel0 = v0;
-}
-
-void JEllipse::DoStretch(bool stretch)
-{
-    _do_stretch = stretch;
-}
-
-/*************************************************************
- Getter-Funktionen
- ************************************************************/
-
-const Point& JEllipse::GetV() const
-{
-    return _vel;
-}
-
-const Point& JEllipse::GetCenter() const
-{
-    return _center;
-}
-
-double JEllipse::GetCosPhi() const
-{
-    return _cosPhi;
-}
-
-double JEllipse::GetSinPhi() const
-{
-    return _sinPhi;
-}
-
-double JEllipse::GetXp() const
-{
-    return _Xp;
-}
-
-double JEllipse::GetAmin() const
-{
-    return _Amin;
-}
-
-double JEllipse::GetAv() const
-{
-    return _Av;
-}
-
-double JEllipse::GetBmin() const
-{
-    return _Bmin;
-}
-
-double JEllipse::GetBmax() const
-{
-    if(_do_stretch) {
-        return _Bmax;
-    } else
-        return _Bmin;
-}
-
-double JEllipse::GetV0() const
-{
-    return _vel0;
-}
-double JEllipse::GetArea() const
-{
-    double ea = GetEA(); // _Amin + V * _Av;
-    double eb = GetEB(); //_Bmax - V * x;
-    return ea * eb * M_PI;
+    vel0 = v0;
 }
 
 // ellipse  semi-axis in the direction of the velocity
-double JEllipse::GetEA() const
+double Ellipse::GetEA() const
 {
-    return _Amin + _vel.Norm() * _Av;
-}
-
-bool JEllipse::DoesStretch() const
-{
-    return _do_stretch;
+    return _Amin + vel.Norm() * _Av;
 }
 
 // ellipse semi-axis in the orthogonal direction of the velocity
-double JEllipse::GetEB() const
+double Ellipse::GetEB() const
 {
-    if(_do_stretch) {
-        double x = (_vel0 <= 0.001) ? 0 : (_Bmax - _Bmin) / _vel0;
-        return _Bmax - _vel.Norm() * x;
-    } else {
-        return _Bmin;
-    }
+    double x = (vel0 <= 0.001) ? 0 : (Bmax - _Bmin) / vel0;
+    return Bmax - vel.Norm() * x;
 }
 
-double JEllipse::EffectiveDistanceToEllipse(const JEllipse& E2, double* dist) const
+double Ellipse::EffectiveDistanceToEllipse(const Ellipse& E2, double* dist) const
 {
-    //  E1 ist Objekt auf dem aufgerufen wird
-    Point E1center = this->GetCenter();
-    Point E2center = E2.GetCenter();
     Point R1, R2;
     Point E1inE2, // center of E1 in coordinate system of E2
         E2inE1;
-    E2inE1 = E2center.TransformToEllipseCoordinates(
-        this->GetCenter(), this->GetCosPhi(), this->GetSinPhi());
-    E1inE2 = E1center.TransformToEllipseCoordinates(E2.GetCenter(), E2.GetCosPhi(), E2.GetSinPhi());
+    E2inE1 = E2.center.TransformToEllipseCoordinates(center, this->cosPhi, this->sinPhi);
+    E1inE2 = center.TransformToEllipseCoordinates(E2.center, E2.cosPhi, E2.sinPhi);
     // distance between centers of E1 and E2
-    *dist = (E1center - E2center).Norm();
+    *dist = (center - E2.center).Norm();
     R1 = this->PointOnEllipse(E2inE1);
     R2 = E2.PointOnEllipse(E1inE2);
     // effective distance
-    return *dist - (E1center - R1).Norm() - (E2center - R2).Norm();
+    return *dist - (center - R1).Norm() - (E2.center - R2).Norm();
 }
 
 // input: P is a point in the ellipse world.
 // output: The point on the ellipse (in cartesian coord) that lays on the same line OP
 // O being the center of the ellipse
 // if P approx equal to Center of ellipse return cartesian coordinats of the point (a,0)/ellipse
-Point JEllipse::PointOnEllipse(const Point& P) const
+Point Ellipse::PointOnEllipse(const Point& P) const
 {
     double x = P.x, y = P.y;
     double r = x * x + y * y;
     if(r < J_EPS * J_EPS) {
         Point CP(this->GetEA(), 0);
-        return CP.TransformToCartesianCoordinates(
-            this->GetCenter(), this->GetCosPhi(), this->GetSinPhi());
+        return CP.TransformToCartesianCoordinates(center, this->cosPhi, this->sinPhi);
     }
     r = sqrt(r);
 
@@ -211,46 +96,5 @@ Point JEllipse::PointOnEllipse(const Point& P) const
     Point S;
     S.x = a * cosTheta;
     S.y = b * sinTheta;
-    return S.TransformToCartesianCoordinates(_center, _cosPhi, _sinPhi);
-}
-
-double JEllipse::EffectiveDistanceToLine(const Line& l) const
-{
-    Point C = this->GetCenter();
-    Point P = l.ShortestPoint(C);
-    Point R = this->PointOnEllipse(P);
-    return (P - R).Norm();
-}
-
-// check if point given in the ellipse coordinates is inside an ellipse
-bool JEllipse::IsInside(const Point& p) const
-{
-    double a = GetEA();
-    double b = GetEB();
-    double x = p.x;
-    double y = p.y;
-    double condition = (x * x) / (a * a) + (y * y) / (b * b) - 1;
-    return condition < 0;
-}
-
-// check if point given in the ellipse coordinates is outside an ellipse
-bool JEllipse::IsOutside(const Point& p) const
-{
-    double a = GetEA();
-    double b = GetEB();
-    double x = p.x;
-    double y = p.y;
-    double condition = (x * x) / (a * a) + (y * y) / (b * b) - 1;
-    return condition > 0;
-}
-
-// check if point given in the ellipse coordinates is on an ellipse
-bool JEllipse::IsOn(const Point& p) const
-{
-    double a = GetEA();
-    double b = GetEB();
-    double x = p.x;
-    double y = p.y;
-    double condition = (x * x) / (a * a) + (y * y) / (b * b) - 1;
-    return (-J_EPS_DIST < condition) && (condition < J_EPS_DIST);
+    return S.TransformToCartesianCoordinates(center, cosPhi, sinPhi);
 }

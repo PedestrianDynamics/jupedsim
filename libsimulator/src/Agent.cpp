@@ -7,7 +7,7 @@
 #include <Logger.hpp>
 #include <cassert>
 
-void Agent::SetEllipse(const JEllipse& e)
+void Agent::SetEllipse(const Ellipse& e)
 {
     _ellipse = e;
 }
@@ -27,19 +27,19 @@ void Agent::SetV0(double v0)
     _ellipse.SetV0(v0);
 }
 
-const JEllipse& Agent::GetEllipse() const
+const Ellipse& Agent::GetEllipse() const
 {
     return _ellipse;
 }
 
 const Point& Agent::GetPos() const
 {
-    return _ellipse.GetCenter();
+    return _ellipse.center;
 }
 
 const Point& Agent::GetV() const
 {
-    return _ellipse.GetV();
+    return _ellipse.vel;
 }
 
 const Point& Agent::GetE0() const
@@ -50,11 +50,11 @@ const Point& Agent::GetE0() const
 double Agent::GetV0() const
 {
     double smoothFactor = 15;
-    double v0 = _ellipse.GetV0();
+    double v0 = _ellipse.vel0;
     double f = 2.0 / (1 + exp(-smoothFactor)) - 1;
     double g = 2.0 / (1 + exp(-smoothFactor)) - 1;
 
-    double walking_speed = (1 - f * g) * _ellipse.GetV0() + f * g * v0;
+    double walking_speed = (1 - f * g) * _ellipse.vel0 + f * g * v0;
     return walking_speed;
 }
 
@@ -70,8 +70,8 @@ void Agent::SetPhiPed()
         cosPhi = vx / normv;
         sinPhi = vy / normv;
     } else {
-        cosPhi = GetEllipse().GetCosPhi();
-        sinPhi = GetEllipse().GetSinPhi();
+        cosPhi = GetEllipse().cosPhi;
+        sinPhi = GetEllipse().sinPhi;
     }
     _ellipse.SetCosPhi(cosPhi);
     _ellipse.SetSinPhi(sinPhi);

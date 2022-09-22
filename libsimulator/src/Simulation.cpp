@@ -69,7 +69,7 @@ uint64_t Simulation::AddAgent(
     auto agent = std::make_unique<Agent>();
     const auto orientationNormalised = orientation.Normalized();
 
-    JEllipse e{};
+    Ellipse e{};
     e.SetAv(Av);
     e.SetAmin(AMin);
     e.SetBmax(BMax);
