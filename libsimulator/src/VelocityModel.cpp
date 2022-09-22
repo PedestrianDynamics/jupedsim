@@ -40,16 +40,16 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
     const NeighborhoodSearch& neighborhoodSearch) const
 {
     const double radius = 4.0;
-    const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.GetPos(), radius);
+    const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.pos, radius);
     const auto parameters = _parameterProfiles.at(ped.parameterProfileId);
     double min_spacing = 100.0;
     Point repPed = Point(0, 0);
-    const Point p1 = ped.GetPos();
+    const Point p1 = ped.pos;
     for(const auto* other : neighborhood) {
         if(other->id == ped.id) {
             continue;
         }
-        if(!geometry.IntersectsAny(Line(p1, other->GetPos()))) {
+        if(!geometry.IntersectsAny(Line(p1, other->pos))) {
             repPed += ForceRepPed(&ped, other);
         }
     }
@@ -64,14 +64,14 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
         if(other->id == ped.id) {
             continue;
         }
-        if(!geometry.IntersectsAny(Line(p1, other->GetPos()))) {
+        if(!geometry.IntersectsAny(Line(p1, other->pos))) {
             double spacing = GetSpacing(&ped, other, direction).first;
             min_spacing = std::min(min_spacing, spacing);
         }
     }
 
     update.velocity = direction.Normalized() * OptimalSpeed(&ped, min_spacing, parameters.timeGap);
-    update.position = ped.GetPos() + *update.velocity * dT;
+    update.position = ped.pos + *update.velocity * dT;
     if(update.velocity->Norm() >= J_EPS_V) {
         update.resetPhi = true;
     }
@@ -90,7 +90,7 @@ void VelocityModel::ApplyUpdate(const PedestrianUpdate& update, Agent& agent) co
         agent.SetPhiPed();
     }
     if(update.position) {
-        agent.SetPos(*update.position);
+        agent.pos = *update.position;
     }
     if(update.velocity) {
         agent.SetV(*update.velocity);
@@ -106,7 +106,7 @@ void VelocityModel::e0(const Agent* ped, Point target, double deltaT, Pedestrian
     const
 {
     Point desired_direction;
-    const auto pos = ped->GetPos();
+    const auto pos = ped->pos;
     const auto dest = ped->destination;
     const auto dist = (dest - pos).Norm();
     if(dist > J_EPS_GOAL) {
@@ -133,7 +133,7 @@ double VelocityModel::OptimalSpeed(const Agent* ped, double spacing, double t) c
 // return spacing and id of the nearest pedestrian
 my_pair VelocityModel::GetSpacing(const Agent* ped1, const Agent* ped2, Point ei) const
 {
-    Point distp12 = ped2->GetPos() - ped1->GetPos(); // inversed sign
+    Point distp12 = ped2->pos - ped1->pos; // inversed sign
     double Distance = distp12.Norm();
     double l = 2 * ped1->GetEllipse().Bmax;
     Point ep12;
@@ -164,7 +164,7 @@ Point VelocityModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
 {
     Point F_rep(0.0, 0.0);
     // x- and y-coordinate of the distance between p1 and p2
-    Point distp12 = ped2->GetPos() - ped1->GetPos();
+    Point distp12 = ped2->pos - ped1->pos;
     double Distance = distp12.Norm();
     Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
     double R_ij;
@@ -180,11 +180,11 @@ Point VelocityModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
             "pedestrians ped1 {} at ({:f},{:f}) and ped2 {} at ({:f}, {:f})",
             Distance,
             ped1->id,
-            ped1->GetPos().x,
-            ped1->GetPos().y,
+            ped1->pos.x,
+            ped1->pos.y,
             ped2->id,
-            ped2->GetPos().x,
-            ped2->GetPos().y);
+            ped2->pos.x,
+            ped2->pos.y);
         exit(EXIT_FAILURE); // TODO: quick and dirty fix for issue #158
                             //  (sometimes sources create peds on the same location)
     }
@@ -203,7 +203,7 @@ Point VelocityModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
 
 Point VelocityModel::ForceRepRoom(const Agent* ped, const CollisionGeometry& geometry) const
 {
-    auto walls = geometry.LineSegmentsInDistanceTo(5.0, ped->GetPos());
+    auto walls = geometry.LineSegmentsInDistanceTo(5.0, ped->pos);
 
     auto f = std::accumulate(
         walls.begin(),
@@ -217,12 +217,12 @@ Point VelocityModel::ForceRepRoom(const Agent* ped, const CollisionGeometry& geo
 
 Point VelocityModel::ForceRepWall(const Agent* ped, const Line& w) const
 {
-    if(const auto distGoal = (ped->destination - ped->GetPos()).Norm(); distGoal < J_EPS_GOAL) {
+    if(const auto distGoal = (ped->destination - ped->pos).Norm(); distGoal < J_EPS_GOAL) {
         return Point{0, 0};
     }
 
-    const Point pt = w.ShortestPoint(ped->GetPos());
-    const Point dist_vec = pt - ped->GetPos();
+    const Point pt = w.ShortestPoint(ped->pos);
+    const Point dist_vec = pt - ped->pos;
     const double dist = dist_vec.Norm();
     const Point e_iw = dist_vec / dist;
 

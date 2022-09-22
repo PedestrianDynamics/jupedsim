@@ -7,11 +7,6 @@ void Ellipse::SetV(const Point& v)
     vel = v;
 }
 
-void Ellipse::SetCenter(Point pos)
-{
-    center = pos;
-}
-
 void Ellipse::SetCosPhi(double c)
 {
     cosPhi = c;
@@ -57,27 +52,29 @@ double Ellipse::GetEB(double scale) const
 
 double Ellipse::EffectiveDistanceToEllipse(
     const Ellipse& E2,
+    Point center_first,
+    Point center_second,
     double scale_first,
     double scale_second) const
 {
     Point R1, R2;
     Point E1inE2, // center of E1 in coordinate system of E2
         E2inE1;
-    E2inE1 = E2.center.TransformToEllipseCoordinates(center, this->cosPhi, this->sinPhi);
-    E1inE2 = center.TransformToEllipseCoordinates(E2.center, E2.cosPhi, E2.sinPhi);
+    E2inE1 = center_second.TransformToEllipseCoordinates(center_first, this->cosPhi, this->sinPhi);
+    E1inE2 = center_first.TransformToEllipseCoordinates(center_second, E2.cosPhi, E2.sinPhi);
     // distance between centers of E1 and E2
-    const auto dist = (center - E2.center).Norm();
-    R1 = this->PointOnEllipse(E2inE1, scale_first);
-    R2 = E2.PointOnEllipse(E1inE2, scale_second);
+    const auto dist = (center_first - center_second).Norm();
+    R1 = this->PointOnEllipse(E2inE1, scale_first, center_first);
+    R2 = E2.PointOnEllipse(E1inE2, scale_second, center_second);
     // effective distance
-    return dist - (center - R1).Norm() - (E2.center - R2).Norm();
+    return dist - (center_first - R1).Norm() - (center_second - R2).Norm();
 }
 
 // input: P is a point in the ellipse world.
 // output: The point on the ellipse (in cartesian coord) that lays on the same line OP
 // O being the center of the ellipse
 // if P approx equal to Center of ellipse return cartesian coordinats of the point (a,0)/ellipse
-Point Ellipse::PointOnEllipse(const Point& P, double scale) const
+Point Ellipse::PointOnEllipse(const Point& P, double scale, const Point& center) const
 {
     double x = P.x, y = P.y;
     double r = x * x + y * y;

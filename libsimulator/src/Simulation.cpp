@@ -77,7 +77,7 @@ uint64_t Simulation::AddAgent(
     e.SetCosPhi(orientationNormalised.x);
     e.SetSinPhi(orientationNormalised.y);
     agent->SetEllipse(e);
-    agent->SetPos(position);
+    agent->pos = position;
     agent->v0 = v0;
     agent->parameterProfileId = profileId;
 

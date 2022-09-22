@@ -347,14 +347,14 @@ double JPS_Agent_PositionX(JPS_Agent handle)
 {
     assert(handle);
     const auto agent = reinterpret_cast<const Agent*>(handle);
-    return agent->GetPos().x;
+    return agent->pos.x;
 }
 
 double JPS_Agent_PositionY(JPS_Agent handle)
 {
     assert(handle);
     const auto agent = reinterpret_cast<const Agent*>(handle);
-    return agent->GetPos().y;
+    return agent->pos.y;
 }
 
 double JPS_Agent_OrientationX(JPS_Agent handle)

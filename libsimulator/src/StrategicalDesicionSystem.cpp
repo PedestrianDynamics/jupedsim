@@ -9,6 +9,6 @@ void StrategicalDecisionSystem::Run(
     std::vector<std::unique_ptr<Agent>>& agents) const
 {
     for(auto& agent : agents) {
-        agent->waypoint = agent->behaviour->DesiredDestination(agent->GetPos());
+        agent->waypoint = agent->behaviour->DesiredDestination(agent->pos);
     }
 }
