@@ -138,7 +138,7 @@ Point GCFMModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
     double px; // hermite Interpolation value
     const Ellipse& E1 = ped1->GetEllipse();
     const Ellipse& E2 = ped2->GetEllipse();
-    double dist_eff =
+    const double dist_eff =
         E1.EffectiveDistanceToEllipse(E2, E1.vel.Norm() / ped1->v0, E2.vel.Norm() / ped2->v0);
     const auto agent1_mass = _parameterProfiles.at(ped1->parameterProfileId).mass;
 
@@ -152,18 +152,14 @@ Point GCFMModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
         return F_rep;
     }
 
-    //%------- Free parameter --------------
-    Point p1, p2; // "Normale" Koordinaten
-    double mindist;
-
-    p1 = Point(0, 0).TransformToCartesianCoordinates(E1.center, E1.cosPhi, E1.sinPhi);
-    p2 = Point(0, 0).TransformToCartesianCoordinates(E2.center, E2.cosPhi, E2.sinPhi);
-    distp12 = p2 - p1;
-    mindist = 0.5; // for performance reasons, it is assumed that this distance is about 50 cm
-    double dist_intpol_left = mindist + _intp_widthPed; // lower cut-off for Frep (modCFM)
-    double dist_intpol_right = _distEffMaxPed - _intp_widthPed; // upper cut-off for Frep (modCFM)
-    double smax = mindist - _intp_widthPed; // max overlapping
-    double f = 0.0f, f1 = 0.0f; // function value and its derivative at the interpolation point'
+    const double mindist =
+        0.5; // for performance reasons, it is assumed that this distance is about 50 cm
+    const double dist_intpol_left = mindist + _intp_widthPed; // lower cut-off for Frep (modCFM)
+    const double dist_intpol_right =
+        _distEffMaxPed - _intp_widthPed; // upper cut-off for Frep (modCFM)
+    const double smax = mindist - _intp_widthPed; // max overlapping
+    double f = 0.0f; // fuction value
+    double f1 = 0.0f; // derivative of function value
 
     // todo: runtime normsquare?
     if(distp12.Norm() >= J_EPS) {
