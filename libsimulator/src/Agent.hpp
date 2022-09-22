@@ -26,7 +26,7 @@ public:
     OperationalModel::ParametersID parameterProfileId;
 
 private:
-    JEllipse _ellipse{}; // the shape of this pedestrian
+    Ellipse _ellipse{}; // the shape of this pedestrian
     Point _e0 = Point(0, 0); // desired direction
     int _newOrientationDelay = 0;
 
@@ -34,7 +34,7 @@ public:
     Agent() = default;
     ~Agent() = default;
 
-    void SetEllipse(const JEllipse& e);
+    void SetEllipse(const Ellipse& e);
 
     void SetPos(const Point& pos);
     void SetV(const Point& v);
@@ -44,7 +44,7 @@ public:
     void IncrementOrientationDelay();
     void SetPhiPed();
 
-    const JEllipse& GetEllipse() const;
+    const Ellipse& GetEllipse() const;
     const Point& GetPos() const;
     const Point& GetV() const;
     const Point& GetE0() const;

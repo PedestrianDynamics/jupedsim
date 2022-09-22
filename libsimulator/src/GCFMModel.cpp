@@ -136,8 +136,8 @@ Point GCFMModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
     double K_ij;
     double nom; // nominator of Frep
     double px; // hermite Interpolation value
-    const JEllipse& E1 = ped1->GetEllipse();
-    const JEllipse& E2 = ped2->GetEllipse();
+    const Ellipse& E1 = ped1->GetEllipse();
+    const Ellipse& E2 = ped2->GetEllipse();
     double distsq;
     double dist_eff = E1.EffectiveDistanceToEllipse(E2, &distsq);
     const auto agent1_mass = _parameterProfiles.at(ped1->parameterProfileId).mass;
@@ -156,10 +156,8 @@ Point GCFMModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
     Point p1, p2; // "Normale" Koordinaten
     double mindist;
 
-    p1 = Point(E1.GetXp(), 0)
-             .TransformToCartesianCoordinates(E1.GetCenter(), E1.GetCosPhi(), E1.GetSinPhi());
-    p2 = Point(E2.GetXp(), 0)
-             .TransformToCartesianCoordinates(E2.GetCenter(), E2.GetCosPhi(), E2.GetSinPhi());
+    p1 = Point(0, 0).TransformToCartesianCoordinates(E1.center, E1.cosPhi, E1.sinPhi);
+    p2 = Point(0, 0).TransformToCartesianCoordinates(E2.center, E2.cosPhi, E2.sinPhi);
     distp12 = p2 - p1;
     mindist = 0.5; // for performance reasons, it is assumed that this distance is about 50 cm
     double dist_intpol_left = mindist + _intp_widthPed; // lower cut-off for Frep (modCFM)
@@ -302,7 +300,7 @@ Point GCFMModel::ForceRepStatPoint(const Agent* ped, const Point& p, double l, d
     double bla;
     Point r;
     Point pinE; // vorher x1, y1
-    const JEllipse& E = ped->GetEllipse();
+    const Ellipse& E = ped->GetEllipse();
 
     if(d < J_EPS)
         return Point(0.0, 0.0);
@@ -316,11 +314,11 @@ Point GCFMModel::ForceRepStatPoint(const Agent* ped, const Point& p, double l, d
     double K_ij;
     K_ij = 0.5 * bla / v.Norm(); // K_ij
     // Punkt auf der Ellipse
-    pinE = p.TransformToEllipseCoordinates(E.GetCenter(), E.GetCosPhi(), E.GetSinPhi());
+    pinE = p.TransformToEllipseCoordinates(E.center, E.cosPhi, E.sinPhi);
     // Punkt auf der Ellipse
     r = E.PointOnEllipse(pinE);
     // interpolierte Kraft
-    F_rep = ForceInterpolation(ped->GetV0(), K_ij, e_ij, vn, d, (r - E.GetCenter()).Norm(), l);
+    F_rep = ForceInterpolation(ped->GetV0(), K_ij, e_ij, vn, d, (r - E.center).Norm(), l);
     return F_rep;
 }
 
