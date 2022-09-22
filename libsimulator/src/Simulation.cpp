@@ -78,7 +78,7 @@ uint64_t Simulation::AddAgent(
     e.SetSinPhi(orientationNormalised.y);
     agent->SetEllipse(e);
     agent->SetPos(position);
-    agent->SetV0(v0);
+    agent->v0 = v0;
     agent->parameterProfileId = profileId;
 
     if(const auto& iter = _journeys.find(journeyId); iter != _journeys.end()) {

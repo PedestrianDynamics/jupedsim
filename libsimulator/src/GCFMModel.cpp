@@ -138,8 +138,8 @@ Point GCFMModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
     double px; // hermite Interpolation value
     const Ellipse& E1 = ped1->GetEllipse();
     const Ellipse& E2 = ped2->GetEllipse();
-    double distsq;
-    double dist_eff = E1.EffectiveDistanceToEllipse(E2, &distsq);
+    double dist_eff =
+        E1.EffectiveDistanceToEllipse(E2, E1.vel.Norm() / ped1->v0, E2.vel.Norm() / ped2->v0);
     const auto agent1_mass = _parameterProfiles.at(ped1->parameterProfileId).mass;
 
     //          smax    dist_intpol_left      dist_intpol_right       dist_eff_max
@@ -316,7 +316,7 @@ Point GCFMModel::ForceRepStatPoint(const Agent* ped, const Point& p, double l, d
     // Punkt auf der Ellipse
     pinE = p.TransformToEllipseCoordinates(E.center, E.cosPhi, E.sinPhi);
     // Punkt auf der Ellipse
-    r = E.PointOnEllipse(pinE);
+    r = E.PointOnEllipse(pinE, E.vel.Norm() / ped->v0);
     // interpolierte Kraft
     F_rep = ForceInterpolation(ped->GetV0(), K_ij, e_ij, vn, d, (r - E.center).Norm(), l);
     return F_rep;

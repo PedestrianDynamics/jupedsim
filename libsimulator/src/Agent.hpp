@@ -25,6 +25,9 @@ public:
     Point waypoint{};
     OperationalModel::ParametersID parameterProfileId;
 
+    /// Desired speed of agent
+    double v0;
+
 private:
     Ellipse _ellipse{}; // the shape of this pedestrian
     Point _e0 = Point(0, 0); // desired direction
@@ -38,7 +41,6 @@ public:
 
     void SetPos(const Point& pos);
     void SetV(const Point& v);
-    void SetV0(double v0);
     void SetE0(const Point& p) { _e0 = p; }
     void SetSmoothTurning();
     void IncrementOrientationDelay();
@@ -50,11 +52,6 @@ public:
     const Point& GetE0() const;
     Point GetE0(const Point& target, double deltaT) const;
     void InitE0(const Point& target);
-
-    /**
-     * the desired speed is the projection of the speed on the horizontal plane.
-     * @return the norm of the desired speed.
-     */
     double GetV0() const;
 };
 

@@ -22,11 +22,6 @@ void Agent::SetV(const Point& v)
     _ellipse.SetV(v);
 }
 
-void Agent::SetV0(double v0)
-{
-    _ellipse.SetV0(v0);
-}
-
 const Ellipse& Agent::GetEllipse() const
 {
     return _ellipse;
@@ -49,13 +44,10 @@ const Point& Agent::GetE0() const
 
 double Agent::GetV0() const
 {
-    double smoothFactor = 15;
-    double v0 = _ellipse.vel0;
-    double f = 2.0 / (1 + exp(-smoothFactor)) - 1;
-    double g = 2.0 / (1 + exp(-smoothFactor)) - 1;
-
-    double walking_speed = (1 - f * g) * _ellipse.vel0 + f * g * v0;
-    return walking_speed;
+    const double smoothFactor = 15;
+    const double f = 2.0 / (1 + exp(-smoothFactor)) - 1;
+    const double g = 2.0 / (1 + exp(-smoothFactor)) - 1;
+    return (1 - f * g) * v0 + f * g * v0;
 }
 
 void Agent::SetPhiPed()
