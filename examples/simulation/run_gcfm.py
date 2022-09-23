@@ -8,10 +8,10 @@ from jupedsim.serialization import JpsCoreStyleTrajectoryWriter
 from utilities import (
     build_areas,
     build_geometry,
-    build_velocity_model,
+    build_gcfm_model,
     distribute_and_add_agents,
     init_journey,
-    init_velocity_agent_parameters,
+    init_gcfm_agent_parameters,
 )
 
 
@@ -37,18 +37,28 @@ def main(fps: int, dt: float, trajectory_path: pathlib.Path):
     labels = ["exit", "other-label"]
     areas = build_areas(destinations, labels)
     parameter_profiles = {
-        # id:  (timeGap, tau, v0)
-        1: (1, 0.5, 1.0),
+        # id:  (mass, tau, v0)
+        1: (1, 0.5, 1.2),
         2: (1, 0.5, 0.1),
     }
-    model = build_velocity_model(8, 0.1, 5, 0.02, parameter_profiles)
+    model = build_gcfm_model(
+        0.3, 0.21, 2, 2.1, 0.1, 0.11, 3, 3.1, parameter_profiles
+    )
+
     log_info(f"Init simulation with dt={dt} [s] and fps={fps}")
     simulation = jps.Simulation(model, geometry, areas, dt)
     log_info("Init simulation done")
     way_points = [((19, 5), 0.5)]
     journey_id = init_journey(simulation, way_points)
-    agent_parameters = init_velocity_agent_parameters(
-        radius=0.15, phi_x=1, phi_y=0, journey=journey_id, profile=1
+    agent_parameters = init_gcfm_agent_parameters(
+        a_min=0.15,
+        b_min=0.15,
+        b_max=0.30,
+        a_v=0.2,
+        phi_x=1,
+        phi_y=0,
+        journey=journey_id,
+        profile=1,
     )
     positions = [(7, 7), (1, 3), (1, 5), (1, 7), (2, 7)]
     ped_ids = distribute_and_add_agents(
