@@ -84,6 +84,7 @@ PYBIND11_MODULE(py_jupedsim, m)
         owner.warning = {};
         owner.error = {};
     }));
+    m.doc() = "JuPedSim Python bindings";
     m.def("set_debug_callback", [](LogCallbackOwner::LogCallback callback) {
         LogCallbackOwner::Instance().debug = callback;
         JPS_Logging_SetDebugCallback(
@@ -114,14 +115,14 @@ PYBIND11_MODULE(py_jupedsim, m)
             [](const JPS_GeometryBuilder_Wrapper& w, std::vector<double> points) {
                 JPS_GeometryBuilder_AddAccessibleArea(w.handle, points.data(), points.size() / 2);
             },
-            "")
+            "Add area where agents can move")
         .def(
             "exclude_from_accssible_area",
             [](const JPS_GeometryBuilder_Wrapper& w, std::vector<double> points) {
                 JPS_GeometryBuilder_ExcludeFromAccessibleArea(
                     w.handle, points.data(), points.size() / 2);
             },
-            "")
+            "Add areas where agents can not move (obstacles)")
         .def(
             "build",
             [](const JPS_GeometryBuilder_Wrapper& w) {
@@ -134,7 +135,7 @@ PYBIND11_MODULE(py_jupedsim, m)
                 JPS_ErrorMessage_Free(errorMsg);
                 throw std::runtime_error{msg};
             },
-            "");
+            "Geometry builder");
     py::class_<JPS_OperationalModel_Wrapper>(m, "OperationalModel");
     py::class_<JPS_VelocityModelBuilder_Wrapper>(m, "VelocityModelBuilder")
         .def(py::init([](double aPed, double DPed, double aWall, double DWall) {
@@ -231,7 +232,7 @@ PYBIND11_MODULE(py_jupedsim, m)
                     tags_as_c_str.data(),
                     tags.size());
             },
-            "")
+            "Add area")
         .def(
             "build",
             [](const JPS_AreasBuilder_Wrapper& w) {
@@ -244,7 +245,7 @@ PYBIND11_MODULE(py_jupedsim, m)
                 JPS_ErrorMessage_Free(errorMsg);
                 throw std::runtime_error{msg};
             },
-            "");
+            "Build area");
     py::class_<JPS_Journey_Wrapper>(m, "Journey")
         .def_static(
             "make_waypoint_journey",
