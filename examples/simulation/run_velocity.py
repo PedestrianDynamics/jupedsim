@@ -14,6 +14,7 @@ def build_geometry() -> jps.GeometryBuilder:
     :returns: a geometry builder
 
     """
+    log_info("Init geometry")
     geo_builder = jps.GeometryBuilder()
     geo_builder.add_accessible_area([0, 0, 10, 0, 10, 10, 0, 10])
     geo_builder.add_accessible_area([10, 4, 20, 4, 20, 6, 10, 6])
@@ -28,6 +29,7 @@ def build_areas() -> jps.AreasBuilder:
     :returns: Area builder
 
     """
+    log_info("Init areas")
     destination_id = 1
     areas_builder = jps.AreasBuilder()
     areas_builder.add_area(
@@ -56,6 +58,7 @@ def build_model(
     :returns: velocity model
 
     """
+    log_info("Init velocity model")
     model_builder = jps.VelocityModelBuilder(a_ped, D_ped, a_wall, D_wall)
     # define two different profiles
     for key, params in parameter_profiles.items():
@@ -73,6 +76,7 @@ def init_journey(simulation: jps.Simulation) -> int:
     :returns:
 
     """
+    log_info("Init journey")
     points = [((19, 5), 0.5)]  # defined as a list of (point, distance)
     journey = jps.Journey.make_waypoint_journey(points)
     journey_id = simulation.add_journey(journey)
@@ -96,6 +100,7 @@ def init_agent_parameters(
     :returns:
 
     """
+    log_info("Create agents")
     agent_parameters = jps.AgentParameters()
     # Shape is a circle
     agent_parameters.a_min = radius
@@ -141,12 +146,9 @@ def main(fps: int, dt: float, trajectory_path: pathlib.Path):
     :returns:
 
     """
-    init_logger(jps)
-    log_info("Init geometry")
-    geometry = build_geometry()
-    log_info("Init areas")
+    init_logger(jps)    
+    geometry = build_geometry()    
     areas = build_areas()
-    log_info("Init velocity model")
     parameter_profiles = {
         # id:  (timeGap, tau, v0)
         1: (1, 0.5, 1.0),
@@ -156,9 +158,7 @@ def main(fps: int, dt: float, trajectory_path: pathlib.Path):
     log_info(f"Init simulation with dt={dt} [s] and fps={fps}")
     simulation = jps.Simulation(model, geometry, areas, dt)
     log_info("Init simulation done")
-    log_info("Init journey")
     journey_id = init_journey(simulation)
-    log_info("Create agents")
     agent_parameters = init_agent_parameters(
         radius=0.15, phi_x=1, phi_y=0, journey=journey_id, profile=1
     )
