@@ -1,4 +1,5 @@
 import logging
+import py_jupedsim as jps
 
 
 def log_debug(msg):
@@ -21,7 +22,7 @@ logging.basicConfig(
     level=logging.DEBUG, format="%(levelname)s : %(message)s"
 )
 
-def init_logger(jps):
+def init_logger():
     jps.set_debug_callback(log_debug)
     jps.set_info_callback(log_info)
     jps.set_warning_callback(log_warn)
