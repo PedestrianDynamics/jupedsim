@@ -110,7 +110,7 @@ def init_agent_parameters(
     return agent_parameters
 
 
-def distribute_and_add_agent(
+def distribute_and_add_agents(
     simulation: jps.Simulation, agent_parameters: jps.AgentParameters
 ) -> list:
     """Initialize positions of agents and insert them into the simulation
@@ -162,7 +162,7 @@ def main(fps: int, dt: float, trajectory_path: pathlib.Path):
     agent_parameters = init_agent_parameters(
         radius=0.15, phi_x=1, phi_y=0, journey=journey_id, profile=1
     )
-    ped_ids = distribute_and_add_agent(simulation, agent_parameters)
+    ped_ids = distribute_and_add_agents(simulation, agent_parameters)
     log_info(f"Running simulation for {len(ped_ids)} agents:")
     writer = JpsCoreStyleTrajectoryWriter(trajectory_path)
     writer.begin_writing(fps)
