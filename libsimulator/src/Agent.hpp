@@ -28,6 +28,9 @@ public:
     /// Desired speed of agent
     double v0;
     Point pos;
+    // Gurantueed to be a unit vector
+    Point orientation;
+    double speed;
 
 private:
     Ellipse _ellipse{}; // the shape of this pedestrian
@@ -39,15 +42,11 @@ public:
     ~Agent() = default;
 
     void SetEllipse(const Ellipse& e);
-
-    void SetV(const Point& v);
     void SetE0(const Point& p) { _e0 = p; }
     void SetSmoothTurning();
     void IncrementOrientationDelay();
-    void SetPhiPed();
 
     const Ellipse& GetEllipse() const;
-    const Point& GetV() const;
     const Point& GetE0() const;
     Point GetE0(const Point& target, double deltaT) const;
     void InitE0(const Point& target);

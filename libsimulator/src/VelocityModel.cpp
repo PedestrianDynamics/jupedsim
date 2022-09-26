@@ -72,9 +72,6 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
 
     update.velocity = direction.Normalized() * OptimalSpeed(&ped, min_spacing, parameters.timeGap);
     update.position = ped.pos + *update.velocity * dT;
-    if(update.velocity->Norm() >= J_EPS_V) {
-        update.resetPhi = true;
-    }
     return update;
 };
 
@@ -86,14 +83,12 @@ void VelocityModel::ApplyUpdate(const PedestrianUpdate& update, Agent& agent) co
         agent.IncrementOrientationDelay();
     }
     agent.SetE0(update.e0);
-    if(update.resetPhi) {
-        agent.SetPhiPed();
-    }
     if(update.position) {
         agent.pos = *update.position;
     }
     if(update.velocity) {
-        agent.SetV(*update.velocity);
+        agent.orientation = (*update.velocity).Normalized();
+        agent.speed = (*update.velocity).Norm();
     }
 }
 
@@ -188,10 +183,7 @@ Point VelocityModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
         exit(EXIT_FAILURE); // TODO: quick and dirty fix for issue #158
                             //  (sometimes sources create peds on the same location)
     }
-    Point ei = ped1->GetV().Normalized();
-    if(ped1->GetV().NormSquare() < 0.01) {
-        ei = ped1->GetE0().Normalized();
-    }
+    Point ei = ped1->orientation;
     double condition1 = ei.ScalarProduct(ep12); // < e_i , e_ij > should be positive
     condition1 = (condition1 > 0) ? condition1 : 0; // abs
 

@@ -361,14 +361,14 @@ double JPS_Agent_OrientationX(JPS_Agent handle)
 {
     assert(handle);
     const auto agent = reinterpret_cast<const Agent*>(handle);
-    return agent->GetEllipse().cosPhi;
+    return agent->orientation.x;
 }
 
 double JPS_Agent_OrientationY(JPS_Agent handle)
 {
     assert(handle);
     const auto agent = reinterpret_cast<const Agent*>(handle);
-    return agent->GetEllipse().sinPhi;
+    return agent->orientation.y;
 }
 
 JPS_AgentId JPS_Agent_Id(JPS_Agent handle)

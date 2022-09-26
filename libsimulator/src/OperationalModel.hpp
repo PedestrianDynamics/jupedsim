@@ -18,7 +18,6 @@ struct PedestrianUpdate {
     std::optional<Point> waitingPos{};
     Point e0{}; // desired direction
     bool resetTurning{false};
-    bool resetPhi{false};
 };
 
 class OperationalModel : public Clonable<OperationalModel>
