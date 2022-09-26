@@ -12,19 +12,9 @@ void Agent::SetEllipse(const Ellipse& e)
     _ellipse = e;
 }
 
-void Agent::SetV(const Point& v)
-{
-    _ellipse.SetV(v);
-}
-
 const Ellipse& Agent::GetEllipse() const
 {
     return _ellipse;
-}
-
-const Point& Agent::GetV() const
-{
-    return _ellipse.vel;
 }
 
 const Point& Agent::GetE0() const
@@ -38,25 +28,6 @@ double Agent::GetV0() const
     const double f = 2.0 / (1 + exp(-smoothFactor)) - 1;
     const double g = 2.0 / (1 + exp(-smoothFactor)) - 1;
     return (1 - f * g) * v0 + f * g * v0;
-}
-
-void Agent::SetPhiPed()
-{
-    double cosPhi;
-    double sinPhi;
-    double vx = GetV().x;
-    double vy = GetV().y;
-
-    if(fabs(vx) > J_EPS || fabs(vy) > J_EPS) {
-        double normv = sqrt(vx * vx + vy * vy);
-        cosPhi = vx / normv;
-        sinPhi = vy / normv;
-    } else {
-        cosPhi = GetEllipse().cosPhi;
-        sinPhi = GetEllipse().sinPhi;
-    }
-    _ellipse.SetCosPhi(cosPhi);
-    _ellipse.SetSinPhi(sinPhi);
 }
 
 void Agent::InitE0(const Point& target)
