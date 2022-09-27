@@ -147,8 +147,9 @@ PYBIND11_MODULE(py_jupedsim, m)
                JPS_ModelParameterProfileId id,
                double t,
                double tau,
-               double v0) {
-                JPS_VelocityModelBuilder_AddParameterProfile(w.handle, id, t, tau, v0);
+               double v0,
+               double radius) {
+                JPS_VelocityModelBuilder_AddParameterProfile(w.handle, id, t, tau, v0, radius);
             })
         .def("build", [](JPS_VelocityModelBuilder_Wrapper& w) {
             JPS_ErrorMessage errorMsg{};
@@ -185,8 +186,13 @@ PYBIND11_MODULE(py_jupedsim, m)
                JPS_ModelParameterProfileId id,
                double mass,
                double tau,
-               double v0) {
-                JPS_GCFMModelBuilder_AddParameterProfile(w.handle, id, mass, tau, v0);
+               double v0,
+               double a_v,
+               double a_min,
+               double b_min,
+               double b_max) {
+                JPS_GCFMModelBuilder_AddParameterProfile(
+                    w.handle, id, mass, tau, v0, a_v, a_min, b_min, b_max);
             })
         .def("build", [](JPS_GCFMModelBuilder_Wrapper& w) {
             JPS_ErrorMessage errorMsg{};
@@ -282,10 +288,6 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def_readwrite("y", &JPS_AgentParameters::positionY)
         .def_readwrite("orientation_x", &JPS_AgentParameters::orientationX)
         .def_readwrite("orientation_y", &JPS_AgentParameters::orientationY)
-        .def_readwrite("a_v", &JPS_AgentParameters::Av)
-        .def_readwrite("a_min", &JPS_AgentParameters::AMin)
-        .def_readwrite("b_max", &JPS_AgentParameters::BMax)
-        .def_readwrite("b_min", &JPS_AgentParameters::BMin)
         .def_readwrite("journey_id", &JPS_AgentParameters::journeyId)
         .def_readwrite("profile_id", &JPS_AgentParameters::profileId);
     py::class_<JPS_Simulation_Wrapper>(m, "Simulation")

@@ -31,6 +31,7 @@ struct VelocityModelAgentParameters {
     double timeGap;
     double tau;
     double v0;
+    double radius;
 };
 
 /*!

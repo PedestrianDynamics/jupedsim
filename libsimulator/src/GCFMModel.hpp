@@ -15,6 +15,10 @@ struct GCFMModelAgentParameters {
     double mass;
     double tau;
     double v0;
+    double Av;
+    double AMin;
+    double BMin;
+    double BMax;
 };
 
 class GCFMModel : public OperationalModelBase<GCFMModelAgentParameters>
