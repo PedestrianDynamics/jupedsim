@@ -116,7 +116,7 @@ void VelocityModel::e0(const Agent* ped, Point target, double deltaT, Pedestrian
 double VelocityModel::OptimalSpeed(const Agent* ped, double spacing, double t) const
 {
     double v0 = ped->GetV0();
-    double l = 2 * ped->ellipse.Bmax; // assume peds are circles with const radius
+    double l = 2 * ped->radius;
     double speed = (spacing - l) / t;
     speed = (speed > 0) ? speed : 0;
     speed = (speed < v0) ? speed : v0;
@@ -130,7 +130,7 @@ my_pair VelocityModel::GetSpacing(const Agent* ped1, const Agent* ped2, Point ei
 {
     Point distp12 = ped2->pos - ped1->pos; // inversed sign
     double Distance = distp12.Norm();
-    double l = 2 * ped1->ellipse.Bmax;
+    double l = 2 * ped1->radius;
     Point ep12;
     if(Distance >= J_EPS) {
         ep12 = distp12.Normalized();
@@ -163,7 +163,7 @@ Point VelocityModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
     double Distance = distp12.Norm();
     Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
     double R_ij;
-    double l = 2 * ped1->ellipse.Bmax;
+    double l = 2 * ped1->radius;
 
     if(Distance >= J_EPS) {
         ep12 = distp12.Normalized();
@@ -218,7 +218,7 @@ Point VelocityModel::ForceRepWall(const Agent* ped, const Line& w) const
     const double dist = dist_vec.Norm();
     const Point e_iw = dist_vec / dist;
 
-    const double l = ped->ellipse.Bmax;
+    const double l = ped->radius;
     const double R_iw = -_aWall * exp((l - dist) / _DWall);
     return e_iw * R_iw;
 }

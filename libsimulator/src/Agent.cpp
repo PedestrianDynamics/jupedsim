@@ -14,6 +14,8 @@ const Point& Agent::GetE0() const
 
 double Agent::GetV0() const
 {
+    // TODO(kkratz): This is broken atm, this should smooth current to desired speed (i.e. should
+    // work on speed / v0)
     const double smoothFactor = 15;
     const double f = 2.0 / (1 + exp(-smoothFactor)) - 1;
     const double g = 2.0 / (1 + exp(-smoothFactor)) - 1;

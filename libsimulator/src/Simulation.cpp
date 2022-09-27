@@ -79,6 +79,8 @@ uint64_t Simulation::AddAgent(
     agent->pos = position;
     agent->v0 = v0;
     agent->parameterProfileId = profileId;
+    // TODO(kkratz): Replace later
+    agent->radius = BMax;
 
     if(const auto& iter = _journeys.find(journeyId); iter != _journeys.end()) {
         agent->behaviour = std::make_unique<FollowWaypointsBehaviour>(
