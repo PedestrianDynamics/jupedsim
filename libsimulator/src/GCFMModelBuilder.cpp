@@ -24,6 +24,7 @@ GCFMModelBuilder::GCFMModelBuilder(
 }
 
 GCFMModelBuilder& GCFMModelBuilder::AddAgentParameterProfile(GCFMModelAgentParameters profile)
+
 {
     _profiles.emplace_back(profile);
     return *this;

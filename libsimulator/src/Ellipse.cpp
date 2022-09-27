@@ -2,36 +2,16 @@
 /// SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Ellipse.hpp"
 
-void Ellipse::SetAmin(double a_min)
-{
-    _Amin = a_min;
-}
-
-void Ellipse::SetAv(double a_v)
-{
-    _Av = a_v;
-}
-
-void Ellipse::SetBmin(double b_min)
-{
-    _Bmin = b_min;
-}
-
-void Ellipse::SetBmax(double b_max)
-{
-    Bmax = b_max;
-}
-
 // ellipse  semi-axis in the direction of the velocity
 double Ellipse::GetEA(double speed) const
 {
-    return _Amin + speed * _Av;
+    return Amin + speed * Av;
 }
 
 // ellipse semi-axis in the orthogonal direction of the velocity
 double Ellipse::GetEB(double scale) const
 {
-    const double deltaB = Bmax - _Bmin;
+    const double deltaB = Bmax - Bmin;
     return Bmax - deltaB * scale;
 }
 

@@ -108,11 +108,11 @@ void VelocityModel::e0(const Agent* ped, Point target, double deltaT, Pedestrian
 
 double VelocityModel::OptimalSpeed(const Agent* ped, double spacing, double t) const
 {
-    const auto v0 = parameterProfile(ped->parameterProfileId).v0;
-    const double l = 2 * ped->radius;
+    const auto& profile = parameterProfile(ped->parameterProfileId);
+    const double l = 2 * profile.radius;
     double speed = (spacing - l) / t;
     speed = (speed > 0) ? speed : 0;
-    speed = (speed < v0) ? speed : v0;
+    speed = (speed < profile.v0) ? speed : profile.v0;
     //      (1-winkel)*speed;
     // todo use winkel
     return speed;
@@ -121,18 +121,19 @@ double VelocityModel::OptimalSpeed(const Agent* ped, double spacing, double t) c
 // return spacing and id of the nearest pedestrian
 my_pair VelocityModel::GetSpacing(const Agent* ped1, const Agent* ped2, Point ei) const
 {
+
     Point distp12 = ped2->pos - ped1->pos; // inversed sign
-    double Distance = distp12.Norm();
-    double l = 2 * ped1->radius;
+    const double distance = distp12.Norm();
+    const double l = 2 * parameterProfile(ped1->parameterProfileId).radius;
     Point ep12;
-    if(Distance >= J_EPS) {
+    if(distance >= J_EPS) {
         ep12 = distp12.Normalized();
     } else {
         LOG_WARNING(
             "VelocityModel::GetSPacing() ep12 can not be calculated! Pedestrians are to close "
             "to "
             "each other ({:f})",
-            Distance);
+            distance);
         exit(EXIT_FAILURE); // TODO
     }
 
@@ -141,7 +142,7 @@ my_pair VelocityModel::GetSpacing(const Agent* ped1, const Agent* ped2, Point ei
         ei.Rotate(0, 1).ScalarProduct(ep12); // theta = pi/2. condition2 should <= than l/Distance
     condition2 = (condition2 > 0) ? condition2 : -condition2; // abs
 
-    if((condition1 >= 0) && (condition2 <= l / Distance)) {
+    if((condition1 >= 0) && (condition2 <= l / distance)) {
         // return a pair <dist, condition1>. Then take the smallest dist. In case of equality the
         // biggest condition1
         return my_pair(distp12.Norm(), ped2->id);
@@ -156,7 +157,7 @@ Point VelocityModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
     double Distance = distp12.Norm();
     Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
     double R_ij;
-    double l = 2 * ped1->radius;
+    double l = 2 * parameterProfile(ped1->parameterProfileId).radius;
 
     if(Distance >= J_EPS) {
         ep12 = distp12.Normalized();
@@ -211,7 +212,7 @@ Point VelocityModel::ForceRepWall(const Agent* ped, const Line& w) const
     const double dist = dist_vec.Norm();
     const Point e_iw = dist_vec / dist;
 
-    const double l = ped->radius;
+    const double l = parameterProfile(ped->parameterProfileId).radius;
     const double R_iw = -_aWall * exp((l - dist) / _DWall);
     return e_iw * R_iw;
 }

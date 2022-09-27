@@ -122,11 +122,15 @@ void JPS_GCFMModelBuilder_AddParameterProfile(
     uint64_t id,
     double mass,
     double tau,
-    double v0)
+    double v0,
+    double a_v,
+    double a_min,
+    double b_min,
+    double b_max)
 {
     assert(handle != nullptr);
     auto builder = reinterpret_cast<GCFMModelBuilder*>(handle);
-    builder->AddAgentParameterProfile({id, mass, tau, v0});
+    builder->AddAgentParameterProfile({id, mass, tau, v0, a_v, a_min, b_min, b_max});
 }
 
 JPS_OperationalModel
@@ -170,11 +174,12 @@ JUPEDSIM_API void JPS_VelocityModelBuilder_AddParameterProfile(
     uint64_t id,
     double t,
     double tau,
-    double v0)
+    double v0,
+    double radius)
 {
     assert(handle);
     auto builder = reinterpret_cast<VelocityModelBuilder*>(handle);
-    builder->AddAgentParameterProfile({id, t, tau, v0});
+    builder->AddAgentParameterProfile({id, t, tau, v0, radius});
 }
 
 JUPEDSIM_API JPS_OperationalModel
@@ -495,10 +500,6 @@ JPS_AgentId JPS_Simulation_AddAgent(
         result = simulation->AddAgent(
             Point(parameters.positionX, parameters.positionY),
             Point(parameters.orientationX, parameters.orientationY),
-            parameters.Av,
-            parameters.AMin,
-            parameters.BMax,
-            parameters.BMin,
             parameters.journeyId,
             parameters.profileId);
     } catch(const std::exception& ex) {

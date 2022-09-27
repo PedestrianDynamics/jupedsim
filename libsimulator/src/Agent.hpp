@@ -29,14 +29,6 @@ public:
     Point pos;
     Point orientation;
 
-    // TODO(kkratz): this cannot be changed by the model, this is an external parameter -> move to
-    // parameter profile VelocityModel ONLY fields
-    double radius; // constant
-
-    // GCFMModel ONLY fields
-    // TODO(kkratz): this cannot be changed by the model, this is an external parameter -> move to
-    // parameter profile
-    Ellipse ellipse{}; // constant
     // Guaranteed to be a unit vector
     double speed;
 

@@ -65,10 +65,6 @@ public:
     uint64_t AddAgent(
         const Point& position,
         const Point& orientation,
-        double Av,
-        double AMin,
-        double BMax,
-        double BMin,
         Journey::ID journeyId,
         OperationalModel::ParametersID profileId);
 

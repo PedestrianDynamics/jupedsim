@@ -9,20 +9,12 @@
 class Ellipse
 {
 public:
+    double Av{0.53};
+    double Amin{0.18};
     double Bmax{0.25};
-
-private:
-    /// pAmin + V * pAv
-    double _Amin{0.18};
-    double _Av{0.53};
-    /// Semi-axis in direction of shoulders: pBmax - V *[(pBmax - pBmin) / V0]
-    double _Bmin{0.20};
+    double Bmin{0.20};
 
 public:
-    void SetAmin(double a_min);
-    void SetAv(double a_v);
-    void SetBmin(double b_min);
-    void SetBmax(double b_max);
     double GetEA(double speed) const; // ellipse semi-axis in the direction of the velocity
     // ellipse semi-axis in the orthogonal direction of the velocity
     double GetEB(double scale) const;

@@ -58,27 +58,15 @@ Journey::ID Simulation::AddJourney(std::unique_ptr<Journey>&& journey)
 uint64_t Simulation::AddAgent(
     const Point& position,
     const Point& orientation,
-    double Av,
-    double AMin,
-    double BMax,
-    double BMin,
     Journey::ID journeyId,
     OperationalModel::ParametersID profileId)
 {
     auto agent = std::make_unique<Agent>();
     const auto orientationNormalised = orientation.Normalized();
 
-    Ellipse e{};
-    e.SetAv(Av);
-    e.SetAmin(AMin);
-    e.SetBmax(BMax);
-    e.SetBmin(BMin);
     agent->orientation = orientationNormalised;
-    agent->ellipse = e;
     agent->pos = position;
     agent->parameterProfileId = profileId;
-    // TODO(kkratz): Replace later
-    agent->radius = BMax;
 
     if(const auto& iter = _journeys.find(journeyId); iter != _journeys.end()) {
         agent->behaviour = std::make_unique<FollowWaypointsBehaviour>(
