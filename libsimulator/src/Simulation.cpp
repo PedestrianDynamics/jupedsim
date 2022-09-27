@@ -75,7 +75,7 @@ uint64_t Simulation::AddAgent(
     e.SetBmax(BMax);
     e.SetBmin(BMin);
     agent->orientation = orientationNormalised;
-    agent->SetEllipse(e);
+    agent->ellipse = e;
     agent->pos = position;
     agent->v0 = v0;
     agent->parameterProfileId = profileId;

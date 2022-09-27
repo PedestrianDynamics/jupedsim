@@ -136,8 +136,8 @@ Point GCFMModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
     double K_ij;
     double nom; // nominator of Frep
     double px; // hermite Interpolation value
-    const Ellipse& E1 = ped1->GetEllipse();
-    const Ellipse& E2 = ped2->GetEllipse();
+    const Ellipse& E1 = ped1->ellipse;
+    const Ellipse& E2 = ped2->ellipse;
     const double dist_eff = E1.EffectiveDistanceToEllipse(
         E2,
         ped1->pos,
@@ -274,7 +274,7 @@ inline Point GCFMModel::ForceRepWall(const Agent* ped, const Line& w) const
     if(fabs((w.GetPoint1() - w.GetPoint2()).ScalarProduct(ped->pos - pt)) > J_EPS) {
         return F;
     }
-    // double mind = ped->GetEllipse().MinimumDistanceToLine(w);
+    // double mind = ped->ellipse.MinimumDistanceToLine(w);
     double mind = 0.5; // for performance reasons this distance is assumed to be constant
     double vn =
         w.NormalComp(ped->orientation * ped->speed); // normal component of the velocity on the wall
@@ -307,7 +307,7 @@ Point GCFMModel::ForceRepStatPoint(const Agent* ped, const Point& p, double l, d
     double bla;
     Point r;
     Point pinE; // vorher x1, y1
-    const Ellipse& E = ped->GetEllipse();
+    const Ellipse& E = ped->ellipse;
 
     if(d < J_EPS)
         return Point(0.0, 0.0);

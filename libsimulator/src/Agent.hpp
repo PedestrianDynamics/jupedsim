@@ -25,15 +25,19 @@ public:
     Point waypoint{};
     OperationalModel::ParametersID parameterProfileId;
 
+    // Agent fields common for all models
+    Point pos;
+    Point orientation;
+
     /// Desired speed of agent
     double v0;
-    Point pos;
-    // Gurantueed to be a unit vector
-    Point orientation;
+
+    // GCFM Only fields
+    Ellipse ellipse{};
+    // Guaranteed to be a unit vector
     double speed;
 
 private:
-    Ellipse _ellipse{}; // the shape of this pedestrian
     Point _e0 = Point(0, 0); // desired direction
     int _newOrientationDelay = 0;
 
@@ -41,12 +45,10 @@ public:
     Agent() = default;
     ~Agent() = default;
 
-    void SetEllipse(const Ellipse& e);
     void SetE0(const Point& p) { _e0 = p; }
     void SetSmoothTurning();
     void IncrementOrientationDelay();
 
-    const Ellipse& GetEllipse() const;
     const Point& GetE0() const;
     Point GetE0(const Point& target, double deltaT) const;
     void InitE0(const Point& target);
