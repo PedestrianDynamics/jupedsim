@@ -7,16 +7,6 @@
 #include <Logger.hpp>
 #include <cassert>
 
-void Agent::SetEllipse(const Ellipse& e)
-{
-    _ellipse = e;
-}
-
-const Ellipse& Agent::GetEllipse() const
-{
-    return _ellipse;
-}
-
 const Point& Agent::GetE0() const
 {
     return _e0;
