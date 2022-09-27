@@ -12,7 +12,7 @@ void TacticalDecisionSystem::Run(
 
     for(auto& agent : agents) {
         const auto dest = agent->waypoint;
-        const auto waypoints = routingEngine.ComputeWaypoint(agent->GetPos(), dest);
+        const auto waypoints = routingEngine.ComputeWaypoint(agent->pos, dest);
         agent->destination = waypoints[1];
     }
 }

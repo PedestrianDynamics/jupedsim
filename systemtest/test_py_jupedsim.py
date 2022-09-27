@@ -1,5 +1,5 @@
-import pytest
 import py_jupedsim as jps
+import pytest
 
 
 def test_can_run_simulation():
@@ -21,28 +21,31 @@ def test_can_run_simulation():
     destination = 1
     areas_builder = jps.AreasBuilder()
     areas_builder.add_area(
-        destination, [18, 4, 20, 4, 20, 6, 18, 6], ["exit", "other-label"]
+        id=destination,
+        polygon=[18, 4, 20, 4, 20, 6, 18, 6],
+        labels=["exit", "other-label"],
     )
     areas = areas_builder.build()
 
-    model_builder = jps.VelocityModelBuilder(8, 0.1, 5, 0.02)
+    model_builder = jps.VelocityModelBuilder(
+        a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
+    )
     profile_id = 3
-    model_builder.add_parameter_profile(profile_id, 1, 0.5)
+    model_builder.add_parameter_profile(
+        id=profile_id, t=1, tau=0.5, v0=1.2, radius=0.3
+    )
 
     model = model_builder.build()
 
-    simulation = jps.Simulation(model, geometry, areas, 0.01)
+    simulation = jps.Simulation(
+        model=model, geometry=geometry, areas=areas, dt=0.01
+    )
 
     journey = jps.Journey.make_waypoint_journey([((19, 5), 0.5)])
 
     journey_id = simulation.add_journey(journey)
 
     agent_parameters = jps.AgentParameters()
-    agent_parameters.v0 = 1.0
-    agent_parameters.a_min = 0.15
-    agent_parameters.b_max = 0.15
-    agent_parameters.b_min = 0.15
-    agent_parameters.a_v = 0.53
     agent_parameters.journey_id = journey_id
     agent_parameters.orientation_x = 1.0
     agent_parameters.orientation_y = 0.0

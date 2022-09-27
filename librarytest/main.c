@@ -71,7 +71,7 @@ int main(int argc, char** argv)
     JPS_Areas areas = JPS_AreasBuilder_Build(areas_builder, NULL);
     JPS_AreasBuilder_Free(areas_builder);
 
-    JPS_OperationalModel model = JPS_OperationalModel_Create_VelocityModel(8, 0.1, 5, 0.02, NULL);
+    JPS_OperationalModel model = JPS_OperationalModel_Create_VelocityModel(8, 0.1, 5, 1.2, 0.3, NULL);
 
     JPS_Simulation simulation = JPS_Simulation_Create(model, geometry, areas, 0.01, NULL);
 
@@ -80,13 +80,6 @@ int main(int argc, char** argv)
     JPS_Areas_Free(areas);
 
     JPS_AgentParameters agent_parameters;
-    agent_parameters.v0 = 1.0;
-    agent_parameters.AMin = 0.15;
-    agent_parameters.BMax = 0.15;
-    agent_parameters.BMin = 0.15;
-    agent_parameters.Av = 0.53;
-    agent_parameters.T = 1;
-    agent_parameters.Tau = 0.5;
     agent_parameters.destinationAreaId = destinationId;
     agent_parameters.orientationX = 1.0;
     agent_parameters.orientationY = 0.0;

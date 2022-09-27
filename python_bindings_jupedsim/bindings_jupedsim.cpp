@@ -6,8 +6,6 @@
 #include <exception>
 #include <iterator>
 #include <memory>
-#include <pybind11/detail/common.h>
-#include <pybind11/pytypes.h>
 #include <stdexcept>
 #include <vector>
 
@@ -84,6 +82,7 @@ PYBIND11_MODULE(py_jupedsim, m)
         owner.warning = {};
         owner.error = {};
     }));
+    m.doc() = "JuPedSim Python bindings";
     m.def("set_debug_callback", [](LogCallbackOwner::LogCallback callback) {
         LogCallbackOwner::Instance().debug = callback;
         JPS_Logging_SetDebugCallback(
@@ -114,14 +113,14 @@ PYBIND11_MODULE(py_jupedsim, m)
             [](const JPS_GeometryBuilder_Wrapper& w, std::vector<double> points) {
                 JPS_GeometryBuilder_AddAccessibleArea(w.handle, points.data(), points.size() / 2);
             },
-            "")
+            "Add area where agents can move")
         .def(
             "exclude_from_accssible_area",
             [](const JPS_GeometryBuilder_Wrapper& w, std::vector<double> points) {
                 JPS_GeometryBuilder_ExcludeFromAccessibleArea(
                     w.handle, points.data(), points.size() / 2);
             },
-            "")
+            "Add areas where agents can not move (obstacles)")
         .def(
             "build",
             [](const JPS_GeometryBuilder_Wrapper& w) {
@@ -134,19 +133,33 @@ PYBIND11_MODULE(py_jupedsim, m)
                 JPS_ErrorMessage_Free(errorMsg);
                 throw std::runtime_error{msg};
             },
-            "");
+            "Geometry builder");
     py::class_<JPS_OperationalModel_Wrapper>(m, "OperationalModel");
     py::class_<JPS_VelocityModelBuilder_Wrapper>(m, "VelocityModelBuilder")
-        .def(py::init([](double aPed, double DPed, double aWall, double DWall) {
-            return std::make_unique<JPS_VelocityModelBuilder_Wrapper>(
-                JPS_VelocityModelBuilder_Create(aPed, DPed, aWall, DWall));
-        }))
+        .def(
+            py::init([](double aPed, double DPed, double aWall, double DWall) {
+                return std::make_unique<JPS_VelocityModelBuilder_Wrapper>(
+                    JPS_VelocityModelBuilder_Create(aPed, DPed, aWall, DWall));
+            }),
+            py::arg("a_ped"),
+            py::arg("d_ped"),
+            py::arg("a_wall"),
+            py::arg("d_wall"))
         .def(
             "add_parameter_profile",
             [](JPS_VelocityModelBuilder_Wrapper& w,
                JPS_ModelParameterProfileId id,
                double t,
-               double tau) { JPS_VelocityModelBuilder_AddParameterProfile(w.handle, id, t, tau); })
+               double tau,
+               double v0,
+               double radius) {
+                JPS_VelocityModelBuilder_AddParameterProfile(w.handle, id, t, tau, v0, radius);
+            },
+            py::arg("id"),
+            py::arg("t"),
+            py::arg("tau"),
+            py::arg("v0"),
+            py::arg("radius"))
         .def("build", [](JPS_VelocityModelBuilder_Wrapper& w) {
             JPS_ErrorMessage errorMsg{};
             auto result = JPS_VelocityModelBuilder_Build(w.handle, &errorMsg);
@@ -158,33 +171,55 @@ PYBIND11_MODULE(py_jupedsim, m)
             throw std::runtime_error{msg};
         });
     py::class_<JPS_GCFMModelBuilder_Wrapper>(m, "GCFMModelBuilder")
-        .def(py::init([](double nu_Ped,
-                         double nu_Wall,
-                         double dist_eff_Ped,
-                         double dist_eff_Wall,
-                         double intp_width_Ped,
-                         double intp_width_Wall,
-                         double maxf_Ped,
-                         double maxf_Wall) {
-            return std::make_unique<JPS_GCFMModelBuilder_Wrapper>(JPS_GCFMModelBuilder_Create(
-                nu_Ped,
-                nu_Wall,
-                dist_eff_Ped,
-                dist_eff_Wall,
-                intp_width_Ped,
-                intp_width_Wall,
-                maxf_Ped,
-                maxf_Wall));
-        }))
+        .def(
+            py::init([](double nu_Ped,
+                        double nu_Wall,
+                        double dist_eff_Ped,
+                        double dist_eff_Wall,
+                        double intp_width_Ped,
+                        double intp_width_Wall,
+                        double maxf_Ped,
+                        double maxf_Wall) {
+                return std::make_unique<JPS_GCFMModelBuilder_Wrapper>(JPS_GCFMModelBuilder_Create(
+                    nu_Ped,
+                    nu_Wall,
+                    dist_eff_Ped,
+                    dist_eff_Wall,
+                    intp_width_Ped,
+                    intp_width_Wall,
+                    maxf_Ped,
+                    maxf_Wall));
+            }),
+            py::arg("nuPed"),
+            py::arg("nuWall"),
+            py::arg("distEffPed"),
+            py::arg("distEffWall"),
+            py::arg("intpWidthPed"),
+            py::arg("intpWidthWall"),
+            py::arg("maxfPed"),
+            py::arg("maxfWall"))
         .def(
             "add_parameter_profile",
             [](JPS_GCFMModelBuilder_Wrapper& w,
                JPS_ModelParameterProfileId id,
                double mass,
-               double t,
-               double tau) {
-                JPS_GCFMModelBuilder_AddParameterProfile(w.handle, id, t, tau, mass);
-            })
+               double tau,
+               double v0,
+               double a_v,
+               double a_min,
+               double b_min,
+               double b_max) {
+                JPS_GCFMModelBuilder_AddParameterProfile(
+                    w.handle, id, mass, tau, v0, a_v, a_min, b_min, b_max);
+            },
+            py::arg("id"),
+            py::arg("mass"),
+            py::arg("tau"),
+            py::arg("v0"),
+            py::arg("a_v"),
+            py::arg("a_min"),
+            py::arg("b_min"),
+            py::arg("b_max"))
         .def("build", [](JPS_GCFMModelBuilder_Wrapper& w) {
             JPS_ErrorMessage errorMsg{};
             auto result = JPS_GCFMModelBuilder_Build(w.handle, &errorMsg);
@@ -222,7 +257,10 @@ PYBIND11_MODULE(py_jupedsim, m)
                     tags_as_c_str.data(),
                     tags.size());
             },
-            "")
+            py::arg("id"),
+            py::arg("polygon"),
+            py::arg("labels"),
+            "Add area")
         .def(
             "build",
             [](const JPS_AreasBuilder_Wrapper& w) {
@@ -235,7 +273,7 @@ PYBIND11_MODULE(py_jupedsim, m)
                 JPS_ErrorMessage_Free(errorMsg);
                 throw std::runtime_error{msg};
             },
-            "");
+            "Build area");
     py::class_<JPS_Journey_Wrapper>(m, "Journey")
         .def_static(
             "make_waypoint_journey",
@@ -279,28 +317,28 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def_readwrite("y", &JPS_AgentParameters::positionY)
         .def_readwrite("orientation_x", &JPS_AgentParameters::orientationX)
         .def_readwrite("orientation_y", &JPS_AgentParameters::orientationY)
-        .def_readwrite("v0", &JPS_AgentParameters::v0)
-        .def_readwrite("a_v", &JPS_AgentParameters::Av)
-        .def_readwrite("a_min", &JPS_AgentParameters::AMin)
-        .def_readwrite("b_max", &JPS_AgentParameters::BMax)
-        .def_readwrite("b_min", &JPS_AgentParameters::BMin)
         .def_readwrite("journey_id", &JPS_AgentParameters::journeyId)
         .def_readwrite("profile_id", &JPS_AgentParameters::profileId);
     py::class_<JPS_Simulation_Wrapper>(m, "Simulation")
-        .def(py::init([](JPS_OperationalModel_Wrapper& model,
-                         JPS_Geometry_Wrapper& geometry,
-                         JPS_Areas_Wrapper& areas,
-                         double dT) {
-            JPS_ErrorMessage errorMsg{};
-            auto result =
-                JPS_Simulation_Create(model.handle, geometry.handle, areas.handle, dT, &errorMsg);
-            if(result) {
-                return std::make_unique<JPS_Simulation_Wrapper>(result);
-            }
-            auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-            JPS_ErrorMessage_Free(errorMsg);
-            throw std::runtime_error{msg};
-        }))
+        .def(
+            py::init([](JPS_OperationalModel_Wrapper& model,
+                        JPS_Geometry_Wrapper& geometry,
+                        JPS_Areas_Wrapper& areas,
+                        double dT) {
+                JPS_ErrorMessage errorMsg{};
+                auto result = JPS_Simulation_Create(
+                    model.handle, geometry.handle, areas.handle, dT, &errorMsg);
+                if(result) {
+                    return std::make_unique<JPS_Simulation_Wrapper>(result);
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
+            }),
+            py::arg("model"),
+            py::arg("geometry"),
+            py::arg("areas"),
+            py::arg("dt"))
         .def(
             "add_journey",
             [](JPS_Simulation_Wrapper& simulation, JPS_Journey_Wrapper& journey) {
@@ -383,7 +421,9 @@ PYBIND11_MODULE(py_jupedsim, m)
                 auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
                 JPS_ErrorMessage_Free(errorMsg);
                 throw std::runtime_error{msg};
-            })
+            },
+            py::arg("agent_id"),
+            py::arg("profile_id"))
         .def(
             "agent_count",
             [](JPS_Simulation_Wrapper& simulation) {

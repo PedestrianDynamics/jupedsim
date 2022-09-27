@@ -86,7 +86,7 @@ void NeighborhoodIterator::increment()
 
 bool NeighborhoodIterator::is_it_valid() const
 {
-    return _cur_grid_it != _cur_grid_end && !is_ended() && _filter(_cur_grid_it->value->GetPos());
+    return _cur_grid_it != _cur_grid_end && !is_ended() && _filter(_cur_grid_it->value->pos);
 }
 
 bool NeighborhoodIterator::is_ended() const

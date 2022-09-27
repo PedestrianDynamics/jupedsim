@@ -31,8 +31,8 @@ void NeighborhoodSearch::Update(const std::vector<std::unique_ptr<Agent>>& peds)
     values.reserve(peds.size());
     for(const auto& ped : peds) {
         // determine the cell coordinates of pedestrian i
-        std::int32_t ix = static_cast<std::int32_t>(ped->GetPos().x / _cellSize);
-        std::int32_t iy = static_cast<std::int32_t>(ped->GetPos().y / _cellSize);
+        std::int32_t ix = static_cast<std::int32_t>(ped->pos.x / _cellSize);
+        std::int32_t iy = static_cast<std::int32_t>(ped->pos.y / _cellSize);
         values.push_back({{ix, iy}, ped.get()});
     }
     _grid = Grid2D<Agent*>(values);

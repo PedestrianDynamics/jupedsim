@@ -7,88 +7,24 @@
 #include <Logger.hpp>
 #include <cassert>
 
-void Agent::SetEllipse(const JEllipse& e)
-{
-    _ellipse = e;
-}
-
-void Agent::SetPos(const Point& pos)
-{
-    _ellipse.SetCenter(pos);
-}
-
-void Agent::SetV(const Point& v)
-{
-    _ellipse.SetV(v);
-}
-
-void Agent::SetV0(double v0)
-{
-    _ellipse.SetV0(v0);
-}
-
-const JEllipse& Agent::GetEllipse() const
-{
-    return _ellipse;
-}
-
-const Point& Agent::GetPos() const
-{
-    return _ellipse.GetCenter();
-}
-
-const Point& Agent::GetV() const
-{
-    return _ellipse.GetV();
-}
-
 const Point& Agent::GetE0() const
 {
     return _e0;
 }
 
-double Agent::GetV0() const
-{
-    double smoothFactor = 15;
-    double v0 = _ellipse.GetV0();
-    double f = 2.0 / (1 + exp(-smoothFactor)) - 1;
-    double g = 2.0 / (1 + exp(-smoothFactor)) - 1;
-
-    double walking_speed = (1 - f * g) * _ellipse.GetV0() + f * g * v0;
-    return walking_speed;
-}
-
-void Agent::SetPhiPed()
-{
-    double cosPhi;
-    double sinPhi;
-    double vx = GetV().x;
-    double vy = GetV().y;
-
-    if(fabs(vx) > J_EPS || fabs(vy) > J_EPS) {
-        double normv = sqrt(vx * vx + vy * vy);
-        cosPhi = vx / normv;
-        sinPhi = vy / normv;
-    } else {
-        cosPhi = GetEllipse().GetCosPhi();
-        sinPhi = GetEllipse().GetSinPhi();
-    }
-    _ellipse.SetCosPhi(cosPhi);
-    _ellipse.SetSinPhi(sinPhi);
-}
-
-void Agent::InitE0(const Point& target)
-{
-    const Point& pos = GetPos();
-    Point delta = target - pos;
-
-    _e0 = delta.Normalized();
-}
+// double Agent::GetV0() const
+//{
+//     // TODO(kkratz): This is broken atm, this should smooth current to desired speed (i.e. should
+//     // work on speed / v0)
+//     const double smoothFactor = 15;
+//     const double f = 2.0 / (1 + exp(-smoothFactor)) - 1;
+//     const double g = 2.0 / (1 + exp(-smoothFactor)) - 1;
+//     return (1 - f * g) * v0 + f * g * v0;
+// }
 
 Point Agent::GetE0(const Point& target, double deltaT) const
 {
     constexpr double _tau = 0.5;
-    const Point& pos = GetPos();
     const Point delta = target - pos;
     const Point new_e0 = delta.Normalized();
     const double t = _newOrientationDelay * deltaT;

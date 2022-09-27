@@ -121,12 +121,16 @@ void JPS_GCFMModelBuilder_AddParameterProfile(
     JPS_GCFMModelBuilder handle,
     uint64_t id,
     double mass,
-    double t,
-    double tau)
+    double tau,
+    double v0,
+    double a_v,
+    double a_min,
+    double b_min,
+    double b_max)
 {
     assert(handle != nullptr);
     auto builder = reinterpret_cast<GCFMModelBuilder*>(handle);
-    builder->AddAgentParameterProfile({id, mass, t, tau});
+    builder->AddAgentParameterProfile({id, mass, tau, v0, a_v, a_min, b_min, b_max});
 }
 
 JPS_OperationalModel
@@ -169,11 +173,13 @@ JUPEDSIM_API void JPS_VelocityModelBuilder_AddParameterProfile(
     JPS_VelocityModelBuilder handle,
     uint64_t id,
     double t,
-    double tau)
+    double tau,
+    double v0,
+    double radius)
 {
     assert(handle);
     auto builder = reinterpret_cast<VelocityModelBuilder*>(handle);
-    builder->AddAgentParameterProfile({id, t, tau});
+    builder->AddAgentParameterProfile({id, t, tau, v0, radius});
 }
 
 JUPEDSIM_API JPS_OperationalModel
@@ -347,28 +353,28 @@ double JPS_Agent_PositionX(JPS_Agent handle)
 {
     assert(handle);
     const auto agent = reinterpret_cast<const Agent*>(handle);
-    return agent->GetPos().x;
+    return agent->pos.x;
 }
 
 double JPS_Agent_PositionY(JPS_Agent handle)
 {
     assert(handle);
     const auto agent = reinterpret_cast<const Agent*>(handle);
-    return agent->GetPos().y;
+    return agent->pos.y;
 }
 
 double JPS_Agent_OrientationX(JPS_Agent handle)
 {
     assert(handle);
     const auto agent = reinterpret_cast<const Agent*>(handle);
-    return agent->GetEllipse().GetCosPhi();
+    return agent->orientation.x;
 }
 
 double JPS_Agent_OrientationY(JPS_Agent handle)
 {
     assert(handle);
     const auto agent = reinterpret_cast<const Agent*>(handle);
-    return agent->GetEllipse().GetSinPhi();
+    return agent->orientation.y;
 }
 
 JPS_AgentId JPS_Agent_Id(JPS_Agent handle)
@@ -494,11 +500,6 @@ JPS_AgentId JPS_Simulation_AddAgent(
         result = simulation->AddAgent(
             Point(parameters.positionX, parameters.positionY),
             Point(parameters.orientationX, parameters.orientationY),
-            parameters.Av,
-            parameters.AMin,
-            parameters.BMax,
-            parameters.BMin,
-            parameters.v0,
             parameters.journeyId,
             parameters.profileId);
     } catch(const std::exception& ex) {

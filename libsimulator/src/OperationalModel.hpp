@@ -15,10 +15,8 @@ class Agent;
 struct PedestrianUpdate {
     std::optional<Point> position{};
     std::optional<Point> velocity{};
-    std::optional<Point> waitingPos{};
     Point e0{}; // desired direction
     bool resetTurning{false};
-    bool resetPhi{false};
 };
 
 class OperationalModel : public Clonable<OperationalModel>
@@ -39,4 +37,35 @@ public:
 
     virtual void ApplyUpdate(const PedestrianUpdate& update, Agent& agent) const = 0;
     virtual bool ParameterProfileExists(ParametersID id) const = 0;
+};
+
+template <typename ModelData>
+class OperationalModelBase : public OperationalModel
+{
+private:
+    std::unordered_map<OperationalModel::ParametersID, ModelData> _parameterProfiles;
+
+public:
+    bool ParameterProfileExists(ParametersID id) const override
+    {
+        return _parameterProfiles.count(id) > 0;
+    };
+
+protected:
+    OperationalModelBase(const std::vector<ModelData>& parameterProfiles)
+    {
+        _parameterProfiles.reserve(parameterProfiles.size());
+        for(auto&& p : parameterProfiles) {
+            auto [_, success] = _parameterProfiles.try_emplace(p.id, p);
+            if(!success) {
+                throw std::runtime_error(
+                    fmt::format("Duplicate agent profile id={} supplied", p.id));
+            }
+        }
+    };
+
+    const ModelData& parameterProfile(OperationalModel::ParametersID id) const
+    {
+        return _parameterProfiles.at(id);
+    };
 };

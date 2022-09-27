@@ -58,27 +58,14 @@ Journey::ID Simulation::AddJourney(std::unique_ptr<Journey>&& journey)
 uint64_t Simulation::AddAgent(
     const Point& position,
     const Point& orientation,
-    double Av,
-    double AMin,
-    double BMax,
-    double BMin,
-    double v0,
     Journey::ID journeyId,
     OperationalModel::ParametersID profileId)
 {
     auto agent = std::make_unique<Agent>();
     const auto orientationNormalised = orientation.Normalized();
 
-    JEllipse e{};
-    e.SetAv(Av);
-    e.SetAmin(AMin);
-    e.SetBmax(BMax);
-    e.SetBmin(BMin);
-    e.SetCosPhi(orientationNormalised.x);
-    e.SetSinPhi(orientationNormalised.y);
-    agent->SetEllipse(e);
-    agent->SetPos(position);
-    agent->SetV0(v0);
+    agent->orientation = orientationNormalised;
+    agent->pos = position;
     agent->parameterProfileId = profileId;
 
     if(const auto& iter = _journeys.find(journeyId); iter != _journeys.end()) {
@@ -108,7 +95,7 @@ Agent* Simulation::AgentPtr(Agent::ID id) const
     const auto iter =
         std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped->id; });
     if(iter == _agents.end()) {
-        throw std::logic_error("Trying to access unknown Agent.");
+        throw std::logic_error(fmt::format("Trying to access unknown Agent {}", id));
     }
     return iter->get();
 }
