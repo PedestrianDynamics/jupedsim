@@ -49,12 +49,14 @@ def main():
     )
     profile_id = 3
     model_builder.add_parameter_profile(
-        id=profile_id, t_gap=1, tau=0.5, v0=1.2, radius=0.3
+        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.3
     )
 
     model = model_builder.build()
 
-    simulation = jps.Simulation(model, geometry, areas, dt=0.01)
+    simulation = jps.Simulation(
+        model=model, geometry=geometry, areas=areas, dt=0.01
+    )
 
     journey = jps.Journey.make_waypoint_journey([((19, 5), 0.5)])
 

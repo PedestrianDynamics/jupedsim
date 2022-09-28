@@ -158,7 +158,7 @@ PYBIND11_MODULE(py_jupedsim, m)
             },
             py::kw_only(),
             py::arg("id"),
-            py::arg("t_gap"),
+            py::arg("time_gap"),
             py::arg("tau"),
             py::arg("v0"),
             py::arg("radius"))
@@ -339,10 +339,10 @@ PYBIND11_MODULE(py_jupedsim, m)
                 JPS_ErrorMessage_Free(errorMsg);
                 throw std::runtime_error{msg};
             }),
+            py::kw_only(),
             py::arg("model"),
             py::arg("geometry"),
             py::arg("areas"),
-            py::kw_only(),
             py::arg("dt"))
         .def(
             "add_journey",
