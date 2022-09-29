@@ -37,18 +37,26 @@ def main(fps: int, dt: float, trajectory_path: pathlib.Path):
     labels = ["exit", "other-label"]
     areas = build_areas(destinations, labels)
     parameter_profiles = {
-        # id:  (timeGap, tau, v0)
-        1: (1, 0.5, 1.0),
-        2: (1, 0.5, 0.1),
+        # id:  (timeGap, tau, v0, radius)
+        1: (1, 0.5, 1.0, 0.2),
+        2: (1, 0.5, 0.1, 0.2),
     }
-    model = build_velocity_model(8, 0.1, 5, 0.02, parameter_profiles)
+    model = build_velocity_model(
+        a_ped=8,
+        d_ped=0.1,
+        a_wall=5,
+        d_wall=0.02,
+        parameter_profiles=parameter_profiles,
+    )
     log_info(f"Init simulation with dt={dt} [s] and fps={fps}")
-    simulation = jps.Simulation(model, geometry, areas, dt)
+    simulation = jps.Simulation(
+        model=model, geometry=geometry, areas=areas, dt=dt
+    )
     log_info("Init simulation done")
     way_points = [((19, 5), 0.5)]
     journey_id = init_journey(simulation, way_points)
     agent_parameters = init_velocity_agent_parameters(
-        radius=0.15, phi_x=1, phi_y=0, journey=journey_id, profile=1
+        phi_x=1, phi_y=0, journey=journey_id, profile=1
     )
     positions = [(7, 7), (1, 3), (1, 5), (1, 7), (2, 7)]
     ped_ids = distribute_and_add_agents(
@@ -77,7 +85,9 @@ def main(fps: int, dt: float, trajectory_path: pathlib.Path):
             actual_profile = 1
 
         try:
-            simulation.switch_agent_profile(test_id, actual_profile)
+            simulation.switch_agent_profile(
+                agent_id=test_id, profile_id=actual_profile
+            )
         except RuntimeError:
             log_error(
                 f"Can not change Profile of Agent {test_id} to Profile={actual_profile} at Iteration={simulation.iteration_count()}"

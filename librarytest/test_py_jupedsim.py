@@ -40,7 +40,9 @@ def main():
     destination = 1
     areas_builder = jps.AreasBuilder()
     areas_builder.add_area(
-        destination, [18, 4, 20, 4, 20, 6, 18, 6], ["exit", "other-label"]
+        id=destination,
+        polygon=[18, 4, 20, 4, 20, 6, 18, 6],
+        labels=["exit", "other-label"],
     )
     areas = areas_builder.build()
 
