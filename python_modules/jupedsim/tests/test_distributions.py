@@ -54,8 +54,9 @@ def test_point_in_circle():
 def test_bounding_box_determination():
     polygon = [(6, 0), (9, 2), (11, 4), (12, 7), (11.5, 9.5), (9.5, 10.5), (7.5, 10),
                (6, 9), (4.5, 10), (2.5, 10.5), (0.6, 9.5), (0, 7), (1, 4), (3, 2)]
+    s_polygon = distributions.shply.Polygon(polygon)
     expected_box = [(0, 0), (12, 10.5)]
-    assert distributions.get_bounding_box(polygon) == expected_box
+    assert distributions.get_bounding_box(s_polygon) == expected_box
 
 
 def test_minimal_distance_to_polygon():
@@ -68,50 +69,36 @@ def test_minimal_distance_to_polygon():
     assert abs(difference) < acceptance_rate
 
 
-def test_seed_works_correct_for_random_points():
+def test_seed_works_correct_for_determination_by_number():
     polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
+    polygon = distributions.shply.Polygon(polygon)
     agent_radius, wall_distance = 0.3, 0.3
     set_seed = 1337
-    samples1 = distributions.create_random_points_number(polygon, 100, agent_radius, wall_distance, seed=set_seed)
-    samples2 = distributions.create_random_points_number(polygon, 100, agent_radius, wall_distance, seed=set_seed)
+    samples1 = distributions.distribute_by_number(polygon, 100, agent_radius, wall_distance, seed=set_seed)
+    samples2 = distributions.distribute_by_number(polygon, 100, agent_radius, wall_distance, seed=set_seed)
     assert samples1 == samples2
 
 
-def test_placing_Circles():
-    distribution = distributions.Distribution((0, 1))
-    distribution.create_circle(0, 1, 2)
-    assert distribution.mid_point == (0, 1)
-    assert distribution.circles == [(0, 1, 2, None)]
-    with pytest.raises(distributions.Overlapping):
-        distribution.create_circle(0.5, 3, 5)
-    with pytest.raises(distributions.NegativeNumber):
-        distribution.create_circle(-1, -2, 5)
-    distribution.create_circle(2, 3, 2)
-    assert distribution.circles == [(0, 1, 2, None), (2, 3, 2, None)]
-    with pytest.raises(distributions.Overlapping):
-        distribution.create_circle(1.5, 2.5, 5)
-    distribution.create_circle(1, 2, 2)
-    assert distribution.circles == [(0, 1, 2, None), (2, 3, 2, None), (1, 2, 2, None)]
-    distribution = distributions.Distribution((0, 1))
-    distribution.create_circle(0, 1, density=1)
-    assert distribution.circles == [(0, 1, None, 1)]
-    with pytest.raises(distributions.Overlapping):
-        distribution.create_circle(5, 3, 6)
-
-
-def test_seed_works_correct_for_Circles():
-    distibution = distributions.Distribution((5, 5))
-    polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
+def test_seed_works_correct_for_distribution_in_circle_by_number():
+    polygon = distributions.shply.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+    number_of_agents = [5]
+    agent_distance = 0.3
+    distace_to_polygon = 0.3
     set_seed = 1337
-    distibution.create_circle(0, 5, number=5)
-    samples1 = distibution.place_in_Polygon(polygon, agent_radius=0.3, wall_distance=0.3, seed=set_seed)
-    samples2 = distibution.place_in_Polygon(polygon, agent_radius=0.3, wall_distance=0.3, seed=set_seed)
-    assert samples2 is not []
+    center_point = (5, 5)
+    circle_segment_radii = [(0, 5)]
+
+    samples1 = distributions.distribute_in_circles_by_number(polygon=polygon, agent_distance=agent_distance,
+                                                             distance_to_polygon=distace_to_polygon,
+                                                             center_point=center_point,
+                                                             circle_segment_radii=circle_segment_radii,
+                                                             numbers_of_agents=number_of_agents,
+                                                             seed=set_seed, max_iterations=10_000)
+    samples2 = distributions.distribute_in_circles_by_number(polygon=polygon, agent_distance=agent_distance,
+                                                             distance_to_polygon=distace_to_polygon,
+                                                             center_point=center_point,
+                                                             circle_segment_radii=circle_segment_radii,
+                                                             numbers_of_agents=number_of_agents,
+                                                             seed=set_seed, max_iterations=10_000)
+
     assert samples1 == samples2
-
-
-def test_removing_Circles():
-    distribution = distributions.Distribution("no mid point")
-    distribution.circles = [(0, 1, 2, None), (2, 3, 2, None)]
-    distribution.remove_circle(0, 1)
-    assert distribution.circles == [(2, 3, 2, None)]

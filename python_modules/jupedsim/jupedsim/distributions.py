@@ -94,6 +94,7 @@ class Distribution:
             if entire_circle_area < entire_polygon_area:
                 # inside the circle it is more likely to find a random point that is inside the polygon
                 for placed_count in range(targeted_count):
+                    # inside the circle it is more likely to find a random point that is inside the polygon
                     i = 0
                     while i < max_iterations:
                         i += 1
@@ -160,9 +161,12 @@ def is_inside_circle(point, mid, min_r, max_r):
 
 def get_bounding_box(polygon):
     """returns an Axis Aligned Bounding Box containing the minimal/maximal x and y values
-    formatted like : [(min(x_values), min(y_values)), (max(x_values), max(y_values))]"""
+    formatted like : [(min(x_values), min(y_values)), (max(x_values), max(y_values))]
+    polygon needs to be a shapely polygon
+    """
+    corner_points = list(polygon.exterior.coords)
     x_values, y_values = [], []
-    for point in polygon:
+    for point in corner_points:
         x_values.append(point[0])
         y_values.append(point[1])
 
@@ -179,40 +183,32 @@ def min_distance_to_polygon(pt, polygon):
     return min_dist
 
 
-def create_random_points_number(polygon, count, agent_radius, wall_distance,
-                                seed=None, obstacles=None, max_iterations=10000):
-    """returns points randomly placed inside the polygon
+def distribute_by_number(polygon, number_of_agents, agent_distance, distance_to_polygon,
+                         seed=None, max_iterations=10000):
+    """"returns number_of_agents points randomly placed inside the polygon
 
-        :param polygon: List of corner points given as tuples
-        :param count: number of points placed
-        :param agent_radius: minimal distance between points
-        :param wall_distance: minimal distance between points and the polygon
-        :param seed: define a seed for random generation
-        :param obstacles: holes inside the polygon given as a List of Lists of Corner points as tuples
-        :param max_iterations: no more than max_iterations must find a point inside the polygon
-        :return: list of created points
-    """
+        :param polygon: shapely polygon in which the agents will be placed
+        :param number_of_agents: number of agents distributed
+        :param agent_distance: minimal distance between the centers of agents
+        :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
+        :param seed: define a seed for random generation, Default value is None which corresponds to a random value
+        :param max_iterations: no more than max_iterations must find a point inside the polygon, default is 10_000
+        :return: list of created points"""
     box = get_bounding_box(polygon)
 
     if seed is not None:
         np.random.seed(seed)
 
-    if obstacles is None:
-        holes = []
-    else:
-        holes = obstacles
-
-    s_polygon = shply.Polygon(polygon, holes)
-    grid = Grid(box, agent_radius)
+    grid = Grid(box, agent_distance)
     created_points = 0
     iterations = 0
-    while created_points < count:
+    while created_points < number_of_agents:
         if iterations > max_iterations:
-            msg = f"Only {created_points} of {count}  could be placed." \
-                  f" density: {round(created_points / s_polygon.area, 2)} p/m²"
+            msg = f"Only {created_points} of {number_of_agents}  could be placed." \
+                  f" density: {round(created_points / polygon.area, 2)} p/m²"
             raise AgentCount(msg)
         temp_point = (np.random.uniform(box[0][0], box[1][0]), np.random.uniform(box[0][1], box[1][1]))
-        if check_distance_constraints(temp_point, wall_distance, grid, s_polygon):
+        if check_distance_constraints(temp_point, distance_to_polygon, grid, polygon):
             grid.append_point(temp_point)
 
             iterations = 0
@@ -223,13 +219,129 @@ def create_random_points_number(polygon, count, agent_radius, wall_distance,
     return grid.get_samples()
 
 
-def create_random_points_density(polygon, density, agent_radius, wall_distance, seed=None, max_iterations=10000,
-                                 obstacles=None):
-    if obstacles is None:
-        obstacles = []
-    area = shply.Polygon(polygon, obstacles).area
+def distribute_by_density(polygon, density, agent_distance, distance_to_polygon, seed=None, max_iterations=10000):
+    """returns points randomly placed inside the polygon with the given density
+
+        :param polygon: shapely polygon in which the agents will be placed
+        :param density: Density of agents inside the polygon
+        :param agent_distance: minimal distance between the centers of agents
+        :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
+        :param seed: define a seed for random generation, Default value is None which corresponds to a random value
+        :param max_iterations: no more than max_iterations must find a point inside the polygon, Default is 10_000
+        :return: list of created points"""
+    area = polygon.area
     number = round(density * area)
-    return create_random_points_number(polygon, number, agent_radius, wall_distance, seed, obstacles, max_iterations)
+    return distribute_by_number(polygon, number, agent_distance, distance_to_polygon, seed, max_iterations)
+
+
+def distribute_in_circles_by_number(polygon, agent_distance, distance_to_polygon,
+                                    center_point, circle_segment_radii, numbers_of_agents,
+                                    seed=None, max_iterations=10_000):
+    """returns points randomly placed inside the polygon inside each the circle segments
+
+        :param polygon: shapely polygon in which the agents will be placed
+        :param agent_distance: minimal distance between the centers of agents
+        :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
+        :param center_point: the Center point of the circle segments
+        :param circle_segment_radii: a list of minimal and maximal radius for each circle segment
+            Circle segments must not overlap
+            formatted like [(minimum_radius, maximum_radius)]
+        :param numbers_of_agents: a list of number of agents for each Circle segment
+            the position of the number corresponds to the order in which the Circle segments are given
+        :param seed: define a seed for random generation, Default value is None which corresponds to a random value
+        :param max_iterations: no more than max_iterations must find a point inside the polygon, Default is 10_000
+        :return: list of created points"""
+
+    # todo: needs errors implementation
+    if seed is not None:
+        np.random.seed(seed)
+    box = get_bounding_box(polygon)
+    grid = Grid(box, agent_distance)
+    for circle_segment, number in zip(circle_segment_radii, numbers_of_agents):
+        big_circle_area = intersecting_area_polygon_circle(center_point, circle_segment[1], polygon)
+        small_circle_area = intersecting_area_polygon_circle(center_point, circle_segment[0], polygon)
+        placeable_area = big_circle_area - small_circle_area
+
+        # it is being checked whether to place points inside the circle segment or around the polygon
+        # determine the entire area of the circle segment
+        entire_circle_area = np.pi * (circle_segment[1] ** 2 - circle_segment[0] ** 2)
+        # determine the area where a point might be placed around the polygon
+        dif_x, dif_y = box[1][0] - box[0][0], box[1][1] - box[0][1]
+        entire_polygon_area = dif_x * dif_y
+
+        if entire_circle_area < entire_polygon_area:
+            # inside the circle it is more likely to find a random point that is inside the polygon
+            for placed_count in range(number):
+                # inside the circle it is more likely to find a random point that is inside the polygon
+                i = 0
+                while i < max_iterations:
+                    i += 1
+                    # determines a random radius within the circle segment
+                    rho = np.sqrt(np.random.uniform(circle_segment[0] ** 2, circle_segment[1] ** 2))
+                    # determines a random degree
+                    theta = np.random.uniform(0, 2 * np.pi)
+                    pt = center_point[0] + rho * np.cos(theta), center_point[1] + rho * np.sin(theta)
+                    if check_distance_constraints(pt, distance_to_polygon, grid, polygon):
+                        grid.append_point(pt)
+                        break
+
+                if i >= max_iterations and placed_count != number:
+                    message = f"the desired amount of agents in the Circle segment from" \
+                              f" {circle_segment[0]} to {circle_segment[1]} could not be achieved." \
+                              f"\nOnly {placed_count} of {number}  could be placed." \
+                              f"\nactual density: {round(placed_count / placeable_area, 2)} p/m²"
+                    raise AgentCount(message)
+            else:
+                # placing points around the polygon is more likely to find a random point that is inside the circle
+                placed_count = 0
+                iterations = 0
+                while placed_count < number:
+                    if iterations > max_iterations:
+                        message = f"the desired amount of agents in the Circle segment from" \
+                                  f" {circle_segment[0]} to {circle_segment[1]} could not be achieved." \
+                                  f"\nOnly {placed_count} of {number}  could be placed." \
+                                  f"\nactual density: {round(placed_count / placeable_area, 2)} p/m²"
+                        raise AgentCount(message)
+                    temp_point = (np.random.uniform(box[0][0], box[1][0]), np.random.uniform(box[0][1], box[1][1]))
+                    if is_inside_circle(temp_point, center_point, circle_segment[0], circle_segment[1]) \
+                            and check_distance_constraints(temp_point, distance_to_polygon, grid, polygon):
+                        grid.append_point(temp_point)
+                        iterations = 0
+                        placed_count += 1
+                    else:
+                        iterations += 1
+        return grid.get_samples()
+
+
+def distribute_in_circles_by_density(polygon, agent_radius, distance_to_polygon,
+                                     center_point, circle_segment_radii, densities,
+                                     seed=None, max_iterations=10_000):
+    """returns points randomly placed inside the polygon inside each the circle segments
+
+        :param polygon: shapely polygon in which the agents will be placed
+        :param agent_radius: minimal distance between the centers of agents
+        :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
+        :param center_point: the Center point of the circle segments
+        :param circle_segment_radii: a list of minimal and maximal radius for each circle segment
+            Circle segments must not overlap
+            formatted like [(minimum_radius, maximum_radius)]
+        :param densities: a list of densities for each Circle segment
+            the position of the number corresponds to the order in which the Circle segments are given
+        :param seed: define a seed for random generation, Default value is None which corresponds to a random value
+        :param max_iterations: no more than max_iterations must find a point inside the polygon, Default is 10_000
+        :return: list of created points"""
+
+    number_of_agents = []
+    for circle_segment, density in zip(circle_segment_radii, densities):
+        big_circle_area = intersecting_area_polygon_circle(center_point, circle_segment[1], polygon)
+        small_circle_area = intersecting_area_polygon_circle(center_point, circle_segment[0], polygon)
+        placeable_area = big_circle_area - small_circle_area
+        number_of_agents.append(density * placeable_area)
+
+    return distribute_in_circles_by_number(polygon=polygon, agent_distance=agent_radius,
+                                           distance_to_polygon=distance_to_polygon, center_point=center_point,
+                                           circle_segment_radii=circle_segment_radii,
+                                           numbers_of_agents=number_of_agents, seed=seed, max_iterations=max_iterations)
 
 
 def check_distance_constraints(pt, wall_distance, grid, polygon):
