@@ -37,24 +37,30 @@ def main(fps: int, dt: float, trajectory_path: pathlib.Path):
     labels = ["exit", "other-label"]
     areas = build_areas(destinations, labels)
     parameter_profiles = {
-        # id:  (mass, tau, v0)
-        1: (1, 0.5, 1.2),
-        2: (1, 0.5, 0.1),
+        # id:  (mass, tau, v0, a_v, a_min, b_min, _b_max)
+        1: (1, 0.5, 1.2, 0.2, 0.15, 0.15, 0.30),
+        2: (1, 0.5, 0.1, 0.2, 0.15, 0.15, 0.30),
     }
     model = build_gcfm_model(
-        0.3, 0.21, 2, 2.1, 0.1, 0.11, 3, 3.1, parameter_profiles
+        nu_ped=0.3,
+        nu_wall=0.21,
+        dist_eff_ped=2,
+        dist_eff_wall=2.1,
+        intp_width_ped=0.1,
+        intp_width_wall=0.11,
+        maxf_ped=3,
+        maxf_wall=3.1,
+        parameter_profiles=parameter_profiles,
     )
 
     log_info(f"Init simulation with dt={dt} [s] and fps={fps}")
-    simulation = jps.Simulation(model, geometry, areas, dt)
+    simulation = jps.Simulation(
+        model=model, geometry=geometry, areas=areas, dt=dt
+    )
     log_info("Init simulation done")
     way_points = [((19, 5), 0.5)]
     journey_id = init_journey(simulation, way_points)
     agent_parameters = init_gcfm_agent_parameters(
-        a_min=0.15,
-        b_min=0.15,
-        b_max=0.30,
-        a_v=0.2,
         phi_x=1,
         phi_y=0,
         journey=journey_id,
@@ -87,7 +93,9 @@ def main(fps: int, dt: float, trajectory_path: pathlib.Path):
             actual_profile = 1
 
         try:
-            simulation.switch_agent_profile(test_id, actual_profile)
+            simulation.switch_agent_profile(
+                agent_id=test_id, profile_id=actual_profile
+            )
         except RuntimeError:
             log_error(
                 f"Can not change Profile of Agent {test_id} to Profile={actual_profile} at Iteration={simulation.iteration_count()}"

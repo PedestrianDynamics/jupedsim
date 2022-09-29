@@ -30,9 +30,9 @@ def build_areas(destinations: dict, labels: list) -> jps.AreasBuilder:
     areas_builder = jps.AreasBuilder()
     for destination_id, polygon in destinations.items():
         areas_builder.add_area(
-            destination_id,
-            polygon,
-            labels,
+            id=destination_id,
+            polygon=polygon,
+            labels=labels,
         )
 
     areas = areas_builder.build()
@@ -43,7 +43,7 @@ def build_gcfm_model(
     nu_ped: float,
     nu_wall: float,
     dist_eff_ped: float,
-    disr_eff_wall: float,
+    dist_eff_wall: float,
     intp_width_ped: float,
     intp_width_wall: float,
     maxf_ped: float,
@@ -55,7 +55,7 @@ def build_gcfm_model(
     :param nu_ped:
     :param nu_wall:
     :param dist_eff_ped:
-    :param disr_eff_wall:
+    :param dist_eff_wall:
     :param intp_width_ped:
     :param intp_width_wall:
     :param maxf_ped:
@@ -66,19 +66,27 @@ def build_gcfm_model(
     """
     log_info("Init gcfm model")
     model_builder = jps.GCFMModelBuilder(
-        nu_ped,
-        nu_wall,
-        dist_eff_ped,
-        disr_eff_wall,
-        intp_width_ped,
-        intp_width_wall,
-        maxf_ped,
-        maxf_wall,
+        nu_ped=nu_ped,
+        nu_wall=nu_wall,
+        dist_eff_ped=dist_eff_ped,
+        dist_eff_wall=dist_eff_wall,
+        intp_width_ped=intp_width_ped,
+        intp_width_wall=intp_width_wall,
+        maxf_ped=maxf_ped,
+        maxf_wall=maxf_wall,
     )
     # define two different profiles
     for key, params in parameter_profiles.items():
+        assert len(params) == 7
         model_builder.add_parameter_profile(
-            key, params[0], params[1], params[2]
+            id=key,
+            mass=params[0],
+            tau=params[1],
+            v0=params[2],
+            a_v=params[3],
+            a_min=params[4],
+            b_min=params[5],
+            b_max=params[6],
         )
     model = model_builder.build()
     return model
@@ -86,26 +94,33 @@ def build_gcfm_model(
 
 def build_velocity_model(
     a_ped: float,
-    D_ped: float,
+    d_ped: float,
     a_wall: float,
-    D_wall: float,
+    d_wall: float,
     parameter_profiles: dict,
 ) -> jps.OperationalModel:
     """Initialize velocity model with parameter values
 
     :param a_ped:
-    :param D_ped:
+    :param d_ped:
     :param a_wall:
-    :param D_wall:
+    :param d_wall:
     :returns: velocity model
 
     """
-    log_info("Init velocity model")
-    model_builder = jps.VelocityModelBuilder(a_ped, D_ped, a_wall, D_wall)
+    log_info(f"Init velocity model {parameter_profiles}")
+    model_builder = jps.VelocityModelBuilder(
+        a_ped=a_ped, d_ped=d_ped, a_wall=a_wall, d_wall=d_wall
+    )
     # define two different profiles
     for key, params in parameter_profiles.items():
+        assert len(params) == 4
         model_builder.add_parameter_profile(
-            key, params[0], params[1], params[2]
+            id=key,
+            time_gap=params[0],
+            tau=params[1],
+            v0=params[2],
+            radius=params[3],
         )
     model = model_builder.build()
     return model
@@ -126,10 +141,6 @@ def init_journey(simulation: jps.Simulation, way_points: list) -> int:
 
 
 def init_gcfm_agent_parameters(
-    a_min: float,
-    b_min: float,
-    b_max: float,
-    a_v: float,
     phi_x: float,
     phi_y: float,
     journey: jps.Journey,
@@ -137,10 +148,6 @@ def init_gcfm_agent_parameters(
 ) -> jps.AgentParameters:
     """Init agent shape and parameters
 
-    :param a_min:
-    :param b_min:
-    :param b_max:
-    :param a_v:
     :param phi_x: direcion in x-axis
     :param phi_y: direction in y-axis
     :param journey: waypoints for agents to pass through
@@ -150,11 +157,6 @@ def init_gcfm_agent_parameters(
     """
     log_info("Create agents")
     agent_parameters = jps.AgentParameters()
-    # Shape is a circle
-    agent_parameters.a_min = a_min
-    agent_parameters.b_min = b_min
-    agent_parameters.b_max = b_max
-    agent_parameters.a_v = a_v
     # ----- Profile
     agent_parameters.journey_id = journey
     agent_parameters.orientation_x = phi_x
@@ -164,7 +166,6 @@ def init_gcfm_agent_parameters(
 
 
 def init_velocity_agent_parameters(
-    radius: float,
     phi_x: float,
     phi_y: float,
     journey: jps.Journey,
@@ -182,11 +183,6 @@ def init_velocity_agent_parameters(
     """
     log_info("Create agents")
     agent_parameters = jps.AgentParameters()
-    # Shape is a circle
-    agent_parameters.a_min = radius
-    agent_parameters.b_max = radius
-    agent_parameters.b_min = radius
-    agent_parameters.a_v = 0.0
     # ----- Profile
     agent_parameters.journey_id = journey
     agent_parameters.orientation_x = phi_x
