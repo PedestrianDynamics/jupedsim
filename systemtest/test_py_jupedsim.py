@@ -32,7 +32,7 @@ def test_can_run_simulation():
     )
     profile_id = 3
     model_builder.add_parameter_profile(
-        id=profile_id, t=1, tau=0.5, v0=1.2, radius=0.3
+        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.3
     )
 
     model = model_builder.build()

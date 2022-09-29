@@ -141,6 +141,7 @@ PYBIND11_MODULE(py_jupedsim, m)
                 return std::make_unique<JPS_VelocityModelBuilder_Wrapper>(
                     JPS_VelocityModelBuilder_Create(aPed, DPed, aWall, DWall));
             }),
+            py::kw_only(),
             py::arg("a_ped"),
             py::arg("d_ped"),
             py::arg("a_wall"),
@@ -155,8 +156,9 @@ PYBIND11_MODULE(py_jupedsim, m)
                double radius) {
                 JPS_VelocityModelBuilder_AddParameterProfile(w.handle, id, t, tau, v0, radius);
             },
+            py::kw_only(),
             py::arg("id"),
-            py::arg("t"),
+            py::arg("time_gap"),
             py::arg("tau"),
             py::arg("v0"),
             py::arg("radius"))
@@ -190,6 +192,7 @@ PYBIND11_MODULE(py_jupedsim, m)
                     maxf_Ped,
                     maxf_Wall));
             }),
+            py::kw_only(),
             py::arg("nuPed"),
             py::arg("nuWall"),
             py::arg("distEffPed"),
@@ -212,6 +215,7 @@ PYBIND11_MODULE(py_jupedsim, m)
                 JPS_GCFMModelBuilder_AddParameterProfile(
                     w.handle, id, mass, tau, v0, a_v, a_min, b_min, b_max);
             },
+            py::kw_only(),
             py::arg("id"),
             py::arg("mass"),
             py::arg("tau"),
@@ -257,6 +261,7 @@ PYBIND11_MODULE(py_jupedsim, m)
                     tags_as_c_str.data(),
                     tags.size());
             },
+            py::kw_only(),
             py::arg("id"),
             py::arg("polygon"),
             py::arg("labels"),
@@ -335,6 +340,7 @@ PYBIND11_MODULE(py_jupedsim, m)
                 JPS_ErrorMessage_Free(errorMsg);
                 throw std::runtime_error{msg};
             }),
+            py::kw_only(),
             py::arg("model"),
             py::arg("geometry"),
             py::arg("areas"),
@@ -422,6 +428,7 @@ PYBIND11_MODULE(py_jupedsim, m)
                 JPS_ErrorMessage_Free(errorMsg);
                 throw std::runtime_error{msg};
             },
+            py::kw_only(),
             py::arg("agent_id"),
             py::arg("profile_id"))
         .def(
