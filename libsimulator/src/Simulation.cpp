@@ -15,7 +15,6 @@
 #include <memory>
 #include <optional>
 #include <stdexcept>
-#include <tinyxml.h>
 #include <variant>
 
 Simulation::Simulation(
