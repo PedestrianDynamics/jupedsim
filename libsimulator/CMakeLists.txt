@@ -21,6 +21,7 @@ add_library(simulator STATIC
     src/DTriangulation.hpp
     src/Ellipse.cpp
     src/Ellipse.hpp
+    src/Enum.hpp
     src/GCFMModel.cpp
     src/GCFMModel.hpp
     src/GCFMModelBuilder.cpp
@@ -32,10 +33,15 @@ add_library(simulator STATIC
     src/GeometryBuilder.hpp
     src/Graph.hpp
     src/Grid2D.hpp
+    src/HashCombine.hpp
+    src/IteratorPair.hpp
     src/Journey.cpp
     src/Journey.hpp
     src/Line.cpp
     src/Line.hpp
+    src/Logger.cpp
+    src/Logger.hpp
+    src/Macros.hpp
     src/Mathematics.cpp
     src/Mathematics.hpp
     src/NeighborhoodIterator.cpp
@@ -59,6 +65,7 @@ add_library(simulator STATIC
     src/TacticalDecisionSystem.hpp
     src/Triangle.cpp
     src/Triangle.hpp
+    src/UniqueID.hpp
     src/VelocityModel.cpp
     src/VelocityModel.hpp
     src/VelocityModelBuilder.cpp
@@ -74,7 +81,6 @@ target_link_libraries(simulator PUBLIC
     Boost::boost
     poly2tri
     fmt::fmt
-    shared
     CGAL::CGAL
 )
 target_include_directories(simulator PUBLIC
@@ -132,6 +138,7 @@ if (BUILD_TESTS)
         test/TestLine.cpp
         test/TestNeighborhoodSearch.cpp
         test/TestSimulationClock.cpp
+        test/TestUniqueID.cpp
     )
 
     target_link_libraries(libsimulator-tests PRIVATE
