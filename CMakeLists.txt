@@ -132,12 +132,13 @@ if(BUILD_JPSVIS)
     set(CMAKE_AUTOUIC ON)
     set(CMAKE_AUTOMOC ON)
     set(CMAKE_AUTORCC ON)
+    # remaining in-tree dependencies
+    # only tinyxml at this point
+    add_subdirectory(third-party)
 endif()
 if(BUILD_TESTS)
     find_package(GTest REQUIRED CONFIG)
 endif()
-# remaining in-tree dependencies
-add_subdirectory(third-party)
 ################################################################################
 # VCS info
 ################################################################################
@@ -258,7 +259,7 @@ if(BUILD_TESTS)
                 --junit-xml=result-systemtests.xml
         DEPENDS py_jupedsim
     )
-    set(unittests_dependency_list libjupedsim-unittests libsimulator-unittests libshared-unittests)
+    set(unittests_dependency_list libjupedsim-unittests libsimulator-unittests)
     add_custom_target(unittests
         DEPENDS ${unittests_dependency_list}
     )
@@ -274,12 +275,6 @@ if(BUILD_TESTS)
         COMMAND $<TARGET_FILE:libsimulator-tests>
                 --gtest_output=xml:result-libsimulator-unittests.xml
         DEPENDS libsimulator-tests
-    )
-    add_custom_target(libshared-unittests
-        COMMENT "Running unit tests"
-        COMMAND $<TARGET_FILE:libshared-tests>
-                --gtest_output=xml:result-libshared-unittests.xml
-        DEPENDS libshared-tests
     )
 endif()
 
@@ -300,7 +295,6 @@ if(BUILD_JPSVIS)
     add_subdirectory(jpsvis)
 endif()
 add_subdirectory(libjupedsim)
-add_subdirectory(libshared)
 add_subdirectory(libsimulator)
 add_subdirectory(python_bindings_jupedsim)
 
@@ -330,7 +324,7 @@ if(UNIX)
             )
             if(version MATCHES "^${clang-format-version}.*")
                 message(STATUS "Found clang-format ${version}, add format-check and reformat targets")
-                set(folders jpsvis libcore libshared libsimulator libjupedsim)
+                set(folders jpsvis libcore libsimulator libjupedsim)
                 add_custom_target(check-format
                     COMMENT "Checking format with clang-format"
                     COMMAND find ${folders}
