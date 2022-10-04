@@ -1,5 +1,5 @@
+import math
 from jupedsim import distributions
-import pytest
 
 
 class GridMock(distributions.Grid):
@@ -17,8 +17,8 @@ def test_cell_coord_determination():
 
 def test_grid_creation():
     box = [(0, 0), (3, 3)]
-    agent_radius = 0.3
-    grid = distributions.Grid(box, agent_radius)
+    agent_distance = 0.3
+    grid = distributions.Grid(box, agent_distance)
     acceptance_rate = 0.01
     assert grid.box == box
     assert abs(grid.c_s_l - 0.21213203435596423) < acceptance_rate
@@ -35,7 +35,7 @@ def test_neighbour_determination():
     mock.coords_list = [(ix, iy) for ix in range(mock.nx) for iy in range(mock.ny)]
     mock.cells = {coords: None for coords in mock.coords_list}
     for i in range(15):
-        mock.cells[(i, i)] = (i+0.5, i+0.5)
+        mock.cells[(i, i)] = (i + 0.5, i + 0.5)
     assert mock.has_neighbour_in_distance((7, 7), (7, 7)) is True
     assert mock.has_neighbour_in_distance((10, 0), (10, 0)) is False
 
@@ -72,33 +72,124 @@ def test_minimal_distance_to_polygon():
 def test_seed_works_correct_for_determination_by_number():
     polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
     polygon = distributions.shply.Polygon(polygon)
-    agent_radius, wall_distance = 0.3, 0.3
+    agent_distance, distance_to_polygon = 0.3, 0.3
     set_seed = 1337
-    samples1 = distributions.distribute_by_number(polygon, 100, agent_radius, wall_distance, seed=set_seed)
-    samples2 = distributions.distribute_by_number(polygon, 100, agent_radius, wall_distance, seed=set_seed)
+    samples1 = distributions.distribute_by_number(polygon, 100, agent_distance, distance_to_polygon, seed=set_seed)
+    samples2 = distributions.distribute_by_number(polygon, 100, agent_distance, distance_to_polygon, seed=set_seed)
     assert samples1 == samples2
 
 
-def test_seed_works_correct_for_distribution_in_circle_by_number():
-    polygon = distributions.shply.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
-    number_of_agents = [5]
+def test__determination_by_number_works_fine():
+    polygon = [(0, 2), (3, 3), (3, 5), (6, 5), (6, 0), (14, 0), (15, 15), (9, 15), (6, 10), (4, 12.5), (0, 7.5)]
+    holes = [[(8.5, 4), (10, 3), (12, 6.5), (10, 7)], [(10, 10.5), (11, 9.5), (14, 12.5), (11, 13)]]
+    polygon = distributions.shply.Polygon(polygon, holes)
+    agent_distance, distance_to_polygon = 0.3, 0.3
+    number_of_agents = 450
+    set_seed = 1337
+    samples = distributions.distribute_by_number(polygon=polygon, number_of_agents=number_of_agents,
+                                                 agent_distance=agent_distance, distance_to_polygon=distance_to_polygon,
+                                                 seed=set_seed)
+    # as many points created as intended
+    assert len(samples) == number_of_agents
+
+    # all created points contained inside polygon
+    for sample in samples:
+        assert polygon.contains(distributions.shply.Point(sample))
+
+    # all Points have enough distance to another
+    for i, sample in enumerate(samples):
+        j = 0
+        while j < len(samples):
+            if i == j:
+                j = j + 1
+                continue
+            dif_x = sample[0] - samples[j][0]
+            dif_y = sample[1] - samples[j][1]
+            distance = math.sqrt(dif_x ** 2 + dif_y ** 2)
+            assert distance >= agent_distance
+            j = j + 1
+
+
+def test__determination_by_density_correct_amount():
+    polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
+    # polygon 10 x 10 square with 100m²
+    polygon = distributions.shply.Polygon(polygon)
+    agent_distance, distance_to_polygon = 0.3, 0.3
+    density = 2.5
+    # 2.5 persons per m²
+    set_seed = 1337
+    samples = distributions.distribute_by_density(polygon=polygon, density=density, agent_distance=agent_distance,
+                                                  distance_to_polygon=distance_to_polygon, seed=set_seed)
+    # as many points created as intended
+    assert len(samples) == 250
+
+
+def test_distribution_in_circle_by_number_works_fine():
+    polygon = [(0, 2), (3, 3), (3, 5), (6, 5), (6, 0), (14, 0), (15, 15), (9, 15), (6, 10), (4, 12.5), (0, 7.5)]
+    holes = [[(8.5, 4), (10, 3), (12, 6.5), (10, 7)], [(10, 10.5), (11, 9.5), (14, 12.5), (11, 13)]]
+    polygon = distributions.shply.Polygon(polygon, holes)
+    number_of_agents = [200, 150]
+    agent_distance = 0.3
+    distace_to_polygon = 0.3
+    set_seed = 1337
+    center_point = (7.5, 7.5)
+    circle_segment_radii = [(0, 5), (6, 7.5)]
+
+    samples = distributions.distribute_in_circles_by_number(polygon=polygon, agent_distance=agent_distance,
+                                                            distance_to_polygon=distace_to_polygon,
+                                                            center_point=center_point,
+                                                            circle_segment_radii=circle_segment_radii,
+                                                            numbers_of_agents=number_of_agents,
+                                                            seed=set_seed, max_iterations=10_000)
+    # as many points created as intended
+    assert len(samples) == sum(number_of_agents)
+    i = 0
+
+    # all created points inside their corresponding circle segment
+    while i < number_of_agents[0]:
+        assert distributions.is_inside_circle(samples[i], center_point,
+                                              circle_segment_radii[0][0], circle_segment_radii[0][1])
+        i = i + 1
+    while i < number_of_agents[0] + number_of_agents[1]:
+        assert distributions.is_inside_circle(samples[i], center_point,
+                                              circle_segment_radii[1][0], circle_segment_radii[1][1])
+        i = i + 1
+
+    # all created points contained inside polygon
+    for sample in samples:
+        assert polygon.contains(distributions.shply.Point(sample))
+
+    # all Points have enough distance to another
+    for i, sample in enumerate(samples):
+        j = 0
+        while j < len(samples):
+            if i == j:
+                j = j + 1
+                continue
+            dif_x = sample[0] - samples[j][0]
+            dif_y = sample[1] - samples[j][1]
+            distance = math.sqrt(dif_x ** 2 + dif_y ** 2)
+            assert distance >= agent_distance
+            j = j + 1
+
+
+def test_distribution_in_circle_by_density_works_fine():
+    polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
+    # polygon 10 x 10 square with 100m²
+    polygon = distributions.shply.Polygon(polygon)
+    densities = [1]
     agent_distance = 0.3
     distace_to_polygon = 0.3
     set_seed = 1337
     center_point = (5, 5)
     circle_segment_radii = [(0, 5)]
 
-    samples1 = distributions.distribute_in_circles_by_number(polygon=polygon, agent_distance=agent_distance,
+    samples = distributions.distribute_in_circles_by_density(polygon=polygon, agent_distance=agent_distance,
                                                              distance_to_polygon=distace_to_polygon,
                                                              center_point=center_point,
                                                              circle_segment_radii=circle_segment_radii,
-                                                             numbers_of_agents=number_of_agents,
+                                                             densities=densities,
                                                              seed=set_seed, max_iterations=10_000)
-    samples2 = distributions.distribute_in_circles_by_number(polygon=polygon, agent_distance=agent_distance,
-                                                             distance_to_polygon=distace_to_polygon,
-                                                             center_point=center_point,
-                                                             circle_segment_radii=circle_segment_radii,
-                                                             numbers_of_agents=number_of_agents,
-                                                             seed=set_seed, max_iterations=10_000)
+    # as many points created as intended
+    assert len(samples) == 78
 
-    assert samples1 == samples2

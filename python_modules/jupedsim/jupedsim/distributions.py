@@ -8,12 +8,12 @@ class AgentCount(Exception):
         self.message = message
 
 
-class Overlapping(Exception):
+class OverlappingCirclesError(Exception):
     def __init__(self, message):
         self.message = message
 
 
-class NegativeNumber(Exception):
+class NegativeValueError(Exception):
     def __init__(self, message):
         self.message = message
 
@@ -168,26 +168,26 @@ def distribute_in_circles_by_number(polygon, agent_distance, distance_to_polygon
                               f"\nOnly {placed_count} of {number}  could be placed." \
                               f"\nactual density: {round(placed_count / placeable_area, 2)} p/m²"
                     raise AgentCount(message)
-            else:
-                # placing points around the polygon is more likely to find a random point that is inside the circle
-                placed_count = 0
-                iterations = 0
-                while placed_count < number:
-                    if iterations > max_iterations:
-                        message = f"the desired amount of agents in the Circle segment from" \
-                                  f" {circle_segment[0]} to {circle_segment[1]} could not be achieved." \
-                                  f"\nOnly {placed_count} of {number}  could be placed." \
-                                  f"\nactual density: {round(placed_count / placeable_area, 2)} p/m²"
-                        raise AgentCount(message)
-                    temp_point = (np.random.uniform(box[0][0], box[1][0]), np.random.uniform(box[0][1], box[1][1]))
-                    if is_inside_circle(temp_point, center_point, circle_segment[0], circle_segment[1]) \
-                            and check_distance_constraints(temp_point, distance_to_polygon, grid, polygon):
-                        grid.append_point(temp_point)
-                        iterations = 0
-                        placed_count += 1
-                    else:
-                        iterations += 1
-        return grid.get_samples()
+        else:
+            # placing points around the polygon is more likely to find a random point that is inside the circle
+            placed_count = 0
+            iterations = 0
+            while placed_count < number:
+                if iterations > max_iterations:
+                    message = f"the desired amount of agents in the Circle segment from" \
+                              f" {circle_segment[0]} to {circle_segment[1]} could not be achieved." \
+                              f"\nOnly {placed_count} of {number}  could be placed." \
+                              f"\nactual density: {round(placed_count / placeable_area, 2)} p/m²"
+                    raise AgentCount(message)
+                temp_point = (np.random.uniform(box[0][0], box[1][0]), np.random.uniform(box[0][1], box[1][1]))
+                if is_inside_circle(temp_point, center_point, circle_segment[0], circle_segment[1]) \
+                        and check_distance_constraints(temp_point, distance_to_polygon, grid, polygon):
+                    grid.append_point(temp_point)
+                    iterations = 0
+                    placed_count += 1
+                else:
+                    iterations += 1
+    return grid.get_samples()
 
 
 def distribute_in_circles_by_density(polygon, agent_distance, distance_to_polygon,
@@ -213,7 +213,7 @@ def distribute_in_circles_by_density(polygon, agent_distance, distance_to_polygo
         big_circle_area = intersecting_area_polygon_circle(center_point, circle_segment[1], polygon)
         small_circle_area = intersecting_area_polygon_circle(center_point, circle_segment[0], polygon)
         placeable_area = big_circle_area - small_circle_area
-        number_of_agents.append(density * placeable_area)
+        number_of_agents.append(int(density * placeable_area))
 
     return distribute_in_circles_by_number(polygon=polygon, agent_distance=agent_distance,
                                            distance_to_polygon=distance_to_polygon, center_point=center_point,
