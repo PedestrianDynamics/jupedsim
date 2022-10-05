@@ -3,28 +3,28 @@ import distributions
 import matplotlib.pyplot as plt
 
 
-def show_points(polygon, samples, radius, distributer=None, obstacles=None):
+def show_points(s_polygon, samples, radius, circle_segment_radii=None, center_point=None, obstacles=None):
     if obstacles is None:
         obstacles = []
-    box = distributions.get_bounding_box(polygon)
+    box = distributions.get_bounding_box(s_polygon)
+    exterior = list(s_polygon.exterior.coords)
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
     for elem in samples:
         ax.add_patch(plt.Circle(radius=radius / 2, xy=elem, fill=False))
         ax.add_patch(plt.Circle(radius=0.1, xy=elem, color="r"))
 
-    if distributer is not None:
-        center = distributer.mid_point
-        for circle in distributer.circles:
-            ax.add_patch(plt.Circle(radius=circle[0], xy=center, fill=False))
-            ax.add_patch(plt.Circle(radius=circle[1], xy=center, fill=False))
+    if circle_segment_radii is not None:
+        for circle_segment in circle_segment_radii:
+            ax.add_patch(plt.Circle(radius=circle_segment[0], xy=center_point, fill=False))
+            ax.add_patch(plt.Circle(radius=circle_segment[1], xy=center_point, fill=False))
 
-    n = len(polygon)
+    n = len(exterior)
     i = 0
     while True:
         following = (i + 1) % n
-        x_value = [polygon[i][0], polygon[following][0]]
-        y_value = [polygon[i][1], polygon[following][1]]
+        x_value = [exterior[i][0], exterior[following][0]]
+        y_value = [exterior[i][1], exterior[following][1]]
         plt.plot(x_value, y_value, color='blue')
 
         i += 1
@@ -55,10 +55,10 @@ def main():
     agents = density = 0
 
     with st.sidebar:
-        a_r = st.slider("space among agents", 0.1, 2.0, value=0.3)
-        w_d = st.slider("space between agents and walls", 0.1, 2.0, value=0.3)
+        agent_distance = st.slider("Distance between the center points of the agents", 0.1, 2.0, value=0.3)
+        distance_to_polygon = st.slider("Distance between agents and walls", 0.1, 2.0, value=0.3)
         st.text("Polygon settings")
-        corners = st.number_input("number of corner points in polygon", 3, value=len(default_polygon))
+        corners = st.number_input("Number of edges in polygon", 3, value=len(default_polygon))
         col1, col2 = st.columns(2)
         x_values, y_values = [], []
         with col1:
@@ -71,26 +71,26 @@ def main():
                 y_values.append(st.number_input(f"y value {i + 1}",
                                                 value=default_polygon[i][1] if i < len(default_polygon) else 0.0,
                                                 step=1.0))
-        seed = st.number_input("set a seed. 0 = random seed", 0)
+        seed = st.number_input("Set a seed. 0 = random seed", 0)
         if seed == 0:
             seed = None
-        st.text("Obstacle settings")
-        obstacle_count = st.number_input("number of obstacles", 0, value=0)
+        st.text("Hole settings")
+        obstacle_count = st.number_input("Number of Holes", 0, value=0)
         obstacle_corners = []
         obstacle_values = []
         for i in range(obstacle_count):
-            obstacle_corners.append(st.number_input(f"number of corner points in obstacle {i + 1}", 3, value=4))
+            obstacle_corners.append(st.number_input(f"Number of edges in hole {i + 1}", 3, value=4))
         col3, col4 = st.columns(2)
         with col3:
             for i in range(obstacle_count):
                 obstacle_values.append([])
                 for j in range(obstacle_corners[i]):
-                    obstacle_values[i].append([st.number_input(f"x value {j + 1} for obstacle{i + 1}",
+                    obstacle_values[i].append([st.number_input(f"x value {j + 1} for hole {i + 1}",
                                                                value=0.0, step=1.0)])
         with col4:
             for i in range(obstacle_count):
                 for j in range(obstacle_corners[i]):
-                    obstacle_values[i][j].append(st.number_input(f"y value {j + 1} for obstacle{i + 1}",
+                    obstacle_values[i][j].append(st.number_input(f"y value {j + 1} for hole {i + 1}",
                                                                  value=0.0, step=1.0))
 
     obstacles = []
@@ -101,10 +101,12 @@ def main():
     polygon = []
     for x, y in zip(x_values, y_values):
         polygon.append((x, y))
-    area = distributions.shply.Polygon(polygon, obstacles).area
-    distribution_type = st.radio("how to distribute agents?", ("place random", "place in Circle"))
+    s_polygon = distributions.shply.Polygon(polygon, obstacles)
+    area = s_polygon.area
+    distribution_type = st.radio("How to distribute agents?", ("place random", "place in Circle"))
 
     if distribution_type == "place in Circle":
+        style = (st.radio(f"How to choose number of agents for Circles", ("density", "number")))
         circle_count = st.number_input("number of circles", 1)
         col1, col2, col3 = st.columns(3)
         min_values, max_values = [], []
@@ -113,52 +115,68 @@ def main():
         with col1:
             mid_x = st.number_input("Center -> x value", value=default_center[0], step=1.0)
             for i in range(circle_count):
-                min_values.append(st.number_input(f"minimum radius for Circle {i + 1}", step=1.0))
+                min_values.append(st.number_input(f"minimum radius for Circle segment {i + 1}", step=1.0))
         with col2:
             mid_y = st.number_input("Center -> y value", value=default_center[1], step=1.0)
             for i in range(circle_count):
-                max_values.append(st.number_input(f"maximum radius for Circle {i + 1}", step=1.0))
+                max_values.append(st.number_input(f"maximum radius for Circle segment {i + 1}", step=1.0))
         with col3:
             for i in range(circle_count):
-                style = (st.radio(f"how to choose number of agents for Circle {i}", ("density", "number")))
                 if style == "density":
-                    agents.append(None)
-                    densities.append(st.slider("persons / m²", 0.1, 7.5, key=i), )
+                    densities.append(st.slider(f"Persons / m² in Circle segment {i+1}", 0.1, 7.5, key=i), )
                 elif style == "number":
-                    agents.append(st.slider("agents", 1, round(area * 5), key=i))
-                    densities.append(None)
-        distributer = distributions.Distribution((mid_x, mid_y))
+                    agents.append(st.slider(f"Agents in Circle segment {i+1}", 1, round(area * 5), key=i))
+
+        center_point = (mid_x, mid_y)
+        circle_segment_radii = []
         for i in range(circle_count):
-            distributer.create_circle(min_values[i], max_values[i], number=agents[i], density=densities[i])
+            circle_segment_radii.append((min_values[i], max_values[i]))
 
         button_clicked = st.button('distribute agents')
         if button_clicked:
-            samples = distributer.place_in_Polygon(polygon, a_r, w_d, seed=seed, obstacles=obstacles)
+            samples = []
+            if style == "density":
+                samples = distributions.distribute_in_circles_by_density(polygon=s_polygon,
+                                                                         agent_distance=agent_distance,
+                                                                         distance_to_polygon=distance_to_polygon,
+                                                                         center_point=center_point,
+                                                                         circle_segment_radii=circle_segment_radii,
+                                                                         densities=densities, seed=seed)
+            elif style == "number":
+                samples = distributions.distribute_in_circles_by_number(polygon=s_polygon,
+                                                                        agent_distance=agent_distance,
+                                                                        distance_to_polygon=distance_to_polygon,
+                                                                        center_point=center_point,
+                                                                        circle_segment_radii=circle_segment_radii,
+                                                                        numbers_of_agents=agents, seed=seed)
             st.text('below should be a plot')
-            show_points(polygon, samples, a_r, distributer, obstacles)
+            show_points(s_polygon, samples, agent_distance, circle_segment_radii, center_point, obstacles)
         else:
-            show_points(polygon, [], a_r, distributer, obstacles)
+            show_points(s_polygon, [], agent_distance, circle_segment_radii, center_point, obstacles)
 
     if distribution_type == "place random":
-        style = st.radio("how to choose number of agents?", ("density", "number"))
+        style = st.radio("How to choose number of agents?", ("density", "number"))
         if style == "density":
-            agents = None
-            density = st.slider("persons / m²", 0.1, 7.5)
+            density = st.slider("Persons / m²", 0.1, 7.5)
         elif style == "number":
-            agents = st.slider("agents", 1, round(area * 5))
-            density = None
+            agents = st.slider("Agents", 1, round(area * 5))
 
         button_clicked = st.button('distribute agents')
 
         if button_clicked:
-            if density is not None:
-                samples = distributions.create_random_points_density(polygon, density, a_r, w_d, seed, obstacles=obstacles)
-            else:
-                samples = distributions.create_random_points_number(polygon, agents, a_r, w_d, seed, obstacles=obstacles)
-            st.text('below should be a plot')
-            show_points(polygon, samples, a_r, obstacles=obstacles)
+            samples = []
+            if style == "density":
+                samples = distributions.distribute_by_density(polygon=s_polygon, density=density,
+                                                              agent_distance=agent_distance,
+                                                              distance_to_polygon=distance_to_polygon, seed=seed)
+            elif style == "number":
+                samples = distributions.distribute_by_number(polygon=s_polygon, number_of_agents=agents,
+                                                             agent_distance=agent_distance,
+                                                             distance_to_polygon=distance_to_polygon, seed=seed)
+            st.text('Below should be a plot')
+            show_points(s_polygon=s_polygon, samples=samples, radius=agent_distance, obstacles=obstacles)
         else:
-            show_points(polygon, [], a_r, obstacles=obstacles)
+            show_points(s_polygon=s_polygon, samples=[], radius=agent_distance, obstacles=obstacles)
 
 
 if __name__ == "__main__":
