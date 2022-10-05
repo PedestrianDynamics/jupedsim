@@ -8,6 +8,11 @@ class AgentCount(Exception):
         self.message = message
 
 
+class IncorrectParameterError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
 class OverlappingCirclesError(Exception):
     def __init__(self, message):
         self.message = message
@@ -71,6 +76,9 @@ def distribute_by_number(polygon, number_of_agents, agent_distance, distance_to_
         :param seed: define a seed for random generation, Default value is None which corresponds to a random value
         :param max_iterations: no more than max_iterations must find a point inside the polygon, default is 10_000
         :return: list of created points"""
+
+    if not isinstance(polygon, shply.polygon.Polygon):
+        raise IncorrectParameterError(f"Polygon is expected to be a shapely Polygon")
     box = get_bounding_box(polygon)
 
     if seed is not None:
@@ -106,9 +114,43 @@ def distribute_by_density(polygon, density, agent_distance, distance_to_polygon,
         :param seed: define a seed for random generation, Default value is None which corresponds to a random value
         :param max_iterations: no more than max_iterations must find a point inside the polygon, Default is 10_000
         :return: list of created points"""
+
+    if not isinstance(polygon, shply.polygon.Polygon):
+        raise IncorrectParameterError(f"Polygon is expected to be a shapely Polygon")
     area = polygon.area
     number = round(density * area)
     return distribute_by_number(polygon, number, agent_distance, distance_to_polygon, seed, max_iterations)
+
+
+def catch_wrong_inputs(polygon, center_point, circle_segment_radii, fill_parameters):
+    """checks if an input parameter is incorrect and raises an Exception"""
+    if not isinstance(polygon, shply.polygon.Polygon):
+        raise IncorrectParameterError(f"Polygon is expected to be a shapely Polygon")
+    try:
+        if len(center_point) != 2:
+            raise IncorrectParameterError(f"Center_point expected a tuple of 2 numbers, {len(center_point)} were given")
+    except TypeError:
+        # center point is no tuple or list
+        raise IncorrectParameterError(f"Center_point expected a tuple of 2 numbers")
+    if len(circle_segment_radii) != len(fill_parameters):
+        raise IncorrectParameterError(f"the number of circle segments does not match the number of fill parameters.\n"
+                                      f"radii given for {len(circle_segment_radii)} circle segments,"
+                                      f"fill parameter given for {len(fill_parameters)} circle segments")
+    for i, c_s_radius in enumerate(circle_segment_radii):
+        if c_s_radius[0] < 0 or c_s_radius[1] < 0:
+            raise NegativeValueError(f"Circle segment {c_s_radius[0]} : {c_s_radius[1]} is expected to be positiv")
+        if c_s_radius[0] >= c_s_radius[1]:
+            raise OverlappingCirclesError(f"minimum radius bigger than maximum radius\n"
+                                          f"a Circle segment from {c_s_radius[0]} to {c_s_radius[1]} is not possible")
+        j = 0
+        while j < i:
+            if c_s_radius[0] < c_s_radius[1] <= circle_segment_radii[j][0] \
+                    or circle_segment_radii[j][1] <= c_s_radius[0] < c_s_radius[1]:
+                j = j+1
+                continue
+            else:
+                raise OverlappingCirclesError(f"the new Circle would overlap with"
+                                              f"the existing circle from {c_s_radius[0]} to {c_s_radius[1]}")
 
 
 def distribute_in_circles_by_number(polygon, agent_distance, distance_to_polygon,
@@ -129,7 +171,9 @@ def distribute_in_circles_by_number(polygon, agent_distance, distance_to_polygon
         :param max_iterations: no more than max_iterations must find a point inside the polygon, Default is 10_000
         :return: list of created points"""
 
-    # todo: needs errors implementation
+    # catch wrong inputs
+    catch_wrong_inputs(polygon=polygon, center_point=center_point,
+                       circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
     if seed is not None:
         np.random.seed(seed)
     box = get_bounding_box(polygon)
@@ -149,7 +193,6 @@ def distribute_in_circles_by_number(polygon, agent_distance, distance_to_polygon
         if entire_circle_area < entire_polygon_area:
             # inside the circle it is more likely to find a random point that is inside the polygon
             for placed_count in range(number):
-                # inside the circle it is more likely to find a random point that is inside the polygon
                 i = 0
                 while i < max_iterations:
                     i += 1
@@ -208,6 +251,8 @@ def distribute_in_circles_by_density(polygon, agent_distance, distance_to_polygo
         :param max_iterations: no more than max_iterations must find a point inside the polygon, Default is 10_000
         :return: list of created points"""
 
+    catch_wrong_inputs(polygon=polygon, center_point=center_point,
+                       circle_segment_radii=circle_segment_radii, fill_parameters=densities)
     number_of_agents = []
     for circle_segment, density in zip(circle_segment_radii, densities):
         big_circle_area = intersecting_area_polygon_circle(center_point, circle_segment[1], polygon)
