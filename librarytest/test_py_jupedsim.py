@@ -33,14 +33,16 @@ def main():
     jps.set_error_callback(log_error)
 
     geo_builder = jps.GeometryBuilder()
-    geo_builder.add_accessible_area([0, 0, 10, 0, 10, 10, 0, 10])
-    geo_builder.add_accessible_area([10, 4, 20, 4, 20, 6, 10, 6])
+    geo_builder.add_accessible_area([(0, 0), (10, 0), (10, 10), (0, 10)])
+    geo_builder.add_accessible_area([(10, 4), (20, 4), (20, 6), (10, 6)])
     geometry = geo_builder.build()
 
     destination = 1
     areas_builder = jps.AreasBuilder()
     areas_builder.add_area(
-        destination, [18, 4, 20, 4, 20, 6, 18, 6], ["exit", "other-label"]
+        destination,
+        [(18, 4), (20, 4), (20, 6), (18, 6)],
+        ["exit", "other-label"],
     )
     areas = areas_builder.build()
 

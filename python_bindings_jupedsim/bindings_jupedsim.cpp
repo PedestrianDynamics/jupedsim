@@ -110,15 +110,29 @@ PYBIND11_MODULE(py_jupedsim, m)
         }))
         .def(
             "add_accessible_area",
-            [](const JPS_GeometryBuilder_Wrapper& w, std::vector<double> points) {
-                JPS_GeometryBuilder_AddAccessibleArea(w.handle, points.data(), points.size() / 2);
+            [](const JPS_GeometryBuilder_Wrapper& w,
+               std::vector<std::tuple<double, double>> points) {
+                std::vector<double> values{};
+                values.reserve(points.size() * 2);
+                for(const auto [x, y] : points) {
+                    values.emplace_back(x);
+                    values.emplace_back(y);
+                }
+                JPS_GeometryBuilder_AddAccessibleArea(w.handle, values.data(), values.size() / 2);
             },
             "Add area where agents can move")
         .def(
             "exclude_from_accssible_area",
-            [](const JPS_GeometryBuilder_Wrapper& w, std::vector<double> points) {
+            [](const JPS_GeometryBuilder_Wrapper& w,
+               std::vector<std::tuple<double, double>> points) {
+                std::vector<double> values{};
+                values.reserve(points.size() * 2);
+                for(const auto [x, y] : points) {
+                    values.emplace_back(x);
+                    values.emplace_back(y);
+                }
                 JPS_GeometryBuilder_ExcludeFromAccessibleArea(
-                    w.handle, points.data(), points.size() / 2);
+                    w.handle, values.data(), values.size() / 2);
             },
             "Add areas where agents can not move (obstacles)")
         .def(
@@ -243,8 +257,14 @@ PYBIND11_MODULE(py_jupedsim, m)
             "add_area",
             [](const JPS_AreasBuilder_Wrapper& w,
                uint64_t id,
-               std::vector<double> points,
+               std::vector<std::tuple<double, double>> points,
                std::vector<std::string> tags) {
+                std::vector<double> values{};
+                values.reserve(points.size() * 2);
+                for(const auto [x, y] : points) {
+                    values.emplace_back(x);
+                    values.emplace_back(y);
+                }
                 std::vector<const char*> tags_as_c_str;
                 tags_as_c_str.reserve(tags.size());
                 std::transform(
@@ -256,8 +276,8 @@ PYBIND11_MODULE(py_jupedsim, m)
                 JPS_AreasBuilder_AddArea(
                     w.handle,
                     id,
-                    points.data(),
-                    points.size() / 2,
+                    values.data(),
+                    values.size() / 2,
                     tags_as_c_str.data(),
                     tags.size());
             },
