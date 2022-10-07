@@ -2,10 +2,10 @@
 /// SPDX-License-Identifier: LGPL-3.0-or-later
 #include "VelocityModel.hpp"
 
-#include "Agent.hpp"
+#include "GenericAgent.hpp"
+#include "Macros.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
-#include "Simulation.hpp"
 
 #include <Logger.hpp>
 #include <memory>
@@ -28,9 +28,10 @@ VelocityModel::VelocityModel(
 
 PedestrianUpdate VelocityModel::ComputeNewPosition(
     double dT,
-    const Agent& ped,
+    const GenericAgent& ped,
+    const Data& modelData,
     const CollisionGeometry& geometry,
-    const NeighborhoodSearch& neighborhoodSearch) const
+    const NeighborhoodSearchType& neighborhoodSearch) const
 {
     const double radius = 4.0;
     const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.pos, radius);
@@ -38,12 +39,12 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
     double min_spacing = 100.0;
     Point repPed = Point(0, 0);
     const Point p1 = ped.pos;
-    for(const auto* other : neighborhood) {
-        if(other->id == ped.id) {
+    for(const auto& [otherGenericAgent, otherModelData] : neighborhood) {
+        if(otherGenericAgent->id == ped.id) {
             continue;
         }
-        if(!geometry.IntersectsAny(Line(p1, other->pos))) {
-            repPed += ForceRepPed(&ped, other);
+        if(!geometry.IntersectsAny(Line(p1, otherGenericAgent->pos))) {
+            repPed += ForceRepPed(&ped, otherGenericAgent);
         }
     }
     // repulsive forces to walls and closed transitions that are not my target
@@ -51,14 +52,14 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
 
     // calculate new direction ei according to (6)
     PedestrianUpdate update{};
-    e0(&ped, ped.destination, dT, update);
+    e0(&ped, modelData, ped.destination, dT, update);
     const Point direction = update.e0 + repPed + repWall;
-    for(const auto* other : neighborhood) {
-        if(other->id == ped.id) {
+    for(const auto& [otherGenericAgent, otherModelData] : neighborhood) {
+        if(otherGenericAgent->id == ped.id) {
             continue;
         }
-        if(!geometry.IntersectsAny(Line(p1, other->pos))) {
-            double spacing = GetSpacing(&ped, other, direction).first;
+        if(!geometry.IntersectsAny(Line(p1, otherGenericAgent->pos))) {
+            double spacing = GetSpacing(&ped, otherGenericAgent, direction).first;
             min_spacing = std::min(min_spacing, spacing);
         }
     }
@@ -68,20 +69,22 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
     return update;
 };
 
-void VelocityModel::ApplyUpdate(const PedestrianUpdate& update, Agent& agent) const
+void VelocityModel::ApplyUpdate(
+    const PedestrianUpdate& update,
+    GenericAgent& agent,
+    Data& modelData) const
 {
     if(update.resetTurning) {
-        agent.SetSmoothTurning();
+        modelData.orientationDelay = 0;
     } else {
-        agent.IncrementOrientationDelay();
+        ++modelData.orientationDelay;
     }
-    agent.SetE0(update.e0);
+    modelData.e0 = update.e0;
     if(update.position) {
         agent.pos = *update.position;
     }
     if(update.velocity) {
         agent.orientation = (*update.velocity).Normalized();
-        agent.speed = (*update.velocity).Norm();
     }
 }
 
@@ -90,23 +93,28 @@ std::unique_ptr<OperationalModel> VelocityModel::Clone() const
     return std::make_unique<VelocityModel>(*this);
 }
 
-void VelocityModel::e0(const Agent* ped, Point target, double deltaT, PedestrianUpdate& update)
-    const
+void VelocityModel::e0(
+    const GenericAgent* ped,
+    const Data& modelData,
+    Point target,
+    double deltaT,
+    PedestrianUpdate& update) const
 {
     Point desired_direction;
     const auto pos = ped->pos;
     const auto dest = ped->destination;
     const auto dist = (dest - pos).Norm();
     if(dist > J_EPS_GOAL) {
-        desired_direction = ped->GetE0(target, deltaT);
+        desired_direction =
+            MollifyE0(target, pos, deltaT, modelData.orientationDelay, modelData.e0);
     } else {
         update.resetTurning = true;
-        desired_direction = ped->GetE0();
+        desired_direction = modelData.e0;
     }
     update.e0 = desired_direction;
 }
 
-double VelocityModel::OptimalSpeed(const Agent* ped, double spacing, double t) const
+double VelocityModel::OptimalSpeed(const GenericAgent* ped, double spacing, double t) const
 {
     const auto& profile = parameterProfile(ped->parameterProfileId);
     const double l = 2 * profile.radius;
@@ -119,7 +127,8 @@ double VelocityModel::OptimalSpeed(const Agent* ped, double spacing, double t) c
 }
 
 // return spacing and id of the nearest pedestrian
-my_pair VelocityModel::GetSpacing(const Agent* ped1, const Agent* ped2, Point ei) const
+my_pair
+VelocityModel::GetSpacing(const GenericAgent* ped1, const GenericAgent* ped2, Point ei) const
 {
 
     Point distp12 = ped2->pos - ped1->pos; // inversed sign
@@ -149,7 +158,7 @@ my_pair VelocityModel::GetSpacing(const Agent* ped1, const Agent* ped2, Point ei
     }
     return my_pair(FLT_MAX, ped2->id);
 }
-Point VelocityModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
+Point VelocityModel::ForceRepPed(const GenericAgent* ped1, const GenericAgent* ped2) const
 {
     Point F_rep(0.0, 0.0);
     // x- and y-coordinate of the distance between p1 and p2
@@ -187,7 +196,7 @@ Point VelocityModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
     return F_rep;
 }
 
-Point VelocityModel::ForceRepRoom(const Agent* ped, const CollisionGeometry& geometry) const
+Point VelocityModel::ForceRepRoom(const GenericAgent* ped, const CollisionGeometry& geometry) const
 {
     auto walls = geometry.LineSegmentsInDistanceTo(5.0, ped->pos);
 
@@ -201,7 +210,7 @@ Point VelocityModel::ForceRepRoom(const Agent* ped, const CollisionGeometry& geo
     return f;
 }
 
-Point VelocityModel::ForceRepWall(const Agent* ped, const Line& w) const
+Point VelocityModel::ForceRepWall(const GenericAgent* ped, const Line& w) const
 {
     if(const auto distGoal = (ped->destination - ped->pos).Norm(); distGoal < J_EPS_GOAL) {
         return Point{0, 0};

@@ -404,7 +404,7 @@ typedef uint64_t JPS_AgentId;
 /**
  * Opaque type of a agent in the simulation.
  * Agents never need to be freed and their lifetime is always managed by the simulation.
- * Agents get invalidated if they are removed by the simulation.
+ * Important: Agents get invalidated after each iteration of the simulation.
  */
 typedef const struct JPS_Agent_t* JPS_Agent;
 
