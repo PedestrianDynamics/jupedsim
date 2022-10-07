@@ -4,8 +4,6 @@
 add_library(simulator STATIC
     src/AABB.cpp
     src/AABB.hpp
-    src/Agent.cpp
-    src/Agent.hpp
     src/AgentExitSystem.cpp
     src/AgentExitSystem.hpp
     src/Area.cpp
@@ -26,15 +24,14 @@ add_library(simulator STATIC
     src/GCFMModel.hpp
     src/GCFMModelBuilder.cpp
     src/GCFMModelBuilder.hpp
+    src/GenericAgent.cpp
+    src/GenericAgent.hpp
     src/GeometricFunctions.hpp
     src/Geometry.cpp
     src/Geometry.hpp
     src/GeometryBuilder.cpp
     src/GeometryBuilder.hpp
     src/Graph.hpp
-    src/Grid2D.hpp
-    src/HashCombine.hpp
-    src/IteratorPair.hpp
     src/Journey.cpp
     src/Journey.hpp
     src/Line.cpp
@@ -44,9 +41,6 @@ add_library(simulator STATIC
     src/Macros.hpp
     src/Mathematics.cpp
     src/Mathematics.hpp
-    src/NeighborhoodIterator.cpp
-    src/NeighborhoodIterator.hpp
-    src/NeighborhoodSearch.cpp
     src/NeighborhoodSearch.hpp
     src/OperationalDecisionSystem.cpp
     src/OperationalDecisionSystem.hpp
@@ -134,7 +128,6 @@ if (BUILD_TESTS)
         test/TestBasicPrimitiveTests.cpp
         test/TestCollisionGeometry.cpp
         test/TestGraph.cpp
-        test/TestGrid2D.cpp
         test/TestLine.cpp
         test/TestNeighborhoodSearch.cpp
         test/TestSimulationClock.cpp

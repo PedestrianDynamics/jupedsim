@@ -2,7 +2,9 @@
 /// SPDX-License-Identifier: LGPL-3.0-or-later
 #include "GCFMModel.hpp"
 
-#include "Agent.hpp"
+#include "Ellipse.hpp"
+#include "GenericAgent.hpp"
+#include "Macros.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "Simulation.hpp"
@@ -34,9 +36,10 @@ GCFMModel::GCFMModel(
 
 PedestrianUpdate GCFMModel::ComputeNewPosition(
     double dT,
-    const Agent& agent,
+    const GenericAgent& agent,
+    const Data& agentModelData,
     const CollisionGeometry& geometry,
-    const NeighborhoodSearch& neighborhoodSearch) const
+    const NeighborhoodSearchType& neighborhoodSearch) const
 {
     const auto& parameters = parameterProfile(agent.parameterProfileId);
     // const double delta = 1.5;
@@ -56,36 +59,38 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
     const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(agent.pos, radius);
     const auto p1 = agent.pos;
     Point F_rep;
-    for(const auto* other : neighborhood) {
-        if(other->id == agent.id) {
+    for(const auto& [otherGenericAgent, otherModelData] : neighborhood) {
+        if(otherGenericAgent->id == agent.id) {
             continue;
         }
-        if(!geometry.IntersectsAny(Line(p1, other->pos))) {
-            F_rep += ForceRepPed(&agent, other);
+        if(!geometry.IntersectsAny(Line(p1, otherGenericAgent->pos))) {
+            F_rep += ForceRepPed(&agent, otherGenericAgent, agentModelData, *otherModelData);
         }
     }
 
     PedestrianUpdate update{};
     // repulsive forces to the walls and transitions that are not my target
-    Point repwall = ForceRepRoom(&agent, geometry);
-    Point fd = ForceDriv(&agent, agent.destination, parameters.mass, parameters.tau, dT, update);
+    Point repwall = ForceRepRoom(&agent, agentModelData, geometry);
+    Point fd = ForceDriv(
+        &agent, agentModelData, agent.destination, parameters.mass, parameters.tau, dT, update);
     Point acc = (fd + F_rep + repwall) / parameters.mass;
 
-    update.velocity = (agent.orientation * agent.speed) + acc * dT;
+    update.velocity = (agent.orientation * agentModelData.speed) + acc * dT;
     update.position = agent.pos + *update.velocity * dT;
     return update;
 }
 
-void GCFMModel::ApplyUpdate(const PedestrianUpdate& update, Agent& agent) const
+void GCFMModel::ApplyUpdate(const PedestrianUpdate& update, GenericAgent& agent, Data& modelData)
+    const
 {
-    agent.SetE0(update.e0);
-    agent.IncrementOrientationDelay();
+    modelData.e0 = update.e0;
+    ++modelData.orientationDelay;
     if(update.position) {
         agent.pos = *update.position;
     }
     if(update.velocity) {
         agent.orientation = (*update.velocity).Normalized();
-        agent.speed = (*update.velocity).Norm();
+        modelData.speed = (*update.velocity).Norm();
     }
 }
 
@@ -94,8 +99,9 @@ std::unique_ptr<OperationalModel> GCFMModel::Clone() const
     return std::make_unique<GCFMModel>(*this);
 }
 
-inline Point GCFMModel::ForceDriv(
-    const Agent* ped,
+Point GCFMModel::ForceDriv(
+    const GenericAgent* ped,
+    const Data& agentModelData,
     Point target,
     double mass,
     double tau,
@@ -108,23 +114,29 @@ inline Point GCFMModel::ForceDriv(
     const auto dist = (dest - pos).Norm();
     const auto v0 = parameterProfile(ped->parameterProfileId).v0;
     if(dist > J_EPS_GOAL) {
-        const Point e0 = ped->GetE0(target, deltaT);
+
+        const Point e0 =
+            MollifyE0(target, pos, deltaT, agentModelData.orientationDelay, agentModelData.e0);
         update.e0 = e0;
-        F_driv = ((e0 * v0 - (ped->orientation * ped->speed)) * mass) / tau;
+        F_driv = ((e0 * v0 - (ped->orientation * agentModelData.speed)) * mass) / tau;
     } else {
-        const Point e0 = ped->GetE0();
-        F_driv = ((e0 * v0 - (ped->orientation * ped->speed)) * mass) / tau;
+        const Point e0 = agentModelData.e0;
+        F_driv = ((e0 * v0 - (ped->orientation * agentModelData.speed)) * mass) / tau;
     }
     return F_driv;
 }
 
-Point GCFMModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
+Point GCFMModel::ForceRepPed(
+    const GenericAgent* ped1,
+    const GenericAgent* ped2,
+    const Data& modelData1,
+    const Data& modelData2) const
 {
     Point F_rep;
     // x- and y-coordinate of the distance between p1 and p2
     Point distp12 = ped2->pos - ped1->pos;
-    const Point vp1 = (ped1->orientation * ped1->speed); // v Ped1
-    const Point vp2 = (ped2->orientation * ped2->speed); // v Ped2
+    const Point vp1 = (ped1->orientation * modelData1.speed); // v Ped1
+    const Point vp2 = (ped2->orientation * modelData2.speed); // v Ped2
     Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
     double tmp, tmp2;
     double v_ij;
@@ -149,10 +161,10 @@ Point GCFMModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
         E2,
         ped1->pos,
         ped2->pos,
-        ped1->speed / v0_1,
-        ped2->speed / v0_2,
-        ped1->speed,
-        ped2->speed,
+        modelData1.speed / v0_1,
+        modelData2.speed / v0_2,
+        modelData1.speed,
+        modelData2.speed,
         ped1->orientation,
         ped2->orientation);
     const auto agent1_mass = parameterProfile(ped1->parameterProfileId).mass;
@@ -253,7 +265,10 @@ Point GCFMModel::ForceRepPed(const Agent* ped1, const Agent* ped2) const
  *   - Vektor(x,y) mit Summe aller abstoßenden Kräfte im SubRoom
  * */
 
-inline Point GCFMModel::ForceRepRoom(const Agent* ped, const CollisionGeometry& geometry) const
+inline Point GCFMModel::ForceRepRoom(
+    const GenericAgent* ped,
+    const Data& modelData,
+    const CollisionGeometry& geometry) const
 {
     auto walls = geometry.LineSegmentsInDistanceTo(5.0, ped->pos);
 
@@ -261,13 +276,14 @@ inline Point GCFMModel::ForceRepRoom(const Agent* ped, const CollisionGeometry& 
         walls.begin(),
         walls.end(),
         Point(0, 0),
-        [this, &ped](const auto& acc, const auto& element) {
-            return acc + ForceRepWall(ped, element);
+        [this, &ped, &modelData](const auto& acc, const auto& element) {
+            return acc + ForceRepWall(ped, modelData, element);
         });
     return f;
 }
 
-inline Point GCFMModel::ForceRepWall(const Agent* ped, const Line& w) const
+inline Point
+GCFMModel::ForceRepWall(const GenericAgent* ped, const Data& modelData, const Line& w) const
 {
     Point F = Point(0.0, 0.0);
     Point pt = w.ShortestPoint(ped->pos);
@@ -282,9 +298,9 @@ inline Point GCFMModel::ForceRepWall(const Agent* ped, const Line& w) const
         return F;
     }
     double mind = 0.5; // for performance reasons this distance is assumed to be constant
-    double vn =
-        w.NormalComp(ped->orientation * ped->speed); // normal component of the velocity on the wall
-    F = ForceRepStatPoint(ped, pt, mind, vn);
+    double vn = w.NormalComp(
+        ped->orientation * modelData.speed); // normal component of the velocity on the wall
+    F = ForceRepStatPoint(ped, modelData, pt, mind, vn);
 
     return F; // line --> l != 0
 }
@@ -299,12 +315,17 @@ inline Point GCFMModel::ForceRepWall(const Agent* ped, const Line& w) const
  *   - Vektor(x,y) mit abstoßender Kraft
  * */
 // TODO: use effective DistanceToEllipse and simplify this function.
-Point GCFMModel::ForceRepStatPoint(const Agent* ped, const Point& p, double l, double vn) const
+Point GCFMModel::ForceRepStatPoint(
+    const GenericAgent* ped,
+    const Data& modelData,
+    const Point& p,
+    double l,
+    double vn) const
 {
     Point F_rep = Point(0.0, 0.0);
     // TODO(kkratz): this will fail for speed 0.
     // I think the code can be rewritten to account for orientation and speed separately
-    const Point v = ped->orientation * ped->speed;
+    const Point v = ped->orientation * modelData.speed;
     Point dist = p - ped->pos; // x- and y-coordinate of the distance between ped and p
     double d = dist.Norm(); // distance between the centre of ped and point p
     Point e_ij; // x- and y-coordinate of the normalized vector between ped and p
@@ -335,7 +356,7 @@ Point GCFMModel::ForceRepStatPoint(const Agent* ped, const Point& p, double l, d
     pinE = p.TransformToEllipseCoordinates(ped->pos, ped->orientation.x, ped->orientation.y);
     const auto v0 = parameterProfile(ped->parameterProfileId).v0;
     // Punkt auf der Ellipse
-    r = E.PointOnEllipse(pinE, ped->speed / v0, ped->pos, ped->speed, ped->orientation);
+    r = E.PointOnEllipse(pinE, modelData.speed / v0, ped->pos, modelData.speed, ped->orientation);
     // interpolierte Kraft
     F_rep = ForceInterpolation(v0, K_ij, e_ij, vn, d, (r - ped->pos).Norm(), l);
     return F_rep;

@@ -2,8 +2,8 @@
 /// SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "Agent.hpp"
 #include "Area.hpp"
+#include "GenericAgent.hpp"
 #include "RoutingEngine.hpp"
 
 #include <vector>
@@ -21,5 +21,5 @@ public:
     void
     Run(const std::map<Area::Id, Area> areas,
         RoutingEngine& routingEngine,
-        std::vector<std::unique_ptr<Agent>>& agents) const;
+        std::vector<GenericAgent>& agents) const;
 };
