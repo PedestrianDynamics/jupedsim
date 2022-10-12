@@ -1,4 +1,4 @@
-from jupedsim.Grid import Grid
+from jupedsim.grid import Grid
 import numpy as np
 import shapely.geometry as shply
 

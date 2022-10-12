@@ -139,7 +139,8 @@ def main():
 
         for i in range(circle_count):
             if style == "density":
-                densities.append(st.slider(f"Agents / m² in Circle segment {i+1}", 0.1, 10.0, key=i), )
+                densities.append(st.slider(f"Agents / m² in Circle segment {i+1}", 0.1,
+                                           round(((1371.2855*0.0648**agent_distance) + 100)/100, 2), key=i), )
             elif style == "number":
                 temp_min, temp_max = circle_segment_radii[i][0], circle_segment_radii[i][1]
                 area_small = distributions.intersecting_area_polygon_circle(center_point, temp_min, s_polygon)
@@ -176,7 +177,7 @@ def main():
                 "General settings can be made in the left sidebar")
         style = st.radio("How to choose number of agents?", ("density", "number"))
         if style == "density":
-            density = st.slider("Agents / m²", 0.1, 10.0)
+            density = st.slider("Agents / m²", 0.1, round(((1371.2855*0.0648**agent_distance) + 100)/100, 2))
         elif style == "number":
             agents = st.slider("Agents", 1, round(area * 5))
 
