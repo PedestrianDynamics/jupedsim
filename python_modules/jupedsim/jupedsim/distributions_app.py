@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 def show_points(s_polygon, samples, radius, circle_segment_radii=None, center_point=None, obstacles=None):
     if obstacles is None:
         obstacles = []
-    box = distributions.get_bounding_box(s_polygon)
+    box = distributions.__get_bounding_box(s_polygon)
     exterior = list(s_polygon.exterior.coords)
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
@@ -143,8 +143,8 @@ def main():
                                            round(((1371.2855*0.0648**agent_distance) + 100)/100, 2), key=i), )
             elif style == "number":
                 temp_min, temp_max = circle_segment_radii[i][0], circle_segment_radii[i][1]
-                area_small = distributions.intersecting_area_polygon_circle(center_point, temp_min, s_polygon)
-                area_big = distributions.intersecting_area_polygon_circle(center_point, temp_max, s_polygon)
+                area_small = distributions.__intersecting_area_polygon_circle(center_point, temp_min, s_polygon)
+                area_big = distributions.__intersecting_area_polygon_circle(center_point, temp_max, s_polygon)
                 area_segment = area_big - area_small
                 agents.append(st.slider(f"Agents in Circle segment {i+1}", 1, round(area_segment * 5), key=i))
 

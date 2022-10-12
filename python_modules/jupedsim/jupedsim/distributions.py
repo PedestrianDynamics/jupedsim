@@ -3,7 +3,7 @@ import numpy as np
 import shapely.geometry as shply
 
 
-class AgentCount(Exception):
+class AgentNumberError(Exception):
     def __init__(self, message):
         self.message = message
 
@@ -23,7 +23,7 @@ class NegativeValueError(Exception):
         self.message = message
 
 
-def intersecting_area_polygon_circle(mid_point, radius, polygon):
+def __intersecting_area_polygon_circle(mid_point, radius, polygon):
     """returns the intersecting area of circle and polygon"""
     # creates a point
     point = shply.Point(mid_point)
@@ -33,7 +33,7 @@ def intersecting_area_polygon_circle(mid_point, radius, polygon):
     return polygon.intersection(circle).area
 
 
-def is_inside_circle(point, mid, min_r, max_r):
+def __is_inside_circle(point, mid, min_r, max_r):
     """checks if a point is inside a Circle segment reaching from minimum radius to maximum radius"""
     dif_x = point[0] - mid[0]
     dif_y = point[1] - mid[1]
@@ -41,7 +41,7 @@ def is_inside_circle(point, mid, min_r, max_r):
     return min_r ** 2 <= circle_equation <= max_r ** 2
 
 
-def get_bounding_box(polygon):
+def __get_bounding_box(polygon):
     """returns an Axis Aligned Bounding Box containing the minimal/maximal x and y values
     formatted like : [(min(x_values), min(y_values)), (max(x_values), max(y_values))]
     polygon needs to be a shapely polygon
@@ -55,7 +55,7 @@ def get_bounding_box(polygon):
     return [(min(x_values), min(y_values)), ((max(x_values)), max(y_values))]
 
 
-def min_distance_to_polygon(pt, polygon):
+def __min_distance_to_polygon(pt, polygon):
     """returns the minimal distance between a point and every line segment of a polygon"""
     pt = shply.Point(pt)
     min_dist = polygon.exterior.distance(pt)
@@ -79,7 +79,7 @@ def distribute_by_number(polygon, number_of_agents, agent_distance, distance_to_
 
     if not isinstance(polygon, shply.polygon.Polygon):
         raise IncorrectParameterError(f"Polygon is expected to be a shapely Polygon")
-    box = get_bounding_box(polygon)
+    box = __get_bounding_box(polygon)
 
     if seed is not None:
         np.random.seed(seed)
@@ -91,9 +91,9 @@ def distribute_by_number(polygon, number_of_agents, agent_distance, distance_to_
         if iterations > max_iterations:
             msg = f"Only {created_points} of {number_of_agents}  could be placed." \
                   f" density: {round(created_points / polygon.area, 2)} p/m²"
-            raise AgentCount(msg)
+            raise AgentNumberError(msg)
         temp_point = (np.random.uniform(box[0][0], box[1][0]), np.random.uniform(box[0][1], box[1][1]))
-        if check_distance_constraints(temp_point, distance_to_polygon, grid, polygon):
+        if __check_distance_constraints(temp_point, distance_to_polygon, grid, polygon):
             grid.append_point(temp_point)
 
             iterations = 0
@@ -140,7 +140,7 @@ def catch_wrong_inputs(polygon, center_point, circle_segment_radii, fill_paramet
         if c_s_radius[0] < 0 or c_s_radius[1] < 0:
             raise NegativeValueError(f"Circle segment {c_s_radius[0]} : {c_s_radius[1]} is expected to be positiv")
         if c_s_radius[0] >= c_s_radius[1]:
-            raise OverlappingCirclesError(f"minimum radius bigger than maximum radius\n"
+            raise OverlappingCirclesError(f"inner radius bigger than/equal to outer radius\n"
                                           f"a Circle segment from {c_s_radius[0]} to {c_s_radius[1]} is not possible")
         j = 0
         while j < i:
@@ -176,11 +176,11 @@ def distribute_in_circles_by_number(polygon, agent_distance, distance_to_polygon
                        circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
     if seed is not None:
         np.random.seed(seed)
-    box = get_bounding_box(polygon)
+    box = __get_bounding_box(polygon)
     grid = Grid(box, agent_distance)
     for circle_segment, number in zip(circle_segment_radii, numbers_of_agents):
-        big_circle_area = intersecting_area_polygon_circle(center_point, circle_segment[1], polygon)
-        small_circle_area = intersecting_area_polygon_circle(center_point, circle_segment[0], polygon)
+        big_circle_area = __intersecting_area_polygon_circle(center_point, circle_segment[1], polygon)
+        small_circle_area = __intersecting_area_polygon_circle(center_point, circle_segment[0], polygon)
         placeable_area = big_circle_area - small_circle_area
 
         # it is being checked whether to place points inside the circle segment or around the polygon
@@ -201,7 +201,7 @@ def distribute_in_circles_by_number(polygon, agent_distance, distance_to_polygon
                     # determines a random degree
                     theta = np.random.uniform(0, 2 * np.pi)
                     pt = center_point[0] + rho * np.cos(theta), center_point[1] + rho * np.sin(theta)
-                    if check_distance_constraints(pt, distance_to_polygon, grid, polygon):
+                    if __check_distance_constraints(pt, distance_to_polygon, grid, polygon):
                         grid.append_point(pt)
                         break
 
@@ -210,7 +210,7 @@ def distribute_in_circles_by_number(polygon, agent_distance, distance_to_polygon
                               f" {circle_segment[0]} to {circle_segment[1]} could not be achieved." \
                               f"\nOnly {placed_count} of {number}  could be placed." \
                               f"\nactual density: {round(placed_count / placeable_area, 2)} p/m²"
-                    raise AgentCount(message)
+                    raise AgentNumberError(message)
         else:
             # placing points around the polygon is more likely to find a random point that is inside the circle
             placed_count = 0
@@ -221,10 +221,10 @@ def distribute_in_circles_by_number(polygon, agent_distance, distance_to_polygon
                               f" {circle_segment[0]} to {circle_segment[1]} could not be achieved." \
                               f"\nOnly {placed_count} of {number}  could be placed." \
                               f"\nactual density: {round(placed_count / placeable_area, 2)} p/m²"
-                    raise AgentCount(message)
+                    raise AgentNumberError(message)
                 temp_point = (np.random.uniform(box[0][0], box[1][0]), np.random.uniform(box[0][1], box[1][1]))
-                if is_inside_circle(temp_point, center_point, circle_segment[0], circle_segment[1]) \
-                        and check_distance_constraints(temp_point, distance_to_polygon, grid, polygon):
+                if __is_inside_circle(temp_point, center_point, circle_segment[0], circle_segment[1]) \
+                        and __check_distance_constraints(temp_point, distance_to_polygon, grid, polygon):
                     grid.append_point(temp_point)
                     iterations = 0
                     placed_count += 1
@@ -255,8 +255,8 @@ def distribute_in_circles_by_density(polygon, agent_distance, distance_to_polygo
                        circle_segment_radii=circle_segment_radii, fill_parameters=densities)
     number_of_agents = []
     for circle_segment, density in zip(circle_segment_radii, densities):
-        big_circle_area = intersecting_area_polygon_circle(center_point, circle_segment[1], polygon)
-        small_circle_area = intersecting_area_polygon_circle(center_point, circle_segment[0], polygon)
+        big_circle_area = __intersecting_area_polygon_circle(center_point, circle_segment[1], polygon)
+        small_circle_area = __intersecting_area_polygon_circle(center_point, circle_segment[0], polygon)
         placeable_area = big_circle_area - small_circle_area
         number_of_agents.append(int(density * placeable_area))
 
@@ -266,7 +266,7 @@ def distribute_in_circles_by_density(polygon, agent_distance, distance_to_polygo
                                            numbers_of_agents=number_of_agents, seed=seed, max_iterations=max_iterations)
 
 
-def check_distance_constraints(pt, wall_distance, grid, polygon):
+def __check_distance_constraints(pt, wall_distance, grid, polygon):
     """Determines if a point has enough distance to other points and to the walls
      Uses a Grid to determine neighbours
     :param grid: the grid of the polygon
@@ -276,6 +276,6 @@ def check_distance_constraints(pt, wall_distance, grid, polygon):
     :return:True or False"""
     if not polygon.contains(shply.Point(pt)):
         return False
-    if min_distance_to_polygon(pt, polygon) < wall_distance:
+    if __min_distance_to_polygon(pt, polygon) < wall_distance:
         return False
     return grid.no_neighbours_in_distance(pt)

@@ -45,11 +45,11 @@ def test_point_in_circle():
     mid = (0, 0)
     min_radius, max_radius = 5, 10
     test_point = (2, 2)
-    assert distributions.is_inside_circle(test_point, mid, min_radius, max_radius) is False
+    assert distributions.__is_inside_circle(test_point, mid, min_radius, max_radius) is False
     test_point = (10, 10)
-    assert distributions.is_inside_circle(test_point, mid, min_radius, max_radius) is False
+    assert distributions.__is_inside_circle(test_point, mid, min_radius, max_radius) is False
     test_point = (7, 7)
-    assert distributions.is_inside_circle(test_point, mid, min_radius, max_radius) is True
+    assert distributions.__is_inside_circle(test_point, mid, min_radius, max_radius) is True
 
 
 def test_bounding_box_determination():
@@ -57,7 +57,7 @@ def test_bounding_box_determination():
                (6, 9), (4.5, 10), (2.5, 10.5), (0.6, 9.5), (0, 7), (1, 4), (3, 2)]
     s_polygon = distributions.shply.Polygon(polygon)
     expected_box = [(0, 0), (12, 10.5)]
-    assert distributions.get_bounding_box(s_polygon) == expected_box
+    assert distributions.__get_bounding_box(s_polygon) == expected_box
 
 
 def test_minimal_distance_to_polygon():
@@ -65,7 +65,7 @@ def test_minimal_distance_to_polygon():
     pt = (3, 3)
     expected_result = min([2.182820625326997, 1.7888543819998317, 1.7888543819998317, 2.0, 2.1213203435596424, 3.0])
     acceptance_rate = 0.01
-    actual_result = distributions.min_distance_to_polygon(pt, polygon)
+    actual_result = distributions.__min_distance_to_polygon(pt, polygon)
     difference = actual_result - expected_result
     assert abs(difference) < acceptance_rate
 
@@ -73,10 +73,15 @@ def test_minimal_distance_to_polygon():
 def test_seed_works_correct_for_determination_by_number():
     polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
     polygon = distributions.shply.Polygon(polygon)
-    agent_distance, distance_to_polygon = 0.3, 0.3
+    distance_to_agents, distance_to_polygon = 0.3, 0.3
+    number_of_agents = 100
     set_seed = 1337
-    samples1 = distributions.distribute_by_number(polygon, 100, agent_distance, distance_to_polygon, seed=set_seed)
-    samples2 = distributions.distribute_by_number(polygon, 100, agent_distance, distance_to_polygon, seed=set_seed)
+    samples1 = distributions.distribute_by_number(polygon=polygon, number_of_agents=number_of_agents,
+                                                  agent_distance=distance_to_agents,
+                                                  distance_to_polygon=distance_to_polygon, seed=set_seed)
+    samples2 = distributions.distribute_by_number(polygon=polygon, number_of_agents=number_of_agents,
+                                                  agent_distance=distance_to_agents,
+                                                  distance_to_polygon=distance_to_polygon, seed=set_seed)
     assert samples1 == samples2
 
 
@@ -156,13 +161,13 @@ def test_distribution_in_circle_by_number_creates_correct_points():
     polygon = distributions.shply.Polygon(polygon, holes)
     number_of_agents = [200, 150]
     agent_distance = 0.3
-    distace_to_polygon = 0.3
+    distance_to_polygon = 0.3
     set_seed = 1337
     center_point = (7.5, 7.5)
     circle_segment_radii = [(0, 5), (6, 7.5)]
 
     samples = distributions.distribute_in_circles_by_number(polygon=polygon, agent_distance=agent_distance,
-                                                            distance_to_polygon=distace_to_polygon,
+                                                            distance_to_polygon=distance_to_polygon,
                                                             center_point=center_point,
                                                             circle_segment_radii=circle_segment_radii,
                                                             numbers_of_agents=number_of_agents,
@@ -173,12 +178,12 @@ def test_distribution_in_circle_by_number_creates_correct_points():
 
     # all created points inside their corresponding circle segment
     while i < number_of_agents[0]:
-        assert distributions.is_inside_circle(samples[i], center_point,
-                                              circle_segment_radii[0][0], circle_segment_radii[0][1])
+        assert distributions.__is_inside_circle(samples[i], center_point,
+                                                circle_segment_radii[0][0], circle_segment_radii[0][1])
         i = i + 1
     while i < number_of_agents[0] + number_of_agents[1]:
-        assert distributions.is_inside_circle(samples[i], center_point,
-                                              circle_segment_radii[1][0], circle_segment_radii[1][1])
+        assert distributions.__is_inside_circle(samples[i], center_point,
+                                                circle_segment_radii[1][0], circle_segment_radii[1][1])
         i = i + 1
 
     # all created points contained inside polygon
@@ -205,13 +210,13 @@ def test_distribution_in_circle_by_density_creates_correct_amount():
     polygon = distributions.shply.Polygon(polygon)
     densities = [1]
     agent_distance = 0.3
-    distace_to_polygon = 0.3
+    distance_to_polygon = 0.3
     set_seed = 1337
     center_point = (5, 5)
     circle_segment_radii = [(0, 5)]
 
     samples = distributions.distribute_in_circles_by_density(polygon=polygon, agent_distance=agent_distance,
-                                                             distance_to_polygon=distace_to_polygon,
+                                                             distance_to_polygon=distance_to_polygon,
                                                              center_point=center_point,
                                                              circle_segment_radii=circle_segment_radii,
                                                              densities=densities,
