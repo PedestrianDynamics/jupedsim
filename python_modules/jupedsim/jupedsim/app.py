@@ -55,6 +55,7 @@ def main():
     agents = density = 0
 
     with st.sidebar:
+        st.text("General settings")
         agent_distance = st.slider("Distance between the center points of the agents", 0.1, 2.0, value=0.3)
         distance_to_polygon = st.slider("Distance between agents and walls", 0.1, 2.0, value=0.3)
         st.text("Polygon settings")
@@ -63,15 +64,15 @@ def main():
         x_values, y_values = [], []
         with col1:
             for i in range(corners):
-                x_values.append(st.number_input(f"x value {i + 1}",
+                x_values.append(st.number_input(f"X{i + 1}",
                                                 value=default_polygon[i][0] if i < len(default_polygon) else 0.0,
                                                 step=1.0))
         with col2:
             for i in range(corners):
-                y_values.append(st.number_input(f"y value {i + 1}",
+                y_values.append(st.number_input(f"Y{i + 1}",
                                                 value=default_polygon[i][1] if i < len(default_polygon) else 0.0,
                                                 step=1.0))
-        seed = st.number_input("Set a seed. 0 = random seed", 0)
+        seed = st.number_input("Set a seed. If the seed is set to zero the distribution will be random each time", 0)
         if seed == 0:
             seed = None
         st.text("Hole settings")
@@ -84,13 +85,16 @@ def main():
         with col3:
             for i in range(obstacle_count):
                 obstacle_values.append([])
+                st.text(f"Settings for")
                 for j in range(obstacle_corners[i]):
-                    obstacle_values[i].append([st.number_input(f"x value {j + 1} for hole {i + 1}",
+                    obstacle_values[i].append([st.number_input(f"X{j + 1} in hole {i + 1}",
                                                                value=0.0, step=1.0)])
         with col4:
             for i in range(obstacle_count):
+                st.text(f"hole {i+1}")
+                # this text is placed so the columns align
                 for j in range(obstacle_corners[i]):
-                    obstacle_values[i][j].append(st.number_input(f"y value {j + 1} for hole {i + 1}",
+                    obstacle_values[i][j].append(st.number_input(f"Y{j + 1} in hole {i + 1}",
                                                                  value=0.0, step=1.0))
 
     obstacles = []
@@ -106,31 +110,42 @@ def main():
     distribution_type = st.radio("How to distribute agents?", ("place random", "place in Circle"))
 
     if distribution_type == "place in Circle":
+        st.text("Instructions:\n"
+                "distributes agents inside the polygon inside circle segments\n"
+                "agents do not keep distance to circle segment borders like polygons\n"
+                "you need to select a center point for all circle segments\n"
+                "you also need to select the range of each Circle segment\n"
+                "Circle segments musst not Overlap or have negativ values\n"
+                "General settings can be made in the left sidebar")
         style = (st.radio(f"How to choose number of agents for Circles", ("density", "number")))
         circle_count = st.number_input("number of circles", 1)
-        col1, col2, col3 = st.columns(3)
+        col1, col2= st.columns(2)
         min_values, max_values = [], []
         densities, agents = [], []
         default_center = (5.0, 5.0)
         with col1:
-            mid_x = st.number_input("Center -> x value", value=default_center[0], step=1.0)
+            mid_x = st.number_input("Center X", value=default_center[0], step=1.0)
             for i in range(circle_count):
-                min_values.append(st.number_input(f"minimum radius for Circle segment {i + 1}", step=1.0))
+                min_values.append(st.number_input(f"inner radius for Circle segment {i + 1}", step=1.0))
         with col2:
-            mid_y = st.number_input("Center -> y value", value=default_center[1], step=1.0)
+            mid_y = st.number_input("Center Y", value=default_center[1], step=1.0)
             for i in range(circle_count):
-                max_values.append(st.number_input(f"maximum radius for Circle segment {i + 1}", step=1.0))
-        with col3:
-            for i in range(circle_count):
-                if style == "density":
-                    densities.append(st.slider(f"Persons / m² in Circle segment {i+1}", 0.1, 7.5, key=i), )
-                elif style == "number":
-                    agents.append(st.slider(f"Agents in Circle segment {i+1}", 1, round(area * 5), key=i))
+                max_values.append(st.number_input(f"outer radius for Circle segment {i + 1}", step=1.0))
 
         center_point = (mid_x, mid_y)
         circle_segment_radii = []
         for i in range(circle_count):
             circle_segment_radii.append((min_values[i], max_values[i]))
+
+        for i in range(circle_count):
+            if style == "density":
+                densities.append(st.slider(f"Agents / m² in Circle segment {i+1}", 0.1, 10.0, key=i), )
+            elif style == "number":
+                temp_min, temp_max = circle_segment_radii[i][0], circle_segment_radii[i][1]
+                area_small = distributions.intersecting_area_polygon_circle(center_point, temp_min, s_polygon)
+                area_big = distributions.intersecting_area_polygon_circle(center_point, temp_max, s_polygon)
+                area_segment = area_big - area_small
+                agents.append(st.slider(f"Agents in Circle segment {i+1}", 1, round(area_segment * 5), key=i))
 
         button_clicked = st.button('distribute agents')
         if button_clicked:
@@ -155,9 +170,13 @@ def main():
             show_points(s_polygon, [], agent_distance, circle_segment_radii, center_point, obstacles)
 
     if distribution_type == "place random":
+        st.text("Instructions:\n"
+                "distributes a certain amount of agents inside the polygon\n"
+                "you can enter this amount either by a specific number or a density\n"
+                "General settings can be made in the left sidebar")
         style = st.radio("How to choose number of agents?", ("density", "number"))
         if style == "density":
-            density = st.slider("Persons / m²", 0.1, 7.5)
+            density = st.slider("Agents / m²", 0.1, 10.0)
         elif style == "number":
             agents = st.slider("Agents", 1, round(area * 5))
 
