@@ -52,7 +52,7 @@ def __get_bounding_box(polygon):
         x_values.append(point[0])
         y_values.append(point[1])
 
-    return [(min(x_values), min(y_values)), ((max(x_values)), max(y_values))]
+    return [(min(x_values), min(y_values)), (max(x_values), max(y_values))]
 
 
 def __min_distance_to_polygon(pt, polygon):
