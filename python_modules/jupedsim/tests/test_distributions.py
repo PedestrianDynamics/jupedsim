@@ -18,8 +18,8 @@ def test_cell_coord_determination():
 
 def test_grid_creation():
     box = [(0, 0), (3, 3)]
-    agent_distance = 0.3
-    grid = distributions.Grid(box, agent_distance)
+    distance_to_agents = 0.3
+    grid = distributions.Grid(box, distance_to_agents)
     acceptance_rate = 0.01
     assert grid.box == box
     assert abs(grid.c_s_l - 0.21213203435596423) < acceptance_rate
@@ -77,10 +77,10 @@ def test_seed_works_correct_for_determination_by_number():
     number_of_agents = 100
     set_seed = 1337
     samples1 = distributions.distribute_by_number(polygon=polygon, number_of_agents=number_of_agents,
-                                                  agent_distance=distance_to_agents,
+                                                  distance_to_agents=distance_to_agents,
                                                   distance_to_polygon=distance_to_polygon, seed=set_seed)
     samples2 = distributions.distribute_by_number(polygon=polygon, number_of_agents=number_of_agents,
-                                                  agent_distance=distance_to_agents,
+                                                  distance_to_agents=distance_to_agents,
                                                   distance_to_polygon=distance_to_polygon, seed=set_seed)
     assert samples1 == samples2
 
@@ -89,19 +89,19 @@ def test_seed_works_correct_for_determination_in_Circles_by_number():
     polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
     polygon = distributions.shply.Polygon(polygon)
     number_of_agents = [75]
-    agent_distance = 0.3
+    distance_to_agents = 0.3
     distance_to_polygon = 0.3
     set_seed = 1337
     center_point = (5, 5)
     circle_segment_radii = [(0, 5)]
 
-    samples1 = distributions.distribute_in_circles_by_number(polygon=polygon, agent_distance=agent_distance,
+    samples1 = distributions.distribute_in_circles_by_number(polygon=polygon, distance_to_agents=distance_to_agents,
                                                              distance_to_polygon=distance_to_polygon,
                                                              center_point=center_point,
                                                              circle_segment_radii=circle_segment_radii,
                                                              numbers_of_agents=number_of_agents,
                                                              seed=set_seed, max_iterations=10_000)
-    samples2 = distributions.distribute_in_circles_by_number(polygon=polygon, agent_distance=agent_distance,
+    samples2 = distributions.distribute_in_circles_by_number(polygon=polygon, distance_to_agents=distance_to_agents,
                                                              distance_to_polygon=distance_to_polygon,
                                                              center_point=center_point,
                                                              circle_segment_radii=circle_segment_radii,
@@ -114,11 +114,11 @@ def test_determination_by_number_creates_correct_points():
     polygon = [(0, 2), (3, 3), (3, 5), (6, 5), (6, 0), (14, 0), (15, 15), (9, 15), (6, 10), (4, 12.5), (0, 7.5)]
     holes = [[(8.5, 4), (10, 3), (12, 6.5), (10, 7)], [(10, 10.5), (11, 9.5), (14, 12.5), (11, 13)]]
     polygon = distributions.shply.Polygon(polygon, holes)
-    agent_distance, distance_to_polygon = 0.3, 0.3
+    distance_to_agents, distance_to_polygon = 0.3, 0.3
     number_of_agents = 450
     set_seed = 1337
     samples = distributions.distribute_by_number(polygon=polygon, number_of_agents=number_of_agents,
-                                                 agent_distance=agent_distance, distance_to_polygon=distance_to_polygon,
+                                                 distance_to_agents=distance_to_agents, distance_to_polygon=distance_to_polygon,
                                                  seed=set_seed)
     # as many points created as intended
     assert len(samples) == number_of_agents
@@ -137,7 +137,7 @@ def test_determination_by_number_creates_correct_points():
             dif_x = sample[0] - samples[j][0]
             dif_y = sample[1] - samples[j][1]
             distance = math.sqrt(dif_x ** 2 + dif_y ** 2)
-            assert distance >= agent_distance
+            assert distance >= distance_to_agents
             j = j + 1
 
 
@@ -145,11 +145,11 @@ def test_determination_by_density_creates_correct_amount():
     polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
     # polygon 10 x 10 square with 100m²
     polygon = distributions.shply.Polygon(polygon)
-    agent_distance, distance_to_polygon = 0.3, 0.3
+    distance_to_agents, distance_to_polygon = 0.3, 0.3
     density = 2.5
     # 2.5 persons per m²
     set_seed = 1337
-    samples = distributions.distribute_by_density(polygon=polygon, density=density, agent_distance=agent_distance,
+    samples = distributions.distribute_by_density(polygon=polygon, density=density, distance_to_agents=distance_to_agents,
                                                   distance_to_polygon=distance_to_polygon, seed=set_seed)
     # as many points created as intended
     assert len(samples) == 250
@@ -160,13 +160,13 @@ def test_distribution_in_circle_by_number_creates_correct_points():
     holes = [[(8.5, 4), (10, 3), (12, 6.5), (10, 7)], [(10, 10.5), (11, 9.5), (14, 12.5), (11, 13)]]
     polygon = distributions.shply.Polygon(polygon, holes)
     number_of_agents = [200, 150]
-    agent_distance = 0.3
+    distance_to_agents = 0.3
     distance_to_polygon = 0.3
     set_seed = 1337
     center_point = (7.5, 7.5)
     circle_segment_radii = [(0, 5), (6, 7.5)]
 
-    samples = distributions.distribute_in_circles_by_number(polygon=polygon, agent_distance=agent_distance,
+    samples = distributions.distribute_in_circles_by_number(polygon=polygon, distance_to_agents=distance_to_agents,
                                                             distance_to_polygon=distance_to_polygon,
                                                             center_point=center_point,
                                                             circle_segment_radii=circle_segment_radii,
@@ -200,7 +200,7 @@ def test_distribution_in_circle_by_number_creates_correct_points():
             dif_x = sample[0] - samples[j][0]
             dif_y = sample[1] - samples[j][1]
             distance = math.sqrt(dif_x ** 2 + dif_y ** 2)
-            assert distance >= agent_distance
+            assert distance >= distance_to_agents
             j = j + 1
 
 
@@ -209,13 +209,13 @@ def test_distribution_in_circle_by_density_creates_correct_amount():
     # polygon 10 x 10 square with 100m²
     polygon = distributions.shply.Polygon(polygon)
     densities = [1]
-    agent_distance = 0.3
+    distance_to_agents = 0.3
     distance_to_polygon = 0.3
     set_seed = 1337
     center_point = (5, 5)
     circle_segment_radii = [(0, 5)]
 
-    samples = distributions.distribute_in_circles_by_density(polygon=polygon, agent_distance=agent_distance,
+    samples = distributions.distribute_in_circles_by_density(polygon=polygon, distance_to_agents=distance_to_agents,
                                                              distance_to_polygon=distance_to_polygon,
                                                              center_point=center_point,
                                                              circle_segment_radii=circle_segment_radii,
@@ -231,8 +231,8 @@ def test_catch_wrong_inputs_for_wrong_polygon_type():
     # polygon is no Shapely Polygon
     center_point, circle_segment_radii, numbers_of_agents = (0, 0), [(1, 3)], [5]
     with pytest.raises(distributions.IncorrectParameterError):
-        distributions.catch_wrong_inputs(polygon=polygon, center_point=center_point,
-                                         circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
+        distributions.__catch_wrong_inputs(polygon=polygon, center_point=center_point,
+                                           circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
 
 
 def test_catch_wrong_inputs_for_wrong_length_center_point():
@@ -241,13 +241,13 @@ def test_catch_wrong_inputs_for_wrong_length_center_point():
     # center_point is no tuple
     circle_segment_radii, numbers_of_agents = [(1, 3)], [5]
     with pytest.raises(distributions.IncorrectParameterError):
-        distributions.catch_wrong_inputs(polygon=polygon, center_point=center_point,
-                                         circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
+        distributions.__catch_wrong_inputs(polygon=polygon, center_point=center_point,
+                                           circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
     center_point = [0]
     # center_point only contains 1 number
     with pytest.raises(distributions.IncorrectParameterError):
-        distributions.catch_wrong_inputs(polygon=polygon, center_point=center_point,
-                                         circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
+        distributions.__catch_wrong_inputs(polygon=polygon, center_point=center_point,
+                                           circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
 
 
 def test_catch_wrong_inputs_for_not_enough_fill_parameter():
@@ -256,8 +256,8 @@ def test_catch_wrong_inputs_for_not_enough_fill_parameter():
     circle_segment_radii, numbers_of_agents = [(1, 3), (3, 5)], [5]
     # two circle segments given only one fill parameter
     with pytest.raises(distributions.IncorrectParameterError):
-        distributions.catch_wrong_inputs(polygon=polygon, center_point=center_point,
-                                         circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
+        distributions.__catch_wrong_inputs(polygon=polygon, center_point=center_point,
+                                           circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
 
 
 def test_catch_wrong_inputs_for_negativ_radius():
@@ -265,8 +265,8 @@ def test_catch_wrong_inputs_for_negativ_radius():
     center_point, numbers_of_agents = (0, 0), [5, 5]
     circle_segment_radii = [(-1, 3), (3, 5)]
     with pytest.raises(distributions.NegativeValueError):
-        distributions.catch_wrong_inputs(polygon=polygon, center_point=center_point,
-                                         circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
+        distributions.__catch_wrong_inputs(polygon=polygon, center_point=center_point,
+                                           circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
 
 
 def test_catch_wrong_inputs_for_Overlapping_Circles():
@@ -274,12 +274,12 @@ def test_catch_wrong_inputs_for_Overlapping_Circles():
     center_point, numbers_of_agents = (0, 0), [5, 5]
     circle_segment_radii = [(1, 3), (2, 5)]
     with pytest.raises(distributions.OverlappingCirclesError):
-        distributions.catch_wrong_inputs(polygon=polygon, center_point=center_point,
-                                         circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
+        distributions.__catch_wrong_inputs(polygon=polygon, center_point=center_point,
+                                           circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
     circle_segment_radii, numbers_of_agents = [(0, 2), (3, 5), (2, 4)], [5, 5, 5]
     with pytest.raises(distributions.OverlappingCirclesError):
-        distributions.catch_wrong_inputs(polygon=polygon, center_point=center_point,
-                                         circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
+        distributions.__catch_wrong_inputs(polygon=polygon, center_point=center_point,
+                                           circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
 
 
 def test_catch_wrong_inputs_for_minimum_radius_bigger_than_maximum_radius():
@@ -287,5 +287,5 @@ def test_catch_wrong_inputs_for_minimum_radius_bigger_than_maximum_radius():
     center_point, numbers_of_agents = (0, 0), [5, 5]
     circle_segment_radii = [(0, 5), (8, 3)]
     with pytest.raises(distributions.OverlappingCirclesError):
-        distributions.catch_wrong_inputs(polygon=polygon, center_point=center_point,
-                                         circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
+        distributions.__catch_wrong_inputs(polygon=polygon, center_point=center_point,
+                                           circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)

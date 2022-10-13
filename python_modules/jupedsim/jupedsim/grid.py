@@ -6,14 +6,14 @@ class Grid:
     """Class to save points and check for neighbours within a radius
 
     box : an Axis Aligned Bounding Box where the Grid will be able to save points
-    agent_radius : radius in which points are searched for
+    distance_to_agents : radius in which points are searched for
     """
-    def __init__(self, box, agent_radius):
+    def __init__(self, box, distance_to_agents):
         self.box = box
-        self.a_r = agent_radius
+        self.a_r = distance_to_agents
         width, height = box[1][0] - box[0][0], box[1][1] - box[0][1]
         # Cell side length
-        self.c_s_l = agent_radius / np.sqrt(2)
+        self.c_s_l = distance_to_agents / np.sqrt(2)
         # Number of cells in the x- and y-directions of the grid
         self.nx, self.ny = int(width / self.c_s_l) + 1, int(height / self.c_s_l) + 1
         # A list of coordinates in the grid of cells

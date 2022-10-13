@@ -65,13 +65,13 @@ def __min_distance_to_polygon(pt, polygon):
     return min_dist
 
 
-def distribute_by_number(*, polygon, number_of_agents, agent_distance, distance_to_polygon,
+def distribute_by_number(*, polygon, number_of_agents, distance_to_agents, distance_to_polygon,
                          seed=None, max_iterations=10000):
     """"returns number_of_agents points randomly placed inside the polygon
 
         :param polygon: shapely polygon in which the agents will be placed
         :param number_of_agents: number of agents distributed
-        :param agent_distance: minimal distance between the centers of agents
+        :param distance_to_agents: minimal distance between the centers of agents
         :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
         :param seed: define a seed for random generation, Default value is None which corresponds to a random value
         :param max_iterations: no more than max_iterations must find a point inside the polygon, default is 10_000
@@ -84,7 +84,7 @@ def distribute_by_number(*, polygon, number_of_agents, agent_distance, distance_
     if seed is not None:
         np.random.seed(seed)
 
-    grid = Grid(box, agent_distance)
+    grid = Grid(box, distance_to_agents)
     created_points = 0
     iterations = 0
     while created_points < number_of_agents:
@@ -104,12 +104,12 @@ def distribute_by_number(*, polygon, number_of_agents, agent_distance, distance_
     return grid.get_samples()
 
 
-def distribute_by_density(*, polygon, density, agent_distance, distance_to_polygon, seed=None, max_iterations=10000):
+def distribute_by_density(*, polygon, density, distance_to_agents, distance_to_polygon, seed=None, max_iterations=10000):
     """returns points randomly placed inside the polygon with the given density
 
         :param polygon: shapely polygon in which the agents will be placed
         :param density: Density of agents inside the polygon
-        :param agent_distance: minimal distance between the centers of agents
+        :param distance_to_agents: minimal distance between the centers of agents
         :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
         :param seed: define a seed for random generation, Default value is None which corresponds to a random value
         :param max_iterations: no more than max_iterations must find a point inside the polygon, Default is 10_000
@@ -119,7 +119,7 @@ def distribute_by_density(*, polygon, density, agent_distance, distance_to_polyg
         raise IncorrectParameterError(f"Polygon is expected to be a shapely Polygon")
     area = polygon.area
     number = round(density * area)
-    return distribute_by_number(polygon=polygon, number_of_agents=number, agent_distance=agent_distance,
+    return distribute_by_number(polygon=polygon, number_of_agents=number, distance_to_agents=distance_to_agents,
                                 distance_to_polygon=distance_to_polygon, seed=seed, max_iterations=max_iterations)
 
 
@@ -154,13 +154,13 @@ def __catch_wrong_inputs(polygon, center_point, circle_segment_radii, fill_param
                                               f"the existing circle from {c_s_radius[0]} to {c_s_radius[1]}")
 
 
-def distribute_in_circles_by_number(*, polygon, agent_distance, distance_to_polygon,
+def distribute_in_circles_by_number(*, polygon, distance_to_agents, distance_to_polygon,
                                     center_point, circle_segment_radii, numbers_of_agents,
                                     seed=None, max_iterations=10_000):
     """returns points randomly placed inside the polygon inside each the circle segments
 
         :param polygon: shapely polygon in which the agents will be placed
-        :param agent_distance: minimal distance between the centers of agents
+        :param distance_to_agents: minimal distance between the centers of agents
         :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
         :param center_point: the Center point of the circle segments
         :param circle_segment_radii: a list of minimal and maximal radius for each circle segment
@@ -178,7 +178,7 @@ def distribute_in_circles_by_number(*, polygon, agent_distance, distance_to_poly
     if seed is not None:
         np.random.seed(seed)
     box = __get_bounding_box(polygon)
-    grid = Grid(box, agent_distance)
+    grid = Grid(box, distance_to_agents)
     for circle_segment, number in zip(circle_segment_radii, numbers_of_agents):
         big_circle_area = __intersecting_area_polygon_circle(center_point, circle_segment[1], polygon)
         small_circle_area = __intersecting_area_polygon_circle(center_point, circle_segment[0], polygon)
@@ -234,13 +234,13 @@ def distribute_in_circles_by_number(*, polygon, agent_distance, distance_to_poly
     return grid.get_samples()
 
 
-def distribute_in_circles_by_density(*, polygon, agent_distance, distance_to_polygon,
+def distribute_in_circles_by_density(*, polygon, distance_to_agents, distance_to_polygon,
                                      center_point, circle_segment_radii, densities,
                                      seed=None, max_iterations=10_000):
     """returns points randomly placed inside the polygon inside each the circle segments
 
         :param polygon: shapely polygon in which the agents will be placed
-        :param agent_distance: minimal distance between the centers of agents
+        :param distance_to_agents: minimal distance between the centers of agents
         :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
         :param center_point: the Center point of the circle segments
         :param circle_segment_radii: a list of minimal and maximal radius for each circle segment
@@ -261,7 +261,7 @@ def distribute_in_circles_by_density(*, polygon, agent_distance, distance_to_pol
         placeable_area = big_circle_area - small_circle_area
         number_of_agents.append(int(density * placeable_area))
 
-    return distribute_in_circles_by_number(polygon=polygon, agent_distance=agent_distance,
+    return distribute_in_circles_by_number(polygon=polygon, distance_to_agents=distance_to_agents,
                                            distance_to_polygon=distance_to_polygon, center_point=center_point,
                                            circle_segment_radii=circle_segment_radii,
                                            numbers_of_agents=number_of_agents, seed=seed, max_iterations=max_iterations)

@@ -56,7 +56,7 @@ def main():
 
     with st.sidebar:
         st.text("General settings")
-        agent_distance = st.slider("Distance between the center points of the agents", 0.1, 2.0, value=0.3)
+        distance_to_agents = st.slider("Distance between the center points of the agents", 0.1, 2.0, value=0.3)
         distance_to_polygon = st.slider("Distance between agents and walls", 0.1, 2.0, value=0.3)
         st.text("Polygon settings")
         corners = st.number_input("Number of edges in polygon", 3, value=len(default_polygon))
@@ -140,7 +140,7 @@ def main():
         for i in range(circle_count):
             if style == "density":
                 densities.append(st.slider(f"Agents / m² in Circle segment {i+1}", 0.1,
-                                           round(((1371.2855*0.0648**agent_distance) + 100)/100, 2), key=i), )
+                                           round(((1371.2855*0.0648**distance_to_agents) + 100)/100, 2), key=i), )
             elif style == "number":
                 temp_min, temp_max = circle_segment_radii[i][0], circle_segment_radii[i][1]
                 area_small = distributions.__intersecting_area_polygon_circle(center_point, temp_min, s_polygon)
@@ -153,22 +153,22 @@ def main():
             samples = []
             if style == "density":
                 samples = distributions.distribute_in_circles_by_density(polygon=s_polygon,
-                                                                         agent_distance=agent_distance,
+                                                                         distance_to_agents=distance_to_agents,
                                                                          distance_to_polygon=distance_to_polygon,
                                                                          center_point=center_point,
                                                                          circle_segment_radii=circle_segment_radii,
                                                                          densities=densities, seed=seed)
             elif style == "number":
                 samples = distributions.distribute_in_circles_by_number(polygon=s_polygon,
-                                                                        agent_distance=agent_distance,
+                                                                        distance_to_agents=distance_to_agents,
                                                                         distance_to_polygon=distance_to_polygon,
                                                                         center_point=center_point,
                                                                         circle_segment_radii=circle_segment_radii,
                                                                         numbers_of_agents=agents, seed=seed)
             st.text('below should be a plot')
-            show_points(s_polygon, samples, agent_distance, circle_segment_radii, center_point, obstacles)
+            show_points(s_polygon, samples, distance_to_agents, circle_segment_radii, center_point, obstacles)
         else:
-            show_points(s_polygon, [], agent_distance, circle_segment_radii, center_point, obstacles)
+            show_points(s_polygon, [], distance_to_agents, circle_segment_radii, center_point, obstacles)
 
     if distribution_type == "place random":
         st.text("Instructions:\n"
@@ -177,7 +177,7 @@ def main():
                 "General settings can be made in the left sidebar")
         style = st.radio("How to choose number of agents?", ("density", "number"))
         if style == "density":
-            density = st.slider("Agents / m²", 0.1, round(((1371.2855*0.0648**agent_distance) + 100)/100, 2))
+            density = st.slider("Agents / m²", 0.1, round(((1371.2855*0.0648**distance_to_agents) + 100)/100, 2))
         elif style == "number":
             agents = st.slider("Agents", 1, round(area * 5))
 
@@ -187,16 +187,16 @@ def main():
             samples = []
             if style == "density":
                 samples = distributions.distribute_by_density(polygon=s_polygon, density=density,
-                                                              agent_distance=agent_distance,
+                                                              distance_to_agents=distance_to_agents,
                                                               distance_to_polygon=distance_to_polygon, seed=seed)
             elif style == "number":
                 samples = distributions.distribute_by_number(polygon=s_polygon, number_of_agents=agents,
-                                                             agent_distance=agent_distance,
+                                                             distance_to_agents=distance_to_agents,
                                                              distance_to_polygon=distance_to_polygon, seed=seed)
             st.text('Below should be a plot')
-            show_points(s_polygon=s_polygon, samples=samples, radius=agent_distance, obstacles=obstacles)
+            show_points(s_polygon=s_polygon, samples=samples, radius=distance_to_agents, obstacles=obstacles)
         else:
-            show_points(s_polygon=s_polygon, samples=[], radius=agent_distance, obstacles=obstacles)
+            show_points(s_polygon=s_polygon, samples=[], radius=distance_to_agents, obstacles=obstacles)
 
 
 if __name__ == "__main__":
