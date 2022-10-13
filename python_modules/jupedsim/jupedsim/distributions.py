@@ -157,7 +157,7 @@ def __catch_wrong_inputs(polygon, center_point, circle_segment_radii, fill_param
 def distribute_in_circles_by_number(*, polygon, distance_to_agents, distance_to_polygon,
                                     center_point, circle_segment_radii, numbers_of_agents,
                                     seed=None, max_iterations=10_000):
-    """returns points randomly placed inside the polygon inside each the circle segments
+    """returns number_of_agents points randomly placed inside the polygon inside each circle segment
 
         :param polygon: shapely polygon in which the agents will be placed
         :param distance_to_agents: minimal distance between the centers of agents
