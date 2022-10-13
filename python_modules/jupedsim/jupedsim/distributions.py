@@ -145,8 +145,8 @@ def __catch_wrong_inputs(polygon, center_point, circle_segment_radii, fill_param
                                           f"a Circle segment from {c_s_radius[0]} to {c_s_radius[1]} is not possible")
         j = 0
         while j < i:
-            if c_s_radius[0] < c_s_radius[1] <= circle_segment_radii[j][0] \
-                    or circle_segment_radii[j][1] <= c_s_radius[0] < c_s_radius[1]:
+            if c_s_radius[1] <= circle_segment_radii[j][0] \
+                    or circle_segment_radii[j][1] <= c_s_radius[0]:
                 j = j + 1
                 continue
             else:
