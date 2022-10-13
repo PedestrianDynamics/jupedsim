@@ -237,7 +237,7 @@ def distribute_in_circles_by_number(*, polygon, distance_to_agents, distance_to_
 def distribute_in_circles_by_density(*, polygon, distance_to_agents, distance_to_polygon,
                                      center_point, circle_segment_radii, densities,
                                      seed=None, max_iterations=10_000):
-    """returns points randomly placed inside the polygon inside each the circle segments
+    """returns points randomly placed inside the polygon inside each circle segment with a given density
 
         :param polygon: shapely polygon in which the agents will be placed
         :param distance_to_agents: minimal distance between the centers of agents
