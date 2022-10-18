@@ -52,7 +52,7 @@ def __get_bounding_box(polygon):
         x_values.append(point[0])
         y_values.append(point[1])
 
-    return [(min(x_values), min(y_values)), (max(x_values), max(y_values))]
+    return [(min(x_values), min(y_values)), ((max(x_values)), max(y_values))]
 
 
 def __min_distance_to_polygon(pt, polygon):
@@ -132,7 +132,7 @@ def __catch_wrong_inputs(polygon, center_point, circle_segment_radii, fill_param
             raise IncorrectParameterError(f"Center_point expected a tuple of 2 numbers, {len(center_point)} were given")
     except TypeError:
         # center point is no tuple or list
-        raise IncorrectParameterError(f"Center_point expected a tuple of 2 numbers")
+        raise IncorrectParameterError(f"Center_point expected a tuple of 2 numbers, given Type: {type(center_point)}")
     if len(circle_segment_radii) != len(fill_parameters):
         raise IncorrectParameterError(f"the number of circle segments does not match the number of fill parameters.\n"
                                       f"radii given for {len(circle_segment_radii)} circle segments,"
@@ -145,19 +145,18 @@ def __catch_wrong_inputs(polygon, center_point, circle_segment_radii, fill_param
                                           f"a Circle segment from {c_s_radius[0]} to {c_s_radius[1]} is not possible")
         j = 0
         while j < i:
-            if c_s_radius[1] <= circle_segment_radii[j][0] \
-                    or circle_segment_radii[j][1] <= c_s_radius[0]:
+            if c_s_radius[0] < c_s_radius[1] <= circle_segment_radii[j][0] \
+                    or circle_segment_radii[j][1] <= c_s_radius[0] < c_s_radius[1]:
                 j = j + 1
                 continue
             else:
-                raise OverlappingCirclesError(f"the new Circle would overlap with"
-                                              f"the existing circle from {c_s_radius[0]} to {c_s_radius[1]}")
+                raise OverlappingCirclesError(f"the Circle from {c_s_radius[0]} to {c_s_radius[1]} overlaps with others")
 
 
 def distribute_in_circles_by_number(*, polygon, distance_to_agents, distance_to_polygon,
                                     center_point, circle_segment_radii, numbers_of_agents,
                                     seed=None, max_iterations=10_000):
-    """returns number_of_agents points randomly placed inside the polygon inside each circle segment
+    """returns points randomly placed inside the polygon inside each the circle segments
 
         :param polygon: shapely polygon in which the agents will be placed
         :param distance_to_agents: minimal distance between the centers of agents
@@ -237,7 +236,7 @@ def distribute_in_circles_by_number(*, polygon, distance_to_agents, distance_to_
 def distribute_in_circles_by_density(*, polygon, distance_to_agents, distance_to_polygon,
                                      center_point, circle_segment_radii, densities,
                                      seed=None, max_iterations=10_000):
-    """returns points randomly placed inside the polygon inside each circle segment with a given density
+    """returns points randomly placed inside the polygon inside each the circle segments
 
         :param polygon: shapely polygon in which the agents will be placed
         :param distance_to_agents: minimal distance between the centers of agents

@@ -13,6 +13,8 @@ class Grid:
         self.a_r = distance_to_agents
         width, height = box[1][0] - box[0][0], box[1][1] - box[0][1]
         # Cell side length
+        # distance between points is divided by sqrt(2) so that only one point fits inside each Cell of the grid
+        # also the diagonal of each Cell is equal to the distance between points
         self.c_s_l = distance_to_agents / np.sqrt(2)
         # Number of cells in the x- and y-directions of the grid
         self.nx, self.ny = int(width / self.c_s_l) + 1, int(height / self.c_s_l) + 1
