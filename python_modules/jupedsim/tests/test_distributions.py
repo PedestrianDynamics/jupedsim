@@ -3,6 +3,7 @@ import pytest
 from jupedsim import distributions
 
 
+
 class GridMock(distributions.Grid):
     def __init__(self):
         pass
@@ -118,7 +119,8 @@ def test_determination_by_number_creates_correct_points():
     number_of_agents = 450
     set_seed = 1337
     samples = distributions.distribute_by_number(polygon=polygon, number_of_agents=number_of_agents,
-                                                 distance_to_agents=distance_to_agents, distance_to_polygon=distance_to_polygon,
+                                                 distance_to_agents=distance_to_agents,
+                                                 distance_to_polygon=distance_to_polygon,
                                                  seed=set_seed)
     # as many points created as intended
     assert len(samples) == number_of_agents
@@ -149,7 +151,8 @@ def test_determination_by_density_creates_correct_amount():
     density = 2.5
     # 2.5 persons per m²
     set_seed = 1337
-    samples = distributions.distribute_by_density(polygon=polygon, density=density, distance_to_agents=distance_to_agents,
+    samples = distributions.distribute_by_density(polygon=polygon, density=density,
+                                                  distance_to_agents=distance_to_agents,
                                                   distance_to_polygon=distance_to_polygon, seed=set_seed)
     # as many points created as intended
     assert len(samples) == 250
@@ -204,6 +207,10 @@ def test_distribution_in_circle_by_number_creates_correct_points():
             j = j + 1
 
 
+def foo(*, a, b):
+    return a + b
+
+
 def test_distribution_in_circle_by_density_creates_correct_amount():
     polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
     # polygon 10 x 10 square with 100m²
@@ -226,66 +233,31 @@ def test_distribution_in_circle_by_density_creates_correct_amount():
     assert len(samples) == 78
 
 
+test_parameters = [
+    [[(0, 0), (10, 0), (10, 10), (0, 10)], 5, [(1, 3)], [5], distributions.IncorrectParameterError],
+    [[(0, 0), (10, 0), (10, 10), (0, 10)], [0], [(1, 3)], [5], distributions.IncorrectParameterError],
+    [[(0, 0), (10, 0), (10, 10), (0, 10)], (0, 0), [(1, 3), (3, 5)], [5], distributions.IncorrectParameterError],
+    [[(0, 0), (10, 0), (10, 10), (0, 10)], (0, 0), [(-1, 3), (3, 5)], [5, 5], distributions.NegativeValueError],
+    [[(0, 0), (10, 0), (10, 10), (0, 10)], (0, 0), [(1, 3), (2, 5)], [5, 5], distributions.OverlappingCirclesError],
+    [[(0, 0), (10, 0), (10, 10), (0, 10)], (0, 0), [(0, 2), (3, 5), (2, 4)], [5, 5, 5],
+     distributions.OverlappingCirclesError],
+    [[(0, 0), (10, 0), (10, 10), (0, 10)], (0, 0), [(0, 5), (8, 3)], [5, 5], distributions.OverlappingCirclesError]
+]
+
+
 def test_catch_wrong_inputs_for_wrong_polygon_type():
     polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
-    # polygon is no Shapely Polygon
-    center_point, circle_segment_radii, numbers_of_agents = (0, 0), [(1, 3)], [5]
-    with pytest.raises(distributions.IncorrectParameterError):
-        distributions.__catch_wrong_inputs(polygon=polygon, center_point=center_point,
-                                           circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
-
-
-def test_catch_wrong_inputs_for_wrong_length_center_point():
-    polygon = distributions.shply.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
-    center_point = 5
-    # center_point is no tuple
-    circle_segment_radii, numbers_of_agents = [(1, 3)], [5]
-    with pytest.raises(distributions.IncorrectParameterError):
-        distributions.__catch_wrong_inputs(polygon=polygon, center_point=center_point,
-                                           circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
-    center_point = [0]
-    # center_point only contains 1 number
-    with pytest.raises(distributions.IncorrectParameterError):
-        distributions.__catch_wrong_inputs(polygon=polygon, center_point=center_point,
-                                           circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
-
-
-def test_catch_wrong_inputs_for_not_enough_fill_parameter():
-    polygon = distributions.shply.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     center_point = (0, 0)
-    circle_segment_radii, numbers_of_agents = [(1, 3), (3, 5)], [5]
-    # two circle segments given only one fill parameter
+    circle_segment_radii, numbers_of_agents = [(1, 3)], [5]
+    # polygon is no Shapely Polygon
     with pytest.raises(distributions.IncorrectParameterError):
         distributions.__catch_wrong_inputs(polygon=polygon, center_point=center_point,
                                            circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
 
 
-def test_catch_wrong_inputs_for_negativ_radius():
-    polygon = distributions.shply.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
-    center_point, numbers_of_agents = (0, 0), [5, 5]
-    circle_segment_radii = [(-1, 3), (3, 5)]
-    with pytest.raises(distributions.NegativeValueError):
-        distributions.__catch_wrong_inputs(polygon=polygon, center_point=center_point,
-                                           circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
-
-
-def test_catch_wrong_inputs_for_Overlapping_Circles():
-    polygon = distributions.shply.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
-    center_point, numbers_of_agents = (0, 0), [5, 5]
-    circle_segment_radii = [(1, 3), (2, 5)]
-    with pytest.raises(distributions.OverlappingCirclesError):
-        distributions.__catch_wrong_inputs(polygon=polygon, center_point=center_point,
-                                           circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
-    circle_segment_radii, numbers_of_agents = [(0, 2), (3, 5), (2, 4)], [5, 5, 5]
-    with pytest.raises(distributions.OverlappingCirclesError):
-        distributions.__catch_wrong_inputs(polygon=polygon, center_point=center_point,
-                                           circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
-
-
-def test_catch_wrong_inputs_for_minimum_radius_bigger_than_maximum_radius():
-    polygon = distributions.shply.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
-    center_point, numbers_of_agents = (0, 0), [5, 5]
-    circle_segment_radii = [(0, 5), (8, 3)]
-    with pytest.raises(distributions.OverlappingCirclesError):
-        distributions.__catch_wrong_inputs(polygon=polygon, center_point=center_point,
+@pytest.mark.parametrize("polygon, center_point, circle_segment_radii, numbers_of_agents, error_list", test_parameters)
+def test_catch_wrong_inputs(polygon, center_point, circle_segment_radii, numbers_of_agents, error_list):
+    s_polygon = distributions.shply.Polygon(polygon)
+    with pytest.raises(error_list):
+        distributions.__catch_wrong_inputs(polygon=s_polygon, center_point=center_point,
                                            circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
