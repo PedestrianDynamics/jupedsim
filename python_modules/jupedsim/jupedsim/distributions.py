@@ -178,16 +178,23 @@ def distribute_in_circles_by_number(*, polygon, distance_to_agents, distance_to_
         np.random.seed(seed)
     box = __get_bounding_box(polygon)
     grid = Grid(box, distance_to_agents)
+
     for circle_segment, number in zip(circle_segment_radii, numbers_of_agents):
-        big_circle_area = __intersecting_area_polygon_circle(center_point, circle_segment[1], polygon)
-        small_circle_area = __intersecting_area_polygon_circle(center_point, circle_segment[0], polygon)
+        outer_radius = circle_segment[1]
+        inner_radius = circle_segment[0]
+        big_circle_area = __intersecting_area_polygon_circle(center_point, outer_radius, polygon)
+        small_circle_area = __intersecting_area_polygon_circle(center_point, inner_radius, polygon)
         placeable_area = big_circle_area - small_circle_area
 
-        # checking whether to place points inside the circle segment or inside the bounding box of the polygon
+        # checking whether to place points
+        # inside the circle segment or
+        # inside the bounding box of the intersection of polygon and Circle Segment
+
         # determine the entire area of the circle segment
-        entire_circle_area = np.pi * (circle_segment[1] ** 2 - circle_segment[0] ** 2)
+        entire_circle_area = np.pi * (outer_radius ** 2 - inner_radius ** 2)
         # determine the area where a point might be placed around the polygon
-        dif_x, dif_y = box[1][0] - box[0][0], box[1][1] - box[0][1]
+        sec_box = __box_of_intersection(polygon, center_point, outer_radius)
+        dif_x, dif_y = sec_box[1][0] - sec_box[0][0], sec_box[1][1] - sec_box[0][1]
         bounding_box_area = dif_x * dif_y
 
         if entire_circle_area < bounding_box_area:
@@ -197,7 +204,7 @@ def distribute_in_circles_by_number(*, polygon, distance_to_agents, distance_to_
                 while i < max_iterations:
                     i += 1
                     # determines a random radius within the circle segment
-                    rho = np.sqrt(np.random.uniform(circle_segment[0] ** 2, circle_segment[1] ** 2))
+                    rho = np.sqrt(np.random.uniform(inner_radius ** 2, outer_radius ** 2))
                     # determines a random degree
                     theta = np.random.uniform(0, 2 * np.pi)
                     pt = center_point[0] + rho * np.cos(theta), center_point[1] + rho * np.sin(theta)
@@ -207,7 +214,7 @@ def distribute_in_circles_by_number(*, polygon, distance_to_agents, distance_to_
 
                 if i >= max_iterations and placed_count != number:
                     message = f"the desired amount of agents in the Circle segment from" \
-                              f" {circle_segment[0]} to {circle_segment[1]} could not be achieved." \
+                              f" {inner_radius} to {outer_radius} could not be achieved." \
                               f"\nOnly {placed_count} of {number}  could be placed." \
                               f"\nactual density: {round(placed_count / placeable_area, 2)} p/m²"
                     raise AgentNumberError(message)
@@ -218,12 +225,12 @@ def distribute_in_circles_by_number(*, polygon, distance_to_agents, distance_to_
             while placed_count < number:
                 if iterations > max_iterations:
                     message = f"the desired amount of agents in the Circle segment from" \
-                              f" {circle_segment[0]} to {circle_segment[1]} could not be achieved." \
+                              f" {inner_radius} to {outer_radius} could not be achieved." \
                               f"\nOnly {placed_count} of {number}  could be placed." \
                               f"\nactual density: {round(placed_count / placeable_area, 2)} p/m²"
                     raise AgentNumberError(message)
-                temp_point = (np.random.uniform(box[0][0], box[1][0]), np.random.uniform(box[0][1], box[1][1]))
-                if __is_inside_circle(temp_point, center_point, circle_segment[0], circle_segment[1]) \
+                temp_point = (np.random.uniform(sec_box[0][0], sec_box[1][0]), np.random.uniform(sec_box[0][1], sec_box[1][1]))
+                if __is_inside_circle(temp_point, center_point, inner_radius, outer_radius) \
                         and __check_distance_constraints(temp_point, distance_to_polygon, grid, polygon):
                     grid.append_point(temp_point)
                     iterations = 0
@@ -279,3 +286,18 @@ def __check_distance_constraints(pt, wall_distance, grid, polygon):
     if __min_distance_to_polygon(pt, polygon) < wall_distance:
         return False
     return grid.no_neighbours_in_distance(pt)
+
+
+def __box_of_intersection(polygon, center_point, outer_radius):
+    """returns an Axis Aligned Bounding Box containing the intersection of a Circle and the polygon
+    @:param polygon is a shapely Polygon
+    @:param center_point is the Center point of the Circle
+   @:param outer_radius is the radius of the Circle
+   @:return bounding box formated like [(min(x_values), min(y_values)), (max(x_values), max(y_values))]"""
+    # creates a point
+    point = shply.Point(center_point)
+    # creates a layer with the size of the radius all around this point
+    circle = point.buffer(outer_radius)
+    # returns the size of the intersecting area
+    shapely_bounds = polygon.intersection(circle).bounds
+    return [shapely_bounds[:2], shapely_bounds[2:]]

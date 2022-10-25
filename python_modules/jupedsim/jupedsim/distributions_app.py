@@ -91,7 +91,7 @@ def main():
                                                                value=0.0, step=1.0)])
         with col4:
             for i in range(obstacle_count):
-                st.text(f"hole {i+1}")
+                st.text(f"hole {i + 1}")
                 # this text is placed so the columns align
                 for j in range(obstacle_corners[i]):
                     obstacle_values[i][j].append(st.number_input(f"Y{j + 1} in hole {i + 1}",
@@ -119,7 +119,7 @@ def main():
                 "General settings can be made in the left sidebar")
         style = (st.radio(f"How to choose number of agents for Circles", ("density", "number")))
         circle_count = st.number_input("number of circles", 1)
-        col1, col2= st.columns(2)
+        col1, col2 = st.columns(2)
         min_values, max_values = [], []
         densities, agents = [], []
         default_center = (5.0, 5.0)
@@ -139,14 +139,14 @@ def main():
 
         for i in range(circle_count):
             if style == "density":
-                densities.append(st.slider(f"Agents / m² in Circle segment {i+1}", 0.1,
-                                           round(((1371.2855*0.0648**distance_to_agents) + 100)/100, 2), key=i), )
+                densities.append(st.slider(f"Agents / m² in Circle segment {i + 1}", 0.1,
+                                           round((69.2636*(distance_to_agents**(-1.89412))/100), 2), key=i))
             elif style == "number":
                 temp_min, temp_max = circle_segment_radii[i][0], circle_segment_radii[i][1]
                 area_small = distributions.__intersecting_area_polygon_circle(center_point, temp_min, s_polygon)
                 area_big = distributions.__intersecting_area_polygon_circle(center_point, temp_max, s_polygon)
                 area_segment = area_big - area_small
-                agents.append(st.slider(f"Agents in Circle segment {i+1}", 1, round(area_segment * 5), key=i))
+                agents.append(st.slider(f"Agents in Circle segment {i + 1}", 1, round(area_segment * 8), key=i))
 
         button_clicked = st.button('distribute agents')
         if button_clicked:
@@ -177,9 +177,9 @@ def main():
                 "General settings can be made in the left sidebar")
         style = st.radio("How to choose number of agents?", ("density", "number"))
         if style == "density":
-            density = st.slider("Agents / m²", 0.1, round(((1371.2855*0.0648**distance_to_agents) + 100)/100, 2))
+            density = st.slider("Agents / m²", 0.1, round((69.2636*(distance_to_agents**(-1.89412))/100), 2))
         elif style == "number":
-            agents = st.slider("Agents", 1, round(area * 5))
+            agents = st.slider("Agents", 1, round(area * 8))
 
         button_clicked = st.button('distribute agents')
 
