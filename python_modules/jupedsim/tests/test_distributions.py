@@ -85,7 +85,7 @@ def test_seed_works_correct_for_determination_by_number():
     assert samples1 == samples2
 
 
-def test_seed_works_correct_for_determination_in_Circles_by_number():
+def test_seed_works_correct_for_determination_in_circles_by_number():
     polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
     polygon = distributions.shply.Polygon(polygon)
     number_of_agents = [75]
@@ -253,7 +253,7 @@ def test_catch_wrong_inputs_for_wrong_polygon_type():
                                            circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
 
 
-def test_catch_wrong_inputs_Negativ_Value():
+def test_catch_wrong_inputs_negativ_value():
     s_polygon = distributions.shply.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     center_point = (0, 0)
     circle_segment_radii = [(-1, 3), (3, 5)]
@@ -271,7 +271,7 @@ test_parameters = [
 
 
 @pytest.mark.parametrize("polygon, center_point, circle_segment_radii, numbers_of_agents", test_parameters)
-def test_catch_wrong_inputs_incorrect_Parameter(polygon, center_point, circle_segment_radii, numbers_of_agents):
+def test_catch_wrong_inputs_incorrect_parameter(polygon, center_point, circle_segment_radii, numbers_of_agents):
     s_polygon = distributions.shply.Polygon(polygon)
     with pytest.raises(distributions.IncorrectParameterError):
         distributions.__catch_wrong_inputs(polygon=s_polygon, center_point=center_point,
@@ -286,7 +286,7 @@ test_parameters = [
 
 
 @pytest.mark.parametrize("polygon, center_point, circle_segment_radii, numbers_of_agents", test_parameters)
-def test_catch_wrong_inputs_Overlapping_Circles(polygon, center_point, circle_segment_radii, numbers_of_agents):
+def test_catch_wrong_inputs_overlapping_circles(polygon, center_point, circle_segment_radii, numbers_of_agents):
     s_polygon = distributions.shply.Polygon(polygon)
     with pytest.raises(distributions.OverlappingCirclesError):
         distributions.__catch_wrong_inputs(polygon=s_polygon, center_point=center_point,
