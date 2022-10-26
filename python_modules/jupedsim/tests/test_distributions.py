@@ -3,7 +3,6 @@ import pytest
 from jupedsim import distributions
 
 
-
 class GridMock(distributions.Grid):
     def __init__(self):
         pass
@@ -207,10 +206,6 @@ def test_distribution_in_circle_by_number_creates_correct_points():
             j = j + 1
 
 
-def foo(*, a, b):
-    return a + b
-
-
 def test_distribution_in_circle_by_density_creates_correct_amount():
     polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
     # polygon 10 x 10 square with 100m²
@@ -233,16 +228,19 @@ def test_distribution_in_circle_by_density_creates_correct_amount():
     assert len(samples) == 78
 
 
-test_parameters = [
-    [[(0, 0), (10, 0), (10, 10), (0, 10)], 5, [(1, 3)], [5], distributions.IncorrectParameterError],
-    [[(0, 0), (10, 0), (10, 10), (0, 10)], [0], [(1, 3)], [5], distributions.IncorrectParameterError],
-    [[(0, 0), (10, 0), (10, 10), (0, 10)], (0, 0), [(1, 3), (3, 5)], [5], distributions.IncorrectParameterError],
-    [[(0, 0), (10, 0), (10, 10), (0, 10)], (0, 0), [(-1, 3), (3, 5)], [5, 5], distributions.NegativeValueError],
-    [[(0, 0), (10, 0), (10, 10), (0, 10)], (0, 0), [(1, 3), (2, 5)], [5, 5], distributions.OverlappingCirclesError],
-    [[(0, 0), (10, 0), (10, 10), (0, 10)], (0, 0), [(0, 2), (3, 5), (2, 4)], [5, 5, 5],
-     distributions.OverlappingCirclesError],
-    [[(0, 0), (10, 0), (10, 10), (0, 10)], (0, 0), [(0, 5), (8, 3)], [5, 5], distributions.OverlappingCirclesError]
-]
+def test_box_of_intersection():
+    polygon = [(0, 0), (8, 0), (8, 2), (2, 2), (2, 4), (6, 4), (6, 6), (2, 6), (2, 8), (8, 8), (8, 10), (0, 10)]
+    s_polygon = distributions.shply.Polygon(polygon)
+    center_point = (4, 7)
+    outer_radius = 3.5
+    expected_box = [(0.5, 4), (7.35329, 10)]
+    actual_box = distributions.__box_of_intersection(s_polygon, center_point, outer_radius)
+    exception_rate = 0.01
+
+    assert abs(expected_box[0][0] - actual_box[0][0]) < exception_rate
+    assert abs(expected_box[0][1] - actual_box[0][1]) < exception_rate
+    assert abs(expected_box[1][0] - actual_box[1][0]) < exception_rate
+    assert abs(expected_box[1][1] - actual_box[1][1]) < exception_rate
 
 
 def test_catch_wrong_inputs_for_wrong_polygon_type():
@@ -255,9 +253,41 @@ def test_catch_wrong_inputs_for_wrong_polygon_type():
                                            circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
 
 
-@pytest.mark.parametrize("polygon, center_point, circle_segment_radii, numbers_of_agents, error_list", test_parameters)
-def test_catch_wrong_inputs(polygon, center_point, circle_segment_radii, numbers_of_agents, error_list):
+def test_catch_wrong_inputs_Negativ_Value():
+    s_polygon = distributions.shply.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+    center_point = (0, 0)
+    circle_segment_radii = [(-1, 3), (3, 5)]
+    numbers_of_agents = [5, 5]
+    with pytest.raises(distributions.NegativeValueError):
+        distributions.__catch_wrong_inputs(polygon=s_polygon, center_point=center_point,
+                                           circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
+
+
+test_parameters = [
+    [[(0, 0), (10, 0), (10, 10), (0, 10)], 5, [(1, 3)], [5]],
+    [[(0, 0), (10, 0), (10, 10), (0, 10)], [0], [(1, 3)], [5]],
+    [[(0, 0), (10, 0), (10, 10), (0, 10)], (0, 0), [(1, 3), (3, 5)], [5]]
+]
+
+
+@pytest.mark.parametrize("polygon, center_point, circle_segment_radii, numbers_of_agents", test_parameters)
+def test_catch_wrong_inputs_incorrect_Parameter(polygon, center_point, circle_segment_radii, numbers_of_agents):
     s_polygon = distributions.shply.Polygon(polygon)
-    with pytest.raises(error_list):
+    with pytest.raises(distributions.IncorrectParameterError):
+        distributions.__catch_wrong_inputs(polygon=s_polygon, center_point=center_point,
+                                           circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
+
+
+test_parameters = [
+    [[(0, 0), (10, 0), (10, 10), (0, 10)], (0, 0), [(1, 3), (2, 5)], [5, 5]],
+    [[(0, 0), (10, 0), (10, 10), (0, 10)], (0, 0), [(0, 2), (3, 5), (2, 4)], [5, 5, 5]],
+    [[(0, 0), (10, 0), (10, 10), (0, 10)], (0, 0), [(0, 5), (8, 3)], [5, 5]]
+]
+
+
+@pytest.mark.parametrize("polygon, center_point, circle_segment_radii, numbers_of_agents", test_parameters)
+def test_catch_wrong_inputs_Overlapping_Circles(polygon, center_point, circle_segment_radii, numbers_of_agents):
+    s_polygon = distributions.shply.Polygon(polygon)
+    with pytest.raises(distributions.OverlappingCirclesError):
         distributions.__catch_wrong_inputs(polygon=s_polygon, center_point=center_point,
                                            circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)

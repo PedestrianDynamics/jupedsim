@@ -81,8 +81,7 @@ def distribute_by_number(*, polygon, number_of_agents, distance_to_agents, dista
         raise IncorrectParameterError(f"Polygon is expected to be a shapely Polygon")
     box = __get_bounding_box(polygon)
 
-    if seed is not None:
-        np.random.seed(seed)
+    np.random.seed(seed)
 
     grid = Grid(box, distance_to_agents)
     created_points = 0
@@ -174,8 +173,7 @@ def distribute_in_circles_by_number(*, polygon, distance_to_agents, distance_to_
     # catch wrong inputs
     __catch_wrong_inputs(polygon=polygon, center_point=center_point,
                          circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
-    if seed is not None:
-        np.random.seed(seed)
+    np.random.seed(seed)
     box = __get_bounding_box(polygon)
     grid = Grid(box, distance_to_agents)
 
@@ -229,7 +227,8 @@ def distribute_in_circles_by_number(*, polygon, distance_to_agents, distance_to_
                               f"\nOnly {placed_count} of {number}  could be placed." \
                               f"\nactual density: {round(placed_count / placeable_area, 2)} p/m²"
                     raise AgentNumberError(message)
-                temp_point = (np.random.uniform(sec_box[0][0], sec_box[1][0]), np.random.uniform(sec_box[0][1], sec_box[1][1]))
+                temp_point = (np.random.uniform(sec_box[0][0], sec_box[1][0]),
+                              np.random.uniform(sec_box[0][1], sec_box[1][1]))
                 if __is_inside_circle(temp_point, center_point, inner_radius, outer_radius) \
                         and __check_distance_constraints(temp_point, distance_to_polygon, grid, polygon):
                     grid.append_point(temp_point)
@@ -293,7 +292,7 @@ def __box_of_intersection(polygon, center_point, outer_radius):
     @:param polygon is a shapely Polygon
     @:param center_point is the Center point of the Circle
    @:param outer_radius is the radius of the Circle
-   @:return bounding box formated like [(min(x_values), min(y_values)), (max(x_values), max(y_values))]"""
+   @:return bounding box formatted like [(min(x_values), min(y_values)), (max(x_values), max(y_values))]"""
     # creates a point
     point = shply.Point(center_point)
     # creates a layer with the size of the radius all around this point

@@ -141,6 +141,8 @@ def main():
             if style == "density":
                 densities.append(st.slider(f"Agents / m² in Circle segment {i + 1}", 0.1,
                                            round((69.2636*(distance_to_agents**(-1.89412))/100), 2), key=i))
+                # the function for the maximum selectable density is an estimate of the real maximum density possible
+                # the estimation was done by Power-Regression
             elif style == "number":
                 temp_min, temp_max = circle_segment_radii[i][0], circle_segment_radii[i][1]
                 area_small = distributions.__intersecting_area_polygon_circle(center_point, temp_min, s_polygon)
@@ -178,6 +180,8 @@ def main():
         style = st.radio("How to choose number of agents?", ("density", "number"))
         if style == "density":
             density = st.slider("Agents / m²", 0.1, round((69.2636*(distance_to_agents**(-1.89412))/100), 2))
+            # the function for the maximum selectable density is an estimate of the real maximum density possible
+            # the estimation was done by Power-Regression
         elif style == "number":
             agents = st.slider("Agents", 1, round(area * 8))
 
