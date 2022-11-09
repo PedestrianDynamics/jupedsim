@@ -272,6 +272,54 @@ def distribute_in_circles_by_density(*, polygon, distance_to_agents, distance_to
                                            numbers_of_agents=number_of_agents, seed=seed, max_iterations=max_iterations)
 
 
+def distribute_til_full(*, polygon, distance_to_agents, distance_to_polygon, seed=None, max_iterations=10000):
+    """returns as many randomly placed points as fit into the polygon
+        :param polygon: shapely polygon in which the agents will be placed
+        :param distance_to_agents: minimal distance between the centers of agents
+        :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
+        :param seed: define a seed for random generation, Default value is None which corresponds to a random value
+        :param max_iterations: no more than max_iterations must find a point inside the polygon, default is 10_000
+        :return: list of created points"""
+    if not isinstance(polygon, shply.polygon.Polygon):
+        raise IncorrectParameterError(f"Polygon is expected to be a shapely Polygon")
+    box = __get_bounding_box(polygon)
+
+    np.random.seed(seed)
+
+    grid = Grid(box, distance_to_agents)
+    iterations = 0
+    while True:
+        if iterations > max_iterations:
+            break
+        temp_point = (np.random.uniform(box[0][0], box[1][0]), np.random.uniform(box[0][1], box[1][1]))
+        if __check_distance_constraints(temp_point, distance_to_polygon, grid, polygon):
+            grid.append_point(temp_point)
+
+            iterations = 0
+        else:
+            iterations += 1
+
+    return grid.get_samples()
+
+
+def distribute_by_percentage(*, polygon, percent, distance_to_agents, distance_to_polygon, seed=None, max_iterations=10000):
+    """returns a percentage of agents that can fit inside the polygon
+       fills the polygon entirely and then selects the percentage of placed agents
+
+        :param polygon: shapely polygon in which the agents will be placed
+        :param percent: percentage of agents selected - 100% ≙ completely filled polygon 0% ≙ 0 placed points
+        :param distance_to_agents: minimal distance between the centers of agents
+        :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
+        :param seed: define a seed for random generation, Default value is None which corresponds to a random value
+        :param max_iterations: no more than max_iterations must find a point inside the polygon, Default is 10_000
+        :return: list of created points"""
+    samples = distribute_til_full(polygon=polygon, distance_to_agents=distance_to_agents,
+                                  distance_to_polygon=distance_to_polygon, seed=seed, max_iterations=max_iterations)
+    sample_amount = len(samples)
+    needed_amount = round(sample_amount * (percent/100))
+    return samples[:needed_amount]
+
+
 def __check_distance_constraints(pt, wall_distance, grid, polygon):
     """Determines if a point has enough distance to other points and to the walls
      Uses a Grid to determine neighbours
@@ -300,3 +348,4 @@ def __box_of_intersection(polygon, center_point, outer_radius):
     # returns the size of the intersecting area
     shapely_bounds = polygon.intersection(circle).bounds
     return [shapely_bounds[:2], shapely_bounds[2:]]
+
