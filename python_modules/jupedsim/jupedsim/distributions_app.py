@@ -203,25 +203,39 @@ def main():
             show_points(s_polygon=s_polygon, samples=[], radius=distance_to_agents, obstacles=obstacles)
 
     if distribution_type == "full":
+        st.text("Instructions:\n"
+                "distributes agents all over the polygon\n"
+                "you can enter how many tries there should be to\n"
+                "find another place to put an agent before a polygon is considered filled\n"
+                "General settings can be made in the left sidebar")
+        max_iterations = st.number_input("maximum tries to find a new point", 1, value=10_000, step=100)
         button_clicked = st.button('distribute agents')
 
         if button_clicked:
             samples = distributions.distribute_til_full(polygon=s_polygon, distance_to_agents=distance_to_agents,
-                                                        distance_to_polygon=distance_to_polygon, seed=seed)
+                                                        distance_to_polygon=distance_to_polygon, seed=seed,
+                                                        max_iterations=max_iterations)
             st.text('Below should be a plot')
             show_points(s_polygon=s_polygon, samples=samples, radius=distance_to_agents, obstacles=obstacles)
         else:
             show_points(s_polygon=s_polygon, samples=[], radius=distance_to_agents, obstacles=obstacles)
 
     if distribution_type == "percent":
+        st.text("Instructions:\n"
+                "distributes agents inside the polygon\n"
+                "you can enter a percentage of how much the polygon should be filled\n"
+                "you can also enter how many tries there should be to\n"
+                "find another place to put an agent before a polygon is considered filled\n"
+                "General settings can be made in the left sidebar")
         percent = st.slider("Percent filled: ", 1, 100)
+        max_iterations = st.number_input("maximum tries to find a new point", 1, value=10_000, step=100)
 
         button_clicked = st.button('distribute agents')
 
         if button_clicked:
             samples = distributions.distribute_by_percentage(polygon=s_polygon, percent=percent,
                                                              distance_to_agents=distance_to_agents,
-                                                             distance_to_polygon=distance_to_polygon, seed=seed)
+                                                             distance_to_polygon=distance_to_polygon, seed=seed, max_iterations=max_iterations)
             st.text('Below should be a plot')
             show_points(s_polygon=s_polygon, samples=samples, radius=distance_to_agents, obstacles=obstacles)
         else:
