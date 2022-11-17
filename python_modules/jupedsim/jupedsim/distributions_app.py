@@ -107,7 +107,7 @@ def main():
         polygon.append((x, y))
     s_polygon = distributions.shply.Polygon(polygon, obstacles)
     area = s_polygon.area
-    distribution_type = st.radio("How to distribute agents?", ("place random", "place in Circle"))
+    distribution_type = st.radio("How to distribute agents?", ("place random", "place in Circle", "full", "percent"))
 
     if distribution_type == "place in Circle":
         st.text("Instructions:\n"
@@ -140,7 +140,7 @@ def main():
         for i in range(circle_count):
             if style == "density":
                 densities.append(st.slider(f"Agents / m² in Circle segment {i + 1}", 0.1,
-                                           round((69.2636*(distance_to_agents**(-1.89412))/100), 2), key=i))
+                                           round((69.2636 * (distance_to_agents ** (-1.89412)) / 100), 2), key=i))
                 # the function for the maximum selectable density is an estimate of the real maximum density possible
                 # the estimation was done by Power-Regression
             elif style == "number":
@@ -179,7 +179,7 @@ def main():
                 "General settings can be made in the left sidebar")
         style = st.radio("How to choose number of agents?", ("density", "number"))
         if style == "density":
-            density = st.slider("Agents / m²", 0.1, round((69.2636*(distance_to_agents**(-1.89412))/100), 2))
+            density = st.slider("Agents / m²", 0.1, round((69.2636 * (distance_to_agents ** (-1.89412)) / 100), 2))
             # the function for the maximum selectable density is an estimate of the real maximum density possible
             # the estimation was done by Power-Regression
         elif style == "number":
@@ -197,6 +197,44 @@ def main():
                 samples = distributions.distribute_by_number(polygon=s_polygon, number_of_agents=agents,
                                                              distance_to_agents=distance_to_agents,
                                                              distance_to_polygon=distance_to_polygon, seed=seed)
+            st.text('Below should be a plot')
+            show_points(s_polygon=s_polygon, samples=samples, radius=distance_to_agents, obstacles=obstacles)
+        else:
+            show_points(s_polygon=s_polygon, samples=[], radius=distance_to_agents, obstacles=obstacles)
+
+    if distribution_type == "full":
+        st.text("Instructions:\n"
+                "distributes agents all over the polygon\n"
+                "you can enter how many tries there should be to\n"
+                "find another place to put an agent before a the space around an agent is considered filled\n"
+                "General settings can be made in the left sidebar")
+        k = st.number_input("maximum tries to find a point around a reference point", 1, value=30, step=1)
+        button_clicked = st.button('distribute agents')
+
+        if button_clicked:
+            samples = distributions.distribute_til_full(polygon=s_polygon, distance_to_agents=distance_to_agents,
+                                                        distance_to_polygon=distance_to_polygon, seed=seed, k=k)
+            st.text('Below should be a plot')
+            show_points(s_polygon=s_polygon, samples=samples, radius=distance_to_agents, obstacles=obstacles)
+        else:
+            show_points(s_polygon=s_polygon, samples=[], radius=distance_to_agents, obstacles=obstacles)
+
+    if distribution_type == "percent":
+        st.text("Instructions:\n"
+                "distributes agents inside the polygon\n"
+                "you can enter a percentage of how much the polygon should be filled\n"
+                "you can also enter how many tries there should be to\n"
+                "find another place to put an agent before a the space around an agent is considered filled\n"
+                "General settings can be made in the left sidebar")
+        k = st.number_input("maximum tries to find a point around a reference point", 1, value=30, step=1)
+        percent = st.slider("Percent filled: ", 1, 100)
+
+        button_clicked = st.button('distribute agents')
+
+        if button_clicked:
+            samples = distributions.distribute_by_percentage(polygon=s_polygon, percent=percent,
+                                                             distance_to_agents=distance_to_agents,
+                                                             distance_to_polygon=distance_to_polygon, seed=seed, k=k)
             st.text('Below should be a plot')
             show_points(s_polygon=s_polygon, samples=samples, radius=distance_to_agents, obstacles=obstacles)
         else:
