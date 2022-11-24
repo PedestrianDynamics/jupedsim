@@ -310,8 +310,9 @@ def distribute_til_full(*, polygon, distance_to_agents, distance_to_polygon, see
         iteration = 0
         # tries to find a point around the reference Point
         while iteration < k:
-            # determines a random radius within the circle segment
-            rho = np.sqrt(np.random.uniform(distance_to_agents, 2 * distance_to_agents))
+            # determines a random radius within a circle segment
+            # with radius from distance_to_agents to distance_to_agents * 2
+            rho = np.sqrt(np.random.uniform(distance_to_agents ** 2, 4 * distance_to_agents ** 2))
             # determines a random degree
             theta = np.random.uniform(0, 2 * np.pi)
             pt = ref_point[0] + rho * np.cos(theta), ref_point[1] + rho * np.sin(theta)
