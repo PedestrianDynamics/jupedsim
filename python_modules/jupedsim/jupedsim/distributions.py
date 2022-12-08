@@ -303,7 +303,7 @@ def distribute_til_full(*, polygon, distance_to_agents, distance_to_polygon, see
 
 
 def distribute_by_percentage(*, polygon, percent, distance_to_agents, distance_to_polygon, seed=None, max_iterations=10000):
-    """returns a percentage of agents that can fit inside the polygon
+    """returns points for the desired percentage of agents that fit inside the polygon (max possible number)
        fills the polygon entirely and then selects the percentage of placed agents
 
         :param polygon: shapely polygon in which the agents will be placed
