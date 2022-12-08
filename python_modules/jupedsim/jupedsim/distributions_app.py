@@ -172,7 +172,7 @@ def main():
                                                                         center_point=center_point,
                                                                         circle_segment_radii=circle_segment_radii,
                                                                         numbers_of_agents=agents, seed=seed)
-            st.text('below should be a plot')
+            st.text(f'Below should be a plot containing {len(samples)} agents')
             show_points(s_polygon, samples, distance_to_agents, circle_segment_radii, center_point, obstacles)
         else:
             show_points(s_polygon, [], distance_to_agents, circle_segment_radii, center_point, obstacles)
@@ -202,7 +202,7 @@ def main():
                 samples = distributions.distribute_by_number(polygon=s_polygon, number_of_agents=agents,
                                                              distance_to_agents=distance_to_agents,
                                                              distance_to_polygon=distance_to_polygon, seed=seed)
-            st.text('Below should be a plot')
+            st.text(f'Below should be a plot containing {len(samples)} agents')
             show_points(s_polygon=s_polygon, samples=samples, radius=distance_to_agents, obstacles=obstacles)
         else:
             show_points(s_polygon=s_polygon, samples=[], radius=distance_to_agents, obstacles=obstacles)
@@ -210,7 +210,7 @@ def main():
     if distribution_type == "place till full":
         st.text("Instructions: "
                 "agents will be distributed all over the polygon.\n"
-                "You can enter how many tries there should be to\n"
+                "You can enter how many tries there should be to "
                 "find another place to put an agent before a polygon is considered filled.\n"
                 "General settings can be made in the left sidebar")
         max_iterations = st.number_input("maximum tries to find a new point", 1, value=10_000, step=100)
@@ -220,7 +220,7 @@ def main():
             samples = distributions.distribute_til_full(polygon=s_polygon, distance_to_agents=distance_to_agents,
                                                         distance_to_polygon=distance_to_polygon, seed=seed,
                                                         max_iterations=max_iterations)
-            st.text('Below should be a plot')
+            st.text(f'Below should be a plot containing {len(samples)} agents')
             show_points(s_polygon=s_polygon, samples=samples, radius=distance_to_agents, obstacles=obstacles)
         else:
             show_points(s_polygon=s_polygon, samples=[], radius=distance_to_agents, obstacles=obstacles)
@@ -229,7 +229,7 @@ def main():
         st.text("Instructions: "
                 "distributes agents inside the polygon.\n"
                 "The polygon will be filled to a certain percentage.\n"
-                "You can also enter how many tries there should be to\n"
+                "You can also enter how many tries there should be to "
                 "find another place to put an agent before a polygon is considered filled.\n"
                 "General settings can be made in the left sidebar")
         percent = st.slider("Percent filled: ", 1, 100)
@@ -241,7 +241,7 @@ def main():
             samples = distributions.distribute_by_percentage(polygon=s_polygon, percent=percent,
                                                              distance_to_agents=distance_to_agents,
                                                              distance_to_polygon=distance_to_polygon, seed=seed, max_iterations=max_iterations)
-            st.text('Below should be a plot')
+            st.text(f'Below should be a plot containing {len(samples)} agents')
             show_points(s_polygon=s_polygon, samples=samples, radius=distance_to_agents, obstacles=obstacles)
         else:
             show_points(s_polygon=s_polygon, samples=[], radius=distance_to_agents, obstacles=obstacles)
