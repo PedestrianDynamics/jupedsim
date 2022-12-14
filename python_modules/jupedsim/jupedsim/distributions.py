@@ -331,7 +331,7 @@ def distribute_til_full(*, polygon, distance_to_agents, distance_to_polygon, see
 
 def distribute_by_percentage(*, polygon, percent, distance_to_agents, distance_to_polygon, seed=None,
                              max_iterations=10000, k=30):
-    """returns a percentage of agents that can fit inside the polygon
+    """returns points for the desired percentage of agents that fit inside the polygon (max possible number)
        fills the polygon entirely and then selects the percentage of placed agents
 
         :param polygon: shapely polygon in which the agents will be placed
@@ -354,7 +354,6 @@ def distribute_by_percentage(*, polygon, percent, distance_to_agents, distance_t
         samples.remove(temp_sample)
 
     return selected_samples
-
 
 
 
@@ -386,3 +385,4 @@ def __box_of_intersection(polygon, center_point, outer_radius):
     # returns the size of the intersecting area
     shapely_bounds = polygon.intersection(circle).bounds
     return [shapely_bounds[:2], shapely_bounds[2:]]
+

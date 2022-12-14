@@ -266,7 +266,7 @@ def test_seed_works_correct_for_distribution_till_full():
     set_seed = 1337
     samples1 = distributions.distribute_til_full(polygon=polygon, distance_to_agents=distance_to_agents,
                                                  distance_to_polygon=distance_to_polygon,
-                                                 seed=set_seed)
+                                                 seed=set_seed, max_iterations=750)
     samples2 = distributions.distribute_til_full(polygon=polygon, distance_to_agents=distance_to_agents,
                                                  distance_to_polygon=distance_to_polygon,
                                                  seed=set_seed, max_iterations=750)
