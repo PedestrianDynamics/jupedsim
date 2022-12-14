@@ -120,7 +120,7 @@ def main():
                 "Agents do not keep distance to circle segment borders like polygons.\n"
                 "You need to select a center point for all circle segments.\n"
                 "You also need to select the range of each circle segment.\n"
-                "Circle segments musst not Overlap or have negativ values.\n"
+                "Circle segments musst not overlap or have negativ values.\n"
                 "General settings can be made in the left sidebar.")
         style = (st.radio(f"How to choose number of agents distributed inside Circle Segements?", ("density", "number")))
         circle_count = st.number_input("number of circles", 1)
