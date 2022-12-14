@@ -111,7 +111,7 @@ def main():
         polygon.append((x, y))
     s_polygon = distributions.shply.Polygon(polygon, obstacles)
     area = s_polygon.area
-    distribution_type = st.radio("How to distribute agents?", ("place by number/density", "place in Circles",
+    distribution_type = st.radio("How to distribute agents?", ("place by number/density", "place in circles",
                                                                "place till full", "place by percentage"))
 
     if distribution_type == "place in Circles":
