@@ -3,10 +3,12 @@
 
 * Agents will keep distance to other agents as well as to the polygon borders
 
-* There are four methods to distribute agents:
+* There are six methods to distribute agents:
 
 	* distribute by density or number
 	* distribute in circle segments by number or density
+	* distribute till full
+	* distribute by percent
 	
 * Constraints
 	* If you want to distribute agents into two polygons you must consider the following things.

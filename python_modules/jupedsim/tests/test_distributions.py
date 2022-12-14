@@ -228,6 +228,101 @@ def test_distribution_in_circle_by_density_creates_correct_amount():
     assert len(samples) == 78
 
 
+def test_distribution_till_full_creates_correct_points():
+    polygon = [(0, 2), (3, 3), (3, 5), (6, 5), (6, 0), (14, 0), (15, 15), (9, 15), (6, 10), (4, 12.5), (0, 7.5)]
+    holes = [[(8.5, 4), (10, 3), (12, 6.5), (10, 7)], [(10, 10.5), (11, 9.5), (14, 12.5), (11, 13)]]
+    polygon = distributions.shply.Polygon(polygon, holes)
+    distance_to_agents = 2.0
+    distance_to_polygon = 1.0
+    set_seed = 1337
+    samples = distributions.distribute_til_full(polygon=polygon, distance_to_agents=distance_to_agents,
+                                                distance_to_polygon=distance_to_polygon,
+                                                seed=set_seed, max_iterations=750)
+    # as many points created as intended
+    assert len(samples) == 18
+
+    # all created points contained inside polygon
+    for sample in samples:
+        assert polygon.contains(distributions.shply.Point(sample))
+
+    # all Points have enough distance to another
+    for i, sample in enumerate(samples):
+        j = 0
+        while j < len(samples):
+            if i == j:
+                j = j + 1
+                continue
+            dif_x = sample[0] - samples[j][0]
+            dif_y = sample[1] - samples[j][1]
+            distance = math.sqrt(dif_x ** 2 + dif_y ** 2)
+            assert distance >= distance_to_agents
+            j = j + 1
+
+
+def test_seed_works_correct_for_distribution_till_full():
+    polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
+    polygon = distributions.shply.Polygon(polygon)
+    distance_to_agents, distance_to_polygon = 0.75, 0.75
+    set_seed = 1337
+    samples1 = distributions.distribute_til_full(polygon=polygon, distance_to_agents=distance_to_agents,
+                                                 distance_to_polygon=distance_to_polygon,
+                                                 seed=set_seed, max_iterations=750)
+    samples2 = distributions.distribute_til_full(polygon=polygon, distance_to_agents=distance_to_agents,
+                                                 distance_to_polygon=distance_to_polygon,
+                                                 seed=set_seed, max_iterations=750)
+    assert samples1 == samples2
+
+
+def test_distribution_by_percentage_creates_correct_points():
+    polygon = [(0, 2), (3, 3), (3, 5), (6, 5), (6, 0), (14, 0), (15, 15), (9, 15), (6, 10), (4, 12.5), (0, 7.5)]
+    holes = [[(8.5, 4), (10, 3), (12, 6.5), (10, 7)], [(10, 10.5), (11, 9.5), (14, 12.5), (11, 13)]]
+    polygon = distributions.shply.Polygon(polygon, holes)
+    percent = 73
+    distance_to_agents = 2.0
+    distance_to_polygon = 1.0
+    set_seed = 1337
+    samples = distributions.distribute_by_percentage(polygon=polygon, percent=percent,
+                                                     distance_to_agents=distance_to_agents,
+                                                     distance_to_polygon=distance_to_polygon,
+                                                     seed=set_seed, max_iterations=750)
+    # as many points created as intended
+    assert len(samples) == round(18 * (percent / 100))
+
+    # all created points contained inside polygon
+    for sample in samples:
+        assert polygon.contains(distributions.shply.Point(sample))
+
+    # all Points have enough distance to another
+    for i, sample in enumerate(samples):
+        j = 0
+        while j < len(samples):
+            if i == j:
+                j = j + 1
+                continue
+            dif_x = sample[0] - samples[j][0]
+            dif_y = sample[1] - samples[j][1]
+            distance = math.sqrt(dif_x ** 2 + dif_y ** 2)
+            assert distance >= distance_to_agents
+            j = j + 1
+
+
+def test_seed_works_correct_for_distribution_by_percentage():
+    polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
+    polygon = distributions.shply.Polygon(polygon)
+    distance_to_agents, distance_to_polygon = 0.75, 0.75
+    set_seed = 1337
+    percent = 73
+    samples1 = distributions.distribute_by_percentage(polygon=polygon, percent=percent,
+                                                      distance_to_agents=distance_to_agents,
+                                                      distance_to_polygon=distance_to_polygon,
+                                                      seed=set_seed, max_iterations=750)
+    samples2 = distributions.distribute_by_percentage(polygon=polygon, percent=percent,
+                                                      distance_to_agents=distance_to_agents,
+                                                      distance_to_polygon=distance_to_polygon,
+                                                      seed=set_seed, max_iterations=750)
+    assert samples1 == samples2
+
+
 def test_box_of_intersection():
     polygon = [(0, 0), (8, 0), (8, 2), (2, 2), (2, 4), (6, 4), (6, 6), (2, 6), (2, 8), (8, 8), (8, 10), (0, 10)]
     s_polygon = distributions.shply.Polygon(polygon)

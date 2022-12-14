@@ -72,10 +72,13 @@ def main():
                 y_values.append(st.number_input(f"Y{i + 1}",
                                                 value=default_polygon[i][1] if i < len(default_polygon) else 0.0,
                                                 step=1.0))
-        seed = st.number_input("Set a seed. If the seed is set to zero the distribution will be random each time", 0)
+        seed = st.number_input("Set a seed for random number generation.\n"
+                               "Agent Distribution with the same settings will lead to the same output.\n"
+                               "If the seed is set to zero the distribution will be random each time", 0)
         if seed == 0:
             seed = None
-        st.text("Hole settings")
+        st.text("Hole settings:\n"
+                "Holes define Spaces where no Agents must be placed.")
         obstacle_count = st.number_input("Number of Holes", 0, value=0)
         obstacle_corners = []
         obstacle_values = []
@@ -86,13 +89,14 @@ def main():
             for i in range(obstacle_count):
                 obstacle_values.append([])
                 st.text(f"Settings for")
+                # the rest of the text can be found in column 4
                 for j in range(obstacle_corners[i]):
                     obstacle_values[i].append([st.number_input(f"X{j + 1} in hole {i + 1}",
                                                                value=0.0, step=1.0)])
         with col4:
             for i in range(obstacle_count):
                 st.text(f"hole {i + 1}")
-                # this text is placed so the columns align
+                # this text is placed so the text "Settings for hole <i+1> aligns through columns 3 & 4
                 for j in range(obstacle_corners[i]):
                     obstacle_values[i][j].append(st.number_input(f"Y{j + 1} in hole {i + 1}",
                                                                  value=0.0, step=1.0))
@@ -107,17 +111,18 @@ def main():
         polygon.append((x, y))
     s_polygon = distributions.shply.Polygon(polygon, obstacles)
     area = s_polygon.area
-    distribution_type = st.radio("How to distribute agents?", ("place random", "place in Circle"))
+    distribution_type = st.radio("How to distribute agents?", ("place by number/density", "place in circles",
+                                                               "place till full", "place by percentage"))
 
-    if distribution_type == "place in Circle":
-        st.text("Instructions:\n"
-                "distributes agents inside the polygon inside circle segments\n"
-                "agents do not keep distance to circle segment borders like polygons\n"
-                "you need to select a center point for all circle segments\n"
-                "you also need to select the range of each Circle segment\n"
-                "Circle segments musst not Overlap or have negativ values\n"
-                "General settings can be made in the left sidebar")
-        style = (st.radio(f"How to choose number of agents for Circles", ("density", "number")))
+    if distribution_type == "place in circles":
+        st.text("Instructions: "
+                "Agents will be distributed inside both the polygon and circle segments.\n"
+                "Agents do not keep distance to circle segment borders like polygons.\n"
+                "You need to select a center point for all circle segments.\n"
+                "You also need to select the range of each circle segment.\n"
+                "Circle segments musst not overlap or have negativ values.\n"
+                "General settings can be made in the left sidebar.")
+        style = (st.radio(f"How to choose number of agents distributed inside circle segments?", ("density", "number")))
         circle_count = st.number_input("number of circles", 1)
         col1, col2 = st.columns(2)
         min_values, max_values = [], []
@@ -140,7 +145,7 @@ def main():
         for i in range(circle_count):
             if style == "density":
                 densities.append(st.slider(f"Agents / m² in Circle segment {i + 1}", 0.1,
-                                           round((69.2636*(distance_to_agents**(-1.89412))/100), 2), key=i))
+                                           round((69.2636 * (distance_to_agents ** (-1.89412)) / 100), 2), key=i))
                 # the function for the maximum selectable density is an estimate of the real maximum density possible
                 # the estimation was done by Power-Regression
             elif style == "number":
@@ -167,19 +172,19 @@ def main():
                                                                         center_point=center_point,
                                                                         circle_segment_radii=circle_segment_radii,
                                                                         numbers_of_agents=agents, seed=seed)
-            st.text('below should be a plot')
+            st.text(f'Below should be a plot containing {len(samples)} agents')
             show_points(s_polygon, samples, distance_to_agents, circle_segment_radii, center_point, obstacles)
         else:
             show_points(s_polygon, [], distance_to_agents, circle_segment_radii, center_point, obstacles)
 
-    if distribution_type == "place random":
-        st.text("Instructions:\n"
-                "distributes a certain amount of agents inside the polygon\n"
-                "you can enter this amount either by a specific number or a density\n"
-                "General settings can be made in the left sidebar")
+    if distribution_type == "place by number/density":
+        st.text("Instructions: "
+                "a certain amount of agents will be distributed inside the polygon.\n"
+                "You can enter this amount either by a specific number or a density.\n"
+                "General settings can be made in the left sidebar.")
         style = st.radio("How to choose number of agents?", ("density", "number"))
         if style == "density":
-            density = st.slider("Agents / m²", 0.1, round((69.2636*(distance_to_agents**(-1.89412))/100), 2))
+            density = st.slider("Agents / m²", 0.1, round((69.2636 * (distance_to_agents ** (-1.89412)) / 100), 2))
             # the function for the maximum selectable density is an estimate of the real maximum density possible
             # the estimation was done by Power-Regression
         elif style == "number":
@@ -197,7 +202,46 @@ def main():
                 samples = distributions.distribute_by_number(polygon=s_polygon, number_of_agents=agents,
                                                              distance_to_agents=distance_to_agents,
                                                              distance_to_polygon=distance_to_polygon, seed=seed)
-            st.text('Below should be a plot')
+            st.text(f'Below should be a plot containing {len(samples)} agents')
+            show_points(s_polygon=s_polygon, samples=samples, radius=distance_to_agents, obstacles=obstacles)
+        else:
+            show_points(s_polygon=s_polygon, samples=[], radius=distance_to_agents, obstacles=obstacles)
+
+    if distribution_type == "place till full":
+        st.text("Instructions: "
+                "agents will be distributed all over the polygon.\n"
+                "You can enter how many tries there should be to "
+                "find another place to put an agent before a polygon is considered filled.\n"
+                "General settings can be made in the left sidebar")
+        max_iterations = st.number_input("maximum tries to find a new point", 1, value=10_000, step=100)
+        button_clicked = st.button('distribute agents')
+
+        if button_clicked:
+            samples = distributions.distribute_til_full(polygon=s_polygon, distance_to_agents=distance_to_agents,
+                                                        distance_to_polygon=distance_to_polygon, seed=seed,
+                                                        max_iterations=max_iterations)
+            st.text(f'Below should be a plot containing {len(samples)} agents')
+            show_points(s_polygon=s_polygon, samples=samples, radius=distance_to_agents, obstacles=obstacles)
+        else:
+            show_points(s_polygon=s_polygon, samples=[], radius=distance_to_agents, obstacles=obstacles)
+
+    if distribution_type == "place by percentage":
+        st.text("Instructions: "
+                "distributes agents inside the polygon.\n"
+                "The polygon will be filled to a certain percentage.\n"
+                "You can also enter how many tries there should be to "
+                "find another place to put an agent before a polygon is considered filled.\n"
+                "General settings can be made in the left sidebar")
+        percent = st.slider("Percent filled: ", 1, 100)
+        max_iterations = st.number_input("maximum tries to find a new point", 1, value=10_000, step=100)
+
+        button_clicked = st.button('distribute agents')
+
+        if button_clicked:
+            samples = distributions.distribute_by_percentage(polygon=s_polygon, percent=percent,
+                                                             distance_to_agents=distance_to_agents,
+                                                             distance_to_polygon=distance_to_polygon, seed=seed, max_iterations=max_iterations)
+            st.text(f'Below should be a plot containing {len(samples)} agents')
             show_points(s_polygon=s_polygon, samples=samples, radius=distance_to_agents, obstacles=obstacles)
         else:
             show_points(s_polygon=s_polygon, samples=[], radius=distance_to_agents, obstacles=obstacles)
