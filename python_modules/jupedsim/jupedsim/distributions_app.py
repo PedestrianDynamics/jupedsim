@@ -122,7 +122,7 @@ def main():
                 "You also need to select the range of each circle segment.\n"
                 "Circle segments musst not overlap or have negativ values.\n"
                 "General settings can be made in the left sidebar.")
-        style = (st.radio(f"How to choose number of agents distributed inside Circle Segements?", ("density", "number")))
+        style = (st.radio(f"How to choose number of agents distributed inside circle segments?", ("density", "number")))
         circle_count = st.number_input("number of circles", 1)
         col1, col2 = st.columns(2)
         min_values, max_values = [], []
