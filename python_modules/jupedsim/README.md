@@ -9,6 +9,10 @@
 	* distribute in circle segments by number or density
 	* distribute till full
 	* distribute by percent
+
+* distribute till full and distribute by percent use Bridson’s algorithm for Poisson-disc sampling
+
+* The algorithm is explained in Robert Bridson´s [Paper](https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf) "Fast Poisson Disk Sampling in Arbitrary Dimensions" 
 	
 * Constraints
 	* If you want to distribute agents into two polygons you must consider the following things.

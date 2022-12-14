@@ -275,7 +275,9 @@ def distribute_in_circles_by_density(*, polygon, distance_to_agents, distance_to
 
 
 def distribute_till_full(*, polygon, distance_to_agents, distance_to_polygon, seed=None, max_iterations=10_000, k=30):
-    """returns as many randomly placed points as fit into the polygon
+    """returns as many randomly placed points as fit into the polygon. 
+    Points are distributed using Bridson’s algorithm for Poisson-disc sampling
+    The algorithm is explained in Robert Bridson´s Paper "Fast Poisson Disk Sampling in Arbitrary Dimensions"
         :param polygon: shapely polygon in which the agents will be placed
         :param distance_to_agents: minimal distance between the centers of agents
         :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
@@ -332,7 +334,8 @@ def distribute_till_full(*, polygon, distance_to_agents, distance_to_polygon, se
 def distribute_by_percentage(*, polygon, percent, distance_to_agents, distance_to_polygon, seed=None,
                              max_iterations=10000, k=30):
     """returns points for the desired percentage of agents that fit inside the polygon (max possible number)
-       fills the polygon entirely and then selects the percentage of placed agents
+       fills the polygon entirely using Bridson’s algorithm for Poisson-disc sampling and then selects the percentage of placed agents
+       
 
         :param polygon: shapely polygon in which the agents will be placed
         :param percent: percentage of agents selected - 100% ≙ completely filled polygon 0% ≙ 0 placed points
