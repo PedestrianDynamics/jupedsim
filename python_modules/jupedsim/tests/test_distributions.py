@@ -235,7 +235,7 @@ def test_distribution_till_full_creates_correct_points():
     distance_to_agents = 2.0
     distance_to_polygon = 1.0
     set_seed = 1337
-    samples = distributions.distribute_til_full(polygon=polygon, distance_to_agents=distance_to_agents,
+    samples = distributions.distribute_till_full(polygon=polygon, distance_to_agents=distance_to_agents,
                                                 distance_to_polygon=distance_to_polygon,
                                                 seed=set_seed, max_iterations=750)
     # as many points created as intended
@@ -264,10 +264,10 @@ def test_seed_works_correct_for_distribution_till_full():
     polygon = distributions.shply.Polygon(polygon)
     distance_to_agents, distance_to_polygon = 0.75, 0.75
     set_seed = 1337
-    samples1 = distributions.distribute_til_full(polygon=polygon, distance_to_agents=distance_to_agents,
+    samples1 = distributions.distribute_till_full(polygon=polygon, distance_to_agents=distance_to_agents,
                                                  distance_to_polygon=distance_to_polygon,
                                                  seed=set_seed, max_iterations=750)
-    samples2 = distributions.distribute_til_full(polygon=polygon, distance_to_agents=distance_to_agents,
+    samples2 = distributions.distribute_till_full(polygon=polygon, distance_to_agents=distance_to_agents,
                                                  distance_to_polygon=distance_to_polygon,
                                                  seed=set_seed, max_iterations=750)
     assert samples1 == samples2

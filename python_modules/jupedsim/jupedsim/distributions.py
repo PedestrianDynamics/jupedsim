@@ -274,7 +274,7 @@ def distribute_in_circles_by_density(*, polygon, distance_to_agents, distance_to
                                            numbers_of_agents=number_of_agents, seed=seed, max_iterations=max_iterations)
 
 
-def distribute_til_full(*, polygon, distance_to_agents, distance_to_polygon, seed=None, max_iterations=10_000, k=30):
+def distribute_till_full(*, polygon, distance_to_agents, distance_to_polygon, seed=None, max_iterations=10_000, k=30):
     """returns as many randomly placed points as fit into the polygon
         :param polygon: shapely polygon in which the agents will be placed
         :param distance_to_agents: minimal distance between the centers of agents
@@ -341,7 +341,7 @@ def distribute_by_percentage(*, polygon, percent, distance_to_agents, distance_t
         :param seed: define a seed for random generation, Default value is None which corresponds to a random value
         :param max_iterations: no more than max_iterations must find a point inside the polygon, Default is 10_000
         :return: list of created points"""
-    samples = distribute_til_full(polygon=polygon, distance_to_agents=distance_to_agents,
+    samples = distribute_till_full(polygon=polygon, distance_to_agents=distance_to_agents,
                                   distance_to_polygon=distance_to_polygon, seed=seed,
                                   max_iterations=max_iterations, k=k)
     sample_amount = len(samples)
