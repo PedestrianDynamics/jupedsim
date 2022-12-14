@@ -114,7 +114,7 @@ def main():
     distribution_type = st.radio("How to distribute agents?", ("place by number/density", "place in circles",
                                                                "place till full", "place by percentage"))
 
-    if distribution_type == "place in Circles":
+    if distribution_type == "place in circles":
         st.text("Instructions: "
                 "Agents will be distributed inside both the polygon and circle segments.\n"
                 "Agents do not keep distance to circle segment borders like polygons.\n"
