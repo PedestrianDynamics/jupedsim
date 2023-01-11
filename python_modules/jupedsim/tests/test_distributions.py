@@ -228,48 +228,17 @@ def test_distribution_in_circle_by_density_creates_correct_amount():
     assert len(samples) == 78
 
 
-def test_distribution_till_full_creates_correct_points():
-    polygon = [(0, 2), (3, 3), (3, 5), (6, 5), (6, 0), (14, 0), (15, 15), (9, 15), (6, 10), (4, 12.5), (0, 7.5)]
-    holes = [[(8.5, 4), (10, 3), (12, 6.5), (10, 7)], [(10, 10.5), (11, 9.5), (14, 12.5), (11, 13)]]
-    polygon = distributions.shply.Polygon(polygon, holes)
-    distance_to_agents = 2.0
-    distance_to_polygon = 1.0
-    set_seed = 1337
-    samples = distributions.distribute_till_full(polygon=polygon, distance_to_agents=distance_to_agents,
-                                                distance_to_polygon=distance_to_polygon,
-                                                seed=set_seed, max_iterations=750)
-    # as many points created as intended
-    assert len(samples) == 16
-
-    # all created points contained inside polygon
-    for sample in samples:
-        assert polygon.contains(distributions.shply.Point(sample))
-
-    # all Points have enough distance to another
-    for i, sample in enumerate(samples):
-        j = 0
-        while j < len(samples):
-            if i == j:
-                j = j + 1
-                continue
-            dif_x = sample[0] - samples[j][0]
-            dif_y = sample[1] - samples[j][1]
-            distance = math.sqrt(dif_x ** 2 + dif_y ** 2)
-            assert distance >= distance_to_agents
-            j = j + 1
-
-
 def test_seed_works_correct_for_distribution_till_full():
     polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
     polygon = distributions.shply.Polygon(polygon)
     distance_to_agents, distance_to_polygon = 0.75, 0.75
     set_seed = 1337
     samples1 = distributions.distribute_till_full(polygon=polygon, distance_to_agents=distance_to_agents,
-                                                 distance_to_polygon=distance_to_polygon,
-                                                 seed=set_seed, max_iterations=750)
+                                                  distance_to_polygon=distance_to_polygon,
+                                                  seed=set_seed)
     samples2 = distributions.distribute_till_full(polygon=polygon, distance_to_agents=distance_to_agents,
-                                                 distance_to_polygon=distance_to_polygon,
-                                                 seed=set_seed, max_iterations=750)
+                                                  distance_to_polygon=distance_to_polygon,
+                                                  seed=set_seed, max_iterations=750)
     assert samples1 == samples2
 
 
@@ -386,3 +355,41 @@ def test_catch_wrong_inputs_overlapping_circles(polygon, center_point, circle_se
     with pytest.raises(distributions.OverlappingCirclesError):
         distributions.__catch_wrong_inputs(polygon=s_polygon, center_point=center_point,
                                            circle_segment_radii=circle_segment_radii, fill_parameters=numbers_of_agents)
+
+
+test_parameters = [
+    [[(0, 2), (3, 3), (3, 5), (6, 5), (6, 0), (14, 0), (15, 15), (9, 15), (6, 10), (4, 12.5), (0, 7.5)],
+     [[(8.5, 4), (10, 3), (12, 6.5), (10, 7)], [(10, 10.5), (11, 9.5), (14, 12.5), (11, 13)]],
+     2.0, 1.0, 16],
+    [[(0, 0), (1, 0), (1, 1), (0, 1)], [], 2.0, 0.1, 1],
+    [[(1, 0), (9, 0), (6.5, 5), (8.5, 5), (6.5, 10), (7.5, 10), (5, 15), (2.5, 10), (3.5, 10), (1.5, 5), (3.5, 5)],
+     [], 1.0, 0.2, 44]
+]
+
+
+@pytest.mark.parametrize("polygon, holes, distance_to_agents, distance_to_polygon, expected_size", test_parameters)
+def test_distribution_till_full_creates_correct_points(polygon, holes, distance_to_agents, distance_to_polygon, expected_size):
+    polygon = distributions.shply.Polygon(polygon, holes)
+    set_seed = 1337
+    samples = distributions.distribute_till_full(polygon=polygon, distance_to_agents=distance_to_agents,
+                                                distance_to_polygon=distance_to_polygon,
+                                                seed=set_seed, max_iterations=750)
+    # as many points created as intended
+    assert len(samples) == expected_size
+
+    # all created points contained inside polygon
+    for sample in samples:
+        assert polygon.contains(distributions.shply.Point(sample))
+
+    # all Points have enough distance to another
+    for i, sample in enumerate(samples):
+        j = 0
+        while j < len(samples):
+            if i == j:
+                j = j + 1
+                continue
+            dif_x = sample[0] - samples[j][0]
+            dif_y = sample[1] - samples[j][1]
+            distance = math.sqrt(dif_x ** 2 + dif_y ** 2)
+            assert distance >= distance_to_agents
+            j = j + 1
