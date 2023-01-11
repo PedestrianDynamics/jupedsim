@@ -350,13 +350,9 @@ def distribute_by_percentage(*, polygon, percent, distance_to_agents, distance_t
     sample_amount = len(samples)
     needed_amount = round(sample_amount * (percent / 100))
     np.random.seed(seed)
-    selected_samples = []
-    for i in range(needed_amount):
-        temp_sample = samples[np.random.randint(0, len(samples))]
-        selected_samples.append(temp_sample)
-        samples.remove(temp_sample)
+    np.random.shuffle(samples)
 
-    return selected_samples
+    return samples[:needed_amount]
 
 
 
