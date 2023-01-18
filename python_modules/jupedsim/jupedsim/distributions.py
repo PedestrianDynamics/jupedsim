@@ -103,7 +103,8 @@ def distribute_by_number(*, polygon, number_of_agents, distance_to_agents, dista
     return grid.get_samples()
 
 
-def distribute_by_density(*, polygon, density, distance_to_agents, distance_to_polygon, seed=None, max_iterations=10000):
+def distribute_by_density(*, polygon, density, distance_to_agents, distance_to_polygon, seed=None,
+                          max_iterations=10000):
     """returns points randomly placed inside the polygon with the given density
 
         :param polygon: shapely polygon in which the agents will be placed
@@ -149,7 +150,8 @@ def __catch_wrong_inputs(polygon, center_point, circle_segment_radii, fill_param
                 j = j + 1
                 continue
             else:
-                raise OverlappingCirclesError(f"the Circle from {c_s_radius[0]} to {c_s_radius[1]} overlaps with others")
+                raise OverlappingCirclesError(
+                    f"the Circle from {c_s_radius[0]} to {c_s_radius[1]} overlaps with others")
 
 
 def distribute_in_circles_by_number(*, polygon, distance_to_agents, distance_to_polygon,
@@ -272,39 +274,68 @@ def distribute_in_circles_by_density(*, polygon, distance_to_agents, distance_to
                                            numbers_of_agents=number_of_agents, seed=seed, max_iterations=max_iterations)
 
 
-def distribute_til_full(*, polygon, distance_to_agents, distance_to_polygon, seed=None, max_iterations=10000):
-    """returns as many randomly placed points as fit into the polygon
+def distribute_till_full(*, polygon, distance_to_agents, distance_to_polygon, seed=None, max_iterations=10_000, k=30):
+    """returns as many randomly placed points as fit into the polygon. 
+    Points are distributed using Bridson’s algorithm for Poisson-disc sampling
+    The algorithm is explained in Robert Bridson´s Paper "Fast Poisson Disk Sampling in Arbitrary Dimensions"
         :param polygon: shapely polygon in which the agents will be placed
         :param distance_to_agents: minimal distance between the centers of agents
         :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
         :param seed: define a seed for random generation, Default value is None which corresponds to a random value
         :param max_iterations: no more than max_iterations must find a point inside the polygon, default is 10_000
+        :param k: around each point k point will be created before the point is considered inactive
         :return: list of created points"""
     if not isinstance(polygon, shply.polygon.Polygon):
         raise IncorrectParameterError(f"Polygon is expected to be a shapely Polygon")
     box = __get_bounding_box(polygon)
 
     np.random.seed(seed)
-
+    # initialises a list for active Points and a Grid administering all created points
+    active = []
     grid = Grid(box, distance_to_agents)
-    iterations = 0
-    while True:
-        if iterations > max_iterations:
+    # initialisation of the first point
+    iteration = 0
+    while iteration < max_iterations:
+        first_point = (np.random.uniform(box[0][0], box[1][0]), np.random.uniform(box[0][1], box[1][1]))
+        if __check_distance_constraints(first_point, distance_to_polygon, grid, polygon):
+            grid.append_point(first_point)
+            active.append(first_point)
             break
-        temp_point = (np.random.uniform(box[0][0], box[1][0]), np.random.uniform(box[0][1], box[1][1]))
-        if __check_distance_constraints(temp_point, distance_to_polygon, grid, polygon):
-            grid.append_point(temp_point)
+        iteration = iteration + 1
+    if iteration >= max_iterations:
+        raise IncorrectParameterError("The first point could not be placed inside the polygon."
+                                      " Check if there is enough space for agents provided inside the polygon")
 
-            iterations = 0
-        else:
-            iterations += 1
+    # while points are active a random reference point is selected
+    while active:
+        ref_point = active[np.random.randint(0, len(active))]
+        iteration = 0
+        # tries to find a point around the reference Point
+        while iteration < k:
+            # determines a random radius within a circle segment
+            # with radius from distance_to_agents to distance_to_agents * 2
+            rho = np.sqrt(np.random.uniform(distance_to_agents ** 2, 4 * distance_to_agents ** 2))
+            # determines a random degree
+            theta = np.random.uniform(0, 2 * np.pi)
+            pt = ref_point[0] + rho * np.cos(theta), ref_point[1] + rho * np.sin(theta)
+            if __check_distance_constraints(pt, distance_to_polygon, grid, polygon):
+                grid.append_point(pt)
+                active.append(pt)
+                break
+            iteration = iteration + 1
+
+        # if there was no point found around the reference point it is considered inactive
+        if iteration >= k:
+            active.remove(ref_point)
 
     return grid.get_samples()
 
 
-def distribute_by_percentage(*, polygon, percent, distance_to_agents, distance_to_polygon, seed=None, max_iterations=10000):
+def distribute_by_percentage(*, polygon, percent, distance_to_agents, distance_to_polygon, seed=None,
+                             max_iterations=10000, k=30):
     """returns points for the desired percentage of agents that fit inside the polygon (max possible number)
-       fills the polygon entirely and then selects the percentage of placed agents
+       fills the polygon entirely using Bridson’s algorithm for Poisson-disc sampling and then selects the percentage of placed agents
+       
 
         :param polygon: shapely polygon in which the agents will be placed
         :param percent: percentage of agents selected - 100% ≙ completely filled polygon 0% ≙ 0 placed points
@@ -313,11 +344,16 @@ def distribute_by_percentage(*, polygon, percent, distance_to_agents, distance_t
         :param seed: define a seed for random generation, Default value is None which corresponds to a random value
         :param max_iterations: no more than max_iterations must find a point inside the polygon, Default is 10_000
         :return: list of created points"""
-    samples = distribute_til_full(polygon=polygon, distance_to_agents=distance_to_agents,
-                                  distance_to_polygon=distance_to_polygon, seed=seed, max_iterations=max_iterations)
+    samples = distribute_till_full(polygon=polygon, distance_to_agents=distance_to_agents,
+                                  distance_to_polygon=distance_to_polygon, seed=seed,
+                                  max_iterations=max_iterations, k=k)
     sample_amount = len(samples)
-    needed_amount = round(sample_amount * (percent/100))
+    needed_amount = round(sample_amount * (percent / 100))
+    np.random.seed(seed)
+    np.random.shuffle(samples)
+
     return samples[:needed_amount]
+
 
 
 def __check_distance_constraints(pt, wall_distance, grid, polygon):
