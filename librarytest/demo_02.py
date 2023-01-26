@@ -72,7 +72,7 @@ def main():
     )
     
 	# waypoints?
-    journey = jps.Journey.make_waypoint_journey([((65, 102), 2)])
+    journey = jps.Journey.make_waypoint_journey([((61, 102), 1)])
 
     journey_id = simulation.add_journey(journey)
 
@@ -85,8 +85,8 @@ def main():
     agent_parameters.profile_id = profile_id
 	
 	# 30 agents needed
-    for x, y in [(55, 102)]:
-    	# (54, 101), (52, 103), (53.5, 102), (51, 103)
+    for x, y in [(52, 102)]:
+    	# (54, 101), (51, 103), (52, 103), (53.5, 102)
         agent_parameters.x = x
         agent_parameters.y = y
         simulation.add_agent(agent_parameters)
