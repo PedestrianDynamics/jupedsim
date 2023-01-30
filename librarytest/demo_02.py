@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import logging
 import pathlib
+from jupedsim.distributions import distribute_by_number
+import shapely
 
 import py_jupedsim as jps
 from jupedsim.serialization import JpsCoreStyleTrajectoryWriter
@@ -82,10 +84,16 @@ def main():
     agent_parameters.x = 0.0
     agent_parameters.y = 0.0
     agent_parameters.profile_id = profile_id
+    
+    s_polygon = shapely.Polygon([(50, 100), (55, 100), (55, 104), (50, 104)])
+    seed = 45131502
+    agents = distribute_by_number(polygon=s_polygon, number_of_agents=30,
+		                  distance_to_agents=0.30,
+		                  distance_to_polygon=0.20, seed=seed)
+    
 
     # 30 agents needed
-    for x, y in [(51, 103)]:
-        # (54, 101), (51, 103), (52, 103), (53.5, 102)
+    for x, y in agents:
         agent_parameters.x = x
         agent_parameters.y = y
         simulation.add_agent(agent_parameters)
