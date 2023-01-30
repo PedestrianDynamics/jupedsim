@@ -24,7 +24,7 @@ def log_error(msg):
 
 
 def main():
-	#logging
+    # logging
     logging.basicConfig(
         level=logging.DEBUG, format="%(levelname)s : %(message)s"
     )
@@ -33,21 +33,20 @@ def main():
     jps.set_warning_callback(log_warn)
     jps.set_error_callback(log_error)
 
-	# geometry
+    # geometry
     geo_builder = jps.GeometryBuilder()
     geo_builder.add_accessible_area([(50, 100), (60, 100), (60, 104), (50, 104)])
     geo_builder.add_accessible_area([(60, 101.4), (62, 101.4), (62, 102.6), (60, 102.6)])
     geo_builder.add_accessible_area([(62, 100), (65, 100), (65, 104), (62, 104)])
     geometry = geo_builder.build()
-	
-	
-	# (50, 104)	(60, 104)	(62, 104)    (65, 104)
-	# 		(60, 102.6)	(62, 102.6)    
-	#
-	#		(60, 101.4)	(62, 101.4)
-	# (50, 100)	(60, 100)	(62, 100)     (65, 100)
-	
-	# destination
+
+    # (50, 104)	(60, 104)	(62, 104)    (65, 104)
+    # 		(60, 102.6)	(62, 102.6)
+    #
+    #		(60, 101.4)	(62, 101.4)
+    # (50, 100)	(60, 100)	(62, 100)     (65, 100)
+
+    # destination
     destination = 1
     areas_builder = jps.AreasBuilder()
     areas_builder.add_area(
@@ -62,7 +61,7 @@ def main():
     )
     profile_id = 3
     model_builder.add_parameter_profile(
-        id=profile_id, time_gap=1, tau=0.5, v0=1.0, radius=0.3
+        id=profile_id, time_gap=1, tau=0.5, v0=1.0, radius=0.15
     )
 
     model = model_builder.build()
@@ -70,9 +69,9 @@ def main():
     simulation = jps.Simulation(
         model=model, geometry=geometry, areas=areas, dt=0.01
     )
-    
-	# waypoints?
-    journey = jps.Journey.make_waypoint_journey([((61, 102), 1)])
+
+    # waypoints?
+    journey = jps.Journey.make_waypoint_journey([((61, 102), 1), ((64.75, 102), 0.25)])
 
     journey_id = simulation.add_journey(journey)
 
@@ -83,10 +82,10 @@ def main():
     agent_parameters.x = 0.0
     agent_parameters.y = 0.0
     agent_parameters.profile_id = profile_id
-	
-	# 30 agents needed
-    for x, y in [(52, 102)]:
-    	# (54, 101), (51, 103), (52, 103), (53.5, 102)
+
+    # 30 agents needed
+    for x, y in [(51, 103)]:
+        # (54, 101), (51, 103), (52, 103), (53.5, 102)
         agent_parameters.x = x
         agent_parameters.y = y
         simulation.add_agent(agent_parameters)
