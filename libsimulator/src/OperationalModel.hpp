@@ -4,13 +4,15 @@
 
 #include "Clonable.hpp"
 #include "CollisionGeometry.hpp"
-#include "NeighborhoodSearch.hpp"
 #include "Point.hpp"
 #include "UniqueID.hpp"
 
 #include <optional>
+#include <unordered_map>
 
-class Agent;
+class GenericAgent;
+template <typename T>
+class NeighborhoodSearch;
 
 struct PedestrianUpdate {
     std::optional<Point> position{};
@@ -29,21 +31,21 @@ public:
     OperationalModel() = default;
     virtual ~OperationalModel() = default;
 
-    virtual PedestrianUpdate ComputeNewPosition(
-        double dT,
-        const Agent& ped,
-        const CollisionGeometry& geometry,
-        const NeighborhoodSearch& neighborhoodSearch) const = 0;
+    // virtual PedestrianUpdate ComputeNewPosition(
+    //     double dT,
+    //     const GenericAgent& ped,
+    //     const CollisionGeometry& geometry,
+    //     const NeighborhoodSearch<GenericAgent*>& neighborhoodSearch) const = 0;
 
-    virtual void ApplyUpdate(const PedestrianUpdate& update, Agent& agent) const = 0;
+    // virtual void ApplyUpdate(const PedestrianUpdate& update, GenericAgent& agent) const = 0;
     virtual bool ParameterProfileExists(ParametersID id) const = 0;
 };
 
-template <typename ModelData>
+template <typename Params>
 class OperationalModelBase : public OperationalModel
 {
 private:
-    std::unordered_map<OperationalModel::ParametersID, ModelData> _parameterProfiles;
+    std::unordered_map<OperationalModel::ParametersID, Params> _parameterProfiles;
 
 public:
     bool ParameterProfileExists(ParametersID id) const override
@@ -52,7 +54,7 @@ public:
     };
 
 protected:
-    OperationalModelBase(const std::vector<ModelData>& parameterProfiles)
+    OperationalModelBase(const std::vector<Params>& parameterProfiles)
     {
         _parameterProfiles.reserve(parameterProfiles.size());
         for(auto&& p : parameterProfiles) {
@@ -64,7 +66,7 @@ protected:
         }
     };
 
-    const ModelData& parameterProfile(OperationalModel::ParametersID id) const
+    const Params& parameterProfile(OperationalModel::ParametersID id) const
     {
         return _parameterProfiles.at(id);
     };

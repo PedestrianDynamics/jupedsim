@@ -2,97 +2,107 @@
 /// SPDX-License-Identifier: LGPL-3.0-or-later
 #include "NeighborhoodSearch.hpp"
 
-#include "Agent.hpp"
-
+#include <cmath>
 #include <gtest/gtest.h>
 #include <iostream>
+#include <memory>
+#include <ranges>
 
-TEST(NeighborhoodSearch, GetNeighboringAgents)
+TEST(Grid2D, EmptyDefauneighborhood_searchorhood_searchtruction)
 {
-    NeighborhoodSearch neighborhood_search(2.2);
+    Grid2D<int> grid;
 
-    std::vector<std::unique_ptr<Agent>> pedestrians{};
-    for(int counter = 0; counter < 10; ++counter) {
-        pedestrians.emplace_back(std::make_unique<Agent>());
-        pedestrians.back()->pos = Point(0, 0);
-    }
-    std::vector<Agent*> pedestrians_as_raw{};
-    std::transform(
-        std::begin(pedestrians),
-        std::end(pedestrians),
-        std::back_inserter(pedestrians_as_raw),
-        [](const auto& e) { return e.get(); });
-
-    neighborhood_search.Update(pedestrians);
-
-    std::vector<Agent*> neighborhood;
-
-    Agent special_ped;
-    special_ped.pos = Point(0, 0);
-
-    for(auto neighbor : neighborhood_search.GetNeighboringAgents(special_ped.pos, 2.2)) {
-        neighborhood.push_back(neighbor);
-    }
-    EXPECT_EQ(pedestrians_as_raw, neighborhood);
-    neighborhood.clear();
-
-    special_ped.pos = Point(10, 10);
-    for(auto neighbor : neighborhood_search.GetNeighboringAgents(special_ped.pos, 2.2)) {
-        neighborhood.push_back(neighbor);
-    }
-    EXPECT_TRUE(neighborhood.empty());
-    neighborhood.clear();
-
-    special_ped.pos = Point(0, 4.4);
-    for(auto neighbor : neighborhood_search.GetNeighboringAgents(special_ped.pos, 2.2)) {
-        neighborhood.push_back(neighbor);
-    }
-    EXPECT_TRUE(neighborhood.empty());
-    neighborhood.clear();
-
-    special_ped.pos = Point(0, 4.3);
-    for(auto neighbor : neighborhood_search.GetNeighboringAgents(special_ped.pos, 5)) {
-        neighborhood.push_back(neighbor);
-    }
-    EXPECT_EQ(pedestrians_as_raw, neighborhood);
-    neighborhood.clear();
-
-    for(auto neighbor :
-        neighborhood_search.GetNeighboringAgents(pedestrians_as_raw.front()->pos, 2.2)) {
-        neighborhood.push_back(neighbor);
-    }
-    EXPECT_EQ(pedestrians_as_raw, neighborhood);
-    neighborhood.clear();
+    ASSERT_EQ(grid.size(), 0);
+    ASSERT_TRUE(grid.empty());
 }
 
-TEST(NeighborhoodSearch, GetNeighboringAgentsRadius)
+TEST(Grid2D, Construction)
 {
-    NeighborhoodSearch neighborhood_search(2);
+    std::vector<Grid2D<double>::IndexValuePair> values;
 
-    std::vector<std::unique_ptr<Agent>> pedestrians{};
-    pedestrians.emplace_back(std::make_unique<Agent>());
-    pedestrians.back()->pos = Point(0, 0);
-
-    std::vector<Agent*> pedestrians_as_raw{};
-    std::transform(
-        std::begin(pedestrians),
-        std::end(pedestrians),
-        std::back_inserter(pedestrians_as_raw),
-        [](const auto& e) { return e.get(); });
-
-    neighborhood_search.Update(pedestrians);
-
-    std::vector<Agent*> neighborhood;
-    Agent special_ped;
-    // one level radius
-    special_ped.pos = Point(2.5, 2.3);
-    for(auto neighbor : neighborhood_search.GetNeighboringAgents(special_ped.pos, 4)) {
-        neighborhood.push_back(neighbor);
+    for(int i = 0; i < 100; ++i) {
+        values.push_back({{100 - i, i}, 2.4});
     }
-    EXPECT_EQ(pedestrians_as_raw, neighborhood);
-    neighborhood.clear();
 
-    // Pedestrians should be filtered by the neighborhood level already
-    special_ped.pos = Point(4.5, 4.3);
-    EXPECT_TRUE(neighborhood_search.GetNeighboringAgents(special_ped.pos, 2).empty());
+    Grid2D<double> grid(values);
+
+    ASSERT_EQ(grid.size(), 100);
+    ASSERT_FALSE(grid.empty());
+
+    auto it_pair = grid.get({99, 1});
+    ASSERT_EQ(std::distance(it_pair.first(), it_pair.second()), 1);
+    ASSERT_EQ(it_pair.first()->value, 2.4);
+}
+
+TEST(NeighborhoodSearch, ReturnsEmptyOnEmpty)
+{
+    NeighborhoodSearch<int> neighborhood{3};
+    const auto range = neighborhood.GetNeighboringAgents({0, 0}, 10);
+    ASSERT_EQ(std::begin(range), std::end(range));
+}
+
+TEST(NeighborhoodSearch, ReturnsOneValueInRange)
+{
+    NeighborhoodSearch<int> neighborhood{3};
+    neighborhood.Update({{{0, 0}, 1}});
+
+    const auto expected = std::set<int>{1};
+    const auto result = neighborhood.GetNeighboringAgents({0, 0}, 10);
+    std::set<int> actual{std::begin(result), std::end(result)};
+    ASSERT_EQ(actual, expected);
+}
+
+TEST(NeighborhoodSearch, ReturnsMultipleValuesInRange)
+{
+    NeighborhoodSearch<int> neighborhood{3};
+    neighborhood.Update({{{0, 0}, 1}, {{0, 0}, 0}});
+
+    const auto expected = std::set<int>{1, 0};
+    const auto result = neighborhood.GetNeighboringAgents({0, 0}, 10);
+    std::set<int> actual{std::begin(result), std::end(result)};
+    ASSERT_EQ(actual, expected);
+}
+
+TEST(NeighborhoodSearch, ReturnsValuesFromDifferentInternalGridCells)
+{
+    NeighborhoodSearch<int> neighborhood{3};
+    neighborhood.Update({{{0, 0}, 1}, {{-3, 0}, 0}, {{4, 4}, 6}});
+
+    const auto expected = std::set<int>{1, 0, 6};
+    const auto result = neighborhood.GetNeighboringAgents({0, 0}, 10);
+    std::set<int> actual{std::begin(result), std::end(result)};
+    ASSERT_EQ(actual, expected);
+}
+
+TEST(NeighborhoodSearch, RejectesValuesInGridCellsTooFarAway)
+{
+    NeighborhoodSearch<int> neighborhood{3};
+    neighborhood.Update({{{0, 0}, 1}, {{-3, 0}, 0}, {{4, 4}, 6}, {{10, 10}, 7}});
+
+    const auto expected = std::set<int>{1, 0, 6};
+    const auto result = neighborhood.GetNeighboringAgents({0, 0}, 10);
+    std::set<int> actual{std::begin(result), std::end(result)};
+    ASSERT_EQ(actual, expected);
+}
+
+TEST(NeighborhoodSearch, RejectsValuesFromSelectedGridThatareTooFarAway)
+{
+    NeighborhoodSearch<int> neighborhood{3};
+    neighborhood.Update({{{0, 0}, 1}, {{0.5, 0.5}, 2}, {{0.4, 0.4}, 3}});
+
+    const auto expected = std::set<int>{1, 3};
+    const auto result = neighborhood.GetNeighboringAgents({0, 0}, 0.41 * sqrt(2.0));
+    std::set<int> actual{std::begin(result), std::end(result)};
+    ASSERT_EQ(actual, expected);
+}
+
+TEST(NeighborhoodSearch, ReturnsValueExactlyDistanceAwayFromQueryPoint)
+{
+    NeighborhoodSearch<int> neighborhood{3};
+    neighborhood.Update({{{1, 0}, 1}});
+
+    const auto expected = std::set<int>{1};
+    const auto result = neighborhood.GetNeighboringAgents({0, 0}, 1);
+    std::set<int> actual{std::begin(result), std::end(result)};
+    ASSERT_EQ(actual, expected);
 }

@@ -5,11 +5,11 @@
 #include "AgentIterator.hpp"
 #include "ErrorMessage.hpp"
 
-#include <Agent.hpp>
 #include <Area.hpp>
 #include <CollisionGeometry.hpp>
 #include <GCFMModel.hpp>
 #include <GCFMModelBuilder.hpp>
+#include <GenericAgent.hpp>
 #include <Geometry.hpp>
 #include <GeometryBuilder.hpp>
 #include <Journey.hpp>
@@ -352,35 +352,35 @@ void JPS_Areas_Free(JPS_Areas handle)
 double JPS_Agent_PositionX(JPS_Agent handle)
 {
     assert(handle);
-    const auto agent = reinterpret_cast<const Agent*>(handle);
+    const auto agent = reinterpret_cast<const GenericAgent*>(handle);
     return agent->pos.x;
 }
 
 double JPS_Agent_PositionY(JPS_Agent handle)
 {
     assert(handle);
-    const auto agent = reinterpret_cast<const Agent*>(handle);
+    const auto agent = reinterpret_cast<const GenericAgent*>(handle);
     return agent->pos.y;
 }
 
 double JPS_Agent_OrientationX(JPS_Agent handle)
 {
     assert(handle);
-    const auto agent = reinterpret_cast<const Agent*>(handle);
+    const auto agent = reinterpret_cast<const GenericAgent*>(handle);
     return agent->orientation.x;
 }
 
 double JPS_Agent_OrientationY(JPS_Agent handle)
 {
     assert(handle);
-    const auto agent = reinterpret_cast<const Agent*>(handle);
+    const auto agent = reinterpret_cast<const GenericAgent*>(handle);
     return agent->orientation.y;
 }
 
 JPS_AgentId JPS_Agent_Id(JPS_Agent handle)
 {
     assert(handle);
-    const auto agent = reinterpret_cast<const Agent*>(handle);
+    const auto agent = reinterpret_cast<const GenericAgent*>(handle);
     return agent->id.getID();
 }
 
@@ -443,12 +443,27 @@ JPS_Simulation JPS_Simulation_Create(
         auto areasInternal = reinterpret_cast<Areas*>(areas);
         auto areas = std::make_unique<Areas>(*areasInternal);
 
-        result = reinterpret_cast<JPS_Simulation>(new Simulation(
-            std::move(model),
-            std::move(collisionGeometry),
-            std::move(routingEngine),
-            std::move(areas),
-            dT));
+        if(dynamic_cast<VelocityModel*>(model.get())) {
+            auto ptr = dynamic_cast<VelocityModel*>(model.release());
+            auto derived = std::unique_ptr<VelocityModel>(ptr);
+            result = reinterpret_cast<JPS_Simulation>(new TypedSimulation<VelocityModel>(
+                std::move(derived),
+                std::move(collisionGeometry),
+                std::move(routingEngine),
+                std::move(areas),
+                dT));
+        } else if(dynamic_cast<GCFMModel*>(model.get())) {
+            auto ptr = dynamic_cast<GCFMModel*>(model.release());
+            auto derived = std::unique_ptr<GCFMModel>(ptr);
+            result = reinterpret_cast<JPS_Simulation>(new TypedSimulation<GCFMModel>(
+                std::move(derived),
+                std::move(collisionGeometry),
+                std::move(routingEngine),
+                std::move(areas),
+                dT));
+        } else {
+            throw std::runtime_error("Unknown model type encountered");
+        }
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
@@ -546,7 +561,7 @@ JPS_Simulation_ReadAgent(JPS_Simulation handle, JPS_AgentId id, JPS_ErrorMessage
     auto simulation = reinterpret_cast<Simulation*>(handle);
     JPS_Agent result{};
     try {
-        result = reinterpret_cast<JPS_Agent>(simulation->AgentPtr(id));
+        result = reinterpret_cast<JPS_Agent>(&simulation->Agent(id));
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});

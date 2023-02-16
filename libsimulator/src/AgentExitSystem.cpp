@@ -6,19 +6,19 @@
 
 void AgentExitSystem::Run(
     const std::map<Area::Id, Area> areas,
-    std::vector<std::unique_ptr<Agent>>& agents,
+    std::vector<GenericAgent>& agents,
     std::vector<uint64_t>& removedAgentIds) const
 {
     removedAgentIds.clear();
     auto iter = std::remove_if(
         std::begin(agents),
         std::end(agents),
-        [&areas, &removedAgentIds](const std::unique_ptr<Agent>& agent) {
+        [&areas, &removedAgentIds](const GenericAgent& agent) {
             for(const auto& [k, v] : areas) {
                 if(v.labels.find("exit") != v.labels.end()) {
-                    auto inside = v.polygon.Inside(agent->pos);
+                    auto inside = v.polygon.Inside(agent.pos);
                     if(inside) {
-                        removedAgentIds.emplace_back(agent->id.getID());
+                        removedAgentIds.emplace_back(agent.id.getID());
                         return true;
                     }
                 }
