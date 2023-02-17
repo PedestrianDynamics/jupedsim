@@ -7,12 +7,12 @@
 void TacticalDecisionSystem::Run(
     const std::map<Area::Id, Area> areas,
     RoutingEngine& routingEngine,
-    std::vector<std::unique_ptr<Agent>>& agents) const
+    std::vector<GenericAgent>& agents) const
 {
 
     for(auto& agent : agents) {
-        const auto dest = agent->waypoint;
-        const auto waypoints = routingEngine.ComputeWaypoint(agent->pos, dest);
-        agent->destination = waypoints[1];
+        const auto dest = agent.waypoint;
+        const auto waypoints = routingEngine.ComputeWaypoint(agent.pos, dest);
+        agent.destination = waypoints[1];
     }
 }
