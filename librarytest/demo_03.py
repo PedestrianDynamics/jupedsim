@@ -72,7 +72,7 @@ def main():
     )
 
     # waypoints
-    journey = jps.Journey.make_waypoint_journey([((10, 5), 1), ((16, 5), 1.42), ((16, -0.5), 0.5), ((16, -5), 1)])
+    journey = jps.Journey.make_waypoint_journey([((10, 5), 1), ((15, 5), 1),  ((16, 4.5), 1.12), ((16, 3), 1), ((16, -5), 1)])
 
     journey_id = simulation.add_journey(journey)
 
