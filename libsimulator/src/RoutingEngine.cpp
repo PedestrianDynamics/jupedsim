@@ -3,7 +3,9 @@
 #include "RoutingEngine.hpp"
 
 #include "GeometricFunctions.hpp"
+#include "IteratorPair.hpp"
 #include "Line.hpp"
+#include "Triangle.hpp"
 
 #include <vector>
 
@@ -16,6 +18,8 @@ std::unique_ptr<RoutingEngine> NavMeshRoutingEngine::Clone() const
     return std::make_unique<NavMeshRoutingEngine>(*this);
 }
 
+// TODO(kkratz): Split into 2 functions. First will compute unsmoothed path, second will use this
+// path and smooth it.
 std::vector<Point> NavMeshRoutingEngine::ComputeWaypoint(Point currentPosition, Point destination)
 {
     GraphType::VertexId from = findVertex(currentPosition);
@@ -98,8 +102,34 @@ std::vector<Point> NavMeshRoutingEngine::ComputeWaypoint(Point currentPosition, 
     return waypoints;
 }
 
+bool NavMeshRoutingEngine::IsRoutable(Point p) const
+{
+    for(const auto& id : _graph.Vertices()) {
+        const auto& v = _graph.Vertex(id);
+        if(v.aabb.Inside(p) && v.triangle.Inside(p)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void NavMeshRoutingEngine::Update()
 {
+}
+
+std::vector<Triangle> NavMeshRoutingEngine::Mesh() const
+{
+    std::vector<Triangle> mesh{};
+    for(const auto& id : _graph.Vertices()) {
+        const auto& v = _graph.Vertex(id);
+        mesh.emplace_back(v.triangle);
+    }
+    return mesh;
+}
+
+std::vector<EdgeData> NavMeshRoutingEngine::EdgesFor(GraphType::VertexId id) const
+{
+    return _graph.EdgesFor(id);
 }
 
 NavMeshRoutingEngine::GraphType::VertexId NavMeshRoutingEngine::findVertex(Point p) const
