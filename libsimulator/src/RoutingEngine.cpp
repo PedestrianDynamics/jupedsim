@@ -35,10 +35,11 @@ std::vector<Point> NavMeshRoutingEngine::ComputeWaypoint(Point currentPosition, 
     // TODO(kkratz): Edge lookup is O(n) where n is the number of edges in the graph
     // This needs to be replaced with a graph that allows for faster edge lookup
     std::vector<Line> portals{};
-    portals.reserve(path.size() - 1);
+    portals.reserve(path.size());
     for(size_t index = 1; index < path.size(); ++index) {
         portals.push_back(_graph.Edge(path[index - 1], path[index]).edge);
     }
+    portals.push_back({destination, destination});
 
     // This is the actual simple stupid funnel algorithm
     auto apex = currentPosition;
@@ -60,10 +61,8 @@ std::vector<Point> NavMeshRoutingEngine::ComputeWaypoint(Point currentPosition, 
         const auto line_segment_left = portals[index_portal].GetPoint2();
         const auto line_segment_right = portals[index_portal].GetPoint1();
         const auto line_segment_direction = (line_segment_right - line_segment_left).Normalized();
-        const auto candidate_left =
-            portals[index_portal].GetPoint2() + (line_segment_direction * 0.2);
-        const auto candidate_right =
-            portals[index_portal].GetPoint1() - (line_segment_direction * 0.2);
+        const auto candidate_left = line_segment_left + (line_segment_direction * 0.2);
+        const auto candidate_right = line_segment_right - (line_segment_direction * 0.2);
 
         if(triarea2d(apex, portal_right, candidate_right) <= 0.0) {
             if(apex == portal_right || triarea2d(apex, portal_left, candidate_right) > 0.0) {
