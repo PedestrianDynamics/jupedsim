@@ -55,7 +55,7 @@ It should be possible to build on all major platforms however, we only test a fe
 Right now, we ensure a working Build for:
 
 * Windows 10
-* MacOS Montery
+* MacOS 13 (Ventura)
 * Ubuntu 22.04
 
 ### Build Options
@@ -209,15 +209,32 @@ bundle in `jpscore/bin` or run it from the command line with
 
 #### Library Dependencies
 
-On Windows dependencies are installed with `vcpkg`, get it from <vcpkg.io>.
-`vcpkg` will automatically download and install the dependencies listen in
-`vcpkg.json` if used with CMake.
+For Windows we support installation of dependencies with VCPKG in Manifest Mode.
+
+If you intend to enable `jpsvis` you will need to ensure to install the
+optional dependencies by adding `--x-feature=Vis` to the `vcpkg` invocation.  
+
+Due to long compile and copy times on Windows it is recommended to install
+dependencies into a location that can be preserved when switching branches or
+clean the repository path. This can be achived by adding
+`--x-install-root=<PATH-OUTSIDE-SOURCE>`.
+
+Do not forget to add the triplet to specify 32/64 bit version and static vs.
+dynamic linking version, e.g. `--triplet=x64-windows-static`
+
+For example if you want to install dependencies for `libjupedims` and `jpsvis`
+invoke `vcpkg` like this:
+
+```bash
+mkdir jpscore-deps
+cd <JPSCORE-SOURCE-PATH>
+vcpkg.exe --x-feature=Vis --x-install-root=../jpscore-deps --triplet=x64-windows-static
+```
 
 During the CMake invocation listed in the next section, add this to your invocation:
 
 ```bash
 -DCMAKE_TOOLCHAIN_FILE=<PATH-TO-VCPKG-INSTALLATION>/scripts/buildsystems/vcpkg.cmake
--DVCPKG_MANIFEST_DIR=<PATH-TO-SOURCE-FOLDER>/vcpkg.json
 ```
 
 ## Contributing to JuPedSim

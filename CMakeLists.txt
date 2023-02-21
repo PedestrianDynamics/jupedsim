@@ -82,7 +82,6 @@ list(APPEND COMMON_COMPILE_OPTIONS
 find_package(fmt 8.0 REQUIRED CONFIG)
 find_package(Boost 1.76 REQUIRED)
 find_package(Threads REQUIRED)
-find_package(glm REQUIRED CONFIG)
 # Silence CGAL CMake warning. No example data for CGAL will be loaded anyways
 set(CGAL_DATA_DIR "none")
 set(WITH_CGAL_ImageIO OFF)
@@ -115,6 +114,7 @@ find_package(Python COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11 REQUIRED CONFIG)
 
 if(BUILD_JPSVIS)
+    find_package(glm REQUIRED CONFIG)
     find_package(VTK 9.0
         COMPONENTS
             CommonCore
