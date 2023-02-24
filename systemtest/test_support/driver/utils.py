@@ -2,9 +2,9 @@ import difflib
 import os
 import pathlib
 import shutil
+from itertools import tee
 from typing import List
 
-from itertools import tee
 from driver.driver import JpsCoreDriver
 from driver.environment import Environment
 
@@ -92,6 +92,7 @@ def copy_files(*, sources: List[pathlib.Path], dest: pathlib.Path):
     for path in sources:
         if path.is_file():
             shutil.copy2(path, dest)
+
 
 def pairwise(iterable):
     """
