@@ -2,13 +2,12 @@
 import argparse
 import io
 import logging
+import logging as log
 import sys
 import unittest
-import logging as log
 
 
 class IncorrectTrajectory(Exception):
-
     def __init__(self, message):
         self.message = message
 
@@ -19,45 +18,67 @@ class Mock:
 
 class TestTrajectoryClass(unittest.TestCase):
     def test_exception_when_missing_framerate(self):
-        f = io.StringIO("\n".join(
-            ["#geometry: geo_stairs_1.0m.xml",
-             "#ID	FR	X	Y	Z	A	B	ANGLE	COLOR",
-             "1	0	14.90	6.60	0.00	0.20	0.20	-165.96	0"]
-        ))
+        f = io.StringIO(
+            "\n".join(
+                [
+                    "#geometry: geo_stairs_1.0m.xml",
+                    "#ID	FR	X	Y	Z	A	B	ANGLE	COLOR",
+                    "1	0	14.90	6.60	0.00	0.20	0.20	-165.96	0",
+                ]
+            )
+        )
         path = "no path"
         with self.assertRaises(IncorrectTrajectory) as ex:
             Trajectory.parse_from_stream(f, path)
-        assert ex.exception.message == f"file named '{path}' is missing a frame rate in the Header"
+        assert (
+            ex.exception.message
+            == f"file named '{path}' is missing a frame rate in the Header"
+        )
 
     def test_exception_when_missing_geometry(self):
-        f = io.StringIO("\n".join(
-            ["#framerate: 64.00",
-             "#ID	FR	X	Y	Z	A	B	ANGLE	COLOR",
-             "1	0	14.90	6.60	0.00	0.20	0.20	-165.96	0"]
-        ))
+        f = io.StringIO(
+            "\n".join(
+                [
+                    "#framerate: 64.00",
+                    "#ID	FR	X	Y	Z	A	B	ANGLE	COLOR",
+                    "1	0	14.90	6.60	0.00	0.20	0.20	-165.96	0",
+                ]
+            )
+        )
         path = "no path"
         with self.assertRaises(IncorrectTrajectory) as ex:
             Trajectory.parse_from_stream(f, path)
-        assert ex.exception.message == f"file named '{path}' is missing a Geometry in the Header"
+        assert (
+            ex.exception.message
+            == f"file named '{path}' is missing a Geometry in the Header"
+        )
 
     def test_correct_framerate_parsed(self):
-        f = io.StringIO("\n".join(
-            ["#framerate: 64.00",
-             "#geometry: geo_stairs_1.0m.xml",
-             "#ID	FR	X	Y	Z	A	B	ANGLE	COLOR",
-             "1	0	14.90	6.60	0.00	0.20	0.20	-165.96	0"]
-        ))
+        f = io.StringIO(
+            "\n".join(
+                [
+                    "#framerate: 64.00",
+                    "#geometry: geo_stairs_1.0m.xml",
+                    "#ID	FR	X	Y	Z	A	B	ANGLE	COLOR",
+                    "1	0	14.90	6.60	0.00	0.20	0.20	-165.96	0",
+                ]
+            )
+        )
         path = "no path"
         trajec_data = Trajectory.parse_from_stream(f, path)
         self.assertEqual(trajec_data[0], "64.00")
 
     def test_correct_geometry_parsed(self):
-        f = io.StringIO("\n".join(
-            ["#framerate: 64.00",
-             "#geometry: geo_stairs_1.0m.xml",
-             "#ID	FR	X	Y	Z	A	B	ANGLE	COLOR",
-             "1	0	14.90	6.60	0.00	0.20	0.20	-165.96	0"]
-        ))
+        f = io.StringIO(
+            "\n".join(
+                [
+                    "#framerate: 64.00",
+                    "#geometry: geo_stairs_1.0m.xml",
+                    "#ID	FR	X	Y	Z	A	B	ANGLE	COLOR",
+                    "1	0	14.90	6.60	0.00	0.20	0.20	-165.96	0",
+                ]
+            )
+        )
         path = "no path"
         trajec_data = Trajectory.parse_from_stream(f, path)
         self.assertEqual(trajec_data[1], "geo_stairs_1.0m.xml")
@@ -68,41 +89,61 @@ class TestTrajectoryClass(unittest.TestCase):
             Trajectory(path)
 
     def test_exception_when_missing_frames(self):
-        f = io.StringIO("\n".join(
-            ["#framerate: 64.00",
-             "#geometry: geo_stairs_1.0m.xml",
-             "#ID	FR	X	Y	Z	A	B	ANGLE	COLOR",
-             "1	0	14.90	6.60	0.00	0.20	0.20	-165.96	0",
-             "1	2	14.89	6.60	0.00	0.20	0.20	-159.19	104	"
-             ]
-        ))
+        f = io.StringIO(
+            "\n".join(
+                [
+                    "#framerate: 64.00",
+                    "#geometry: geo_stairs_1.0m.xml",
+                    "#ID	FR	X	Y	Z	A	B	ANGLE	COLOR",
+                    "1	0	14.90	6.60	0.00	0.20	0.20	-165.96	0",
+                    "1	2	14.89	6.60	0.00	0.20	0.20	-159.19	104	",
+                ]
+            )
+        )
         path = "no path"
         with self.assertRaises(IncorrectTrajectory) as ex:
             Trajectory.parse_from_stream(f, path)
-        assert ex.exception.message == f"file {path} has missing frames ~ missed frame 1"
+        assert (
+            ex.exception.message
+            == f"file {path} has missing frames ~ missed frame 1"
+        )
 
     def test_exception_when_line_has_no_frame(self):
         wrong_line1 = "this line has no frames and no tabs"
         wrong_line2 = "this line has no frames but   tabs"
-        f = io.StringIO("\n".join(
-            ["#framerate: 64.00\n",
-             "#geometry: geo_stairs_1.0m.xml\n",
-             "#ID	FR	X	Y	Z	A	B	ANGLE	COLOR\n",
-             wrong_line1
-             ]))
-        f2 = io.StringIO("\n".join(
-            ["#framerate: 64.00\n",
-             "#geometry: geo_stairs_1.0m.xml\n",
-             "#ID	FR	X	Y	Z	A	B	ANGLE	COLOR\n",
-             wrong_line2
-             ]))
+        f = io.StringIO(
+            "\n".join(
+                [
+                    "#framerate: 64.00\n",
+                    "#geometry: geo_stairs_1.0m.xml\n",
+                    "#ID	FR	X	Y	Z	A	B	ANGLE	COLOR\n",
+                    wrong_line1,
+                ]
+            )
+        )
+        f2 = io.StringIO(
+            "\n".join(
+                [
+                    "#framerate: 64.00\n",
+                    "#geometry: geo_stairs_1.0m.xml\n",
+                    "#ID	FR	X	Y	Z	A	B	ANGLE	COLOR\n",
+                    wrong_line2,
+                ]
+            )
+        )
         path = "no path"
         with self.assertRaises(IncorrectTrajectory) as ex:
             Trajectory.parse_from_stream(f, path)
-        assert ex.exception.message == f"file named '{path}' has wrong formatted Line: {wrong_line1}"
+        assert (
+            ex.exception.message
+            == f"file named '{path}' has wrong formatted Line: {wrong_line1}"
+        )
         with self.assertRaises(IncorrectTrajectory) as ex:
             Trajectory.parse_from_stream(f2, path)
-        assert ex.exception.message == f"file named '{path}' has wrong formatted Line: {wrong_line2}"
+        assert (
+            ex.exception.message
+            == f"file named '{path}' has wrong formatted Line: {wrong_line2}"
+        )
 
 
 class TestCheckInput(unittest.TestCase):
@@ -112,7 +153,10 @@ class TestCheckInput(unittest.TestCase):
         geometries = ["geo1.xml", "geo1.xml"]
         with self.assertRaises(IncorrectTrajectory) as ex:
             check_header((paths, frame_rates, geometries))
-        assert ex.exception.message == f"the frame rate in file {paths[1]} is not matching"
+        assert (
+            ex.exception.message
+            == f"the frame rate in file {paths[1]} is not matching"
+        )
 
     def test_exception_when_geometries_dont_match(self):
         paths = ["no path", "still no path"]
@@ -120,7 +164,10 @@ class TestCheckInput(unittest.TestCase):
         geometries = ["geo1.xml", "geo2.xml"]
         with self.assertRaises(IncorrectTrajectory) as ex:
             check_header((paths, frame_rates, geometries))
-        assert ex.exception.message == f"the Geometry path in file {paths[1]} is not matching"
+        assert (
+            ex.exception.message
+            == f"the Geometry path in file {paths[1]} is not matching"
+        )
 
     def test_exception_multiple_startvalues(self):
         with self.assertRaises(IncorrectTrajectory) as ex:
@@ -134,20 +181,34 @@ class TestCheckInput(unittest.TestCase):
             start_frames = [0, 4500, 9000, 12500]
             end_frames = [5000, 8999, 12499, 15000]
             check_data((start_frames, end_frames))
-        assert ex.exception.message == f"the starting frame 4500 is not matching the other files"
+        assert (
+            ex.exception.message
+            == f"the starting frame 4500 is not matching the other files"
+        )
 
     def test_exception_frames_overlap(self):
         with self.assertRaises(IncorrectTrajectory) as ex:
             start_frames = [0, 4500, 9000, 12500]
             end_frames = [4499, 9500, 12499, 15000]
             check_data((start_frames, end_frames))
-        assert ex.exception.message == f"the starting frame 9000 is not matching the other files"
+        assert (
+            ex.exception.message
+            == f"the starting frame 9000 is not matching the other files"
+        )
 
     def test_read_header(self):
         trajec1 = Mock()
-        trajec1.path, trajec1.framerate, trajec1.geometry = "no path", "64.00", "geo1.xml"
+        trajec1.path, trajec1.framerate, trajec1.geometry = (
+            "no path",
+            "64.00",
+            "geo1.xml",
+        )
         trajec2 = Mock()
-        trajec2.path, trajec2.framerate, trajec2.geometry = "still no path", "32.00", "geo1.xml"
+        trajec2.path, trajec2.framerate, trajec2.geometry = (
+            "still no path",
+            "32.00",
+            "geo1.xml",
+        )
         trajecs = [trajec1, trajec2]
         actual = read_header(trajecs)
         act_paths = actual[0]
@@ -178,7 +239,9 @@ class TestCheckInput(unittest.TestCase):
 
 class TestFrameFromLine(unittest.TestCase):
     def test_for_correct_frame(self):
-        self.assertEqual(frame_from_line("1	0	14.90	6.60	0.00	0.20	0.20	-165.96	0\n"), 0)
+        self.assertEqual(
+            frame_from_line("1	0	14.90	6.60	0.00	0.20	0.20	-165.96	0\n"), 0
+        )
 
     def test_for_incorrect_format(self):
         with self.assertRaises(IndexError):
@@ -186,7 +249,9 @@ class TestFrameFromLine(unittest.TestCase):
 
     def test_for_incorrect_type(self):
         with self.assertRaises(ValueError):
-            frame_from_line("1	no number	14.90	6.60	0.00	0.20	0.20	-165.96	0\n")
+            frame_from_line(
+                "1	no number	14.90	6.60	0.00	0.20	0.20	-165.96	0\n"
+            )
 
 
 class TestOutput(unittest.TestCase):
@@ -208,12 +273,14 @@ class TestOutput(unittest.TestCase):
         self.assertEqual(geometry, "geometry.xml")
 
     def test_string_from_trajecs(self):
-        lines = ["#framerate: 64.00",
-                 "#geometry: geo_stairs_1.0m.xml",
-                 "#ID	FR	X	Y	Z	A	B	ANGLE	COLOR",
-                 "",
-                 "1	0	14.90	6.60	0.00	0.20	0.20	-165.96	0",
-                 "18	0	16.10	3.40	0.00	0.20	0.20	-178.53	0"]
+        lines = [
+            "#framerate: 64.00",
+            "#geometry: geo_stairs_1.0m.xml",
+            "#ID	FR	X	Y	Z	A	B	ANGLE	COLOR",
+            "",
+            "1	0	14.90	6.60	0.00	0.20	0.20	-165.96	0",
+            "18	0	16.10	3.40	0.00	0.20	0.20	-178.53	0",
+        ]
         f = io.StringIO("\n".join(lines))
         actual = entries_from_stream(f)
         expected = "\n".join(lines[4:])
@@ -221,22 +288,31 @@ class TestOutput(unittest.TestCase):
 
 
 class Trajectory:
-
     def __init__(self, path):
         """initialises frame rate and geometry, the starting Frame and the last Frame"""
         self.path = path
         try:
             with open(self.path, "r") as trajec:
-                (self.framerate, self.geometry, self.start_frame, self.end_frame) = \
-                    Trajectory.parse_from_stream(trajec, self.path)
+                (
+                    self.framerate,
+                    self.geometry,
+                    self.start_frame,
+                    self.end_frame,
+                ) = Trajectory.parse_from_stream(trajec, self.path)
 
         except FileNotFoundError as error:
-            raise IncorrectTrajectory(f"the file '{error.filename}' can not be found")
+            raise IncorrectTrajectory(
+                f"the file '{error.filename}' can not be found"
+            )
         except (IndexError, ValueError):
             # if this Error occurs no Frame could be found in a line
-            raise IncorrectTrajectory(f"the file '{self.path}' is no correct Trajectory-file")
+            raise IncorrectTrajectory(
+                f"the file '{self.path}' is no correct Trajectory-file"
+            )
         except OSError:
-            raise IncorrectTrajectory(f'the path "{path}" is not allowed with our operation system')
+            raise IncorrectTrajectory(
+                f'the path "{path}" is not allowed with our operation system'
+            )
 
     def __lt__(self, other):
         return self.start_frame < other.start_frame
@@ -244,7 +320,7 @@ class Trajectory:
     @staticmethod
     def parse_from_stream(trajec, path):
         """determines frame rate, geometry, start frame and end frame
-            throws an exception if a frame is missing in the file"""
+        throws an exception if a frame is missing in the file"""
         framerate, geometry, start_frame, end_frame = None, None, None, None
         frame_found = False
         geometry_found = False
@@ -269,12 +345,18 @@ class Trajectory:
                     start_frame = value
                     break
                 except (ValueError, IndexError):
-                    raise IncorrectTrajectory(f"file named '{path}' has wrong formatted Line: {line}")
+                    raise IncorrectTrajectory(
+                        f"file named '{path}' has wrong formatted Line: {line}"
+                    )
 
         if not frame_found:
-            raise IncorrectTrajectory(f"file named '{path}' is missing a frame rate in the Header")
+            raise IncorrectTrajectory(
+                f"file named '{path}' is missing a frame rate in the Header"
+            )
         if not geometry_found:
-            raise IncorrectTrajectory(f"file named '{path}' is missing a Geometry in the Header")
+            raise IncorrectTrajectory(
+                f"file named '{path}' is missing a Geometry in the Header"
+            )
 
         # this will continue iteration where we left off the last time
         # All headers and empty lines are skipped only frame lines remain
@@ -282,13 +364,18 @@ class Trajectory:
         try:
             for line in trajec:
                 current_frame = frame_from_line(line)
-                if current_frame != last_frame and current_frame != (last_frame + 1):
+                if current_frame != last_frame and current_frame != (
+                    last_frame + 1
+                ):
                     raise IncorrectTrajectory(
-                        f"file {path} has missing frames ~ missed frame {last_frame + 1}")
+                        f"file {path} has missing frames ~ missed frame {last_frame + 1}"
+                    )
                 last_frame = current_frame
             # if the file is completely iterated through all Frames are included
         except (ValueError, IndexError):
-            raise IncorrectTrajectory(f"file named '{path}' has wrong formatted Line: {line}")
+            raise IncorrectTrajectory(
+                f"file named '{path}' has wrong formatted Line: {line}"
+            )
         value = last_frame
         end_frame = value
         return framerate, geometry, start_frame, end_frame
@@ -321,9 +408,13 @@ def check_header(data):
     _, expected_frame_rate, expected_geometry_file = next(values)
     for path, frame_rate, geometry_file in values:
         if frame_rate != expected_frame_rate:
-            raise IncorrectTrajectory(f"the frame rate in file {path} is not matching")
+            raise IncorrectTrajectory(
+                f"the frame rate in file {path} is not matching"
+            )
         if geometry_file != expected_geometry_file:
-            raise IncorrectTrajectory(f"the Geometry path in file {path} is not matching")
+            raise IncorrectTrajectory(
+                f"the Geometry path in file {path} is not matching"
+            )
     return True
 
 
@@ -347,17 +438,24 @@ def check_data(starting_and_ending_frames):
     for start_frame in start_frames:
         # a starting frame is considered valid if it is the first frame of the given trajectories
         # a starting frame is considered valid if it comes after an end frame
-        if start_frame != min(start_frames) and start_frame - 1 not in end_frames:
-            raise IncorrectTrajectory(f"the starting frame {start_frame} is not matching the other files")
+        if (
+            start_frame != min(start_frames)
+            and start_frame - 1 not in end_frames
+        ):
+            raise IncorrectTrajectory(
+                f"the starting frame {start_frame} is not matching the other files"
+            )
         # a starting frame is invalid if it appears more than once
         if start_frames.count(start_frame) > 1:
-            raise IncorrectTrajectory(f"multiple files start with the frame {start_frame}")
+            raise IncorrectTrajectory(
+                f"multiple files start with the frame {start_frame}"
+            )
     return True
 
 
 def merge_trajectories(trajecs, output, verbose):
     """will merge all data into the output-file
-      "trajecs" is a list of all Trajectory files in Class format"""
+    "trajecs" is a list of all Trajectory files in Class format"""
 
     # Trajectories are sorted after starting Frame
     trajecs.sort()
@@ -388,9 +486,11 @@ def entries_from_stream(stream):
 
 
 def get_header(framerate, geometry):
-    return f"#merged with MergeTool\n" \
-           f"#framerate: {framerate}\n" \
-           f"#geometry: {geometry}\n\n"
+    return (
+        f"#merged with MergeTool\n"
+        f"#framerate: {framerate}\n"
+        f"#geometry: {geometry}\n\n"
+    )
 
 
 def write_text(text, output, mode):
@@ -400,16 +500,33 @@ def write_text(text, output, mode):
 
 def configuration():
     """sets the Logger and Argumentparser up"""
-    log.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+    log.basicConfig(format="%(levelname)s:%(message)s", level=logging.DEBUG)
     parser = argparse.ArgumentParser()
-    parser.add_argument("file", type=str, help="Merge the given Trajectory files together",
-                        nargs='+')
-    parser.add_argument('-o', type=str, required=False, default="merged_Trajectories.txt",
-                        help="define output file, default path is merged_Trajectories.txt",
-                        dest="output_path")
-    parser.add_argument('-v', action="store_true", help="activates verbose mode and shows how many files remain",
-                        dest="verbose")
-    parser.add_argument("--self-test", action="store_true", help="Will run self tests, print the results and exit.")
+    parser.add_argument(
+        "file",
+        type=str,
+        help="Merge the given Trajectory files together",
+        nargs="+",
+    )
+    parser.add_argument(
+        "-o",
+        type=str,
+        required=False,
+        default="merged_Trajectories.txt",
+        help="define output file, default path is merged_Trajectories.txt",
+        dest="output_path",
+    )
+    parser.add_argument(
+        "-v",
+        action="store_true",
+        help="activates verbose mode and shows how many files remain",
+        dest="verbose",
+    )
+    parser.add_argument(
+        "--self-test",
+        action="store_true",
+        help="Will run self tests, print the results and exit.",
+    )
     args = parser.parse_args()
     return args
 
@@ -439,9 +556,13 @@ def main():
         log.error(error)
         log.info("Use -h for more info on how to use the Script")
         sys.exit(1)
-    write_text(get_header(trajecs[0].framerate, trajecs[0].geometry), args.output_path, "w")
+    write_text(
+        get_header(trajecs[0].framerate, trajecs[0].geometry),
+        args.output_path,
+        "w",
+    )
     merge_trajectories(trajecs, args.output_path, args.verbose)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
