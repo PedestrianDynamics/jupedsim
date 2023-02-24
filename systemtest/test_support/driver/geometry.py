@@ -1,4 +1,3 @@
-
 from driver.utils import pairwise
 from numpy import ndarray
 from sympy.geometry import Point, Segment

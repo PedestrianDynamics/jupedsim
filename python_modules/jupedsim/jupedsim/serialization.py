@@ -8,9 +8,10 @@ deserialize different forms of input / ouput commonly used.
 import abc
 import math
 from io import TextIOWrapper
-import py_jupedsim as jps
 from pathlib import Path
 from typing import Optional, Tuple
+
+import py_jupedsim as jps
 
 
 class TrajectoryWriter(metaclass=abc.ABCMeta):
