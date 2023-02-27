@@ -2,7 +2,7 @@
 set -ex
 
 googletest_version="1.13.0"
-fmt_version="8.0.1"
+fmt_version="9.1.0"
 boost_version="1.81.0"
 # GLM has removed the cmake install target in 9.9.9.6 for unknown reasons
 # on master the install target has been reintroduced. Instead of manually

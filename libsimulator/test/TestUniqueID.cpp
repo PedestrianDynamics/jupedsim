@@ -85,7 +85,7 @@ TEST(UniqueId, CanBeFormatted)
     struct Foo {
     };
     jps::UniqueID<Foo> id;
-    ASSERT_EQ("1", "{}"_format(id));
+    ASSERT_EQ("1", fmt::format("{}", id));
 }
 
 TEST(UniqueId, CanBeHashed)
