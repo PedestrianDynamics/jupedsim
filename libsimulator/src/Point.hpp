@@ -117,7 +117,7 @@ struct fmt::formatter<Point> {
     }
 
     template <typename FormatContext>
-    auto format(const Point& p, FormatContext& ctx)
+    auto format(const Point& p, FormatContext& ctx) const
     {
         return presentation == 'f' ? fmt::format_to(ctx.out(), "({:.1f}, {:.1f})", p.x, p.y) :
                                      fmt::format_to(ctx.out(), "({:.1e}, {:.1e})", p.x, p.y);
