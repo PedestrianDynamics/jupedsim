@@ -96,7 +96,7 @@ struct formatter<::jps::UniqueID<Tag>> {
     template <typename FormatContext>
     auto format(::jps::UniqueID<Tag> const& p_id, FormatContext& p_ctx) const
     {
-        return format_to(p_ctx.out(), "{}", p_id.m_value);
+        return fmt::format_to(p_ctx.out(), "{}", p_id.m_value);
     }
 };
 } // namespace fmt
