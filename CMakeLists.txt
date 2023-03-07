@@ -1,7 +1,7 @@
 ################################################################################
 # Project setup
 ################################################################################
-cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
 project(JuPedSim VERSION 0.10.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -90,25 +90,50 @@ if(UNIX)
     set(CGAL_DISABLE_GMP ON)
 endif()
 find_package(CGAL 5.4 REQUIRED)
-find_library(POLY2TRI_LIB poly2tri)
-if(POLY2TRI_LIB-NOTFOUND)
-    message(FATAL_ERROR "Cannot find libpoly2tri.a")
+
+if(UNIX)
+    find_library(POLY2TRI_LIB poly2tri REQUIRED)
+    find_path(POLY2TRI_HEADER poly2tri.h
+        REQUIRED
+        PATH_SUFFIXES poly2tri
+    )
+    add_library(poly2tri UNKNOWN IMPORTED)
+    set_target_properties(poly2tri PROPERTIES
+        IMPORTED_LOCATION ${POLY2TRI_LIB}
+    )
+    target_include_directories(poly2tri INTERFACE
+        ${POLY2TRI_HEADER}/..
+    )
 else()
-    message(STATUS "Found poly2tri: ${POLY2TRI_LIB}")
+    find_library(
+        POLY2TRI_LIB_RELEASE poly2tri
+        REQUIRED
+    )
+    get_filename_component(path ${POLY2TRI_LIB_RELEASE} DIRECTORY)
+    list(APPEND paths 
+        "${path}/../debug/lib"
+    )
+    find_library(
+        POLY2TRI_LIB_DEBUG poly2tri
+        PATH_SUFFIXES "debug" "debug/lib"
+        PATHS ${paths}
+        NO_DEFAULT_PATH
+    )
+    find_path(POLY2TRI_HEADER poly2tri.h
+        PATH_SUFFIXES poly2tri
+        REQUIRED
+    )
+    add_library(poly2tri UNKNOWN IMPORTED)
+    set_target_properties(poly2tri PROPERTIES
+        IMPORTED_LOCATION_DEBUG ${POLY2TRI_LIB_DEBUG}
+        IMPORTED_LOCATION_RELEASE ${POLY2TRI_LIB_RELEASE}
+        IMPORTED_CONFIGURATIONS "RELEASE;DEBUG"
+    )
+    target_include_directories(poly2tri INTERFACE
+        ${POLY2TRI_HEADER}/..
+    )
 endif()
-find_path(POLY2TRI_HEADER poly2tri.h
-    PATH_SUFFIXES poly2tri
-)
-if(POLY2TRI_HEADER-NOTFOUND)
-    message(FATAL_ERROR "Cannot find poly2tri header")
-endif()
-add_library(poly2tri UNKNOWN IMPORTED)
-set_target_properties(poly2tri PROPERTIES
-    IMPORTED_LOCATION ${POLY2TRI_LIB}
-)
-target_include_directories(poly2tri INTERFACE
-    ${POLY2TRI_HEADER}/..
-)
+
 set(Python_FIND_VIRTUALENV "FIRST")
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11 REQUIRED CONFIG)
