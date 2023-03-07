@@ -220,7 +220,7 @@ clean the repository path. This can be achived by adding
 `--x-install-root=<PATH-OUTSIDE-SOURCE>`.
 
 Do not forget to add the triplet to specify 32/64 bit version and static vs.
-dynamic linking version, e.g. `--triplet=x64-windows-static`
+dynamic linking version, e.g. `--triplet=x64-windows`
 
 For example if you want to install dependencies for `libjupedims` and `jpsvis`
 invoke `vcpkg` like this:
@@ -228,13 +228,13 @@ invoke `vcpkg` like this:
 ```bash
 mkdir jpscore-deps
 cd <JPSCORE-SOURCE-PATH>
-vcpkg.exe --x-feature=Vis --x-install-root=../jpscore-deps --triplet=x64-windows-static
+vcpkg.exe --x-feature=Vis --x-install-root=../jpscore-deps --triplet=x64-windows
 ```
 
 During the CMake invocation listed in the next section, add this to your invocation:
 
 ```bash
--DCMAKE_TOOLCHAIN_FILE=<PATH-TO-VCPKG-INSTALLATION>/scripts/buildsystems/vcpkg.cmake
+-DCMAKE_PREFIX_PATH=<INSTALL-ROOT>/x64-windows
 ```
 
 ## Contributing to JuPedSim
