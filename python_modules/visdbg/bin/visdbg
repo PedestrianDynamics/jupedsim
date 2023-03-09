@@ -1,0 +1,241 @@
+#! /usr/bin/env python3
+
+import math
+import sys
+from pathlib import Path
+
+import jupedsim as jps
+import py_jupedsim as pjps
+import py_jupedsim.experimental as jpex
+import shapely
+import vtkmodules.vtkRenderingOpenGL2
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import Qt
+from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from vtkmodules.vtkCommonCore import vtkIntArray, vtkPoints
+from vtkmodules.vtkCommonDataModel import (
+    vtkCellArray,
+    vtkLine,
+    vtkPolyData,
+    vtkTriangle,
+)
+from vtkmodules.vtkFiltersSources import vtkPlaneSource
+from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
+from vtkmodules.vtkRenderingCore import (
+    vtkActor,
+    vtkPolyDataMapper,
+    vtkRenderer,
+)
+from visdbg.config import Colors, ZLayers
+from visdbg.move_controller import MoveController
+from visdbg.grid import Grid
+
+
+def build_jps_geometry(geo: shapely.GeometryCollection):
+    geo_builder = pjps.GeometryBuilder()
+
+    for obj in geo.geoms:
+        if obj.geom_type != "Polygon":
+            raise Exception(
+                "Unexpected geometry type found in GeometryCollection: {obj.type}"
+            )
+        geo_builder.add_accessible_area(obj.exterior.coords[:-1])
+        for hole in obj.interiors:
+            geo_builder.exclude_from_accssible_area(hole.coords[:-1])
+    return geo_builder.build()
+
+
+class MainWindow(QtWidgets.QMainWindow):
+    def __init__(self, parent=None):
+        QtWidgets.QMainWindow.__init__(self, parent)
+        self.navi = None
+        self.setWindowTitle("VisTwo")
+        self.__build_menu_bar()
+        self.setCentralWidget(QtWidgets.QWidget())
+        layout = QtWidgets.QVBoxLayout()
+        self.centralWidget().setLayout(layout)
+
+        self.actor = None
+        self.edge_actor = None
+
+        self.geometry_label = QtWidgets.QLabel("Geometry: nothing loaded")
+        self.geometry_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+        self.properties_label = QtWidgets.QLabel("")
+        self.properties_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+
+        bottom_layout = QtWidgets.QHBoxLayout()
+        bottom_layout.addWidget(
+            self.geometry_label, 1, Qt.AlignmentFlag.AlignLeft
+        )
+        bottom_layout.addWidget(
+            self.properties_label, 1, Qt.AlignmentFlag.AlignRight
+        )
+
+        reset_cam_bt = QtWidgets.QPushButton("Reset Camera")
+        reset_cam_bt.clicked.connect(self.__reset_camera)
+
+        layout.addWidget(reset_cam_bt)
+
+        self.vtk_widget = QVTKRenderWindowInteractor()
+        layout.addWidget(self.vtk_widget)
+        layout.addLayout(bottom_layout)
+
+        self.ren = vtkRenderer()
+        self.ren.SetBackground(Colors.d)
+        self.vtk_widget.GetRenderWindow().AddRenderer(self.ren)
+        self.iren = self.vtk_widget.GetRenderWindow().GetInteractor()
+
+        cam = self.ren.GetActiveCamera()
+        cam.ParallelProjectionOn()
+
+        self.__reset_camera()
+
+        self.showMaximized()
+        style = vtkInteractorStyleUser()
+        self.iren.SetInteractorStyle(style)
+        self.iren.Initialize()
+
+        self.move_controller = MoveController(style, cam)
+
+        self.grid = Grid(self.ren, cam)
+
+    def __build_menu_bar(self):
+        menu = self.menuBar()
+        open_menu = menu.addMenu("Open")
+        open_wkt_act = open_menu.addAction("WKT")
+        open_wkt_act.triggered.connect(self.__on_load_wkt)
+
+    def __reset_camera(self):
+        focal_pt_2d = (0, 0)
+        scale = 10
+        if self.actor:
+            bounds = self.actor.GetBounds()
+            width = bounds[1] - bounds[0]
+            height = bounds[3] - bounds[2]
+            focal_pt_2d = (bounds[0] + width / 2, bounds[2] + height / 2)
+
+            (
+                viewport_aspect_width,
+                viewport_aspect_height,
+            ) = self.ren.GetAspect()
+            viewport_aspect_ratio = (
+                viewport_aspect_width / viewport_aspect_height
+            )
+            scene_aspect_ratio = width / height
+
+            if viewport_aspect_ratio > scene_aspect_ratio:
+                scale = (height / 2) * 1.05
+            else:
+                scale = (width / 2) / viewport_aspect_ratio * 1.05
+
+        cam = self.ren.GetActiveCamera()
+        cam.SetParallelScale(scale)
+        cam.SetFocalPoint(focal_pt_2d[0], focal_pt_2d[1], 0)
+        cam.SetPosition(focal_pt_2d[0], focal_pt_2d[1], 100)
+        cam.SetViewUp(0, 1, 0)
+        cam.SetClippingRange(0, 200)
+        self.iren.Render()
+
+    def __on_load_wkt(self):
+        self.geometry_label.setText("Geometry: nothing loaded")
+        self.properties_label.setText("")
+        file, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self, "Open WKT file", str(Path("~").expanduser())
+        )
+        try:
+            wkt = jps.serialization.parse_wkt(
+                Path(file).read_text(encoding="UTF-8")
+            )
+            self.navi = jpex.RoutingEngine(build_jps_geometry(wkt))
+            xmin, ymin, xmax, ymax = wkt.bounds
+            self.properties_label.setText(
+                f"Dimensions: {math.ceil(xmax - xmin)}m x {math.ceil(ymax-ymin)}m "
+                f"Triangles: {len(self.navi.mesh())}"
+            )
+            self.geometry_label.setText(f"Geometry: {file}")
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(
+                self,
+                "Error importing WKT geometry",
+                f"Error importing WKT geometry:\n{e}",
+            )
+            return
+
+        self.move_controller.set_navi(self.navi)
+
+        triangle_points = vtkPoints()
+        graph_edge_points = vtkPoints()
+        triangles = vtkCellArray()
+        graph_edges = vtkCellArray()
+        triangle_data = vtkIntArray()
+
+        for idx, tri in enumerate(self.navi.mesh()):
+            triangle_points.InsertNextPoint(tri[0][0], tri[0][1], ZLayers.geo)
+            triangle_points.InsertNextPoint(tri[1][0], tri[1][1], ZLayers.geo)
+            triangle_points.InsertNextPoint(tri[2][0], tri[2][1], ZLayers.geo)
+            triangle = vtkTriangle()
+            triangle.GetPointIds().SetId(0, idx * 3)
+            triangle.GetPointIds().SetId(1, idx * 3 + 1)
+            triangle.GetPointIds().SetId(2, idx * 3 + 2)
+            triangles.InsertNextCell(triangle)
+            triangle_data.InsertNextValue(idx)
+
+            for edge_from, edge_to in self.navi.edges_for(idx):
+                if edge_from == edge_to:
+                    continue
+                from_idx = graph_edge_points.InsertNextPoint(
+                    edge_from[0], edge_from[1], ZLayers.graph_edges
+                )
+                to_idx = graph_edge_points.InsertNextPoint(
+                    edge_to[0], edge_to[1], ZLayers.graph_edges
+                )
+                line = vtkLine()
+                line.GetPointIds().SetId(0, from_idx)
+                line.GetPointIds().SetId(1, to_idx)
+                graph_edges.InsertNextCell(line)
+
+        triangle_poly_data = vtkPolyData()
+        triangle_poly_data.SetPoints(triangle_points)
+        triangle_poly_data.SetPolys(triangles)
+        triangle_poly_data.GetCellData().AddArray(triangle_data)
+
+        triangle_mapper = vtkPolyDataMapper()
+        triangle_mapper.SetInputData(triangle_poly_data)
+
+        edges_poly_data = vtkPolyData()
+        edges_poly_data.SetPoints(graph_edge_points)
+        edges_poly_data.SetLines(graph_edges)
+        edge_poly_mapper = vtkPolyDataMapper()
+        edge_poly_mapper.SetInputData(edges_poly_data)
+
+        if self.actor:
+            self.ren.RemoveActor(self.actor)
+
+        actor = vtkActor()
+        actor.SetMapper(triangle_mapper)
+        actor.GetProperty().SetColor(Colors.c)
+        actor.GetProperty().EdgeVisibilityOn()
+        actor.GetProperty().SetEdgeColor(Colors.a)
+        self.actor = actor
+        self.ren.AddActor(self.actor)
+
+        if self.edge_actor:
+            self.ren.RemoveActor(self.edge_actor)
+
+        edge_actor = vtkActor()
+        edge_actor.SetMapper(edge_poly_mapper)
+        edge_actor.GetProperty().SetColor(0, 0, 1)
+        edge_actor.GetProperty().EdgeVisibilityOn()
+        edge_actor.GetProperty().SetLineWidth(3)
+        self.edge_actor = edge_actor
+        self.ren.AddActor(self.edge_actor)
+
+        self.__reset_camera()
+        self.iren.Render()
+
+
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    window = MainWindow()
+    sys.exit(app.exec())
