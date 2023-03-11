@@ -21,7 +21,6 @@ class MoveController:
         self.navi = None
         self.actor = None
         self.interactor_style = interactor_style
-        interactor_style.RemoveAllObservers()
         interactor_style.AddObserver(vtkCommand.CharEvent, self._on_char)
 
         interactor_style.AddObserver(

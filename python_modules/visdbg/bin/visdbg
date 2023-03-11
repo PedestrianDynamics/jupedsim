@@ -12,23 +12,14 @@ import vtkmodules.vtkRenderingOpenGL2
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from vtkmodules.vtkCommonCore import vtkIntArray, vtkPoints
-from vtkmodules.vtkCommonDataModel import (
-    vtkCellArray,
-    vtkLine,
-    vtkPolyData,
-    vtkTriangle,
-)
-from vtkmodules.vtkFiltersSources import vtkPlaneSource
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import (
-    vtkActor,
-    vtkPolyDataMapper,
     vtkRenderer,
 )
 from visdbg.config import Colors, ZLayers
 from visdbg.move_controller import MoveController
 from visdbg.grid import Grid
+from visdbg.geometry import Geometry, HoverInfo
 
 
 def build_jps_geometry(geo: shapely.GeometryCollection):
@@ -49,6 +40,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.navi = None
+        self.geo = None
+        self.geo_bounds = None
         self.setWindowTitle("VisTwo")
         self.__build_menu_bar()
         self.setCentralWidget(QtWidgets.QWidget())
@@ -79,6 +72,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.vtk_widget = QVTKRenderWindowInteractor()
         layout.addWidget(self.vtk_widget)
+        self.hover_label = QtWidgets.QLabel("")
+        self.hover_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.hover_label)
         layout.addLayout(bottom_layout)
 
         self.ren = vtkRenderer()
@@ -97,6 +93,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.iren.Initialize()
 
         self.move_controller = MoveController(style, cam)
+        self.hover_info = HoverInfo(self.ren, style)
+        self.hover_info.hoveredTriangle.connect(self.hover_label.setText)
 
         self.grid = Grid(self.ren, cam)
 
@@ -109,8 +107,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def __reset_camera(self):
         focal_pt_2d = (0, 0)
         scale = 10
-        if self.actor:
-            bounds = self.actor.GetBounds()
+        if self.geo:
+            bounds = self.geo.get_bounds()
             width = bounds[1] - bounds[0]
             height = bounds[3] - bounds[2]
             focal_pt_2d = (bounds[0] + width / 2, bounds[2] + height / 2)
@@ -164,73 +162,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.move_controller.set_navi(self.navi)
 
-        triangle_points = vtkPoints()
-        graph_edge_points = vtkPoints()
-        triangles = vtkCellArray()
-        graph_edges = vtkCellArray()
-        triangle_data = vtkIntArray()
+        if self.geo:
+            for actor in self.geo.get_actors():
+                self.ren.RemoveActor(actor)
+        self.geo = Geometry(self.navi)
+        for actor in self.geo.get_actors():
+            self.ren.AddActor(actor)
 
-        for idx, tri in enumerate(self.navi.mesh()):
-            triangle_points.InsertNextPoint(tri[0][0], tri[0][1], ZLayers.geo)
-            triangle_points.InsertNextPoint(tri[1][0], tri[1][1], ZLayers.geo)
-            triangle_points.InsertNextPoint(tri[2][0], tri[2][1], ZLayers.geo)
-            triangle = vtkTriangle()
-            triangle.GetPointIds().SetId(0, idx * 3)
-            triangle.GetPointIds().SetId(1, idx * 3 + 1)
-            triangle.GetPointIds().SetId(2, idx * 3 + 2)
-            triangles.InsertNextCell(triangle)
-            triangle_data.InsertNextValue(idx)
-
-            for edge_from, edge_to in self.navi.edges_for(idx):
-                if edge_from == edge_to:
-                    continue
-                from_idx = graph_edge_points.InsertNextPoint(
-                    edge_from[0], edge_from[1], ZLayers.graph_edges
-                )
-                to_idx = graph_edge_points.InsertNextPoint(
-                    edge_to[0], edge_to[1], ZLayers.graph_edges
-                )
-                line = vtkLine()
-                line.GetPointIds().SetId(0, from_idx)
-                line.GetPointIds().SetId(1, to_idx)
-                graph_edges.InsertNextCell(line)
-
-        triangle_poly_data = vtkPolyData()
-        triangle_poly_data.SetPoints(triangle_points)
-        triangle_poly_data.SetPolys(triangles)
-        triangle_poly_data.GetCellData().AddArray(triangle_data)
-
-        triangle_mapper = vtkPolyDataMapper()
-        triangle_mapper.SetInputData(triangle_poly_data)
-
-        edges_poly_data = vtkPolyData()
-        edges_poly_data.SetPoints(graph_edge_points)
-        edges_poly_data.SetLines(graph_edges)
-        edge_poly_mapper = vtkPolyDataMapper()
-        edge_poly_mapper.SetInputData(edges_poly_data)
-
-        if self.actor:
-            self.ren.RemoveActor(self.actor)
-
-        actor = vtkActor()
-        actor.SetMapper(triangle_mapper)
-        actor.GetProperty().SetColor(Colors.c)
-        actor.GetProperty().EdgeVisibilityOn()
-        actor.GetProperty().SetEdgeColor(Colors.a)
-        self.actor = actor
-        self.ren.AddActor(self.actor)
-
-        if self.edge_actor:
-            self.ren.RemoveActor(self.edge_actor)
-
-        edge_actor = vtkActor()
-        edge_actor.SetMapper(edge_poly_mapper)
-        edge_actor.GetProperty().SetColor(0, 0, 1)
-        edge_actor.GetProperty().EdgeVisibilityOn()
-        edge_actor.GetProperty().SetLineWidth(3)
-        self.edge_actor = edge_actor
-        self.ren.AddActor(self.edge_actor)
-
+        self.hover_info.set_geo(self.geo)
         self.__reset_camera()
         self.iren.Render()
 
