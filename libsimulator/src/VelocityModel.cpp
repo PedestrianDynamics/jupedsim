@@ -84,7 +84,10 @@ void VelocityModel::ApplyUpdate(
         agent.pos = *update.position;
     }
     if(update.velocity) {
-        agent.orientation = (*update.velocity).Normalized();
+        const auto dir = (*update.velocity).Normalized();
+        if(dir != Point{0, 0}) {
+            agent.orientation = dir;
+        }
     }
 }
 
