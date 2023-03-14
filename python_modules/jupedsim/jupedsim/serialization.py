@@ -118,15 +118,17 @@ class JpsCoreStyleTrajectoryWriter(TrajectoryWriter):
         if not self._out:
             raise TrajectoryWriter.Exception("Output file not opened")
 
-        def agent_orientaion_as_degrees(agent: jps.Agent) -> float:
-            vec2 = (agent.orientation_x, agent.orientation_y)
+        def agent_orientaion_as_degrees(
+            agent: jps.GCFMModelAgentParameters
+            | jps.VelocityModelAgentParameters,
+        ) -> float:
             return JpsCoreStyleTrajectoryWriter._orientation_to_angle(
-                JpsCoreStyleTrajectoryWriter._normalize(vec2)
+                agent.orientation
             )
 
         self._out.writelines(
             map(
-                lambda agent: f"{agent.id}\t{self._frame}\t{agent.x}\t{agent.y}\t{0}\t{0.3}\t{0.3}\t{agent_orientaion_as_degrees(agent)}\t{0.4}\n",
+                lambda agent: f"{agent.id}\t{self._frame}\t{agent.position.x}\t{agent.position.y}\t{0}\t{0.3}\t{0.3}\t{agent_orientaion_as_degrees(agent)}\t{0.4}\n",
                 simulation.agents(),
             ),
         )

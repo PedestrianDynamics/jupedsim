@@ -4,7 +4,6 @@
 add_library(simulator STATIC
     src/AABB.cpp
     src/AABB.hpp
-    src/AgentExitSystem.cpp
     src/AgentExitSystem.hpp
     src/Area.cpp
     src/Area.hpp
@@ -24,7 +23,6 @@ add_library(simulator STATIC
     src/GCFMModel.hpp
     src/GCFMModelBuilder.cpp
     src/GCFMModelBuilder.hpp
-    src/GenericAgent.cpp
     src/GenericAgent.hpp
     src/GeometricFunctions.hpp
     src/Geometry.cpp
@@ -42,20 +40,16 @@ add_library(simulator STATIC
     src/Mathematics.cpp
     src/Mathematics.hpp
     src/NeighborhoodSearch.hpp
-    src/OperationalDecisionSystem.cpp
     src/OperationalDecisionSystem.hpp
     src/OperationalModel.hpp
     src/Point.cpp
     src/Point.hpp
     src/RoutingEngine.cpp
     src/RoutingEngine.hpp
-    src/Simulation.cpp
     src/Simulation.hpp
     src/SimulationClock.cpp
     src/SimulationClock.hpp
-    src/StrategicalDesicionSystem.cpp
     src/StrategicalDesicionSystem.hpp
-    src/TacticalDecisionSystem.cpp
     src/TacticalDecisionSystem.hpp
     src/Triangle.cpp
     src/Triangle.hpp

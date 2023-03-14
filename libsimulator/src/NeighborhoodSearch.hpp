@@ -59,21 +59,19 @@ template <typename T>
 class Grid2D
 {
 public:
-    struct IndexValuePair {
+    struct Entry {
         Grid2DIndex id;
+        Point pos;
         T value;
 
-        bool operator<(const IndexValuePair& other) const { return id < other.id; }
-        bool operator==(const IndexValuePair& other) const
-        {
-            return id == other.id && value == other.value;
-        }
+        bool operator<(const Entry& other) const { return id < other.id; }
+        bool operator==(const Entry& other) const { return id == other.id && pos == other.pos; }
     };
 
 public:
     using value_type = T;
     using size_type = std::size_t;
-    using container_type = std::vector<IndexValuePair>;
+    using container_type = std::vector<Entry>;
     using it_type = typename container_type::const_iterator;
     using it_pair = IteratorPair<it_type>;
 
@@ -122,32 +120,28 @@ private:
 template <typename Value>
 class NeighborhoodSearch
 {
-    using Grid = Grid2D<std::tuple<Point, Value>>;
+    using Grid = Grid2D<const Value*>;
     double _cellSize;
     Grid _grid{};
 
 public:
     explicit NeighborhoodSearch(double cellSize) : _cellSize(cellSize){};
 
-    void Update(const std::vector<std::tuple<Point, Value>>& items)
+    void Update(const std::vector<Value>& items)
     {
-        std::vector<typename Grid::IndexValuePair> values;
+        std::vector<typename Grid::Entry> values;
         values.reserve(items.size());
         std::transform(
-            std::begin(items),
-            std::end(items),
-            std::back_inserter(values),
-            [this](const auto& tuple) {
-                const auto& [pos, _] = tuple;
+            std::begin(items), std::end(items), std::back_inserter(values), [this](const auto& v) {
                 auto idx = Grid2DIndex{
-                    static_cast<std::int32_t>(pos.x / _cellSize),
-                    static_cast<std::int32_t>(pos.y / _cellSize)};
-                return typename Grid::IndexValuePair{idx, tuple};
+                    static_cast<std::int32_t>(v.pos.x / _cellSize),
+                    static_cast<std::int32_t>(v.pos.y / _cellSize)};
+                return typename Grid::Entry{idx, v.pos, &v};
             });
         _grid = Grid(values);
     }
 
-    std::vector<Value> GetNeighboringAgents(Point pos, double radius) const
+    std::vector<const Value*> GetNeighboringAgents(Point pos, double radius) const
     {
         const int32_t pos_idx = static_cast<int32_t>(pos.x / _cellSize);
         const int32_t pos_idy = static_cast<int32_t>(pos.y / _cellSize);
@@ -157,13 +151,12 @@ public:
         const int32_t y_min = pos_idy - nh_level;
         const int32_t y_max = pos_idy + nh_level;
 
-        std::vector<Value> result{};
+        std::vector<const Value*> result{};
         for(int32_t x = x_min; x <= x_max; ++x) {
             for(int32_t y = y_min; y <= y_max; ++y) {
                 for(const auto& item : _grid.get({x, y})) {
-                    const auto [otherPos, value] = item.value;
-                    if(Distance(otherPos, pos) <= radius) {
-                        result.emplace_back(value);
+                    if(Distance(item.pos, pos) <= radius) {
+                        result.emplace_back(item.value);
                     }
                 }
             }
