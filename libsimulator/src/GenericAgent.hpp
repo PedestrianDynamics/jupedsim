@@ -4,18 +4,17 @@
 
 #include "Journey.hpp"
 #include "OperationalModel.hpp"
+#include "Point.hpp"
 #include "UniqueID.hpp"
 
 #include <memory>
 
-class GenericAgent
-{
-public:
+struct GenericAgent {
     using ID = jps::UniqueID<GenericAgent>;
     ID id{};
 
-    // This is evaluated by the "strategic level"
-    std::unique_ptr<Behaviour> behaviour{};
+    Journey::ID journeyId{Journey::ID::Invalid};
+    size_t currentJourneyStage{};
 
     // This is evaluated by the "operational level"
     Point destination{};
@@ -25,12 +24,18 @@ public:
     // Agent fields common for all models
     Point pos{};
     Point orientation{};
-};
 
-// TODO(kkratz): This does neither belong here nor is this a good name.
-Point MollifyE0(
-    const Point& target,
-    const Point& pos,
-    double deltaT,
-    int orientationDelay,
-    const Point& e0);
+    GenericAgent(
+        ID id_,
+        Journey::ID journeyId_,
+        OperationalModel::ParametersID parameterProfileId_,
+        Point pos_,
+        Point orientation_)
+        : id(id_ != ID::Invalid ? id_ : ID{})
+        , journeyId(journeyId_)
+        , parameterProfileId(parameterProfileId_)
+        , pos(pos_)
+        , orientation(orientation_)
+    {
+    }
+};

@@ -4,6 +4,7 @@
 
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
+#include "Journey.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 
@@ -20,9 +21,6 @@ struct sort_pred {
                                              (left.first < right.first);
     }
 };
-
-// forward declaration
-class GenericAgent;
 
 struct VelocityModelAgentParameters {
     OperationalModel::ParametersID id;
@@ -44,12 +42,22 @@ struct VelocityModelAgentParameters {
 class VelocityModel : public OperationalModelBase<VelocityModelAgentParameters>
 {
 public:
-    struct Data {
+    struct Data : public GenericAgent {
         /// Desired direction
         Point e0{};
         int orientationDelay{0};
+        Data(
+            ID id_,
+            Journey::ID journeyId_,
+            OperationalModel::ParametersID parameterProfileId_,
+            Point pos_,
+            Point orientation_,
+            Point e0_)
+            : GenericAgent(id_, journeyId_, parameterProfileId_, pos_, orientation_), e0(e0_)
+        {
+        }
     };
-    using NeighborhoodSearchType = NeighborhoodSearch<std::tuple<GenericAgent*, Data*>>;
+    using NeighborhoodSearchType = NeighborhoodSearch<Data>;
 
 private:
     /// Modellparameter
@@ -69,12 +77,11 @@ public:
 
     PedestrianUpdate ComputeNewPosition(
         double dT,
-        const GenericAgent& ped,
-        const Data& data,
+        const Data& ped,
         const CollisionGeometry& geometry,
         const NeighborhoodSearchType& neighborhoodSearch) const;
 
-    void ApplyUpdate(const PedestrianUpdate& update, GenericAgent& agent, Data& modelData) const;
+    void ApplyUpdate(const PedestrianUpdate& update, Data& agent) const;
     std::unique_ptr<OperationalModel> Clone() const override;
 
 private:
@@ -87,7 +94,7 @@ private:
      *
      * @return double
      */
-    double OptimalSpeed(const GenericAgent* ped, double spacing, double t) const;
+    double OptimalSpeed(const Data& ped, double spacing, double t) const;
 
     /**
      * The desired direction of pedestrian
@@ -97,12 +104,7 @@ private:
      *
      * @return Point
      */
-    void
-    e0(const GenericAgent* ped,
-       const Data& modelData,
-       Point target,
-       double deltaT,
-       PedestrianUpdate& update) const;
+    void e0(const Data& ped, Point target, double deltaT, PedestrianUpdate& update) const;
     /**
      * Get the spacing between ped1 and ped2
      *
@@ -113,7 +115,7 @@ private:
      * and should be calculated *before* calling OptimalSpeed
      * @return Point
      */
-    my_pair GetSpacing(const GenericAgent* ped1, const GenericAgent* ped2, Point ei) const;
+    my_pair GetSpacing(const Data& ped1, const Data& ped2, Point ei) const;
     /**
      * Repulsive force between two pedestrians ped1 and ped2 according to
      * the Velocity model (to be published in TGF15)
@@ -123,7 +125,7 @@ private:
      *
      * @return Point
      */
-    Point ForceRepPed(const GenericAgent* ped1, const GenericAgent* ped2) const;
+    Point ForceRepPed(const Data& ped1, const Data& ped2) const;
     /**
      * Repulsive force acting on pedestrian <ped> from the walls in
      * <subroom>. The sum of all repulsive forces of the walls in <subroom> is calculated
@@ -133,7 +135,7 @@ private:
      *
      * @return Point
      */
-    Point ForceRepRoom(const GenericAgent* ped, const CollisionGeometry& geometry) const;
+    Point ForceRepRoom(const Data& ped, const CollisionGeometry& geometry) const;
     /**
      * Repulsive force between pedestrian <ped> and wall <l>
      *
@@ -142,5 +144,5 @@ private:
      *
      * @return Point
      */
-    Point ForceRepWall(const GenericAgent* ped, const Line& l) const;
+    Point ForceRepWall(const Data& ped, const Line& l) const;
 };

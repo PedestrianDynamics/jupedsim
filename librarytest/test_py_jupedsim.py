@@ -64,17 +64,14 @@ def main():
 
     journey_id = simulation.add_journey(journey)
 
-    agent_parameters = jps.AgentParameters()
+    agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.journey_id = journey_id
-    agent_parameters.orientation_x = 1.0
-    agent_parameters.orientation_y = 0.0
-    agent_parameters.x = 0.0
-    agent_parameters.y = 0.0
+    agent_parameters.orientation = (1.0, 0.0)
+    agent_parameters.position = (0.0, 0.0)
     agent_parameters.profile_id = profile_id
 
-    for x, y in [(7, 7), (1, 3), (1, 5), (1, 7), (2, 7)]:
-        agent_parameters.x = x
-        agent_parameters.y = y
+    for new_pos in [(7, 7), (1, 3), (1, 5), (1, 7), (2, 7)]:
+        agent_parameters.position = new_pos
         simulation.add_agent(agent_parameters)
 
     print("Running simulation")

@@ -10,7 +10,6 @@
 #include <optional>
 #include <unordered_map>
 
-class GenericAgent;
 template <typename T>
 class NeighborhoodSearch;
 

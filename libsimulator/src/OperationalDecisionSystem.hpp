@@ -32,28 +32,28 @@ public:
         double /*t_in_sec*/,
         const typename Model::NeighborhoodSearchType& neighborhoodSearch,
         const CollisionGeometry& geometry,
-        std::vector<GenericAgent>& agents,
-        std::vector<typename Model::Data>& modelData) const
+        std::vector<typename Model::Data>& agents) const
     {
         std::vector<std::optional<PedestrianUpdate>> updates{};
         updates.reserve(agents.size());
 
-        auto modelDataIter = std::begin(modelData);
-        for(auto& genericAgent : agents) {
-            updates.push_back(_model->ComputeNewPosition(
-                dT, genericAgent, *modelDataIter, geometry, neighborhoodSearch));
-            ++modelDataIter;
-        }
+        std::transform(
+            std::begin(agents),
+            std::end(agents),
+            std::back_inserter(updates),
+            [this, &dT, &geometry, &neighborhoodSearch](const auto& agent) {
+                return _model->ComputeNewPosition(dT, agent, geometry, neighborhoodSearch);
+            });
 
-        modelDataIter = std::begin(modelData);
-        auto genericAgentIter = std::begin(agents);
-        for(const auto& update : updates) {
-            if(update) {
-                _model->ApplyUpdate(*update, *genericAgentIter, *modelDataIter);
-            }
-            ++modelDataIter;
-            ++genericAgentIter;
-        }
+        std::for_each(
+            boost::make_zip_iterator(boost::make_tuple(std::begin(agents), std::begin(updates))),
+            boost::make_zip_iterator(boost::make_tuple(std::end(agents), std::end(updates))),
+            [this](auto tup) {
+                auto& [agent, update] = tup;
+                if(update) {
+                    _model->ApplyUpdate(*update, agent);
+                }
+            });
     }
 
     void ValidateAgentParameterProfileId(OperationalModel::ParametersID id) const

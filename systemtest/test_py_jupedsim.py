@@ -45,21 +45,18 @@ def test_can_run_simulation():
 
     journey_id = simulation.add_journey(journey)
 
-    agent_parameters = jps.AgentParameters()
+    agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.journey_id = journey_id
-    agent_parameters.orientation_x = 1.0
-    agent_parameters.orientation_y = 0.0
-    agent_parameters.x = 0.0
-    agent_parameters.y = 0.0
+    agent_parameters.orientation = (1.0, 0.0)
+    agent_parameters.position = (0.0, 0.0)
     agent_parameters.profile_id = profile_id
 
     initial_agent_positions = [(7, 7), (1, 3), (1, 5), (1, 7), (2, 7)]
 
     expected_agent_ids = set()
 
-    for x, y in initial_agent_positions:
-        agent_parameters.x = x
-        agent_parameters.y = y
+    for new_pos in initial_agent_positions:
+        agent_parameters.position = new_pos
         expected_agent_ids.add(simulation.add_agent(agent_parameters))
 
     actual_agent_ids = {agent.id for agent in simulation.agents()}
@@ -72,8 +69,7 @@ def test_can_run_simulation():
         assert simulation.remove_agent(agent_id)
 
     for actual, expected in zip(simulation.agents(), initial_agent_positions):
-        assert actual.x == expected[0]
-        assert actual.y == expected[1]
+        assert actual.position == jps.Point(expected)
 
     while simulation.agent_count() > 0:
         simulation.iterate()
