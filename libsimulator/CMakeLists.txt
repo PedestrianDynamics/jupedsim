@@ -49,6 +49,8 @@ add_library(simulator STATIC
     src/Simulation.hpp
     src/SimulationClock.cpp
     src/SimulationClock.hpp
+    src/Stage.cpp
+    src/Stage.hpp
     src/StrategicalDesicionSystem.hpp
     src/TacticalDecisionSystem.hpp
     src/Triangle.cpp

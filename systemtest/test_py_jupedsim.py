@@ -18,15 +18,6 @@ def test_can_run_simulation():
     geo_builder.add_accessible_area([(10, 4), (20, 4), (20, 6), (10, 6)])
     geometry = geo_builder.build()
 
-    destination = 1
-    areas_builder = jps.AreasBuilder()
-    areas_builder.add_area(
-        id=destination,
-        polygon=[(18, 4), (20, 4), (20, 6), (18, 6)],
-        labels=["exit", "other-label"],
-    )
-    areas = areas_builder.build()
-
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
     )
@@ -37,11 +28,10 @@ def test_can_run_simulation():
 
     model = model_builder.build()
 
-    simulation = jps.Simulation(
-        model=model, geometry=geometry, areas=areas, dt=0.01
-    )
+    simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
 
-    journey = jps.Journey.make_waypoint_journey([((19, 5), 0.5)])
+    journey = jps.Journey()
+    journey.add_exit([(18, 4), (20, 4), (20, 6), (18, 6)])
 
     journey_id = simulation.add_journey(journey)
 

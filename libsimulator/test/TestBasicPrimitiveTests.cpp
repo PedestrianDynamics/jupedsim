@@ -12,7 +12,7 @@ TEST(Polygon, PointIsInside)
     const Point points[]{{0, 0}, {1, 1}, {0, 2}, {-1, 1}};
     const Point pt{0, 0.5};
     ConvexPolygon poly(points);
-    ASSERT_TRUE(poly.Inside(pt));
+    ASSERT_TRUE(poly.IsInside(pt));
 }
 
 TEST(Polygon, PointIsInsideRightHalf)
@@ -20,7 +20,7 @@ TEST(Polygon, PointIsInsideRightHalf)
     const Point points[]{{0, 0}, {1, 1}, {0, 2}, {-1, 1}};
     const Point pt{-0.25, 0.5};
     ConvexPolygon poly(points);
-    ASSERT_TRUE(poly.Inside(pt));
+    ASSERT_TRUE(poly.IsInside(pt));
 }
 
 TEST(Polygon, PointIsInsideLeftHalf)
@@ -28,7 +28,7 @@ TEST(Polygon, PointIsInsideLeftHalf)
     const Point points[]{{0, 0}, {1, 1}, {0, 2}, {-1, 1}};
     const Point pt{0.25, 0.5};
     ConvexPolygon poly(points);
-    ASSERT_TRUE(poly.Inside(pt));
+    ASSERT_TRUE(poly.IsInside(pt));
 }
 
 TEST(Polygon, PointIsOutsideRightOfFirstLineSegmentOfPolygon)
@@ -36,7 +36,7 @@ TEST(Polygon, PointIsOutsideRightOfFirstLineSegmentOfPolygon)
     const Point points[]{{0, 0}, {1, 1}, {0, 2}, {-1, 1}};
     const Point pt{0.6, 0.5};
     ConvexPolygon poly(points);
-    ASSERT_FALSE(poly.Inside(pt));
+    ASSERT_FALSE(poly.IsInside(pt));
 }
 
 TEST(Polygon, PointIsOutsideLeftOfLastLineSegmentOfPolygon)
@@ -44,7 +44,7 @@ TEST(Polygon, PointIsOutsideLeftOfLastLineSegmentOfPolygon)
     const Point points[]{{0, 0}, {1, 1}, {0, 2}, {-1, 1}};
     const Point pt{-0.6, 0.5};
     ConvexPolygon poly(points);
-    ASSERT_FALSE(poly.Inside(pt));
+    ASSERT_FALSE(poly.IsInside(pt));
 }
 
 TEST(Polygon, PointIsOutsideRightOfMiddleLineSegmentOfPolygon)
@@ -52,5 +52,5 @@ TEST(Polygon, PointIsOutsideRightOfMiddleLineSegmentOfPolygon)
     const Point points[]{{0, 0}, {1, 1}, {0, 2}, {-1, 1}};
     const Point pt{0.5, 1.6};
     ConvexPolygon poly(points);
-    ASSERT_FALSE(poly.Inside(pt));
+    ASSERT_FALSE(poly.IsInside(pt));
 }

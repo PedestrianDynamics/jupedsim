@@ -80,22 +80,6 @@ const Point& Line::GetCentre() const
 }
 
 /*************************************************************
- Ausgabe
- ************************************************************/
-std::string Line::Write() const
-{
-    std::string geometry;
-    char wall[500] = "";
-    geometry.append("\t\t<wall color=\"100\">\n");
-    sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", (GetPoint1().x), (GetPoint1().y));
-    geometry.append(wall);
-    sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", (GetPoint2().x), (GetPoint2().y));
-    geometry.append(wall);
-    geometry.append("\t\t</wall>\n");
-    return geometry;
-}
-
-/*************************************************************
  Sonstige Funktionen
  ************************************************************/
 // Normalen vector zur Linie
@@ -495,13 +479,6 @@ const Point& Line::GetRight(const Point& pt)
     }
 }
 
-std::string Line::toString() const
-{
-    std::stringstream tmp;
-    tmp << _point1.toString() << "--" << _point2.toString();
-    return tmp.str();
-}
-
 // get distance between first point of line with the intersection point.
 // if no intersection return infinity
 // this function is exactly the same as GetIntersection(), but returns the distance squared
@@ -517,14 +494,6 @@ double Line::GetDistanceToIntersectionPoint(const Line& l) const
     if(!IsInLineSegment(PointF)) // is point on the line?
         return std::numeric_limits<double>::infinity();
     double dist = (_point1 - PointF).NormSquare();
-
-    LOG_DEBUG(
-        "GetDistanceToIntersectionPoint: {} intersects with {} in point {} with distance {}",
-        l.toString(),
-        toString(),
-        PointF.toString(),
-        sqrt(dist));
-
     return dist;
 }
 
