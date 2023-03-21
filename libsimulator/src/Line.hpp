@@ -7,10 +7,6 @@
 #include <string>
 #include <vector>
 
-// forward declarations
-class OutputHandler;
-class Wall;
-
 class Line
 {
 private:
@@ -32,7 +28,7 @@ public:
 
     Line(const Point& p1, const Point& p2);
 
-    virtual ~Line() = default;
+    ~Line() = default;
 
     /**
      * All Line elements (also derived class) have a unique ID
@@ -265,16 +261,6 @@ public:
      * @return left point wrt. the point pt
      */
     const Point& GetRight(const Point& pt);
-
-    /**
-     * @return a nice formated string describing the line
-     */
-    virtual std::string Write() const;
-
-    /**
-     * @return a nice formated string describing the line
-     */
-    virtual std::string toString() const;
 
     /**
      * @return the angle between two lines

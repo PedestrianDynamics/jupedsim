@@ -2,18 +2,18 @@
 /// SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "Journey.hpp"
 #include "OperationalModel.hpp"
 #include "Point.hpp"
 #include "UniqueID.hpp"
 
 #include <memory>
+class Journey;
 
 struct GenericAgent {
     using ID = jps::UniqueID<GenericAgent>;
     ID id{};
 
-    Journey::ID journeyId{Journey::ID::Invalid};
+    jps::UniqueID<Journey> journeyId{jps::UniqueID<Journey>::Invalid};
     size_t currentJourneyStage{};
 
     // This is evaluated by the "operational level"
@@ -27,7 +27,7 @@ struct GenericAgent {
 
     GenericAgent(
         ID id_,
-        Journey::ID journeyId_,
+        jps::UniqueID<Journey> journeyId_,
         OperationalModel::ParametersID parameterProfileId_,
         Point pos_,
         Point orientation_)

@@ -64,21 +64,6 @@ int main(int argc, char** argv)
 
     JPS_GeometryBuilder_Free(geo_builder);
 
-    JPS_AreasBuilder areas_builder = JPS_AreasBuilder_Create();
-
-    const uint16_t destinationId = 1;
-    double box[] = {18, 4, 20, 4, 20, 6, 18, 6};
-    const char* labels[] = {"exit"};
-    JPS_AreasBuilder_AddArea(areas_builder, destinationId, box, 4, labels, 1);
-
-    JPS_Areas areas = JPS_AreasBuilder_Build(areas_builder, &error_msg);
-    if(areas == NULL) {
-        printf("Error creating areas: %s\n", JPS_ErrorMessage_GetMessage(error_msg));
-        JPS_ErrorMessage_Free(error_msg);
-        return -1;
-    }
-    JPS_AreasBuilder_Free(areas_builder);
-
     JPS_VelocityModelBuilder model_builder = JPS_VelocityModelBuilder_Create(8, 0.1, 5, 0.02);
     const u_int64_t profile_id = 1;
     JPS_VelocityModelBuilder_AddParameterProfile(model_builder, profile_id, 1, 0.5, 1.2, 0.3);
@@ -90,26 +75,23 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    JPS_Simulation simulation = JPS_Simulation_Create(model, geometry, areas, 0.01, &error_msg);
-    if(areas == NULL) {
-        printf("Error creating simuation: %s\n", JPS_ErrorMessage_GetMessage(error_msg));
-        JPS_ErrorMessage_Free(error_msg);
-        return -1;
-    }
+    JPS_Simulation simulation = JPS_Simulation_Create(model, geometry, 0.01, &error_msg);
 
     const size_t num_waypoints = 1;
     JPS_Waypoint waypoints[] = {{{19.95, 5}, 0.4}};
-    JPS_Journey journey = JPS_Journey_Create_SimpleJourney(waypoints, num_waypoints);
+    JPS_Point exit[] = {{18, 4}, {20, 4}, {20, 6}, {18, 6}};
+    JPS_Journey journey = JPS_Journey_Create();
+    JPS_Journey_AddExit(journey, exit, 4);
     JPS_JourneyId journey_id = JPS_Simulation_AddJourney(simulation, journey, &error_msg);
     if(journey_id == 0) {
         printf("Error creating journey: %s\n", JPS_ErrorMessage_GetMessage(error_msg));
         JPS_ErrorMessage_Free(error_msg);
         return -1;
     }
+    JPS_Journey_Free(journey);
 
     JPS_OperationalModel_Free(model);
     JPS_Geometry_Free(geometry);
-    JPS_Areas_Free(areas);
 
     JPS_VelocityModelAgentParameters agent_parameters;
     agent_parameters.e0 = (JPS_Point){0.0, 0.0};

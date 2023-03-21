@@ -2,34 +2,33 @@
 /// SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "Clonable.hpp"
+#include "GenericAgent.hpp"
 #include "Point.hpp"
+#include "Stage.hpp"
+#include "StageDescription.hpp"
+#include "UniqueID.hpp"
 
-#include <UniqueID.hpp>
-
+#include <memory>
 #include <tuple>
 #include <vector>
 
-class Journey : public Clonable<Journey>
+class Journey
 {
 public:
     using ID = jps::UniqueID<Journey>;
 
 private:
     ID id;
-    using Waypoint = std::tuple<Point, double>;
-    std::vector<Waypoint> waypoints{};
+    std::vector<std::unique_ptr<Stage>> stages{};
 
 public:
-    virtual ~Journey() = default;
+    ~Journey() = default;
+
+    Journey(
+        const std::vector<StageDescription>& stageDescriptions,
+        std::vector<GenericAgent::ID>& toRemove);
 
     ID Id() const { return id; }
 
-    void AddWaypoint(Point p, double distance);
-
-    const Waypoint& operator[](size_t index) const { return waypoints[index]; }
-
-    size_t size() const { return waypoints.size(); }
-
-    std::unique_ptr<Journey> Clone() const override;
+    std::tuple<Point, size_t> Target(const GenericAgent& agent) const;
 };

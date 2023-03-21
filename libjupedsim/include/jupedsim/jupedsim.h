@@ -317,77 +317,33 @@ JPS_GeometryBuilder_Build(JPS_GeometryBuilder handle, JPS_ErrorMessage* errorMes
 JUPEDSIM_API void JPS_GeometryBuilder_Free(JPS_GeometryBuilder handle);
 
 /**
- * Opaque type that describes convex areas that agents navigate to / can be influced from.
- * JPS_Areas are created vis a JPS_AreasBuilder.
- * NOTE: Currently they only function as navigation targets / exit zones.
- */
-typedef struct JPS_Areas_t* JPS_Areas;
-
-/**
- * Frees a JPS_Areas.
- * @param handle to the JPS_Areas to free.
- */
-JUPEDSIM_API void JPS_Areas_Free(JPS_Areas handle);
-
-/**
- * Opaque type that builds a JPS_Areas object.
- */
-typedef struct JPS_AreasBuilder_t* JPS_AreasBuilder;
-
-/**
- * Creates a JPS_AreasBuilder.
- */
-JUPEDSIM_API JPS_AreasBuilder JPS_AreasBuilder_Create();
-
-/**
- * Adds a area with lables to the builder.
- * NOTE: Currently only the label "exit" is supported and marks the labeled area as an exit. Agents
- * that are located wothin any area labeled with "exit" are removed at the beginning of an
- * iteration.
- * Area ids can be used to instruct agents to navigate towards the center of this area.
- * WARNING: The polygon describing a area needs to be simple and convex!
- * @param handle of builder to operate on.
- * @param id of the area. Ids need to be unique over all areas.
- * @param points pointer to the x/y coordinates for the points describing the polygon. The number of
- *        double values in this array is expected to be 2*pointCount!
- * @param pointCount number of points the polygon consists of.
- * @param tags lables to attach to this area
- * @param tagCount number of lables
- */
-JUPEDSIM_API void JPS_AreasBuilder_AddArea(
-    JPS_AreasBuilder handle,
-    uint64_t id,
-    double* points,
-    size_t pointCount,
-    const char** tags,
-    size_t tagCount);
-
-/**
- * Builds a JPS_Areas object.
- * @param handle of the builder to operate on
- * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
- */
-JUPEDSIM_API JPS_Areas
-JPS_AreasBuilder_Build(JPS_AreasBuilder handle, JPS_ErrorMessage* errorMessage);
-
-/**
- * Frees a JPS_AreasBuilder.
- * @param handle to the JPS_AreasBuilder to free.
- */
-JUPEDSIM_API void JPS_AreasBuilder_Free(JPS_AreasBuilder handle);
-
-/**
  * Opaque type that describes a journey
  */
 typedef struct JPS_Journey_t* JPS_Journey;
 
 /**
- * Creates a simple waypoint based journey.
- * @param waypoints waypoint data
- * @param count_waypoints number of waypoints in data
+ * Creates an empty journey.
  */
-JUPEDSIM_API JPS_Journey
-JPS_Journey_Create_SimpleJourney(const JPS_Waypoint* waypoints, size_t count_waypoints);
+JUPEDSIM_API JPS_Journey JPS_Journey_Create();
+
+/**
+ * Extends the journey with a waypoint.
+ * @param handle of the journey to extend.
+ * @param position of the waypoint.
+ * @param distance to the position to count this point as visited.
+ */
+JUPEDSIM_API void JPS_Journey_AddWaypoint(JPS_Journey handle, JPS_Point position, double distance);
+
+/**
+ * Extends the journey with an exit waypoint. When the agent enters the defined polygon and is
+ * currently navigating towards this stage(!), the argent will be marked for removal an is removed
+ * at the beginning of the next iteration.
+ * @param handle of the journey to extend.
+ * @param polygon A CCW convex polygon describing the exit area. Note that agents will move towards
+ * the centroid of this area. Do not repeat the first point.
+ * @param len_polygon, number of points in the polygon.
+ */
+JUPEDSIM_API void JPS_Journey_AddExit(JPS_Journey handle, JPS_Point* polygon, size_t len_polygon);
 
 /**
  * Frees a JPS_Journey.
@@ -536,8 +492,6 @@ typedef struct JPS_Simulation_t* JPS_Simulation;
  * another simulation.
  * @param geometry to use. Will copy 'geometry', 'geometry' can be freed after this call or reused
  * for another simulation.
- * @param areas to use. Will copy 'areas', 'areas' can be freed after this call or reused for
- * another simulation.
  * @param dT simulation timestep in seconds
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return the Simulation
@@ -545,7 +499,6 @@ typedef struct JPS_Simulation_t* JPS_Simulation;
 JUPEDSIM_API JPS_Simulation JPS_Simulation_Create(
     JPS_OperationalModel model,
     JPS_Geometry geometry,
-    JPS_Areas areas,
     double dT,
     JPS_ErrorMessage* errorMessage);
 
