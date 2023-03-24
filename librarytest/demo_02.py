@@ -1,5 +1,6 @@
 # Copyright © 2012-2022 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
+# Demo 02 - Bottleneck
 import logging
 import pathlib
 from jupedsim.distributions import distribute_by_number
@@ -77,12 +78,10 @@ def main():
 
     journey_id = simulation.add_journey(journey)
 
-    agent_parameters = jps.AgentParameters()
+    agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.journey_id = journey_id
-    agent_parameters.orientation_x = 1.0
-    agent_parameters.orientation_y = 0.0
-    agent_parameters.x = 0.0
-    agent_parameters.y = 0.0
+    agent_parameters.orientation = (1.0, 0.0)
+    agent_parameters.position = (0.0, 0.0)
     agent_parameters.profile_id = profile_id
     
     s_polygon = shapely.Polygon([(50, 100), (55, 100), (55, 104), (50, 104)])
@@ -94,8 +93,7 @@ def main():
 
     # 30 agents needed
     for x, y in agents:
-        agent_parameters.x = x
-        agent_parameters.y = y
+        agent_parameters.position = (x, y)
         simulation.add_agent(agent_parameters)
 
     print("Running simulation")

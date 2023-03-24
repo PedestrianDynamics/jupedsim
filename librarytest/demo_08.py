@@ -1,5 +1,6 @@
 # Copyright © 2012-2022 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
+# Demo 08 - Sources
 import logging
 import pathlib
 from jupedsim.distributions import distribute_by_number
@@ -125,12 +126,10 @@ def main():
     journey_ids.append(simulation.add_journey(journeys[UP]))
     
 
-    agent_parameters = jps.AgentParameters()
+    agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.journey_id = journey_ids[RIGHT]
-    agent_parameters.orientation_x = 1.0
-    agent_parameters.orientation_y = 0.0
-    agent_parameters.x = 0.0
-    agent_parameters.y = 0.0
+    agent_parameters.orientation = (1.0, 0.0)
+    agent_parameters.position = (0.0, 0.0)
     agent_parameters.profile_id = profile_id
     
     origin_seed = 12542
@@ -152,8 +151,7 @@ def main():
         )
     
     for x, y in agents:
-        agent_parameters.x = x
-        agent_parameters.y = y
+        agent_parameters.position = (x, y)
         
         # select journey with nearest exit
         distances_to_ends = []
@@ -169,7 +167,7 @@ def main():
 
     print("Running simulation")
 
-    writer = JpsCoreStyleTrajectoryWriter(pathlib.Path("08_16.txt"))
+    writer = JpsCoreStyleTrajectoryWriter(pathlib.Path("08.txt"))
     fps = 10;
     writer.begin_writing(fps)
     
@@ -188,8 +186,7 @@ def main():
                 )
             
             for x, y in agents:
-                agent_parameters.x = x
-                agent_parameters.y = y
+                agent_parameters.position = (x, y)
                 
                 # select journey with nearest exit
                 distances_to_ends = []
