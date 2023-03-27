@@ -4,7 +4,6 @@
 add_library(simulator STATIC
     src/AABB.cpp
     src/AABB.hpp
-    src/AgentExitSystem.cpp
     src/AgentExitSystem.hpp
     src/Area.cpp
     src/Area.hpp
@@ -24,7 +23,6 @@ add_library(simulator STATIC
     src/GCFMModel.hpp
     src/GCFMModelBuilder.cpp
     src/GCFMModelBuilder.hpp
-    src/GenericAgent.cpp
     src/GenericAgent.hpp
     src/GeometricFunctions.hpp
     src/Geometry.cpp
@@ -42,20 +40,16 @@ add_library(simulator STATIC
     src/Mathematics.cpp
     src/Mathematics.hpp
     src/NeighborhoodSearch.hpp
-    src/OperationalDecisionSystem.cpp
     src/OperationalDecisionSystem.hpp
     src/OperationalModel.hpp
     src/Point.cpp
     src/Point.hpp
     src/RoutingEngine.cpp
     src/RoutingEngine.hpp
-    src/Simulation.cpp
     src/Simulation.hpp
     src/SimulationClock.cpp
     src/SimulationClock.hpp
-    src/StrategicalDesicionSystem.cpp
     src/StrategicalDesicionSystem.hpp
-    src/TacticalDecisionSystem.cpp
     src/TacticalDecisionSystem.hpp
     src/Triangle.cpp
     src/Triangle.hpp
@@ -77,48 +71,14 @@ target_link_libraries(simulator PUBLIC
     fmt::fmt
     CGAL::CGAL
 )
+target_link_options(simulator PUBLIC 
+    $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_ASAN}>>:-fsanitize=address>
+)
 target_include_directories(simulator PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 set_property(TARGET simulator PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
 set_property(TARGET simulator PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
-
-################################################################################
-# Build jspjupedsim_asan executable - jpsjupedsim with address sanitizer
-################################################################################
-if(BUILD_WITH_ASAN)
-    get_target_property(simulator_source simulator SOURCES)
-    get_target_property(simulator_compile_options simulator COMPILE_OPTIONS)
-    get_target_property(simulator_compile_definitions simulator COMPILE_DEFINITIONS)
-    get_target_property(simulator_link_libraries simulator LINK_LIBRARIES)
-    get_target_property(simulator_include_directories simulator INCLUDE_DIRECTORIES)
-
-    add_library(simulator_asan STATIC
-        ${simulator_source}
-    )
-
-    target_compile_options(simulator_asan PRIVATE
-        ${simulator_compile_options}
-        -fno-omit-frame-pointer
-        -fno-optimize-sibling-calls
-        -fsanitize=address
-    )
-
-    target_compile_definitions(simulator_asan PUBLIC
-        ${simulator_compile_definitions}
-    )
-
-    target_link_libraries(simulator_asan
-        ${simulator_link_libraries}
-    )
-
-    target_include_directories(simulator_asan PUBLIC
-        ${simulator_include_directories}
-    )
-
-    set_property(TARGET simulator_asan PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
-    set_property(TARGET simulator_asan PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
-endif()
 
 ################################################################################
 # libsimulator unit tests

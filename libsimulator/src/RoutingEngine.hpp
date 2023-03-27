@@ -5,9 +5,11 @@
 #include "AABB.hpp"
 #include "CGALPolygon.hpp"
 #include "Graph.hpp"
+#include "IteratorPair.hpp"
 #include "Line.hpp"
 #include "Point.hpp"
 #include "Triangle.hpp"
+#include <vector>
 
 class RoutingEngine
 {
@@ -17,6 +19,11 @@ public:
 
     // TODO(kkratz): additional input parameters missing
     virtual std::vector<Point> ComputeWaypoint(Point currentPosition, Point destination) = 0;
+
+    /// Checks if supplied point is inside the routable space.
+    /// @@param p Point to validate
+    /// @return boolean IsRoutable?
+    virtual bool IsRoutable(Point p) const = 0;
 
     // TODO(kkratz): input sources missing
     virtual void Update() = 0;
@@ -61,7 +68,16 @@ public:
 
     std::unique_ptr<RoutingEngine> Clone() const override;
     std::vector<Point> ComputeWaypoint(Point currentPosition, Point destination) override;
+    bool IsRoutable(Point p) const override;
     void Update() override;
+
+    /// This is designed for debugging purposes.
+    /// @return a copy of all triangles that make up the accessible area.
+    std::vector<Triangle> Mesh() const;
+
+    /// This is designed for debugging purposes.
+    /// @return vector of edgedata
+    std::vector<EdgeData> EdgesFor(GraphType::VertexId id) const;
 
 private:
     GraphType::VertexId findVertex(Point p) const;

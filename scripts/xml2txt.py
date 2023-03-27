@@ -30,12 +30,12 @@ def write_header(o, fps, geometry_file):
 
 if __name__ == "__main__":
     if len(argv) < 2:
-        exit('usage: %s filename' % argv[0])
+        exit("usage: %s filename" % argv[0])
 
     filename = argv[1]
     filename1, file_extension = os.path.splitext(filename)
     if file_extension != ".xml":
-        exit('ERROR: not an xml file')
+        exit("ERROR: not an xml file")
 
     output = filename1 + ".txt"
     print(">> %s" % output)
@@ -43,49 +43,52 @@ if __name__ == "__main__":
     tree = ET.parse(filename)
     root = tree.getroot()
 
-    for header in root.iter('header'):
-        fps = header.find('frameRate').text
+    for header in root.iter("header"):
+        fps = header.find("frameRate").text
 
     try:
         fps = float(fps)
     except ValueError:
         exit("ERROR: could not read <fps>")
 
-    for header in root.iter('header'):
-        N = header.find('agents').text
+    for header in root.iter("header"):
+        N = header.find("agents").text
 
     try:
         N = int(N)
     except ValueError:
         exit("ERROR: could not read <agents>")
 
-    for g in root.iter('geometry'):
-        file_location = g.find('file').attrib
-        location = file_location['location']
+    for g in root.iter("geometry"):
+        file_location = g.find("file").attrib
+        location = file_location["location"]
 
     with open(output, "w") as o:
         write_header(o, fps, location)
         for node in root.iter():
             tag = node.tag
             if tag == "frame":
-                frame = node.attrib['ID']
+                frame = node.attrib["ID"]
                 for agent in list(node):
-                    x = agent.attrib['x']
-                    y = agent.attrib['y']
-                    z = agent.attrib['z']
-                    rA = agent.attrib['rA']
-                    rB = agent.attrib['rB']
-                    eO = agent.attrib['eO']
-                    eC = agent.attrib['eC']
-                    ID = agent.attrib['ID']
+                    x = agent.attrib["x"]
+                    y = agent.attrib["y"]
+                    z = agent.attrib["z"]
+                    rA = agent.attrib["rA"]
+                    rB = agent.attrib["rB"]
+                    eO = agent.attrib["eO"]
+                    eC = agent.attrib["eC"]
+                    ID = agent.attrib["ID"]
                     o.write(
-                        "%d\t%d\t%.5f\t%.5f\t%.5f\t%.5f\t%.5f\t%.5f\t%d\n" %
-                        (int(ID),
-                         int(frame),
-                         float(x),
-                         float(y),
-                         float(z),
-                         float(rA),
-                         float(rB),
-                         float(eO),
-                         float(eC)))
+                        "%d\t%d\t%.5f\t%.5f\t%.5f\t%.5f\t%.5f\t%.5f\t%d\n"
+                        % (
+                            int(ID),
+                            int(frame),
+                            float(x),
+                            float(y),
+                            float(z),
+                            float(rA),
+                            float(rB),
+                            float(eO),
+                            float(eC),
+                        )
+                    )

@@ -120,19 +120,16 @@ TEST(Simulation, CanSimulate)
     auto journey = JPS_Journey_Create_SimpleJourney(waypoints, sizeof(waypoints));
     auto journeyId = JPS_Simulation_AddJourney(simulation, journey, nullptr);
 
-    JPS_AgentParameters agent_parameters{};
+    JPS_VelocityModelAgentParameters agent_parameters{};
     agent_parameters.journeyId = journeyId;
-    agent_parameters.orientationX = 1.0;
-    agent_parameters.orientationY = 0.0;
-    agent_parameters.positionX = 0.0;
-    agent_parameters.positionY = 0.0;
+    agent_parameters.orientation = JPS_Point{1.0, 0.0};
+    agent_parameters.position = JPS_Point{0.0, 0.0};
     agent_parameters.profileId = profile_id;
 
-    std::vector<Point> positions{Point(7, 7), Point(1, 3), Point(1, 5), Point(1, 7), Point(2, 7)};
+    std::vector<JPS_Point> positions{{7, 7}, {1, 3}, {1, 5}, {1, 7}, {2, 7}};
     for(const auto& p : positions) {
-        agent_parameters.positionX = p.x;
-        agent_parameters.positionY = p.y;
-        JPS_Simulation_AddAgent(simulation, agent_parameters, nullptr);
+        agent_parameters.position = p;
+        JPS_Simulation_AddVelocityModelAgent(simulation, agent_parameters, nullptr);
     }
     while(JPS_Simulation_AgentCount(simulation) > 0) {
         ASSERT_TRUE(JPS_Simulation_Iterate(simulation, nullptr));
@@ -194,57 +191,34 @@ struct SimulationTest : public ::testing::Test {
 TEST_F(SimulationTest, AgentIteratorIsEmptyForNewSimulation)
 {
     ASSERT_EQ(JPS_Simulation_AgentCount(simulation), 0);
-    auto iter = JPS_Simulation_AgentIterator(simulation);
+    auto iter = JPS_Simulation_VelocityModelAgentIterator(simulation);
     ASSERT_NE(iter, nullptr);
-    ASSERT_EQ(JPS_AgentIterator_Next(iter), nullptr);
+    ASSERT_EQ(JPS_VelocityModelAgentIterator_Next(iter), nullptr);
 }
 
 TEST_F(SimulationTest, AgentIteratorCanIterate)
 {
-    std::vector<JPS_AgentParameters> agent_parameters{
-        {1.0, 1.0, 1.0, 1.0, journey_id, model_paramater_profile_id[0]},
-        {2.0, 1.0, 1.0, 1.0, journey_id, model_paramater_profile_id[0]},
-        {3.0, 1.0, 1.0, 1.0, journey_id, model_paramater_profile_id[0]}};
+    std::vector<JPS_VelocityModelAgentParameters> agent_parameters{
+        {{}, {1.0, 1.0}, {1.0, 1.0}, journey_id, model_paramater_profile_id[0], 0},
+        {{}, {2.0, 1.0}, {1.0, 1.0}, journey_id, model_paramater_profile_id[0], 0},
+        {{}, {3.0, 1.0}, {1.0, 1.0}, journey_id, model_paramater_profile_id[0], 0}};
     for(const auto& agent_params : agent_parameters) {
-        ASSERT_NE(JPS_Simulation_AddAgent(simulation, agent_params, nullptr), 0);
+        ASSERT_NE(JPS_Simulation_AddVelocityModelAgent(simulation, agent_params, nullptr), 0);
     }
     ASSERT_EQ(JPS_Simulation_AgentCount(simulation), 3);
-    auto iter = JPS_Simulation_AgentIterator(simulation);
+    auto iter = JPS_Simulation_VelocityModelAgentIterator(simulation);
     ASSERT_NE(iter, nullptr);
-    ASSERT_NE(JPS_AgentIterator_Next(iter), nullptr);
-    ASSERT_NE(JPS_AgentIterator_Next(iter), nullptr);
-    ASSERT_NE(JPS_AgentIterator_Next(iter), nullptr);
-    ASSERT_EQ(JPS_AgentIterator_Next(iter), nullptr);
-}
-
-TEST_F(SimulationTest, CanQueryAgentProperties)
-{
-    const double pos_x = 1.123;
-    const double pos_y = 0.999;
-    const double orientation_x = 1;
-    const double orientation_y = 0;
-    JPS_AgentParameters agent_params{
-        pos_x, pos_y, orientation_x, orientation_y, journey_id, model_paramater_profile_id[0]};
-    const auto agent_id = JPS_Simulation_AddAgent(simulation, agent_params, nullptr);
-    ASSERT_NE(agent_id, 0);
-    ASSERT_EQ(JPS_Simulation_AgentCount(simulation), 1);
-    auto iter = JPS_Simulation_AgentIterator(simulation);
-    ASSERT_NE(iter, nullptr);
-    const auto agent = JPS_AgentIterator_Next(iter);
-    ASSERT_NE(agent, nullptr);
-    ASSERT_EQ(JPS_AgentIterator_Next(iter), nullptr);
-
-    ASSERT_EQ(JPS_Agent_Id(agent), agent_id);
-    ASSERT_EQ(JPS_Agent_PositionX(agent), pos_x);
-    ASSERT_EQ(JPS_Agent_PositionY(agent), pos_y);
-    ASSERT_EQ(JPS_Agent_OrientationX(agent), orientation_x);
-    ASSERT_EQ(JPS_Agent_OrientationY(agent), orientation_y);
+    ASSERT_NE(JPS_VelocityModelAgentIterator_Next(iter), nullptr);
+    ASSERT_NE(JPS_VelocityModelAgentIterator_Next(iter), nullptr);
+    ASSERT_NE(JPS_VelocityModelAgentIterator_Next(iter), nullptr);
+    ASSERT_EQ(JPS_VelocityModelAgentIterator_Next(iter), nullptr);
 }
 
 TEST_F(SimulationTest, CanChangeModelParameterProfiles)
 {
-    JPS_AgentParameters agent_params{1, 1, 1, 0, journey_id, model_paramater_profile_id[0]};
-    const auto agent_id = JPS_Simulation_AddAgent(simulation, agent_params, nullptr);
+    JPS_VelocityModelAgentParameters agent_params{
+        {}, {1, 1}, {1, 0}, journey_id, model_paramater_profile_id[0], 0};
+    const auto agent_id = JPS_Simulation_AddVelocityModelAgent(simulation, agent_params, nullptr);
     ASSERT_NE(agent_id, 0);
     ASSERT_EQ(JPS_Simulation_AgentCount(simulation), 1);
     ASSERT_EQ(JPS_Simulation_Iterate(simulation, nullptr), true);

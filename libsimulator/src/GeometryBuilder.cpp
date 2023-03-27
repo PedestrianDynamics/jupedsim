@@ -16,6 +16,7 @@
 #include <fmt/ranges.h>
 #include <poly2tri/common/shapes.h>
 
+#include <algorithm>
 #include <memory>
 #include <stdexcept>
 #include <vector>
@@ -45,20 +46,6 @@ static VertexData toVertexData(p2t::Triangle* triangle)
         points[index] = Point{p2t_p->x, p2t_p->y};
     }
     return VertexData{AABB(points), Triangle{points[0], points[1], points[2]}};
-}
-
-static Line edgeIndex(p2t::Triangle* from, p2t::Triangle* to)
-{
-    const Line dist(centroid(from), centroid(to));
-    for(int index = 0; index < 3; ++index) {
-        const auto a = from->GetPoint(index);
-        const auto b = from->GetPoint((index + 1) % 3);
-        const Line edge({a->x, a->y}, {b->x, b->y});
-        if(dist.IntersectionWith(edge)) {
-            return edge;
-        }
-    }
-    throw std::logic_error("Triangles have to share an edge");
 }
 
 enum class Ordering { CW, CCW };
@@ -144,7 +131,6 @@ Geometry GeometryBuilder::Build()
     const auto boundary = Convert(
         accessibleArea.outer_boundary().vertices_begin(),
         accessibleArea.outer_boundary().vertices_end());
-
     std::vector<std::vector<Point>> holes{};
     holes.reserve(accessibleArea.number_of_holes());
     std::transform(
@@ -171,30 +157,57 @@ Geometry GeometryBuilder::Build()
     }
 
     DTriangulation triangulation(boundary, holes);
-    std::stack<std::tuple<p2t::Triangle*, GraphType::VertexId>> toVisit{};
-    std::set<p2t::Triangle*> known{};
+    std::stack<p2t::Triangle*> toVisit{};
+    std::set<p2t::Triangle*> visited{};
+    std::map<p2t::Triangle*, GraphType::VertexId> addedTriangles{};
     GraphType::Builder builder{};
-    auto firstTriangle = triangulation.GetTriangles().front();
-    toVisit.push({firstTriangle, builder.AddVertex(toVertexData(firstTriangle))});
-    known.insert(std::get<0>(toVisit.top()));
+    auto triangles = triangulation.GetTriangles();
+    auto firstTriangle = *std::find_if(
+        std::begin(triangles), std::end(triangles), [](const auto t) { return t->IsInterior(); });
+    toVisit.push(firstTriangle);
+
+    auto find_or_insert_id = [&builder, &addedTriangles](p2t::Triangle* t) -> GraphType::VertexId {
+        auto iter = addedTriangles.find(t);
+        if(iter != addedTriangles.end()) {
+            return iter->second;
+        }
+        const auto id = builder.AddVertex(toVertexData(t));
+        addedTriangles.emplace(std::make_pair(t, id));
+        return id;
+    };
 
     while(!toVisit.empty()) {
         auto top_of_stack = toVisit.top();
-        auto [t, id] = top_of_stack;
+        auto t = top_of_stack;
         toVisit.pop();
+        if(visited.count(t) > 0) {
+            continue;
+        } else {
+            visited.insert(t);
+        }
+        const auto id = find_or_insert_id(t);
+
         const auto pos_from = centroid(t);
         for(int index = 0; index < 3; ++index) {
+            // Triangle neighbors have the same index as the point oposing the shared edge. I.e.
+            // neighbor[0] is the neighboring triangle that shares an edge created by the points 1
+            // and 2.
             auto neighbor = t->GetNeighbor(index);
-            if(neighbor == nullptr || known.count(neighbor) > 0 || !neighbor->IsInterior()) {
+            if(neighbor == nullptr || !neighbor->IsInterior()) {
                 continue;
             }
             const auto pos_to = centroid(neighbor);
-            const auto neighbor_id = builder.AddVertex(toVertexData(neighbor));
+            const auto neighbor_id = find_or_insert_id(neighbor);
             const auto weight = (pos_to - pos_from).Norm();
-            builder.AddEdge(id, neighbor_id, {weight, edgeIndex(t, neighbor)});
-            builder.AddEdge(neighbor_id, id, {weight, edgeIndex(neighbor, t)});
-            known.insert(neighbor);
-            toVisit.push({neighbor, neighbor_id});
+            const auto idx_edge_from = (index + 1) % 3;
+            const auto edge_from = t->GetPoint(idx_edge_from);
+            const auto idx_edge_to = (index + 2) % 3;
+            const auto edge_to = t->GetPoint(idx_edge_to);
+            builder.AddEdge(
+                id,
+                neighbor_id,
+                {weight, {{edge_from->x, edge_from->y}, {edge_to->x, edge_to->y}}});
+            toVisit.push(neighbor);
         }
     }
     return {

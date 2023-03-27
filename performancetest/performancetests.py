@@ -1,12 +1,13 @@
 #! /usr/bin/env python3
-import time
-import logging
 import json
+import logging
 import sys
+import time
 from pathlib import Path
+
 from driver.driver import JpsCoreDriver
-from driver.utils import copy_all_files
 from driver.environment import Environment
+from driver.utils import copy_all_files
 
 
 def run_scenario(

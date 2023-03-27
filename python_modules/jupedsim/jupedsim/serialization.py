@@ -1,16 +1,18 @@
-""" Serialization support
+""" Serialization/deserialization support
 
-In this file you will find interfaces and impementations to serialize and
-deserialize different forms of input / ouput commonly used.
+In this file you will find interfaces and implementations to serialize and
+deserialize different forms of input / output commonly used.
 
 """
 
 import abc
 import math
 from io import TextIOWrapper
-import py_jupedsim as jps
 from pathlib import Path
 from typing import Optional, Tuple
+
+import py_jupedsim as jps
+import shapely
 
 
 class TrajectoryWriter(metaclass=abc.ABCMeta):
@@ -21,7 +23,7 @@ class TrajectoryWriter(metaclass=abc.ABCMeta):
         """Begin writing trajectory data.
 
         This method is intended to handle all data writing that has to be done
-        once before the trajectory data can be writte. E.g. Meta information
+        once before the trajectory data can be written. E.g. Meta information
         such as framerate etc...
         """
         raise NotImplementedError
@@ -39,22 +41,22 @@ class TrajectoryWriter(metaclass=abc.ABCMeta):
     def end_writing(self) -> None:
         """End writing trajectory data.
 
-        This method is intended to handle finalizing wirting of trajectory
+        This method is intended to handle finalizing writing of trajectory
         data, e.g. write closing tags, or footer meta data.
         """
         raise NotImplementedError
 
     class Exception(Exception):
-        """Represents exceptions specific to the trjectory writer."""
+        """Represents exceptions specific to the trajectory writer."""
 
         pass
 
 
 class JpsCoreStyleTrajectoryWriter(TrajectoryWriter):
-    """Writes jpscore / jpsvis compatible trjectory files w.o. a referenced geometry.
+    """Writes jpscore / jpsvis compatible trajectory files w.o. a referenced geometry.
 
     This implementation tracks the number of calls to 'write_iteration_state'
-    and inserts the appropiate frame number, to write a usefull file header the
+    and inserts the appropriate frame number, to write a useful file header the
     fps the data is written in needs to be supplied on construction
     """
 
@@ -116,15 +118,17 @@ class JpsCoreStyleTrajectoryWriter(TrajectoryWriter):
         if not self._out:
             raise TrajectoryWriter.Exception("Output file not opened")
 
-        def agent_orientaion_as_degrees(agent: jps.Agent) -> float:
-            vec2 = (agent.orientation_x, agent.orientation_y)
+        def agent_orientaion_as_degrees(
+            agent: jps.GCFMModelAgentParameters
+            | jps.VelocityModelAgentParameters,
+        ) -> float:
             return JpsCoreStyleTrajectoryWriter._orientation_to_angle(
-                JpsCoreStyleTrajectoryWriter._normalize(vec2)
+                agent.orientation
             )
 
         self._out.writelines(
             map(
-                lambda agent: f"{agent.id}\t{self._frame}\t{agent.x}\t{agent.y}\t{0}\t{0.3}\t{0.3}\t{agent_orientaion_as_degrees(agent)}\t{0.4}\n",
+                lambda agent: f"{agent.id}\t{self._frame}\t{agent.position.x}\t{agent.position.y}\t{0}\t{0.3}\t{0.3}\t{agent_orientaion_as_degrees(agent)}\t{0.4}\n",
                 simulation.agents(),
             ),
         )
@@ -149,3 +153,90 @@ class JpsCoreStyleTrajectoryWriter(TrajectoryWriter):
     def _orientation_to_angle(vec2: Tuple[float, float]) -> float:
         vec2 = JpsCoreStyleTrajectoryWriter._normalize(vec2)
         return math.degrees(math.atan2(vec2[1], vec2[0]))
+
+
+class ParseException(Exception):
+    pass
+
+
+def parse_dlr_ad_hoc(input: str) -> shapely.GeometryCollection:
+    """
+    This function parses data from an ad-hoc file format as it was used by the DLR to
+    specify accessible areas, E.g:
+        Lane :J1_w0_0
+        98.5
+        5
+        98.5
+        -5
+        101.5
+        -1.5
+        101.5
+        1.5
+        Lane :J2_w0_0
+        198.5
+        1.5
+        198.5
+        -1.5
+        201.5
+        -5
+        201.5
+        5
+    Identifiers are followed by x and y coordinates, each specifying a polygon.
+
+    Parameters
+    ----------
+    input : str
+        text in the above mentioned format
+
+    Returns
+    -------
+    shapely.GeometryCollection that only contains polygons
+    """
+    polygons = []
+    laneName = None
+    laneCoordinates = []
+    for line in input.splitlines():
+        if line.startswith("Lane"):
+            if laneName:
+                polygons.append(laneCoordinates)
+                laneCoordinates = []
+            laneName = line[5:-1]
+        else:
+            laneCoordinates.append(float(line))
+    polygons.append(laneCoordinates)
+
+    def into_poly(values: list[float]) -> shapely.Polygon:
+        points = [(x, y) for x, y in zip(values[::2], values[1::2])]
+        return shapely.Polygon(points)
+
+    return shapely.GeometryCollection(geoms=[into_poly(p) for p in polygons])
+
+
+def parse_wkt(input: str) -> shapely.GeometryCollection:
+    """
+    Creates a Geometry collection from a WKT collection
+
+    Parameters
+    ----------
+    input : str
+        text containing one WKT GEOMETRYCOLLECTION
+
+    Raises
+    ------
+    ParseException will be raised on any errors parsing the input
+
+    Returns
+    -------
+    A shapely.GeometryCollection that only contains polygons
+    """
+
+    result = None
+    try:
+        result = shapely.from_wkt(input)
+    except Exception as e:
+        raise ParseException(f"Error parsing input: {e}")
+    if not isinstance(result, shapely.GeometryCollection):
+        raise ParseException(
+            f"Expected a WKT containing exactly one GeometryCollection"
+        )
+    return result

@@ -6,7 +6,6 @@ import pytest
 from driver.driver import JpsCoreDriver
 from driver.environment import Platform
 from driver.events import read_starting_times
-from fixtures import env
 from driver.flow import check_flow
 from driver.geometry import get_intersetions_path_segment
 from driver.inifile import (
@@ -22,6 +21,7 @@ from driver.utils import (
     pairwise,
     setup_jpscore_driver,
 )
+from fixtures import env
 from sympy.geometry import Point, Segment
 
 
@@ -287,7 +287,7 @@ def test_juelich_2_single_pedestrian_moving_in_a_corridor(
 
     d_x = max(agent_path[:, 2]) - min(agent_path[:, 2])
     d_y = max(agent_path[:, 3]) - min(agent_path[:, 3])
-    beeline_distance = numpy.sqrt(d_x ** 2 + d_y ** 2)
+    beeline_distance = numpy.sqrt(d_x**2 + d_y**2)
     v_expected = 1.0
     time_limit = (beeline_distance / v_expected) + 0.1
     assert trajectories.runtime() <= time_limit

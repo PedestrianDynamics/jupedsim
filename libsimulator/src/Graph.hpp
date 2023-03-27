@@ -5,11 +5,13 @@
 #include "IteratorPair.hpp"
 #include "Point.hpp"
 
+#include <algorithm>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/detail/adjacency_list.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <fmt/format.h>
 
+#include <iterator>
 #include <map>
 #include <poly2tri/common/shapes.h>
 #include <stdexcept>
@@ -32,6 +34,7 @@ public:
     using VertexId = uint32_t;
     using Type =
         boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, VertexValue, EdgeValue>;
+    using OutEdgeIterator = typename Type::out_edge_iterator;
 
 private:
     Type _graph;
@@ -64,6 +67,7 @@ public:
     const VertexValue& Vertex(VertexId id) const;
     auto Vertices() const;
     const EdgeValue& Edge(VertexId from, VertexId to) const;
+    std::vector<EdgeValue> EdgesFor(VertexId id) const;
 };
 
 template <typename VertexValue, typename EdgeValue>
@@ -94,6 +98,9 @@ public:
     void AddEdge(VertexId from, VertexId to, const EdgeValue& value);
 };
 
+////////////////////////////////////////////////////////////////////////////////
+// Graph
+////////////////////////////////////////////////////////////////////////////////
 template <typename VertexValue, typename EdgeValue>
 Graph<VertexValue, EdgeValue>::Graph(Graph::Type&& graph) : _graph(std::move(graph))
 {
@@ -153,6 +160,21 @@ const EdgeValue& Graph<VertexValue, EdgeValue>::Edge(Graph::VertexId from, Graph
     return _graph[boost::edge(from, to, _graph).first];
 }
 
+template <typename VertexValue, typename EdgeValue>
+std::vector<EdgeValue> Graph<VertexValue, EdgeValue>::EdgesFor(Graph::VertexId id) const
+{
+    const auto count = boost::out_degree(id, _graph);
+    auto [begin, end] = boost::out_edges(id, _graph);
+    std::vector<EdgeValue> edges{};
+    edges.resize(count);
+    std::transform(
+        begin, end, std::back_inserter(edges), [this](const auto& iter) { return _graph[iter]; });
+    return edges;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Graph::Builder
+////////////////////////////////////////////////////////////////////////////////
 template <typename VertexValue, typename EdgeValue>
 Graph<VertexValue, EdgeValue> Graph<VertexValue, EdgeValue>::Builder::Build()
 {

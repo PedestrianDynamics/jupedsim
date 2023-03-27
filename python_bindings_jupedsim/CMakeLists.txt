@@ -7,6 +7,7 @@ target_link_libraries(py_jupedsim
         pybind11::module
         pybind11::lto
         pybind11::windows_extras
+        fmt::fmt
         jupedsim
 )
 
