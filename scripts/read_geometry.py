@@ -1,13 +1,16 @@
 import xml.etree.ElementTree as ET
+from shapely.geometry import Polygon
+from shapely.ops import unary_union
+import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     tree = ET.parse('correct_aknz_geo_arrival.xml')
     root = tree.getroot()
     subrooms = root.findall('.//subroom')
 
-    
+    # list with all polygons from this geometry
+    geometry_polygons = []
     for subroom in subrooms:
-        print('Subroom:', subroom.get('id'))
         room_obstacles = []
         room_polygon = []
         polygons = subroom.findall('polygon')
@@ -30,6 +33,14 @@ if __name__ == "__main__":
                 point = (float(vertex.get('px')), float(vertex.get('py')))
                 if point not in room_polygon:
                     room_polygon.append(point)
+        # subroom geometry is now parsed
+        geometry_polygons.append(Polygon(room_polygon, room_obstacles))
 
-        print(room_polygon)
-        print(room_obstacles)
+    for polygon in geometry_polygons:
+        plt.plot(*polygon.exterior.xy)
+
+    plt.show()
+
+    # merged_polygon = unary_union(geometry_polygons)
+    # plt.plot(*merged_polygon.exterior.xy)
+    # plt.show()
