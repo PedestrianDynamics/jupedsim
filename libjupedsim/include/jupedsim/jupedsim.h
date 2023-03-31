@@ -479,6 +479,25 @@ JPS_VelocityModelAgentIterator_Next(JPS_VelocityModelAgentIterator handle);
  */
 JUPEDSIM_API void JPS_VelocityModelAgentIterator_Free(JPS_VelocityModelAgentIterator handle);
 
+/**
+ * Opaque type of an iterator over agent ids
+ */
+typedef struct JPS_AgentIdIterator_t* JPS_AgentIdIterator;
+
+/**
+ * Access the next element in the iterator.
+ * Calling JPS_AgentIterator_Next repeatedly on a finished iterator is save.
+ * @param handle of the iterator to advance and access
+ * @return an agentId, Zero in case the iterator has reachedits end.
+ */
+JUPEDSIM_API JPS_AgentId JPS_AgentIdIterator_Next(JPS_AgentIdIterator handle);
+
+/**
+ * Free the iterator.
+ * @param handle to the JPS_AgentIterator to free.
+ */
+JUPEDSIM_API void JPS_AgentIdIterator_Free(JPS_AgentIdIterator handle);
+
 /*
  * Opaque type to a Simulator object.
  */
@@ -657,6 +676,26 @@ JUPEDSIM_API bool JPS_Simulation_SwitchAgentProfile(
  * @return the type of pedestrian model used in this simulation instance.
  */
 JUPEDSIM_API JPS_ModelType JPS_Simulation_ModelType(JPS_Simulation handle);
+
+/**
+ * Query the simulation for all agent ids in distance to this point;
+ * @param handle of the Simulation to operate on
+ * @param position to query
+ * @param distance around position
+ * @return iterator containing all agent ids in range
+ */
+JUPEDSIM_API JPS_AgentIdIterator
+JPS_Simulation_AgentsInRange(JPS_Simulation handle, JPS_Point position, double distance);
+
+/**
+ * Query the simulation for all agent ids in the supplied polygon.
+ * @param handle of the Simulation to operate on
+ * @param polygon array of JPS_Points (CCW ordered convex polygon)
+ * @param len_polygon number of points in the polygon
+ * @return iterator over the Ids inside the polygon
+ */
+JUPEDSIM_API JPS_AgentIdIterator
+JPS_Simulation_AgentsInPolygon(JPS_Simulation handle, JPS_Point* polygon, size_t len_polygon);
 
 /**
  * Frees a JPS_Simulation.

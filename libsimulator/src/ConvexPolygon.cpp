@@ -24,3 +24,13 @@ bool ConvexPolygon::IsInside(Point p) const
 
     return triarea2d(points[index_low], points[index_high], p) < 0.0;
 }
+
+std::tuple<Point, double> ConvexPolygon::ContainingCircle() const
+{
+    const auto center = Centroid();
+    auto distance = 0.0;
+    std::for_each(std::begin(points), std::end(points), [&distance, center](const auto& p) {
+        distance = std::max(distance, (center - p).Norm());
+    });
+    return {center, distance};
+}

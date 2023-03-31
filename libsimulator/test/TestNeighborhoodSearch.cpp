@@ -7,7 +7,6 @@
 #include <iostream>
 #include <iterator>
 #include <memory>
-#include <ranges>
 
 TEST(Grid2D, EmptyDefauneighborhood_searchorhood_searchtruction)
 {

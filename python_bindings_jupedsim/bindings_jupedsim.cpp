@@ -7,10 +7,12 @@
 #include <exception>
 #include <iterator>
 #include <memory>
+#include <pybind11/detail/common.h>
 #include <stdexcept>
 #include <vector>
 
 #include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <pybind11/functional.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -54,6 +56,7 @@ OWNED_WRAPPER(JPS_Journey);
 OWNED_WRAPPER(JPS_Simulation);
 OWNED_WRAPPER(JPS_GCFMModelAgentIterator);
 OWNED_WRAPPER(JPS_VelocityModelAgentIterator);
+OWNED_WRAPPER(JPS_AgentIdIterator);
 
 // Experimental only types
 OWNED_WRAPPER(JPS_RoutingEngine);
@@ -75,6 +78,11 @@ public:
         return instance;
     }
 };
+
+std::tuple<double, double> intoTuple(const JPS_Point& p)
+{
+    return std::make_tuple(p.x, p.y);
+}
 
 PYBIND11_MODULE(py_jupedsim, m)
 {
@@ -158,7 +166,19 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def_readwrite("orientation", &JPS_GCFMModelAgentParameters::orientation)
         .def_readwrite("journey_id", &JPS_GCFMModelAgentParameters::journeyId)
         .def_readwrite("profile_id", &JPS_GCFMModelAgentParameters::profileId)
-        .def_readwrite("id", &JPS_GCFMModelAgentParameters::agentId);
+        .def_readwrite("id", &JPS_GCFMModelAgentParameters::agentId)
+        .def("__repr__", [](const JPS_GCFMModelAgentParameters& p) {
+            return fmt::format(
+                "speed: {}, e0: {}, position: {}, orientation: {}, journey_id: {}, profile_id: {}, "
+                "id: {}",
+                p.speed,
+                intoTuple(p.e0),
+                intoTuple(p.position),
+                intoTuple(p.orientation),
+                p.journeyId,
+                p.profileId,
+                p.agentId);
+        });
     py::class_<JPS_VelocityModelAgentParameters>(m, "VelocityModelAgentParameters")
         .def(py::init())
         .def_readwrite("e0", &JPS_VelocityModelAgentParameters::e0)
@@ -166,7 +186,18 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def_readwrite("orientation", &JPS_VelocityModelAgentParameters::orientation)
         .def_readwrite("journey_id", &JPS_VelocityModelAgentParameters::journeyId)
         .def_readwrite("profile_id", &JPS_VelocityModelAgentParameters::profileId)
-        .def_readwrite("id", &JPS_VelocityModelAgentParameters::agentId);
+        .def_readwrite("id", &JPS_VelocityModelAgentParameters::agentId)
+        .def("__repr__", [](const JPS_VelocityModelAgentParameters& p) {
+            return fmt::format(
+                "e0: {}, position: {}, orientation: {}, journey_id: {}, profile_id: {}, "
+                "id: {}",
+                intoTuple(p.e0),
+                intoTuple(p.position),
+                intoTuple(p.orientation),
+                p.journeyId,
+                p.profileId,
+                p.agentId);
+        });
     py::class_<JPS_Geometry_Wrapper>(m, "Geometry");
     py::class_<JPS_GeometryBuilder_Wrapper>(m, "GeometryBuilder")
         .def(py::init([]() {
@@ -354,6 +385,17 @@ PYBIND11_MODULE(py_jupedsim, m)
             }
             throw py::stop_iteration{};
         });
+    py::class_<JPS_AgentIdIterator_Wrapper>(m, "AgentIdIterator")
+        .def(
+            "__iter__",
+            [](JPS_AgentIdIterator_Wrapper& w) -> JPS_AgentIdIterator_Wrapper& { return w; })
+        .def("__next__", [](JPS_AgentIdIterator_Wrapper& w) {
+            const auto id = JPS_AgentIdIterator_Next(w.handle);
+            if(id != 0) {
+                return id;
+            }
+            throw py::stop_iteration{};
+        });
     py::class_<JPS_Simulation_Wrapper>(m, "Simulation")
         .def(
             py::init(
@@ -504,20 +546,43 @@ PYBIND11_MODULE(py_jupedsim, m)
             [](JPS_Simulation_Wrapper& simulation) {
                 return JPS_Simulation_IterationCount(simulation.handle);
             })
-        .def("agents", [](const JPS_Simulation_Wrapper& simulation) {
-            using Iterators = std::variant<
-                std::unique_ptr<JPS_GCFMModelAgentIterator_Wrapper>,
-                std::unique_ptr<JPS_VelocityModelAgentIterator_Wrapper>>;
-            const auto type = JPS_Simulation_ModelType(simulation.handle);
-            switch(type) {
-                case JPS_GCFMModel:
-                    return Iterators{std::make_unique<JPS_GCFMModelAgentIterator_Wrapper>(
-                        JPS_Simulation_GCFMModelAgentIterator(simulation.handle))};
-                case JPS_VelocityModel:
-                    return Iterators{std::make_unique<JPS_VelocityModelAgentIterator_Wrapper>(
-                        JPS_Simulation_VelocityModelAgentIterator(simulation.handle))};
-            }
-        });
+        .def(
+            "agents",
+            [](const JPS_Simulation_Wrapper& simulation) {
+                using Iterators = std::variant<
+                    std::unique_ptr<JPS_GCFMModelAgentIterator_Wrapper>,
+                    std::unique_ptr<JPS_VelocityModelAgentIterator_Wrapper>>;
+                const auto type = JPS_Simulation_ModelType(simulation.handle);
+                switch(type) {
+                    case JPS_GCFMModel:
+                        return Iterators{std::make_unique<JPS_GCFMModelAgentIterator_Wrapper>(
+                            JPS_Simulation_GCFMModelAgentIterator(simulation.handle))};
+                    case JPS_VelocityModel:
+                        return Iterators{std::make_unique<JPS_VelocityModelAgentIterator_Wrapper>(
+                            JPS_Simulation_VelocityModelAgentIterator(simulation.handle))};
+                }
+            })
+        .def(
+            "agents_in_range",
+            [](JPS_Simulation_Wrapper& w, std::tuple<double, double> pos, double distance) {
+                return std::make_unique<JPS_AgentIdIterator_Wrapper>(JPS_Simulation_AgentsInRange(
+                    w.handle, JPS_Point{std::get<0>(pos), std::get<1>(pos)}, distance));
+            })
+        .def(
+            "agents_in_polygon",
+            [](JPS_Simulation_Wrapper& w, const std::vector<std::tuple<double, double>>& poly) {
+                std::vector<JPS_Point> ppoly{};
+                ppoly.reserve(poly.size());
+                std::transform(
+                    std::begin(poly),
+                    std::end(poly),
+                    std::back_inserter(ppoly),
+                    [](const auto& pt) {
+                        return JPS_Point{std::get<0>(pt), std::get<1>(pt)};
+                    });
+                return std::make_unique<JPS_AgentIdIterator_Wrapper>(
+                    JPS_Simulation_AgentsInPolygon(w.handle, ppoly.data(), ppoly.size()));
+            });
     py::module_ exp = m.def_submodule("experimental", "Experimental API extensions for jupedsim");
     py::class_<JPS_RoutingEngine_Wrapper>(exp, "RoutingEngine")
         .def(py::init([](const JPS_Geometry_Wrapper& geo) {
