@@ -30,6 +30,7 @@
 #include <iterator>
 #include <memory>
 #include <string>
+#include <tuple>
 #include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -320,6 +321,35 @@ void JPS_VelocityModelAgentIterator_Free(JPS_VelocityModelAgentIterator handle)
 {
     delete reinterpret_cast<AgentIterator<VelocityModel::Data, JPS_VelocityModelAgentParameters>*>(
         handle);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// AgentIdIterator
+////////////////////////////////////////////////////////////////////////////////////////////////////
+struct AgentIdIterator {
+    using AgentIds = std::vector<GenericAgent::ID>;
+    AgentIds ids;
+    AgentIds::const_iterator iter;
+
+    AgentIdIterator(AgentIds&& ids_) : ids(std::move(ids_)) { iter = std::begin(ids); }
+};
+
+JPS_AgentId JPS_AgentIdIterator_Next(JPS_AgentIdIterator handle)
+{
+    assert(handle);
+    auto iterator = reinterpret_cast<AgentIdIterator*>(handle);
+    auto& [vec, iter] = *iterator;
+    if(iter == std::end(vec)) {
+        return GenericAgent::ID::Invalid.getID();
+    }
+    const auto id = *iter;
+    ++iter;
+    return id.getID();
+}
+
+void JPS_AgentIdIterator_Free(JPS_AgentIdIterator handle)
+{
+    delete reinterpret_cast<AgentIdIterator*>(handle);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -717,6 +747,27 @@ JPS_ModelType JPS_Simulation_ModelType(JPS_Simulation handle)
 #elif defined(_MSC_VER) // MSVC
     __assume(false);
 #endif
+}
+
+JPS_AgentIdIterator
+JPS_Simulation_AgentsInRange(JPS_Simulation handle, JPS_Point position, double distance)
+{
+    assert(handle);
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    return reinterpret_cast<JPS_AgentIdIterator>(
+        new AgentIdIterator(simulation->AgentsInRange(intoPoint(position), distance)));
+}
+
+JPS_AgentIdIterator
+JPS_Simulation_AgentsInPolygon(JPS_Simulation handle, JPS_Point* polygon, size_t len_polygon)
+{
+    assert(handle);
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    std::vector<Point> poly{};
+    poly.reserve(len_polygon);
+    std::transform(polygon, polygon + len_polygon, std::back_inserter(poly), intoPoint);
+    return reinterpret_cast<JPS_AgentIdIterator>(
+        new AgentIdIterator(simulation->AgentsInPolygon(poly)));
 }
 
 void JPS_Simulation_Free(JPS_Simulation handle)

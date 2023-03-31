@@ -3,6 +3,7 @@
 #pragma once
 
 #include "AgentExitSystem.hpp"
+#include "ConvexPolygon.hpp"
 #include "GenericAgent.hpp"
 #include "Geometry.hpp"
 #include "Journey.hpp"
@@ -17,8 +18,8 @@
 #include "TacticalDecisionSystem.hpp"
 
 #include <boost/iterator/zip_iterator.hpp>
+
 #include <chrono>
-#include <cstddef>
 #include <iterator>
 #include <memory>
 #include <tuple>
@@ -40,6 +41,10 @@ public:
     virtual void
     SwitchAgentProfile(GenericAgent::ID agent_id, OperationalModel::ParametersID profile_id) = 0;
     virtual uint64_t Iteration() const = 0;
+    virtual std::vector<GenericAgent::ID> AgentsInRange(Point p, double distance) = 0;
+    /// Returns IDs of all agents inside the defined polygon
+    /// @param polygon Required to be a simple convex polygon with CCW ordering.
+    virtual std::vector<GenericAgent::ID> AgentsInPolygon(const std::vector<Point>& polygon) = 0;
 };
 
 template <typename ModelType>
@@ -101,6 +106,10 @@ public:
         override;
 
     uint64_t Iteration() const override { return _clock.Iteration(); }
+
+    std::vector<GenericAgent::ID> AgentsInRange(Point p, double distance) override;
+
+    std::vector<GenericAgent::ID> AgentsInPolygon(const std::vector<Point>& polygon) override;
 
     const std::vector<AgentType>& Agents() const { return _agents; };
 };
@@ -208,4 +217,39 @@ void TypedSimulation<T>::SwitchAgentProfile(
 {
     _operationalDecisionSystem.ValidateAgentParameterProfileId(profile_id);
     Agent(agent_id).parameterProfileId = profile_id;
+}
+
+template <typename T>
+std::vector<GenericAgent::ID> TypedSimulation<T>::AgentsInRange(Point p, double distance)
+{
+    _neighborhoodSearch.Update(_agents);
+    const auto neighbors = _neighborhoodSearch.GetNeighboringAgents(p, distance);
+
+    std::vector<GenericAgent::ID> neighborIds{};
+    neighborIds.reserve(neighbors.size());
+    std::transform(
+        std::begin(neighbors),
+        std::end(neighbors),
+        std::back_inserter(neighborIds),
+        [](const auto& agent) { return agent->id; });
+    return neighborIds;
+}
+
+template <typename T>
+std::vector<GenericAgent::ID> TypedSimulation<T>::AgentsInPolygon(const std::vector<Point>& polygon)
+{
+    _neighborhoodSearch.Update(_agents);
+    const ConvexPolygon poly{polygon};
+    const auto [p, dist] = poly.ContainingCircle();
+
+    const auto candidates = _neighborhoodSearch.GetNeighboringAgents(p, dist);
+    std::vector<GenericAgent::ID> result{};
+    result.reserve(candidates.size());
+    std::for_each(
+        std::begin(candidates), std::end(candidates), [&result, &poly](const auto& agent) {
+            if(poly.IsInside(agent->pos)) {
+                result.push_back(agent->id);
+            }
+        });
+    return result;
 }

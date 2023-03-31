@@ -29,4 +29,5 @@ public:
 
     bool IsInside(Point p) const;
     Point Centroid() const { return centroid; }
+    std::tuple<Point, double> ContainingCircle() const;
 };
