@@ -7,7 +7,6 @@
 #include <exception>
 #include <iterator>
 #include <memory>
-#include <pybind11/detail/common.h>
 #include <stdexcept>
 #include <vector>
 
@@ -51,8 +50,6 @@ OWNED_WRAPPER(JPS_GeometryBuilder);
 OWNED_WRAPPER(JPS_OperationalModel);
 OWNED_WRAPPER(JPS_VelocityModelBuilder);
 OWNED_WRAPPER(JPS_GCFMModelBuilder);
-OWNED_WRAPPER(JPS_Areas);
-OWNED_WRAPPER(JPS_AreasBuilder);
 OWNED_WRAPPER(JPS_Journey);
 OWNED_WRAPPER(JPS_Simulation);
 OWNED_WRAPPER(JPS_GCFMModelAgentIterator);
@@ -315,70 +312,23 @@ PYBIND11_MODULE(py_jupedsim, m)
             JPS_ErrorMessage_Free(errorMsg);
             throw std::runtime_error{msg};
         });
-
-    py::class_<JPS_Areas_Wrapper>(m, "Areas");
-    py::class_<JPS_AreasBuilder_Wrapper>(m, "AreasBuilder")
-        .def(py::init(
-            []() { return std::make_unique<JPS_AreasBuilder_Wrapper>(JPS_AreasBuilder_Create()); }))
-        .def(
-            "add_area",
-            [](const JPS_AreasBuilder_Wrapper& w,
-               uint64_t id,
-               std::vector<std::tuple<double, double>> points,
-               std::vector<std::string> tags) {
-                std::vector<double> values{};
-                values.reserve(points.size() * 2);
-                for(const auto [x, y] : points) {
-                    values.emplace_back(x);
-                    values.emplace_back(y);
-                }
-                std::vector<const char*> tags_as_c_str;
-                tags_as_c_str.reserve(tags.size());
-                std::transform(
-                    tags.begin(),
-                    tags.end(),
-                    std::back_inserter(tags_as_c_str),
-                    [](const auto& str) { return str.c_str(); });
-
-                JPS_AreasBuilder_AddArea(
-                    w.handle,
-                    id,
-                    values.data(),
-                    values.size() / 2,
-                    tags_as_c_str.data(),
-                    tags.size());
-            },
-            py::kw_only(),
-            py::arg("id"),
-            py::arg("polygon"),
-            py::arg("labels"),
-            "Add area")
-        .def(
-            "build",
-            [](const JPS_AreasBuilder_Wrapper& w) {
-                JPS_ErrorMessage errorMsg{};
-                auto result = JPS_AreasBuilder_Build(w.handle, &errorMsg);
-                if(result) {
-                    return std::make_unique<JPS_Areas_Wrapper>(result);
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
-            },
-            "Build area");
     py::class_<JPS_Journey_Wrapper>(m, "Journey")
-        .def_static(
-            "make_waypoint_journey",
-            [](const std::vector<std::tuple<std::tuple<double, double>, double>>& list) {
-                std::vector<JPS_Waypoint> waypoints{};
-                waypoints.reserve(list.size());
-                for(const auto [pt, distance] : list) {
-                    const auto [x, y] = pt;
-                    waypoints.push_back(JPS_Waypoint{{x, y}, distance});
-                }
-                auto journey = JPS_Journey_Create_SimpleJourney(waypoints.data(), waypoints.size());
-                return std::make_unique<JPS_Journey_Wrapper>(journey);
-            });
+        .def(py::init([]() { return std::make_unique<JPS_Journey_Wrapper>(JPS_Journey_Create()); }))
+        .def(
+            "add_waypoint",
+            [](JPS_Journey_Wrapper& w, std::tuple<double, double> pt, double distance) {
+                JPS_Journey_AddWaypoint(
+                    w.handle, JPS_Point{std::get<0>(pt), std::get<1>(pt)}, distance);
+            })
+        .def("add_exit", [](JPS_Journey_Wrapper& w, std::vector<std::tuple<double, double>> poly) {
+            std::vector<JPS_Point> ppoly{};
+            ppoly.reserve(poly.size());
+            std::transform(
+                std::begin(poly), std::end(poly), std::back_inserter(ppoly), [](const auto& pt) {
+                    return JPS_Point{std::get<0>(pt), std::get<1>(pt)};
+                });
+            JPS_Journey_AddExit(w.handle, ppoly.data(), ppoly.size());
+        });
     py::class_<JPS_GCFMModelAgentIterator_Wrapper>(m, "GCFMModelAgentIterator")
         .def(
             "__iter__",
@@ -406,24 +356,21 @@ PYBIND11_MODULE(py_jupedsim, m)
         });
     py::class_<JPS_Simulation_Wrapper>(m, "Simulation")
         .def(
-            py::init([](JPS_OperationalModel_Wrapper& model,
-                        JPS_Geometry_Wrapper& geometry,
-                        JPS_Areas_Wrapper& areas,
-                        double dT) {
-                JPS_ErrorMessage errorMsg{};
-                auto result = JPS_Simulation_Create(
-                    model.handle, geometry.handle, areas.handle, dT, &errorMsg);
-                if(result) {
-                    return std::make_unique<JPS_Simulation_Wrapper>(result);
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
-            }),
+            py::init(
+                [](JPS_OperationalModel_Wrapper& model, JPS_Geometry_Wrapper& geometry, double dT) {
+                    JPS_ErrorMessage errorMsg{};
+                    auto result =
+                        JPS_Simulation_Create(model.handle, geometry.handle, dT, &errorMsg);
+                    if(result) {
+                        return std::make_unique<JPS_Simulation_Wrapper>(result);
+                    }
+                    auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                    JPS_ErrorMessage_Free(errorMsg);
+                    throw std::runtime_error{msg};
+                }),
             py::kw_only(),
             py::arg("model"),
             py::arg("geometry"),
-            py::arg("areas"),
             py::arg("dt"))
         .def(
             "add_journey",

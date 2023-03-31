@@ -3,7 +3,6 @@
 #pragma once
 
 #include "AgentExitSystem.hpp"
-#include "Area.hpp"
 #include "GenericAgent.hpp"
 #include "Geometry.hpp"
 #include "Journey.hpp"
@@ -13,6 +12,7 @@
 #include "OperationalModel.hpp"
 #include "Point.hpp"
 #include "SimulationClock.hpp"
+#include "StageDescription.hpp"
 #include "StrategicalDesicionSystem.hpp"
 #include "TacticalDecisionSystem.hpp"
 
@@ -23,6 +23,7 @@
 #include <memory>
 #include <tuple>
 #include <unordered_map>
+#include <vector>
 
 class Simulation
 {
@@ -32,9 +33,9 @@ public:
     /// Advances the simulation by one time step.
     virtual void Iterate() = 0;
     // TODO(kkratz): doc
-    virtual Journey::ID AddJourney(std::unique_ptr<Journey>&& journey) = 0;
-    virtual void RemoveAgent(uint64_t id) = 0;
-    virtual const std::vector<uint64_t>& RemovedAgents() const = 0;
+    virtual Journey::ID AddJourney(const std::vector<StageDescription>& journeyDescription) = 0;
+    virtual void RemoveAgent(GenericAgent::ID id) = 0;
+    virtual const std::vector<GenericAgent::ID>& RemovedAgents() const = 0;
     virtual size_t AgentCount() const = 0;
     virtual void
     SwitchAgentProfile(GenericAgent::ID agent_id, OperationalModel::ParametersID profile_id) = 0;
@@ -56,8 +57,7 @@ private:
     std::unique_ptr<RoutingEngine> _routingEngine;
     std::unique_ptr<CollisionGeometry> _geometry;
     std::vector<AgentType> _agents;
-    std::unique_ptr<Areas> _areas;
-    std::vector<uint64_t> _removedAgentsInLastIteration;
+    std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
     std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;
 
 public:
@@ -65,7 +65,6 @@ public:
         std::unique_ptr<ModelType> operationalModel,
         std::unique_ptr<CollisionGeometry>&& geometry,
         std::unique_ptr<RoutingEngine>&& routingEngine,
-        std::unique_ptr<Areas>&& areas,
         double dT);
 
     ~TypedSimulation() override = default;
@@ -84,17 +83,17 @@ public:
     void Iterate() override;
 
     // TODO(kkratz): doc
-    Journey::ID AddJourney(std::unique_ptr<Journey>&& journey) override;
+    Journey::ID AddJourney(const std::vector<StageDescription>& journeyDescription) override;
 
-    uint64_t AddAgent(AgentType&& agent);
+    GenericAgent::ID AddAgent(AgentType&& agent);
 
-    void RemoveAgent(uint64_t id) override;
+    void RemoveAgent(GenericAgent::ID) override;
 
     const AgentType& Agent(GenericAgent::ID id) const;
 
     AgentType& Agent(GenericAgent::ID id);
 
-    const std::vector<uint64_t>& RemovedAgents() const override;
+    const std::vector<GenericAgent::ID>& RemovedAgents() const override;
 
     size_t AgentCount() const override;
 
@@ -111,13 +110,11 @@ TypedSimulation<T>::TypedSimulation(
     std::unique_ptr<T> operationalModel,
     std::unique_ptr<CollisionGeometry>&& geometry,
     std::unique_ptr<RoutingEngine>&& routingEngine,
-    std::unique_ptr<Areas>&& areas,
     double dT)
     : _clock(dT)
     , _operationalDecisionSystem(std::move(operationalModel))
     , _routingEngine(std::move(routingEngine))
     , _geometry(std::move(geometry))
-    , _areas(std::move(areas))
 {
     // TODO(kkratz): Ensure all areas are fully contained inside the walkable area. Otherwise an
     // agent may try to navigate to a point outside the navigation mesh, resulting in an exception.
@@ -127,9 +124,9 @@ template <typename T>
 void TypedSimulation<T>::Iterate()
 {
     _neighborhoodSearch.Update(_agents);
-    _agentExitSystem.Run(*_areas, _agents, _removedAgentsInLastIteration);
-    _stategicalDecisionSystem.Run(*_areas, _journeys, _agents);
-    _tacticalDecisionSystem.Run(*_areas, *_routingEngine, _agents);
+    _agentExitSystem.Run(_agents, _removedAgentsInLastIteration);
+    _stategicalDecisionSystem.Run(_journeys, _agents);
+    _tacticalDecisionSystem.Run(*_routingEngine, _agents);
     _operationalDecisionSystem.Run(
         _clock.dT(), _clock.ElapsedTime(), _neighborhoodSearch, *_geometry, _agents);
 
@@ -138,15 +135,16 @@ void TypedSimulation<T>::Iterate()
 }
 
 template <typename T>
-Journey::ID TypedSimulation<T>::AddJourney(std::unique_ptr<Journey>&& journey)
+Journey::ID TypedSimulation<T>::AddJourney(const std::vector<StageDescription>& journeyDescription)
 {
+    auto journey = std::make_unique<Journey>(journeyDescription, _removedAgentsInLastIteration);
     const auto id = journey->Id();
     _journeys.emplace(id, std::move(journey));
     return id;
 }
 
 template <typename T>
-uint64_t TypedSimulation<T>::AddAgent(AgentType&& agent)
+GenericAgent::ID TypedSimulation<T>::AddAgent(AgentType&& agent)
 {
     agent.orientation = agent.orientation.Normalized();
 
@@ -159,11 +157,10 @@ uint64_t TypedSimulation<T>::AddAgent(AgentType&& agent)
 }
 
 template <typename T>
-void TypedSimulation<T>::RemoveAgent(uint64_t id)
+void TypedSimulation<T>::RemoveAgent(GenericAgent::ID id)
 {
-    const auto iter = std::find_if(std::begin(_agents), std::end(_agents), [id](auto& agent) {
-        return agent.id.getID() == id;
-    });
+    const auto iter = std::find_if(
+        std::begin(_agents), std::end(_agents), [id](auto& agent) { return agent.id == id; });
     if(iter == std::end(_agents)) {
         throw std::runtime_error(fmt::format("Unknown agent id {}", id));
     }
@@ -193,7 +190,7 @@ typename TypedSimulation<T>::AgentType& TypedSimulation<T>::Agent(GenericAgent::
 }
 
 template <typename T>
-const std::vector<uint64_t>& TypedSimulation<T>::RemovedAgents() const
+const std::vector<GenericAgent::ID>& TypedSimulation<T>::RemovedAgents() const
 {
     return _removedAgentsInLastIteration;
 }

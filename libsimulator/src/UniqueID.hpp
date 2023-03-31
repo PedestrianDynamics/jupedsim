@@ -21,6 +21,10 @@ namespace jps
 template <typename Tag, typename Integer = uint64_t>
 class UniqueID
 {
+public:
+    using underlying_type = Integer;
+
+private:
     /// Static count for the next available unique identifier.
     // As there is a bug in clang-tidy (https://bugs.llvm.org/show_bug.cgi?id=48040) the nolint is
     // needed for now NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)

@@ -66,22 +66,6 @@ TEST(GeometryBuilder, CanConstruct)
     ASSERT_NO_FATAL_FAILURE(JPS_GeometryBuilder_Free(builder));
 }
 
-TEST(Areas, CanConstruct)
-{
-    auto builder = JPS_AreasBuilder_Create();
-
-    std::vector<double> box{0, 0, 1, 0, 1, 1, 0, 1};
-    std::vector<const char*> labels{"exit", "carpet", "deathtrap"};
-    JPS_AreasBuilder_AddArea(builder, 1, box.data(), box.size() / 2, labels.data(), labels.size());
-
-    JPS_ErrorMessage message{};
-    auto areas = JPS_AreasBuilder_Build(builder, &message);
-    ASSERT_NE(areas, nullptr);
-    ASSERT_EQ(message, nullptr);
-    ASSERT_NO_FATAL_FAILURE(JPS_Areas_Free(areas));
-    ASSERT_NO_FATAL_FAILURE(JPS_AreasBuilder_Free(builder));
-}
-
 TEST(Simulation, CanSimulate)
 {
     auto geo_builder = JPS_GeometryBuilder_Create();
@@ -95,17 +79,6 @@ TEST(Simulation, CanSimulate)
     auto geometry = JPS_GeometryBuilder_Build(geo_builder, nullptr);
     ASSERT_NE(geometry, nullptr);
 
-    auto areas_builder = JPS_AreasBuilder_Create();
-
-    const uint16_t destinationId = 1;
-    std::vector<double> box{18, 4, 20, 4, 20, 6, 18, 6};
-    std::vector<const char*> labels{"exit"};
-    JPS_AreasBuilder_AddArea(
-        areas_builder, destinationId, box.data(), box.size() / 2, labels.data(), labels.size());
-
-    auto areas = JPS_AreasBuilder_Build(areas_builder, nullptr);
-    ASSERT_NE(areas, nullptr);
-
     auto modelBuilder = JPS_VelocityModelBuilder_Create(8, 0.1, 5, 0.02);
     const JPS_ModelParameterProfileId profile_id = 1;
     JPS_VelocityModelBuilder_AddParameterProfile(modelBuilder, profile_id, 1, 0.5, 1.2, 0.3);
@@ -113,11 +86,12 @@ TEST(Simulation, CanSimulate)
     auto model = JPS_VelocityModelBuilder_Build(modelBuilder, nullptr);
     ASSERT_NE(model, nullptr);
 
-    auto simulation = JPS_Simulation_Create(model, geometry, areas, 0.01, nullptr);
+    auto simulation = JPS_Simulation_Create(model, geometry, 0.01, nullptr);
     ASSERT_NE(simulation, nullptr);
 
-    JPS_Waypoint waypoints[] = {{{19, 5}, 1}};
-    auto journey = JPS_Journey_Create_SimpleJourney(waypoints, sizeof(waypoints));
+    auto journey = JPS_Journey_Create();
+    std::vector<JPS_Point> box{{18, 4}, {20, 4}, {20, 6}, {18, 6}};
+    JPS_Journey_AddExit(journey, box.data(), box.size());
     auto journeyId = JPS_Simulation_AddJourney(simulation, journey, nullptr);
 
     JPS_VelocityModelAgentParameters agent_parameters{};
@@ -151,18 +125,6 @@ struct SimulationTest : public ::testing::Test {
         ASSERT_NE(geometry, nullptr);
         JPS_GeometryBuilder_Free(geo_builder);
 
-        auto areas_builder = JPS_AreasBuilder_Create();
-
-        const uint16_t destinationId = 1;
-        std::vector<double> box{18, 4, 20, 4, 20, 6, 18, 6};
-        std::vector<const char*> labels{"exit"};
-        JPS_AreasBuilder_AddArea(
-            areas_builder, destinationId, box.data(), box.size() / 2, labels.data(), labels.size());
-
-        auto areas = JPS_AreasBuilder_Build(areas_builder, nullptr);
-        ASSERT_NE(areas, nullptr);
-        JPS_AreasBuilder_Free(areas_builder);
-
         auto modelBuilder = JPS_VelocityModelBuilder_Create(9, 0.1, 5, 0.02);
         JPS_VelocityModelBuilder_AddParameterProfile(
             modelBuilder, model_paramater_profile_id[0], 1, 0.5, 1.5, 0.3);
@@ -172,17 +134,18 @@ struct SimulationTest : public ::testing::Test {
 
         ASSERT_NE(model, nullptr);
 
-        simulation = JPS_Simulation_Create(model, geometry, areas, 0.01, nullptr);
+        simulation = JPS_Simulation_Create(model, geometry, 0.01, nullptr);
         ASSERT_NE(simulation, nullptr);
 
-        const std::vector<JPS_Waypoint> waypoints{{{1, 1}, 1}};
-        auto journey = JPS_Journey_Create_SimpleJourney(waypoints.data(), waypoints.size());
+        auto journey = JPS_Journey_Create();
+        JPS_Journey_AddWaypoint(journey, {1, 1}, 1);
         journey_id = JPS_Simulation_AddJourney(simulation, journey, nullptr);
+
+        JPS_Journey_Free(journey);
         ASSERT_NE(journey_id, 0);
 
         JPS_OperationalModel_Free(model);
         JPS_Geometry_Free(geometry);
-        JPS_Areas_Free(areas);
     }
 
     void TearDown() override { JPS_Simulation_Free(simulation); }
@@ -221,7 +184,12 @@ TEST_F(SimulationTest, CanChangeModelParameterProfiles)
     const auto agent_id = JPS_Simulation_AddVelocityModelAgent(simulation, agent_params, nullptr);
     ASSERT_NE(agent_id, 0);
     ASSERT_EQ(JPS_Simulation_AgentCount(simulation), 1);
-    ASSERT_EQ(JPS_Simulation_Iterate(simulation, nullptr), true);
+    JPS_ErrorMessage errorMsg{};
+    EXPECT_EQ(JPS_Simulation_Iterate(simulation, &errorMsg), true);
+    if(errorMsg) {
+        std::cerr << JPS_ErrorMessage_GetMessage(errorMsg) << std::endl;
+        JPS_ErrorMessage_Free(errorMsg);
+    }
     ASSERT_EQ(
         JPS_Simulation_SwitchAgentProfile(
             simulation, agent_id, model_paramater_profile_id[1], nullptr),

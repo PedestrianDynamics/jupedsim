@@ -2,7 +2,6 @@
 /// SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "Area.hpp"
 #include "RoutingEngine.hpp"
 
 #include <vector>
@@ -18,19 +17,13 @@ public:
     TacticalDecisionSystem(TacticalDecisionSystem&& other) = delete;
     TacticalDecisionSystem& operator=(TacticalDecisionSystem&& other) = delete;
 
-    void
-    Run(const std::map<Area::Id, Area> areas,
-        RoutingEngine& routingEngine,
-        std::vector<Agent>& agents) const;
+    void Run(RoutingEngine& routingEngine, std::vector<Agent>& agents) const;
 };
 
 template <typename Agent>
-void TacticalDecisionSystem<Agent>::Run(
-    const std::map<Area::Id, Area> areas,
-    RoutingEngine& routingEngine,
-    std::vector<Agent>& agents) const
+void TacticalDecisionSystem<Agent>::Run(RoutingEngine& routingEngine, std::vector<Agent>& agents)
+    const
 {
-
     for(auto& agent : agents) {
         const auto dest = agent.waypoint;
         const auto waypoints = routingEngine.ComputeWaypoint(agent.pos, dest);

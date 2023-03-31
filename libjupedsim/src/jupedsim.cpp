@@ -4,8 +4,9 @@
 
 #include "AgentIterator.hpp"
 #include "ErrorMessage.hpp"
+#include "Journey.hpp"
 
-#include <Area.hpp>
+#include "gtest/gtest.h"
 #include <CollisionGeometry.hpp>
 #include <Conversion.hpp>
 #include <GCFMModel.hpp>
@@ -13,18 +14,20 @@
 #include <GenericAgent.hpp>
 #include <Geometry.hpp>
 #include <GeometryBuilder.hpp>
-#include <Journey.hpp>
 #include <Logger.hpp>
 #include <OperationalModel.hpp>
 #include <OperationalModelType.hpp>
 #include <Point.hpp>
 #include <RoutingEngine.hpp>
 #include <Simulation.hpp>
+#include <StageDescription.hpp>
 #include <VelocityModel.hpp>
 #include <VelocityModelBuilder.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <exception>
+#include <iterator>
 #include <memory>
 #include <string>
 #include <vector>
@@ -284,70 +287,6 @@ void JPS_Geometry_Free(JPS_Geometry handle)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// AreasBuilder
-////////////////////////////////////////////////////////////////////////////////////////////////////
-JPS_AreasBuilder JPS_AreasBuilder_Create()
-{
-    return reinterpret_cast<JPS_AreasBuilder>(new AreasBuilder{});
-}
-
-void JPS_AreasBuilder_AddArea(
-    JPS_AreasBuilder handle,
-    uint64_t id,
-    double* points,
-    size_t pointCount,
-    const char** tags,
-    size_t tagCount)
-{
-    assert(handle);
-    auto builder = reinterpret_cast<AreasBuilder*>(handle);
-    std::vector<Point> lineLoop{};
-    lineLoop.reserve(pointCount);
-    for(size_t pointIndex = 0; pointIndex < pointCount; ++pointIndex) {
-        lineLoop.emplace_back(points[pointIndex * 2], points[pointIndex * 2 + 1]);
-    }
-    std::vector<std::string> labels{};
-    labels.reserve(tagCount);
-    for(size_t tagIndex = 0; tagIndex < tagCount; ++tagIndex) {
-        labels.emplace_back(tags[tagIndex]);
-    }
-    builder->AddArea(id, lineLoop, labels);
-}
-
-JPS_Areas JPS_AreasBuilder_Build(JPS_AreasBuilder handle, JPS_ErrorMessage* errorMessage)
-{
-    assert(handle);
-    auto builder = reinterpret_cast<AreasBuilder*>(handle);
-    JPS_Areas result{};
-    try {
-        result = reinterpret_cast<JPS_Areas>(new Areas(builder->Build()));
-    } catch(const std::exception& ex) {
-        if(errorMessage) {
-            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
-        }
-    } catch(...) {
-        if(errorMessage) {
-            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
-                new JPS_ErrorMessage_t{"Unknown internal error."});
-        }
-    }
-    return result;
-}
-
-void JPS_AreasBuilder_Free(JPS_AreasBuilder handle)
-{
-    delete reinterpret_cast<AreasBuilder*>(handle);
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// Areas
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void JPS_Areas_Free(JPS_Areas handle)
-{
-    delete reinterpret_cast<Areas*>(handle);
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 /// GCFMModelAgentIterator
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 const JPS_GCFMModelAgentParameters*
@@ -386,19 +325,33 @@ void JPS_VelocityModelAgentIterator_Free(JPS_VelocityModelAgentIterator handle)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Journey
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-JPS_Journey JPS_Journey_Create_SimpleJourney(const JPS_Waypoint* waypoints, size_t count_waypoints)
+using JourneyDesc = std::vector<StageDescription>;
+
+JPS_Journey JPS_Journey_Create()
 {
-    auto* journey = new Journey{};
-    for(size_t index = 0; index < count_waypoints; ++index) {
-        const auto& waypoint = waypoints[index];
-        journey->AddWaypoint({waypoint.position.x, waypoint.position.y}, waypoint.distance);
-    }
-    return reinterpret_cast<JPS_Journey>(journey);
+    return reinterpret_cast<JPS_Journey>(new JourneyDesc{});
+}
+
+void JPS_Journey_AddWaypoint(JPS_Journey handle, JPS_Point position, double distance)
+{
+    assert(handle);
+    auto journey = reinterpret_cast<JourneyDesc*>(handle);
+    journey->push_back(WaypointDescription{intoPoint(position), distance});
+}
+
+void JPS_Journey_AddExit(JPS_Journey handle, JPS_Point* polygon, size_t len_polygon)
+{
+    assert(handle);
+    auto journey = reinterpret_cast<JourneyDesc*>(handle);
+    std::vector<Point> loop{};
+    loop.reserve(len_polygon);
+    std::transform(polygon, polygon + len_polygon, std::back_inserter(loop), intoPoint);
+    journey->push_back(ExitDescription{std::move(loop)});
 }
 
 void JPS_Journey_Free(JPS_Journey handle)
 {
-    delete reinterpret_cast<Journey*>(handle);
+    delete reinterpret_cast<JourneyDesc*>(handle);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -407,13 +360,11 @@ void JPS_Journey_Free(JPS_Journey handle)
 JPS_Simulation JPS_Simulation_Create(
     JPS_OperationalModel model,
     JPS_Geometry geometry,
-    JPS_Areas areas,
     double dT,
     JPS_ErrorMessage* errorMessage)
 {
     assert(model);
     assert(geometry);
-    assert(areas);
     JPS_Simulation result{};
     try {
         auto geometryInternal = reinterpret_cast<Geometry*>(geometry);
@@ -424,27 +375,16 @@ JPS_Simulation JPS_Simulation_Create(
         auto modelInternal = reinterpret_cast<OperationalModel*>(model);
         auto model = modelInternal->Clone();
 
-        auto areasInternal = reinterpret_cast<Areas*>(areas);
-        auto areas = std::make_unique<Areas>(*areasInternal);
-
         if(dynamic_cast<VelocityModel*>(model.get())) {
             auto ptr = dynamic_cast<VelocityModel*>(model.release());
             auto derived = std::unique_ptr<VelocityModel>(ptr);
             result = reinterpret_cast<JPS_Simulation>(new TypedSimulation<VelocityModel>(
-                std::move(derived),
-                std::move(collisionGeometry),
-                std::move(routingEngine),
-                std::move(areas),
-                dT));
+                std::move(derived), std::move(collisionGeometry), std::move(routingEngine), dT));
         } else if(dynamic_cast<GCFMModel*>(model.get())) {
             auto ptr = dynamic_cast<GCFMModel*>(model.release());
             auto derived = std::unique_ptr<GCFMModel>(ptr);
             result = reinterpret_cast<JPS_Simulation>(new TypedSimulation<GCFMModel>(
-                std::move(derived),
-                std::move(collisionGeometry),
-                std::move(routingEngine),
-                std::move(areas),
-                dT));
+                std::move(derived), std::move(collisionGeometry), std::move(routingEngine), dT));
         } else {
             throw std::runtime_error("Unknown model type encountered");
         }
@@ -470,10 +410,10 @@ JPS_JourneyId JPS_Simulation_AddJourney(
     assert(journey);
 
     auto simulation = reinterpret_cast<Simulation*>(handle);
-    auto journeyInternal = reinterpret_cast<Journey*>(journey);
+    auto journeyInternal = reinterpret_cast<JourneyDesc*>(journey);
     auto result = Journey::ID::Invalid.getID();
     try {
-        result = simulation->AddJourney(std::unique_ptr<Journey>(journeyInternal->Clone())).getID();
+        result = simulation->AddJourney(*journeyInternal).getID();
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
@@ -493,7 +433,7 @@ JPS_AgentId JPS_Simulation_AddGCFMModelAgent(
     JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
-    JPS_AgentId result{};
+    auto result = GenericAgent::ID::Invalid;
     auto simulation_base = reinterpret_cast<Simulation*>(handle);
     auto simulation = dynamic_cast<TypedSimulation<GCFMModel>*>(simulation_base);
     if(simulation == nullptr) {
@@ -501,7 +441,7 @@ JPS_AgentId JPS_Simulation_AddGCFMModelAgent(
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{
                 "Simulation is not using GCFMModel, cannot add an Agent with this model."});
         }
-        return result;
+        return result.getID();
     }
     try {
         GCFMModel::Data agent(
@@ -523,7 +463,7 @@ JPS_AgentId JPS_Simulation_AddGCFMModelAgent(
                 new JPS_ErrorMessage_t{"Unknown internal error."});
         }
     }
-    return result;
+    return result.getID();
 }
 
 JPS_AgentId JPS_Simulation_AddVelocityModelAgent(
@@ -532,7 +472,7 @@ JPS_AgentId JPS_Simulation_AddVelocityModelAgent(
     JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
-    JPS_AgentId result{};
+    auto result = GenericAgent::ID::Invalid;
     auto simulation_base = reinterpret_cast<Simulation*>(handle);
     auto simulation = dynamic_cast<TypedSimulation<VelocityModel>*>(simulation_base);
     if(simulation == nullptr) {
@@ -540,7 +480,7 @@ JPS_AgentId JPS_Simulation_AddVelocityModelAgent(
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{
                 "Simulation is not using VelocityModel, cannot add an Agent with this model."});
         }
-        return result;
+        return result.getID();
     }
     try {
         VelocityModel::Data agent(
@@ -561,7 +501,7 @@ JPS_AgentId JPS_Simulation_AddVelocityModelAgent(
                 new JPS_ErrorMessage_t{"Unknown internal error."});
         }
     }
-    return result;
+    return result.getID();
 }
 
 bool JPS_Simulation_RemoveAgent(
@@ -654,7 +594,10 @@ size_t JPS_Simulation_RemovedAgents(JPS_Simulation handle, const JPS_AgentId** d
     assert(handle);
     auto simulation = reinterpret_cast<Simulation*>(handle);
     const auto& agents = simulation->RemovedAgents();
-    *data = agents.data();
+    static_assert(
+        std::is_same<JPS_AgentId, GenericAgent::ID::underlying_type>::value,
+        "GenericAgentIDs cannot be casted in JPS_AgentId");
+    *data = reinterpret_cast<const JPS_AgentId*>(agents.data());
     return agents.size();
 }
 

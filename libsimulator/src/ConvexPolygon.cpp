@@ -2,7 +2,9 @@
 /// SPDX-License-Identifier: LGPL-3.0-or-later
 #include "ConvexPolygon.hpp"
 
-bool ConvexPolygon::Inside(Point p) const
+#include "GeometricFunctions.hpp"
+
+bool ConvexPolygon::IsInside(Point p) const
 {
     size_t index_low = 0;
     size_t index_high = points.size();
@@ -21,10 +23,4 @@ bool ConvexPolygon::Inside(Point p) const
     }
 
     return triarea2d(points[index_low], points[index_high], p) < 0.0;
-}
-
-Point ConvexPolygon::Centroid() const
-{
-    const auto sum = std::accumulate(std::begin(points), std::end(points), Point{});
-    return sum / points.size();
 }
