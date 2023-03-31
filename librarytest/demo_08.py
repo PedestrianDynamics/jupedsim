@@ -96,8 +96,9 @@ def main():
 
     model = model_builder.build()
 
+    dt = 0.01
     simulation = jps.Simulation(
-        model=model, geometry=geometry, areas=areas, dt=0.01
+        model=model, geometry=geometry, areas=areas, dt=dt
     )
 
     # waypoints
@@ -170,10 +171,12 @@ def main():
     writer = JpsCoreStyleTrajectoryWriter(pathlib.Path("08.txt"))
     fps = 10;
     writer.begin_writing(fps)
-    
+    #fps * iterations_per_frame = 1 / dt
+    iterations_per_frame = 10
     agents_added = False
     time_to_deploy = 2.0
-    iteration_to_deploy = time_to_deploy * fps * fps;
+    
+    iteration_to_deploy = time_to_deploy * fps * iterations_per_frame;
     while simulation.agent_count() > 0 or not agents_added:
         if simulation.iteration_count() == iteration_to_deploy:
             agents = []
@@ -202,7 +205,7 @@ def main():
                 agents_added = True
                         
         simulation.iterate()
-        if simulation.iteration_count() % fps == 0:	
+        if simulation.iteration_count() % iterations_per_frame == 0:	
             writer.write_iteration_state(simulation)
     writer.end_writing()
     print(
