@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from shapely.geometry import Polygon
-from shapely.geometry import LineString, Point
+from shapely.ops import polygonize
 from shapely.ops import unary_union
 import matplotlib.pyplot as plt
 
@@ -14,10 +14,9 @@ if __name__ == "__main__":
         subrooms = room.findall('.//subroom')
         for subroom in subrooms:
             room_obstacles = []
-            ordered_lines = []
             room_polygon = []
             room_lines = []
-            polygons = subroom.findall('polygon')
+            # parse all obstacles into room obstacles list
             obstacles = subroom.findall('obstacle')
             for obstacle in obstacles:
                 temp_obstacle = []
@@ -31,71 +30,42 @@ if __name__ == "__main__":
                             last_point = point
 
                 room_obstacles.append(temp_obstacle)
-
+            # parse all edges of polygon into room_lines list
+            polygons = subroom.findall('polygon')
             for polygon in polygons:
                 vertices = polygon.findall('vertex')
                 point1 = (float(vertices[0].get('px')), float(vertices[0].get('py')))
                 point2 = (float(vertices[1].get('px')), float(vertices[1].get('py')))
                 room_lines.append([point1, point2])
 
+            # add all transitions with according room id and subroom id to room_lines list
             transitions = root.findall('.//transition')
             subroom_id = subroom.attrib['id']
+            room_id = room.attrib['id']
             for transition in transitions:
-                if transition.attrib['subroom1_id'] == subroom_id \
-                        and room.attrib['id'] == transition.attrib['room1_id']\
-                        or\
-                        transition.attrib['subroom2_id'] == subroom_id \
-                        and room.attrib['id'] == transition.attrib['room2_id']:
+                room1_id = transition.attrib['room1_id']
+                room2_id = transition.attrib['room2_id']
+                sub1_id = transition.attrib['subroom1_id']
+                sub2_id = transition.attrib['subroom2_id']
+                if sub1_id == subroom_id and room_id == room1_id \
+                        or sub2_id == subroom_id and room2_id == room_id:
                     vertices = transition.findall('vertex')
                     point1 = (float(vertices[0].get('px')), float(vertices[0].get('py')))
                     point2 = (float(vertices[1].get('px')), float(vertices[1].get('py')))
                     room_lines.append([point1, point2])
 
+            # put lines together to form a polygon
+            room_polygon = polygonize(room_lines)[0]
 
-            # remove double entries
-            unique_lines = []
-            for line in room_lines:
-                if line not in unique_lines:
-                    unique_lines.append(line)
-            room_lines = unique_lines
-
-            # sort unordered lines to ordered lines
-            ending_pt = room_lines[0][0]
-            curr_pt = room_lines[0][1]
-            ordered_lines.append(room_lines[0])
-            room_lines.pop(0)
-            last_pt = curr_pt
-            while len(room_lines) > 0:
-                for i, line in enumerate(room_lines):
-                    if line[0] == curr_pt:
-                        curr_pt = line[1]
-                        ordered_lines.append(room_lines[i])
-                        room_lines.pop(i)
-                        break
-                    if line[1] == curr_pt:
-                        curr_pt = line[0]
-                        ordered_lines.append(room_lines[i])
-                        room_lines.pop(i)
-                        break
-                if curr_pt == last_pt and len(room_lines) > 0:
-                    print("something doesn´t add up")
-                    break
-                else:
-                    last_pt = curr_pt
-
-            for line in ordered_lines:
-                if line[0] not in room_polygon:
-                    room_polygon.append(line[0])
-                if line[1] not in room_polygon:
-                    room_polygon.append(line[1])
-
-            # subroom geometry is now parsed
-            geometry_polygons.append(Polygon(room_polygon, room_obstacles))
-
-    #for polygon in geometry_polygons:
-    #    plt.plot(*polygon.exterior.xy)
-    #plt.show()
+            # create polygon from room and obstacles and add to list of geometries polygons
+            geometry_polygons.append(Polygon(room_polygon.exterior, room_obstacles))
 
     merged_polygon = unary_union(geometry_polygons)
+    # -- only plotting from here --
+
+    # for polygon in geometry_polygons:
+    #    plt.plot(*polygon.exterior.xy)
+    # plt.show()
+
     plt.plot(*merged_polygon.exterior.xy)
     plt.show()
