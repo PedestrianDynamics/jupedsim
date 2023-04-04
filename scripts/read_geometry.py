@@ -1,11 +1,23 @@
 import xml.etree.ElementTree as ET
+from shapely import  to_wkt
 from shapely.geometry import Polygon
 from shapely.ops import polygonize
 from shapely.ops import unary_union
 import matplotlib.pyplot as plt
 
-if __name__ == "__main__":
-    tree = ET.parse('correct_aknz_geo_arrival.xml')
+def convert_to_wkt(geo_file, out_file, all_rooms=False):
+    """
+    Parses the geo_file and converts geometry to WKT.
+
+    :param geo_file: The file containing the geometry data.
+
+    :param out_file: The file to write the output to.
+
+    :param all_rooms: (optional) If True, writes each room to the output file separately.
+                      If False, writes only the entire geometry to the output file.
+    :type all_rooms: bool
+    """
+    tree = ET.parse(geo_file)
     root = tree.getroot()
     rooms = root.findall('.//room')
     # list with all polygons from this geometry
@@ -14,7 +26,6 @@ if __name__ == "__main__":
         subrooms = room.findall('.//subroom')
         for subroom in subrooms:
             room_obstacles = []
-            room_polygon = []
             room_lines = []
             # parse all obstacles into room obstacles list
             obstacles = subroom.findall('obstacle')
@@ -49,6 +60,7 @@ if __name__ == "__main__":
                 sub2_id = transition.attrib['subroom2_id']
                 if sub1_id == subroom_id and room_id == room1_id \
                         or sub2_id == subroom_id and room2_id == room_id:
+                    # the transition matches the current subroom
                     vertices = transition.findall('vertex')
                     point1 = (float(vertices[0].get('px')), float(vertices[0].get('py')))
                     point2 = (float(vertices[1].get('px')), float(vertices[1].get('py')))
@@ -59,13 +71,21 @@ if __name__ == "__main__":
 
             # create polygon from room and obstacles and add to list of geometries polygons
             geometry_polygons.append(Polygon(room_polygon.exterior, room_obstacles))
+    if all_rooms:
+        with open(out_file, 'a') as out:
+            for poly in geometry_polygons:
+                out.write(to_wkt(poly))
+                out.write("\n")
+    else:
+        merged_polygon = unary_union(geometry_polygons)
+        with open(out_file, 'a') as out:
+            out.write(to_wkt(merged_polygon))
 
-    merged_polygon = unary_union(geometry_polygons)
-    # -- only plotting from here --
 
-    # for polygon in geometry_polygons:
-    #    plt.plot(*polygon.exterior.xy)
-    # plt.show()
 
-    plt.plot(*merged_polygon.exterior.xy)
-    plt.show()
+
+if __name__ == "__main__":
+    convert_to_wkt('correct_aknz_geo_arrival.xml', 'wkt_geo.txt', True)
+    with open('wkt_geo.txt', 'r') as f:
+        for line in f:
+            print(line)
