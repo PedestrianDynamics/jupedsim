@@ -5,15 +5,9 @@ add_library(simulator STATIC
     src/AABB.cpp
     src/AABB.hpp
     src/AgentExitSystem.hpp
-    src/Area.cpp
-    src/Area.hpp
-    src/CGALPolygon.cpp
-    src/CGALPolygon.hpp
     src/Clonable.hpp
     src/CollisionGeometry.cpp
     src/CollisionGeometry.hpp
-    src/ConvexPolygon.cpp
-    src/ConvexPolygon.hpp
     src/DTriangulation.cpp
     src/DTriangulation.hpp
     src/Ellipse.cpp
@@ -44,6 +38,8 @@ add_library(simulator STATIC
     src/OperationalModel.hpp
     src/Point.cpp
     src/Point.hpp
+    src/Polygon.cpp
+    src/Polygon.hpp
     src/RoutingEngine.cpp
     src/RoutingEngine.hpp
     src/Simulation.hpp

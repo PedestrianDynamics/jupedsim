@@ -376,7 +376,7 @@ void JPS_Journey_AddExit(JPS_Journey handle, JPS_Point* polygon, size_t len_poly
     std::vector<Point> loop{};
     loop.reserve(len_polygon);
     std::transform(polygon, polygon + len_polygon, std::back_inserter(loop), intoPoint);
-    journey->push_back(ExitDescription{std::move(loop)});
+    journey->push_back(ExitDescription{Polygon(loop)});
 }
 
 void JPS_Journey_Free(JPS_Journey handle)

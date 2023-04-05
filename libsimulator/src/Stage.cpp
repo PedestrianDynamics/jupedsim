@@ -2,10 +2,10 @@
 /// SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Stage.hpp"
 
-#include "ConvexPolygon.hpp"
 #include "GenericAgent.hpp"
 #include "Point.hpp"
 #include "Simulation.hpp"
+#include <stdexcept>
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Waypoint
@@ -28,9 +28,12 @@ Point Waypoint::Target() const
 ////////////////////////////////////////////////////////////////////////////////
 /// Exit
 ////////////////////////////////////////////////////////////////////////////////
-Exit::Exit(ConvexPolygon&& area_, std::vector<GenericAgent::ID>& toRemove_)
+Exit::Exit(Polygon area_, std::vector<GenericAgent::ID>& toRemove_)
     : area(std::move(area_)), toRemove(toRemove_)
 {
+    if(!area.IsConvex()) {
+        throw std::runtime_error("Exit areas need to be bounded by convex polygons.");
+    }
 }
 
 bool Exit::IsCompleted(const GenericAgent& agent) const
