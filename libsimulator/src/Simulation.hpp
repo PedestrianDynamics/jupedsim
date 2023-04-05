@@ -3,7 +3,6 @@
 #pragma once
 
 #include "AgentExitSystem.hpp"
-#include "ConvexPolygon.hpp"
 #include "GenericAgent.hpp"
 #include "Geometry.hpp"
 #include "Journey.hpp"
@@ -12,6 +11,7 @@
 #include "OperationalDecisionSystem.hpp"
 #include "OperationalModel.hpp"
 #include "Point.hpp"
+#include "Polygon.hpp"
 #include "SimulationClock.hpp"
 #include "StageDescription.hpp"
 #include "StrategicalDesicionSystem.hpp"
@@ -20,6 +20,7 @@
 #include <boost/iterator/zip_iterator.hpp>
 
 #include <chrono>
+#include <exception>
 #include <iterator>
 #include <memory>
 #include <tuple>
@@ -239,7 +240,10 @@ template <typename T>
 std::vector<GenericAgent::ID> TypedSimulation<T>::AgentsInPolygon(const std::vector<Point>& polygon)
 {
     _neighborhoodSearch.Update(_agents);
-    const ConvexPolygon poly{polygon};
+    const Polygon poly{polygon};
+    if(!poly.IsConvex()) {
+        throw std::runtime_error("Polygon needs to be simple and convex");
+    }
     const auto [p, dist] = poly.ContainingCircle();
 
     const auto candidates = _neighborhoodSearch.GetNeighboringAgents(p, dist);

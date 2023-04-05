@@ -2,9 +2,10 @@
 /// SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "ConvexPolygon.hpp"
 #include "Point.hpp"
+#include "Polygon.hpp"
 #include "UniqueID.hpp"
+
 #include <vector>
 
 class Simulation;
@@ -33,11 +34,11 @@ public:
 /// Notifies simulation of all agents that need to be removed at the beginning of the next iteration
 class Exit : public Stage
 {
-    ConvexPolygon area;
+    Polygon area;
     std::vector<jps::UniqueID<GenericAgent>>& toRemove;
 
 public:
-    Exit(ConvexPolygon&& area, std::vector<jps::UniqueID<GenericAgent>>& toRemove_);
+    Exit(Polygon area, std::vector<jps::UniqueID<GenericAgent>>& toRemove_);
     ~Exit() override = default;
     bool IsCompleted(const GenericAgent& agent) const override;
     Point Target() const override;

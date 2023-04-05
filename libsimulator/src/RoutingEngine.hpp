@@ -3,13 +3,15 @@
 #pragma once
 
 #include "AABB.hpp"
-#include "CGALPolygon.hpp"
 #include "Graph.hpp"
 #include "IteratorPair.hpp"
 #include "Line.hpp"
 #include "Point.hpp"
 #include "Triangle.hpp"
+
 #include <vector>
+
+#include <CGAL/Boolean_set_operations_2.h>
 
 class RoutingEngine
 {

@@ -31,7 +31,7 @@ Journey::Journey(
                     if constexpr(std::is_same_v<T, WaypointDescription>) {
                         result = std::make_unique<Waypoint>(var.position, var.distance);
                     } else if constexpr(std::is_same_v<T, ExitDescription>) {
-                        result = std::make_unique<Exit>(var.lineloop, toRemove);
+                        result = std::make_unique<Exit>(var.polygon, toRemove);
                     } else {
                         static_assert(always_false_v<T>, "non-exhaustive visitor!");
                     }
