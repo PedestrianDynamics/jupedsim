@@ -1,21 +1,16 @@
 import xml.etree.ElementTree as ET
-from shapely import  to_wkt
+from shapely import to_wkt
 from shapely.geometry import Polygon
 from shapely.ops import polygonize
 from shapely.ops import unary_union
-import matplotlib.pyplot as plt
 
-def convert_to_wkt(geo_file, out_file, all_rooms=False):
+
+def parse_geo_file(geo_file):
     """
-    Parses the geo_file and converts geometry to WKT.
-
+    Parses the geo_file returns all rooms as shapely polygon.
     :param geo_file: The file containing the geometry data.
-
-    :param out_file: The file to write the output to.
-
-    :param all_rooms: (optional) If True, writes each room to the output file separately.
-                      If False, writes only the entire geometry to the output file.
-    :type all_rooms: bool
+    :returns: geo_file as list of rooms as polygon
+    :rtype: list of shapely polygons corresponding to the geometry
     """
     tree = ET.parse(geo_file)
     root = tree.getroot()
@@ -38,7 +33,6 @@ def convert_to_wkt(geo_file, out_file, all_rooms=False):
                         point = (float(vertex.get('px')), float(vertex.get('py')))
                         if point not in temp_obstacle:
                             temp_obstacle.append(point)
-                            last_point = point
 
                 room_obstacles.append(temp_obstacle)
             # parse all edges of polygon into room_lines list
@@ -71,6 +65,22 @@ def convert_to_wkt(geo_file, out_file, all_rooms=False):
 
             # create polygon from room and obstacles and add to list of geometries polygons
             geometry_polygons.append(Polygon(room_polygon.exterior, room_obstacles))
+
+    return geometry_polygons
+
+
+def convert_to_wkt(geometry_polygons, out_file, all_rooms=False):
+    """
+    converts geometry_polygons into wkt and writes them in out_file
+
+    :param geometry_polygons: list of shapely polygons corresponding to the geometry
+
+    :param out_file: The file to write the output to.
+
+    :param all_rooms: (optional) If True, writes each room to the output file separately.
+                      If False, writes only the entire geometry to the output file.
+    :type all_rooms: bool
+    """
     if all_rooms:
         with open(out_file, 'a') as out:
             for poly in geometry_polygons:
@@ -82,10 +92,22 @@ def convert_to_wkt(geo_file, out_file, all_rooms=False):
             out.write(to_wkt(merged_polygon))
 
 
+def remove_existing_rooms(existing_polygons, new_polygons):
+    """removes all existing polygons from new_polygons"""
+    exists = [False] * len(new_polygons)
+    for i, poly in enumerate(new_polygons):
+        for existing_polygon in existing_polygons:
+            if poly.equals(existing_polygon):
+                exists[i] = True
+                break
+    for i in range(len(exists)):
+        if exists[i]:
+            del new_polygons[i]
 
 
 if __name__ == "__main__":
-    convert_to_wkt('correct_aknz_geo_arrival.xml', 'wkt_geo.txt', True)
+    geo_polygons = parse_geo_file('correct_aknz_geo_arrival.xml')
+    convert_to_wkt(geo_polygons, 'wkt_geo.txt', False)
     with open('wkt_geo.txt', 'r') as f:
         for line in f:
             print(line)
