@@ -89,10 +89,11 @@ TEST(Simulation, CanSimulate)
     auto simulation = JPS_Simulation_Create(model, geometry, 0.01, nullptr);
     ASSERT_NE(simulation, nullptr);
 
-    auto journey = JPS_Journey_Create();
+    auto journey = JPS_JourneyDescription_Create();
     std::vector<JPS_Point> box{{18, 4}, {20, 4}, {20, 6}, {18, 6}};
-    JPS_Journey_AddExit(journey, box.data(), box.size());
+    JPS_JourneyDescription_AddExit(journey, box.data(), box.size());
     auto journeyId = JPS_Simulation_AddJourney(simulation, journey, nullptr);
+    JPS_JourneyDescription_Free(journey);
 
     JPS_VelocityModelAgentParameters agent_parameters{};
     agent_parameters.journeyId = journeyId;
@@ -137,11 +138,11 @@ struct SimulationTest : public ::testing::Test {
         simulation = JPS_Simulation_Create(model, geometry, 0.01, nullptr);
         ASSERT_NE(simulation, nullptr);
 
-        auto journey = JPS_Journey_Create();
-        JPS_Journey_AddWaypoint(journey, {1, 1}, 1);
+        auto journey = JPS_JourneyDescription_Create();
+        JPS_JourneyDescription_AddWaypoint(journey, {1, 1}, 1);
         journey_id = JPS_Simulation_AddJourney(simulation, journey, nullptr);
 
-        JPS_Journey_Free(journey);
+        JPS_JourneyDescription_Free(journey);
         ASSERT_NE(journey_id, 0);
 
         JPS_OperationalModel_Free(model);

@@ -17,4 +17,9 @@ struct ExitDescription {
     Polygon polygon;
 };
 
-using StageDescription = std::variant<WaypointDescription, ExitDescription>;
+struct NotifiableWaitingSetDescription {
+    std::vector<Point> slots;
+};
+
+using StageDescription =
+    std::variant<WaypointDescription, ExitDescription, NotifiableWaitingSetDescription>;

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "AgentExitSystem.hpp"
+#include "Events.hpp"
 #include "GenericAgent.hpp"
 #include "Geometry.hpp"
 #include "Journey.hpp"
@@ -16,6 +17,7 @@
 #include "StageDescription.hpp"
 #include "StrategicalDesicionSystem.hpp"
 #include "TacticalDecisionSystem.hpp"
+#include "TemplateHelper.hpp"
 
 #include <boost/iterator/zip_iterator.hpp>
 
@@ -23,6 +25,7 @@
 #include <exception>
 #include <iterator>
 #include <memory>
+#include <stdexcept>
 #include <tuple>
 #include <unordered_map>
 #include <vector>
@@ -46,6 +49,7 @@ public:
     /// Returns IDs of all agents inside the defined polygon
     /// @param polygon Required to be a simple convex polygon with CCW ordering.
     virtual std::vector<GenericAgent::ID> AgentsInPolygon(const std::vector<Point>& polygon) = 0;
+    virtual void Notify(Event evt) = 0;
 };
 
 template <typename ModelType>
@@ -112,6 +116,8 @@ public:
 
     std::vector<GenericAgent::ID> AgentsInPolygon(const std::vector<Point>& polygon) override;
 
+    void Notify(Event evt) override;
+
     const std::vector<AgentType>& Agents() const { return _agents; };
 };
 
@@ -135,6 +141,11 @@ void TypedSimulation<T>::Iterate()
 {
     _neighborhoodSearch.Update(_agents);
     _agentExitSystem.Run(_agents, _removedAgentsInLastIteration);
+
+    for(auto& [_, j] : _journeys) {
+        j->Update(_neighborhoodSearch);
+    }
+
     _stategicalDecisionSystem.Run(_journeys, _agents);
     _tacticalDecisionSystem.Run(*_routingEngine, _agents);
     _operationalDecisionSystem.Run(
@@ -256,4 +267,24 @@ std::vector<GenericAgent::ID> TypedSimulation<T>::AgentsInPolygon(const std::vec
             }
         });
     return result;
+}
+
+template <typename T>
+void TypedSimulation<T>::Notify(Event evt)
+{
+    std::visit(
+        [this](auto&& evt) {
+            using EvtT = std::decay_t<decltype(evt)>;
+            if constexpr(std::is_same_v<EvtT, NotifyWaitingSet>) {
+                auto journey = _journeys.find(evt.journeyId);
+                if(journey == std::end(_journeys)) {
+                    throw std::runtime_error(fmt::format(
+                        "Cannot send event to unknown journey {}", evt.journeyId.getID()));
+                }
+                journey->second->HandleNofifyWaitingSetEvent(evt);
+            } else {
+                static_assert(always_false_v<EvtT>, "non-exhaustive visitor!");
+            }
+        },
+        evt);
 }
