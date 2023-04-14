@@ -27,8 +27,13 @@ namespace py = pybind11;
 #define OWNED_WRAPPER(cls)                                                                         \
     struct cls##_Wrapper {                                                                         \
         cls handle;                                                                                \
-        cls##_Wrapper(cls h) : handle(h) {}                                                        \
-        ~cls##_Wrapper() { cls##_Free(handle); }                                                   \
+        cls##_Wrapper(cls h) : handle(h)                                                           \
+        {                                                                                          \
+        }                                                                                          \
+        ~cls##_Wrapper()                                                                           \
+        {                                                                                          \
+            cls##_Free(handle);                                                                    \
+        }                                                                                          \
         cls##_Wrapper(const cls##_Wrapper&) = delete;                                              \
         cls##_Wrapper& operator=(const cls##_Wrapper&) = delete;                                   \
         cls##_Wrapper(cls##_Wrapper&&) = delete;                                                   \
@@ -38,7 +43,9 @@ namespace py = pybind11;
 #define WRAPPER(cls)                                                                               \
     struct cls##_Wrapper {                                                                         \
         cls handle;                                                                                \
-        cls##_Wrapper(cls h) : handle(h) {}                                                        \
+        cls##_Wrapper(cls h) : handle(h)                                                           \
+        {                                                                                          \
+        }                                                                                          \
         ~cls##_Wrapper() = default;                                                                \
         cls##_Wrapper(const cls##_Wrapper&) = delete;                                              \
         cls##_Wrapper& operator=(const cls##_Wrapper&) = delete;                                   \
@@ -52,7 +59,7 @@ OWNED_WRAPPER(JPS_GeometryBuilder);
 OWNED_WRAPPER(JPS_OperationalModel);
 OWNED_WRAPPER(JPS_VelocityModelBuilder);
 OWNED_WRAPPER(JPS_GCFMModelBuilder);
-OWNED_WRAPPER(JPS_Journey);
+OWNED_WRAPPER(JPS_JourneyDescription);
 OWNED_WRAPPER(JPS_Simulation);
 OWNED_WRAPPER(JPS_GCFMModelAgentIterator);
 OWNED_WRAPPER(JPS_VelocityModelAgentIterator);
@@ -343,23 +350,47 @@ PYBIND11_MODULE(py_jupedsim, m)
             JPS_ErrorMessage_Free(errorMsg);
             throw std::runtime_error{msg};
         });
-    py::class_<JPS_Journey_Wrapper>(m, "Journey")
-        .def(py::init([]() { return std::make_unique<JPS_Journey_Wrapper>(JPS_Journey_Create()); }))
+    py::class_<JPS_JourneyDescription_Wrapper>(m, "JourneyDescription")
+        .def(py::init([]() {
+            return std::make_unique<JPS_JourneyDescription_Wrapper>(
+                JPS_JourneyDescription_Create());
+        }))
         .def(
             "add_waypoint",
-            [](JPS_Journey_Wrapper& w, std::tuple<double, double> pt, double distance) {
-                JPS_Journey_AddWaypoint(
+            [](JPS_JourneyDescription_Wrapper& w, std::tuple<double, double> pt, double distance) {
+                return JPS_JourneyDescription_AddWaypoint(
                     w.handle, JPS_Point{std::get<0>(pt), std::get<1>(pt)}, distance);
             })
-        .def("add_exit", [](JPS_Journey_Wrapper& w, std::vector<std::tuple<double, double>> poly) {
-            std::vector<JPS_Point> ppoly{};
-            ppoly.reserve(poly.size());
-            std::transform(
-                std::begin(poly), std::end(poly), std::back_inserter(ppoly), [](const auto& pt) {
-                    return JPS_Point{std::get<0>(pt), std::get<1>(pt)};
-                });
-            JPS_Journey_AddExit(w.handle, ppoly.data(), ppoly.size());
-        });
+        .def(
+            "add_exit",
+            [](JPS_JourneyDescription_Wrapper& w, std::vector<std::tuple<double, double>> poly) {
+                std::vector<JPS_Point> ppoly{};
+                ppoly.reserve(poly.size());
+                std::transform(
+                    std::begin(poly),
+                    std::end(poly),
+                    std::back_inserter(ppoly),
+                    [](const auto& pt) {
+                        return JPS_Point{std::get<0>(pt), std::get<1>(pt)};
+                    });
+                return JPS_JourneyDescription_AddExit(w.handle, ppoly.data(), ppoly.size());
+            })
+        .def(
+            "add_notifiable_waiting_set",
+            [](JPS_JourneyDescription_Wrapper& w,
+               std::vector<std::tuple<double, double>> waiting_points) {
+                std::vector<JPS_Point> points{};
+                points.reserve(waiting_points.size());
+                std::transform(
+                    std::begin(waiting_points),
+                    std::end(waiting_points),
+                    std::back_inserter(points),
+                    [](const auto& pt) {
+                        return JPS_Point{std::get<0>(pt), std::get<1>(pt)};
+                    });
+                return JPS_JourneyDescription_AddNotifiableWaitingSet(
+                    w.handle, points.data(), points.size());
+            });
     py::class_<JPS_GCFMModelAgentIterator_Wrapper>(m, "GCFMModelAgentIterator")
         .def(
             "__iter__",
@@ -416,7 +447,7 @@ PYBIND11_MODULE(py_jupedsim, m)
             py::arg("dt"))
         .def(
             "add_journey",
-            [](JPS_Simulation_Wrapper& simulation, JPS_Journey_Wrapper& journey) {
+            [](JPS_Simulation_Wrapper& simulation, JPS_JourneyDescription_Wrapper& journey) {
                 JPS_ErrorMessage errorMsg{};
                 const auto result =
                     JPS_Simulation_AddJourney(simulation.handle, journey.handle, &errorMsg);
@@ -582,6 +613,19 @@ PYBIND11_MODULE(py_jupedsim, m)
                     });
                 return std::make_unique<JPS_AgentIdIterator_Wrapper>(
                     JPS_Simulation_AgentsInPolygon(w.handle, ppoly.data(), ppoly.size()));
+            })
+        .def(
+            "notify_waiting_set",
+            [](JPS_Simulation_Wrapper& w, JPS_JourneyId journeyId, size_t stageIdx, bool active) {
+                JPS_ErrorMessage errorMsg{};
+                auto result = JPS_Simulation_ChangeWaitingSetState(
+                    w.handle, journeyId, stageIdx, active, &errorMsg);
+                if(result) {
+                    return;
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
             });
     py::module_ exp = m.def_submodule("experimental", "Experimental API extensions for jupedsim");
     py::class_<JPS_RoutingEngine_Wrapper>(exp, "RoutingEngine")

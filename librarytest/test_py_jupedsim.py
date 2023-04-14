@@ -49,7 +49,8 @@ def main():
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
 
-    journey = jps.Journey()
+    journey = jps.JourneyDescription()
+    stage = journey.add_notifiable_waiting_set([(16, 5), (15, 5), (14, 5)])
     journey.add_exit([(18, 4), (20, 4), (20, 6), (18, 6)])
 
     journey_id = simulation.add_journey(journey)
@@ -73,6 +74,8 @@ def main():
         simulation.iterate()
         if simulation.iteration_count() % 10 == 0:
             writer.write_iteration_state(simulation)
+        if simulation.iteration_count() == 1300:
+            simulation.notify_waiting_set(journey_id, stage, False)
     writer.end_writing()
     print(
         f"Simulation completed after {simulation.iteration_count()} iterations"

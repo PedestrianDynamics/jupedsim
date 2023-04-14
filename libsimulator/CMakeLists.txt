@@ -13,6 +13,7 @@ add_library(simulator STATIC
     src/Ellipse.cpp
     src/Ellipse.hpp
     src/Enum.hpp
+    src/Events.hpp
     src/GCFMModel.cpp
     src/GCFMModel.hpp
     src/GCFMModelBuilder.cpp
@@ -49,6 +50,7 @@ add_library(simulator STATIC
     src/Stage.hpp
     src/StrategicalDesicionSystem.hpp
     src/TacticalDecisionSystem.hpp
+    src/TemplateHelper.hpp
     src/Triangle.cpp
     src/Triangle.hpp
     src/UniqueID.hpp
