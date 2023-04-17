@@ -4,6 +4,8 @@ from shapely.geometry import Polygon
 from shapely.ops import polygonize
 from shapely.ops import unary_union
 
+import matplotlib.pyplot as plt
+
 
 def parse_geo_file(geo_file):
     """
@@ -93,22 +95,23 @@ def convert_to_wkt(geometry_polygons, out_file, all_rooms=False):
 
 
 def remove_existing_rooms(existing_polygons, new_polygons):
-    """removes all existing polygons from new_polygons"""
+    """returns all polygons that do not already exist"""
     exists = [False] * len(new_polygons)
     for i, poly in enumerate(new_polygons):
         for existing_polygon in existing_polygons:
             if poly.equals(existing_polygon):
                 exists[i] = True
                 break
+    remaining_polygons = []
     for i in range(len(exists)):
-        if exists[i]:
-            del new_polygons[i]
+        if not exists[i]:
+            remaining_polygons.append(new_polygons[i])
+    return remaining_polygons
 
 
 if __name__ == "__main__":
     geo_polygons = parse_geo_file('correct_aknz_geo_arrival.xml')
-    convert_to_wkt(geo_polygons, 'wkt_arrival_geo.txt', False)
+    convert_to_wkt(geo_polygons, 'wkt_arrival_geo.wkt', False)
     geo2_polygons = parse_geo_file('correct_aknz_geo_evac_2exits_stage.xml')
-
-    remove_existing_rooms(geo_polygons, geo2_polygons)
-    convert_to_wkt(geo_polygons, 'wkt_additionnal_geo.txt', False)
+    geo2_polygons = remove_existing_rooms(geo_polygons, geo2_polygons)
+    convert_to_wkt(geo_polygons, 'wkt_additional_geo.wkt', False)
