@@ -1,10 +1,8 @@
 import xml.etree.ElementTree as ET
-from shapely import to_wkt
+from shapely import to_wkt, GeometryCollection
 from shapely.geometry import Polygon
 from shapely.ops import polygonize
 from shapely.ops import unary_union
-
-import matplotlib.pyplot as plt
 
 
 def parse_geo_file(geo_file):
@@ -61,6 +59,16 @@ def parse_geo_file(geo_file):
                     point1 = (float(vertices[0].get('px')), float(vertices[0].get('py')))
                     point2 = (float(vertices[1].get('px')), float(vertices[1].get('py')))
                     room_lines.append([point1, point2])
+            crossings = room.findall('crossings')[0]
+            for crossing in crossings:
+                sub1_id = crossing.attrib['subroom1_id']
+                sub2_id = crossing.attrib['subroom2_id']
+                if sub1_id == subroom_id or sub2_id == subroom_id:
+                    # the transition matches the current subroom
+                    vertices = crossing.findall('vertex')
+                    point1 = (float(vertices[0].get('px')), float(vertices[0].get('py')))
+                    point2 = (float(vertices[1].get('px')), float(vertices[1].get('py')))
+                    room_lines.append([point1, point2])
 
             # put lines together to form a polygon
             room_polygon = polygonize(room_lines)[0]
@@ -84,14 +92,14 @@ def convert_to_wkt(geometry_polygons, out_file, all_rooms=False):
     :type all_rooms: bool
     """
     if all_rooms:
+        geomery_collection = GeometryCollection(geometry_polygons)
         with open(out_file, 'a') as out:
-            for poly in geometry_polygons:
-                out.write(to_wkt(poly))
-                out.write("\n")
+            out.write(to_wkt(geomery_collection))
     else:
         merged_polygon = unary_union(geometry_polygons)
+        geomery_collection = GeometryCollection(merged_polygon)
         with open(out_file, 'a') as out:
-            out.write(to_wkt(merged_polygon))
+            out.write(to_wkt(geomery_collection))
 
 
 def remove_existing_rooms(existing_polygons, new_polygons):
@@ -110,8 +118,5 @@ def remove_existing_rooms(existing_polygons, new_polygons):
 
 
 if __name__ == "__main__":
-    geo_polygons = parse_geo_file('correct_aknz_geo_arrival.xml')
-    convert_to_wkt(geo_polygons, 'wkt_arrival_geo.wkt', False)
-    geo2_polygons = parse_geo_file('correct_aknz_geo_evac_2exits_stage.xml')
-    geo2_polygons = remove_existing_rooms(geo_polygons, geo2_polygons)
-    convert_to_wkt(geo_polygons, 'wkt_additional_geo.wkt', False)
+    geo_polygons = parse_geo_file('wa_triangle_geo.xml')
+    convert_to_wkt(geo_polygons, 'wkt_triangle_geo.wkt', False)
