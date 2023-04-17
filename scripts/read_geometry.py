@@ -107,7 +107,8 @@ def remove_existing_rooms(existing_polygons, new_polygons):
 
 if __name__ == "__main__":
     geo_polygons = parse_geo_file('correct_aknz_geo_arrival.xml')
-    convert_to_wkt(geo_polygons, 'wkt_geo.txt', False)
-    with open('wkt_geo.txt', 'r') as f:
-        for line in f:
-            print(line)
+    convert_to_wkt(geo_polygons, 'wkt_arrival_geo.txt', False)
+    geo2_polygons = parse_geo_file('correct_aknz_geo_evac_2exits_stage.xml')
+
+    remove_existing_rooms(geo_polygons, geo2_polygons)
+    convert_to_wkt(geo_polygons, 'wkt_additionnal_geo.txt', False)
