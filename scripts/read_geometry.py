@@ -3,6 +3,8 @@ from shapely import to_wkt, GeometryCollection
 from shapely.geometry import Polygon
 from shapely.ops import polygonize
 from shapely.ops import unary_union
+import matplotlib.pyplot as plt
+import geopandas as gpd
 
 
 def parse_geo_file(geo_file):
@@ -128,8 +130,23 @@ if __name__ == "__main__":
     geo_polygons[7] = replacement_polygon
     geo2_polygons[8:11] = [replacement_polygon]
     # now both rooms have the same coordinates and there won´t appear any problems around walls
+
+    # there is an unneeded point in one room which needs to be excluded from both geometries
+    coords = list(geo2_polygons[2].exterior.coords)
+    coords[20:22] = [coords[21]]
+    geo2_polygons[2] = Polygon(coords)
+    plt.plot(*geo_polygons[5].exterior.xy)
+    coords = list(geo_polygons[5].exterior.coords)
+    coords[1:3] = [coords[2]]
+    geo_polygons[5] = Polygon(coords)
+
+    convert_to_wkt(geo2_polygons, '../examples/geometry/aknz_evac.wkt', False)
+
     # there is a zero-width wall that needs to be fixed with a hole
     # this is equivalent to a 20 cm wall
     hole = Polygon([(615.43, 1875.70), (673.46, 1896.16), (673.40, 1896.36), (615.37, 1875.9)])
     merged_polygon = unary_union(geo_polygons)
     merged_polygon = merged_polygon.difference(hole)
+    geomery_collection = GeometryCollection(merged_polygon)
+    with open('../examples/geometry/aknz_arrival.wkt', 'a') as out:
+        out.write(to_wkt(geomery_collection))
