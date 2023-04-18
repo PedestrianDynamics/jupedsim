@@ -118,5 +118,12 @@ def remove_existing_rooms(existing_polygons, new_polygons):
 
 
 if __name__ == "__main__":
-    geo_polygons = parse_geo_file('wa_triangle_geo.xml')
-    convert_to_wkt(geo_polygons, 'wkt_triangle_geo.wkt', False)
+    geo_polygons = parse_geo_file('correct_aknz_geo_arrival.xml')
+    geo2_polygons = parse_geo_file('correct_aknz_geo_evac_2exits_stage.xml')
+    # single_poly and combined_poly resemble the same Room however some Coordinates are very slightly different
+    single_poly = geo_polygons[7]
+    combined_poly = unary_union(geo2_polygons[8:11])
+    replacement_polygon = single_poly.union(combined_poly)
+    geo_polygons[7] = replacement_polygon
+    geo2_polygons[8:11] = [replacement_polygon]
+    # now both rooms have the same coordinates and there won´t appear any problems around walls
