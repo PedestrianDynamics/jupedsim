@@ -120,10 +120,16 @@ def remove_existing_rooms(existing_polygons, new_polygons):
 if __name__ == "__main__":
     geo_polygons = parse_geo_file('correct_aknz_geo_arrival.xml')
     geo2_polygons = parse_geo_file('correct_aknz_geo_evac_2exits_stage.xml')
-    # single_poly and combined_poly resemble the same Room however some Coordinates are very slightly different
+
+    # single_poly and combined_poly resemble the same Room however some coordinates are very slightly different
     single_poly = geo_polygons[7]
     combined_poly = unary_union(geo2_polygons[8:11])
     replacement_polygon = single_poly.union(combined_poly)
     geo_polygons[7] = replacement_polygon
     geo2_polygons[8:11] = [replacement_polygon]
     # now both rooms have the same coordinates and there won´t appear any problems around walls
+    # there is a zero-width wall that needs to be fixed with a hole
+    # this is equivalent to a 20 cm wall
+    hole = Polygon([(615.43, 1875.70), (673.46, 1896.16), (673.40, 1896.36), (615.37, 1875.9)])
+    merged_polygon = unary_union(geo_polygons)
+    merged_polygon = merged_polygon.difference(hole)
