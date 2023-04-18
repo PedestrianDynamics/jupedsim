@@ -6,6 +6,7 @@ import pathlib
 
 import py_jupedsim as jps
 from jupedsim.serialization import JpsCoreStyleTrajectoryWriter
+from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
 
 
 def log_debug(msg):
@@ -68,16 +69,22 @@ def main():
 
     print("Running simulation")
 
-    writer = JpsCoreStyleTrajectoryWriter(pathlib.Path("out.txt"))
-    writer.begin_writing(10)
+    writers = [
+        JpsCoreStyleTrajectoryWriter(pathlib.Path("out.txt")),
+        SqliteTrajectoryWriter(pathlib.Path("out.sqlite")),
+    ]
+    for writer in writers:
+        writer.begin_writing(10)
 
     while simulation.agent_count() > 0:
         simulation.iterate()
-        if simulation.iteration_count() % 10 == 0:
-            writer.write_iteration_state(simulation)
+        if simulation.iteration_count() % 4 == 0:
+            for writer in writers:
+                writer.write_iteration_state(simulation)
         if simulation.iteration_count() == 1300:
             simulation.notify_waiting_set(journey_id, stage, False)
-    writer.end_writing()
+    for writer in writers:
+        writer.end_writing()
     print(
         f"Simulation completed after {simulation.iteration_count()} iterations"
     )
