@@ -6,6 +6,7 @@
 #include "GenericAgent.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "Point.hpp"
+#include "RoutingEngine.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
 #include "UniqueID.hpp"
@@ -28,7 +29,8 @@ public:
 
     Journey(
         const std::vector<StageDescription>& stageDescriptions,
-        std::vector<GenericAgent::ID>& toRemove);
+        std::vector<GenericAgent::ID>& toRemove,
+        const RoutingEngine& routingEngine);
 
     ID Id() const { return id; }
 

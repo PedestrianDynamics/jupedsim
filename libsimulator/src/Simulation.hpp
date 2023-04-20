@@ -158,7 +158,8 @@ void TypedSimulation<T>::Iterate()
 template <typename T>
 Journey::ID TypedSimulation<T>::AddJourney(const std::vector<StageDescription>& journeyDescription)
 {
-    auto journey = std::make_unique<Journey>(journeyDescription, _removedAgentsInLastIteration);
+    auto journey = std::make_unique<Journey>(
+        journeyDescription, _removedAgentsInLastIteration, *_routingEngine);
     const auto id = journey->Id();
     _journeys.emplace(id, std::move(journey));
     return id;

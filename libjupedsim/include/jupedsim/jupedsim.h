@@ -53,10 +53,10 @@ typedef enum JPS_ModelType { JPS_GCFMModel, JPS_VelocityModel } JPS_ModelType;
 typedef uint64_t JPS_JourneyId;
 
 /**
- * Id of a stage within a journey.
+ * Index of a stage within a journey.
  * Note that stage ids are only unique within the journey they refer to.
  */
-typedef uint64_t JPS_StageId;
+typedef size_t JPS_StageIndex;
 
 /**
  * Id of an agent.
@@ -348,13 +348,17 @@ JUPEDSIM_API JPS_JourneyDescription JPS_JourneyDescription_Create();
  * Extends the journey with a waypoint.
  * @param handle of the journey to extend.
  * @param position of the waypoint.
- * @param distance to the position to count this point as visited.
- * @return id of this stage
+ * @param distance to the position to count this point as visited. Needs to be >= 0.
+ * @param[out] stageIndex if not NULL: will be set to the stage index of this stage.
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return sucess if an waypoint could be added to the journey.
  */
-JUPEDSIM_API JPS_StageId JPS_JourneyDescription_AddWaypoint(
+JUPEDSIM_API bool JPS_JourneyDescription_AddWaypoint(
     JPS_JourneyDescription handle,
     JPS_Point position,
-    double distance);
+    double distance,
+    JPS_StageIndex* stageIndex,
+    JPS_ErrorMessage* errorMessage);
 
 /**
  * Extends the journey with an exit waypoint. When the agent enters the defined polygon and is
@@ -364,26 +368,34 @@ JUPEDSIM_API JPS_StageId JPS_JourneyDescription_AddWaypoint(
  * @param polygon A CCW convex polygon describing the exit area. Note that agents will move towards
  * the centroid of this area. Do not repeat the first point.
  * @param len_polygon, number of points in the polygon.
- * @return id of this stage
+ * @param[out] stageIndex if not NULL: will be set to the stage index of this stage.
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return sucess if an Exit could be added to the journey.
  */
-JUPEDSIM_API JPS_StageId JPS_JourneyDescription_AddExit(
+JUPEDSIM_API bool JPS_JourneyDescription_AddExit(
     JPS_JourneyDescription handle,
     JPS_Point* polygon,
-    size_t len_polygon);
+    size_t len_polygon,
+    JPS_StageIndex* stageIndex,
+    JPS_ErrorMessage* errorMessage);
 
 /**
  * Extends the journey with a notifiable waiting set. The waiting set consists of a ordered list of
  * points. Agents waiting will steer towards the first empty slot in this list.
- *
+ * The waiting set has to contain at least 1 waiting point.
  * @param handle of the journey to extend.
  * @param waiting_points the ordered waiting points
  * @param len_waiting_points number of waiting points
- * @return id of this stage
+ * @param[out] stageIndex if not NULL: will be set to the stage index of this stage.
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return success if a waypoint could be added to journey
  */
-JUPEDSIM_API JPS_StageId JPS_JourneyDescription_AddNotifiableWaitingSet(
+JUPEDSIM_API bool JPS_JourneyDescription_AddNotifiableWaitingSet(
     JPS_JourneyDescription handle,
     JPS_Point* waiting_points,
-    size_t len_waiting_points);
+    size_t len_waiting_points,
+    JPS_StageIndex* stageIndex,
+    JPS_ErrorMessage* errorMessage);
 
 /**
  * Frees a JPS_Journey.
