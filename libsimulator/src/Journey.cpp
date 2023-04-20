@@ -3,38 +3,63 @@
 #include "Journey.hpp"
 
 #include "Events.hpp"
+#include "RoutingEngine.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
 #include "TemplateHelper.hpp"
 
+#include <algorithm>
 #include <iterator>
 #include <memory>
 #include <stdexcept>
 #include <tuple>
 #include <vector>
 
+#include "fmt/ranges.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 /// SimpleJourney
 ////////////////////////////////////////////////////////////////////////////////
 Journey::Journey(
     const std::vector<StageDescription>& stageDescriptions,
-    std::vector<GenericAgent::ID>& toRemove)
+    std::vector<GenericAgent::ID>& toRemove,
+    const RoutingEngine& routingEngine)
 {
     stages.reserve(stageDescriptions.size());
     std::transform(
         std::begin(stageDescriptions),
         std::end(stageDescriptions),
         std::back_inserter(stages),
-        [&toRemove, this](const auto& stageDesc) {
+        [&toRemove, &routingEngine, this](const auto& stageDesc) {
             std::unique_ptr<Stage> result{};
             std::visit(
-                [&result, &toRemove, this](auto&& var) {
+                [&result, &toRemove, &routingEngine, this](auto&& var) {
                     using T = std::decay_t<decltype(var)>;
                     if constexpr(std::is_same_v<T, WaypointDescription>) {
+                        if(!routingEngine.IsRoutable(var.position)) {
+                            throw std::runtime_error(fmt::format(
+                                "Error creating Journey: Waypoint {} out of accessible area",
+                                var.position));
+                        }
                         result = std::make_unique<Waypoint>(var.position, var.distance);
                     } else if constexpr(std::is_same_v<T, ExitDescription>) {
+                        // TODO(kkratz): Add check to ensure polygon is inside routable area
                         result = std::make_unique<Exit>(var.polygon, toRemove);
                     } else if constexpr(std::is_same_v<T, NotifiableWaitingSetDescription>) {
+                        std::vector<Point> pointsOutside{};
+                        std::copy_if(
+                            std::begin(var.slots),
+                            std::end(var.slots),
+                            std::back_inserter(pointsOutside),
+                            [&routingEngine](const auto& p) {
+                                return !routingEngine.IsRoutable(p);
+                            });
+                        if(!pointsOutside.empty()) {
+                            throw std::runtime_error(fmt::format(
+                                "Error creating Journey: NotifiableWaitingSet contais waiting "
+                                "points outside of accessible area, {}",
+                                pointsOutside));
+                        }
                         result = std::make_unique<NotifiableWaitingSet>(var.slots, id);
                     } else {
                         static_assert(always_false_v<T>, "non-exhaustive visitor!");
