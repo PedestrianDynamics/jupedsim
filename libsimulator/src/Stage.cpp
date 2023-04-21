@@ -71,7 +71,6 @@ bool NotifiableWaitingSet::IsCompleted(const GenericAgent& agent)
     }
     const auto find_iter = std::find(std::begin(occupants), std::end(occupants), agent.id);
     if(find_iter != std::end(occupants)) {
-        occupants.erase(find_iter);
         return true;
     }
     const auto distance = (agent.pos - slots[0]).Norm();
@@ -97,6 +96,12 @@ Point NotifiableWaitingSet::Target(const GenericAgent& agent)
 
 void NotifiableWaitingSet::State(WaitingState s)
 {
+    if(state == s) {
+        return;
+    }
+    if(s == WaitingState::Active) {
+        occupants.clear();
+    }
     state = s;
 }
 

@@ -712,6 +712,22 @@ JUPEDSIM_API bool JPS_Simulation_SwitchAgentProfile(
     JPS_ErrorMessage* errorMessage);
 
 /**
+ * Switches the journey and currently selected stage of this agent
+ * @param handle of the Simulation to operate on
+ * @param agentId id of the agent to modify
+ * @param journeyId of the journey to select
+ * @param stageIdx of the stage to select
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return true on success, false on any error, e.g. unknown agent id or profile id
+ */
+JUPEDSIM_API bool JPS_Simulation_SwitchAgentJourney(
+    JPS_Simulation handle,
+    JPS_AgentId agentId,
+    JPS_JourneyId journeyId,
+    JPS_StageIndex stageIdx,
+    JPS_ErrorMessage* errorMessage);
+
+/**
  * Query the pedestrian model used by this simulation.
  * @return the type of pedestrian model used in this simulation instance.
  */

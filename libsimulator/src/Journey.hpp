@@ -40,6 +40,8 @@ public:
 
     template <typename T>
     void Update(const NeighborhoodSearch<T>& neighborhoodSearch);
+
+    size_t CountStages() const { return stages.size(); }
 };
 
 template <typename T>

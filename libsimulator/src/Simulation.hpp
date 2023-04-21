@@ -44,6 +44,8 @@ public:
     virtual size_t AgentCount() const = 0;
     virtual void
     SwitchAgentProfile(GenericAgent::ID agent_id, OperationalModel::ParametersID profile_id) = 0;
+    virtual void
+    SwitchAgentJourney(GenericAgent::ID agent_id, Journey::ID journey_id, size_t stage_idx) = 0;
     virtual uint64_t Iteration() const = 0;
     virtual std::vector<GenericAgent::ID> AgentsInRange(Point p, double distance) = 0;
     /// Returns IDs of all agents inside the defined polygon
@@ -108,6 +110,9 @@ public:
     size_t AgentCount() const override;
 
     void SwitchAgentProfile(GenericAgent::ID agent_id, OperationalModel::ParametersID profile_id)
+        override;
+
+    void SwitchAgentJourney(GenericAgent::ID agent_id, Journey::ID journey_id, size_t stage_idx)
         override;
 
     uint64_t Iteration() const override { return _clock.Iteration(); }
@@ -230,6 +235,26 @@ void TypedSimulation<T>::SwitchAgentProfile(
 {
     _operationalDecisionSystem.ValidateAgentParameterProfileId(profile_id);
     Agent(agent_id).parameterProfileId = profile_id;
+}
+
+template <typename T>
+void TypedSimulation<T>::SwitchAgentJourney(
+    GenericAgent::ID agent_id,
+    Journey::ID journey_id,
+    size_t stage_idx)
+{
+    const auto find_iter = _journeys.find(journey_id);
+    if(find_iter == std::end(_journeys)) {
+        throw std::runtime_error(fmt::format("Unknown Journey id {}", journey_id));
+    }
+    auto& journey = find_iter->second;
+    if(stage_idx >= journey->CountStages()) {
+        throw std::runtime_error(
+            fmt::format("Stage index {} for journey {} out of range", stage_idx, journey_id));
+    }
+    auto& agent = Agent(agent_id);
+    agent.journeyId = journey_id;
+    agent.currentJourneyStage = stage_idx;
 }
 
 template <typename T>
