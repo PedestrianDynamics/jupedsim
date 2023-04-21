@@ -41,9 +41,7 @@ def parse_geo_file(geo_file):
             polygons = subroom.findall('polygon')
             for polygon in polygons:
                 vertices = polygon.findall('vertex')
-                point1 = (float(vertices[0].get('px')), float(vertices[0].get('py')))
-                point2 = (float(vertices[1].get('px')), float(vertices[1].get('py')))
-                room_lines.append([point1, point2])
+                room_lines.append([(float(vertex.get('px')), float(vertex.get('py'))) for vertex in vertices])
 
             # add all transitions with according room id and subroom id to room_lines list
             transitions = root.findall('.//transition')
@@ -61,22 +59,30 @@ def parse_geo_file(geo_file):
                     point1 = (float(vertices[0].get('px')), float(vertices[0].get('py')))
                     point2 = (float(vertices[1].get('px')), float(vertices[1].get('py')))
                     room_lines.append([point1, point2])
-            crossings = room.findall('crossings')[0]
-            for crossing in crossings:
-                sub1_id = crossing.attrib['subroom1_id']
-                sub2_id = crossing.attrib['subroom2_id']
-                if sub1_id == subroom_id or sub2_id == subroom_id:
-                    # the transition matches the current subroom
-                    vertices = crossing.findall('vertex')
-                    point1 = (float(vertices[0].get('px')), float(vertices[0].get('py')))
-                    point2 = (float(vertices[1].get('px')), float(vertices[1].get('py')))
-                    room_lines.append([point1, point2])
-
+            crossings = room.findall('crossings')
+            if len(crossings) > 0:
+                # crossings for this room found
+                crossings = crossings[0]
+                for crossing in crossings:
+                    sub1_id = crossing.attrib['subroom1_id']
+                    sub2_id = crossing.attrib['subroom2_id']
+                    if sub1_id == subroom_id or sub2_id == subroom_id:
+                        # the transition matches the current subroom
+                        vertices = crossing.findall('vertex')
+                        point1 = (float(vertices[0].get('px')), float(vertices[0].get('py')))
+                        point2 = (float(vertices[1].get('px')), float(vertices[1].get('py')))
+                        room_lines.append([point1, point2])
             # put lines together to form a polygon
-            room_polygon = polygonize(room_lines)[0]
-
-            # create polygon from room and obstacles and add to list of geometries polygons
-            geometry_polygons.append(Polygon(room_polygon.exterior, room_obstacles))
+            try:
+                # create polygon from lines parsed from room
+                room_polygon = polygonize(room_lines)[0]
+                # create polygon from room and obstacles and add to list of geometries polygons
+                geometry_polygons.append(Polygon(room_polygon.exterior, room_obstacles))
+            except Exception:
+                message = f"there has been an error parsing subroom {subroom_id} in room {room_id}"
+                # include for debugging
+                # print("the following lines were recognized \n", room_lines)
+                raise RuntimeError(message)
 
     return geometry_polygons
 
@@ -119,9 +125,16 @@ def remove_existing_rooms(existing_polygons, new_polygons):
     return remaining_polygons
 
 
+def plot_polygon(polygon):
+    """plots a polygon with its interior in matplotlib"""
+    poly = gpd.GeoSeries([polygon])
+    poly.plot()
+    plt.show()
+
+
 if __name__ == "__main__":
-    geo_polygons = parse_geo_file('correct_aknz_geo_arrival.xml')
-    geo2_polygons = parse_geo_file('correct_aknz_geo_evac_2exits_stage.xml')
+    geo_polygons = parse_geo_file('Convert_geo/akzn/correct_aknz_geo_arrival.xml')
+    geo2_polygons = parse_geo_file('Convert_geo/akzn/correct_aknz_geo_evac_2exits_stage.xml')
 
     # single_poly and combined_poly resemble the same Room however some coordinates are very slightly different
     single_poly = geo_polygons[7]
