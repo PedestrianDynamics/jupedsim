@@ -7,6 +7,7 @@
 #include <exception>
 #include <iterator>
 #include <memory>
+#include <pybind11/cast.h>
 #include <pybind11/detail/common.h>
 #include <stdexcept>
 #include <vector>
@@ -596,6 +597,26 @@ PYBIND11_MODULE(py_jupedsim, m)
             py::kw_only(),
             py::arg("agent_id"),
             py::arg("profile_id"))
+        .def(
+            "switch_agent_journey",
+            [](const JPS_Simulation_Wrapper& w,
+               JPS_AgentId agentId,
+               JPS_JourneyId journeyId,
+               JPS_StageIndex stageIdx) {
+                JPS_ErrorMessage errorMsg{};
+                auto result = JPS_Simulation_SwitchAgentJourney(
+                    w.handle, agentId, journeyId, stageIdx, &errorMsg);
+                if(result) {
+                    return;
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
+            },
+            py::kw_only(),
+            py::arg("agent_id"),
+            py::arg("journey_id"),
+            py::arg("stage_index"))
         .def(
             "agent_count",
             [](JPS_Simulation_Wrapper& simulation) {

@@ -791,6 +791,32 @@ bool JPS_Simulation_SwitchAgentProfile(
     return result;
 }
 
+bool JPS_Simulation_SwitchAgentJourney(
+    JPS_Simulation handle,
+    JPS_AgentId agentId,
+    JPS_JourneyId journeyId,
+    JPS_StageIndex stageIdx,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    const auto simulation = reinterpret_cast<Simulation*>(handle);
+    bool result = false;
+    try {
+        simulation->SwitchAgentJourney(agentId, journeyId, stageIdx);
+        result = true;
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return result;
+}
+
 JPS_ModelType JPS_Simulation_ModelType(JPS_Simulation handle)
 {
     assert(handle);

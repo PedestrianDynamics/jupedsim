@@ -3,6 +3,7 @@
 #include "Journey.hpp"
 
 #include "Events.hpp"
+#include "GenericAgent.hpp"
 #include "RoutingEngine.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
