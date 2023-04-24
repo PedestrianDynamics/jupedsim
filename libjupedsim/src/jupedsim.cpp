@@ -440,6 +440,33 @@ bool JPS_JourneyDescription_AddNotifiableWaitingSet(
     return true;
 }
 
+bool JPS_JourneyDescription_AddNotifiableQueue(
+    JPS_JourneyDescription handle,
+    JPS_Point* waiting_points,
+    size_t len_waiting_points,
+    JPS_StageIndex* stageIndex,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    if(len_waiting_points < 1) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"NotifiableQueue needs at least 1 waiting point"});
+        }
+        return false;
+    }
+    auto journey = reinterpret_cast<JourneyDesc*>(handle);
+    std::vector<Point> slots{};
+    slots.reserve(len_waiting_points);
+    std::transform(
+        waiting_points, waiting_points + len_waiting_points, std::back_inserter(slots), intoPoint);
+    journey->push_back(NotifiableQueueDescription{std::move(slots)});
+    if(stageIndex != nullptr) {
+        *stageIndex = journey->size() - 1;
+    }
+    return true;
+}
+
 void JPS_JourneyDescription_Free(JPS_JourneyDescription handle)
 {
     delete reinterpret_cast<JourneyDesc*>(handle);
@@ -872,6 +899,25 @@ bool JPS_Simulation_ChangeWaitingSetState(
             stageIdx,
             active ? NotifiableWaitingSet::WaitingState::Active :
                      NotifiableWaitingSet::WaitingState::Inactive});
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+        return false;
+    }
+    return true;
+}
+JUPEDSIM_API bool JPS_Simulation_PopAgentsFromQueue(
+    JPS_Simulation handle,
+    JPS_JourneyId journeyId,
+    size_t stageIdx,
+    size_t count,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    auto simuation = reinterpret_cast<Simulation*>(handle);
+    try {
+        simuation->Notify(NotifyQueue{journeyId, stageIdx, count});
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});

@@ -388,9 +388,27 @@ JUPEDSIM_API bool JPS_JourneyDescription_AddExit(
  * @param len_waiting_points number of waiting points
  * @param[out] stageIndex if not NULL: will be set to the stage index of this stage.
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
- * @return success if a waypoint could be added to journey
+ * @return success if the stage could be added.
  */
 JUPEDSIM_API bool JPS_JourneyDescription_AddNotifiableWaitingSet(
+    JPS_JourneyDescription handle,
+    JPS_Point* waiting_points,
+    size_t len_waiting_points,
+    JPS_StageIndex* stageIndex,
+    JPS_ErrorMessage* errorMessage);
+
+/**
+ * Extends the journey with a notifiable queue. The queue consists of a ordered list of
+ * points. Agents waiting will steer towards the first empty slot in this list.
+ * The waiting set has to contain at least 1 waiting point.
+ * @param handle of the journey to extend.
+ * @param waiting_points the ordered waiting points
+ * @param len_waiting_points number of waiting points
+ * @param[out] stageIndex if not NULL: will be set to the stage index of this stage.
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return success if the stage could be added.
+ */
+JUPEDSIM_API bool JPS_JourneyDescription_AddNotifiableQueue(
     JPS_JourneyDescription handle,
     JPS_Point* waiting_points,
     size_t len_waiting_points,
@@ -769,6 +787,22 @@ JUPEDSIM_API bool JPS_Simulation_ChangeWaitingSetState(
     JPS_JourneyId journeyId,
     size_t stageIdx,
     bool active,
+    JPS_ErrorMessage* errorMessage);
+
+/**
+ * Tell the simulation to release `count` many agents from the queue.
+ * @param handle of the Simulation to operate on
+ * @param journeyId journey to modify
+ * @param stageIdx stage to notify, this index has to point to a NotifiableQueue
+ * @param count of agents to release
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return true on success, false on any error, e.g. unknown journeyId
+ */
+JUPEDSIM_API bool JPS_Simulation_PopAgentsFromQueue(
+    JPS_Simulation handle,
+    JPS_JourneyId journeyId,
+    size_t stageIdx,
+    size_t count,
     JPS_ErrorMessage* errorMessage);
 
 /**

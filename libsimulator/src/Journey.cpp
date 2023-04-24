@@ -62,6 +62,22 @@ Journey::Journey(
                                 pointsOutside));
                         }
                         result = std::make_unique<NotifiableWaitingSet>(var.slots, id);
+                    } else if constexpr(std::is_same_v<T, NotifiableQueueDescription>) {
+                        std::vector<Point> pointsOutside{};
+                        std::copy_if(
+                            std::begin(var.slots),
+                            std::end(var.slots),
+                            std::back_inserter(pointsOutside),
+                            [&routingEngine](const auto& p) {
+                                return !routingEngine.IsRoutable(p);
+                            });
+                        if(!pointsOutside.empty()) {
+                            throw std::runtime_error(fmt::format(
+                                "Error creating Journey: NotifiableQueue contais waiting "
+                                "points outside of accessible area, {}",
+                                pointsOutside));
+                        }
+                        result = std::make_unique<NotifiableQueue>(var.slots, id);
                     } else {
                         static_assert(always_false_v<T>, "non-exhaustive visitor!");
                     }
@@ -94,4 +110,18 @@ void Journey::HandleNofifyWaitingSetEvent(NotifyWaitingSet evt) const
             "Journey {} has no NotiafiableWaitingSet at stage {}", id.getID(), evt.stageIdx));
     }
     stage->State(evt.newState);
+}
+
+void Journey::HandleNofifyQueueEvent(NotifyQueue evt) const
+{
+    if(evt.stageIdx >= stages.size()) {
+        throw std::runtime_error(
+            fmt::format("Journey {} has no stage {}", id.getID(), evt.stageIdx));
+    }
+    auto stage = dynamic_cast<NotifiableQueue*>(stages[evt.stageIdx].get());
+    if(stage == nullptr) {
+        throw std::runtime_error(fmt::format(
+            "Journey {} has no NotiafiableWaitingSet at stage {}", id.getID(), evt.stageIdx));
+    }
+    stage->Pop(evt.count);
 }
