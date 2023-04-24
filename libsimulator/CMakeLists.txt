@@ -54,6 +54,7 @@ add_library(simulator STATIC
     src/Triangle.cpp
     src/Triangle.hpp
     src/UniqueID.hpp
+    src/Util.hpp
     src/VelocityModel.cpp
     src/VelocityModel.hpp
     src/VelocityModelBuilder.cpp

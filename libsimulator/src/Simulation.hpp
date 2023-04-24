@@ -157,7 +157,6 @@ void TypedSimulation<T>::Iterate()
         _clock.dT(), _clock.ElapsedTime(), _neighborhoodSearch, *_geometry, _agents);
 
     _clock.Advance();
-    LOG_DEBUG("Iteration done.");
 }
 
 template <typename T>
@@ -308,6 +307,13 @@ void TypedSimulation<T>::Notify(Event evt)
                         "Cannot send event to unknown journey {}", evt.journeyId.getID()));
                 }
                 journey->second->HandleNofifyWaitingSetEvent(evt);
+            } else if constexpr(std::is_same_v<EvtT, NotifyQueue>) {
+                auto journey = _journeys.find(evt.journeyId);
+                if(journey == std::end(_journeys)) {
+                    throw std::runtime_error(fmt::format(
+                        "Cannot send event to unknown journey {}", evt.journeyId.getID()));
+                }
+                journey->second->HandleNofifyQueueEvent(evt);
             } else {
                 static_assert(always_false_v<EvtT>, "non-exhaustive visitor!");
             }

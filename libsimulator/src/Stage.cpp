@@ -3,9 +3,12 @@
 #include "Stage.hpp"
 
 #include "GenericAgent.hpp"
+#include "Journey.hpp"
 #include "Point.hpp"
 #include "Simulation.hpp"
 #include "UniqueID.hpp"
+#include "Util.hpp"
+
 #include <list>
 #include <stdexcept>
 #include <vector>
@@ -108,4 +111,36 @@ void NotifiableWaitingSet::State(WaitingState s)
 NotifiableWaitingSet::WaitingState NotifiableWaitingSet::State() const
 {
     return state;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// NotifiablQueue
+////////////////////////////////////////////////////////////////////////////////
+NotifiableQueue::NotifiableQueue(std::vector<Point> slots_, jps::UniqueID<Journey> journeyId_)
+    : slots(std::move(slots_)), journeyId(journeyId_)
+{
+    occupants.reserve(slots.size());
+    exitingThisUpdate.reserve(slots.size());
+}
+
+bool NotifiableQueue::IsCompleted(const GenericAgent& agent)
+{
+    return std::find(std::begin(exitingThisUpdate), std::end(exitingThisUpdate), agent.id) !=
+           std::end(exitingThisUpdate);
+}
+
+Point NotifiableQueue::Target(const GenericAgent& agent)
+{
+
+    if(const auto index_opt = IndexInVector(occupants, agent.id); index_opt) {
+        return slots[*index_opt];
+    }
+
+    const auto next_target_index = std::min(occupants.size(), occupants.capacity() - 1);
+    return slots[next_target_index];
+}
+
+void NotifiableQueue::Pop(size_t count)
+{
+    popCountOnNextUpdate = std::min(occupants.size(), popCountOnNextUpdate + count);
 }

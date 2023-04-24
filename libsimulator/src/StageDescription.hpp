@@ -21,5 +21,12 @@ struct NotifiableWaitingSetDescription {
     std::vector<Point> slots;
 };
 
-using StageDescription =
-    std::variant<WaypointDescription, ExitDescription, NotifiableWaitingSetDescription>;
+struct NotifiableQueueDescription {
+    std::vector<Point> slots;
+};
+
+using StageDescription = std::variant<
+    WaypointDescription,
+    ExitDescription,
+    NotifiableWaitingSetDescription,
+    NotifiableQueueDescription>;

@@ -37,6 +37,7 @@ public:
     std::tuple<Point, size_t> Target(const GenericAgent& agent) const;
 
     void HandleNofifyWaitingSetEvent(NotifyWaitingSet evt) const;
+    void HandleNofifyQueueEvent(NotifyQueue evt) const;
 
     template <typename T>
     void Update(const NeighborhoodSearch<T>& neighborhoodSearch);
@@ -50,6 +51,8 @@ void Journey::Update(const NeighborhoodSearch<T>& neighborhoodSearch)
     for(auto& stage : stages) {
         if(auto waitingSet = dynamic_cast<NotifiableWaitingSet*>(stage.get()); waitingSet) {
             waitingSet->Update(neighborhoodSearch);
+        } else if(auto queue = dynamic_cast<NotifiableQueue*>(stage.get()); queue) {
+            queue->Update(neighborhoodSearch);
         }
     }
 }
