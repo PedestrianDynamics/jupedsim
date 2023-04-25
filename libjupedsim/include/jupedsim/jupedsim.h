@@ -292,14 +292,13 @@ JUPEDSIM_API JPS_GeometryBuilder JPS_GeometryBuilder_Create();
  * Multiple accessible areas may overlap, the final accessible area is created by forming the union
  * over all accessible areas.
  * The Union over all accessible areas minus exclusions must form one polygon.
- * @param points pointer to the x/y coordinates for the points describing the polygon. The number of
- *        double values in this array is expected to be 2*pointCount!
+ * @param polygon describing the accessible area.
  * @param pointCount number of points the polygon consists of.
  */
 JUPEDSIM_API void JPS_GeometryBuilder_AddAccessibleArea(
     JPS_GeometryBuilder handle,
-    double* points,
-    size_t pointCount);
+    JPS_Point* points,
+    size_t lenPolygon);
 
 /**
  * Adds an accessible area to the geometry.

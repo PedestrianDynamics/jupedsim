@@ -215,15 +215,8 @@ PYBIND11_MODULE(py_jupedsim, m)
         }))
         .def(
             "add_accessible_area",
-            [](const JPS_GeometryBuilder_Wrapper& w,
-               std::vector<std::tuple<double, double>> points) {
-                std::vector<double> values{};
-                values.reserve(points.size() * 2);
-                for(const auto [x, y] : points) {
-                    values.emplace_back(x);
-                    values.emplace_back(y);
-                }
-                JPS_GeometryBuilder_AddAccessibleArea(w.handle, values.data(), values.size() / 2);
+            [](const JPS_GeometryBuilder_Wrapper& w, std::vector<JPS_Point> polygon) {
+                JPS_GeometryBuilder_AddAccessibleArea(w.handle, polygon.data(), polygon.size());
             },
             "Add area where agents can move")
         .def(
