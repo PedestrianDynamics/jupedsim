@@ -226,18 +226,15 @@ JPS_GeometryBuilder JPS_GeometryBuilder_Create()
 
 void JPS_GeometryBuilder_AddAccessibleArea(
     JPS_GeometryBuilder handle,
-    double* points,
-    size_t pointCount)
+    JPS_Point* polygon,
+    size_t lenPolygon)
 {
     assert(handle != nullptr);
     auto builder = reinterpret_cast<GeometryBuilder*>(handle);
-    std::vector<Point> lineLoop{};
-    lineLoop.reserve(pointCount);
-    for(size_t pointIndex = 0; pointIndex < pointCount; ++pointIndex) {
-        lineLoop.emplace_back(points[pointIndex * 2], points[pointIndex * 2 + 1]);
-    }
-    // TODO(kkratz): Consider adding a move version of 'AddAccessibleArea'
-    builder->AddAccessibleArea(lineLoop);
+    std::vector<Point> loop{};
+    loop.reserve(lenPolygon);
+    std::transform(polygon, polygon + lenPolygon, std::back_inserter(loop), intoPoint);
+    builder->AddAccessibleArea(loop);
 }
 
 void JPS_GeometryBuilder_ExcludeFromAccessibleArea(
