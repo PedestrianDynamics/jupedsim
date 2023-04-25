@@ -5,6 +5,7 @@
 #include "Clonable.hpp"
 #include "CollisionGeometry.hpp"
 #include "Point.hpp"
+#include "SimulationError.hpp"
 #include "UniqueID.hpp"
 
 #include <optional>
@@ -59,8 +60,7 @@ protected:
         for(auto&& p : parameterProfiles) {
             auto [_, success] = _parameterProfiles.try_emplace(p.id, p);
             if(!success) {
-                throw std::runtime_error(
-                    fmt::format("Duplicate agent profile id={} supplied", p.id));
+                throw SimulationError("Duplicate agent profile id={} supplied", p.id);
             }
         }
     };

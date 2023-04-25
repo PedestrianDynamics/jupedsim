@@ -38,7 +38,7 @@ Exit::Exit(Polygon area_, std::vector<GenericAgent::ID>& toRemove_)
     : area(std::move(area_)), toRemove(toRemove_)
 {
     if(!area.IsConvex()) {
-        throw std::runtime_error("Exit areas need to be bounded by convex polygons.");
+        throw SimulationError("Exit areas need to be bounded by convex polygons.");
     }
 }
 

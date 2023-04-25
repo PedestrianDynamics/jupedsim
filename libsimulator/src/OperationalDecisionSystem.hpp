@@ -7,6 +7,7 @@
 #include "IteratorPair.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
+#include "SimulationError.hpp"
 
 #include <boost/iterator/zip_iterator.hpp>
 
@@ -59,8 +60,7 @@ public:
     void ValidateAgentParameterProfileId(OperationalModel::ParametersID id) const
     {
         if(!_model->ParameterProfileExists(id)) {
-            throw new std::runtime_error(
-                fmt::format("Unknown parameters profile id \"{}\" supplied", id.getID()));
+            throw SimulationError("Unknown parameters profile id \"{}\" supplied", id.getID());
         }
     }
 };
