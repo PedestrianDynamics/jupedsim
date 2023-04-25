@@ -5,6 +5,7 @@
 #include "Events.hpp"
 #include "GenericAgent.hpp"
 #include "RoutingEngine.hpp"
+#include "SimulationError.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
 #include "TemplateHelper.hpp"
@@ -38,9 +39,9 @@ Journey::Journey(
                     using T = std::decay_t<decltype(var)>;
                     if constexpr(std::is_same_v<T, WaypointDescription>) {
                         if(!routingEngine.IsRoutable(var.position)) {
-                            throw std::runtime_error(fmt::format(
+                            throw SimulationError(
                                 "Error creating Journey: Waypoint {} out of accessible area",
-                                var.position));
+                                var.position);
                         }
                         result = std::make_unique<Waypoint>(var.position, var.distance);
                     } else if constexpr(std::is_same_v<T, ExitDescription>) {
@@ -56,10 +57,10 @@ Journey::Journey(
                                 return !routingEngine.IsRoutable(p);
                             });
                         if(!pointsOutside.empty()) {
-                            throw std::runtime_error(fmt::format(
+                            throw SimulationError(
                                 "Error creating Journey: NotifiableWaitingSet contais waiting "
                                 "points outside of accessible area, {}",
-                                pointsOutside));
+                                pointsOutside);
                         }
                         result = std::make_unique<NotifiableWaitingSet>(var.slots, id);
                     } else if constexpr(std::is_same_v<T, NotifiableQueueDescription>) {
@@ -72,10 +73,10 @@ Journey::Journey(
                                 return !routingEngine.IsRoutable(p);
                             });
                         if(!pointsOutside.empty()) {
-                            throw std::runtime_error(fmt::format(
+                            throw SimulationError(
                                 "Error creating Journey: NotifiableQueue contais waiting "
                                 "points outside of accessible area, {}",
-                                pointsOutside));
+                                pointsOutside);
                         }
                         result = std::make_unique<NotifiableQueue>(var.slots, id);
                     } else {
@@ -101,13 +102,12 @@ std::tuple<Point, size_t> Journey::Target(const GenericAgent& agent) const
 void Journey::HandleNofifyWaitingSetEvent(NotifyWaitingSet evt) const
 {
     if(evt.stageIdx >= stages.size()) {
-        throw std::runtime_error(
-            fmt::format("Journey {} has no stage {}", id.getID(), evt.stageIdx));
+        throw SimulationError("Journey {} has no stage {}", id.getID(), evt.stageIdx);
     }
     auto stage = dynamic_cast<NotifiableWaitingSet*>(stages[evt.stageIdx].get());
     if(stage == nullptr) {
-        throw std::runtime_error(fmt::format(
-            "Journey {} has no NotiafiableWaitingSet at stage {}", id.getID(), evt.stageIdx));
+        throw SimulationError(
+            "Journey {} has no NotiafiableWaitingSet at stage {}", id.getID(), evt.stageIdx);
     }
     stage->State(evt.newState);
 }
@@ -115,13 +115,12 @@ void Journey::HandleNofifyWaitingSetEvent(NotifyWaitingSet evt) const
 void Journey::HandleNofifyQueueEvent(NotifyQueue evt) const
 {
     if(evt.stageIdx >= stages.size()) {
-        throw std::runtime_error(
-            fmt::format("Journey {} has no stage {}", id.getID(), evt.stageIdx));
+        throw SimulationError("Journey {} has no stage {}", id.getID(), evt.stageIdx);
     }
     auto stage = dynamic_cast<NotifiableQueue*>(stages[evt.stageIdx].get());
     if(stage == nullptr) {
-        throw std::runtime_error(fmt::format(
-            "Journey {} has no NotiafiableWaitingSet at stage {}", id.getID(), evt.stageIdx));
+        throw SimulationError(
+            "Journey {} has no NotiafiableWaitingSet at stage {}", id.getID(), evt.stageIdx);
     }
     stage->Pop(evt.count);
 }

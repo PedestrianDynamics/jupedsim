@@ -275,7 +275,8 @@ int Line::IntersectionWith(const Point& p1, const Point& p2, Point& p3) const
             p3 = Point(J_NAN, J_NAN);
             return LineIntersectType::OVERLAP;
     }
-    throw std::runtime_error("Not reachable...");
+    /// This should never be reached
+    std::abort();
 }
 
 int Line::IntersectionWith(const Line& L, Point& p3) const

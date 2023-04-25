@@ -14,6 +14,7 @@
 #include "Point.hpp"
 #include "Polygon.hpp"
 #include "SimulationClock.hpp"
+#include "SimulationError.hpp"
 #include "StageDescription.hpp"
 #include "StrategicalDesicionSystem.hpp"
 #include "TacticalDecisionSystem.hpp"
@@ -175,7 +176,7 @@ GenericAgent::ID TypedSimulation<T>::AddAgent(AgentType&& agent)
     agent.orientation = agent.orientation.Normalized();
 
     if(_journeys.count(agent.journeyId) == 0) {
-        throw std::runtime_error(fmt::format("Unknown journey id: {}", agent.journeyId));
+        throw SimulationError("Unknown journey id: {}", agent.journeyId);
     }
 
     _agents.emplace_back(std::move(agent));
@@ -188,7 +189,7 @@ void TypedSimulation<T>::RemoveAgent(GenericAgent::ID id)
     const auto iter = std::find_if(
         std::begin(_agents), std::end(_agents), [id](auto& agent) { return agent.id == id; });
     if(iter == std::end(_agents)) {
-        throw std::runtime_error(fmt::format("Unknown agent id {}", id));
+        throw SimulationError("Unknown agent id {}", id);
     }
     _agents.erase(iter);
 }
@@ -199,7 +200,7 @@ const typename TypedSimulation<T>::AgentType& TypedSimulation<T>::Agent(GenericA
     const auto iter =
         std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
     if(iter == _agents.end()) {
-        throw std::logic_error(fmt::format("Trying to access unknown Agent {}", id));
+        throw SimulationError("Trying to access unknown Agent {}", id);
     }
     return *iter;
 }
@@ -210,7 +211,7 @@ typename TypedSimulation<T>::AgentType& TypedSimulation<T>::Agent(GenericAgent::
     const auto iter =
         std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
     if(iter == _agents.end()) {
-        throw std::logic_error(fmt::format("Trying to access unknown Agent {}", id));
+        throw SimulationError("Trying to access unknown Agent {}", id);
     }
     return *iter;
 }
@@ -244,12 +245,11 @@ void TypedSimulation<T>::SwitchAgentJourney(
 {
     const auto find_iter = _journeys.find(journey_id);
     if(find_iter == std::end(_journeys)) {
-        throw std::runtime_error(fmt::format("Unknown Journey id {}", journey_id));
+        throw SimulationError("Unknown Journey id {}", journey_id);
     }
     auto& journey = find_iter->second;
     if(stage_idx >= journey->CountStages()) {
-        throw std::runtime_error(
-            fmt::format("Stage index {} for journey {} out of range", stage_idx, journey_id));
+        throw SimulationError("Stage index {} for journey {} out of range", stage_idx, journey_id);
     }
     auto& agent = Agent(agent_id);
     agent.journeyId = journey_id;
@@ -278,7 +278,7 @@ std::vector<GenericAgent::ID> TypedSimulation<T>::AgentsInPolygon(const std::vec
     _neighborhoodSearch.Update(_agents);
     const Polygon poly{polygon};
     if(!poly.IsConvex()) {
-        throw std::runtime_error("Polygon needs to be simple and convex");
+        throw SimulationError("Polygon needs to be simple and convex");
     }
     const auto [p, dist] = poly.ContainingCircle();
 
@@ -303,15 +303,15 @@ void TypedSimulation<T>::Notify(Event evt)
             if constexpr(std::is_same_v<EvtT, NotifyWaitingSet>) {
                 auto journey = _journeys.find(evt.journeyId);
                 if(journey == std::end(_journeys)) {
-                    throw std::runtime_error(fmt::format(
-                        "Cannot send event to unknown journey {}", evt.journeyId.getID()));
+                    throw SimulationError(
+                        "Cannot send event to unknown journey {}", evt.journeyId.getID());
                 }
                 journey->second->HandleNofifyWaitingSetEvent(evt);
             } else if constexpr(std::is_same_v<EvtT, NotifyQueue>) {
                 auto journey = _journeys.find(evt.journeyId);
                 if(journey == std::end(_journeys)) {
-                    throw std::runtime_error(fmt::format(
-                        "Cannot send event to unknown journey {}", evt.journeyId.getID()));
+                    throw SimulationError(
+                        "Cannot send event to unknown journey {}", evt.journeyId.getID());
                 }
                 journey->second->HandleNofifyQueueEvent(evt);
             } else {
