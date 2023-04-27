@@ -1,7 +1,7 @@
 import sys
 
 import py_jupedsim.experimental as jpex
-from PyQt6.QtCore import QObject, pyqtSignal
+from PySide6.QtCore import QObject, Signal
 from visdbg.config import Colors, ZLayers
 from vtkmodules.vtkCommonCore import vtkCommand, vtkIntArray, vtkPoints
 from vtkmodules.vtkCommonDataModel import (
@@ -16,7 +16,6 @@ from vtkmodules.vtkRenderingCore import (
     vtkCellPicker,
     vtkPolyDataMapper,
     vtkRenderer,
-    vtkRenderWindowInteractor,
 )
 
 
@@ -100,7 +99,7 @@ class Geometry:
 
 
 class HoverInfo(QObject):
-    hoveredTriangle = pyqtSignal(str)
+    hoveredTriangle = Signal(str)
 
     def __init__(
         self,
