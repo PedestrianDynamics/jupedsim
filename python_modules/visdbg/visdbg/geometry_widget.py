@@ -1,13 +1,7 @@
 import py_jupedsim
 import vtkmodules.vtkRenderingOpenGL2
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtCore import Signal
+from PySide6.QtWidgets import QWidget
 from visdbg.config import Colors
 from visdbg.geometry import Geometry, HoverInfo
 from visdbg.grid import Grid
@@ -17,31 +11,28 @@ from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import vtkRenderer
 
 
-class GeometryWidget(QWidget):
+class GeometryWidget(QVTKRenderWindowInteractor):
+    on_hover_triangle = Signal(str)
+
     def __init__(
         self,
         navi: py_jupedsim.experimental.RoutingEngine,
-        name_text: str,
-        info_text: str,
         parent=None,
     ):
-        QWidget.__init__(self, parent)
+        QVTKRenderWindowInteractor.__init__(self, parent)
         self.navi = navi
         self.geo = Geometry(self.navi)
 
-        self._build_content(name_text, info_text)
-
         self.ren = vtkRenderer()
         self.ren.SetBackground(Colors.d)
-        self.vtk_rwi.GetRenderWindow().AddRenderer(self.ren)
+        self.GetRenderWindow().AddRenderer(self.ren)
         for actor in self.geo.get_actors():
             self.ren.AddActor(actor)
-        self.iren = self.vtk_rwi.GetRenderWindow().GetInteractor()
+        self.iren = self.GetRenderWindow().GetInteractor()
 
         cam = self.ren.GetActiveCamera()
         cam.ParallelProjectionOn()
 
-        self.showMaximized()
         style = vtkInteractorStyleUser()
         self.iren.SetInteractorStyle(style)
         self.iren.Initialize()
@@ -49,43 +40,13 @@ class GeometryWidget(QWidget):
         self.move_controller = MoveController(style, cam)
         self.move_controller.set_navi(self.navi)
         self.hover_info = HoverInfo(self.ren, style)
-        self.hover_info.hoveredTriangle.connect(self.hover_label.setText)
+        self.hover_info.hoveredTriangle.connect(self.on_hover_triangle)
         self.hover_info.set_geo(self.geo)
 
         self.grid = Grid(self.ren, cam)
-        self._reset_camera()
+        self.reset_camera()
 
-    def _build_content(self, name_text, info_text):
-        geometry_label = QLabel(name_text)
-        geometry_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
-
-        properties_label = QLabel(info_text)
-        properties_label.setAlignment(Qt.AlignmentFlag.AlignRight)
-
-        bottom_layout = QHBoxLayout()
-        bottom_layout.addWidget(geometry_label, 1, Qt.AlignmentFlag.AlignLeft)
-        bottom_layout.addWidget(
-            properties_label, 1, Qt.AlignmentFlag.AlignRight
-        )
-
-        layout = QVBoxLayout()
-
-        reset_cam_bt = QPushButton("Reset Camera")
-        reset_cam_bt.clicked.connect(self._reset_camera)
-        layout.addWidget(reset_cam_bt)
-
-        self.vtk_rwi = QVTKRenderWindowInteractor(self)
-        layout.addWidget(self.vtk_rwi)
-
-        self.hover_label = QLabel("")
-        self.hover_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.hover_label)
-
-        layout.addLayout(bottom_layout)
-
-        self.setLayout(layout)
-
-    def _reset_camera(self):
+    def reset_camera(self):
         focal_pt_2d = (0, 0)
         scale = 10
         bounds = self.geo.get_bounds()

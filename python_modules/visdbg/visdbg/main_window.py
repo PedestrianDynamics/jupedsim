@@ -12,8 +12,28 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QTabWidget,
 )
-from visdbg.geometry_widget import GeometryWidget
+from visdbg.replay_widget import ReplayWidget
 from visdbg.util import build_jps_geometry
+from visdbg.view_geometry_widget import ViewGeometryWidget
+
+
+def full_stack():
+    import sys
+    import traceback
+
+    exc = sys.exc_info()[0]
+    if exc is not None:
+        f = sys.exc_info()[-1].tb_frame.f_back
+        stack = traceback.extract_stack(f)
+    else:
+        stack = traceback.extract_stack()[
+            :-1
+        ]  # last one would be full_stack()
+    trc = "Traceback (most recent call last):\n"
+    stackstr = trc + "".join(traceback.format_list(stack))
+    if exc is not None:
+        stackstr += "  " + traceback.format_exc().lstrip(trc)
+    return stackstr
 
 
 class MainWindow(QMainWindow):
@@ -41,6 +61,8 @@ class MainWindow(QMainWindow):
         open_menu = menu.addMenu("File")
         open_wkt_act = open_menu.addAction("Open wkt file")
         open_wkt_act.triggered.connect(self._open_wkt)
+        open_replay_act = open_menu.addAction("Open replay file")
+        open_replay_act.triggered.connect(self._open_replay)
 
     def _build_state_machine(self) -> None:
         sm = QStateMachine(self)
@@ -72,8 +94,10 @@ class MainWindow(QMainWindow):
 
     def _open_wkt(self):
         file, _ = QFileDialog.getOpenFileName(
-            self, "Open WKT file", str(Path("~").expanduser())
+            self, caption="Open WKT file", dir=str(Path("~").expanduser())
         )
+        if not file:
+            return
         file = Path(file)
         try:
             wkt = parse_wkt(Path(file).read_text(encoding="UTF-8"))
@@ -84,15 +108,22 @@ class MainWindow(QMainWindow):
             info_text = f"Dimensions: {math.ceil(xmax - xmin)}m x {math.ceil(ymax-ymin)}m Triangles: {len(navi.mesh())}"
             name_text = f"Geometry: {file}"
             self.setUpdatesEnabled(False)
-            tab = GeometryWidget(navi, name_text, info_text)
+            tab = ViewGeometryWidget(navi, name_text, info_text)
             tab_idx = self.tabs.insertTab(0, tab, file.name)
             self.tabs.setCurrentIndex(tab_idx)
             self.setUpdatesEnabled(True)
-            self.update()
         except Exception as e:
             QMessageBox.critical(
                 self,
                 "Error importing WKT geometry",
-                f"Error importing WKT geometry:\n{e}",
+                f"Error importing WKT geometry:\n{e}\n{full_stack()}",
             )
             return
+
+    def _open_replay(self):
+        self.setUpdatesEnabled(False)
+        tab = ReplayWidget()
+        tab_idx = self.tabs.insertTab(0, tab, "replay")
+        self.tabs.setCurrentIndex(tab_idx)
+        self.setUpdatesEnabled(True)
+        self.update()
