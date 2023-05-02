@@ -5,7 +5,7 @@ import logging
 import pathlib
 
 import py_jupedsim as jps
-from jupedsim.serialization import JpsCoreStyleTrajectoryWriter
+from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
 
 
 def log_debug(msg):
@@ -74,7 +74,7 @@ def main():
         agent_parameters.position = (0.5, y)
         simulation.add_agent(agent_parameters)
 
-    writer = JpsCoreStyleTrajectoryWriter(pathlib.Path("out.txt"))
+    writer = SqliteTrajectoryWriter(pathlib.Path("out.sqlite"))
     writer.begin_writing(25)
     while simulation.agent_count() > 0:
         if (
