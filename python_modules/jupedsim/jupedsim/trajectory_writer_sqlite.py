@@ -48,8 +48,13 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                 "   ori_y REAL NOT NULL)"
             )
             cur.execute("DROP TABLE IF EXISTS metadata")
-            cur.execute("CREATE TABLE metadata(fps REAL NOT NULL)")
-            cur.execute("INSERT INTO metadata VALUES(?)", (fps,))
+            cur.execute(
+                "CREATE TABLE metadata(key TEXT NOT NULL UNIQUE, value TEXT NOT NULL)"
+            )
+            cur.executemany(
+                "INSERT INTO metadata VALUES(?, ?)",
+                (("version", "1"), ("fps", fps)),
+            )
             cur.execute("COMMIT")
         except sqlite3.Error as e:
             cur.execute("ROLLBACK")
