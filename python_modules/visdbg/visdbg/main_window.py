@@ -2,6 +2,7 @@ import math
 from pathlib import Path
 
 import py_jupedsim
+from jupedsim.recording import Recording
 from jupedsim.serialization import parse_wkt
 from PySide6.QtCore import QSize
 from PySide6.QtStateMachine import QFinalState, QState, QStateMachine
@@ -12,28 +13,11 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QTabWidget,
 )
+from visdbg.geometry import Geometry
 from visdbg.replay_widget import ReplayWidget
+from visdbg.trajectory import Trajectory
 from visdbg.util import build_jps_geometry
 from visdbg.view_geometry_widget import ViewGeometryWidget
-
-
-def full_stack():
-    import sys
-    import traceback
-
-    exc = sys.exc_info()[0]
-    if exc is not None:
-        f = sys.exc_info()[-1].tb_frame.f_back
-        stack = traceback.extract_stack(f)
-    else:
-        stack = traceback.extract_stack()[
-            :-1
-        ]  # last one would be full_stack()
-    trc = "Traceback (most recent call last):\n"
-    stackstr = trc + "".join(traceback.format_list(stack))
-    if exc is not None:
-        stackstr += "  " + traceback.format_exc().lstrip(trc)
-    return stackstr
 
 
 class MainWindow(QMainWindow):
@@ -108,7 +92,8 @@ class MainWindow(QMainWindow):
             info_text = f"Dimensions: {math.ceil(xmax - xmin)}m x {math.ceil(ymax-ymin)}m Triangles: {len(navi.mesh())}"
             name_text = f"Geometry: {file}"
             self.setUpdatesEnabled(False)
-            tab = ViewGeometryWidget(navi, name_text, info_text)
+            geo = Geometry(navi)
+            tab = ViewGeometryWidget(navi, geo, name_text, info_text)
             tab_idx = self.tabs.insertTab(0, tab, file.name)
             self.tabs.setCurrentIndex(tab_idx)
             self.setUpdatesEnabled(True)
@@ -116,14 +101,34 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(
                 self,
                 "Error importing WKT geometry",
-                f"Error importing WKT geometry:\n{e}\n{full_stack()}",
+                f"Error importing WKT geometry:\n{e}",
             )
             return
 
     def _open_replay(self):
-        self.setUpdatesEnabled(False)
-        tab = ReplayWidget()
-        tab_idx = self.tabs.insertTab(0, tab, "replay")
-        self.tabs.setCurrentIndex(tab_idx)
-        self.setUpdatesEnabled(True)
-        self.update()
+        file, _ = QFileDialog.getOpenFileName(
+            self, caption="Open recording", dir=str(Path("~").expanduser())
+        )
+        if not file:
+            return
+        file = Path(file)
+        try:
+            rec = Recording(file.as_posix())
+            self.setUpdatesEnabled(False)
+            navi = py_jupedsim.experimental.RoutingEngine(
+                build_jps_geometry(rec.geometry())
+            )
+            geo = Geometry(navi)
+            trajectory = Trajectory(rec)
+            tab = ReplayWidget(navi, rec, geo, trajectory)
+            tab_idx = self.tabs.insertTab(0, tab, file.name)
+            self.tabs.setCurrentIndex(tab_idx)
+            self.setUpdatesEnabled(True)
+            self.update()
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Error importing simulation recording",
+                f"Error importing simulation recording:\n{e}",
+            )
+            return

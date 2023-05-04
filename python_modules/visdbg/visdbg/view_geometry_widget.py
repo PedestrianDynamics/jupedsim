@@ -7,13 +7,15 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from visdbg.geometry_widget import GeometryWidget
+from visdbg.geometry import Geometry
+from visdbg.geometry_widget import RenderWidget
 
 
 class ViewGeometryWidget(QWidget):
     def __init__(
         self,
         navi: py_jupedsim.experimental.RoutingEngine,
+        geo: Geometry,
         name_text: str,
         info_text: str,
         parent=None,
@@ -35,7 +37,7 @@ class ViewGeometryWidget(QWidget):
         reset_cam_bt = QPushButton("Reset Camera")
         layout.addWidget(reset_cam_bt)
 
-        self.geo_widget = GeometryWidget(navi)
+        self.geo_widget = RenderWidget(navi, [geo])
         layout.addWidget(self.geo_widget)
 
         self.hover_label = QLabel("")

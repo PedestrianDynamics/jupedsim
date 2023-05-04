@@ -8,8 +8,17 @@ def test_can_read_db():
     db_name = "file::memory:?cache=shared"
     db = sqlite3.connect(db_name, uri=True)
     with db:
-        db.execute("CREATE TABLE metadata(version INTEGER NOT NULL)")
-        db.execute("INSERT INTO metadata VALUES(?)", (1,))
+        db.execute(
+            "CREATE TABLE metadata(key TEXT NOT NULL, value TEXT NOT NULL)"
+        )
+        db.executemany(
+            "INSERT INTO metadata VALUES(?, ?)", (("version", 1), ("fps", 25))
+        )
+        db.execute("CREATE TABLE geometry(wkt TEXT NOT NULL)")
+        db.execute(
+            "INSERT INTO geometry VALUES(?)",
+            ("GEOMETRYCOLLECTION(POLYGON((0 0, 0 1, 1 1, 1 0, 0 0)))",),
+        )
         db.execute(
             "CREATE TABLE trajectory_data ("
             "   frame INTEGER NOT NULL,"
@@ -41,3 +50,4 @@ def test_can_read_db():
             assert agent.id == test_data[1]
             assert agent.position == (test_data[2], test_data[3])
             assert agent.orientation == (test_data[4], test_data[5])
+    assert rec.geometry() is not None
