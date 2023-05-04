@@ -1,6 +1,7 @@
 import sys
 
 import py_jupedsim.experimental as jpex
+from jupedsim.aabb import AABB
 from PySide6.QtCore import QObject, Signal
 from visdbg.config import Colors, ZLayers
 from vtkmodules.vtkCommonCore import vtkCommand, vtkIntArray, vtkPoints
@@ -84,7 +85,7 @@ class Geometry:
     def get_actors(self):
         return [self.edge_actor, self.actor]
 
-    def get_bounds(self):
+    def get_bounds(self) -> AABB:
         xmin = sys.maxsize
         ymin = sys.maxsize
         xmax = ~sys.maxsize
@@ -92,10 +93,10 @@ class Geometry:
         for actor in self.get_actors():
             bounds = actor.GetBounds()
             xmin = min(xmin, bounds[0])
-            ymin = min(ymin, bounds[1])
-            xmax = max(xmax, bounds[2])
+            xmax = max(xmax, bounds[1])
+            ymin = min(ymin, bounds[2])
             ymax = max(ymax, bounds[3])
-        return (xmin, ymin, xmax, ymax)
+        return AABB(xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymax)
 
 
 class HoverInfo(QObject):

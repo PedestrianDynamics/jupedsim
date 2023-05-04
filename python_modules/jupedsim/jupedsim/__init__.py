@@ -1,3 +1,4 @@
+import jupedsim.aabb
 import jupedsim.distributions
 import jupedsim.grid
 import jupedsim.serialization

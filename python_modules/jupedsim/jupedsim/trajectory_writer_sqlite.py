@@ -26,7 +26,7 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         self._frame = 0
         self._con: Optional[sqlite3.Connection] = None
 
-    def begin_writing(self, fps: float) -> None:
+    def begin_writing(self, fps: float, geometry_as_wkt: str) -> None:
         """Begin writing trajectory data.
 
         This method is intended to handle all data writing that has to be done
@@ -54,6 +54,12 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
             cur.executemany(
                 "INSERT INTO metadata VALUES(?, ?)",
                 (("version", "1"), ("fps", fps)),
+            )
+            cur.execute("DROP TABLE IF EXISTS geometry")
+            cur.execute("CREATE TABLE geometry(wkt TEXT NOT NULL)")
+            cur.execute("INSERT INTO geometry VALUES(?)", (geometry_as_wkt,))
+            cur.execute(
+                "CREATE INDEX frame_id_idx ON trajectory_data(frame, id)"
             )
             cur.execute("COMMIT")
         except sqlite3.Error as e:
@@ -88,8 +94,10 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                 frame_data,
             )
             cur.execute("COMMIT")
-        except:
+        except sqlite3.Error as e:
             cur.execute("ROLLBACK")
+            raise TrajectoryWriter.Exception(f"Error writing to database: {e}")
+
         self._frame += 1
 
     def end_writing(self) -> None:
@@ -98,5 +106,35 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         This method is intended to handle finalizing writing of trajectory
         data, e.g. write closing tags, or footer meta data.
         """
-        if self._con:
-            self._con.close()
+        if not self._con:
+            raise TrajectoryWriter.Exception("Database not opened.")
+
+        cur = self._con.cursor()
+        try:
+            cur.execute("BEGIN")
+            res = cur.execute(
+                "SELECT MIN(pos_x), MAX(pos_x), MIN(pos_y), MAX(pos_y) FROM trajectory_data"
+            )
+            xmin, xmax, ymin, ymax = res.fetchone()
+            cur.execute(
+                "INSERT INTO metadata(key, value) VALUES(?,?)",
+                ("xmin", str(xmin)),
+            )
+            cur.execute(
+                "INSERT INTO metadata(key, value) VALUES(?,?)",
+                ("xmax", str(xmax)),
+            )
+            cur.execute(
+                "INSERT INTO metadata(key, value) VALUES(?,?)",
+                ("ymin", str(ymin)),
+            )
+            cur.execute(
+                "INSERT INTO metadata(key, value) VALUES(?,?)",
+                ("ymax", str(ymax)),
+            )
+            cur.execute("COMMIT")
+        except sqlite3.Error as e:
+            cur.execute("ROLLBACK")
+            raise TrajectoryWriter.Exception(f"Error writing to database: {e}")
+
+        self._con.close()

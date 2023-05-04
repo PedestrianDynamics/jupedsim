@@ -1,6 +1,9 @@
 import sqlite3
 from dataclasses import dataclass
 
+import shapely
+from jupedsim.aabb import AABB
+
 
 @dataclass
 class RecordingAgent:
@@ -36,6 +39,36 @@ class Recording:
             (index,),
         )
         return RecordingFrame(index, res.fetchall())
+
+    def geometry(self) -> shapely.GeometryCollection:
+        cur = self.db.cursor()
+        res = cur.execute("SELECT wkt FROM geometry")
+        wkt_str = res.fetchone()[0]
+        return shapely.from_wkt(wkt_str)
+
+    def bounds(self) -> AABB:
+        cur = self.db.cursor()
+        res = cur.execute("SELECT value FROM metadata WHERE key == 'xmin'")
+        xmin = float(res.fetchone()[0])
+        res = cur.execute("SELECT value FROM metadata WHERE key == 'xmax'")
+        xmax = float(res.fetchone()[0])
+        res = cur.execute("SELECT value FROM metadata WHERE key == 'ymin'")
+        ymin = float(res.fetchone()[0])
+        res = cur.execute("SELECT value FROM metadata WHERE key == 'xmax'")
+        ymax = float(res.fetchone()[0])
+        return AABB(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+
+    @property
+    def num_frames(self) -> int:
+        cur = self.db.cursor()
+        res = cur.execute("SELECT MAX(frame) FROM trajectory_data")
+        return res.fetchone()[0]
+
+    @property
+    def fps(self) -> float:
+        cur = self.db.cursor()
+        res = cur.execute("SELECT value from metadata WHERE key == 'fps'")
+        return float(res.fetchone()[0])
 
     def _check_version_compatible(self) -> None:
         cur = self.db.cursor()
