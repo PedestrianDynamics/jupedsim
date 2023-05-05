@@ -212,3 +212,86 @@ def test_can_wait():
         simulation.iterate()
         if simulation.iteration_count() == 1000:
             simulation.notify_waiting_set(journey_id, stage, False)
+
+
+def test_can_change_journey_while_waiting():
+    messages = []
+
+    def log_msg_handler(msg):
+        messages.append(msg)
+
+    jps.set_info_callback(log_msg_handler)
+    jps.set_warning_callback(log_msg_handler)
+    jps.set_error_callback(log_msg_handler)
+
+    geo_builder = jps.GeometryBuilder()
+    geo_builder.add_accessible_area([(0, 0), (100, 0), (100, 100), (0, 100)])
+    geometry = geo_builder.build()
+
+    model_builder = jps.VelocityModelBuilder(
+        a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
+    )
+    profile_id = 3
+    model_builder.add_parameter_profile(
+        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.3
+    )
+
+    model = model_builder.build()
+
+    simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
+
+    journey1 = jps.JourneyDescription()
+    journey1.add_waypoint((50, 50), 1)
+    stage = journey1.add_notifiable_waiting_set(
+        [
+            (60, 50),
+            (59, 50),
+            (58, 50),
+        ]
+    )
+    journey1.add_exit([(99, 40), (99, 60), (100, 60), (100, 40)])
+
+    journey2 = jps.JourneyDescription()
+    journey2.add_waypoint((60, 40), 1)
+    journey2.add_waypoint((40, 40), 1)
+    journey2.add_waypoint((40, 60), 1)
+    journey2.add_waypoint((60, 60), 1)
+    journey2.add_exit([(99, 50), (99, 70), (100, 70), (100, 50)])
+
+    journeys = []
+    journeys.append(simulation.add_journey(journey1))
+    journeys.append(simulation.add_journey(journey2))
+
+    agent_parameters = jps.VelocityModelAgentParameters()
+    agent_parameters.journey_id = journeys[0]
+    agent_parameters.orientation = (1.0, 0.0)
+    agent_parameters.position = (0.0, 0.0)
+    agent_parameters.profile_id = profile_id
+
+    agent_parameters.position = (10, 50)
+    simulation.add_agent(agent_parameters)
+
+    agent_parameters.position = (8, 50)
+    simulation.add_agent(agent_parameters)
+
+    agent_parameters.position = (6, 50)
+    simulation.add_agent(agent_parameters)
+
+    redirect_once = True
+    signal_once = True
+    while simulation.agent_count() > 0:
+        agents_at_head_of_waiting = list(
+            simulation.agents_in_range((60, 50), 1)
+        )
+        if redirect_once and agents_at_head_of_waiting:
+            simulation.switch_agent_journey(
+                agent_id=agents_at_head_of_waiting[0],
+                journey_id=journeys[1],
+                stage_index=0,
+            )
+            redirect_once = False
+
+        if signal_once and simulation.agents_in_range((60, 60), 1):
+            simulation.notify_waiting_set(journeys[0], stage, False)
+            signal_once = False
+        simulation.iterate()

@@ -5,6 +5,7 @@
 #include "GeometricFunctions.hpp"
 #include "IteratorPair.hpp"
 #include "Line.hpp"
+#include "SimulationError.hpp"
 #include "Triangle.hpp"
 
 #include <vector>
@@ -139,6 +140,5 @@ NavMeshRoutingEngine::GraphType::VertexId NavMeshRoutingEngine::findVertex(Point
             return id;
         }
     }
-    // TODO(kratz): Use custom exception
-    throw std::runtime_error("Point outside accessible area");
+    throw SimulationError("Point outside accessible area");
 }

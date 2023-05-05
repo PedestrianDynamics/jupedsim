@@ -46,6 +46,7 @@ add_library(simulator STATIC
     src/Simulation.hpp
     src/SimulationClock.cpp
     src/SimulationClock.hpp
+    src/SimulationError.hpp
     src/Stage.cpp
     src/Stage.hpp
     src/StrategicalDesicionSystem.hpp
@@ -54,6 +55,7 @@ add_library(simulator STATIC
     src/Triangle.cpp
     src/Triangle.hpp
     src/UniqueID.hpp
+    src/Util.hpp
     src/VelocityModel.cpp
     src/VelocityModel.hpp
     src/VelocityModelBuilder.cpp
