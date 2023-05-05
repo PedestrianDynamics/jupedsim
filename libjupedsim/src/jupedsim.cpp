@@ -226,18 +226,15 @@ JPS_GeometryBuilder JPS_GeometryBuilder_Create()
 
 void JPS_GeometryBuilder_AddAccessibleArea(
     JPS_GeometryBuilder handle,
-    double* points,
-    size_t pointCount)
+    JPS_Point* polygon,
+    size_t lenPolygon)
 {
     assert(handle != nullptr);
     auto builder = reinterpret_cast<GeometryBuilder*>(handle);
-    std::vector<Point> lineLoop{};
-    lineLoop.reserve(pointCount);
-    for(size_t pointIndex = 0; pointIndex < pointCount; ++pointIndex) {
-        lineLoop.emplace_back(points[pointIndex * 2], points[pointIndex * 2 + 1]);
-    }
-    // TODO(kkratz): Consider adding a move version of 'AddAccessibleArea'
-    builder->AddAccessibleArea(lineLoop);
+    std::vector<Point> loop{};
+    loop.reserve(lenPolygon);
+    std::transform(polygon, polygon + lenPolygon, std::back_inserter(loop), intoPoint);
+    builder->AddAccessibleArea(loop);
 }
 
 void JPS_GeometryBuilder_ExcludeFromAccessibleArea(
@@ -434,6 +431,33 @@ bool JPS_JourneyDescription_AddNotifiableWaitingSet(
     std::transform(
         waiting_points, waiting_points + len_waiting_points, std::back_inserter(slots), intoPoint);
     journey->push_back(NotifiableWaitingSetDescription{std::move(slots)});
+    if(stageIndex != nullptr) {
+        *stageIndex = journey->size() - 1;
+    }
+    return true;
+}
+
+bool JPS_JourneyDescription_AddNotifiableQueue(
+    JPS_JourneyDescription handle,
+    JPS_Point* waiting_points,
+    size_t len_waiting_points,
+    JPS_StageIndex* stageIndex,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    if(len_waiting_points < 1) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"NotifiableQueue needs at least 1 waiting point"});
+        }
+        return false;
+    }
+    auto journey = reinterpret_cast<JourneyDesc*>(handle);
+    std::vector<Point> slots{};
+    slots.reserve(len_waiting_points);
+    std::transform(
+        waiting_points, waiting_points + len_waiting_points, std::back_inserter(slots), intoPoint);
+    journey->push_back(NotifiableQueueDescription{std::move(slots)});
     if(stageIndex != nullptr) {
         *stageIndex = journey->size() - 1;
     }
@@ -791,6 +815,32 @@ bool JPS_Simulation_SwitchAgentProfile(
     return result;
 }
 
+bool JPS_Simulation_SwitchAgentJourney(
+    JPS_Simulation handle,
+    JPS_AgentId agentId,
+    JPS_JourneyId journeyId,
+    JPS_StageIndex stageIdx,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    const auto simulation = reinterpret_cast<Simulation*>(handle);
+    bool result = false;
+    try {
+        simulation->SwitchAgentJourney(agentId, journeyId, stageIdx);
+        result = true;
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return result;
+}
+
 JPS_ModelType JPS_Simulation_ModelType(JPS_Simulation handle)
 {
     assert(handle);
@@ -846,6 +896,25 @@ bool JPS_Simulation_ChangeWaitingSetState(
             stageIdx,
             active ? NotifiableWaitingSet::WaitingState::Active :
                      NotifiableWaitingSet::WaitingState::Inactive});
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+        return false;
+    }
+    return true;
+}
+JUPEDSIM_API bool JPS_Simulation_PopAgentsFromQueue(
+    JPS_Simulation handle,
+    JPS_JourneyId journeyId,
+    size_t stageIdx,
+    size_t count,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    auto simuation = reinterpret_cast<Simulation*>(handle);
+    try {
+        simuation->Notify(NotifyQueue{journeyId, stageIdx, count});
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});

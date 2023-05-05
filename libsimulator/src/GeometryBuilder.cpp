@@ -9,6 +9,7 @@
 #include "Line.hpp"
 #include "Point.hpp"
 #include "RoutingEngine.hpp"
+#include "SimulationError.hpp"
 
 #include <CGAL/Boolean_set_operations_2/difference.h>
 #include <CGAL/number_utils.h>
@@ -58,7 +59,7 @@ static Poly intoCGALPolygon(const std::vector<Point>& ring, Ordering ordering)
     }
 
     if(!poly.is_simple()) {
-        throw std::runtime_error(fmt::format("Polygon is not simple: {}", ring));
+        throw SimulationError("Polygon is not simple: {}", ring);
     }
     const bool needsReversal = (ordering == Ordering::CW && poly.is_counterclockwise_oriented()) ||
                                (ordering == Ordering::CCW && poly.is_clockwise_oriented());
@@ -98,7 +99,7 @@ Geometry GeometryBuilder::Build()
         std::back_inserter(accessibleList));
 
     if(accessibleList.size() != 1) {
-        throw std::runtime_error("accesisble area not connected");
+        throw SimulationError("accesisble area not connected");
     }
 
     auto accessibleArea = *accessibleList.begin();
@@ -115,7 +116,7 @@ Geometry GeometryBuilder::Build()
         PolyWithHolesList res{};
         CGAL::difference(accessibleArea, ex, std::back_inserter(res));
         if(res.size() != 1) {
-            throw std::runtime_error("Exclusion splits accessibleArea");
+            throw SimulationError("Exclusion splits accessibleArea");
         }
         accessibleArea = *res.begin();
     }

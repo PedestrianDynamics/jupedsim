@@ -1,8 +1,12 @@
 /// Copyright © 2012-2022 Forschungszentrum Jülich GmbH
 /// SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Polygon.hpp"
+
+#include "SimulationError.hpp"
+
 #include <CGAL/enum.h>
 #include <CGAL/number_utils.h>
+
 #include <stdexcept>
 #include <vector>
 
@@ -14,12 +18,12 @@ Polygon::Polygon(const std::vector<Point>& points)
     });
 
     if(!_polygon.is_simple()) {
-        throw std::runtime_error("Polygon is not simple");
+        throw SimulationError("Polygon is not simple");
     }
 
     switch(_polygon.orientation()) {
         case CGAL::Orientation::COLLINEAR:
-            throw std::runtime_error("Polygon may not be collinear.");
+            throw SimulationError("Polygon may not be collinear.");
         case CGAL::Orientation::CLOCKWISE:
             _polygon.reverse_orientation();
         case CGAL::Orientation::COUNTERCLOCKWISE:

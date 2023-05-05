@@ -11,4 +11,10 @@ struct NotifyWaitingSet {
     NotifiableWaitingSet::WaitingState newState;
 };
 
-using Event = std::variant<NotifyWaitingSet>;
+struct NotifyQueue {
+    jps::UniqueID<Journey> journeyId;
+    size_t stageIdx;
+    size_t count;
+};
+
+using Event = std::variant<NotifyWaitingSet, NotifyQueue>;

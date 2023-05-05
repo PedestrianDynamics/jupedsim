@@ -7,6 +7,7 @@
 #include <exception>
 #include <iterator>
 #include <memory>
+#include <pybind11/cast.h>
 #include <pybind11/detail/common.h>
 #include <stdexcept>
 #include <vector>
@@ -165,6 +166,8 @@ PYBIND11_MODULE(py_jupedsim, m)
 
     py::implicitly_convertible<std::tuple<double, double>, JPS_Point>();
     py::implicitly_convertible<std::tuple<int, int>, JPS_Point>();
+    py::implicitly_convertible<std::tuple<int, double>, JPS_Point>();
+    py::implicitly_convertible<std::tuple<double, int>, JPS_Point>();
     py::class_<JPS_GCFMModelAgentParameters>(m, "GCFMModelAgentParameters")
         .def(py::init())
         .def_readwrite("speed", &JPS_GCFMModelAgentParameters::speed)
@@ -212,15 +215,8 @@ PYBIND11_MODULE(py_jupedsim, m)
         }))
         .def(
             "add_accessible_area",
-            [](const JPS_GeometryBuilder_Wrapper& w,
-               std::vector<std::tuple<double, double>> points) {
-                std::vector<double> values{};
-                values.reserve(points.size() * 2);
-                for(const auto [x, y] : points) {
-                    values.emplace_back(x);
-                    values.emplace_back(y);
-                }
-                JPS_GeometryBuilder_AddAccessibleArea(w.handle, values.data(), values.size() / 2);
+            [](const JPS_GeometryBuilder_Wrapper& w, std::vector<JPS_Point> polygon) {
+                JPS_GeometryBuilder_AddAccessibleArea(w.handle, polygon.data(), polygon.size());
             },
             "Add area where agents can move")
         .def(
@@ -419,6 +415,30 @@ PYBIND11_MODULE(py_jupedsim, m)
                 auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
                 JPS_ErrorMessage_Free(errorMsg);
                 throw std::runtime_error{msg};
+            })
+        .def(
+            "add_notifiable_queue",
+            [](JPS_JourneyDescription_Wrapper& w,
+               std::vector<std::tuple<double, double>> waiting_points) {
+                std::vector<JPS_Point> points{};
+                points.reserve(waiting_points.size());
+                std::transform(
+                    std::begin(waiting_points),
+                    std::end(waiting_points),
+                    std::back_inserter(points),
+                    [](const auto& pt) {
+                        return JPS_Point{std::get<0>(pt), std::get<1>(pt)};
+                    });
+                JPS_StageIndex stageIndex;
+                JPS_ErrorMessage errorMsg{};
+                const auto success = JPS_JourneyDescription_AddNotifiableQueue(
+                    w.handle, points.data(), points.size(), &stageIndex, &errorMsg);
+                if(success) {
+                    return stageIndex;
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
             });
     py::class_<JPS_GCFMModelAgentIterator_Wrapper>(m, "GCFMModelAgentIterator")
         .def(
@@ -597,6 +617,26 @@ PYBIND11_MODULE(py_jupedsim, m)
             py::arg("agent_id"),
             py::arg("profile_id"))
         .def(
+            "switch_agent_journey",
+            [](const JPS_Simulation_Wrapper& w,
+               JPS_AgentId agentId,
+               JPS_JourneyId journeyId,
+               JPS_StageIndex stageIdx) {
+                JPS_ErrorMessage errorMsg{};
+                auto result = JPS_Simulation_SwitchAgentJourney(
+                    w.handle, agentId, journeyId, stageIdx, &errorMsg);
+                if(result) {
+                    return;
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
+            },
+            py::kw_only(),
+            py::arg("agent_id"),
+            py::arg("journey_id"),
+            py::arg("stage_index"))
+        .def(
             "agent_count",
             [](JPS_Simulation_Wrapper& simulation) {
                 return JPS_Simulation_AgentCount(simulation.handle);
@@ -649,6 +689,19 @@ PYBIND11_MODULE(py_jupedsim, m)
                 JPS_ErrorMessage errorMsg{};
                 auto result = JPS_Simulation_ChangeWaitingSetState(
                     w.handle, journeyId, stageIdx, active, &errorMsg);
+                if(result) {
+                    return;
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
+            })
+        .def(
+            "notify_queue",
+            [](JPS_Simulation_Wrapper& w, JPS_JourneyId journeyId, size_t stageIdx, size_t count) {
+                JPS_ErrorMessage errorMsg{};
+                auto result = JPS_Simulation_PopAgentsFromQueue(
+                    w.handle, journeyId, stageIdx, count, &errorMsg);
                 if(result) {
                     return;
                 }

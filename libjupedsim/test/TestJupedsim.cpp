@@ -45,14 +45,14 @@ TEST(GeometryBuilder, CanConstruct)
 {
     auto builder = JPS_GeometryBuilder_Create();
 
-    std::vector<std::vector<double>> data{
-        {0, 0, 1, 0, 1, 1, 0, 1},
-        {0, 0, 0, -1, 1, -1, 1, 0},
-        {0, 0, -1, 0, -1, -1, 0, -1},
-        {0, 0, 0, 1, -1, 1, -1, 0}};
+    std::vector<std::vector<JPS_Point>> data{
+        {{0, 0}, {1, 0}, {1, 1}, {0, 1}},
+        {{0, 0}, {0, -1}, {1, -1}, {1, 0}},
+        {{0, 0}, {-1, 0}, {-1, -1}, {0, -1}},
+        {{0, 0}, {0, 1}, {-1, 1}, {-1, 0}}};
 
     for(auto& poly : data) {
-        JPS_GeometryBuilder_AddAccessibleArea(builder, poly.data(), poly.size() / 2);
+        JPS_GeometryBuilder_AddAccessibleArea(builder, poly.data(), poly.size());
     }
 
     std::vector<double> box4{0, 0, 0.2, 0, 0.2, 0.2, 0, 0.2};
@@ -70,11 +70,11 @@ TEST(Simulation, CanSimulate)
 {
     auto geo_builder = JPS_GeometryBuilder_Create();
 
-    std::vector<double> box1{0, 0, 10, 0, 10, 10, 0, 10};
-    JPS_GeometryBuilder_AddAccessibleArea(geo_builder, box1.data(), box1.size() / 2);
+    std::vector<JPS_Point> box1{{0, 0}, {10, 0}, {10, 10}, {0, 10}};
+    JPS_GeometryBuilder_AddAccessibleArea(geo_builder, box1.data(), box1.size());
 
-    std::vector<double> box2{10, 4, 20, 4, 20, 6, 10, 6};
-    JPS_GeometryBuilder_AddAccessibleArea(geo_builder, box2.data(), box2.size() / 2);
+    std::vector<JPS_Point> box2{{10, 4}, {20, 4}, {20, 6}, {10, 6}};
+    JPS_GeometryBuilder_AddAccessibleArea(geo_builder, box2.data(), box2.size());
 
     auto geometry = JPS_GeometryBuilder_Build(geo_builder, nullptr);
     ASSERT_NE(geometry, nullptr);
@@ -122,8 +122,8 @@ struct SimulationTest : public ::testing::Test {
     void SetUp() override
     {
         auto geo_builder = JPS_GeometryBuilder_Create();
-        std::vector<double> box1{0, 0, 10, 0, 10, 10, 0, 10};
-        JPS_GeometryBuilder_AddAccessibleArea(geo_builder, box1.data(), box1.size() / 2);
+        std::vector<JPS_Point> box1{{0, 0}, {10, 0}, {10, 10}, {0, 10}};
+        JPS_GeometryBuilder_AddAccessibleArea(geo_builder, box1.data(), box1.size());
         auto geometry = JPS_GeometryBuilder_Build(geo_builder, nullptr);
         ASSERT_NE(geometry, nullptr);
         JPS_GeometryBuilder_Free(geo_builder);
@@ -203,17 +203,18 @@ TEST_F(SimulationTest, CanChangeModelParameterProfiles)
 TEST(Regression, Bug1028)
 {
 
-    std::vector<std::vector<double>> data{// CW ordered polygons
-                                          {103.2, 96.8, 105.2, 96.8, 105.2, 94.8, 103.2, 92.8},
-                                          {100, 96.8, 100, 92.8, 98, 94.8, 98, 96.8},
-                                          // CCW ordered polygons
-                                          {100.0, 96.8, 100.0, 92.8, 103.2, 92.8, 103.2, 96.8},
-                                          {0, 96.8, 0, 94.8, 98, 94.8, 98, 96.8},
-                                          {105.2, 96.8, 105.2, 94.8, 200, 94.8, 200, 96.8}};
+    std::vector<std::vector<JPS_Point>> data{
+        // CW ordered polygons
+        {{103.2, 96.8}, {105.2, 96.8}, {105.2, 94.8}, {103.2, 92.8}},
+        {{100, 96.8}, {100, 92.8}, {98, 94.8}, {98, 96.8}},
+        // CCW ordered polygons
+        {{100.0, 96.8}, {100.0, 92.8}, {103.2, 92.8}, {103.2, 96.8}},
+        {{0, 96.8}, {0, 94.8}, {98, 94.8}, {98, 96.8}},
+        {{105.2, 96.8}, {105.2, 94.8}, {200, 94.8}, {200, 96.8}}};
     auto geo_builder = JPS_GeometryBuilder_Create();
 
     for(auto& poly : data) {
-        JPS_GeometryBuilder_AddAccessibleArea(geo_builder, poly.data(), poly.size() / 2);
+        JPS_GeometryBuilder_AddAccessibleArea(geo_builder, poly.data(), poly.size());
     }
     auto geometry = JPS_GeometryBuilder_Build(geo_builder, nullptr);
     ASSERT_NE(geometry, nullptr);

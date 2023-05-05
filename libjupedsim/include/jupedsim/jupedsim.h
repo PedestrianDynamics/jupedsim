@@ -292,14 +292,13 @@ JUPEDSIM_API JPS_GeometryBuilder JPS_GeometryBuilder_Create();
  * Multiple accessible areas may overlap, the final accessible area is created by forming the union
  * over all accessible areas.
  * The Union over all accessible areas minus exclusions must form one polygon.
- * @param points pointer to the x/y coordinates for the points describing the polygon. The number of
- *        double values in this array is expected to be 2*pointCount!
+ * @param polygon describing the accessible area.
  * @param pointCount number of points the polygon consists of.
  */
 JUPEDSIM_API void JPS_GeometryBuilder_AddAccessibleArea(
     JPS_GeometryBuilder handle,
-    double* points,
-    size_t pointCount);
+    JPS_Point* points,
+    size_t lenPolygon);
 
 /**
  * Adds an accessible area to the geometry.
@@ -388,9 +387,27 @@ JUPEDSIM_API bool JPS_JourneyDescription_AddExit(
  * @param len_waiting_points number of waiting points
  * @param[out] stageIndex if not NULL: will be set to the stage index of this stage.
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
- * @return success if a waypoint could be added to journey
+ * @return success if the stage could be added.
  */
 JUPEDSIM_API bool JPS_JourneyDescription_AddNotifiableWaitingSet(
+    JPS_JourneyDescription handle,
+    JPS_Point* waiting_points,
+    size_t len_waiting_points,
+    JPS_StageIndex* stageIndex,
+    JPS_ErrorMessage* errorMessage);
+
+/**
+ * Extends the journey with a notifiable queue. The queue consists of a ordered list of
+ * points. Agents waiting will steer towards the first empty slot in this list.
+ * The waiting set has to contain at least 1 waiting point.
+ * @param handle of the journey to extend.
+ * @param waiting_points the ordered waiting points
+ * @param len_waiting_points number of waiting points
+ * @param[out] stageIndex if not NULL: will be set to the stage index of this stage.
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return success if the stage could be added.
+ */
+JUPEDSIM_API bool JPS_JourneyDescription_AddNotifiableQueue(
     JPS_JourneyDescription handle,
     JPS_Point* waiting_points,
     size_t len_waiting_points,
@@ -712,6 +729,22 @@ JUPEDSIM_API bool JPS_Simulation_SwitchAgentProfile(
     JPS_ErrorMessage* errorMessage);
 
 /**
+ * Switches the journey and currently selected stage of this agent
+ * @param handle of the Simulation to operate on
+ * @param agentId id of the agent to modify
+ * @param journeyId of the journey to select
+ * @param stageIdx of the stage to select
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return true on success, false on any error, e.g. unknown agent id or profile id
+ */
+JUPEDSIM_API bool JPS_Simulation_SwitchAgentJourney(
+    JPS_Simulation handle,
+    JPS_AgentId agentId,
+    JPS_JourneyId journeyId,
+    JPS_StageIndex stageIdx,
+    JPS_ErrorMessage* errorMessage);
+
+/**
  * Query the pedestrian model used by this simulation.
  * @return the type of pedestrian model used in this simulation instance.
  */
@@ -753,6 +786,22 @@ JUPEDSIM_API bool JPS_Simulation_ChangeWaitingSetState(
     JPS_JourneyId journeyId,
     size_t stageIdx,
     bool active,
+    JPS_ErrorMessage* errorMessage);
+
+/**
+ * Tell the simulation to release `count` many agents from the queue.
+ * @param handle of the Simulation to operate on
+ * @param journeyId journey to modify
+ * @param stageIdx stage to notify, this index has to point to a NotifiableQueue
+ * @param count of agents to release
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return true on success, false on any error, e.g. unknown journeyId
+ */
+JUPEDSIM_API bool JPS_Simulation_PopAgentsFromQueue(
+    JPS_Simulation handle,
+    JPS_JourneyId journeyId,
+    size_t stageIdx,
+    size_t count,
     JPS_ErrorMessage* errorMessage);
 
 /**
