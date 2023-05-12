@@ -221,16 +221,9 @@ PYBIND11_MODULE(py_jupedsim, m)
             "Add area where agents can move")
         .def(
             "exclude_from_accssible_area",
-            [](const JPS_GeometryBuilder_Wrapper& w,
-               std::vector<std::tuple<double, double>> points) {
-                std::vector<double> values{};
-                values.reserve(points.size() * 2);
-                for(const auto [x, y] : points) {
-                    values.emplace_back(x);
-                    values.emplace_back(y);
-                }
+            [](const JPS_GeometryBuilder_Wrapper& w, std::vector<JPS_Point> polygon) {
                 JPS_GeometryBuilder_ExcludeFromAccessibleArea(
-                    w.handle, values.data(), values.size() / 2);
+                    w.handle, polygon.data(), polygon.size());
             },
             "Add areas where agents can not move (obstacles)")
         .def(

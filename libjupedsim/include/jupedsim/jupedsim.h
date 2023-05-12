@@ -297,7 +297,7 @@ JUPEDSIM_API JPS_GeometryBuilder JPS_GeometryBuilder_Create();
  */
 JUPEDSIM_API void JPS_GeometryBuilder_AddAccessibleArea(
     JPS_GeometryBuilder handle,
-    JPS_Point* points,
+    JPS_Point* polygon,
     size_t lenPolygon);
 
 /**
@@ -308,14 +308,13 @@ JUPEDSIM_API void JPS_GeometryBuilder_AddAccessibleArea(
  * over all exclusion areas.
  * Exclusion areas are subtracted from accessible areas.
  * The Union over all accessible areas minus exclusions must form a single polygon.
- * @param points pointer to the x/y coordinates for the points describing the polygon. The number of
- *        double values in this array is expected to be 2*pointCount!
+ * @param polygon describing the accessible area.
  * @param pointCount number of points the polygon consists of.
  */
 JUPEDSIM_API void JPS_GeometryBuilder_ExcludeFromAccessibleArea(
     JPS_GeometryBuilder handle,
-    double* lineSegments,
-    size_t lineSegmentsCount);
+    JPS_Point* polygon,
+    size_t lenPolygon);
 
 /**
  * Creates a JPS_Geometry from a JPS_GeometryBuilder. After this call the builder still has to be

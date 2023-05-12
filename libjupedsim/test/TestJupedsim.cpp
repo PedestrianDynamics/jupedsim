@@ -55,8 +55,8 @@ TEST(GeometryBuilder, CanConstruct)
         JPS_GeometryBuilder_AddAccessibleArea(builder, poly.data(), poly.size());
     }
 
-    std::vector<double> box4{0, 0, 0.2, 0, 0.2, 0.2, 0, 0.2};
-    JPS_GeometryBuilder_ExcludeFromAccessibleArea(builder, box4.data(), box4.size() / 2);
+    std::vector<JPS_Point> box4{{0, 0}, {0.2, 0}, {0.2, 0.2}, {0, 0.2}};
+    JPS_GeometryBuilder_ExcludeFromAccessibleArea(builder, box4.data(), box4.size());
 
     JPS_ErrorMessage message{};
     auto geometry = JPS_GeometryBuilder_Build(builder, &message);
