@@ -71,8 +71,8 @@ def main():
             agent_parameters.position = (0.5 + x, y + 0.5)
             simulation.add_agent(agent_parameters)
 
-    writer = SqliteTrajectoryWriter(pathlib.Path("out.sqlite"))
-    writer.begin_writing(5, to_wkt(geo))
+    writer = SqliteTrajectoryWriter(pathlib.Path("example4_out.sqlite"))
+    writer.begin_writing(5, to_wkt(geo, rounding_precision=-1))
     while simulation.agent_count() > 0:
         try:
             if simulation.iteration_count() % 20 == 0:
