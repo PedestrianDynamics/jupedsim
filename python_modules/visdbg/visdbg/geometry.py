@@ -100,32 +100,31 @@ class Geometry:
 
 
 class HoverInfo(QObject):
-    hoveredTriangle = Signal(str)
+    hovered = Signal(str)
 
     def __init__(
         self,
+        geo: Geometry,
         renderer: vtkRenderer,
         interactor_style: vtkInteractorStyleUser,
     ):
         QObject.__init__(self)
+        self.geo = geo
         self.renderer = renderer
         self.picker = vtkCellPicker()
         self.picker.PickFromListOn()
-        self.geo = None
         interactor_style.AddObserver(
             vtkCommand.MouseMoveEvent, self.on_mouse_move
         )
-
-    def set_geo(self, geo: Geometry):
-        self.geo = geo
         self.picker.InitializePickList()
         self.picker.AddPickList(self.geo.actor)
 
     def on_mouse_move(self, obj, evt):
-        if not self.geo:
-            return
         interactor = obj.GetInteractor()
         pos = interactor.GetEventPosition()
         self.picker.Pick(pos[0], pos[1], 0, self.renderer)
         cell_id = self.picker.GetCellId()
-        self.hoveredTriangle.emit(str(cell_id) if cell_id != -1 else "")
+        x, y, _ = self.picker.GetPickPosition()
+        cell_text = str(f"Nav ID: {cell_id}" if cell_id != -1 else "")
+        text = f"x: {x:.2f} y: {y:.2f} {cell_text}"
+        self.hovered.emit(text)
