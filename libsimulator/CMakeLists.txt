@@ -87,6 +87,7 @@ set_property(TARGET simulator PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 ################################################################################
 if (BUILD_TESTS)
     add_executable(libsimulator-tests
+        test/TestAABB.cpp
         test/TestBasicPrimitiveTests.cpp
         test/TestCollisionGeometry.cpp
         test/TestGraph.cpp
