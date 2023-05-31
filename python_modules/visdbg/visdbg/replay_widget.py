@@ -138,7 +138,7 @@ class ReplayWidget(QWidget):
         self.rec = rec
         self.trajectory = trajectory
         self.control = PlayerControlWidget()
-        self.render_widget = RenderWidget(navi, [geo, trajectory])
+        self.render_widget = RenderWidget(geo, navi, [geo, trajectory])
         layout = QVBoxLayout()
         layout.addWidget(self.render_widget, 1)
         layout.addWidget(self.control)

@@ -17,6 +17,7 @@ class RenderWidget(QVTKRenderWindowInteractor):
 
     def __init__(
         self,
+        geo: py_jupedsim.Geometry,
         navi: py_jupedsim.experimental.RoutingEngine,
         actor_sources,
         parent=None,
@@ -42,9 +43,8 @@ class RenderWidget(QVTKRenderWindowInteractor):
 
         self.move_controller = MoveController(style, cam)
         self.move_controller.set_navi(self.navi)
-        self.hover_info = HoverInfo(self.ren, style)
-        self.hover_info.hoveredTriangle.connect(self.on_hover_triangle)
-        # self.hover_info.set_geo(self.geo)
+        self.hover_info = HoverInfo(geo, self.ren, style)
+        self.hover_info.hovered.connect(self.on_hover_triangle)
 
         self.grid = Grid(self.ren, cam)
         self.reset_camera()
