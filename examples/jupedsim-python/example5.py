@@ -142,12 +142,12 @@ def main():
     ]
 
     writer = SqliteTrajectoryWriter(pathlib.Path("example5_out.sqlite"))
-    writer.begin_writing(5, to_wkt(geo, rounding_precision=-1))
+    writer.begin_writing(2, to_wkt(geo, rounding_precision=-1))
     for s in spawners:
         s.spawn(simulation.iteration_count())
     while simulation.agent_count() > 0:
         try:
-            if simulation.iteration_count() % 20 == 0:
+            if simulation.iteration_count() % 50 == 0:
                 writer.write_iteration_state(simulation)
             for s in spawners:
                 s.spawn(simulation.iteration_count())
@@ -155,12 +155,12 @@ def main():
             simulation.iterate()
             duration = time.perf_counter_ns() - before
             print(
-                f"Iteration: {simulation.iteration_count():3.0f} / Time taken: {duration / 1000000}ms",
+                f"Iteration: {simulation.iteration_count():6d} / Agents: {simulation.agent_count():4d} / Time taken: {duration / 1000000:6.2f}ms",
                 end="\r",
             )
         except KeyboardInterrupt:
             writer.end_writing()
-            print("CTRL-C Recieved! Shuting down")
+            print("\nCTRL-C Recieved! Shuting down")
             sys.exit(1)
 
     writer.end_writing()

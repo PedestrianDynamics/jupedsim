@@ -27,8 +27,8 @@ add_library(simulator STATIC
     src/Graph.hpp
     src/Journey.cpp
     src/Journey.hpp
-    src/Line.cpp
-    src/Line.hpp
+    src/LineSegment.cpp
+    src/LineSegment.hpp
     src/Logger.cpp
     src/Logger.hpp
     src/Macros.hpp
@@ -91,7 +91,7 @@ if (BUILD_TESTS)
         test/TestBasicPrimitiveTests.cpp
         test/TestCollisionGeometry.cpp
         test/TestGraph.cpp
-        test/TestLine.cpp
+        test/TestLineSegment.cpp
         test/TestNeighborhoodSearch.cpp
         test/TestSimulationClock.cpp
         test/TestUniqueID.cpp
