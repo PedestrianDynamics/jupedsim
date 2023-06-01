@@ -202,6 +202,9 @@ target_compile_definitions(git-info INTERFACE
     GIT_BRANCH="${GIT_BRANCH}"
 )
 configure_file(cmake_templates/BuildInfo.cpp.in ${CMAKE_BINARY_DIR}/generated/BuildInfo.cpp @ONLY)
+if(UNIX)
+    configure_file(cmake_templates/unix_env.in ${CMAKE_BINARY_DIR}/environment @ONLY)
+endif()
 ################################################################################
 # Documentation
 ################################################################################
