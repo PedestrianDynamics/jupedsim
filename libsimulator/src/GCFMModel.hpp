@@ -111,7 +111,7 @@ private:
      * @return
      */
     Point ForceRepRoom(const Data& ped, const CollisionGeometry& geometry) const;
-    Point ForceRepWall(const Data& ped, const Line& l) const;
+    Point ForceRepWall(const Data& ped, const LineSegment& l) const;
     Point ForceRepStatPoint(const Data& ped, const Point& p, double l, double vn) const;
     Point ForceInterpolation(
         double v0,
