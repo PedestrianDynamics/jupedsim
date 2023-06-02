@@ -5,7 +5,8 @@ import logging
 import pathlib
 
 import py_jupedsim as jps
-from jupedsim.serialization import JpsCoreStyleTrajectoryWriter
+from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
+from shapely import to_wkt
 
 
 def log_debug(msg):
@@ -86,8 +87,11 @@ def main():
     agent_parameters.position = (6, 50)
     simulation.add_agent(agent_parameters)
 
-    writer = JpsCoreStyleTrajectoryWriter(pathlib.Path("out.txt"))
-    writer.begin_writing(25)
+    writer = SqliteTrajectoryWriter(pathlib.Path("example2_out.sqlite"))
+    writer.begin_writing(
+        25,
+        to_wkt(geometry, rounding_precision=-1),
+    )
     redirect_once = True
     signal_once = True
     while simulation.agent_count() > 0:

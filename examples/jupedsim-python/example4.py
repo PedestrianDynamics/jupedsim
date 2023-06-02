@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import logging
 import pathlib
+import sys
+import time
 
 import py_jupedsim as jps
 from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
@@ -35,7 +37,7 @@ def main():
     jps.set_error_callback(log_error)
 
     geo = GeometryCollection(
-        Polygon(shell=[(0, 0), (100, 0), (100, 100), (0, 100), (0, 0)])
+        Polygon(shell=[(0, 0), (1000, 0), (1000, 5000), (0, 5000), (0, 0)])
     )
 
     geo_builder = jps.GeometryBuilder()
@@ -55,18 +57,7 @@ def main():
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
 
     journey = jps.JourneyDescription()
-    stage = journey.add_notifiable_queue(
-        [
-            (60, 50),
-            (59, 50),
-            (58, 50),
-            (57, 50),
-            (56, 50),
-            (55, 50),
-            (54, 50),
-        ]
-    )
-    journey.add_exit([(99, 40), (99, 60), (100, 60), (100, 40)])
+    journey.add_exit([(999, 2000), (999, 3000), (1000, 3000), (1000, 2000)])
     journey_id = simulation.add_journey(journey)
 
     agent_parameters = jps.VelocityModelAgentParameters()
@@ -75,23 +66,28 @@ def main():
     agent_parameters.position = (0.0, 0.0)
     agent_parameters.profile_id = profile_id
 
-    for y in range(1, 16):
-        agent_parameters.position = (0.5, y)
-        simulation.add_agent(agent_parameters)
+    for y in range(0, 5000):
+        for x in range(0, 12):
+            agent_parameters.position = (0.5 + x, y + 0.5)
+            simulation.add_agent(agent_parameters)
 
-    writer = SqliteTrajectoryWriter(pathlib.Path("example3_out.sqlite"))
-    writer.begin_writing(25, to_wkt(geo, rounding_precision=-1))
+    writer = SqliteTrajectoryWriter(pathlib.Path("example4_out.sqlite"))
+    writer.begin_writing(5, to_wkt(geo, rounding_precision=-1))
     while simulation.agent_count() > 0:
-        if (
-            simulation.iteration_count() > 100 * 52
-            and simulation.iteration_count() % 400 == 0
-        ):
-            simulation.notify_queue(journey_id, stage, 1)
-            print("Next!")
-
-        if simulation.iteration_count() % 4 == 0:
-            writer.write_iteration_state(simulation)
-        simulation.iterate()
+        try:
+            if simulation.iteration_count() % 20 == 0:
+                writer.write_iteration_state(simulation)
+            before = time.perf_counter_ns()
+            simulation.iterate()
+            duration = time.perf_counter_ns() - before
+            print(
+                f"Iteration: {simulation.iteration_count():3.0f} / Time taken: {duration / 1000000}ms",
+                end="\r",
+            )
+        except KeyboardInterrupt:
+            writer.end_writing()
+            print("CTRL-C Recieved! Shuting down")
+            sys.exit(1)
 
     writer.end_writing()
 

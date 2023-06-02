@@ -89,8 +89,8 @@ JUPEDSIM_API JPS_Lines JPS_RoutingEngine_EdgesFor(JPS_RoutingEngine handle, uint
     lines.len = res.size();
     std::transform(std::begin(res), std::end(res), lines.lines, [](const auto& edge) {
         JPS_Line line{};
-        line.points[0] = intoJPS_Point(edge.edge.GetPoint1());
-        line.points[1] = intoJPS_Point(edge.edge.GetPoint2());
+        line.points[0] = intoJPS_Point(edge.edge.p1);
+        line.points[1] = intoJPS_Point(edge.edge.p2);
         return line;
     });
     return lines;

@@ -6,6 +6,11 @@ from shapely.ops import unary_union
 import matplotlib.pyplot as plt
 import geopandas as gpd
 
+"""This script takes a XML file containing a geometry as input and 
+returns a list of Shapely polygons corresponding to the geometry.
+The script also includes functions for converting the polygons to WKT format and
+plotting the polygons using the Matplotlib and Geopandas libraries."""
+
 
 def parse_geo_file(geo_file):
     """
@@ -59,9 +64,10 @@ def parse_geo_file(geo_file):
                     point1 = (float(vertices[0].get('px')), float(vertices[0].get('py')))
                     point2 = (float(vertices[1].get('px')), float(vertices[1].get('py')))
                     room_lines.append([point1, point2])
+            # add all crossings from the room to room_lines list
             crossings = room.findall('crossings')
             if len(crossings) > 0:
-                # crossings for this room found
+                # at least one crossing for this room found
                 crossings = crossings[0]
                 for crossing in crossings:
                     sub1_id = crossing.attrib['subroom1_id']
@@ -74,14 +80,12 @@ def parse_geo_file(geo_file):
                         room_lines.append([point1, point2])
             # put lines together to form a polygon
             try:
-                # create polygon from lines parsed from room
+                # create polygon from lines parsed from this room
                 room_polygon = polygonize(room_lines)[0]
-                # create polygon from room and obstacles and add to list of geometries polygons
+                # create polygon from this rooms polygon and parsed obstacles and add to list of geometries polygons
                 geometry_polygons.append(Polygon(room_polygon.exterior, room_obstacles))
             except Exception:
                 message = f"there has been an error parsing subroom {subroom_id} in room {room_id}"
-                # include for debugging
-                # print("the following lines were recognized \n", room_lines)
                 raise RuntimeError(message)
 
     return geometry_polygons
@@ -130,36 +134,3 @@ def plot_polygon(polygon):
     poly = gpd.GeoSeries([polygon])
     poly.plot()
     plt.show()
-
-
-if __name__ == "__main__":
-    geo_polygons = parse_geo_file('Convert_geo/akzn/correct_aknz_geo_arrival.xml')
-    geo2_polygons = parse_geo_file('Convert_geo/akzn/correct_aknz_geo_evac_2exits_stage.xml')
-
-    # single_poly and combined_poly resemble the same Room however some coordinates are very slightly different
-    single_poly = geo_polygons[7]
-    combined_poly = unary_union(geo2_polygons[8:11])
-    replacement_polygon = single_poly.union(combined_poly)
-    geo_polygons[7] = replacement_polygon
-    geo2_polygons[8:11] = [replacement_polygon]
-    # now both rooms have the same coordinates and there won´t appear any problems around walls
-
-    # there is an unneeded point in one room which needs to be excluded from both geometries
-    coords = list(geo2_polygons[2].exterior.coords)
-    coords[20:22] = [coords[21]]
-    geo2_polygons[2] = Polygon(coords)
-    plt.plot(*geo_polygons[5].exterior.xy)
-    coords = list(geo_polygons[5].exterior.coords)
-    coords[1:3] = [coords[2]]
-    geo_polygons[5] = Polygon(coords)
-
-    convert_to_wkt(geo2_polygons, '../examples/geometry/aknz_evac.wkt', False)
-
-    # there is a zero-width wall that needs to be fixed with a hole
-    # this is equivalent to a 20 cm wall
-    hole = Polygon([(615.43, 1875.70), (673.46, 1896.16), (673.40, 1896.36), (615.37, 1875.9)])
-    merged_polygon = unary_union(geo_polygons)
-    merged_polygon = merged_polygon.difference(hole)
-    geomery_collection = GeometryCollection(merged_polygon)
-    with open('../examples/geometry/aknz_arrival.wkt', 'a') as out:
-        out.write(to_wkt(geomery_collection))

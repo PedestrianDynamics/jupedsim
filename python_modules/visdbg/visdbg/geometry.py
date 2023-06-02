@@ -1,7 +1,8 @@
 import sys
 
 import py_jupedsim.experimental as jpex
-from PyQt6.QtCore import QObject, pyqtSignal
+from jupedsim.aabb import AABB
+from PySide6.QtCore import QObject, Signal
 from visdbg.config import Colors, ZLayers
 from vtkmodules.vtkCommonCore import vtkCommand, vtkIntArray, vtkPoints
 from vtkmodules.vtkCommonDataModel import (
@@ -16,7 +17,6 @@ from vtkmodules.vtkRenderingCore import (
     vtkCellPicker,
     vtkPolyDataMapper,
     vtkRenderer,
-    vtkRenderWindowInteractor,
 )
 
 
@@ -85,7 +85,7 @@ class Geometry:
     def get_actors(self):
         return [self.edge_actor, self.actor]
 
-    def get_bounds(self):
+    def get_bounds(self) -> AABB:
         xmin = sys.maxsize
         ymin = sys.maxsize
         xmax = ~sys.maxsize
@@ -93,39 +93,38 @@ class Geometry:
         for actor in self.get_actors():
             bounds = actor.GetBounds()
             xmin = min(xmin, bounds[0])
-            ymin = min(ymin, bounds[1])
-            xmax = max(xmax, bounds[2])
+            xmax = max(xmax, bounds[1])
+            ymin = min(ymin, bounds[2])
             ymax = max(ymax, bounds[3])
-        return (xmin, ymin, xmax, ymax)
+        return AABB(xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymax)
 
 
 class HoverInfo(QObject):
-    hoveredTriangle = pyqtSignal(str)
+    hovered = Signal(str)
 
     def __init__(
         self,
+        geo: Geometry,
         renderer: vtkRenderer,
         interactor_style: vtkInteractorStyleUser,
     ):
         QObject.__init__(self)
+        self.geo = geo
         self.renderer = renderer
         self.picker = vtkCellPicker()
         self.picker.PickFromListOn()
-        self.geo = None
         interactor_style.AddObserver(
             vtkCommand.MouseMoveEvent, self.on_mouse_move
         )
-
-    def set_geo(self, geo: Geometry):
-        self.geo = geo
         self.picker.InitializePickList()
         self.picker.AddPickList(self.geo.actor)
 
     def on_mouse_move(self, obj, evt):
-        if not self.geo:
-            return
         interactor = obj.GetInteractor()
         pos = interactor.GetEventPosition()
         self.picker.Pick(pos[0], pos[1], 0, self.renderer)
         cell_id = self.picker.GetCellId()
-        self.hoveredTriangle.emit(str(cell_id) if cell_id != -1 else "")
+        x, y, _ = self.picker.GetPickPosition()
+        cell_text = str(f"Nav ID: {cell_id}" if cell_id != -1 else "")
+        text = f"x: {x:.2f} y: {y:.2f} {cell_text}"
+        self.hovered.emit(text)
