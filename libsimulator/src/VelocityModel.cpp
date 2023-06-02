@@ -34,18 +34,28 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
     const NeighborhoodSearchType& neighborhoodSearch) const
 {
     const double radius = 4.0;
-    const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.pos, radius);
+    auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.pos, radius);
+    // Remove any agent from the neighborhood that is obstructed by geometry and the current agent
+    neighborhood.erase(
+        std::remove_if(
+            std::begin(neighborhood),
+            std::end(neighborhood),
+            [&ped, &geometry](const auto& n) {
+                if(ped.id == n->id) {
+                    return true;
+                }
+                if(geometry.IntersectsAny(LineSegment(ped.pos, n->pos))) {
+                    return true;
+                }
+                return false;
+            }),
+        std::end(neighborhood));
+
     const auto& parameters = parameterProfile(ped.parameterProfileId);
     double min_spacing = 100.0;
     Point repPed = Point(0, 0);
-    const Point p1 = ped.pos;
     for(const auto neighbor : neighborhood) {
-        if(neighbor->id == ped.id) {
-            continue;
-        }
-        if(!geometry.IntersectsAny(Line(p1, neighbor->pos))) {
-            repPed += ForceRepPed(ped, *neighbor);
-        }
+        repPed += ForceRepPed(ped, *neighbor);
     }
     // repulsive forces to walls and closed transitions that are not my target
     Point repWall = ForceRepRoom(ped, geometry);
@@ -55,13 +65,8 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
     e0(ped, ped.destination, dT, update);
     const Point direction = update.e0 + repPed + repWall;
     for(const auto neighbor : neighborhood) {
-        if(neighbor->id == ped.id) {
-            continue;
-        }
-        if(!geometry.IntersectsAny(Line(p1, neighbor->pos))) {
-            double spacing = GetSpacing(ped, *neighbor, direction).first;
-            min_spacing = std::min(min_spacing, spacing);
-        }
+        double spacing = GetSpacing(ped, *neighbor, direction).first;
+        min_spacing = std::min(min_spacing, spacing);
     }
 
     update.velocity = direction.Normalized() * OptimalSpeed(ped, min_spacing, parameters.timeGap);
@@ -123,7 +128,6 @@ double VelocityModel::OptimalSpeed(const Data& ped, double spacing, double t) co
 // return spacing and id of the nearest pedestrian
 my_pair VelocityModel::GetSpacing(const Data& ped1, const Data& ped2, Point ei) const
 {
-
     Point distp12 = ped2.pos - ped1.pos; // inversed sign
     const double distance = distp12.Norm();
     const double l = 2 * parameterProfile(ped1.parameterProfileId).radius;
@@ -145,8 +149,8 @@ my_pair VelocityModel::GetSpacing(const Data& ped1, const Data& ped2, Point ei) 
     condition2 = (condition2 > 0) ? condition2 : -condition2; // abs
 
     if((condition1 >= 0) && (condition2 <= l / distance)) {
-        // return a pair <dist, condition1>. Then take the smallest dist. In case of equality the
-        // biggest condition1
+        // return a pair <dist, condition1>. Then take the smallest dist. In case of equality
+        // the biggest condition1
         return my_pair(distp12.Norm(), ped2.id);
     }
     return my_pair(FLT_MAX, ped2.id);
@@ -203,7 +207,7 @@ Point VelocityModel::ForceRepRoom(const Data& ped, const CollisionGeometry& geom
     return f;
 }
 
-Point VelocityModel::ForceRepWall(const Data& ped, const Line& w) const
+Point VelocityModel::ForceRepWall(const Data& ped, const LineSegment& w) const
 {
     if(const auto distGoal = (ped.destination - ped.pos).Norm(); distGoal < J_EPS_GOAL) {
         return Point{0, 0};

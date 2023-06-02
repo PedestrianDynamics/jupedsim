@@ -35,9 +35,6 @@ check_prefix_path()
 set(WERROR OFF CACHE BOOL "Build wth -Werror enabled. Not supported on Windows")
 print_var(WERROR)
 
-set(BUILD_JPSVIS ON CACHE BOOL "Build jpsvis gui application")
-print_var(BUILD_JPSVIS)
-
 set(BUILD_TESTS OFF CACHE BOOL "Build tests")
 print_var(BUILD_TESTS)
 
@@ -138,34 +135,6 @@ set(Python_FIND_VIRTUALENV "FIRST")
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11 REQUIRED CONFIG)
 
-if(BUILD_JPSVIS)
-    find_package(glm REQUIRED CONFIG)
-    find_package(VTK 9.0
-        COMPONENTS
-            CommonCore
-            opengl
-            RenderingQt
-            RenderingCore
-            GUISupportQt
-            RenderingUI
-            InteractionStyle
-            RenderingAnnotation
-            IOImage
-        REQUIRED CONFIG
-    )
-    find_package(
-        Qt5 5.12
-        COMPONENTS Widgets Xml Core Gui
-        REQUIRED
-    )
-    list(APPEND CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_SOURCE_DIR}/forms")
-    set(CMAKE_AUTOUIC ON)
-    set(CMAKE_AUTOMOC ON)
-    set(CMAKE_AUTORCC ON)
-    # remaining in-tree dependencies
-    # only tinyxml at this point
-    add_subdirectory(third-party)
-endif()
 if(BUILD_TESTS)
     find_package(GTest REQUIRED CONFIG)
 endif()
@@ -321,9 +290,6 @@ endif()
 ################################################################################
 # Add libraries / executables
 ################################################################################
-if(BUILD_JPSVIS)
-    add_subdirectory(jpsvis)
-endif()
 add_subdirectory(libjupedsim)
 add_subdirectory(libsimulator)
 add_subdirectory(python_bindings_jupedsim)

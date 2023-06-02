@@ -5,7 +5,7 @@
 #include "AABB.hpp"
 #include "Graph.hpp"
 #include "IteratorPair.hpp"
-#include "Line.hpp"
+#include "LineSegment.hpp"
 #include "Point.hpp"
 #include "Triangle.hpp"
 
@@ -47,7 +47,7 @@ struct VertexData {
 
 struct EdgeData {
     double weight;
-    Line edge;
+    LineSegment edge;
 };
 
 class NavMeshRoutingEngine : public RoutingEngine

@@ -144,5 +144,5 @@ private:
      *
      * @return Point
      */
-    Point ForceRepWall(const Data& ped, const Line& l) const;
+    Point ForceRepWall(const Data& ped, const LineSegment& l) const;
 };

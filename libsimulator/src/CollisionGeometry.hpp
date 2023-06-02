@@ -3,13 +3,13 @@
 #pragma once
 
 #include "IteratorPair.hpp"
-#include "Line.hpp"
+#include "LineSegment.hpp"
 
 #include <vector>
 
 class CollisionGeometry;
 
-double dist(Line l, Point p);
+double dist(LineSegment l, Point p);
 
 template <typename T>
 class DistanceQueryIterator
@@ -58,13 +58,13 @@ public:
 
 class CollisionGeometry
 {
-    std::vector<Line> _segments;
+    std::vector<LineSegment> _segments;
 
 public:
-    using LineSegmentRange = IteratorPair<DistanceQueryIterator<Line>>;
+    using LineSegmentRange = IteratorPair<DistanceQueryIterator<LineSegment>>;
     /// Do not call constructor drectly use 'GeometryBuilder'
     /// @param segments line segments constituting the geometry
-    explicit CollisionGeometry(std::vector<Line>&& segments);
+    explicit CollisionGeometry(std::vector<LineSegment>&& segments);
     /// Default destructor
     ~CollisionGeometry() = default;
     /// Copyable
@@ -84,18 +84,18 @@ public:
     /// doors.
     /// @param linesegment to test for intersection with geometry
     /// @return if any linesegment of the geometry was intersected.
-    bool IntersectsAny(Line linesegment) const;
+    bool IntersectsAny(LineSegment linesegment) const;
 
     /// The following methods are temporay until we have completely migrated from building to
     /// geometry and function to support the required geometry modification for trains in the mean
     /// time.
-    void AddLineSegment(Line l);
-    void RemoveLineSegment(Line l);
+    void AddLineSegment(LineSegment l);
+    void RemoveLineSegment(LineSegment l);
 };
 
 class CollisionGeometryBuilder
 {
-    std::vector<Line> _segements;
+    std::vector<LineSegment> _segements;
 
 public:
     /// Default constructor

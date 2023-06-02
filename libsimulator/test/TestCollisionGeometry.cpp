@@ -1,7 +1,7 @@
 /// Copyright © 2012-2022 Forschungszentrum Jülich GmbH
 /// SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CollisionGeometry.hpp"
-#include "Line.hpp"
+#include "LineSegment.hpp"
 #include "Point.hpp"
 
 #include <deque>
@@ -49,14 +49,15 @@ TEST_F(CollisionGeometryFilterByDistance, SomeAreInRange)
 {
     const auto range = geometry.LineSegmentsInDistanceTo(2, Point{0, -2});
     for(const auto& line : range) {
-        ASSERT_EQ(line, Line(Point(-1, 0), Point(1, 0)));
+        ASSERT_EQ(line, LineSegment(Point(-1, 0), Point(1, 0)));
     }
 }
 
 TEST_F(CollisionGeometryFilterByDistance, AllAreInRange)
 {
     const auto range = geometry.LineSegmentsInDistanceTo(1, Point{0, -2});
-    std::deque<Line> expected{Line(Point(-1, 0), Point(1, 0)), Line(Point(-1, 1), Point(1, 1))};
+    std::deque<LineSegment> expected{
+        LineSegment(Point(-1, 0), Point(1, 0)), LineSegment(Point(-1, 1), Point(1, 1))};
     for(const auto& line : range) {
         ASSERT_EQ(line, expected.front());
         expected.pop_front();

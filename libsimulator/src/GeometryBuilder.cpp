@@ -6,7 +6,7 @@
 #include "DTriangulation.hpp"
 #include "Geometry.hpp"
 #include "Graph.hpp"
-#include "Line.hpp"
+#include "LineSegment.hpp"
 #include "Point.hpp"
 #include "RoutingEngine.hpp"
 #include "SimulationError.hpp"
