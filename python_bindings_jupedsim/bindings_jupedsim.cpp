@@ -635,6 +635,11 @@ PYBIND11_MODULE(py_jupedsim, m)
                 return JPS_Simulation_AgentCount(simulation.handle);
             })
         .def(
+            "elapsed_time",
+            [](JPS_Simulation_Wrapper& simulation) {
+                return JPS_Simulation_ElapsedTime(simulation.handle);
+            })
+        .def(
             "iteration_count",
             [](JPS_Simulation_Wrapper& simulation) {
                 return JPS_Simulation_IterationCount(simulation.handle);
