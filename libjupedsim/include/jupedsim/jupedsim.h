@@ -692,6 +692,13 @@ JUPEDSIM_API size_t JPS_Simulation_AgentCount(JPS_Simulation handle);
 JUPEDSIM_API double JPS_Simulation_ElapsedTime(JPS_Simulation handle);
 
 /**
+ * Returns time simulated per iteration call.
+ * @param handle of the simulation
+ * @return time simulated per iteration call in seconds
+ */
+JUPEDSIM_API double JPS_Simulation_DeltaTime(JPS_Simulation handle);
+
+/**
  * Returns how many iterations have been simulated.
  * @param handle of the simulation
  * @return count of elapsed iterations

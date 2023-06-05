@@ -44,6 +44,7 @@ public:
     virtual const std::vector<GenericAgent::ID>& RemovedAgents() const = 0;
     virtual size_t AgentCount() const = 0;
     virtual double ElapsedTime() const = 0;
+    virtual double DT() const = 0;
     virtual void
     SwitchAgentProfile(GenericAgent::ID agent_id, OperationalModel::ParametersID profile_id) = 0;
     virtual void
@@ -112,6 +113,8 @@ public:
     size_t AgentCount() const override;
 
     double ElapsedTime() const override;
+
+    double DT() const override;
 
     void SwitchAgentProfile(GenericAgent::ID agent_id, OperationalModel::ParametersID profile_id)
         override;
@@ -235,6 +238,12 @@ template <typename T>
 double TypedSimulation<T>::ElapsedTime() const
 {
     return _clock.ElapsedTime();
+}
+
+template <typename T>
+double TypedSimulation<T>::DT() const
+{
+    return _clock.dT();
 }
 
 template <typename T>
