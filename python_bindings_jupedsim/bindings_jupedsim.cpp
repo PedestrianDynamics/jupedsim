@@ -581,16 +581,20 @@ PYBIND11_MODULE(py_jupedsim, m)
             })
         .def(
             "iterate",
-            [](const JPS_Simulation_Wrapper& simulation) {
+            [](const JPS_Simulation_Wrapper& simulation, size_t count) {
                 JPS_ErrorMessage errorMsg{};
-                auto result = JPS_Simulation_Iterate(simulation.handle, &errorMsg);
-                if(result) {
+                bool iterate_ok = true;
+                for(size_t counter = 0; counter < count && iterate_ok; ++counter) {
+                    iterate_ok = JPS_Simulation_Iterate(simulation.handle, &errorMsg);
+                }
+                if(iterate_ok) {
                     return;
                 }
                 auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
                 JPS_ErrorMessage_Free(errorMsg);
                 throw std::runtime_error{msg};
-            })
+            },
+            py::arg("count") = 1)
         .def(
             "switch_agent_profile",
             [](const JPS_Simulation_Wrapper& w,
