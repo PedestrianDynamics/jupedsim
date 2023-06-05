@@ -748,6 +748,13 @@ double JPS_Simulation_ElapsedTime(JPS_Simulation handle)
     return simulation->ElapsedTime();
 }
 
+double JPS_Simulation_DeltaTime(JPS_Simulation handle)
+{
+    assert(handle);
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    return simulation->DT();
+}
+
 uint64_t JPS_Simulation_IterationCount(JPS_Simulation handle)
 {
     assert(handle);

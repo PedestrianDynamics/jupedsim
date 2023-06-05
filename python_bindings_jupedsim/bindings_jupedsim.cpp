@@ -640,6 +640,11 @@ PYBIND11_MODULE(py_jupedsim, m)
                 return JPS_Simulation_ElapsedTime(simulation.handle);
             })
         .def(
+            "delta_time",
+            [](JPS_Simulation_Wrapper& simulation) {
+                return JPS_Simulation_DeltaTime(simulation.handle);
+            })
+        .def(
             "iteration_count",
             [](JPS_Simulation_Wrapper& simulation) {
                 return JPS_Simulation_IterationCount(simulation.handle);
