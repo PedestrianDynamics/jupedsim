@@ -88,48 +88,7 @@ if(UNIX)
 endif()
 find_package(CGAL 5.4 REQUIRED)
 
-if(UNIX)
-    find_library(POLY2TRI_LIB poly2tri REQUIRED)
-    find_path(POLY2TRI_HEADER poly2tri.h
-        REQUIRED
-        PATH_SUFFIXES poly2tri
-    )
-    add_library(poly2tri UNKNOWN IMPORTED)
-    set_target_properties(poly2tri PROPERTIES
-        IMPORTED_LOCATION ${POLY2TRI_LIB}
-    )
-    target_include_directories(poly2tri INTERFACE
-        ${POLY2TRI_HEADER}/..
-    )
-else()
-    find_library(
-        POLY2TRI_LIB_RELEASE poly2tri
-        REQUIRED
-    )
-    get_filename_component(path ${POLY2TRI_LIB_RELEASE} DIRECTORY)
-    list(APPEND paths 
-        "${path}/../debug/lib"
-    )
-    find_library(
-        POLY2TRI_LIB_DEBUG poly2tri
-        PATH_SUFFIXES "debug" "debug/lib"
-        PATHS ${paths}
-        NO_DEFAULT_PATH
-    )
-    find_path(POLY2TRI_HEADER poly2tri.h
-        PATH_SUFFIXES poly2tri
-        REQUIRED
-    )
-    add_library(poly2tri UNKNOWN IMPORTED)
-    set_target_properties(poly2tri PROPERTIES
-        IMPORTED_LOCATION_DEBUG ${POLY2TRI_LIB_DEBUG}
-        IMPORTED_LOCATION_RELEASE ${POLY2TRI_LIB_RELEASE}
-        IMPORTED_CONFIGURATIONS "RELEASE;DEBUG"
-    )
-    target_include_directories(poly2tri INTERFACE
-        ${POLY2TRI_HEADER}/..
-    )
-endif()
+add_subdirectory(third-party/poly2tri)
 
 set(Python_FIND_VIRTUALENV "FIRST")
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
