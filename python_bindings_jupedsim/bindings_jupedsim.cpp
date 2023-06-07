@@ -744,9 +744,8 @@ PYBIND11_MODULE(py_jupedsim, m)
             })
         .def(
             "is_routable",
-            [](const JPS_RoutingEngine_Wrapper& w, std::tuple<double, double> p) {
-                return JPS_RoutingEngine_IsRoutable(
-                    w.handle, JPS_Point{std::get<0>(p), std::get<1>(p)});
+            [](const JPS_RoutingEngine_Wrapper& w, JPS_Point p) {
+                return JPS_RoutingEngine_IsRoutable(w.handle, p);
             })
         .def(
             "mesh",
