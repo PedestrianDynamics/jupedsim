@@ -5,6 +5,13 @@
 #include "AABB.hpp"
 #include "GeometricFunctions.hpp"
 #include "IteratorPair.hpp"
+#include "LineSegment.hpp"
+
+#include <CGAL/Boolean_set_operations_2.h>
+#include <CGAL/Point_2.h>
+#include <CGAL/Polygon_2_algorithms.h>
+#include <CGAL/enum.h>
+#include <CGAL/number_utils.h>
 
 #include <algorithm>
 #include <vector>
@@ -14,9 +21,36 @@ double dist(LineSegment l, Point p)
     return l.DistTo(p);
 }
 
-CollisionGeometry::CollisionGeometry(std::vector<LineSegment>&& segments)
-    : _segments(std::move(segments))
+size_t CountLineSegments(const PolyWithHoles& poly)
 {
+    auto count = poly.outer_boundary().size();
+    for(const auto& hole : poly.holes()) {
+        count += hole.size();
+    }
+    return count;
+}
+
+Point fromPoint_2(const Kernel::Point_2& p)
+{
+    return {CGAL::to_double(p.x()), CGAL::to_double(p.y())};
+}
+
+void ExtractSegmentsFromPolygon(const Poly& p, std::vector<LineSegment>& segments)
+{
+    const auto& boundary = p.container();
+    for(size_t index = 1; index < boundary.size(); ++index) {
+        segments.emplace_back(fromPoint_2(boundary[index - 1]), fromPoint_2(boundary[index]));
+    }
+    segments.emplace_back(fromPoint_2(boundary.back()), fromPoint_2(boundary.front()));
+}
+
+CollisionGeometry::CollisionGeometry(PolyWithHoles accessibleArea) : _accessibleArea(accessibleArea)
+{
+    _segments.reserve(CountLineSegments(accessibleArea));
+    ExtractSegmentsFromPolygon(accessibleArea.outer_boundary(), _segments);
+    for(const auto& hole : accessibleArea.holes()) {
+        ExtractSegmentsFromPolygon(hole, _segments);
+    }
 }
 
 CollisionGeometry::LineSegmentRange
@@ -40,25 +74,8 @@ bool CollisionGeometry::IntersectsAny(LineSegment linesegment) const
            }) != _segments.end();
 }
 
-void CollisionGeometry::AddLineSegment(LineSegment l)
+bool CollisionGeometry::InsideGeometry(Point p) const
 {
-    _segments.push_back(l);
-}
-
-void CollisionGeometry::RemoveLineSegment(LineSegment l)
-{
-    _segments.erase(std::remove(_segments.begin(), _segments.end(), l), _segments.end());
-}
-
-CollisionGeometryBuilder&
-CollisionGeometryBuilder::AddLineSegment(double x1, double y1, double x2, double y2)
-{
-    _segements.emplace_back(Point{x1, y1}, Point{x2, y2});
-    return *this;
-}
-
-CollisionGeometry CollisionGeometryBuilder::Build()
-{
-    _segements.shrink_to_fit();
-    return CollisionGeometry{std::move(_segements)};
+    return CGAL::oriented_side(Kernel::Point_2(p.x, p.y), _accessibleArea) ==
+           CGAL::ON_POSITIVE_SIDE;
 }
