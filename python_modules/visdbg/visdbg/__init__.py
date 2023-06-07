@@ -4,5 +4,4 @@ import visdbg.geometry_widget
 import visdbg.grid
 import visdbg.main_window
 import visdbg.move_controller
-import visdbg.util
 import visdbg.view_geometry_widget
