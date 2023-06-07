@@ -7,6 +7,13 @@
 
 #include <vector>
 
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Polygon_with_holes_2.h>
+
+using Kernel = CGAL::Exact_predicates_exact_constructions_kernel;
+using PolyWithHoles = CGAL::Polygon_with_holes_2<Kernel>;
+using Poly = CGAL::Polygon_2<Kernel>;
+
 class CollisionGeometry;
 
 double dist(LineSegment l, Point p);
@@ -58,13 +65,14 @@ public:
 
 class CollisionGeometry
 {
+    PolyWithHoles _accessibleArea;
     std::vector<LineSegment> _segments;
 
 public:
     using LineSegmentRange = IteratorPair<DistanceQueryIterator<LineSegment>>;
     /// Do not call constructor drectly use 'GeometryBuilder'
     /// @param segments line segments constituting the geometry
-    explicit CollisionGeometry(std::vector<LineSegment>&& segments);
+    explicit CollisionGeometry(PolyWithHoles accessibleArea);
     /// Default destructor
     ~CollisionGeometry() = default;
     /// Copyable
@@ -86,46 +94,5 @@ public:
     /// @return if any linesegment of the geometry was intersected.
     bool IntersectsAny(LineSegment linesegment) const;
 
-    /// The following methods are temporay until we have completely migrated from building to
-    /// geometry and function to support the required geometry modification for trains in the mean
-    /// time.
-    void AddLineSegment(LineSegment l);
-    void RemoveLineSegment(LineSegment l);
-};
-
-class CollisionGeometryBuilder
-{
-    std::vector<LineSegment> _segements;
-
-public:
-    /// Default constructor
-    CollisionGeometryBuilder() = default;
-    /// Default destructor
-    ~CollisionGeometryBuilder() = default;
-    /// Non-copyable
-    CollisionGeometryBuilder(const CollisionGeometryBuilder& other) = delete;
-    /// Non-copyable
-    CollisionGeometryBuilder& operator=(const CollisionGeometryBuilder& other) = delete;
-    /// Non-movable
-    CollisionGeometryBuilder(CollisionGeometryBuilder&& other) = delete;
-    /// Non-movable
-    CollisionGeometryBuilder& operator=(CollisionGeometryBuilder&& other) = delete;
-    /// Add linesegment to static geometry
-    /// @param x1 x cordinate of first point of line segment
-    /// @param y1 y cordinate of first point of line segment
-    /// @param x2 x cordinate of second point of line segment
-    /// @param y2 y cordinate of second point of line segment
-    /// @return GeometryBuilder to chaining calls
-    CollisionGeometryBuilder& AddLineSegment(double x1, double y1, double x2, double y2);
-    /// Add door to geometry
-    /// @param x1 x cordinate of first point of line segment
-    /// @param y1 y cordinate of first point of line segment
-    /// @param x2 x cordinate of second point of line segment
-    /// @param y2 y cordinate of second point of line segment
-    /// @param id of the door for later maniputation (open/close)
-    /// @return GeometryBuilder to chaining calls
-    CollisionGeometryBuilder& AddDoor(double x1, double y1, double x2, double y2, int id);
-    /// Finishes Geometry construction and creates 'Geometry' from the builder.
-    /// @return Geometry with all added line sements.
-    CollisionGeometry Build();
+    bool InsideGeometry(Point p) const;
 };
