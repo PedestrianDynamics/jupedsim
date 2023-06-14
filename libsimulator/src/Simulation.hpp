@@ -19,6 +19,7 @@
 #include "StrategicalDesicionSystem.hpp"
 #include "TacticalDecisionSystem.hpp"
 #include "TemplateHelper.hpp"
+#include "Tracing.hpp"
 
 #include <boost/iterator/zip_iterator.hpp>
 
@@ -36,6 +37,8 @@ class Simulation
 public:
     virtual ~Simulation() = default;
     virtual const SimulationClock& Clock() const = 0;
+    virtual void SetTracing(bool on) = 0;
+    virtual PerfStats GetLastStats() const = 0;
     /// Advances the simulation by one time step.
     virtual void Iterate() = 0;
     // TODO(kkratz): doc
@@ -74,6 +77,7 @@ private:
     std::vector<AgentType> _agents;
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
     std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;
+    PerfStats _perfStats{};
 
 public:
     TypedSimulation(
@@ -93,6 +97,10 @@ public:
     TypedSimulation& operator=(TypedSimulation&& other) = delete;
 
     const SimulationClock& Clock() const override { return _clock; }
+
+    void SetTracing(bool status) override { _perfStats.SetEnabled(status); };
+
+    PerfStats GetLastStats() const override { return _perfStats; };
 
     /// Advances the simulation by one time step.
     void Iterate() override;
@@ -151,6 +159,8 @@ TypedSimulation<T>::TypedSimulation(
 template <typename T>
 void TypedSimulation<T>::Iterate()
 {
+    auto t = _perfStats.TraceIterate();
+
     _neighborhoodSearch.Update(_agents);
     _agentExitSystem.Run(_agents, _removedAgentsInLastIteration);
 
@@ -160,9 +170,11 @@ void TypedSimulation<T>::Iterate()
 
     _stategicalDecisionSystem.Run(_journeys, _agents);
     _tacticalDecisionSystem.Run(*_routingEngine, _agents);
-    _operationalDecisionSystem.Run(
-        _clock.dT(), _clock.ElapsedTime(), _neighborhoodSearch, *_geometry, _agents);
-
+    {
+        auto t2 = _perfStats.TraceOperationalDecisionSystemRun();
+        _operationalDecisionSystem.Run(
+            _clock.dT(), _clock.ElapsedTime(), _neighborhoodSearch, *_geometry, _agents);
+    }
     _clock.Advance();
 }
 
