@@ -32,7 +32,9 @@ class Trajectory:
         self.polydata = polydata
 
         # Create anything you want here, we will use a polygon for the demo.
-        polygonSource = vtkRegularPolygonSource()  # default is 6 sides
+        polygonSource = vtkRegularPolygonSource()
+        polygonSource.SetRadius(0.15)
+        polygonSource.SetNumberOfSides(24)
 
         glyph2D = vtkGlyph2D()
         glyph2D.SetSourceConnection(polygonSource.GetOutputPort())
@@ -46,7 +48,7 @@ class Trajectory:
 
         actor = vtkActor()
         actor.SetMapper(mapper)
-        actor.GetProperty().SetColor(Colors.e)
+        actor.GetProperty().SetColor(Colors.agent)
         self.actor = actor
 
     def get_actors(self) -> list[vtkActor]:
