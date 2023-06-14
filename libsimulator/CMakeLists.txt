@@ -52,6 +52,8 @@ add_library(simulator STATIC
     src/StrategicalDesicionSystem.hpp
     src/TacticalDecisionSystem.hpp
     src/TemplateHelper.hpp
+    src/Tracing.cpp
+    src/Tracing.hpp
     src/Triangle.cpp
     src/Triangle.hpp
     src/UniqueID.hpp

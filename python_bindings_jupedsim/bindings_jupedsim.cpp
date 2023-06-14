@@ -168,6 +168,16 @@ PYBIND11_MODULE(py_jupedsim, m)
     py::implicitly_convertible<std::tuple<int, int>, JPS_Point>();
     py::implicitly_convertible<std::tuple<int, double>, JPS_Point>();
     py::implicitly_convertible<std::tuple<double, int>, JPS_Point>();
+
+    py::class_<JPS_Trace>(m, "Trace")
+        .def_readonly("iteration_duration", &JPS_Trace::iteration_duration)
+        .def_readonly("operational_level_duration", &JPS_Trace::operational_level_duration)
+        .def("__repr__", [](const JPS_Trace& t) {
+            return fmt::format(
+                "Trace( Iteration: {:f}us, OperationalLevel {:f}us)",
+                t.iteration_duration,
+                t.operational_level_duration);
+        });
     py::class_<JPS_GCFMModelAgentParameters>(m, "GCFMModelAgentParameters")
         .def(py::init())
         .def_readwrite("speed", &JPS_GCFMModelAgentParameters::speed)
@@ -715,7 +725,15 @@ PYBIND11_MODULE(py_jupedsim, m)
                 auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
                 JPS_ErrorMessage_Free(errorMsg);
                 throw std::runtime_error{msg};
-            });
+            })
+        .def(
+            "set_tracing",
+            [](JPS_Simulation_Wrapper& w, bool status) {
+                JPS_Simulation_SetTracing(w.handle, status);
+            })
+        .def("get_last_trace", [](JPS_Simulation_Wrapper& w) {
+            return JPS_Simulation_GetTrace(w.handle);
+        });
     py::module_ exp = m.def_submodule("experimental", "Experimental API extensions for jupedsim");
     py::class_<JPS_RoutingEngine_Wrapper>(exp, "RoutingEngine")
         .def(py::init([](const JPS_Geometry_Wrapper& geo) {
