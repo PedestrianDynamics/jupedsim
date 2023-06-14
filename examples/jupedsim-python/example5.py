@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import logging
 import pathlib
+import random
 import sys
 import time
 
@@ -16,18 +17,22 @@ wkt = "GEOMETRYCOLLECTION(POLYGON ((485.8289118342039501 155.9471319348058671, 4
 
 
 def log_debug(msg):
+    print("\n")
     logging.debug(msg)
 
 
 def log_info(msg):
+    print("\n")
     logging.info(msg)
 
 
 def log_warn(msg):
+    print("\n")
     logging.warning(msg)
 
 
 def log_error(msg):
+    print("\n")
     logging.error(msg)
 
 
@@ -37,46 +42,114 @@ class Spawner:
         sim: jps.Simulation,
         dt: int,
         stop_at: int,
-        points: list[tuple[float, float]],
-        parameter_profile_id: int,
+        point_a: tuple[float, float],
+        point_b: tuple[float, float],
+        profile_picker,
         journey_id: int,
+        max: int | None = None,
     ):
         self.sim = sim
         self.dt = dt
         self.stop_at = stop_at
-        self.points = points
+        self.point_a = point_a
+        self.profile_picker = profile_picker
+        self.dir = (point_b[0] - point_a[0], point_b[1] - point_a[1])
         self.agent_parameters = jps.VelocityModelAgentParameters()
         self.agent_parameters.journey_id = journey_id
-        self.agent_parameters.profile_id = parameter_profile_id
+        self.agent_parameters.profile_id = 0
         self.agent_parameters.orientation = (1.0, 0.0)
+        self._needs_placement = 0
+        self.max_agents = max
+        self.spawned = 0
 
     def spawn(self, iteration: int):
+        if self.max_agents and self.spawned >= self.max_agents:
+            return
         if iteration > self.stop_at:
             return
         if iteration % self.dt == 0:
-            for p in self.points:
-                if len(list(self.sim.agents_in_range(p, 0.6))) == 0:
-                    self.agent_parameters.position = p
-                    self.sim.add_agent(self.agent_parameters)
+            self._needs_placement += 1
+        if self._needs_placement > 0:
+            offset = random.uniform(0, 1)
+            p = (
+                self.point_a[0] + offset * self.dir[0],
+                self.point_a[1] + offset * self.dir[1],
+            )
+            if len(list(self.sim.agents_in_range(p, 0.6))) == 0:
+                self.agent_parameters.position = p
+                self.agent_parameters.profile_id = self.profile_picker.pick()
+                self.sim.add_agent(self.agent_parameters)
+                self._needs_placement -= 1
+                self.spawned += 1
 
 
-def create_journeys(sim: jps.Simulation):
-    exits = [
-        [(1107, -7.6), (1104, -6.29), (1104, -4.24), (1107.87, -5.68)],
+class RandomProfilePicker:
+    def __init__(self, *, mu_v0, sigma_v0, mu_d, sigma_d):
+        # middle bin represents mu, first reprsents mu - 3 sigma, last bin represents mu + 3 sigma
+        self._num_bins = 13
+        self._profiles = {}
+        self._mu_v0 = mu_v0
+        self._sigma_v0 = sigma_v0
+        self._mu_d = mu_d
+        self._sigma_d = sigma_d
+
+    def create_profiles(self, model_builder: jps.VelocityModelBuilder):
+        self._profiles = {
+            (v0_idx, d_idx): self._num_bins * v0_idx + d_idx
+            for v0_idx in range(0, self._num_bins)
+            for d_idx in range(0, self._num_bins)
+        }
+        for k, v in self._profiles.items():
+            model_builder.add_parameter_profile(
+                id=v,
+                time_gap=1,
+                tau=0.5,
+                v0=self._mu_v0 + 0.5 * self._sigma_v0 * (k[0] - 6),
+                radius=(self._mu_d + 0.5 * self._sigma_d * (k[1] - 6)) / 2,
+            )
+
+    def pick(self):
+        v0_idx = self._to_idx(random.gauss(6, 2))
+        d_idx = self._to_idx(random.gauss(6, 2))
+        return self._profiles[(v0_idx, d_idx)]
+
+    def _to_idx(self, f: float):
+        return min(max(round(f), 0), self._num_bins - 1)
+
+
+def create_journey(sim: jps.Simulation):
+    journey = jps.JourneyDescription()
+    first_wait = journey.add_notifiable_waiting_set(
         [
-            (1038.9, 2425.24),
-            (1037.51, 2426.48),
-            (1042.61, 2433.24),
-            (1044.12, 2432.12),
-        ],
-    ]
-
-    def make(exit, sim):
-        journey = jps.JourneyDescription()
-        journey.add_exit(exit)
-        return sim.add_journey(journey)
-
-    return [make(e, sim) for e in exits]
+            (1384.33, 635.51),
+            (1384.91, 636.33),
+            (1385.91, 637.61),
+            (1385.60, 634.71),
+            (1386.56, 635.85),
+            (1387.84, 636.44),
+            (1387.56, 634.27),
+            (1388.91, 634.85),
+        ]
+    )
+    journey.add_waypoint((1283.35, 510.25), 1.5)
+    journey.add_waypoint((1159.81, 693.19), 1.5)
+    journey.add_waypoint((1223.74, 768.90), 1.5)
+    journey.add_waypoint((1214.52, 766.20), 1.5)
+    journey.add_waypoint((962.36, 555.14), 1.5)
+    second_wait = journey.add_notifiable_queue(
+        [
+            (950.56, 538.72),
+            (952.46, 538.19),
+            (953.89, 537.66),
+            (955.61, 536.76),
+            (957.04, 536.47),
+            (958.46, 536.88),
+        ]
+    )
+    journey.add_exit(
+        [(630.01, 25.88), (630.03, 27.63), (625.97, 28.03), (625.92, 26.18)]
+    )
+    return sim.add_journey(journey), (first_wait, second_wait)
 
 
 def main():
@@ -94,67 +167,77 @@ def main():
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
     )
-    profile_id = 3
-    model_builder.add_parameter_profile(
-        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.3
+    profile_picker = RandomProfilePicker(
+        mu_v0=1.34, sigma_v0=0.25, mu_d=0.15, sigma_d=0.015
     )
-
+    profile_picker.create_profiles(model_builder)
     model = model_builder.build()
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
+    simulation.set_tracing(True)
 
-    journeys = create_journeys(simulation)
+    journey, wait_points = create_journey(simulation)
     spawners = [
         Spawner(
             simulation,
-            200,
+            5,
             90000,
-            [
-                (72.29, 1220.56),
-                (71.92, 1219.36),
-                (-4, 1033.79),
-                (-4.33, 1034.54),
-                (-4.82, 1035.21),
-                (1455.15, 534),
-                (1456.12, 535),
-            ],
-            profile_id,
-            journeys[0],
-        ),
-        Spawner(
-            simulation,
-            260,
-            90000,
-            [
-                (72.29, 1220.56),
-                (71.92, 1219.36),
-                (-4, 1033.79),
-                (-4.33, 1034.54),
-                (-4.82, 1035.21),
-                (1455.15, 534),
-                (1456.12, 535),
-            ],
-            profile_id,
-            journeys[1],
+            (1455.05, 533.89),
+            (1456.38, 534.73),
+            profile_picker,
+            journey,
+            1024,
         ),
     ]
 
     writer = SqliteTrajectoryWriter(pathlib.Path("example5_out.sqlite"))
     writer.begin_writing(2, to_wkt(geo, rounding_precision=-1))
+
+    # HACK
+    writer._con.cursor().execute("DROP TABLE IF EXISTS perf_statistics")
+    writer._con.cursor().execute(
+        "CREATE TABLE perf_statistics ("
+        "   frame INTEGER NOT NULL,"
+        "   time_ns INTEGER NOT NULL,"
+        "   agent_count INTEGER NOT NULL)"
+    )
+
+    def add_perf_measurement(con, frame, time_ns, agent_count):
+        con.cursor().execute(
+            "INSERT INTO perf_statistics VALUES(?,?,?)",
+            (frame, time_ns, agent_count),
+        )
+
     for s in spawners:
         s.spawn(simulation.iteration_count())
+    start_time = time.perf_counter_ns()
     while simulation.agent_count() > 0:
         try:
+            if (simulation.iteration_count() + 100 * 30) % (100 * 60) == 0:
+                simulation.notify_waiting_set(journey, wait_points[0], False)
+            if simulation.iteration_count() % (100 * 60) == 0:
+                simulation.notify_waiting_set(journey, wait_points[0], True)
+            if simulation.iteration_count() % (100 * 8) == 0:
+                simulation.notify_queue(journey, wait_points[1], 1)
             if simulation.iteration_count() % 50 == 0:
                 writer.write_iteration_state(simulation)
             for s in spawners:
                 s.spawn(simulation.iteration_count())
-            before = time.perf_counter_ns()
             simulation.iterate()
-            duration = time.perf_counter_ns() - before
+            dt = (time.perf_counter_ns() - start_time) / 1000000000
+            duration = simulation.get_last_trace().iteration_duration
+            op_dur = simulation.get_last_trace().operational_level_duration
+
             print(
-                f"Iteration: {simulation.iteration_count():6d} / Agents: {simulation.agent_count():4d} / Time taken: {duration / 1000000:6.2f}ms",
+                f"Wall Clock Time: {dt:6.2f}s Sim Time: {simulation.iteration_count() / 100:6.2f}s Iteration: {simulation.iteration_count():6d} / Agents: {simulation.agent_count():4d} / Time taken: {duration / 1000:6.2f}ms [OpLevel {op_dur / 1000:6.2f}ms]",
                 end="\r",
+            )
+            # HACK
+            add_perf_measurement(
+                writer._con,
+                simulation.iteration_count(),
+                duration,
+                simulation.agent_count(),
             )
         except KeyboardInterrupt:
             writer.end_writing()
