@@ -336,6 +336,7 @@ void TypedSimulation<T>::Notify(Event evt)
                     throw SimulationError(
                         "Cannot send event to unknown journey {}", evt.journeyId.getID());
                 }
+                LOG_DEBUG("Received 'NotifyWaitingSet' evt: {}", evt);
                 journey->second->HandleNofifyWaitingSetEvent(evt);
             } else if constexpr(std::is_same_v<EvtT, NotifyQueue>) {
                 auto journey = _journeys.find(evt.journeyId);
@@ -343,6 +344,7 @@ void TypedSimulation<T>::Notify(Event evt)
                     throw SimulationError(
                         "Cannot send event to unknown journey {}", evt.journeyId.getID());
                 }
+                LOG_DEBUG("Received 'NotifyQueue' evt: {}", evt);
                 journey->second->HandleNofifyQueueEvent(evt);
             } else {
                 static_assert(always_false_v<EvtT>, "non-exhaustive visitor!");
