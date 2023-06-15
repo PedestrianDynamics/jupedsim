@@ -1,6 +1,6 @@
 set JPSCORE_EXECUTABLE_PATH="@CMAKE_BINARY_DIR@/bin/Release/jpscore"
 set JPSCORE_SOURCE_PATH="@CMAKE_SOURCE_DIR@"
-set PYTHONPATH="@CMAKE_SOURCE_DIR@"/python_modules"
+set PYTHONPATH="@CMAKE_SOURCE_DIR@"/systemtest/test_support;"@CMAKE_LIBRARY_OUTPUT_DIRECTORY@"
 
 pytest %JPSCORE_SOURCE_PATH%/systemtest %*
 

@@ -44,6 +44,9 @@ def extract_info(file_obj):
         if not line.startswith("#"):  # now the trajectories start
             break
 
+        if "unit" in line:
+            unit = line.split(":")[-1].strip()
+
         if "x/" in line:
             unit = line.split("x/")[-1].split()[0]
 

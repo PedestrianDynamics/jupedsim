@@ -17,6 +17,17 @@ function(check_prefix_path)
 endfunction()
 
 function(find_python_library python_lib)
+    if(WIN32)
+        # Using python from vcpkg messes with cmakes find package.
+        # find_package(Python) should prefer a venv python over a concrete one,
+        # this no longer works when using the vcpkg toolchain file.
+        # On windows we just "hope" to find the right python as there is currently 
+        # no way to force use of the venv python
+        set(PYTHON_EXECUTABLE "python")
+    else()
+        set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
+    endif()
+    
     execute_process(
             COMMAND
             ${PYTHON_EXECUTABLE} "-c" "import ${python_lib}; print(${python_lib}.__version__)"

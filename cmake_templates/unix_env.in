@@ -1,0 +1,2 @@
+export PYTHONPATH="@CMAKE_SOURCE_DIR@/python_modules/jupedsim:@CMAKE_SOURCE_DIR@/python_modules/visdbg:@CMAKE_LIBRARY_OUTPUT_DIRECTORY@"
+

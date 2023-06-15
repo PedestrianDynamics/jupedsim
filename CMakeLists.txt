@@ -1,9 +1,9 @@
 ################################################################################
 # Project setup
 ################################################################################
-cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
 project(JuPedSim VERSION 0.10.0 LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
@@ -32,6 +32,9 @@ check_prefix_path()
 ################################################################################
 # Optional features
 ################################################################################
+set(WERROR OFF CACHE BOOL "Build wth -Werror enabled. Not supported on Windows")
+print_var(WERROR)
+
 set(BUILD_TESTS OFF CACHE BOOL "Build tests")
 print_var(BUILD_TESTS)
 
@@ -56,57 +59,44 @@ endif()
 #          CMake will enclose multiple flags in '' which the compiler then
 #          treats as a single flag and does not understand.
 list(APPEND COMMON_COMPILE_OPTIONS
+    $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>,$<BOOL:${WERROR}>>:-Werror>
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-Wall>
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-Wextra>
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-fdiagnostics-color=always>
+    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-fPIC>
     $<$<CXX_COMPILER_ID:MSVC>:/W2>
     $<$<CXX_COMPILER_ID:MSVC>:/EHsc>
     $<$<CXX_COMPILER_ID:MSVC>:/MP>
+    $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_ASAN}>>:-fno-omit-frame-pointer>
+    $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_ASAN}>>:-fno-optimize-sibling-calls>
+    $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_ASAN}>>:-fsanitize=address>
+    $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_ASAN}>>:-shared-libasan>
 )
 
 ################################################################################
 # Dependencies
 ################################################################################
 find_package(fmt 8.0 REQUIRED CONFIG)
-find_package(spdlog 1.9 REQUIRED CONFIG)
-find_package(CLI11 2.1 REQUIRED CONFIG)
 find_package(Boost 1.76 REQUIRED)
-# std::filesystem needs to be linked on gcc < 9
-add_library(fs INTERFACE)
-target_link_libraries(fs INTERFACE
-    $<$<PLATFORM_ID:Linux>:stdc++fs>
-)
 find_package(Threads REQUIRED)
-find_package(PythonInterp 3 REQUIRED)
-find_package(VTK 9.0
-    COMPONENTS
-        CommonCore
-        opengl
-        RenderingQt
-        RenderingCore
-        GUISupportQt
-        RenderingUI
-        InteractionStyle
-        RenderingAnnotation
-        IOImage
-    REQUIRED CONFIG
-)
-find_package(
-    Qt5 5.12
-    COMPONENTS Widgets Xml Core Gui
-    REQUIRED
-)
-list(APPEND CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_SOURCE_DIR}/forms")
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-find_package(glm REQUIRED CONFIG)
-if(BUILD_TESTS)
-    find_package(Catch2 REQUIRED)
-    find_package(GTest 1.11 REQUIRED CONFIG)
+# Silence CGAL CMake warning. No example data for CGAL will be loaded anyways
+set(CGAL_DATA_DIR "none")
+set(WITH_CGAL_ImageIO OFF)
+set(WITH_CGAL_Qt5 OFF)
+if(UNIX)
+    set(CGAL_DISABLE_GMP ON)
 endif()
-# remaining in-tree dependencies
-add_subdirectory(third-party)
+find_package(CGAL 5.4 REQUIRED)
+
+add_subdirectory(third-party/poly2tri)
+
+set(Python_FIND_VIRTUALENV "FIRST")
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
+find_package(pybind11 REQUIRED CONFIG)
+
+if(BUILD_TESTS)
+    find_package(GTest REQUIRED CONFIG)
+endif()
 ################################################################################
 # VCS info
 ################################################################################
@@ -171,6 +161,9 @@ target_compile_definitions(git-info INTERFACE
     GIT_BRANCH="${GIT_BRANCH}"
 )
 configure_file(cmake_templates/BuildInfo.cpp.in ${CMAKE_BINARY_DIR}/generated/BuildInfo.cpp @ONLY)
+if(UNIX)
+    configure_file(cmake_templates/unix_env.in ${CMAKE_BINARY_DIR}/environment @ONLY)
+endif()
 ################################################################################
 # Documentation
 ################################################################################
@@ -225,18 +218,24 @@ if(BUILD_TESTS)
         COMMAND ${pytest-wrapper-out} -vv -s
                 --basetemp=${CMAKE_BINARY_DIR}/systemtest-out
                 --junit-xml=result-systemtests.xml
-        DEPENDS jpscore
+        DEPENDS py_jupedsim
     )
+    set(unittests_dependency_list libjupedsim-unittests libsimulator-unittests)
     add_custom_target(unittests
+        DEPENDS ${unittests_dependency_list}
+    )
+
+    add_custom_target(libjupedsim-unittests
+        COMMENT "Running libjupedsim unittests"
+        COMMAND $<TARGET_FILE:libjupedsim-tests>
+                --gtest_output=xml:result-libjupedsim-unittests.xml
+        DEPENDS libjupedsim-tests
+    )
+    add_custom_target(libsimulator-unittests
         COMMENT "Running unit tests"
-        COMMAND echo "GTest"
-        COMMAND $<TARGET_FILE:libcore-tests>
-                --gtest_output=xml:result-unittests.xml
-        COMMAND echo "Catch2"
-        COMMAND $<TARGET_FILE:catch-unittests>
-                --reporter junit
-                --out=result-unittests2.xml
-        DEPENDS libcore-tests catch-unittests
+        COMMAND $<TARGET_FILE:libsimulator-tests>
+                --gtest_output=xml:result-libsimulator-unittests.xml
+        DEPENDS libsimulator-tests
     )
 endif()
 
@@ -253,10 +252,9 @@ endif()
 ################################################################################
 # Add libraries / executables
 ################################################################################
-add_subdirectory(jpscore)
-add_subdirectory(jpsvis)
-add_subdirectory(libcore)
-add_subdirectory(libshared)
+add_subdirectory(libjupedsim)
+add_subdirectory(libsimulator)
+add_subdirectory(python_bindings_jupedsim)
 
 ################################################################################
 # Code formating
@@ -284,7 +282,7 @@ if(UNIX)
             )
             if(version MATCHES "^${clang-format-version}.*")
                 message(STATUS "Found clang-format ${version}, add format-check and reformat targets")
-                set(folders jpscore jpsvis libcore libshared)
+                set(folders jpsvis libcore libsimulator libjupedsim)
                 add_custom_target(check-format
                     COMMENT "Checking format with clang-format"
                     COMMAND find ${folders}
@@ -331,15 +329,13 @@ set(CPACK_PACKAGE_VENDOR "Forschungszentrum Juelich GmbH")
 set(CPACK_PACKAGE_DESCRIPTION "JuPedSim")
 set(CPACK_PACKAGE_HOMEPAGE_URL "http://jupedsim.org")
 set(CPACK_MONOLITHIC_INSTALL ON)
-set(CPACK_PACKAGE_EXECUTABLES "jpscore;JuPedSim Simulator;jpsvis;JuPedSim Visualization")
+set(CPACK_PACKAGE_EXECUTABLES "jpsvis;JuPedSim Visualization")
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE)
 set(JPSCORE_INSTALLER_LOCATION ".")
 
 if(APPLE)
     set(CPACK_GENERATOR "DragNDrop")
-    set(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_SOURCE_DIR}/jpscore/forms/background.png")
     set(CPACK_DMG_VOLUME_NAME "${PROJECT_NAME}")
-    set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/jpscore/forms/jpscore.ico")
     # MacOS PList settings
     set(MACOSX_BUNDLE_BUNDLE_NAME "JuPedSim")
     set(MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}")
@@ -369,134 +365,5 @@ elseif(WIN32)
       "Delete '$DESKTOP\\\\JPSvis.lnk'"
     )
     set(JPSCORE_INSTALLER_LOCATION "bin")
-endif()
-
-install(TARGETS jpscore
-    DESTINATION ${JPSCORE_INSTALLER_LOCATION}
-)
-
-install(TARGETS jpsvis
-    BUNDLE
-    DESTINATION .
-)
-
-install(DIRECTORY
-    ${CMAKE_SOURCE_DIR}/examples
-    DESTINATION .
-)
-
-if(APPLE)
-    set_target_properties(jpsvis PROPERTIES
-        MACOSX_BUNDLE_BUNDLE_NAME "JPSvis"
-        MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
-        MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2015-2022 Forschungszentrum Juelich. All rights reserved."
-        MACOSX_BUNDLE_GUI_IDENTIFIER "www.jupedsim.org"
-        MACOSX_BUNDLE_ICON_FILE JPSvis.icns
-        MACOSX_BUNDLE_INFO_STRING "Visualisation module for  JuPedSim, a framework for simulation and analysis of pedestrian dynamics."
-        MACOSX_BUNDLE_LONG_VERSION_STRING "version ${PROJECT_VERSION}"
-        MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
-        INSTALL_RPATH @executable_path/../Frameworks
-    )
-    get_target_property(mocExe Qt5::moc IMPORTED_LOCATION)
-    get_filename_component(qtBinDir "${mocExe}" DIRECTORY)
-    find_program(DEPLOYQT_EXECUTABLE macdeployqt PATHS "${qtBinDir}" NO_DEFAULT_PATH)
-    set(DEPLOY_OPTIONS "${CMAKE_BINARY_DIR}/bin/jpsvis.app")
-    configure_file(${CMAKE_SOURCE_DIR}/cmake_templates/qt-deployapp-macos.cmake.in deployapp.cmake @ONLY)
-    install(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/deployapp.cmake)
-    install(CODE [[
-      include(BundleUtilities)
-
-      # This string is crazy-long enough that it's worth folding into a var...
-      set (_plugin_file "$<TARGET_FILE_NAME:Qt5::QCocoaIntegrationPlugin>")
-
-      # Ditto the output paths for our installation
-      set (_appdir "${CMAKE_INSTALL_PREFIX}/jpsvis.app")
-      set (_outdir "${_appdir}/Contents/PlugIns/platforms")
-
-      file(INSTALL DESTINATION "${_outdir}"
-        TYPE FILE FILES "$<TARGET_FILE:Qt5::QCocoaIntegrationPlugin>")
-
-      fixup_bundle("${_appdir}/Contents/MacOS/jpsvis" "${_outdir}/${_plugin_file}" "")
-    ]] COMPONENT Runtime)
-
-elseif(WIN32)
-    set(origin "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}")
-    install(FILES
-        ${origin}/bin/Qt5Core.dll
-        ${origin}/bin/Qt5Gui.dll
-        ${origin}/bin/Qt5Widgets.dll
-        ${origin}/bin/Qt5Xml.dll
-        ${origin}/bin/brotlicommon.dll
-        ${origin}/bin/brotlidec.dll
-        ${origin}/bin/bz2.dll
-        ${origin}/bin/fmt.dll
-        ${origin}/bin/freetype.dll
-        ${origin}/bin/glew32.dll
-        ${origin}/bin/harfbuzz.dll
-        ${origin}/bin/icudt69.dll
-        ${origin}/bin/icuin69.dll
-        ${origin}/bin/icuuc69.dll
-        ${origin}/bin/jpeg62.dll
-        ${origin}/bin/libexpat.dll
-        ${origin}/bin/libpng16.dll
-        ${origin}/bin/lz4.dll
-        ${origin}/bin/lzma.dll
-        ${origin}/bin/pcre2-16.dll
-        ${origin}/bin/pugixml.dll
-        ${origin}/bin/spdlog.dll
-        ${origin}/bin/tiff.dll
-        ${origin}/bin/vtkCommonColor-9.0.dll
-        ${origin}/bin/vtkCommonComputationalGeometry-9.0.dll
-        ${origin}/bin/vtkCommonCore-9.0.dll
-        ${origin}/bin/vtkCommonDataModel-9.0.dll
-        ${origin}/bin/vtkCommonExecutionModel-9.0.dll
-        ${origin}/bin/vtkCommonMath-9.0.dll
-        ${origin}/bin/vtkCommonMisc-9.0.dll
-        ${origin}/bin/vtkCommonSystem-9.0.dll
-        ${origin}/bin/vtkCommonTransforms-9.0.dll
-        ${origin}/bin/vtkDICOMParser-9.0.dll
-        ${origin}/bin/vtkFiltersCore-9.0.dll
-        ${origin}/bin/vtkFiltersExtraction-9.0.dll
-        ${origin}/bin/vtkFiltersGeneral-9.0.dll
-        ${origin}/bin/vtkFiltersGeometry-9.0.dll
-        ${origin}/bin/vtkFiltersHybrid-9.0.dll
-        ${origin}/bin/vtkFiltersModeling-9.0.dll
-        ${origin}/bin/vtkFiltersSources-9.0.dll
-        ${origin}/bin/vtkFiltersStatistics-9.0.dll
-        ${origin}/bin/vtkFiltersTexture-9.0.dll
-        ${origin}/bin/vtkGUISupportQt-9.0.dll
-        ${origin}/bin/vtkIOCore-9.0.dll
-        ${origin}/bin/vtkIOImage-9.0.dll
-        ${origin}/bin/vtkIOLegacy-9.0.dll
-        ${origin}/bin/vtkIOXML-9.0.dll
-        ${origin}/bin/vtkIOXMLParser-9.0.dll
-        ${origin}/bin/vtkImagingColor-9.0.dll
-        ${origin}/bin/vtkImagingCore-9.0.dll
-        ${origin}/bin/vtkImagingFourier-9.0.dll
-        ${origin}/bin/vtkImagingGeneral-9.0.dll
-        ${origin}/bin/vtkImagingHybrid-9.0.dll
-        ${origin}/bin/vtkImagingSources-9.0.dll
-        ${origin}/bin/vtkImagingSources-9.0.dll
-        ${origin}/bin/vtkInteractionStyle-9.0.dll
-        ${origin}/bin/vtkInteractionWidgets-9.0.dll
-        ${origin}/bin/vtkParallelCore-9.0.dll
-        ${origin}/bin/vtkParallelDIY-9.0.dll
-        ${origin}/bin/vtkRenderingAnnotation-9.0.dll
-        ${origin}/bin/vtkRenderingCore-9.0.dll
-        ${origin}/bin/vtkRenderingFreeType-9.0.dll
-        ${origin}/bin/vtkRenderingLabel-9.0.dll
-        ${origin}/bin/vtkRenderingOpenGL2-9.0.dll
-        ${origin}/bin/vtkRenderingUI-9.0.dll
-        ${origin}/bin/vtkloguru-9.0.dll
-        ${origin}/bin/vtkmetaio-9.0.dll
-        ${origin}/bin/vtksys-9.0.dll
-        ${origin}/bin/zlib1.dll
-        ${origin}/bin/zstd.dll
-        TYPE BIN
-    )
-    install(DIRECTORY
-        ${origin}/plugins/platforms
-        TYPE BIN
-    )
 endif()
 include(CPack)
