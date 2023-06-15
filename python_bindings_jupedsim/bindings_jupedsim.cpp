@@ -174,7 +174,7 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def_readonly("operational_level_duration", &JPS_Trace::operational_level_duration)
         .def("__repr__", [](const JPS_Trace& t) {
             return fmt::format(
-                "Trace( Iteration: {:f}us, OperationalLevel {:f}us)",
+                "Trace( Iteration: {:d}us, OperationalLevel {:d}us)",
                 t.iteration_duration,
                 t.operational_level_duration);
         });
