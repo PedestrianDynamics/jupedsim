@@ -6,6 +6,7 @@ import pathlib
 
 import py_jupedsim as jps
 from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
+from jupedsim.util import build_jps_geometry
 from shapely import GeometryCollection, Polygon, to_wkt
 
 
@@ -34,13 +35,10 @@ def main():
     jps.set_warning_callback(log_warn)
     jps.set_error_callback(log_error)
 
-    geo = GeometryCollection(
-        Polygon(shell=[(0, 0), (100, 0), (100, 100), (0, 100), (0, 0)])
+    area = GeometryCollection(
+        Polygon([(0, 0), (100, 0), (100, 100), (0, 100), (0, 0)])
     )
-
-    geo_builder = jps.GeometryBuilder()
-    geo_builder.add_accessible_area(geo.geoms[0].exterior.coords[:-1])
-    geometry = geo_builder.build()
+    geometry = build_jps_geometry(area)
 
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
@@ -80,7 +78,7 @@ def main():
         simulation.add_agent(agent_parameters)
 
     writer = SqliteTrajectoryWriter(pathlib.Path("example3_out.sqlite"))
-    writer.begin_writing(25, to_wkt(geo, rounding_precision=-1))
+    writer.begin_writing(25, to_wkt(area, rounding_precision=-1))
     while simulation.agent_count() > 0:
         if (
             simulation.iteration_count() > 100 * 52
