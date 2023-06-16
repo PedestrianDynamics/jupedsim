@@ -4,7 +4,8 @@
 
 #include "GeometricFunctions.hpp"
 #include "IteratorPair.hpp"
-#include "Line.hpp"
+#include "LineSegment.hpp"
+#include "SimulationError.hpp"
 #include "Triangle.hpp"
 
 #include <vector>
@@ -34,7 +35,7 @@ std::vector<Point> NavMeshRoutingEngine::ComputeWaypoint(Point currentPosition, 
 
     // TODO(kkratz): Edge lookup is O(n) where n is the number of edges in the graph
     // This needs to be replaced with a graph that allows for faster edge lookup
-    std::vector<Line> portals{};
+    std::vector<LineSegment> portals{};
     portals.reserve(path.size());
     for(size_t index = 1; index < path.size(); ++index) {
         portals.push_back(_graph.Edge(path[index - 1], path[index]).edge);
@@ -58,8 +59,8 @@ std::vector<Point> NavMeshRoutingEngine::ComputeWaypoint(Point currentPosition, 
         // benefit of disconnecting parts of the nav mesh that are connected by a gap that is
         // narrower than a agents size.
         // Hard coded 0.2 value could / should become a input parameter
-        const auto line_segment_left = portals[index_portal].GetPoint2();
-        const auto line_segment_right = portals[index_portal].GetPoint1();
+        const auto line_segment_left = portals[index_portal].p2;
+        const auto line_segment_right = portals[index_portal].p1;
         const auto line_segment_direction = (line_segment_right - line_segment_left).Normalized();
         const auto candidate_left = line_segment_left + (line_segment_direction * 0.2);
         const auto candidate_right = line_segment_right - (line_segment_direction * 0.2);
@@ -139,6 +140,5 @@ NavMeshRoutingEngine::GraphType::VertexId NavMeshRoutingEngine::findVertex(Point
             return id;
         }
     }
-    // TODO(kratz): Use custom exception
-    throw std::runtime_error("Point outside accessible area");
+    throw SimulationError("Point {} outside accessible area", p);
 }

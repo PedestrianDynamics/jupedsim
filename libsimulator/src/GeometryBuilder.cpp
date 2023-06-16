@@ -6,9 +6,10 @@
 #include "DTriangulation.hpp"
 #include "Geometry.hpp"
 #include "Graph.hpp"
-#include "Line.hpp"
+#include "LineSegment.hpp"
 #include "Point.hpp"
 #include "RoutingEngine.hpp"
+#include "SimulationError.hpp"
 
 #include <CGAL/Boolean_set_operations_2/difference.h>
 #include <CGAL/number_utils.h>
@@ -58,7 +59,7 @@ static Poly intoCGALPolygon(const std::vector<Point>& ring, Ordering ordering)
     }
 
     if(!poly.is_simple()) {
-        throw std::runtime_error(fmt::format("Polygon is not simple: {}", ring));
+        throw SimulationError("Polygon is not simple: {}", ring);
     }
     const bool needsReversal = (ordering == Ordering::CW && poly.is_counterclockwise_oriented()) ||
                                (ordering == Ordering::CCW && poly.is_clockwise_oriented());
@@ -98,7 +99,7 @@ Geometry GeometryBuilder::Build()
         std::back_inserter(accessibleList));
 
     if(accessibleList.size() != 1) {
-        throw std::runtime_error("accesisble area not connected");
+        throw SimulationError("accessisble area not connected");
     }
 
     auto accessibleArea = *accessibleList.begin();
@@ -115,7 +116,7 @@ Geometry GeometryBuilder::Build()
         PolyWithHolesList res{};
         CGAL::difference(accessibleArea, ex, std::back_inserter(res));
         if(res.size() != 1) {
-            throw std::runtime_error("Exclusion splits accessibleArea");
+            throw SimulationError("Exclusion splits accessibleArea");
         }
         accessibleArea = *res.begin();
     }
@@ -140,21 +141,9 @@ Geometry GeometryBuilder::Build()
         [Convert](const auto& hole) {
             return Convert(hole.vertices_begin(), hole.vertices_end());
         });
-    CollisionGeometryBuilder collisionGeometryBuilder{};
-    for(size_t index = 1; index < boundary.size(); ++index) {
-        collisionGeometryBuilder.AddLineSegment(
-            boundary[index - 1].x, boundary[index - 1].y, boundary[index].x, boundary[index].y);
-    }
-    collisionGeometryBuilder.AddLineSegment(
-        boundary.back().x, boundary.back().y, boundary.front().x, boundary.front().y);
-    for(const auto& hole : holes) {
-        for(size_t index = 1; index < hole.size(); ++index) {
-            collisionGeometryBuilder.AddLineSegment(
-                hole[index - 1].x, hole[index - 1].y, hole[index].x, hole[index].y);
-        }
-        collisionGeometryBuilder.AddLineSegment(
-            hole.back().x, hole.back().y, hole.front().x, hole.front().y);
-    }
+
+    std::unique_ptr<CollisionGeometry> collisionGeometry =
+        std::make_unique<CollisionGeometry>(accessibleArea);
 
     DTriangulation triangulation(boundary, holes);
     std::stack<p2t::Triangle*> toVisit{};
@@ -210,7 +199,5 @@ Geometry GeometryBuilder::Build()
             toVisit.push(neighbor);
         }
     }
-    return {
-        std::make_unique<CollisionGeometry>(collisionGeometryBuilder.Build()),
-        std::make_unique<NavMeshRoutingEngine>(builder.Build())};
+    return {std::move(collisionGeometry), std::make_unique<NavMeshRoutingEngine>(builder.Build())};
 }

@@ -4,7 +4,9 @@
 
 #include "AgentIterator.hpp"
 #include "ErrorMessage.hpp"
+#include "Events.hpp"
 #include "Journey.hpp"
+#include "Stage.hpp"
 
 #include "gtest/gtest.h"
 #include <CollisionGeometry.hpp>
@@ -30,6 +32,7 @@
 #include <iterator>
 #include <memory>
 #include <string>
+#include <tuple>
 #include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -223,34 +226,28 @@ JPS_GeometryBuilder JPS_GeometryBuilder_Create()
 
 void JPS_GeometryBuilder_AddAccessibleArea(
     JPS_GeometryBuilder handle,
-    double* points,
-    size_t pointCount)
+    JPS_Point* polygon,
+    size_t lenPolygon)
 {
     assert(handle != nullptr);
     auto builder = reinterpret_cast<GeometryBuilder*>(handle);
-    std::vector<Point> lineLoop{};
-    lineLoop.reserve(pointCount);
-    for(size_t pointIndex = 0; pointIndex < pointCount; ++pointIndex) {
-        lineLoop.emplace_back(points[pointIndex * 2], points[pointIndex * 2 + 1]);
-    }
-    // TODO(kkratz): Consider adding a move version of 'AddAccessibleArea'
-    builder->AddAccessibleArea(lineLoop);
+    std::vector<Point> loop{};
+    loop.reserve(lenPolygon);
+    std::transform(polygon, polygon + lenPolygon, std::back_inserter(loop), intoPoint);
+    builder->AddAccessibleArea(loop);
 }
 
 void JPS_GeometryBuilder_ExcludeFromAccessibleArea(
     JPS_GeometryBuilder handle,
-    double* points,
-    size_t pointCount)
+    JPS_Point* polygon,
+    size_t lenPolygon)
 {
     assert(handle != nullptr);
     auto builder = reinterpret_cast<GeometryBuilder*>(handle);
-    std::vector<Point> lineLoop{};
-    lineLoop.reserve(pointCount);
-    for(size_t pointIndex = 0; pointIndex < pointCount; ++pointIndex) {
-        lineLoop.emplace_back(points[pointIndex * 2], points[pointIndex * 2 + 1]);
-    }
-    // TODO(kkratz): Consider adding a move version of 'AddAccessibleArea'
-    builder->ExcludeFromAccessibleArea(lineLoop);
+    std::vector<Point> loop{};
+    loop.reserve(lenPolygon);
+    std::transform(polygon, polygon + lenPolygon, std::back_inserter(loop), intoPoint);
+    builder->ExcludeFromAccessibleArea(loop);
 }
 
 JPS_Geometry JPS_GeometryBuilder_Build(JPS_GeometryBuilder handle, JPS_ErrorMessage* errorMessage)
@@ -323,33 +320,148 @@ void JPS_VelocityModelAgentIterator_Free(JPS_VelocityModelAgentIterator handle)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// Journey
+/// AgentIdIterator
+////////////////////////////////////////////////////////////////////////////////////////////////////
+struct AgentIdIterator {
+    using AgentIds = std::vector<GenericAgent::ID>;
+    AgentIds ids;
+    AgentIds::const_iterator iter;
+
+    AgentIdIterator(AgentIds&& ids_) : ids(std::move(ids_)) { iter = std::begin(ids); }
+};
+
+JPS_AgentId JPS_AgentIdIterator_Next(JPS_AgentIdIterator handle)
+{
+    assert(handle);
+    auto iterator = reinterpret_cast<AgentIdIterator*>(handle);
+    auto& [vec, iter] = *iterator;
+    if(iter == std::end(vec)) {
+        return GenericAgent::ID::Invalid.getID();
+    }
+    const auto id = *iter;
+    ++iter;
+    return id.getID();
+}
+
+void JPS_AgentIdIterator_Free(JPS_AgentIdIterator handle)
+{
+    delete reinterpret_cast<AgentIdIterator*>(handle);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// JourneyDescription
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 using JourneyDesc = std::vector<StageDescription>;
 
-JPS_Journey JPS_Journey_Create()
+JPS_JourneyDescription JPS_JourneyDescription_Create()
 {
-    return reinterpret_cast<JPS_Journey>(new JourneyDesc{});
+    return reinterpret_cast<JPS_JourneyDescription>(new JourneyDesc{});
 }
 
-void JPS_Journey_AddWaypoint(JPS_Journey handle, JPS_Point position, double distance)
+bool JPS_JourneyDescription_AddWaypoint(
+    JPS_JourneyDescription handle,
+    JPS_Point position,
+    double distance,
+    JPS_StageIndex* stageIndex,
+    JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
+    if(distance < 0) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Distance needs to be >= 0"});
+        }
+        return false;
+    }
     auto journey = reinterpret_cast<JourneyDesc*>(handle);
     journey->push_back(WaypointDescription{intoPoint(position), distance});
+    if(stageIndex != nullptr) {
+        *stageIndex = journey->size() - 1;
+    }
+    return true;
 }
 
-void JPS_Journey_AddExit(JPS_Journey handle, JPS_Point* polygon, size_t len_polygon)
+bool JPS_JourneyDescription_AddExit(
+    JPS_JourneyDescription handle,
+    JPS_Point* polygon,
+    size_t len_polygon,
+    JPS_StageIndex* stageIndex,
+    JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
     auto journey = reinterpret_cast<JourneyDesc*>(handle);
     std::vector<Point> loop{};
     loop.reserve(len_polygon);
     std::transform(polygon, polygon + len_polygon, std::back_inserter(loop), intoPoint);
-    journey->push_back(ExitDescription{std::move(loop)});
+    try {
+        journey->push_back(ExitDescription{Polygon(loop)});
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+        return false;
+    }
+    if(stageIndex != nullptr) {
+        *stageIndex = journey->size() - 1;
+    }
+    return true;
 }
 
-void JPS_Journey_Free(JPS_Journey handle)
+bool JPS_JourneyDescription_AddNotifiableWaitingSet(
+    JPS_JourneyDescription handle,
+    JPS_Point* waiting_points,
+    size_t len_waiting_points,
+    JPS_StageIndex* stageIndex,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    if(len_waiting_points < 1) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"NotifiableWaitingSet needs at least 1 waiting point"});
+        }
+        return false;
+    }
+    auto journey = reinterpret_cast<JourneyDesc*>(handle);
+    std::vector<Point> slots{};
+    slots.reserve(len_waiting_points);
+    std::transform(
+        waiting_points, waiting_points + len_waiting_points, std::back_inserter(slots), intoPoint);
+    journey->push_back(NotifiableWaitingSetDescription{std::move(slots)});
+    if(stageIndex != nullptr) {
+        *stageIndex = journey->size() - 1;
+    }
+    return true;
+}
+
+bool JPS_JourneyDescription_AddNotifiableQueue(
+    JPS_JourneyDescription handle,
+    JPS_Point* waiting_points,
+    size_t len_waiting_points,
+    JPS_StageIndex* stageIndex,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    if(len_waiting_points < 1) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"NotifiableQueue needs at least 1 waiting point"});
+        }
+        return false;
+    }
+    auto journey = reinterpret_cast<JourneyDesc*>(handle);
+    std::vector<Point> slots{};
+    slots.reserve(len_waiting_points);
+    std::transform(
+        waiting_points, waiting_points + len_waiting_points, std::back_inserter(slots), intoPoint);
+    journey->push_back(NotifiableQueueDescription{std::move(slots)});
+    if(stageIndex != nullptr) {
+        *stageIndex = journey->size() - 1;
+    }
+    return true;
+}
+
+void JPS_JourneyDescription_Free(JPS_JourneyDescription handle)
 {
     delete reinterpret_cast<JourneyDesc*>(handle);
 }
@@ -403,7 +515,7 @@ JPS_Simulation JPS_Simulation_Create(
 
 JPS_JourneyId JPS_Simulation_AddJourney(
     JPS_Simulation handle,
-    JPS_Journey journey,
+    JPS_JourneyDescription journey,
     JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
@@ -629,6 +741,20 @@ size_t JPS_Simulation_AgentCount(JPS_Simulation handle)
     return simulation->AgentCount();
 }
 
+double JPS_Simulation_ElapsedTime(JPS_Simulation handle)
+{
+    assert(handle);
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    return simulation->ElapsedTime();
+}
+
+double JPS_Simulation_DeltaTime(JPS_Simulation handle)
+{
+    assert(handle);
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    return simulation->DT();
+}
+
 uint64_t JPS_Simulation_IterationCount(JPS_Simulation handle)
 {
     assert(handle);
@@ -700,6 +826,32 @@ bool JPS_Simulation_SwitchAgentProfile(
     return result;
 }
 
+bool JPS_Simulation_SwitchAgentJourney(
+    JPS_Simulation handle,
+    JPS_AgentId agentId,
+    JPS_JourneyId journeyId,
+    JPS_StageIndex stageIdx,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    const auto simulation = reinterpret_cast<Simulation*>(handle);
+    bool result = false;
+    try {
+        simulation->SwitchAgentJourney(agentId, journeyId, stageIdx);
+        result = true;
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return result;
+}
+
 JPS_ModelType JPS_Simulation_ModelType(JPS_Simulation handle)
 {
     assert(handle);
@@ -717,6 +869,86 @@ JPS_ModelType JPS_Simulation_ModelType(JPS_Simulation handle)
 #elif defined(_MSC_VER) // MSVC
     __assume(false);
 #endif
+}
+
+JPS_AgentIdIterator
+JPS_Simulation_AgentsInRange(JPS_Simulation handle, JPS_Point position, double distance)
+{
+    assert(handle);
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    return reinterpret_cast<JPS_AgentIdIterator>(
+        new AgentIdIterator(simulation->AgentsInRange(intoPoint(position), distance)));
+}
+
+JPS_AgentIdIterator
+JPS_Simulation_AgentsInPolygon(JPS_Simulation handle, JPS_Point* polygon, size_t len_polygon)
+{
+    assert(handle);
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    std::vector<Point> poly{};
+    poly.reserve(len_polygon);
+    std::transform(polygon, polygon + len_polygon, std::back_inserter(poly), intoPoint);
+    return reinterpret_cast<JPS_AgentIdIterator>(
+        new AgentIdIterator(simulation->AgentsInPolygon(poly)));
+}
+
+bool JPS_Simulation_ChangeWaitingSetState(
+    JPS_Simulation handle,
+    JPS_JourneyId journeyId,
+    size_t stageIdx,
+    bool active,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    auto simuation = reinterpret_cast<Simulation*>(handle);
+    try {
+        simuation->Notify(NotifyWaitingSet{
+            journeyId,
+            stageIdx,
+            active ? NotifiableWaitingSet::WaitingState::Active :
+                     NotifiableWaitingSet::WaitingState::Inactive});
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+        return false;
+    }
+    return true;
+}
+
+bool JPS_Simulation_PopAgentsFromQueue(
+    JPS_Simulation handle,
+    JPS_JourneyId journeyId,
+    size_t stageIdx,
+    size_t count,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    auto simuation = reinterpret_cast<Simulation*>(handle);
+    try {
+        simuation->Notify(NotifyQueue{journeyId, stageIdx, count});
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+        return false;
+    }
+    return true;
+}
+
+void JPS_Simulation_SetTracing(JPS_Simulation handle, bool status)
+{
+    assert(handle);
+    auto simuation = reinterpret_cast<Simulation*>(handle);
+    simuation->SetTracing(status);
+}
+
+JPS_Trace JPS_Simulation_GetTrace(JPS_Simulation handle)
+{
+    assert(handle);
+    auto simuation = reinterpret_cast<Simulation*>(handle);
+    const auto stats = simuation->GetLastStats();
+    return JPS_Trace{stats.IterationDuration(), stats.OpDecSystemRunDuration()};
 }
 
 void JPS_Simulation_Free(JPS_Simulation handle)

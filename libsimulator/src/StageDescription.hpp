@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Point.hpp"
+#include "Polygon.hpp"
 
 #include <variant>
 #include <vector>
@@ -13,10 +14,19 @@ struct WaypointDescription {
 };
 
 struct ExitDescription {
-    /// Constraints:
-    /// * last to first point linesegment is implied
-    /// * lineloop has to form ccw orienetd convex polygon
-    std::vector<Point> lineloop;
+    Polygon polygon;
 };
 
-using StageDescription = std::variant<WaypointDescription, ExitDescription>;
+struct NotifiableWaitingSetDescription {
+    std::vector<Point> slots;
+};
+
+struct NotifiableQueueDescription {
+    std::vector<Point> slots;
+};
+
+using StageDescription = std::variant<
+    WaypointDescription,
+    ExitDescription,
+    NotifiableWaitingSetDescription,
+    NotifiableQueueDescription>;

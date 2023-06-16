@@ -5,20 +5,15 @@ add_library(simulator STATIC
     src/AABB.cpp
     src/AABB.hpp
     src/AgentExitSystem.hpp
-    src/Area.cpp
-    src/Area.hpp
-    src/CGALPolygon.cpp
-    src/CGALPolygon.hpp
     src/Clonable.hpp
     src/CollisionGeometry.cpp
     src/CollisionGeometry.hpp
-    src/ConvexPolygon.cpp
-    src/ConvexPolygon.hpp
     src/DTriangulation.cpp
     src/DTriangulation.hpp
     src/Ellipse.cpp
     src/Ellipse.hpp
     src/Enum.hpp
+    src/Events.hpp
     src/GCFMModel.cpp
     src/GCFMModel.hpp
     src/GCFMModelBuilder.cpp
@@ -32,8 +27,8 @@ add_library(simulator STATIC
     src/Graph.hpp
     src/Journey.cpp
     src/Journey.hpp
-    src/Line.cpp
-    src/Line.hpp
+    src/LineSegment.cpp
+    src/LineSegment.hpp
     src/Logger.cpp
     src/Logger.hpp
     src/Macros.hpp
@@ -44,18 +39,25 @@ add_library(simulator STATIC
     src/OperationalModel.hpp
     src/Point.cpp
     src/Point.hpp
+    src/Polygon.cpp
+    src/Polygon.hpp
     src/RoutingEngine.cpp
     src/RoutingEngine.hpp
     src/Simulation.hpp
     src/SimulationClock.cpp
     src/SimulationClock.hpp
+    src/SimulationError.hpp
     src/Stage.cpp
     src/Stage.hpp
     src/StrategicalDesicionSystem.hpp
     src/TacticalDecisionSystem.hpp
+    src/TemplateHelper.hpp
+    src/Tracing.cpp
+    src/Tracing.hpp
     src/Triangle.cpp
     src/Triangle.hpp
     src/UniqueID.hpp
+    src/Util.hpp
     src/VelocityModel.cpp
     src/VelocityModel.hpp
     src/VelocityModelBuilder.cpp
@@ -87,10 +89,10 @@ set_property(TARGET simulator PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 ################################################################################
 if (BUILD_TESTS)
     add_executable(libsimulator-tests
+        test/TestAABB.cpp
         test/TestBasicPrimitiveTests.cpp
-        test/TestCollisionGeometry.cpp
         test/TestGraph.cpp
-        test/TestLine.cpp
+        test/TestLineSegment.cpp
         test/TestNeighborhoodSearch.cpp
         test/TestSimulationClock.cpp
         test/TestUniqueID.cpp

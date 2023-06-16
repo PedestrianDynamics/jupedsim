@@ -63,7 +63,7 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
         if(neighbor->id == agent.id) {
             continue;
         }
-        if(!geometry.IntersectsAny(Line(p1, neighbor->pos))) {
+        if(!geometry.IntersectsAny(LineSegment(p1, neighbor->pos))) {
             F_rep += ForceRepPed(agent, *neighbor);
         }
     }
@@ -271,7 +271,7 @@ inline Point GCFMModel::ForceRepRoom(const Data& ped, const CollisionGeometry& g
     return f;
 }
 
-inline Point GCFMModel::ForceRepWall(const Data& ped, const Line& w) const
+inline Point GCFMModel::ForceRepWall(const Data& ped, const LineSegment& w) const
 {
     Point F = Point(0.0, 0.0);
     Point pt = w.ShortestPoint(ped.pos);
@@ -282,7 +282,7 @@ inline Point GCFMModel::ForceRepWall(const Data& ped, const Line& w) const
     }
     // Kraft soll nur orthgonal wirken
     // ???
-    if(fabs((w.GetPoint1() - w.GetPoint2()).ScalarProduct(ped.pos - pt)) > J_EPS) {
+    if(fabs((w.p1 - w.p2).ScalarProduct(ped.pos - pt)) > J_EPS) {
         return F;
     }
     double mind = 0.5; // for performance reasons this distance is assumed to be constant

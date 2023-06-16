@@ -4,13 +4,6 @@ set -ex
 googletest_version="1.13.0"
 fmt_version="9.1.0"
 boost_version="1.81.0"
-# GLM has removed the cmake install target in 9.9.9.6 for unknown reasons
-# on master the install target has been reintroduced. Instead of manually
-# gatering the headers and static libs or maintaing a patch we will instead use
-# a known good build from master. This is api compatible with 9.9.9.8 so we
-# should(TM) have no issues with Windows.
-glm_version="6ad79aae3eb5bf809c30bf1168171e9e55857e45"
-poly2tri_version="81612cb108b54c14c695808f494f432990b279fd"
 cgal_version="5.5.1"
 pybind11_version="2.10.3"
 install_path=/usr/local
@@ -101,57 +94,6 @@ function setup_fmt {
     rm -rf ${temp_folder}
 }
 
-function setup_glm {
-    root=$(pwd)
-    temp_folder=$(mktemp -d)
-    cd ${temp_folder}
-
-    wget https://github.com/g-truc/glm/archive/${glm_version}.zip
-    unzip ${glm_version}.zip
-    cd glm-${glm_version}
-    mkdir build
-    cd build
-    cmake .. \
-        -DCMAKE_CXX_FLAGS="-fPIC -fvisibility=hidden" \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DBUILD_SHARED_LIBS=OFF \
-        -DBUILD_STATIC_LIBS=ON \
-        -DGLM_TEST_ENABLE=OFF \
-        -DCMAKE_INSTALL_PREFIX=${install_path}
-    cmake --build . --target install -- -j${CPUS}
-
-    cd ${root}
-    rm -rf ${temp_folder}
-}
-
-function setup_poly2tri {
-    root=$(pwd)
-    temp_folder=$(mktemp -d)
-    cd ${temp_folder}
-
-    wget https://github.com/jhasse/poly2tri/archive/${poly2tri_version}.zip
-    unzip ${poly2tri_version}.zip
-    cd poly2tri-${poly2tri_version}
-    mkdir build
-    cd build
-    cmake .. \
-        -DCMAKE_CXX_FLAGS="-fPIC" \
-        -DCMAKE_BUILD_TYPE=Release
-    cmake --build . -- -j${CPUS}
-
-    # Manual install since poly2tri cmake has no install target
-    cp libpoly2tri.a ${install_path}/lib
-
-    header_path=${install_path}/include/poly2tri
-    mkdir -p ${header_path}/{common,sweep}
-    cp ../poly2tri/poly2tri.h ${header_path}
-    cp ../poly2tri/common/*.h ${header_path}/common
-    cp ../poly2tri/sweep/*.h ${header_path}/sweep
-
-    cd ${root}
-    rm -rf ${temp_folder}
-}
-
 function setup_cgal {
     root=$(pwd)
     temp_folder=$(mktemp -d)
@@ -196,7 +138,5 @@ function setup_pybind11 {
 setup_boost
 setup_googletest
 setup_fmt
-setup_glm
-setup_poly2tri
 setup_cgal
 setup_pybind11

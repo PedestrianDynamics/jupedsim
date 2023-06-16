@@ -2,7 +2,7 @@
 /// SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "Line.hpp"
+#include "LineSegment.hpp"
 #include "Macros.hpp"
 #include "Mathematics.hpp"
 

@@ -21,6 +21,21 @@ extern "C" {
 #endif
 
 /**
+ * Contains basic performance trace information
+ */
+typedef struct JPS_Trace {
+    /**
+     * Duration of the iterate call in micorseconds
+     */
+    uint64_t iteration_duration;
+    /**
+     * Duration to compute updates of the operational decision level in micorseconds.
+     * This is fully contained in iterate.
+     */
+    uint64_t operational_level_duration;
+} JPS_Trace;
+
+/**
  * A 2D coordinate. Units are 'meters'
  */
 typedef struct JPS_Point {
@@ -45,6 +60,24 @@ typedef struct JPS_Waypoint {
  * Describes the pedestrian model used in the simulation.
  */
 typedef enum JPS_ModelType { JPS_GCFMModel, JPS_VelocityModel } JPS_ModelType;
+
+/**
+ * Id of a journey.
+ * Zero represents an invalid id.
+ */
+typedef uint64_t JPS_JourneyId;
+
+/**
+ * Index of a stage within a journey.
+ * Note that stage ids are only unique within the journey they refer to.
+ */
+typedef size_t JPS_StageIndex;
+
+/**
+ * Id of an agent.
+ * Zero represents an invalid id.
+ */
+typedef uint64_t JPS_AgentId;
 
 /**
  * Callback type for logging
@@ -274,14 +307,13 @@ JUPEDSIM_API JPS_GeometryBuilder JPS_GeometryBuilder_Create();
  * Multiple accessible areas may overlap, the final accessible area is created by forming the union
  * over all accessible areas.
  * The Union over all accessible areas minus exclusions must form one polygon.
- * @param points pointer to the x/y coordinates for the points describing the polygon. The number of
- *        double values in this array is expected to be 2*pointCount!
+ * @param polygon describing the accessible area.
  * @param pointCount number of points the polygon consists of.
  */
 JUPEDSIM_API void JPS_GeometryBuilder_AddAccessibleArea(
     JPS_GeometryBuilder handle,
-    double* points,
-    size_t pointCount);
+    JPS_Point* polygon,
+    size_t lenPolygon);
 
 /**
  * Adds an accessible area to the geometry.
@@ -291,14 +323,13 @@ JUPEDSIM_API void JPS_GeometryBuilder_AddAccessibleArea(
  * over all exclusion areas.
  * Exclusion areas are subtracted from accessible areas.
  * The Union over all accessible areas minus exclusions must form a single polygon.
- * @param points pointer to the x/y coordinates for the points describing the polygon. The number of
- *        double values in this array is expected to be 2*pointCount!
+ * @param polygon describing the accessible area.
  * @param pointCount number of points the polygon consists of.
  */
 JUPEDSIM_API void JPS_GeometryBuilder_ExcludeFromAccessibleArea(
     JPS_GeometryBuilder handle,
-    double* lineSegments,
-    size_t lineSegmentsCount);
+    JPS_Point* polygon,
+    size_t lenPolygon);
 
 /**
  * Creates a JPS_Geometry from a JPS_GeometryBuilder. After this call the builder still has to be
@@ -319,20 +350,28 @@ JUPEDSIM_API void JPS_GeometryBuilder_Free(JPS_GeometryBuilder handle);
 /**
  * Opaque type that describes a journey
  */
-typedef struct JPS_Journey_t* JPS_Journey;
+typedef struct JPS_Journey_t* JPS_JourneyDescription;
 
 /**
  * Creates an empty journey.
  */
-JUPEDSIM_API JPS_Journey JPS_Journey_Create();
+JUPEDSIM_API JPS_JourneyDescription JPS_JourneyDescription_Create();
 
 /**
  * Extends the journey with a waypoint.
  * @param handle of the journey to extend.
  * @param position of the waypoint.
- * @param distance to the position to count this point as visited.
+ * @param distance to the position to count this point as visited. Needs to be >= 0.
+ * @param[out] stageIndex if not NULL: will be set to the stage index of this stage.
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return sucess if an waypoint could be added to the journey.
  */
-JUPEDSIM_API void JPS_Journey_AddWaypoint(JPS_Journey handle, JPS_Point position, double distance);
+JUPEDSIM_API bool JPS_JourneyDescription_AddWaypoint(
+    JPS_JourneyDescription handle,
+    JPS_Point position,
+    double distance,
+    JPS_StageIndex* stageIndex,
+    JPS_ErrorMessage* errorMessage);
 
 /**
  * Extends the journey with an exit waypoint. When the agent enters the defined polygon and is
@@ -342,26 +381,58 @@ JUPEDSIM_API void JPS_Journey_AddWaypoint(JPS_Journey handle, JPS_Point position
  * @param polygon A CCW convex polygon describing the exit area. Note that agents will move towards
  * the centroid of this area. Do not repeat the first point.
  * @param len_polygon, number of points in the polygon.
+ * @param[out] stageIndex if not NULL: will be set to the stage index of this stage.
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return sucess if an Exit could be added to the journey.
  */
-JUPEDSIM_API void JPS_Journey_AddExit(JPS_Journey handle, JPS_Point* polygon, size_t len_polygon);
+JUPEDSIM_API bool JPS_JourneyDescription_AddExit(
+    JPS_JourneyDescription handle,
+    JPS_Point* polygon,
+    size_t len_polygon,
+    JPS_StageIndex* stageIndex,
+    JPS_ErrorMessage* errorMessage);
+
+/**
+ * Extends the journey with a notifiable waiting set. The waiting set consists of a ordered list of
+ * points. Agents waiting will steer towards the first empty slot in this list.
+ * The waiting set has to contain at least 1 waiting point.
+ * @param handle of the journey to extend.
+ * @param waiting_points the ordered waiting points
+ * @param len_waiting_points number of waiting points
+ * @param[out] stageIndex if not NULL: will be set to the stage index of this stage.
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return success if the stage could be added.
+ */
+JUPEDSIM_API bool JPS_JourneyDescription_AddNotifiableWaitingSet(
+    JPS_JourneyDescription handle,
+    JPS_Point* waiting_points,
+    size_t len_waiting_points,
+    JPS_StageIndex* stageIndex,
+    JPS_ErrorMessage* errorMessage);
+
+/**
+ * Extends the journey with a notifiable queue. The queue consists of a ordered list of
+ * points. Agents waiting will steer towards the first empty slot in this list.
+ * The waiting set has to contain at least 1 waiting point.
+ * @param handle of the journey to extend.
+ * @param waiting_points the ordered waiting points
+ * @param len_waiting_points number of waiting points
+ * @param[out] stageIndex if not NULL: will be set to the stage index of this stage.
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return success if the stage could be added.
+ */
+JUPEDSIM_API bool JPS_JourneyDescription_AddNotifiableQueue(
+    JPS_JourneyDescription handle,
+    JPS_Point* waiting_points,
+    size_t len_waiting_points,
+    JPS_StageIndex* stageIndex,
+    JPS_ErrorMessage* errorMessage);
 
 /**
  * Frees a JPS_Journey.
  * @param handle to the JPS_Journey to free.
  */
-JUPEDSIM_API void JPS_Journey_Free(JPS_Journey handle);
-
-/**
- * Id of a journey.
- * Zero represents an invalid id.
- */
-typedef uint64_t JPS_JourneyId;
-
-/**
- * Id of an agent.
- * Zero represents an invalid id.
- */
-typedef uint64_t JPS_AgentId;
+JUPEDSIM_API void JPS_JourneyDescription_Free(JPS_JourneyDescription handle);
 
 /**
  * Describes parameters of an Agent in GCFMModel
@@ -479,6 +550,25 @@ JPS_VelocityModelAgentIterator_Next(JPS_VelocityModelAgentIterator handle);
  */
 JUPEDSIM_API void JPS_VelocityModelAgentIterator_Free(JPS_VelocityModelAgentIterator handle);
 
+/**
+ * Opaque type of an iterator over agent ids
+ */
+typedef struct JPS_AgentIdIterator_t* JPS_AgentIdIterator;
+
+/**
+ * Access the next element in the iterator.
+ * Calling JPS_AgentIterator_Next repeatedly on a finished iterator is save.
+ * @param handle of the iterator to advance and access
+ * @return an agentId, Zero in case the iterator has reachedits end.
+ */
+JUPEDSIM_API JPS_AgentId JPS_AgentIdIterator_Next(JPS_AgentIdIterator handle);
+
+/**
+ * Free the iterator.
+ * @param handle to the JPS_AgentIterator to free.
+ */
+JUPEDSIM_API void JPS_AgentIdIterator_Free(JPS_AgentIdIterator handle);
+
 /*
  * Opaque type to a Simulator object.
  */
@@ -511,7 +601,7 @@ JUPEDSIM_API JPS_Simulation JPS_Simulation_Create(
  */
 JUPEDSIM_API JPS_JourneyId JPS_Simulation_AddJourney(
     JPS_Simulation handle,
-    JPS_Journey journey,
+    JPS_JourneyDescription journey,
     JPS_ErrorMessage* errorMessage);
 
 /**
@@ -610,6 +700,20 @@ JUPEDSIM_API bool JPS_Simulation_Iterate(JPS_Simulation handle, JPS_ErrorMessage
 JUPEDSIM_API size_t JPS_Simulation_AgentCount(JPS_Simulation handle);
 
 /**
+ * Returns time progressed in the simulation.
+ * @param handle of the simulation
+ * @return seconds elapsed
+ */
+JUPEDSIM_API double JPS_Simulation_ElapsedTime(JPS_Simulation handle);
+
+/**
+ * Returns time simulated per iteration call.
+ * @param handle of the simulation
+ * @return time simulated per iteration call in seconds
+ */
+JUPEDSIM_API double JPS_Simulation_DeltaTime(JPS_Simulation handle);
+
+/**
  * Returns how many iterations have been simulated.
  * @param handle of the simulation
  * @return count of elapsed iterations
@@ -653,10 +757,94 @@ JUPEDSIM_API bool JPS_Simulation_SwitchAgentProfile(
     JPS_ErrorMessage* errorMessage);
 
 /**
+ * Switches the journey and currently selected stage of this agent
+ * @param handle of the Simulation to operate on
+ * @param agentId id of the agent to modify
+ * @param journeyId of the journey to select
+ * @param stageIdx of the stage to select
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return true on success, false on any error, e.g. unknown agent id or profile id
+ */
+JUPEDSIM_API bool JPS_Simulation_SwitchAgentJourney(
+    JPS_Simulation handle,
+    JPS_AgentId agentId,
+    JPS_JourneyId journeyId,
+    JPS_StageIndex stageIdx,
+    JPS_ErrorMessage* errorMessage);
+
+/**
  * Query the pedestrian model used by this simulation.
  * @return the type of pedestrian model used in this simulation instance.
  */
 JUPEDSIM_API JPS_ModelType JPS_Simulation_ModelType(JPS_Simulation handle);
+
+/**
+ * Query the simulation for all agent ids in distance to this point;
+ * @param handle of the Simulation to operate on
+ * @param position to query
+ * @param distance around position
+ * @return iterator containing all agent ids in range
+ */
+JUPEDSIM_API JPS_AgentIdIterator
+JPS_Simulation_AgentsInRange(JPS_Simulation handle, JPS_Point position, double distance);
+
+/**
+ * Query the simulation for all agent ids in the supplied polygon.
+ * @param handle of the Simulation to operate on
+ * @param polygon array of JPS_Points (CCW ordered convex polygon)
+ * @param len_polygon number of points in the polygon
+ * @return iterator over the Ids inside the polygon
+ */
+JUPEDSIM_API JPS_AgentIdIterator
+JPS_Simulation_AgentsInPolygon(JPS_Simulation handle, JPS_Point* polygon, size_t len_polygon);
+
+/**
+ * Tell the simulation to change the state (active/inactive) of a waiting set.
+ * If the specified journey does not contain a waiting set at the specified index the function
+ * returns false and the errorMessage is filled.
+ * @param handle of the Simulation to operate on
+ * @param journeyId journey to modify
+ * @param stageIdx stage to notify, this index has to point to a NotifiableWaitingSet
+ * @param active, new state of the WaitingSet
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return true on success, false on any error, e.g. unknown journeyId
+ */
+JUPEDSIM_API bool JPS_Simulation_ChangeWaitingSetState(
+    JPS_Simulation handle,
+    JPS_JourneyId journeyId,
+    size_t stageIdx,
+    bool active,
+    JPS_ErrorMessage* errorMessage);
+
+/**
+ * Tell the simulation to release `count` many agents from the queue.
+ * @param handle of the Simulation to operate on
+ * @param journeyId journey to modify
+ * @param stageIdx stage to notify, this index has to point to a NotifiableQueue
+ * @param count of agents to release
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return true on success, false on any error, e.g. unknown journeyId
+ */
+JUPEDSIM_API bool JPS_Simulation_PopAgentsFromQueue(
+    JPS_Simulation handle,
+    JPS_JourneyId journeyId,
+    size_t stageIdx,
+    size_t count,
+    JPS_ErrorMessage* errorMessage);
+
+/**
+ * Enable / disable  collection of performance data.
+ * @param handle of the Simulation to operate on
+ * @param status new status to set
+ */
+JUPEDSIM_API void JPS_Simulation_SetTracing(JPS_Simulation handle, bool status);
+
+/**
+ * Read trace data from alst iteration. If tracing is disable all timings will be zero.
+ * @param handle of the Simulation to operate on
+ * @return trace data
+ */
+JUPEDSIM_API JPS_Trace JPS_Simulation_GetTrace(JPS_Simulation handle);
 
 /**
  * Frees a JPS_Simulation.

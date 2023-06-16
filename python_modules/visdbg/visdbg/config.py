@@ -12,6 +12,7 @@ class Colors:
     c = web_color("fbf2c4")
     d = web_color("74a892")
     e = web_color("008585")
+    agent = web_color("ffb366")
 
 
 class ZLayers:
