@@ -168,6 +168,16 @@ PYBIND11_MODULE(py_jupedsim, m)
     py::implicitly_convertible<std::tuple<int, int>, JPS_Point>();
     py::implicitly_convertible<std::tuple<int, double>, JPS_Point>();
     py::implicitly_convertible<std::tuple<double, int>, JPS_Point>();
+
+    py::class_<JPS_Trace>(m, "Trace")
+        .def_readonly("iteration_duration", &JPS_Trace::iteration_duration)
+        .def_readonly("operational_level_duration", &JPS_Trace::operational_level_duration)
+        .def("__repr__", [](const JPS_Trace& t) {
+            return fmt::format(
+                "Trace( Iteration: {:d}us, OperationalLevel {:d}us)",
+                t.iteration_duration,
+                t.operational_level_duration);
+        });
     py::class_<JPS_GCFMModelAgentParameters>(m, "GCFMModelAgentParameters")
         .def(py::init())
         .def_readwrite("speed", &JPS_GCFMModelAgentParameters::speed)
@@ -581,16 +591,20 @@ PYBIND11_MODULE(py_jupedsim, m)
             })
         .def(
             "iterate",
-            [](const JPS_Simulation_Wrapper& simulation) {
+            [](const JPS_Simulation_Wrapper& simulation, size_t count) {
                 JPS_ErrorMessage errorMsg{};
-                auto result = JPS_Simulation_Iterate(simulation.handle, &errorMsg);
-                if(result) {
+                bool iterate_ok = true;
+                for(size_t counter = 0; counter < count && iterate_ok; ++counter) {
+                    iterate_ok = JPS_Simulation_Iterate(simulation.handle, &errorMsg);
+                }
+                if(iterate_ok) {
                     return;
                 }
                 auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
                 JPS_ErrorMessage_Free(errorMsg);
                 throw std::runtime_error{msg};
-            })
+            },
+            py::arg("count") = 1)
         .def(
             "switch_agent_profile",
             [](const JPS_Simulation_Wrapper& w,
@@ -633,6 +647,16 @@ PYBIND11_MODULE(py_jupedsim, m)
             "agent_count",
             [](JPS_Simulation_Wrapper& simulation) {
                 return JPS_Simulation_AgentCount(simulation.handle);
+            })
+        .def(
+            "elapsed_time",
+            [](JPS_Simulation_Wrapper& simulation) {
+                return JPS_Simulation_ElapsedTime(simulation.handle);
+            })
+        .def(
+            "delta_time",
+            [](JPS_Simulation_Wrapper& simulation) {
+                return JPS_Simulation_DeltaTime(simulation.handle);
             })
         .def(
             "iteration_count",
@@ -701,7 +725,15 @@ PYBIND11_MODULE(py_jupedsim, m)
                 auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
                 JPS_ErrorMessage_Free(errorMsg);
                 throw std::runtime_error{msg};
-            });
+            })
+        .def(
+            "set_tracing",
+            [](JPS_Simulation_Wrapper& w, bool status) {
+                JPS_Simulation_SetTracing(w.handle, status);
+            })
+        .def("get_last_trace", [](JPS_Simulation_Wrapper& w) {
+            return JPS_Simulation_GetTrace(w.handle);
+        });
     py::module_ exp = m.def_submodule("experimental", "Experimental API extensions for jupedsim");
     py::class_<JPS_RoutingEngine_Wrapper>(exp, "RoutingEngine")
         .def(py::init([](const JPS_Geometry_Wrapper& geo) {
@@ -730,9 +762,8 @@ PYBIND11_MODULE(py_jupedsim, m)
             })
         .def(
             "is_routable",
-            [](const JPS_RoutingEngine_Wrapper& w, std::tuple<double, double> p) {
-                return JPS_RoutingEngine_IsRoutable(
-                    w.handle, JPS_Point{std::get<0>(p), std::get<1>(p)});
+            [](const JPS_RoutingEngine_Wrapper& w, JPS_Point p) {
+                return JPS_RoutingEngine_IsRoutable(w.handle, p);
             })
         .def(
             "mesh",

@@ -27,8 +27,8 @@ add_library(simulator STATIC
     src/Graph.hpp
     src/Journey.cpp
     src/Journey.hpp
-    src/Line.cpp
-    src/Line.hpp
+    src/LineSegment.cpp
+    src/LineSegment.hpp
     src/Logger.cpp
     src/Logger.hpp
     src/Macros.hpp
@@ -52,6 +52,8 @@ add_library(simulator STATIC
     src/StrategicalDesicionSystem.hpp
     src/TacticalDecisionSystem.hpp
     src/TemplateHelper.hpp
+    src/Tracing.cpp
+    src/Tracing.hpp
     src/Triangle.cpp
     src/Triangle.hpp
     src/UniqueID.hpp
@@ -87,10 +89,10 @@ set_property(TARGET simulator PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 ################################################################################
 if (BUILD_TESTS)
     add_executable(libsimulator-tests
+        test/TestAABB.cpp
         test/TestBasicPrimitiveTests.cpp
-        test/TestCollisionGeometry.cpp
         test/TestGraph.cpp
-        test/TestLine.cpp
+        test/TestLineSegment.cpp
         test/TestNeighborhoodSearch.cpp
         test/TestSimulationClock.cpp
         test/TestUniqueID.cpp

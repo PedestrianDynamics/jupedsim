@@ -21,6 +21,21 @@ extern "C" {
 #endif
 
 /**
+ * Contains basic performance trace information
+ */
+typedef struct JPS_Trace {
+    /**
+     * Duration of the iterate call in micorseconds
+     */
+    uint64_t iteration_duration;
+    /**
+     * Duration to compute updates of the operational decision level in micorseconds.
+     * This is fully contained in iterate.
+     */
+    uint64_t operational_level_duration;
+} JPS_Trace;
+
+/**
  * A 2D coordinate. Units are 'meters'
  */
 typedef struct JPS_Point {
@@ -685,6 +700,20 @@ JUPEDSIM_API bool JPS_Simulation_Iterate(JPS_Simulation handle, JPS_ErrorMessage
 JUPEDSIM_API size_t JPS_Simulation_AgentCount(JPS_Simulation handle);
 
 /**
+ * Returns time progressed in the simulation.
+ * @param handle of the simulation
+ * @return seconds elapsed
+ */
+JUPEDSIM_API double JPS_Simulation_ElapsedTime(JPS_Simulation handle);
+
+/**
+ * Returns time simulated per iteration call.
+ * @param handle of the simulation
+ * @return time simulated per iteration call in seconds
+ */
+JUPEDSIM_API double JPS_Simulation_DeltaTime(JPS_Simulation handle);
+
+/**
  * Returns how many iterations have been simulated.
  * @param handle of the simulation
  * @return count of elapsed iterations
@@ -802,6 +831,20 @@ JUPEDSIM_API bool JPS_Simulation_PopAgentsFromQueue(
     size_t stageIdx,
     size_t count,
     JPS_ErrorMessage* errorMessage);
+
+/**
+ * Enable / disable  collection of performance data.
+ * @param handle of the Simulation to operate on
+ * @param status new status to set
+ */
+JUPEDSIM_API void JPS_Simulation_SetTracing(JPS_Simulation handle, bool status);
+
+/**
+ * Read trace data from alst iteration. If tracing is disable all timings will be zero.
+ * @param handle of the Simulation to operate on
+ * @return trace data
+ */
+JUPEDSIM_API JPS_Trace JPS_Simulation_GetTrace(JPS_Simulation handle);
 
 /**
  * Frees a JPS_Simulation.

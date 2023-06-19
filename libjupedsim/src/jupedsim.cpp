@@ -741,6 +741,20 @@ size_t JPS_Simulation_AgentCount(JPS_Simulation handle)
     return simulation->AgentCount();
 }
 
+double JPS_Simulation_ElapsedTime(JPS_Simulation handle)
+{
+    assert(handle);
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    return simulation->ElapsedTime();
+}
+
+double JPS_Simulation_DeltaTime(JPS_Simulation handle)
+{
+    assert(handle);
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    return simulation->DT();
+}
+
 uint64_t JPS_Simulation_IterationCount(JPS_Simulation handle)
 {
     assert(handle);
@@ -901,7 +915,8 @@ bool JPS_Simulation_ChangeWaitingSetState(
     }
     return true;
 }
-JUPEDSIM_API bool JPS_Simulation_PopAgentsFromQueue(
+
+bool JPS_Simulation_PopAgentsFromQueue(
     JPS_Simulation handle,
     JPS_JourneyId journeyId,
     size_t stageIdx,
@@ -919,6 +934,21 @@ JUPEDSIM_API bool JPS_Simulation_PopAgentsFromQueue(
         return false;
     }
     return true;
+}
+
+void JPS_Simulation_SetTracing(JPS_Simulation handle, bool status)
+{
+    assert(handle);
+    auto simuation = reinterpret_cast<Simulation*>(handle);
+    simuation->SetTracing(status);
+}
+
+JPS_Trace JPS_Simulation_GetTrace(JPS_Simulation handle)
+{
+    assert(handle);
+    auto simuation = reinterpret_cast<Simulation*>(handle);
+    const auto stats = simuation->GetLastStats();
+    return JPS_Trace{stats.IterationDuration(), stats.OpDecSystemRunDuration()};
 }
 
 void JPS_Simulation_Free(JPS_Simulation handle)

@@ -37,7 +37,7 @@ class ViewGeometryWidget(QWidget):
         reset_cam_bt = QPushButton("Reset Camera")
         layout.addWidget(reset_cam_bt)
 
-        self.geo_widget = RenderWidget(navi, [geo])
+        self.geo_widget = RenderWidget(geo, navi, [geo])
         layout.addWidget(self.geo_widget)
 
         self.hover_label = QLabel("")
@@ -48,3 +48,4 @@ class ViewGeometryWidget(QWidget):
         self.setLayout(layout)
 
         reset_cam_bt.clicked.connect(self.geo_widget.reset_camera)
+        self.geo_widget.on_hover_triangle.connect(self.hover_label.setText)

@@ -5,8 +5,10 @@ import logging
 import pathlib
 
 import py_jupedsim as jps
-from jupedsim.serialization import JpsCoreStyleTrajectoryWriter
 from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
+from jupedsim.util import build_jps_geometry
+from shapely import GeometryCollection, Polygon, geometry, to_wkt
+from shapely.geometry.base import geom_factory
 
 
 def log_debug(msg):
@@ -34,10 +36,10 @@ def main():
     jps.set_warning_callback(log_warn)
     jps.set_error_callback(log_error)
 
-    geo_builder = jps.GeometryBuilder()
-    geo_builder.add_accessible_area([(0, 0), (10, 0), (10, 10), (0, 10)])
-    geo_builder.add_accessible_area([(10, 4), (20, 4), (20, 6), (10, 6)])
-    geometry = geo_builder.build()
+    p1 = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+    p2 = Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
+    area = GeometryCollection(p1.union(p2))
+    geometry = build_jps_geometry(area)
 
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
@@ -69,22 +71,16 @@ def main():
 
     print("Running simulation")
 
-    writers = [
-        JpsCoreStyleTrajectoryWriter(pathlib.Path("out.txt")),
-        SqliteTrajectoryWriter(pathlib.Path("out.sqlite")),
-    ]
-    for writer in writers:
-        writer.begin_writing(10)
+    writer = SqliteTrajectoryWriter(pathlib.Path("example1_out.sqlite"))
+    writer.begin_writing(10, to_wkt(area, rounding_precision=-1))
 
     while simulation.agent_count() > 0:
         simulation.iterate()
         if simulation.iteration_count() % 4 == 0:
-            for writer in writers:
-                writer.write_iteration_state(simulation)
+            writer.write_iteration_state(simulation)
         if simulation.iteration_count() == 1300:
             simulation.notify_waiting_set(journey_id, stage, False)
-    for writer in writers:
-        writer.end_writing()
+    writer.end_writing()
     print(
         f"Simulation completed after {simulation.iteration_count()} iterations"
     )

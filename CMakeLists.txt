@@ -35,9 +35,6 @@ check_prefix_path()
 set(WERROR OFF CACHE BOOL "Build wth -Werror enabled. Not supported on Windows")
 print_var(WERROR)
 
-set(BUILD_JPSVIS ON CACHE BOOL "Build jpsvis gui application")
-print_var(BUILD_JPSVIS)
-
 set(BUILD_TESTS OFF CACHE BOOL "Build tests")
 print_var(BUILD_TESTS)
 
@@ -91,81 +88,12 @@ if(UNIX)
 endif()
 find_package(CGAL 5.4 REQUIRED)
 
-if(UNIX)
-    find_library(POLY2TRI_LIB poly2tri REQUIRED)
-    find_path(POLY2TRI_HEADER poly2tri.h
-        REQUIRED
-        PATH_SUFFIXES poly2tri
-    )
-    add_library(poly2tri UNKNOWN IMPORTED)
-    set_target_properties(poly2tri PROPERTIES
-        IMPORTED_LOCATION ${POLY2TRI_LIB}
-    )
-    target_include_directories(poly2tri INTERFACE
-        ${POLY2TRI_HEADER}/..
-    )
-else()
-    find_library(
-        POLY2TRI_LIB_RELEASE poly2tri
-        REQUIRED
-    )
-    get_filename_component(path ${POLY2TRI_LIB_RELEASE} DIRECTORY)
-    list(APPEND paths 
-        "${path}/../debug/lib"
-    )
-    find_library(
-        POLY2TRI_LIB_DEBUG poly2tri
-        PATH_SUFFIXES "debug" "debug/lib"
-        PATHS ${paths}
-        NO_DEFAULT_PATH
-    )
-    find_path(POLY2TRI_HEADER poly2tri.h
-        PATH_SUFFIXES poly2tri
-        REQUIRED
-    )
-    add_library(poly2tri UNKNOWN IMPORTED)
-    set_target_properties(poly2tri PROPERTIES
-        IMPORTED_LOCATION_DEBUG ${POLY2TRI_LIB_DEBUG}
-        IMPORTED_LOCATION_RELEASE ${POLY2TRI_LIB_RELEASE}
-        IMPORTED_CONFIGURATIONS "RELEASE;DEBUG"
-    )
-    target_include_directories(poly2tri INTERFACE
-        ${POLY2TRI_HEADER}/..
-    )
-endif()
+add_subdirectory(third-party/poly2tri)
 
 set(Python_FIND_VIRTUALENV "FIRST")
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11 REQUIRED CONFIG)
 
-if(BUILD_JPSVIS)
-    find_package(glm REQUIRED CONFIG)
-    find_package(VTK 9.0
-        COMPONENTS
-            CommonCore
-            opengl
-            RenderingQt
-            RenderingCore
-            GUISupportQt
-            RenderingUI
-            InteractionStyle
-            RenderingAnnotation
-            IOImage
-        REQUIRED CONFIG
-    )
-    find_package(
-        Qt5 5.12
-        COMPONENTS Widgets Xml Core Gui
-        REQUIRED
-    )
-    list(APPEND CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_SOURCE_DIR}/forms")
-    set(CMAKE_AUTOUIC ON)
-    set(CMAKE_AUTOMOC ON)
-    set(CMAKE_AUTORCC ON)
-    # remaining in-tree dependencies
-    # only tinyxml at this point
-    add_subdirectory(third-party)
-endif()
 if(BUILD_TESTS)
     find_package(GTest REQUIRED CONFIG)
 endif()
@@ -233,6 +161,9 @@ target_compile_definitions(git-info INTERFACE
     GIT_BRANCH="${GIT_BRANCH}"
 )
 configure_file(cmake_templates/BuildInfo.cpp.in ${CMAKE_BINARY_DIR}/generated/BuildInfo.cpp @ONLY)
+if(UNIX)
+    configure_file(cmake_templates/unix_env.in ${CMAKE_BINARY_DIR}/environment @ONLY)
+endif()
 ################################################################################
 # Documentation
 ################################################################################
@@ -321,9 +252,6 @@ endif()
 ################################################################################
 # Add libraries / executables
 ################################################################################
-if(BUILD_JPSVIS)
-    add_subdirectory(jpsvis)
-endif()
 add_subdirectory(libjupedsim)
 add_subdirectory(libsimulator)
 add_subdirectory(python_bindings_jupedsim)

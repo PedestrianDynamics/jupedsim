@@ -54,7 +54,7 @@ class Recording:
         xmax = float(res.fetchone()[0])
         res = cur.execute("SELECT value FROM metadata WHERE key == 'ymin'")
         ymin = float(res.fetchone()[0])
-        res = cur.execute("SELECT value FROM metadata WHERE key == 'xmax'")
+        res = cur.execute("SELECT value FROM metadata WHERE key == 'ymax'")
         ymax = float(res.fetchone()[0])
         return AABB(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 

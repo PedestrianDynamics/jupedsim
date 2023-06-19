@@ -64,6 +64,9 @@ __pycache__/
 *.out
 *.app
 
+# example results
+*.sqlite
+
 # Hidden files
 .*
 !/.gitignore
