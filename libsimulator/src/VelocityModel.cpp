@@ -132,16 +132,7 @@ my_pair VelocityModel::GetSpacing(const Data& ped1, const Data& ped2, Point ei) 
     const double distance = distp12.Norm();
     const double l = 2 * parameterProfile(ped1.parameterProfileId).radius;
     Point ep12;
-    if(distance >= J_EPS) {
-        ep12 = distp12.Normalized();
-    } else {
-        LOG_WARNING(
-            "VelocityModel::GetSPacing() ep12 can not be calculated! Pedestrians are to close "
-            "to "
-            "each other ({:f})",
-            distance);
-        exit(EXIT_FAILURE); // TODO
-    }
+    ep12 = distp12.Normalized();
 
     double condition1 = ei.ScalarProduct(ep12); // < e_i , e_ij > should be positive
     double condition2 =
@@ -165,24 +156,7 @@ Point VelocityModel::ForceRepPed(const Data& ped1, const Data& ped2) const
     double R_ij;
     double l = 2 * parameterProfile(ped1.parameterProfileId).radius;
 
-    if(Distance >= J_EPS) {
-        ep12 = distp12.Normalized();
-    } else {
-        LOG_ERROR(
-            "VelocityModel::forcePedPed() ep12 can not be calculated! Pedestrians are too near "
-            "to "
-            "each other (dist={:f}). Adjust <a> value in force_ped to counter this. Affected "
-            "pedestrians ped1 {} at ({:f},{:f}) and ped2 {} at ({:f}, {:f})",
-            Distance,
-            ped1.id,
-            ped1.pos.x,
-            ped1.pos.y,
-            ped2.id,
-            ped2.pos.x,
-            ped2.pos.y);
-        exit(EXIT_FAILURE); // TODO: quick and dirty fix for issue #158
-                            //  (sometimes sources create peds on the same location)
-    }
+    ep12 = distp12.Normalized();
     Point ei = ped1.orientation;
     double condition1 = ei.ScalarProduct(ep12); // < e_i , e_ij > should be positive
     condition1 = (condition1 > 0) ? condition1 : 0; // abs
