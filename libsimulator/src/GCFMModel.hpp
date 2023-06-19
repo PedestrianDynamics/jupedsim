@@ -72,6 +72,9 @@ public:
         const CollisionGeometry& geometry,
         const NeighborhoodSearchType& neighborhoodSearch) const;
     void ApplyUpdate(const PedestrianUpdate& upate, Data& agent) const;
+    void CheckDistanceConstraint(
+        const Data& agent,
+        const NeighborhoodSearchType& neighborhoodSearch) const;
     std::unique_ptr<OperationalModel> Clone() const override;
     OperationalModel::ParametersID AddParameterProfile(GCFMModelAgentParameters parameters);
 
@@ -121,4 +124,5 @@ private:
         double d,
         double r,
         double l) const;
+    double AgentToAgentSpacing(const Data& agent, const Data& otherAgent) const;
 };

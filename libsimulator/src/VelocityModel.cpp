@@ -7,6 +7,8 @@
 #include "Mathematics.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
+#include "SimulationError.hpp"
+#include "Stage.hpp"
 
 #include <Logger.hpp>
 #include <memory>
@@ -92,6 +94,23 @@ void VelocityModel::ApplyUpdate(const PedestrianUpdate& update, Data& agent) con
         }
     }
 }
+void VelocityModel::CheckDistanceConstraint(
+    const Data& agent,
+    const NeighborhoodSearchType& neighborhoodSearch) const
+{
+    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
+    const auto r = parameterProfile(agent.parameterProfileId).radius;
+    for(const auto& neighbor : neighbors) {
+        const auto contanctdDist = r + parameterProfile(neighbor->parameterProfileId).radius;
+        const auto distance = (agent.pos - neighbor->pos).Norm();
+        if(contanctdDist >= distance) {
+            throw SimulationError(
+                "Model constraint violation: Agent {} too close to agent {}",
+                agent.id,
+                neighbor->id);
+        }
+    }
+}
 
 std::unique_ptr<OperationalModel> VelocityModel::Clone() const
 {
@@ -120,8 +139,6 @@ double VelocityModel::OptimalSpeed(const Data& ped, double spacing, double t) co
     double speed = (spacing - l) / t;
     speed = (speed > 0) ? speed : 0;
     speed = (speed < profile.v0) ? speed : profile.v0;
-    //      (1-winkel)*speed;
-    // todo use winkel
     return speed;
 }
 
