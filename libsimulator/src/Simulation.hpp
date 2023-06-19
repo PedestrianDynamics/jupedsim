@@ -160,9 +160,8 @@ template <typename T>
 void TypedSimulation<T>::Iterate()
 {
     auto t = _perfStats.TraceIterate();
-
-    _neighborhoodSearch.Update(_agents);
     _agentExitSystem.Run(_agents, _removedAgentsInLastIteration);
+    _neighborhoodSearch.Update(_agents);
 
     for(auto& [_, j] : _journeys) {
         j->Update(_neighborhoodSearch);
@@ -192,12 +191,14 @@ template <typename T>
 GenericAgent::ID TypedSimulation<T>::AddAgent(AgentType&& agent)
 {
     agent.orientation = agent.orientation.Normalized();
+    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch);
 
     if(_journeys.count(agent.journeyId) == 0) {
         throw SimulationError("Unknown journey id: {}", agent.journeyId);
     }
 
     _agents.emplace_back(std::move(agent));
+    _neighborhoodSearch.Update(_agents);
     return _agents.back().id.getID();
 }
 
@@ -289,7 +290,6 @@ void TypedSimulation<T>::SwitchAgentJourney(
 template <typename T>
 std::vector<GenericAgent::ID> TypedSimulation<T>::AgentsInRange(Point p, double distance)
 {
-    _neighborhoodSearch.Update(_agents);
     const auto neighbors = _neighborhoodSearch.GetNeighboringAgents(p, distance);
 
     std::vector<GenericAgent::ID> neighborIds{};
@@ -305,7 +305,6 @@ std::vector<GenericAgent::ID> TypedSimulation<T>::AgentsInRange(Point p, double 
 template <typename T>
 std::vector<GenericAgent::ID> TypedSimulation<T>::AgentsInPolygon(const std::vector<Point>& polygon)
 {
-    _neighborhoodSearch.Update(_agents);
     const Polygon poly{polygon};
     if(!poly.IsConvex()) {
         throw SimulationError("Polygon needs to be simple and convex");
