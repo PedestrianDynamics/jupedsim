@@ -1,12 +1,13 @@
 import ezdxf
+import matplotlib.pyplot
 from shapely import LineString, Polygon, polygonize, to_wkt, GeometryCollection
 import matplotlib.pyplot as plt
 import geopandas as gpd
-
-
+import logging
 class IncorrectDXFFile(Exception):
-    def __init__(self, message):
+    def __init__(self, message, geometries=None):
         self.message = message
+        self.geometries = geometries
         super().__init__(self.message)
 
 
@@ -42,8 +43,8 @@ def polyline_to_polygon(polyline):
     for point in polyline.get_points():
         points.append([point[0], point[1]])
     if len(points) < 3:
-        # polyline has at most 2 points and can not be a Polygon
-        raise IncorrectDXFFile(f"the polyline {points} can not be converted to a Polygon")
+        logging.error("a polyline has at most 2 points and can not be a Polygon")
+        raise IncorrectDXFFile(f"a polyline could not be converted to a Polygon", [points])
     return Polygon(points)
 
 
@@ -54,11 +55,11 @@ def parse_dxf_file(dxf_path, outer_line_layer, hole_layers):
     @param hole_layers: a list with all layer names in the dxf-file where holes are defined
     @return: shapely polygon containing polygon from dxf-file
     """
+
     holes = []
     outer_lines = []
     # Open the DXF file
     doc = ezdxf.readfile(dxf_path)
-
     # Access the model (modelspace)
     msp = doc.modelspace()
 
@@ -70,12 +71,11 @@ def parse_dxf_file(dxf_path, outer_line_layer, hole_layers):
             elif entity.dxf.layer == outer_line_layer:
                 outer_lines.append(polyline_to_linestring(entity))
         elif entity.dxftype() != "INSERT":
-            # todo: log a warning instead of print
-            print("entity type:", entity.dxftype())
+            logging.warning(f"there is an entity of type {entity.dxftype()} defined which will not be parsed")
+            print("there is a entity of unknow type")
 
     # create a polygon from all outer lines (only works if outer_lines is one polyline)
     outer_polygon = Polygon(outer_lines[0].coords)
-    plot_polygon(outer_polygon)
 
     # separate simple and not simple holes
     simple_holes = []
@@ -84,8 +84,8 @@ def parse_dxf_file(dxf_path, outer_line_layer, hole_layers):
         simple_holes.append(hole) if hole.is_simple else other_holes.append(hole)
 
     if len(other_holes) > 0:
-        # todo: exception handling
-        print(f"there are {len(other_holes)} not simple polygons left")
+        logging.error(f"{len(other_holes)} not simple polygons were parsed. These are not supported.")
+        raise IncorrectDXFFile("The file contained at least one not simple Polygon.", other_holes)
 
     # create new Polygon with holes
     simple_holes = polygonize(simple_holes)
@@ -93,12 +93,14 @@ def parse_dxf_file(dxf_path, outer_line_layer, hole_layers):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     file_name = "SiB2023_entrance_jupedsim.dxf"
     outer_layer = "jupedsim_walkable_area"
     inner_layers = ["jupedsim_holes", "entranceGates"]
     merged_polygon = parse_dxf_file(file_name, outer_layer, inner_layers)
-
     # plot final Polygon
+    logging.basicConfig(level=logging.WARNING)
+    matplotlib.pyplot.set_loglevel("warning")
     plot_polygon(merged_polygon)
     # now cast to wkt and write into a file
     out_file_name = "entrance_jupedsim.wkt"
