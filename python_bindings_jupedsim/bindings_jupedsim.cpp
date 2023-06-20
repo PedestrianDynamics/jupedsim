@@ -580,6 +580,8 @@ PYBIND11_MODULE(py_jupedsim, m)
                         throw std::runtime_error{msg};
                         break;
                     }
+                    default:
+                        throw std::runtime_error{"Unknown Model Type"};
                 }
             })
         .def(
@@ -677,6 +679,8 @@ PYBIND11_MODULE(py_jupedsim, m)
                     case JPS_VelocityModel:
                         return Iterators{std::make_unique<JPS_VelocityModelAgentIterator_Wrapper>(
                             JPS_Simulation_VelocityModelAgentIterator(simulation.handle))};
+                    default:
+                        throw std::runtime_error{"Unknown Model Type"};
                 }
             })
         .def(
