@@ -91,6 +91,7 @@ if (BUILD_TESTS)
     add_executable(libsimulator-tests
         test/TestAABB.cpp
         test/TestBasicPrimitiveTests.cpp
+        test/TestCollisionGeometry.cpp
         test/TestGraph.cpp
         test/TestLineSegment.cpp
         test/TestNeighborhoodSearch.cpp

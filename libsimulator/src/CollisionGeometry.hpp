@@ -2,6 +2,7 @@
 /// SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "HashCombine.hpp"
 #include "IteratorPair.hpp"
 #include "LineSegment.hpp"
 
@@ -63,10 +64,37 @@ public:
     const T& operator*() const { return *_current; }
 };
 
+/// Encodes a cell in the geometry grid.
+/// Cells are defined on the intervalls [min.x, min.x + extend), [min.y, min.y + extend)
+const int CELL_EXTEND = 4;
+using Cell = Point;
+
+/// Checks if two Cells are N8 neighbors. 'a' and 'b' are not considered neighbors if they have the
+/// same coordinates.
+bool IsN8Adjacent(const Cell& a, const Cell& b);
+
+/// Creates a cell from a position.
+/// Cells are always alligned to multiples of CELL_EXTEND. Cells are defined in worldcoordinates NOT
+/// indices.
+Cell makeCell(Point p);
+
+template <>
+struct std::hash<Cell> {
+    std::size_t operator()(const Point& pos) const noexcept
+    {
+        std::hash<std::int32_t> hasher{};
+        return jps::hash_combine(hasher(pos.x), hasher(pos.y));
+    }
+};
+
+/// Creates all cells that are trouched by the linesegment
+std::set<Cell> cellsFromLineSegment(LineSegment ls);
+
 class CollisionGeometry
 {
     PolyWithHoles _accessibleArea;
     std::vector<LineSegment> _segments;
+    std::unordered_map<Cell, std::set<LineSegment>> _grid{};
 
 public:
     using LineSegmentRange = IteratorPair<DistanceQueryIterator<LineSegment>>;

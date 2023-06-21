@@ -2,8 +2,6 @@
 /// SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include <boost/geometry.hpp>
-#include <boost/geometry/geometries/register/point.hpp>
 #include <fmt/format.h>
 
 #include <cmath>
@@ -73,15 +71,7 @@ public:
     bool operator<=(const Point& rhs) const;
 
     bool operator>=(const Point& rhs) const;
-
-    /**
-     * @param [in/out] ostream& : ostream to write the point as xml-format into
-     * @return the given ostream with point as xml-format written into
-     */
-    std::ostream& SaveToXml(std::ostream&) const;
 };
-
-BOOST_GEOMETRY_REGISTER_POINT_2D(Point, double, cs::cartesian, x, y);
 
 /**
  * Calculates the distance between the 2 given points.
@@ -104,22 +94,11 @@ template <>
 struct fmt::formatter<Point> {
     char presentation{'f'};
 
-    constexpr auto parse(format_parse_context& ctx)
-    {
-        auto it = ctx.begin(), end = ctx.end();
-        if(it != end && (*it == 'f' || *it == 'e')) {
-            presentation = *it++;
-        }
-        if(it != end && *it != '}') {
-            throw format_error("invalid format");
-        }
-        return it;
-    }
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
     template <typename FormatContext>
     auto format(const Point& p, FormatContext& ctx) const
     {
-        return presentation == 'f' ? fmt::format_to(ctx.out(), "({:f}, {:f})", p.x, p.y) :
-                                     fmt::format_to(ctx.out(), "({:e}, {:e})", p.x, p.y);
+        return fmt::format_to(ctx.out(), "({}, {})", p.x, p.y);
     }
 };
