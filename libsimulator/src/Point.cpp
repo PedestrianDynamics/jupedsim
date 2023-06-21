@@ -195,12 +195,6 @@ const Point operator/(const Point& p, double f)
     }
 }
 
-std::ostream& Point::SaveToXml(std::ostream& ostream) const
-{
-    ostream << "<vertex px=" << x << " py=" << y << " />" << std::endl;
-    return ostream;
-}
-
 bool Point::operator<(const Point& rhs) const
 {
     if(*this != *this || rhs != rhs)
@@ -229,10 +223,10 @@ bool Point::operator>=(const Point& rhs) const
 
 double Distance(const Point& point1, const Point& point2)
 {
-    return boost::geometry::distance(point1, point2);
+    return (point1 - point2).Norm();
 }
 
 std::ostream& operator<<(std::ostream& out, const Point& p)
 {
-    return out << "[" << p.x << ", " << p.y << "]";
+    return out << fmt::format("{}", p);
 }
