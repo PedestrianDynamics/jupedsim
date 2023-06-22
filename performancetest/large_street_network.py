@@ -225,7 +225,7 @@ def main():
 
     start_time = time.perf_counter_ns()
     iteration = simulation.iteration_count()
-    while iteration < args.limit:
+    while args.limit == 0 or iteration < args.limit:
         try:
             for s in spawners:
                 s.spawn(iteration)
