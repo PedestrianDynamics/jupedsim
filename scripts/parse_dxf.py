@@ -1,9 +1,11 @@
 import ezdxf
 import matplotlib.pyplot
-from shapely import LineString, Polygon, polygonize, to_wkt, GeometryCollection
+from shapely import LineString, Polygon, Point, polygonize, to_wkt, GeometryCollection
 import matplotlib.pyplot as plt
 import geopandas as gpd
 import logging
+
+
 class IncorrectDXFFile(Exception):
     def __init__(self, message, geometries=None):
         self.message = message
@@ -29,8 +31,15 @@ def plot_polygon(polygon):
     plt.show()
 
 
+def line_to_linestring(line):
+    """converts an entity with dxftype line to a shapely Linestring"""
+    start_point = line.dxf.start
+    end_point = line.dxf.end
+    return LineString([(start_point[0], start_point[1]), (end_point[0], end_point[1])])
+
+
 def polyline_to_linestring(polyline):
-    """converts a entity with dxftype polyline to a shapely Linestring"""
+    """converts an entity with dxftype polyline to a shapely Linestring"""
     points = []
     for point in polyline.get_points():
         points.append([point[0], point[1]])
@@ -38,7 +47,7 @@ def polyline_to_linestring(polyline):
 
 
 def polyline_to_polygon(polyline):
-    """converts a entity with dxftype polyline to a shapely Polygon"""
+    """converts an entity with dxftype polyline to a shapely Polygon"""
     points = []
     for point in polyline.get_points():
         points.append([point[0], point[1]])
@@ -48,6 +57,13 @@ def polyline_to_polygon(polyline):
     return Polygon(points)
 
 
+def dxf_circle_to_shply(dxf_circle):
+    """converts an entity with dxftype circle to a shapely Point with buffer"""
+    pt = dxf_circle.dxf.center
+    radius = dxf_circle.dxf.radius
+    return Point(pt).buffer(radius)
+
+
 def parse_dxf_file(dxf_path, outer_line_layer, hole_layers):
     """ parses a dxf-file and creates a Polygon with the structure of the file
     @param dxf_path: Path to the DXF file
@@ -55,7 +71,6 @@ def parse_dxf_file(dxf_path, outer_line_layer, hole_layers):
     @param hole_layers: a list with all layer names in the dxf-file where holes are defined
     @return: shapely polygon containing polygon from dxf-file
     """
-
     holes = []
     outer_lines = []
     # Open the DXF file
@@ -65,17 +80,38 @@ def parse_dxf_file(dxf_path, outer_line_layer, hole_layers):
 
     # Iterate over all entities in the model
     for entity in msp:
-        if entity.dxftype() == "LWPOLYLINE":
+        if entity.dxftype() == "LINE":
+            if entity.dxf.layer == outer_line_layer:
+                # outer_lines.append(line_to_linestring(entity))
+                logging.error("there is a Line defined in the outer layer. this feature is not implemented yet")
+            else:
+                logging.warning(f"there is a Line defined in Layer {entity.dxf.layer} "
+                                f"from {entity.dxf.start} to {entity.dxf.end}."
+                                f" This is not valid and will be ignored")
+        elif entity.dxftype() == "LWPOLYLINE":
             if entity.dxf.layer in hole_layers:
                 holes.append(polyline_to_polygon(entity))
             elif entity.dxf.layer == outer_line_layer:
+                if not entity.closed:
+                    logging.error("the outer polygon is not closed. this may cause issues creating the polygon")
                 outer_lines.append(polyline_to_linestring(entity))
+        elif entity.dxftype() == "CIRCLE":
+            if entity.dxf.layer in hole_layers:
+                holes.append(dxf_circle_to_shply(entity))
+            else:
+                logging.warning(f"there is a circle defined in Layer {entity.dxf.layer} at {entity.dxf.center}."
+                                f" This is not valid and will be ignored")
+
         elif entity.dxftype() != "INSERT":
             logging.warning(f"there is an entity of type {entity.dxftype()} defined which will not be parsed")
-            print("there is a entity of unknow type")
 
+    if len(outer_lines) != 1:
+        raise IncorrectDXFFile("The Layer containing the outer Polygon does not contain exactly one element."
+                               " This is required", outer_lines)
     # create a polygon from all outer lines (only works if outer_lines is one polyline)
     outer_polygon = Polygon(outer_lines[0].coords)
+    # this does not work but would be the better implementation
+    # outer_polygon = polygonize(outer_lines)
 
     # separate simple and not simple holes
     simple_holes = []
@@ -89,6 +125,7 @@ def parse_dxf_file(dxf_path, outer_line_layer, hole_layers):
 
     # create new Polygon with holes
     simple_holes = polygonize(simple_holes)
+    logging.debug(f"the Polygon was parsed")
     return outer_polygon.difference(simple_holes)
 
 
