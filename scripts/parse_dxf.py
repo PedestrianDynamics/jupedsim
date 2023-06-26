@@ -57,18 +57,22 @@ def polyline_to_polygon(polyline):
     return Polygon(points)
 
 
-def dxf_circle_to_shply(dxf_circle):
-    """converts an entity with dxftype circle to a shapely Point with buffer"""
+def dxf_circle_to_shply(dxf_circle, quad_segs=8):
+    """converts an entity with dxftype circle to a shapely Point with buffer
+    @param dxf_circle: an entity with dxf-type circle
+    @param quad_segs: Sets the number of line segments used to approximate an angle fillet"""
     pt = dxf_circle.dxf.center
     radius = dxf_circle.dxf.radius
-    return Point(pt).buffer(radius)
+    return Point(pt).buffer(radius, quad_segs)
 
 
-def parse_dxf_file(dxf_path, outer_line_layer, hole_layers):
+def parse_dxf_file(dxf_path, outer_line_layer, hole_layers, circle_accuracy=8):
     """ parses a dxf-file and creates a Polygon with the structure of the file
     @param dxf_path: Path to the DXF file
     @param outer_line_layer: the name of the layer in the dxf-file where the outer polygon is defined
     @param hole_layers: a list with all layer names in the dxf-file where holes are defined
+    @param circle_accuracy: The accuracy of the circle, specified as the number of line segments
+                         used to approximate a circle. By default, `circle_accuracy` is set to 8.
     @return: shapely polygon containing polygon from dxf-file
     """
     holes = []
@@ -97,7 +101,7 @@ def parse_dxf_file(dxf_path, outer_line_layer, hole_layers):
                 outer_lines.append(polyline_to_linestring(entity))
         elif entity.dxftype() == "CIRCLE":
             if entity.dxf.layer in hole_layers:
-                holes.append(dxf_circle_to_shply(entity))
+                holes.append(dxf_circle_to_shply(entity, circle_accuracy))
             else:
                 logging.warning(f"there is a circle defined in Layer {entity.dxf.layer} at {entity.dxf.center}."
                                 f" This is not valid and will be ignored")
@@ -130,14 +134,15 @@ def parse_dxf_file(dxf_path, outer_line_layer, hole_layers):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.DEBUG)
     file_name = "SiB2023_entrance_jupedsim.dxf"
     outer_layer = "jupedsim_walkable_area"
     inner_layers = ["jupedsim_holes", "entranceGates"]
     merged_polygon = parse_dxf_file(file_name, outer_layer, inner_layers)
     # plot final Polygon
-    logging.basicConfig(level=logging.WARNING)
     matplotlib.pyplot.set_loglevel("warning")
+    logger = logging.getLogger('PIL.PngImagePlugin')
+    logger.setLevel(logging.WARNING)
     plot_polygon(merged_polygon)
     # now cast to wkt and write into a file
     out_file_name = "entrance_jupedsim.wkt"
