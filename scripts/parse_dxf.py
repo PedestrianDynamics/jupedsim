@@ -22,7 +22,7 @@ def save_as_wkt(geometry, out_file):
     geomery_collection = GeometryCollection(geometry)
     with open(out_file_name, 'w') as out:
         out.write(to_wkt(geomery_collection, rounding_precision=-1))
-
+    logging.debug(f"wkt was written into {out_file_name}")
 
 def plot_polygon(polygon):
     """plots a polygon with its interior in matplotlib"""
@@ -38,11 +38,21 @@ def line_to_linestring(line):
     return LineString([(start_point[0], start_point[1]), (end_point[0], end_point[1])])
 
 
+def multipolygon_to_list(multipolygon):
+    """converts a multipolygon to a list of polygons"""
+    return [poly for poly in multipolygon.geoms]
+
+
 def polyline_to_linestring(polyline):
     """converts an entity with dxftype polyline to a shapely Linestring"""
     points = []
     for point in polyline.get_points():
         points.append([point[0], point[1]])
+
+    # if the polyline is closed this resembles a polygon
+    # to create a closed shapely linestring the last point must correspond to the first point
+    if polyline.closed:
+        points.append(points[0])
     return LineString(points)
 
 
@@ -51,6 +61,7 @@ def polyline_to_polygon(polyline):
     points = []
     for point in polyline.get_points():
         points.append([point[0], point[1]])
+
     if len(points) < 3:
         logging.error("a polyline has at most 2 points and can not be a Polygon")
         raise IncorrectDXFFile(f"a polyline could not be converted to a Polygon", [points])
@@ -67,13 +78,13 @@ def dxf_circle_to_shply(dxf_circle, quad_segs=8):
 
 
 def parse_dxf_file(dxf_path, outer_line_layer, hole_layers, circle_accuracy=8):
-    """ parses a dxf-file and creates a Polygon with the structure of the file
+    """ parses a dxf-file and creates a shapely structure resembling the file
     @param dxf_path: Path to the DXF file
     @param outer_line_layer: the name of the layer in the dxf-file where the outer polygon is defined
     @param hole_layers: a list with all layer names in the dxf-file where holes are defined
     @param circle_accuracy: The accuracy of the circle, specified as the number of line segments
                          used to approximate a circle. By default, `circle_accuracy` is set to 8.
-    @return: shapely polygon containing polygon from dxf-file
+    @return: shapely polygon or multipolygon from dxf-file
     """
     holes = []
     outer_lines = []
@@ -84,20 +95,14 @@ def parse_dxf_file(dxf_path, outer_line_layer, hole_layers, circle_accuracy=8):
 
     # Iterate over all entities in the model
     for entity in msp:
-        if entity.dxftype() == "LINE":
-            if entity.dxf.layer == outer_line_layer:
-                # outer_lines.append(line_to_linestring(entity))
-                logging.error("there is a Line defined in the outer layer. this feature is not implemented yet")
-            else:
-                logging.warning(f"there is a Line defined in Layer {entity.dxf.layer} "
-                                f"from {entity.dxf.start} to {entity.dxf.end}."
-                                f" This is not valid and will be ignored")
-        elif entity.dxftype() == "LWPOLYLINE":
+        if entity.dxftype() == "LWPOLYLINE":
+            if not entity.closed:
+                logging.error(f"There is a Polygon in layer {entity.dxf.layer} that is not closed. "
+                              f"This may cause issues creating the polygon")
             if entity.dxf.layer in hole_layers:
                 holes.append(polyline_to_polygon(entity))
             elif entity.dxf.layer == outer_line_layer:
-                if not entity.closed:
-                    logging.error("the outer polygon is not closed. this may cause issues creating the polygon")
+
                 outer_lines.append(polyline_to_linestring(entity))
         elif entity.dxftype() == "CIRCLE":
             if entity.dxf.layer in hole_layers:
@@ -109,13 +114,11 @@ def parse_dxf_file(dxf_path, outer_line_layer, hole_layers, circle_accuracy=8):
         elif entity.dxftype() != "INSERT":
             logging.warning(f"there is an entity of type {entity.dxftype()} defined which will not be parsed")
 
-    if len(outer_lines) != 1:
-        raise IncorrectDXFFile("The Layer containing the outer Polygon does not contain exactly one element."
-                               " This is required", outer_lines)
-    # create a polygon from all outer lines (only works if outer_lines is one polyline)
-    outer_polygon = Polygon(outer_lines[0].coords)
-    # this does not work but would be the better implementation
-    # outer_polygon = polygonize(outer_lines)
+    # create a polygon from all outer lines
+    outer_polygons = []
+    for line in outer_lines:
+        outer_polygons.append(Polygon(line.coords))
+    outer_polygon = polygonize(outer_lines)
 
     # separate simple and not simple holes
     simple_holes = []
@@ -129,21 +132,27 @@ def parse_dxf_file(dxf_path, outer_line_layer, hole_layers, circle_accuracy=8):
 
     # create new Polygon with holes
     simple_holes = polygonize(simple_holes)
-    logging.debug(f"the Polygon was parsed")
+    logging.debug(f"the geometry was parsed")
     return outer_polygon.difference(simple_holes)
 
 
 if __name__ == "__main__":
+    # set up logger
     logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.DEBUG)
     file_name = "SiB2023_entrance_jupedsim.dxf"
     outer_layer = "jupedsim_walkable_area"
     inner_layers = ["jupedsim_holes", "entranceGates"]
+    # parse polygon(s)
     merged_polygon = parse_dxf_file(file_name, outer_layer, inner_layers)
     # plot final Polygon
     matplotlib.pyplot.set_loglevel("warning")
-    logger = logging.getLogger('PIL.PngImagePlugin')
-    logger.setLevel(logging.WARNING)
-    plot_polygon(merged_polygon)
+    logging.getLogger('PIL.PngImagePlugin').setLevel(logging.WARNING)
+    if merged_polygon.geom_type == "Polygon":
+        plot_polygon(merged_polygon)
+    if merged_polygon.geom_type == 'MultiPolygon':
+        merged_polygon = multipolygon_to_list(merged_polygon)
+        for poly in merged_polygon:
+            plot_polygon(poly)
     # now cast to wkt and write into a file
     out_file_name = "entrance_jupedsim.wkt"
     save_as_wkt(merged_polygon, out_file=out_file_name)
