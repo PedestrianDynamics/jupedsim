@@ -1,8 +1,7 @@
 #! /usr/bin/env bash
 export JPSCORE_EXECUTABLE_PATH="@CMAKE_BINARY_DIR@/bin/jpscore"
 export JPSCORE_SOURCE_PATH="@CMAKE_SOURCE_DIR@"
-export PYTHONPATH="@CMAKE_SOURCE_DIR@/systemtest/test_support"
-export JPSCORE_PERFORMACETESTS_PATH="@CMAKE_SOURCE_DIR@/performancetest"
+export PYTHONPATH="@CMAKE_SOURCE_DIR@/python_modules/jupedsim:@CMAKE_LIBRARY_OUTPUT_DIRECTORY@"
+export JPSCORE_PERFORMANCETESTS_PATH="@CMAKE_SOURCE_DIR@/performancetest"
 
-${JPSCORE_PERFORMACETESTS_PATH}/performancetests.py
-
+${JPSCORE_PERFORMANCETESTS_PATH}/large_street_network.py

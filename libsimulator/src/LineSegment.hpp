@@ -21,6 +21,7 @@ public:
 
     bool operator==(const LineSegment& other) const;
     bool operator!=(const LineSegment& other) const;
+    bool operator<(const LineSegment& other) const;
 
     Point NormalVec() const;
 

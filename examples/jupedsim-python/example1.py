@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import logging
 import pathlib
+import sys
 
 import py_jupedsim as jps
 from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
@@ -75,11 +76,16 @@ def main():
     writer.begin_writing(10, to_wkt(area, rounding_precision=-1))
 
     while simulation.agent_count() > 0:
-        simulation.iterate()
-        if simulation.iteration_count() % 4 == 0:
-            writer.write_iteration_state(simulation)
-        if simulation.iteration_count() == 1300:
-            simulation.notify_waiting_set(journey_id, stage, False)
+        try:
+            simulation.iterate()
+            if simulation.iteration_count() % 4 == 0:
+                writer.write_iteration_state(simulation)
+            if simulation.iteration_count() == 1300:
+                simulation.notify_waiting_set(journey_id, stage, False)
+        except KeyboardInterrupt:
+            writer.end_writing()
+            print("CTRL-C Recieved! Shuting down")
+            sys.exit(1)
     writer.end_writing()
     print(
         f"Simulation completed after {simulation.iteration_count()} iterations"
