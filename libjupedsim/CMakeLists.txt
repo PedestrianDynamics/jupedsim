@@ -29,6 +29,7 @@ target_include_directories(jupedsim
 target_link_libraries(jupedsim
     PRIVATE
         simulator
+        common
 )
 set_property(TARGET jupedsim PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
 set_property(TARGET jupedsim PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
