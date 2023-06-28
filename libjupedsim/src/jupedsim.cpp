@@ -9,6 +9,7 @@
 #include "Stage.hpp"
 
 #include "gtest/gtest.h"
+#include <BuildInfo.hpp>
 #include <CollisionGeometry.hpp>
 #include <Conversion.hpp>
 #include <GCFMModel.hpp>
@@ -35,6 +36,19 @@
 #include <string>
 #include <tuple>
 #include <vector>
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// BuildInfo
+////////////////////////////////////////////////////////////////////////////////////////////////////
+JPS_BuildInfo JPS_GetBuildInfo()
+{
+    return JPS_BuildInfo{
+        GIT_COMMIT_HASH.c_str(),
+        GIT_COMMIT_DATE.c_str(),
+        GIT_BRANCH.c_str(),
+        COMPILER.c_str(),
+        COMPILER_VERSION.c_str()};
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Logging
