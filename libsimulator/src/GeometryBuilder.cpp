@@ -122,15 +122,6 @@ Geometry GeometryBuilder::Build()
             accessibleArea = *res.begin();
     }
 
-    /*for(const auto& ex : exclusionAreaInput) {
-        PolyWithHolesList res{};
-        CGAL::difference(accessibleArea, ex, std::back_inserter(res));
-        if(res.size() != 1) {
-            throw SimulationError("Exclusion splits accessibleArea");
-        }
-        accessibleArea = *res.begin();
-    }*/
-
     auto Convert = [](const auto& begin, const auto& end) {
         std::vector<Point> result{};
         result.reserve(end - begin);
