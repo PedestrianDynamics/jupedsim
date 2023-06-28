@@ -108,7 +108,7 @@ if (GIT_SCM AND GITDIR)
     # the commit's SHA1, and whether the building workspace was dirty or not
     # describe --match=NeVeRmAtCh --always --tags --abbrev=40 --dirty
     execute_process(COMMAND
-    "${GIT_EXECUTABLE}" --no-pager describe --tags --always --dirty
+        "${GIT_EXECUTABLE}" --no-pager describe --match=Nevermatch --tags --always --dirty
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     OUTPUT_VARIABLE GIT_SHA1
     ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -160,7 +160,11 @@ target_compile_definitions(git-info INTERFACE
     GIT_COMMIT_SUBJECT="${GIT_COMMIT_SUBJECT}"
     GIT_BRANCH="${GIT_BRANCH}"
 )
-configure_file(cmake_templates/BuildInfo.cpp.in ${CMAKE_BINARY_DIR}/generated/BuildInfo.cpp @ONLY)
+configure_file(cmake_templates/BuildInfo.hpp.in ${CMAKE_BINARY_DIR}/generated/build_info/BuildInfo.hpp @ONLY)
+add_library(build_info INTERFACE)
+target_include_directories(build_info INTERFACE
+    ${CMAKE_BINARY_DIR}/generated/build_info
+)
 if(UNIX)
     configure_file(cmake_templates/unix_env.in ${CMAKE_BINARY_DIR}/environment @ONLY)
 endif()
