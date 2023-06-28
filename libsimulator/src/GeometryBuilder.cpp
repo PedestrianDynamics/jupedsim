@@ -99,7 +99,7 @@ Geometry GeometryBuilder::Build()
         std::back_inserter(accessibleList));
 
     if(accessibleList.size() != 1) {
-        throw SimulationError("accessisble area not connected");
+        throw SimulationError("accessibleArea not connected");
     }
 
     auto accessibleArea = *accessibleList.begin();
@@ -111,15 +111,25 @@ Geometry GeometryBuilder::Build()
         std::end(_exclusions),
         std::back_inserter(exclusionAreaInput),
         [](const auto& p) { return intoCGALPolygon(p, Ordering::CCW); });
+    PolyWithHolesList obstacleList{};
+    CGAL::join(
+        std::begin(exclusionAreaInput),
+        std::end(exclusionAreaInput),
+        std::back_inserter(obstacleList));
+    for(const auto& ob : obstacleList) {
+            PolyWithHolesList res{};
+            CGAL::difference(accessibleArea, ob, std::back_inserter(res));
+            accessibleArea = *res.begin();
+    }
 
-    for(const auto& ex : exclusionAreaInput) {
+    /*for(const auto& ex : exclusionAreaInput) {
         PolyWithHolesList res{};
         CGAL::difference(accessibleArea, ex, std::back_inserter(res));
         if(res.size() != 1) {
             throw SimulationError("Exclusion splits accessibleArea");
         }
         accessibleArea = *res.begin();
-    }
+    }*/
 
     auto Convert = [](const auto& begin, const auto& end) {
         std::vector<Point> result{};
