@@ -5,7 +5,7 @@ import py_jupedsim
 from jupedsim.recording import Recording
 from jupedsim.serialization import parse_wkt
 from jupedsim.util import build_jps_geometry
-from PySide6.QtCore import QSize
+from PySide6.QtCore import QSettings, QSize
 from PySide6.QtStateMachine import QFinalState, QState, QStateMachine
 from PySide6.QtWidgets import (
     QApplication,
@@ -23,6 +23,7 @@ from visdbg.view_geometry_widget import ViewGeometryWidget
 class MainWindow(QMainWindow):
     def __init__(self, parent=None) -> None:
         QMainWindow.__init__(self, parent)
+        self.settings = QSettings("jupedsim", "visdbg")
         self.setWindowTitle("visdbg")
         self._build_central_tabs_widget()
         self._build_menu_bar()
@@ -77,12 +78,19 @@ class MainWindow(QMainWindow):
         return state
 
     def _open_wkt(self):
+        base_path_obj = self.settings.value(
+            "files/last_wkt_location",
+            type=str,
+            defaultValue=Path("~").expanduser(),
+        )
+        base_path = Path(str(base_path_obj))
         file, _ = QFileDialog.getOpenFileName(
-            self, caption="Open WKT file", dir=str(Path("~").expanduser())
+            self, caption="Open WKT file", dir=str(base_path)
         )
         if not file:
             return
         file = Path(file)
+        self.settings.setValue("files/last_wkt_location", str(file.parent))
         try:
             wkt = parse_wkt(Path(file).read_text(encoding="UTF-8"))
             navi = py_jupedsim.experimental.RoutingEngine(
@@ -106,12 +114,19 @@ class MainWindow(QMainWindow):
             return
 
     def _open_replay(self):
+        base_path_obj = self.settings.value(
+            "files/last_replay_location",
+            type=str,
+            defaultValue=Path("~").expanduser(),
+        )
+        base_path = Path(str(base_path_obj))
         file, _ = QFileDialog.getOpenFileName(
-            self, caption="Open recording", dir=str(Path("~").expanduser())
+            self, caption="Open recording", dir=str(base_path)
         )
         if not file:
             return
         file = Path(file)
+        self.settings.setValue("files/last_replay_location", str(file.parent))
         try:
             rec = Recording(file.as_posix())
             self.setUpdatesEnabled(False)
