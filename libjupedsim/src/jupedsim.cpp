@@ -23,6 +23,7 @@
 #include <RoutingEngine.hpp>
 #include <Simulation.hpp>
 #include <StageDescription.hpp>
+#include <Unreachable.hpp>
 #include <VelocityModel.hpp>
 #include <VelocityModelBuilder.hpp>
 
@@ -864,11 +865,7 @@ JPS_ModelType JPS_Simulation_ModelType(JPS_Simulation handle)
        simulation != nullptr) {
         return JPS_VelocityModel;
     }
-#if defined(__GNUC__) // GCC, Clang, ICC
-    __builtin_unreachable();
-#elif defined(_MSC_VER) // MSVC
-    __assume(false);
-#endif
+    UNREACHABLE();
 }
 
 JPS_AgentIdIterator

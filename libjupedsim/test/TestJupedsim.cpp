@@ -5,8 +5,10 @@
 #include <ErrorMessage.hpp>
 #include <jupedsim/jupedsim.h>
 
-#include <gtest/gtest.h>
+#include <array>
 #include <vector>
+
+#include <gtest/gtest.h>
 
 TEST(ErrorMessage, CanGetMessage)
 {

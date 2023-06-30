@@ -42,19 +42,6 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
     const NeighborhoodSearchType& neighborhoodSearch) const
 {
     const auto& parameters = parameterProfile(agent.parameterProfileId);
-    // const double delta = 1.5;
-    // const double normVi = agent.GetV().ScalarProduct(agent.GetV());
-    // const double v0 = agent.GetV0();
-    // const double tmp = (v0 + delta) * (v0 + delta);
-    // if(normVi > tmp && v0 > 0) {
-    //     LOG_ERROR(
-    //         "GCFMModel::calculateForce() actual velocity (%f) of iped %d "
-    //         "is bigger than desired velocity (%f)\n",
-    //         sqrt(normVi),
-    //         agent.id,
-    //         v0);
-    // }
-
     const double radius = 4.0; // TODO (MC) check this free parameter
     const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(agent.pos, radius);
     const auto p1 = agent.pos;
@@ -89,6 +76,22 @@ void GCFMModel::ApplyUpdate(const PedestrianUpdate& update, Data& agent) const
     if(update.velocity) {
         agent.orientation = (*update.velocity).Normalized();
         agent.speed = (*update.velocity).Norm();
+    }
+}
+
+void GCFMModel::CheckDistanceConstraint(
+    const Data& agent,
+    const NeighborhoodSearchType& neighborhoodSearch) const
+{
+    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
+    for(const auto& neighbor : neighbors) {
+        const auto spacing = AgentToAgentSpacing(agent, *neighbor);
+        if(spacing <= 0) {
+            throw SimulationError(
+                "Model constraint violation: Agent {} too close to agent {}",
+                agent.id,
+                neighbor->id);
+        }
     }
 }
 
@@ -135,30 +138,7 @@ Point GCFMModel::ForceRepPed(const Data& ped1, const Data& ped2) const
     double K_ij;
     double nom; // nominator of Frep
     double px; // hermite Interpolation value
-    const auto& ped1ParameterProfile = parameterProfile(ped1.parameterProfileId);
-    const Ellipse E1{
-        ped1ParameterProfile.Av,
-        ped1ParameterProfile.AMin,
-        ped1ParameterProfile.BMax,
-        ped1ParameterProfile.BMin};
-    const auto& ped2ParameterProfile = parameterProfile(ped2.parameterProfileId);
-    const Ellipse E2{
-        ped2ParameterProfile.Av,
-        ped2ParameterProfile.AMin,
-        ped2ParameterProfile.BMax,
-        ped2ParameterProfile.BMin};
-    const auto v0_1 = parameterProfile(ped1.parameterProfileId).v0;
-    const auto v0_2 = parameterProfile(ped2.parameterProfileId).v0;
-    const double dist_eff = E1.EffectiveDistanceToEllipse(
-        E2,
-        ped1.pos,
-        ped2.pos,
-        ped1.speed / v0_1,
-        ped2.speed / v0_2,
-        ped1.speed,
-        ped2.speed,
-        ped1.orientation,
-        ped2.orientation);
+    const auto dist_eff = AgentToAgentSpacing(ped1, ped2);
     const auto agent1_mass = parameterProfile(ped1.parameterProfileId).mass;
 
     //          smax    dist_intpol_left      dist_intpol_right       dist_eff_max
@@ -209,6 +189,8 @@ Point GCFMModel::ForceRepPed(const Data& ped1, const Data& ped2) const
             return F_rep;
         }
     }
+
+    const auto v0_1 = parameterProfile(ped1.parameterProfileId).v0;
     nom = _nuPed * v0_1 + v_ij; // Nu: 0=CFM, 0.28=modifCFM;
     nom *= nom;
 
@@ -399,4 +381,31 @@ Point GCFMModel::ForceInterpolation(
         F_rep = e * px;
     }
     return F_rep;
+}
+double GCFMModel::AgentToAgentSpacing(const Data& agent1, const Data& agent2) const
+{
+    const auto& ped1ParameterProfile = parameterProfile(agent1.parameterProfileId);
+    const Ellipse E1{
+        ped1ParameterProfile.Av,
+        ped1ParameterProfile.AMin,
+        ped1ParameterProfile.BMax,
+        ped1ParameterProfile.BMin};
+    const auto& ped2ParameterProfile = parameterProfile(agent2.parameterProfileId);
+    const Ellipse E2{
+        ped2ParameterProfile.Av,
+        ped2ParameterProfile.AMin,
+        ped2ParameterProfile.BMax,
+        ped2ParameterProfile.BMin};
+    const auto v0_1 = ped1ParameterProfile.v0;
+    const auto v0_2 = ped2ParameterProfile.v0;
+    return E1.EffectiveDistanceToEllipse(
+        E2,
+        agent1.pos,
+        agent2.pos,
+        agent1.speed / v0_1,
+        agent2.speed / v0_2,
+        agent1.speed,
+        agent2.speed,
+        agent1.orientation,
+        agent2.orientation);
 }

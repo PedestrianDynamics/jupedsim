@@ -9,6 +9,7 @@ target_link_libraries(py_jupedsim
         pybind11::windows_extras
         fmt::fmt
         jupedsim
+        common
 )
 
 pybind11_extension(py_jupedsim)

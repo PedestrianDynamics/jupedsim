@@ -6,6 +6,8 @@
 #include "GeometricFunctions.hpp"
 #include "IteratorPair.hpp"
 #include "LineSegment.hpp"
+#include "Mathematics.hpp"
+#include "Point.hpp"
 
 #include <CGAL/Boolean_set_operations_2.h>
 #include <CGAL/Point_2.h>
@@ -14,7 +16,58 @@
 #include <CGAL/number_utils.h>
 
 #include <algorithm>
+#include <cmath>
 #include <vector>
+
+Cell makeCell(Point p)
+{
+    return {floor(p.x / CELL_EXTEND) * CELL_EXTEND, floor(p.y / CELL_EXTEND) * CELL_EXTEND};
+}
+
+bool IsN8Adjacent(const Cell& a, const Cell& b)
+{
+    const auto dx = static_cast<int>(abs(a.x - b.x) / CELL_EXTEND);
+    const auto dy = static_cast<int>(abs(a.y - b.y) / CELL_EXTEND);
+    if((dx == 0 && dy == 0) || dx > 1 || dy > 1) {
+        return false;
+    }
+    return true;
+}
+
+std::set<Cell> cellsFromLineSegment(LineSegment ls)
+{
+    const auto firstCell = makeCell(ls.p1);
+    const auto lastCell = makeCell(ls.p2);
+    if(firstCell == lastCell) {
+        return {firstCell};
+    }
+
+    if(IsN8Adjacent(firstCell, lastCell)) {
+        return {firstCell, lastCell};
+    }
+
+    std::set<Cell> cells{firstCell, lastCell};
+
+    const auto toMultiple = [](double x) { return ceil(x / CELL_EXTEND) * CELL_EXTEND; };
+    const AABB bounds(ls.p1, ls.p2);
+    const auto vec_p1p2 = ls.p2 - ls.p1;
+    std::vector<Point> intersections{};
+    for(double x_intersect = toMultiple(bounds.xmin); x_intersect <= bounds.xmax;
+        x_intersect += CELL_EXTEND) {
+        const double fact = (x_intersect - ls.p1.x) / vec_p1p2.x;
+        intersections.emplace_back(x_intersect, ls.p1.y + fact * vec_p1p2.y);
+    }
+    for(double y_intersect = toMultiple(bounds.ymin); y_intersect <= bounds.ymax;
+        y_intersect += CELL_EXTEND) {
+        const double fact = (y_intersect - ls.p1.y) / vec_p1p2.y;
+        intersections.emplace_back(ls.p1.x + fact * vec_p1p2.x, y_intersect);
+    }
+    std::sort(std::begin(intersections), std::end(intersections));
+    for(size_t index = 1; index < intersections.size(); ++index) {
+        cells.insert(makeCell((intersections[index - 1] + intersections[index]) / 2));
+    }
+    return cells;
+}
 
 double dist(LineSegment l, Point p)
 {
@@ -51,6 +104,13 @@ CollisionGeometry::CollisionGeometry(PolyWithHoles accessibleArea) : _accessible
     for(const auto& hole : accessibleArea.holes()) {
         ExtractSegmentsFromPolygon(hole, _segments);
     }
+
+    for(const auto& ls : _segments) {
+        const auto cells = cellsFromLineSegment(ls);
+        for(const auto& cell : cells) {
+            _grid[cell].insert(ls);
+        }
+    }
 }
 
 CollisionGeometry::LineSegmentRange
@@ -63,15 +123,18 @@ CollisionGeometry::LineSegmentsInDistanceTo(double distance, Point p) const
 
 bool CollisionGeometry::IntersectsAny(LineSegment linesegment) const
 {
-    return std::find_if(_segments.cbegin(), _segments.cend(), [&linesegment](const auto candidate) {
-               // ad hoc check for AABB overlap
-               const AABB a(linesegment.p1, linesegment.p2);
-               const AABB b(candidate.p1, candidate.p2);
-               if(!a.Overlap(b)) {
-                   return false;
-               }
+    const auto cellsToQuery = cellsFromLineSegment(linesegment);
+    std::set<LineSegment> segments{};
+    for(const auto& cell : cellsToQuery) {
+        const auto iter = _grid.find(cell);
+        if(iter == std::end(_grid)) {
+            continue;
+        }
+        segments.insert(std::begin(iter->second), std::end(iter->second));
+    }
+    return std::find_if(segments.cbegin(), segments.cend(), [&linesegment](const auto candidate) {
                return intersects(linesegment, candidate);
-           }) != _segments.end();
+           }) != segments.end();
 }
 
 bool CollisionGeometry::InsideGeometry(Point p) const
