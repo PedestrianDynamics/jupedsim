@@ -1,6 +1,6 @@
 import ezdxf
 import matplotlib.pyplot
-from shapely import LineString, Polygon, Point, polygonize, to_wkt, GeometryCollection
+from shapely import LineString, Polygon, Point, polygonize, to_wkt, GeometryCollection, MultiPolygon
 import matplotlib.pyplot as plt
 import geopandas as gpd
 import logging
@@ -20,9 +20,10 @@ def save_as_wkt(geometry, out_file):
     @param out_file: The file to write the output to.
     """
     geomery_collection = GeometryCollection(geometry)
-    with open(out_file_name, 'w') as out:
+    with open(out_file, 'w') as out:
         out.write(to_wkt(geomery_collection, rounding_precision=-1))
-    logging.debug(f"wkt was written into {out_file_name}")
+    logging.debug(f"wkt was written into {out_file}")
+
 
 def plot_polygon(polygon):
     """plots a polygon with its interior in matplotlib"""
@@ -68,7 +69,7 @@ def polyline_to_polygon(polyline):
     return Polygon(points)
 
 
-def dxf_circle_to_shply(dxf_circle, quad_segs=8):
+def dxf_circle_to_shply(dxf_circle, quad_segs=4):
     """converts an entity with dxftype circle to a shapely Point with buffer
     @param dxf_circle: an entity with dxf-type circle
     @param quad_segs: Sets the number of line segments used to approximate an angle fillet"""
@@ -77,7 +78,7 @@ def dxf_circle_to_shply(dxf_circle, quad_segs=8):
     return Point(pt).buffer(radius, quad_segs)
 
 
-def parse_dxf_file(dxf_path, outer_line_layer, hole_layers, circle_accuracy=8):
+def parse_dxf_file(dxf_path, outer_line_layer, hole_layers, circle_accuracy=4):
     """ parses a dxf-file and creates a shapely structure resembling the file
     @param dxf_path: Path to the DXF file
     @param outer_line_layer: the name of the layer in the dxf-file where the outer polygon is defined
@@ -136,7 +137,37 @@ def parse_dxf_file(dxf_path, outer_line_layer, hole_layers, circle_accuracy=8):
     return outer_polygon.difference(simple_holes)
 
 
-if __name__ == "__main__":
+def shapely_to_dxf(geometry, dxf_path, walkable_layer="walkable_layer", hole_layer="hole_layer"):
+    """creates a dxf file according to the geometry
+    @param geometry: shapely Polygon or Multipolygon
+    @param dxf_path: path to where the created dxf file should be saved to
+    @param walkable_layer: name of the layer containing the walkable area
+    @param hole_layer: name of the layer containing the holes of the geometry
+    """
+
+    def add_polyline(polyline, layername):
+        points = list(polyline.coords)
+        modelspace.add_lwpolyline(points, dxfattribs={"layer": layername})
+
+    doc = ezdxf.new("R2010")
+    modelspace = doc.modelspace()
+
+    if isinstance(geometry, Polygon):
+        geometry = [geometry]
+    elif isinstance(geometry, MultiPolygon):
+        geometry = geometry.geoms
+
+    for polygon in geometry:
+        if not polygon.is_empty:
+            add_polyline(polygon.exterior, walkable_layer)
+            for hole in polygon.interiors:
+                add_polyline(hole, hole_layer)
+
+    doc.saveas(dxf_path)
+    logging.debug(f"dxf was written into {dxf_path}")
+
+
+def main():
     # set up logger
     logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.DEBUG)
     file_name = "SiB2023_entrance_jupedsim.dxf"
@@ -144,9 +175,12 @@ if __name__ == "__main__":
     inner_layers = ["jupedsim_holes", "entranceGates"]
     # parse polygon(s)
     merged_polygon = parse_dxf_file(file_name, outer_layer, inner_layers)
+    # create a dxf file using the parsed geometry
+    shapely_to_dxf(merged_polygon, "parsed_entrance.dxf")
     # plot final Polygon
     matplotlib.pyplot.set_loglevel("warning")
     logging.getLogger('PIL.PngImagePlugin').setLevel(logging.WARNING)
+
     if merged_polygon.geom_type == "Polygon":
         plot_polygon(merged_polygon)
     if merged_polygon.geom_type == 'MultiPolygon':
@@ -156,3 +190,7 @@ if __name__ == "__main__":
     # now cast to wkt and write into a file
     out_file_name = "entrance_jupedsim.wkt"
     save_as_wkt(merged_polygon, out_file=out_file_name)
+
+
+if __name__ == "__main__":
+    main()
