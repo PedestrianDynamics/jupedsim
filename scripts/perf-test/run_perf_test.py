@@ -20,30 +20,32 @@ def parse_args():
     parser.add_argument("-s", "--source", help="source directory of JuPedSim", type=pathlib.Path)
 
     known, forwarded_args = parser.parse_known_args()
-    if forwarded_args[0] != "--":
-        # TODO warning when remainder does not start with --
-        pass
+    if forwarded_args and forwarded_args[0] != "--":
+        logging.warning(f"found unknown arguments: '{' '.join(forwarded_args)}' will be ignored. If you want to pass "
+                        f"them to the container, separate them with '--', e.g., \n"
+                        f"$ python run_perf_test.py -- -t large_street_network -- --limit 10000")
+
     else:
         forwarded_args = forwarded_args[1:]
 
     return known, forwarded_args
 
 
-def build_docker_container(client):
-    # TODO context: .. or better as input?
+def build_docker_container(client, source_dir: pathlib.Path):
     perf_test_image, build_logs = client.images.build(
-        path="..",
+        path=source_dir.absolute().__str__(),
         dockerfile=perf_container_file.absolute().__str__(),
         tag=perf_container_tag,
     )
     for chunk in build_logs:
         if 'stream' in chunk:
             for line in chunk['stream'].splitlines():
-                logging.debug(line)
+                logging.info(line)
 
     return perf_test_image
 
-def get_results(container, output_dir):
+
+def get_results(container, output_dir: pathlib.Path):
     with open("results.tar", "wb") as f:
         bits, stat = container.get_archive("/build/results/")
         for chunk in bits:
@@ -57,14 +59,15 @@ def get_results(container, output_dir):
 
     # move all files from results folder to
     for file in (output_dir / "results").iterdir():
-        shutil.move(file, output_dir/file.name)
+        shutil.move(file, output_dir / file.name)
     (output_dir / "results").rmdir()
+
 
 def main():
     parsed_args, forwarded_args = parse_args()
 
     client = docker.from_env()
-    perf_test_image = build_docker_container(client)
+    perf_test_image = build_docker_container(client, parsed_args.source)
 
     container = client.containers.run(
         perf_test_image.tags[0],
@@ -78,12 +81,15 @@ def main():
         command=[*forwarded_args],
     )
 
+    # print the output from the container
     output = container.attach(stdout=True, stream=True, logs=True)
     for line in output:
         print(line.decode('utf-8').strip())
 
     get_results(container, parsed_args.output)
+    
     container.remove()
+
 
 if __name__ == "__main__":
     main()
