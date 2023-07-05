@@ -21,6 +21,19 @@ extern "C" {
 #endif
 
 /**
+ * Contains build information about this library
+ */
+typedef struct JPS_BuildInfo {
+    const char* git_commit_hash;
+    const char* git_commit_date;
+    const char* git_branch;
+    const char* compiler;
+    const char* compiler_version;
+} JPS_BuildInfo;
+
+JPS_BuildInfo JPS_GetBuildInfo();
+
+/**
  * Contains basic performance trace information
  */
 typedef struct JPS_Trace {
