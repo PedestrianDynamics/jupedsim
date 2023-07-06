@@ -15,7 +15,45 @@ perf_container_tag = "perf-test"
 
 
 def parse_args():
-    parser = argparse.ArgumentParser('JuPedSim Performance Tests')
+    parser = argparse.ArgumentParser(
+        description="""
+JuPedSim Performance Tests
+
+Executes the performance tests in a docker container to saves the resulting \
+flame-graphs to the desired output directory.
+
+It is possible to select specific tests with provided options:
+run_perf_test.py -o <output> -s <source> -- [-t,--test] <test>  -- <option>
+
+Available tests are:
+- grosser_stern
+- large_street_network
+- all
+
+Available options are:
+
+---------------------------------------------------------
+| test                 | options              | default |
+=========================================================
+| grosser_stern        | [-l,--limit LIMIT]   |  100    |
+---------------------------------------------------------
+| large_street_network | [-l,--limit LIMIT]   |  4000   |
+---------------------------------------------------------
+| all                  | none, runs the tests |         |
+|                      | with default values  |         |
+---------------------------------------------------------
+
+Example call to run large_street_network with a limit of 1000 iterations:
+run_perf_test -s ../.. -o perf-out -- -t large_street_network -- -l 1000
+
+In the process following steps are taken:
+- build docker container from <source>/container/perf-measurement/Dockerfile
+- build JuPedSim inside container
+- executes the selected tests with the provided options inside container
+- copy flame-graph svgs from container back to host <output>
+        """,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     parser.add_argument("-o", "--output", help="output directory", type=pathlib.Path)
     parser.add_argument("-s", "--source", help="source directory of JuPedSim", type=pathlib.Path)
 
