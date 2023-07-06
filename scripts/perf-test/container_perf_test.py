@@ -101,13 +101,13 @@ def run_tests(test_selection: str, args):
     if test_selection in ["all", "large_street_network"]:
         logging.info("run large_street_network performance test")
         if not args or test_selection == "all":
-            args = ["--limit", "100"]  # 4000
+            args = ["--limit", "4000"]
         run_test("large_street_network", args, build_dir, result_dir)
 
     if test_selection in ["all", "grosser_stern"]:
         logging.info("run grosser_stern performance test")
         if not args or test_selection == "all":
-            args = ["--limit", "10"]  # 100
+            args = ["--limit", "100"]
         run_test("grosser_stern", args, build_dir, result_dir)
 
 
