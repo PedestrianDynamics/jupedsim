@@ -33,7 +33,7 @@ def build_jupedsim():
     build_path.mkdir()
 
     with subprocess.Popen(
-            ["cmake", "-S", "/src", "-B", "/build", "-DCMAKE_PREFIX_PATH=/opt/deps"],
+            ["cmake", "-S", "/src", "-B", "/build", "-DCMAKE_PREFIX_PATH=/opt/deps", "-DCMAKE_BUILD_TYPE=RelWithDebInfo"],
             stdout=subprocess.PIPE,
     ) as p:
         for line in p.stdout:
