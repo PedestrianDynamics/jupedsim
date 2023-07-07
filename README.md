@@ -228,7 +228,7 @@ invoke `vcpkg` like this:
 ```bash
 mkdir jpscore-deps
 cd <JPSCORE-SOURCE-PATH>
-vcpkg.exe --x-feature=Vis --x-install-root=../jpscore-deps --triplet=x64-windows
+vcpkg.exe install --x-feature=Vis --x-install-root=../jpscore-deps --triplet=x64-windows
 ```
 
 During the CMake invocation listed in the next section, add this to your invocation:
