@@ -111,8 +111,13 @@ Geometry GeometryBuilder::Build()
         std::end(_exclusions),
         std::back_inserter(exclusionAreaInput),
         [](const auto& p) { return intoCGALPolygon(p, Ordering::CCW); });
+    PolyWithHolesList exclusionsList{};
+    CGAL::join(
+        std::begin(exclusionAreaInput),
+        std::end(exclusionAreaInput),
+        std::back_inserter(exclusionsList));
 
-    for(const auto& ex : exclusionAreaInput) {
+    for(const auto& ex : exclusionsList) {
         PolyWithHolesList res{};
         CGAL::difference(accessibleArea, ex, std::back_inserter(res));
         if(res.size() != 1) {
