@@ -20,7 +20,8 @@ public:
     virtual ~RoutingEngine() = default;
 
     // TODO(kkratz): additional input parameters missing
-    virtual std::vector<Point> ComputeWaypoint(Point currentPosition, Point destination) = 0;
+    virtual Point ComputeWaypoint(Point currentPosition, Point destination) = 0;
+    virtual std::vector<Point> ComputeAllWaypoints(Point currentPosition, Point destination) = 0;
 
     /// Checks if supplied point is inside the routable space.
     /// @@param p Point to validate
@@ -69,7 +70,8 @@ public:
     NavMeshRoutingEngine& operator=(NavMeshRoutingEngine&& other) = default;
 
     std::unique_ptr<RoutingEngine> Clone() const override;
-    std::vector<Point> ComputeWaypoint(Point currentPosition, Point destination) override;
+    Point ComputeWaypoint(Point currentPosition, Point destination) override;
+    std::vector<Point> ComputeAllWaypoints(Point currentPosition, Point destination) override;
     bool IsRoutable(Point p) const override;
     void Update() override;
 

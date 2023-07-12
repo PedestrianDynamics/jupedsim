@@ -51,7 +51,7 @@ JUPEDSIM_API JPS_Path
 JPS_RoutingEngine_ComputeWaypoint(JPS_RoutingEngine handle, JPS_Point from, JPS_Point to)
 {
     auto* engine = reinterpret_cast<NavMeshRoutingEngine*>(handle);
-    const auto path = engine->ComputeWaypoint(intoPoint(from), intoPoint(to));
+    const auto path = engine->ComputeAllWaypoints(intoPoint(from), intoPoint(to));
     JPS_Path p{path.size(), new JPS_Point[path.size()]};
     std::transform(
         std::begin(path), std::end(path), p.points, [](const auto& p) { return intoJPS_Point(p); });
