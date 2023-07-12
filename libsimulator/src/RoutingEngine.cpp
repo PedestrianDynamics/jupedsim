@@ -19,9 +19,53 @@ std::unique_ptr<RoutingEngine> NavMeshRoutingEngine::Clone() const
     return std::make_unique<NavMeshRoutingEngine>(*this);
 }
 
-// TODO(kkratz): Split into 2 functions. First will compute unsmoothed path, second will use this
-// path and smooth it.
-std::vector<Point> NavMeshRoutingEngine::ComputeWaypoint(Point currentPosition, Point destination)
+Point NavMeshRoutingEngine::ComputeWaypoint(Point currentPosition, Point destination)
+{
+    GraphType::VertexId from = findVertex(currentPosition);
+    GraphType::VertexId to = findVertex(destination);
+    if(from == to) {
+        return destination;
+    }
+
+    const auto path = _graph.Path(from, to);
+    assert(!path.empty());
+
+    const size_t portalCount = path.size();
+
+    // This is the actual simple stupid funnel algorithm
+    auto apex = currentPosition;
+    auto portal_left = currentPosition;
+    auto portal_right = currentPosition;
+
+    for(size_t index_portal = 1; index_portal <= portalCount; ++index_portal) {
+        // TODO(kkratz): Edge lookup is O(n) where n is the number of edges in the graph
+        // This needs to be replaced with a graph that allows for faster edge lookup
+        const auto portal = index_portal < portalCount ?
+                                _graph.Edge(path[index_portal - 1], path[index_portal]).edge :
+                                LineSegment(destination, destination);
+        const auto& candidate_left = portal.p2;
+        const auto& candidate_right = portal.p1;
+
+        if(triarea2d(apex, portal_right, candidate_right) <= 0.0) {
+            if(apex == portal_right || triarea2d(apex, portal_left, candidate_right) > 0.0) {
+                portal_right = candidate_right;
+            } else {
+                return portal_left;
+            }
+        }
+        if(triarea2d(apex, portal_left, candidate_left) >= 0.0) {
+            if(apex == portal_left || triarea2d(apex, portal_right, candidate_left) < 0.0) {
+                portal_left = candidate_left;
+            } else {
+                return portal_right;
+            }
+        }
+    }
+    return destination;
+}
+
+std::vector<Point>
+NavMeshRoutingEngine::ComputeAllWaypoints(Point currentPosition, Point destination)
 {
     GraphType::VertexId from = findVertex(currentPosition);
     GraphType::VertexId to = findVertex(destination);
@@ -33,14 +77,7 @@ std::vector<Point> NavMeshRoutingEngine::ComputeWaypoint(Point currentPosition, 
     const auto path = _graph.Path(from, to);
     assert(!path.empty());
 
-    // TODO(kkratz): Edge lookup is O(n) where n is the number of edges in the graph
-    // This needs to be replaced with a graph that allows for faster edge lookup
-    std::vector<LineSegment> portals{};
-    portals.reserve(path.size());
-    for(size_t index = 1; index < path.size(); ++index) {
-        portals.push_back(_graph.Edge(path[index - 1], path[index]).edge);
-    }
-    portals.push_back({destination, destination});
+    const size_t portalCount = path.size();
 
     // This is the actual simple stupid funnel algorithm
     auto apex = currentPosition;
@@ -51,16 +88,12 @@ std::vector<Point> NavMeshRoutingEngine::ComputeWaypoint(Point currentPosition, 
     size_t index_left{0};
     size_t index_right{0};
 
-    for(size_t index_portal = 0; index_portal < portals.size(); ++index_portal) {
-        // TODO(kkratz): Revisit this code.
-        // Currently we constrain the portal size by 20cm on both ends to
-        // avoid agents coming to cose to corners.
-        // Alternatively this can be adresse by shrining the nav mesh, this would have the added
-        // benefit of disconnecting parts of the nav mesh that are connected by a gap that is
-        // narrower than a agents size.
-        // Hard coded 0.2 value could / should become a input parameter
-        const auto line_segment_left = portals[index_portal].p2;
-        const auto line_segment_right = portals[index_portal].p1;
+    for(size_t index_portal = 1; index_portal <= portalCount; ++index_portal) {
+        const auto portal = index_portal < portalCount ?
+                                _graph.Edge(path[index_portal - 1], path[index_portal]).edge :
+                                LineSegment(destination, destination);
+        const auto line_segment_left = portal.p2;
+        const auto line_segment_right = portal.p1;
         const auto line_segment_direction = (line_segment_right - line_segment_left).Normalized();
         const auto candidate_left = line_segment_left + (line_segment_direction * 0.2);
         const auto candidate_right = line_segment_right - (line_segment_direction * 0.2);

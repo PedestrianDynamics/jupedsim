@@ -26,7 +26,6 @@ void TacticalDecisionSystem<Agent>::Run(RoutingEngine& routingEngine, std::vecto
 {
     for(auto& agent : agents) {
         const auto dest = agent.waypoint;
-        const auto waypoints = routingEngine.ComputeWaypoint(agent.pos, dest);
-        agent.destination = waypoints[1];
+        agent.destination = routingEngine.ComputeWaypoint(agent.pos, dest);
     }
 }
