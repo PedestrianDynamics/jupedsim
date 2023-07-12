@@ -52,6 +52,8 @@ add_library(simulator STATIC
     src/StrategicalDesicionSystem.hpp
     src/TacticalDecisionSystem.hpp
     src/TemplateHelper.hpp
+    src/Tracing.cpp
+    src/Tracing.hpp
     src/Triangle.cpp
     src/Triangle.hpp
     src/UniqueID.hpp
@@ -72,6 +74,7 @@ target_link_libraries(simulator PUBLIC
     poly2tri
     fmt::fmt
     CGAL::CGAL
+    build_info
 )
 target_link_options(simulator PUBLIC 
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_ASAN}>>:-fsanitize=address>

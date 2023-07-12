@@ -24,7 +24,7 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         """
         self._output_file = output_file
         self._frame = 0
-        self._con: Optional[sqlite3.Connection] = None
+        self._con = sqlite3.connect(self._output_file, isolation_level=None)
 
     def begin_writing(self, fps: float, geometry_as_wkt: str) -> None:
         """Begin writing trajectory data.
@@ -33,7 +33,6 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         once before the trajectory data can be written. E.g. Meta information
         such as framerate etc...
         """
-        self._con = sqlite3.connect(self._output_file, isolation_level=None)
         cur = self._con.cursor()
         try:
             cur.execute("BEGIN")
@@ -138,3 +137,6 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
             raise TrajectoryWriter.Exception(f"Error writing to database: {e}")
 
         self._con.close()
+
+    def connection(self) -> sqlite3.Connection:
+        return self._con

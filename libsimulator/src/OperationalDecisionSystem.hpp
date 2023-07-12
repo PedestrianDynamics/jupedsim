@@ -63,4 +63,11 @@ public:
             throw SimulationError("Unknown parameters profile id \"{}\" supplied", id.getID());
         }
     }
+
+    void ValidateAgent(
+        const typename Model::Data& agent,
+        const typename Model::NeighborhoodSearchType& neighborhoodSearch) const
+    {
+        _model->CheckDistanceConstraint(agent, neighborhoodSearch);
+    }
 };

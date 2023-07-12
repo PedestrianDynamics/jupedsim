@@ -21,7 +21,7 @@ def test_can_query_agents_in_range():
     )
     profile_id = 1
     model_builder.add_parameter_profile(
-        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.3
+        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.15
     )
 
     model = model_builder.build()
@@ -86,7 +86,7 @@ def test_can_run_simulation():
     )
     profile_id = 3
     model_builder.add_parameter_profile(
-        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.3
+        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.15
     )
 
     model = model_builder.build()
@@ -116,6 +116,7 @@ def test_can_run_simulation():
 
     assert actual_agent_ids == expected_agent_ids
 
+    agent_parameters.position = (6, 6)
     agent_id = simulation.add_agent(agent_parameters)
     assert simulation.remove_agent(agent_id)
     with pytest.raises(RuntimeError, match=r"Unknown agent id \d+"):
@@ -148,7 +149,7 @@ def test_can_wait():
     )
     profile_id = 3
     model_builder.add_parameter_profile(
-        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.3
+        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.15
     )
 
     model = model_builder.build()
@@ -200,6 +201,7 @@ def test_can_wait():
 
     assert actual_agent_ids == expected_agent_ids
 
+    agent_parameters.position = (30, 30)
     agent_id = simulation.add_agent(agent_parameters)
     assert simulation.remove_agent(agent_id)
     with pytest.raises(RuntimeError, match=r"Unknown agent id \d+"):
@@ -233,7 +235,7 @@ def test_can_change_journey_while_waiting():
     )
     profile_id = 3
     model_builder.add_parameter_profile(
-        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.3
+        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.15
     )
 
     model = model_builder.build()

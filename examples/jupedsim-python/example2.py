@@ -5,8 +5,10 @@ import logging
 import pathlib
 
 import py_jupedsim as jps
+import shapely
 from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
-from shapely import to_wkt
+from jupedsim.util import build_jps_geometry
+from shapely import GeometryCollection, Polygon, to_wkt
 
 
 def log_debug(msg):
@@ -34,9 +36,10 @@ def main():
     jps.set_warning_callback(log_warn)
     jps.set_error_callback(log_error)
 
-    geo_builder = jps.GeometryBuilder()
-    geo_builder.add_accessible_area([(0, 0), (100, 0), (100, 100), (0, 100)])
-    geometry = geo_builder.build()
+    area = GeometryCollection(
+        Polygon([(0, 0), (100, 0), (100, 100), (0, 100)])
+    )
+    geometry = build_jps_geometry(area)
 
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
@@ -90,7 +93,7 @@ def main():
     writer = SqliteTrajectoryWriter(pathlib.Path("example2_out.sqlite"))
     writer.begin_writing(
         25,
-        to_wkt(geometry, rounding_precision=-1),
+        to_wkt(area, rounding_precision=-1),
     )
     redirect_once = True
     signal_once = True

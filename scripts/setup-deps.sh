@@ -4,7 +4,6 @@ set -ex
 googletest_version="1.13.0"
 fmt_version="9.1.0"
 boost_version="1.81.0"
-poly2tri_version="81612cb108b54c14c695808f494f432990b279fd"
 cgal_version="5.5.1"
 pybind11_version="2.10.3"
 install_path=/usr/local
@@ -95,34 +94,6 @@ function setup_fmt {
     rm -rf ${temp_folder}
 }
 
-function setup_poly2tri {
-    root=$(pwd)
-    temp_folder=$(mktemp -d)
-    cd ${temp_folder}
-
-    wget https://github.com/jhasse/poly2tri/archive/${poly2tri_version}.zip
-    unzip ${poly2tri_version}.zip
-    cd poly2tri-${poly2tri_version}
-    mkdir build
-    cd build
-    cmake .. \
-        -DCMAKE_CXX_FLAGS="-fPIC" \
-        -DCMAKE_BUILD_TYPE=Release
-    cmake --build . -- -j${CPUS}
-
-    # Manual install since poly2tri cmake has no install target
-    cp libpoly2tri.a ${install_path}/lib
-
-    header_path=${install_path}/include/poly2tri
-    mkdir -p ${header_path}/{common,sweep}
-    cp ../poly2tri/poly2tri.h ${header_path}
-    cp ../poly2tri/common/*.h ${header_path}/common
-    cp ../poly2tri/sweep/*.h ${header_path}/sweep
-
-    cd ${root}
-    rm -rf ${temp_folder}
-}
-
 function setup_cgal {
     root=$(pwd)
     temp_folder=$(mktemp -d)
@@ -167,6 +138,5 @@ function setup_pybind11 {
 setup_boost
 setup_googletest
 setup_fmt
-setup_poly2tri
 setup_cgal
 setup_pybind11
