@@ -7,6 +7,7 @@ boost_version="1.81.0"
 cgal_version="5.5.1"
 pybind11_version="2.10.3"
 install_path=/usr/local
+google_benchmark_version="1.8.1"
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]; do
@@ -135,8 +136,37 @@ function setup_pybind11 {
     rm -rf ${temp_folder}
 }
 
+function setup_google_benchmark {
+    root=$(pwd)
+    temp_folder=$(mktemp -d)
+    cd ${temp_folder}
+
+    wget https://github.com/google/benchmark/archive/refs/tags/v${google_benchmark_version}.tar.gz
+    tar xf v${google_benchmark_version}.tar.gz
+
+    cd benchmark-${google_benchmark_version}
+    mkdir build
+    cd build
+
+    cmake .. \
+        -DCMAKE_INSTALL_PREFIX=${install_path} \
+        -DBENCHMARK_DOWNLOAD_DEPENDENCIES=OFF \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DBENCHMARK_INSTALL_DOCS=OFF \
+        -DBENCHMARK_ENABLE_DOXYGEN=OFF \
+        -DBENCHMARK_USE_BUNDLED_GTEST=OFF \
+        -DBENCHMARK_ENABLE_TESTING=OFF  \
+        -DBENCHMARK_ENABLE_GTEST_TESTS=OFF
+
+    cmake --build . --config Release --target install -- -j${CPUS}
+
+    cd ${root}
+    rm -rf ${temp_folder}
+}
+
 setup_boost
 setup_googletest
 setup_fmt
 setup_cgal
 setup_pybind11
+setup_google_benchmark

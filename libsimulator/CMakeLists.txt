@@ -113,3 +113,23 @@ if (BUILD_TESTS)
     set_property(TARGET libsimulator-tests PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
     set_property(TARGET libsimulator-tests PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 endif()
+
+################################################################################
+# libjupedsim micro benchmarks
+################################################################################
+if (BUILD_BENCHMARKS)
+    add_executable(libsimulator-benchmarks
+        benchmark/BenchmarkMain.cpp
+    )
+    target_link_libraries(libsimulator-benchmarks PRIVATE
+        benchmark::benchmark
+        simulator
+    )
+
+    target_compile_options(libsimulator-benchmarks PRIVATE
+        ${COMMON_COMPILE_OPTIONS}
+    )
+
+    set_property(TARGET libsimulator-benchmarks PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
+    set_property(TARGET libsimulator-benchmarks PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
+endif ()
