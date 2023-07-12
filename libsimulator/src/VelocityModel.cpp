@@ -7,6 +7,8 @@
 #include "Mathematics.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
+#include "SimulationError.hpp"
+#include "Stage.hpp"
 
 #include <Logger.hpp>
 #include <memory>
@@ -92,6 +94,23 @@ void VelocityModel::ApplyUpdate(const PedestrianUpdate& update, Data& agent) con
         }
     }
 }
+void VelocityModel::CheckDistanceConstraint(
+    const Data& agent,
+    const NeighborhoodSearchType& neighborhoodSearch) const
+{
+    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
+    const auto r = parameterProfile(agent.parameterProfileId).radius;
+    for(const auto& neighbor : neighbors) {
+        const auto contanctdDist = r + parameterProfile(neighbor->parameterProfileId).radius;
+        const auto distance = (agent.pos - neighbor->pos).Norm();
+        if(contanctdDist >= distance) {
+            throw SimulationError(
+                "Model constraint violation: Agent {} too close to agent {}",
+                agent.id,
+                neighbor->id);
+        }
+    }
+}
 
 std::unique_ptr<OperationalModel> VelocityModel::Clone() const
 {
@@ -120,8 +139,6 @@ double VelocityModel::OptimalSpeed(const Data& ped, double spacing, double t) co
     double speed = (spacing - l) / t;
     speed = (speed > 0) ? speed : 0;
     speed = (speed < profile.v0) ? speed : profile.v0;
-    //      (1-winkel)*speed;
-    // todo use winkel
     return speed;
 }
 
@@ -132,16 +149,7 @@ my_pair VelocityModel::GetSpacing(const Data& ped1, const Data& ped2, Point ei) 
     const double distance = distp12.Norm();
     const double l = 2 * parameterProfile(ped1.parameterProfileId).radius;
     Point ep12;
-    if(distance >= J_EPS) {
-        ep12 = distp12.Normalized();
-    } else {
-        LOG_WARNING(
-            "VelocityModel::GetSPacing() ep12 can not be calculated! Pedestrians are to close "
-            "to "
-            "each other ({:f})",
-            distance);
-        exit(EXIT_FAILURE); // TODO
-    }
+    ep12 = distp12.Normalized();
 
     double condition1 = ei.ScalarProduct(ep12); // < e_i , e_ij > should be positive
     double condition2 =
@@ -165,24 +173,7 @@ Point VelocityModel::ForceRepPed(const Data& ped1, const Data& ped2) const
     double R_ij;
     double l = 2 * parameterProfile(ped1.parameterProfileId).radius;
 
-    if(Distance >= J_EPS) {
-        ep12 = distp12.Normalized();
-    } else {
-        LOG_ERROR(
-            "VelocityModel::forcePedPed() ep12 can not be calculated! Pedestrians are too near "
-            "to "
-            "each other (dist={:f}). Adjust <a> value in force_ped to counter this. Affected "
-            "pedestrians ped1 {} at ({:f},{:f}) and ped2 {} at ({:f}, {:f})",
-            Distance,
-            ped1.id,
-            ped1.pos.x,
-            ped1.pos.y,
-            ped2.id,
-            ped2.pos.x,
-            ped2.pos.y);
-        exit(EXIT_FAILURE); // TODO: quick and dirty fix for issue #158
-                            //  (sometimes sources create peds on the same location)
-    }
+    ep12 = distp12.Normalized();
     Point ei = ped1.orientation;
     double condition1 = ei.ScalarProduct(ep12); // < e_i , e_ij > should be positive
     condition1 = (condition1 > 0) ? condition1 : 0; // abs

@@ -2,6 +2,8 @@
 /// SPDX-License-Identifier: LGPL-3.0-or-later
 #include "DTriangulation.hpp"
 
+#include <algorithm>
+
 static std::vector<p2t::Point*> ConvertPointVector(const std::vector<Point>& vec)
 {
     std::vector<p2t::Point*> result{};

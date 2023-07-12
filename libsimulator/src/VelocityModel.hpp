@@ -82,6 +82,9 @@ public:
         const NeighborhoodSearchType& neighborhoodSearch) const;
 
     void ApplyUpdate(const PedestrianUpdate& update, Data& agent) const;
+    void CheckDistanceConstraint(
+        const Data& agent,
+        const NeighborhoodSearchType& neighborhoodSearch) const;
     std::unique_ptr<OperationalModel> Clone() const override;
 
 private:

@@ -2,7 +2,7 @@ class AABB:
     def __init__(
         self, *, xmin: float, xmax: float, ymin: float, ymax: float
     ) -> None:
-        if xmax <= xmin or ymax <= ymin:
+        if xmax < xmin or ymax < ymin:
             raise Exception(
                 f"Invalid arguments to create AABB: max values have to be larger than min values."
             )

@@ -64,10 +64,10 @@ list(APPEND COMMON_COMPILE_OPTIONS
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-Wextra>
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-fdiagnostics-color=always>
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-fPIC>
+    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-fno-omit-frame-pointer>
     $<$<CXX_COMPILER_ID:MSVC>:/W2>
     $<$<CXX_COMPILER_ID:MSVC>:/EHsc>
     $<$<CXX_COMPILER_ID:MSVC>:/MP>
-    $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_ASAN}>>:-fno-omit-frame-pointer>
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_ASAN}>>:-fno-optimize-sibling-calls>
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_ASAN}>>:-fsanitize=address>
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_ASAN}>>:-shared-libasan>
@@ -88,48 +88,7 @@ if(UNIX)
 endif()
 find_package(CGAL 5.4 REQUIRED)
 
-if(UNIX)
-    find_library(POLY2TRI_LIB poly2tri REQUIRED)
-    find_path(POLY2TRI_HEADER poly2tri.h
-        REQUIRED
-        PATH_SUFFIXES poly2tri
-    )
-    add_library(poly2tri UNKNOWN IMPORTED)
-    set_target_properties(poly2tri PROPERTIES
-        IMPORTED_LOCATION ${POLY2TRI_LIB}
-    )
-    target_include_directories(poly2tri INTERFACE
-        ${POLY2TRI_HEADER}/..
-    )
-else()
-    find_library(
-        POLY2TRI_LIB_RELEASE poly2tri
-        REQUIRED
-    )
-    get_filename_component(path ${POLY2TRI_LIB_RELEASE} DIRECTORY)
-    list(APPEND paths 
-        "${path}/../debug/lib"
-    )
-    find_library(
-        POLY2TRI_LIB_DEBUG poly2tri
-        PATH_SUFFIXES "debug" "debug/lib"
-        PATHS ${paths}
-        NO_DEFAULT_PATH
-    )
-    find_path(POLY2TRI_HEADER poly2tri.h
-        PATH_SUFFIXES poly2tri
-        REQUIRED
-    )
-    add_library(poly2tri UNKNOWN IMPORTED)
-    set_target_properties(poly2tri PROPERTIES
-        IMPORTED_LOCATION_DEBUG ${POLY2TRI_LIB_DEBUG}
-        IMPORTED_LOCATION_RELEASE ${POLY2TRI_LIB_RELEASE}
-        IMPORTED_CONFIGURATIONS "RELEASE;DEBUG"
-    )
-    target_include_directories(poly2tri INTERFACE
-        ${POLY2TRI_HEADER}/..
-    )
-endif()
+add_subdirectory(third-party/poly2tri)
 
 set(Python_FIND_VIRTUALENV "FIRST")
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
@@ -149,7 +108,7 @@ if (GIT_SCM AND GITDIR)
     # the commit's SHA1, and whether the building workspace was dirty or not
     # describe --match=NeVeRmAtCh --always --tags --abbrev=40 --dirty
     execute_process(COMMAND
-    "${GIT_EXECUTABLE}" --no-pager describe --tags --always --dirty
+        "${GIT_EXECUTABLE}" --no-pager describe --match=Nevermatch --tags --always --dirty
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     OUTPUT_VARIABLE GIT_SHA1
     ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -201,7 +160,14 @@ target_compile_definitions(git-info INTERFACE
     GIT_COMMIT_SUBJECT="${GIT_COMMIT_SUBJECT}"
     GIT_BRANCH="${GIT_BRANCH}"
 )
-configure_file(cmake_templates/BuildInfo.cpp.in ${CMAKE_BINARY_DIR}/generated/BuildInfo.cpp @ONLY)
+configure_file(cmake_templates/BuildInfo.hpp.in ${CMAKE_BINARY_DIR}/generated/build_info/BuildInfo.hpp @ONLY)
+add_library(build_info INTERFACE)
+target_include_directories(build_info INTERFACE
+    ${CMAKE_BINARY_DIR}/generated/build_info
+)
+if(UNIX)
+    configure_file(cmake_templates/unix_env.in ${CMAKE_BINARY_DIR}/environment @ONLY)
+endif()
 ################################################################################
 # Documentation
 ################################################################################
@@ -291,6 +257,7 @@ endif()
 # Add libraries / executables
 ################################################################################
 add_subdirectory(libjupedsim)
+add_subdirectory(libcommon)
 add_subdirectory(libsimulator)
 add_subdirectory(python_bindings_jupedsim)
 

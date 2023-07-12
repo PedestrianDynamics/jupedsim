@@ -1,65 +1,139 @@
-/// Copyright © 2012-2022 Forschungszentrum Jülich GmbH
-/// SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CollisionGeometry.hpp"
 #include "LineSegment.hpp"
-#include "Point.hpp"
 
-#include <deque>
+#include "gtest/gtest.h"
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <gtest/gtest.h>
 
-TEST(CollisionGeometry, CanBuildEmpty)
-{
-    CollisionGeometryBuilder geo{};
-    ASSERT_NO_THROW(geo.Build());
-}
-
-TEST(Geometry, CanIterate)
-{
-    CollisionGeometryBuilder builder{};
-    const auto geo = builder.Build();
-    for(const auto& line : geo.LineSegmentsInDistanceTo(5, Point(0, 0))) {
-        (void) line;
-    }
-}
-
-class CollisionGeometryFilterByDistance : public ::testing::Test
-{
-public:
-    CollisionGeometryFilterByDistance() : geometry(build()){};
-
-protected:
-    CollisionGeometry geometry;
-
-private:
-    static CollisionGeometry build()
-    {
-        CollisionGeometryBuilder b{};
-        b.AddLineSegment(-1, 0, 1, 0).AddLineSegment(-1, 1, 1, 1);
-        return b.Build();
-    }
+struct CellAdjacencyTestData {
+    Cell c;
+    Cell neighbor;
+    bool expected;
 };
 
-TEST_F(CollisionGeometryFilterByDistance, NoneAreInRange)
+class CellAdjacencyTest : public ::testing::TestWithParam<CellAdjacencyTestData>
 {
-    const auto range = geometry.LineSegmentsInDistanceTo(1, Point{0, -2});
-    ASSERT_EQ(range.begin(), range.end());
+};
+
+TEST_P(CellAdjacencyTest, All)
+{
+    const auto [c, neighbor, expected] = GetParam();
+    EXPECT_EQ(IsN8Adjacent(c, neighbor), expected);
+    EXPECT_EQ(IsN8Adjacent(neighbor, c), expected);
 }
 
-TEST_F(CollisionGeometryFilterByDistance, SomeAreInRange)
+// clang-format off
+INSTANTIATE_TEST_SUITE_P(
+    CellNeighborhood,
+    CellAdjacencyTest,
+    testing::Values(
+        // A cell is not a neighbor of itself
+        CellAdjacencyTestData{{0, 0}, {0, 0}, false},
+        // N4 neigbors
+        CellAdjacencyTestData{{0, 0}, {CELL_EXTEND, 0}, true},
+        CellAdjacencyTestData{{0, 0}, {0, CELL_EXTEND}, true},
+        CellAdjacencyTestData{{0, 0}, {CELL_EXTEND, CELL_EXTEND}, true},
+        CellAdjacencyTestData{{0, 0}, {-CELL_EXTEND, 0}, true},
+        CellAdjacencyTestData{{0, 0}, {0, -CELL_EXTEND}, true},
+        // N8 neighbors
+        CellAdjacencyTestData{{0, 0}, {-CELL_EXTEND, -CELL_EXTEND}, true},
+        CellAdjacencyTestData{{0, 0}, {CELL_EXTEND, -CELL_EXTEND}, true},
+        CellAdjacencyTestData{{0, 0}, {-CELL_EXTEND, CELL_EXTEND}, true},
+        // Layer beyond N8 (all false, no direct neighbors)
+        CellAdjacencyTestData{{0, 0}, {CELL_EXTEND*2, 0}, false},
+        CellAdjacencyTestData{{0, 0}, {CELL_EXTEND*2, CELL_EXTEND}, false},
+        CellAdjacencyTestData{{0, 0}, {CELL_EXTEND*2, CELL_EXTEND*2}, false},
+        CellAdjacencyTestData{{0, 0}, {CELL_EXTEND, CELL_EXTEND*2}, false},
+        CellAdjacencyTestData{{0, 0}, {0, CELL_EXTEND*2}, false},
+        CellAdjacencyTestData{{0, 0}, {-CELL_EXTEND, CELL_EXTEND*2}, false},
+        CellAdjacencyTestData{{0, 0}, {-CELL_EXTEND*2, CELL_EXTEND*2}, false},
+        CellAdjacencyTestData{{0, 0}, {-CELL_EXTEND*2, CELL_EXTEND}, false},
+        CellAdjacencyTestData{{0, 0}, {-CELL_EXTEND*2, 0}, false},
+        CellAdjacencyTestData{{0, 0}, {-CELL_EXTEND*2, -CELL_EXTEND}, false},
+        CellAdjacencyTestData{{0, 0}, {-CELL_EXTEND*2, -CELL_EXTEND*2}, false},
+        CellAdjacencyTestData{{0, 0}, {-CELL_EXTEND, -CELL_EXTEND*2}, false},
+        CellAdjacencyTestData{{0, 0}, {0, -CELL_EXTEND*2}, false},
+        CellAdjacencyTestData{{0, 0}, {CELL_EXTEND, -CELL_EXTEND*2}, false},
+        CellAdjacencyTestData{{0, 0}, {CELL_EXTEND*2, -CELL_EXTEND*2}, false},
+        CellAdjacencyTestData{{0, 0}, {CELL_EXTEND*2, -CELL_EXTEND}, false}
+    )
+);
+// clang-format on
+
+class CellsFromLSTest : public ::testing::TestWithParam<std::tuple<LineSegment, std::set<Cell>>>
 {
-    const auto range = geometry.LineSegmentsInDistanceTo(2, Point{0, -2});
-    for(const auto& line : range) {
-        ASSERT_EQ(line, LineSegment(Point(-1, 0), Point(1, 0)));
-    }
+};
+
+TEST_P(CellsFromLSTest, All)
+{
+    const auto [input, expected] = GetParam();
+    const LineSegment reverseInput{input.p2, input.p1};
+    EXPECT_EQ(expected, cellsFromLineSegment(input));
+    EXPECT_EQ(expected, cellsFromLineSegment(reverseInput));
 }
 
-TEST_F(CollisionGeometryFilterByDistance, AllAreInRange)
-{
-    const auto range = geometry.LineSegmentsInDistanceTo(1, Point{0, -2});
-    std::deque<LineSegment> expected{
-        LineSegment(Point(-1, 0), Point(1, 0)), LineSegment(Point(-1, 1), Point(1, 1))};
-    for(const auto& line : range) {
-        ASSERT_EQ(line, expected.front());
-        expected.pop_front();
-    }
-}
+// clang-format off
+INSTANTIATE_TEST_SUITE_P(
+    CellComputation,
+    CellsFromLSTest,
+    testing::Values(
+        std::make_tuple(
+            LineSegment{{0, 0}, {0, 0}},
+            std::set<Cell>{{0, 0}}
+        ),
+        std::make_tuple(
+            LineSegment{{1, 0}, {0, 0}},
+            std::set<Cell>{{0, 0}}
+        ),
+        std::make_tuple(
+            LineSegment{{0, 1}, {0, 0}},
+            std::set<Cell>{{0, 0}}
+        ),
+        std::make_tuple(
+            LineSegment{{0, 0}, {1, 1}},
+            std::set<Cell>{{0, 0}}
+        ),
+        std::make_tuple(
+            LineSegment{{1, 3}, {11, 5}},
+            std::set<Cell>{{0,0}, {4, 0}, {4, 4}, {8, 4}}
+        ),
+        std::make_tuple(
+            LineSegment{{-3, 0}, {6, 0}},
+            std::set<Cell>{{-4, 0}, {0, 0}, {4, 0}}
+        ),
+        std::make_tuple(
+            LineSegment{{0, 0}, {-7, -7}},
+            std::set<Cell>{{-8,-8},{0, 0}, {-4, -4}}
+        ),
+        std::make_tuple(
+            LineSegment{{0, 0}, {7, 7}},
+            std::set<Cell>{{0, 0}, {4, 4}}
+        ),
+        std::make_tuple(
+            LineSegment{{1, 1}, {3, 4}},
+            std::set<Cell>{{0, 0}, {0, 4}}
+        ),
+        std::make_tuple(
+            LineSegment{{4, 12}, {8, 0}},
+            std::set<Cell>{{4, 12}, {4, 8}, {4,4}, {4,0}, {8,0}}
+        ),
+        std::make_tuple(
+            LineSegment{{0, 0}, {0, 8}},
+            std::set<Cell>{{0, 0}, {0, 4}, {0, 8}}
+        ),
+        std::make_tuple(
+            LineSegment{{0, 0}, {8, 0}},
+            std::set<Cell>{{0, 0}, {4, 0}, {8, 0}}
+        ),
+        std::make_tuple(
+            LineSegment{{0, 0}, {0, 0}},
+            std::set<Cell>{{0, 0}}
+        ),
+        std::make_tuple(
+            LineSegment{{0, 0}, {0, 0}},
+            std::set<Cell>{{0, 0}}
+        )
+    )
+);
+// clang-format on

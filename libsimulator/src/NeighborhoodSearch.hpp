@@ -6,6 +6,7 @@
 #include "IteratorPair.hpp"
 #include "Point.hpp"
 
+#include <algorithm>
 #include <iterator>
 #include <unordered_map>
 #include <vector>
