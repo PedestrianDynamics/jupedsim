@@ -42,7 +42,7 @@ RUN cd /opt && git clone --depth=1 https://github.com/brendangregg/FlameGraph.gi
 RUN git config --global --add safe.directory '*'
 
 # Copy perf run test
-COPY scripts/perf-test/container_perf_test.py /opt/
+COPY container/perf-measurement/container_perf_test.py /opt/
 
 ENTRYPOINT ["python3", "-u", "/opt/container_perf_test.py"]
 CMD []
