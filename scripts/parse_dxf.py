@@ -112,7 +112,7 @@ def parse_dxf_file(
     dxf_path: pathlib.Path,
     outer_line_layer: str,
     hole_layers: List[str],
-    circle_accuracy: int,
+    quad_segs: int,
 ):
     """parses a dxf-file and creates a shapely structure resembling the file
     @param dxf_path: Path to the DXF file
@@ -120,8 +120,9 @@ def parse_dxf_file(
                              outer polygon is defined
     @param hole_layers: a list with all layer names in the dxf-file where holes
                         are defined
-    @param circle_accuracy: The accuracy of the circle, specified as the number
-                            of line segments used to approximate a circle.
+    @param quad_segs: Specifies the number of linear segments in a quarter
+                      circle in the approximation of circular arcs.
+
     @return: shapely polygon or multipolygon from dxf-file
     """
     holes = []
@@ -146,7 +147,7 @@ def parse_dxf_file(
                 outer_lines.append(polyline_to_linestring(entity))
         elif entity.dxftype() == "CIRCLE":
             if entity.dxf.layer in hole_layers:
-                holes.append(dxf_circle_to_shply(entity, circle_accuracy))
+                holes.append(dxf_circle_to_shply(entity, quad_segs))
             else:
                 logging.warning(
                     f"there is a circle defined in Layer {entity.dxf.layer} "
@@ -290,13 +291,17 @@ The polygon should end up looking like the structure in the dxf file:
     )
 
     parser.add_argument(
-        "-c",
-        "--circle-accuracy",
-        help="number of line segments used to approximate a circle (default: 8)",
-        default=8,
+        "-q",
+        "--quad-segments",
+        help="specifies the number of linear segments in a quarter circle in "
+        "the approximation of circular arcs (default: 4)",
+        default=4,
     )
     parser.add_argument(
-        "-p", "--plot", help="plot the parsed polygon", action="store_true"
+        "-p",
+        "--plot",
+        help="plot the parsed polygon in an interactive window",
+        action="store_true",
     )
     return parser.parse_args()
 
@@ -306,7 +311,10 @@ def main():
 
     # parse polygon(s)
     merged_polygon = parse_dxf_file(
-        parsed_args.input, parsed_args.walkable, parsed_args.obstacles
+        parsed_args.input,
+        parsed_args.walkable,
+        parsed_args.obstacles,
+        parsed_args.quad_segments,
     )
 
     # create a dxf file using the parsed geometry
