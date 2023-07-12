@@ -31,7 +31,7 @@ typedef struct JPS_BuildInfo {
     const char* compiler_version;
 } JPS_BuildInfo;
 
-JPS_BuildInfo JPS_GetBuildInfo();
+JUPEDSIM_API JPS_BuildInfo JPS_GetBuildInfo();
 
 /**
  * Contains basic performance trace information
