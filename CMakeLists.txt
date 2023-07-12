@@ -47,6 +47,9 @@ print_var(BUILD_WITH_ASAN)
 if(BUILD_WITH_ASAN AND ${CMAKE_SYSTEM} MATCHES "Windows")
     message(FATAL_ERROR "Address sanitizer builds are not supported on Windows")
 endif()
+
+set(BUILD_BENCHMARKS OFF CACHE BOOL "Build micro benchmark")
+print_var(BUILD_BENCHMARKS)
 ################################################################################
 # Compilation flags
 ################################################################################
@@ -97,6 +100,10 @@ find_package(pybind11 REQUIRED CONFIG)
 if(BUILD_TESTS)
     find_package(GTest REQUIRED CONFIG)
 endif()
+
+if (BUILD_BENCHMARKS)
+    find_package(benchmark REQUIRED)
+endif ()
 ################################################################################
 # VCS info
 ################################################################################
