@@ -120,7 +120,7 @@ endif()
 if (BUILD_BENCHMARKS)
     add_executable(libsimulator-benchmarks
         benchmark/BenchmarkMain.cpp
-    )
+        benchmark/benchmarkCollisionGeometry.hpp benchmark/benchmarkLineSegment.hpp benchmark/benchmarkPoint.hpp)
     target_link_libraries(libsimulator-benchmarks PRIVATE
         benchmark::benchmark
         simulator
