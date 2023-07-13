@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import logging
+import os
 import pathlib
 import shutil
 import tarfile
@@ -56,13 +57,18 @@ In the process following steps are taken:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
-        "-o", "--output", help="output directory", type=pathlib.Path
+        "-o",
+        "--output",
+        help="output directory",
+        type=pathlib.Path,
+        default=os.getcwd(),
     )
     parser.add_argument(
         "-s",
         "--source",
         help="source directory of JuPedSim",
         type=pathlib.Path,
+        required=True,
     )
 
     known, forwarded_args = parser.parse_known_args()
