@@ -44,7 +44,6 @@ public:
     /**
      * @return the distance from the line to the point p
      */
-    double DistToOld(const Point& p) const;
     double DistTo(const Point& p) const;
 
     /**
