@@ -78,15 +78,6 @@ Point LineSegment::ShortestPoint(const Point& p) const
         return p2 + t * lambda;
 }
 
-/* Berechnet direkt den Abstand von p zum Segment l
- * dazu wird die Funktion Line::ShortestPoint()
- * benuzt
- * */
-double LineSegment::DistToOld(const Point& p) const
-{
-    return (p - ShortestPoint(p)).Norm();
-}
-
 double LineSegment::DistTo(const Point& p) const
 {
     using Kernel = CGAL::Simple_cartesian<double>;
