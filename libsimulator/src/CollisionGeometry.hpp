@@ -7,6 +7,9 @@
 #include "LineSegment.hpp"
 
 #include <vector>
+#include <map>
+#include <set>
+#include <unordered_map>
 
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Polygon_with_holes_2.h>
@@ -95,6 +98,7 @@ class CollisionGeometry
     PolyWithHoles _accessibleArea;
     std::vector<LineSegment> _segments;
     std::unordered_map<Cell, std::set<LineSegment>> _grid{};
+    std::multimap<Cell, LineSegment> _grid2{};
 
 public:
     using LineSegmentRange = IteratorPair<DistanceQueryIterator<LineSegment>>;
@@ -123,4 +127,21 @@ public:
     bool IntersectsAny(LineSegment linesegment) const;
 
     bool InsideGeometry(Point p) const;
+
+private:
+    void insertIntoGrid2(const LineSegment& ls);
 };
+
+
+// data type:
+//      Cell with same extend (reuse Cell from top)
+//      search radius (construction parameter)
+//
+// flow:
+// loop line segments:
+//      compute AABB for ls
+//      compute cells from AABB
+//      for each cell check if ls intersects cell + search radius (fixed)
+//          if intersects place ls in multimap<Cell, LineSegment> (can be adapted)
+//
+//  equal_range(multimap)

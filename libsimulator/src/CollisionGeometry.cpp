@@ -34,6 +34,8 @@ bool IsN8Adjacent(const Cell& a, const Cell& b)
     return true;
 }
 
+const auto toMultiple = [](double x) { return ceil(x / CELL_EXTEND) * CELL_EXTEND; };
+
 std::set<Cell> cellsFromLineSegment(LineSegment ls)
 {
     const auto firstCell = makeCell(ls.p1);
@@ -48,7 +50,6 @@ std::set<Cell> cellsFromLineSegment(LineSegment ls)
 
     std::set<Cell> cells{firstCell, lastCell};
 
-    const auto toMultiple = [](double x) { return ceil(x / CELL_EXTEND) * CELL_EXTEND; };
     const AABB bounds(ls.p1, ls.p2);
     const auto vec_p1p2 = ls.p2 - ls.p1;
     std::vector<Point> intersections{};
@@ -110,7 +111,39 @@ CollisionGeometry::CollisionGeometry(PolyWithHoles accessibleArea) : _accessible
         for(const auto& cell : cells) {
             _grid[cell].insert(ls);
         }
+
+        insertIntoGrid2(ls);
     }
+}
+
+void CollisionGeometry::insertIntoGrid2(const LineSegment& ls)
+{
+//      compute AABB for ls
+//      compute cells from AABB
+//      for each cell check if ls intersects cell + search radius (fixed)
+//          if intersects place ls in multimap<Cell, LineSegment> (can be adapted)
+
+    const AABB bounds(ls.p1, ls.p2);
+//    const lowerLeft = makeCell({aabb.xmin, aabb.ymin});
+//    const topRight = makeCell({aabb.xmax, aabb.ymax});
+
+    for(double x_intersect = toMultiple(bounds.xmin); x_intersect <= bounds.xmax; x_intersect += CELL_EXTEND) {
+        for(double y_intersect = toMultiple(bounds.ymin); y_intersect <= bounds.ymax; y_intersect += CELL_EXTEND) {
+            const auto cell = makeCell({x_intersect, y_intersect});
+
+        }
+//    for (double x=aabb.xmin; x<aabb.xmax; x+=CELL_EXTEND){
+//        for (double y=aabb.ymin; y<aabb.ymax; y+=CELL_EXTEND){
+//            const auto cell = makeCell({x, y});
+//        }
+    }
+    std::vector<Cell> cells{};
+
+    ///   x--------------------------------------x
+    ///   v                                      v
+    // |----|----|----|----|----|----|----|----|----|
+    //
+    //
 }
 
 CollisionGeometry::LineSegmentRange
