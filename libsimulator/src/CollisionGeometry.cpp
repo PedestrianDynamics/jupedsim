@@ -110,6 +110,50 @@ CollisionGeometry::CollisionGeometry(PolyWithHoles accessibleArea) : _accessible
         for(const auto& cell : cells) {
             _grid[cell].insert(ls);
         }
+
+        insertIntoApproximateGrid(ls);
+    }
+
+    for(auto& [_, vec] : _approximateGrid) {
+        vec.shrink_to_fit();
+    }
+}
+
+const std::vector<LineSegment>& CollisionGeometry::LineSegmentsInApproxDistanceTo(Point p) const
+{
+    const auto cell = makeCell(p);
+    if(const auto it = _approximateGrid.find(cell); it != _approximateGrid.end()) {
+        return it->second;
+    }
+    static const std::vector<LineSegment> empty{};
+    return empty;
+}
+
+void CollisionGeometry::insertIntoApproximateGrid(const LineSegment& ls)
+{
+    constexpr double searchRadius = 4.;
+
+    const auto searchExtend = Point(searchRadius, searchRadius);
+    const AABB lineSegmentBounds({ls.p1, ls.p2});
+    const AABB searchBounds(
+        lineSegmentBounds.BottomLeft() - searchExtend, lineSegmentBounds.TopRight() + searchExtend);
+
+    auto cellBottomLeft = makeCell(searchBounds.BottomLeft());
+    auto cellTopRight = makeCell(searchBounds.TopRight());
+
+    for(double x = cellBottomLeft.x; x <= cellTopRight.x; x += CELL_EXTEND) {
+        for(double y = cellBottomLeft.y; y <= cellTopRight.y; y += CELL_EXTEND) {
+            const auto cell = makeCell({x, y});
+
+            const AABB bbWithSearchRadius(
+                {cell.x - searchRadius, cell.y - searchRadius},
+                {cell.x + searchRadius + CELL_EXTEND, cell.y + searchRadius + CELL_EXTEND});
+
+            if(bbWithSearchRadius.Intersects(ls)) {
+                auto& vec = _approximateGrid[cell];
+                vec.push_back(ls);
+            }
+        }
     }
 }
 
@@ -121,7 +165,7 @@ CollisionGeometry::LineSegmentsInDistanceTo(double distance, Point p) const
         DistanceQueryIterator<LineSegment>{distance, p, _segments.cend(), _segments.cend()}};
 }
 
-bool CollisionGeometry::IntersectsAny(LineSegment linesegment) const
+bool CollisionGeometry::IntersectsAny(const LineSegment& linesegment) const
 {
     const auto cellsToQuery = cellsFromLineSegment(linesegment);
     for(const auto& cell : cellsToQuery) {
