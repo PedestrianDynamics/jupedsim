@@ -3,6 +3,7 @@
 #pragma once
 
 #include "IteratorPair.hpp"
+#include "LineSegment.hpp"
 #include "Point.hpp"
 #include "SimulationError.hpp"
 
@@ -44,4 +45,11 @@ struct AABB {
     {
         return !(xmax < other.xmin || xmin > other.xmax || ymax < other.ymin || ymin > other.ymax);
     };
+
+    bool Intersects(const LineSegment& lineSegment) const;
+
+    Point TopLeft() const { return Point{xmin, ymax}; };
+    Point TopRight() const { return Point{xmax, ymax}; };
+    Point BottomLeft() const { return Point{xmin, ymin}; };
+    Point BottomRight() const { return Point{xmax, ymin}; };
 };

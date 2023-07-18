@@ -3,6 +3,7 @@
 #include "VelocityModel.hpp"
 
 #include "GenericAgent.hpp"
+#include "GeometricFunctions.hpp"
 #include "Macros.hpp"
 #include "Mathematics.hpp"
 #include "NeighborhoodSearch.hpp"
@@ -37,18 +38,27 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
 {
     const double radius = 4.0;
     auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.pos, radius);
-    // Remove any agent from the neighborhood that is obstructed by geometry and the current agent
+    const auto& walls = geometry.LineSegmentsInApproxDistanceTo(ped.pos);
+
+    // Remove any agent from the neighborhood that is obstructed by geometry and the current
+    // agent
     neighborhood.erase(
         std::remove_if(
             std::begin(neighborhood),
             std::end(neighborhood),
-            [&ped, &geometry](const auto& n) {
+            [&ped, &walls](const auto& n) {
                 if(ped.id == n->id) {
                     return true;
                 }
-                if(geometry.IntersectsAny(LineSegment(ped.pos, n->pos))) {
+                const auto lineSegment = LineSegment(ped.pos, n->pos);
+
+                if(std::find_if(
+                       walls.cbegin(), walls.cend(), [&lineSegment](const auto& candidate) {
+                           return intersects(lineSegment, candidate);
+                       }) != walls.end()) {
                     return true;
                 }
+
                 return false;
             }),
         std::end(neighborhood));
@@ -186,11 +196,11 @@ Point VelocityModel::ForceRepPed(const Data& ped1, const Data& ped2) const
 
 Point VelocityModel::ForceRepRoom(const Data& ped, const CollisionGeometry& geometry) const
 {
-    auto walls = geometry.LineSegmentsInDistanceTo(5.0, ped.pos);
+    const auto& walls = geometry.LineSegmentsInApproxDistanceTo(ped.pos);
 
     auto f = std::accumulate(
-        walls.begin(),
-        walls.end(),
+        walls.cbegin(),
+        walls.cend(),
         Point(0, 0),
         [this, &ped](const auto& acc, const auto& element) {
             return acc + ForceRepWall(ped, element);

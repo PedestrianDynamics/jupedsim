@@ -76,7 +76,7 @@ target_link_libraries(simulator PUBLIC
     CGAL::CGAL
     build_info
 )
-target_link_options(simulator PUBLIC 
+target_link_options(simulator PUBLIC
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_ASAN}>>:-fsanitize=address>
 )
 target_include_directories(simulator PUBLIC
@@ -121,6 +121,8 @@ if (BUILD_BENCHMARKS)
     add_executable(libsimulator-benchmarks
         benchmark/BenchmarkMain.cpp
         benchmark/benchmarkLineSegment.hpp
+        benchmark/benchmarkCollisionGeometry.hpp
+        benchmark/buildGeometries.hpp
     )
 
     target_link_libraries(libsimulator-benchmarks PRIVATE
