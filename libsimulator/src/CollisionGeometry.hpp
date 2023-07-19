@@ -6,10 +6,10 @@
 #include "IteratorPair.hpp"
 #include "LineSegment.hpp"
 
-#include <vector>
 #include <map>
 #include <set>
 #include <unordered_map>
+#include <vector>
 
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Polygon_with_holes_2.h>
@@ -121,8 +121,7 @@ public:
     /// @return iterator_pair to all linesegments in range
     LineSegmentRange LineSegmentsInDistanceTo(double distance, Point p) const;
 
-    const std::vector<LineSegment>&
-    LineSegmentsInApproxDistanceTo(Point p) const;
+    const std::vector<LineSegment>& LineSegmentsInApproxDistanceTo(Point p) const;
 
     /// Will perfrom a linesegment intersection versus the whole geometry, i.e. walls and closed
     /// doors.
@@ -135,7 +134,6 @@ public:
 private:
     void insertIntoGrid2(const LineSegment& ls);
 };
-
 
 // data type:
 //      Cell with same extend (reuse Cell from top)

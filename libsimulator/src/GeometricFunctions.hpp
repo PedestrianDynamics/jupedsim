@@ -83,7 +83,7 @@ inline bool intersectsWithCGAL(const LineSegment l1, const LineSegment l2)
     return CGAL::do_intersect(this_segment, other_segment);
 }
 
-inline bool intersects(const LineSegment l1, const LineSegment l2)
+inline bool intersects(const LineSegment& l1, const LineSegment& l2)
 {
     return intersects(l1.p1, l1.p2, l2.p1, l2.p2);
 }
