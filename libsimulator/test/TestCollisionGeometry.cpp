@@ -216,19 +216,65 @@ protected:
     }
 };
 
-TEST_F(LongDiagonalRectangle, CornersOfBBOutside)
+TEST_F(LongDiagonalRectangle, FarCellsOutside)
 {
-    //    const std::set<LineSegment> expected = {
-    //        {{1., 1.}, {3., 1.}},
-    //        {{3., 1.}, {3., 3.}},
-    //        {{3., 3.}, {1., 3.}},
-    //        {{1., 3.}, {1., 1.}},
-    //    };
+    const std::vector<Cell> candidates = {
+        {-16., -4}, {-16, 0}, {-16, 4}, {-16, 8},  {-16, 12}, {-12, 4}, {-12, 8},
+        {-12, 12},  {-8, 8},  {-8, 12}, {-4, -20}, {0, -16},  {4, -20}, {4, -16},
+        {4, -12},   {4, -8},  {8, -20}, {8, -16},  {8, -12},  {8, -8},  {8, -4}};
 
-    const auto resultTopLeft = collisionGeometry.LineSegmentsInApproxDistanceTo({-12., 8.});
-    ASSERT_TRUE(resultTopLeft.empty());
+    for(const auto& point : candidates) {
+        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        ASSERT_TRUE(result.empty());
+    }
+}
 
-    const auto resultBottomRight = collisionGeometry.LineSegmentsInApproxDistanceTo({4., -16.});
+TEST_F(LongDiagonalRectangle, CellsAtBottomLeft)
+{
+    const std::set<LineSegment> expected = {
+        {{-11., -13.}, {5., 11.}}, {{6., 10.}, {-10., -14.}}, {{-10., -14.}, {-11., -13.}}};
 
-    ASSERT_TRUE(resultBottomRight.empty());
+    const auto middleCell = Cell{-12, -16};
+    const std::vector<Cell> candidates = {
+        {middleCell.x - CELL_EXTEND, middleCell.y - CELL_EXTEND},
+        {middleCell.x - CELL_EXTEND, middleCell.y},
+        {middleCell.x - CELL_EXTEND, middleCell.y + CELL_EXTEND},
+        {middleCell.x, middleCell.y - CELL_EXTEND},
+        {middleCell.x, middleCell.y},
+        {middleCell.x, middleCell.y + CELL_EXTEND},
+        {middleCell.x + CELL_EXTEND, middleCell.y - CELL_EXTEND},
+        {middleCell.x + CELL_EXTEND, middleCell.y},
+        {middleCell.x + CELL_EXTEND, middleCell.y + CELL_EXTEND}};
+
+    for(const auto& point : candidates) {
+        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const std::set<LineSegment> actual(std::begin(result), std::end(result));
+
+        ASSERT_EQ(actual, expected);
+    }
+}
+
+TEST_F(LongDiagonalRectangle, CellsAtTopRight)
+{
+    const std::set<LineSegment> expected = {
+        {{-11., -13.}, {5., 11.}}, {{5., 11.}, {6., 10.}}, {{6., 10.}, {-10., -14.}}};
+
+    const auto middleCell = Cell{4, 8};
+    const std::vector<Cell> candidates = {
+        {middleCell.x - CELL_EXTEND, middleCell.y - CELL_EXTEND},
+        {middleCell.x - CELL_EXTEND, middleCell.y},
+        {middleCell.x - CELL_EXTEND, middleCell.y + CELL_EXTEND},
+        {middleCell.x, middleCell.y - CELL_EXTEND},
+        {middleCell.x, middleCell.y},
+        {middleCell.x, middleCell.y + CELL_EXTEND},
+        {middleCell.x + CELL_EXTEND, middleCell.y - CELL_EXTEND},
+        {middleCell.x + CELL_EXTEND, middleCell.y},
+        {middleCell.x + CELL_EXTEND, middleCell.y + CELL_EXTEND}};
+
+    for(const auto& point : candidates) {
+        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const std::set<LineSegment> actual(std::begin(result), std::end(result));
+
+        ASSERT_EQ(actual, expected);
+    }
 }

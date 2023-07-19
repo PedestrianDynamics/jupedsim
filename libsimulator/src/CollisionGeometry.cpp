@@ -132,11 +132,6 @@ const std::vector<LineSegment>& CollisionGeometry::LineSegmentsInApproxDistanceT
 
 void CollisionGeometry::insertIntoGrid2(const LineSegment& ls)
 {
-    //      compute AABB for ls
-    //      compute cells from AABB
-    //      for each cell check if ls intersects cell + search radius (fixed)
-    //          if intersects place ls in multimap<Cell, LineSegment> (can be adapted)
-
     constexpr double searchRadius = 4.;
 
     const auto searchExtend = Point(searchRadius, searchRadius);
@@ -147,12 +142,6 @@ void CollisionGeometry::insertIntoGrid2(const LineSegment& ls)
     auto cellBottomLeft = makeCell(searchBounds.BottomLeft());
     auto cellTopRight = makeCell(searchBounds.TopRight());
 
-    fmt::print("LS: {}--{}\n", ls.p1, ls.p2);
-    fmt::print(
-        "lineSegmentBounds: {}--{}\n",
-        lineSegmentBounds.BottomLeft(),
-        lineSegmentBounds.TopRight());
-    fmt::print("searchBounds: {}--{}\n", searchBounds.BottomLeft(), searchBounds.TopRight());
     for(double x = cellBottomLeft.x; x <= cellTopRight.x; x += CELL_EXTEND) {
         for(double y = cellBottomLeft.y; y <= cellTopRight.y; y += CELL_EXTEND) {
             const auto cell = makeCell({x, y});
@@ -162,13 +151,11 @@ void CollisionGeometry::insertIntoGrid2(const LineSegment& ls)
                 {cell.x + searchRadius + CELL_EXTEND, cell.y + searchRadius + CELL_EXTEND});
 
             if(bbWithSearchRadius.Intersects(ls)) {
-                fmt::print("cell: {}\n", cell);
                 auto& vec = _grid2[cell];
                 vec.push_back(ls);
             }
         }
     }
-    fmt::print("\n");
 }
 
 CollisionGeometry::LineSegmentRange
