@@ -278,3 +278,49 @@ TEST_F(LongDiagonalRectangle, CellsAtTopRight)
         ASSERT_EQ(actual, expected);
     }
 }
+
+TEST_F(LongDiagonalRectangle, CellsWithOneLSLeft)
+{
+    const std::set<LineSegment> expected = {{{-11., -13.}, {5., 11.}}};
+
+    const std::vector<Cell> candidates = {{-12, 0}, {-4, 12}};
+
+    for(const auto& point : candidates) {
+        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const std::set<LineSegment> actual(std::begin(result), std::end(result));
+
+        ASSERT_EQ(actual, expected);
+    }
+}
+
+TEST_F(LongDiagonalRectangle, CellsWithOneLSRight)
+{
+    const std::set<LineSegment> expected = {{{6., 10.}, {-10., -14.}}};
+
+    const std::vector<Cell> candidates = {{0, -12}, {8, 0}};
+
+    for(const auto& point : candidates) {
+        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const std::set<LineSegment> actual(std::begin(result), std::end(result));
+
+        ASSERT_EQ(actual, expected);
+    }
+}
+
+TEST_F(LongDiagonalRectangle, CellsWithTwoLSMiddle)
+{
+    const std::set<LineSegment> expected = {{{-11., -13.}, {5., 11.}}, {{6., 10.}, {-10., -14.}}};
+
+    const std::vector<Cell> candidates = {
+        {-16, -8}, {-12, -8}, {-12, -4}, {-8, -8}, {-8, -4}, {-8, 0}, {-8, 4},
+        {-4, -16}, {-4, -12}, {-4, -8},  {-4, -4}, {-4, 0},  {-4, 4}, {-4, 8},
+        {0, -8},   {0, -4},   {0, 0},    {4, -4},  {4, 0},
+    };
+
+    for(const auto& point : candidates) {
+        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const std::set<LineSegment> actual(std::begin(result), std::end(result));
+
+        ASSERT_EQ(actual, expected);
+    }
+}
