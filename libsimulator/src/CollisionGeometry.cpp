@@ -114,36 +114,53 @@ CollisionGeometry::CollisionGeometry(PolyWithHoles accessibleArea) : _accessible
 
         insertIntoGrid2(ls);
     }
+
+    for(auto& [_, vec] : _grid2) {
+        vec.shrink_to_fit();
+    }
+}
+
+const std::vector<LineSegment>& CollisionGeometry::LineSegmentsInApproxDistanceTo(Point p) const
+{
+    const auto cell = makeCell(p);
+    if(const auto it = _grid2.find(cell); it != _grid2.end()) {
+        return it->second;
+    }
+    static const std::vector<LineSegment> empty{};
+    return empty;
 }
 
 void CollisionGeometry::insertIntoGrid2(const LineSegment& ls)
 {
-//      compute AABB for ls
-//      compute cells from AABB
-//      for each cell check if ls intersects cell + search radius (fixed)
-//          if intersects place ls in multimap<Cell, LineSegment> (can be adapted)
+    //      compute AABB for ls
+    //      compute cells from AABB
+    //      for each cell check if ls intersects cell + search radius (fixed)
+    //          if intersects place ls in multimap<Cell, LineSegment> (can be adapted)
 
-    const AABB bounds(ls.p1, ls.p2);
-//    const lowerLeft = makeCell({aabb.xmin, aabb.ymin});
-//    const topRight = makeCell({aabb.xmax, aabb.ymax});
+    constexpr double searchRadius = 4.;
 
-    for(double x_intersect = toMultiple(bounds.xmin); x_intersect <= bounds.xmax; x_intersect += CELL_EXTEND) {
-        for(double y_intersect = toMultiple(bounds.ymin); y_intersect <= bounds.ymax; y_intersect += CELL_EXTEND) {
-            const auto cell = makeCell({x_intersect, y_intersect});
+    const auto searchExtend = Point(searchRadius, searchRadius);
+    const AABB lineSegmentBounds(ls.p1, ls.p2);
+    const AABB searchBounds(
+        lineSegmentBounds.BottomLeft() - searchExtend, lineSegmentBounds.TopRight() + searchExtend);
 
+    auto cellBottomLeft = makeCell(searchBounds.BottomLeft());
+    auto cellTopRight = makeCell(searchBounds.TopRight());
+
+    for(double x = cellBottomLeft.x; x <= cellTopRight.x; x += CELL_EXTEND) {
+        for(double y = cellBottomLeft.y; y <= cellTopRight.y; y += CELL_EXTEND) {
+            const auto cell = makeCell({x, y});
+
+            const AABB bbWithSearchRadius(
+                {cell.x - searchRadius, cell.y - searchRadius},
+                {cell.x + searchRadius + CELL_EXTEND, cell.y + searchRadius + CELL_EXTEND});
+
+            if(bbWithSearchRadius.Intersects(ls)) {
+                auto& vec = _grid2[cell];
+                vec.push_back(ls);
+            }
         }
-//    for (double x=aabb.xmin; x<aabb.xmax; x+=CELL_EXTEND){
-//        for (double y=aabb.ymin; y<aabb.ymax; y+=CELL_EXTEND){
-//            const auto cell = makeCell({x, y});
-//        }
     }
-    std::vector<Cell> cells{};
-
-    ///   x--------------------------------------x
-    ///   v                                      v
-    // |----|----|----|----|----|----|----|----|----|
-    //
-    //
 }
 
 CollisionGeometry::LineSegmentRange

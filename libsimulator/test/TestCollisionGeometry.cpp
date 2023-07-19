@@ -137,3 +137,69 @@ INSTANTIATE_TEST_SUITE_P(
     )
 );
 // clang-format on
+
+PolyWithHoles constructPolyFromPoints(const std::vector<Point>& points)
+{
+    using CGALPoint = PolyWithHoles::Polygon_2::Point_2;
+    std::vector<CGALPoint> cgalPoints{};
+    cgalPoints.reserve(points.size());
+    std::transform(
+        std::begin(points), std::end(points), std::back_inserter(cgalPoints), [](const auto& p) {
+            return CGALPoint{p.x, p.y};
+        });
+    return PolyWithHoles(Poly{cgalPoints.begin(), cgalPoints.end()});
+}
+
+class ApproximateDistanceSimpleRectangle : public ::testing::Test
+{
+protected:
+    CollisionGeometry collisionGeometry;
+
+    ApproximateDistanceSimpleRectangle()
+        : collisionGeometry(constructPolyFromPoints({{1., 1.}, {3., 1.}, {3., 3.}, {1., 3.}}))
+    {
+    }
+};
+
+TEST_F(ApproximateDistanceSimpleRectangle, InsideSingleCell)
+{
+    const std::set<LineSegment> expected = {
+        {{1., 1.}, {3., 1.}},
+        {{3., 1.}, {3., 3.}},
+        {{3., 3.}, {1., 3.}},
+        {{1., 3.}, {1., 1.}},
+    };
+
+    const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo({2., 2.});
+    const std::set<LineSegment> actual(std::begin(result), std::end(result));
+
+    ASSERT_EQ(actual, expected);
+}
+
+TEST_F(ApproximateDistanceSimpleRectangle, outsideInRange)
+{
+    const std::set<LineSegment> expected = {
+        {{1., 1.}, {3., 1.}},
+        {{3., 1.}, {3., 3.}},
+        {{3., 3.}, {1., 3.}},
+        {{1., 3.}, {1., 1.}},
+    };
+
+    const std::vector<Cell> candidates = {
+        {-CELL_EXTEND, -CELL_EXTEND},
+        {-CELL_EXTEND, 0},
+        {-CELL_EXTEND, CELL_EXTEND},
+        {0, -CELL_EXTEND},
+        {0, 0},
+        {0, CELL_EXTEND},
+        {CELL_EXTEND, -CELL_EXTEND},
+        {CELL_EXTEND, 0},
+        {CELL_EXTEND, CELL_EXTEND}};
+
+    for(const auto& point : candidates) {
+        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const std::set<LineSegment> actual(std::begin(result), std::end(result));
+
+        ASSERT_EQ(actual, expected);
+    }
+}

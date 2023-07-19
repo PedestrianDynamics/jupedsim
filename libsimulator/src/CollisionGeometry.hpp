@@ -98,7 +98,7 @@ class CollisionGeometry
     PolyWithHoles _accessibleArea;
     std::vector<LineSegment> _segments;
     std::unordered_map<Cell, std::set<LineSegment>> _grid{};
-    std::multimap<Cell, LineSegment> _grid2{};
+    std::unordered_map<Cell, std::vector<LineSegment>> _grid2{};
 
 public:
     using LineSegmentRange = IteratorPair<DistanceQueryIterator<LineSegment>>;
@@ -120,6 +120,10 @@ public:
     /// @param p reference point
     /// @return iterator_pair to all linesegments in range
     LineSegmentRange LineSegmentsInDistanceTo(double distance, Point p) const;
+
+    const std::vector<LineSegment>&
+    LineSegmentsInApproxDistanceTo(Point p) const;
+
     /// Will perfrom a linesegment intersection versus the whole geometry, i.e. walls and closed
     /// doors.
     /// @param linesegment to test for intersection with geometry
