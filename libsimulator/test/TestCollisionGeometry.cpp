@@ -203,3 +203,32 @@ TEST_F(ApproximateDistanceSimpleRectangle, outsideInRange)
         ASSERT_EQ(actual, expected);
     }
 }
+
+class LongDiagonalRectangle : public ::testing::Test
+{
+protected:
+    CollisionGeometry collisionGeometry;
+
+    LongDiagonalRectangle()
+        : collisionGeometry(
+              constructPolyFromPoints({{-11., -13.}, {5., 11.}, {6., 10.}, {-10., -14.}}))
+    {
+    }
+};
+
+TEST_F(LongDiagonalRectangle, CornersOfBBOutside)
+{
+    //    const std::set<LineSegment> expected = {
+    //        {{1., 1.}, {3., 1.}},
+    //        {{3., 1.}, {3., 3.}},
+    //        {{3., 3.}, {1., 3.}},
+    //        {{1., 3.}, {1., 1.}},
+    //    };
+
+    const auto resultTopLeft = collisionGeometry.LineSegmentsInApproxDistanceTo({-12., 8.});
+    ASSERT_TRUE(resultTopLeft.empty());
+
+    const auto resultBottomRight = collisionGeometry.LineSegmentsInApproxDistanceTo({4., -16.});
+
+    ASSERT_TRUE(resultBottomRight.empty());
+}

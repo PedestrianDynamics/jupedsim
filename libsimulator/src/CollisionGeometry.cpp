@@ -140,13 +140,19 @@ void CollisionGeometry::insertIntoGrid2(const LineSegment& ls)
     constexpr double searchRadius = 4.;
 
     const auto searchExtend = Point(searchRadius, searchRadius);
-    const AABB lineSegmentBounds(ls.p1, ls.p2);
+    const AABB lineSegmentBounds({ls.p1, ls.p2});
     const AABB searchBounds(
         lineSegmentBounds.BottomLeft() - searchExtend, lineSegmentBounds.TopRight() + searchExtend);
 
     auto cellBottomLeft = makeCell(searchBounds.BottomLeft());
     auto cellTopRight = makeCell(searchBounds.TopRight());
 
+    fmt::print("LS: {}--{}\n", ls.p1, ls.p2);
+    fmt::print(
+        "lineSegmentBounds: {}--{}\n",
+        lineSegmentBounds.BottomLeft(),
+        lineSegmentBounds.TopRight());
+    fmt::print("searchBounds: {}--{}\n", searchBounds.BottomLeft(), searchBounds.TopRight());
     for(double x = cellBottomLeft.x; x <= cellTopRight.x; x += CELL_EXTEND) {
         for(double y = cellBottomLeft.y; y <= cellTopRight.y; y += CELL_EXTEND) {
             const auto cell = makeCell({x, y});
@@ -156,11 +162,13 @@ void CollisionGeometry::insertIntoGrid2(const LineSegment& ls)
                 {cell.x + searchRadius + CELL_EXTEND, cell.y + searchRadius + CELL_EXTEND});
 
             if(bbWithSearchRadius.Intersects(ls)) {
+                fmt::print("cell: {}\n", cell);
                 auto& vec = _grid2[cell];
                 vec.push_back(ls);
             }
         }
     }
+    fmt::print("\n");
 }
 
 CollisionGeometry::LineSegmentRange
