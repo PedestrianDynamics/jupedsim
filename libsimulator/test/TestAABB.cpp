@@ -21,12 +21,30 @@ TEST(AABB, CannotConstructFromEmptyVector)
     ASSERT_THROW(const AABB aabb(c), SimulationError);
 }
 
-TEST(AABB, CanConstructFromPoints)
+TEST(AABB, CanConstructFromPositivePoints)
 {
     const AABB aabb({0, 0}, {1, 1});
     ASSERT_EQ(aabb.xmin, 0);
     ASSERT_EQ(aabb.xmax, 1);
     ASSERT_EQ(aabb.ymin, 0);
+    ASSERT_EQ(aabb.ymax, 1);
+}
+
+TEST(AABB, CanConstructFromNegativePoints)
+{
+    const AABB aabb({-10, -1}, {-4, -5});
+    ASSERT_EQ(aabb.xmin, -10);
+    ASSERT_EQ(aabb.xmax, -4);
+    ASSERT_EQ(aabb.ymin, -5);
+    ASSERT_EQ(aabb.ymax, -1);
+}
+
+TEST(AABB, CanConstructFromPoints)
+{
+    const AABB aabb({-2, 1}, {3, -5});
+    ASSERT_EQ(aabb.xmin, -2);
+    ASSERT_EQ(aabb.xmax, 3);
+    ASSERT_EQ(aabb.ymin, -5);
     ASSERT_EQ(aabb.ymax, 1);
 }
 
