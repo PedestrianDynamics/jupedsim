@@ -6,6 +6,9 @@
 #include "IteratorPair.hpp"
 #include "LineSegment.hpp"
 
+#include <map>
+#include <set>
+#include <unordered_map>
 #include <vector>
 
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
@@ -95,6 +98,7 @@ class CollisionGeometry
     PolyWithHoles _accessibleArea;
     std::vector<LineSegment> _segments;
     std::unordered_map<Cell, std::set<LineSegment>> _grid{};
+    std::unordered_map<Cell, std::vector<LineSegment>> _approximateGrid{};
 
 public:
     using LineSegmentRange = IteratorPair<DistanceQueryIterator<LineSegment>>;
@@ -116,11 +120,17 @@ public:
     /// @param p reference point
     /// @return iterator_pair to all linesegments in range
     LineSegmentRange LineSegmentsInDistanceTo(double distance, Point p) const;
+
+    const std::vector<LineSegment>& LineSegmentsInApproxDistanceTo(Point p) const;
+
     /// Will perfrom a linesegment intersection versus the whole geometry, i.e. walls and closed
     /// doors.
     /// @param linesegment to test for intersection with geometry
     /// @return if any linesegment of the geometry was intersected.
-    bool IntersectsAny(LineSegment linesegment) const;
+    bool IntersectsAny(const LineSegment& linesegment) const;
 
     bool InsideGeometry(Point p) const;
+
+private:
+    void insertIntoApproximateGrid(const LineSegment& ls);
 };
