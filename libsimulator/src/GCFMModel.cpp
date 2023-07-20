@@ -47,6 +47,7 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
     const auto p1 = agent.pos;
     Point F_rep;
     for(const auto neighbor : neighborhood) {
+        // TODO: Only use neighbors who have an unobstructed line of sight to the current agent
         if(neighbor->id == agent.id) {
             continue;
         }

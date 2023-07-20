@@ -34,8 +34,6 @@ bool IsN8Adjacent(const Cell& a, const Cell& b)
     return true;
 }
 
-const auto toMultiple = [](double x) { return ceil(x / CELL_EXTEND) * CELL_EXTEND; };
-
 std::set<Cell> cellsFromLineSegment(LineSegment ls)
 {
     const auto firstCell = makeCell(ls.p1);
@@ -50,6 +48,7 @@ std::set<Cell> cellsFromLineSegment(LineSegment ls)
 
     std::set<Cell> cells{firstCell, lastCell};
 
+    const auto toMultiple = [](double x) { return ceil(x / CELL_EXTEND) * CELL_EXTEND; };
     const AABB bounds(ls.p1, ls.p2);
     const auto vec_p1p2 = ls.p2 - ls.p1;
     std::vector<Point> intersections{};
@@ -112,10 +111,10 @@ CollisionGeometry::CollisionGeometry(PolyWithHoles accessibleArea) : _accessible
             _grid[cell].insert(ls);
         }
 
-        insertIntoGrid2(ls);
+        insertIntoApproximateGrid(ls);
     }
 
-    for(auto& [_, vec] : _grid2) {
+    for(auto& [_, vec] : _approximateGrid) {
         vec.shrink_to_fit();
     }
 }
@@ -123,14 +122,14 @@ CollisionGeometry::CollisionGeometry(PolyWithHoles accessibleArea) : _accessible
 const std::vector<LineSegment>& CollisionGeometry::LineSegmentsInApproxDistanceTo(Point p) const
 {
     const auto cell = makeCell(p);
-    if(const auto it = _grid2.find(cell); it != _grid2.end()) {
+    if(const auto it = _approximateGrid.find(cell); it != _approximateGrid.end()) {
         return it->second;
     }
     static const std::vector<LineSegment> empty{};
     return empty;
 }
 
-void CollisionGeometry::insertIntoGrid2(const LineSegment& ls)
+void CollisionGeometry::insertIntoApproximateGrid(const LineSegment& ls)
 {
     constexpr double searchRadius = 4.;
 
@@ -151,7 +150,7 @@ void CollisionGeometry::insertIntoGrid2(const LineSegment& ls)
                 {cell.x + searchRadius + CELL_EXTEND, cell.y + searchRadius + CELL_EXTEND});
 
             if(bbWithSearchRadius.Intersects(ls)) {
-                auto& vec = _grid2[cell];
+                auto& vec = _approximateGrid[cell];
                 vec.push_back(ls);
             }
         }
@@ -166,10 +165,9 @@ CollisionGeometry::LineSegmentsInDistanceTo(double distance, Point p) const
         DistanceQueryIterator<LineSegment>{distance, p, _segments.cend(), _segments.cend()}};
 }
 
-bool CollisionGeometry::IntersectsAny(LineSegment linesegment) const
+bool CollisionGeometry::IntersectsAny(const LineSegment& linesegment) const
 {
     const auto cellsToQuery = cellsFromLineSegment(linesegment);
-
     for(const auto& cell : cellsToQuery) {
         const auto iter = _grid.find(cell);
         if(iter == std::end(_grid)) {

@@ -120,7 +120,12 @@ TEST(AABB, IntersectsDiagonalInverted)
 
 TEST(AABB, IntersectsParallelToAxis)
 {
-    const AABB a({-1., -1.,}, {1., 1.});
+    const AABB a(
+        {
+            -1.,
+            -1.,
+        },
+        {1., 1.});
     const LineSegment l1({-1., -1.}, {-1., 1.});
     ASSERT_TRUE(a.Intersects(l1));
     const LineSegment l2({-1., 1.}, {1., 1.});
@@ -133,7 +138,12 @@ TEST(AABB, IntersectsParallelToAxis)
 
 TEST(AABB, IntersectsTouchesCorner)
 {
-    const AABB a({-1., -1.,}, {1., 1.});
+    const AABB a(
+        {
+            -1.,
+            -1.,
+        },
+        {1., 1.});
     const LineSegment l1({-1., -1.}, {-2., -2.});
     ASSERT_TRUE(a.Intersects(l1));
     const LineSegment l2({-1., 1.}, {-2., 2.});
@@ -149,7 +159,12 @@ TEST(AABB, IntersectsTouchesCorner)
 
 TEST(AABB, IntersectsTouchesEdge)
 {
-    const AABB a({-1., -1.,}, {1., 1.});
+    const AABB a(
+        {
+            -1.,
+            -1.,
+        },
+        {1., 1.});
     const LineSegment l1({-1., 0.}, {-2., 0.});
     ASSERT_TRUE(a.Intersects(l1));
     const LineSegment l2({0., 1.}, {0., 2.});
@@ -162,32 +177,46 @@ TEST(AABB, IntersectsTouchesEdge)
 
 TEST(AABB, IntersectsPartlyInside)
 {
-    const AABB a({-1., -1.,}, {1., 1.});
+    const AABB a(
+        {
+            -1.,
+            -1.,
+        },
+        {1., 1.});
     const LineSegment l({0., 0.}, {-2., 3.});
     ASSERT_TRUE(a.Intersects(l));
 }
 
 TEST(AABB, IntersectsCompletlyInside)
 {
-    const AABB a({-1., -1.,}, {1., 1.});
+    const AABB a(
+        {
+            -1.,
+            -1.,
+        },
+        {1., 1.});
     const LineSegment l({-0.5, -0.5}, {0.5, 0.5});
     ASSERT_TRUE(a.Intersects(l));
 }
 
 TEST(AABB, DoesNotIntersect)
 {
-    const AABB a({-1., -1.,}, {1., 1.});
+    const AABB a(
+        {
+            -1.,
+            -1.,
+        },
+        {1., 1.});
 
-    const LineSegment l1({a.TopLeft()+Point{0., 1.}, a.TopRight()+Point{0., 1.}});
+    const LineSegment l1({a.TopLeft() + Point{0., 1.}, a.TopRight() + Point{0., 1.}});
     ASSERT_FALSE(a.Intersects(l1));
 
-    const LineSegment l2({a.TopRight()+Point{1., 0.}, a.BottomRight()+Point{1., 0.}});
+    const LineSegment l2({a.TopRight() + Point{1., 0.}, a.BottomRight() + Point{1., 0.}});
     ASSERT_FALSE(a.Intersects(l2));
 
-    const LineSegment l3({a.BottomRight()-Point{0., 1.}, a.BottomLeft()-Point{0., 1.}});
+    const LineSegment l3({a.BottomRight() - Point{0., 1.}, a.BottomLeft() - Point{0., 1.}});
     ASSERT_FALSE(a.Intersects(l3));
 
-    const LineSegment l4({a.BottomLeft()-Point{1., 0.}, a.TopLeft()-Point{1., 0.}});
+    const LineSegment l4({a.BottomLeft() - Point{1., 0.}, a.TopLeft() - Point{1., 0.}});
     ASSERT_FALSE(a.Intersects(l4));
-
 }

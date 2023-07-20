@@ -98,7 +98,7 @@ class CollisionGeometry
     PolyWithHoles _accessibleArea;
     std::vector<LineSegment> _segments;
     std::unordered_map<Cell, std::set<LineSegment>> _grid{};
-    std::unordered_map<Cell, std::vector<LineSegment>> _grid2{};
+    std::unordered_map<Cell, std::vector<LineSegment>> _approximateGrid{};
 
 public:
     using LineSegmentRange = IteratorPair<DistanceQueryIterator<LineSegment>>;
@@ -127,23 +127,10 @@ public:
     /// doors.
     /// @param linesegment to test for intersection with geometry
     /// @return if any linesegment of the geometry was intersected.
-    bool IntersectsAny(LineSegment linesegment) const;
+    bool IntersectsAny(const LineSegment& linesegment) const;
 
     bool InsideGeometry(Point p) const;
 
 private:
-    void insertIntoGrid2(const LineSegment& ls);
+    void insertIntoApproximateGrid(const LineSegment& ls);
 };
-
-// data type:
-//      Cell with same extend (reuse Cell from top)
-//      search radius (construction parameter)
-//
-// flow:
-// loop line segments:
-//      compute AABB for ls
-//      compute cells from AABB
-//      for each cell check if ls intersects cell + search radius (fixed)
-//          if intersects place ls in multimap<Cell, LineSegment> (can be adapted)
-//
-//  equal_range(multimap)
