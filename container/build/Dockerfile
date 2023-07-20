@@ -3,6 +3,7 @@ FROM ubuntu:22.04
 RUN apt-get update && \
     apt-get install -y software-properties-common
 
+RUN echo "deb [trusted=yes] http://apt.llvm.org/jammy/ llvm-toolchain-jammy-16 main" | tee /etc/apt/sources.list.d/clang.list
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
     wget \
@@ -13,7 +14,7 @@ RUN apt-get update && \
     make \
     ninja-build \
     clang \
-    clang-format-14 \
+    clang-format-16 \
     libglm-dev \
     qtbase5-dev \
     libvtk9-dev \

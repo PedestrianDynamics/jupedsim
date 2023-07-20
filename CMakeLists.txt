@@ -50,6 +50,13 @@ endif()
 
 set(BUILD_BENCHMARKS OFF CACHE BOOL "Build micro benchmark")
 print_var(BUILD_BENCHMARKS)
+
+set(WITH_FORMAT OFF CACHE BOOL "Create format tools")
+print_var(WITH_FORMAT)
+if(WITH_FORMAT AND ${CMAKE_SYSTEM} MATCHES "Windows")
+    message(FATAL_ERROR "Format target can not be created on Windows")
+endif()
+
 ################################################################################
 # Compilation flags
 ################################################################################
@@ -269,14 +276,15 @@ add_subdirectory(libsimulator)
 add_subdirectory(python_bindings_jupedsim)
 
 ################################################################################
-# Code formating
+# Code formatting
 ################################################################################
-if(UNIX)
-    set(clang-format-version 14)
+if(UNIX AND WITH_FORMAT)
+    set(clang-format-version 16)
     find_program(CLANG_FORMAT
         NAMES
             clang-format-${clang-format-version}
             clang-format
+        REQUIRED
     )
     if(CLANG_FORMAT)
         execute_process(
@@ -294,7 +302,7 @@ if(UNIX)
             )
             if(version MATCHES "^${clang-format-version}.*")
                 message(STATUS "Found clang-format ${version}, add format-check and reformat targets")
-                set(folders jpsvis libcore libsimulator libjupedsim)
+                set(folders libcommon libjupedsim libsimulator)
                 add_custom_target(check-format
                     COMMENT "Checking format with clang-format"
                     COMMAND find ${folders}
@@ -315,7 +323,11 @@ if(UNIX)
                         -i --style=file
                     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                 )
+            else ()
+                message(FATAL_ERROR "Could not create formatting target, clang-format version ${version} found, but ${clang-format-version} required")
             endif()
+        else ()
+            message(FATAL_ERROR "Could not create formatting target, clang-format ${version_string} does not yield a version number")
         endif()
     endif()
 endif()
