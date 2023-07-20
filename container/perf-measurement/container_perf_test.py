@@ -13,14 +13,21 @@ logging.basicConfig(
 
 
 def parse_args():
-    parser = argparse.ArgumentParser('JuPedSim Performance Tests')
-    parser.add_argument("-t", "--test", choices=["grosser_stern", "large_street_network", "all"], default="all")
+    parser = argparse.ArgumentParser("JuPedSim Performance Tests")
+    parser.add_argument(
+        "-t",
+        "--test",
+        choices=["grosser_stern", "large_street_network", "all"],
+        default="all",
+    )
 
     known, forwarded_args = parser.parse_known_args()
     if forwarded_args and forwarded_args[0] != "--":
-        logging.warning(f"found unknown arguments: '{' '.join(forwarded_args)}' will be ignored. If you want to pass "
-                        f"them to the tests, separate them with '--', e.g., \n"
-                        f"$ python run_perf_test.py -- -t large_street_network -- --limit 10000")
+        logging.warning(
+            f"found unknown arguments: '{' '.join(forwarded_args)}' will be ignored. If you want to pass "
+            f"them to the tests, separate them with '--', e.g., \n"
+            f"$ python run_perf_test.py -- -t large_street_network -- --limit 10000"
+        )
     else:
         forwarded_args = forwarded_args[1:]
 
@@ -33,15 +40,23 @@ def build_jupedsim():
     build_path.mkdir()
 
     with subprocess.Popen(
-            ["cmake", "-S", "/src", "-B", "/build", "-DCMAKE_PREFIX_PATH=/opt/deps", "-DCMAKE_BUILD_TYPE=RelWithDebInfo"],
-            stdout=subprocess.PIPE,
+        [
+            "cmake",
+            "-S",
+            "/src",
+            "-B",
+            "/build",
+            "-DCMAKE_PREFIX_PATH=/opt/deps",
+            "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+        ],
+        stdout=subprocess.PIPE,
     ) as p:
         for line in p.stdout:
             print(line.decode("utf-8").rstrip())
 
     with subprocess.Popen(
-            ["cmake", "--build", "/build", "--", "-j", "--", "VERBOSE=1"],
-            stdout=subprocess.PIPE,
+        ["cmake", "--build", "/build", "--", "-j", "--", "VERBOSE=1"],
+        stdout=subprocess.PIPE,
     ) as p:
         for line in p.stdout:
             print(line.decode("utf-8").rstrip())
@@ -49,7 +64,9 @@ def build_jupedsim():
 
 def run_test(test, args, build_dir, result_dir):
     test_env = os.environ.copy()
-    test_env["PYTHONPATH"] = f"/src/python_modules/jupedsim:/src/python_modules/visdbg:/build/lib"
+    test_env[
+        "PYTHONPATH"
+    ] = f"/src/python_modules/jupedsim:/src/python_modules/visdbg:/build/lib"
 
     perf_data_file_name = f"{test}.perf.data"
     perf_file_name = f"{test}.perf"
@@ -57,8 +74,19 @@ def run_test(test, args, build_dir, result_dir):
     perf_svg_file_name = f"{test}.svg"
 
     subprocess.run(
-        ["perf", "record", "--call-graph", "fp", "-e", "cycles:u", "-o", perf_data_file_name, "python3",
-         f"/src/performancetest/{test}.py", *args],
+        [
+            "perf",
+            "record",
+            "--call-graph",
+            "fp",
+            "-e",
+            "cycles:u",
+            "-o",
+            perf_data_file_name,
+            "python3",
+            f"/src/performancetest/{test}.py",
+            *args,
+        ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         env=test_env,
@@ -90,7 +118,9 @@ def run_test(test, args, build_dir, result_dir):
             check=True,
         )
 
-    logging.info(f"created flamegraph for {test} in: {str(result_dir / perf_svg_file_name)}")
+    logging.info(
+        f"created flamegraph for {test} in: {str(result_dir / perf_svg_file_name)}"
+    )
 
 
 def run_tests(test_selection: str, args):
