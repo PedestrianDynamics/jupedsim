@@ -54,7 +54,7 @@ print_var(BUILD_BENCHMARKS)
 set(WITH_FORMAT OFF CACHE BOOL "Create format tools")
 print_var(WITH_FORMAT)
 if(WITH_FORMAT AND ${CMAKE_SYSTEM} MATCHES "Windows")
-    message(FATAL_ERROR "Format target can not be created on Windows")
+    message(FATAL_ERROR "Format target not supported on Windows")
 endif()
 
 ################################################################################
