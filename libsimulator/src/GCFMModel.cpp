@@ -241,11 +241,11 @@ Point GCFMModel::ForceRepPed(const Data& ped1, const Data& ped2) const
 
 inline Point GCFMModel::ForceRepRoom(const Data& ped, const CollisionGeometry& geometry) const
 {
-    auto walls = geometry.LineSegmentsInDistanceTo(5.0, ped.pos);
+    const auto& walls = geometry.LineSegmentsInApproxDistanceTo(ped.pos);
 
     auto f = std::accumulate(
-        walls.begin(),
-        walls.end(),
+        walls.cbegin(),
+        walls.cend(),
         Point(0, 0),
         [this, &ped](const auto& acc, const auto& element) {
             return acc + ForceRepWall(ped, element);
