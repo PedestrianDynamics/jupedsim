@@ -21,69 +21,95 @@ def parse_geo_file(geo_file):
     """
     tree = ET.parse(geo_file)
     root = tree.getroot()
-    rooms = root.findall('.//room')
+    rooms = root.findall(".//room")
     # list with all polygons from this geometry
     geometry_polygons = []
     for room in rooms:
-        subrooms = room.findall('.//subroom')
+        subrooms = room.findall(".//subroom")
         for subroom in subrooms:
             room_obstacles = []
             room_lines = []
             # parse all obstacles into room obstacles list
-            obstacles = subroom.findall('obstacle')
+            obstacles = subroom.findall("obstacle")
             for obstacle in obstacles:
                 temp_obstacle = []
-                obstacle_polygons = obstacle.findall('polygon')
+                obstacle_polygons = obstacle.findall("polygon")
                 for polygon in obstacle_polygons:
-                    vertices = polygon.findall('vertex')
+                    vertices = polygon.findall("vertex")
                     for vertex in vertices:
-                        point = (float(vertex.get('px')), float(vertex.get('py')))
+                        point = (
+                            float(vertex.get("px")),
+                            float(vertex.get("py")),
+                        )
                         if point not in temp_obstacle:
                             temp_obstacle.append(point)
 
                 room_obstacles.append(temp_obstacle)
             # parse all edges of polygon into room_lines list
-            polygons = subroom.findall('polygon')
+            polygons = subroom.findall("polygon")
             for polygon in polygons:
-                vertices = polygon.findall('vertex')
-                room_lines.append([(float(vertex.get('px')), float(vertex.get('py'))) for vertex in vertices])
+                vertices = polygon.findall("vertex")
+                room_lines.append(
+                    [
+                        (float(vertex.get("px")), float(vertex.get("py")))
+                        for vertex in vertices
+                    ]
+                )
 
             # add all transitions with according room id and subroom id to room_lines list
-            transitions = root.findall('.//transition')
-            subroom_id = subroom.attrib['id']
-            room_id = room.attrib['id']
+            transitions = root.findall(".//transition")
+            subroom_id = subroom.attrib["id"]
+            room_id = room.attrib["id"]
             for transition in transitions:
-                room1_id = transition.attrib['room1_id']
-                room2_id = transition.attrib['room2_id']
-                sub1_id = transition.attrib['subroom1_id']
-                sub2_id = transition.attrib['subroom2_id']
-                if sub1_id == subroom_id and room_id == room1_id \
-                        or sub2_id == subroom_id and room2_id == room_id:
+                room1_id = transition.attrib["room1_id"]
+                room2_id = transition.attrib["room2_id"]
+                sub1_id = transition.attrib["subroom1_id"]
+                sub2_id = transition.attrib["subroom2_id"]
+                if (
+                    sub1_id == subroom_id
+                    and room_id == room1_id
+                    or sub2_id == subroom_id
+                    and room2_id == room_id
+                ):
                     # the transition matches the current subroom
-                    vertices = transition.findall('vertex')
-                    point1 = (float(vertices[0].get('px')), float(vertices[0].get('py')))
-                    point2 = (float(vertices[1].get('px')), float(vertices[1].get('py')))
+                    vertices = transition.findall("vertex")
+                    point1 = (
+                        float(vertices[0].get("px")),
+                        float(vertices[0].get("py")),
+                    )
+                    point2 = (
+                        float(vertices[1].get("px")),
+                        float(vertices[1].get("py")),
+                    )
                     room_lines.append([point1, point2])
             # add all crossings from the room to room_lines list
-            crossings = room.findall('crossings')
+            crossings = room.findall("crossings")
             if len(crossings) > 0:
                 # at least one crossing for this room found
                 crossings = crossings[0]
                 for crossing in crossings:
-                    sub1_id = crossing.attrib['subroom1_id']
-                    sub2_id = crossing.attrib['subroom2_id']
+                    sub1_id = crossing.attrib["subroom1_id"]
+                    sub2_id = crossing.attrib["subroom2_id"]
                     if sub1_id == subroom_id or sub2_id == subroom_id:
                         # the transition matches the current subroom
-                        vertices = crossing.findall('vertex')
-                        point1 = (float(vertices[0].get('px')), float(vertices[0].get('py')))
-                        point2 = (float(vertices[1].get('px')), float(vertices[1].get('py')))
+                        vertices = crossing.findall("vertex")
+                        point1 = (
+                            float(vertices[0].get("px")),
+                            float(vertices[0].get("py")),
+                        )
+                        point2 = (
+                            float(vertices[1].get("px")),
+                            float(vertices[1].get("py")),
+                        )
                         room_lines.append([point1, point2])
             # put lines together to form a polygon
             try:
                 # create polygon from lines parsed from this room
                 room_polygon = polygonize(room_lines)[0]
                 # create polygon from this rooms polygon and parsed obstacles and add to list of geometries polygons
-                geometry_polygons.append(Polygon(room_polygon.exterior, room_obstacles))
+                geometry_polygons.append(
+                    Polygon(room_polygon.exterior, room_obstacles)
+                )
             except Exception:
                 message = f"there has been an error parsing subroom {subroom_id} in room {room_id}"
                 raise RuntimeError(message)
@@ -105,12 +131,12 @@ def convert_to_wkt(geometry_polygons, out_file, all_rooms=False):
     """
     if all_rooms:
         geomery_collection = GeometryCollection(geometry_polygons)
-        with open(out_file, 'a') as out:
+        with open(out_file, "a") as out:
             out.write(to_wkt(geomery_collection))
     else:
         merged_polygon = unary_union(geometry_polygons)
         geomery_collection = GeometryCollection(merged_polygon)
-        with open(out_file, 'a') as out:
+        with open(out_file, "a") as out:
             out.write(to_wkt(geomery_collection))
 
 

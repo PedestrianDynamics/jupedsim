@@ -46,6 +46,15 @@ class StatsWriter:
         )
         cur.close()
 
+    def write_metadata(self, commit_id, hostname):
+        cur = self.con.cursor()
+        cur.execute(
+            "INSERT INTO metadata VALUES(?, ?)", ("commit_id", commit_id)
+        )
+        cur.execute(
+            "INSERT INTO metadata VALUES(?, ?)", ("hostname", hostname)
+        )
+
     def write_stats(self, frame_idx: int, agent_count: int, stats: jps.Trace):
         """
         Adds one set of measurements to the database.

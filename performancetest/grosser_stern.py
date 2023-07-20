@@ -7,6 +7,7 @@ import pathlib
 import random
 import sys
 import time
+import platform
 
 import py_jupedsim as jps
 import shapely
@@ -44526,6 +44527,9 @@ def main():
     writer = SqliteTrajectoryWriter(pathlib.Path("grosser_stern.sqlite"))
     stats_writer = StatsWriter(writer.connection())
     writer.begin_writing(2, to_wkt(geo, rounding_precision=-1))
+    stats_writer.write_metadata(
+        jps.get_build_info().git_commit_hash, platform.node()
+    )
 
     start_time = time.perf_counter_ns()
     iteration = simulation.iteration_count()
