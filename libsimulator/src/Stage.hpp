@@ -90,14 +90,14 @@ void NotifiableWaitingSet::Update(const NeighborhoodSearch<T>& neighborhoodSearc
         const auto candidates = neighborhoodSearch.GetNeighboringAgents(slots[index], 2);
         GenericAgent::ID occupant = GenericAgent::ID::Invalid;
         double min_distance = std::numeric_limits<double>::max();
-        for(const auto agent : candidates) {
-            if(agent->journeyId == journeyId) {
-                if(std::find(std::begin(occupants), std::end(occupants), agent->id) ==
+        for(const auto& agent : candidates) {
+            if(agent.journeyId == journeyId) {
+                if(std::find(std::begin(occupants), std::end(occupants), agent.id) ==
                    std::end(occupants)) {
-                    const auto distance = (agent->pos - slots[index]).Norm();
+                    const auto distance = (agent.pos - slots[index]).Norm();
                     if(distance < min_distance) {
                         min_distance = distance;
-                        occupant = agent->id;
+                        occupant = agent.id;
                     }
                 }
             }
@@ -151,14 +151,14 @@ void NotifiableQueue::Update(const NeighborhoodSearch<T>& neighborhoodSearch)
         const auto candidates = neighborhoodSearch.GetNeighboringAgents(slots[index], 2);
         GenericAgent::ID occupant = GenericAgent::ID::Invalid;
         double min_distance = std::numeric_limits<double>::max();
-        for(const auto agent : candidates) {
-            if(agent->journeyId == journeyId) {
-                if(std::find(std::begin(occupants), std::end(occupants), agent->id) ==
+        for(const auto& agent : candidates) {
+            if(agent.journeyId == journeyId) {
+                if(std::find(std::begin(occupants), std::end(occupants), agent.id) ==
                    std::end(occupants)) {
-                    const auto distance = (agent->pos - slots[index]).Norm();
+                    const auto distance = (agent.pos - slots[index]).Norm();
                     if(distance < min_distance) {
                         min_distance = distance;
-                        occupant = agent->id;
+                        occupant = agent.id;
                     }
                 }
             }

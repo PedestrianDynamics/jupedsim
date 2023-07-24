@@ -8,31 +8,31 @@
 #include <iterator>
 #include <memory>
 
-TEST(Grid2D, EmptyDefauneighborhood_searchorhood_searchtruction)
-{
-    Grid2D<int> grid;
-
-    ASSERT_EQ(grid.size(), 0);
-    ASSERT_TRUE(grid.empty());
-}
-
-TEST(Grid2D, Construction)
-{
-    std::vector<Grid2D<double>::Entry> values;
-
-    for(int i = 0; i < 100; ++i) {
-        values.push_back({{100 - i, i}, {100.0 - i, static_cast<double>(i)}, 2.4});
-    }
-
-    Grid2D<double> grid(values);
-
-    ASSERT_EQ(grid.size(), 100);
-    ASSERT_FALSE(grid.empty());
-
-    auto it_pair = grid.get({99, 1});
-    ASSERT_EQ(std::distance(it_pair.first(), it_pair.second()), 1);
-    ASSERT_EQ(it_pair.first()->value, 2.4);
-}
+// TEST(Grid2D, EmptyDefauneighborhood_searchorhood_searchtruction)
+//{
+//     Grid2D<int> grid;
+//
+//     ASSERT_EQ(grid.size(), 0);
+//     ASSERT_TRUE(grid.empty());
+// }
+//
+// TEST(Grid2D, Construction)
+//{
+//     std::vector<Grid2D<double>::Entry> values;
+//
+//     for(int i = 0; i < 100; ++i) {
+//         values.push_back({{100 - i, i}, {100.0 - i, static_cast<double>(i)}, 2.4});
+//     }
+//
+//     Grid2D<double> grid(values);
+//
+//     ASSERT_EQ(grid.size(), 100);
+//     ASSERT_FALSE(grid.empty());
+//
+//     auto it_pair = grid.get({99, 1});
+//     ASSERT_EQ(std::distance(it_pair.first(), it_pair.second()), 1);
+//     ASSERT_EQ(it_pair.first()->value, 2.4);
+// }
 
 template <typename T>
 struct ValueWithPos {
@@ -42,7 +42,7 @@ struct ValueWithPos {
 
 TEST(NeighborhoodSearch, ReturnsEmptyOnEmpty)
 {
-    NeighborhoodSearch<int> neighborhood{3};
+    NeighborhoodSearch<ValueWithPos<int>> neighborhood{3};
     const auto range = neighborhood.GetNeighboringAgents({0, 0}, 10);
     ASSERT_EQ(std::begin(range), std::end(range));
 }
@@ -60,7 +60,7 @@ TEST(NeighborhoodSearch, ReturnsOneValueInRange)
         std::begin(result),
         std::end(result),
         std::inserter(actual, std::begin(actual)),
-        [](const auto& v) { return v->val; });
+        [](const auto& v) { return v.val; });
     ASSERT_EQ(actual, expected);
 }
 
@@ -77,7 +77,7 @@ TEST(NeighborhoodSearch, ReturnsMultipleValuesInRange)
         std::begin(result),
         std::end(result),
         std::inserter(actual, std::begin(actual)),
-        [](const auto& v) { return v->val; });
+        [](const auto& v) { return v.val; });
     ASSERT_EQ(actual, expected);
 }
 
@@ -94,7 +94,7 @@ TEST(NeighborhoodSearch, ReturnsValuesFromDifferentInternalGridCells)
         std::begin(result),
         std::end(result),
         std::inserter(actual, std::begin(actual)),
-        [](const auto& v) { return v->val; });
+        [](const auto& v) { return v.val; });
     ASSERT_EQ(actual, expected);
 }
 
@@ -112,7 +112,7 @@ TEST(NeighborhoodSearch, RejectesValuesInGridCellsTooFarAway)
         std::begin(result),
         std::end(result),
         std::inserter(actual, std::begin(actual)),
-        [](const auto& v) { return v->val; });
+        [](const auto& v) { return v.val; });
     ASSERT_EQ(actual, expected);
 }
 
@@ -129,7 +129,7 @@ TEST(NeighborhoodSearch, RejectsValuesFromSelectedGridThatareTooFarAway)
         std::begin(result),
         std::end(result),
         std::inserter(actual, std::begin(actual)),
-        [](const auto& v) { return v->val; });
+        [](const auto& v) { return v.val; });
     ASSERT_EQ(actual, expected);
 }
 
@@ -146,6 +146,6 @@ TEST(NeighborhoodSearch, ReturnsValueExactlyDistanceAwayFromQueryPoint)
         std::begin(result),
         std::end(result),
         std::inserter(actual, std::begin(actual)),
-        [](const auto& v) { return v->val; });
+        [](const auto& v) { return v.val; });
     ASSERT_EQ(actual, expected);
 }

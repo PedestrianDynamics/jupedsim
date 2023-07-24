@@ -56,110 +56,109 @@ struct std::hash<Grid2DIndex> {
     }
 };
 
-template <typename T>
-class Grid2D
-{
-public:
-    struct Entry {
-        Grid2DIndex id;
-        Point pos;
-        T value;
-
-        bool operator<(const Entry& other) const { return id < other.id; }
-        bool operator==(const Entry& other) const { return id == other.id && pos == other.pos; }
-    };
-
-public:
-    using value_type = T;
-    using size_type = std::size_t;
-    using container_type = std::vector<Entry>;
-    using it_type = typename container_type::const_iterator;
-    using it_pair = IteratorPair<it_type>;
-
-    Grid2D() = default;
-
-    Grid2D(container_type data) : _data(data)
-    {
-        // sort data
-        std::sort(_data.begin(), _data.end());
-
-        // create mapping
-        if(!_data.empty()) {
-            auto last_it = _data.cbegin();
-            _data_mapping.emplace(last_it->id, it_pair(last_it, _data.cend()));
-            for(auto it = _data.cbegin(); it != _data.cend(); ++it) {
-                if(last_it->id == it->id) {
-                    continue;
-                }
-                _data_mapping.erase(last_it->id);
-                _data_mapping.emplace(last_it->id, it_pair(last_it, it));
-                _data_mapping.emplace(it->id, it_pair(it, _data.cend()));
-                last_it = it;
-            }
-        }
-    }
-
-    size_type size() const { return _data.size(); }
-
-    bool empty() const { return _data.empty(); }
-
-    it_pair get(Grid2DIndex index) const
-    {
-        auto it = _data_mapping.find(index);
-
-        if(it != _data_mapping.cend()) {
-            return it->second;
-        }
-        return {_data.cend(), _data.cend()};
-    }
-
-private:
-    container_type _data;
-    std::unordered_map<Grid2DIndex, it_pair> _data_mapping;
-};
+// template <typename T>
+// class Grid2D
+//{
+// public:
+//     struct Entry {
+//         Grid2DIndex id;
+//         Point pos;
+//         T value;
+//
+//         bool operator<(const Entry& other) const { return id < other.id; }
+//         bool operator==(const Entry& other) const { return id == other.id && pos == other.pos; }
+//     };
+//
+//  public:
+//      using size_type = std::size_t;
+//      using container_type = std::vector<T>;
+//
+//      Grid2D() = default;
+//
+//      size_type size() const { return _data.size(); }
+//
+//      bool empty() const { return _data.empty(); }
+//
+//      container_type get(Grid2DIndex index) const
+//      {
+//          auto it = _data.find(index);
+//
+//          if(it != _data.cend()) {
+//              return it->second;
+//          }
+//
+//          static const container_type empty{};
+//          return empty;
+//      }
+//
+//      void insert(Grid2DIndex index, T item)
+//      {
+//          auto& vec = _data[index];
+//          vec.push_back(item);
+//      }
+//
+//  private:
+//      std::unordered_map<Grid2DIndex, container_type> _data;
+//  };
 
 template <typename Value>
 class NeighborhoodSearch
 {
-    using Grid = Grid2D<const Value*>;
+    using Grid = std::unordered_map<Grid2DIndex, std::vector<Value>>;
+
     double _cellSize;
     Grid _grid{};
+
+private:
+    Grid2DIndex getIndex(const Point& pos) const
+    {
+        const int32_t idx = static_cast<int32_t>(pos.x / _cellSize);
+        const int32_t idy = static_cast<int32_t>(pos.y / _cellSize);
+        return Grid2DIndex{idx, idy};
+    }
 
 public:
     explicit NeighborhoodSearch(double cellSize) : _cellSize(cellSize){};
 
-    void Update(const std::vector<Value>& items)
+    void AddAgent(const Value& item)
     {
-        std::vector<typename Grid::Entry> values;
-        values.reserve(items.size());
-        std::transform(
-            std::begin(items), std::end(items), std::back_inserter(values), [this](const auto& v) {
-                auto idx = Grid2DIndex{
-                    static_cast<std::int32_t>(v.pos.x / _cellSize),
-                    static_cast<std::int32_t>(v.pos.y / _cellSize)};
-                return typename Grid::Entry{idx, v.pos, &v};
-            });
-        _grid = Grid(values);
+        auto index = getIndex(item.pos);
+        auto& vec = _grid[index];
+        vec.push_back(item);
     }
 
-    std::vector<const Value*> GetNeighboringAgents(Point pos, double radius) const
+    void Update(const std::vector<Value>& items)
     {
-        const int32_t pos_idx = static_cast<int32_t>(pos.x / _cellSize);
-        const int32_t pos_idy = static_cast<int32_t>(pos.y / _cellSize);
-        const int32_t nh_level = static_cast<int32_t>(std::ceil(radius / _cellSize));
-        const int32_t x_min = pos_idx - nh_level;
-        const int32_t x_max = pos_idx + nh_level;
-        const int32_t y_min = pos_idy - nh_level;
-        const int32_t y_max = pos_idy + nh_level;
+        _grid.clear();
+        for(const auto& item : items) {
+            auto index = getIndex(item.pos);
+            auto& vec = _grid[index];
+            vec.push_back(item);
+        }
+    }
 
-        std::vector<const Value*> result{};
+    std::vector<Value> GetNeighboringAgents(Point pos, double radius) const
+    {
+        std::vector<Value> result{};
         result.reserve(128);
+
+        const auto posIdx = getIndex(pos);
+        const auto offset = static_cast<int32_t>(std::ceil(radius / _cellSize));
+        const int32_t xMin = posIdx.idx - offset;
+        const int32_t xMax = posIdx.idx + offset;
+        const int32_t yMin = posIdx.idy - offset;
+        const int32_t yMax = posIdx.idy + offset;
+
         const auto radiusSquared = radius * radius;
-        for(int32_t x = x_min; x <= x_max; ++x) {
-            for(int32_t y = y_min; y <= y_max; ++y) {
-                for(const auto& item : _grid.get({x, y})) {
-                    if(DistanceSquared(item.pos, pos) <= radiusSquared) {
-                        result.emplace_back(item.value);
+
+        for(int32_t x = xMin; x <= xMax; ++x) {
+            for(int32_t y = yMin; y <= yMax; ++y) {
+                auto it = _grid.find({x, y});
+                if(it != _grid.cend()) {
+                    for(const auto& item : it->second) {
+                        if(DistanceSquared(item.pos, pos) <= radiusSquared) {
+                            result.emplace_back(item);
+                        }
                     }
                 }
             }
