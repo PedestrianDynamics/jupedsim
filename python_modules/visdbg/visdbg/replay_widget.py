@@ -1,6 +1,5 @@
 import math
 
-from jupedsim.recording import Recording
 from py_jupedsim.experimental import RoutingEngine
 from PySide6.QtCore import QSignalBlocker, Qt, QTimer
 from PySide6.QtGui import QFont
@@ -19,6 +18,8 @@ from PySide6.QtWidgets import (
 from visdbg.geometry import Geometry
 from visdbg.geometry_widget import RenderWidget
 from visdbg.trajectory import Trajectory
+
+from jupedsim.recording import Recording
 
 
 class PlayerControlWidget(QWidget):

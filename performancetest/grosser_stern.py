@@ -4,17 +4,17 @@
 import argparse
 import logging
 import pathlib
+import platform
 import random
 import sys
 import time
-import platform
 
 import py_jupedsim as jps
 import shapely
-from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
-from jupedsim.util import build_jps_geometry
 from shapely import to_wkt
 
+from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
+from jupedsim.util import build_jps_geometry
 from performancetest.geometry import geometries
 from performancetest.stats_writer import StatsWriter
 
@@ -44524,7 +44524,11 @@ def main():
         agent_parameters.journey_id = random.choice(journeys)
         simulation.add_agent(agent_parameters)
 
-    writer = SqliteTrajectoryWriter(pathlib.Path("grosser_stern.sqlite"))
+    writer = SqliteTrajectoryWriter(
+        pathlib.Path(
+            f"{jps.get_build_info().git_commit_hash}_grosser_stern.sqlite"
+        )
+    )
     stats_writer = StatsWriter(writer.connection())
     writer.begin_writing(2, to_wkt(geo, rounding_precision=-1))
     stats_writer.write_metadata(

@@ -1,10 +1,10 @@
 import xml.etree.ElementTree as ET
-from shapely import to_wkt, GeometryCollection
-from shapely.geometry import Polygon
-from shapely.ops import polygonize
-from shapely.ops import unary_union
-import matplotlib.pyplot as plt
+
 import geopandas as gpd
+import matplotlib.pyplot as plt
+from shapely import GeometryCollection, to_wkt
+from shapely.geometry import Polygon
+from shapely.ops import polygonize, unary_union
 
 """This script takes a XML file containing a geometry as input and 
 returns a list of Shapely polygons corresponding to the geometry.

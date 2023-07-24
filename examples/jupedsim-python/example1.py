@@ -6,10 +6,11 @@ import pathlib
 import sys
 
 import py_jupedsim as jps
-from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
-from jupedsim.util import build_jps_geometry
 from shapely import GeometryCollection, Polygon, geometry, to_wkt
 from shapely.geometry.base import geom_factory
+
+from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
+from jupedsim.util import build_jps_geometry
 
 
 def log_debug(msg):

@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Optional
 
 import py_jupedsim as jps
+
 from jupedsim.serialization import TrajectoryWriter
 
 
