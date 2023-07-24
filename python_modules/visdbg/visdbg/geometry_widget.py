@@ -1,6 +1,5 @@
 import py_jupedsim
 import vtkmodules.vtkRenderingOpenGL2
-from jupedsim.aabb import AABB
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 from visdbg.config import Colors
@@ -10,6 +9,8 @@ from visdbg.move_controller import MoveController
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import vtkRenderer
+
+from jupedsim.aabb import AABB
 
 
 class RenderWidget(QVTKRenderWindowInteractor):

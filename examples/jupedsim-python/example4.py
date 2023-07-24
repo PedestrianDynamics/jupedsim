@@ -7,9 +7,10 @@ import sys
 import time
 
 import py_jupedsim as jps
+from shapely import GeometryCollection, Polygon, to_wkt
+
 from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
 from jupedsim.util import build_jps_geometry
-from shapely import GeometryCollection, Polygon, to_wkt
 
 
 def log_debug(msg):

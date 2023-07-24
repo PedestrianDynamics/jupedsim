@@ -2,6 +2,7 @@ import sqlite3
 from dataclasses import dataclass
 
 import shapely
+
 from jupedsim.aabb import AABB
 
 
