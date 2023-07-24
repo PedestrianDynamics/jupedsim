@@ -153,10 +153,11 @@ public:
         const int32_t y_max = pos_idy + nh_level;
 
         std::vector<const Value*> result{};
+        const auto radiusSquared = radius * radius;
         for(int32_t x = x_min; x <= x_max; ++x) {
             for(int32_t y = y_min; y <= y_max; ++y) {
                 for(const auto& item : _grid.get({x, y})) {
-                    if(Distance(item.pos, pos) <= radius) {
+                    if(DistanceSquared(item.pos, pos) <= radiusSquared) {
                         result.emplace_back(item.value);
                     }
                 }
