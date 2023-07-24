@@ -226,6 +226,11 @@ double Distance(const Point& point1, const Point& point2)
     return (point1 - point2).Norm();
 }
 
+double DistanceSquared(const Point& a, const Point& b)
+{
+    return (a - b).NormSquare();
+}
+
 std::ostream& operator<<(std::ostream& out, const Point& p)
 {
     return out << fmt::format("{}", p);

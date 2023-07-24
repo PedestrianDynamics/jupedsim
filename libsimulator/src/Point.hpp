@@ -73,15 +73,17 @@ public:
     bool operator>=(const Point& rhs) const;
 };
 
-/**
- * Calculates the distance between the 2 given points.
- * @param [in] point1
- * @param [in] point2
- * @return distance between point1 and point2
- * @see
- * [boost/geometry](http://www.boost.org/doc/libs/1_60_0/libs/geometry/doc/html/geometry/reference/algorithms/distance.html)
- */
-double Distance(const Point&, const Point&);
+/// Euclidean distance between 'a' and 'b'
+/// @param [in] Point a
+/// @param [in] Point b
+/// @return distance between 'a' and 'b'
+double Distance(const Point& a, const Point& b);
+
+/// Squared euclidean distance between 'a' and 'b'
+/// @param [in] Point a
+/// @param [in] Point b
+/// @return distance between 'a' and 'b'
+double DistanceSquared(const Point& a, const Point& b);
 
 /// multiplication
 const Point operator*(const Point& p, const double f);
