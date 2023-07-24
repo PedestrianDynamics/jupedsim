@@ -12,6 +12,8 @@ Analysis of results can be done with jpsreport.
 
 ## Quick start
 
+BLA BLA BLA
+
 See [Getting started with jupedsim](http://www.jupedsim.org/jpscore_introduction.html).
 
 ## Showcase and tutorials
