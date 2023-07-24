@@ -46,13 +46,13 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
     const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(agent.pos, radius);
     const auto p1 = agent.pos;
     Point F_rep;
-    for(const auto neighbor : neighborhood) {
-        // TODO: Only use neighbors who have an unobstructed line of sight to the current agent
-        if(neighbor->id == agent.id) {
+    for(const auto& neighbor : neighborhood) {
+        // TODO: Only use neighbors who have an unobstructed line of sight to the current agent (TS)
+        if(neighbor.id == agent.id) {
             continue;
         }
-        if(!geometry.IntersectsAny(LineSegment(p1, neighbor->pos))) {
-            F_rep += ForceRepPed(agent, *neighbor);
+        if(!geometry.IntersectsAny(LineSegment(p1, neighbor.pos))) {
+            F_rep += ForceRepPed(agent, neighbor);
         }
     }
 
@@ -86,12 +86,12 @@ void GCFMModel::CheckDistanceConstraint(
 {
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
     for(const auto& neighbor : neighbors) {
-        const auto spacing = AgentToAgentSpacing(agent, *neighbor);
+        const auto spacing = AgentToAgentSpacing(agent, neighbor);
         if(spacing <= 0) {
             throw SimulationError(
                 "Model constraint violation: Agent {} too close to agent {}",
                 agent.id,
-                neighbor->id);
+                neighbor.id);
         }
     }
 }

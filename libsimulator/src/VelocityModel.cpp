@@ -47,10 +47,10 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
             std::begin(neighborhood),
             std::end(neighborhood),
             [&ped, &walls](const auto& n) {
-                if(ped.id == n->id) {
+                if(ped.id == n.id) {
                     return true;
                 }
-                const auto lineSegment = LineSegment(ped.pos, n->pos);
+                const auto lineSegment = LineSegment(ped.pos, n.pos);
 
                 if(std::find_if(
                        walls.cbegin(), walls.cend(), [&lineSegment](const auto& candidate) {
@@ -66,8 +66,8 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
     const auto& parameters = parameterProfile(ped.parameterProfileId);
     double min_spacing = 100.0;
     Point repPed = Point(0, 0);
-    for(const auto neighbor : neighborhood) {
-        repPed += ForceRepPed(ped, *neighbor);
+    for(const auto& neighbor : neighborhood) {
+        repPed += ForceRepPed(ped, neighbor);
     }
     // repulsive forces to walls and closed transitions that are not my target
     Point repWall = ForceRepRoom(ped, geometry);
@@ -76,8 +76,8 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
     PedestrianUpdate update{};
     e0(ped, ped.destination, dT, update);
     const Point direction = update.e0 + repPed + repWall;
-    for(const auto neighbor : neighborhood) {
-        double spacing = GetSpacing(ped, *neighbor, direction).first;
+    for(const auto& neighbor : neighborhood) {
+        double spacing = GetSpacing(ped, neighbor, direction).first;
         min_spacing = std::min(min_spacing, spacing);
     }
 
@@ -111,13 +111,14 @@ void VelocityModel::CheckDistanceConstraint(
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
     const auto r = parameterProfile(agent.parameterProfileId).radius;
     for(const auto& neighbor : neighbors) {
-        const auto contanctdDist = r + parameterProfile(neighbor->parameterProfileId).radius;
-        const auto distance = (agent.pos - neighbor->pos).Norm();
+        const auto contanctdDist = r + parameterProfile(neighbor.parameterProfileId).radius;
+        const auto distance = (agent.pos - neighbor.pos).Norm();
         if(contanctdDist >= distance) {
             throw SimulationError(
-                "Model constraint violation: Agent {} too close to agent {}",
-                agent.id,
-                neighbor->id);
+                "Model constraint violation: Agent {} too close to agent {}: distance {}",
+                agent.pos,
+                neighbor.pos,
+                distance);
         }
     }
 }

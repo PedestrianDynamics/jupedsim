@@ -198,7 +198,8 @@ GenericAgent::ID TypedSimulation<T>::AddAgent(AgentType&& agent)
     }
 
     _agents.emplace_back(std::move(agent));
-    _neighborhoodSearch.Update(_agents);
+    _neighborhoodSearch.AddAgent(_agents.back());
+
     return _agents.back().id.getID();
 }
 
@@ -298,7 +299,7 @@ std::vector<GenericAgent::ID> TypedSimulation<T>::AgentsInRange(Point p, double 
         std::begin(neighbors),
         std::end(neighbors),
         std::back_inserter(neighborIds),
-        [](const auto& agent) { return agent->id; });
+        [](const auto& agent) { return agent.id; });
     return neighborIds;
 }
 
@@ -316,8 +317,8 @@ std::vector<GenericAgent::ID> TypedSimulation<T>::AgentsInPolygon(const std::vec
     result.reserve(candidates.size());
     std::for_each(
         std::begin(candidates), std::end(candidates), [&result, &poly](const auto& agent) {
-            if(poly.IsInside(agent->pos)) {
-                result.push_back(agent->id);
+            if(poly.IsInside(agent.pos)) {
+                result.push_back(agent.id);
             }
         });
     return result;
