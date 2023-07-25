@@ -146,6 +146,16 @@ Point Point::Rotate(double ctheta, double stheta) const
     return Point(x * ctheta - y * stheta, x * stheta + y * ctheta);
 }
 
+Point Point::Rotate90Deg() const
+{
+    return {-y, x};
+}
+
+bool Point::IsUnitLength() const
+{
+    return NormSquare() == 1.0;
+}
+
 //  sum
 const Point Point::operator+(const Point& p) const
 {

@@ -8,10 +8,16 @@
 #include "Mathematics.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
+#include "Point.hpp"
 #include "SimulationError.hpp"
 #include "Stage.hpp"
 
 #include <Logger.hpp>
+
+#include <fmt/format.h>
+
+#include <algorithm>
+#include <limits>
 #include <memory>
 #include <numeric>
 #include <vector>
@@ -26,7 +32,18 @@ VelocityModel::VelocityModel(
     double awall,
     double Dwall,
     const std::vector<VelocityModelAgentParameters>& profiles)
-    : OperationalModelBase(profiles), _aPed(aped), _DPed(Dped), _aWall(awall), _DWall(Dwall)
+    : OperationalModelBase(profiles)
+    , _aPed(aped)
+    , _DPed(Dped)
+    , _aWall(awall)
+    , _DWall(Dwall)
+    , _cutOffRadius(
+          2 * std::max_element(
+                  std::begin(profiles),
+                  std::end(profiles),
+                  [](const auto& p1, const auto& p2) { return p1.radius < p2.radius; })
+                  ->radius -
+          Dped * log(_minForce / aped))
 {
 }
 
@@ -36,8 +53,7 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
     const CollisionGeometry& geometry,
     const NeighborhoodSearchType& neighborhoodSearch) const
 {
-    const double radius = 4.0;
-    auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.pos, radius);
+    auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.pos, _cutOffRadius);
     const auto& walls = geometry.LineSegmentsInApproxDistanceTo(ped.pos);
 
     // Remove any agent from the neighborhood that is obstructed by geometry and the current
@@ -64,7 +80,7 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
         std::end(neighborhood));
 
     const auto& parameters = parameterProfile(ped.parameterProfileId);
-    double min_spacing = 100.0;
+    double min_spacing = std::numeric_limits<double>::max();
     Point repPed = Point(0, 0);
     for(const auto& neighbor : neighborhood) {
         repPed += ForceRepPed(ped, neighbor);
@@ -75,13 +91,13 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
     // calculate new direction ei according to (6)
     PedestrianUpdate update{};
     e0(ped, ped.destination, dT, update);
-    const Point direction = update.e0 + repPed + repWall;
+    const Point direction = (update.e0 + repPed + repWall).Normalized();
     for(const auto& neighbor : neighborhood) {
-        double spacing = GetSpacing(ped, neighbor, direction).first;
+        const double spacing = GetSpacing(ped, neighbor, direction);
         min_spacing = std::min(min_spacing, spacing);
     }
 
-    update.velocity = direction.Normalized() * OptimalSpeed(ped, min_spacing, parameters.timeGap);
+    update.velocity = direction * OptimalSpeed(ped, min_spacing, parameters.timeGap);
     update.position = ped.pos + *update.velocity * dT;
     return update;
 };
@@ -154,45 +170,34 @@ double VelocityModel::OptimalSpeed(const Data& ped, double spacing, double t) co
 }
 
 // return spacing and id of the nearest pedestrian
-my_pair VelocityModel::GetSpacing(const Data& ped1, const Data& ped2, Point ei) const
+double VelocityModel::GetSpacing(const Data& ped1, const Data& ped2, const Point direction) const
 {
-    Point distp12 = ped2.pos - ped1.pos; // inversed sign
-    const double distance = distp12.Norm();
-    const double l = 2 * parameterProfile(ped1.parameterProfileId).radius;
-    Point ep12;
-    ep12 = distp12.Normalized();
+    assert(direction.IsUnitLength());
 
-    double condition1 = ei.ScalarProduct(ep12); // < e_i , e_ij > should be positive
-    double condition2 =
-        ei.Rotate(0, 1).ScalarProduct(ep12); // theta = pi/2. condition2 should <= than l/Distance
-    condition2 = (condition2 > 0) ? condition2 : -condition2; // abs
-
-    if((condition1 >= 0) && (condition2 <= l / distance)) {
-        // return a pair <dist, condition1>. Then take the smallest dist. In case of equality
-        // the biggest condition1
-        return my_pair(distp12.Norm(), ped2.id);
+    const Point distp12 = ped2.pos - ped1.pos;
+    const bool inFront = direction.ScalarProduct(distp12) >= 0;
+    if(!inFront) {
+        return std::numeric_limits<double>::max();
     }
-    return my_pair(FLT_MAX, ped2.id);
+
+    const Point left = direction.Rotate90Deg();
+    const double l = parameterProfile(ped1.parameterProfileId).radius +
+                     parameterProfile(ped2.parameterProfileId).radius;
+    if(std::abs(left.ScalarProduct(distp12)) > l) {
+        return std::numeric_limits<double>::max();
+    }
+
+    return distp12.Norm();
 }
 Point VelocityModel::ForceRepPed(const Data& ped1, const Data& ped2) const
 {
-    Point F_rep(0.0, 0.0);
-    // x- and y-coordinate of the distance between p1 and p2
-    Point distp12 = ped2.pos - ped1.pos;
-    double Distance = distp12.Norm();
-    Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
-    double R_ij;
-    double l = 2 * parameterProfile(ped1.parameterProfileId).radius;
-
-    ep12 = distp12.Normalized();
-    Point ei = ped1.orientation;
-    double condition1 = ei.ScalarProduct(ep12); // < e_i , e_ij > should be positive
-    condition1 = (condition1 > 0) ? condition1 : 0; // abs
-
-    R_ij = -_aPed * exp((l - Distance) / _DPed);
-    F_rep = ep12 * R_ij;
-
-    return F_rep;
+    const Point distp12 = ped2.pos - ped1.pos;
+    const double dist = distp12.Norm();
+    const double l = parameterProfile(ped1.parameterProfileId).radius +
+                     parameterProfile(ped2.parameterProfileId).radius;
+    const auto ep12 = distp12 / dist;
+    const double R_ij = -_aPed * exp((l - dist) / _DPed);
+    return ep12 * R_ij;
 }
 
 Point VelocityModel::ForceRepRoom(const Data& ped, const CollisionGeometry& geometry) const

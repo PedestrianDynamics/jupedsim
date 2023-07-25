@@ -50,6 +50,14 @@ public:
     /// rotate the vector by theta
     Point Rotate(double ctheta, double stheta) const;
 
+    /// Create a new vector rotated by +90 degree (ccw rotation)
+    /// @return rotated vector
+    Point Rotate90Deg() const;
+
+    /// Tests that the vector is length 1
+    /// @return length == 1
+    bool IsUnitLength() const;
+
     // operators
     /// addition
     const Point operator+(const Point& p) const;
@@ -61,7 +69,6 @@ public:
     bool operator!=(const Point& p) const;
     /// Assignement
     Point& operator+=(const Point& p);
-    /// nice formating of the point
     std::string toString() const;
 
     bool operator<(const Point& rhs) const;

@@ -60,11 +60,13 @@ public:
     using NeighborhoodSearchType = NeighborhoodSearch<Data>;
 
 private:
+    static constexpr double _minForce = 10e-4;
     /// Modellparameter
     double _aPed;
     double _DPed;
     double _aWall;
     double _DWall;
+    double _cutOffRadius{};
 
 public:
     VelocityModel(
@@ -113,12 +115,12 @@ private:
      *
      * @param ped1 Pointer to Pedestrian: First pedestrian
      * @param ped2 Pointer to Pedestrian: Second pedestrian
-     * @param ei the direction of pedestrian.
+     * @param direction of pedestrian (e_i).
      * This direction is: \f$ e_0 + \sum_j{R(spacing_{ij})*e_{ij}}\f$
      * and should be calculated *before* calling OptimalSpeed
      * @return Point
      */
-    my_pair GetSpacing(const Data& ped1, const Data& ped2, Point ei) const;
+    double GetSpacing(const Data& ped1, const Data& ped2, const Point direction) const;
     /**
      * Repulsive force between two pedestrians ped1 and ped2 according to
      * the Velocity model (to be published in TGF15)
