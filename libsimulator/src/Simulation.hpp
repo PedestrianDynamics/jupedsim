@@ -81,7 +81,7 @@ private:
 
 public:
     TypedSimulation(
-        std::unique_ptr<ModelType> operationalModel,
+        std::unique_ptr<ModelType>&& operationalModel,
         std::unique_ptr<CollisionGeometry>&& geometry,
         std::unique_ptr<RoutingEngine>&& routingEngine,
         double dT);
@@ -143,7 +143,7 @@ public:
 
 template <typename T>
 TypedSimulation<T>::TypedSimulation(
-    std::unique_ptr<T> operationalModel,
+    std::unique_ptr<T>&& operationalModel,
     std::unique_ptr<CollisionGeometry>&& geometry,
     std::unique_ptr<RoutingEngine>&& routingEngine,
     double dT)
