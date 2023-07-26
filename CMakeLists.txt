@@ -115,7 +115,7 @@ add_subdirectory(third-party/poly2tri)
 
 set(Python_FIND_VIRTUALENV "FIRST")
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
-find_package(pybind11 REQUIRED CONFIG)
+add_subdirectory(third-party/pybind11-2.11.1)
 
 if(BUILD_TESTS)
     add_subdirectory(third-party/googletest-1.13.0)
