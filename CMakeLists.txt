@@ -204,7 +204,7 @@ endif()
 if(BUILD_DOC)
     find_package(Doxygen REQUIRED)
     configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/docs/doxygen/Doxyfile.in
+            ${CMAKE_CURRENT_SOURCE_DIR}/docs_old/doxygen/Doxyfile.in
         ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
         @ONLY
     )
@@ -216,13 +216,13 @@ if(BUILD_DOC)
     )
     # generate file titlepage.tex based on titlepage.tex.in
     configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide/titlepage.tex.in
-        ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide/titlepage.tex
+            ${CMAKE_CURRENT_SOURCE_DIR}/docs_old/jps_guide/titlepage.tex.in
+            ${CMAKE_CURRENT_SOURCE_DIR}/docs_old/jps_guide/titlepage.tex
         @ONLY
     )
     add_custom_target(guide
-        "${PYTHON_EXECUTABLE}" ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide/make_guide.py
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide
+        "${PYTHON_EXECUTABLE}" ${CMAKE_CURRENT_SOURCE_DIR}/docs_old/jps_guide/make_guide.py
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/docs_old/jps_guide
         COMMENT "Generating guide"
         VERBATIM
     )
