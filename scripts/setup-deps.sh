@@ -2,7 +2,6 @@
 set -ex
 
 boost_version="1.81.0"
-cgal_version="5.5.1"
 pybind11_version="2.10.3"
 install_path=/usr/local
 
@@ -51,27 +50,6 @@ function setup_boost {
     rm -rf ${temp_folder}
 }
 
-function setup_cgal {
-    root=$(pwd)
-    temp_folder=$(mktemp -d)
-    cd ${temp_folder}
-
-    wget https://github.com/CGAL/cgal/releases/download/v${cgal_version}/CGAL-${cgal_version}-library.tar.xz
-    tar xf CGAL-${cgal_version}-library.tar.xz
-    cd CGAL-${cgal_version}
-    mkdir build
-    cd build
-    cmake .. \
-        -DCMAKE_INSTALL_PREFIX=${install_path} \
-        -DWITH_CGAL_Qt5=OFF \
-        -DWITH_CGAL_ImageIO=OFF \
-        -DCMAKE_BUILD_TYPE=Release
-    cmake --build . --target install -- -j${CPUS}
-
-    cd ${root}
-    rm -rf ${temp_folder}
-}
-
 function setup_pybind11 {
     root=$(pwd)
     temp_folder=$(mktemp -d)
@@ -93,5 +71,4 @@ function setup_pybind11 {
 }
 
 setup_boost
-setup_cgal
-setup_pybind11
+tetup_pybind11

@@ -102,10 +102,14 @@ find_package(Threads REQUIRED)
 set(CGAL_DATA_DIR "none")
 set(WITH_CGAL_ImageIO OFF)
 set(WITH_CGAL_Qt5 OFF)
-if(UNIX)
-    set(CGAL_DISABLE_GMP ON)
-endif()
-find_package(CGAL 5.4 REQUIRED)
+set(CGAL_DISABLE_GMP ON)
+find_package(CGAL 5.5
+    REQUIRED 
+    CONFIG 
+    NO_DEFAULT_PATH 
+    PATHS 
+        ${CMAKE_SOURCE_DIR}/third-party/cgal-5.5.2
+)
 
 add_subdirectory(third-party/poly2tri)
 
