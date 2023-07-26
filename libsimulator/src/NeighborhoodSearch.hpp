@@ -82,6 +82,21 @@ public:
         vec.push_back(item);
     }
 
+    void RemoveAgent(const Value& item)
+    {
+        for(auto& [_, agents] : _grid) {
+            const auto iter =
+                std::find_if(std::begin(agents), std::end(agents), [item](auto& agent) {
+                    return agent.id == item.id;
+                });
+            if(iter != std::end(agents)) {
+                agents.erase(iter);
+                return;
+            }
+        }
+        throw SimulationError("Unknown agent id {}", item.id);
+    }
+
     void Update(const std::vector<Value>& items)
     {
         _grid.clear();

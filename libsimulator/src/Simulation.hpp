@@ -212,6 +212,7 @@ void TypedSimulation<T>::RemoveAgent(GenericAgent::ID id)
         throw SimulationError("Unknown agent id {}", id);
     }
     _agents.erase(iter);
+    _neighborhoodSearch.RemoveAgent(*iter);
 }
 
 template <typename T>
