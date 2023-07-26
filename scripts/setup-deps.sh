@@ -2,7 +2,6 @@
 set -ex
 
 boost_version="1.81.0"
-pybind11_version="2.10.3"
 install_path=/usr/local
 
 POSITIONAL=()
@@ -50,25 +49,4 @@ function setup_boost {
     rm -rf ${temp_folder}
 }
 
-function setup_pybind11 {
-    root=$(pwd)
-    temp_folder=$(mktemp -d)
-    cd ${temp_folder}
-
-    wget https://github.com/pybind/pybind11/archive/refs/tags/v${pybind11_version}.tar.gz
-    tar xf v${pybind11_version}.tar.gz
-    cd pybind11-${pybind11_version}
-    mkdir build
-    cd build
-    cmake .. \
-        -DCMAKE_INSTALL_PREFIX=${install_path} \
-        -DPYBIND11_TEST=OFF \
-        -DCMAKE_BUILD_TYPE=Release
-    cmake --build . --target install -- -j${CPUS}
-
-    cd ${root}
-    rm -rf ${temp_folder}
-}
-
 setup_boost
-tetup_pybind11
