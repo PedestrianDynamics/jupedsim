@@ -109,7 +109,11 @@ if(BUILD_TESTS)
 endif()
 
 if (BUILD_BENCHMARKS)
-    find_package(benchmark REQUIRED)
+    set(BENCHMARK_ENABLE_TESTING OFF)
+    set(BENCHMARK_ENABLE_INSTALL OFF)
+    set(BENCHMARK_ENABLE_WERROR OFF)
+    set(BENCHMARK_INSTALL_DOCS OFF)
+    add_subdirectory(third-party/benchmark-1.8.2)
 endif ()
 ################################################################################
 # VCS info
