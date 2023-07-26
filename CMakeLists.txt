@@ -105,7 +105,7 @@ find_package(Python COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11 REQUIRED CONFIG)
 
 if(BUILD_TESTS)
-    find_package(GTest REQUIRED CONFIG)
+    add_subdirectory(third-party/googletest-1.13.0)
 endif()
 
 if (BUILD_BENCHMARKS)

@@ -1,7 +1,6 @@
 #! /bin/bash
 set -ex
 
-googletest_version="1.13.0"
 fmt_version="9.1.0"
 boost_version="1.81.0"
 cgal_version="5.5.1"
@@ -50,25 +49,6 @@ function setup_boost {
     ./bootstrap.sh --prefix=${install_path} --with-libraries="headers"
     ./b2 --prefix=${install_path} install
 
-    cd ${root}
-    rm -rf ${temp_folder}
-}
-
-function setup_googletest {
-    root=$(pwd)
-    temp_folder=$(mktemp -d)
-    cd ${temp_folder}
-
-    wget https://github.com/google/googletest/archive/refs/tags/v${googletest_version}.tar.gz
-    tar xf v${googletest_version}.tar.gz
-    cd googletest-${googletest_version}
-    mkdir build
-    cd build
-    cmake .. \
-        -DCMAKE_INSTALL_PREFIX=${install_path} \
-        -DCMAKE_BUILD_TYPE=Release
-    cmake --build . -j ${CPUS}
-    cmake --install .
     cd ${root}
     rm -rf ${temp_folder}
 }
@@ -165,7 +145,6 @@ function setup_google_benchmark {
 }
 
 setup_boost
-setup_googletest
 setup_fmt
 setup_cgal
 setup_pybind11
