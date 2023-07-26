@@ -89,7 +89,6 @@ list(APPEND COMMON_COMPILE_OPTIONS
 set(FMT_INSTALL OFF)
 add_subdirectory(third-party/fmt-10.0.0)
 set_property(TARGET fmt PROPERTY POSITION_INDEPENDENT_CODE ON)
-<<<<<<< HEAD
 find_package(Boost 1.82
     REQUIRED
     CONFIG
@@ -104,10 +103,10 @@ set(WITH_CGAL_ImageIO OFF)
 set(WITH_CGAL_Qt5 OFF)
 set(CGAL_DISABLE_GMP ON)
 find_package(CGAL 5.5
-    REQUIRED 
-    CONFIG 
-    NO_DEFAULT_PATH 
-    PATHS 
+    REQUIRED
+    CONFIG
+    NO_DEFAULT_PATH
+    PATHS
         ${CMAKE_SOURCE_DIR}/third-party/cgal-5.5.2
 )
 

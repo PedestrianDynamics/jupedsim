@@ -1,7 +1,6 @@
 #! /bin/bash
 set -ex
 
-boost_version="1.81.0"
 install_path=/usr/local
 
 POSITIONAL=()
@@ -34,19 +33,3 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
     CPUS=$(sysctl -n hw.logicalcpu)
 fi
 
-function setup_boost {
-    root=$(pwd)
-    temp_folder=$(mktemp -d)
-    cd ${temp_folder}
-    boost_version_string=${boost_version//[.]/_}
-    wget https://boostorg.jfrog.io/artifactory/main/release/${boost_version}/source/boost_${boost_version_string}.tar.gz
-    tar xf boost_${boost_version_string}.tar.gz
-    cd boost_${boost_version_string}
-    ./bootstrap.sh --prefix=${install_path} --with-libraries="headers"
-    ./b2 --prefix=${install_path} install
-
-    cd ${root}
-    rm -rf ${temp_folder}
-}
-
-setup_boost

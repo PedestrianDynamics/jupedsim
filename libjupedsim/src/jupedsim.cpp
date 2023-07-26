@@ -8,7 +8,6 @@
 #include "Journey.hpp"
 #include "Stage.hpp"
 
-#include "gtest/gtest.h"
 #include <BuildInfo.hpp>
 #include <CollisionGeometry.hpp>
 #include <Conversion.hpp>
