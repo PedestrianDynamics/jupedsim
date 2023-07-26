@@ -1,7 +1,6 @@
 #! /bin/bash
 set -ex
 
-fmt_version="9.1.0"
 boost_version="1.81.0"
 cgal_version="5.5.1"
 pybind11_version="2.10.3"
@@ -52,28 +51,6 @@ function setup_boost {
     rm -rf ${temp_folder}
 }
 
-function setup_fmt {
-    root=$(pwd)
-    temp_folder=$(mktemp -d)
-    cd ${temp_folder}
-
-    wget https://github.com/fmtlib/fmt/archive/${fmt_version}.tar.gz
-    tar xf ${fmt_version}.tar.gz
-    cd fmt-${fmt_version}
-    mkdir build
-    cd build
-    cmake .. \
-        -DCMAKE_CXX_FLAGS="-fPIC -fvisibility=hidden" \
-        -DFMT_DOC=OFF \
-        -DFMT_TEST=OFF \
-        -DCMAKE_INSTALL_PREFIX=${install_path} \
-        -DCMAKE_BUILD_TYPE=Release
-    cmake --build . -j ${CPUS}
-    cmake --install .
-    cd ${root}
-    rm -rf ${temp_folder}
-}
-
 function setup_cgal {
     root=$(pwd)
     temp_folder=$(mktemp -d)
@@ -116,6 +93,5 @@ function setup_pybind11 {
 }
 
 setup_boost
-setup_fmt
 setup_cgal
 setup_pybind11
