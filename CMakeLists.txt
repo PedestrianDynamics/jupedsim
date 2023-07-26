@@ -86,8 +86,17 @@ list(APPEND COMMON_COMPILE_OPTIONS
 ################################################################################
 # Dependencies
 ################################################################################
-find_package(fmt 8.0 REQUIRED CONFIG)
-find_package(Boost 1.76 REQUIRED)
+set(FMT_INSTALL OFF)
+add_subdirectory(third-party/fmt-10.0.0)
+set_property(TARGET fmt PROPERTY POSITION_INDEPENDENT_CODE ON)
+<<<<<<< HEAD
+find_package(Boost 1.82
+    REQUIRED
+    CONFIG
+    NO_DEFAULT_PATH
+    PATHS
+        ${CMAKE_SOURCE_DIR}/third-party/boost-1.82.0
+)
 find_package(Threads REQUIRED)
 # Silence CGAL CMake warning. No example data for CGAL will be loaded anyways
 set(CGAL_DATA_DIR "none")
