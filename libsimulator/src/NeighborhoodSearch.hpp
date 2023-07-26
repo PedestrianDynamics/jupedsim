@@ -56,51 +56,6 @@ struct std::hash<Grid2DIndex> {
     }
 };
 
-// template <typename T>
-// class Grid2D
-//{
-// public:
-//     struct Entry {
-//         Grid2DIndex id;
-//         Point pos;
-//         T value;
-//
-//         bool operator<(const Entry& other) const { return id < other.id; }
-//         bool operator==(const Entry& other) const { return id == other.id && pos == other.pos; }
-//     };
-//
-//  public:
-//      using size_type = std::size_t;
-//      using container_type = std::vector<T>;
-//
-//      Grid2D() = default;
-//
-//      size_type size() const { return _data.size(); }
-//
-//      bool empty() const { return _data.empty(); }
-//
-//      container_type get(Grid2DIndex index) const
-//      {
-//          auto it = _data.find(index);
-//
-//          if(it != _data.cend()) {
-//              return it->second;
-//          }
-//
-//          static const container_type empty{};
-//          return empty;
-//      }
-//
-//      void insert(Grid2DIndex index, T item)
-//      {
-//          auto& vec = _data[index];
-//          vec.push_back(item);
-//      }
-//
-//  private:
-//      std::unordered_map<Grid2DIndex, container_type> _data;
-//  };
-
 template <typename Value>
 class NeighborhoodSearch
 {
