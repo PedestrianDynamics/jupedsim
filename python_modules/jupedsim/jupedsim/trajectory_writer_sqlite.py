@@ -2,7 +2,7 @@ import sqlite3
 from pathlib import Path
 from typing import Optional
 
-import py_jupedsim as jps
+import jupedsim.jps_native as jps
 
 from jupedsim.serialization import TrajectoryWriter
 

@@ -24,3 +24,4 @@ set_target_properties(py_jupedsim
         CXX_VISIBILITY_PRESET "hidden"
         CUDA_VISIBILITY_PRESET "hidden"
 )
+

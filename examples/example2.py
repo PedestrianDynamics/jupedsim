@@ -4,7 +4,7 @@
 import logging
 import pathlib
 
-import py_jupedsim as jps
+import jupedsim.py_jupedsim as jps
 import shapely
 from shapely import GeometryCollection, Polygon, to_wkt
 

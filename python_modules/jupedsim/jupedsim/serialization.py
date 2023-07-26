@@ -11,7 +11,7 @@ from io import TextIOWrapper
 from pathlib import Path
 from typing import Optional, Tuple
 
-import py_jupedsim as jps
+import jupedsim.jps_native as jps
 import shapely
 
 
