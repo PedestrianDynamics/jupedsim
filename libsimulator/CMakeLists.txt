@@ -96,6 +96,7 @@ if (BUILD_TESTS)
         test/TestGraph.cpp
         test/TestLineSegment.cpp
         test/TestNeighborhoodSearch.cpp
+        test/TestPoint.cpp
         test/TestSimulationClock.cpp
         test/TestUniqueID.cpp
     )
