@@ -5,6 +5,7 @@
 #include "Macros.hpp"
 
 #include <Logger.hpp>
+#include <limits>
 #include <sstream>
 /************************************************************
   Konstruktoren
@@ -153,7 +154,7 @@ Point Point::Rotate90Deg() const
 
 bool Point::IsUnitLength() const
 {
-    return NormSquare() == 1.0;
+    return std::abs(1 - NormSquare()) <= std::numeric_limits<double>::epsilon();
 }
 
 //  sum
