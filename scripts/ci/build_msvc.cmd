@@ -3,5 +3,6 @@ call C:\jpscore-deps\venv\Scripts\activate.bat
 set PATH=%PATH%;C:\jpscore-deps\x64-windows\bin
 mkdir build
 cd build
-cmake .. -DCMAKE_PREFIX_PATH=C:/jpscore-deps/x64-windows -DBUILD_TESTS=ON -DBUILD_JPSVIS=OFF
+cmake .. -DBUILD_TESTS=ON
+cmake --build . --config Release
 cmake --build . --config Release --target unittests

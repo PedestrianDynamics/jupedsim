@@ -32,8 +32,7 @@ RUN cd /usr/src && tar -xf *.tar.bz2
 RUN cd $(ls -d /usr/src/linux-source*/) && make -j -C tools/perf prefix=/usr/local install
 
 # Install jpscore dependencies
-COPY scripts/setup-deps.sh requirements.txt /opt/
-RUN cd /opt && ./setup-deps.sh
+COPY requirements.txt /opt/
 RUN pip3 install -r /opt/requirements.txt --break-system-packages
 
 # Clone FlameGraph repo

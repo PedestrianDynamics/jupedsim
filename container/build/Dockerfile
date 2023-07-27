@@ -30,9 +30,7 @@ RUN apt-get update && \
 
 RUN cd /usr/bin && ln -s pytest-3 pytest
 
-COPY scripts/setup-deps.sh requirements.txt /opt/
-
-RUN cd /opt && ./setup-deps.sh
+COPY requirements.txt /opt/
 
 RUN pip3 install -r /opt/requirements.txt
 
