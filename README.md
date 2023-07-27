@@ -1,28 +1,18 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6144559.svg)](https://doi.org/10.5281/zenodo.6144559) [![GitHub license](https://img.shields.io/badge/license-LGPL-blue.svg)](https://raw.githubusercontent.com/JuPedSim/jpscore/master/LICENSE)
-
-
-[**documentation**](http://www.jupedsim.org) | [**jpscore**](http://www.jupedsim.org/jpscore_introduction.html) | [**jpsreport**](http://www.jupedsim.org/jpsreport_introduction.html) | [**jpsvis**](https://www.jupedsim.org/jpsvis_introduction.html)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6144559.svg)](https://doi.org/10.5281/zenodo.6144559) [![GitHub license](https://img.shields.io/badge/license-LGPL-blue.svg)](https://raw.githubusercontent.com/PedestrianDynamics/jupedsim/master/LICENSE)
 
 ## Introduction
 
-This repository contains software for simulating pedestrian dynamics (jpscore)
-and visualizing the resulting trajectories (jpsvis).
+JuPedSim is a library to simulate pedestrian dynamics. The main API is the
+`jupedsim` python module, we also support a C-API onto of which the python
+module is build.
 
-Analysis of results can be done with jpsreport.
+For how to use JuPedSim see the code in `examples`
 
-## Quick start
+## Questions and Suggestions
 
-See [Getting started with jupedsim](http://www.jupedsim.org/jpscore_introduction.html).
-
-## Showcase and tutorials
-
-To highlight some features of JuPedSim, we have uploaded some videos on our
-[YouTube channel](https://www.youtube.com/channel/UCKS8w8CUClHEeN4K1SUSMBA).
-
-## Support
-
-If you got a question or a problem and need support from our team feel free to
-contact us. You can do this via [email](mailto:dev@jupedsim.org).
+If you have a question or a problem and need support from our team feel free to
+open a new topic in GitHub discussions
+[https://github.com/PedestrianDynamics/jupedsim/discussions]
 
 Please do not use the issue tracker for personal support requests.
 
@@ -50,7 +40,8 @@ If you submit a feature request please help us by including:
 
 ## Building from source
 
-It should be possible to build on all major platforms however, we only test a few:
+It should be possible to build on all major platforms, however we only test on
+a limited set:
 
 Right now, we ensure a working Build for:
 
@@ -58,220 +49,45 @@ Right now, we ensure a working Build for:
 * MacOS 13 (Ventura)
 * Ubuntu 22.04
 
-### Build Options
-
-We support only a few settings. For a list of build options, please see
-[CMakeLists.txt] directly.
-
 ### General Information
 
 All of the following descriptions assume the following layout on disk:
 
 ```txt
 .
-├── jpscore <- code repository
-├── jpscore-build <- build folder
-└── jpscore-deps <- install location of library dependencies
+├── jupedsim <- code repository
+└── jupedsim-build <- build folder
 
 ```
 
-### Build on Linux
+We support only a few settings. For a list of build options, please see
+[CMakeLists.txt] directly.
+
+### Build on Linux / MacOS / Windows
 
 #### System Requirements
 
-Builds are only tested on the latest Ubuntu version (at this time 21.04). To
-compile from source you will need a couple of system dependencies.
+To compile from source you will need a C++20 capable toolchain to be available
+and development headers for python3.10 or later.
 
-* C++17 capable compiler (default GCC will do)
-* wget
-* vtk9 with qt support
-* qt 5
-
-Recommended:
-
-* ninja
-
-For a exact list of ubuntu packages required to build please consult
-[container/build/Dockerfile]
-
-#### Library Dependencies
-
-On Linux and MacOS all dependencies except VTK & QT are built from source, they are
-either part of the source tree and do not need any special attention or
-they are built with `scripts/setup-deps.sh`. To compile dependencies invoke the
-script and specify the install path:
+#### Configure and Compile
 
 ```bash
-./scripts/setup-deps.sh --install-path ~/jpscore-deps
+cmake -S jupedsim -B jupedsim-build
+cmake --build jupedsim
 ```
 
-The output created in `~jpscore-deps` now contains an install tree of all required
-library dependencies.
+### How to use `jupedsim`
 
-Warning: If you do not specify an install path the script tries to install into
-`/usr/local`.
+On Linux and MacOS you will find a file `environment` inside the build folder,
+this contains the PYTHONPATH required to import `jupedsim`. On Windows you will
+need to add the paths to the PYTHONPATH by yourself.
 
-#### Compiling
+The following locations need to be on the PYTHONPATH
 
-Now that you have all library dependencies, you need to generate build files
-with CMake and compile.
-
-```bash
-mkdir jpscore-build
-cd jpscore-build
-cmake -GNinja -DCMAKE_BUILD_TYPE=Debug \
-    -DCMAKE_PREFIX_PATH=<path-to-dependencies> \
-    <path-to-cmakelists>
-ninja
+```
+jupedsim-build/lib/
+jupedsim/python_modules/jupedsim
+jupedsim/python_modules/visdbg
 ```
 
-Alternatively you can generate a make based build with:
-
-```bash
-mkdir jpscore-build
-cd jpscore-build
-cmake -DCMAKE_BUILD_TYPE=Debug \
-    -DCMAKE_PREFIX_PATH=<path-to-dependencies> \
-    <path-to-cmakelists>
-make -j$(nproc)
-```
-
-You will find `jpscore` and `jpsvis` executables in `jpscore-build/bin` after
-the build.
-
-### Build on MacOS
-
-#### System Requirements
-
-* homebrew for qt / vtk packages
-* wget
-* vtk9 from homebrew
-* qt from homebrew
-
-Recommended:
-
-* ninja
-
-Once the above-listed requirements are installed, build the library dependencies.
-
-#### Library Dependencies
-
-On Linux and MacOS all dependencies except VTK & QT are built from source, they are
-either part of the source tree and do not need any special attention or
-they are built with `scripts/setup-deps.sh`. To compile dependencies invoke the
-script and specify the install path:
-
-```bash
-./scripts/setup-deps.sh --install-path ~/jspcore-deps
-```
-
-The output created in `~jpscore-deps` now contains an install tree of all required
-library dependencies.
-
-Warning: If you do not specify an install path the script tries to install into
-`/usr/local`.
-
-#### Compiling
-
-Now that you have all library dependencies, you need to generate build files
-with CMake and compile.
-
-```bash
-mkdir jpscore-build
-cd jpscore-build
-cmake -GNinja -DCMAKE_BUILD_TYPE=Debug \
-    -DCMAKE_PREFIX_PATH=<path-to-dependencies> \
-    <path-to-cmakelists>
-ninja
-```
-
-Alternatively you can generate a make based build with:
-
-```bash
-mkdir jpscore-build
-cd jpscore-build
-cmake -DCMAKE_BUILD_TYPE=Debug \
-    -DCMAKE_PREFIX_PATH=<path-to-dependencies> \
-    <path-to-cmakelists>
-make -j$(nproc)
-```
-
-You will find `jpscore` executable and `jpsvis.app` app bundle in
-`jpscore-build/bin` after the build. To start `jpsvis` either click on the
-bundle in `jpscore/bin` or run it from the command line with
-`./bin/jpsvis.app/Contents/MacOS/jpsvis`
-
-### Build on Windows
-
-#### System Dependencies
-
-* Visual Studio
-
-#### Library Dependencies
-
-For Windows we support installation of dependencies with VCPKG in Manifest Mode.
-
-If you intend to enable `jpsvis` you will need to ensure to install the
-optional dependencies by adding `--x-feature=Vis` to the `vcpkg` invocation.  
-
-Due to long compile and copy times on Windows it is recommended to install
-dependencies into a location that can be preserved when switching branches or
-clean the repository path. This can be achived by adding
-`--x-install-root=<PATH-OUTSIDE-SOURCE>`.
-
-Do not forget to add the triplet to specify 32/64 bit version and static vs.
-dynamic linking version, e.g. `--triplet=x64-windows`
-
-For example if you want to install dependencies for `libjupedims` and `jpsvis`
-invoke `vcpkg` like this:
-
-```bash
-mkdir jpscore-deps
-cd <JPSCORE-SOURCE-PATH>
-vcpkg.exe --x-feature=Vis --x-install-root=../jpscore-deps --triplet=x64-windows
-```
-
-During the CMake invocation listed in the next section, add this to your invocation:
-
-```bash
--DCMAKE_PREFIX_PATH=<INSTALL-ROOT>/x64-windows
-```
-
-## Contributing to JuPedSim
-
-This project is mainly developed by a small group of researchers and students
-from [Jülich Research Center](http://www.fz-juelich.de/en) and
-[BUW](http://www.uni-wuppertal.de/). However, you are kindly invited not only to
-use JuPedSim but also contributing to our open-source-project. It does not
-matter if you are a researcher, student or just interested in pedestrian
-dynamics. There are only a few rules and advices we want to give to you:
-
-### Workflow
-
-We use a fork based workflow for all development. If you want to contribute any
-modification we kindly ask you to fork this repository, create a branch with
-your changes on your fork and then open a Pull Request via GitHub.
-
-As part of our CI integration we run formatting checks so make sure your code
-is formatted with clang-format-14!
-
-If you want to support us by writing the enhancement yourself, consider what
-kind of change it is:
-
-* **Major changes** that you wish to contribute to the project should be
-  discussed first on our **dev mailing list** so that we can better coordinate
-  our efforts, prevent duplication of work, and help you to craft the change so
-  that it is successfully accepted into the project.
-* **Small changes** can be crafted and submitted to our repository as a **pull
-  or merge request**.
-
-Nevertheless, open an issue for documentation purposes with the following template:
-
-### Code formatting
-
-This has become very easy:
-
-* All code needs to be formatted with clang-format-14
-  (A build target for checking / formatting is available: `check-format` /
-  `reformat`)
-* Use only spaces in code
