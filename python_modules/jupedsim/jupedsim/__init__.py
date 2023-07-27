@@ -1,9 +1,8 @@
 try:
-    import jupedsim.py_jupedsim as jps_native
+    from .py_jupedsim import *
 except ModuleNotFoundError:
-    import py_jupedsim as jps_native
+    from py_jupedsim import *
 
-print(jps_native)
 import jupedsim.aabb
 import jupedsim.distributions
 import jupedsim.grid

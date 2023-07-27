@@ -6,7 +6,7 @@ import pathlib
 import sys
 import time
 
-import py_jupedsim as jps
+import jupedsim.py_jupedsim as jps
 from shapely import GeometryCollection, Polygon, to_wkt
 
 from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter

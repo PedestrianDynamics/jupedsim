@@ -2,8 +2,7 @@ import sqlite3
 from pathlib import Path
 from typing import Optional
 
-import jupedsim.jps_native as jps
-
+from jupedsim import Simulation
 from jupedsim.serialization import TrajectoryWriter
 
 
@@ -66,7 +65,7 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
             cur.execute("ROLLBACK")
             raise TrajectoryWriter.Exception(f"Error creating database: {e}")
 
-    def write_iteration_state(self, simulation: jps.Simulation) -> None:
+    def write_iteration_state(self, simulation: Simulation) -> None:
         """Write trajectory data of one simulation iteration.
 
         This method is intended to handle serialization of the trajectory data

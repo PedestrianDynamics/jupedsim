@@ -11,8 +11,13 @@ from io import TextIOWrapper
 from pathlib import Path
 from typing import Optional, Tuple
 
-import jupedsim.jps_native as jps
 import shapely
+
+from jupedsim import (
+    GCFMModelAgentParameters,
+    Simulation,
+    VelocityModelAgentParameters,
+)
 
 
 class TrajectoryWriter(metaclass=abc.ABCMeta):
@@ -29,7 +34,7 @@ class TrajectoryWriter(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def write_iteration_state(self, simulation: jps.Simulation) -> None:
+    def write_iteration_state(self, simulation: Simulation) -> None:
         """Write trajectory data of one simulation iteration.
 
         This method is intended to handle serialization of the trajectory data
@@ -100,7 +105,7 @@ class JpsCoreStyleTrajectoryWriter(TrajectoryWriter):
         )
         self._out.flush()
 
-    def write_iteration_state(self, simulation: jps.Simulation) -> None:
+    def write_iteration_state(self, simulation: Simulation) -> None:
         """Writes trajectory information for a single iteration.
 
         Parameters
@@ -119,8 +124,7 @@ class JpsCoreStyleTrajectoryWriter(TrajectoryWriter):
             raise TrajectoryWriter.Exception("Output file not opened")
 
         def agent_orientaion_as_degrees(
-            agent: jps.GCFMModelAgentParameters
-            | jps.VelocityModelAgentParameters,
+            agent: GCFMModelAgentParameters | VelocityModelAgentParameters,
         ) -> float:
             return JpsCoreStyleTrajectoryWriter._orientation_to_angle(
                 agent.orientation

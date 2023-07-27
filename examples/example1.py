@@ -5,7 +5,7 @@ import logging
 import pathlib
 import sys
 
-import jupedsim.jps_native as jps
+import jupedsim.py_jupedsim as jps
 from shapely import GeometryCollection, Polygon, geometry, to_wkt
 from shapely.geometry.base import geom_factory
 
