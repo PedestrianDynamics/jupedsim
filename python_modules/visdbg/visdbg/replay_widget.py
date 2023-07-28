@@ -1,6 +1,6 @@
 import math
 
-from py_jupedsim.experimental import RoutingEngine
+from jupedsim.py_jupedsim.experimental import RoutingEngine
 from PySide6.QtCore import QSignalBlocker, Qt, QTimer
 from PySide6.QtGui import QFont
 from PySide6.QtStateMachine import QState, QStateMachine
@@ -128,12 +128,12 @@ class PlayerControlWidget(QWidget):
 
 class ReplayWidget(QWidget):
     def __init__(
-        self,
-        navi: RoutingEngine,
-        rec: Recording,
-        geo: Geometry,
-        trajectory: Trajectory,
-        parent=None,
+            self,
+            navi: RoutingEngine,
+            rec: Recording,
+            geo: Geometry,
+            trajectory: Trajectory,
+            parent=None,
     ):
         QWidget.__init__(self, parent)
         self.rec = rec

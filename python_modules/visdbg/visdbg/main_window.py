@@ -1,7 +1,7 @@
 import math
 from pathlib import Path
 
-import py_jupedsim
+import jupedsim.py_jupedsim as jps
 from PySide6.QtCore import QSettings, QSize
 from PySide6.QtStateMachine import QFinalState, QState, QStateMachine
 from PySide6.QtWidgets import (
@@ -94,11 +94,11 @@ class MainWindow(QMainWindow):
         self.settings.setValue("files/last_wkt_location", str(file.parent))
         try:
             wkt = parse_wkt(Path(file).read_text(encoding="UTF-8"))
-            navi = py_jupedsim.experimental.RoutingEngine(
+            navi = jps.experimental.RoutingEngine(
                 build_jps_geometry(wkt)
             )
             xmin, ymin, xmax, ymax = wkt.bounds
-            info_text = f"Dimensions: {math.ceil(xmax - xmin)}m x {math.ceil(ymax-ymin)}m Triangles: {len(navi.mesh())}"
+            info_text = f"Dimensions: {math.ceil(xmax - xmin)}m x {math.ceil(ymax - ymin)}m Triangles: {len(navi.mesh())}"
             name_text = f"Geometry: {file}"
             self.setUpdatesEnabled(False)
             geo = Geometry(navi)
@@ -131,7 +131,7 @@ class MainWindow(QMainWindow):
         try:
             rec = Recording(file.as_posix())
             self.setUpdatesEnabled(False)
-            navi = py_jupedsim.experimental.RoutingEngine(
+            navi = jps.experimental.RoutingEngine(
                 build_jps_geometry(rec.geometry())
             )
             geo = Geometry(navi)

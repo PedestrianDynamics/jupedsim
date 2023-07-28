@@ -1,4 +1,4 @@
-import py_jupedsim.experimental as jpex
+import jupedsim.py_jupedsim.experimental as jpex
 from visdbg.config import ZLayers
 from vtkmodules.vtkCommonCore import vtkCommand, vtkPoints
 from vtkmodules.vtkCommonDataModel import (
@@ -12,7 +12,7 @@ from vtkmodules.vtkRenderingCore import vtkActor, vtkCamera, vtkPolyDataMapper
 
 class MoveController:
     def __init__(
-        self, interactor_style: vtkInteractorStyleUser, cam: vtkCamera
+            self, interactor_style: vtkInteractorStyleUser, cam: vtkCamera
     ):
         self.route_from = None
         self.route_to = None
@@ -115,10 +115,10 @@ class MoveController:
         )
 
         if (
-            not self.route_to
-            or not self.route_from
-            or not self.navi.is_routable(self.route_from)
-            or not self.navi.is_routable(self.route_to)
+                not self.route_to
+                or not self.route_from
+                or not self.navi.is_routable(self.route_from)
+                or not self.navi.is_routable(self.route_to)
         ):
             if self.actor:
                 renderer.RemoveActor(self.actor)
@@ -149,7 +149,7 @@ class MoveController:
         interactor.Render()
 
     def _to_world_coordinate_2d(
-        self, display_pos: tuple[float, float]
+            self, display_pos: tuple[float, float]
     ) -> tuple[float, float]:
         renderer = (
             self.interactor_style.GetInteractor()

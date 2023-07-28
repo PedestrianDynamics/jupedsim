@@ -160,9 +160,11 @@ setup(
     python_requires=">=3.10",
     packages=[
         "jupedsim",
+        "visdbg"
     ],
     package_dir={
         'jupedsim': 'python_modules/jupedsim/jupedsim',
+        'visdbg': 'python_modules/visdbg/visdbg',
     },
     install_requires=[
         "numpy~=1.24.2",
@@ -170,7 +172,10 @@ setup(
         "scipy~=1.10.1",
         "matplotlib~=3.7.0",
         "shapely~=2.0.1",
+        "pyside6~=6.5.2",
+        "vtk~=9.2.6"
     ],
+    scripts=['python_modules/visdbg/bin/visdbg'],
     url="https://www.jupedsim.org",
     project_urls={
         'Documentation': 'https://www.jupedsim.org',

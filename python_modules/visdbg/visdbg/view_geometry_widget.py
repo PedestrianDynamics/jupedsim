@@ -1,4 +1,4 @@
-import py_jupedsim
+import jupedsim.py_jupedsim as jps
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QHBoxLayout,
@@ -13,12 +13,12 @@ from visdbg.geometry_widget import RenderWidget
 
 class ViewGeometryWidget(QWidget):
     def __init__(
-        self,
-        navi: py_jupedsim.experimental.RoutingEngine,
-        geo: Geometry,
-        name_text: str,
-        info_text: str,
-        parent=None,
+            self,
+            navi: jps.experimental.RoutingEngine,
+            geo: Geometry,
+            name_text: str,
+            info_text: str,
+            parent=None,
     ):
         QWidget.__init__(self, parent)
         bottom_layout = QHBoxLayout()
