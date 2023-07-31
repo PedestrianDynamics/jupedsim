@@ -88,6 +88,6 @@ The following locations need to be on the PYTHONPATH
 ```
 jupedsim-build/lib/
 jupedsim/python_modules/jupedsim
-jupedsim/python_modules/visdbg
+jupedsim/python_modules/jupedsim_visualizer
 ```
 

@@ -160,11 +160,11 @@ setup(
     python_requires=">=3.10",
     packages=[
         "jupedsim",
-        "visdbg"
+        "jupedsim_visualizer"
     ],
     package_dir={
         'jupedsim': 'python_modules/jupedsim/jupedsim',
-        'visdbg': 'python_modules/visdbg/visdbg',
+        'jupedsim_visualizer': 'python_modules/jupedsim_visualizer/jupedsim_visualizer',
     },
     install_requires=[
         "numpy~=1.24.2",
@@ -175,7 +175,7 @@ setup(
         "pyside6~=6.5.2",
         "vtk~=9.2.6"
     ],
-    scripts=['python_modules/visdbg/bin/visdbg'],
+    scripts=['python_modules/jupedsim_visualizer/bin/jupedsim_visualizer'],
     url="https://www.jupedsim.org",
     project_urls={
         'Documentation': 'https://www.jupedsim.org',

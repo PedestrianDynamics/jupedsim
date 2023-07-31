@@ -11,10 +11,10 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QTabWidget,
 )
-from visdbg.geometry import Geometry
-from visdbg.replay_widget import ReplayWidget
-from visdbg.trajectory import Trajectory
-from visdbg.view_geometry_widget import ViewGeometryWidget
+from jupedsim_visualizer.geometry import Geometry
+from jupedsim_visualizer.replay_widget import ReplayWidget
+from jupedsim_visualizer.trajectory import Trajectory
+from jupedsim_visualizer.view_geometry_widget import ViewGeometryWidget
 
 from jupedsim.recording import Recording
 from jupedsim.serialization import parse_wkt
@@ -24,8 +24,8 @@ from jupedsim.util import build_jps_geometry
 class MainWindow(QMainWindow):
     def __init__(self, parent=None) -> None:
         QMainWindow.__init__(self, parent)
-        self.settings = QSettings("jupedsim", "visdbg")
-        self.setWindowTitle("visdbg")
+        self.settings = QSettings("jupedsim", "jupedsim_visualizer")
+        self.setWindowTitle("jupedsim_visualizer")
         self._build_central_tabs_widget()
         self._build_menu_bar()
         self._build_state_machine()

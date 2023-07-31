@@ -39,23 +39,23 @@ def build_jupedsim():
     build_path.mkdir()
 
     with subprocess.Popen(
-        [
-            "cmake",
-            "-S",
-            "/src",
-            "-B",
-            "/build",
-            "-DCMAKE_PREFIX_PATH=/opt/deps",
-            "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
-        ],
-        stdout=subprocess.PIPE,
+            [
+                "cmake",
+                "-S",
+                "/src",
+                "-B",
+                "/build",
+                "-DCMAKE_PREFIX_PATH=/opt/deps",
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+            ],
+            stdout=subprocess.PIPE,
     ) as p:
         for line in p.stdout:
             print(line.decode("utf-8").rstrip())
 
     with subprocess.Popen(
-        ["cmake", "--build", "/build", "--", "-j", "--", "VERBOSE=1"],
-        stdout=subprocess.PIPE,
+            ["cmake", "--build", "/build", "--", "-j", "--", "VERBOSE=1"],
+            stdout=subprocess.PIPE,
     ) as p:
         for line in p.stdout:
             print(line.decode("utf-8").rstrip())
@@ -65,7 +65,7 @@ def run_test(test, args, build_dir, result_dir):
     test_env = os.environ.copy()
     test_env[
         "PYTHONPATH"
-    ] = f"/src/python_modules/jupedsim:/src/python_modules/visdbg:/build/lib"
+    ] = f"/src/python_modules/jupedsim:/src/python_modules/jupedsim_visualizer:/build/lib"
 
     perf_data_file_name = f"{test}.perf.data"
     perf_file_name = f"{test}.perf"

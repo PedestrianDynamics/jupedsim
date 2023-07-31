@@ -15,9 +15,9 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from visdbg.geometry import Geometry
-from visdbg.geometry_widget import RenderWidget
-from visdbg.trajectory import Trajectory
+from jupedsim_visualizer.geometry import Geometry
+from jupedsim_visualizer.geometry_widget import RenderWidget
+from jupedsim_visualizer.trajectory import Trajectory
 
 from jupedsim.recording import Recording
 

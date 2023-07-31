@@ -2,10 +2,10 @@ import jupedsim.py_jupedsim as jps
 import vtkmodules.vtkRenderingOpenGL2
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
-from visdbg.config import Colors
-from visdbg.geometry import Geometry, HoverInfo
-from visdbg.grid import Grid
-from visdbg.move_controller import MoveController
+from jupedsim_visualizer.config import Colors
+from jupedsim_visualizer.geometry import Geometry, HoverInfo
+from jupedsim_visualizer.grid import Grid
+from jupedsim_visualizer.move_controller import MoveController
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import vtkRenderer

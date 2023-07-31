@@ -7,8 +7,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from visdbg.geometry import Geometry
-from visdbg.geometry_widget import RenderWidget
+from jupedsim_visualizer.geometry import Geometry
+from jupedsim_visualizer.geometry_widget import RenderWidget
 
 
 class ViewGeometryWidget(QWidget):

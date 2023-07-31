@@ -1,4 +1,4 @@
-from visdbg.config import Colors, ZLayers
+from jupedsim_visualizer.config import Colors, ZLayers
 from vtkmodules.vtkCommonCore import vtkPoints
 from vtkmodules.vtkCommonDataModel import vtkPolyData
 from vtkmodules.vtkFiltersCore import vtkGlyph2D

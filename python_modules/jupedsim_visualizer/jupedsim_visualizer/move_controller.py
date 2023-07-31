@@ -1,5 +1,5 @@
 import jupedsim.py_jupedsim.experimental as jpex
-from visdbg.config import ZLayers
+from jupedsim_visualizer.config import ZLayers
 from vtkmodules.vtkCommonCore import vtkCommand, vtkPoints
 from vtkmodules.vtkCommonDataModel import (
     vtkCellArray,

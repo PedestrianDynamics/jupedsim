@@ -2,7 +2,7 @@ import sys
 
 import jupedsim.py_jupedsim.experimental as jpex
 from PySide6.QtCore import QObject, Signal
-from visdbg.config import Colors, ZLayers
+from jupedsim_visualizer.config import Colors, ZLayers
 from vtkmodules.vtkCommonCore import vtkCommand, vtkIntArray, vtkPoints
 from vtkmodules.vtkCommonDataModel import (
     vtkCellArray,
