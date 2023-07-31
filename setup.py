@@ -1,10 +1,10 @@
+import glob
 import os
 import pathlib
 import re
 import shutil
 import subprocess
 import sys
-import glob
 from pathlib import Path
 
 from setuptools import Extension, setup
@@ -39,8 +39,11 @@ class CMakeBuild(build_ext):
 
         # Using this requires trailing slash for auto-detection & inclusion of
         # auxiliary "native" libs
-        debug = int(
-            os.environ.get("DEBUG", 0)) if self.debug is None else self.debug
+        debug = (
+            int(os.environ.get("DEBUG", 0))
+            if self.debug is None
+            else self.debug
+        )
         cfg = "Debug" if debug else "Release"
 
         # CMake lets you override the generator - we need to check this.
@@ -63,8 +66,9 @@ class CMakeBuild(build_ext):
         # Adding CMake arguments set as environment variable
         # (needed e.g. to build for ARM OSx on conda-forge)
         if "CMAKE_ARGS" in os.environ:
-            cmake_args += [item for item in os.environ["CMAKE_ARGS"].split(" ")
-                           if item]
+            cmake_args += [
+                item for item in os.environ["CMAKE_ARGS"].split(" ") if item
+            ]
 
         if self.compiler.compiler_type != "msvc":
             # Using Ninja-build since it a) is available as a wheel and b)
@@ -87,7 +91,8 @@ class CMakeBuild(build_ext):
         else:
             # Single config generators are handled "normally"
             single_config = any(
-                x in cmake_generator for x in {"NMake", "Ninja"})
+                x in cmake_generator for x in {"NMake", "Ninja"}
+            )
 
             # CMake allows an arch-in-generator style for backward compatibility
             contains_arch = any(x in cmake_generator for x in {"ARM", "Win64"})
@@ -110,7 +115,8 @@ class CMakeBuild(build_ext):
             archs = re.findall(r"-arch (\S+)", os.environ.get("ARCHFLAGS", ""))
             if archs:
                 cmake_args += [
-                    "-DCMAKE_OSX_ARCHITECTURES={}".format(";".join(archs))]
+                    "-DCMAKE_OSX_ARCHITECTURES={}".format(";".join(archs))
+                ]
 
         # Set CMAKE_BUILD_PARALLEL_LEVEL to control the parallel build level
         # across all generators.
@@ -125,7 +131,7 @@ class CMakeBuild(build_ext):
         if not build_temp.exists():
             build_temp.mkdir(parents=True)
 
-        build_args += ['--', '-j']
+        build_args += ["-j"]
 
         subprocess.run(
             ["cmake", ext.sourcedir, *cmake_args], cwd=build_temp, check=True
@@ -153,18 +159,15 @@ setup(
     description="JuPedSim is an open source pedestrian dynamics simulator",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    license_files=('LICENSE',),
+    license_files=("LICENSE",),
     ext_modules=[CMakeExtension("python_bindings_jupedsim")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
     python_requires=">=3.10",
-    packages=[
-        "jupedsim",
-        "jupedsim_visualizer"
-    ],
+    packages=["jupedsim", "jupedsim_visualizer"],
     package_dir={
-        'jupedsim': 'python_modules/jupedsim/jupedsim',
-        'jupedsim_visualizer': 'python_modules/jupedsim_visualizer/jupedsim_visualizer',
+        "jupedsim": "python_modules/jupedsim/jupedsim",
+        "jupedsim_visualizer": "python_modules/jupedsim_visualizer/jupedsim_visualizer",
     },
     install_requires=[
         "numpy~=1.24.2",
@@ -173,14 +176,14 @@ setup(
         "matplotlib~=3.7.0",
         "shapely~=2.0.1",
         "pyside6~=6.5.2",
-        "vtk~=9.2.6"
+        "vtk~=9.2.6",
     ],
-    scripts=['python_modules/jupedsim_visualizer/bin/jupedsim_visualizer'],
+    scripts=["python_modules/jupedsim_visualizer/bin/jupedsim_visualizer"],
     url="https://www.jupedsim.org",
     project_urls={
-        'Documentation': 'https://www.jupedsim.org',
-        'Source': 'https://github.com/PedestrianDynamics/jupedsim',
-        'Tracker': 'https://github.com/PedestrianDynamics/jupedsim/issues',
+        "Documentation": "https://www.jupedsim.org",
+        "Source": "https://github.com/PedestrianDynamics/jupedsim",
+        "Tracker": "https://github.com/PedestrianDynamics/jupedsim/issues",
     },
     classifiers=[
         "Development Status :: 4 - Beta",
