@@ -10,6 +10,14 @@ from pathlib import Path
 from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
 
+# Read version number from CMakeLists.txt
+with open("CMakeLists.txt", "r", encoding="utf-8") as cmakelist:
+    cmake_input = cmakelist.read()
+    version_line = re.findall(r"project\(JuPedSim.*", cmake_input)[0]
+    start_index = version_line.rfind("VERSION") + len("VERSION")
+    end_index = version_line.find("LANGUAGES")
+    version = version_line[start_index:end_index].strip()
+
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
@@ -153,7 +161,7 @@ class CMakeBuild(build_ext):
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
     name="jupedsim",
-    version="0.10.0a8",
+    version=version,
     maintainer="JuPedSim Development Core Team",
     maintainer_email="dev@jupedsim.org",
     description="JuPedSim is an open source pedestrian dynamics simulator",
