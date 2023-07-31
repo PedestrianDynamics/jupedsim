@@ -347,14 +347,3 @@ if(UNIX AND WITH_FORMAT)
         endif()
     endif()
 endif()
-
-################################################################################
-# Integration tests
-################################################################################
-if (BUILD_TESTS)
-  # Find libraries needed by python tests
-  find_python_library(numpy)
-  find_python_library(scipy)
-  find_python_library(pandas)
-  find_python_library(matplotlib)
-endif (BUILD_TESTS)
