@@ -10,6 +10,7 @@ RUN dnf upgrade && \
         make \
         ninja-build \
         llvm \
+        llvm-toolset \
         clang-tools-extra
 
 RUN /opt/python/cp310-cp310/bin/pip install pytest && \
