@@ -1,4 +1,4 @@
-FROM quay.io/pypa/manylinux_2_28_x86_64:2023-07-30-0f4b381
+FROM quay.io/pypa/manylinux_2_28_x86_64:latest
 
 RUN dnf upgrade && \
     dnf install -y \
