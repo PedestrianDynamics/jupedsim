@@ -1,15 +1,15 @@
-import jupedsim.py_jupedsim as jps
 import vtkmodules.vtkRenderingOpenGL2
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QWidget
 from jupedsim_visualizer.config import Colors
 from jupedsim_visualizer.geometry import Geometry, HoverInfo
 from jupedsim_visualizer.grid import Grid
 from jupedsim_visualizer.move_controller import MoveController
+from PySide6.QtCore import Signal
+from PySide6.QtWidgets import QWidget
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import vtkRenderer
 
+import jupedsim.py_jupedsim as jps
 from jupedsim.aabb import AABB
 
 
@@ -17,11 +17,11 @@ class RenderWidget(QVTKRenderWindowInteractor):
     on_hover_triangle = Signal(str)
 
     def __init__(
-            self,
-            geo: jps.Geometry,
-            navi: jps.experimental.RoutingEngine,
-            actor_sources,
-            parent=None,
+        self,
+        geo: jps.Geometry,
+        navi: jps.experimental.RoutingEngine,
+        actor_sources,
+        parent=None,
     ):
         QVTKRenderWindowInteractor.__init__(self, parent)
         self.navi = navi

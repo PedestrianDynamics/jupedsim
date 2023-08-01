@@ -4,9 +4,9 @@
 import logging
 import pathlib
 
-import jupedsim.py_jupedsim as jps
 from shapely import GeometryCollection, Polygon, to_wkt
 
+import jupedsim.py_jupedsim as jps
 from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
 from jupedsim.util import build_jps_geometry
 
@@ -82,8 +82,8 @@ def main():
     writer.begin_writing(25, to_wkt(area, rounding_precision=-1))
     while simulation.agent_count() > 0:
         if (
-                simulation.iteration_count() > 100 * 52
-                and simulation.iteration_count() % 400 == 0
+            simulation.iteration_count() > 100 * 52
+            and simulation.iteration_count() % 400 == 0
         ):
             simulation.notify_queue(journey_id, stage, 1)
             print("Next!")
