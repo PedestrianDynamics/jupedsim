@@ -7,5 +7,5 @@ echo "Executable path ${JPSCORE_EXECUTABLE_PATH}"
 echo "Source path ${JPSCORE_SOURCE_PATH}"
 echo "PYTHONPATH=${PYTHONPATH}"
 
-pytest  ${JPSCORE_SOURCE_PATH}/systemtest "$@"
+@Python_EXECUTABLE@ -m pytest  ${JPSCORE_SOURCE_PATH}/systemtest "$@"
 

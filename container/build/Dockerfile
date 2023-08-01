@@ -1,37 +1,18 @@
-FROM ubuntu:22.04
+FROM quay.io/pypa/manylinux_2_28_x86_64:2023-07-30-0f4b381
 
-RUN apt-get update && \
-    apt-get install -y software-properties-common
+RUN dnf upgrade && \
+    dnf install -y \
+        wget \
+        unzip \
+        git \
+        gcc \
+        cmake \
+        make \
+        ninja-build \
+        llvm \
+        clang-tools-extra
 
-RUN echo "deb [trusted=yes] http://apt.llvm.org/jammy/ llvm-toolchain-jammy-16 main" | tee /etc/apt/sources.list.d/clang.list
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    wget \
-    unzip \
-    git \
-    g++ \
-    cmake \
-    make \
-    ninja-build \
-    clang \
-    clang-format-16 \
-    libglm-dev \
-    qtbase5-dev \
-    libvtk9-dev \
-    libvtk9-qt-dev \
-    libopengl-dev \
-    python3 \
-    python3-pip \
-    python3-matplotlib \
-    python3-numpy \
-    python3-pandas \
-    python3-scipy \
-    python3-pytest
-
-RUN cd /usr/bin && ln -s pytest-3 pytest
-
-COPY requirements.txt /opt/
-
-RUN pip3 install -r /opt/requirements.txt
+RUN /opt/python/cp310-cp310/bin/pip install pytest && \
+    /opt/python/cp311-cp311/bin/pip install pytest
 
 RUN git config --global --add safe.directory '*'

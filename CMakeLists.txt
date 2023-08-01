@@ -113,7 +113,7 @@ find_package(CGAL 5.5
 add_subdirectory(third-party/poly2tri)
 
 set(Python_FIND_VIRTUALENV "FIRST")
-find_package(Python COMPONENTS Interpreter Development REQUIRED)
+find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 add_subdirectory(third-party/pybind11-2.11.1)
 
 if(BUILD_TESTS)
@@ -347,3 +347,11 @@ if(UNIX AND WITH_FORMAT)
         endif()
     endif()
 endif()
+
+################################################################################
+# Integration tests
+################################################################################
+if (BUILD_TESTS)
+  # Find libraries needed by python tests
+  find_python_library(pytest)
+endif (BUILD_TESTS)
