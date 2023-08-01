@@ -149,9 +149,9 @@ class CMakeBuild(build_ext):
         )
 
         # Copy library files to root build folder
-        files = glob.glob(str(build_temp) + "/lib/*.so")
-        files.extend(glob.glob(str(build_temp) + "/lib/*.dylib"))
-        files.extend(glob.glob(str(build_temp) + "/lib/*.pyd"))
+        files = glob.glob(str(build_temp) + "/lib/py_jupedsim*.so")
+        files.extend(glob.glob(str(build_temp) + "/lib/py_jupedsim*.dylib"))
+        files.extend(glob.glob(str(build_temp) + "/lib/py_jupedsim*.pyd"))
 
         for lib_file in files:
             shutil.copy(dst=extdir / "jupedsim", src=lib_file)
