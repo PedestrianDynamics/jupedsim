@@ -1,9 +1,10 @@
-import py_jupedsim
 import shapely
+
+from jupedsim import GeometryBuilder
 
 
 def build_jps_geometry(geo: shapely.GeometryCollection):
-    geo_builder = py_jupedsim.GeometryBuilder()
+    geo_builder = GeometryBuilder()
 
     for obj in geo.geoms:
         if obj.geom_type != "Polygon":

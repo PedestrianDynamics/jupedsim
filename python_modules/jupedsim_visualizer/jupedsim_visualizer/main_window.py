@@ -1,7 +1,7 @@
 import math
 from pathlib import Path
 
-import py_jupedsim
+import jupedsim.py_jupedsim as jps
 from PySide6.QtCore import QSettings, QSize
 from PySide6.QtStateMachine import QFinalState, QState, QStateMachine
 from PySide6.QtWidgets import (
@@ -11,10 +11,10 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QTabWidget,
 )
-from visdbg.geometry import Geometry
-from visdbg.replay_widget import ReplayWidget
-from visdbg.trajectory import Trajectory
-from visdbg.view_geometry_widget import ViewGeometryWidget
+from jupedsim_visualizer.geometry import Geometry
+from jupedsim_visualizer.replay_widget import ReplayWidget
+from jupedsim_visualizer.trajectory import Trajectory
+from jupedsim_visualizer.view_geometry_widget import ViewGeometryWidget
 
 from jupedsim.recording import Recording
 from jupedsim.serialization import parse_wkt
@@ -24,8 +24,8 @@ from jupedsim.util import build_jps_geometry
 class MainWindow(QMainWindow):
     def __init__(self, parent=None) -> None:
         QMainWindow.__init__(self, parent)
-        self.settings = QSettings("jupedsim", "visdbg")
-        self.setWindowTitle("visdbg")
+        self.settings = QSettings("jupedsim", "jupedsim_visualizer")
+        self.setWindowTitle("jupedsim_visualizer")
         self._build_central_tabs_widget()
         self._build_menu_bar()
         self._build_state_machine()
@@ -94,11 +94,11 @@ class MainWindow(QMainWindow):
         self.settings.setValue("files/last_wkt_location", str(file.parent))
         try:
             wkt = parse_wkt(Path(file).read_text(encoding="UTF-8"))
-            navi = py_jupedsim.experimental.RoutingEngine(
+            navi = jps.experimental.RoutingEngine(
                 build_jps_geometry(wkt)
             )
             xmin, ymin, xmax, ymax = wkt.bounds
-            info_text = f"Dimensions: {math.ceil(xmax - xmin)}m x {math.ceil(ymax-ymin)}m Triangles: {len(navi.mesh())}"
+            info_text = f"Dimensions: {math.ceil(xmax - xmin)}m x {math.ceil(ymax - ymin)}m Triangles: {len(navi.mesh())}"
             name_text = f"Geometry: {file}"
             self.setUpdatesEnabled(False)
             geo = Geometry(navi)
@@ -131,7 +131,7 @@ class MainWindow(QMainWindow):
         try:
             rec = Recording(file.as_posix())
             self.setUpdatesEnabled(False)
-            navi = py_jupedsim.experimental.RoutingEngine(
+            navi = jps.experimental.RoutingEngine(
                 build_jps_geometry(rec.geometry())
             )
             geo = Geometry(navi)

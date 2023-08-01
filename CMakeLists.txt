@@ -113,7 +113,7 @@ find_package(CGAL 5.5
 add_subdirectory(third-party/poly2tri)
 
 set(Python_FIND_VIRTUALENV "FIRST")
-find_package(Python COMPONENTS Interpreter Development REQUIRED)
+find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 add_subdirectory(third-party/pybind11-2.11.1)
 
 if(BUILD_TESTS)
@@ -295,7 +295,7 @@ add_subdirectory(python_bindings_jupedsim)
 # Code formatting
 ################################################################################
 if(UNIX AND WITH_FORMAT)
-    set(clang-format-version 16)
+    set(clang-format-version 15)
     find_program(CLANG_FORMAT
         NAMES
             clang-format-${clang-format-version}
@@ -353,8 +353,5 @@ endif()
 ################################################################################
 if (BUILD_TESTS)
   # Find libraries needed by python tests
-  find_python_library(numpy)
-  find_python_library(scipy)
-  find_python_library(pandas)
-  find_python_library(matplotlib)
+  find_python_library(pytest)
 endif (BUILD_TESTS)

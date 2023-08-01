@@ -1,6 +1,6 @@
 import math
 
-from visdbg.config import Colors, ZLayers
+from jupedsim_visualizer.config import Colors, ZLayers
 from vtkmodules.vtkCommonCore import vtkCommand
 from vtkmodules.vtkFiltersSources import vtkPlaneSource
 from vtkmodules.vtkRenderingCore import (
@@ -51,7 +51,7 @@ class Grid:
     @staticmethod
     def __compute_scale(scale):
         pow2_scale = math.ceil(math.log2(scale))
-        scale = int(2**pow2_scale)
+        scale = int(2 ** pow2_scale)
         div = int(2 ** (max(1, pow2_scale - 4)))
         return (scale, div)
 

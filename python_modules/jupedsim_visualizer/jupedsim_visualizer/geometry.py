@@ -1,8 +1,8 @@
 import sys
 
-import py_jupedsim.experimental as jpex
+import jupedsim.py_jupedsim.experimental as jpex
 from PySide6.QtCore import QObject, Signal
-from visdbg.config import Colors, ZLayers
+from jupedsim_visualizer.config import Colors, ZLayers
 from vtkmodules.vtkCommonCore import vtkCommand, vtkIntArray, vtkPoints
 from vtkmodules.vtkCommonDataModel import (
     vtkCellArray,
@@ -104,10 +104,10 @@ class HoverInfo(QObject):
     hovered = Signal(str)
 
     def __init__(
-        self,
-        geo: Geometry,
-        renderer: vtkRenderer,
-        interactor_style: vtkInteractorStyleUser,
+            self,
+            geo: Geometry,
+            renderer: vtkRenderer,
+            interactor_style: vtkInteractorStyleUser,
     ):
         QObject.__init__(self)
         self.geo = geo

@@ -1,0 +1,10 @@
+include README.md LICENSE CMakeLists.txt
+graft cmake_modules
+graft cmake_templates
+graft libcommon
+graft libjupedsim
+graft libsimulator
+graft python_bindings_jupedsim
+graft python_modules/jupedsim
+graft third-party
+global-exclude *.pdf *.html *.off *.png *.dat *.bff  third-party/**/examples/** third-party/**/doc/** third-party/**/test/** third-party/**/benchmark/** third-party/**/demo/** third-party/**/Data/data/** third-party/**/Documentation/** third-party/**/tests/** third-party/**/docs/** third-party/**/Maintenance/** third-party/**/.github/** third-party/**/testbed/** third-party/**/unittest/**

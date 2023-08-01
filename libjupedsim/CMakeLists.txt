@@ -1,7 +1,7 @@
 ################################################################################
-# libjupedsim
+# jupedsim_obj
 ################################################################################
-add_library(jupedsim SHARED
+add_library(jupedsim_obj OBJECT
     include/jupedsim/jupedsim.h
     include/jupedsim/jupedsim_experimental.h
     src/AgentIterator.hpp
@@ -12,13 +12,62 @@ add_library(jupedsim SHARED
     src/jupedsim_experimental.cpp
 )
 
-target_compile_options(jupedsim PRIVATE
+target_compile_options(jupedsim_obj PRIVATE
     ${COMMON_COMPILE_OPTIONS}
 )
-target_compile_definitions(jupedsim
+target_compile_definitions(jupedsim_obj
     PRIVATE
         JUPEDSIM_API_EXPORTS
 )
+target_include_directories(jupedsim_obj
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
+        $<INSTALL_INTERFACE:include>
+    PRIVATE src
+)
+
+target_link_libraries(jupedsim_obj
+    PRIVATE
+        simulator
+        common
+)
+set_property(TARGET jupedsim_obj PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
+set_property(TARGET jupedsim_obj PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
+
+################################################################################
+# libjupedsim unit tests
+################################################################################
+if (BUILD_TESTS)
+    add_executable(libjupedsim-tests
+        test/TestJupedsim.cpp
+    )
+
+    target_link_libraries(libjupedsim-tests PRIVATE
+        GTest::gtest
+        GTest::gtest_main
+        jupedsim_obj
+        simulator
+    )
+
+    target_compile_options(libjupedsim-tests PRIVATE
+        ${COMMON_COMPILE_OPTIONS}
+    )
+
+    # Also allow the unit test access to the non-public header files of jupedsim_obj
+    # This is required to construct some otherwise opqaue types in tests, e.g. ErrorMessage
+    target_include_directories(libjupedsim-tests
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
+    )
+
+    set_property(TARGET libjupedsim-tests PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
+    set_property(TARGET libjupedsim-tests PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
+endif()
+
+################################################################################
+# libjupedsim
+################################################################################
+add_library(jupedsim SHARED $<TARGET_OBJECTS:jupedsim_obj>)
+
 target_include_directories(jupedsim
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
@@ -33,35 +82,6 @@ target_link_libraries(jupedsim
 )
 set_property(TARGET jupedsim PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
 set_property(TARGET jupedsim PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
-
-################################################################################
-# libjupedsim unit tests
-################################################################################
-if (BUILD_TESTS)
-    add_executable(libjupedsim-tests
-        test/TestJupedsim.cpp
-    )
-
-    target_link_libraries(libjupedsim-tests PRIVATE
-        GTest::gtest
-        GTest::gtest_main
-        jupedsim
-        simulator
-    )
-
-    target_compile_options(libjupedsim-tests PRIVATE
-        ${COMMON_COMPILE_OPTIONS}
-    )
-
-    # Also allow the unit test access to the non-public header files of libjupedsim
-    # This is required to construct some otherwise opqaue types in tests, e.g. ErrorMessage
-    target_include_directories(libjupedsim-tests
-        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
-    )
-
-    set_property(TARGET libjupedsim-tests PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
-    set_property(TARGET libjupedsim-tests PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
-endif()
 
 ################################################################################
 # Installation
