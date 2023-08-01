@@ -3,6 +3,7 @@
 
 # tempfiles
 *~
+
 # Python specific ignores
 __pycache__/
 
@@ -17,3 +18,8 @@ __pycache__/
 
 # Jupyter
 .ipynb_checkpoints
+
+# setuptools output
+build/
+dist/
+jupedsim.egg-info/
