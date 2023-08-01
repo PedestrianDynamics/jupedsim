@@ -186,7 +186,7 @@ setup(
         "pyside6~=6.5.2",
         "vtk~=9.2.6",
     ],
-    scripts=["python_modules/jupedsim_visualizer/bin/jupedsim_visualizer"],
+    scripts=["python_modules/jupedsim_visualizer/bin/jupedsim-visualizer"],
     url="https://www.jupedsim.org",
     project_urls={
         "Documentation": "https://www.jupedsim.org",
