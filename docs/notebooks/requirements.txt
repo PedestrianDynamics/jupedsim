@@ -1,0 +1,5 @@
+numpy
+pandas
+matplotlib
+ipywidgets
+nodejs>=5
