@@ -389,15 +389,18 @@ def distribute_till_full(
     k=30,
 ):
     """returns as many randomly placed points as fit into the polygon.
+
     Points are distributed using Bridson’s algorithm for Poisson-disc sampling
     The algorithm is explained in Robert Bridson´s Paper "Fast Poisson Disk Sampling in Arbitrary Dimensions"
-        :param polygon: shapely polygon in which the agents will be placed
-        :param distance_to_agents: minimal distance between the centers of agents
-        :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
-        :param seed: define a seed for random generation, Default value is None which corresponds to a random value
-        :param max_iterations: no more than max_iterations must find a point inside the polygon, default is 10_000
-        :param k: around each point k point will be created before the point is considered inactive
-        :return: list of created points"""
+
+    :param polygon: shapely polygon in which the agents will be placed
+    :param distance_to_agents: minimal distance between the centers of agents
+    :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
+    :param seed: define a seed for random generation, Default value is None which corresponds to a random value
+    :param max_iterations: no more than max_iterations must find a point inside the polygon, default is 10_000
+    :param k: around each point k point will be created before the point is considered inactive
+    :return: list of created points
+    """
     if not isinstance(polygon, shply.polygon.Polygon):
         raise IncorrectParameterError(
             f"Polygon is expected to be a shapely Polygon"
@@ -474,14 +477,14 @@ def distribute_by_percentage(
     """returns points for the desired percentage of agents that fit inside the polygon (max possible number)
     fills the polygon entirely using Bridson’s algorithm for Poisson-disc sampling and then selects the percentage of placed agents
 
-
-     :param polygon: shapely polygon in which the agents will be placed
-     :param percent: percentage of agents selected - 100% ≙ completely filled polygon 0% ≙ 0 placed points
-     :param distance_to_agents: minimal distance between the centers of agents
-     :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
-     :param seed: define a seed for random generation, Default value is None which corresponds to a random value
-     :param max_iterations: no more than max_iterations must find a point inside the polygon, Default is 10_000
-     :return: list of created points"""
+    :param polygon: shapely polygon in which the agents will be placed
+    :param percent: percentage of agents selected - 100% ≙ completely filled polygon 0% ≙ 0 placed points
+    :param distance_to_agents: minimal distance between the centers of agents
+    :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
+    :param seed: define a seed for random generation, Default value is None which corresponds to a random value
+    :param max_iterations: no more than max_iterations must find a point inside the polygon, Default is 10_000
+    :return: list of created points
+    """
     samples = distribute_till_full(
         polygon=polygon,
         distance_to_agents=distance_to_agents,
