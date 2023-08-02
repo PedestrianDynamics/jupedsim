@@ -20,6 +20,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "autoapi.extension",
+    "sphinx_favicon",
 ]
 
 templates_path = ["_templates"]
@@ -51,8 +52,9 @@ html_theme = "sphinx_book_theme"
 html_static_path = ["_static"]
 
 html_logo = "_static/jupedsim.svg"
-html_favicon = "_static/logo.svg"
-
+favicons = [
+    "logo.svg",
+]
 html_css_files = [
     "css/custom.css",
 ]
