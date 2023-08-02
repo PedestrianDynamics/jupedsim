@@ -17,7 +17,7 @@ JuPedSim's documentation!
 
 
 **Useful links**:
-`Binary Installers <https://pypi.org/project/jupedsim/>`__ |
+`Python Packages <https://pypi.org/project/jupedsim/>`__ |
 `Source Repository <https://github.com/PedestrianDynamics/jupedsim>`__ |
 `Issues <https://github.com/PedestrianDynamics/jupedsim/issues>`__ |
 `Discussions <https://github.com/PedestrianDynamics/jupedsim/discussions>`__
