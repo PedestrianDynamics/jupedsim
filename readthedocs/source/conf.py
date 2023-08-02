@@ -51,7 +51,7 @@ html_static_path = ["_static"]
 
 html_logo = "_static/jupedsim.svg"
 favicons = [
-    "logo.svg",
+    "logo.png",
 ]
 html_css_files = [
     "css/custom.css",
