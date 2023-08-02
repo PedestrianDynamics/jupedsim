@@ -20,6 +20,6 @@ __pycache__/
 .ipynb_checkpoints
 
 # setuptools output
-build/
-dist/
-jupedsim.egg-info/
+/build/
+/dist/
+/jupedsim.egg-info/

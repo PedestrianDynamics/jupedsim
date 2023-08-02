@@ -1,7 +1,10 @@
 import math
 from pathlib import Path
 
-import jupedsim.py_jupedsim as jps
+from jupedsim_visualizer.geometry import Geometry
+from jupedsim_visualizer.replay_widget import ReplayWidget
+from jupedsim_visualizer.trajectory import Trajectory
+from jupedsim_visualizer.view_geometry_widget import ViewGeometryWidget
 from PySide6.QtCore import QSettings, QSize
 from PySide6.QtStateMachine import QFinalState, QState, QStateMachine
 from PySide6.QtWidgets import (
@@ -11,11 +14,8 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QTabWidget,
 )
-from jupedsim_visualizer.geometry import Geometry
-from jupedsim_visualizer.replay_widget import ReplayWidget
-from jupedsim_visualizer.trajectory import Trajectory
-from jupedsim_visualizer.view_geometry_widget import ViewGeometryWidget
 
+import jupedsim.py_jupedsim as jps
 from jupedsim.recording import Recording
 from jupedsim.serialization import parse_wkt
 from jupedsim.util import build_jps_geometry
@@ -94,9 +94,7 @@ class MainWindow(QMainWindow):
         self.settings.setValue("files/last_wkt_location", str(file.parent))
         try:
             wkt = parse_wkt(Path(file).read_text(encoding="UTF-8"))
-            navi = jps.experimental.RoutingEngine(
-                build_jps_geometry(wkt)
-            )
+            navi = jps.experimental.RoutingEngine(build_jps_geometry(wkt))
             xmin, ymin, xmax, ymax = wkt.bounds
             info_text = f"Dimensions: {math.ceil(xmax - xmin)}m x {math.ceil(ymax - ymin)}m Triangles: {len(navi.mesh())}"
             name_text = f"Geometry: {file}"
