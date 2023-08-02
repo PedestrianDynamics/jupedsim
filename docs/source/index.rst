@@ -20,3 +20,5 @@ JuPedSim's documentation!
 `Binary Installers <TODO>`__ |
 `Source Repository <https://github.com/PedestrianDynamics/jupedsim>`__ |
 `Issues & Ideas <https://github.com/PedestrianDynamics/jupedsim/issues>`__
+
+This is a text which will be deleted.
