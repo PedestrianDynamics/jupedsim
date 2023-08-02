@@ -38,9 +38,6 @@ print_var(WERROR)
 set(BUILD_TESTS OFF CACHE BOOL "Build tests")
 print_var(BUILD_TESTS)
 
-set(BUILD_DOC OFF CACHE BOOL "Build doxygen documentation")
-print_var(BUILD_DOC)
-
 set(BUILD_WITH_ASAN OFF CACHE BOOL
   "Build with address sanitizer support. Linux / macOS only.")
 print_var(BUILD_WITH_ASAN)
@@ -198,35 +195,6 @@ target_include_directories(build_info INTERFACE
 if(UNIX)
     configure_file(cmake_templates/unix_env.in ${CMAKE_BINARY_DIR}/environment @ONLY)
 endif()
-################################################################################
-# Documentation
-################################################################################
-if(BUILD_DOC)
-    find_package(Doxygen REQUIRED)
-    configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/docs/doxygen/Doxyfile.in
-        ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-        @ONLY
-    )
-    add_custom_target(doc
-        ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMENT "Generating API documentation with Doxygen"
-        VERBATIM
-    )
-    # generate file titlepage.tex based on titlepage.tex.in
-    configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide/titlepage.tex.in
-        ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide/titlepage.tex
-        @ONLY
-    )
-    add_custom_target(guide
-        "${PYTHON_EXECUTABLE}" ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide/make_guide.py
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide
-        COMMENT "Generating guide"
-        VERBATIM
-    )
-endif(BUILD_DOC)
 
 ################################################################################
 # Testing
