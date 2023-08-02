@@ -5,22 +5,21 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+import datetime
+
 project = "JuPedSim"
-copyright = "2023, Forschungszentrum Jülich GmbH, IAS-7"
-author = "Dev-Team"
+copyright = (
+    f"{datetime.datetime.today().year}, Forschungszentrum Jülich GmbH, IAS-7"
+)
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    "sphinx_design",
     "sphinx_copybutton",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
-    "sphinxcontrib.apidoc",
-    "sphinx.ext.napoleon",
     "autoapi.extension",
-    "sphinx_typo3_theme",
 ]
 
 templates_path = ["_templates"]
@@ -48,12 +47,11 @@ autoapi_member_order = ["groupwise"]
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-# html_theme = "pydata_sphinx_theme"
-# html_theme = "furo"
 html_theme = "sphinx_book_theme"
 html_static_path = ["_static"]
 
-html_logo = "_static/jupedsim.png"
+html_logo = "_static/jupedsim.svg"
+html_favicon = "_static/logo.svg"
 
 html_css_files = [
     "css/custom.css",
