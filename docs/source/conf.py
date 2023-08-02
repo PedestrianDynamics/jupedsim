@@ -21,6 +21,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "autoapi.extension",
     "sphinx_favicon",
+    "notfound.extension",
 ]
 
 templates_path = ["_templates"]
@@ -61,12 +62,15 @@ html_css_files = [
 html_context = {"default_mode": "light"}
 
 html_theme_options = {
-    "show_nav_level": 5,
+    # "show_nav_level": 5,
     "github_url": "https://github.com/PedestrianDynamics/jupedsim",
-    "header_links_before_dropdown": 5,
-    "show_toc_level": 5,
-    "navbar_end": ["navbar-icon-links"],
-    "sidebar_hide_name": True,
+    "home_page_in_toc": True,
+    "use_fullscreen_button": False,
+    "use_issues_button": False,
+    "use_download_button": False,
+    # "header_links_before_dropdown": 5,
+    # "show_toc_level": 5,
+    # "navbar_end": [],
 }
 
 # -- Options for EPUB output
