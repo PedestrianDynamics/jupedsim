@@ -1,7 +1,6 @@
 import sqlite3
 
 import pytest
-
 from jupedsim.recording import Recording
 
 

@@ -1,5 +1,7 @@
 import math
 
+from jupedsim.py_jupedsim.experimental import RoutingEngine
+from jupedsim.recording import Recording
 from jupedsim_visualizer.geometry import Geometry
 from jupedsim_visualizer.geometry_widget import RenderWidget
 from jupedsim_visualizer.trajectory import Trajectory
@@ -17,9 +19,6 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-
-from jupedsim.py_jupedsim.experimental import RoutingEngine
-from jupedsim.recording import Recording
 
 
 class PlayerControlWidget(QWidget):

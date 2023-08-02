@@ -1,3 +1,4 @@
+import jupedsim.py_jupedsim.experimental as jpex
 from jupedsim_visualizer.config import ZLayers
 from vtkmodules.vtkCommonCore import vtkCommand, vtkPoints
 from vtkmodules.vtkCommonDataModel import (
@@ -7,8 +8,6 @@ from vtkmodules.vtkCommonDataModel import (
 )
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import vtkActor, vtkCamera, vtkPolyDataMapper
-
-import jupedsim.py_jupedsim.experimental as jpex
 
 
 class MoveController:

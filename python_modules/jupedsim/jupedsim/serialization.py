@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 import shapely
-
 from jupedsim import (
     GCFMModelAgentParameters,
     Simulation,

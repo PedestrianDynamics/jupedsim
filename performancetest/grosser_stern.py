@@ -11,10 +11,10 @@ import time
 
 import py_jupedsim as jps
 import shapely
-from shapely import to_wkt
-
 from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
 from jupedsim.util import build_jps_geometry
+from shapely import to_wkt
+
 from performancetest.geometry import geometries
 from performancetest.stats_writer import StatsWriter
 

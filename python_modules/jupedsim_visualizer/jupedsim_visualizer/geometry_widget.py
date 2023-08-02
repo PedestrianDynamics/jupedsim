@@ -1,4 +1,6 @@
+import jupedsim.py_jupedsim as jps
 import vtkmodules.vtkRenderingOpenGL2
+from jupedsim.aabb import AABB
 from jupedsim_visualizer.config import Colors
 from jupedsim_visualizer.geometry import Geometry, HoverInfo
 from jupedsim_visualizer.grid import Grid
@@ -8,9 +10,6 @@ from PySide6.QtWidgets import QWidget
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import vtkRenderer
-
-import jupedsim.py_jupedsim as jps
-from jupedsim.aabb import AABB
 
 
 class RenderWidget(QVTKRenderWindowInteractor):
