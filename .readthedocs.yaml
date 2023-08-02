@@ -18,10 +18,9 @@ build:
     - gcc
     - cmake
 
-  jobs:
-    pre_build:
-      - pip install .
-      - apt-get install cmake
+#  jobs:
+#    pre_build:
+#      - pip install .
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
