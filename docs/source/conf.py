@@ -35,11 +35,8 @@ autoapi_root = "api"
 autoapi_options = [
     "members",
     "undoc-members",
-    # "inherited-members",
-    # "private-members",
     "show-inheritance",
     "show-module-summary",
-    # "special-members",
     "imported-members",
 ]
 autoapi_ignore = ["**/tests/**"]
@@ -62,15 +59,11 @@ html_css_files = [
 html_context = {"default_mode": "light"}
 
 html_theme_options = {
-    # "show_nav_level": 5,
     "github_url": "https://github.com/PedestrianDynamics/jupedsim",
     "home_page_in_toc": True,
     "use_fullscreen_button": False,
     "use_issues_button": False,
     "use_download_button": False,
-    # "header_links_before_dropdown": 5,
-    # "show_toc_level": 5,
-    # "navbar_end": [],
 }
 
 # -- Options for EPUB output
