@@ -1,10 +1,6 @@
 import math
 from pathlib import Path
 
-import jupedsim.py_jupedsim as jps
-from jupedsim.recording import Recording
-from jupedsim.serialization import parse_wkt
-from jupedsim.util import build_jps_geometry
 from jupedsim_visualizer.geometry import Geometry
 from jupedsim_visualizer.replay_widget import ReplayWidget
 from jupedsim_visualizer.trajectory import Trajectory
@@ -18,6 +14,11 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QTabWidget,
 )
+
+import jupedsim.py_jupedsim as jps
+from jupedsim.recording import Recording
+from jupedsim.serialization import parse_wkt
+from jupedsim.util import build_jps_geometry
 
 
 class MainWindow(QMainWindow):

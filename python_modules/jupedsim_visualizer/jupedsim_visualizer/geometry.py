@@ -1,7 +1,5 @@
 import sys
 
-import jupedsim.py_jupedsim.experimental as jpex
-from jupedsim.aabb import AABB
 from jupedsim_visualizer.config import Colors, ZLayers
 from PySide6.QtCore import QObject, Signal
 from vtkmodules.vtkCommonCore import vtkCommand, vtkIntArray, vtkPoints
@@ -18,6 +16,9 @@ from vtkmodules.vtkRenderingCore import (
     vtkPolyDataMapper,
     vtkRenderer,
 )
+
+import jupedsim.py_jupedsim.experimental as jpex
+from jupedsim.aabb import AABB
 
 
 class Geometry:

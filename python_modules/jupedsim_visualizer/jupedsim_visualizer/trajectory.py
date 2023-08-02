@@ -1,11 +1,12 @@
-from jupedsim.aabb import AABB
-from jupedsim.recording import Recording, RecordingFrame
 from jupedsim_visualizer.config import Colors, ZLayers
 from vtkmodules.vtkCommonCore import vtkPoints
 from vtkmodules.vtkCommonDataModel import vtkPolyData
 from vtkmodules.vtkFiltersCore import vtkGlyph2D
 from vtkmodules.vtkFiltersSources import vtkRegularPolygonSource
 from vtkmodules.vtkRenderingCore import vtkActor, vtkPolyDataMapper
+
+from jupedsim.aabb import AABB
+from jupedsim.recording import Recording, RecordingFrame
 
 
 def to_vtk_points(frame: RecordingFrame) -> vtkPoints:

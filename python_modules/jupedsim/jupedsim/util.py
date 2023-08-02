@@ -1,4 +1,5 @@
 import shapely
+
 from jupedsim import GeometryBuilder
 
 

@@ -8,3 +8,4 @@ profile = "black"
 py_version = "311"
 line_length = 79
 extend_skip = ["docs", "third-party"]
+known_first_party = ["jupedsim"]
