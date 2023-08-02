@@ -20,6 +20,7 @@ extensions = [
     "sphinxcontrib.apidoc",
     "sphinx.ext.napoleon",
     "autoapi.extension",
+    "sphinx_typo3_theme",
 ]
 
 templates_path = ["_templates"]
@@ -48,6 +49,8 @@ autoapi_member_order = ["groupwise"]
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "pydata_sphinx_theme"
+# html_theme = "furo"
+# html_theme = "sphinx_typo3_theme"
 html_static_path = ["_static"]
 
 html_logo = "_static/jupedsim.png"
@@ -63,6 +66,7 @@ html_theme_options = {
     "header_links_before_dropdown": 5,
     "show_toc_level": 5,
     "navbar_end": ["navbar-icon-links"],
+    "sidebar_hide_name": True,
 }
 
 # -- Options for EPUB output
