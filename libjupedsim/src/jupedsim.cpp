@@ -46,7 +46,8 @@ JPS_BuildInfo JPS_GetBuildInfo()
         GIT_COMMIT_DATE.c_str(),
         GIT_BRANCH.c_str(),
         COMPILER.c_str(),
-        COMPILER_VERSION.c_str()};
+        COMPILER_VERSION.c_str(),
+        LIBRARY_VERSION.c_str()};
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

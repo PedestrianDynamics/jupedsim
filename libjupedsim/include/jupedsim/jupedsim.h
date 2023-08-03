@@ -29,6 +29,7 @@ typedef struct JPS_BuildInfo {
     const char* git_branch;
     const char* compiler;
     const char* compiler_version;
+    const char* library_version;
 } JPS_BuildInfo;
 
 JUPEDSIM_API JPS_BuildInfo JPS_GetBuildInfo();

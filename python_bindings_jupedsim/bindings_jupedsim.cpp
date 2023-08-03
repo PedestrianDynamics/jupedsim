@@ -129,7 +129,8 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def_readonly("git_commit_date", &JPS_BuildInfo::git_commit_date)
         .def_readonly("git_branch", &JPS_BuildInfo::git_branch)
         .def_readonly("compiler", &JPS_BuildInfo::compiler)
-        .def_readonly("compiler_version", &JPS_BuildInfo::compiler_version);
+        .def_readonly("compiler_version", &JPS_BuildInfo::compiler_version)
+        .def_readonly("library_version", &JPS_BuildInfo::library_version);
     m.def("get_build_info", []() { return JPS_GetBuildInfo(); });
     py::class_<JPS_Point>(m, "Point")
         .def(py::init())
