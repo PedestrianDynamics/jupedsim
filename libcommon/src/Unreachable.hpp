@@ -1,5 +1,5 @@
-/// Copyright © 2012-2022 Forschungszentrum Jülich GmbH
-/// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright © 2012-2023 Forschungszentrum Jülich GmbH
+// SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef UNREACHABLE
 #if defined(__GNUC__) // GCC, Clang, ICC
