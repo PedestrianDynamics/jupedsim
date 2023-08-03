@@ -1,3 +1,5 @@
+# Copyright © 2012-2023 Forschungszentrum Jülich GmbH
+# SPDX-License-Identifier: LGPL-3.0-or-later
 from jupedsim_visualizer.geometry import Geometry
 from jupedsim_visualizer.geometry_widget import RenderWidget
 from PySide6.QtCore import Qt

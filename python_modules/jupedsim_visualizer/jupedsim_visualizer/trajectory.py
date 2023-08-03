@@ -1,3 +1,5 @@
+# Copyright © 2012-2023 Forschungszentrum Jülich GmbH
+# SPDX-License-Identifier: LGPL-3.0-or-later
 from jupedsim_visualizer.config import Colors, ZLayers
 from vtkmodules.vtkCommonCore import vtkPoints
 from vtkmodules.vtkCommonDataModel import vtkPolyData

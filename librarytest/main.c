@@ -1,4 +1,4 @@
-/* Copyright © 2012-2022 Forschungszentrum Jülich GmbH */
+/* Copyright © 2012-2023 Forschungszentrum Jülich GmbH */
 /* SPDX-License-Identifier: LGPL-3.0-or-later */
 #include <jupedsim/jupedsim.h>
 
@@ -126,3 +126,4 @@ int main(int argc, char** argv)
     printf("Simulation completed after %zu iterations\n", iteration);
     return 0;
 }
+

@@ -1,3 +1,5 @@
+# Copyright © 2012-2023 Forschungszentrum Jülich GmbH
+# SPDX-License-Identifier: LGPL-3.0-or-later
 import vtkmodules.vtkRenderingOpenGL2
 from jupedsim_visualizer.config import Colors
 from jupedsim_visualizer.geometry import Geometry, HoverInfo

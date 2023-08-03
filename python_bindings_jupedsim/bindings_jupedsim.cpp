@@ -1,5 +1,5 @@
-/// Copyright © 2012-2022 Forschungszentrum Jülich GmbH
-/// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright © 2012-2023 Forschungszentrum Jülich GmbH
+// SPDX-License-Identifier: LGPL-3.0-or-later
 #include <Unreachable.hpp>
 #include <jupedsim/jupedsim.h>
 #include <jupedsim/jupedsim_experimental.h>
@@ -811,3 +811,4 @@ PYBIND11_MODULE(py_jupedsim, m)
             return lines;
         });
 }
+
