@@ -7,6 +7,8 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
+import textwrap
 from pathlib import Path
 
 from setuptools import Extension, setup
@@ -32,6 +34,52 @@ PLAT_TO_CMAKE = {
 }
 
 
+def check_cmake():
+    try:
+        subprocess.run(["cmake", "--version"], check=True)
+    except:
+        return False
+    return True
+
+
+def check_cpp_compiler():
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        simple_main = textwrap.dedent(
+            """
+            int main(){ 
+                return 0;
+            }
+            """
+        )
+        cpp_file = tmp_dir + "/main.cpp"
+        with open(cpp_file, "w") as cp_file:
+            cp_file.write(simple_main)
+
+        simple_cmake = textwrap.dedent(
+            """
+            cmake_minimum_required(VERSION 3.19)
+            project(SimpleTest)
+
+            add_executable(simple_test main.cpp)
+            """
+        )
+        cmake_file = tmp_dir + "/CMakeLists.txt"
+        with open(cmake_file, "w") as cm_file:
+            cm_file.write(simple_cmake)
+
+        tmp_dir_build = pathlib.Path(tmp_dir) / "build"
+        tmp_dir_build.mkdir()
+
+        try:
+            subprocess.run(
+                ["cmake", "-S", str(tmp_dir), "-B", str(tmp_dir_build)],
+                check=True,
+            )
+        except:
+            return False
+    return True
+
+
 # A CMakeExtension needs a sourcedir instead of a file list.
 # The name must be the _single_ output extension from the CMake build.
 # If you need multiple extensions, see scikit-build.
@@ -43,6 +91,18 @@ class CMakeExtension(Extension):
 
 class CMakeBuild(build_ext):
     def build_extension(self, ext: CMakeExtension) -> None:
+        if not check_cmake():
+            raise ModuleNotFoundError(
+                "No CMake installation found on the system, "
+                "please install CMake to install JuPedSim."
+            )
+
+        if not check_cpp_compiler():
+            raise ModuleNotFoundError(
+                "Could not compile a simple C++ program, "
+                "please install a C++ compiler to install JuPedSim."
+            )
+
         # Must be in this form due to bug in .resolve() only fixed in Python 3.10+
         ext_fullpath = Path.cwd() / self.get_ext_fullpath(ext.name)
         extdir = ext_fullpath.parent.resolve()
