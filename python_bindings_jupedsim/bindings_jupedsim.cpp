@@ -740,8 +740,7 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def("get_last_trace", [](JPS_Simulation_Wrapper& w) {
             return JPS_Simulation_GetTrace(w.handle);
         });
-    py::module_ exp = m.def_submodule("experimental", "Experimental API extensions for jupedsim");
-    py::class_<JPS_RoutingEngine_Wrapper>(exp, "RoutingEngine")
+    py::class_<JPS_RoutingEngine_Wrapper>(m, "RoutingEngine")
         .def(py::init([](const JPS_Geometry_Wrapper& geo) {
             return std::make_unique<JPS_RoutingEngine_Wrapper>(
                 JPS_RoutingEngine_Create(geo.handle));

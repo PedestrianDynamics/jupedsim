@@ -19,12 +19,12 @@ from vtkmodules.vtkRenderingCore import (
     vtkRenderer,
 )
 
-import jupedsim.py_jupedsim.experimental as jpex
 from jupedsim.aabb import AABB
+from jupedsim.py_jupedsim import RoutingEngine
 
 
 class Geometry:
-    def __init__(self, navi: jpex.RoutingEngine):
+    def __init__(self, navi: RoutingEngine):
         self.navi = navi
         triangle_points = vtkPoints()
         graph_edge_points = vtkPoints()

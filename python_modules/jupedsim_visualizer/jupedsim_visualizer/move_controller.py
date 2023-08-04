@@ -10,7 +10,7 @@ from vtkmodules.vtkCommonDataModel import (
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import vtkActor, vtkCamera, vtkPolyDataMapper
 
-import jupedsim.py_jupedsim.experimental as jpex
+from jupedsim.py_jupedsim import RoutingEngine
 
 
 class MoveController:
@@ -42,7 +42,7 @@ class MoveController:
             vtkCommand.MouseMoveEvent, self._on_mouse_move
         )
 
-    def set_navi(self, navi: jpex.RoutingEngine | None):
+    def set_navi(self, navi: RoutingEngine | None):
         self.navi = navi
 
     def _on_char(self, obj, evt):
