@@ -3,13 +3,11 @@
 ################################################################################
 add_library(jupedsim_obj OBJECT
     include/jupedsim/jupedsim.h
-    include/jupedsim/jupedsim_experimental.h
     src/AgentIterator.hpp
     src/Conversion.cpp
     src/Conversion.hpp
     src/ErrorMessage.hpp
     src/jupedsim.cpp
-    src/jupedsim_experimental.cpp
 )
 
 target_compile_options(jupedsim_obj PRIVATE
@@ -97,7 +95,6 @@ install(TARGETS jupedsim
 install(
     FILES
         include/jupedsim/jupedsim.h
-        include/jupedsim/jupedsim_experimental.h
     DESTINATION include/jupedsim
 )
 
