@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include <Unreachable.hpp>
 #include <jupedsim/jupedsim.h>
-#include <jupedsim/jupedsim_experimental.h>
 
 #include <algorithm>
 #include <exception>
@@ -66,8 +65,6 @@ OWNED_WRAPPER(JPS_Simulation);
 OWNED_WRAPPER(JPS_GCFMModelAgentIterator);
 OWNED_WRAPPER(JPS_VelocityModelAgentIterator);
 OWNED_WRAPPER(JPS_AgentIdIterator);
-
-// Experimental only types
 OWNED_WRAPPER(JPS_RoutingEngine);
 
 class LogCallbackOwner
