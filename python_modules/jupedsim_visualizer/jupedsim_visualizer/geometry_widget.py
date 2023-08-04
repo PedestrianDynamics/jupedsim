@@ -21,7 +21,7 @@ class RenderWidget(QVTKRenderWindowInteractor):
     def __init__(
         self,
         geo: jps.Geometry,
-        navi: jps.experimental.RoutingEngine,
+        navi: jps.RoutingEngine,
         actor_sources,
         parent=None,
     ):

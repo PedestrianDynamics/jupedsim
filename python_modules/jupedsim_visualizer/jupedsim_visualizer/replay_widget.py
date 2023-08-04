@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from jupedsim.py_jupedsim.experimental import RoutingEngine
+from jupedsim.py_jupedsim import RoutingEngine
 from jupedsim.recording import Recording
 
 

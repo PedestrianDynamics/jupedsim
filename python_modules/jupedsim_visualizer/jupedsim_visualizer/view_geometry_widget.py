@@ -17,7 +17,7 @@ import jupedsim.py_jupedsim as jps
 class ViewGeometryWidget(QWidget):
     def __init__(
         self,
-        navi: jps.experimental.RoutingEngine,
+        navi: jps.RoutingEngine,
         geo: Geometry,
         name_text: str,
         info_text: str,

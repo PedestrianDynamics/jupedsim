@@ -96,7 +96,7 @@ class MainWindow(QMainWindow):
         self.settings.setValue("files/last_wkt_location", str(file.parent))
         try:
             wkt = parse_wkt(Path(file).read_text(encoding="UTF-8"))
-            navi = jps.experimental.RoutingEngine(build_jps_geometry(wkt))
+            navi = jps.RoutingEngine(build_jps_geometry(wkt))
             xmin, ymin, xmax, ymax = wkt.bounds
             info_text = f"Dimensions: {math.ceil(xmax - xmin)}m x {math.ceil(ymax - ymin)}m Triangles: {len(navi.mesh())}"
             name_text = f"Geometry: {file}"
@@ -131,9 +131,7 @@ class MainWindow(QMainWindow):
         try:
             rec = Recording(file.as_posix())
             self.setUpdatesEnabled(False)
-            navi = jps.experimental.RoutingEngine(
-                build_jps_geometry(rec.geometry())
-            )
+            navi = jps.RoutingEngine(build_jps_geometry(rec.geometry()))
             geo = Geometry(navi)
             trajectory = Trajectory(rec)
             tab = ReplayWidget(navi, rec, geo, trajectory)
