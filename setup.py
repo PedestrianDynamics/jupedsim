@@ -7,10 +7,15 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
+import textwrap
 from pathlib import Path
 
 from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
+
+min_cpp_standard = 20
+min_cmake_version = "3.19"
 
 # Read version number from CMakeLists.txt
 with open("CMakeLists.txt", "r", encoding="utf-8") as cmakelist:
@@ -32,6 +37,64 @@ PLAT_TO_CMAKE = {
 }
 
 
+def check_cmake():
+    try:
+        result = subprocess.run(
+            ["cmake", "--version"], check=True, capture_output=True, text=True
+        )
+        # Check CMake version
+        found_cmake_version = re.search(
+            r"(\d+).(\d+).(\d+)", str(result.stdout)
+        )
+        for min_version, found_version in zip(
+            min_cmake_version.split("."), found_cmake_version.groups()
+        ):
+            if found_version < min_version:
+                return False
+    except:
+        return False
+    return True
+
+
+def check_cpp_compiler():
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        simple_main = textwrap.dedent(
+            """
+            int main(){ 
+                return 0;
+            }
+            """
+        )
+        cpp_file = tmp_dir + "/main.cpp"
+        with open(cpp_file, "w") as cp_file:
+            cp_file.write(simple_main)
+
+        simple_cmake = textwrap.dedent(
+            f"""
+            cmake_minimum_required(VERSION 3.19)
+            project(SimpleTest)
+            set(CMAKE_CXX_STANDARD {min_cpp_standard})
+            set(CMAKE_CXX_STANDARD_REQUIRED ON)
+            add_executable(simple_test main.cpp)
+            """
+        )
+        cmake_file = tmp_dir + "/CMakeLists.txt"
+        with open(cmake_file, "w") as cm_file:
+            cm_file.write(simple_cmake)
+
+        tmp_dir_build = pathlib.Path(tmp_dir) / "build"
+        tmp_dir_build.mkdir()
+
+        try:
+            subprocess.run(
+                ["cmake", "-S", str(tmp_dir), "-B", str(tmp_dir_build)],
+                check=True,
+            )
+        except:
+            return False
+    return True
+
+
 # A CMakeExtension needs a sourcedir instead of a file list.
 # The name must be the _single_ output extension from the CMake build.
 # If you need multiple extensions, see scikit-build.
@@ -43,6 +106,20 @@ class CMakeExtension(Extension):
 
 class CMakeBuild(build_ext):
     def build_extension(self, ext: CMakeExtension) -> None:
+        if not check_cmake():
+            raise ModuleNotFoundError(
+                f"No CMake or no CMake >= {min_cmake_version} installation "
+                f"found on the system, please install "
+                f"CMake >= {min_cmake_version} to install JuPedSim."
+            )
+
+        if not check_cpp_compiler():
+            raise ModuleNotFoundError(
+                "Could not compile a simple C++ program, "
+                f"please install a C++ compiler with C++{min_cpp_standard} "
+                f"support to install JuPedSim."
+            )
+
         # Must be in this form due to bug in .resolve() only fixed in Python 3.10+
         ext_fullpath = Path.cwd() / self.get_ext_fullpath(ext.name)
         extdir = ext_fullpath.parent.resolve()
