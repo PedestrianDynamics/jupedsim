@@ -10,7 +10,7 @@ from vtkmodules.vtkCommonDataModel import (
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import vtkActor, vtkCamera, vtkPolyDataMapper
 
-from jupedsim.py_jupedsim import RoutingEngine
+from jupedsim import RoutingEngine
 
 
 class MoveController:

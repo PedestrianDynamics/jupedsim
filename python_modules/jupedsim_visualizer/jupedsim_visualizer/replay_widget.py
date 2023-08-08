@@ -6,7 +6,7 @@ from jupedsim_visualizer.geometry import Geometry
 from jupedsim_visualizer.geometry_widget import RenderWidget
 from jupedsim_visualizer.trajectory import Trajectory
 from PySide6.QtCore import QSignalBlocker, Qt, QTimer
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QPaintEvent
 from PySide6.QtStateMachine import QState, QStateMachine
 from PySide6.QtWidgets import (
     QApplication,
@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from jupedsim.py_jupedsim import RoutingEngine
+from jupedsim import RoutingEngine
 from jupedsim.recording import Recording
 
 
@@ -140,8 +140,11 @@ class ReplayWidget(QWidget):
         QWidget.__init__(self, parent)
         self.rec = rec
         self.trajectory = trajectory
-        self.control = PlayerControlWidget()
-        self.render_widget = RenderWidget(geo, navi, [geo, trajectory])
+        self.control = PlayerControlWidget(parent=self)
+        self.render_widget = RenderWidget(
+            geo, navi, [geo, trajectory], parent=self
+        )
+        self.geo = geo
         layout = QVBoxLayout()
         layout.addWidget(self.render_widget, 1)
         layout.addWidget(self.control)
@@ -192,3 +195,10 @@ class ReplayWidget(QWidget):
         else:
             if self.timer:
                 self.timer.stop()
+
+    def render(self):
+        self.render_widget.render()
+
+    def paintEvent(self, event: QPaintEvent) -> None:
+        self.render()
+        return super().paintEvent(event)

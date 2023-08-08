@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (
     QTabWidget,
 )
 
-import jupedsim.py_jupedsim as jps
+import jupedsim as jps
 from jupedsim.recording import Recording
 from jupedsim.serialization import parse_wkt
 from jupedsim.util import build_jps_geometry
@@ -51,6 +51,19 @@ class MainWindow(QMainWindow):
         open_wkt_act.triggered.connect(self._open_wkt)
         open_replay_act = open_menu.addAction("Open replay file")
         open_replay_act.triggered.connect(self._open_replay)
+        settings_menu = menu.addMenu("Settings")
+        self._show_triangulation = settings_menu.addAction(
+            "show triangulation"
+        )
+        self._show_triangulation.setCheckable(True)
+        self._show_triangulation.toggled.connect(self._toggle_triangulation)
+        self._show_triangulation.setChecked(
+            bool(
+                self.settings.value(
+                    "show_triangulation", type=bool, defaultValue=False
+                )
+            )
+        )
 
     def _build_state_machine(self) -> None:
         sm = QStateMachine(self)
@@ -80,6 +93,12 @@ class MainWindow(QMainWindow):
         state = QFinalState()
         return state
 
+    def _toggle_triangulation(self, state: bool) -> None:
+        self.settings.setValue("show_triangulation", state)
+        for idx in range(self.tabs.count()):
+            self.tabs.widget(idx).geo.show_triangulation(state)
+        self.repaint()
+
     def _open_wkt(self):
         base_path_obj = self.settings.value(
             "files/last_wkt_location",
@@ -102,7 +121,10 @@ class MainWindow(QMainWindow):
             name_text = f"Geometry: {file}"
             self.setUpdatesEnabled(False)
             geo = Geometry(navi)
-            tab = ViewGeometryWidget(navi, geo, name_text, info_text)
+            geo.show_triangulation(self._show_triangulation.isChecked())
+            tab = ViewGeometryWidget(
+                navi, geo, name_text, info_text, parent=self
+            )
             tab_idx = self.tabs.insertTab(0, tab, file.name)
             self.tabs.setCurrentIndex(tab_idx)
             self.setUpdatesEnabled(True)
@@ -133,8 +155,9 @@ class MainWindow(QMainWindow):
             self.setUpdatesEnabled(False)
             navi = jps.RoutingEngine(build_jps_geometry(rec.geometry()))
             geo = Geometry(navi)
+            geo.show_triangulation(self._show_triangulation.isChecked())
             trajectory = Trajectory(rec)
-            tab = ReplayWidget(navi, rec, geo, trajectory)
+            tab = ReplayWidget(navi, rec, geo, trajectory, parent=self)
             tab_idx = self.tabs.insertTab(0, tab, file.name)
             self.tabs.setCurrentIndex(tab_idx)
             self.setUpdatesEnabled(True)
