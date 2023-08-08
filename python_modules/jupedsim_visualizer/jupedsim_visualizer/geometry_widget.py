@@ -6,12 +6,13 @@ from jupedsim_visualizer.geometry import Geometry, HoverInfo
 from jupedsim_visualizer.grid import Grid
 from jupedsim_visualizer.move_controller import MoveController
 from PySide6.QtCore import Signal
+from PySide6.QtGui import QPaintEvent
 from PySide6.QtWidgets import QWidget
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import vtkRenderer
 
-import jupedsim.py_jupedsim as jps
+import jupedsim as jps
 from jupedsim.aabb import AABB
 
 

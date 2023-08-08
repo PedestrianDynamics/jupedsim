@@ -3,6 +3,7 @@
 from jupedsim_visualizer.geometry import Geometry
 from jupedsim_visualizer.geometry_widget import RenderWidget
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QPaintEvent
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -11,7 +12,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-import jupedsim.py_jupedsim as jps
+import jupedsim as jps
 
 
 class ViewGeometryWidget(QWidget):
@@ -24,6 +25,7 @@ class ViewGeometryWidget(QWidget):
         parent=None,
     ):
         QWidget.__init__(self, parent)
+        self.geo = geo
         bottom_layout = QHBoxLayout()
         geometry_label = QLabel(name_text)
         geometry_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
@@ -40,8 +42,8 @@ class ViewGeometryWidget(QWidget):
         reset_cam_bt = QPushButton("Reset Camera")
         layout.addWidget(reset_cam_bt)
 
-        self.geo_widget = RenderWidget(geo, navi, [geo])
-        layout.addWidget(self.geo_widget)
+        self.render_widget = RenderWidget(geo, navi, [geo], parent=self)
+        layout.addWidget(self.render_widget)
 
         self.hover_label = QLabel("")
         self.hover_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -50,5 +52,12 @@ class ViewGeometryWidget(QWidget):
         layout.addLayout(bottom_layout)
         self.setLayout(layout)
 
-        reset_cam_bt.clicked.connect(self.geo_widget.reset_camera)
-        self.geo_widget.on_hover_triangle.connect(self.hover_label.setText)
+        reset_cam_bt.clicked.connect(self.render_widget.reset_camera)
+        self.render_widget.on_hover_triangle.connect(self.hover_label.setText)
+
+    def render(self):
+        self.render_widget.render()
+
+    def paintEvent(self, event: QPaintEvent) -> None:
+        self.render()
+        return super().paintEvent(event)

@@ -7,7 +7,6 @@ from PySide6.QtCore import QObject, Signal
 from vtkmodules.vtkCommonCore import vtkCommand, vtkIntArray, vtkPoints
 from vtkmodules.vtkCommonDataModel import (
     vtkCellArray,
-    vtkLine,
     vtkPolyData,
     vtkTriangle,
 )
@@ -19,17 +18,15 @@ from vtkmodules.vtkRenderingCore import (
     vtkRenderer,
 )
 
+from jupedsim import RoutingEngine
 from jupedsim.aabb import AABB
-from jupedsim.py_jupedsim import RoutingEngine
 
 
 class Geometry:
     def __init__(self, navi: RoutingEngine):
         self.navi = navi
         triangle_points = vtkPoints()
-        graph_edge_points = vtkPoints()
         triangles = vtkCellArray()
-        graph_edges = vtkCellArray()
         triangle_data = vtkIntArray()
 
         for idx, tri in enumerate(self.navi.mesh()):
@@ -43,20 +40,6 @@ class Geometry:
             triangles.InsertNextCell(triangle)
             triangle_data.InsertNextValue(idx)
 
-            for edge_from, edge_to in self.navi.edges_for(idx):
-                if edge_from == edge_to:
-                    continue
-                from_idx = graph_edge_points.InsertNextPoint(
-                    edge_from[0], edge_from[1], ZLayers.graph_edges
-                )
-                to_idx = graph_edge_points.InsertNextPoint(
-                    edge_to[0], edge_to[1], ZLayers.graph_edges
-                )
-                line = vtkLine()
-                line.GetPointIds().SetId(0, from_idx)
-                line.GetPointIds().SetId(1, to_idx)
-                graph_edges.InsertNextCell(line)
-
         triangle_poly_data = vtkPolyData()
         triangle_poly_data.SetPoints(triangle_points)
         triangle_poly_data.SetPolys(triangles)
@@ -65,28 +48,14 @@ class Geometry:
         triangle_mapper = vtkPolyDataMapper()
         triangle_mapper.SetInputData(triangle_poly_data)
 
-        edges_poly_data = vtkPolyData()
-        edges_poly_data.SetPoints(graph_edge_points)
-        edges_poly_data.SetLines(graph_edges)
-        edge_poly_mapper = vtkPolyDataMapper()
-        edge_poly_mapper.SetInputData(edges_poly_data)
-
         actor = vtkActor()
         actor.SetMapper(triangle_mapper)
         actor.GetProperty().SetColor(Colors.c)
-        actor.GetProperty().EdgeVisibilityOn()
         actor.GetProperty().SetEdgeColor(Colors.a)
         self.actor = actor
 
-        edge_actor = vtkActor()
-        edge_actor.SetMapper(edge_poly_mapper)
-        edge_actor.GetProperty().SetColor(0, 0, 1)
-        edge_actor.GetProperty().EdgeVisibilityOn()
-        edge_actor.GetProperty().SetLineWidth(3)
-        self.edge_actor = edge_actor
-
     def get_actors(self):
-        return [self.edge_actor, self.actor]
+        return [self.actor]
 
     def get_bounds(self) -> AABB:
         xmin = sys.maxsize
@@ -100,6 +69,10 @@ class Geometry:
             ymin = min(ymin, bounds[2])
             ymax = max(ymax, bounds[3])
         return AABB(xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymax)
+
+    def show_triangulation(self, state: bool) -> None:
+        self.actor.GetProperty().SetEdgeVisibility(state)
+        self.actor.Modified()
 
 
 class HoverInfo(QObject):
