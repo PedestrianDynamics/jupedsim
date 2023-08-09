@@ -5,10 +5,9 @@
 import logging
 import pathlib
 
-import shapely
 from shapely import GeometryCollection, Polygon, to_wkt
 
-import jupedsim.py_jupedsim as jps
+import jupedsim as jps
 from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
 from jupedsim.util import build_jps_geometry
 
@@ -54,28 +53,33 @@ def main():
     model = model_builder.build()
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
-
-    journey1 = jps.JourneyDescription()
-    journey1.add_waypoint((50, 50), 1)
-    stage = journey1.add_notifiable_waiting_set(
+    stage = simulation.add_waiting_set_stage(
         [
             (60, 50),
             (59, 50),
             (58, 50),
         ]
     )
-    journey1.add_exit([(99, 40), (99, 60), (100, 60), (100, 40)])
+    exits = [
+        simulation.add_exit_stage([(99, 40), (99, 60), (100, 60), (100, 40)]),
+        simulation.add_exit_stage([(99, 50), (99, 70), (100, 70), (100, 50)]),
+    ]
+    waypoints = [
+        simulation.add_waypoint_stage((50, 50), 1),
+        simulation.add_waypoint_stage((60, 40), 1),
+        simulation.add_waypoint_stage((40, 40), 1),
+        simulation.add_waypoint_stage((40, 60), 1),
+        simulation.add_waypoint_stage((60, 60), 1),
+    ]
 
-    journey2 = jps.JourneyDescription()
-    journey2.add_waypoint((60, 40), 1)
-    journey2.add_waypoint((40, 40), 1)
-    journey2.add_waypoint((40, 60), 1)
-    journey2.add_waypoint((60, 60), 1)
-    journey2.add_exit([(99, 50), (99, 70), (100, 70), (100, 50)])
-
-    journeys = []
-    journeys.append(simulation.add_journey(journey1))
-    journeys.append(simulation.add_journey(journey2))
+    journeys = [
+        simulation.add_journey(
+            jps.JourneyDescription([waypoints[0], stage, exits[0]])
+        ),
+        simulation.add_journey(
+            jps.JourneyDescription([*waypoints[1:], exits[1]])
+        ),
+    ]
 
     agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.journey_id = journeys[0]
@@ -115,7 +119,7 @@ def main():
             )
 
         if signal_once and any(simulation.agents_in_range((60, 60), 1)):
-            simulation.notify_waiting_set(journeys[0], stage, False)
+            simulation.notify_waiting_set(stage, False)
             print(f"Stop Waiting @{simulation.iteration_count()}")
             signal_once = False
         if simulation.iteration_count() % 4 == 0:

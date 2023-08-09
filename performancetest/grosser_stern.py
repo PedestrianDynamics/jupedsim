@@ -44445,12 +44445,12 @@ def create_journeys(sim: jps.Simulation):
         (-1655.71, -154.36),
         (-1660.21, -117.91),
     ]
+    gates_stages = [sim.add_waypoint_stage(g, 0.5) for g in gates]
+    exit_stage = sim.add_exit_stage(exit)
 
     journeys = []
-    for gate in gates:
-        journey = jps.JourneyDescription()
-        journey.add_waypoint(gate, 0.5)
-        journey.add_exit(exit)
+    for gate_stage in gates_stages:
+        journey = jps.JourneyDescription([gate_stage, exit_stage])
         journeys.append(sim.add_journey(journey))
 
     return journeys

@@ -8,13 +8,15 @@
 
 #include <memory>
 class Journey;
+class Stage;
 
 struct GenericAgent {
     using ID = jps::UniqueID<GenericAgent>;
     ID id{};
 
     jps::UniqueID<Journey> journeyId{jps::UniqueID<Journey>::Invalid};
-    size_t currentJourneyStage{};
+    size_t currentJourneyStageIdx{};
+    jps::UniqueID<Stage> stageId{jps::UniqueID<Stage>::Invalid};
 
     // This is evaluated by the "operational level"
     Point destination{};

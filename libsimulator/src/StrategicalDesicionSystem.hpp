@@ -31,8 +31,9 @@ void StrategicalDecisionSystem<Agent>::Run(
     std::vector<Agent>& agents) const
 {
     for(auto& agent : agents) {
-        const auto [target, idx] = journeys.at(agent.journeyId)->Target(agent);
+        const auto [target, idx, id] = journeys.at(agent.journeyId)->Target(agent);
         agent.waypoint = target;
-        agent.currentJourneyStage = idx;
+        agent.currentJourneyStageIdx = idx;
+        agent.stageId = id;
     }
 }

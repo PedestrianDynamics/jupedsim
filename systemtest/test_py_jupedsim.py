@@ -1,7 +1,8 @@
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
-import py_jupedsim as jps
 import pytest
+
+import jupedsim as jps
 
 
 def test_can_query_agents_in_range():
@@ -29,9 +30,11 @@ def test_can_query_agents_in_range():
     model = model_builder.build()
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
+    exit = simulation.add_exit_stage(
+        [(99, 45), (99, 55), (100, 55), (100, 45)]
+    )
 
-    journey = jps.JourneyDescription()
-    journey.add_exit([(99, 45), (99, 55), (100, 55), (100, 45)])
+    journey = jps.JourneyDescription([exit])
 
     journey_id = simulation.add_journey(journey)
 
@@ -95,8 +98,9 @@ def test_can_run_simulation():
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
 
-    journey = jps.JourneyDescription()
-    journey.add_exit([(18, 4), (20, 4), (20, 6), (18, 6)])
+    journey = jps.JourneyDescription(
+        [simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])]
+    )
 
     journey_id = simulation.add_journey(journey)
 
@@ -158,9 +162,8 @@ def test_can_wait():
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
 
-    journey = jps.JourneyDescription()
-    journey.add_waypoint((50, 50), 1)
-    stage = journey.add_notifiable_waiting_set(
+    wp = simulation.add_waypoint_stage((50, 50), 1)
+    waiting_set = simulation.add_waiting_set_stage(
         [
             (70, 50),
             (69, 50),
@@ -171,7 +174,10 @@ def test_can_wait():
             (64, 50),
         ]
     )
-    journey.add_exit([(99, 40), (99, 60), (100, 60), (100, 40)])
+    exit = simulation.add_exit_stage(
+        [(99, 40), (99, 60), (100, 60), (100, 40)]
+    )
+    journey = jps.JourneyDescription([wp, waiting_set, exit])
 
     journey_id = simulation.add_journey(journey)
 
@@ -215,7 +221,7 @@ def test_can_wait():
     while simulation.agent_count() > 0:
         simulation.iterate()
         if simulation.iteration_count() == 1000:
-            simulation.notify_waiting_set(journey_id, stage, False)
+            simulation.notify_waiting_set(waiting_set, False)
 
 
 def test_can_change_journey_while_waiting():
@@ -243,24 +249,30 @@ def test_can_change_journey_while_waiting():
     model = model_builder.build()
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
-
-    journey1 = jps.JourneyDescription()
-    journey1.add_waypoint((50, 50), 1)
-    stage = journey1.add_notifiable_waiting_set(
+    wp = simulation.add_waypoint_stage((50, 50), 1)
+    stage = simulation.add_waiting_set_stage(
         [
             (60, 50),
             (59, 50),
             (58, 50),
         ]
     )
-    journey1.add_exit([(99, 40), (99, 60), (100, 60), (100, 40)])
+    exit1 = simulation.add_exit_stage(
+        [(99, 40), (99, 60), (100, 60), (100, 40)]
+    )
 
-    journey2 = jps.JourneyDescription()
-    journey2.add_waypoint((60, 40), 1)
-    journey2.add_waypoint((40, 40), 1)
-    journey2.add_waypoint((40, 60), 1)
-    journey2.add_waypoint((60, 60), 1)
-    journey2.add_exit([(99, 50), (99, 70), (100, 70), (100, 50)])
+    journey1 = jps.JourneyDescription([wp, stage, exit1])
+    journey2 = jps.JourneyDescription(
+        [
+            simulation.add_waypoint_stage((60, 40), 1),
+            simulation.add_waypoint_stage((40, 40), 1),
+            simulation.add_waypoint_stage((40, 60), 1),
+            simulation.add_waypoint_stage((60, 60), 1),
+            simulation.add_exit_stage(
+                [(99, 50), (99, 70), (100, 70), (100, 50)]
+            ),
+        ]
+    )
 
     journeys = []
     journeys.append(simulation.add_journey(journey1))
@@ -296,6 +308,6 @@ def test_can_change_journey_while_waiting():
             redirect_once = False
 
         if signal_once and simulation.agents_in_range((60, 60), 1):
-            simulation.notify_waiting_set(journeys[0], stage, False)
+            simulation.notify_waiting_set(stage, False)
             signal_once = False
         simulation.iterate()

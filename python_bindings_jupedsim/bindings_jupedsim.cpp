@@ -360,95 +360,24 @@ PYBIND11_MODULE(py_jupedsim, m)
             return std::make_unique<JPS_JourneyDescription_Wrapper>(
                 JPS_JourneyDescription_Create());
         }))
+        .def(py::init([](const std::vector<JPS_StageId>& ids) {
+            auto desc =
+                std::make_unique<JPS_JourneyDescription_Wrapper>(JPS_JourneyDescription_Create());
+            for(const auto id : ids) {
+                JPS_JourneyDescription_AddStage(desc->handle, id);
+            }
+            return desc;
+        }))
         .def(
-            "add_waypoint",
-            [](JPS_JourneyDescription_Wrapper& w, std::tuple<double, double> pt, double distance) {
-                JPS_StageIndex stageIndex{};
-                JPS_ErrorMessage errorMsg{};
-                const auto success = JPS_JourneyDescription_AddWaypoint(
-                    w.handle,
-                    JPS_Point{std::get<0>(pt), std::get<1>(pt)},
-                    distance,
-                    &stageIndex,
-                    &errorMsg);
-                if(success) {
-                    return stageIndex;
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
+            "append",
+            [](JPS_JourneyDescription_Wrapper& w, JPS_StageId id) {
+                JPS_JourneyDescription_AddStage(w.handle, id);
             })
-        .def(
-            "add_exit",
-            [](JPS_JourneyDescription_Wrapper& w, std::vector<std::tuple<double, double>> poly) {
-                std::vector<JPS_Point> ppoly{};
-                ppoly.reserve(poly.size());
-                std::transform(
-                    std::begin(poly),
-                    std::end(poly),
-                    std::back_inserter(ppoly),
-                    [](const auto& pt) {
-                        return JPS_Point{std::get<0>(pt), std::get<1>(pt)};
-                    });
-                JPS_StageIndex stageIndex{};
-                JPS_ErrorMessage errorMsg{};
-                const auto sucess = JPS_JourneyDescription_AddExit(
-                    w.handle, ppoly.data(), ppoly.size(), &stageIndex, &errorMsg);
-                if(sucess) {
-                    return stageIndex;
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
-            })
-        .def(
-            "add_notifiable_waiting_set",
-            [](JPS_JourneyDescription_Wrapper& w,
-               std::vector<std::tuple<double, double>> waiting_points) {
-                std::vector<JPS_Point> points{};
-                points.reserve(waiting_points.size());
-                std::transform(
-                    std::begin(waiting_points),
-                    std::end(waiting_points),
-                    std::back_inserter(points),
-                    [](const auto& pt) {
-                        return JPS_Point{std::get<0>(pt), std::get<1>(pt)};
-                    });
-                JPS_StageIndex stageIndex;
-                JPS_ErrorMessage errorMsg{};
-                const auto success = JPS_JourneyDescription_AddNotifiableWaitingSet(
-                    w.handle, points.data(), points.size(), &stageIndex, &errorMsg);
-                if(success) {
-                    return stageIndex;
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
-            })
-        .def(
-            "add_notifiable_queue",
-            [](JPS_JourneyDescription_Wrapper& w,
-               std::vector<std::tuple<double, double>> waiting_points) {
-                std::vector<JPS_Point> points{};
-                points.reserve(waiting_points.size());
-                std::transform(
-                    std::begin(waiting_points),
-                    std::end(waiting_points),
-                    std::back_inserter(points),
-                    [](const auto& pt) {
-                        return JPS_Point{std::get<0>(pt), std::get<1>(pt)};
-                    });
-                JPS_StageIndex stageIndex;
-                JPS_ErrorMessage errorMsg{};
-                const auto success = JPS_JourneyDescription_AddNotifiableQueue(
-                    w.handle, points.data(), points.size(), &stageIndex, &errorMsg);
-                if(success) {
-                    return stageIndex;
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
-            });
+        .def("append", [](JPS_JourneyDescription_Wrapper& w, const std::vector<JPS_StageId>& ids) {
+            for(const auto& id : ids) {
+                JPS_JourneyDescription_AddStage(w.handle, id);
+            }
+        });
     py::class_<JPS_GCFMModelAgentIterator_Wrapper>(m, "GCFMModelAgentIterator")
         .def(
             "__iter__",
@@ -503,6 +432,58 @@ PYBIND11_MODULE(py_jupedsim, m)
             py::arg("model"),
             py::arg("geometry"),
             py::arg("dt"))
+        .def(
+            "add_waypoint_stage",
+            [](JPS_Simulation_Wrapper& w, JPS_Point position, double distance) {
+                JPS_ErrorMessage errorMsg{};
+                const auto result =
+                    JPS_Simulation_AddStageWaypoint(w.handle, position, distance, &errorMsg);
+                if(result != 0) {
+                    return result;
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
+            })
+        .def(
+            "add_queue_stage",
+            [](JPS_Simulation_Wrapper& w, const std::vector<JPS_Point>& positions) {
+                JPS_ErrorMessage errorMsg{};
+                const auto result = JPS_Simulation_AddStageNotifiableQueue(
+                    w.handle, positions.data(), positions.size(), &errorMsg);
+                if(result != 0) {
+                    return result;
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
+            })
+        .def(
+            "add_waiting_set_stage",
+            [](JPS_Simulation_Wrapper& w, const std::vector<JPS_Point>& positions) {
+                JPS_ErrorMessage errorMsg{};
+                const auto result = JPS_Simulation_AddStageWaitingSet(
+                    w.handle, positions.data(), positions.size(), &errorMsg);
+                if(result != 0) {
+                    return result;
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
+            })
+        .def(
+            "add_exit_stage",
+            [](JPS_Simulation_Wrapper& w, const std::vector<JPS_Point>& polygon) {
+                JPS_ErrorMessage errorMsg{};
+                const auto result = JPS_Simulation_AddStageExit(
+                    w.handle, polygon.data(), polygon.size(), &errorMsg);
+                if(result != 0) {
+                    return result;
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
+            })
         .def(
             "add_journey",
             [](JPS_Simulation_Wrapper& simulation, JPS_JourneyDescription_Wrapper& journey) {
@@ -708,10 +689,10 @@ PYBIND11_MODULE(py_jupedsim, m)
             })
         .def(
             "notify_waiting_set",
-            [](JPS_Simulation_Wrapper& w, JPS_JourneyId journeyId, size_t stageIdx, bool active) {
+            [](JPS_Simulation_Wrapper& w, JPS_StageId stageId, bool active) {
                 JPS_ErrorMessage errorMsg{};
-                auto result = JPS_Simulation_ChangeWaitingSetState(
-                    w.handle, journeyId, stageIdx, active, &errorMsg);
+                auto result =
+                    JPS_Simulation_ChangeWaitingSetState(w.handle, stageId, active, &errorMsg);
                 if(result) {
                     return;
                 }
@@ -721,10 +702,10 @@ PYBIND11_MODULE(py_jupedsim, m)
             })
         .def(
             "notify_queue",
-            [](JPS_Simulation_Wrapper& w, JPS_JourneyId journeyId, size_t stageIdx, size_t count) {
+            [](JPS_Simulation_Wrapper& w, JPS_StageId stageId, size_t count) {
                 JPS_ErrorMessage errorMsg{};
-                auto result = JPS_Simulation_PopAgentsFromQueue(
-                    w.handle, journeyId, stageIdx, count, &errorMsg);
+                auto result =
+                    JPS_Simulation_PopAgentsFromQueue(w.handle, stageId, count, &errorMsg);
                 if(result) {
                     return;
                 }
@@ -807,4 +788,3 @@ PYBIND11_MODULE(py_jupedsim, m)
             return lines;
         });
 }
-

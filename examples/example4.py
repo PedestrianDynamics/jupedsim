@@ -9,7 +9,7 @@ import time
 
 from shapely import GeometryCollection, Polygon, to_wkt
 
-import jupedsim.py_jupedsim as jps
+import jupedsim as jps
 from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
 from jupedsim.util import build_jps_geometry
 
@@ -55,9 +55,11 @@ def main():
     model = model_builder.build()
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
+    exit = simulation.add_exit_stage(
+        [(999, 2000), (999, 3000), (1000, 3000), (1000, 2000)]
+    )
 
-    journey = jps.JourneyDescription()
-    journey.add_exit([(999, 2000), (999, 3000), (1000, 3000), (1000, 2000)])
+    journey = jps.JourneyDescription([exit])
     journey_id = simulation.add_journey(journey)
 
     agent_parameters = jps.VelocityModelAgentParameters()

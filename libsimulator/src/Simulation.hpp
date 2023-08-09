@@ -15,11 +15,13 @@
 #include "Polygon.hpp"
 #include "SimulationClock.hpp"
 #include "SimulationError.hpp"
+#include "Stage.hpp"
 #include "StageDescription.hpp"
 #include "StrategicalDesicionSystem.hpp"
 #include "TacticalDecisionSystem.hpp"
 #include "TemplateHelper.hpp"
 #include "Tracing.hpp"
+#include "Visitor.hpp"
 
 #include <boost/iterator/zip_iterator.hpp>
 
@@ -42,7 +44,8 @@ public:
     /// Advances the simulation by one time step.
     virtual void Iterate() = 0;
     // TODO(kkratz): doc
-    virtual Journey::ID AddJourney(const std::vector<StageDescription>& journeyDescription) = 0;
+    virtual Journey::ID AddJourney(const std::vector<Stage::ID>& stages) = 0;
+    virtual Stage::ID AddStage(const StageDescription stageDescription) = 0;
     virtual void RemoveAgent(GenericAgent::ID id) = 0;
     virtual const std::vector<GenericAgent::ID>& RemovedAgents() const = 0;
     virtual size_t AgentCount() const = 0;
@@ -77,6 +80,7 @@ private:
     std::vector<AgentType> _agents;
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
     std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;
+    std::unordered_map<Stage::ID, std::unique_ptr<Stage>> _stages;
     PerfStats _perfStats{};
 
 public:
@@ -106,7 +110,9 @@ public:
     void Iterate() override;
 
     // TODO(kkratz): doc
-    Journey::ID AddJourney(const std::vector<StageDescription>& journeyDescription) override;
+    Journey::ID AddJourney(const std::vector<Stage::ID>& stages) override;
+
+    Stage::ID AddStage(const StageDescription stageDescription) override;
 
     GenericAgent::ID AddAgent(AgentType&& agent);
 
@@ -163,8 +169,14 @@ void TypedSimulation<T>::Iterate()
     _agentExitSystem.Run(_agents, _removedAgentsInLastIteration);
     _neighborhoodSearch.Update(_agents);
 
-    for(auto& [_, j] : _journeys) {
-        j->Update(_neighborhoodSearch);
+    for(auto& [_, stage] : _stages) {
+        if(auto* updatable_stage = dynamic_cast<NotifiableWaitingSet*>(stage.get());
+           updatable_stage != nullptr) {
+            updatable_stage->Update(_neighborhoodSearch);
+        } else if(auto* updatable_stage = dynamic_cast<NotifiableQueue*>(stage.get());
+                  updatable_stage != nullptr) {
+            updatable_stage->Update(_neighborhoodSearch);
+        }
     }
 
     _stategicalDecisionSystem.Run(_journeys, _agents);
@@ -178,12 +190,50 @@ void TypedSimulation<T>::Iterate()
 }
 
 template <typename T>
-Journey::ID TypedSimulation<T>::AddJourney(const std::vector<StageDescription>& journeyDescription)
+Journey::ID TypedSimulation<T>::AddJourney(const std::vector<Stage::ID>& stageIds)
 {
-    auto journey = std::make_unique<Journey>(
-        journeyDescription, _removedAgentsInLastIteration, *_routingEngine);
+    std::vector<Stage*> stages;
+    stages.reserve(stageIds.size());
+    std::transform(
+        std::begin(stageIds),
+        std::end(stageIds),
+        std::back_inserter(stages),
+        [this](const auto id) {
+            const auto iter = _stages.find(id);
+            if(iter == std::end(_stages)) {
+                throw SimulationError("Unknown stage id ({}) provided in journey.", id.getID());
+            }
+            return iter->second.get();
+        });
+    auto journey = std::make_unique<Journey>(std::move(stages));
     const auto id = journey->Id();
     _journeys.emplace(id, std::move(journey));
+    return id;
+}
+
+template <typename T>
+Stage::ID TypedSimulation<T>::AddStage(const StageDescription stageDescription)
+{
+    std::unique_ptr<Stage> stage = std::visit(
+        overloaded{
+            [](const WaypointDescription& d) -> std::unique_ptr<Stage> {
+                return std::make_unique<Waypoint>(d.position, d.distance);
+            },
+            [this](const ExitDescription& d) -> std::unique_ptr<Stage> {
+                return std::make_unique<Exit>(d.polygon, _removedAgentsInLastIteration);
+            },
+            [](const NotifiableWaitingSetDescription& d) -> std::unique_ptr<Stage> {
+                return std::make_unique<NotifiableWaitingSet>(d.slots);
+            },
+            [](const NotifiableQueueDescription& d) -> std::unique_ptr<Stage> {
+                return std::make_unique<NotifiableQueue>(d.slots);
+            }},
+        stageDescription);
+    if(_stages.find(stage->Id()) != _stages.end()) {
+        throw SimulationError("Internal error, stage id already in use.");
+    }
+    const auto id = stage->Id();
+    _stages.emplace(id, std::move(stage));
     return id;
 }
 
@@ -286,7 +336,8 @@ void TypedSimulation<T>::SwitchAgentJourney(
     }
     auto& agent = Agent(agent_id);
     agent.journeyId = journey_id;
-    agent.currentJourneyStage = stage_idx;
+    agent.currentJourneyStageIdx = stage_idx;
+    agent.stageId = journey->StageAt(stage_idx)->Id();
 }
 
 template <typename T>
@@ -329,27 +380,21 @@ template <typename T>
 void TypedSimulation<T>::Notify(Event evt)
 {
     std::visit(
-        [this](auto&& evt) {
-            using EvtT = std::decay_t<decltype(evt)>;
-            if constexpr(std::is_same_v<EvtT, NotifyWaitingSet>) {
-                auto journey = _journeys.find(evt.journeyId);
-                if(journey == std::end(_journeys)) {
+        overloaded{
+            [this](const NotifyWaitingSet& evt) {
+                auto* stage = dynamic_cast<NotifiableWaitingSet*>(_stages.at(evt.stageId).get());
+                if(stage == nullptr) {
                     throw SimulationError(
-                        "Cannot send event to unknown journey {}", evt.journeyId.getID());
+                        "Stage id {} is not a NotiafiableWaitingSet", evt.stageId);
                 }
-                LOG_DEBUG("Received 'NotifyWaitingSet' evt: {}", evt);
-                journey->second->HandleNofifyWaitingSetEvent(evt);
-            } else if constexpr(std::is_same_v<EvtT, NotifyQueue>) {
-                auto journey = _journeys.find(evt.journeyId);
-                if(journey == std::end(_journeys)) {
-                    throw SimulationError(
-                        "Cannot send event to unknown journey {}", evt.journeyId.getID());
+                stage->State(evt.newState);
+            },
+            [this](const NotifyQueue& evt) {
+                auto* stage = dynamic_cast<NotifiableQueue*>(_stages.at(evt.stageId).get());
+                if(stage == nullptr) {
+                    throw SimulationError("Stage id {} is not a NotiafiableQueue", evt.stageId);
                 }
-                LOG_DEBUG("Received 'NotifyQueue' evt: {}", evt);
-                journey->second->HandleNofifyQueueEvent(evt);
-            } else {
-                static_assert(always_false_v<EvtT>, "non-exhaustive visitor!");
-            }
-        },
+                stage->Pop(evt.count);
+            }},
         evt);
 }
