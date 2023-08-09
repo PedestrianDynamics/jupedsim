@@ -8,14 +8,12 @@
 #include <fmt/core.h>
 
 struct NotifyWaitingSet {
-    jps::UniqueID<Journey> journeyId;
-    size_t stageIdx;
+    Stage::ID stageId;
     NotifiableWaitingSet::WaitingState newState;
 };
 
 struct NotifyQueue {
-    jps::UniqueID<Journey> journeyId;
-    size_t stageIdx;
+    Stage::ID stageId;
     size_t count;
 };
 
@@ -36,9 +34,8 @@ struct formatter<NotifyWaitingSet> {
     {
         return fmt::format_to(
             p_ctx.out(),
-            "NotifyWaitingSet[id: {}, idx: {}, state: {}]",
-            evt.journeyId,
-            evt.stageIdx,
+            "NotifyWaitingSet[stage id: {}, state: {}]",
+            evt.stageId,
             evt.newState == NotifiableWaitingSet::WaitingState::Active ? "active" : "inactive");
     }
 };
@@ -55,11 +52,7 @@ struct formatter<NotifyQueue> {
     auto format(NotifyQueue const& evt, FormatContext& p_ctx) const
     {
         return fmt::format_to(
-            p_ctx.out(),
-            "NotifyQueue[id: {}, idx: {}, count: {}]",
-            evt.journeyId,
-            evt.stageIdx,
-            evt.count);
+            p_ctx.out(), "NotifyQueue[stage id: {}, count: {}]", evt.stageId, evt.count);
     }
 };
 } // namespace fmt

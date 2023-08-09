@@ -1,11 +1,11 @@
 #! /usr/bin/env bash
 export JPSCORE_EXECUTABLE_PATH="@CMAKE_BINARY_DIR@/bin/jpscore"
 export JPSCORE_SOURCE_PATH="@CMAKE_SOURCE_DIR@"
-export PYTHONPATH="@CMAKE_SOURCE_DIR@/systemtest/test_support:@CMAKE_LIBRARY_OUTPUT_DIRECTORY@"
+export PYTHONPATH="@CMAKE_SOURCE_DIR@/systemtest/test_support:@CMAKE_SOURCE_DIR@/python_modules/jupedsim:@CMAKE_SOURCE_DIR@/python_modules/jupedsim_visualizer:@CMAKE_LIBRARY_OUTPUT_DIRECTORY@"
 
 echo "Executable path ${JPSCORE_EXECUTABLE_PATH}"
 echo "Source path ${JPSCORE_SOURCE_PATH}"
 echo "PYTHONPATH=${PYTHONPATH}"
 
-@Python_EXECUTABLE@ -m pytest  ${JPSCORE_SOURCE_PATH}/systemtest "$@"
+@Python_EXECUTABLE@ -m pytest  ${JPSCORE_SOURCE_PATH}/systemtest --basetemp="$(pwd)/test-results" "$@"
 

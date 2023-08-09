@@ -59,10 +59,7 @@ Point Exit::Target(const GenericAgent&)
 ////////////////////////////////////////////////////////////////////////////////
 /// NotifiableWaitingSet
 ////////////////////////////////////////////////////////////////////////////////
-NotifiableWaitingSet::NotifiableWaitingSet(
-    std::vector<Point> slots_,
-    jps::UniqueID<Journey> journeyId_)
-    : slots(std::move(slots_)), journeyId(journeyId_)
+NotifiableWaitingSet::NotifiableWaitingSet(std::vector<Point> slots_) : slots(std::move(slots_))
 {
     occupants.reserve(slots.size());
 }
@@ -116,8 +113,7 @@ NotifiableWaitingSet::WaitingState NotifiableWaitingSet::State() const
 ////////////////////////////////////////////////////////////////////////////////
 /// NotifiablQueue
 ////////////////////////////////////////////////////////////////////////////////
-NotifiableQueue::NotifiableQueue(std::vector<Point> slots_, jps::UniqueID<Journey> journeyId_)
-    : slots(std::move(slots_)), journeyId(journeyId_)
+NotifiableQueue::NotifiableQueue(std::vector<Point> slots_) : slots(std::move(slots_))
 {
     occupants.reserve(slots.size());
     exitingThisUpdate.reserve(slots.size());

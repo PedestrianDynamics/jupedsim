@@ -121,38 +121,45 @@ class RandomProfilePicker:
 
 
 def create_journey(sim: jps.Simulation):
-    journey = jps.JourneyDescription()
-    first_wait = journey.add_notifiable_waiting_set(
-        [
-            (1384.33, 635.51),
-            (1384.91, 636.33),
-            (1385.91, 637.61),
-            (1385.60, 634.71),
-            (1386.56, 635.85),
-            (1387.84, 636.44),
-            (1387.56, 634.27),
-            (1388.91, 634.85),
-        ]
-    )
-    journey.add_waypoint((1283.35, 510.25), 1.5)
-    journey.add_waypoint((1159.81, 693.19), 1.5)
-    journey.add_waypoint((1223.74, 768.90), 1.5)
-    journey.add_waypoint((1214.52, 766.20), 1.5)
-    journey.add_waypoint((962.36, 555.14), 1.5)
-    second_wait = journey.add_notifiable_queue(
-        [
-            (950.56, 538.72),
-            (952.46, 538.19),
-            (953.89, 537.66),
-            (955.61, 536.76),
-            (957.04, 536.47),
-            (958.46, 536.88),
-        ]
-    )
-    journey.add_exit(
-        [(630.01, 25.88), (630.03, 27.63), (625.97, 28.03), (625.92, 26.18)]
-    )
-    return sim.add_journey(journey), (first_wait, second_wait)
+    stages = [
+        sim.add_waiting_set_stage(
+            [
+                (1384.33, 635.51),
+                (1384.91, 636.33),
+                (1385.91, 637.61),
+                (1385.60, 634.71),
+                (1386.56, 635.85),
+                (1387.84, 636.44),
+                (1387.56, 634.27),
+                (1388.91, 634.85),
+            ]
+        ),
+        sim.add_waypoint_stage((1283.35, 510.25), 1.5),
+        sim.add_waypoint_stage((1159.81, 693.19), 1.5),
+        sim.add_waypoint_stage((1223.74, 768.90), 1.5),
+        sim.add_waypoint_stage((1214.52, 766.20), 1.5),
+        sim.add_waypoint_stage((962.36, 555.14), 1.5),
+        sim.add_queue_stage(
+            [
+                (950.56, 538.72),
+                (952.46, 538.19),
+                (953.89, 537.66),
+                (955.61, 536.76),
+                (957.04, 536.47),
+                (958.46, 536.88),
+            ]
+        ),
+        sim.add_exit_stage(
+            [
+                (630.01, 25.88),
+                (630.03, 27.63),
+                (625.97, 28.03),
+                (625.92, 26.18),
+            ]
+        ),
+    ]
+    journey = jps.JourneyDescription(stages)
+    return sim.add_journey(journey), (stages[0], stages[-2])
 
 
 def parse_args():
@@ -233,11 +240,11 @@ def main():
             for s in spawners:
                 s.spawn(iteration)
             if (iteration + 100 * 30) % (100 * 60) == 0:
-                simulation.notify_waiting_set(journey, wait_points[0], False)
+                simulation.notify_waiting_set(wait_points[0], False)
             if iteration % (100 * 60) == 0:
-                simulation.notify_waiting_set(journey, wait_points[0], True)
+                simulation.notify_waiting_set(wait_points[0], True)
             if iteration % (100 * 8) == 0:
-                simulation.notify_queue(journey, wait_points[1], 1)
+                simulation.notify_queue(wait_points[1], 1)
             if iteration % 50 == 0:
                 writer.write_iteration_state(simulation)
             simulation.iterate()

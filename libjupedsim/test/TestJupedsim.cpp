@@ -91,11 +91,10 @@ TEST(Simulation, CanSimulate)
     auto simulation = JPS_Simulation_Create(model, geometry, 0.01, nullptr);
     ASSERT_NE(simulation, nullptr);
 
-    auto journey = JPS_JourneyDescription_Create();
     std::vector<JPS_Point> box{{18, 4}, {20, 4}, {20, 6}, {18, 6}};
-    auto success =
-        JPS_JourneyDescription_AddExit(journey, box.data(), box.size(), nullptr, nullptr);
-    ASSERT_TRUE(success);
+    const auto exitStage = JPS_Simulation_AddStageExit(simulation, box.data(), box.size(), nullptr);
+    auto journey = JPS_JourneyDescription_Create();
+    JPS_JourneyDescription_AddStage(journey, exitStage);
     auto journeyId = JPS_Simulation_AddJourney(simulation, journey, nullptr);
     JPS_JourneyDescription_Free(journey);
 
@@ -142,8 +141,10 @@ struct SimulationTest : public ::testing::Test {
         simulation = JPS_Simulation_Create(model, geometry, 0.01, nullptr);
         ASSERT_NE(simulation, nullptr);
 
+        const auto waypoint_id = JPS_Simulation_AddStageWaypoint(simulation, {1, 1}, 1, nullptr);
+
         auto journey = JPS_JourneyDescription_Create();
-        ASSERT_TRUE(JPS_JourneyDescription_AddWaypoint(journey, {1, 1}, 1, nullptr, nullptr));
+        JPS_JourneyDescription_AddStage(journey, waypoint_id);
         journey_id = JPS_Simulation_AddJourney(simulation, journey, nullptr);
 
         JPS_JourneyDescription_Free(journey);

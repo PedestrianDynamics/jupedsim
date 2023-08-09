@@ -20,9 +20,16 @@ class Simulation;
 class Stage
 {
 public:
+    using ID = jps::UniqueID<Stage>;
+
+protected:
+    ID id;
+
+public:
     virtual ~Stage() = default;
     virtual bool IsCompleted(const GenericAgent& agent) = 0;
     virtual Point Target(const GenericAgent& agent) = 0;
+    ID Id() const { return id; }
 };
 
 class Waypoint : public Stage
@@ -60,12 +67,11 @@ public:
 
 private:
     std::vector<Point> slots;
-    jps::UniqueID<Journey> journeyId;
     std::vector<GenericAgent::ID> occupants{};
     WaitingState state{WaitingState::Active};
 
 public:
-    NotifiableWaitingSet(std::vector<Point> slots_, jps::UniqueID<Journey> journeyId);
+    NotifiableWaitingSet(std::vector<Point> slots_);
     ~NotifiableWaitingSet() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
     Point Target(const GenericAgent& agent) override;
@@ -91,7 +97,7 @@ void NotifiableWaitingSet::Update(const NeighborhoodSearch<T>& neighborhoodSearc
         GenericAgent::ID occupant = GenericAgent::ID::Invalid;
         double min_distance = std::numeric_limits<double>::max();
         for(const auto& agent : candidates) {
-            if(agent.journeyId == journeyId) {
+            if(agent.stageId == id) {
                 if(std::find(std::begin(occupants), std::end(occupants), agent.id) ==
                    std::end(occupants)) {
                     const auto distance = (agent.pos - slots[index]).Norm();
@@ -115,13 +121,12 @@ class NotifiableQueue : public Stage
 
 private:
     std::vector<Point> slots;
-    jps::UniqueID<Journey> journeyId;
     std::vector<GenericAgent::ID> occupants{};
     std::vector<GenericAgent::ID> exitingThisUpdate{};
     size_t popCountOnNextUpdate{};
 
 public:
-    NotifiableQueue(std::vector<Point> slots_, jps::UniqueID<Journey> journeyId_);
+    NotifiableQueue(std::vector<Point> slots_);
     ~NotifiableQueue() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
     Point Target(const GenericAgent& agent) override;
@@ -152,7 +157,7 @@ void NotifiableQueue::Update(const NeighborhoodSearch<T>& neighborhoodSearch)
         GenericAgent::ID occupant = GenericAgent::ID::Invalid;
         double min_distance = std::numeric_limits<double>::max();
         for(const auto& agent : candidates) {
-            if(agent.journeyId == journeyId) {
+            if(agent.stageId == id) {
                 if(std::find(std::begin(occupants), std::end(occupants), agent.id) ==
                    std::end(occupants)) {
                     const auto distance = (agent.pos - slots[index]).Norm();
@@ -165,7 +170,6 @@ void NotifiableQueue::Update(const NeighborhoodSearch<T>& neighborhoodSearch)
         }
         if(occupant != GenericAgent::ID::Invalid) {
             occupants.push_back(occupant);
-            LOG_DEBUG("occupant {} enqueued @ {}", occupant, occupants.size());
         } else {
             return;
         }

@@ -21,38 +21,20 @@ public:
     using ID = jps::UniqueID<Journey>;
 
 private:
-    ID id;
-    std::vector<std::unique_ptr<Stage>> stages{};
+    ID id{};
+    std::vector<Stage*> stages{};
 
 public:
     ~Journey() = default;
 
-    Journey(
-        const std::vector<StageDescription>& stageDescriptions,
-        std::vector<GenericAgent::ID>& toRemove,
-        const RoutingEngine& routingEngine);
+    Journey(std::vector<Stage*> stages);
 
     ID Id() const { return id; }
 
-    std::tuple<Point, size_t> Target(const GenericAgent& agent) const;
+    std::tuple<Point, size_t, Stage::ID> Target(const GenericAgent& agent) const;
 
     void HandleNofifyWaitingSetEvent(NotifyWaitingSet evt) const;
     void HandleNofifyQueueEvent(NotifyQueue evt) const;
-
-    template <typename T>
-    void Update(const NeighborhoodSearch<T>& neighborhoodSearch);
-
     size_t CountStages() const { return stages.size(); }
+    Stage* StageAt(size_t idx) { return stages.at(idx); }
 };
-
-template <typename T>
-void Journey::Update(const NeighborhoodSearch<T>& neighborhoodSearch)
-{
-    for(auto& stage : stages) {
-        if(auto waitingSet = dynamic_cast<NotifiableWaitingSet*>(stage.get()); waitingSet) {
-            waitingSet->Update(neighborhoodSearch);
-        } else if(auto queue = dynamic_cast<NotifiableQueue*>(stage.get()); queue) {
-            queue->Update(neighborhoodSearch);
-        }
-    }
-}

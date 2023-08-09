@@ -241,7 +241,7 @@ JPS_GeometryBuilder JPS_GeometryBuilder_Create()
 
 void JPS_GeometryBuilder_AddAccessibleArea(
     JPS_GeometryBuilder handle,
-    JPS_Point* polygon,
+    const JPS_Point* polygon,
     size_t lenPolygon)
 {
     assert(handle != nullptr);
@@ -254,7 +254,7 @@ void JPS_GeometryBuilder_AddAccessibleArea(
 
 void JPS_GeometryBuilder_ExcludeFromAccessibleArea(
     JPS_GeometryBuilder handle,
-    JPS_Point* polygon,
+    const JPS_Point* polygon,
     size_t lenPolygon)
 {
     assert(handle != nullptr);
@@ -366,114 +366,18 @@ void JPS_AgentIdIterator_Free(JPS_AgentIdIterator handle)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// JourneyDescription
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-using JourneyDesc = std::vector<StageDescription>;
+using JourneyDesc = std::vector<Stage::ID>;
 
 JPS_JourneyDescription JPS_JourneyDescription_Create()
 {
     return reinterpret_cast<JPS_JourneyDescription>(new JourneyDesc{});
 }
 
-bool JPS_JourneyDescription_AddWaypoint(
-    JPS_JourneyDescription handle,
-    JPS_Point position,
-    double distance,
-    JPS_StageIndex* stageIndex,
-    JPS_ErrorMessage* errorMessage)
+void JPS_JourneyDescription_AddStage(JPS_JourneyDescription handle, JPS_StageId id)
 {
     assert(handle);
-    if(distance < 0) {
-        if(errorMessage) {
-            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
-                new JPS_ErrorMessage_t{"Distance needs to be >= 0"});
-        }
-        return false;
-    }
-    auto journey = reinterpret_cast<JourneyDesc*>(handle);
-    journey->push_back(WaypointDescription{intoPoint(position), distance});
-    if(stageIndex != nullptr) {
-        *stageIndex = journey->size() - 1;
-    }
-    return true;
-}
-
-bool JPS_JourneyDescription_AddExit(
-    JPS_JourneyDescription handle,
-    JPS_Point* polygon,
-    size_t len_polygon,
-    JPS_StageIndex* stageIndex,
-    JPS_ErrorMessage* errorMessage)
-{
-    assert(handle);
-    auto journey = reinterpret_cast<JourneyDesc*>(handle);
-    std::vector<Point> loop{};
-    loop.reserve(len_polygon);
-    std::transform(polygon, polygon + len_polygon, std::back_inserter(loop), intoPoint);
-    try {
-        journey->push_back(ExitDescription{Polygon(loop)});
-    } catch(const std::exception& ex) {
-        if(errorMessage) {
-            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
-        }
-        return false;
-    }
-    if(stageIndex != nullptr) {
-        *stageIndex = journey->size() - 1;
-    }
-    return true;
-}
-
-bool JPS_JourneyDescription_AddNotifiableWaitingSet(
-    JPS_JourneyDescription handle,
-    JPS_Point* waiting_points,
-    size_t len_waiting_points,
-    JPS_StageIndex* stageIndex,
-    JPS_ErrorMessage* errorMessage)
-{
-    assert(handle);
-    if(len_waiting_points < 1) {
-        if(errorMessage) {
-            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
-                new JPS_ErrorMessage_t{"NotifiableWaitingSet needs at least 1 waiting point"});
-        }
-        return false;
-    }
-    auto journey = reinterpret_cast<JourneyDesc*>(handle);
-    std::vector<Point> slots{};
-    slots.reserve(len_waiting_points);
-    std::transform(
-        waiting_points, waiting_points + len_waiting_points, std::back_inserter(slots), intoPoint);
-    journey->push_back(NotifiableWaitingSetDescription{std::move(slots)});
-    if(stageIndex != nullptr) {
-        *stageIndex = journey->size() - 1;
-    }
-    return true;
-}
-
-bool JPS_JourneyDescription_AddNotifiableQueue(
-    JPS_JourneyDescription handle,
-    JPS_Point* waiting_points,
-    size_t len_waiting_points,
-    JPS_StageIndex* stageIndex,
-    JPS_ErrorMessage* errorMessage)
-{
-    assert(handle);
-    if(len_waiting_points < 1) {
-        if(errorMessage) {
-            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
-                new JPS_ErrorMessage_t{"NotifiableQueue needs at least 1 waiting point"});
-        }
-        return false;
-    }
-    auto journey = reinterpret_cast<JourneyDesc*>(handle);
-    std::vector<Point> slots{};
-    slots.reserve(len_waiting_points);
-    std::transform(
-        waiting_points, waiting_points + len_waiting_points, std::back_inserter(slots), intoPoint);
-    journey->push_back(NotifiableQueueDescription{std::move(slots)});
-    if(stageIndex != nullptr) {
-        *stageIndex = journey->size() - 1;
-    }
-    return true;
+    auto journeyDesc = reinterpret_cast<JourneyDesc*>(handle);
+    journeyDesc->emplace_back(id);
 }
 
 void JPS_JourneyDescription_Free(JPS_JourneyDescription handle)
@@ -552,6 +456,84 @@ JPS_JourneyId JPS_Simulation_AddJourney(
         }
     }
     return result;
+}
+
+static JPS_StageId add_stage(
+    JPS_Simulation handle,
+    const StageDescription& stageDescription,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    auto result = Journey::ID::Invalid.getID();
+    try {
+
+        result = simulation->AddStage(stageDescription).getID();
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return result;
+}
+
+JPS_StageId JPS_Simulation_AddStageWaypoint(
+    JPS_Simulation handle,
+    JPS_Point position,
+    double distance,
+    JPS_ErrorMessage* errorMessage)
+{
+    return add_stage(handle, WaypointDescription{intoPoint(position), distance}, errorMessage);
+}
+
+JPS_StageId JPS_Simulation_AddStageExit(
+    JPS_Simulation handle,
+    const JPS_Point* polygon,
+    size_t len_polygon,
+    JPS_ErrorMessage* errorMessage)
+{
+    std::vector<Point> loop{};
+    loop.reserve(len_polygon);
+    std::transform(polygon, polygon + len_polygon, std::back_inserter(loop), intoPoint);
+    return add_stage(handle, ExitDescription{Polygon(loop)}, errorMessage);
+}
+
+JPS_StageId JPS_Simulation_AddStageNotifiableQueue(
+    JPS_Simulation handle,
+    const JPS_Point* waiting_positions,
+    size_t len_waiting_positions,
+    JPS_ErrorMessage* errorMessage)
+{
+    std::vector<Point> positions{};
+    positions.reserve(len_waiting_positions);
+    std::transform(
+        waiting_positions,
+        waiting_positions + len_waiting_positions,
+        std::back_inserter(positions),
+        intoPoint);
+    return add_stage(handle, NotifiableQueueDescription{positions}, errorMessage);
+}
+
+JPS_StageId JPS_Simulation_AddStageWaitingSet(
+    JPS_Simulation handle,
+    const JPS_Point* waiting_positions,
+    size_t len_waiting_positions,
+    JPS_ErrorMessage* errorMessage)
+{
+    std::vector<Point> positions{};
+    positions.reserve(len_waiting_positions);
+    std::transform(
+        waiting_positions,
+        waiting_positions + len_waiting_positions,
+        std::back_inserter(positions),
+        intoPoint);
+    return add_stage(handle, NotifiableWaitingSetDescription{positions}, errorMessage);
 }
 
 JPS_AgentId JPS_Simulation_AddGCFMModelAgent(
@@ -892,7 +874,7 @@ JPS_Simulation_AgentsInRange(JPS_Simulation handle, JPS_Point position, double d
 }
 
 JPS_AgentIdIterator
-JPS_Simulation_AgentsInPolygon(JPS_Simulation handle, JPS_Point* polygon, size_t len_polygon)
+JPS_Simulation_AgentsInPolygon(JPS_Simulation handle, const JPS_Point* polygon, size_t len_polygon)
 {
     assert(handle);
     auto simulation = reinterpret_cast<Simulation*>(handle);
@@ -905,8 +887,7 @@ JPS_Simulation_AgentsInPolygon(JPS_Simulation handle, JPS_Point* polygon, size_t
 
 bool JPS_Simulation_ChangeWaitingSetState(
     JPS_Simulation handle,
-    JPS_JourneyId journeyId,
-    size_t stageIdx,
+    JPS_StageId stageId,
     bool active,
     JPS_ErrorMessage* errorMessage)
 {
@@ -914,8 +895,7 @@ bool JPS_Simulation_ChangeWaitingSetState(
     auto simuation = reinterpret_cast<Simulation*>(handle);
     try {
         simuation->Notify(NotifyWaitingSet{
-            journeyId,
-            stageIdx,
+            stageId,
             active ? NotifiableWaitingSet::WaitingState::Active :
                      NotifiableWaitingSet::WaitingState::Inactive});
     } catch(const std::exception& ex) {
@@ -929,15 +909,14 @@ bool JPS_Simulation_ChangeWaitingSetState(
 
 bool JPS_Simulation_PopAgentsFromQueue(
     JPS_Simulation handle,
-    JPS_JourneyId journeyId,
-    size_t stageIdx,
+    JPS_StageId stageId,
     size_t count,
     JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
     auto simuation = reinterpret_cast<Simulation*>(handle);
     try {
-        simuation->Notify(NotifyQueue{journeyId, stageIdx, count});
+        simuation->Notify(NotifyQueue{stageId, count});
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
@@ -1011,9 +990,10 @@ JPS_RoutingEngine_ComputeWaypoint(JPS_RoutingEngine handle, JPS_Point from, JPS_
 {
     auto* engine = reinterpret_cast<NavMeshRoutingEngine*>(handle);
     const auto path = engine->ComputeAllWaypoints(intoPoint(from), intoPoint(to));
-    JPS_Path p{path.size(), new JPS_Point[path.size()]};
+    auto points = new JPS_Point[path.size()];
+    JPS_Path p{path.size(), points};
     std::transform(
-        std::begin(path), std::end(path), p.points, [](const auto& p) { return intoJPS_Point(p); });
+        std::begin(path), std::end(path), points, [](const auto& p) { return intoJPS_Point(p); });
     return p;
 }
 

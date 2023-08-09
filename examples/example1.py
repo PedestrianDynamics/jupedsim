@@ -6,8 +6,7 @@ import logging
 import pathlib
 import sys
 
-from shapely import GeometryCollection, Polygon, geometry, to_wkt
-from shapely.geometry.base import geom_factory
+from shapely import GeometryCollection, Polygon, to_wkt
 
 import jupedsim as jps
 from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
@@ -56,9 +55,12 @@ def main():
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
 
+    stage = simulation.add_waiting_set_stage([(16, 5), (15, 5), (14, 5)])
+    exit = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
+
     journey = jps.JourneyDescription()
-    stage = journey.add_notifiable_waiting_set([(16, 5), (15, 5), (14, 5)])
-    journey.add_exit([(18, 4), (20, 4), (20, 6), (18, 6)])
+    journey.append(stage)
+    journey.append(exit)
 
     journey_id = simulation.add_journey(journey)
 
@@ -83,7 +85,7 @@ def main():
             if simulation.iteration_count() % 4 == 0:
                 writer.write_iteration_state(simulation)
             if simulation.iteration_count() == 1300:
-                simulation.notify_waiting_set(journey_id, stage, False)
+                simulation.notify_waiting_set(stage, False)
         except KeyboardInterrupt:
             writer.end_writing()
             print("CTRL-C Recieved! Shuting down")

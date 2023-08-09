@@ -7,7 +7,7 @@ import pathlib
 
 from shapely import GeometryCollection, Polygon, to_wkt
 
-import jupedsim.py_jupedsim as jps
+import jupedsim as jps
 from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
 from jupedsim.util import build_jps_geometry
 
@@ -53,9 +53,7 @@ def main():
     model = model_builder.build()
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
-
-    journey = jps.JourneyDescription()
-    stage = journey.add_notifiable_queue(
+    stage = simulation.add_queue_stage(
         [
             (60, 50),
             (59, 50),
@@ -66,7 +64,11 @@ def main():
             (54, 50),
         ]
     )
-    journey.add_exit([(99, 40), (99, 60), (100, 60), (100, 40)])
+    exit = simulation.add_exit_stage(
+        [(99, 40), (99, 60), (100, 60), (100, 40)]
+    )
+
+    journey = jps.JourneyDescription([stage, exit])
     journey_id = simulation.add_journey(journey)
 
     agent_parameters = jps.VelocityModelAgentParameters()
@@ -81,12 +83,14 @@ def main():
 
     writer = SqliteTrajectoryWriter(pathlib.Path("example3_out.sqlite"))
     writer.begin_writing(25, to_wkt(area, rounding_precision=-1))
-    while simulation.agent_count() > 0:
+    while (
+        simulation.agent_count() > 0 and simulation.iteration_count() < 20_000
+    ):
         if (
             simulation.iteration_count() > 100 * 52
             and simulation.iteration_count() % 400 == 0
         ):
-            simulation.notify_queue(journey_id, stage, 1)
+            simulation.notify_queue(stage, 1)
             print("Next!")
 
         if simulation.iteration_count() % 4 == 0:

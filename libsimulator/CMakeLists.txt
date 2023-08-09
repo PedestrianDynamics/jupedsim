@@ -70,6 +70,7 @@ target_compile_definitions(simulator PUBLIC
     JPSCORE_VERSION="${PROJECT_VERSION}"
 )
 target_link_libraries(simulator PUBLIC
+    common
     Boost::boost
     poly2tri
     fmt::fmt
