@@ -107,7 +107,7 @@ def build_docker_container(client, source_dir: pathlib.Path):
 
 def get_results(container, output_dir: pathlib.Path):
     with open("results.tar", "wb") as f:
-        bits, stat = container.get_archive("/build/results/")
+        bits, stat = container.get_archive("/build/results")
         for chunk in bits:
             f.write(chunk)
 
@@ -116,11 +116,6 @@ def get_results(container, output_dir: pathlib.Path):
         with tarfile.open(tar_file.absolute()) as f:
             f.extractall(path=output_dir)
     tar_file.unlink()
-
-    # move all files from results folder to
-    for file in (output_dir / "results").iterdir():
-        shutil.move(file, output_dir / file.name)
-    (output_dir / "results").rmdir()
 
 
 def main():

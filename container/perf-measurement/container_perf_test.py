@@ -5,7 +5,8 @@ import logging
 import os
 import pathlib
 import subprocess
-import sys
+
+import jinja2
 
 logging.basicConfig(
     level=logging.INFO,
@@ -105,7 +106,10 @@ def run_test(test, args, build_dir, result_dir):
 
     with open(build_dir / perf_folded_file_name, "w") as perf_file:
         subprocess.run(
-            ["/opt/FlameGraph/stackcollapse-perf.pl", perf_file_name],
+            [
+                "/opt/FlameGraph/stackcollapse-perf.pl",
+                perf_file_name,
+            ],
             stdout=perf_file,
             cwd="/build",
             check=True,
@@ -113,15 +117,106 @@ def run_test(test, args, build_dir, result_dir):
 
     with open(result_dir / perf_svg_file_name, "w") as perf_file:
         subprocess.run(
-            ["/opt/FlameGraph/flamegraph.pl", perf_folded_file_name],
+            [
+                "/opt/FlameGraph/flamegraph.pl",
+                "--title",
+                test,
+                "--inverted",
+                "--colors",
+                "mem",
+                perf_folded_file_name,
+            ],
             stdout=perf_file,
             cwd="/build",
             check=True,
         )
 
-    logging.info(
-        f"created flamegraph for {test} in: {str(result_dir / perf_svg_file_name)}"
-    )
+    logging.info(f"created flamegraph for {test}")
+
+
+def build_report(results_dir: pathlib.Path, results: dict[str, str]) -> None:
+    template = """
+<!DOCTYPE html>
+<html lang="en">
+<style>
+.title {
+    background-color: #777;
+    color: white;
+    padding: 6px;
+    text-align: center;
+    font-size: 15px;
+    margin: 0 0 0 0;
+}
+.collapsible {
+    background-color: #777;
+    color: white;
+    cursor: pointer;
+    padding: 6px;
+    width: 100%;
+    border: none;
+    text-align: center;
+    outline: none;
+    font-size: 12px;
+}
+
+.collapsible:after {
+    content: '++++';
+    color: white;
+    font-weight: bold;
+    float: right;
+}
+
+.collapsible:before {
+    content: '++++';
+    color: white;
+    font-weight: bold;
+    float: left;
+}
+
+.active:after {
+    content: "----";
+}
+
+.active:before {
+    content: "----";
+}
+
+.content {
+    max-height: 0;
+    overflow: hidden;
+    text-align: center;
+}
+</style>
+<head><title>Performance Test Results</title></head>
+<body>
+    <h1 class="title">Performance Test Results</h1>
+    {% for title, content in results.items() %}
+        <button class="collapsible">{{ title }}</button>
+        <div class="content">
+            <object type="image/svg+xml" data="./{{ content }}"></object>
+        </div>
+    {% endfor %}
+<script defer>
+var coll = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.maxHeight){
+      content.style.maxHeight = null;
+    } else {
+      content.style.maxHeight = content.scrollHeight + "px";
+    } 
+  });
+}
+</script>
+</body>
+</html>
+    """
+    tpl = jinja2.Environment().from_string(template)
+    (results_dir / "report.html").write_text(tpl.render(results=results))
 
 
 def run_tests(test_selection: str, args):
@@ -129,17 +224,21 @@ def run_tests(test_selection: str, args):
     result_dir = build_dir / "results"
     result_dir.mkdir()
 
+    results = {}
     if test_selection in ["all", "large_street_network"]:
         logging.info("run large_street_network performance test")
         if not args or test_selection == "all":
             args = ["--limit", "4000"]
         run_test("large_street_network", args, build_dir, result_dir)
+        results["Large Street Network"] = "large_street_network.svg"
 
     if test_selection in ["all", "grosser_stern"]:
         logging.info("run grosser_stern performance test")
         if not args or test_selection == "all":
             args = ["--limit", "100"]
         run_test("grosser_stern", args, build_dir, result_dir)
+        results["Grosser Stern"] = "grosser_stern.svg"
+    build_report(result_dir, results)
 
 
 def main():
