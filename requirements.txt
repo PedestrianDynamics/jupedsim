@@ -10,3 +10,4 @@ shapely~=2.0.1
 wheel
 build
 setuptools
+jinja2
