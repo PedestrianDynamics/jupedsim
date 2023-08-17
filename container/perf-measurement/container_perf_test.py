@@ -1,6 +1,7 @@
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import argparse
+import io
 import logging
 import os
 import pathlib
@@ -52,16 +53,20 @@ def build_jupedsim():
             "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
         ],
         stdout=subprocess.PIPE,
-    ) as p:
-        for line in p.stdout:
-            print(line.decode("utf-8").rstrip())
+        stderr=subprocess.STDOUT,
+    ) as proc:
+        if proc.stdout:
+            for line in proc.stdout:
+                print(line.decode("utf-8").rstrip())
 
     with subprocess.Popen(
         ["cmake", "--build", "/build", "--", "-j", "--", "VERBOSE=1"],
         stdout=subprocess.PIPE,
-    ) as p:
-        for line in p.stdout:
-            print(line.decode("utf-8").rstrip())
+        stderr=subprocess.STDOUT,
+    ) as proc:
+        if proc.stdout:
+            for line in proc.stdout:
+                print(line.decode("utf-8").rstrip())
 
 
 def run_test(test, args, build_dir, result_dir):
@@ -75,7 +80,7 @@ def run_test(test, args, build_dir, result_dir):
     perf_folded_file_name = f"{test}.folded"
     perf_svg_file_name = f"{test}.svg"
 
-    subprocess.run(
+    with subprocess.Popen(
         [
             "perf",
             "record",
@@ -90,11 +95,13 @@ def run_test(test, args, build_dir, result_dir):
             *args,
         ],
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
         env=test_env,
         cwd="/build",
-        check=True,
-    )
+    ) as proc:
+        if proc.stdout:
+            for line in proc.stdout:
+                print(line.decode("utf-8").rstrip())
 
     with open(build_dir / perf_file_name, "w") as perf_file:
         subprocess.run(
