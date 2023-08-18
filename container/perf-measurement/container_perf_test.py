@@ -40,7 +40,7 @@ def parse_args():
 def build_jupedsim():
     # Create build directory
     build_path = pathlib.Path("/build")
-    build_path.mkdir()
+    build_path.mkdir(exist_ok=True)
 
     with subprocess.Popen(
         [
