@@ -1,4 +1,6 @@
+#! /bin/zsh 
 set -e
+eval "$(/opt/homebrew/bin/brew shellenv)"
 numcpus=$(sysctl -n hw.logicalcpu)
 mkdir build && cd build
 python3.11 -m venv python-env
