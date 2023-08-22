@@ -11,6 +11,7 @@
 #include "Point.hpp"
 #include "SimulationError.hpp"
 #include "Stage.hpp"
+#include "VelocityModelData.hpp"
 
 #include <Logger.hpp>
 
@@ -47,9 +48,14 @@ VelocityModel::VelocityModel(
 {
 }
 
+OperationalModelType VelocityModel::Type() const
+{
+    return OperationalModelType::VELOCITY;
+}
+
 PedestrianUpdate VelocityModel::ComputeNewPosition(
     double dT,
-    const Data& ped,
+    const GenericAgent& ped,
     const CollisionGeometry& geometry,
     const NeighborhoodSearchType& neighborhoodSearch) const
 {
@@ -102,14 +108,15 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
     return update;
 };
 
-void VelocityModel::ApplyUpdate(const PedestrianUpdate& update, Data& agent) const
+void VelocityModel::ApplyUpdate(const PedestrianUpdate& update, GenericAgent& agent) const
 {
+    auto& model = std::get<VelocityModelData>(agent.model);
     if(update.resetTurning) {
-        agent.orientationDelay = 0;
+        model.orientationDelay = 0;
     } else {
-        ++agent.orientationDelay;
+        ++model.orientationDelay;
     }
-    agent.e0 = update.e0;
+    model.e0 = update.e0;
     if(update.position) {
         agent.pos = *update.position;
     }
@@ -121,7 +128,7 @@ void VelocityModel::ApplyUpdate(const PedestrianUpdate& update, Data& agent) con
     }
 }
 void VelocityModel::CheckDistanceConstraint(
-    const Data& agent,
+    const GenericAgent& agent,
     const NeighborhoodSearchType& neighborhoodSearch) const
 {
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
@@ -144,22 +151,27 @@ std::unique_ptr<OperationalModel> VelocityModel::Clone() const
     return std::make_unique<VelocityModel>(*this);
 }
 
-void VelocityModel::e0(const Data& ped, Point target, double deltaT, PedestrianUpdate& update) const
+void VelocityModel::e0(
+    const GenericAgent& ped,
+    Point target,
+    double deltaT,
+    PedestrianUpdate& update) const
 {
     Point desired_direction;
     const auto pos = ped.pos;
     const auto dest = ped.destination;
     const auto dist = (dest - pos).Norm();
+    const auto& model = std::get<VelocityModelData>(ped.model);
     if(dist > J_EPS_GOAL) {
-        desired_direction = mollify_e0(target, pos, deltaT, ped.orientationDelay, ped.e0);
+        desired_direction = mollify_e0(target, pos, deltaT, model.orientationDelay, model.e0);
     } else {
         update.resetTurning = true;
-        desired_direction = ped.e0;
+        desired_direction = model.e0;
     }
     update.e0 = desired_direction;
 }
 
-double VelocityModel::OptimalSpeed(const Data& ped, double spacing, double t) const
+double VelocityModel::OptimalSpeed(const GenericAgent& ped, double spacing, double t) const
 {
     const auto& profile = parameterProfile(ped.parameterProfileId);
     const double l = 2 * profile.radius;
@@ -170,7 +182,10 @@ double VelocityModel::OptimalSpeed(const Data& ped, double spacing, double t) co
 }
 
 // return spacing and id of the nearest pedestrian
-double VelocityModel::GetSpacing(const Data& ped1, const Data& ped2, const Point direction) const
+double VelocityModel::GetSpacing(
+    const GenericAgent& ped1,
+    const GenericAgent& ped2,
+    const Point direction) const
 {
     assert(direction.IsUnitLength());
 
@@ -189,7 +204,7 @@ double VelocityModel::GetSpacing(const Data& ped1, const Data& ped2, const Point
 
     return distp12.Norm();
 }
-Point VelocityModel::ForceRepPed(const Data& ped1, const Data& ped2) const
+Point VelocityModel::ForceRepPed(const GenericAgent& ped1, const GenericAgent& ped2) const
 {
     const Point distp12 = ped2.pos - ped1.pos;
     const double dist = distp12.Norm();
@@ -200,7 +215,7 @@ Point VelocityModel::ForceRepPed(const Data& ped1, const Data& ped2) const
     return ep12 * R_ij;
 }
 
-Point VelocityModel::ForceRepRoom(const Data& ped, const CollisionGeometry& geometry) const
+Point VelocityModel::ForceRepRoom(const GenericAgent& ped, const CollisionGeometry& geometry) const
 {
     const auto& walls = geometry.LineSegmentsInApproxDistanceTo(ped.pos);
 
@@ -214,7 +229,7 @@ Point VelocityModel::ForceRepRoom(const Data& ped, const CollisionGeometry& geom
     return f;
 }
 
-Point VelocityModel::ForceRepWall(const Data& ped, const LineSegment& w) const
+Point VelocityModel::ForceRepWall(const GenericAgent& ped, const LineSegment& w) const
 {
     if(const auto distGoal = (ped.destination - ped.pos).Norm(); distGoal < J_EPS_GOAL) {
         return Point{0, 0};

@@ -84,6 +84,9 @@ def main():
             simulation.iterate()
             if simulation.iteration_count() % 4 == 0:
                 writer.write_iteration_state(simulation)
+                for a in simulation.agents():
+                    print(f"{a.model.e0}")
+                    break
             if simulation.iteration_count() == 1300:
                 simulation.notify_waiting_set(stage, False)
         except KeyboardInterrupt:

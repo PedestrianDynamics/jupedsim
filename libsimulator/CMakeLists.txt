@@ -18,6 +18,7 @@ add_library(simulator STATIC
     src/GCFMModel.hpp
     src/GCFMModelBuilder.cpp
     src/GCFMModelBuilder.hpp
+    src/GeneralizedCentrifugalForceModelData.hpp
     src/GenericAgent.hpp
     src/GeometricFunctions.hpp
     src/Geometry.cpp
@@ -43,6 +44,7 @@ add_library(simulator STATIC
     src/Polygon.hpp
     src/RoutingEngine.cpp
     src/RoutingEngine.hpp
+    src/Simulation.cpp
     src/Simulation.hpp
     src/SimulationClock.cpp
     src/SimulationClock.hpp
@@ -62,6 +64,7 @@ add_library(simulator STATIC
     src/VelocityModel.hpp
     src/VelocityModelBuilder.cpp
     src/VelocityModelBuilder.hpp
+    src/VelocityModelData.hpp
 )
 target_compile_options(simulator PRIVATE
     ${COMMON_COMPILE_OPTIONS}

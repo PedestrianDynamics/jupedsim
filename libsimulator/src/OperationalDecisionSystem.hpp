@@ -7,6 +7,7 @@
 #include "IteratorPair.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
+#include "OperationalModelType.hpp"
 #include "SimulationError.hpp"
 
 #include <boost/iterator/zip_iterator.hpp>
@@ -15,25 +16,28 @@
 #include <memory>
 #include <vector>
 
-template <typename Model>
 class OperationalDecisionSystem
 {
-    std::unique_ptr<Model> _model{};
+    std::unique_ptr<OperationalModel> _model{};
 
 public:
-    OperationalDecisionSystem(std::unique_ptr<Model>&& model) : _model(std::move(model)) {}
+    OperationalDecisionSystem(std::unique_ptr<OperationalModel>&& model) : _model(std::move(model))
+    {
+    }
     ~OperationalDecisionSystem() = default;
     OperationalDecisionSystem(const OperationalDecisionSystem& other) = delete;
     OperationalDecisionSystem& operator=(const OperationalDecisionSystem& other) = delete;
     OperationalDecisionSystem(OperationalDecisionSystem&& other) = delete;
     OperationalDecisionSystem& operator=(OperationalDecisionSystem&& other) = delete;
 
+    OperationalModelType ModelType() const { return _model->Type(); }
+
     void
     Run(double dT,
         double /*t_in_sec*/,
-        const typename Model::NeighborhoodSearchType& neighborhoodSearch,
+        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
         const CollisionGeometry& geometry,
-        std::vector<typename Model::Data>& agents) const
+        std::vector<GenericAgent>& agents) const
     {
         std::vector<std::optional<PedestrianUpdate>> updates{};
         updates.reserve(agents.size());
@@ -65,8 +69,8 @@ public:
     }
 
     void ValidateAgent(
-        const typename Model::Data& agent,
-        const typename Model::NeighborhoodSearchType& neighborhoodSearch) const
+        const GenericAgent& agent,
+        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
     {
         _model->CheckDistanceConstraint(agent, neighborhoodSearch);
     }
