@@ -301,3 +301,87 @@ class VelocityModelAgentParameters:
 
     def __str__(self) -> str:
         return self.__obj.__repr__()
+
+
+class JPS_Simulation_Wrapper:
+    def __init__(self, model: py_jps.JPS_OperationalModel_Wrapper, geometry: py_jps.JPS_Geometry_Wrapper,
+                 dT: float) -> None:
+        self.__obj = py_jps.JPS_Simulation_Wrapper(model, geometry, dT)
+
+    def add_waypoint_stage(self, w: py_jps.JPS_Simulation_Wrapper, position: py_jps.JPS_Point,
+                           distance) -> py_jps.JPS_StageId:
+        return self.__obj.add_waypoint_stage(w, position, distance)
+
+    def add_queue_stage(self, w: py_jps.JPS_Simulation_Wrapper, positions: list) -> py_jps.JPS_StageId:
+        # todo position should be std::vector<JPS_Point> | is a list fine?
+        return self.__obj.add_queue_stage(w, positions)
+
+    def add_waiting_set_stage(self, w: py_jps.JPS_Simulation_Wrapper, positions: list) -> py_jps.JPS_StageId:
+        return self.__obj.add_waiting_set_stage(w, positions)
+
+    def add_exit_stage(self, w: py_jps.JPS_Simulation_Wrapper, polygon: list) -> py_jps.JPS_StageId:
+        return self.__obj.add_exit_stage(w, polygon)
+
+    def add_journey(self, simulation: py_jps.JPS_Simulation_Wrapper,
+                    journey: py_jps.JPS_JourneyDescription_Wrapper) -> py_jps.JPS_JourneyId:
+        return self.__obj.add_journey(simulation, journey)
+
+    def add_agent(self, simulation: py_jps.JPS_Simulation_Wrapper,
+                  parameters: py_jps.JPS_GCFMModelAgentParameters | py_jps.JPS_VelocityModelAgentParameters) -> py_jps.JPS_AgentId:
+        return self.__obj.add_agent(simulation, parameters)
+
+    def remove_agent(self, simulation: py_jps.JPS_Simulation_Wrapper, id: py_jps.JPS_AgentId) -> bool:
+        return self.__obj.remove_agent(simulation, id)
+
+    def read_agent(self, simulation: py_jps.JPS_Simulation_Wrapper,
+                   id: py_jps.JPS_AgentId) -> py_jps.JPS_GCFMModelAgentParameters | py_jps.JPS_VelocityModelAgentParameters:
+        return self.__obj.read_agent(simulation, id)
+
+    def remove_agents(self, simulation: py_jps.JPS_Simulation_Wrapper) -> None:
+        self.__obj.remove_agents(simulation)
+
+    def iterate(self, simulation: py_jps.JPS_Simulation_Wrapper, count: int) -> None:
+        # todo actually size_t | still fine?
+        self.__obj.iterate(simulation, count)
+
+    def switch_agent_profile(self, w: py_jps.JPS_Simulation_Wrapper, agentId: py_jps.JPS_AgentId,
+                             profileId: py_jps.JPS_ModelParameterProfileId) -> None:
+        self.__obj.switch_agent_profile(w, agentId, profileId)
+
+    def switch_agent_journey(self, w: py_jps.JPS_Simulation_Wrapper, agentId: py_jps.JPS_AgentId,
+                             journeyId: py_jps.JPS_JourneyId, stageIdx: py_jps.JPS_StageIndex) -> None:
+        self.__obj.switch_agent_journey(w, agentId, journeyId, stageIdx)
+
+    def agent_count(self, simulation: py_jps.JPS_Simulation_Wrapper) -> int:
+        return self.__obj.agent_count(simulation)
+
+    def elapsed_time(self, simulation: py_jps.JPS_Simulation_Wrapper) -> float:
+        return self.__obj.elapsed_time(simulation)
+
+    def delta_time(self, simulation: py_jps.JPS_Simulation_Wrapper) -> float:
+        return self.__obj.delta_time(simulation)
+
+    def iteration_count(self, simulation: py_jps.JPS_Simulation_Wrapper) -> int:
+        return self.__obj.iteration_count(simulation)
+
+    def agents(self, simulation: py_jps.JPS_Simulation_Wrapper):
+        # todo return value is an Iterator | returns a list?
+        return self.__obj.agents(simulation)
+
+    def agents_in_range(self, w: py_jps.JPS_Simulation_Wrapper, pos: tuple[float, float], distance: float):
+        return self.__obj.agents_in_range(w, pos, distance)
+
+    def agents_in_polygon(self, w: py_jps.JPS_Simulation_Wrapper, poly: list[tuple[float, float]]):
+        return self.__obj.agents_in_polygon(w, poly)
+
+    def notify_waiting_set(self, w: py_jps.JPS_Simulation_Wrapper, stageId: py_jps.JPS_StageId, active: bool) -> None:
+        self.__obj.notify_waiting_set(w, stageId, active)
+
+    def notify_queue(self, w: py_jps.JPS_Simulation_Wrapper, stageId: py_jps.JPS_StageId, count: int) -> None:
+        self.__obj.notify_queue(w, stageId, count)
+
+    def set_tracing(self, w: py_jps.JPS_Simulation_Wrapper, status: bool) -> None:
+        self.__obj.set_tracing(w, status)
+
+    def get_last_trace(self, w: py_jps.JPS_Simulation_Wrapper) -> py_jps.JPS_Trace:
+        return self.__obj.get_last_trace(w)
