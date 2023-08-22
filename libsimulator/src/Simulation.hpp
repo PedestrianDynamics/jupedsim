@@ -11,6 +11,7 @@
 #include "NeighborhoodSearch.hpp"
 #include "OperationalDecisionSystem.hpp"
 #include "OperationalModel.hpp"
+#include "OperationalModelType.hpp"
 #include "Point.hpp"
 #include "Polygon.hpp"
 #include "SimulationClock.hpp"
@@ -36,365 +37,53 @@
 
 class Simulation
 {
-public:
-    virtual ~Simulation() = default;
-    virtual const SimulationClock& Clock() const = 0;
-    virtual void SetTracing(bool on) = 0;
-    virtual PerfStats GetLastStats() const = 0;
-    /// Advances the simulation by one time step.
-    virtual void Iterate() = 0;
-    // TODO(kkratz): doc
-    virtual Journey::ID AddJourney(const std::vector<Stage::ID>& stages) = 0;
-    virtual Stage::ID AddStage(const StageDescription stageDescription) = 0;
-    virtual void RemoveAgent(GenericAgent::ID id) = 0;
-    virtual const std::vector<GenericAgent::ID>& RemovedAgents() const = 0;
-    virtual size_t AgentCount() const = 0;
-    virtual double ElapsedTime() const = 0;
-    virtual double DT() const = 0;
-    virtual void
-    SwitchAgentProfile(GenericAgent::ID agent_id, OperationalModel::ParametersID profile_id) = 0;
-    virtual void
-    SwitchAgentJourney(GenericAgent::ID agent_id, Journey::ID journey_id, size_t stage_idx) = 0;
-    virtual uint64_t Iteration() const = 0;
-    virtual std::vector<GenericAgent::ID> AgentsInRange(Point p, double distance) = 0;
-    /// Returns IDs of all agents inside the defined polygon
-    /// @param polygon Required to be a simple convex polygon with CCW ordering.
-    virtual std::vector<GenericAgent::ID> AgentsInPolygon(const std::vector<Point>& polygon) = 0;
-    virtual void Notify(Event evt) = 0;
-};
-
-template <typename ModelType>
-class TypedSimulation : public Simulation
-{
-    using AgentType = typename ModelType::Data;
-
-private:
     SimulationClock _clock;
-    StrategicalDecisionSystem<AgentType> _stategicalDecisionSystem{};
-    TacticalDecisionSystem<AgentType> _tacticalDecisionSystem{};
-    OperationalDecisionSystem<ModelType> _operationalDecisionSystem;
-    AgentExitSystem<AgentType> _agentExitSystem{};
-    NeighborhoodSearch<AgentType> _neighborhoodSearch{2.2};
+    StrategicalDecisionSystem<GenericAgent> _stategicalDecisionSystem{};
+    TacticalDecisionSystem<GenericAgent> _tacticalDecisionSystem{};
+    OperationalDecisionSystem _operationalDecisionSystem;
+    AgentExitSystem<GenericAgent> _agentExitSystem{};
+    NeighborhoodSearch<GenericAgent> _neighborhoodSearch{2.2};
     std::unique_ptr<RoutingEngine> _routingEngine;
     std::unique_ptr<CollisionGeometry> _geometry;
-    std::vector<AgentType> _agents;
+    std::vector<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
     std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;
     std::unordered_map<Stage::ID, std::unique_ptr<Stage>> _stages;
     PerfStats _perfStats{};
 
 public:
-    TypedSimulation(
-        std::unique_ptr<ModelType>&& operationalModel,
+    Simulation(
+        std::unique_ptr<OperationalModel>&& operationalModel,
         std::unique_ptr<CollisionGeometry>&& geometry,
         std::unique_ptr<RoutingEngine>&& routingEngine,
         double dT);
-
-    ~TypedSimulation() override = default;
-
-    TypedSimulation(const TypedSimulation& other) = delete;
-
-    TypedSimulation& operator=(const TypedSimulation& other) = delete;
-
-    TypedSimulation(TypedSimulation&& other) = delete;
-
-    TypedSimulation& operator=(TypedSimulation&& other) = delete;
-
-    const SimulationClock& Clock() const override { return _clock; }
-
-    void SetTracing(bool status) override { _perfStats.SetEnabled(status); };
-
-    PerfStats GetLastStats() const override { return _perfStats; };
-
-    /// Advances the simulation by one time step.
-    void Iterate() override;
-
-    // TODO(kkratz): doc
-    Journey::ID AddJourney(const std::vector<Stage::ID>& stages) override;
-
-    Stage::ID AddStage(const StageDescription stageDescription) override;
-
-    GenericAgent::ID AddAgent(AgentType&& agent);
-
-    void RemoveAgent(GenericAgent::ID) override;
-
-    const AgentType& Agent(GenericAgent::ID id) const;
-
-    AgentType& Agent(GenericAgent::ID id);
-
-    const std::vector<GenericAgent::ID>& RemovedAgents() const override;
-
-    size_t AgentCount() const override;
-
-    double ElapsedTime() const override;
-
-    double DT() const override;
-
-    void SwitchAgentProfile(GenericAgent::ID agent_id, OperationalModel::ParametersID profile_id)
-        override;
-
-    void SwitchAgentJourney(GenericAgent::ID agent_id, Journey::ID journey_id, size_t stage_idx)
-        override;
-
-    uint64_t Iteration() const override { return _clock.Iteration(); }
-
-    std::vector<GenericAgent::ID> AgentsInRange(Point p, double distance) override;
-
-    std::vector<GenericAgent::ID> AgentsInPolygon(const std::vector<Point>& polygon) override;
-
-    void Notify(Event evt) override;
-
-    const std::vector<AgentType>& Agents() const { return _agents; };
+    Simulation(const Simulation& other) = delete;
+    Simulation& operator=(const Simulation& other) = delete;
+    Simulation(Simulation&& other) = delete;
+    Simulation& operator=(Simulation&& other) = delete;
+    ~Simulation() = default;
+    const SimulationClock& Clock() const;
+    void SetTracing(bool on);
+    PerfStats GetLastStats() const;
+    void Iterate();
+    Journey::ID AddJourney(const std::vector<Stage::ID>& stages);
+    Stage::ID AddStage(const StageDescription stageDescription);
+    void RemoveAgent(GenericAgent::ID id);
+    const std::vector<GenericAgent::ID>& RemovedAgents() const;
+    size_t AgentCount() const;
+    double ElapsedTime() const;
+    double DT() const;
+    void SwitchAgentProfile(GenericAgent::ID agent_id, OperationalModel::ParametersID profile_id);
+    void SwitchAgentJourney(GenericAgent::ID agent_id, Journey::ID journey_id, size_t stage_idx);
+    uint64_t Iteration() const;
+    std::vector<GenericAgent::ID> AgentsInRange(Point p, double distance);
+    /// Returns IDs of all agents inside the defined polygon
+    /// @param polygon Required to be a simple convex polygon with CCW ordering.
+    std::vector<GenericAgent::ID> AgentsInPolygon(const std::vector<Point>& polygon);
+    void Notify(Event evt);
+    GenericAgent::ID AddAgent(GenericAgent&& agent);
+    const GenericAgent& Agent(GenericAgent::ID id) const;
+    GenericAgent& Agent(GenericAgent::ID id);
+    const std::vector<GenericAgent>& Agents() const;
+    OperationalModelType ModelType() const;
 };
-
-template <typename T>
-TypedSimulation<T>::TypedSimulation(
-    std::unique_ptr<T>&& operationalModel,
-    std::unique_ptr<CollisionGeometry>&& geometry,
-    std::unique_ptr<RoutingEngine>&& routingEngine,
-    double dT)
-    : _clock(dT)
-    , _operationalDecisionSystem(std::move(operationalModel))
-    , _routingEngine(std::move(routingEngine))
-    , _geometry(std::move(geometry))
-{
-    // TODO(kkratz): Ensure all areas are fully contained inside the walkable area. Otherwise an
-    // agent may try to navigate to a point outside the navigation mesh, resulting in an exception.
-}
-
-template <typename T>
-void TypedSimulation<T>::Iterate()
-{
-    auto t = _perfStats.TraceIterate();
-    _agentExitSystem.Run(_agents, _removedAgentsInLastIteration);
-    _neighborhoodSearch.Update(_agents);
-
-    for(auto& [_, stage] : _stages) {
-        if(auto* updatable_stage = dynamic_cast<NotifiableWaitingSet*>(stage.get());
-           updatable_stage != nullptr) {
-            updatable_stage->Update(_neighborhoodSearch);
-        } else if(auto* updatable_stage = dynamic_cast<NotifiableQueue*>(stage.get());
-                  updatable_stage != nullptr) {
-            updatable_stage->Update(_neighborhoodSearch);
-        }
-    }
-
-    _stategicalDecisionSystem.Run(_journeys, _agents);
-    _tacticalDecisionSystem.Run(*_routingEngine, _agents);
-    {
-        auto t2 = _perfStats.TraceOperationalDecisionSystemRun();
-        _operationalDecisionSystem.Run(
-            _clock.dT(), _clock.ElapsedTime(), _neighborhoodSearch, *_geometry, _agents);
-    }
-    _clock.Advance();
-}
-
-template <typename T>
-Journey::ID TypedSimulation<T>::AddJourney(const std::vector<Stage::ID>& stageIds)
-{
-    std::vector<Stage*> stages;
-    stages.reserve(stageIds.size());
-    std::transform(
-        std::begin(stageIds),
-        std::end(stageIds),
-        std::back_inserter(stages),
-        [this](const auto id) {
-            const auto iter = _stages.find(id);
-            if(iter == std::end(_stages)) {
-                throw SimulationError("Unknown stage id ({}) provided in journey.", id.getID());
-            }
-            return iter->second.get();
-        });
-    auto journey = std::make_unique<Journey>(std::move(stages));
-    const auto id = journey->Id();
-    _journeys.emplace(id, std::move(journey));
-    return id;
-}
-
-template <typename T>
-Stage::ID TypedSimulation<T>::AddStage(const StageDescription stageDescription)
-{
-    std::unique_ptr<Stage> stage = std::visit(
-        overloaded{
-            [](const WaypointDescription& d) -> std::unique_ptr<Stage> {
-                return std::make_unique<Waypoint>(d.position, d.distance);
-            },
-            [this](const ExitDescription& d) -> std::unique_ptr<Stage> {
-                return std::make_unique<Exit>(d.polygon, _removedAgentsInLastIteration);
-            },
-            [](const NotifiableWaitingSetDescription& d) -> std::unique_ptr<Stage> {
-                return std::make_unique<NotifiableWaitingSet>(d.slots);
-            },
-            [](const NotifiableQueueDescription& d) -> std::unique_ptr<Stage> {
-                return std::make_unique<NotifiableQueue>(d.slots);
-            }},
-        stageDescription);
-    if(_stages.find(stage->Id()) != _stages.end()) {
-        throw SimulationError("Internal error, stage id already in use.");
-    }
-    const auto id = stage->Id();
-    _stages.emplace(id, std::move(stage));
-    return id;
-}
-
-template <typename T>
-GenericAgent::ID TypedSimulation<T>::AddAgent(AgentType&& agent)
-{
-    agent.orientation = agent.orientation.Normalized();
-    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch);
-
-    if(_journeys.count(agent.journeyId) == 0) {
-        throw SimulationError("Unknown journey id: {}", agent.journeyId);
-    }
-
-    _agents.emplace_back(std::move(agent));
-    _neighborhoodSearch.AddAgent(_agents.back());
-
-    return _agents.back().id.getID();
-}
-
-template <typename T>
-void TypedSimulation<T>::RemoveAgent(GenericAgent::ID id)
-{
-    const auto iter = std::find_if(
-        std::begin(_agents), std::end(_agents), [id](auto& agent) { return agent.id == id; });
-    if(iter == std::end(_agents)) {
-        throw SimulationError("Unknown agent id {}", id);
-    }
-    _agents.erase(iter);
-    _neighborhoodSearch.RemoveAgent(*iter);
-}
-
-template <typename T>
-const typename TypedSimulation<T>::AgentType& TypedSimulation<T>::Agent(GenericAgent::ID id) const
-{
-    const auto iter =
-        std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
-    if(iter == _agents.end()) {
-        throw SimulationError("Trying to access unknown Agent {}", id);
-    }
-    return *iter;
-}
-
-template <typename T>
-typename TypedSimulation<T>::AgentType& TypedSimulation<T>::Agent(GenericAgent::ID id)
-{
-    const auto iter =
-        std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
-    if(iter == _agents.end()) {
-        throw SimulationError("Trying to access unknown Agent {}", id);
-    }
-    return *iter;
-}
-
-template <typename T>
-const std::vector<GenericAgent::ID>& TypedSimulation<T>::RemovedAgents() const
-{
-    return _removedAgentsInLastIteration;
-}
-
-template <typename T>
-size_t TypedSimulation<T>::AgentCount() const
-{
-    return _agents.size();
-}
-
-template <typename T>
-double TypedSimulation<T>::ElapsedTime() const
-{
-    return _clock.ElapsedTime();
-}
-
-template <typename T>
-double TypedSimulation<T>::DT() const
-{
-    return _clock.dT();
-}
-
-template <typename T>
-void TypedSimulation<T>::SwitchAgentProfile(
-    GenericAgent::ID agent_id,
-    OperationalModel::ParametersID profile_id)
-{
-    _operationalDecisionSystem.ValidateAgentParameterProfileId(profile_id);
-    Agent(agent_id).parameterProfileId = profile_id;
-}
-
-template <typename T>
-void TypedSimulation<T>::SwitchAgentJourney(
-    GenericAgent::ID agent_id,
-    Journey::ID journey_id,
-    size_t stage_idx)
-{
-    const auto find_iter = _journeys.find(journey_id);
-    if(find_iter == std::end(_journeys)) {
-        throw SimulationError("Unknown Journey id {}", journey_id);
-    }
-    auto& journey = find_iter->second;
-    if(stage_idx >= journey->CountStages()) {
-        throw SimulationError("Stage index {} for journey {} out of range", stage_idx, journey_id);
-    }
-    auto& agent = Agent(agent_id);
-    agent.journeyId = journey_id;
-    agent.currentJourneyStageIdx = stage_idx;
-    agent.stageId = journey->StageAt(stage_idx)->Id();
-}
-
-template <typename T>
-std::vector<GenericAgent::ID> TypedSimulation<T>::AgentsInRange(Point p, double distance)
-{
-    const auto neighbors = _neighborhoodSearch.GetNeighboringAgents(p, distance);
-
-    std::vector<GenericAgent::ID> neighborIds{};
-    neighborIds.reserve(neighbors.size());
-    std::transform(
-        std::begin(neighbors),
-        std::end(neighbors),
-        std::back_inserter(neighborIds),
-        [](const auto& agent) { return agent.id; });
-    return neighborIds;
-}
-
-template <typename T>
-std::vector<GenericAgent::ID> TypedSimulation<T>::AgentsInPolygon(const std::vector<Point>& polygon)
-{
-    const Polygon poly{polygon};
-    if(!poly.IsConvex()) {
-        throw SimulationError("Polygon needs to be simple and convex");
-    }
-    const auto [p, dist] = poly.ContainingCircle();
-
-    const auto candidates = _neighborhoodSearch.GetNeighboringAgents(p, dist);
-    std::vector<GenericAgent::ID> result{};
-    result.reserve(candidates.size());
-    std::for_each(
-        std::begin(candidates), std::end(candidates), [&result, &poly](const auto& agent) {
-            if(poly.IsInside(agent.pos)) {
-                result.push_back(agent.id);
-            }
-        });
-    return result;
-}
-
-template <typename T>
-void TypedSimulation<T>::Notify(Event evt)
-{
-    std::visit(
-        overloaded{
-            [this](const NotifyWaitingSet& evt) {
-                auto* stage = dynamic_cast<NotifiableWaitingSet*>(_stages.at(evt.stageId).get());
-                if(stage == nullptr) {
-                    throw SimulationError(
-                        "Stage id {} is not a NotiafiableWaitingSet", evt.stageId);
-                }
-                stage->State(evt.newState);
-            },
-            [this](const NotifyQueue& evt) {
-                auto* stage = dynamic_cast<NotifiableQueue*>(_stages.at(evt.stageId).get());
-                if(stage == nullptr) {
-                    throw SimulationError("Stage id {} is not a NotiafiableQueue", evt.stageId);
-                }
-                stage->Pop(evt.count);
-            }},
-        evt);
-}

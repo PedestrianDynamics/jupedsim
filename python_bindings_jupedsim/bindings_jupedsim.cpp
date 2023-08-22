@@ -8,6 +8,7 @@
 #include <iterator>
 #include <memory>
 #include <stdexcept>
+#include <variant>
 #include <vector>
 
 #include <fmt/format.h>
@@ -62,10 +63,12 @@ OWNED_WRAPPER(JPS_VelocityModelBuilder);
 OWNED_WRAPPER(JPS_GCFMModelBuilder);
 OWNED_WRAPPER(JPS_JourneyDescription);
 OWNED_WRAPPER(JPS_Simulation);
-OWNED_WRAPPER(JPS_GCFMModelAgentIterator);
-OWNED_WRAPPER(JPS_VelocityModelAgentIterator);
+OWNED_WRAPPER(JPS_AgentIterator);
 OWNED_WRAPPER(JPS_AgentIdIterator);
 OWNED_WRAPPER(JPS_RoutingEngine);
+WRAPPER(JPS_Agent);
+WRAPPER(JPS_GeneralizedCentrifugalForceModelState);
+WRAPPER(JPS_VelocityModelState);
 
 class LogCallbackOwner
 {
@@ -378,28 +381,14 @@ PYBIND11_MODULE(py_jupedsim, m)
                 JPS_JourneyDescription_AddStage(w.handle, id);
             }
         });
-    py::class_<JPS_GCFMModelAgentIterator_Wrapper>(m, "GCFMModelAgentIterator")
+    py::class_<JPS_AgentIterator_Wrapper>(m, "VelocityModelAgentIterator")
         .def(
             "__iter__",
-            [](JPS_GCFMModelAgentIterator_Wrapper& w) -> JPS_GCFMModelAgentIterator_Wrapper& {
-                return w;
-            })
-        .def("__next__", [](JPS_GCFMModelAgentIterator_Wrapper& w) {
-            const auto result = JPS_GCFMModelAgentIterator_Next(w.handle);
+            [](JPS_AgentIterator_Wrapper& w) -> JPS_AgentIterator_Wrapper& { return w; })
+        .def("__next__", [](JPS_AgentIterator_Wrapper& w) {
+            const auto result = JPS_AgentIterator_Next(w.handle);
             if(result) {
-                return std::make_unique<JPS_GCFMModelAgentParameters>(*result);
-            }
-            throw py::stop_iteration{};
-        });
-    py::class_<JPS_VelocityModelAgentIterator_Wrapper>(m, "VelocityModelAgentIterator")
-        .def(
-            "__iter__",
-            [](JPS_VelocityModelAgentIterator_Wrapper& w)
-                -> JPS_VelocityModelAgentIterator_Wrapper& { return w; })
-        .def("__next__", [](JPS_VelocityModelAgentIterator_Wrapper& w) {
-            const auto result = JPS_VelocityModelAgentIterator_Next(w.handle);
-            if(result) {
-                return std::make_unique<JPS_VelocityModelAgentParameters>(*result);
+                return std::make_unique<JPS_Agent_Wrapper>(result);
             }
             throw py::stop_iteration{};
         });
@@ -414,6 +403,53 @@ PYBIND11_MODULE(py_jupedsim, m)
             }
             throw py::stop_iteration{};
         });
+    py::class_<JPS_GeneralizedCentrifugalForceModelState_Wrapper>(
+        m, "GeneralizedCentrifugalForceModelState")
+        .def_property_readonly(
+            "speed",
+            [](const JPS_GeneralizedCentrifugalForceModelState_Wrapper& w) {
+                return JPS_GeneralizedCentrifugalForceModelState_GetSpeed(w.handle);
+            })
+        .def_property_readonly(
+            "e0", [](const JPS_GeneralizedCentrifugalForceModelState_Wrapper& w) {
+                return JPS_GeneralizedCentrifugalForceModelState_GetE0(w.handle);
+            });
+    py::class_<JPS_VelocityModelState_Wrapper>(m, "VelocityModelState")
+        .def_property_readonly("e0", [](const JPS_VelocityModelState_Wrapper& w) {
+            return JPS_VelocityModelState_GetE0(w.handle);
+        });
+    py::class_<JPS_Agent_Wrapper>(m, "Agent")
+        .def_property_readonly(
+            "id", [](const JPS_Agent_Wrapper& w) { return JPS_Agent_GetId(w.handle); })
+        .def_property_readonly(
+            "journey_id",
+            [](const JPS_Agent_Wrapper& w) { return JPS_Agent_GetJourneyId(w.handle); })
+        .def_property_readonly(
+            "stage_id", [](const JPS_Agent_Wrapper& w) { return JPS_Agent_GetStageId(w.handle); })
+        .def_property_readonly(
+            "stage_index",
+            [](const JPS_Agent_Wrapper& w) { return JPS_Agent_GetStageIndex(w.handle); })
+        .def_property_readonly(
+            "position", [](const JPS_Agent_Wrapper& w) { return JPS_Agent_GetPosition(w.handle); })
+        .def_property_readonly(
+            "orientation",
+            [](const JPS_Agent_Wrapper& w) { return JPS_Agent_GetOrientation(w.handle); })
+        .def_property_readonly(
+            "model",
+            [](const JPS_Agent_Wrapper& w)
+                -> std::variant<
+                    std::unique_ptr<JPS_GeneralizedCentrifugalForceModelState_Wrapper>,
+                    std::unique_ptr<JPS_VelocityModelState_Wrapper>> {
+                switch(JPS_Agent_GetModelType(w.handle)) {
+                    case JPS_GCFMModel:
+                        return std::make_unique<JPS_GeneralizedCentrifugalForceModelState_Wrapper>(
+                            JPS_Agent_GetGeneralizedCentrifugalForceModelState(w.handle, nullptr));
+                    case JPS_VelocityModel:
+                        return std::make_unique<JPS_VelocityModelState_Wrapper>(
+                            JPS_Agent_GetVelocityModelState(w.handle, nullptr));
+                }
+                UNREACHABLE();
+            });
     py::class_<JPS_Simulation_Wrapper>(m, "Simulation")
         .def(
             py::init(
@@ -536,39 +572,6 @@ PYBIND11_MODULE(py_jupedsim, m)
                 throw std::runtime_error{msg};
             })
         .def(
-            "read_agent",
-            [](JPS_Simulation_Wrapper& simulation, JPS_AgentId id) {
-                JPS_ErrorMessage errorMsg{};
-                using AgentVariants =
-                    std::variant<JPS_GCFMModelAgentParameters, JPS_VelocityModelAgentParameters>;
-                const auto type = JPS_Simulation_ModelType(simulation.handle);
-                switch(type) {
-                    case JPS_GCFMModel: {
-                        JPS_GCFMModelAgentParameters agent{};
-                        bool result = JPS_Simulation_ReadGCFMModelAgent(
-                            simulation.handle, id, &agent, &errorMsg);
-                        if(result) {
-                            return AgentVariants{agent};
-                        }
-                        auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                        JPS_ErrorMessage_Free(errorMsg);
-                        throw std::runtime_error{msg};
-                    }
-                    case JPS_VelocityModel: {
-                        JPS_VelocityModelAgentParameters agent{};
-                        bool result = JPS_Simulation_ReadVelocityModelAgent(
-                            simulation.handle, id, &agent, &errorMsg);
-                        if(result) {
-                            return AgentVariants{agent};
-                        }
-                        auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                        JPS_ErrorMessage_Free(errorMsg);
-                        throw std::runtime_error{msg};
-                    }
-                }
-                UNREACHABLE();
-            })
-        .def(
             "removed_agents",
             [](const JPS_Simulation_Wrapper& simulation) {
                 const JPS_AgentId* ids{};
@@ -652,19 +655,8 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def(
             "agents",
             [](const JPS_Simulation_Wrapper& simulation) {
-                using Iterators = std::variant<
-                    std::unique_ptr<JPS_GCFMModelAgentIterator_Wrapper>,
-                    std::unique_ptr<JPS_VelocityModelAgentIterator_Wrapper>>;
-                const auto type = JPS_Simulation_ModelType(simulation.handle);
-                switch(type) {
-                    case JPS_GCFMModel:
-                        return Iterators{std::make_unique<JPS_GCFMModelAgentIterator_Wrapper>(
-                            JPS_Simulation_GCFMModelAgentIterator(simulation.handle))};
-                    case JPS_VelocityModel:
-                        return Iterators{std::make_unique<JPS_VelocityModelAgentIterator_Wrapper>(
-                            JPS_Simulation_VelocityModelAgentIterator(simulation.handle))};
-                }
-                UNREACHABLE();
+                return std::make_unique<JPS_AgentIterator_Wrapper>(
+                    JPS_Simulation_AgentIterator(simulation.handle));
             })
         .def(
             "agents_in_range",

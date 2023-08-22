@@ -420,6 +420,122 @@ JUPEDSIM_API void JPS_JourneyDescription_AddStage(JPS_JourneyDescription handle,
 JUPEDSIM_API void JPS_JourneyDescription_Free(JPS_JourneyDescription handle);
 
 /**
+ * Opaque type of Generalized Centrifugal Force model state
+ */
+typedef struct JPS_GeneralizedCentrifugalForceModelState_t const*
+    JPS_GeneralizedCentrifugalForceModelState;
+
+JUPEDSIM_API double JPS_GeneralizedCentrifugalForceModelState_GetSpeed(
+    JPS_GeneralizedCentrifugalForceModelState handle);
+
+JUPEDSIM_API JPS_Point
+JPS_GeneralizedCentrifugalForceModelState_GetE0(JPS_GeneralizedCentrifugalForceModelState handle);
+
+/**
+ * Opaque type of Velocity model state
+ */
+typedef struct JPS_VelocityModelState_t const* JPS_VelocityModelState;
+JUPEDSIM_API JPS_Point JPS_VelocityModelState_GetE0(JPS_VelocityModelState handle);
+
+/**
+ * Opaque type of an agent
+ */
+typedef struct JPS_Agent_t const* JPS_Agent;
+
+/**
+ * Access the agents id.
+ * @param handle of the agent to access.
+ * @return the id
+ */
+JUPEDSIM_API JPS_AgentId JPS_Agent_GetId(JPS_Agent handle);
+
+/**
+ * Access the agents journey id.
+ * @param handle of the agent to access.
+ * @return the id of this agents journey
+ */
+JUPEDSIM_API JPS_JourneyId JPS_Agent_GetJourneyId(JPS_Agent handle);
+
+/**
+ * Access the agents currently targeted stage id.
+ * @param handle of the agent to access.
+ * @return the id of the stage currently targeted
+ */
+JUPEDSIM_API JPS_StageId JPS_Agent_GetStageId(JPS_Agent handle);
+
+/**
+ * Access the index of the currently targeted stage in this agents journey.
+ *
+ * @param handle of the agent to access.
+ * @return the index of the currently targeted stage in this agents journey
+ */
+JUPEDSIM_API JPS_StageIndex JPS_Agent_GetStageIndex(JPS_Agent handle);
+
+/**
+ * Access the agents position.
+ * @param handle of the agent to access.
+ * @return position
+ */
+JUPEDSIM_API JPS_Point JPS_Agent_GetPosition(JPS_Agent handle);
+
+/**
+ * Access the agents orientation.
+ * The orientation is unit length.
+ * @param handle of the agent to access.
+ * @return the orientation
+ */
+JUPEDSIM_API JPS_Point JPS_Agent_GetOrientation(JPS_Agent handle);
+
+/**
+ * Access the agets model type information.
+ * @param handle of the agent to access.
+ * @return type of model in use
+ */
+JUPEDSIM_API JPS_ModelType JPS_Agent_GetModelType(JPS_Agent handle);
+
+/**
+ * Access Generalized Centrifugal Force model state.
+ * Precondition: Agent needs to use Generalized Centrifugal Force model
+ * @param handle of the agent to access.
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return state or NULL on error
+ */
+JUPEDSIM_API JPS_GeneralizedCentrifugalForceModelState
+JPS_Agent_GetGeneralizedCentrifugalForceModelState(
+    JPS_Agent handle,
+    JPS_ErrorMessage* errorMessage);
+
+/**
+ * Access Velocity model state.
+ * Precondition: Agent needs to use Velocity model
+ * @param handle of the agent to access.
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return state or NULL on error
+ */
+JUPEDSIM_API JPS_VelocityModelState
+JPS_Agent_GetVelocityModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
+
+/**
+ * Opaque type of an iterator over agents
+ */
+typedef struct JPS_AgentIterator_t* JPS_AgentIterator;
+
+/**
+ * Access the next element in the iterator.
+ * Calling JPS_AgentIterator_Next repeatedly on a finished iterator is save.
+ * @param handle of the iterator to advance and access
+ * @return an agent or NULL if the iterator is at the end. The pointer returned does not need to be
+ * freed and is invalidated on the next call to this function!
+ */
+JUPEDSIM_API JPS_Agent JPS_AgentIterator_Next(JPS_AgentIterator handle);
+
+/**
+ * Free the iterator.
+ * @param handle to the JPS_AgentIterator to free.
+ */
+JUPEDSIM_API void JPS_AgentIterator_Free(JPS_AgentIterator handle);
+
+/**
  * Describes parameters of an Agent in GCFMModel
  */
 typedef struct JPS_GCFMModelAgentParameters {
@@ -459,27 +575,6 @@ typedef struct JPS_GCFMModelAgentParameters {
 } JPS_GCFMModelAgentParameters;
 
 /**
- * Opaque type of an iterator over agents
- */
-typedef struct JPS_GCFMModelAgentIterator_t* JPS_GCFMModelAgentIterator;
-
-/**
- * Access the next element in the iterator.
- * Calling JPS_AgentIterator_Next repeatedly on a finished iterator is save.
- * @param handle of the iterator to advance and access
- * @return an agent or NULL if the iterator is at the end. The pointer returned does not need to be
- * freed and is invalidated on the next call to this function!
- */
-JUPEDSIM_API const JPS_GCFMModelAgentParameters*
-JPS_GCFMModelAgentIterator_Next(JPS_GCFMModelAgentIterator handle);
-
-/**
- * Free the iterator.
- * @param handle to the JPS_AgentIterator to free.
- */
-JUPEDSIM_API void JPS_GCFMModelAgentIterator_Free(JPS_GCFMModelAgentIterator handle);
-
-/**
  * Describes parameters of an Agent in GCFMModel
  */
 typedef struct JPS_VelocityModelAgentParameters {
@@ -513,27 +608,6 @@ typedef struct JPS_VelocityModelAgentParameters {
      */
     JPS_AgentId agentId;
 } JPS_VelocityModelAgentParameters;
-
-/**
- * Opaque type of an iterator over agents
- */
-typedef struct JPS_VelocityModelAgentIterator_t* JPS_VelocityModelAgentIterator;
-
-/**
- * Access the next element in the iterator.
- * Calling JPS_AgentIterator_Next repeatedly on a finished iterator is save.
- * @param handle of the iterator to advance and access
- * @return an agent or NULL if the iterator is at the end. The pointer returned does not need to be
- * freed and is invalidated on the next call to this function!
- */
-JUPEDSIM_API const JPS_VelocityModelAgentParameters*
-JPS_VelocityModelAgentIterator_Next(JPS_VelocityModelAgentIterator handle);
-
-/**
- * Free the iterator.
- * @param handle to the JPS_AgentIterator to free.
- */
-JUPEDSIM_API void JPS_VelocityModelAgentIterator_Free(JPS_VelocityModelAgentIterator handle);
 
 /**
  * Opaque type of an iterator over agent ids
@@ -706,34 +780,6 @@ JUPEDSIM_API bool JPS_Simulation_RemoveAgent(
     JPS_ErrorMessage* errorMessage);
 
 /*
- * Access the agent data.
- * @param handle to the simulation object
- * @param id of the agent to access
- * @param[out] agent_out: destination where parameters will be written to. May not be NULL,
- * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
- * @return success of the operation, will fail on unknown agent id or NULL agent parameter
- */
-JUPEDSIM_API bool JPS_Simulation_ReadGCFMModelAgent(
-    JPS_Simulation handle,
-    JPS_AgentId id,
-    JPS_GCFMModelAgentParameters* agent_out,
-    JPS_ErrorMessage* errorMessage);
-
-/*
- * Access the agent data.
- * @param handle to the simulation object
- * @param id of the agent to access
- * @param[out] agent: destination where parameters will be written to. May not be NULL,
- * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
- * @return success of the operation, will fail on unknown agent id or NULL agent parameter
- */
-JUPEDSIM_API bool JPS_Simulation_ReadVelocityModelAgent(
-    JPS_Simulation handle,
-    JPS_AgentId id,
-    JPS_VelocityModelAgentParameters* agent_out,
-    JPS_ErrorMessage* errorMessage);
-
-/*
  * Returns the ids of all agents that exited the simulation in the last iteration.
  * @param handle of the Simulation
  * @param[out] data pointer to the ids
@@ -764,7 +810,7 @@ JUPEDSIM_API size_t JPS_Simulation_AgentCount(JPS_Simulation handle);
 JUPEDSIM_API double JPS_Simulation_ElapsedTime(JPS_Simulation handle);
 
 /**
- * Returns time simulated per iteration call.
+ * Returns time simulad per iteration call.
  * @param handle of the simulation
  * @return time simulated per iteration call in seconds
  */
@@ -785,19 +831,7 @@ JUPEDSIM_API uint64_t JPS_Simulation_IterationCount(JPS_Simulation handle);
  * @param handle of the simulation
  * @return iterator over agents in the simulation
  */
-JUPEDSIM_API JPS_GCFMModelAgentIterator
-JPS_Simulation_GCFMModelAgentIterator(JPS_Simulation handle);
-
-/**
- * Returns an iterator over all agents in the simulation.
- * Notes:
- *   The iterator will be invalidated once JPS_Simulation_Iterate is called.
- *   The iterator needs to be freed after use.
- * @param handle of the simulation
- * @return iterator over agents in the simulation
- */
-JUPEDSIM_API JPS_VelocityModelAgentIterator
-JPS_Simulation_VelocityModelAgentIterator(JPS_Simulation handle);
+JUPEDSIM_API JPS_AgentIterator JPS_Simulation_AgentIterator(JPS_Simulation handle);
 
 /**
  * Switches the operational model parameter profile for an agent

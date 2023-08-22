@@ -5,31 +5,27 @@
 #include <functional>
 #include <memory>
 
-template <typename Model, typename ApiAgentType>
+template <typename Model>
 class AgentIterator
 {
 private:
     using Container = std::vector<Model>;
     const Container& container{};
     typename Container::const_iterator iter{};
-    using MapFunc = std::function<ApiAgentType(Model)>;
-    MapFunc mapFunc{};
-    ApiAgentType item{};
 
 public:
-    AgentIterator(const Container& container_, MapFunc mapFunc_)
-        : container(container_), iter(std::begin(container_)), mapFunc(mapFunc_)
+    AgentIterator(const Container& container_) : container(container_), iter(std::begin(container_))
     {
     }
     ~AgentIterator() = default;
 
-    const ApiAgentType* Next()
+    const Model* Next()
     {
         if(iter == std::end(container)) {
             return nullptr;
         }
-        item = mapFunc(*iter);
+        const auto result = &*iter;
         ++iter;
-        return &item;
+        return result;
     }
 };

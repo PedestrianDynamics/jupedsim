@@ -160,9 +160,9 @@ struct SimulationTest : public ::testing::Test {
 TEST_F(SimulationTest, AgentIteratorIsEmptyForNewSimulation)
 {
     ASSERT_EQ(JPS_Simulation_AgentCount(simulation), 0);
-    auto iter = JPS_Simulation_VelocityModelAgentIterator(simulation);
+    auto iter = JPS_Simulation_AgentIterator(simulation);
     ASSERT_NE(iter, nullptr);
-    ASSERT_EQ(JPS_VelocityModelAgentIterator_Next(iter), nullptr);
+    ASSERT_EQ(JPS_AgentIterator_Next(iter), nullptr);
 }
 
 TEST_F(SimulationTest, AgentIteratorCanIterate)
@@ -175,12 +175,12 @@ TEST_F(SimulationTest, AgentIteratorCanIterate)
         ASSERT_NE(JPS_Simulation_AddVelocityModelAgent(simulation, agent_params, nullptr), 0);
     }
     ASSERT_EQ(JPS_Simulation_AgentCount(simulation), 3);
-    auto iter = JPS_Simulation_VelocityModelAgentIterator(simulation);
+    auto iter = JPS_Simulation_AgentIterator(simulation);
     ASSERT_NE(iter, nullptr);
-    ASSERT_NE(JPS_VelocityModelAgentIterator_Next(iter), nullptr);
-    ASSERT_NE(JPS_VelocityModelAgentIterator_Next(iter), nullptr);
-    ASSERT_NE(JPS_VelocityModelAgentIterator_Next(iter), nullptr);
-    ASSERT_EQ(JPS_VelocityModelAgentIterator_Next(iter), nullptr);
+    ASSERT_NE(JPS_AgentIterator_Next(iter), nullptr);
+    ASSERT_NE(JPS_AgentIterator_Next(iter), nullptr);
+    ASSERT_NE(JPS_AgentIterator_Next(iter), nullptr);
+    ASSERT_EQ(JPS_AgentIterator_Next(iter), nullptr);
 }
 
 TEST_F(SimulationTest, CanChangeModelParameterProfiles)

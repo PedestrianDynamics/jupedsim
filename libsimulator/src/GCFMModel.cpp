@@ -3,11 +3,13 @@
 #include "GCFMModel.hpp"
 
 #include "Ellipse.hpp"
+#include "GeneralizedCentrifugalForceModelData.hpp"
 #include "GenericAgent.hpp"
 #include "Macros.hpp"
 #include "Mathematics.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
+#include "OperationalModelType.hpp"
 #include "Simulation.hpp"
 
 #include <Logger.hpp>
@@ -35,9 +37,14 @@ GCFMModel::GCFMModel(
 {
 }
 
+OperationalModelType GCFMModel::Type() const
+{
+    return OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE;
+}
+
 PedestrianUpdate GCFMModel::ComputeNewPosition(
     double dT,
-    const Data& agent,
+    const GenericAgent& agent,
     const CollisionGeometry& geometry,
     const NeighborhoodSearchType& neighborhoodSearch) const
 {
@@ -63,26 +70,28 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
     Point fd = ForceDriv(agent, agent.destination, parameters.mass, parameters.tau, dT, update);
     Point acc = (fd + F_rep + repwall) / parameters.mass;
 
-    update.velocity = (agent.orientation * agent.speed) + acc * dT;
+    const auto& model = std::get<GeneralizedCentrifugalForceModelData>(agent.model);
+    update.velocity = (agent.orientation * model.speed) + acc * dT;
     update.position = agent.pos + *update.velocity * dT;
     return update;
 }
 
-void GCFMModel::ApplyUpdate(const PedestrianUpdate& update, Data& agent) const
+void GCFMModel::ApplyUpdate(const PedestrianUpdate& update, GenericAgent& agent) const
 {
-    agent.e0 = update.e0;
-    ++agent.orientationDelay;
+    auto& model = std::get<GeneralizedCentrifugalForceModelData>(agent.model);
+    model.e0 = update.e0;
+    ++model.orientationDelay;
     if(update.position) {
         agent.pos = *update.position;
     }
     if(update.velocity) {
         agent.orientation = (*update.velocity).Normalized();
-        agent.speed = (*update.velocity).Norm();
+        model.speed = (*update.velocity).Norm();
     }
 }
 
 void GCFMModel::CheckDistanceConstraint(
-    const Data& agent,
+    const GenericAgent& agent,
     const NeighborhoodSearchType& neighborhoodSearch) const
 {
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
@@ -103,7 +112,7 @@ std::unique_ptr<OperationalModel> GCFMModel::Clone() const
 }
 
 Point GCFMModel::ForceDriv(
-    const Data& ped,
+    const GenericAgent& ped,
     Point target,
     double mass,
     double tau,
@@ -115,25 +124,28 @@ Point GCFMModel::ForceDriv(
     const auto dest = ped.destination;
     const auto dist = (dest - pos).Norm();
     const auto v0 = parameterProfile(ped.parameterProfileId).v0;
+    const auto& model = std::get<GeneralizedCentrifugalForceModelData>(ped.model);
     if(dist > J_EPS_GOAL) {
 
-        const Point e0 = mollify_e0(target, pos, deltaT, ped.orientationDelay, ped.e0);
+        const Point e0 = mollify_e0(target, pos, deltaT, model.orientationDelay, model.e0);
         update.e0 = e0;
-        F_driv = ((e0 * v0 - (ped.orientation * ped.speed)) * mass) / tau;
+        F_driv = ((e0 * v0 - (ped.orientation * model.speed)) * mass) / tau;
     } else {
-        const Point e0 = ped.e0;
-        F_driv = ((e0 * v0 - (ped.orientation * ped.speed)) * mass) / tau;
+        const Point e0 = model.e0;
+        F_driv = ((e0 * v0 - (ped.orientation * model.speed)) * mass) / tau;
     }
     return F_driv;
 }
 
-Point GCFMModel::ForceRepPed(const Data& ped1, const Data& ped2) const
+Point GCFMModel::ForceRepPed(const GenericAgent& ped1, const GenericAgent& ped2) const
 {
+    const auto& model1 = std::get<GeneralizedCentrifugalForceModelData>(ped1.model);
+    const auto& model2 = std::get<GeneralizedCentrifugalForceModelData>(ped2.model);
     Point F_rep;
     // x- and y-coordinate of the distance between p1 and p2
     Point distp12 = ped2.pos - ped1.pos;
-    const Point vp1 = (ped1.orientation * ped1.speed); // v Ped1
-    const Point vp2 = (ped2.orientation * ped2.speed); // v Ped2
+    const Point vp1 = (ped1.orientation * model1.speed); // v Ped1
+    const Point vp2 = (ped2.orientation * model2.speed); // v Ped2
     Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
     double tmp, tmp2;
     double v_ij;
@@ -241,7 +253,8 @@ Point GCFMModel::ForceRepPed(const Data& ped1, const Data& ped2) const
  *   - Vektor(x,y) mit Summe aller abstoßenden Kräfte im SubRoom
  * */
 
-inline Point GCFMModel::ForceRepRoom(const Data& ped, const CollisionGeometry& geometry) const
+inline Point
+GCFMModel::ForceRepRoom(const GenericAgent& ped, const CollisionGeometry& geometry) const
 {
     const auto& walls = geometry.LineSegmentsInApproxDistanceTo(ped.pos);
 
@@ -255,7 +268,7 @@ inline Point GCFMModel::ForceRepRoom(const Data& ped, const CollisionGeometry& g
     return f;
 }
 
-inline Point GCFMModel::ForceRepWall(const Data& ped, const LineSegment& w) const
+inline Point GCFMModel::ForceRepWall(const GenericAgent& ped, const LineSegment& w) const
 {
     Point F = Point(0.0, 0.0);
     Point pt = w.ShortestPoint(ped.pos);
@@ -270,8 +283,9 @@ inline Point GCFMModel::ForceRepWall(const Data& ped, const LineSegment& w) cons
         return F;
     }
     double mind = 0.5; // for performance reasons this distance is assumed to be constant
+    const auto& model = std::get<GeneralizedCentrifugalForceModelData>(ped.model);
     double vn =
-        w.NormalComp(ped.orientation * ped.speed); // normal component of the velocity on the wall
+        w.NormalComp(ped.orientation * model.speed); // normal component of the velocity on the wall
     F = ForceRepStatPoint(ped, pt, mind, vn);
 
     return F; // line --> l != 0
@@ -287,12 +301,14 @@ inline Point GCFMModel::ForceRepWall(const Data& ped, const LineSegment& w) cons
  *   - Vektor(x,y) mit abstoßender Kraft
  * */
 // TODO: use effective DistanceToEllipse and simplify this function.
-Point GCFMModel::ForceRepStatPoint(const Data& ped, const Point& p, double l, double vn) const
+Point GCFMModel::ForceRepStatPoint(const GenericAgent& ped, const Point& p, double l, double vn)
+    const
 {
     Point F_rep = Point(0.0, 0.0);
     // TODO(kkratz): this will fail for speed 0.
     // I think the code can be rewritten to account for orientation and speed separately
-    const Point v = ped.orientation * ped.speed;
+    const auto& model = std::get<GeneralizedCentrifugalForceModelData>(ped.model);
+    const Point v = ped.orientation * model.speed;
     Point dist = p - ped.pos; // x- and y-coordinate of the distance between ped and p
     double d = dist.Norm(); // distance between the centre of ped and point p
     Point e_ij; // x- and y-coordinate of the normalized vector between ped and p
@@ -323,7 +339,7 @@ Point GCFMModel::ForceRepStatPoint(const Data& ped, const Point& p, double l, do
     pinE = p.TransformToEllipseCoordinates(ped.pos, ped.orientation.x, ped.orientation.y);
     const auto v0 = parameterProfile(ped.parameterProfileId).v0;
     // Punkt auf der Ellipse
-    r = E.PointOnEllipse(pinE, ped.speed / v0, ped.pos, ped.speed, ped.orientation);
+    r = E.PointOnEllipse(pinE, model.speed / v0, ped.pos, model.speed, ped.orientation);
     // interpolierte Kraft
     F_rep = ForceInterpolation(v0, K_ij, e_ij, vn, d, (r - ped.pos).Norm(), l);
     return F_rep;
@@ -384,7 +400,7 @@ Point GCFMModel::ForceInterpolation(
     }
     return F_rep;
 }
-double GCFMModel::AgentToAgentSpacing(const Data& agent1, const Data& agent2) const
+double GCFMModel::AgentToAgentSpacing(const GenericAgent& agent1, const GenericAgent& agent2) const
 {
     const auto& ped1ParameterProfile = parameterProfile(agent1.parameterProfileId);
     const Ellipse E1{
@@ -400,14 +416,16 @@ double GCFMModel::AgentToAgentSpacing(const Data& agent1, const Data& agent2) co
         ped2ParameterProfile.BMin};
     const auto v0_1 = ped1ParameterProfile.v0;
     const auto v0_2 = ped2ParameterProfile.v0;
+    const auto& model1 = std::get<GeneralizedCentrifugalForceModelData>(agent1.model);
+    const auto& model2 = std::get<GeneralizedCentrifugalForceModelData>(agent2.model);
     return E1.EffectiveDistanceToEllipse(
         E2,
         agent1.pos,
         agent2.pos,
-        agent1.speed / v0_1,
-        agent2.speed / v0_2,
-        agent1.speed,
-        agent2.speed,
+        model1.speed / v0_1,
+        model2.speed / v0_2,
+        model1.speed,
+        model2.speed,
         agent1.orientation,
         agent2.orientation);
 }

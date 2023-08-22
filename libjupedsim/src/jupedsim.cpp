@@ -5,6 +5,7 @@
 #include "AgentIterator.hpp"
 #include "ErrorMessage.hpp"
 #include "Events.hpp"
+#include "GeneralizedCentrifugalForceModelData.hpp"
 #include "Journey.hpp"
 #include "Stage.hpp"
 
@@ -32,6 +33,7 @@
 #include <exception>
 #include <iterator>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -299,39 +301,147 @@ void JPS_Geometry_Free(JPS_Geometry handle)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// GCFMModelAgentIterator
+/// GeneralizedCentrifugalForceModelState
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-const JPS_GCFMModelAgentParameters*
-JPS_GCFMModelAgentIterator_Next(JPS_GCFMModelAgentIterator handle)
+double
+JPS_GeneralizedCentrifugalForceModelState_GetSpeed(JPS_GeneralizedCentrifugalForceModelState handle)
 {
     assert(handle);
-    auto iterator =
-        reinterpret_cast<AgentIterator<GCFMModel::Data, JPS_GCFMModelAgentParameters>*>(handle);
-    return iterator->Next();
+    const auto state = reinterpret_cast<const GeneralizedCentrifugalForceModelData*>(handle);
+    return state->speed;
 }
 
-void JPS_GCFMModelAgentIterator_Free(JPS_GCFMModelAgentIterator handle)
-{
-    delete reinterpret_cast<AgentIterator<GCFMModel::Data, JPS_GCFMModelAgentParameters>*>(handle);
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// VelocityModelAgentIterator
-////////////////////////////////////////////////////////////////////////////////////////////////////
-const JPS_VelocityModelAgentParameters*
-JPS_VelocityModelAgentIterator_Next(JPS_VelocityModelAgentIterator handle)
+JPS_Point
+JPS_GeneralizedCentrifugalForceModelState_GetE0(JPS_GeneralizedCentrifugalForceModelState handle)
 {
     assert(handle);
-    auto iterator =
-        reinterpret_cast<AgentIterator<VelocityModel::Data, JPS_VelocityModelAgentParameters>*>(
-            handle);
-    return iterator->Next();
+    const auto state = reinterpret_cast<const GeneralizedCentrifugalForceModelData*>(handle);
+    return intoJPS_Point(state->e0);
 }
 
-void JPS_VelocityModelAgentIterator_Free(JPS_VelocityModelAgentIterator handle)
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// VelocityModelState
+////////////////////////////////////////////////////////////////////////////////////////////////////
+JPS_Point JPS_VelocityModelState_GetE0(JPS_VelocityModelState handle)
 {
-    delete reinterpret_cast<AgentIterator<VelocityModel::Data, JPS_VelocityModelAgentParameters>*>(
-        handle);
+    assert(handle);
+    const auto state = reinterpret_cast<const VelocityModelData*>(handle);
+    return intoJPS_Point(state->e0);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Agent
+////////////////////////////////////////////////////////////////////////////////////////////////////
+JPS_AgentId JPS_Agent_GetId(JPS_Agent handle)
+{
+    assert(handle);
+    const auto agent = reinterpret_cast<const GenericAgent*>(handle);
+    return agent->id.getID();
+}
+
+JPS_JourneyId JPS_Agent_GetJourneyId(JPS_Agent handle)
+{
+    assert(handle);
+    const auto agent = reinterpret_cast<const GenericAgent*>(handle);
+    return agent->journeyId.getID();
+}
+
+JPS_StageId JPS_Agent_GetStageId(JPS_Agent handle)
+{
+    assert(handle);
+    const auto agent = reinterpret_cast<const GenericAgent*>(handle);
+    return agent->stageId.getID();
+}
+
+JPS_StageIndex JPS_Agent_GetStageIndex(JPS_Agent handle)
+{
+    assert(handle);
+    const auto agent = reinterpret_cast<const GenericAgent*>(handle);
+    return agent->currentJourneyStageIdx;
+}
+
+JPS_Point JPS_Agent_GetPosition(JPS_Agent handle)
+{
+    assert(handle);
+    const auto agent = reinterpret_cast<const GenericAgent*>(handle);
+    return intoJPS_Point(agent->pos);
+}
+
+JPS_Point JPS_Agent_GetOrientation(JPS_Agent handle)
+{
+    assert(handle);
+    const auto agent = reinterpret_cast<const GenericAgent*>(handle);
+    return intoJPS_Point(agent->orientation);
+}
+
+JPS_ModelType JPS_Agent_GetModelType(JPS_Agent handle)
+{
+    assert(handle);
+    const auto agent = reinterpret_cast<const GenericAgent*>(handle);
+    switch(agent->model.index()) {
+        case 0:
+            return JPS_GCFMModel;
+        case 1:
+            return JPS_VelocityModel;
+    }
+    UNREACHABLE();
+}
+
+JPS_GeneralizedCentrifugalForceModelState
+JPS_Agent_GetGeneralizedCentrifugalForceModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    const auto agent = reinterpret_cast<const GenericAgent*>(handle);
+    try {
+        const auto& model = std::get<GeneralizedCentrifugalForceModelData>(agent->model);
+        return reinterpret_cast<JPS_GeneralizedCentrifugalForceModelState>(&model);
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return nullptr;
+}
+
+JPS_VelocityModelState
+JPS_Agent_GetVelocityModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    const auto agent = reinterpret_cast<const GenericAgent*>(handle);
+    try {
+        const auto& model = std::get<VelocityModelData>(agent->model);
+        return reinterpret_cast<JPS_VelocityModelState>(&model);
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return nullptr;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// AgentIterator
+////////////////////////////////////////////////////////////////////////////////////////////////////
+JPS_Agent JPS_AgentIterator_Next(JPS_AgentIterator handle)
+{
+    assert(handle);
+    auto iterator = reinterpret_cast<AgentIterator<GenericAgent>*>(handle);
+    return reinterpret_cast<JPS_Agent>(iterator->Next());
+}
+
+void JPS_AgentIterator_Free(JPS_AgentIterator handle)
+{
+    delete reinterpret_cast<AgentIterator<GenericAgent>*>(handle);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -405,20 +515,8 @@ JPS_Simulation JPS_Simulation_Create(
 
         auto modelInternal = reinterpret_cast<OperationalModel*>(model);
         auto model = modelInternal->Clone();
-
-        if(dynamic_cast<VelocityModel*>(model.get())) {
-            auto ptr = dynamic_cast<VelocityModel*>(model.release());
-            auto derived = std::unique_ptr<VelocityModel>(ptr);
-            result = reinterpret_cast<JPS_Simulation>(new TypedSimulation<VelocityModel>(
-                std::move(derived), std::move(collisionGeometry), std::move(routingEngine), dT));
-        } else if(dynamic_cast<GCFMModel*>(model.get())) {
-            auto ptr = dynamic_cast<GCFMModel*>(model.release());
-            auto derived = std::unique_ptr<GCFMModel>(ptr);
-            result = reinterpret_cast<JPS_Simulation>(new TypedSimulation<GCFMModel>(
-                std::move(derived), std::move(collisionGeometry), std::move(routingEngine), dT));
-        } else {
-            throw std::runtime_error("Unknown model type encountered");
-        }
+        result = reinterpret_cast<JPS_Simulation>(new Simulation(
+            std::move(model), std::move(collisionGeometry), std::move(routingEngine), dT));
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
@@ -543,24 +641,19 @@ JPS_AgentId JPS_Simulation_AddGCFMModelAgent(
 {
     assert(handle);
     auto result = GenericAgent::ID::Invalid;
-    auto simulation_base = reinterpret_cast<Simulation*>(handle);
-    auto simulation = dynamic_cast<TypedSimulation<GCFMModel>*>(simulation_base);
-    if(simulation == nullptr) {
-        if(errorMessage) {
-            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{
-                "Simulation is not using GCFMModel, cannot add an Agent with this model."});
-        }
-        return result.getID();
-    }
+    auto simulation = reinterpret_cast<Simulation*>(handle);
     try {
-        GCFMModel::Data agent(
-            GCFMModel::Data::ID(parameters.agentId),
+        if(simulation->ModelType() != OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE) {
+            throw std::runtime_error(
+                "Simulation is not configured to use Generalized Centrifugal Force Model");
+        }
+        GenericAgent agent{
+            parameters.agentId,
             Journey::ID(parameters.journeyId),
             OperationalModel::ParametersID(parameters.profileId),
             intoPoint(parameters.position),
             intoPoint(parameters.orientation),
-            parameters.speed,
-            intoPoint(parameters.e0));
+            GeneralizedCentrifugalForceModelData{parameters.speed, intoPoint(parameters.e0)}};
         result = simulation->AddAgent(std::move(agent));
     } catch(const std::exception& ex) {
         if(errorMessage) {
@@ -582,23 +675,18 @@ JPS_AgentId JPS_Simulation_AddVelocityModelAgent(
 {
     assert(handle);
     auto result = GenericAgent::ID::Invalid;
-    auto simulation_base = reinterpret_cast<Simulation*>(handle);
-    auto simulation = dynamic_cast<TypedSimulation<VelocityModel>*>(simulation_base);
-    if(simulation == nullptr) {
-        if(errorMessage) {
-            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{
-                "Simulation is not using VelocityModel, cannot add an Agent with this model."});
-        }
-        return result.getID();
-    }
+    auto simulation = reinterpret_cast<Simulation*>(handle);
     try {
-        VelocityModel::Data agent(
-            VelocityModel::Data::ID(parameters.agentId),
+        if(simulation->ModelType() != OperationalModelType::VELOCITY) {
+            throw std::runtime_error("Simulation is not configured to use Velocity Model");
+        }
+        GenericAgent agent{
+            parameters.agentId,
             Journey::ID(parameters.journeyId),
             OperationalModel::ParametersID(parameters.profileId),
             intoPoint(parameters.position),
             intoPoint(parameters.orientation),
-            intoPoint(parameters.e0));
+            VelocityModelData{intoPoint(parameters.e0)}};
         result = simulation->AddAgent(std::move(agent));
     } catch(const std::exception& ex) {
         if(errorMessage) {
@@ -635,67 +723,6 @@ bool JPS_Simulation_RemoveAgent(
         }
     }
     return result;
-}
-
-bool JPS_Simulation_ReadGCFMModelAgent(
-    JPS_Simulation handle,
-    JPS_AgentId id,
-    JPS_GCFMModelAgentParameters* agent_out,
-    JPS_ErrorMessage* errorMessage)
-{
-    assert(handle);
-    auto simulation_base = reinterpret_cast<Simulation*>(handle);
-    auto simulation = dynamic_cast<TypedSimulation<GCFMModel>*>(simulation_base);
-    assert(simulation);
-    try {
-        const auto& agent = simulation->Agent(id);
-        agent_out->speed = agent.speed, agent_out->e0 = intoJPS_Point(agent.e0),
-        agent_out->position = intoJPS_Point(agent.pos),
-        agent_out->orientation = intoJPS_Point(agent.orientation),
-        agent_out->journeyId = agent.journeyId.getID();
-        agent_out->profileId = agent.parameterProfileId.getID();
-        return true;
-    } catch(const std::exception& ex) {
-        if(errorMessage) {
-            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
-        }
-    } catch(...) {
-        if(errorMessage) {
-            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
-                new JPS_ErrorMessage_t{"Unknown internal error."});
-        }
-    }
-    return false;
-}
-
-bool JPS_Simulation_ReadVelocityModelAgent(
-    JPS_Simulation handle,
-    JPS_AgentId id,
-    JPS_VelocityModelAgentParameters* agent_out,
-    JPS_ErrorMessage* errorMessage)
-{
-    assert(handle);
-    auto simulation_base = reinterpret_cast<Simulation*>(handle);
-    auto simulation = dynamic_cast<TypedSimulation<VelocityModel>*>(simulation_base);
-    assert(simulation);
-    try {
-        const auto& agent = simulation->Agent(id);
-        agent_out->position = intoJPS_Point(agent.pos),
-        agent_out->orientation = intoJPS_Point(agent.orientation),
-        agent_out->journeyId = agent.journeyId.getID();
-        agent_out->profileId = agent.parameterProfileId.getID();
-        return true;
-    } catch(const std::exception& ex) {
-        if(errorMessage) {
-            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
-        }
-    } catch(...) {
-        if(errorMessage) {
-            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
-                new JPS_ErrorMessage_t{"Unknown internal error."});
-        }
-    }
-    return false;
 }
 
 size_t JPS_Simulation_RemovedAgents(JPS_Simulation handle, const JPS_AgentId** data)
@@ -759,43 +786,13 @@ uint64_t JPS_Simulation_IterationCount(JPS_Simulation handle)
     return simulation->Iteration();
 }
 
-JPS_GCFMModelAgentIterator JPS_Simulation_GCFMModelAgentIterator(JPS_Simulation handle)
+JPS_AgentIterator JPS_Simulation_AgentIterator(JPS_Simulation handle)
 {
     assert(handle);
-    auto simulation_base = reinterpret_cast<Simulation*>(handle);
-    auto simulation = dynamic_cast<TypedSimulation<GCFMModel>*>(simulation_base);
+    const auto simulation = reinterpret_cast<Simulation*>(handle);
     assert(simulation);
-    return reinterpret_cast<JPS_GCFMModelAgentIterator>(
-        new AgentIterator<GCFMModel::Data, JPS_GCFMModelAgentParameters>(
-            simulation->Agents(), [](const auto& agent) {
-                return JPS_GCFMModelAgentParameters{
-                    agent.speed,
-                    intoJPS_Point(agent.e0),
-                    intoJPS_Point(agent.pos),
-                    intoJPS_Point(agent.orientation),
-                    agent.journeyId.getID(),
-                    agent.parameterProfileId.getID(),
-                    agent.id.getID()};
-            }));
-}
-
-JPS_VelocityModelAgentIterator JPS_Simulation_VelocityModelAgentIterator(JPS_Simulation handle)
-{
-    assert(handle);
-    auto simulation_base = reinterpret_cast<Simulation*>(handle);
-    auto simulation = dynamic_cast<TypedSimulation<VelocityModel>*>(simulation_base);
-    assert(simulation);
-    return reinterpret_cast<JPS_VelocityModelAgentIterator>(
-        new AgentIterator<VelocityModel::Data, JPS_VelocityModelAgentParameters>(
-            simulation->Agents(), [](const auto& agent) {
-                return JPS_VelocityModelAgentParameters{
-                    intoJPS_Point(agent.e0),
-                    intoJPS_Point(agent.pos),
-                    intoJPS_Point(agent.orientation),
-                    agent.journeyId.getID(),
-                    agent.parameterProfileId.getID(),
-                    agent.id.getID()};
-            }));
+    return reinterpret_cast<JPS_AgentIterator>(
+        new AgentIterator<GenericAgent>(simulation->Agents()));
 }
 
 bool JPS_Simulation_SwitchAgentProfile(
@@ -852,14 +849,13 @@ bool JPS_Simulation_SwitchAgentJourney(
 JPS_ModelType JPS_Simulation_ModelType(JPS_Simulation handle)
 {
     assert(handle);
-    const auto simulation_base = reinterpret_cast<Simulation*>(handle);
-    if(const auto simulation = dynamic_cast<TypedSimulation<GCFMModel>*>(simulation_base);
-       simulation != nullptr) {
-        return JPS_GCFMModel;
-    }
-    if(const auto simulation = dynamic_cast<TypedSimulation<VelocityModel>*>(simulation_base);
-       simulation != nullptr) {
-        return JPS_VelocityModel;
+    const auto simulation = reinterpret_cast<Simulation*>(handle);
+    const auto type = simulation->ModelType();
+    switch(type) {
+        case OperationalModelType::VELOCITY:
+            return JPS_VelocityModel;
+        case OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE:
+            return JPS_GCFMModel;
     }
     UNREACHABLE();
 }
