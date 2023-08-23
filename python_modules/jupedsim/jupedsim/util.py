@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import shapely
 
-from jupedsim import GeometryBuilder
+from jupedsim.simulation import GeometryBuilder
 
 
 def build_jps_geometry(geo: shapely.GeometryCollection):

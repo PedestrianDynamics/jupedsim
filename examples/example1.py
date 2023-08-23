@@ -11,6 +11,9 @@ from shapely import GeometryCollection, Polygon, to_wkt
 import jupedsim as jps
 from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
 from jupedsim.util import build_jps_geometry
+from jupedsim.simulation import (
+    set_debug_callback, set_info_callback, set_error_callback, set_warning_callback,
+    VelocityModelBuilder, Simulation, JourneyDescription, VelocityModelAgentParameters)
 
 
 def log_debug(msg):
@@ -33,17 +36,17 @@ def main():
     logging.basicConfig(
         level=logging.DEBUG, format="%(levelname)s : %(message)s"
     )
-    jps.set_debug_callback(log_debug)
-    jps.set_info_callback(log_info)
-    jps.set_warning_callback(log_warn)
-    jps.set_error_callback(log_error)
+    set_debug_callback(log_debug)
+    set_info_callback(log_info)
+    set_warning_callback(log_warn)
+    set_error_callback(log_error)
 
     p1 = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
     area = GeometryCollection(p1.union(p2))
     geometry = build_jps_geometry(area)
 
-    model_builder = jps.VelocityModelBuilder(
+    model_builder = VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
     )
     profile_id = 3
@@ -53,18 +56,18 @@ def main():
 
     model = model_builder.build()
 
-    simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
+    simulation = Simulation(model=model, geometry=geometry, dt=0.01)
 
     stage = simulation.add_waiting_set_stage([(16, 5), (15, 5), (14, 5)])
     exit = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
 
-    journey = jps.JourneyDescription()
+    journey = JourneyDescription()
     journey.append(stage)
     journey.append(exit)
 
     journey_id = simulation.add_journey(journey)
 
-    agent_parameters = jps.VelocityModelAgentParameters()
+    agent_parameters = VelocityModelAgentParameters()
     agent_parameters.journey_id = journey_id
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)

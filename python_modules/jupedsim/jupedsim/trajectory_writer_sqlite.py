@@ -4,7 +4,7 @@ import sqlite3
 from pathlib import Path
 from typing import Optional
 
-from jupedsim import Simulation
+from .simulation import Simulation
 from jupedsim.serialization import TrajectoryWriter
 
 

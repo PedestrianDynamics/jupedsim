@@ -1,6 +1,10 @@
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
-import simulation.py_jupedsim as py_jps
+"""try:
+    import .py_jupedsim as py_jps
+except ModuleNotFoundError:
+    import py_jupedsim as py_jps"""
+import py_jupedsim as py_jps
 
 
 # TODO(kkratz): add typehints for function params
@@ -37,7 +41,7 @@ def set_warning_callback(fn) -> None:
     fn: fn<str>
         function that accepts a msg as string
     """
-    py_jps.set_warnign_callback(fn)
+    py_jps.set_warning_callback(fn)
 
 
 def set_error_callback(fn) -> None:
@@ -84,6 +88,10 @@ class BuildInfo:
 
 def get_build_info() -> BuildInfo:
     return BuildInfo()
+
+
+class Trace:
+    pass
 
 
 class GCFMModelAgentParameters:
@@ -219,7 +227,7 @@ class VelocityModelAgentParameters:
     """
 
     def __init__(self):
-        self.__obj = py_jps.VelocityModelAgentParameters()
+        self._obj = py_jps.VelocityModelAgentParameters()
 
     @property
     def e0(self) -> float:
@@ -228,11 +236,11 @@ class VelocityModelAgentParameters:
 
         NOTE: Setting this property has no effect on agents that are already part of the simulation
         """
-        return self.__obj.e0
+        return self._obj.e0
 
     @e0.setter
     def e0(self, value: tuple[float, float]) -> None:
-        self.__obj.e0 = value
+        self._obj.e0 = value
 
     @property
     def position(self) -> tuple[float, float]:
@@ -241,11 +249,11 @@ class VelocityModelAgentParameters:
 
         NOTE: Setting this property has no effect on agents that are already part of the simulation
         """
-        return self.__obj.position
+        return self._obj.position
 
     @position.setter
     def position(self, value: tuple[float, float]) -> None:
-        self.__obj.position = value
+        self._obj.position = value
 
     @property
     def orientation(self) -> tuple[float, float]:
@@ -254,11 +262,11 @@ class VelocityModelAgentParameters:
 
         NOTE: Setting this property has no effect on agents that are already part of the simulation
         """
-        return self.__obj.orientation
+        return self._obj.orientation
 
     @orientation.setter
     def orientation(self, value: tuple[float, float]) -> None:
-        self.__obj.orientation = value
+        self._obj.orientation = value
 
     @property
     def journey_id(self) -> int:
@@ -267,11 +275,11 @@ class VelocityModelAgentParameters:
 
         NOTE: Setting this property has no effect on agents that are already part of the simulation
         """
-        return self.__obj.journey_id
+        return self._obj.journey_id
 
     @journey_id.setter
     def journey_id(self, value: int) -> None:
-        self.__obj.journey_id = value
+        self._obj.journey_id = value
 
     @property
     def profile_id(self) -> int:
@@ -280,11 +288,11 @@ class VelocityModelAgentParameters:
 
         NOTE: Setting this property has no effect on agents that are already part of the simulation
         """
-        return self.__obj.profile_id
+        return self._obj.profile_id
 
     @profile_id.setter
     def profile_id(self, value: int) -> None:
-        self.__obj.profile_id = value
+        self._obj.profile_id = value
 
     @property
     def id(self) -> int:
@@ -293,95 +301,166 @@ class VelocityModelAgentParameters:
 
         NOTE: Setting this property has no effect on agents that are already part of the simulation
         """
-        return self.__obj.id
+        return self._obj.id
 
     @id.setter
     def id(self, value: int) -> None:
-        self.__obj.id = value
+        self._obj.id = value
 
     def __str__(self) -> str:
-        return self.__obj.__repr__()
+        return self._obj.__repr__()
 
 
-class JPS_Simulation_Wrapper:
-    def __init__(self, model: py_jps.JPS_OperationalModel_Wrapper, geometry: py_jps.JPS_Geometry_Wrapper,
-                 dT: float) -> None:
-        self.__obj = py_jps.JPS_Simulation_Wrapper(model, geometry, dT)
+class Geometry:
+    def __init__(self):
+        self._geo = py_jps.Geometry()
 
-    def add_waypoint_stage(self, w: py_jps.JPS_Simulation_Wrapper, position: py_jps.JPS_Point,
-                           distance) -> py_jps.JPS_StageId:
-        return self.__obj.add_waypoint_stage(w, position, distance)
 
-    def add_queue_stage(self, w: py_jps.JPS_Simulation_Wrapper, positions: list) -> py_jps.JPS_StageId:
-        # todo position should be std::vector<JPS_Point> | is a list fine?
-        return self.__obj.add_queue_stage(w, positions)
+class GeometryBuilder:
+    def __init__(self):
+        self.__obj = py_jps.GeometryBuilder()
 
-    def add_waiting_set_stage(self, w: py_jps.JPS_Simulation_Wrapper, positions: list) -> py_jps.JPS_StageId:
-        return self.__obj.add_waiting_set_stage(w, positions)
+    def add_accessible_area(self, polygon: list[tuple[float, float]]) -> None:
+        self.__obj.add_accessible_area(polygon)
 
-    def add_exit_stage(self, w: py_jps.JPS_Simulation_Wrapper, polygon: list) -> py_jps.JPS_StageId:
-        return self.__obj.add_exit_stage(w, polygon)
+    # todo typo in bindings_jupedsim
+    def exclude_from_accssible_area(self, polygon: list[tuple[float, float]]) -> None:
+        self.__obj.exclude_from_accssible_area(polygon)
 
-    def add_journey(self, simulation: py_jps.JPS_Simulation_Wrapper,
-                    journey: py_jps.JPS_JourneyDescription_Wrapper) -> py_jps.JPS_JourneyId:
-        return self.__obj.add_journey(simulation, journey)
+    def build(self):
+        return self.__obj.build()
 
-    def add_agent(self, simulation: py_jps.JPS_Simulation_Wrapper,
-                  parameters: py_jps.JPS_GCFMModelAgentParameters | py_jps.JPS_VelocityModelAgentParameters) -> py_jps.JPS_AgentId:
-        return self.__obj.add_agent(simulation, parameters)
 
-    def remove_agent(self, simulation: py_jps.JPS_Simulation_Wrapper, id: py_jps.JPS_AgentId) -> bool:
-        return self.__obj.remove_agent(simulation, id)
+class VelocityModelBuilder:
+    def __init__(self, a_ped: float, d_ped: float, a_wall: float, d_wall: float) -> None:
+        self.__obj = py_jps.VelocityModelBuilder(a_ped=a_ped, d_ped=d_ped, a_wall=a_wall, d_wall=d_wall)
 
-    def read_agent(self, simulation: py_jps.JPS_Simulation_Wrapper,
-                   id: py_jps.JPS_AgentId) -> py_jps.JPS_GCFMModelAgentParameters | py_jps.JPS_VelocityModelAgentParameters:
-        return self.__obj.read_agent(simulation, id)
+    def add_parameter_profile(self, id: int, time_gap: float, tau: float, v0: float, radius: float) -> None:
+        self.__obj.add_parameter_profile(id=id, time_gap=time_gap, tau=tau, v0=v0, radius=radius)
 
-    def remove_agents(self, simulation: py_jps.JPS_Simulation_Wrapper) -> None:
-        self.__obj.remove_agents(simulation)
+    def build(self):
+        return self.__obj.build()
 
-    def iterate(self, simulation: py_jps.JPS_Simulation_Wrapper, count: int) -> None:
-        # todo actually size_t | still fine?
-        self.__obj.iterate(simulation, count)
 
-    def switch_agent_profile(self, w: py_jps.JPS_Simulation_Wrapper, agentId: py_jps.JPS_AgentId,
-                             profileId: py_jps.JPS_ModelParameterProfileId) -> None:
-        self.__obj.switch_agent_profile(w, agentId, profileId)
+class GCFMModelBuilder:
+    def __init__(self,
+                 nu_Ped: float, nu_Wall: float,
+                 dist_eff_Ped: float, dist_eff_Wall: float,
+                 intp_width_Ped: float, intp_width_Wall: float,
+                 maxf_Ped: float, maxf_Wall: float) -> None:
+        self.__obj = py_jps.GCFMModelBuilder(nu_Ped=nu_Ped, nu_Wall=nu_Wall,
+                                             dist_eff_Ped=dist_eff_Ped, dist_eff_Wall=dist_eff_Wall,
+                                             intp_width_Ped=intp_width_Ped, intp_width_Wall=intp_width_Wall,
+                                             maxf_Ped=maxf_Ped, maxf_Wall=maxf_Wall)
 
-    def switch_agent_journey(self, w: py_jps.JPS_Simulation_Wrapper, agentId: py_jps.JPS_AgentId,
-                             journeyId: py_jps.JPS_JourneyId, stageIdx: py_jps.JPS_StageIndex) -> None:
-        self.__obj.switch_agent_journey(w, agentId, journeyId, stageIdx)
+    def add_parameter_profile(self, profile_id: int, mass: float, tau: float, v0: float, a_v: float, a_min: float,
+                              b_min: float, b_max: float):
+        return self.__obj.add_parameter_profile(id=profile_id, mass=mass, tau=tau, v0=v0, a_v=a_v, a_min=a_min,
+                                                b_min=b_min, b_max=b_max)
 
-    def agent_count(self, simulation: py_jps.JPS_Simulation_Wrapper) -> int:
-        return self.__obj.agent_count(simulation)
+    def build(self):
+        return self.__obj.build()
 
-    def elapsed_time(self, simulation: py_jps.JPS_Simulation_Wrapper) -> float:
-        return self.__obj.elapsed_time(simulation)
 
-    def delta_time(self, simulation: py_jps.JPS_Simulation_Wrapper) -> float:
-        return self.__obj.delta_time(simulation)
+class JourneyDescription:
+    def __init__(self, stage_id: list[int] = None):
+        if stage_id is None:
+            self._obj = py_jps.JourneyDescription()
+        else:
+            self._obj = py_jps.JourneyDescription(stage_id)
 
-    def iteration_count(self, simulation: py_jps.JPS_Simulation_Wrapper) -> int:
-        return self.__obj.iteration_count(simulation)
+    def append(self, stages: int | list[int]) -> None:
+        self._obj.append(stages)
 
-    def agents(self, simulation: py_jps.JPS_Simulation_Wrapper):
-        # todo return value is an Iterator | returns a list?
-        return self.__obj.agents(simulation)
 
-    def agents_in_range(self, w: py_jps.JPS_Simulation_Wrapper, pos: tuple[float, float], distance: float):
-        return self.__obj.agents_in_range(w, pos, distance)
+class Simulation:
+    def __init__(self, model, geometry: Geometry, dt: float) -> None:
+        self._sim = py_jps.Simulation(model=model, geometry=geometry, dt=dt)
 
-    def agents_in_polygon(self, w: py_jps.JPS_Simulation_Wrapper, poly: list[tuple[float, float]]):
-        return self.__obj.agents_in_polygon(w, poly)
+    def add_waypoint_stage(self, position: tuple[float, float], distance) -> int:
+        return self._sim.add_waypoint_stage(position, distance)
 
-    def notify_waiting_set(self, w: py_jps.JPS_Simulation_Wrapper, stageId: py_jps.JPS_StageId, active: bool) -> None:
-        self.__obj.notify_waiting_set(w, stageId, active)
+    def add_queue_stage(self, positions: list[tuple[float, float]]) -> int:
+        return self._sim.add_queue_stage(positions)
 
-    def notify_queue(self, w: py_jps.JPS_Simulation_Wrapper, stageId: py_jps.JPS_StageId, count: int) -> None:
-        self.__obj.notify_queue(w, stageId, count)
+    def add_waiting_set_stage(self, positions: list[tuple[float, float]]) -> int:
+        return self._sim.add_waiting_set_stage(positions)
 
-    def set_tracing(self, w: py_jps.JPS_Simulation_Wrapper, status: bool) -> None:
-        self.__obj.set_tracing(w, status)
+    def add_exit_stage(self, polygon: list[tuple[float, float]]) -> int:
+        return self._sim.add_exit_stage(polygon)
 
-    def get_last_trace(self, w: py_jps.JPS_Simulation_Wrapper) -> py_jps.JPS_Trace:
-        return self.__obj.get_last_trace(w)
+    def add_journey(self, journey: JourneyDescription) -> int:
+        return self._sim.add_journey(journey._obj)
+
+    def add_agent(self, parameters: GCFMModelAgentParameters | VelocityModelAgentParameters) -> int:
+        return self._sim.add_agent(parameters._obj)
+
+    def remove_agent(self, agent_id: int) -> bool:
+        return self._sim.remove_agent(agent_id)
+
+    def read_agent(self, agent_id: int) -> GCFMModelAgentParameters | VelocityModelAgentParameters:
+        return self._sim.read_agent(agent_id)
+
+    def remove_agents(self) -> None:
+        self._sim.remove_agents()
+
+    def iterate(self, count: int = 1) -> None:
+        self._sim.iterate(count)
+
+    def switch_agent_profile(self, agentId: int, profileId: int) -> None:
+        self._sim.switch_agent_profile(agentId=agentId, profileId=profileId)
+
+    def switch_agent_journey(self, agentId: int,
+                             journeyId: int, stageIdx: int) -> None:
+        self._sim.switch_agent_journey(agentId=agentId, journeyId=journeyId, stageIdx=stageIdx)
+
+    def agent_count(self) -> int:
+        return self._sim.agent_count()
+
+    def elapsed_time(self) -> float:
+        return self._sim.elapsed_time()
+
+    def delta_time(self) -> float:
+        return self._sim.delta_time()
+
+    def iteration_count(self) -> int:
+        return self._sim.iteration_count()
+
+    def agents(self):
+        return self._sim.agents()
+
+    def agents_in_range(self, pos: tuple[float, float], distance: float):
+        return self._sim.agents_in_range(pos, distance)
+
+    def agents_in_polygon(self, poly: list[tuple[float, float]]):
+        return self._sim.agents_in_polygon(poly)
+
+    def notify_waiting_set(self, stageId: int, active: bool) -> None:
+        self._sim.notify_waiting_set(stageId, active)
+
+    def notify_queue(self, stageId: int, count: int) -> None:
+        self._sim.notify_queue(stageId, count)
+
+    def set_tracing(self, status: bool) -> None:
+        self._sim.set_tracing(status)
+
+    def get_last_trace(self) -> Trace:
+        return self._sim.get_last_trace()
+
+
+class RoutingEngine:
+    def __init__(self, geo: Geometry) -> None:
+        self.__obj = py_jps.RoutingEngine(geo)
+
+    def compute_waypoints(self, frm: tuple[float, float],
+                          to: tuple[float, float]) -> list[tuple[float, float]]:
+        return self.__obj.compute_waypoints(frm, to)
+
+    def is_routable(self, p: tuple[float, float]) -> bool:
+        return self.__obj.is_routable(p)
+
+    def mesh(self) -> list[tuple[tuple[float, float], tuple[float, float], tuple[float, float]]]:
+        return self.__obj.mesh()
+
+    def edges_for(self, vertex_id: int):
+        return self.__obj.edges_for(vertex_id)

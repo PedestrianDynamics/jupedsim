@@ -15,12 +15,12 @@ from typing import Optional, Tuple
 
 import shapely
 
-from jupedsim import (
-    GCFMModelAgentParameters,
-    Simulation,
-    VelocityModelAgentParameters,
-)
 
+from .simulation import (
+    Simulation,
+    GCFMModelAgentParameters,
+    VelocityModelAgentParameters
+)
 
 class TrajectoryWriter(metaclass=abc.ABCMeta):
     """Interface for trajectory serialization"""
