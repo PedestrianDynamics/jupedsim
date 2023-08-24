@@ -7,6 +7,11 @@ import os
 import pathlib
 import subprocess
 
+from performancetest.geometry import geometries
+import shapely
+import matplotlib.pyplot as plt
+import geopandas as gpd
+
 import jinja2
 
 logging.basicConfig(
@@ -79,6 +84,7 @@ def run_test(test, args, build_dir, result_dir):
     perf_file_name = f"{test}.perf"
     perf_folded_file_name = f"{test}.folded"
     perf_svg_file_name = f"{test}.svg"
+    perf_geo_svg_file_name = f"{test}_geo.svg"
 
     with subprocess.Popen(
         [
@@ -245,6 +251,13 @@ def run_tests(test_selection: str, args):
             args = ["--limit", "100"]
         run_test("grosser_stern", args, build_dir, result_dir)
         results["Grosser Stern"] = "grosser_stern.svg"
+
+        geo = shapely.from_wkt(geometries["grosser_stern"])
+        for geo in geo.geoms:
+            poly = gpd.GeoSeries([geo])
+            poly.plot()
+        plt.savefig(f"{result_dir}/grosser_stern.svg")
+
     build_report(result_dir, results)
 
 
