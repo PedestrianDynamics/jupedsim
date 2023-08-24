@@ -7,8 +7,8 @@ import os
 import pathlib
 import subprocess
 
-from geometry import geometries
 import shapely
+import sqlite3
 import matplotlib.pyplot as plt
 import geopandas as gpd
 
@@ -144,6 +144,17 @@ def run_test(test, args, build_dir, result_dir):
             check=True,
         )
 
+    db = sqlite3.connect(perf_data_file_name)
+    geometry_as_wkt = (
+        db.cursor().execute("SELECT * from geometry LIMIT 1").fetchone()[0]
+    )
+    geometry = shapely.from_wkt(geometry_as_wkt)
+
+    for geo in geometry.geoms:
+        poly = gpd.GeoSeries([geo])
+        poly.plot()
+    plt.savefig(result_dir / perf_geo_svg_file_name)
+
     logging.info(f"created flamegraph for {test}")
 
 
@@ -250,13 +261,8 @@ def run_tests(test_selection: str, args):
         if not args or test_selection == "all":
             args = ["--limit", "100"]
         run_test("grosser_stern", args, build_dir, result_dir)
-        results["Grosser Stern"] = "grosser_stern.svg"
-
-        geo = shapely.from_wkt(geometries["grosser_stern"])
-        for geo in geo.geoms:
-            poly = gpd.GeoSeries([geo])
-            poly.plot()
-        plt.savefig(f"{result_dir}/grosser_stern.svg")
+        # adds plot of geo instead of flamegraph
+        results["Grosser Stern"] = "grosser_stern_geo.svg"
 
     build_report(result_dir, results)
 
