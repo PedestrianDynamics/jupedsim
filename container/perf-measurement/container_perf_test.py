@@ -196,7 +196,7 @@ def build_report(results_dir: pathlib.Path, results: dict[str, str]) -> None:
 </style>
 <head><title>Performance Test Results</title></head>
 <body>
-    <h1 class="title">Performance Test Results</h1>
+    <h1 class="title">Performance Test Results with a little change</h1>
     {% for title, content in results.items() %}
         <button class="collapsible">{{ title }}</button>
         <div class="content">
