@@ -142,8 +142,9 @@ def run_test(test, args, build_dir, result_dir):
             cwd="/build",
             check=True,
         )
-
-    db = sqlite3.connect(perf_data_file_name)
+    sql_files = [f for f in os.listdir(os.getcwd()) if f.endswith(".sql") and test in f]
+    print(sql_files)
+    db = sqlite3.connect(sql_files[0])
     geometry_as_wkt = (
         db.cursor().execute("SELECT * from geometry LIMIT 1").fetchone()[0]
     )
