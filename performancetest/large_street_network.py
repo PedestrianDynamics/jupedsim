@@ -5,6 +5,7 @@
 import argparse
 import logging
 import pathlib
+import platform
 import random
 import sys
 import time
@@ -234,6 +235,9 @@ def main():
     )
     stats_writer = StatsWriter(writer.connection())
     writer.begin_writing(2, to_wkt(geo, rounding_precision=-1))
+    stats_writer.write_metadata(
+        jps.get_build_info().git_commit_hash, platform.node()
+    )
 
     start_time = time.perf_counter_ns()
     iteration = simulation.iteration_count()
