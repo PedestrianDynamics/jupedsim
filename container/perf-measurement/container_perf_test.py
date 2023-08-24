@@ -7,7 +7,7 @@ import os
 import pathlib
 import subprocess
 
-from performancetest.geometry import geometries
+from geometry import geometries
 import shapely
 import matplotlib.pyplot as plt
 import geopandas as gpd
