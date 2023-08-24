@@ -10,7 +10,6 @@ import subprocess
 import shapely
 import sqlite3
 import matplotlib.pyplot as plt
-import geopandas as gpd
 
 import jinja2
 
@@ -151,8 +150,13 @@ def run_test(test, args, build_dir, result_dir):
     geometry = shapely.from_wkt(geometry_as_wkt)
 
     for geo in geometry.geoms:
-        poly = gpd.GeoSeries([geo])
-        poly.plot()
+        xe, ye = geo.exterior.xy
+
+        for inner in geo.interiors:
+            xi, yi = zip(*inner.coords[:])
+            plt.plot(xi, yi, color="blue")
+
+        plt.plot(xe, ye, color="blue")
     plt.savefig(result_dir / perf_geo_svg_file_name)
 
     logging.info(f"created flamegraph for {test}")
