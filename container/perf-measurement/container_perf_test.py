@@ -146,7 +146,7 @@ def run_test(test, args, build_dir, result_dir):
     path = os.getcwd()
     for root, dirs, files in os.walk(path):
         for file in files:
-            if file.endswith(".sqlite"):
+            if file.endswith(".sqlite") and test in file:
                 sql_files.append(os.path.join(root, file))
 
     print(sql_files)
@@ -265,7 +265,8 @@ def run_tests(test_selection: str, args):
         if not args or test_selection == "all":
             args = ["--limit", "4000"]
         run_test("large_street_network", args, build_dir, result_dir)
-        results["Large Street Network"] = "large_street_network.svg"
+        results["Large Street Network flamegraph"] = "large_street_network.svg"
+        results["Large Street Network plot"] = "large_street_network_geo.svg"
 
     if test_selection in ["all", "grosser_stern"]:
         logging.info("run grosser_stern performance test")
@@ -273,7 +274,8 @@ def run_tests(test_selection: str, args):
             args = ["--limit", "100"]
         run_test("grosser_stern", args, build_dir, result_dir)
         # adds plot of geo instead of flamegraph
-        results["Grosser Stern"] = "grosser_stern_geo.svg"
+        results["Grosser Stern flamegraph"] = "grosser_stern.svg"
+        results["Grosser Stern plot"] = "grosser_stern_geo.svg"
 
     build_report(result_dir, results)
 
