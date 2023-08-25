@@ -142,7 +142,13 @@ def run_test(test, args, build_dir, result_dir):
             cwd="/build",
             check=True,
         )
-    sql_files = [f for f in os.listdir(os.getcwd()) if f.endswith(".sql") and test in f]
+    sql_files = []
+    path = os.getcwd()
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            if file.endswith(".sqlite"):
+                sql_files.append(os.path.join(root, file))
+
     print(sql_files)
     db = sqlite3.connect(sql_files[0])
     geometry_as_wkt = (
