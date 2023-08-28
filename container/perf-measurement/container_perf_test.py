@@ -162,6 +162,7 @@ def run_test(test, args, build_dir, result_dir):
     )
     geometry = shapely.from_wkt(geometry_as_wkt)
 
+    plt.figure()
     for geo in geometry.geoms:
         xe, ye = geo.exterior.xy
 
@@ -198,7 +199,7 @@ def run_test(test, args, build_dir, result_dir):
     )
     perf_stats["agent_count"].plot(secondary_y=True, ylabel="agents", legend=True)
     plt.savefig(result_dir / perf_tt_svg_file_name)
-    # plt.figure()
+    plt.figure()
 
     logging.info(f"created flamegraph for {test}")
 
