@@ -171,6 +171,7 @@ def run_test(test, args, build_dir, result_dir):
 
         plt.plot(xe, ye, color="blue")
     plt.savefig(result_dir / perf_geo_svg_file_name)
+    plt.figure()
 
     # Total iteration time / agent count per iteration
     perf_stats["iteration_loop_us"].plot(
@@ -178,6 +179,7 @@ def run_test(test, args, build_dir, result_dir):
     )
     perf_stats["agent_count"].plot(secondary_y=True, ylabel="agents", legend=True)
     plt.savefig(result_dir / perf_it_time_svg_file_name)
+    plt.figure()
 
     # Time to compute oerational level update / agent count per iteration
     perf_stats["operational_level_us"].plot(
@@ -185,6 +187,7 @@ def run_test(test, args, build_dir, result_dir):
     )
     perf_stats["agent_count"].plot(secondary_y=True, ylabel="agents", legend=True)
     plt.savefig(result_dir / perf_op_lvl_svg_file_name)
+    plt.figure()
 
     # Total time w.o. operational level / agent count per iteration
     perf_stats["delta"] = (
@@ -195,6 +198,7 @@ def run_test(test, args, build_dir, result_dir):
     )
     perf_stats["agent_count"].plot(secondary_y=True, ylabel="agents", legend=True)
     plt.savefig(result_dir / perf_tt_svg_file_name)
+    # plt.figure()
 
     logging.info(f"created flamegraph for {test}")
 
