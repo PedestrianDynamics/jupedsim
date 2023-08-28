@@ -149,7 +149,6 @@ def run_test(test, args, build_dir, result_dir):
             if file.endswith(".sqlite") and test in file:
                 sql_files.append(os.path.join(root, file))
 
-    print(sql_files)
     db = sqlite3.connect(sql_files[0])
     geometry_as_wkt = (
         db.cursor().execute("SELECT * from geometry LIMIT 1").fetchone()[0]
@@ -169,7 +168,7 @@ def run_test(test, args, build_dir, result_dir):
     logging.info(f"created flamegraph for {test}")
 
 
-def build_report(results_dir: pathlib.Path, results: dict[str, str]) -> None:
+def build_report(results_dir: pathlib.Path, results: dict[str, list[str]]) -> None:
     template = """
 <!DOCTYPE html>
 <html lang="en">
@@ -228,7 +227,9 @@ def build_report(results_dir: pathlib.Path, results: dict[str, str]) -> None:
     {% for title, content in results.items() %}
         <button class="collapsible">{{ title }}</button>
         <div class="content">
-            <object type="image/svg+xml" data="./{{ content }}"></object>
+            {% for svg_filename in content %}
+                <object type="image/svg+xml" data="./{{ svg_filename }}"></object>
+            {% endfor %}
         </div>
     {% endfor %}
 <script defer>
@@ -265,8 +266,7 @@ def run_tests(test_selection: str, args):
         if not args or test_selection == "all":
             args = ["--limit", "4000"]
         run_test("large_street_network", args, build_dir, result_dir)
-        results["Large Street Network flamegraph"] = "large_street_network.svg"
-        results["Large Street Network plot"] = "large_street_network_geo.svg"
+        results["Large Street Network"] = ["large_street_network.svg",  "large_street_network_geo.svg"]
 
     if test_selection in ["all", "grosser_stern"]:
         logging.info("run grosser_stern performance test")
@@ -274,8 +274,7 @@ def run_tests(test_selection: str, args):
             args = ["--limit", "100"]
         run_test("grosser_stern", args, build_dir, result_dir)
         # adds plot of geo instead of flamegraph
-        results["Grosser Stern flamegraph"] = "grosser_stern.svg"
-        results["Grosser Stern plot"] = "grosser_stern_geo.svg"
+        results["Grosser Stern"] = ["grosser_stern.svg", "grosser_stern_geo.svg"]
 
     build_report(result_dir, results)
 
