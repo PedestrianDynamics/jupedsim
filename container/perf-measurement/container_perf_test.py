@@ -84,6 +84,7 @@ def run_test(test, args, build_dir, result_dir):
     perf_folded_file_name = f"{test}.folded"
     perf_svg_file_name = f"{test}.svg"
     perf_geo_svg_file_name = f"{test}_geo.svg"
+    sqlite_file_name = f"{test}_sql.sqlite"
 
     with subprocess.Popen(
         [
@@ -149,6 +150,8 @@ def run_test(test, args, build_dir, result_dir):
             if file.endswith(".sqlite") and test in file:
                 sql_files.append(os.path.join(root, file))
 
+    os.system(f"cp {sql_files[0]} {result_dir / sqlite_file_name}")
+    print(f"copied {sql_files[0]} to {result_dir / sqlite_file_name}")
     db = sqlite3.connect(sql_files[0])
     geometry_as_wkt = (
         db.cursor().execute("SELECT * from geometry LIMIT 1").fetchone()[0]
