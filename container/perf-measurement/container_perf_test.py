@@ -6,6 +6,7 @@ import logging
 import os
 import pathlib
 import subprocess
+import pandas as pd
 
 import shapely
 import sqlite3
@@ -47,26 +48,26 @@ def build_jupedsim():
     build_path.mkdir(exist_ok=True)
 
     with subprocess.Popen(
-        [
-            "cmake",
-            "-S",
-            "/src",
-            "-B",
-            "/build",
-            "-DCMAKE_PREFIX_PATH=/opt/deps",
-            "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
+            [
+                "cmake",
+                "-S",
+                "/src",
+                "-B",
+                "/build",
+                "-DCMAKE_PREFIX_PATH=/opt/deps",
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
     ) as proc:
         if proc.stdout:
             for line in proc.stdout:
                 print(line.decode("utf-8").rstrip())
 
     with subprocess.Popen(
-        ["cmake", "--build", "/build", "--", "-j", "--", "VERBOSE=1"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
+            ["cmake", "--build", "/build", "--", "-j", "--", "VERBOSE=1"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
     ) as proc:
         if proc.stdout:
             for line in proc.stdout:
@@ -84,26 +85,28 @@ def run_test(test, args, build_dir, result_dir):
     perf_folded_file_name = f"{test}.folded"
     perf_svg_file_name = f"{test}.svg"
     perf_geo_svg_file_name = f"{test}_geo.svg"
-    sqlite_file_name = f"{test}_sql.sqlite"
+    perf_it_time_svg_file_name = f"{test}_it_time.svg"
+    perf_op_lvl_svg_file_name = f"{test}_op_lvl.svg"
+    perf_tt_svg_file_name = f"{test}_tt.svg"
 
     with subprocess.Popen(
-        [
-            "perf",
-            "record",
-            "--call-graph",
-            "fp",
-            "-e",
-            "cycles:u",
-            "-o",
-            perf_data_file_name,
-            "python3",
-            f"/src/performancetest/{test}.py",
-            *args,
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        env=test_env,
-        cwd="/build",
+            [
+                "perf",
+                "record",
+                "--call-graph",
+                "fp",
+                "-e",
+                "cycles:u",
+                "-o",
+                perf_data_file_name,
+                "python3",
+                f"/src/performancetest/{test}.py",
+                *args,
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            env=test_env,
+            cwd="/build",
     ) as proc:
         if proc.stdout:
             for line in proc.stdout:
@@ -150,9 +153,10 @@ def run_test(test, args, build_dir, result_dir):
             if file.endswith(".sqlite") and test in file:
                 sql_files.append(os.path.join(root, file))
 
-    os.system(f"cp {sql_files[0]} {result_dir / sqlite_file_name}")
-    print(f"copied {sql_files[0]} to {result_dir / sqlite_file_name}")
     db = sqlite3.connect(sql_files[0])
+
+    perf_stats = pd.read_sql_query("SELECT * FROM perf_statistics", db)
+    metadata = pd.read_sql_query("SELECT * FROM metadata", db)
     geometry_as_wkt = (
         db.cursor().execute("SELECT * from geometry LIMIT 1").fetchone()[0]
     )
@@ -167,6 +171,30 @@ def run_test(test, args, build_dir, result_dir):
 
         plt.plot(xe, ye, color="blue")
     plt.savefig(result_dir / perf_geo_svg_file_name)
+
+    # Total iteration time / agent count per iteration
+    perf_stats["iteration_loop_us"].plot(
+        figsize=(20, 10), xlabel="iteration", ylabel="time[µs]", legend=True
+    )
+    perf_stats["agent_count"].plot(secondary_y=True, ylabel="agents", legend=True)
+    plt.savefig(result_dir / perf_it_time_svg_file_name)
+
+    # Time to compute oerational level update / agent count per iteration
+    perf_stats["operational_level_us"].plot(
+        figsize=(20, 10), xlabel="iteration", ylabel="time[µs]", legend=True
+    )
+    perf_stats["agent_count"].plot(secondary_y=True, ylabel="agents", legend=True)
+    plt.savefig(result_dir / perf_op_lvl_svg_file_name)
+
+    # Total time w.o. operational level / agent count per iteration
+    perf_stats["delta"] = (
+            perf_stats["iteration_loop_us"] - perf_stats["operational_level_us"]
+    )
+    perf_stats["delta"].plot(
+        figsize=(20, 10), xlabel="iteration", ylabel="time[µs]", legend=True
+    )
+    perf_stats["agent_count"].plot(secondary_y=True, ylabel="agents", legend=True)
+    plt.savefig(result_dir / perf_tt_svg_file_name)
 
     logging.info(f"created flamegraph for {test}")
 
@@ -269,7 +297,11 @@ def run_tests(test_selection: str, args):
         if not args or test_selection == "all":
             args = ["--limit", "4000"]
         run_test("large_street_network", args, build_dir, result_dir)
-        results["Large Street Network"] = ["large_street_network.svg",  "large_street_network_geo.svg"]
+        results["Large Street Network"] = ["large_street_network.svg",
+                                           "large_street_network_geo.svg",
+                                           "large_street_network_it_time.svg",
+                                           "large_street_network_op_lvl.svg",
+                                           "large_street_network_tt.svg"]
 
     if test_selection in ["all", "grosser_stern"]:
         logging.info("run grosser_stern performance test")
@@ -277,7 +309,11 @@ def run_tests(test_selection: str, args):
             args = ["--limit", "100"]
         run_test("grosser_stern", args, build_dir, result_dir)
         # adds plot of geo instead of flamegraph
-        results["Grosser Stern"] = ["grosser_stern.svg", "grosser_stern_geo.svg"]
+        results["Grosser Stern"] = ["grosser_stern.svg",
+                                    "grosser_stern_geo.svg",
+                                    "grosser_stern_it_time.svg",
+                                    "grosser_stern_op_lvl.svg",
+                                    "grosser_stern_tt.svg"]
 
     build_report(result_dir, results)
 
