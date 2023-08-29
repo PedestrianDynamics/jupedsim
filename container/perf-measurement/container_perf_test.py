@@ -205,7 +205,7 @@ def run_test(test, args, build_dir, result_dir):
     logging.info(f"created flamegraph for {test}")
 
 
-def build_report(results_dir: pathlib.Path, results: dict[str, str], plots: dict[str, str]) -> None:
+def build_report(results_dir: pathlib.Path, results: dict[str, str], plots: dict[str, dict[str, str]]) -> None:
     template = """
 <!DOCTYPE html>
 <html lang="en">
@@ -276,8 +276,14 @@ def build_report(results_dir: pathlib.Path, results: dict[str, str], plots: dict
     {% endfor %}
     {% for title, content in plots.items() %}
         <div class=plot>
-            <div class="title"> {{ title }} </div>
-            <object type="image/svg+xml" data="./{{ content }}"></object>
+            <h1 class="title"> {{ title }} </h1>
+            {% for plotname, path in content.items() %}
+                <div class=plot>
+                    <div class="title"> {{ plotname }} </div>
+                    
+                    <object type="image/svg+xml" data="./{{ path }}"></object>
+                </div>
+            {% endfor %}
         </div>
     {% endfor %}
     
@@ -316,22 +322,24 @@ def run_tests(test_selection: str, args):
             args = ["--limit", "4000"]
         run_test("large_street_network", args, build_dir, result_dir)
         results["Large Street Network"] = "large_street_network.svg"
-        plots["Large Street Network Geometry"] = "large_street_network_geo.svg"
-        plots["Large Street Network Total iteration time"] = "large_street_network_it_time.svg"
-        plots["Large Street Network Time to compute operational level"] = "large_street_network_op_lvl.svg"
-        plots["Large Street Network Total time w.o. operational level"] = "large_street_network_tt.svg"
-
+        plots["Large Street Network"] = {
+            "Geometry": "large_street_network_geo.svg",
+            "Total iteration time": "large_street_network_it_time.svg",
+            "Time to compute operational level": "large_street_network_op_lvl.svg",
+            "Total time w.o.operational level": "large_street_network_tt.svg"
+        }
     if test_selection in ["all", "grosser_stern"]:
         logging.info("run grosser_stern performance test")
         if not args or test_selection == "all":
             args = ["--limit", "100"]
         run_test("grosser_stern", args, build_dir, result_dir)
-        # adds plot of geo instead of flamegraph
         results["Grosser Stern"] = "grosser_stern.svg"
-        plots["Grosser Stern Geometry"] = "grosser_stern_geo.svg"
-        plots["Grosser Stern Total iteration time"] = "grosser_stern_it_time.svg"
-        plots["Grosser Stern Time to compute operational level"] = "grosser_stern_op_lvl.svg"
-        plots["Grosser Stern Total time w.o. operational level"] = "grosser_stern_tt.svg"
+        plots["Grosser Stern"] = {
+            "Geometry": "grosser_stern_geo.svg",
+            "Total iteration time": "grosser_stern_it_time.svg",
+            "Time to compute operational level": "grosser_stern_op_lvl.svg",
+            "Total time w.o.operational level": "grosser_stern_tt.svg"
+        }
 
     build_report(result_dir, results, plots)
 
