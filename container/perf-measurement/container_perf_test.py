@@ -294,7 +294,7 @@ for (i = 0; i < coll.length; i++) {
 </html>
     """
     tpl = jinja2.Environment().from_string(template)
-    (results_dir / "report.html").write_text(tpl.render(results=results))
+    (results_dir / "report.html").write_text(tpl.render(results=results, plots=plots))
 
 
 def run_tests(test_selection: str, args):
