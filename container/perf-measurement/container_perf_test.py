@@ -219,7 +219,8 @@ def build_report(results_dir: pathlib.Path, results: dict[str, str], plots: dict
     margin: 0 0 0 0;
 }
 .collapsible {
-    background-color: #777;    color: white;
+    background-color: #777;
+    color: white;
     cursor: pointer;
     padding: 6px;
     width: 100%;
@@ -260,10 +261,13 @@ def build_report(results_dir: pathlib.Path, results: dict[str, str], plots: dict
     overflow: hidden;
     text-align: center;
 }
+.plot .title {
+    font-size: 12px;
+}
 </style>
 <head><title>Performance Test Results</title></head>
 <body>
-    <h1 class="title">Performance Test Results with a little change</h1>
+    <h1 class="title">Performance Test Results</h1>
     {% for title, content in results.items() %}
         <button class="collapsible">{{ title }}</button>
         <div class="content">
