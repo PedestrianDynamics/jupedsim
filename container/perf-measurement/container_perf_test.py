@@ -163,6 +163,7 @@ def run_test(test, args, build_dir, result_dir):
     geometry = shapely.from_wkt(geometry_as_wkt)
 
     plt.figure()
+    plt.axis('equal')
     for geo in geometry.geoms:
         xe, ye = geo.exterior.xy
 
