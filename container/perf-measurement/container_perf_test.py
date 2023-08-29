@@ -256,6 +256,10 @@ def build_report(results_dir: pathlib.Path, results: dict[str, str], plots: dict
     overflow: hidden;
     text-align: center;
 }
+.plot {
+    overflow: hidden;
+    text-align: center;
+}
 </style>
 <head><title>Performance Test Results</title></head>
 <body>
@@ -267,7 +271,7 @@ def build_report(results_dir: pathlib.Path, results: dict[str, str], plots: dict
         </div>
     {% endfor %}
     {% for title, content in plots.items() %}
-        <div class="content">
+        <div class=plot>
             <div class="title"> {{ title }} </div>
             <object type="image/svg+xml" data="./{{ content }}"></object>
         </div>
