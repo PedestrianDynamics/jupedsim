@@ -9,7 +9,6 @@
 #include <unordered_map>
 #include <vector>
 
-template <typename Agent>
 class StrategicalDecisionSystem
 {
 public:
@@ -22,18 +21,13 @@ public:
 
     void
     Run(const std::unordered_map<Journey::ID, std::unique_ptr<Journey>>& journeys,
-        std::vector<Agent>& agents) const;
-};
-
-template <typename Agent>
-void StrategicalDecisionSystem<Agent>::Run(
-    const std::unordered_map<Journey::ID, std::unique_ptr<Journey>>& journeys,
-    std::vector<Agent>& agents) const
-{
-    for(auto& agent : agents) {
-        const auto [target, idx, id] = journeys.at(agent.journeyId)->Target(agent);
-        agent.waypoint = target;
-        agent.currentJourneyStageIdx = idx;
-        agent.stageId = id;
+        auto&& agents) const
+    {
+        for(auto& agent : agents) {
+            const auto [target, idx, id] = journeys.at(agent.journeyId)->Target(agent);
+            agent.waypoint = target;
+            agent.currentJourneyStageIdx = idx;
+            agent.stageId = id;
+        }
     }
-}
+};

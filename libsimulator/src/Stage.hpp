@@ -17,22 +17,89 @@
 
 class Simulation;
 
-class Stage
+class BaseStage;
+
+enum class WaitingSetState {
+    Active,
+    Inactive,
+};
+
+class BaseProxy
+{
+protected:
+    const Simulation* simulation;
+    BaseStage* stage;
+
+    BaseProxy(const Simulation* simulation_, BaseStage* stage_)
+        : simulation(simulation_), stage(stage_)
+    {
+    }
+    virtual ~BaseProxy() = default;
+
+public:
+    size_t CountTargeting() const;
+};
+
+class WaypointProxy : public BaseProxy
 {
 public:
-    using ID = jps::UniqueID<Stage>;
+    WaypointProxy(const Simulation* simulation_, BaseStage* stage_) : BaseProxy(simulation_, stage_)
+    {
+    }
+};
+
+class NotifiableWaitingSetProxy : public BaseProxy
+{
+public:
+    NotifiableWaitingSetProxy(const Simulation* simulation_, BaseStage* stage_)
+        : BaseProxy(simulation_, stage_)
+    {
+    }
+    void State(WaitingSetState newState);
+    WaitingSetState State() const;
+    size_t CountWaiting() const;
+    const std::vector<GenericAgent::ID>& Waiting() const;
+};
+
+class NotifiableQueueProxy : public BaseProxy
+{
+public:
+    NotifiableQueueProxy(const Simulation* simulation_, BaseStage* stage_)
+        : BaseProxy(simulation_, stage_)
+    {
+    }
+
+    size_t CountEnqueued() const;
+    const std::vector<GenericAgent::ID>& Enqueued() const;
+    void Pop(size_t count);
+};
+
+class ExitProxy : public BaseProxy
+{
+public:
+    ExitProxy(const Simulation* simulation_, BaseStage* stage_) : BaseProxy(simulation_, stage_) {}
+};
+
+using StageProxy =
+    std::variant<WaypointProxy, NotifiableWaitingSetProxy, NotifiableQueueProxy, ExitProxy>;
+
+class BaseStage
+{
+public:
+    using ID = jps::UniqueID<BaseStage>;
 
 protected:
     ID id;
 
 public:
-    virtual ~Stage() = default;
+    virtual ~BaseStage() = default;
     virtual bool IsCompleted(const GenericAgent& agent) = 0;
     virtual Point Target(const GenericAgent& agent) = 0;
+    virtual StageProxy Proxy(const Simulation* simulation_) = 0;
     ID Id() const { return id; }
 };
 
-class Waypoint : public Stage
+class Waypoint : public BaseStage
 {
     Point position;
     double distance;
@@ -42,10 +109,11 @@ public:
     ~Waypoint() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
     Point Target(const GenericAgent& agent) override;
+    StageProxy Proxy(const Simulation* simulation_) override;
 };
 
 /// Notifies simulation of all agents that need to be removed at the beginning of the next iteration
-class Exit : public Stage
+class Exit : public BaseStage
 {
     Polygon area;
     std::vector<GenericAgent::ID>& toRemove;
@@ -55,36 +123,32 @@ public:
     ~Exit() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
     Point Target(const GenericAgent& agent) override;
+    StageProxy Proxy(const Simulation* simulation_) override;
 };
 
-class NotifiableWaitingSet : public Stage
+class NotifiableWaitingSet : public BaseStage
 {
-public:
-    enum class WaitingState {
-        Active,
-        Inactive,
-    };
-
-private:
     std::vector<Point> slots;
     std::vector<GenericAgent::ID> occupants{};
-    WaitingState state{WaitingState::Active};
+    WaitingSetState state{WaitingSetState::Active};
 
 public:
     NotifiableWaitingSet(std::vector<Point> slots_);
     ~NotifiableWaitingSet() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
     Point Target(const GenericAgent& agent) override;
-    void State(WaitingState s);
-    WaitingState State() const;
+    StageProxy Proxy(const Simulation* simulation_) override;
+    void State(WaitingSetState s);
+    WaitingSetState State() const;
     template <typename T>
     void Update(const NeighborhoodSearch<T>& neighborhoodSearch);
+    const std::vector<GenericAgent::ID>& Occupants() const;
 };
 
 template <typename T>
 void NotifiableWaitingSet::Update(const NeighborhoodSearch<T>& neighborhoodSearch)
 {
-    if(state == WaitingState::Inactive) {
+    if(state == WaitingSetState::Inactive) {
         return;
     }
     const auto count_occupants = occupants.size();
@@ -116,7 +180,7 @@ void NotifiableWaitingSet::Update(const NeighborhoodSearch<T>& neighborhoodSearc
     }
 }
 
-class NotifiableQueue : public Stage
+class NotifiableQueue : public BaseStage
 {
 
 private:
@@ -130,9 +194,11 @@ public:
     ~NotifiableQueue() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
     Point Target(const GenericAgent& agent) override;
+    StageProxy Proxy(const Simulation* simulation_) override;
     template <typename T>
     void Update(const NeighborhoodSearch<T>& neighborhoodSearch);
     void Pop(size_t count);
+    const std::vector<GenericAgent::ID>& Occupants() const;
 };
 
 template <typename T>

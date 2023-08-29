@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Journey.hpp"
 
-#include "Events.hpp"
 #include "GenericAgent.hpp"
 #include "RoutingEngine.hpp"
 #include "SimulationError.hpp"
@@ -22,11 +21,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// SimpleJourney
 ////////////////////////////////////////////////////////////////////////////////
-Journey::Journey(std::vector<Stage*> stages_) : stages(std::move(stages_))
+Journey::Journey(std::vector<BaseStage*> stages_) : stages(std::move(stages_))
 {
 }
 
-std::tuple<Point, size_t, Stage::ID> Journey::Target(const GenericAgent& agent) const
+std::tuple<Point, size_t, BaseStage::ID> Journey::Target(const GenericAgent& agent) const
 {
     for(size_t idx = agent.currentJourneyStageIdx; idx < stages.size(); ++idx) {
         if(stages[idx]->IsCompleted(agent)) {

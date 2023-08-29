@@ -53,7 +53,7 @@ def main():
     model = model_builder.build()
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
-    stage = simulation.add_queue_stage(
+    stage_id = simulation.add_queue_stage(
         [
             (60, 50),
             (59, 50),
@@ -64,11 +64,12 @@ def main():
             (54, 50),
         ]
     )
+    queue = simulation.get_stage_proxy(stage_id)
     exit = simulation.add_exit_stage(
         [(99, 40), (99, 60), (100, 60), (100, 40)]
     )
 
-    journey = jps.JourneyDescription([stage, exit])
+    journey = jps.JourneyDescription([stage_id, exit])
     journey_id = simulation.add_journey(journey)
 
     agent_parameters = jps.VelocityModelAgentParameters()
@@ -90,7 +91,7 @@ def main():
             simulation.iteration_count() > 100 * 52
             and simulation.iteration_count() % 400 == 0
         ):
-            simulation.notify_queue(stage, 1)
+            queue.pop(1)
             print("Next!")
 
         if simulation.iteration_count() % 4 == 0:

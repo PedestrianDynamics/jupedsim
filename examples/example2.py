@@ -53,13 +53,14 @@ def main():
     model = model_builder.build()
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
-    stage = simulation.add_waiting_set_stage(
+    stage_id = simulation.add_waiting_set_stage(
         [
             (60, 50),
             (59, 50),
             (58, 50),
         ]
     )
+    stage = simulation.get_stage_proxy(stage_id)
     exits = [
         simulation.add_exit_stage([(99, 40), (99, 60), (100, 60), (100, 40)]),
         simulation.add_exit_stage([(99, 50), (99, 70), (100, 70), (100, 50)]),
@@ -74,7 +75,7 @@ def main():
 
     journeys = [
         simulation.add_journey(
-            jps.JourneyDescription([waypoints[0], stage, exits[0]])
+            jps.JourneyDescription([waypoints[0], stage_id, exits[0]])
         ),
         simulation.add_journey(
             jps.JourneyDescription([*waypoints[1:], exits[1]])
@@ -119,7 +120,7 @@ def main():
             )
 
         if signal_once and any(simulation.agents_in_range((60, 60), 1)):
-            simulation.notify_waiting_set(stage, False)
+            stage.state = jps.WaitingSetState.Inactive
             print(f"Stop Waiting @{simulation.iteration_count()}")
             signal_once = False
         if simulation.iteration_count() % 4 == 0:

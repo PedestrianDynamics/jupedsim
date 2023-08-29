@@ -9,9 +9,80 @@
 #include "UniqueID.hpp"
 #include "Util.hpp"
 
+#include <cstddef>
 #include <list>
 #include <stdexcept>
 #include <vector>
+
+////////////////////////////////////////////////////////////////////////////////
+/// Base Proxy
+////////////////////////////////////////////////////////////////////////////////
+size_t BaseProxy::CountTargeting() const
+{
+    size_t count = 0;
+    for(const auto& agent : simulation->Agents()) {
+        if(agent.stageId == stage->Id()) {
+            ++count;
+        }
+    }
+    return count;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// NotifiableQueueProxy
+////////////////////////////////////////////////////////////////////////////////
+
+size_t NotifiableQueueProxy::CountEnqueued() const
+{
+    auto concreteStage = dynamic_cast<NotifiableQueue*>(stage);
+    assert(stage);
+    return concreteStage->Occupants().size();
+}
+
+const std::vector<GenericAgent::ID>& NotifiableQueueProxy::Enqueued() const
+{
+    const auto concreteStage = dynamic_cast<const NotifiableQueue*>(stage);
+    assert(stage);
+    return concreteStage->Occupants();
+}
+
+void NotifiableQueueProxy::Pop(size_t count)
+{
+    auto concreteStage = dynamic_cast<NotifiableQueue*>(stage);
+    assert(stage);
+    return concreteStage->Pop(count);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// NotifiableWaitingSetProxy
+////////////////////////////////////////////////////////////////////////////////
+void NotifiableWaitingSetProxy::State(WaitingSetState newState)
+{
+    auto concreteStage = dynamic_cast<NotifiableWaitingSet*>(stage);
+    assert(stage);
+    concreteStage->State(newState);
+}
+
+WaitingSetState NotifiableWaitingSetProxy::State() const
+{
+    const auto concreteStage = dynamic_cast<const NotifiableWaitingSet*>(stage);
+    assert(stage);
+    return concreteStage->State();
+}
+
+size_t NotifiableWaitingSetProxy::CountWaiting() const
+{
+    const auto concreteStage = dynamic_cast<const NotifiableWaitingSet*>(stage);
+    assert(stage);
+    return concreteStage->Occupants().size();
+}
+
+const std::vector<GenericAgent::ID>& NotifiableWaitingSetProxy::Waiting() const
+{
+    auto concreteStage = dynamic_cast<NotifiableWaitingSet*>(stage);
+    assert(stage);
+    return concreteStage->Occupants();
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Waypoint
@@ -29,6 +100,11 @@ bool Waypoint::IsCompleted(const GenericAgent& agent)
 Point Waypoint::Target(const GenericAgent&)
 {
     return position;
+}
+
+StageProxy Waypoint::Proxy(const Simulation* simulation)
+{
+    return WaypointProxy(simulation, this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -56,6 +132,11 @@ Point Exit::Target(const GenericAgent&)
     return area.Centroid();
 }
 
+StageProxy Exit::Proxy(const Simulation* simulation)
+{
+    return ExitProxy(simulation, this);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 /// NotifiableWaitingSet
 ////////////////////////////////////////////////////////////////////////////////
@@ -66,7 +147,7 @@ NotifiableWaitingSet::NotifiableWaitingSet(std::vector<Point> slots_) : slots(st
 
 bool NotifiableWaitingSet::IsCompleted(const GenericAgent& agent)
 {
-    if(state == WaitingState::Active) {
+    if(state == WaitingSetState::Active) {
         return false;
     }
     const auto find_iter = std::find(std::begin(occupants), std::end(occupants), agent.id);
@@ -79,7 +160,7 @@ bool NotifiableWaitingSet::IsCompleted(const GenericAgent& agent)
 
 Point NotifiableWaitingSet::Target(const GenericAgent& agent)
 {
-    if(state == WaitingState::Inactive) {
+    if(state == WaitingSetState::Inactive) {
         return slots[0];
     }
 
@@ -94,20 +175,30 @@ Point NotifiableWaitingSet::Target(const GenericAgent& agent)
     return slots[next_slot_index];
 }
 
-void NotifiableWaitingSet::State(WaitingState s)
+void NotifiableWaitingSet::State(WaitingSetState s)
 {
     if(state == s) {
         return;
     }
-    if(s == WaitingState::Active) {
+    if(s == WaitingSetState::Active) {
         occupants.clear();
     }
     state = s;
 }
 
-NotifiableWaitingSet::WaitingState NotifiableWaitingSet::State() const
+WaitingSetState NotifiableWaitingSet::State() const
 {
     return state;
+}
+
+StageProxy NotifiableWaitingSet::Proxy(const Simulation* simulation)
+{
+    return NotifiableWaitingSetProxy(simulation, this);
+}
+
+const std::vector<GenericAgent::ID>& NotifiableWaitingSet::Occupants() const
+{
+    return occupants;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -139,4 +230,14 @@ Point NotifiableQueue::Target(const GenericAgent& agent)
 void NotifiableQueue::Pop(size_t count)
 {
     popCountOnNextUpdate = std::min(occupants.size(), popCountOnNextUpdate + count);
+}
+
+StageProxy NotifiableQueue::Proxy(const Simulation* simulation)
+{
+    return NotifiableQueueProxy(simulation, this);
+}
+
+const std::vector<GenericAgent::ID>& NotifiableQueue::Occupants() const
+{
+    return occupants;
 }

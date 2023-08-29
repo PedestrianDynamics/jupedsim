@@ -66,6 +66,10 @@ OWNED_WRAPPER(JPS_Simulation);
 OWNED_WRAPPER(JPS_AgentIterator);
 OWNED_WRAPPER(JPS_AgentIdIterator);
 OWNED_WRAPPER(JPS_RoutingEngine);
+OWNED_WRAPPER(JPS_NotifiableQueueProxy);
+OWNED_WRAPPER(JPS_WaitingSetProxy);
+OWNED_WRAPPER(JPS_WaypointProxy);
+OWNED_WRAPPER(JPS_ExitProxy);
 WRAPPER(JPS_Agent);
 WRAPPER(JPS_GeneralizedCentrifugalForceModelState);
 WRAPPER(JPS_VelocityModelState);
@@ -418,6 +422,64 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def_property_readonly("e0", [](const JPS_VelocityModelState_Wrapper& w) {
             return JPS_VelocityModelState_GetE0(w.handle);
         });
+    py::class_<JPS_NotifiableQueueProxy_Wrapper>(m, "NotifiableQueueProxy")
+        .def(
+            "count_targeting",
+            [](const JPS_NotifiableQueueProxy_Wrapper& w) {
+                return JPS_NotifiableQueueProxy_GetCountTargeting(w.handle);
+            })
+        .def(
+            "count_enqueued",
+            [](const JPS_NotifiableQueueProxy_Wrapper& w) {
+                return JPS_NotifiableQueueProxy_GetCountEnqueued(w.handle);
+            })
+        .def(
+            "pop",
+            [](JPS_NotifiableQueueProxy_Wrapper& w, size_t count) {
+                JPS_NotifiableQueueProxy_Pop(w.handle, count);
+            })
+        .def("enqueued", [](const JPS_NotifiableQueueProxy_Wrapper& w) {
+            const JPS_AgentId* ids{};
+            const auto count = JPS_NotifiableQueueProxy_GetEnqueued(w.handle, &ids);
+            return std::vector<JPS_AgentId>{ids, ids + count};
+        });
+    py::enum_<JPS_WaitingSetState>(m, "WaitingSetState")
+        .value("Active", JPS_WaitingSet_Active)
+        .value("Inactive", JPS_WaitingSet_Inactive);
+    py::class_<JPS_WaitingSetProxy_Wrapper>(m, "WaitingSetProxy")
+        .def(
+            "count_targeting",
+            [](const JPS_WaitingSetProxy_Wrapper& w) {
+                return JPS_WaitingSetProxy_GetCountTargeting(w.handle);
+            })
+        .def(
+            "count_waiting",
+            [](const JPS_WaitingSetProxy_Wrapper& w) {
+                return JPS_WaitingSetProxy_GetCountWaiting(w.handle);
+            })
+        .def(
+            "waiting",
+            [](const JPS_WaitingSetProxy_Wrapper& w) {
+                const JPS_AgentId* ids{};
+                const auto count = JPS_WaitingSetProxy_GetWaiting(w.handle, &ids);
+                return std::vector<JPS_AgentId>{ids, ids + count};
+            })
+        .def_property(
+            "state",
+            [](const JPS_WaitingSetProxy_Wrapper& w) {
+                return JPS_WaitingSetProxy_GetWaitingSetState(w.handle);
+            },
+            [](JPS_WaitingSetProxy_Wrapper& w, JPS_WaitingSetState state) {
+                JPS_WaitingSetProxy_SetWaitingSetState(w.handle, state);
+            });
+    py::class_<JPS_WaypointProxy_Wrapper>(m, "WaypointProxy")
+        .def("count_targeting", [](const JPS_WaypointProxy_Wrapper& w) {
+            return JPS_WaypointProxy_GetCountTargeting(w.handle);
+        });
+    py::class_<JPS_ExitProxy_Wrapper>(m, "ExitProxy")
+        .def("count_targeting", [](const JPS_ExitProxy_Wrapper& w) {
+            return JPS_ExitProxy_GetCountTargeting(w.handle);
+        });
     py::class_<JPS_Agent_Wrapper>(m, "Agent")
         .def_property_readonly(
             "id", [](const JPS_Agent_Wrapper& w) { return JPS_Agent_GetId(w.handle); })
@@ -680,30 +742,56 @@ PYBIND11_MODULE(py_jupedsim, m)
                     JPS_Simulation_AgentsInPolygon(w.handle, ppoly.data(), ppoly.size()));
             })
         .def(
-            "notify_waiting_set",
-            [](JPS_Simulation_Wrapper& w, JPS_StageId stageId, bool active) {
-                JPS_ErrorMessage errorMsg{};
-                auto result =
-                    JPS_Simulation_ChangeWaitingSetState(w.handle, stageId, active, &errorMsg);
-                if(result) {
-                    return;
+            "get_stage_proxy",
+            [](JPS_Simulation_Wrapper& w, JPS_StageId id)
+                -> std::variant<
+                    std::unique_ptr<JPS_WaypointProxy_Wrapper>,
+                    std::unique_ptr<JPS_NotifiableQueueProxy_Wrapper>,
+                    std::unique_ptr<JPS_WaitingSetProxy_Wrapper>,
+                    std::unique_ptr<JPS_ExitProxy_Wrapper>> {
+                const auto type = JPS_Simulation_GetStageType(w.handle, id);
+                JPS_ErrorMessage errorMessage{};
+                const auto raise = [](JPS_ErrorMessage err) {
+                    const auto msg = std::string(JPS_ErrorMessage_GetMessage(err));
+                    JPS_ErrorMessage_Free(err);
+                    throw std::runtime_error{msg};
+                };
+
+                switch(type) {
+                    case JPS_NotifiableQueueType: {
+                        auto ptr = std::make_unique<JPS_NotifiableQueueProxy_Wrapper>(
+                            JPS_Simulation_GetNotifiableQueueProxy(w.handle, id, &errorMessage));
+                        if(!ptr) {
+                            raise(errorMessage);
+                        }
+                        return ptr;
+                    }
+                    case JPS_WaitingSetType: {
+                        auto ptr = std::make_unique<JPS_WaitingSetProxy_Wrapper>(
+                            JPS_Simulation_GetWaitingSetProxy(w.handle, id, &errorMessage));
+                        if(!ptr) {
+                            raise(errorMessage);
+                        }
+                        return ptr;
+                    }
+                    case JPS_WaypointType: {
+                        auto ptr = std::make_unique<JPS_WaypointProxy_Wrapper>(
+                            JPS_Simulation_GetWaypointProxy(w.handle, id, &errorMessage));
+                        if(!ptr) {
+                            raise(errorMessage);
+                        }
+                        return ptr;
+                    }
+                    case JPS_ExitType: {
+                        auto ptr = std::make_unique<JPS_ExitProxy_Wrapper>(
+                            JPS_Simulation_GetExitProxy(w.handle, id, &errorMessage));
+                        if(!ptr) {
+                            raise(errorMessage);
+                        }
+                        return ptr;
+                    }
                 }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
-            })
-        .def(
-            "notify_queue",
-            [](JPS_Simulation_Wrapper& w, JPS_StageId stageId, size_t count) {
-                JPS_ErrorMessage errorMsg{};
-                auto result =
-                    JPS_Simulation_PopAgentsFromQueue(w.handle, stageId, count, &errorMsg);
-                if(result) {
-                    return;
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
+                UNREACHABLE();
             })
         .def(
             "set_tracing",
