@@ -159,7 +159,9 @@ def create_journey(sim: jps.Simulation):
         ),
     ]
     journey = jps.JourneyDescription(stages)
-    return sim.add_journey(journey), (stages[0], stages[-2])
+    queue = sim.get_stage_proxy(stages[-2])
+    waiting_area = sim.get_stage_proxy(stages[0])
+    return sim.add_journey(journey), (waiting_area, queue)
 
 
 def parse_args():
@@ -211,7 +213,7 @@ def main():
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
     simulation.set_tracing(True)
 
-    journey, wait_points = create_journey(simulation)
+    journey, (waiting_area, queue) = create_journey(simulation)
     spawners = [
         Spawner(
             simulation,
@@ -240,11 +242,11 @@ def main():
             for s in spawners:
                 s.spawn(iteration)
             if (iteration + 100 * 30) % (100 * 60) == 0:
-                simulation.notify_waiting_set(wait_points[0], False)
+                waiting_area.state = jps.WaitingSetState.Inactive
             if iteration % (100 * 60) == 0:
-                simulation.notify_waiting_set(wait_points[0], True)
+                waiting_area.state = jps.WaitingSetState.Active
             if iteration % (100 * 8) == 0:
-                simulation.notify_queue(wait_points[1], 1)
+                queue.pop(1)
             if iteration % 50 == 0:
                 writer.write_iteration_state(simulation)
             simulation.iterate()

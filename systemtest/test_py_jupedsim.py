@@ -163,7 +163,7 @@ def test_can_wait():
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
 
     wp = simulation.add_waypoint_stage((50, 50), 1)
-    waiting_set = simulation.add_waiting_set_stage(
+    waiting_set_id = simulation.add_waiting_set_stage(
         [
             (70, 50),
             (69, 50),
@@ -174,10 +174,11 @@ def test_can_wait():
             (64, 50),
         ]
     )
+    waiting_set = simulation.get_stage_proxy(waiting_set_id)
     exit = simulation.add_exit_stage(
         [(99, 40), (99, 60), (100, 60), (100, 40)]
     )
-    journey = jps.JourneyDescription([wp, waiting_set, exit])
+    journey = jps.JourneyDescription([wp, waiting_set_id, exit])
 
     journey_id = simulation.add_journey(journey)
 
@@ -221,7 +222,7 @@ def test_can_wait():
     while simulation.agent_count() > 0:
         simulation.iterate()
         if simulation.iteration_count() == 1000:
-            simulation.notify_waiting_set(waiting_set, False)
+            waiting_set.state = jps.WaitingSetState.Inactive
 
 
 def test_can_change_journey_while_waiting():
@@ -250,18 +251,19 @@ def test_can_change_journey_while_waiting():
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
     wp = simulation.add_waypoint_stage((50, 50), 1)
-    stage = simulation.add_waiting_set_stage(
+    stage_id = simulation.add_waiting_set_stage(
         [
             (60, 50),
             (59, 50),
             (58, 50),
         ]
     )
+    stage = simulation.get_stage_proxy(stage_id)
     exit1 = simulation.add_exit_stage(
         [(99, 40), (99, 60), (100, 60), (100, 40)]
     )
 
-    journey1 = jps.JourneyDescription([wp, stage, exit1])
+    journey1 = jps.JourneyDescription([wp, stage_id, exit1])
     journey2 = jps.JourneyDescription(
         [
             simulation.add_waypoint_stage((60, 40), 1),
@@ -308,6 +310,6 @@ def test_can_change_journey_while_waiting():
             redirect_once = False
 
         if signal_once and simulation.agents_in_range((60, 60), 1):
-            simulation.notify_waiting_set(stage, False)
+            stage.state = jps.WaitingSetState.Inactive
             signal_once = False
         simulation.iterate()

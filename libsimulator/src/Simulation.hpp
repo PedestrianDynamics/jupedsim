@@ -3,7 +3,6 @@
 #pragma once
 
 #include "AgentExitSystem.hpp"
-#include "Events.hpp"
 #include "GenericAgent.hpp"
 #include "Geometry.hpp"
 #include "Journey.hpp"
@@ -38,8 +37,8 @@
 class Simulation
 {
     SimulationClock _clock;
-    StrategicalDecisionSystem<GenericAgent> _stategicalDecisionSystem{};
-    TacticalDecisionSystem<GenericAgent> _tacticalDecisionSystem{};
+    StrategicalDecisionSystem _stategicalDecisionSystem{};
+    TacticalDecisionSystem _tacticalDecisionSystem{};
     OperationalDecisionSystem _operationalDecisionSystem;
     AgentExitSystem<GenericAgent> _agentExitSystem{};
     NeighborhoodSearch<GenericAgent> _neighborhoodSearch{2.2};
@@ -48,7 +47,7 @@ class Simulation
     std::vector<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
     std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;
-    std::unordered_map<Stage::ID, std::unique_ptr<Stage>> _stages;
+    std::unordered_map<BaseStage::ID, std::unique_ptr<BaseStage>> _stages;
     PerfStats _perfStats{};
 
 public:
@@ -66,8 +65,8 @@ public:
     void SetTracing(bool on);
     PerfStats GetLastStats() const;
     void Iterate();
-    Journey::ID AddJourney(const std::vector<Stage::ID>& stages);
-    Stage::ID AddStage(const StageDescription stageDescription);
+    Journey::ID AddJourney(const std::vector<BaseStage::ID>& stages);
+    BaseStage::ID AddStage(const StageDescription stageDescription);
     void RemoveAgent(GenericAgent::ID id);
     const std::vector<GenericAgent::ID>& RemovedAgents() const;
     size_t AgentCount() const;
@@ -80,10 +79,10 @@ public:
     /// Returns IDs of all agents inside the defined polygon
     /// @param polygon Required to be a simple convex polygon with CCW ordering.
     std::vector<GenericAgent::ID> AgentsInPolygon(const std::vector<Point>& polygon);
-    void Notify(Event evt);
     GenericAgent::ID AddAgent(GenericAgent&& agent);
     const GenericAgent& Agent(GenericAgent::ID id) const;
     GenericAgent& Agent(GenericAgent::ID id);
     const std::vector<GenericAgent>& Agents() const;
     OperationalModelType ModelType() const;
+    StageProxy Stage(BaseStage::ID stageId) const;
 };

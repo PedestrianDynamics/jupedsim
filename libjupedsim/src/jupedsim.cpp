@@ -4,7 +4,6 @@
 
 #include "AgentIterator.hpp"
 #include "ErrorMessage.hpp"
-#include "Events.hpp"
 #include "GeneralizedCentrifugalForceModelData.hpp"
 #include "Journey.hpp"
 #include "Stage.hpp"
@@ -330,6 +329,146 @@ JPS_Point JPS_VelocityModelState_GetE0(JPS_VelocityModelState handle)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// NotifiableQueueProxy
+////////////////////////////////////////////////////////////////////////////////////////////////////
+size_t JPS_NotifiableQueueProxy_GetCountTargeting(JPS_NotifiableQueueProxy handle)
+{
+    assert(handle);
+    auto proxy = reinterpret_cast<NotifiableQueueProxy*>(handle);
+    return proxy->CountTargeting();
+}
+
+size_t JPS_NotifiableQueueProxy_GetCountEnqueued(JPS_NotifiableQueueProxy handle)
+{
+    assert(handle);
+    auto proxy = reinterpret_cast<NotifiableQueueProxy*>(handle);
+    return proxy->CountEnqueued();
+}
+
+void JPS_NotifiableQueueProxy_Pop(JPS_NotifiableQueueProxy handle, size_t count)
+{
+    assert(handle);
+    auto proxy = reinterpret_cast<NotifiableQueueProxy*>(handle);
+    proxy->Pop(count);
+}
+
+size_t
+JPS_NotifiableQueueProxy_GetEnqueued(JPS_NotifiableQueueProxy handle, const JPS_AgentId** data)
+{
+    assert(handle);
+    auto proxy = reinterpret_cast<NotifiableQueueProxy*>(handle);
+    const auto& agents = proxy->Enqueued();
+    static_assert(
+        std::is_same<JPS_AgentId, GenericAgent::ID::underlying_type>::value,
+        "GenericAgentIDs cannot be casted in JPS_AgentId");
+    *data = reinterpret_cast<const JPS_AgentId*>(agents.data());
+    return agents.size();
+}
+
+void JPS_NotifiableQueueProxy_Free(JPS_NotifiableQueueProxy handle)
+{
+    delete reinterpret_cast<NotifiableQueueProxy*>(handle);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// WaitingSetProxy
+////////////////////////////////////////////////////////////////////////////////////////////////////
+size_t JPS_WaitingSetProxy_GetCountTargeting(JPS_WaitingSetProxy handle)
+{
+    assert(handle);
+    auto proxy = reinterpret_cast<NotifiableWaitingSetProxy*>(handle);
+    return proxy->CountTargeting();
+}
+
+size_t JPS_WaitingSetProxy_GetCountWaiting(JPS_WaitingSetProxy handle)
+{
+    assert(handle);
+    auto proxy = reinterpret_cast<NotifiableWaitingSetProxy*>(handle);
+    return proxy->CountWaiting();
+}
+
+size_t JPS_WaitingSetProxy_GetWaiting(JPS_WaitingSetProxy handle, const JPS_AgentId** data)
+{
+    assert(handle);
+    auto proxy = reinterpret_cast<NotifiableWaitingSetProxy*>(handle);
+    const auto& agents = proxy->Waiting();
+    static_assert(
+        std::is_same<JPS_AgentId, GenericAgent::ID::underlying_type>::value,
+        "GenericAgentIDs cannot be casted in JPS_AgentId");
+    *data = reinterpret_cast<const JPS_AgentId*>(agents.data());
+    return agents.size();
+}
+
+void JPS_WaitingSetProxy_SetWaitingSetState(
+    JPS_WaitingSetProxy handle,
+    JPS_WaitingSetState newState)
+{
+    const auto convert = [](const auto s) {
+        switch(s) {
+            case JPS_WaitingSet_Active:
+                return WaitingSetState::Active;
+            case JPS_WaitingSet_Inactive:
+                return WaitingSetState::Inactive;
+        }
+        UNREACHABLE();
+    };
+    assert(handle);
+    auto proxy = reinterpret_cast<NotifiableWaitingSetProxy*>(handle);
+    proxy->State(convert(newState));
+}
+
+JPS_WaitingSetState JPS_WaitingSetProxy_GetWaitingSetState(JPS_WaitingSetProxy handle)
+{
+    const auto convert = [](const auto s) {
+        switch(s) {
+            case WaitingSetState::Active:
+                return JPS_WaitingSet_Active;
+            case WaitingSetState::Inactive:
+                return JPS_WaitingSet_Inactive;
+        }
+        UNREACHABLE();
+    };
+    assert(handle);
+    auto proxy = reinterpret_cast<NotifiableWaitingSetProxy*>(handle);
+    return convert(proxy->State());
+}
+
+void JPS_WaitingSetProxy_Free(JPS_WaitingSetProxy handle)
+{
+    delete reinterpret_cast<NotifiableWaitingSetProxy*>(handle);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// WaypointProxy
+////////////////////////////////////////////////////////////////////////////////////////////////////
+size_t JPS_WaypointProxy_GetCountTargeting(JPS_WaypointProxy handle)
+{
+    assert(handle);
+    auto proxy = reinterpret_cast<WaypointProxy*>(handle);
+    return proxy->CountTargeting();
+}
+
+void JPS_WaypointProxy_Free(JPS_WaypointProxy handle)
+{
+    delete reinterpret_cast<WaypointProxy*>(handle);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// WaitingSetProxy
+////////////////////////////////////////////////////////////////////////////////////////////////////
+size_t JPS_ExitProxy_GetCountTargeting(JPS_ExitProxy handle)
+{
+    assert(handle);
+    auto proxy = reinterpret_cast<ExitProxy*>(handle);
+    return proxy->CountTargeting();
+}
+
+void JPS_ExitProxy_Free(JPS_ExitProxy handle)
+{
+    delete reinterpret_cast<ExitProxy*>(handle);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Agent
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 JPS_AgentId JPS_Agent_GetId(JPS_Agent handle)
@@ -476,7 +615,7 @@ void JPS_AgentIdIterator_Free(JPS_AgentIdIterator handle)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// JourneyDescription
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-using JourneyDesc = std::vector<Stage::ID>;
+using JourneyDesc = std::vector<BaseStage::ID>;
 
 JPS_JourneyDescription JPS_JourneyDescription_Create()
 {
@@ -881,45 +1020,95 @@ JPS_Simulation_AgentsInPolygon(JPS_Simulation handle, const JPS_Point* polygon, 
         new AgentIdIterator(simulation->AgentsInPolygon(poly)));
 }
 
-bool JPS_Simulation_ChangeWaitingSetState(
-    JPS_Simulation handle,
-    JPS_StageId stageId,
-    bool active,
-    JPS_ErrorMessage* errorMessage)
+JPS_StageType JPS_Simulation_GetStageType(JPS_Simulation handle, JPS_StageId id)
 {
     assert(handle);
-    auto simuation = reinterpret_cast<Simulation*>(handle);
-    try {
-        simuation->Notify(NotifyWaitingSet{
-            stageId,
-            active ? NotifiableWaitingSet::WaitingState::Active :
-                     NotifiableWaitingSet::WaitingState::Inactive});
-    } catch(const std::exception& ex) {
-        if(errorMessage) {
-            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    const auto convert = [](const auto t) {
+        switch(t) {
+            case 0:
+                return JPS_WaypointType;
+            case 1:
+                return JPS_WaitingSetType;
+            case 2:
+                return JPS_NotifiableQueueType;
+            case 3:
+                return JPS_ExitType;
         }
-        return false;
-    }
-    return true;
+        UNREACHABLE();
+    };
+    return convert(simulation->Stage(id).index());
 }
 
-bool JPS_Simulation_PopAgentsFromQueue(
+JPS_NotifiableQueueProxy JPS_Simulation_GetNotifiableQueueProxy(
     JPS_Simulation handle,
     JPS_StageId stageId,
-    size_t count,
     JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
-    auto simuation = reinterpret_cast<Simulation*>(handle);
+    auto simulation = reinterpret_cast<Simulation*>(handle);
     try {
-        simuation->Notify(NotifyQueue{stageId, count});
+        return reinterpret_cast<JPS_NotifiableQueueProxy>(
+            new NotifiableQueueProxy(std::get<NotifiableQueueProxy>(simulation->Stage(stageId))));
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
         }
-        return false;
+        return nullptr;
     }
-    return true;
+}
+JUPEDSIM_API JPS_WaitingSetProxy JPS_Simulation_GetWaitingSetProxy(
+    JPS_Simulation handle,
+    JPS_StageId stageId,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    try {
+        return reinterpret_cast<JPS_WaitingSetProxy>(new NotifiableWaitingSetProxy(
+            std::get<NotifiableWaitingSetProxy>(simulation->Stage(stageId))));
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+        return nullptr;
+    }
+}
+
+JUPEDSIM_API JPS_WaypointProxy JPS_Simulation_GetWaypointProxy(
+    JPS_Simulation handle,
+    JPS_StageId stageId,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    try {
+        return reinterpret_cast<JPS_WaypointProxy>(
+            new WaypointProxy(std::get<WaypointProxy>(simulation->Stage(stageId))));
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+        return nullptr;
+    }
+}
+
+JUPEDSIM_API JPS_ExitProxy JPS_Simulation_GetExitProxy(
+    JPS_Simulation handle,
+    JPS_StageId stageId,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    try {
+        return reinterpret_cast<JPS_ExitProxy>(
+            new ExitProxy(std::get<ExitProxy>(simulation->Stage(stageId))));
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+        return nullptr;
+    }
 }
 
 void JPS_Simulation_SetTracing(JPS_Simulation handle, bool status)

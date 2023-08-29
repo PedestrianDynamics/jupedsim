@@ -110,3 +110,90 @@ def test_can_share_queue_between_stages(tmp_path):
             # writer.write_iteration_state(simulation)
             break
     # writer.end_writing()
+
+
+def test_can_use_stage_proxy(tmp_path):
+    messages = []
+
+    def log_msg_handler(msg):
+        messages.append(msg)
+
+    jps.set_info_callback(log_msg_handler)
+    jps.set_warning_callback(log_msg_handler)
+    jps.set_error_callback(log_msg_handler)
+
+    polygon = shapely.union(
+        shapely.Polygon([(-10, 2.5), (-10, -2.5), (10, -2.5), (10, 2.5)]),
+        shapely.Polygon([(-2.5, 2.5), (-2.5, -10), (2.5, -10), (2.5, 2.5)]),
+    )
+
+    geo_builder = jps.GeometryBuilder()
+    geo_builder.add_accessible_area(polygon.exterior.coords[:-1])
+    geometry = geo_builder.build()
+
+    model_builder = jps.VelocityModelBuilder(
+        a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
+    )
+    profile_id = 1
+    model_builder.add_parameter_profile(
+        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.15
+    )
+
+    model = model_builder.build()
+
+    simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
+
+    exit_id = simulation.add_exit_stage(
+        [(-2.5, -9.5), (-2.5, -10), (2.5, -10), (2.5, -9.5)]
+    )
+
+    waypoint_id = simulation.add_waypoint_stage((9.5, 0), 1)
+
+    exit_journey_id = simulation.add_journey(
+        jps.JourneyDescription(
+            [
+                exit_id,
+            ]
+        )
+    )
+
+    entry_journey_id = simulation.add_journey(
+        jps.JourneyDescription(
+            [
+                waypoint_id,
+            ]
+        )
+    )
+
+    exit = simulation.get_stage_proxy(exit_id)
+    waypoint = simulation.get_stage_proxy(waypoint_id)
+
+    assert exit.count_targeting() == 0
+    assert waypoint.count_targeting() == 0
+
+    agent_parameters = jps.VelocityModelAgentParameters()
+    agent_parameters.orientation = (1.0, 0.0)
+    agent_parameters.profile_id = profile_id
+    agent_parameters.position = (-9.5, 0)
+    agent_parameters.journey_id = exit_journey_id
+    agent_id = simulation.add_agent(agent_parameters)
+
+    assert exit.count_targeting() == 1
+    assert waypoint.count_targeting() == 0
+
+    simulation.iterate()
+
+    assert exit.count_targeting() == 1
+    assert waypoint.count_targeting() == 0
+
+    simulation.switch_agent_journey(
+        agent_id=agent_id, journey_id=entry_journey_id, stage_index=0
+    )
+
+    assert exit.count_targeting() == 0
+    assert waypoint.count_targeting() == 1
+
+    simulation.iterate()
+
+    assert exit.count_targeting() == 0
+    assert waypoint.count_targeting() == 1

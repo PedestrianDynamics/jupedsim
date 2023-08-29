@@ -6,7 +6,6 @@
 
 #include <vector>
 
-template <typename Agent>
 class TacticalDecisionSystem
 {
 public:
@@ -17,15 +16,11 @@ public:
     TacticalDecisionSystem(TacticalDecisionSystem&& other) = delete;
     TacticalDecisionSystem& operator=(TacticalDecisionSystem&& other) = delete;
 
-    void Run(RoutingEngine& routingEngine, std::vector<Agent>& agents) const;
-};
-
-template <typename Agent>
-void TacticalDecisionSystem<Agent>::Run(RoutingEngine& routingEngine, std::vector<Agent>& agents)
-    const
-{
-    for(auto& agent : agents) {
-        const auto dest = agent.waypoint;
-        agent.destination = routingEngine.ComputeWaypoint(agent.pos, dest);
+    void Run(RoutingEngine& routingEngine, auto&& agents) const
+    {
+        for(auto& agent : agents) {
+            const auto dest = agent.waypoint;
+            agent.destination = routingEngine.ComputeWaypoint(agent.pos, dest);
+        }
     }
-}
+};

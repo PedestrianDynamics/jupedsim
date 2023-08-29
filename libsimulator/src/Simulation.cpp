@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Simulation.hpp"
 #include "GenericAgent.hpp"
+#include "IteratorPair.hpp"
 #include "OperationalModel.hpp"
+#include "Stage.hpp"
 
 Simulation::Simulation(
     std::unique_ptr<OperationalModel>&& operationalModel,
@@ -58,9 +60,9 @@ void Simulation::Iterate()
     _clock.Advance();
 }
 
-Journey::ID Simulation::AddJourney(const std::vector<Stage::ID>& stageIds)
+Journey::ID Simulation::AddJourney(const std::vector<BaseStage::ID>& stageIds)
 {
-    std::vector<Stage*> stages;
+    std::vector<BaseStage*> stages;
     stages.reserve(stageIds.size());
     std::transform(
         std::begin(stageIds),
@@ -79,20 +81,20 @@ Journey::ID Simulation::AddJourney(const std::vector<Stage::ID>& stageIds)
     return id;
 }
 
-Stage::ID Simulation::AddStage(const StageDescription stageDescription)
+BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
 {
-    std::unique_ptr<Stage> stage = std::visit(
+    std::unique_ptr<BaseStage> stage = std::visit(
         overloaded{
-            [](const WaypointDescription& d) -> std::unique_ptr<Stage> {
+            [](const WaypointDescription& d) -> std::unique_ptr<BaseStage> {
                 return std::make_unique<Waypoint>(d.position, d.distance);
             },
-            [this](const ExitDescription& d) -> std::unique_ptr<Stage> {
+            [this](const ExitDescription& d) -> std::unique_ptr<BaseStage> {
                 return std::make_unique<Exit>(d.polygon, _removedAgentsInLastIteration);
             },
-            [](const NotifiableWaitingSetDescription& d) -> std::unique_ptr<Stage> {
+            [](const NotifiableWaitingSetDescription& d) -> std::unique_ptr<BaseStage> {
                 return std::make_unique<NotifiableWaitingSet>(d.slots);
             },
-            [](const NotifiableQueueDescription& d) -> std::unique_ptr<Stage> {
+            [](const NotifiableQueueDescription& d) -> std::unique_ptr<BaseStage> {
                 return std::make_unique<NotifiableQueue>(d.slots);
             }},
         stageDescription);
@@ -116,6 +118,9 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
     _agents.emplace_back(std::move(agent));
     _neighborhoodSearch.AddAgent(_agents.back());
 
+    auto v = IteratorPair(std::prev(std::end(_agents)), std::end(_agents));
+    _stategicalDecisionSystem.Run(_journeys, v);
+    _tacticalDecisionSystem.Run(*_routingEngine, v);
     return _agents.back().id.getID();
 }
 
@@ -241,28 +246,12 @@ std::vector<GenericAgent::ID> Simulation::AgentsInPolygon(const std::vector<Poin
     return result;
 }
 
-void Simulation::Notify(Event evt)
-{
-    std::visit(
-        overloaded{
-            [this](const NotifyWaitingSet& evt) {
-                auto* stage = dynamic_cast<NotifiableWaitingSet*>(_stages.at(evt.stageId).get());
-                if(stage == nullptr) {
-                    throw SimulationError(
-                        "Stage id {} is not a NotiafiableWaitingSet", evt.stageId);
-                }
-                stage->State(evt.newState);
-            },
-            [this](const NotifyQueue& evt) {
-                auto* stage = dynamic_cast<NotifiableQueue*>(_stages.at(evt.stageId).get());
-                if(stage == nullptr) {
-                    throw SimulationError("Stage id {} is not a NotiafiableQueue", evt.stageId);
-                }
-                stage->Pop(evt.count);
-            }},
-        evt);
-}
 OperationalModelType Simulation::ModelType() const
 {
     return _operationalDecisionSystem.ModelType();
+}
+
+StageProxy Simulation::Stage(BaseStage::ID stageId) const
+{
+    return _stages.at(stageId)->Proxy(this);
 }

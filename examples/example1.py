@@ -55,12 +55,13 @@ def main():
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
 
-    stage = simulation.add_waiting_set_stage([(16, 5), (15, 5), (14, 5)])
-    exit = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
+    stage_id = simulation.add_waiting_set_stage([(16, 5), (15, 5), (14, 5)])
+    exit_stage = simulation.get_stage_proxy(stage_id)
+    exit_id = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
 
     journey = jps.JourneyDescription()
-    journey.append(stage)
-    journey.append(exit)
+    journey.append(stage_id)
+    journey.append(exit_id)
 
     journey_id = simulation.add_journey(journey)
 
@@ -88,7 +89,7 @@ def main():
                     print(f"{a.model.e0}")
                     break
             if simulation.iteration_count() == 1300:
-                simulation.notify_waiting_set(stage, False)
+                exit_stage.state = jps.WaitingSetState.Inactive
         except KeyboardInterrupt:
             writer.end_writing()
             print("CTRL-C Recieved! Shuting down")

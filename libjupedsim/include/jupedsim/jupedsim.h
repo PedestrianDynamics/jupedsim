@@ -2,6 +2,7 @@
 /* SPDX-License-Identifier: LGPL-3.0-or-later */
 #pragma once
 
+#include <cstddef>
 #ifdef _WIN32
 #ifdef JUPEDSIM_API_EXPORTS
 #define JUPEDSIM_API __declspec(dllexport)
@@ -436,6 +437,53 @@ JPS_GeneralizedCentrifugalForceModelState_GetE0(JPS_GeneralizedCentrifugalForceM
  */
 typedef struct JPS_VelocityModelState_t const* JPS_VelocityModelState;
 JUPEDSIM_API JPS_Point JPS_VelocityModelState_GetE0(JPS_VelocityModelState handle);
+
+enum JPS_StageType { JPS_NotifiableQueueType, JPS_WaitingSetType, JPS_WaypointType, JPS_ExitType };
+
+/**
+ * Opaque type of an NotifiableQueueProxy
+ */
+typedef struct JPS_NotifiableQueueProxy_t* JPS_NotifiableQueueProxy;
+
+JUPEDSIM_API size_t JPS_NotifiableQueueProxy_GetCountTargeting(JPS_NotifiableQueueProxy handle);
+
+JUPEDSIM_API size_t JPS_NotifiableQueueProxy_GetCountEnqueued(JPS_NotifiableQueueProxy handle);
+
+JUPEDSIM_API void JPS_NotifiableQueueProxy_Pop(JPS_NotifiableQueueProxy handle, size_t count);
+
+JUPEDSIM_API size_t
+JPS_NotifiableQueueProxy_GetEnqueued(JPS_NotifiableQueueProxy handle, const JPS_AgentId** data);
+
+JUPEDSIM_API void JPS_NotifiableQueueProxy_Free(JPS_NotifiableQueueProxy handle);
+
+enum JPS_WaitingSetState { JPS_WaitingSet_Active, JPS_WaitingSet_Inactive };
+typedef struct JPS_WaitingSetProxy_t* JPS_WaitingSetProxy;
+
+JUPEDSIM_API size_t JPS_WaitingSetProxy_GetCountTargeting(JPS_WaitingSetProxy handle);
+
+JUPEDSIM_API size_t JPS_WaitingSetProxy_GetCountWaiting(JPS_WaitingSetProxy handle);
+
+JUPEDSIM_API size_t
+JPS_WaitingSetProxy_GetWaiting(JPS_WaitingSetProxy handle, const JPS_AgentId** data);
+
+JUPEDSIM_API void
+JPS_WaitingSetProxy_SetWaitingSetState(JPS_WaitingSetProxy handle, JPS_WaitingSetState newState);
+
+JUPEDSIM_API JPS_WaitingSetState JPS_WaitingSetProxy_GetWaitingSetState(JPS_WaitingSetProxy handle);
+
+JUPEDSIM_API void JPS_WaitingSetProxy_Free(JPS_WaitingSetProxy handle);
+
+typedef struct JPS_WaypointProxy_t* JPS_WaypointProxy;
+
+JUPEDSIM_API size_t JPS_WaypointProxy_GetCountTargeting(JPS_WaypointProxy handle);
+
+JUPEDSIM_API void JPS_WaypointProxy_Free(JPS_WaypointProxy handle);
+
+typedef struct JPS_ExitProxy_t* JPS_ExitProxy;
+
+JUPEDSIM_API size_t JPS_ExitProxy_GetCountTargeting(JPS_ExitProxy handle);
+
+JUPEDSIM_API void JPS_ExitProxy_Free(JPS_ExitProxy handle);
 
 /**
  * Opaque type of an agent
@@ -889,34 +937,26 @@ JPS_Simulation_AgentsInRange(JPS_Simulation handle, JPS_Point position, double d
 JUPEDSIM_API JPS_AgentIdIterator
 JPS_Simulation_AgentsInPolygon(JPS_Simulation handle, const JPS_Point* polygon, size_t len_polygon);
 
-/**
- * Tell the simulation to change the state (active/inactive) of a waiting set.
- * If the specified journey does not contain a waiting set at the specified index the function
- * returns false and the errorMessage is filled.
- * @param handle of the Simulation to operate on
- * @param stageId stage to modify
- * @param active, new state of the WaitingSet
- * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
- * @return true on success, false on any error, e.g. unknown journeyId
- */
-JUPEDSIM_API bool JPS_Simulation_ChangeWaitingSetState(
+JUPEDSIM_API JPS_StageType JPS_Simulation_GetStageType(JPS_Simulation handle, JPS_StageId id);
+
+JUPEDSIM_API JPS_NotifiableQueueProxy JPS_Simulation_GetNotifiableQueueProxy(
     JPS_Simulation handle,
     JPS_StageId stageId,
-    bool active,
     JPS_ErrorMessage* errorMessage);
 
-/**
- * Tell the simulation to release `count` many agents from the queue.
- * @param handle of the Simulation to operate on
- * @param stageId stage to modify
- * @param count of agents to release
- * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
- * @return true on success, false on any error, e.g. unknown journeyId
- */
-JUPEDSIM_API bool JPS_Simulation_PopAgentsFromQueue(
+JUPEDSIM_API JPS_WaitingSetProxy JPS_Simulation_GetWaitingSetProxy(
     JPS_Simulation handle,
     JPS_StageId stageId,
-    size_t count,
+    JPS_ErrorMessage* errorMessage);
+
+JUPEDSIM_API JPS_WaypointProxy JPS_Simulation_GetWaypointProxy(
+    JPS_Simulation handle,
+    JPS_StageId stageId,
+    JPS_ErrorMessage* errorMessage);
+
+JUPEDSIM_API JPS_ExitProxy JPS_Simulation_GetExitProxy(
+    JPS_Simulation handle,
+    JPS_StageId stageId,
     JPS_ErrorMessage* errorMessage);
 
 /**
