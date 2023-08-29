@@ -177,7 +177,7 @@ def run_test(test, args, build_dir, result_dir):
 
     # Total iteration time / agent count per iteration
     perf_stats["iteration_loop_us"].plot(
-        figsize=(20, 10), xlabel="iteration", ylabel="time[µs]", legend=True
+        figsize=(12.5, 6.25), xlabel="iteration", ylabel="time[µs]", legend=True
     )
     perf_stats["agent_count"].plot(secondary_y=True, ylabel="agents", legend=True)
     plt.savefig(result_dir / perf_it_time_svg_file_name)
@@ -185,7 +185,7 @@ def run_test(test, args, build_dir, result_dir):
 
     # Time to compute oerational level update / agent count per iteration
     perf_stats["operational_level_us"].plot(
-        figsize=(20, 10), xlabel="iteration", ylabel="time[µs]", legend=True
+        figsize=(12.5, 6.25), xlabel="iteration", ylabel="time[µs]", legend=True
     )
     perf_stats["agent_count"].plot(secondary_y=True, ylabel="agents", legend=True)
     plt.savefig(result_dir / perf_op_lvl_svg_file_name)
@@ -196,7 +196,7 @@ def run_test(test, args, build_dir, result_dir):
             perf_stats["iteration_loop_us"] - perf_stats["operational_level_us"]
     )
     perf_stats["delta"].plot(
-        figsize=(20, 10), xlabel="iteration", ylabel="time[µs]", legend=True
+        figsize=(12.5, 6.25), xlabel="iteration", ylabel="time[µs]", legend=True
     )
     perf_stats["agent_count"].plot(secondary_y=True, ylabel="agents", legend=True)
     plt.savefig(result_dir / perf_tt_svg_file_name)
@@ -205,7 +205,7 @@ def run_test(test, args, build_dir, result_dir):
     logging.info(f"created flamegraph for {test}")
 
 
-def build_report(results_dir: pathlib.Path, results: dict[str, list[str]]) -> None:
+def build_report(results_dir: pathlib.Path, results: dict[str, str], plots: dict[str, str]) -> None:
     template = """
 <!DOCTYPE html>
 <html lang="en">
@@ -264,11 +264,16 @@ def build_report(results_dir: pathlib.Path, results: dict[str, list[str]]) -> No
     {% for title, content in results.items() %}
         <button class="collapsible">{{ title }}</button>
         <div class="content">
-            {% for svg_filename in content %}
-                <object type="image/svg+xml" data="./{{ svg_filename }}"></object>
-            {% endfor %}
+            <object type="image/svg+xml" data="./{{ content }}"></object>
         </div>
     {% endfor %}
+    {% for title, content in plots.items() %}
+        <div class="content">
+            <div class="title"> {{ title }} </div>
+            <object type="image/svg+xml" data="./{{ content }}"></object>
+        </div>
+    {% endfor %}
+    
 <script defer>
 var coll = document.getElementsByClassName("collapsible");
 var i;
@@ -297,17 +302,17 @@ def run_tests(test_selection: str, args):
     result_dir = build_dir / "results"
     result_dir.mkdir()
 
-    results = {}
+    results, plots = {}, {}
     if test_selection in ["all", "large_street_network"]:
         logging.info("run large_street_network performance test")
         if not args or test_selection == "all":
             args = ["--limit", "4000"]
         run_test("large_street_network", args, build_dir, result_dir)
-        results["Large Street Network"] = ["large_street_network.svg",
-                                           "large_street_network_geo.svg",
-                                           "large_street_network_it_time.svg",
-                                           "large_street_network_op_lvl.svg",
-                                           "large_street_network_tt.svg"]
+        results["Large Street Network"] = ["large_street_network.svg"]
+        plots["Large Street Network Geometry"] = ["large_street_network_geo.svg"],
+        plots["Large Street Network Total iteration time"] = ["large_street_network_it_time.svg"]
+        plots["Large Street Network Time to compute operational level"] = ["large_street_network_op_lvl.svg"]
+        plots["Large Street Network Total time w.o. operational level"] = ["large_street_network_tt.svg"]
 
     if test_selection in ["all", "grosser_stern"]:
         logging.info("run grosser_stern performance test")
@@ -315,13 +320,13 @@ def run_tests(test_selection: str, args):
             args = ["--limit", "100"]
         run_test("grosser_stern", args, build_dir, result_dir)
         # adds plot of geo instead of flamegraph
-        results["Grosser Stern"] = ["grosser_stern.svg",
-                                    "grosser_stern_geo.svg",
-                                    "grosser_stern_it_time.svg",
-                                    "grosser_stern_op_lvl.svg",
-                                    "grosser_stern_tt.svg"]
+        results["Grosser Stern"] = ["grosser_stern.svg"]
+        plots["Grosser Stern Geometry"] = ["grosser_stern_geo.svg"]
+        plots["Grosser Stern Total iteration time"] = ["grosser_stern_it_time.svg"]
+        plots["Grosser Stern Time to compute operational level"] = ["grosser_stern_op_lvl.svg"]
+        plots["Grosser Stern Total time w.o. operational level"] = ["grosser_stern_tt.svg"]
 
-    build_report(result_dir, results)
+    build_report(result_dir, results, plots)
 
 
 def main():
