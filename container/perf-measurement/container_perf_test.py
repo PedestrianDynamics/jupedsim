@@ -215,7 +215,7 @@ def build_report(results_dir: pathlib.Path, results: dict[str, str], plots: dict
     color: white;
     padding: 6px;
     text-align: center;
-    font-size: 15px;
+    font-size: 20px;
     margin: 0 0 0 0;
 }
 .collapsible {
@@ -227,7 +227,7 @@ def build_report(results_dir: pathlib.Path, results: dict[str, str], plots: dict
     border: none;
     text-align: center;
     outline: none;
-    font-size: 12px;
+    font-size: 15px;
 }
 
 .collapsible:after {
@@ -257,12 +257,18 @@ def build_report(results_dir: pathlib.Path, results: dict[str, str], plots: dict
     overflow: hidden;
     text-align: center;
 }
+.plot-container {
+    overflow: hidden;
+    text-align: center;
+    border: 5px solid #000; 
+    margin-bottom: 5px;
+}
 .plot {
     overflow: hidden;
     text-align: center;
 }
 .plot .title {
-    font-size: 12px;
+    font-size: 15px;
 }
 </style>
 <head><title>Performance Test Results</title></head>
@@ -275,7 +281,7 @@ def build_report(results_dir: pathlib.Path, results: dict[str, str], plots: dict
         </div>
     {% endfor %}
     {% for title, content in plots.items() %}
-        <div class=plot>
+        <div class=plot-container>
             <h1 class="title"> {{ title }} </h1>
             {% for plotname, path in content.items() %}
                 <div class=plot>
