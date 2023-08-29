@@ -219,8 +219,7 @@ def build_report(results_dir: pathlib.Path, results: dict[str, str], plots: dict
     margin: 0 0 0 0;
 }
 .collapsible {
-    background-color: #777;
-    color: white;
+    background-color: #777;    color: white;
     cursor: pointer;
     padding: 6px;
     width: 100%;
@@ -308,11 +307,11 @@ def run_tests(test_selection: str, args):
         if not args or test_selection == "all":
             args = ["--limit", "4000"]
         run_test("large_street_network", args, build_dir, result_dir)
-        results["Large Street Network"] = ["large_street_network.svg"]
-        plots["Large Street Network Geometry"] = ["large_street_network_geo.svg"],
-        plots["Large Street Network Total iteration time"] = ["large_street_network_it_time.svg"]
-        plots["Large Street Network Time to compute operational level"] = ["large_street_network_op_lvl.svg"]
-        plots["Large Street Network Total time w.o. operational level"] = ["large_street_network_tt.svg"]
+        results["Large Street Network"] = "large_street_network.svg"
+        plots["Large Street Network Geometry"] = "large_street_network_geo.svg"
+        plots["Large Street Network Total iteration time"] = "large_street_network_it_time.svg"
+        plots["Large Street Network Time to compute operational level"] = "large_street_network_op_lvl.svg"
+        plots["Large Street Network Total time w.o. operational level"] = "large_street_network_tt.svg"
 
     if test_selection in ["all", "grosser_stern"]:
         logging.info("run grosser_stern performance test")
@@ -320,11 +319,11 @@ def run_tests(test_selection: str, args):
             args = ["--limit", "100"]
         run_test("grosser_stern", args, build_dir, result_dir)
         # adds plot of geo instead of flamegraph
-        results["Grosser Stern"] = ["grosser_stern.svg"]
-        plots["Grosser Stern Geometry"] = ["grosser_stern_geo.svg"]
-        plots["Grosser Stern Total iteration time"] = ["grosser_stern_it_time.svg"]
-        plots["Grosser Stern Time to compute operational level"] = ["grosser_stern_op_lvl.svg"]
-        plots["Grosser Stern Total time w.o. operational level"] = ["grosser_stern_tt.svg"]
+        results["Grosser Stern"] = "grosser_stern.svg"
+        plots["Grosser Stern Geometry"] = "grosser_stern_geo.svg"
+        plots["Grosser Stern Total iteration time"] = "grosser_stern_it_time.svg"
+        plots["Grosser Stern Time to compute operational level"] = "grosser_stern_op_lvl.svg"
+        plots["Grosser Stern Total time w.o. operational level"] = "grosser_stern_tt.svg"
 
     build_report(result_dir, results, plots)
 
