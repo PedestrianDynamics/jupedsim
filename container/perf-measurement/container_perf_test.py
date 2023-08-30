@@ -367,11 +367,12 @@ def build_report(results_dir: pathlib.Path,
             <div class=metadata>
                  {% for test, table in meta_data.items() %}
                     {% if  title == test %}
-                        {{ table }}
+                        <div>
+                          {{ table }}
+                        </div>
                     {% endif %}
                  {% endfor %}
                  
-            <span>placeholder (remove me later)</span>
             </div>
             {% for plotname, path in content.items() %}
                 <div class=plot>
