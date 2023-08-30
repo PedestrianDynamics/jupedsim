@@ -208,13 +208,47 @@ def run_test(test, args, build_dir, result_dir):
     plt.figure()
 
     metadata = pd.read_sql_query("SELECT * FROM metadata", db)
-    condition = metadata['key'].isin(['hostname', 'commit_id', 'performance_test_description'])
-    metadata_as_html = metadata[condition].to_html()
+    condition = metadata['key'].isin(['hostname', 'commit_id', 'description'])
 
+    meta_dict = {}
+    commit_id = None
+    for index, row in metadata[condition].iterrows():
+        key = row['key']
+        value = row['value']
+        if key == 'commit_id':
+            commit_id = value
+        else:
+            meta_dict[key] = value
+    metadata_as_html = metadata_to_html(commit_id, meta_dict)
     with open(result_dir / metadata_file_name, 'w') as file:
         file.write(metadata_as_html)
 
     logging.info(f"created flamegraph for {test}")
+
+
+def metadata_to_html(commit_id: str, other_metadata: dict[str, str]) -> str:
+    html = f"""  
+<table>
+  <tr>
+    <th colspan="2">Metadata</th>
+  </tr>
+  <tr>
+    <td>Commit</td>
+    <td>{"no commit available" if commit_id is None else f'<a href="https://github.com/PedestrianDynamics/jupedsim/commit/{commit_id}">commit</a>'}</td>
+  </tr>"""
+
+    for key, value in other_metadata.items():
+        html += f"""  
+          <tr>
+            <td>{key}</td>
+            <td>{value}</td>
+          </tr>
+        """
+
+    html += """
+    
+</table"""
+    return html
 
 
 def build_report(results_dir: pathlib.Path,
