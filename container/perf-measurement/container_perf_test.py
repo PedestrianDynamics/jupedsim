@@ -328,15 +328,16 @@ def build_report(results_dir: pathlib.Path,
 }
 .meta-table {
     border-collapse: collapse;
-    margin: 25px 0;
+    margin: 25px auto;
     font-family: sans-serif;
     min-width: 400px;
+    border-radius: 5px, 5px, 0, 0;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 .meta-table thead tr {
     background-color: #777777;
     color: #ffffff;
-    text-align: left;
+    text-align: center;
 }
 .meta-table th,
 .meta-table td {
@@ -373,6 +374,7 @@ def build_report(results_dir: pathlib.Path,
                         {{ table }}
                     {% endif %}
                  {% endfor %}
+                 
             </div>
             {% for plotname, path in content.items() %}
                 <div class=plot>
