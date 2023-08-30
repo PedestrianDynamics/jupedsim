@@ -371,6 +371,7 @@ def build_report(results_dir: pathlib.Path,
                     {% endif %}
                  {% endfor %}
                  
+            <span>placeholder (remove me later)</span>
             </div>
             {% for plotname, path in content.items() %}
                 <div class=plot>
