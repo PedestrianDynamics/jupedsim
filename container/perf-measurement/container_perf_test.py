@@ -88,7 +88,6 @@ def run_test(test, args, build_dir, result_dir):
     perf_it_time_svg_file_name = f"{test}_it_time.svg"
     perf_op_lvl_svg_file_name = f"{test}_op_lvl.svg"
     perf_tt_svg_file_name = f"{test}_tt.svg"
-    sqlite_file_name = f"{test}_sql.sqlite"
     metadata_file_name = f"{test}_metadata_as_html.txt"
 
     with subprocess.Popen(
@@ -154,9 +153,6 @@ def run_test(test, args, build_dir, result_dir):
         for file in files:
             if file.endswith(".sqlite") and test in file:
                 sql_files.append(os.path.join(root, file))
-
-    os.system(f"cp {sql_files[0]} {result_dir / sqlite_file_name}")
-    print(f"copied {sql_files[0]} to {result_dir / sqlite_file_name}")
 
     db = sqlite3.connect(sql_files[0])
 
