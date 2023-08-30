@@ -46,7 +46,7 @@ class StatsWriter:
         )
         cur.close()
 
-    def write_metadata(self, commit_id, hostname, description=(None,)):
+    def write_metadata(self, commit_id, hostname, description="No description available"):
         cur = self.con.cursor()
         cur.execute(
             "INSERT INTO metadata VALUES(?, ?)", ("commit_id", commit_id)
