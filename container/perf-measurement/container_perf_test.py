@@ -89,6 +89,7 @@ def run_test(test, args, build_dir, result_dir):
     perf_op_lvl_svg_file_name = f"{test}_op_lvl.svg"
     perf_tt_svg_file_name = f"{test}_tt.svg"
     sqlite_file_name = f"{test}_sql.sqlite"
+    metadata_file_name = f"{test}_metadata_as_html.txt"
 
     with subprocess.Popen(
             [
@@ -160,7 +161,7 @@ def run_test(test, args, build_dir, result_dir):
     db = sqlite3.connect(sql_files[0])
 
     perf_stats = pd.read_sql_query("SELECT * FROM perf_statistics", db)
-    metadata = pd.read_sql_query("SELECT * FROM metadata", db)
+
     geometry_as_wkt = (
         db.cursor().execute("SELECT * from geometry LIMIT 1").fetchone()[0]
     )
@@ -206,10 +207,20 @@ def run_test(test, args, build_dir, result_dir):
     plt.savefig(result_dir / perf_tt_svg_file_name)
     plt.figure()
 
+    metadata = pd.read_sql_query("SELECT * FROM metadata", db)
+    condition = metadata['key'].isin(['hostname', 'commit_id', 'performance_test_description'])
+    metadata_as_html = metadata[condition].to_html()
+
+    with open(result_dir / metadata_file_name, 'w') as file:
+        file.write(metadata_as_html)
+
     logging.info(f"created flamegraph for {test}")
 
 
-def build_report(results_dir: pathlib.Path, results: dict[str, str], plots: dict[str, dict[str, str]]) -> None:
+def build_report(results_dir: pathlib.Path,
+                 results: dict[str, str],
+                 plots: dict[str, dict[str, str]],
+                 meta_data: dict[str, str]) -> None:
     template = """
 <!DOCTYPE html>
 <html lang="en">
@@ -267,6 +278,9 @@ def build_report(results_dir: pathlib.Path, results: dict[str, str], plots: dict
     border: 5px solid #000; 
     margin-bottom: 5px;
 }
+.metadata {
+    font-size: 12px;    
+}
 .plot {
     overflow: hidden;
     text-align: center;
@@ -287,6 +301,13 @@ def build_report(results_dir: pathlib.Path, results: dict[str, str], plots: dict
     {% for title, content in plots.items() %}
         <div class=plot-container>
             <h1 class="title"> {{ title }} </h1>
+            <div class=metadata>
+                 {% for test, table in meta_data.items() %}
+                    {% if  title == test %}
+                        {{ table }}
+                    {% endif %}
+                 {% endfor %}
+            </div>
             {% for plotname, path in content.items() %}
                 <div class=plot>
                     <div class="title"> {{ plotname }} </div>
@@ -317,7 +338,7 @@ for (i = 0; i < coll.length; i++) {
 </html>
     """
     tpl = jinja2.Environment().from_string(template)
-    (results_dir / "report.html").write_text(tpl.render(results=results, plots=plots))
+    (results_dir / "report.html").write_text(tpl.render(results=results, plots=plots, meta_data=meta_data))
 
 
 def run_tests(test_selection: str, args):
@@ -325,7 +346,7 @@ def run_tests(test_selection: str, args):
     result_dir = build_dir / "results"
     result_dir.mkdir()
 
-    results, plots = {}, {}
+    results, plots, metadata = {}, {}, {}
     if test_selection in ["all", "large_street_network"]:
         logging.info("run large_street_network performance test")
         if not args or test_selection == "all":
@@ -338,6 +359,10 @@ def run_tests(test_selection: str, args):
             "Time to compute operational level": "large_street_network_op_lvl.svg",
             "Total time w.o.operational level": "large_street_network_tt.svg"
         }
+        with open(result_dir / "large_street_network_metadata_as_html.txt", 'r') as file:
+            metadata_as_html = file.read()
+        metadata["Large Street Network"] = metadata_as_html
+
     if test_selection in ["all", "grosser_stern"]:
         logging.info("run grosser_stern performance test")
         if not args or test_selection == "all":
@@ -350,8 +375,11 @@ def run_tests(test_selection: str, args):
             "Time to compute operational level": "grosser_stern_op_lvl.svg",
             "Total time w.o.operational level": "grosser_stern_tt.svg"
         }
+        with open(result_dir / "grosser_stern_metadata_as_html.txt", 'r') as file:
+            metadata_as_html = file.read()
+        metadata["Grosser Stern"] = metadata_as_html
 
-    build_report(result_dir, results, plots)
+    build_report(result_dir, results, plots, metadata)
 
 
 def main():
