@@ -364,15 +364,12 @@ def build_report(results_dir: pathlib.Path,
     {% for title, content in plots.items() %}
         <div class=plot-container>
             <h1 class="title"> {{ title }} </h1>
-            <div class=metadata>
+            <div class="metadata">
                  {% for test, table in meta_data.items() %}
                     {% if  title == test %}
-                        <div>
-                          {{ table }}
-                        </div>
+                        {{ table }}
                     {% endif %}
-                 {% endfor %}
-                 
+                 {% endfor %}     
             </div>
             {% for plotname, path in content.items() %}
                 <div class=plot>
