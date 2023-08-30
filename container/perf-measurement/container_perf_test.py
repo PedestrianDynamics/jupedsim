@@ -228,14 +228,17 @@ def run_test(test, args, build_dir, result_dir):
 
 def metadata_to_html(commit_id: str, other_metadata: dict[str, str]) -> str:
     html = f"""  
-<table>
-  <tr>
-    <th colspan="2">Metadata</th>
-  </tr>
-  <tr>
-    <td>Commit</td>
-    <td>{"no commit available" if commit_id is None else f'<a href="https://github.com/PedestrianDynamics/jupedsim/commit/{commit_id}">commit</a>'}</td>
-  </tr>"""
+<table class=meta-table>
+  <thead>
+    <tr>
+      <th colspan="2">Metadata</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Commit</td>
+      <td>{"no commit available" if commit_id is None else f'<a href="https://github.com/PedestrianDynamics/jupedsim/commit/{commit_id}">commit</a>'}</td>
+    </tr>"""
 
     for key, value in other_metadata.items():
         html += f"""  
@@ -246,7 +249,8 @@ def metadata_to_html(commit_id: str, other_metadata: dict[str, str]) -> str:
         """
 
     html += """
-    
+
+  </tbody>
 </table"""
     return html
 
@@ -322,6 +326,34 @@ def build_report(results_dir: pathlib.Path,
 .plot .title {
     font-size: 15px;
 }
+.meta-table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+.meta-table thead tr {
+    background-color: #777777;
+    color: #ffffff;
+    text-align: left;
+}
+.meta-table th,
+.meta-table td {
+    padding: 12px 15px;
+}
+.meta-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.meta-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.meta-table tbody tr:last-of-type {
+    border-bottom: 2px solid #777777;
+}
+
 </style>
 <head><title>Performance Test Results</title></head>
 <body>
