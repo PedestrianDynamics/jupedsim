@@ -369,7 +369,8 @@ def build_report(results_dir: pathlib.Path,
                     {% if  title == test %}
                         {{ table }}
                     {% endif %}
-                 {% endfor %}     
+                 {% endfor %}   
+            <span></span>  
             </div>
             {% for plotname, path in content.items() %}
                 <div class=plot>
