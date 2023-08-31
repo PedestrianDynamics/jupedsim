@@ -6,7 +6,7 @@ mkdir build
 set PYTHONPATH=%cd%\python_modules\jupedsim;%cd%\build\lib\Release
 cd build
 echo %PYTHONPATH%
-cmake .. -DBUILD_TESTS=ON
+cmake .. -DBUILD_TESTS=ON -DCMAKE_UNITY_BUILD=ON
 cmake --build . --config Release
 cmake --build . --config Release --target unittests
 cd ..
