@@ -6,7 +6,7 @@ mkdir build && cd build
 python3.11 -m venv python-env
 source python-env/bin/activate
 pip install -r ../requirements.txt
-cmake .. -DBUILD_TESTS=ON -DWERROR=ON
+cmake .. -DBUILD_TESTS=ON -DWERROR=ON -DCMAKE_UNITY_BUILD=ON
 cmake --build . -- -j ${numcpus}
 cmake --build . -t tests -- -j ${numcpus}
 cd ..

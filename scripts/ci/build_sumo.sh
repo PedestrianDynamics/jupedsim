@@ -3,7 +3,7 @@ export CXX=/usr/bin/g++
 export CC=/usr/bin/gcc
 numcpus=$(nproc)
 mkdir build-jupedsim && cd build-jupedsim
-cmake  ../jupedsim -DBUILD_TESTS=ON
+cmake  ../jupedsim -DBUILD_TESTS=ON -DCMAKE_UNITY_BUILD=ON
 cmake --build . -- -j ${numcpus} -- VERBOSE=1
 cmake --build . -t tests -- -j${numcpus} -- VERBOSE=1
 cmake --build . -t install -- -j${numcpus} -- VERBOSE=1

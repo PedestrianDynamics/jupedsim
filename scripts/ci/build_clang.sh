@@ -5,6 +5,6 @@ export PYTHON_DIR=/opt/python/cp311-cp311
 
 numcpus=$(nproc)
 mkdir build && cd build
-cmake  .. -DBUILD_TESTS=ON -DWERROR=ON -DPython_ROOT_DIR=$PYTHON_DIR
+cmake  .. -DBUILD_TESTS=ON -DWERROR=ON -DPython_ROOT_DIR=$PYTHON_DIR -DCMAKE_UNITY_BUILD=ON
 cmake --build . -- -j ${numcpus} -- VERBOSE=1
 cmake --build . -t tests -- -j ${numcpus} -- VERBOSE=1
