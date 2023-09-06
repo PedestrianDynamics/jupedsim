@@ -10,6 +10,7 @@ setuptools
 
 # test deps
 pytest~=7.2
+pandas~=2.1
 
 # ci deps
 jinja2
