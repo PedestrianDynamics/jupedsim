@@ -1,7 +1,7 @@
 // Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "jupedsim/jupedsim.h"
 #include <Unreachable.hpp>
-#include <jupedsim/jupedsim.h>
 
 #include <algorithm>
 #include <exception>
@@ -92,9 +92,33 @@ public:
     }
 };
 
-std::tuple<double, double> intoTuple(const JPS_Point& p)
+static std::tuple<double, double> intoTuple(const JPS_Point& p)
 {
     return std::make_tuple(p.x, p.y);
+}
+
+static std::vector<std::tuple<double, double>> intoTuple(const std::vector<JPS_Point>& p)
+{
+    std::vector<std::tuple<double, double>> res;
+    res.reserve(p.size());
+    std::transform(
+        std::begin(p), std::end(p), std::back_inserter(res), [](auto&& x) { return intoTuple(x); });
+    return res;
+}
+
+static JPS_Point intoJPS_Point(const std::tuple<double, double> p)
+{
+    return JPS_Point{std::get<0>(p), std::get<1>(p)};
+};
+
+static std::vector<JPS_Point> intoJPS_Point(const std::vector<std::tuple<double, double>>& p)
+{
+    std::vector<JPS_Point> res;
+    res.reserve(p.size());
+    std::transform(std::begin(p), std::end(p), std::back_inserter(res), [](auto&& x) {
+        return intoJPS_Point(x);
+    });
+    return res;
 }
 
 PYBIND11_MODULE(py_jupedsim, m)
@@ -136,52 +160,6 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def_readonly("compiler_version", &JPS_BuildInfo::compiler_version)
         .def_readonly("library_version", &JPS_BuildInfo::library_version);
     m.def("get_build_info", []() { return JPS_GetBuildInfo(); });
-    py::class_<JPS_Point>(m, "Point")
-        .def(py::init())
-        .def(py::init([](std::tuple<double, double> tup) {
-            return JPS_Point{std::get<0>(tup), std::get<1>(tup)};
-        }))
-        .def_readwrite("x", &JPS_Point::x)
-        .def_readwrite("y", &JPS_Point::y)
-        .def(
-            "__getitem__",
-            [](const JPS_Point& pt, int idx) {
-                switch(idx) {
-                    case 0:
-                        return pt.x;
-                    case 1:
-                        return pt.y;
-                    default:
-                        throw pybind11::index_error{};
-                }
-            })
-        .def(
-            "__setitem__",
-            [](JPS_Point& pt, int idx, double value) {
-                switch(idx) {
-                    case 0:
-                        pt.x = value;
-                        break;
-                    case 1:
-                        pt.y = value;
-                        break;
-                    default:
-                        throw pybind11::index_error{};
-                }
-            })
-        .def(
-            "__eq__",
-            [](const JPS_Point& lhs, const JPS_Point& rhs) {
-                return lhs.x == rhs.x && lhs.y == rhs.y;
-            })
-        .def(
-            "__str__", [](const JPS_Point& pt) { return fmt::format("({:f}, {:f})", pt.x, pt.y); });
-
-    py::implicitly_convertible<std::tuple<double, double>, JPS_Point>();
-    py::implicitly_convertible<std::tuple<int, int>, JPS_Point>();
-    py::implicitly_convertible<std::tuple<int, double>, JPS_Point>();
-    py::implicitly_convertible<std::tuple<double, int>, JPS_Point>();
-
     py::class_<JPS_Trace>(m, "Trace")
         .def_readonly("iteration_duration", &JPS_Trace::iteration_duration)
         .def_readonly("operational_level_duration", &JPS_Trace::operational_level_duration)
@@ -194,9 +172,24 @@ PYBIND11_MODULE(py_jupedsim, m)
     py::class_<JPS_GCFMModelAgentParameters>(m, "GCFMModelAgentParameters")
         .def(py::init())
         .def_readwrite("speed", &JPS_GCFMModelAgentParameters::speed)
-        .def_readwrite("e0", &JPS_GCFMModelAgentParameters::e0)
-        .def_readwrite("position", &JPS_GCFMModelAgentParameters::position)
-        .def_readwrite("orientation", &JPS_GCFMModelAgentParameters::orientation)
+        .def_property(
+            "e0",
+            [](const JPS_GCFMModelAgentParameters& p) { return intoTuple(p.e0); },
+            [](JPS_GCFMModelAgentParameters& p, std::tuple<double, double> pt) {
+                p.e0 = intoJPS_Point(pt);
+            })
+        .def_property(
+            "position",
+            [](const JPS_GCFMModelAgentParameters& p) { return intoTuple(p.position); },
+            [](JPS_GCFMModelAgentParameters& p, std::tuple<double, double> pt) {
+                p.position = intoJPS_Point(pt);
+            })
+        .def_property(
+            "orientation",
+            [](const JPS_GCFMModelAgentParameters& p) { return intoTuple(p.orientation); },
+            [](JPS_GCFMModelAgentParameters& p, std::tuple<double, double> pt) {
+                p.orientation = intoJPS_Point(pt);
+            })
         .def_readwrite("journey_id", &JPS_GCFMModelAgentParameters::journeyId)
         .def_readwrite("profile_id", &JPS_GCFMModelAgentParameters::profileId)
         .def_readwrite("id", &JPS_GCFMModelAgentParameters::agentId)
@@ -214,9 +207,24 @@ PYBIND11_MODULE(py_jupedsim, m)
         });
     py::class_<JPS_VelocityModelAgentParameters>(m, "VelocityModelAgentParameters")
         .def(py::init())
-        .def_readwrite("e0", &JPS_VelocityModelAgentParameters::e0)
-        .def_readwrite("position", &JPS_VelocityModelAgentParameters::position)
-        .def_readwrite("orientation", &JPS_VelocityModelAgentParameters::orientation)
+        .def_property(
+            "e0",
+            [](const JPS_VelocityModelAgentParameters& p) { return intoTuple(p.e0); },
+            [](JPS_VelocityModelAgentParameters& p, std::tuple<double, double> pt) {
+                p.e0 = intoJPS_Point(pt);
+            })
+        .def_property(
+            "position",
+            [](const JPS_VelocityModelAgentParameters& p) { return intoTuple(p.position); },
+            [](JPS_VelocityModelAgentParameters& p, std::tuple<double, double> pt) {
+                p.position = intoJPS_Point(pt);
+            })
+        .def_property(
+            "orientation",
+            [](const JPS_VelocityModelAgentParameters& p) { return intoTuple(p.orientation); },
+            [](JPS_VelocityModelAgentParameters& p, std::tuple<double, double> pt) {
+                p.orientation = intoJPS_Point(pt);
+            })
         .def_readwrite("journey_id", &JPS_VelocityModelAgentParameters::journeyId)
         .def_readwrite("profile_id", &JPS_VelocityModelAgentParameters::profileId)
         .def_readwrite("id", &JPS_VelocityModelAgentParameters::agentId)
@@ -238,15 +246,18 @@ PYBIND11_MODULE(py_jupedsim, m)
         }))
         .def(
             "add_accessible_area",
-            [](const JPS_GeometryBuilder_Wrapper& w, std::vector<JPS_Point> polygon) {
-                JPS_GeometryBuilder_AddAccessibleArea(w.handle, polygon.data(), polygon.size());
+            [](const JPS_GeometryBuilder_Wrapper& w,
+               std::vector<std::tuple<double, double>> polygon) {
+                const auto pts = intoJPS_Point(polygon);
+                JPS_GeometryBuilder_AddAccessibleArea(w.handle, pts.data(), pts.size());
             },
             "Add area where agents can move")
         .def(
             "exclude_from_accessible_area",
-            [](const JPS_GeometryBuilder_Wrapper& w, std::vector<JPS_Point> polygon) {
-                JPS_GeometryBuilder_ExcludeFromAccessibleArea(
-                    w.handle, polygon.data(), polygon.size());
+            [](const JPS_GeometryBuilder_Wrapper& w,
+               std::vector<std::tuple<double, double>> polygon) {
+                const auto pts = intoJPS_Point(polygon);
+                JPS_GeometryBuilder_ExcludeFromAccessibleArea(w.handle, pts.data(), pts.size());
             },
             "Add areas where agents can not move (obstacles)")
         .def(
@@ -416,11 +427,11 @@ PYBIND11_MODULE(py_jupedsim, m)
             })
         .def_property_readonly(
             "e0", [](const JPS_GeneralizedCentrifugalForceModelState_Wrapper& w) {
-                return JPS_GeneralizedCentrifugalForceModelState_GetE0(w.handle);
+                return intoTuple(JPS_GeneralizedCentrifugalForceModelState_GetE0(w.handle));
             });
     py::class_<JPS_VelocityModelState_Wrapper>(m, "VelocityModelState")
         .def_property_readonly("e0", [](const JPS_VelocityModelState_Wrapper& w) {
-            return JPS_VelocityModelState_GetE0(w.handle);
+            return intoTuple(JPS_VelocityModelState_GetE0(w.handle));
         });
     py::class_<JPS_NotifiableQueueProxy_Wrapper>(m, "NotifiableQueueProxy")
         .def(
@@ -492,10 +503,13 @@ PYBIND11_MODULE(py_jupedsim, m)
             "stage_index",
             [](const JPS_Agent_Wrapper& w) { return JPS_Agent_GetStageIndex(w.handle); })
         .def_property_readonly(
-            "position", [](const JPS_Agent_Wrapper& w) { return JPS_Agent_GetPosition(w.handle); })
+            "position",
+            [](const JPS_Agent_Wrapper& w) { return intoTuple(JPS_Agent_GetPosition(w.handle)); })
         .def_property_readonly(
             "orientation",
-            [](const JPS_Agent_Wrapper& w) { return JPS_Agent_GetOrientation(w.handle); })
+            [](const JPS_Agent_Wrapper& w) {
+                return intoTuple(JPS_Agent_GetOrientation(w.handle));
+            })
         .def_property_readonly(
             "model",
             [](const JPS_Agent_Wrapper& w)
@@ -532,10 +546,10 @@ PYBIND11_MODULE(py_jupedsim, m)
             py::arg("dt"))
         .def(
             "add_waypoint_stage",
-            [](JPS_Simulation_Wrapper& w, JPS_Point position, double distance) {
+            [](JPS_Simulation_Wrapper& w, std::tuple<double, double> position, double distance) {
                 JPS_ErrorMessage errorMsg{};
-                const auto result =
-                    JPS_Simulation_AddStageWaypoint(w.handle, position, distance, &errorMsg);
+                const auto result = JPS_Simulation_AddStageWaypoint(
+                    w.handle, intoJPS_Point(position), distance, &errorMsg);
                 if(result != 0) {
                     return result;
                 }
@@ -545,10 +559,12 @@ PYBIND11_MODULE(py_jupedsim, m)
             })
         .def(
             "add_queue_stage",
-            [](JPS_Simulation_Wrapper& w, const std::vector<JPS_Point>& positions) {
+            [](JPS_Simulation_Wrapper& w,
+               const std::vector<std::tuple<double, double>>& positions) {
                 JPS_ErrorMessage errorMsg{};
+                const auto jpsPointPositions = intoJPS_Point(positions);
                 const auto result = JPS_Simulation_AddStageNotifiableQueue(
-                    w.handle, positions.data(), positions.size(), &errorMsg);
+                    w.handle, jpsPointPositions.data(), jpsPointPositions.size(), &errorMsg);
                 if(result != 0) {
                     return result;
                 }
@@ -558,10 +574,12 @@ PYBIND11_MODULE(py_jupedsim, m)
             })
         .def(
             "add_waiting_set_stage",
-            [](JPS_Simulation_Wrapper& w, const std::vector<JPS_Point>& positions) {
+            [](JPS_Simulation_Wrapper& w,
+               const std::vector<std::tuple<double, double>>& positions) {
                 JPS_ErrorMessage errorMsg{};
+                const auto jpsPointPositions = intoJPS_Point(positions);
                 const auto result = JPS_Simulation_AddStageWaitingSet(
-                    w.handle, positions.data(), positions.size(), &errorMsg);
+                    w.handle, jpsPointPositions.data(), jpsPointPositions.size(), &errorMsg);
                 if(result != 0) {
                     return result;
                 }
@@ -571,10 +589,11 @@ PYBIND11_MODULE(py_jupedsim, m)
             })
         .def(
             "add_exit_stage",
-            [](JPS_Simulation_Wrapper& w, const std::vector<JPS_Point>& polygon) {
+            [](JPS_Simulation_Wrapper& w, const std::vector<std::tuple<double, double>>& polygon) {
                 JPS_ErrorMessage errorMsg{};
+                const auto jpsPointPoly = intoJPS_Point(polygon);
                 const auto result = JPS_Simulation_AddStageExit(
-                    w.handle, polygon.data(), polygon.size(), &errorMsg);
+                    w.handle, jpsPointPoly.data(), jpsPointPoly.size(), &errorMsg);
                 if(result != 0) {
                     return result;
                 }
@@ -736,21 +755,13 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def(
             "agents_in_range",
             [](JPS_Simulation_Wrapper& w, std::tuple<double, double> pos, double distance) {
-                return std::make_unique<JPS_AgentIdIterator_Wrapper>(JPS_Simulation_AgentsInRange(
-                    w.handle, JPS_Point{std::get<0>(pos), std::get<1>(pos)}, distance));
+                return std::make_unique<JPS_AgentIdIterator_Wrapper>(
+                    JPS_Simulation_AgentsInRange(w.handle, intoJPS_Point(pos), distance));
             })
         .def(
             "agents_in_polygon",
             [](JPS_Simulation_Wrapper& w, const std::vector<std::tuple<double, double>>& poly) {
-                std::vector<JPS_Point> ppoly{};
-                ppoly.reserve(poly.size());
-                std::transform(
-                    std::begin(poly),
-                    std::end(poly),
-                    std::back_inserter(ppoly),
-                    [](const auto& pt) {
-                        return JPS_Point{std::get<0>(pt), std::get<1>(pt)};
-                    });
+                const auto ppoly = intoJPS_Point(poly);
                 return std::make_unique<JPS_AgentIdIterator_Wrapper>(
                     JPS_Simulation_AgentsInPolygon(w.handle, ppoly.data(), ppoly.size()));
             })
@@ -841,8 +852,8 @@ PYBIND11_MODULE(py_jupedsim, m)
             })
         .def(
             "is_routable",
-            [](const JPS_RoutingEngine_Wrapper& w, JPS_Point p) {
-                return JPS_RoutingEngine_IsRoutable(w.handle, p);
+            [](const JPS_RoutingEngine_Wrapper& w, std::tuple<double, double> p) {
+                return JPS_RoutingEngine_IsRoutable(w.handle, intoJPS_Point(p));
             })
         .def(
             "mesh",
