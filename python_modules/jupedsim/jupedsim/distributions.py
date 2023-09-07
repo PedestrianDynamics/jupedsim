@@ -3,7 +3,7 @@
 import numpy as np
 import shapely.geometry as shply
 
-from jupedsim.grid import Grid
+from jupedsim.internal.grid import Grid
 
 
 class AgentNumberError(Exception):

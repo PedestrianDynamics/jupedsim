@@ -10,12 +10,10 @@ import random
 import sys
 import time
 
-import py_jupedsim as jps
 import shapely
 from shapely import to_wkt
 
-from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
-from jupedsim.util import build_jps_geometry
+import jupedsim as jps
 from performancetest.geometry import geometries
 from performancetest.stats_writer import StatsWriter
 
@@ -44491,7 +44489,7 @@ def main():
     jps.set_error_callback(log_error)
 
     geo = shapely.from_wkt(geometries["grosser_stern"])
-    geometry = build_jps_geometry(geo)
+    geometry = jps.build_jps_geometry(geo)
 
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
@@ -44525,7 +44523,7 @@ def main():
         agent_parameters.journey_id = random.choice(journeys)
         simulation.add_agent(agent_parameters)
 
-    writer = SqliteTrajectoryWriter(
+    writer = jps.SqliteTrajectoryWriter(
         pathlib.Path(
             f"{jps.get_build_info().git_commit_hash}_grosser_stern.sqlite"
         )
@@ -44565,7 +44563,7 @@ def main():
             )
         except KeyboardInterrupt:
             writer.end_writing()
-            print("\nCTRL-C Recieved! Shuting down")
+            print("\nCTRL-C Received! Shutting down")
             sys.exit(1)
 
     writer.end_writing()

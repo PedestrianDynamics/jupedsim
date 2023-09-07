@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 import shapely
 
-from jupedsim.aabb import AABB
+from jupedsim.internal.aabb import AABB
 
 
 @dataclass
