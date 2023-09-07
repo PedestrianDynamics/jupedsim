@@ -82,10 +82,10 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                 (
                     self._frame,
                     agent.id,
-                    agent.position.x,
-                    agent.position.y,
-                    agent.orientation.x,
-                    agent.orientation.y,
+                    agent.position[0],
+                    agent.position[1],
+                    agent.orientation[0],
+                    agent.orientation[1],
                 )
                 for agent in simulation.agents()
             ]
