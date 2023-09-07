@@ -243,7 +243,7 @@ PYBIND11_MODULE(py_jupedsim, m)
             },
             "Add area where agents can move")
         .def(
-            "exclude_from_accssible_area",
+            "exclude_from_accessible_area",
             [](const JPS_GeometryBuilder_Wrapper& w, std::vector<JPS_Point> polygon) {
                 JPS_GeometryBuilder_ExcludeFromAccessibleArea(
                     w.handle, polygon.data(), polygon.size());
@@ -321,14 +321,14 @@ PYBIND11_MODULE(py_jupedsim, m)
                     maxf_Wall));
             }),
             py::kw_only(),
-            py::arg("nuPed"),
-            py::arg("nuWall"),
-            py::arg("distEffPed"),
-            py::arg("distEffWall"),
-            py::arg("intpWidthPed"),
-            py::arg("intpWidthWall"),
-            py::arg("maxfPed"),
-            py::arg("maxfWall"))
+            py::arg("nu_ped"),
+            py::arg("nu_wall"),
+            py::arg("dist_eff_ped"),
+            py::arg("dist_eff_wall"),
+            py::arg("intp_width_ped"),
+            py::arg("intp_width_wall"),
+            py::arg("maxf_ped"),
+            py::arg("maxf_wall"))
         .def(
             "add_parameter_profile",
             [](JPS_GCFMModelBuilder_Wrapper& w,

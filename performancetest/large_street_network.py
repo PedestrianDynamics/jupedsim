@@ -10,12 +10,10 @@ import random
 import sys
 import time
 
-import py_jupedsim as jps
 import shapely
 from shapely import to_wkt
 
-from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
-from jupedsim.util import build_jps_geometry
+import jupedsim as jps
 from performancetest.geometry import geometries
 from performancetest.stats_writer import StatsWriter
 
@@ -200,7 +198,7 @@ def main():
     jps.set_error_callback(log_error)
 
     geo = shapely.from_wkt(geometries["large_street_network"])
-    geometry = build_jps_geometry(geo)
+    geometry = jps.build_jps_geometry(geo)
 
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
@@ -228,7 +226,7 @@ def main():
         ),
     ]
 
-    writer = SqliteTrajectoryWriter(
+    writer = jps.SqliteTrajectoryWriter(
         pathlib.Path(
             f"{jps.get_build_info().git_commit_hash}_large_street_network.sqlite"
         )
@@ -246,9 +244,9 @@ def main():
             for s in spawners:
                 s.spawn(iteration)
             if (iteration + 100 * 30) % (100 * 60) == 0:
-                waiting_area.state = jps.WaitingSetState.Inactive
+                waiting_area.state = jps.WaitingSetState.INACTIVE
             if iteration % (100 * 60) == 0:
-                waiting_area.state = jps.WaitingSetState.Active
+                waiting_area.state = jps.WaitingSetState.ACTIVE
             if iteration % (100 * 8) == 0:
                 queue.pop(1)
             if iteration % 50 == 0:
@@ -276,7 +274,7 @@ def main():
             )
         except KeyboardInterrupt:
             writer.end_writing()
-            print("\nCTRL-C Recieved! Shuting down")
+            print("\nCTRL-C Received! Shutting down")
             sys.exit(1)
 
     writer.end_writing()

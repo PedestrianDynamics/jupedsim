@@ -129,7 +129,7 @@ def test_can_run_simulation():
         assert simulation.remove_agent(agent_id)
 
     for actual, expected in zip(simulation.agents(), initial_agent_positions):
-        assert actual.position == jps.Point(expected)
+        assert actual.position == expected
 
     while simulation.agent_count() > 0:
         simulation.iterate()
@@ -217,12 +217,12 @@ def test_can_wait():
         assert simulation.remove_agent(agent_id)
 
     for actual, expected in zip(simulation.agents(), initial_agent_positions):
-        assert actual.position == jps.Point(expected)
+        assert actual.position == expected
 
     while simulation.agent_count() > 0:
         simulation.iterate()
         if simulation.iteration_count() == 1000:
-            waiting_set.state = jps.WaitingSetState.Inactive
+            waiting_set.state = jps.WaitingSetState.INACTIVE
 
 
 def test_can_change_journey_while_waiting():
@@ -310,6 +310,6 @@ def test_can_change_journey_while_waiting():
             redirect_once = False
 
         if signal_once and simulation.agents_in_range((60, 60), 1):
-            stage.state = jps.WaitingSetState.Inactive
+            stage.state = jps.WaitingSetState.INACTIVE
             signal_once = False
         simulation.iterate()

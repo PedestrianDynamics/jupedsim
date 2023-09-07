@@ -8,8 +8,6 @@ import pathlib
 from shapely import GeometryCollection, Polygon, to_wkt
 
 import jupedsim as jps
-from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
-from jupedsim.util import build_jps_geometry
 
 
 def log_debug(msg):
@@ -40,7 +38,7 @@ def main():
     area = GeometryCollection(
         Polygon([(0, 0), (100, 0), (100, 100), (0, 100)])
     )
-    geometry = build_jps_geometry(area)
+    geometry = jps.build_jps_geometry(area)
 
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
@@ -97,7 +95,7 @@ def main():
     agent_parameters.position = (6, 50)
     simulation.add_agent(agent_parameters)
 
-    writer = SqliteTrajectoryWriter(pathlib.Path("example2_out.sqlite"))
+    writer = jps.SqliteTrajectoryWriter(pathlib.Path("example2_out.sqlite"))
     writer.begin_writing(
         25,
         to_wkt(area, rounding_precision=-1),
@@ -120,7 +118,7 @@ def main():
             )
 
         if signal_once and any(simulation.agents_in_range((60, 60), 1)):
-            stage.state = jps.WaitingSetState.Inactive
+            stage.state = jps.WaitingSetState.INACTIVE
             print(f"Stop Waiting @{simulation.iteration_count()}")
             signal_once = False
         if simulation.iteration_count() % 4 == 0:

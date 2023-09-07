@@ -9,8 +9,6 @@ import sys
 from shapely import GeometryCollection, Polygon, to_wkt
 
 import jupedsim as jps
-from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
-from jupedsim.util import build_jps_geometry
 
 
 def log_debug(msg):
@@ -41,7 +39,7 @@ def main():
     p1 = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
     area = GeometryCollection(p1.union(p2))
-    geometry = build_jps_geometry(area)
+    geometry = jps.build_jps_geometry(area)
 
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
@@ -56,7 +54,8 @@ def main():
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
 
     stage_id = simulation.add_waiting_set_stage([(16, 5), (15, 5), (14, 5)])
-    exit_stage = simulation.get_stage_proxy(stage_id)
+    waiting_stage = simulation.get_stage_proxy(stage_id)
+    assert isinstance(waiting_stage, jps.WaitingSetProxy)
     exit_id = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
 
     journey = jps.JourneyDescription()
@@ -77,7 +76,7 @@ def main():
 
     print("Running simulation")
 
-    writer = SqliteTrajectoryWriter(pathlib.Path("example1_out.sqlite"))
+    writer = jps.SqliteTrajectoryWriter(pathlib.Path("example1_out.sqlite"))
     writer.begin_writing(10, to_wkt(area, rounding_precision=-1))
 
     while simulation.agent_count() > 0:
@@ -89,7 +88,8 @@ def main():
                     print(f"{a.model.e0}")
                     break
             if simulation.iteration_count() == 1300:
-                exit_stage.state = jps.WaitingSetState.Inactive
+                if waiting_stage.state == jps.WaitingSetState.ACTIVE:
+                    waiting_stage.state = jps.WaitingSetState.INACTIVE
         except KeyboardInterrupt:
             writer.end_writing()
             print("CTRL-C Recieved! Shuting down")

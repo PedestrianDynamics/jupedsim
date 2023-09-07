@@ -15,11 +15,11 @@ from typing import Optional, Tuple
 
 import shapely
 
-from jupedsim import (
+from jupedsim.native.models import (
     GCFMModelAgentParameters,
-    Simulation,
     VelocityModelAgentParameters,
 )
+from jupedsim.native.simulation import Simulation
 
 
 class TrajectoryWriter(metaclass=abc.ABCMeta):
