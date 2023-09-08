@@ -13,7 +13,7 @@ from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import vtkRenderer
 
 import jupedsim as jps
-from jupedsim.aabb import AABB
+from jupedsim.internal.aabb import AABB
 
 
 class RenderWidget(QVTKRenderWindowInteractor):

@@ -19,7 +19,7 @@ from vtkmodules.vtkRenderingCore import (
 )
 
 from jupedsim import RoutingEngine
-from jupedsim.aabb import AABB
+from jupedsim.internal.aabb import AABB
 
 
 class Geometry:
