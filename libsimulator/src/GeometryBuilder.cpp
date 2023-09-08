@@ -99,7 +99,7 @@ Geometry GeometryBuilder::Build()
         std::back_inserter(accessibleList));
 
     if(accessibleList.size() != 1) {
-        throw SimulationError("accessisble area not connected");
+        throw SimulationError("accessible area not connected");
     }
 
     auto accessibleArea = *accessibleList.begin();

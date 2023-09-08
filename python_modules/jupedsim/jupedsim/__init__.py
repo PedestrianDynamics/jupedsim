@@ -43,7 +43,12 @@ from jupedsim.native.stages import (
 from jupedsim.native.tracing import Trace
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
-from jupedsim.util import build_jps_geometry
+from jupedsim.util import (
+    GeometryError,
+    geometry_from_coordinates,
+    geometry_from_shapely,
+    geometry_from_wkt,
+)
 
 __all__ = [
     "AgentNumberError",
@@ -84,5 +89,8 @@ __all__ = [
     "RecordingAgent",
     "RecordingFrame",
     "SqliteTrajectoryWriter",
-    "build_jps_geometry",
+    "geometry_from_wkt",
+    "geometry_from_shapely",
+    "geometry_from_coordinates",
+    "GeometryError",
 ]

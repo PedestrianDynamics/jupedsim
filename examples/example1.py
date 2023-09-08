@@ -39,7 +39,7 @@ def main():
     p1 = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
     area = GeometryCollection(p1.union(p2))
-    geometry = jps.build_jps_geometry(area)
+    geometry = jps.geometry_from_shapely(area)
 
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
