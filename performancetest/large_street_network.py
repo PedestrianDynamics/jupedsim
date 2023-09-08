@@ -198,7 +198,7 @@ def main():
     jps.set_error_callback(log_error)
 
     geo = shapely.from_wkt(geometries["large_street_network"])
-    geometry = jps.build_jps_geometry(geo)
+    geometry = jps.geometry_from_shapely(geo)
 
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
