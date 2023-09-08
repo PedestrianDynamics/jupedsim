@@ -3,7 +3,10 @@
 
 from typing import Optional
 
-import py_jupedsim as py_jps
+try:
+    from .. import py_jupedsim as py_jps
+except ImportError:
+    import py_jupedsim as py_jps
 
 
 class JourneyDescription:

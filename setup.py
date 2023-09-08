@@ -252,9 +252,16 @@ setup(
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
     python_requires=">=3.10",
-    packages=["jupedsim", "jupedsim_visualizer"],
+    packages=[
+        "jupedsim",
+        "jupedsim.internal",
+        "jupedsim.native",
+        "jupedsim_visualizer",
+    ],
     package_dir={
         "jupedsim": "python_modules/jupedsim/jupedsim",
+        "jupedsim.internal": "python_modules/jupedsim/jupedsim/internal",
+        "jupedsim.native": "python_modules/jupedsim/jupedsim/native",
         "jupedsim_visualizer": "python_modules/jupedsim_visualizer/jupedsim_visualizer",
     },
     install_requires=[
