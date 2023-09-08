@@ -721,6 +721,13 @@ PYBIND11_MODULE(py_jupedsim, m)
                     JPS_Simulation_AgentIterator(simulation.handle));
             })
         .def(
+            "agent",
+            [](const JPS_Simulation_Wrapper& simulation, JPS_AgentId agentId) {
+                return std::make_unique<JPS_Agent_Wrapper>(
+                    JPS_Simulation_GetAgent(simulation.handle, agentId));
+            },
+            py::arg("agent_id"))
+        .def(
             "agents_in_range",
             [](JPS_Simulation_Wrapper& w, std::tuple<double, double> pos, double distance) {
                 return std::make_unique<JPS_AgentIdIterator_Wrapper>(JPS_Simulation_AgentsInRange(

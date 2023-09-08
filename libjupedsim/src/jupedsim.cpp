@@ -934,6 +934,16 @@ JPS_AgentIterator JPS_Simulation_AgentIterator(JPS_Simulation handle)
         new AgentIterator<GenericAgent>(simulation->Agents()));
 }
 
+JPS_Agent JPS_Simulation_GetAgent(JPS_Simulation handle, JPS_AgentId agentId)
+{
+    assert(handle);
+    const auto simulation = reinterpret_cast<Simulation*>(handle);
+    assert(simulation);
+    const auto agent = &simulation->Agent(agentId);
+    assert(agent);
+    return reinterpret_cast<JPS_Agent>(agent);
+}
+
 bool JPS_Simulation_SwitchAgentProfile(
     JPS_Simulation handle,
     JPS_AgentId agentId,
