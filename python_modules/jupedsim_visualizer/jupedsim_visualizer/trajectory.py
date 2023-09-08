@@ -7,7 +7,7 @@ from vtkmodules.vtkFiltersCore import vtkGlyph2D
 from vtkmodules.vtkFiltersSources import vtkRegularPolygonSource
 from vtkmodules.vtkRenderingCore import vtkActor, vtkPolyDataMapper
 
-from jupedsim.aabb import AABB
+from jupedsim.internal.aabb import AABB
 from jupedsim.recording import Recording, RecordingFrame
 
 

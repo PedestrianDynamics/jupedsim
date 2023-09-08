@@ -2,7 +2,10 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 from enum import Enum
 
-import py_jupedsim as py_jps
+try:
+    from .. import py_jupedsim as py_jps
+except ImportError:
+    import py_jupedsim as py_jps
 
 
 class NotifiableQueueProxy:

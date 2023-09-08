@@ -1,7 +1,10 @@
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-import py_jupedsim as py_jps
+try:
+    from .. import py_jupedsim as py_jps
+except ImportError:
+    import py_jupedsim as py_jps
 
 
 class Geometry:
