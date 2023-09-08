@@ -88,6 +88,9 @@ class Simulation:
     def agents(self):
         return self._sim.agents()
 
+    def agent(self, agent_id):
+        return self._sim.agent(agent_id)
+
     def agents_in_range(self, pos: tuple[float, float], distance: float):
         return self._sim.agents_in_range(pos, distance)
 
