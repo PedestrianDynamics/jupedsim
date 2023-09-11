@@ -890,7 +890,8 @@ JUPEDSIM_API JPS_AgentIterator JPS_Simulation_AgentIterator(JPS_Simulation handl
  * @param agentId Id of the agent to get
  * @return Agent with given Id
  */
-JUPEDSIM_API JPS_Agent JPS_Simulation_GetAgent(JPS_Simulation handle, JPS_AgentId agentId);
+JUPEDSIM_API JPS_Agent
+JPS_Simulation_GetAgent(JPS_Simulation handle, JPS_AgentId agentId, JPS_ErrorMessage* errorMessage);
 
 /**
  * Switches the operational model parameter profile for an agent

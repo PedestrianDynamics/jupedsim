@@ -723,8 +723,14 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def(
             "agent",
             [](const JPS_Simulation_Wrapper& simulation, JPS_AgentId agentId) {
-                return std::make_unique<JPS_Agent_Wrapper>(
-                    JPS_Simulation_GetAgent(simulation.handle, agentId));
+                JPS_ErrorMessage errorMsg{};
+                auto result = JPS_Simulation_GetAgent(simulation.handle, agentId, &errorMsg);
+                if(result) {
+                    return std::make_unique<JPS_Agent_Wrapper>(result);
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
             },
             py::arg("agent_id"))
         .def(

@@ -929,19 +929,30 @@ JPS_AgentIterator JPS_Simulation_AgentIterator(JPS_Simulation handle)
 {
     assert(handle);
     const auto simulation = reinterpret_cast<Simulation*>(handle);
-    assert(simulation);
     return reinterpret_cast<JPS_AgentIterator>(
         new AgentIterator<GenericAgent>(simulation->Agents()));
 }
 
-JPS_Agent JPS_Simulation_GetAgent(JPS_Simulation handle, JPS_AgentId agentId)
+JPS_Agent
+JPS_Simulation_GetAgent(JPS_Simulation handle, JPS_AgentId agentId, JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
     const auto simulation = reinterpret_cast<Simulation*>(handle);
-    assert(simulation);
-    const auto agent = &simulation->Agent(agentId);
-    assert(agent);
-    return reinterpret_cast<JPS_Agent>(agent);
+
+    try {
+        const auto agent = &simulation->Agent(agentId);
+        return reinterpret_cast<JPS_Agent>(agent);
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return nullptr;
 }
 
 bool JPS_Simulation_SwitchAgentProfile(
