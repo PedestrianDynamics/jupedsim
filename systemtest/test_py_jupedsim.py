@@ -313,3 +313,108 @@ def test_can_change_journey_while_waiting():
             stage.state = jps.WaitingSetState.INACTIVE
             signal_once = False
         simulation.iterate()
+
+
+def test_get_single_agent_from_simulation():
+    messages = []
+
+    def log_msg_handler(msg):
+        messages.append(msg)
+
+    # jps.set_debug_callback(log_msg_handler)
+    jps.set_info_callback(log_msg_handler)
+    jps.set_warning_callback(log_msg_handler)
+    jps.set_error_callback(log_msg_handler)
+
+    geo_builder = jps.GeometryBuilder()
+    geo_builder.add_accessible_area([(0, 0), (10, 0), (10, 10), (0, 10)])
+    geo_builder.add_accessible_area([(10, 4), (20, 4), (20, 6), (10, 6)])
+    geometry = geo_builder.build()
+
+    model_builder = jps.VelocityModelBuilder(
+        a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
+    )
+    profile_id = 3
+    model_builder.add_parameter_profile(
+        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.15
+    )
+
+    model = model_builder.build()
+
+    simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
+
+    journey = jps.JourneyDescription(
+        [simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])]
+    )
+
+    journey_id = simulation.add_journey(journey)
+
+    agent_parameters = jps.VelocityModelAgentParameters()
+    agent_parameters.journey_id = journey_id
+    agent_parameters.orientation = (1.0, 0.0)
+    agent_parameters.position = (0.0, 0.0)
+    agent_parameters.profile_id = profile_id
+
+    initial_agent_positions = [(7, 7), (1, 3), (1, 5), (1, 7), (2, 7)]
+
+    agent_ids = set()
+
+    for new_pos in initial_agent_positions:
+        agent_parameters.position = new_pos
+        agent_ids.add(simulation.add_agent(agent_parameters))
+
+    for agent_id in agent_ids:
+        assert simulation.agent(agent_id).id == agent_id
+
+
+def test_get_agent_non_existing_agent_from_simulation():
+    messages = []
+
+    def log_msg_handler(msg):
+        messages.append(msg)
+
+    # jps.set_debug_callback(log_msg_handler)
+    jps.set_info_callback(log_msg_handler)
+    jps.set_warning_callback(log_msg_handler)
+    jps.set_error_callback(log_msg_handler)
+
+    geo_builder = jps.GeometryBuilder()
+    geo_builder.add_accessible_area([(0, 0), (10, 0), (10, 10), (0, 10)])
+    geo_builder.add_accessible_area([(10, 4), (20, 4), (20, 6), (10, 6)])
+    geometry = geo_builder.build()
+
+    model_builder = jps.VelocityModelBuilder(
+        a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
+    )
+    profile_id = 3
+    model_builder.add_parameter_profile(
+        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.15
+    )
+
+    model = model_builder.build()
+
+    simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
+
+    journey = jps.JourneyDescription(
+        [simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])]
+    )
+
+    journey_id = simulation.add_journey(journey)
+
+    agent_parameters = jps.VelocityModelAgentParameters()
+    agent_parameters.journey_id = journey_id
+    agent_parameters.orientation = (1.0, 0.0)
+    agent_parameters.position = (0.0, 0.0)
+    agent_parameters.profile_id = profile_id
+
+    initial_agent_position = (7, 7)
+    agent_parameters.position = initial_agent_position
+
+    agent_id = simulation.add_agent(agent_parameters)
+
+    assert simulation.agent(agent_id).id == agent_id
+
+    with pytest.raises(
+        RuntimeError, match=".*Trying to access unknown Agent.*"
+    ):
+        simulation.agent(1000)
