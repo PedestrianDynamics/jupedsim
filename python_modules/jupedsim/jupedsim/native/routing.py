@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 try:
-    from .. import py_jupedsim as py_jps
-except ImportError:
     import py_jupedsim as py_jps
+except ImportError:
+    from .. import py_jupedsim as py_jps
 
 from jupedsim.native.geometry import Geometry
 

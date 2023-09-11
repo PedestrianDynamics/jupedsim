@@ -3,9 +3,9 @@
 from enum import Enum
 
 try:
-    from .. import py_jupedsim as py_jps
-except ImportError:
     import py_jupedsim as py_jps
+except ImportError:
+    from .. import py_jupedsim as py_jps
 
 
 class NotifiableQueueProxy:
