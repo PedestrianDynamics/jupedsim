@@ -1,5 +1,6 @@
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
+
 from jupedsim.distributions import (
     AgentNumberError,
     IncorrectParameterError,
@@ -50,6 +51,12 @@ from jupedsim.util import (
     geometry_from_wkt,
 )
 
+__version__ = get_build_info().library_version
+__commit__ = get_build_info().git_commit_hash
+__compiler__ = (
+    f"{get_build_info().compiler} ({get_build_info().compiler_version})"
+)
+
 __all__ = [
     "AgentNumberError",
     "IncorrectParameterError",
@@ -93,4 +100,8 @@ __all__ = [
     "geometry_from_shapely",
     "geometry_from_coordinates",
     "GeometryError",
+    "build_jps_geometry",
+    "__version__",
+    "__commit__",
+    "__compiler__",
 ]

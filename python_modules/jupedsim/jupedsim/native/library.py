@@ -6,6 +6,8 @@ try:
 except ImportError:
     from .. import py_jupedsim as py_jps
 
+from textwrap import dedent
+
 
 # TODO(kkratz): add typehints for function params
 def set_debug_callback(fn) -> None:
@@ -84,6 +86,15 @@ class BuildInfo:
     @property
     def library_version(self) -> str:
         return self.__obj.library_version
+
+    def __repr__(self):
+        return dedent(
+            f"""\
+            JuPedSim {self.library_version}:
+            --------------------------------
+            Commit: {self.git_commit_hash} from {self.git_branch} on {self.git_commit_date}
+            Compiler: {self.compiler} ({self.compiler_version})"""
+        )
 
 
 def get_build_info() -> BuildInfo:
