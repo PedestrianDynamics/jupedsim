@@ -60,22 +60,55 @@ void Simulation::Iterate()
     _clock.Advance();
 }
 
-Journey::ID Simulation::AddJourney(const std::vector<BaseStage::ID>& stageIds)
+Journey2::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescription>& stages)
 {
-    std::vector<BaseStage*> stages;
-    stages.reserve(stageIds.size());
+
+    std::map<BaseStage::ID, JourneyNode> nodes;
+
     std::transform(
-        std::begin(stageIds),
-        std::end(stageIds),
-        std::back_inserter(stages),
-        [this](const auto id) {
+        std::begin(stages),
+        std::end(stages),
+        std::inserter(nodes, std::end(nodes)),
+        [this](auto const& pair) -> std::pair<BaseStage::ID, JourneyNode> {
+            const auto& [id, desc] = pair;
             const auto iter = _stages.find(id);
             if(iter == std::end(_stages)) {
                 throw SimulationError("Unknown stage id ({}) provided in journey.", id.getID());
             }
-            return iter->second.get();
+            return {
+                id,
+                JourneyNode{
+                    iter->second.get(),
+                    std::visit(
+                        overloaded{
+                            [this,
+                             id](const NonTransitionDescription& d) -> std::unique_ptr<Transition> {
+                                return std::make_unique<FixedTransition>(_stages.at(id).get());
+                            },
+                            [this](const FixedTransitionDescription& d)
+                                -> std::unique_ptr<Transition> {
+                                return std::make_unique<FixedTransition>(
+                                    _stages.at(d.NextId()).get());
+                            },
+                            [this](const RoundRobinTransitionDescription& d)
+                                -> std::unique_ptr<Transition> {
+                                std::vector<std::tuple<BaseStage*, uint64_t>> weightedStages{};
+                                weightedStages.reserve(d.WeightedStages().size());
+
+                                std::transform(
+                                    std::begin(d.WeightedStages()),
+                                    std::end(d.WeightedStages()),
+                                    std::back_inserter(weightedStages),
+                                    [this](auto const& pair) -> std::tuple<BaseStage*, uint64_t> {
+                                        const auto& [id, weight] = pair;
+                                        return {_stages.at(id).get(), weight};
+                                    });
+
+                                return std::make_unique<RoundRobinTransition>(weightedStages);
+                            }},
+                        desc)}};
         });
-    auto journey = std::make_unique<Journey>(std::move(stages));
+    auto journey = std::make_unique<Journey2>(std::move(nodes));
     const auto id = journey->Id();
     _journeys.emplace(id, std::move(journey));
     return id;

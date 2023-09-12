@@ -398,6 +398,39 @@ JPS_GeometryBuilder_Build(JPS_GeometryBuilder handle, JPS_ErrorMessage* errorMes
 JUPEDSIM_API void JPS_GeometryBuilder_Free(JPS_GeometryBuilder handle);
 
 /**
+ * Opaque type for transition, describing route based decisions.
+ */
+typedef struct JPS_Transition_t* JPS_Transition;
+
+/**
+ * Create a fixed transition to stage
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return Fixed transition to stage
+ */
+JUPEDSIM_API JPS_Transition
+JPS_Transition_CreateFixedTransition(JPS_StageId stageId, JPS_ErrorMessage* errorMessage);
+
+/**
+ * Create a round robin transition to stages
+ * @param stages target stages
+ * @param weights weights of target stage
+ * @param len length of stages and weights
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return Round robin transition to stages
+ */
+JUPEDSIM_API JPS_Transition JPS_Transition_CreateRoundRobinTransition(
+    JPS_StageId* stages,
+    uint64_t* weights,
+    size_t len,
+    JPS_ErrorMessage* errorMessage);
+
+/**
+ * Frees a JPS_Transition
+ * @param handle to the JPS_Transition to free.
+ */
+JUPEDSIM_API void JPS_Transition_Free(JPS_Transition handle);
+
+/**
  * Opaque type that describes a journey
  */
 typedef struct JPS_Journey_t* JPS_JourneyDescription;
@@ -413,6 +446,18 @@ JUPEDSIM_API JPS_JourneyDescription JPS_JourneyDescription_Create();
  * @param id of the stage to extend the journey with.
  */
 JUPEDSIM_API void JPS_JourneyDescription_AddStage(JPS_JourneyDescription handle, JPS_StageId id);
+
+/**
+ * Specifies the transition to the next stage, once this stage is completed.
+ * @param handle of the JourneyDescription to modify.
+ * @param id of the stage to set the transition for.
+ * @param transition transition to the next stage.
+ */
+JUPEDSIM_API bool JPS_JourneyDescription_SetTransitionForStage(
+    JPS_JourneyDescription handle,
+    JPS_StageId id,
+    JPS_Transition transition,
+    JPS_ErrorMessage* errorMessage);
 
 /**
  * Frees a JPS_Journey.
