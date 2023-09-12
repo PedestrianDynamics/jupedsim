@@ -883,9 +883,6 @@ JUPEDSIM_API JPS_AgentIterator JPS_Simulation_AgentIterator(JPS_Simulation handl
 
 /**
  * Returns a specific agent of the simulation.
- * Notes:
- *   The iterator will be invalidated once JPS_Simulation_Iterate is called.
- *   The iterator needs to be freed after use.
  * @param handle of the simulation
  * @param agentId Id of the agent to get
  * @return Agent with given Id
