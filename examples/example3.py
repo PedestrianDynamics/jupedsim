@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import logging
 import pathlib
-
+import sys
 from shapely import GeometryCollection, Polygon, to_wkt
 
 import jupedsim as jps
@@ -68,10 +68,16 @@ def main():
     )
 
     journey = jps.JourneyDescription([stage_id, exit])
+    journey.set_transition_for_stage(
+        stage_id, jps.Transition.create_fixed_transition(exit)
+    )
+
     journey_id = simulation.add_journey(journey)
 
     agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.journey_id = journey_id
+    agent_parameters.stage_id = stage_id
+
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
     agent_parameters.profile_id = profile_id
@@ -85,16 +91,21 @@ def main():
     while (
         simulation.agent_count() > 0 and simulation.iteration_count() < 20_000
     ):
-        if (
-            simulation.iteration_count() > 100 * 52
-            and simulation.iteration_count() % 400 == 0
-        ):
-            queue.pop(1)
-            print("Next!")
+        try:
+            if (
+                simulation.iteration_count() > 100 * 52
+                and simulation.iteration_count() % 400 == 0
+            ):
+                queue.pop(1)
+                print("Next!")
 
-        if simulation.iteration_count() % 4 == 0:
-            writer.write_iteration_state(simulation)
-        simulation.iterate()
+            if simulation.iteration_count() % 4 == 0:
+                writer.write_iteration_state(simulation)
+            simulation.iterate()
+        except KeyboardInterrupt:
+            writer.end_writing()
+            print("CTRL-C Recieved! Shuting down")
+            sys.exit(1)
 
     writer.end_writing()
 
