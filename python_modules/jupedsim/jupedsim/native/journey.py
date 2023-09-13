@@ -23,11 +23,11 @@ class Transition:
 
 
 class JourneyDescription:
-    def __init__(self, stage_id: Optional[list[int]] = None):
-        if stage_id is None:
+    def __init__(self, stage_ids: Optional[list[int]] = None):
+        if stage_ids is None:
             self._obj = py_jps.JourneyDescription()
         else:
-            self._obj = py_jps.JourneyDescription(stage_id)
+            self._obj = py_jps.JourneyDescription(stage_ids)
 
     def add(self, stages: int | list[int]) -> None:
         self._obj.add(stages)

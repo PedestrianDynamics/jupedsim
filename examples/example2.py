@@ -6,7 +6,7 @@ import logging
 import pathlib
 
 from shapely import GeometryCollection, Polygon, to_wkt
-
+import sys
 import jupedsim as jps
 
 
@@ -71,17 +71,37 @@ def main():
         simulation.add_waypoint_stage((60, 60), 1),
     ]
 
+    print(f"stage: {stage_id}")
+    print(f"exits: {exits}")
+    print(f"waypoints: {waypoints}")
+    short_journey = jps.JourneyDescription([waypoints[0], stage_id, exits[0]])
+    long_journey = jps.JourneyDescription([*waypoints[1:], exits[1]])
+
+    short_journey.set_transition_for_stage(
+        waypoints[0], jps.Transition.create_fixed_transition(stage_id)
+    )
+    short_journey.set_transition_for_stage(
+        stage_id, jps.Transition.create_fixed_transition(exits[0])
+    )
+
+    for waypoint_start, waypoint_end in zip(waypoints[1:-1], waypoints[2:]):
+        long_journey.set_transition_for_stage(
+            waypoint_start,
+            jps.Transition.create_fixed_transition(waypoint_end),
+        )
+    long_journey.set_transition_for_stage(
+        waypoints[-1],
+        jps.Transition.create_fixed_transition(exits[1]),
+    )
+
     journeys = [
-        simulation.add_journey(
-            jps.JourneyDescription([waypoints[0], stage_id, exits[0]])
-        ),
-        simulation.add_journey(
-            jps.JourneyDescription([*waypoints[1:], exits[1]])
-        ),
+        simulation.add_journey(short_journey),
+        simulation.add_journey(long_journey),
     ]
 
     agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.journey_id = journeys[0]
+    agent_parameters.stage_id = waypoints[0]
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
     agent_parameters.profile_id = profile_id
@@ -103,27 +123,32 @@ def main():
     redirect_once = True
     signal_once = True
     while simulation.agent_count() > 0:
-        agents_at_head_of_waiting = list(
-            simulation.agents_in_range((60, 50), 1)
-        )
-        if redirect_once and len(agents_at_head_of_waiting) == 1:
-            simulation.switch_agent_journey(
-                agent_id=agents_at_head_of_waiting[0],
-                journey_id=journeys[1],
-                stage_index=0,
+        try:
+            agents_at_head_of_waiting = list(
+                simulation.agents_in_range((60, 50), 1)
             )
-            redirect_once = False
-            print(
-                f"Switched journey for agent {agents_at_head_of_waiting[0]} @{simulation.iteration_count()}"
-            )
+            if redirect_once and len(agents_at_head_of_waiting) == 1:
+                simulation.switch_agent_journey(
+                    agent_id=agents_at_head_of_waiting[0],
+                    journey_id=journeys[1],
+                    stage_id=waypoints[1],
+                )
+                redirect_once = False
+                print(
+                    f"Switched journey for agent {agents_at_head_of_waiting[0]} @{simulation.iteration_count()}"
+                )
 
-        if signal_once and any(simulation.agents_in_range((60, 60), 1)):
-            stage.state = jps.WaitingSetState.INACTIVE
-            print(f"Stop Waiting @{simulation.iteration_count()}")
-            signal_once = False
-        if simulation.iteration_count() % 4 == 0:
-            writer.write_iteration_state(simulation)
-        simulation.iterate()
+            if signal_once and any(simulation.agents_in_range((60, 60), 1)):
+                stage.state = jps.WaitingSetState.INACTIVE
+                print(f"Stop Waiting @{simulation.iteration_count()}")
+                signal_once = False
+            if simulation.iteration_count() % 4 == 0:
+                writer.write_iteration_state(simulation)
+            simulation.iterate()
+        except KeyboardInterrupt:
+            writer.end_writing()
+            print("CTRL-C Recieved! Shuting down")
+            sys.exit(1)
 
     writer.end_writing()
 

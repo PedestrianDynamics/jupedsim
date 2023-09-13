@@ -67,10 +67,10 @@ class Simulation:
         )
 
     def switch_agent_journey(
-        self, agent_id: int, journey_id: int, stage_index: int
+        self, agent_id: int, journey_id: int, stage_id: int
     ) -> None:
         self._sim.switch_agent_journey(
-            agent_id=agent_id, journey_id=journey_id, stage_index=stage_index
+            agent_id=agent_id, journey_id=journey_id, stage_id=stage_id
         )
 
     def agent_count(self) -> int:
