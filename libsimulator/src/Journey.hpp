@@ -15,28 +15,6 @@
 #include <tuple>
 #include <vector>
 
-class Journey
-{
-public:
-    using ID = jps::UniqueID<Journey>;
-
-private:
-    ID id{};
-    std::vector<BaseStage*> stages{};
-
-public:
-    ~Journey() = default;
-
-    Journey(std::vector<BaseStage*> stages);
-
-    ID Id() const { return id; }
-
-    std::tuple<Point, size_t, BaseStage::ID> Target(const GenericAgent& agent) const;
-
-    size_t CountStages() const { return stages.size(); }
-    BaseStage* StageAt(size_t idx) { return stages.at(idx); }
-};
-
 class NonTransitionDescription
 {
 };
@@ -141,23 +119,23 @@ struct JourneyNode {
     std::unique_ptr<Transition> transition;
 };
 
-class Journey2
+class Journey
 {
 public:
-    using ID = jps::UniqueID<Journey2>;
+    using ID = jps::UniqueID<Journey>;
 
 private:
     ID id{};
     std::map<BaseStage::ID, JourneyNode> stages{};
 
 public:
-    ~Journey2() = default;
+    ~Journey() = default;
 
-    Journey2(std::map<BaseStage::ID, JourneyNode> stages); // TODO
+    Journey(std::map<BaseStage::ID, JourneyNode> stages_) : stages(std::move(stages_)) {}
 
     ID Id() const { return id; }
 
-    std::tuple<Point, size_t, BaseStage::ID> Target(const GenericAgent& agent) const
+    std::tuple<Point, BaseStage::ID> Target(const GenericAgent& agent) const
     {
         auto& node = stages.at(agent.stageId);
         auto stage = node.stage;
@@ -167,12 +145,14 @@ public:
             stage = transition->NextStage();
         }
 
-        return std::make_tuple(stage->Target(agent), 0, stage->Id());
+        return std::make_tuple(stage->Target(agent), stage->Id());
     }
 
     size_t CountStages() const { return stages.size(); }
-    BaseStage* StageAt(size_t idx)
+
+    bool ContainsStage(BaseStage::ID stageId) const
     {
-        return nullptr; // TODO (TS)
+        const auto find_iter = stages.find(stageId);
+        return find_iter != std::end(stages);
     }
 };

@@ -500,9 +500,6 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def_property_readonly(
             "stage_id", [](const JPS_Agent_Wrapper& w) { return JPS_Agent_GetStageId(w.handle); })
         .def_property_readonly(
-            "stage_index",
-            [](const JPS_Agent_Wrapper& w) { return JPS_Agent_GetStageIndex(w.handle); })
-        .def_property_readonly(
             "position",
             [](const JPS_Agent_Wrapper& w) { return intoTuple(JPS_Agent_GetPosition(w.handle)); })
         .def_property_readonly(
@@ -698,10 +695,10 @@ PYBIND11_MODULE(py_jupedsim, m)
             [](const JPS_Simulation_Wrapper& w,
                JPS_AgentId agentId,
                JPS_JourneyId journeyId,
-               JPS_StageIndex stageIdx) {
+               JPS_StageId stageId) {
                 JPS_ErrorMessage errorMsg{};
                 auto result = JPS_Simulation_SwitchAgentJourney(
-                    w.handle, agentId, journeyId, stageIdx, &errorMsg);
+                    w.handle, agentId, journeyId, stageId, &errorMsg);
                 if(result) {
                     return;
                 }
@@ -712,7 +709,7 @@ PYBIND11_MODULE(py_jupedsim, m)
             py::kw_only(),
             py::arg("agent_id"),
             py::arg("journey_id"),
-            py::arg("stage_index"))
+            py::arg("stage_id"))
         .def(
             "agent_count",
             [](JPS_Simulation_Wrapper& simulation) {

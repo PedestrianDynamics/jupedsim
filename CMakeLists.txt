@@ -85,7 +85,10 @@ list(APPEND COMMON_COMPILE_OPTIONS
 ################################################################################
 set(FMT_INSTALL OFF)
 add_subdirectory(third-party/fmt-10.0.0)
-set_property(TARGET fmt PROPERTY POSITION_INDEPENDENT_CODE ON)
+set_target_properties(fmt PROPERTIES 
+    POSITION_INDEPENDENT_CODE ON
+    SYSTEM ON
+)
 find_package(Boost 1.82
     REQUIRED
     CONFIG

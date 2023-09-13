@@ -557,14 +557,6 @@ JUPEDSIM_API JPS_JourneyId JPS_Agent_GetJourneyId(JPS_Agent handle);
 JUPEDSIM_API JPS_StageId JPS_Agent_GetStageId(JPS_Agent handle);
 
 /**
- * Access the index of the currently targeted stage in this agents journey.
- *
- * @param handle of the agent to access.
- * @return the index of the currently targeted stage in this agents journey
- */
-JUPEDSIM_API JPS_StageIndex JPS_Agent_GetStageIndex(JPS_Agent handle);
-
-/**
  * Access the agents position.
  * @param handle of the agent to access.
  * @return position
@@ -954,7 +946,7 @@ JUPEDSIM_API bool JPS_Simulation_SwitchAgentProfile(
  * @param handle of the Simulation to operate on
  * @param agentId id of the agent to modify
  * @param journeyId of the journey to select
- * @param stageIdx of the stage to select
+ * @param stageId of the stage to select
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return true on success, false on any error, e.g. unknown agent id or profile id
  */
@@ -962,7 +954,7 @@ JUPEDSIM_API bool JPS_Simulation_SwitchAgentJourney(
     JPS_Simulation handle,
     JPS_AgentId agentId,
     JPS_JourneyId journeyId,
-    JPS_StageIndex stageIdx,
+    JPS_StageId stageId,
     JPS_ErrorMessage* errorMessage);
 
 /**

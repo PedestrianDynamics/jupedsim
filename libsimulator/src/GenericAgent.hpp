@@ -16,7 +16,6 @@ struct GenericAgent {
     ID id{};
 
     jps::UniqueID<Journey> journeyId{jps::UniqueID<Journey>::Invalid};
-    size_t currentJourneyStageIdx{};
     jps::UniqueID<BaseStage> stageId{jps::UniqueID<BaseStage>::Invalid};
 
     // This is evaluated by the "operational level"

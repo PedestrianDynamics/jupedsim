@@ -60,7 +60,7 @@ void Simulation::Iterate()
     _clock.Advance();
 }
 
-Journey2::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescription>& stages)
+Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescription>& stages)
 {
 
     std::map<BaseStage::ID, JourneyNode> nodes;
@@ -82,7 +82,7 @@ Journey2::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDesc
                     std::visit(
                         overloaded{
                             [this,
-                             id](const NonTransitionDescription& d) -> std::unique_ptr<Transition> {
+                             id](const NonTransitionDescription&) -> std::unique_ptr<Transition> {
                                 return std::make_unique<FixedTransition>(_stages.at(id).get());
                             },
                             [this](const FixedTransitionDescription& d)
@@ -108,7 +108,7 @@ Journey2::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDesc
                             }},
                         desc)}};
         });
-    auto journey = std::make_unique<Journey2>(std::move(nodes));
+    auto journey = std::make_unique<Journey>(std::move(nodes));
     const auto id = journey->Id();
     _journeys.emplace(id, std::move(journey));
     return id;
@@ -229,20 +229,19 @@ void Simulation::SwitchAgentProfile(
 void Simulation::SwitchAgentJourney(
     GenericAgent::ID agent_id,
     Journey::ID journey_id,
-    size_t stage_idx)
+    BaseStage::ID stage_id)
 {
     const auto find_iter = _journeys.find(journey_id);
     if(find_iter == std::end(_journeys)) {
         throw SimulationError("Unknown Journey id {}", journey_id);
     }
     auto& journey = find_iter->second;
-    if(stage_idx >= journey->CountStages()) {
-        throw SimulationError("Stage index {} for journey {} out of range", stage_idx, journey_id);
+    if(!journey->ContainsStage(stage_id)) {
+        throw SimulationError("Stage {} not part of Journey {}", stage_id, journey_id);
     }
     auto& agent = Agent(agent_id);
     agent.journeyId = journey_id;
-    agent.currentJourneyStageIdx = stage_idx;
-    agent.stageId = journey->StageAt(stage_idx)->Id();
+    agent.stageId = stage_id;
 }
 
 std::vector<GenericAgent::ID> Simulation::AgentsInRange(Point p, double distance)

@@ -17,21 +17,3 @@
 #include <vector>
 
 #include "fmt/ranges.h"
-
-////////////////////////////////////////////////////////////////////////////////
-/// SimpleJourney
-////////////////////////////////////////////////////////////////////////////////
-Journey::Journey(std::vector<BaseStage*> stages_) : stages(std::move(stages_))
-{
-}
-
-std::tuple<Point, size_t, BaseStage::ID> Journey::Target(const GenericAgent& agent) const
-{
-    for(size_t idx = agent.currentJourneyStageIdx; idx < stages.size(); ++idx) {
-        if(stages[idx]->IsCompleted(agent)) {
-            continue;
-        }
-        return std::make_tuple(stages[idx]->Target(agent), idx, stages[idx]->Id());
-    }
-    return std::make_tuple(stages.back()->Target(agent), stages.size() - 1, stages.back()->Id());
-}

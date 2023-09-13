@@ -46,7 +46,7 @@ class Simulation
     std::unique_ptr<CollisionGeometry> _geometry;
     std::vector<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
-    std::unordered_map<Journey2::ID, std::unique_ptr<Journey2>> _journeys;
+    std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;
     std::unordered_map<BaseStage::ID, std::unique_ptr<BaseStage>> _stages;
     PerfStats _perfStats{};
 
@@ -65,7 +65,7 @@ public:
     void SetTracing(bool on);
     PerfStats GetLastStats() const;
     void Iterate();
-    Journey2::ID AddJourney(const std::map<BaseStage::ID, TransitionDescription>& stages);
+    Journey::ID AddJourney(const std::map<BaseStage::ID, TransitionDescription>& stages);
     BaseStage::ID AddStage(const StageDescription stageDescription);
     void RemoveAgent(GenericAgent::ID id);
     const std::vector<GenericAgent::ID>& RemovedAgents() const;
@@ -73,7 +73,8 @@ public:
     double ElapsedTime() const;
     double DT() const;
     void SwitchAgentProfile(GenericAgent::ID agent_id, OperationalModel::ParametersID profile_id);
-    void SwitchAgentJourney(GenericAgent::ID agent_id, Journey::ID journey_id, size_t stage_idx);
+    void
+    SwitchAgentJourney(GenericAgent::ID agent_id, Journey::ID journey_id, BaseStage::ID stage_id);
     uint64_t Iteration() const;
     std::vector<GenericAgent::ID> AgentsInRange(Point p, double distance);
     /// Returns IDs of all agents inside the defined polygon

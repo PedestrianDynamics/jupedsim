@@ -492,13 +492,6 @@ JPS_StageId JPS_Agent_GetStageId(JPS_Agent handle)
     return agent->stageId.getID();
 }
 
-JPS_StageIndex JPS_Agent_GetStageIndex(JPS_Agent handle)
-{
-    assert(handle);
-    const auto agent = reinterpret_cast<const GenericAgent*>(handle);
-    return agent->currentJourneyStageIdx;
-}
-
 JPS_Point JPS_Agent_GetPosition(JPS_Agent handle)
 {
     assert(handle);
@@ -689,7 +682,7 @@ JPS_Transition JPS_Transition_CreateRoundRobinTransition(
     JPS_Transition result{};
     std::vector<std::tuple<BaseStage::ID, uint64_t>> stageWeights;
     stageWeights.reserve(len);
-    for(auto i = 0; i < len; ++i) {
+    for(size_t i = 0; i < len; ++i) {
         stageWeights[i] = std::make_tuple(stages[i], weights[i]);
     }
 
@@ -1064,14 +1057,14 @@ bool JPS_Simulation_SwitchAgentJourney(
     JPS_Simulation handle,
     JPS_AgentId agentId,
     JPS_JourneyId journeyId,
-    JPS_StageIndex stageIdx,
+    JPS_StageId stageId,
     JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
     const auto simulation = reinterpret_cast<Simulation*>(handle);
     bool result = false;
     try {
-        simulation->SwitchAgentJourney(agentId, journeyId, stageIdx);
+        simulation->SwitchAgentJourney(agentId, journeyId, stageId);
         result = true;
     } catch(const std::exception& ex) {
         if(errorMessage) {

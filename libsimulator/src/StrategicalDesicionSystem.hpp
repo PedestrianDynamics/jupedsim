@@ -24,9 +24,8 @@ public:
         auto&& agents) const
     {
         for(auto& agent : agents) {
-            const auto [target, idx, id] = journeys.at(agent.journeyId)->Target(agent);
+            const auto [target, id] = journeys.at(agent.journeyId)->Target(agent);
             agent.waypoint = target;
-            agent.currentJourneyStageIdx = idx;
             agent.stageId = id;
         }
     }
