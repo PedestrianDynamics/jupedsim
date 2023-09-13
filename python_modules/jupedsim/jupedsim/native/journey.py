@@ -19,7 +19,9 @@ class Transition:
 
     @staticmethod
     def create_round_robin_transition(stage_weights: list[tuple[int, int]]):
-        return Transition(py_jps.Transition.create_round_robin_transition(stage_weights))
+        return Transition(
+            py_jps.Transition.create_round_robin_transition(stage_weights)
+        )
 
 
 class JourneyDescription:

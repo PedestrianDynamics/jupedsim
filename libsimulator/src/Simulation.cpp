@@ -36,6 +36,7 @@ PerfStats Simulation::GetLastStats() const
 
 void Simulation::Iterate()
 {
+    LOG_ERROR("BLA!");
     auto t = _perfStats.TraceIterate();
     _agentExitSystem.Run(_agents, _removedAgentsInLastIteration);
     _neighborhoodSearch.Update(_agents);
@@ -62,7 +63,6 @@ void Simulation::Iterate()
 
 Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescription>& stages)
 {
-
     std::map<BaseStage::ID, JourneyNode> nodes;
 
     std::transform(
@@ -73,7 +73,7 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
             const auto& [id, desc] = pair;
             const auto iter = _stages.find(id);
             if(iter == std::end(_stages)) {
-                throw SimulationError("Unknown stage id ({}) provided in journey.", id.getID());
+                throw SimulationError("Unknown stagep id ({}) provided in journey.", id.getID());
             }
             return {
                 id,
@@ -105,6 +105,9 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
                                         return {_stages.at(id).get(), weight};
                                     });
 
+                                for(auto const& [stage, weight] : weightedStages) {
+                                    LOG_ERROR("{}: {}", (void*) stage, weight);
+                                }
                                 return std::make_unique<RoundRobinTransition>(weightedStages);
                             }},
                         desc)}};
