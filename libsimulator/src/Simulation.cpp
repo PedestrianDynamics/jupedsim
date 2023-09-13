@@ -148,6 +148,9 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
         throw SimulationError("Unknown journey id: {}", agent.journeyId);
     }
 
+    if(!_journeys.at(agent.journeyId)->ContainsStage(agent.stageId)) {
+        throw SimulationError("Unknown stage id: {}", agent.stageId);
+    }
     _agents.emplace_back(std::move(agent));
     _neighborhoodSearch.AddAgent(_agents.back());
 

@@ -862,6 +862,7 @@ JPS_AgentId JPS_Simulation_AddGCFMModelAgent(
         GenericAgent agent{
             parameters.agentId,
             Journey::ID(parameters.journeyId),
+            BaseStage::ID(parameters.stageId),
             OperationalModel::ParametersID(parameters.profileId),
             intoPoint(parameters.position),
             intoPoint(parameters.orientation),
@@ -895,6 +896,7 @@ JPS_AgentId JPS_Simulation_AddVelocityModelAgent(
         GenericAgent agent{
             parameters.agentId,
             Journey::ID(parameters.journeyId),
+            BaseStage::ID(parameters.stageId),
             OperationalModel::ParametersID(parameters.profileId),
             intoPoint(parameters.position),
             intoPoint(parameters.orientation),

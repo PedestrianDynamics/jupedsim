@@ -452,6 +452,7 @@ JUPEDSIM_API void JPS_JourneyDescription_AddStage(JPS_JourneyDescription handle,
  * @param handle of the JourneyDescription to modify.
  * @param id of the stage to set the transition for.
  * @param transition transition to the next stage.
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  */
 JUPEDSIM_API bool JPS_JourneyDescription_SetTransitionForStage(
     JPS_JourneyDescription handle,
@@ -647,6 +648,10 @@ typedef struct JPS_GCFMModelAgentParameters {
      */
     JPS_JourneyId journeyId;
     /**
+     * Defines the current stage of its journey
+     */
+    JPS_StageId stageId;
+    /**
      * Defines the paramter profile this agents uses during the simulation
      */
     JPS_ModelParameterProfileId profileId;
@@ -681,6 +686,10 @@ typedef struct JPS_VelocityModelAgentParameters {
      * Defines the journey this agent will take use
      */
     JPS_JourneyId journeyId;
+    /**
+     * Defines the current stage of its journey
+     */
+    JPS_StageId stageId;
     /**
      * Defines the paramter profile this agents uses during the simulation
      */

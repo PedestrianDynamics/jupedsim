@@ -30,10 +30,6 @@ class Agent:
         return self._obj.stage_id
 
     @property
-    def stage_index(self):
-        return self._obj.stage_index
-
-    @property
     def position(self):
         return self._obj.position
 
