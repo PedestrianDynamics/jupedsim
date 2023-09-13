@@ -36,7 +36,6 @@ PerfStats Simulation::GetLastStats() const
 
 void Simulation::Iterate()
 {
-    LOG_ERROR("BLA!");
     auto t = _perfStats.TraceIterate();
     _agentExitSystem.Run(_agents, _removedAgentsInLastIteration);
     _neighborhoodSearch.Update(_agents);
@@ -105,9 +104,6 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
                                         return {_stages.at(id).get(), weight};
                                     });
 
-                                for(auto const& [stage, weight] : weightedStages) {
-                                    LOG_ERROR("{}: {}", (void*) stage, weight);
-                                }
                                 return std::make_unique<RoundRobinTransition>(weightedStages);
                             }},
                         desc)}};

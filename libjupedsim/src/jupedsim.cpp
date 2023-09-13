@@ -683,7 +683,7 @@ JPS_Transition JPS_Transition_CreateRoundRobinTransition(
     std::vector<std::tuple<BaseStage::ID, uint64_t>> stageWeights;
     stageWeights.reserve(len);
     for(size_t i = 0; i < len; ++i) {
-        stageWeights[i] = std::make_tuple(stages[i], weights[i]);
+        stageWeights.emplace_back(std::make_tuple(stages[i], weights[i]));
     }
 
     try {

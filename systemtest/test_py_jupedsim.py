@@ -40,6 +40,7 @@ def test_can_query_agents_in_range():
 
     agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.journey_id = journey_id
+    agent_parameters.stage_id = exit
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
     agent_parameters.profile_id = profile_id
