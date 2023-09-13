@@ -82,8 +82,9 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
                     std::visit(
                         overloaded{
                             [this,
-                             id](const NonTransitionDescription&) -> std::unique_ptr<Transition> {
-                                return std::make_unique<FixedTransition>(_stages.at(id).get());
+                             pair](const NonTransitionDescription&) -> std::unique_ptr<Transition> {
+                                return std::make_unique<FixedTransition>(
+                                    _stages.at(pair.first).get());
                             },
                             [this](const FixedTransitionDescription& d)
                                 -> std::unique_ptr<Transition> {
