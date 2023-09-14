@@ -187,8 +187,6 @@ double VelocityModel::GetSpacing(
     const GenericAgent& ped2,
     const Point direction) const
 {
-    // assert(direction.IsUnitLength());
-
     const Point distp12 = ped2.pos - ped1.pos;
     const bool inFront = direction.ScalarProduct(distp12) >= 0;
     if(!inFront) {

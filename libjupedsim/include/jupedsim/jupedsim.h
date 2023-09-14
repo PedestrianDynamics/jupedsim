@@ -405,7 +405,7 @@ typedef struct JPS_Transition_t* JPS_Transition;
 /**
  * Create a fixed transition to stage
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
- * @return Fixed transition to stage
+ * @return Fixed transition to stage or NULL on any error.
  */
 JUPEDSIM_API JPS_Transition
 JPS_Transition_CreateFixedTransition(JPS_StageId stageId, JPS_ErrorMessage* errorMessage);
@@ -416,7 +416,7 @@ JPS_Transition_CreateFixedTransition(JPS_StageId stageId, JPS_ErrorMessage* erro
  * @param weights weights of target stage
  * @param len length of stages and weights
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
- * @return Round robin transition to stages
+ * @return Round robin transition to stages or NULL on any error.
  */
 JUPEDSIM_API JPS_Transition JPS_Transition_CreateRoundRobinTransition(
     JPS_StageId* stages,
@@ -453,6 +453,7 @@ JUPEDSIM_API void JPS_JourneyDescription_AddStage(JPS_JourneyDescription handle,
  * @param id of the stage to set the transition for.
  * @param transition transition to the next stage.
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return true if the transition for the stage could be added otherwise false
  */
 JUPEDSIM_API bool JPS_JourneyDescription_SetTransitionForStage(
     JPS_JourneyDescription handle,

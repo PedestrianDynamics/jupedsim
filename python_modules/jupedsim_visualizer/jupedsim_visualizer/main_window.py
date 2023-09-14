@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
 import jupedsim as jps
 from jupedsim.recording import Recording
 from jupedsim.serialization import parse_wkt
-from jupedsim.util import geometry_from_wkt, geometry_from_shapely
+from jupedsim.util import geometry_from_shapely, geometry_from_wkt
 
 
 class MainWindow(QMainWindow):

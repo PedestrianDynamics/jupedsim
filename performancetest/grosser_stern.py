@@ -44449,9 +44449,11 @@ def create_journeys(sim: jps.Simulation):
     journeys = []
     for gate_stage in gates_stages:
         journey = jps.JourneyDescription([gate_stage, exit_stage])
-        journey.set_transition_for_stage(gate_stage, jps.Transition.create_fixed_transition(exit_stage),
-)
-        journeys.append((sim.add_journey(journey), gate_stage)) 
+        journey.set_transition_for_stage(
+            gate_stage,
+            jps.Transition.create_fixed_transition(exit_stage),
+        )
+        journeys.append((sim.add_journey(journey), gate_stage))
 
     return journeys
 
