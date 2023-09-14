@@ -3,6 +3,7 @@
 import pytest
 
 import jupedsim as jps
+from jupedsim.native.journey import Transition
 
 
 def test_can_query_agents_in_range():
@@ -98,15 +99,17 @@ def test_can_run_simulation():
     model = model_builder.build()
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
-
-    journey = jps.JourneyDescription(
-        [simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])]
+    exit_stage_id = simulation.add_exit_stage(
+        [(18, 4), (20, 4), (20, 6), (18, 6)]
     )
+
+    journey = jps.JourneyDescription([exit_stage_id])
 
     journey_id = simulation.add_journey(journey)
 
     agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.journey_id = journey_id
+    agent_parameters.stage_id = exit_stage_id
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
     agent_parameters.profile_id = profile_id
@@ -180,11 +183,18 @@ def test_can_wait():
         [(99, 40), (99, 60), (100, 60), (100, 40)]
     )
     journey = jps.JourneyDescription([wp, waiting_set_id, exit])
+    journey.set_transition_for_stage(
+        wp, Transition.create_fixed_transition(waiting_set_id)
+    )
+    journey.set_transition_for_stage(
+        waiting_set_id, Transition.create_fixed_transition(exit)
+    )
 
     journey_id = simulation.add_journey(journey)
 
     agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.journey_id = journey_id
+    agent_parameters.stage_id = wp
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
     agent_parameters.profile_id = profile_id
@@ -265,17 +275,24 @@ def test_can_change_journey_while_waiting():
     )
 
     journey1 = jps.JourneyDescription([wp, stage_id, exit1])
-    journey2 = jps.JourneyDescription(
-        [
-            simulation.add_waypoint_stage((60, 40), 1),
-            simulation.add_waypoint_stage((40, 40), 1),
-            simulation.add_waypoint_stage((40, 60), 1),
-            simulation.add_waypoint_stage((60, 60), 1),
-            simulation.add_exit_stage(
-                [(99, 50), (99, 70), (100, 70), (100, 50)]
-            ),
-        ]
+    journey1.set_transition_for_stage(
+        wp, Transition.create_fixed_transition(stage_id)
     )
+    journey1.set_transition_for_stage(
+        stage_id, Transition.create_fixed_transition(exit1)
+    )
+    journey2_stages = [
+        simulation.add_waypoint_stage((60, 40), 1),
+        simulation.add_waypoint_stage((40, 40), 1),
+        simulation.add_waypoint_stage((40, 60), 1),
+        simulation.add_waypoint_stage((60, 60), 1),
+        simulation.add_exit_stage([(99, 50), (99, 70), (100, 70), (100, 50)]),
+    ]
+    journey2 = jps.JourneyDescription(journey2_stages)
+    for src, dst in zip(journey2_stages[:-1], journey2_stages[1:]):
+        journey2.set_transition_for_stage(
+            src, Transition.create_fixed_transition(dst)
+        )
 
     journeys = []
     journeys.append(simulation.add_journey(journey1))
@@ -283,6 +300,7 @@ def test_can_change_journey_while_waiting():
 
     agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.journey_id = journeys[0]
+    agent_parameters.stage_id = stage_id
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
     agent_parameters.profile_id = profile_id
@@ -306,7 +324,7 @@ def test_can_change_journey_while_waiting():
             simulation.switch_agent_journey(
                 agent_id=agents_at_head_of_waiting[0],
                 journey_id=journeys[1],
-                stage_index=0,
+                stage_id=journey2_stages[0],
             )
             redirect_once = False
 
@@ -343,15 +361,15 @@ def test_get_single_agent_from_simulation():
     model = model_builder.build()
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
+    exit_id = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
 
-    journey = jps.JourneyDescription(
-        [simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])]
-    )
+    journey = jps.JourneyDescription([exit_id])
 
     journey_id = simulation.add_journey(journey)
 
     agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.journey_id = journey_id
+    agent_parameters.stage_id = exit_id
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
     agent_parameters.profile_id = profile_id
@@ -396,14 +414,14 @@ def test_get_agent_non_existing_agent_from_simulation():
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
 
-    journey = jps.JourneyDescription(
-        [simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])]
-    )
+    exit_id = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
+    journey = jps.JourneyDescription([exit_id])
 
     journey_id = simulation.add_journey(journey)
 
     agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.journey_id = journey_id
+    agent_parameters.stage_id = exit_id
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
     agent_parameters.profile_id = profile_id
