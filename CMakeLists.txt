@@ -2,7 +2,7 @@
 # Project setup
 ################################################################################
 cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
-project(JuPedSim VERSION 0.11.0 LANGUAGES CXX)
+project(JuPedSim VERSION 0.11.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
