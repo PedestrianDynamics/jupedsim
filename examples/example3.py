@@ -5,6 +5,7 @@
 import logging
 import pathlib
 import sys
+
 from shapely import GeometryCollection, Polygon, to_wkt
 
 import jupedsim as jps

@@ -4,9 +4,10 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import logging
 import pathlib
+import sys
 
 from shapely import GeometryCollection, Polygon, to_wkt
-import sys
+
 import jupedsim as jps
 
 
