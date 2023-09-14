@@ -71,9 +71,6 @@ def main():
         simulation.add_waypoint_stage((60, 60), 1),
     ]
 
-    print(f"stage: {stage_id}")
-    print(f"exits: {exits}")
-    print(f"waypoints: {waypoints}")
     short_journey = jps.JourneyDescription([waypoints[0], stage_id, exits[0]])
     long_journey = jps.JourneyDescription([*waypoints[1:], exits[1]])
 

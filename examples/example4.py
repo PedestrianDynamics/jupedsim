@@ -5,7 +5,6 @@
 import logging
 import pathlib
 import sys
-import time
 
 from shapely import GeometryCollection, Polygon, to_wkt
 
@@ -77,10 +76,24 @@ def main():
     exit_right = simulation.add_exit_stage(
         [(24, -8), (24, 8), (23, 8), (23, -8)]
     )
-    waypoint_middle = simulation.add_waypoint_stage((0, 0), 2)
+
+    queue_id = simulation.add_queue_stage(
+        [
+            (0, -4),
+            (0, -8),
+        ]
+    )
+    queue = simulation.get_stage_proxy(queue_id)
+
+    waypoint_middle = simulation.add_waypoint_stage((0, 0), 1)
 
     journey = jps.JourneyDescription(
-        [waypoint_middle, exit_left, exit_top, exit_right]
+        [queue_id, waypoint_middle, exit_left, exit_top, exit_right]
+    )
+
+    journey.set_transition_for_stage(
+        queue_id,
+        jps.Transition.create_fixed_transition(waypoint_middle),
     )
     journey.set_transition_for_stage(
         waypoint_middle,
@@ -92,7 +105,7 @@ def main():
 
     agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.journey_id = journey_id
-    agent_parameters.stage_id = waypoint_middle
+    agent_parameters.stage_id = queue_id
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
     agent_parameters.profile_id = profile_id
@@ -106,15 +119,16 @@ def main():
     writer.begin_writing(5, to_wkt(area, rounding_precision=-1))
     while simulation.agent_count() > 0:
         try:
-            if simulation.iteration_count() % 20 == 0:
+            if (
+                simulation.iteration_count() > 100 * 5
+                and simulation.iteration_count() % 100 == 0
+            ):
+                queue.pop(1)
+                print("Next!")
+
+            if simulation.iteration_count() % 4 == 0:
                 writer.write_iteration_state(simulation)
-            before = time.perf_counter_ns()
             simulation.iterate()
-            duration = time.perf_counter_ns() - before
-            print(
-                f"Iteration: {simulation.iteration_count():3.0f} / Time taken: {duration / 1000000}ms",
-                end="\r",
-            )
         except KeyboardInterrupt:
             writer.end_writing()
             print("CTRL-C Recieved! Shuting down")
