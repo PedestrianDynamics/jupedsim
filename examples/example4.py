@@ -77,7 +77,7 @@ def main():
     exit_right = simulation.add_exit_stage(
         [(24, -8), (24, 8), (23, 8), (23, -8)]
     )
-    waypoint_middle = simulation.add_waypoint_stage((0, 0), 5)
+    waypoint_middle = simulation.add_waypoint_stage((0, 0), 2)
 
     journey = jps.JourneyDescription(
         [waypoint_middle, exit_left, exit_top, exit_right]
