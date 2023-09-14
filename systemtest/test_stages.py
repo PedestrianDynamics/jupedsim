@@ -6,6 +6,7 @@ import pytest
 import shapely
 
 import jupedsim as jps
+from jupedsim.native.journey import Transition
 from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
 
 
@@ -40,6 +41,8 @@ def test_can_share_queue_between_stages(tmp_path):
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
 
+    wp_j1 = simulation.add_waypoint_stage((-1, 0), 0.5)
+
     common_exit = simulation.add_exit_stage(
         [(-2.5, -9.5), (-2.5, -10), (2.5, -10), (2.5, -9.5)]
     )
@@ -47,21 +50,33 @@ def test_can_share_queue_between_stages(tmp_path):
     common_queue = simulation.add_queue_stage(
         [(0, -9), (0, -8), (0, -7), (0, -6), (0, -5), (0, -4)]
     )
+    queue = simulation.get_stage_proxy(common_queue)
 
     journey1 = jps.JourneyDescription(
         [
-            simulation.add_waypoint_stage((-1, 0), 0.5),
+            wp_j1,
             common_queue,
             common_exit,
         ]
     )
-    journey2 = jps.JourneyDescription(
-        [simulation.add_waypoint_stage((1, 0), 0.5), common_queue, common_exit]
+    journey1.set_transition_for_stage(
+        wp_j1, Transition.create_fixed_transition(common_queue)
+    )
+    journey1.set_transition_for_stage(
+        common_queue, Transition.create_fixed_transition(common_exit)
+    )
+    wp_j2 = simulation.add_waypoint_stage((1, 0), 0.5)
+    journey2 = jps.JourneyDescription([wp_j2, common_queue, common_exit])
+    journey2.set_transition_for_stage(
+        wp_j2, Transition.create_fixed_transition(common_queue)
+    )
+    journey2.set_transition_for_stage(
+        common_queue, Transition.create_fixed_transition(common_exit)
     )
 
     journeys = [
-        simulation.add_journey(journey1),
-        simulation.add_journey(journey2),
+        (simulation.add_journey(journey1), wp_j1),
+        (simulation.add_journey(journey2), wp_j2),
     ]
 
     agents = [
@@ -81,35 +96,21 @@ def test_can_share_queue_between_stages(tmp_path):
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.profile_id = profile_id
 
-    for agent in agents:
-        agent_parameters.position = agent[0]
-        agent_parameters.journey_id = agent[1]
+    for pos, (journey_id, stage_id) in agents:
+        agent_parameters.position = pos
+        agent_parameters.journey_id = journey_id
+        agent_parameters.stage_id = stage_id
         simulation.add_agent(agent_parameters)
 
-    # writer = SqliteTrajectoryWriter(
-    #    tmp_path / "test_can_share_queue_between_stages.sqlite"
-    # )
-    # writer.begin_writing(
-    #    25,
-    #    shapely.to_wkt(
-    #        shapely.GeometryCollection(polygon), rounding_precision=-1
-    #    ),
-    # )
     while simulation.agent_count() > 0:
-        try:
-            if simulation.iteration_count() % 4 == 0:
-                # writer.write_iteration_state(simulation)
-                pass
-            if (
-                max(simulation.iteration_count() - 3000, 0) > 0
-                and simulation.iteration_count() % 200 == 0
-            ):
-                simulation.notify_queue(common_queue, 1)
-            simulation.iterate()
-        except:
-            # writer.write_iteration_state(simulation)
-            break
-    # writer.end_writing()
+        if simulation.iteration_count() % 4 == 0:
+            pass
+        if (
+            max(simulation.iteration_count() - 3000, 0) > 0
+            and simulation.iteration_count() % 200 == 0
+        ):
+            queue.pop(1)
+        simulation.iterate()
 
 
 def test_can_use_stage_proxy(tmp_path):
@@ -176,6 +177,7 @@ def test_can_use_stage_proxy(tmp_path):
     agent_parameters.profile_id = profile_id
     agent_parameters.position = (-9.5, 0)
     agent_parameters.journey_id = exit_journey_id
+    agent_parameters.stage_id = exit_id
     agent_id = simulation.add_agent(agent_parameters)
 
     assert exit.count_targeting() == 1
@@ -187,7 +189,7 @@ def test_can_use_stage_proxy(tmp_path):
     assert waypoint.count_targeting() == 0
 
     simulation.switch_agent_journey(
-        agent_id=agent_id, journey_id=entry_journey_id, stage_index=0
+        agent_id=agent_id, journey_id=entry_journey_id, stage_id=waypoint_id
     )
 
     assert exit.count_targeting() == 0

@@ -97,6 +97,7 @@ if (BUILD_TESTS)
         test/TestBasicPrimitiveTests.cpp
         test/TestCollisionGeometry.cpp
         test/TestGraph.cpp
+        test/TestJourney.cpp
         test/TestLineSegment.cpp
         test/TestNeighborhoodSearch.cpp
         test/TestPoint.cpp

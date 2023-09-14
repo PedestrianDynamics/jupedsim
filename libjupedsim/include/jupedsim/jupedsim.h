@@ -398,6 +398,39 @@ JPS_GeometryBuilder_Build(JPS_GeometryBuilder handle, JPS_ErrorMessage* errorMes
 JUPEDSIM_API void JPS_GeometryBuilder_Free(JPS_GeometryBuilder handle);
 
 /**
+ * Opaque type for transition, describing route based decisions.
+ */
+typedef struct JPS_Transition_t* JPS_Transition;
+
+/**
+ * Create a fixed transition to stage
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return Fixed transition to stage or NULL on any error.
+ */
+JUPEDSIM_API JPS_Transition
+JPS_Transition_CreateFixedTransition(JPS_StageId stageId, JPS_ErrorMessage* errorMessage);
+
+/**
+ * Create a round robin transition to stages
+ * @param stages target stages
+ * @param weights weights of target stage
+ * @param len length of stages and weights
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return Round robin transition to stages or NULL on any error.
+ */
+JUPEDSIM_API JPS_Transition JPS_Transition_CreateRoundRobinTransition(
+    JPS_StageId* stages,
+    uint64_t* weights,
+    size_t len,
+    JPS_ErrorMessage* errorMessage);
+
+/**
+ * Frees a JPS_Transition
+ * @param handle to the JPS_Transition to free.
+ */
+JUPEDSIM_API void JPS_Transition_Free(JPS_Transition handle);
+
+/**
  * Opaque type that describes a journey
  */
 typedef struct JPS_Journey_t* JPS_JourneyDescription;
@@ -413,6 +446,20 @@ JUPEDSIM_API JPS_JourneyDescription JPS_JourneyDescription_Create();
  * @param id of the stage to extend the journey with.
  */
 JUPEDSIM_API void JPS_JourneyDescription_AddStage(JPS_JourneyDescription handle, JPS_StageId id);
+
+/**
+ * Specifies the transition to the next stage, once this stage is completed.
+ * @param handle of the JourneyDescription to modify.
+ * @param id of the stage to set the transition for.
+ * @param transition transition to the next stage.
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return true if the transition for the stage could be added otherwise false
+ */
+JUPEDSIM_API bool JPS_JourneyDescription_SetTransitionForStage(
+    JPS_JourneyDescription handle,
+    JPS_StageId id,
+    JPS_Transition transition,
+    JPS_ErrorMessage* errorMessage);
 
 /**
  * Frees a JPS_Journey.
@@ -512,14 +559,6 @@ JUPEDSIM_API JPS_JourneyId JPS_Agent_GetJourneyId(JPS_Agent handle);
 JUPEDSIM_API JPS_StageId JPS_Agent_GetStageId(JPS_Agent handle);
 
 /**
- * Access the index of the currently targeted stage in this agents journey.
- *
- * @param handle of the agent to access.
- * @return the index of the currently targeted stage in this agents journey
- */
-JUPEDSIM_API JPS_StageIndex JPS_Agent_GetStageIndex(JPS_Agent handle);
-
-/**
  * Access the agents position.
  * @param handle of the agent to access.
  * @return position
@@ -610,6 +649,10 @@ typedef struct JPS_GCFMModelAgentParameters {
      */
     JPS_JourneyId journeyId;
     /**
+     * Defines the current stage of its journey
+     */
+    JPS_StageId stageId;
+    /**
      * Defines the paramter profile this agents uses during the simulation
      */
     JPS_ModelParameterProfileId profileId;
@@ -644,6 +687,10 @@ typedef struct JPS_VelocityModelAgentParameters {
      * Defines the journey this agent will take use
      */
     JPS_JourneyId journeyId;
+    /**
+     * Defines the current stage of its journey
+     */
+    JPS_StageId stageId;
     /**
      * Defines the paramter profile this agents uses during the simulation
      */
@@ -909,7 +956,7 @@ JUPEDSIM_API bool JPS_Simulation_SwitchAgentProfile(
  * @param handle of the Simulation to operate on
  * @param agentId id of the agent to modify
  * @param journeyId of the journey to select
- * @param stageIdx of the stage to select
+ * @param stageId of the stage to select
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return true on success, false on any error, e.g. unknown agent id or profile id
  */
@@ -917,7 +964,7 @@ JUPEDSIM_API bool JPS_Simulation_SwitchAgentJourney(
     JPS_Simulation handle,
     JPS_AgentId agentId,
     JPS_JourneyId journeyId,
-    JPS_StageIndex stageIdx,
+    JPS_StageId stageId,
     JPS_ErrorMessage* errorMessage);
 
 /**

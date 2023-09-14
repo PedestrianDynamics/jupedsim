@@ -5,7 +5,6 @@
 import logging
 import pathlib
 import sys
-import time
 
 from shapely import GeometryCollection, Polygon, to_wkt
 
@@ -38,7 +37,22 @@ def main():
     jps.set_error_callback(log_error)
 
     area = GeometryCollection(
-        Polygon(shell=[(0, 0), (1000, 0), (1000, 5000), (0, 5000), (0, 0)])
+        Polygon(
+            shell=[
+                (-8, -8),
+                (-24, -8),
+                (-24, 8),
+                (-8, 8),
+                (-8, 24),
+                (8, 24),
+                (8, 8),
+                (24, 8),
+                (24, -8),
+                (8, -8),
+                (8, -24),
+                (-8, -24),
+            ]
+        )
     )
     geometry = jps.geometry_from_shapely(area)
 
@@ -53,37 +67,68 @@ def main():
     model = model_builder.build()
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
-    exit = simulation.add_exit_stage(
-        [(999, 2000), (999, 3000), (1000, 3000), (1000, 2000)]
+    exit_left = simulation.add_exit_stage(
+        [(-24, -8), (-24, 8), (-23, 8), (-23, -8)]
+    )
+    exit_top = simulation.add_exit_stage(
+        [(-8, 24), (8, 24), (8, 23), (-8, 23)]
+    )
+    exit_right = simulation.add_exit_stage(
+        [(24, -8), (24, 8), (23, 8), (23, -8)]
     )
 
-    journey = jps.JourneyDescription([exit])
+    queue_id = simulation.add_queue_stage(
+        [
+            (0, -4),
+            (0, -8),
+        ]
+    )
+    queue = simulation.get_stage_proxy(queue_id)
+
+    waypoint_middle = simulation.add_waypoint_stage((0, 0), 1)
+
+    journey = jps.JourneyDescription(
+        [queue_id, waypoint_middle, exit_left, exit_top, exit_right]
+    )
+
+    journey.set_transition_for_stage(
+        queue_id,
+        jps.Transition.create_fixed_transition(waypoint_middle),
+    )
+    journey.set_transition_for_stage(
+        waypoint_middle,
+        jps.Transition.create_round_robin_transition(
+            [(exit_left, 5), (exit_top, 1), (exit_right, 3)]
+        ),
+    )
     journey_id = simulation.add_journey(journey)
 
     agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.journey_id = journey_id
+    agent_parameters.stage_id = queue_id
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
     agent_parameters.profile_id = profile_id
 
-    for y in range(0, 5000):
-        for x in range(0, 12):
-            agent_parameters.position = (0.5 + x, y + 0.5)
+    for y in range(-23, -12, 2):
+        for x in range(-7, 8, 2):
+            agent_parameters.position = (x, y)
             simulation.add_agent(agent_parameters)
 
     writer = jps.SqliteTrajectoryWriter(pathlib.Path("example4_out.sqlite"))
     writer.begin_writing(5, to_wkt(area, rounding_precision=-1))
     while simulation.agent_count() > 0:
         try:
-            if simulation.iteration_count() % 20 == 0:
+            if (
+                simulation.iteration_count() > 100 * 5
+                and simulation.iteration_count() % 100 == 0
+            ):
+                queue.pop(1)
+                print("Next!")
+
+            if simulation.iteration_count() % 4 == 0:
                 writer.write_iteration_state(simulation)
-            before = time.perf_counter_ns()
             simulation.iterate()
-            duration = time.perf_counter_ns() - before
-            print(
-                f"Iteration: {simulation.iteration_count():3.0f} / Time taken: {duration / 1000000}ms",
-                end="\r",
-            )
         except KeyboardInterrupt:
             writer.end_writing()
             print("CTRL-C Recieved! Shuting down")

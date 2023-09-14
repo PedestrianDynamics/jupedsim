@@ -15,7 +15,7 @@ from jupedsim.distributions import (
 )
 from jupedsim.native.agent import Agent
 from jupedsim.native.geometry import Geometry, GeometryBuilder
-from jupedsim.native.journey import JourneyDescription
+from jupedsim.native.journey import JourneyDescription, Transition
 from jupedsim.native.library import (
     BuildInfo,
     get_build_info,
@@ -72,6 +72,7 @@ __all__ = [
     "Geometry",
     "GeometryBuilder",
     "JourneyDescription",
+    "Transition",
     "BuildInfo",
     "get_build_info",
     "set_debug_callback",
@@ -100,7 +101,6 @@ __all__ = [
     "geometry_from_shapely",
     "geometry_from_coordinates",
     "GeometryError",
-    "build_jps_geometry",
     "__version__",
     "__commit__",
     "__compiler__",

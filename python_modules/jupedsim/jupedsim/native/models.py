@@ -161,6 +161,19 @@ class GCFMModelAgentParameters:
         self._obj.journey_id = value
 
     @property
+    def stage_id(self) -> int:
+        """
+        Id of curently followed stage
+
+        NOTE: Setting this property has no effect on agents that are already part of the simulation
+        """
+        return self._obj.stage_id
+
+    @stage_id.setter
+    def stage_id(self, value: int) -> None:
+        self._obj.stage_id = value
+
+    @property
     def profile_id(self) -> int:
         """
         Id of curently used profile
@@ -261,6 +274,19 @@ class VelocityModelAgentParameters:
     @journey_id.setter
     def journey_id(self, value: int) -> None:
         self._obj.journey_id = value
+
+    @property
+    def stage_id(self) -> int:
+        """
+        Id of curently followed stage
+
+        NOTE: Setting this property has no effect on agents that are already part of the simulation
+        """
+        return self._obj.stage_id
+
+    @stage_id.setter
+    def stage_id(self, value: int) -> None:
+        self._obj.stage_id = value
 
     @property
     def profile_id(self) -> int:

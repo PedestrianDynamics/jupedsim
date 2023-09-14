@@ -62,6 +62,7 @@ OWNED_WRAPPER(JPS_OperationalModel);
 OWNED_WRAPPER(JPS_VelocityModelBuilder);
 OWNED_WRAPPER(JPS_GCFMModelBuilder);
 OWNED_WRAPPER(JPS_JourneyDescription);
+OWNED_WRAPPER(JPS_Transition);
 OWNED_WRAPPER(JPS_Simulation);
 OWNED_WRAPPER(JPS_AgentIterator);
 OWNED_WRAPPER(JPS_AgentIdIterator);
@@ -191,17 +192,19 @@ PYBIND11_MODULE(py_jupedsim, m)
                 p.orientation = intoJPS_Point(pt);
             })
         .def_readwrite("journey_id", &JPS_GCFMModelAgentParameters::journeyId)
+        .def_readwrite("stage_id", &JPS_GCFMModelAgentParameters::stageId)
         .def_readwrite("profile_id", &JPS_GCFMModelAgentParameters::profileId)
         .def_readwrite("id", &JPS_GCFMModelAgentParameters::agentId)
         .def("__repr__", [](const JPS_GCFMModelAgentParameters& p) {
             return fmt::format(
-                "speed: {}, e0: {}, position: {}, orientation: {}, journey_id: {}, profile_id: {}, "
-                "id: {}",
+                "speed: {}, e0: {}, position: {}, orientation: {}, journey_id: {}, "
+                "stage_id: {}, profile_id: {}, id: {}",
                 p.speed,
                 intoTuple(p.e0),
                 intoTuple(p.position),
                 intoTuple(p.orientation),
                 p.journeyId,
+                p.stageId,
                 p.profileId,
                 p.agentId);
         });
@@ -226,16 +229,18 @@ PYBIND11_MODULE(py_jupedsim, m)
                 p.orientation = intoJPS_Point(pt);
             })
         .def_readwrite("journey_id", &JPS_VelocityModelAgentParameters::journeyId)
+        .def_readwrite("stage_id", &JPS_VelocityModelAgentParameters::stageId)
         .def_readwrite("profile_id", &JPS_VelocityModelAgentParameters::profileId)
         .def_readwrite("id", &JPS_VelocityModelAgentParameters::agentId)
         .def("__repr__", [](const JPS_VelocityModelAgentParameters& p) {
             return fmt::format(
-                "e0: {}, position: {}, orientation: {}, journey_id: {}, profile_id: {}, "
-                "id: {}",
+                "e0: {}, position: {}, orientation: {}, journey_id: {}, stage_id: {}, "
+                "profile_id: {}, id: {}",
                 intoTuple(p.e0),
                 intoTuple(p.position),
                 intoTuple(p.orientation),
                 p.journeyId,
+                p.stageId,
                 p.profileId,
                 p.agentId);
         });
@@ -373,6 +378,41 @@ PYBIND11_MODULE(py_jupedsim, m)
             JPS_ErrorMessage_Free(errorMsg);
             throw std::runtime_error{msg};
         });
+    py::class_<JPS_Transition_Wrapper>(m, "Transition")
+        .def_static(
+            "create_fixed_transition",
+            [](JPS_StageId stageId) {
+                JPS_ErrorMessage errorMsg{};
+                auto result = JPS_Transition_CreateFixedTransition(stageId, &errorMsg);
+                if(result) {
+                    return std::make_unique<JPS_Transition_Wrapper>(result);
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
+            })
+        .def_static(
+            "create_round_robin_transition",
+            [](const std::vector<std::tuple<JPS_StageId, uint64_t>>& stageWeights) {
+                JPS_ErrorMessage errorMsg{};
+                std::vector<JPS_StageId> stageIds;
+                stageIds.reserve(stageWeights.size());
+                std::vector<uint64_t> weights;
+                weights.reserve(stageWeights.size());
+                for(auto const& [stageId, weight] : stageWeights) {
+                    stageIds.emplace_back(stageId);
+                    weights.emplace_back(weight);
+                }
+                auto result = JPS_Transition_CreateRoundRobinTransition(
+                    stageIds.data(), weights.data(), stageIds.size(), &errorMsg);
+                if(result) {
+                    return std::make_unique<JPS_Transition_Wrapper>(result);
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
+            });
+
     py::class_<JPS_JourneyDescription_Wrapper>(m, "JourneyDescription")
         .def(py::init([]() {
             return std::make_unique<JPS_JourneyDescription_Wrapper>(
@@ -387,15 +427,31 @@ PYBIND11_MODULE(py_jupedsim, m)
             return desc;
         }))
         .def(
-            "append",
+            "add",
             [](JPS_JourneyDescription_Wrapper& w, JPS_StageId id) {
                 JPS_JourneyDescription_AddStage(w.handle, id);
             })
-        .def("append", [](JPS_JourneyDescription_Wrapper& w, const std::vector<JPS_StageId>& ids) {
-            for(const auto& id : ids) {
-                JPS_JourneyDescription_AddStage(w.handle, id);
-            }
-        });
+        .def(
+            "add",
+            [](JPS_JourneyDescription_Wrapper& w, const std::vector<JPS_StageId>& ids) {
+                for(const auto& id : ids) {
+                    JPS_JourneyDescription_AddStage(w.handle, id);
+                }
+            })
+        .def(
+            "set_transition_for_stage",
+            [](JPS_JourneyDescription_Wrapper& w,
+               JPS_StageId stageId,
+               JPS_Transition_Wrapper& transition) {
+                JPS_ErrorMessage errorMsg{};
+                auto success = JPS_JourneyDescription_SetTransitionForStage(
+                    w.handle, stageId, transition.handle, &errorMsg);
+                if(!success) {
+                    auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                    JPS_ErrorMessage_Free(errorMsg);
+                    throw std::runtime_error{msg};
+                }
+            });
     py::class_<JPS_AgentIterator_Wrapper>(m, "VelocityModelAgentIterator")
         .def(
             "__iter__",
@@ -499,9 +555,6 @@ PYBIND11_MODULE(py_jupedsim, m)
             [](const JPS_Agent_Wrapper& w) { return JPS_Agent_GetJourneyId(w.handle); })
         .def_property_readonly(
             "stage_id", [](const JPS_Agent_Wrapper& w) { return JPS_Agent_GetStageId(w.handle); })
-        .def_property_readonly(
-            "stage_index",
-            [](const JPS_Agent_Wrapper& w) { return JPS_Agent_GetStageIndex(w.handle); })
         .def_property_readonly(
             "position",
             [](const JPS_Agent_Wrapper& w) { return intoTuple(JPS_Agent_GetPosition(w.handle)); })
@@ -698,10 +751,10 @@ PYBIND11_MODULE(py_jupedsim, m)
             [](const JPS_Simulation_Wrapper& w,
                JPS_AgentId agentId,
                JPS_JourneyId journeyId,
-               JPS_StageIndex stageIdx) {
+               JPS_StageId stageId) {
                 JPS_ErrorMessage errorMsg{};
                 auto result = JPS_Simulation_SwitchAgentJourney(
-                    w.handle, agentId, journeyId, stageIdx, &errorMsg);
+                    w.handle, agentId, journeyId, stageId, &errorMsg);
                 if(result) {
                     return;
                 }
@@ -712,7 +765,7 @@ PYBIND11_MODULE(py_jupedsim, m)
             py::kw_only(),
             py::arg("agent_id"),
             py::arg("journey_id"),
-            py::arg("stage_index"))
+            py::arg("stage_id"))
         .def(
             "agent_count",
             [](JPS_Simulation_Wrapper& simulation) {

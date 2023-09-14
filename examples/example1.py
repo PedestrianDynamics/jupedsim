@@ -59,13 +59,16 @@ def main():
     exit_id = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
 
     journey = jps.JourneyDescription()
-    journey.append(stage_id)
-    journey.append(exit_id)
-
+    journey.add(stage_id)
+    journey.add(exit_id)
+    journey.set_transition_for_stage(
+        stage_id, jps.Transition.create_fixed_transition(exit_id)
+    )
     journey_id = simulation.add_journey(journey)
 
     agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.journey_id = journey_id
+    agent_parameters.stage_id = stage_id
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
     agent_parameters.profile_id = profile_id
@@ -84,9 +87,6 @@ def main():
             simulation.iterate()
             if simulation.iteration_count() % 4 == 0:
                 writer.write_iteration_state(simulation)
-                for a in simulation.agents():
-                    print(f"{a.model.e0}")
-                    break
             if simulation.iteration_count() == 1300:
                 if waiting_stage.state == jps.WaitingSetState.ACTIVE:
                     waiting_stage.state = jps.WaitingSetState.INACTIVE

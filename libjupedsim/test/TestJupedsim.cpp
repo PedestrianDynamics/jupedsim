@@ -118,6 +118,7 @@ TEST(Simulation, CanSimulate)
 struct SimulationTest : public ::testing::Test {
     JPS_Simulation simulation{};
     JPS_JourneyId journey_id{};
+    JPS_StageId stage_id{};
     std::array<JPS_ModelParameterProfileId, 2> model_paramater_profile_id{1, 2};
 
     void SetUp() override
@@ -141,10 +142,10 @@ struct SimulationTest : public ::testing::Test {
         simulation = JPS_Simulation_Create(model, geometry, 0.01, nullptr);
         ASSERT_NE(simulation, nullptr);
 
-        const auto waypoint_id = JPS_Simulation_AddStageWaypoint(simulation, {1, 1}, 1, nullptr);
+        stage_id = JPS_Simulation_AddStageWaypoint(simulation, {1, 1}, 1, nullptr);
 
         auto journey = JPS_JourneyDescription_Create();
-        JPS_JourneyDescription_AddStage(journey, waypoint_id);
+        JPS_JourneyDescription_AddStage(journey, stage_id);
         journey_id = JPS_Simulation_AddJourney(simulation, journey, nullptr);
 
         JPS_JourneyDescription_Free(journey);
@@ -168,9 +169,9 @@ TEST_F(SimulationTest, AgentIteratorIsEmptyForNewSimulation)
 TEST_F(SimulationTest, AgentIteratorCanIterate)
 {
     std::vector<JPS_VelocityModelAgentParameters> agent_parameters{
-        {{}, {1.0, 1.0}, {1.0, 1.0}, journey_id, model_paramater_profile_id[0], 0},
-        {{}, {2.0, 1.0}, {1.0, 1.0}, journey_id, model_paramater_profile_id[0], 0},
-        {{}, {3.0, 1.0}, {1.0, 1.0}, journey_id, model_paramater_profile_id[0], 0}};
+        {{}, {1.0, 1.0}, {1.0, 1.0}, journey_id, stage_id, model_paramater_profile_id[0], 0},
+        {{}, {2.0, 1.0}, {1.0, 1.0}, journey_id, stage_id, model_paramater_profile_id[0], 0},
+        {{}, {3.0, 1.0}, {1.0, 1.0}, journey_id, stage_id, model_paramater_profile_id[0], 0}};
     for(const auto& agent_params : agent_parameters) {
         ASSERT_NE(JPS_Simulation_AddVelocityModelAgent(simulation, agent_params, nullptr), 0);
     }
@@ -186,7 +187,7 @@ TEST_F(SimulationTest, AgentIteratorCanIterate)
 TEST_F(SimulationTest, CanChangeModelParameterProfiles)
 {
     JPS_VelocityModelAgentParameters agent_params{
-        {}, {1, 1}, {1, 0}, journey_id, model_paramater_profile_id[0], 0};
+        {}, {1, 1}, {1, 0}, journey_id, stage_id, model_paramater_profile_id[0], 0};
     const auto agent_id = JPS_Simulation_AddVelocityModelAgent(simulation, agent_params, nullptr);
     ASSERT_NE(agent_id, 0);
     ASSERT_EQ(JPS_Simulation_AgentCount(simulation), 1);

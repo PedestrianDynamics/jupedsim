@@ -65,7 +65,7 @@ public:
     void SetTracing(bool on);
     PerfStats GetLastStats() const;
     void Iterate();
-    Journey::ID AddJourney(const std::vector<BaseStage::ID>& stages);
+    Journey::ID AddJourney(const std::map<BaseStage::ID, TransitionDescription>& stages);
     BaseStage::ID AddStage(const StageDescription stageDescription);
     void RemoveAgent(GenericAgent::ID id);
     const std::vector<GenericAgent::ID>& RemovedAgents() const;
@@ -73,7 +73,8 @@ public:
     double ElapsedTime() const;
     double DT() const;
     void SwitchAgentProfile(GenericAgent::ID agent_id, OperationalModel::ParametersID profile_id);
-    void SwitchAgentJourney(GenericAgent::ID agent_id, Journey::ID journey_id, size_t stage_idx);
+    void
+    SwitchAgentJourney(GenericAgent::ID agent_id, Journey::ID journey_id, BaseStage::ID stage_id);
     uint64_t Iteration() const;
     std::vector<GenericAgent::ID> AgentsInRange(Point p, double distance);
     /// Returns IDs of all agents inside the defined polygon

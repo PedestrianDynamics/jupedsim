@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
 import jupedsim as jps
 from jupedsim.recording import Recording
 from jupedsim.serialization import parse_wkt
-from jupedsim.util import build_geometry
+from jupedsim.util import geometry_from_shapely, geometry_from_wkt
 
 
 class MainWindow(QMainWindow):
@@ -114,9 +114,9 @@ class MainWindow(QMainWindow):
         file = Path(file)
         self.settings.setValue("files/last_wkt_location", str(file.parent))
         try:
-            wkt = parse_wkt(Path(file).read_text(encoding="UTF-8"))
-            navi = jps.RoutingEngine(build_geometry(wkt))
-            xmin, ymin, xmax, ymax = wkt.bounds
+            polygon = parse_wkt(Path(file).read_text(encoding="UTF-8"))
+            navi = jps.RoutingEngine(geometry_from_shapely(polygon))
+            xmin, ymin, xmax, ymax = polygon.bounds
             info_text = f"Dimensions: {math.ceil(xmax - xmin)}m x {math.ceil(ymax - ymin)}m Triangles: {len(navi.mesh())}"
             name_text = f"Geometry: {file}"
             self.setUpdatesEnabled(False)
@@ -153,7 +153,8 @@ class MainWindow(QMainWindow):
         try:
             rec = Recording(file.as_posix())
             self.setUpdatesEnabled(False)
-            navi = jps.RoutingEngine(build_jps_geometry(rec.geometry()))
+            print(rec.geometry())
+            navi = jps.RoutingEngine(geometry_from_shapely(rec.geometry()))
             geo = Geometry(navi)
             geo.show_triangulation(self._show_triangulation.isChecked())
             trajectory = Trajectory(rec)
@@ -163,6 +164,9 @@ class MainWindow(QMainWindow):
             self.setUpdatesEnabled(True)
             self.update()
         except Exception as e:
+            import traceback
+
+            traceback.print_exception(e)
             QMessageBox.critical(
                 self,
                 "Error importing simulation recording",
