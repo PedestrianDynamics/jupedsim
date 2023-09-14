@@ -60,8 +60,10 @@ def main():
 
     journey = jps.JourneyDescription()
     journey.add(stage_id)
-    journey.add(exit_id)    
-    journey.set_transition_for_stage(stage_id, jps.Transition.create_fixed_transition(exit_id))
+    journey.add(exit_id)
+    journey.set_transition_for_stage(
+        stage_id, jps.Transition.create_fixed_transition(exit_id)
+    )
     journey_id = simulation.add_journey(journey)
 
     agent_parameters = jps.VelocityModelAgentParameters()
