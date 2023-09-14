@@ -44449,7 +44449,9 @@ def create_journeys(sim: jps.Simulation):
     journeys = []
     for gate_stage in gates_stages:
         journey = jps.JourneyDescription([gate_stage, exit_stage])
-        journeys.append(sim.add_journey(journey))
+        journey.set_transition_for_stage(gate_stage, jps.Transition.create_fixed_transition(exit_stage),
+)
+        journeys.append((sim.add_journey(journey), gate_stage)) 
 
     return journeys
 
@@ -44520,7 +44522,9 @@ def main():
     for pos in positions:
         agent_parameters.position = pos
         agent_parameters.profile_id = profile_picker.pick()
-        agent_parameters.journey_id = random.choice(journeys)
+        journey, start_stage = random.choice(journeys)
+        agent_parameters.journey_id = journey
+        agent_parameters.stage_id = start_stage
         simulation.add_agent(agent_parameters)
 
     writer = jps.SqliteTrajectoryWriter(
