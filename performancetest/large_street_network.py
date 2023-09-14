@@ -48,6 +48,7 @@ class Spawner:
         point_b: tuple[float, float],
         profile_picker,
         journey_id: int,
+        start_stage: int,
         max: int | None = None,
     ):
         self.sim = sim
@@ -58,6 +59,7 @@ class Spawner:
         self.dir = (point_b[0] - point_a[0], point_b[1] - point_a[1])
         self.agent_parameters = jps.VelocityModelAgentParameters()
         self.agent_parameters.journey_id = journey_id
+        self.agent_parameters.stage_id = start_stage
         self.agent_parameters.profile_id = 0
         self.agent_parameters.orientation = (1.0, 0.0)
         self._needs_placement = 0
@@ -157,10 +159,17 @@ def create_journey(sim: jps.Simulation):
             ]
         ),
     ]
+
     journey = jps.JourneyDescription(stages)
+    for stages_start, stage_end in zip(stages[0:-1], stages[1:]):
+        journey.set_transition_for_stage(
+            stages_start,
+            jps.Transition.create_fixed_transition(stage_end),
+        )
+
     queue = sim.get_stage_proxy(stages[-2])
     waiting_area = sim.get_stage_proxy(stages[0])
-    return sim.add_journey(journey), (waiting_area, queue)
+    return sim.add_journey(journey), (stages[0], waiting_area, queue)
 
 
 def parse_args():
@@ -212,7 +221,7 @@ def main():
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
     simulation.set_tracing(True)
 
-    journey, (waiting_area, queue) = create_journey(simulation)
+    journey, (start_stage, waiting_area, queue) = create_journey(simulation)
     spawners = [
         Spawner(
             simulation,
@@ -222,6 +231,7 @@ def main():
             (1456.38, 534.73),
             profile_picker,
             journey,
+            start_stage,
             1024,
         ),
     ]
