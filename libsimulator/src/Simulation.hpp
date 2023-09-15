@@ -17,6 +17,8 @@
 #include "SimulationError.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
+#include "StageManager.hpp"
+#include "StageSystem.hpp"
 #include "StrategicalDesicionSystem.hpp"
 #include "TacticalDecisionSystem.hpp"
 #include "TemplateHelper.hpp"
@@ -41,13 +43,14 @@ class Simulation
     TacticalDecisionSystem _tacticalDecisionSystem{};
     OperationalDecisionSystem _operationalDecisionSystem;
     AgentExitSystem<GenericAgent> _agentExitSystem{};
+    StageManager _stageManager{};
+    StageSystem _stageSystem{};
     NeighborhoodSearch<GenericAgent> _neighborhoodSearch{2.2};
     std::unique_ptr<RoutingEngine> _routingEngine;
     std::unique_ptr<CollisionGeometry> _geometry;
     std::vector<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
     std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;
-    std::unordered_map<BaseStage::ID, std::unique_ptr<BaseStage>> _stages;
     PerfStats _perfStats{};
 
 public:

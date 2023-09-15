@@ -50,6 +50,10 @@ add_library(simulator STATIC
     src/SimulationError.hpp
     src/Stage.cpp
     src/Stage.hpp
+    src/StageManager.cpp
+    src/StageManager.hpp
+    src/StageSystem.cpp
+    src/StageSystem.hpp
     src/StrategicalDesicionSystem.hpp
     src/TacticalDecisionSystem.hpp
     src/TemplateHelper.hpp
