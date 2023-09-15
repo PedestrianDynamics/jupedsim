@@ -23,6 +23,12 @@ class Transition:
             py_jps.Transition.create_round_robin_transition(stage_weights)
         )
 
+    @staticmethod
+    def create_least_targeted_transition(stage_ids: list[int]):
+        return Transition(
+            py_jps.Transition.create_least_targeted_transition(stage_ids)
+        )
+
 
 class JourneyDescription:
     def __init__(self, stage_ids: Optional[list[int]] = None):

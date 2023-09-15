@@ -63,8 +63,8 @@ private:
     std::vector<BaseStage::ID> targetCandidates;
 
 public:
-    LeastTargetedTransitionDescription(const std::vector<BaseStage::ID> targetCandidates_)
-        : targetCandidates(targetCandidates_)
+    LeastTargetedTransitionDescription(std::vector<BaseStage::ID> targetCandidates_)
+        : targetCandidates(std::move(targetCandidates_))
     {
         for(const auto& stageId : targetCandidates) {
             if(stageId == BaseStage::ID::Invalid.getID()) {
@@ -140,24 +140,21 @@ public:
 class LeastTargetedTransition : public Transition
 {
 private:
-    const Simulation* simulation;
     std::vector<BaseStage*> targetCandidates;
 
 public:
-    LeastTargetedTransition(
-        const Simulation* simulation_,
-        const std::vector<BaseStage*>& targetCandidates_)
-        : simulation(simulation_), targetCandidates(targetCandidates_)
+    LeastTargetedTransition(std::vector<BaseStage*> targetCandidates_)
+        : targetCandidates(std::move(targetCandidates_))
     {
     }
 
     BaseStage* NextStage() override
     {
         auto leastTargeted = std::min_element(
-            std::begin(targetCandidates), std::end(targetCandidates), [this](auto const& target) {
-                auto proxy = BaseProxy(simulation, target);
-
-                return proxy.CountTargeting();
+            std::begin(targetCandidates),
+            std::end(targetCandidates),
+            [this](auto const& a, auto const& b) {
+                return a->CountTargeting() < b->CountTargeting();
             });
 
         return *leastTargeted;

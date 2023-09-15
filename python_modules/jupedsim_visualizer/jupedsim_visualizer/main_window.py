@@ -153,7 +153,6 @@ class MainWindow(QMainWindow):
         try:
             rec = Recording(file.as_posix())
             self.setUpdatesEnabled(False)
-            print(rec.geometry())
             navi = jps.RoutingEngine(geometry_from_shapely(rec.geometry()))
             geo = Geometry(navi)
             geo.show_triangulation(self._show_triangulation.isChecked())

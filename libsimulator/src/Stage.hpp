@@ -99,8 +99,12 @@ public:
     virtual StageProxy Proxy(const Simulation* simulation_) = 0;
     ID Id() const { return id; }
     size_t CountTargeting() const { return targeting; }
-    void IncreaseTargeting() { targeting += 1; }
-    void DecreaseTargeting() { targeting -= 1; }
+    void IncreaseTargeting() { targeting = targeting + 1; }
+    void DecreaseTargeting()
+    {
+        assert(targeting >= 1);
+        targeting = targeting - 1;
+    }
 };
 
 class Waypoint : public BaseStage

@@ -19,13 +19,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 size_t BaseProxy::CountTargeting() const
 {
-    size_t count = 0;
-    for(const auto& agent : simulation->Agents()) {
-        if(agent.stageId == stage->Id()) {
-            ++count;
-        }
-    }
-    return count;
+    return stage->CountTargeting();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

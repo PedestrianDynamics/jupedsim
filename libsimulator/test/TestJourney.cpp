@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Journey.hpp"
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 TEST(FixedTransition, NextIsCorrect)
@@ -67,4 +68,47 @@ TEST(RoundRobinTransition, ZeroWeightGivesException)
         {reinterpret_cast<BaseStage*>(&stage1), 0}};
 
     ASSERT_THROW(RoundRobinTransition sut(weightedStages), SimulationError);
+}
+
+TEST(LeastTargetedTransition, NextIsCorrect)
+{
+    class MockStage : public BaseStage
+    {
+    public:
+        MockStage(size_t targeting_)
+        {
+            targeting = targeting_;
+            ON_CALL(*this, CountTargeting).WillByDefault([this]() { return targeting; });
+            ON_CALL(*this, IsCompleted).WillByDefault([]() { return true; });
+        }
+        MOCK_METHOD(size_t, CountTargeting, (), (const));
+        MOCK_METHOD(bool, IsCompleted, (const GenericAgent& agent), (override));
+        MOCK_METHOD(Point, Target, (const GenericAgent& agent), (override));
+        MOCK_METHOD(StageProxy, Proxy, (const Simulation* simulation_), (override));
+        void SetTargeting(size_t targeting_) { targeting = targeting_; }
+    };
+
+    MockStage mockstage1(3);
+    MockStage mockstage2(2);
+    MockStage mockstage3(1);
+
+    std::vector<BaseStage*> stages = {&mockstage1, &mockstage2, &mockstage3};
+    LeastTargetedTransition sut(stages);
+
+    ASSERT_EQ(&mockstage3, sut.NextStage());
+
+    mockstage1.SetTargeting(1);
+    mockstage2.SetTargeting(1);
+    mockstage3.SetTargeting(1);
+    ASSERT_EQ(&mockstage1, sut.NextStage());
+
+    mockstage1.SetTargeting(5);
+    mockstage2.SetTargeting(1);
+    mockstage3.SetTargeting(5);
+    ASSERT_EQ(&mockstage2, sut.NextStage());
+
+    mockstage1.SetTargeting(5);
+    mockstage2.SetTargeting(5);
+    mockstage3.SetTargeting(2);
+    ASSERT_EQ(&mockstage3, sut.NextStage());
 }

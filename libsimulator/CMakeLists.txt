@@ -50,6 +50,7 @@ add_library(simulator STATIC
     src/SimulationError.hpp
     src/Stage.cpp
     src/Stage.hpp
+    src/StageDescription.hpp
     src/StageManager.cpp
     src/StageManager.hpp
     src/StageSystem.cpp
@@ -111,6 +112,7 @@ if (BUILD_TESTS)
 
     target_link_libraries(libsimulator-tests PRIVATE
         GTest::gtest
+        GTest::gmock
         GTest::gtest_main
         simulator
     )

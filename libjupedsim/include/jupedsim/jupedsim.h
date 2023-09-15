@@ -425,6 +425,18 @@ JUPEDSIM_API JPS_Transition JPS_Transition_CreateRoundRobinTransition(
     JPS_ErrorMessage* errorMessage);
 
 /**
+ * Create a least targeted transition to stages
+ * @param stages target stages
+ * @param len length of stages and weights
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return least targeted transition to stages or NULL on any error.
+ */
+JUPEDSIM_API JPS_Transition JPS_Transition_CreateLeastTargetedTransition(
+    JPS_StageId* stages,
+    size_t len,
+    JPS_ErrorMessage* errorMessage);
+
+/**
  * Frees a JPS_Transition
  * @param handle to the JPS_Transition to free.
  */
