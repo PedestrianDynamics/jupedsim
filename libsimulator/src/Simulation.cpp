@@ -38,6 +38,7 @@ void Simulation::Iterate()
 {
     auto t = _perfStats.TraceIterate();
     _agentExitSystem.Run(_agents, _removedAgentsInLastIteration);
+    // TODO(TS) stage update system
     _neighborhoodSearch.Update(_agents);
 
     _stageSystem.Run(_stageManager, _neighborhoodSearch);
