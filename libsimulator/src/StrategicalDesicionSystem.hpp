@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Journey.hpp"
+#include "StageManager.hpp"
 
 #include <memory>
 #include <tuple>
@@ -21,11 +22,13 @@ public:
 
     void
     Run(const std::unordered_map<Journey::ID, std::unique_ptr<Journey>>& journeys,
-        auto&& agents) const
+        auto&& agents,
+        StageManager& stageManager) const
     {
         for(auto& agent : agents) {
             const auto [target, id] = journeys.at(agent.journeyId)->Target(agent);
             agent.waypoint = target;
+            stageManager.MigrateAgent(agent.stageId, id);
             agent.stageId = id;
         }
     }

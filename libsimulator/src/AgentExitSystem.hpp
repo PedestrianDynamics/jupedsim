@@ -4,6 +4,7 @@
 
 #include "GenericAgent.hpp"
 #include "IteratorPair.hpp"
+#include "StageManager.hpp"
 
 #include <map>
 #include <vector>
@@ -19,19 +20,32 @@ public:
     AgentExitSystem(AgentExitSystem&& other) = delete;
     AgentExitSystem& operator=(AgentExitSystem&& other) = delete;
 
-    void Run(std::vector<Agent>& agents, std::vector<GenericAgent::ID>& removedAgentIds) const;
+    void
+    Run(std::vector<Agent>& agents,
+        std::vector<GenericAgent::ID>& removedAgentIds,
+        StageManager& stageManager) const;
 };
 
 template <typename Agent>
 void AgentExitSystem<Agent>::Run(
     std::vector<Agent>& agents,
-    std::vector<GenericAgent::ID>& removedAgentIds) const
+    std::vector<GenericAgent::ID>& removedAgentIds,
+    StageManager& stageManager) const
 {
+
     auto iter = std::remove_if(
-        std::begin(agents), std::end(agents), [&removedAgentIds](const GenericAgent& agent) {
-            return std::find(std::begin(removedAgentIds), std::end(removedAgentIds), agent.id) !=
-                   std::end(removedAgentIds);
+        std::begin(agents),
+        std::end(agents),
+        [&removedAgentIds, &stageManager](const GenericAgent& agent) {
+            auto found =
+                std::find(std::begin(removedAgentIds), std::end(removedAgentIds), agent.id) !=
+                std::end(removedAgentIds);
+            if(found) {
+                stageManager.HandleRemoveAgent(agent.stageId);
+            }
+            return found;
         });
     agents.erase(iter, std::end(agents));
+
     removedAgentIds.clear();
 }

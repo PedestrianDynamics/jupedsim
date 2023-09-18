@@ -702,6 +702,29 @@ JPS_Transition JPS_Transition_CreateRoundRobinTransition(
     return result;
 }
 
+JPS_Transition JPS_Transition_CreateLeastTargetedTransition(
+    JPS_StageId* stages,
+    size_t len,
+    JPS_ErrorMessage* errorMessage)
+{
+    JPS_Transition result{};
+    std::vector<BaseStage::ID> stageIds(stages, stages + len);
+    try {
+        result = reinterpret_cast<JPS_Transition>(
+            new TransitionDescription(LeastTargetedTransitionDescription(std::move(stageIds))));
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return result;
+}
+
 void JPS_Transition_Free(JPS_Transition handle)
 {
     delete reinterpret_cast<JPS_Transition*>(handle);

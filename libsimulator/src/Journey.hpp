@@ -57,8 +57,31 @@ public:
     }
 };
 
-using TransitionDescription = std::
-    variant<NonTransitionDescription, FixedTransitionDescription, RoundRobinTransitionDescription>;
+class LeastTargetedTransitionDescription
+{
+private:
+    std::vector<BaseStage::ID> targetCandidates;
+
+public:
+    LeastTargetedTransitionDescription(std::vector<BaseStage::ID> targetCandidates_)
+        : targetCandidates(std::move(targetCandidates_))
+    {
+        for(const auto& stageId : targetCandidates) {
+            if(stageId == BaseStage::ID::Invalid.getID()) {
+                throw SimulationError(
+                    "Can not create least targeted transition from invalid stage id.");
+            }
+        }
+    }
+
+    const std::vector<BaseStage::ID>& TargetCandidates() const { return targetCandidates; }
+};
+
+using TransitionDescription = std::variant<
+    NonTransitionDescription,
+    FixedTransitionDescription,
+    RoundRobinTransitionDescription,
+    LeastTargetedTransitionDescription>;
 
 class Transition
 {
@@ -111,6 +134,27 @@ public:
         }
         nextCalled = (nextCalled + 1) % sumWeights;
         return candidate;
+    }
+};
+
+class LeastTargetedTransition : public Transition
+{
+private:
+    std::vector<BaseStage*> targetCandidates;
+
+public:
+    LeastTargetedTransition(std::vector<BaseStage*> targetCandidates_)
+        : targetCandidates(std::move(targetCandidates_))
+    {
+    }
+
+    BaseStage* NextStage() override
+    {
+        auto leastTargeted = std::min_element(
+            std::begin(targetCandidates),
+            std::end(targetCandidates),
+            [](auto const& a, auto const& b) { return a->CountTargeting() < b->CountTargeting(); });
+        return *leastTargeted;
     }
 };
 

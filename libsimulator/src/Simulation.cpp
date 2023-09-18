@@ -37,20 +37,11 @@ PerfStats Simulation::GetLastStats() const
 void Simulation::Iterate()
 {
     auto t = _perfStats.TraceIterate();
-    _agentExitSystem.Run(_agents, _removedAgentsInLastIteration);
+    _agentExitSystem.Run(_agents, _removedAgentsInLastIteration, _stageManager);
     _neighborhoodSearch.Update(_agents);
 
-    for(auto& [_, stage] : _stages) {
-        if(auto* updatable_stage = dynamic_cast<NotifiableWaitingSet*>(stage.get());
-           updatable_stage != nullptr) {
-            updatable_stage->Update(_neighborhoodSearch);
-        } else if(auto* updatable_stage = dynamic_cast<NotifiableQueue*>(stage.get());
-                  updatable_stage != nullptr) {
-            updatable_stage->Update(_neighborhoodSearch);
-        }
-    }
-
-    _stategicalDecisionSystem.Run(_journeys, _agents);
+    _stageSystem.Run(_stageManager, _neighborhoodSearch);
+    _stategicalDecisionSystem.Run(_journeys, _agents, _stageManager);
     _tacticalDecisionSystem.Run(*_routingEngine, _agents);
     {
         auto t2 = _perfStats.TraceOperationalDecisionSystemRun();
@@ -70,25 +61,21 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
         std::inserter(nodes, std::end(nodes)),
         [this](auto const& pair) -> std::pair<BaseStage::ID, JourneyNode> {
             const auto& [id, desc] = pair;
-            const auto iter = _stages.find(id);
-            if(iter == std::end(_stages)) {
-                throw SimulationError("Unknown stagep id ({}) provided in journey.", id.getID());
-            }
+            auto stage = _stageManager.Stage(id);
             return {
                 id,
                 JourneyNode{
-                    iter->second.get(),
+                    stage,
                     std::visit(
                         overloaded{
-                            [this,
-                             pair](const NonTransitionDescription&) -> std::unique_ptr<Transition> {
-                                return std::make_unique<FixedTransition>(
-                                    _stages.at(pair.first).get());
+                            [stage](
+                                const NonTransitionDescription&) -> std::unique_ptr<Transition> {
+                                return std::make_unique<FixedTransition>(stage);
                             },
                             [this](const FixedTransitionDescription& d)
                                 -> std::unique_ptr<Transition> {
                                 return std::make_unique<FixedTransition>(
-                                    _stages.at(d.NextId()).get());
+                                    _stageManager.Stage(d.NextId()));
                             },
                             [this](const RoundRobinTransitionDescription& d)
                                 -> std::unique_ptr<Transition> {
@@ -101,10 +88,25 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
                                     std::back_inserter(weightedStages),
                                     [this](auto const& pair) -> std::tuple<BaseStage*, uint64_t> {
                                         const auto& [id, weight] = pair;
-                                        return {_stages.at(id).get(), weight};
+                                        return {_stageManager.Stage(id), weight};
                                     });
 
                                 return std::make_unique<RoundRobinTransition>(weightedStages);
+                            },
+                            [this](const LeastTargetedTransitionDescription& d)
+                                -> std::unique_ptr<Transition> {
+                                std::vector<BaseStage*> candidates{};
+                                candidates.reserve(d.TargetCandidates().size());
+
+                                std::transform(
+                                    std::begin(d.TargetCandidates()),
+                                    std::end(d.TargetCandidates()),
+                                    std::back_inserter(candidates),
+                                    [this](auto const& id) -> BaseStage* {
+                                        return _stageManager.Stage(id);
+                                    });
+
+                                return std::make_unique<LeastTargetedTransition>(candidates);
                             }},
                         desc)}};
         });
@@ -116,27 +118,7 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
 
 BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
 {
-    std::unique_ptr<BaseStage> stage = std::visit(
-        overloaded{
-            [](const WaypointDescription& d) -> std::unique_ptr<BaseStage> {
-                return std::make_unique<Waypoint>(d.position, d.distance);
-            },
-            [this](const ExitDescription& d) -> std::unique_ptr<BaseStage> {
-                return std::make_unique<Exit>(d.polygon, _removedAgentsInLastIteration);
-            },
-            [](const NotifiableWaitingSetDescription& d) -> std::unique_ptr<BaseStage> {
-                return std::make_unique<NotifiableWaitingSet>(d.slots);
-            },
-            [](const NotifiableQueueDescription& d) -> std::unique_ptr<BaseStage> {
-                return std::make_unique<NotifiableQueue>(d.slots);
-            }},
-        stageDescription);
-    if(_stages.find(stage->Id()) != _stages.end()) {
-        throw SimulationError("Internal error, stage id already in use.");
-    }
-    const auto id = stage->Id();
-    _stages.emplace(id, std::move(stage));
-    return id;
+    return _stageManager.AddStage(stageDescription, _removedAgentsInLastIteration);
 }
 
 GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
@@ -151,11 +133,12 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
     if(!_journeys.at(agent.journeyId)->ContainsStage(agent.stageId)) {
         throw SimulationError("Unknown stage id: {}", agent.stageId);
     }
+    _stageManager.HandleNewAgent(agent.stageId);
     _agents.emplace_back(std::move(agent));
     _neighborhoodSearch.AddAgent(_agents.back());
 
     auto v = IteratorPair(std::prev(std::end(_agents)), std::end(_agents));
-    _stategicalDecisionSystem.Run(_journeys, v);
+    _stategicalDecisionSystem.Run(_journeys, v, _stageManager);
     _tacticalDecisionSystem.Run(*_routingEngine, v);
     return _agents.back().id.getID();
 }
@@ -167,6 +150,8 @@ void Simulation::RemoveAgent(GenericAgent::ID id)
     if(iter == std::end(_agents)) {
         throw SimulationError("Unknown agent id {}", id);
     }
+    _stageManager.HandleRemoveAgent(iter->stageId);
+
     _agents.erase(iter);
     _neighborhoodSearch.RemoveAgent(*iter);
 }
@@ -244,6 +229,7 @@ void Simulation::SwitchAgentJourney(
     }
     auto& agent = Agent(agent_id);
     agent.journeyId = journey_id;
+    _stageManager.MigrateAgent(agent.stageId, stage_id);
     agent.stageId = stage_id;
 }
 
@@ -288,5 +274,5 @@ OperationalModelType Simulation::ModelType() const
 
 StageProxy Simulation::Stage(BaseStage::ID stageId) const
 {
-    return _stages.at(stageId)->Proxy(this);
+    return _stageManager.Stage(stageId)->Proxy(this);
 }

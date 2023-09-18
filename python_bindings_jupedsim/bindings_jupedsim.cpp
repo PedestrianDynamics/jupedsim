@@ -411,7 +411,22 @@ PYBIND11_MODULE(py_jupedsim, m)
                 auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
                 JPS_ErrorMessage_Free(errorMsg);
                 throw std::runtime_error{msg};
-            });
+            })
+        .def_static("create_least_targeted_transition", [](const std::vector<JPS_StageId>& stages) {
+            JPS_ErrorMessage errorMsg{};
+            std::vector<JPS_StageId> stageIds;
+            stageIds.reserve(stages.size());
+            std::copy(std::begin(stages), std::end(stages), std::back_inserter(stageIds));
+
+            auto result = JPS_Transition_CreateLeastTargetedTransition(
+                stageIds.data(), stageIds.size(), &errorMsg);
+            if(result) {
+                return std::make_unique<JPS_Transition_Wrapper>(result);
+            }
+            auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+            JPS_ErrorMessage_Free(errorMsg);
+            throw std::runtime_error{msg};
+        });
 
     py::class_<JPS_JourneyDescription_Wrapper>(m, "JourneyDescription")
         .def(py::init([]() {
