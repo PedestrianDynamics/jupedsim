@@ -153,10 +153,7 @@ public:
         auto leastTargeted = std::min_element(
             std::begin(targetCandidates),
             std::end(targetCandidates),
-            [this](auto const& a, auto const& b) {
-                return a->CountTargeting() < b->CountTargeting();
-            });
-
+            [](auto const& a, auto const& b) { return a->CountTargeting() < b->CountTargeting(); });
         return *leastTargeted;
     }
 };
