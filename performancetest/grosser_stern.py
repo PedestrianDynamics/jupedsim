@@ -44341,85 +44341,31 @@ def log_error(msg):
     logging.error(msg)
 
 
-class Spawner:
-    def __init__(
-        self,
-        sim: jps.Simulation,
-        dt: int,
-        stop_at: int,
-        point_a: tuple[float, float],
-        point_b: tuple[float, float],
-        profile_picker,
-        journey_id: int,
-        max: int | None = None,
-    ):
-        self.sim = sim
-        self.dt = dt
-        self.stop_at = stop_at
-        self.point_a = point_a
-        self.profile_picker = profile_picker
-        self.dir = (point_b[0] - point_a[0], point_b[1] - point_a[1])
-        self.agent_parameters = jps.VelocityModelAgentParameters()
-        self.agent_parameters.journey_id = journey_id
-        self.agent_parameters.profile_id = 0
-        self.agent_parameters.orientation = (1.0, 0.0)
-        self._needs_placement = 0
-        self.max_agents = max
-        self.spawned = 0
-
-    def spawn(self, iteration: int):
-        if self.max_agents and self.spawned >= self.max_agents:
-            return
-        if iteration > self.stop_at:
-            return
-        if iteration % self.dt == 0:
-            self._needs_placement += 1
-        if self._needs_placement > 0:
-            offset = random.uniform(0, 1)
-            p = (
-                self.point_a[0] + offset * self.dir[0],
-                self.point_a[1] + offset * self.dir[1],
-            )
-            if len(list(self.sim.agents_in_range(p, 0.6))) == 0:
-                self.agent_parameters.position = p
-                self.agent_parameters.profile_id = self.profile_picker.pick()
-                self.sim.add_agent(self.agent_parameters)
-                self._needs_placement -= 1
-                self.spawned += 1
-
-
 class RandomProfilePicker:
-    def __init__(self, *, mu_v0, sigma_v0, mu_d, sigma_d):
-        # middle bin represents mu, first reprsents mu - 3 sigma, last bin represents mu + 3 sigma
-        self._num_bins = 13
-        self._profiles = {}
+    def __init__(self, *, mu_v0, sigma_v0, mu_d, sigma_d, seed=123456):
+        self._rnd = random.Random(seed)
         self._mu_v0 = mu_v0
         self._sigma_v0 = sigma_v0
         self._mu_d = mu_d
         self._sigma_d = sigma_d
 
-    def create_profiles(self, model_builder: jps.VelocityModelBuilder):
-        self._profiles = {
-            (v0_idx, d_idx): self._num_bins * v0_idx + d_idx
-            for v0_idx in range(0, self._num_bins)
-            for d_idx in range(0, self._num_bins)
-        }
-        for k, v in self._profiles.items():
-            model_builder.add_parameter_profile(
-                id=v,
-                time_gap=1,
-                tau=0.5,
-                v0=self._mu_v0 + 0.5 * self._sigma_v0 * (k[0] - 6),
-                radius=(self._mu_d + 0.5 * self._sigma_d * (k[1] - 6)) / 2,
-            )
-
-    def pick(self):
-        v0_idx = self._to_idx(random.gauss(6, 2))
-        d_idx = self._to_idx(random.gauss(6, 2))
-        return self._profiles[(v0_idx, d_idx)]
-
-    def _to_idx(self, f: float):
-        return min(max(round(f), 0), self._num_bins - 1)
+    def randomise_radius_and_v0(
+        self, agent: jps.VelocityModelAgentParameters
+    ) -> jps.VelocityModelAgentParameters:
+        new_agent = jps.VelocityModelAgentParameters()
+        new_agent.e0 = agent.e0
+        new_agent.position = agent.position
+        new_agent.orientation = agent.orientation
+        new_agent.journey_id = agent.journey_id
+        new_agent.stage_id = agent.stage_id
+        new_agent.time_gap = agent.time_gap
+        new_agent.tau = agent.tau
+        new_agent.id = agent.id
+        new_agent.v0 = self._rnd.gauss(mu=self._mu_v0, sigma=self._sigma_v0)
+        new_agent.radius = self._rnd.gauss(
+            mu=self._mu_d / 2, sigma=self._sigma_d / 2
+        )
+        return new_agent
 
 
 def create_journeys(sim: jps.Simulation):
@@ -44501,7 +44447,6 @@ def main():
     profile_picker = RandomProfilePicker(
         mu_v0=1.34, sigma_v0=0.25, mu_d=0.15, sigma_d=0.015
     )
-    profile_picker.create_profiles(model_builder)
     model = model_builder.build()
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
@@ -44523,11 +44468,11 @@ def main():
 
     for pos in positions:
         agent_parameters.position = pos
-        agent_parameters.profile_id = profile_picker.pick()
         journey, start_stage = random.choice(journeys)
         agent_parameters.journey_id = journey
         agent_parameters.stage_id = start_stage
-        simulation.add_agent(agent_parameters)
+        p = profile_picker.randomise_radius_and_v0(agent_parameters)
+        simulation.add_agent(p)
 
     writer = jps.SqliteTrajectoryWriter(
         pathlib.Path(

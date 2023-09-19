@@ -1,16 +1,13 @@
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
-import pathlib
-
 import pytest
 import shapely
 
 import jupedsim as jps
-from jupedsim.native.journey import Transition
-from jupedsim.trajectory_writer_sqlite import SqliteTrajectoryWriter
+from jupedsim import Transition
 
 
-def test_can_share_queue_between_stages(tmp_path):
+def test_can_share_queue_between_stages():
     messages = []
 
     def log_msg_handler(msg):
@@ -32,11 +29,6 @@ def test_can_share_queue_between_stages(tmp_path):
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
     )
-    profile_id = 1
-    model_builder.add_parameter_profile(
-        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.15
-    )
-
     model = model_builder.build()
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
@@ -94,7 +86,10 @@ def test_can_share_queue_between_stages(tmp_path):
 
     agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.orientation = (1.0, 0.0)
-    agent_parameters.profile_id = profile_id
+    agent_parameters.time_gap = 1
+    agent_parameters.tau = 0.5
+    agent_parameters.v0 = 1.2
+    agent_parameters.radius = 0.15
 
     for pos, (journey_id, stage_id) in agents:
         agent_parameters.position = pos
@@ -113,7 +108,7 @@ def test_can_share_queue_between_stages(tmp_path):
         simulation.iterate()
 
 
-def test_can_use_stage_proxy(tmp_path):
+def test_can_use_stage_proxy():
     messages = []
 
     def log_msg_handler(msg):
@@ -135,11 +130,6 @@ def test_can_use_stage_proxy(tmp_path):
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
     )
-    profile_id = 1
-    model_builder.add_parameter_profile(
-        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.15
-    )
-
     model = model_builder.build()
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
@@ -174,10 +164,13 @@ def test_can_use_stage_proxy(tmp_path):
 
     agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.orientation = (1.0, 0.0)
-    agent_parameters.profile_id = profile_id
     agent_parameters.position = (-9.5, 0)
     agent_parameters.journey_id = exit_journey_id
     agent_parameters.stage_id = exit_id
+    agent_parameters.time_gap = 1
+    agent_parameters.tau = 0.5
+    agent_parameters.v0 = 1.2
+    agent_parameters.radius = 0.15
     agent_id = simulation.add_agent(agent_parameters)
 
     assert exit.count_targeting() == 1

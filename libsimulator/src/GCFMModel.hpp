@@ -10,18 +10,7 @@
 
 struct GenericAgent;
 
-struct GCFMModelAgentParameters {
-    OperationalModel::ParametersID id{};
-    double mass;
-    double tau;
-    double v0;
-    double Av;
-    double AMin;
-    double BMin;
-    double BMax;
-};
-
-class GCFMModel : public OperationalModelBase<GCFMModelAgentParameters>
+class GCFMModel : public OperationalModel
 {
 public:
     using NeighborhoodSearchType = NeighborhoodSearch<GenericAgent>;
@@ -44,8 +33,7 @@ public:
         double intp_widthped,
         double intp_widthwall,
         double maxfped,
-        double maxfwall,
-        const std::vector<GCFMModelAgentParameters>& profiles);
+        double maxfwall);
     ~GCFMModel() override = default;
 
     OperationalModelType Type() const override;
@@ -59,7 +47,6 @@ public:
         const GenericAgent& agent,
         const NeighborhoodSearchType& neighborhoodSearch) const override;
     std::unique_ptr<OperationalModel> Clone() const override;
-    OperationalModel::ParametersID AddParameterProfile(GCFMModelAgentParameters parameters);
 
 private:
     /**

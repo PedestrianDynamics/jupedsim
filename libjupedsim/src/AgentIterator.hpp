@@ -10,21 +10,19 @@ class AgentIterator
 {
 private:
     using Container = std::vector<Model>;
-    const Container& container{};
-    typename Container::const_iterator iter{};
+    Container& container{};
+    typename Container::iterator iter{};
 
 public:
-    AgentIterator(const Container& container_) : container(container_), iter(std::begin(container_))
-    {
-    }
+    AgentIterator(Container& container_) : container(container_), iter(std::begin(container_)) {}
     ~AgentIterator() = default;
 
-    const Model* Next()
+    Model* Next()
     {
         if(iter == std::end(container)) {
             return nullptr;
         }
-        const auto result = &*iter;
+        auto result = &*iter;
         ++iter;
         return result;
     }

@@ -75,7 +75,6 @@ public:
     size_t AgentCount() const;
     double ElapsedTime() const;
     double DT() const;
-    void SwitchAgentProfile(GenericAgent::ID agent_id, OperationalModel::ParametersID profile_id);
     void
     SwitchAgentJourney(GenericAgent::ID agent_id, Journey::ID journey_id, BaseStage::ID stage_id);
     uint64_t Iteration() const;
@@ -86,7 +85,7 @@ public:
     GenericAgent::ID AddAgent(GenericAgent&& agent);
     const GenericAgent& Agent(GenericAgent::ID id) const;
     GenericAgent& Agent(GenericAgent::ID id);
-    const std::vector<GenericAgent>& Agents() const;
+    std::vector<GenericAgent>& Agents();
     OperationalModelType ModelType() const;
-    StageProxy Stage(BaseStage::ID stageId) const;
+    StageProxy Stage(BaseStage::ID stageId);
 };

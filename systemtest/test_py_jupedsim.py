@@ -23,10 +23,6 @@ def test_can_query_agents_in_range():
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
     )
-    profile_id = 1
-    model_builder.add_parameter_profile(
-        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.15
-    )
 
     model = model_builder.build()
 
@@ -44,7 +40,10 @@ def test_can_query_agents_in_range():
     agent_parameters.stage_id = exit
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
-    agent_parameters.profile_id = profile_id
+    agent_parameters.time_gap = 1
+    agent_parameters.tau = 0.5
+    agent_parameters.v0 = 1.2
+    agent_parameters.radius = 0.15
 
     initial_agent_positions = [
         (10, 10),
@@ -56,8 +55,13 @@ def test_can_query_agents_in_range():
 
     expected_agent_ids = set()
 
-    for new_pos in initial_agent_positions:
+    for new_pos, id in zip(
+        initial_agent_positions,
+        range(10, 10 + len(initial_agent_positions)),
+    ):
+        print(id)
         agent_parameters.position = new_pos
+        agent_parameters.id = id
         expected_agent_ids.add(simulation.add_agent(agent_parameters))
 
     actual_ids_in_range = list(
@@ -68,8 +72,8 @@ def test_can_query_agents_in_range():
         simulation.agents_in_polygon([(39, 11), (39, 9), (51, 9), (51, 11)])
     )
 
-    assert actual_ids_in_range == [2, 3, 4]
-    assert actual_ids_in_polygon == [4, 5]
+    assert actual_ids_in_range == [11, 12, 13]
+    assert actual_ids_in_polygon == [13, 14]
 
 
 def test_can_run_simulation():
@@ -91,11 +95,6 @@ def test_can_run_simulation():
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
     )
-    profile_id = 3
-    model_builder.add_parameter_profile(
-        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.15
-    )
-
     model = model_builder.build()
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
@@ -112,7 +111,10 @@ def test_can_run_simulation():
     agent_parameters.stage_id = exit_stage_id
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
-    agent_parameters.profile_id = profile_id
+    agent_parameters.time_gap = 1
+    agent_parameters.tau = 0.5
+    agent_parameters.v0 = 1.2
+    agent_parameters.radius = 0.15
 
     initial_agent_positions = [(7, 7), (1, 3), (1, 5), (1, 7), (2, 7)]
 
@@ -157,15 +159,8 @@ def test_can_wait():
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
     )
-    profile_id = 3
-    model_builder.add_parameter_profile(
-        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.15
-    )
-
     model = model_builder.build()
-
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
-
     wp = simulation.add_waypoint_stage((50, 50), 1)
     waiting_set_id = simulation.add_waiting_set_stage(
         [
@@ -197,7 +192,10 @@ def test_can_wait():
     agent_parameters.stage_id = wp
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
-    agent_parameters.profile_id = profile_id
+    agent_parameters.time_gap = 1
+    agent_parameters.tau = 0.5
+    agent_parameters.v0 = 1.2
+    agent_parameters.radius = 0.15
 
     initial_agent_positions = [
         (1, 1),
@@ -253,11 +251,6 @@ def test_can_change_journey_while_waiting():
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
     )
-    profile_id = 3
-    model_builder.add_parameter_profile(
-        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.15
-    )
-
     model = model_builder.build()
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
@@ -303,7 +296,10 @@ def test_can_change_journey_while_waiting():
     agent_parameters.stage_id = stage_id
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
-    agent_parameters.profile_id = profile_id
+    agent_parameters.time_gap = 1
+    agent_parameters.tau = 0.5
+    agent_parameters.v0 = 1.2
+    agent_parameters.radius = 0.15
 
     agent_parameters.position = (10, 50)
     simulation.add_agent(agent_parameters)
@@ -353,11 +349,6 @@ def test_get_single_agent_from_simulation():
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
     )
-    profile_id = 3
-    model_builder.add_parameter_profile(
-        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.15
-    )
-
     model = model_builder.build()
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
@@ -372,7 +363,10 @@ def test_get_single_agent_from_simulation():
     agent_parameters.stage_id = exit_id
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
-    agent_parameters.profile_id = profile_id
+    agent_parameters.time_gap = 1
+    agent_parameters.tau = 0.5
+    agent_parameters.v0 = 1.2
+    agent_parameters.radius = 0.15
 
     initial_agent_positions = [(7, 7), (1, 3), (1, 5), (1, 7), (2, 7)]
 
@@ -405,11 +399,6 @@ def test_get_agent_non_existing_agent_from_simulation():
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
     )
-    profile_id = 3
-    model_builder.add_parameter_profile(
-        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.15
-    )
-
     model = model_builder.build()
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
@@ -424,7 +413,10 @@ def test_get_agent_non_existing_agent_from_simulation():
     agent_parameters.stage_id = exit_id
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
-    agent_parameters.profile_id = profile_id
+    agent_parameters.time_gap = 1
+    agent_parameters.tau = 0.5
+    agent_parameters.v0 = 1.2
+    agent_parameters.radius = 0.15
 
     initial_agent_position = (7, 7)
     agent_parameters.position = initial_agent_position

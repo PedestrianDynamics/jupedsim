@@ -27,11 +27,7 @@ struct PedestrianUpdate {
 
 class OperationalModel : public Clonable<OperationalModel>
 {
-    struct Parameters {
-    };
-
 public:
-    using ParametersID = jps::UniqueID<OperationalModel::Parameters>;
     OperationalModel() = default;
     virtual ~OperationalModel() = default;
 
@@ -46,35 +42,4 @@ public:
     virtual void CheckDistanceConstraint(
         const GenericAgent& agent,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const = 0;
-    virtual bool ParameterProfileExists(ParametersID id) const = 0;
-};
-
-template <typename Params>
-class OperationalModelBase : public OperationalModel
-{
-private:
-    std::unordered_map<OperationalModel::ParametersID, Params> _parameterProfiles;
-
-public:
-    bool ParameterProfileExists(ParametersID id) const override
-    {
-        return _parameterProfiles.count(id) > 0;
-    };
-
-protected:
-    OperationalModelBase(const std::vector<Params>& parameterProfiles)
-    {
-        _parameterProfiles.reserve(parameterProfiles.size());
-        for(auto&& p : parameterProfiles) {
-            auto [_, success] = _parameterProfiles.try_emplace(p.id, p);
-            if(!success) {
-                throw SimulationError("Duplicate agent profile id={} supplied", p.id);
-            }
-        }
-    };
-
-    const Params& parameterProfile(OperationalModel::ParametersID id) const
-    {
-        return _parameterProfiles.at(id);
-    };
 };

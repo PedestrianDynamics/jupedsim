@@ -44,11 +44,6 @@ def main():
     model_builder = jps.VelocityModelBuilder(
         a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
     )
-    profile_id = 3
-    model_builder.add_parameter_profile(
-        id=profile_id, time_gap=1, tau=0.5, v0=1.2, radius=0.3
-    )
-
     model = model_builder.build()
 
     simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
@@ -81,7 +76,10 @@ def main():
 
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
-    agent_parameters.profile_id = profile_id
+    agent_parameters.time_gap = 1
+    agent_parameters.tau = 0.5
+    agent_parameters.v0 = 1.2
+    agent_parameters.radius = 0.3
 
     for y in range(1, 16):
         agent_parameters.position = (0.5, y)

@@ -193,19 +193,28 @@ PYBIND11_MODULE(py_jupedsim, m)
             })
         .def_readwrite("journey_id", &JPS_GCFMModelAgentParameters::journeyId)
         .def_readwrite("stage_id", &JPS_GCFMModelAgentParameters::stageId)
-        .def_readwrite("profile_id", &JPS_GCFMModelAgentParameters::profileId)
-        .def_readwrite("id", &JPS_GCFMModelAgentParameters::agentId)
+        .def_readwrite("mass", &JPS_GCFMModelAgentParameters::mass)
+        .def_readwrite("v0", &JPS_GCFMModelAgentParameters::v0)
+        .def_readwrite("a_v", &JPS_GCFMModelAgentParameters::a_v)
+        .def_readwrite("a_min", &JPS_GCFMModelAgentParameters::a_min)
+        .def_readwrite("b_min", &JPS_GCFMModelAgentParameters::b_min)
+        .def_readwrite("b_max", &JPS_GCFMModelAgentParameters::b_max)
         .def("__repr__", [](const JPS_GCFMModelAgentParameters& p) {
             return fmt::format(
                 "speed: {}, e0: {}, position: {}, orientation: {}, journey_id: {}, "
-                "stage_id: {}, profile_id: {}, id: {}",
+                "stage_id: {}, mass: {}, v0: {}, a_v: {}, a_min: {}, b_min: {}, b_max: {}, id: {}",
                 p.speed,
                 intoTuple(p.e0),
                 intoTuple(p.position),
                 intoTuple(p.orientation),
                 p.journeyId,
                 p.stageId,
-                p.profileId,
+                p.mass,
+                p.v0,
+                p.a_v,
+                p.a_min,
+                p.b_min,
+                p.b_max,
                 p.agentId);
         });
     py::class_<JPS_VelocityModelAgentParameters>(m, "VelocityModelAgentParameters")
@@ -230,18 +239,24 @@ PYBIND11_MODULE(py_jupedsim, m)
             })
         .def_readwrite("journey_id", &JPS_VelocityModelAgentParameters::journeyId)
         .def_readwrite("stage_id", &JPS_VelocityModelAgentParameters::stageId)
-        .def_readwrite("profile_id", &JPS_VelocityModelAgentParameters::profileId)
+        .def_readwrite("time_gap", &JPS_VelocityModelAgentParameters::time_gap)
+        .def_readwrite("tau", &JPS_VelocityModelAgentParameters::tau)
+        .def_readwrite("v0", &JPS_VelocityModelAgentParameters::v0)
+        .def_readwrite("radius", &JPS_VelocityModelAgentParameters::radius)
         .def_readwrite("id", &JPS_VelocityModelAgentParameters::agentId)
         .def("__repr__", [](const JPS_VelocityModelAgentParameters& p) {
             return fmt::format(
                 "e0: {}, position: {}, orientation: {}, journey_id: {}, stage_id: {}, "
-                "profile_id: {}, id: {}",
+                "time_gap: {}, tau: {}, v0: {}, radius: {}, id: {}",
                 intoTuple(p.e0),
                 intoTuple(p.position),
                 intoTuple(p.orientation),
                 p.journeyId,
                 p.stageId,
-                p.profileId,
+                p.time_gap,
+                p.tau,
+                p.v0,
+                p.radius,
                 p.agentId);
         });
     py::class_<JPS_Geometry_Wrapper>(m, "Geometry");
@@ -290,22 +305,6 @@ PYBIND11_MODULE(py_jupedsim, m)
             py::arg("d_ped"),
             py::arg("a_wall"),
             py::arg("d_wall"))
-        .def(
-            "add_parameter_profile",
-            [](JPS_VelocityModelBuilder_Wrapper& w,
-               JPS_ModelParameterProfileId id,
-               double t,
-               double tau,
-               double v0,
-               double radius) {
-                JPS_VelocityModelBuilder_AddParameterProfile(w.handle, id, t, tau, v0, radius);
-            },
-            py::kw_only(),
-            py::arg("id"),
-            py::arg("time_gap"),
-            py::arg("tau"),
-            py::arg("v0"),
-            py::arg("radius"))
         .def("build", [](JPS_VelocityModelBuilder_Wrapper& w) {
             JPS_ErrorMessage errorMsg{};
             auto result = JPS_VelocityModelBuilder_Build(w.handle, &errorMsg);
@@ -345,29 +344,6 @@ PYBIND11_MODULE(py_jupedsim, m)
             py::arg("intp_width_wall"),
             py::arg("maxf_ped"),
             py::arg("maxf_wall"))
-        .def(
-            "add_parameter_profile",
-            [](JPS_GCFMModelBuilder_Wrapper& w,
-               JPS_ModelParameterProfileId id,
-               double mass,
-               double tau,
-               double v0,
-               double a_v,
-               double a_min,
-               double b_min,
-               double b_max) {
-                JPS_GCFMModelBuilder_AddParameterProfile(
-                    w.handle, id, mass, tau, v0, a_v, a_min, b_min, b_max);
-            },
-            py::kw_only(),
-            py::arg("id"),
-            py::arg("mass"),
-            py::arg("tau"),
-            py::arg("v0"),
-            py::arg("a_v"),
-            py::arg("a_min"),
-            py::arg("b_min"),
-            py::arg("b_max"))
         .def("build", [](JPS_GCFMModelBuilder_Wrapper& w) {
             JPS_ErrorMessage errorMsg{};
             auto result = JPS_GCFMModelBuilder_Build(w.handle, &errorMsg);
@@ -491,19 +467,117 @@ PYBIND11_MODULE(py_jupedsim, m)
         });
     py::class_<JPS_GeneralizedCentrifugalForceModelState_Wrapper>(
         m, "GeneralizedCentrifugalForceModelState")
-        .def_property_readonly(
+        .def_property(
             "speed",
             [](const JPS_GeneralizedCentrifugalForceModelState_Wrapper& w) {
                 return JPS_GeneralizedCentrifugalForceModelState_GetSpeed(w.handle);
+            },
+            [](JPS_GeneralizedCentrifugalForceModelState_Wrapper& w, double speed) {
+                JPS_GeneralizedCentrifugalForceModelState_SetSpeed(w.handle, speed);
             })
-        .def_property_readonly(
-            "e0", [](const JPS_GeneralizedCentrifugalForceModelState_Wrapper& w) {
+        .def_property(
+            "e0",
+            [](const JPS_GeneralizedCentrifugalForceModelState_Wrapper& w) {
                 return intoTuple(JPS_GeneralizedCentrifugalForceModelState_GetE0(w.handle));
+            },
+            [](JPS_GeneralizedCentrifugalForceModelState_Wrapper& w,
+               std::tuple<double, double> e0) {
+                JPS_GeneralizedCentrifugalForceModelState_SetE0(w.handle, intoJPS_Point(e0));
+            })
+        .def_property(
+            "mass",
+            [](const JPS_GeneralizedCentrifugalForceModelState_Wrapper& w) {
+                return JPS_GeneralizedCentrifugalForceModelState_GetMass(w.handle);
+            },
+            [](JPS_GeneralizedCentrifugalForceModelState_Wrapper& w, double mass) {
+                JPS_GeneralizedCentrifugalForceModelState_SetMass(w.handle, mass);
+            })
+        .def_property(
+            "tau",
+            [](const JPS_GeneralizedCentrifugalForceModelState_Wrapper& w) {
+                return JPS_GeneralizedCentrifugalForceModelState_GetTau(w.handle);
+            },
+            [](JPS_GeneralizedCentrifugalForceModelState_Wrapper& w, double tau) {
+                JPS_GeneralizedCentrifugalForceModelState_SetTau(w.handle, tau);
+            })
+        .def_property(
+            "v0",
+            [](const JPS_GeneralizedCentrifugalForceModelState_Wrapper& w) {
+                return JPS_GeneralizedCentrifugalForceModelState_GetV0(w.handle);
+            },
+            [](JPS_GeneralizedCentrifugalForceModelState_Wrapper& w, double v0) {
+                JPS_GeneralizedCentrifugalForceModelState_SetV0(w.handle, v0);
+            })
+        .def_property(
+            "a_v",
+            [](const JPS_GeneralizedCentrifugalForceModelState_Wrapper& w) {
+                return JPS_GeneralizedCentrifugalForceModelState_GetAV(w.handle);
+            },
+            [](JPS_GeneralizedCentrifugalForceModelState_Wrapper& w, double a_v) {
+                JPS_GeneralizedCentrifugalForceModelState_SetAV(w.handle, a_v);
+            })
+        .def_property(
+            "a_min",
+            [](const JPS_GeneralizedCentrifugalForceModelState_Wrapper& w) {
+                return JPS_GeneralizedCentrifugalForceModelState_GetAMin(w.handle);
+            },
+            [](JPS_GeneralizedCentrifugalForceModelState_Wrapper& w, double a_min) {
+                JPS_GeneralizedCentrifugalForceModelState_SetAMin(w.handle, a_min);
+            })
+        .def_property(
+            "b_min",
+            [](const JPS_GeneralizedCentrifugalForceModelState_Wrapper& w) {
+                return JPS_GeneralizedCentrifugalForceModelState_GetBMin(w.handle);
+            },
+            [](JPS_GeneralizedCentrifugalForceModelState_Wrapper& w, double b_min) {
+                JPS_GeneralizedCentrifugalForceModelState_SetBMin(w.handle, b_min);
+            })
+        .def_property(
+            "b_max",
+            [](const JPS_GeneralizedCentrifugalForceModelState_Wrapper& w) {
+                return JPS_GeneralizedCentrifugalForceModelState_GetBMax(w.handle);
+            },
+            [](JPS_GeneralizedCentrifugalForceModelState_Wrapper& w, double b_max) {
+                JPS_GeneralizedCentrifugalForceModelState_SetBMax(w.handle, b_max);
             });
     py::class_<JPS_VelocityModelState_Wrapper>(m, "VelocityModelState")
-        .def_property_readonly("e0", [](const JPS_VelocityModelState_Wrapper& w) {
-            return intoTuple(JPS_VelocityModelState_GetE0(w.handle));
-        });
+        .def_property_readonly(
+            "e0",
+            [](const JPS_VelocityModelState_Wrapper& w) {
+                return intoTuple(JPS_VelocityModelState_GetE0(w.handle));
+            })
+        .def_property(
+            "time_gap",
+            [](const JPS_VelocityModelState_Wrapper& w) {
+                return JPS_VelocityModelState_GetTimeGap(w.handle);
+            },
+            [](JPS_VelocityModelState_Wrapper& w, double time_gap) {
+                JPS_VelocityModelState_SetTimeGap(w.handle, time_gap);
+            })
+        .def_property(
+            "tau",
+            [](const JPS_VelocityModelState_Wrapper& w) {
+                return JPS_VelocityModelState_GetTau(w.handle);
+            },
+            [](JPS_VelocityModelState_Wrapper& w, double tau) {
+                JPS_VelocityModelState_SetTau(w.handle, tau);
+            })
+        .def_property(
+            "v0",
+            [](const JPS_VelocityModelState_Wrapper& w) {
+                return JPS_VelocityModelState_GetV0(w.handle);
+            },
+            [](JPS_VelocityModelState_Wrapper& w, double v0) {
+                JPS_VelocityModelState_SetV0(w.handle, v0);
+            })
+        .def_property(
+            "radius",
+            [](const JPS_VelocityModelState_Wrapper& w) {
+                return JPS_VelocityModelState_GetRadius(w.handle);
+            },
+            [](JPS_VelocityModelState_Wrapper& w, double radius) {
+                JPS_VelocityModelState_SetRadius(w.handle, radius);
+            });
     py::class_<JPS_NotifiableQueueProxy_Wrapper>(m, "NotifiableQueueProxy")
         .def(
             "count_targeting",
@@ -743,24 +817,6 @@ PYBIND11_MODULE(py_jupedsim, m)
                 throw std::runtime_error{msg};
             },
             py::arg("count") = 1)
-        .def(
-            "switch_agent_profile",
-            [](const JPS_Simulation_Wrapper& w,
-               JPS_AgentId agentId,
-               JPS_ModelParameterProfileId profileId) {
-                JPS_ErrorMessage errorMsg{};
-                auto result =
-                    JPS_Simulation_SwitchAgentProfile(w.handle, agentId, profileId, &errorMsg);
-                if(result) {
-                    return;
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
-            },
-            py::kw_only(),
-            py::arg("agent_id"),
-            py::arg("profile_id"))
         .def(
             "switch_agent_journey",
             [](const JPS_Simulation_Wrapper& w,

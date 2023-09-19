@@ -199,12 +199,6 @@ JUPEDSIM_API void JPS_ErrorMessage_Free(JPS_ErrorMessage handle);
 typedef struct JPS_OperationalModel_t* JPS_OperationalModel;
 
 /**
- * Id of a model parameter profile.
- * Zero represents an invalid id.
- */
-typedef uint64_t JPS_ModelParameterProfileId;
-
-/**
  * Frees a JPS_OperationalModel
  * @param handle to the JPS_OperationalModel to free.
  */
@@ -238,31 +232,6 @@ JUPEDSIM_API JPS_GCFMModelBuilder JPS_GCFMModelBuilder_Create(
     double maxf_Wall);
 
 /**
- * Registeres a parameter profile for this model.
- * There has to be at least one model registered for the model to be considered valid.
- * @param handle of builder to operate on
- * @param id desired id of the parameter profile. If the id is already used by the model and
- *        previously added profile will be overwritten.
- * @param mass of the agents using this profile
- * @param tau of the agents using this profile
- * @param v0 of the agents using this profile
- * @param a_v sagital axis stretch factor
- * @param a_min minimum length of sagital axis in 'meters'
- * @param b_min minimum length of transversal axis in 'meters'
- * @param b_max maximum length of transversal axis in 'meters'
- */
-JUPEDSIM_API void JPS_GCFMModelBuilder_AddParameterProfile(
-    JPS_GCFMModelBuilder handle,
-    JPS_ModelParameterProfileId id,
-    double mass,
-    double tau,
-    double v0,
-    double a_v,
-    double a_min,
-    double b_min,
-    double b_max);
-
-/**
  * Creates a JPS_OperationalModel of type GCFM Model from the JPS_GCFMModelBuilder.
  * @param handle the builder to operate on
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error
@@ -292,25 +261,6 @@ typedef struct JPS_VelocityModelBuilder_t* JPS_VelocityModelBuilder;
  */
 JUPEDSIM_API JPS_VelocityModelBuilder
 JPS_VelocityModelBuilder_Create(double aPed, double DPed, double aWall, double DWall);
-
-/**
- * Registeres a parameter profile for this model.
- * There has to be at least one model registered for the model to be considered valid.
- * @param handle of builder to operate on
- * @param id desired id of the parameter profile. If the id is already used by the model and
- *        previously added profile will be overwritten.
- * @param timeGap of the agents using this profile (T in the OV-function)
- * @param tau of the agents using this profile
- * @param radius of the agent in 'meters'
- * @param v0 of the agents using this profile (desired speed)
- */
-JUPEDSIM_API void JPS_VelocityModelBuilder_AddParameterProfile(
-    JPS_VelocityModelBuilder handle,
-    JPS_ModelParameterProfileId id,
-    double timeGap,
-    double tau,
-    double v0,
-    double radius);
 
 /**
  * Creates a JPS_OperationalModel of type Velocity Model from the JPS_GCFMModelBuilder.
@@ -482,21 +432,240 @@ JUPEDSIM_API void JPS_JourneyDescription_Free(JPS_JourneyDescription handle);
 /**
  * Opaque type of Generalized Centrifugal Force model state
  */
-typedef struct JPS_GeneralizedCentrifugalForceModelState_t const*
+typedef struct JPS_GeneralizedCentrifugalForceModelState_t*
     JPS_GeneralizedCentrifugalForceModelState;
 
+/**
+ * Read speed of this agent.
+ * @param handle of the Agent to access.
+ * @return speed in m/s
+ */
 JUPEDSIM_API double JPS_GeneralizedCentrifugalForceModelState_GetSpeed(
     JPS_GeneralizedCentrifugalForceModelState handle);
 
+/**
+ * Write speed of this agent.
+ * @param handle of the Agent to access.
+ * @param speed in m/s
+ */
+JUPEDSIM_API void JPS_GeneralizedCentrifugalForceModelState_SetSpeed(
+    JPS_GeneralizedCentrifugalForceModelState handle,
+    double speed);
+
+/**
+ * Read desired orientation of this agent.
+ * @param handle of the Agent to access.
+ * @return 2D orientation vector
+ */
 JUPEDSIM_API JPS_Point
 JPS_GeneralizedCentrifugalForceModelState_GetE0(JPS_GeneralizedCentrifugalForceModelState handle);
 
 /**
+ * Write desired direction of this agent.
+ * @param handle of the Agent to access.
+ * @param e0 desired orientation of this agent.
+ */
+JUPEDSIM_API void JPS_GeneralizedCentrifugalForceModelState_SetE0(
+    JPS_GeneralizedCentrifugalForceModelState handle,
+    JPS_Point e0);
+
+/**
+ * Read mass in Kg of this agent.
+ * @param handle of the Agent to access.
+ * @return mass (Kg) of this agent
+ */
+JUPEDSIM_API double
+JPS_GeneralizedCentrifugalForceModelState_GetMass(JPS_GeneralizedCentrifugalForceModelState handle);
+
+/**
+ * Write mass in Kg of this agent.
+ * @param handle of the Agent to access.
+ * @param mass (Kg) of this agent.
+ */
+JUPEDSIM_API void JPS_GeneralizedCentrifugalForceModelState_SetMass(
+    JPS_GeneralizedCentrifugalForceModelState handle,
+    double mass);
+
+/**
+ * Read tau of this agent.
+ * @param handle of the Agent to access.
+ * @return tau of this agent
+ */
+JUPEDSIM_API double
+JPS_GeneralizedCentrifugalForceModelState_GetTau(JPS_GeneralizedCentrifugalForceModelState handle);
+
+/**
+ * Write tau of this agent.
+ * @param handle of the Agent to access.
+ * @param tau of this agent.
+ */
+JUPEDSIM_API void JPS_GeneralizedCentrifugalForceModelState_SetTau(
+    JPS_GeneralizedCentrifugalForceModelState handle,
+    double tau);
+
+/**
+ * Read v0 of this agent.
+ * @param handle of the Agent to access.
+ * @return v0 of this agent
+ */
+JUPEDSIM_API double
+JPS_GeneralizedCentrifugalForceModelState_GetV0(JPS_GeneralizedCentrifugalForceModelState handle);
+
+/**
+ * Write v0 of this agent.
+ * @param handle of the Agent to access.
+ * @param v0 of this agent.
+ */
+JUPEDSIM_API void JPS_GeneralizedCentrifugalForceModelState_SetV0(
+    JPS_GeneralizedCentrifugalForceModelState handle,
+    double v0);
+
+/**
+ * Read a_v of this agent.
+ * @param handle of the Agent to access.
+ * @return AV of this agent
+ */
+JUPEDSIM_API double
+JPS_GeneralizedCentrifugalForceModelState_GetAV(JPS_GeneralizedCentrifugalForceModelState handle);
+
+/**
+ * Write a_v of this agent.
+ * @param handle of the Agent to access.
+ * @param a_v of this agent.
+ */
+JUPEDSIM_API void JPS_GeneralizedCentrifugalForceModelState_SetAV(
+    JPS_GeneralizedCentrifugalForceModelState handle,
+    double a_v);
+
+/**
+ * Read a_min of this agent.
+ * @param handle of the Agent to access.
+ * @return a_min of this agent
+ */
+JUPEDSIM_API double
+JPS_GeneralizedCentrifugalForceModelState_GetAMin(JPS_GeneralizedCentrifugalForceModelState handle);
+
+/**
+ * Write a_min of this agent.
+ * @param handle of the Agent to access.
+ * @param a_min of this agent.
+ */
+JUPEDSIM_API void JPS_GeneralizedCentrifugalForceModelState_SetAMin(
+    JPS_GeneralizedCentrifugalForceModelState handle,
+    double a_min);
+
+/**
+ * Read b_min of this agent.
+ * @param handle of the Agent to access.
+ * @return b_min of this agent
+ */
+JUPEDSIM_API double
+JPS_GeneralizedCentrifugalForceModelState_GetBMin(JPS_GeneralizedCentrifugalForceModelState handle);
+
+/**
+ * Write b_min of this agent.
+ * @param handle of the Agent to access.
+ * @param b_min of this agent.
+ */
+JUPEDSIM_API void JPS_GeneralizedCentrifugalForceModelState_SetBMin(
+    JPS_GeneralizedCentrifugalForceModelState handle,
+    double b_min);
+
+/**
+ * Read b_max of this agent.
+ * @param handle of the Agent to access.
+ * @return b_max of this agent
+ */
+JUPEDSIM_API double
+JPS_GeneralizedCentrifugalForceModelState_GetBMax(JPS_GeneralizedCentrifugalForceModelState handle);
+
+/**
+ * Write b_max of this agent.
+ * @param handle of the Agent to access.
+ * @param a_min of this agent.
+ */
+JUPEDSIM_API void JPS_GeneralizedCentrifugalForceModelState_SetBMax(
+    JPS_GeneralizedCentrifugalForceModelState handle,
+    double b_max);
+
+/**
  * Opaque type of Velocity model state
  */
-typedef struct JPS_VelocityModelState_t const* JPS_VelocityModelState;
+typedef struct JPS_VelocityModelState_t* JPS_VelocityModelState;
+
+/**
+ * Read e0 of this agent.
+ * @param handle of the Agent to access.
+ * @return e0 of this agent
+ */
 JUPEDSIM_API JPS_Point JPS_VelocityModelState_GetE0(JPS_VelocityModelState handle);
 
+/**
+ * Write e0 of this agent.
+ * @param handle of the Agent to access.
+ * @param e0 of this agent.
+ */
+JUPEDSIM_API void JPS_VelocityModelState_SetE0(JPS_VelocityModelState handle, JPS_Point e0);
+
+/**
+ * Read time gap of this agent.
+ * @param handle of the Agent to access.
+ * @return time gap of this agent
+ */
+JUPEDSIM_API double JPS_VelocityModelState_GetTimeGap(JPS_VelocityModelState handle);
+
+/**
+ * Write time gap of this agent.
+ * @param handle of the Agent to access.
+ * @param time_gap of this agent.
+ */
+JUPEDSIM_API void JPS_VelocityModelState_SetTimeGap(JPS_VelocityModelState handle, double time_gap);
+
+/**
+ * Read tau of this agent.
+ * @param handle of the Agent to access.
+ * @return tau of this agent
+ */
+JUPEDSIM_API double JPS_VelocityModelState_GetTau(JPS_VelocityModelState handle);
+
+/**
+ * Write tau of this agent.
+ * @param handle of the Agent to access.
+ * @param tau of this agent.
+ */
+JUPEDSIM_API void JPS_VelocityModelState_SetTau(JPS_VelocityModelState handle, double tau);
+
+/**
+ * Read v0 of this agent.
+ * @param handle of the Agent to access.
+ * @return v0 of this agent
+ */
+JUPEDSIM_API double JPS_VelocityModelState_GetV0(JPS_VelocityModelState handle);
+
+/**
+ * Write v0 of this agent.
+ * @param handle of the Agent to access.
+ * @param v0 of this agent.
+ */
+JUPEDSIM_API void JPS_VelocityModelState_SetV0(JPS_VelocityModelState handle, double v0);
+
+/**
+ * Read radius of this agent.
+ * @param handle of the Agent to access.
+ * @return radius of this agent
+ */
+JUPEDSIM_API double JPS_VelocityModelState_GetRadius(JPS_VelocityModelState handle);
+
+/**
+ * Write radius of this agent in meters.
+ * @param handle of the Agent to access.
+ * @param radius (m) of this agent.
+ */
+JUPEDSIM_API void JPS_VelocityModelState_SetRadius(JPS_VelocityModelState handle, double radius);
+
+/**
+ * Identifies the type of stage
+ */
 enum JPS_StageType { JPS_NotifiableQueueType, JPS_WaitingSetType, JPS_WaypointType, JPS_ExitType };
 
 /**
@@ -547,7 +716,7 @@ JUPEDSIM_API void JPS_ExitProxy_Free(JPS_ExitProxy handle);
 /**
  * Opaque type of an agent
  */
-typedef struct JPS_Agent_t const* JPS_Agent;
+typedef struct JPS_Agent_t* JPS_Agent;
 
 /**
  * Access the agents id.
@@ -665,9 +834,33 @@ typedef struct JPS_GCFMModelAgentParameters {
      */
     JPS_StageId stageId;
     /**
-     * Defines the paramter profile this agents uses during the simulation
+     * Mass of the agent
      */
-    JPS_ModelParameterProfileId profileId;
+    double mass;
+    /**
+     * Tau of the agent
+     */
+    double tau;
+    /**
+     * V0 of the agent
+     */
+    double v0;
+    /**
+     * a_v sagital axis stretch factor
+     */
+    double a_v;
+    /**
+     * b_min minimum length of transversal axis in 'meters'
+     */
+    double a_min;
+    /**
+     * a_min minimum length of sagital axis in 'meters'
+     */
+    double b_min;
+    /**
+     * b_max maximum length of transversal axis in 'meters'
+     */
+    double b_max;
     /**
      * Id of this agent.
      * If set to non zero value the simulation will use the id provided and check that no agent with
@@ -704,13 +897,25 @@ typedef struct JPS_VelocityModelAgentParameters {
      */
     JPS_StageId stageId;
     /**
-     * Defines the paramter profile this agents uses during the simulation
+     * @param time_gap of the agents using this profile (T in the OV-function)
      */
-    JPS_ModelParameterProfileId profileId;
+    double time_gap;
+    /**
+     * @param tau of the agents using this profile
+     */
+    double tau;
+    /**
+     *@param v0 of the agents using this profile(desired speed) double radius;
+     */
+    double v0;
+    /**
+     *@param radius of the agent in 'meters'
+     */
+    double radius;
     /**
      * Id of this agent.
-     * If set to non zero value the simulation will use the id provided and check that no agent with
-     * this id is present. Adding an agent with an already used id will result in an error.
+     * If set to non zero value the simulation will use the id provided and check that no agent
+     * with this id is present. Adding an agent with an already used id will result in an error.
      * If set to zero the simulation will create a unique id internally.
      */
     JPS_AgentId agentId;
@@ -948,20 +1153,6 @@ JUPEDSIM_API JPS_AgentIterator JPS_Simulation_AgentIterator(JPS_Simulation handl
  */
 JUPEDSIM_API JPS_Agent
 JPS_Simulation_GetAgent(JPS_Simulation handle, JPS_AgentId agentId, JPS_ErrorMessage* errorMessage);
-
-/**
- * Switches the operational model parameter profile for an agent
- * @param handle of the Simulation to operate on
- * @param agentId id of the agent to modify
- * @param profileId to use from now on
- * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
- * @return true on success, false on any error, e.g. unknown agent id or profile id
- */
-JUPEDSIM_API bool JPS_Simulation_SwitchAgentProfile(
-    JPS_Simulation handle,
-    JPS_AgentId agentId,
-    JPS_ModelParameterProfileId profileId,
-    JPS_ErrorMessage* errorMessage);
 
 /**
  * Switches the journey and currently selected stage of this agent

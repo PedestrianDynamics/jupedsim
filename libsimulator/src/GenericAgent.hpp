@@ -21,7 +21,6 @@ struct GenericAgent {
     // This is evaluated by the "operational level"
     Point destination{};
     Point waypoint{};
-    OperationalModel::ParametersID parameterProfileId{OperationalModel::ParametersID::Invalid};
 
     // Agent fields common for all models
     Point pos{};
@@ -34,14 +33,12 @@ struct GenericAgent {
         ID id_,
         jps::UniqueID<Journey> journeyId_,
         jps::UniqueID<BaseStage> stageId_,
-        OperationalModel::ParametersID parameterProfileId_,
         Point pos_,
         Point orientation_,
         Model model_)
         : id(id_ != ID::Invalid ? id_ : ID{})
         , journeyId(journeyId_)
         , stageId(stageId_)
-        , parameterProfileId(parameterProfileId_)
         , pos(pos_)
         , orientation(orientation_)
         , model(std::move(model_))

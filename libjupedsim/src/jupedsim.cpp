@@ -7,6 +7,7 @@
 #include "GeneralizedCentrifugalForceModelData.hpp"
 #include "Journey.hpp"
 #include "Stage.hpp"
+#include "VelocityModelData.hpp"
 
 #include <BuildInfo.hpp>
 #include <CollisionGeometry.hpp>
@@ -140,22 +141,6 @@ JPS_GCFMModelBuilder JPS_GCFMModelBuilder_Create(
         maxf_Wall));
 }
 
-void JPS_GCFMModelBuilder_AddParameterProfile(
-    JPS_GCFMModelBuilder handle,
-    uint64_t id,
-    double mass,
-    double tau,
-    double v0,
-    double a_v,
-    double a_min,
-    double b_min,
-    double b_max)
-{
-    assert(handle != nullptr);
-    auto builder = reinterpret_cast<GCFMModelBuilder*>(handle);
-    builder->AddAgentParameterProfile({id, mass, tau, v0, a_v, a_min, b_min, b_max});
-}
-
 JPS_OperationalModel
 JPS_GCFMModelBuilder_Build(JPS_GCFMModelBuilder handle, JPS_ErrorMessage* errorMessage)
 {
@@ -190,19 +175,6 @@ JPS_VelocityModelBuilder_Create(double aPed, double DPed, double aWall, double D
 {
     return reinterpret_cast<JPS_VelocityModelBuilder>(
         new VelocityModelBuilder(aPed, DPed, aWall, DWall));
-}
-
-JUPEDSIM_API void JPS_VelocityModelBuilder_AddParameterProfile(
-    JPS_VelocityModelBuilder handle,
-    uint64_t id,
-    double t,
-    double tau,
-    double v0,
-    double radius)
-{
-    assert(handle);
-    auto builder = reinterpret_cast<VelocityModelBuilder*>(handle);
-    builder->AddAgentParameterProfile({id, t, tau, v0, radius});
 }
 
 JUPEDSIM_API JPS_OperationalModel
@@ -309,6 +281,14 @@ JPS_GeneralizedCentrifugalForceModelState_GetSpeed(JPS_GeneralizedCentrifugalFor
     const auto state = reinterpret_cast<const GeneralizedCentrifugalForceModelData*>(handle);
     return state->speed;
 }
+void JPS_GeneralizedCentrifugalForceModelState_SetSpeed(
+    JPS_GeneralizedCentrifugalForceModelState handle,
+    double speed)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<GeneralizedCentrifugalForceModelData*>(handle);
+    state->speed = speed;
+}
 
 JPS_Point
 JPS_GeneralizedCentrifugalForceModelState_GetE0(JPS_GeneralizedCentrifugalForceModelState handle)
@@ -316,6 +296,134 @@ JPS_GeneralizedCentrifugalForceModelState_GetE0(JPS_GeneralizedCentrifugalForceM
     assert(handle);
     const auto state = reinterpret_cast<const GeneralizedCentrifugalForceModelData*>(handle);
     return intoJPS_Point(state->e0);
+}
+
+void JPS_GeneralizedCentrifugalForceModelState_SetE0(
+    JPS_GeneralizedCentrifugalForceModelState handle,
+    JPS_Point e0)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<GeneralizedCentrifugalForceModelData*>(handle);
+    state->e0 = intoPoint(e0);
+}
+
+double
+JPS_GeneralizedCentrifugalForceModelState_GetMass(JPS_GeneralizedCentrifugalForceModelState handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const GeneralizedCentrifugalForceModelData*>(handle);
+    return state->mass;
+}
+
+void JPS_GeneralizedCentrifugalForceModelState_SetMass(
+    JPS_GeneralizedCentrifugalForceModelState handle,
+    double mass)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<GeneralizedCentrifugalForceModelData*>(handle);
+    state->mass = mass;
+}
+
+double
+JPS_GeneralizedCentrifugalForceModelState_GetTau(JPS_GeneralizedCentrifugalForceModelState handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const GeneralizedCentrifugalForceModelData*>(handle);
+    return state->tau;
+}
+
+void JPS_GeneralizedCentrifugalForceModelState_SetTau(
+    JPS_GeneralizedCentrifugalForceModelState handle,
+    double tau)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<GeneralizedCentrifugalForceModelData*>(handle);
+    state->tau = tau;
+}
+
+double
+JPS_GeneralizedCentrifugalForceModelState_GetV0(JPS_GeneralizedCentrifugalForceModelState handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const GeneralizedCentrifugalForceModelData*>(handle);
+    return state->v0;
+}
+
+void JPS_GeneralizedCentrifugalForceModelState_SetV0(
+    JPS_GeneralizedCentrifugalForceModelState handle,
+    double v0)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<GeneralizedCentrifugalForceModelData*>(handle);
+    state->v0 = v0;
+}
+
+double
+JPS_GeneralizedCentrifugalForceModelState_GetAV(JPS_GeneralizedCentrifugalForceModelState handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const GeneralizedCentrifugalForceModelData*>(handle);
+    return state->Av;
+}
+
+void JPS_GeneralizedCentrifugalForceModelState_SetAV(
+    JPS_GeneralizedCentrifugalForceModelState handle,
+    double a_v)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<GeneralizedCentrifugalForceModelData*>(handle);
+    state->Av = a_v;
+}
+
+double
+JPS_GeneralizedCentrifugalForceModelState_GetAMin(JPS_GeneralizedCentrifugalForceModelState handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const GeneralizedCentrifugalForceModelData*>(handle);
+    return state->AMin;
+}
+
+void JPS_GeneralizedCentrifugalForceModelState_SetAMin(
+    JPS_GeneralizedCentrifugalForceModelState handle,
+    double a_min)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<GeneralizedCentrifugalForceModelData*>(handle);
+    state->AMin = a_min;
+}
+
+double
+JPS_GeneralizedCentrifugalForceModelState_GetBMin(JPS_GeneralizedCentrifugalForceModelState handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const GeneralizedCentrifugalForceModelData*>(handle);
+    return state->BMin;
+}
+
+void JPS_GeneralizedCentrifugalForceModelState_SetBMin(
+    JPS_GeneralizedCentrifugalForceModelState handle,
+    double b_min)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<GeneralizedCentrifugalForceModelData*>(handle);
+    state->BMin = b_min;
+}
+
+double
+JPS_GeneralizedCentrifugalForceModelState_GetBMax(JPS_GeneralizedCentrifugalForceModelState handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const GeneralizedCentrifugalForceModelData*>(handle);
+    return state->BMax;
+}
+
+void JPS_GeneralizedCentrifugalForceModelState_SetBMax(
+    JPS_GeneralizedCentrifugalForceModelState handle,
+    double b_max)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<GeneralizedCentrifugalForceModelData*>(handle);
+    state->BMax = b_max;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -328,6 +436,67 @@ JPS_Point JPS_VelocityModelState_GetE0(JPS_VelocityModelState handle)
     return intoJPS_Point(state->e0);
 }
 
+void JPS_VelocityModelState_SetE0(JPS_VelocityModelState handle, JPS_Point e0)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<VelocityModelData*>(handle);
+    state->e0 = intoPoint(e0);
+}
+
+double JPS_VelocityModelState_GetTimeGap(JPS_VelocityModelState handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const VelocityModelData*>(handle);
+    return state->timeGap;
+}
+
+void JPS_VelocityModelState_SetTimeGap(JPS_VelocityModelState handle, double time_gap)
+{
+    assert(handle);
+    auto state = reinterpret_cast<VelocityModelData*>(handle);
+    state->timeGap = time_gap;
+}
+
+double JPS_VelocityModelState_GetTau(JPS_VelocityModelState handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const VelocityModelData*>(handle);
+    return state->tau;
+}
+
+void JPS_VelocityModelState_SetTau(JPS_VelocityModelState handle, double tau)
+{
+    assert(handle);
+    auto state = reinterpret_cast<VelocityModelData*>(handle);
+    state->tau = tau;
+}
+
+double JPS_VelocityModelState_GetV0(JPS_VelocityModelState handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const VelocityModelData*>(handle);
+    return state->v0;
+}
+
+void JPS_VelocityModelState_SetV0(JPS_VelocityModelState handle, double v0)
+{
+    assert(handle);
+    auto state = reinterpret_cast<VelocityModelData*>(handle);
+    state->v0 = v0;
+}
+double JPS_VelocityModelState_GetRadius(JPS_VelocityModelState handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const VelocityModelData*>(handle);
+    return state->radius;
+}
+
+void JPS_VelocityModelState_SetRadius(JPS_VelocityModelState handle, double radius)
+{
+    assert(handle);
+    auto state = reinterpret_cast<VelocityModelData*>(handle);
+    state->radius = radius;
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// NotifiableQueueProxy
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -523,9 +692,9 @@ JPS_GeneralizedCentrifugalForceModelState
 JPS_Agent_GetGeneralizedCentrifugalForceModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
-    const auto agent = reinterpret_cast<const GenericAgent*>(handle);
+    const auto agent = reinterpret_cast<GenericAgent*>(handle);
     try {
-        const auto& model = std::get<GeneralizedCentrifugalForceModelData>(agent->model);
+        auto& model = std::get<GeneralizedCentrifugalForceModelData>(agent->model);
         return reinterpret_cast<JPS_GeneralizedCentrifugalForceModelState>(&model);
     } catch(const std::exception& ex) {
         if(errorMessage) {
@@ -544,9 +713,9 @@ JPS_VelocityModelState
 JPS_Agent_GetVelocityModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
-    const auto agent = reinterpret_cast<const GenericAgent*>(handle);
+    const auto agent = reinterpret_cast<GenericAgent*>(handle);
     try {
-        const auto& model = std::get<VelocityModelData>(agent->model);
+        auto& model = std::get<VelocityModelData>(agent->model);
         return reinterpret_cast<JPS_VelocityModelState>(&model);
     } catch(const std::exception& ex) {
         if(errorMessage) {
@@ -886,10 +1055,19 @@ JPS_AgentId JPS_Simulation_AddGCFMModelAgent(
             parameters.agentId,
             Journey::ID(parameters.journeyId),
             BaseStage::ID(parameters.stageId),
-            OperationalModel::ParametersID(parameters.profileId),
             intoPoint(parameters.position),
             intoPoint(parameters.orientation),
-            GeneralizedCentrifugalForceModelData{parameters.speed, intoPoint(parameters.e0)}};
+            GeneralizedCentrifugalForceModelData{
+                parameters.speed,
+                intoPoint(parameters.e0),
+                0,
+                parameters.mass,
+                parameters.tau,
+                parameters.v0,
+                parameters.a_v,
+                parameters.a_min,
+                parameters.b_min,
+                parameters.b_max}};
         result = simulation->AddAgent(std::move(agent));
     } catch(const std::exception& ex) {
         if(errorMessage) {
@@ -920,10 +1098,15 @@ JPS_AgentId JPS_Simulation_AddVelocityModelAgent(
             parameters.agentId,
             Journey::ID(parameters.journeyId),
             BaseStage::ID(parameters.stageId),
-            OperationalModel::ParametersID(parameters.profileId),
             intoPoint(parameters.position),
             intoPoint(parameters.orientation),
-            VelocityModelData{intoPoint(parameters.e0)}};
+            VelocityModelData{
+                intoPoint(parameters.e0),
+                0,
+                parameters.time_gap,
+                parameters.tau,
+                parameters.v0,
+                parameters.radius}};
         result = simulation->AddAgent(std::move(agent));
     } catch(const std::exception& ex) {
         if(errorMessage) {
@@ -1026,7 +1209,7 @@ uint64_t JPS_Simulation_IterationCount(JPS_Simulation handle)
 JPS_AgentIterator JPS_Simulation_AgentIterator(JPS_Simulation handle)
 {
     assert(handle);
-    const auto simulation = reinterpret_cast<Simulation*>(handle);
+    auto simulation = reinterpret_cast<Simulation*>(handle);
     return reinterpret_cast<JPS_AgentIterator>(
         new AgentIterator<GenericAgent>(simulation->Agents()));
 }
@@ -1051,31 +1234,6 @@ JPS_Simulation_GetAgent(JPS_Simulation handle, JPS_AgentId agentId, JPS_ErrorMes
         }
     }
     return nullptr;
-}
-
-bool JPS_Simulation_SwitchAgentProfile(
-    JPS_Simulation handle,
-    JPS_AgentId agentId,
-    JPS_ModelParameterProfileId profileId,
-    JPS_ErrorMessage* errorMessage)
-{
-    assert(handle);
-    const auto simulation = reinterpret_cast<Simulation*>(handle);
-    bool result = false;
-    try {
-        simulation->SwitchAgentProfile(agentId, profileId);
-        result = true;
-    } catch(const std::exception& ex) {
-        if(errorMessage) {
-            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
-        }
-    } catch(...) {
-        if(errorMessage) {
-            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
-                new JPS_ErrorMessage_t{"Unknown internal error."});
-        }
-    }
-    return result;
 }
 
 bool JPS_Simulation_SwitchAgentJourney(
