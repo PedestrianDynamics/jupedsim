@@ -3,6 +3,7 @@
 import math
 from pathlib import Path
 
+import shapely
 from jupedsim_visualizer.geometry import Geometry
 from jupedsim_visualizer.replay_widget import ReplayWidget
 from jupedsim_visualizer.trajectory import Trajectory
@@ -19,8 +20,7 @@ from PySide6.QtWidgets import (
 
 import jupedsim as jps
 from jupedsim.recording import Recording
-from jupedsim.serialization import parse_wkt
-from jupedsim.util import geometry_from_shapely, geometry_from_wkt
+from jupedsim.util import geometry_from_shapely
 
 
 class MainWindow(QMainWindow):
@@ -128,7 +128,7 @@ class MainWindow(QMainWindow):
         file = Path(file)
         self.settings.setValue("files/last_wkt_location", str(file.parent))
         try:
-            polygon = parse_wkt(Path(file).read_text(encoding="UTF-8"))
+            polygon = shapely.from_wkt(Path(file).read_text(encoding="UTF-8"))
             navi = jps.RoutingEngine(geometry_from_shapely(polygon))
             xmin, ymin, xmax, ymax = polygon.bounds
             info_text = f"Dimensions: {math.ceil(xmax - xmin)}m x {math.ceil(ymax - ymin)}m Triangles: {len(navi.mesh())}"

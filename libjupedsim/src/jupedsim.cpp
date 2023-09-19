@@ -266,9 +266,72 @@ void JPS_GeometryBuilder_Free(JPS_GeometryBuilder handle)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Geometry
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+size_t JPS_Geometry_GetBoundarySize(JPS_Geometry handle)
+{
+    assert(handle);
+    const auto geo = reinterpret_cast<Geometry const*>(handle);
+    return std::get<0>(geo->collisionGeometry->AccessibleArea()).size();
+}
+
+const JPS_Point* JPS_Geometry_GetBoundaryData(JPS_Geometry handle)
+{
+    assert(handle);
+    const auto geo = reinterpret_cast<Geometry const*>(handle);
+    return reinterpret_cast<const JPS_Point*>(
+        std::get<0>(geo->collisionGeometry->AccessibleArea()).data());
+}
+
+size_t JPS_Geometry_GetHoleCount(JPS_Geometry handle)
+{
+    assert(handle);
+    const auto geo = reinterpret_cast<Geometry const*>(handle);
+    return std::get<1>(geo->collisionGeometry->AccessibleArea()).size();
+}
+
+size_t
+JPS_Geometry_GetHoleSize(JPS_Geometry handle, size_t hole_index, JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    const auto geo = reinterpret_cast<Geometry const*>(handle);
+    try {
+        return std::get<1>(geo->collisionGeometry->AccessibleArea()).at(hole_index).size();
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return 0;
+}
+
+const JPS_Point*
+JPS_Geometry_GetHoleData(JPS_Geometry handle, size_t hole_index, JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    const auto geo = reinterpret_cast<Geometry const*>(handle);
+    try {
+        return reinterpret_cast<const JPS_Point*>(
+            std::get<1>(geo->collisionGeometry->AccessibleArea()).at(hole_index).data());
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return nullptr;
+}
+
 void JPS_Geometry_Free(JPS_Geometry handle)
 {
-    delete reinterpret_cast<Geometry*>(handle);
+    delete reinterpret_cast<Geometry const*>(handle);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -912,7 +975,7 @@ JPS_Simulation JPS_Simulation_Create(
     assert(geometry);
     JPS_Simulation result{};
     try {
-        auto geometryInternal = reinterpret_cast<Geometry*>(geometry);
+        auto geometryInternal = reinterpret_cast<const Geometry*>(geometry);
         auto collisionGeometry =
             std::make_unique<CollisionGeometry>(*geometryInternal->collisionGeometry);
         auto routingEngine = geometryInternal->routingEngine->Clone();
@@ -1403,6 +1466,13 @@ JPS_Trace JPS_Simulation_GetTrace(JPS_Simulation handle)
     return JPS_Trace{stats.IterationDuration(), stats.OpDecSystemRunDuration()};
 }
 
+JPS_Geometry JPS_Simulation_GetGeometry(JPS_Simulation handle)
+{
+    assert(handle);
+    const auto simulation = reinterpret_cast<const Simulation*>(handle);
+    return reinterpret_cast<JPS_Geometry>(new Geometry(simulation->Geo()));
+}
+
 void JPS_Simulation_Free(JPS_Simulation handle)
 {
     delete reinterpret_cast<Simulation*>(handle);
@@ -1443,7 +1513,7 @@ JUPEDSIM_API void JPS_Lines_Free(JPS_Lines* lines)
 ////////////////////////////////////////////////////////////////////////////////
 JUPEDSIM_API JPS_RoutingEngine JPS_RoutingEngine_Create(JPS_Geometry geometry)
 {
-    auto* geo = reinterpret_cast<Geometry*>(geometry);
+    auto* geo = reinterpret_cast<const Geometry*>(geometry);
     return reinterpret_cast<JPS_RoutingEngine>(geo->routingEngine->Clone().release());
 }
 

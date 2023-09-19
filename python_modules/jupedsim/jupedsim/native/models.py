@@ -1,54 +1,63 @@
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
+from dataclasses import dataclass
+
 try:
     import py_jupedsim as py_jps
 except ImportError:
     from .. import py_jupedsim as py_jps
 
 
-class VelocityModelBuilder:
-    def __init__(
-        self, a_ped: float, d_ped: float, a_wall: float, d_wall: float
-    ) -> None:
-        self._obj = py_jps.VelocityModelBuilder(
-            a_ped=a_ped, d_ped=d_ped, a_wall=a_wall, d_wall=d_wall
-        )
+@dataclass(kw_only=True)
+class VelocityModelParameters:
+    """Parameters for Velocity Model
 
-    def build(self):
-        return self._obj.build()
+    All attributes are initialized with reasonably good defaults.
 
-
-class GCFMModelBuilder:
-    def __init__(
-        self,
-        nu_ped: float,
-        nu_wall: float,
-        dist_eff_ped: float,
-        dist_eff_wall: float,
-        intp_width_ped: float,
-        intp_width_wall: float,
-        maxf_ped: float,
-        maxf_wall: float,
-    ) -> None:
-        self._obj = py_jps.GCFMModelBuilder(
-            nu_ped=nu_ped,
-            nu_wall=nu_wall,
-            dist_eff_ped=dist_eff_ped,
-            dist_eff_wall=dist_eff_wall,
-            intp_width_ped=intp_width_ped,
-            intp_width_wall=intp_width_wall,
-            maxf_ped=maxf_ped,
-            maxf_wall=maxf_wall,
-        )
-
-    def build(self):
-        return self._obj.build()
-
-
-class GCFMModelAgentParameters:
+    Attributes:
+        a_ped (float): TODO
+        d_ped (float): TODO
+        a_wall (float):
+        d_wall (float):
     """
-    Agent parameters for Generalized Centrifugal Model.
+
+    a_ped: float = 8.0
+    d_ped: float = 0.1
+    a_wall: float = 5.0
+    d_wall: float = 0.02
+
+
+@dataclass(kw_only=True)
+class GeneralizedCentrifugalForceModelParameters:
+    """Parameters for Generalized Centrifugal Force Model
+
+    All attributes are initialized with reasonably good defaults.
+
+    Attributes:
+        nu_ped (float):
+        nu_wall (float):
+        dist_eff_ped (float)
+        dist_eff_wall (float)
+        intp_width_ped (float)
+        intp_width_wall (float)
+        maxf_ped (float)
+        maxf_wall (float)
+    """
+
+    nu_ped: float = 0.3
+    nu_wall: float = 0.2
+    dist_eff_ped: float = 2
+    dist_eff_wall: float = 2
+    intp_width_ped: float = 0.1
+    intp_width_wall: float = 0.1
+    maxf_ped: float = 3
+    maxf_wall: float = 3
+
+
+class GeneralizedCentrifugalForceModelAgentParameters:
+    """
+    Agent parameters for Generalized Centrifugal Force Model.
 
     See the scientifc publication for more details about this model
     https://arxiv.org/abs/1008.4297

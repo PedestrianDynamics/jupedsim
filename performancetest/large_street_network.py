@@ -5,13 +5,11 @@
 import argparse
 import logging
 import pathlib
-import platform
 import random
 import sys
 import time
 
 import shapely
-from shapely import to_wkt
 
 import jupedsim as jps
 from performancetest.geometry import geometries
@@ -204,16 +202,22 @@ def main():
     geo = shapely.from_wkt(geometries["large_street_network"])
     geometry = jps.geometry_from_shapely(geo)
 
-    model_builder = jps.VelocityModelBuilder(
-        a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
-    )
     profile_picker = RandomProfilePicker(
         mu_v0=1.34, sigma_v0=0.25, mu_d=0.15, sigma_d=0.015
     )
-    model = model_builder.build()
 
-    simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
-    simulation.set_tracing(True)
+    stats_writer = StatsWriter(
+        jps.SqliteTrajectoryWriter(
+            output_file=pathlib.Path(
+                f"{jps.get_build_info().git_commit_hash}_large_street_network.sqlite"
+            ),
+        )
+    )
+    simulation = jps.Simulation(
+        model=jps.VelocityModelParameters(),
+        geometry=geometry,
+        trajectory_writer=stats_writer,
+    )
 
     journey, (start_stage, waiting_area, queue) = create_journey(simulation)
     spawners = [
@@ -230,17 +234,6 @@ def main():
         ),
     ]
 
-    writer = jps.SqliteTrajectoryWriter(
-        pathlib.Path(
-            f"{jps.get_build_info().git_commit_hash}_large_street_network.sqlite"
-        )
-    )
-    stats_writer = StatsWriter(writer.connection())
-    writer.begin_writing(2, to_wkt(geo, rounding_precision=-1))
-    stats_writer.write_metadata(
-        jps.get_build_info().git_commit_hash, platform.node()
-    )
-
     start_time = time.perf_counter_ns()
     iteration = simulation.iteration_count()
     while args.limit == 0 or iteration < args.limit:
@@ -253,8 +246,6 @@ def main():
                 waiting_area.state = jps.WaitingSetState.ACTIVE
             if iteration % (100 * 8) == 0:
                 queue.pop(1)
-            if iteration % 50 == 0:
-                writer.write_iteration_state(simulation)
             simulation.iterate()
             iteration = simulation.iteration_count()
 
@@ -271,17 +262,9 @@ def main():
                 f"[OpLvl {op_dur / 1000:6.2f}ms]",
                 end="\r",
             )
-            stats_writer.write_stats(
-                simulation.iteration_count(),
-                simulation.agent_count(),
-                simulation.get_last_trace(),
-            )
         except KeyboardInterrupt:
-            writer.end_writing()
             print("\nCTRL-C Received! Shutting down")
             sys.exit(1)
-
-    writer.end_writing()
 
 
 if __name__ == "__main__":

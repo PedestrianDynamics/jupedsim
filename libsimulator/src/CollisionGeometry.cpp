@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iterator>
 #include <vector>
 
 Cell makeCell(Point p)
@@ -97,7 +98,8 @@ void ExtractSegmentsFromPolygon(const Poly& p, std::vector<LineSegment>& segment
     segments.emplace_back(fromPoint_2(boundary.back()), fromPoint_2(boundary.front()));
 }
 
-CollisionGeometry::CollisionGeometry(PolyWithHoles accessibleArea) : _accessibleArea(accessibleArea)
+CollisionGeometry::CollisionGeometry(PolyWithHoles accessibleArea)
+    : _accessibleAreaPolygon(accessibleArea)
 {
     _segments.reserve(CountLineSegments(accessibleArea));
     ExtractSegmentsFromPolygon(accessibleArea.outer_boundary(), _segments);
@@ -117,6 +119,24 @@ CollisionGeometry::CollisionGeometry(PolyWithHoles accessibleArea) : _accessible
     for(auto& [_, vec] : _approximateGrid) {
         vec.shrink_to_fit();
     }
+
+    const auto cvt = [](const auto& c) {
+        std::vector<Point> out{};
+        out.reserve(c.size());
+        std::transform(std::begin(c), std::end(c), std::back_inserter(out), [](auto&& p) {
+            return fromPoint_2(p);
+        });
+        return out;
+    };
+    std::vector<Point> exterior = cvt(_accessibleAreaPolygon.outer_boundary().container());
+    std::vector<std::vector<Point>> holes{};
+    holes.reserve(_accessibleAreaPolygon.holes().size());
+    std::transform(
+        std::begin(_accessibleAreaPolygon.holes()),
+        std::end(_accessibleAreaPolygon.holes()),
+        std::back_inserter(holes),
+        [&cvt](auto&& c) { return cvt(c); });
+    _accessibleArea = std::make_tuple(exterior, holes);
 }
 
 const std::vector<LineSegment>& CollisionGeometry::LineSegmentsInApproxDistanceTo(Point p) const
@@ -185,6 +205,12 @@ bool CollisionGeometry::IntersectsAny(const LineSegment& linesegment) const
 
 bool CollisionGeometry::InsideGeometry(Point p) const
 {
-    return CGAL::oriented_side(Kernel::Point_2(p.x, p.y), _accessibleArea) ==
+    return CGAL::oriented_side(Kernel::Point_2(p.x, p.y), _accessibleAreaPolygon) ==
            CGAL::ON_POSITIVE_SIDE;
+}
+
+const std::tuple<std::vector<Point>, std::vector<std::vector<Point>>>&
+CollisionGeometry::AccessibleArea() const
+{
+    return _accessibleArea;
 }

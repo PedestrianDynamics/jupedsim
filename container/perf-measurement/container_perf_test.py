@@ -1,7 +1,6 @@
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import argparse
-import io
 import logging
 import os
 import pathlib
@@ -164,14 +163,27 @@ def run_test(test, args, build_dir, result_dir):
 
     plt.figure()
     plt.axis("equal")
-    for geo in geometry.geoms:
-        xe, ye = geo.exterior.xy
 
-        for inner in geo.interiors:
+    def plot_poly(poly):
+        assert isinstance(poly, shapely.Polygon)
+        xe, ye = poly.exterior.xy
+
+        for inner in poly.interiors:
             xi, yi = zip(*inner.coords[:])
             plt.plot(xi, yi, color="blue")
 
         plt.plot(xe, ye, color="blue")
+
+    if isinstance(geometry, shapely.Polygon):
+        plot_poly(geometry)
+    elif isinstance(geometry, shapely.MultiPolygon) or isinstance(
+        geometry, shapely.GeometryCollection
+    ):
+        for geo in geometry.geoms:
+            plot_poly(geo)
+    else:
+        raise Exception("WKT not polygon, multipolygon or geometry collection")
+
     plt.savefig(result_dir / perf_geo_svg_file_name)
     plt.figure()
 
