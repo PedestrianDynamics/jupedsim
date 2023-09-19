@@ -61,13 +61,6 @@ public:
             });
     }
 
-    void ValidateAgentParameterProfileId(OperationalModel::ParametersID id) const
-    {
-        if(!_model->ParameterProfileExists(id)) {
-            throw SimulationError("Unknown parameters profile id \"{}\" supplied", id.getID());
-        }
-    }
-
     void ValidateAgent(
         const GenericAgent& agent,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const

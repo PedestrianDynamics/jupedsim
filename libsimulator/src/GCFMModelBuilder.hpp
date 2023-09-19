@@ -15,7 +15,6 @@ class GCFMModelBuilder
     double _intp_widthwall;
     double _maxfped;
     double _maxfwall;
-    std::vector<GCFMModelAgentParameters> _profiles{};
 
 public:
     GCFMModelBuilder(
@@ -27,6 +26,5 @@ public:
         double intp_widthwall,
         double maxfped,
         double maxfwall);
-    GCFMModelBuilder& AddAgentParameterProfile(GCFMModelAgentParameters profile);
     GCFMModel Build();
 };

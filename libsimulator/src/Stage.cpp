@@ -96,7 +96,7 @@ Point Waypoint::Target(const GenericAgent&)
     return position;
 }
 
-StageProxy Waypoint::Proxy(const Simulation* simulation)
+StageProxy Waypoint::Proxy(Simulation* simulation)
 {
     return WaypointProxy(simulation, this);
 }
@@ -126,7 +126,7 @@ Point Exit::Target(const GenericAgent&)
     return area.Centroid();
 }
 
-StageProxy Exit::Proxy(const Simulation* simulation)
+StageProxy Exit::Proxy(Simulation* simulation)
 {
     return ExitProxy(simulation, this);
 }
@@ -185,7 +185,7 @@ WaitingSetState NotifiableWaitingSet::State() const
     return state;
 }
 
-StageProxy NotifiableWaitingSet::Proxy(const Simulation* simulation)
+StageProxy NotifiableWaitingSet::Proxy(Simulation* simulation)
 {
     return NotifiableWaitingSetProxy(simulation, this);
 }
@@ -226,7 +226,7 @@ void NotifiableQueue::Pop(size_t count)
     popCountOnNextUpdate = std::min(occupants.size(), popCountOnNextUpdate + count);
 }
 
-StageProxy NotifiableQueue::Proxy(const Simulation* simulation)
+StageProxy NotifiableQueue::Proxy(Simulation* simulation)
 {
     return NotifiableQueueProxy(simulation, this);
 }

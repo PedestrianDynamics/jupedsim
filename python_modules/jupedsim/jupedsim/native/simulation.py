@@ -61,11 +61,6 @@ class Simulation:
     def iterate(self, count: int = 1) -> None:
         self._sim.iterate(count)
 
-    def switch_agent_profile(self, agent_id: int, profile_id: int) -> None:
-        self._sim.switch_agent_profile(
-            agent_id=agent_id, profile_id=profile_id
-        )
-
     def switch_agent_journey(
         self, agent_id: int, journey_id: int, stage_id: int
     ) -> None:

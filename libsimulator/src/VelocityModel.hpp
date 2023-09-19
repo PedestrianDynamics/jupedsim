@@ -12,44 +12,22 @@
 
 struct GenericAgent;
 
-struct VelocityModelAgentParameters {
-    OperationalModel::ParametersID id;
-    double timeGap;
-    double tau;
-    double v0;
-    double radius;
-};
-
-/*!
- * \class VelocityModel
- *
- * \brief @todo
- *
- *\ingroup OperationalModels
- *
- * \author Mohcine Chraibi
- */
-class VelocityModel : public OperationalModelBase<VelocityModelAgentParameters>
+class VelocityModel : public OperationalModel
 {
 public:
     using NeighborhoodSearchType = NeighborhoodSearch<GenericAgent>;
 
 private:
     static constexpr double _minForce = 10e-4;
-    /// Modellparameter
+    static constexpr double maxRadius = 1;
     double _aPed;
     double _DPed;
     double _aWall;
     double _DWall;
-    double _cutOffRadius{};
+    double _cutOffRadius;
 
 public:
-    VelocityModel(
-        double aped,
-        double Dped,
-        double awall,
-        double Dwall,
-        const std::vector<VelocityModelAgentParameters>& profiles);
+    VelocityModel(double aped, double Dped, double awall, double Dwall);
     ~VelocityModel() override = default;
 
     OperationalModelType Type() const override;

@@ -57,7 +57,7 @@ def geometry_from_shapely(
 
 
 def geometry_from_coordinates(
-    coordinates: List[Tuple], excluded_areas: Optional[List[Tuple]]
+    coordinates: List[Tuple], *, excluded_areas: Optional[List[Tuple]] = None
 ) -> Geometry:
     polygon = shapely.Polygon(coordinates, holes=excluded_areas)
     return _build_geometry([polygon])

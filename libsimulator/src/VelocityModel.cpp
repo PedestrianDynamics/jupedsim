@@ -23,28 +23,12 @@
 #include <numeric>
 #include <vector>
 
-double xRight = 26.0;
-double xLeft = 0.0;
-double cutoff = 2.0;
-
-VelocityModel::VelocityModel(
-    double aped,
-    double Dped,
-    double awall,
-    double Dwall,
-    const std::vector<VelocityModelAgentParameters>& profiles)
-    : OperationalModelBase(profiles)
-    , _aPed(aped)
+VelocityModel::VelocityModel(double aped, double Dped, double awall, double Dwall)
+    : _aPed(aped)
     , _DPed(Dped)
     , _aWall(awall)
     , _DWall(Dwall)
-    , _cutOffRadius(
-          2 * std::max_element(
-                  std::begin(profiles),
-                  std::end(profiles),
-                  [](const auto& p1, const auto& p2) { return p1.radius < p2.radius; })
-                  ->radius -
-          Dped * log(_minForce / aped))
+    , _cutOffRadius(2 * maxRadius - Dped * log(_minForce / aped))
 {
 }
 
@@ -85,7 +69,6 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
             }),
         std::end(neighborhood));
 
-    const auto& parameters = parameterProfile(ped.parameterProfileId);
     double min_spacing = std::numeric_limits<double>::max();
     Point repPed = Point(0, 0);
     for(const auto& neighbor : neighborhood) {
@@ -103,7 +86,8 @@ PedestrianUpdate VelocityModel::ComputeNewPosition(
         min_spacing = std::min(min_spacing, spacing);
     }
 
-    update.velocity = direction * OptimalSpeed(ped, min_spacing, parameters.timeGap);
+    const auto& model = std::get<VelocityModelData>(ped.model);
+    update.velocity = direction * OptimalSpeed(ped, min_spacing, model.timeGap);
     update.position = ped.pos + *update.velocity * dT;
     return update;
 };
@@ -132,16 +116,19 @@ void VelocityModel::CheckDistanceConstraint(
     const NeighborhoodSearchType& neighborhoodSearch) const
 {
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
-    const auto r = parameterProfile(agent.parameterProfileId).radius;
+    const auto& model = std::get<VelocityModelData>(agent.model);
     for(const auto& neighbor : neighbors) {
-        const auto contanctdDist = r + parameterProfile(neighbor.parameterProfileId).radius;
+        const auto& neighborModel = std::get<VelocityModelData>(agent.model);
+        const auto contanctDist = model.radius + neighborModel.radius;
         const auto distance = (agent.pos - neighbor.pos).Norm();
-        if(contanctdDist >= distance) {
+        if(contanctDist >= distance) {
             throw SimulationError(
-                "Model constraint violation: Agent {} too close to agent {}: distance {}",
+                "Model constraint violation: Agent {} too close to agent {}: distance {}, "
+                "effective distance {}",
                 agent.pos,
                 neighbor.pos,
-                distance);
+                distance,
+                distance - contanctDist);
         }
     }
 }
@@ -173,11 +160,11 @@ void VelocityModel::e0(
 
 double VelocityModel::OptimalSpeed(const GenericAgent& ped, double spacing, double t) const
 {
-    const auto& profile = parameterProfile(ped.parameterProfileId);
-    const double l = 2 * profile.radius;
+    const auto& model = std::get<VelocityModelData>(ped.model);
+    const double l = 2 * model.radius;
     double speed = (spacing - l) / t;
     speed = (speed > 0) ? speed : 0;
-    speed = (speed < profile.v0) ? speed : profile.v0;
+    speed = (speed < model.v0) ? speed : model.v0;
     return speed;
 }
 
@@ -194,8 +181,9 @@ double VelocityModel::GetSpacing(
     }
 
     const Point left = direction.Rotate90Deg();
-    const double l = parameterProfile(ped1.parameterProfileId).radius +
-                     parameterProfile(ped2.parameterProfileId).radius;
+    const auto& model1 = std::get<VelocityModelData>(ped1.model);
+    const auto& model2 = std::get<VelocityModelData>(ped2.model);
+    const double l = model1.radius + model2.radius;
     if(std::abs(left.ScalarProduct(distp12)) > l) {
         return std::numeric_limits<double>::max();
     }
@@ -206,8 +194,9 @@ Point VelocityModel::ForceRepPed(const GenericAgent& ped1, const GenericAgent& p
 {
     const Point distp12 = ped2.pos - ped1.pos;
     const double dist = distp12.Norm();
-    const double l = parameterProfile(ped1.parameterProfileId).radius +
-                     parameterProfile(ped2.parameterProfileId).radius;
+    const auto& model1 = std::get<VelocityModelData>(ped1.model);
+    const auto& model2 = std::get<VelocityModelData>(ped2.model);
+    const double l = model1.radius + model2.radius;
     const auto ep12 = distp12 / dist;
     const double R_ij = -_aPed * exp((l - dist) / _DPed);
     return ep12 * R_ij;
@@ -238,7 +227,8 @@ Point VelocityModel::ForceRepWall(const GenericAgent& ped, const LineSegment& w)
     const double dist = dist_vec.Norm();
     const Point e_iw = dist_vec / dist;
 
-    const double l = parameterProfile(ped.parameterProfileId).radius;
+    const auto& model = std::get<VelocityModelData>(ped.model);
+    const double l = model.radius;
     const double R_iw = -_aWall * exp((l - dist) / _DWall);
     return e_iw * R_iw;
 }

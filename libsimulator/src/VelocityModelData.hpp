@@ -7,4 +7,8 @@
 struct VelocityModelData {
     Point e0{};
     int orientationDelay{};
+    double timeGap{};
+    double tau{};
+    double v0{};
+    double radius{};
 };

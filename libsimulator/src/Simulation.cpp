@@ -201,18 +201,10 @@ size_t Simulation::AgentCount() const
     return _agents.size();
 }
 
-const std::vector<GenericAgent>& Simulation::Agents() const
+std::vector<GenericAgent>& Simulation::Agents()
 {
     return _agents;
 };
-
-void Simulation::SwitchAgentProfile(
-    GenericAgent::ID agent_id,
-    OperationalModel::ParametersID profile_id)
-{
-    _operationalDecisionSystem.ValidateAgentParameterProfileId(profile_id);
-    Agent(agent_id).parameterProfileId = profile_id;
-}
 
 void Simulation::SwitchAgentJourney(
     GenericAgent::ID agent_id,
@@ -272,7 +264,7 @@ OperationalModelType Simulation::ModelType() const
     return _operationalDecisionSystem.ModelType();
 }
 
-StageProxy Simulation::Stage(BaseStage::ID stageId) const
+StageProxy Simulation::Stage(BaseStage::ID stageId)
 {
     return _stageManager.Stage(stageId)->Proxy(this);
 }

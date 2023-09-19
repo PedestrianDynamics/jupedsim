@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "AgentIterator.hpp"
 #include "Point.hpp"
+#include "gtest/gtest.h"
 #include <ErrorMessage.hpp>
 #include <jupedsim/jupedsim.h>
 
@@ -23,7 +24,6 @@ TEST(OperationalModel, CanConstructVelocityModel)
 {
     JPS_ErrorMessage errorMsg{};
     auto builder = JPS_VelocityModelBuilder_Create(1, 1, 1, 1);
-    JPS_VelocityModelBuilder_AddParameterProfile(builder, 1, 1, 1, 1, 0.3);
     auto model = JPS_VelocityModelBuilder_Build(builder, &errorMsg);
     EXPECT_NE(model, nullptr);
     EXPECT_EQ(errorMsg, nullptr);
@@ -35,7 +35,6 @@ TEST(OperationalModel, CanConstructGCFMModel)
 {
     JPS_ErrorMessage errorMsg{};
     auto builder = JPS_GCFMModelBuilder_Create(1, 1, 1, 1, 1, 1, 1, 1);
-    JPS_GCFMModelBuilder_AddParameterProfile(builder, 1, 1, 0.5, 1.2, 0.53, 0.15, 0.15, 0.15);
     auto model = JPS_GCFMModelBuilder_Build(builder, &errorMsg);
     EXPECT_NE(model, nullptr);
     EXPECT_EQ(errorMsg, nullptr);
@@ -82,8 +81,6 @@ TEST(Simulation, CanSimulate)
     ASSERT_NE(geometry, nullptr);
 
     auto modelBuilder = JPS_VelocityModelBuilder_Create(8, 0.1, 5, 0.02);
-    const JPS_ModelParameterProfileId profile_id = 1;
-    JPS_VelocityModelBuilder_AddParameterProfile(modelBuilder, profile_id, 1, 0.5, 1.2, 0.3);
 
     auto model = JPS_VelocityModelBuilder_Build(modelBuilder, nullptr);
     ASSERT_NE(model, nullptr);
@@ -102,7 +99,10 @@ TEST(Simulation, CanSimulate)
     agent_parameters.journeyId = journeyId;
     agent_parameters.orientation = JPS_Point{1.0, 0.0};
     agent_parameters.position = JPS_Point{0.0, 0.0};
-    agent_parameters.profileId = profile_id;
+    agent_parameters.time_gap = 1;
+    agent_parameters.tau = 0.5;
+    agent_parameters.v0 = 1.2;
+    agent_parameters.radius = 0.3;
 
     std::vector<JPS_Point> positions{{7, 7}, {1, 3}, {1, 5}, {1, 7}, {2, 7}};
     for(const auto& p : positions) {
@@ -119,7 +119,10 @@ struct SimulationTest : public ::testing::Test {
     JPS_Simulation simulation{};
     JPS_JourneyId journey_id{};
     JPS_StageId stage_id{};
-    std::array<JPS_ModelParameterProfileId, 2> model_paramater_profile_id{1, 2};
+    std::array<JPS_VelocityModelAgentParameters, 2> agent_templates{
+        JPS_VelocityModelAgentParameters{{}, {}, {1, 1}, 0, 0, 1, 0.5, 1.5, 0.3, 0},
+        JPS_VelocityModelAgentParameters{{}, {}, {1, 1}, 0, 0, 1, 0.5, 1.5, 0.3, 0},
+    };
 
     void SetUp() override
     {
@@ -131,10 +134,6 @@ struct SimulationTest : public ::testing::Test {
         JPS_GeometryBuilder_Free(geo_builder);
 
         auto modelBuilder = JPS_VelocityModelBuilder_Create(9, 0.1, 5, 0.02);
-        JPS_VelocityModelBuilder_AddParameterProfile(
-            modelBuilder, model_paramater_profile_id[0], 1, 0.5, 1.5, 0.3);
-        JPS_VelocityModelBuilder_AddParameterProfile(
-            modelBuilder, model_paramater_profile_id[1], 1, 0.3, 1.2, 0.13);
         auto model = JPS_VelocityModelBuilder_Build(modelBuilder, nullptr);
 
         ASSERT_NE(model, nullptr);
@@ -153,6 +152,10 @@ struct SimulationTest : public ::testing::Test {
 
         JPS_OperationalModel_Free(model);
         JPS_Geometry_Free(geometry);
+        for(auto&& agent : agent_templates) {
+            agent.journeyId = journey_id;
+            agent.stageId = stage_id;
+        }
     }
 
     void TearDown() override { JPS_Simulation_Free(simulation); }
@@ -168,10 +171,13 @@ TEST_F(SimulationTest, AgentIteratorIsEmptyForNewSimulation)
 
 TEST_F(SimulationTest, AgentIteratorCanIterate)
 {
-    std::vector<JPS_VelocityModelAgentParameters> agent_parameters{
-        {{}, {1.0, 1.0}, {1.0, 1.0}, journey_id, stage_id, model_paramater_profile_id[0], 0},
-        {{}, {2.0, 1.0}, {1.0, 1.0}, journey_id, stage_id, model_paramater_profile_id[0], 0},
-        {{}, {3.0, 1.0}, {1.0, 1.0}, journey_id, stage_id, model_paramater_profile_id[0], 0}};
+    std::vector<JPS_Point> positions{{1, 1}, {2, 1}, {3, 1}};
+    std::vector<JPS_VelocityModelAgentParameters> agent_parameters(
+        positions.size(), agent_templates[0]);
+    for(size_t index = 0; index < positions.size(); ++index) {
+        agent_parameters[index].position = positions[index];
+    }
+
     for(const auto& agent_params : agent_parameters) {
         ASSERT_NE(JPS_Simulation_AddVelocityModelAgent(simulation, agent_params, nullptr), 0);
     }
@@ -182,26 +188,6 @@ TEST_F(SimulationTest, AgentIteratorCanIterate)
     ASSERT_NE(JPS_AgentIterator_Next(iter), nullptr);
     ASSERT_NE(JPS_AgentIterator_Next(iter), nullptr);
     ASSERT_EQ(JPS_AgentIterator_Next(iter), nullptr);
-}
-
-TEST_F(SimulationTest, CanChangeModelParameterProfiles)
-{
-    JPS_VelocityModelAgentParameters agent_params{
-        {}, {1, 1}, {1, 0}, journey_id, stage_id, model_paramater_profile_id[0], 0};
-    const auto agent_id = JPS_Simulation_AddVelocityModelAgent(simulation, agent_params, nullptr);
-    ASSERT_NE(agent_id, 0);
-    ASSERT_EQ(JPS_Simulation_AgentCount(simulation), 1);
-    JPS_ErrorMessage errorMsg{};
-    EXPECT_EQ(JPS_Simulation_Iterate(simulation, &errorMsg), true);
-    if(errorMsg) {
-        std::cerr << JPS_ErrorMessage_GetMessage(errorMsg) << std::endl;
-        JPS_ErrorMessage_Free(errorMsg);
-    }
-    ASSERT_EQ(
-        JPS_Simulation_SwitchAgentProfile(
-            simulation, agent_id, model_paramater_profile_id[1], nullptr),
-        true);
-    ASSERT_EQ(JPS_Simulation_Iterate(simulation, nullptr), true);
 }
 
 TEST(Regression, Bug1028)

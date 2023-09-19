@@ -23,10 +23,8 @@ GCFMModel::GCFMModel(
     double intp_widthped,
     double intp_widthwall,
     double maxfped,
-    double maxfwall,
-    const std::vector<GCFMModelAgentParameters>& profiles)
-    : OperationalModelBase(profiles)
-    , _nuPed(nuped)
+    double maxfwall)
+    : _nuPed(nuped)
     , _nuWall(nuwall)
     , _intp_widthPed(intp_widthped)
     , _intp_widthWall(intp_widthwall)
@@ -48,7 +46,6 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
     const CollisionGeometry& geometry,
     const NeighborhoodSearchType& neighborhoodSearch) const
 {
-    const auto& parameters = parameterProfile(agent.parameterProfileId);
     const double radius = 4.0; // TODO (MC) check this free parameter
     const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(agent.pos, radius);
     const auto p1 = agent.pos;
@@ -67,10 +64,10 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
     PedestrianUpdate update{};
     // repulsive forces to the walls and transitions that are not my target
     Point repwall = ForceRepRoom(agent, geometry);
-    Point fd = ForceDriv(agent, agent.destination, parameters.mass, parameters.tau, dT, update);
-    Point acc = (fd + F_rep + repwall) / parameters.mass;
-
     const auto& model = std::get<GeneralizedCentrifugalForceModelData>(agent.model);
+    Point fd = ForceDriv(agent, agent.destination, model.mass, model.tau, dT, update);
+    Point acc = (fd + F_rep + repwall) / model.mass;
+
     update.velocity = (agent.orientation * model.speed) + acc * dT;
     update.position = agent.pos + *update.velocity * dT;
     return update;
@@ -96,12 +93,16 @@ void GCFMModel::CheckDistanceConstraint(
 {
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
     for(const auto& neighbor : neighbors) {
-        const auto spacing = AgentToAgentSpacing(agent, neighbor);
-        if(spacing <= 0) {
+        const auto contanctDist = AgentToAgentSpacing(agent, neighbor);
+        const auto distance = (agent.pos - neighbor.pos).Norm();
+        if(contanctDist >= distance) {
             throw SimulationError(
-                "Model constraint violation: Agent {} too close to agent {}",
-                agent.id,
-                neighbor.id);
+                "Model constraint violation: Agent {} too close to agent {}: distance {}, "
+                "effective distance {}",
+                agent.pos,
+                neighbor.pos,
+                distance,
+                distance - contanctDist);
         }
     }
 }
@@ -123,16 +124,15 @@ Point GCFMModel::ForceDriv(
     const auto pos = ped.pos;
     const auto dest = ped.destination;
     const auto dist = (dest - pos).Norm();
-    const auto v0 = parameterProfile(ped.parameterProfileId).v0;
     const auto& model = std::get<GeneralizedCentrifugalForceModelData>(ped.model);
     if(dist > J_EPS_GOAL) {
 
         const Point e0 = mollify_e0(target, pos, deltaT, model.orientationDelay, model.e0);
         update.e0 = e0;
-        F_driv = ((e0 * v0 - (ped.orientation * model.speed)) * mass) / tau;
+        F_driv = ((e0 * model.v0 - (ped.orientation * model.speed)) * mass) / tau;
     } else {
         const Point e0 = model.e0;
-        F_driv = ((e0 * v0 - (ped.orientation * model.speed)) * mass) / tau;
+        F_driv = ((e0 * model.v0 - (ped.orientation * model.speed)) * mass) / tau;
     }
     return F_driv;
 }
@@ -153,7 +153,7 @@ Point GCFMModel::ForceRepPed(const GenericAgent& ped1, const GenericAgent& ped2)
     double nom; // nominator of Frep
     double px; // hermite Interpolation value
     const auto dist_eff = AgentToAgentSpacing(ped1, ped2);
-    const auto agent1_mass = parameterProfile(ped1.parameterProfileId).mass;
+    const auto agent1_mass = model1.mass;
 
     //          smax    dist_intpol_left      dist_intpol_right       dist_eff_max
     //       ----|-------------|--------------------------|--------------|----
@@ -204,7 +204,7 @@ Point GCFMModel::ForceRepPed(const GenericAgent& ped1, const GenericAgent& ped2)
         }
     }
 
-    const auto v0_1 = parameterProfile(ped1.parameterProfileId).v0;
+    const auto v0_1 = model1.v0;
     nom = _nuPed * v0_1 + v_ij; // Nu: 0=CFM, 0.28=modifCFM;
     nom *= nom;
 
@@ -317,12 +317,7 @@ Point GCFMModel::ForceRepStatPoint(const GenericAgent& ped, const Point& p, doub
     double bla;
     Point r;
     Point pinE; // vorher x1, y1
-    const auto& pedParameterProfile = parameterProfile(ped.parameterProfileId);
-    const Ellipse E{
-        pedParameterProfile.Av,
-        pedParameterProfile.AMin,
-        pedParameterProfile.BMax,
-        pedParameterProfile.BMin};
+    const Ellipse E{model.Av, model.AMin, model.BMax, model.BMin};
 
     if(d < J_EPS)
         return Point(0.0, 0.0);
@@ -337,7 +332,7 @@ Point GCFMModel::ForceRepStatPoint(const GenericAgent& ped, const Point& p, doub
     K_ij = 0.5 * bla / v.Norm(); // K_ij
     // Punkt auf der Ellipse
     pinE = p.TransformToEllipseCoordinates(ped.pos, ped.orientation.x, ped.orientation.y);
-    const auto v0 = parameterProfile(ped.parameterProfileId).v0;
+    const auto v0 = model.v0;
     // Punkt auf der Ellipse
     r = E.PointOnEllipse(pinE, model.speed / v0, ped.pos, model.speed, ped.orientation);
     // interpolierte Kraft
@@ -402,22 +397,12 @@ Point GCFMModel::ForceInterpolation(
 }
 double GCFMModel::AgentToAgentSpacing(const GenericAgent& agent1, const GenericAgent& agent2) const
 {
-    const auto& ped1ParameterProfile = parameterProfile(agent1.parameterProfileId);
-    const Ellipse E1{
-        ped1ParameterProfile.Av,
-        ped1ParameterProfile.AMin,
-        ped1ParameterProfile.BMax,
-        ped1ParameterProfile.BMin};
-    const auto& ped2ParameterProfile = parameterProfile(agent2.parameterProfileId);
-    const Ellipse E2{
-        ped2ParameterProfile.Av,
-        ped2ParameterProfile.AMin,
-        ped2ParameterProfile.BMax,
-        ped2ParameterProfile.BMin};
-    const auto v0_1 = ped1ParameterProfile.v0;
-    const auto v0_2 = ped2ParameterProfile.v0;
     const auto& model1 = std::get<GeneralizedCentrifugalForceModelData>(agent1.model);
     const auto& model2 = std::get<GeneralizedCentrifugalForceModelData>(agent2.model);
+    const Ellipse E1{model1.Av, model1.AMin, model1.BMax, model1.BMin};
+    const Ellipse E2{model2.Av, model2.AMin, model2.BMax, model2.BMin};
+    const auto v0_1 = model1.v0;
+    const auto v0_2 = model2.v0;
     return E1.EffectiveDistanceToEllipse(
         E2,
         agent1.pos,

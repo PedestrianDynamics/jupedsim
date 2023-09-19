@@ -27,11 +27,10 @@ enum class WaitingSetState {
 class BaseProxy
 {
 protected:
-    const Simulation* simulation;
+    Simulation* simulation;
     BaseStage* stage;
 
-    BaseProxy(const Simulation* simulation_, BaseStage* stage_)
-        : simulation(simulation_), stage(stage_)
+    BaseProxy(Simulation* simulation_, BaseStage* stage_) : simulation(simulation_), stage(stage_)
     {
     }
     virtual ~BaseProxy() = default;
@@ -43,15 +42,13 @@ public:
 class WaypointProxy : public BaseProxy
 {
 public:
-    WaypointProxy(const Simulation* simulation_, BaseStage* stage_) : BaseProxy(simulation_, stage_)
-    {
-    }
+    WaypointProxy(Simulation* simulation_, BaseStage* stage_) : BaseProxy(simulation_, stage_) {}
 };
 
 class NotifiableWaitingSetProxy : public BaseProxy
 {
 public:
-    NotifiableWaitingSetProxy(const Simulation* simulation_, BaseStage* stage_)
+    NotifiableWaitingSetProxy(Simulation* simulation_, BaseStage* stage_)
         : BaseProxy(simulation_, stage_)
     {
     }
@@ -64,7 +61,7 @@ public:
 class NotifiableQueueProxy : public BaseProxy
 {
 public:
-    NotifiableQueueProxy(const Simulation* simulation_, BaseStage* stage_)
+    NotifiableQueueProxy(Simulation* simulation_, BaseStage* stage_)
         : BaseProxy(simulation_, stage_)
     {
     }
@@ -77,7 +74,7 @@ public:
 class ExitProxy : public BaseProxy
 {
 public:
-    ExitProxy(const Simulation* simulation_, BaseStage* stage_) : BaseProxy(simulation_, stage_) {}
+    ExitProxy(Simulation* simulation_, BaseStage* stage_) : BaseProxy(simulation_, stage_) {}
 };
 
 using StageProxy =
@@ -96,7 +93,7 @@ public:
     virtual ~BaseStage() = default;
     virtual bool IsCompleted(const GenericAgent& agent) = 0;
     virtual Point Target(const GenericAgent& agent) = 0;
-    virtual StageProxy Proxy(const Simulation* simulation_) = 0;
+    virtual StageProxy Proxy(Simulation* simulation_) = 0;
     ID Id() const { return id; }
     size_t CountTargeting() const { return targeting; }
     void IncreaseTargeting() { targeting = targeting + 1; }
@@ -117,7 +114,7 @@ public:
     ~Waypoint() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
     Point Target(const GenericAgent& agent) override;
-    StageProxy Proxy(const Simulation* simulation_) override;
+    StageProxy Proxy(Simulation* simulation_) override;
 };
 
 /// Notifies simulation of all agents that need to be removed at the beginning of the next iteration
@@ -131,7 +128,7 @@ public:
     ~Exit() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
     Point Target(const GenericAgent& agent) override;
-    StageProxy Proxy(const Simulation* simulation_) override;
+    StageProxy Proxy(Simulation* simulation_) override;
 };
 
 class NotifiableWaitingSet : public BaseStage
@@ -145,7 +142,7 @@ public:
     ~NotifiableWaitingSet() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
     Point Target(const GenericAgent& agent) override;
-    StageProxy Proxy(const Simulation* simulation_) override;
+    StageProxy Proxy(Simulation* simulation_) override;
     void State(WaitingSetState s);
     WaitingSetState State() const;
     template <typename T>
@@ -202,7 +199,7 @@ public:
     ~NotifiableQueue() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
     Point Target(const GenericAgent& agent) override;
-    StageProxy Proxy(const Simulation* simulation_) override;
+    StageProxy Proxy(Simulation* simulation_) override;
     template <typename T>
     void Update(const NeighborhoodSearch<T>& neighborhoodSearch);
     void Pop(size_t count);

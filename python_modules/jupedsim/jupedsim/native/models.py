@@ -15,13 +15,6 @@ class VelocityModelBuilder:
             a_ped=a_ped, d_ped=d_ped, a_wall=a_wall, d_wall=d_wall
         )
 
-    def add_parameter_profile(
-        self, id: int, time_gap: float, tau: float, v0: float, radius: float
-    ) -> None:
-        self._obj.add_parameter_profile(
-            id=id, time_gap=time_gap, tau=tau, v0=v0, radius=radius
-        )
-
     def build(self):
         return self._obj.build()
 
@@ -47,28 +40,6 @@ class GCFMModelBuilder:
             intp_width_wall=intp_width_wall,
             maxf_ped=maxf_ped,
             maxf_wall=maxf_wall,
-        )
-
-    def add_parameter_profile(
-        self,
-        profile_id: int,
-        mass: float,
-        tau: float,
-        v0: float,
-        a_v: float,
-        a_min: float,
-        b_min: float,
-        b_max: float,
-    ):
-        return self._obj.add_parameter_profile(
-            id=profile_id,
-            mass=mass,
-            tau=tau,
-            v0=v0,
-            a_v=a_v,
-            a_min=a_min,
-            b_min=b_min,
-            b_max=b_max,
         )
 
     def build(self):
@@ -174,17 +145,81 @@ class GCFMModelAgentParameters:
         self._obj.stage_id = value
 
     @property
-    def profile_id(self) -> int:
+    def mass(self) -> float:
         """
-        Id of curently used profile
-
         NOTE: Setting this property has no effect on agents that are already part of the simulation
         """
-        return self._obj.profile_id
+        return self._obj.mass
 
-    @profile_id.setter
-    def profile_id(self, value: int) -> None:
-        self._obj.profile_id = value
+    @mass.setter
+    def mass(self, value: float) -> None:
+        self._obj.mass = value
+
+    @property
+    def tau(self) -> float:
+        """
+        NOTE: Setting this property has no effect on agents that are already part of the simulation
+        """
+        return self._obj.tau
+
+    @tau.setter
+    def tau(self, value: float) -> None:
+        self._obj.tau = value
+
+    @property
+    def v0(self) -> float:
+        """
+        NOTE: Setting this property has no effect on agents that are already part of the simulation
+        """
+        return self._obj.v0
+
+    @v0.setter
+    def v0(self, value: float) -> None:
+        self._obj.v0 = value
+
+    @property
+    def a_v(self) -> float:
+        """
+        NOTE: Setting this property has no effect on agents that are already part of the simulation
+        """
+        return self._obj.a_v
+
+    @a_v.setter
+    def a_v(self, value: float) -> None:
+        self._obj.a_v = value
+
+    @property
+    def a_min(self) -> float:
+        """
+        NOTE: Setting this property has no effect on agents that are already part of the simulation
+        """
+        return self._obj.a_min
+
+    @a_min.setter
+    def a_min(self, value: float) -> None:
+        self._obj.a_min = value
+
+    @property
+    def b_min(self) -> float:
+        """
+        NOTE: Setting this property has no effect on agents that are already part of the simulation
+        """
+        return self._obj.b_min
+
+    @b_min.setter
+    def b_min(self, value: float) -> None:
+        self._obj.b_min = value
+
+    @property
+    def b_max(self) -> float:
+        """
+        NOTE: Setting this property has no effect on agents that are already part of the simulation
+        """
+        return self._obj.b_max
+
+    @b_max.setter
+    def b_max(self, value: float) -> None:
+        self._obj.b_max = value
 
     @property
     def id(self) -> int:
@@ -289,17 +324,48 @@ class VelocityModelAgentParameters:
         self._obj.stage_id = value
 
     @property
-    def profile_id(self) -> int:
+    def time_gap(self) -> float:
         """
-        Id of curently used profile
-
         NOTE: Setting this property has no effect on agents that are already part of the simulation
         """
-        return self._obj.profile_id
+        return self._obj.time_gap
 
-    @profile_id.setter
-    def profile_id(self, value: int) -> None:
-        self._obj.profile_id = value
+    @time_gap.setter
+    def time_gap(self, value: float) -> None:
+        self._obj.time_gap = value
+
+    @property
+    def tau(self) -> float:
+        """
+        NOTE: Setting this property has no effect on agents that are already part of the simulation
+        """
+        return self._obj.tau
+
+    @tau.setter
+    def tau(self, value: float) -> None:
+        self._obj.tau = value
+
+    @property
+    def v0(self) -> float:
+        """
+        NOTE: Setting this property has no effect on agents that are already part of the simulation
+        """
+        return self._obj.v0
+
+    @v0.setter
+    def v0(self, value: float) -> None:
+        self._obj.v0 = value
+
+    @property
+    def radius(self) -> float:
+        """
+        NOTE: Setting this property has no effect on agents that are already part of the simulation
+        """
+        return self._obj.radius
+
+    @radius.setter
+    def radius(self, value: float) -> None:
+        self._obj.radius = value
 
     @property
     def id(self) -> int:
@@ -326,9 +392,65 @@ class GeneralizedCentrifugalForceModelState:
     def speed(self) -> float:
         return self._obj.speed
 
+    @speed.setter
+    def speed(self, speed):
+        self._obj.speed = speed
+
     @property
     def e0(self) -> tuple[float, float]:
         return self._obj.e0
+
+    @e0.setter
+    def e0(self, e0):
+        self._obj.e0 = e0
+
+    @property
+    def tau(self) -> float:
+        return self._obj.tau
+
+    @tau.setter
+    def tau(self, tau):
+        self._obj.tau = tau
+
+    @property
+    def v0(self) -> float:
+        return self._obj.v0
+
+    @v0.setter
+    def v0(self, v0):
+        self._obj.v0 = v0
+
+    @property
+    def a_v(self) -> float:
+        return self._obj.a_v
+
+    @a_v.setter
+    def a_v(self, a_v):
+        self._obj.a_v = a_v
+
+    @property
+    def a_min(self) -> float:
+        return self._obj.a_min
+
+    @a_min.setter
+    def a_min(self, a_min):
+        self._obj.a_min = a_min
+
+    @property
+    def b_min(self) -> float:
+        return self._obj.b_min
+
+    @b_min.setter
+    def b_min(self, b_min):
+        self._obj.b_min = b_min
+
+    @property
+    def b_max(self) -> float:
+        return self._obj.b_max
+
+    @b_max.setter
+    def b_max(self, b_max):
+        self._obj.b_max = b_max
 
 
 class VelocityModelState:
@@ -338,3 +460,39 @@ class VelocityModelState:
     @property
     def e0(self) -> tuple[float, float]:
         return self._obj.e0
+
+    @e0.setter
+    def e0(self, e0):
+        self._obj.e0 = e0
+
+    @property
+    def time_gap(self) -> float:
+        return self._obj.time_gap
+
+    @time_gap.setter
+    def time_gap(self, time_gap):
+        self._obj.time_gap = time_gap
+
+    @property
+    def tau(self) -> float:
+        return self._obj.tau
+
+    @tau.setter
+    def tau(self, tau):
+        self._obj.tau = tau
+
+    @property
+    def v0(self) -> float:
+        return self._obj.v0
+
+    @v0.setter
+    def v0(self, v0):
+        self._obj.v0 = v0
+
+    @property
+    def radius(self) -> float:
+        return self._obj.radius
+
+    @radius.setter
+    def radius(self, radius):
+        self._obj.radius = radius

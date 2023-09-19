@@ -23,13 +23,6 @@ GCFMModelBuilder::GCFMModelBuilder(
 {
 }
 
-GCFMModelBuilder& GCFMModelBuilder::AddAgentParameterProfile(GCFMModelAgentParameters profile)
-
-{
-    _profiles.emplace_back(profile);
-    return *this;
-}
-
 GCFMModel GCFMModelBuilder::Build()
 {
     return GCFMModel(
@@ -40,6 +33,5 @@ GCFMModel GCFMModelBuilder::Build()
         _intp_widthped,
         _intp_widthwall,
         _maxfped,
-        _maxfwall,
-        _profiles);
+        _maxfwall);
 }
