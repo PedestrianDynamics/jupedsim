@@ -88,4 +88,5 @@ public:
     std::vector<GenericAgent>& Agents();
     OperationalModelType ModelType() const;
     StageProxy Stage(BaseStage::ID stageId);
+    Geometry Geo() const;
 };

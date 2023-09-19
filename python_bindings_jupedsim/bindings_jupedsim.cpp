@@ -107,6 +107,14 @@ static std::vector<std::tuple<double, double>> intoTuple(const std::vector<JPS_P
     return res;
 }
 
+static std::vector<std::tuple<double, double>> intoTuple(const JPS_Point* beg, const JPS_Point* end)
+{
+    std::vector<std::tuple<double, double>> res;
+    res.reserve(end - beg);
+    std::transform(beg, end, std::back_inserter(res), [](auto&& x) { return intoTuple(x); });
+    return res;
+}
+
 static JPS_Point intoJPS_Point(const std::tuple<double, double> p)
 {
     return JPS_Point{std::get<0>(p), std::get<1>(p)};
@@ -259,7 +267,25 @@ PYBIND11_MODULE(py_jupedsim, m)
                 p.radius,
                 p.agentId);
         });
-    py::class_<JPS_Geometry_Wrapper>(m, "Geometry");
+    py::class_<JPS_Geometry_Wrapper>(m, "Geometry")
+        .def(
+            "boundary",
+            [](const JPS_Geometry_Wrapper& w) {
+                const auto len = JPS_Geometry_GetBoundarySize(w.handle);
+                const auto data = JPS_Geometry_GetBoundaryData(w.handle);
+                return intoTuple(data, data + len);
+            })
+        .def("holes", [](const JPS_Geometry_Wrapper& w) {
+            const auto holeCount = JPS_Geometry_GetHoleCount(w.handle);
+            std::vector<std::vector<std::tuple<double, double>>> res{};
+            res.reserve(holeCount);
+            for(size_t index = 0; index < holeCount; ++index) {
+                const auto len = JPS_Geometry_GetHoleSize(w.handle, index, nullptr);
+                const auto data = JPS_Geometry_GetHoleData(w.handle, index, nullptr);
+                res.emplace_back(intoTuple(data, data + len));
+            }
+            return res;
+        });
     py::class_<JPS_GeometryBuilder_Wrapper>(m, "GeometryBuilder")
         .def(py::init([]() {
             return std::make_unique<JPS_GeometryBuilder_Wrapper>(JPS_GeometryBuilder_Create());
@@ -803,20 +829,16 @@ PYBIND11_MODULE(py_jupedsim, m)
             })
         .def(
             "iterate",
-            [](const JPS_Simulation_Wrapper& simulation, size_t count) {
+            [](const JPS_Simulation_Wrapper& simulation) {
                 JPS_ErrorMessage errorMsg{};
-                bool iterate_ok = true;
-                for(size_t counter = 0; counter < count && iterate_ok; ++counter) {
-                    iterate_ok = JPS_Simulation_Iterate(simulation.handle, &errorMsg);
-                }
+                bool iterate_ok = JPS_Simulation_Iterate(simulation.handle, &errorMsg);
                 if(iterate_ok) {
                     return;
                 }
                 auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
                 JPS_ErrorMessage_Free(errorMsg);
                 throw std::runtime_error{msg};
-            },
-            py::arg("count") = 1)
+            })
         .def(
             "switch_agent_journey",
             [](const JPS_Simulation_Wrapper& w,
@@ -946,8 +968,11 @@ PYBIND11_MODULE(py_jupedsim, m)
             [](JPS_Simulation_Wrapper& w, bool status) {
                 JPS_Simulation_SetTracing(w.handle, status);
             })
-        .def("get_last_trace", [](JPS_Simulation_Wrapper& w) {
-            return JPS_Simulation_GetTrace(w.handle);
+        .def(
+            "get_last_trace",
+            [](JPS_Simulation_Wrapper& w) { return JPS_Simulation_GetTrace(w.handle); })
+        .def("get_geometry", [](const JPS_Simulation_Wrapper& w) {
+            return std::make_unique<JPS_Geometry_Wrapper>(JPS_Simulation_GetGeometry(w.handle));
         });
     py::class_<JPS_RoutingEngine_Wrapper>(m, "RoutingEngine")
         .def(py::init([](const JPS_Geometry_Wrapper& geo) {

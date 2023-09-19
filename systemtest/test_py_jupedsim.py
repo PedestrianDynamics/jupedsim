@@ -20,13 +20,9 @@ def test_can_query_agents_in_range():
     geo_builder.add_accessible_area([(0, 0), (100, 0), (100, 100), (0, 100)])
     geometry = geo_builder.build()
 
-    model_builder = jps.VelocityModelBuilder(
-        a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
+    simulation = jps.Simulation(
+        model=jps.VelocityModelParameters(), geometry=geometry, dt=0.01
     )
-
-    model = model_builder.build()
-
-    simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
     exit = simulation.add_exit_stage(
         [(99, 45), (99, 55), (100, 55), (100, 45)]
     )
@@ -92,12 +88,9 @@ def test_can_run_simulation():
     geo_builder.add_accessible_area([(10, 4), (20, 4), (20, 6), (10, 6)])
     geometry = geo_builder.build()
 
-    model_builder = jps.VelocityModelBuilder(
-        a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
+    simulation = jps.Simulation(
+        model=jps.VelocityModelParameters(), geometry=geometry, dt=0.01
     )
-    model = model_builder.build()
-
-    simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
     exit_stage_id = simulation.add_exit_stage(
         [(18, 4), (20, 4), (20, 6), (18, 6)]
     )
@@ -156,11 +149,9 @@ def test_can_wait():
     geo_builder.add_accessible_area([(0, 0), (100, 0), (100, 100), (0, 100)])
     geometry = geo_builder.build()
 
-    model_builder = jps.VelocityModelBuilder(
-        a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
+    simulation = jps.Simulation(
+        model=jps.VelocityModelParameters(), geometry=geometry, dt=0.01
     )
-    model = model_builder.build()
-    simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
     wp = simulation.add_waypoint_stage((50, 50), 1)
     waiting_set_id = simulation.add_waiting_set_stage(
         [
@@ -248,12 +239,9 @@ def test_can_change_journey_while_waiting():
     geo_builder.add_accessible_area([(0, 0), (100, 0), (100, 100), (0, 100)])
     geometry = geo_builder.build()
 
-    model_builder = jps.VelocityModelBuilder(
-        a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
+    simulation = jps.Simulation(
+        model=jps.VelocityModelParameters(), geometry=geometry, dt=0.01
     )
-    model = model_builder.build()
-
-    simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
     wp = simulation.add_waypoint_stage((50, 50), 1)
     stage_id = simulation.add_waiting_set_stage(
         [
@@ -346,12 +334,9 @@ def test_get_single_agent_from_simulation():
     geo_builder.add_accessible_area([(10, 4), (20, 4), (20, 6), (10, 6)])
     geometry = geo_builder.build()
 
-    model_builder = jps.VelocityModelBuilder(
-        a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
+    simulation = jps.Simulation(
+        model=jps.VelocityModelParameters(), geometry=geometry, dt=0.01
     )
-    model = model_builder.build()
-
-    simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
     exit_id = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
 
     journey = jps.JourneyDescription([exit_id])
@@ -396,12 +381,9 @@ def test_get_agent_non_existing_agent_from_simulation():
     geo_builder.add_accessible_area([(10, 4), (20, 4), (20, 6), (10, 6)])
     geometry = geo_builder.build()
 
-    model_builder = jps.VelocityModelBuilder(
-        a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
+    simulation = jps.Simulation(
+        model=jps.VelocityModelParameters(), geometry=geometry, dt=0.01
     )
-    model = model_builder.build()
-
-    simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
 
     exit_id = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
     journey = jps.JourneyDescription([exit_id])

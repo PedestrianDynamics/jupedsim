@@ -25,13 +25,9 @@ def test_can_share_queue_between_stages():
     geo_builder = jps.GeometryBuilder()
     geo_builder.add_accessible_area(polygon.exterior.coords[:-1])
     geometry = geo_builder.build()
-
-    model_builder = jps.VelocityModelBuilder(
-        a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
+    simulation = jps.Simulation(
+        model=jps.VelocityModelParameters(), geometry=geometry, dt=0.01
     )
-    model = model_builder.build()
-
-    simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
 
     wp_j1 = simulation.add_waypoint_stage((-1, 0), 0.5)
 
@@ -126,13 +122,9 @@ def test_can_use_stage_proxy():
     geo_builder = jps.GeometryBuilder()
     geo_builder.add_accessible_area(polygon.exterior.coords[:-1])
     geometry = geo_builder.build()
-
-    model_builder = jps.VelocityModelBuilder(
-        a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
+    simulation = jps.Simulation(
+        model=jps.VelocityModelParameters(), geometry=geometry, dt=0.01
     )
-    model = model_builder.build()
-
-    simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
 
     exit_id = simulation.add_exit_stage(
         [(-2.5, -9.5), (-2.5, -10), (2.5, -10), (2.5, -9.5)]

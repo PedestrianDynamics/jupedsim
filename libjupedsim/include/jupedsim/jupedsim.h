@@ -281,7 +281,48 @@ JUPEDSIM_API void JPS_VelocityModelBuilder_Free(JPS_VelocityModelBuilder handle)
  * Opaque type that represents the geometry the simulation acts on.
  * This type is created from JPS_GeometryBuilder.
  */
-typedef struct JPS_Geometry_t* JPS_Geometry;
+typedef struct JPS_Geometry_t const* JPS_Geometry;
+
+/**
+ * Returns the number of points that the outer boundary of the geometry consists of.
+ * @param handle to the JPS_Geometry to operate on
+ * @return Number of points in the outer boundary
+ */
+JUPEDSIM_API size_t JPS_Geometry_GetBoundarySize(JPS_Geometry handle);
+
+/**
+ * Returns the points the outer boundary consists of.
+ * @param handle to the JPS_Geometry to operate on
+ * @return the outer boundary. Do not free the returned pointer, it is still owned by JPS_Geometry.
+ */
+JUPEDSIM_API const JPS_Point* JPS_Geometry_GetBoundaryData(JPS_Geometry handle);
+
+/**
+ * Returns the number of holes in the geometry.
+ * @param handle to the JPS_Geometry to operate on
+ * @return Number of holes
+ */
+JUPEDSIM_API size_t JPS_Geometry_GetHoleCount(JPS_Geometry handle);
+
+/**
+ * Returns the number of points that hole consists of.
+ * @param handle to the JPS_Geometry to operate on
+ * @param index of the hole to access
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error
+ * @return Number of points in hole boundary or 0 on error.
+ */
+JUPEDSIM_API size_t
+JPS_Geometry_GetHoleSize(JPS_Geometry handle, size_t hole_index, JPS_ErrorMessage* errorMessage);
+
+/**
+ * Returns the points the hole boundary consists of.
+ * @param handle to the JPS_Geometry to operate on
+ * @param index of the hole to access
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error
+ * @return points of the hole boundary or NULL on error.
+ */
+JUPEDSIM_API const JPS_Point*
+JPS_Geometry_GetHoleData(JPS_Geometry handle, size_t hole_index, JPS_ErrorMessage* errorMessage);
 
 /**
  * Frees a JPS_Geometry
@@ -1231,6 +1272,14 @@ JUPEDSIM_API void JPS_Simulation_SetTracing(JPS_Simulation handle, bool status);
  * @return trace data
  */
 JUPEDSIM_API JPS_Trace JPS_Simulation_GetTrace(JPS_Simulation handle);
+
+/**
+ * Gain read access to the geometry used by this simulation.
+ * @param handle of the Simulation to operate on
+ * @return the geometry. Do not call JPS_Geometry_Free on this handle,
+ * the geometry is still owned by the simulation!
+ */
+JUPEDSIM_API JPS_Geometry JPS_Simulation_GetGeometry(JPS_Simulation handle);
 
 /**
  * Frees a JPS_Simulation.

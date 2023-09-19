@@ -12,11 +12,9 @@ def corridor():
     geometry = jps.geometry_from_coordinates(
         [(0, 0), (10, 0), (10, 2), (0, 2)]
     )
-    model_builder = jps.VelocityModelBuilder(
-        a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
+    return jps.Simulation(
+        model=jps.VelocityModelParameters(), geometry=geometry, dt=0.01
     )
-    model = model_builder.build()
-    return jps.Simulation(model=model, geometry=geometry, dt=0.01)
 
 
 def test_set_v0(corridor):

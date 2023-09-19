@@ -7,6 +7,7 @@
 #include "LineSegment.hpp"
 
 #include <map>
+#include <optional>
 #include <set>
 #include <unordered_map>
 #include <vector>
@@ -95,10 +96,11 @@ std::set<Cell> cellsFromLineSegment(LineSegment ls);
 
 class CollisionGeometry
 {
-    PolyWithHoles _accessibleArea;
+    PolyWithHoles _accessibleAreaPolygon;
     std::vector<LineSegment> _segments;
     std::unordered_map<Cell, std::set<LineSegment>> _grid{};
     std::unordered_map<Cell, std::vector<LineSegment>> _approximateGrid{};
+    std::tuple<std::vector<Point>, std::vector<std::vector<Point>>> _accessibleArea{};
 
 public:
     using LineSegmentRange = IteratorPair<DistanceQueryIterator<LineSegment>>;
@@ -130,6 +132,8 @@ public:
     bool IntersectsAny(const LineSegment& linesegment) const;
 
     bool InsideGeometry(Point p) const;
+
+    const std::tuple<std::vector<Point>, std::vector<std::vector<Point>>>& AccessibleArea() const;
 
 private:
     void insertIntoApproximateGrid(const LineSegment& ls);

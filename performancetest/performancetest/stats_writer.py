@@ -4,38 +4,48 @@
 Provides functionality to store performance measurements in SQLite
 """
 
-import sqlite3
+import platform
 
-import py_jupedsim as jps
+import jupedsim as jps
 
 
-class StatsWriter:
+class StatsWriter(jps.TrajectoryWriter):
     """
     StatsWriter will recreate perf_statistics table.
     New entries can be added with write stats
     """
 
-    def __init__(self, connection: sqlite3.Connection):
-        """
-        Parameters
-        ----------
-        connection : sqlite3.Connection
-            Opened connection to a sqlite database.
-            'perf_statistics' table will be recreated.
+    def __init__(
+        self,
+        trajectory_writer: jps.SqliteTrajectoryWriter,
+        description: str = "N/A",
+    ):
+        self._trajectory_writer = trajectory_writer
+        self._description = description
+        self._con = trajectory_writer._con
 
-        Returns
-        -------
-        StatsWriter
-        """
-        self.con = connection
+    def begin_writing(self, simulation) -> None:
+        simulation.set_tracing(True)
+        self._trajectory_writer.begin_writing(simulation)
         self._recreate_table()
+        self.write_metadata()
+
+    def write_iteration_state(self, simulation) -> None:
+        self._trajectory_writer.write_iteration_state(simulation)
+        self.write_stats(simulation)
+
+    def end_writing(self, simulation) -> None:
+        self._trajectory_writer.end_writing(simulation)
+
+    def every_nth_frame(self) -> int:
+        return self._trajectory_writer.every_nth_frame()
 
     def _recreate_table(self):
         """
         Recreates perf_statistics table to ensure no other data is
         present in the table or the schema is not matching
         """
-        cur = self.con.cursor()
+        cur = self._con.cursor()
         cur.execute("DROP TABLE IF EXISTS perf_statistics")
         cur.execute(
             "CREATE TABLE perf_statistics ("
@@ -46,34 +56,29 @@ class StatsWriter:
         )
         cur.close()
 
-    def write_metadata(
-        self, commit_id, hostname, description="No description available"
-    ):
-        cur = self.con.cursor()
+    def write_metadata(self):
+        cur = self._con.cursor()
         cur.execute(
-            "INSERT INTO metadata VALUES(?, ?)", ("commit_id", commit_id)
+            "INSERT INTO metadata VALUES(?, ?)",
+            ("commit_id", jps.get_build_info().git_commit_hash),
         )
         cur.execute(
-            "INSERT INTO metadata VALUES(?, ?)", ("hostname", hostname)
+            "INSERT INTO metadata VALUES(?, ?)",
+            ("hostname", platform.node()),
         )
         cur.execute(
-            "INSERT INTO metadata VALUES(?, ?)", ("description", description)
+            "INSERT INTO metadata VALUES(?, ?)",
+            ("description", self._description),
         )
 
-    def write_stats(self, frame_idx: int, agent_count: int, stats: jps.Trace):
-        """
-        Adds one set of measurements to the database.
-
-        Parameters
-        ----------
-        frame_idx : int
-            index of the frame that created the measurements
-        agent_count : int
-            numer of agents simulated in this frame
-        stats : py_jupedsim.Trace
-            time measurements from one iteration of the simulation
-        """
-        self.con.cursor().execute(
+    def write_stats(self, simulation):
+        iteration = simulation.iteration_count()
+        if iteration % self.every_nth_frame() != 0:
+            return
+        frame_idx = iteration / self.every_nth_frame()
+        stats = simulation.get_last_trace()
+        agent_count = simulation.agent_count()
+        self._con.cursor().execute(
             "INSERT INTO perf_statistics VALUES(?,?,?,?)",
             (
                 frame_idx,

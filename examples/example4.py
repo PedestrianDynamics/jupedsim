@@ -6,35 +6,17 @@ import logging
 import pathlib
 import sys
 
-from shapely import GeometryCollection, Polygon, to_wkt
+from shapely import GeometryCollection, Polygon
 
 import jupedsim as jps
-
-
-def log_debug(msg):
-    logging.debug(msg)
-
-
-def log_info(msg):
-    logging.info(msg)
-
-
-def log_warn(msg):
-    logging.warning(msg)
-
-
-def log_error(msg):
-    logging.error(msg)
 
 
 def main():
     logging.basicConfig(
         level=logging.DEBUG, format="%(levelname)s : %(message)s"
     )
-    jps.set_debug_callback(log_debug)
-    jps.set_info_callback(log_info)
-    jps.set_warning_callback(log_warn)
-    jps.set_error_callback(log_error)
+    jps.set_warning_callback(lambda x: logging.debug(x))
+    jps.set_error_callback(lambda x: logging.debug(x))
 
     area = GeometryCollection(
         Polygon(
@@ -56,13 +38,13 @@ def main():
     )
     geometry = jps.geometry_from_shapely(area)
 
-    model_builder = jps.VelocityModelBuilder(
-        a_ped=8, d_ped=0.1, a_wall=5, d_wall=0.02
+    simulation = jps.Simulation(
+        model=jps.VelocityModelParameters(),
+        geometry=geometry,
+        trajectory_writer=jps.SqliteTrajectoryWriter(
+            output_file=pathlib.Path("example4_out.sqlite"),
+        ),
     )
-
-    model = model_builder.build()
-
-    simulation = jps.Simulation(model=model, geometry=geometry, dt=0.01)
     exit_left = simulation.add_exit_stage(
         [(-24, -8), (-24, 8), (-23, 8), (-23, -8)]
     )
@@ -114,8 +96,6 @@ def main():
             agent_parameters.position = (x, y)
             simulation.add_agent(agent_parameters)
 
-    writer = jps.SqliteTrajectoryWriter(pathlib.Path("example4_out.sqlite"))
-    writer.begin_writing(5, to_wkt(area, rounding_precision=-1))
     while simulation.agent_count() > 0:
         try:
             if (
@@ -125,15 +105,10 @@ def main():
                 queue.pop(1)
                 print("Next!")
 
-            if simulation.iteration_count() % 4 == 0:
-                writer.write_iteration_state(simulation)
             simulation.iterate()
         except KeyboardInterrupt:
-            writer.end_writing()
             print("CTRL-C Recieved! Shuting down")
             sys.exit(1)
-
-    writer.end_writing()
 
 
 if __name__ == "__main__":
