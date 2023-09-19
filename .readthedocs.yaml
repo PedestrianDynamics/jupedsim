@@ -10,15 +10,12 @@ build:
   os: ubuntu-22.04
   tools:
     python: "3.11"
-
-# Build documentation in the docs/ directory with Sphinx
-sphinx:
-  configuration: readthedocs/source/conf.py
+  commands:
+    - mkdir --parents $READTHEDOCS_OUTPUT/html/
+    - wget -O ${READTHEDOCS_GIT_COMMIT_HASH}.tar  https://fz-juelich.sciebo.de/s/99uKnQ6xa1Knmlg/download\?path\=%2F\&files\=${READTHEDOCS_GIT_COMMIT_HASH}.tar
+    - tar xf ${READTHEDOCS_GIT_COMMIT_HASH}.tar
+    - mv readthedocs/build/* $READTHEDOCS_OUTPUT/html/
 
 # Build no formats
 formats: [ ]
 
-# Optionally declare the Python requirements required to build your docs
-python:
-  install:
-    - requirements: readthedocs/requirements.txt

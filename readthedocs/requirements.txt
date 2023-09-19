@@ -4,3 +4,5 @@ sphinx-autoapi==2.1.1
 sphinx-book-theme==1.0.1
 sphinx-favicon==1.0.1
 sphinx-notfound-page==0.8.3
+myst-nb==0.17.2
+nbconvert==7.7.1

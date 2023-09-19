@@ -14,5 +14,10 @@ RUN apt-get update && \
     python3-full \
     python3-pip \
     linux-tools-common \
-    linux-tools-generic 
+    linux-tools-generic \
+    curl
 
+COPY readthedocs/requirements.txt /opt/
+RUN python3 -m pip install -r /opt/requirements.txt --break-system-packages
+
+RUN git config --global --add safe.directory '*'

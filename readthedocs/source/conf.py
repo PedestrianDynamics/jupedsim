@@ -24,6 +24,8 @@ extensions = [
     "autoapi.extension",
     "sphinx_favicon",
     "notfound.extension",
+    "sphinx.ext.mathjax",
+    "myst_nb",
 ]
 
 templates_path = ["_templates"]
@@ -44,6 +46,19 @@ autoapi_options = [
 autoapi_ignore = ["**/tests/**"]
 autoapi_member_order = ["groupwise"]
 
+
+# -- Automatic execution of jupyter notebooks --------------------------------
+nb_execution_excludepatterns = []
+nb_execution_timeout = 120
+myst_enable_extensions = [
+    "amsmath",
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "html_image",
+]
+
+nb_execution_raise_on_error = True
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
