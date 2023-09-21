@@ -49,6 +49,11 @@ class Grid:
         actor.GetProperty().SetColor(Colors.e)
         actor.GetProperty().SetRepresentationToWireframe()
         renderer.AddActor(actor)
+        self._actor = actor
+
+    def show(self, state: bool):
+        self._actor.SetVisibility(state)
+        self._actor.Modified()
 
     @staticmethod
     def __compute_scale(scale):

@@ -64,6 +64,14 @@ class MainWindow(QMainWindow):
                 )
             )
         )
+        self._show_grid = settings_menu.addAction("show grid")
+        self._show_grid.setCheckable(True)
+        self._show_grid.toggled.connect(self._toggle_grid)
+        self._show_grid.setChecked(
+            bool(
+                self.settings.value("show_grid", type=bool, defaultValue=False)
+            )
+        )
 
     def _build_state_machine(self) -> None:
         sm = QStateMachine(self)
@@ -99,6 +107,12 @@ class MainWindow(QMainWindow):
             self.tabs.widget(idx).geo.show_triangulation(state)
         self.repaint()
 
+    def _toggle_grid(self, state: bool) -> None:
+        self.settings.setValue("show_grid", state)
+        for idx in range(self.tabs.count()):
+            self.tabs.widget(idx).render_widget.show_grid(state)
+        self.repaint()
+
     def _open_wkt(self):
         base_path_obj = self.settings.value(
             "files/last_wkt_location",
@@ -125,6 +139,7 @@ class MainWindow(QMainWindow):
             tab = ViewGeometryWidget(
                 navi, geo, name_text, info_text, parent=self
             )
+            tab.render_widget.show_grid(self._show_grid.isChecked())
             tab_idx = self.tabs.insertTab(0, tab, file.name)
             self.tabs.setCurrentIndex(tab_idx)
             self.setUpdatesEnabled(True)
@@ -158,6 +173,7 @@ class MainWindow(QMainWindow):
             geo.show_triangulation(self._show_triangulation.isChecked())
             trajectory = Trajectory(rec)
             tab = ReplayWidget(navi, rec, geo, trajectory, parent=self)
+            tab.render_widget.show_grid(self._show_grid.isChecked())
             tab_idx = self.tabs.insertTab(0, tab, file.name)
             self.tabs.setCurrentIndex(tab_idx)
             self.setUpdatesEnabled(True)
