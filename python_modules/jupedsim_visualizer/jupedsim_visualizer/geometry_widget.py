@@ -80,5 +80,8 @@ class RenderWidget(QVTKRenderWindowInteractor):
         cam.SetClippingRange(0, 200)
         self.iren.Render()
 
+    def show_grid(self, state: bool):
+        self.grid.show(state)
+
     def render(self):
         self.iren.Render()
