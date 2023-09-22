@@ -76,11 +76,35 @@ html_css_files = [
 html_context = {"default_mode": "light"}
 
 html_theme_options = {
-    "github_url": "https://github.com/PedestrianDynamics/jupedsim",
-    "home_page_in_toc": True,
+    "home_page_in_toc": False,
     "use_fullscreen_button": False,
     "use_issues_button": False,
     "use_download_button": False,
+    "article_header_end": ["search-button", "toggle-secondary-sidebar"],
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/PedestrianDynamics/jupedsim",
+            "icon": "fa-brands fa-github",
+        },
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/jupedsim/",
+            "icon": "https://img.shields.io/pypi/v/jupedsim",
+            "type": "url",
+        },
+        {
+            "name": "DOI",
+            "url": "https://doi.org/10.5281/zenodo.6470814",
+            "icon": "https://zenodo.org/badge/DOI/10.5281/zenodo.6470814.svg",
+            "type": "url",
+        },
+    ],
+    "show_toc_level": 3,
+}
+
+html_sidebars = {
+    "**": ["navbar-logo", "icon-links", "search-field", "sbt-sidebar-nav.html"]
 }
 
 # -- Options for EPUB output
