@@ -62,29 +62,61 @@ if (BUILD_TESTS)
 endif()
 
 ################################################################################
-# libjupedsim
-################################################################################
-add_library(jupedsim SHARED $<TARGET_OBJECTS:jupedsim_obj>)
+# libjupedsim shared
+###############################################################################
+add_library(jupedsim_shared SHARED $<TARGET_OBJECTS:jupedsim_obj>)
 
-target_include_directories(jupedsim
+target_include_directories(jupedsim_shared
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
+        $<INSTALL_INTERFACE:include>
+    PRIVATE src
+)
+set_target_properties(jupedsim_shared PROPERTIES OUTPUT_NAME jupedsim)
+
+target_link_libraries(jupedsim_shared
+    PRIVATE
+        simulator
+        common
+)
+set_property(TARGET jupedsim_shared PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
+set_property(TARGET jupedsim_shared PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
+
+################################################################################
+# libjupedsim static
+################################################################################
+add_library(jupedsim_static STATIC 
+    $<TARGET_OBJECTS:jupedsim_obj>
+    $<TARGET_OBJECTS:simulator>
+)
+set_target_properties(jupedsim_static PROPERTIES OUTPUT_NAME jupedsim)
+
+target_include_directories(jupedsim_static
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
         $<INSTALL_INTERFACE:include>
     PRIVATE src
 )
 
-target_link_libraries(jupedsim
+target_include_directories(jupedsim_static
     PRIVATE
-        simulator
         common
 )
-set_property(TARGET jupedsim PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
-set_property(TARGET jupedsim PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
+set_property(TARGET jupedsim_static PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
+set_property(TARGET jupedsim_static PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 
 ################################################################################
 # Installation
 ################################################################################
-install(TARGETS jupedsim
+install(TARGETS jupedsim_shared
+    EXPORT jupedsimTargets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
+)
+
+install(TARGETS jupedsim_static
     EXPORT jupedsimTargets
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib

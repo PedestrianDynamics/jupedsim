@@ -1,7 +1,7 @@
 ################################################################################
 # Build libsimulator
 ################################################################################
-add_library(simulator STATIC
+add_library(simulator OBJECT
     src/AABB.cpp
     src/AABB.hpp
     src/AgentExitSystem.hpp
