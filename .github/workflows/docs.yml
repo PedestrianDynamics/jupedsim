@@ -1,0 +1,60 @@
+# This is a basic workflow to help you get started with Actions
+name: Build documentation
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches:
+      - master
+    tags:
+      - '**'
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
+
+    - name: Install dependencies
+      run:
+        sudo apt-get update && sudo apt-get install -y g++ cmake ninja-build
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install jupedsim
+      run: |
+        pip install .
+
+    - name: Build documentation
+      run: |
+        python3 -m pip install -r docs/requirements.txt
+        sphinx-build docs/source docs/build -j$(nproc)
+
+    - name: Upload html pages as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: docs
+        path: |
+          docs/build/
