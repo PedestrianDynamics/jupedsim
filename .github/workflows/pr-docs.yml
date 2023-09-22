@@ -1,0 +1,41 @@
+name: Deploy PR previews
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
+
+concurrency: preview-${{ github.ref }}
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run:
+          sudo apt-get update && sudo apt-get install -y g++ cmake ninja-build
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install jupedsim
+        run: |
+          pip install .
+
+      - name: Build documentation
+        run: |
+          python3 -m pip install -r docs/requirements.txt
+          sphinx-build docs/source docs/build -j$(nproc)
+
+      - name: Deploy preview
+        uses: rossjrw/pr-preview-action@v1
+        with:
+          source-dir: ./docs/build/
