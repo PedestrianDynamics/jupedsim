@@ -100,6 +100,11 @@ html_theme_options = {
             "type": "url",
         },
     ],
+    "switcher": {
+        "json_url": "https://www.jupedsim.org/versions.json",
+        "version_match": "foo",
+    },
+    "primary_sidebar_end": ["version-switcher"],
     "show_toc_level": 3,
 }
 

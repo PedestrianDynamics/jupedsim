@@ -52,6 +52,11 @@ jobs:
         python3 -m pip install -r docs/requirements.txt
         sphinx-build docs/source docs/build -j$(nproc)
 
+    - name: Deploy preview
+      uses: rossjrw/pr-preview-action@v1
+      with:
+        source-dir: ./docs/build
+
     - name: Upload html pages as artifact
       uses: actions/upload-artifact@v3
       with:
