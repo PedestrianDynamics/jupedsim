@@ -1,9 +1,6 @@
-# This is a basic workflow to help you get started with Actions
 name: Build documentation
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
     branches:
       - master
@@ -12,54 +9,91 @@ on:
   pull_request:
     branches:
       - master
-    types:
-      - opened
-      - reopened
-      - synchronize
-      - closed
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+  docs:
+    runs-on: ubuntu-22.04
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
-
-    - name: Install dependencies
-      run:
-        sudo apt-get update && sudo apt-get install -y g++ cmake ninja-build
 
     - name: Set up Python 3.11
       uses: actions/setup-python@v4
       with:
         python-version: "3.11"
 
-    - name: Install jupedsim
-      run: |
-        pip install .
-
-    - name: Build documentation
+    - name: Build docs
       run: |
         python3 -m pip install -r docs/requirements.txt
         sphinx-build docs/source docs/build -j$(nproc)
 
-    - name: Deploy preview
-      uses: rossjrw/pr-preview-action@v1
+    - name: Determine directory to publish docs to
+      id: docs-publish-dir
+      uses: jannekem/run-python-script-action@v1
       with:
-        source-dir: ./docs/build
+        script: |
+          import os, re
+          github_ref = os.environ.get('GITHUB_REF')
+          m = re.match(r'^refs/tags/v([0-9]+\.[0-9]+\.[0-9]+(-dev\.[0-9]+)?)$',
+                       github_ref)
+          if m:
+              target = "${{ github.ref_name }}"
+          elif github_ref == 'refs/heads/master':
+              target = 'latest'
+          else:
+              target = ''
+          print(target)
+          set_output('target', target)
 
-    - name: Upload html pages as artifact
-      uses: actions/upload-artifact@v3
+    - name: Publish docs to GitHub pages
+      if: steps.docs-publish-dir.outputs.target != ''
+      uses: peaceiris/actions-gh-pages@v3
       with:
-        name: docs
-        path: |
-          docs/build/
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: docs/build
+        destination_dir: ${{ steps.docs-publish-dir.outputs.target }}
+        keep_files: false
+
+    outputs:
+      docs-target: ${{ steps.docs-publish-dir.outputs.target }}
+
+
+  docs-versions:
+    name: Update docs versions JSON
+    needs: docs
+    if: needs.docs.outputs.docs-target != ''
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: gh-pages
+    - name: Write versions to JSON file
+      uses: jannekem/run-python-script-action@v1
+      with:
+        script: |
+          import json
+          from pathlib import Path
+
+          prefix = "https://www.jupedsim.org/" 
+          cwd = Path.cwd()
+          versions = sorted((item.name for item in cwd.iterdir()
+                             if item.is_dir() and not item.name.startswith('.')),
+                            reverse=True)
+          versions_url = [dict(name=version, version=version, url= prefix + version)
+               for version in versions]
+
+          target_file = Path('versions.json')
+          with target_file.open('w') as f:
+              json.dump(versions_url, f)
+
+    - name: Redirect stable to new release
+      if: needs.docs.outputs.docs-target != 'latest'
+      run: |
+        rm -rf stable
+        ln -s ${{needs.docs.outputs.docs-target}} stable
+
+    - name: Update files in gh-pages branch
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        branch: gh-pages
+        commit_message: Update versions and stable
