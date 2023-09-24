@@ -1,0 +1,4 @@
+[
+  {"name": "latest", "version": "latest", "url": "https://www.jupedsim.org/latest"},
+  {"name": "stable", "version": "stable", "url": "https://www.jupedsim.org/stable"}
+]
