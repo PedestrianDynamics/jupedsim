@@ -1,4 +1,5 @@
 [
-  {"name": "latest", "version": "latest", "url": "https://www.jupedsim.org/latest"},
-  {"name": "stable", "version": "stable", "url": "https://www.jupedsim.org/stable"}
+  {"name": "latest", "version": "latest", "url": "https://www.jupedsim.org/latest/"},
+  {"name": "stable", "version": "stable", "url": "https://www.jupedsim.org/stable/"},
+  {"name": "v0.10.0", "version": "v0.10.0", "url": "https://www.jupedsim.org/v0.10.0/"}
 ]
