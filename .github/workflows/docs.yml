@@ -58,6 +58,13 @@ jobs:
         destination_dir: ${{ steps.docs-publish-dir.outputs.target }}
         keep_files: false
 
+    - name: Upload documentation as artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: pages
+        path: |
+          docs/build/
+
     outputs:
       docs-target: ${{ steps.docs-publish-dir.outputs.target }}
 
