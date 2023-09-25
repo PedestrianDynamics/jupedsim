@@ -57,7 +57,9 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                 "   pos_x REAL NOT NULL,"
                 "   pos_y REAL NOT NULL,"
                 "   ori_x REAL NOT NULL,"
-                "   ori_y REAL NOT NULL)"
+                "   ori_y REAL NOT NULL,"
+                "   PRIMARY KEY(frame, id))"
+                "   WITHOUT ROWID"
             )
             cur.execute("DROP TABLE IF EXISTS metadata")
             cur.execute(
