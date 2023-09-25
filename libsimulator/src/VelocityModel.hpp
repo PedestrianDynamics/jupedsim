@@ -5,6 +5,7 @@
 #include "CollisionGeometry.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
+#include "UniqueID.hpp"
 #include "VelocityModelData.hpp"
 
 #include <unordered_map>
@@ -24,7 +25,6 @@ private:
     double _DPed;
     double _aWall;
     double _DWall;
-    double _cutOffRadius;
 
 public:
     VelocityModel(double aped, double Dped, double awall, double Dwall);
@@ -76,7 +76,7 @@ private:
      * and should be calculated *before* calling OptimalSpeed
      * @return Point
      */
-    double
+    std::pair<float, jps::UniqueID<GenericAgent>>
     GetSpacing(const GenericAgent& ped1, const GenericAgent& ped2, const Point direction) const;
     /**
      * Repulsive force between two pedestrians ped1 and ped2 according to
