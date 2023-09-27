@@ -137,7 +137,7 @@ def parse_dxf_file(
     # Iterate over all entities in the model
     for entity in msp:
         if entity.dxftype() == "LWPOLYLINE":
-            if not entity.closed:
+            if not entity.closed and (entity.dxf.layer in hole_layers or entity.dxf.layer == outer_line_layer):
                 logging.error(
                     f"There is a Polygon in layer {entity.dxf.layer} "
                     f"that is not closed. This may cause issues "
@@ -289,7 +289,7 @@ The polygon should end up looking like the structure in the dxf file:
         required=True,
     )
     parser.add_argument(
-        "-x", "--obstacles", help="layer(s) containing obstacles", nargs="+"
+        "-x", "--obstacles", help="layer(s) containing obstacles", nargs="+", default=[]
     )
 
     parser.add_argument(
@@ -327,6 +327,10 @@ def main():
     if parsed_args.plot:
         matplotlib.pyplot.set_loglevel("warning")
         logging.getLogger("PIL.PngImagePlugin").setLevel(logging.WARNING)
+        if merged_polygon.geom_type == "GeometryCollection":
+            for geo in merged_polygon.geoms:
+                if geo.geom_type == "Polygon":
+                    plot_polygon(geo)
 
         if merged_polygon.geom_type == "Polygon":
             plot_polygon(merged_polygon)
