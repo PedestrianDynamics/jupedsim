@@ -51,3 +51,14 @@ public:
      */
     double LengthSquare() const;
 };
+
+template <>
+struct fmt::formatter<LineSegment> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const LineSegment& ls, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "LineSegment({}, {})", ls.p1, ls.p2);
+    }
+};

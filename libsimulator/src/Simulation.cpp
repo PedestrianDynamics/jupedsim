@@ -4,8 +4,10 @@
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "IteratorPair.hpp"
+#include "Logger.hpp"
 #include "OperationalModel.hpp"
 #include "Stage.hpp"
+#include "VelocityModelData.hpp"
 #include <memory>
 
 Simulation::Simulation(
@@ -38,6 +40,7 @@ PerfStats Simulation::GetLastStats() const
 
 void Simulation::Iterate()
 {
+    // LOG_DEBUG("Iteration {} / Time {}s", _clock.Iteration(), _clock.ElapsedTime());
     auto t = _perfStats.TraceIterate();
     _agentExitSystem.Run(_agents, _removedAgentsInLastIteration, _stageManager);
     _neighborhoodSearch.Update(_agents);

@@ -39,11 +39,16 @@ Point Point::NormalizedMolified() const
 
 Point Point::Normalized() const
 {
-    double norm = Norm();
-    if(norm > J_EPS)
-        return (Point(x, y) / norm);
+    return std::get<1>(NormAndNormalized());
+}
+
+std::tuple<double, Point> Point::NormAndNormalized() const
+{
+    const double norm = Norm();
+    if(norm > std::numeric_limits<double>::epsilon())
+        return std::make_tuple(norm, (Point(x, y) / norm));
     else
-        return Point(0.0, 0.0);
+        return std::make_tuple(0.0, Point(0.0, 0.0));
 }
 
 /* Transformiert die "normalen" Koordinaten in Koordinaten der Ellipse
