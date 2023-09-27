@@ -40,7 +40,7 @@ OperationalModelType GCFMModel::Type() const
     return OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE;
 }
 
-PedestrianUpdate GCFMModel::ComputeNewPosition(
+OperationalModelUpdate GCFMModel::ComputeNewPosition(
     double dT,
     const GenericAgent& agent,
     const CollisionGeometry& geometry,
@@ -61,7 +61,7 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
         }
     }
 
-    PedestrianUpdate update{};
+    GeneralizedCentrifugalForceModelUpdate update{};
     // repulsive forces to the walls and transitions that are not my target
     Point repwall = ForceRepRoom(agent, geometry);
     const auto& model = std::get<GeneralizedCentrifugalForceModelData>(agent.model);
@@ -73,9 +73,10 @@ PedestrianUpdate GCFMModel::ComputeNewPosition(
     return update;
 }
 
-void GCFMModel::ApplyUpdate(const PedestrianUpdate& update, GenericAgent& agent) const
+void GCFMModel::ApplyUpdate(const OperationalModelUpdate& upd, GenericAgent& agent) const
 {
     auto& model = std::get<GeneralizedCentrifugalForceModelData>(agent.model);
+    const auto& update = std::get<GeneralizedCentrifugalForceModelUpdate>(upd);
     model.e0 = update.e0;
     ++model.orientationDelay;
     if(update.position) {
@@ -118,7 +119,7 @@ Point GCFMModel::ForceDriv(
     double mass,
     double tau,
     double deltaT,
-    PedestrianUpdate& update) const
+    GeneralizedCentrifugalForceModelUpdate& update) const
 {
     Point F_driv;
     const auto pos = ped.pos;

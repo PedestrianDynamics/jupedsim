@@ -5,10 +5,20 @@
 #include "Point.hpp"
 
 struct VelocityModelData {
-    Point e0{};
-    int orientationDelay{};
-    double timeGap{};
-    double tau{};
-    double v0{};
-    double radius{};
+    double timeGap{1};
+    double v0{1.2};
+    double radius{0.15};
+};
+
+template <>
+struct fmt::formatter<VelocityModelData> {
+
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const VelocityModelData& m, FormatContext& ctx) const
+    {
+        return fmt::format_to(
+            ctx.out(), "VelocityModel[timeGap={}, v0={}, radius={}])", m.timeGap, m.v0, m.radius);
+    }
 };

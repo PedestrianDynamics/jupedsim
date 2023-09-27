@@ -228,12 +228,6 @@ PYBIND11_MODULE(py_jupedsim, m)
     py::class_<JPS_VelocityModelAgentParameters>(m, "VelocityModelAgentParameters")
         .def(py::init())
         .def_property(
-            "e0",
-            [](const JPS_VelocityModelAgentParameters& p) { return intoTuple(p.e0); },
-            [](JPS_VelocityModelAgentParameters& p, std::tuple<double, double> pt) {
-                p.e0 = intoJPS_Point(pt);
-            })
-        .def_property(
             "position",
             [](const JPS_VelocityModelAgentParameters& p) { return intoTuple(p.position); },
             [](JPS_VelocityModelAgentParameters& p, std::tuple<double, double> pt) {
@@ -248,21 +242,18 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def_readwrite("journey_id", &JPS_VelocityModelAgentParameters::journeyId)
         .def_readwrite("stage_id", &JPS_VelocityModelAgentParameters::stageId)
         .def_readwrite("time_gap", &JPS_VelocityModelAgentParameters::time_gap)
-        .def_readwrite("tau", &JPS_VelocityModelAgentParameters::tau)
         .def_readwrite("v0", &JPS_VelocityModelAgentParameters::v0)
         .def_readwrite("radius", &JPS_VelocityModelAgentParameters::radius)
         .def_readwrite("id", &JPS_VelocityModelAgentParameters::agentId)
         .def("__repr__", [](const JPS_VelocityModelAgentParameters& p) {
             return fmt::format(
-                "e0: {}, position: {}, orientation: {}, journey_id: {}, stage_id: {}, "
-                "time_gap: {}, tau: {}, v0: {}, radius: {}, id: {}",
-                intoTuple(p.e0),
+                "position: {}, orientation: {}, journey_id: {}, stage_id: {}, "
+                "time_gap: {}, v0: {}, radius: {}, id: {}",
                 intoTuple(p.position),
                 intoTuple(p.orientation),
                 p.journeyId,
                 p.stageId,
                 p.time_gap,
-                p.tau,
                 p.v0,
                 p.radius,
                 p.agentId);
@@ -567,11 +558,6 @@ PYBIND11_MODULE(py_jupedsim, m)
                 JPS_GeneralizedCentrifugalForceModelState_SetBMax(w.handle, b_max);
             });
     py::class_<JPS_VelocityModelState_Wrapper>(m, "VelocityModelState")
-        .def_property_readonly(
-            "e0",
-            [](const JPS_VelocityModelState_Wrapper& w) {
-                return intoTuple(JPS_VelocityModelState_GetE0(w.handle));
-            })
         .def_property(
             "time_gap",
             [](const JPS_VelocityModelState_Wrapper& w) {
@@ -579,14 +565,6 @@ PYBIND11_MODULE(py_jupedsim, m)
             },
             [](JPS_VelocityModelState_Wrapper& w, double time_gap) {
                 JPS_VelocityModelState_SetTimeGap(w.handle, time_gap);
-            })
-        .def_property(
-            "tau",
-            [](const JPS_VelocityModelState_Wrapper& w) {
-                return JPS_VelocityModelState_GetTau(w.handle);
-            },
-            [](JPS_VelocityModelState_Wrapper& w, double tau) {
-                JPS_VelocityModelState_SetTau(w.handle, tau);
             })
         .def_property(
             "v0",

@@ -492,20 +492,6 @@ void JPS_GeneralizedCentrifugalForceModelState_SetBMax(
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// VelocityModelState
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-JPS_Point JPS_VelocityModelState_GetE0(JPS_VelocityModelState handle)
-{
-    assert(handle);
-    const auto state = reinterpret_cast<const VelocityModelData*>(handle);
-    return intoJPS_Point(state->e0);
-}
-
-void JPS_VelocityModelState_SetE0(JPS_VelocityModelState handle, JPS_Point e0)
-{
-    assert(handle);
-    const auto state = reinterpret_cast<VelocityModelData*>(handle);
-    state->e0 = intoPoint(e0);
-}
-
 double JPS_VelocityModelState_GetTimeGap(JPS_VelocityModelState handle)
 {
     assert(handle);
@@ -518,20 +504,6 @@ void JPS_VelocityModelState_SetTimeGap(JPS_VelocityModelState handle, double tim
     assert(handle);
     auto state = reinterpret_cast<VelocityModelData*>(handle);
     state->timeGap = time_gap;
-}
-
-double JPS_VelocityModelState_GetTau(JPS_VelocityModelState handle)
-{
-    assert(handle);
-    const auto state = reinterpret_cast<const VelocityModelData*>(handle);
-    return state->tau;
-}
-
-void JPS_VelocityModelState_SetTau(JPS_VelocityModelState handle, double tau)
-{
-    assert(handle);
-    auto state = reinterpret_cast<VelocityModelData*>(handle);
-    state->tau = tau;
 }
 
 double JPS_VelocityModelState_GetV0(JPS_VelocityModelState handle)
@@ -1163,13 +1135,7 @@ JPS_AgentId JPS_Simulation_AddVelocityModelAgent(
             BaseStage::ID(parameters.stageId),
             intoPoint(parameters.position),
             intoPoint(parameters.orientation),
-            VelocityModelData{
-                intoPoint(parameters.e0),
-                0,
-                parameters.time_gap,
-                parameters.tau,
-                parameters.v0,
-                parameters.radius}};
+            VelocityModelData{parameters.time_gap, parameters.v0, parameters.radius}};
         result = simulation->AddAgent(std::move(agent));
     } catch(const std::exception& ex) {
         if(errorMessage) {

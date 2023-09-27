@@ -39,7 +39,7 @@ public:
         const CollisionGeometry& geometry,
         std::vector<GenericAgent>& agents) const
     {
-        std::vector<std::optional<PedestrianUpdate>> updates{};
+        std::vector<std::optional<OperationalModelUpdate>> updates{};
         updates.reserve(agents.size());
 
         std::transform(

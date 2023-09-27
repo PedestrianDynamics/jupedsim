@@ -268,19 +268,6 @@ class VelocityModelAgentParameters:
         self._obj = py_jps.VelocityModelAgentParameters()
 
     @property
-    def e0(self) -> tuple[float, float]:
-        """
-        e0 (Currently desired direction)
-
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
-        return self._obj.e0
-
-    @e0.setter
-    def e0(self, value: tuple[float, float]) -> None:
-        self._obj.e0 = value
-
-    @property
     def position(self) -> tuple[float, float]:
         """
         Current position
@@ -342,17 +329,6 @@ class VelocityModelAgentParameters:
     @time_gap.setter
     def time_gap(self, value: float) -> None:
         self._obj.time_gap = value
-
-    @property
-    def tau(self) -> float:
-        """
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
-        return self._obj.tau
-
-    @tau.setter
-    def tau(self, value: float) -> None:
-        self._obj.tau = value
 
     @property
     def v0(self) -> float:

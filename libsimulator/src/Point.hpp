@@ -11,17 +11,10 @@
 class Point
 {
 public:
-    double x = 0.; //*<x-coordinate of a 2-d point*/
-    double y = 0.; //*<y-coordinate of a 2-d point*/
+    double x{};
+    double y{};
 
 public:
-    /**
-     * **Ctor**
-     * Constructs a new point with given x and y.
-     * x and y are 0 if not given.
-     * @param [in] x: x-coordinate as double
-     * @param [in] y: y-coordinate as double
-     */
     Point(double x = 0, double y = 0) : x(x), y(y){};
 
     /// Norm
@@ -32,10 +25,17 @@ public:
 
     /// Norm square
     inline double NormSquare() const { return ScalarProduct(*this); }
+
     /// normalized vector
     Point Normalized() const;
+
     /// normalized vector usinf NormMolified
     Point NormalizedMolified() const;
+
+    /// Return norm and direction in one call
+    /// @return Norm and Normalized
+    std::tuple<double, Point> NormAndNormalized() const;
+
     /// dot product
     inline double ScalarProduct(const Point& v) const { return x * v.x + y * v.y; }
 
