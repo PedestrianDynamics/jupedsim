@@ -8,11 +8,12 @@
 #include "Point.hpp"
 #include "Polygon.hpp"
 #include "UniqueID.hpp"
+#include "Util.hpp"
 
 #include <algorithm>
 #include <iterator>
 #include <limits>
-#include <queue>
+#include <unordered_set>
 #include <vector>
 
 class Simulation;
@@ -104,6 +105,18 @@ public:
     }
 };
 
+template <>
+struct fmt::formatter<BaseStage> {
+
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const BaseStage& s, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "(id={}, targeting={})", s.Id(), s.CountTargeting());
+    }
+};
+
 class Waypoint : public BaseStage
 {
     Point position;
@@ -191,8 +204,7 @@ class NotifiableQueue : public BaseStage
 private:
     std::vector<Point> slots;
     std::vector<GenericAgent::ID> occupants{};
-    std::vector<GenericAgent::ID> exitingThisUpdate{};
-    size_t popCountOnNextUpdate{};
+    std::set<GenericAgent::ID> exitingThisUpdate{};
 
 public:
     NotifiableQueue(std::vector<Point> slots_);
@@ -209,15 +221,6 @@ public:
 template <typename T>
 void NotifiableQueue::Update(const NeighborhoodSearch<T>& neighborhoodSearch)
 {
-    exitingThisUpdate.clear();
-    if(popCountOnNextUpdate > 0) {
-        const auto beginCopy = std::begin(occupants);
-        const auto endCopy = beginCopy + popCountOnNextUpdate;
-        std::copy(beginCopy, endCopy, std::back_inserter(exitingThisUpdate));
-        occupants.erase(beginCopy, endCopy);
-        popCountOnNextUpdate = 0;
-    }
-
     const auto count_occupants = occupants.size();
     if(count_occupants == slots.size()) {
         return;
@@ -228,19 +231,18 @@ void NotifiableQueue::Update(const NeighborhoodSearch<T>& neighborhoodSearch)
         GenericAgent::ID occupant = GenericAgent::ID::Invalid;
         double min_distance = std::numeric_limits<double>::max();
         for(const auto& agent : candidates) {
-            if(agent.stageId == id) {
-                if(std::find(std::begin(occupants), std::end(occupants), agent.id) ==
-                   std::end(occupants)) {
-                    const auto distance = (agent.pos - slots[index]).Norm();
-                    if(distance < min_distance) {
-                        min_distance = distance;
-                        occupant = agent.id;
-                    }
-                }
+            if(agent.stageId != id || Contains(occupants, agent.id) ||
+               exitingThisUpdate.contains(agent.id)) {
+                continue;
+            }
+            const auto distance = (agent.pos - slots[index]).Norm();
+            if(distance < min_distance) {
+                min_distance = distance;
+                occupant = agent.id;
             }
         }
         if(occupant != GenericAgent::ID::Invalid) {
-            occupants.push_back(occupant);
+            occupants.emplace_back(occupant);
         } else {
             return;
         }

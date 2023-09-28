@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Journey.hpp"
+#include "Stage.hpp"
 #include "StageManager.hpp"
 
 #include <memory>
