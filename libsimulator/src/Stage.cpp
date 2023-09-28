@@ -200,30 +200,37 @@ const std::vector<GenericAgent::ID>& NotifiableWaitingSet::Occupants() const
 ////////////////////////////////////////////////////////////////////////////////
 NotifiableQueue::NotifiableQueue(std::vector<Point> slots_) : slots(std::move(slots_))
 {
-    occupants.reserve(slots.size());
-    exitingThisUpdate.reserve(slots.size());
 }
 
 bool NotifiableQueue::IsCompleted(const GenericAgent& agent)
 {
-    return std::find(std::begin(exitingThisUpdate), std::end(exitingThisUpdate), agent.id) !=
-           std::end(exitingThisUpdate);
+    const bool completed = exitingThisUpdate.contains(agent.id);
+    if(completed) {
+        exitingThisUpdate.erase(agent.id);
+    }
+    return completed;
 }
 
 Point NotifiableQueue::Target(const GenericAgent& agent)
 {
 
-    if(const auto index_opt = IndexInVector(occupants, agent.id); index_opt) {
+    if(const auto index_opt = IndexInContainer(occupants, agent.id); index_opt) {
         return slots[*index_opt];
     }
 
-    const auto next_target_index = std::min(occupants.size(), occupants.capacity() - 1);
+    const auto next_target_index = std::min(occupants.size(), slots.size() - 1);
     return slots[next_target_index];
 }
 
 void NotifiableQueue::Pop(size_t count)
 {
-    popCountOnNextUpdate = std::min(occupants.size(), popCountOnNextUpdate + count);
+    for(size_t counter = 0; counter < count; ++counter) {
+        if(occupants.empty()) {
+            return;
+        }
+        exitingThisUpdate.insert(occupants.front());
+        occupants.erase(std::begin(occupants));
+    }
 }
 
 StageProxy NotifiableQueue::Proxy(Simulation* simulation)

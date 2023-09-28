@@ -2,16 +2,25 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include <algorithm>
 #include <iterator>
 #include <optional>
-#include <vector>
 
-template <typename T>
-std::optional<size_t> IndexInVector(const std::vector<T>& vec, const T& item)
+template <typename Container>
+std::optional<size_t> IndexInContainer(const Container& c, const typename Container::value_type& v)
 {
-    const auto find_iter = std::find(std::begin(vec), std::end(vec), item);
-    if(find_iter == std::end(vec)) {
-        return {};
+    size_t idx = 0;
+    for(const auto& e : c) {
+        if(e == v) {
+            return idx;
+        }
+        ++idx;
     }
-    return std::distance(std::begin(vec), find_iter);
+    return {};
+}
+
+template <typename Container>
+bool Contains(const Container& c, const typename Container::value_type& v)
+{
+    return std::find(std::begin(c), std::end(c), v) != std::end(c);
 }
