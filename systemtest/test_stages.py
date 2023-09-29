@@ -4,7 +4,25 @@ import pytest
 import shapely
 
 import jupedsim as jps
-from jupedsim import Transition
+
+
+@pytest.fixture
+def square_room_5x5():
+    geo = jps.geometry_from_coordinates(
+        [(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)]
+    )
+    simulation = jps.Simulation(
+        model=jps.VelocityModelParameters(), geometry=geo
+    )
+    return simulation
+
+
+def test_exception_on_empty_polygon_in_exit_stage(square_room_5x5):
+    sim = square_room_5x5
+    with pytest.raises(
+        Exception, match=rf"Polygon must have at least 3 points"
+    ):
+        sim.add_exit_stage([])
 
 
 def test_can_share_queue_between_stages():
@@ -48,18 +66,18 @@ def test_can_share_queue_between_stages():
         ]
     )
     journey1.set_transition_for_stage(
-        wp_j1, Transition.create_fixed_transition(common_queue)
+        wp_j1, jps.Transition.create_fixed_transition(common_queue)
     )
     journey1.set_transition_for_stage(
-        common_queue, Transition.create_fixed_transition(common_exit)
+        common_queue, jps.Transition.create_fixed_transition(common_exit)
     )
     wp_j2 = simulation.add_waypoint_stage((1, 0), 0.5)
     journey2 = jps.JourneyDescription([wp_j2, common_queue, common_exit])
     journey2.set_transition_for_stage(
-        wp_j2, Transition.create_fixed_transition(common_queue)
+        wp_j2, jps.Transition.create_fixed_transition(common_queue)
     )
     journey2.set_transition_for_stage(
-        common_queue, Transition.create_fixed_transition(common_exit)
+        common_queue, jps.Transition.create_fixed_transition(common_exit)
     )
 
     journeys = [
@@ -83,7 +101,6 @@ def test_can_share_queue_between_stages():
     agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.time_gap = 1
-    agent_parameters.tau = 0.5
     agent_parameters.v0 = 1.2
     agent_parameters.radius = 0.15
 
@@ -160,7 +177,6 @@ def test_can_use_stage_proxy():
     agent_parameters.journey_id = exit_journey_id
     agent_parameters.stage_id = exit_id
     agent_parameters.time_gap = 1
-    agent_parameters.tau = 0.5
     agent_parameters.v0 = 1.2
     agent_parameters.radius = 0.15
     agent_id = simulation.add_agent(agent_parameters)
