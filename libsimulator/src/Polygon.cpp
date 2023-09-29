@@ -12,6 +12,9 @@
 
 Polygon::Polygon(const std::vector<Point>& points)
 {
+    if(points.size() < 3) {
+        throw SimulationError("Polygon must have at least 3 points");
+    }
     _polygon.resize(points.size());
     std::transform(std::begin(points), std::end(points), _polygon.begin(), [](const auto& p) {
         return PolygonType::Point_2{p.x, p.y};
