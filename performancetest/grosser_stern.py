@@ -44434,9 +44434,6 @@ def main():
         jps.set_warning_callback(log_warn)
     jps.set_error_callback(log_error)
 
-    geo = shapely.from_wkt(geometries["grosser_stern"])
-    geometry = jps.geometry_from_shapely(geo)
-
     profile_picker = RandomProfilePicker(
         mu_v0=1.34, sigma_v0=0.25, mu_d=0.15, sigma_d=0.015
     )
@@ -44450,19 +44447,11 @@ def main():
     )
     simulation = jps.Simulation(
         model=jps.VelocityModelParameters(),
-        geometry=geometry,
+        geometry=geometries["grosser_stern"],
         trajectory_writer=stats_writer,
     )
 
     journeys = create_journeys(simulation)
-    spawn_area = shapely.Polygon(
-        shell=[
-            (-2310.3, -174.72),
-            (-2003.66, -145.85),
-            (-1999.49, -183.83),
-            (-2316.11, -212.27),
-        ]
-    )
 
     agent_parameters = jps.VelocityModelAgentParameters()
     agent_parameters.orientation = (1.0, 0.0)

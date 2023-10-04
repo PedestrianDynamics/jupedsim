@@ -6,8 +6,8 @@ from pathlib import Path
 
 import shapely
 
-from jupedsim.native.simulation import Simulation
 from jupedsim.serialization import TrajectoryWriter
+from jupedsim.simulation import Simulation
 
 
 class SqliteTrajectoryWriter(TrajectoryWriter):
@@ -132,9 +132,6 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         except sqlite3.Error as e:
             cur.execute("ROLLBACK")
             raise TrajectoryWriter.Exception(f"Error writing to database: {e}")
-
-    def end_writing(self, simulation) -> None:
-        self._con.close()
 
     def every_nth_frame(self) -> int:
         return self._every_nth_frame

@@ -1,10 +1,7 @@
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-try:
-    import py_jupedsim as py_jps
-except ImportError:
-    from .. import py_jupedsim as py_jps
+import jupedsim.native as py_jps
 
 
 class Trace:

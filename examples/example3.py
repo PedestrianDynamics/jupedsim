@@ -2,30 +2,21 @@
 
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
-import logging
 import pathlib
 import sys
-
-from shapely import GeometryCollection, Polygon
 
 import jupedsim as jps
 
 
 def main():
-    logging.basicConfig(
-        level=logging.DEBUG, format="%(levelname)s : %(message)s"
-    )
-    jps.set_warning_callback(lambda x: logging.debug(x))
-    jps.set_error_callback(lambda x: logging.debug(x))
-
-    area = GeometryCollection(
-        Polygon([(0, 0), (100, 0), (100, 100), (0, 100), (0, 0)])
-    )
-    geometry = jps.geometry_from_shapely(area)
+    jps.set_debug_callback(lambda x: print(x))
+    jps.set_info_callback(lambda x: print(x))
+    jps.set_warning_callback(lambda x: print(x))
+    jps.set_error_callback(lambda x: print(x))
 
     simulation = jps.Simulation(
         model=jps.VelocityModelParameters(),
-        geometry=geometry,
+        geometry=[(0, 0), (100, 0), (100, 100), (0, 100), (0, 0)],
         trajectory_writer=jps.SqliteTrajectoryWriter(
             output_file=pathlib.Path("example3_out.sqlite"),
         ),
@@ -60,7 +51,6 @@ def main():
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
     agent_parameters.time_gap = 1
-    agent_parameters.tau = 0.5
     agent_parameters.v0 = 1.2
     agent_parameters.radius = 0.3
 

@@ -4,7 +4,8 @@ from typing import Any, List, Optional, Tuple
 
 import shapely
 
-from jupedsim.native.geometry import Geometry, GeometryBuilder
+import jupedsim.native as py_jps
+from jupedsim.geometry import Geometry
 
 
 class GeometryError(Exception):
@@ -41,7 +42,7 @@ def geometry_from_wkt(wkt_input: str) -> Geometry:
             ) from exc
 
     polygons = _polygons_from_geometry_collection(geometry_collection)
-    return _build_geometry(polygons)
+    return Geometry(_internal_build_geometry(polygons))
 
 
 def geometry_from_shapely(
@@ -53,14 +54,14 @@ def geometry_from_shapely(
     polygons = _polygons_from_geometry_collection(
         shapely.GeometryCollection([geometry_input])
     )
-    return _build_geometry(polygons)
+    return Geometry(_internal_build_geometry(polygons))
 
 
 def geometry_from_coordinates(
     coordinates: List[Tuple], *, excluded_areas: Optional[List[Tuple]] = None
 ) -> Geometry:
     polygon = shapely.Polygon(coordinates, holes=excluded_areas)
-    return _build_geometry([polygon])
+    return Geometry(_internal_build_geometry([polygon]))
 
 
 def _polygons_from_geometry_collection(
@@ -103,11 +104,37 @@ def _polygons_from_geometry_collection(
     return polygons
 
 
-def _build_geometry(polygons: List[shapely.Polygon]) -> Geometry:
-    geo_builder = GeometryBuilder()
+def _internal_build_geometry(
+    polygons: List[shapely.Polygon],
+) -> py_jps.Geometry:
+    geo_builder = py_jps.GeometryBuilder()
 
     for polygon in polygons:
         geo_builder.add_accessible_area(polygon.exterior.coords[:-1])
         for hole in polygon.interiors:
             geo_builder.exclude_from_accessible_area(hole.coords[:-1])
     return geo_builder.build()
+
+
+def build_geometry(
+    geometry: str
+    | shapely.GeometryCollection
+    | shapely.Polygon
+    | shapely.MultiPolygon
+    | shapely.MultiPoint
+    | list[tuple[float, float]],
+    **kwargs: Any,
+):
+    if isinstance(geometry, str):
+        return geometry_from_wkt(geometry)
+    elif (
+        isinstance(geometry, shapely.GeometryCollection)
+        or isinstance(geometry, shapely.Polygon)
+        or isinstance(geometry, shapely.MultiPolygon)
+        or isinstance(geometry, shapely.MultiPoint)
+    ):
+        return geometry_from_shapely(geometry)
+    else:
+        return geometry_from_coordinates(
+            geometry, excluded_areas=kwargs.get("excluded_areas")
+        )

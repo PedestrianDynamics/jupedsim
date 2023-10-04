@@ -8,11 +8,9 @@ import jupedsim as jps
 
 @pytest.fixture
 def square_room_5x5():
-    geo = jps.geometry_from_coordinates(
-        [(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)]
-    )
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(), geometry=geo
+        model=jps.VelocityModelParameters(),
+        geometry=[(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)],
     )
     return simulation
 
@@ -40,11 +38,8 @@ def test_can_share_queue_between_stages():
         shapely.Polygon([(-2.5, 2.5), (-2.5, -10), (2.5, -10), (2.5, 2.5)]),
     )
 
-    geo_builder = jps.GeometryBuilder()
-    geo_builder.add_accessible_area(polygon.exterior.coords[:-1])
-    geometry = geo_builder.build()
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(), geometry=geometry, dt=0.01
+        model=jps.VelocityModelParameters(), geometry=polygon
     )
 
     wp_j1 = simulation.add_waypoint_stage((-1, 0), 0.5)
@@ -136,11 +131,8 @@ def test_can_use_stage_proxy():
         shapely.Polygon([(-2.5, 2.5), (-2.5, -10), (2.5, -10), (2.5, 2.5)]),
     )
 
-    geo_builder = jps.GeometryBuilder()
-    geo_builder.add_accessible_area(polygon.exterior.coords[:-1])
-    geometry = geo_builder.build()
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(), geometry=geometry, dt=0.01
+        model=jps.VelocityModelParameters(), geometry=polygon
     )
 
     exit_id = simulation.add_exit_stage(

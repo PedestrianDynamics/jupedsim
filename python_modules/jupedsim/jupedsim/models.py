@@ -3,10 +3,7 @@
 
 from dataclasses import dataclass
 
-try:
-    import py_jupedsim as py_jps
-except ImportError:
-    from .. import py_jupedsim as py_jps
+import jupedsim.native as py_jps
 
 
 @dataclass(kw_only=True)

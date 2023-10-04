@@ -33,15 +33,6 @@ class TrajectoryWriter(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def end_writing(self, simulation) -> None:
-        """End writing trajectory data.
-
-        This method is intended to handle finalizing writing of trajectory
-        data, e.g. write closing tags, or footer meta data.
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
     def every_nth_frame(self) -> int:
         """Returns the intervall of this writer in frames between writes.
 
