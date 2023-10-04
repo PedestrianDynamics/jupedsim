@@ -50,7 +50,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/jupedsim/util';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'stable';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v0.12.0';
         </script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -167,15 +167,15 @@
 <li class="toctree-l3"><a class="reference internal" href="../../api/jupedsim/util/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">jupedsim.util</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../api/agent/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">agent</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/geometry/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">geometry</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../api/journey/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">journey</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/library/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">library</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../api/models/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/routing/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">routing</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../api/simulation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/stages/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">stages</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/tracing/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tracing</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/agent/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">agent</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/journey/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">journey</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/models/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/simulation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/aabb/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">aabb</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/grid/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grid</span></code></a></li>
 </ul>
@@ -194,7 +194,7 @@
 document.write(`
   <div class="version-switcher__container dropdown">
     <button type="button" class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle" data-bs-toggle="dropdown">
-      stable  <!-- this text may get changed later by javascript -->
+      v0.12.0  <!-- this text may get changed later by javascript -->
       <span class="caret"></span>
     </button>
     <div class="version-switcher__menu dropdown-menu list-group-flush py-0">
@@ -289,7 +289,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">jupedsim.native.geometry</span> <span class="kn">import</span> <span class="n">Geometry</span><span class="p">,</span> <span class="n">GeometryBuilder</span>
 
 
-<div class="viewcode-block" id="GeometryError"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.GeometryError">[docs]</a><span class="k">class</span> <span class="nc">GeometryError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="GeometryError"><a class="viewcode-back" href="../../api/jupedsim/util/index.html#jupedsim.util.GeometryError">[docs]</a><span class="k">class</span> <span class="nc">GeometryError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class reflecting errors when creating JuPedSim geometry objects.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
@@ -301,7 +301,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span></div>
 
 
-<div class="viewcode-block" id="geometry_from_wkt"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.geometry_from_wkt">[docs]</a><span class="k">def</span> <span class="nf">geometry_from_wkt</span><span class="p">(</span><span class="n">wkt_input</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Geometry</span><span class="p">:</span>
+<div class="viewcode-block" id="geometry_from_wkt"><a class="viewcode-back" href="../../api/jupedsim/util/index.html#jupedsim.util.geometry_from_wkt">[docs]</a><span class="k">def</span> <span class="nf">geometry_from_wkt</span><span class="p">(</span><span class="n">wkt_input</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Geometry</span><span class="p">:</span>
     <span class="n">geometry_collection</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">wkt_type</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">from_wkt</span><span class="p">(</span><span class="n">wkt_input</span><span class="p">)</span>
@@ -326,7 +326,7 @@ document.write(`
     <span class="k">return</span> <span class="n">_build_geometry</span><span class="p">(</span><span class="n">polygons</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="geometry_from_shapely"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.geometry_from_shapely">[docs]</a><span class="k">def</span> <span class="nf">geometry_from_shapely</span><span class="p">(</span>
+<div class="viewcode-block" id="geometry_from_shapely"><a class="viewcode-back" href="../../api/jupedsim/util/index.html#jupedsim.util.geometry_from_shapely">[docs]</a><span class="k">def</span> <span class="nf">geometry_from_shapely</span><span class="p">(</span>
     <span class="n">geometry_input</span><span class="p">:</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Polygon</span>
     <span class="o">|</span> <span class="n">shapely</span><span class="o">.</span><span class="n">MultiPolygon</span>
     <span class="o">|</span> <span class="n">shapely</span><span class="o">.</span><span class="n">GeometryCollection</span>
@@ -338,7 +338,7 @@ document.write(`
     <span class="k">return</span> <span class="n">_build_geometry</span><span class="p">(</span><span class="n">polygons</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="geometry_from_coordinates"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.geometry_from_coordinates">[docs]</a><span class="k">def</span> <span class="nf">geometry_from_coordinates</span><span class="p">(</span>
+<div class="viewcode-block" id="geometry_from_coordinates"><a class="viewcode-back" href="../../api/jupedsim/util/index.html#jupedsim.util.geometry_from_coordinates">[docs]</a><span class="k">def</span> <span class="nf">geometry_from_coordinates</span><span class="p">(</span>
     <span class="n">coordinates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">excluded_areas</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Geometry</span><span class="p">:</span>
     <span class="n">polygon</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">holes</span><span class="o">=</span><span class="n">excluded_areas</span><span class="p">)</span>

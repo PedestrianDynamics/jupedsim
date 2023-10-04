@@ -50,7 +50,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/jupedsim/distributions';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'stable';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v0.12.0';
         </script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -167,15 +167,15 @@
 <li class="toctree-l3"><a class="reference internal" href="../../api/jupedsim/util/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">jupedsim.util</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../api/agent/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">agent</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/geometry/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">geometry</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../api/journey/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">journey</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/library/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">library</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../api/models/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/routing/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">routing</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../api/simulation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/stages/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">stages</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/tracing/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tracing</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/agent/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">agent</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/journey/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">journey</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/models/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/simulation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/aabb/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">aabb</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/grid/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grid</span></code></a></li>
 </ul>
@@ -194,7 +194,7 @@
 document.write(`
   <div class="version-switcher__container dropdown">
     <button type="button" class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle" data-bs-toggle="dropdown">
-      stable  <!-- this text may get changed later by javascript -->
+      v0.12.0  <!-- this text may get changed later by javascript -->
       <span class="caret"></span>
     </button>
     <div class="version-switcher__menu dropdown-menu list-group-flush py-0">
@@ -288,22 +288,22 @@ document.write(`
 <span class="kn">from</span> <span class="nn">jupedsim.internal.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
 
 
-<div class="viewcode-block" id="AgentNumberError"><a class="viewcode-back" href="../../api/jupedsim/distributions/index.html#jupedsim.distributions.AgentNumberError">[docs]</a><span class="k">class</span> <span class="nc">AgentNumberError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="AgentNumberError"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.AgentNumberError">[docs]</a><span class="k">class</span> <span class="nc">AgentNumberError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span></div>
 
 
-<div class="viewcode-block" id="IncorrectParameterError"><a class="viewcode-back" href="../../api/jupedsim/distributions/index.html#jupedsim.distributions.IncorrectParameterError">[docs]</a><span class="k">class</span> <span class="nc">IncorrectParameterError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="IncorrectParameterError"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.IncorrectParameterError">[docs]</a><span class="k">class</span> <span class="nc">IncorrectParameterError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span></div>
 
 
-<div class="viewcode-block" id="OverlappingCirclesError"><a class="viewcode-back" href="../../api/jupedsim/distributions/index.html#jupedsim.distributions.OverlappingCirclesError">[docs]</a><span class="k">class</span> <span class="nc">OverlappingCirclesError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="OverlappingCirclesError"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.OverlappingCirclesError">[docs]</a><span class="k">class</span> <span class="nc">OverlappingCirclesError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span></div>
 
 
-<div class="viewcode-block" id="NegativeValueError"><a class="viewcode-back" href="../../api/jupedsim/distributions/index.html#jupedsim.distributions.NegativeValueError">[docs]</a><span class="k">class</span> <span class="nc">NegativeValueError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="NegativeValueError"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.NegativeValueError">[docs]</a><span class="k">class</span> <span class="nc">NegativeValueError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span></div>
 
@@ -350,7 +350,7 @@ document.write(`
     <span class="k">return</span> <span class="n">min_dist</span>
 
 
-<div class="viewcode-block" id="distribute_by_number"><a class="viewcode-back" href="../../api/jupedsim/distributions/index.html#jupedsim.distributions.distribute_by_number">[docs]</a><span class="k">def</span> <span class="nf">distribute_by_number</span><span class="p">(</span>
+<div class="viewcode-block" id="distribute_by_number"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.distribute_by_number">[docs]</a><span class="k">def</span> <span class="nf">distribute_by_number</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">polygon</span><span class="p">,</span>
     <span class="n">number_of_agents</span><span class="p">,</span>
@@ -404,7 +404,7 @@ document.write(`
     <span class="k">return</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_samples</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="distribute_by_density"><a class="viewcode-back" href="../../api/jupedsim/distributions/index.html#jupedsim.distributions.distribute_by_density">[docs]</a><span class="k">def</span> <span class="nf">distribute_by_density</span><span class="p">(</span>
+<div class="viewcode-block" id="distribute_by_density"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.distribute_by_density">[docs]</a><span class="k">def</span> <span class="nf">distribute_by_density</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">polygon</span><span class="p">,</span>
     <span class="n">density</span><span class="p">,</span>
@@ -487,7 +487,7 @@ document.write(`
                 <span class="p">)</span>
 
 
-<div class="viewcode-block" id="distribute_in_circles_by_number"><a class="viewcode-back" href="../../api/jupedsim/distributions/index.html#jupedsim.distributions.distribute_in_circles_by_number">[docs]</a><span class="k">def</span> <span class="nf">distribute_in_circles_by_number</span><span class="p">(</span>
+<div class="viewcode-block" id="distribute_in_circles_by_number"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.distribute_in_circles_by_number">[docs]</a><span class="k">def</span> <span class="nf">distribute_in_circles_by_number</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">polygon</span><span class="p">,</span>
     <span class="n">distance_to_agents</span><span class="p">,</span>
@@ -608,7 +608,7 @@ document.write(`
     <span class="k">return</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_samples</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="distribute_in_circles_by_density"><a class="viewcode-back" href="../../api/jupedsim/distributions/index.html#jupedsim.distributions.distribute_in_circles_by_density">[docs]</a><span class="k">def</span> <span class="nf">distribute_in_circles_by_density</span><span class="p">(</span>
+<div class="viewcode-block" id="distribute_in_circles_by_density"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.distribute_in_circles_by_density">[docs]</a><span class="k">def</span> <span class="nf">distribute_in_circles_by_density</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">polygon</span><span class="p">,</span>
     <span class="n">distance_to_agents</span><span class="p">,</span>
@@ -663,7 +663,7 @@ document.write(`
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="distribute_till_full"><a class="viewcode-back" href="../../api/jupedsim/distributions/index.html#jupedsim.distributions.distribute_till_full">[docs]</a><span class="k">def</span> <span class="nf">distribute_till_full</span><span class="p">(</span>
+<div class="viewcode-block" id="distribute_till_full"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.distribute_till_full">[docs]</a><span class="k">def</span> <span class="nf">distribute_till_full</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">polygon</span><span class="p">,</span>
     <span class="n">distance_to_agents</span><span class="p">,</span>
@@ -748,7 +748,7 @@ document.write(`
     <span class="k">return</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_samples</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="distribute_by_percentage"><a class="viewcode-back" href="../../api/jupedsim/distributions/index.html#jupedsim.distributions.distribute_by_percentage">[docs]</a><span class="k">def</span> <span class="nf">distribute_by_percentage</span><span class="p">(</span>
+<div class="viewcode-block" id="distribute_by_percentage"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.distribute_by_percentage">[docs]</a><span class="k">def</span> <span class="nf">distribute_by_percentage</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">polygon</span><span class="p">,</span>
     <span class="n">percent</span><span class="p">,</span>

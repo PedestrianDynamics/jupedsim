@@ -50,7 +50,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/jupedsim/trajectory_writer_sqlite';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'stable';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v0.11.0';
         </script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -194,7 +194,7 @@
 document.write(`
   <div class="version-switcher__container dropdown">
     <button type="button" class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle" data-bs-toggle="dropdown">
-      stable  <!-- this text may get changed later by javascript -->
+      v0.11.0  <!-- this text may get changed later by javascript -->
       <span class="caret"></span>
     </button>
     <div class="version-switcher__menu dropdown-menu list-group-flush py-0">
@@ -289,7 +289,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">jupedsim.serialization</span> <span class="kn">import</span> <span class="n">TrajectoryWriter</span>
 
 
-<div class="viewcode-block" id="SqliteTrajectoryWriter"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.SqliteTrajectoryWriter">[docs]</a><span class="k">class</span> <span class="nc">SqliteTrajectoryWriter</span><span class="p">(</span><span class="n">TrajectoryWriter</span><span class="p">):</span>
+<div class="viewcode-block" id="SqliteTrajectoryWriter"><a class="viewcode-back" href="../../api/jupedsim/trajectory_writer_sqlite/index.html#jupedsim.trajectory_writer_sqlite.SqliteTrajectoryWriter">[docs]</a><span class="k">class</span> <span class="nc">SqliteTrajectoryWriter</span><span class="p">(</span><span class="n">TrajectoryWriter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Write trajectory data into a sqlite db&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
@@ -309,7 +309,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">_frame</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_con</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_file</span><span class="p">,</span> <span class="n">isolation_level</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SqliteTrajectoryWriter.begin_writing"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.SqliteTrajectoryWriter.begin_writing">[docs]</a>    <span class="k">def</span> <span class="nf">begin_writing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fps</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">geometry_as_wkt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="SqliteTrajectoryWriter.begin_writing"><a class="viewcode-back" href="../../api/jupedsim/trajectory_writer_sqlite/index.html#jupedsim.trajectory_writer_sqlite.SqliteTrajectoryWriter.begin_writing">[docs]</a>    <span class="k">def</span> <span class="nf">begin_writing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fps</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">geometry_as_wkt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Begin writing trajectory data.</span>
 
 <span class="sd">        This method is intended to handle all data writing that has to be done</span>
@@ -348,7 +348,7 @@ document.write(`
             <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;ROLLBACK&quot;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="n">TrajectoryWriter</span><span class="o">.</span><span class="n">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error creating database: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SqliteTrajectoryWriter.write_iteration_state"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.SqliteTrajectoryWriter.write_iteration_state">[docs]</a>    <span class="k">def</span> <span class="nf">write_iteration_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation</span><span class="p">:</span> <span class="n">Simulation</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="SqliteTrajectoryWriter.write_iteration_state"><a class="viewcode-back" href="../../api/jupedsim/trajectory_writer_sqlite/index.html#jupedsim.trajectory_writer_sqlite.SqliteTrajectoryWriter.write_iteration_state">[docs]</a>    <span class="k">def</span> <span class="nf">write_iteration_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation</span><span class="p">:</span> <span class="n">Simulation</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write trajectory data of one simulation iteration.</span>
 
 <span class="sd">        This method is intended to handle serialization of the trajectory data</span>
@@ -382,7 +382,7 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_frame</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
-<div class="viewcode-block" id="SqliteTrajectoryWriter.end_writing"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.SqliteTrajectoryWriter.end_writing">[docs]</a>    <span class="k">def</span> <span class="nf">end_writing</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="SqliteTrajectoryWriter.end_writing"><a class="viewcode-back" href="../../api/jupedsim/trajectory_writer_sqlite/index.html#jupedsim.trajectory_writer_sqlite.SqliteTrajectoryWriter.end_writing">[docs]</a>    <span class="k">def</span> <span class="nf">end_writing</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;End writing trajectory data.</span>
 
 <span class="sd">        This method is intended to handle finalizing writing of trajectory</span>
@@ -421,7 +421,7 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="SqliteTrajectoryWriter.connection"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.SqliteTrajectoryWriter.connection">[docs]</a>    <span class="k">def</span> <span class="nf">connection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Connection</span><span class="p">:</span>
+<div class="viewcode-block" id="SqliteTrajectoryWriter.connection"><a class="viewcode-back" href="../../api/jupedsim/trajectory_writer_sqlite/index.html#jupedsim.trajectory_writer_sqlite.SqliteTrajectoryWriter.connection">[docs]</a>    <span class="k">def</span> <span class="nf">connection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Connection</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_con</span></div></div>
 </pre></div>
 

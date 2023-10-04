@@ -7,15 +7,15 @@ This page contains auto-generated API reference documentation [#f1]_.
    :titlesonly:
 
    /api/jupedsim/index
-   /api/agent/index
    /api/geometry/index
-   /api/journey/index
    /api/library/index
-   /api/models/index
    /api/routing/index
-   /api/simulation/index
    /api/stages/index
    /api/tracing/index
+   /api/agent/index
+   /api/journey/index
+   /api/models/index
+   /api/simulation/index
    /api/aabb/index
    /api/grid/index
 
