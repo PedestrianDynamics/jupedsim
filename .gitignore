@@ -23,4 +23,4 @@ __pycache__/
 /build/
 /dist/
 /jupedsim.egg-info/
-readthedocs/build
+/docs/build

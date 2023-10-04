@@ -1,0 +1,8 @@
+sphinx~=6.2.1
+sphinx-copybutton==0.5.1
+sphinx-autoapi==3.0.0
+sphinx-book-theme==1.0.1
+sphinx-favicon==1.0.1
+sphinx-notfound-page==1.0.0
+myst-nb @ git+https://github.com/executablebooks/MyST-NB@59854c2
+nbconvert==7.7.1
