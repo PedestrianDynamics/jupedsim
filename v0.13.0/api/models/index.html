@@ -1,0 +1,915 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <link href="../../_static/logo.png" sizes="482x536" rel="icon" type="image/png">
+    <title>models &#8212; JuPedSim  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/models/index';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="routing" href="../routing/index.html" />
+    <link rel="prev" title="library" href="../library/index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../_static/jupedsim.svg" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../../_static/jupedsim.svg" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PedestrianDynamics/jupedsim" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/jupedsim/" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://img.shields.io/pypi/v/jupedsim" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.5281/zenodo.6470814" title="DOI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.6470814.svg" class="icon-link-image" alt="DOI"/></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">API reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="../jupedsim/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">jupedsim</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../jupedsim/distributions/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">jupedsim.distributions</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../jupedsim/recording/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">jupedsim.recording</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../jupedsim/serialization/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">jupedsim.serialization</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../jupedsim/sqlite_serialization/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">jupedsim.sqlite_serialization</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../jupedsim/util/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">jupedsim.util</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../agent/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">agent</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">geometry</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../journey/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">journey</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../library/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">library</span></code></a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../routing/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">routing</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../simulation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stages/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">stages</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tracing/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tracing</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../aabb/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">aabb</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../grid/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">grid</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../notebooks/index.html">Notebooks</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/test.html">Test</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../disclaimer.html">Disclaimer</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script></div>
+      
+        <div class="header-article-item"><label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>models</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelParameters"><code class="docutils literal notranslate"><span class="pre">VelocityModelParameters</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelParameters.a_ped"><code class="docutils literal notranslate"><span class="pre">VelocityModelParameters.a_ped</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelParameters.d_ped"><code class="docutils literal notranslate"><span class="pre">VelocityModelParameters.d_ped</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelParameters.a_wall"><code class="docutils literal notranslate"><span class="pre">VelocityModelParameters.a_wall</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelParameters.d_wall"><code class="docutils literal notranslate"><span class="pre">VelocityModelParameters.d_wall</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelParameters"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelParameters</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelParameters.nu_ped"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelParameters.nu_ped</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelParameters.nu_wall"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelParameters.nu_wall</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelParameters.dist_eff_ped"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelParameters.dist_eff_ped</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelParameters.dist_eff_wall"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelParameters.dist_eff_wall</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelParameters.intp_width_ped"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelParameters.intp_width_ped</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelParameters.intp_width_wall"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelParameters.intp_width_wall</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelParameters.maxf_ped"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelParameters.maxf_ped</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelParameters.maxf_wall"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelParameters.maxf_wall</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.speed"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.speed</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.e0"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.e0</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.position"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.position</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.orientation"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.orientation</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.journey_id"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.journey_id</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.stage_id"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.stage_id</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.mass"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.mass</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.tau"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.tau</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.v0"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.v0</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.a_v"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.a_v</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.a_min"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.a_min</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.b_min"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.b_min</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.b_max"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.b_max</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.id"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.id</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelAgentParameters"><code class="docutils literal notranslate"><span class="pre">VelocityModelAgentParameters</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelAgentParameters.position"><code class="docutils literal notranslate"><span class="pre">VelocityModelAgentParameters.position</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelAgentParameters.orientation"><code class="docutils literal notranslate"><span class="pre">VelocityModelAgentParameters.orientation</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelAgentParameters.journey_id"><code class="docutils literal notranslate"><span class="pre">VelocityModelAgentParameters.journey_id</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelAgentParameters.stage_id"><code class="docutils literal notranslate"><span class="pre">VelocityModelAgentParameters.stage_id</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelAgentParameters.time_gap"><code class="docutils literal notranslate"><span class="pre">VelocityModelAgentParameters.time_gap</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelAgentParameters.v0"><code class="docutils literal notranslate"><span class="pre">VelocityModelAgentParameters.v0</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelAgentParameters.radius"><code class="docutils literal notranslate"><span class="pre">VelocityModelAgentParameters.radius</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelAgentParameters.id"><code class="docutils literal notranslate"><span class="pre">VelocityModelAgentParameters.id</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelState"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelState.speed"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.speed</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelState.e0"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.e0</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelState.tau"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.tau</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelState.v0"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.v0</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelState.a_v"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.a_v</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelState.a_min"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.a_min</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelState.b_min"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.b_min</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelState.b_max"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.b_max</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelState"><code class="docutils literal notranslate"><span class="pre">VelocityModelState</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelState.e0"><code class="docutils literal notranslate"><span class="pre">VelocityModelState.e0</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelState.time_gap"><code class="docutils literal notranslate"><span class="pre">VelocityModelState.time_gap</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelState.tau"><code class="docutils literal notranslate"><span class="pre">VelocityModelState.tau</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelState.v0"><code class="docutils literal notranslate"><span class="pre">VelocityModelState.v0</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelState.radius"><code class="docutils literal notranslate"><span class="pre">VelocityModelState.radius</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="module-models">
+<span id="models"></span><h1><a class="reference internal" href="#module-models" title="models"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models</span></code></a><a class="headerlink" href="#module-models" title="Permalink to this heading">#</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">#</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading">#</a></h3>
+<table class="autosummary longtable table autosummary">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#models.VelocityModelParameters" title="models.VelocityModelParameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VelocityModelParameters</span></code></a></p></td>
+<td><p>Parameters for Velocity Model</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#models.GeneralizedCentrifugalForceModelParameters" title="models.GeneralizedCentrifugalForceModelParameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelParameters</span></code></a></p></td>
+<td><p>Parameters for Generalized Centrifugal Force Model</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#models.GeneralizedCentrifugalForceModelAgentParameters" title="models.GeneralizedCentrifugalForceModelAgentParameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters</span></code></a></p></td>
+<td><p>Agent parameters for Generalized Centrifugal Force Model.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#models.VelocityModelAgentParameters" title="models.VelocityModelAgentParameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VelocityModelAgentParameters</span></code></a></p></td>
+<td><p>Agent parameters for Velocity Model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#models.GeneralizedCentrifugalForceModelState" title="models.GeneralizedCentrifugalForceModelState"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#models.VelocityModelState" title="models.VelocityModelState"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VelocityModelState</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="models.VelocityModelParameters">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">VelocityModelParameters</span></span><a class="reference internal" href="../../_modules/models.html#VelocityModelParameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelParameters" title="Permalink to this definition">#</a></dt>
+<dd><p>Parameters for Velocity Model</p>
+<p>All attributes are initialized with reasonably good defaults.</p>
+<dl class="simple">
+<dt>Attributes:</dt><dd><p>a_ped (float): TODO
+d_ped (float): TODO
+a_wall (float):
+d_wall (float):</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="models.VelocityModelParameters.a_ped">
+<span class="sig-name descname"><span class="pre">a_ped</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8.0</span></em><a class="reference internal" href="../../_modules/models.html#VelocityModelParameters.a_ped"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelParameters.a_ped" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="models.VelocityModelParameters.d_ped">
+<span class="sig-name descname"><span class="pre">d_ped</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.1</span></em><a class="reference internal" href="../../_modules/models.html#VelocityModelParameters.d_ped"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelParameters.d_ped" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="models.VelocityModelParameters.a_wall">
+<span class="sig-name descname"><span class="pre">a_wall</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5.0</span></em><a class="reference internal" href="../../_modules/models.html#VelocityModelParameters.a_wall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelParameters.a_wall" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="models.VelocityModelParameters.d_wall">
+<span class="sig-name descname"><span class="pre">d_wall</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.02</span></em><a class="reference internal" href="../../_modules/models.html#VelocityModelParameters.d_wall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelParameters.d_wall" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelParameters">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">GeneralizedCentrifugalForceModelParameters</span></span><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelParameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelParameters" title="Permalink to this definition">#</a></dt>
+<dd><p>Parameters for Generalized Centrifugal Force Model</p>
+<p>All attributes are initialized with reasonably good defaults.</p>
+<dl class="simple">
+<dt>Attributes:</dt><dd><p>nu_ped (float):
+nu_wall (float):
+dist_eff_ped (float)
+dist_eff_wall (float)
+intp_width_ped (float)
+intp_width_wall (float)
+maxf_ped (float)
+maxf_wall (float)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelParameters.nu_ped">
+<span class="sig-name descname"><span class="pre">nu_ped</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.3</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelParameters.nu_ped"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelParameters.nu_ped" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelParameters.nu_wall">
+<span class="sig-name descname"><span class="pre">nu_wall</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.2</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelParameters.nu_wall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelParameters.nu_wall" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelParameters.dist_eff_ped">
+<span class="sig-name descname"><span class="pre">dist_eff_ped</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelParameters.dist_eff_ped"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelParameters.dist_eff_ped" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelParameters.dist_eff_wall">
+<span class="sig-name descname"><span class="pre">dist_eff_wall</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelParameters.dist_eff_wall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelParameters.dist_eff_wall" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelParameters.intp_width_ped">
+<span class="sig-name descname"><span class="pre">intp_width_ped</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.1</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelParameters.intp_width_ped"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelParameters.intp_width_ped" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelParameters.intp_width_wall">
+<span class="sig-name descname"><span class="pre">intp_width_wall</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.1</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelParameters.intp_width_wall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelParameters.intp_width_wall" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelParameters.maxf_ped">
+<span class="sig-name descname"><span class="pre">maxf_ped</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelParameters.maxf_ped"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelParameters.maxf_ped" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelParameters.maxf_wall">
+<span class="sig-name descname"><span class="pre">maxf_wall</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelParameters.maxf_wall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelParameters.maxf_wall" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelAgentParameters">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters</span></span><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelAgentParameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelAgentParameters" title="Permalink to this definition">#</a></dt>
+<dd><p>Agent parameters for Generalized Centrifugal Force Model.</p>
+<p>See the scientifc publication for more details about this model
+<a class="reference external" href="https://arxiv.org/abs/1008.4297">https://arxiv.org/abs/1008.4297</a></p>
+<p>Objects of this type can be used to add new agents to the simulation and are
+returned by the simulation when inspecting agent state. Setting properties on
+objects returned by the simulation has no effect on the agents as this object
+is a copy of internal state.</p>
+<p>Setting properties on this object is only useful when adding multiple agents
+and they share many properties without reprating them on each ‘add_agent’
+call</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelAgentParameters.speed">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">speed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelAgentParameters.speed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelAgentParameters.speed" title="Permalink to this definition">#</a></dt>
+<dd><p>Current speed</p>
+<p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelAgentParameters.e0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelAgentParameters.e0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelAgentParameters.e0" title="Permalink to this definition">#</a></dt>
+<dd><p>e0 (Currently desired orientation)</p>
+<p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelAgentParameters.position">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelAgentParameters.position"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelAgentParameters.position" title="Permalink to this definition">#</a></dt>
+<dd><p>Current position</p>
+<p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelAgentParameters.orientation">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">orientation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelAgentParameters.orientation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelAgentParameters.orientation" title="Permalink to this definition">#</a></dt>
+<dd><p>Current orientation</p>
+<p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelAgentParameters.journey_id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">journey_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelAgentParameters.journey_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelAgentParameters.journey_id" title="Permalink to this definition">#</a></dt>
+<dd><p>Id of curently followed journey</p>
+<p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelAgentParameters.stage_id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stage_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelAgentParameters.stage_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelAgentParameters.stage_id" title="Permalink to this definition">#</a></dt>
+<dd><p>Id of curently followed stage</p>
+<p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelAgentParameters.mass">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mass</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelAgentParameters.mass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelAgentParameters.mass" title="Permalink to this definition">#</a></dt>
+<dd><p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelAgentParameters.tau">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tau</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelAgentParameters.tau"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelAgentParameters.tau" title="Permalink to this definition">#</a></dt>
+<dd><p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelAgentParameters.v0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">v0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelAgentParameters.v0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelAgentParameters.v0" title="Permalink to this definition">#</a></dt>
+<dd><p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelAgentParameters.a_v">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">a_v</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelAgentParameters.a_v"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelAgentParameters.a_v" title="Permalink to this definition">#</a></dt>
+<dd><p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelAgentParameters.a_min">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">a_min</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelAgentParameters.a_min"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelAgentParameters.a_min" title="Permalink to this definition">#</a></dt>
+<dd><p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelAgentParameters.b_min">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b_min</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelAgentParameters.b_min"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelAgentParameters.b_min" title="Permalink to this definition">#</a></dt>
+<dd><p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelAgentParameters.b_max">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b_max</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelAgentParameters.b_max"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelAgentParameters.b_max" title="Permalink to this definition">#</a></dt>
+<dd><p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelAgentParameters.id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelAgentParameters.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelAgentParameters.id" title="Permalink to this definition">#</a></dt>
+<dd><p>Id of this Agent</p>
+<p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.VelocityModelAgentParameters">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">VelocityModelAgentParameters</span></span><a class="reference internal" href="../../_modules/models.html#VelocityModelAgentParameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelAgentParameters" title="Permalink to this definition">#</a></dt>
+<dd><p>Agent parameters for Velocity Model.</p>
+<p>See the scientifc publication for more details about this model
+<a class="reference external" href="https://arxiv.org/abs/1512.05597">https://arxiv.org/abs/1512.05597</a></p>
+<p>Objects of this type can be used to add new agents to the simulation and are
+returned by the simulation when inspecting agent state. Setting properties on
+objects returned by the simulation has no effect on the agents as this object
+is a copy of internal state.</p>
+<p>Setting properties on this object is only useful when adding multiple agents
+and they share many properties without reprating them on each ‘add_agent’
+call</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="models.VelocityModelAgentParameters.position">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="reference internal" href="../../_modules/models.html#VelocityModelAgentParameters.position"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelAgentParameters.position" title="Permalink to this definition">#</a></dt>
+<dd><p>Current position</p>
+<p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.VelocityModelAgentParameters.orientation">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">orientation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="reference internal" href="../../_modules/models.html#VelocityModelAgentParameters.orientation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelAgentParameters.orientation" title="Permalink to this definition">#</a></dt>
+<dd><p>Current orientation</p>
+<p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.VelocityModelAgentParameters.journey_id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">journey_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="reference internal" href="../../_modules/models.html#VelocityModelAgentParameters.journey_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelAgentParameters.journey_id" title="Permalink to this definition">#</a></dt>
+<dd><p>Id of curently followed journey</p>
+<p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.VelocityModelAgentParameters.stage_id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stage_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="reference internal" href="../../_modules/models.html#VelocityModelAgentParameters.stage_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelAgentParameters.stage_id" title="Permalink to this definition">#</a></dt>
+<dd><p>Id of curently followed stage</p>
+<p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.VelocityModelAgentParameters.time_gap">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_gap</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#VelocityModelAgentParameters.time_gap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelAgentParameters.time_gap" title="Permalink to this definition">#</a></dt>
+<dd><p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.VelocityModelAgentParameters.v0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">v0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#VelocityModelAgentParameters.v0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelAgentParameters.v0" title="Permalink to this definition">#</a></dt>
+<dd><p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.VelocityModelAgentParameters.radius">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">radius</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#VelocityModelAgentParameters.radius"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelAgentParameters.radius" title="Permalink to this definition">#</a></dt>
+<dd><p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.VelocityModelAgentParameters.id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="reference internal" href="../../_modules/models.html#VelocityModelAgentParameters.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelAgentParameters.id" title="Permalink to this definition">#</a></dt>
+<dd><p>Id of this Agent</p>
+<p>NOTE: Setting this property has no effect on agents that are already part of the simulation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelState">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">GeneralizedCentrifugalForceModelState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backing</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelState" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelState.speed">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">speed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelState.speed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelState.speed" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelState.e0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelState.e0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelState.e0" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelState.tau">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tau</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelState.tau"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelState.tau" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelState.v0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">v0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelState.v0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelState.v0" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelState.a_v">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">a_v</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelState.a_v"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelState.a_v" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelState.a_min">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">a_min</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelState.a_min"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelState.a_min" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelState.b_min">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b_min</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelState.b_min"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelState.b_min" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.GeneralizedCentrifugalForceModelState.b_max">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b_max</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#GeneralizedCentrifugalForceModelState.b_max"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.GeneralizedCentrifugalForceModelState.b_max" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.VelocityModelState">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">VelocityModelState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backing</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/models.html#VelocityModelState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelState" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="models.VelocityModelState.e0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="reference internal" href="../../_modules/models.html#VelocityModelState.e0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelState.e0" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.VelocityModelState.time_gap">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_gap</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#VelocityModelState.time_gap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelState.time_gap" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.VelocityModelState.tau">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tau</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#VelocityModelState.tau"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelState.tau" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.VelocityModelState.v0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">v0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#VelocityModelState.v0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelState.v0" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.VelocityModelState.radius">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">radius</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="reference internal" href="../../_modules/models.html#VelocityModelState.radius"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.VelocityModelState.radius" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../library/index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">library</span></code></p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../routing/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">routing</span></code></p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelParameters"><code class="docutils literal notranslate"><span class="pre">VelocityModelParameters</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelParameters.a_ped"><code class="docutils literal notranslate"><span class="pre">VelocityModelParameters.a_ped</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelParameters.d_ped"><code class="docutils literal notranslate"><span class="pre">VelocityModelParameters.d_ped</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelParameters.a_wall"><code class="docutils literal notranslate"><span class="pre">VelocityModelParameters.a_wall</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelParameters.d_wall"><code class="docutils literal notranslate"><span class="pre">VelocityModelParameters.d_wall</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelParameters"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelParameters</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelParameters.nu_ped"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelParameters.nu_ped</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelParameters.nu_wall"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelParameters.nu_wall</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelParameters.dist_eff_ped"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelParameters.dist_eff_ped</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelParameters.dist_eff_wall"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelParameters.dist_eff_wall</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelParameters.intp_width_ped"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelParameters.intp_width_ped</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelParameters.intp_width_wall"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelParameters.intp_width_wall</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelParameters.maxf_ped"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelParameters.maxf_ped</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelParameters.maxf_wall"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelParameters.maxf_wall</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.speed"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.speed</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.e0"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.e0</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.position"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.position</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.orientation"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.orientation</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.journey_id"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.journey_id</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.stage_id"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.stage_id</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.mass"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.mass</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.tau"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.tau</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.v0"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.v0</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.a_v"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.a_v</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.a_min"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.a_min</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.b_min"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.b_min</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.b_max"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.b_max</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelAgentParameters.id"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.id</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelAgentParameters"><code class="docutils literal notranslate"><span class="pre">VelocityModelAgentParameters</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelAgentParameters.position"><code class="docutils literal notranslate"><span class="pre">VelocityModelAgentParameters.position</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelAgentParameters.orientation"><code class="docutils literal notranslate"><span class="pre">VelocityModelAgentParameters.orientation</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelAgentParameters.journey_id"><code class="docutils literal notranslate"><span class="pre">VelocityModelAgentParameters.journey_id</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelAgentParameters.stage_id"><code class="docutils literal notranslate"><span class="pre">VelocityModelAgentParameters.stage_id</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelAgentParameters.time_gap"><code class="docutils literal notranslate"><span class="pre">VelocityModelAgentParameters.time_gap</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelAgentParameters.v0"><code class="docutils literal notranslate"><span class="pre">VelocityModelAgentParameters.v0</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelAgentParameters.radius"><code class="docutils literal notranslate"><span class="pre">VelocityModelAgentParameters.radius</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelAgentParameters.id"><code class="docutils literal notranslate"><span class="pre">VelocityModelAgentParameters.id</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelState"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelState.speed"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.speed</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelState.e0"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.e0</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelState.tau"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.tau</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelState.v0"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.v0</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelState.a_v"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.a_v</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelState.a_min"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.a_min</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelState.b_min"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.b_min</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.GeneralizedCentrifugalForceModelState.b_max"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.b_max</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelState"><code class="docutils literal notranslate"><span class="pre">VelocityModelState</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelState.e0"><code class="docutils literal notranslate"><span class="pre">VelocityModelState.e0</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelState.time_gap"><code class="docutils literal notranslate"><span class="pre">VelocityModelState.time_gap</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelState.tau"><code class="docutils literal notranslate"><span class="pre">VelocityModelState.tau</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelState.v0"><code class="docutils literal notranslate"><span class="pre">VelocityModelState.v0</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#models.VelocityModelState.radius"><code class="docutils literal notranslate"><span class="pre">VelocityModelState.radius</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023, Forschungszentrum Jülich GmbH, IAS-7.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
