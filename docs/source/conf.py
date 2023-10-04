@@ -77,6 +77,9 @@ favicons = [
 html_css_files = [
     "css/custom.css",
 ]
+html_js_files = [
+    "https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js",
+]
 html_context = {"default_mode": "light"}
 
 html_theme_options = {

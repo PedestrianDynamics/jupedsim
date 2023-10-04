@@ -6,3 +6,11 @@ sphinx-favicon==1.0.1
 sphinx-notfound-page==1.0.0
 myst-nb @ git+https://github.com/executablebooks/MyST-NB@59854c2
 nbconvert==7.7.1
+
+# notebook dependencies
+shapely
+plotly
+plotly-express
+numpy
+pandas
+pedpy
