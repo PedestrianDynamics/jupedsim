@@ -14,6 +14,10 @@ copyright = (
     f"{datetime.datetime.today().year}, Forschungszentrum Jülich GmbH, IAS-7"
 )
 
+import jupedsim
+
+version = "v" + jupedsim.__version__
+
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
@@ -102,7 +106,7 @@ html_theme_options = {
     ],
     "switcher": {
         "json_url": "https://www.jupedsim.org/versions.json",
-        "version_match": "stable",
+        "version_match": version,
     },
     "primary_sidebar_end": ["version-switcher"],
     "show_toc_level": 3,
