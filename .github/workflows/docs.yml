@@ -28,8 +28,9 @@ jobs:
 
     - name: Build docs
       run: |
+        cp -R notebooks/* docs/source/notebooks
         python3 -m pip install -r docs/requirements.txt
-        sphinx-build docs/source docs/build -j$(nproc)
+        sphinx-build -T -E -d doctree -b html docs/source docs/build -j $(nproc)
 
     - name: Determine directory to publish docs to
       id: docs-publish-dir
