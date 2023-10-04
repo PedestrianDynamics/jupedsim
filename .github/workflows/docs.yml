@@ -42,11 +42,8 @@ jobs:
                        github_ref)
           if m:
               target = "${{ github.ref_name }}"
-          elif github_ref == 'refs/heads/master':
-              target = 'latest'
           else:
               target = ''
-          print(target)
           set_output('target', target)
 
     - name: Publish docs to GitHub pages
@@ -84,21 +81,22 @@ jobs:
         script: |
           import json
           from pathlib import Path
+          from packaging.version import Version
 
-          prefix = "https://www.jupedsim.org/" 
+          prefix = "https://www.jupedsim.org/"
           cwd = Path.cwd()
-          versions = sorted((item.name for item in cwd.iterdir()
-                             if item.is_dir() and not item.name.startswith('.')),
-                            reverse=True)
+          versions = [item.name[1:] for item in cwd.iterdir() if item.is_dir() and not item.name.startswith('.') and item.name.startswith("v")]
+          versions.sort(key=Version, reverse=True)
+          versions = ["v" + v for v in versions]
+          versions.insert(0, "stable")
+          
           versions_url = [dict(name=version, version=version, url= prefix + version)
-               for version in versions]
-
+                          for version in versions]
           target_file = Path('versions.json')
           with target_file.open('w') as f:
               json.dump(versions_url, f)
 
     - name: Redirect stable to new release
-      if: needs.docs.outputs.docs-target != 'latest'
       run: |
         rm -rf stable
         ln -s ${{needs.docs.outputs.docs-target}} stable
