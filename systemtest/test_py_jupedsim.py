@@ -1,9 +1,9 @@
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import pytest
+import shapely
 
 import jupedsim as jps
-from jupedsim.native.journey import Transition
 
 
 def test_can_query_agents_in_range():
@@ -16,12 +16,9 @@ def test_can_query_agents_in_range():
     jps.set_warning_callback(log_msg_handler)
     jps.set_error_callback(log_msg_handler)
 
-    geo_builder = jps.GeometryBuilder()
-    geo_builder.add_accessible_area([(0, 0), (100, 0), (100, 100), (0, 100)])
-    geometry = geo_builder.build()
-
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(), geometry=geometry, dt=0.01
+        model=jps.VelocityModelParameters(),
+        geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
     )
     exit = simulation.add_exit_stage(
         [(99, 45), (99, 55), (100, 55), (100, 45)]
@@ -37,7 +34,6 @@ def test_can_query_agents_in_range():
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
     agent_parameters.time_gap = 1
-    agent_parameters.tau = 0.5
     agent_parameters.v0 = 1.2
     agent_parameters.radius = 0.15
 
@@ -83,13 +79,10 @@ def test_can_run_simulation():
     jps.set_warning_callback(log_msg_handler)
     jps.set_error_callback(log_msg_handler)
 
-    geo_builder = jps.GeometryBuilder()
-    geo_builder.add_accessible_area([(0, 0), (10, 0), (10, 10), (0, 10)])
-    geo_builder.add_accessible_area([(10, 4), (20, 4), (20, 6), (10, 6)])
-    geometry = geo_builder.build()
-
+    p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+    p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(), geometry=geometry, dt=0.01
+        model=jps.VelocityModelParameters(), geometry=p1.union(p2)
     )
     exit_stage_id = simulation.add_exit_stage(
         [(18, 4), (20, 4), (20, 6), (18, 6)]
@@ -105,7 +98,6 @@ def test_can_run_simulation():
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
     agent_parameters.time_gap = 1
-    agent_parameters.tau = 0.5
     agent_parameters.v0 = 1.2
     agent_parameters.radius = 0.15
 
@@ -145,12 +137,9 @@ def test_can_wait():
     jps.set_warning_callback(log_msg_handler)
     jps.set_error_callback(log_msg_handler)
 
-    geo_builder = jps.GeometryBuilder()
-    geo_builder.add_accessible_area([(0, 0), (100, 0), (100, 100), (0, 100)])
-    geometry = geo_builder.build()
-
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(), geometry=geometry, dt=0.01
+        model=jps.VelocityModelParameters(),
+        geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
     )
     wp = simulation.add_waypoint_stage((50, 50), 1)
     waiting_set_id = simulation.add_waiting_set_stage(
@@ -170,10 +159,10 @@ def test_can_wait():
     )
     journey = jps.JourneyDescription([wp, waiting_set_id, exit])
     journey.set_transition_for_stage(
-        wp, Transition.create_fixed_transition(waiting_set_id)
+        wp, jps.Transition.create_fixed_transition(waiting_set_id)
     )
     journey.set_transition_for_stage(
-        waiting_set_id, Transition.create_fixed_transition(exit)
+        waiting_set_id, jps.Transition.create_fixed_transition(exit)
     )
 
     journey_id = simulation.add_journey(journey)
@@ -184,7 +173,6 @@ def test_can_wait():
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
     agent_parameters.time_gap = 1
-    agent_parameters.tau = 0.5
     agent_parameters.v0 = 1.2
     agent_parameters.radius = 0.15
 
@@ -235,12 +223,9 @@ def test_can_change_journey_while_waiting():
     jps.set_warning_callback(log_msg_handler)
     jps.set_error_callback(log_msg_handler)
 
-    geo_builder = jps.GeometryBuilder()
-    geo_builder.add_accessible_area([(0, 0), (100, 0), (100, 100), (0, 100)])
-    geometry = geo_builder.build()
-
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(), geometry=geometry, dt=0.01
+        model=jps.VelocityModelParameters(),
+        geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
     )
     wp = simulation.add_waypoint_stage((50, 50), 1)
     stage_id = simulation.add_waiting_set_stage(
@@ -257,10 +242,10 @@ def test_can_change_journey_while_waiting():
 
     journey1 = jps.JourneyDescription([wp, stage_id, exit1])
     journey1.set_transition_for_stage(
-        wp, Transition.create_fixed_transition(stage_id)
+        wp, jps.Transition.create_fixed_transition(stage_id)
     )
     journey1.set_transition_for_stage(
-        stage_id, Transition.create_fixed_transition(exit1)
+        stage_id, jps.Transition.create_fixed_transition(exit1)
     )
     journey2_stages = [
         simulation.add_waypoint_stage((60, 40), 1),
@@ -272,7 +257,7 @@ def test_can_change_journey_while_waiting():
     journey2 = jps.JourneyDescription(journey2_stages)
     for src, dst in zip(journey2_stages[:-1], journey2_stages[1:]):
         journey2.set_transition_for_stage(
-            src, Transition.create_fixed_transition(dst)
+            src, jps.Transition.create_fixed_transition(dst)
         )
 
     journeys = []
@@ -285,7 +270,6 @@ def test_can_change_journey_while_waiting():
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
     agent_parameters.time_gap = 1
-    agent_parameters.tau = 0.5
     agent_parameters.v0 = 1.2
     agent_parameters.radius = 0.15
 
@@ -329,13 +313,10 @@ def test_get_single_agent_from_simulation():
     jps.set_warning_callback(log_msg_handler)
     jps.set_error_callback(log_msg_handler)
 
-    geo_builder = jps.GeometryBuilder()
-    geo_builder.add_accessible_area([(0, 0), (10, 0), (10, 10), (0, 10)])
-    geo_builder.add_accessible_area([(10, 4), (20, 4), (20, 6), (10, 6)])
-    geometry = geo_builder.build()
-
+    p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+    p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(), geometry=geometry, dt=0.01
+        model=jps.VelocityModelParameters(), geometry=p1.union(p2)
     )
     exit_id = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
 
@@ -349,7 +330,6 @@ def test_get_single_agent_from_simulation():
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
     agent_parameters.time_gap = 1
-    agent_parameters.tau = 0.5
     agent_parameters.v0 = 1.2
     agent_parameters.radius = 0.15
 
@@ -376,13 +356,10 @@ def test_get_agent_non_existing_agent_from_simulation():
     jps.set_warning_callback(log_msg_handler)
     jps.set_error_callback(log_msg_handler)
 
-    geo_builder = jps.GeometryBuilder()
-    geo_builder.add_accessible_area([(0, 0), (10, 0), (10, 10), (0, 10)])
-    geo_builder.add_accessible_area([(10, 4), (20, 4), (20, 6), (10, 6)])
-    geometry = geo_builder.build()
-
+    p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+    p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(), geometry=geometry, dt=0.01
+        model=jps.VelocityModelParameters(), geometry=p1.union(p2)
     )
 
     exit_id = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
@@ -396,7 +373,6 @@ def test_get_agent_non_existing_agent_from_simulation():
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
     agent_parameters.time_gap = 1
-    agent_parameters.tau = 0.5
     agent_parameters.v0 = 1.2
     agent_parameters.radius = 0.15
 

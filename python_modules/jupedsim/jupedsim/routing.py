@@ -1,17 +1,28 @@
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-try:
-    import py_jupedsim as py_jps
-except ImportError:
-    from .. import py_jupedsim as py_jps
+from typing import Any
 
-from jupedsim.native.geometry import Geometry
+import shapely
+
+import jupedsim.native as py_jps
+from jupedsim.geometry_utils import build_geometry
 
 
 class RoutingEngine:
-    def __init__(self, geo: Geometry) -> None:
-        self._obj = py_jps.RoutingEngine(geo._obj)
+    def __init__(
+        self,
+        geometry: str
+        | shapely.GeometryCollection
+        | shapely.Polygon
+        | shapely.MultiPolygon
+        | shapely.MultiPoint
+        | list[tuple[float, float]],
+        **kwargs: Any,
+    ) -> None:
+        self._obj = py_jps.RoutingEngine(
+            build_geometry(geometry, *kwargs)._obj
+        )
 
     def compute_waypoints(
         self, frm: tuple[float, float], to: tuple[float, float]

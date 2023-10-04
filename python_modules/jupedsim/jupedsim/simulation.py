@@ -1,27 +1,28 @@
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-try:
-    import py_jupedsim as py_jps
-except ImportError:
-    from .. import py_jupedsim as py_jps
+from typing import Any
 
-from jupedsim.native.geometry import Geometry
-from jupedsim.native.journey import JourneyDescription
-from jupedsim.native.models import (
+import shapely
+
+import jupedsim.native as py_jps
+from jupedsim.geometry import Geometry
+from jupedsim.geometry_utils import build_geometry
+from jupedsim.journey import JourneyDescription
+from jupedsim.models import (
     GeneralizedCentrifugalForceModelAgentParameters,
     GeneralizedCentrifugalForceModelParameters,
     VelocityModelAgentParameters,
     VelocityModelParameters,
 )
-from jupedsim.native.stages import (
+from jupedsim.serialization import TrajectoryWriter
+from jupedsim.stages import (
     ExitProxy,
     NotifiableQueueProxy,
     WaitingSetProxy,
     WaypointProxy,
 )
-from jupedsim.native.tracing import Trace
-from jupedsim.serialization import TrajectoryWriter
+from jupedsim.tracing import Trace
 
 
 class Simulation:
@@ -30,9 +31,15 @@ class Simulation:
         *,
         model: VelocityModelParameters
         | GeneralizedCentrifugalForceModelParameters,
-        geometry: Geometry,
+        geometry: str
+        | shapely.GeometryCollection
+        | shapely.Polygon
+        | shapely.MultiPolygon
+        | shapely.MultiPoint
+        | list[tuple[float, float]],
         dt: float = 0.01,
         trajectory_writer: TrajectoryWriter | None = None,
+        **kwargs: Any,
     ) -> None:
         if isinstance(model, VelocityModelParameters):
             model_builder = py_jps.VelocityModelBuilder(
@@ -59,7 +66,7 @@ class Simulation:
             raise Exception("Unknown model type supplied")
         self._writer = trajectory_writer
         self._obj = py_jps.Simulation(
-            model=py_jps_model, geometry=geometry._obj, dt=dt
+            model=py_jps_model, geometry=build_geometry(geometry)._obj, dt=dt
         )
 
     def add_waypoint_stage(

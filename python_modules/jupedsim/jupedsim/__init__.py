@@ -1,6 +1,7 @@
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
+from jupedsim.agent import Agent
 from jupedsim.distributions import (
     AgentNumberError,
     IncorrectParameterError,
@@ -13,10 +14,14 @@ from jupedsim.distributions import (
     distribute_in_circles_by_number,
     distribute_till_full,
 )
-from jupedsim.native.agent import Agent
-from jupedsim.native.geometry import Geometry, GeometryBuilder
-from jupedsim.native.journey import JourneyDescription, Transition
-from jupedsim.native.library import (
+from jupedsim.geometry import Geometry
+from jupedsim.geometry_utils import (
+    geometry_from_coordinates,
+    geometry_from_shapely,
+    geometry_from_wkt,
+)
+from jupedsim.journey import JourneyDescription, Transition
+from jupedsim.library import (
     BuildInfo,
     get_build_info,
     set_debug_callback,
@@ -24,7 +29,7 @@ from jupedsim.native.library import (
     set_info_callback,
     set_warning_callback,
 )
-from jupedsim.native.models import (
+from jupedsim.models import (
     GeneralizedCentrifugalForceModelAgentParameters,
     GeneralizedCentrifugalForceModelParameters,
     GeneralizedCentrifugalForceModelState,
@@ -32,25 +37,19 @@ from jupedsim.native.models import (
     VelocityModelParameters,
     VelocityModelState,
 )
-from jupedsim.native.routing import RoutingEngine
-from jupedsim.native.simulation import Simulation
-from jupedsim.native.stages import (
+from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
+from jupedsim.routing import RoutingEngine
+from jupedsim.serialization import TrajectoryWriter
+from jupedsim.simulation import Simulation
+from jupedsim.sqlite_serialization import SqliteTrajectoryWriter
+from jupedsim.stages import (
     ExitProxy,
     NotifiableQueueProxy,
     WaitingSetProxy,
     WaitingSetState,
     WaypointProxy,
 )
-from jupedsim.native.tracing import Trace
-from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
-from jupedsim.serialization import TrajectoryWriter
-from jupedsim.sqlite_serialization import SqliteTrajectoryWriter
-from jupedsim.util import (
-    GeometryError,
-    geometry_from_coordinates,
-    geometry_from_shapely,
-    geometry_from_wkt,
-)
+from jupedsim.tracing import Trace
 
 __version__ = get_build_info().library_version
 __commit__ = get_build_info().git_commit_hash
@@ -67,8 +66,6 @@ __all__ = [
     "GeneralizedCentrifugalForceModelParameters",
     "GeneralizedCentrifugalForceModelState",
     "Geometry",
-    "GeometryBuilder",
-    "GeometryError",
     "IncorrectParameterError",
     "JourneyDescription",
     "NegativeValueError",

@@ -9,8 +9,6 @@ import random
 import sys
 import time
 
-import shapely
-
 import jupedsim as jps
 from performancetest.geometry import geometries
 from performancetest.stats_writer import StatsWriter
@@ -197,9 +195,6 @@ def main():
         jps.set_warning_callback(log_warn)
     jps.set_error_callback(log_error)
 
-    geo = shapely.from_wkt(geometries["large_street_network"])
-    geometry = jps.geometry_from_shapely(geo)
-
     profile_picker = RandomProfilePicker(
         mu_v0=1.34, sigma_v0=0.25, mu_d=0.15, sigma_d=0.015
     )
@@ -213,7 +208,7 @@ def main():
     )
     simulation = jps.Simulation(
         model=jps.VelocityModelParameters(),
-        geometry=geometry,
+        geometry=geometries["large_street_network"],
         trajectory_writer=stats_writer,
     )
 
