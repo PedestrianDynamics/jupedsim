@@ -11,6 +11,7 @@
 #include "OperationalModel.hpp"
 #include "SimulationError.hpp"
 #include "Stage.hpp"
+#include "fmt/ostream.h"
 
 #include <algorithm>
 #include <limits>
@@ -93,6 +94,24 @@ OperationalModelUpdate VelocityModel::ComputeNewPosition(
     const auto& model = std::get<VelocityModelData>(ped.model);
     const auto optimal_speed = OptimalSpeed(ped, spacing, model.timeGap);
     const auto velocity = direction * optimal_speed;
+    if(ped.id == -18)
+        fmt::print(
+            "ped: {}, pos: {}\n direction: {}, desired_direction: {}\n Orientation: {}\n NR: {}, "
+            "WR: {}\nspacing: "
+            "{}, "
+            "speed: "
+            "{}\n--> velocity: {}\n",
+            ped.id,
+            ped.pos,
+            direction,
+            desired_direction,
+            ped.orientation,
+            neighborRepulsion,
+            boundaryRepulsion,
+            spacing,
+            optimal_speed,
+            velocity);
+
     return VelocityModelUpdate{ped.pos + velocity * dT, direction};
 };
 
@@ -154,6 +173,21 @@ double VelocityModel::GetSpacing(
     if(!inCorridor) {
         return std::numeric_limits<double>::max();
     }
+
+    if(ped1.id == -18)
+        fmt::print(
+            "Spacing: \n ped1: {}, ped2: {}. Dist: {}\ninFront: {} = {}, inCorridor: {} = {}\n direction: "
+            "{}, distp12: {}",
+            ped1.id,
+            ped2.id,
+            distp12.Norm() - l,
+            inFront,
+            direction.ScalarProduct(distp12) ,
+            inCorridor,
+            left.ScalarProduct(distp12),
+            direction,
+            distp12);
+    
     return distp12.Norm() - l;
 }
 Point VelocityModel::NeighborRepulsion(const GenericAgent& ped1, const GenericAgent& ped2) const
@@ -163,7 +197,35 @@ Point VelocityModel::NeighborRepulsion(const GenericAgent& ped1, const GenericAg
     const auto& model1 = std::get<VelocityModelData>(ped1.model);
     const auto& model2 = std::get<VelocityModelData>(ped2.model);
     const auto l = model1.radius + model2.radius;
-    return direction * -(_aPed * exp((l - distance) / _DPed));
+    Point desired_direction = (ped1.destination - ped1.pos).Normalized();
+    if(desired_direction == Point()) {
+        desired_direction = ped1.orientation;
+    }
+    bool newmodel = false1;
+    // if((ped1.id == 3 && ped2.id == 35) || (ped1.id == 35 && ped2.id == 3))
+    //     fmt::print(
+    //         "------\n in neighbor function --\n ped1: {}, {}, ped2: {}, {}\n",
+    //         ped1.id,
+    //         ped1.pos,
+    //         ped2.id,
+    //         ped2.pos);
+    if(newmodel) {
+        const auto inFront = ped1.orientation.ScalarProduct(distp12) >= 0;
+
+        if(!inFront) {
+            // if((ped1.id == 3 && ped2.id == 35) || (ped1.id == 35 && ped2.id == 3))
+            //     fmt::print("inFront {}\n\n", inFront);
+            return Point();
+        }
+        auto rotated_desired_direction = desired_direction.Rotate90Deg();
+        float dotProduct = rotated_desired_direction.ScalarProduct(direction);
+        float sign = (dotProduct > 0) ? 1 : -1;
+        Point result = rotated_desired_direction * -sign * (_aPed * exp((l - distance) / _DPed));
+        // if((ped1.id == 3 && ped2.id == 35) || (ped1.id == 35 && ped2.id == 3))
+        //     fmt::print("result: {}\n-------\n", result);
+        return result;
+    } else
+        return direction * -(_aPed * exp((l - distance) / _DPed));
 }
 
 Point VelocityModel::BoundaryRepulsion(const GenericAgent& ped, const LineSegment& boundary_segment)
