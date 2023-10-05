@@ -9,15 +9,38 @@ from jupedsim.models import (
 
 
 class Agent:
+    """Represents an Agent in the simulation.
+
+    Agent objects are always retrieved from the simulation and never created directly.
+
+    NOTE: You need to be aware that currently there are no checks done when setting
+    properties on an Agent instance. For example it is possible to set an Agent position
+    outside the walkable area of the Simulation resulting in a crash.
+    """
+
     def __init__(self, backing):
+        """Do not use.
+
+        Retrieve Agents from the Simulation.
+        """
         self._obj = backing
 
     @property
-    def id(self):
+    def id(self) -> int:
+        """Numeric id of the agent in this simulation.
+
+        Returns (int):
+            Id of this agent.
+        """
         return self._obj.id
 
     @property
     def journey_id(self):
+        """Id of the :class:`Journey` the Agent is currently following.
+
+        Returns (int):
+            Id of the :class:`Journey`
+        """
         return self._obj.journey_id
 
     @journey_id.setter
