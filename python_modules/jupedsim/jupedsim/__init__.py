@@ -16,9 +16,9 @@ from jupedsim.distributions import (
 )
 from jupedsim.geometry import Geometry
 from jupedsim.geometry_utils import (
-    geometry_from_coordinates,
-    geometry_from_shapely,
-    geometry_from_wkt,
+    _geometry_from_coordinates,
+    _geometry_from_shapely,
+    _geometry_from_wkt,
 )
 from jupedsim.journey import JourneyDescription, Transition
 from jupedsim.library import (
@@ -95,9 +95,9 @@ __all__ = [
     "distribute_in_circles_by_density",
     "distribute_in_circles_by_number",
     "distribute_till_full",
-    "geometry_from_coordinates",
-    "geometry_from_shapely",
-    "geometry_from_wkt",
+    "_geometry_from_coordinates",
+    "_geometry_from_shapely",
+    "_geometry_from_wkt",
     "get_build_info",
     "set_debug_callback",
     "set_error_callback",

@@ -4,7 +4,6 @@
 
 In this file you will find interfaces and implementations to serialize and
 deserialize different forms of input / output commonly used.
-
 """
 
 import abc

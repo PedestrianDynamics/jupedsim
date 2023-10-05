@@ -20,7 +20,7 @@ class GeometryError(Exception):
         self.message = message
 
 
-def geometry_from_wkt(wkt_input: str) -> Geometry:
+def _geometry_from_wkt(wkt_input: str) -> Geometry:
     geometry_collection = None
     try:
         wkt_type = shapely.from_wkt(wkt_input)
@@ -45,7 +45,7 @@ def geometry_from_wkt(wkt_input: str) -> Geometry:
     return Geometry(_internal_build_geometry(polygons))
 
 
-def geometry_from_shapely(
+def _geometry_from_shapely(
     geometry_input: shapely.Polygon
     | shapely.MultiPolygon
     | shapely.GeometryCollection
@@ -57,7 +57,7 @@ def geometry_from_shapely(
     return Geometry(_internal_build_geometry(polygons))
 
 
-def geometry_from_coordinates(
+def _geometry_from_coordinates(
     coordinates: List[Tuple], *, excluded_areas: Optional[List[Tuple]] = None
 ) -> Geometry:
     polygon = shapely.Polygon(coordinates, holes=excluded_areas)
@@ -117,24 +117,50 @@ def _internal_build_geometry(
 
 
 def build_geometry(
-    geometry: str
+    geometry: list[tuple[float, float]]
     | shapely.GeometryCollection
     | shapely.Polygon
     | shapely.MultiPolygon
     | shapely.MultiPoint
-    | list[tuple[float, float]],
+    | str,
     **kwargs: Any,
-):
+) -> Geometry:
+    """Create a :class:`Geometry` from different input representations.
+
+    .. note ::
+        The geometric data supplied need to form a single "simple" polygon witn holes. In case
+        the input contains multiple polygons this must hold true for the union of all polygons.
+
+    Arguments:
+        geometry (str | shapely.GeometryCollection |
+                  shapely.Polygon | shapely.MultiPolygon |
+                  shapely.MultiPoint | list[tuple[float, float]]):
+            Data to create the geometry out of. Data may be supplied as:
+            * list of 2d points describing the outer boundary, holes may be added with use of
+                `excluded_areas` kw-argument
+            * GeometryCollection consiting only out of Polygons, MultiPolygons and MultiPoints
+            * MultiPolygon
+            * Polygon
+            * MultiPoint forming a "simple" polygon when points are interpreted as linear
+                ring without repetition of the start/end point.
+            * str with a valid Well Known Text. In this format the same WKT types as mentioned
+                for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON,
+                MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
+    Keyword Arguments:
+        excluded_areas (list[list[tuple(float, float)]]): descibes exclusions
+            from the walkable area. Only use this argument if `geometry` was
+            provided as list[tuple[float, float]].
+    """
     if isinstance(geometry, str):
-        return geometry_from_wkt(geometry)
+        return _geometry_from_wkt(geometry)
     elif (
         isinstance(geometry, shapely.GeometryCollection)
         or isinstance(geometry, shapely.Polygon)
         or isinstance(geometry, shapely.MultiPolygon)
         or isinstance(geometry, shapely.MultiPoint)
     ):
-        return geometry_from_shapely(geometry)
+        return _geometry_from_shapely(geometry)
     else:
-        return geometry_from_coordinates(
+        return _geometry_from_coordinates(
             geometry, excluded_areas=kwargs.get("excluded_areas")
         )

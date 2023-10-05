@@ -10,6 +10,8 @@ from jupedsim.internal.aabb import AABB
 
 @dataclass
 class RecordingAgent:
+    """Data for a single agent at a single frame."""
+
     id: int
     position: tuple[float, float]
     orientation: tuple[float, float]
@@ -17,6 +19,8 @@ class RecordingAgent:
 
 @dataclass
 class RecordingFrame:
+    """A single frame from the simulation."""
+
     index: int
     agents: list[RecordingAgent]
 
@@ -32,6 +36,14 @@ class Recording:
         self._check_version_compatible()
 
     def frame(self, index: int) -> RecordingFrame:
+        """Access a single frame of the recording.
+
+        Arguments:
+            index (int): index of the frame to access.
+
+        Returns (RecordingFrame): A single frame.
+        """
+
         def agent_row(cursor, row):
             return RecordingAgent(row[0], (row[1], row[2]), (row[3], row[4]))
 
@@ -44,12 +56,19 @@ class Recording:
         return RecordingFrame(index, res.fetchall())
 
     def geometry(self) -> shapely.GeometryCollection:
+        """Access this recordings geometry.
+
+        Returns (shapely.GeometryCollection): walkable area of the simulation
+            that created this recording.
+
+        """
         cur = self.db.cursor()
         res = cur.execute("SELECT wkt FROM geometry")
         wkt_str = res.fetchone()[0]
         return shapely.from_wkt(wkt_str)
 
     def bounds(self) -> AABB:
+        """Get bounds of the position data contained in this recording."""
         cur = self.db.cursor()
         res = cur.execute("SELECT value FROM metadata WHERE key == 'xmin'")
         xmin = float(res.fetchone()[0])
@@ -63,12 +82,20 @@ class Recording:
 
     @property
     def num_frames(self) -> int:
+        """Access the number of frmaes stored in this recording.
+
+        Returns (int): Number of frames in this recording.
+        """
         cur = self.db.cursor()
         res = cur.execute("SELECT MAX(frame) FROM trajectory_data")
         return res.fetchone()[0]
 
     @property
     def fps(self) -> float:
+        """How many frames are stored per second.
+
+        Returns (float): Frames per second of this recording.
+        """
         cur = self.db.cursor()
         res = cur.execute("SELECT value from metadata WHERE key == 'fps'")
         return float(res.fetchone()[0])
