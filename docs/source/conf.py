@@ -65,7 +65,7 @@ add_module_names = False
 
 # -- Automatic execution of jupyter notebooks --------------------------------
 nb_execution_excludepatterns = []
-nb_execution_timeout = 120
+nb_execution_timeout = 900
 myst_enable_extensions = [
     "amsmath",
     "colon_fence",
