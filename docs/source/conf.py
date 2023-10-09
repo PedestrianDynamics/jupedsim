@@ -47,9 +47,12 @@ autoapi_options = [
     "show-module-summary",
     "imported-members",
 ]
+autodoc_typehints = "description"
+autoapi_python_class_content = "both"
+autoapi_member_order = "bysource"
 autoapi_ignore = ["**/tests/**"]
-autoapi_member_order = ["groupwise"]
 
+add_module_names = False
 
 # -- Automatic execution of jupyter notebooks --------------------------------
 nb_execution_excludepatterns = []
