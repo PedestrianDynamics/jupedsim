@@ -56,7 +56,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
     """
     Agent parameters for Generalized Centrifugal Force Model.
 
-    See the scientifc publication for more details about this model
+    See the scientific publication for more details about this model
     https://arxiv.org/abs/1008.4297
 
     Objects of this type can be used to add new agents to the simulation and are
@@ -64,8 +64,8 @@ class GeneralizedCentrifugalForceModelAgentParameters:
     objects returned by the simulation has no effect on the agents as this object
     is a copy of internal state.
 
-    Setting properties on this object is only useful when adding multiple agents
-    and they share many properties without reprating them on each 'add_agent'
+    Setting properties on this object is only useful when adding multiple agents,
+    and they share many properties without repeating them on each 'add_agent'
     call
     """
 
@@ -83,7 +83,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
 
     @property
     def e0(self) -> tuple[float, float]:
-        """Desired orientaiton."""
+        """Desired orientation."""
         return self._obj.e0
 
     @e0.setter
@@ -208,7 +208,7 @@ class VelocityModelAgentParameters:
     """
     Agent parameters for Velocity Model.
 
-    See the scientifc publication for more details about this model
+    See the scientific publication for more details about this model
     https://arxiv.org/abs/1512.05597
 
     Objects of this type can be used to add new agents to the simulation and are
@@ -216,8 +216,8 @@ class VelocityModelAgentParameters:
     objects returned by the simulation has no effect on the agents as this object
     is a copy of internal state.
 
-    Setting properties on this object is only useful when adding multiple agents
-    and they share many properties without reprating them on each 'add_agent'
+    Setting properties on this object is only useful when adding multiple agents,
+    and they share many properties without repeating them on each 'add_agent'
     call
     """
 
