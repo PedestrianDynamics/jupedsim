@@ -9,75 +9,98 @@ import jupedsim.native as py_jps
 # TODO(kkratz): add typehints for function params
 def set_debug_callback(fn) -> None:
     """
-    Set reciever for debug messages.
+    Set receiver for debug messages.
 
-    Parameters
-    ----------
-    fn: fn<str>
-        function that accepts a msg as string
+    Arguments:
+        fn (fn<str>): function that accepts a msg as string
+
     """
     py_jps.set_debug_callback(fn)
 
 
 def set_info_callback(fn) -> None:
     """
-    Set reciever for info messages.
+    Set receiver for info messages.
 
-    Parameters
-    ----------
-    fn: fn<str>
-        function that accepts a msg as string
+    Arguments:
+        fn (fn<str>): function that accepts a msg as string
+
     """
     py_jps.set_info_callback(fn)
 
 
 def set_warning_callback(fn) -> None:
     """
-    Set reciever for warning messages.
+    Set receiver for warning messages.
 
-    Parameters
-    ----------
-    fn: fn<str>
-        function that accepts a msg as string
+    Arguments:
+        fn (fn<str>): function that accepts a msg as string
+
     """
     py_jps.set_warning_callback(fn)
 
 
 def set_error_callback(fn) -> None:
     """
-    Set reciever for error messages.
+    Set receiver for error messages.
 
-    Parameters
-    ----------
-    fn: fn<str>
-        function that accepts a msg as string
+    Arguments:
+        fn (fn<str>): function that accepts a msg as string
+
     """
     py_jps.set_error_callback(fn)
 
 
-# TODO(kkratz): refactor this into free functions in C-API / bindings
 class BuildInfo:
     def __init__(self):
         self.__obj = py_jps.get_build_info()
 
     @property
     def git_commit_hash(self) -> str:
+        """SHA1 commit hash of this version.
+
+        Returns:
+            SHA1 of this version.
+
+        """
         return self.__obj.git_commit_hash
 
     @property
     def git_commit_date(self) -> str:
+        """Date this commit was created.
+
+        Returns:
+            Date the commit of this version as string.
+
+        """
         return self.__obj.git_commit_date
 
     @property
     def git_branch(self) -> str:
+        """Branch this commit was crated from.
+
+        Returns:
+            name of the branch this version was build from.
+
+        """
         return self.__obj.git_branch
 
     @property
     def compiler(self) -> str:
+        """Compiler the native code was compiled with.
+
+        Returns:
+            Compiler identification.
+        """
         return self.__obj.compiler
 
     @property
     def compiler_version(self) -> str:
+        """Compiler version the native code was compiled with.
+
+        Returns:
+            Compiler version number.
+        """
         return self.__obj.compiler_version
 
     @property
@@ -95,4 +118,15 @@ class BuildInfo:
 
 
 def get_build_info() -> BuildInfo:
+    """Get build information about jupedsim.
+
+    The received :class:`BuildInfo` is printable, e.g.
+
+    .. code:: python
+
+        print(get_build_info())
+
+    This will display a human-readable string stating
+    basic information about this library.
+    """
     return BuildInfo()

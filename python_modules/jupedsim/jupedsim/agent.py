@@ -9,31 +9,65 @@ from jupedsim.models import (
 
 
 class Agent:
+    """Represents an Agent in the simulation.
+
+    Agent objects are always retrieved from the simulation and never created directly.
+
+    Agents can be accessed with:
+
+    .. code:: python
+
+        # a specific agent
+        sim.agent(id)
+
+        # all agents as iterator
+        sim.agents()
+
+        # agents in a specific distance to a point as iterator
+        sim.agents_in_range(position, distance)
+
+        # agents in a polygon as iterator
+        sim.agents_in_polygon(polygon)
+
+    .. note ::
+        You need to be aware that currently there are no checks done when setting
+        properties on an Agent instance. For example it is possible to set an Agent position
+        outside the walkable area of the Simulation resulting in a crash.
+    """
+
     def __init__(self, backing):
+        """Do not use.
+
+        Retrieve agents from the simulation.
+        """
         self._obj = backing
 
     @property
-    def id(self):
+    def id(self) -> int:
+        """Numeric id of the agent in this simulation."""
         return self._obj.id
 
     @property
-    def journey_id(self):
+    def journey_id(self) -> int:
+        """Id of the :class:`~jupedsim.journey.JourneyDescription` the agent is currently following."""
         return self._obj.journey_id
 
     @journey_id.setter
-    def journey_id(self, id):
+    def journey_id(self, id: int):
         self._obj.journey_id = id
 
     @property
-    def stage_id(self):
+    def stage_id(self) -> int:
+        """Id of the :class:`Stage` the Agent is currently targeting."""
         return self._obj.stage_id
 
     @stage_id.setter
-    def stage_id(self, id):
+    def stage_id(self, id: int):
         self._obj.stage_id = id
 
     @property
-    def position(self):
+    def position(self) -> tuple[float, float]:
+        """Position of the agent."""
         return self._obj.position
 
     @position.setter
@@ -41,7 +75,8 @@ class Agent:
         self._obj.position = position
 
     @property
-    def orientation(self):
+    def orientation(self) -> tuple[float, float]:
+        """Orientation of the agent."""
         return self._obj.orientation
 
     @orientation.setter
@@ -49,7 +84,10 @@ class Agent:
         self._obj.orientation = orientation
 
     @property
-    def model(self):
+    def model(
+        self,
+    ) -> GeneralizedCentrifugalForceModelState | VelocityModelState:
+        """Access model specific state of this agent."""
         model = self._obj.model
         if isinstance(model, py_jps.GeneralizedCentrifugalForceModelState):
             return GeneralizedCentrifugalForceModelState(model)

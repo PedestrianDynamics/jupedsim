@@ -26,6 +26,15 @@ from jupedsim.tracing import Trace
 
 
 class Simulation:
+    """Defines a simulation of pedestrian movement over a continuous walkable area.
+
+    Movement of agents is described with Journeys, Stages and Transitions.
+    Agents can be added and removed at will. The simulation processes one step
+    at a time. No automatic stop condition exists. You can simulate multiple
+    disconnected walkable areas by instantiating multiple instances of
+    simulation.
+    """
+
     def __init__(
         self,
         *,
@@ -41,6 +50,38 @@ class Simulation:
         trajectory_writer: TrajectoryWriter | None = None,
         **kwargs: Any,
     ) -> None:
+        """Creates a Simulation.
+
+        Arguments:
+            model (VelocityModelParameters | GeneralizedCentrifugalForceModelParameters):
+                Defines the operational model used in the simulation.
+            geometry (str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]]):
+                Data to create the geometry out of. Data may be supplied as:
+
+                * list of 2d points describing the outer boundary, holes may be added with use of `excluded_areas` kw-argument
+
+                * :class:`~shapely.GeometryCollection` consisting only out of :class:`Polygons <shapely.Polygon>`, :class:`MultiPolygons <shapely.MultiPolygon>` and :class:`MultiPoints <shapely.MultiPoint>`
+
+                * :class:`~shapely.MultiPolygon`
+
+                * :class:`~shapely.Polygon`
+
+                * :class:`~shapely.MultiPoint` forming a "simple" polygon when points are interpreted as linear ring without repetition of the start/end point.
+
+                * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
+
+            dt (float): Iteration step size in seconds. It is recommended to
+                leave this at its default value.
+            trajectory_writer (TrajectoryWriter): Any object implementing the
+                TrajectoryWriter interface. JuPedSim provides a writer that outputs trajectory data
+                in a sqlite database. If you want other formats such as CSV you need to provide
+                your own custom implementation.
+
+        Keyword Arguments:
+            excluded_areas (list[list[tuple(float, float)]]): describes exclusions
+                from the walkable area. Only use this argument if `geometry` was
+                provided as list[tuple[float, float]].
+        """
         if isinstance(model, VelocityModelParameters):
             model_builder = py_jps.VelocityModelBuilder(
                 a_ped=model.a_ped,
@@ -72,9 +113,30 @@ class Simulation:
     def add_waypoint_stage(
         self, position: tuple[float, float], distance
     ) -> int:
+        """Add a new waypoint stage to this simulation.
+
+        Arguments:
+            position (tuple[float, float]): Position of the waypoint
+            distance (float): Minimum distance required to reach this waypoint
+
+        Returns:
+            Id of the new stage.
+
+        """
         return self._obj.add_waypoint_stage(position, distance)
 
     def add_queue_stage(self, positions: list[tuple[float, float]]) -> int:
+        """Add a new queue state to this simulation.
+
+        Arguments:
+            positions (list[tuple[float, float]]): Ordered list of the waiting
+                points of this queue. The first one in the list is the head of
+                the queue while the last one is the back of the queue.
+
+        Returns:
+            Id of the new stage.
+
+        """
         return self._obj.add_queue_stage(positions)
 
     def add_waiting_set_stage(

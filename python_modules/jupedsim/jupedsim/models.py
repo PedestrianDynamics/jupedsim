@@ -13,10 +13,10 @@ class VelocityModelParameters:
     All attributes are initialized with reasonably good defaults.
 
     Attributes:
-        a_ped (float): TODO
-        d_ped (float): TODO
-        a_wall (float):
-        d_wall (float):
+        a_ped (float): Strength of the repulsion from neighbors
+        d_ped (float): Range of the repulsion from neighbors
+        a_wall (float): Strength of the repulsion from geometry boundaries
+        d_wall (float): Range of the repulsion from geometry boundaries
     """
 
     a_ped: float = 8.0
@@ -56,7 +56,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
     """
     Agent parameters for Generalized Centrifugal Force Model.
 
-    See the scientifc publication for more details about this model
+    See the scientific publication for more details about this model
     https://arxiv.org/abs/1008.4297
 
     Objects of this type can be used to add new agents to the simulation and are
@@ -64,8 +64,8 @@ class GeneralizedCentrifugalForceModelAgentParameters:
     objects returned by the simulation has no effect on the agents as this object
     is a copy of internal state.
 
-    Setting properties on this object is only useful when adding multiple agents
-    and they share many properties without reprating them on each 'add_agent'
+    Setting properties on this object is only useful when adding multiple agents,
+    and they share many properties without repeating them on each 'add_agent'
     call
     """
 
@@ -74,11 +74,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
 
     @property
     def speed(self) -> float:
-        """
-        Current speed
-
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
+        """Current speed."""
         return self._obj.speed
 
     @speed.setter
@@ -87,11 +83,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
 
     @property
     def e0(self) -> tuple[float, float]:
-        """
-        e0 (Currently desired orientation)
-
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
+        """Desired orientation."""
         return self._obj.e0
 
     @e0.setter
@@ -100,11 +92,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
 
     @property
     def position(self) -> tuple[float, float]:
-        """
-        Current position
-
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
+        """Current position."""
         return self._obj.position
 
     @position.setter
@@ -113,11 +101,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
 
     @property
     def orientation(self) -> tuple[float, float]:
-        """
-        Current orientation
-
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
+        """Current orientation."""
         return self._obj.orientation
 
     @orientation.setter
@@ -126,11 +110,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
 
     @property
     def journey_id(self) -> int:
-        """
-        Id of curently followed journey
-
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
+        """Id of journey to follow."""
         return self._obj.journey_id
 
     @journey_id.setter
@@ -139,10 +119,9 @@ class GeneralizedCentrifugalForceModelAgentParameters:
 
     @property
     def stage_id(self) -> int:
-        """
-        Id of curently followed stage
+        """Id of stage to target.
 
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
+        Needs to be part of the journey the agent is using
         """
         return self._obj.stage_id
 
@@ -152,9 +131,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
 
     @property
     def mass(self) -> float:
-        """
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
+        """Mass of this agent."""
         return self._obj.mass
 
     @mass.setter
@@ -163,9 +140,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
 
     @property
     def tau(self) -> float:
-        """
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
+        """Relaxat"""
         return self._obj.tau
 
     @tau.setter
@@ -174,9 +149,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
 
     @property
     def v0(self) -> float:
-        """
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
+        """Maximum speed of this agent."""
         return self._obj.v0
 
     @v0.setter
@@ -185,9 +158,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
 
     @property
     def a_v(self) -> float:
-        """
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
+        """Ellipsis stretch factor along movement axis"""
         return self._obj.a_v
 
     @a_v.setter
@@ -196,9 +167,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
 
     @property
     def a_min(self) -> float:
-        """
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
+        """Minimum length of ellipsis semi-axis along movement axis."""
         return self._obj.a_min
 
     @a_min.setter
@@ -207,9 +176,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
 
     @property
     def b_min(self) -> float:
-        """
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
+        """Minimum length of ellipsis semi-axis orthogonal to movement axis."""
         return self._obj.b_min
 
     @b_min.setter
@@ -218,9 +185,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
 
     @property
     def b_max(self) -> float:
-        """
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
+        """Maximum length of ellipsis semi-axis orthogonal to movement axis."""
         return self._obj.b_max
 
     @b_max.setter
@@ -229,11 +194,6 @@ class GeneralizedCentrifugalForceModelAgentParameters:
 
     @property
     def id(self) -> int:
-        """
-        Id of this Agent
-
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
         return self._obj.id
 
     @id.setter
@@ -248,7 +208,7 @@ class VelocityModelAgentParameters:
     """
     Agent parameters for Velocity Model.
 
-    See the scientifc publication for more details about this model
+    See the scientific publication for more details about this model
     https://arxiv.org/abs/1512.05597
 
     Objects of this type can be used to add new agents to the simulation and are
@@ -256,8 +216,8 @@ class VelocityModelAgentParameters:
     objects returned by the simulation has no effect on the agents as this object
     is a copy of internal state.
 
-    Setting properties on this object is only useful when adding multiple agents
-    and they share many properties without reprating them on each 'add_agent'
+    Setting properties on this object is only useful when adding multiple agents,
+    and they share many properties without repeating them on each 'add_agent'
     call
     """
 
@@ -266,11 +226,7 @@ class VelocityModelAgentParameters:
 
     @property
     def position(self) -> tuple[float, float]:
-        """
-        Current position
-
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
+        """Position of the agent."""
         return self._obj.position
 
     @position.setter
@@ -279,11 +235,7 @@ class VelocityModelAgentParameters:
 
     @property
     def orientation(self) -> tuple[float, float]:
-        """
-        Current orientation
-
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
+        """Orientation of the agent."""
         return self._obj.orientation
 
     @orientation.setter
@@ -292,11 +244,7 @@ class VelocityModelAgentParameters:
 
     @property
     def journey_id(self) -> int:
-        """
-        Id of curently followed journey
-
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
+        """Id of the journey to follow."""
         return self._obj.journey_id
 
     @journey_id.setter
@@ -305,10 +253,9 @@ class VelocityModelAgentParameters:
 
     @property
     def stage_id(self) -> int:
-        """
-        Id of curently followed stage
+        """Id of stage to target.
 
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
+        Needs to be part of the journey the agent is using
         """
         return self._obj.stage_id
 
@@ -318,9 +265,7 @@ class VelocityModelAgentParameters:
 
     @property
     def time_gap(self) -> float:
-        """
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
+        """yes"""
         return self._obj.time_gap
 
     @time_gap.setter
@@ -329,9 +274,7 @@ class VelocityModelAgentParameters:
 
     @property
     def v0(self) -> float:
-        """
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
+        """Desired speed of this agent."""
         return self._obj.v0
 
     @v0.setter
@@ -340,9 +283,7 @@ class VelocityModelAgentParameters:
 
     @property
     def radius(self) -> float:
-        """
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
+        """Radius of this agent."""
         return self._obj.radius
 
     @radius.setter
@@ -351,11 +292,6 @@ class VelocityModelAgentParameters:
 
     @property
     def id(self) -> int:
-        """
-        Id of this Agent
-
-        NOTE: Setting this property has no effect on agents that are already part of the simulation
-        """
         return self._obj.id
 
     @id.setter
@@ -372,6 +308,7 @@ class GeneralizedCentrifugalForceModelState:
 
     @property
     def speed(self) -> float:
+        """Speed of this agent."""
         return self._obj.speed
 
     @speed.setter
@@ -380,6 +317,7 @@ class GeneralizedCentrifugalForceModelState:
 
     @property
     def e0(self) -> tuple[float, float]:
+        """Desired direction of this agent."""
         return self._obj.e0
 
     @e0.setter
@@ -396,6 +334,7 @@ class GeneralizedCentrifugalForceModelState:
 
     @property
     def v0(self) -> float:
+        """Maximum speed of this agent."""
         return self._obj.v0
 
     @v0.setter
@@ -404,6 +343,7 @@ class GeneralizedCentrifugalForceModelState:
 
     @property
     def a_v(self) -> float:
+        """Stretch of the elipsis semi-axis along the movement vector."""
         return self._obj.a_v
 
     @a_v.setter
@@ -412,6 +352,7 @@ class GeneralizedCentrifugalForceModelState:
 
     @property
     def a_min(self) -> float:
+        """Minimum length of the ellipsis semi-axis along the movement vector."""
         return self._obj.a_min
 
     @a_min.setter
@@ -420,6 +361,7 @@ class GeneralizedCentrifugalForceModelState:
 
     @property
     def b_min(self) -> float:
+        """Minimum length of the ellipsis semi-axis orthogonal to the movement vector."""
         return self._obj.b_min
 
     @b_min.setter
@@ -428,6 +370,7 @@ class GeneralizedCentrifugalForceModelState:
 
     @property
     def b_max(self) -> float:
+        """Maximum length of the ellipsis semi-axis orthogonal to the movement vector."""
         return self._obj.b_max
 
     @b_max.setter
@@ -440,14 +383,6 @@ class VelocityModelState:
         self._obj = backing
 
     @property
-    def e0(self) -> tuple[float, float]:
-        return self._obj.e0
-
-    @e0.setter
-    def e0(self, e0):
-        self._obj.e0 = e0
-
-    @property
     def time_gap(self) -> float:
         return self._obj.time_gap
 
@@ -456,15 +391,8 @@ class VelocityModelState:
         self._obj.time_gap = time_gap
 
     @property
-    def tau(self) -> float:
-        return self._obj.tau
-
-    @tau.setter
-    def tau(self, tau):
-        self._obj.tau = tau
-
-    @property
     def v0(self) -> float:
+        """Maximum speed of this agent."""
         return self._obj.v0
 
     @v0.setter
@@ -473,6 +401,7 @@ class VelocityModelState:
 
     @property
     def radius(self) -> float:
+        """Radius of this agent."""
         return self._obj.radius
 
     @radius.setter

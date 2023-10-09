@@ -30,12 +30,21 @@ extensions = [
     "notfound.extension",
     "sphinx.ext.mathjax",
     "myst_nb",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.napoleon",
 ]
 
 templates_path = ["_templates"]
 exclude_patterns = []
 
-# automatic generation of api doc
+# -- Linking ---------------------------------------------------------
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3/", None),
+    "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
+    "shapely": ("https://shapely.readthedocs.io/en/2.0.1/", None),
+}
+
+# -- Automatic generation of API doc -----------------------------------------
 autoapi_dirs = [
     "../../python_modules/jupedsim",
 ]
@@ -48,8 +57,11 @@ autoapi_options = [
     "imported-members",
 ]
 autoapi_ignore = ["**/tests/**"]
-autoapi_member_order = ["groupwise"]
+# autoapi_member_order = "groupwise"
+autodoc_typehints = "description"
+autoapi_python_class_content = "both"
 
+add_module_names = False
 
 # -- Automatic execution of jupyter notebooks --------------------------------
 nb_execution_excludepatterns = []
