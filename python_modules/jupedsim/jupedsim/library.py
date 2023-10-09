@@ -9,40 +9,44 @@ import jupedsim.native as py_jps
 # TODO(kkratz): add typehints for function params
 def set_debug_callback(fn) -> None:
     """
-    Set reciever for debug messages.
+    Set receiver for debug messages.
 
     Arguments:
         fn (fn<str>): function that accepts a msg as string
+
     """
     py_jps.set_debug_callback(fn)
 
 
 def set_info_callback(fn) -> None:
     """
-    Set reciever for info messages.
+    Set receiver for info messages.
 
     Arguments:
         fn (fn<str>): function that accepts a msg as string
+
     """
     py_jps.set_info_callback(fn)
 
 
 def set_warning_callback(fn) -> None:
     """
-    Set reciever for warning messages.
+    Set receiver for warning messages.
 
     Arguments:
         fn (fn<str>): function that accepts a msg as string
+
     """
     py_jps.set_warning_callback(fn)
 
 
 def set_error_callback(fn) -> None:
     """
-    Set reciever for error messages.
+    Set receiver for error messages.
 
     Arguments:
         fn (fn<str>): function that accepts a msg as string
+
     """
     py_jps.set_error_callback(fn)
 
@@ -55,7 +59,9 @@ class BuildInfo:
     def git_commit_hash(self) -> str:
         """SHA1 commit hash of this version.
 
-        Returns (str): SHA1 of this version.
+        Returns:
+            SHA1 of this version.
+
         """
         return self.__obj.git_commit_hash
 
@@ -63,7 +69,9 @@ class BuildInfo:
     def git_commit_date(self) -> str:
         """Date this commit was created.
 
-        Returns (str): Date the commit of this version as string.
+        Returns:
+            Date the commit of this version as string.
+
         """
         return self.__obj.git_commit_date
 
@@ -71,15 +79,18 @@ class BuildInfo:
     def git_branch(self) -> str:
         """Branch this commit was crated from.
 
-        Returns (str): name of the branch this version was build from.
+        Returns:
+            name of the branch this version was build from.
+
         """
         return self.__obj.git_branch
 
     @property
     def compiler(self) -> str:
-        """Compiler the native code was compield with.
+        """Compiler the native code was compiled with.
 
-        Returns (str): Compiler identification.
+        Returns:
+            Compiler identification.
         """
         return self.__obj.compiler
 
@@ -87,7 +98,8 @@ class BuildInfo:
     def compiler_version(self) -> str:
         """Compiler version the native code was compiled with.
 
-        Returns (str): Compiler version number.
+        Returns:
+            Compiler version number.
         """
         return self.__obj.compiler_version
 
@@ -110,9 +122,11 @@ def get_build_info() -> BuildInfo:
 
     The received :class:`BuildInfo` is printable, e.g.
 
-    print(get_build_info())
+    .. code:: python
 
-    This will display a human readable string stating
+        print(get_build_info())
+
+    This will display a human-readable string stating
     basic information about this library.
     """
     return BuildInfo()
