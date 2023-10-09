@@ -41,7 +41,9 @@ class Recording:
         Arguments:
             index (int): index of the frame to access.
 
-        Returns (RecordingFrame): A single frame.
+        Returns:
+            A single frame.
+
         """
 
         def agent_row(cursor, row):
@@ -56,10 +58,10 @@ class Recording:
         return RecordingFrame(index, res.fetchall())
 
     def geometry(self) -> shapely.GeometryCollection:
-        """Access this recordings geometry.
+        """Access this recordings' geometry.
 
-        Returns (shapely.GeometryCollection): walkable area of the simulation
-            that created this recording.
+        Returns:
+            walkable area of the simulation that created this recording.
 
         """
         cur = self.db.cursor()
@@ -82,9 +84,11 @@ class Recording:
 
     @property
     def num_frames(self) -> int:
-        """Access the number of frmaes stored in this recording.
+        """Access the number of frames stored in this recording.
 
-        Returns (int): Number of frames in this recording.
+        Returns:
+            Number of frames in this recording.
+
         """
         cur = self.db.cursor()
         res = cur.execute("SELECT MAX(frame) FROM trajectory_data")
@@ -94,7 +98,9 @@ class Recording:
     def fps(self) -> float:
         """How many frames are stored per second.
 
-        Returns (float): Frames per second of this recording.
+        Returns:
+            Frames per second of this recording.
+
         """
         cur = self.db.cursor()
         res = cur.execute("SELECT value from metadata WHERE key == 'fps'")
