@@ -32,6 +32,7 @@ extensions = [
     "myst_nb",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
+    "sphinx.ext.autosectionlabel",
 ]
 
 templates_path = ["_templates"]

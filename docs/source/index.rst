@@ -8,6 +8,7 @@ JuPedSim
 
    Getting started <notebooks/getting_started>
    API reference <api/jupedsim/index>
+   Concepts <concepts/index>
    Notebooks <notebooks/index>
    History <history>
    Disclaimer <disclaimer>
@@ -29,5 +30,5 @@ JuPedSim as a Python package. See: :ref:`_history`
 
 .. note::
    If you find refernces to versions < 0.10 you need to be aware that they
-   refer to the old CLI application. 
+   refer to the old CLI application.
 
