@@ -15,6 +15,8 @@ class Agent:
 
     Agents can be accessed with:
 
+    .. code:: python
+
         # a specific agent
         sim.agent(id)
 
@@ -42,16 +44,12 @@ class Agent:
 
     @property
     def id(self) -> int:
-        """Numeric id of the agent in this simulation.
-
-        Returns (int):
-            Id of this agent.
-        """
+        """Numeric id of the agent in this simulation."""
         return self._obj.id
 
     @property
     def journey_id(self) -> int:
-        """Id of the :class:`Journey` the agent is currently following."""
+        """Id of the :class:`~jupedsim.journey.JourneyDescription` the agent is currently following."""
         return self._obj.journey_id
 
     @journey_id.setter
@@ -78,7 +76,7 @@ class Agent:
 
     @property
     def orientation(self) -> tuple[float, float]:
-        """Orientation of the agent"""
+        """Orientation of the agent."""
         return self._obj.orientation
 
     @orientation.setter
@@ -86,12 +84,10 @@ class Agent:
         self._obj.orientation = orientation
 
     @property
-    def model(self):
-        """Access model specific state of this agent.
-
-        Returns (GeneralizedCentrifugalForceModelState | VelocityModelState):
-            State specific to the operational model of the agent.
-        """
+    def model(
+        self,
+    ) -> GeneralizedCentrifugalForceModelState | VelocityModelState:
+        """Access model specific state of this agent."""
         model = self._obj.model
         if isinstance(model, py_jps.GeneralizedCentrifugalForceModelState):
             return GeneralizedCentrifugalForceModelState(model)
