@@ -58,15 +58,15 @@ class Simulation:
             geometry (str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]]):
                 Data to create the geometry out of. Data may be supplied as:
 
-                * list of 2d points describing the outer boundary, holes may be added with use of `excluded_area`s kw-argument
+                * list of 2d points describing the outer boundary, holes may be added with use of `excluded_areas` kw-argument
 
-                * GeometryCollection consisting only out of Polygons, MultiPolygons and MultiPoints
+                * :class:`~shapely.GeometryCollection` consisting only out of :class:`Polygons <shapely.Polygon>`, :class:`MultiPolygons <shapely.MultiPolygon>` and :class:`MultiPoints <shapely.MultiPoint>`
 
-                * MultiPolygon
+                * :class:`~shapely.MultiPolygon`
 
-                * Polygon
+                * :class:`~shapely.Polygon`
 
-                * MultiPoint forming a "simple" polygon when points are interpreted as linear ring without repetition of the start/end point.
+                * :class:`~shapely.MultiPoint` forming a "simple" polygon when points are interpreted as linear ring without repetition of the start/end point.
 
                 * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
 
