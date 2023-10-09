@@ -2,11 +2,8 @@
 
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
-import logging
 import pathlib
 import sys
-
-from shapely import GeometryCollection, Polygon
 
 import jupedsim as jps
 
@@ -71,14 +68,9 @@ def main():
 
     journey_id = simulation.add_journey(journey)
 
-    agent_parameters = jps.VelocityModelAgentParameters()
-    agent_parameters.journey_id = journey_id
-    agent_parameters.stage_id = waypoint_middle
-    agent_parameters.orientation = (1.0, 0.0)
-    agent_parameters.position = (0.0, 0.0)
-    agent_parameters.time_gap = 1
-    agent_parameters.v0 = 1.2
-    agent_parameters.radius = 0.3
+    agent_parameters = jps.VelocityModelAgentParameters(
+        journey_id=journey_id, stage_id=waypoint_middle, radius=0.3
+    )
 
     for x in range(-49, -9, 1):
         agent_parameters.position = (x, 0)

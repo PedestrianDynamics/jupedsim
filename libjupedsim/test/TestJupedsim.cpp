@@ -97,10 +97,8 @@ TEST(Simulation, CanSimulate)
 
     JPS_VelocityModelAgentParameters agent_parameters{};
     agent_parameters.journeyId = journeyId;
-    agent_parameters.orientation = JPS_Point{1.0, 0.0};
     agent_parameters.position = JPS_Point{0.0, 0.0};
     agent_parameters.time_gap = 1;
-    agent_parameters.tau = 0.5;
     agent_parameters.v0 = 1.2;
     agent_parameters.radius = 0.3;
 
@@ -120,8 +118,8 @@ struct SimulationTest : public ::testing::Test {
     JPS_JourneyId journey_id{};
     JPS_StageId stage_id{};
     std::array<JPS_VelocityModelAgentParameters, 2> agent_templates{
-        JPS_VelocityModelAgentParameters{{}, {}, {1, 1}, 0, 0, 1, 0.5, 1.5, 0.3, 0},
-        JPS_VelocityModelAgentParameters{{}, {}, {1, 1}, 0, 0, 1, 0.5, 1.5, 0.3, 0},
+        JPS_VelocityModelAgentParameters{{}, 0, 0, 1, 1.5, 0.3, 0},
+        JPS_VelocityModelAgentParameters{{}, 0, 0, 1, 1.5, 0.3, 0},
     };
 
     void SetUp() override

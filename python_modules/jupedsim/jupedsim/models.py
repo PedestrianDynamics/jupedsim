@@ -52,158 +52,78 @@ class GeneralizedCentrifugalForceModelParameters:
     maxf_wall: float = 3
 
 
+@dataclass(kw_only=True)
 class GeneralizedCentrifugalForceModelAgentParameters:
     """
-    Agent parameters for Generalized Centrifugal Force Model.
+    Parameters required to create an Agent in the Generalized Centrifugal Force
+    Model.
 
     See the scientific publication for more details about this model
     https://arxiv.org/abs/1008.4297
 
-    Objects of this type can be used to add new agents to the simulation and are
-    returned by the simulation when inspecting agent state. Setting properties on
-    objects returned by the simulation has no effect on the agents as this object
-    is a copy of internal state.
+    .. note::
+        Insances of this type are copied when creating the agent, you can savely
+        create one instance of this type and modify it between calls to `add_agent`
 
-    Setting properties on this object is only useful when adding multiple agents,
-    and they share many properties without repeating them on each 'add_agent'
-    call
+        E.g.:
+            positions = [...] # List of initial agent positions
+            params = GeneralizedCentrifugalForceModelAgentParameters(speed=0.9) # all agents are slower
+            for p in positions:
+                params.position = p
+                sim.add_agent(params)
+
+    Attributes:
+        speed (float):
+        e0 (tuple[float, float]):
+        position (tuple[float, float]):
+        orientation (tuple[float, float]):
+        journey_id (int):
+        stage_id (int):
+        mass (float):
+        tau (float):
+        v0 (float):
+        a_v (float):
+        a_min (float):
+        b_min (float):
+        b_max (float):
+        id (int):
     """
 
-    def __init__(self):
-        self._obj = py_jps.GCFMModelAgentParameters()
+    speed: float = 0.0
+    e0: tuple[float, float] = (0.0, 0.0)
+    position: tuple[float, float] = (0.0, 0.0)
+    orientation: tuple[float, float] = (0.0, 0.0)
+    journey_id: int = -1
+    stage_id: int = -1
+    mass: float = 1
+    tau: float = 0.5
+    v0: float = 1.2
+    a_v: float = 1
+    a_min: float = 0.2
+    b_min: float = 0.2
+    b_max: float = 0.4
+    id: int = -1
 
-    @property
-    def speed(self) -> float:
-        """Current speed."""
-        return self._obj.speed
-
-    @speed.setter
-    def speed(self, value: float) -> None:
-        self._obj.speed = value
-
-    @property
-    def e0(self) -> tuple[float, float]:
-        """Desired orientation."""
-        return self._obj.e0
-
-    @e0.setter
-    def e0(self, value: tuple[float, float]) -> None:
-        self._obj.e0 = value
-
-    @property
-    def position(self) -> tuple[float, float]:
-        """Current position."""
-        return self._obj.position
-
-    @position.setter
-    def position(self, value: tuple[float, float]) -> None:
-        self._obj.position = value
-
-    @property
-    def orientation(self) -> tuple[float, float]:
-        """Current orientation."""
-        return self._obj.orientation
-
-    @orientation.setter
-    def orientation(self, value: tuple[float, float]) -> None:
-        self._obj.orientation = value
-
-    @property
-    def journey_id(self) -> int:
-        """Id of journey to follow."""
-        return self._obj.journey_id
-
-    @journey_id.setter
-    def journey_id(self, value: int) -> None:
-        self._obj.journey_id = value
-
-    @property
-    def stage_id(self) -> int:
-        """Id of stage to target.
-
-        Needs to be part of the journey the agent is using
-        """
-        return self._obj.stage_id
-
-    @stage_id.setter
-    def stage_id(self, value: int) -> None:
-        self._obj.stage_id = value
-
-    @property
-    def mass(self) -> float:
-        """Mass of this agent."""
-        return self._obj.mass
-
-    @mass.setter
-    def mass(self, value: float) -> None:
-        self._obj.mass = value
-
-    @property
-    def tau(self) -> float:
-        """Relaxat"""
-        return self._obj.tau
-
-    @tau.setter
-    def tau(self, value: float) -> None:
-        self._obj.tau = value
-
-    @property
-    def v0(self) -> float:
-        """Maximum speed of this agent."""
-        return self._obj.v0
-
-    @v0.setter
-    def v0(self, value: float) -> None:
-        self._obj.v0 = value
-
-    @property
-    def a_v(self) -> float:
-        """Ellipsis stretch factor along movement axis"""
-        return self._obj.a_v
-
-    @a_v.setter
-    def a_v(self, value: float) -> None:
-        self._obj.a_v = value
-
-    @property
-    def a_min(self) -> float:
-        """Minimum length of ellipsis semi-axis along movement axis."""
-        return self._obj.a_min
-
-    @a_min.setter
-    def a_min(self, value: float) -> None:
-        self._obj.a_min = value
-
-    @property
-    def b_min(self) -> float:
-        """Minimum length of ellipsis semi-axis orthogonal to movement axis."""
-        return self._obj.b_min
-
-    @b_min.setter
-    def b_min(self, value: float) -> None:
-        self._obj.b_min = value
-
-    @property
-    def b_max(self) -> float:
-        """Maximum length of ellipsis semi-axis orthogonal to movement axis."""
-        return self._obj.b_max
-
-    @b_max.setter
-    def b_max(self, value: float) -> None:
-        self._obj.b_max = value
-
-    @property
-    def id(self) -> int:
-        return self._obj.id
-
-    @id.setter
-    def id(self, value: int) -> None:
-        self._obj.id = value
-
-    def __str__(self) -> str:
-        return self._obj.__repr__()
+    def as_native(self) -> py_jps.GCFMModelAgentParameters:
+        return py_jps.GCFMModelAgentParameters(
+            speed=self.speed,
+            e0=self.e0,
+            position=self.position,
+            orientation=self.orientation,
+            journey_id=self.journey_id,
+            stage_id=self.stage_id,
+            mass=self.mass,
+            tau=self.tau,
+            v0=self.v0,
+            a_v=self.a_v,
+            a_min=self.a_min,
+            b_min=self.b_min,
+            b_max=self.b_max,
+            id=self.id,
+        )
 
 
+@dataclass(kw_only=True)
 class VelocityModelAgentParameters:
     """
     Agent parameters for Velocity Model.
@@ -211,95 +131,45 @@ class VelocityModelAgentParameters:
     See the scientific publication for more details about this model
     https://arxiv.org/abs/1512.05597
 
-    Objects of this type can be used to add new agents to the simulation and are
-    returned by the simulation when inspecting agent state. Setting properties on
-    objects returned by the simulation has no effect on the agents as this object
-    is a copy of internal state.
+    .. note::
+        Insances of this type are copied when creating the agent, you can savely
+        create one instance of this type and modify it between calls to `add_agent`
 
-    Setting properties on this object is only useful when adding multiple agents,
-    and they share many properties without repeating them on each 'add_agent'
-    call
+        E.g.:
+            positions = [...] # List of initial agent positions
+            params = VelocityModelAgentParameters(speed=0.9) # all agents are slower
+            for p in positions:
+                params.position = p
+                sim.add_agent(params)
+
+    Attributes:
+        position (tuple[float, float]):
+        time_gap (float):
+        v0 (float):
+        radius (float):
+        journey_id (int):
+        stage_id (int):
+        id (int):
     """
 
-    def __init__(self):
-        self._obj = py_jps.VelocityModelAgentParameters()
+    position: tuple[float, float] = (0.0, 0.0)
+    time_gap: float = 1.0
+    v0: float = 1.2
+    radius: float = 0.2
+    journey_id: int = 0
+    stage_id: int = 0
+    id: int = 0
 
-    @property
-    def position(self) -> tuple[float, float]:
-        """Position of the agent."""
-        return self._obj.position
-
-    @position.setter
-    def position(self, value: tuple[float, float]) -> None:
-        self._obj.position = value
-
-    @property
-    def orientation(self) -> tuple[float, float]:
-        """Orientation of the agent."""
-        return self._obj.orientation
-
-    @orientation.setter
-    def orientation(self, value: tuple[float, float]) -> None:
-        self._obj.orientation = value
-
-    @property
-    def journey_id(self) -> int:
-        """Id of the journey to follow."""
-        return self._obj.journey_id
-
-    @journey_id.setter
-    def journey_id(self, value: int) -> None:
-        self._obj.journey_id = value
-
-    @property
-    def stage_id(self) -> int:
-        """Id of stage to target.
-
-        Needs to be part of the journey the agent is using
-        """
-        return self._obj.stage_id
-
-    @stage_id.setter
-    def stage_id(self, value: int) -> None:
-        self._obj.stage_id = value
-
-    @property
-    def time_gap(self) -> float:
-        """yes"""
-        return self._obj.time_gap
-
-    @time_gap.setter
-    def time_gap(self, value: float) -> None:
-        self._obj.time_gap = value
-
-    @property
-    def v0(self) -> float:
-        """Desired speed of this agent."""
-        return self._obj.v0
-
-    @v0.setter
-    def v0(self, value: float) -> None:
-        self._obj.v0 = value
-
-    @property
-    def radius(self) -> float:
-        """Radius of this agent."""
-        return self._obj.radius
-
-    @radius.setter
-    def radius(self, value: float) -> None:
-        self._obj.radius = value
-
-    @property
-    def id(self) -> int:
-        return self._obj.id
-
-    @id.setter
-    def id(self, value: int) -> None:
-        self._obj.id = value
-
-    def __str__(self) -> str:
-        return self._obj.__repr__()
+    def as_native(self) -> py_jps.VelocityModelAgentParameters:
+        return py_jps.VelocityModelAgentParameters(
+            position=self.position,
+            time_gap=self.time_gap,
+            v0=self.v0,
+            radius=self.radius,
+            journey_id=self.journey_id,
+            stage_id=self.stage_id,
+            id=self.id,
+        )
 
 
 class GeneralizedCentrifugalForceModelState:

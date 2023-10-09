@@ -12,7 +12,6 @@ def corridor():
     return jps.Simulation(
         model=jps.VelocityModelParameters(),
         geometry=[(0, 0), (10, 0), (10, 2), (0, 2)],
-        dt=0.01,
     )
 
 
@@ -21,14 +20,9 @@ def test_set_v0(corridor):
     wp = sim.add_waypoint_stage((10, 1), 0.5)
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
-    agent = jps.VelocityModelAgentParameters()
-    agent.journey_id = journey_id
-    agent.stage_id = wp
-    agent.position = (1, 1)
-    agent.orientation = (1, 0)
-    agent.time_gap = 1
-    agent.v0 = 1
-    agent.radius = 0.15
+    agent = jps.VelocityModelAgentParameters(
+        journey_id=journey_id, stage_id=wp, position=(1, 1), v0=1
+    )
     agent_id = sim.add_agent(agent)
     assert math.isclose(sim.agent(agent_id).position[0], 1)
     for _ in range(0, 100):

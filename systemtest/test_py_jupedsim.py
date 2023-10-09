@@ -28,15 +28,6 @@ def test_can_query_agents_in_range():
 
     journey_id = simulation.add_journey(journey)
 
-    agent_parameters = jps.VelocityModelAgentParameters()
-    agent_parameters.journey_id = journey_id
-    agent_parameters.stage_id = exit
-    agent_parameters.orientation = (1.0, 0.0)
-    agent_parameters.position = (0.0, 0.0)
-    agent_parameters.time_gap = 1
-    agent_parameters.v0 = 1.2
-    agent_parameters.radius = 0.15
-
     initial_agent_positions = [
         (10, 10),
         (20, 10),
@@ -52,9 +43,16 @@ def test_can_query_agents_in_range():
         range(10, 10 + len(initial_agent_positions)),
     ):
         print(id)
-        agent_parameters.position = new_pos
-        agent_parameters.id = id
-        expected_agent_ids.add(simulation.add_agent(agent_parameters))
+        expected_agent_ids.add(
+            simulation.add_agent(
+                jps.VelocityModelAgentParameters(
+                    position=new_pos,
+                    journey_id=journey_id,
+                    stage_id=exit,
+                    id=id,
+                )
+            )
+        )
 
     actual_ids_in_range = list(
         simulation.agents_in_range(initial_agent_positions[2], 10)
@@ -92,29 +90,32 @@ def test_can_run_simulation():
 
     journey_id = simulation.add_journey(journey)
 
-    agent_parameters = jps.VelocityModelAgentParameters()
-    agent_parameters.journey_id = journey_id
-    agent_parameters.stage_id = exit_stage_id
-    agent_parameters.orientation = (1.0, 0.0)
-    agent_parameters.position = (0.0, 0.0)
-    agent_parameters.time_gap = 1
-    agent_parameters.v0 = 1.2
-    agent_parameters.radius = 0.15
-
     initial_agent_positions = [(7, 7), (1, 3), (1, 5), (1, 7), (2, 7)]
 
     expected_agent_ids = set()
 
     for new_pos in initial_agent_positions:
-        agent_parameters.position = new_pos
-        expected_agent_ids.add(simulation.add_agent(agent_parameters))
+        expected_agent_ids.add(
+            simulation.add_agent(
+                jps.VelocityModelAgentParameters(
+                    position=new_pos,
+                    journey_id=journey_id,
+                    stage_id=exit_stage_id,
+                )
+            )
+        )
 
     actual_agent_ids = {agent.id for agent in simulation.agents()}
 
     assert actual_agent_ids == expected_agent_ids
 
-    agent_parameters.position = (6, 6)
-    agent_id = simulation.add_agent(agent_parameters)
+    agent_id = simulation.add_agent(
+        jps.VelocityModelAgentParameters(
+            position=(6, 6),
+            journey_id=journey_id,
+            stage_id=exit_stage_id,
+        )
+    )
     assert simulation.remove_agent(agent_id)
     with pytest.raises(RuntimeError, match=r"Unknown agent id \d+"):
         assert simulation.remove_agent(agent_id)
@@ -166,16 +167,6 @@ def test_can_wait():
     )
 
     journey_id = simulation.add_journey(journey)
-
-    agent_parameters = jps.VelocityModelAgentParameters()
-    agent_parameters.journey_id = journey_id
-    agent_parameters.stage_id = wp
-    agent_parameters.orientation = (1.0, 0.0)
-    agent_parameters.position = (0.0, 0.0)
-    agent_parameters.time_gap = 1
-    agent_parameters.v0 = 1.2
-    agent_parameters.radius = 0.15
-
     initial_agent_positions = [
         (1, 1),
         (1, 2),
@@ -191,15 +182,27 @@ def test_can_wait():
     expected_agent_ids = set()
 
     for new_pos in initial_agent_positions:
-        agent_parameters.position = new_pos
-        expected_agent_ids.add(simulation.add_agent(agent_parameters))
+        expected_agent_ids.add(
+            simulation.add_agent(
+                jps.VelocityModelAgentParameters(
+                    position=new_pos,
+                    journey_id=journey_id,
+                    stage_id=wp,
+                )
+            )
+        )
 
     actual_agent_ids = {agent.id for agent in simulation.agents()}
 
     assert actual_agent_ids == expected_agent_ids
 
-    agent_parameters.position = (30, 30)
-    agent_id = simulation.add_agent(agent_parameters)
+    agent_id = simulation.add_agent(
+        jps.VelocityModelAgentParameters(
+            position=(30, 30),
+            journey_id=journey_id,
+            stage_id=wp,
+        )
+    )
     assert simulation.remove_agent(agent_id)
     with pytest.raises(RuntimeError, match=r"Unknown agent id \d+"):
         assert simulation.remove_agent(agent_id)
@@ -264,23 +267,29 @@ def test_can_change_journey_while_waiting():
     journeys.append(simulation.add_journey(journey1))
     journeys.append(simulation.add_journey(journey2))
 
-    agent_parameters = jps.VelocityModelAgentParameters()
-    agent_parameters.journey_id = journeys[0]
-    agent_parameters.stage_id = stage_id
-    agent_parameters.orientation = (1.0, 0.0)
-    agent_parameters.position = (0.0, 0.0)
-    agent_parameters.time_gap = 1
-    agent_parameters.v0 = 1.2
-    agent_parameters.radius = 0.15
+    simulation.add_agent(
+        jps.VelocityModelAgentParameters(
+            position=(10, 50),
+            journey_id=journeys[0],
+            stage_id=wp,
+        )
+    )
 
-    agent_parameters.position = (10, 50)
-    simulation.add_agent(agent_parameters)
+    simulation.add_agent(
+        jps.VelocityModelAgentParameters(
+            position=(8, 50),
+            journey_id=journeys[0],
+            stage_id=wp,
+        )
+    )
 
-    agent_parameters.position = (8, 50)
-    simulation.add_agent(agent_parameters)
-
-    agent_parameters.position = (6, 50)
-    simulation.add_agent(agent_parameters)
+    simulation.add_agent(
+        jps.VelocityModelAgentParameters(
+            position=(6, 50),
+            journey_id=journeys[0],
+            stage_id=wp,
+        )
+    )
 
     redirect_once = True
     signal_once = True
@@ -323,23 +332,20 @@ def test_get_single_agent_from_simulation():
     journey = jps.JourneyDescription([exit_id])
 
     journey_id = simulation.add_journey(journey)
-
-    agent_parameters = jps.VelocityModelAgentParameters()
-    agent_parameters.journey_id = journey_id
-    agent_parameters.stage_id = exit_id
-    agent_parameters.orientation = (1.0, 0.0)
-    agent_parameters.position = (0.0, 0.0)
-    agent_parameters.time_gap = 1
-    agent_parameters.v0 = 1.2
-    agent_parameters.radius = 0.15
-
     initial_agent_positions = [(7, 7), (1, 3), (1, 5), (1, 7), (2, 7)]
 
     agent_ids = set()
 
     for new_pos in initial_agent_positions:
-        agent_parameters.position = new_pos
-        agent_ids.add(simulation.add_agent(agent_parameters))
+        agent_ids.add(
+            simulation.add_agent(
+                jps.VelocityModelAgentParameters(
+                    position=new_pos,
+                    journey_id=journey_id,
+                    stage_id=exit_id,
+                )
+            )
+        )
 
     for agent_id in agent_ids:
         assert simulation.agent(agent_id).id == agent_id
@@ -367,19 +373,13 @@ def test_get_agent_non_existing_agent_from_simulation():
 
     journey_id = simulation.add_journey(journey)
 
-    agent_parameters = jps.VelocityModelAgentParameters()
-    agent_parameters.journey_id = journey_id
-    agent_parameters.stage_id = exit_id
-    agent_parameters.orientation = (1.0, 0.0)
-    agent_parameters.position = (0.0, 0.0)
-    agent_parameters.time_gap = 1
-    agent_parameters.v0 = 1.2
-    agent_parameters.radius = 0.15
-
-    initial_agent_position = (7, 7)
-    agent_parameters.position = initial_agent_position
-
-    agent_id = simulation.add_agent(agent_parameters)
+    agent_id = simulation.add_agent(
+        jps.VelocityModelAgentParameters(
+            position=(7, 7),
+            journey_id=journey_id,
+            stage_id=exit_id,
+        )
+    )
 
     assert simulation.agent(agent_id).id == agent_id
 

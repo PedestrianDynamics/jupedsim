@@ -94,10 +94,6 @@ def test_can_share_queue_between_stages():
     ]
 
     agent_parameters = jps.VelocityModelAgentParameters()
-    agent_parameters.orientation = (1.0, 0.0)
-    agent_parameters.time_gap = 1
-    agent_parameters.v0 = 1.2
-    agent_parameters.radius = 0.15
 
     for pos, (journey_id, stage_id) in agents:
         agent_parameters.position = pos
@@ -164,13 +160,9 @@ def test_can_use_stage_proxy():
     assert waypoint.count_targeting() == 0
 
     agent_parameters = jps.VelocityModelAgentParameters()
-    agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (-9.5, 0)
     agent_parameters.journey_id = exit_journey_id
     agent_parameters.stage_id = exit_id
-    agent_parameters.time_gap = 1
-    agent_parameters.v0 = 1.2
-    agent_parameters.radius = 0.15
     agent_id = simulation.add_agent(agent_parameters)
 
     assert exit.count_targeting() == 1
