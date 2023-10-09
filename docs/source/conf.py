@@ -31,6 +31,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "myst_nb",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.napoleon",
 ]
 
 templates_path = ["_templates"]
@@ -43,7 +44,7 @@ intersphinx_mapping = {
     "shapely": ("https://shapely.readthedocs.io/en/2.0.1/", None),
 }
 
-# automatic generation of api doc
+# -- Automatic generation of API doc -----------------------------------------
 autoapi_dirs = [
     "../../python_modules/jupedsim",
 ]
@@ -55,10 +56,10 @@ autoapi_options = [
     "show-module-summary",
     "imported-members",
 ]
+autoapi_ignore = ["**/tests/**"]
+# autoapi_member_order = "groupwise"
 autodoc_typehints = "description"
 autoapi_python_class_content = "both"
-autoapi_member_order = "bysource"
-autoapi_ignore = ["**/tests/**"]
 
 add_module_names = False
 
