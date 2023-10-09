@@ -18,7 +18,8 @@ class TrajectoryWriter(metaclass=abc.ABCMeta):
 
         This method is intended to handle all data writing that has to be done
         once before the trajectory data can be written. E.g. Meta information
-        such as framerate etc...
+        such as frame rate etc...
+
         """
         raise NotImplementedError
 
@@ -28,18 +29,20 @@ class TrajectoryWriter(metaclass=abc.ABCMeta):
 
         This method is intended to handle serialization of the trajectory data
         of a single iteration.
+
         """
         raise NotImplementedError
 
     @abc.abstractmethod
     def every_nth_frame(self) -> int:
-        """Returns the intervall of this writer in frames between writes.
+        """Returns the interval of this writer in frames between writes.
 
-        1 indicates all frames are writen, 10 indicates every 10th frame is
+        1 indicates all frames are written, 10 indicates every 10th frame is
         writen and so on.
 
         Returns:
-            Number of frames beween writes as int
+            Number of frames between writes as int
+
         """
 
     class Exception(Exception):
