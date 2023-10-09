@@ -16,25 +16,34 @@ class NotifiableQueueProxy:
 
     .. note::
         This type is used to interact with an already created stage. To create
-        a stage of this type see :class:`Simulation`
+        a stage of this type see :class:`~jupedsim.simulation.Simulation`
+
     """
 
     def __init__(self, backing):
         self._obj = backing
 
     def count_targeting(self) -> int:
-        """Returns (int): Number of agents currently targeting this stage."""
+        """
+        Returns:
+            Number of agents currently targeting this stage.
+
+        """
         return self._obj.count_targeting()
 
     def count_enqueued(self) -> int:
-        """Returns (int): Number of agents currently enqueued at this stage."""
+        """
+        Returns:
+            Number of agents currently enqueued at this stage.
+
+        """
         return self._obj.count_enqueued()
 
     def pop(self, count) -> None:
         """Pop `count` number of agents from the front of the queue.
 
-        Argumets:
-            count (int): Number of agents to be popped from the front of the
+        Arguments:
+            count: Number of agents to be popped from the front of the
                 queue
         """
         return self._obj.pop(count)
@@ -43,8 +52,8 @@ class NotifiableQueueProxy:
         """Access the ids of all enqueued agents in order they are waiting at
         the queue.
 
-        Returns (list[int]): list of enqueued agents ordered by their position
-            in the queue.
+        Returns:
+            list of enqueued agents ordered by their position in the queue.
         """
         return self._obj.enqueued()
 
@@ -59,10 +68,10 @@ class WaitingSetProxy:
 
     Similar as with a :class:`NotifiableQueueProxy` there needs to be a set of
     waiting positions defined which will be filled in order of definition. The
-    WaitinSetProxy now can be active or inactive. If active aents will fill
+    :class:`WaitingSetProxy` now can be active or inactive. If active agents will fill
     waiting positions until all are occupied. Additional agents will all try to
     wait at the last defined waiting position. In inactive state the
-    WaitingSetProxy acts as a simple waypoint at the position of the first
+    :class:`WaitingSetProxy` acts as a simple waypoint at the position of the first
     defined waiting position.
     """
 
@@ -70,17 +79,24 @@ class WaitingSetProxy:
         self._obj = backing
 
     def count_targeting(self) -> int:
-        """Returns (int): Number of agents currently targeting this stage."""
+        """
+        Returns:
+            Number of agents currently targeting this stage.
+        """
         return self._obj.count_targeting()
 
     def count_waiting(self) -> int:
-        """Returns (int): Number of agents currently waiting at this stage."""
+        """
+        Returns:
+            Number of agents currently waiting at this stage.
+        """
         return self._obj.count_waiting()
 
     def waiting(self) -> list[int]:
         """Access the ids of all waiting agents in order they are waiting.
 
-        Returns (list[int]): list of waiting agents ordered by their position.
+        Returns:
+            list of waiting agents ordered by their position.
         """
         return self._obj.waiting()
 
@@ -108,7 +124,9 @@ class WaypointProxy:
         self._obj = backing
 
     def count_targeting(self):
-        """Returns (int): Number of agents currently targeting this stage."""
+        """Returns:
+        Number of agents currently targeting this stage.
+        """
         return self._obj.count_targeting()
 
 
@@ -116,7 +134,7 @@ class ExitProxy:
     """Models an exit.
 
     Agents entering the polygon defining the exit will be removed at the
-    beginning of the next iteration, i.e. agetns will be inside the specified
+    beginning of the next iteration, i.e. agents will be inside the specified
     polygon for one frame.
     """
 
@@ -124,5 +142,8 @@ class ExitProxy:
         self._obj = backing
 
     def count_targeting(self):
-        """Returns (int): Number of agents currently targeting this stage."""
+        """
+        Returns:
+            Number of agents currently targeting this stage.
+        """
         return self._obj.count_targeting()
