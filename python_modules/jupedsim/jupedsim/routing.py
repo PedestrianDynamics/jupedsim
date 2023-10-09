@@ -10,7 +10,7 @@ from jupedsim.geometry_utils import build_geometry
 
 
 class RoutingEngine:
-    """RoutingEngine to compute shortest paths with navigation meshes."""
+    """RoutingEngine to compute the shortest paths with navigation meshes."""
 
     def __init__(
         self,
@@ -35,15 +35,18 @@ class RoutingEngine:
             frm (tuple[float, float]): point from which to find the shortest path
             to (tuple[float, float]): point to which to find the shortest path
 
-        Returns (list[tuple[float, float]]): List of points (path) from 'frm' to 'to'
-            including from and to.
+        Returns:
+            List of points (path) from 'frm' to 'to' including from and to.
+
         """
         return self._obj.compute_waypoints(frm, to)
 
     def is_routable(self, p: tuple[float, float]) -> bool:
         """Tests if the supplied point is inside the underlying geometry.
 
-        Returns (bool): If the point is inside the geometry.
+        Returns:
+            If the point is inside the geometry.
+
         """
         return self._obj.is_routable(p)
 
@@ -56,8 +59,9 @@ class RoutingEngine:
 
         The navigation mesh is store as a collection of triangles in CCW order.
 
-        Returns list[tuple[tuple[float, float], tuple[float, float], tuple[float, float]]:
-            The triangels composing the navigation mesh. Each triangle is encoded as 3-tuple of points.
+        Returns:
+            The triangles composing the navigation mesh. Each triangle is encoded as 3-tuple of points.
+
         """
         return self._obj.mesh()
 
