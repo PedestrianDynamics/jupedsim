@@ -125,29 +125,29 @@ def build_geometry(
     | str,
     **kwargs: Any,
 ) -> Geometry:
-    """Create a :class:`Geometry` from different input representations.
+    """Create a :class:`~jupedsim.geometry.Geometry` from different input representations.
 
     .. note ::
-        The geometric data supplied need to form a single "simple" polygon witn holes. In case
+        The geometric data supplied need to form a single "simple" polygon with holes. In case
         the input contains multiple polygons this must hold true for the union of all polygons.
 
     Arguments:
-        geometry (str | shapely.GeometryCollection |
-                  shapely.Polygon | shapely.MultiPolygon |
-                  shapely.MultiPoint | list[tuple[float, float]]):
-            Data to create the geometry out of. Data may be supplied as:
-            * list of 2d points describing the outer boundary, holes may be added with use of
-                `excluded_areas` kw-argument
-            * GeometryCollection consiting only out of Polygons, MultiPolygons and MultiPoints
-            * MultiPolygon
-            * Polygon
-            * MultiPoint forming a "simple" polygon when points are interpreted as linear
-                ring without repetition of the start/end point.
-            * str with a valid Well Known Text. In this format the same WKT types as mentioned
-                for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON,
-                MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
+        geometry: Data to create the geometry out of. Data may be supplied as:
+
+            * list of 2d points describing the outer boundary, holes may be added with use of `excluded_areas` kw-argument
+
+            * :class:`~shapely.GeometryCollection` consisting only out of :class:`Polygons <shapely.Polygon>`, :class:`MultiPolygons <shapely.MultiPolygon>` and :class:`MultiPoints <shapely.MultiPoint>`
+
+            * :class:`~shapely.MultiPolygon`
+
+            * :class:`~shapely.Polygon`
+
+            * :class:`~shapely.MultiPoint` forming a "simple" polygon when points are interpreted as linear ring without repetition of the start/end point.
+
+            * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
+
     Keyword Arguments:
-        excluded_areas (list[list[tuple(float, float)]]): descibes exclusions
+        excluded_areas (list[list[tuple(float, float)]]): describes exclusions
             from the walkable area. Only use this argument if `geometry` was
             provided as list[tuple[float, float]].
     """
