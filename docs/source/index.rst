@@ -6,9 +6,8 @@ JuPedSim Documentation
    :maxdepth: 1
    :hidden:
 
-   Getting started <getting_started>
+   Getting started <notebooks/getting_started>
    API reference <api/index>
-   Contribution <dev/index>
    Notebooks <notebooks/index>
    Disclaimer <disclaimer>
 
