@@ -5,8 +5,6 @@
 import pathlib
 import sys
 
-from shapely import GeometryCollection, Polygon
-
 import jupedsim as jps
 
 
@@ -73,14 +71,9 @@ def main():
     )
     journey_id = simulation.add_journey(journey)
 
-    agent_parameters = jps.VelocityModelAgentParameters()
-    agent_parameters.journey_id = journey_id
-    agent_parameters.stage_id = queue_id
-    agent_parameters.orientation = (1.0, 0.0)
-    agent_parameters.position = (0.0, 0.0)
-    agent_parameters.time_gap = 1
-    agent_parameters.v0 = 1.2
-    agent_parameters.radius = 0.3
+    agent_parameters = jps.VelocityModelAgentParameters(
+        journey_id=journey_id, stage_id=queue_id, radius=0.3
+    )
 
     for y in range(-23, -12, 2):
         for x in range(-7, 8, 2):

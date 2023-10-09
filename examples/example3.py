@@ -44,15 +44,9 @@ def main():
 
     journey_id = simulation.add_journey(journey)
 
-    agent_parameters = jps.VelocityModelAgentParameters()
-    agent_parameters.journey_id = journey_id
-    agent_parameters.stage_id = stage_id
-
-    agent_parameters.orientation = (1.0, 0.0)
-    agent_parameters.position = (0.0, 0.0)
-    agent_parameters.time_gap = 1
-    agent_parameters.v0 = 1.2
-    agent_parameters.radius = 0.3
+    agent_parameters = jps.VelocityModelAgentParameters(
+        journey_id=journey_id, stage_id=stage_id, radius=0.3
+    )
 
     for y in range(1, 16):
         agent_parameters.position = (0.5, y)

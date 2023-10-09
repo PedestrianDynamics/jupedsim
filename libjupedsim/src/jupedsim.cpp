@@ -1134,7 +1134,7 @@ JPS_AgentId JPS_Simulation_AddVelocityModelAgent(
             Journey::ID(parameters.journeyId),
             BaseStage::ID(parameters.stageId),
             intoPoint(parameters.position),
-            intoPoint(parameters.orientation),
+            {},
             VelocityModelData{parameters.time_gap, parameters.v0, parameters.radius}};
         result = simulation->AddAgent(std::move(agent));
     } catch(const std::exception& ex) {

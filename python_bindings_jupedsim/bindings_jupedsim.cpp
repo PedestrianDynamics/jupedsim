@@ -179,34 +179,52 @@ PYBIND11_MODULE(py_jupedsim, m)
                 t.operational_level_duration);
         });
     py::class_<JPS_GCFMModelAgentParameters>(m, "GCFMModelAgentParameters")
-        .def(py::init())
-        .def_readwrite("speed", &JPS_GCFMModelAgentParameters::speed)
-        .def_property(
-            "e0",
-            [](const JPS_GCFMModelAgentParameters& p) { return intoTuple(p.e0); },
-            [](JPS_GCFMModelAgentParameters& p, std::tuple<double, double> pt) {
-                p.e0 = intoJPS_Point(pt);
-            })
-        .def_property(
-            "position",
-            [](const JPS_GCFMModelAgentParameters& p) { return intoTuple(p.position); },
-            [](JPS_GCFMModelAgentParameters& p, std::tuple<double, double> pt) {
-                p.position = intoJPS_Point(pt);
-            })
-        .def_property(
-            "orientation",
-            [](const JPS_GCFMModelAgentParameters& p) { return intoTuple(p.orientation); },
-            [](JPS_GCFMModelAgentParameters& p, std::tuple<double, double> pt) {
-                p.orientation = intoJPS_Point(pt);
-            })
-        .def_readwrite("journey_id", &JPS_GCFMModelAgentParameters::journeyId)
-        .def_readwrite("stage_id", &JPS_GCFMModelAgentParameters::stageId)
-        .def_readwrite("mass", &JPS_GCFMModelAgentParameters::mass)
-        .def_readwrite("v0", &JPS_GCFMModelAgentParameters::v0)
-        .def_readwrite("a_v", &JPS_GCFMModelAgentParameters::a_v)
-        .def_readwrite("a_min", &JPS_GCFMModelAgentParameters::a_min)
-        .def_readwrite("b_min", &JPS_GCFMModelAgentParameters::b_min)
-        .def_readwrite("b_max", &JPS_GCFMModelAgentParameters::b_max)
+        .def(
+            py::init([](double speed,
+                        std::tuple<double, double> e0,
+                        std::tuple<double, double> position,
+                        std::tuple<double, double> orientation,
+                        JPS_JourneyId journey_id,
+                        JPS_StageId stage_id,
+                        double mass,
+                        double tau,
+                        double v0,
+                        double a_v,
+                        double a_min,
+                        double b_min,
+                        double b_max,
+                        JPS_AgentId id) {
+                return JPS_GCFMModelAgentParameters{
+                    speed,
+                    intoJPS_Point(e0),
+                    intoJPS_Point(position),
+                    intoJPS_Point(orientation),
+                    journey_id,
+                    stage_id,
+                    mass,
+                    tau,
+                    v0,
+                    a_v,
+                    a_min,
+                    b_min,
+                    b_max,
+                    id};
+            }),
+            py::kw_only(),
+            py::arg("speed"),
+            py::arg("e0"),
+            py::arg("position"),
+            py::arg("orientation"),
+            py::arg("journey_id"),
+            py::arg("stage_id"),
+            py::arg("mass"),
+            py::arg("tau"),
+            py::arg("v0"),
+            py::arg("a_v"),
+            py::arg("a_min"),
+            py::arg("b_min"),
+            py::arg("b_max"),
+            py::arg("id"))
         .def("__repr__", [](const JPS_GCFMModelAgentParameters& p) {
             return fmt::format(
                 "speed: {}, e0: {}, position: {}, orientation: {}, journey_id: {}, "
@@ -226,31 +244,30 @@ PYBIND11_MODULE(py_jupedsim, m)
                 p.agentId);
         });
     py::class_<JPS_VelocityModelAgentParameters>(m, "VelocityModelAgentParameters")
-        .def(py::init())
-        .def_property(
-            "position",
-            [](const JPS_VelocityModelAgentParameters& p) { return intoTuple(p.position); },
-            [](JPS_VelocityModelAgentParameters& p, std::tuple<double, double> pt) {
-                p.position = intoJPS_Point(pt);
-            })
-        .def_property(
-            "orientation",
-            [](const JPS_VelocityModelAgentParameters& p) { return intoTuple(p.orientation); },
-            [](JPS_VelocityModelAgentParameters& p, std::tuple<double, double> pt) {
-                p.orientation = intoJPS_Point(pt);
-            })
-        .def_readwrite("journey_id", &JPS_VelocityModelAgentParameters::journeyId)
-        .def_readwrite("stage_id", &JPS_VelocityModelAgentParameters::stageId)
-        .def_readwrite("time_gap", &JPS_VelocityModelAgentParameters::time_gap)
-        .def_readwrite("v0", &JPS_VelocityModelAgentParameters::v0)
-        .def_readwrite("radius", &JPS_VelocityModelAgentParameters::radius)
-        .def_readwrite("id", &JPS_VelocityModelAgentParameters::agentId)
+        .def(
+            py::init([](std::tuple<double, double> position,
+                        double time_gap,
+                        double v0,
+                        double radius,
+                        JPS_JourneyId journey_id,
+                        JPS_StageId stage_id,
+                        JPS_AgentId id) {
+                return JPS_VelocityModelAgentParameters{
+                    intoJPS_Point(position), journey_id, stage_id, time_gap, v0, radius, id};
+            }),
+            py::kw_only(),
+            py::arg("position"),
+            py::arg("time_gap"),
+            py::arg("v0"),
+            py::arg("radius"),
+            py::arg("journey_id"),
+            py::arg("stage_id"),
+            py::arg("id"))
         .def("__repr__", [](const JPS_VelocityModelAgentParameters& p) {
             return fmt::format(
-                "position: {}, orientation: {}, journey_id: {}, stage_id: {}, "
+                "position: {}, journey_id: {}, stage_id: {}, "
                 "time_gap: {}, v0: {}, radius: {}, id: {}",
                 intoTuple(p.position),
-                intoTuple(p.orientation),
                 p.journeyId,
                 p.stageId,
                 p.time_gap,

@@ -155,7 +155,7 @@ class Simulation:
         parameters: GeneralizedCentrifugalForceModelAgentParameters
         | VelocityModelAgentParameters,
     ) -> int:
-        return self._obj.add_agent(parameters._obj)
+        return self._obj.add_agent(parameters.as_native())
 
     def remove_agent(self, agent_id: int) -> bool:
         return self._obj.remove_agent(agent_id)

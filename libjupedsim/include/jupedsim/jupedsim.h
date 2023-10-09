@@ -916,19 +916,10 @@ typedef struct JPS_GCFMModelAgentParameters {
  */
 typedef struct JPS_VelocityModelAgentParameters {
     /**
-     * Desired orientation.
-     */
-    JPS_Point e0;
-    /**
      * Position of the agent.
      * The position needs to inside the accessible area.
      */
     JPS_Point position;
-    /*
-     * Orientation vector of the agent.
-     * The orientation vector will internally be normalized.
-     */
-    JPS_Point orientation;
     /**
      * Defines the journey this agent will take use
      */
@@ -941,10 +932,6 @@ typedef struct JPS_VelocityModelAgentParameters {
      * @param time_gap of the agents using this profile (T in the OV-function)
      */
     double time_gap;
-    /**
-     * @param tau of the agents using this profile
-     */
-    double tau;
     /**
      *@param v0 of the agents using this profile(desired speed) double radius;
      */
