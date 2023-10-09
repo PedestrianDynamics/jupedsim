@@ -7,7 +7,9 @@ import jupedsim.native as py_jps
 class Geometry:
     """Geometry object representing the area agents can move on.
 
-    Gain acces to the the simulations walkable area by calling:
+    Gain access to the simulation's walkable area by calling:
+
+    .. code :: python
 
         sim.get_geometry()
     """
@@ -18,14 +20,15 @@ class Geometry:
     def boundary(self) -> list[tuple[float, float]]:
         """Access the boundary polygon of the walkable area.
 
-        Returns (list[tuple[float, float]]): List of 2d points describing the polygon.
+        Returns:
+            List of 2d points describing the polygon.
         """
         return self._obj.boundary()
 
     def holes(self) -> list[list[tuple[float, float]]]:
         """Access holes (inner boundaries) of the walkable area.
 
-        Returns (list[list[tuple[float, float]]]): A list of polygons forming holes
-        inside the boundary.
+        Returns:
+            A list of polygons forming holes inside the boundary.
         """
         return self._obj.holes()
