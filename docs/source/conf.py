@@ -30,10 +30,18 @@ extensions = [
     "notfound.extension",
     "sphinx.ext.mathjax",
     "myst_nb",
+    "sphinx.ext.intersphinx",
 ]
 
 templates_path = ["_templates"]
 exclude_patterns = []
+
+# -- Linking ---------------------------------------------------------
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3/", None),
+    "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
+    "shapely": ("https://shapely.readthedocs.io/en/2.0.1/", None),
+}
 
 # automatic generation of api doc
 autoapi_dirs = [
