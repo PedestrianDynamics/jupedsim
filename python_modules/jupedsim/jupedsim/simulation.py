@@ -144,8 +144,39 @@ class Simulation:
     ) -> int:
         return self._obj.add_waiting_set_stage(positions)
 
-    def add_exit_stage(self, polygon: list[tuple[float, float]]) -> int:
-        return self._obj.add_exit_stage(polygon)
+    def add_exit_stage(
+        self,
+        polygon: str
+        | shapely.GeometryCollection
+        | shapely.Polygon
+        | shapely.MultiPolygon
+        | shapely.MultiPoint
+        | list[tuple[float, float]],
+    ) -> int:
+        """Add an exit stage to the simulation.
+
+        Args:
+            polygon (str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]]):
+                Polygon without holes representing the exit stage. Polygon can be passed as:
+
+                * list of 2d points describing the outer boundary
+
+                * :class:`~shapely.GeometryCollection` consisting only out of :class:`Polygons <shapely.Polygon>`, :class:`MultiPolygons <shapely.MultiPolygon>` and :class:`MultiPoints <shapely.MultiPoint>`
+
+                * :class:`~shapely.MultiPolygon`
+
+                * :class:`~shapely.Polygon`
+
+                * :class:`~shapely.MultiPoint` forming a "simple" polygon when points are interpreted as linear ring without repetition of the start/end point.
+
+                * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
+
+        Returns:
+            Id of the added exit stage.
+
+        """
+        exit_geometry = build_geometry(polygon)
+        return self._obj.add_exit_stage(exit_geometry.boundary())
 
     def add_journey(self, journey: JourneyDescription) -> int:
         return self._obj.add_journey(journey._obj)
@@ -201,8 +232,40 @@ class Simulation:
     def agents_in_range(self, pos: tuple[float, float], distance: float):
         return self._obj.agents_in_range(pos, distance)
 
-    def agents_in_polygon(self, poly: list[tuple[float, float]]):
-        return self._obj.agents_in_polygon(poly)
+    def agents_in_polygon(
+        self,
+        poly: str
+        | shapely.GeometryCollection
+        | shapely.Polygon
+        | shapely.MultiPolygon
+        | shapely.MultiPoint
+        | list[tuple[float, float]],
+    ):
+        """Return all agents inside the given polygon.
+
+        Args:
+            poly (str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]]):
+                Polygon without holes in which to check for pedestrians. Polygon can be passed as:
+
+                * list of 2d points describing the outer boundary
+
+                * :class:`~shapely.GeometryCollection` consisting only out of :class:`Polygons <shapely.Polygon>`, :class:`MultiPolygons <shapely.MultiPolygon>` and :class:`MultiPoints <shapely.MultiPoint>`
+
+                * :class:`~shapely.MultiPolygon`
+
+                * :class:`~shapely.Polygon`
+
+                * :class:`~shapely.MultiPoint` forming a "simple" polygon when points are interpreted as linear ring without repetition of the start/end point.
+
+                * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
+
+        Returns:
+            All agents inside given polygon.
+
+        """
+        polygon_geometry = build_geometry(poly)
+
+        return self._obj.agents_in_polygon(polygon_geometry.boundary())
 
     def get_stage_proxy(self, stage_id: int):
         stage = self._obj.get_stage_proxy(stage_id)
