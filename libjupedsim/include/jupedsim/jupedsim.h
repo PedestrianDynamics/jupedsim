@@ -261,14 +261,19 @@ typedef struct JPS_VelocityModelBuilder_t* JPS_VelocityModelBuilder;
 
 /**
  * Creates a Velocity Model builder.
- * @param aPed
- * @param DPed
- * @param aWall
- * @param DWall
+ * @param strength_neighbor_repulsion describes the strength with which neighbors repulse each
+ * other.
+ * @param range_neighbor_repulsion describes the range at hich neighbors repulse each other.
+ * @param strength_geometry_repulsion describes the strength with which neighbors are repules by
+ * geometry.
+ * @param range_geometry_repulsion describes the range at hich neighbors are repulsed by geometry.
  * @return the builder
  */
-JUPEDSIM_API JPS_VelocityModelBuilder
-JPS_VelocityModelBuilder_Create(double aPed, double DPed, double aWall, double DWall);
+JUPEDSIM_API JPS_VelocityModelBuilder JPS_VelocityModelBuilder_Create(
+    double strength_neighbor_repulsion,
+    double range_neighbor_repulsion,
+    double strength_geometry_repulsion,
+    double range_geometry_repulsion);
 
 /**
  * Creates a JPS_OperationalModel of type Velocity Model from the

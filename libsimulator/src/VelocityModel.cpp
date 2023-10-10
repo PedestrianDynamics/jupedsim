@@ -18,8 +18,15 @@
 #include <numeric>
 #include <vector>
 
-VelocityModel::VelocityModel(double aped, double Dped, double awall, double Dwall)
-    : _aPed(aped), _DPed(Dped), _aWall(awall), _DWall(Dwall)
+VelocityModel::VelocityModel(
+    double strengthNeighborRepulsion_,
+    double rangeNeighborRepulsion_,
+    double strengthGeometryRepulsion_,
+    double rangeGeometryRepulsion_)
+    : strengthNeighborRepulsion(strengthNeighborRepulsion_)
+    , rangeNeighborRepulsion(rangeNeighborRepulsion_)
+    , strengthGeometryRepulsion(strengthGeometryRepulsion_)
+    , rangeGeometryRepulsion(rangeGeometryRepulsion_)
 {
 }
 
@@ -163,7 +170,7 @@ Point VelocityModel::NeighborRepulsion(const GenericAgent& ped1, const GenericAg
     const auto& model1 = std::get<VelocityModelData>(ped1.model);
     const auto& model2 = std::get<VelocityModelData>(ped2.model);
     const auto l = model1.radius + model2.radius;
-    return direction * -(_aPed * exp((l - distance) / _DPed));
+    return direction * -(strengthNeighborRepulsion * exp((l - distance) / rangeNeighborRepulsion));
 }
 
 Point VelocityModel::BoundaryRepulsion(const GenericAgent& ped, const LineSegment& boundary_segment)
@@ -174,6 +181,6 @@ Point VelocityModel::BoundaryRepulsion(const GenericAgent& ped, const LineSegmen
     const auto [dist, e_iw] = dist_vec.NormAndNormalized();
     const auto& model = std::get<VelocityModelData>(ped.model);
     const auto l = model.radius;
-    const auto R_iw = -_aWall * exp((l - dist) / _DWall);
+    const auto R_iw = -strengthGeometryRepulsion * exp((l - dist) / rangeGeometryRepulsion);
     return e_iw * R_iw;
 }

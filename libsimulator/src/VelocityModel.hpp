@@ -17,13 +17,17 @@ public:
 
 private:
     double _cutOffRadius{3};
-    double _aPed;
-    double _DPed;
-    double _aWall;
-    double _DWall;
+    double strengthNeighborRepulsion;
+    double rangeNeighborRepulsion;
+    double strengthGeometryRepulsion;
+    double rangeGeometryRepulsion;
 
 public:
-    VelocityModel(double aped, double Dped, double awall, double Dwall);
+    VelocityModel(
+        double strengthNeighborRepulsion,
+        double rangeNeighborRepulsion,
+        double strengthGeometryRepulsion,
+        double rangeGeometryRepulsion);
     ~VelocityModel() override = default;
     OperationalModelType Type() const override;
     OperationalModelUpdate ComputeNewPosition(

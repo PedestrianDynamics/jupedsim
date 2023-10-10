@@ -324,15 +324,22 @@ PYBIND11_MODULE(py_jupedsim, m)
     py::class_<JPS_OperationalModel_Wrapper>(m, "OperationalModel");
     py::class_<JPS_VelocityModelBuilder_Wrapper>(m, "VelocityModelBuilder")
         .def(
-            py::init([](double aPed, double DPed, double aWall, double DWall) {
+            py::init([](double strengthNeighborRepulsion,
+                        double rangeNeighborRepulsion,
+                        double strengthGeometryRepulsion,
+                        double rangeGeometryRepulsion) {
                 return std::make_unique<JPS_VelocityModelBuilder_Wrapper>(
-                    JPS_VelocityModelBuilder_Create(aPed, DPed, aWall, DWall));
+                    JPS_VelocityModelBuilder_Create(
+                        strengthNeighborRepulsion,
+                        rangeNeighborRepulsion,
+                        strengthGeometryRepulsion,
+                        rangeGeometryRepulsion));
             }),
             py::kw_only(),
-            py::arg("a_ped"),
-            py::arg("d_ped"),
-            py::arg("a_wall"),
-            py::arg("d_wall"))
+            py::arg("strength_neighbor_repulsion"),
+            py::arg("range_neighbor_repulsion"),
+            py::arg("strength_geometry_repulsion"),
+            py::arg("range_geometry_repulsion"))
         .def("build", [](JPS_VelocityModelBuilder_Wrapper& w) {
             JPS_ErrorMessage errorMsg{};
             auto result = JPS_VelocityModelBuilder_Build(w.handle, &errorMsg);

@@ -83,10 +83,10 @@ class Simulation:
         """
         if isinstance(model, VelocityModel):
             model_builder = py_jps.VelocityModelBuilder(
-                a_ped=model.a_ped,
-                d_ped=model.d_ped,
-                a_wall=model.a_wall,
-                d_wall=model.d_wall,
+                strength_neighbor_repulsion=model.strength_neighbor_repulsion,
+                range_neighbor_repulsion=model.range_neighbor_repulsion,
+                strength_geometry_repulsion=model.strength_geometry_repulsion,
+                range_geometry_repulsion=model.range_geometry_repulsion,
             )
             py_jps_model = model_builder.build()
         elif isinstance(model, GeneralizedCentrifugalForceModel):

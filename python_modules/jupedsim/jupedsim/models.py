@@ -13,16 +13,16 @@ class VelocityModel:
     All attributes are initialized with reasonably good defaults.
 
     Attributes:
-        a_ped (float): Strength of the repulsion from neighbors
-        d_ped (float): Range of the repulsion from neighbors
-        a_wall (float): Strength of the repulsion from geometry boundaries
-        d_wall (float): Range of the repulsion from geometry boundaries
+        strength_neighbor_repulsion (float): Strength of the repulsion from neighbors
+        range_neighbor_repulsion (float): Range of the repulsion from neighbors
+        strength_geometry_repulsion (float): Strength of the repulsion from geometry boundaries
+        range_geometry_repulsion (float): Range of the repulsion from geometry boundaries
     """
 
-    a_ped: float = 8.0
-    d_ped: float = 0.1
-    a_wall: float = 5.0
-    d_wall: float = 0.02
+    strength_neighbor_repulsion: float = 8.0
+    range_neighbor_repulsion: float = 0.1
+    strength_geometry_repulsion: float = 5.0
+    range_geometry_repulsion: float = 0.02
 
 
 @dataclass(kw_only=True)
@@ -32,14 +32,14 @@ class GeneralizedCentrifugalForceModel:
     # All attributes are initialized with reasonably good defaults.
 
     Attributes:
-        nu_ped (float):
-        nu_wall (float):
-        dist_eff_ped (float)
-        dist_eff_wall (float)
-        intp_width_ped (float)
-        intp_width_wall (float)
-        maxf_ped (float)
-        maxf_wall (float)
+        nu_ped (float): strengh_neighbor_repulsion
+        nu_wall (float): strength_wall_repulsion
+        dist_eff_ped (float): cut-off-radius for ped-ped repulsion (r_c in FIG. 7)
+        dist_eff_wall (float): cut-off-radius for ped-wall repulsion (r_c in FIG. 7)
+        intp_width_ped (float) distance of interpolation of repulsive force for ped-ped interaction (r_eps in FIG. 7)
+        intp_width_wall (float) distance of interpolation of repulsive force for ped-wall interaction (r_eps in FIG. 7)
+        maxf_ped (float): maximum of the repulsion force for ped-ped interaction by contact of ellipses (f_m in FIG. 7)
+        maxf_wall (float): maximum of the repulsion force for ped-wall interaction by contact of ellipses (f_m in FIG. 7)
     """
 
     nu_ped: float = 0.3
