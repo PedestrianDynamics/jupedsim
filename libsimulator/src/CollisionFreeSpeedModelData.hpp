@@ -19,6 +19,10 @@ struct fmt::formatter<CollisionFreeSpeedModelData> {
     auto format(const CollisionFreeSpeedModelData& m, FormatContext& ctx) const
     {
         return fmt::format_to(
-            ctx.out(), "CollisionFreeSpeedModel[timeGap={}, v0={}, radius={}])", m.timeGap, m.v0, m.radius);
+            ctx.out(),
+            "CollisionFreeSpeedModel[timeGap={}, v0={}, radius={}])",
+            m.timeGap,
+            m.v0,
+            m.radius);
     }
 };

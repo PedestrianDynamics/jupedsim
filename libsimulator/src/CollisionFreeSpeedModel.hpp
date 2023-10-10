@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "CollisionFreeSpeedModelData.hpp"
 #include "CollisionGeometry.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "UniqueID.hpp"
-#include "CollisionFreeSpeedModelData.hpp"
 
 struct GenericAgent;
 

@@ -177,7 +177,8 @@ TEST_F(SimulationTest, AgentIteratorCanIterate)
     }
 
     for(const auto& agent_params : agent_parameters) {
-        ASSERT_NE(JPS_Simulation_AddCollisionFreeSpeedModelAgent(simulation, agent_params, nullptr), 0);
+        ASSERT_NE(
+            JPS_Simulation_AddCollisionFreeSpeedModelAgent(simulation, agent_params, nullptr), 0);
     }
     ASSERT_EQ(JPS_Simulation_AgentCount(simulation), 3);
     auto iter = JPS_Simulation_AgentIterator(simulation);

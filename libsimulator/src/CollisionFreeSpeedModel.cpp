@@ -5,7 +5,6 @@
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
 #include "Logger.hpp"
-#include "Macros.hpp"
 #include "Mathematics.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"

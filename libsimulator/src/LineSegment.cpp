@@ -59,10 +59,6 @@ double LineSegment::NormalComp(const Point& v) const
     return fabs(alpha);
 }
 
-/* Punkt auf der Linie mit kürzestem Abstand zu p
- * In der Regel Lotfußpunkt, Ist der Lotfußpunkt nicht im Segment
- * wird der entsprechende Eckpunkt der Line genommen
- * */
 Point LineSegment::ShortestPoint(const Point& p) const
 {
     if(p1 == p2)
