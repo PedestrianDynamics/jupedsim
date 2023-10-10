@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "AgentExitSystem.hpp"
+#include "AgentRemovalSystem.hpp"
 #include "GenericAgent.hpp"
 #include "Geometry.hpp"
 #include "Journey.hpp"
@@ -42,7 +42,7 @@ class Simulation
     StrategicalDecisionSystem _stategicalDecisionSystem{};
     TacticalDecisionSystem _tacticalDecisionSystem{};
     OperationalDecisionSystem _operationalDecisionSystem;
-    AgentExitSystem<GenericAgent> _agentExitSystem{};
+    AgentRemovalSystem<GenericAgent> _agentRemovalSystem{};
     StageManager _stageManager{};
     StageSystem _stageSystem{};
     NeighborhoodSearch<GenericAgent> _neighborhoodSearch{2.2};
@@ -70,7 +70,7 @@ public:
     void Iterate();
     Journey::ID AddJourney(const std::map<BaseStage::ID, TransitionDescription>& stages);
     BaseStage::ID AddStage(const StageDescription stageDescription);
-    void RemoveAgent(GenericAgent::ID id);
+    void MarkAgentForRemoval(GenericAgent::ID id);
     const std::vector<GenericAgent::ID>& RemovedAgents() const;
     size_t AgentCount() const;
     double ElapsedTime() const;

@@ -4,7 +4,7 @@
 add_library(simulator STATIC
     src/AABB.cpp
     src/AABB.hpp
-    src/AgentExitSystem.hpp
+    src/AgentRemovalSystem.hpp
     src/Clonable.hpp
     src/CollisionGeometry.cpp
     src/CollisionGeometry.hpp

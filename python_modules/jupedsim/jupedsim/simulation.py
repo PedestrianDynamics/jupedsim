@@ -188,8 +188,23 @@ class Simulation:
     ) -> int:
         return self._obj.add_agent(parameters.as_native())
 
-    def remove_agent(self, agent_id: int) -> bool:
-        return self._obj.remove_agent(agent_id)
+    def mark_agent_for_removal(self, agent_id: int) -> bool:
+        """Marks an agent for removal.
+
+        Marks the given agent for removal in the simulation. The agent will be
+        removed from the simulation in the start of the next :func:`iterate`
+        call. The removal will take place before any interaction between
+        agents will be computed.
+
+        Arguments:
+            agent_id (int): Id of the agent marked for removal
+
+        Returns:
+            marking for removal was successful
+
+        """
+
+        return self._obj.mark_agent_for_removal(agent_id)
 
     def removed_agents(self) -> list[int]:
         return self._obj.removed_agents()

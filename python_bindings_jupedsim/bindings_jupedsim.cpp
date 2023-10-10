@@ -804,10 +804,10 @@ PYBIND11_MODULE(py_jupedsim, m)
                 throw std::runtime_error{msg};
             })
         .def(
-            "remove_agent",
+            "mark_agent_for_removal",
             [](JPS_Simulation_Wrapper& simulation, JPS_AgentId id) {
                 JPS_ErrorMessage errorMsg{};
-                auto result = JPS_Simulation_RemoveAgent(simulation.handle, id, &errorMsg);
+                auto result = JPS_Simulation_MarkAgentForRemoval(simulation.handle, id, &errorMsg);
                 if(result) {
                     return result;
                 }
