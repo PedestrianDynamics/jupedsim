@@ -52,36 +52,20 @@ class Agent:
         """Id of the :class:`~jupedsim.journey.JourneyDescription` the agent is currently following."""
         return self._obj.journey_id
 
-    @journey_id.setter
-    def journey_id(self, id: int):
-        self._obj.journey_id = id
-
     @property
     def stage_id(self) -> int:
         """Id of the :class:`Stage` the Agent is currently targeting."""
         return self._obj.stage_id
-
-    @stage_id.setter
-    def stage_id(self, id: int):
-        self._obj.stage_id = id
 
     @property
     def position(self) -> tuple[float, float]:
         """Position of the agent."""
         return self._obj.position
 
-    @position.setter
-    def position(self, position: tuple[float, float]):
-        self._obj.position = position
-
     @property
     def orientation(self) -> tuple[float, float]:
         """Orientation of the agent."""
         return self._obj.orientation
-
-    @orientation.setter
-    def orientation(self, orientation: tuple[float, float]):
-        self._obj.orientation = orientation
 
     @property
     def model(
