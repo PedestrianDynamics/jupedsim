@@ -51,7 +51,7 @@ def test_can_share_queue_between_stages():
     common_queue = simulation.add_queue_stage(
         [(0, -9), (0, -8), (0, -7), (0, -6), (0, -5), (0, -4)]
     )
-    queue = simulation.get_stage_proxy(common_queue)
+    queue = simulation.get_stage(common_queue)
 
     journey1 = jps.JourneyDescription(
         [
@@ -153,8 +153,8 @@ def test_can_use_stage_proxy():
         )
     )
 
-    exit = simulation.get_stage_proxy(exit_id)
-    waypoint = simulation.get_stage_proxy(waypoint_id)
+    exit = simulation.get_stage(exit_id)
+    waypoint = simulation.get_stage(waypoint_id)
 
     assert exit.count_targeting() == 0
     assert waypoint.count_targeting() == 0

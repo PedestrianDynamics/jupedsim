@@ -155,8 +155,8 @@ def create_journey(sim: jps.Simulation):
             jps.Transition.create_fixed_transition(stage_end),
         )
 
-    queue = sim.get_stage_proxy(stages[-2])
-    waiting_area = sim.get_stage_proxy(stages[0])
+    queue = sim.get_stage(stages[-2])
+    waiting_area = sim.get_stage(stages[0])
     return sim.add_journey(journey), (stages[0], waiting_area, queue)
 
 

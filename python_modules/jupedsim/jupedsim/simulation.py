@@ -17,10 +17,10 @@ from jupedsim.models import (
 )
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.stages import (
-    ExitProxy,
-    NotifiableQueueProxy,
-    WaitingSetProxy,
-    WaypointProxy,
+    ExitStage,
+    NotifiableQueueStage,
+    WaitingSetStage,
+    WaypointStage,
 )
 from jupedsim.tracing import Trace
 
@@ -281,17 +281,17 @@ class Simulation:
 
         return self._obj.agents_in_polygon(polygon_geometry.boundary())
 
-    def get_stage_proxy(self, stage_id: int):
+    def get_stage(self, stage_id: int):
         stage = self._obj.get_stage_proxy(stage_id)
         match stage:
             case py_jps.WaypointProxy():
-                return WaypointProxy(stage)
+                return WaypointStage(stage)
             case py_jps.ExitProxy():
-                return ExitProxy(stage)
+                return ExitStage(stage)
             case py_jps.NotifiableQueueProxy():
-                return NotifiableQueueProxy(stage)
+                return NotifiableQueueStage(stage)
             case py_jps.WaitingSetProxy():
-                return WaitingSetProxy(stage)
+                return WaitingSetStage(stage)
             case _:
                 raise Exception(
                     f"Internal error, unexpected type: {type(stage)}"

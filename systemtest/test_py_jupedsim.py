@@ -155,7 +155,7 @@ def test_can_wait():
             (64, 50),
         ]
     )
-    waiting_set = simulation.get_stage_proxy(waiting_set_id)
+    waiting_set = simulation.get_stage(waiting_set_id)
     exit = simulation.add_exit_stage(
         [(99, 40), (99, 60), (100, 60), (100, 40)]
     )
@@ -242,7 +242,7 @@ def test_can_change_journey_while_waiting():
             (58, 50),
         ]
     )
-    stage = simulation.get_stage_proxy(stage_id)
+    stage = simulation.get_stage(stage_id)
     exit1 = simulation.add_exit_stage(
         [(99, 40), (99, 60), (100, 60), (100, 40)]
     )

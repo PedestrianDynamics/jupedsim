@@ -43,11 +43,11 @@ from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
 from jupedsim.sqlite_serialization import SqliteTrajectoryWriter
 from jupedsim.stages import (
-    ExitProxy,
-    NotifiableQueueProxy,
-    WaitingSetProxy,
+    ExitStage,
+    NotifiableQueueStage,
+    WaitingSetStage,
     WaitingSetState,
-    WaypointProxy,
+    WaypointStage,
 )
 from jupedsim.tracing import Trace
 
@@ -61,7 +61,7 @@ __all__ = [
     "Agent",
     "AgentNumberError",
     "BuildInfo",
-    "ExitProxy",
+    "ExitStage",
     "GeneralizedCentrifugalForceModelAgentParameters",
     "GeneralizedCentrifugalForceModel",
     "GeneralizedCentrifugalForceModelState",
@@ -69,7 +69,7 @@ __all__ = [
     "IncorrectParameterError",
     "JourneyDescription",
     "NegativeValueError",
-    "NotifiableQueueProxy",
+    "NotifiableQueueStage",
     "OverlappingCirclesError",
     "Recording",
     "RecordingAgent",
@@ -83,9 +83,9 @@ __all__ = [
     "CollisionFreeSpeedModelAgentParameters",
     "CollisionFreeSpeedModel",
     "CollisionFreeSpeedModelState",
-    "WaitingSetProxy",
+    "WaitingSetStage",
     "WaitingSetState",
-    "WaypointProxy",
+    "WaypointStage",
     "__commit__",
     "__compiler__",
     "__version__",
