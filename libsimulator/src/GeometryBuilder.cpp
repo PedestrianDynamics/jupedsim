@@ -49,26 +49,6 @@ static VertexData toVertexData(p2t::Triangle* triangle)
     return VertexData{AABB(points), Triangle{points[0], points[1], points[2]}};
 }
 
-enum class Ordering { CW, CCW };
-
-static Poly intoCGALPolygon(const std::vector<Point>& ring, Ordering ordering)
-{
-    Poly poly{};
-    for(const auto& p : ring) {
-        poly.push_back(Poly::Point_2{p.x, p.y});
-    }
-
-    if(!poly.is_simple()) {
-        throw SimulationError("Polygon is not simple: {}", ring);
-    }
-    const bool needsReversal = (ordering == Ordering::CW && poly.is_counterclockwise_oriented()) ||
-                               (ordering == Ordering::CCW && poly.is_clockwise_oriented());
-    if(needsReversal) {
-        poly.reverse_orientation();
-    }
-    return poly;
-}
-
 GeometryBuilder& GeometryBuilder::AddAccessibleArea(const std::vector<Point>& lineLoop)
 {
     _accessibleAreas.emplace_back(lineLoop);
@@ -85,17 +65,13 @@ Geometry GeometryBuilder::Build()
 {
     using GraphType = NavMeshRoutingEngine::GraphType;
 
-    std::vector<Poly> accessibleAreaInput{};
-    accessibleAreaInput.reserve(_accessibleAreas.size());
-    std::transform(
-        std::begin(_accessibleAreas),
-        std::end(_accessibleAreas),
-        std::back_inserter(accessibleAreaInput),
-        [](const auto& p) { return intoCGALPolygon(p, Ordering::CCW); });
+    const std::vector<Poly> accessibleListInput{
+        std::begin(_accessibleAreas), std::end(_accessibleAreas)};
     PolyWithHolesList accessibleList{};
+
     CGAL::join(
-        std::begin(accessibleAreaInput),
-        std::end(accessibleAreaInput),
+        std::begin(accessibleListInput),
+        std::end(accessibleListInput),
         std::back_inserter(accessibleList));
 
     if(accessibleList.size() != 1) {
@@ -104,17 +80,11 @@ Geometry GeometryBuilder::Build()
 
     auto accessibleArea = *accessibleList.begin();
 
-    std::vector<Poly> exclusionAreaInput{};
-    exclusionAreaInput.reserve(_exclusions.size());
-    std::transform(
-        std::begin(_exclusions),
-        std::end(_exclusions),
-        std::back_inserter(exclusionAreaInput),
-        [](const auto& p) { return intoCGALPolygon(p, Ordering::CCW); });
+    const std::vector<Poly> exclusionsListInput{std::begin(_exclusions), std::end(_exclusions)};
     PolyWithHolesList exclusionsList{};
     CGAL::join(
-        std::begin(exclusionAreaInput),
-        std::end(exclusionAreaInput),
+        std::begin(exclusionsListInput),
+        std::end(exclusionsListInput),
         std::back_inserter(exclusionsList));
 
     for(const auto& ex : exclusionsList) {

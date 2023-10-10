@@ -24,4 +24,6 @@ public:
     bool IsInside(Point p) const;
     Point Centroid() const;
     std::tuple<Point, double> ContainingCircle() const;
+
+    operator PolygonType() const { return _polygon; }
 };
