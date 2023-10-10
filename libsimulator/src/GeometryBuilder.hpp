@@ -3,15 +3,14 @@
 #pragma once
 
 #include "Geometry.hpp"
-#include "Point.hpp"
+#include "Polygon.hpp"
 
 #include <vector>
 
 class GeometryBuilder
 {
-    using LineLoop = std::vector<Point>;
-    std::vector<LineLoop> _accessibleAreas{};
-    std::vector<LineLoop> _exclusions{};
+    std::vector<Polygon> _accessibleAreas{};
+    std::vector<Polygon> _exclusions{};
 
 public:
     GeometryBuilder() = default;
