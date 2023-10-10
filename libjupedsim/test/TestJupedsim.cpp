@@ -118,8 +118,8 @@ struct SimulationTest : public ::testing::Test {
     JPS_JourneyId journey_id{};
     JPS_StageId stage_id{};
     std::array<JPS_VelocityModelAgentParameters, 2> agent_templates{
-        JPS_VelocityModelAgentParameters{{}, 0, 0, 1, 1.5, 0.3, 0},
-        JPS_VelocityModelAgentParameters{{}, 0, 0, 1, 1.5, 0.3, 0},
+        JPS_VelocityModelAgentParameters{{}, 0, 0, 1, 1.5, 0.3},
+        JPS_VelocityModelAgentParameters{{}, 0, 0, 1, 1.5, 0.3},
     };
 
     void SetUp() override

@@ -89,7 +89,6 @@ class GeneralizedCentrifugalForceModelAgentParameters:
         a_min (float):
         b_min (float):
         b_max (float):
-        id (int):
     """
 
     speed: float = 0.0
@@ -105,7 +104,6 @@ class GeneralizedCentrifugalForceModelAgentParameters:
     a_min: float = 0.2
     b_min: float = 0.2
     b_max: float = 0.4
-    id: int = -1
 
     def as_native(self) -> py_jps.GCFMModelAgentParameters:
         return py_jps.GCFMModelAgentParameters(
@@ -122,7 +120,6 @@ class GeneralizedCentrifugalForceModelAgentParameters:
             a_min=self.a_min,
             b_min=self.b_min,
             b_max=self.b_max,
-            id=self.id,
         )
 
 
@@ -155,7 +152,6 @@ class VelocityModelAgentParameters:
         radius (float):
         journey_id (int):
         stage_id (int):
-        id (int):
     """
 
     position: tuple[float, float] = (0.0, 0.0)
@@ -164,7 +160,6 @@ class VelocityModelAgentParameters:
     radius: float = 0.2
     journey_id: int = 0
     stage_id: int = 0
-    id: int = 0
 
     def as_native(self) -> py_jps.VelocityModelAgentParameters:
         return py_jps.VelocityModelAgentParameters(
@@ -174,7 +169,6 @@ class VelocityModelAgentParameters:
             radius=self.radius,
             journey_id=self.journey_id,
             stage_id=self.stage_id,
-            id=self.id,
         )
 
 

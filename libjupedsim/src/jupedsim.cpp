@@ -1087,7 +1087,7 @@ JPS_AgentId JPS_Simulation_AddGCFMModelAgent(
                 "Simulation is not configured to use Generalized Centrifugal Force Model");
         }
         GenericAgent agent{
-            parameters.agentId,
+            GenericAgent::ID::Invalid,
             Journey::ID(parameters.journeyId),
             BaseStage::ID(parameters.stageId),
             intoPoint(parameters.position),
@@ -1129,13 +1129,13 @@ JPS_AgentId JPS_Simulation_AddVelocityModelAgent(
         if(simulation->ModelType() != OperationalModelType::VELOCITY) {
             throw std::runtime_error("Simulation is not configured to use Velocity Model");
         }
-        GenericAgent agent{
-            parameters.agentId,
+        GenericAgent agent(
+            GenericAgent::ID::Invalid,
             Journey::ID(parameters.journeyId),
             BaseStage::ID(parameters.stageId),
             intoPoint(parameters.position),
             {},
-            VelocityModelData{parameters.time_gap, parameters.v0, parameters.radius}};
+            VelocityModelData{parameters.time_gap, parameters.v0, parameters.radius});
         result = simulation->AddAgent(std::move(agent));
     } catch(const std::exception& ex) {
         if(errorMessage) {

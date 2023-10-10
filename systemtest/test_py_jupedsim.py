@@ -42,14 +42,12 @@ def test_can_query_agents_in_range():
         initial_agent_positions,
         range(10, 10 + len(initial_agent_positions)),
     ):
-        print(id)
         expected_agent_ids.add(
             simulation.add_agent(
                 jps.VelocityModelAgentParameters(
                     position=new_pos,
                     journey_id=journey_id,
                     stage_id=exit,
-                    id=id,
                 )
             )
         )
@@ -62,8 +60,8 @@ def test_can_query_agents_in_range():
         simulation.agents_in_polygon([(39, 11), (39, 9), (51, 9), (51, 11)])
     )
 
-    assert actual_ids_in_range == [11, 12, 13]
-    assert actual_ids_in_polygon == [13, 14]
+    assert actual_ids_in_range == [3, 4, 5]
+    assert actual_ids_in_polygon == [5, 6]
 
 
 def test_can_run_simulation():

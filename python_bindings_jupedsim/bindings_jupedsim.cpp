@@ -192,8 +192,7 @@ PYBIND11_MODULE(py_jupedsim, m)
                         double a_v,
                         double a_min,
                         double b_min,
-                        double b_max,
-                        JPS_AgentId id) {
+                        double b_max) {
                 return JPS_GCFMModelAgentParameters{
                     speed,
                     intoJPS_Point(e0),
@@ -207,8 +206,7 @@ PYBIND11_MODULE(py_jupedsim, m)
                     a_v,
                     a_min,
                     b_min,
-                    b_max,
-                    id};
+                    b_max};
             }),
             py::kw_only(),
             py::arg("speed"),
@@ -223,12 +221,11 @@ PYBIND11_MODULE(py_jupedsim, m)
             py::arg("a_v"),
             py::arg("a_min"),
             py::arg("b_min"),
-            py::arg("b_max"),
-            py::arg("id"))
+            py::arg("b_max"))
         .def("__repr__", [](const JPS_GCFMModelAgentParameters& p) {
             return fmt::format(
                 "speed: {}, e0: {}, position: {}, orientation: {}, journey_id: {}, "
-                "stage_id: {}, mass: {}, v0: {}, a_v: {}, a_min: {}, b_min: {}, b_max: {}, id: {}",
+                "stage_id: {}, mass: {}, v0: {}, a_v: {}, a_min: {}, b_min: {}, b_max: {}",
                 p.speed,
                 intoTuple(p.e0),
                 intoTuple(p.position),
@@ -240,8 +237,7 @@ PYBIND11_MODULE(py_jupedsim, m)
                 p.a_v,
                 p.a_min,
                 p.b_min,
-                p.b_max,
-                p.agentId);
+                p.b_max);
         });
     py::class_<JPS_VelocityModelAgentParameters>(m, "VelocityModelAgentParameters")
         .def(
@@ -250,10 +246,9 @@ PYBIND11_MODULE(py_jupedsim, m)
                         double v0,
                         double radius,
                         JPS_JourneyId journey_id,
-                        JPS_StageId stage_id,
-                        JPS_AgentId id) {
+                        JPS_StageId stage_id) {
                 return JPS_VelocityModelAgentParameters{
-                    intoJPS_Point(position), journey_id, stage_id, time_gap, v0, radius, id};
+                    intoJPS_Point(position), journey_id, stage_id, time_gap, v0, radius};
             }),
             py::kw_only(),
             py::arg("position"),
@@ -261,19 +256,17 @@ PYBIND11_MODULE(py_jupedsim, m)
             py::arg("v0"),
             py::arg("radius"),
             py::arg("journey_id"),
-            py::arg("stage_id"),
-            py::arg("id"))
+            py::arg("stage_id"))
         .def("__repr__", [](const JPS_VelocityModelAgentParameters& p) {
             return fmt::format(
                 "position: {}, journey_id: {}, stage_id: {}, "
-                "time_gap: {}, v0: {}, radius: {}, id: {}",
+                "time_gap: {}, v0: {}, radius: {}",
                 intoTuple(p.position),
                 p.journeyId,
                 p.stageId,
                 p.time_gap,
                 p.v0,
-                p.radius,
-                p.agentId);
+                p.radius);
         });
     py::class_<JPS_Geometry_Wrapper>(m, "Geometry")
         .def(

@@ -902,13 +902,6 @@ typedef struct JPS_GCFMModelAgentParameters {
      * b_max maximum length of transversal axis in 'meters'
      */
     double b_max;
-    /**
-     * Id of this agent.
-     * If set to non zero value the simulation will use the id provided and check that no agent with
-     * this id is present. Adding an agent with an already used id will result in an error.
-     * If set to zero the simulation will create a unique id internally.
-     */
-    JPS_AgentId agentId;
 } JPS_GCFMModelAgentParameters;
 
 /**
@@ -940,13 +933,6 @@ typedef struct JPS_VelocityModelAgentParameters {
      *@param radius of the agent in 'meters'
      */
     double radius;
-    /**
-     * Id of this agent.
-     * If set to non zero value the simulation will use the id provided and check that no agent
-     * with this id is present. Adding an agent with an already used id will result in an error.
-     * If set to zero the simulation will create a unique id internally.
-     */
-    JPS_AgentId agentId;
 } JPS_VelocityModelAgentParameters;
 
 /**
