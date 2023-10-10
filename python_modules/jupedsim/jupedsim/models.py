@@ -66,6 +66,9 @@ class GeneralizedCentrifugalForceModelAgentParameters:
         create one instance of this type and modify it between calls to `add_agent`
 
         E.g.:
+
+        .. code:: python
+
             positions = [...] # List of initial agent positions
             params = GeneralizedCentrifugalForceModelAgentParameters(speed=0.9) # all agents are slower
             for p in positions:
@@ -136,6 +139,9 @@ class VelocityModelAgentParameters:
         create one instance of this type and modify it between calls to `add_agent`
 
         E.g.:
+
+            .. code:: python
+
             positions = [...] # List of initial agent positions
             params = VelocityModelAgentParameters(speed=0.9) # all agents are slower
             for p in positions:
