@@ -122,25 +122,25 @@ void JPS_OperationalModel_Free(JPS_OperationalModel handle)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 JPS_GeneralizedCentrifugalForceModelModelBuilder
 JPS_GeneralizedCentrifugalForceModelModelBuilder_Create(
-    double nu_Ped,
-    double nu_Wall,
-    double dist_eff_Ped,
-    double dist_eff_Wall,
-    double intp_width_Ped,
-    double intp_width_Wall,
-    double maxf_Ped,
-    double maxf_Wall)
+    double strengthNeighborRepulsion,
+    double strengthGeometryRepulsion,
+    double maxNeighborInteractionDistance,
+    double maxGeometryInteractionDistance,
+    double maxNeighborInterpolationDistance,
+    double maxGeometryInterpolationDistance,
+    double maxNeighborRepulsionForce,
+    double maxGeometryRepulsionForce)
 {
     return reinterpret_cast<JPS_GeneralizedCentrifugalForceModelModelBuilder>(
         new GeneralizedCentrifugalForceModelBuilder(
-            nu_Ped,
-            nu_Wall,
-            dist_eff_Ped,
-            dist_eff_Wall,
-            intp_width_Ped,
-            intp_width_Wall,
-            maxf_Ped,
-            maxf_Wall));
+            strengthNeighborRepulsion,
+            strengthGeometryRepulsion,
+            maxNeighborInteractionDistance,
+            maxGeometryInteractionDistance,
+            maxNeighborInterpolationDistance,
+            maxGeometryInterpolationDistance,
+            maxNeighborRepulsionForce,
+            maxGeometryRepulsionForce));
 }
 
 JPS_OperationalModel JPS_GeneralizedCentrifugalForceModelModelBuilder_Build(
@@ -175,11 +175,17 @@ void JPS_GeneralizedCentrifugalForceModelModelBuilder_Free(
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Velocity Model Builder
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-JUPEDSIM_API JPS_VelocityModelBuilder
-JPS_VelocityModelBuilder_Create(double aPed, double DPed, double aWall, double DWall)
+JUPEDSIM_API JPS_VelocityModelBuilder JPS_VelocityModelBuilder_Create(
+    double strengthNeighborRepulsion,
+    double rangeNeighborRepulsion,
+    double strengthGeometryRepulsion,
+    double rangeGeometryRepulsion)
 {
-    return reinterpret_cast<JPS_VelocityModelBuilder>(
-        new VelocityModelBuilder(aPed, DPed, aWall, DWall));
+    return reinterpret_cast<JPS_VelocityModelBuilder>(new VelocityModelBuilder(
+        strengthNeighborRepulsion,
+        rangeNeighborRepulsion,
+        strengthGeometryRepulsion,
+        rangeGeometryRepulsion));
 }
 
 JUPEDSIM_API JPS_OperationalModel

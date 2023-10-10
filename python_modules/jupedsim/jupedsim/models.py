@@ -29,27 +29,27 @@ class VelocityModel:
 class GeneralizedCentrifugalForceModel:
     """Parameters for Generalized Centrifugal Force Model
 
-    # All attributes are initialized with reasonably good defaults.
+    All attributes are initialized with reasonably good defaults.
 
     Attributes:
-        nu_ped (float): strengh_neighbor_repulsion
-        nu_wall (float): strength_wall_repulsion
-        dist_eff_ped (float): cut-off-radius for ped-ped repulsion (r_c in FIG. 7)
-        dist_eff_wall (float): cut-off-radius for ped-wall repulsion (r_c in FIG. 7)
-        intp_width_ped (float) distance of interpolation of repulsive force for ped-ped interaction (r_eps in FIG. 7)
-        intp_width_wall (float) distance of interpolation of repulsive force for ped-wall interaction (r_eps in FIG. 7)
-        maxf_ped (float): maximum of the repulsion force for ped-ped interaction by contact of ellipses (f_m in FIG. 7)
-        maxf_wall (float): maximum of the repulsion force for ped-wall interaction by contact of ellipses (f_m in FIG. 7)
+        strength_neighbor_repulsion (float): strengh_neighbor_repulsion
+        strength_geometry_repulsion (float): strength_geometry_repulsion
+        max_neighbor_interaction_distance (float): cut-off-radius for ped-ped repulsion (r_c in FIG. 7)
+        max_geometry_interaction_distance (float): cut-off-radius for ped-wall repulsion (r_c in FIG. 7)
+        max_neighbor_interpolation_distance (float): distance of interpolation of repulsive force for ped-ped interaction (r_eps in FIG. 7)
+        max_geometry_interpolayion_distance (float): distance of interpolation of repulsive force for ped-wall interaction (r_eps in FIG. 7)
+        max_neighbor_repulsion_force (float): maximum of the repulsion force for ped-ped interaction by contact of ellipses (f_m in FIG. 7)
+        max_geometry_repulsion_force (float): maximum of the repulsion force for ped-wall interaction by contact of ellipses (f_m in FIG. 7)
     """
 
-    nu_ped: float = 0.3
-    nu_wall: float = 0.2
-    dist_eff_ped: float = 2
-    dist_eff_wall: float = 2
-    intp_width_ped: float = 0.1
-    intp_width_wall: float = 0.1
-    maxf_ped: float = 3
-    maxf_wall: float = 3
+    strength_neighbor_repulsion: float = 0.3
+    strength_geometry_repulsion: float = 0.2
+    max_neighbor_interaction_distance: float = 2
+    max_geometry_interaction_distance: float = 2
+    max_neighbor_interpolation_distance: float = 0.1
+    max_geometry_interpolation_distance: float = 0.1
+    max_neighbor_repulsion_force: float = 3
+    max_geometry_repulsion_force: float = 3
 
 
 @dataclass(kw_only=True)

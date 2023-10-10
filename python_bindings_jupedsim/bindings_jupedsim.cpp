@@ -353,34 +353,34 @@ PYBIND11_MODULE(py_jupedsim, m)
     py::class_<JPS_GeneralizedCentrifugalForceModelModelBuilder_Wrapper>(
         m, "GeneralizedCentrifugalForceModelModelBuilder")
         .def(
-            py::init([](double nu_Ped,
-                        double nu_Wall,
-                        double dist_eff_Ped,
-                        double dist_eff_Wall,
-                        double intp_width_Ped,
-                        double intp_width_Wall,
-                        double maxf_Ped,
-                        double maxf_Wall) {
+            py::init([](double strengthNeighborRepulsion,
+                        double strengthGeometryRepulsion,
+                        double maxNeighborInteractionDistance,
+                        double maxGeometryInteractionDistance,
+                        double maxNeighborInterpolationDistance,
+                        double maxGeometryInterpolationDistance,
+                        double maxNeighborRepulsionForce,
+                        double maxGeometryRepulsionForce) {
                 return std::make_unique<JPS_GeneralizedCentrifugalForceModelModelBuilder_Wrapper>(
                     JPS_GeneralizedCentrifugalForceModelModelBuilder_Create(
-                        nu_Ped,
-                        nu_Wall,
-                        dist_eff_Ped,
-                        dist_eff_Wall,
-                        intp_width_Ped,
-                        intp_width_Wall,
-                        maxf_Ped,
-                        maxf_Wall));
+                        strengthNeighborRepulsion,
+                        strengthGeometryRepulsion,
+                        maxNeighborInteractionDistance,
+                        maxGeometryInteractionDistance,
+                        maxNeighborInterpolationDistance,
+                        maxGeometryInterpolationDistance,
+                        maxNeighborRepulsionForce,
+                        maxGeometryRepulsionForce));
             }),
             py::kw_only(),
-            py::arg("nu_ped"),
-            py::arg("nu_wall"),
-            py::arg("dist_eff_ped"),
-            py::arg("dist_eff_wall"),
-            py::arg("intp_width_ped"),
-            py::arg("intp_width_wall"),
-            py::arg("maxf_ped"),
-            py::arg("maxf_wall"))
+            py::arg("strength_neighbor_repulsion"),
+            py::arg("strength_geometry_repulsion"),
+            py::arg("max_neighbor_interaction_distance"),
+            py::arg("max_geometry_interaction_distance"),
+            py::arg("max_neighbor_interpolation_distance"),
+            py::arg("max_geometry_interpolation_distance"),
+            py::arg("max_neighbor_repulsion_force"),
+            py::arg("max_geometry_repulsion_force"))
         .def("build", [](JPS_GeneralizedCentrifugalForceModelModelBuilder_Wrapper& w) {
             JPS_ErrorMessage errorMsg{};
             auto result =

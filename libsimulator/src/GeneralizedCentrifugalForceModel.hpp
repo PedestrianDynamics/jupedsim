@@ -16,24 +16,25 @@ public:
     using NeighborhoodSearchType = NeighborhoodSearch<GenericAgent>;
 
 private:
-    double _nuPed; /**< strength of the pedestrian repulsive force */
-    double _nuWall; /**< strength of the wall repulsive force */
-    double _intp_widthPed; /**< Interpolation cutoff radius (in cm) */
-    double _intp_widthWall; /**< Interpolation cutoff radius (in cm) */
-    double _maxfPed;
-    double _maxfWall;
-    double _distEffMaxPed; // maximal effective distance
-    double _distEffMaxWall; // maximal effective distance
+    double strengthNeighborRepulsion;
+    double strengthGeometryRepulsion;
+    double maxNeighborInteractionDistance;
+    double maxGeometryInteractionDistance;
+    double maxNeighborInterpolationDistance;
+    double maxGeometryInterpolationDistance;
+    double maxNeighborRepulsionForce;
+    double maxGeometryRepulsionForce;
+
 public:
     GeneralizedCentrifugalForceModel(
-        double nuped,
-        double nuwall,
-        double dist_effPed,
-        double dist_effWall,
-        double intp_widthped,
-        double intp_widthwall,
-        double maxfped,
-        double maxfwall);
+        double strengthNeighborRepulsion,
+        double strengthWallRepulsion,
+        double maxNeighborInteractionDistance,
+        double maxGeometryInteractionDistance,
+        double maxNeighborInterpolationDistance,
+        double maxGeometryInterpolationDistance,
+        double maxNeighborRepulsionForce,
+        double maxGeometryRepulsionForce);
     ~GeneralizedCentrifugalForceModel() override = default;
 
     OperationalModelType Type() const override;

@@ -215,26 +215,30 @@ typedef struct JPS_GeneralizedCentrifugalForceModelModelBuilder_t*
 
 /**
  * Creates a GeneralizedCentrifugalForceModel model builder.
- * @param nu_Ped
- * @param nu_Wall
- * @param dist_eff_Ped
- * @param dist_eff_Wall
- * @param intp_width_Ped
- * @param intp_width_Wall
- * @param maxf_Ped
- * @param maxf_Wall
+ * @param strengthNeighborRepulsion  strengh_neighbor_repulsion
+ * @param strengthGeometryRepulsion  strength_geometry_repulsion
+ * @param maxNeighborInteractionDistance  cut-off-radius for ped-ped repulsion (r_c in FIG. 7)
+ * @param maxGeometryInteractionDistance  cut-off-radius for ped-wall repulsion (r_c in FIG. 7)
+ * @param maxNeighborInterpolationDistance  distance of interpolation of repulsive force for
+ * ped-ped interaction (r_eps in FIG. 7)
+ * @param maxGeometryInterpolationDistance  distance of interpolation of repulsive force for
+ * ped-wall interaction (r_eps in FIG. 7)
+ * @param maxNeighborRepulsionForce  maximum of the repulsion force for ped-ped interaction by
+ * contact of ellipses (f_m in FIG. 7)
+ * @param maxGeometryRepulsionForce  maximum of the repulsion force for ped-wall interaction by
+ * contact of ellipses (f_m in FIG. 7)
  * @return the GeneralizedCentrifugalForceModel model builder
  */
 JUPEDSIM_API JPS_GeneralizedCentrifugalForceModelModelBuilder
 JPS_GeneralizedCentrifugalForceModelModelBuilder_Create(
-    double nu_Ped,
-    double nu_Wall,
-    double dist_eff_Ped,
-    double dist_eff_Wall,
-    double intp_width_Ped,
-    double intp_width_Wall,
-    double maxf_Ped,
-    double maxf_Wall);
+    double strengthNeighborRepulsion,
+    double strengthGeometryRepulsion,
+    double maxNeighborInteractionDistance,
+    double maxGeometryInteractionDistance,
+    double maxNeighborInterpolationDistance,
+    double maxGeometryInterpolationDistance,
+    double maxNeighborRepulsionForce,
+    double maxGeometryRepulsionForce);
 
 /**
  * Creates a JPS_OperationalModel of type GeneralizedCentrifugalForceModel Model from the
@@ -270,10 +274,10 @@ typedef struct JPS_VelocityModelBuilder_t* JPS_VelocityModelBuilder;
  * @return the builder
  */
 JUPEDSIM_API JPS_VelocityModelBuilder JPS_VelocityModelBuilder_Create(
-    double strength_neighbor_repulsion,
-    double range_neighbor_repulsion,
-    double strength_geometry_repulsion,
-    double range_geometry_repulsion);
+    double strengthNeighborRepulsion,
+    double rangeNeighborRepulsion,
+    double strengthGeometryRepulsion,
+    double rangeGeometryRepulsion);
 
 /**
  * Creates a JPS_OperationalModel of type Velocity Model from the

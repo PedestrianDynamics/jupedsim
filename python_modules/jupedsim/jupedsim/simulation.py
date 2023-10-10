@@ -52,7 +52,7 @@ class Simulation:
         """Creates a Simulation.
 
         Arguments:
-            model (VelocityModel | GeneralizedCentrifugalForceModel):
+        model (VelocityModel | GeneralizedCentrifugalForceModel):
                 Defines the operational model used in the simulation.
             geometry (str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]]):
                 Data to create the geometry out of. Data may be supplied as:
@@ -90,15 +90,15 @@ class Simulation:
             )
             py_jps_model = model_builder.build()
         elif isinstance(model, GeneralizedCentrifugalForceModel):
-            model_builder = py_jps.GCFMModelBuilder(
-                nu_ped=model.nu_ped,
-                nu_wall=model.nu_wall,
-                dist_eff_ped=model.dist_eff_ped,
-                dist_eff_wall=model.dist_eff_wall,
-                intp_width_ped=model.intp_width_ped,
-                intp_width_wall=model.intp_width_wall,
-                maxf_ped=model.maxf_ped,
-                maxf_wall=model.maxf_wall,
+            model_builder = py_jps.GeneralizedCentrifugalForceModelBuilder(
+                strength_neighbor_repulsion=model.strength_neighbor_repulsion,
+                strength_geometry_repulsion=model.strength_geometry_repulsion,
+                max_neighbor_interaction_distance=model.max_neighbor_interaction_distance,
+                max_geometry_interaction_distance=model.max_geometry_interaction_distance,
+                max_neighbor_interpolation_distance=model.max_neighbor_interpolation_distance,
+                max_geometry_interpolation_distance=model.max_geometry_interpolation_distance,
+                max_neighbor_repulsion_force=model.max_neighbor_repulsion_force,
+                max_geometry_repulsion_force=model.max_geometry_repulsion_force,
             )
             py_jps_model = model_builder.build()
             pass
