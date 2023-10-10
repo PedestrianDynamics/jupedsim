@@ -1108,13 +1108,15 @@ JUPEDSIM_API JPS_AgentId JPS_Simulation_AddVelocityModelAgent(
     JPS_ErrorMessage* errorMessage);
 
 /**
- * Removes an agent from the simuation.
+ * Marks an agent from the simuation for removal.
+ * The agent will be removed at the start of the next simulation iteration, before the interaction
+ * are computed.
  * @param handle to the simulation to act on
  * @param agentID to remove
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
- * @return bool true if the agent existed and was removed otherwise false
+ * @return bool true if the agent existed and was marked for removal otherwise false
  */
-JUPEDSIM_API bool JPS_Simulation_RemoveAgent(
+JUPEDSIM_API bool JPS_Simulation_MarkAgentForRemoval(
     JPS_Simulation handle,
     JPS_AgentId agentId,
     JPS_ErrorMessage* errorMessage);

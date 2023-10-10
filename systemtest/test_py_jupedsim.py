@@ -116,12 +116,15 @@ def test_can_run_simulation():
             stage_id=exit_stage_id,
         )
     )
-    assert simulation.remove_agent(agent_id)
-    with pytest.raises(RuntimeError, match=r"Unknown agent id \d+"):
-        assert simulation.remove_agent(agent_id)
 
     for actual, expected in zip(simulation.agents(), initial_agent_positions):
         assert actual.position == expected
+
+    assert simulation.mark_agent_for_removal(agent_id)
+    simulation.iterate()
+
+    with pytest.raises(RuntimeError, match=r"Unknown agent id \d+"):
+        assert simulation.mark_agent_for_removal(agent_id)
 
     while simulation.agent_count() > 0:
         simulation.iterate()
@@ -203,12 +206,15 @@ def test_can_wait():
             stage_id=wp,
         )
     )
-    assert simulation.remove_agent(agent_id)
-    with pytest.raises(RuntimeError, match=r"Unknown agent id \d+"):
-        assert simulation.remove_agent(agent_id)
 
     for actual, expected in zip(simulation.agents(), initial_agent_positions):
         assert actual.position == expected
+
+    assert simulation.mark_agent_for_removal(agent_id)
+    simulation.iterate()
+
+    with pytest.raises(RuntimeError, match=r"Unknown agent id \d+"):
+        assert simulation.mark_agent_for_removal(agent_id)
 
     while simulation.agent_count() > 0:
         simulation.iterate()
@@ -387,3 +393,68 @@ def test_get_agent_non_existing_agent_from_simulation():
         RuntimeError, match=".*Trying to access unknown Agent.*"
     ):
         simulation.agent(1000)
+
+
+def test_agent_can_be_removed_from_simulation():
+    messages = []
+
+    def log_msg_handler(msg):
+        messages.append(msg)
+
+    # jps.set_debug_callback(log_msg_handler)
+    jps.set_info_callback(log_msg_handler)
+    jps.set_warning_callback(log_msg_handler)
+    jps.set_error_callback(log_msg_handler)
+
+    p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+    p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
+    simulation = jps.Simulation(
+        model=jps.VelocityModelParameters(), geometry=p1.union(p2)
+    )
+    exit_stage_id = simulation.add_exit_stage(
+        [(18, 4), (20, 4), (20, 6), (18, 6)]
+    )
+
+    journey = jps.JourneyDescription([exit_stage_id])
+
+    journey_id = simulation.add_journey(journey)
+
+    initial_agent_positions = [(7, 7), (1, 3), (1, 5), (1, 7), (2, 7)]
+
+    expected_agent_ids = set()
+
+    for new_pos in initial_agent_positions:
+        expected_agent_ids.add(
+            simulation.add_agent(
+                jps.VelocityModelAgentParameters(
+                    position=new_pos,
+                    journey_id=journey_id,
+                    stage_id=exit_stage_id,
+                )
+            )
+        )
+
+    actual_agent_ids = {agent.id for agent in simulation.agents()}
+    assert actual_agent_ids == expected_agent_ids
+
+    # remove one agent form simulation
+    agent_removed_id = actual_agent_ids.pop()
+    expected_agent_ids.remove(agent_removed_id)
+
+    simulation.mark_agent_for_removal(agent_removed_id)
+    simulation.iterate()
+    actual_agent_ids = {agent.id for agent in simulation.agents()}
+    assert actual_agent_ids == expected_agent_ids
+
+    # try removing the same agent will raise an error
+    with pytest.raises(RuntimeError, match=r"Unknown agent id \d+"):
+        assert simulation.mark_agent_for_removal(agent_removed_id)
+
+    # remove second agent form simulation
+    second_agent_removed_id = actual_agent_ids.pop()
+    expected_agent_ids.remove(second_agent_removed_id)
+
+    simulation.mark_agent_for_removal(second_agent_removed_id)
+    simulation.iterate()
+    actual_agent_ids = {agent.id for agent in simulation.agents()}
+    assert actual_agent_ids == expected_agent_ids

@@ -1150,7 +1150,7 @@ JPS_AgentId JPS_Simulation_AddVelocityModelAgent(
     return result.getID();
 }
 
-bool JPS_Simulation_RemoveAgent(
+bool JPS_Simulation_MarkAgentForRemoval(
     JPS_Simulation handle,
     JPS_AgentId agentId,
     JPS_ErrorMessage* errorMessage)
@@ -1159,7 +1159,7 @@ bool JPS_Simulation_RemoveAgent(
     auto simulation = reinterpret_cast<Simulation*>(handle);
     bool result{false};
     try {
-        simulation->RemoveAgent(agentId);
+        simulation->MarkAgentForRemoval(agentId);
         result = true;
     } catch(const std::exception& ex) {
         if(errorMessage) {
