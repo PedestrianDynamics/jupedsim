@@ -10,15 +10,15 @@
 #include <vector>
 
 template <typename Agent>
-class AgentExitSystem
+class AgentRemovalSystem
 {
 public:
-    AgentExitSystem() = default;
-    ~AgentExitSystem() = default;
-    AgentExitSystem(const AgentExitSystem& other) = delete;
-    AgentExitSystem& operator=(const AgentExitSystem& other) = delete;
-    AgentExitSystem(AgentExitSystem&& other) = delete;
-    AgentExitSystem& operator=(AgentExitSystem&& other) = delete;
+    AgentRemovalSystem() = default;
+    ~AgentRemovalSystem() = default;
+    AgentRemovalSystem(const AgentRemovalSystem& other) = delete;
+    AgentRemovalSystem& operator=(const AgentRemovalSystem& other) = delete;
+    AgentRemovalSystem(AgentRemovalSystem&& other) = delete;
+    AgentRemovalSystem& operator=(AgentRemovalSystem&& other) = delete;
 
     void
     Run(std::vector<Agent>& agents,
@@ -27,7 +27,7 @@ public:
 };
 
 template <typename Agent>
-void AgentExitSystem<Agent>::Run(
+void AgentRemovalSystem<Agent>::Run(
     std::vector<Agent>& agents,
     std::vector<GenericAgent::ID>& removedAgentIds,
     StageManager& stageManager) const

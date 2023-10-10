@@ -42,7 +42,7 @@ void Simulation::Iterate()
 {
     // LOG_DEBUG("Iteration {} / Time {}s", _clock.Iteration(), _clock.ElapsedTime());
     auto t = _perfStats.TraceIterate();
-    _agentExitSystem.Run(_agents, _removedAgentsInLastIteration, _stageManager);
+    _agentRemovalSystem.Run(_agents, _removedAgentsInLastIteration, _stageManager);
     _neighborhoodSearch.Update(_agents);
 
     _stageSystem.Run(_stageManager, _neighborhoodSearch);
@@ -148,17 +148,15 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
     return _agents.back().id.getID();
 }
 
-void Simulation::RemoveAgent(GenericAgent::ID id)
+void Simulation::MarkAgentForRemoval(GenericAgent::ID id)
 {
     const auto iter = std::find_if(
         std::begin(_agents), std::end(_agents), [id](auto& agent) { return agent.id == id; });
     if(iter == std::end(_agents)) {
         throw SimulationError("Unknown agent id {}", id);
     }
-    _stageManager.HandleRemoveAgent(iter->stageId);
 
-    _agents.erase(iter);
-    _neighborhoodSearch.RemoveAgent(*iter);
+    _removedAgentsInLastIteration.push_back(id);
 }
 
 const GenericAgent& Simulation::Agent(GenericAgent::ID id) const
