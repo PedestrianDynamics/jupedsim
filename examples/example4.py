@@ -29,7 +29,7 @@ def main():
         (-8, -24),
     ]
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(),
+        model=jps.VelocityModel(),
         geometry=area,
         trajectory_writer=jps.SqliteTrajectoryWriter(
             output_file=pathlib.Path("example4_out.sqlite"),

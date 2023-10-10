@@ -21,7 +21,7 @@ def main():
     area = GeometryCollection(p1.union(p2))
 
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(),
+        model=jps.VelocityModel(),
         geometry=area,
         trajectory_writer=jps.SqliteTrajectoryWriter(
             output_file=pathlib.Path("example1_out.sqlite"),

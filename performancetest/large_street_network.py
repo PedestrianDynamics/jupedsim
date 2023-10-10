@@ -102,7 +102,6 @@ class RandomProfilePicker:
         new_agent.journey_id = agent.journey_id
         new_agent.stage_id = agent.stage_id
         new_agent.time_gap = agent.time_gap
-        new_agent.id = agent.id
         new_agent.v0 = self._rnd.gauss(mu=self._mu_v0, sigma=self._sigma_v0)
         new_agent.radius = self._rnd.gauss(
             mu=self._mu_d / 2, sigma=self._sigma_d / 2
@@ -207,7 +206,7 @@ def main():
         )
     )
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(),
+        model=jps.VelocityModel(),
         geometry=geometries["large_street_network"],
         trajectory_writer=stats_writer,
     )

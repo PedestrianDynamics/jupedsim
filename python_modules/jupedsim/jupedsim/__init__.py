@@ -30,11 +30,11 @@ from jupedsim.library import (
     set_warning_callback,
 )
 from jupedsim.models import (
+    GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
-    GeneralizedCentrifugalForceModelParameters,
     GeneralizedCentrifugalForceModelState,
+    VelocityModel,
     VelocityModelAgentParameters,
-    VelocityModelParameters,
     VelocityModelState,
 )
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
@@ -63,7 +63,7 @@ __all__ = [
     "BuildInfo",
     "ExitProxy",
     "GeneralizedCentrifugalForceModelAgentParameters",
-    "GeneralizedCentrifugalForceModelParameters",
+    "GeneralizedCentrifugalForceModel",
     "GeneralizedCentrifugalForceModelState",
     "Geometry",
     "IncorrectParameterError",
@@ -81,7 +81,7 @@ __all__ = [
     "TrajectoryWriter",
     "Transition",
     "VelocityModelAgentParameters",
-    "VelocityModelParameters",
+    "VelocityModel",
     "VelocityModelState",
     "WaitingSetProxy",
     "WaitingSetState",

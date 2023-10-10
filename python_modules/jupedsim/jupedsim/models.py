@@ -7,7 +7,7 @@ import jupedsim.native as py_jps
 
 
 @dataclass(kw_only=True)
-class VelocityModelParameters:
+class VelocityModel:
     """Parameters for Velocity Model
 
     All attributes are initialized with reasonably good defaults.
@@ -26,10 +26,10 @@ class VelocityModelParameters:
 
 
 @dataclass(kw_only=True)
-class GeneralizedCentrifugalForceModelParameters:
+class GeneralizedCentrifugalForceModel:
     """Parameters for Generalized Centrifugal Force Model
 
-    All attributes are initialized with reasonably good defaults.
+    # All attributes are initialized with reasonably good defaults.
 
     Attributes:
         nu_ped (float):

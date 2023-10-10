@@ -17,7 +17,7 @@ def test_can_query_agents_in_range():
     jps.set_error_callback(log_msg_handler)
 
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(),
+        model=jps.VelocityModel(),
         geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
     )
     exit = simulation.add_exit_stage(
@@ -78,7 +78,7 @@ def test_can_run_simulation():
     p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(), geometry=p1.union(p2)
+        model=jps.VelocityModel(), geometry=p1.union(p2)
     )
     exit_stage_id = simulation.add_exit_stage(
         [(18, 4), (20, 4), (20, 6), (18, 6)]
@@ -140,7 +140,7 @@ def test_can_wait():
     jps.set_error_callback(log_msg_handler)
 
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(),
+        model=jps.VelocityModel(),
         geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
     )
     wp = simulation.add_waypoint_stage((50, 50), 1)
@@ -231,7 +231,7 @@ def test_can_change_journey_while_waiting():
     jps.set_error_callback(log_msg_handler)
 
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(),
+        model=jps.VelocityModel(),
         geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
     )
     wp = simulation.add_waypoint_stage((50, 50), 1)
@@ -329,7 +329,7 @@ def test_get_single_agent_from_simulation():
     p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(), geometry=p1.union(p2)
+        model=jps.VelocityModel(), geometry=p1.union(p2)
     )
     exit_id = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
 
@@ -369,7 +369,7 @@ def test_get_agent_non_existing_agent_from_simulation():
     p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(), geometry=p1.union(p2)
+        model=jps.VelocityModel(), geometry=p1.union(p2)
     )
 
     exit_id = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
@@ -407,7 +407,7 @@ def test_agent_can_be_removed_from_simulation():
     p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(), geometry=p1.union(p2)
+        model=jps.VelocityModel(), geometry=p1.union(p2)
     )
     exit_stage_id = simulation.add_exit_stage(
         [(18, 4), (20, 4), (20, 6), (18, 6)]

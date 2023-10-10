@@ -10,7 +10,7 @@ import jupedsim as jps
 @pytest.fixture
 def corridor():
     return jps.Simulation(
-        model=jps.VelocityModelParameters(),
+        model=jps.VelocityModel(),
         geometry=[(0, 0), (10, 0), (10, 2), (0, 2)],
     )
 
