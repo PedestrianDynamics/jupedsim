@@ -3,8 +3,8 @@
 
 import jupedsim.native as py_jps
 from jupedsim.models import (
+    CollisionFreeSpeedModelState,
     GeneralizedCentrifugalForceModelState,
-    VelocityModelState,
 )
 
 
@@ -70,12 +70,12 @@ class Agent:
     @property
     def model(
         self,
-    ) -> GeneralizedCentrifugalForceModelState | VelocityModelState:
+    ) -> GeneralizedCentrifugalForceModelState | CollisionFreeSpeedModelState:
         """Access model specific state of this agent."""
         model = self._obj.model
         if isinstance(model, py_jps.GeneralizedCentrifugalForceModelState):
             return GeneralizedCentrifugalForceModelState(model)
-        elif isinstance(model, py_jps.VelocityModelState):
-            return VelocityModelState(model)
+        elif isinstance(model, py_jps.CollisionFreeSpeedModelState):
+            return CollisionFreeSpeedModelState(model)
         else:
             raise Exception("Internal error")

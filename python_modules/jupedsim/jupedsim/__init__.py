@@ -30,12 +30,12 @@ from jupedsim.library import (
     set_warning_callback,
 )
 from jupedsim.models import (
+    CollisionFreeSpeedModel,
+    CollisionFreeSpeedModelAgentParameters,
+    CollisionFreeSpeedModelState,
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
     GeneralizedCentrifugalForceModelState,
-    VelocityModel,
-    VelocityModelAgentParameters,
-    VelocityModelState,
 )
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import RoutingEngine
@@ -80,9 +80,9 @@ __all__ = [
     "Trace",
     "TrajectoryWriter",
     "Transition",
-    "VelocityModelAgentParameters",
-    "VelocityModel",
-    "VelocityModelState",
+    "CollisionFreeSpeedModelAgentParameters",
+    "CollisionFreeSpeedModel",
+    "CollisionFreeSpeedModelState",
     "WaitingSetProxy",
     "WaitingSetState",
     "WaypointProxy",

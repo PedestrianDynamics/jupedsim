@@ -7,8 +7,8 @@ import jupedsim.native as py_jps
 
 
 @dataclass(kw_only=True)
-class VelocityModel:
-    """Parameters for Velocity Model
+class CollisionFreeSpeedModel:
+    """Parameters for Collision Free Speed Model
 
     All attributes are initialized with reasonably good defaults.
 
@@ -126,9 +126,9 @@ class GeneralizedCentrifugalForceModelAgentParameters:
 
 
 @dataclass(kw_only=True)
-class VelocityModelAgentParameters:
+class CollisionFreeSpeedModelAgentParameters:
     """
-    Agent parameters for Velocity Model.
+    Agent parameters for Collision Free Speed Model.
 
     See the scientific publication for more details about this model
     https://arxiv.org/abs/1512.05597
@@ -142,7 +142,7 @@ class VelocityModelAgentParameters:
             .. code:: python
 
             positions = [...] # List of initial agent positions
-            params = VelocityModelAgentParameters(speed=0.9) # all agents are slower
+            params = CollisionFreeSpeedModelAgentParameters(speed=0.9) # all agents are slower
             for p in positions:
                 params.position = p
                 sim.add_agent(params)
@@ -163,8 +163,8 @@ class VelocityModelAgentParameters:
     journey_id: int = 0
     stage_id: int = 0
 
-    def as_native(self) -> py_jps.VelocityModelAgentParameters:
-        return py_jps.VelocityModelAgentParameters(
+    def as_native(self) -> py_jps.CollisionFreeSpeedModelAgentParameters:
+        return py_jps.CollisionFreeSpeedModelAgentParameters(
             position=self.position,
             time_gap=self.time_gap,
             v0=self.v0,
@@ -250,7 +250,7 @@ class GeneralizedCentrifugalForceModelState:
         self._obj.b_max = b_max
 
 
-class VelocityModelState:
+class CollisionFreeSpeedModelState:
     def __init__(self, backing):
         self._obj = backing
 

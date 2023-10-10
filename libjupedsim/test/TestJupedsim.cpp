@@ -20,14 +20,14 @@ TEST(ErrorMessage, CanGetMessage)
     ASSERT_NO_FATAL_FAILURE(JPS_ErrorMessage_Free(msg));
 }
 
-TEST(OperationalModel, CanConstructVelocityModel)
+TEST(OperationalModel, CanConstructCollisionFreeSpeedModel)
 {
     JPS_ErrorMessage errorMsg{};
-    auto builder = JPS_VelocityModelBuilder_Create(1, 1, 1, 1);
-    auto model = JPS_VelocityModelBuilder_Build(builder, &errorMsg);
+    auto builder = JPS_CollisionFreeSpeedModelBuilder_Create(1, 1, 1, 1);
+    auto model = JPS_CollisionFreeSpeedModelBuilder_Build(builder, &errorMsg);
     EXPECT_NE(model, nullptr);
     EXPECT_EQ(errorMsg, nullptr);
-    JPS_VelocityModelBuilder_Free(builder);
+    JPS_CollisionFreeSpeedModelBuilder_Free(builder);
     JPS_OperationalModel_Free(model);
 }
 
@@ -80,9 +80,9 @@ TEST(Simulation, CanSimulate)
     auto geometry = JPS_GeometryBuilder_Build(geo_builder, nullptr);
     ASSERT_NE(geometry, nullptr);
 
-    auto modelBuilder = JPS_VelocityModelBuilder_Create(8, 0.1, 5, 0.02);
+    auto modelBuilder = JPS_CollisionFreeSpeedModelBuilder_Create(8, 0.1, 5, 0.02);
 
-    auto model = JPS_VelocityModelBuilder_Build(modelBuilder, nullptr);
+    auto model = JPS_CollisionFreeSpeedModelBuilder_Build(modelBuilder, nullptr);
     ASSERT_NE(model, nullptr);
 
     auto simulation = JPS_Simulation_Create(model, geometry, 0.01, nullptr);
@@ -95,7 +95,7 @@ TEST(Simulation, CanSimulate)
     auto journeyId = JPS_Simulation_AddJourney(simulation, journey, nullptr);
     JPS_JourneyDescription_Free(journey);
 
-    JPS_VelocityModelAgentParameters agent_parameters{};
+    JPS_CollisionFreeSpeedModelAgentParameters agent_parameters{};
     agent_parameters.journeyId = journeyId;
     agent_parameters.position = JPS_Point{0.0, 0.0};
     agent_parameters.time_gap = 1;
@@ -105,7 +105,7 @@ TEST(Simulation, CanSimulate)
     std::vector<JPS_Point> positions{{7, 7}, {1, 3}, {1, 5}, {1, 7}, {2, 7}};
     for(const auto& p : positions) {
         agent_parameters.position = p;
-        JPS_Simulation_AddVelocityModelAgent(simulation, agent_parameters, nullptr);
+        JPS_Simulation_AddCollisionFreeSpeedModelAgent(simulation, agent_parameters, nullptr);
     }
     while(JPS_Simulation_AgentCount(simulation) > 0) {
         ASSERT_TRUE(JPS_Simulation_Iterate(simulation, nullptr));
@@ -117,9 +117,9 @@ struct SimulationTest : public ::testing::Test {
     JPS_Simulation simulation{};
     JPS_JourneyId journey_id{};
     JPS_StageId stage_id{};
-    std::array<JPS_VelocityModelAgentParameters, 2> agent_templates{
-        JPS_VelocityModelAgentParameters{{}, 0, 0, 1, 1.5, 0.3},
-        JPS_VelocityModelAgentParameters{{}, 0, 0, 1, 1.5, 0.3},
+    std::array<JPS_CollisionFreeSpeedModelAgentParameters, 2> agent_templates{
+        JPS_CollisionFreeSpeedModelAgentParameters{{}, 0, 0, 1, 1.5, 0.3},
+        JPS_CollisionFreeSpeedModelAgentParameters{{}, 0, 0, 1, 1.5, 0.3},
     };
 
     void SetUp() override
@@ -131,8 +131,8 @@ struct SimulationTest : public ::testing::Test {
         ASSERT_NE(geometry, nullptr);
         JPS_GeometryBuilder_Free(geo_builder);
 
-        auto modelBuilder = JPS_VelocityModelBuilder_Create(9, 0.1, 5, 0.02);
-        auto model = JPS_VelocityModelBuilder_Build(modelBuilder, nullptr);
+        auto modelBuilder = JPS_CollisionFreeSpeedModelBuilder_Create(9, 0.1, 5, 0.02);
+        auto model = JPS_CollisionFreeSpeedModelBuilder_Build(modelBuilder, nullptr);
 
         ASSERT_NE(model, nullptr);
 
@@ -170,14 +170,14 @@ TEST_F(SimulationTest, AgentIteratorIsEmptyForNewSimulation)
 TEST_F(SimulationTest, AgentIteratorCanIterate)
 {
     std::vector<JPS_Point> positions{{1, 1}, {2, 1}, {3, 1}};
-    std::vector<JPS_VelocityModelAgentParameters> agent_parameters(
+    std::vector<JPS_CollisionFreeSpeedModelAgentParameters> agent_parameters(
         positions.size(), agent_templates[0]);
     for(size_t index = 0; index < positions.size(); ++index) {
         agent_parameters[index].position = positions[index];
     }
 
     for(const auto& agent_params : agent_parameters) {
-        ASSERT_NE(JPS_Simulation_AddVelocityModelAgent(simulation, agent_params, nullptr), 0);
+        ASSERT_NE(JPS_Simulation_AddCollisionFreeSpeedModelAgent(simulation, agent_params, nullptr), 0);
     }
     ASSERT_EQ(JPS_Simulation_AgentCount(simulation), 3);
     auto iter = JPS_Simulation_AgentIterator(simulation);

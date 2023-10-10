@@ -6,11 +6,11 @@
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "UniqueID.hpp"
-#include "VelocityModelData.hpp"
+#include "CollisionFreeSpeedModelData.hpp"
 
 struct GenericAgent;
 
-class VelocityModel : public OperationalModel
+class CollisionFreeSpeedModel : public OperationalModel
 {
 public:
     using NeighborhoodSearchType = NeighborhoodSearch<GenericAgent>;
@@ -23,12 +23,12 @@ private:
     double rangeGeometryRepulsion;
 
 public:
-    VelocityModel(
+    CollisionFreeSpeedModel(
         double strengthNeighborRepulsion,
         double rangeNeighborRepulsion,
         double strengthGeometryRepulsion,
         double rangeGeometryRepulsion);
-    ~VelocityModel() override = default;
+    ~CollisionFreeSpeedModel() override = default;
     OperationalModelType Type() const override;
     OperationalModelUpdate ComputeNewPosition(
         double dT,

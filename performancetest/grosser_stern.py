@@ -44348,9 +44348,9 @@ class RandomProfilePicker:
         self._sigma_d = sigma_d
 
     def randomise_radius_and_v0(
-        self, agent: jps.VelocityModelAgentParameters
-    ) -> jps.VelocityModelAgentParameters:
-        new_agent = jps.VelocityModelAgentParameters()
+        self, agent: jps.CollisionFreeSpeedModelAgentParameters
+    ) -> jps.CollisionFreeSpeedModelAgentParameters:
+        new_agent = jps.CollisionFreeSpeedModelAgentParameters()
         new_agent.position = agent.position
         new_agent.orientation = agent.orientation
         new_agent.journey_id = agent.journey_id
@@ -44445,14 +44445,14 @@ def main():
         )
     )
     simulation = jps.Simulation(
-        model=jps.VelocityModel(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=geometries["grosser_stern"],
         trajectory_writer=stats_writer,
     )
 
     journeys = create_journeys(simulation)
 
-    agent_parameters = jps.VelocityModelAgentParameters()
+    agent_parameters = jps.CollisionFreeSpeedModelAgentParameters()
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
 

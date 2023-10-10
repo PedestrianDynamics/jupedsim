@@ -7,7 +7,7 @@
 #include "Logger.hpp"
 #include "OperationalModel.hpp"
 #include "Stage.hpp"
-#include "VelocityModelData.hpp"
+#include "CollisionFreeSpeedModelData.hpp"
 #include <memory>
 
 Simulation::Simulation(

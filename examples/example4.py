@@ -29,7 +29,7 @@ def main():
         (-8, -24),
     ]
     simulation = jps.Simulation(
-        model=jps.VelocityModel(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=area,
         trajectory_writer=jps.SqliteTrajectoryWriter(
             output_file=pathlib.Path("example4_out.sqlite"),
@@ -71,7 +71,7 @@ def main():
     )
     journey_id = simulation.add_journey(journey)
 
-    agent_parameters = jps.VelocityModelAgentParameters(
+    agent_parameters = jps.CollisionFreeSpeedModelAgentParameters(
         journey_id=journey_id, stage_id=queue_id, radius=0.3
     )
 

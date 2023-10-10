@@ -64,11 +64,11 @@ int main(int argc, char** argv)
 
     JPS_GeometryBuilder_Free(geo_builder);
 
-    JPS_VelocityModelBuilder model_builder = JPS_VelocityModelBuilder_Create(8, 0.1, 5, 0.02);
+    JPS_CollisionFreeSpeedModelBuilder model_builder = JPS_CollisionFreeSpeedModelBuilder_Create(8, 0.1, 5, 0.02);
     const u_int64_t profile_id = 1;
-    JPS_VelocityModelBuilder_AddParameterProfile(model_builder, profile_id, 1, 0.5, 1.2, 0.3);
+    JPS_CollisionFreeSpeedModelBuilder_AddParameterProfile(model_builder, profile_id, 1, 0.5, 1.2, 0.3);
 
-    JPS_OperationalModel model = JPS_VelocityModelBuilder_Build(model_builder, &error_msg);
+    JPS_OperationalModel model = JPS_CollisionFreeSpeedModelBuilder_Build(model_builder, &error_msg);
     if(model == NULL) {
         printf("Error creating model: %s\n", JPS_ErrorMessage_GetMessage(error_msg));
         JPS_ErrorMessage_Free(error_msg);
@@ -93,7 +93,7 @@ int main(int argc, char** argv)
     JPS_OperationalModel_Free(model);
     JPS_Geometry_Free(geometry);
 
-    JPS_VelocityModelAgentParameters agent_parameters;
+    JPS_CollisionFreeSpeedModelAgentParameters agent_parameters;
     agent_parameters.e0 = (JPS_Point){0.0, 0.0};
     agent_parameters.position = (JPS_Point){0.0, 0.0};
     agent_parameters.orientation = (JPS_Point){1.0, 0.0};
@@ -103,7 +103,7 @@ int main(int argc, char** argv)
     JPS_Point positions[] = {{7, 7}, {1, 3}, {1, 5}, {1, 7}, {2, 7}};
     for(int index; index < 5; ++index) {
         agent_parameters.position = positions[index];
-        if(!JPS_Simulation_AddVelocityModelAgent(simulation, agent_parameters, &error_msg)) {
+        if(!JPS_Simulation_AddCollisionFreeSpeedModelAgent(simulation, agent_parameters, &error_msg)) {
             printf("Error creating areas: %s\n", JPS_ErrorMessage_GetMessage(error_msg));
             JPS_ErrorMessage_Free(error_msg);
             return -1;

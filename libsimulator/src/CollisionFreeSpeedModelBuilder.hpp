@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "VelocityModel.hpp"
-class VelocityModelBuilder
+#include "CollisionFreeSpeedModel.hpp"
+class CollisionFreeSpeedModelBuilder
 {
     double _aPed;
     double _DPed;
@@ -11,6 +11,6 @@ class VelocityModelBuilder
     double _DWall;
 
 public:
-    VelocityModelBuilder(double aPed, double DPed, double aWall, double DWall);
-    VelocityModel Build();
+    CollisionFreeSpeedModelBuilder(double aPed, double DPed, double aWall, double DWall);
+    CollisionFreeSpeedModel Build();
 };

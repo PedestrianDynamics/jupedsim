@@ -66,12 +66,12 @@ add_library(simulator STATIC
     src/Triangle.hpp
     src/UniqueID.hpp
     src/Util.hpp
-    src/VelocityModel.cpp
-    src/VelocityModel.hpp
-    src/VelocityModelBuilder.cpp
-    src/VelocityModelBuilder.hpp
-    src/VelocityModelData.hpp
-    src/VelocityModelUpdate.hpp
+    src/CollisionFreeSpeedModel.cpp
+    src/CollisionFreeSpeedModel.hpp
+    src/CollisionFreeSpeedModelBuilder.cpp
+    src/CollisionFreeSpeedModelBuilder.hpp
+    src/CollisionFreeSpeedModelData.hpp
+    src/CollisionFreeSpeedModelUpdate.hpp
 )
 target_compile_options(simulator PRIVATE
     ${COMMON_COMPILE_OPTIONS}

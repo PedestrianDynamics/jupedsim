@@ -59,7 +59,7 @@ namespace py = pybind11;
 OWNED_WRAPPER(JPS_Geometry);
 OWNED_WRAPPER(JPS_GeometryBuilder);
 OWNED_WRAPPER(JPS_OperationalModel);
-OWNED_WRAPPER(JPS_VelocityModelBuilder);
+OWNED_WRAPPER(JPS_CollisionFreeSpeedModelBuilder);
 OWNED_WRAPPER(JPS_GeneralizedCentrifugalForceModelModelBuilder);
 OWNED_WRAPPER(JPS_JourneyDescription);
 OWNED_WRAPPER(JPS_Transition);
@@ -73,7 +73,7 @@ OWNED_WRAPPER(JPS_WaypointProxy);
 OWNED_WRAPPER(JPS_ExitProxy);
 WRAPPER(JPS_Agent);
 WRAPPER(JPS_GeneralizedCentrifugalForceModelState);
-WRAPPER(JPS_VelocityModelState);
+WRAPPER(JPS_CollisionFreeSpeedModelState);
 
 class LogCallbackOwner
 {
@@ -240,7 +240,7 @@ PYBIND11_MODULE(py_jupedsim, m)
                 p.b_min,
                 p.b_max);
         });
-    py::class_<JPS_VelocityModelAgentParameters>(m, "VelocityModelAgentParameters")
+    py::class_<JPS_CollisionFreeSpeedModelAgentParameters>(m, "CollisionFreeSpeedModelAgentParameters")
         .def(
             py::init([](std::tuple<double, double> position,
                         double time_gap,
@@ -248,7 +248,7 @@ PYBIND11_MODULE(py_jupedsim, m)
                         double radius,
                         JPS_JourneyId journey_id,
                         JPS_StageId stage_id) {
-                return JPS_VelocityModelAgentParameters{
+                return JPS_CollisionFreeSpeedModelAgentParameters{
                     intoJPS_Point(position), journey_id, stage_id, time_gap, v0, radius};
             }),
             py::kw_only(),
@@ -258,7 +258,7 @@ PYBIND11_MODULE(py_jupedsim, m)
             py::arg("radius"),
             py::arg("journey_id"),
             py::arg("stage_id"))
-        .def("__repr__", [](const JPS_VelocityModelAgentParameters& p) {
+        .def("__repr__", [](const JPS_CollisionFreeSpeedModelAgentParameters& p) {
             return fmt::format(
                 "position: {}, journey_id: {}, stage_id: {}, "
                 "time_gap: {}, v0: {}, radius: {}",
@@ -322,14 +322,14 @@ PYBIND11_MODULE(py_jupedsim, m)
             },
             "Geometry builder");
     py::class_<JPS_OperationalModel_Wrapper>(m, "OperationalModel");
-    py::class_<JPS_VelocityModelBuilder_Wrapper>(m, "VelocityModelBuilder")
+    py::class_<JPS_CollisionFreeSpeedModelBuilder_Wrapper>(m, "CollisionFreeSpeedModelBuilder")
         .def(
             py::init([](double strengthNeighborRepulsion,
                         double rangeNeighborRepulsion,
                         double strengthGeometryRepulsion,
                         double rangeGeometryRepulsion) {
-                return std::make_unique<JPS_VelocityModelBuilder_Wrapper>(
-                    JPS_VelocityModelBuilder_Create(
+                return std::make_unique<JPS_CollisionFreeSpeedModelBuilder_Wrapper>(
+                    JPS_CollisionFreeSpeedModelBuilder_Create(
                         strengthNeighborRepulsion,
                         rangeNeighborRepulsion,
                         strengthGeometryRepulsion,
@@ -340,9 +340,9 @@ PYBIND11_MODULE(py_jupedsim, m)
             py::arg("range_neighbor_repulsion"),
             py::arg("strength_geometry_repulsion"),
             py::arg("range_geometry_repulsion"))
-        .def("build", [](JPS_VelocityModelBuilder_Wrapper& w) {
+        .def("build", [](JPS_CollisionFreeSpeedModelBuilder_Wrapper& w) {
             JPS_ErrorMessage errorMsg{};
-            auto result = JPS_VelocityModelBuilder_Build(w.handle, &errorMsg);
+            auto result = JPS_CollisionFreeSpeedModelBuilder_Build(w.handle, &errorMsg);
             if(result) {
                 return std::make_unique<JPS_OperationalModel_Wrapper>(result);
             }
@@ -481,7 +481,7 @@ PYBIND11_MODULE(py_jupedsim, m)
                     throw std::runtime_error{msg};
                 }
             });
-    py::class_<JPS_AgentIterator_Wrapper>(m, "VelocityModelAgentIterator")
+    py::class_<JPS_AgentIterator_Wrapper>(m, "CollisionFreeSpeedModelAgentIterator")
         .def(
             "__iter__",
             [](JPS_AgentIterator_Wrapper& w) -> JPS_AgentIterator_Wrapper& { return w; })
@@ -578,30 +578,30 @@ PYBIND11_MODULE(py_jupedsim, m)
             [](JPS_GeneralizedCentrifugalForceModelState_Wrapper& w, double b_max) {
                 JPS_GeneralizedCentrifugalForceModelState_SetBMax(w.handle, b_max);
             });
-    py::class_<JPS_VelocityModelState_Wrapper>(m, "VelocityModelState")
+    py::class_<JPS_CollisionFreeSpeedModelState_Wrapper>(m, "CollisionFreeSpeedModelState")
         .def_property(
             "time_gap",
-            [](const JPS_VelocityModelState_Wrapper& w) {
-                return JPS_VelocityModelState_GetTimeGap(w.handle);
+            [](const JPS_CollisionFreeSpeedModelState_Wrapper& w) {
+                return JPS_CollisionFreeSpeedModelState_GetTimeGap(w.handle);
             },
-            [](JPS_VelocityModelState_Wrapper& w, double time_gap) {
-                JPS_VelocityModelState_SetTimeGap(w.handle, time_gap);
+            [](JPS_CollisionFreeSpeedModelState_Wrapper& w, double time_gap) {
+                JPS_CollisionFreeSpeedModelState_SetTimeGap(w.handle, time_gap);
             })
         .def_property(
             "v0",
-            [](const JPS_VelocityModelState_Wrapper& w) {
-                return JPS_VelocityModelState_GetV0(w.handle);
+            [](const JPS_CollisionFreeSpeedModelState_Wrapper& w) {
+                return JPS_CollisionFreeSpeedModelState_GetV0(w.handle);
             },
-            [](JPS_VelocityModelState_Wrapper& w, double v0) {
-                JPS_VelocityModelState_SetV0(w.handle, v0);
+            [](JPS_CollisionFreeSpeedModelState_Wrapper& w, double v0) {
+                JPS_CollisionFreeSpeedModelState_SetV0(w.handle, v0);
             })
         .def_property(
             "radius",
-            [](const JPS_VelocityModelState_Wrapper& w) {
-                return JPS_VelocityModelState_GetRadius(w.handle);
+            [](const JPS_CollisionFreeSpeedModelState_Wrapper& w) {
+                return JPS_CollisionFreeSpeedModelState_GetRadius(w.handle);
             },
-            [](JPS_VelocityModelState_Wrapper& w, double radius) {
-                JPS_VelocityModelState_SetRadius(w.handle, radius);
+            [](JPS_CollisionFreeSpeedModelState_Wrapper& w, double radius) {
+                JPS_CollisionFreeSpeedModelState_SetRadius(w.handle, radius);
             });
     py::class_<JPS_NotifiableQueueProxy_Wrapper>(m, "NotifiableQueueProxy")
         .def(
@@ -682,14 +682,14 @@ PYBIND11_MODULE(py_jupedsim, m)
             [](const JPS_Agent_Wrapper& w)
                 -> std::variant<
                     std::unique_ptr<JPS_GeneralizedCentrifugalForceModelState_Wrapper>,
-                    std::unique_ptr<JPS_VelocityModelState_Wrapper>> {
+                    std::unique_ptr<JPS_CollisionFreeSpeedModelState_Wrapper>> {
                 switch(JPS_Agent_GetModelType(w.handle)) {
                     case JPS_GeneralizedCentrifugalForceModelModel:
                         return std::make_unique<JPS_GeneralizedCentrifugalForceModelState_Wrapper>(
                             JPS_Agent_GetGeneralizedCentrifugalForceModelState(w.handle, nullptr));
-                    case JPS_VelocityModel:
-                        return std::make_unique<JPS_VelocityModelState_Wrapper>(
-                            JPS_Agent_GetVelocityModelState(w.handle, nullptr));
+                    case JPS_CollisionFreeSpeedModel:
+                        return std::make_unique<JPS_CollisionFreeSpeedModelState_Wrapper>(
+                            JPS_Agent_GetCollisionFreeSpeedModelState(w.handle, nullptr));
                 }
                 UNREACHABLE();
             });
@@ -797,10 +797,10 @@ PYBIND11_MODULE(py_jupedsim, m)
             })
         .def(
             "add_agent",
-            [](JPS_Simulation_Wrapper& simulation, JPS_VelocityModelAgentParameters& parameters) {
+            [](JPS_Simulation_Wrapper& simulation, JPS_CollisionFreeSpeedModelAgentParameters& parameters) {
                 JPS_ErrorMessage errorMsg{};
                 auto result =
-                    JPS_Simulation_AddVelocityModelAgent(simulation.handle, parameters, &errorMsg);
+                    JPS_Simulation_AddCollisionFreeSpeedModelAgent(simulation.handle, parameters, &errorMsg);
                 if(result) {
                     return result;
                 }

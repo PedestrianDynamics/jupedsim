@@ -10,10 +10,10 @@ from jupedsim.geometry import Geometry
 from jupedsim.geometry_utils import build_geometry
 from jupedsim.journey import JourneyDescription
 from jupedsim.models import (
+    CollisionFreeSpeedModel,
+    CollisionFreeSpeedModelAgentParameters,
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
-    VelocityModel,
-    VelocityModelAgentParameters,
 )
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.stages import (
@@ -38,7 +38,7 @@ class Simulation:
     def __init__(
         self,
         *,
-        model: VelocityModel | GeneralizedCentrifugalForceModel,
+        model: CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel,
         geometry: str
         | shapely.GeometryCollection
         | shapely.Polygon
@@ -52,7 +52,7 @@ class Simulation:
         """Creates a Simulation.
 
         Arguments:
-        model (VelocityModel | GeneralizedCentrifugalForceModel):
+        model (CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel):
                 Defines the operational model used in the simulation.
             geometry (str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]]):
                 Data to create the geometry out of. Data may be supplied as:
@@ -81,8 +81,8 @@ class Simulation:
                 from the walkable area. Only use this argument if `geometry` was
                 provided as list[tuple[float, float]].
         """
-        if isinstance(model, VelocityModel):
-            model_builder = py_jps.VelocityModelBuilder(
+        if isinstance(model, CollisionFreeSpeedModel):
+            model_builder = py_jps.CollisionFreeSpeedModelBuilder(
                 strength_neighbor_repulsion=model.strength_neighbor_repulsion,
                 range_neighbor_repulsion=model.range_neighbor_repulsion,
                 strength_geometry_repulsion=model.strength_geometry_repulsion,
@@ -183,7 +183,7 @@ class Simulation:
     def add_agent(
         self,
         parameters: GeneralizedCentrifugalForceModelAgentParameters
-        | VelocityModelAgentParameters,
+        | CollisionFreeSpeedModelAgentParameters,
     ) -> int:
         return self._obj.add_agent(parameters.as_native())
 

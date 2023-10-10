@@ -10,7 +10,7 @@ import jupedsim as jps
 @pytest.fixture
 def corridor():
     return jps.Simulation(
-        model=jps.VelocityModel(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=[(0, 0), (10, 0), (10, 2), (0, 2)],
     )
 
@@ -20,7 +20,7 @@ def test_set_v0(corridor):
     wp = sim.add_waypoint_stage((10, 1), 0.5)
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
-    agent = jps.VelocityModelAgentParameters(
+    agent = jps.CollisionFreeSpeedModelAgentParameters(
         journey_id=journey_id, stage_id=wp, position=(1, 1), v0=1
     )
     agent_id = sim.add_agent(agent)

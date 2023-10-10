@@ -2,4 +2,4 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-enum class OperationalModelType { VELOCITY, GENERALIZED_CENTRIFUGAL_FORCE };
+enum class OperationalModelType { COLLISION_FREE_SPEED, GENERALIZED_CENTRIFUGAL_FORCE };
