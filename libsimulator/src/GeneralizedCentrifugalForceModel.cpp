@@ -1,6 +1,6 @@
 // Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "GCFMModel.hpp"
+#include "GeneralizedCentrifugalForceModel.hpp"
 
 #include "Ellipse.hpp"
 #include "GeneralizedCentrifugalForceModelData.hpp"
@@ -15,7 +15,7 @@
 #include <Logger.hpp>
 #include <stdexcept>
 
-GCFMModel::GCFMModel(
+GeneralizedCentrifugalForceModel::GeneralizedCentrifugalForceModel(
     double nuped,
     double nuwall,
     double dist_effPed,
@@ -35,12 +35,12 @@ GCFMModel::GCFMModel(
 {
 }
 
-OperationalModelType GCFMModel::Type() const
+OperationalModelType GeneralizedCentrifugalForceModel::Type() const
 {
     return OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE;
 }
 
-OperationalModelUpdate GCFMModel::ComputeNewPosition(
+OperationalModelUpdate GeneralizedCentrifugalForceModel::ComputeNewPosition(
     double dT,
     const GenericAgent& agent,
     const CollisionGeometry& geometry,
@@ -73,7 +73,9 @@ OperationalModelUpdate GCFMModel::ComputeNewPosition(
     return update;
 }
 
-void GCFMModel::ApplyUpdate(const OperationalModelUpdate& upd, GenericAgent& agent) const
+void GeneralizedCentrifugalForceModel::ApplyUpdate(
+    const OperationalModelUpdate& upd,
+    GenericAgent& agent) const
 {
     auto& model = std::get<GeneralizedCentrifugalForceModelData>(agent.model);
     const auto& update = std::get<GeneralizedCentrifugalForceModelUpdate>(upd);
@@ -88,7 +90,7 @@ void GCFMModel::ApplyUpdate(const OperationalModelUpdate& upd, GenericAgent& age
     }
 }
 
-void GCFMModel::CheckDistanceConstraint(
+void GeneralizedCentrifugalForceModel::CheckDistanceConstraint(
     const GenericAgent& agent,
     const NeighborhoodSearchType& neighborhoodSearch) const
 {
@@ -108,12 +110,12 @@ void GCFMModel::CheckDistanceConstraint(
     }
 }
 
-std::unique_ptr<OperationalModel> GCFMModel::Clone() const
+std::unique_ptr<OperationalModel> GeneralizedCentrifugalForceModel::Clone() const
 {
-    return std::make_unique<GCFMModel>(*this);
+    return std::make_unique<GeneralizedCentrifugalForceModel>(*this);
 }
 
-Point GCFMModel::ForceDriv(
+Point GeneralizedCentrifugalForceModel::ForceDriv(
     const GenericAgent& ped,
     Point target,
     double mass,
@@ -138,7 +140,9 @@ Point GCFMModel::ForceDriv(
     return F_driv;
 }
 
-Point GCFMModel::ForceRepPed(const GenericAgent& ped1, const GenericAgent& ped2) const
+Point GeneralizedCentrifugalForceModel::ForceRepPed(
+    const GenericAgent& ped1,
+    const GenericAgent& ped2) const
 {
     const auto& model1 = std::get<GeneralizedCentrifugalForceModelData>(ped1.model);
     const auto& model2 = std::get<GeneralizedCentrifugalForceModelData>(ped2.model);
@@ -254,8 +258,9 @@ Point GCFMModel::ForceRepPed(const GenericAgent& ped1, const GenericAgent& ped2)
  *   - Vektor(x,y) mit Summe aller abstoßenden Kräfte im SubRoom
  * */
 
-inline Point
-GCFMModel::ForceRepRoom(const GenericAgent& ped, const CollisionGeometry& geometry) const
+inline Point GeneralizedCentrifugalForceModel::ForceRepRoom(
+    const GenericAgent& ped,
+    const CollisionGeometry& geometry) const
 {
     const auto& walls = geometry.LineSegmentsInApproxDistanceTo(ped.pos);
 
@@ -269,7 +274,8 @@ GCFMModel::ForceRepRoom(const GenericAgent& ped, const CollisionGeometry& geomet
     return f;
 }
 
-inline Point GCFMModel::ForceRepWall(const GenericAgent& ped, const LineSegment& w) const
+inline Point
+GeneralizedCentrifugalForceModel::ForceRepWall(const GenericAgent& ped, const LineSegment& w) const
 {
     Point F = Point(0.0, 0.0);
     Point pt = w.ShortestPoint(ped.pos);
@@ -302,8 +308,11 @@ inline Point GCFMModel::ForceRepWall(const GenericAgent& ped, const LineSegment&
  *   - Vektor(x,y) mit abstoßender Kraft
  * */
 // TODO: use effective DistanceToEllipse and simplify this function.
-Point GCFMModel::ForceRepStatPoint(const GenericAgent& ped, const Point& p, double l, double vn)
-    const
+Point GeneralizedCentrifugalForceModel::ForceRepStatPoint(
+    const GenericAgent& ped,
+    const Point& p,
+    double l,
+    double vn) const
 {
     Point F_rep = Point(0.0, 0.0);
     // TODO(kkratz): this will fail for speed 0.
@@ -341,7 +350,7 @@ Point GCFMModel::ForceRepStatPoint(const GenericAgent& ped, const Point& p, doub
     return F_rep;
 }
 
-Point GCFMModel::ForceInterpolation(
+Point GeneralizedCentrifugalForceModel::ForceInterpolation(
     double v0,
     double K_ij,
     const Point& e,
@@ -396,7 +405,9 @@ Point GCFMModel::ForceInterpolation(
     }
     return F_rep;
 }
-double GCFMModel::AgentToAgentSpacing(const GenericAgent& agent1, const GenericAgent& agent2) const
+double GeneralizedCentrifugalForceModel::AgentToAgentSpacing(
+    const GenericAgent& agent1,
+    const GenericAgent& agent2) const
 {
     const auto& model1 = std::get<GeneralizedCentrifugalForceModelData>(agent1.model);
     const auto& model2 = std::get<GeneralizedCentrifugalForceModelData>(agent2.model);

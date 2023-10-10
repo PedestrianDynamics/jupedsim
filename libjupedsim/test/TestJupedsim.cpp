@@ -31,14 +31,14 @@ TEST(OperationalModel, CanConstructVelocityModel)
     JPS_OperationalModel_Free(model);
 }
 
-TEST(OperationalModel, CanConstructGCFMModel)
+TEST(OperationalModel, CanConstructGeneralizedCentrifugalForceModelModel)
 {
     JPS_ErrorMessage errorMsg{};
-    auto builder = JPS_GCFMModelBuilder_Create(1, 1, 1, 1, 1, 1, 1, 1);
-    auto model = JPS_GCFMModelBuilder_Build(builder, &errorMsg);
+    auto builder = JPS_GeneralizedCentrifugalForceModelModelBuilder_Create(1, 1, 1, 1, 1, 1, 1, 1);
+    auto model = JPS_GeneralizedCentrifugalForceModelModelBuilder_Build(builder, &errorMsg);
     EXPECT_NE(model, nullptr);
     EXPECT_EQ(errorMsg, nullptr);
-    JPS_GCFMModelBuilder_Free(builder);
+    JPS_GeneralizedCentrifugalForceModelModelBuilder_Free(builder);
     JPS_OperationalModel_Free(model);
 }
 

@@ -12,8 +12,8 @@
 #include <BuildInfo.hpp>
 #include <CollisionGeometry.hpp>
 #include <Conversion.hpp>
-#include <GCFMModel.hpp>
-#include <GCFMModelBuilder.hpp>
+#include <GeneralizedCentrifugalForceModel.hpp>
+#include <GeneralizedCentrifugalForceModelBuilder.hpp>
 #include <GenericAgent.hpp>
 #include <Geometry.hpp>
 #include <GeometryBuilder.hpp>
@@ -118,9 +118,10 @@ void JPS_OperationalModel_Free(JPS_OperationalModel handle)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// GCFM Model Builder
+/// GeneralizedCentrifugalForceModel Model Builder
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-JPS_GCFMModelBuilder JPS_GCFMModelBuilder_Create(
+JPS_GeneralizedCentrifugalForceModelModelBuilder
+JPS_GeneralizedCentrifugalForceModelModelBuilder_Create(
     double nu_Ped,
     double nu_Wall,
     double dist_eff_Ped,
@@ -130,25 +131,28 @@ JPS_GCFMModelBuilder JPS_GCFMModelBuilder_Create(
     double maxf_Ped,
     double maxf_Wall)
 {
-    return reinterpret_cast<JPS_GCFMModelBuilder>(new GCFMModelBuilder(
-        nu_Ped,
-        nu_Wall,
-        dist_eff_Ped,
-        dist_eff_Wall,
-        intp_width_Ped,
-        intp_width_Wall,
-        maxf_Ped,
-        maxf_Wall));
+    return reinterpret_cast<JPS_GeneralizedCentrifugalForceModelModelBuilder>(
+        new GeneralizedCentrifugalForceModelBuilder(
+            nu_Ped,
+            nu_Wall,
+            dist_eff_Ped,
+            dist_eff_Wall,
+            intp_width_Ped,
+            intp_width_Wall,
+            maxf_Ped,
+            maxf_Wall));
 }
 
-JPS_OperationalModel
-JPS_GCFMModelBuilder_Build(JPS_GCFMModelBuilder handle, JPS_ErrorMessage* errorMessage)
+JPS_OperationalModel JPS_GeneralizedCentrifugalForceModelModelBuilder_Build(
+    JPS_GeneralizedCentrifugalForceModelModelBuilder handle,
+    JPS_ErrorMessage* errorMessage)
 {
     assert(handle != nullptr);
-    auto builder = reinterpret_cast<GCFMModelBuilder*>(handle);
+    auto builder = reinterpret_cast<GeneralizedCentrifugalForceModelBuilder*>(handle);
     JPS_OperationalModel result{};
     try {
-        result = reinterpret_cast<JPS_OperationalModel>(new GCFMModel(builder->Build()));
+        result = reinterpret_cast<JPS_OperationalModel>(
+            new GeneralizedCentrifugalForceModel(builder->Build()));
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
@@ -162,9 +166,10 @@ JPS_GCFMModelBuilder_Build(JPS_GCFMModelBuilder handle, JPS_ErrorMessage* errorM
     return result;
 }
 
-void JPS_GCFMModelBuilder_Free(JPS_GCFMModelBuilder handle)
+void JPS_GeneralizedCentrifugalForceModelModelBuilder_Free(
+    JPS_GeneralizedCentrifugalForceModelModelBuilder handle)
 {
-    delete reinterpret_cast<GCFMModelBuilder*>(handle);
+    delete reinterpret_cast<GeneralizedCentrifugalForceModelBuilder*>(handle);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -716,7 +721,7 @@ JPS_ModelType JPS_Agent_GetModelType(JPS_Agent handle)
     const auto agent = reinterpret_cast<const GenericAgent*>(handle);
     switch(agent->model.index()) {
         case 0:
-            return JPS_GCFMModel;
+            return JPS_GeneralizedCentrifugalForceModelModel;
         case 1:
             return JPS_VelocityModel;
     }
@@ -1073,9 +1078,9 @@ JPS_StageId JPS_Simulation_AddStageWaitingSet(
     return add_stage(handle, NotifiableWaitingSetDescription{positions}, errorMessage);
 }
 
-JPS_AgentId JPS_Simulation_AddGCFMModelAgent(
+JPS_AgentId JPS_Simulation_AddGeneralizedCentrifugalForceModelModelAgent(
     JPS_Simulation handle,
-    JPS_GCFMModelAgentParameters parameters,
+    JPS_GeneralizedCentrifugalForceModelModelAgentParameters parameters,
     JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
@@ -1300,7 +1305,7 @@ JPS_ModelType JPS_Simulation_ModelType(JPS_Simulation handle)
         case OperationalModelType::VELOCITY:
             return JPS_VelocityModel;
         case OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE:
-            return JPS_GCFMModel;
+            return JPS_GeneralizedCentrifugalForceModelModel;
     }
     UNREACHABLE();
 }

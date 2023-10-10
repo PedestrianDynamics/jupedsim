@@ -13,10 +13,10 @@ add_library(simulator STATIC
     src/Ellipse.cpp
     src/Ellipse.hpp
     src/Enum.hpp
-    src/GCFMModel.cpp
-    src/GCFMModel.hpp
-    src/GCFMModelBuilder.cpp
-    src/GCFMModelBuilder.hpp
+    src/GeneralizedCentrifugalForceModel.cpp
+    src/GeneralizedCentrifugalForceModel.hpp
+    src/GeneralizedCentrifugalForceModelBuilder.cpp
+    src/GeneralizedCentrifugalForceModelBuilder.hpp
     src/GeneralizedCentrifugalForceModelData.hpp
     src/GeneralizedCentrifugalForceModelUpdate.hpp
     src/GenericAgent.hpp

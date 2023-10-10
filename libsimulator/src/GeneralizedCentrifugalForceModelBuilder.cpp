@@ -1,9 +1,9 @@
 // Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "GCFMModelBuilder.hpp"
-#include "GCFMModel.hpp"
+#include "GeneralizedCentrifugalForceModelBuilder.hpp"
+#include "GeneralizedCentrifugalForceModel.hpp"
 
-GCFMModelBuilder::GCFMModelBuilder(
+GeneralizedCentrifugalForceModelBuilder::GeneralizedCentrifugalForceModelBuilder(
     double nuped,
     double nuwall,
     double dist_effPed,
@@ -23,9 +23,9 @@ GCFMModelBuilder::GCFMModelBuilder(
 {
 }
 
-GCFMModel GCFMModelBuilder::Build()
+GeneralizedCentrifugalForceModel GeneralizedCentrifugalForceModelBuilder::Build()
 {
-    return GCFMModel(
+    return GeneralizedCentrifugalForceModel(
         _nuped,
         _nuwall,
         _dist_effPed,

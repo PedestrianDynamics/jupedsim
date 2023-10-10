@@ -105,8 +105,10 @@ class GeneralizedCentrifugalForceModelAgentParameters:
     b_min: float = 0.2
     b_max: float = 0.4
 
-    def as_native(self) -> py_jps.GCFMModelAgentParameters:
-        return py_jps.GCFMModelAgentParameters(
+    def as_native(
+        self,
+    ) -> py_jps.GeneralizedCentrifugalForceModelModelAgentParameters:
+        return py_jps.GeneralizedCentrifugalForceModelModelAgentParameters(
             speed=self.speed,
             e0=self.e0,
             position=self.position,

@@ -10,7 +10,7 @@
 
 struct GenericAgent;
 
-class GCFMModel : public OperationalModel
+class GeneralizedCentrifugalForceModel : public OperationalModel
 {
 public:
     using NeighborhoodSearchType = NeighborhoodSearch<GenericAgent>;
@@ -25,7 +25,7 @@ private:
     double _distEffMaxPed; // maximal effective distance
     double _distEffMaxWall; // maximal effective distance
 public:
-    GCFMModel(
+    GeneralizedCentrifugalForceModel(
         double nuped,
         double nuwall,
         double dist_effPed,
@@ -34,7 +34,7 @@ public:
         double intp_widthwall,
         double maxfped,
         double maxfwall);
-    ~GCFMModel() override = default;
+    ~GeneralizedCentrifugalForceModel() override = default;
 
     OperationalModelType Type() const override;
     OperationalModelUpdate ComputeNewPosition(

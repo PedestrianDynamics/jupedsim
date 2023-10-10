@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "GCFMModel.hpp"
+#include "GeneralizedCentrifugalForceModel.hpp"
 #include <vector>
 
-class GCFMModelBuilder
+class GeneralizedCentrifugalForceModelBuilder
 {
     double _nuped;
     double _nuwall;
@@ -17,7 +17,7 @@ class GCFMModelBuilder
     double _maxfwall;
 
 public:
-    GCFMModelBuilder(
+    GeneralizedCentrifugalForceModelBuilder(
         double nuped,
         double nuwall,
         double dist_effPed,
@@ -26,5 +26,5 @@ public:
         double intp_widthwall,
         double maxfped,
         double maxfwall);
-    GCFMModel Build();
+    GeneralizedCentrifugalForceModel Build();
 };
