@@ -218,7 +218,7 @@ Point GeneralizedCentrifugalForceModel::ForceRepPed(
     K_ij = sqrt(K_ij);
     if(dist_eff <= smax) { // 5
         f = -agent1_mass * K_ij * nom / dist_intpol_left;
-        F_rep = ep12 * maxGeometryInterpolationDistance * f;
+        F_rep = ep12 * maxNeighborInterpolationDistance * f;
         return F_rep;
     }
 
@@ -238,7 +238,7 @@ Point GeneralizedCentrifugalForceModel::ForceRepPed(
         f = -agent1_mass * K_ij * nom / dist_intpol_left;
         f1 = -f / dist_intpol_left;
         px = hermite_interp(
-            dist_eff, smax, dist_intpol_left, maxGeometryInterpolationDistance * f, f, 0, f1);
+            dist_eff, smax, dist_intpol_left, maxNeighborInterpolationDistance * f, f, 0, f1);
         F_rep = ep12 * px;
     }
     if(F_rep.x != F_rep.x || F_rep.y != F_rep.y) {
