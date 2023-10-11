@@ -29,8 +29,8 @@ def main():
     )
 
     stage_id = simulation.add_waiting_set_stage([(16, 5), (15, 5), (14, 5)])
-    waiting_stage = simulation.get_stage_proxy(stage_id)
-    assert isinstance(waiting_stage, jps.WaitingSetProxy)
+    waiting_stage = simulation.get_stage(stage_id)
+    assert isinstance(waiting_stage, jps.WaitingSetStage)
     exit_id = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
 
     journey = jps.JourneyDescription()

@@ -34,7 +34,7 @@ def main():
             (58, 50),
         ]
     )
-    stage = simulation.get_stage_proxy(stage_id)
+    stage = simulation.get_stage(stage_id)
     exits = [
         simulation.add_exit_stage([(99, 40), (99, 60), (100, 60), (100, 40)]),
         simulation.add_exit_stage([(99, 50), (99, 70), (100, 70), (100, 50)]),
