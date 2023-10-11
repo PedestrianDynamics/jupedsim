@@ -32,7 +32,7 @@ def main():
             (54, 50),
         ]
     )
-    queue = simulation.get_stage_proxy(stage_id)
+    queue = simulation.get_stage(stage_id)
     exit = simulation.add_exit_stage(
         [(99, 40), (99, 60), (100, 60), (100, 40)]
     )

@@ -51,7 +51,7 @@ def main():
             (0, -8),
         ]
     )
-    queue = simulation.get_stage_proxy(queue_id)
+    queue = simulation.get_stage(queue_id)
 
     waypoint_middle = simulation.add_waypoint_stage((0, 0), 1)
 

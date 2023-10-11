@@ -53,7 +53,7 @@ def main():
             (0, -8),
         ]
     )
-    queue = simulation.get_stage_proxy(waypoint_middle)
+    queue = simulation.get_stage(waypoint_middle)
 
     journey = jps.JourneyDescription(
         [waypoint_middle, exit_top, exit_right, exit_bottom]
