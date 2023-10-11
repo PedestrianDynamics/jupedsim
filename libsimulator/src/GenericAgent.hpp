@@ -25,7 +25,7 @@ struct GenericAgent {
 
     // Agent fields common for all models
     Point pos{};
-    Point orientation{};
+    Point orientation{1, 0};
 
     using Model = std::variant<GeneralizedCentrifugalForceModelData, CollisionFreeSpeedModelData>;
     Model model{};

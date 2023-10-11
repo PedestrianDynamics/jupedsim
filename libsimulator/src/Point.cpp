@@ -171,7 +171,9 @@ Point& Point::operator+=(const Point& p)
 
 const Point operator/(const Point& p, double f)
 {
-    if(f > J_EPS * J_EPS)
+    static auto constexpr eps =
+        std::numeric_limits<double>::epsilon() * std::numeric_limits<double>::epsilon();
+    if(f > eps)
         return Point(p.x / f, p.y / f);
     else {
         LOG_WARNING("Point::operator/ dividend {} is too small. Using 1 instead.", f);
