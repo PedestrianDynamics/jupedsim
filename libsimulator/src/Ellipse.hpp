@@ -3,7 +3,6 @@
 #pragma once
 
 #include "LineSegment.hpp"
-#include "Macros.hpp"
 #include "Mathematics.hpp"
 
 class Ellipse

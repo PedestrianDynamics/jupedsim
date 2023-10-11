@@ -53,7 +53,7 @@ class Spawner:
         self.point_a = point_a
         self.profile_picker = profile_picker
         self.dir = (point_b[0] - point_a[0], point_b[1] - point_a[1])
-        self.agent_parameters = jps.VelocityModelAgentParameters()
+        self.agent_parameters = jps.CollisionFreeSpeedModelAgentParameters()
         self.agent_parameters.journey_id = journey_id
         self.agent_parameters.stage_id = start_stage
         self.agent_parameters.orientation = (1.0, 0.0)
@@ -94,15 +94,14 @@ class RandomProfilePicker:
         self._sigma_d = sigma_d
 
     def randomise_radius_and_v0(
-        self, agent: jps.VelocityModelAgentParameters
-    ) -> jps.VelocityModelAgentParameters:
-        new_agent = jps.VelocityModelAgentParameters()
+        self, agent: jps.CollisionFreeSpeedModelAgentParameters
+    ) -> jps.CollisionFreeSpeedModelAgentParameters:
+        new_agent = jps.CollisionFreeSpeedModelAgentParameters()
         new_agent.position = agent.position
         new_agent.orientation = agent.orientation
         new_agent.journey_id = agent.journey_id
         new_agent.stage_id = agent.stage_id
         new_agent.time_gap = agent.time_gap
-        new_agent.id = agent.id
         new_agent.v0 = self._rnd.gauss(mu=self._mu_v0, sigma=self._sigma_v0)
         new_agent.radius = self._rnd.gauss(
             mu=self._mu_d / 2, sigma=self._sigma_d / 2
@@ -156,8 +155,8 @@ def create_journey(sim: jps.Simulation):
             jps.Transition.create_fixed_transition(stage_end),
         )
 
-    queue = sim.get_stage_proxy(stages[-2])
-    waiting_area = sim.get_stage_proxy(stages[0])
+    queue = sim.get_stage(stages[-2])
+    waiting_area = sim.get_stage(stages[0])
     return sim.add_journey(journey), (stages[0], waiting_area, queue)
 
 
@@ -207,7 +206,7 @@ def main():
         )
     )
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=geometries["large_street_network"],
         trajectory_writer=stats_writer,
     )

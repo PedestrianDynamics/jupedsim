@@ -2,29 +2,33 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "CollisionFreeSpeedModelData.hpp"
 #include "CollisionGeometry.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "UniqueID.hpp"
-#include "VelocityModelData.hpp"
 
 struct GenericAgent;
 
-class VelocityModel : public OperationalModel
+class CollisionFreeSpeedModel : public OperationalModel
 {
 public:
     using NeighborhoodSearchType = NeighborhoodSearch<GenericAgent>;
 
 private:
     double _cutOffRadius{3};
-    double _aPed;
-    double _DPed;
-    double _aWall;
-    double _DWall;
+    double strengthNeighborRepulsion;
+    double rangeNeighborRepulsion;
+    double strengthGeometryRepulsion;
+    double rangeGeometryRepulsion;
 
 public:
-    VelocityModel(double aped, double Dped, double awall, double Dwall);
-    ~VelocityModel() override = default;
+    CollisionFreeSpeedModel(
+        double strengthNeighborRepulsion,
+        double rangeNeighborRepulsion,
+        double strengthGeometryRepulsion,
+        double rangeGeometryRepulsion);
+    ~CollisionFreeSpeedModel() override = default;
     OperationalModelType Type() const override;
     OperationalModelUpdate ComputeNewPosition(
         double dT,

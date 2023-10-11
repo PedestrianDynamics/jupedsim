@@ -1,6 +1,7 @@
 // Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Ellipse.hpp"
+#include "Macros.hpp"
 
 // ellipse  semi-axis in the direction of the velocity
 double Ellipse::GetEA(double speed) const

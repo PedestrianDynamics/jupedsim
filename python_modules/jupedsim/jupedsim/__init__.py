@@ -30,12 +30,12 @@ from jupedsim.library import (
     set_warning_callback,
 )
 from jupedsim.models import (
+    CollisionFreeSpeedModel,
+    CollisionFreeSpeedModelAgentParameters,
+    CollisionFreeSpeedModelState,
+    GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
-    GeneralizedCentrifugalForceModelParameters,
     GeneralizedCentrifugalForceModelState,
-    VelocityModelAgentParameters,
-    VelocityModelParameters,
-    VelocityModelState,
 )
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import RoutingEngine
@@ -43,11 +43,11 @@ from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
 from jupedsim.sqlite_serialization import SqliteTrajectoryWriter
 from jupedsim.stages import (
-    ExitProxy,
-    NotifiableQueueProxy,
-    WaitingSetProxy,
+    ExitStage,
+    NotifiableQueueStage,
+    WaitingSetStage,
     WaitingSetState,
-    WaypointProxy,
+    WaypointStage,
 )
 from jupedsim.tracing import Trace
 
@@ -61,15 +61,15 @@ __all__ = [
     "Agent",
     "AgentNumberError",
     "BuildInfo",
-    "ExitProxy",
+    "ExitStage",
     "GeneralizedCentrifugalForceModelAgentParameters",
-    "GeneralizedCentrifugalForceModelParameters",
+    "GeneralizedCentrifugalForceModel",
     "GeneralizedCentrifugalForceModelState",
     "Geometry",
     "IncorrectParameterError",
     "JourneyDescription",
     "NegativeValueError",
-    "NotifiableQueueProxy",
+    "NotifiableQueueStage",
     "OverlappingCirclesError",
     "Recording",
     "RecordingAgent",
@@ -80,12 +80,12 @@ __all__ = [
     "Trace",
     "TrajectoryWriter",
     "Transition",
-    "VelocityModelAgentParameters",
-    "VelocityModelParameters",
-    "VelocityModelState",
-    "WaitingSetProxy",
+    "CollisionFreeSpeedModelAgentParameters",
+    "CollisionFreeSpeedModel",
+    "CollisionFreeSpeedModelState",
+    "WaitingSetStage",
     "WaitingSetState",
-    "WaypointProxy",
+    "WaypointStage",
     "__commit__",
     "__compiler__",
     "__version__",

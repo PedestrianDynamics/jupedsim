@@ -17,7 +17,7 @@ def test_can_query_agents_in_range():
     jps.set_error_callback(log_msg_handler)
 
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
     )
     exit = simulation.add_exit_stage(
@@ -42,14 +42,12 @@ def test_can_query_agents_in_range():
         initial_agent_positions,
         range(10, 10 + len(initial_agent_positions)),
     ):
-        print(id)
         expected_agent_ids.add(
             simulation.add_agent(
-                jps.VelocityModelAgentParameters(
+                jps.CollisionFreeSpeedModelAgentParameters(
                     position=new_pos,
                     journey_id=journey_id,
                     stage_id=exit,
-                    id=id,
                 )
             )
         )
@@ -62,8 +60,8 @@ def test_can_query_agents_in_range():
         simulation.agents_in_polygon([(39, 11), (39, 9), (51, 9), (51, 11)])
     )
 
-    assert actual_ids_in_range == [11, 12, 13]
-    assert actual_ids_in_polygon == [13, 14]
+    assert actual_ids_in_range == [3, 4, 5]
+    assert actual_ids_in_polygon == [5, 6]
 
 
 def test_can_run_simulation():
@@ -80,7 +78,7 @@ def test_can_run_simulation():
     p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(), geometry=p1.union(p2)
+        model=jps.CollisionFreeSpeedModel(), geometry=p1.union(p2)
     )
     exit_stage_id = simulation.add_exit_stage(
         [(18, 4), (20, 4), (20, 6), (18, 6)]
@@ -97,7 +95,7 @@ def test_can_run_simulation():
     for new_pos in initial_agent_positions:
         expected_agent_ids.add(
             simulation.add_agent(
-                jps.VelocityModelAgentParameters(
+                jps.CollisionFreeSpeedModelAgentParameters(
                     position=new_pos,
                     journey_id=journey_id,
                     stage_id=exit_stage_id,
@@ -110,7 +108,7 @@ def test_can_run_simulation():
     assert actual_agent_ids == expected_agent_ids
 
     agent_id = simulation.add_agent(
-        jps.VelocityModelAgentParameters(
+        jps.CollisionFreeSpeedModelAgentParameters(
             position=(6, 6),
             journey_id=journey_id,
             stage_id=exit_stage_id,
@@ -142,7 +140,7 @@ def test_can_wait():
     jps.set_error_callback(log_msg_handler)
 
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
     )
     wp = simulation.add_waypoint_stage((50, 50), 1)
@@ -157,7 +155,7 @@ def test_can_wait():
             (64, 50),
         ]
     )
-    waiting_set = simulation.get_stage_proxy(waiting_set_id)
+    waiting_set = simulation.get_stage(waiting_set_id)
     exit = simulation.add_exit_stage(
         [(99, 40), (99, 60), (100, 60), (100, 40)]
     )
@@ -187,7 +185,7 @@ def test_can_wait():
     for new_pos in initial_agent_positions:
         expected_agent_ids.add(
             simulation.add_agent(
-                jps.VelocityModelAgentParameters(
+                jps.CollisionFreeSpeedModelAgentParameters(
                     position=new_pos,
                     journey_id=journey_id,
                     stage_id=wp,
@@ -200,7 +198,7 @@ def test_can_wait():
     assert actual_agent_ids == expected_agent_ids
 
     agent_id = simulation.add_agent(
-        jps.VelocityModelAgentParameters(
+        jps.CollisionFreeSpeedModelAgentParameters(
             position=(30, 30),
             journey_id=journey_id,
             stage_id=wp,
@@ -233,7 +231,7 @@ def test_can_change_journey_while_waiting():
     jps.set_error_callback(log_msg_handler)
 
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
     )
     wp = simulation.add_waypoint_stage((50, 50), 1)
@@ -244,7 +242,7 @@ def test_can_change_journey_while_waiting():
             (58, 50),
         ]
     )
-    stage = simulation.get_stage_proxy(stage_id)
+    stage = simulation.get_stage(stage_id)
     exit1 = simulation.add_exit_stage(
         [(99, 40), (99, 60), (100, 60), (100, 40)]
     )
@@ -274,7 +272,7 @@ def test_can_change_journey_while_waiting():
     journeys.append(simulation.add_journey(journey2))
 
     simulation.add_agent(
-        jps.VelocityModelAgentParameters(
+        jps.CollisionFreeSpeedModelAgentParameters(
             position=(10, 50),
             journey_id=journeys[0],
             stage_id=wp,
@@ -282,7 +280,7 @@ def test_can_change_journey_while_waiting():
     )
 
     simulation.add_agent(
-        jps.VelocityModelAgentParameters(
+        jps.CollisionFreeSpeedModelAgentParameters(
             position=(8, 50),
             journey_id=journeys[0],
             stage_id=wp,
@@ -290,7 +288,7 @@ def test_can_change_journey_while_waiting():
     )
 
     simulation.add_agent(
-        jps.VelocityModelAgentParameters(
+        jps.CollisionFreeSpeedModelAgentParameters(
             position=(6, 50),
             journey_id=journeys[0],
             stage_id=wp,
@@ -331,7 +329,7 @@ def test_get_single_agent_from_simulation():
     p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(), geometry=p1.union(p2)
+        model=jps.CollisionFreeSpeedModel(), geometry=p1.union(p2)
     )
     exit_id = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
 
@@ -345,7 +343,7 @@ def test_get_single_agent_from_simulation():
     for new_pos in initial_agent_positions:
         agent_ids.add(
             simulation.add_agent(
-                jps.VelocityModelAgentParameters(
+                jps.CollisionFreeSpeedModelAgentParameters(
                     position=new_pos,
                     journey_id=journey_id,
                     stage_id=exit_id,
@@ -371,7 +369,7 @@ def test_get_agent_non_existing_agent_from_simulation():
     p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(), geometry=p1.union(p2)
+        model=jps.CollisionFreeSpeedModel(), geometry=p1.union(p2)
     )
 
     exit_id = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
@@ -380,7 +378,7 @@ def test_get_agent_non_existing_agent_from_simulation():
     journey_id = simulation.add_journey(journey)
 
     agent_id = simulation.add_agent(
-        jps.VelocityModelAgentParameters(
+        jps.CollisionFreeSpeedModelAgentParameters(
             position=(7, 7),
             journey_id=journey_id,
             stage_id=exit_id,
@@ -409,7 +407,7 @@ def test_agent_can_be_removed_from_simulation():
     p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(), geometry=p1.union(p2)
+        model=jps.CollisionFreeSpeedModel(), geometry=p1.union(p2)
     )
     exit_stage_id = simulation.add_exit_stage(
         [(18, 4), (20, 4), (20, 6), (18, 6)]
@@ -426,7 +424,7 @@ def test_agent_can_be_removed_from_simulation():
     for new_pos in initial_agent_positions:
         expected_agent_ids.add(
             simulation.add_agent(
-                jps.VelocityModelAgentParameters(
+                jps.CollisionFreeSpeedModelAgentParameters(
                     position=new_pos,
                     journey_id=journey_id,
                     stage_id=exit_stage_id,

@@ -1,13 +1,13 @@
 // Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Simulation.hpp"
+#include "CollisionFreeSpeedModelData.hpp"
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "IteratorPair.hpp"
 #include "Logger.hpp"
 #include "OperationalModel.hpp"
 #include "Stage.hpp"
-#include "VelocityModelData.hpp"
 #include <memory>
 
 Simulation::Simulation(

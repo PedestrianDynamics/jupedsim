@@ -7,49 +7,49 @@ import jupedsim.native as py_jps
 
 
 @dataclass(kw_only=True)
-class VelocityModelParameters:
-    """Parameters for Velocity Model
+class CollisionFreeSpeedModel:
+    """Parameters for Collision Free Speed Model
 
     All attributes are initialized with reasonably good defaults.
 
     Attributes:
-        a_ped (float): Strength of the repulsion from neighbors
-        d_ped (float): Range of the repulsion from neighbors
-        a_wall (float): Strength of the repulsion from geometry boundaries
-        d_wall (float): Range of the repulsion from geometry boundaries
+        strength_neighbor_repulsion (float): Strength of the repulsion from neighbors
+        range_neighbor_repulsion (float): Range of the repulsion from neighbors
+        strength_geometry_repulsion (float): Strength of the repulsion from geometry boundaries
+        range_geometry_repulsion (float): Range of the repulsion from geometry boundaries
     """
 
-    a_ped: float = 8.0
-    d_ped: float = 0.1
-    a_wall: float = 5.0
-    d_wall: float = 0.02
+    strength_neighbor_repulsion: float = 8.0
+    range_neighbor_repulsion: float = 0.1
+    strength_geometry_repulsion: float = 5.0
+    range_geometry_repulsion: float = 0.02
 
 
 @dataclass(kw_only=True)
-class GeneralizedCentrifugalForceModelParameters:
+class GeneralizedCentrifugalForceModel:
     """Parameters for Generalized Centrifugal Force Model
 
     All attributes are initialized with reasonably good defaults.
 
     Attributes:
-        nu_ped (float):
-        nu_wall (float):
-        dist_eff_ped (float)
-        dist_eff_wall (float)
-        intp_width_ped (float)
-        intp_width_wall (float)
-        maxf_ped (float)
-        maxf_wall (float)
+        strength_neighbor_repulsion (float): strengh_neighbor_repulsion
+        strength_geometry_repulsion (float): strength_geometry_repulsion
+        max_neighbor_interaction_distance (float): cut-off-radius for ped-ped repulsion (r_c in FIG. 7)
+        max_geometry_interaction_distance (float): cut-off-radius for ped-wall repulsion (r_c in FIG. 7)
+        max_neighbor_interpolation_distance (float): distance of interpolation of repulsive force for ped-ped interaction (r_eps in FIG. 7)
+        max_geometry_interpolayion_distance (float): distance of interpolation of repulsive force for ped-wall interaction (r_eps in FIG. 7)
+        max_neighbor_repulsion_force (float): maximum of the repulsion force for ped-ped interaction by contact of ellipses (f_m in FIG. 7)
+        max_geometry_repulsion_force (float): maximum of the repulsion force for ped-wall interaction by contact of ellipses (f_m in FIG. 7)
     """
 
-    nu_ped: float = 0.3
-    nu_wall: float = 0.2
-    dist_eff_ped: float = 2
-    dist_eff_wall: float = 2
-    intp_width_ped: float = 0.1
-    intp_width_wall: float = 0.1
-    maxf_ped: float = 3
-    maxf_wall: float = 3
+    strength_neighbor_repulsion: float = 0.3
+    strength_geometry_repulsion: float = 0.2
+    max_neighbor_interaction_distance: float = 2
+    max_geometry_interaction_distance: float = 2
+    max_neighbor_interpolation_distance: float = 0.1
+    max_geometry_interpolation_distance: float = 0.1
+    max_neighbor_repulsion_force: float = 3
+    max_geometry_repulsion_force: float = 3
 
 
 @dataclass(kw_only=True)
@@ -66,6 +66,9 @@ class GeneralizedCentrifugalForceModelAgentParameters:
         create one instance of this type and modify it between calls to `add_agent`
 
         E.g.:
+
+        .. code:: python
+
             positions = [...] # List of initial agent positions
             params = GeneralizedCentrifugalForceModelAgentParameters(speed=0.9) # all agents are slower
             for p in positions:
@@ -86,7 +89,6 @@ class GeneralizedCentrifugalForceModelAgentParameters:
         a_min (float):
         b_min (float):
         b_max (float):
-        id (int):
     """
 
     speed: float = 0.0
@@ -102,10 +104,11 @@ class GeneralizedCentrifugalForceModelAgentParameters:
     a_min: float = 0.2
     b_min: float = 0.2
     b_max: float = 0.4
-    id: int = -1
 
-    def as_native(self) -> py_jps.GCFMModelAgentParameters:
-        return py_jps.GCFMModelAgentParameters(
+    def as_native(
+        self,
+    ) -> py_jps.GeneralizedCentrifugalForceModelModelAgentParameters:
+        return py_jps.GeneralizedCentrifugalForceModelModelAgentParameters(
             speed=self.speed,
             e0=self.e0,
             position=self.position,
@@ -119,14 +122,13 @@ class GeneralizedCentrifugalForceModelAgentParameters:
             a_min=self.a_min,
             b_min=self.b_min,
             b_max=self.b_max,
-            id=self.id,
         )
 
 
 @dataclass(kw_only=True)
-class VelocityModelAgentParameters:
+class CollisionFreeSpeedModelAgentParameters:
     """
-    Agent parameters for Velocity Model.
+    Agent parameters for Collision Free Speed Model.
 
     See the scientific publication for more details about this model
     https://arxiv.org/abs/1512.05597
@@ -136,8 +138,11 @@ class VelocityModelAgentParameters:
         create one instance of this type and modify it between calls to `add_agent`
 
         E.g.:
+
+            .. code:: python
+
             positions = [...] # List of initial agent positions
-            params = VelocityModelAgentParameters(speed=0.9) # all agents are slower
+            params = CollisionFreeSpeedModelAgentParameters(speed=0.9) # all agents are slower
             for p in positions:
                 params.position = p
                 sim.add_agent(params)
@@ -149,7 +154,6 @@ class VelocityModelAgentParameters:
         radius (float):
         journey_id (int):
         stage_id (int):
-        id (int):
     """
 
     position: tuple[float, float] = (0.0, 0.0)
@@ -158,17 +162,15 @@ class VelocityModelAgentParameters:
     radius: float = 0.2
     journey_id: int = 0
     stage_id: int = 0
-    id: int = 0
 
-    def as_native(self) -> py_jps.VelocityModelAgentParameters:
-        return py_jps.VelocityModelAgentParameters(
+    def as_native(self) -> py_jps.CollisionFreeSpeedModelAgentParameters:
+        return py_jps.CollisionFreeSpeedModelAgentParameters(
             position=self.position,
             time_gap=self.time_gap,
             v0=self.v0,
             radius=self.radius,
             journey_id=self.journey_id,
             stage_id=self.stage_id,
-            id=self.id,
         )
 
 
@@ -248,7 +250,7 @@ class GeneralizedCentrifugalForceModelState:
         self._obj.b_max = b_max
 
 
-class VelocityModelState:
+class CollisionFreeSpeedModelState:
     def __init__(self, backing):
         self._obj = backing
 

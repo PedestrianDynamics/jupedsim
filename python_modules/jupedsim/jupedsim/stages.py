@@ -5,7 +5,7 @@ from enum import Enum
 import jupedsim.native as py_jps
 
 
-class NotifiableQueueProxy:
+class NotifiableQueueStage:
     """Models a queue where agents can wait until notified.
 
     The queues waiting positions are predefined and agents will wait on the
@@ -63,15 +63,15 @@ class WaitingSetState(Enum):
     INACTIVE = py_jps.WaitingSetState.Inactive
 
 
-class WaitingSetProxy:
+class WaitingSetStage:
     """Models a set of waiting positions that can be activated or deactivated.
 
-    Similar as with a :class:`NotifiableQueueProxy` there needs to be a set of
+    Similar as with a :class:`NotifiableQueueStage there needs to be a set of
     waiting positions defined which will be filled in order of definition. The
-    :class:`WaitingSetProxy` now can be active or inactive. If active agents will fill
+    :class:`WaitingSetStage` now can be active or inactive. If active agents will fill
     waiting positions until all are occupied. Additional agents will all try to
     wait at the last defined waiting position. In inactive state the
-    :class:`WaitingSetProxy` acts as a simple waypoint at the position of the first
+    :class:`WaitingSetStage` acts as a simple waypoint at the position of the first
     defined waiting position.
     """
 
@@ -113,7 +113,7 @@ class WaitingSetProxy:
         self._obj.state = new_state.value
 
 
-class WaypointProxy:
+class WaypointStage:
     """Models a waypoint.
 
     A waypoint is considered to be reached if an agent is within the specified
@@ -130,7 +130,7 @@ class WaypointProxy:
         return self._obj.count_targeting()
 
 
-class ExitProxy:
+class ExitStage:
     """Models an exit.
 
     Agents entering the polygon defining the exit will be removed at the

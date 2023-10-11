@@ -20,17 +20,11 @@ public:
     /// Norm
     double Norm() const;
 
-    /// Norm molified see Koester2013
-    double NormMolified() const;
-
     /// Norm square
     inline double NormSquare() const { return ScalarProduct(*this); }
 
     /// normalized vector
     Point Normalized() const;
-
-    /// normalized vector usinf NormMolified
-    Point NormalizedMolified() const;
 
     /// Return norm and direction in one call
     /// @return Norm and Normalized
@@ -69,7 +63,6 @@ public:
     bool operator!=(const Point& p) const;
     /// Assignement
     Point& operator+=(const Point& p);
-    std::string toString() const;
 
     bool operator<(const Point& rhs) const;
 
@@ -96,8 +89,6 @@ double DistanceSquared(const Point& a, const Point& b);
 const Point operator*(const Point& p, const double f);
 /// division
 const Point operator/(const Point& p, const double f);
-
-std::ostream& operator<<(std::ostream& out, const Point& p);
 
 template <>
 struct fmt::formatter<Point> {

@@ -1,11 +1,11 @@
 // Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
+#include "CollisionFreeSpeedModelData.hpp"
 #include "GeneralizedCentrifugalForceModelData.hpp"
 #include "OperationalModel.hpp"
 #include "Point.hpp"
 #include "UniqueID.hpp"
-#include "VelocityModelData.hpp"
 #include "Visitor.hpp"
 
 #include <memory>
@@ -27,7 +27,7 @@ struct GenericAgent {
     Point pos{};
     Point orientation{};
 
-    using Model = std::variant<GeneralizedCentrifugalForceModelData, VelocityModelData>;
+    using Model = std::variant<GeneralizedCentrifugalForceModelData, CollisionFreeSpeedModelData>;
     Model model{};
 
     GenericAgent(
@@ -69,7 +69,7 @@ struct fmt::formatter<GenericAgent> {
                         agent.orientation,
                         m);
                 },
-                [&ctx, &agent](const VelocityModelData& m) {
+                [&ctx, &agent](const CollisionFreeSpeedModelData& m) {
                     return fmt::format_to(
                         ctx.out(),
                         "Agent[id={}, journey={}, stage={}, destination={}, waypoint={}, pos={}, "

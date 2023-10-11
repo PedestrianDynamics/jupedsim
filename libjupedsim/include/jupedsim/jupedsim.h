@@ -103,7 +103,10 @@ typedef struct JPS_Waypoint {
 /**
  * Describes the pedestrian model used in the simulation.
  */
-typedef enum JPS_ModelType { JPS_GCFMModel, JPS_VelocityModel } JPS_ModelType;
+typedef enum JPS_ModelType {
+    JPS_GeneralizedCentrifugalForceModelModel,
+    JPS_CollisionFreeSpeedModel
+} JPS_ModelType;
 
 /**
  * Id of a journey.
@@ -205,77 +208,94 @@ typedef struct JPS_OperationalModel_t* JPS_OperationalModel;
 JUPEDSIM_API void JPS_OperationalModel_Free(JPS_OperationalModel handle);
 
 /**
- * Opaque type for a GCFM Model Builder
+ * Opaque type for a GeneralizedCentrifugalForceModel Model Builder
  */
-typedef struct JPS_GCFMModelBuilder_t* JPS_GCFMModelBuilder;
+typedef struct JPS_GeneralizedCentrifugalForceModelModelBuilder_t*
+    JPS_GeneralizedCentrifugalForceModelModelBuilder;
 
 /**
- * Creates a GCFM model builder.
- * @param nu_Ped
- * @param nu_Wall
- * @param dist_eff_Ped
- * @param dist_eff_Wall
- * @param intp_width_Ped
- * @param intp_width_Wall
- * @param maxf_Ped
- * @param maxf_Wall
- * @return the GCFM model builder
+ * Creates a GeneralizedCentrifugalForceModel model builder.
+ * @param strengthNeighborRepulsion  strengh_neighbor_repulsion
+ * @param strengthGeometryRepulsion  strength_geometry_repulsion
+ * @param maxNeighborInteractionDistance  cut-off-radius for ped-ped repulsion (r_c in FIG. 7)
+ * @param maxGeometryInteractionDistance  cut-off-radius for ped-wall repulsion (r_c in FIG. 7)
+ * @param maxNeighborInterpolationDistance  distance of interpolation of repulsive force for
+ * ped-ped interaction (r_eps in FIG. 7)
+ * @param maxGeometryInterpolationDistance  distance of interpolation of repulsive force for
+ * ped-wall interaction (r_eps in FIG. 7)
+ * @param maxNeighborRepulsionForce  maximum of the repulsion force for ped-ped interaction by
+ * contact of ellipses (f_m in FIG. 7)
+ * @param maxGeometryRepulsionForce  maximum of the repulsion force for ped-wall interaction by
+ * contact of ellipses (f_m in FIG. 7)
+ * @return the GeneralizedCentrifugalForceModel model builder
  */
-JUPEDSIM_API JPS_GCFMModelBuilder JPS_GCFMModelBuilder_Create(
-    double nu_Ped,
-    double nu_Wall,
-    double dist_eff_Ped,
-    double dist_eff_Wall,
-    double intp_width_Ped,
-    double intp_width_Wall,
-    double maxf_Ped,
-    double maxf_Wall);
+JUPEDSIM_API JPS_GeneralizedCentrifugalForceModelModelBuilder
+JPS_GeneralizedCentrifugalForceModelModelBuilder_Create(
+    double strengthNeighborRepulsion,
+    double strengthGeometryRepulsion,
+    double maxNeighborInteractionDistance,
+    double maxGeometryInteractionDistance,
+    double maxNeighborInterpolationDistance,
+    double maxGeometryInterpolationDistance,
+    double maxNeighborRepulsionForce,
+    double maxGeometryRepulsionForce);
 
 /**
- * Creates a JPS_OperationalModel of type GCFM Model from the JPS_GCFMModelBuilder.
+ * Creates a JPS_OperationalModel of type GeneralizedCentrifugalForceModel Model from the
+ * JPS_GeneralizedCentrifugalForceModelModelBuilder.
  * @param handle the builder to operate on
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error
- * @return a JPS_GCFMModel or NULL if an error occured.
+ * @return a JPS_GeneralizedCentrifugalForceModelModel or NULL if an error occured.
  */
-JUPEDSIM_API JPS_OperationalModel
-JPS_GCFMModelBuilder_Build(JPS_GCFMModelBuilder handle, JPS_ErrorMessage* errorMessage);
+JUPEDSIM_API JPS_OperationalModel JPS_GeneralizedCentrifugalForceModelModelBuilder_Build(
+    JPS_GeneralizedCentrifugalForceModelModelBuilder handle,
+    JPS_ErrorMessage* errorMessage);
 
 /**
- * Frees a JPS_GCFMModelBuilder
- * @param handle to the JPS_GCFMModelBuilder to free.
+ * Frees a JPS_GeneralizedCentrifugalForceModelModelBuilder
+ * @param handle to the JPS_GeneralizedCentrifugalForceModelModelBuilder to free.
  */
-JUPEDSIM_API void JPS_GCFMModelBuilder_Free(JPS_GCFMModelBuilder handle);
+JUPEDSIM_API void JPS_GeneralizedCentrifugalForceModelModelBuilder_Free(
+    JPS_GeneralizedCentrifugalForceModelModelBuilder handle);
 
 /**
- * Opaque type for a Velocity Model Builder
+ * Opaque type for a Collision Free Speed Model Builder
  */
-typedef struct JPS_VelocityModelBuilder_t* JPS_VelocityModelBuilder;
+typedef struct JPS_CollisionFreeSpeedModelBuilder_t* JPS_CollisionFreeSpeedModelBuilder;
 
 /**
- * Creates a Velocity Model builder.
- * @param aPed
- * @param DPed
- * @param aWall
- * @param DWall
+ * Creates a Collision Free Speed Model builder.
+ * @param strength_neighbor_repulsion describes the strength with which neighbors repulse each
+ * other.
+ * @param range_neighbor_repulsion describes the range at hich neighbors repulse each other.
+ * @param strength_geometry_repulsion describes the strength with which neighbors are repules by
+ * geometry.
+ * @param range_geometry_repulsion describes the range at hich neighbors are repulsed by geometry.
  * @return the builder
  */
-JUPEDSIM_API JPS_VelocityModelBuilder
-JPS_VelocityModelBuilder_Create(double aPed, double DPed, double aWall, double DWall);
+JUPEDSIM_API JPS_CollisionFreeSpeedModelBuilder JPS_CollisionFreeSpeedModelBuilder_Create(
+    double strengthNeighborRepulsion,
+    double rangeNeighborRepulsion,
+    double strengthGeometryRepulsion,
+    double rangeGeometryRepulsion);
 
 /**
- * Creates a JPS_OperationalModel of type Velocity Model from the JPS_GCFMModelBuilder.
+ * Creates a JPS_OperationalModel of type Collision Free Speed Model from the
+ * JPS_GeneralizedCentrifugalForceModelModelBuilder.
  * @param handle the builder to operate on
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error
- * @return a JPS_GCFMModel or NULL if an error occured.
+ * @return a JPS_GeneralizedCentrifugalForceModelModel or NULL if an error occured.
  */
-JUPEDSIM_API JPS_OperationalModel
-JPS_VelocityModelBuilder_Build(JPS_VelocityModelBuilder handle, JPS_ErrorMessage* errorMessage);
+JUPEDSIM_API JPS_OperationalModel JPS_CollisionFreeSpeedModelBuilder_Build(
+    JPS_CollisionFreeSpeedModelBuilder handle,
+    JPS_ErrorMessage* errorMessage);
 
 /**
- * Frees a JPS_VelocityModelBuilder
- * @param handle to the JPS_VelocityModelBuilder to free.
+ * Frees a JPS_CollisionFreeSpeedModelBuilder
+ * @param handle to the JPS_CollisionFreeSpeedModelBuilder to free.
  */
-JUPEDSIM_API void JPS_VelocityModelBuilder_Free(JPS_VelocityModelBuilder handle);
+JUPEDSIM_API void
+JPS_CollisionFreeSpeedModelBuilder_Free(JPS_CollisionFreeSpeedModelBuilder handle);
 
 /**
  * Opaque type that represents the geometry the simulation acts on.
@@ -630,79 +650,89 @@ JUPEDSIM_API void JPS_GeneralizedCentrifugalForceModelState_SetBMax(
     double b_max);
 
 /**
- * Opaque type of Velocity model state
+ * Opaque type of Collision Free Speed model state
  */
-typedef struct JPS_VelocityModelState_t* JPS_VelocityModelState;
+typedef struct JPS_CollisionFreeSpeedModelState_t* JPS_CollisionFreeSpeedModelState;
 
 /**
  * Read e0 of this agent.
  * @param handle of the Agent to access.
  * @return e0 of this agent
  */
-JUPEDSIM_API JPS_Point JPS_VelocityModelState_GetE0(JPS_VelocityModelState handle);
+JUPEDSIM_API JPS_Point
+JPS_CollisionFreeSpeedModelState_GetE0(JPS_CollisionFreeSpeedModelState handle);
 
 /**
  * Write e0 of this agent.
  * @param handle of the Agent to access.
  * @param e0 of this agent.
  */
-JUPEDSIM_API void JPS_VelocityModelState_SetE0(JPS_VelocityModelState handle, JPS_Point e0);
+JUPEDSIM_API void
+JPS_CollisionFreeSpeedModelState_SetE0(JPS_CollisionFreeSpeedModelState handle, JPS_Point e0);
 
 /**
  * Read time gap of this agent.
  * @param handle of the Agent to access.
  * @return time gap of this agent
  */
-JUPEDSIM_API double JPS_VelocityModelState_GetTimeGap(JPS_VelocityModelState handle);
+JUPEDSIM_API double
+JPS_CollisionFreeSpeedModelState_GetTimeGap(JPS_CollisionFreeSpeedModelState handle);
 
 /**
  * Write time gap of this agent.
  * @param handle of the Agent to access.
  * @param time_gap of this agent.
  */
-JUPEDSIM_API void JPS_VelocityModelState_SetTimeGap(JPS_VelocityModelState handle, double time_gap);
+JUPEDSIM_API void JPS_CollisionFreeSpeedModelState_SetTimeGap(
+    JPS_CollisionFreeSpeedModelState handle,
+    double time_gap);
 
 /**
  * Read tau of this agent.
  * @param handle of the Agent to access.
  * @return tau of this agent
  */
-JUPEDSIM_API double JPS_VelocityModelState_GetTau(JPS_VelocityModelState handle);
+JUPEDSIM_API double
+JPS_CollisionFreeSpeedModelState_GetTau(JPS_CollisionFreeSpeedModelState handle);
 
 /**
  * Write tau of this agent.
  * @param handle of the Agent to access.
  * @param tau of this agent.
  */
-JUPEDSIM_API void JPS_VelocityModelState_SetTau(JPS_VelocityModelState handle, double tau);
+JUPEDSIM_API void
+JPS_CollisionFreeSpeedModelState_SetTau(JPS_CollisionFreeSpeedModelState handle, double tau);
 
 /**
  * Read v0 of this agent.
  * @param handle of the Agent to access.
  * @return v0 of this agent
  */
-JUPEDSIM_API double JPS_VelocityModelState_GetV0(JPS_VelocityModelState handle);
+JUPEDSIM_API double JPS_CollisionFreeSpeedModelState_GetV0(JPS_CollisionFreeSpeedModelState handle);
 
 /**
  * Write v0 of this agent.
  * @param handle of the Agent to access.
  * @param v0 of this agent.
  */
-JUPEDSIM_API void JPS_VelocityModelState_SetV0(JPS_VelocityModelState handle, double v0);
+JUPEDSIM_API void
+JPS_CollisionFreeSpeedModelState_SetV0(JPS_CollisionFreeSpeedModelState handle, double v0);
 
 /**
  * Read radius of this agent.
  * @param handle of the Agent to access.
  * @return radius of this agent
  */
-JUPEDSIM_API double JPS_VelocityModelState_GetRadius(JPS_VelocityModelState handle);
+JUPEDSIM_API double
+JPS_CollisionFreeSpeedModelState_GetRadius(JPS_CollisionFreeSpeedModelState handle);
 
 /**
  * Write radius of this agent in meters.
  * @param handle of the Agent to access.
  * @param radius (m) of this agent.
  */
-JUPEDSIM_API void JPS_VelocityModelState_SetRadius(JPS_VelocityModelState handle, double radius);
+JUPEDSIM_API void
+JPS_CollisionFreeSpeedModelState_SetRadius(JPS_CollisionFreeSpeedModelState handle, double radius);
 
 /**
  * Identifies the type of stage
@@ -815,14 +845,14 @@ JPS_Agent_GetGeneralizedCentrifugalForceModelState(
     JPS_ErrorMessage* errorMessage);
 
 /**
- * Access Velocity model state.
- * Precondition: Agent needs to use Velocity model
+ * Access Collision Free Speed model state.
+ * Precondition: Agent needs to use Collision Free Speed model
  * @param handle of the agent to access.
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return state or NULL on error
  */
-JUPEDSIM_API JPS_VelocityModelState
-JPS_Agent_GetVelocityModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
+JUPEDSIM_API JPS_CollisionFreeSpeedModelState
+JPS_Agent_GetCollisionFreeSpeedModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
 
 /**
  * Opaque type of an iterator over agents
@@ -845,9 +875,9 @@ JUPEDSIM_API JPS_Agent JPS_AgentIterator_Next(JPS_AgentIterator handle);
 JUPEDSIM_API void JPS_AgentIterator_Free(JPS_AgentIterator handle);
 
 /**
- * Describes parameters of an Agent in GCFMModel
+ * Describes parameters of an Agent in GeneralizedCentrifugalForceModelModel
  */
-typedef struct JPS_GCFMModelAgentParameters {
+typedef struct JPS_GeneralizedCentrifugalForceModelModelAgentParameters {
     /**
      * Initial speed of the Agent
      */
@@ -902,19 +932,12 @@ typedef struct JPS_GCFMModelAgentParameters {
      * b_max maximum length of transversal axis in 'meters'
      */
     double b_max;
-    /**
-     * Id of this agent.
-     * If set to non zero value the simulation will use the id provided and check that no agent with
-     * this id is present. Adding an agent with an already used id will result in an error.
-     * If set to zero the simulation will create a unique id internally.
-     */
-    JPS_AgentId agentId;
-} JPS_GCFMModelAgentParameters;
+} JPS_GeneralizedCentrifugalForceModelModelAgentParameters;
 
 /**
- * Describes parameters of an Agent in GCFMModel
+ * Describes parameters of an Agent in GeneralizedCentrifugalForceModelModel
  */
-typedef struct JPS_VelocityModelAgentParameters {
+typedef struct JPS_CollisionFreeSpeedModelAgentParameters {
     /**
      * Position of the agent.
      * The position needs to inside the accessible area.
@@ -940,14 +963,7 @@ typedef struct JPS_VelocityModelAgentParameters {
      *@param radius of the agent in 'meters'
      */
     double radius;
-    /**
-     * Id of this agent.
-     * If set to non zero value the simulation will use the id provided and check that no agent
-     * with this id is present. Adding an agent with an already used id will result in an error.
-     * If set to zero the simulation will create a unique id internally.
-     */
-    JPS_AgentId agentId;
-} JPS_VelocityModelAgentParameters;
+} JPS_CollisionFreeSpeedModelAgentParameters;
 
 /**
  * Opaque type of an iterator over agent ids
@@ -1086,9 +1102,9 @@ JUPEDSIM_API JPS_StageId JPS_Simulation_AddStageWaitingSet(
  * error.
  * @return id of the new agent or 0 if the agent could not be added due to an error.
  */
-JUPEDSIM_API JPS_AgentId JPS_Simulation_AddGCFMModelAgent(
+JUPEDSIM_API JPS_AgentId JPS_Simulation_AddGeneralizedCentrifugalForceModelModelAgent(
     JPS_Simulation handle,
-    JPS_GCFMModelAgentParameters parameters,
+    JPS_GeneralizedCentrifugalForceModelModelAgentParameters parameters,
     JPS_ErrorMessage* errorMessage);
 
 /**
@@ -1102,9 +1118,9 @@ JUPEDSIM_API JPS_AgentId JPS_Simulation_AddGCFMModelAgent(
  * error.
  * @return id of the new agent or 0 if the agent could not be added due to an error.
  */
-JUPEDSIM_API JPS_AgentId JPS_Simulation_AddVelocityModelAgent(
+JUPEDSIM_API JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelAgent(
     JPS_Simulation handle,
-    JPS_VelocityModelAgentParameters parameters,
+    JPS_CollisionFreeSpeedModelAgentParameters parameters,
     JPS_ErrorMessage* errorMessage);
 
 /**

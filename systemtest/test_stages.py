@@ -9,7 +9,7 @@ import jupedsim as jps
 @pytest.fixture
 def square_room_5x5():
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=[(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)],
     )
     return simulation
@@ -39,7 +39,7 @@ def test_can_share_queue_between_stages():
     )
 
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(), geometry=polygon
+        model=jps.CollisionFreeSpeedModel(), geometry=polygon
     )
 
     wp_j1 = simulation.add_waypoint_stage((-1, 0), 0.5)
@@ -51,7 +51,7 @@ def test_can_share_queue_between_stages():
     common_queue = simulation.add_queue_stage(
         [(0, -9), (0, -8), (0, -7), (0, -6), (0, -5), (0, -4)]
     )
-    queue = simulation.get_stage_proxy(common_queue)
+    queue = simulation.get_stage(common_queue)
 
     journey1 = jps.JourneyDescription(
         [
@@ -93,7 +93,7 @@ def test_can_share_queue_between_stages():
         ((5.5, 0), journeys[1]),
     ]
 
-    agent_parameters = jps.VelocityModelAgentParameters()
+    agent_parameters = jps.CollisionFreeSpeedModelAgentParameters()
 
     for pos, (journey_id, stage_id) in agents:
         agent_parameters.position = pos
@@ -128,7 +128,7 @@ def test_can_use_stage_proxy():
     )
 
     simulation = jps.Simulation(
-        model=jps.VelocityModelParameters(), geometry=polygon
+        model=jps.CollisionFreeSpeedModel(), geometry=polygon
     )
 
     exit_id = simulation.add_exit_stage(
@@ -153,13 +153,13 @@ def test_can_use_stage_proxy():
         )
     )
 
-    exit = simulation.get_stage_proxy(exit_id)
-    waypoint = simulation.get_stage_proxy(waypoint_id)
+    exit = simulation.get_stage(exit_id)
+    waypoint = simulation.get_stage(waypoint_id)
 
     assert exit.count_targeting() == 0
     assert waypoint.count_targeting() == 0
 
-    agent_parameters = jps.VelocityModelAgentParameters()
+    agent_parameters = jps.CollisionFreeSpeedModelAgentParameters()
     agent_parameters.position = (-9.5, 0)
     agent_parameters.journey_id = exit_journey_id
     agent_parameters.stage_id = exit_id

@@ -4,21 +4,25 @@
 
 #include "Point.hpp"
 
-struct VelocityModelData {
+struct CollisionFreeSpeedModelData {
     double timeGap{1};
     double v0{1.2};
     double radius{0.15};
 };
 
 template <>
-struct fmt::formatter<VelocityModelData> {
+struct fmt::formatter<CollisionFreeSpeedModelData> {
 
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
     template <typename FormatContext>
-    auto format(const VelocityModelData& m, FormatContext& ctx) const
+    auto format(const CollisionFreeSpeedModelData& m, FormatContext& ctx) const
     {
         return fmt::format_to(
-            ctx.out(), "VelocityModel[timeGap={}, v0={}, radius={}])", m.timeGap, m.v0, m.radius);
+            ctx.out(),
+            "CollisionFreeSpeedModel[timeGap={}, v0={}, radius={}])",
+            m.timeGap,
+            m.v0,
+            m.radius);
     }
 };

@@ -10,17 +10,17 @@ from jupedsim.geometry import Geometry
 from jupedsim.geometry_utils import build_geometry
 from jupedsim.journey import JourneyDescription
 from jupedsim.models import (
+    CollisionFreeSpeedModel,
+    CollisionFreeSpeedModelAgentParameters,
+    GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
-    GeneralizedCentrifugalForceModelParameters,
-    VelocityModelAgentParameters,
-    VelocityModelParameters,
 )
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.stages import (
-    ExitProxy,
-    NotifiableQueueProxy,
-    WaitingSetProxy,
-    WaypointProxy,
+    ExitStage,
+    NotifiableQueueStage,
+    WaitingSetStage,
+    WaypointStage,
 )
 from jupedsim.tracing import Trace
 
@@ -38,8 +38,7 @@ class Simulation:
     def __init__(
         self,
         *,
-        model: VelocityModelParameters
-        | GeneralizedCentrifugalForceModelParameters,
+        model: CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel,
         geometry: str
         | shapely.GeometryCollection
         | shapely.Polygon
@@ -53,7 +52,7 @@ class Simulation:
         """Creates a Simulation.
 
         Arguments:
-            model (VelocityModelParameters | GeneralizedCentrifugalForceModelParameters):
+        model (CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel):
                 Defines the operational model used in the simulation.
             geometry (str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]]):
                 Data to create the geometry out of. Data may be supplied as:
@@ -82,24 +81,24 @@ class Simulation:
                 from the walkable area. Only use this argument if `geometry` was
                 provided as list[tuple[float, float]].
         """
-        if isinstance(model, VelocityModelParameters):
-            model_builder = py_jps.VelocityModelBuilder(
-                a_ped=model.a_ped,
-                d_ped=model.d_ped,
-                a_wall=model.a_wall,
-                d_wall=model.d_wall,
+        if isinstance(model, CollisionFreeSpeedModel):
+            model_builder = py_jps.CollisionFreeSpeedModelBuilder(
+                strength_neighbor_repulsion=model.strength_neighbor_repulsion,
+                range_neighbor_repulsion=model.range_neighbor_repulsion,
+                strength_geometry_repulsion=model.strength_geometry_repulsion,
+                range_geometry_repulsion=model.range_geometry_repulsion,
             )
             py_jps_model = model_builder.build()
-        elif isinstance(model, GeneralizedCentrifugalForceModelParameters):
-            model_builder = py_jps.GCFMModelBuilder(
-                nu_ped=model.nu_ped,
-                nu_wall=model.nu_wall,
-                dist_eff_ped=model.dist_eff_ped,
-                dist_eff_wall=model.dist_eff_wall,
-                intp_width_ped=model.intp_width_ped,
-                intp_width_wall=model.intp_width_wall,
-                maxf_ped=model.maxf_ped,
-                maxf_wall=model.maxf_wall,
+        elif isinstance(model, GeneralizedCentrifugalForceModel):
+            model_builder = py_jps.GeneralizedCentrifugalForceModelBuilder(
+                strength_neighbor_repulsion=model.strength_neighbor_repulsion,
+                strength_geometry_repulsion=model.strength_geometry_repulsion,
+                max_neighbor_interaction_distance=model.max_neighbor_interaction_distance,
+                max_geometry_interaction_distance=model.max_geometry_interaction_distance,
+                max_neighbor_interpolation_distance=model.max_neighbor_interpolation_distance,
+                max_geometry_interpolation_distance=model.max_geometry_interpolation_distance,
+                max_neighbor_repulsion_force=model.max_neighbor_repulsion_force,
+                max_geometry_repulsion_force=model.max_geometry_repulsion_force,
             )
             py_jps_model = model_builder.build()
             pass
@@ -184,7 +183,7 @@ class Simulation:
     def add_agent(
         self,
         parameters: GeneralizedCentrifugalForceModelAgentParameters
-        | VelocityModelAgentParameters,
+        | CollisionFreeSpeedModelAgentParameters,
     ) -> int:
         return self._obj.add_agent(parameters.as_native())
 
@@ -282,17 +281,17 @@ class Simulation:
 
         return self._obj.agents_in_polygon(polygon_geometry.boundary())
 
-    def get_stage_proxy(self, stage_id: int):
+    def get_stage(self, stage_id: int):
         stage = self._obj.get_stage_proxy(stage_id)
         match stage:
             case py_jps.WaypointProxy():
-                return WaypointProxy(stage)
+                return WaypointStage(stage)
             case py_jps.ExitProxy():
-                return ExitProxy(stage)
+                return ExitStage(stage)
             case py_jps.NotifiableQueueProxy():
-                return NotifiableQueueProxy(stage)
+                return NotifiableQueueStage(stage)
             case py_jps.WaitingSetProxy():
-                return WaitingSetProxy(stage)
+                return WaitingSetStage(stage)
             case _:
                 raise Exception(
                     f"Internal error, unexpected type: {type(stage)}"

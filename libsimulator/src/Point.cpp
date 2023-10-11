@@ -6,35 +6,10 @@
 
 #include <Logger.hpp>
 #include <limits>
-#include <sstream>
-/************************************************************
-  Konstruktoren
- ************************************************************/
-std::string Point::toString() const
-{
-    std::stringstream tmp;
-    tmp << "( " << x << " : " << y << " )";
-    return tmp.str();
-}
 
 double Point::Norm() const
 {
     return sqrt(NormSquare());
-}
-
-double Point::NormMolified() const
-{
-    double const eps_sq = 0.1;
-    return sqrt(NormSquare() + eps_sq);
-}
-
-Point Point::NormalizedMolified() const
-{
-    double norm = NormMolified();
-    if(norm > J_EPS_GOAL)
-        return (Point(x, y) / norm);
-    else
-        return Point(0.0, 0.0);
 }
 
 Point Point::Normalized() const
@@ -162,37 +137,31 @@ bool Point::IsUnitLength() const
     return std::abs(1 - NormSquare()) <= std::numeric_limits<double>::epsilon();
 }
 
-//  sum
 const Point Point::operator+(const Point& p) const
 {
     return Point(x + p.x, y + p.y);
 }
 
-// sub
 const Point Point::operator-(const Point& p) const
 {
     return Point(x - p.x, y - p.y);
 }
 
-// equal
 bool Point::operator==(const Point& p) const
 {
     return (fabs(x - p.x) < J_EPS && fabs(y - p.y) < J_EPS);
 }
 
-// not equal
 bool Point::operator!=(const Point& p) const
 {
     return (fabs(x - p.x) > J_EPS || fabs(y - p.y) > J_EPS);
 }
 
-// multiplication with scalar
 const Point operator*(const Point& p, double f)
 {
     return Point(p.x * f, p.y * f);
 }
 
-// Assignment
 Point& Point::operator+=(const Point& p)
 {
     x += p.x;
@@ -200,7 +169,6 @@ Point& Point::operator+=(const Point& p)
     return *this;
 }
 
-// divition with scalar
 const Point operator/(const Point& p, double f)
 {
     if(f > J_EPS * J_EPS)
@@ -245,9 +213,4 @@ double Distance(const Point& point1, const Point& point2)
 double DistanceSquared(const Point& a, const Point& b)
 {
     return (a - b).NormSquare();
-}
-
-std::ostream& operator<<(std::ostream& out, const Point& p)
-{
-    return out << fmt::format("{}", p);
 }
