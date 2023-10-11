@@ -83,11 +83,11 @@ OperationalModelUpdate CollisionFreeSpeedModel::ComputeNewPosition(
             return acc + BoundaryRepulsion(ped, element);
         });
 
-    Point desired_direction = (ped.destination - ped.pos).Normalized();
-    if(desired_direction == Point()) {
-        desired_direction = ped.orientation;
+    const auto desired_direction = (ped.destination - ped.pos).Normalized();
+    auto direction = (desired_direction + neighborRepulsion + boundaryRepulsion).Normalized();
+    if(direction == Point{}) {
+        direction = ped.orientation;
     }
-    const auto direction = (desired_direction + neighborRepulsion + boundaryRepulsion).Normalized();
     const auto spacing = std::accumulate(
         std::begin(neighborhood),
         std::end(neighborhood),
