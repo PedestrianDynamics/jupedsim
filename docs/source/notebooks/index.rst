@@ -11,3 +11,5 @@ Notebooks
     How to work with Journeys <journey>         
     Modelling Motivation <motivation>
     How routing can influence evacuation times <routing>
+    Single file movement <single-file>
+    Lane Formation <lane-formation>

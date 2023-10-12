@@ -299,7 +299,11 @@ def animate(
     radius: float = 0.2,
     title_note: str = "",
 ):
-    data_df = pedpy.compute_individual_speed(traj_data=data, frame_step=5)
+    data_df = pedpy.compute_individual_speed(
+        traj_data=data,
+        frame_step=5,
+        speed_calculation=pedpy.SpeedCalculation.BORDER_SINGLE_SIDED,
+    )
     data_df = data_df.merge(data.data, on=["id", "frame"], how="left")
     data_df["radius"] = radius
     min_speed = data_df["speed"].min()
@@ -318,7 +322,7 @@ def animate(
         initial_arrows,
     ) = _get_shapes_for_frame(initial_frame_data, min_speed, max_speed)
     color_map_trace = _get_colormap(initial_frame_data, max_speed)
-    for frame_num in selected_frames[1:]:
+    for frame_num in selected_frames:
         frame_data, agent_count = _get_processed_frame_data(
             data_df, frame_num, max_agents
         )
@@ -326,9 +330,10 @@ def animate(
             frame_data, min_speed, max_speed
         )
         title = f"<b>{title_note + '  |  ' if title_note else ''}Number of Agents: {agent_count}</b>"
+        frame_name = str(int(frame_num))
         frame = go.Frame(
             data=geometry_traces + hover_traces,
-            name=str(frame_num),
+            name=frame_name,
             layout=go.Layout(
                 shapes=shapes + arrows,
                 title=title,
@@ -339,14 +344,14 @@ def animate(
 
         step = {
             "args": [
-                [str(frame_num)],
+                [frame_name],
                 {
                     "frame": {"duration": 100, "redraw": True},
                     "mode": "immediate",
                     "transition": {"duration": 500},
                 },
             ],
-            "label": str(frame_num),
+            "label": frame_name,
             "method": "animate",
         }
         steps.append(step)
