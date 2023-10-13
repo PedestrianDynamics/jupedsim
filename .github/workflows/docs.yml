@@ -90,7 +90,7 @@ jobs:
           versions = ["v" + v for v in versions]
           versions.insert(0, "stable")
           
-          versions_url = [dict(name=version, version=version, url= prefix + version)
+          versions_url = [dict(name=version, version=version, url=f"{prefix}{version}/")
                           for version in versions]
           target_file = Path('versions.json')
           with target_file.open('w') as f:
