@@ -348,13 +348,13 @@ def test_seed_works_correct_for_distribution_till_full():
     polygon = distributions.shply.Polygon(polygon)
     distance_to_agents, distance_to_polygon = 0.75, 0.75
     set_seed = 1337
-    samples1 = distributions.distribute_till_full(
+    samples1 = distributions.distribute_until_filled(
         polygon=polygon,
         distance_to_agents=distance_to_agents,
         distance_to_polygon=distance_to_polygon,
         seed=set_seed,
     )
-    samples2 = distributions.distribute_till_full(
+    samples2 = distributions.distribute_until_filled(
         polygon=polygon,
         distance_to_agents=distance_to_agents,
         distance_to_polygon=distance_to_polygon,
@@ -609,7 +609,7 @@ def test_distribution_till_full_creates_correct_points(
 ):
     polygon = distributions.shply.Polygon(polygon, holes)
     set_seed = 1337
-    samples = distributions.distribute_till_full(
+    samples = distributions.distribute_until_filled(
         polygon=polygon,
         distance_to_agents=distance_to_agents,
         distance_to_polygon=distance_to_polygon,
