@@ -1,7 +1,7 @@
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import numpy as np
-import shapely.geometry as shply
+import shapely
 
 from jupedsim.internal.grid import Grid
 
@@ -29,7 +29,7 @@ class NegativeValueError(Exception):
 def __intersecting_area_polygon_circle(mid_point, radius, polygon):
     """returns the intersecting area of circle and polygon"""
     # creates a point
-    point = shply.Point(mid_point)
+    point = shapely.Point(mid_point)
     # creates a layer with the size of the radius all around this point
     circle = point.buffer(radius)
     # returns the size of the intersecting area
@@ -60,7 +60,7 @@ def __get_bounding_box(polygon):
 
 def __min_distance_to_polygon(pt, polygon):
     """returns the minimal distance between a point and every line segment of a polygon"""
-    pt = shply.Point(pt)
+    pt = shapely.Point(pt)
     min_dist = polygon.exterior.distance(pt)
     for hole in polygon.interiors:
         candidate_dist = hole.distance(pt)
@@ -70,24 +70,42 @@ def __min_distance_to_polygon(pt, polygon):
 
 def distribute_by_number(
     *,
-    polygon,
-    number_of_agents,
-    distance_to_agents,
-    distance_to_polygon,
-    seed=None,
-    max_iterations=10000,
-):
-    """ "returns number_of_agents points randomly placed inside the polygon
+    polygon: shapely.Polygon,
+    number_of_agents: int,
+    distance_to_agents: float,
+    distance_to_polygon: float,
+    seed: int | None = None,
+    max_iterations: int = 10000,
+) -> list[tuple[float, float]]:
+    """Generates specified number of randomized 2D coordiantes.
 
-    :param polygon: shapely polygon in which the agents will be placed
-    :param number_of_agents: number of agents distributed
-    :param distance_to_agents: minimal distance between the centers of agents
-    :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
-    :param seed: define a seed for random generation, Default value is None which corresponds to a random value
-    :param max_iterations: no more than max_iterations must find a point inside the polygon, default is 10_000
-    :return: list of created points"""
+    This function will generate the speficied number of 2D coordiantes where
+    all coordiantes are inside the specified geometry and generated coordinates
+    are constraint by distance_to_agents and distance_to_polygon. This function
+    may not always by able to generate the requested coordinate because it
+    cannot do so without violating the constraints. In this case the function
+    will stop after max_iterations and raise an Exception.
 
-    if not isinstance(polygon, shply.polygon.Polygon):
+    Arguments:
+        polygon (shapely.Polygon): polygon where the agents shall be placed
+        number_of_agents (int): number of agents to be distributed
+        distance_to_agents (float): minimal distance between the centers of agents
+        distance_to_polygon (float): minimal distance between the center of agents
+            and the polygon edges
+        seed (int|None): Will be used to seed the random number generator.
+        max_iterations (int): Up to max_iterations are attempts are made to
+            place a random point without conastraint violation, default is 10_000
+
+    Returns (list[tuple(float, float)]):
+        2D coordiantes
+
+    Raises:
+        :class:`AgentNumberError`: if not all agents could be placed.
+        :class:`IncorrectParameterError`: if polygon is not of type
+            :class:`~shapely.Polygon`
+
+    """
+    if not isinstance(polygon, shapely.Polygon):
         raise IncorrectParameterError(
             f"Polygon is expected to be a shapely Polygon"
         )
@@ -124,24 +142,46 @@ def distribute_by_number(
 
 def distribute_by_density(
     *,
-    polygon,
-    density,
-    distance_to_agents,
-    distance_to_polygon,
-    seed=None,
-    max_iterations=10000,
-):
-    """returns points randomly placed inside the polygon with the given density
+    polygon: shapely.Polygon,
+    density: float,
+    distance_to_agents: float,
+    distance_to_polygon: float,
+    seed: int | None = None,
+    max_iterations: int = 10000,
+) -> list[tuple[float, float]]:
+    """Generates randomized 2D coordiantes based on a desired agent density per
+    square meter.
 
-    :param polygon: shapely polygon in which the agents will be placed
-    :param density: Density of agents inside the polygon
-    :param distance_to_agents: minimal distance between the centers of agents
-    :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
-    :param seed: define a seed for random generation, Default value is None which corresponds to a random value
-    :param max_iterations: no more than max_iterations must find a point inside the polygon, Default is 10_000
-    :return: list of created points"""
+    This function will generate as many 2D coordinates as required to reach the
+    desired density. Essentially this function tries to place area * density
+    many agents while adhering to the distance_to_polygon and
+    distance_to_agents constraints. This function may not always by able to
+    generate the requested coordinate because it cannot do so without violating
+    the constraints. In this case the function will stop after max_iterations
+    and raise an Exception.
 
-    if not isinstance(polygon, shply.polygon.Polygon):
+    Arguments:
+        polygon: (shapely.Polygon): Are where to generate 2D coordiantes in.
+        density (float): desired density in agents per square meter
+        distance_to_agents (float): minimal distance between the centers of agents
+        distance_to_polygon (float): minimal distance between the center of agents
+            and the polygon edges
+        seed (int|None): Will be used to seed the random number generator.
+        max_iterations (int): Up to max_iterations are attempts are made to
+            place a random point without conastraint violation, default is 10_000
+
+
+    Returns (list[tuple(float, float)]):
+        2D coordiantes
+
+    Raises:
+        :class:`AgentNumberError`: if not all agents could be placed.
+        :class:`IncorrectParameterError`: if polygon is not of type
+            :class:`~shapely.Polygon`
+
+    """
+
+    if not isinstance(polygon, shapely.Polygon):
         raise IncorrectParameterError(
             f"Polygon is expected to be a shapely Polygon"
         )
@@ -161,7 +201,8 @@ def __catch_wrong_inputs(
     polygon, center_point, circle_segment_radii, fill_parameters
 ):
     """checks if an input parameter is incorrect and raises an Exception"""
-    if not isinstance(polygon, shply.polygon.Polygon):
+
+    if not isinstance(polygon, shapely.Polygon):
         raise IncorrectParameterError(
             f"Polygon is expected to be a shapely Polygon"
         )
@@ -207,29 +248,48 @@ def __catch_wrong_inputs(
 
 def distribute_in_circles_by_number(
     *,
-    polygon,
-    distance_to_agents,
-    distance_to_polygon,
-    center_point,
-    circle_segment_radii,
-    numbers_of_agents,
+    polygon: shapely.Polygon,
+    distance_to_agents: float,
+    distance_to_polygon: float,
+    center_point: tuple[float, float],
+    circle_segment_radii: list[tuple[float, float]],
+    numbers_of_agents: list[int],
     seed=None,
     max_iterations=10_000,
-):
-    """returns points randomly placed inside the polygon inside each the circle segments
+) -> list[tuple[float, float]]:
+    """Generates randomized 2D coordiantes in a user defined number of rings.
 
-    :param polygon: shapely polygon in which the agents will be placed
-    :param distance_to_agents: minimal distance between the centers of agents
-    :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
-    :param center_point: the Center point of the circle segments
-    :param circle_segment_radii: a list of minimal and maximal radius for each circle segment
-        Circle segments must not overlap
-        formatted like [(minimum_radius, maximum_radius)]
-    :param numbers_of_agents: a list of number of agents for each Circle segment
-        the position of the number corresponds to the order in which the Circle segments are given
-    :param seed: define a seed for random generation, Default value is None which corresponds to a random value
-    :param max_iterations: no more than max_iterations must find a point inside the polygon, Default is 10_000
-    :return: list of created points"""
+    This function will generate 2D coordinates in the intersection of the
+    polygon and the rings specified by the centerpoint and the min/max radii of
+    each ring. `number_of_agents` is expected to contain the number of agents
+    to be placed for each ring. This function may not always by able to
+    generate the requested coordinate because it cannot do so without violating
+    the constraints. In this case the function will stop after max_iterations
+    and raise an Exception.
+
+    Arguments:
+        polygon (shapely.Polygon): polygon where agents can be placed.
+        distance_to_agents (float): minimal distance between the centers of agents
+        distance_to_polygon (float): minimal distance between the center of agents
+            and the polygon edges
+        center_point (tuple[float, float]): Center point of the rings.
+        circle_segment_radii (list[tuple[float, float]]): min/max radius per ring,
+            rings may not overlap
+        number_of_agents (list[int]): agents to be placed per ring
+        seed (int|None): Will be used to seed the random number generator.
+        max_iterations (int): Up to max_iterations are attempts are made to
+            place a random point without conastraint violation, default is 10_000
+
+    Returns (list[tuple(float, float)]):
+        2D coordiantes
+
+    Raises:
+        :class:`AgentNumberError`: if not all agents could be placed.
+        :class:`IncorrectParameterError`: if polygon is not of type
+            :class:`~shapely.Polygon`
+        :class:`OverlappingCirclesError`: if rings in circle_segment_radii
+            overlapp
+    """
 
     # catch wrong inputs
     __catch_wrong_inputs(
@@ -328,29 +388,49 @@ def distribute_in_circles_by_number(
 
 def distribute_in_circles_by_density(
     *,
-    polygon,
-    distance_to_agents,
-    distance_to_polygon,
-    center_point,
-    circle_segment_radii,
-    densities,
-    seed=None,
-    max_iterations=10_000,
-):
-    """returns points randomly placed inside the polygon inside each the circle segments
+    polygon: shapely.Polygon,
+    distance_to_agents: float,
+    distance_to_polygon: float,
+    center_point: tuple[float, float],
+    circle_segment_radii: list[tuple[float, float]],
+    densities: list[float],
+    seed: int | None = None,
+    max_iterations: int = 10_000,
+) -> list[tuple[float, float]]:
+    """Generates randomized 2D coordiantes in a user defined number of rings
+    with defined density.
 
-    :param polygon: shapely polygon in which the agents will be placed
-    :param distance_to_agents: minimal distance between the centers of agents
-    :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
-    :param center_point: the Center point of the circle segments
-    :param circle_segment_radii: a list of minimal and maximal radius for each circle segment
-        Circle segments must not overlap
-        formatted like [(minimum_radius, maximum_radius)]
-    :param densities: a list of densities for each Circle segment
-        the position of the number corresponds to the order in which the Circle segments are given
-    :param seed: define a seed for random generation, Default value is None which corresponds to a random value
-    :param max_iterations: no more than max_iterations must find a point inside the polygon, Default is 10_000
-    :return: list of created points"""
+    This function will generate 2D coordinates in the intersection of the
+    polygon and the rings specified by the centerpoint and the min/max radii of
+    each ring. The number of positions generated is defined by the desired
+    density and available space of each ring. This function may not always by
+    able to generate the requested coordinate because it cannot do so without
+    violating the constraints. In this case the function will stop after
+    max_iterations and raise an Exception.
+
+    Arguments:
+        polygon (shapely.Polygon): polygon where agents can be placed.
+        distance_to_agents (float): minimal distance between the centers of agents
+        distance_to_polygon (float): minimal distance between the center of agents
+            and the polygon edges
+        center_point (tuple[float, float]): Center point of the rings.
+        circle_segment_radii (list[tuple[float, float]]): min/max radius per ring,
+            rings may not overlap
+        desnities (list[float]): density in positionsper square meter for each ring
+        seed (int|None): Will be used to seed the random number generator.
+        max_iterations (int): Up to max_iterations are attempts are made to
+            place a random point without conastraint violation, default is 10_000
+
+    Returns (list[tuple(float, float)]):
+        2D coordiantes
+
+    Raises:
+        :class:`AgentNumberError`: if not all agents could be placed.
+        :class:`IncorrectParameterError`: if polygon is not of type
+            :class:`~shapely.Polygon`
+        :class:`OverlappingCirclesError`: if rings in circle_segment_radii
+            overlapp
+    """
 
     __catch_wrong_inputs(
         polygon=polygon,
@@ -381,29 +461,45 @@ def distribute_in_circles_by_density(
     )
 
 
-def distribute_till_full(
+def distribute_until_filled(
     *,
-    polygon,
-    distance_to_agents,
-    distance_to_polygon,
-    seed=None,
-    max_iterations=10_000,
-    k=30,
-):
-    """returns as many randomly placed points as fit into the polygon.
+    polygon: shapely.Polygon,
+    distance_to_agents: float,
+    distance_to_polygon: float,
+    seed: int | None = None,
+    max_iterations: int = 10_000,
+    k: int = 30,
+) -> list[tuple[float, float]]:
+    """Generates randomized 2D coordiantes that fill the specified area.
 
-    Points are distributed using Bridson’s algorithm for Poisson-disc sampling
-    The algorithm is explained in Robert Bridson´s Paper "Fast Poisson Disk Sampling in Arbitrary Dimensions"
+    This function will generate 2D coordinates in the specified area. The
+    number of positions generated depends on the ability to place aditional
+    points. This function may not always by able to generate the requested
+    coordinate because it cannot do so without violating the constraints. In
+    this case the function will stop after max_iterations and raise an
+    Exception.
 
-    :param polygon: shapely polygon in which the agents will be placed
-    :param distance_to_agents: minimal distance between the centers of agents
-    :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
-    :param seed: define a seed for random generation, Default value is None which corresponds to a random value
-    :param max_iterations: no more than max_iterations must find a point inside the polygon, default is 10_000
-    :param k: around each point k point will be created before the point is considered inactive
-    :return: list of created points
+    Arguments:
+        polygon (shapely.Polygon): polygon where agents can be placed.
+        distance_to_agents (float): minimal distance between the centers of agents
+        distance_to_polygon (float): minimal distance between the center of agents
+            and the polygon edges
+        seed (int|None): Will be used to seed the random number generator.
+        max_iterations (int): Up to max_iterations are attempts are made to
+            place a random point without conastraint violation, default is 10_000
+        k (int): maximum number of attempts to place neighbors to already inserted
+            points. A higher value will result in a higher density but will greatly
+            increase runtim.
+
+    Returns (list[tuple(float, float)]):
+        2D coordiantes
+
+    Raises:
+        :class:`AgentNumberError`: if not all agents could be placed.
+        :class:`IncorrectParameterError`: if polygon is not of type
+            :class:`~shapely.Polygon`
     """
-    if not isinstance(polygon, shply.polygon.Polygon):
+    if not isinstance(polygon, shapely.Polygon):
         raise IncorrectParameterError(
             f"Polygon is expected to be a shapely Polygon"
         )
@@ -468,26 +564,47 @@ def distribute_till_full(
 
 def distribute_by_percentage(
     *,
-    polygon,
-    percent,
-    distance_to_agents,
-    distance_to_polygon,
-    seed=None,
-    max_iterations=10000,
-    k=30,
+    polygon: shapely.Polygon,
+    percent: float,
+    distance_to_agents: float,
+    distance_to_polygon: float,
+    seed: int | None = None,
+    max_iterations: int = 10000,
+    k: int = 30,
 ):
-    """returns points for the desired percentage of agents that fit inside the polygon (max possible number)
-    fills the polygon entirely using Bridson’s algorithm for Poisson-disc sampling and then selects the percentage of placed agents
+    """Generates randomized 2D coordiantes that fill the specified area to a
+    percentage of a possible maximum.
 
-    :param polygon: shapely polygon in which the agents will be placed
-    :param percent: percentage of agents selected - 100% ≙ completely filled polygon 0% ≙ 0 placed points
-    :param distance_to_agents: minimal distance between the centers of agents
-    :param distance_to_polygon: minimal distance between the center of agents and the polygon edges
-    :param seed: define a seed for random generation, Default value is None which corresponds to a random value
-    :param max_iterations: no more than max_iterations must find a point inside the polygon, Default is 10_000
-    :return: list of created points
+    This function will generate 2D coordinates in the specified area. The
+    number of positions generated depends on the ability to place aditional
+    points. This function may not always by able to generate the requested
+    coordinate because it cannot do so without violating the constraints. In
+    this case the function will stop after max_iterations and raise an
+    Exception.
+
+    Arguments:
+        polygon (shapely.Polygon): polygon where agents can be placed.
+        percent (float): percent value of occupancy to generate. needs to be in
+            the intervall (0, 100]
+        distance_to_agents (float): minimal distance between the centers of agents
+        distance_to_polygon (float): minimal distance between the center of agents
+            and the polygon edges
+        seed (int|None): Will be used to seed the random number generator.
+        max_iterations (int): Up to max_iterations are attempts are made to
+            place a random point without conastraint violation, default is 10_000
+        k (int): maximum number of attempts to place neighbors to already inserted
+            points. A higher value will result in a higher density but will greatly
+            increase runtim.
+
+    Returns (list[tuple(float, float)]):
+        2D coordiantes
+
+    Raises:
+        :class:`AgentNumberError`: if not all agents could be placed.
+        :class:`IncorrectParameterError`: if polygon is not of type
+            :class:`~shapely.Polygon`
     """
-    samples = distribute_till_full(
+    samples = distribute_until_filled(
         polygon=polygon,
         distance_to_agents=distance_to_agents,
         distance_to_polygon=distance_to_polygon,
@@ -511,7 +628,7 @@ def __check_distance_constraints(pt, wall_distance, grid, polygon):
     :param wall_distance: minimal distance between point and the polygon
     :param polygon: shapely Polygon in which the points must lie
     :return:True or False"""
-    if not polygon.contains(shply.Point(pt)):
+    if not polygon.contains(shapely.Point(pt)):
         return False
     if __min_distance_to_polygon(pt, polygon) < wall_distance:
         return False
@@ -526,7 +643,7 @@ def __box_of_intersection(polygon, center_point, outer_radius):
     @:return bounding box formatted like [(min(x_values), min(y_values)), (max(x_values), max(y_values))]
     """
     # creates a point
-    point = shply.Point(center_point)
+    point = shapely.Point(center_point)
     # creates a layer with the size of the radius all around this point
     circle = point.buffer(outer_radius)
     # returns the size of the intersecting area

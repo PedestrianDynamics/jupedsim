@@ -12,7 +12,7 @@ from jupedsim.distributions import (
     distribute_by_percentage,
     distribute_in_circles_by_density,
     distribute_in_circles_by_number,
-    distribute_till_full,
+    distribute_until_filled,
 )
 from jupedsim.geometry import Geometry
 from jupedsim.geometry_utils import (
@@ -94,7 +94,7 @@ __all__ = [
     "distribute_by_percentage",
     "distribute_in_circles_by_density",
     "distribute_in_circles_by_number",
-    "distribute_till_full",
+    "distribute_until_filled",
     "_geometry_from_coordinates",
     "_geometry_from_shapely",
     "_geometry_from_wkt",

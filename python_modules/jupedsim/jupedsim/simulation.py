@@ -154,7 +154,7 @@ class Simulation:
     ) -> int:
         """Add an exit stage to the simulation.
 
-        Args:
+        Arguments:
             polygon (str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]]):
                 Polygon without holes representing the exit stage. Polygon can be passed as:
 
