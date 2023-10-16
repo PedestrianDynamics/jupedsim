@@ -110,13 +110,29 @@ void CollisionFreeSpeedModel::ApplyUpdate(const OperationalModelUpdate& upd, Gen
     agent.orientation = update.orientation;
 }
 
-void CollisionFreeSpeedModel::CheckDistanceConstraint(
+void CollisionFreeSpeedModel::CheckModelConstraint(
     const GenericAgent& agent,
-    const NeighborhoodSearchType& neighborhoodSearch) const
+    const NeighborhoodSearchType& neighborhoodSearch,
+    const CollisionGeometry& geometry) const
 {
-    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
     const auto& model = std::get<CollisionFreeSpeedModelData>(agent.model);
+
     const auto r = model.radius;
+    constexpr double rMin = 0.;
+    constexpr double rMax = 2.;
+    validateConstraint(r, rMin, rMax, "radius", true);
+
+    const auto v0 = model.v0;
+    constexpr double v0Min = 0.;
+    constexpr double v0Max = 10.;
+    validateConstraint(v0, v0Min, v0Max, "v0", true);
+
+    const auto timeGap = model.timeGap;
+    constexpr double timeGapMin = 0.1;
+    constexpr double timeGapMax = 10.;
+    validateConstraint(timeGap, timeGapMin, timeGapMax, "timeGap");
+
+    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
     for(const auto& neighbor : neighbors) {
         const auto& neighbor_model = std::get<CollisionFreeSpeedModelData>(neighbor.model);
         const auto contanctdDist = r + neighbor_model.radius;
@@ -128,6 +144,15 @@ void CollisionFreeSpeedModel::CheckDistanceConstraint(
                 neighbor.pos,
                 distance);
         }
+    }
+
+    const auto lineSegments = geometry.LineSegmentsInDistanceTo(r / 2., agent.pos);
+    if(std::begin(lineSegments) != std::end(lineSegments)) {
+        throw SimulationError(
+            "Model constraint violation: Agent {} too close to geometry boundaries, distance "
+            "<= {}",
+            agent.pos,
+            r);
     }
 }
 

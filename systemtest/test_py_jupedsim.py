@@ -36,13 +36,13 @@ def test_can_query_agents_in_range():
         (50, 10),
     ]
 
-    expected_agent_ids = set()
+    expected_agent_ids = list()
 
     for new_pos, id in zip(
         initial_agent_positions,
         range(10, 10 + len(initial_agent_positions)),
     ):
-        expected_agent_ids.add(
+        expected_agent_ids.append(
             simulation.add_agent(
                 jps.CollisionFreeSpeedModelAgentParameters(
                     position=new_pos,
@@ -60,8 +60,15 @@ def test_can_query_agents_in_range():
         simulation.agents_in_polygon([(39, 11), (39, 9), (51, 9), (51, 11)])
     )
 
-    assert actual_ids_in_range == [3, 4, 5]
-    assert actual_ids_in_polygon == [5, 6]
+    assert actual_ids_in_range == [
+        expected_agent_ids[1],
+        expected_agent_ids[2],
+        expected_agent_ids[3],
+    ]
+    assert actual_ids_in_polygon == [
+        expected_agent_ids[3],
+        expected_agent_ids[4],
+    ]
 
 
 def test_can_run_simulation():
@@ -456,3 +463,47 @@ def test_agent_can_be_removed_from_simulation():
     simulation.iterate()
     actual_agent_ids = {agent.id for agent in simulation.agents()}
     assert actual_agent_ids == expected_agent_ids
+
+
+def test_agent_can_not_be_added_outside_geometry():
+    messages = []
+
+    def log_msg_handler(msg):
+        messages.append(msg)
+
+    jps.set_info_callback(log_msg_handler)
+    jps.set_warning_callback(log_msg_handler)
+    jps.set_error_callback(log_msg_handler)
+
+    simulation = jps.Simulation(
+        model=jps.CollisionFreeSpeedModel(),
+        geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
+    )
+
+    exit_id = simulation.add_exit_stage(
+        [(99, 45), (99, 55), (100, 55), (100, 45)]
+    )
+
+    journey = jps.JourneyDescription([exit_id])
+    journey_id = simulation.add_journey(journey)
+
+    agent_position = (50, 50)
+
+    simulation.add_agent(
+        jps.CollisionFreeSpeedModelAgentParameters(
+            position=agent_position,
+            journey_id=journey_id,
+            stage_id=exit_id,
+        )
+    )
+
+    with pytest.raises(
+        RuntimeError, match=r"Agent \(-50, -50\) not inside walkable area"
+    ):
+        assert simulation.add_agent(
+            jps.CollisionFreeSpeedModelAgentParameters(
+                position=(-50, -50),
+                journey_id=journey_id,
+                stage_id=exit_id,
+            )
+        )
