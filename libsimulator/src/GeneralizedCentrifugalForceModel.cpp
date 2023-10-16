@@ -90,10 +90,48 @@ void GeneralizedCentrifugalForceModel::ApplyUpdate(
     }
 }
 
-void GeneralizedCentrifugalForceModel::CheckDistanceConstraint(
+void GeneralizedCentrifugalForceModel::CheckModelConstraint(
     const GenericAgent& agent,
-    const NeighborhoodSearchType& neighborhoodSearch) const
+    const NeighborhoodSearchType& neighborhoodSearch,
+    const CollisionGeometry& geometry) const
 {
+    const auto& model = std::get<GeneralizedCentrifugalForceModelData>(agent.model);
+
+    const auto mass = model.mass;
+    constexpr double massMin = 1.;
+    constexpr double massMax = 100.;
+    validateConstraint(mass, massMin, massMax, "mass");
+
+    const auto tau = model.tau;
+    constexpr double tauMin = 0.1;
+    constexpr double tauMax = 10.;
+    validateConstraint(tau, tauMin, tauMax, "tau");
+
+    const auto v0 = model.v0;
+    constexpr double v0Min = 0.;
+    constexpr double v0Max = 10.;
+    validateConstraint(v0, v0Min, v0Max, "v0", true);
+
+    const auto Av = model.Av;
+    constexpr double AvMin = 0.;
+    constexpr double AvMax = 10.;
+    validateConstraint(Av, AvMin, AvMax, "Av");
+
+    const auto AMin = model.AMin;
+    constexpr double AMinMin = 0.1;
+    constexpr double AMinMax = 1.;
+    validateConstraint(AMin, AMinMin, AMinMax, "AMin");
+
+    const auto BMin = model.BMin;
+    constexpr double BMinMin = 0.1;
+    constexpr double BMinMax = 1.;
+    validateConstraint(BMin, BMinMin, BMinMax, "BMin");
+
+    const auto BMax = model.BMax;
+    const double BMaxMin = BMin;
+    constexpr double BMaxMax = 2.;
+    validateConstraint(BMax, BMaxMin, BMaxMax, "BMax");
+
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
     for(const auto& neighbor : neighbors) {
         const auto contanctDist = AgentToAgentSpacing(agent, neighbor);
@@ -107,6 +145,15 @@ void GeneralizedCentrifugalForceModel::CheckDistanceConstraint(
                 distance,
                 distance - contanctDist);
         }
+    }
+
+    const auto maxRadius = std::max(AMin, BMax) / 2.;
+    const auto lineSegments = geometry.LineSegmentsInDistanceTo(maxRadius, agent.pos);
+    if(std::begin(lineSegments) != std::end(lineSegments)) {
+        throw SimulationError(
+            "Model constraint violation: Agent {} too close to geometry boundaries, distance <= {}",
+            agent.pos,
+            maxRadius);
     }
 }
 

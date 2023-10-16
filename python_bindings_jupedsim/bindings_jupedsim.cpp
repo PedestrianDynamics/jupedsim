@@ -240,7 +240,8 @@ PYBIND11_MODULE(py_jupedsim, m)
                 p.b_min,
                 p.b_max);
         });
-    py::class_<JPS_CollisionFreeSpeedModelAgentParameters>(m, "CollisionFreeSpeedModelAgentParameters")
+    py::class_<JPS_CollisionFreeSpeedModelAgentParameters>(
+        m, "CollisionFreeSpeedModelAgentParameters")
         .def(
             py::init([](std::tuple<double, double> position,
                         double time_gap,
@@ -351,7 +352,7 @@ PYBIND11_MODULE(py_jupedsim, m)
             throw std::runtime_error{msg};
         });
     py::class_<JPS_GeneralizedCentrifugalForceModelModelBuilder_Wrapper>(
-        m, "GeneralizedCentrifugalForceModelModelBuilder")
+        m, "GeneralizedCentrifugalForceModelBuilder")
         .def(
             py::init([](double strengthNeighborRepulsion,
                         double strengthGeometryRepulsion,
@@ -797,10 +798,11 @@ PYBIND11_MODULE(py_jupedsim, m)
             })
         .def(
             "add_agent",
-            [](JPS_Simulation_Wrapper& simulation, JPS_CollisionFreeSpeedModelAgentParameters& parameters) {
+            [](JPS_Simulation_Wrapper& simulation,
+               JPS_CollisionFreeSpeedModelAgentParameters& parameters) {
                 JPS_ErrorMessage errorMsg{};
-                auto result =
-                    JPS_Simulation_AddCollisionFreeSpeedModelAgent(simulation.handle, parameters, &errorMsg);
+                auto result = JPS_Simulation_AddCollisionFreeSpeedModelAgent(
+                    simulation.handle, parameters, &errorMsg);
                 if(result) {
                     return result;
                 }

@@ -128,8 +128,12 @@ BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
 
 GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
 {
+    if(!_geometry->InsideGeometry(agent.pos)) {
+        throw SimulationError("Agent {} not inside walkable area", agent.pos);
+    }
+
     agent.orientation = agent.orientation.Normalized();
-    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch);
+    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry.get());
 
     if(_journeys.count(agent.journeyId) == 0) {
         throw SimulationError("Unknown journey id: {}", agent.journeyId);

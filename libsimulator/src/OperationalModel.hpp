@@ -43,6 +43,40 @@ struct fmt::formatter<PedestrianUpdate> {
     }
 };
 
+template <typename T>
+void validateConstraint(
+    T value,
+    T valueMin,
+    T valueMax,
+    const std::string& name,
+    bool includeMin = false)
+{
+    if(includeMin) {
+        if(value <= valueMin || value > valueMax) {
+            throw SimulationError(
+                "Model constraint violation: {} {} not in allowed range, "
+                "{} needs to be in ({},{}]",
+                name,
+                value,
+                name,
+                valueMin,
+                valueMax);
+        }
+
+    } else {
+        if(value < valueMin || value > valueMax) {
+            throw SimulationError(
+                "Model constraint violation: {} {} not in allowed range, "
+                "{} needs to be in [{},{}]",
+                name,
+                value,
+                name,
+                valueMin,
+                valueMax);
+        }
+    }
+}
+
 class OperationalModel : public Clonable<OperationalModel>
 {
 public:
@@ -57,7 +91,8 @@ public:
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const = 0;
 
     virtual void ApplyUpdate(const OperationalModelUpdate& update, GenericAgent& agent) const = 0;
-    virtual void CheckDistanceConstraint(
+    virtual void CheckModelConstraint(
         const GenericAgent& agent,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const = 0;
+        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+        const CollisionGeometry& geometry) const = 0;
 };

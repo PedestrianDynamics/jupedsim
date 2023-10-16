@@ -63,8 +63,9 @@ public:
 
     void ValidateAgent(
         const GenericAgent& agent,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
+        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+        const CollisionGeometry& geometry) const
     {
-        _model->CheckDistanceConstraint(agent, neighborhoodSearch);
+        _model->CheckModelConstraint(agent, neighborhoodSearch, geometry);
     }
 };

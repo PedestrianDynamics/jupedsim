@@ -44,9 +44,10 @@ public:
         const CollisionGeometry& geometry,
         const NeighborhoodSearchType& neighborhoodSearch) const override;
     void ApplyUpdate(const OperationalModelUpdate& upate, GenericAgent& agent) const override;
-    void CheckDistanceConstraint(
+    void CheckModelConstraint(
         const GenericAgent& agent,
-        const NeighborhoodSearchType& neighborhoodSearch) const override;
+        const NeighborhoodSearchType& neighborhoodSearch,
+        const CollisionGeometry& geometry) const override;
     std::unique_ptr<OperationalModel> Clone() const override;
 
 private:
