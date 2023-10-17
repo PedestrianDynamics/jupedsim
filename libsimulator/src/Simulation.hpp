@@ -45,7 +45,7 @@ class Simulation
     AgentRemovalSystem<GenericAgent> _agentRemovalSystem{};
     StageManager _stageManager{};
     StageSystem _stageSystem{};
-    NeighborhoodSearch<GenericAgent> _neighborhoodSearch{2.2};
+    NeighborhoodSearch<GenericAgent> _neighborhoodSearch{3};
     std::unique_ptr<RoutingEngine> _routingEngine;
     std::unique_ptr<CollisionGeometry> _geometry;
     std::vector<GenericAgent> _agents;

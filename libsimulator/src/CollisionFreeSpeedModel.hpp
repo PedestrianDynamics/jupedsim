@@ -35,6 +35,11 @@ public:
         const GenericAgent& ped,
         const CollisionGeometry& geometry,
         const NeighborhoodSearchType& neighborhoodSearch) const override;
+    OperationalModelUpdate ComputeNewPosition(
+        double dT,
+        const GenericAgent& ped,
+        const CollisionGeometry& geometry,
+        Neighbors neighbors) const override;
     void ApplyUpdate(const OperationalModelUpdate& update, GenericAgent& agent) const override;
     void CheckModelConstraint(
         const GenericAgent& agent,

@@ -62,9 +62,11 @@ class NeighborhoodSearch
     using Grid = std::unordered_map<Grid2DIndex, std::vector<Value>>;
 
     double _cellSize;
+
+public:
     Grid _grid{};
 
-private:
+    // private:
     Grid2DIndex getIndex(const Point& pos) const
     {
         const int32_t idx = static_cast<int32_t>(pos.x / _cellSize);

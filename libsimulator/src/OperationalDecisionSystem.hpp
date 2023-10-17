@@ -14,6 +14,7 @@
 
 #include <iterator>
 #include <memory>
+#include <optional>
 #include <vector>
 
 class OperationalDecisionSystem
@@ -41,6 +42,31 @@ public:
     {
         std::vector<std::optional<OperationalModelUpdate>> updates{};
         updates.reserve(agents.size());
+
+        using OptVec = const std::vector<GenericAgent>*;
+        auto getCell = [](const auto& n, Grid2DIndex idx) -> OptVec {
+            const auto iter = n._grid.find(idx);
+            if(iter == std::end(n._grid)) {
+                return nullptr;
+            } else {
+                return &iter->second;
+            }
+        };
+        for(const auto& [key, value] : neighborhoodSearch._grid) {
+            std::vector<GenericAgent> neighbors{};
+            for(int x = -1; x < 2; ++x) {
+                for(int y = -1; y < 2; ++y) {
+                    auto c = getCell(neighborhoodSearch, {key.idx + x, key.idy + y});
+                    if(c != nullptr) {
+                        neighbors.insert(neighbors.end(), c->begin(), c->end());
+                    }
+                }
+            }
+
+            for(const auto& agent : value) {
+                _model->ComputeNewPosition(dT, agent, geometry, neighbors);
+            }
+        }
 
         std::transform(
             std::begin(agents),

@@ -8,6 +8,7 @@
 #include "Mathematics.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
+#include "Point.hpp"
 #include "SimulationError.hpp"
 #include "Stage.hpp"
 
@@ -33,6 +34,93 @@ OperationalModelType CollisionFreeSpeedModel::Type() const
 {
     return OperationalModelType::COLLISION_FREE_SPEED;
 }
+
+OperationalModelUpdate CollisionFreeSpeedModel::ComputeNewPosition(
+    double dT,
+    const GenericAgent& ped,
+    const CollisionGeometry& geometry,
+    Neighbors neighbors) const
+{
+
+    const auto& boundary = geometry.LineSegmentsInApproxDistanceTo(ped.pos);
+    auto hasImpact = [](const auto& boundary, const auto& a, const auto& b) {
+        if(a.id == b.id) {
+            return false;
+        }
+        const auto agent_to_neighbor = LineSegment(a.pos, b.pos);
+        if(std::find_if(
+               boundary.cbegin(),
+               boundary.cend(),
+               [&agent_to_neighbor](const auto& boundary_segment) {
+                   return intersects(agent_to_neighbor, boundary_segment);
+               }) != boundary.end()) {
+            return false;
+        }
+        if(DistanceSquared(a.pos, b.pos) > 3) {
+            return false;
+        }
+        return true;
+    };
+    neighbors.erase(
+        std::remove_if(
+            std::begin(neighbors),
+            std::end(neighbors),
+            [&ped, &boundary](const auto& neighbor) {
+                if(ped.id == neighbor.id) {
+                    return true;
+                }
+                const auto agent_to_neighbor = LineSegment(ped.pos, neighbor.pos);
+                if(std::find_if(
+                       boundary.cbegin(),
+                       boundary.cend(),
+                       [&agent_to_neighbor](const auto& boundary_segment) {
+                           return intersects(agent_to_neighbor, boundary_segment);
+                       }) != boundary.end()) {
+                    return true;
+                }
+                if(DistanceSquared(ped.pos, neighbor.pos) > 9) {
+                    return true;
+                }
+
+                return false;
+            }),
+        std::end(neighbors));
+
+    const auto neighborRepulsion = std::accumulate(
+        std::begin(neighbors),
+        std::end(neighbors),
+        Point{},
+        [&ped, this](const auto& res, const auto& neighbor) {
+            return res + NeighborRepulsion(ped, neighbor);
+        });
+
+    const auto boundaryRepulsion = std::accumulate(
+        boundary.cbegin(),
+        boundary.cend(),
+        Point(0, 0),
+        [this, &ped](const auto& acc, const auto& element) {
+            return acc + BoundaryRepulsion(ped, element);
+        });
+
+    const auto desired_direction = (ped.destination - ped.pos).Normalized();
+    auto direction = (desired_direction + neighborRepulsion + boundaryRepulsion).Normalized();
+    if(direction == Point{}) {
+        direction = ped.orientation;
+    }
+
+    const auto spacing = std::accumulate(
+        std::begin(neighbors),
+        std::end(neighbors),
+        std::numeric_limits<double>::max(),
+        [&ped, &direction, this](const auto& res, const auto& neighbor) {
+            return std::min(res, GetSpacing(ped, neighbor, direction));
+        });
+
+    const auto& model = std::get<CollisionFreeSpeedModelData>(ped.model);
+    const auto optimal_speed = OptimalSpeed(ped, spacing, model.timeGap);
+    const auto velocity = direction * optimal_speed;
+    return CollisionFreeSpeedModelUpdate{ped.pos + velocity * dT, direction};
+};
 
 OperationalModelUpdate CollisionFreeSpeedModel::ComputeNewPosition(
     double dT,

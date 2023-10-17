@@ -13,6 +13,7 @@
 
 #include <optional>
 #include <unordered_map>
+#include <vector>
 
 template <typename T>
 class NeighborhoodSearch;
@@ -89,6 +90,16 @@ public:
         const GenericAgent& ped,
         const CollisionGeometry& geometry,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const = 0;
+
+    using Neighbors = std::vector<GenericAgent>;
+    virtual OperationalModelUpdate ComputeNewPosition(
+        double dT,
+        const GenericAgent& ped,
+        const CollisionGeometry& geometry,
+        Neighbors neighbors) const
+    {
+        return {};
+    };
 
     virtual void ApplyUpdate(const OperationalModelUpdate& update, GenericAgent& agent) const = 0;
     virtual void CheckModelConstraint(
