@@ -134,12 +134,13 @@ class CollisionFreeSpeedModelAgentParameters:
     https://arxiv.org/abs/1512.05597
 
     .. note::
-        Insances of this type are copied when creating the agent, you can savely
+
+        Instances of this type are copied when creating the agent, you can safely
         create one instance of this type and modify it between calls to `add_agent`
 
         E.g.:
 
-            .. code:: python
+        .. code:: python
 
             positions = [...] # List of initial agent positions
             params = CollisionFreeSpeedModelAgentParameters(speed=0.9) # all agents are slower
