@@ -17,11 +17,11 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         """SqliteTrajectoryWriter constructor
 
         Args:
-        output_file : pathlib.Path
-            name of the output file.
-            Note: the file will not be written until the first call to 'begin_writing'
-        every_nth_frame: int
-            indicates interval between writes, 1 means every frame, 5 every 5th
+            output_file : pathlib.Path
+                name of the output file.
+                Note: the file will not be written until the first call to 'begin_writing'
+            every_nth_frame: int
+                indicates interval between writes, 1 means every frame, 5 every 5th
 
         Returns:
             SqliteTrajectoryWriter

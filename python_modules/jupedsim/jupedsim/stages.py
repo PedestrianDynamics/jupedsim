@@ -66,7 +66,7 @@ class WaitingSetState(Enum):
 class WaitingSetStage:
     """Models a set of waiting positions that can be activated or deactivated.
 
-    Similar as with a :class:`NotifiableQueueStage there needs to be a set of
+    Similar as with a :class:`NotifiableQueueStage` there needs to be a set of
     waiting positions defined which will be filled in order of definition. The
     :class:`WaitingSetStage` now can be active or inactive. If active agents will fill
     waiting positions until all are occupied. Additional agents will all try to

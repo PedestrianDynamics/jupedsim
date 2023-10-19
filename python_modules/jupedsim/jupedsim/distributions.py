@@ -96,7 +96,7 @@ def distribute_by_number(
         max_iterations (int): Up to max_iterations are attempts are made to
             place a random point without conastraint violation, default is 10_000
 
-    Returns (list[tuple(float, float)]):
+    Returns:
         2D coordiantes
 
     Raises:
@@ -149,7 +149,7 @@ def distribute_by_density(
     seed: int | None = None,
     max_iterations: int = 10000,
 ) -> list[tuple[float, float]]:
-    """Generates randomized 2D coordiantes based on a desired agent density per
+    """Generates randomized 2D coordinates based on a desired agent density per
     square meter.
 
     This function will generate as many 2D coordinates as required to reach the
@@ -161,17 +161,17 @@ def distribute_by_density(
     and raise an Exception.
 
     Arguments:
-        polygon: (shapely.Polygon): Are where to generate 2D coordiantes in.
+        polygon: Area where to generate 2D coordinates in.
         density (float): desired density in agents per square meter
         distance_to_agents (float): minimal distance between the centers of agents
         distance_to_polygon (float): minimal distance between the center of agents
             and the polygon edges
         seed (int|None): Will be used to seed the random number generator.
         max_iterations (int): Up to max_iterations are attempts are made to
-            place a random point without conastraint violation, default is 10_000
+            place a random point without constraint violation, default is 10_000
 
 
-    Returns (list[tuple(float, float)]):
+    Returns:
         2D coordiantes
 
     Raises:
@@ -280,7 +280,7 @@ def distribute_in_circles_by_number(
         max_iterations (int): Up to max_iterations are attempts are made to
             place a random point without conastraint violation, default is 10_000
 
-    Returns (list[tuple(float, float)]):
+    Returns:
         2D coordiantes
 
     Raises:
@@ -421,7 +421,7 @@ def distribute_in_circles_by_density(
         max_iterations (int): Up to max_iterations are attempts are made to
             place a random point without conastraint violation, default is 10_000
 
-    Returns (list[tuple(float, float)]):
+    Returns:
         2D coordiantes
 
     Raises:
@@ -491,7 +491,7 @@ def distribute_until_filled(
             points. A higher value will result in a higher density but will greatly
             increase runtim.
 
-    Returns (list[tuple(float, float)]):
+    Returns:
         2D coordiantes
 
     Raises:
@@ -596,7 +596,7 @@ def distribute_by_percentage(
             points. A higher value will result in a higher density but will greatly
             increase runtim.
 
-    Returns (list[tuple(float, float)]):
+    Returns:
         2D coordiantes
 
     Raises:

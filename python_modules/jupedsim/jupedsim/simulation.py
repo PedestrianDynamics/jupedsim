@@ -52,7 +52,7 @@ class Simulation:
         """Creates a Simulation.
 
         Arguments:
-        model (CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel):
+            model (CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel):
                 Defines the operational model used in the simulation.
             geometry (str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]]):
                 Data to create the geometry out of. Data may be supplied as:

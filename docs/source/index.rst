@@ -7,7 +7,7 @@ JuPedSim Documentation
    :hidden:
 
    Getting started <notebooks/getting_started>
-   API reference <api/index>
+   API reference <api/jupedsim/index>
    Notebooks <notebooks/index>
    Disclaimer <disclaimer>
 

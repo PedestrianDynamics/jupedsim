@@ -46,22 +46,39 @@ intersphinx_mapping = {
 
 # -- Automatic generation of API doc -----------------------------------------
 autoapi_dirs = [
-    "../../python_modules/jupedsim",
+    "../../python_modules/jupedsim/jupedsim",
 ]
 autoapi_root = "api"
 autoapi_options = [
     "members",
     "undoc-members",
     "show-inheritance",
-    "show-module-summary",
     "imported-members",
 ]
-autoapi_ignore = ["**/tests/**"]
+autoapi_ignore = [
+    "**/tests/**",
+    "**/native/**",
+    "**/internal/**",
+    "**/\\w.*.py",
+]
 # autoapi_member_order = "groupwise"
-autodoc_typehints = "description"
+autodoc_typehints = "both"
 autoapi_python_class_content = "both"
 
 add_module_names = False
+
+autoapi_add_toctree_entry = False
+
+
+def skip_submodules(app, what, name, obj, skip, options):
+    if what == "module":
+        skip = True
+    return skip
+
+
+def setup(sphinx):
+    sphinx.connect("autoapi-skip-member", skip_submodules)
+
 
 # -- Automatic execution of jupyter notebooks --------------------------------
 nb_execution_excludepatterns = []
@@ -124,7 +141,7 @@ html_theme_options = {
         "version_match": version,
     },
     "primary_sidebar_end": ["version-switcher"],
-    "show_toc_level": 3,
+    "show_toc_level": 2,
 }
 
 html_sidebars = {
