@@ -1,93 +1,108 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6144559.svg)](https://doi.org/10.5281/zenodo.6144559) [![GitHub license](https://img.shields.io/badge/license-LGPL-blue.svg)](https://raw.githubusercontent.com/PedestrianDynamics/jupedsim/master/LICENSE)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6144559.svg)](https://doi.org/10.5281/zenodo.6144559)
+[![GitHub license](https://img.shields.io/badge/license-LGPL-blue.svg)](https://raw.githubusercontent.com/PedestrianDynamics/jupedsim/master/LICENSE)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/jupedsim)
+![PyPI - Version](https://img.shields.io/pypi/v/jupedsim)
 
-## Introduction
+# Jülich Pedestrian Simulator - JuPedSim
 
-JuPedSim is a library to simulate pedestrian dynamics. The main API is the
-`jupedsim` python module, we also support a C-API onto of which the python
-module is build.
+JuPedSim is a library to simulate pedestrian dynamics. This software is mainly
+developed at the Institute for Civil Safety
+[IAS-7](https://www.fz-juelich.de/en/ias/ias-7) of the Jülich Research Center
+(Forschungszentrum Jülich) in Germany.
 
-For how to use JuPedSim see the code in `examples`
+## Installation
 
-## Questions and Suggestions
+It is easiest to install directly with pip from
+[PyPi.org](https://pypi.org/project/jupedsim/)
 
-If you have a question or a problem and need support from our team feel free to
-open a new topic in GitHub discussions
-[https://github.com/PedestrianDynamics/jupedsim/discussions]
+```
+pip install jupedsim
+```
 
-Please do not use the issue tracker for personal support requests.
+## Usage
 
-### Reporting bugs and requesting features
+Please consult our [documentation.](http://jupedsim.org)
 
-If you find a bug in the source code, a mistake in the documentation or think
-there is functionality missing you can help us by submitting an issue.
+## Contributing
 
-If you submit a bug please make sure to include:
+We are open for contributions and would be happy to see Questions, Issues and
+Pull Requests.
 
-* What version / commit id you are using
-* What did you expect the software to do
-* What did the software do instead
-* A description of how to reproduce the issue if possible
-* Log output
+### Questions
 
-If you submit a feature request please help us by including:
+If you have a question or a problem please open a new topic in [GitHub
+discussions](https://github.com/PedestrianDynamics/jupedsim/discussions).
 
-* Use a clear and descriptive title for the issue to identify the suggestion.
-* Provide a step-by-step description of the suggested enhancement in as many
-  details as possible.
-* Provide specific examples to demonstrate the steps.
-* Describe the current behavior and explain which behavior you expected to see
-  instead and why.
+### Issues
+
+If you found a bug and want to give us a chance to fix it we would be very
+happy to hear from you. To make it easy for us to help you please include the
+following information when you open a [new
+issue](https://github.com/PedestrianDynamics/jupedsim/issues):
+
+* What did JuPedSim do?
+* What did you expect JuPedSim to do?
+* How can we reproduce the issue?
+
+### Pull Requests
+
+If you encounter a bug and are would like to submit a fix feel free to open a
+PR, we will look into it.
+
+Before embarking on larger work it is a good idea to
+[discuss](https://github.com/PedestrianDynamics/jupedsim/discussions) what you
+plan.
+
+While we are very happy if you contribute we reserve us the right to
+decline your PR because it may not fit into our vision of JuPedSim.
+
+## License
+
+[GNU LGPLv3](LICENSE)
 
 ## Building from source
 
-It should be possible to build on all major platforms, however we only test on
-a limited set:
+Here you have two options.
 
-Right now, we ensure a working Build for:
+### With setuptools
 
-* Windows 10
-* MacOS 13 (Ventura)
-* Ubuntu 22.04
+You will need a C++20 capable compiler and CMake >= 3.19 installed on your
+system. Then install our python dependencies via pip. Our python package
+dependencies are listed in `requirements.txt` in the root of this repository.
+Now you can call `pip install .`
 
-### General Information
-
-All of the following descriptions assume the following layout on disk:
-
-```txt
-.
-├── jupedsim <- code repository
-└── jupedsim-build <- build folder
-
-```
-
-We support only a few settings. For a list of build options, please see
-[CMakeLists.txt] directly.
-
-### Build on Linux / MacOS / Windows
-
-#### System Requirements
-
-To compile from source you will need a C++20 capable toolchain to be available
-and development headers for python3.10 or later.
-
-#### Configure and Compile
+E.g.:
 
 ```bash
-cmake -S jupedsim -B jupedsim-build
-cmake --build jupedsim
+cd jupedsim
+pip install -r requirements.txt
+pip install .
 ```
 
-### How to use `jupedsim`
+### Compile yourself
 
-On Linux and MacOS you will find a file `environment` inside the build folder,
-this contains the PYTHONPATH required to import `jupedsim`. On Windows you will
-need to add the paths to the PYTHONPATH by yourself.
+You will need a C++20 capable compiler and CMake >= 3.19 installed on your
+system. Then install our python dependencies via pip. Our python package
+dependencies are listed in `requirements.txt` in the root of this repository.
+Now you can generate makefiles with CMake, then compile and run the python
+library.
 
-The following locations need to be on the PYTHONPATH
-
+```bash
+pip install -r jupedsim/requirements.txt
+mkdir jupedsim-build
+cd jupedsim-build
+cmake ../jupedsim
+make -j
+source ./environment
 ```
-jupedsim-build/lib/
-jupedsim/python_modules/jupedsim
-jupedsim/python_modules/jupedsim-visualizer
-```
+
+The last line in the above description will populate the python path with the
+location of our python code and the native library.
+
+> [!WARNING]
+>
+> When sourcing `./environment` from the build folder you need to ensure JuPedSim
+> is not installed in the current python environment. Otherwise there will be
+> erroneous calls to the wrong python code, resulting in crashes and/or
+> exceptions.
 
