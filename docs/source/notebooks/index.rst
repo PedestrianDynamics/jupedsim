@@ -5,7 +5,6 @@ Notebooks
 .. toctree::
     :maxdepth: 1
 
-    bottleneck
     corner
     double-bottleneck
     journey
