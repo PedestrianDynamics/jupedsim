@@ -2,12 +2,12 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 from textwrap import dedent
+from typing import Callable
 
 import jupedsim.native as py_jps
 
 
-# TODO(kkratz): add typehints for function params
-def set_debug_callback(fn) -> None:
+def set_debug_callback(fn: Callable[[str], None]) -> None:
     """
     Set receiver for debug messages.
 
@@ -18,7 +18,7 @@ def set_debug_callback(fn) -> None:
     py_jps.set_debug_callback(fn)
 
 
-def set_info_callback(fn) -> None:
+def set_info_callback(fn: Callable[[str], None]) -> None:
     """
     Set receiver for info messages.
 
@@ -29,7 +29,7 @@ def set_info_callback(fn) -> None:
     py_jps.set_info_callback(fn)
 
 
-def set_warning_callback(fn) -> None:
+def set_warning_callback(fn: Callable[[str], None]) -> None:
     """
     Set receiver for warning messages.
 
@@ -40,7 +40,7 @@ def set_warning_callback(fn) -> None:
     py_jps.set_warning_callback(fn)
 
 
-def set_error_callback(fn) -> None:
+def set_error_callback(fn: Callable[[str], None]) -> None:
     """
     Set receiver for error messages.
 
@@ -52,7 +52,7 @@ def set_error_callback(fn) -> None:
 
 
 class BuildInfo:
-    def __init__(self):
+    def __init__(self) -> None:
         self.__obj = py_jps.get_build_info()
 
     @property

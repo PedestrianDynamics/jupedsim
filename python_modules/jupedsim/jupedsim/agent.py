@@ -35,7 +35,7 @@ class Agent:
         outside the walkable area of the Simulation resulting in a crash.
     """
 
-    def __init__(self, backing):
+    def __init__(self, backing) -> None:
         """Do not use.
 
         Retrieve agents from the simulation.

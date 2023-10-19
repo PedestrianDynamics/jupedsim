@@ -12,7 +12,7 @@ class Grid:
     distance_to_agents : radius in which points are searched for
     """
 
-    def __init__(self, box, distance_to_agents):
+    def __init__(self, box, distance_to_agents) -> None:
         self.box = box
         self.a_r = distance_to_agents
         width, height = box[1][0] - box[0][0], box[1][1] - box[0][1]

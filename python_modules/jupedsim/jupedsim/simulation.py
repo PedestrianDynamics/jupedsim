@@ -1,11 +1,12 @@
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-from typing import Any
+from typing import Any, Iterable
 
 import shapely
 
 import jupedsim.native as py_jps
+from jupedsim.agent import Agent
 from jupedsim.geometry import Geometry
 from jupedsim.geometry_utils import build_geometry
 from jupedsim.journey import JourneyDescription
@@ -54,7 +55,7 @@ class Simulation:
         Arguments:
             model (CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel):
                 Defines the operational model used in the simulation.
-            geometry (str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]]):
+            geometry:
                 Data to create the geometry out of. Data may be supplied as:
 
                 * list of 2d points describing the outer boundary, holes may be added with use of `excluded_areas` kw-argument
@@ -69,15 +70,15 @@ class Simulation:
 
                 * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
 
-            dt (float): Iteration step size in seconds. It is recommended to
+            dt: Iteration step size in seconds. It is recommended to
                 leave this at its default value.
-            trajectory_writer (TrajectoryWriter): Any object implementing the
+            trajectory_writer: Any object implementing the
                 TrajectoryWriter interface. JuPedSim provides a writer that outputs trajectory data
                 in a sqlite database. If you want other formats such as CSV you need to provide
                 your own custom implementation.
 
         Keyword Arguments:
-            excluded_areas (list[list[tuple(float, float)]]): describes exclusions
+            excluded_areas: describes exclusions
                 from the walkable area. Only use this argument if `geometry` was
                 provided as list[tuple[float, float]].
         """
@@ -115,8 +116,8 @@ class Simulation:
         """Add a new waypoint stage to this simulation.
 
         Arguments:
-            position (tuple[float, float]): Position of the waypoint
-            distance (float): Minimum distance required to reach this waypoint
+            position: Position of the waypoint
+            distance: Minimum distance required to reach this waypoint
 
         Returns:
             Id of the new stage.
@@ -128,7 +129,7 @@ class Simulation:
         """Add a new queue state to this simulation.
 
         Arguments:
-            positions (list[tuple[float, float]]): Ordered list of the waiting
+            positions: Ordered list of the waiting
                 points of this queue. The first one in the list is the head of
                 the queue while the last one is the back of the queue.
 
@@ -155,7 +156,7 @@ class Simulation:
         """Add an exit stage to the simulation.
 
         Arguments:
-            polygon (str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]]):
+            polygon:
                 Polygon without holes representing the exit stage. Polygon can be passed as:
 
                 * list of 2d points describing the outer boundary
@@ -196,7 +197,7 @@ class Simulation:
         agents will be computed.
 
         Arguments:
-            agent_id (int): Id of the agent marked for removal
+            agent_id: Id of the agent marked for removal
 
         Returns:
             marking for removal was successful
@@ -237,13 +238,15 @@ class Simulation:
     def iteration_count(self) -> int:
         return self._obj.iteration_count()
 
-    def agents(self):
+    def agents(self) -> Iterable[Agent]:
         return self._obj.agents()
 
-    def agent(self, agent_id):
+    def agent(self, agent_id) -> Agent:
         return self._obj.agent(agent_id)
 
-    def agents_in_range(self, pos: tuple[float, float], distance: float):
+    def agents_in_range(
+        self, pos: tuple[float, float], distance: float
+    ) -> list[Agent]:
         return self._obj.agents_in_range(pos, distance)
 
     def agents_in_polygon(
@@ -254,11 +257,11 @@ class Simulation:
         | shapely.MultiPolygon
         | shapely.MultiPoint
         | list[tuple[float, float]],
-    ):
+    ) -> list[Agent]:
         """Return all agents inside the given polygon.
 
         Args:
-            poly (str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]]):
+            poly:
                 Polygon without holes in which to check for pedestrians. Polygon can be passed as:
 
                 * list of 2d points describing the outer boundary
