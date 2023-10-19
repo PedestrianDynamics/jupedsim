@@ -13,7 +13,7 @@ from jupedsim.simulation import Simulation
 class SqliteTrajectoryWriter(TrajectoryWriter):
     """Write trajectory data into a sqlite db"""
 
-    def __init__(self, *, output_file: Path, every_nth_frame: int = 4):
+    def __init__(self, *, output_file: Path, every_nth_frame: int = 4) -> None:
         """SqliteTrajectoryWriter constructor
 
         Args:

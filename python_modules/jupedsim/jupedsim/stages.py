@@ -75,7 +75,7 @@ class WaitingSetStage:
     defined waiting position.
     """
 
-    def __init__(self, backing):
+    def __init__(self, backing) -> None:
         self._obj = backing
 
     def count_targeting(self) -> int:
@@ -120,10 +120,10 @@ class WaypointStage:
     distance to the waypoint.
     """
 
-    def __init__(self, backing):
+    def __init__(self, backing) -> None:
         self._obj = backing
 
-    def count_targeting(self):
+    def count_targeting(self) -> int:
         """Returns:
         Number of agents currently targeting this stage.
         """

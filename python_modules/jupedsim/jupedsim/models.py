@@ -13,10 +13,10 @@ class CollisionFreeSpeedModel:
     All attributes are initialized with reasonably good defaults.
 
     Attributes:
-        strength_neighbor_repulsion (float): Strength of the repulsion from neighbors
-        range_neighbor_repulsion (float): Range of the repulsion from neighbors
-        strength_geometry_repulsion (float): Strength of the repulsion from geometry boundaries
-        range_geometry_repulsion (float): Range of the repulsion from geometry boundaries
+        strength_neighbor_repulsion: Strength of the repulsion from neighbors
+        range_neighbor_repulsion: Range of the repulsion from neighbors
+        strength_geometry_repulsion: Strength of the repulsion from geometry boundaries
+        range_geometry_repulsion: Range of the repulsion from geometry boundaries
     """
 
     strength_neighbor_repulsion: float = 8.0
@@ -32,14 +32,14 @@ class GeneralizedCentrifugalForceModel:
     All attributes are initialized with reasonably good defaults.
 
     Attributes:
-        strength_neighbor_repulsion (float): strengh_neighbor_repulsion
-        strength_geometry_repulsion (float): strength_geometry_repulsion
-        max_neighbor_interaction_distance (float): cut-off-radius for ped-ped repulsion (r_c in FIG. 7)
-        max_geometry_interaction_distance (float): cut-off-radius for ped-wall repulsion (r_c in FIG. 7)
-        max_neighbor_interpolation_distance (float): distance of interpolation of repulsive force for ped-ped interaction (r_eps in FIG. 7)
-        max_geometry_interpolayion_distance (float): distance of interpolation of repulsive force for ped-wall interaction (r_eps in FIG. 7)
-        max_neighbor_repulsion_force (float): maximum of the repulsion force for ped-ped interaction by contact of ellipses (f_m in FIG. 7)
-        max_geometry_repulsion_force (float): maximum of the repulsion force for ped-wall interaction by contact of ellipses (f_m in FIG. 7)
+        strength_neighbor_repulsion: strengh_neighbor_repulsion
+        strength_geometry_repulsion: strength_geometry_repulsion
+        max_neighbor_interaction_distance: cut-off-radius for ped-ped repulsion (r_c in FIG. 7)
+        max_geometry_interaction_distance: cut-off-radius for ped-wall repulsion (r_c in FIG. 7)
+        max_neighbor_interpolation_distance: distance of interpolation of repulsive force for ped-ped interaction (r_eps in FIG. 7)
+        max_geometry_interpolayion_distance: distance of interpolation of repulsive force for ped-wall interaction (r_eps in FIG. 7)
+        max_neighbor_repulsion_force: maximum of the repulsion force for ped-ped interaction by contact of ellipses (f_m in FIG. 7)
+        max_geometry_repulsion_force: maximum of the repulsion force for ped-wall interaction by contact of ellipses (f_m in FIG. 7)
     """
 
     strength_neighbor_repulsion: float = 0.3
@@ -76,19 +76,19 @@ class GeneralizedCentrifugalForceModelAgentParameters:
                 sim.add_agent(params)
 
     Attributes:
-        speed (float):
-        e0 (tuple[float, float]):
-        position (tuple[float, float]):
-        orientation (tuple[float, float]):
-        journey_id (int):
-        stage_id (int):
-        mass (float):
-        tau (float):
-        v0 (float):
-        a_v (float):
-        a_min (float):
-        b_min (float):
-        b_max (float):
+        speed:
+        e0:
+        position:
+        orientation:
+        journey_id:
+        stage_id:
+        mass:
+        tau:
+        v0:
+        a_v:
+        a_min:
+        b_min:
+        b_max:
     """
 
     speed: float = 0.0
@@ -149,12 +149,12 @@ class CollisionFreeSpeedModelAgentParameters:
                 sim.add_agent(params)
 
     Attributes:
-        position (tuple[float, float]):
-        time_gap (float):
-        v0 (float):
-        radius (float):
-        journey_id (int):
-        stage_id (int):
+        position:
+        time_gap:
+        v0:
+        radius:
+        journey_id:
+        stage_id:
     """
 
     position: tuple[float, float] = (0.0, 0.0)
@@ -176,7 +176,7 @@ class CollisionFreeSpeedModelAgentParameters:
 
 
 class GeneralizedCentrifugalForceModelState:
-    def __init__(self, backing):
+    def __init__(self, backing) -> None:
         self._obj = backing
 
     @property

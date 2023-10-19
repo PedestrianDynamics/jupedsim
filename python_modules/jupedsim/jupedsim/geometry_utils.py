@@ -11,7 +11,7 @@ from jupedsim.geometry import Geometry
 class GeometryError(Exception):
     """Class reflecting errors when creating JuPedSim geometry objects."""
 
-    def __init__(self, message):
+    def __init__(self, message) -> None:
         """Create GeometryError with the given message.
 
         Args:
@@ -147,7 +147,7 @@ def build_geometry(
             * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
 
     Keyword Arguments:
-        excluded_areas (list[list[tuple(float, float)]]): describes exclusions
+        excluded_areas: describes exclusions
             from the walkable area. Only use this argument if `geometry` was
             provided as list[tuple[float, float]].
     """

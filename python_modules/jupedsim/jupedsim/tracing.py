@@ -9,7 +9,7 @@ class Trace:
         self._obj = py_jps.Trace
 
     @property
-    def iteration_duration(self):
+    def iteration_duration(self) -> float:
         """Time for one simulation iteration in us.
 
         Returns:
@@ -18,7 +18,7 @@ class Trace:
         return self._obj.iteration_duration
 
     @property
-    def operational_level_duration(self):
+    def operational_level_duration(self) -> float:
         """Time for one simulation iteration in the operational level in us.
 
         Returns:

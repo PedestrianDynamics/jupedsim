@@ -26,7 +26,7 @@ class AABB:
         return (self.xmin + self.width / 2, self.ymin + self.height / 2)
 
     @staticmethod
-    def combine(aabb, *other):
+    def combine(aabb, *other) -> "AABB":
         xmin = aabb.xmin
         ymin = aabb.ymin
         xmax = aabb.xmax

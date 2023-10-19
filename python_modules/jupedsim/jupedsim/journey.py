@@ -33,20 +33,22 @@ class Transition:
         self._obj = backing
 
     @staticmethod
-    def create_fixed_transition(stage_id: int):
+    def create_fixed_transition(stage_id: int) -> "Transition":
         """Create a fixed transition.
 
         On completion of this transitions stage all agents will proceed to the
         specified next stage.
 
         Arguments:
-            stage_id (int): id of the stage to move to next.
+            stage_id: id of the stage to move to next.
 
         """
         return Transition(py_jps.Transition.create_fixed_transition(stage_id))
 
     @staticmethod
-    def create_round_robin_transition(stage_weights: list[tuple[int, int]]):
+    def create_round_robin_transition(
+        stage_weights: list[tuple[int, int]]
+    ) -> "Transition":
         """Create a round-robin transition.
 
         Round-robin transitions: On completion of this transitions stage agents
@@ -57,7 +59,7 @@ class Transition:
         first stage, and so on...
 
         Arguments:
-            stage_weights (list[tuple[int, int]]): list of id/weight tuples.
+            stage_weights: list of id/weight tuples.
 
         """
         return Transition(
@@ -65,7 +67,7 @@ class Transition:
         )
 
     @staticmethod
-    def create_least_targeted_transition(stage_ids: list[int]):
+    def create_least_targeted_transition(stage_ids: list[int]) -> "Transition":
         """Create a least targeted transition.
 
         On completion of this stage agents will proceed towards the currently
@@ -74,8 +76,7 @@ class Transition:
         This includes agents from different journeys.
 
         Arguments:
-            stage_ids (list[int]): list of stage ids to choose the next target
-                from.
+            stage_ids: list of stage ids to choose the next target from.
 
         """
         return Transition(
@@ -92,11 +93,11 @@ class JourneyDescription:
     transitions.
     """
 
-    def __init__(self, stage_ids: Optional[list[int]] = None):
+    def __init__(self, stage_ids: Optional[list[int]] = None) -> None:
         """Create a Journey Description.
 
         Arguments:
-            stage_ids (Optional[list[int]]): list of stages this journey should contain.
+            stage_ids: list of stages this journey should contain.
 
         """
         if stage_ids is None:
@@ -108,19 +109,21 @@ class JourneyDescription:
         """Add additional stage or stages.
 
         Arguments:
-            stages (int | list[int]): A single stage id or a list of stage ids.
+            stages: A single stage id or a list of stage ids.
 
         """
         self._obj.add(stages)
 
-    def set_transition_for_stage(self, stage_id: int, transition: Transition):
+    def set_transition_for_stage(
+        self, stage_id: int, transition: Transition
+    ) -> None:
         """Set a new transition for the specified stage.
 
         Any prior set transition for this stage will be removed.
 
         Arguments:
-            stage_id (int): id of the stage to set the transition for.
-            transition (Transition): transition to set
+            stage_id: id of the stage to set the transition for.
+            transition: transition to set
 
         """
         self._obj.set_transition_for_stage(stage_id, transition._obj)

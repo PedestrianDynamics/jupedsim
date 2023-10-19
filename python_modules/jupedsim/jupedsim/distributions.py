@@ -87,13 +87,13 @@ def distribute_by_number(
     will stop after max_iterations and raise an Exception.
 
     Arguments:
-        polygon (shapely.Polygon): polygon where the agents shall be placed
-        number_of_agents (int): number of agents to be distributed
-        distance_to_agents (float): minimal distance between the centers of agents
-        distance_to_polygon (float): minimal distance between the center of agents
+        polygon: polygon where the agents shall be placed
+        number_of_agents: number of agents to be distributed
+        distance_to_agents: minimal distance between the centers of agents
+        distance_to_polygon: minimal distance between the center of agents
             and the polygon edges
-        seed (int|None): Will be used to seed the random number generator.
-        max_iterations (int): Up to max_iterations are attempts are made to
+        seed: Will be used to seed the random number generator.
+        max_iterations: Up to max_iterations are attempts are made to
             place a random point without conastraint violation, default is 10_000
 
     Returns:
@@ -162,12 +162,12 @@ def distribute_by_density(
 
     Arguments:
         polygon: Area where to generate 2D coordinates in.
-        density (float): desired density in agents per square meter
-        distance_to_agents (float): minimal distance between the centers of agents
-        distance_to_polygon (float): minimal distance between the center of agents
+        density: desired density in agents per square meter
+        distance_to_agents: minimal distance between the centers of agents
+        distance_to_polygon: minimal distance between the center of agents
             and the polygon edges
-        seed (int|None): Will be used to seed the random number generator.
-        max_iterations (int): Up to max_iterations are attempts are made to
+        seed: Will be used to seed the random number generator.
+        max_iterations: Up to max_iterations are attempts are made to
             place a random point without constraint violation, default is 10_000
 
 
@@ -268,16 +268,15 @@ def distribute_in_circles_by_number(
     and raise an Exception.
 
     Arguments:
-        polygon (shapely.Polygon): polygon where agents can be placed.
-        distance_to_agents (float): minimal distance between the centers of agents
-        distance_to_polygon (float): minimal distance between the center of agents
+        polygon: polygon where agents can be placed.
+        distance_to_agents: minimal distance between the centers of agents
+        distance_to_polygon: minimal distance between the center of agents
             and the polygon edges
-        center_point (tuple[float, float]): Center point of the rings.
-        circle_segment_radii (list[tuple[float, float]]): min/max radius per ring,
-            rings may not overlap
-        number_of_agents (list[int]): agents to be placed per ring
-        seed (int|None): Will be used to seed the random number generator.
-        max_iterations (int): Up to max_iterations are attempts are made to
+        center_point: Center point of the rings.
+        circle_segment_radii: min/max radius per ring, rings may not overlap
+        number_of_agents: agents to be placed per ring
+        seed: Will be used to seed the random number generator.
+        max_iterations: Up to max_iterations are attempts are made to
             place a random point without conastraint violation, default is 10_000
 
     Returns:
@@ -409,17 +408,16 @@ def distribute_in_circles_by_density(
     max_iterations and raise an Exception.
 
     Arguments:
-        polygon (shapely.Polygon): polygon where agents can be placed.
-        distance_to_agents (float): minimal distance between the centers of agents
-        distance_to_polygon (float): minimal distance between the center of agents
+        polygon: polygon where agents can be placed.
+        distance_to_agents: minimal distance between the centers of agents
+        distance_to_polygon: minimal distance between the center of agents
             and the polygon edges
-        center_point (tuple[float, float]): Center point of the rings.
-        circle_segment_radii (list[tuple[float, float]]): min/max radius per ring,
-            rings may not overlap
-        desnities (list[float]): density in positionsper square meter for each ring
-        seed (int|None): Will be used to seed the random number generator.
-        max_iterations (int): Up to max_iterations are attempts are made to
-            place a random point without conastraint violation, default is 10_000
+        center_point: Center point of the rings.
+        circle_segment_radii: min/max radius per ring, rings may not overlap
+        desnities: density in positionsper square meter for each ring
+        seed: Will be used to seed the random number generator.
+        max_iterations: Up to max_iterations are attempts are made to place a
+            random point without conastraint violation, default is 10_000
 
     Returns:
         2D coordiantes
@@ -480,14 +478,14 @@ def distribute_until_filled(
     Exception.
 
     Arguments:
-        polygon (shapely.Polygon): polygon where agents can be placed.
-        distance_to_agents (float): minimal distance between the centers of agents
-        distance_to_polygon (float): minimal distance between the center of agents
+        polygon: polygon where agents can be placed.
+        distance_to_agents: minimal distance between the centers of agents
+        distance_to_polygon: minimal distance between the center of agents
             and the polygon edges
-        seed (int|None): Will be used to seed the random number generator.
-        max_iterations (int): Up to max_iterations are attempts are made to
+        seed: Will be used to seed the random number generator.
+        max_iterations: Up to max_iterations are attempts are made to
             place a random point without conastraint violation, default is 10_000
-        k (int): maximum number of attempts to place neighbors to already inserted
+        k: maximum number of attempts to place neighbors to already inserted
             points. A higher value will result in a higher density but will greatly
             increase runtim.
 
@@ -529,6 +527,8 @@ def distribute_until_filled(
             " Check if there is enough space for agents provided inside the polygon"
         )
 
+    # Uses https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf
+    # "Fast Poisson Disk Sampling in Arbitrary Dimensions"
     # while points are active a random reference point is selected
     while active:
         ref_point = active[np.random.randint(0, len(active))]
@@ -583,16 +583,16 @@ def distribute_by_percentage(
     Exception.
 
     Arguments:
-        polygon (shapely.Polygon): polygon where agents can be placed.
-        percent (float): percent value of occupancy to generate. needs to be in
+        polygon: polygon where agents can be placed.
+        percent: percent value of occupancy to generate. needs to be in
             the intervall (0, 100]
-        distance_to_agents (float): minimal distance between the centers of agents
-        distance_to_polygon (float): minimal distance between the center of agents
+        distance_to_agents: minimal distance between the centers of agents
+        distance_to_polygon: minimal distance between the center of agents
             and the polygon edges
-        seed (int|None): Will be used to seed the random number generator.
-        max_iterations (int): Up to max_iterations are attempts are made to
+        seed: Will be used to seed the random number generator.
+        max_iterations: Up to max_iterations are attempts are made to
             place a random point without conastraint violation, default is 10_000
-        k (int): maximum number of attempts to place neighbors to already inserted
+        k: maximum number of attempts to place neighbors to already inserted
             points. A higher value will result in a higher density but will greatly
             increase runtim.
 
