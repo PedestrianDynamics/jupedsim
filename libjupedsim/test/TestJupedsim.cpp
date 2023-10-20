@@ -31,15 +31,50 @@ TEST(OperationalModel, CanConstructCollisionFreeSpeedModel)
     JPS_OperationalModel_Free(model);
 }
 
-TEST(OperationalModel, CanConstructGeneralizedCentrifugalForceModelModel)
+TEST(OperationalModel, DefaultsOfCollisionFreeSpeedModelAgentParameters)
+{
+    JPS_CollisionFreeSpeedModelAgentParameters agentParameters{};
+
+    ASSERT_DOUBLE_EQ(agentParameters.position.x, 0);
+    ASSERT_DOUBLE_EQ(agentParameters.position.y, 0);
+    ASSERT_DOUBLE_EQ(agentParameters.journeyId, 0);
+    ASSERT_DOUBLE_EQ(agentParameters.stageId, 0);
+    ASSERT_DOUBLE_EQ(agentParameters.time_gap, 1);
+    ASSERT_DOUBLE_EQ(agentParameters.v0, 1.2);
+    ASSERT_DOUBLE_EQ(agentParameters.radius, 0.2);
+}
+
+TEST(OperationalModel, CanConstructGeneralizedCentrifugalForceModel)
 {
     JPS_ErrorMessage errorMsg{};
-    auto builder = JPS_GeneralizedCentrifugalForceModelModelBuilder_Create(1, 1, 1, 1, 1, 1, 1, 1);
-    auto model = JPS_GeneralizedCentrifugalForceModelModelBuilder_Build(builder, &errorMsg);
+    auto builder = JPS_GeneralizedCentrifugalForceModelBuilder_Create(1, 1, 1, 1, 1, 1, 1, 1);
+    auto model = JPS_GeneralizedCentrifugalForceModelBuilder_Build(builder, &errorMsg);
     EXPECT_NE(model, nullptr);
     EXPECT_EQ(errorMsg, nullptr);
-    JPS_GeneralizedCentrifugalForceModelModelBuilder_Free(builder);
+    JPS_GeneralizedCentrifugalForceModelBuilder_Free(builder);
     JPS_OperationalModel_Free(model);
+}
+
+TEST(OperationalModel, DefaultsOfGeneralizedCentrifugalForceModelAgentParameters)
+{
+    JPS_GeneralizedCentrifugalForceModelAgentParameters agentParameters{};
+
+    ASSERT_DOUBLE_EQ(agentParameters.speed, 0);
+    ASSERT_DOUBLE_EQ(agentParameters.e0.x, 0);
+    ASSERT_DOUBLE_EQ(agentParameters.e0.y, 0);
+    ASSERT_DOUBLE_EQ(agentParameters.position.x, 0);
+    ASSERT_DOUBLE_EQ(agentParameters.position.y, 0);
+    ASSERT_DOUBLE_EQ(agentParameters.orientation.x, 0);
+    ASSERT_DOUBLE_EQ(agentParameters.orientation.y, 0);
+    ASSERT_DOUBLE_EQ(agentParameters.journeyId, 0);
+    ASSERT_DOUBLE_EQ(agentParameters.stageId, 0);
+    ASSERT_DOUBLE_EQ(agentParameters.mass, 1);
+    ASSERT_DOUBLE_EQ(agentParameters.tau, 0.5);
+    ASSERT_DOUBLE_EQ(agentParameters.v0, 1.2);
+    ASSERT_DOUBLE_EQ(agentParameters.a_v, 1.);
+    ASSERT_DOUBLE_EQ(agentParameters.a_min, 0.2);
+    ASSERT_DOUBLE_EQ(agentParameters.b_min, 0.2);
+    ASSERT_DOUBLE_EQ(agentParameters.b_max, 0.4);
 }
 
 TEST(GeometryBuilder, CanConstruct)

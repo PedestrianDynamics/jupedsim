@@ -60,7 +60,7 @@ OWNED_WRAPPER(JPS_Geometry);
 OWNED_WRAPPER(JPS_GeometryBuilder);
 OWNED_WRAPPER(JPS_OperationalModel);
 OWNED_WRAPPER(JPS_CollisionFreeSpeedModelBuilder);
-OWNED_WRAPPER(JPS_GeneralizedCentrifugalForceModelModelBuilder);
+OWNED_WRAPPER(JPS_GeneralizedCentrifugalForceModelBuilder);
 OWNED_WRAPPER(JPS_JourneyDescription);
 OWNED_WRAPPER(JPS_Transition);
 OWNED_WRAPPER(JPS_Simulation);
@@ -178,8 +178,8 @@ PYBIND11_MODULE(py_jupedsim, m)
                 t.iteration_duration,
                 t.operational_level_duration);
         });
-    py::class_<JPS_GeneralizedCentrifugalForceModelModelAgentParameters>(
-        m, "GeneralizedCentrifugalForceModelModelAgentParameters")
+    py::class_<JPS_GeneralizedCentrifugalForceModelAgentParameters>(
+        m, "GeneralizedCentrifugalForceModelAgentParameters")
         .def(
             py::init([](double speed,
                         std::tuple<double, double> e0,
@@ -194,7 +194,7 @@ PYBIND11_MODULE(py_jupedsim, m)
                         double a_min,
                         double b_min,
                         double b_max) {
-                return JPS_GeneralizedCentrifugalForceModelModelAgentParameters{
+                return JPS_GeneralizedCentrifugalForceModelAgentParameters{
                     speed,
                     intoJPS_Point(e0),
                     intoJPS_Point(position),
@@ -223,7 +223,7 @@ PYBIND11_MODULE(py_jupedsim, m)
             py::arg("a_min"),
             py::arg("b_min"),
             py::arg("b_max"))
-        .def("__repr__", [](const JPS_GeneralizedCentrifugalForceModelModelAgentParameters& p) {
+        .def("__repr__", [](const JPS_GeneralizedCentrifugalForceModelAgentParameters& p) {
             return fmt::format(
                 "speed: {}, e0: {}, position: {}, orientation: {}, journey_id: {}, "
                 "stage_id: {}, mass: {}, v0: {}, a_v: {}, a_min: {}, b_min: {}, b_max: {}",
@@ -351,7 +351,7 @@ PYBIND11_MODULE(py_jupedsim, m)
             JPS_ErrorMessage_Free(errorMsg);
             throw std::runtime_error{msg};
         });
-    py::class_<JPS_GeneralizedCentrifugalForceModelModelBuilder_Wrapper>(
+    py::class_<JPS_GeneralizedCentrifugalForceModelBuilder_Wrapper>(
         m, "GeneralizedCentrifugalForceModelBuilder")
         .def(
             py::init([](double strengthNeighborRepulsion,
@@ -362,8 +362,8 @@ PYBIND11_MODULE(py_jupedsim, m)
                         double maxGeometryInterpolationDistance,
                         double maxNeighborRepulsionForce,
                         double maxGeometryRepulsionForce) {
-                return std::make_unique<JPS_GeneralizedCentrifugalForceModelModelBuilder_Wrapper>(
-                    JPS_GeneralizedCentrifugalForceModelModelBuilder_Create(
+                return std::make_unique<JPS_GeneralizedCentrifugalForceModelBuilder_Wrapper>(
+                    JPS_GeneralizedCentrifugalForceModelBuilder_Create(
                         strengthNeighborRepulsion,
                         strengthGeometryRepulsion,
                         maxNeighborInteractionDistance,
@@ -382,10 +382,10 @@ PYBIND11_MODULE(py_jupedsim, m)
             py::arg("max_geometry_interpolation_distance"),
             py::arg("max_neighbor_repulsion_force"),
             py::arg("max_geometry_repulsion_force"))
-        .def("build", [](JPS_GeneralizedCentrifugalForceModelModelBuilder_Wrapper& w) {
+        .def("build", [](JPS_GeneralizedCentrifugalForceModelBuilder_Wrapper& w) {
             JPS_ErrorMessage errorMsg{};
             auto result =
-                JPS_GeneralizedCentrifugalForceModelModelBuilder_Build(w.handle, &errorMsg);
+                JPS_GeneralizedCentrifugalForceModelBuilder_Build(w.handle, &errorMsg);
             if(result) {
                 return std::make_unique<JPS_OperationalModel_Wrapper>(result);
             }
@@ -685,7 +685,7 @@ PYBIND11_MODULE(py_jupedsim, m)
                     std::unique_ptr<JPS_GeneralizedCentrifugalForceModelState_Wrapper>,
                     std::unique_ptr<JPS_CollisionFreeSpeedModelState_Wrapper>> {
                 switch(JPS_Agent_GetModelType(w.handle)) {
-                    case JPS_GeneralizedCentrifugalForceModelModel:
+                    case JPS_GeneralizedCentrifugalForceModel:
                         return std::make_unique<JPS_GeneralizedCentrifugalForceModelState_Wrapper>(
                             JPS_Agent_GetGeneralizedCentrifugalForceModelState(w.handle, nullptr));
                     case JPS_CollisionFreeSpeedModel:
@@ -785,9 +785,9 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def(
             "add_agent",
             [](JPS_Simulation_Wrapper& simulation,
-               JPS_GeneralizedCentrifugalForceModelModelAgentParameters& parameters) {
+               JPS_GeneralizedCentrifugalForceModelAgentParameters& parameters) {
                 JPS_ErrorMessage errorMsg{};
-                auto result = JPS_Simulation_AddGeneralizedCentrifugalForceModelModelAgent(
+                auto result = JPS_Simulation_AddGeneralizedCentrifugalForceModelAgent(
                     simulation.handle, parameters, &errorMsg);
                 if(result) {
                     return result;

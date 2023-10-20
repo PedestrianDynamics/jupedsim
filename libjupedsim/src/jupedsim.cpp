@@ -120,8 +120,7 @@ void JPS_OperationalModel_Free(JPS_OperationalModel handle)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// GeneralizedCentrifugalForceModel Model Builder
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-JPS_GeneralizedCentrifugalForceModelModelBuilder
-JPS_GeneralizedCentrifugalForceModelModelBuilder_Create(
+JPS_GeneralizedCentrifugalForceModelBuilder JPS_GeneralizedCentrifugalForceModelBuilder_Create(
     double strengthNeighborRepulsion,
     double strengthGeometryRepulsion,
     double maxNeighborInteractionDistance,
@@ -131,7 +130,7 @@ JPS_GeneralizedCentrifugalForceModelModelBuilder_Create(
     double maxNeighborRepulsionForce,
     double maxGeometryRepulsionForce)
 {
-    return reinterpret_cast<JPS_GeneralizedCentrifugalForceModelModelBuilder>(
+    return reinterpret_cast<JPS_GeneralizedCentrifugalForceModelBuilder>(
         new GeneralizedCentrifugalForceModelBuilder(
             strengthNeighborRepulsion,
             strengthGeometryRepulsion,
@@ -143,8 +142,8 @@ JPS_GeneralizedCentrifugalForceModelModelBuilder_Create(
             maxGeometryRepulsionForce));
 }
 
-JPS_OperationalModel JPS_GeneralizedCentrifugalForceModelModelBuilder_Build(
-    JPS_GeneralizedCentrifugalForceModelModelBuilder handle,
+JPS_OperationalModel JPS_GeneralizedCentrifugalForceModelBuilder_Build(
+    JPS_GeneralizedCentrifugalForceModelBuilder handle,
     JPS_ErrorMessage* errorMessage)
 {
     assert(handle != nullptr);
@@ -166,8 +165,8 @@ JPS_OperationalModel JPS_GeneralizedCentrifugalForceModelModelBuilder_Build(
     return result;
 }
 
-void JPS_GeneralizedCentrifugalForceModelModelBuilder_Free(
-    JPS_GeneralizedCentrifugalForceModelModelBuilder handle)
+void JPS_GeneralizedCentrifugalForceModelBuilder_Free(
+    JPS_GeneralizedCentrifugalForceModelBuilder handle)
 {
     delete reinterpret_cast<GeneralizedCentrifugalForceModelBuilder*>(handle);
 }
@@ -733,7 +732,7 @@ JPS_ModelType JPS_Agent_GetModelType(JPS_Agent handle)
     const auto agent = reinterpret_cast<const GenericAgent*>(handle);
     switch(agent->model.index()) {
         case 0:
-            return JPS_GeneralizedCentrifugalForceModelModel;
+            return JPS_GeneralizedCentrifugalForceModel;
         case 1:
             return JPS_CollisionFreeSpeedModel;
     }
@@ -1090,9 +1089,9 @@ JPS_StageId JPS_Simulation_AddStageWaitingSet(
     return add_stage(handle, NotifiableWaitingSetDescription{positions}, errorMessage);
 }
 
-JPS_AgentId JPS_Simulation_AddGeneralizedCentrifugalForceModelModelAgent(
+JPS_AgentId JPS_Simulation_AddGeneralizedCentrifugalForceModelAgent(
     JPS_Simulation handle,
-    JPS_GeneralizedCentrifugalForceModelModelAgentParameters parameters,
+    JPS_GeneralizedCentrifugalForceModelAgentParameters parameters,
     JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
@@ -1318,7 +1317,7 @@ JPS_ModelType JPS_Simulation_ModelType(JPS_Simulation handle)
         case OperationalModelType::COLLISION_FREE_SPEED:
             return JPS_CollisionFreeSpeedModel;
         case OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE:
-            return JPS_GeneralizedCentrifugalForceModelModel;
+            return JPS_GeneralizedCentrifugalForceModel;
     }
     UNREACHABLE();
 }

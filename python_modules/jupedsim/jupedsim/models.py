@@ -32,12 +32,12 @@ class GeneralizedCentrifugalForceModel:
     All attributes are initialized with reasonably good defaults.
 
     Attributes:
-        strength_neighbor_repulsion: strengh_neighbor_repulsion
-        strength_geometry_repulsion: strength_geometry_repulsion
+        strength_neighbor_repulsion: Strength of the repulsion from neighbors
+        strength_geometry_repulsion: Strength of the repulsion from geometry boundaries
         max_neighbor_interaction_distance: cut-off-radius for ped-ped repulsion (r_c in FIG. 7)
         max_geometry_interaction_distance: cut-off-radius for ped-wall repulsion (r_c in FIG. 7)
         max_neighbor_interpolation_distance: distance of interpolation of repulsive force for ped-ped interaction (r_eps in FIG. 7)
-        max_geometry_interpolayion_distance: distance of interpolation of repulsive force for ped-wall interaction (r_eps in FIG. 7)
+        max_geometry_interpolation_distance: distance of interpolation of repulsive force for ped-wall interaction (r_eps in FIG. 7)
         max_neighbor_repulsion_force: maximum of the repulsion force for ped-ped interaction by contact of ellipses (f_m in FIG. 7)
         max_geometry_repulsion_force: maximum of the repulsion force for ped-wall interaction by contact of ellipses (f_m in FIG. 7)
     """
@@ -62,7 +62,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
     https://arxiv.org/abs/1008.4297
 
     .. note::
-        Insances of this type are copied when creating the agent, you can savely
+        Instances of this type are copied when creating the agent, you can safely
         create one instance of this type and modify it between calls to `add_agent`
 
         E.g.:
@@ -76,19 +76,19 @@ class GeneralizedCentrifugalForceModelAgentParameters:
                 sim.add_agent(params)
 
     Attributes:
-        speed:
-        e0:
-        position:
-        orientation:
-        journey_id:
-        stage_id:
-        mass:
-        tau:
-        v0:
-        a_v:
-        a_min:
-        b_min:
-        b_max:
+        speed: Speed of the agent.
+        e0: Desired direction of the agent.
+        position: Position of the agent.
+        orientation: Orientation of the agent.
+        journey_id: Id of the journey the agent follows.
+        stage_id: Id of the stage the agent targets.
+        mass: Mass of the agent.
+        tau: Time constant that describes how fast the agent accelerates to its desired speed (v0).
+        v0: Maximum speed of the agent.
+        a_v: Stretch of the ellipsis semi-axis along the movement vector.
+        a_min: Minimum length of the ellipsis semi-axis along the movement vector.
+        b_min: Minimum length of the ellipsis semi-axis orthogonal to the movement vector.
+        b_max: Maximum length of the ellipsis semi-axis orthogonal to the movement vector.
     """
 
     speed: float = 0.0
@@ -107,8 +107,8 @@ class GeneralizedCentrifugalForceModelAgentParameters:
 
     def as_native(
         self,
-    ) -> py_jps.GeneralizedCentrifugalForceModelModelAgentParameters:
-        return py_jps.GeneralizedCentrifugalForceModelModelAgentParameters(
+    ) -> py_jps.GeneralizedCentrifugalForceModelAgentParameters:
+        return py_jps.GeneralizedCentrifugalForceModelAgentParameters(
             speed=self.speed,
             e0=self.e0,
             position=self.position,
@@ -149,12 +149,12 @@ class CollisionFreeSpeedModelAgentParameters:
                 sim.add_agent(params)
 
     Attributes:
-        position:
-        time_gap:
-        v0:
-        radius:
-        journey_id:
-        stage_id:
+        position: Position of the agent.
+        time_gap: Time constant that describe how fast pedestrian close gaps.
+        v0: Maximum speed of the agent.
+        radius: Radius of the agent.
+        journey_id: Id of the journey the agent follows.
+        stage_id: Id of the stage the agent targets.
     """
 
     position: tuple[float, float] = (0.0, 0.0)
@@ -216,7 +216,7 @@ class GeneralizedCentrifugalForceModelState:
 
     @property
     def a_v(self) -> float:
-        """Stretch of the elipsis semi-axis along the movement vector."""
+        """Stretch of the ellipsis semi-axis along the movement vector."""
         return self._obj.a_v
 
     @a_v.setter
