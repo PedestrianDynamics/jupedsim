@@ -26,11 +26,14 @@ What is JuPedSim
 *JuPedSim* is a Python package with a C++ core to simulate pedestrian dynamics.
 This project originally started in 2010 as a C++ based CLI application. However
 looking at how this application was used and abused we decided to rewrite
-*JuPedSim* as a Python package. See: :ref:`_history`
+*JuPedSim* as a Python package.
 
 .. note::
    If you find references to versions < 0.10 you need to be aware that they
    refer to the old CLI application.
+
+If you are interested to learn about the history of this project, see
+:ref:`_history`
 
 Where to get it
 ===============
