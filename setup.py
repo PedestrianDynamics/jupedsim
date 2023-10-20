@@ -25,7 +25,7 @@ with open("CMakeLists.txt", "r", encoding="utf-8") as cmakelist:
     end_index = version_line.find("LANGUAGES")
     version = version_line[start_index:end_index].strip()
 
-with open("README.md", "r", encoding="utf-8") as fh:
+with open("pypi-readme.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
