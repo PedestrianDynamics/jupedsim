@@ -102,7 +102,6 @@ class Simulation:
                 max_geometry_repulsion_force=model.max_geometry_repulsion_force,
             )
             py_jps_model = model_builder.build()
-            pass
         else:
             raise Exception("Unknown model type supplied")
         self._writer = trajectory_writer
