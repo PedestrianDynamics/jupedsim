@@ -15,7 +15,7 @@ RUN dnf upgrade && \
 
 COPY requirements.txt /opt/
 
-RUN /opt/python/cp310-cp310/bin/pip install -r /opt/requirements.txt && \
+RUN /opt/python/cp312-cp312/bin/pip install -r /opt/requirements.txt && \
     /opt/python/cp311-cp311/bin/pip install -r /opt/requirements.txt && \
     pipx install isort==5.12.0 --python python3.11 && \
     pipx install black==23.7.0 --python python3.11 
