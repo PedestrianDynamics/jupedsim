@@ -4,11 +4,13 @@ on:
   push:
     branches:
       - master
+      - rls-*
     tags:
       - '**'
   pull_request:
     branches:
       - master
+      - rls-*
 
 jobs:
   docs:
