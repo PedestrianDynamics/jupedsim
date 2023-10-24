@@ -46,7 +46,7 @@ It is easiest to install directly with pip from
     pip install jupedsim
 
 
-For information how to build *JuPedSim* from source, visit our `GitHub repository <https://github.com/PedestrianDynamics/jupedsim/)>`_.
+For information how to build *JuPedSim* from source, visit our `GitHub repository <https://github.com/PedestrianDynamics/jupedsim/>`_.
 
 Main features
 =============
