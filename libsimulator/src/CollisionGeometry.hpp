@@ -86,7 +86,7 @@ template <>
 struct std::hash<Cell> {
     std::size_t operator()(const Point& pos) const noexcept
     {
-        std::hash<std::int32_t> hasher{};
+        std::hash<double> hasher{};
         return jps::hash_combine(hasher(pos.x), hasher(pos.y));
     }
 };
