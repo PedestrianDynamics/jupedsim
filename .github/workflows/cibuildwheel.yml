@@ -176,7 +176,7 @@ jobs:
     env:
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
       CIBW_SKIP: "*musllinux*"
-      MACOSX_DEPLOYMENT_TARGET: "13"
+      MACOSX_DEPLOYMENT_TARGET: "12"
     strategy:
       matrix:
         include:
