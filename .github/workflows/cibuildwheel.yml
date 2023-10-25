@@ -229,10 +229,12 @@ jobs:
       id-token: write
     steps:
       # retrieve your distributions here
-      - name: Download paackages
+      - name: Download packages
         uses: actions/Download-artifact@v3
         with:
           name: python-packages
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: python-packages
