@@ -51,99 +51,99 @@ jobs:
         CC: ${{ matrix.toolchain.cc }}
         CXX: ${{ matrix.toolchain.cxx }}
       run: ./scripts/ci/gh_build_linux.sh
-  docs:
-    name: Documentation
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+        # docs:
+        #   name: Documentation
+        #   runs-on: ubuntu-latest
+        #   steps:
+        #   - name: Checkout
+        #     uses: actions/checkout@v4
 
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.11"
+        #   - name: Set up Python 3.11
+        #     uses: actions/setup-python@v4
+        #     with:
+        #       python-version: "3.11"
 
-    - name: Install jupedsim
-      run: |
-        python3 -m pip install .
+        #   - name: Install jupedsim
+        #     run: |
+        #       python3 -m pip install .
 
-    - name: Build Documentation
-      run: |
-        python3 -m pip install -r docs/requirements.txt
-        sphinx-build -T -E -d doctree -b html docs/source docs/build -j $(nproc)
+        #   - name: Build Documentation
+        #     run: |
+        #       python3 -m pip install -r docs/requirements.txt
+        #       sphinx-build -T -E -d doctree -b html docs/source docs/build -j $(nproc)
 
-    - name: Determine directory to publish docs to
-      id: docs-publish-dir
-      uses: jannekem/run-python-script-action@v1
-      with:
-        script: |
-          import os, re
-          github_ref = os.environ.get('GITHUB_REF')
-          m = re.match(r'^refs/tags/v([0-9]+\.[0-9]+\.[0-9]+(-dev\.[0-9]+)?)$',
-                       github_ref)
-          if m:
-              target = "${{ github.ref_name }}"
-          else:
-              target = ''
-          set_output('target', target)
+        #   - name: Determine directory to publish docs to
+        #     id: docs-publish-dir
+        #     uses: jannekem/run-python-script-action@v1
+        #     with:
+        #       script: |
+        #         import os, re
+        #         github_ref = os.environ.get('GITHUB_REF')
+        #         m = re.match(r'^refs/tags/v([0-9]+\.[0-9]+\.[0-9]+(-dev\.[0-9]+)?)$',
+        #                      github_ref)
+        #         if m:
+        #             target = "${{ github.ref_name }}"
+        #         else:
+        #             target = ''
+        #         set_output('target', target)
 
-    - name: Publish docs to GitHub pages
-      if: steps.docs-publish-dir.outputs.target != ''
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: docs/build
-        destination_dir: ${{ steps.docs-publish-dir.outputs.target }}
-        keep_files: false
+        #   - name: Publish docs to GitHub pages
+        #     if: steps.docs-publish-dir.outputs.target != ''
+        #     uses: peaceiris/actions-gh-pages@v3
+        #     with:
+        #       github_token: ${{ secrets.GITHUB_TOKEN }}
+        #       publish_dir: docs/build
+        #       destination_dir: ${{ steps.docs-publish-dir.outputs.target }}
+        #       keep_files: false
 
-    - name: Upload documentation as artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: pages
-        path: docs/build/
+        #   - name: Upload documentation as artifacts
+        #     uses: actions/upload-artifact@v3
+        #     with:
+        #       name: pages
+        #       path: docs/build/
 
-    outputs:
-      docs-target: ${{ steps.docs-publish-dir.outputs.target }}
-  docs-publish:
-    name: Publish docs versions JSON
-    needs: docs
-    if: needs.docs.outputs.docs-target != ''
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        ref: gh-pages
-    - name: Write versions to JSON file
-      uses: jannekem/run-python-script-action@v1
-      with:
-        script: |
-          import json
-          from pathlib import Path
-          from packaging.version import Version
+        #   outputs:
+        #     docs-target: ${{ steps.docs-publish-dir.outputs.target }}
+        # docs-publish:
+        #   name: Publish docs versions JSON
+        #   needs: docs
+        #   if: needs.docs.outputs.docs-target != ''
+        #   runs-on: ubuntu-latest
+        #   steps:
+        #   - uses: actions/checkout@v4
+        #     with:
+        #       ref: gh-pages
+        #   - name: Write versions to JSON file
+        #     uses: jannekem/run-python-script-action@v1
+        #     with:
+        #       script: |
+        #         import json
+        #         from pathlib import Path
+        #         from packaging.version import Version
 
-          prefix = "https://www.jupedsim.org/"
-          cwd = Path.cwd()
-          versions = [item.name[1:] for item in cwd.iterdir() if item.is_dir() and not item.name.startswith('.') and item.name.startswith("v")]
-          versions.sort(key=Version, reverse=True)
-          versions = ["v" + v for v in versions]
-          versions.insert(0, "stable")
+        #         prefix = "https://www.jupedsim.org/"
+        #         cwd = Path.cwd()
+        #         versions = [item.name[1:] for item in cwd.iterdir() if item.is_dir() and not item.name.startswith('.') and item.name.startswith("v")]
+        #         versions.sort(key=Version, reverse=True)
+        #         versions = ["v" + v for v in versions]
+        #         versions.insert(0, "stable")
 
-          versions_url = [dict(name=version, version=version, url=f"{prefix}{version}/")
-                          for version in versions]
-          target_file = Path('versions.json')
-          with target_file.open('w') as f:
-              json.dump(versions_url, f)
+        #         versions_url = [dict(name=version, version=version, url=f"{prefix}{version}/")
+        #                         for version in versions]
+        #         target_file = Path('versions.json')
+        #         with target_file.open('w') as f:
+        #             json.dump(versions_url, f)
 
-    - name: Redirect stable to new release
-      run: |
-        rm -rf stable
-        ln -s ${{needs.docs.outputs.docs-target}} stable
+        #   - name: Redirect stable to new release
+        #     run: |
+        #       rm -rf stable
+        #       ln -s ${{needs.docs.outputs.docs-target}} stable
 
-    - name: Update files in gh-pages branch
-      uses: stefanzweifel/git-auto-commit-action@v4
-      with:
-        branch: gh-pages
-        commit_message: Update versions and stable
+        #   - name: Update files in gh-pages branch
+        #     uses: stefanzweifel/git-auto-commit-action@v4
+        #     with:
+        #       branch: gh-pages
+        #       commit_message: Update versions and stable
   build_sdist:
     name: Build sdist
     runs-on: ubuntu-latest
@@ -169,56 +169,56 @@ jobs:
           name: python-packages
           path: dist/jupedsim-*.tar.gz
           if-no-files-found: error
-  build_wheels:
-    name: Build wheels on ${{ matrix.os }} for ${{ matrix.cibw_archs }}
-    runs-on: ${{ matrix.os }}
-    env:
-      CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
-      CIBW_SKIP: "*musllinux*"
-      MACOSX_DEPLOYMENT_TARGET: 10.16
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            cibw_archs: "x86_64"
-            cibw_build: "cp310-*"
-          - os: ubuntu-latest
-            cibw_archs: "x86_64"
-            cibw_build: "cp311-*"
-          - os: windows-latest
-            cibw_archs: "auto64"
-            cibw_build: "cp310-*"
-          - os: windows-latest
-            cibw_archs: "auto64"
-            cibw_build: "cp311-*"
-          - os: macos-latest
-            cibw_archs: "x86_64"
-            cibw_build: "cp310-*"
-          - os: macos-latest
-            cibw_archs: "x86_64"
-            cibw_build: "cp311-*"
-          - os: macos-latest
-            cibw_archs: "arm64"
-            cibw_build: "cp310-*"
-          - os: macos-latest
-            cibw_archs: "arm64"
-            cibw_build: "cp311-*"
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build wheels for CPython ${{ matrix.cibw_build }} on ${{ matrix.cibw_archs }}
-        uses: pypa/cibuildwheel@v2.16.2
-        env:
-          CIBW_BUILD: ${{ matrix.cibw_build }}
-          CIBW_ARCHS: ${{ matrix.cibw_archs }}
+            # build_wheels:
+            #   name: Build wheels on ${{ matrix.os }} for ${{ matrix.cibw_archs }}
+            #   runs-on: ${{ matrix.os }}
+            #   env:
+            #     CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+            #     CIBW_SKIP: "*musllinux*"
+            #     MACOSX_DEPLOYMENT_TARGET: 10.16
+            #   strategy:
+            #     matrix:
+            #       include:
+            #         - os: ubuntu-latest
+            #           cibw_archs: "x86_64"
+            #           cibw_build: "cp310-*"
+            #         - os: ubuntu-latest
+            #           cibw_archs: "x86_64"
+            #           cibw_build: "cp311-*"
+            #         - os: windows-latest
+            #           cibw_archs: "auto64"
+            #           cibw_build: "cp310-*"
+            #         - os: windows-latest
+            #           cibw_archs: "auto64"
+            #           cibw_build: "cp311-*"
+            #         - os: macos-latest
+            #           cibw_archs: "x86_64"
+            #           cibw_build: "cp310-*"
+            #         - os: macos-latest
+            #           cibw_archs: "x86_64"
+            #           cibw_build: "cp311-*"
+            #         - os: macos-latest
+            #           cibw_archs: "arm64"
+            #           cibw_build: "cp310-*"
+            #         - os: macos-latest
+            #           cibw_archs: "arm64"
+            #           cibw_build: "cp311-*"
+            #   steps:
+            #     - uses: actions/checkout@v4
+            #     - name: Build wheels for CPython ${{ matrix.cibw_build }} on ${{ matrix.cibw_archs }}
+            #       uses: pypa/cibuildwheel@v2.16.2
+            #       env:
+            #         CIBW_BUILD: ${{ matrix.cibw_build }}
+            #         CIBW_ARCHS: ${{ matrix.cibw_archs }}
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: python-packages
-          path: ./wheelhouse/*.whl
-          if-no-files-found: error
+            #     - uses: actions/upload-artifact@v3
+            #       with:
+            #         name: python-packages
+            #         path: ./wheelhouse/*.whl
+            #         if-no-files-found: error
   pypi-publish:
-    needs: [build_wheels, build_sdist]
-    if: ${{ github.event_name == 'release' && github.event.action == 'released' }}
+    needs: [build_sdist]
+    # if: ${{ github.event_name == 'release' && github.event.action == 'released' }}
     name: Publish to PyPI
     runs-on: ubuntu-latest
     environment: release
@@ -230,8 +230,12 @@ jobs:
         uses: actions/Download-artifact@v3
         with:
           name: python-packages
+      - name: wtf
+        run: |
+          ls -R
+          ls python-packages
 
-      - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: python-packages
+          #@ - name: Publish package distributions to PyPI
+          #@   uses: pypa/gh-action-pypi-publish@release/v1
+          #@   with:
+          #@     packages-dir: python-packages/
