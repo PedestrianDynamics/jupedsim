@@ -1,4 +1,0 @@
-/*!
-\example Alpha_wrap_3/triangle_mesh_wrap.cpp
-\example Alpha_wrap_3/point_set_wrap.cpp
-*/
