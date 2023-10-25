@@ -232,7 +232,7 @@ jobs:
           name: python-packages
       - name: wtf
         run: |
-          ls -R
+          tar xf python-packages.tar.gz
           ls python-packages
 
           #@ - name: Publish package distributions to PyPI
