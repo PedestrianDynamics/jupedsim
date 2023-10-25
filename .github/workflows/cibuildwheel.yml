@@ -12,9 +12,6 @@ on:
       - master
       - rls-*
 
-permissions:
-  contents: read
-
 jobs:
   checks:
     name: Check Format
