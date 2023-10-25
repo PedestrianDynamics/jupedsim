@@ -83,3 +83,30 @@ TEST(LineSegment, ItersectsWithOneEndpointTouchingInTheMiddle)
     const LineSegment l2{{1, -1}, {0, 0}};
     ASSERT_TRUE(intersects(l1, l2));
 }
+
+TEST(LineSegment, OperatorLTCaseA)
+{
+    const LineSegment a{{0, 0}, {1, 1}};
+    const LineSegment b{{1, 1}, {0, 0}};
+    ASSERT_TRUE(a < b);
+    ASSERT_FALSE(b < a);
+    ASSERT_FALSE(a < a);
+}
+
+TEST(LineSegment, OperatorLTCaseB)
+{
+    const LineSegment a{{0, 0}, {2, 2}};
+    const LineSegment b{{1, 1}, {2, 2}};
+    ASSERT_TRUE(a < b);
+    ASSERT_FALSE(b < a);
+    ASSERT_FALSE(a < a);
+}
+
+TEST(LineSegment, OperatorLTCaseC)
+{
+    const LineSegment a{{0, 0}, {1, 1}};
+    const LineSegment b{{0, 0}, {2, 2}};
+    ASSERT_TRUE(a < b);
+    ASSERT_FALSE(b < a);
+    ASSERT_FALSE(a < a);
+}
