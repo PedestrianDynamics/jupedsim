@@ -1,3 +1,0 @@
-#!/bin/sh
-
-exec ${Python3_EXECUTABLE} ${CMAKE_BINARY_DIR}/pkglist_filter.py "$1"
