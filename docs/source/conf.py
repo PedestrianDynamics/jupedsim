@@ -132,8 +132,8 @@ html_theme_options = {
         },
         {
             "name": "DOI",
-            "url": "https://doi.org/10.5281/zenodo.6470814",
-            "icon": "https://zenodo.org/badge/DOI/10.5281/zenodo.6470814.svg",
+            "url": "https://doi.org/10.5281/zenodo.1293771",
+            "icon": "https://zenodo.org/badge/DOI/10.5281/zenodo.1293771.svg",
             "type": "url",
         },
     ],

@@ -4,7 +4,7 @@
 
 -----------------
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6144559.svg)](https://doi.org/10.5281/zenodo.6144559)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1293771.svg)](https://doi.org/10.5281/zenodo.1293771)
 [![GitHub license](https://img.shields.io/badge/license-LGPL-blue.svg)](https://raw.githubusercontent.com/PedestrianDynamics/jupedsim/master/LICENSE)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/jupedsim)
 ![PyPI - Version](https://img.shields.io/pypi/v/jupedsim)
