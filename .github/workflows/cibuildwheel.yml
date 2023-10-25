@@ -176,7 +176,7 @@ jobs:
     env:
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
       CIBW_SKIP: "*musllinux*"
-      MACOSX_DEPLOYMENT_TARGET: "13"
+      MACOSX_DEPLOYMENT_TARGET: 10.16
     strategy:
       matrix:
         include:
@@ -192,16 +192,16 @@ jobs:
           - os: windows-latest
             cibw_archs: "auto64"
             cibw_build: "cp311-*"
-          - os: macos-13
+          - os: macos-latest
             cibw_archs: "x86_64"
             cibw_build: "cp310-*"
-          - os: macos-13
+          - os: macos-latest
             cibw_archs: "x86_64"
             cibw_build: "cp311-*"
-          - os: macos-13
+          - os: macos-latest
             cibw_archs: "arm64"
             cibw_build: "cp310-*"
-          - os: macos-13
+          - os: macos-latest
             cibw_archs: "arm64"
             cibw_build: "cp311-*"
     steps:
