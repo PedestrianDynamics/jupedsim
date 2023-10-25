@@ -31,7 +31,11 @@ bool LineSegment::operator!=(const LineSegment& other) const
 
 bool LineSegment::operator<(const LineSegment& other) const
 {
-    return p1 < other.p1 || p2 < other.p2;
+    if(p1 < other.p1)
+        return true;
+    if((p1 == other.p1) && (p2 < other.p2))
+        return true;
+    return false;
 }
 
 Point LineSegment::NormalVec() const

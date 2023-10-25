@@ -149,12 +149,12 @@ const Point Point::operator-(const Point& p) const
 
 bool Point::operator==(const Point& p) const
 {
-    return (fabs(x - p.x) < J_EPS && fabs(y - p.y) < J_EPS);
+    return x == p.x && y == p.y;
 }
 
 bool Point::operator!=(const Point& p) const
 {
-    return (fabs(x - p.x) > J_EPS || fabs(y - p.y) > J_EPS);
+    return !(*this == p);
 }
 
 const Point operator*(const Point& p, double f)
@@ -183,8 +183,6 @@ const Point operator/(const Point& p, double f)
 
 bool Point::operator<(const Point& rhs) const
 {
-    if(*this != *this || rhs != rhs)
-        return false;
     if(x < rhs.x)
         return true;
     else if((x == rhs.x) && (y < rhs.y))
