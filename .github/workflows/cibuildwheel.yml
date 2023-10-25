@@ -230,8 +230,8 @@ jobs:
         uses: actions/Download-artifact@v3
         with:
           name: python-packages
+          path: dist
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: python-packages
+
