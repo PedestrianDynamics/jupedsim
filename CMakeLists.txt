@@ -84,8 +84,8 @@ list(APPEND COMMON_COMPILE_OPTIONS
 # Dependencies
 ################################################################################
 set(FMT_INSTALL OFF)
-add_subdirectory(third-party/fmt-10.0.0)
-set_target_properties(fmt PROPERTIES 
+add_subdirectory(third-party/fmt-10.1.1)
+set_target_properties(fmt PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     SYSTEM ON
 )
