@@ -1,6 +1,8 @@
 name: Build CI wheels
 
 on:
+  release:
+    types: [released]
   push:
     branches:
       - master
