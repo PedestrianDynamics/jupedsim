@@ -1,4 +1,4 @@
-include README.md LICENSE CMakeLists.txt
+include README.md pypi-readme.md LICENSE CMakeLists.txt
 graft cmake_modules
 graft cmake_templates
 graft libcommon
