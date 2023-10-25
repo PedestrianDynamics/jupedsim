@@ -107,7 +107,7 @@ find_package(CGAL 5.5
     CONFIG
     NO_DEFAULT_PATH
     PATHS
-        ${CMAKE_SOURCE_DIR}/third-party/cgal-5.5.2
+        ${CMAKE_SOURCE_DIR}/third-party/cgal-5.6.0
 )
 
 add_subdirectory(third-party/poly2tri)

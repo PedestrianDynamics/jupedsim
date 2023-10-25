@@ -1,1 +1,0 @@
-The 3D Alpha Wrapping package is a generic meshing algorithm to create valid and input-enclosing meshes.
