@@ -34,7 +34,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        toolchain: [ {cc: clang, cxx: clang++}, {cc: gcc, cxx: g++} ]
+        # Disabled clang build until this is fixed: https://github.com/actions/runner-images/issues/8659
+        # toolchain: [ {cc: clang, cxx: clang++}, {cc: gcc, cxx: g++} ]
+        toolchain: [ {cc: gcc, cxx: g++} ]
     steps:
     - name: Checkout
       uses: actions/checkout@v4
