@@ -1,7 +1,7 @@
 ################################################################################
 # Project setup
 ################################################################################
-cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 project(JuPedSim VERSION 1.1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -83,50 +83,8 @@ list(APPEND COMMON_COMPILE_OPTIONS
 ################################################################################
 # Dependencies
 ################################################################################
-set(FMT_INSTALL OFF)
-add_subdirectory(third-party/fmt-10.1.1)
-set_target_properties(fmt PROPERTIES
-    POSITION_INDEPENDENT_CODE ON
-    SYSTEM ON
-)
-find_package(Boost 1.82
-    REQUIRED
-    CONFIG
-    NO_DEFAULT_PATH
-    PATHS
-        ${CMAKE_SOURCE_DIR}/third-party/boost-1.82.0
-)
-find_package(Threads REQUIRED)
-# Silence CGAL CMake warning. No example data for CGAL will be loaded anyways
-set(CGAL_DATA_DIR "none")
-set(WITH_CGAL_ImageIO OFF)
-set(WITH_CGAL_Qt5 OFF)
-set(CGAL_DISABLE_GMP ON)
-find_package(CGAL 5.5
-    REQUIRED
-    CONFIG
-    NO_DEFAULT_PATH
-    PATHS
-        ${CMAKE_SOURCE_DIR}/third-party/cgal-5.6.0
-)
+add_subdirectory(third-party)
 
-add_subdirectory(third-party/poly2tri)
-
-set(Python_FIND_VIRTUALENV "FIRST")
-find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
-add_subdirectory(third-party/pybind11-2.11.1)
-
-if(BUILD_TESTS)
-    add_subdirectory(third-party/googletest-1.13.0)
-endif()
-
-if (BUILD_BENCHMARKS)
-    set(BENCHMARK_ENABLE_TESTING OFF)
-    set(BENCHMARK_ENABLE_INSTALL OFF)
-    set(BENCHMARK_ENABLE_WERROR OFF)
-    set(BENCHMARK_INSTALL_DOCS OFF)
-    add_subdirectory(third-party/benchmark-1.8.2)
-endif ()
 ################################################################################
 # VCS info
 ################################################################################
