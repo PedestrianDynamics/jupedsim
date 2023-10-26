@@ -51,7 +51,7 @@ Point Polygon::Centroid() const
     std::for_each(_polygon.begin(), _polygon.end(), [&sum](const auto& p) {
         sum += Point(CGAL::to_double(p.x()), CGAL::to_double(p.y()));
     });
-    return sum / _polygon.size();
+    return sum / static_cast<double>(_polygon.size());
 }
 
 std::tuple<Point, double> Polygon::ContainingCircle() const
