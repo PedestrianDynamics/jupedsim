@@ -7,11 +7,11 @@ JuPedSim
    :hidden:
 
    Getting started <notebooks/getting_started>
-   API reference <api/jupedsim/index>
    Concepts <concepts/index>
    Notebooks <notebooks/index>
    History <history>
    Disclaimer <disclaimer>
+   API reference <api/jupedsim/index>
 
 
 **Useful links**:
@@ -33,7 +33,7 @@ looking at how this application was used and abused we decided to rewrite
    refer to the old CLI application.
 
 If you are interested to learn about the history of this project, see
-:ref:`_history`
+:ref:`here <history>`.
 
 Where to get it
 ===============
