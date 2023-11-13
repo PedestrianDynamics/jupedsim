@@ -110,7 +110,7 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
     const auto v0 = model.v0;
     constexpr double v0Min = 0.;
     constexpr double v0Max = 10.;
-    validateConstraint(v0, v0Min, v0Max, "v0", true);
+    validateConstraint(v0, v0Min, v0Max, "v0");
 
     const auto Av = model.Av;
     constexpr double AvMin = 0.;

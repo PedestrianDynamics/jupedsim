@@ -49,9 +49,9 @@ void validateConstraint(
     T valueMin,
     T valueMax,
     const std::string& name,
-    bool includeMin = false)
+    bool excludeMin = false)
 {
-    if(includeMin) {
+    if(excludeMin) {
         if(value <= valueMin || value > valueMax) {
             throw SimulationError(
                 "Model constraint violation: {} {} not in allowed range, "

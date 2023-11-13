@@ -125,7 +125,7 @@ void CollisionFreeSpeedModel::CheckModelConstraint(
     const auto v0 = model.v0;
     constexpr double v0Min = 0.;
     constexpr double v0Max = 10.;
-    validateConstraint(v0, v0Min, v0Max, "v0", true);
+    validateConstraint(v0, v0Min, v0Max, "v0");
 
     const auto timeGap = model.timeGap;
     constexpr double timeGapMin = 0.1;
@@ -146,7 +146,7 @@ void CollisionFreeSpeedModel::CheckModelConstraint(
         }
     }
 
-    const auto lineSegments = geometry.LineSegmentsInDistanceTo(r / 2., agent.pos);
+    const auto lineSegments = geometry.LineSegmentsInDistanceTo(r, agent.pos);
     if(std::begin(lineSegments) != std::end(lineSegments)) {
         throw SimulationError(
             "Model constraint violation: Agent {} too close to geometry boundaries, distance "

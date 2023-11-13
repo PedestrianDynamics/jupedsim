@@ -1,51 +1,73 @@
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
+import logging
+
+import numpy as np
 import pytest
 
 import jupedsim as jps
 
 
-def test_collision_free_speed_model_constraints():
-    messages = []
-
-    def log_msg_handler(msg):
-        messages.append(msg)
-
-    jps.set_info_callback(log_msg_handler)
-    jps.set_warning_callback(log_msg_handler)
-    jps.set_error_callback(log_msg_handler)
-
+@pytest.fixture
+def square_room_100x100():
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
-        geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
+        geometry=[(-50, -50), (50, -50), (50, 50), (-50, 50)],
     )
 
-    exit_id = simulation.add_exit_stage(
-        [(99, 45), (99, 55), (100, 55), (100, 45)]
-    )
+    exit_id = simulation.add_exit_stage([(49, -3), (49, 3), (50, 3), (50, -3)])
 
     journey = jps.JourneyDescription([exit_id])
     journey_id = simulation.add_journey(journey)
+    agent_position = (0, 0)
 
-    agent_position = (50, 50)
+    return simulation, journey_id, exit_id, agent_position
 
-    # Radius
-    with pytest.raises(
-        RuntimeError, match=r"Model constraint violation: radius 0 .*"
-    ):
-        assert simulation.add_agent(
-            jps.CollisionFreeSpeedModelAgentParameters(
-                position=agent_position,
-                journey_id=journey_id,
-                stage_id=exit_id,
-                radius=0,
-            )
+
+@pytest.fixture
+def square_room_100x100_gcfm():
+    simulation = jps.Simulation(
+        model=jps.GeneralizedCentrifugalForceModel(),
+        geometry=[(-50, -50), (50, -50), (50, 50), (-50, 50)],
+    )
+
+    exit_id = simulation.add_exit_stage([(49, -3), (49, 3), (50, 3), (50, -3)])
+
+    journey = jps.JourneyDescription([exit_id])
+    journey_id = simulation.add_journey(journey)
+    agent_position = (0, 0)
+
+    return simulation, journey_id, exit_id, agent_position
+
+
+@pytest.mark.parametrize(
+    "radius",
+    np.arange(0.01, 2, 0.5),
+)
+def test_collision_free_speed_model_can_set_radius(
+    square_room_100x100, radius
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100
+
+    simulation.add_agent(
+        jps.CollisionFreeSpeedModelAgentParameters(
+            position=agent_position,
+            journey_id=journey_id,
+            stage_id=exit_id,
+            radius=radius,
         )
+    )
+
+
+def test_collision_free_speed_model_can_not_set_radius_too_small(
+    square_room_100x100,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100
 
     with pytest.raises(
         RuntimeError, match=r"Model constraint violation: radius -1 .*"
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.CollisionFreeSpeedModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
@@ -54,10 +76,34 @@ def test_collision_free_speed_model_constraints():
             )
         )
 
+
+def test_collision_free_speed_model_can_not_set_radius_zero(
+    square_room_100x100,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100
+
+    with pytest.raises(
+        RuntimeError, match=r"Model constraint violation: radius 0 .*"
+    ):
+        simulation.add_agent(
+            jps.CollisionFreeSpeedModelAgentParameters(
+                position=agent_position,
+                journey_id=journey_id,
+                stage_id=exit_id,
+                radius=0,
+            )
+        )
+
+
+def test_collision_free_speed_model_can_not_set_radius_too_large(
+    square_room_100x100,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100
+
     with pytest.raises(
         RuntimeError, match=r"Model constraint violation: radius 2.1 .*"
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.CollisionFreeSpeedModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
@@ -66,23 +112,30 @@ def test_collision_free_speed_model_constraints():
             )
         )
 
-    # v0
-    with pytest.raises(
-        RuntimeError, match=r"Model constraint violation: v0 0 .*"
-    ):
-        assert simulation.add_agent(
-            jps.CollisionFreeSpeedModelAgentParameters(
-                position=agent_position,
-                journey_id=journey_id,
-                stage_id=exit_id,
-                v0=0,
-            )
+
+@pytest.mark.parametrize("v0", np.arange(0.0, 10, 1))
+def test_collision_free_speed_model_can_set_v0(square_room_100x100, v0):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100
+
+    simulation.add_agent(
+        jps.CollisionFreeSpeedModelAgentParameters(
+            position=agent_position,
+            journey_id=journey_id,
+            stage_id=exit_id,
+            v0=v0,
         )
+    )
+
+
+def test_collision_free_speed_model_can_not_set_v0_too_small(
+    square_room_100x100,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100
 
     with pytest.raises(
         RuntimeError, match=r"Model constraint violation: v0 -1 .*"
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.CollisionFreeSpeedModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
@@ -91,10 +144,16 @@ def test_collision_free_speed_model_constraints():
             )
         )
 
+
+def test_collision_free_speed_model_can_not_set_v0_too_large(
+    square_room_100x100,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100
+
     with pytest.raises(
         RuntimeError, match=r"Model constraint violation: v0 10.1 .*"
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.CollisionFreeSpeedModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
@@ -103,23 +162,50 @@ def test_collision_free_speed_model_constraints():
             )
         )
 
-    # time gap
+
+@pytest.mark.parametrize("time_gap", [*np.arange(0.1, 10, 1), 10])
+def test_collision_free_speed_model_can_set_time_gap(
+    square_room_100x100, time_gap
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100
+
+    simulation.add_agent(
+        jps.CollisionFreeSpeedModelAgentParameters(
+            position=agent_position,
+            journey_id=journey_id,
+            stage_id=exit_id,
+            time_gap=time_gap,
+        )
+    )
+
+
+def test_collision_free_speed_model_can_not_set_time_gap_too_small(
+    square_room_100x100,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100
+
     with pytest.raises(
-        RuntimeError, match=r"Model constraint violation: timeGap 0.09 .*"
+        RuntimeError, match=r"Model constraint violation: timeGap -1 .*"
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.CollisionFreeSpeedModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
                 stage_id=exit_id,
-                time_gap=0.09,
+                time_gap=-1,
             )
         )
+
+
+def test_collision_free_speed_model_can_not_set_time_too_large(
+    square_room_100x100,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100
 
     with pytest.raises(
         RuntimeError, match=r"Model constraint violation: timeGap 10.1 .*"
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.CollisionFreeSpeedModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
@@ -128,15 +214,21 @@ def test_collision_free_speed_model_constraints():
             )
         )
 
-    # too close to wall
-    radius = 0.2
+
+@pytest.mark.parametrize("radius", np.arange(0.1, 0.5, 0.1))
+def test_collision_free_speed_model_can_not_add_agent_too_close_to_wall(
+    square_room_100x100,
+    radius,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100
+
     with pytest.raises(
         RuntimeError,
-        match=r"Model constraint violation: Agent (.+) too close to geometry boundaries, distance <= \d+\.?\d*",
+        match=r"Model constraint violation: Agent (.+) too close to geometry boundaries, distance .*",
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.CollisionFreeSpeedModelAgentParameters(
-                position=(0 + 0.5 * radius, 10),
+                position=(50 - (0.99 * radius), 0),
                 journey_id=journey_id,
                 stage_id=exit_id,
                 radius=radius,
@@ -144,49 +236,47 @@ def test_collision_free_speed_model_constraints():
         )
 
 
-def test_generalized_centrifugal_force_constraints():
-    messages = []
+@pytest.mark.parametrize("mass", [*np.arange(1, 100, 20), 100])
+def test_generalized_centrifugal_force_model_can_set_mass(
+    square_room_100x100_gcfm, mass
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
 
-    def log_msg_handler(msg):
-        messages.append(msg)
-
-    jps.set_info_callback(log_msg_handler)
-    jps.set_warning_callback(log_msg_handler)
-    jps.set_error_callback(log_msg_handler)
-
-    simulation = jps.Simulation(
-        model=jps.GeneralizedCentrifugalForceModel(),
-        geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
+    simulation.add_agent(
+        jps.GeneralizedCentrifugalForceModelAgentParameters(
+            position=agent_position,
+            journey_id=journey_id,
+            stage_id=exit_id,
+            mass=mass,
+        )
     )
 
-    exit_id = simulation.add_exit_stage(
-        [(99, 45), (99, 55), (100, 55), (100, 45)]
-    )
 
-    journey = jps.JourneyDescription([exit_id])
-    journey_id = simulation.add_journey(journey)
-
-    agent_position = (50, 50)
-
-    # mass
+def test_generalized_centrifugal_force_model_can_not_set_mass_too_small(
+    square_room_100x100_gcfm,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
     with pytest.raises(
-        RuntimeError,
-        match=r"Model constraint violation: mass [+-]?\d+\.?\d* .+",
+        RuntimeError, match=r"Model constraint violation: mass 0 .*"
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.GeneralizedCentrifugalForceModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
                 stage_id=exit_id,
-                mass=0.99,
+                mass=0,
             )
         )
 
+
+def test_generalized_centrifugal_force_model_can_not_set_mass_too_large(
+    square_room_100x100_gcfm,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
     with pytest.raises(
-        RuntimeError,
-        match=r"Model constraint violation: mass [+-]?\d+\.?\d* .+",
+        RuntimeError, match=r"Model constraint violation: mass 100.1 .*"
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.GeneralizedCentrifugalForceModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
@@ -195,25 +285,48 @@ def test_generalized_centrifugal_force_constraints():
             )
         )
 
-    # tau
+
+@pytest.mark.parametrize("tau", [*np.arange(0.1, 10, 1), 10])
+def test_generalized_centrifugal_force_model_can_set_tau(
+    square_room_100x100_gcfm, tau
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
+
+    simulation.add_agent(
+        jps.GeneralizedCentrifugalForceModelAgentParameters(
+            position=agent_position,
+            journey_id=journey_id,
+            stage_id=exit_id,
+            tau=tau,
+        )
+    )
+
+
+def test_generalized_centrifugal_force_model_can_not_set_tau_too_small(
+    square_room_100x100_gcfm,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
     with pytest.raises(
-        RuntimeError,
-        match=r"Model constraint violation: tau [+-]?\d+\.?\d* .+",
+        RuntimeError, match=r"Model constraint violation: tau 0 .*"
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.GeneralizedCentrifugalForceModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
                 stage_id=exit_id,
-                tau=0.09,
+                tau=0,
             )
         )
 
+
+def test_generalized_centrifugal_force_model_can_not_set_tau_too_large(
+    square_room_100x100_gcfm,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
     with pytest.raises(
-        RuntimeError,
-        match=r"Model constraint violation: tau [+-]?\d+\.?\d* .+",
+        RuntimeError, match=r"Model constraint violation: tau 10.1 .*"
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.GeneralizedCentrifugalForceModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
@@ -222,35 +335,48 @@ def test_generalized_centrifugal_force_constraints():
             )
         )
 
-    # v0
+
+@pytest.mark.parametrize("v0", [*np.arange(0, 10, 1), 10])
+def test_generalized_centrifugal_force_model_can_set_v0(
+    square_room_100x100_gcfm, v0
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
+
+    simulation.add_agent(
+        jps.GeneralizedCentrifugalForceModelAgentParameters(
+            position=agent_position,
+            journey_id=journey_id,
+            stage_id=exit_id,
+            v0=v0,
+        )
+    )
+
+
+def test_generalized_centrifugal_force_model_can_not_set_v0_too_small(
+    square_room_100x100_gcfm,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
     with pytest.raises(
-        RuntimeError, match=r"Model constraint violation: v0 [+-]?\d+\.?\d* .+"
+        RuntimeError, match=r"Model constraint violation: v0 -0.1 .*"
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.GeneralizedCentrifugalForceModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
                 stage_id=exit_id,
-                v0=0,
+                v0=-0.1,
             )
         )
 
-    with pytest.raises(
-        RuntimeError, match=r"Model constraint violation: v0 [+-]?\d+\.?\d* .+"
-    ):
-        assert simulation.add_agent(
-            jps.GeneralizedCentrifugalForceModelAgentParameters(
-                position=agent_position,
-                journey_id=journey_id,
-                stage_id=exit_id,
-                v0=-1,
-            )
-        )
 
+def test_generalized_centrifugal_force_model_can_not_set_v0_too_large(
+    square_room_100x100_gcfm,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
     with pytest.raises(
-        RuntimeError, match=r"Model constraint violation: v0 [+-]?\d+\.?\d* .+"
+        RuntimeError, match=r"Model constraint violation: v0 10.1 .*"
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.GeneralizedCentrifugalForceModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
@@ -259,23 +385,48 @@ def test_generalized_centrifugal_force_constraints():
             )
         )
 
-    # Av
+
+@pytest.mark.parametrize("a_v", [*np.arange(0.1, 10, 1), 10])
+def test_generalized_centrifugal_force_model_can_set_a_v(
+    square_room_100x100_gcfm, a_v
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
+
+    simulation.add_agent(
+        jps.GeneralizedCentrifugalForceModelAgentParameters(
+            position=agent_position,
+            journey_id=journey_id,
+            stage_id=exit_id,
+            a_v=a_v,
+        )
+    )
+
+
+def test_generalized_centrifugal_force_model_can_not_set_a_v_too_small(
+    square_room_100x100_gcfm,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
     with pytest.raises(
-        RuntimeError, match=r"Model constraint violation: Av [+-]?\d+\.?\d* .+"
+        RuntimeError, match=r"Model constraint violation: Av -0.1 .*"
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.GeneralizedCentrifugalForceModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
                 stage_id=exit_id,
-                a_v=-0.001,
+                a_v=-0.1,
             )
         )
 
+
+def test_generalized_centrifugal_force_model_can_not_set_a_v_too_large(
+    square_room_100x100_gcfm,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
     with pytest.raises(
-        RuntimeError, match=r"Model constraint violation: Av [+-]?\d+\.?\d* .+"
+        RuntimeError, match=r"Model constraint violation: Av 10.1 .*"
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.GeneralizedCentrifugalForceModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
@@ -284,12 +435,31 @@ def test_generalized_centrifugal_force_constraints():
             )
         )
 
-    # AMin
+
+@pytest.mark.parametrize("a_min", [*np.arange(0.1, 1, 0.1), 1])
+def test_generalized_centrifugal_force_model_can_set_a_min(
+    square_room_100x100_gcfm, a_min
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
+
+    simulation.add_agent(
+        jps.GeneralizedCentrifugalForceModelAgentParameters(
+            position=agent_position,
+            journey_id=journey_id,
+            stage_id=exit_id,
+            a_min=a_min,
+        )
+    )
+
+
+def test_generalized_centrifugal_force_model_can_not_set_a_min_too_small(
+    square_room_100x100_gcfm,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
     with pytest.raises(
-        RuntimeError,
-        match=r"Model constraint violation: AMin [+-]?\d+\.?\d* .+",
+        RuntimeError, match=r"Model constraint violation: AMin 0.099 .*"
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.GeneralizedCentrifugalForceModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
@@ -298,11 +468,15 @@ def test_generalized_centrifugal_force_constraints():
             )
         )
 
+
+def test_generalized_centrifugal_force_model_can_not_set_a_min_too_large(
+    square_room_100x100_gcfm,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
     with pytest.raises(
-        RuntimeError,
-        match=r"Model constraint violation: AMin [+-]?\d+\.?\d* .+",
+        RuntimeError, match=r"Model constraint violation: AMin 1.1 .*"
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.GeneralizedCentrifugalForceModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
@@ -311,12 +485,32 @@ def test_generalized_centrifugal_force_constraints():
             )
         )
 
-    # BMin
+
+@pytest.mark.parametrize("b_min", [*np.arange(0.1, 1, 0.1), 1])
+def test_generalized_centrifugal_force_model_can_set_b_min(
+    square_room_100x100_gcfm, b_min
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
+
+    simulation.add_agent(
+        jps.GeneralizedCentrifugalForceModelAgentParameters(
+            position=agent_position,
+            journey_id=journey_id,
+            stage_id=exit_id,
+            b_min=b_min,
+            b_max=b_min,
+        )
+    )
+
+
+def test_generalized_centrifugal_force_model_can_not_set_b_min_too_small(
+    square_room_100x100_gcfm,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
     with pytest.raises(
-        RuntimeError,
-        match=r"Model constraint violation: BMin [+-]?\d+\.?\d* .+",
+        RuntimeError, match=r"Model constraint violation: BMin 0.099 .*"
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.GeneralizedCentrifugalForceModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
@@ -325,11 +519,15 @@ def test_generalized_centrifugal_force_constraints():
             )
         )
 
+
+def test_generalized_centrifugal_force_model_can_not_set_b_min_too_large(
+    square_room_100x100_gcfm,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
     with pytest.raises(
-        RuntimeError,
-        match=r"Model constraint violation: BMin [+-]?\d+\.?\d* .+",
+        RuntimeError, match=r"Model constraint violation: BMin 1.1 .*"
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.GeneralizedCentrifugalForceModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
@@ -338,46 +536,74 @@ def test_generalized_centrifugal_force_constraints():
             )
         )
 
-    # BMax
-    with pytest.raises(
-        RuntimeError,
-        match=r"Model constraint violation: BMax [+-]?\d+\.?\d* .+",
-    ):
-        b_min = 0.3
 
+@pytest.mark.parametrize("b_max", [*np.arange(0.2, 2, 0.3), 2])
+def test_generalized_centrifugal_force_model_can_set_b_max(
+    square_room_100x100_gcfm, b_max
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
+
+    simulation.add_agent(
+        jps.GeneralizedCentrifugalForceModelAgentParameters(
+            position=agent_position,
+            journey_id=journey_id,
+            stage_id=exit_id,
+            b_max=b_max,
+        )
+    )
+
+
+def test_generalized_centrifugal_force_model_can_not_set_b_max_too_small(
+    square_room_100x100_gcfm,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
+    b_min = 0.4
+    with pytest.raises(
+        RuntimeError, match=r"Model constraint violation: BMax 0.39 .*"
+    ):
         simulation.add_agent(
             jps.GeneralizedCentrifugalForceModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
                 stage_id=exit_id,
-                b_min=b_min,
-                b_max=b_min - 0.001,
+                b_min=0.4,
+                b_max=0.39,
             )
         )
 
+
+def test_generalized_centrifugal_force_model_can_not_set_b_max_too_large(
+    square_room_100x100_gcfm,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
     with pytest.raises(
-        RuntimeError,
-        match=r"Model constraint violation: BMax [+-]?\d+\.?\d* .+",
+        RuntimeError, match=r"Model constraint violation: BMax 2.1 .*"
     ):
         simulation.add_agent(
             jps.GeneralizedCentrifugalForceModelAgentParameters(
                 position=agent_position,
                 journey_id=journey_id,
                 stage_id=exit_id,
-                b_max=2.01,
+                b_max=2.1,
             )
         )
 
-    # too close to wall
+
+@pytest.mark.parametrize("radius", np.arange(0.1, 0.5, 0.1))
+def test_generalized_centrifugal_force_model_can_not_add_agent_too_close_to_wall(
+    square_room_100x100_gcfm,
+    radius,
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
     a_min = 0.3
     b_max = a_min
     with pytest.raises(
         RuntimeError,
         match=r"Model constraint violation: Agent (.+) too close to geometry boundaries, distance <= \d+\.?\d*",
     ):
-        assert simulation.add_agent(
+        simulation.add_agent(
             jps.GeneralizedCentrifugalForceModelAgentParameters(
-                position=(0 + 0.5 * a_min, 10),
+                position=(-50 + 0.5 * a_min, 10),
                 journey_id=journey_id,
                 stage_id=exit_id,
                 a_min=a_min,
