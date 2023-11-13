@@ -205,8 +205,8 @@ bool CollisionGeometry::IntersectsAny(const LineSegment& linesegment) const
 
 bool CollisionGeometry::InsideGeometry(Point p) const
 {
-    return CGAL::oriented_side(Kernel::Point_2(p.x, p.y), _accessibleAreaPolygon) ==
-           CGAL::ON_POSITIVE_SIDE;
+    return CGAL::oriented_side(Kernel::Point_2(p.x, p.y), _accessibleAreaPolygon) !=
+           CGAL::ON_NEGATIVE_SIDE;
 }
 
 const std::tuple<std::vector<Point>, std::vector<std::vector<Point>>>&

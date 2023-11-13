@@ -8,6 +8,7 @@
 #include "Logger.hpp"
 #include "OperationalModel.hpp"
 #include "Stage.hpp"
+#include "Visitor.hpp"
 #include <memory>
 
 Simulation::Simulation(
@@ -123,6 +124,36 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
 
 BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
 {
+    std::visit(
+        overloaded{
+            [this](const WaypointDescription& d) -> void {
+                if(!this->_geometry->InsideGeometry(d.position)) {
+                    throw SimulationError("WayPoint {} not inside walkable area", d.position);
+                }
+            },
+            [this](const ExitDescription& d) -> void {
+                if(!this->_geometry->InsideGeometry(d.polygon.Centroid())) {
+                    throw SimulationError("Exit {} not inside walkable area", d.polygon.Centroid());
+                }
+            },
+            [this](const NotifiableWaitingSetDescription& d) -> void {
+                for(const auto& point : d.slots) {
+                    if(!this->_geometry->InsideGeometry(point)) {
+                        throw SimulationError(
+                            "NotifiableWaitingSet point {} not inside walkable area", point);
+                    }
+                }
+            },
+            [this](const NotifiableQueueDescription& d) -> void {
+                for(const auto& point : d.slots) {
+                    if(!this->_geometry->InsideGeometry(point)) {
+                        throw SimulationError(
+                            "NotifiableQueue point {} not inside walkable area", point);
+                    }
+                }
+            }},
+        stageDescription);
+
     return _stageManager.AddStage(stageDescription, _removedAgentsInLastIteration);
 }
 
