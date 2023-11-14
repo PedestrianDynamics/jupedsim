@@ -30,32 +30,32 @@ The illustration of such a network can be seen below:
     :alt: A graphical representation of a directed graph.
 
     Graphical representation of the underlying routing network of a more complex simulation.
-    Each circle represents a intermediate stage, and the arrows the corresponding connections.
+    Each circle represents an intermediate stage, while the arrows the corresponding connections.
 
 In the following sections, we will explain how to set-up such routing networks in *JuPedSim*.
 
 Stages
 ------
 
-A stage in *JuPedSim* is an intermediate target the agent wants to reach.
+In *JuPedSim*, a stage refers to an interim target that the agent aims to reach.
 When a stage is reached, the agent will wait for its completion and then continue to the next stage.
 A stage may already count as completed when the stage is reached or when some condition is fulfilled.
-These different kind of stages will be explained below.
+The various types of stages will be explained below.
 
 Waypoint
 ^^^^^^^^
 
-The most fundamental kind of stage is a :class:`Waypoint <jupedsim.stages.WaypointStage>`, it represents a target the agent need to reach.
+The most fundamental kind of stage is a :class:`Waypoint <jupedsim.stages.WaypointStage>`. It represents a target the agent needs to reach.
 For the way finding, the agent always targets the Waypoint directly.
-A Waypoint counts as completed when the agents reach a specified distance from the defined Waypoint.
-The figure belows shows how a Waypoint is used in the simulation, here the center (orange) is the Waypoint and the blue area marks which an agent needs to reach to complete the stage.
+A Waypoint is considered completed once agents arrive within a designated distance from the defined Waypoint.
+The figure below shows how a Waypoint is used in the simulation. Here the center (colored orange) represents the Waypoint, and the surrounding blue area indicates the zone an agent must enter to complete the stage.
 
 .. figure:: /_static/stages/waypoint.svg
     :width: 20%
     :align: center
     :alt: A dot representing the Waypoint, with an circle around it, depicting the area an agent needs to enter to complete the stage.
 
-    Representation of a :class:`Waypoint <jupedsim.stages.WaypointStage>` (orange) with the given distance (orange line).
+    Representation of a :class:`Waypoint <jupedsim.stages.WaypointStage>` (colored orange) with the given distance (orange line).
 
 A Waypoint at :math:`(0.6, -1.4)` with an accepted distance of 2m can be added to the simulation via:
 
@@ -66,8 +66,8 @@ A Waypoint at :math:`(0.6, -1.4)` with an accepted distance of 2m can be added t
 Exit
 ^^^^
 
-An other stage is an :class:`Exit <jupedsim.stages.ExitStage>`, which as the name describe, model exits of the simulation.
-It marks an area, at which agents will be marked for removal from the simulation when they reach it.
+An other stage type is the :class:`Exit <jupedsim.stages.ExitStage>`. As the name suggests, this stage models the exits within the simulation.
+The `ExitStage` designates an area where agents are marked for removal from the simulation upon their arrival.
 The removal itself is done at the beginning of the next iteration step.
 As a target the agents will aim for the center of the exit polygon.
 
@@ -80,7 +80,7 @@ As a target the agents will aim for the center of the exit polygon.
     :align: center
     :alt: A polygon representing the exit area is shown in blue, with the center highlighted in orange.
 
-    Representation of an :class:`Exit <jupedsim.stages.ExitStage>` (blue). The agents will aim for the center (orange).
+    Representation of an :class:`Exit <jupedsim.stages.ExitStage>` (colored blue). The agents will aim for the center (colored orange).
 
 An exit located in the polygon :math:`(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)` can be added to the simulation via:
 
@@ -95,29 +95,29 @@ An exit located in the polygon :math:`(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-
 
 .. warning::
 
-    As the pedestrians currently aim for the center of the exit area, defining wide exits may lead to unexpected behavior.
-    In some case it might be more suitable to define multiple exits instead one wide one.
+    Currently, pedestrians in the simulation are programmed to target the center of the exit area.
+    Therefore, creating wide exits could potentially lead to unpredictable behavior.
+    In certain situations, it may be more appropriate to establish multiple exits rather than a single wide one.
 
 Waiting Queue
 ^^^^^^^^^^^^^
 
 It is not only possible to steer agents with waypoints, it is also possible to let them wait in queues.
 *JuPedSim* offers :class:`Queues <jupedsim.stages.NotifiableQueueStage>` where the agents will wait at predefined positions.
-The provided positions are ordered by their order of definition, and agents will wait on the first empty spot.
+The positions given are arranged according to the sequence in which they are defined, and agents will wait at the first available spot.
 When agents leave the queue, the other agents will move up in their waiting positions until they reach the front.
-To release agents from the queue, a signal needs to be send to the queue, signaling that the first n agents can leave it.
+In order to allow agents to leave the queue, a signal must be sent to it, indicating that the first `n` agents in the queue are permitted to exit.
 
 .. note::
 
-    When there are more agents arriving at the queue then waiting positions are available, all overflow agents will wait at the last waiting position.
-
+    If the number of agents arriving at the queue exceeds the available waiting positions, all additional agents beyond capacity will wait at the last designated waiting position.
 
 .. figure:: /_static/stages/queue.svg
     :width: 80%
     :align: center
     :alt: A series of dots represent the different waiting positions, connected with arrows which show in which direction the agents will move up.
 
-    Representation of an :class:`Queue <jupedsim.stages.NotifiableQueueStage>` (dots).
+    Representation of the :class:`Queue <jupedsim.stages.NotifiableQueueStage>` (dots).
     The first position is marked orange and the last position light-blue.
     The movement of the agents to move up the queue is indicated by the red arrows.
 
@@ -157,7 +157,7 @@ If a waiting set is inactive when an agents targets it, the first defined waitin
 
 .. note::
 
-    When more agent target the waiting set, than available waiting spots, the overflow agents will wait at the last entered waiting position.
+    When the number of agents targeting the waiting set exceeds the available waiting spots, the agents in excess will wait at the position where the last agent entered the waiting area.
 
 
 .. figure:: /_static/stages/waiting_set.svg
@@ -165,8 +165,8 @@ If a waiting set is inactive when an agents targets it, the first defined waitin
     :align: center
     :alt: A waiting set is represented by a number of unevenly distributed circles. Two circles are highlighted.
 
-    Representation of an :class:`WaitingSet <jupedsim.stages.WaitingSetStage>`.
-    The first (orange) and last defined position (blue) are highlighted.
+    Representation of the :class:`WaitingSet <jupedsim.stages.WaitingSetStage>`.
+    The first (colored orange) and last defined position (colored blue) are highlighted.
 
 In the following, you can see how to add a waiting set to a simulation and how to activate and deactivate it:
 
@@ -198,9 +198,9 @@ Journeys
 
 Multiple stages can be combined into what in *JuPedSim* is called a Journey.
 
-
 For creating more complex routes in *JuPedSim* multiple stages can be combined to a so called Journey.
-For
+
+For example:
 
 .. code-block:: python
 
@@ -220,20 +220,22 @@ For
 Transitions
 -----------
 
-Now, we have Journey with a set of stages which have no connection to each other.
-But for creating the complete routing set-up we need to define theses connections, the so called Transitions.
-They define, which stage an agents target after its current one is completed.
-*JuPedSim* offers different types of connections directly to model some decision making processes.
+We currently have a Journey composed of various stages that are not interconnected.
+To establish a comprehensive routing setup, we need to define the connections between these stages, known as Transitions.
+
+Transitions specify which stage an agent will target next after completing its current stage.
+*JuPedSim* offers different types of connections to directly model certain decision making processes.
 
 .. note::
 
     When adding the transitions to your journeys make sure, that :ref:`Exits <Exit>` are only added at the end of a trip.
-    Otherwise the agents will be removed from the simulation when they reach the exit and will not continue to the next stage.
+    Otherwise the agents will be removed from the simulation when they reach the exit and will not advance to the next stage.
 
 Fixed transition
 ^^^^^^^^^^^^^^^^
 
-The simplest kind of transition is to define that the agent will continue its journey with one specific next stage.
+The most basic form of transition is to define that the agent will proceed on its journey with one specific subsequent stage.
+
 
 .. figure:: /_static/transitions/fixed.svg
     :width: 40%
@@ -252,16 +254,16 @@ Round-robin transition
 
 It is also possible to model a decision making process and split the agents at a stage, with a round-robin transition.
 Here, the agents will proceed in a weighted round-robin manner.
-E.g., when defining a round robin transition with three outgoing stages and the corresponding weights 10, 5, 1, the first 10 agents to make a choice will continue with the first given stage.
+E.g., when defining a round-robin transition with three outgoing stages and the corresponding weights 10, 5, 1, the first 10 agents to make a choice will continue with the first given stage.
 The next 4 with the second one, and the next agent will continue with the third stage.
-Then the circle starts again at stage one.
+
+After this, the cycle restarts with the first stage.
 
 .. figure:: /_static/transitions/round_robin.svg
     :width: 40%
     :align: center
 
-How to create such a round-robin transition as described above see here:
-
+To create a round-robin transition as described above, you can follow these steps:
 .. code-block:: python
 
     journey.set_transition_for_stage(
@@ -286,7 +288,7 @@ When multiple stages have the same number of agent targeting the first defined w
     :width: 40%
     :align: center
 
-A least targeted transition can be added to a journey with:
+A least-targeted transition can be added to a journey with:
 
 .. code-block:: python
 
@@ -305,9 +307,11 @@ A least targeted transition can be added to a journey with:
 Way finding
 ===========
 
-Depending on the principles explained above each agent gets a target assigned, there they head to.
-Now, the route towards this goal needs to be determined.
-For distinguishing the route *JuPedSim* triangulates the geometry and computes the distance between two points through the triangulation.
+Each agent in the simulation is assigned a specific target destination towards which they will head.
+The next crucial step is to determine the route that these agents will take to reach their assigned goals.
+This involves calculating the most efficient or desired paths from their current locations to their targets within the simulation environment.
+
+To determine the route, *JuPedSim* triangulates the geometry and computes the distance between two points through the triangulation.
 Here, it will compute the distance between the centers of two neighboring triangles.
 When multiple paths lead to the target, the shortest one will be preferred.
 
@@ -320,8 +324,8 @@ How the path is distinguished for different target points, you can see in the an
 .. warning::
 
     As the distance is computed along the centers of the triangles, it may happen, that not the shortest-path on the ground is taken.
-    This is a known issue of the *JuPedSim*'s routing, it will be fixed in the near future.
-    To avoid is behaviour intermediate waypoints can be added to the simulation.
+    This is a known issue of the *JuPedSim*'s routing, that will be fixed in the near future.
+    To avoid this behaviour intermediate waypoints can be added to the simulation.
 
     .. image:: /_static/routing/expected_routing.png
         :width: 40%

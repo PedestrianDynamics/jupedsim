@@ -24,14 +24,15 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      inkscape:zoom="1.8476291"
-     inkscape:cx="604.82919"
+     inkscape:cx="605.37042"
      inkscape:cy="381.84071"
      inkscape:window-width="3836"
      inkscape:window-height="2101"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
+     inkscape:current-layer="layer1"
+     showgrid="false" />
   <defs
      id="defs1">
     <marker
@@ -301,7 +302,7 @@
        sodipodi:nodetypes="cc" />
     <path
        style="fill:#808080;stroke:#e97586;stroke-width:1;stroke-dasharray:none;marker-end:url(#ConcaveTriangle-72)"
-       d="m 190.92713,147.69617 -38.33839,29.5488"
+       d="m 190.92713,147.69617 -31.70357,28.82496"
        id="path2-06"
        sodipodi:nodetypes="cc" />
     <path
