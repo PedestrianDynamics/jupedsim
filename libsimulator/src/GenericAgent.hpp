@@ -40,6 +40,7 @@ struct GenericAgent {
         : id(id_ != ID::Invalid ? id_ : ID{})
         , journeyId(journeyId_)
         , stageId(stageId_)
+        , waypoint(pos_)
         , pos(pos_)
         , orientation(orientation_)
         , model(std::move(model_))

@@ -8,6 +8,9 @@
 #include <variant>
 #include <vector>
 
+struct DirectSteeringDescription {
+};
+
 struct WaypointDescription {
     Point position;
     double distance;
@@ -26,6 +29,7 @@ struct NotifiableQueueDescription {
 };
 
 using StageDescription = std::variant<
+    DirectSteeringDescription,
     WaypointDescription,
     ExitDescription,
     NotifiableWaitingSetDescription,

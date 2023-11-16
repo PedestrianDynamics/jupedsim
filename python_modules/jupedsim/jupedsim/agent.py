@@ -68,6 +68,14 @@ class Agent:
         return self._obj.orientation
 
     @property
+    def waypoint(self):
+        return self._obj.waypoint
+
+    @waypoint.setter
+    def waypoint(self, waypoint: tuple[float, float]):
+        self._obj.waypoint = waypoint
+
+    @property
     def model(
         self,
     ) -> GeneralizedCentrifugalForceModelState | CollisionFreeSpeedModelState:

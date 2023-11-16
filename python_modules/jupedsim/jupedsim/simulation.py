@@ -177,6 +177,9 @@ class Simulation:
         exit_geometry = build_geometry(polygon)
         return self._obj.add_exit_stage(exit_geometry.boundary())
 
+    def add_direct_steering_stage(self) -> int:
+        return self._obj.add_direct_steering_stage()
+
     def add_journey(self, journey: JourneyDescription) -> int:
         return self._obj.add_journey(journey._obj)
 

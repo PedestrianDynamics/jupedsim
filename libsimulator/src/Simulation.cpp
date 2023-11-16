@@ -151,6 +151,9 @@ BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
                             "NotifiableQueue point {} not inside walkable area", point);
                     }
                 }
+            },
+            [](const DirectSteeringDescription&) -> void {
+
             }},
         stageDescription);
 

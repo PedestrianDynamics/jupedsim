@@ -78,8 +78,20 @@ public:
     ExitProxy(Simulation* simulation_, BaseStage* stage_) : BaseProxy(simulation_, stage_) {}
 };
 
-using StageProxy =
-    std::variant<WaypointProxy, NotifiableWaitingSetProxy, NotifiableQueueProxy, ExitProxy>;
+class DirectSteeringProxy : public BaseProxy
+{
+public:
+    DirectSteeringProxy(Simulation* simulation_, BaseStage* stage_) : BaseProxy(simulation_, stage_)
+    {
+    }
+};
+
+using StageProxy = std::variant<
+    WaypointProxy,
+    NotifiableWaitingSetProxy,
+    NotifiableQueueProxy,
+    ExitProxy,
+    DirectSteeringProxy>;
 
 class BaseStage
 {
@@ -96,7 +108,7 @@ public:
     virtual Point Target(const GenericAgent& agent) = 0;
     virtual StageProxy Proxy(Simulation* simulation_) = 0;
     ID Id() const { return id; }
-    size_t CountTargeting() const { return targeting; }
+    virtual size_t CountTargeting() const { return targeting; }
     void IncreaseTargeting() { targeting = targeting + 1; }
     void DecreaseTargeting()
     {
@@ -248,3 +260,18 @@ void NotifiableQueue::Update(const NeighborhoodSearch<T>& neighborhoodSearch)
         }
     }
 }
+
+class DirectSteering : public BaseStage
+{
+public:
+    DirectSteering() = default;
+    ~DirectSteering() override = default;
+    bool IsCompleted(const GenericAgent&) override { return false; };
+    Point Target(const GenericAgent& agent) override { return agent.waypoint; };
+    StageProxy Proxy(Simulation* simulation) override
+    {
+        return DirectSteeringProxy(simulation, this);
+    };
+
+    size_t CountTargeting() const override { return 1; };
+};

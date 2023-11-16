@@ -77,6 +77,7 @@ public:
     double DT() const;
     void
     SwitchAgentJourney(GenericAgent::ID agent_id, Journey::ID journey_id, BaseStage::ID stage_id);
+    void ChangeAgentWaypoint(GenericAgent::ID agent_id, Point waypoint);
     uint64_t Iteration() const;
     std::vector<GenericAgent::ID> AgentsInRange(Point p, double distance);
     /// Returns IDs of all agents inside the defined polygon

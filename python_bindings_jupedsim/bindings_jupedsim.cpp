@@ -71,6 +71,7 @@ OWNED_WRAPPER(JPS_NotifiableQueueProxy);
 OWNED_WRAPPER(JPS_WaitingSetProxy);
 OWNED_WRAPPER(JPS_WaypointProxy);
 OWNED_WRAPPER(JPS_ExitProxy);
+OWNED_WRAPPER(JPS_DirectSteeringProxy);
 WRAPPER(JPS_Agent);
 WRAPPER(JPS_GeneralizedCentrifugalForceModelState);
 WRAPPER(JPS_CollisionFreeSpeedModelState);
@@ -384,8 +385,7 @@ PYBIND11_MODULE(py_jupedsim, m)
             py::arg("max_geometry_repulsion_force"))
         .def("build", [](JPS_GeneralizedCentrifugalForceModelBuilder_Wrapper& w) {
             JPS_ErrorMessage errorMsg{};
-            auto result =
-                JPS_GeneralizedCentrifugalForceModelBuilder_Build(w.handle, &errorMsg);
+            auto result = JPS_GeneralizedCentrifugalForceModelBuilder_Build(w.handle, &errorMsg);
             if(result) {
                 return std::make_unique<JPS_OperationalModel_Wrapper>(result);
             }
@@ -662,6 +662,11 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def("count_targeting", [](const JPS_ExitProxy_Wrapper& w) {
             return JPS_ExitProxy_GetCountTargeting(w.handle);
         });
+    py::class_<JPS_DirectSteeringProxy_Wrapper>(m, "DirectSteeringProxy")
+        .def("count_targeting", [](const JPS_DirectSteeringProxy_Wrapper& w) {
+            return JPS_DirectSteeringProxy_GetCountTargeting(w.handle);
+        });
+
     py::class_<JPS_Agent_Wrapper>(m, "Agent")
         .def_property_readonly(
             "id", [](const JPS_Agent_Wrapper& w) { return JPS_Agent_GetId(w.handle); })
@@ -677,6 +682,18 @@ PYBIND11_MODULE(py_jupedsim, m)
             "orientation",
             [](const JPS_Agent_Wrapper& w) {
                 return intoTuple(JPS_Agent_GetOrientation(w.handle));
+            })
+        .def_property(
+            "waypoint",
+            [](const JPS_Agent_Wrapper& w) { return intoTuple(JPS_Agent_GetWayPoint(w.handle)); },
+            [](JPS_Agent_Wrapper& w, std::tuple<double, double> waypoint) {
+                JPS_ErrorMessage errorMsg{};
+                auto success = JPS_Agent_SetWayPoint(w.handle, intoJPS_Point(waypoint), &errorMsg);
+                if(!success) {
+                    auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                    JPS_ErrorMessage_Free(errorMsg);
+                    throw std::runtime_error{msg};
+                }
             })
         .def_property_readonly(
             "model",
@@ -762,6 +779,18 @@ PYBIND11_MODULE(py_jupedsim, m)
                 const auto jpsPointPoly = intoJPS_Point(polygon);
                 const auto result = JPS_Simulation_AddStageExit(
                     w.handle, jpsPointPoly.data(), jpsPointPoly.size(), &errorMsg);
+                if(result != 0) {
+                    return result;
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
+            })
+        .def(
+            "add_direct_steering_stage",
+            [](JPS_Simulation_Wrapper& w) {
+                JPS_ErrorMessage errorMsg{};
+                const auto result = JPS_Simulation_AddStageDirectSteering(w.handle, &errorMsg);
                 if(result != 0) {
                     return result;
                 }
@@ -920,7 +949,8 @@ PYBIND11_MODULE(py_jupedsim, m)
                     std::unique_ptr<JPS_WaypointProxy_Wrapper>,
                     std::unique_ptr<JPS_NotifiableQueueProxy_Wrapper>,
                     std::unique_ptr<JPS_WaitingSetProxy_Wrapper>,
-                    std::unique_ptr<JPS_ExitProxy_Wrapper>> {
+                    std::unique_ptr<JPS_ExitProxy_Wrapper>,
+                    std::unique_ptr<JPS_DirectSteeringProxy_Wrapper>> {
                 const auto type = JPS_Simulation_GetStageType(w.handle, id);
                 JPS_ErrorMessage errorMessage{};
                 const auto raise = [](JPS_ErrorMessage err) {
@@ -957,6 +987,14 @@ PYBIND11_MODULE(py_jupedsim, m)
                     case JPS_ExitType: {
                         auto ptr = std::make_unique<JPS_ExitProxy_Wrapper>(
                             JPS_Simulation_GetExitProxy(w.handle, id, &errorMessage));
+                        if(!ptr) {
+                            raise(errorMessage);
+                        }
+                        return ptr;
+                    }
+                    case JPS_DirectSteeringType: {
+                        auto ptr = std::make_unique<JPS_DirectSteeringProxy_Wrapper>(
+                            JPS_Simulation_GetDirectSteeringProxy(w.handle, id, &errorMessage));
                         if(!ptr) {
                             raise(errorMessage);
                         }
