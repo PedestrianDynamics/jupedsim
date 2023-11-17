@@ -29,6 +29,7 @@ jobs:
 
     - name: Run checks
       run: ./scripts/ci/check_format.sh
+
   tests:
     name: Run tests [${{ matrix.toolchain.cxx }}]
     runs-on: ubuntu-latest
@@ -53,6 +54,7 @@ jobs:
         CC: ${{ matrix.toolchain.cc }}
         CXX: ${{ matrix.toolchain.cxx }}
       run: ./scripts/ci/gh_build_linux.sh
+
   docs:
     name: Documentation
     runs-on: ubuntu-latest
@@ -103,9 +105,9 @@ jobs:
       with:
         name: pages
         path: docs/build/
-
     outputs:
       docs-target: ${{ steps.docs-publish-dir.outputs.target }}
+
   docs-publish:
     name: Publish docs versions JSON
     needs: docs
@@ -146,6 +148,7 @@ jobs:
       with:
         branch: gh-pages
         commit_message: Update versions and stable
+
   build_sdist:
     name: Build sdist
     runs-on: ubuntu-latest
@@ -171,6 +174,7 @@ jobs:
           name: python-packages
           path: dist/jupedsim-*.tar.gz
           if-no-files-found: error
+
   build_wheels:
     name: Build wheels on ${{ matrix.os }} for ${{ matrix.cibw_archs }}
     runs-on: ${{ matrix.os }}
@@ -205,6 +209,7 @@ jobs:
           - os: macos-latest
             cibw_archs: "arm64"
             cibw_build: "cp311-*"
+
     steps:
       - uses: actions/checkout@v4
       - name: Build wheels for CPython ${{ matrix.cibw_build }} on ${{ matrix.cibw_archs }}
@@ -218,6 +223,63 @@ jobs:
           name: python-packages
           path: ./wheelhouse/*.whl
           if-no-files-found: error
+
+  test-wheels:
+    name: Test wheel on ${{ matrix.os }} with Python ${{ matrix.python-version }}
+    needs: [ build_wheels ]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.10", "3.11"]
+
+    steps:
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Download packages
+        uses: actions/Download-artifact@v3
+        with:
+          name: python-packages
+          path: dist
+
+      - name: Install wheel
+        run: |
+          python -m pip install -U pip
+          python -m pip install --find-links=dist jupedsim
+
+      - name: Check installation
+        run: |
+          python -c "import jupedsim; print(jupedsim.__version__)"
+
+  test-sdist:
+    name: Test sdist install
+    needs: [ build_sdist ]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Download packages
+        uses: actions/Download-artifact@v3
+        with:
+          name: python-packages
+          path: dist
+
+      - name: Install wheel
+        run: |
+          python -m pip install -U pip
+          python -m pip install dist/jupedsim*.tar.gz
+
+      - name: Check installation
+        run: |
+          python -c "import jupedsim; print(jupedsim.__version__)"
+
   pypi-publish:
     needs: [build_wheels, build_sdist]
     if: ${{ github.event_name == 'release' && github.event.action == 'released' }}
