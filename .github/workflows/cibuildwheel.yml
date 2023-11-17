@@ -192,12 +192,18 @@ jobs:
           - os: ubuntu-latest
             cibw_archs: "x86_64"
             cibw_build: "cp311-*"
+          - os: ubuntu-latest
+            cibw_archs: "x86_64"
+            cibw_build: "cp312-*"
           - os: windows-latest
             cibw_archs: "auto64"
             cibw_build: "cp310-*"
           - os: windows-latest
             cibw_archs: "auto64"
             cibw_build: "cp311-*"
+          - os: windows-latest
+            cibw_archs: "auto64"
+            cibw_build: "cp312-*"
           - os: macos-latest
             cibw_archs: "x86_64"
             cibw_build: "cp310-*"
@@ -205,11 +211,17 @@ jobs:
             cibw_archs: "x86_64"
             cibw_build: "cp311-*"
           - os: macos-latest
+            cibw_archs: "x86_64"
+            cibw_build: "cp312-*"
+          - os: macos-latest
             cibw_archs: "arm64"
             cibw_build: "cp310-*"
           - os: macos-latest
             cibw_archs: "arm64"
             cibw_build: "cp311-*"
+          - os: macos-latest
+            cibw_archs: "arm64"
+            cibw_build: "cp312-*"
 
     steps:
       - uses: actions/checkout@v4
@@ -232,7 +244,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.10", "3.11"]
+        python-version: ["3.10", "3.11", "3.12"]
 
     steps:
       - name: Set up Python ${{ matrix.python-version }}
@@ -261,10 +273,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set up Python 3.11
+      - name: Set up Python 3.12
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: 3.12
 
       - name: Download packages
         uses: actions/Download-artifact@v3
