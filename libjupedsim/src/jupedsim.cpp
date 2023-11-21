@@ -661,13 +661,6 @@ void JPS_WaitingSetProxy_Free(JPS_WaitingSetProxy handle)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// DirectSteeringProxy
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-size_t JPS_DirectSteeringProxy_GetCountTargeting(JPS_DirectSteeringProxy handle)
-{
-    assert(handle);
-    auto proxy = reinterpret_cast<DirectSteeringProxy*>(handle);
-    return proxy->CountTargeting();
-}
-
 void JPS_DirectSteeringProxy_Free(JPS_DirectSteeringProxy handle)
 {
     delete reinterpret_cast<DirectSteeringProxy*>(handle);

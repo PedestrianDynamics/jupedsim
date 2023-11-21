@@ -30,6 +30,7 @@ class Agent:
         sim.agents_in_polygon(polygon)
 
     .. note ::
+
         You need to be aware that currently there are no checks done when setting
         properties on an Agent instance. For example it is possible to set an Agent position
         outside the walkable area of the Simulation resulting in a crash.
@@ -68,7 +69,21 @@ class Agent:
         return self._obj.orientation
 
     @property
-    def waypoint(self):
+    def waypoint(self) -> tuple[float, float]:
+        """Current waypoint the agent targets.
+
+        Can be used to directly steer an agent towards the given coordinate.
+        This will bypass the strategical and tactical level, but the operational level
+        will still be active.
+
+        .. important::
+
+            If the agent is not in a Journey with a DirectSteering stage, any change will be
+            ignored.
+
+        Returns:
+            Current target of the agent.
+        """
         return self._obj.waypoint
 
     @waypoint.setter

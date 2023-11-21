@@ -10,6 +10,7 @@
 #include "Stage.hpp"
 #include "Visitor.hpp"
 #include <memory>
+#include <variant>
 
 Simulation::Simulation(
     std::unique_ptr<OperationalModel>&& operationalModel,
@@ -116,6 +117,7 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
                             }},
                         desc)}};
         });
+
     auto journey = std::make_unique<Journey>(std::move(nodes));
     const auto id = journey->Id();
     _journeys.emplace(id, std::move(journey));

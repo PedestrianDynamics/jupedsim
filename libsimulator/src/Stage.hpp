@@ -108,7 +108,7 @@ public:
     virtual Point Target(const GenericAgent& agent) = 0;
     virtual StageProxy Proxy(Simulation* simulation_) = 0;
     ID Id() const { return id; }
-    virtual size_t CountTargeting() const { return targeting; }
+    size_t CountTargeting() const { return targeting; }
     void IncreaseTargeting() { targeting = targeting + 1; }
     void DecreaseTargeting()
     {
@@ -272,6 +272,4 @@ public:
     {
         return DirectSteeringProxy(simulation, this);
     };
-
-    size_t CountTargeting() const override { return 1; };
 };

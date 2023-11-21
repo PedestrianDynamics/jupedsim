@@ -662,10 +662,7 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def("count_targeting", [](const JPS_ExitProxy_Wrapper& w) {
             return JPS_ExitProxy_GetCountTargeting(w.handle);
         });
-    py::class_<JPS_DirectSteeringProxy_Wrapper>(m, "DirectSteeringProxy")
-        .def("count_targeting", [](const JPS_DirectSteeringProxy_Wrapper& w) {
-            return JPS_DirectSteeringProxy_GetCountTargeting(w.handle);
-        });
+    py::class_<JPS_DirectSteeringProxy_Wrapper>(m, "DirectSteeringProxy");
 
     py::class_<JPS_Agent_Wrapper>(m, "Agent")
         .def_property_readonly(
