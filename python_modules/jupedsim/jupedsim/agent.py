@@ -81,6 +81,11 @@ class Agent:
             If the agent is not in a Journey with a DirectSteering stage, any change will be
             ignored.
 
+        .. important::
+
+            When setting the target, the given coordinates must lie within the walkable area.
+            Otherwise, an error will be thrown at the next iteration call.
+
         Returns:
             Current target of the agent.
         """
