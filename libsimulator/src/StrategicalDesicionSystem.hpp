@@ -28,7 +28,7 @@ public:
     {
         for(auto& agent : agents) {
             const auto [target, id] = journeys.at(agent.journeyId)->Target(agent);
-            agent.waypoint = target;
+            agent.target = target;
             stageManager.MigrateAgent(agent.stageId, id);
             agent.stageId = id;
         }

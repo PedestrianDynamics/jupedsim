@@ -659,7 +659,15 @@ void JPS_WaitingSetProxy_Free(JPS_WaitingSetProxy handle)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// WaypointProxy
+/// DirectSteeringProxy
+////////////////////////////////////////////////////////////////////////////////////////////////////
+void JPS_DirectSteeringProxy_Free(JPS_DirectSteeringProxy handle)
+{
+    delete reinterpret_cast<DirectSteeringProxy*>(handle);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// WaitPointProxy
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 size_t JPS_WaypointProxy_GetCountTargeting(JPS_WaypointProxy handle)
 {
@@ -674,7 +682,7 @@ void JPS_WaypointProxy_Free(JPS_WaypointProxy handle)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// WaitingSetProxy
+/// ExitProxy
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 size_t JPS_ExitProxy_GetCountTargeting(JPS_ExitProxy handle)
 {
@@ -717,6 +725,33 @@ JPS_Point JPS_Agent_GetPosition(JPS_Agent handle)
     assert(handle);
     const auto agent = reinterpret_cast<const GenericAgent*>(handle);
     return intoJPS_Point(agent->pos);
+}
+
+JPS_Point JPS_Agent_GetTarget(JPS_Agent handle)
+{
+    assert(handle);
+    const auto agent = reinterpret_cast<const GenericAgent*>(handle);
+    return intoJPS_Point(agent->target);
+}
+
+bool JPS_Agent_SetTarget(JPS_Agent handle, JPS_Point waypoint, JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    try {
+        auto agent = reinterpret_cast<GenericAgent*>(handle);
+        agent->target = intoPoint(waypoint);
+        return true;
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return false;
 }
 
 JPS_Point JPS_Agent_GetOrientation(JPS_Agent handle)
@@ -1089,6 +1124,12 @@ JPS_StageId JPS_Simulation_AddStageWaitingSet(
     return add_stage(handle, NotifiableWaitingSetDescription{positions}, errorMessage);
 }
 
+JPS_StageId
+JPS_Simulation_AddStageDirectSteering(JPS_Simulation handle, JPS_ErrorMessage* errorMessage)
+{
+    return add_stage(handle, DirectSteeringDescription{}, errorMessage);
+}
+
 JPS_AgentId JPS_Simulation_AddGeneralizedCentrifugalForceModelAgent(
     JPS_Simulation handle,
     JPS_GeneralizedCentrifugalForceModelAgentParameters parameters,
@@ -1357,6 +1398,8 @@ JPS_StageType JPS_Simulation_GetStageType(JPS_Simulation handle, JPS_StageId id)
                 return JPS_NotifiableQueueType;
             case 3:
                 return JPS_ExitType;
+            case 4:
+                return JPS_DirectSteeringType;
         }
         UNREACHABLE();
     };
@@ -1426,6 +1469,24 @@ JUPEDSIM_API JPS_ExitProxy JPS_Simulation_GetExitProxy(
     try {
         return reinterpret_cast<JPS_ExitProxy>(
             new ExitProxy(std::get<ExitProxy>(simulation->Stage(stageId))));
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+        return nullptr;
+    }
+}
+
+JPS_DirectSteeringProxy JPS_Simulation_GetDirectSteeringProxy(
+    JPS_Simulation handle,
+    JPS_StageId stageId,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    try {
+        return reinterpret_cast<JPS_DirectSteeringProxy>(
+            new DirectSteeringProxy(std::get<DirectSteeringProxy>(simulation->Stage(stageId))));
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});

@@ -38,6 +38,9 @@ public:
                 },
                 [](const NotifiableQueueDescription& d) -> std::unique_ptr<BaseStage> {
                     return std::make_unique<NotifiableQueue>(d.slots);
+                },
+                [](const DirectSteeringDescription&) -> std::unique_ptr<BaseStage> {
+                    return std::make_unique<DirectSteering>();
                 }},
             stageDescription);
         if(stages.find(stage->Id()) != stages.end()) {
@@ -45,6 +48,7 @@ public:
         }
         const auto id = stage->Id();
         stages.emplace(id, std::move(stage));
+
         return id;
     }
 

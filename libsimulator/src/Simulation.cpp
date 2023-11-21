@@ -10,6 +10,7 @@
 #include "Stage.hpp"
 #include "Visitor.hpp"
 #include <memory>
+#include <variant>
 
 Simulation::Simulation(
     std::unique_ptr<OperationalModel>&& operationalModel,
@@ -60,6 +61,15 @@ void Simulation::Iterate()
 Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescription>& stages)
 {
     std::map<BaseStage::ID, JourneyNode> nodes;
+    bool containsDirectSteering =
+        std::find_if(std::begin(stages), std::end(stages), [this](auto const& pair) {
+            return std::holds_alternative<DirectSteeringProxy>(Stage(pair.first));
+        }) != std::end(stages);
+
+    if(containsDirectSteering && stages.size() > 1) {
+        throw SimulationError(
+            "Journeys containing a DirectSteeringStage, may only contain this stage.");
+    }
 
     std::transform(
         std::begin(stages),
@@ -116,6 +126,7 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
                             }},
                         desc)}};
         });
+
     auto journey = std::make_unique<Journey>(std::move(nodes));
     const auto id = journey->Id();
     _journeys.emplace(id, std::move(journey));
@@ -151,6 +162,9 @@ BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
                             "NotifiableQueue point {} not inside walkable area", point);
                     }
                 }
+            },
+            [](const DirectSteeringDescription&) -> void {
+
             }},
         stageDescription);
 

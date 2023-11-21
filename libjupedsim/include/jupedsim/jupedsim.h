@@ -737,7 +737,13 @@ JPS_CollisionFreeSpeedModelState_SetRadius(JPS_CollisionFreeSpeedModelState hand
 /**
  * Identifies the type of stage
  */
-enum JPS_StageType { JPS_NotifiableQueueType, JPS_WaitingSetType, JPS_WaypointType, JPS_ExitType };
+enum JPS_StageType {
+    JPS_NotifiableQueueType,
+    JPS_WaitingSetType,
+    JPS_WaypointType,
+    JPS_ExitType,
+    JPS_DirectSteeringType
+};
 
 /**
  * Opaque type of an NotifiableQueueProxy
@@ -784,6 +790,10 @@ JUPEDSIM_API size_t JPS_ExitProxy_GetCountTargeting(JPS_ExitProxy handle);
 
 JUPEDSIM_API void JPS_ExitProxy_Free(JPS_ExitProxy handle);
 
+typedef struct JPS_DirectSteeringProxy_t* JPS_DirectSteeringProxy;
+
+JUPEDSIM_API void JPS_DirectSteeringProxy_Free(JPS_DirectSteeringProxy handle);
+
 /**
  * Opaque type of an agent
  */
@@ -816,6 +826,16 @@ JUPEDSIM_API JPS_StageId JPS_Agent_GetStageId(JPS_Agent handle);
  * @return position
  */
 JUPEDSIM_API JPS_Point JPS_Agent_GetPosition(JPS_Agent handle);
+
+/**
+ * Access the agents current target.
+ * @param handle of the agent to access.
+ * @return target of the agent
+ */
+JUPEDSIM_API JPS_Point JPS_Agent_GetTarget(JPS_Agent handle);
+
+JUPEDSIM_API bool
+JPS_Agent_SetTarget(JPS_Agent handle, JPS_Point target, JPS_ErrorMessage* errorMessage);
 
 /**
  * Access the agents orientation.
@@ -1092,6 +1112,20 @@ JUPEDSIM_API JPS_StageId JPS_Simulation_AddStageWaitingSet(
     JPS_ErrorMessage* errorMessage);
 
 /**
+ * Adds a new direct steering stage to the simulation.
+ *
+ * This allows a direct control of the target of an agent.
+ *
+ * Important: A direct steering stage can only be used if it is the only stage in a Journey.
+ *
+ * @param handle to the simulation to act on
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return Id of the stage
+ */
+JUPEDSIM_API JPS_StageId
+JPS_Simulation_AddStageDirectSteering(JPS_Simulation handle, JPS_ErrorMessage* errorMessage);
+
+/**
  * Adds a new agent to the simulation.
  * This can be called at any time, i.e. agents can be added at any iteration.
  * NOTE: Currently there is no checking done to ensure the agent can be placed at the desired
@@ -1260,6 +1294,11 @@ JUPEDSIM_API JPS_WaypointProxy JPS_Simulation_GetWaypointProxy(
     JPS_ErrorMessage* errorMessage);
 
 JUPEDSIM_API JPS_ExitProxy JPS_Simulation_GetExitProxy(
+    JPS_Simulation handle,
+    JPS_StageId stageId,
+    JPS_ErrorMessage* errorMessage);
+
+JUPEDSIM_API JPS_DirectSteeringProxy JPS_Simulation_GetDirectSteeringProxy(
     JPS_Simulation handle,
     JPS_StageId stageId,
     JPS_ErrorMessage* errorMessage);
