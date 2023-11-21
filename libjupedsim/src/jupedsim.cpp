@@ -727,19 +727,19 @@ JPS_Point JPS_Agent_GetPosition(JPS_Agent handle)
     return intoJPS_Point(agent->pos);
 }
 
-JPS_Point JPS_Agent_GetWayPoint(JPS_Agent handle)
+JPS_Point JPS_Agent_GetTarget(JPS_Agent handle)
 {
     assert(handle);
     const auto agent = reinterpret_cast<const GenericAgent*>(handle);
-    return intoJPS_Point(agent->waypoint);
+    return intoJPS_Point(agent->target);
 }
 
-bool JPS_Agent_SetWayPoint(JPS_Agent handle, JPS_Point waypoint, JPS_ErrorMessage* errorMessage)
+bool JPS_Agent_SetTarget(JPS_Agent handle, JPS_Point waypoint, JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
     try {
         auto agent = reinterpret_cast<GenericAgent*>(handle);
-        agent->waypoint = intoPoint(waypoint);
+        agent->target = intoPoint(waypoint);
         return true;
     } catch(const std::exception& ex) {
         if(errorMessage) {

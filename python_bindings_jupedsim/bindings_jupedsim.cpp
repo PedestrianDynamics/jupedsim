@@ -681,11 +681,11 @@ PYBIND11_MODULE(py_jupedsim, m)
                 return intoTuple(JPS_Agent_GetOrientation(w.handle));
             })
         .def_property(
-            "waypoint",
-            [](const JPS_Agent_Wrapper& w) { return intoTuple(JPS_Agent_GetWayPoint(w.handle)); },
-            [](JPS_Agent_Wrapper& w, std::tuple<double, double> waypoint) {
+            "target",
+            [](const JPS_Agent_Wrapper& w) { return intoTuple(JPS_Agent_GetTarget(w.handle)); },
+            [](JPS_Agent_Wrapper& w, std::tuple<double, double> target) {
                 JPS_ErrorMessage errorMsg{};
-                auto success = JPS_Agent_SetWayPoint(w.handle, intoJPS_Point(waypoint), &errorMsg);
+                auto success = JPS_Agent_SetTarget(w.handle, intoJPS_Point(target), &errorMsg);
                 if(!success) {
                     auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
                     JPS_ErrorMessage_Free(errorMsg);

@@ -178,6 +178,19 @@ class Simulation:
         return self._obj.add_exit_stage(exit_geometry.boundary())
 
     def add_direct_steering_stage(self) -> int:
+        """Add an direct steering stage to the simulation.
+
+        This stage allows a direct control of the target the agent is walking to.
+        Thus, it will bypass the tactical and stragecial level of the simulation, but the
+        operational level will still be active.
+
+        .. important::
+
+            A direct steering stage can only be used if it is the only stage in a Journey.
+
+        Returns:
+            Id of the added direct steering stage.
+        """
         return self._obj.add_direct_steering_stage()
 
     def add_journey(self, journey: JourneyDescription) -> int:

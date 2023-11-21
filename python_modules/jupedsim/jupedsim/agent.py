@@ -69,8 +69,8 @@ class Agent:
         return self._obj.orientation
 
     @property
-    def waypoint(self) -> tuple[float, float]:
-        """Current waypoint the agent targets.
+    def target(self) -> tuple[float, float]:
+        """Current target of the agent.
 
         Can be used to directly steer an agent towards the given coordinate.
         This will bypass the strategical and tactical level, but the operational level
@@ -84,11 +84,11 @@ class Agent:
         Returns:
             Current target of the agent.
         """
-        return self._obj.waypoint
+        return self._obj.target
 
-    @waypoint.setter
-    def waypoint(self, waypoint: tuple[float, float]):
-        self._obj.waypoint = waypoint
+    @target.setter
+    def target(self, target: tuple[float, float]):
+        self._obj.target = target
 
     @property
     def model(

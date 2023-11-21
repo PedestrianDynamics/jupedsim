@@ -21,7 +21,7 @@ struct GenericAgent {
 
     // This is evaluated by the "operational level"
     Point destination{};
-    Point waypoint{};
+    Point target{};
 
     // Agent fields common for all models
     Point pos{};
@@ -40,7 +40,7 @@ struct GenericAgent {
         : id(id_ != ID::Invalid ? id_ : ID{})
         , journeyId(journeyId_)
         , stageId(stageId_)
-        , waypoint(pos_)
+        , target(pos_)
         , pos(pos_)
         , orientation(orientation_)
         , model(std::move(model_))
@@ -65,7 +65,7 @@ struct fmt::formatter<GenericAgent> {
                         agent.journeyId,
                         agent.stageId,
                         agent.destination,
-                        agent.waypoint,
+                        agent.target,
                         agent.pos,
                         agent.orientation,
                         m);
@@ -79,7 +79,7 @@ struct fmt::formatter<GenericAgent> {
                         agent.journeyId,
                         agent.stageId,
                         agent.destination,
-                        agent.waypoint,
+                        agent.target,
                         agent.pos,
                         agent.orientation,
                         m);

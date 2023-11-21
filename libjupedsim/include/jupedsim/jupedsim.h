@@ -792,8 +792,6 @@ JUPEDSIM_API void JPS_ExitProxy_Free(JPS_ExitProxy handle);
 
 typedef struct JPS_DirectSteeringProxy_t* JPS_DirectSteeringProxy;
 
-JUPEDSIM_API size_t JPS_DirectSteeringProxy_GetCountTargeting(JPS_DirectSteeringProxy handle);
-
 JUPEDSIM_API void JPS_DirectSteeringProxy_Free(JPS_DirectSteeringProxy handle);
 
 /**
@@ -830,14 +828,14 @@ JUPEDSIM_API JPS_StageId JPS_Agent_GetStageId(JPS_Agent handle);
 JUPEDSIM_API JPS_Point JPS_Agent_GetPosition(JPS_Agent handle);
 
 /**
- * Access the agents waypoint.
+ * Access the agents current target.
  * @param handle of the agent to access.
- * @return waypoint
+ * @return target of the agent
  */
-JUPEDSIM_API JPS_Point JPS_Agent_GetWayPoint(JPS_Agent handle);
+JUPEDSIM_API JPS_Point JPS_Agent_GetTarget(JPS_Agent handle);
 
 JUPEDSIM_API bool
-JPS_Agent_SetWayPoint(JPS_Agent handle, JPS_Point waypoint, JPS_ErrorMessage* errorMessage);
+JPS_Agent_SetTarget(JPS_Agent handle, JPS_Point target, JPS_ErrorMessage* errorMessage);
 
 /**
  * Access the agents orientation.
@@ -1114,7 +1112,15 @@ JUPEDSIM_API JPS_StageId JPS_Simulation_AddStageWaitingSet(
     JPS_ErrorMessage* errorMessage);
 
 /**
- * @todo
+ * Adds a new direct steering stage to the simulation.
+ *
+ * This allows a direct control of the target of an agent.
+ *
+ * Important: A direct steering stage can only be used if it is the only stage in a Journey.
+ *
+ * @param handle to the simulation to act on
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return Id of the stage
  */
 JUPEDSIM_API JPS_StageId
 JPS_Simulation_AddStageDirectSteering(JPS_Simulation handle, JPS_ErrorMessage* errorMessage);
