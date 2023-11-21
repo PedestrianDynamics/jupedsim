@@ -252,7 +252,7 @@ setup(
     ext_modules=[CMakeExtension("python_bindings_jupedsim")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
-    python_requires=">=3.10,<3.12",
+    python_requires=">=3.10,<3.13",
     packages=[
         "jupedsim",
         "jupedsim.internal",
@@ -269,7 +269,7 @@ setup(
         "numpy~=1.25",
         "shapely~=2.0",
         "pyside6~=6.5",
-        "vtk~=9.2",
+        "vtk~=9.3",
     ],
     scripts=["python_modules/jupedsim_visualizer/bin/jupedsim-visualizer"],
     url="https://www.jupedsim.org",
