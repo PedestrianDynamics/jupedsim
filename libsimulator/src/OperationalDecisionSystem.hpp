@@ -8,6 +8,7 @@
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
+#include "OptimalStepsModel.hpp"
 #include "SimulationError.hpp"
 
 #include <boost/iterator/zip_iterator.hpp>
@@ -16,7 +17,24 @@
 #include <memory>
 #include <vector>
 
-class OperationalDecisionSystem
+class OperationalDecisionSystemInterface
+{
+public:
+    virtual ~OperationalDecisionSystemInterface() = default;
+    virtual void
+    Run(double dT,
+        double /*t_in_sec*/,
+        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+        const CollisionGeometry& geometry,
+        std::vector<GenericAgent>& agents) const = 0;
+
+    virtual void ValidateAgent(
+        const GenericAgent& agent,
+        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+        const CollisionGeometry& geometry) const = 0;
+};
+
+class OperationalDecisionSystem : public OperationalDecisionSystemInterface
 {
     std::unique_ptr<OperationalModel> _model{};
 
@@ -37,7 +55,7 @@ public:
         double /*t_in_sec*/,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
         const CollisionGeometry& geometry,
-        std::vector<GenericAgent>& agents) const
+        std::vector<GenericAgent>& agents) const override
     {
         std::vector<std::optional<OperationalModelUpdate>> updates{};
         updates.reserve(agents.size());
@@ -64,8 +82,11 @@ public:
     void ValidateAgent(
         const GenericAgent& agent,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-        const CollisionGeometry& geometry) const
+        const CollisionGeometry& geometry) const override
     {
         _model->CheckModelConstraint(agent, neighborhoodSearch, geometry);
     }
 };
+
+std::unique_ptr<OperationalDecisionSystemInterface>
+MakeOperationalDecisionSystem(std::unique_ptr<OperationalModel>&& model);
