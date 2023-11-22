@@ -45,6 +45,7 @@ OperationalModelUpdate OptimalStepsModel::ComputeNewPosition(
 
     // Remove any agent from the neighborhood that is obstructed by geometry and the current
     // agent
+    //
     neighborhood.erase(
         std::remove_if(
             std::begin(neighborhood),
