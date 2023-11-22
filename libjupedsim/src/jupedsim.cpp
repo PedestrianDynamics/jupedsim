@@ -22,6 +22,7 @@
 #include <Logger.hpp>
 #include <OperationalModel.hpp>
 #include <OperationalModelType.hpp>
+#include <OptimalStepsModelBuilder.hpp>
 #include <Point.hpp>
 #include <RoutingEngine.hpp>
 #include <Simulation.hpp>
@@ -213,6 +214,49 @@ JUPEDSIM_API JPS_OperationalModel JPS_CollisionFreeSpeedModelBuilder_Build(
 JUPEDSIM_API void JPS_CollisionFreeSpeedModelBuilder_Free(JPS_CollisionFreeSpeedModelBuilder handle)
 {
     delete reinterpret_cast<CollisionFreeSpeedModelBuilder*>(handle);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Collision Free Speed Model Builder
+////////////////////////////////////////////////////////////////////////////////////////////////////
+JUPEDSIM_API JPS_OptimalStepsModelBuilder JPS_OptimalStepsModelBuilder_Create(
+    double strengthNeighborRepulsion,
+    double rangeNeighborRepulsion,
+    double strengthGeometryRepulsion,
+    double rangeGeometryRepulsion)
+{
+    return reinterpret_cast<JPS_OptimalStepsModelBuilder>(new OptimalStepsModelBuilder(
+        strengthNeighborRepulsion,
+        rangeNeighborRepulsion,
+        strengthGeometryRepulsion,
+        rangeGeometryRepulsion));
+}
+
+JUPEDSIM_API JPS_OperationalModel JPS_OptimalStepsModelBuilder_Build(
+    JPS_OptimalStepsModelBuilder handle,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle != nullptr);
+    auto builder = reinterpret_cast<OptimalStepsModelBuilder*>(handle);
+    JPS_OperationalModel result{};
+    try {
+        result = reinterpret_cast<JPS_OperationalModel>(new OptimalStepsModel(builder->Build()));
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return result;
+}
+
+JUPEDSIM_API void JPS_OptimalStepsModelBuilder_Free(JPS_OptimalStepsModelBuilder handle)
+{
+    delete reinterpret_cast<OptimalStepsModelBuilder*>(handle);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -548,6 +592,50 @@ void JPS_CollisionFreeSpeedModelState_SetRadius(
     auto state = reinterpret_cast<CollisionFreeSpeedModelData*>(handle);
     state->radius = radius;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// OptimalStepsModelState
+////////////////////////////////////////////////////////////////////////////////////////////////////
+double JPS_OptimalStepsModelState_GetTimeGap(JPS_OptimalStepsModelState handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const OptimalStepsModelData*>(handle);
+    return state->timeGap;
+}
+
+void JPS_OptimalStepsModelState_SetTimeGap(JPS_OptimalStepsModelState handle, double time_gap)
+{
+    assert(handle);
+    auto state = reinterpret_cast<OptimalStepsModelData*>(handle);
+    state->timeGap = time_gap;
+}
+
+double JPS_OptimalStepsModelState_GetV0(JPS_OptimalStepsModelState handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const OptimalStepsModelData*>(handle);
+    return state->v0;
+}
+
+void JPS_OptimalStepsModelState_SetV0(JPS_OptimalStepsModelState handle, double v0)
+{
+    assert(handle);
+    auto state = reinterpret_cast<OptimalStepsModelData*>(handle);
+    state->v0 = v0;
+}
+double JPS_OptimalStepsModelState_GetRadius(JPS_OptimalStepsModelState handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const OptimalStepsModelData*>(handle);
+    return state->radius;
+}
+
+void JPS_OptimalStepsModelState_SetRadius(JPS_OptimalStepsModelState handle, double radius)
+{
+    assert(handle);
+    auto state = reinterpret_cast<OptimalStepsModelData*>(handle);
+    state->radius = radius;
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// NotifiableQueueProxy
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -816,6 +904,26 @@ JPS_Agent_GetCollisionFreeSpeedModelState(JPS_Agent handle, JPS_ErrorMessage* er
     return nullptr;
 }
 
+JPS_OptimalStepsModelState
+JPS_Agent_GetOptimalStepsModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    const auto agent = reinterpret_cast<GenericAgent*>(handle);
+    try {
+        auto& model = std::get<OptimalStepsModelData>(agent->model);
+        return reinterpret_cast<JPS_OptimalStepsModelState>(&model);
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return nullptr;
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// AgentIterator
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1208,6 +1316,39 @@ JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelAgent(
     return result.getID();
 }
 
+JPS_AgentId JPS_Simulation_AddOptimalStepsModelAgent(
+    JPS_Simulation handle,
+    JPS_OptimalStepsModelAgentParameters parameters,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    auto result = GenericAgent::ID::Invalid;
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    try {
+        if(simulation->ModelType() != OperationalModelType::OPTIMAL_STEPS) {
+            throw std::runtime_error("Simulation is not configured to use Optimal Steps Model");
+        }
+        GenericAgent agent(
+            GenericAgent::ID::Invalid,
+            Journey::ID(parameters.journeyId),
+            BaseStage::ID(parameters.stageId),
+            intoPoint(parameters.position),
+            {},
+            OptimalStepsModelData{parameters.time_gap, parameters.v0, parameters.radius});
+        result = simulation->AddAgent(std::move(agent));
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return result.getID();
+}
+
 bool JPS_Simulation_MarkAgentForRemoval(
     JPS_Simulation handle,
     JPS_AgentId agentId,
@@ -1359,6 +1500,8 @@ JPS_ModelType JPS_Simulation_ModelType(JPS_Simulation handle)
             return JPS_CollisionFreeSpeedModel;
         case OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE:
             return JPS_GeneralizedCentrifugalForceModel;
+        case OperationalModelType::OPTIMAL_STEPS:
+            return JPS_OptimalStepsModel;
     }
     UNREACHABLE();
 }

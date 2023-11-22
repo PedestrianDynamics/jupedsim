@@ -15,6 +15,8 @@ from jupedsim.models import (
     CollisionFreeSpeedModelAgentParameters,
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
+    OptimalStepsModel,
+    OptimalStepsModelAgentParameters,
 )
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.stages import (
@@ -102,6 +104,15 @@ class Simulation:
                 max_geometry_repulsion_force=model.max_geometry_repulsion_force,
             )
             py_jps_model = model_builder.build()
+        elif isinstance(model, OptimalStepsModel):
+            model_builder = py_jps.OptimalStepsModelBuilder(
+                strength_neighbor_repulsion=model.strength_neighbor_repulsion,
+                range_neighbor_repulsion=model.range_neighbor_repulsion,
+                strength_geometry_repulsion=model.strength_geometry_repulsion,
+                range_geometry_repulsion=model.range_geometry_repulsion,
+            )
+            py_jps_model = model_builder.build()
+
         else:
             raise Exception("Unknown model type supplied")
         self._writer = trajectory_writer
@@ -199,7 +210,8 @@ class Simulation:
     def add_agent(
         self,
         parameters: GeneralizedCentrifugalForceModelAgentParameters
-        | CollisionFreeSpeedModelAgentParameters,
+        | CollisionFreeSpeedModelAgentParameters
+        | OptimalStepsModelAgentParameters,
     ) -> int:
         return self._obj.add_agent(parameters.as_native())
 

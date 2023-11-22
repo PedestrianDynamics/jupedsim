@@ -4,6 +4,7 @@
 #include "CollisionFreeSpeedModelData.hpp"
 #include "GeneralizedCentrifugalForceModelData.hpp"
 #include "OperationalModel.hpp"
+#include "OptimalStepsModelData.hpp"
 #include "Point.hpp"
 #include "UniqueID.hpp"
 #include "Visitor.hpp"
@@ -27,7 +28,10 @@ struct GenericAgent {
     Point pos{};
     Point orientation{1, 0};
 
-    using Model = std::variant<GeneralizedCentrifugalForceModelData, CollisionFreeSpeedModelData>;
+    using Model = std::variant<
+        GeneralizedCentrifugalForceModelData,
+        CollisionFreeSpeedModelData,
+        OptimalStepsModelData>;
     Model model{};
 
     GenericAgent(

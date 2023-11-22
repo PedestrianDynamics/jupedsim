@@ -61,6 +61,7 @@ OWNED_WRAPPER(JPS_GeometryBuilder);
 OWNED_WRAPPER(JPS_OperationalModel);
 OWNED_WRAPPER(JPS_CollisionFreeSpeedModelBuilder);
 OWNED_WRAPPER(JPS_GeneralizedCentrifugalForceModelBuilder);
+OWNED_WRAPPER(JPS_OptimalStepsModelBuilder);
 OWNED_WRAPPER(JPS_JourneyDescription);
 OWNED_WRAPPER(JPS_Transition);
 OWNED_WRAPPER(JPS_Simulation);
@@ -75,6 +76,7 @@ OWNED_WRAPPER(JPS_DirectSteeringProxy);
 WRAPPER(JPS_Agent);
 WRAPPER(JPS_GeneralizedCentrifugalForceModelState);
 WRAPPER(JPS_CollisionFreeSpeedModelState);
+WRAPPER(JPS_OptimalStepsModelState);
 
 class LogCallbackOwner
 {
@@ -271,6 +273,35 @@ PYBIND11_MODULE(py_jupedsim, m)
                 p.v0,
                 p.radius);
         });
+    py::class_<JPS_OptimalStepsModelAgentParameters>(m, "OptimalStepsModelAgentParameters")
+        .def(
+            py::init([](std::tuple<double, double> position,
+                        double time_gap,
+                        double v0,
+                        double radius,
+                        JPS_JourneyId journey_id,
+                        JPS_StageId stage_id) {
+                return JPS_OptimalStepsModelAgentParameters{
+                    intoJPS_Point(position), journey_id, stage_id, time_gap, v0, radius};
+            }),
+            py::kw_only(),
+            py::arg("position"),
+            py::arg("time_gap"),
+            py::arg("v0"),
+            py::arg("radius"),
+            py::arg("journey_id"),
+            py::arg("stage_id"))
+        .def("__repr__", [](const JPS_OptimalStepsModelAgentParameters& p) {
+            return fmt::format(
+                "position: {}, journey_id: {}, stage_id: {}, "
+                "time_gap: {}, v0: {}, radius: {}",
+                intoTuple(p.position),
+                p.journeyId,
+                p.stageId,
+                p.time_gap,
+                p.v0,
+                p.radius);
+        });
     py::class_<JPS_Geometry_Wrapper>(m, "Geometry")
         .def(
             "boundary",
@@ -352,6 +383,35 @@ PYBIND11_MODULE(py_jupedsim, m)
             JPS_ErrorMessage_Free(errorMsg);
             throw std::runtime_error{msg};
         });
+    py::class_<JPS_OptimalStepsModelBuilder_Wrapper>(m, "OptimalStepsModelBuilder")
+        .def(
+            py::init([](double strengthNeighborRepulsion,
+                        double rangeNeighborRepulsion,
+                        double strengthGeometryRepulsion,
+                        double rangeGeometryRepulsion) {
+                return std::make_unique<JPS_OptimalStepsModelBuilder_Wrapper>(
+                    JPS_OptimalStepsModelBuilder_Create(
+                        strengthNeighborRepulsion,
+                        rangeNeighborRepulsion,
+                        strengthGeometryRepulsion,
+                        rangeGeometryRepulsion));
+            }),
+            py::kw_only(),
+            py::arg("strength_neighbor_repulsion"),
+            py::arg("range_neighbor_repulsion"),
+            py::arg("strength_geometry_repulsion"),
+            py::arg("range_geometry_repulsion"))
+        .def("build", [](JPS_OptimalStepsModelBuilder_Wrapper& w) {
+            JPS_ErrorMessage errorMsg{};
+            auto result = JPS_OptimalStepsModelBuilder_Build(w.handle, &errorMsg);
+            if(result) {
+                return std::make_unique<JPS_OperationalModel_Wrapper>(result);
+            }
+            auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+            JPS_ErrorMessage_Free(errorMsg);
+            throw std::runtime_error{msg};
+        });
+
     py::class_<JPS_GeneralizedCentrifugalForceModelBuilder_Wrapper>(
         m, "GeneralizedCentrifugalForceModelBuilder")
         .def(
@@ -482,7 +542,7 @@ PYBIND11_MODULE(py_jupedsim, m)
                     throw std::runtime_error{msg};
                 }
             });
-    py::class_<JPS_AgentIterator_Wrapper>(m, "CollisionFreeSpeedModelAgentIterator")
+    py::class_<JPS_AgentIterator_Wrapper>(m, "OptimalStepsModelAgentIterator")
         .def(
             "__iter__",
             [](JPS_AgentIterator_Wrapper& w) -> JPS_AgentIterator_Wrapper& { return w; })
@@ -603,6 +663,31 @@ PYBIND11_MODULE(py_jupedsim, m)
             },
             [](JPS_CollisionFreeSpeedModelState_Wrapper& w, double radius) {
                 JPS_CollisionFreeSpeedModelState_SetRadius(w.handle, radius);
+            });
+    py::class_<JPS_OptimalStepsModelState_Wrapper>(m, "OptimalStepsModelState")
+        .def_property(
+            "time_gap",
+            [](const JPS_OptimalStepsModelState_Wrapper& w) {
+                return JPS_OptimalStepsModelState_GetTimeGap(w.handle);
+            },
+            [](JPS_OptimalStepsModelState_Wrapper& w, double time_gap) {
+                JPS_OptimalStepsModelState_SetTimeGap(w.handle, time_gap);
+            })
+        .def_property(
+            "v0",
+            [](const JPS_OptimalStepsModelState_Wrapper& w) {
+                return JPS_OptimalStepsModelState_GetV0(w.handle);
+            },
+            [](JPS_OptimalStepsModelState_Wrapper& w, double v0) {
+                JPS_OptimalStepsModelState_SetV0(w.handle, v0);
+            })
+        .def_property(
+            "radius",
+            [](const JPS_OptimalStepsModelState_Wrapper& w) {
+                return JPS_OptimalStepsModelState_GetRadius(w.handle);
+            },
+            [](JPS_OptimalStepsModelState_Wrapper& w, double radius) {
+                JPS_OptimalStepsModelState_SetRadius(w.handle, radius);
             });
     py::class_<JPS_NotifiableQueueProxy_Wrapper>(m, "NotifiableQueueProxy")
         .def(
@@ -828,6 +913,20 @@ PYBIND11_MODULE(py_jupedsim, m)
                JPS_CollisionFreeSpeedModelAgentParameters& parameters) {
                 JPS_ErrorMessage errorMsg{};
                 auto result = JPS_Simulation_AddCollisionFreeSpeedModelAgent(
+                    simulation.handle, parameters, &errorMsg);
+                if(result) {
+                    return result;
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
+            })
+        .def(
+            "add_agent",
+            [](JPS_Simulation_Wrapper& simulation,
+               JPS_OptimalStepsModelAgentParameters& parameters) {
+                JPS_ErrorMessage errorMsg{};
+                auto result = JPS_Simulation_AddOptimalStepsModelAgent(
                     simulation.handle, parameters, &errorMsg);
                 if(result) {
                     return result;

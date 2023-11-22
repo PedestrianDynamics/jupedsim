@@ -26,6 +26,25 @@ class CollisionFreeSpeedModel:
 
 
 @dataclass(kw_only=True)
+class OptimalStepsModel:
+    """Parameters for Optimal Steps Model
+
+    All attributes are initialized with reasonably good defaults.
+
+    Attributes:
+        strength_neighbor_repulsion: Strength of the repulsion from neighbors
+        range_neighbor_repulsion: Range of the repulsion from neighbors
+        strength_geometry_repulsion: Strength of the repulsion from geometry boundaries
+        range_geometry_repulsion: Range of the repulsion from geometry boundaries
+    """
+
+    strength_neighbor_repulsion: float = 8.0
+    range_neighbor_repulsion: float = 0.1
+    strength_geometry_repulsion: float = 5.0
+    range_geometry_repulsion: float = 0.02
+
+
+@dataclass(kw_only=True)
 class GeneralizedCentrifugalForceModel:
     """Parameters for Generalized Centrifugal Force Model
 
@@ -175,6 +194,53 @@ class CollisionFreeSpeedModelAgentParameters:
         )
 
 
+@dataclass(kw_only=True)
+class OptimalStepsModelAgentParameters:
+    """
+    Agent parameters for Optimal Steps Model.
+
+    .. note::
+
+        Instances of this type are copied when creating the agent, you can safely
+        create one instance of this type and modify it between calls to `add_agent`
+
+        E.g.:
+
+        .. code:: python
+
+            positions = [...] # List of initial agent positions
+            params = CollisionFreeSpeedModelAgentParameters(speed=0.9) # all agents are slower
+            for p in positions:
+                params.position = p
+                sim.add_agent(params)
+
+    Attributes:
+        position: Position of the agent.
+        time_gap: Time constant that describe how fast pedestrian close gaps.
+        v0: Maximum speed of the agent.
+        radius: Radius of the agent.
+        journey_id: Id of the journey the agent follows.
+        stage_id: Id of the stage the agent targets.
+    """
+
+    position: tuple[float, float] = (0.0, 0.0)
+    time_gap: float = 1.0
+    v0: float = 1.2
+    radius: float = 0.2
+    journey_id: int = 0
+    stage_id: int = 0
+
+    def as_native(self) -> py_jps.OptimalStepsModelAgentParameters:
+        return py_jps.OptimalStepsModelAgentParameters(
+            position=self.position,
+            time_gap=self.time_gap,
+            v0=self.v0,
+            radius=self.radius,
+            journey_id=self.journey_id,
+            stage_id=self.stage_id,
+        )
+
+
 class GeneralizedCentrifugalForceModelState:
     def __init__(self, backing) -> None:
         self._obj = backing
@@ -252,6 +318,37 @@ class GeneralizedCentrifugalForceModelState:
 
 
 class CollisionFreeSpeedModelState:
+    def __init__(self, backing):
+        self._obj = backing
+
+    @property
+    def time_gap(self) -> float:
+        return self._obj.time_gap
+
+    @time_gap.setter
+    def time_gap(self, time_gap):
+        self._obj.time_gap = time_gap
+
+    @property
+    def v0(self) -> float:
+        """Maximum speed of this agent."""
+        return self._obj.v0
+
+    @v0.setter
+    def v0(self, v0):
+        self._obj.v0 = v0
+
+    @property
+    def radius(self) -> float:
+        """Radius of this agent."""
+        return self._obj.radius
+
+    @radius.setter
+    def radius(self, radius):
+        self._obj.radius = radius
+
+
+class OptimalStepsModelState:
     def __init__(self, backing):
         self._obj = backing
 

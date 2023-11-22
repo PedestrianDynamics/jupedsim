@@ -39,6 +39,12 @@ add_library(simulator STATIC
     src/OperationalDecisionSystem.hpp
     src/OperationalModel.hpp
     src/OperationalModelUpdate.hpp
+    src/OptimalStepsModel.cpp
+    src/OptimalStepsModel.hpp
+    src/OptimalStepsModelBuilder.cpp
+    src/OptimalStepsModelBuilder.hpp
+    src/OptimalStepsModelData.hpp
+    src/OptimalStepsModelUpdate.hpp
     src/Point.cpp
     src/Point.hpp
     src/Polygon.cpp

@@ -36,6 +36,9 @@ from jupedsim.models import (
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
     GeneralizedCentrifugalForceModelState,
+    OptimalStepsModel,
+    OptimalStepsModelAgentParameters,
+    OptimalStepsModelState,
 )
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import RoutingEngine
@@ -70,6 +73,9 @@ __all__ = [
     "JourneyDescription",
     "NegativeValueError",
     "NotifiableQueueStage",
+    "OptimalStepsModel",
+    "OptimalStepsModelAgentParameters",
+    "OptimalStepsModelState",
     "OverlappingCirclesError",
     "Recording",
     "RecordingAgent",

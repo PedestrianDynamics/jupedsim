@@ -105,7 +105,8 @@ typedef struct JPS_Waypoint {
  */
 typedef enum JPS_ModelType {
     JPS_GeneralizedCentrifugalForceModel,
-    JPS_CollisionFreeSpeedModel
+    JPS_CollisionFreeSpeedModel,
+    JPS_OptimalStepsModel
 } JPS_ModelType;
 
 /**
@@ -296,6 +297,44 @@ JUPEDSIM_API JPS_OperationalModel JPS_CollisionFreeSpeedModelBuilder_Build(
  */
 JUPEDSIM_API void
 JPS_CollisionFreeSpeedModelBuilder_Free(JPS_CollisionFreeSpeedModelBuilder handle);
+
+/**
+ * Opaque type for a Collision Free Speed Model Builder
+ */
+typedef struct JPS_OptimalStepsModelBuilder_t* JPS_OptimalStepsModelBuilder;
+
+/**
+ * Creates a Collision Free Speed Model builder.
+ * @param strength_neighbor_repulsion describes the strength with which neighbors repulse each
+ * other.
+ * @param range_neighbor_repulsion describes the range at hich neighbors repulse each other.
+ * @param strength_geometry_repulsion describes the strength with which neighbors are repules by
+ * geometry.
+ * @param range_geometry_repulsion describes the range at hich neighbors are repulsed by geometry.
+ * @return the builder
+ */
+JUPEDSIM_API JPS_OptimalStepsModelBuilder JPS_OptimalStepsModelBuilder_Create(
+    double strengthNeighborRepulsion,
+    double rangeNeighborRepulsion,
+    double strengthGeometryRepulsion,
+    double rangeGeometryRepulsion);
+
+/**
+ * Creates a JPS_OperationalModel of type Collision Free Speed Model from the
+ * JPS_GeneralizedCentrifugalForceModelBuilder.
+ * @param handle the builder to operate on
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error
+ * @return a JPS_GeneralizedCentrifugalForceModel or NULL if an error occured.
+ */
+JUPEDSIM_API JPS_OperationalModel JPS_OptimalStepsModelBuilder_Build(
+    JPS_OptimalStepsModelBuilder handle,
+    JPS_ErrorMessage* errorMessage);
+
+/**
+ * Frees a JPS_OptimalStepsModelBuilder
+ * @param handle to the JPS_OptimalStepsModelBuilder to free.
+ */
+JUPEDSIM_API void JPS_OptimalStepsModelBuilder_Free(JPS_OptimalStepsModelBuilder handle);
 
 /**
  * Opaque type that represents the geometry the simulation acts on.
@@ -735,6 +774,83 @@ JUPEDSIM_API void
 JPS_CollisionFreeSpeedModelState_SetRadius(JPS_CollisionFreeSpeedModelState handle, double radius);
 
 /**
+ * Opaque type of Optimal Steps model state
+ */
+typedef struct JPS_OptimalStepsModelState_t* JPS_OptimalStepsModelState;
+
+/**
+ * Read e0 of this agent.
+ * @param handle of the Agent to access.
+ * @return e0 of this agent
+ */
+JUPEDSIM_API JPS_Point JPS_OptimalStepsModelState_GetE0(JPS_OptimalStepsModelState handle);
+
+/**
+ * Write e0 of this agent.
+ * @param handle of the Agent to access.
+ * @param e0 of this agent.
+ */
+JUPEDSIM_API void JPS_OptimalStepsModelState_SetE0(JPS_OptimalStepsModelState handle, JPS_Point e0);
+
+/**
+ * Read time gap of this agent.
+ * @param handle of the Agent to access.
+ * @return time gap of this agent
+ */
+JUPEDSIM_API double JPS_OptimalStepsModelState_GetTimeGap(JPS_OptimalStepsModelState handle);
+
+/**
+ * Write time gap of this agent.
+ * @param handle of the Agent to access.
+ * @param time_gap of this agent.
+ */
+JUPEDSIM_API void
+JPS_OptimalStepsModelState_SetTimeGap(JPS_OptimalStepsModelState handle, double time_gap);
+
+/**
+ * Read tau of this agent.
+ * @param handle of the Agent to access.
+ * @return tau of this agent
+ */
+JUPEDSIM_API double JPS_OptimalStepsModelState_GetTau(JPS_OptimalStepsModelState handle);
+
+/**
+ * Write tau of this agent.
+ * @param handle of the Agent to access.
+ * @param tau of this agent.
+ */
+JUPEDSIM_API void JPS_OptimalStepsModelState_SetTau(JPS_OptimalStepsModelState handle, double tau);
+
+/**
+ * Read v0 of this agent.
+ * @param handle of the Agent to access.
+ * @return v0 of this agent
+ */
+JUPEDSIM_API double JPS_OptimalStepsModelState_GetV0(JPS_OptimalStepsModelState handle);
+
+/**
+ * Write v0 of this agent.
+ * @param handle of the Agent to access.
+ * @param v0 of this agent.
+ */
+JUPEDSIM_API void JPS_OptimalStepsModelState_SetV0(JPS_OptimalStepsModelState handle, double v0);
+
+/**
+ * Read radius of this agent.
+ * @param handle of the Agent to access.
+ * @return radius of this agent
+ */
+JUPEDSIM_API double JPS_OptimalStepsModelState_GetRadius(JPS_OptimalStepsModelState handle);
+
+/**
+ * Write radius of this agent in meters.
+ * @param handle of the Agent to access.
+ * @param radius (m) of this agent.
+ */
+JUPEDSIM_API void
+JPS_OptimalStepsModelState_SetRadius(JPS_OptimalStepsModelState handle, double radius);
+
+/**
  * Identifies the type of stage
  */
 enum JPS_StageType {
@@ -875,6 +991,16 @@ JUPEDSIM_API JPS_CollisionFreeSpeedModelState
 JPS_Agent_GetCollisionFreeSpeedModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
 
 /**
+ * Access Optimal Steps model state.
+ * Precondition: Agent needs to use Optimal Steps model
+ * @param handle of the agent to access.
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return state or NULL on error
+ */
+JUPEDSIM_API JPS_OptimalStepsModelState
+JPS_Agent_GetOptimalModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
+
+/**
  * Opaque type of an iterator over agents
  */
 typedef struct JPS_AgentIterator_t* JPS_AgentIterator;
@@ -984,6 +1110,37 @@ typedef struct JPS_CollisionFreeSpeedModelAgentParameters {
      */
     double radius = 0.2;
 } JPS_CollisionFreeSpeedModelAgentParameters;
+
+/**
+ * Describes parameters of an Agent in GeneralizedCentrifugalForceModel
+ */
+typedef struct JPS_OptimalStepsModelAgentParameters {
+    /**
+     * Position of the agent.
+     * The position needs to inside the accessible area.
+     */
+    JPS_Point position{0, 0};
+    /**
+     * Defines the journey this agent will take use
+     */
+    JPS_JourneyId journeyId = 0;
+    /**
+     * Defines the current stage of its journey
+     */
+    JPS_StageId stageId = 0;
+    /**
+     * @param time_gap of the agents using this profile (T in the OV-function)
+     */
+    double time_gap = 1.;
+    /**
+     *@param v0 of the agents using this profile(desired speed) double radius;
+     */
+    double v0 = 1.2;
+    /**
+     *@param radius of the agent in 'meters'
+     */
+    double radius = 0.2;
+} JPS_OptimalStepsModelAgentParameters;
 
 /**
  * Opaque type of an iterator over agent ids
@@ -1155,6 +1312,22 @@ JUPEDSIM_API JPS_AgentId JPS_Simulation_AddGeneralizedCentrifugalForceModelAgent
 JUPEDSIM_API JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelAgent(
     JPS_Simulation handle,
     JPS_CollisionFreeSpeedModelAgentParameters parameters,
+    JPS_ErrorMessage* errorMessage);
+
+/**
+ * Adds a new agent to the simulation.
+ * This can be called at any time, i.e. agents can be added at any iteration.
+ * NOTE: Currently there is no checking done to ensure the agent can be placed at the desired
+ * location.
+ * @param handle to the simulation to act on
+ * @param parameters describing the new agent.
+ * @param[out] errorMessage if not NULL. Will contain address of JPS_ErrorMessage in case of an
+ * error.
+ * @return id of the new agent or 0 if the agent could not be added due to an error.
+ */
+JUPEDSIM_API JPS_AgentId JPS_Simulation_AddOptimalStepsModelAgent(
+    JPS_Simulation handle,
+    JPS_OptimalStepsModelAgentParameters parameters,
     JPS_ErrorMessage* errorMessage);
 
 /**
