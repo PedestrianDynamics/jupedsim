@@ -5,4 +5,6 @@
 struct OptimalStepsModelUpdate {
     Point position{};
     Point orientation{};
+
+    double nextTimeToAct{};
 };

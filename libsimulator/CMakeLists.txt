@@ -36,6 +36,7 @@ add_library(simulator STATIC
     src/Mathematics.cpp
     src/Mathematics.hpp
     src/NeighborhoodSearch.hpp
+    src/OperationalDecisionSystem.cpp
     src/OperationalDecisionSystem.hpp
     src/OperationalModel.hpp
     src/OperationalModelUpdate.hpp

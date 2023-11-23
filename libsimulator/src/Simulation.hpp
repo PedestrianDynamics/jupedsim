@@ -41,7 +41,7 @@ class Simulation
     SimulationClock _clock;
     StrategicalDecisionSystem _stategicalDecisionSystem{};
     TacticalDecisionSystem _tacticalDecisionSystem{};
-    OperationalDecisionSystem _operationalDecisionSystem;
+    std::unique_ptr<OperationalDecisionSystemInterface> _operationalDecisionSystem;
     AgentRemovalSystem<GenericAgent> _agentRemovalSystem{};
     StageManager _stageManager{};
     StageSystem _stageSystem{};

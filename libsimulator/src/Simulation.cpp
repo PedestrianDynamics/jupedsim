@@ -17,13 +17,14 @@ Simulation::Simulation(
     std::unique_ptr<CollisionGeometry>&& geometry,
     std::unique_ptr<RoutingEngine>&& routingEngine,
     double dT)
-    : _clock(dT)
-    , _operationalDecisionSystem(std::move(operationalModel))
-    , _routingEngine(std::move(routingEngine))
-    , _geometry(std::move(geometry))
+    : _clock(dT), _routingEngine(std::move(routingEngine)), _geometry(std::move(geometry))
 {
     // TODO(kkratz): Ensure all areas are fully contained inside the walkable area. Otherwise an
     // agent may try to navigate to a point outside the navigation mesh, resulting in an exception.
+    if(auto model = dynamic_cast<OptimalStepsModel*>(operationalModel.get()); model != nullptr) {
+        model->SetRoutingEngine(_routingEngine.get());
+    }
+    _operationalDecisionSystem = MakeOperationalDecisionSystem(std::move(operationalModel));
 }
 const SimulationClock& Simulation::Clock() const
 {
@@ -52,7 +53,7 @@ void Simulation::Iterate()
     _tacticalDecisionSystem.Run(*_routingEngine, _agents);
     {
         auto t2 = _perfStats.TraceOperationalDecisionSystemRun();
-        _operationalDecisionSystem.Run(
+        _operationalDecisionSystem->Run(
             _clock.dT(), _clock.ElapsedTime(), _neighborhoodSearch, *_geometry, _agents);
     }
     _clock.Advance();
@@ -178,7 +179,7 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
     }
 
     agent.orientation = agent.orientation.Normalized();
-    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry.get());
+    _operationalDecisionSystem->ValidateAgent(agent, _neighborhoodSearch, *_geometry.get());
 
     // HACK!!!
     // TODO(TS): Add hook for model specific actions when adding an agent
@@ -319,7 +320,7 @@ std::vector<GenericAgent::ID> Simulation::AgentsInPolygon(const std::vector<Poin
 
 OperationalModelType Simulation::ModelType() const
 {
-    return _operationalDecisionSystem.ModelType();
+    return _operationalDecisionSystem->ModelType();
 }
 
 StageProxy Simulation::Stage(BaseStage::ID stageId)

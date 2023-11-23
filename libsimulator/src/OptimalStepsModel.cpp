@@ -107,7 +107,7 @@ void OptimalStepsModel::ApplyUpdate(const OperationalModelUpdate& upd, GenericAg
 {
     const auto& update = std::get<OptimalStepsModelUpdate>(upd);
     agent.pos = update.position;
-    agent.orientation = update.orientation;
+    std::get<OptimalStepsModelData>(agent.model).nextTimeToAct = update.nextTimeToAct;
 }
 
 void OptimalStepsModel::CheckModelConstraint(
@@ -117,43 +117,43 @@ void OptimalStepsModel::CheckModelConstraint(
 {
     const auto& model = std::get<OptimalStepsModelData>(agent.model);
 
-    const auto r = model.radius;
-    constexpr double rMin = 0.;
-    constexpr double rMax = 2.;
-    validateConstraint(r, rMin, rMax, "radius", true);
+    // const auto r = model.radius;
+    // constexpr double rMin = 0.;
+    // constexpr double rMax = 2.;
+    // validateConstraint(r, rMin, rMax, "radius", true);
 
-    const auto v0 = model.v0;
-    constexpr double v0Min = 0.;
-    constexpr double v0Max = 10.;
-    validateConstraint(v0, v0Min, v0Max, "v0");
+    // const auto v0 = model.v0;
+    // constexpr double v0Min = 0.;
+    // constexpr double v0Max = 10.;
+    // validateConstraint(v0, v0Min, v0Max, "v0");
 
-    const auto timeGap = model.timeGap;
-    constexpr double timeGapMin = 0.1;
-    constexpr double timeGapMax = 10.;
-    validateConstraint(timeGap, timeGapMin, timeGapMax, "timeGap");
+    // const auto timeGap = model.timeGap;
+    // constexpr double timeGapMin = 0.1;
+    // constexpr double timeGapMax = 10.;
+    // validateConstraint(timeGap, timeGapMin, timeGapMax, "timeGap");
 
-    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
-    for(const auto& neighbor : neighbors) {
-        const auto& neighbor_model = std::get<OptimalStepsModelData>(neighbor.model);
-        const auto contanctdDist = r + neighbor_model.radius;
-        const auto distance = (agent.pos - neighbor.pos).Norm();
-        if(contanctdDist >= distance) {
-            throw SimulationError(
-                "Model constraint violation: Agent {} too close to agent {}: distance {}",
-                agent.pos,
-                neighbor.pos,
-                distance);
-        }
-    }
+    // const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
+    // for(const auto& neighbor : neighbors) {
+    //     const auto& neighbor_model = std::get<OptimalStepsModelData>(neighbor.model);
+    //     const auto contanctdDist = r + neighbor_model.radius;
+    //     const auto distance = (agent.pos - neighbor.pos).Norm();
+    //     if(contanctdDist >= distance) {
+    //         throw SimulationError(
+    //             "Model constraint violation: Agent {} too close to agent {}: distance {}",
+    //             agent.pos,
+    //             neighbor.pos,
+    //             distance);
+    //     }
+    // }
 
-    const auto lineSegments = geometry.LineSegmentsInDistanceTo(r, agent.pos);
-    if(std::begin(lineSegments) != std::end(lineSegments)) {
-        throw SimulationError(
-            "Model constraint violation: Agent {} too close to geometry boundaries, distance "
-            "<= {}",
-            agent.pos,
-            r);
-    }
+    // const auto lineSegments = geometry.LineSegmentsInDistanceTo(r, agent.pos);
+    // if(std::begin(lineSegments) != std::end(lineSegments)) {
+    //     throw SimulationError(
+    //         "Model constraint violation: Agent {} too close to geometry boundaries, distance "
+    //         "<= {}",
+    //         agent.pos,
+    //         r);
+    // }
 }
 
 std::unique_ptr<OperationalModel> OptimalStepsModel::Clone() const
@@ -210,4 +210,29 @@ Point OptimalStepsModel::BoundaryRepulsion(
     const auto l = model.radius;
     const auto R_iw = -strengthGeometryRepulsion * exp((l - dist) / rangeGeometryRepulsion);
     return e_iw * R_iw;
+}
+
+double OptimalStepsModel::computeDistancePotential(const Point& position, const Point& destination)
+{
+    const auto path = routingEngine->ComputeAllWaypoints(position, destination);
+    double distance = 0;
+    for(size_t i = 1; i <= path.size(); ++i) {
+        Point dist{path[i - 1] - path[i]};
+        distance += dist.Norm();
+    }
+    return distance;
+}
+
+double OptimalStepsModel::computeNeighborPotential(
+    const GenericAgent& agent,
+    const NeighborhoodSearchType& neighborhoodSearch)
+{
+    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 1.2);
+
+    double potential = 0;
+    for(const auto& neighbor : neighbors) {
+        if(neighbor.id == agent.id) {
+            continue;
+        }
+    }
 }
