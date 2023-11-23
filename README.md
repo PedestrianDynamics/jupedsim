@@ -25,8 +25,9 @@ Please consult our [documentation.](http://jupedsim.org)
 
 ## Contributing
 
-We are open for contributions and would be happy to see Questions, Issues and
-Pull Requests.
+JuPedSim is licensed under [GNU LGPLv3](LICENSE) hence we are looking forward
+to your contributions and would be happy to see questions, issues and pull
+requests.
 
 ### Questions
 
