@@ -5,6 +5,7 @@
 #include "Point.hpp"
 
 struct OptimalStepsModelData {
+    double nextTimeToAct{0};
     double timeGap{1};
     double v0{1.2};
     double radius{0.15};

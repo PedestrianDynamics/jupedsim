@@ -180,6 +180,12 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
     agent.orientation = agent.orientation.Normalized();
     _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry.get());
 
+    // HACK!!!
+    // TODO(TS): Add hook for model specific actions when adding an agent
+    if(std::holds_alternative<OptimalStepsModelData>(agent.model)) {
+        std::get<OptimalStepsModelData>(agent.model).nextTimeToAct = _clock.ElapsedTime();
+    }
+
     if(_journeys.count(agent.journeyId) == 0) {
         throw SimulationError("Unknown journey id: {}", agent.journeyId);
     }
