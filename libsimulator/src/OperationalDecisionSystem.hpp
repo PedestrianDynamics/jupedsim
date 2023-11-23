@@ -52,7 +52,7 @@ public:
         : OperationalDecisionSystemInterface(std::move(model))
     {
     }
-    ~OperationalDecisionSystem() = default;
+    ~OperationalDecisionSystem() override = default;
     OperationalDecisionSystem(const OperationalDecisionSystem& other) = delete;
     OperationalDecisionSystem& operator=(const OperationalDecisionSystem& other) = delete;
     OperationalDecisionSystem(OperationalDecisionSystem&& other) = delete;
@@ -105,7 +105,7 @@ public:
         : OperationalDecisionSystemInterface(std::move(model))
     {
     }
-    ~OperationalDecisionSystemOSM() = default;
+    ~OperationalDecisionSystemOSM() override = default;
     OperationalDecisionSystemOSM(const OperationalDecisionSystemOSM& other) = delete;
     OperationalDecisionSystemOSM& operator=(const OperationalDecisionSystemOSM& other) = delete;
     OperationalDecisionSystemOSM(OperationalDecisionSystemOSM&& other) = delete;
@@ -153,6 +153,8 @@ public:
                 _model->ComputeNewPosition(dT, *agentToUpdate, geometry, neighborhoodSearch);
             _model->ApplyUpdate(update, *agentToUpdate);
             agentActionEvents.pop();
+            neighborhoodSearch.RemoveAgent(*agentToUpdate);
+            neighborhoodSearch.AddAgent(*agentToUpdate);
             agentActionEvents.push(agentToUpdate);
         }
     }

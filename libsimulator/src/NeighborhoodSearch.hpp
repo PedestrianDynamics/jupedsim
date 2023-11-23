@@ -5,6 +5,7 @@
 #include "HashCombine.hpp"
 #include "IteratorPair.hpp"
 #include "Point.hpp"
+#include "SimulationError.hpp"
 
 #include <algorithm>
 #include <iterator>

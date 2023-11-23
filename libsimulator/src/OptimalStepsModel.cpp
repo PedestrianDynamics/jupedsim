@@ -8,6 +8,7 @@
 #include "Mathematics.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
+#include "OptimalStepsModelData.hpp"
 #include "SimulationError.hpp"
 #include "Stage.hpp"
 
@@ -161,34 +162,6 @@ std::unique_ptr<OperationalModel> OptimalStepsModel::Clone() const
     return std::make_unique<OptimalStepsModel>(*this);
 }
 
-double
-OptimalStepsModel::OptimalSpeed(const GenericAgent& ped, double spacing, double time_gap) const
-{
-    const auto& model = std::get<OptimalStepsModelData>(ped.model);
-    return std::min(std::max(spacing / time_gap, 0.0), model.v0);
-}
-
-double OptimalStepsModel::GetSpacing(
-    const GenericAgent& ped1,
-    const GenericAgent& ped2,
-    const Point& direction) const
-{
-    const auto& model1 = std::get<OptimalStepsModelData>(ped1.model);
-    const auto& model2 = std::get<OptimalStepsModelData>(ped2.model);
-    const auto distp12 = ped2.pos - ped1.pos;
-    const auto inFront = direction.ScalarProduct(distp12) >= 0;
-    if(!inFront) {
-        return std::numeric_limits<double>::max();
-    }
-
-    const auto left = direction.Rotate90Deg();
-    const auto l = model1.radius + model2.radius;
-    bool inCorridor = std::abs(left.ScalarProduct(distp12)) <= l;
-    if(!inCorridor) {
-        return std::numeric_limits<double>::max();
-    }
-    return distp12.Norm() - l;
-}
 Point OptimalStepsModel::NeighborRepulsion(const GenericAgent& ped1, const GenericAgent& ped2) const
 {
     const auto distp12 = ped2.pos - ped1.pos;
@@ -227,12 +200,19 @@ double OptimalStepsModel::computeNeighborPotential(
     const GenericAgent& agent,
     const NeighborhoodSearchType& neighborhoodSearch)
 {
-    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 1.2);
+    const double radius = std::get<OptimalStepsModelData>(agent.model).radius;
+    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 1.2 + radius);
 
     double potential = 0;
     for(const auto& neighbor : neighbors) {
         if(neighbor.id == agent.id) {
             continue;
         }
+        const double dist = (agent.pos - neighbor.pos).Norm();
+        // TO BE CONTINUED
+        // @ TOBI guck mal in
+        // VadereSimulator/src/org/vadere/simulator/models/potential/PotentialFieldPedestrianCompactSoftshell.java
+        // getAgentPotential
     }
+    return potential;
 }
