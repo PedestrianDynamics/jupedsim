@@ -18,10 +18,17 @@ public:
 
 private:
     double _cutOffRadius{3};
-    double strengthNeighborRepulsion;
-    double rangeNeighborRepulsion;
-    double strengthGeometryRepulsion;
-    double rangeGeometryRepulsion;
+
+    int numberCircles{};
+    int positionsPerCircle{};
+
+    double intimateWidth{}; // \delta_{i}
+    double personalWidth{}; // \delta_{per}
+    double repulsionIntensity{}; // \mu_p
+
+    double geometryWidth{};
+    double geometryHeight{};
+
     RoutingEngine* routingEngine{};
 
 public:
@@ -46,15 +53,18 @@ public:
     void SetRoutingEngine(RoutingEngine* routingEngine_) { routingEngine = routingEngine_; }
 
 private:
-    double OptimalSpeed(const GenericAgent& ped, double spacing, double time_gap) const;
-    double
-    GetSpacing(const GenericAgent& ped1, const GenericAgent& ped2, const Point& direction) const;
-    Point NeighborRepulsion(const GenericAgent& ped1, const GenericAgent& ped2) const;
-    Point BoundaryRepulsion(const GenericAgent& ped, const LineSegment& boundary_segment) const;
-
     double computeDistancePotential(const Point& position, const Point& destination);
-    double computeNeighborPotential(
+    double computeNeighborsPotential(
+        const Point& position,
         const GenericAgent& agent,
         const NeighborhoodSearchType& neighborhoodSearch);
-    double computeBoundaryPotential(const Point& position, const CollisionGeometry& geometry);
+    double computeNeighborPotential(
+        const Point& position,
+        const GenericAgent& agent,
+        const GenericAgent& otherAgent);
+
+    double computeBoundaryPotential(
+        const Point& position,
+        const GenericAgent& agent,
+        const CollisionGeometry& geometry);
 };

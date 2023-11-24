@@ -23,10 +23,6 @@ OptimalStepsModel::OptimalStepsModel(
     double rangeNeighborRepulsion_,
     double strengthGeometryRepulsion_,
     double rangeGeometryRepulsion_)
-    : strengthNeighborRepulsion(strengthNeighborRepulsion_)
-    , rangeNeighborRepulsion(rangeNeighborRepulsion_)
-    , strengthGeometryRepulsion(strengthGeometryRepulsion_)
-    , rangeGeometryRepulsion(rangeGeometryRepulsion_)
 {
 }
 
@@ -41,68 +37,7 @@ OperationalModelUpdate OptimalStepsModel::ComputeNewPosition(
     const CollisionGeometry& geometry,
     const NeighborhoodSearchType& neighborhoodSearch) const
 {
-    auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.pos, _cutOffRadius);
-    const auto& boundary = geometry.LineSegmentsInApproxDistanceTo(ped.pos);
-
-    // Remove any agent from the neighborhood that is obstructed by geometry and the current
-    // agent
-    //
-    neighborhood.erase(
-        std::remove_if(
-            std::begin(neighborhood),
-            std::end(neighborhood),
-            [&ped, &boundary](const auto& neighbor) {
-                if(ped.id == neighbor.id) {
-                    return true;
-                }
-                const auto agent_to_neighbor = LineSegment(ped.pos, neighbor.pos);
-                if(std::find_if(
-                       boundary.cbegin(),
-                       boundary.cend(),
-                       [&agent_to_neighbor](const auto& boundary_segment) {
-                           return intersects(agent_to_neighbor, boundary_segment);
-                       }) != boundary.end()) {
-                    return true;
-                }
-
-                return false;
-            }),
-        std::end(neighborhood));
-
-    const auto neighborRepulsion = std::accumulate(
-        std::begin(neighborhood),
-        std::end(neighborhood),
-        Point{},
-        [&ped, this](const auto& res, const auto& neighbor) {
-            return res + NeighborRepulsion(ped, neighbor);
-        });
-
-    const auto boundaryRepulsion = std::accumulate(
-        boundary.cbegin(),
-        boundary.cend(),
-        Point(0, 0),
-        [this, &ped](const auto& acc, const auto& element) {
-            return acc + BoundaryRepulsion(ped, element);
-        });
-
-    const auto desired_direction = (ped.destination - ped.pos).Normalized();
-    auto direction = (desired_direction + neighborRepulsion + boundaryRepulsion).Normalized();
-    if(direction == Point{}) {
-        direction = ped.orientation;
-    }
-    const auto spacing = std::accumulate(
-        std::begin(neighborhood),
-        std::end(neighborhood),
-        std::numeric_limits<double>::max(),
-        [&ped, &direction, this](const auto& res, const auto& neighbor) {
-            return std::min(res, GetSpacing(ped, neighbor, direction));
-        });
-
-    const auto& model = std::get<OptimalStepsModelData>(ped.model);
-    const auto optimal_speed = OptimalSpeed(ped, spacing, model.timeGap);
-    const auto velocity = direction * optimal_speed;
-    return OptimalStepsModelUpdate{ped.pos + velocity * dT, direction};
-};
+}
 
 void OptimalStepsModel::ApplyUpdate(const OperationalModelUpdate& upd, GenericAgent& agent) const
 {
@@ -162,29 +97,6 @@ std::unique_ptr<OperationalModel> OptimalStepsModel::Clone() const
     return std::make_unique<OptimalStepsModel>(*this);
 }
 
-Point OptimalStepsModel::NeighborRepulsion(const GenericAgent& ped1, const GenericAgent& ped2) const
-{
-    const auto distp12 = ped2.pos - ped1.pos;
-    const auto [distance, direction] = distp12.NormAndNormalized();
-    const auto& model1 = std::get<OptimalStepsModelData>(ped1.model);
-    const auto& model2 = std::get<OptimalStepsModelData>(ped2.model);
-    const auto l = model1.radius + model2.radius;
-    return direction * -(strengthNeighborRepulsion * exp((l - distance) / rangeNeighborRepulsion));
-}
-
-Point OptimalStepsModel::BoundaryRepulsion(
-    const GenericAgent& ped,
-    const LineSegment& boundary_segment) const
-{
-    const auto pt = boundary_segment.ShortestPoint(ped.pos);
-    const auto dist_vec = pt - ped.pos;
-    const auto [dist, e_iw] = dist_vec.NormAndNormalized();
-    const auto& model = std::get<OptimalStepsModelData>(ped.model);
-    const auto l = model.radius;
-    const auto R_iw = -strengthGeometryRepulsion * exp((l - dist) / rangeGeometryRepulsion);
-    return e_iw * R_iw;
-}
-
 double OptimalStepsModel::computeDistancePotential(const Point& position, const Point& destination)
 {
     const auto path = routingEngine->ComputeAllWaypoints(position, destination);
@@ -196,23 +108,88 @@ double OptimalStepsModel::computeDistancePotential(const Point& position, const 
     return distance;
 }
 
-double OptimalStepsModel::computeNeighborPotential(
+double OptimalStepsModel::computeNeighborsPotential(
+    const Point& position,
     const GenericAgent& agent,
     const NeighborhoodSearchType& neighborhoodSearch)
 {
     const double radius = std::get<OptimalStepsModelData>(agent.model).radius;
-    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 1.2 + radius);
+
+    // TODO (TS): replace 1.2 with model parameter
+    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(position, 1.2 + radius);
 
     double potential = 0;
     for(const auto& neighbor : neighbors) {
         if(neighbor.id == agent.id) {
             continue;
         }
-        const double dist = (agent.pos - neighbor.pos).Norm();
-        // TO BE CONTINUED
-        // @ TOBI guck mal in
-        // VadereSimulator/src/org/vadere/simulator/models/potential/PotentialFieldPedestrianCompactSoftshell.java
-        // getAgentPotential
+        potential += computeNeighborPotential(position, agent, neighbor);
     }
     return potential;
+}
+
+double OptimalStepsModel::computeNeighborPotential(
+    const Point& position,
+    const GenericAgent& agent,
+    const GenericAgent& otherAgent)
+{
+    const double radii = std::get<OptimalStepsModelData>(agent.model).radius +
+                         std::get<OptimalStepsModelData>(otherAgent.model).radius;
+
+    const double distanceSq = (position - otherAgent.pos).NormSquare();
+    const double maxDistanceSq = (std::max(personalWidth, intimateWidth) + radii) *
+                                 (std::max(personalWidth, intimateWidth) + radii);
+
+    if(distanceSq < maxDistanceSq) {
+        const double distance = (position - otherAgent.pos).Norm();
+
+        const int intimateSpacePower = 1; // b_p
+        const int personalSpacePower = 1;
+        const double intimateSpaceFactor = 2.; // a_p
+
+        if(distance < radii) {
+            // vadere
+            return 1000 * std::exp(1 / (std::pow(distance / radii, 4) - 1));
+            // sivers 2016
+            // return 1000 * std::exp(1 / (std::pow(distance / radii, 2) - 1));
+        }
+        if(distance < intimateWidth + radii) {
+            return repulsionIntensity / intimateSpaceFactor *
+                   std::exp(
+                       4 /
+                       (std::pow(distance / (intimateWidth + radii), 2 * intimateSpacePower) - 1));
+        }
+
+        if(distance < personalWidth + radii) {
+            return repulsionIntensity *
+                   std::exp(
+                       4 /
+                       (std::pow(distance / (personalWidth + radii), 2 * personalSpacePower) - 1));
+        }
+    }
+
+    return 0;
+}
+
+double OptimalStepsModel::computeBoundaryPotential(
+    const Point& position,
+    const GenericAgent& agent,
+    const CollisionGeometry& geometry)
+{
+    double boundaryPotential = 0;
+    const auto& lineSegments = geometry.LineSegmentsInApproxDistanceTo(position);
+    const double radius = std::get<OptimalStepsModelData>(agent.model).radius;
+
+    for(const auto& lineSegment : lineSegments) {
+        // TODO (TS): Check if line segment "directly visibile"?
+        auto distance = lineSegment.DistTo(position);
+
+        if(distance < radius) {
+            boundaryPotential += 100000 * std::exp(1 / (std::pow(distance / radius, 2) - 1));
+        } else if(distance < geometryWidth) {
+            boundaryPotential +=
+                geometryHeight * std::exp(2 / (std::pow(distance / (geometryWidth), 2) - 1));
+        }
+    }
+    return boundaryPotential;
 }
