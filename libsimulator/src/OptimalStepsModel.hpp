@@ -53,18 +53,18 @@ public:
     void SetRoutingEngine(RoutingEngine* routingEngine_) { routingEngine = routingEngine_; }
 
 private:
-    double computeDistancePotential(const Point& position, const Point& destination);
+    double computeDistancePotential(const Point& position, const Point& destination) const;
     double computeNeighborsPotential(
         const Point& position,
         const GenericAgent& agent,
-        const NeighborhoodSearchType& neighborhoodSearch);
+        const NeighborhoodSearchType& neighborhoodSearch) const;
     double computeNeighborPotential(
         const Point& position,
         const GenericAgent& agent,
-        const GenericAgent& otherAgent);
+        const GenericAgent& otherAgent) const;
 
     double computeBoundaryPotential(
         const Point& position,
         const GenericAgent& agent,
-        const CollisionGeometry& geometry);
+        const CollisionGeometry& geometry) const;
 };

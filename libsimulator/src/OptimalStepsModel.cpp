@@ -37,6 +37,33 @@ OperationalModelUpdate OptimalStepsModel::ComputeNewPosition(
     const CollisionGeometry& geometry,
     const NeighborhoodSearchType& neighborhoodSearch) const
 {
+    Point newPosition{0, 0};
+    double minPotential = std::numeric_limits<double>::max();
+
+    for(size_t circle = 0; circle < numberCircles; ++circle) {
+        for(size_t circlePosition = 0; circlePosition < positionsPerCircle; ++circlePosition) {
+            Point candidatePosition;
+            // compute candidate position
+
+            double targetPotential = computeDistancePotential(candidatePosition, ped.target);
+            double neighborPotential =
+                computeNeighborsPotential(candidatePosition, ped, neighborhoodSearch);
+            double boundaryPotential = computeBoundaryPotential(candidatePosition, ped, geometry);
+
+            double candidatePotential = targetPotential + neighborPotential + boundaryPotential;
+
+            if(candidatePotential < minPotential) {
+                newPosition = candidatePosition;
+            }
+        }
+    }
+
+    // compute next time to act
+    double nextTimeToAct = 0;
+
+    OptimalStepsModelUpdate update;
+    update.position = newPosition;
+    update.nextTimeToAct = nextTimeToAct;
 }
 
 void OptimalStepsModel::ApplyUpdate(const OperationalModelUpdate& upd, GenericAgent& agent) const
@@ -53,7 +80,7 @@ void OptimalStepsModel::CheckModelConstraint(
 {
     const auto& model = std::get<OptimalStepsModelData>(agent.model);
 
-    // const auto r = model.radius;
+    const auto r = model.radius;
     // constexpr double rMin = 0.;
     // constexpr double rMax = 2.;
     // validateConstraint(r, rMin, rMax, "radius", true);
@@ -68,28 +95,28 @@ void OptimalStepsModel::CheckModelConstraint(
     // constexpr double timeGapMax = 10.;
     // validateConstraint(timeGap, timeGapMin, timeGapMax, "timeGap");
 
-    // const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
-    // for(const auto& neighbor : neighbors) {
-    //     const auto& neighbor_model = std::get<OptimalStepsModelData>(neighbor.model);
-    //     const auto contanctdDist = r + neighbor_model.radius;
-    //     const auto distance = (agent.pos - neighbor.pos).Norm();
-    //     if(contanctdDist >= distance) {
-    //         throw SimulationError(
-    //             "Model constraint violation: Agent {} too close to agent {}: distance {}",
-    //             agent.pos,
-    //             neighbor.pos,
-    //             distance);
-    //     }
-    // }
+    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
+    for(const auto& neighbor : neighbors) {
+        const auto& neighbor_model = std::get<OptimalStepsModelData>(neighbor.model);
+        const auto contanctdDist = r + neighbor_model.radius;
+        const auto distance = (agent.pos - neighbor.pos).Norm();
+        if(contanctdDist >= distance) {
+            throw SimulationError(
+                "Model constraint violation: Agent {} too close to agent {}: distance {}",
+                agent.pos,
+                neighbor.pos,
+                distance);
+        }
+    }
 
-    // const auto lineSegments = geometry.LineSegmentsInDistanceTo(r, agent.pos);
-    // if(std::begin(lineSegments) != std::end(lineSegments)) {
-    //     throw SimulationError(
-    //         "Model constraint violation: Agent {} too close to geometry boundaries, distance "
-    //         "<= {}",
-    //         agent.pos,
-    //         r);
-    // }
+    const auto lineSegments = geometry.LineSegmentsInDistanceTo(r, agent.pos);
+    if(std::begin(lineSegments) != std::end(lineSegments)) {
+        throw SimulationError(
+            "Model constraint violation: Agent {} too close to geometry boundaries, distance "
+            "<= {}",
+            agent.pos,
+            r);
+    }
 }
 
 std::unique_ptr<OperationalModel> OptimalStepsModel::Clone() const
@@ -97,7 +124,8 @@ std::unique_ptr<OperationalModel> OptimalStepsModel::Clone() const
     return std::make_unique<OptimalStepsModel>(*this);
 }
 
-double OptimalStepsModel::computeDistancePotential(const Point& position, const Point& destination)
+double
+OptimalStepsModel::computeDistancePotential(const Point& position, const Point& destination) const
 {
     const auto path = routingEngine->ComputeAllWaypoints(position, destination);
     double distance = 0;
@@ -111,7 +139,7 @@ double OptimalStepsModel::computeDistancePotential(const Point& position, const 
 double OptimalStepsModel::computeNeighborsPotential(
     const Point& position,
     const GenericAgent& agent,
-    const NeighborhoodSearchType& neighborhoodSearch)
+    const NeighborhoodSearchType& neighborhoodSearch) const
 {
     const double radius = std::get<OptimalStepsModelData>(agent.model).radius;
 
@@ -131,7 +159,7 @@ double OptimalStepsModel::computeNeighborsPotential(
 double OptimalStepsModel::computeNeighborPotential(
     const Point& position,
     const GenericAgent& agent,
-    const GenericAgent& otherAgent)
+    const GenericAgent& otherAgent) const
 {
     const double radii = std::get<OptimalStepsModelData>(agent.model).radius +
                          std::get<OptimalStepsModelData>(otherAgent.model).radius;
@@ -174,7 +202,7 @@ double OptimalStepsModel::computeNeighborPotential(
 double OptimalStepsModel::computeBoundaryPotential(
     const Point& position,
     const GenericAgent& agent,
-    const CollisionGeometry& geometry)
+    const CollisionGeometry& geometry) const
 {
     double boundaryPotential = 0;
     const auto& lineSegments = geometry.LineSegmentsInApproxDistanceTo(position);
