@@ -9,6 +9,16 @@ struct OptimalStepsModelData {
     double timeGap{1};
     double v0{1.2};
     double radius{0.15};
+
+    double intimateSpaceWidth{}; // \delta_{i}
+    double intimateSpacePower{};
+    double intimateSpaceFactor{};
+    double personalSpaceWidth{}; // \delta_{per}
+    double personalSpacePower{};
+    double repulsionIntensity{}; // \mu_p
+
+    double geometryWidth{};
+    double geometryHeight{};
 };
 
 template <>

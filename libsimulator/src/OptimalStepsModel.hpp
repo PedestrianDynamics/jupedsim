@@ -9,6 +9,9 @@
 #include "RoutingEngine.hpp"
 #include "UniqueID.hpp"
 
+#include "RNG.hpp"
+#include <optional>
+
 struct GenericAgent;
 
 class OptimalStepsModel : public OperationalModel
@@ -19,16 +22,12 @@ public:
 private:
     double _cutOffRadius{3};
 
-    int numberCircles{};
-    int positionsPerCircle{};
+    int numberCircles{1};
+    int positionsPerCircle{4};
 
-    double intimateWidth{}; // \delta_{i}
-    double personalWidth{}; // \delta_{per}
-    double repulsionIntensity{}; // \mu_p
-
-    double geometryWidth{};
-    double geometryHeight{};
-
+    static constexpr double stepLengthIntercept{0.4625};
+    static constexpr double stepLengthSlopeSpeed{0.2345};
+    double stepLengthSD{0.036};
     RoutingEngine* routingEngine{};
 
 public:
@@ -67,4 +66,20 @@ private:
         const Point& position,
         const GenericAgent& agent,
         const CollisionGeometry& geometry) const;
+
+    std::optional<Point> computeCandiateOnCircle(
+        const Point& center,
+        double radius,
+        int count,
+        int numberOfPoints,
+        const std::vector<LineSegment>& walls) const;
+
+    double computePotential(
+        const Point& position,
+        const GenericAgent& ped,
+        const CollisionGeometry& geometry,
+        const NeighborhoodSearchType& neighborhoodSearch) const;
+
+    double computeDesiredStepSize(const GenericAgent& agent) const;
+    double computeNextTimeToAct(const GenericAgent& agent, double stepSize) const;
 };

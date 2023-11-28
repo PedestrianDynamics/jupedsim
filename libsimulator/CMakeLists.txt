@@ -50,6 +50,7 @@ add_library(simulator STATIC
     src/Point.hpp
     src/Polygon.cpp
     src/Polygon.hpp
+    src/RNG.hpp
     src/RoutingEngine.cpp
     src/RoutingEngine.hpp
     src/Simulation.cpp

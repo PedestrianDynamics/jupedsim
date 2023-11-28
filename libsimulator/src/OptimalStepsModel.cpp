@@ -9,12 +9,15 @@
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OptimalStepsModelData.hpp"
+#include "RNG.hpp"
 #include "SimulationError.hpp"
 #include "Stage.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
 #include <memory>
+#include <numbers>
 #include <numeric>
 #include <vector>
 
@@ -37,23 +40,30 @@ OperationalModelUpdate OptimalStepsModel::ComputeNewPosition(
     const CollisionGeometry& geometry,
     const NeighborhoodSearchType& neighborhoodSearch) const
 {
-    Point newPosition{0, 0};
-    double minPotential = std::numeric_limits<double>::max();
+    Point newPosition = ped.pos;
+    double minPotential = computePotential(ped.pos, ped, geometry, neighborhoodSearch);
 
     for(size_t circle = 0; circle < numberCircles; ++circle) {
         for(size_t circlePosition = 0; circlePosition < positionsPerCircle; ++circlePosition) {
-            Point candidatePosition;
             // compute candidate position
+            double radius = 0; // TODO
 
-            double targetPotential = computeDistancePotential(candidatePosition, ped.target);
-            double neighborPotential =
-                computeNeighborsPotential(candidatePosition, ped, neighborhoodSearch);
-            double boundaryPotential = computeBoundaryPotential(candidatePosition, ped, geometry);
+            auto candidatePosition = computeCandiateOnCircle(
+                ped.pos,
+                radius,
+                circlePosition,
+                positionsPerCircle,
+                geometry.LineSegmentsInApproxDistanceTo(ped.pos));
 
-            double candidatePotential = targetPotential + neighborPotential + boundaryPotential;
+            if(!candidatePosition) {
+                continue;
+            }
+
+            double candidatePotential =
+                computePotential(*candidatePosition, ped, geometry, neighborhoodSearch);
 
             if(candidatePotential < minPotential) {
-                newPosition = candidatePosition;
+                newPosition = *candidatePosition;
             }
         }
     }
@@ -64,6 +74,19 @@ OperationalModelUpdate OptimalStepsModel::ComputeNewPosition(
     OptimalStepsModelUpdate update;
     update.position = newPosition;
     update.nextTimeToAct = nextTimeToAct;
+}
+
+double OptimalStepsModel::computePotential(
+    const Point& position,
+    const GenericAgent& ped,
+    const CollisionGeometry& geometry,
+    const NeighborhoodSearchType& neighborhoodSearch) const
+{
+    double targetPotential = computeDistancePotential(position, ped.target);
+    double neighborPotential = computeNeighborsPotential(position, ped, neighborhoodSearch);
+    double boundaryPotential = computeBoundaryPotential(position, ped, geometry);
+
+    return targetPotential + neighborPotential + boundaryPotential;
 }
 
 void OptimalStepsModel::ApplyUpdate(const OperationalModelUpdate& upd, GenericAgent& agent) const
@@ -117,6 +140,9 @@ void OptimalStepsModel::CheckModelConstraint(
             agent.pos,
             r);
     }
+
+    // TODO radius < intimate
+    // TODO intimate < personalWidth
 }
 
 std::unique_ptr<OperationalModel> OptimalStepsModel::Clone() const
@@ -161,39 +187,33 @@ double OptimalStepsModel::computeNeighborPotential(
     const GenericAgent& agent,
     const GenericAgent& otherAgent) const
 {
-    const double radii = std::get<OptimalStepsModelData>(agent.model).radius +
-                         std::get<OptimalStepsModelData>(otherAgent.model).radius;
+    const auto& agentModel = std::get<OptimalStepsModelData>(agent.model);
+    const auto& otherModel = std::get<OptimalStepsModelData>(otherAgent.model);
 
-    const double distanceSq = (position - otherAgent.pos).NormSquare();
-    const double maxDistanceSq = (std::max(personalWidth, intimateWidth) + radii) *
-                                 (std::max(personalWidth, intimateWidth) + radii);
+    const double radii = agentModel.radius + otherModel.radius;
+    const double distance = (position - otherAgent.pos).Norm();
 
-    if(distanceSq < maxDistanceSq) {
-        const double distance = (position - otherAgent.pos).Norm();
+    double potential = 0;
+    if(distance < agentModel.personalSpaceWidth + radii) {
+        potential += agentModel.repulsionIntensity *
+                     std::exp(
+                         4 / (std::pow(
+                                  distance / (agentModel.personalSpaceWidth + radii),
+                                  (2 * agentModel.personalSpacePower)) -
+                              1));
+    }
 
-        const int intimateSpacePower = 1; // b_p
-        const int personalSpacePower = 1;
-        const double intimateSpaceFactor = 2.; // a_p
+    if(distance < agentModel.intimateSpaceWidth + radii) {
+        potential += (agentModel.repulsionIntensity / agentModel.intimateSpaceFactor) *
+                     std::exp(
+                         4 / std::pow(
+                                 distance / (agentModel.personalSpaceWidth + radii),
+                                 2 * agentModel.personalSpacePower) -
+                         1);
+    }
 
-        if(distance < radii) {
-            // vadere
-            return 1000 * std::exp(1 / (std::pow(distance / radii, 4) - 1));
-            // sivers 2016
-            // return 1000 * std::exp(1 / (std::pow(distance / radii, 2) - 1));
-        }
-        if(distance < intimateWidth + radii) {
-            return repulsionIntensity / intimateSpaceFactor *
-                   std::exp(
-                       4 /
-                       (std::pow(distance / (intimateWidth + radii), 2 * intimateSpacePower) - 1));
-        }
-
-        if(distance < personalWidth + radii) {
-            return repulsionIntensity *
-                   std::exp(
-                       4 /
-                       (std::pow(distance / (personalWidth + radii), 2 * personalSpacePower) - 1));
-        }
+    if(distance < radii) {
+        potential += 1000 * std::exp(1 / (std::pow(distance / radii, 4) - 1));
     }
 
     return 0;
@@ -204,20 +224,55 @@ double OptimalStepsModel::computeBoundaryPotential(
     const GenericAgent& agent,
     const CollisionGeometry& geometry) const
 {
-    double boundaryPotential = 0;
     const auto& lineSegments = geometry.LineSegmentsInApproxDistanceTo(position);
-    const double radius = std::get<OptimalStepsModelData>(agent.model).radius;
+    const auto& agentModel = std::get<OptimalStepsModelData>(agent.model);
+
+    const double radius = agentModel.radius;
+
+    double minDistance = std::numeric_limits<double>::max();
 
     for(const auto& lineSegment : lineSegments) {
-        // TODO (TS): Check if line segment "directly visibile"?
-        auto distance = lineSegment.DistTo(position);
+        minDistance = std::min(minDistance, lineSegment.DistTo(position));
+    }
 
-        if(distance < radius) {
-            boundaryPotential += 100000 * std::exp(1 / (std::pow(distance / radius, 2) - 1));
-        } else if(distance < geometryWidth) {
-            boundaryPotential +=
-                geometryHeight * std::exp(2 / (std::pow(distance / (geometryWidth), 2) - 1));
+    if(minDistance < radius) {
+        return 100000 * std::exp(1 / (std::pow(minDistance / radius, 2) - 1));
+    } else if(minDistance < agentModel.geometryWidth) {
+        return agentModel.geometryHeight *
+               std::exp(2 / (std::pow(minDistance / (agentModel.geometryWidth), 2) - 1));
+    }
+
+    return 0;
+}
+
+std::optional<Point> OptimalStepsModel::computeCandiateOnCircle(
+    const Point& center,
+    double radius,
+    int count,
+    int numberOfPoints,
+    const std::vector<LineSegment>& walls) const
+{
+    const double x = center.x + radius * cos(2. * std::numbers::pi * count / numberOfPoints);
+    const double y = center.y + radius * sin(2. * std::numbers::pi * count / numberOfPoints);
+
+    const Point candidate{x, y};
+    const LineSegment movement{candidate, center};
+
+    for(const auto& wall : walls) {
+        if(intersects(movement, wall)) {
+            return std::nullopt;
         }
     }
-    return boundaryPotential;
+
+    return candidate;
+}
+
+double OptimalStepsModel::computeDesiredStepSize(const GenericAgent& agent) const
+{
+    Random rng{1200};
+
+    double step = stepLengthIntercept +
+                  stepLengthSlopeSpeed * std::get<OptimalStepsModelData>(agent.model).v0 +
+                  rng.normalDistributen(0., 1.) * stepLengthSD;
+    return step;
 }
