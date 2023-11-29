@@ -793,21 +793,6 @@ JUPEDSIM_API JPS_Point JPS_OptimalStepsModelState_GetE0(JPS_OptimalStepsModelSta
 JUPEDSIM_API void JPS_OptimalStepsModelState_SetE0(JPS_OptimalStepsModelState handle, JPS_Point e0);
 
 /**
- * Read time gap of this agent.
- * @param handle of the Agent to access.
- * @return time gap of this agent
- */
-JUPEDSIM_API double JPS_OptimalStepsModelState_GetTimeGap(JPS_OptimalStepsModelState handle);
-
-/**
- * Write time gap of this agent.
- * @param handle of the Agent to access.
- * @param time_gap of this agent.
- */
-JUPEDSIM_API void
-JPS_OptimalStepsModelState_SetTimeGap(JPS_OptimalStepsModelState handle, double time_gap);
-
-/**
  * Read tau of this agent.
  * @param handle of the Agent to access.
  * @return tau of this agent
@@ -1128,10 +1113,8 @@ typedef struct JPS_OptimalStepsModelAgentParameters {
      * Defines the current stage of its journey
      */
     JPS_StageId stageId = 0;
-    /**
-     * @param time_gap of the agents using this profile (T in the OV-function)
-     */
-    double time_gap = 1.;
+
+    // TODO add doc
     /**
      *@param v0 of the agents using this profile(desired speed) double radius;
      */

@@ -276,17 +276,15 @@ PYBIND11_MODULE(py_jupedsim, m)
     py::class_<JPS_OptimalStepsModelAgentParameters>(m, "OptimalStepsModelAgentParameters")
         .def(
             py::init([](std::tuple<double, double> position,
-                        double time_gap,
                         double v0,
                         double radius,
                         JPS_JourneyId journey_id,
                         JPS_StageId stage_id) {
                 return JPS_OptimalStepsModelAgentParameters{
-                    intoJPS_Point(position), journey_id, stage_id, time_gap, v0, radius};
+                    intoJPS_Point(position), journey_id, stage_id, v0, radius};
             }),
             py::kw_only(),
             py::arg("position"),
-            py::arg("time_gap"),
             py::arg("v0"),
             py::arg("radius"),
             py::arg("journey_id"),
@@ -294,11 +292,10 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def("__repr__", [](const JPS_OptimalStepsModelAgentParameters& p) {
             return fmt::format(
                 "position: {}, journey_id: {}, stage_id: {}, "
-                "time_gap: {}, v0: {}, radius: {}",
+                "v0: {}, radius: {}",
                 intoTuple(p.position),
                 p.journeyId,
                 p.stageId,
-                p.time_gap,
                 p.v0,
                 p.radius);
         });
@@ -665,14 +662,6 @@ PYBIND11_MODULE(py_jupedsim, m)
                 JPS_CollisionFreeSpeedModelState_SetRadius(w.handle, radius);
             });
     py::class_<JPS_OptimalStepsModelState_Wrapper>(m, "OptimalStepsModelState")
-        .def_property(
-            "time_gap",
-            [](const JPS_OptimalStepsModelState_Wrapper& w) {
-                return JPS_OptimalStepsModelState_GetTimeGap(w.handle);
-            },
-            [](JPS_OptimalStepsModelState_Wrapper& w, double time_gap) {
-                JPS_OptimalStepsModelState_SetTimeGap(w.handle, time_gap);
-            })
         .def_property(
             "v0",
             [](const JPS_OptimalStepsModelState_Wrapper& w) {

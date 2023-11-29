@@ -40,40 +40,39 @@ OperationalModelUpdate OptimalStepsModel::ComputeNewPosition(
     const CollisionGeometry& geometry,
     const NeighborhoodSearchType& neighborhoodSearch) const
 {
+    const double radius = computeDesiredStepSize(ped);
+
     Point newPosition = ped.pos;
     double minPotential = computePotential(ped.pos, ped, geometry, neighborhoodSearch);
 
-    for(size_t circle = 0; circle < numberCircles; ++circle) {
-        for(size_t circlePosition = 0; circlePosition < positionsPerCircle; ++circlePosition) {
-            // compute candidate position
-            double radius = 0; // TODO
+    for(size_t circlePosition = 0; circlePosition < positionsPerCircle; ++circlePosition) {
+        auto candidatePosition = computeCandiateOnCircle(
+            ped.pos,
+            radius,
+            circlePosition,
+            positionsPerCircle,
+            geometry.LineSegmentsInApproxDistanceTo(ped.pos));
 
-            auto candidatePosition = computeCandiateOnCircle(
-                ped.pos,
-                radius,
-                circlePosition,
-                positionsPerCircle,
-                geometry.LineSegmentsInApproxDistanceTo(ped.pos));
+        if(!candidatePosition) {
+            continue;
+        }
 
-            if(!candidatePosition) {
-                continue;
-            }
+        double candidatePotential =
+            computePotential(*candidatePosition, ped, geometry, neighborhoodSearch);
 
-            double candidatePotential =
-                computePotential(*candidatePosition, ped, geometry, neighborhoodSearch);
-
-            if(candidatePotential < minPotential) {
-                newPosition = *candidatePosition;
-            }
+        if(candidatePotential < minPotential) {
+            minPotential = candidatePotential;
+            newPosition = *candidatePosition;
         }
     }
 
     // compute next time to act
-    double nextTimeToAct = 0;
+    const double nextTimeToAct = computeNextTimeToAct(ped, radius);
 
     OptimalStepsModelUpdate update;
     update.position = newPosition;
     update.nextTimeToAct = nextTimeToAct;
+    return update;
 }
 
 double OptimalStepsModel::computePotential(
@@ -104,19 +103,6 @@ void OptimalStepsModel::CheckModelConstraint(
     const auto& model = std::get<OptimalStepsModelData>(agent.model);
 
     const auto r = model.radius;
-    // constexpr double rMin = 0.;
-    // constexpr double rMax = 2.;
-    // validateConstraint(r, rMin, rMax, "radius", true);
-
-    // const auto v0 = model.v0;
-    // constexpr double v0Min = 0.;
-    // constexpr double v0Max = 10.;
-    // validateConstraint(v0, v0Min, v0Max, "v0");
-
-    // const auto timeGap = model.timeGap;
-    // constexpr double timeGapMin = 0.1;
-    // constexpr double timeGapMax = 10.;
-    // validateConstraint(timeGap, timeGapMin, timeGapMax, "timeGap");
 
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
     for(const auto& neighbor : neighbors) {
@@ -269,10 +255,17 @@ std::optional<Point> OptimalStepsModel::computeCandiateOnCircle(
 
 double OptimalStepsModel::computeDesiredStepSize(const GenericAgent& agent) const
 {
-    Random rng{1200};
+    static Random rng{1200};
 
     double step = stepLengthIntercept +
                   stepLengthSlopeSpeed * std::get<OptimalStepsModelData>(agent.model).v0 +
                   rng.normalDistributen(0., 1.) * stepLengthSD;
     return step;
+}
+
+double OptimalStepsModel::computeNextTimeToAct(const GenericAgent& agent, double stepSize) const
+{
+    const auto& agentModel = std::get<OptimalStepsModelData>(agent.model);
+
+    return agentModel.nextTimeToAct + stepSize / agentModel.v0;
 }

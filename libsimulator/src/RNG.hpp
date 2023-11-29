@@ -19,4 +19,3 @@ public:
         return d(mt);
     };
 };
-p

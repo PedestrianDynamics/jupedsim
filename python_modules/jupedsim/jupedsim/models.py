@@ -216,7 +216,6 @@ class OptimalStepsModelAgentParameters:
 
     Attributes:
         position: Position of the agent.
-        time_gap: Time constant that describe how fast pedestrian close gaps.
         v0: Maximum speed of the agent.
         radius: Radius of the agent.
         journey_id: Id of the journey the agent follows.
@@ -224,7 +223,6 @@ class OptimalStepsModelAgentParameters:
     """
 
     position: tuple[float, float] = (0.0, 0.0)
-    time_gap: float = 1.0
     v0: float = 1.2
     radius: float = 0.2
     journey_id: int = 0
@@ -233,7 +231,6 @@ class OptimalStepsModelAgentParameters:
     def as_native(self) -> py_jps.OptimalStepsModelAgentParameters:
         return py_jps.OptimalStepsModelAgentParameters(
             position=self.position,
-            time_gap=self.time_gap,
             v0=self.v0,
             radius=self.radius,
             journey_id=self.journey_id,

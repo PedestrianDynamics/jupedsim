@@ -596,20 +596,6 @@ void JPS_CollisionFreeSpeedModelState_SetRadius(
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// OptimalStepsModelState
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-double JPS_OptimalStepsModelState_GetTimeGap(JPS_OptimalStepsModelState handle)
-{
-    assert(handle);
-    const auto state = reinterpret_cast<const OptimalStepsModelData*>(handle);
-    return state->timeGap;
-}
-
-void JPS_OptimalStepsModelState_SetTimeGap(JPS_OptimalStepsModelState handle, double time_gap)
-{
-    assert(handle);
-    auto state = reinterpret_cast<OptimalStepsModelData*>(handle);
-    state->timeGap = time_gap;
-}
-
 double JPS_OptimalStepsModelState_GetV0(JPS_OptimalStepsModelState handle)
 {
     assert(handle);
@@ -1334,7 +1320,7 @@ JPS_AgentId JPS_Simulation_AddOptimalStepsModelAgent(
             BaseStage::ID(parameters.stageId),
             intoPoint(parameters.position),
             {},
-            OptimalStepsModelData{parameters.time_gap, parameters.v0, parameters.radius});
+            OptimalStepsModelData(parameters.v0, parameters.radius));
         result = simulation->AddAgent(std::move(agent));
     } catch(const std::exception& ex) {
         if(errorMessage) {

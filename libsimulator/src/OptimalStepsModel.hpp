@@ -23,11 +23,12 @@ private:
     double _cutOffRadius{3};
 
     int numberCircles{1};
-    int positionsPerCircle{4};
+    int positionsPerCircle{16};
 
     static constexpr double stepLengthIntercept{0.4625};
     static constexpr double stepLengthSlopeSpeed{0.2345};
     double stepLengthSD{0.036};
+
     RoutingEngine* routingEngine{};
 
 public:
