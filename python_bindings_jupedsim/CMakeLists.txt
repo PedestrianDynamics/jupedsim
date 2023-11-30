@@ -1,5 +1,21 @@
 add_library(py_jupedsim MODULE
     bindings_jupedsim.cpp
+    build_info.cpp
+    conversion.cpp
+    conversion.hpp
+    generalized_centrifugal_force_model.cpp
+    collision_free_speed_model.cpp
+    logging.cpp
+    logging.hpp
+    trace.cpp
+    wrapper.hpp
+    geometry.cpp
+    routing.cpp
+    simulation.cpp
+    agent.cpp
+    stage.cpp
+    journey.cpp
+    transition.cpp
 )
 
 target_link_libraries(py_jupedsim
@@ -19,8 +35,8 @@ if(NOT MSVC AND NOT ${CMAKE_BUILD_TYPE} MATCHES Debug|RelWithDebInfo)
     pybind11_strip(py_jupedsim)
 endif()
 
-set_target_properties(py_jupedsim 
-    PROPERTIES 
+set_target_properties(py_jupedsim
+    PROPERTIES
         CXX_VISIBILITY_PRESET "hidden"
         CUDA_VISIBILITY_PRESET "hidden"
 )

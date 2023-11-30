@@ -1,5 +1,6 @@
 add_library(common INTERFACE
     src/Unreachable.hpp
+    src/Visitor.hpp
 )
 
 target_include_directories(common INTERFACE

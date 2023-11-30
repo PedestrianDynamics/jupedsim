@@ -3,6 +3,8 @@
 
 #include "Conversion.hpp"
 
+namespace jupedsim::detail
+{
 Point intoPoint(JPS_Point p)
 {
     return {p.x, p.y};
@@ -22,3 +24,4 @@ std::tuple<double, double> intoTuple(JPS_Point p)
 {
     return std::make_tuple(p.x, p.y);
 }
+} // namespace jupedsim::detail
