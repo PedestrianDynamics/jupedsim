@@ -255,12 +255,14 @@ setup(
     python_requires=">=3.10,<3.13",
     packages=[
         "jupedsim",
+        "jupedsim.models",
         "jupedsim.internal",
         "jupedsim.native",
         "jupedsim_visualizer",
     ],
     package_dir={
         "jupedsim": "python_modules/jupedsim/jupedsim",
+        "jupedsim.models": "python_modules/jupedsim/jupedsim/models",
         "jupedsim.internal": "python_modules/jupedsim/jupedsim/internal",
         "jupedsim.native": "python_modules/jupedsim/jupedsim/native",
         "jupedsim_visualizer": "python_modules/jupedsim_visualizer/jupedsim_visualizer",
