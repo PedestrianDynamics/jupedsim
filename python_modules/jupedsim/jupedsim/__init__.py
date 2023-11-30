@@ -29,10 +29,12 @@ from jupedsim.library import (
     set_info_callback,
     set_warning_callback,
 )
-from jupedsim.models import (
+from jupedsim.models.collision_free_speed import (
     CollisionFreeSpeedModel,
     CollisionFreeSpeedModelAgentParameters,
     CollisionFreeSpeedModelState,
+)
+from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
     GeneralizedCentrifugalForceModelState,
