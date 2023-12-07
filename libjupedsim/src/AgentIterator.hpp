@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include <GenericAgent.hpp>
+
 #include <functional>
 #include <memory>
 
@@ -26,4 +28,12 @@ public:
         ++iter;
         return result;
     }
+};
+
+struct AgentIdIterator {
+    using AgentIds = std::vector<GenericAgent::ID>;
+    AgentIds ids;
+    AgentIds::const_iterator iter;
+
+    AgentIdIterator(AgentIds&& ids_) : ids(std::move(ids_)) { iter = std::begin(ids); }
 };
