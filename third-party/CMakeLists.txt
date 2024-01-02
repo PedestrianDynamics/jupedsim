@@ -17,12 +17,12 @@ find_package(Boost 1.82
     NO_DEFAULT_PATH
     PATHS
     ${CMAKE_CURRENT_SOURCE_DIR}/boost-1.82.0
-    GLOBAL
 )
+set_target_properties(Boost::boost PROPERTIES IMPORTED_GLOBAL TRUE)
 ################################################################################
 # threading
 ################################################################################
-find_package(Threads REQUIRED GLOBAL)
+find_package(Threads REQUIRED)
 
 ################################################################################
 # CGAL
@@ -38,7 +38,6 @@ find_package(CGAL 5.5
     NO_DEFAULT_PATH
     PATHS
     ${CMAKE_CURRENT_SOURCE_DIR}/cgal-5.6.0
-    GLOBAL
 )
 
 ################################################################################
@@ -50,7 +49,7 @@ add_subdirectory(poly2tri)
 # Python Interpreter / CPython
 ################################################################################
 set(Python_FIND_VIRTUALENV "FIRST")
-find_package(Python COMPONENTS Interpreter Development.Module REQUIRED GLOBAL)
+find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 add_subdirectory(pybind11-2.11.1)
 set(Python_EXECUTABLE ${Python_EXECUTABLE} PARENT_SCOPE)
 
