@@ -77,12 +77,12 @@ def distribute_by_number(
     seed: int | None = None,
     max_iterations: int = 10000,
 ) -> list[tuple[float, float]]:
-    """Generates specified number of randomized 2D coordiantes.
+    """Generates specified number of randomized 2D coordinates.
 
-    This function will generate the speficied number of 2D coordiantes where
-    all coordiantes are inside the specified geometry and generated coordinates
+    This function will generate the speficied number of 2D coordinates where
+    all coordinates are inside the specified geometry and generated coordinates
     are constraint by distance_to_agents and distance_to_polygon. This function
-    may not always by able to generate the requested coordinate because it
+    may not always be able to generate the requested coordinate because it
     cannot do so without violating the constraints. In this case the function
     will stop after max_iterations and raise an Exception.
 
@@ -94,10 +94,10 @@ def distribute_by_number(
             and the polygon edges
         seed: Will be used to seed the random number generator.
         max_iterations: Up to max_iterations are attempts are made to
-            place a random point without conastraint violation, default is 10_000
+            place a random point without constraint violation, default is 10_000
 
     Returns:
-        2D coordiantes
+        2D coordinates
 
     Raises:
         :class:`AgentNumberError`: if not all agents could be placed.
@@ -155,7 +155,7 @@ def distribute_by_density(
     This function will generate as many 2D coordinates as required to reach the
     desired density. Essentially this function tries to place area * density
     many agents while adhering to the distance_to_polygon and
-    distance_to_agents constraints. This function may not always by able to
+    distance_to_agents constraints. This function may not always be able to
     generate the requested coordinate because it cannot do so without violating
     the constraints. In this case the function will stop after max_iterations
     and raise an Exception.
@@ -172,7 +172,7 @@ def distribute_by_density(
 
 
     Returns:
-        2D coordiantes
+        2D coordinates
 
     Raises:
         :class:`AgentNumberError`: if not all agents could be placed.
@@ -257,12 +257,12 @@ def distribute_in_circles_by_number(
     seed=None,
     max_iterations=10_000,
 ) -> list[tuple[float, float]]:
-    """Generates randomized 2D coordiantes in a user defined number of rings.
+    """Generates randomized 2D coordinates in a user defined number of rings.
 
     This function will generate 2D coordinates in the intersection of the
     polygon and the rings specified by the centerpoint and the min/max radii of
     each ring. `number_of_agents` is expected to contain the number of agents
-    to be placed for each ring. This function may not always by able to
+    to be placed for each ring. This function may not always be able to
     generate the requested coordinate because it cannot do so without violating
     the constraints. In this case the function will stop after max_iterations
     and raise an Exception.
@@ -277,10 +277,10 @@ def distribute_in_circles_by_number(
         number_of_agents: agents to be placed per ring
         seed: Will be used to seed the random number generator.
         max_iterations: Up to max_iterations are attempts are made to
-            place a random point without conastraint violation, default is 10_000
+            place a random point without constraint violation, default is 10_000
 
     Returns:
-        2D coordiantes
+        2D coordinates
 
     Raises:
         :class:`AgentNumberError`: if not all agents could be placed.
@@ -396,7 +396,7 @@ def distribute_in_circles_by_density(
     seed: int | None = None,
     max_iterations: int = 10_000,
 ) -> list[tuple[float, float]]:
-    """Generates randomized 2D coordiantes in a user defined number of rings
+    """Generates randomized 2D coordinates in a user defined number of rings
     with defined density.
 
     This function will generate 2D coordinates in the intersection of the
@@ -417,10 +417,10 @@ def distribute_in_circles_by_density(
         desnities: density in positionsper square meter for each ring
         seed: Will be used to seed the random number generator.
         max_iterations: Up to max_iterations are attempts are made to place a
-            random point without conastraint violation, default is 10_000
+            random point without constraint violation, default is 10_000
 
     Returns:
-        2D coordiantes
+        2D coordinates
 
     Raises:
         :class:`AgentNumberError`: if not all agents could be placed.
@@ -468,11 +468,11 @@ def distribute_until_filled(
     max_iterations: int = 10_000,
     k: int = 30,
 ) -> list[tuple[float, float]]:
-    """Generates randomized 2D coordiantes that fill the specified area.
+    """Generates randomized 2D coordinates that fill the specified area.
 
     This function will generate 2D coordinates in the specified area. The
     number of positions generated depends on the ability to place aditional
-    points. This function may not always by able to generate the requested
+    points. This function may not always be able to generate the requested
     coordinate because it cannot do so without violating the constraints. In
     this case the function will stop after max_iterations and raise an
     Exception.
@@ -484,13 +484,13 @@ def distribute_until_filled(
             and the polygon edges
         seed: Will be used to seed the random number generator.
         max_iterations: Up to max_iterations are attempts are made to
-            place a random point without conastraint violation, default is 10_000
+            place a random point without constraint violation, default is 10_000
         k: maximum number of attempts to place neighbors to already inserted
             points. A higher value will result in a higher density but will greatly
             increase runtim.
 
     Returns:
-        2D coordiantes
+        2D coordinates
 
     Raises:
         :class:`AgentNumberError`: if not all agents could be placed.
@@ -572,12 +572,12 @@ def distribute_by_percentage(
     max_iterations: int = 10000,
     k: int = 30,
 ):
-    """Generates randomized 2D coordiantes that fill the specified area to a
+    """Generates randomized 2D coordinates that fill the specified area to a
     percentage of a possible maximum.
 
     This function will generate 2D coordinates in the specified area. The
     number of positions generated depends on the ability to place aditional
-    points. This function may not always by able to generate the requested
+    points. This function may not always be able to generate the requested
     coordinate because it cannot do so without violating the constraints. In
     this case the function will stop after max_iterations and raise an
     Exception.
@@ -591,13 +591,13 @@ def distribute_by_percentage(
             and the polygon edges
         seed: Will be used to seed the random number generator.
         max_iterations: Up to max_iterations are attempts are made to
-            place a random point without conastraint violation, default is 10_000
+            place a random point without constraint violation, default is 10_000
         k: maximum number of attempts to place neighbors to already inserted
             points. A higher value will result in a higher density but will greatly
             increase runtim.
 
     Returns:
-        2D coordiantes
+        2D coordinates
 
     Raises:
         :class:`AgentNumberError`: if not all agents could be placed.
