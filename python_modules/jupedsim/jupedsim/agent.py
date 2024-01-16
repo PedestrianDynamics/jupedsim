@@ -106,7 +106,7 @@ class Agent:
             return GeneralizedCentrifugalForceModelState(model)
         elif isinstance(model, py_jps.CollisionFreeSpeedModelState):
             return CollisionFreeSpeedModelState(model)
-        elif isinstance(model, py_jps.CollisionFreeSpeedModelState):
+        elif isinstance(model, py_jps.SocialForceModelState):
             return SocialForceModelState(model)
         else:
             raise Exception("Internal error")

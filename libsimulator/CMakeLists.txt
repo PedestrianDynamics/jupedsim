@@ -53,6 +53,7 @@ add_library(simulator STATIC
     src/SimulationError.hpp
     src/SocialForceModel.hpp
     src/SocialForceModelBuilder.hpp
+    src/SocialForceModelBuilder.cpp
     src/SocialForceModelData.hpp
     src/SocialForceModelUpdate.hpp
     src/Stage.cpp

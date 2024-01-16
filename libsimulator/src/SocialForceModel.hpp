@@ -17,20 +17,20 @@ private:
     double test_value;
 
 public:
-    SocialForceModel(double test_value);
+    SocialForceModel(double test_value){};
     ~SocialForceModel() override = default;
-    OperationalModelType Type() const override;
+    OperationalModelType Type() const override{};
     OperationalModelUpdate ComputeNewPosition(
         double dT,
         const GenericAgent& ped,
         const CollisionGeometry& geometry,
-        const NeighborhoodSearchType& neighborhoodSearch) const override;
-    void ApplyUpdate(const OperationalModelUpdate& update, GenericAgent& agent) const override;
+        const NeighborhoodSearchType& neighborhoodSearch) const override{};
+    void ApplyUpdate(const OperationalModelUpdate& update, GenericAgent& agent) const override{};
     void CheckModelConstraint(
         const GenericAgent& agent,
         const NeighborhoodSearchType& neighborhoodSearch,
-        const CollisionGeometry& geometry) const override;
-    std::unique_ptr<OperationalModel> Clone() const override;
+        const CollisionGeometry& geometry) const override{};
+    std::unique_ptr<OperationalModel> Clone() const override{};
 
 private:
     

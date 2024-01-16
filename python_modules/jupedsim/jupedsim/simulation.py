@@ -111,7 +111,7 @@ class Simulation:
             )
             py_jps_model = model_builder.build()
         elif isinstance(model, SocialForceModel):
-            model_builder = py_jps.GeneralizedCentrifugalForceModelBuilder(
+            model_builder = py_jps.SocialForceModelBuilder(
                 test_value = model.test_value
             )
             py_jps_model = model_builder.build()
@@ -214,7 +214,7 @@ class Simulation:
     def add_agent(
         self,
         parameters: GeneralizedCentrifugalForceModelAgentParameters
-        | CollisionFreeSpeedModelAgentParameters,
+        | CollisionFreeSpeedModelAgentParameters
         | SocialForceModelAgentParameters,
     ) -> int:
         return self._obj.add_agent(parameters.as_native())

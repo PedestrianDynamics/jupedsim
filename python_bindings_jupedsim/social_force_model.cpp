@@ -20,7 +20,7 @@ void init_social_force_model(py::module_& m)
                     test_value};
             }),
             py::kw_only(),
-            py::arg("test_value"),
+            py::arg("test_value"))
         .def("__repr__", [](const JPS_SocialForceModelAgentParameters& p) {
             return fmt::format(
                 "test_value: {}",
@@ -35,7 +35,7 @@ void init_social_force_model(py::module_& m)
                         test_value));
             }),
             py::kw_only(),
-            py::arg("test_value")
+            py::arg("test_value"))
         .def("build", [](JPS_SocialForceModelBuilder_Wrapper& w) {
             JPS_ErrorMessage errorMsg{};
             auto result = JPS_SocialForceModelBuilder_Build(w.handle, &errorMsg);

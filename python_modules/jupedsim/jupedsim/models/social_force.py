@@ -29,7 +29,7 @@ class SocialForceModelAgentParameters:
         self,
     ) -> py_jps.SocialForceModelAgentParameters:
         return py_jps.SocialForceModelAgentParameters(
-            test_value
+            test_value=test_value
         )
     
 class SocialForceModelState:

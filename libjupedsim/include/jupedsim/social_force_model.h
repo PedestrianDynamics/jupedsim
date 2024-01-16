@@ -19,7 +19,6 @@ typedef struct JPS_SocialForceModelBuilder_t*
  * Creates a SocialForceModel model builder.
  * @param test_value is a test parameter that needs to be replaced with actual values
  */
-
 JUPEDSIM_API JPS_SocialForceModelBuilder JPS_SocialForceModelBuilder_Create(
     double test_value);
 
@@ -47,17 +46,6 @@ JUPEDSIM_API void JPS_SocialForceModelBuilder_Free(
 typedef struct JPS_SocialForceModelState_t*
     JPS_SocialForceModelState;
 
-// no getters or setters implemented yet
-
-/**
- * Describes parameters of an Agent in SocialForceModel
- */
-typedef struct JPS_SocialForceModelAgentParameters {
-    /**
-     * Test Value
-     */
-    double test_value = 2.5;
-
 /**
  * Read test value of this agent.
  * @param handle of the Agent to access.
@@ -72,11 +60,20 @@ JUPEDSIM_API double JPS_SocialForceModelState_GetTestValue(
  * @param test_value test value without any meaning
  */
 JUPEDSIM_API void JPS_SocialForceModelState_SetTestValue(
-    JPS_GeneralizedCentrifugalForceModelState handle,
+    JPS_SocialForceModelState handle,
     double test_value);
 
 
+/**
+ * Describes parameters of an Agent in SocialForceModel
+ */
+typedef struct JPS_SocialForceModelAgentParameters {
+    /**
+     * Test Value
+     */
+    double test_value = 2.5;
 } JPS_SocialForceModelAgentParameters;
+
 #ifdef __cplusplus
 }
 #endif
