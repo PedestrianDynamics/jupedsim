@@ -8,6 +8,7 @@
 #include "error.h"
 #include "export.h"
 #include "generalized_centrifugal_force_model.h"
+#include "social_force_model.h"
 #include "geometry.h"
 #include "journey.h"
 #include "logging.h"

@@ -18,6 +18,10 @@ from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
 )
+from jupedsim.models.social_force import (
+    SocialForceModel,
+    SocialForceModelAgentParameters,
+)
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.stages import (
     ExitStage,
@@ -104,6 +108,11 @@ class Simulation:
                 max_geometry_interpolation_distance=model.max_geometry_interpolation_distance,
                 max_neighbor_repulsion_force=model.max_neighbor_repulsion_force,
                 max_geometry_repulsion_force=model.max_geometry_repulsion_force,
+            )
+            py_jps_model = model_builder.build()
+        elif isinstance(model, SocialForceModel):
+            model_builder = py_jps.GeneralizedCentrifugalForceModelBuilder(
+                test_value = model.test_value
             )
             py_jps_model = model_builder.build()
         else:
@@ -204,10 +213,9 @@ class Simulation:
 
     def add_agent(
         self,
-        parameters: (
-            GeneralizedCentrifugalForceModelAgentParameters
-            | CollisionFreeSpeedModelAgentParameters
-        ),
+        parameters: GeneralizedCentrifugalForceModelAgentParameters
+        | CollisionFreeSpeedModelAgentParameters,
+        | SocialForceModelAgentParameters,
     ) -> int:
         return self._obj.add_agent(parameters.as_native())
 

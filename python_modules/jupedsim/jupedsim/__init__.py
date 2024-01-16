@@ -39,6 +39,11 @@ from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModelAgentParameters,
     GeneralizedCentrifugalForceModelState,
 )
+from jupedsim.models.social_force import (
+    SocialForceModel,
+    SocialForceModelAgentParameters,
+    SocialForceModelState,
+)
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import RoutingEngine
 from jupedsim.serialization import TrajectoryWriter
@@ -85,6 +90,9 @@ __all__ = [
     "CollisionFreeSpeedModelAgentParameters",
     "CollisionFreeSpeedModel",
     "CollisionFreeSpeedModelState",
+    "SocialForceModelAgentParameters",
+    "SocialForceModel",
+    "SocialForceModelState",
     "WaitingSetStage",
     "WaitingSetState",
     "WaypointStage",

@@ -395,6 +395,8 @@ JPS_ModelType JPS_Simulation_ModelType(JPS_Simulation handle)
             return JPS_CollisionFreeSpeedModel;
         case OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE:
             return JPS_GeneralizedCentrifugalForceModel;
+        case OperationalModelType::SOCIAL_FORCE:
+            return JPS_SocialForceModel;
     }
     UNREACHABLE();
 }
