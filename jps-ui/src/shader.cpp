@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "shader.hpp"
 
-#include <OpenGL/OpenGL.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 

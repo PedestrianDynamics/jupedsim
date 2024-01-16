@@ -7,7 +7,8 @@
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Polygon_with_holes_2.h>
 
-#include <OpenGL/OpenGL.h>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <geos_c.h>
 
 #include <array>

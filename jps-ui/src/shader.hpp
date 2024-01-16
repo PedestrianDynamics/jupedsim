@@ -1,7 +1,7 @@
 // Copyright © 2024 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
-
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 
 class Shader
 {

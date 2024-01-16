@@ -20,6 +20,7 @@ target_link_libraries(jps-ui
     imgui
     imgui_filedialog
     glm
+    glad
 )
 
 target_compile_definitions(jps-ui PUBLIC

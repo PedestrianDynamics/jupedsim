@@ -5,8 +5,8 @@
 #include "shader.hpp"
 #include "wkt.hpp"
 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <OpenGL/OpenGL.h>
 #include <geos_c.h>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/vec3.hpp>
@@ -91,6 +91,7 @@ int main(int argc, char** argv)
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
+    gladLoadGL();
     glfwSwapInterval(1);
 
     IMGUI_CHECKVERSION();

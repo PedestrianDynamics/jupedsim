@@ -3,7 +3,6 @@
 #include "wkt.hpp"
 #include "aabb.hpp"
 
-#include <OpenGL/OpenGL.h>
 #include <geos_c.h>
 #include <glm/glm.hpp>
 

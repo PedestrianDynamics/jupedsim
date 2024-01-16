@@ -75,6 +75,7 @@ endif()
 # DearImGui / ImGuiFileDialog
 ################################################################################
 if(BUILD_JPS_UI)
+    add_subdirectory(glad)
     set(BUILD_SHARED_LIBS_BEFORE ${BUILD_SHARED_LIBS})
     set(BUILD_SHARED_LIBS OFF)
     find_package(OpenGL REQUIRED)
