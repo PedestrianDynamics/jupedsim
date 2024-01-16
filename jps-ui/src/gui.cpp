@@ -45,7 +45,7 @@ void Gui::Draw()
                 should_recenter = true;
             }
             ImGui::Separator();
-            static const auto exit_shortcut = to_shortcut(ImGuiMod_Shortcut | ImGuiKey_O);
+            static const auto exit_shortcut = to_shortcut(ImGuiMod_Shortcut | ImGuiKey_Q);
             if(ImGui::MenuItem("Exit", exit_shortcut.c_str())) {
                 should_exit = true;
             }
@@ -58,6 +58,11 @@ void Gui::Draw()
         ImGuiFileDialog::Instance()->OpenDialog(
             "ChooseFileDlgKey", "Choose File", ".wkt", ".", 1, nullptr, ImGuiFileDialogFlags_Modal);
     }
+
+    if(ImGui::IsKeyChordPressed(ImGuiMod_Shortcut | ImGuiKey_Q)) {
+        should_exit = true;
+    }
+
 
     if(ImGui::IsKeyChordPressed(ImGuiKey_C)) {
         should_recenter = true;
