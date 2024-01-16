@@ -25,6 +25,6 @@ target_link_libraries(jps-ui
 
 target_compile_definitions(jps-ui PUBLIC
     GL_SILENCE_DEPRECATION
-    GLFW_INCLUDE_GLCOREARB
+    GLFW_INCLUDE_NONE
 )
 

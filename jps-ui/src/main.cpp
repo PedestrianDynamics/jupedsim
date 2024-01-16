@@ -5,9 +5,9 @@
 #include "shader.hpp"
 #include "wkt.hpp"
 
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <geos_c.h>
+#include <glad/glad.h>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/vec3.hpp>
 #include <imgui.h>
@@ -79,9 +79,11 @@ int main(int argc, char** argv)
     /* Create a windowed mode window and its OpenGL context */
     const char* glsl_version = "#version 150";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
+#ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
     window = glfwCreateWindow(640, 480, "Mesh Viewer", NULL, NULL);
 
     if(!window) {
@@ -91,7 +93,9 @@ int main(int argc, char** argv)
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
-    gladLoadGL();
+    if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
+        return -1;
+    }
     glfwSwapInterval(1);
 
     IMGUI_CHECKVERSION();
