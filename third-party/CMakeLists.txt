@@ -69,4 +69,26 @@ if (BUILD_BENCHMARKS)
     set(BENCHMARK_ENABLE_WERROR OFF)
     set(BENCHMARK_INSTALL_DOCS OFF)
     add_subdirectory(benchmark-1.8.2)
-endif ()
+endif()
+
+################################################################################
+# DearImGui / ImGuiFileDialog
+################################################################################
+if(BUILD_JPS_UI)
+    set(BUILD_SHARED_LIBS_BEFORE ${BUILD_SHARED_LIBS})
+    set(BUILD_SHARED_LIBS OFF)
+    find_package(OpenGL REQUIRED)
+    set_target_properties(OpenGL::GL PROPERTIES IMPORTED_GLOBAL TRUE)
+    add_subdirectory(dearimgui/v1.90.1)
+    add_subdirectory(imgui_filedialog)
+    add_subdirectory(geos-3.12.1)
+    set(GLFW_BUILD_EXAMPLES OFF)
+    set(GLFW_BUILD_TESTS OFF)
+    set(GLFW_BUILD_DOCS OFF)
+    set(GLFW_BUILD_INSTALL OFF)
+    add_subdirectory(glfw-3.3.9)
+    #TODO(kkratz): this glm version is the latest commit on the v1.0.0 release
+    # branch, we should switch to the official release at some time
+    add_subdirectory(glm-glm-v1)
+    set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_BEFORE})
+endif()

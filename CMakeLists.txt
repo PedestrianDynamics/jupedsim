@@ -48,6 +48,8 @@ endif()
 set(BUILD_BENCHMARKS OFF CACHE BOOL "Build micro benchmark")
 print_var(BUILD_BENCHMARKS)
 
+option(BUILD_JPS_UI "Build visualisation" OFF)
+
 set(WITH_FORMAT OFF CACHE BOOL "Create format tools")
 print_var(WITH_FORMAT)
 if(WITH_FORMAT AND ${CMAKE_SYSTEM} MATCHES "Windows")
@@ -219,6 +221,9 @@ add_subdirectory(libjupedsim)
 add_subdirectory(libcommon)
 add_subdirectory(libsimulator)
 add_subdirectory(python_bindings_jupedsim)
+if(BUILD_JPS_UI)
+    add_subdirectory(jps-ui)
+endif()
 
 ################################################################################
 # Code formatting
