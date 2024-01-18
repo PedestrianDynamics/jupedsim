@@ -17,6 +17,8 @@
 
 #include <cassert>
 
+#include <iostream>
+
 using jupedsim::detail::intoJPS_Point;
 using jupedsim::detail::intoPoint;
 using jupedsim::detail::intoTuple;
@@ -39,8 +41,11 @@ JPS_Simulation JPS_Simulation_Create(
             std::make_unique<CollisionGeometry>(*geometryInternal->collisionGeometry);
         auto routingEngine = geometryInternal->routingEngine->Clone();
 
+        std::cout << "reinterpreting model \n";
         auto modelInternal = reinterpret_cast<OperationalModel*>(model);
+        std::cout << "cloning model \n";
         auto model = modelInternal->Clone();
+        std::cout << "clone created \n";
         result = reinterpret_cast<JPS_Simulation>(new Simulation(
             std::move(model), std::move(collisionGeometry), std::move(routingEngine), dT));
     } catch(const std::exception& ex) {
@@ -230,6 +235,41 @@ JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelAgent(
             intoPoint(parameters.position),
             {},
             CollisionFreeSpeedModelData{parameters.time_gap, parameters.v0, parameters.radius});
+        result = simulation->AddAgent(std::move(agent));
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return result.getID();
+}
+
+JPS_AgentId JPS_Simulation_AddSocialForceModelAgent(
+    JPS_Simulation handle,
+    JPS_SocialForceModelAgentParameters parameters,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    auto result = GenericAgent::ID::Invalid;
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    try {
+        if(simulation->ModelType() != OperationalModelType::SOCIAL_FORCE) {
+            throw std::runtime_error(
+                "Simulation is not configured to use Social Force Model");
+        }
+        GenericAgent agent{
+            GenericAgent::ID::Invalid,
+            Journey::ID(parameters.journeyId),
+            BaseStage::ID(parameters.stageId),
+            intoPoint(parameters.position),
+            intoPoint(parameters.orientation),
+            SocialForceModelData{
+                parameters.test_value}};
         result = simulation->AddAgent(std::move(agent));
     } catch(const std::exception& ex) {
         if(errorMessage) {

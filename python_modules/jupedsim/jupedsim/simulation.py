@@ -45,15 +45,13 @@ class Simulation:
     def __init__(
         self,
         *,
-        model: CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel,
-        geometry: (
-            str
-            | shapely.GeometryCollection
-            | shapely.Polygon
-            | shapely.MultiPolygon
-            | shapely.MultiPoint
-            | list[tuple[float, float]]
-        ),
+        model: CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel | SocialForceModel,
+        geometry: str
+        | shapely.GeometryCollection
+        | shapely.Polygon
+        | shapely.MultiPolygon
+        | shapely.MultiPoint
+        | list[tuple[float, float]],
         dt: float = 0.01,
         trajectory_writer: TrajectoryWriter | None = None,
         **kwargs: Any,
@@ -118,9 +116,11 @@ class Simulation:
         else:
             raise Exception("Unknown model type supplied")
         self._writer = trajectory_writer
+        print("trajec_writer set")
         self._obj = py_jps.Simulation(
             model=py_jps_model, geometry=build_geometry(geometry)._obj, dt=dt
         )
+        print("Simulation created")
 
     def add_waypoint_stage(
         self, position: tuple[float, float], distance

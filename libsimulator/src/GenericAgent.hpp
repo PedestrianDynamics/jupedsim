@@ -85,6 +85,20 @@ struct fmt::formatter<GenericAgent> {
                         agent.orientation,
                         m);
                 }},
+                [&ctx, &agent](const SocialForceModelData& m) {
+                    return fmt::format_to(
+                        ctx.out(),
+                        "Agent[id={}, journey={}, stage={}, destination={}, waypoint={}, pos={}, "
+                        "orientation={}, model={})",
+                        agent.id,
+                        agent.journeyId,
+                        agent.stageId,
+                        agent.destination,
+                        agent.target,
+                        agent.pos,
+                        agent.orientation,
+                        m);
+                },
             agent.model);
     }
 };

@@ -15,12 +15,24 @@ void init_social_force_model(py::module_& m)
     py::class_<JPS_SocialForceModelAgentParameters>(
         m, "SocialForceModelAgentParameters")
         .def(
-            py::init([](double test_value) {
+            py::init([](double test_value, 
+                        std::tuple<double, double> position,
+                        std::tuple<double, double> orientation,
+                        JPS_JourneyId journey_id,
+                        JPS_StageId stage_id) {
                 return JPS_SocialForceModelAgentParameters{
-                    test_value};
+                    test_value,
+                    intoJPS_Point(position),
+                    intoJPS_Point(orientation),
+                    journey_id,
+                    stage_id};
             }),
             py::kw_only(),
-            py::arg("test_value"))
+            py::arg("test_value"),
+            py::arg("position"),
+            py::arg("orientation"),
+            py::arg("journey_id"),
+            py::arg("stage_id"))
         .def("__repr__", [](const JPS_SocialForceModelAgentParameters& p) {
             return fmt::format(
                 "test_value: {}",

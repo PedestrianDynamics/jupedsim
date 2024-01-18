@@ -72,6 +72,25 @@ typedef struct JPS_SocialForceModelAgentParameters {
      * Test Value
      */
     double test_value = 2.5;
+    /**
+     * Position of the agent.
+     * The position needs to inside the accessible area.
+     */
+    JPS_Point position{0, 0};
+    /*
+     * Orientation vector of the agent.
+     * The orientation vector will internally be normalized.
+     */
+    JPS_Point orientation{0, 0};
+    /**
+     * Defines the journey this agent will take use
+     */
+    JPS_JourneyId journeyId = 0;
+    /**
+     * Defines the current stage of its journey
+     */
+    JPS_StageId stageId = 0;
+    
 } JPS_SocialForceModelAgentParameters;
 
 #ifdef __cplusplus

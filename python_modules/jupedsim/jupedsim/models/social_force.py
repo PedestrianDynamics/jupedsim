@@ -13,7 +13,7 @@ class SocialForceModel:
     """
 
     test_value: float = 2.5
-
+py_jps
 @dataclass(kw_only=True)
 class SocialForceModelAgentParameters:
     """
@@ -29,7 +29,7 @@ class SocialForceModelAgentParameters:
         self,
     ) -> py_jps.SocialForceModelAgentParameters:
         return py_jps.SocialForceModelAgentParameters(
-            test_value=test_value
+            test_value=self.test_value
         )
     
 class SocialForceModelState:
