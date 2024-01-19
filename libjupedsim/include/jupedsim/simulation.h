@@ -171,6 +171,23 @@ JUPEDSIM_API JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelAgent(
     JPS_ErrorMessage* errorMessage);
 
 /**
+ * Adds a new agent to the simulation.
+ * This can be called at any time, i.e. agents can be added at any iteration.
+ * NOTE: Currently there is no checking done to ensure the agent can be placed at the desired
+ * location.
+ * @param handle to the simulation to act on
+ * @param parameters describing the new agent.
+ * @param[out] errorMessage if not NULL. Will contain address of JPS_ErrorMessage in case of an
+ * error.
+ * @return id of the new agent or 0 if the agent could not be added due to an error.
+ */
+JUPEDSIM_API JPS_AgentId JPS_Simulation_AddSocialForceModelAgent(
+    JPS_Simulation handle,
+    JPS_SocialForceModelAgentParameters parameters,
+    JPS_ErrorMessage* errorMessage);
+
+
+/**
  * Marks an agent from the simuation for removal.
  * The agent will be removed at the start of the next simulation iteration, before the interaction
  * are computed.
