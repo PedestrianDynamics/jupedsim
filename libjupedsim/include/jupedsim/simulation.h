@@ -338,6 +338,12 @@ JUPEDSIM_API JPS_Trace JPS_Simulation_GetTrace(JPS_Simulation handle);
  */
 JUPEDSIM_API JPS_Geometry JPS_Simulation_GetGeometry(JPS_Simulation handle);
 
+JUPEDSIM_API bool JPS_Simulation_SwitchGeometry(
+    JPS_Simulation handle,
+    JPS_Geometry geometry,
+    JPS_GeometryError* out,
+    JPS_ErrorMessage* errorMessage);
+
 /**
  * Frees a JPS_Simulation.
  * @param handle to the JPS_Simulation to free.

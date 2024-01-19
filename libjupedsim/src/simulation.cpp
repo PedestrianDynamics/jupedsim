@@ -552,6 +552,37 @@ JPS_Geometry JPS_Simulation_GetGeometry(JPS_Simulation handle)
     return reinterpret_cast<JPS_Geometry>(new Geometry(simulation->Geo()));
 }
 
+bool JPS_Simulation_SwitchGeometry(
+    JPS_Simulation handle,
+    JPS_Geometry geometry,
+    JPS_GeometryError* out,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    assert(geometry);
+
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    auto geometryInternal = reinterpret_cast<const Geometry*>(geometry);
+    auto collisionGeometry =
+        std::make_unique<CollisionGeometry>(*geometryInternal->collisionGeometry);
+
+    bool result = false;
+    try {
+        simulation->SwitchGeometry(std::move(collisionGeometry));
+        result = true;
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return result;
+}
+
 void JPS_Simulation_Free(JPS_Simulation handle)
 {
     delete reinterpret_cast<Simulation*>(handle);

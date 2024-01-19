@@ -140,6 +140,7 @@ public:
     bool IsCompleted(const GenericAgent& agent) override;
     Point Target(const GenericAgent& agent) override;
     StageProxy Proxy(Simulation* simulation_) override;
+    Point Position() const { return position; };
 };
 
 /// Notifies simulation of all agents that need to be removed at the beginning of the next iteration
@@ -154,6 +155,7 @@ public:
     bool IsCompleted(const GenericAgent& agent) override;
     Point Target(const GenericAgent& agent) override;
     StageProxy Proxy(Simulation* simulation_) override;
+    Polygon Position() const { return area; };
 };
 
 class NotifiableWaitingSet : public BaseStage
@@ -173,6 +175,7 @@ public:
     template <typename T>
     void Update(const NeighborhoodSearch<T>& neighborhoodSearch);
     const std::vector<GenericAgent::ID>& Occupants() const;
+    const std::vector<Point>& Slots() const { return slots; };
 };
 
 template <typename T>
@@ -228,6 +231,7 @@ public:
     void Update(const NeighborhoodSearch<T>& neighborhoodSearch);
     void Pop(size_t count);
     const std::vector<GenericAgent::ID>& Occupants() const;
+    const std::vector<Point>& Slots() const { return slots; };
 };
 
 template <typename T>
