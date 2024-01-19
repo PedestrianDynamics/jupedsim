@@ -199,4 +199,6 @@ public:
         const auto find_iter = stages.find(stageId);
         return find_iter != std::end(stages);
     }
+
+    const std::map<BaseStage::ID, JourneyNode>& Stages() const { return stages; };
 };
