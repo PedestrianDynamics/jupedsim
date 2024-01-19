@@ -89,7 +89,9 @@ public:
     OperationalModelType ModelType() const;
     StageProxy Stage(BaseStage::ID stageId);
     Geometry Geo() const;
-    void SwitchGeometry(std::unique_ptr<CollisionGeometry>&& geometry);
+    void SwitchGeometry(
+        std::unique_ptr<CollisionGeometry>&& geometry,
+        std::unique_ptr<RoutingEngine>&& routingEngine);
 
 private:
     void ValidateGeometry(const std::unique_ptr<CollisionGeometry>& geometry) const;

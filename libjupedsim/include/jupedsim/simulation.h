@@ -341,7 +341,7 @@ JUPEDSIM_API JPS_Geometry JPS_Simulation_GetGeometry(JPS_Simulation handle);
 JUPEDSIM_API bool JPS_Simulation_SwitchGeometry(
     JPS_Simulation handle,
     JPS_Geometry geometry,
-    JPS_GeometryError* out,
+    JPS_AgentIdIterator* faultyAgents,
     JPS_ErrorMessage* errorMessage);
 
 /**

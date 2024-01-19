@@ -134,6 +134,9 @@ void CollisionFreeSpeedModel::CheckModelConstraint(
 
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
     for(const auto& neighbor : neighbors) {
+        if(agent.id == neighbor.id) {
+            continue;
+        }
         const auto& neighbor_model = std::get<CollisionFreeSpeedModelData>(neighbor.model);
         const auto contanctdDist = r + neighbor_model.radius;
         const auto distance = (agent.pos - neighbor.pos).Norm();

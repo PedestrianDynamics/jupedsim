@@ -25,6 +25,7 @@ add_library(simulator STATIC
     src/Geometry.hpp
     src/GeometryBuilder.cpp
     src/GeometryBuilder.hpp
+    src/GeometrySwitchError.hpp
     src/Graph.hpp
     src/Journey.cpp
     src/Journey.hpp
