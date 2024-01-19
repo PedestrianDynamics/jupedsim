@@ -4,6 +4,7 @@
 #include "CollisionFreeSpeedModelData.hpp"
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
+#include "GeometrySwitchError.hpp"
 #include "IteratorPair.hpp"
 #include "Logger.hpp"
 #include "OperationalModel.hpp"
@@ -325,19 +326,39 @@ Geometry Simulation::Geo() const
     return {std::make_unique<CollisionGeometry>(*_geometry), _routingEngine->Clone()};
 }
 
-void Simulation::SwitchGeometry(std::unique_ptr<CollisionGeometry>&& geometry)
+void Simulation::SwitchGeometry(
+    std::unique_ptr<CollisionGeometry>&& geometry,
+    std::unique_ptr<RoutingEngine>&& routingEngine)
 {
     ValidateGeometry(geometry);
     _geometry = std::move(geometry);
+    _routingEngine = std::move(routingEngine);
 }
 
 void Simulation::ValidateGeometry(const std::unique_ptr<CollisionGeometry>& geometry) const
 {
     std::vector<GenericAgent::ID> faultyAgents;
     for(const auto& agent : _agents) {
+        if(const auto find_iter = std::find(
+               std::begin(_removedAgentsInLastIteration),
+               std::end(_removedAgentsInLastIteration),
+               agent.id);
+           find_iter != std::end(_removedAgentsInLastIteration)) {
+            continue;
+        }
+
+        bool faulty = false;
+        if(!geometry->InsideGeometry(agent.pos)) {
+            faulty = true;
+        }
+
         try {
             _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *geometry);
         } catch(const std::exception& ex) {
+            faulty = true;
+        }
+
+        if(faulty) {
             faultyAgents.push_back(agent.id);
         }
     }
@@ -385,6 +406,6 @@ void Simulation::ValidateGeometry(const std::unique_ptr<CollisionGeometry>& geom
                 fmt::join(faultyStages, ", "));
         }
 
-        throw SimulationError(message.c_str());
+        throw GeometrySwitchError(message.c_str(), faultyAgents, faultyStages);
     }
 }

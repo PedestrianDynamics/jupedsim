@@ -11,6 +11,7 @@
 #include "JourneyDescription.hpp"
 
 #include <Geometry.hpp>
+#include <GeometrySwitchError.hpp>
 #include <Simulation.hpp>
 #include <Unreachable.hpp>
 
@@ -555,7 +556,7 @@ JPS_Geometry JPS_Simulation_GetGeometry(JPS_Simulation handle)
 bool JPS_Simulation_SwitchGeometry(
     JPS_Simulation handle,
     JPS_Geometry geometry,
-    JPS_GeometryError* out,
+    JPS_AgentIdIterator* faultyAgents,
     JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
@@ -565,15 +566,21 @@ bool JPS_Simulation_SwitchGeometry(
     auto geometryInternal = reinterpret_cast<const Geometry*>(geometry);
     auto collisionGeometry =
         std::make_unique<CollisionGeometry>(*geometryInternal->collisionGeometry);
+    auto routingEngine = geometryInternal->routingEngine->Clone();
 
     bool result = false;
     try {
-        simulation->SwitchGeometry(std::move(collisionGeometry));
+        simulation->SwitchGeometry(std::move(collisionGeometry), std::move(routingEngine));
         result = true;
-    } catch(const std::exception& ex) {
+    } catch(const GeometrySwitchError& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
         }
+        if(faultyAgents) {
+            *faultyAgents =
+                reinterpret_cast<JPS_AgentIdIterator>(new AgentIdIterator(ex.FaultyAgents()));
+        }
+
     } catch(...) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
