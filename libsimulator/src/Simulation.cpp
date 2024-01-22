@@ -47,7 +47,7 @@ void Simulation::Iterate()
     _agentRemovalSystem.Run(_agents, _removedAgentsInLastIteration, _stageManager);
     _neighborhoodSearch.Update(_agents);
 
-    _stageSystem.Run(_stageManager, _neighborhoodSearch);
+    _stageSystem.Run(_stageManager, _neighborhoodSearch, *_geometry);
     _stategicalDecisionSystem.Run(_journeys, _agents, _stageManager);
     _tacticalDecisionSystem.Run(*_routingEngine, _agents);
     {
