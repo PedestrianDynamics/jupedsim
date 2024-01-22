@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
+#include "GeometricFunctions.hpp"
 #include "Logger.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "Point.hpp"
@@ -171,12 +173,14 @@ public:
     void State(WaitingSetState s);
     WaitingSetState State() const;
     template <typename T>
-    void Update(const NeighborhoodSearch<T>& neighborhoodSearch);
+    void Update(const NeighborhoodSearch<T>& neighborhoodSearch, const CollisionGeometry& geometry);
     const std::vector<GenericAgent::ID>& Occupants() const;
 };
 
 template <typename T>
-void NotifiableWaitingSet::Update(const NeighborhoodSearch<T>& neighborhoodSearch)
+void NotifiableWaitingSet::Update(
+    const NeighborhoodSearch<T>& neighborhoodSearch,
+    const CollisionGeometry& geometry)
 {
     if(state == WaitingSetState::Inactive) {
         return;
@@ -187,7 +191,28 @@ void NotifiableWaitingSet::Update(const NeighborhoodSearch<T>& neighborhoodSearc
     }
 
     for(size_t index = count_occupants; index < slots.size(); ++index) {
-        const auto candidates = neighborhoodSearch.GetNeighboringAgents(slots[index], 2);
+        const auto slot_pos = slots[index];
+        const auto& boundary = geometry.LineSegmentsInApproxDistanceTo(slot_pos);
+        auto candidates = neighborhoodSearch.GetNeighboringAgents(slot_pos, 2);
+        candidates.erase(
+            std::remove_if(
+                std::begin(candidates),
+                std::end(candidates),
+                [&slot_pos, &boundary](const auto& neighbor) {
+                    const auto agent_to_neighbor = LineSegment(slot_pos, neighbor.pos);
+                    if(std::find_if(
+                           boundary.cbegin(),
+                           boundary.cend(),
+                           [&agent_to_neighbor](const auto& boundary_segment) {
+                               return intersects(agent_to_neighbor, boundary_segment);
+                           }) != boundary.end()) {
+                        return true;
+                    }
+
+                    return false;
+                }),
+            std::end(candidates));
+
         GenericAgent::ID occupant = GenericAgent::ID::Invalid;
         double min_distance = std::numeric_limits<double>::max();
         for(const auto& agent : candidates) {
@@ -225,13 +250,15 @@ public:
     Point Target(const GenericAgent& agent) override;
     StageProxy Proxy(Simulation* simulation_) override;
     template <typename T>
-    void Update(const NeighborhoodSearch<T>& neighborhoodSearch);
+    void Update(const NeighborhoodSearch<T>& neighborhoodSearch, const CollisionGeometry& geometry);
     void Pop(size_t count);
     const std::vector<GenericAgent::ID>& Occupants() const;
 };
 
 template <typename T>
-void NotifiableQueue::Update(const NeighborhoodSearch<T>& neighborhoodSearch)
+void NotifiableQueue::Update(
+    const NeighborhoodSearch<T>& neighborhoodSearch,
+    const CollisionGeometry& geometry)
 {
     const auto count_occupants = occupants.size();
     if(count_occupants == slots.size()) {
@@ -239,7 +266,28 @@ void NotifiableQueue::Update(const NeighborhoodSearch<T>& neighborhoodSearch)
     }
 
     for(size_t index = count_occupants; index < slots.size(); ++index) {
-        const auto candidates = neighborhoodSearch.GetNeighboringAgents(slots[index], 2);
+        const auto slot_pos = slots[index];
+        const auto& boundary = geometry.LineSegmentsInApproxDistanceTo(slot_pos);
+        auto candidates = neighborhoodSearch.GetNeighboringAgents(slot_pos, 2);
+        candidates.erase(
+            std::remove_if(
+                std::begin(candidates),
+                std::end(candidates),
+                [&slot_pos, &boundary](const auto& neighbor) {
+                    const auto agent_to_neighbor = LineSegment(slot_pos, neighbor.pos);
+                    if(std::find_if(
+                           boundary.cbegin(),
+                           boundary.cend(),
+                           [&agent_to_neighbor](const auto& boundary_segment) {
+                               return intersects(agent_to_neighbor, boundary_segment);
+                           }) != boundary.end()) {
+                        return true;
+                    }
+
+                    return false;
+                }),
+            std::end(candidates));
+
         GenericAgent::ID occupant = GenericAgent::ID::Invalid;
         double min_distance = std::numeric_limits<double>::max();
         for(const auto& agent : candidates) {
