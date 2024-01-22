@@ -16,36 +16,6 @@
 #include <tuple>
 #include <utility>
 #include <vector>
-
-#include <CGAL/Constrained_Delaunay_triangulation_2.h>
-#include <CGAL/Surface_mesh.h>
-#include <CGAL/Triangulation_vertex_base_with_info_2.h>
-#include <CGAL/draw_triangulation_2.h>
-#include <CGAL/mark_domain_in_triangulation.h>
-using K = CGAL::Exact_predicates_exact_constructions_kernel;
-using Vb = CGAL::Triangulation_vertex_base_with_info_2<unsigned int, K>;
-template <class Gt, class Fb = CGAL::Constrained_triangulation_face_base_2<Gt>>
-class MyFace : public Fb
-{
-    bool in{false};
-    typedef Fb Base;
-    typedef typename Fb::Triangulation_data_structure TDS;
-
-public:
-    using Fb::Fb;
-    template <typename TDS2>
-    struct Rebind_TDS {
-        typedef typename Fb::template Rebind_TDS<TDS2>::Other Fb2;
-        typedef MyFace<Gt, Fb2> Other;
-    };
-    void set_in_domain(bool v) { in = v; }
-    bool get_in_domain() const { return in; }
-};
-using TDS = CGAL::Triangulation_data_structure_2<Vb, MyFace<K>>;
-using Itag = CGAL::Exact_predicates_tag;
-using CDT = CGAL::Constrained_Delaunay_triangulation_2<K, TDS, Itag>;
-using Point = K::Point_2;
-
 namespace GeosHelper
 {
 unsigned int GEOSCoordSeqGetDimensions(const GEOSCoordSequence* seq)
@@ -85,12 +55,11 @@ void add_linear_ring(
 }
 
 std::tuple<std::vector<glm::vec2>, std::vector<unsigned int>, std::vector<unsigned int>>
-partition_polygon(const GEOSGeometry* g)
+DrawableGEOS::partition_polygon(const GEOSGeometry* g)
 {
     assert(GEOSGeomTypeId(g) == GEOS_POLYGON);
     auto out = std::make_tuple(
         std::vector<glm::vec2>{}, std::vector<unsigned int>{}, std::vector<unsigned int>{});
-    CDT cdt{};
     unsigned int vertex_index{};
 
     const auto ring = GEOSGetExteriorRing(g);
@@ -267,26 +236,27 @@ DrawableGEOS::~DrawableGEOS()
 
 void DrawableGEOS::Draw(Shader& shader) const
 {
-    shader.Activate();
-
-    shader.SetUniform("color", glm::vec4(0.0f, 0.0f, 0.75f, 1.0f));
-    for(size_t index = 0; index < triangles.size(); ++index) {
-        glBindVertexArray(vaos[index + sequences.size() + triangles.size()]);
-        glDrawElements(
-            GL_TRIANGLES, std::get<1>(triangles[index]).size(), GL_UNSIGNED_INT, nullptr);
-    }
-
-    shader.SetUniform("color", glm::vec4(255.0f / 255.0f, 0.0f, 0.0f, 1.0f));
-    for(size_t index = 0; index < triangles.size(); ++index) {
-        glBindVertexArray(vaos[index + sequences.size()]);
-        glDrawElements(GL_LINES, std::get<2>(triangles[index]).size(), GL_UNSIGNED_INT, nullptr);
-    }
-
-    shader.SetUniform("color", glm::vec4(255.0f / 255.0f, 1.0f, 1.0f, 1.0f));
-    for(size_t index = 0; index < sequences.size(); ++index) {
-        glBindVertexArray(vaos[index]);
-        glDrawArrays(GL_LINE_STRIP, 0, sequences[index].size());
-    }
+    //    shader.Activate();
+    //
+    //    shader.SetUniform("color", glm::vec4(0.0f, 0.0f, 0.75f, 1.0f));
+    //    for(size_t index = 0; index < triangles.size(); ++index) {
+    //        glBindVertexArray(vaos[index + sequences.size() + triangles.size()]);
+    //        glDrawElements(
+    //            GL_TRIANGLES, std::get<1>(triangles[index]).size(), GL_UNSIGNED_INT, nullptr);
+    //    }
+    //
+    //    shader.SetUniform("color", glm::vec4(255.0f / 255.0f, 0.0f, 0.0f, 1.0f));
+    //    for(size_t index = 0; index < triangles.size(); ++index) {
+    //        glBindVertexArray(vaos[index + sequences.size()]);
+    //        glDrawElements(GL_LINES, std::get<2>(triangles[index]).size(), GL_UNSIGNED_INT,
+    //        nullptr);
+    //    }
+    //
+    //    shader.SetUniform("color", glm::vec4(255.0f / 255.0f, 1.0f, 1.0f, 1.0f));
+    //    for(size_t index = 0; index < sequences.size(); ++index) {
+    //        glBindVertexArray(vaos[index]);
+    //        glDrawArrays(GL_LINE_STRIP, 0, sequences[index].size());
+    //    }
 }
 
 const GEOSGeometry* read_wkt(std::filesystem::path file)

@@ -35,14 +35,6 @@ static void glfw_error_callback(int error, const char* description)
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
-struct Mesh {
-    std::vector<vec3> vertices{};
-    std::vector<GLint> indices{};
-};
-
-struct ApplicationState {
-};
-
 const std::string vertex_shader_code = R"(
     #version 330 core
     layout (location = 0) in vec2 inPos;
@@ -135,6 +127,9 @@ int main(int argc, char** argv)
         cam.Update(shader);
         if(gui.Geometry()) {
             gui.Geometry()->Draw(shader);
+        }
+        if(gui.RMesh()) {
+            gui.RMesh()->Draw(shader);
         }
         gui.Draw();
 

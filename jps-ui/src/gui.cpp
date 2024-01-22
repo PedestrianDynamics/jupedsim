@@ -1,6 +1,8 @@
 // Copyright © 2024 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "gui.hpp"
+#include "mesh.hpp"
+#include "rendering_mesh.hpp"
 #include "wkt.hpp"
 
 #include <imgui_internal.h>
@@ -76,6 +78,8 @@ void Gui::Draw()
             const auto wkt = read_wkt(filePath / filePathName);
             if(wkt) {
                 geo = std::make_unique<DrawableGEOS>(wkt);
+                const Mesh m(geo->tri());
+                mesh = std::make_unique<RenderingMesh>(m);
                 should_recenter = true;
             }
         }

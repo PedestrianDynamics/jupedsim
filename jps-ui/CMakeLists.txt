@@ -4,8 +4,12 @@ add_executable(jps-ui
     src/gui.cpp
     src/gui.hpp
     src/main.cpp
+    src/mesh.cpp
+    src/mesh.hpp
     src/ortho_camera.cpp
     src/ortho_camera.hpp
+    src/rendering_mesh.cpp
+    src/rendering_mesh.hpp
     src/shader.cpp
     src/shader.hpp
     src/wkt.cpp

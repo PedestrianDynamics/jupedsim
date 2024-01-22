@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "rendering_mesh.hpp"
 #include "wkt.hpp"
 
 #include <imgui.h>
@@ -10,6 +11,7 @@ class Gui
 {
 private:
     std::unique_ptr<DrawableGEOS> geo{nullptr};
+    std::unique_ptr<RenderingMesh> mesh{nullptr};
     bool should_exit = false;
     bool should_recenter = false;
 
@@ -21,4 +23,5 @@ public:
     bool ShouldExit() const { return should_exit; }
     bool RecenterOnGeometry() const { return should_recenter; }
     const DrawableGEOS* Geometry() const { return geo.get(); }
+    const RenderingMesh* RMesh() const { return mesh.get(); }
 };
