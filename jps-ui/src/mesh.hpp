@@ -7,12 +7,15 @@
 
 #include <glm/vec2.hpp>
 
+#include <limits>
 #include <vector>
 
 class Mesh
 {
 public:
     struct Polygon {
+        /// Represent invalid indices, e.g. neightbor index where no adjacent polygon is defined
+        static constexpr size_t InvalidIndex{std::numeric_limits<size_t>::max()};
         /// Index into the vertices store of the Mesh
         std::vector<size_t> vertices{};
         /// Index into the polygon store of the Mesh
@@ -41,4 +44,6 @@ private:
     void mergeDeadEnds(DisjointSet& djs);
     void smartMerge();
     bool isValid() const;
+    bool isConvex(const std::vector<size_t>& indices) const;
+    bool tryMerge(size_t polygon_a_index, size_t polygon_b_index, size_t first_common_vertex_in_a);
 };

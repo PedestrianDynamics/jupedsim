@@ -65,7 +65,6 @@ void Gui::Draw()
         should_exit = true;
     }
 
-
     if(ImGui::IsKeyChordPressed(ImGuiKey_C)) {
         should_recenter = true;
     }
@@ -78,7 +77,8 @@ void Gui::Draw()
             const auto wkt = read_wkt(filePath / filePathName);
             if(wkt) {
                 geo = std::make_unique<DrawableGEOS>(wkt);
-                const Mesh m(geo->tri());
+                Mesh m(geo->tri());
+                m.MergeGreedy();
                 mesh = std::make_unique<RenderingMesh>(m);
                 should_recenter = true;
             }

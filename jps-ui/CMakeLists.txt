@@ -1,6 +1,8 @@
 add_executable(jps-ui
     src/aabb.cpp
     src/aabb.hpp
+    src/disjoint_set.cpp
+    src/disjoint_set.hpp
     src/gui.cpp
     src/gui.hpp
     src/main.cpp
