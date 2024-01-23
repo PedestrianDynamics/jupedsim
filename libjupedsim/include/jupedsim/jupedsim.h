@@ -415,6 +415,10 @@ typedef struct JPS_Transition_t* JPS_Transition;
 
 /**
  * Create a fixed transition to stage
+ *
+ * A transition can be reused for many journeys (they are copied on assignment. After
+ * they are added to the last journey they need to be freed.
+ *
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return Fixed transition to stage or NULL on any error.
  */
@@ -423,6 +427,10 @@ JPS_Transition_CreateFixedTransition(JPS_StageId stageId, JPS_ErrorMessage* erro
 
 /**
  * Create a round robin transition to stages
+ *
+ * A transition can be reused for many journeys (they are copied on assignment. After
+ * they are added to the last journey they need to be freed.
+ *
  * @param stages target stages
  * @param weights weights of target stage
  * @param len length of stages and weights
@@ -437,6 +445,10 @@ JUPEDSIM_API JPS_Transition JPS_Transition_CreateRoundRobinTransition(
 
 /**
  * Create a least targeted transition to stages
+ *
+ * A transition can be reused for many journeys (they are copied on assignment. After
+ * they are added to the last journey they need to be freed.
+ *
  * @param stages target stages
  * @param len length of stages
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
