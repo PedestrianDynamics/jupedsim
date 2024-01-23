@@ -31,8 +31,6 @@ JUPEDSIM_API const char* JPS_ErrorMessage_GetMessage(JPS_ErrorMessage handle);
  */
 JUPEDSIM_API void JPS_ErrorMessage_Free(JPS_ErrorMessage handle);
 
-typedef struct JPS_GeometryError_t* JPS_GeometryError;
-
 #ifdef __cplusplus
 }
 #endif

@@ -321,11 +321,11 @@ void init_simulation(py::module_& m)
             })
         .def("switch_geometry", [](JPS_Simulation_Wrapper& w, JPS_Geometry_Wrapper& geometry) {
             JPS_ErrorMessage errorMsg{};
-            JPS_AgentIdIterator faultyAgents{};
 
-            auto sucess =
-                JPS_Simulation_SwitchGeometry(w.handle, geometry.handle, &faultyAgents, &errorMsg);
-            if(errorMsg) {
+            auto success =
+                JPS_Simulation_SwitchGeometry(w.handle, geometry.handle, nullptr, &errorMsg);
+
+            if(!success) {
                 auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
                 JPS_ErrorMessage_Free(errorMsg);
                 throw std::runtime_error{msg};
