@@ -132,5 +132,5 @@ JPS_Transition JPS_Transition_CreateLeastTargetedTransition(
 
 void JPS_Transition_Free(JPS_Transition handle)
 {
-    delete reinterpret_cast<JPS_Transition*>(handle);
+    delete reinterpret_cast<TransitionDescription*>(handle);
 }
