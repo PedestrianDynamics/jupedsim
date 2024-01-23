@@ -580,7 +580,6 @@ bool JPS_Simulation_SwitchGeometry(
             *faultyAgents =
                 reinterpret_cast<JPS_AgentIdIterator>(new AgentIdIterator(ex.FaultyAgents()));
         }
-
     } catch(...) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
