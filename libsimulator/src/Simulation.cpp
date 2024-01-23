@@ -347,18 +347,7 @@ void Simulation::ValidateGeometry(const std::unique_ptr<CollisionGeometry>& geom
             continue;
         }
 
-        bool faulty = false;
         if(!geometry->InsideGeometry(agent.pos)) {
-            faulty = true;
-        }
-
-        try {
-            _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *geometry);
-        } catch(const std::exception& ex) {
-            faulty = true;
-        }
-
-        if(faulty) {
             faultyAgents.push_back(agent.id);
         }
     }

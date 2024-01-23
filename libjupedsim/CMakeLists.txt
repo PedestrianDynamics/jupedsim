@@ -13,7 +13,6 @@ add_library(jupedsim_obj OBJECT
     src/error.cpp
     src/generalized_centrifugal_force_model.cpp
     src/geometry.cpp
-    src/GeometryError.hpp
     src/journey.cpp
     src/logging.cpp
     src/operational_model.cpp
