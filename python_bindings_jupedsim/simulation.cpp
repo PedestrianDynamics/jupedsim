@@ -330,6 +330,6 @@ void init_simulation(py::module_& m)
                 JPS_ErrorMessage_Free(errorMsg);
                 throw std::runtime_error{msg};
             }
-            return sucess;
+            return success;
         });
 }
