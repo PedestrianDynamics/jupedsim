@@ -7,6 +7,10 @@
 #include <CGAL/number_utils.h>
 
 #include <algorithm>
+#include <fmt/format.h>
+#include <fmt/ranges.h>
+#include <format>
+
 #include <iterator>
 #include <optional>
 #include <vector>
@@ -82,31 +86,35 @@ void Mesh::mergeDeadEnds(DisjointSet& djs)
         merged = false;
         size_t merge_candidate{};
         size_t merge_target{};
-        for(size_t index; index < polygons.size() && !merged; ++index) {
+        for(size_t index = 0; index < polygons.size() && !merged; ++index) {
             if(merged_polygons[index]) {
                 continue;
             }
             const auto& p = polygons[index];
+
+            auto isValidNeighbor = [index](const auto& idx) {
+                if((idx != Polygon::InvalidIndex) && (idx != index)) {
+                    return true;
+                }
+                return false;
+            };
+
             const auto num_valid_neigbors =
-                std::count_if(std::begin(p.neighbors), std::end(p.neighbors), [](const auto& idx) {
-                    return idx != Polygon::InvalidIndex;
-                });
+                std::count_if(std::begin(p.neighbors), std::end(p.neighbors), isValidNeighbor);
+
             if(num_valid_neigbors != 1) {
                 continue;
             }
 
-            const auto firstValidNeighbor = [](const auto& p) {
-                for(size_t nth_neighbor = 0; nth_neighbor < p.neighbors.size(); ++nth_neighbor) {
-                    if(p.neighbors[nth_neighbor] != Polygon::InvalidIndex) {
-                        return nth_neighbor;
-                    }
-                }
-                return Polygon::InvalidIndex;
-            };
-
-            const auto valid_neighbor = firstValidNeighbor(p);
+            const auto neighbor =
+                std::find_if(std::begin(p.neighbors), std::end(p.neighbors), isValidNeighbor);
+            assert(neighbor != std::end(p.neighbors));
+            const auto valid_neighbor = std::distance(std::begin(p.neighbors), neighbor);
             merge_candidate = p.neighbors[valid_neighbor];
+
             merge_target = index;
+
+            // due to data structure valid_neighbor is also first_common_vertex_in_a
             merged = tryMerge(merge_target, merge_candidate, valid_neighbor);
         }
 
@@ -126,7 +134,6 @@ void Mesh::mergeDeadEnds(DisjointSet& djs)
                     merge_target);
             }
         }
-
     } while(merged);
 }
 
@@ -141,22 +148,27 @@ bool Mesh::isValid() const
 
 bool Mesh::isConvex(const std::vector<size_t>& indices) const
 {
-    const auto prev = [this, &indices](size_t index) -> size_t {
+    const auto prev = [&indices](size_t index) -> size_t {
         const auto count = indices.size();
         assert(count >= 3);
         return (count + index - 1) % count;
     };
-    const auto next = [this, &indices](size_t index) -> size_t {
+    const auto next = [&indices](size_t index) -> size_t {
         const auto count = indices.size();
         assert(count >= 3);
         return (index + 1) % count;
     };
 
     for(size_t index = 0; index < indices.size(); ++index) {
-        const auto segment_a = vertices[index] - vertices[prev(index)];
-        const auto segment_b = vertices[next(index)] - vertices[index];
+        const auto& current_vertex = vertices[indices[index]];
+        const auto& prev_vertex = vertices[indices[prev(index)]];
+        const auto& next_vertex = vertices[indices[next(index)]];
+
+        const auto segment_a = current_vertex - prev_vertex;
+        const auto segment_b = next_vertex - current_vertex;
         const auto cp = glm::cross(glm::dvec3(segment_a, 0), glm::dvec3(segment_b, 0));
-        if(cp.z > 0.0) {
+
+        if(cp.z < 0.0) {
             // This indicates CW winding between consecutive segments
             return false;
         }
@@ -172,27 +184,34 @@ bool Mesh::tryMerge(size_t polygon_a_index, size_t polygon_b_index, size_t first
 
     std::vector<size_t> indices{};
     indices.reserve(new_vertex_count);
+    std::vector<size_t> neighbors{};
+    neighbors.reserve(new_vertex_count);
+
     const auto iter_b = std::find(
         std::begin(polygon_b.vertices),
         std::end(polygon_b.vertices),
         polygon_a.vertices[first_common_vertex_in_a]);
-    assert(iter != std::end(polygon_b.vertices));
-    const auto vertex_in_b = *iter_b;
-    for(size_t index; index < polygon_b.vertices.size(); ++index) {
-        vertices.emplace_back(
-            polygon_b.vertices[(index + vertex_in_b) % polygon_b.vertices.size()]);
+    assert(iter_b != std::end(polygon_b.vertices));
+    const auto vertex_in_b = std::distance(std::begin(polygon_b.vertices), iter_b);
+
+    for(size_t index = 0; index < polygon_b.vertices.size(); ++index) {
+        indices.emplace_back(polygon_b.vertices[(index + vertex_in_b) % polygon_b.vertices.size()]);
+        neighbors.emplace_back(
+            polygon_b.neighbors[(index + vertex_in_b) % polygon_b.neighbors.size()]);
     }
-    for(size_t index; index < polygon_a.vertices.size() - 2; ++index) {
-        vertices.emplace_back(
+    for(size_t index = 0; index < polygon_a.vertices.size() - 2; ++index) {
+        indices.emplace_back(
             polygon_a.vertices[(index + first_common_vertex_in_a + 2) % polygon_a.vertices.size()]);
+        neighbors.emplace_back(
+            polygon_a
+                .neighbors[(index + first_common_vertex_in_a + 2) % polygon_a.neighbors.size()]);
     }
 
-    indices.insert(std::end(indices), iter_b, std::end(polygon_b.vertices));
-    indices.insert(std::end(indices), std::begin(polygon_b.vertices), iter_b);
-    auto iter_a = std::begin(polygon_a.vertices);
-    std::advance(iter_a, first_common_vertex_in_a);
-    indices.insert(std::end(indices), iter_a, std::end(polygon_a.vertices));
-    indices.insert(std::end(indices), std::begin(polygon_a.vertices), iter_a);
+    if(isConvex(indices)) {
+        polygon_a.vertices = indices;
+        polygon_a.neighbors = neighbors;
+        return true;
+    }
 
     return false;
 }
