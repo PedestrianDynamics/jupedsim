@@ -3,6 +3,7 @@
 #include <optional>
 
 struct SocialForceModelUpdate {
-    std::optional<Point> position{};
-    std::optional<Point> velocity{};
+    Point position{};
+    Point velocity{};
+    Point desiredDirection{};
 };

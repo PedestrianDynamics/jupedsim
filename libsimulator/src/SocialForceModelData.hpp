@@ -1,8 +1,17 @@
 #pragma once
 
-#include "Point.hpp" // is currently included to find fmt
+#include "Point.hpp" 
 struct SocialForceModelData {
-    double test_value;
+    Point velocity{}; // v
+    Point desiredDirection{}; // e0
+    double mass{}; // m
+    double desiredSpeed{}; // v0
+    double reactionTime{}; // T
+    double agentScale{}; // A for other agents
+    double obstacleScale{}; // A for obstacles
+    double forceDistance{}; // B
+    double radius{}; // r
+    
 };
 
 template <>
@@ -13,6 +22,6 @@ struct fmt::formatter<SocialForceModelData> {
     template <typename FormatContext>
     auto format(const SocialForceModelData& m, FormatContext& ctx) const
     {
-        return fmt::format_to(ctx.out(), "SFM[test_val={}])", m.test_value);
+        return fmt::format_to(ctx.out(), "SFM[velocity={}])", m.velocity);
     }
 };

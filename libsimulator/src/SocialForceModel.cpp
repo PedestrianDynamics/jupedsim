@@ -13,7 +13,7 @@
 #include <Logger.hpp>
 #include <stdexcept>
 
-SocialForceModel::SocialForceModel(double test_value_):test_value(test_value_){};
+SocialForceModel::SocialForceModel(double bodyForce_, double friction_):bodyForce(bodyForce_), friction(friction_){};
 
 OperationalModelType SocialForceModel::Type() const
 {

@@ -14,10 +14,12 @@ public:
     using NeighborhoodSearchType = NeighborhoodSearch<GenericAgent>;
 
 private:
-    double test_value;
+    double _cutOffRadius{2.5};
+    double bodyForce;
+    double friction;
 
 public:
-    SocialForceModel(double test_value);
+    SocialForceModel(double bodyForce_, double friction_);
     ~SocialForceModel() override = default;
     OperationalModelType Type() const override;
     OperationalModelUpdate ComputeNewPosition(

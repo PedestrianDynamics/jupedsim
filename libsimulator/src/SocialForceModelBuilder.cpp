@@ -2,13 +2,13 @@
 #include "SocialForceModel.hpp"
 
 SocialForceModelBuilder::SocialForceModelBuilder(
-    double test_value)
-    : _testVal(test_value)
+    double bodyForce, double friction)
+    : _bodyForce(bodyForce), _friction(friction)
 {
 }
 
 SocialForceModel SocialForceModelBuilder::Build()
 {
     return SocialForceModel(
-        _testVal);
+        _bodyForce, _friction);
 }

@@ -22,7 +22,6 @@ pos_in_spawning_area = jps.distributions.distribute_by_number(
 exit_area = Polygon([(10, 11), (12, 11), (12, 12), (10, 12)])
 
 trajectory_file = "corner.sqlite"  # output file
-print("trajec_file created")
 simulation = jps.Simulation(
     model=jps.SocialForceModel(),
     geometry=area,
@@ -40,13 +39,13 @@ v_distribution = normal(1.34, 0.05, num_agents)
 for pos, v0 in zip(pos_in_spawning_area, v_distribution):
     simulation.add_agent(
         jps.SocialForceModelAgentParameters(
-            test_value=v0,
             position=pos,
             orientation=(0,0),
-            # journey_id=journey_id,
-            # stage_id=exit_id
+            journey_id=journey_id,
+            stage_id=exit_id
         )
     )
+print("Agents added")
 
 while simulation.agent_count() > 0:
     simulation.iterate()

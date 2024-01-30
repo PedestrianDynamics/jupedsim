@@ -110,17 +110,16 @@ class Simulation:
             py_jps_model = model_builder.build()
         elif isinstance(model, SocialForceModel):
             model_builder = py_jps.SocialForceModelBuilder(
-                test_value = model.test_value
+                bodyForce = model.bodyForce,
+                friction = model.friction
             )
             py_jps_model = model_builder.build()
         else:
             raise Exception("Unknown model type supplied")
         self._writer = trajectory_writer
-        print("trajec_writer set")
         self._obj = py_jps.Simulation(
             model=py_jps_model, geometry=build_geometry(geometry)._obj, dt=dt
         )
-        print("Simulation created")
 
     def add_waypoint_stage(
         self, position: tuple[float, float], distance

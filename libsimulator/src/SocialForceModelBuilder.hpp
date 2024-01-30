@@ -3,9 +3,10 @@
 #include "SocialForceModel.hpp"
 class SocialForceModelBuilder
 {
-    double _testVal;
+    double _bodyForce;
+    double _friction;
 
 public:
-    SocialForceModelBuilder(double test_value);
+    SocialForceModelBuilder(double bodyForce, double friction);
     SocialForceModel Build();
 };

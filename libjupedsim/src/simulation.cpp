@@ -17,8 +17,6 @@
 
 #include <cassert>
 
-#include <iostream>
-
 using jupedsim::detail::intoJPS_Point;
 using jupedsim::detail::intoPoint;
 using jupedsim::detail::intoTuple;
@@ -41,11 +39,8 @@ JPS_Simulation JPS_Simulation_Create(
             std::make_unique<CollisionGeometry>(*geometryInternal->collisionGeometry);
         auto routingEngine = geometryInternal->routingEngine->Clone();
 
-        std::cout << "reinterpreting model \n";
         auto modelInternal = reinterpret_cast<OperationalModel*>(model);
-        std::cout << "cloning model \n";
         auto model = modelInternal->Clone();
-        std::cout << "clone created \n";
         result = reinterpret_cast<JPS_Simulation>(new Simulation(
             std::move(model), std::move(collisionGeometry), std::move(routingEngine), dT));
     } catch(const std::exception& ex) {
@@ -269,7 +264,15 @@ JPS_AgentId JPS_Simulation_AddSocialForceModelAgent(
             intoPoint(parameters.position),
             intoPoint(parameters.orientation),
             SocialForceModelData{
-                parameters.test_value}};
+                intoPoint(parameters.velocity),
+                intoPoint(parameters.desiredDirection),
+                parameters.mass,
+                parameters.desiredSpeed,
+                parameters.reactionTime,
+                parameters.agentScale,
+                parameters.obstacleScale,
+                parameters.forceDistance,
+                parameters.radius}};
         result = simulation->AddAgent(std::move(agent));
     } catch(const std::exception& ex) {
         if(errorMessage) {
