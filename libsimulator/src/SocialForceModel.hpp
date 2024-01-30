@@ -26,8 +26,8 @@ public:
         double dT,
         const GenericAgent& ped,
         const CollisionGeometry& geometry,
-        const NeighborhoodSearchType& neighborhoodSearch) const override{};
-    void ApplyUpdate(const OperationalModelUpdate& update, GenericAgent& agent) const override{};
+        const NeighborhoodSearchType& neighborhoodSearch) const override;
+    void ApplyUpdate(const OperationalModelUpdate& update, GenericAgent& agent) const override;
     void CheckModelConstraint(
         const GenericAgent& agent,
         const NeighborhoodSearchType& neighborhoodSearch,
