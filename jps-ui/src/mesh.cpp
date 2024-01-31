@@ -10,6 +10,7 @@
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 #include <format>
+#include <queue>
 
 #include <iterator>
 #include <optional>
@@ -75,6 +76,7 @@ void Mesh::MergeGreedy()
     // 1) Merge polygons with only one nieghbor, aka "dead-ends"
     mergeDeadEnds(djs);
     // 2) "Smart" merge remaining polygons
+    smartMerge(true);
     // 3) Validate correctness
 }
 
@@ -137,8 +139,176 @@ void Mesh::mergeDeadEnds(DisjointSet& djs)
     } while(merged);
 }
 
-void Mesh::smartMerge()
+double Mesh::polygonArea(const std::vector<size_t> indices) const
 {
+    const auto next = [&indices](size_t index) -> size_t {
+        const auto count = indices.size();
+        assert(count >= 3);
+        return (index + 1) % count;
+    };
+
+    double area = 0.;
+
+    for(size_t index = 0; index < indices.size(); ++index) {
+        const auto& current_vertex = vertices[indices[index]];
+        const auto& next_vertex = vertices[indices[next(index)]];
+
+        area += (current_vertex.x * next_vertex.y) - (current_vertex.y - next_vertex.x);
+    }
+    area = std::abs(area) / 2.0;
+    return area;
+}
+
+void Mesh::smartMerge(bool keep_deadends = true)
+{
+    constexpr double InvalidArea{std::numeric_limits<double>::lowest()};
+
+    struct SearchNode {
+
+        size_t source;
+        double area;
+
+        // Comparison.
+        // Always take the "biggest" search node in a priority queue.
+        bool operator<(const SearchNode& other) const { return area < other.area; }
+        bool operator>(const SearchNode& other) const { return area > other.area; }
+    };
+
+    std::vector<double> bestMerge(polygons.size(), InvalidArea);
+    std::priority_queue<SearchNode> polygonQueue;
+
+    auto rateMerge = [&](size_t index) {
+        if(index == Polygon::InvalidIndex) {
+            return;
+        }
+        auto const& polygon = polygons[index];
+
+        auto isValidNeighbor = [index](const auto& idx) {
+            if((idx != Polygon::InvalidIndex) && (idx != index)) {
+                return true;
+            }
+            return false;
+        };
+
+        const auto num_valid_neigbors = std::count_if(
+            std::begin(polygon.neighbors), std::end(polygon.neighbors), isValidNeighbor);
+
+        if(keep_deadends && num_valid_neigbors == 1) {
+            // It's a dead end and we don't want to merge it.
+            return;
+        }
+
+        SearchNode thisNode{index, InvalidArea};
+        size_t best = Polygon::InvalidIndex;
+        for(size_t i = 0; i < polygon.neighbors.size(); ++i) {
+            const auto& neighbor = polygon.neighbors[i];
+            if(neighbor == Polygon::InvalidIndex || neighbor == index ||
+               polygons[neighbor].neighbors.size() == 0) {
+                continue;
+            }
+            const auto& valid_neighbor = i;
+            size_t mergeIndex = polygon.neighbors[valid_neighbor];
+
+            auto [indices, neighbors] = mergedPolygon(index, mergeIndex, valid_neighbor);
+
+            if(isConvex(indices)) {
+                thisNode.area = std::max(thisNode.area, polygonArea(indices));
+                best = neighbor;
+            }
+        }
+        if(thisNode.area != InvalidArea) {
+            polygonQueue.push(thisNode);
+            bestMerge[index] = thisNode.area;
+            fmt::print("best: {} with {}\n", thisNode.source, best);
+
+        } else {
+            bestMerge[index] = InvalidArea;
+        }
+    };
+
+    for(size_t i = 0; i < polygons.size(); ++i) {
+        rateMerge(i);
+    }
+
+    size_t mergePartner = Polygon::InvalidIndex;
+    size_t firstCommonVertex = Polygon::InvalidIndex;
+
+    while(!polygonQueue.empty()) {
+        const auto node = polygonQueue.top();
+        polygonQueue.pop();
+
+        if(abs(node.area - bestMerge[node.source]) > 1e-8) {
+            // Not the right node.
+            continue;
+        }
+
+        const auto& polygon = polygons[node.source];
+
+        for(size_t i = 0; i < polygon.neighbors.size(); ++i) {
+            const auto& neighbor = polygon.neighbors[i];
+            if(neighbor == Polygon::InvalidIndex || neighbor == node.source ||
+               polygons[neighbor].vertices.size() == 0) {
+                continue;
+            }
+            size_t mergeIndex = polygon.neighbors[i];
+
+            auto [indices, neighbors] = mergedPolygon(node.source, mergeIndex, i);
+            if(isConvex(indices)) {
+                auto area = polygonArea(indices);
+                if(std::abs(node.area - area) < 1e-8) {
+                    mergePartner = mergeIndex;
+                    firstCommonVertex = i;
+                    break;
+                }
+            }
+        }
+        assert(mergePartner != Polygon::InvalidIndex);
+        assert(firstCommonVertex != Polygon::InvalidIndex);
+
+        auto mergeSuccess = tryMerge(node.source, mergePartner, firstCommonVertex);
+        if(!mergeSuccess) {
+            continue;
+        }
+
+        fmt::print("merged: {} with {}\n", node.source, mergePartner);
+        assert(mergeSuccess);
+        bestMerge[mergePartner] = InvalidArea;
+        polygons[mergePartner].neighbors.clear();
+        polygons[mergePartner].vertices.clear();
+        for(size_t index = 0; index < polygons.size(); ++index) {
+            // if(best[index]) {
+            //     continue;
+            // }
+            auto& polygon = polygons[index];
+            std::replace(
+                std::begin(polygon.neighbors),
+                std::end(polygon.neighbors),
+                mergePartner,
+                node.source);
+        }
+
+        // Update THIS merge
+
+        fmt::print("current:\n");
+        rateMerge(node.source);
+
+        fmt::print("neighbors:\n");
+        // Update the polygons around this merge.
+        for(size_t i = 0; i < polygon.neighbors.size(); ++i) {
+            rateMerge(polygon.neighbors[i]);
+        }
+    }
+}
+
+bool Mesh::isMergable(
+    size_t polygon_a_index,
+    size_t polygon_b_index,
+    size_t first_common_vertex_in_a)
+{
+    auto [indices, neighbors] =
+        mergedPolygon(polygon_a_index, polygon_b_index, first_common_vertex_in_a);
+
+    return isConvex(indices);
 }
 
 bool Mesh::isValid() const
@@ -176,7 +346,8 @@ bool Mesh::isConvex(const std::vector<size_t>& indices) const
     return true;
 }
 
-bool Mesh::tryMerge(size_t polygon_a_index, size_t polygon_b_index, size_t first_common_vertex_in_a)
+std::tuple<std::vector<size_t>, std::vector<size_t>>
+Mesh::mergedPolygon(size_t polygon_a_index, size_t polygon_b_index, size_t first_common_vertex_in_a)
 {
     auto& polygon_a = polygons[polygon_a_index];
     const auto& polygon_b = polygons[polygon_b_index];
@@ -194,20 +365,31 @@ bool Mesh::tryMerge(size_t polygon_a_index, size_t polygon_b_index, size_t first
     assert(iter_b != std::end(polygon_b.vertices));
     const auto vertex_in_b = std::distance(std::begin(polygon_b.vertices), iter_b);
 
-    for(size_t index = 0; index < polygon_b.vertices.size(); ++index) {
+    for(size_t index = 0; index < polygon_b.vertices.size() - 1; ++index) {
         indices.emplace_back(polygon_b.vertices[(index + vertex_in_b) % polygon_b.vertices.size()]);
         neighbors.emplace_back(
             polygon_b.neighbors[(index + vertex_in_b) % polygon_b.neighbors.size()]);
     }
-    for(size_t index = 0; index < polygon_a.vertices.size() - 2; ++index) {
+    for(size_t index = 0; index < polygon_a.vertices.size() - 1; ++index) {
         indices.emplace_back(
-            polygon_a.vertices[(index + first_common_vertex_in_a + 2) % polygon_a.vertices.size()]);
+            polygon_a.vertices[(index + first_common_vertex_in_a + 1) % polygon_a.vertices.size()]);
         neighbors.emplace_back(
             polygon_a
-                .neighbors[(index + first_common_vertex_in_a + 2) % polygon_a.neighbors.size()]);
+                .neighbors[(index + first_common_vertex_in_a + 1) % polygon_a.neighbors.size()]);
     }
 
+    return std::make_tuple(indices, neighbors);
+}
+
+bool Mesh::tryMerge(size_t polygon_a_index, size_t polygon_b_index, size_t first_common_vertex_in_a)
+{
+    auto [indices, neighbors] =
+        mergedPolygon(polygon_a_index, polygon_b_index, first_common_vertex_in_a);
+
     if(isConvex(indices)) {
+        auto& polygon_a = polygons[polygon_a_index];
+        const auto& polygon_b = polygons[polygon_b_index];
+
         polygon_a.vertices = indices;
         polygon_a.neighbors = neighbors;
         return true;

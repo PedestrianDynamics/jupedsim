@@ -42,8 +42,13 @@ private:
     Mesh(Mesh&& other) = delete;
     void operator=(Mesh&& other) = delete;
     void mergeDeadEnds(DisjointSet& djs);
-    void smartMerge();
+    void smartMerge(bool keep_deadends);
     bool isValid() const;
     bool isConvex(const std::vector<size_t>& indices) const;
     bool tryMerge(size_t polygon_a_index, size_t polygon_b_index, size_t first_common_vertex_in_a);
+    bool
+    isMergable(size_t polygon_a_index, size_t polygon_b_index, size_t first_common_vertex_in_a);
+    std::tuple<std::vector<size_t>, std::vector<size_t>>
+    mergedPolygon(size_t polygon_a_index, size_t polygon_b_index, size_t first_common_vertex_in_a);
+    double polygonArea(const std::vector<size_t> indices) const;
 };
