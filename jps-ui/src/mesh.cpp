@@ -68,6 +68,8 @@ Mesh::Mesh(const CDT& cdt)
             }
         }
     }
+
+    updateBoundingBoxes();
 };
 
 void Mesh::MergeGreedy()
@@ -78,6 +80,8 @@ void Mesh::MergeGreedy()
     // 2) "Smart" merge remaining polygons
     smartMerge(true);
     // 3) Validate correctness
+
+    updateBoundingBoxes();
 }
 
 void Mesh::mergeDeadEnds(DisjointSet& djs)
@@ -459,4 +463,59 @@ std::vector<uint16_t> Mesh::SegmentIndices() const
         indices.emplace_back(std::get<1>(s));
     }
     return indices;
+}
+
+void Mesh::updateBoundingBoxes()
+{
+    boundingBoxes.clear();
+    boundingBoxes.reserve(polygons.size());
+
+    std::transform(
+        std::begin(polygons),
+        std::end(polygons),
+        std::back_inserter(boundingBoxes),
+        [this](const auto& polygon) {
+            float xMin = std::numeric_limits<float>::max();
+            float xMax = std::numeric_limits<float>::lowest();
+            float yMin = std::numeric_limits<float>::max();
+            float yMax = std::numeric_limits<float>::lowest();
+
+            for(const auto& pIndex : polygon.vertices) {
+                const auto& p = vertices[pIndex];
+                xMin = std::min(xMin, static_cast<float>(p.x));
+                xMax = std::max(xMax, static_cast<float>(p.x));
+                yMin = std::min(yMin, static_cast<float>(p.y));
+                yMax = std::max(yMax, static_cast<float>(p.y));
+            }
+
+            return AABB{{xMin, yMin}, {xMax, yMax}};
+        });
+}
+
+size_t Mesh::FindContainingPolygon(const glm::vec2& p) const
+{
+    for(size_t index = 0; index < polygons.size(); ++index) {
+        if(boundingBoxes[index].Contains(p) && polygonContains(index, p)) {
+            return index;
+        }
+    }
+
+    return Polygon::InvalidIndex;
+}
+
+bool Mesh::polygonContains(const size_t polygonIndex, glm::vec2 p) const
+{
+    const auto& poly = polygons[polygonIndex];
+
+    for(size_t i = 0; i < poly.vertices.size(); ++i) {
+
+        const glm::vec2 diff = vertices[(i + 1) % poly.vertices.size()] - vertices[i];
+        const glm::vec2 xp = p - vertices[i];
+
+        const auto cp = glm::cross(glm::vec3(diff, 0), glm::vec3(xp, 0));
+        if(cp.z < 0.0) {
+            return false;
+        }
+    }
+    return true;
 }

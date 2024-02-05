@@ -27,6 +27,7 @@ private:
     std::vector<glm::dvec2> vertices{};
     /// All convex polygons in this Mesh in CCW orientation.
     std::vector<Polygon> polygons{};
+    std::vector<AABB> boundingBoxes{};
 
 public:
     Mesh(const CDT& cdt);
@@ -35,6 +36,7 @@ public:
     std::vector<glm::vec2> FVertices() const;
     std::vector<uint16_t> TriangleIndices() const;
     std::vector<uint16_t> SegmentIndices() const;
+    size_t FindContainingPolygon(const glm::vec2& p) const;
 
 private:
     Mesh(const Mesh& other) = delete;
@@ -51,4 +53,6 @@ private:
     std::tuple<std::vector<size_t>, std::vector<size_t>>
     mergedPolygon(size_t polygon_a_index, size_t polygon_b_index, size_t first_common_vertex_in_a);
     double polygonArea(const std::vector<size_t> indices) const;
+    bool polygonContains(const size_t, glm::vec2 p) const;
+    void updateBoundingBoxes();
 };

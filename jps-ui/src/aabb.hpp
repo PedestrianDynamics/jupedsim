@@ -3,6 +3,7 @@
 #pragma once
 
 #include <glm/vec2.hpp>
+#include <vector>
 
 struct AABB {
     glm::vec2 min;
@@ -12,4 +13,8 @@ struct AABB {
     float Width() const;
     float Height() const;
     glm::vec2 Center() const;
+
+    bool Contains(const glm::vec2& point) const;
 };
+
+AABB CreateFromPoints(const std::vector<glm::vec2>& points);
