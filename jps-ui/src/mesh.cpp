@@ -219,7 +219,6 @@ void Mesh::smartMerge(bool keep_deadends = true)
         if(thisNode.area != InvalidArea) {
             polygonQueue.push(thisNode);
             bestMerge[index] = thisNode.area;
-            fmt::print("best: {} with {}\n", thisNode.source, best);
 
         } else {
             bestMerge[index] = InvalidArea;
@@ -270,7 +269,6 @@ void Mesh::smartMerge(bool keep_deadends = true)
             continue;
         }
 
-        fmt::print("merged: {} with {}\n", node.source, mergePartner);
         assert(mergeSuccess);
         bestMerge[mergePartner] = InvalidArea;
         polygons[mergePartner].neighbors.clear();
@@ -288,11 +286,8 @@ void Mesh::smartMerge(bool keep_deadends = true)
         }
 
         // Update THIS merge
-
-        fmt::print("current:\n");
         rateMerge(node.source);
 
-        fmt::print("neighbors:\n");
         // Update the polygons around this merge.
         for(size_t i = 0; i < polygon.neighbors.size(); ++i) {
             rateMerge(polygon.neighbors[i]);
