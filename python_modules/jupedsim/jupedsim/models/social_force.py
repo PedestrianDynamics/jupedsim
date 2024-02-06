@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 import jupedsim.native as py_jps
 
+
 @dataclass(kw_only=True)
 class SocialForceModel:
     """Parameters for Social Force Model
