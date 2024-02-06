@@ -46,10 +46,12 @@ def _geometry_from_wkt(wkt_input: str) -> Geometry:
 
 
 def _geometry_from_shapely(
-    geometry_input: shapely.Polygon
-    | shapely.MultiPolygon
-    | shapely.GeometryCollection
-    | shapely.MultiPoint,
+    geometry_input: (
+        shapely.Polygon
+        | shapely.MultiPolygon
+        | shapely.GeometryCollection
+        | shapely.MultiPoint
+    ),
 ) -> Geometry:
     polygons = _polygons_from_geometry_collection(
         shapely.GeometryCollection([geometry_input])
@@ -117,12 +119,14 @@ def _internal_build_geometry(
 
 
 def build_geometry(
-    geometry: list[tuple[float, float]]
-    | shapely.GeometryCollection
-    | shapely.Polygon
-    | shapely.MultiPolygon
-    | shapely.MultiPoint
-    | str,
+    geometry: (
+        list[tuple[float, float]]
+        | shapely.GeometryCollection
+        | shapely.Polygon
+        | shapely.MultiPolygon
+        | shapely.MultiPoint
+        | str
+    ),
     **kwargs: Any,
 ) -> Geometry:
     """Create a :class:`~jupedsim.geometry.Geometry` from different input representations.
