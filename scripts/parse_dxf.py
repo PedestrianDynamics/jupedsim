@@ -176,8 +176,10 @@ def parse_dxf_file(
     simple_holes = []
     other_holes = []
     for hole in holes:
-        simple_holes.append(hole) if hole.is_simple else other_holes.append(
-            hole
+        (
+            simple_holes.append(hole)
+            if hole.is_simple
+            else other_holes.append(hole)
         )
 
     if len(other_holes) > 0:

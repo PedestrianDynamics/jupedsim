@@ -40,12 +40,14 @@ class Simulation:
         self,
         *,
         model: CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel,
-        geometry: str
-        | shapely.GeometryCollection
-        | shapely.Polygon
-        | shapely.MultiPolygon
-        | shapely.MultiPoint
-        | list[tuple[float, float]],
+        geometry: (
+            str
+            | shapely.GeometryCollection
+            | shapely.Polygon
+            | shapely.MultiPolygon
+            | shapely.MultiPoint
+            | list[tuple[float, float]]
+        ),
         dt: float = 0.01,
         trajectory_writer: TrajectoryWriter | None = None,
         **kwargs: Any,
@@ -145,12 +147,14 @@ class Simulation:
 
     def add_exit_stage(
         self,
-        polygon: str
-        | shapely.GeometryCollection
-        | shapely.Polygon
-        | shapely.MultiPolygon
-        | shapely.MultiPoint
-        | list[tuple[float, float]],
+        polygon: (
+            str
+            | shapely.GeometryCollection
+            | shapely.Polygon
+            | shapely.MultiPolygon
+            | shapely.MultiPoint
+            | list[tuple[float, float]]
+        ),
     ) -> int:
         """Add an exit stage to the simulation.
 
@@ -182,8 +186,10 @@ class Simulation:
 
     def add_agent(
         self,
-        parameters: GeneralizedCentrifugalForceModelAgentParameters
-        | CollisionFreeSpeedModelAgentParameters,
+        parameters: (
+            GeneralizedCentrifugalForceModelAgentParameters
+            | CollisionFreeSpeedModelAgentParameters
+        ),
     ) -> int:
         return self._obj.add_agent(parameters.as_native())
 
@@ -250,12 +256,14 @@ class Simulation:
 
     def agents_in_polygon(
         self,
-        poly: str
-        | shapely.GeometryCollection
-        | shapely.Polygon
-        | shapely.MultiPolygon
-        | shapely.MultiPoint
-        | list[tuple[float, float]],
+        poly: (
+            str
+            | shapely.GeometryCollection
+            | shapely.Polygon
+            | shapely.MultiPolygon
+            | shapely.MultiPoint
+            | list[tuple[float, float]]
+        ),
     ) -> list[Agent]:
         """Return all agents inside the given polygon.
 
