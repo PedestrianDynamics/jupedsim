@@ -1,0 +1,1040 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>jupedsim.distributions &#8212; JuPedSim  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/jupedsim/distributions';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.2';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v1.0.6';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../_static/jupedsim.svg" class="logo__image only-light" alt="JuPedSim  documentation - Home"/>
+    <script>document.write(`<img src="../../_static/jupedsim.svg" class="logo__image only-dark" alt="JuPedSim  documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PedestrianDynamics/jupedsim" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/jupedsim/" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://img.shields.io/pypi/v/jupedsim" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.5281/zenodo.1293771" title="DOI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1293771.svg" class="icon-link-image" alt="DOI"/></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/getting_started.html">Getting started</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../concepts/index.html">Concepts</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../concepts/geometry.html">Geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../concepts/routing.html">Routing</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../notebooks/index.html">Notebooks</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/corner.html">Movement around Corners</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/double-bottleneck.html">Movement through Bottlenecks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/journey.html">How to work with Journeys</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/lane-formation.html">Lane formation in bi-directional flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/motivation.html">Modelling Motivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/queues_waiting.html">Waiting in Queues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/routing.html">How Route Choice can Impact Evacuation Times</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/single-file.html">Simulating Single-File Movement</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../disclaimer.html">Disclaimer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/jupedsim/index.html">API reference</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for jupedsim.distributions</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright © 2012-2024 Forschungszentrum Jülich GmbH</span>
+<span class="c1"># SPDX-License-Identifier: LGPL-3.0-or-later</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">shapely</span>
+
+<span class="kn">from</span> <span class="nn">jupedsim.internal.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
+
+
+<div class="viewcode-block" id="AgentNumberError"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.AgentNumberError">[docs]</a><span class="k">class</span> <span class="nc">AgentNumberError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span></div>
+
+
+<div class="viewcode-block" id="IncorrectParameterError"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.IncorrectParameterError">[docs]</a><span class="k">class</span> <span class="nc">IncorrectParameterError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span></div>
+
+
+<div class="viewcode-block" id="OverlappingCirclesError"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.OverlappingCirclesError">[docs]</a><span class="k">class</span> <span class="nc">OverlappingCirclesError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span></div>
+
+
+<div class="viewcode-block" id="NegativeValueError"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.NegativeValueError">[docs]</a><span class="k">class</span> <span class="nc">NegativeValueError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span></div>
+
+
+<span class="k">def</span> <span class="nf">__intersecting_area_polygon_circle</span><span class="p">(</span><span class="n">mid_point</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">polygon</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;returns the intersecting area of circle and polygon&quot;&quot;&quot;</span>
+    <span class="c1"># creates a point</span>
+    <span class="n">point</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="n">mid_point</span><span class="p">)</span>
+    <span class="c1"># creates a layer with the size of the radius all around this point</span>
+    <span class="n">circle</span> <span class="o">=</span> <span class="n">point</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">radius</span><span class="p">)</span>
+    <span class="c1"># returns the size of the intersecting area</span>
+    <span class="k">return</span> <span class="n">polygon</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">circle</span><span class="p">)</span><span class="o">.</span><span class="n">area</span>
+
+
+<span class="k">def</span> <span class="nf">__is_inside_circle</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span> <span class="n">min_r</span><span class="p">,</span> <span class="n">max_r</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;checks if a point is inside a Circle segment reaching from minimum radius to maximum radius&quot;&quot;&quot;</span>
+    <span class="n">dif_x</span> <span class="o">=</span> <span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">mid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">dif_y</span> <span class="o">=</span> <span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">mid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">circle_equation</span> <span class="o">=</span> <span class="n">dif_x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dif_y</span><span class="o">**</span><span class="mi">2</span>
+    <span class="k">return</span> <span class="n">min_r</span><span class="o">**</span><span class="mi">2</span> <span class="o">&lt;=</span> <span class="n">circle_equation</span> <span class="o">&lt;=</span> <span class="n">max_r</span><span class="o">**</span><span class="mi">2</span>
+
+
+<span class="k">def</span> <span class="nf">__get_bounding_box</span><span class="p">(</span><span class="n">polygon</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;returns an Axis Aligned Bounding Box containing the minimal/maximal x and y values</span>
+<span class="sd">    formatted like : [(min(x_values), min(y_values)), (max(x_values), max(y_values))]</span>
+<span class="sd">    polygon needs to be a shapely polygon</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">corner_points</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">polygon</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+    <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">corner_points</span><span class="p">:</span>
+        <span class="n">x_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">y_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="p">[(</span><span class="nb">min</span><span class="p">(</span><span class="n">x_values</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">y_values</span><span class="p">)),</span> <span class="p">((</span><span class="nb">max</span><span class="p">(</span><span class="n">x_values</span><span class="p">)),</span> <span class="nb">max</span><span class="p">(</span><span class="n">y_values</span><span class="p">))]</span>
+
+
+<span class="k">def</span> <span class="nf">__min_distance_to_polygon</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">polygon</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;returns the minimal distance between a point and every line segment of a polygon&quot;&quot;&quot;</span>
+    <span class="n">pt</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
+    <span class="n">min_dist</span> <span class="o">=</span> <span class="n">polygon</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">hole</span> <span class="ow">in</span> <span class="n">polygon</span><span class="o">.</span><span class="n">interiors</span><span class="p">:</span>
+        <span class="n">candidate_dist</span> <span class="o">=</span> <span class="n">hole</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
+        <span class="n">min_dist</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">min_dist</span><span class="p">,</span> <span class="n">candidate_dist</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">min_dist</span>
+
+
+<div class="viewcode-block" id="distribute_by_number"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.distribute_by_number">[docs]</a><span class="k">def</span> <span class="nf">distribute_by_number</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">polygon</span><span class="p">:</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Polygon</span><span class="p">,</span>
+    <span class="n">number_of_agents</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">distance_to_agents</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">distance_to_polygon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates specified number of randomized 2D coordiantes.</span>
+
+<span class="sd">    This function will generate the speficied number of 2D coordiantes where</span>
+<span class="sd">    all coordiantes are inside the specified geometry and generated coordinates</span>
+<span class="sd">    are constraint by distance_to_agents and distance_to_polygon. This function</span>
+<span class="sd">    may not always by able to generate the requested coordinate because it</span>
+<span class="sd">    cannot do so without violating the constraints. In this case the function</span>
+<span class="sd">    will stop after max_iterations and raise an Exception.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        polygon: polygon where the agents shall be placed</span>
+<span class="sd">        number_of_agents: number of agents to be distributed</span>
+<span class="sd">        distance_to_agents: minimal distance between the centers of agents</span>
+<span class="sd">        distance_to_polygon: minimal distance between the center of agents</span>
+<span class="sd">            and the polygon edges</span>
+<span class="sd">        seed: Will be used to seed the random number generator.</span>
+<span class="sd">        max_iterations: Up to max_iterations are attempts are made to</span>
+<span class="sd">            place a random point without conastraint violation, default is 10_000</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        2D coordiantes</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        :class:`AgentNumberError`: if not all agents could be placed.</span>
+<span class="sd">        :class:`IncorrectParameterError`: if polygon is not of type</span>
+<span class="sd">            :class:`~shapely.Polygon`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">polygon</span><span class="p">,</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Polygon</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">IncorrectParameterError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Polygon is expected to be a shapely Polygon&quot;</span>
+        <span class="p">)</span>
+    <span class="n">box</span> <span class="o">=</span> <span class="n">__get_bounding_box</span><span class="p">(</span><span class="n">polygon</span><span class="p">)</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">box</span><span class="p">,</span> <span class="n">distance_to_agents</span><span class="p">)</span>
+    <span class="n">created_points</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">iterations</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">created_points</span> <span class="o">&lt;</span> <span class="n">number_of_agents</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">iterations</span> <span class="o">&gt;</span> <span class="n">max_iterations</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Only </span><span class="si">{</span><span class="n">created_points</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">number_of_agents</span><span class="si">}</span><span class="s2">  could be placed.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; density: </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">created_points</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">polygon</span><span class="o">.</span><span class="n">area</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> p/m²&quot;</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">AgentNumberError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">temp_point</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">__check_distance_constraints</span><span class="p">(</span>
+            <span class="n">temp_point</span><span class="p">,</span> <span class="n">distance_to_polygon</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">polygon</span>
+        <span class="p">):</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">append_point</span><span class="p">(</span><span class="n">temp_point</span><span class="p">)</span>
+
+            <span class="n">iterations</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">created_points</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">iterations</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_samples</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="distribute_by_density"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.distribute_by_density">[docs]</a><span class="k">def</span> <span class="nf">distribute_by_density</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">polygon</span><span class="p">:</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Polygon</span><span class="p">,</span>
+    <span class="n">density</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">distance_to_agents</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">distance_to_polygon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates randomized 2D coordinates based on a desired agent density per</span>
+<span class="sd">    square meter.</span>
+
+<span class="sd">    This function will generate as many 2D coordinates as required to reach the</span>
+<span class="sd">    desired density. Essentially this function tries to place area * density</span>
+<span class="sd">    many agents while adhering to the distance_to_polygon and</span>
+<span class="sd">    distance_to_agents constraints. This function may not always by able to</span>
+<span class="sd">    generate the requested coordinate because it cannot do so without violating</span>
+<span class="sd">    the constraints. In this case the function will stop after max_iterations</span>
+<span class="sd">    and raise an Exception.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        polygon: Area where to generate 2D coordinates in.</span>
+<span class="sd">        density: desired density in agents per square meter</span>
+<span class="sd">        distance_to_agents: minimal distance between the centers of agents</span>
+<span class="sd">        distance_to_polygon: minimal distance between the center of agents</span>
+<span class="sd">            and the polygon edges</span>
+<span class="sd">        seed: Will be used to seed the random number generator.</span>
+<span class="sd">        max_iterations: Up to max_iterations are attempts are made to</span>
+<span class="sd">            place a random point without constraint violation, default is 10_000</span>
+
+
+<span class="sd">    Returns:</span>
+<span class="sd">        2D coordiantes</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        :class:`AgentNumberError`: if not all agents could be placed.</span>
+<span class="sd">        :class:`IncorrectParameterError`: if polygon is not of type</span>
+<span class="sd">            :class:`~shapely.Polygon`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">polygon</span><span class="p">,</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Polygon</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">IncorrectParameterError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Polygon is expected to be a shapely Polygon&quot;</span>
+        <span class="p">)</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="n">polygon</span><span class="o">.</span><span class="n">area</span>
+    <span class="n">number</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">density</span> <span class="o">*</span> <span class="n">area</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">distribute_by_number</span><span class="p">(</span>
+        <span class="n">polygon</span><span class="o">=</span><span class="n">polygon</span><span class="p">,</span>
+        <span class="n">number_of_agents</span><span class="o">=</span><span class="n">number</span><span class="p">,</span>
+        <span class="n">distance_to_agents</span><span class="o">=</span><span class="n">distance_to_agents</span><span class="p">,</span>
+        <span class="n">distance_to_polygon</span><span class="o">=</span><span class="n">distance_to_polygon</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+        <span class="n">max_iterations</span><span class="o">=</span><span class="n">max_iterations</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">__catch_wrong_inputs</span><span class="p">(</span>
+    <span class="n">polygon</span><span class="p">,</span> <span class="n">center_point</span><span class="p">,</span> <span class="n">circle_segment_radii</span><span class="p">,</span> <span class="n">fill_parameters</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;checks if an input parameter is incorrect and raises an Exception&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">polygon</span><span class="p">,</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Polygon</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">IncorrectParameterError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Polygon is expected to be a shapely Polygon&quot;</span>
+        <span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">center_point</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">IncorrectParameterError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Center_point expected a tuple of 2 numbers, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">center_point</span><span class="p">)</span><span class="si">}</span><span class="s2"> were given&quot;</span>
+            <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="c1"># center point is no tuple or list</span>
+        <span class="k">raise</span> <span class="n">IncorrectParameterError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Center_point expected a tuple of 2 numbers, given Type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">center_point</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">circle_segment_radii</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fill_parameters</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">IncorrectParameterError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;the number of circle segments does not match the number of fill parameters.</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;radii given for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">circle_segment_radii</span><span class="p">)</span><span class="si">}</span><span class="s2"> circle segments,&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;fill parameter given for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">fill_parameters</span><span class="p">)</span><span class="si">}</span><span class="s2"> circle segments&quot;</span>
+        <span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c_s_radius</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">circle_segment_radii</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">c_s_radius</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">c_s_radius</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NegativeValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Circle segment </span><span class="si">{</span><span class="n">c_s_radius</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> : </span><span class="si">{</span><span class="n">c_s_radius</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> is expected to be positiv&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">c_s_radius</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">c_s_radius</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">OverlappingCirclesError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;inner radius bigger than/equal to outer radius</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;a Circle segment from </span><span class="si">{</span><span class="n">c_s_radius</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">c_s_radius</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not possible&quot;</span>
+            <span class="p">)</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">i</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">c_s_radius</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">c_s_radius</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">circle_segment_radii</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="ow">or</span> <span class="n">circle_segment_radii</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">c_s_radius</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">c_s_radius</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">):</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">OverlappingCirclesError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;the Circle from </span><span class="si">{</span><span class="n">c_s_radius</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">c_s_radius</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> overlaps with others&quot;</span>
+                <span class="p">)</span>
+
+
+<div class="viewcode-block" id="distribute_in_circles_by_number"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.distribute_in_circles_by_number">[docs]</a><span class="k">def</span> <span class="nf">distribute_in_circles_by_number</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">polygon</span><span class="p">:</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Polygon</span><span class="p">,</span>
+    <span class="n">distance_to_agents</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">distance_to_polygon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">center_point</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">circle_segment_radii</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+    <span class="n">numbers_of_agents</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_iterations</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates randomized 2D coordiantes in a user defined number of rings.</span>
+
+<span class="sd">    This function will generate 2D coordinates in the intersection of the</span>
+<span class="sd">    polygon and the rings specified by the centerpoint and the min/max radii of</span>
+<span class="sd">    each ring. `number_of_agents` is expected to contain the number of agents</span>
+<span class="sd">    to be placed for each ring. This function may not always by able to</span>
+<span class="sd">    generate the requested coordinate because it cannot do so without violating</span>
+<span class="sd">    the constraints. In this case the function will stop after max_iterations</span>
+<span class="sd">    and raise an Exception.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        polygon: polygon where agents can be placed.</span>
+<span class="sd">        distance_to_agents: minimal distance between the centers of agents</span>
+<span class="sd">        distance_to_polygon: minimal distance between the center of agents</span>
+<span class="sd">            and the polygon edges</span>
+<span class="sd">        center_point: Center point of the rings.</span>
+<span class="sd">        circle_segment_radii: min/max radius per ring, rings may not overlap</span>
+<span class="sd">        number_of_agents: agents to be placed per ring</span>
+<span class="sd">        seed: Will be used to seed the random number generator.</span>
+<span class="sd">        max_iterations: Up to max_iterations are attempts are made to</span>
+<span class="sd">            place a random point without conastraint violation, default is 10_000</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        2D coordiantes</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        :class:`AgentNumberError`: if not all agents could be placed.</span>
+<span class="sd">        :class:`IncorrectParameterError`: if polygon is not of type</span>
+<span class="sd">            :class:`~shapely.Polygon`</span>
+<span class="sd">        :class:`OverlappingCirclesError`: if rings in circle_segment_radii</span>
+<span class="sd">            overlapp</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># catch wrong inputs</span>
+    <span class="n">__catch_wrong_inputs</span><span class="p">(</span>
+        <span class="n">polygon</span><span class="o">=</span><span class="n">polygon</span><span class="p">,</span>
+        <span class="n">center_point</span><span class="o">=</span><span class="n">center_point</span><span class="p">,</span>
+        <span class="n">circle_segment_radii</span><span class="o">=</span><span class="n">circle_segment_radii</span><span class="p">,</span>
+        <span class="n">fill_parameters</span><span class="o">=</span><span class="n">numbers_of_agents</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">box</span> <span class="o">=</span> <span class="n">__get_bounding_box</span><span class="p">(</span><span class="n">polygon</span><span class="p">)</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">box</span><span class="p">,</span> <span class="n">distance_to_agents</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">circle_segment</span><span class="p">,</span> <span class="n">number</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">circle_segment_radii</span><span class="p">,</span> <span class="n">numbers_of_agents</span><span class="p">):</span>
+        <span class="n">outer_radius</span> <span class="o">=</span> <span class="n">circle_segment</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">inner_radius</span> <span class="o">=</span> <span class="n">circle_segment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">big_circle_area</span> <span class="o">=</span> <span class="n">__intersecting_area_polygon_circle</span><span class="p">(</span>
+            <span class="n">center_point</span><span class="p">,</span> <span class="n">outer_radius</span><span class="p">,</span> <span class="n">polygon</span>
+        <span class="p">)</span>
+        <span class="n">small_circle_area</span> <span class="o">=</span> <span class="n">__intersecting_area_polygon_circle</span><span class="p">(</span>
+            <span class="n">center_point</span><span class="p">,</span> <span class="n">inner_radius</span><span class="p">,</span> <span class="n">polygon</span>
+        <span class="p">)</span>
+        <span class="n">placeable_area</span> <span class="o">=</span> <span class="n">big_circle_area</span> <span class="o">-</span> <span class="n">small_circle_area</span>
+
+        <span class="c1"># checking whether to place points</span>
+        <span class="c1"># inside the circle segment or</span>
+        <span class="c1"># inside the bounding box of the intersection of polygon and Circle Segment</span>
+
+        <span class="c1"># determine the entire area of the circle segment</span>
+        <span class="n">entire_circle_area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">outer_radius</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">inner_radius</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># determine the area where a point might be placed around the polygon</span>
+        <span class="n">sec_box</span> <span class="o">=</span> <span class="n">__box_of_intersection</span><span class="p">(</span><span class="n">polygon</span><span class="p">,</span> <span class="n">center_point</span><span class="p">,</span> <span class="n">outer_radius</span><span class="p">)</span>
+        <span class="n">dif_x</span><span class="p">,</span> <span class="n">dif_y</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">sec_box</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">sec_box</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">sec_box</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">sec_box</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">bounding_box_area</span> <span class="o">=</span> <span class="n">dif_x</span> <span class="o">*</span> <span class="n">dif_y</span>
+
+        <span class="k">if</span> <span class="n">entire_circle_area</span> <span class="o">&lt;</span> <span class="n">bounding_box_area</span><span class="p">:</span>
+            <span class="c1"># inside the circle it is more likely to find a random point that is inside the polygon</span>
+            <span class="k">for</span> <span class="n">placed_count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number</span><span class="p">):</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">max_iterations</span><span class="p">:</span>
+                    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="c1"># determines a random radius within the circle segment</span>
+                    <span class="n">rho</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">inner_radius</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">outer_radius</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="c1"># determines a random degree</span>
+                    <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+                    <span class="n">pt</span> <span class="o">=</span> <span class="n">center_point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">rho</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">center_point</span><span class="p">[</span>
+                        <span class="mi">1</span>
+                    <span class="p">]</span> <span class="o">+</span> <span class="n">rho</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">__check_distance_constraints</span><span class="p">(</span>
+                        <span class="n">pt</span><span class="p">,</span> <span class="n">distance_to_polygon</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">polygon</span>
+                    <span class="p">):</span>
+                        <span class="n">grid</span><span class="o">.</span><span class="n">append_point</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
+                        <span class="k">break</span>
+
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">max_iterations</span> <span class="ow">and</span> <span class="n">placed_count</span> <span class="o">!=</span> <span class="n">number</span><span class="p">:</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;the desired amount of agents in the Circle segment from&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">inner_radius</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">outer_radius</span><span class="si">}</span><span class="s2"> could not be achieved.&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Only </span><span class="si">{</span><span class="n">placed_count</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">  could be placed.&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">actual density: </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">placed_count</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">placeable_area</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> p/m²&quot;</span>
+                    <span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">AgentNumberError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># placing point inside the bounding box is more likely to find a random point that is inside the circle</span>
+            <span class="n">placed_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">iterations</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">while</span> <span class="n">placed_count</span> <span class="o">&lt;</span> <span class="n">number</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">iterations</span> <span class="o">&gt;</span> <span class="n">max_iterations</span><span class="p">:</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;the desired amount of agents in the Circle segment from&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">inner_radius</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">outer_radius</span><span class="si">}</span><span class="s2"> could not be achieved.&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Only </span><span class="si">{</span><span class="n">placed_count</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">  could be placed.&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">actual density: </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">placed_count</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">placeable_area</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> p/m²&quot;</span>
+                    <span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">AgentNumberError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+                <span class="n">temp_point</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">sec_box</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">sec_box</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">sec_box</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">sec_box</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">__is_inside_circle</span><span class="p">(</span>
+                    <span class="n">temp_point</span><span class="p">,</span> <span class="n">center_point</span><span class="p">,</span> <span class="n">inner_radius</span><span class="p">,</span> <span class="n">outer_radius</span>
+                <span class="p">)</span> <span class="ow">and</span> <span class="n">__check_distance_constraints</span><span class="p">(</span>
+                    <span class="n">temp_point</span><span class="p">,</span> <span class="n">distance_to_polygon</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">polygon</span>
+                <span class="p">):</span>
+                    <span class="n">grid</span><span class="o">.</span><span class="n">append_point</span><span class="p">(</span><span class="n">temp_point</span><span class="p">)</span>
+                    <span class="n">iterations</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">placed_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">iterations</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_samples</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="distribute_in_circles_by_density"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.distribute_in_circles_by_density">[docs]</a><span class="k">def</span> <span class="nf">distribute_in_circles_by_density</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">polygon</span><span class="p">:</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Polygon</span><span class="p">,</span>
+    <span class="n">distance_to_agents</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">distance_to_polygon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">center_point</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">circle_segment_radii</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+    <span class="n">densities</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10_000</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates randomized 2D coordiantes in a user defined number of rings</span>
+<span class="sd">    with defined density.</span>
+
+<span class="sd">    This function will generate 2D coordinates in the intersection of the</span>
+<span class="sd">    polygon and the rings specified by the centerpoint and the min/max radii of</span>
+<span class="sd">    each ring. The number of positions generated is defined by the desired</span>
+<span class="sd">    density and available space of each ring. This function may not always by</span>
+<span class="sd">    able to generate the requested coordinate because it cannot do so without</span>
+<span class="sd">    violating the constraints. In this case the function will stop after</span>
+<span class="sd">    max_iterations and raise an Exception.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        polygon: polygon where agents can be placed.</span>
+<span class="sd">        distance_to_agents: minimal distance between the centers of agents</span>
+<span class="sd">        distance_to_polygon: minimal distance between the center of agents</span>
+<span class="sd">            and the polygon edges</span>
+<span class="sd">        center_point: Center point of the rings.</span>
+<span class="sd">        circle_segment_radii: min/max radius per ring, rings may not overlap</span>
+<span class="sd">        desnities: density in positionsper square meter for each ring</span>
+<span class="sd">        seed: Will be used to seed the random number generator.</span>
+<span class="sd">        max_iterations: Up to max_iterations are attempts are made to place a</span>
+<span class="sd">            random point without conastraint violation, default is 10_000</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        2D coordiantes</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        :class:`AgentNumberError`: if not all agents could be placed.</span>
+<span class="sd">        :class:`IncorrectParameterError`: if polygon is not of type</span>
+<span class="sd">            :class:`~shapely.Polygon`</span>
+<span class="sd">        :class:`OverlappingCirclesError`: if rings in circle_segment_radii</span>
+<span class="sd">            overlapp</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">__catch_wrong_inputs</span><span class="p">(</span>
+        <span class="n">polygon</span><span class="o">=</span><span class="n">polygon</span><span class="p">,</span>
+        <span class="n">center_point</span><span class="o">=</span><span class="n">center_point</span><span class="p">,</span>
+        <span class="n">circle_segment_radii</span><span class="o">=</span><span class="n">circle_segment_radii</span><span class="p">,</span>
+        <span class="n">fill_parameters</span><span class="o">=</span><span class="n">densities</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">number_of_agents</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">circle_segment</span><span class="p">,</span> <span class="n">density</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">circle_segment_radii</span><span class="p">,</span> <span class="n">densities</span><span class="p">):</span>
+        <span class="n">big_circle_area</span> <span class="o">=</span> <span class="n">__intersecting_area_polygon_circle</span><span class="p">(</span>
+            <span class="n">center_point</span><span class="p">,</span> <span class="n">circle_segment</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">polygon</span>
+        <span class="p">)</span>
+        <span class="n">small_circle_area</span> <span class="o">=</span> <span class="n">__intersecting_area_polygon_circle</span><span class="p">(</span>
+            <span class="n">center_point</span><span class="p">,</span> <span class="n">circle_segment</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">polygon</span>
+        <span class="p">)</span>
+        <span class="n">placeable_area</span> <span class="o">=</span> <span class="n">big_circle_area</span> <span class="o">-</span> <span class="n">small_circle_area</span>
+        <span class="n">number_of_agents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">density</span> <span class="o">*</span> <span class="n">placeable_area</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">distribute_in_circles_by_number</span><span class="p">(</span>
+        <span class="n">polygon</span><span class="o">=</span><span class="n">polygon</span><span class="p">,</span>
+        <span class="n">distance_to_agents</span><span class="o">=</span><span class="n">distance_to_agents</span><span class="p">,</span>
+        <span class="n">distance_to_polygon</span><span class="o">=</span><span class="n">distance_to_polygon</span><span class="p">,</span>
+        <span class="n">center_point</span><span class="o">=</span><span class="n">center_point</span><span class="p">,</span>
+        <span class="n">circle_segment_radii</span><span class="o">=</span><span class="n">circle_segment_radii</span><span class="p">,</span>
+        <span class="n">numbers_of_agents</span><span class="o">=</span><span class="n">number_of_agents</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+        <span class="n">max_iterations</span><span class="o">=</span><span class="n">max_iterations</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="distribute_until_filled"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.distribute_until_filled">[docs]</a><span class="k">def</span> <span class="nf">distribute_until_filled</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">polygon</span><span class="p">:</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Polygon</span><span class="p">,</span>
+    <span class="n">distance_to_agents</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">distance_to_polygon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10_000</span><span class="p">,</span>
+    <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates randomized 2D coordiantes that fill the specified area.</span>
+
+<span class="sd">    This function will generate 2D coordinates in the specified area. The</span>
+<span class="sd">    number of positions generated depends on the ability to place aditional</span>
+<span class="sd">    points. This function may not always by able to generate the requested</span>
+<span class="sd">    coordinate because it cannot do so without violating the constraints. In</span>
+<span class="sd">    this case the function will stop after max_iterations and raise an</span>
+<span class="sd">    Exception.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        polygon: polygon where agents can be placed.</span>
+<span class="sd">        distance_to_agents: minimal distance between the centers of agents</span>
+<span class="sd">        distance_to_polygon: minimal distance between the center of agents</span>
+<span class="sd">            and the polygon edges</span>
+<span class="sd">        seed: Will be used to seed the random number generator.</span>
+<span class="sd">        max_iterations: Up to max_iterations are attempts are made to</span>
+<span class="sd">            place a random point without conastraint violation, default is 10_000</span>
+<span class="sd">        k: maximum number of attempts to place neighbors to already inserted</span>
+<span class="sd">            points. A higher value will result in a higher density but will greatly</span>
+<span class="sd">            increase runtim.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        2D coordiantes</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        :class:`AgentNumberError`: if not all agents could be placed.</span>
+<span class="sd">        :class:`IncorrectParameterError`: if polygon is not of type</span>
+<span class="sd">            :class:`~shapely.Polygon`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">polygon</span><span class="p">,</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Polygon</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">IncorrectParameterError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Polygon is expected to be a shapely Polygon&quot;</span>
+        <span class="p">)</span>
+    <span class="n">box</span> <span class="o">=</span> <span class="n">__get_bounding_box</span><span class="p">(</span><span class="n">polygon</span><span class="p">)</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="c1"># initialises a list for active Points and a Grid administering all created points</span>
+    <span class="n">active</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">box</span><span class="p">,</span> <span class="n">distance_to_agents</span><span class="p">)</span>
+    <span class="c1"># initialisation of the first point</span>
+    <span class="n">iteration</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">iteration</span> <span class="o">&lt;</span> <span class="n">max_iterations</span><span class="p">:</span>
+        <span class="n">first_point</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">__check_distance_constraints</span><span class="p">(</span>
+            <span class="n">first_point</span><span class="p">,</span> <span class="n">distance_to_polygon</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">polygon</span>
+        <span class="p">):</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">append_point</span><span class="p">(</span><span class="n">first_point</span><span class="p">)</span>
+            <span class="n">active</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">first_point</span><span class="p">)</span>
+            <span class="k">break</span>
+        <span class="n">iteration</span> <span class="o">=</span> <span class="n">iteration</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">iteration</span> <span class="o">&gt;=</span> <span class="n">max_iterations</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">IncorrectParameterError</span><span class="p">(</span>
+            <span class="s2">&quot;The first point could not be placed inside the polygon.&quot;</span>
+            <span class="s2">&quot; Check if there is enough space for agents provided inside the polygon&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Uses https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf</span>
+    <span class="c1"># &quot;Fast Poisson Disk Sampling in Arbitrary Dimensions&quot;</span>
+    <span class="c1"># while points are active a random reference point is selected</span>
+    <span class="k">while</span> <span class="n">active</span><span class="p">:</span>
+        <span class="n">ref_point</span> <span class="o">=</span> <span class="n">active</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">active</span><span class="p">))]</span>
+        <span class="n">iteration</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># tries to find a point around the reference Point</span>
+        <span class="k">while</span> <span class="n">iteration</span> <span class="o">&lt;</span> <span class="n">k</span><span class="p">:</span>
+            <span class="c1"># determines a random radius within a circle segment</span>
+            <span class="c1"># with radius from distance_to_agents to distance_to_agents * 2</span>
+            <span class="n">rho</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span>
+                    <span class="n">distance_to_agents</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">distance_to_agents</span><span class="o">**</span><span class="mi">2</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="c1"># determines a random degree</span>
+            <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+            <span class="n">pt</span> <span class="o">=</span> <span class="n">ref_point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">rho</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">ref_point</span><span class="p">[</span>
+                <span class="mi">1</span>
+            <span class="p">]</span> <span class="o">+</span> <span class="n">rho</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">__check_distance_constraints</span><span class="p">(</span>
+                <span class="n">pt</span><span class="p">,</span> <span class="n">distance_to_polygon</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">polygon</span>
+            <span class="p">):</span>
+                <span class="n">grid</span><span class="o">.</span><span class="n">append_point</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
+                <span class="n">active</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
+                <span class="k">break</span>
+            <span class="n">iteration</span> <span class="o">=</span> <span class="n">iteration</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="c1"># if there was no point found around the reference point it is considered inactive</span>
+        <span class="k">if</span> <span class="n">iteration</span> <span class="o">&gt;=</span> <span class="n">k</span><span class="p">:</span>
+            <span class="n">active</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ref_point</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_samples</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="distribute_by_percentage"><a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.distributions.distribute_by_percentage">[docs]</a><span class="k">def</span> <span class="nf">distribute_by_percentage</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">polygon</span><span class="p">:</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Polygon</span><span class="p">,</span>
+    <span class="n">percent</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">distance_to_agents</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">distance_to_polygon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+    <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates randomized 2D coordiantes that fill the specified area to a</span>
+<span class="sd">    percentage of a possible maximum.</span>
+
+<span class="sd">    This function will generate 2D coordinates in the specified area. The</span>
+<span class="sd">    number of positions generated depends on the ability to place aditional</span>
+<span class="sd">    points. This function may not always by able to generate the requested</span>
+<span class="sd">    coordinate because it cannot do so without violating the constraints. In</span>
+<span class="sd">    this case the function will stop after max_iterations and raise an</span>
+<span class="sd">    Exception.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        polygon: polygon where agents can be placed.</span>
+<span class="sd">        percent: percent value of occupancy to generate. needs to be in</span>
+<span class="sd">            the intervall (0, 100]</span>
+<span class="sd">        distance_to_agents: minimal distance between the centers of agents</span>
+<span class="sd">        distance_to_polygon: minimal distance between the center of agents</span>
+<span class="sd">            and the polygon edges</span>
+<span class="sd">        seed: Will be used to seed the random number generator.</span>
+<span class="sd">        max_iterations: Up to max_iterations are attempts are made to</span>
+<span class="sd">            place a random point without conastraint violation, default is 10_000</span>
+<span class="sd">        k: maximum number of attempts to place neighbors to already inserted</span>
+<span class="sd">            points. A higher value will result in a higher density but will greatly</span>
+<span class="sd">            increase runtim.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        2D coordiantes</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        :class:`AgentNumberError`: if not all agents could be placed.</span>
+<span class="sd">        :class:`IncorrectParameterError`: if polygon is not of type</span>
+<span class="sd">            :class:`~shapely.Polygon`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="n">distribute_until_filled</span><span class="p">(</span>
+        <span class="n">polygon</span><span class="o">=</span><span class="n">polygon</span><span class="p">,</span>
+        <span class="n">distance_to_agents</span><span class="o">=</span><span class="n">distance_to_agents</span><span class="p">,</span>
+        <span class="n">distance_to_polygon</span><span class="o">=</span><span class="n">distance_to_polygon</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+        <span class="n">max_iterations</span><span class="o">=</span><span class="n">max_iterations</span><span class="p">,</span>
+        <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">sample_amount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+    <span class="n">needed_amount</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">sample_amount</span> <span class="o">*</span> <span class="p">(</span><span class="n">percent</span> <span class="o">/</span> <span class="mi">100</span><span class="p">))</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">samples</span><span class="p">[:</span><span class="n">needed_amount</span><span class="p">]</span></div>
+
+
+<span class="k">def</span> <span class="nf">__check_distance_constraints</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">wall_distance</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">polygon</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determines if a point has enough distance to other points and to the walls</span>
+<span class="sd">     Uses a Grid to determine neighbours</span>
+<span class="sd">    :param grid: the grid of the polygon</span>
+<span class="sd">    :param pt: point that is being checked</span>
+<span class="sd">    :param wall_distance: minimal distance between point and the polygon</span>
+<span class="sd">    :param polygon: shapely Polygon in which the points must lie</span>
+<span class="sd">    :return:True or False&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">polygon</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">shapely</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="n">pt</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">__min_distance_to_polygon</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">polygon</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">wall_distance</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">grid</span><span class="o">.</span><span class="n">no_neighbours_in_distance</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">__box_of_intersection</span><span class="p">(</span><span class="n">polygon</span><span class="p">,</span> <span class="n">center_point</span><span class="p">,</span> <span class="n">outer_radius</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;returns an Axis Aligned Bounding Box containing the intersection of a Circle and the polygon</span>
+<span class="sd">     @:param polygon is a shapely Polygon</span>
+<span class="sd">     @:param center_point is the Center point of the Circle</span>
+<span class="sd">    @:param outer_radius is the radius of the Circle</span>
+<span class="sd">    @:return bounding box formatted like [(min(x_values), min(y_values)), (max(x_values), max(y_values))]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># creates a point</span>
+    <span class="n">point</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="n">center_point</span><span class="p">)</span>
+    <span class="c1"># creates a layer with the size of the radius all around this point</span>
+    <span class="n">circle</span> <span class="o">=</span> <span class="n">point</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">outer_radius</span><span class="p">)</span>
+    <span class="c1"># returns the size of the intersecting area</span>
+    <span class="n">shapely_bounds</span> <span class="o">=</span> <span class="n">polygon</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">circle</span><span class="p">)</span><span class="o">.</span><span class="n">bounds</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">shapely_bounds</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">shapely_bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">:]]</span>
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Forschungszentrum Jülich GmbH, IAS-7.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
