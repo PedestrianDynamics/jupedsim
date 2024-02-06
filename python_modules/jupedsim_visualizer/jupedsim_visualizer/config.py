@@ -1,4 +1,4 @@
-# Copyright © 2012-2023 Forschungszentrum Jülich GmbH
+# Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
 def web_color(color_as_hex_string: str) -> list[float]:
     value = int(color_as_hex_string, 16)
