@@ -25,7 +25,7 @@ jobs:
       with:
         python-version: "3.11"
     - name: Install dependencies
-      run: pip install black isort jupyter-black
+      run: pip install black==24.1.1 isort==5.13.2 jupyter-black==0.3.4
 
     - name: Run checks
       run: ./scripts/ci/check_format.sh

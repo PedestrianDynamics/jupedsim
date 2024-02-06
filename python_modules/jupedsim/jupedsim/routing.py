@@ -14,12 +14,14 @@ class RoutingEngine:
 
     def __init__(
         self,
-        geometry: str
-        | shapely.GeometryCollection
-        | shapely.Polygon
-        | shapely.MultiPolygon
-        | shapely.MultiPoint
-        | list[tuple[float, float]],
+        geometry: (
+            str
+            | shapely.GeometryCollection
+            | shapely.Polygon
+            | shapely.MultiPolygon
+            | shapely.MultiPoint
+            | list[tuple[float, float]]
+        ),
         **kwargs: Any,
     ) -> None:
         self._obj = py_jps.RoutingEngine(
