@@ -99,7 +99,11 @@ class Agent:
     @property
     def model(
         self,
-    ) -> GeneralizedCentrifugalForceModelState | CollisionFreeSpeedModelState | SocialForceModelState:
+    ) -> (
+        GeneralizedCentrifugalForceModelState
+        | CollisionFreeSpeedModelState
+        | SocialForceModelState
+    ):
         """Access model specific state of this agent."""
         model = self._obj.model
         if isinstance(model, py_jps.GeneralizedCentrifugalForceModelState):

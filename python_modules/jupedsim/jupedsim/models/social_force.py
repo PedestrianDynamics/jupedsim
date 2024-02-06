@@ -11,9 +11,10 @@ class SocialForceModel:
 
 
     Attributes:
-        bodyForce: describes the strength with which an agent is influenced by pushing forces from obstacles and neighbors in its direct proximity. 
+        bodyForce: describes the strength with which an agent is influenced by pushing forces from obstacles and neighbors in its direct proximity.
         friction: describes the strength with which an agent is influenced by frictional forces from obstacles and neighbors in its direct proximity.
     """
+
     bodyForce: float = 120000
     friction: float = 240000
 
@@ -66,9 +67,10 @@ class SocialForceModelAgentParameters:
             agentScale=self.agentScale,
             obstacleScale=self.obstacleScale,
             forceDistance=self.forceDistance,
-            radius=self.radius
+            radius=self.radius,
         )
-    
+
+
 class SocialForceModelState:
     def __init__(self, backing) -> None:
         self._obj = backing
@@ -77,7 +79,7 @@ class SocialForceModelState:
     def velocity(self) -> float:
         """velocity of this agent."""
         return self._obj.test_value
-    
+
     @velocity.setter
     def velocity(self, velocity):
         self._obj.velocity = velocity
@@ -86,7 +88,7 @@ class SocialForceModelState:
     def mass(self) -> float:
         """mass of this agent."""
         return self._obj.mass
-    
+
     @mass.setter
     def mass(self, mass):
         self._obj.mass = mass
@@ -95,7 +97,7 @@ class SocialForceModelState:
     def desiredSpeed(self) -> float:
         """desired Speed of this agent."""
         return self._obj.desiredSpeed
-    
+
     @desiredSpeed.setter
     def desiredSpeed(self, desiredSpeed):
         self._obj.desiredSpeed = desiredSpeed
@@ -104,7 +106,7 @@ class SocialForceModelState:
     def reactionTime(self) -> float:
         """reaction Time of this agent."""
         return self._obj.reactionTime
-    
+
     @reactionTime.setter
     def reactionTime(self, reactionTime):
         self._obj.reactionTime = reactionTime
@@ -113,16 +115,16 @@ class SocialForceModelState:
     def agentScale(self) -> float:
         """agent Scale of this agent."""
         return self._obj.agentScale
-    
+
     @agentScale.setter
     def agentScale(self, agentScale):
         self._obj.agentScale = agentScale
-    
+
     @property
     def obstacleScale(self) -> float:
         """obstacle Scale of this agent."""
         return self._obj.obstacleScale
-    
+
     @obstacleScale.setter
     def obstacleScale(self, obstacleScale):
         self._obj.obstacleScale = obstacleScale
@@ -131,7 +133,7 @@ class SocialForceModelState:
     def forceDistance(self) -> float:
         """force Distance of this agent."""
         return self._obj.forceDistance
-    
+
     @forceDistance.setter
     def forceDistance(self, forceDistance):
         self._obj.forceDistance = forceDistance
@@ -140,7 +142,7 @@ class SocialForceModelState:
     def radius(self) -> float:
         """radius of this agent."""
         return self._obj.radius
-    
+
     @radius.setter
     def radius(self, radius):
         self._obj.radius = radius

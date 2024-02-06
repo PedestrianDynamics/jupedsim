@@ -45,7 +45,9 @@ class Simulation:
     def __init__(
         self,
         *,
-        model: CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel | SocialForceModel,
+        model: CollisionFreeSpeedModel
+        | GeneralizedCentrifugalForceModel
+        | SocialForceModel,
         geometry: str
         | shapely.GeometryCollection
         | shapely.Polygon
@@ -110,8 +112,7 @@ class Simulation:
             py_jps_model = model_builder.build()
         elif isinstance(model, SocialForceModel):
             model_builder = py_jps.SocialForceModelBuilder(
-                bodyForce = model.bodyForce,
-                friction = model.friction
+                bodyForce=model.bodyForce, friction=model.friction
             )
             py_jps_model = model_builder.build()
         else:
