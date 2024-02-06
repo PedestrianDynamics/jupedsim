@@ -3,9 +3,9 @@
 #pragma once
 #include "CollisionFreeSpeedModelData.hpp"
 #include "GeneralizedCentrifugalForceModelData.hpp"
-#include "SocialForceModelData.hpp"
 #include "OperationalModel.hpp"
 #include "Point.hpp"
+#include "SocialForceModelData.hpp"
 #include "UniqueID.hpp"
 #include "Visitor.hpp"
 
@@ -28,7 +28,10 @@ struct GenericAgent {
     Point pos{};
     Point orientation{1, 0};
 
-    using Model = std::variant<GeneralizedCentrifugalForceModelData, CollisionFreeSpeedModelData, SocialForceModelData>;
+    using Model = std::variant<
+        GeneralizedCentrifugalForceModelData,
+        CollisionFreeSpeedModelData,
+        SocialForceModelData>;
     Model model{};
 
     GenericAgent(
@@ -85,20 +88,20 @@ struct fmt::formatter<GenericAgent> {
                         agent.orientation,
                         m);
                 }},
-                [&ctx, &agent](const SocialForceModelData& m) {
-                    return fmt::format_to(
-                        ctx.out(),
-                        "Agent[id={}, journey={}, stage={}, destination={}, waypoint={}, pos={}, "
-                        "orientation={}, model={})",
-                        agent.id,
-                        agent.journeyId,
-                        agent.stageId,
-                        agent.destination,
-                        agent.target,
-                        agent.pos,
-                        agent.orientation,
-                        m);
-                },
+            [&ctx, &agent](const SocialForceModelData& m) {
+                return fmt::format_to(
+                    ctx.out(),
+                    "Agent[id={}, journey={}, stage={}, destination={}, waypoint={}, pos={}, "
+                    "orientation={}, model={})",
+                    agent.id,
+                    agent.journeyId,
+                    agent.stageId,
+                    agent.destination,
+                    agent.target,
+                    agent.pos,
+                    agent.orientation,
+                    m);
+            },
             agent.model);
     }
 };

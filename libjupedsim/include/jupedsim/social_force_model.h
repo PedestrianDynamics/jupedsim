@@ -12,18 +12,17 @@ extern "C" {
 /**
  * Opaque type for a SocialForceModel Builder
  */
-typedef struct JPS_SocialForceModelBuilder_t*
-    JPS_SocialForceModelBuilder;
+typedef struct JPS_SocialForceModelBuilder_t* JPS_SocialForceModelBuilder;
 
 /**
  * Creates a SocialForceModel builder.
  * @param bodyForce describes the strength with which an agent is influenced
- * by pushing forces from obstacles and neighbors in its direct proximity. 
- * @param friction describes the strength with which an agent is influenced 
+ * by pushing forces from obstacles and neighbors in its direct proximity.
+ * @param friction describes the strength with which an agent is influenced
  * by frictional forces from obstacles and neighbors in its direct proximity.
  * */
-JUPEDSIM_API JPS_SocialForceModelBuilder JPS_SocialForceModelBuilder_Create(
-    double bodyForce, double friction);
+JUPEDSIM_API JPS_SocialForceModelBuilder
+JPS_SocialForceModelBuilder_Create(double bodyForce, double friction);
 
 /**
  * Creates a JPS_OperationalModel of type SocialForceModel Model from the
@@ -40,48 +39,27 @@ JUPEDSIM_API JPS_OperationalModel JPS_SocialForceModelBuilder_Build(
  * Frees a JPS_SocialForceModelBuilder
  * @param handle to the JPS_SocialForceModelBuilder to free.
  */
-JUPEDSIM_API void JPS_SocialForceModelBuilder_Free(
-    JPS_SocialForceModelBuilder handle);
+JUPEDSIM_API void JPS_SocialForceModelBuilder_Free(JPS_SocialForceModelBuilder handle);
 
 /**
  * Opaque type of Social Force model state
  */
-typedef struct JPS_SocialForceModelState_t*
-    JPS_SocialForceModelState;
+typedef struct JPS_SocialForceModelState_t* JPS_SocialForceModelState;
 
 /**
  * Read Velocity of this agent.
  * @param handle of the Agent to access.
  * @return Velocity of this agent.
  */
-JUPEDSIM_API JPS_Point JPS_SocialForceModelState_GetVelocity(
-    JPS_SocialForceModelState handle);
+JUPEDSIM_API JPS_Point JPS_SocialForceModelState_GetVelocity(JPS_SocialForceModelState handle);
 
 /**
  * Write Velocity of this agent.
  * @param handle of the Agent to access.
  * @param velocity Velocity of this agent.
  */
-JUPEDSIM_API void JPS_SocialForceModelState_SetVelocity(
-    JPS_SocialForceModelState handle,
-    JPS_Point velocity);
-
-/**
- * Read desired Direction of this agent.
- * @param handle of the Agent to access.
- * @return Velocity of this agent.
- */
-JUPEDSIM_API JPS_Point JPS_SocialForceModelState_GetDesiredDirection(
-    JPS_SocialForceModelState handle);
-
-/**
- * Write desired Direction of this agent.
- * @param handle of the Agent to access.
- * @param desiredDirection desired Direction of this agent.
- */
-JUPEDSIM_API void JPS_SocialForceModelState_SetDesiredDirection(
-    JPS_SocialForceModelState handle,
-    JPS_Point desiredDirection);
+JUPEDSIM_API void
+JPS_SocialForceModelState_SetVelocity(JPS_SocialForceModelState handle, JPS_Point velocity);
 
 /**
  * Read mass of this agent.
@@ -95,9 +73,7 @@ JUPEDSIM_API double JPS_SocialForceModelState_GetMass(JPS_SocialForceModelState 
  * @param handle of the Agent to access.
  * @param mass in kg of this agent.
  */
-JUPEDSIM_API void JPS_SocialForceModelState_SetMass(
-    JPS_SocialForceModelState handle,
-    double mass);
+JUPEDSIM_API void JPS_SocialForceModelState_SetMass(JPS_SocialForceModelState handle, double mass);
 
 /**
  * Read desired Speed of this agent.
@@ -111,9 +87,8 @@ JUPEDSIM_API double JPS_SocialForceModelState_GetDesiredSpeed(JPS_SocialForceMod
  * @param handle of the Agent to access.
  * @param desiredSpeed in m/s of this agent.
  */
-JUPEDSIM_API void JPS_SocialForceModelState_SetDesiredSpeed(
-    JPS_SocialForceModelState handle,
-    double desiredSpeed);
+JUPEDSIM_API void
+JPS_SocialForceModelState_SetDesiredSpeed(JPS_SocialForceModelState handle, double desiredSpeed);
 
 /**
  * Read reaction Time of this agent.
@@ -127,9 +102,8 @@ JUPEDSIM_API double JPS_SocialForceModelState_GetReactionTime(JPS_SocialForceMod
  * @param handle of the Agent to access.
  * @param reactionTime in s of this agent.
  */
-JUPEDSIM_API void JPS_SocialForceModelState_SetReactionTime(
-    JPS_SocialForceModelState handle,
-    double reactionTime);
+JUPEDSIM_API void
+JPS_SocialForceModelState_SetReactionTime(JPS_SocialForceModelState handle, double reactionTime);
 
 /**
  * Read agent Scale of this agent.
@@ -143,9 +117,8 @@ JUPEDSIM_API double JPS_SocialForceModelState_GetAgentScale(JPS_SocialForceModel
  * @param handle of the Agent to access.
  * @param agentScale of this agent.
  */
-JUPEDSIM_API void JPS_SocialForceModelState_SetAgentScale(
-    JPS_SocialForceModelState handle,
-    double agentScale);
+JUPEDSIM_API void
+JPS_SocialForceModelState_SetAgentScale(JPS_SocialForceModelState handle, double agentScale);
 
 /**
  * Read obstacle Scale of this agent.
@@ -159,9 +132,8 @@ JUPEDSIM_API double JPS_SocialForceModelState_GetObstacleScale(JPS_SocialForceMo
  * @param handle of the Agent to access.
  * @param obstacleScale of this agent.
  */
-JUPEDSIM_API void JPS_SocialForceModelState_SetObstacleScale(
-    JPS_SocialForceModelState handle,
-    double obstacleScale);
+JUPEDSIM_API void
+JPS_SocialForceModelState_SetObstacleScale(JPS_SocialForceModelState handle, double obstacleScale);
 
 /**
  * Read force Distance of this agent.
@@ -175,10 +147,9 @@ JUPEDSIM_API double JPS_SocialForceModelState_GetForceDistance(JPS_SocialForceMo
  * @param handle of the Agent to access.
  * @param forceDistance of this agent.
  */
-JUPEDSIM_API void JPS_SocialForceModelState_SetForceDistance(
-    JPS_SocialForceModelState handle,
-    double forceDistance);
-    
+JUPEDSIM_API void
+JPS_SocialForceModelState_SetForceDistance(JPS_SocialForceModelState handle, double forceDistance);
+
 /**
  * Read radius of this agent.
  * @param handle of the Agent to access.
@@ -191,9 +162,8 @@ JUPEDSIM_API double JPS_SocialForceModelState_GetRadius(JPS_SocialForceModelStat
  * @param handle of the Agent to access.
  * @param radius in m of this agent.
  */
-JUPEDSIM_API void JPS_SocialForceModelState_SetRadius(
-    JPS_SocialForceModelState handle,
-    double radius);
+JUPEDSIM_API void
+JPS_SocialForceModelState_SetRadius(JPS_SocialForceModelState handle, double radius);
 
 /**
  * Describes parameters of an Agent in SocialForceModel
@@ -222,10 +192,6 @@ typedef struct JPS_SocialForceModelAgentParameters {
      */
     JPS_Point velocity = {0, 0};
     /**
-     * Desired orientation.
-     */
-    JPS_Point desiredDirection{0, 0};
-    /**
      * Mass of the agent
      */
     double mass = 80;
@@ -253,7 +219,7 @@ typedef struct JPS_SocialForceModelAgentParameters {
      * radius of the agent
      */
     double radius = 0.3;
-    
+
 } JPS_SocialForceModelAgentParameters;
 
 #ifdef __cplusplus

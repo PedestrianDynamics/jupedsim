@@ -7,10 +7,10 @@
 #include "error.h"
 #include "export.h"
 #include "generalized_centrifugal_force_model.h"
-#include "social_force_model.h"
 #include "geometry.h"
 #include "journey.h"
 #include "operational_model.h"
+#include "social_force_model.h"
 #include "stage.h"
 #include "types.h"
 
@@ -186,7 +186,6 @@ JUPEDSIM_API JPS_AgentId JPS_Simulation_AddSocialForceModelAgent(
     JPS_Simulation handle,
     JPS_SocialForceModelAgentParameters parameters,
     JPS_ErrorMessage* errorMessage);
-
 
 /**
  * Marks an agent from the simuation for removal.

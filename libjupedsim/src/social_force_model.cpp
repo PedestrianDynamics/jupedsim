@@ -15,12 +15,10 @@ using jupedsim::detail::intoTuple;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// SocialForceModel Model Builder
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-JPS_SocialForceModelBuilder JPS_SocialForceModelBuilder_Create(
-    double bodyForce, double friction)
+JPS_SocialForceModelBuilder JPS_SocialForceModelBuilder_Create(double bodyForce, double friction)
 {
     return reinterpret_cast<JPS_SocialForceModelBuilder>(
-        new SocialForceModelBuilder(
-            bodyForce, friction));
+        new SocialForceModelBuilder(bodyForce, friction));
 }
 
 JPS_OperationalModel JPS_SocialForceModelBuilder_Build(
@@ -31,8 +29,7 @@ JPS_OperationalModel JPS_SocialForceModelBuilder_Build(
     auto builder = reinterpret_cast<SocialForceModelBuilder*>(handle);
     JPS_OperationalModel result{};
     try {
-        result = reinterpret_cast<JPS_OperationalModel>(
-            new SocialForceModel(builder->Build()));
+        result = reinterpret_cast<JPS_OperationalModel>(new SocialForceModel(builder->Build()));
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
@@ -46,8 +43,7 @@ JPS_OperationalModel JPS_SocialForceModelBuilder_Build(
     return result;
 }
 
-void JPS_SocialForceModelBuilder_Free(
-    JPS_SocialForceModelBuilder handle)
+void JPS_SocialForceModelBuilder_Free(JPS_SocialForceModelBuilder handle)
 {
     delete reinterpret_cast<SocialForceModelBuilder*>(handle);
 }
@@ -62,29 +58,11 @@ JPS_Point JPS_SocialForceModelState_GetVelocity(JPS_SocialForceModelState handle
     return intoJPS_Point(state->velocity);
 }
 
-void JPS_SocialForceModelState_SetVelocity(
-    JPS_SocialForceModelState handle,
-    JPS_Point velocity)
+void JPS_SocialForceModelState_SetVelocity(JPS_SocialForceModelState handle, JPS_Point velocity)
 {
     assert(handle);
     const auto state = reinterpret_cast<SocialForceModelData*>(handle);
     state->velocity = intoPoint(velocity);
-}
-
-JPS_Point JPS_SocialForceModelState_GetDesiredDirection(JPS_SocialForceModelState handle)
-{
-    assert(handle);
-    const auto state = reinterpret_cast<const SocialForceModelData*>(handle);
-    return intoJPS_Point(state->desiredDirection);
-}
-
-void JPS_SocialForceModelState_SetDesiredDirection(
-    JPS_SocialForceModelState handle,
-    JPS_Point desiredDirection)
-{
-    assert(handle);
-    const auto state = reinterpret_cast<SocialForceModelData*>(handle);
-    state->desiredDirection = intoPoint(desiredDirection);
 }
 
 double JPS_SocialForceModelState_GetMass(JPS_SocialForceModelState handle)
@@ -94,9 +72,7 @@ double JPS_SocialForceModelState_GetMass(JPS_SocialForceModelState handle)
     return state->mass;
 }
 
-void JPS_SocialForceModelState_SetMass(
-    JPS_SocialForceModelState handle,
-    double mass)
+void JPS_SocialForceModelState_SetMass(JPS_SocialForceModelState handle, double mass)
 {
     assert(handle);
     const auto state = reinterpret_cast<SocialForceModelData*>(handle);
@@ -142,9 +118,7 @@ double JPS_SocialForceModelState_GetAgentScale(JPS_SocialForceModelState handle)
     return state->agentScale;
 }
 
-void JPS_SocialForceModelState_SetAgentScale(
-    JPS_SocialForceModelState handle,
-    double agentScale)
+void JPS_SocialForceModelState_SetAgentScale(JPS_SocialForceModelState handle, double agentScale)
 {
     assert(handle);
     const auto state = reinterpret_cast<SocialForceModelData*>(handle);
@@ -190,9 +164,7 @@ double JPS_SocialForceModelState_GetRadius(JPS_SocialForceModelState handle)
     return state->radius;
 }
 
-void JPS_SocialForceModelState_SetRadius(
-    JPS_SocialForceModelState handle,
-    double radius)
+void JPS_SocialForceModelState_SetRadius(JPS_SocialForceModelState handle, double radius)
 {
     assert(handle);
     const auto state = reinterpret_cast<SocialForceModelData*>(handle);

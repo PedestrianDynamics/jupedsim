@@ -20,7 +20,6 @@ void init_social_force_model(py::module_& m)
                         JPS_JourneyId journey_id,
                         JPS_StageId stage_id,
                         std::tuple<double, double> velocity,
-                        std::tuple<double, double> desiredDirection,
                         double mass,
                         double desiredSpeed,
                         double reactionTime,
@@ -34,7 +33,6 @@ void init_social_force_model(py::module_& m)
                     journey_id,
                     stage_id,
                     intoJPS_Point(velocity),
-                    intoJPS_Point(desiredDirection),
                     mass,
                     desiredSpeed,
                     reactionTime,
@@ -49,7 +47,6 @@ void init_social_force_model(py::module_& m)
             py::arg("journey_id"),
             py::arg("stage_id"),
             py::arg("velocity"),
-            py::arg("desiredDirection"),
             py::arg("mass"),
             py::arg("desiredSpeed"),
             py::arg("reactionTime"),
@@ -60,14 +57,13 @@ void init_social_force_model(py::module_& m)
         .def("__repr__", [](const JPS_SocialForceModelAgentParameters& p) {
             return fmt::format(
                 "position: {}, orientation: {}, journey_id: {}, stage_id: {},"
-                "velocity: {}, desiredDirection{}, mass: {}, desiredSpeed: {},"
+                "velocity: {}, mass: {}, desiredSpeed: {},"
                 "reactionTime: {}, agentScale: {}, obstacleScale: {}, forceDistance: {}, radius: {}",
                 intoTuple(p.position),
                 intoTuple(p.orientation),
                 p.journeyId,
                 p.stageId,
                 intoTuple(p.velocity),
-                intoTuple(p.desiredDirection),
                 p.mass,
                 p.desiredSpeed,
                 p.reactionTime,
@@ -107,15 +103,6 @@ void init_social_force_model(py::module_& m)
             [](JPS_SocialForceModelState_Wrapper& w,
              std::tuple<double, double> velocity) {
                 JPS_SocialForceModelState_SetVelocity(w.handle, intoJPS_Point(velocity));
-            })
-        .def_property(
-            "desiredDirection",
-            [](const JPS_SocialForceModelState_Wrapper& w) {
-                return intoTuple(JPS_SocialForceModelState_GetDesiredDirection(w.handle));
-            },
-            [](JPS_SocialForceModelState_Wrapper& w,
-             std::tuple<double, double> desiredDirection) {
-                JPS_SocialForceModelState_SetDesiredDirection(w.handle, intoJPS_Point(desiredDirection));
             })
         .def_property(
             "mass",

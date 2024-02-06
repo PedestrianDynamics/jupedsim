@@ -254,8 +254,7 @@ JPS_AgentId JPS_Simulation_AddSocialForceModelAgent(
     auto simulation = reinterpret_cast<Simulation*>(handle);
     try {
         if(simulation->ModelType() != OperationalModelType::SOCIAL_FORCE) {
-            throw std::runtime_error(
-                "Simulation is not configured to use Social Force Model");
+            throw std::runtime_error("Simulation is not configured to use Social Force Model");
         }
         GenericAgent agent{
             GenericAgent::ID::Invalid,
@@ -265,7 +264,6 @@ JPS_AgentId JPS_Simulation_AddSocialForceModelAgent(
             intoPoint(parameters.orientation),
             SocialForceModelData{
                 intoPoint(parameters.velocity),
-                intoPoint(parameters.desiredDirection),
                 parameters.mass,
                 parameters.desiredSpeed,
                 parameters.reactionTime,

@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Point.hpp" 
+#include "Point.hpp"
 struct SocialForceModelData {
     Point velocity{}; // v
-    Point desiredDirection{}; // e0
     double mass{}; // m
     double desiredSpeed{}; // v0
     double reactionTime{}; // T
@@ -11,7 +10,6 @@ struct SocialForceModelData {
     double obstacleScale{}; // A for obstacles
     double forceDistance{}; // B
     double radius{}; // r
-    
 };
 
 template <>

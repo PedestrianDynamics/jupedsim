@@ -6,5 +6,7 @@
 
 #include <variant>
 
-using OperationalModelUpdate =
-    std::variant<GeneralizedCentrifugalForceModelUpdate, CollisionFreeSpeedModelUpdate, SocialForceModelUpdate>;
+using OperationalModelUpdate = std::variant<
+    GeneralizedCentrifugalForceModelUpdate,
+    CollisionFreeSpeedModelUpdate,
+    SocialForceModelUpdate>;

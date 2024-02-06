@@ -95,7 +95,6 @@ JPS_Agent_GetGeneralizedCentrifugalForceModelState(
 JUPEDSIM_API JPS_CollisionFreeSpeedModelState
 JPS_Agent_GetCollisionFreeSpeedModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
 
-
 /**
  * Access Social Force model state.
  * Precondition: Agent needs to use Social Force model
@@ -104,8 +103,7 @@ JPS_Agent_GetCollisionFreeSpeedModelState(JPS_Agent handle, JPS_ErrorMessage* er
  * @return state or NULL on error
  */
 JUPEDSIM_API JPS_SocialForceModelState
-JPS_Agent_GetSocialForceModelState(
-    JPS_Agent handle, JPS_ErrorMessage* errorMessage);
+JPS_Agent_GetSocialForceModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
 
 /**
  * Opaque type of an iterator over agents

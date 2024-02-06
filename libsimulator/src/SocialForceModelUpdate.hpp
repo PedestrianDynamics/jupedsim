@@ -5,5 +5,4 @@
 struct SocialForceModelUpdate {
     Point position{};
     Point velocity{};
-    Point desiredDirection{};
 };

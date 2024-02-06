@@ -28,7 +28,6 @@ class SocialForceModelAgentParameters:
         journey_id: Id of the journey the agent follows.
         stage_id: Id of the stage the agent targets.
         velocity: current velocity of the agent
-        desiredDirection: desired Direction of the agent.
         mass: mass of the agent.
         desiredSpeed: desired Speed of the agent.
         reactionTime: reaction Time of the agent.
@@ -43,7 +42,6 @@ class SocialForceModelAgentParameters:
     journey_id: int = -1
     stage_id: int = -1
     velocity: tuple[float, float] = (0.0, 0.0)
-    desiredDirection: tuple[float, float] = (0.0, 0.0)
     mass: float = 80.0
     desiredSpeed: float = 0.8
     reactionTime: float = 0.5
@@ -61,7 +59,6 @@ class SocialForceModelAgentParameters:
             journey_id=self.journey_id,
             stage_id=self.stage_id,
             velocity=self.velocity,
-            desiredDirection=self.desiredDirection,
             mass=self.mass,
             desiredSpeed=self.desiredSpeed,
             reactionTime=self.reactionTime,
@@ -83,15 +80,6 @@ class SocialForceModelState:
     @velocity.setter
     def velocity(self, velocity):
         self._obj.velocity = velocity
-
-    @property
-    def desiredDirection(self) -> float:
-        """desired Direction of this agent."""
-        return self._obj.test_value
-    
-    @desiredDirection.setter
-    def desiredDirection(self, desiredDirection):
-        self._obj.desiredDirection = desiredDirection
 
     @property
     def mass(self) -> float:
