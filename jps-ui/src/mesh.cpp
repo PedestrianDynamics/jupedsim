@@ -503,16 +503,20 @@ size_t Mesh::FindContainingPolygon(const glm::vec2& p) const
     return Polygon::InvalidIndex;
 }
 
+glm::vec2 Mesh::Vertex(size_t index) const
+{
+    return vertices.at(index);
+}
+
 bool Mesh::polygonContains(const size_t polygonIndex, glm::vec2 p) const
 {
     const auto& poly = polygons[polygonIndex];
 
     for(size_t i = 0; i < poly.vertices.size(); ++i) {
-
-        const glm::vec2 diff = vertices[(i + 1) % poly.vertices.size()] - vertices[i];
-        const glm::vec2 xp = p - vertices[i];
-
-        const auto cp = glm::cross(glm::vec3(diff, 0), glm::vec3(xp, 0));
+        const glm::vec2 edge =
+            vertices[poly.vertices[(i + 1) % poly.vertices.size()]] - vertices[poly.vertices[i]];
+        const glm::vec2 to_p = p - glm::vec2(vertices[poly.vertices[i]]);
+        const auto cp = glm::cross(glm::vec3(edge, 0), glm::vec3(to_p, 0));
         if(cp.z < 0.0) {
             return false;
         }

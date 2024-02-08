@@ -9,7 +9,6 @@
 #include <fstream>
 
 #include <CGAL/partition_2.h>
-#include <GLFW/glfw3.h>
 #include <exception>
 #include <limits>
 #include <stdexcept>
@@ -54,8 +53,7 @@ void add_linear_ring(
 {
 }
 
-std::tuple<std::vector<glm::vec2>, std::vector<unsigned int>, std::vector<unsigned int>>
-DrawableGEOS::partition_polygon(const GEOSGeometry* g)
+void DrawableGEOS::partition_polygon(const GEOSGeometry* g)
 {
     assert(GEOSGeomTypeId(g) == GEOS_POLYGON);
     auto out = std::make_tuple(
@@ -104,24 +102,6 @@ DrawableGEOS::partition_polygon(const GEOSGeometry* g)
     }
 
     CGAL::mark_domain_in_triangulation(cdt);
-
-    for(auto&& face : cdt.finite_face_handles()) {
-        if(!face->get_in_domain()) {
-            continue;
-        }
-        std::get<1>(out).push_back(face->vertex(0)->info());
-        std::get<1>(out).push_back(face->vertex(1)->info());
-        std::get<1>(out).push_back(face->vertex(2)->info());
-    }
-
-    for(auto&& edge : cdt.finite_edges()) {
-        if(edge.first->get_in_domain() || edge.first->neighbor(edge.second)->get_in_domain()) {
-            std::get<2>(out).push_back(edge.first->vertex(CDT::cw(edge.second))->info());
-            std::get<2>(out).push_back(edge.first->vertex(CDT::ccw(edge.second))->info());
-        }
-    }
-
-    return out;
 };
 
 DrawableGEOS::DrawableGEOS(const GEOSGeometry* geo) : bounds(initBounds(geo))
@@ -163,7 +143,7 @@ DrawableGEOS::DrawableGEOS(const GEOSGeometry* geo) : bounds(initBounds(geo))
                 for(int index = 0; index < count; ++index) {
                     stack.push_back(GEOSGetInteriorRingN(g, index));
                 }
-                triangles.emplace_back(partition_polygon(g));
+                partition_polygon(g);
                 break;
             }
             case GEOS_MULTIPOINT:
@@ -182,93 +162,26 @@ DrawableGEOS::DrawableGEOS(const GEOSGeometry* geo) : bounds(initBounds(geo))
                 throw std::runtime_error("Internal error");
         }
     }
-
-    vaos.resize(sequences.size() + triangles.size() * 2);
-    vbos.resize(sequences.size() + triangles.size() * 3);
-    glGenVertexArrays(sequences.size() + triangles.size() * 2, vaos.data());
-    glGenBuffers(sequences.size() + triangles.size() * 3, vbos.data());
-
-    for(size_t index = 0; index < sequences.size(); ++index) {
-        glBindVertexArray(vaos[index]);
-        glBindBuffer(GL_ARRAY_BUFFER, vbos[index]);
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            sequences[index].size() * sizeof(glm::vec2),
-            reinterpret_cast<const GLvoid*>(sequences[index].data()),
-            GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), nullptr);
-        glEnableVertexAttribArray(0);
-    }
-    for(size_t index = 0; index < triangles.size(); ++index) {
-        glBindVertexArray(vaos[sequences.size() + index]);
-        glBindBuffer(GL_ARRAY_BUFFER, vbos[sequences.size() + index * 3]);
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            std::get<0>(triangles[index]).size() * sizeof(glm::vec2),
-            reinterpret_cast<const GLvoid*>(std::get<0>(triangles[index]).data()),
-            GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), nullptr);
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos[sequences.size() + index * 3 + 2]);
-        glBufferData(
-            GL_ELEMENT_ARRAY_BUFFER,
-            std::get<2>(triangles[index]).size() * sizeof(unsigned int),
-            reinterpret_cast<const GLvoid*>(std::get<2>(triangles[index]).data()),
-            GL_STATIC_DRAW);
-    }
-    for(size_t index = 0; index < triangles.size(); ++index) {
-        glBindVertexArray(vaos[sequences.size() + triangles.size() + index]);
-        glBindBuffer(GL_ARRAY_BUFFER, vbos[sequences.size() + index * 3]);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), nullptr);
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos[sequences.size() + index * 3 + 1]);
-        glBufferData(
-            GL_ELEMENT_ARRAY_BUFFER,
-            std::get<1>(triangles[index]).size() * sizeof(unsigned int),
-            reinterpret_cast<const GLvoid*>(std::get<1>(triangles[index]).data()),
-            GL_STATIC_DRAW);
-    }
 }
 
 DrawableGEOS::~DrawableGEOS()
 {
 }
 
-void DrawableGEOS::Draw(Shader& shader) const
+const GEOSGeometry* read_wkt(const std::string& data)
 {
-    //    shader.Activate();
-    //
-    //    shader.SetUniform("color", glm::vec4(0.0f, 0.0f, 0.75f, 1.0f));
-    //    for(size_t index = 0; index < triangles.size(); ++index) {
-    //        glBindVertexArray(vaos[index + sequences.size() + triangles.size()]);
-    //        glDrawElements(
-    //            GL_TRIANGLES, std::get<1>(triangles[index]).size(), GL_UNSIGNED_INT, nullptr);
-    //    }
-    //
-    //    shader.SetUniform("color", glm::vec4(255.0f / 255.0f, 0.0f, 0.0f, 1.0f));
-    //    for(size_t index = 0; index < triangles.size(); ++index) {
-    //        glBindVertexArray(vaos[index + sequences.size()]);
-    //        glDrawElements(GL_LINES, std::get<2>(triangles[index]).size(), GL_UNSIGNED_INT,
-    //        nullptr);
-    //    }
-    //
-    //    shader.SetUniform("color", glm::vec4(255.0f / 255.0f, 1.0f, 1.0f, 1.0f));
-    //    for(size_t index = 0; index < sequences.size(); ++index) {
-    //        glBindVertexArray(vaos[index]);
-    //        glDrawArrays(GL_LINE_STRIP, 0, sequences[index].size());
-    //    }
+    GEOSWKTReader* reader = GEOSWKTReader_create();
+    GEOSGeometry* geom_a = GEOSWKTReader_read(reader, data.c_str());
+    GEOSWKTReader_destroy(reader);
+    return geom_a;
 }
 
-const GEOSGeometry* read_wkt(std::filesystem::path file)
+const GEOSGeometry* read_wkt(const std::filesystem::path& file)
 {
     std::ifstream in(file);
     const std::string wkt((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
     in.close();
-
-    GEOSWKTReader* reader = GEOSWKTReader_create();
-    GEOSGeometry* geom_a = GEOSWKTReader_read(reader, wkt.c_str());
-    GEOSWKTReader_destroy(reader);
-    return geom_a;
+    return read_wkt(wkt);
 }
 
 AABB DrawableGEOS::initBounds(const GEOSGeometry* geo)

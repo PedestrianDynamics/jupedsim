@@ -63,6 +63,7 @@ if (BUILD_TESTS)
     target_link_libraries(jps-ui-tests PRIVATE
         GTest::gtest
         GTest::gtest_main
+        GTest::gmock
         glfw
         OpenGL::GL
         GEOS::geos_c
@@ -72,7 +73,7 @@ if (BUILD_TESTS)
         glm
         glad
         fmt
-        )
+    )
 
     target_compile_options(jps-ui-tests PRIVATE
         ${COMMON_COMPILE_OPTIONS}

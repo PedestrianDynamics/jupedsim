@@ -125,9 +125,6 @@ int main(int argc, char** argv)
             cam.CenterOn(gui.Geometry()->Bounds());
         }
         cam.Update(shader);
-        if(gui.Geometry()) {
-            gui.Geometry()->Draw(shader);
-        }
         if(gui.RMesh()) {
             gui.RMesh()->Draw(shader);
         }

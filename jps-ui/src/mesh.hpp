@@ -37,6 +37,8 @@ public:
     std::vector<uint16_t> TriangleIndices() const;
     std::vector<uint16_t> SegmentIndices() const;
     size_t FindContainingPolygon(const glm::vec2& p) const;
+    glm::vec2 Vertex(size_t index) const;
+    size_t CountVertices() const { return vertices.size(); }
 
 private:
     Mesh(const Mesh& other) = delete;

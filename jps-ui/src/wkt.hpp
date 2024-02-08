@@ -12,9 +12,7 @@
 #include <CGAL/draw_triangulation_2.h>
 #include <CGAL/mark_domain_in_triangulation.h>
 
-#include <GLFW/glfw3.h>
 #include <geos_c.h>
-#include <glad/glad.h>
 
 #include <array>
 #include <filesystem>
@@ -49,25 +47,19 @@ class DrawableGEOS
 {
 private:
     std::vector<std::vector<glm::vec2>> sequences{};
-    std::vector<
-        std::tuple<std::vector<glm::vec2>, std::vector<unsigned int>, std::vector<unsigned int>>>
-        triangles{};
-    std::vector<GLuint> vbos{};
-    std::vector<GLuint> vaos{};
     AABB bounds{};
     CDT cdt{};
 
 public:
     explicit DrawableGEOS(const GEOSGeometry* geo);
     ~DrawableGEOS();
-    void Draw(Shader& shader) const;
     const AABB& Bounds() const { return bounds; }
     const CDT& tri() const { return cdt; }
 
 private:
     AABB initBounds(const GEOSGeometry* geo);
-    std::tuple<std::vector<glm::vec2>, std::vector<unsigned int>, std::vector<unsigned int>>
-    partition_polygon(const GEOSGeometry* g);
+    void partition_polygon(const GEOSGeometry* g);
 };
 
-const GEOSGeometry* read_wkt(std::filesystem::path file);
+const GEOSGeometry* read_wkt(const std::string& data);
+const GEOSGeometry* read_wkt(const std::filesystem::path& file);
