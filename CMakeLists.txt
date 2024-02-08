@@ -2,7 +2,7 @@
 # Project setup
 ################################################################################
 cmake_minimum_required(VERSION 3.22 FATAL_ERROR)
-project(JuPedSim VERSION 1.1.0 LANGUAGES CXX)
+project(JuPedSim VERSION 1.1.0 LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -47,6 +47,8 @@ endif()
 
 set(BUILD_BENCHMARKS OFF CACHE BOOL "Build micro benchmark")
 print_var(BUILD_BENCHMARKS)
+
+option(BUILD_JPS_UI "Build visualisation" OFF)
 
 set(WITH_FORMAT OFF CACHE BOOL "Create format tools")
 print_var(WITH_FORMAT)
@@ -219,6 +221,9 @@ add_subdirectory(libjupedsim)
 add_subdirectory(libcommon)
 add_subdirectory(libsimulator)
 add_subdirectory(python_bindings_jupedsim)
+if(BUILD_JPS_UI)
+    add_subdirectory(jps-ui)
+endif()
 
 ################################################################################
 # Code formatting
