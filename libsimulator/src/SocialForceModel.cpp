@@ -144,7 +144,7 @@ Point SocialForceModel::AgentForce(const GenericAgent& ped1, const GenericAgent&
 {
     double dist = (ped1.pos - ped2.pos).Norm();
     auto& model1 = std::get<SocialForceModelData>(ped1.model);
-    auto& model2 = std::get<SocialForceModelData>(ped1.model);
+    auto& model2 = std::get<SocialForceModelData>(ped2.model);
 
     double total_radius = model1.radius + model2.radius;
     double pushing_force_length =
