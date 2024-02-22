@@ -45,15 +45,19 @@ class Simulation:
     def __init__(
         self,
         *,
-        model: CollisionFreeSpeedModel
-        | GeneralizedCentrifugalForceModel
-        | SocialForceModel,
-        geometry: str
-        | shapely.GeometryCollection
-        | shapely.Polygon
-        | shapely.MultiPolygon
-        | shapely.MultiPoint
-        | list[tuple[float, float]],
+        model: (
+            CollisionFreeSpeedModel
+            | GeneralizedCentrifugalForceModel
+            | SocialForceModel
+        ),
+        geometry: (
+            str
+            | shapely.GeometryCollection
+            | shapely.Polygon
+            | shapely.MultiPolygon
+            | shapely.MultiPoint
+            | list[tuple[float, float]]
+        ),
         dt: float = 0.01,
         trajectory_writer: TrajectoryWriter | None = None,
         **kwargs: Any,
@@ -213,9 +217,11 @@ class Simulation:
 
     def add_agent(
         self,
-        parameters: GeneralizedCentrifugalForceModelAgentParameters
-        | CollisionFreeSpeedModelAgentParameters
-        | SocialForceModelAgentParameters,
+        parameters: (
+            GeneralizedCentrifugalForceModelAgentParameters
+            | CollisionFreeSpeedModelAgentParameters
+            | SocialForceModelAgentParameters
+        ),
     ) -> int:
         return self._obj.add_agent(parameters.as_native())
 
