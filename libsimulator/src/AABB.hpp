@@ -23,7 +23,10 @@ struct AABB {
         if(std::empty(container)) {
             throw SimulationError("Cannot create a AABB from zero points");
         }
-        for(const auto [x, y] : container) {
+        for(const auto point : container) {
+            const auto x = point.x();
+            const auto y = point.y();
+
             xmin = std::min(x, xmin);
             xmax = std::max(x, xmax);
             ymin = std::min(y, ymin);
@@ -33,13 +36,16 @@ struct AABB {
 
     AABB(const Point a, const Point b)
     {
-        xmin = std::min(b.x, std::min(a.x, xmin));
-        xmax = std::max(b.x, std::max(a.x, xmax));
-        ymin = std::min(b.y, std::min(a.y, ymin));
-        ymax = std::max(b.y, std::max(a.y, ymax));
+        xmin = std::min(b.x(), std::min(a.x(), xmin));
+        xmax = std::max(b.x(), std::max(a.x(), xmax));
+        ymin = std::min(b.y(), std::min(a.y(), ymin));
+        ymax = std::max(b.y(), std::max(a.y(), ymax));
     }
 
-    bool Inside(Point p) const { return p.x >= xmin && p.x <= xmax && p.y >= ymin && p.y <= ymax; }
+    bool Inside(Point p) const
+    {
+        return p.x() >= xmin && p.x() <= xmax && p.y() >= ymin && p.y() <= ymax;
+    }
 
     bool Overlap(const AABB& other) const
     {

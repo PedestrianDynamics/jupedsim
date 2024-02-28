@@ -86,6 +86,7 @@ target_link_libraries(simulator PUBLIC
     poly2tri
     fmt::fmt
     CGAL::CGAL
+    glm::glm
     build_info
 )
 target_link_options(simulator PUBLIC

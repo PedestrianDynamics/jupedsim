@@ -9,7 +9,7 @@ static std::vector<p2t::Point*> ConvertPointVector(const std::vector<Point>& vec
     std::vector<p2t::Point*> result{};
     result.resize(vec.size());
     std::transform(vec.begin(), vec.end(), result.begin(), [](const auto& p) {
-        return new p2t::Point(p.x, p.y);
+        return new p2t::Point(p.x(), p.y());
     });
     return result;
 }

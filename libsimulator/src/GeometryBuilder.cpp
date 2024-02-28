@@ -33,8 +33,7 @@ static Point centroid(p2t::Triangle* t)
     Point res{};
     for(int index = 0; index < 3; ++index) {
         const auto p = t->GetPoint(index);
-        res.x += p->x;
-        res.y += p->y;
+        res += Point{p->x, p->y};
     }
     return res / 3.0;
 };

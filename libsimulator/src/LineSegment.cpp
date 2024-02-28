@@ -41,7 +41,7 @@ bool LineSegment::operator<(const LineSegment& other) const
 Point LineSegment::NormalVec() const
 {
     const Point r = (p2 - p1);
-    return Point(-r.y, r.x).Normalized();
+    return Point(-r.y(), r.x()).Normalized();
 }
 
 double LineSegment::NormalComp(const Point& v) const
@@ -52,10 +52,10 @@ double LineSegment::NormalComp(const Point& v) const
 
     double alpha;
 
-    if(fabs(l.x) < J_EPS) {
-        alpha = v.x / n.x;
-    } else if(fabs(l.y) < J_EPS) {
-        alpha = v.y / n.y;
+    if(fabs(l.x()) < J_EPS) {
+        alpha = v.x() / n.x();
+    } else if(fabs(l.y()) < J_EPS) {
+        alpha = v.y() / n.y();
     } else {
         alpha = l.CrossProduct(v) / n.CrossProduct(l);
     }
@@ -84,8 +84,8 @@ double LineSegment::DistTo(const Point& p) const
     using PointCGAL = Kernel::Point_2;
     using SegmentCGAL = Kernel::Segment_2;
 
-    PointCGAL point(p.x, p.y);
-    SegmentCGAL segment(PointCGAL(p1.x, p1.y), PointCGAL(p2.x, p2.y));
+    PointCGAL point(p.x(), p.y());
+    SegmentCGAL segment(PointCGAL(p1.x(), p1.y()), PointCGAL(p2.x(), p2.y()));
 
     return sqrt(CGAL::squared_distance(point, segment));
 }

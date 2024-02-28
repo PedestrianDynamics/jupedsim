@@ -67,8 +67,8 @@ class NeighborhoodSearch
 private:
     Grid2DIndex getIndex(const Point& pos) const
     {
-        const int32_t idx = static_cast<int32_t>(pos.x / _cellSize);
-        const int32_t idy = static_cast<int32_t>(pos.y / _cellSize);
+        const int32_t idx = static_cast<int32_t>(pos.x() / _cellSize);
+        const int32_t idy = static_cast<int32_t>(pos.y() / _cellSize);
         return Grid2DIndex{idx, idy};
     }
 

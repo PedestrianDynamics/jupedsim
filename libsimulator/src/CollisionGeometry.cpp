@@ -22,13 +22,13 @@
 
 Cell makeCell(Point p)
 {
-    return {floor(p.x / CELL_EXTEND) * CELL_EXTEND, floor(p.y / CELL_EXTEND) * CELL_EXTEND};
+    return {floor(p.x() / CELL_EXTEND) * CELL_EXTEND, floor(p.y() / CELL_EXTEND) * CELL_EXTEND};
 }
 
 bool IsN8Adjacent(const Cell& a, const Cell& b)
 {
-    const auto dx = static_cast<int>(abs(a.x - b.x) / CELL_EXTEND);
-    const auto dy = static_cast<int>(abs(a.y - b.y) / CELL_EXTEND);
+    const auto dx = static_cast<int>(abs(a.x() - b.x()) / CELL_EXTEND);
+    const auto dy = static_cast<int>(abs(a.y() - b.y()) / CELL_EXTEND);
     if((dx == 0 && dy == 0) || dx > 1 || dy > 1) {
         return false;
     }
@@ -55,13 +55,13 @@ std::set<Cell> cellsFromLineSegment(LineSegment ls)
     std::vector<Point> intersections{};
     for(double x_intersect = toMultiple(bounds.xmin); x_intersect <= bounds.xmax;
         x_intersect += CELL_EXTEND) {
-        const double fact = (x_intersect - ls.p1.x) / vec_p1p2.x;
-        intersections.emplace_back(x_intersect, ls.p1.y + fact * vec_p1p2.y);
+        const double fact = (x_intersect - ls.p1.x()) / vec_p1p2.x();
+        intersections.emplace_back(x_intersect, ls.p1.y() + fact * vec_p1p2.y());
     }
     for(double y_intersect = toMultiple(bounds.ymin); y_intersect <= bounds.ymax;
         y_intersect += CELL_EXTEND) {
-        const double fact = (y_intersect - ls.p1.y) / vec_p1p2.y;
-        intersections.emplace_back(ls.p1.x + fact * vec_p1p2.x, y_intersect);
+        const double fact = (y_intersect - ls.p1.y()) / vec_p1p2.y();
+        intersections.emplace_back(ls.p1.x() + fact * vec_p1p2.x(), y_intersect);
     }
     std::sort(std::begin(intersections), std::end(intersections));
     for(size_t index = 1; index < intersections.size(); ++index) {
@@ -161,13 +161,13 @@ void CollisionGeometry::insertIntoApproximateGrid(const LineSegment& ls)
     auto cellBottomLeft = makeCell(searchBounds.BottomLeft());
     auto cellTopRight = makeCell(searchBounds.TopRight());
 
-    for(double x = cellBottomLeft.x; x <= cellTopRight.x; x += CELL_EXTEND) {
-        for(double y = cellBottomLeft.y; y <= cellTopRight.y; y += CELL_EXTEND) {
+    for(double x = cellBottomLeft.x(); x <= cellTopRight.x(); x += CELL_EXTEND) {
+        for(double y = cellBottomLeft.y(); y <= cellTopRight.y(); y += CELL_EXTEND) {
             const auto cell = makeCell({x, y});
 
             const AABB bbWithSearchRadius(
-                {cell.x - searchRadius, cell.y - searchRadius},
-                {cell.x + searchRadius + CELL_EXTEND, cell.y + searchRadius + CELL_EXTEND});
+                {cell.x() - searchRadius, cell.y() - searchRadius},
+                {cell.x() + searchRadius + CELL_EXTEND, cell.y() + searchRadius + CELL_EXTEND});
 
             if(bbWithSearchRadius.Intersects(ls)) {
                 auto& vec = _approximateGrid[cell];
@@ -205,7 +205,7 @@ bool CollisionGeometry::IntersectsAny(const LineSegment& linesegment) const
 
 bool CollisionGeometry::InsideGeometry(Point p) const
 {
-    return CGAL::oriented_side(Kernel::Point_2(p.x, p.y), _accessibleAreaPolygon) !=
+    return CGAL::oriented_side(Kernel::Point_2(p.x(), p.y()), _accessibleAreaPolygon) !=
            CGAL::ON_NEGATIVE_SIDE;
 }
 

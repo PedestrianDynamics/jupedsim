@@ -6,7 +6,7 @@ static bool intersectsLine(const AABB& boundingBox, const LineSegment& lineSegme
 {
     const Point base = lineSegment.p1;
     const Point dir = lineSegment.p2 - lineSegment.p1;
-    const Point n = Point{dir.y, -dir.x};
+    const Point n = Point{dir.y(), -dir.x()};
 
     const Point c1 = boundingBox.BottomLeft() - base;
     const Point c2 = boundingBox.TopRight() - base;

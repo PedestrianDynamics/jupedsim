@@ -292,13 +292,13 @@ Point GeneralizedCentrifugalForceModel::ForceRepPed(
             dist_eff, smax, dist_intpol_left, maxNeighborInterpolationDistance * f, f, 0, f1);
         F_rep = ep12 * px;
     }
-    if(F_rep.x != F_rep.x || F_rep.y != F_rep.y) {
+    if(F_rep.x() != F_rep.x() || F_rep.y() != F_rep.y()) {
         LOG_ERROR(
             "NAN return p1{} p2 {} Frepx={:f} Frepy={:f} K_ij={:f}",
             ped1.id,
             ped2.id,
-            F_rep.x,
-            F_rep.y,
+            F_rep.x(),
+            F_rep.y(),
             K_ij);
     }
     return F_rep;
@@ -390,12 +390,12 @@ Point GeneralizedCentrifugalForceModel::ForceRepStatPoint(
     bla = (tmp + fabs(tmp));
     if(!bla) // Fussgaenger nicht im Sichtfeld
         return Point(0.0, 0.0);
-    if(fabs(v.x) < J_EPS && fabs(v.y) < J_EPS) // v==0)
+    if(fabs(v.x()) < J_EPS && fabs(v.y()) < J_EPS) // v==0)
         return Point(0.0, 0.0);
     double K_ij;
     K_ij = 0.5 * bla / v.Norm(); // K_ij
     // Punkt auf der Ellipse
-    pinE = p.TransformToEllipseCoordinates(ped.pos, ped.orientation.x, ped.orientation.y);
+    pinE = p.TransformToEllipseCoordinates(ped.pos, ped.orientation.x(), ped.orientation.y());
     const auto v0 = model.v0;
     // Punkt auf der Ellipse
     r = E.PointOnEllipse(pinE, model.speed / v0, ped.pos, model.speed, ped.orientation);

@@ -17,7 +17,7 @@ Polygon::Polygon(const std::vector<Point>& points)
     }
     _polygon.resize(points.size());
     std::transform(std::begin(points), std::end(points), _polygon.begin(), [](const auto& p) {
-        return PolygonType::Point_2{p.x, p.y};
+        return PolygonType::Point_2{p.x(), p.y()};
     });
 
     if(!_polygon.is_simple()) {
@@ -41,7 +41,7 @@ bool Polygon::IsConvex() const
 
 bool Polygon::IsInside(Point p) const
 {
-    const auto side = _polygon.bounded_side(PolygonType::Point_2{p.x, p.y});
+    const auto side = _polygon.bounded_side(PolygonType::Point_2{p.x(), p.y()});
     return side != CGAL::Bounded_side::ON_UNBOUNDED_SIDE;
 }
 

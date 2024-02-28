@@ -8,14 +8,18 @@
 #include <iostream>
 #include <string>
 
+#include <glm/glm.hpp>
+
 class Point
 {
-public:
-    double x{};
-    double y{};
+private:
+    glm::dvec2 point{};
 
 public:
-    Point(double x = 0, double y = 0) : x(x), y(y){};
+    Point(double x = 0, double y = 0) : point(x, y){};
+
+    double x() const { return point.x; };
+    double y() const { return point.y; };
 
     /// Norm
     double Norm() const;
@@ -31,12 +35,18 @@ public:
     std::tuple<double, Point> NormAndNormalized() const;
 
     /// dot product
-    inline double ScalarProduct(const Point& v) const { return x * v.x + y * v.y; }
+    inline double ScalarProduct(const Point& v) const
+    {
+        return point.x * v.point.x + point.y * v.point.y;
+    }
 
     inline double CrossProduct(const Point& p) const { return Determinant(p); }
 
     /// determinant of the square matrix formed by the vectors [ this, v]
-    inline double Determinant(const Point& v) const { return x * v.y - y * v.x; }
+    inline double Determinant(const Point& v) const
+    {
+        return point.x * v.point.y - point.y * v.point.x;
+    }
 
     Point TransformToEllipseCoordinates(const Point& center, double cphi, double sphi) const;
     /// translation and rotation in cartesian system
@@ -99,6 +109,6 @@ struct fmt::formatter<Point> {
     template <typename FormatContext>
     auto format(const Point& p, FormatContext& ctx) const
     {
-        return fmt::format_to(ctx.out(), "({}, {})", p.x, p.y);
+        return fmt::format_to(ctx.out(), "({}, {})", p.x(), p.y());
     }
 };
