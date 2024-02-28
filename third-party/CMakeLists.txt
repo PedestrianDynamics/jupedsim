@@ -70,3 +70,9 @@ if (BUILD_BENCHMARKS)
     set(BENCHMARK_INSTALL_DOCS OFF)
     add_subdirectory(benchmark-1.8.2)
 endif ()
+
+################################################################################
+# glm
+################################################################################
+set(GLM_ENABLE_CXX_20 ON)
+add_subdirectory(glm-1.0.0)
