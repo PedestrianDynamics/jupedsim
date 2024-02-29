@@ -1,11 +1,9 @@
 // Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
-#include "CollisionFreeSpeedModelData.hpp"
-
 #include "Point.hpp"
 
-struct CollisionFreeSpeedModelUpdate {
+struct CollisionFreeSpeedModelIndividualUpdate {
     Point position{};
     Point orientation{};
 };

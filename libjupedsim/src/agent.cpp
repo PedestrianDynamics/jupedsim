@@ -88,6 +88,8 @@ JPS_ModelType JPS_Agent_GetModelType(JPS_Agent handle)
             return JPS_GeneralizedCentrifugalForceModel;
         case 1:
             return JPS_CollisionFreeSpeedModel;
+        case 2:
+            return JPS_CollisionFreeSpeedModelIndividual;
     }
     UNREACHABLE();
 }
@@ -121,6 +123,28 @@ JPS_Agent_GetCollisionFreeSpeedModelState(JPS_Agent handle, JPS_ErrorMessage* er
     try {
         auto& model = std::get<CollisionFreeSpeedModelData>(agent->model);
         return reinterpret_cast<JPS_CollisionFreeSpeedModelState>(&model);
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return nullptr;
+}
+
+JPS_CollisionFreeSpeedModelIndividualState JPS_Agent_GetCollisionFreeSpeedModelIndividualState(
+    JPS_Agent handle,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    const auto agent = reinterpret_cast<GenericAgent*>(handle);
+    try {
+        auto& model = std::get<CollisionFreeSpeedModelIndividualData>(agent->model);
+        return reinterpret_cast<JPS_CollisionFreeSpeedModelIndividualState>(&model);
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});

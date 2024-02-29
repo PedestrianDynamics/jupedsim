@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 #include "CollisionFreeSpeedModelData.hpp"
+#include "CollisionFreeSpeedModelIndividualData.hpp"
 #include "GeneralizedCentrifugalForceModelData.hpp"
 #include "OperationalModel.hpp"
 #include "Point.hpp"
@@ -27,7 +28,10 @@ struct GenericAgent {
     Point pos{};
     Point orientation{1, 0};
 
-    using Model = std::variant<GeneralizedCentrifugalForceModelData, CollisionFreeSpeedModelData>;
+    using Model = std::variant<
+        GeneralizedCentrifugalForceModelData,
+        CollisionFreeSpeedModelData,
+        CollisionFreeSpeedModelIndividualData>;
     Model model{};
 
     GenericAgent(
