@@ -13,6 +13,8 @@ from jupedsim.journey import JourneyDescription
 from jupedsim.models import (
     CollisionFreeSpeedModel,
     CollisionFreeSpeedModelAgentParameters,
+    CollisionFreeSpeedModelv2,
+    CollisionFreeSpeedModelv2AgentParameters,
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
 )
@@ -39,7 +41,11 @@ class Simulation:
     def __init__(
         self,
         *,
-        model: CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel,
+        model: (
+            CollisionFreeSpeedModel
+            | GeneralizedCentrifugalForceModel
+            | CollisionFreeSpeedModelv2
+        ),
         geometry: (
             str
             | shapely.GeometryCollection
@@ -55,7 +61,7 @@ class Simulation:
         """Creates a Simulation.
 
         Arguments:
-            model (CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel):
+            model (CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel | CollisionFreeSpeedModelv2):
                 Defines the operational model used in the simulation.
             geometry:
                 Data to create the geometry out of. Data may be supplied as:
@@ -91,6 +97,9 @@ class Simulation:
                 strength_geometry_repulsion=model.strength_geometry_repulsion,
                 range_geometry_repulsion=model.range_geometry_repulsion,
             )
+            py_jps_model = model_builder.build()
+        elif isinstance(model, CollisionFreeSpeedModelv2):
+            model_builder = py_jps.CollisionFreeSpeedModelv2Builder()
             py_jps_model = model_builder.build()
         elif isinstance(model, GeneralizedCentrifugalForceModel):
             model_builder = py_jps.GeneralizedCentrifugalForceModelBuilder(
@@ -189,6 +198,7 @@ class Simulation:
         parameters: (
             GeneralizedCentrifugalForceModelAgentParameters
             | CollisionFreeSpeedModelAgentParameters
+            | CollisionFreeSpeedModelv2AgentParameters
         ),
     ) -> int:
         return self._obj.add_agent(parameters.as_native())
