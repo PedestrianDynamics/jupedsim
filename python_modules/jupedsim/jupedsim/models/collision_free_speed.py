@@ -43,7 +43,7 @@ class CollisionFreeSpeedModelAgentParameters:
         .. code:: python
 
             positions = [...] # List of initial agent positions
-            params = CollisionFreeSpeedModelAgentParameters(speed=0.9) # all agents are slower
+            params = CollisionFreeSpeedModelAgentParameters(v0=0.9) # all agents are slower
             for p in positions:
                 params.position = p
                 sim.add_agent(params)
