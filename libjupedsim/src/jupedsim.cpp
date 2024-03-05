@@ -12,6 +12,9 @@
 #include <BuildInfo.hpp>
 #include <CollisionFreeSpeedModel.hpp>
 #include <CollisionFreeSpeedModelBuilder.hpp>
+#include <CollisionFreeSpeedModelv2.hpp>
+#include <CollisionFreeSpeedModelv2Builder.hpp>
+#include <CollisionFreeSpeedModelv2Data.hpp>
 #include <CollisionGeometry.hpp>
 #include <Conversion.hpp>
 #include <GeneralizedCentrifugalForceModel.hpp>
@@ -213,6 +216,44 @@ JUPEDSIM_API JPS_OperationalModel JPS_CollisionFreeSpeedModelBuilder_Build(
 JUPEDSIM_API void JPS_CollisionFreeSpeedModelBuilder_Free(JPS_CollisionFreeSpeedModelBuilder handle)
 {
     delete reinterpret_cast<CollisionFreeSpeedModelBuilder*>(handle);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Collision Free Speed Model v2 Builder
+////////////////////////////////////////////////////////////////////////////////////////////////////
+JUPEDSIM_API JPS_CollisionFreeSpeedModelv2Builder JPS_CollisionFreeSpeedModelv2Builder_Create()
+{
+    return reinterpret_cast<JPS_CollisionFreeSpeedModelv2Builder>(
+        new CollisionFreeSpeedModelv2Builder());
+}
+
+JUPEDSIM_API JPS_OperationalModel JPS_CollisionFreeSpeedModelv2Builder_Build(
+    JPS_CollisionFreeSpeedModelv2Builder handle,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle != nullptr);
+    auto builder = reinterpret_cast<CollisionFreeSpeedModelv2Builder*>(handle);
+    JPS_OperationalModel result{};
+    try {
+        result =
+            reinterpret_cast<JPS_OperationalModel>(new CollisionFreeSpeedModelv2(builder->Build()));
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return result;
+}
+
+JUPEDSIM_API void
+JPS_CollisionFreeSpeedModelv2Builder_Free(JPS_CollisionFreeSpeedModelv2Builder handle)
+{
+    delete reinterpret_cast<CollisionFreeSpeedModelv2Builder*>(handle);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -548,6 +589,123 @@ void JPS_CollisionFreeSpeedModelState_SetRadius(
     auto state = reinterpret_cast<CollisionFreeSpeedModelData*>(handle);
     state->radius = radius;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// CollisionFreeSpeedModelv2State
+////////////////////////////////////////////////////////////////////////////////////////////////////
+double JPS_CollisionFreeSpeedModelv2State_GetStrengthNeighborRepulsion(
+    JPS_CollisionFreeSpeedModelv2State handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const CollisionFreeSpeedModelv2Data*>(handle);
+    return state->strengthNeighborRepulsion;
+}
+
+void JPS_CollisionFreeSpeedModelv2State_SetStrengthNeighborRepulsion(
+    JPS_CollisionFreeSpeedModelv2State handle,
+    double strengthNeighborRepulsion)
+{
+    assert(handle);
+    auto state = reinterpret_cast<CollisionFreeSpeedModelv2Data*>(handle);
+    state->strengthGeometryRepulsion = strengthNeighborRepulsion;
+}
+
+double JPS_CollisionFreeSpeedModelv2State_GetRangeNeighborRepulsion(
+    JPS_CollisionFreeSpeedModelv2State handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const CollisionFreeSpeedModelv2Data*>(handle);
+    return state->rangeNeighborRepulsion;
+}
+
+void JPS_CollisionFreeSpeedModelv2State_SetRangeNeighborRepulsion(
+    JPS_CollisionFreeSpeedModelv2State handle,
+    double rangeNeighborRepulsion)
+{
+    assert(handle);
+    auto state = reinterpret_cast<CollisionFreeSpeedModelv2Data*>(handle);
+    state->rangeNeighborRepulsion = rangeNeighborRepulsion;
+}
+
+double JPS_CollisionFreeSpeedModelv2State_GetStrengthGeometryRepulsion(
+    JPS_CollisionFreeSpeedModelv2State handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const CollisionFreeSpeedModelv2Data*>(handle);
+    return state->strengthGeometryRepulsion;
+}
+
+void JPS_CollisionFreeSpeedModelv2State_SetStrengthGeometryRepulsion(
+    JPS_CollisionFreeSpeedModelv2State handle,
+    double strengthGeometryRepulsion)
+{
+    assert(handle);
+    auto state = reinterpret_cast<CollisionFreeSpeedModelv2Data*>(handle);
+    state->strengthGeometryRepulsion = strengthGeometryRepulsion;
+}
+
+double JPS_CollisionFreeSpeedModelv2State_GetRangeGeometryRepulsion(
+    JPS_CollisionFreeSpeedModelv2State handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const CollisionFreeSpeedModelv2Data*>(handle);
+    return state->rangeNeighborRepulsion;
+}
+
+void JPS_CollisionFreeSpeedModelv2State_SetRangeGeometryRepulsion(
+    JPS_CollisionFreeSpeedModelv2State handle,
+    double rangeNeighborRepulsion)
+{
+    assert(handle);
+    auto state = reinterpret_cast<CollisionFreeSpeedModelv2Data*>(handle);
+    state->rangeNeighborRepulsion = rangeNeighborRepulsion;
+}
+
+double JPS_CollisionFreeSpeedModelv2State_GetTimeGap(JPS_CollisionFreeSpeedModelv2State handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const CollisionFreeSpeedModelv2Data*>(handle);
+    return state->timeGap;
+}
+
+void JPS_CollisionFreeSpeedModelv2State_SetTimeGap(
+    JPS_CollisionFreeSpeedModelv2State handle,
+    double time_gap)
+{
+    assert(handle);
+    auto state = reinterpret_cast<CollisionFreeSpeedModelv2Data*>(handle);
+    state->timeGap = time_gap;
+}
+
+double JPS_CollisionFreeSpeedModelv2State_GetV0(JPS_CollisionFreeSpeedModelv2State handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const CollisionFreeSpeedModelv2Data*>(handle);
+    return state->v0;
+}
+
+void JPS_CollisionFreeSpeedModelv2State_SetV0(JPS_CollisionFreeSpeedModelv2State handle, double v0)
+{
+    assert(handle);
+    auto state = reinterpret_cast<CollisionFreeSpeedModelv2Data*>(handle);
+    state->v0 = v0;
+}
+double JPS_CollisionFreeSpeedModelv2State_GetRadius(JPS_CollisionFreeSpeedModelv2State handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const CollisionFreeSpeedModelv2Data*>(handle);
+    return state->radius;
+}
+
+void JPS_CollisionFreeSpeedModelv2State_SetRadius(
+    JPS_CollisionFreeSpeedModelv2State handle,
+    double radius)
+{
+    assert(handle);
+    auto state = reinterpret_cast<CollisionFreeSpeedModelv2Data*>(handle);
+    state->radius = radius;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// NotifiableQueueProxy
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -735,6 +893,8 @@ JPS_ModelType JPS_Agent_GetModelType(JPS_Agent handle)
             return JPS_GeneralizedCentrifugalForceModel;
         case 1:
             return JPS_CollisionFreeSpeedModel;
+        case 2:
+            return JPS_CollisionFreeSpeedModelv2;
     }
     UNREACHABLE();
 }
@@ -768,6 +928,27 @@ JPS_Agent_GetCollisionFreeSpeedModelState(JPS_Agent handle, JPS_ErrorMessage* er
     try {
         auto& model = std::get<CollisionFreeSpeedModelData>(agent->model);
         return reinterpret_cast<JPS_CollisionFreeSpeedModelState>(&model);
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return nullptr;
+}
+
+JPS_CollisionFreeSpeedModelv2State
+JPS_Agent_GetCollisionFreeSpeedModelv2State(JPS_Agent handle, JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    const auto agent = reinterpret_cast<GenericAgent*>(handle);
+    try {
+        auto& model = std::get<CollisionFreeSpeedModelv2Data>(agent->model);
+        return reinterpret_cast<JPS_CollisionFreeSpeedModelv2State>(&model);
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
@@ -1167,6 +1348,47 @@ JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelAgent(
     return result.getID();
 }
 
+JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelv2Agent(
+    JPS_Simulation handle,
+    JPS_CollisionFreeSpeedModelv2AgentParameters parameters,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    auto result = GenericAgent::ID::Invalid;
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    try {
+        if(simulation->ModelType() != OperationalModelType::COLLISION_FREE_SPEED_V2) {
+            throw std::runtime_error(
+                "Simulation is not configured to use Collision Free Speed Model v2");
+        }
+        GenericAgent agent(
+            GenericAgent::ID::Invalid,
+            Journey::ID(parameters.journeyId),
+            BaseStage::ID(parameters.stageId),
+            intoPoint(parameters.position),
+            {},
+            CollisionFreeSpeedModelv2Data{
+                parameters.strengthNeighborRepulsion,
+                parameters.rangeNeighborRepulsion,
+                parameters.strengthGeometryRepulsion,
+                parameters.rangeGeometryRepulsion,
+                parameters.time_gap,
+                parameters.v0,
+                parameters.radius});
+        result = simulation->AddAgent(std::move(agent));
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return result.getID();
+}
+
 bool JPS_Simulation_MarkAgentForRemoval(
     JPS_Simulation handle,
     JPS_AgentId agentId,
@@ -1318,6 +1540,8 @@ JPS_ModelType JPS_Simulation_ModelType(JPS_Simulation handle)
             return JPS_CollisionFreeSpeedModel;
         case OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE:
             return JPS_GeneralizedCentrifugalForceModel;
+        case OperationalModelType::COLLISION_FREE_SPEED_V2:
+            return JPS_CollisionFreeSpeedModelv2;
     }
     UNREACHABLE();
 }
