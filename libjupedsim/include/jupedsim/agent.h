@@ -86,8 +86,8 @@ JPS_Agent_GetGeneralizedCentrifugalForceModelState(
     JPS_ErrorMessage* errorMessage);
 
 /**
- * Access Collision Free Speed model v2 state.
- * Precondition: Agent needs to use Collision Free Speed model v2
+ * Access Collision Free Speed model state.
+ * Precondition: Agent needs to use Collision Free Speed model
  * @param handle of the agent to access.
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return state or NULL on error
