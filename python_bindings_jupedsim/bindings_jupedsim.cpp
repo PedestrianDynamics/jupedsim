@@ -1126,8 +1126,28 @@ PYBIND11_MODULE(py_jupedsim, m)
         .def(
             "get_last_trace",
             [](JPS_Simulation_Wrapper& w) { return JPS_Simulation_GetTrace(w.handle); })
-        .def("get_geometry", [](const JPS_Simulation_Wrapper& w) {
-            return std::make_unique<JPS_Geometry_Wrapper>(JPS_Simulation_GetGeometry(w.handle));
+        .def(
+            "get_geometry",
+            [](const JPS_Simulation_Wrapper& w) {
+                return std::make_unique<JPS_Geometry_Wrapper>(JPS_Simulation_GetGeometry(w.handle));
+            })
+        .def(
+            "get_geometry",
+            [](const JPS_Simulation_Wrapper& w) {
+                return std::make_unique<JPS_Geometry_Wrapper>(JPS_Simulation_GetGeometry(w.handle));
+            })
+        .def("switch_geometry", [](JPS_Simulation_Wrapper& w, JPS_Geometry_Wrapper& geometry) {
+            JPS_ErrorMessage errorMsg{};
+
+            auto success =
+                JPS_Simulation_SwitchGeometry(w.handle, geometry.handle, nullptr, &errorMsg);
+
+            if(!success) {
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
+            }
+            return success;
         });
     py::class_<JPS_RoutingEngine_Wrapper>(m, "RoutingEngine")
         .def(py::init([](const JPS_Geometry_Wrapper& geo) {

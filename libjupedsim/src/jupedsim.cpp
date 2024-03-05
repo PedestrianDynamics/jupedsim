@@ -22,6 +22,7 @@
 #include <GenericAgent.hpp>
 #include <Geometry.hpp>
 #include <GeometryBuilder.hpp>
+#include <GeometrySwitchError.hpp>
 #include <Logger.hpp>
 #include <OperationalModel.hpp>
 #include <OperationalModelType.hpp>
@@ -1678,6 +1679,42 @@ JPS_Geometry JPS_Simulation_GetGeometry(JPS_Simulation handle)
     assert(handle);
     const auto simulation = reinterpret_cast<const Simulation*>(handle);
     return reinterpret_cast<JPS_Geometry>(new Geometry(simulation->Geo()));
+}
+
+bool JPS_Simulation_SwitchGeometry(
+    JPS_Simulation handle,
+    JPS_Geometry geometry,
+    JPS_AgentIdIterator* faultyAgents,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    assert(geometry);
+
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    auto geometryInternal = reinterpret_cast<const Geometry*>(geometry);
+    auto collisionGeometry =
+        std::make_unique<CollisionGeometry>(*geometryInternal->collisionGeometry);
+    auto routingEngine = geometryInternal->routingEngine->Clone();
+
+    bool result = false;
+    try {
+        simulation->SwitchGeometry(std::move(collisionGeometry), std::move(routingEngine));
+        result = true;
+    } catch(const GeometrySwitchError& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+        if(faultyAgents) {
+            *faultyAgents =
+                reinterpret_cast<JPS_AgentIdIterator>(new AgentIdIterator(ex.FaultyAgents()));
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return result;
 }
 
 void JPS_Simulation_Free(JPS_Simulation handle)

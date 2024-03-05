@@ -198,6 +198,11 @@ JUPEDSIM_API const char* JPS_ErrorMessage_GetMessage(JPS_ErrorMessage handle);
 JUPEDSIM_API void JPS_ErrorMessage_Free(JPS_ErrorMessage handle);
 
 /**
+ * Opaque type for error regarding the geometry.
+ */
+typedef struct JPS_GeometryError_t* JPS_GeometryError;
+
+/**
  * Opaque type for operational models describing how agents interact in the simulation.
  */
 typedef struct JPS_OperationalModel_t* JPS_OperationalModel;
@@ -1561,6 +1566,21 @@ JUPEDSIM_API JPS_Trace JPS_Simulation_GetTrace(JPS_Simulation handle);
  * the geometry is still owned by the simulation!
  */
 JUPEDSIM_API JPS_Geometry JPS_Simulation_GetGeometry(JPS_Simulation handle);
+
+/**
+ * Switch the geometry in which the agent move during the simulation.
+ * @param handle of the Simulation to operate on
+ * @param geometry the new geometry to be used in the simulation.
+ * @param[out] faultyAgents iterator to all agents outside the new geometry, empty if successful
+ * @param[out] errorMessage if not succcessful: will be set to a JPS_ErrorMessage in case of an
+ * error.
+ * @return could successfully change the simulation geometry
+ */
+JUPEDSIM_API bool JPS_Simulation_SwitchGeometry(
+    JPS_Simulation handle,
+    JPS_Geometry geometry,
+    JPS_AgentIdIterator* faultyAgents,
+    JPS_ErrorMessage* errorMessage);
 
 /**
  * Frees a JPS_Simulation.
