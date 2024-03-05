@@ -69,7 +69,7 @@ void init_agent(py::module_& m)
                 -> std::variant<
                     std::unique_ptr<JPS_GeneralizedCentrifugalForceModelState_Wrapper>,
                     std::unique_ptr<JPS_CollisionFreeSpeedModelState_Wrapper>,
-                    std::unique_ptr<JPS_CollisionFreeSpeedModelIndividualState_Wrapper>> {
+                    std::unique_ptr<JPS_CollisionFreeSpeedModelv2State_Wrapper>> {
                 switch(JPS_Agent_GetModelType(w.handle)) {
                     case JPS_GeneralizedCentrifugalForceModel:
                         return std::make_unique<JPS_GeneralizedCentrifugalForceModelState_Wrapper>(
@@ -78,9 +78,9 @@ void init_agent(py::module_& m)
                         return std::make_unique<JPS_CollisionFreeSpeedModelState_Wrapper>(
                             JPS_Agent_GetCollisionFreeSpeedModelState(w.handle, nullptr));
 
-                    case JPS_CollisionFreeSpeedModelIndividual:
-                        return std::make_unique<JPS_CollisionFreeSpeedModelIndividualState_Wrapper>(
-                            JPS_Agent_GetCollisionFreeSpeedModelIndividualState(w.handle, nullptr));
+                    case JPS_CollisionFreeSpeedModelv2:
+                        return std::make_unique<JPS_CollisionFreeSpeedModelv2State_Wrapper>(
+                            JPS_Agent_GetCollisionFreeSpeedModelv2State(w.handle, nullptr));
                 }
 
                 UNREACHABLE();

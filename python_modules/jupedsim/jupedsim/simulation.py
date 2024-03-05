@@ -14,9 +14,9 @@ from jupedsim.models.collision_free_speed import (
     CollisionFreeSpeedModel,
     CollisionFreeSpeedModelAgentParameters,
 )
-from jupedsim.models.collision_free_speed_individual import (
-    CollisionFreeSpeedModelIndividual,
-    CollisionFreeSpeedModelIndividualAgentParameters,
+from jupedsim.models.collision_free_speed_v2 import (
+    CollisionFreeSpeedModelv2,
+    CollisionFreeSpeedModelv2AgentParameters,
 )
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModel,
@@ -48,7 +48,7 @@ class Simulation:
         model: (
             CollisionFreeSpeedModel
             | GeneralizedCentrifugalForceModel
-            | CollisionFreeSpeedModelIndividual
+            | CollisionFreeSpeedModelv2
         ),
         geometry: (
             str
@@ -102,8 +102,8 @@ class Simulation:
                 range_geometry_repulsion=model.range_geometry_repulsion,
             )
             py_jps_model = model_builder.build()
-        elif isinstance(model, CollisionFreeSpeedModelIndividual):
-            model_builder = py_jps.CollisionFreeSpeedModelIndividualBuilder()
+        elif isinstance(model, CollisionFreeSpeedModelv2):
+            model_builder = py_jps.CollisionFreeSpeedModelv2Builder()
             py_jps_model = model_builder.build()
         elif isinstance(model, GeneralizedCentrifugalForceModel):
             model_builder = py_jps.GeneralizedCentrifugalForceModelBuilder(
@@ -218,7 +218,7 @@ class Simulation:
         parameters: (
             GeneralizedCentrifugalForceModelAgentParameters
             | CollisionFreeSpeedModelAgentParameters
-            | CollisionFreeSpeedModelIndividual
+            | CollisionFreeSpeedModelv2
         ),
     ) -> int:
         return self._obj.add_agent(parameters.as_native())

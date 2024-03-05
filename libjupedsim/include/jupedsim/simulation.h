@@ -4,7 +4,7 @@
 
 #include "agent.h"
 #include "collision_free_speed_model.h"
-#include "collision_free_speed_model_individual.h"
+#include "collision_free_speed_model_v2.h"
 #include "error.h"
 #include "export.h"
 #include "generalized_centrifugal_force_model.h"
@@ -182,9 +182,9 @@ JUPEDSIM_API JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelAgent(
  * error.
  * @return id of the new agent or 0 if the agent could not be added due to an error.
  */
-JUPEDSIM_API JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelIndividualAgent(
+JUPEDSIM_API JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelv2Agent(
     JPS_Simulation handle,
-    JPS_CollisionFreeSpeedModelIndividualAgentParameters parameters,
+    JPS_CollisionFreeSpeedModelv2AgentParameters parameters,
     JPS_ErrorMessage* errorMessage);
 
 /**

@@ -145,9 +145,9 @@ void init_simulation(py::module_& m)
         .def(
             "add_agent",
             [](JPS_Simulation_Wrapper& simulation,
-               JPS_CollisionFreeSpeedModelIndividualAgentParameters& parameters) {
+               JPS_CollisionFreeSpeedModelv2AgentParameters& parameters) {
                 JPS_ErrorMessage errorMsg{};
-                auto result = JPS_Simulation_AddCollisionFreeSpeedModelIndividualAgent(
+                auto result = JPS_Simulation_AddCollisionFreeSpeedModelv2Agent(
                     simulation.handle, parameters, &errorMsg);
                 if(result) {
                     return result;

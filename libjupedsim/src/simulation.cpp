@@ -244,18 +244,18 @@ JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelAgent(
     return result.getID();
 }
 
-JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelIndividualAgent(
+JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelv2Agent(
     JPS_Simulation handle,
-    JPS_CollisionFreeSpeedModelIndividualAgentParameters parameters,
+    JPS_CollisionFreeSpeedModelv2AgentParameters parameters,
     JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
     auto result = GenericAgent::ID::Invalid;
     auto simulation = reinterpret_cast<Simulation*>(handle);
     try {
-        if(simulation->ModelType() != OperationalModelType::COLLISION_FREE_SPEED_INDIVIDUAL) {
+        if(simulation->ModelType() != OperationalModelType::COLLISION_FREE_SPEED_V2) {
             throw std::runtime_error(
-                "Simulation is not configured to use Collision Free Speed Model Individual");
+                "Simulation is not configured to use Collision Free Speed Model v2");
         }
         GenericAgent agent(
             GenericAgent::ID::Invalid,
@@ -263,7 +263,7 @@ JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelIndividualAgent(
             BaseStage::ID(parameters.stageId),
             intoPoint(parameters.position),
             {},
-            CollisionFreeSpeedModelIndividualData{
+            CollisionFreeSpeedModelv2Data{
                 parameters.strengthNeighborRepulsion,
                 parameters.rangeNeighborRepulsion,
                 parameters.strengthGeometryRepulsion,
@@ -436,8 +436,8 @@ JPS_ModelType JPS_Simulation_ModelType(JPS_Simulation handle)
             return JPS_CollisionFreeSpeedModel;
         case OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE:
             return JPS_GeneralizedCentrifugalForceModel;
-        case OperationalModelType::COLLISION_FREE_SPEED_INDIVIDUAL:
-            return JPS_CollisionFreeSpeedModelIndividual;
+        case OperationalModelType::COLLISION_FREE_SPEED_V2:
+            return JPS_CollisionFreeSpeedModelv2;
     }
     UNREACHABLE();
 }

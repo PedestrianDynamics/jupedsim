@@ -4,7 +4,7 @@
 
 #include "Point.hpp"
 
-struct CollisionFreeSpeedModelIndividualData {
+struct CollisionFreeSpeedModelv2Data {
     double strengthNeighborRepulsion{};
     double rangeNeighborRepulsion{};
     double strengthGeometryRepulsion{};
@@ -16,16 +16,16 @@ struct CollisionFreeSpeedModelIndividualData {
 };
 
 template <>
-struct fmt::formatter<CollisionFreeSpeedModelIndividualData> {
+struct fmt::formatter<CollisionFreeSpeedModelv2Data> {
 
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
     template <typename FormatContext>
-    auto format(const CollisionFreeSpeedModelIndividualData& m, FormatContext& ctx) const
+    auto format(const CollisionFreeSpeedModelv2Data& m, FormatContext& ctx) const
     {
         return fmt::format_to(
             ctx.out(),
-            "CollisionFreeSpeedModelIndividual[strengthNeighborRepulsion={}, "
+            "CollisionFreeSpeedModelv2[strengthNeighborRepulsion={}, "
             "rangeNeighborRepulsion={}, strengthGeometryRepulsion={}, rangeGeometryRepulsion={}, "
             "timeGap={}, v0={}, radius={}])",
             m.strengthNeighborRepulsion,

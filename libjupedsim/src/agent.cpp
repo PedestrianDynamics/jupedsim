@@ -89,7 +89,7 @@ JPS_ModelType JPS_Agent_GetModelType(JPS_Agent handle)
         case 1:
             return JPS_CollisionFreeSpeedModel;
         case 2:
-            return JPS_CollisionFreeSpeedModelIndividual;
+            return JPS_CollisionFreeSpeedModelv2;
     }
     UNREACHABLE();
 }
@@ -136,15 +136,14 @@ JPS_Agent_GetCollisionFreeSpeedModelState(JPS_Agent handle, JPS_ErrorMessage* er
     return nullptr;
 }
 
-JPS_CollisionFreeSpeedModelIndividualState JPS_Agent_GetCollisionFreeSpeedModelIndividualState(
-    JPS_Agent handle,
-    JPS_ErrorMessage* errorMessage)
+JPS_CollisionFreeSpeedModelv2State
+JPS_Agent_GetCollisionFreeSpeedModelv2State(JPS_Agent handle, JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
     const auto agent = reinterpret_cast<GenericAgent*>(handle);
     try {
-        auto& model = std::get<CollisionFreeSpeedModelIndividualData>(agent->model);
-        return reinterpret_cast<JPS_CollisionFreeSpeedModelIndividualState>(&model);
+        auto& model = std::get<CollisionFreeSpeedModelv2Data>(agent->model);
+        return reinterpret_cast<JPS_CollisionFreeSpeedModelv2State>(&model);
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});

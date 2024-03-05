@@ -60,7 +60,7 @@ typedef struct JPS_Waypoint {
 typedef enum JPS_ModelType {
     JPS_GeneralizedCentrifugalForceModel,
     JPS_CollisionFreeSpeedModel,
-    JPS_CollisionFreeSpeedModelIndividual
+    JPS_CollisionFreeSpeedModelv2
 } JPS_ModelType;
 
 /**
