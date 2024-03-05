@@ -65,7 +65,7 @@ class Simulation:
         """Creates a Simulation.
 
         Arguments:
-            model (CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel):
+            model (CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel | CollisionFreeSpeedModelv2):
                 Defines the operational model used in the simulation.
             geometry:
                 Data to create the geometry out of. Data may be supplied as:
@@ -218,7 +218,7 @@ class Simulation:
         parameters: (
             GeneralizedCentrifugalForceModelAgentParameters
             | CollisionFreeSpeedModelAgentParameters
-            | CollisionFreeSpeedModelv2
+            | CollisionFreeSpeedModelv2AgentParameters
         ),
     ) -> int:
         return self._obj.add_agent(parameters.as_native())

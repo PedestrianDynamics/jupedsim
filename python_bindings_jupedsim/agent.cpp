@@ -77,7 +77,6 @@ void init_agent(py::module_& m)
                     case JPS_CollisionFreeSpeedModel:
                         return std::make_unique<JPS_CollisionFreeSpeedModelState_Wrapper>(
                             JPS_Agent_GetCollisionFreeSpeedModelState(w.handle, nullptr));
-
                     case JPS_CollisionFreeSpeedModelv2:
                         return std::make_unique<JPS_CollisionFreeSpeedModelv2State_Wrapper>(
                             JPS_Agent_GetCollisionFreeSpeedModelv2State(w.handle, nullptr));

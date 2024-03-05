@@ -54,12 +54,18 @@ void init_collision_free_speed_model_v2(py::module_& m)
             return fmt::format(
                 "position: {}, journey_id: {}, stage_id: {}, "
                 "time_gap: {}, v0: {}, radius: {}",
+                "strength_neighbor_repulsion: {}, range_neighbor_repulsion: {}"
+                "strength_geometry_repulsion: {}, range_geometry_repulsion: {}",
                 intoTuple(p.position),
                 p.journeyId,
                 p.stageId,
                 p.time_gap,
                 p.v0,
-                p.radius);
+                p.radius,
+                p.strengthNeighborRepulsion,
+                p.rangeNeighborRepulsion,
+                p.strengthGeometryRepulsion,
+                p.rangeGeometryRepulsion);
         });
     py::class_<JPS_CollisionFreeSpeedModelv2Builder_Wrapper>(m, "CollisionFreeSpeedModelv2Builder")
         .def(py::init([]() {
