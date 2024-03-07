@@ -4,6 +4,7 @@
 #include "CollisionFreeSpeedModelData.hpp"
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
+#include "GeometrySwitchError.hpp"
 #include "IteratorPair.hpp"
 #include "Logger.hpp"
 #include "OperationalModel.hpp"
@@ -309,4 +310,77 @@ StageProxy Simulation::Stage(BaseStage::ID stageId)
 Geometry Simulation::Geo() const
 {
     return {std::make_unique<CollisionGeometry>(*_geometry), _routingEngine->Clone()};
+}
+
+void Simulation::SwitchGeometry(
+    std::unique_ptr<CollisionGeometry>&& geometry,
+    std::unique_ptr<RoutingEngine>&& routingEngine)
+{
+    ValidateGeometry(geometry);
+    _geometry = std::move(geometry);
+    _routingEngine = std::move(routingEngine);
+}
+
+void Simulation::ValidateGeometry(const std::unique_ptr<CollisionGeometry>& geometry) const
+{
+    std::vector<GenericAgent::ID> faultyAgents;
+    for(const auto& agent : _agents) {
+        if(const auto find_iter = std::find(
+               std::begin(_removedAgentsInLastIteration),
+               std::end(_removedAgentsInLastIteration),
+               agent.id);
+           find_iter != std::end(_removedAgentsInLastIteration)) {
+            continue;
+        }
+
+        if(!geometry->InsideGeometry(agent.pos)) {
+            faultyAgents.push_back(agent.id);
+        }
+    }
+
+    std::vector<BaseStage::ID> faultyStages;
+    for(const auto& [_, journey] : _journeys) {
+        for(const auto& [stageId, node] : journey->Stages()) {
+
+            if(auto exit = dynamic_cast<Exit*>(node.stage); exit != nullptr) {
+                if(!geometry->InsideGeometry(exit->Position().Centroid())) {
+                    faultyStages.push_back(stageId);
+                }
+            } else if(auto waypoint = dynamic_cast<Waypoint*>(node.stage); waypoint != nullptr) {
+                if(!geometry->InsideGeometry(waypoint->Position())) {
+                    faultyStages.push_back(stageId);
+                }
+            } else if(auto queue = dynamic_cast<NotifiableQueue*>(node.stage); queue != nullptr) {
+                for(const auto& point : queue->Slots()) {
+                    if(!geometry->InsideGeometry(point)) {
+                        faultyStages.push_back(stageId);
+                    }
+                }
+            } else if(auto waitingset = dynamic_cast<NotifiableWaitingSet*>(node.stage);
+                      waitingset != nullptr) {
+                for(const auto& point : waitingset->Slots()) {
+                    if(!geometry->InsideGeometry(point)) {
+                        faultyStages.push_back(stageId);
+                    }
+                }
+            }
+        }
+    }
+
+    if(!faultyAgents.empty() || !faultyStages.empty()) {
+        std::string message = "Could not switch the geometry.\n";
+
+        if(!faultyAgents.empty()) {
+            message += fmt::format(
+                "The following agents would be outside of the new geometry: {}\n",
+                fmt::join(faultyAgents, ", "));
+        }
+        if(!faultyStages.empty()) {
+            message += fmt::format(
+                "The following stages would be outside of the new geometry: {}",
+                fmt::join(faultyStages, ", "));
+        }
+
+        throw GeometrySwitchError(message.c_str(), faultyAgents, faultyStages);
+    }
 }

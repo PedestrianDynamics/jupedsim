@@ -25,6 +25,7 @@ add_library(simulator STATIC
     src/Geometry.hpp
     src/GeometryBuilder.cpp
     src/GeometryBuilder.hpp
+    src/GeometrySwitchError.hpp
     src/Graph.hpp
     src/Journey.cpp
     src/Journey.hpp
@@ -78,7 +79,6 @@ add_library(simulator STATIC
     src/CollisionFreeSpeedModelv2Builder.hpp
     src/CollisionFreeSpeedModelv2Data.hpp
     src/CollisionFreeSpeedModelv2Update.hpp
-
 )
 target_compile_options(simulator PRIVATE
     ${COMMON_COMPILE_OPTIONS}

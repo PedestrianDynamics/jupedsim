@@ -325,3 +325,7 @@ class Simulation:
 
     def get_geometry(self) -> Geometry:
         return Geometry(self._obj.get_geometry())
+
+    def switch_geometry(self, geometry: Geometry):
+        internal_geometry = build_geometry(geometry)
+        return self._obj.switch_geometry(internal_geometry._obj)

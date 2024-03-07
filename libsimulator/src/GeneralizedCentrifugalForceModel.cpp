@@ -134,6 +134,10 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
 
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
     for(const auto& neighbor : neighbors) {
+        if(agent.id == neighbor.id) {
+            continue;
+        }
+
         const auto contanctDist = AgentToAgentSpacing(agent, neighbor);
         const auto distance = (agent.pos - neighbor.pos).Norm();
         if(contanctDist >= distance) {
