@@ -99,7 +99,7 @@ class Simulation:
             )
             py_jps_model = model_builder.build()
         elif isinstance(model, CollisionFreeSpeedModelV2):
-            model_builder = py_jps.CollisionFreeSpeedModelv2Builder()
+            model_builder = py_jps.CollisionFreeSpeedModelV2Builder()
             py_jps_model = model_builder.build()
         elif isinstance(model, GeneralizedCentrifugalForceModel):
             model_builder = py_jps.GeneralizedCentrifugalForceModelBuilder(
