@@ -8,7 +8,12 @@ import jupedsim.native as py_jps
 
 @dataclass(kw_only=True)
 class CollisionFreeSpeedModel:
-    """Parameters for Collision Free Speed Model
+    """Collision Free Speed Model
+
+    A general description of the Collision Free Speed Model can be found in the originating publication
+    https://arxiv.org/abs/1512.05597
+
+    A more detailed description can be found at https://pedestriandynamics.org/models/collision_free_speed_model/
 
     All attributes are initialized with reasonably good defaults.
 
@@ -27,7 +32,16 @@ class CollisionFreeSpeedModel:
 
 @dataclass(kw_only=True)
 class CollisionFreeSpeedModelv2:
-    """Collision Free Speed Model v2 has no model parameters."""
+    """Collision Free Speed Model V2
+
+    This is a variation of the Collision Free Speed Model where geometry and neighbor repulsion are individual
+    agent parameters instead of global parameters.
+
+    A general description of the Collision Free Speed Model can be found in the originating publication
+    https://arxiv.org/abs/1512.05597
+
+    A more detailed description can be found at https://pedestriandynamics.org/models/collision_free_speed_model/
+    """
 
     pass
 
@@ -35,6 +49,12 @@ class CollisionFreeSpeedModelv2:
 @dataclass(kw_only=True)
 class GeneralizedCentrifugalForceModel:
     """Parameters for Generalized Centrifugal Force Model
+
+    .. warning::
+        Unfortunately we broke the model before the 1.0 release and did not notice it in time.
+        For the time being please do not use this model.
+
+        We track the defect here: https://github.com/PedestrianDynamics/jupedsim/issues/1337
 
     All attributes are initialized with reasonably good defaults.
 
