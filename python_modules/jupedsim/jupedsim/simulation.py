@@ -152,6 +152,16 @@ class Simulation:
     def add_waiting_set_stage(
         self, positions: list[tuple[float, float]]
     ) -> int:
+        """Add a new waiting set stage to this simulation.
+
+        Arguments:
+            positions: Ordered list of the waiting points of this waiting set.
+                The agents will fill the waiting points in the given order. If more agents
+                are targeting the waiting, the remaining will wait at the last given point.
+
+        Returns:
+            Id of the new stage.
+        """
         return self._obj.add_waiting_set_stage(positions)
 
     def add_exit_stage(
@@ -191,6 +201,15 @@ class Simulation:
         return self._obj.add_exit_stage(exit_geometry.boundary())
 
     def add_journey(self, journey: JourneyDescription) -> int:
+        """Add a journey to the simulation.
+
+        Arguments:
+            journey: Description of the journey.
+
+        Returns:
+            Id of the added Journey.
+
+        """
         return self._obj.add_journey(journey._obj)
 
     def add_agent(
@@ -201,6 +220,16 @@ class Simulation:
             | CollisionFreeSpeedModelv2AgentParameters
         ),
     ) -> int:
+        """Add an agent to the simulation.
+
+        Arguments:
+            parameters: Agent Parameters of the newly added model. The parameters have to
+                match the model used in this simulation. When adding agents with invalid parameters,
+                or too close to the boundary or other agents, this will cause an error.
+
+        Returns:
+            Id of the added agent.
+        """
         return self._obj.add_agent(parameters.as_native())
 
     def mark_agent_for_removal(self, agent_id: int) -> bool:
@@ -216,15 +245,27 @@ class Simulation:
 
         Returns:
             marking for removal was successful
-
         """
 
         return self._obj.mark_agent_for_removal(agent_id)
 
     def removed_agents(self) -> list[int]:
+        """All agents (given by Id) removed in the last iteration.
+
+        All agents removed from the simulation since the last call of :func:`iterate`.
+        These agents are can no longer be accessed.
+
+        Returns:
+            Ids of all removed agents since the last call of :func:`iterate`.
+        """
         return self._obj.removed_agents()
 
     def iterate(self, count: int = 1) -> None:
+        """Advance the simulation by the given number of iterations.
+
+        Arguments:
+            count: Number of iterations to advance
+        """
         if self._writer and self.iteration_count() == 0:
             self._writer.begin_writing(self)
             self._writer.write_iteration_state(self)
@@ -237,31 +278,81 @@ class Simulation:
     def switch_agent_journey(
         self, agent_id: int, journey_id: int, stage_id: int
     ) -> None:
+        """Switch agent to the given journey at the given stage.
+
+        Arguments:
+            agent_id: Id of the agent to switch
+            journey_id: Id of the new journey to follow
+            stage_id: Id of the stage in the new journey the agent continues with
+        """
         self._obj.switch_agent_journey(
             agent_id=agent_id, journey_id=journey_id, stage_id=stage_id
         )
 
     def agent_count(self) -> int:
+        """Number of agents in the simulation.
+
+        Returns:
+            Number of agents in the simulation.
+        """
         return self._obj.agent_count()
 
     def elapsed_time(self) -> float:
+        """Elapsed time in seconds since the start of the simulation.
+
+        Returns:
+            Time in seconds since the start of the simulation.
+        """
         return self._obj.elapsed_time()
 
     def delta_time(self) -> float:
+        """Time step length in seconds of one iteration.
+
+        Returns:
+            Time step length of one iteration.
+        """
         return self._obj.delta_time()
 
     def iteration_count(self) -> int:
+        """Number of iterations performed since start of the simulation.
+
+        Returns:
+            Number of iterations performed.
+        """
         return self._obj.iteration_count()
 
     def agents(self) -> Iterable[Agent]:
+        """Agents in the simulation.
+
+        Returns:
+            Iterator over all agents in the simulation.
+        """
+
         return self._obj.agents()
 
     def agent(self, agent_id) -> Agent:
+        """Access specific agent in the simulation.
+
+        Arguments:
+            agent_id: Id of the agent to access
+
+        Returns:
+            Agent instance
+        """
         return self._obj.agent(agent_id)
 
     def agents_in_range(
         self, pos: tuple[float, float], distance: float
     ) -> list[Agent]:
+        """Agents within the given distance to the given position.
+
+        Arguments:
+             pos:  point around which to search for agents
+             distance: search radius
+
+        Returns:
+            List of agents within the given distance to the given position.
+        """
         return self._obj.agents_in_range(pos, distance)
 
     def agents_in_polygon(
@@ -302,6 +393,14 @@ class Simulation:
         return self._obj.agents_in_polygon(polygon_geometry.boundary())
 
     def get_stage(self, stage_id: int):
+        """Specific stage in the simulation.
+
+        Arguments:
+            stage_id: Id of the stage to retrieve.
+
+        Returns:
+            The stage object.
+        """
         stage = self._obj.get_stage_proxy(stage_id)
         match stage:
             case py_jps.WaypointProxy():
@@ -324,8 +423,22 @@ class Simulation:
         return self._obj.get_last_trace()
 
     def get_geometry(self) -> Geometry:
+        """Current geometry of the simulation.
+
+        Returns:
+            The geometry of the simulation.
+        """
         return Geometry(self._obj.get_geometry())
 
-    def switch_geometry(self, geometry: Geometry):
+    def switch_geometry(self, geometry: Geometry) -> None:
+        """Switch the geometry of the simulation.
+
+        Exchanges the current geometry with the new one. Checks if all agents
+        and stages lie within the new geometry.
+
+        Arguments:
+            geometry: The new geometry to be used in the simulation.
+
+        """
         internal_geometry = build_geometry(geometry)
-        return self._obj.switch_geometry(internal_geometry._obj)
+        self._obj.switch_geometry(internal_geometry._obj)
