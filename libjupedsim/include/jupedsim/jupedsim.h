@@ -106,7 +106,7 @@ typedef struct JPS_Waypoint {
 typedef enum JPS_ModelType {
     JPS_GeneralizedCentrifugalForceModel,
     JPS_CollisionFreeSpeedModel,
-    JPS_CollisionFreeSpeedModelv2
+    JPS_CollisionFreeSpeedModelV2
 } JPS_ModelType;
 
 /**
@@ -304,33 +304,33 @@ JUPEDSIM_API void
 JPS_CollisionFreeSpeedModelBuilder_Free(JPS_CollisionFreeSpeedModelBuilder handle);
 
 /**
- * Opaque type for a Collision Free Speed Model v2 Builder
+ * Opaque type for a Collision Free Speed Model V2 Builder
  */
-typedef struct JPS_CollisionFreeSpeedModelv2Builder_t* JPS_CollisionFreeSpeedModelv2Builder;
+typedef struct JPS_CollisionFreeSpeedModelV2Builder_t* JPS_CollisionFreeSpeedModelV2Builder;
 
 /**
- * Creates a Collision Free Speed Model v2 builder.
+ * Creates a Collision Free Speed Model V2 builder.
  * @return the builder
  */
-JUPEDSIM_API JPS_CollisionFreeSpeedModelv2Builder JPS_CollisionFreeSpeedModelv2Builder_Create();
+JUPEDSIM_API JPS_CollisionFreeSpeedModelV2Builder JPS_CollisionFreeSpeedModelV2Builder_Create();
 
 /**
- * Creates a JPS_OperationalModel of type Collision Free Speed Model v2 from the
- * JPS_CollisionFreeSpeedModelv2Builder.
+ * Creates a JPS_OperationalModel of type Collision Free Speed Model V2 from the
+ * JPS_CollisionFreeSpeedModelV2Builder.
  * @param handle the builder to operate on
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error
- * @return a JPS_CollisionFreeSpeedModelv2 or NULL if an error occured.
+ * @return a JPS_CollisionFreeSpeedModelV2 or NULL if an error occured.
  */
-JUPEDSIM_API JPS_OperationalModel JPS_CollisionFreeSpeedModelv2Builder_Build(
-    JPS_CollisionFreeSpeedModelv2Builder handle,
+JUPEDSIM_API JPS_OperationalModel JPS_CollisionFreeSpeedModelV2Builder_Build(
+    JPS_CollisionFreeSpeedModelV2Builder handle,
     JPS_ErrorMessage* errorMessage);
 
 /**
- * Frees a JPS_CollisionFreeSpeedModelv2Builder
- * @param handle to the JPS_CollisionFreeSpeedModelv2Builder to free.
+ * Frees a JPS_CollisionFreeSpeedModelV2Builder
+ * @param handle to the JPS_CollisionFreeSpeedModelV2Builder to free.
  */
 JUPEDSIM_API void
-JPS_CollisionFreeSpeedModelv2Builder_Free(JPS_CollisionFreeSpeedModelv2Builder handle);
+JPS_CollisionFreeSpeedModelV2Builder_Free(JPS_CollisionFreeSpeedModelV2Builder handle);
 
 /**
  * Opaque type that represents the geometry the simulation acts on.
@@ -782,25 +782,25 @@ JUPEDSIM_API void
 JPS_CollisionFreeSpeedModelState_SetRadius(JPS_CollisionFreeSpeedModelState handle, double radius);
 
 /**
- * Opaque type of Collision Free Speed v2 model state
+ * Opaque type of Collision Free Speed V2 model state
  */
-typedef struct JPS_CollisionFreeSpeedModelv2State_t* JPS_CollisionFreeSpeedModelv2State;
+typedef struct JPS_CollisionFreeSpeedModelV2State_t* JPS_CollisionFreeSpeedModelV2State;
 
 /**
  * Read strength neighbor repulsion of this agent.
  * @param handle of the Agent to access.
  * @return strength neighbor repulsion of this agent
  */
-JUPEDSIM_API double JPS_CollisionFreeSpeedModelv2State_GetStrengthNeighborRepulsion(
-    JPS_CollisionFreeSpeedModelv2State handle);
+JUPEDSIM_API double JPS_CollisionFreeSpeedModelV2State_GetStrengthNeighborRepulsion(
+    JPS_CollisionFreeSpeedModelV2State handle);
 
 /**
  * Write strength neighbor repulsion of this agent.
  * @param handle of the Agent to access.
  * @param strengthNeighborRepulsion of this agent.
  */
-JUPEDSIM_API void JPS_CollisionFreeSpeedModelv2State_SetStrengthNeighborRepulsion(
-    JPS_CollisionFreeSpeedModelv2State handle,
+JUPEDSIM_API void JPS_CollisionFreeSpeedModelV2State_SetStrengthNeighborRepulsion(
+    JPS_CollisionFreeSpeedModelV2State handle,
     double strengthNeighborRepulsion);
 
 /**
@@ -808,16 +808,16 @@ JUPEDSIM_API void JPS_CollisionFreeSpeedModelv2State_SetStrengthNeighborRepulsio
  * @param handle of the Agent to access.
  * @return range neighbor repulsion of this agent
  */
-JUPEDSIM_API double JPS_CollisionFreeSpeedModelv2State_GetRangeNeighborRepulsion(
-    JPS_CollisionFreeSpeedModelv2State handle);
+JUPEDSIM_API double JPS_CollisionFreeSpeedModelV2State_GetRangeNeighborRepulsion(
+    JPS_CollisionFreeSpeedModelV2State handle);
 
 /**
  * Write range neighbor repulsion of this agent.
  * @param handle of the Agent to access.
  * @param rangeNeighborRepulsion of this agent.
  */
-JUPEDSIM_API void JPS_CollisionFreeSpeedModelv2State_SetRangeNeighborRepulsion(
-    JPS_CollisionFreeSpeedModelv2State handle,
+JUPEDSIM_API void JPS_CollisionFreeSpeedModelV2State_SetRangeNeighborRepulsion(
+    JPS_CollisionFreeSpeedModelV2State handle,
     double rangeNeighborRepulsion);
 
 /**
@@ -825,16 +825,16 @@ JUPEDSIM_API void JPS_CollisionFreeSpeedModelv2State_SetRangeNeighborRepulsion(
  * @param handle of the Agent to access.
  * @return strength geometry repulsion of this agent
  */
-JUPEDSIM_API double JPS_CollisionFreeSpeedModelv2State_GetStrengthGeometryRepulsion(
-    JPS_CollisionFreeSpeedModelv2State handle);
+JUPEDSIM_API double JPS_CollisionFreeSpeedModelV2State_GetStrengthGeometryRepulsion(
+    JPS_CollisionFreeSpeedModelV2State handle);
 
 /**
  * Write strength geometry repulsion of this agent.
  * @param handle of the Agent to access.
  * @param strengthGeometryRepulsion of this agent.
  */
-JUPEDSIM_API void JPS_CollisionFreeSpeedModelv2State_SetStrengthGeometryRepulsion(
-    JPS_CollisionFreeSpeedModelv2State handle,
+JUPEDSIM_API void JPS_CollisionFreeSpeedModelV2State_SetStrengthGeometryRepulsion(
+    JPS_CollisionFreeSpeedModelV2State handle,
     double strengthGeometryRepulsion);
 
 /**
@@ -842,16 +842,16 @@ JUPEDSIM_API void JPS_CollisionFreeSpeedModelv2State_SetStrengthGeometryRepulsio
  * @param handle of the Agent to access.
  * @return range geometry repulsion of this agent
  */
-JUPEDSIM_API double JPS_CollisionFreeSpeedModelv2State_GetRangeGeometryRepulsion(
-    JPS_CollisionFreeSpeedModelv2State handle);
+JUPEDSIM_API double JPS_CollisionFreeSpeedModelV2State_GetRangeGeometryRepulsion(
+    JPS_CollisionFreeSpeedModelV2State handle);
 
 /**
  * Write strength neighbor repulsion of this agent.
  * @param handle of the Agent to access.
  * @param rangeGeometryRepulsion of this agent.
  */
-JUPEDSIM_API void JPS_CollisionFreeSpeedModelv2State_SetRangeGeometryRepulsion(
-    JPS_CollisionFreeSpeedModelv2State handle,
+JUPEDSIM_API void JPS_CollisionFreeSpeedModelV2State_SetRangeGeometryRepulsion(
+    JPS_CollisionFreeSpeedModelV2State handle,
     double rangeGeometryRepulsion);
 
 /**
@@ -860,7 +860,7 @@ JUPEDSIM_API void JPS_CollisionFreeSpeedModelv2State_SetRangeGeometryRepulsion(
  * @return e0 of this agent
  */
 JUPEDSIM_API JPS_Point
-JPS_CollisionFreeSpeedModelv2State_GetE0(JPS_CollisionFreeSpeedModelv2State handle);
+JPS_CollisionFreeSpeedModelV2State_GetE0(JPS_CollisionFreeSpeedModelV2State handle);
 
 /**
  * Write e0 of this agent.
@@ -868,7 +868,7 @@ JPS_CollisionFreeSpeedModelv2State_GetE0(JPS_CollisionFreeSpeedModelv2State hand
  * @param e0 of this agent.
  */
 JUPEDSIM_API void
-JPS_CollisionFreeSpeedModelv2State_SetE0(JPS_CollisionFreeSpeedModelv2State handle, JPS_Point e0);
+JPS_CollisionFreeSpeedModelV2State_SetE0(JPS_CollisionFreeSpeedModelV2State handle, JPS_Point e0);
 
 /**
  * Read time gap of this agent.
@@ -876,15 +876,15 @@ JPS_CollisionFreeSpeedModelv2State_SetE0(JPS_CollisionFreeSpeedModelv2State hand
  * @return time gap of this agent
  */
 JUPEDSIM_API double
-JPS_CollisionFreeSpeedModelv2State_GetTimeGap(JPS_CollisionFreeSpeedModelv2State handle);
+JPS_CollisionFreeSpeedModelV2State_GetTimeGap(JPS_CollisionFreeSpeedModelV2State handle);
 
 /**
  * Write time gap of this agent.
  * @param handle of the Agent to access.
  * @param time_gap of this agent.
  */
-JUPEDSIM_API void JPS_CollisionFreeSpeedModelv2State_SetTimeGap(
-    JPS_CollisionFreeSpeedModelv2State handle,
+JUPEDSIM_API void JPS_CollisionFreeSpeedModelV2State_SetTimeGap(
+    JPS_CollisionFreeSpeedModelV2State handle,
     double time_gap);
 
 /**
@@ -893,7 +893,7 @@ JUPEDSIM_API void JPS_CollisionFreeSpeedModelv2State_SetTimeGap(
  * @return tau of this agent
  */
 JUPEDSIM_API double
-JPS_CollisionFreeSpeedModelv2State_GetTau(JPS_CollisionFreeSpeedModelv2State handle);
+JPS_CollisionFreeSpeedModelV2State_GetTau(JPS_CollisionFreeSpeedModelV2State handle);
 
 /**
  * Write tau of this agent.
@@ -901,7 +901,7 @@ JPS_CollisionFreeSpeedModelv2State_GetTau(JPS_CollisionFreeSpeedModelv2State han
  * @param tau of this agent.
  */
 JUPEDSIM_API void
-JPS_CollisionFreeSpeedModelv2State_SetTau(JPS_CollisionFreeSpeedModelv2State handle, double tau);
+JPS_CollisionFreeSpeedModelV2State_SetTau(JPS_CollisionFreeSpeedModelV2State handle, double tau);
 
 /**
  * Read v0 of this agent.
@@ -909,7 +909,7 @@ JPS_CollisionFreeSpeedModelv2State_SetTau(JPS_CollisionFreeSpeedModelv2State han
  * @return v0 of this agent
  */
 JUPEDSIM_API double
-JPS_CollisionFreeSpeedModelv2State_GetV0(JPS_CollisionFreeSpeedModelv2State handle);
+JPS_CollisionFreeSpeedModelV2State_GetV0(JPS_CollisionFreeSpeedModelV2State handle);
 
 /**
  * Write v0 of this agent.
@@ -917,7 +917,7 @@ JPS_CollisionFreeSpeedModelv2State_GetV0(JPS_CollisionFreeSpeedModelv2State hand
  * @param v0 of this agent.
  */
 JUPEDSIM_API void
-JPS_CollisionFreeSpeedModelv2State_SetV0(JPS_CollisionFreeSpeedModelv2State handle, double v0);
+JPS_CollisionFreeSpeedModelV2State_SetV0(JPS_CollisionFreeSpeedModelV2State handle, double v0);
 
 /**
  * Read radius of this agent.
@@ -925,15 +925,15 @@ JPS_CollisionFreeSpeedModelv2State_SetV0(JPS_CollisionFreeSpeedModelv2State hand
  * @return radius of this agent
  */
 JUPEDSIM_API double
-JPS_CollisionFreeSpeedModelv2State_GetRadius(JPS_CollisionFreeSpeedModelv2State handle);
+JPS_CollisionFreeSpeedModelV2State_GetRadius(JPS_CollisionFreeSpeedModelV2State handle);
 
 /**
  * Write radius of this agent in meters.
  * @param handle of the Agent to access.
  * @param radius (m) of this agent.
  */
-JUPEDSIM_API void JPS_CollisionFreeSpeedModelv2State_SetRadius(
-    JPS_CollisionFreeSpeedModelv2State handle,
+JUPEDSIM_API void JPS_CollisionFreeSpeedModelV2State_SetRadius(
+    JPS_CollisionFreeSpeedModelV2State handle,
     double radius);
 
 /**
@@ -1057,14 +1057,14 @@ JUPEDSIM_API JPS_CollisionFreeSpeedModelState
 JPS_Agent_GetCollisionFreeSpeedModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
 
 /**
- * Access Collision Free Speed model v2 state.
- * Precondition: Agent needs to use Collision Free Speed model v2
+ * Access Collision Free Speed model V2 state.
+ * Precondition: Agent needs to use Collision Free Speed model V2
  * @param handle of the agent to access.
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return state or NULL on error
  */
-JUPEDSIM_API JPS_CollisionFreeSpeedModelv2State
-JPS_Agent_GetCollisionFreeSpeedModelv2State(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
+JUPEDSIM_API JPS_CollisionFreeSpeedModelV2State
+JPS_Agent_GetCollisionFreeSpeedModelV2State(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
 
 /**
  * Opaque type of an iterator over agents
@@ -1178,9 +1178,9 @@ typedef struct JPS_CollisionFreeSpeedModelAgentParameters {
 } JPS_CollisionFreeSpeedModelAgentParameters;
 
 /**
- * Describes parameters of an Agent in Collision Free Speed Model v2
+ * Describes parameters of an Agent in Collision Free Speed Model V2
  */
-typedef struct JPS_CollisionFreeSpeedModelv2AgentParameters {
+typedef struct JPS_CollisionFreeSpeedModelV2AgentParameters {
     /**
      * Position of the agent.
      * The position needs to inside the accessible area.
@@ -1228,7 +1228,7 @@ typedef struct JPS_CollisionFreeSpeedModelv2AgentParameters {
      */
     double rangeGeometryRepulsion{0.02};
 
-} JPS_CollisionFreeSpeedModelv2AgentParameters;
+} JPS_CollisionFreeSpeedModelV2AgentParameters;
 
 /**
  * Opaque type of an iterator over agent ids
@@ -1399,9 +1399,9 @@ JUPEDSIM_API JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelAgent(
  * error.
  * @return id of the new agent or 0 if the agent could not be added due to an error.
  */
-JUPEDSIM_API JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelv2Agent(
+JUPEDSIM_API JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelV2Agent(
     JPS_Simulation handle,
-    JPS_CollisionFreeSpeedModelv2AgentParameters parameters,
+    JPS_CollisionFreeSpeedModelV2AgentParameters parameters,
     JPS_ErrorMessage* errorMessage);
 
 /**

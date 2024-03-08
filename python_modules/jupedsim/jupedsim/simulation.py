@@ -13,8 +13,8 @@ from jupedsim.journey import JourneyDescription
 from jupedsim.models import (
     CollisionFreeSpeedModel,
     CollisionFreeSpeedModelAgentParameters,
-    CollisionFreeSpeedModelv2,
-    CollisionFreeSpeedModelv2AgentParameters,
+    CollisionFreeSpeedModelV2,
+    CollisionFreeSpeedModelV2AgentParameters,
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
 )
@@ -44,7 +44,7 @@ class Simulation:
         model: (
             CollisionFreeSpeedModel
             | GeneralizedCentrifugalForceModel
-            | CollisionFreeSpeedModelv2
+            | CollisionFreeSpeedModelV2
         ),
         geometry: (
             str
@@ -98,7 +98,7 @@ class Simulation:
                 range_geometry_repulsion=model.range_geometry_repulsion,
             )
             py_jps_model = model_builder.build()
-        elif isinstance(model, CollisionFreeSpeedModelv2):
+        elif isinstance(model, CollisionFreeSpeedModelV2):
             model_builder = py_jps.CollisionFreeSpeedModelv2Builder()
             py_jps_model = model_builder.build()
         elif isinstance(model, GeneralizedCentrifugalForceModel):
@@ -217,7 +217,7 @@ class Simulation:
         parameters: (
             GeneralizedCentrifugalForceModelAgentParameters
             | CollisionFreeSpeedModelAgentParameters
-            | CollisionFreeSpeedModelv2AgentParameters
+            | CollisionFreeSpeedModelV2AgentParameters
         ),
     ) -> int:
         """Add an agent to the simulation.
