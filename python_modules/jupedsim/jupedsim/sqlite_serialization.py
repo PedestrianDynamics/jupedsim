@@ -1,13 +1,29 @@
 # Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
+import itertools
 import sqlite3
 from pathlib import Path
-
-import shapely
+from typing import Final
 
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
+
+DATABASE_VERSION: Final = 2
+
+
+def get_database_version(connection: sqlite3.Connection) -> int:
+    cur = connection.Cursor()
+    return int(
+        cur.execute(
+            "SELECT value FROM metadata WHERE key = ?", ("version",)
+        ).fetchone()[0]
+    )
+
+
+def uses_latest_database_version(connection: sqlite3.Connection) -> bool:
+    version = get_database_version(connection)
+    return version == DATABASE_VERSION
 
 
 class SqliteTrajectoryWriter(TrajectoryWriter):
@@ -40,11 +56,7 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         such as framerate etc...
         """
         fps = 1 / simulation.delta_time() / self._every_nth_frame
-        geometry = simulation.get_geometry()
-        geo = shapely.to_wkt(
-            shapely.Polygon(geometry.boundary(), holes=geometry.holes()),
-            rounding_precision=-1,
-        )
+        geo = simulation.get_geometry().as_wkt()
 
         cur = self._con.cursor()
         try:
@@ -65,11 +77,25 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
             )
             cur.executemany(
                 "INSERT INTO metadata VALUES(?, ?)",
-                (("version", "1"), ("fps", fps)),
+                (("version", DATABASE_VERSION), ("fps", fps)),
             )
             cur.execute("DROP TABLE IF EXISTS geometry")
-            cur.execute("CREATE TABLE geometry(wkt TEXT NOT NULL)")
-            cur.execute("INSERT INTO geometry VALUES(?)", (geo,))
+            cur.execute(
+                "CREATE TABLE geometry("
+                "   hash INTEGER NOT NULL, "
+                "   wkt TEXT NOT NULL)"
+            )
+            cur.execute(
+                "INSERT INTO geometry VALUES(?, ?)",
+                (hash(geo), geo),
+            )
+            cur.execute("DROP TABLE IF EXISTS frame_data")
+            cur.execute(
+                "CREATE TABLE frame_data("
+                "   frame INTEGER NOT NULL,"
+                "   geometry_hash INTEGER NOT NULL)"
+            )
+
             cur.execute(
                 "CREATE INDEX frame_id_idx ON trajectory_data(frame, id)"
             )
@@ -128,6 +154,10 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                     ("ymax", str(max(ymax, float(old_ymax)))),
                 ],
             )
+            cur.execute(
+                "INSERT INTO frame_data VALUES(?, ?)",
+                (frame, hash(simulation.get_geometry().as_wkt())),
+            )
             cur.execute("COMMIT")
         except sqlite3.Error as e:
             cur.execute("ROLLBACK")
@@ -160,3 +190,59 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
 
     def _y_max(self, cur):
         return self._value_or_default(cur, "ymax", float("-inf"))
+
+
+def update_database_to_latest_version(connection: sqlite3.Connection):
+    version = get_database_version(connection)
+
+    if version == 1:
+        convert_database_v1_to_v2(connection)
+        version = 2
+
+    # if version == 2:
+    #     convert_database_v2_to_v3
+    #     version = 3
+    # ... for future versions
+
+
+def convert_database_v1_to_v2(connection: sqlite3.Connection):
+    cur = connection.cursor()
+
+    try:
+        cur.execute("BEGIN")
+
+        version = get_database_version(connection)
+        if version != 1:
+            raise RuntimeError(
+                f"Internal Error: When converting from database version 1 to 2, encountered database version {version}."
+            )
+
+        cur.execute(
+            "UPDATE metadata SET value = ? WHERE key = ?", (2, "version")
+        )
+
+        cur.execute(
+            "CREATE TABLE frame_data("
+            "   frame INTEGER NOT NULL,"
+            "   geometry_hash INTEGER NOT NULL)"
+        )
+
+        res = cur.execute("SELECT wkt FROM geometry")
+        wkt_str = res.fetchone()[0]
+        wkt_hash = hash(wkt_str)
+
+        cur.execute("ALTER TABLE geometry ADD hash INTEGER NOT NULL DEFAULT 0")
+        cur.execute("UPDATE geometry SET hash = ?", (wkt_hash,))
+
+        res = cur.execute("SELECT max(frame) FROM trajectory_data")
+        frame_limit = res.fetchone()[0] + 1
+
+        cur.executemany(
+            "INSERT INTO frame_data VALUES(?, ?)",
+            zip(range(frame_limit), itertools.repeat(wkt_hash)),
+        )
+        cur.execute("COMMIT")
+        cur.execute("VACUUM")
+    except sqlite3.Error as e:
+        cur.execute("ROLLBACK")
+        raise TrajectoryWriter.Exception(f"Error writing to database: {e}")
