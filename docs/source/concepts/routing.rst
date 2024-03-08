@@ -264,6 +264,7 @@ After this, the cycle restarts with the first stage.
     :align: center
 
 To create a round-robin transition as described above, you can follow these steps:
+
 .. code-block:: python
 
     journey.set_transition_for_stage(
