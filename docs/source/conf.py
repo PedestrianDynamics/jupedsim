@@ -74,6 +74,9 @@ autoapi_add_toctree_entry = False
 def skip_submodules(app, what, name, obj, skip, options):
     if what == "module":
         skip = True
+    if what == "method":
+        if name.endswith("as_native"):
+            skip = True
     return skip
 
 
