@@ -8,9 +8,12 @@ import jupedsim.native as py_jps
 
 @dataclass(kw_only=True)
 class CollisionFreeSpeedModel:
-    """Parameters for Collision Free Speed Model
+    """Collision Free Speed Model
 
-    All attributes are initialized with reasonably good defaults.
+    A general description of the Collision Free Speed Model can be found in the originating publication
+    https://arxiv.org/abs/1512.05597
+
+    A more detailed description can be found at https://pedestriandynamics.org/models/collision_free_speed_model/
 
     Attributes:
         strength_neighbor_repulsion: Strength of the repulsion from neighbors
