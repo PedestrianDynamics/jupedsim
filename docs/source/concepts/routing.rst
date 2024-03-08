@@ -42,6 +42,11 @@ When a stage is reached, the agent will wait for its completion and then continu
 A stage may already count as completed when the stage is reached or when some condition is fulfilled.
 The various types of stages will be explained below.
 
+.. note::
+
+    All stages added to the simulation need to be inside the walkable area.
+    This needs to be uphold when the geometry is changed.
+
 Waypoint
 ^^^^^^^^
 
@@ -195,8 +200,6 @@ In the following, you can see how to add a waiting set to a simulation and how t
 
 Journeys
 --------
-
-Multiple stages can be combined into what in *JuPedSim* is called a Journey.
 
 For creating more complex routes in *JuPedSim* multiple stages can be combined to a so called Journey.
 
