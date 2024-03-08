@@ -8,7 +8,16 @@ import jupedsim.native as py_jps
 
 @dataclass(kw_only=True)
 class CollisionFreeSpeedModelv2:
-    """Collision Free Speed Model v2 has no model parameters."""
+    """Collision Free Speed Model V2
+
+    This is a variation of the Collision Free Speed Model where geometry and neighbor repulsion are individual
+    agent parameters instead of global parameters.
+
+    A general description of the Collision Free Speed Model can be found in the originating publication
+    https://arxiv.org/abs/1512.05597
+
+    A more detailed description can be found at https://pedestriandynamics.org/models/collision_free_speed_model/
+    """
 
     pass
 
