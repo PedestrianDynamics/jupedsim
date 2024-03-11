@@ -12,7 +12,7 @@ Point intoPoint(JPS_Point p)
 
 JPS_Point intoJPS_Point(Point p)
 {
-    return {p.x, p.y};
+    return {p.x(), p.y()};
 }
 
 JPS_Point intoJPS_Point(std::tuple<double, double> p)

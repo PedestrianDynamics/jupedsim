@@ -147,7 +147,7 @@ PolyWithHoles constructPolyFromPoints(const std::vector<Point>& points)
     cgalPoints.reserve(points.size());
     std::transform(
         std::begin(points), std::end(points), std::back_inserter(cgalPoints), [](const auto& p) {
-            return CGALPoint{p.x, p.y};
+            return CGALPoint{p.x(), p.y()};
         });
     return PolyWithHoles(Poly{cgalPoints.begin(), cgalPoints.end()});
 }
@@ -238,15 +238,15 @@ TEST_F(LongDiagonalRectangle, CellsAtBottomLeft)
 
     const auto middleCell = Cell{-12, -16};
     const std::vector<Cell> candidates = {
-        {middleCell.x - CELL_EXTEND, middleCell.y - CELL_EXTEND},
-        {middleCell.x - CELL_EXTEND, middleCell.y},
-        {middleCell.x - CELL_EXTEND, middleCell.y + CELL_EXTEND},
-        {middleCell.x, middleCell.y - CELL_EXTEND},
-        {middleCell.x, middleCell.y},
-        {middleCell.x, middleCell.y + CELL_EXTEND},
-        {middleCell.x + CELL_EXTEND, middleCell.y - CELL_EXTEND},
-        {middleCell.x + CELL_EXTEND, middleCell.y},
-        {middleCell.x + CELL_EXTEND, middleCell.y + CELL_EXTEND}};
+        {middleCell.x() - CELL_EXTEND, middleCell.y() - CELL_EXTEND},
+        {middleCell.x() - CELL_EXTEND, middleCell.y()},
+        {middleCell.x() - CELL_EXTEND, middleCell.y() + CELL_EXTEND},
+        {middleCell.x(), middleCell.y() - CELL_EXTEND},
+        {middleCell.x(), middleCell.y()},
+        {middleCell.x(), middleCell.y() + CELL_EXTEND},
+        {middleCell.x() + CELL_EXTEND, middleCell.y() - CELL_EXTEND},
+        {middleCell.x() + CELL_EXTEND, middleCell.y()},
+        {middleCell.x() + CELL_EXTEND, middleCell.y() + CELL_EXTEND}};
 
     for(const auto& point : candidates) {
         const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
@@ -263,15 +263,15 @@ TEST_F(LongDiagonalRectangle, CellsAtTopRight)
 
     const auto middleCell = Cell{4, 8};
     const std::vector<Cell> candidates = {
-        {middleCell.x - CELL_EXTEND, middleCell.y - CELL_EXTEND},
-        {middleCell.x - CELL_EXTEND, middleCell.y},
-        {middleCell.x - CELL_EXTEND, middleCell.y + CELL_EXTEND},
-        {middleCell.x, middleCell.y - CELL_EXTEND},
-        {middleCell.x, middleCell.y},
-        {middleCell.x, middleCell.y + CELL_EXTEND},
-        {middleCell.x + CELL_EXTEND, middleCell.y - CELL_EXTEND},
-        {middleCell.x + CELL_EXTEND, middleCell.y},
-        {middleCell.x + CELL_EXTEND, middleCell.y + CELL_EXTEND}};
+        {middleCell.x() - CELL_EXTEND, middleCell.y() - CELL_EXTEND},
+        {middleCell.x() - CELL_EXTEND, middleCell.y()},
+        {middleCell.x() - CELL_EXTEND, middleCell.y() + CELL_EXTEND},
+        {middleCell.x(), middleCell.y() - CELL_EXTEND},
+        {middleCell.x(), middleCell.y()},
+        {middleCell.x(), middleCell.y() + CELL_EXTEND},
+        {middleCell.x() + CELL_EXTEND, middleCell.y() - CELL_EXTEND},
+        {middleCell.x() + CELL_EXTEND, middleCell.y()},
+        {middleCell.x() + CELL_EXTEND, middleCell.y() + CELL_EXTEND}};
 
     for(const auto& point : candidates) {
         const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);

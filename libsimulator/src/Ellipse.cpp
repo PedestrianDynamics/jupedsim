@@ -31,9 +31,9 @@ double Ellipse::EffectiveDistanceToEllipse(
     Point E1inE2, // center of E1 in coordinate system of E2
         E2inE1;
     E2inE1 = center_second.TransformToEllipseCoordinates(
-        center_first, orientation_first.x, orientation_first.y);
+        center_first, orientation_first.x(), orientation_first.y());
     E1inE2 = center_first.TransformToEllipseCoordinates(
-        center_second, orientation_second.x, orientation_second.y);
+        center_second, orientation_second.x(), orientation_second.y());
     // distance between centers of E1 and E2
     const auto dist = (center_first - center_second).Norm();
     R1 = this->PointOnEllipse(E2inE1, scale_first, center_first, speed_first, orientation_first);
@@ -53,11 +53,11 @@ Point Ellipse::PointOnEllipse(
     double speed,
     const Point& orientation) const
 {
-    double x = P.x, y = P.y;
+    double x = P.x(), y = P.y();
     double r = x * x + y * y;
     if(r < J_EPS * J_EPS) {
         Point CP(this->GetEA(speed), 0);
-        return CP.TransformToCartesianCoordinates(center, orientation.x, orientation.y);
+        return CP.TransformToCartesianCoordinates(center, orientation.x(), orientation.y());
     }
     r = sqrt(r);
 
@@ -65,8 +65,6 @@ Point Ellipse::PointOnEllipse(
     double sinTheta = y / r;
     double a = GetEA(speed);
     double b = GetEB(scale);
-    Point S;
-    S.x = a * cosTheta;
-    S.y = b * sinTheta;
-    return S.TransformToCartesianCoordinates(center, orientation.x, orientation.y);
+    Point S{a * cosTheta, b * sinTheta};
+    return S.TransformToCartesianCoordinates(center, orientation.x(), orientation.y());
 }

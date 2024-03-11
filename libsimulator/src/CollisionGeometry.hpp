@@ -87,7 +87,7 @@ struct std::hash<Cell> {
     std::size_t operator()(const Point& pos) const noexcept
     {
         std::hash<double> hasher{};
-        return jps::hash_combine(hasher(pos.x), hasher(pos.y));
+        return jps::hash_combine(hasher(pos.x()), hasher(pos.y()));
     }
 };
 
