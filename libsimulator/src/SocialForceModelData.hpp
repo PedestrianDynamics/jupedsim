@@ -7,7 +7,7 @@ struct SocialForceModelData {
     Point velocity{}; // v
     double mass{}; // m
     double desiredSpeed{}; // v0
-    double reactionTime{}; // T
+    double reactionTime{}; // tau
     double agentScale{}; // A for other agents
     double obstacleScale{}; // A for obstacles
     double forceDistance{}; // B
@@ -22,6 +22,6 @@ struct fmt::formatter<SocialForceModelData> {
     template <typename FormatContext>
     auto format(const SocialForceModelData& m, FormatContext& ctx) const
     {
-        return fmt::format_to(ctx.out(), "SFM[velocity={}])", m.velocity);
+        return fmt::format_to(ctx.out(), "SFM[velocity={}, m={}, v0={}, tau={}, A_ped={}, A_obst={}, B={}, r={}])", m.velocity, m.mass, m.desiredSpeed, m.reactionTime, m.agentScale, m.obstacleScale, m.forceDistance, m.radius);
     }
 };

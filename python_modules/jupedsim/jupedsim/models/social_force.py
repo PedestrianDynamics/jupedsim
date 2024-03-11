@@ -17,8 +17,9 @@ class SocialForceModel:
         friction: describes the strength with which an agent is influenced by frictional forces from obstacles and neighbors in its direct proximity.
     """
 
-    bodyForce: float = 120000
-    friction: float = 240000
+    # values are from paper Helbing 2000: Simulating dynamical features of escape panic
+    bodyForce: float = 120000 # [kg s^-2] is called k
+    friction: float = 240000 # [kg m^-1 s^-1] is called kappa
 
 
 @dataclass(kw_only=True)
@@ -26,6 +27,9 @@ class SocialForceModelAgentParameters:
     """
     Parameters required to create an Agent in the Social Force Model.
 
+    See the scientific publication for more details about this model
+    https://doi.org/10.1038/35035023
+    
     Attributes:
         position: Position of the agent.
         orientation: Orientation of the agent.
@@ -46,13 +50,14 @@ class SocialForceModelAgentParameters:
     journey_id: int = -1
     stage_id: int = -1
     velocity: tuple[float, float] = (0.0, 0.0)
-    mass: float = 80.0
-    desiredSpeed: float = 0.8
-    reactionTime: float = 0.5
-    agentScale: float = 2000
-    obstacleScale: float = 2000
-    forceDistance: float = 0.08
-    radius: float = 0.3
+    # the values are from paper Helbing 2000: Simulating dynamical features of escape panic
+    mass: float = 80.0 # [kg] is called m
+    desiredSpeed: float = 0.8 # [m / s] is called v0 can be set higher depending on situation 
+    reactionTime: float = 0.5 # [s] is called tau
+    agentScale: float = 2000 # [N] is called A
+    obstacleScale: float = 2000 # [N] is called A
+    forceDistance: float = 0.08 # [m] is called B
+    radius: float = 0.3 # [m] in paper 2r is uniformy distibuted in interval [0.5 m, 0.7 m]
 
     def as_native(
         self,
