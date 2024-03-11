@@ -22,6 +22,16 @@ struct fmt::formatter<SocialForceModelData> {
     template <typename FormatContext>
     auto format(const SocialForceModelData& m, FormatContext& ctx) const
     {
-        return fmt::format_to(ctx.out(), "SFM[velocity={}, m={}, v0={}, tau={}, A_ped={}, A_obst={}, B={}, r={}])", m.velocity, m.mass, m.desiredSpeed, m.reactionTime, m.agentScale, m.obstacleScale, m.forceDistance, m.radius);
+        return fmt::format_to(
+            ctx.out(),
+            "SFM[velocity={}, m={}, v0={}, tau={}, A_ped={}, A_obst={}, B={}, r={}])",
+            m.velocity,
+            m.mass,
+            m.desiredSpeed,
+            m.reactionTime,
+            m.agentScale,
+            m.obstacleScale,
+            m.forceDistance,
+            m.radius);
     }
 };
