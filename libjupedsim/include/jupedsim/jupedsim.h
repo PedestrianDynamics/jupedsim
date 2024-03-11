@@ -5,6 +5,7 @@
 #include "agent.h"
 #include "build_info.h"
 #include "collision_free_speed_model.h"
+#include "collision_free_speed_model_v2.h"
 #include "error.h"
 #include "export.h"
 #include "generalized_centrifugal_force_model.h"

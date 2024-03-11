@@ -10,6 +10,7 @@ add_library(jupedsim_obj OBJECT
     src/agent.cpp
     src/build_info.cpp
     src/collision_free_speed_model.cpp
+    src/collision_free_speed_model_v2.cpp
     src/error.cpp
     src/generalized_centrifugal_force_model.cpp
     src/geometry.cpp
@@ -119,6 +120,7 @@ install(
         ${header_dest}/operational_model.h
         ${header_dest}/stage.h
         ${header_dest}/collision_free_speed_model.h
+        ${header_dest}/collision_free_speed_model_v2.h
         ${header_dest}/generalized_centrifugal_force_model.h
         ${header_dest}/jupedsim.h
         ${header_dest}/routing.h

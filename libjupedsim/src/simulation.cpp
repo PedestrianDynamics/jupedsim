@@ -244,6 +244,47 @@ JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelAgent(
     return result.getID();
 }
 
+JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelv2Agent(
+    JPS_Simulation handle,
+    JPS_CollisionFreeSpeedModelv2AgentParameters parameters,
+    JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    auto result = GenericAgent::ID::Invalid;
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    try {
+        if(simulation->ModelType() != OperationalModelType::COLLISION_FREE_SPEED_V2) {
+            throw std::runtime_error(
+                "Simulation is not configured to use Collision Free Speed Model v2");
+        }
+        GenericAgent agent(
+            GenericAgent::ID::Invalid,
+            Journey::ID(parameters.journeyId),
+            BaseStage::ID(parameters.stageId),
+            intoPoint(parameters.position),
+            {},
+            CollisionFreeSpeedModelv2Data{
+                parameters.strengthNeighborRepulsion,
+                parameters.rangeNeighborRepulsion,
+                parameters.strengthGeometryRepulsion,
+                parameters.rangeGeometryRepulsion,
+                parameters.time_gap,
+                parameters.v0,
+                parameters.radius});
+        result = simulation->AddAgent(std::move(agent));
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return result.getID();
+}
+
 JPS_AgentId JPS_Simulation_AddSocialForceModelAgent(
     JPS_Simulation handle,
     JPS_SocialForceModelAgentParameters parameters,
@@ -436,6 +477,8 @@ JPS_ModelType JPS_Simulation_ModelType(JPS_Simulation handle)
             return JPS_CollisionFreeSpeedModel;
         case OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE:
             return JPS_GeneralizedCentrifugalForceModel;
+        case OperationalModelType::COLLISION_FREE_SPEED_V2:
+            return JPS_CollisionFreeSpeedModelv2;
         case OperationalModelType::SOCIAL_FORCE:
             return JPS_SocialForceModel;
     }

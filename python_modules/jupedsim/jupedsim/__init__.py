@@ -34,6 +34,11 @@ from jupedsim.models.collision_free_speed import (
     CollisionFreeSpeedModelAgentParameters,
     CollisionFreeSpeedModelState,
 )
+from jupedsim.models.collision_free_speed_v2 import (
+    CollisionFreeSpeedModelv2,
+    CollisionFreeSpeedModelv2AgentParameters,
+    CollisionFreeSpeedModelv2State,
+)
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
@@ -90,6 +95,9 @@ __all__ = [
     "CollisionFreeSpeedModelAgentParameters",
     "CollisionFreeSpeedModel",
     "CollisionFreeSpeedModelState",
+    "CollisionFreeSpeedModelv2AgentParameters",
+    "CollisionFreeSpeedModelv2",
+    "CollisionFreeSpeedModelv2State",
     "SocialForceModelAgentParameters",
     "SocialForceModel",
     "SocialForceModelState",

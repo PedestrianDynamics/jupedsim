@@ -5,5 +5,6 @@
 enum class OperationalModelType {
     COLLISION_FREE_SPEED,
     GENERALIZED_CENTRIFUGAL_FORCE,
+    COLLISION_FREE_SPEED_V2,
     SOCIAL_FORCE
 };
