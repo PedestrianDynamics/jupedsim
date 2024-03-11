@@ -11,13 +11,14 @@ class SocialForceModel:
 
     All attributes are initialized with reasonably good defaults.
 
+    See the scientific publication for more details about this model
+    https://doi.org/10.1038/35035023
 
     Attributes:
         bodyForce: describes the strength with which an agent is influenced by pushing forces from obstacles and neighbors in its direct proximity.
         friction: describes the strength with which an agent is influenced by frictional forces from obstacles and neighbors in its direct proximity.
     """
 
-    # values are from paper Helbing 2000: Simulating dynamical features of escape panic
     bodyForce: float = 120000  # [kg s^-2] is called k
     friction: float = 240000  # [kg m^-1 s^-1] is called kappa
 
@@ -51,7 +52,7 @@ class SocialForceModelAgentParameters:
     journey_id: int = -1
     stage_id: int = -1
     velocity: tuple[float, float] = (0.0, 0.0)
-    # the values are from paper Helbing 2000: Simulating dynamical features of escape panic
+    # the values are from paper. doi is in class description
     mass: float = 80.0  # [kg] is called m
     desiredSpeed: float = (
         0.8  # [m / s] is called v0 can be set higher depending on situation
