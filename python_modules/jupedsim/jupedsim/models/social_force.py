@@ -38,7 +38,7 @@ class SocialForceModelAgentParameters:
         forceDistance: indicates how much the distance between an agent and obstacles or neighbors influences social forces.
         radius: radius of the space an agent occupies.
     """
-
+    # todo write force equation from paper
     position: tuple[float, float] = (0.0, 0.0)
     orientation: tuple[float, float] = (0.0, 0.0)
     journey_id: int = -1

@@ -34,10 +34,9 @@ public:
         const CollisionGeometry& geometry) const override;
     std::unique_ptr<OperationalModel> Clone() const override;
 
-    Point drivingForce(const GenericAgent& agent) const;
+private:
+    Point DrivingForce(const GenericAgent& agent) const;
     Point AgentForce(const GenericAgent& ped1, const GenericAgent& ped2) const;
     Point ObstacleForce(const GenericAgent& agent, const LineSegment& segment) const;
-    double pushing_Force(double A, double B, double r, double distance) const;
-
-private:
+    double Pushing_Force(double A, double B, double r, double distance) const;
 };
