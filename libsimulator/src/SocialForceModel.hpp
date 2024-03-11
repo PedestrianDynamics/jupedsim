@@ -37,8 +37,51 @@ public:
     std::unique_ptr<OperationalModel> Clone() const override;
 
 private:
-    Point DrivingForce(const GenericAgent& agent) const;
+    static Point DrivingForce(const GenericAgent& agent);
+    /**
+     * Driving force acting on pedestrian <agent>
+     * @param agent reference to Pedestrian
+     *
+     * @return vector with driving force of pedestrian
+     */
     Point AgentForce(const GenericAgent& ped1, const GenericAgent& ped2) const;
+    /**
+     *  Repulsive force acting on pedestrian <ped1> from pedestrian <ped2>
+     * @param ped1 reference to Pedestrian 1 on whom the force acts on
+     * @param ped2 reference to Pedestrian 2, from whom the force originates
+     * @return vector with the repulsive force
+     */
+
     Point ObstacleForce(const GenericAgent& agent, const LineSegment& segment) const;
-    double Pushing_Force(double A, double B, double r, double distance) const;
+    /**
+     *  Repulsive force acting on pedestrian <agent> from line segment <segment>
+     * @param agent reference to the Pedestrian on whom the force acts on
+     * @param segment reference to line segment, from which the force originates
+     * @return vector with the repulsive force
+     */
+    Point ForceBetweenPoints(
+        const Point pt1,
+        const Point pt2,
+        const double A,
+        const double B,
+        const double radius,
+        const Point velocity) const;
+    /**
+     * calculates the pushing and friction forces acting between <pt1> and <pt2>
+     * @param pt1 Point on which the forces act
+     * @param pt2 Point from which the forces originate
+     * @param A Agent scale
+     * @param B force distance
+     * @param r radius
+     * @param velocity velocity difference
+     */
+    static double PushingForceLength(double A, double B, double r, double distance);
+    /**
+     *  exponential function that specifies the length of the pushing force between two points
+     * @param A Agent scale
+     * @param B force distance
+     * @param r radius
+     * @param distance distance between the two points
+     * @return length of pushing force between the two points
+     */
 };
