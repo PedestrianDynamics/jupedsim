@@ -13,7 +13,7 @@ DATABASE_VERSION: Final = 2
 
 
 def get_database_version(connection: sqlite3.Connection) -> int:
-    cur = connection.Cursor()
+    cur = connection.cursor()
     return int(
         cur.execute(
             "SELECT value FROM metadata WHERE key = ?", ("version",)
