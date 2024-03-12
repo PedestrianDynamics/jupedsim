@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import shapely
 
 from jupedsim.internal.aabb import AABB
+from jupedsim.sqlite_serialization import update_database_to_latest_version
 
 
 @dataclass
@@ -26,13 +27,14 @@ class RecordingFrame:
 
 
 class Recording:
-    __supported_database_version = 1
+    __supported_database_version = 2
     """Provides access to a simulation recording in a sqlite database"""
 
     def __init__(self, db_connection_str: str, uri=False) -> None:
         self.db = sqlite3.connect(
             db_connection_str, uri=uri, isolation_level=None
         )
+        update_database_to_latest_version(self.db)
         self._check_version_compatible()
 
     def frame(self, index: int) -> RecordingFrame:
@@ -66,8 +68,16 @@ class Recording:
         """
         cur = self.db.cursor()
         res = cur.execute("SELECT wkt FROM geometry")
-        wkt_str = res.fetchone()[0]
-        return shapely.from_wkt(wkt_str)
+        geometries = [shapely.from_wkt(s) for s in res.fetchall()]
+        return shapely.union_all(geometries)
+
+    def geometry_id_for_frame(self, frame_id) -> int:
+        cur = self.db.cursor()
+        res = cur.execute(
+            "SELECT geometry_hash from frame_data WHERE frame == ?",
+            (frame_id,),
+        )
+        return res.fetchone()[0]
 
     def bounds(self) -> AABB:
         """Get bounds of the position data contained in this recording."""
@@ -91,7 +101,7 @@ class Recording:
 
         """
         cur = self.db.cursor()
-        res = cur.execute("SELECT MAX(frame) FROM trajectory_data")
+        res = cur.execute("SELECT count(*) FROM frame_data")
         return res.fetchone()[0]
 
     @property
