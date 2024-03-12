@@ -71,7 +71,7 @@ private:
         const Point pt1,
         const Point pt2,
         const double A,
-    
+
         const double B,
         const double radius,
         const Point velocity) const;

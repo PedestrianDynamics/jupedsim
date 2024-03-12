@@ -43,7 +43,7 @@ class SocialForceModelAgentParameters:
         agentScale: indicates how strong an agent is influenced by pushing forces from neighbors. [in N] (is called A)
         obstacleScale: indicates how strong an agent is influenced by pushing forces from obstacles. [in N] (is called A)
         forceDistance: indicates how much the distance between an agent and obstacles or neighbors influences social forces. [in m] (is called B)
-        radius: radius of the space an agent occupies. [in m] (is called r) 
+        radius: radius of the space an agent occupies. [in m] (is called r)
     """
 
     # todo write force equation from paper
