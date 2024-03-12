@@ -15,8 +15,8 @@ class SocialForceModel:
     https://doi.org/10.1038/35035023
 
     Attributes:
-        bodyForce: describes the strength with which an agent is influenced by pushing forces from obstacles and neighbors in its direct proximity.
-        friction: describes the strength with which an agent is influenced by frictional forces from obstacles and neighbors in its direct proximity.
+        bodyForce: describes the strength with which an agent is influenced by pushing forces from obstacles and neighbors in its direct proximity. [in kg s^-2] (is called k)
+        friction: describes the strength with which an agent is influenced by frictional forces from obstacles and neighbors in its direct proximity. [in kg m^-1 s^-1] (is called :math:`\kappa`)
     """
 
     bodyForce: float = 120000  # [kg s^-2] is called k
@@ -36,14 +36,14 @@ class SocialForceModelAgentParameters:
         orientation: Orientation of the agent.
         journey_id: Id of the journey the agent follows.
         stage_id: Id of the stage the agent targets.
-        velocity: current velocity of the agent
-        mass: mass of the agent.
-        desiredSpeed: desired Speed of the agent.
-        reactionTime: reaction Time of the agent.
-        agentScale: indicates how strong an agent is influenced by pushing forces from neighbors.
-        obstacleScale: indicates how strong an agent is influenced by pushing forces from obstacles.
-        forceDistance: indicates how much the distance between an agent and obstacles or neighbors influences social forces.
-        radius: radius of the space an agent occupies.
+        velocity: current velocity of the agent.
+        mass: mass of the agent. [in kg] (is called m)
+        desiredSpeed: desired Speed of the agent. [in m/s] (is called v0)
+        reactionTime: reaction Time of the agent. [in s] (is called :math:`\\tau`)
+        agentScale: indicates how strong an agent is influenced by pushing forces from neighbors. [in N] (is called A)
+        obstacleScale: indicates how strong an agent is influenced by pushing forces from obstacles. [in N] (is called A)
+        forceDistance: indicates how much the distance between an agent and obstacles or neighbors influences social forces. [in m] (is called B)
+        radius: radius of the space an agent occupies. [in m] (is called r) 
     """
 
     # todo write force equation from paper
