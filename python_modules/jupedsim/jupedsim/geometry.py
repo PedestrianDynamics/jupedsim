@@ -1,6 +1,8 @@
 # Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
+import shapely
+
 import jupedsim.native as py_jps
 
 
@@ -32,3 +34,15 @@ class Geometry:
             A list of polygons forming holes inside the boundary.
         """
         return self._obj.holes()
+
+    def as_wkt(self) -> str:
+        """_summary_
+
+        Returns:
+            String: _description_
+        """
+        poly = shapely.Polygon(self.boundary(), holes=self.holes())
+        return shapely.to_wkt(
+            poly,
+            rounding_precision=-1,
+        )
