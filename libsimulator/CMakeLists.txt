@@ -51,6 +51,12 @@ add_library(simulator STATIC
     src/SimulationClock.cpp
     src/SimulationClock.hpp
     src/SimulationError.hpp
+    src/SocialForceModel.cpp
+    src/SocialForceModel.hpp
+    src/SocialForceModelBuilder.hpp
+    src/SocialForceModelBuilder.cpp
+    src/SocialForceModelData.hpp
+    src/SocialForceModelUpdate.hpp
     src/Stage.cpp
     src/Stage.hpp
     src/StageDescription.hpp

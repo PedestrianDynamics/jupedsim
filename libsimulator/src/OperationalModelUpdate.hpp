@@ -3,10 +3,12 @@
 #include "CollisionFreeSpeedModelUpdate.hpp"
 #include "CollisionFreeSpeedModelv2Update.hpp"
 #include "GeneralizedCentrifugalForceModelUpdate.hpp"
+#include "SocialForceModelUpdate.hpp"
 
 #include <variant>
 
 using OperationalModelUpdate = std::variant<
     GeneralizedCentrifugalForceModelUpdate,
     CollisionFreeSpeedModelUpdate,
-    CollisionFreeSpeedModelv2Update>;
+    CollisionFreeSpeedModelv2Update,
+    SocialForceModelUpdate>;

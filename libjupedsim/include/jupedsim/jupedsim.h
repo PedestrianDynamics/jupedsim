@@ -15,6 +15,7 @@
 #include "operational_model.h"
 #include "routing.h"
 #include "simulation.h"
+#include "social_force_model.h"
 #include "stage.h"
 #include "transition.h"
 #include "types.h"

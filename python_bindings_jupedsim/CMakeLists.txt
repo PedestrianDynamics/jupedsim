@@ -6,6 +6,7 @@ add_library(py_jupedsim MODULE
     generalized_centrifugal_force_model.cpp
     collision_free_speed_model.cpp
     collision_free_speed_model_v2.cpp
+    social_force_model.cpp
     logging.cpp
     logging.hpp
     trace.cpp
