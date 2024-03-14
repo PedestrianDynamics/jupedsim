@@ -109,22 +109,23 @@ set(header_dest include/jupedsim)
 install(
     FILES
         ${header_dest}/agent.h
-        ${header_dest}/error.h
-        ${header_dest}/geometry.h
-        ${header_dest}/logging.h
-        ${header_dest}/simulation.h
-        ${header_dest}/types.h
         ${header_dest}/build_info.h
-        ${header_dest}/export.h
-        ${header_dest}/journey.h
-        ${header_dest}/operational_model.h
-        ${header_dest}/stage.h
         ${header_dest}/collision_free_speed_model.h
         ${header_dest}/collision_free_speed_model_v2.h
+        ${header_dest}/error.h
+        ${header_dest}/export.h
         ${header_dest}/generalized_centrifugal_force_model.h
+        ${header_dest}/geometry.h
+        ${header_dest}/journey.h
         ${header_dest}/jupedsim.h
+        ${header_dest}/logging.h
+        ${header_dest}/operational_model.h
         ${header_dest}/routing.h
+        ${header_dest}/simulation.h
+        ${header_dest}/social_force_model.h
+        ${header_dest}/stage.h
         ${header_dest}/transition.h
+        ${header_dest}/types.h
     DESTINATION ${header_dest}
 )
 
