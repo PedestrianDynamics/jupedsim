@@ -107,14 +107,14 @@ JUPEDSIM_API JPS_SocialForceModelState
 JPS_Agent_GetSocialForceModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
 
 /**
- * Access Collision Free Speed model v2 state.
- * Precondition: Agent needs to use Collision Free Speed model v2
+ * Access Collision Free Speed model V2 state.
+ * Precondition: Agent needs to use Collision Free Speed model V2
  * @param handle of the agent to access.
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return state or NULL on error
  */
-JUPEDSIM_API JPS_CollisionFreeSpeedModelv2State
-JPS_Agent_GetCollisionFreeSpeedModelv2State(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
+JUPEDSIM_API JPS_CollisionFreeSpeedModelV2State
+JPS_Agent_GetCollisionFreeSpeedModelV2State(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
 
 /**
  * Opaque type of an iterator over agents

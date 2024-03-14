@@ -244,9 +244,9 @@ JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelAgent(
     return result.getID();
 }
 
-JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelv2Agent(
+JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelV2Agent(
     JPS_Simulation handle,
-    JPS_CollisionFreeSpeedModelv2AgentParameters parameters,
+    JPS_CollisionFreeSpeedModelV2AgentParameters parameters,
     JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
@@ -255,7 +255,7 @@ JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelv2Agent(
     try {
         if(simulation->ModelType() != OperationalModelType::COLLISION_FREE_SPEED_V2) {
             throw std::runtime_error(
-                "Simulation is not configured to use Collision Free Speed Model v2");
+                "Simulation is not configured to use Collision Free Speed Model V2");
         }
         GenericAgent agent(
             GenericAgent::ID::Invalid,
@@ -263,7 +263,7 @@ JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelv2Agent(
             BaseStage::ID(parameters.stageId),
             intoPoint(parameters.position),
             {},
-            CollisionFreeSpeedModelv2Data{
+            CollisionFreeSpeedModelV2Data{
                 parameters.strengthNeighborRepulsion,
                 parameters.rangeNeighborRepulsion,
                 parameters.strengthGeometryRepulsion,
@@ -478,7 +478,7 @@ JPS_ModelType JPS_Simulation_ModelType(JPS_Simulation handle)
         case OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE:
             return JPS_GeneralizedCentrifugalForceModel;
         case OperationalModelType::COLLISION_FREE_SPEED_V2:
-            return JPS_CollisionFreeSpeedModelv2;
+            return JPS_CollisionFreeSpeedModelV2;
         case OperationalModelType::SOCIAL_FORCE:
             return JPS_SocialForceModel;
     }

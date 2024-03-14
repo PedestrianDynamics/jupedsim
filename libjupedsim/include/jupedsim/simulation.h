@@ -183,9 +183,9 @@ JUPEDSIM_API JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelAgent(
  * error.
  * @return id of the new agent or 0 if the agent could not be added due to an error.
  */
-JUPEDSIM_API JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelv2Agent(
+JUPEDSIM_API JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelV2Agent(
     JPS_Simulation handle,
-    JPS_CollisionFreeSpeedModelv2AgentParameters parameters,
+    JPS_CollisionFreeSpeedModelV2AgentParameters parameters,
     JPS_ErrorMessage* errorMessage);
 
 /**

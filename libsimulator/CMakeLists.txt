@@ -79,12 +79,12 @@ add_library(simulator STATIC
     src/CollisionFreeSpeedModelBuilder.hpp
     src/CollisionFreeSpeedModelData.hpp
     src/CollisionFreeSpeedModelUpdate.hpp
-    src/CollisionFreeSpeedModelv2.cpp
-    src/CollisionFreeSpeedModelv2.hpp
-    src/CollisionFreeSpeedModelv2Builder.cpp
-    src/CollisionFreeSpeedModelv2Builder.hpp
-    src/CollisionFreeSpeedModelv2Data.hpp
-    src/CollisionFreeSpeedModelv2Update.hpp
+    src/CollisionFreeSpeedModelV2.cpp
+    src/CollisionFreeSpeedModelV2.hpp
+    src/CollisionFreeSpeedModelV2Builder.cpp
+    src/CollisionFreeSpeedModelV2Builder.hpp
+    src/CollisionFreeSpeedModelV2Data.hpp
+    src/CollisionFreeSpeedModelV2Update.hpp
 
 )
 target_compile_options(simulator PRIVATE
