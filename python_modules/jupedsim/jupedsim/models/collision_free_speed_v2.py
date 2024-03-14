@@ -7,7 +7,7 @@ import jupedsim.native as py_jps
 
 
 @dataclass(kw_only=True)
-class CollisionFreeSpeedModelv2:
+class CollisionFreeSpeedModelV2:
     """Collision Free Speed Model V2
 
     This is a variation of the Collision Free Speed Model where geometry and neighbor repulsion are individual
@@ -23,9 +23,9 @@ class CollisionFreeSpeedModelv2:
 
 
 @dataclass(kw_only=True)
-class CollisionFreeSpeedModelv2AgentParameters:
+class CollisionFreeSpeedModelV2AgentParameters:
     """
-    Agent parameters for Collision Free Speed Model v2.
+    Agent parameters for Collision Free Speed Model V2.
 
     See the scientific publication for more details about this model
     https://arxiv.org/abs/1512.05597
@@ -40,7 +40,7 @@ class CollisionFreeSpeedModelv2AgentParameters:
         .. code:: python
 
             positions = [...] # List of initial agent positions
-            params = CollisionFreeSpeedModelv2AgentParameters(v0=0.9) # all agents are slower
+            params = CollisionFreeSpeedModelV2AgentParameters(v0=0.9) # all agents are slower
             for p in positions:
                 params.position = p
                 sim.add_agent(params)
@@ -71,8 +71,8 @@ class CollisionFreeSpeedModelv2AgentParameters:
 
     def as_native(
         self,
-    ) -> py_jps.CollisionFreeSpeedModelv2AgentParameters:
-        return py_jps.CollisionFreeSpeedModelv2AgentParameters(
+    ) -> py_jps.CollisionFreeSpeedModelV2AgentParameters:
+        return py_jps.CollisionFreeSpeedModelV2AgentParameters(
             position=self.position,
             time_gap=self.time_gap,
             v0=self.v0,
@@ -86,7 +86,7 @@ class CollisionFreeSpeedModelv2AgentParameters:
         )
 
 
-class CollisionFreeSpeedModelv2State:
+class CollisionFreeSpeedModelV2State:
     def __init__(self, backing):
         self._obj = backing
 

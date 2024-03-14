@@ -15,8 +15,8 @@ from jupedsim.models.collision_free_speed import (
     CollisionFreeSpeedModelAgentParameters,
 )
 from jupedsim.models.collision_free_speed_v2 import (
-    CollisionFreeSpeedModelv2,
-    CollisionFreeSpeedModelv2AgentParameters,
+    CollisionFreeSpeedModelV2,
+    CollisionFreeSpeedModelV2AgentParameters,
 )
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModel,
@@ -52,7 +52,7 @@ class Simulation:
         model: (
             CollisionFreeSpeedModel
             | GeneralizedCentrifugalForceModel
-            | CollisionFreeSpeedModelv2
+            | CollisionFreeSpeedModelV2
             | SocialForceModel
         ),
         geometry: (
@@ -70,7 +70,7 @@ class Simulation:
         """Creates a Simulation.
 
         Arguments:
-            model (CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel | CollisionFreeSpeedModelv2):
+            model (CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel | CollisionFreeSpeedModelV2):
                 Defines the operational model used in the simulation.
             geometry:
                 Data to create the geometry out of. Data may be supplied as:
@@ -107,8 +107,8 @@ class Simulation:
                 range_geometry_repulsion=model.range_geometry_repulsion,
             )
             py_jps_model = model_builder.build()
-        elif isinstance(model, CollisionFreeSpeedModelv2):
-            model_builder = py_jps.CollisionFreeSpeedModelv2Builder()
+        elif isinstance(model, CollisionFreeSpeedModelV2):
+            model_builder = py_jps.CollisionFreeSpeedModelV2Builder()
             py_jps_model = model_builder.build()
         elif isinstance(model, GeneralizedCentrifugalForceModel):
             model_builder = py_jps.GeneralizedCentrifugalForceModelBuilder(
@@ -247,7 +247,7 @@ class Simulation:
         parameters: (
             GeneralizedCentrifugalForceModelAgentParameters
             | CollisionFreeSpeedModelAgentParameters
-            | CollisionFreeSpeedModelv2AgentParameters
+            | CollisionFreeSpeedModelV2AgentParameters
             | SocialForceModelAgentParameters
         ),
     ) -> int:

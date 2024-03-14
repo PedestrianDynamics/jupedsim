@@ -14,8 +14,7 @@ namespace py = pybind11;
 
 void init_social_force_model(py::module_& m)
 {
-    py::class_<JPS_SocialForceModelAgentParameters>(
-        m, "SocialForceModelAgentParameters")
+    py::class_<JPS_SocialForceModelAgentParameters>(m, "SocialForceModelAgentParameters")
         .def(
             py::init([](std::tuple<double, double> position,
                         std::tuple<double, double> orientation,
@@ -60,7 +59,8 @@ void init_social_force_model(py::module_& m)
             return fmt::format(
                 "position: {}, orientation: {}, journey_id: {}, stage_id: {},"
                 "velocity: {}, mass: {}, desiredSpeed: {},"
-                "reactionTime: {}, agentScale: {}, obstacleScale: {}, forceDistance: {}, radius: {}",
+                "reactionTime: {}, agentScale: {}, obstacleScale: {}, forceDistance: {}, radius: "
+                "{}",
                 intoTuple(p.position),
                 intoTuple(p.orientation),
                 p.journeyId,
@@ -74,13 +74,11 @@ void init_social_force_model(py::module_& m)
                 p.forceDistance,
                 p.radius);
         });
-    py::class_<JPS_SocialForceModelBuilder_Wrapper>(
-        m, "SocialForceModelBuilder")
+    py::class_<JPS_SocialForceModelBuilder_Wrapper>(m, "SocialForceModelBuilder")
         .def(
             py::init([](double bodyForce, double friction) {
                 return std::make_unique<JPS_SocialForceModelBuilder_Wrapper>(
-                    JPS_SocialForceModelBuilder_Create(
-                        bodyForce, friction));
+                    JPS_SocialForceModelBuilder_Create(bodyForce, friction));
             }),
             py::kw_only(),
             py::arg("bodyForce"),
@@ -95,15 +93,13 @@ void init_social_force_model(py::module_& m)
             JPS_ErrorMessage_Free(errorMsg);
             throw std::runtime_error{msg};
         });
-    py::class_<JPS_SocialForceModelState_Wrapper>(
-        m, "SocialForceModelState")
+    py::class_<JPS_SocialForceModelState_Wrapper>(m, "SocialForceModelState")
         .def_property(
             "velocity",
             [](const JPS_SocialForceModelState_Wrapper& w) {
                 return intoTuple(JPS_SocialForceModelState_GetVelocity(w.handle));
             },
-            [](JPS_SocialForceModelState_Wrapper& w,
-             std::tuple<double, double> velocity) {
+            [](JPS_SocialForceModelState_Wrapper& w, std::tuple<double, double> velocity) {
                 JPS_SocialForceModelState_SetVelocity(w.handle, intoJPS_Point(velocity));
             })
         .def_property(

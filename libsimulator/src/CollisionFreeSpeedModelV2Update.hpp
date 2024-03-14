@@ -3,7 +3,7 @@
 #pragma once
 #include "Point.hpp"
 
-struct CollisionFreeSpeedModelv2Update {
+struct CollisionFreeSpeedModelV2Update {
     Point position{};
     Point orientation{};
 };
