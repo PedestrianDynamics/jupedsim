@@ -85,6 +85,7 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                 "   hash INTEGER NOT NULL, "
                 "   wkt TEXT NOT NULL)"
             )
+            cur.execute("CREATE UNIQUE INDEX geometry_hash on geometry( hash)")
             cur.execute(
                 "INSERT INTO geometry VALUES(?, ?)",
                 (hash(geo), geo),
@@ -154,9 +155,16 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                     ("ymax", str(max(ymax, float(old_ymax)))),
                 ],
             )
+
+            geo_wkt = simulation.get_geometry().as_wkt()
+            geo_hash = hash(geo_wkt)
+            cur.execute(
+                "INSERT OR IGNORE INTO geometry(hash, wkt) VALUES(?,?)",
+                (geo_hash, geo_wkt),
+            )
             cur.execute(
                 "INSERT INTO frame_data VALUES(?, ?)",
-                (frame, hash(simulation.get_geometry().as_wkt())),
+                (frame, geo_hash),
             )
             cur.execute("COMMIT")
         except sqlite3.Error as e:
