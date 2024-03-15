@@ -157,7 +157,7 @@ def run_test(test, args, build_dir, result_dir):
     perf_stats = pd.read_sql_query("SELECT * FROM perf_statistics", db)
 
     geometry_as_wkt = (
-        db.cursor().execute("SELECT * from geometry LIMIT 1").fetchone()[0]
+        db.cursor().execute("SELECT wkt from geometry LIMIT 1").fetchone()[0]
     )
     geometry = shapely.from_wkt(geometry_as_wkt)
 

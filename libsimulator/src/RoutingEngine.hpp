@@ -3,21 +3,22 @@
 #pragma once
 
 #include "AABB.hpp"
+#include "CfgCgal.hpp"
+#include "Clonable.hpp"
 #include "Graph.hpp"
 #include "IteratorPair.hpp"
 #include "LineSegment.hpp"
+#include "Mesh.hpp"
 #include "Point.hpp"
-#include "Triangle.hpp"
 
+#include <memory>
 #include <vector>
 
-#include <CGAL/Boolean_set_operations_2.h>
-
-class RoutingEngine
+class RoutingEngine : public Clonable<RoutingEngine>
 {
 public:
     RoutingEngine() = default;
-    virtual ~RoutingEngine() = default;
+    ~RoutingEngine() override = default;
 
     // TODO(kkratz): additional input parameters missing
     virtual Point ComputeWaypoint(Point currentPosition, Point destination) = 0;
@@ -31,8 +32,6 @@ public:
     // TODO(kkratz): input sources missing
     virtual void Update() = 0;
 
-    virtual std::unique_ptr<RoutingEngine> Clone() const = 0;
-
 protected:
     RoutingEngine(const RoutingEngine&) = default;
     RoutingEngine& operator=(const RoutingEngine&) = default;
@@ -41,30 +40,18 @@ protected:
     RoutingEngine& operator=(RoutingEngine&&) = default;
 };
 
-struct VertexData {
-    AABB aabb{};
-    Triangle triangle{};
-};
-
-struct EdgeData {
-    double weight;
-    LineSegment edge;
-};
-
 class NavMeshRoutingEngine : public RoutingEngine
 {
-public:
-    using GraphType = Graph<VertexData, EdgeData>;
-
-private:
-    GraphType _graph{};
+    CDT cdt{};
+    std::unique_ptr<Mesh> mesh{};
 
 public:
-    explicit NavMeshRoutingEngine(GraphType&& graph);
+    NavMeshRoutingEngine();
+    explicit NavMeshRoutingEngine(const PolyWithHoles& poly);
     ~NavMeshRoutingEngine() override = default;
 
-    NavMeshRoutingEngine(const NavMeshRoutingEngine& other) = default;
-    NavMeshRoutingEngine& operator=(const NavMeshRoutingEngine& other) = default;
+    NavMeshRoutingEngine(const NavMeshRoutingEngine& other) = delete;
+    NavMeshRoutingEngine& operator=(const NavMeshRoutingEngine& other) = delete;
 
     NavMeshRoutingEngine(NavMeshRoutingEngine&& other) = default;
     NavMeshRoutingEngine& operator=(NavMeshRoutingEngine&& other) = default;
@@ -75,14 +62,10 @@ public:
     bool IsRoutable(Point p) const override;
     void Update() override;
 
-    /// This is designed for debugging purposes.
-    /// @return a copy of all triangles that make up the accessible area.
-    std::vector<Triangle> Mesh() const;
-
-    /// This is designed for debugging purposes.
-    /// @return vector of edgedata
-    std::vector<EdgeData> EdgesFor(GraphType::VertexId id) const;
+    const Mesh* MeshData() const { return mesh.get(); };
 
 private:
-    GraphType::VertexId findVertex(Point p) const;
+    CDT::Face_handle find_face(K::Point_2) const;
+    std::vector<Point>
+    straightenPath(Point from, Point to, const std::vector<CDT::Face_handle>& path);
 };

@@ -1,5 +1,7 @@
 # Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
+import math
+
 from jupedsim_visualizer.config import ZLayers
 from vtkmodules.vtkCommonCore import vtkCommand, vtkPoints
 from vtkmodules.vtkCommonDataModel import (
@@ -24,6 +26,7 @@ class MoveController:
         self.navi = None
         self.actor = None
         self.interactor_style = interactor_style
+        self.dist = 0
         interactor_style.AddObserver(vtkCommand.CharEvent, self._on_char)
 
         interactor_style.AddObserver(
@@ -107,6 +110,7 @@ class MoveController:
         self.lmb_pressed = False
         self.route_from = None
         self.route_to = None
+        self.dist = 0
 
     def _render_path(self):
         if not self.navi:
@@ -129,6 +133,11 @@ class MoveController:
             return
 
         points = self.navi.compute_waypoints(self.route_from, self.route_to)
+
+        self.dist = 0
+        for a, b in zip(points[:-1], points[1:]):
+            self.dist += math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+
         vtk_points = vtkPoints()
         polyline = vtkPolyLine()
         polyline.GetPointIds().SetNumberOfIds(len(points))

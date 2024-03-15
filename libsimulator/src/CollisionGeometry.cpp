@@ -84,7 +84,7 @@ size_t CountLineSegments(const PolyWithHoles& poly)
     return count;
 }
 
-Point fromPoint_2(const Kernel::Point_2& p)
+Point fromPoint_2(const K::Point_2& p)
 {
     return {CGAL::to_double(p.x()), CGAL::to_double(p.y())};
 }
@@ -205,7 +205,7 @@ bool CollisionGeometry::IntersectsAny(const LineSegment& linesegment) const
 
 bool CollisionGeometry::InsideGeometry(Point p) const
 {
-    return CGAL::oriented_side(Kernel::Point_2(p.x, p.y), _accessibleAreaPolygon) !=
+    return CGAL::oriented_side(K::Point_2(p.x, p.y), _accessibleAreaPolygon) !=
            CGAL::ON_NEGATIVE_SIDE;
 }
 

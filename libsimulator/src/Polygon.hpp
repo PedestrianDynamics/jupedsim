@@ -2,14 +2,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "CfgCgal.hpp"
 #include "Point.hpp"
-
-#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
-#include <CGAL/Polygon_2.h>
-
 class Polygon
 {
-    using PolygonType = CGAL::Polygon_2<CGAL::Exact_predicates_exact_constructions_kernel>;
+    using PolygonType = Poly;
 
     PolygonType _polygon;
 

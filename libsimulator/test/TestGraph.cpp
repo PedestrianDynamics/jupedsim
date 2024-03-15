@@ -5,50 +5,58 @@
 
 #include <gtest/gtest.h>
 
-struct Edge {
-    double weight;
-};
-using GraphType = Graph<int, Edge>;
-
-TEST(Graph, CanConstructFromEmptyBuilder)
+TEST(DirectedGraph, CanConstructWithVoidData)
 {
-    ASSERT_NO_THROW(auto g = GraphType::Builder().Build());
+    DirectedGraph<>::Builder g{};
+    ASSERT_NO_FATAL_FAILURE(g.Build());
 }
 
-TEST(Graph, CanConstructFromBuilder)
+TEST(DirectedGraph, CanConstructSimpleGraphWithVoidData)
 {
-    GraphType::Builder b{};
-    const auto vt1 = b.AddVertex(1);
-    const auto vt2 = b.AddVertex(2);
-    const auto vt3 = b.AddVertex(3);
-    b.AddEdge(vt1, vt2, {1});
-    b.AddEdge(vt2, vt3, {1});
-    const auto g = b.Build();
-    ASSERT_EQ(g.Vertex(vt1), 1);
-    ASSERT_EQ(g.Vertex(vt2), 2);
-    ASSERT_EQ(g.Vertex(vt3), 3);
+    DirectedGraph<>::Builder g{};
+    const auto v1 = g.AddVertex();
+    const auto v2 = g.AddVertex();
+    const auto v3 = g.AddVertex();
+    const auto v4 = g.AddVertex();
+    g.AddEdge(v1, v2);
+    g.AddEdge(v1, v3);
+    g.AddEdge(v2, v4);
+    g.AddEdge(v3, v4);
+    g.AddEdge(v4, v1);
+    const auto graph = g.Build();
+    ASSERT_EQ(graph.Edges(v1).size(), 2);
+    ASSERT_EQ(graph.Edges(v2).size(), 1);
+    ASSERT_EQ(graph.Edges(v3).size(), 1);
+    ASSERT_EQ(graph.Edges(v4).size(), 1);
 }
 
-TEST(Graph, CanComuteShortestPath)
+TEST(DirectedGraph, CanConstructSimpleGraphWithData)
 {
-    GraphType::Builder b{};
-    const auto vt1 = b.AddVertex(1);
-    const auto vt2 = b.AddVertex(2);
-    const auto vt3 = b.AddVertex(3);
-    const auto vt4 = b.AddVertex(4);
-    b.AddEdge(vt1, vt2, {99});
-    b.AddEdge(vt2, vt1, {99});
+    using Graph = DirectedGraph<std::string, std::string>;
+    Graph::Builder g{};
+    const auto v1 = g.AddVertex("V1");
+    const auto v2 = g.AddVertex("V2");
+    const auto v3 = g.AddVertex("V3");
+    const auto v4 = g.AddVertex("V4");
+    g.AddEdge(v1, v2, "V1->V2");
+    g.AddEdge(v1, v3, "V1->V3");
+    g.AddEdge(v2, v4, "V2->V4");
+    g.AddEdge(v3, v4, "V3->V4");
+    g.AddEdge(v4, v1, "V4->V1");
+    const auto graph = g.Build();
+    ASSERT_EQ(graph.Edges(v1).size(), 2);
+    ASSERT_EQ(graph.Edges(v2).size(), 1);
+    ASSERT_EQ(graph.Edges(v3).size(), 1);
+    ASSERT_EQ(graph.Edges(v4).size(), 1);
+    ASSERT_EQ(graph.VertexData(v1), "V1");
+    ASSERT_EQ(graph.VertexData(v2), "V2");
+    ASSERT_EQ(graph.VertexData(v3), "V3");
+    ASSERT_EQ(graph.VertexData(v4), "V4");
 
-    b.AddEdge(vt2, vt3, {1});
-    b.AddEdge(vt3, vt1, {1});
-
-    b.AddEdge(vt3, vt4, {1});
-    b.AddEdge(vt4, vt3, {1});
-
-    b.AddEdge(vt1, vt4, {1});
-    b.AddEdge(vt4, vt1, {1});
-
-    auto g = b.Build();
-    ASSERT_EQ(g.NextVertexTo(vt1, vt4), vt4);
-    ASSERT_EQ(g.NextVertexTo(vt4, vt4), vt4);
+    std::set<std::string> expected_v1_out_edges{"V1->V2", "V1->V3"};
+    std::set<std::string> actual{};
+    for(const auto& e : graph.Edges(v1)) {
+        actual.insert(std::get<1>(e));
+    }
+    ASSERT_EQ(expected_v1_out_edges, actual);
 }

@@ -47,7 +47,7 @@ class RenderWidget(QVTKRenderWindowInteractor):
 
         self.move_controller = MoveController(style, cam)
         self.move_controller.set_navi(self.navi)
-        self.hover_info = HoverInfo(geo, self.ren, style)
+        self.hover_info = HoverInfo(geo, self.ren, style, self.move_controller)
         self.hover_info.hovered.connect(self.on_hover_triangle)
 
         self.grid = Grid(self.ren, cam)

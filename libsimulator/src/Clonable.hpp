@@ -9,4 +9,7 @@ class Clonable
 {
 public:
     virtual std::unique_ptr<T> Clone() const = 0;
+
+protected:
+    virtual ~Clonable() = default;
 };
