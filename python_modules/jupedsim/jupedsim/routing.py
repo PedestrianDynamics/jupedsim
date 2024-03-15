@@ -73,16 +73,25 @@ class RoutingEngine:
 
     def mesh(
         self,
-    ) -> list[
-        tuple[tuple[float, float], tuple[float, float], tuple[float, float]]
-    ]:
+    ) -> tuple[list[tuple[float, float]], list[list[int]]]:
         """Access the navigation mesh geometry.
 
-        The navigation mesh is store as a collection of triangles in CCW order.
+        The navigation mesh is store as a collection of convex polygons in CCW order.
+
+        The returned data is to be interpreted as:
+
+        .. code::
+
+            tuple[
+                list[tuple[float, float]], # All vertices in this mesh.
+                list[ # List of polygons
+                    list[int] # List of indices into the vertices that compose this polygon in CCW order
+                ]
+            ]
 
         Returns:
-            The triangles composing the navigation mesh. Each triangle is encoded as 3-tuple of points.
-
+            A tuple of vertices and list of polygons which in turn are a list of indices
+            tuple[list[tuple[float, float]],list[list[int]]]
         """
         return self._obj.mesh()
 

@@ -1,15 +1,12 @@
 # Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
+import math
 import sys
 
 from jupedsim_visualizer.config import Colors, ZLayers
 from PySide6.QtCore import QObject, Signal
 from vtkmodules.vtkCommonCore import vtkCommand, vtkIntArray, vtkPoints
-from vtkmodules.vtkCommonDataModel import (
-    vtkCellArray,
-    vtkPolyData,
-    vtkTriangle,
-)
+from vtkmodules.vtkCommonDataModel import vtkCellArray, vtkPolyData, vtkPolygon
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import (
     vtkActor,
@@ -25,31 +22,30 @@ from jupedsim.internal.aabb import AABB
 class Geometry:
     def __init__(self, navi: RoutingEngine):
         self.navi = navi
-        triangle_points = vtkPoints()
-        triangles = vtkCellArray()
-        triangle_data = vtkIntArray()
+        vertices = vtkPoints()
+        polygons = vtkCellArray()
 
-        for idx, tri in enumerate(self.navi.mesh()):
-            triangle_points.InsertNextPoint(tri[0][0], tri[0][1], ZLayers.geo)
-            triangle_points.InsertNextPoint(tri[1][0], tri[1][1], ZLayers.geo)
-            triangle_points.InsertNextPoint(tri[2][0], tri[2][1], ZLayers.geo)
-            triangle = vtkTriangle()
-            triangle.GetPointIds().SetId(0, idx * 3)
-            triangle.GetPointIds().SetId(1, idx * 3 + 1)
-            triangle.GetPointIds().SetId(2, idx * 3 + 2)
-            triangles.InsertNextCell(triangle)
-            triangle_data.InsertNextValue(idx)
+        mesh = self.navi.mesh()
 
-        triangle_poly_data = vtkPolyData()
-        triangle_poly_data.SetPoints(triangle_points)
-        triangle_poly_data.SetPolys(triangles)
-        triangle_poly_data.GetCellData().AddArray(triangle_data)
+        for v in mesh[0]:
+            vertices.InsertNextPoint(v[0], v[1], ZLayers.geo)
 
-        triangle_mapper = vtkPolyDataMapper()
-        triangle_mapper.SetInputData(triangle_poly_data)
+        for idx, p in enumerate(mesh[1]):
+            poly = vtkPolygon()
+            poly.GetPointIds().SetNumberOfIds(len(p))
+            for idx, idx_p in enumerate(p):
+                poly.GetPointIds().SetId(idx, idx_p)
+            polygons.InsertNextCell(poly)
+
+        poly_data = vtkPolyData()
+        poly_data.SetPoints(vertices)
+        poly_data.SetPolys(polygons)
+
+        mapper = vtkPolyDataMapper()
+        mapper.SetInputData(poly_data)
 
         actor = vtkActor()
-        actor.SetMapper(triangle_mapper)
+        actor.SetMapper(mapper)
         actor.GetProperty().SetColor(Colors.c)
         actor.GetProperty().SetEdgeColor(Colors.a)
         self.actor = actor
@@ -83,6 +79,7 @@ class HoverInfo(QObject):
         geo: Geometry,
         renderer: vtkRenderer,
         interactor_style: vtkInteractorStyleUser,
+        move_controller=None,
     ):
         QObject.__init__(self)
         self.geo = geo
@@ -94,6 +91,7 @@ class HoverInfo(QObject):
         )
         self.picker.InitializePickList()
         self.picker.AddPickList(self.geo.actor)
+        self.move_controller = move_controller
 
     def on_mouse_move(self, obj, evt):
         interactor = obj.GetInteractor()
@@ -102,5 +100,8 @@ class HoverInfo(QObject):
         cell_id = self.picker.GetCellId()
         x, y, _ = self.picker.GetPickPosition()
         cell_text = str(f"Nav ID: {cell_id}" if cell_id != -1 else "")
-        text = f"x: {x:.2f} y: {y:.2f} {cell_text}"
+        path_text = ""
+        if self.move_controller:
+            path_text = str(f"Path length: {self.move_controller.dist}")
+        text = f"x: {x:.2f} y: {y:.2f} {cell_text} {path_text}"
         self.hovered.emit(text)

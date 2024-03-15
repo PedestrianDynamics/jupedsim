@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "CfgCgal.hpp"
 #include "HashCombine.hpp"
 #include "IteratorPair.hpp"
 #include "LineSegment.hpp"
@@ -11,13 +12,6 @@
 #include <set>
 #include <unordered_map>
 #include <vector>
-
-#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
-#include <CGAL/Polygon_with_holes_2.h>
-
-using Kernel = CGAL::Exact_predicates_exact_constructions_kernel;
-using PolyWithHoles = CGAL::Polygon_with_holes_2<Kernel>;
-using Poly = CGAL::Polygon_2<Kernel>;
 
 class CollisionGeometry;
 

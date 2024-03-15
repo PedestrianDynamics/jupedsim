@@ -130,7 +130,7 @@ class MainWindow(QMainWindow):
             polygon = shapely.from_wkt(Path(file).read_text(encoding="UTF-8"))
             navi = jps.RoutingEngine(polygon)
             xmin, ymin, xmax, ymax = polygon.bounds
-            info_text = f"Dimensions: {math.ceil(xmax - xmin)}m x {math.ceil(ymax - ymin)}m Triangles: {len(navi.mesh())}"
+            info_text = f"Dimensions: {math.ceil(xmax - xmin)}m x {math.ceil(ymax - ymin)}m Polygons: {len(navi.mesh()[1])}"
             name_text = f"Geometry: {file}"
             self.setUpdatesEnabled(False)
             geo = Geometry(navi)

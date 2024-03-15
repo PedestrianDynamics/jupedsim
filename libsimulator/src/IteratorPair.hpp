@@ -6,6 +6,7 @@
 ///
 /// Provides begin and end method required for range based for loops.
 /// _it_second must be reachable by _it_first.
+#include <iterator>
 template <typename IteratorFirst, typename IteratorSecond = IteratorFirst>
 class IteratorPair
 {
@@ -22,4 +23,5 @@ public:
     IteratorSecond end() const { return second(); }
 
     bool empty() const { return _it_first == _it_second; }
+    size_t size() const { return std::distance(_it_first, _it_second); }
 };

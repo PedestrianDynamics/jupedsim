@@ -12,34 +12,75 @@
 extern "C" {
 #endif
 
-struct JPS_Path {
+/**
+ * A path inside the walkable area.
+ */
+typedef struct JPS_Path {
+    /**
+     * Number of points in this path
+     */
     size_t len;
+    /**
+     * JPS_Points in this path.
+     */
     const JPS_Point* points;
-};
+} JPS_Path;
 
-JUPEDSIM_API void JPS_Path_Free(JPS_Path* path);
+/**
+ * Frees memory held by JPS_Path
+ *
+ * @param path to free its memory.
+ */
+JUPEDSIM_API void JPS_Path_Free(JPS_Path path);
 
-struct JPS_Triangle {
-    JPS_Point points[3];
-};
-
-struct JPS_TriangleMesh {
+/**
+ * Describes a polygon in terms of indices of vertices belonging to a JPS_Mesh.
+ */
+typedef struct JPS_Polygon_Desc {
+    /**
+     * Offset point to the beginning of this polygons indices in the JPS_Mesh indices array.
+     */
+    size_t offset;
+    /**
+     * Number of vertices in this polygon
+     */
     size_t len;
-    JPS_Triangle* triangles;
-};
+} JPS_Polygon_Desc;
 
-JUPEDSIM_API void JPS_TriangleMesh_Free(JPS_TriangleMesh* mesh);
+/**
+ * Describes a polygonal mesh.
+ * Each polygon in the mesh is defined in CCW order.
+ * Each vertex is stored once and referred by index in each polygon.
+ */
+typedef struct JPS_Mesh {
+    /**
+     * Number of vertices in this mesh
+     */
+    size_t vertices_len;
+    /**
+     * The vertex data
+     */
+    JPS_Point* vertices;
+    /**
+     * Number of polygons in this mesh
+     */
+    size_t polygons_len;
+    /**
+     * Definitions of all polygons in this mesh
+     */
+    JPS_Polygon_Desc* polygons;
+    /**
+     * Array of all vertex indices used by the polygons.
+     * Length of this array is sum of all polygon indices.
+     * (Sum of all JPS_Polygon_Desc.len)
+     */
+    uint16_t* indices;
+} JPS_Mesh;
 
-struct JPS_Line {
-    JPS_Point points[2];
-};
-
-struct JPS_Lines {
-    size_t len;
-    JPS_Line* lines;
-};
-
-JUPEDSIM_API void JPS_Lines_Free(JPS_Lines* lines);
+/**
+ * Frees the memory held by JPS_Mesh
+ */
+JUPEDSIM_API void JPS_Mesh_Free(JPS_Mesh mesh);
 
 /**
  * WARNING this is currently a NavMeshRoutingEngine! This does not account possible other types of
@@ -54,10 +95,7 @@ JPS_RoutingEngine_ComputeWaypoint(JPS_RoutingEngine handle, JPS_Point from, JPS_
 
 JUPEDSIM_API bool JPS_RoutingEngine_IsRoutable(JPS_RoutingEngine handle, JPS_Point p);
 
-JUPEDSIM_API JPS_TriangleMesh JPS_RoutingEngine_Mesh(JPS_RoutingEngine handle);
-
-/// Note: Currently the ID is the index of the vertex from 'JPS_RoutingEngine_Mesh'
-JUPEDSIM_API JPS_Lines JPS_RoutingEngine_EdgesFor(JPS_RoutingEngine handle, uint32_t id);
+JUPEDSIM_API JPS_Mesh JPS_RoutingEngine_Mesh(JPS_RoutingEngine handle);
 
 JUPEDSIM_API void JPS_RoutingEngine_Free(JPS_RoutingEngine handle);
 
