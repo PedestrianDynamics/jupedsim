@@ -203,22 +203,22 @@ jobs:
           - os: windows-latest
             cibw_archs: "auto64"
             cibw_build: "cp312-*"
-          - os: macos-latest
+          - os: macos-12
             cibw_archs: "x86_64"
             cibw_build: "cp310-*"
-          - os: macos-latest
+          - os: macos-12
             cibw_archs: "x86_64"
             cibw_build: "cp311-*"
-          - os: macos-latest
+          - os: macos-12
             cibw_archs: "x86_64"
             cibw_build: "cp312-*"
-          - os: macos-latest
+          - os: macos-12
             cibw_archs: "arm64"
             cibw_build: "cp310-*"
-          - os: macos-latest
+          - os: macos-12
             cibw_archs: "arm64"
             cibw_build: "cp311-*"
-          - os: macos-latest
+          - os: macos-12
             cibw_archs: "arm64"
             cibw_build: "cp312-*"
 
@@ -242,7 +242,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-14]
+        os: [ubuntu-latest, windows-latest, macos-12, macos-14]
         python-version: ["3.10", "3.11", "3.12"]
 
     steps:
