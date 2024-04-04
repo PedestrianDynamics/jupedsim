@@ -23,7 +23,6 @@ add_library(py_jupedsim MODULE
 target_link_libraries(py_jupedsim
     PRIVATE
         pybind11::module
-        pybind11::lto
         pybind11::windows_extras
         fmt::fmt
         jupedsim_obj
@@ -41,5 +40,7 @@ set_target_properties(py_jupedsim
     PROPERTIES
         CXX_VISIBILITY_PRESET "hidden"
         CUDA_VISIBILITY_PRESET "hidden"
+        INTERPROCEDURAL_OPTIMIZATION ${USE_IPO}
+        INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF
 )
 

@@ -2,7 +2,7 @@
 # libfmt
 ################################################################################
 set(FMT_INSTALL OFF)
-add_subdirectory(fmt-10.1.1)
+add_subdirectory(fmt-10.2.1)
 set_target_properties(fmt PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     SYSTEM ON
@@ -37,7 +37,7 @@ find_package(CGAL 5.5
     CONFIG
     NO_DEFAULT_PATH
     PATHS
-    ${CMAKE_CURRENT_SOURCE_DIR}/cgal-5.6.0
+    ${CMAKE_CURRENT_SOURCE_DIR}/cgal-5.6.1
 )
 
 ################################################################################
@@ -45,7 +45,9 @@ find_package(CGAL 5.5
 ################################################################################
 set(Python_FIND_VIRTUALENV "FIRST")
 find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
-add_subdirectory(pybind11-2.11.1)
+set(PYBIND11_SIMPLE_GIL_MANAGEMENT ON)
+set(PYBIND11_NUMPY_1_ONLY ON)
+add_subdirectory(pybind11-2.12.0)
 set(Python_EXECUTABLE ${Python_EXECUTABLE} PARENT_SCOPE)
 
 ################################################################################
@@ -70,4 +72,4 @@ endif ()
 # glm
 ################################################################################
 set(GLM_ENABLE_CXX_20 ON CACHE BOOL "" FORCE)
-add_subdirectory(glm-1.0.0)
+add_subdirectory(glm-1.0.1)
