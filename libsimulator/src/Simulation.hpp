@@ -64,7 +64,7 @@ public:
     Simulation(Simulation&& other) = delete;
     Simulation& operator=(Simulation&& other) = delete;
     ~Simulation() = default;
-    const SimulationClock& Clock() const;
+    SimulationClock& Clock();
     void SetTracing(bool on);
     PerfStats GetLastStats() const;
     void Iterate();

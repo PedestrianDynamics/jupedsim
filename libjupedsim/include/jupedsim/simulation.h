@@ -378,6 +378,9 @@ JUPEDSIM_API bool JPS_Simulation_SwitchGeometry(
     JPS_AgentIdIterator* faultyAgents,
     JPS_ErrorMessage* errorMessage);
 
+JUPEDSIM_API bool
+JPS_Simulation_SetDeltaTime(JPS_Simulation handle, double dt, JPS_ErrorMessage* errorMessage);
+
 /**
  * Frees a JPS_Simulation.
  * @param handle to the JPS_Simulation to free.

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "SimulationClock.hpp"
 
-#include <chrono>
+#include "SimulationError.hpp"
 
 SimulationClock::SimulationClock(double dT) : _dT(dT)
 {
@@ -26,4 +26,12 @@ uint64_t SimulationClock::Iteration() const
 double SimulationClock::dT() const
 {
     return _dT;
+}
+
+void SimulationClock::UpdateDT(double newDT)
+{
+    if(newDT < 0.0) {
+        throw SimulationError("Simulation dt may only be positive");
+    }
+    _dT = newDT;
 }

@@ -473,3 +473,12 @@ class Simulation:
         """
         internal_geometry = build_geometry(geometry)
         self._obj.switch_geometry(internal_geometry._obj)
+
+    def set_delta_time(self, dt: float) -> bool:
+        """Set the simulations delta time.
+
+        Arguments:
+            dt: new delta time to use
+
+        """
+        return self._obj.set_delta_time(dt)

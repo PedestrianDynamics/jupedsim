@@ -666,6 +666,31 @@ bool JPS_Simulation_SwitchGeometry(
             *faultyAgents =
                 reinterpret_cast<JPS_AgentIdIterator>(new AgentIdIterator(ex.FaultyAgents()));
         }
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return result;
+}
+
+bool JPS_Simulation_SetDeltaTime(JPS_Simulation handle, double dt, JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    auto simulation = reinterpret_cast<Simulation*>(handle);
+    bool result = false;
+    try {
+        simulation->Clock().UpdateDT(dt);
+        result = true;
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
     } catch(...) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(

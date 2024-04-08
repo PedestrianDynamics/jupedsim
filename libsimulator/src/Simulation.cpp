@@ -26,7 +26,7 @@ Simulation::Simulation(
     // TODO(kkratz): Ensure all areas are fully contained inside the walkable area. Otherwise an
     // agent may try to navigate to a point outside the navigation mesh, resulting in an exception.
 }
-const SimulationClock& Simulation::Clock() const
+SimulationClock& Simulation::Clock()
 {
     return _clock;
 }

@@ -347,12 +347,24 @@ void init_simulation(py::module_& m)
             [](const JPS_Simulation_Wrapper& w) {
                 return std::make_unique<JPS_Geometry_Wrapper>(JPS_Simulation_GetGeometry(w.handle));
             })
-        .def("switch_geometry", [](JPS_Simulation_Wrapper& w, JPS_Geometry_Wrapper& geometry) {
+        .def(
+            "switch_geometry",
+            [](JPS_Simulation_Wrapper& w, JPS_Geometry_Wrapper& geometry) {
+                JPS_ErrorMessage errorMsg{};
+
+                auto success =
+                    JPS_Simulation_SwitchGeometry(w.handle, geometry.handle, nullptr, &errorMsg);
+
+                if(!success) {
+                    auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                    JPS_ErrorMessage_Free(errorMsg);
+                    throw std::runtime_error{msg};
+                }
+                return success;
+            })
+        .def("set_delta_time", [](JPS_Simulation_Wrapper& w, double delta_time) {
             JPS_ErrorMessage errorMsg{};
-
-            auto success =
-                JPS_Simulation_SwitchGeometry(w.handle, geometry.handle, nullptr, &errorMsg);
-
+            auto success = JPS_Simulation_SetDeltaTime(w.handle, delta_time, &errorMsg);
             if(!success) {
                 auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
                 JPS_ErrorMessage_Free(errorMsg);
