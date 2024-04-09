@@ -218,6 +218,7 @@ endif()
 add_subdirectory(libjupedsim)
 add_subdirectory(libcommon)
 add_subdirectory(libsimulator)
+add_subdirectory(libdistance)
 add_subdirectory(python_bindings_jupedsim)
 
 ################################################################################
