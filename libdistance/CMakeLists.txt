@@ -1,4 +1,6 @@
-add_library(distance INTERFACE)
+add_library(distance INTERFACE
+    src/DistanceMap.hpp
+)
 target_include_directories(distance
     INTERFACE 
         ${CMAKE_CURRENT_SOURCE_DIR}/src
