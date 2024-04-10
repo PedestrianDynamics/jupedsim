@@ -4,6 +4,7 @@ graft cmake_templates
 graft libcommon
 graft libjupedsim
 graft libsimulator
+graft libdistance
 graft python_bindings_jupedsim
 graft python_modules/jupedsim
 graft third-party
