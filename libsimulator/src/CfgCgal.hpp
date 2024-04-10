@@ -11,6 +11,7 @@
 #include <CGAL/draw_triangulation_2.h>
 #include <CGAL/mark_domain_in_triangulation.h>
 
+#include <functional>
 #include <list>
 
 // using K = CGAL::Exact_predicates_exact_constructions_kernel;
@@ -42,3 +43,18 @@ public:
 using TDS = CGAL::Triangulation_data_structure_2<Vb, MyFace<K>>;
 using Itag = CGAL::Exact_predicates_tag;
 using CDT = CGAL::Constrained_Delaunay_triangulation_2<K, TDS, Itag>;
+
+namespace std
+{
+template <>
+class hash<PolyWithHoles>
+{
+public:
+    size_t operator()(const PolyWithHoles& p) const
+    {
+        std::stringstream ss{};
+        ss << p;
+        return std::hash<std::string>()(ss.str());
+    }
+};
+} // namespace std

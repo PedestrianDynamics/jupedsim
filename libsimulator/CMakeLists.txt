@@ -31,8 +31,6 @@ add_library(simulator STATIC
     src/GeneralizedCentrifugalForceModelUpdate.hpp
     src/GenericAgent.hpp
     src/GeometricFunctions.hpp
-    src/Geometry.cpp
-    src/Geometry.hpp
     src/GeometryBuilder.cpp
     src/GeometryBuilder.hpp
     src/GeometrySwitchError.hpp

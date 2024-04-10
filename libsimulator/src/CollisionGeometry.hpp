@@ -6,9 +6,8 @@
 #include "HashCombine.hpp"
 #include "IteratorPair.hpp"
 #include "LineSegment.hpp"
+#include "UniqueID.hpp"
 
-#include <map>
-#include <optional>
 #include <set>
 #include <unordered_map>
 #include <vector>
@@ -90,6 +89,11 @@ std::set<Cell> cellsFromLineSegment(LineSegment ls);
 
 class CollisionGeometry
 {
+public:
+    using ID = jps::UniqueID<CollisionGeometry>;
+
+private:
+    ID _id{};
     PolyWithHoles _accessibleAreaPolygon;
     std::vector<LineSegment> _segments;
     std::unordered_map<Cell, std::set<LineSegment>> _grid{};
@@ -128,6 +132,10 @@ public:
     bool InsideGeometry(Point p) const;
 
     const std::tuple<std::vector<Point>, std::vector<std::vector<Point>>>& AccessibleArea() const;
+
+    const PolyWithHoles& Polygon() const { return _accessibleAreaPolygon; }
+
+    ID Id() const { return _id; }
 
 private:
     void insertIntoApproximateGrid(const LineSegment& ls);

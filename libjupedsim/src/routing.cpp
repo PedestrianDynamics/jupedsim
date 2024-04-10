@@ -4,7 +4,7 @@
 
 #include "Conversion.hpp"
 
-#include <Geometry.hpp>
+#include <CollisionGeometry.hpp>
 #include <RoutingEngine.hpp>
 
 #include <algorithm>
@@ -38,14 +38,14 @@ JUPEDSIM_API void JPS_Mesh_Free(JPS_Mesh mesh)
 ////////////////////////////////////////////////////////////////////////////////
 JUPEDSIM_API JPS_RoutingEngine JPS_RoutingEngine_Create(JPS_Geometry geometry)
 {
-    auto* geo = reinterpret_cast<const Geometry*>(geometry);
-    return reinterpret_cast<JPS_RoutingEngine>(geo->routingEngine->Clone().release());
+    auto* geo = reinterpret_cast<const CollisionGeometry*>(geometry);
+    return reinterpret_cast<JPS_RoutingEngine>(new RoutingEngine(geo->Polygon()));
 }
 
 JUPEDSIM_API JPS_Path
 JPS_RoutingEngine_ComputeWaypoint(JPS_RoutingEngine handle, JPS_Point from, JPS_Point to)
 {
-    auto* engine = reinterpret_cast<NavMeshRoutingEngine*>(handle);
+    auto* engine = reinterpret_cast<RoutingEngine*>(handle);
     const auto path = engine->ComputeAllWaypoints(intoPoint(from), intoPoint(to));
     auto points = new JPS_Point[path.size()];
     JPS_Path p{path.size(), points};
@@ -56,13 +56,13 @@ JPS_RoutingEngine_ComputeWaypoint(JPS_RoutingEngine handle, JPS_Point from, JPS_
 
 JUPEDSIM_API bool JPS_RoutingEngine_IsRoutable(JPS_RoutingEngine handle, JPS_Point p)
 {
-    const auto* engine = reinterpret_cast<NavMeshRoutingEngine*>(handle);
+    const auto* engine = reinterpret_cast<RoutingEngine*>(handle);
     return engine->IsRoutable(intoPoint(p));
 }
 
 JUPEDSIM_API JPS_Mesh JPS_RoutingEngine_Mesh(JPS_RoutingEngine handle)
 {
-    const auto* engine = reinterpret_cast<NavMeshRoutingEngine*>(handle);
+    const auto* engine = reinterpret_cast<RoutingEngine*>(handle);
     const auto mesh = engine->MeshData();
 
     JPS_Mesh result{};
@@ -96,5 +96,5 @@ JUPEDSIM_API JPS_Mesh JPS_RoutingEngine_Mesh(JPS_RoutingEngine handle)
 
 JUPEDSIM_API void JPS_RoutingEngine_Free(JPS_RoutingEngine handle)
 {
-    delete reinterpret_cast<NavMeshRoutingEngine*>(handle);
+    delete reinterpret_cast<RoutingEngine*>(handle);
 }

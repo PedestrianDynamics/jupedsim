@@ -7,7 +7,7 @@
 #include "Conversion.hpp"
 #include "ErrorMessage.hpp"
 
-#include <Geometry.hpp>
+#include <CollisionGeometry.hpp>
 #include <GeometryBuilder.hpp>
 
 using jupedsim::detail::intoJPS_Point;
@@ -55,7 +55,7 @@ JPS_Geometry JPS_GeometryBuilder_Build(JPS_GeometryBuilder handle, JPS_ErrorMess
     auto builder = reinterpret_cast<GeometryBuilder*>(handle);
     JPS_Geometry result{};
     try {
-        result = reinterpret_cast<JPS_Geometry>(new Geometry(builder->Build()));
+        result = reinterpret_cast<JPS_Geometry>(new CollisionGeometry(builder->Build()));
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
@@ -80,32 +80,31 @@ void JPS_GeometryBuilder_Free(JPS_GeometryBuilder handle)
 size_t JPS_Geometry_GetBoundarySize(JPS_Geometry handle)
 {
     assert(handle);
-    const auto geo = reinterpret_cast<Geometry const*>(handle);
-    return std::get<0>(geo->collisionGeometry->AccessibleArea()).size();
+    const auto geo = reinterpret_cast<CollisionGeometry const*>(handle);
+    return std::get<0>(geo->AccessibleArea()).size();
 }
 
 const JPS_Point* JPS_Geometry_GetBoundaryData(JPS_Geometry handle)
 {
     assert(handle);
-    const auto geo = reinterpret_cast<Geometry const*>(handle);
-    return reinterpret_cast<const JPS_Point*>(
-        std::get<0>(geo->collisionGeometry->AccessibleArea()).data());
+    const auto geo = reinterpret_cast<CollisionGeometry const*>(handle);
+    return reinterpret_cast<const JPS_Point*>(std::get<0>(geo->AccessibleArea()).data());
 }
 
 size_t JPS_Geometry_GetHoleCount(JPS_Geometry handle)
 {
     assert(handle);
-    const auto geo = reinterpret_cast<Geometry const*>(handle);
-    return std::get<1>(geo->collisionGeometry->AccessibleArea()).size();
+    const auto geo = reinterpret_cast<CollisionGeometry const*>(handle);
+    return std::get<1>(geo->AccessibleArea()).size();
 }
 
 size_t
 JPS_Geometry_GetHoleSize(JPS_Geometry handle, size_t hole_index, JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
-    const auto geo = reinterpret_cast<Geometry const*>(handle);
+    const auto geo = reinterpret_cast<CollisionGeometry const*>(handle);
     try {
-        return std::get<1>(geo->collisionGeometry->AccessibleArea()).at(hole_index).size();
+        return std::get<1>(geo->AccessibleArea()).at(hole_index).size();
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
@@ -123,10 +122,10 @@ const JPS_Point*
 JPS_Geometry_GetHoleData(JPS_Geometry handle, size_t hole_index, JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
-    const auto geo = reinterpret_cast<Geometry const*>(handle);
+    const auto geo = reinterpret_cast<CollisionGeometry const*>(handle);
     try {
         return reinterpret_cast<const JPS_Point*>(
-            std::get<1>(geo->collisionGeometry->AccessibleArea()).at(hole_index).data());
+            std::get<1>(geo->AccessibleArea()).at(hole_index).data());
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
@@ -142,5 +141,5 @@ JPS_Geometry_GetHoleData(JPS_Geometry handle, size_t hole_index, JPS_ErrorMessag
 
 void JPS_Geometry_Free(JPS_Geometry handle)
 {
-    delete reinterpret_cast<Geometry const*>(handle);
+    delete reinterpret_cast<CollisionGeometry const*>(handle);
 }

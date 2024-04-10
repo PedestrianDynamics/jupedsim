@@ -3,7 +3,6 @@
 #pragma once
 
 #include "GenericAgent.hpp"
-#include "Geometry.hpp"
 #include "IteratorPair.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"

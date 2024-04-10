@@ -4,35 +4,24 @@
 
 #include "AgentRemovalSystem.hpp"
 #include "GenericAgent.hpp"
-#include "Geometry.hpp"
 #include "Journey.hpp"
-#include "Logger.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalDecisionSystem.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
-#include "Polygon.hpp"
 #include "SimulationClock.hpp"
-#include "SimulationError.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
 #include "StageManager.hpp"
 #include "StageSystem.hpp"
 #include "StrategicalDesicionSystem.hpp"
 #include "TacticalDecisionSystem.hpp"
-#include "TemplateHelper.hpp"
 #include "Tracing.hpp"
-#include "Visitor.hpp"
 
 #include <boost/iterator/zip_iterator.hpp>
 
-#include <chrono>
-#include <exception>
-#include <iterator>
 #include <memory>
-#include <stdexcept>
-#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -46,8 +35,12 @@ class Simulation
     StageManager _stageManager{};
     StageSystem _stageSystem{};
     NeighborhoodSearch<GenericAgent> _neighborhoodSearch{2.2};
-    std::unique_ptr<RoutingEngine> _routingEngine;
-    std::unique_ptr<CollisionGeometry> _geometry;
+    std::unordered_map<
+        CollisionGeometry::ID,
+        std::tuple<std::unique_ptr<CollisionGeometry>, std::unique_ptr<RoutingEngine>>>
+        geometries{};
+    RoutingEngine* _routingEngine;
+    CollisionGeometry* _geometry;
     std::vector<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
     std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;
@@ -57,7 +50,6 @@ public:
     Simulation(
         std::unique_ptr<OperationalModel>&& operationalModel,
         std::unique_ptr<CollisionGeometry>&& geometry,
-        std::unique_ptr<RoutingEngine>&& routingEngine,
         double dT);
     Simulation(const Simulation& other) = delete;
     Simulation& operator=(const Simulation& other) = delete;
@@ -88,10 +80,8 @@ public:
     std::vector<GenericAgent>& Agents();
     OperationalModelType ModelType() const;
     StageProxy Stage(BaseStage::ID stageId);
-    Geometry Geo() const;
-    void SwitchGeometry(
-        std::unique_ptr<CollisionGeometry>&& geometry,
-        std::unique_ptr<RoutingEngine>&& routingEngine);
+    CollisionGeometry Geo() const;
+    void SwitchGeometry(std::unique_ptr<CollisionGeometry>&& geometry);
 
 private:
     void ValidateGeometry(const std::unique_ptr<CollisionGeometry>& geometry) const;
