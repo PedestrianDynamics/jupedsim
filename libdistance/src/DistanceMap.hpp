@@ -5,7 +5,6 @@
 #include <cmath>
 #include <concepts>
 #include <cstddef>
-#include <format>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -13,6 +12,8 @@
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
+
+#include <fmt/format.h>
 
 template <typename T>
 concept UnsignedIntegral = std::is_integral_v<T> && std::is_unsigned_v<T>;
@@ -291,11 +292,11 @@ void PrintDistanceMap(const std::vector<UI>& distance, size_t xDim, size_t yDim)
         for(size_t x = 0; x < xDim; ++x) {
             const auto& val = distance[ToIndex(x, y, xDim)];
             if(val == DistanceMap<UI, A>::FREE_SPACE) {
-                output += std::format("  -  ");
+                output += fmt::format("  -  ");
             } else if(val == DistanceMap<UI, A>::BLOCKED) {
-                output += std::format("  x  ");
+                output += fmt::format("  x  ");
             } else {
-                output += std::format("{:^4d} ", val);
+                output += fmt::format("{:^4d} ", val);
             }
         }
         output += '\n';
@@ -310,7 +311,7 @@ void PrintBoolDistanceMap(const std::vector<bool>& visited, size_t xDim, size_t 
     std::string output;
     for(I y = yDim - 1; y >= 0; --y) {
         for(size_t x = 0; x < xDim; ++x) {
-            output += std::format("{:^6} ", visited[ToIndex(x, y, xDim)]);
+            output += fmt::format("{:^6} ", static_cast<bool>(visited[ToIndex(x, y, xDim)]));
         }
         output += '\n';
     }
@@ -658,7 +659,7 @@ public:
 
         // compute bounding box -> mapping coordinate to grid cell
         const auto [xMin, yMin, xMax, yMax] = computeBoundingBox();
-        std::cout << std::format("x: {} - {}\ty: {} - {}\n", xMin, xMax, yMin, yMax);
+        std::cout << fmt::format("x: {} - {}\ty: {} - {}\n", xMin, xMax, yMin, yMax);
 
         //        auto distanceMap = std::make_unique<DistanceMap<T, U>>(xMin, yMin, xMax, yMax);
         auto xDim = computeXGridSize(xMin, xMax);

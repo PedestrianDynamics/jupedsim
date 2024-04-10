@@ -5,6 +5,9 @@ target_include_directories(distance
     INTERFACE 
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+target_link_libraries(distance INTERFACE
+    fmt::fmt
+)
 
 set_property(TARGET distance PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
 set_property(TARGET distance PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
