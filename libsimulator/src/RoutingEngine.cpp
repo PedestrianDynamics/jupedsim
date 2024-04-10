@@ -33,11 +33,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 // NavMeshRoutingEngine
 ////////////////////////////////////////////////////////////////////////////////
-NavMeshRoutingEngine::NavMeshRoutingEngine()
+RoutingEngine::RoutingEngine()
 {
 }
 
-NavMeshRoutingEngine::NavMeshRoutingEngine(const PolyWithHoles& poly)
+RoutingEngine::RoutingEngine(const PolyWithHoles& poly)
 {
     cdt.insert_constraint(
         poly.outer_boundary().vertices_begin(), poly.outer_boundary().vertices_end(), true);
@@ -48,15 +48,15 @@ NavMeshRoutingEngine::NavMeshRoutingEngine(const PolyWithHoles& poly)
     mesh = std::make_unique<Mesh>(cdt);
 }
 
-std::unique_ptr<RoutingEngine> NavMeshRoutingEngine::Clone() const
+std::unique_ptr<RoutingEngine> RoutingEngine::Clone() const
 {
-    auto clone = std::make_unique<NavMeshRoutingEngine>();
+    auto clone = std::make_unique<RoutingEngine>();
     clone->cdt = cdt;
     clone->mesh = mesh->Clone();
     return clone;
 }
 
-Point NavMeshRoutingEngine::ComputeWaypoint(Point currentPosition, Point destination)
+Point RoutingEngine::ComputeWaypoint(Point currentPosition, Point destination)
 {
     return ComputeAllWaypoints(currentPosition, destination)[1];
 }
@@ -109,8 +109,7 @@ double length_of_path(const std::vector<Point>& path)
     return segment_sum;
 }
 
-std::vector<Point>
-NavMeshRoutingEngine::ComputeAllWaypoints(Point currentPosition, Point destination)
+std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Point destination)
 {
     const auto from_pos = CDT::Point{currentPosition.x, currentPosition.y};
     const auto to_pos = CDT::Point{destination.x, destination.y};
@@ -243,7 +242,7 @@ NavMeshRoutingEngine::ComputeAllWaypoints(Point currentPosition, Point destinati
     return path;
 }
 
-bool NavMeshRoutingEngine::IsRoutable(Point p) const
+bool RoutingEngine::IsRoutable(Point p) const
 {
     try {
         find_face({p.x, p.y});
@@ -253,11 +252,11 @@ bool NavMeshRoutingEngine::IsRoutable(Point p) const
     return true;
 }
 
-void NavMeshRoutingEngine::Update()
+void RoutingEngine::Update()
 {
 }
 
-CDT::Face_handle NavMeshRoutingEngine::find_face(K::Point_2 p) const
+CDT::Face_handle RoutingEngine::find_face(K::Point_2 p) const
 {
     const auto face = cdt.locate(p);
     if(face == nullptr || cdt.is_infinite(face) || !face->get_in_domain()) {
@@ -269,10 +268,8 @@ CDT::Face_handle NavMeshRoutingEngine::find_face(K::Point_2 p) const
     return face;
 }
 
-std::vector<Point> NavMeshRoutingEngine::straightenPath(
-    Point from,
-    Point to,
-    const std::vector<CDT::Face_handle>& path)
+std::vector<Point>
+RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_handle>& path)
 {
     // TODO(kkratz): Remove the 0.2m edge width adjustment and replace this with p[roper
     // arc-paths from the "Efficient Triangulation-Based Pathfinding" publication

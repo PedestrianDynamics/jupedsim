@@ -10,7 +10,7 @@
 #include "ErrorMessage.hpp"
 #include "JourneyDescription.hpp"
 
-#include <Geometry.hpp>
+#include <CollisionGeometry.hpp>
 #include <GeometrySwitchError.hpp>
 #include <Simulation.hpp>
 #include <Unreachable.hpp>
@@ -34,15 +34,11 @@ JPS_Simulation JPS_Simulation_Create(
     assert(geometry);
     JPS_Simulation result{};
     try {
-        auto geometryInternal = reinterpret_cast<const Geometry*>(geometry);
-        auto collisionGeometry =
-            std::make_unique<CollisionGeometry>(*geometryInternal->collisionGeometry);
-        auto routingEngine = geometryInternal->routingEngine->Clone();
-
+        auto collisionGeometry = reinterpret_cast<const CollisionGeometry*>(geometry);
         auto modelInternal = reinterpret_cast<OperationalModel*>(model);
         auto model = modelInternal->Clone();
         result = reinterpret_cast<JPS_Simulation>(new Simulation(
-            std::move(model), std::move(collisionGeometry), std::move(routingEngine), dT));
+            std::move(model), std::make_unique<CollisionGeometry>(*collisionGeometry), dT));
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
@@ -636,7 +632,7 @@ JPS_Geometry JPS_Simulation_GetGeometry(JPS_Simulation handle)
 {
     assert(handle);
     const auto simulation = reinterpret_cast<const Simulation*>(handle);
-    return reinterpret_cast<JPS_Geometry>(new Geometry(simulation->Geo()));
+    return reinterpret_cast<JPS_Geometry>(new CollisionGeometry(simulation->Geo()));
 }
 
 bool JPS_Simulation_SwitchGeometry(
@@ -649,14 +645,11 @@ bool JPS_Simulation_SwitchGeometry(
     assert(geometry);
 
     auto simulation = reinterpret_cast<Simulation*>(handle);
-    auto geometryInternal = reinterpret_cast<const Geometry*>(geometry);
-    auto collisionGeometry =
-        std::make_unique<CollisionGeometry>(*geometryInternal->collisionGeometry);
-    auto routingEngine = geometryInternal->routingEngine->Clone();
+    auto collisionGeometry = reinterpret_cast<const CollisionGeometry*>(geometry);
 
     bool result = false;
     try {
-        simulation->SwitchGeometry(std::move(collisionGeometry), std::move(routingEngine));
+        simulation->SwitchGeometry(std::make_unique<CollisionGeometry>(*collisionGeometry));
         result = true;
     } catch(const GeometrySwitchError& ex) {
         if(errorMessage) {

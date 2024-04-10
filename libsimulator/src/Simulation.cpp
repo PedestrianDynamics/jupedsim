@@ -1,30 +1,33 @@
 // Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Simulation.hpp"
-#include "CollisionFreeSpeedModelData.hpp"
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "GeometrySwitchError.hpp"
 #include "IteratorPair.hpp"
-#include "Logger.hpp"
 #include "OperationalModel.hpp"
 #include "Stage.hpp"
 #include "Visitor.hpp"
+
 #include <memory>
 #include <variant>
 
 Simulation::Simulation(
     std::unique_ptr<OperationalModel>&& operationalModel,
     std::unique_ptr<CollisionGeometry>&& geometry,
-    std::unique_ptr<RoutingEngine>&& routingEngine,
     double dT)
-    : _clock(dT)
-    , _operationalDecisionSystem(std::move(operationalModel))
-    , _routingEngine(std::move(routingEngine))
-    , _geometry(std::move(geometry))
+    : _clock(dT), _operationalDecisionSystem(std::move(operationalModel))
 {
-    // TODO(kkratz): Ensure all areas are fully contained inside the walkable area. Otherwise an
-    // agent may try to navigate to a point outside the navigation mesh, resulting in an exception.
+    const auto p = geometry->Polygon();
+    const auto& [tup, res] = geometries.emplace(
+        std::piecewise_construct,
+        std::forward_as_tuple(geometry->Id()),
+        std::forward_as_tuple(std::move(geometry), std::make_unique<RoutingEngine>(p)));
+    if(!res) {
+        throw SimulationError("Internal error");
+    }
+    _geometry = std::get<0>(tup->second).get();
+    _routingEngine = std::get<1>(tup->second).get();
 }
 const SimulationClock& Simulation::Clock() const
 {
@@ -179,7 +182,7 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
     }
 
     agent.orientation = agent.orientation.Normalized();
-    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry.get());
+    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry);
 
     if(_journeys.count(agent.journeyId) == 0) {
         throw SimulationError("Unknown journey id: {}", agent.journeyId);
@@ -321,18 +324,29 @@ StageProxy Simulation::Stage(BaseStage::ID stageId)
 {
     return _stageManager.Stage(stageId)->Proxy(this);
 }
-Geometry Simulation::Geo() const
+CollisionGeometry Simulation::Geo() const
 {
-    return {std::make_unique<CollisionGeometry>(*_geometry), _routingEngine->Clone()};
+    return *_geometry;
 }
 
-void Simulation::SwitchGeometry(
-    std::unique_ptr<CollisionGeometry>&& geometry,
-    std::unique_ptr<RoutingEngine>&& routingEngine)
+void Simulation::SwitchGeometry(std::unique_ptr<CollisionGeometry>&& geometry)
 {
     ValidateGeometry(geometry);
-    _geometry = std::move(geometry);
-    _routingEngine = std::move(routingEngine);
+    if(const auto& iter = geometries.find(geometry->Id()); iter != std::end(geometries)) {
+        _geometry = std::get<0>(iter->second).get();
+        _routingEngine = std::get<1>(iter->second).get();
+    } else {
+        const auto p = geometry->Polygon();
+        const auto& [tup, res] = geometries.emplace(
+            std::piecewise_construct,
+            std::forward_as_tuple(geometry->Id()),
+            std::forward_as_tuple(std::move(geometry), std::make_unique<RoutingEngine>(p)));
+        if(!res) {
+            throw SimulationError("Internal error");
+        }
+        _geometry = std::get<0>(tup->second).get();
+        _routingEngine = std::get<1>(tup->second).get();
+    }
 }
 
 void Simulation::ValidateGeometry(const std::unique_ptr<CollisionGeometry>& geometry) const

@@ -4,7 +4,7 @@
 
 #include "CollisionGeometry.hpp"
 #include "Stage.hpp"
-#include <unordered_map>
+#include "StageManager.hpp"
 
 class StageSystem
 {

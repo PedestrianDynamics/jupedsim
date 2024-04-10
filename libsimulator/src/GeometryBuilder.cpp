@@ -4,9 +4,6 @@
 
 #include "CfgCgal.hpp"
 #include "CollisionGeometry.hpp"
-#include "Geometry.hpp"
-#include "Graph.hpp"
-#include "LineSegment.hpp"
 #include "Point.hpp"
 #include "RoutingEngine.hpp"
 #include "SimulationError.hpp"
@@ -14,9 +11,7 @@
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 
-#include <algorithm>
 #include <memory>
-#include <stdexcept>
 #include <vector>
 
 GeometryBuilder& GeometryBuilder::AddAccessibleArea(const std::vector<Point>& lineLoop)
@@ -31,7 +26,7 @@ GeometryBuilder& GeometryBuilder::ExcludeFromAccessibleArea(const std::vector<Po
     return *this;
 }
 
-Geometry GeometryBuilder::Build()
+CollisionGeometry GeometryBuilder::Build()
 {
     const std::vector<Poly> accessibleListInput{
         std::begin(_accessibleAreas), std::end(_accessibleAreas)};
@@ -64,8 +59,5 @@ Geometry GeometryBuilder::Build()
         accessibleArea = *res.begin();
     }
 
-    std::unique_ptr<CollisionGeometry> collisionGeometry =
-        std::make_unique<CollisionGeometry>(accessibleArea);
-
-    return {std::move(collisionGeometry), std::make_unique<NavMeshRoutingEngine>(accessibleArea)};
+    return CollisionGeometry(accessibleArea);
 }

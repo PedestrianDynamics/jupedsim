@@ -4,18 +4,16 @@
 #include <benchmark/benchmark.h>
 
 #include "CollisionGeometry.hpp"
-#include "GeometryBuilder.hpp"
-#include "LineSegment.hpp"
 #include "buildGeometries.hpp"
 
 template <class... Args>
 void bmLineSegmentsInDistanceTo(benchmark::State& state, Args&&... args)
 {
     auto args_tuple = std::make_tuple(std::move(args)...);
-    auto geometry = std::move(std::get<Geometry>(args_tuple));
+    auto geometry = std::move(std::get<CollisionGeometry>(args_tuple));
 
     for(auto _ : state) {
-        benchmark::DoNotOptimize(geometry.collisionGeometry->LineSegmentsInDistanceTo(5., {0, 0}));
+        benchmark::DoNotOptimize(geometry.LineSegmentsInDistanceTo(5., {0, 0}));
         benchmark::ClobberMemory();
     }
 }
@@ -24,11 +22,10 @@ template <class... Args>
 void bmLineSegmentsInApproxDistanceTo(benchmark::State& state, Args&&... args)
 {
     auto args_tuple = std::make_tuple(std::move(args)...);
-    auto geometry = std::move(std::get<Geometry>(args_tuple));
+    auto geometry = std::move(std::get<CollisionGeometry>(args_tuple));
 
     for(auto _ : state) {
-        benchmark::DoNotOptimize(
-            geometry.collisionGeometry->LineSegmentsInApproxDistanceTo({0, 0}));
+        benchmark::DoNotOptimize(geometry.LineSegmentsInApproxDistanceTo({0, 0}));
         benchmark::ClobberMemory();
     }
 }

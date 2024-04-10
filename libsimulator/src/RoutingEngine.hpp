@@ -14,53 +14,30 @@
 #include <memory>
 #include <vector>
 
+using LocationID = size_t;
+using Location = std::variant<Point, LocationID>;
+
 class RoutingEngine : public Clonable<RoutingEngine>
-{
-public:
-    RoutingEngine() = default;
-    ~RoutingEngine() override = default;
-
-    // TODO(kkratz): additional input parameters missing
-    virtual Point ComputeWaypoint(Point currentPosition, Point destination) = 0;
-    virtual std::vector<Point> ComputeAllWaypoints(Point currentPosition, Point destination) = 0;
-
-    /// Checks if supplied point is inside the routable space.
-    /// @@param p Point to validate
-    /// @return boolean IsRoutable?
-    virtual bool IsRoutable(Point p) const = 0;
-
-    // TODO(kkratz): input sources missing
-    virtual void Update() = 0;
-
-protected:
-    RoutingEngine(const RoutingEngine&) = default;
-    RoutingEngine& operator=(const RoutingEngine&) = default;
-
-    RoutingEngine(RoutingEngine&&) = default;
-    RoutingEngine& operator=(RoutingEngine&&) = default;
-};
-
-class NavMeshRoutingEngine : public RoutingEngine
 {
     CDT cdt{};
     std::unique_ptr<Mesh> mesh{};
 
 public:
-    NavMeshRoutingEngine();
-    explicit NavMeshRoutingEngine(const PolyWithHoles& poly);
-    ~NavMeshRoutingEngine() override = default;
+    RoutingEngine();
+    explicit RoutingEngine(const PolyWithHoles& poly);
+    ~RoutingEngine() override = default;
 
-    NavMeshRoutingEngine(const NavMeshRoutingEngine& other) = delete;
-    NavMeshRoutingEngine& operator=(const NavMeshRoutingEngine& other) = delete;
+    RoutingEngine(const RoutingEngine& other) = delete;
+    RoutingEngine& operator=(const RoutingEngine& other) = delete;
 
-    NavMeshRoutingEngine(NavMeshRoutingEngine&& other) = default;
-    NavMeshRoutingEngine& operator=(NavMeshRoutingEngine&& other) = default;
+    RoutingEngine(RoutingEngine&& other) = default;
+    RoutingEngine& operator=(RoutingEngine&& other) = default;
 
     std::unique_ptr<RoutingEngine> Clone() const override;
-    Point ComputeWaypoint(Point currentPosition, Point destination) override;
-    std::vector<Point> ComputeAllWaypoints(Point currentPosition, Point destination) override;
-    bool IsRoutable(Point p) const override;
-    void Update() override;
+    Point ComputeWaypoint(Point currentPosition, Point destination);
+    std::vector<Point> ComputeAllWaypoints(Point currentPosition, Point destination);
+    bool IsRoutable(Point p) const;
+    void Update();
 
     const Mesh* MeshData() const { return mesh.get(); };
 
