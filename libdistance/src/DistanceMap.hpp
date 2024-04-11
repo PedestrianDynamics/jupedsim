@@ -5,15 +5,16 @@
 #include <cmath>
 #include <concepts>
 #include <cstddef>
+#include <fmt/format.h>
+#include <fstream>
 #include <iostream>
 #include <map>
 #include <memory>
 #include <queue>
+#include <span>
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
-
-#include <fmt/format.h>
 
 template <typename T>
 concept UnsignedIntegral = std::is_integral_v<T> && std::is_unsigned_v<T>;
@@ -75,6 +76,15 @@ inline std::pair<size_t, size_t> FromIndex(size_t i, size_t xDim)
     return {x, y};
 }
 
+template <UnsignedIntegral UI, Arithmetic A>
+std::pair<size_t, size_t> ToGrid(UI x, UI y, A xMin, A yMin);
+
+template <UnsignedIntegral UI, Arithmetic A>
+std::pair<size_t, size_t> ToGrid(Point<A> p, A xMin, A yMin);
+
+template <UnsignedIntegral UI, Arithmetic A>
+std::pair<A, A> ToWorld(size_t i, size_t j, A xMin, A yMin);
+
 template <UnsignedIntegral UI>
 class Map
 {
@@ -93,52 +103,89 @@ public:
 
     size_t Height() const { return height; }
     size_t Width() const { return width; }
+
+    std::span<const UI> Data() const { return std::span{data}; };
+
+    size_t Size() const { return data.size(); }
 };
 
+template <UnsignedIntegral UI>
+class MapStencilView
+{
+private:
+    using SignedSizeT = typename std::make_signed_t<size_t>;
+
+    static constexpr UI OUT_OF_BOUNDS = std::numeric_limits<UI>::max();
+    const Map<UI>& map;
+
+    size_t centerX;
+    size_t centerY;
+    size_t blockSize;
+
+public:
+    MapStencilView(const Map<UI>& map, size_t centerX, size_t centerY, size_t blockSize)
+        : map(map), centerX(centerX), centerY(centerY), blockSize(blockSize){};
+
+    UI At(SignedSizeT x, SignedSizeT y) const
+    {
+        assert(std::abs(x) <= blockSize);
+        assert(std::abs(y) <= blockSize);
+
+        SignedSizeT xMapped = centerX + x;
+        SignedSizeT yMapped = centerY + y;
+
+        if(xMapped < 0 || xMapped > map.Width() || yMapped < 0 || yMapped > map.Height()) {
+            return OUT_OF_BOUNDS;
+        }
+
+        return map.At(xMapped, yMapped);
+    }
+};
 /**
  * Distance Map
  *
  * Index -> Grid cell center
  *
- * @tparam T
- * @tparam U
+ * @tparam UI
+ * @tparam A
  */
-template <UnsignedIntegral T, Arithmetic U>
+template <UnsignedIntegral UI, Arithmetic A>
 class DistanceMap
 {
 private:
-    using SignedT = typename std::make_signed_t<T>; // Get the corresponding signed type
+    using SignedT = typename std::make_signed_t<UI>; // Get the corresponding signed type
+    using SignedSizeT = typename std::make_signed_t<size_t>; // Get the corresponding signed type
 
     // TODO(TS) data type
-    U xMin{};
-    U xMax{};
-    U yMin{};
-    U yMax{};
+    A xMin{};
+    A xMax{};
+    A yMin{};
+    A yMax{};
 
-    T xDim{};
-    T yDim{};
+    UI xDim{};
+    UI yDim{};
 
-    std::vector<T> distance{};
+    Map<UI> distance{};
 
-    Map<T> personToIntermediate;
-
+    Map<UI> personToIntermediate{};
+//    Map<UI> personToIntermediateFull{};
 public:
-    static constexpr U CELL_SIZE = 0.2; // in meter
+    static constexpr A CELL_SIZE = 0.2; // in meter
     static constexpr size_t BLOCK_SIZE = 11; // size of one quadrant
-    static constexpr T CELL_SIZE_CM = DistanceMap<T, U>::CELL_SIZE * 100;
+    static constexpr UI CELL_SIZE_CM = DistanceMap<UI, A>::CELL_SIZE * 100;
 
-    static constexpr T FREE_SPACE = std::numeric_limits<T>::max();
-    static constexpr T BLOCKED = std::numeric_limits<T>::max() - 1;
+    static constexpr UI FREE_SPACE = std::numeric_limits<UI>::max();
+    static constexpr UI BLOCKED = std::numeric_limits<UI>::max() - 1;
 
     DistanceMap(
-        U xMin,
-        U yMin,
-        U xMax,
-        U yMax,
-        T xDim,
-        T yDim,
-        std::vector<T> distance,
-        Map<T> personToIntermediate)
+        A xMin,
+        A yMin,
+        A xMax,
+        A yMax,
+        UI xDim,
+        UI yDim,
+        Map<UI> distance,
+        Map<UI> personToIntermediate)
         : xMin(xMin)
         , yMin(yMin)
         , xMax(xMax)
@@ -148,46 +195,54 @@ public:
         , distance(std::move(distance))
         , personToIntermediate(std::move(personToIntermediate))
     {
+
     }
 
-    std::pair<size_t, size_t> GridSize() const { return {xDim, yDim}; }
+//    std::pair<size_t, size_t> GridSize() const { return {xDim, yDim}; }
+//    UI GetValue(A x, A y) const {}
+//    UI GetValue(size_t i, size_t j) const {}
 
-    T GetValue(U x, U y) const;
-    T GetValue(size_t i, size_t j) const;
-
-    class Proxy
+    Point<A> GetNextTarget(Point<A> position) const
     {
-        DistanceMap& map;
-        size_t x;
+        const auto [currentX, currentY] = ToGrid<UI, A>(position, xMin, yMin);
+        const auto centerValue = distance.At(currentX, currentY);
+        Map<UI> surplusDistanceToExit(DistanceMap<UI, A>::BLOCK_SIZE, DistanceMap<UI, A>::BLOCK_SIZE)
 
-    public:
-        Proxy(DistanceMap& map, size_t x) : map(map), x(x) {}
 
-        T& operator[](size_t y)
-        {
-            assert(y < map.yDim && "y index out of bounds.");
-            return map.distance[x + map.xDim * y];
-        }
-    };
-
-    // Overload the [] operator to return a Proxy instance for row access
-    Proxy operator[](size_t x)
-    {
-        assert(x < xDim && "x index out of bounds.");
-        return Proxy(*this, x);
-    }
-
-    Point<U> GetNextTarget(Point<U> position)
-    {
         // get local distances (all quadrants) -> localDist
-        // get stencil around position (values from distance map) -> distance
 
-        // localDist + distance -> distanceToExit
+        // get stencil around position (values from distance map) -> distance
+        MapStencilView<UI> distanceStencil(
+            distance, currentX, currentY, DistanceMap<UI, A>::BLOCK_SIZE);
 
         // distanceToExit - (value at position) -> surplusDistanceToExit
 
-        // find 0 value with largest distance to center in surplusDistanceToExit
-        //
+
+        // find 0 value with the largest distance to center in surplusDistanceToExit
+
+
+        std::string output;
+        output += "Distance stencil\n";
+        for(SignedSizeT y = DistanceMap<UI, A>::BLOCK_SIZE;
+            y >= static_cast<SignedSizeT>(-DistanceMap<UI, A>::BLOCK_SIZE);
+            --y) {
+            for(SignedSizeT x = -DistanceMap<UI, A>::BLOCK_SIZE;
+                x <= static_cast<SignedSizeT>(DistanceMap<UI, A>::BLOCK_SIZE);
+                ++x) {
+                const auto& val = distanceStencil.At(x, y);
+                if(val == DistanceMap<UI, A>::FREE_SPACE) {
+                    output += fmt::format("  -  ");
+                } else if(val == DistanceMap<UI, A>::BLOCKED) {
+                    output += fmt::format("  x  ");
+                } else {
+                    output += fmt::format("{:^4d} ", val);
+                }
+            }
+            output += '\n';
+        }
+        std::cout << output << "\n";
+        return position;
+
     }
 
 private:
@@ -227,7 +282,8 @@ private:
     //
     //        // Step size for drawing (smaller = more precise)
     //        double thetaStep =
-    //            1.0 / static_cast<double>(radius); // Adjust based on radius for smoother curves
+    //            1.0 / static_cast<double>(radius); // Adjust based on radius for smoother
+    //            curves
     //
     //        for(double theta = startRad; theta <= endRad; theta += thetaStep) {
     //            size_t x = static_cast<size_t>(round(xCenter + radius * cos(theta)));
@@ -262,8 +318,8 @@ private:
     //
     //                if((y >= y1 && y < y2) || (y < y1 && y >= y2)) {
     //                    int xIntersect =
-    //                        static_cast<int>(x1 + (y - y1) * (double) (x2 - x1) / (double) (y2 -
-    //                        y1));
+    //                        static_cast<int>(x1 + (y - y1) * (double) (x2 - x1) / (double) (y2
+    //                        - y1));
     //                    xIntersections.push_back(xIntersect);
     //                }
     //            }
@@ -282,15 +338,74 @@ private:
     //    }
 };
 
+template <UnsignedIntegral UI>
+void DumpDistanceMapMatplotlibCSV(const Map<UI>& map)
+{
+    std::ofstream file("dump.csv");
+    for(size_t y = 0; y < map.Height(); ++y) {
+        for(size_t x = 0; x < map.Width(); ++x) {
+            file << map.At(x, y);
+            if(x < map.Width() - 1) {
+                file << ",";
+            }
+        }
+        file << "\n";
+    }
+
+    file.close();
+}
+
 template <UnsignedIntegral UI, Arithmetic A>
-void PrintDistanceMap(const std::vector<UI>& distance, size_t xDim, size_t yDim)
+std::vector<char> DumpDistanceMap(const Map<UI>& map)
+{
+    const auto max = *std::max_element(
+        std::begin(map.Data()), std::end(map.Data()), [](const auto& lhs, const auto& rhs) {
+            if(lhs == DistanceMap<UI, A>::BLOCKED || lhs == DistanceMap<UI, A>::FREE_SPACE) {
+                return true;
+            }
+            return lhs < rhs;
+        });
+
+    std::vector<char> bytes(3 * map.Data().size());
+    auto ptrBytes = bytes.data();
+
+    for(const auto value : map.Data()) {
+        if(value == DistanceMap<UI, A>::BLOCKED) {
+            *ptrBytes++ = 255;
+            *ptrBytes++ = 0;
+            *ptrBytes++ = 0;
+        } else if(value == DistanceMap<UI, A>::FREE_SPACE || value == 0) {
+            *ptrBytes++ = 0;
+            *ptrBytes++ = 255;
+            *ptrBytes++ = 0;
+        } else {
+            *ptrBytes++ = 0;
+            *ptrBytes++ = 0;
+            *ptrBytes++ = static_cast<char>(
+                static_cast<double>(value) / static_cast<double>(max) *
+                std::numeric_limits<char>::max());
+        }
+    }
+    //    std::transform(
+    //        std::begin(map.Data()), std::end(map.Data()), std::begin(bytes), [&max](const UI&
+    //        value) {
+    //            return static_cast<char>(static_cast<double>(value)/static_cast<double>(max) *
+    //            std::numeric_limits<char>::max());
+    //        });
+    return bytes;
+}
+
+template <UnsignedIntegral UI, Arithmetic A>
+void PrintDistanceMap(const Map<UI>& distance)
 {
     using I = typename std::make_signed_t<UI>; // Get the corresponding signed type
+    const auto xDim = distance.Width();
+    const auto yDim = distance.Height();
 
     std::string output;
     for(I y = yDim - 1; y >= 0; --y) {
         for(size_t x = 0; x < xDim; ++x) {
-            const auto& val = distance[ToIndex(x, y, xDim)];
+            const auto& val = distance.At(x, y);
             if(val == DistanceMap<UI, A>::FREE_SPACE) {
                 output += fmt::format("  -  ");
             } else if(val == DistanceMap<UI, A>::BLOCKED) {
@@ -415,45 +530,37 @@ private:
     U upPadding{0};
     U downPadding{0};
 
-    void MarkObstacles(
-        std::vector<T>& distance,
-        size_t xDim,
-        size_t yDim,
-        U xMin,
-        U yMin,
-        T fillValue = DistanceMap<T, U>::BLOCKED) const
+    void
+    MarkObstacles(Map<T>& distance, U xMin, U yMin, T fillValue = DistanceMap<T, U>::BLOCKED) const
     {
         // mark lines
         for(const auto& line : lines) {
-            MarkLine(distance, xDim, yDim, xMin, yMin, line, DistanceMap<T, U>::BLOCKED);
+            MarkLine(distance, xMin, yMin, line, DistanceMap<T, U>::BLOCKED);
         }
 
         // mark arcs
         // mark circles
     }
 
-    void
-    MarkExits(std::vector<T>& distance, size_t xDim, size_t yDim, U xMin, U yMin, T fillValue = 0)
-        const
+    void MarkExits(Map<T>& distance, U xMin, U yMin, T fillValue = 0) const
     {
         // mark exit lines
         for(const auto& exitLine : exitLines) {
-            MarkLine(distance, xDim, yDim, xMin, yMin, exitLine, 0);
+            MarkLine(distance, xMin, yMin, exitLine, 0);
         }
 
         // mark exit polygons
     }
 
     void MarkLine(
-        std::vector<T>& distance,
-        size_t xDim,
-        size_t yDim,
+        Map<T>& distance,
         U xMin,
         U yMin,
         Line<U> line,
         T fillValue = DistanceMap<T, U>::BLOCKED) const
     {
-
+        const auto xDim = distance.Width();
+        const auto yDim = distance.Height();
         const auto [i1, j1] = ToGrid<T, U>(line.p1, xMin, yMin);
         const auto [i2, j2] = ToGrid<T, U>(line.p2, xMin, yMin);
 
@@ -469,7 +576,7 @@ private:
 
         while(true) {
             if(i >= 0 && i < xDim && j >= 0 && j < yDim) {
-                distance[ToIndex(i, j, xDim)] = fillValue;
+                distance.At(i, j) = fillValue;
             }
 
             if(i == i2 && j == j2)
@@ -495,28 +602,29 @@ private:
     void MarkArc(Arc<U> arc, T fillValue = DistanceMap<T, U>::BLOCKED) const;
     void MarkPolygon(Arc<U> arc, T fillValue = DistanceMap<T, U>::BLOCKED) const;
 
-    void
-    PrepareDistanceMap(std::vector<T>& distance, size_t xDim, size_t yDim, U xMin, U yMin) const
+    void PrepareDistanceMap(Map<T>& distance, U xMin, U yMin) const
     {
-        MarkObstacles(distance, xDim, yDim, xMin, yMin);
-        MarkExits(distance, xDim, yDim, xMin, yMin);
+        MarkObstacles(distance, xMin, yMin);
+        MarkExits(distance, xMin, yMin);
     }
 
-    void ComputeDistanceMap(
-        std::vector<T>& distance,
-        size_t xDim,
-        size_t yDim,
-        const Map<T>& localDistance) const
+    void ComputeDistanceMap(Map<T>& distance, const Map<T>& localDistance) const
     {
-        std::vector<bool> visited(distance.size(), false);
+        const auto xDim = distance.Width();
+        const auto yDim = distance.Height();
 
+        std::vector<bool> visited(distance.Size(), false);
+
+        //        PrintDistanceMap<T, U>(localDistance);
         std::queue<std::pair<size_t, size_t>> queue;
 
         // find zero values and put in queue, mark as visited
-        for(size_t i = 0; i < distance.size(); ++i) {
-            if(distance[i] == 0) {
+
+        for(size_t i = 0; i < distance.Size(); ++i) {
+            const auto [x, y] = FromIndex(i, xDim);
+            if(distance.At(x, y) == 0) {
                 visited[i] = true;
-                queue.emplace(FromIndex(i, xDim));
+                queue.emplace(x, y);
             }
         }
 
@@ -525,6 +633,8 @@ private:
             const auto [idx_x, idx_y] = queue.front();
             queue.pop();
             UpdateDistances(distance, xDim, yDim, idx_x, idx_y, localDistance);
+            //            std::cout << fmt::format("computed {} {}\n", idx_x, idx_y);
+            //            PrintDistanceMap<T, U>(distance);
 
             const auto signed_idx_x = static_cast<int64_t>(idx_x);
             const auto signed_idx_y = static_cast<int64_t>(idx_y);
@@ -536,7 +646,10 @@ private:
 
                     if(neighbor_idx_x >= 0 && neighbor_idx_x < xDim && neighbor_idx_y >= 0 &&
                        neighbor_idx_y < yDim &&
-                       !visited[ToIndex(neighbor_idx_x, neighbor_idx_y, xDim)]) {
+                       !visited[ToIndex(neighbor_idx_x, neighbor_idx_y, xDim)] &&
+                       distance.At(neighbor_idx_x, neighbor_idx_y) != DistanceMap<T, U>::BLOCKED &&
+                       distance.At(neighbor_idx_x, neighbor_idx_y) !=
+                           DistanceMap<T, U>::FREE_SPACE) {
                         queue.emplace(neighbor_idx_x, neighbor_idx_y);
                         visited[ToIndex(neighbor_idx_x, neighbor_idx_y, xDim)] = true;
                     }
@@ -546,22 +659,30 @@ private:
     }
 
     void UpdateDistances(
-        std::vector<T>& distance,
+        Map<T>& distance,
         size_t xDim,
         size_t yDim,
         size_t x,
         size_t y,
         const Map<T>& localDistance) const
     {
-        const auto centerValue = distance[ToIndex(x, y, xDim)];
+        const auto centerValue = distance.At(x, y);
 
         // spiral movement in to out
         const int movementDirections[2] = {-1, 1};
 
         for(const auto yMovementDirection : movementDirections) {
-            const auto yLimit = ((0.5 * DistanceMap<T, U>::BLOCK_SIZE + 1) * yMovementDirection);
+            const auto yLimit =
+                static_cast<SignedT>(DistanceMap<T, U>::BLOCK_SIZE - 1) * yMovementDirection;
+            //            const auto yLimit = ((0.5 * DistanceMap<T, U>::BLOCK_SIZE + 1) *
+            //            yMovementDirection);
+
             for(const auto xMovementDirection : movementDirections) {
-                auto xLimit = ((0.5 * DistanceMap<T, U>::BLOCK_SIZE + 1) * xMovementDirection);
+                auto xLimit =
+                    static_cast<SignedT>(DistanceMap<T, U>::BLOCK_SIZE - 1) * xMovementDirection;
+                //                auto xLimit = ((0.5 * DistanceMap<T, U>::BLOCK_SIZE + 1) *
+                //                xMovementDirection);
+
                 auto xObstacle = std::numeric_limits<T>::max();
 
                 for(int yDisplacement = 0; std::abs(yDisplacement) <= std::abs(yLimit);
@@ -578,7 +699,7 @@ private:
                             break;
                         }
 
-                        const auto valueCurrent = distance[ToIndex(xCurrent, yCurrent, xDim)];
+                        const auto valueCurrent = distance.At(xCurrent, yCurrent);
 
                         if(valueCurrent == DistanceMap<T, U>::BLOCKED) {
                             xObstacle = xCurrent;
@@ -592,23 +713,10 @@ private:
                         const auto candidateValue =
                             centerValue +
                             localDistance.At(std::abs(xDisplacement), std::abs(yDisplacement));
-                        //                            std::sqrt(
-                        //                                std::pow(
-                        //                                    std::abs(
-                        //                                        xDisplacement *
-                        //                                        static_cast<SignedT>(DistanceMap<T,
-                        //                                        U>::CELL_SIZE_CM)),
-                        //                                    2) +
-                        //                                std::pow(
-                        //                                    std::abs(
-                        //                                        yDisplacement *
-                        //                                        static_cast<SignedT>(DistanceMap<T,
-                        //                                        U>::CELL_SIZE_CM)),
-                        //                                    2));
 
                         if(valueCurrent == DistanceMap<T, U>::FREE_SPACE ||
                            candidateValue < valueCurrent) {
-                            distance[ToIndex(xCurrent, yCurrent, xDim)] = candidateValue;
+                            distance.At(xCurrent, yCurrent) = candidateValue;
                         }
                     }
                 }
@@ -659,28 +767,38 @@ public:
 
         // compute bounding box -> mapping coordinate to grid cell
         const auto [xMin, yMin, xMax, yMax] = computeBoundingBox();
-        std::cout << fmt::format("x: {} - {}\ty: {} - {}\n", xMin, xMax, yMin, yMax);
+        //        std::cout << fmt::format("x: {} - {}\ty: {} - {}\n", xMin, xMax, yMin, yMax);
 
-        //        auto distanceMap = std::make_unique<DistanceMap<T, U>>(xMin, yMin, xMax, yMax);
+        //        auto distanceMap = std::make_unique<DistanceMap<T, U>>(xMin, yMin, xMax,
+        //        yMax);
         auto xDim = computeXGridSize(xMin, xMax);
         auto yDim = computeYGridSize(yMin, yMax);
+        std::cout << fmt::format("xDim: {} yDim: {}\n", xDim, yDim);
 
-        std::vector<T> distance(xDim * yDim, DistanceMap<T, U>::FREE_SPACE);
+        Map<T> distance(xDim, yDim, DistanceMap<T, U>::FREE_SPACE);
 
         auto localDistance = ComputeLocalDistance();
 
-        std::cout << "empty: \n";
-        PrintDistanceMap<T, U>(distance, xDim, yDim);
+        //        std::cout << "empty: \n";
+        //        PrintDistanceMap<T, U>(distance, xDim, yDim);
 
-        PrepareDistanceMap(distance, xDim, yDim, xMin, yMin);
-        std::cout << "Prepared: \n";
-        PrintDistanceMap<T, U>(distance, xDim, yDim);
+        PrepareDistanceMap(distance, xMin, yMin);
+        //        std::cout << "Prepared: \n";
+        //        PrintDistanceMap<T, U>(distance);
 
-        ComputeDistanceMap(distance, xDim, yDim, localDistance);
+        ComputeDistanceMap(distance, localDistance);
 
-        std::cout << "Final: \n";
-        PrintDistanceMap<T, U>(distance, xDim, yDim);
+        //        std::cout << "Final: \n";
+        //        PrintDistanceMap<T, U>(distance);
 
+        auto bytes = DumpDistanceMap<T, U>(distance);
+        std::fstream out("dump.data", std::ios::trunc | std::ios::binary | std::ios::out);
+        if(out.good()) {
+            out.write(bytes.data(), bytes.size());
+        }
+        out.close();
+
+        DumpDistanceMapMatplotlibCSV(distance);
         return std::make_unique<DistanceMap<T, U>>(
             xMin, yMin, xMax, yMax, xDim, yDim, std::move(distance), std::move(localDistance));
     }
@@ -689,13 +807,15 @@ public:
     {
         return static_cast<T>(
             (std::abs(xMax - xMin) + DistanceMap<T, U>::CELL_SIZE) / DistanceMap<T, U>::CELL_SIZE);
-        //        return static_cast<T>((std::abs(xMax - xMin) + 0.9999 * CELL_SIZE) / CELL_SIZE);
+        //        return static_cast<T>((std::abs(xMax - xMin) + 0.9999 * CELL_SIZE) /
+        //        CELL_SIZE);
     }
 
     T computeYGridSize(U yMin, U yMax) const
     {
         return static_cast<T>(
             (std::abs(yMax - yMin) + DistanceMap<T, U>::CELL_SIZE) / DistanceMap<T, U>::CELL_SIZE);
-        //        return static_cast<T>((std::abs(yMax - yMin) + 0.9999 * CELL_SIZE) / CELL_SIZE);
+        //        return static_cast<T>((std::abs(yMax - yMin) + 0.9999 * CELL_SIZE) /
+        //        CELL_SIZE);
     }
 };
