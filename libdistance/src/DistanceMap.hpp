@@ -185,7 +185,9 @@ private:
     Map<UI> distance{};
 
     Map<UI> personToIntermediate{};
-    //    Map<UI> personToIntermediateFull{};
+    // Map<UI> personToIntermediateFull{};
+    std::vector<std::tuple<SignedSizeT, SignedSizeT>> farToNearIndices{};
+
 public:
     static constexpr A CELL_SIZE = 0.2; // in meter
     static constexpr size_t BLOCK_SIZE = 11; // size of one quadrant
@@ -211,6 +213,7 @@ public:
         , yDim(yDim)
         , distance(std::move(distance))
         , personToIntermediate(std::move(personToIntermediate))
+        , farToNearIndices(createFarToNearIndices(personToIntermediate))
     {
     }
 
@@ -286,6 +289,31 @@ private:
         }
         std::cout << output << "\n";
         return surplusDistanceToExitStencil;
+    }
+
+private:
+    std::vector<std::tuple<SignedSizeT, SignedSizeT>>
+    createFarToNearIndices(const Map<UI>& localDistances) const
+    {
+        std::vector<std::tuple<SignedSizeT, SignedSizeT>> indices{};
+        const SignedSizeT dimension = 2 * BLOCK_SIZE - 1;
+        indices.reserve(dimension * dimension);
+        const SignedSizeT offset = BLOCK_SIZE - dimension;
+        for(SignedSizeT x = 0; x < dimension; ++x) {
+            for(SignedSizeT y = 0; y < dimension; ++y) {
+                indices.emplace_back(x + offset, y + offset);
+            }
+        }
+        MapStencilView localDistanceView(
+            localDistances, BLOCK_SIZE - 1, BLOCK_SIZE - 1, BLOCK_SIZE);
+        std::sort(
+            std::begin(indices),
+            std::end(indices),
+            [&localDistanceView](const auto& tup_lhs, const auto& tup_rhs) {
+                const auto& [x_lhs, y_lhs] = tup_lhs;
+                const auto& [x_rhs, y_rhs] = tup_rhs;
+                return localDistanceView.At(x_lhs, y_lhs) > localDistanceView.At(x_rhs, y_rhs);
+            });
     }
     //    void markCircle(int xm, int ym, int r, T value)
     //    {
@@ -397,7 +425,7 @@ void DumpDistanceMapMatplotlibCSV(const Map<UI>& map)
 }
 
 template <UnsignedIntegral UI, Arithmetic A>
-std::vector<char> DumpDistanceMap(const Map<UI>& map)
+std::vector<unsigned char> DumpDistanceMap(const Map<UI>& map)
 {
     const auto max = *std::max_element(
         std::begin(map.Data()), std::end(map.Data()), [](const auto& lhs, const auto& rhs) {
@@ -407,7 +435,7 @@ std::vector<char> DumpDistanceMap(const Map<UI>& map)
             return lhs < rhs;
         });
 
-    std::vector<char> bytes(3 * map.Data().size());
+    std::vector<unsigned char> bytes(3 * map.Data().size());
     auto ptrBytes = bytes.data();
 
     for(const auto value : map.Data()) {
