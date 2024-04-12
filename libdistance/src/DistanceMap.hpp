@@ -62,6 +62,54 @@ struct Arc {
 };
 
 template <Arithmetic Arithmetic>
+std::tuple<Arithmetic, Arithmetic, Arithmetic, Arithmetic>
+ArcBoundingBox(const Arc<Arithmetic>& arc)
+{
+    // Lambda to convert degrees to radians if needed
+    auto toRadians = [](Arithmetic angle) { return angle * (M_PI / 180.0); };
+
+    // Lambda to calculate a point on the arc given an angle
+    auto calculatePoint = [&](Arithmetic angle) {
+        return Point<Arithmetic>{
+            arc.center.x + arc.radius * std::cos(angle),
+            arc.center.y + arc.radius * std::sin(angle)};
+    };
+
+    // Convert angles to radians if using degrees
+    Arithmetic startAngle = toRadians(arc.startAngle);
+    Arithmetic endAngle = toRadians(arc.endAngle);
+
+    // Ensure the start angle is less than the end angle for comparison
+    if(startAngle > endAngle) {
+        std::swap(startAngle, endAngle);
+    }
+
+    // Initialize min and max points with start and end points of the arc
+    Point<Arithmetic> minPoint = calculatePoint(startAngle);
+    Point<Arithmetic> maxPoint = calculatePoint(endAngle);
+
+    // Check for each critical angle within the arc's span
+    std::array<Arithmetic, 4> criticalAngles = {0, M_PI_2, M_PI, 3 * M_PI_2};
+    for(auto& angle : criticalAngles) {
+        // Normalize the angle for comparison
+        while(angle < startAngle)
+            angle += 2 * M_PI;
+        while(angle > endAngle)
+            angle -= 2 * M_PI;
+
+        if(angle >= startAngle && angle <= endAngle) {
+            Point<Arithmetic> point = calculatePoint(angle);
+            minPoint.x = std::min(minPoint.x, point.x);
+            minPoint.y = std::min(minPoint.y, point.y);
+            maxPoint.x = std::max(maxPoint.x, point.x);
+            maxPoint.y = std::max(maxPoint.y, point.y);
+        }
+    }
+
+    return {minPoint.x, minPoint.y, maxPoint.x, maxPoint.y};
+}
+
+template <Arithmetic Arithmetic>
 struct Circle {
     Point<Arithmetic> center;
     Arithmetic radius;
@@ -221,7 +269,8 @@ public:
     static constexpr Arithmetic CELL_SIZE = 0.2; // in meter
     static constexpr size_t BLOCK_SIZE = 11; // size of one quadrant
     static constexpr size_t FULL_BLOCK_SIZE = 2 * BLOCK_SIZE - 1;
-    static constexpr SignedIntegral CELL_SIZE_CM = DistanceMap<SignedIntegral, Arithmetic>::CELL_SIZE * 100;
+    static constexpr SignedIntegral CELL_SIZE_CM =
+        DistanceMap<SignedIntegral, Arithmetic>::CELL_SIZE * 100;
 
     static constexpr SignedIntegral FREE_SPACE = -2;
     static constexpr SignedIntegral BLOCKED = -1;
@@ -254,7 +303,8 @@ public:
         MapStencilView<Map<SignedIntegral>> surplusDistanceToExitStencil(
             surplusDistance, BLOCK_SIZE - 1, BLOCK_SIZE - 1, BLOCK_SIZE);
 
-        auto [targetIndexX, targetIndexY] = ToGrid<SignedIntegral, Arithmetic>(position, xMin, yMin);
+        auto [targetIndexX, targetIndexY] =
+            ToGrid<SignedIntegral, Arithmetic>(position, xMin, yMin);
 
         // find 0 value with the largest distance to center in surplusDistanceToExit
         for(auto const& [idx_x, idx_y] : farToNearIndices) {
@@ -262,7 +312,8 @@ public:
             if(surplusDistanceToExitStencil.At(idx_x, idx_y) == 0) {
                 targetIndexX += idx_x;
                 targetIndexY += idx_y;
-                const auto [x, y] = ToWorld<SignedIntegral, Arithmetic>(targetIndexX, targetIndexY, xMin, yMin);
+                const auto [x, y] =
+                    ToWorld<SignedIntegral, Arithmetic>(targetIndexX, targetIndexY, xMin, yMin);
                 return {x, y};
             }
         }
@@ -540,6 +591,20 @@ private:
         }
 
         // TODO(TS): add computation of BB arc and circle
+        for(const auto& circle : circles) {
+            xMin = std::min(xMin, circle.center.x - circle.radius);
+            xMax = std::max(xMax, circle.center.x + circle.radius);
+            yMin = std::min(yMin, circle.center.y - circle.radius);
+            yMax = std::max(yMax, circle.center.y + circle.radius);
+        }
+
+        for(const auto& arc : arcs) {
+            const auto [xMinArc, yMinArc, xMaxArc, yMaxArc] = ArcBoundingBox(arc);
+            xMin = std::min(xMin, xMinArc);
+            xMax = std::max(xMax, xMaxArc);
+            yMin = std::min(yMin, yMinArc);
+            yMax = std::max(yMax, yMaxArc);
+        }
         for(const auto& exitPoint : exitPoints) {
             xMin = std::min(xMin, exitPoint.x);
             xMax = std::max(xMax, exitPoint.x);
