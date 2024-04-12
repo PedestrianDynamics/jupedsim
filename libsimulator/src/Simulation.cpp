@@ -18,16 +18,12 @@ Simulation::Simulation(
     double dT)
     : _clock(dT), _operationalDecisionSystem(std::move(operationalModel))
 {
-    const auto p = geometry->Polygon();
-    const auto& [tup, res] = geometries.emplace(
-        std::piecewise_construct,
-        std::forward_as_tuple(geometry->Id()),
-        std::forward_as_tuple(std::move(geometry), std::make_unique<RoutingEngine>(p)));
+    const auto& [val, res] =
+        geometries.emplace(geometry->Id(), std::make_unique<Routing>(std::move(geometry)));
     if(!res) {
         throw SimulationError("Internal error");
     }
-    _geometry = std::get<0>(tup->second).get();
-    _routingEngine = std::get<1>(tup->second).get();
+    _routing = val->second.get();
 }
 const SimulationClock& Simulation::Clock() const
 {
@@ -51,13 +47,13 @@ void Simulation::Iterate()
     _agentRemovalSystem.Run(_agents, _removedAgentsInLastIteration, _stageManager);
     _neighborhoodSearch.Update(_agents);
 
-    _stageSystem.Run(_stageManager, _neighborhoodSearch, *_geometry);
+    _stageSystem.Run(_stageManager, _neighborhoodSearch, _routing->Geometry());
     _stategicalDecisionSystem.Run(_journeys, _agents, _stageManager);
-    _tacticalDecisionSystem.Run(*_routingEngine, _agents);
+    _tacticalDecisionSystem.Run(*_routing, _agents);
     {
         auto t2 = _perfStats.TraceOperationalDecisionSystemRun();
         _operationalDecisionSystem.Run(
-            _clock.dT(), _clock.ElapsedTime(), _neighborhoodSearch, *_geometry, _agents);
+            _clock.dT(), _clock.ElapsedTime(), _neighborhoodSearch, _routing->Geometry(), _agents);
     }
     _clock.Advance();
 }
@@ -142,18 +138,18 @@ BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
     std::visit(
         overloaded{
             [this](const WaypointDescription& d) -> void {
-                if(!this->_geometry->InsideGeometry(d.position)) {
+                if(!this->_routing->InsideGeometry(d.position)) {
                     throw SimulationError("WayPoint {} not inside walkable area", d.position);
                 }
             },
             [this](const ExitDescription& d) -> void {
-                if(!this->_geometry->InsideGeometry(d.polygon.Centroid())) {
+                if(!this->_routing->InsideGeometry(d.polygon.Centroid())) {
                     throw SimulationError("Exit {} not inside walkable area", d.polygon.Centroid());
                 }
             },
             [this](const NotifiableWaitingSetDescription& d) -> void {
                 for(const auto& point : d.slots) {
-                    if(!this->_geometry->InsideGeometry(point)) {
+                    if(!this->_routing->InsideGeometry(point)) {
                         throw SimulationError(
                             "NotifiableWaitingSet point {} not inside walkable area", point);
                     }
@@ -161,7 +157,7 @@ BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
             },
             [this](const NotifiableQueueDescription& d) -> void {
                 for(const auto& point : d.slots) {
-                    if(!this->_geometry->InsideGeometry(point)) {
+                    if(!this->_routing->InsideGeometry(point)) {
                         throw SimulationError(
                             "NotifiableQueue point {} not inside walkable area", point);
                     }
@@ -172,17 +168,19 @@ BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
             }},
         stageDescription);
 
-    return _stageManager.AddStage(stageDescription, _removedAgentsInLastIteration);
+    const auto id = _stageManager.AddStage(stageDescription, _removedAgentsInLastIteration);
+
+    return id;
 }
 
 GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
 {
-    if(!_geometry->InsideGeometry(agent.pos)) {
+    if(!_routing->InsideGeometry(agent.pos)) {
         throw SimulationError("Agent {} not inside walkable area", agent.pos);
     }
 
     agent.orientation = agent.orientation.Normalized();
-    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry);
+    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, _routing->Geometry());
 
     if(_journeys.count(agent.journeyId) == 0) {
         throw SimulationError("Unknown journey id: {}", agent.journeyId);
@@ -197,7 +195,7 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
 
     auto v = IteratorPair(std::prev(std::end(_agents)), std::end(_agents));
     _stategicalDecisionSystem.Run(_journeys, v, _stageManager);
-    _tacticalDecisionSystem.Run(*_routingEngine, v);
+    _tacticalDecisionSystem.Run(*_routing, v);
     return _agents.back().id.getID();
 }
 
@@ -326,26 +324,22 @@ StageProxy Simulation::Stage(BaseStage::ID stageId)
 }
 CollisionGeometry Simulation::Geo() const
 {
-    return *_geometry;
+    return _routing->Geometry();
 }
 
 void Simulation::SwitchGeometry(std::unique_ptr<CollisionGeometry>&& geometry)
 {
     ValidateGeometry(geometry);
     if(const auto& iter = geometries.find(geometry->Id()); iter != std::end(geometries)) {
-        _geometry = std::get<0>(iter->second).get();
-        _routingEngine = std::get<1>(iter->second).get();
+        _routing = iter->second.get();
     } else {
         const auto p = geometry->Polygon();
-        const auto& [tup, res] = geometries.emplace(
-            std::piecewise_construct,
-            std::forward_as_tuple(geometry->Id()),
-            std::forward_as_tuple(std::move(geometry), std::make_unique<RoutingEngine>(p)));
+        const auto& [val, res] =
+            geometries.emplace(geometry->Id(), std::make_unique<Routing>(std::move(geometry)));
         if(!res) {
             throw SimulationError("Internal error");
         }
-        _geometry = std::get<0>(tup->second).get();
-        _routingEngine = std::get<1>(tup->second).get();
+        _routing = val->second.get();
     }
 }
 

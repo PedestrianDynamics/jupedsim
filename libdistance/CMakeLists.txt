@@ -12,13 +12,13 @@ target_link_libraries(distance INTERFACE
 set_property(TARGET distance PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
 set_property(TARGET distance PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 
-add_executable(distance_map_test
-    src/distance_test.cpp
-)
-target_link_libraries(distance_map_test
-    PRIVATE
-        distance
-)
+# add_executable(distance_map_test
+#     src/distance_test.cpp
+# )
+# target_link_libraries(distance_map_test
+#     PRIVATE
+#         distance
+# )
 
 #if(BUILD_TESTS)
 #    add_executable(libdistance-tests

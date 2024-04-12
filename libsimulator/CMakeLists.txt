@@ -54,6 +54,8 @@ add_library(simulator STATIC
     src/Point.hpp
     src/Polygon.cpp
     src/Polygon.hpp
+    src/Routing.cpp
+    src/Routing.hpp
     src/RoutingEngine.cpp
     src/RoutingEngine.hpp
     src/Simulation.cpp
@@ -90,6 +92,7 @@ target_compile_definitions(simulator PUBLIC
 )
 target_link_libraries(simulator PUBLIC
     common
+    distance
     fmt::fmt
     CGAL::CGAL
     build_info

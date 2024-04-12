@@ -10,6 +10,7 @@
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
+#include "Routing.hpp"
 #include "SimulationClock.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
@@ -35,12 +36,8 @@ class Simulation
     StageManager _stageManager{};
     StageSystem _stageSystem{};
     NeighborhoodSearch<GenericAgent> _neighborhoodSearch{2.2};
-    std::unordered_map<
-        CollisionGeometry::ID,
-        std::tuple<std::unique_ptr<CollisionGeometry>, std::unique_ptr<RoutingEngine>>>
-        geometries{};
-    RoutingEngine* _routingEngine;
-    CollisionGeometry* _geometry;
+    std::unordered_map<CollisionGeometry::ID, std::unique_ptr<Routing>> geometries{};
+    Routing* _routing;
     std::vector<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
     std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;

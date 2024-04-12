@@ -91,9 +91,9 @@ bool Waypoint::IsCompleted(const GenericAgent& agent)
     return actual_distance <= distance;
 }
 
-Point Waypoint::Target(const GenericAgent&)
+BaseStage::Location Waypoint::Target(const GenericAgent&)
 {
-    return position;
+    return id;
 }
 
 StageProxy Waypoint::Proxy(Simulation* simulation)
@@ -121,9 +121,9 @@ bool Exit::IsCompleted(const GenericAgent& agent)
     return hasReachedExit;
 }
 
-Point Exit::Target(const GenericAgent&)
+BaseStage::Location Exit::Target(const GenericAgent&)
 {
-    return area.Centroid();
+    return id;
 }
 
 StageProxy Exit::Proxy(Simulation* simulation)
@@ -152,7 +152,7 @@ bool NotifiableWaitingSet::IsCompleted(const GenericAgent& agent)
     return distance <= 1;
 }
 
-Point NotifiableWaitingSet::Target(const GenericAgent& agent)
+BaseStage::Location NotifiableWaitingSet::Target(const GenericAgent& agent)
 {
     if(state == WaitingSetState::Inactive) {
         return slots[0];
@@ -211,7 +211,7 @@ bool NotifiableQueue::IsCompleted(const GenericAgent& agent)
     return completed;
 }
 
-Point NotifiableQueue::Target(const GenericAgent& agent)
+BaseStage::Location NotifiableQueue::Target(const GenericAgent& agent)
 {
 
     if(const auto index_opt = IndexInContainer(occupants, agent.id); index_opt) {

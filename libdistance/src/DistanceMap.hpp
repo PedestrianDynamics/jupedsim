@@ -17,6 +17,8 @@
 #include <type_traits>
 #include <vector>
 
+namespace distance
+{
 template <typename T>
 concept SignedIntegral = std::is_integral_v<T> && std::is_signed_v<T>;
 
@@ -565,7 +567,7 @@ void PrintDistanceMap(const Map<UI>& distance)
     std::cout << output << "\n";
 }
 
-void PrintBoolDistanceMap(const std::vector<bool>& visited, size_t xDim, size_t yDim)
+static void PrintBoolDistanceMap(const std::vector<bool>& visited, size_t xDim, size_t yDim)
 {
     using I = typename std::make_signed_t<size_t>; // Get the corresponding signed type
 
@@ -978,7 +980,7 @@ public:
     void AddArc(const Arc<U>& arc) { arcs.emplace_back(arc); }
     void AddCircle(const Circle<U>& circle) { circles.emplace_back(circle); }
     void AddExitLine(const Line<U>& exitLine) { exitLines.emplace_back(exitLine); }
-    void AddExitPolygon(const Polygon<U> exitPolygon);
+    void AddExitPolygon(const Polygon<U> exitPolygon){};
     //    TODO(TS): needed for Simulex?
     //    void AddBoundingBox(const )
 
@@ -1006,13 +1008,13 @@ public:
         //        PrintDistanceMap<T, U>(distance, xDim, yDim);
 
         PrepareDistanceMap(distance, xMin, yMin);
-//        std::cout << "Prepared: \n";
-//        PrintDistanceMap<T, U>(distance);
+        //        std::cout << "Prepared: \n";
+        //        PrintDistanceMap<T, U>(distance);
 
         ComputeDistanceMap(distance, localDistance);
 
-//        std::cout << "Final: \n";
-//        PrintDistanceMap<T, U>(distance);
+        //        std::cout << "Final: \n";
+        //        PrintDistanceMap<T, U>(distance);
 
         //        auto bytes = DumpDistanceMap<T, U>(distance);
         //        std::fstream out("dump.data", std::ios::trunc | std::ios::binary |
@@ -1042,3 +1044,4 @@ public:
         //        CELL_SIZE);
     }
 };
+} // namespace distance

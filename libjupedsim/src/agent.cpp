@@ -10,6 +10,7 @@
 #include <Unreachable.hpp>
 
 #include <cassert>
+#include <variant>
 
 using jupedsim::detail::intoJPS_Point;
 using jupedsim::detail::intoPoint;
@@ -49,7 +50,10 @@ JPS_Point JPS_Agent_GetTarget(JPS_Agent handle)
 {
     assert(handle);
     const auto agent = reinterpret_cast<const GenericAgent*>(handle);
-    return intoJPS_Point(agent->target);
+    if(auto val = std::get_if<Point>(&agent->target); val != nullptr) {
+        return intoJPS_Point(*val);
+    }
+    return {};
 }
 
 bool JPS_Agent_SetTarget(JPS_Agent handle, JPS_Point waypoint, JPS_ErrorMessage* errorMessage)
