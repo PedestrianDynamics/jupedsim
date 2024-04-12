@@ -36,7 +36,7 @@ void Routing::AddDistanceMapForStage(const BaseStage::ID id, const Point& p)
     builder->AddExitLine({{p.x, p.y}, {p.x, p.y}});
     _distanceMaps.emplace(id, builder->Build());
     // HACK(kkratz):
-    // distance::DumpDistanceMapMatplotlibCSV(*_distanceMaps[id]);
+    // distance::DumpDistanceMapMatplotlibCSV(*_distanceMaps[id], id.getID());
 }
 
 void Routing::AddDistanceMapForStage(const BaseStage::ID id, const Polygon& p)
@@ -45,7 +45,7 @@ void Routing::AddDistanceMapForStage(const BaseStage::ID id, const Polygon& p)
     builder->AddExitPolygon(cvt_poly(p));
     _distanceMaps.emplace(id, builder->Build());
     // HACK(kkratz):
-    // distance::DumpDistanceMapMatplotlibCSV(*_distanceMaps[id]);
+    // distance::DumpDistanceMapMatplotlibCSV(*_distanceMaps[id], id.getID());
 }
 
 std::unique_ptr<Routing::DMapBuilder> Routing::PrepareDistanceMapBuilder() const
@@ -53,9 +53,9 @@ std::unique_ptr<Routing::DMapBuilder> Routing::PrepareDistanceMapBuilder() const
     auto builder = std::make_unique<DMapBuilder>();
 
     const auto poly = _geometry->Polygon();
-    builder->AddPolygon(cvt_poly(poly.outer_boundary()));
+    builder->AddOutlinePolygon(cvt_poly(poly.outer_boundary()));
     for(const auto& hole : poly.holes()) {
-        builder->AddPolygon(cvt_poly(hole));
+        builder->AddFilledPolygon(cvt_poly(hole));
     }
 
     return builder;
