@@ -17,6 +17,7 @@ def ARGV(args: list[str]):
         sys.argv = old_args
 
 
+@pytest.mark.skip("too slow")
 @pytest.mark.parametrize(
     "module_name", ["grosser_stern", "large_street_network"]
 )

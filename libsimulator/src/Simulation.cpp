@@ -135,41 +135,53 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
 
 BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
 {
-    std::visit(
+    using Loc = std::variant<const Point*, const Polygon*>;
+    using OptLoc = std::optional<Loc>;
+    OptLoc distanceMapGoal = std::visit(
         overloaded{
-            [this](const WaypointDescription& d) -> void {
+            [this](const WaypointDescription& d) -> OptLoc {
                 if(!this->_routing->InsideGeometry(d.position)) {
                     throw SimulationError("WayPoint {} not inside walkable area", d.position);
                 }
+
+                return std::make_optional(Loc{&d.position});
             },
-            [this](const ExitDescription& d) -> void {
+            [this](const ExitDescription& d) -> OptLoc {
                 if(!this->_routing->InsideGeometry(d.polygon.Centroid())) {
                     throw SimulationError("Exit {} not inside walkable area", d.polygon.Centroid());
                 }
+                return std::make_optional(Loc{&d.polygon});
             },
-            [this](const NotifiableWaitingSetDescription& d) -> void {
+            [this](const NotifiableWaitingSetDescription& d) -> OptLoc {
                 for(const auto& point : d.slots) {
                     if(!this->_routing->InsideGeometry(point)) {
                         throw SimulationError(
                             "NotifiableWaitingSet point {} not inside walkable area", point);
                     }
                 }
+                return {};
             },
-            [this](const NotifiableQueueDescription& d) -> void {
+            [this](const NotifiableQueueDescription& d) -> OptLoc {
                 for(const auto& point : d.slots) {
                     if(!this->_routing->InsideGeometry(point)) {
                         throw SimulationError(
                             "NotifiableQueue point {} not inside walkable area", point);
                     }
                 }
+                return {};
             },
-            [](const DirectSteeringDescription&) -> void {
-
-            }},
+            [](const DirectSteeringDescription&) -> OptLoc { return {}; }},
         stageDescription);
 
     const auto id = _stageManager.AddStage(stageDescription, _removedAgentsInLastIteration);
-
+    if(distanceMapGoal) {
+        auto var = *distanceMapGoal;
+        std::visit(
+            overloaded{
+                [this, id](const Point* p) { _routing->AddDistanceMapForStage(id, *p); },
+                [this, id](const Polygon* p) { _routing->AddDistanceMapForStage(id, *p); }},
+            var);
+    }
     return id;
 }
 

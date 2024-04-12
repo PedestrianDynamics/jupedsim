@@ -30,31 +30,22 @@ Routing::Routing(std::unique_ptr<CollisionGeometry> geometry)
 {
 }
 
-void Routing::AddDistanceMapForStage(
-    const BaseStage::ID id,
-    const StageDescription stageDescription)
+void Routing::AddDistanceMapForStage(const BaseStage::ID id, const Point& p)
 {
-    std::visit(
-        overloaded{
-            [this, id](const WaypointDescription& d) -> void {
-                auto builder = PrepareDistanceMapBuilder();
-                builder->AddExitLine({{d.position.x, d.position.y}, {d.position.x, d.position.y}});
-                _distanceMaps.emplace(id, builder->Build());
-                // HACK(kkratz):
-                // distance::DumpDistanceMapMatplotlibCSV(*_distanceMaps[id]);
-            },
-            [this, id](const ExitDescription& d) -> void {
-                auto builder = PrepareDistanceMapBuilder();
-                const Poly& p = d.polygon;
-                builder->AddExitPolygon(cvt_poly(p));
-                _distanceMaps.emplace(id, builder->Build());
-                // HACK(kkratz):
-                // distance::DumpDistanceMapMatplotlibCSV(*_distanceMaps[id]);
-            },
-            [](const NotifiableWaitingSetDescription&) -> void {},
-            [](const NotifiableQueueDescription&) -> void {},
-            [](const DirectSteeringDescription&) -> void {}},
-        stageDescription);
+    auto builder = PrepareDistanceMapBuilder();
+    builder->AddExitLine({{p.x, p.y}, {p.x, p.y}});
+    _distanceMaps.emplace(id, builder->Build());
+    // HACK(kkratz):
+    // distance::DumpDistanceMapMatplotlibCSV(*_distanceMaps[id]);
+}
+
+void Routing::AddDistanceMapForStage(const BaseStage::ID id, const Polygon& p)
+{
+    auto builder = PrepareDistanceMapBuilder();
+    builder->AddExitPolygon(cvt_poly(p));
+    _distanceMaps.emplace(id, builder->Build());
+    // HACK(kkratz):
+    // distance::DumpDistanceMapMatplotlibCSV(*_distanceMaps[id]);
 }
 
 std::unique_ptr<Routing::DMapBuilder> Routing::PrepareDistanceMapBuilder() const

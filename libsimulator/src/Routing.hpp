@@ -24,7 +24,8 @@ public:
     Routing& operator=(const Routing& other) = delete;
     Routing(Routing&& other) = default;
     Routing& operator=(Routing&& other) = default;
-    void AddDistanceMapForStage(const BaseStage::ID id, const StageDescription stageDescription);
+    void AddDistanceMapForStage(const BaseStage::ID id, const Point& goal);
+    void AddDistanceMapForStage(const BaseStage::ID id, const Polygon& goal);
 
     const CollisionGeometry& Geometry() const { return *_geometry; }
     bool InsideGeometry(const Point& p) const { return _geometry->InsideGeometry(p); }
