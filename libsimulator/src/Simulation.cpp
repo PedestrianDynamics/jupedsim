@@ -18,8 +18,11 @@ Simulation::Simulation(
     double dT)
     : _clock(dT), _operationalDecisionSystem(std::move(operationalModel))
 {
+    const auto geometryId = geometry->Id();
+    auto routing =  std::make_unique<Routing>(std::move(geometry));
+
     const auto& [val, res] =
-        geometries.emplace(geometry->Id(), std::make_unique<Routing>(std::move(geometry)));
+        geometries.emplace(geometryId, std::move(routing));
     if(!res) {
         throw SimulationError("Internal error");
     }
