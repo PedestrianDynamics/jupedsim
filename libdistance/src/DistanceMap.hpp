@@ -687,7 +687,9 @@ private:
         SignedIntegral fillValue = DistanceMap<SignedIntegral, Arithmetic>::BLOCKED)
     {
         const auto [i, j] = ToGrid<SignedIntegral, Arithmetic>(point, xMin, yMin);
-        distance.At(i, j) = fillValue;
+        if(distance.At(i, j) != DistanceMap<SignedIntegral, Arithmetic>::BLOCKED) {
+            distance.At(i, j) = fillValue;
+        }
     }
 
     void markLine(
@@ -710,7 +712,8 @@ private:
         SignedSizeT i = i1, j = j1;
 
         while(true) {
-            if(i >= 0 && i < xDim && j >= 0 && j < yDim) {
+            if(i >= 0 && i < xDim && j >= 0 && j < yDim &&
+               distance.At(i, j) != DistanceMap<SignedIntegral, Arithmetic>::BLOCKED) {
                 distance.At(i, j) = fillValue;
             }
 
@@ -780,7 +783,9 @@ private:
             Arithmetic y = arc.center.y + arc.radius * sin(theta);
 
             const auto [i, j] = ToGrid<SignedIntegral, Arithmetic>(x, y, xMin, yMin);
-            distance.At(i, j) = fillValue;
+            if(distance.At(i, j) != DistanceMap<SignedIntegral, Arithmetic>::BLOCKED) {
+                distance.At(i, j) = fillValue;
+            }
         }
     }
 
@@ -821,7 +826,8 @@ private:
 
             for(size_t i = 0; i + 1 < xIntersections.size(); i += 2) {
                 for(SignedSizeT x = xIntersections[i]; x <= xIntersections[i + 1]; ++x) {
-                    if(x >= 0 && static_cast<size_t>(x) < distance.Width()) {
+                    if(x >= 0 && static_cast<size_t>(x) < distance.Width() &&
+                       distance.At(x, y) != DistanceMap<SignedIntegral, Arithmetic>::BLOCKED) {
                         distance.At(x, y) = fillValue;
                     }
                 }
@@ -987,7 +993,10 @@ public:
 
     void AddExitPoint(const Point<Arithmetic>& exitPoint) { exitPoints.push_back(exitPoint); }
     void AddExitLine(const Line<Arithmetic>& exitLine) { exitLines.emplace_back(exitLine); }
-    void AddExitPolygon(const Polygon<Arithmetic> exitPolygon) {};
+    void AddExitPolygon(const Polygon<Arithmetic> exitPolygon)
+    {
+        exitPolygons.push_back(exitPolygon);
+    };
 
     std::unique_ptr<const DistanceMap<SignedIntegral, Arithmetic>> Build()
     {
@@ -1003,7 +1012,7 @@ public:
         //        yMax);
         auto xDim = computeXGridSize(xMin, xMax);
         auto yDim = computeYGridSize(yMin, yMax);
-        std::cout << fmt::format("xDim: {} yDim: {}\n", xDim, yDim);
+//        std::cout << fmt::format("xDim: {} yDim: {}\n", xDim, yDim);
 
         distance =
             Map<SignedIntegral>(xDim, yDim, DistanceMap<SignedIntegral, Arithmetic>::FREE_SPACE);
@@ -1019,8 +1028,8 @@ public:
 
         computeDistanceMap(localDistance);
 
-        std::cout << "Final: \n";
-        PrintDistanceMap<SignedIntegral, Arithmetic>(distance);
+//        std::cout << "Final: \n";
+//        PrintDistanceMap<SignedIntegral, Arithmetic>(distance);
 
         //        auto bytes = DumpDistanceMap<T, U>(distance);
         //        std::fstream out("dump.data", std::ios::trunc | std::ios::binary |
