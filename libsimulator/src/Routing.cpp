@@ -1,6 +1,7 @@
 // Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Routing.hpp"
+#include <chrono>
 
 #include "CfgCgal.hpp"
 #include "Unreachable.hpp"
@@ -33,10 +34,17 @@ Routing::Routing(std::unique_ptr<CollisionGeometry> geometry)
 void Routing::AddDistanceMapForStage(const BaseStage::ID id, const Point& p)
 {
     auto builder = PrepareDistanceMapBuilder();
-    builder->AddExitLine({{p.x, p.y}, {p.x, p.y}});
+    builder->AddExitPoint({p.x, p.y});
+    auto started = std::chrono::high_resolution_clock::now();
+
     _distanceMaps.emplace(id, builder->Build());
+    auto done = std::chrono::high_resolution_clock::now();
+    std::cout << fmt::format(
+        "{} ms needed\n", std::chrono::duration_cast<std::chrono::milliseconds>(done - started).count());
+
     // HACK(kkratz):
-    // distance::DumpDistanceMapMatplotlibCSV(*_distanceMaps[id], id.getID());
+    distance::DumpDistanceMap<int, float>(_distanceMaps[id]->Distance());
+    distance::DumpDistanceMapMatplotlibCSV(_distanceMaps[id]->Distance(), id.getID());
 }
 
 void Routing::AddDistanceMapForStage(const BaseStage::ID id, const Polygon& p)
@@ -45,7 +53,8 @@ void Routing::AddDistanceMapForStage(const BaseStage::ID id, const Polygon& p)
     builder->AddExitPolygon(cvt_poly(p));
     _distanceMaps.emplace(id, builder->Build());
     // HACK(kkratz):
-    // distance::DumpDistanceMapMatplotlibCSV(*_distanceMaps[id], id.getID());
+    distance::DumpDistanceMap<int, float>(_distanceMaps[id]->Distance());
+    distance::DumpDistanceMapMatplotlibCSV(_distanceMaps[id]->Distance(), id.getID());
 }
 
 std::unique_ptr<Routing::DMapBuilder> Routing::PrepareDistanceMapBuilder() const

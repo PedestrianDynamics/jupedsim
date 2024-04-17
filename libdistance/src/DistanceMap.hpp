@@ -219,9 +219,9 @@ public:
         for(SignedSizeT y = blockSize - 1; y > static_cast<SignedSizeT>(-blockSize); --y) {
             for(SignedSizeT x = -(blockSize - 1); x < static_cast<SignedSizeT>(blockSize); ++x) {
                 const auto& val = At(x, y);
-                if(val == -2) {
+                if(val == -2147483647) {
                     output << fmt::format("   -   ");
-                } else if(val == -1) {
+                } else if(val == -2147483648) {
                     output << fmt::format("   x   ");
                 } else {
                     output << fmt::format("{:^6d} ", val);
@@ -266,14 +266,14 @@ private:
     std::vector<std::tuple<SignedSizeT, SignedSizeT>> farToNearIndices{};
 
 public:
-    static constexpr Arithmetic CELL_SIZE = 0.2; // in meter
+    static constexpr Arithmetic CELL_SIZE = 0.15; // in meter
     static constexpr size_t BLOCK_SIZE = 11; // size of one quadrant
     static constexpr size_t FULL_BLOCK_SIZE = 2 * BLOCK_SIZE - 1;
     static constexpr SignedIntegral CELL_SIZE_CM =
         DistanceMap<SignedIntegral, Arithmetic>::CELL_SIZE * 100;
 
-    static constexpr SignedIntegral FREE_SPACE = -2;
-    static constexpr SignedIntegral BLOCKED = -1;
+    static constexpr SignedIntegral FREE_SPACE = std::numeric_limits<SignedIntegral>::lowest()+1;
+    static constexpr SignedIntegral BLOCKED = std::numeric_limits<SignedIntegral>::lowest();
 
     DistanceMap(
         Arithmetic xMin,
@@ -299,12 +299,14 @@ public:
 
     Point<Arithmetic> GetNextTarget(const Point<Arithmetic>& position) const
     {
-        auto surplusDistance = computeSurplusDistance(position);
+        auto [targetIndexX, targetIndexY] = findPositionInGrid(position);
+
+        auto surplusDistance = computeSurplusDistance({targetIndexX, targetIndexY});
         MapStencilView<Map<SignedIntegral>> surplusDistanceToExitStencil(
             surplusDistance, BLOCK_SIZE - 1, BLOCK_SIZE - 1, BLOCK_SIZE);
 
-        auto [targetIndexX, targetIndexY] =
-            ToGrid<SignedIntegral, Arithmetic>(position, xMin, yMin);
+        auto center = surplusDistanceToExitStencil.At(0, 0);
+        auto centerDistance = distance.At(targetIndexX, targetIndexY);
 
         // find 0 value with the largest distance to center in surplusDistanceToExit
         for(auto const& [idx_x, idx_y] : farToNearIndices) {
@@ -318,12 +320,49 @@ public:
             }
         }
 
+        std::string foo = surplusDistanceToExitStencil.Dump();
         throw std::runtime_error("ERROR!!!!");
     }
 
     const Map<SignedIntegral>& Distance() const { return distance; }
 
 private:
+    std::pair<size_t, size_t> findPositionInGrid(const Point<Arithmetic>& position) const
+    {
+        auto [positionX, positionY] = ToGrid<SignedIntegral, Arithmetic>(position, xMin, yMin);
+
+        if(distance.At(positionX, positionY) != BLOCKED &&
+           distance.At(positionX, positionY) != FREE_SPACE) {
+            return {positionX, positionY};
+        }
+
+
+        const std::pair<size_t, size_t> neighbors[4] = {
+            {positionX - 1, positionY},
+            {positionX, positionY + 1},
+            {positionX + 1, positionY},
+            {positionX, positionY - 1}};
+
+        auto min = std::numeric_limits<Arithmetic>::max();
+        auto minNeighbor = std::make_pair<size_t, size_t>(0, 0);
+
+        for(const auto& [neighborX, neighborY] : neighbors) {
+            auto neighborValue = distance.At(neighborX, neighborY);
+            if(neighborValue != BLOCKED && neighborValue != FREE_SPACE) {
+                if(neighborValue < min) {
+                    min = neighborValue;
+                    minNeighbor = {neighborX, neighborY};
+                }
+            }
+        }
+
+        if(min != std::numeric_limits<Arithmetic>::max()) {
+            return minNeighbor;
+        }
+
+        throw std::runtime_error("Could not find non blocked/free current position");
+    }
+
     Map<SignedIntegral> createLocalDistanceFull(const Map<SignedIntegral>& localDistanceQuadrant)
     {
         Map<SignedIntegral> localDistanceFull(FULL_BLOCK_SIZE, FULL_BLOCK_SIZE);
@@ -365,17 +404,19 @@ private:
         return indices;
     }
 
-    Map<SignedIntegral> computeSurplusDistance(const Point<Arithmetic>& position) const
+    Map<SignedIntegral> computeSurplusDistance(const std::pair<size_t, size_t>& currentIndex) const
     {
-        const auto [currentX, currentY] = ToGrid<SignedIntegral, Arithmetic>(position, xMin, yMin);
+        const auto [currentX, currentY] = currentIndex;
         const auto centerValue = distance.At(currentX, currentY);
 
-        Map<SignedIntegral> surplusDistanceToExit(2 * BLOCK_SIZE - 1, 2 * BLOCK_SIZE - 1);
+        Map<SignedIntegral> surplusDistanceToExit(FULL_BLOCK_SIZE, FULL_BLOCK_SIZE);
         MapStencilView<Map<SignedIntegral>> surplusDistanceToExitStencil(
             surplusDistanceToExit, BLOCK_SIZE - 1, BLOCK_SIZE - 1, BLOCK_SIZE);
 
         // get stencil around position (values from distance map) -> distance
         MapStencilView distanceStencil(distance, currentX, currentY, BLOCK_SIZE);
+
+        const auto strDistanceStencil = distanceStencil.Dump();
 
         // localDist + distance -> distanceToExit
         for(SignedSizeT y = BLOCK_SIZE - 1; y > static_cast<SignedSizeT>(-BLOCK_SIZE); --y) {
@@ -385,7 +426,7 @@ private:
                 auto distanceToCenter = distanceStencil.At(x, y);
                 auto localDistanceToCenter = localDistanceStencil.At(x, y);
 
-                if(distanceToCenter == BLOCKED) {
+                if(distanceToCenter == BLOCKED || distanceToCenter == FREE_SPACE) {
                     surplusDistanceToExitStencil.Set(x, y, BLOCKED);
                 } else {
                     surplusDistanceToExitStencil.Set(
@@ -393,26 +434,25 @@ private:
                 }
             }
         }
+        const auto strLocalDistanceStencil = surplusDistanceToExitStencil.Dump();
 
         // distanceToExit - (value at position) -> surplusDistanceToExit
         for(SignedSizeT y = BLOCK_SIZE - 1; y > static_cast<SignedSizeT>(-BLOCK_SIZE); --y) {
             for(auto x = static_cast<SignedSizeT>(-BLOCK_SIZE);
                 x <= static_cast<SignedSizeT>(BLOCK_SIZE);
                 ++x) {
-                surplusDistanceToExitStencil.Set(
-                    x, y, surplusDistanceToExitStencil.At(x, y) - centerValue);
+
+                if(surplusDistanceToExitStencil.At(x, y) == BLOCKED ||
+                   surplusDistanceToExitStencil.At(x, y) == FREE_SPACE) {
+                    surplusDistanceToExitStencil.Set(x, y, BLOCKED);
+                } else {
+                    surplusDistanceToExitStencil.Set(
+                        x, y, surplusDistanceToExitStencil.At(x, y) - centerValue);
+                }
             }
         }
+        const auto strSurplusDistanceToExitStencil = surplusDistanceToExitStencil.Dump();
 
-        //        std::cout << "Local distance\n";
-        //        std::cout << localDistanceStencil.Dump();
-        //
-        //        std::cout << "Distance stencil\n";
-        //        std::cout << distanceStencil.Dump();
-        //
-        //        std::cout << "surplus stencil\n";
-        //        std::cout << surplusDistanceToExitStencil.Dump();
-        //
         return surplusDistanceToExit;
     }
 };
@@ -472,7 +512,7 @@ std::vector<unsigned char> DumpDistanceMap(const Map<SignedIntegral>& map)
 template <SignedIntegral SignedIntegral, Arithmetic Arithmetic>
 void PrintDistanceMap(const Map<SignedIntegral>& distance)
 {
-    using I = typename std::make_signed_t<SignedIntegral>; // Get the corresponding signed type
+    using I = typename std::make_signed_t<SignedIntegral>;
     const auto xDim = distance.Width();
     const auto yDim = distance.Height();
 
@@ -712,7 +752,7 @@ private:
         SignedSizeT i = i1, j = j1;
 
         while(true) {
-            if(i >= 0 && i < xDim && j >= 0 && j < yDim &&
+            if(i >= 0 && i < static_cast<SignedSizeT>(xDim) && j >= 0 && j < yDim &&
                distance.At(i, j) != DistanceMap<SignedIntegral, Arithmetic>::BLOCKED) {
                 distance.At(i, j) = fillValue;
             }
@@ -1000,43 +1040,27 @@ public:
 
     std::unique_ptr<const DistanceMap<SignedIntegral, Arithmetic>> Build()
     {
-        //        if (exitLines.empty() && exitPolygons.empty()){
-        //            throw std::runtime_error("No exit lines and no exit polygons specified");
-        //        }
+        if(exitPoints.empty() && exitLines.empty() && exitPolygons.empty()) {
+            throw std::runtime_error("No exit lines and no exit polygons specified");
+        }
 
-        // compute bounding box -> mapping coordinate to grid cell
-        const auto [xMin, yMin, xMax, yMax] = computeBoundingBox();
-        //        std::cout << fmt::format("x: {} - {}\ty: {} - {}\n", xMin, xMax, yMin, yMax);
+        const auto boundingBox = computeBoundingBox();
+        xMin = std::get<0>(boundingBox);
+        yMin = std::get<1>(boundingBox);
+        xMax = std::get<2>(boundingBox);
+        yMax = std::get<3>(boundingBox);
 
-        //        auto distanceMap = std::make_unique<DistanceMap<T, U>>(xMin, yMin, xMax,
-        //        yMax);
         auto xDim = computeXGridSize(xMin, xMax);
         auto yDim = computeYGridSize(yMin, yMax);
-//        std::cout << fmt::format("xDim: {} yDim: {}\n", xDim, yDim);
 
         distance =
             Map<SignedIntegral>(xDim, yDim, DistanceMap<SignedIntegral, Arithmetic>::FREE_SPACE);
 
         auto localDistance = ComputeLocalDistance();
 
-        //        std::cout << "empty: \n";
-        //        PrintDistanceMap<T, U>(distance, xDim, yDim);
-
         prepareDistanceMap();
-        //        std::cout << "Prepared: \n";
-        //        PrintDistanceMap<T, U>(distance);
 
         computeDistanceMap(localDistance);
-
-//        std::cout << "Final: \n";
-//        PrintDistanceMap<SignedIntegral, Arithmetic>(distance);
-
-        //        auto bytes = DumpDistanceMap<T, U>(distance);
-        //        std::fstream out("dump.data", std::ios::trunc | std::ios::binary |
-        //        std::ios::out); if(out.good()) {
-        //            out.write(bytes.data(), bytes.size());
-        //        }
-        //        out.close();
 
         DumpDistanceMapMatplotlibCSV(distance, 0);
         return std::make_unique<DistanceMap<SignedIntegral, Arithmetic>>(
