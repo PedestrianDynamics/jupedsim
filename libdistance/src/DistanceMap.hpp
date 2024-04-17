@@ -152,8 +152,20 @@ public:
     {
     }
 
-    SignedIntegral& At(int64_t x, int64_t y) { return data[x + y * width]; }
-    SignedIntegral At(int64_t x, int64_t y) const { return data[x + y * width]; }
+    SignedIntegral& At(int64_t x, int64_t y)
+    {
+        assert(x < width);
+        assert(y < height);
+
+        return data[x + y * width];
+    }
+    SignedIntegral At(int64_t x, int64_t y) const
+    {
+        assert(x < width);
+        assert(y < height);
+
+        return data[x + y * width];
+    }
 
     int64_t Height() const { return height; }
     int64_t Width() const { return width; }
@@ -266,7 +278,7 @@ private:
     std::vector<std::tuple<SignedSizeT, SignedSizeT>> farToNearIndices{};
 
 public:
-    static constexpr Arithmetic CELL_SIZE = 0.15; // in meter
+    static constexpr Arithmetic CELL_SIZE = 0.2; // in meter
     static constexpr int64_t BLOCK_SIZE = 11; // size of one quadrant
     static constexpr int64_t FULL_BLOCK_SIZE = 2 * BLOCK_SIZE - 1;
     static constexpr SignedIntegral CELL_SIZE_CM =
@@ -952,27 +964,28 @@ private:
                                   DistanceMap<SignedIntegral, Arithmetic>::BLOCK_SIZE - 1) *
                               xMovementDirection;
 
-                auto xObstacle = std::numeric_limits<SignedIntegral>::max();
+                auto xObstacleOffset = std::numeric_limits<SignedIntegral>::max();
 
-                for(int yDisplacement = 0; std::abs(yDisplacement) <= std::abs(yLimit);
+                for(SignedSizeT yDisplacement = 0; yDisplacement != yLimit;
                     yDisplacement += yMovementDirection) {
                     const auto yCurrent = y + yDisplacement;
 
-                    if(yCurrent >= distance.Height()) {
+                    if(yCurrent < 0 || yCurrent >= distance.Height()) {
                         break;
                     }
-                    for(int xDisplacement = 0; std::abs(xDisplacement) <= std::abs(xLimit);
+                    for(SignedSizeT xDisplacement = 0; xDisplacement != xLimit;
                         xDisplacement += xMovementDirection) {
                         const auto xCurrent = x + xDisplacement;
-                        if(xCurrent >= distance.Width() || xCurrent >= xObstacle) {
+                        if(xCurrent < 0 || xCurrent >= distance.Width()) {
+                            xLimit = xCurrent;
                             break;
                         }
 
                         const auto valueCurrent = distance.At(xCurrent, yCurrent);
 
                         if(valueCurrent == DistanceMap<SignedIntegral, Arithmetic>::BLOCKED) {
-                            xObstacle = xCurrent;
-                            break;
+                            xLimit = xDisplacement;
+                            continue;
                         }
 
                         if(valueCurrent != DistanceMap<SignedIntegral, Arithmetic>::FREE_SPACE &&
