@@ -115,12 +115,12 @@ struct Circle {
     Arithmetic radius;
 };
 
-inline size_t ToIndex(size_t x, size_t y, size_t xDim)
+inline int64_t ToIndex(int64_t x, int64_t y, int64_t xDim)
 {
     return x + y * xDim;
 }
 
-inline std::pair<size_t, size_t> FromIndex(size_t i, size_t xDim)
+inline std::pair<int64_t, int64_t> FromIndex(int64_t i, int64_t xDim)
 {
     auto x = i % xDim;
     auto y = i / xDim;
@@ -128,39 +128,39 @@ inline std::pair<size_t, size_t> FromIndex(size_t i, size_t xDim)
 }
 
 template <SignedIntegral SignedIntegral, Arithmetic Arithmetic>
-std::pair<size_t, size_t>
+std::pair<int64_t, int64_t>
 ToGrid(SignedIntegral x, SignedIntegral y, Arithmetic xMin, Arithmetic yMin);
 
 template <SignedIntegral SignedIntegral, Arithmetic Arithmetic>
-std::pair<size_t, size_t> ToGrid(Point<Arithmetic> p, Arithmetic xMin, Arithmetic yMin);
+std::pair<int64_t, int64_t> ToGrid(Point<Arithmetic> p, Arithmetic xMin, Arithmetic yMin);
 
 template <SignedIntegral SignedIntegral, Arithmetic Arithmetic>
-std::pair<Arithmetic, Arithmetic> ToWorld(size_t i, size_t j, Arithmetic xMin, Arithmetic yMin);
+std::pair<Arithmetic, Arithmetic> ToWorld(int64_t i, int64_t j, Arithmetic xMin, Arithmetic yMin);
 
 template <SignedIntegral SignedIntegral>
 class Map
 {
-    size_t width;
-    size_t height;
+    int64_t width;
+    int64_t height;
     std::vector<SignedIntegral> data;
 
 public:
     using ValueType = SignedIntegral; // Define ValueType for access in MapStencilView
 
-    Map(size_t width_, size_t height_, SignedIntegral default_value = {})
+    Map(int64_t width_, int64_t height_, SignedIntegral default_value = {})
         : width(width_), height(height_), data(width * height, default_value)
     {
     }
 
-    SignedIntegral& At(size_t x, size_t y) { return data[x + y * width]; }
-    SignedIntegral At(size_t x, size_t y) const { return data[x + y * width]; }
+    SignedIntegral& At(int64_t x, int64_t y) { return data[x + y * width]; }
+    SignedIntegral At(int64_t x, int64_t y) const { return data[x + y * width]; }
 
-    size_t Height() const { return height; }
-    size_t Width() const { return width; }
+    int64_t Height() const { return height; }
+    int64_t Width() const { return width; }
 
     std::span<const SignedIntegral> Data() const { return std::span{data}; };
 
-    size_t Size() const { return data.size(); }
+    int64_t Size() const { return data.size(); }
 };
 
 template <typename MapType>
@@ -170,16 +170,16 @@ public:
     using MapValue = typename MapType::ValueType;
 
 private:
-    using SignedSizeT = typename std::make_signed_t<size_t>;
+    using SignedSizeT = int64_t;
     static constexpr MapValue OUT_OF_BOUNDS = std::numeric_limits<MapValue>::max();
     MapType& map;
 
-    size_t centerX;
-    size_t centerY;
-    size_t blockSize;
+    int64_t centerX;
+    int64_t centerY;
+    int64_t blockSize;
 
 public:
-    MapStencilView(MapType& map, size_t centerX, size_t centerY, size_t blockSize)
+    MapStencilView(MapType& map, int64_t centerX, int64_t centerY, int64_t blockSize)
         : map(map), centerX(centerX), centerY(centerY), blockSize(blockSize){};
 
     MapValue At(SignedSizeT x, SignedSizeT y) const
@@ -247,7 +247,7 @@ template <SignedIntegral SignedIntegral, Arithmetic Arithmetic>
 class DistanceMap
 {
 private:
-    using SignedSizeT = typename std::make_signed_t<size_t>;
+    using SignedSizeT = int64_t;
 
     // TODO(TS) data type
     Arithmetic xMin{};
@@ -267,12 +267,12 @@ private:
 
 public:
     static constexpr Arithmetic CELL_SIZE = 0.15; // in meter
-    static constexpr size_t BLOCK_SIZE = 11; // size of one quadrant
-    static constexpr size_t FULL_BLOCK_SIZE = 2 * BLOCK_SIZE - 1;
+    static constexpr int64_t BLOCK_SIZE = 11; // size of one quadrant
+    static constexpr int64_t FULL_BLOCK_SIZE = 2 * BLOCK_SIZE - 1;
     static constexpr SignedIntegral CELL_SIZE_CM =
         DistanceMap<SignedIntegral, Arithmetic>::CELL_SIZE * 100;
 
-    static constexpr SignedIntegral FREE_SPACE = std::numeric_limits<SignedIntegral>::lowest()+1;
+    static constexpr SignedIntegral FREE_SPACE = std::numeric_limits<SignedIntegral>::lowest() + 1;
     static constexpr SignedIntegral BLOCKED = std::numeric_limits<SignedIntegral>::lowest();
 
     DistanceMap(
@@ -285,8 +285,8 @@ public:
         Map<SignedIntegral> distance,
         Map<SignedIntegral> personToIntermediate)
         : xMin(xMin)
-        , yMin(yMin)
         , xMax(xMax)
+        , yMin(yMin)
         , yMax(yMax)
         , xDim(xDim)
         , yDim(yDim)
@@ -305,12 +305,8 @@ public:
         MapStencilView<Map<SignedIntegral>> surplusDistanceToExitStencil(
             surplusDistance, BLOCK_SIZE - 1, BLOCK_SIZE - 1, BLOCK_SIZE);
 
-        auto center = surplusDistanceToExitStencil.At(0, 0);
-        auto centerDistance = distance.At(targetIndexX, targetIndexY);
-
         // find 0 value with the largest distance to center in surplusDistanceToExit
         for(auto const& [idx_x, idx_y] : farToNearIndices) {
-            const auto value = surplusDistanceToExitStencil.At(idx_x, idx_y);
             if(surplusDistanceToExitStencil.At(idx_x, idx_y) == 0) {
                 targetIndexX += idx_x;
                 targetIndexY += idx_y;
@@ -327,7 +323,7 @@ public:
     const Map<SignedIntegral>& Distance() const { return distance; }
 
 private:
-    std::pair<size_t, size_t> findPositionInGrid(const Point<Arithmetic>& position) const
+    std::pair<int64_t, int64_t> findPositionInGrid(const Point<Arithmetic>& position) const
     {
         auto [positionX, positionY] = ToGrid<SignedIntegral, Arithmetic>(position, xMin, yMin);
 
@@ -336,15 +332,14 @@ private:
             return {positionX, positionY};
         }
 
-
-        const std::pair<size_t, size_t> neighbors[4] = {
+        const std::pair<int64_t, int64_t> neighbors[4] = {
             {positionX - 1, positionY},
             {positionX, positionY + 1},
             {positionX + 1, positionY},
             {positionX, positionY - 1}};
 
         auto min = std::numeric_limits<Arithmetic>::max();
-        auto minNeighbor = std::make_pair<size_t, size_t>(0, 0);
+        auto minNeighbor = std::make_pair<int64_t, int64_t>(0, 0);
 
         for(const auto& [neighborX, neighborY] : neighbors) {
             auto neighborValue = distance.At(neighborX, neighborY);
@@ -368,8 +363,8 @@ private:
         Map<SignedIntegral> localDistanceFull(FULL_BLOCK_SIZE, FULL_BLOCK_SIZE);
         const SignedSizeT offset = BLOCK_SIZE - 1;
 
-        for(size_t x = 0; x < FULL_BLOCK_SIZE; ++x) {
-            for(size_t y = 0; y < FULL_BLOCK_SIZE; ++y) {
+        for(int64_t x = 0; x < FULL_BLOCK_SIZE; ++x) {
+            for(int64_t y = 0; y < FULL_BLOCK_SIZE; ++y) {
                 auto xx = static_cast<SignedSizeT>(x - offset);
                 auto yy = static_cast<SignedSizeT>(y - offset);
                 localDistanceFull.At(x, y) = localDistanceQuadrant.At(std::abs(xx), std::abs(yy));
@@ -404,7 +399,8 @@ private:
         return indices;
     }
 
-    Map<SignedIntegral> computeSurplusDistance(const std::pair<size_t, size_t>& currentIndex) const
+    Map<SignedIntegral>
+    computeSurplusDistance(const std::pair<int64_t, int64_t>& currentIndex) const
     {
         const auto [currentX, currentY] = currentIndex;
         const auto centerValue = distance.At(currentX, currentY);
@@ -461,8 +457,8 @@ template <SignedIntegral SignedIntegral>
 void DumpDistanceMapMatplotlibCSV(const Map<SignedIntegral>& map, int i)
 {
     std::ofstream file(fmt::format("dump_{:02}.csv", i));
-    for(size_t y = 0; y < map.Height(); ++y) {
-        for(size_t x = 0; x < map.Width(); ++x) {
+    for(int64_t y = 0; y < map.Height(); ++y) {
+        for(int64_t x = 0; x < map.Width(); ++x) {
             file << map.At(x, y);
             if(x < map.Width() - 1) {
                 file << ",";
@@ -518,7 +514,7 @@ void PrintDistanceMap(const Map<SignedIntegral>& distance)
 
     std::string output;
     for(I y = yDim - 1; y >= 0; --y) {
-        for(size_t x = 0; x < xDim; ++x) {
+        for(int64_t x = 0; x < xDim; ++x) {
             const auto& val = distance.At(x, y);
             if(val == DistanceMap<SignedIntegral, Arithmetic>::FREE_SPACE) {
                 output += fmt::format("  -  ");
@@ -534,7 +530,7 @@ void PrintDistanceMap(const Map<SignedIntegral>& distance)
 }
 
 template <SignedIntegral SignedIntegral, Arithmetic Arithmetic>
-std::pair<size_t, size_t> ToGrid(Arithmetic x, Arithmetic y, Arithmetic xMin, Arithmetic yMin)
+std::pair<int64_t, int64_t> ToGrid(Arithmetic x, Arithmetic y, Arithmetic xMin, Arithmetic yMin)
 {
     // TODO(TS) asserts
     auto i = (x - xMin) / DistanceMap<SignedIntegral, Arithmetic>::CELL_SIZE;
@@ -543,7 +539,7 @@ std::pair<size_t, size_t> ToGrid(Arithmetic x, Arithmetic y, Arithmetic xMin, Ar
 }
 
 template <SignedIntegral SignedIntegral, Arithmetic Arithmetic>
-std::pair<size_t, size_t> ToGrid(Point<Arithmetic> p, Arithmetic xMin, Arithmetic yMin)
+std::pair<int64_t, int64_t> ToGrid(Point<Arithmetic> p, Arithmetic xMin, Arithmetic yMin)
 {
     // TODO(TS) asserts
     auto i = (p.x - xMin) / DistanceMap<SignedIntegral, Arithmetic>::CELL_SIZE;
@@ -552,7 +548,7 @@ std::pair<size_t, size_t> ToGrid(Point<Arithmetic> p, Arithmetic xMin, Arithmeti
 }
 
 template <SignedIntegral SignedIntegral, Arithmetic Arithmetic>
-std::pair<Arithmetic, Arithmetic> ToWorld(size_t i, size_t j, Arithmetic xMin, Arithmetic yMin)
+std::pair<Arithmetic, Arithmetic> ToWorld(int64_t i, int64_t j, Arithmetic xMin, Arithmetic yMin)
 {
     // TODO(TS) asserts
     auto x = xMin + i * DistanceMap<SignedIntegral, Arithmetic>::CELL_SIZE +
@@ -566,7 +562,7 @@ template <SignedIntegral SignedIntegral, Arithmetic Arithmetic>
 class DistanceMapBuilder
 {
 private:
-    using SignedSizeT = typename std::make_signed_t<size_t>; // Get the corresponding signed type
+    using SignedSizeT = int64_t;
 
     static constexpr SignedIntegral EXIT_VALUE = 0;
     static constexpr SignedIntegral OBSTACLE_VALUE =
@@ -676,7 +672,7 @@ private:
         return std::make_tuple(xMin, yMin, xMax, yMax);
     }
 
-    void markObstacles(SignedIntegral fillValue = DistanceMap<SignedIntegral, Arithmetic>::BLOCKED)
+    void markObstacles()
     {
         for(const auto& point : points) {
             markPoint(point, OBSTACLE_VALUE);
@@ -705,7 +701,7 @@ private:
         }
     }
 
-    void markExits(SignedIntegral fillValue = 0)
+    void markExits()
     {
         for(const auto& exitPoint : exitPoints) {
             markPoint(exitPoint, EXIT_VALUE);
@@ -842,12 +838,12 @@ private:
             std::back_inserter(vertexIndices),
             [this](const auto& p) { return ToGrid<SignedIntegral, Arithmetic>(p, xMin, yMin); });
 
-        for(size_t y = 0; y < distance.Height(); ++y) {
+        for(int64_t y = 0; y < distance.Height(); ++y) {
             std::vector<SignedSizeT> xIntersections;
 
-            for(size_t i = 0; i < vertexIndices.size(); ++i) {
+            for(int64_t i = 0; i < static_cast<int64_t>(vertexIndices.size()); ++i) {
                 auto [x1, y1] = vertexIndices[i];
-                auto [x2, y2] = vertexIndices[(i + 1) % vertexIndices.size()];
+                auto [x2, y2] = vertexIndices[(i + 1) % static_cast<int64_t>(vertexIndices.size())];
 
                 if(y1 == y2) {
                     continue; // Skip horizontal edges
@@ -864,9 +860,9 @@ private:
 
             std::sort(xIntersections.begin(), xIntersections.end());
 
-            for(size_t i = 0; i + 1 < xIntersections.size(); i += 2) {
+            for(int64_t i = 0; i + 1 < static_cast<int64_t>(xIntersections.size()); i += 2) {
                 for(SignedSizeT x = xIntersections[i]; x <= xIntersections[i + 1]; ++x) {
-                    if(x >= 0 && static_cast<size_t>(x) < distance.Width() &&
+                    if(x >= 0 && x < distance.Width() &&
                        distance.At(x, y) != DistanceMap<SignedIntegral, Arithmetic>::BLOCKED) {
                         distance.At(x, y) = fillValue;
                     }
@@ -879,7 +875,7 @@ private:
         Polygon<Arithmetic> polygon,
         SignedIntegral fillValue = DistanceMap<SignedIntegral, Arithmetic>::BLOCKED)
     {
-        for(size_t i = 0; i < polygon.points.size(); ++i) {
+        for(int64_t i = 0; i < static_cast<int64_t>(polygon.points.size()); ++i) {
             markLine(
                 {polygon.points[i], polygon.points[(i + 1) % polygon.points.size()]}, fillValue);
         }
@@ -897,11 +893,11 @@ private:
         const auto yDim = distance.Height();
 
         std::vector<bool> visited(distance.Size(), false);
-        std::queue<std::pair<size_t, size_t>> queue;
+        std::queue<std::pair<int64_t, int64_t>> queue;
 
         // find zero values and put in queue, mark as visited
 
-        for(size_t i = 0; i < distance.Size(); ++i) {
+        for(int64_t i = 0; i < distance.Size(); ++i) {
             const auto [x, y] = FromIndex(i, xDim);
             if(distance.At(x, y) == 0) {
                 visited[i] = true;
@@ -939,7 +935,7 @@ private:
         }
     }
 
-    void updateDistances(size_t x, size_t y, const Map<SignedIntegral>& localDistance)
+    void updateDistances(int64_t x, int64_t y, const Map<SignedIntegral>& localDistance)
     {
         const auto centerValue = distance.At(x, y);
 
@@ -1003,8 +999,8 @@ private:
         Map<SignedIntegral> localDistance(
             DistanceMap<SignedIntegral, Arithmetic>::BLOCK_SIZE,
             DistanceMap<SignedIntegral, Arithmetic>::BLOCK_SIZE);
-        for(size_t x = 0; x < localDistance.Width(); ++x) {
-            for(size_t y = 0; y < localDistance.Height(); ++y) {
+        for(int64_t x = 0; x < localDistance.Width(); ++x) {
+            for(int64_t y = 0; y < localDistance.Height(); ++y) {
                 localDistance.At(x, y) = static_cast<SignedIntegral>(
                     0.5 + DistanceMap<SignedIntegral, Arithmetic>::CELL_SIZE_CM *
                               std::sqrt(static_cast<float>(x * x + y * y)));
