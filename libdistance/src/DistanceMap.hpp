@@ -956,13 +956,13 @@ private:
 
         for(const auto yMovementDirection : movementDirections) {
             const auto yLimit =
-                static_cast<SignedSizeT>(DistanceMap<SignedIntegral, Arithmetic>::BLOCK_SIZE - 1) *
+                static_cast<SignedSizeT>(DistanceMap<SignedIntegral, Arithmetic>::BLOCK_SIZE) *
                 yMovementDirection;
 
             for(const auto xMovementDirection : movementDirections) {
-                auto xLimit = static_cast<SignedSizeT>(
-                                  DistanceMap<SignedIntegral, Arithmetic>::BLOCK_SIZE - 1) *
-                              xMovementDirection;
+                auto xLimit =
+                    static_cast<SignedSizeT>(DistanceMap<SignedIntegral, Arithmetic>::BLOCK_SIZE) *
+                    xMovementDirection;
 
                 auto xObstacleOffset = std::numeric_limits<SignedIntegral>::max();
 
@@ -977,7 +977,7 @@ private:
                         xDisplacement += xMovementDirection) {
                         const auto xCurrent = x + xDisplacement;
                         if(xCurrent < 0 || xCurrent >= distance.Width()) {
-                            xLimit = xCurrent;
+                            xLimit = xDisplacement;
                             break;
                         }
 
