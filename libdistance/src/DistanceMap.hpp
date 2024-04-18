@@ -985,7 +985,7 @@ private:
 
                         if(valueCurrent == DistanceMap<SignedIntegral, Arithmetic>::BLOCKED) {
                             xLimit = xDisplacement;
-                            continue;
+                            break;
                         }
 
                         if(valueCurrent != DistanceMap<SignedIntegral, Arithmetic>::FREE_SPACE &&
@@ -1059,8 +1059,8 @@ public:
         xMax = std::get<2>(boundingBox);
         yMax = std::get<3>(boundingBox);
 
-        auto xDim = computeXGridSize(xMin, xMax);
-        auto yDim = computeYGridSize(yMin, yMax);
+        auto xDim = computeXGridSize();
+        auto yDim = computeYGridSize();
 
         distance =
             Map<SignedIntegral>(xDim, yDim, DistanceMap<SignedIntegral, Arithmetic>::FREE_SPACE);
@@ -1071,19 +1071,18 @@ public:
 
         computeDistanceMap(localDistance);
 
-        DumpDistanceMapMatplotlibCSV(distance, 0);
         return std::make_unique<DistanceMap<SignedIntegral, Arithmetic>>(
             xMin, yMin, xMax, yMax, xDim, yDim, std::move(distance), std::move(localDistance));
     }
 
-    SignedIntegral computeXGridSize(Arithmetic xMin, Arithmetic xMax) const
+    SignedIntegral computeXGridSize() const
     {
         return static_cast<SignedIntegral>(
             (std::abs(xMax - xMin) + DistanceMap<SignedIntegral, Arithmetic>::CELL_SIZE) /
             DistanceMap<SignedIntegral, Arithmetic>::CELL_SIZE);
     }
 
-    SignedIntegral computeYGridSize(Arithmetic yMin, Arithmetic yMax) const
+    SignedIntegral computeYGridSize() const
     {
         return static_cast<SignedIntegral>(
             (std::abs(yMax - yMin) + DistanceMap<SignedIntegral, Arithmetic>::CELL_SIZE) /
