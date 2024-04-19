@@ -5,6 +5,7 @@ import itertools
 import sqlite3
 from pathlib import Path
 from typing import Final
+
 from shapely import box, from_wkt
 
 from jupedsim.serialization import TrajectoryWriter
@@ -155,8 +156,6 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
             old_xmax = self._x_max(cur)
             old_ymin = self._y_min(cur)
             old_ymax = self._y_max(cur)
-
-            old_bb = box(old_xmin, old_ymin, old_xmax, old_ymax)
 
             cur.executemany(
                 "INSERT OR REPLACE INTO metadata(key, value) VALUES(?,?)",
