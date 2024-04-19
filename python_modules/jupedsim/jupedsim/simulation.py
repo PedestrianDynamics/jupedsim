@@ -33,7 +33,7 @@ from jupedsim.stages import (
     WaitingSetStage,
     WaypointStage,
 )
-from jupedsim.tracing import Trace
+from jupedsim.internal.tracing import Trace
 
 
 class Simulation:

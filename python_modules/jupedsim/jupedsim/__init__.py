@@ -61,7 +61,7 @@ from jupedsim.stages import (
     WaitingSetState,
     WaypointStage,
 )
-from jupedsim.tracing import Trace
+from jupedsim.internal.tracing import Trace
 
 __version__ = get_build_info().library_version
 __commit__ = get_build_info().git_commit_hash
