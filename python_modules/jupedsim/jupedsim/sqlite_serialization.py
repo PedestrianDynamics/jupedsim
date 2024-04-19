@@ -5,6 +5,7 @@ import itertools
 import sqlite3
 from pathlib import Path
 from typing import Final
+from shapely import box, from_wkt
 
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
@@ -136,25 +137,6 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                 "INSERT INTO trajectory_data VALUES(?, ?, ?, ?, ?, ?)",
                 frame_data,
             )
-            res = cur.execute(
-                "SELECT MIN(pos_x), MAX(pos_x), MIN(pos_y), MAX(pos_y) FROM trajectory_data"
-            )
-            xmin, xmax, ymin, ymax = res.fetchone()
-
-            old_xmin = self._x_min(cur)
-            old_xmax = self._x_max(cur)
-            old_ymin = self._y_min(cur)
-            old_ymax = self._y_max(cur)
-
-            cur.executemany(
-                "INSERT OR REPLACE INTO metadata(key, value) VALUES(?,?)",
-                [
-                    ("xmin", str(min(xmin, float(old_xmin)))),
-                    ("xmax", str(max(xmax, float(old_xmax)))),
-                    ("ymin", str(min(ymin, float(old_ymin)))),
-                    ("ymax", str(max(ymax, float(old_ymax)))),
-                ],
-            )
 
             geo_wkt = simulation.get_geometry().as_wkt()
             geo_hash = hash(geo_wkt)
@@ -166,6 +148,26 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                 "INSERT INTO frame_data VALUES(?, ?)",
                 (frame, geo_hash),
             )
+
+            xmin, xmax, ymin, ymax = from_wkt(geo_wkt).bounds
+
+            old_xmin = self._x_min(cur)
+            old_xmax = self._x_max(cur)
+            old_ymin = self._y_min(cur)
+            old_ymax = self._y_max(cur)
+
+            old_bb = box(old_xmin, old_ymin, old_xmax, old_ymax)
+
+            cur.executemany(
+                "INSERT OR REPLACE INTO metadata(key, value) VALUES(?,?)",
+                [
+                    ("xmin", str(min(xmin, float(old_xmin)))),
+                    ("xmax", str(max(xmax, float(old_xmax)))),
+                    ("ymin", str(min(ymin, float(old_ymin)))),
+                    ("ymax", str(max(ymax, float(old_ymax)))),
+                ],
+            )
+
             cur.execute("COMMIT")
         except sqlite3.Error as e:
             cur.execute("ROLLBACK")
