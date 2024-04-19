@@ -20,6 +20,7 @@ from jupedsim.geometry_utils import (
     _geometry_from_shapely,
     _geometry_from_wkt,
 )
+from jupedsim.internal.tracing import Trace
 from jupedsim.journey import JourneyDescription, Transition
 from jupedsim.library import (
     BuildInfo,
@@ -61,7 +62,6 @@ from jupedsim.stages import (
     WaitingSetState,
     WaypointStage,
 )
-from jupedsim.internal.tracing import Trace
 
 __version__ = get_build_info().library_version
 __commit__ = get_build_info().git_commit_hash

@@ -9,6 +9,7 @@ import jupedsim.native as py_jps
 from jupedsim.agent import Agent
 from jupedsim.geometry import Geometry
 from jupedsim.geometry_utils import build_geometry
+from jupedsim.internal.tracing import Trace
 from jupedsim.journey import JourneyDescription
 from jupedsim.models.collision_free_speed import (
     CollisionFreeSpeedModel,
@@ -33,7 +34,6 @@ from jupedsim.stages import (
     WaitingSetStage,
     WaypointStage,
 )
-from jupedsim.internal.tracing import Trace
 
 
 class Simulation:
