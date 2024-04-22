@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <concepts>
-#include <cstddef>
 #include <fmt/format.h>
 #include <fstream>
 #include <iostream>
@@ -333,6 +331,7 @@ public:
     }
 
     const Map<SignedIntegral>& Distance() const { return distance; }
+    const Map<SignedIntegral>& LocalDistance() const { return localDistance; }
 
 private:
     std::pair<int64_t, int64_t> findPositionInGrid(const Point<Arithmetic>& position) const
@@ -466,9 +465,9 @@ private:
 };
 
 template <SignedIntegral SignedIntegral>
-void DumpDistanceMapMatplotlibCSV(const Map<SignedIntegral>& map, int i)
+void DumpDistanceMapMatplotlibCSV(const Map<SignedIntegral>& map, const std::filesystem::path& p)
 {
-    std::ofstream file(fmt::format("dump_{:02}.csv", i));
+    std::ofstream file(p);
     for(int64_t y = 0; y < map.Height(); ++y) {
         for(int64_t x = 0; x < map.Width(); ++x) {
             file << map.At(x, y);

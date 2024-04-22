@@ -1,10 +1,11 @@
 #! /usr/bin/env python
 
-import shapely
 import dataclasses
-from typing import List
 import textwrap
+from typing import List
+
 import jinja2
+import shapely
 
 
 def cvt_poly(poly):
@@ -40,11 +41,11 @@ class TestCase:
 
 
 def generate_test_cases():
-    box_test_case = TestCase(
-        shapely.box(0, 0, 4.5, 4.5), shapely.Point([2.3, 2.3])
-    )
-    geometries = [box_test_case]
-    return geometries
+    return [
+        TestCase(
+            shapely.box(0, 0, 23 * 0.2, 23 * 0.2), shapely.Point([2.3, 2.3])
+        ),
+    ]
 
 
 def generate_header(test_cases: List[TestCase]):

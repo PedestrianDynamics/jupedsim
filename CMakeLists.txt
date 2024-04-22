@@ -221,6 +221,7 @@ add_subdirectory(libcommon)
 add_subdirectory(libsimulator)
 add_subdirectory(libdistance)
 add_subdirectory(python_bindings_jupedsim)
+add_subdirectory(tools)
 
 ################################################################################
 # Code formatting
