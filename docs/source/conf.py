@@ -62,6 +62,7 @@ autoapi_ignore = [
     "**/internal/**",
     "**/\\w.*.py",
 ]
+
 # autoapi_member_order = "groupwise"
 autodoc_typehints = "both"
 autoapi_python_class_content = "both"
@@ -76,6 +77,10 @@ def skip_submodules(app, what, name, obj, skip, options):
         skip = True
     if what == "method":
         if name.endswith("as_native"):
+            skip = True
+        if "tracing" in name:
+            skip = True
+        if "get_last_trace" in name:
             skip = True
     return skip
 

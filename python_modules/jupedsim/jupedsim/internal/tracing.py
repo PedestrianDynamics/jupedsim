@@ -5,6 +5,14 @@ import jupedsim.native as py_jps
 
 
 class Trace:
+    """
+    .. important::
+
+        This is indented for internal usage. We will not guarantee that this API will
+        stable and available in any release. It might be changed on any update, regardless of
+        a major/minor/patch update.
+    """
+
     def __init__(self) -> None:
         self._obj = py_jps.Trace
 
