@@ -47,6 +47,7 @@ set(Python_FIND_VIRTUALENV "FIRST")
 find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 set(PYBIND11_SIMPLE_GIL_MANAGEMENT ON)
 set(PYBIND11_NUMPY_1_ONLY ON)
+set(PYBIND11_FINDPYTHON ON)
 add_subdirectory(pybind11-2.12.0)
 set(Python_EXECUTABLE ${Python_EXECUTABLE} PARENT_SCOPE)
 

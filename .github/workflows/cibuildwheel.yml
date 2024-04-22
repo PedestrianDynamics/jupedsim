@@ -21,12 +21,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set up Python 3.11
+    - name: Set up Python 3.12
       uses: actions/setup-python@v5
       with:
-        python-version: "3.11"
+        python-version: "3.12"
     - name: Install dependencies
-      run: pip install black==24.1.1 isort==5.13.2 jupyter-black==0.3.4
+      run: pip install black==24.4.0 isort==5.13.2 jupyter-black==0.3.4
 
     - name: Run checks
       run: ./scripts/ci/check_format.sh
@@ -43,10 +43,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set up Python 3.11
+    - name: Set up Python 3.12
       uses: actions/setup-python@v5
       with:
-        python-version: "3.11"
+        python-version: "3.12"
     - name: Install dependencies
       run: pip install -r requirements.txt
 
@@ -63,10 +63,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set up Python 3.11
+    - name: Set up Python 3.12
       uses: actions/setup-python@v5
       with:
-        python-version: "3.11"
+        python-version: "3.12"
 
     - name: Install jupedsim
       run: |
@@ -160,7 +160,7 @@ jobs:
       - uses: actions/setup-python@v5
         name: Install Python
         with:
-          python-version: 3.11
+          python-version: 3.12
 
       - name: Install dependencies
         run: python -m pip install wheel build setuptools
