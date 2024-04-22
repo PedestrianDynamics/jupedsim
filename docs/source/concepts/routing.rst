@@ -324,14 +324,3 @@ How the path is distinguished for different target points, you can see in the an
 .. image:: /notebooks/demo-data/journey/shortest_path.gif
     :width: 60%
     :align: center
-
-.. warning::
-
-    As the distance is computed along the centers of the triangles, it may happen, that not the shortest-path on the ground is taken.
-    This is a known issue of the *JuPedSim*'s routing, that will be fixed in the near future.
-    To avoid this behaviour intermediate waypoints can be added to the simulation.
-
-    .. image:: /_static/routing/expected_routing.png
-        :width: 40%
-    .. image:: /_static/routing/unexpected_routing.png
-        :width: 40%
