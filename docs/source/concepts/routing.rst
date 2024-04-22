@@ -307,6 +307,47 @@ A least-targeted transition can be added to a journey with:
         )
     )
 
+Direct Steering
+---------------
+
+In certain scenarios, e.g., developing a specific behavior model, you may not want to have a fixed set of stages along the path of an agent, but want to be more flexible.
+For this purpose, *JuPedSim* offers a method called "direct steering" it moves an agent to specific position in the walkable area on the shortest path avoiding any obstacles (see :ref:`Way finding <Way finding>`).
+To use direct steering in your simulation, you need to add a direct steering stage and a journey consisting only of the stage to the simulation:
+
+.. code:: python
+
+    direct_steering_stage = simulation.add_direct_steering_stage()
+    direct_steering_journey = jps.JourneyDescription([direct_steering_stage])
+    direct_steering_journey_id = simulation.add_journey(direct_steering_journey)
+
+Afterward, an agents or agents can be added, targeting this journey and stage.
+The agent with the ID direct_steering_agent_id is using the direct steering journey.
+We now can directly set the target of this specific agent.
+It will move towards the specified point and if the point is reached, it will come to a halt there:
+
+.. code:: python
+
+    agent = simulation.agent(direct_steering_agent_id)
+    agent.target = (-10, -10)
+
+.. note::
+
+    Remember, as the agents do not walk towards an exit when using direct steering, they will not be removed from the simulation.
+    If they should be removed from the simulation if they reached a certain position, you have to do it manually:
+
+    .. code:: python
+
+        simulation.mark_agent_for_removal(direct_steering_agent_id)
+
+    Alternatively, the journey of an agent can be switched to some journey with an exit:
+
+    .. code:: python
+
+        simulation.switch_agent_journey(
+            direct_steering_agent_id,
+            new_journey_id,
+            new_stage_id
+        )
 
 Way finding
 ===========
