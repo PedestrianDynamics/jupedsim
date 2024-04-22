@@ -228,7 +228,7 @@ Point GeneralizedCentrifugalForceModel::ForceRepPed(
     const double dist_intpol_left =
         mindist + maxNeighborInterpolationDistance; // lower cut-off for Frep (modCFM)
     const double dist_intpol_right =
-     maxNeighborInteractionDistance -
+        maxNeighborInteractionDistance -
         maxNeighborInterpolationDistance; // upper cut-off for Frep (modCFM)
     const double smax = mindist - maxNeighborInterpolationDistance; // max overlapping
     double f = 0.0f; // fuction value
@@ -281,7 +281,8 @@ Point GeneralizedCentrifugalForceModel::ForceRepPed(
     if(dist_eff >= dist_intpol_right) { // 2
         f = -agent1_mass * K_ij * nom / dist_intpol_right; // abs(NR-Dv(i)+Sa)
         f1 = -f / dist_intpol_right;
-        px = hermite_interp(dist_eff, dist_intpol_right, maxNeighborInteractionDistance, f, 0, f1, 0);
+        px = hermite_interp(
+            dist_eff, dist_intpol_right, maxNeighborInteractionDistance, f, 0, f1, 0);
         F_rep = ep12 * px;
     } else if(dist_eff >= dist_intpol_left) { // 3
         f = -agent1_mass * K_ij * nom / fabs(dist_eff); // abs(NR-Dv(i)+Sa)
@@ -447,7 +448,8 @@ Point GeneralizedCentrifugalForceModel::ForceInterpolation(
     if(dist_eff > tmp2) { // 2
         f = -nominator / dist_intpol_right;
         f1 = -f / dist_intpol_right; // nominator / (dist_intpol_right^2) = derivativ of f
-        px = hermite_interp(dist_eff, dist_intpol_right, maxGeometryInteractionDistance, f, 0, f1, 0);
+        px = hermite_interp(
+            dist_eff, dist_intpol_right, maxGeometryInteractionDistance, f, 0, f1, 0);
         F_rep = e * px;
     } else if(dist_eff >= tmp3) { // 3
         f = -nominator / fabs(dist_eff); // devided by abs f the effective distance
