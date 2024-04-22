@@ -10,12 +10,6 @@ import jupedsim.native as py_jps
 class GeneralizedCentrifugalForceModel:
     """Parameters for Generalized Centrifugal Force Model
 
-    .. warning::
-        Unfortunately we broke the model before the 1.0 release and did not notice it in time.
-        For the time being please do not use this model.
-
-        We track the defect here: https://github.com/PedestrianDynamics/jupedsim/issues/1337
-
     All attributes are initialized with reasonably good defaults.
 
     Attributes:
