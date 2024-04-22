@@ -349,6 +349,21 @@ It will move towards the specified point and if the point is reached, it will co
             new_stage_id
         )
 
+Working with multiple journeys
+------------------------------
+
+When working with complex scenarios it might be necessary to work with multiple journeys to model the movement of the agents.
+At some point or at some time agents might need to switch between these journeys depending on some conditions.
+After the following code, the agent with the ID `agent_id` will continue in the journey `new_journey_id` targeting `new_stage_id`:
+
+.. code::
+
+        simulation.switch_agent_journey(
+            agent_id,
+            new_journey_id,
+            new_stage_id
+        )
+
 Way finding
 ===========
 
