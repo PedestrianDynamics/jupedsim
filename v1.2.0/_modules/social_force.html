@@ -1,0 +1,559 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>social_force &#8212; JuPedSim  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/social_force';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.2';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v1.2.0';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../_static/jupedsim.svg" class="logo__image only-light" alt="JuPedSim  documentation - Home"/>
+    <script>document.write(`<img src="../_static/jupedsim.svg" class="logo__image only-dark" alt="JuPedSim  documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PedestrianDynamics/jupedsim" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/jupedsim/" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://img.shields.io/pypi/v/jupedsim" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.5281/zenodo.1293771" title="DOI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1293771.svg" class="icon-link-image" alt="DOI"/></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/getting_started.html">Getting started</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../concepts/index.html">Concepts</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../concepts/geometry.html">Geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../concepts/routing.html">Routing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../pedestrian_models/index.html">Pedestrian Models</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../notebooks/index.html">Notebooks</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/corner.html">Movement around Corners</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/double-bottleneck.html">Movement through Bottlenecks</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/journey.html">How to work with Journeys</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/lane-formation.html">Lane formation in bi-directional flow</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/motivation.html">Modelling Motivation</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/queues_waiting.html">Waiting in Queues</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/routing.html">How Route Choice can Impact Evacuation Times</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/single-file.html">Simulating Single-File Movement</a></li>
+
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../disclaimer.html">Disclaimer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/jupedsim/index.html">API reference</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for social_force</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright © 2012-2024 Forschungszentrum Jülich GmbH</span>
+<span class="c1"># SPDX-License-Identifier: LGPL-3.0-or-later</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="kn">import</span> <span class="nn">jupedsim.native</span> <span class="k">as</span> <span class="nn">py_jps</span>
+
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">kw_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="viewcode-block" id="SocialForceModel"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModel">[docs]</a><span class="k">class</span> <span class="nc">SocialForceModel</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters for Social Force Model</span>
+
+<span class="sd">    All attributes are initialized with reasonably good defaults.</span>
+
+<span class="sd">    See the scientific publication for more details about this model</span>
+<span class="sd">    https://doi.org/10.1038/35035023</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        bodyForce: describes the strength with which an agent is influenced by pushing forces from obstacles and neighbors in its direct proximity. [in kg s^-2] (is called k)</span>
+<span class="sd">        friction: describes the strength with which an agent is influenced by frictional forces from obstacles and neighbors in its direct proximity. [in kg m^-1 s^-1] (is called :math:`\kappa`)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SocialForceModel.bodyForce"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModel.bodyForce">[docs]</a>    <span class="n">bodyForce</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">120000</span>  <span class="c1"># [kg s^-2] is called k</span></div>
+<div class="viewcode-block" id="SocialForceModel.friction"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModel.friction">[docs]</a>    <span class="n">friction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">240000</span>  <span class="c1"># [kg m^-1 s^-1] is called kappa</span></div></div>
+
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">kw_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="viewcode-block" id="SocialForceModelAgentParameters"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelAgentParameters">[docs]</a><span class="k">class</span> <span class="nc">SocialForceModelAgentParameters</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters required to create an Agent in the Social Force Model.</span>
+
+<span class="sd">    See the scientific publication for more details about this model</span>
+<span class="sd">    https://doi.org/10.1038/35035023</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        position: Position of the agent.</span>
+<span class="sd">        orientation: Orientation of the agent.</span>
+<span class="sd">        journey_id: Id of the journey the agent follows.</span>
+<span class="sd">        stage_id: Id of the stage the agent targets.</span>
+<span class="sd">        velocity: current velocity of the agent.</span>
+<span class="sd">        mass: mass of the agent. [in kg] (is called m)</span>
+<span class="sd">        desiredSpeed: desired Speed of the agent. [in m/s] (is called v0)</span>
+<span class="sd">        reactionTime: reaction Time of the agent. [in s] (is called :math:`\\tau`)</span>
+<span class="sd">        agentScale: indicates how strong an agent is influenced by pushing forces from neighbors. [in N] (is called A)</span>
+<span class="sd">        obstacleScale: indicates how strong an agent is influenced by pushing forces from obstacles. [in N] (is called A)</span>
+<span class="sd">        forceDistance: indicates how much the distance between an agent and obstacles or neighbors influences social forces. [in m] (is called B)</span>
+<span class="sd">        radius: radius of the space an agent occupies. [in m] (is called r)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># todo write force equation from paper</span>
+<div class="viewcode-block" id="SocialForceModelAgentParameters.position"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelAgentParameters.position">[docs]</a>    <span class="n">position</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span></div>
+<div class="viewcode-block" id="SocialForceModelAgentParameters.orientation"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelAgentParameters.orientation">[docs]</a>    <span class="n">orientation</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span></div>
+<div class="viewcode-block" id="SocialForceModelAgentParameters.journey_id"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelAgentParameters.journey_id">[docs]</a>    <span class="n">journey_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span></div>
+<div class="viewcode-block" id="SocialForceModelAgentParameters.stage_id"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelAgentParameters.stage_id">[docs]</a>    <span class="n">stage_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span></div>
+<div class="viewcode-block" id="SocialForceModelAgentParameters.velocity"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelAgentParameters.velocity">[docs]</a>    <span class="n">velocity</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span></div>
+    <span class="c1"># the values are from paper. doi is in class description</span>
+<div class="viewcode-block" id="SocialForceModelAgentParameters.mass"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelAgentParameters.mass">[docs]</a>    <span class="n">mass</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">80.0</span>  <span class="c1"># [kg] is called m</span></div>
+<div class="viewcode-block" id="SocialForceModelAgentParameters.desiredSpeed"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelAgentParameters.desiredSpeed">[docs]</a>    <span class="n">desiredSpeed</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">0.8</span>  <span class="c1"># [m / s] is called v0 can be set higher depending on situation</span>
+    <span class="p">)</span></div>
+<div class="viewcode-block" id="SocialForceModelAgentParameters.reactionTime"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelAgentParameters.reactionTime">[docs]</a>    <span class="n">reactionTime</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># [s] is called tau</span></div>
+<div class="viewcode-block" id="SocialForceModelAgentParameters.agentScale"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelAgentParameters.agentScale">[docs]</a>    <span class="n">agentScale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2000</span>  <span class="c1"># [N] is called A</span></div>
+<div class="viewcode-block" id="SocialForceModelAgentParameters.obstacleScale"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelAgentParameters.obstacleScale">[docs]</a>    <span class="n">obstacleScale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2000</span>  <span class="c1"># [N] is called A</span></div>
+<div class="viewcode-block" id="SocialForceModelAgentParameters.forceDistance"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelAgentParameters.forceDistance">[docs]</a>    <span class="n">forceDistance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.08</span>  <span class="c1"># [m] is called B</span></div>
+<div class="viewcode-block" id="SocialForceModelAgentParameters.radius"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelAgentParameters.radius">[docs]</a>    <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">0.3</span>  <span class="c1"># [m] in paper 2r is uniformy distibuted in interval [0.5 m, 0.7 m]</span>
+    <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">as_native</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">SocialForceModelAgentParameters</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">SocialForceModelAgentParameters</span><span class="p">(</span>
+            <span class="n">position</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">,</span>
+            <span class="n">orientation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span>
+            <span class="n">journey_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">journey_id</span><span class="p">,</span>
+            <span class="n">stage_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stage_id</span><span class="p">,</span>
+            <span class="n">velocity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">,</span>
+            <span class="n">mass</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span>
+            <span class="n">desiredSpeed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">desiredSpeed</span><span class="p">,</span>
+            <span class="n">reactionTime</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reactionTime</span><span class="p">,</span>
+            <span class="n">agentScale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">agentScale</span><span class="p">,</span>
+            <span class="n">obstacleScale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">obstacleScale</span><span class="p">,</span>
+            <span class="n">forceDistance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">forceDistance</span><span class="p">,</span>
+            <span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SocialForceModelState"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelState">[docs]</a><span class="k">class</span> <span class="nc">SocialForceModelState</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backing</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">backing</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="SocialForceModelState.velocity"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelState.velocity">[docs]</a>    <span class="k">def</span> <span class="nf">velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;velocity of this agent.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">test_value</span></div>
+
+    <span class="nd">@velocity</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">velocity</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="n">velocity</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="SocialForceModelState.mass"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelState.mass">[docs]</a>    <span class="k">def</span> <span class="nf">mass</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;mass of this agent.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">mass</span></div>
+
+    <span class="nd">@mass</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">mass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mass</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="SocialForceModelState.desiredSpeed"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelState.desiredSpeed">[docs]</a>    <span class="k">def</span> <span class="nf">desiredSpeed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;desired Speed of this agent.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">desiredSpeed</span></div>
+
+    <span class="nd">@desiredSpeed</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">desiredSpeed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desiredSpeed</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">desiredSpeed</span> <span class="o">=</span> <span class="n">desiredSpeed</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="SocialForceModelState.reactionTime"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelState.reactionTime">[docs]</a>    <span class="k">def</span> <span class="nf">reactionTime</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;reaction Time of this agent.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">reactionTime</span></div>
+
+    <span class="nd">@reactionTime</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">reactionTime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reactionTime</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">reactionTime</span> <span class="o">=</span> <span class="n">reactionTime</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="SocialForceModelState.agentScale"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelState.agentScale">[docs]</a>    <span class="k">def</span> <span class="nf">agentScale</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;agent Scale of this agent.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">agentScale</span></div>
+
+    <span class="nd">@agentScale</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">agentScale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agentScale</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">agentScale</span> <span class="o">=</span> <span class="n">agentScale</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="SocialForceModelState.obstacleScale"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelState.obstacleScale">[docs]</a>    <span class="k">def</span> <span class="nf">obstacleScale</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;obstacle Scale of this agent.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">obstacleScale</span></div>
+
+    <span class="nd">@obstacleScale</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">obstacleScale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obstacleScale</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">obstacleScale</span> <span class="o">=</span> <span class="n">obstacleScale</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="SocialForceModelState.forceDistance"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelState.forceDistance">[docs]</a>    <span class="k">def</span> <span class="nf">forceDistance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;force Distance of this agent.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">forceDistance</span></div>
+
+    <span class="nd">@forceDistance</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">forceDistance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forceDistance</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">forceDistance</span> <span class="o">=</span> <span class="n">forceDistance</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="SocialForceModelState.radius"><a class="viewcode-back" href="../api/social_force/index.html#social_force.SocialForceModelState.radius">[docs]</a>    <span class="k">def</span> <span class="nf">radius</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;radius of this agent.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">radius</span></div>
+
+    <span class="nd">@radius</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">radius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span></div>
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Forschungszentrum Jülich GmbH, IAS-7.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
