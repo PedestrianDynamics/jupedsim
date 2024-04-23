@@ -106,7 +106,6 @@ An exit located in the polygon :math:`(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-
 
     When adding exits close to the boundary of the walkable area make sure that there is enough room for the agents to enter the exit polygon.
     Otherwise they will not be able to each the exit at all.
-    If the exit is too close to the geometry boundaries you may notice some repulsive impulses from the operational model.
 
 .. warning::
 
@@ -212,7 +211,7 @@ Journeys
 --------
 
 Now that we have added the nodes in the network, we need to combine them to a so called Journey in *JuPedSim*.
-An agent will always continue its moving along the transitions of a journey after completing its current stage.
+An agent will always continue to move along the transitions of a journey after completing its current stage.
 But before we can add transitions we have to create Journeys:
 
 .. code-block:: python
@@ -331,7 +330,7 @@ To use direct steering in your simulation, you need to add a direct steering sta
     direct_steering_journey_id = simulation.add_journey(direct_steering_journey)
 
 Afterwards, an agent or agents can be added, targeting this journey and stage.
-The agent with the ID direct_steering_agent_id is using the direct steering journey.
+The agent with the ID `direct_steering_agent_id` is using the direct steering journey.
 We now can directly set the target of this specific agent.
 It will move towards the specified point and if the point is reached, it will come to a halt there:
 
@@ -349,20 +348,12 @@ It will move towards the specified point and if the point is reached, it will co
 
         simulation.mark_agent_for_removal(direct_steering_agent_id)
 
-    Alternatively, the journey of an agent can be switched to some journey:
+    Alternatively, the journey of an agent can be switched to some other journey, see :ref:`Switch journey`.
 
-    .. code:: python
+Switch journey
+--------------
 
-        simulation.switch_agent_journey(
-            direct_steering_agent_id,
-            new_journey_id,
-            new_stage_id
-        )
-
-Working with multiple journeys
-------------------------------
-
-When working with complex scenarios it might be necessary to work with multiple journeys to model the movement of the agents.
+In complex scenarios it might be necessary to work with multiple journeys to model the movement of the agents.
 At some point or at some time agents might need to switch between these journeys depending on some conditions.
 After the following code, the agent with the ID `agent_id` will continue in the journey `new_journey_id` targeting `new_stage_id`:
 
