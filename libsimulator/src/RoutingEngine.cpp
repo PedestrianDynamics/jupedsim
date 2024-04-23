@@ -261,7 +261,7 @@ CDT::Face_handle RoutingEngine::find_face(K::Point_2 p) const
     const auto face = cdt.locate(p);
     if(face == nullptr || cdt.is_infinite(face) || !face->get_in_domain()) {
         throw SimulationError(
-            "Point ({}, {}) is outside oif accessible area",
+            "Point ({}, {}) is outside of accessible area",
             CGAL::to_double(p.x()),
             CGAL::to_double(p.y()));
     }

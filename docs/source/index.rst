@@ -8,6 +8,7 @@ JuPedSim
 
    Getting started <notebooks/getting_started>
    Concepts <concepts/index>
+   Pedestrian Models <pedestrian_models/index>
    Notebooks <notebooks/index>
    History <history>
    Disclaimer <disclaimer>
