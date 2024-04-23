@@ -36,9 +36,9 @@ JPS_Simulation JPS_Simulation_Create(
     try {
         auto collisionGeometry = reinterpret_cast<const CollisionGeometry*>(geometry);
         auto modelInternal = reinterpret_cast<OperationalModel*>(model);
-        auto model = modelInternal->Clone();
+        auto modelClone = modelInternal->Clone();
         result = reinterpret_cast<JPS_Simulation>(new Simulation(
-            std::move(model), std::make_unique<CollisionGeometry>(*collisionGeometry), dT));
+            std::move(modelClone), std::make_unique<CollisionGeometry>(*collisionGeometry), dT));
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});

@@ -179,7 +179,7 @@ public:
 
     ID Id() const { return id; }
 
-    std::tuple<Point, BaseStage::ID> Target(const GenericAgent& agent) const
+    std::tuple<BaseStage::Location, BaseStage::ID> Target(const GenericAgent& agent) const
     {
         auto& node = stages.at(agent.stageId);
         auto stage = node.stage;

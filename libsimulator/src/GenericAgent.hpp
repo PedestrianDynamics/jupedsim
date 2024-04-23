@@ -23,7 +23,8 @@ struct GenericAgent {
 
     // This is evaluated by the "operational level"
     Point destination{};
-    Point target{};
+    // TODO(kkratz): Type needs to be BaseStage::Location
+    std::variant<Point, jps::UniqueID<BaseStage>> target{};
 
     // Agent fields common for all models
     Point pos{};
