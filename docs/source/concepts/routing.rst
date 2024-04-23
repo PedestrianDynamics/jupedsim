@@ -21,7 +21,11 @@ Route planning
 ==============
 
 For modeling complex scenarios in which the agents will move through different specific targets on their way, it is possible to define routes.
-These routes are modeled as a network, where each target is a node, and the nodes can be connected, indicating how the agent might continue their route.
+These routes are modeled as a network (so called :ref:`Journeys`), consisting of:
+
+- targets as nodes (so called :ref:`Stages`) ,
+- directed connections between these targets, indicating the next target, as edges (so called :ref:`Transitions`),
+
 The illustration of such a network can be seen below:
 
 .. figure:: /_static/routing/route-planning.svg
@@ -30,9 +34,9 @@ The illustration of such a network can be seen below:
     :alt: A graphical representation of a directed graph.
 
     Graphical representation of the underlying routing network of a more complex simulation.
-    Each circle represents an intermediate stage, while the arrows the corresponding connections.
+    Each circle represents an intermediate stage, while the arrows the corresponding transitions.
 
-In the following sections, we will explain how to set-up such routing networks in *JuPedSim*.
+In the following sections, we will explain how to set-up such Journeys in *JuPedSim*.
 
 Stages
 ------
@@ -97,6 +101,11 @@ An exit located in the polygon :math:`(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-
     # create exit from shapely.Polygon
     exit_polygon = shapely.Polygon([(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)])
     exit_id = simulation.add_exit_stage(exit_polygon)
+
+.. note::
+
+    When adding exits close to the boundary of the walkable area make sure that there is enough room for the agents to enter the exit polygon.
+    Otherwise they will not be able to each the exit at all.
 
 .. warning::
 
@@ -201,9 +210,9 @@ In the following, you can see how to add a waiting set to a simulation and how t
 Journeys
 --------
 
-For creating more complex routes in *JuPedSim* multiple stages can be combined to a so called Journey.
-
-For example:
+Now that we have added the nodes in the network, we need to combine them to a so called Journey in *JuPedSim*.
+An agent will always continue to move along the transitions of a journey after completing its current stage.
+But before we can add transitions we have to create Journeys:
 
 .. code-block:: python
 
@@ -307,6 +316,54 @@ A least-targeted transition can be added to a journey with:
         )
     )
 
+Direct Steering
+---------------
+
+In certain scenarios, e.g., developing a specific behavior model, you may want to bypass the decision-making process modeled by the journeys.
+For this purpose, *JuPedSim* offers a method called "direct steering", it moves an agent to a specific position in the walkable area on the shortest path (see :ref:`Way finding <Way finding>`).
+To use direct steering in your simulation, you need to add a direct steering stage and a journey consisting only of the stage to the simulation:
+
+.. code:: python
+
+    direct_steering_stage = simulation.add_direct_steering_stage()
+    direct_steering_journey = jps.JourneyDescription([direct_steering_stage])
+    direct_steering_journey_id = simulation.add_journey(direct_steering_journey)
+
+Afterwards, an agent or agents can be added, targeting this journey and stage.
+The agent with the ID `direct_steering_agent_id` is using the direct steering journey.
+We now can directly set the target of this specific agent.
+It will move towards the specified point and if the point is reached, it will come to a halt there:
+
+.. code:: python
+
+    agent = simulation.agent(direct_steering_agent_id)
+    agent.target = (-10, -10)
+
+.. note::
+
+    Remember, as the agents do not walk towards an exit when using direct steering, they will not be removed from the simulation.
+    If they should be removed from the simulation if they reached a certain position, you have to do it manually:
+
+    .. code:: python
+
+        simulation.mark_agent_for_removal(direct_steering_agent_id)
+
+    Alternatively, the journey of an agent can be switched to some other journey, see :ref:`Switch journey`.
+
+Switch journey
+--------------
+
+In complex scenarios it might be necessary to work with multiple journeys to model the movement of the agents.
+At some point or at some time agents might need to switch between these journeys depending on some conditions.
+After the following code, the agent with the ID `agent_id` will continue in the journey `new_journey_id` targeting `new_stage_id`:
+
+.. code::
+
+        simulation.switch_agent_journey(
+            agent_id,
+            new_journey_id,
+            new_stage_id
+        )
 
 Way finding
 ===========
@@ -324,14 +381,3 @@ How the path is distinguished for different target points, you can see in the an
 .. image:: /notebooks/demo-data/journey/shortest_path.gif
     :width: 60%
     :align: center
-
-.. warning::
-
-    As the distance is computed along the centers of the triangles, it may happen, that not the shortest-path on the ground is taken.
-    This is a known issue of the *JuPedSim*'s routing, that will be fixed in the near future.
-    To avoid this behaviour intermediate waypoints can be added to the simulation.
-
-    .. image:: /_static/routing/expected_routing.png
-        :width: 40%
-    .. image:: /_static/routing/unexpected_routing.png
-        :width: 40%
