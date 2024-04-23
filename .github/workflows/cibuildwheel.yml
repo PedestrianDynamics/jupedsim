@@ -302,7 +302,7 @@ jobs:
 
   pypi-publish:
     needs: [test-wheels, test-sdist]
-    if: ${{ github.event_name == 'release' && github.event.action == 'released' }}
+    if: ${{ github.event_name == 'release' && github.event.action == 'published' }}
     name: Publish to PyPI
     runs-on: ubuntu-latest
     environment: release
