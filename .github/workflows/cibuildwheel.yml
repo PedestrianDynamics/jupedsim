@@ -9,6 +9,11 @@ on:
     branches:
       - master
       - rls-*
+  release:
+    types: [published]
+    branches:
+      - master
+      - rls-*
 
 permissions:
   contents: read
