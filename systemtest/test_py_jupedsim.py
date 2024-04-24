@@ -1,9 +1,8 @@
 # Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
+import jupedsim as jps
 import pytest
 import shapely
-
-import jupedsim as jps
 
 
 def test_can_query_agents_in_range():
@@ -20,9 +19,7 @@ def test_can_query_agents_in_range():
         model=jps.CollisionFreeSpeedModel(),
         geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
     )
-    exit = simulation.add_exit_stage(
-        [(99, 45), (99, 55), (100, 55), (100, 45)]
-    )
+    exit = simulation.add_exit_stage([(99, 45), (99, 55), (100, 55), (100, 45)])
 
     journey = jps.JourneyDescription([exit])
 
@@ -163,9 +160,7 @@ def test_can_wait():
         ]
     )
     waiting_set = simulation.get_stage(waiting_set_id)
-    exit = simulation.add_exit_stage(
-        [(99, 40), (99, 60), (100, 60), (100, 40)]
-    )
+    exit = simulation.add_exit_stage([(99, 40), (99, 60), (100, 60), (100, 40)])
     journey = jps.JourneyDescription([wp, waiting_set_id, exit])
     journey.set_transition_for_stage(
         wp, jps.Transition.create_fixed_transition(waiting_set_id)

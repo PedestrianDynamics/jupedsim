@@ -5,7 +5,7 @@
 
 We make no promises about the functions from this file w.r.t. API stability. We
 reservere us the right to change the code here w.o. warning. Do not use the
-code here. Use it at your own peril. 
+code here. Use it at your own peril.
 """
 
 import sqlite3
@@ -207,7 +207,8 @@ def _create_fig(
     minx, miny, maxx, maxy = area_bounds
     title = f"<b>{title_note + '  |  ' if title_note else ''}Number of Agents: {initial_agent_count}</b>"
     fig = go.Figure(
-        data=geometry_traces + initial_scatter_trace
+        data=geometry_traces
+        + initial_scatter_trace
         # + hover_traces
         + initial_hover_trace,
         frames=frames,

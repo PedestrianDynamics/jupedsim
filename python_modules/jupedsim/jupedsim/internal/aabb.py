@@ -6,7 +6,7 @@ class AABB:
     ) -> None:
         if xmax < xmin or ymax < ymin:
             raise Exception(
-                f"Invalid arguments to create AABB: max values have to be larger than min values."
+                "Invalid arguments to create AABB: max values have to be larger than min values."
             )
         self.xmin = xmin
         self.xmax = xmax
