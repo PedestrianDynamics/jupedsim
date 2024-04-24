@@ -1,11 +1,9 @@
 # Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
-import logging
-
-import numpy as np
-import pytest
 
 import jupedsim as jps
+import numpy as np
+import pytest
 
 
 @pytest.fixture
@@ -44,9 +42,7 @@ def square_room_100x100_gcfm():
     "radius",
     np.arange(0.01, 2, 0.5),
 )
-def test_collision_free_speed_model_can_set_radius(
-    square_room_100x100, radius
-):
+def test_collision_free_speed_model_can_set_radius(square_room_100x100, radius):
     simulation, journey_id, exit_id, agent_position = square_room_100x100
 
     simulation.add_agent(
@@ -557,7 +553,6 @@ def test_generalized_centrifugal_force_model_can_not_set_b_max_too_small(
     square_room_100x100_gcfm,
 ):
     simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
-    b_min = 0.4
     with pytest.raises(
         RuntimeError, match=r"Model constraint violation: BMax 0.39 .*"
     ):

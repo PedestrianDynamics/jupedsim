@@ -177,7 +177,7 @@ class TestCheckInput(unittest.TestCase):
             end_frames = [4777, 8857, 12470, 15761, 18817, 21684, 24393, 26178]
             start_frames = [0, 0, 8858, 12471, 15762, 18818, 21685, 24394]
             check_data((start_frames, end_frames))
-        assert ex.exception.message == f"multiple files start with the frame 0"
+        assert ex.exception.message == "multiple files start with the frame 0"
 
     def test_exception_frames_miss_between_files(self):
         with self.assertRaises(IncorrectTrajectory) as ex:
@@ -186,7 +186,7 @@ class TestCheckInput(unittest.TestCase):
             check_data((start_frames, end_frames))
         assert (
             ex.exception.message
-            == f"the starting frame 4500 is not matching the other files"
+            == "the starting frame 4500 is not matching the other files"
         )
 
     def test_exception_frames_overlap(self):
@@ -196,7 +196,7 @@ class TestCheckInput(unittest.TestCase):
             check_data((start_frames, end_frames))
         assert (
             ex.exception.message
-            == f"the starting frame 9000 is not matching the other files"
+            == "the starting frame 9000 is not matching the other files"
         )
 
     def test_read_header(self):
@@ -243,7 +243,10 @@ class TestCheckInput(unittest.TestCase):
 class TestFrameFromLine(unittest.TestCase):
     def test_for_correct_frame(self):
         self.assertEqual(
-            frame_from_line("1	0	14.90	6.60	0.00	0.20	0.20	-165.96	0\n"), 0
+            frame_from_line(
+                "1	0	14.90	6.60	0.00	0.20	0.20	-165.96	0\n"
+            ),
+            0,
         )
 
     def test_for_incorrect_format(self):

@@ -1,9 +1,8 @@
 # Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
+import jupedsim as jps
 import pytest
 import shapely
-
-import jupedsim as jps
 
 
 @pytest.fixture
@@ -29,9 +28,7 @@ def square_room_5x5_with_obstacle():
 
 def test_exception_on_empty_polygon_in_exit_stage(square_room_5x5):
     sim = square_room_5x5
-    with pytest.raises(
-        Exception, match=rf"Polygon must have at least 3 points"
-    ):
+    with pytest.raises(Exception, match=r"Polygon must have at least 3 points"):
         sim.add_exit_stage([])
 
 
@@ -215,16 +212,14 @@ def test_can_not_add_waypoint_outside_geometry(square_room_5x5):
 
     with pytest.raises(
         RuntimeError, match="WayPoint .* not inside walkable area"
-    ) as error_info:
+    ):
         simulation.add_waypoint_stage((10, 10), 1)
 
 
 def test_can_not_add_exit_completely_outside_geometry(square_room_5x5):
     simulation = square_room_5x5
 
-    with pytest.raises(
-        RuntimeError, match=r"Exit .* not inside walkable area"
-    ) as error_info:
+    with pytest.raises(RuntimeError, match=r"Exit .* not inside walkable area"):
         simulation.add_exit_stage([(-10, -10), (-8, -10), (-8, -8), (-10, -8)])
 
 
@@ -238,9 +233,7 @@ def test_can_not_add_exit_partly_outside_geometry_centroid_outside(
 ):
     simulation = square_room_5x5
 
-    with pytest.raises(
-        RuntimeError, match=r"Exit .* not inside walkable area"
-    ) as error_info:
+    with pytest.raises(RuntimeError, match=r"Exit .* not inside walkable area"):
         simulation.add_exit_stage([(-4, -4), (-4, -2), (-2, -2), (-2, -4)])
 
 
@@ -250,7 +243,7 @@ def test_can_not_add_notifiable_waiting_set_outside_geometry(square_room_5x5):
     with pytest.raises(
         RuntimeError,
         match=r"NotifiableWaitingSet point .* not inside walkable area",
-    ) as error_info:
+    ):
         simulation.add_waiting_set_stage([(2, -2), (-10, -10)])
 
 
@@ -260,5 +253,5 @@ def test_can_not_add_notifiable_queue_outside_geometry(square_room_5x5):
     with pytest.raises(
         RuntimeError,
         match=r"NotifiableQueue point .* not inside walkable area",
-    ) as error_info:
+    ):
         simulation.add_queue_stage([(2, -2), (-10, -10)])

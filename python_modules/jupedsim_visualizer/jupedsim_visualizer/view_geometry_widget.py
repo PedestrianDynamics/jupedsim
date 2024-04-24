@@ -1,7 +1,6 @@
 # Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
-from jupedsim_visualizer.geometry import Geometry
-from jupedsim_visualizer.geometry_widget import RenderWidget
+import jupedsim as jps
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPaintEvent
 from PySide6.QtWidgets import (
@@ -12,7 +11,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-import jupedsim as jps
+from jupedsim_visualizer.geometry import Geometry
+from jupedsim_visualizer.geometry_widget import RenderWidget
 
 
 class ViewGeometryWidget(QWidget):

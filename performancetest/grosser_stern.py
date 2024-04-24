@@ -9,9 +9,8 @@ import random
 import sys
 import time
 
-import shapely
-
 import jupedsim as jps
+
 from performancetest.geometry import geometries
 from performancetest.stats_writer import StatsWriter
 

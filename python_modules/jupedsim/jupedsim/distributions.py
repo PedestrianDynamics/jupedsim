@@ -107,7 +107,7 @@ def distribute_by_number(
     """
     if not isinstance(polygon, shapely.Polygon):
         raise IncorrectParameterError(
-            f"Polygon is expected to be a shapely Polygon"
+            "Polygon is expected to be a shapely Polygon"
         )
     box = __get_bounding_box(polygon)
 
@@ -183,7 +183,7 @@ def distribute_by_density(
 
     if not isinstance(polygon, shapely.Polygon):
         raise IncorrectParameterError(
-            f"Polygon is expected to be a shapely Polygon"
+            "Polygon is expected to be a shapely Polygon"
         )
     area = polygon.area
     number = round(density * area)
@@ -204,7 +204,7 @@ def __catch_wrong_inputs(
 
     if not isinstance(polygon, shapely.Polygon):
         raise IncorrectParameterError(
-            f"Polygon is expected to be a shapely Polygon"
+            "Polygon is expected to be a shapely Polygon"
         )
     try:
         if len(center_point) != 2:
@@ -338,9 +338,10 @@ def distribute_in_circles_by_number(
                     )
                     # determines a random degree
                     theta = np.random.uniform(0, 2 * np.pi)
-                    pt = center_point[0] + rho * np.cos(theta), center_point[
-                        1
-                    ] + rho * np.sin(theta)
+                    pt = (
+                        center_point[0] + rho * np.cos(theta),
+                        center_point[1] + rho * np.sin(theta),
+                    )
                     if __check_distance_constraints(
                         pt, distance_to_polygon, grid, polygon
                     ):
@@ -499,7 +500,7 @@ def distribute_until_filled(
     """
     if not isinstance(polygon, shapely.Polygon):
         raise IncorrectParameterError(
-            f"Polygon is expected to be a shapely Polygon"
+            "Polygon is expected to be a shapely Polygon"
         )
     box = __get_bounding_box(polygon)
 
@@ -544,9 +545,10 @@ def distribute_until_filled(
             )
             # determines a random degree
             theta = np.random.uniform(0, 2 * np.pi)
-            pt = ref_point[0] + rho * np.cos(theta), ref_point[
-                1
-            ] + rho * np.sin(theta)
+            pt = (
+                ref_point[0] + rho * np.cos(theta),
+                ref_point[1] + rho * np.sin(theta),
+            )
             if __check_distance_constraints(
                 pt, distance_to_polygon, grid, polygon
             ):

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import math
 
-from jupedsim_visualizer.config import ZLayers
+from jupedsim import RoutingEngine
 from vtkmodules.vtkCommonCore import vtkCommand, vtkPoints
 from vtkmodules.vtkCommonDataModel import (
     vtkCellArray,
@@ -12,7 +12,7 @@ from vtkmodules.vtkCommonDataModel import (
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import vtkActor, vtkCamera, vtkPolyDataMapper
 
-from jupedsim import RoutingEngine
+from jupedsim_visualizer.config import ZLayers
 
 
 class MoveController:
@@ -29,9 +29,7 @@ class MoveController:
         self.dist = 0
         interactor_style.AddObserver(vtkCommand.CharEvent, self._on_char)
 
-        interactor_style.AddObserver(
-            vtkCommand.KeyPressEvent, self._ignore_evt
-        )
+        interactor_style.AddObserver(vtkCommand.KeyPressEvent, self._ignore_evt)
         interactor_style.AddObserver(
             vtkCommand.KeyReleaseEvent, self._ignore_evt
         )

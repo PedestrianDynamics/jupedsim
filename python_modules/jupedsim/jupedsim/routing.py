@@ -24,9 +24,7 @@ class RoutingEngine:
         ),
         **kwargs: Any,
     ) -> None:
-        self._obj = py_jps.RoutingEngine(
-            build_geometry(geometry, *kwargs)._obj
-        )
+        self._obj = py_jps.RoutingEngine(build_geometry(geometry, *kwargs)._obj)
 
     def compute_waypoints(
         self, frm: tuple[float, float], to: tuple[float, float]

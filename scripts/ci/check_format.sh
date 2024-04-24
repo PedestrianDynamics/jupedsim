@@ -7,5 +7,5 @@ cmake --build . --target check-format -- VERBOSE=1
 
 cd ..
 
-isort --check .
-black --check .
+ruff check --show-source
+ruff format --diff

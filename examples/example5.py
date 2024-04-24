@@ -36,9 +36,7 @@ def main():
         ),
     )
 
-    exit_top = simulation.add_exit_stage(
-        [(-2, 24), (2, 24), (2, 25), (-2, 25)]
-    )
+    exit_top = simulation.add_exit_stage([(-2, 24), (2, 24), (2, 25), (-2, 25)])
     exit_right = simulation.add_exit_stage(
         [(34, -2), (34, 2), (35, 2), (35, -2)]
     )

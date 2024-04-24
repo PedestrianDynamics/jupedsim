@@ -1,9 +1,7 @@
 # Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
-import numpy as np
 import pytest
 import shapely
-
 from jupedsim.util import GeometryError, _polygons_from_geometry_collection
 
 
@@ -94,12 +92,10 @@ def test_polygons_from_geometry_collection(geometry_input):
         shapely.get_type_id(geometry_input)
         == shapely.GeometryType.GEOMETRYCOLLECTION
     ) or (
-        shapely.get_type_id(geometry_input)
-        == shapely.GeometryType.MULTIPOLYGON
+        shapely.get_type_id(geometry_input) == shapely.GeometryType.MULTIPOLYGON
     ):
-        reference = [geo for geo in geometry_input.geoms]
+        [geo for geo in geometry_input.geoms]
     else:
-        reference = [geometry_input]
         geometry_input = shapely.GeometryCollection([geometry_input])
 
     result = _polygons_from_geometry_collection(geometry_input)
