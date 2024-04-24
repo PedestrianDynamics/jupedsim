@@ -158,7 +158,7 @@ Point NotifiableWaitingSet::Target(const GenericAgent& agent)
         return slots[0];
     }
 
-    const auto next_slot_index = occupants.size() == 0 ? 0 : occupants.size() - 1;
+    const auto next_slot_index = std::min(occupants.size(), slots.size() - 1);
 
     for(size_t index = 0; index < next_slot_index; ++index) {
         if(agent.id == occupants[index]) {
