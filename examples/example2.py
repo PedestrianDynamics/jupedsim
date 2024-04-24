@@ -5,9 +5,8 @@
 import pathlib
 import sys
 
-from shapely import GeometryCollection, Polygon
-
 import jupedsim as jps
+from shapely import GeometryCollection, Polygon
 
 
 def main():
@@ -16,9 +15,7 @@ def main():
     jps.set_warning_callback(lambda x: print(x))
     jps.set_error_callback(lambda x: print(x))
 
-    area = GeometryCollection(
-        Polygon([(0, 0), (100, 0), (100, 100), (0, 100)])
-    )
+    area = GeometryCollection(Polygon([(0, 0), (100, 0), (100, 100), (0, 100)]))
 
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),

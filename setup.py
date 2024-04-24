@@ -51,7 +51,7 @@ def check_cmake():
         ):
             if found_version < min_version:
                 return False
-    except:
+    except Exception as _:
         return False
     return True
 
@@ -90,7 +90,7 @@ def check_cpp_compiler():
                 ["cmake", "-S", str(tmp_dir), "-B", str(tmp_dir_build)],
                 check=True,
             )
-        except:
+        except Exception as _:
             return False
     return True
 

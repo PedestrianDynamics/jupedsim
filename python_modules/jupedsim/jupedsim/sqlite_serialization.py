@@ -6,7 +6,7 @@ import sqlite3
 from pathlib import Path
 from typing import Final
 
-from shapely import box, from_wkt
+from shapely import from_wkt
 
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation

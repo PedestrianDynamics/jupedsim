@@ -33,9 +33,7 @@ def main():
         ]
     )
     queue = simulation.get_stage(stage_id)
-    exit = simulation.add_exit_stage(
-        [(99, 40), (99, 60), (100, 60), (100, 40)]
-    )
+    exit = simulation.add_exit_stage([(99, 40), (99, 60), (100, 60), (100, 40)])
 
     journey = jps.JourneyDescription([stage_id, exit])
     journey.set_transition_for_stage(

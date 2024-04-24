@@ -1,11 +1,11 @@
 # Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
-import math
 import sys
 
-from jupedsim_visualizer.config import Colors, ZLayers
+from jupedsim import RoutingEngine
+from jupedsim.internal.aabb import AABB
 from PySide6.QtCore import QObject, Signal
-from vtkmodules.vtkCommonCore import vtkCommand, vtkIntArray, vtkPoints
+from vtkmodules.vtkCommonCore import vtkCommand, vtkPoints
 from vtkmodules.vtkCommonDataModel import vtkCellArray, vtkPolyData, vtkPolygon
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import (
@@ -15,8 +15,7 @@ from vtkmodules.vtkRenderingCore import (
     vtkRenderer,
 )
 
-from jupedsim import RoutingEngine
-from jupedsim.internal.aabb import AABB
+from jupedsim_visualizer.config import Colors, ZLayers
 
 
 class Geometry:

@@ -47,7 +47,7 @@ class Transition:
 
     @staticmethod
     def create_round_robin_transition(
-        stage_weights: list[tuple[int, int]]
+        stage_weights: list[tuple[int, int]],
     ) -> "Transition":
         """Create a round-robin transition.
 
