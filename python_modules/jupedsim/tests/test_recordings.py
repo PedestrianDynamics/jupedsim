@@ -2,8 +2,6 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import sqlite3
 
-import pytest
-
 from jupedsim.recording import Recording
 
 

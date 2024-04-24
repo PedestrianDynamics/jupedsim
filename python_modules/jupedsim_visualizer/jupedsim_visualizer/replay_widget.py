@@ -2,9 +2,8 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import math
 
-from jupedsim_visualizer.geometry import Geometry
-from jupedsim_visualizer.geometry_widget import RenderWidget
-from jupedsim_visualizer.trajectory import Trajectory
+from jupedsim import RoutingEngine
+from jupedsim.recording import Recording
 from PySide6.QtCore import QSignalBlocker, Qt, QTimer
 from PySide6.QtGui import QFont, QPaintEvent
 from PySide6.QtStateMachine import QState, QStateMachine
@@ -20,8 +19,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from jupedsim import RoutingEngine
-from jupedsim.recording import Recording
+from jupedsim_visualizer.geometry import Geometry
+from jupedsim_visualizer.geometry_widget import RenderWidget
+from jupedsim_visualizer.trajectory import Trajectory
 
 
 class PlayerControlWidget(QWidget):

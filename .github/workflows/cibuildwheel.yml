@@ -31,7 +31,7 @@ jobs:
       with:
         python-version: "3.12"
     - name: Install dependencies
-      run: pip install black==24.4.0 isort==5.13.2 jupyter-black==0.3.4
+      run: pip install ruff
 
     - name: Run checks
       run: ./scripts/ci/check_format.sh

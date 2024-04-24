@@ -1,19 +1,16 @@
 # Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
-import vtkmodules.vtkRenderingOpenGL2
-from jupedsim_visualizer.config import Colors
-from jupedsim_visualizer.geometry import Geometry, HoverInfo
-from jupedsim_visualizer.grid import Grid
-from jupedsim_visualizer.move_controller import MoveController
+import jupedsim as jps
+from jupedsim.internal.aabb import AABB
 from PySide6.QtCore import Signal
-from PySide6.QtGui import QPaintEvent
-from PySide6.QtWidgets import QWidget
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import vtkRenderer
 
-import jupedsim as jps
-from jupedsim.internal.aabb import AABB
+from jupedsim_visualizer.config import Colors
+from jupedsim_visualizer.geometry import HoverInfo
+from jupedsim_visualizer.grid import Grid
+from jupedsim_visualizer.move_controller import MoveController
 
 
 class RenderWidget(QVTKRenderWindowInteractor):

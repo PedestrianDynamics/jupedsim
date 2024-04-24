@@ -28,7 +28,7 @@ def update_year_to(file: Path, year: int, pattern: re.Pattern):
     content = file.read_text().splitlines()
     found = False
     for line, idx in zip(content, range(5)):
-        found = pattern.search(line) != None
+        found = pattern.search(line) is not None
         if found:
             content[idx] = pattern.sub(
                 f"Copyright © 2012-{year} Forschungszentrum Jülich GmbH", line

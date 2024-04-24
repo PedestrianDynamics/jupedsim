@@ -94,7 +94,7 @@ def polyline_to_polygon(polyline):
             "a polyline has at most 2 points and can not be a Polygon"
         )
         raise IncorrectDXFFileError(
-            f"a polyline could not be converted to a Polygon", [points]
+            "a polyline could not be converted to a Polygon", [points]
         )
     return Polygon(points)
 
@@ -193,7 +193,7 @@ def parse_dxf_file(
 
     # create new Polygon with holes
     simple_holes = polygonize(simple_holes)
-    logging.debug(f"the geometry was parsed")
+    logging.debug("the geometry was parsed")
     return outer_polygon.difference(simple_holes)
 
 

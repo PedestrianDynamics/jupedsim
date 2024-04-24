@@ -3,11 +3,9 @@
 import math
 from pathlib import Path
 
+import jupedsim as jps
 import shapely
-from jupedsim_visualizer.geometry import Geometry
-from jupedsim_visualizer.replay_widget import ReplayWidget
-from jupedsim_visualizer.trajectory import Trajectory
-from jupedsim_visualizer.view_geometry_widget import ViewGeometryWidget
+from jupedsim.recording import Recording
 from PySide6.QtCore import QSettings, QSize
 from PySide6.QtStateMachine import QFinalState, QState, QStateMachine
 from PySide6.QtWidgets import (
@@ -18,8 +16,10 @@ from PySide6.QtWidgets import (
     QTabWidget,
 )
 
-import jupedsim as jps
-from jupedsim.recording import Recording
+from jupedsim_visualizer.geometry import Geometry
+from jupedsim_visualizer.replay_widget import ReplayWidget
+from jupedsim_visualizer.trajectory import Trajectory
+from jupedsim_visualizer.view_geometry_widget import ViewGeometryWidget
 
 
 class MainWindow(QMainWindow):
@@ -51,9 +51,7 @@ class MainWindow(QMainWindow):
         open_replay_act = open_menu.addAction("Open replay file")
         open_replay_act.triggered.connect(self._open_replay)
         settings_menu = menu.addMenu("Settings")
-        self._show_triangulation = settings_menu.addAction(
-            "show triangulation"
-        )
+        self._show_triangulation = settings_menu.addAction("show triangulation")
         self._show_triangulation.setCheckable(True)
         self._show_triangulation.toggled.connect(self._toggle_triangulation)
         self._show_triangulation.setChecked(
