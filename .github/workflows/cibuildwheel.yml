@@ -236,9 +236,22 @@ jobs:
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_ARCHS: ${{ matrix.cibw_archs }}
 
+      - name: Extract Python Version (Unix/Mac)
+        shell: bash
+        run: echo "PYTHON_VERSION=$(echo ${{ matrix.cibw_build }} | cut -d'-' -f1)" >> $GITHUB_ENV
+        if: runner.os != 'Windows'
+
+      - name: Extract Python Version (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $pythonVersion = "${{ matrix.cibw_build }}" -split '-' | Select-Object -First 1
+          $pythonVersion = $pythonVersion.Trim()
+          echo "PYTHON_VERSION=$pythonVersion" | Out-File -Append -FilePath $env:GITHUB_ENV
+
       - uses: actions/upload-artifact@v4
         with:
-          name: python-packages-${{ matrix.os }}-${{ matrix.cibw_archs }}-${{ strategy.job-index }}
+          name: python-packages-${{ matrix.os }}-${{ matrix.cibw_archs }}-${{ env.PYTHON_VERSION }}
           path: ./wheelhouse/*.whl
           if-no-files-found: error
 
