@@ -150,7 +150,7 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                 (frame, geo_hash),
             )
 
-            xmin, xmax, ymin, ymax = from_wkt(geo_wkt).bounds
+            xmin, ymin, xmax, ymax = from_wkt(geo_wkt).bounds
 
             old_xmin = self._x_min(cur)
             old_xmax = self._x_max(cur)
