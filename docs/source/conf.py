@@ -54,25 +54,23 @@ autoapi_options = [
     "members",
     "undoc-members",
     "show-inheritance",
+    "show-module-summary",
     "imported-members",
 ]
 autoapi_ignore = [
     "**/tests/**",
     "**/native/**",
     "**/internal/**",
-    "**/\\w.*.py",
 ]
-
-# autoapi_member_order = "groupwise"
-autodoc_typehints = "both"
-autoapi_python_class_content = "both"
+autoapi_add_toctree_entry = False
+autoapi_python_class_content = "class"
+autoapi_template_dir = "_templates/autoapi"
+autoapi_member_order = "groupwise"
+autoapi_python_use_implicit_namespaces = True
 
 add_module_names = False
 
-autoapi_add_toctree_entry = False
-
-
-def skip_submodules(app, what, name, obj, skip, options):
+def skip_rules(app, what, name, obj, skip, options):
     if what == "module":
         skip = True
     if what == "method":
@@ -86,8 +84,7 @@ def skip_submodules(app, what, name, obj, skip, options):
 
 
 def setup(sphinx):
-    sphinx.connect("autoapi-skip-member", skip_submodules)
-
+    sphinx.connect("autoapi-skip-member", skip_rules)
 
 # -- Automatic execution of jupyter notebooks --------------------------------
 nb_execution_excludepatterns = []
