@@ -15,11 +15,6 @@ from jupedsim.distributions import (
     distribute_until_filled,
 )
 from jupedsim.geometry import Geometry
-from jupedsim.geometry_utils import (
-    _geometry_from_coordinates,
-    _geometry_from_shapely,
-    _geometry_from_wkt,
-)
 from jupedsim.internal.tracing import Trace
 from jupedsim.journey import JourneyDescription, Transition
 from jupedsim.library import (
@@ -64,10 +59,22 @@ from jupedsim.stages import (
 )
 
 __version__ = get_build_info().library_version
+"""
+The version of this module.
+"""
+
 __commit__ = get_build_info().git_commit_hash
+"""
+Commit id that was used to build this module.
+"""
+
 __compiler__ = (
     f"{get_build_info().compiler} ({get_build_info().compiler_version})"
 )
+"""
+Id of the compiler used to build the native portion of this module.
+"""
+
 
 __all__ = [
     "Agent",
@@ -113,9 +120,6 @@ __all__ = [
     "distribute_in_circles_by_density",
     "distribute_in_circles_by_number",
     "distribute_until_filled",
-    "_geometry_from_coordinates",
-    "_geometry_from_shapely",
-    "_geometry_from_wkt",
     "get_build_info",
     "set_debug_callback",
     "set_error_callback",
