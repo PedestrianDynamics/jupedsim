@@ -24,6 +24,35 @@ void init_routing(py::module_& m)
                 JPS_RoutingEngine_Create(geo.handle));
         }))
         .def(
+            "compute_considered_waypoints",
+            [](const JPS_RoutingEngine_Wrapper& w,
+               std::tuple<double, double> from,
+               std::tuple<double, double> to) {
+                auto intoJPS_Point = [](const auto p) {
+                    return JPS_Point{std::get<0>(p), std::get<1>(p)};
+                };
+                auto allWaypoints = JPS_RoutingEngine_ComputeAllPathsConsidered(
+                    w.handle, intoJPS_Point(from), intoJPS_Point(to));
+                std::vector<std::vector<std::tuple<double, double>>> result;
+                result.reserve(allWaypoints.len);
+                std::transform(
+                    allWaypoints.paths,
+                    allWaypoints.paths + allWaypoints.len,
+                    std::back_inserter(result),
+                    [](const auto& waypoints) {
+                        std::vector<std::tuple<double, double>> p;
+                        p.reserve(waypoints.len);
+                        std::transform(
+                            waypoints.points,
+                            waypoints.points + waypoints.len,
+                            std::back_inserter(p),
+                            [](const auto& p) { return std::make_tuple(p.x, p.y); });
+                        return p;
+                    });
+                JPS_Paths_Free(allWaypoints);
+                return result;
+            })
+        .def(
             "compute_waypoints",
             [](const JPS_RoutingEngine_Wrapper& w,
                std::tuple<double, double> from,

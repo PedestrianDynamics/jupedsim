@@ -36,6 +36,8 @@ public:
     std::unique_ptr<RoutingEngine> Clone() const override;
     Point ComputeWaypoint(Point currentPosition, Point destination);
     std::vector<Point> ComputeAllWaypoints(Point currentPosition, Point destination);
+    std::vector<std::vector<Point>>
+    ComputeAllConsideredPaths(Point currentPosition, Point destination);
     bool IsRoutable(Point p) const;
     void Update();
 

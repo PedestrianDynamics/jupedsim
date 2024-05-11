@@ -23,7 +23,7 @@ typedef struct JPS_Path {
     /**
      * JPS_Points in this path.
      */
-    const JPS_Point* points;
+    JPS_Point* points;
 } JPS_Path;
 
 /**
@@ -32,6 +32,13 @@ typedef struct JPS_Path {
  * @param path to free its memory.
  */
 JUPEDSIM_API void JPS_Path_Free(JPS_Path path);
+
+typedef struct JPS_Paths {
+    size_t len;
+    JPS_Path* paths;
+} JPS_Paths;
+
+JUPEDSIM_API void JPS_Paths_Free(JPS_Paths paths);
 
 /**
  * Describes a polygon in terms of indices of vertices belonging to a JPS_Mesh.
@@ -92,6 +99,9 @@ JUPEDSIM_API JPS_RoutingEngine JPS_RoutingEngine_Create(JPS_Geometry geometry);
 
 JUPEDSIM_API JPS_Path
 JPS_RoutingEngine_ComputeWaypoint(JPS_RoutingEngine handle, JPS_Point from, JPS_Point to);
+
+JUPEDSIM_API JPS_Paths
+JPS_RoutingEngine_ComputeAllPathsConsidered(JPS_RoutingEngine handle, JPS_Point from, JPS_Point to);
 
 JUPEDSIM_API bool JPS_RoutingEngine_IsRoutable(JPS_RoutingEngine handle, JPS_Point p);
 

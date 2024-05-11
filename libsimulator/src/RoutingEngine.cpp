@@ -7,6 +7,7 @@
 #include "Graph.hpp"
 #include "IteratorPair.hpp"
 #include "LineSegment.hpp"
+#include "Logger.hpp"
 #include "Mesh.hpp"
 #include "SimulationError.hpp"
 
@@ -46,6 +47,7 @@ RoutingEngine::RoutingEngine(const PolyWithHoles& poly)
     }
     CGAL::mark_domain_in_triangulation(cdt);
     mesh = std::make_unique<Mesh>(cdt);
+    // mesh->MergeGreedy();
 }
 
 std::unique_ptr<RoutingEngine> RoutingEngine::Clone() const
@@ -240,6 +242,141 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
     }
 
     return path;
+}
+
+std::vector<std::vector<Point>>
+RoutingEngine::ComputeAllConsideredPaths(Point currentPosition, Point destination)
+{
+    const auto from_pos = CDT::Point{currentPosition.x, currentPosition.y};
+    const auto to_pos = CDT::Point{destination.x, destination.y};
+    const auto from = find_face(from_pos);
+    const auto to = find_face(to_pos);
+
+    if(from == to) {
+        return {{currentPosition, destination}};
+    }
+
+    using SearchStatePtr = std::shared_ptr<SearchState>;
+
+    std::vector<SearchStatePtr> open_states{};
+    open_states.emplace_back(
+        new SearchState{0.0, Distance(currentPosition, destination), from, nullptr});
+
+    std::map<CDT::Face_handle, SearchStatePtr> closed_states{};
+
+    std::vector<std::vector<Point>> paths{};
+    double path_length = std::numeric_limits<double>::infinity();
+
+    while(!open_states.empty()) {
+        std::make_heap(std::begin(open_states), std::end(open_states), CompareSearchStatesGt);
+        std::pop_heap(std::begin(open_states), std::end(open_states));
+        auto current_state = open_states.back();
+        open_states.pop_back();
+        closed_states.insert(std::make_pair(current_state->id, current_state));
+
+        if(current_state->id == to) {
+            // Unlike in A* this is only a first candidate solution
+            // Now compute the actual path length via funnel algorithm
+            // store path and length if this variant is the shortest found so far
+            const auto vertex_ids = current_state->path();
+            const auto found_path = straightenPath(currentPosition, destination, vertex_ids);
+            const double found_path_length = length_of_path(found_path);
+            if(found_path_length < path_length) {
+                paths.push_back(found_path);
+                path_length = found_path_length;
+            }
+        }
+
+        if(current_state->f_value() >= path_length) {
+            // This search nodes f-value already excedes our paths length, and since the f-value is
+            // underestimation of the path length the excat path cannot be shorter than what we have
+            return paths;
+        }
+
+        // Generate successors
+        for(int idx = 0; idx < 3; ++idx) {
+            const auto target = current_state->id->neighbor(idx);
+            if(!target->get_in_domain()) {
+                // Not a neighboring triangle.
+                continue;
+            }
+            // Do not add search nodes for nodes already in the ancestor list of this path
+            if(current_state->parents_contain(target)) {
+                continue;
+            }
+
+            // Skip successors for nodes already in the closed list
+            if(closed_states.contains(target)) {
+                continue;
+            }
+
+            const auto edge = cdt.segment(target, idx);
+
+            // For all remaining nodes compute g/h values
+            // The h-value is the distance between the goal and the closts point on the edge
+            // between the current triangle and this successor
+            const double h_value = sqrt(CGAL::to_double((CGAL::squared_distance(to_pos, edge))));
+
+            // The g-value is the maximum of:
+
+            // "The first and simplest is the distance between the start point and the closest
+            // point to it on the entry edge of the corresponding triangle."
+            const double g_value_1 =
+                sqrt(CGAL::to_double((CGAL::squared_distance(from_pos, edge))));
+
+            // The second is g(s) plus the distance between the triangles associated with s and
+            // s′. We assume that the g-value of s is a lower bound, and so we wish to add the
+            // shortest such distance to achieve another lower bound. Again, we take this
+            // measurement using the edges by which the triangles were first reached by search.
+            // Since the triangles are adjacent, this is the distance of moving through the
+            // triangle associated with s. In Theorem 4.2.12, we proved that the shortest
+            // distance between two edges in a triangle was an arc path around the vertex shared
+            // by these edges. Thus, if the entry edges of the triangles corresponding to s′ and
+            // s form an angle θ, this estimate is calculated as g(s) + rθ. NOTE: Right now this
+            // is always g(s) + zero as we asume point size agents (for now)
+            const double g_value_2 = current_state->g_value + 0;
+
+            //  Another lower bound value for g(s′) is g(s)+(h(s)−h(s′)), or the parent state’s
+            //  g-value plus the difference between its h-value and that of the child state.
+            //  This is an underes- timate because the Euclidean distance metric used for the
+            //  heuristic is consistent.
+            const double g_value_3 = current_state->g_value + current_state->h_value - h_value;
+
+            const double g_value = std::max(g_value_1, std::max(g_value_2, g_value_3));
+
+            // NOTE(kkratz): Clang16 seems to be confused with capturing a structured binding
+            // and emits a warnign when capturing 'target' directly As of C++20 this SHOULD(TM)
+            // be valid code but see:
+            // https://stackoverflow.com/questions/46114214/lambda-implicit-capture-fails-with-variable-declared-from-structured-binding
+            auto t2 = target;
+
+            // TODO(kkratz): replace this find on unsorted vector with something with a better
+            // runtime
+            if(auto iter = std::find_if(
+                   std::begin(open_states),
+                   std::end(open_states),
+                   [t2](const auto& s) { return s->id == t2; });
+               iter != std::end(open_states)) {
+                if(auto& s = *iter; s->g_value > g_value) {
+                    s->g_value = g_value;
+                    s->parent = current_state.get();
+                }
+
+            } else if(auto iter = closed_states.find(target); iter != std::end(closed_states)) {
+                if(auto& [_, s] = *iter; s->g_value > g_value) {
+                    s->g_value = g_value;
+                    s->parent = current_state.get();
+                    open_states.push_back(s);
+                    closed_states.erase(s->id);
+                }
+            } else {
+                open_states.emplace_back(
+                    new SearchState{g_value, h_value, target, current_state.get()});
+            }
+        }
+    }
+
+    return paths;
 }
 
 bool RoutingEngine::IsRoutable(Point p) const

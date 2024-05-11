@@ -24,7 +24,7 @@ class MoveController:
         self.lmb_pressed = False
         self.cam = cam
         self.navi = None
-        self.actor = None
+        self.actor = []
         self.interactor_style = interactor_style
         self.dist = 0
         interactor_style.AddObserver(vtkCommand.CharEvent, self._on_char)
@@ -125,37 +125,44 @@ class MoveController:
             or not self.navi.is_routable(self.route_from)
             or not self.navi.is_routable(self.route_to)
         ):
-            if self.actor:
-                renderer.RemoveActor(self.actor)
-                self.actor = None
+            for a in self.actor:
+                renderer.RemoveActor(a)
+            self.actor = []
             return
-
-        points = self.navi.compute_waypoints(self.route_from, self.route_to)
-
-        self.dist = 0
-        for a, b in zip(points[:-1], points[1:]):
-            self.dist += math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
-
-        vtk_points = vtkPoints()
-        polyline = vtkPolyLine()
-        polyline.GetPointIds().SetNumberOfIds(len(points))
-        for idx, pt in enumerate(points):
-            vtk_points.InsertNextPoint(pt[0], pt[1], ZLayers.nav_line)
-            polyline.GetPointIds().SetId(idx, idx)
-        poly_data = vtkPolyData()
-        poly_data.SetPoints(vtk_points)
-        cells = vtkCellArray()
-        cells.InsertNextCell(polyline)
-        poly_data.SetLines(cells)
-        mapper = vtkPolyDataMapper()
-        mapper.SetInputData(poly_data)
         if self.actor:
-            renderer.RemoveActor(self.actor)
-        self.actor = vtkActor()
-        self.actor.SetMapper(mapper)
-        self.actor.GetProperty().SetColor(1, 0, 0)
-        self.actor.GetProperty().SetLineWidth(3)
-        renderer.AddActor(self.actor)
+            for a in self.actor:
+                renderer.RemoveActor(a)
+            self.actor = []
+
+        paths = self.navi.compute_considered_waypoints(
+            self.route_from, self.route_to
+        )
+        print(paths)
+
+        for points in paths:
+            self.dist = 0
+            for a, b in zip(points[:-1], points[1:]):
+                self.dist += math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+
+            vtk_points = vtkPoints()
+            polyline = vtkPolyLine()
+            polyline.GetPointIds().SetNumberOfIds(len(points))
+            for idx, pt in enumerate(points):
+                vtk_points.InsertNextPoint(pt[0], pt[1], ZLayers.nav_line)
+                polyline.GetPointIds().SetId(idx, idx)
+            poly_data = vtkPolyData()
+            poly_data.SetPoints(vtk_points)
+            cells = vtkCellArray()
+            cells.InsertNextCell(polyline)
+            poly_data.SetLines(cells)
+            mapper = vtkPolyDataMapper()
+            mapper.SetInputData(poly_data)
+            actor = vtkActor()
+            actor.SetMapper(mapper)
+            actor.GetProperty().SetColor(1, 0, 0)
+            actor.GetProperty().SetLineWidth(3)
+            renderer.AddActor(actor)
+            self.actor.append(actor)
         interactor.Render()
 
     def _to_world_coordinate_2d(

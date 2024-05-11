@@ -24,6 +24,16 @@ JUPEDSIM_API void JPS_Path_Free(JPS_Path path)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+/// JPS_Paths
+////////////////////////////////////////////////////////////////////////////////
+JUPEDSIM_API void JPS_Paths_Free(JPS_Paths paths)
+{
+    delete[] paths.paths;
+    paths.paths = nullptr;
+    paths.len = 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 /// JPS_Mesh
 ////////////////////////////////////////////////////////////////////////////////
 JUPEDSIM_API void JPS_Mesh_Free(JPS_Mesh mesh)
@@ -52,6 +62,27 @@ JPS_RoutingEngine_ComputeWaypoint(JPS_RoutingEngine handle, JPS_Point from, JPS_
     std::transform(
         std::begin(path), std::end(path), points, [](const auto& p) { return intoJPS_Point(p); });
     return p;
+}
+
+JUPEDSIM_API JPS_Paths
+JPS_RoutingEngine_ComputeAllPathsConsidered(JPS_RoutingEngine handle, JPS_Point from, JPS_Point to)
+{
+    auto* engine = reinterpret_cast<RoutingEngine*>(handle);
+    const auto allPaths = engine->ComputeAllConsideredPaths(intoPoint(from), intoPoint(to));
+    JPS_Paths result{};
+    result.len = allPaths.size();
+    result.paths = new JPS_Path[allPaths.size()];
+
+    for(size_t idx = 0; idx < result.len; ++idx) {
+        result.paths[idx].len = allPaths[idx].size();
+        result.paths[idx].points = new JPS_Point[allPaths[idx].size()];
+        std::transform(
+            std::begin(allPaths[idx]),
+            std::end(allPaths[idx]),
+            result.paths[idx].points,
+            [](const auto& p) { return intoJPS_Point(p); });
+    }
+    return result;
 }
 
 JUPEDSIM_API bool JPS_RoutingEngine_IsRoutable(JPS_RoutingEngine handle, JPS_Point p)
