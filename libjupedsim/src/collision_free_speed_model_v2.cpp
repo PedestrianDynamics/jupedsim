@@ -69,7 +69,7 @@ void JPS_CollisionFreeSpeedModelV2State_SetStrengthNeighborRepulsion(
 {
     assert(handle);
     auto state = reinterpret_cast<CollisionFreeSpeedModelV2Data*>(handle);
-    state->strengthGeometryRepulsion = strengthNeighborRepulsion;
+    state->strengthNeighborRepulsion = strengthNeighborRepulsion;
 }
 
 double JPS_CollisionFreeSpeedModelV2State_GetRangeNeighborRepulsion(

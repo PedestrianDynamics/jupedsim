@@ -9,7 +9,7 @@ import pytest
 @pytest.fixture
 def corridor():
     return jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(),
+        model=jps.CollisionFreeSpeedModelV2(),
         geometry=[(0, 0), (10, 0), (10, 2), (0, 2)],
     )
 
@@ -19,7 +19,7 @@ def test_set_v0(corridor):
     wp = sim.add_waypoint_stage((10, 1), 0.5)
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
-    agent = jps.CollisionFreeSpeedModelAgentParameters(
+    agent = jps.CollisionFreeSpeedModelV2AgentParameters(
         journey_id=journey_id, stage_id=wp, position=(1, 1), v0=1
     )
     agent_id = sim.add_agent(agent)
@@ -37,3 +37,45 @@ def test_set_v0(corridor):
     for _ in range(0, 100):
         sim.iterate()
     assert math.isclose(sim.agent(agent_id).position[0], 7)
+
+
+@pytest.fixture
+def simulation_with_collision_free_speed_model_v2():
+    return jps.Simulation(
+        model=jps.CollisionFreeSpeedModelV2(),
+        geometry=[(0, 0), (10, 0), (10, 10), (0, 10)],
+    )
+
+
+def test_set_model_parameters(simulation_with_collision_free_speed_model_v2):
+    sim = simulation_with_collision_free_speed_model_v2
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.CollisionFreeSpeedModelV2AgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+    )
+    agent_id = sim.add_agent(agent)
+
+    sim.agent(agent_id).model.v0 = 2.0
+    assert sim.agent(agent_id).model.v0 == 2.0
+
+    sim.agent(agent_id).model.time_gap = 3.0
+    assert sim.agent(agent_id).model.time_gap == 3.0
+
+    sim.agent(agent_id).model.radius = 4.0
+    assert sim.agent(agent_id).model.radius == 4.0
+
+    sim.agent(agent_id).model.strength_neighbor_repulsion = 5.0
+    assert sim.agent(agent_id).model.strength_neighbor_repulsion == 5.0
+
+    sim.agent(agent_id).model.range_neighbor_repulsion = 6.0
+    assert sim.agent(agent_id).model.range_neighbor_repulsion == 6.0
+
+    sim.agent(agent_id).model.range_geometry_repulsion = 7.0
+    assert sim.agent(agent_id).model.range_geometry_repulsion == 7.0
+
+    sim.agent(agent_id).model.range_geometry_repulsion = 8.0
+    assert sim.agent(agent_id).model.range_geometry_repulsion == 8.0
