@@ -45,6 +45,9 @@ public:
 
 private:
     CDT::Face_handle find_face(K::Point_2) const;
-    std::vector<Point>
-    straightenPath(Point from, Point to, const std::vector<CDT::Face_handle>& path);
+    std::vector<Point> straightenPath(
+        Point from,
+        Point to,
+        const std::vector<CDT::Face_handle>& path,
+        double shrinkPortal = 0.0);
 };

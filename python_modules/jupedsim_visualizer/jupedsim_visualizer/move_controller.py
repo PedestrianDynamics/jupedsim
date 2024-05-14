@@ -137,13 +137,17 @@ class MoveController:
         paths = self.navi.compute_considered_waypoints(
             self.route_from, self.route_to
         )
-        print(paths)
 
-        for points in paths:
-            self.dist = 0
+        self.dist = None
+        min_dist_idx = 0
+        for path_idx, points in enumerate(paths):
+            dist = 0
             for a, b in zip(points[:-1], points[1:]):
-                self.dist += math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+                dist += math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
 
+            if not self.dist or self.dist > dist:
+                self.dist = dist
+                min_dist_idx = path_idx
             vtk_points = vtkPoints()
             polyline = vtkPolyLine()
             polyline.GetPointIds().SetNumberOfIds(len(points))
@@ -159,10 +163,12 @@ class MoveController:
             mapper.SetInputData(poly_data)
             actor = vtkActor()
             actor.SetMapper(mapper)
-            actor.GetProperty().SetColor(1, 0, 0)
-            actor.GetProperty().SetLineWidth(3)
+            actor.GetProperty().SetColor(0.9, 0.1, 0.1)
+            actor.GetProperty().SetLineWidth(2)
             renderer.AddActor(actor)
             self.actor.append(actor)
+        self.actor[min_dist_idx].GetProperty().SetColor(0.1, 0.9, 0.1)
+        self.actor[min_dist_idx].GetProperty().SetLineWidth(3)
         interactor.Render()
 
     def _to_world_coordinate_2d(

@@ -2,12 +2,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "RoutingEngine.hpp"
 
-#include "AABB.hpp"
 #include "GeometricFunctions.hpp"
-#include "Graph.hpp"
-#include "IteratorPair.hpp"
 #include "LineSegment.hpp"
-#include "Logger.hpp"
 #include "Mesh.hpp"
 #include "SimulationError.hpp"
 
@@ -27,7 +23,6 @@
 
 #include <limits>
 #include <memory>
-#include <queue>
 #include <unordered_map>
 #include <vector>
 
@@ -144,10 +139,12 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
             // Now compute the actual path length via funnel algorithm
             // store path and length if this variant is the shortest found so far
             const auto vertex_ids = current_state->path();
-            const auto found_path = straightenPath(currentPosition, destination, vertex_ids);
-            const double found_path_length = length_of_path(found_path);
+            const auto found_path_strict = straightenPath(currentPosition, destination, vertex_ids);
+            const auto found_path_relaxed =
+                straightenPath(currentPosition, destination, vertex_ids, 0.2);
+            const double found_path_length = length_of_path(found_path_strict);
             if(found_path_length < path_length) {
-                path = found_path;
+                path = found_path_relaxed;
                 path_length = found_path_length;
             }
         }
@@ -167,11 +164,6 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
             }
             // Do not add search nodes for nodes already in the ancestor list of this path
             if(current_state->parents_contain(target)) {
-                continue;
-            }
-
-            // Skip successors for nodes already in the closed list
-            if(closed_states.contains(target)) {
                 continue;
             }
 
@@ -222,13 +214,13 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
                    std::end(open_states),
                    [t2](const auto& s) { return s->id == t2; });
                iter != std::end(open_states)) {
-                if(auto& s = *iter; s->g_value > g_value) {
+                if(auto& s = *iter; s->g_value >= g_value) {
                     s->g_value = g_value;
                     s->parent = current_state.get();
                 }
 
             } else if(auto iter = closed_states.find(target); iter != std::end(closed_states)) {
-                if(auto& [_, s] = *iter; s->g_value > g_value) {
+                if(auto& [_, s] = *iter; s->g_value >= g_value) {
                     s->g_value = g_value;
                     s->parent = current_state.get();
                     open_states.push_back(s);
@@ -278,16 +270,19 @@ RoutingEngine::ComputeAllConsideredPaths(Point currentPosition, Point destinatio
             // Unlike in A* this is only a first candidate solution
             // Now compute the actual path length via funnel algorithm
             // store path and length if this variant is the shortest found so far
+
             const auto vertex_ids = current_state->path();
-            const auto found_path = straightenPath(currentPosition, destination, vertex_ids);
-            const double found_path_length = length_of_path(found_path);
+            const auto found_path_strict = straightenPath(currentPosition, destination, vertex_ids);
+            const auto found_path_relaxed =
+                straightenPath(currentPosition, destination, vertex_ids);
+            const double found_path_length = length_of_path(found_path_strict);
             if(found_path_length < path_length) {
-                paths.push_back(found_path);
+                paths.push_back(found_path_relaxed);
                 path_length = found_path_length;
             }
         }
 
-        if(current_state->f_value() >= path_length) {
+        if(current_state->f_value() > path_length) {
             // This search nodes f-value already excedes our paths length, and since the f-value is
             // underestimation of the path length the excat path cannot be shorter than what we have
             return paths;
@@ -302,11 +297,6 @@ RoutingEngine::ComputeAllConsideredPaths(Point currentPosition, Point destinatio
             }
             // Do not add search nodes for nodes already in the ancestor list of this path
             if(current_state->parents_contain(target)) {
-                continue;
-            }
-
-            // Skip successors for nodes already in the closed list
-            if(closed_states.contains(target)) {
                 continue;
             }
 
@@ -357,13 +347,13 @@ RoutingEngine::ComputeAllConsideredPaths(Point currentPosition, Point destinatio
                    std::end(open_states),
                    [t2](const auto& s) { return s->id == t2; });
                iter != std::end(open_states)) {
-                if(auto& s = *iter; s->g_value > g_value) {
+                if(auto& s = *iter; s->g_value >= g_value) {
                     s->g_value = g_value;
                     s->parent = current_state.get();
                 }
 
             } else if(auto iter = closed_states.find(target); iter != std::end(closed_states)) {
-                if(auto& [_, s] = *iter; s->g_value > g_value) {
+                if(auto& [_, s] = *iter; s->g_value >= g_value) {
                     s->g_value = g_value;
                     s->parent = current_state.get();
                     open_states.push_back(s);
@@ -405,8 +395,11 @@ CDT::Face_handle RoutingEngine::find_face(K::Point_2 p) const
     return face;
 }
 
-std::vector<Point>
-RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_handle>& path)
+std::vector<Point> RoutingEngine::straightenPath(
+    Point from,
+    Point to,
+    const std::vector<CDT::Face_handle>& path,
+    double shrinkPortal)
 {
     // TODO(kkratz): Remove the 0.2m edge width adjustment and replace this with p[roper
     // arc-paths from the "Efficient Triangulation-Based Pathfinding" publication
@@ -450,9 +443,20 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
 
         const auto line_segment_left = portal.p2;
         const auto line_segment_right = portal.p1;
-        const auto line_segment_direction = (line_segment_right - line_segment_left).Normalized();
-        const auto candidate_left = line_segment_left + (line_segment_direction * 0.2);
-        const auto candidate_right = line_segment_right - (line_segment_direction * 0.2);
+        const auto computeCandidates = [&]() {
+            if(shrinkPortal == 0.0) {
+                return std::make_tuple(line_segment_left, line_segment_right);
+            } else {
+                const auto line_segment_direction =
+                    (line_segment_right - line_segment_left).Normalized();
+                const auto candidate_left =
+                    line_segment_left + (line_segment_direction * shrinkPortal);
+                const auto candidate_right =
+                    line_segment_right - (line_segment_direction * shrinkPortal);
+                return std::make_tuple(candidate_left, candidate_right);
+            }
+        };
+        const auto [candidate_left, candidate_right] = computeCandidates();
 
         if(triarea2d(apex, portal_right, candidate_right) <= 0.0) {
             if(apex == portal_right || triarea2d(apex, portal_left, candidate_right) > 0.0) {
