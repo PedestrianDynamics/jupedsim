@@ -175,7 +175,7 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
                 continue;
             }
 
-            const auto edge = cdt.segment(target, idx);
+            const auto edge = cdt.segment(current_state->id, idx);
 
             // For all remaining nodes compute g/h values
             // The h-value is the distance between the goal and the closts point on the edge
@@ -310,7 +310,7 @@ RoutingEngine::ComputeAllConsideredPaths(Point currentPosition, Point destinatio
                 continue;
             }
 
-            const auto edge = cdt.segment(target, idx);
+            const auto edge = cdt.segment(current_state->id, idx);
 
             // For all remaining nodes compute g/h values
             // The h-value is the distance between the goal and the closts point on the edge
