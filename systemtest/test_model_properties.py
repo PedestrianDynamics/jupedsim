@@ -160,3 +160,50 @@ def test_set_model_parameters_generalized_centrifugal_force_model(
 
     sim.agent(agent_id).model.b_max = 9.0
     assert sim.agent(agent_id).model.b_max == 9.0
+
+
+@pytest.fixture
+def simulation_with_social_force_model():
+    return jps.Simulation(
+        model=jps.SocialForceModel(),
+        geometry=[(0, 0), (10, 0), (10, 10), (0, 10)],
+    )
+
+
+def test_set_model_parameters_social_force_model(
+    simulation_with_social_force_model,
+):
+    sim = simulation_with_social_force_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.SocialForceModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+    )
+    agent_id = sim.add_agent(agent)
+
+    sim.agent(agent_id).model.velocity = (2.0, -2.0)
+    assert sim.agent(agent_id).model.velocity == (2.0, -2.0)
+
+    sim.agent(agent_id).model.mass = 3.0
+    assert sim.agent(agent_id).model.mass == 3.0
+
+    sim.agent(agent_id).model.desiredSpeed = 4.0
+    assert sim.agent(agent_id).model.desiredSpeed == 4.0
+
+    sim.agent(agent_id).model.reactionTime = 5.0
+    assert sim.agent(agent_id).model.reactionTime == 5.0
+
+    sim.agent(agent_id).model.agentScale = 6.0
+    assert sim.agent(agent_id).model.agentScale == 6.0
+
+    sim.agent(agent_id).model.obstacleScale = 7.0
+    assert sim.agent(agent_id).model.obstacleScale == 7.0
+
+    sim.agent(agent_id).model.ForceDistance = 8.0
+    assert sim.agent(agent_id).model.ForceDistance == 8.0
+
+    sim.agent(agent_id).model.radius = 9.0
+    assert sim.agent(agent_id).model.radius == 9.0

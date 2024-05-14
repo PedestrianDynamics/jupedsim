@@ -89,7 +89,7 @@ class SocialForceModelState:
         self._obj = backing
 
     @property
-    def velocity(self) -> float:
+    def velocity(self) -> tuple[float, float]:
         """velocity of this agent."""
         return self._obj.test_value
 
