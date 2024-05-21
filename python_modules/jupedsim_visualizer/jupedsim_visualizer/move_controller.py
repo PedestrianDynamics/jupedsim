@@ -170,6 +170,7 @@ class MoveController:
         self.actor[min_dist_idx].GetProperty().SetColor(0.1, 0.9, 0.1)
         self.actor[min_dist_idx].GetProperty().SetLineWidth(3)
         interactor.Render()
+        print(f"{self.route_from} {self.route_to}")
 
     def _to_world_coordinate_2d(
         self, display_pos: tuple[float, float]
