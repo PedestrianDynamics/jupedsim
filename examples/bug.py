@@ -14,19 +14,13 @@ def main():
     jps.set_warning_callback(lambda x: print(x))
     jps.set_error_callback(lambda x: print(x))
 
-    geo_file = pathlib.Path("geometry") / "turnstiles.wkt"
+    geo_file = pathlib.Path("geometry") / "small.wkt"
     router = jps.RoutingEngine(geo_file.read_text())
 
     # buggy path
     frm_b, to_b = (
-        (70.09649309628304, 19.678671507447426),
-        (75.7540758131708, 19.014848468665928),
-    )
-
-    # correct path
-    frm_c, to_c = (
-        (70.24613811286295, 19.681624559617),
-        (75.89010451934591, 19.39324671403028),
+        (70.19708657860755, 20.035852912068368),
+        (74.0455438733101, 19.591800147294997),
     )
 
     def length_of_path(p):
@@ -39,18 +33,6 @@ def main():
 
     res = router.compute_considered_waypoints(frm_b, to_b)
     print("BUGGY PATH")
-    print(f"#paths = {len(res)}")
-    for p in res:
-        print("############")
-        print(f"#vertices in path = {len(p)}")
-        print(f"length of path = {length_of_path(p)}")
-        print(p)
-        print("========")
-
-    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-
-    res = router.compute_considered_waypoints(frm_c, to_c)
-    print("CORRECT PATH")
     print(f"#paths = {len(res)}")
     for p in res:
         print("############")
