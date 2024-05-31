@@ -389,16 +389,16 @@ RoutingEngine::ComputeAllConsideredPaths(Point currentPosition, Point destinatio
 
             // TODO(kkratz): replace this find on unsorted vector with something with a better
             // runtime
-            if(auto iter = std::find_if(
-                   std::begin(open_states),
-                   std::end(open_states),
-                   [t2](const auto& s) { return s->id == t2; });
-               iter != std::end(open_states)) {
-                if(auto& s = *iter; s->g_value > g_value) {
-                    s->g_value = g_value;
-                    s->parent = current_state.get();
-                    LOG_DEBUG("updated \t{}", *s);
-                }
+            // if(auto iter = std::find_if(
+            //        std::begin(open_states),
+            //        std::end(open_states),
+            //        [t2](const auto& s) { return s->id == t2; });
+            //    iter != std::end(open_states)) {
+            //     if(auto& s = *iter; s->g_value > g_value) {
+            //         s->g_value = g_value;
+            //         s->parent = current_state.get();
+            //         LOG_DEBUG("updated \t{}", *s);
+            //     }
 
                 // } else if(auto iter = closed_states.find(target); iter !=
                 // std::end(closed_states)) {
@@ -408,11 +408,11 @@ RoutingEngine::ComputeAllConsideredPaths(Point currentPosition, Point destinatio
                 //         open_states.push_back(s);
                 //         closed_states.erase(s->id);
                 //     }
-            } else {
+            // } else {
                 known_faces.try_emplace(target, known_faces.size() + 1);
                 sss.emplace_back(new SearchState{g_value, h_value, target, current_state.get()});
                 open_states.emplace_back(sss.back());
-            }
+            // }
         }
     }
 
