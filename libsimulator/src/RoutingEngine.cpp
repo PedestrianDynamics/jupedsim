@@ -307,6 +307,13 @@ RoutingEngine::ComputeAllConsideredPaths(Point currentPosition, Point destinatio
         open_states.pop_back();
         // closed_states.insert(std::make_pair(current_state->id, current_state));
 
+        if(current_state->f_value() > path_length) {
+            LOG_DEBUG("DONE");
+            // This search nodes f-value already excedes our paths length, and since the f-value is
+            // underestimation of the path length the excat path cannot be shorter than what we have
+            return paths;
+        }
+
         if(current_state->id == to) {
             LOG_DEBUG("FOUND PATH");
             // Unlike in A* this is only a first candidate solution
@@ -322,13 +329,7 @@ RoutingEngine::ComputeAllConsideredPaths(Point currentPosition, Point destinatio
             if(found_path_length < path_length) {
                 path_length = found_path_length;
             }
-        }
-
-        if(current_state->f_value() > path_length) {
-            LOG_DEBUG("DONE");
-            // This search nodes f-value already excedes our paths length, and since the f-value is
-            // underestimation of the path length the excat path cannot be shorter than what we have
-            return paths;
+            continue;
         }
 
         // Generate successors
