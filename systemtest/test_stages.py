@@ -204,7 +204,7 @@ def test_can_add_waypoint(square_room_5x5_with_obstacle, waypoint_position):
     waypoint_id = simulation.add_waypoint_stage(waypoint_position, 1)
     waypoint_stage = simulation.get_stage(waypoint_id)
 
-    assert type(waypoint_stage) == jps.WaypointStage
+    assert type(waypoint_stage) is jps.WaypointStage
 
 
 def test_can_not_add_waypoint_outside_geometry(square_room_5x5):
