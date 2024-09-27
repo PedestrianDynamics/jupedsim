@@ -29,7 +29,7 @@ Simulation::Simulation(
     _geometry = std::get<0>(tup->second).get();
     _routingEngine = std::get<1>(tup->second).get();
 }
-const SimulationClock& Simulation::Clock() const
+SimulationClock& Simulation::Clock()
 {
     return _clock;
 }

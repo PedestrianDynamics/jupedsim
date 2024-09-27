@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include <chrono>
+#include <cstdint>
 
 class SimulationClock
 {
@@ -19,4 +19,6 @@ public:
     uint64_t Iteration() const;
 
     double dT() const;
+
+    void UpdateDT(double newDT);
 };
