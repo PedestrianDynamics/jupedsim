@@ -2,6 +2,14 @@
 [![GitHub license](https://img.shields.io/badge/license-LGPL-blue.svg)](https://raw.githubusercontent.com/PedestrianDynamics/jupedsim/master/LICENSE)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/jupedsim)
 ![PyPI - Version](https://img.shields.io/pypi/v/jupedsim)
+[![Build CI wheels](https://github.com/PedestrianDynamics/jupedsim/actions/workflows/cibuildwheel.yml/badge.svg)](https://github.com/PedestrianDynamics/jupedsim/actions/workflows/cibuildwheel.yml)
+[![Documentation Status](https://img.shields.io/badge/docs-up--to--date-brightgreen)](https://jupedsim.org/stable)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9491/badge)](https://www.bestpractices.dev/projects/9491)
+[![FAIR checklist badge](https://fairsoftwarechecklist.net/badge.svg)](https://fairsoftwarechecklist.net/v0.2?f=31&a=32113&i=32322&r=133)
+[![fair-software.eu](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green)](https://fair-software.eu)
+
+
 
 # Jülich Pedestrian Simulator - JuPedSim
 
