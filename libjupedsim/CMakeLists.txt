@@ -11,6 +11,7 @@ add_library(jupedsim_obj OBJECT
     src/build_info.cpp
     src/collision_free_speed_model.cpp
     src/collision_free_speed_model_v2.cpp
+    src/collision_free_speed_model_v3.cpp
     src/error.cpp
     src/generalized_centrifugal_force_model.cpp
     src/geometry.cpp
