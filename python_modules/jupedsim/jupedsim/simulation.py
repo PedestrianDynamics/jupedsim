@@ -19,6 +19,10 @@ from jupedsim.models.collision_free_speed_v2 import (
     CollisionFreeSpeedModelV2,
     CollisionFreeSpeedModelV2AgentParameters,
 )
+from jupedsim.models.collision_free_speed_v3 import (
+    CollisionFreeSpeedModelV3,
+    CollisionFreeSpeedModelV3AgentParameters,
+)
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
@@ -53,6 +57,7 @@ class Simulation:
             CollisionFreeSpeedModel
             | GeneralizedCentrifugalForceModel
             | CollisionFreeSpeedModelV2
+            | CollisionFreeSpeedModelV3
             | SocialForceModel
         ),
         geometry: (
@@ -109,6 +114,9 @@ class Simulation:
             py_jps_model = model_builder.build()
         elif isinstance(model, CollisionFreeSpeedModelV2):
             model_builder = py_jps.CollisionFreeSpeedModelV2Builder()
+            py_jps_model = model_builder.build()
+        elif isinstance(model, CollisionFreeSpeedModelV3):
+            model_builder = py_jps.CollisionFreeSpeedModelV3Builder()
             py_jps_model = model_builder.build()
         elif isinstance(model, GeneralizedCentrifugalForceModel):
             model_builder = py_jps.GeneralizedCentrifugalForceModelBuilder(
@@ -248,6 +256,7 @@ class Simulation:
             GeneralizedCentrifugalForceModelAgentParameters
             | CollisionFreeSpeedModelAgentParameters
             | CollisionFreeSpeedModelV2AgentParameters
+            | CollisionFreeSpeedModelV3AgentParameters
             | SocialForceModelAgentParameters
         ),
     ) -> int:

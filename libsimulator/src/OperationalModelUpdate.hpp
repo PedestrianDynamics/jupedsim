@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CollisionFreeSpeedModelUpdate.hpp"
 #include "CollisionFreeSpeedModelV2Update.hpp"
+#include "CollisionFreeSpeedModelV3Update.hpp"
 #include "GeneralizedCentrifugalForceModelUpdate.hpp"
 #include "SocialForceModelUpdate.hpp"
 
@@ -11,4 +12,5 @@ using OperationalModelUpdate = std::variant<
     GeneralizedCentrifugalForceModelUpdate,
     CollisionFreeSpeedModelUpdate,
     CollisionFreeSpeedModelV2Update,
+    CollisionFreeSpeedModelV3Update,
     SocialForceModelUpdate>;

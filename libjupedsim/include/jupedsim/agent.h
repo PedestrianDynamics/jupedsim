@@ -4,6 +4,7 @@
 
 #include "collision_free_speed_model.h"
 #include "collision_free_speed_model_v2.h"
+#include "collision_free_speed_model_v3.h"
 #include "error.h"
 #include "export.h"
 #include "generalized_centrifugal_force_model.h"
@@ -116,6 +117,17 @@ JPS_Agent_GetSocialForceModelState(JPS_Agent handle, JPS_ErrorMessage* errorMess
 JUPEDSIM_API JPS_CollisionFreeSpeedModelV2State
 JPS_Agent_GetCollisionFreeSpeedModelV2State(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
 
+/**
+ * Access Collision Free Speed model V3 state.
+ * Precondition: Agent needs to use Collision Free Speed model V3
+ * @param handle of the agent to access.
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return state or NULL on error
+ */
+JUPEDSIM_API JPS_CollisionFreeSpeedModelV3State
+JPS_Agent_GetCollisionFreeSpeedModelV3State(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
+
+  
 /**
  * Opaque type of an iterator over agents
  */

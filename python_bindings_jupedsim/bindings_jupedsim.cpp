@@ -10,6 +10,7 @@ void init_trace(py::module_& m);
 void init_generalized_centrifugal_force_model(py::module_& m);
 void init_collision_free_speed_model(py::module_& m);
 void init_collision_free_speed_model_v2(py::module_& m);
+void init_collision_free_speed_model_v3(py::module_& m);
 void init_social_force_model(py::module_& m);
 void init_geometry(py::module_& m);
 void init_routing(py::module_& m);
@@ -27,6 +28,7 @@ PYBIND11_MODULE(py_jupedsim, m)
     init_generalized_centrifugal_force_model(m);
     init_collision_free_speed_model(m);
     init_collision_free_speed_model_v2(m);
+    init_collision_free_speed_model_v3(m);
     init_social_force_model(m);
     init_geometry(m);
     init_routing(m);

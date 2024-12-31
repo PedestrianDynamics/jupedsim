@@ -91,6 +91,8 @@ JPS_ModelType JPS_Agent_GetModelType(JPS_Agent handle)
         case 2:
             return JPS_CollisionFreeSpeedModelV2;
         case 3:
+            return JPS_CollisionFreeSpeedModelV3;    
+        case 4:
             return JPS_SocialForceModel;
     }
     UNREACHABLE();

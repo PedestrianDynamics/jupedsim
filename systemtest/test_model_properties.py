@@ -84,6 +84,50 @@ def test_set_model_parameters_collision_free_speed_model_v2(
 
 
 @pytest.fixture
+def simulation_with_collision_free_speed_model_v3():
+    return jps.Simulation(
+        model=jps.CollisionFreeSpeedModelV3(),
+        geometry=[(0, 0), (10, 0), (10, 10), (0, 10)],
+    )
+
+
+def test_set_model_parameters_collision_free_speed_model_v3(
+    simulation_with_collision_free_speed_model_v3,
+):
+    sim = simulation_with_collision_free_speed_model_v3
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.CollisionFreeSpeedModelV3AgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+    )
+    agent_id = sim.add_agent(agent)
+
+    sim.agent(agent_id).model.v0 = 2.0
+    assert sim.agent(agent_id).model.v0 == 2.0
+
+    sim.agent(agent_id).model.time_gap = 3.0
+    assert sim.agent(agent_id).model.time_gap == 3.0
+
+    sim.agent(agent_id).model.radius = 4.0
+    assert sim.agent(agent_id).model.radius == 4.0
+
+    sim.agent(agent_id).model.strength_neighbor_repulsion = 5.0
+    assert sim.agent(agent_id).model.strength_neighbor_repulsion == 5.0
+
+    sim.agent(agent_id).model.range_neighbor_repulsion = 6.0
+    assert sim.agent(agent_id).model.range_neighbor_repulsion == 6.0
+
+    sim.agent(agent_id).model.range_geometry_repulsion = 7.0
+    assert sim.agent(agent_id).model.range_geometry_repulsion == 7.0
+
+    sim.agent(agent_id).model.range_geometry_repulsion = 8.0
+    assert sim.agent(agent_id).model.range_geometry_repulsion == 8.0
+
+
+@pytest.fixture
 def simulation_with_collision_free_speed_model():
     return jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
