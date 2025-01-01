@@ -8,12 +8,28 @@ import sys
 
 import jupedsim as jps
 import shapely
+from shapely import Polygon
 
 
 def main():
-    geometry = shapely.GeometryCollection(shapely.box(0, -2.5, 50, 2.5))
-    exit_polygon = shapely.box(48, -2.5, 50, 2.5)
-
+    room1 = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])  # Room 1 (10m x 10m)
+    room2 = Polygon(
+        [(15, 0), (25, 0), (25, 10), (15, 10)]
+    )  # Room 2 (10m x 10m)
+    width = 0.8
+    num_agents = 10
+    corridor = Polygon(
+        [
+            (10, 5 - width / 2),
+            (15, 5 - width / 2),
+            (15, 5 + width / 2),
+            (10, 5 + width / 2),
+        ]
+    )
+    geometry = room1.union(room2).union(corridor)
+    # geometry = shapely.GeometryCollection(shapely.box(0, -2.5, 50, 2.5))
+    # exit_polygon = shapely.box(48, -2.5, 50, 2.5)  #
+    exit_polygon = Polygon([(24, 4.5), (25, 4.5), (25, 5.5), (24, 5.5)])
     trajectory_file = "example_7.sqlite"
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV3(),
@@ -27,54 +43,33 @@ def main():
     journey = jps.JourneyDescription([exit_id])
     journey_id = simulation.add_journey(journey)
 
-    motivated_start_positions = jps.distribute_by_number(
-        polygon=shapely.box(0, -2.5, 5, 2.5),
-        number_of_agents=30,
-        distance_to_agents=0.3,
+    start_positions = jps.distribute_by_number(
+        polygon=Polygon([(0, 0), (5, 0), (5, 10), (0, 10)]),
+        # shapely.box(0, -2.5, 5, 2.5),
+        number_of_agents=num_agents,
+        distance_to_agents=0.5,
         distance_to_polygon=0.2,
     )
 
-    for position in motivated_start_positions:
+    for position in start_positions:
         simulation.add_agent(
             jps.CollisionFreeSpeedModelV3AgentParameters(
                 journey_id=journey_id,
                 stage_id=exit_id,
                 position=position,
-                radius=0.12,
-                strength_neighbor_repulsion=8,
-                range_neighbor_repulsion=0.1,
-                strength_geometry_repulsion=5,
-                range_geometry_repulsion=0.1,
+                radius=0.2,
+                # strength_neighbor_repulsion=8,
+                # range_neighbor_repulsion=0.1,
+                # strength_geometry_repulsion=5,
+                # range_geometry_repulsion=0.1,
             )
         )
 
-    slow_start_positions = jps.distribute_by_number(
-        polygon=shapely.box(15, -2.5, 20, 2.5),
-        number_of_agents=30,
-        distance_to_agents=0.3,
-        distance_to_polygon=0.2,
-    )
-
-    for position in slow_start_positions:
-        simulation.add_agent(
-            jps.CollisionFreeSpeedModelV3AgentParameters(
-                journey_id=journey_id,
-                stage_id=exit_id,
-                position=position,
-                radius=0.12,
-                strength_neighbor_repulsion=30,
-                range_neighbor_repulsion=0.1,
-                strength_geometry_repulsion=15,
-                range_geometry_repulsion=0.1,
-                v0=0.3,
-            )
-        )
-
-    while simulation.agent_count() > 0:
+    while simulation.agent_count() > 0 and simulation.iteration_count() < 2000:
         try:
             simulation.iterate()
         except KeyboardInterrupt:
-            print("CTRL-C Recieved! Shuting down")
+            print("CTRL-C Received! Shutting down")
             sys.exit(1)
     print(
         f"Simulation completed after {simulation.iteration_count()} iterations ({simulation.elapsed_time()} s)"
