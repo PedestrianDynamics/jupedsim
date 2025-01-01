@@ -113,6 +113,7 @@ install(
         ${header_dest}/build_info.h
         ${header_dest}/collision_free_speed_model.h
         ${header_dest}/collision_free_speed_model_v2.h
+        ${header_dest}/collision_free_speed_model_v3.h
         ${header_dest}/error.h
         ${header_dest}/export.h
         ${header_dest}/generalized_centrifugal_force_model.h
