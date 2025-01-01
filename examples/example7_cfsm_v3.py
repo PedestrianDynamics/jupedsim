@@ -14,9 +14,9 @@ def main():
     geometry = shapely.GeometryCollection(shapely.box(0, -2.5, 50, 2.5))
     exit_polygon = shapely.box(48, -2.5, 50, 2.5)
 
-    trajectory_file = "example_6.sqlite"
+    trajectory_file = "example_7.sqlite"
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModelV2(),
+        model=jps.CollisionFreeSpeedModelV3(),
         geometry=geometry,
         trajectory_writer=jps.SqliteTrajectoryWriter(
             output_file=pathlib.Path(trajectory_file)
@@ -36,7 +36,7 @@ def main():
 
     for position in motivated_start_positions:
         simulation.add_agent(
-            jps.CollisionFreeSpeedModelV2AgentParameters(
+            jps.CollisionFreeSpeedModelV3AgentParameters(
                 journey_id=journey_id,
                 stage_id=exit_id,
                 position=position,
@@ -57,7 +57,7 @@ def main():
 
     for position in slow_start_positions:
         simulation.add_agent(
-            jps.CollisionFreeSpeedModelV2AgentParameters(
+            jps.CollisionFreeSpeedModelV3AgentParameters(
                 journey_id=journey_id,
                 stage_id=exit_id,
                 position=position,
@@ -77,8 +77,9 @@ def main():
             print("CTRL-C Recieved! Shuting down")
             sys.exit(1)
     print(
-        f"Simulation completed after {simulation.iteration_count()} iterations"
+        f"Simulation completed after {simulation.iteration_count()} iterations ({simulation.elapsed_time()} s)"
     )
+    print(f"{trajectory_file = }")
 
 
 if __name__ == "__main__":

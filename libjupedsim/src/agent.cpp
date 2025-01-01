@@ -161,6 +161,27 @@ JPS_Agent_GetCollisionFreeSpeedModelV2State(JPS_Agent handle, JPS_ErrorMessage* 
     return nullptr;
 }
 
+JPS_CollisionFreeSpeedModelV3State
+JPS_Agent_GetCollisionFreeSpeedModelV3State(JPS_Agent handle, JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    const auto agent = reinterpret_cast<GenericAgent*>(handle);
+    try {
+        auto& model = std::get<CollisionFreeSpeedModelV3Data>(agent->model);
+        return reinterpret_cast<JPS_CollisionFreeSpeedModelV3State>(&model);
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return nullptr;
+}
+
 JPS_SocialForceModelState
 JPS_Agent_GetSocialForceModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage)
 {
