@@ -7,28 +7,37 @@ import jupedsim.native as py_jps
 
 
 @dataclass(kw_only=True)
-class CollisionFreeSpeedModelV3:
-    """Collision Free Speed Model V3
+class AnticipationVelocityModel:
+    """Anticipation Velocity Model (AVM).
 
-    This is a variation of the Collision Free Speed Model where geometry and neighbor repulsion are individual
-    agent parameters instead of global parameters.
+    The AVM incorporates pedestrian anticipation, divided into three phases:
+    1. Perception of the current situation.
+    2. Prediction of future situations.
+    3. Strategy selection leading to action.
 
-    A general description of the Collision Free Speed Model can be found in the originating publication
-    https://arxiv.org/abs/1512.05597
+    This model quantitatively reproduces bidirectional pedestrian flow by accounting for:
+    - Anticipation of changes in neighboring pedestrians' positions.
+    - The strategy of following others' movement. The AVM is a model that takes into consideration
+      the anticipation of pedestrians. For this, the process of anticipation is divided into three parts:
+      - perception of the actual situation,
+      - prediction of a future situation and
+      - selection of a strategy leading to action.
 
-    A more detailed description can be found at https://pedestriandynamics.org/models/collision_free_speed_model/
+
+    A general description of the AVM can be found in the originating publication
+    https://doi.org/10.1016/j.trc.2021.103464
     """
 
     pass
 
 
 @dataclass(kw_only=True)
-class CollisionFreeSpeedModelV3AgentParameters:
+class AnticipationVelocityModelAgentParameters:
     """
-    Agent parameters for Collision Free Speed Model V3.
+    Agent parameters for Anticipation Velocity Model (AVM).
 
-    See the scientific publication for more details about this model
-    https://arxiv.org/abs/1512.05597
+    See publication for more details about this model
+    https://doi.org/10.1016/j.trc.2021.103464
 
     .. note::
 
@@ -40,7 +49,7 @@ class CollisionFreeSpeedModelV3AgentParameters:
         .. code:: python
 
             positions = [...] # List of initial agent positions
-            params = CollisionFreeSpeedModelV3AgentParameters(v0=0.9) # all agents are slower
+            params = AnticipationVelocityModelAgentParameters(v0=0.9) # all agents are slower
             for p in positions:
                 params.position = p
                 sim.add_agent(params)
@@ -71,8 +80,8 @@ class CollisionFreeSpeedModelV3AgentParameters:
 
     def as_native(
         self,
-    ) -> py_jps.CollisionFreeSpeedModelV3AgentParameters:
-        return py_jps.CollisionFreeSpeedModelV3AgentParameters(
+    ) -> py_jps.AnticipationVelocityModelAgentParameters:
+        return py_jps.AnticipationVelocityModelAgentParameters(
             position=self.position,
             time_gap=self.time_gap,
             v0=self.v0,
@@ -86,7 +95,7 @@ class CollisionFreeSpeedModelV3AgentParameters:
         )
 
 
-class CollisionFreeSpeedModelV3State:
+class AnticipationVelocityModelState:
     def __init__(self, backing):
         self._obj = backing
 

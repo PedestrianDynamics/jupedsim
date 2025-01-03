@@ -283,18 +283,18 @@ JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelV2Agent(
     return result.getID();
 }
 
-JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelV3Agent(
+JPS_AgentId JPS_Simulation_AddAnticipationVelocityModelAgent(
     JPS_Simulation handle,
-    JPS_CollisionFreeSpeedModelV3AgentParameters parameters,
+    JPS_AnticipationVelocityModelAgentParameters parameters,
     JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
     auto result = GenericAgent::ID::Invalid;
     auto simulation = reinterpret_cast<Simulation*>(handle);
     try {
-        if(simulation->ModelType() != OperationalModelType::COLLISION_FREE_SPEED_V3) {
+        if(simulation->ModelType() != OperationalModelType::ANTICIPATION_VELOCITY_MODEL) {
             throw std::runtime_error(
-                "Simulation is not configured to use Collision Free Speed Model V3");
+                "Simulation is not configured to use Anticipation Velocity Model");
         }
         GenericAgent agent(
             GenericAgent::ID::Invalid,
@@ -302,7 +302,7 @@ JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelV3Agent(
             BaseStage::ID(parameters.stageId),
             intoPoint(parameters.position),
             {},
-            CollisionFreeSpeedModelV3Data{
+            AnticipationVelocityModelData{
                 parameters.strengthNeighborRepulsion,
                 parameters.rangeNeighborRepulsion,
                 parameters.strengthGeometryRepulsion,
@@ -518,8 +518,8 @@ JPS_ModelType JPS_Simulation_ModelType(JPS_Simulation handle)
             return JPS_GeneralizedCentrifugalForceModel;
         case OperationalModelType::COLLISION_FREE_SPEED_V2:
             return JPS_CollisionFreeSpeedModelV2;
-        case OperationalModelType::COLLISION_FREE_SPEED_V3:
-            return JPS_CollisionFreeSpeedModelV3;
+        case OperationalModelType::ANTICIPATION_VELOCITY_MODEL:
+            return JPS_AnticipationVelocityModel;
         case OperationalModelType::SOCIAL_FORCE:
             return JPS_SocialForceModel;
     }

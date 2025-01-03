@@ -12,54 +12,54 @@ extern "C" {
 #endif
 
 /**
- * Opaque type for a Collision Free Speed Model V3 Builder
+ * Opaque type for a Anticipation Velocity Model Builder
  */
-typedef struct JPS_CollisionFreeSpeedModelV3Builder_t* JPS_CollisionFreeSpeedModelV3Builder;
+typedef struct JPS_AnticipationVelocityModelBuilder_t* JPS_AnticipationVelocityModelBuilder;
 
 /**
- * Creates a Collision Free Speed Model V3 builder.
+ * Creates a Anticipation Velocity Model builder.
  * @return the builder
  */
-JUPEDSIM_API JPS_CollisionFreeSpeedModelV3Builder JPS_CollisionFreeSpeedModelV3Builder_Create();
+JUPEDSIM_API JPS_AnticipationVelocityModelBuilder JPS_AnticipationVelocityModelBuilder_Create();
 
 /**
- * Creates a JPS_OperationalModel of type Collision Free Speed Model V3 from the
- * JPS_CollisionFreeSpeedModelV3Builder.
+ * Creates a JPS_OperationalModel of type Anticipation Velocity Model from the
+ * JPS_AnticipationVelocityModelBuilder.
  * @param handle the builder to operate on
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error
- * @return a JPS_CollisionFreeSpeedModelV3 or NULL if an error occured.
+ * @return a JPS_AnticipationVelocityModel or NULL if an error occured.
  */
-JUPEDSIM_API JPS_OperationalModel JPS_CollisionFreeSpeedModelV3Builder_Build(
-    JPS_CollisionFreeSpeedModelV3Builder handle,
+JUPEDSIM_API JPS_OperationalModel JPS_AnticipationVelocityModelBuilder_Build(
+    JPS_AnticipationVelocityModelBuilder handle,
     JPS_ErrorMessage* errorMessage);
 
 /**
- * Frees a JPS_CollisionFreeSpeedModelV3Builder
- * @param handle to the JPS_CollisionFreeSpeedModelV3Builder to free.
+ * Frees a JPS_AnticipationVelocityModelBuilder
+ * @param handle to the JPS_AnticipationVelocityModelBuilder to free.
  */
 JUPEDSIM_API void
-JPS_CollisionFreeSpeedModelV3Builder_Free(JPS_CollisionFreeSpeedModelV3Builder handle);
+JPS_AnticipationVelocityModelBuilder_Free(JPS_AnticipationVelocityModelBuilder handle);
 
 /**
- * Opaque type of Collision Free Speed V3 model state
+ * Opaque type of Anticipation Velocity Model state
  */
-typedef struct JPS_CollisionFreeSpeedModelV3State_t* JPS_CollisionFreeSpeedModelV3State;
+typedef struct JPS_AnticipationVelocityModelState_t* JPS_AnticipationVelocityModelState;
 
 /**
  * Read strength neighbor repulsion of this agent.
  * @param handle of the Agent to access.
  * @return strength neighbor repulsion of this agent
  */
-JUPEDSIM_API double JPS_CollisionFreeSpeedModelV3State_GetStrengthNeighborRepulsion(
-    JPS_CollisionFreeSpeedModelV3State handle);
+JUPEDSIM_API double JPS_AnticipationVelocityModelState_GetStrengthNeighborRepulsion(
+    JPS_AnticipationVelocityModelState handle);
 
 /**
  * Write strength neighbor repulsion of this agent.
  * @param handle of the Agent to access.
  * @param strengthNeighborRepulsion of this agent.
  */
-JUPEDSIM_API void JPS_CollisionFreeSpeedModelV3State_SetStrengthNeighborRepulsion(
-    JPS_CollisionFreeSpeedModelV3State handle,
+JUPEDSIM_API void JPS_AnticipationVelocityModelState_SetStrengthNeighborRepulsion(
+    JPS_AnticipationVelocityModelState handle,
     double strengthNeighborRepulsion);
 
 /**
@@ -67,16 +67,16 @@ JUPEDSIM_API void JPS_CollisionFreeSpeedModelV3State_SetStrengthNeighborRepulsio
  * @param handle of the Agent to access.
  * @return range neighbor repulsion of this agent
  */
-JUPEDSIM_API double JPS_CollisionFreeSpeedModelV3State_GetRangeNeighborRepulsion(
-    JPS_CollisionFreeSpeedModelV3State handle);
+JUPEDSIM_API double JPS_AnticipationVelocityModelState_GetRangeNeighborRepulsion(
+    JPS_AnticipationVelocityModelState handle);
 
 /**
  * Write range neighbor repulsion of this agent.
  * @param handle of the Agent to access.
  * @param rangeNeighborRepulsion of this agent.
  */
-JUPEDSIM_API void JPS_CollisionFreeSpeedModelV3State_SetRangeNeighborRepulsion(
-    JPS_CollisionFreeSpeedModelV3State handle,
+JUPEDSIM_API void JPS_AnticipationVelocityModelState_SetRangeNeighborRepulsion(
+    JPS_AnticipationVelocityModelState handle,
     double rangeNeighborRepulsion);
 
 /**
@@ -84,16 +84,16 @@ JUPEDSIM_API void JPS_CollisionFreeSpeedModelV3State_SetRangeNeighborRepulsion(
  * @param handle of the Agent to access.
  * @return strength geometry repulsion of this agent
  */
-JUPEDSIM_API double JPS_CollisionFreeSpeedModelV3State_GetStrengthGeometryRepulsion(
-    JPS_CollisionFreeSpeedModelV3State handle);
+JUPEDSIM_API double JPS_AnticipationVelocityModelState_GetStrengthGeometryRepulsion(
+    JPS_AnticipationVelocityModelState handle);
 
 /**
  * Write strength geometry repulsion of this agent.
  * @param handle of the Agent to access.
  * @param strengthGeometryRepulsion of this agent.
  */
-JUPEDSIM_API void JPS_CollisionFreeSpeedModelV3State_SetStrengthGeometryRepulsion(
-    JPS_CollisionFreeSpeedModelV3State handle,
+JUPEDSIM_API void JPS_AnticipationVelocityModelState_SetStrengthGeometryRepulsion(
+    JPS_AnticipationVelocityModelState handle,
     double strengthGeometryRepulsion);
 
 /**
@@ -101,16 +101,16 @@ JUPEDSIM_API void JPS_CollisionFreeSpeedModelV3State_SetStrengthGeometryRepulsio
  * @param handle of the Agent to access.
  * @return range geometry repulsion of this agent
  */
-JUPEDSIM_API double JPS_CollisionFreeSpeedModelV3State_GetRangeGeometryRepulsion(
-    JPS_CollisionFreeSpeedModelV3State handle);
+JUPEDSIM_API double JPS_AnticipationVelocityModelState_GetRangeGeometryRepulsion(
+    JPS_AnticipationVelocityModelState handle);
 
 /**
  * Write strength neighbor repulsion of this agent.
  * @param handle of the Agent to access.
  * @param rangeGeometryRepulsion of this agent.
  */
-JUPEDSIM_API void JPS_CollisionFreeSpeedModelV3State_SetRangeGeometryRepulsion(
-    JPS_CollisionFreeSpeedModelV3State handle,
+JUPEDSIM_API void JPS_AnticipationVelocityModelState_SetRangeGeometryRepulsion(
+    JPS_AnticipationVelocityModelState handle,
     double rangeGeometryRepulsion);
 
 /**
@@ -119,7 +119,7 @@ JUPEDSIM_API void JPS_CollisionFreeSpeedModelV3State_SetRangeGeometryRepulsion(
  * @return e0 of this agent
  */
 JUPEDSIM_API JPS_Point
-JPS_CollisionFreeSpeedModelV3State_GetE0(JPS_CollisionFreeSpeedModelV3State handle);
+JPS_AnticipationVelocityModelState_GetE0(JPS_AnticipationVelocityModelState handle);
 
 /**
  * Write e0 of this agent.
@@ -127,7 +127,7 @@ JPS_CollisionFreeSpeedModelV3State_GetE0(JPS_CollisionFreeSpeedModelV3State hand
  * @param e0 of this agent.
  */
 JUPEDSIM_API void
-JPS_CollisionFreeSpeedModelV3State_SetE0(JPS_CollisionFreeSpeedModelV3State handle, JPS_Point e0);
+JPS_AnticipationVelocityModelState_SetE0(JPS_AnticipationVelocityModelState handle, JPS_Point e0);
 
 /**
  * Read time gap of this agent.
@@ -135,15 +135,15 @@ JPS_CollisionFreeSpeedModelV3State_SetE0(JPS_CollisionFreeSpeedModelV3State hand
  * @return time gap of this agent
  */
 JUPEDSIM_API double
-JPS_CollisionFreeSpeedModelV3State_GetTimeGap(JPS_CollisionFreeSpeedModelV3State handle);
+JPS_AnticipationVelocityModelState_GetTimeGap(JPS_AnticipationVelocityModelState handle);
 
 /**
  * Write time gap of this agent.
  * @param handle of the Agent to access.
  * @param time_gap of this agent.
  */
-JUPEDSIM_API void JPS_CollisionFreeSpeedModelV3State_SetTimeGap(
-    JPS_CollisionFreeSpeedModelV3State handle,
+JUPEDSIM_API void JPS_AnticipationVelocityModelState_SetTimeGap(
+    JPS_AnticipationVelocityModelState handle,
     double time_gap);
 
 /**
@@ -152,7 +152,7 @@ JUPEDSIM_API void JPS_CollisionFreeSpeedModelV3State_SetTimeGap(
  * @return tau of this agent
  */
 JUPEDSIM_API double
-JPS_CollisionFreeSpeedModelV3State_GetTau(JPS_CollisionFreeSpeedModelV3State handle);
+JPS_AnticipationVelocityModelState_GetTau(JPS_AnticipationVelocityModelState handle);
 
 /**
  * Write tau of this agent.
@@ -160,7 +160,7 @@ JPS_CollisionFreeSpeedModelV3State_GetTau(JPS_CollisionFreeSpeedModelV3State han
  * @param tau of this agent.
  */
 JUPEDSIM_API void
-JPS_CollisionFreeSpeedModelV3State_SetTau(JPS_CollisionFreeSpeedModelV3State handle, double tau);
+JPS_AnticipationVelocityModelState_SetTau(JPS_AnticipationVelocityModelState handle, double tau);
 
 /**
  * Read v0 of this agent.
@@ -168,7 +168,7 @@ JPS_CollisionFreeSpeedModelV3State_SetTau(JPS_CollisionFreeSpeedModelV3State han
  * @return v0 of this agent
  */
 JUPEDSIM_API double
-JPS_CollisionFreeSpeedModelV3State_GetV0(JPS_CollisionFreeSpeedModelV3State handle);
+JPS_AnticipationVelocityModelState_GetV0(JPS_AnticipationVelocityModelState handle);
 
 /**
  * Write v0 of this agent.
@@ -176,7 +176,7 @@ JPS_CollisionFreeSpeedModelV3State_GetV0(JPS_CollisionFreeSpeedModelV3State hand
  * @param v0 of this agent.
  */
 JUPEDSIM_API void
-JPS_CollisionFreeSpeedModelV3State_SetV0(JPS_CollisionFreeSpeedModelV3State handle, double v0);
+JPS_AnticipationVelocityModelState_SetV0(JPS_AnticipationVelocityModelState handle, double v0);
 
 /**
  * Read radius of this agent.
@@ -184,21 +184,21 @@ JPS_CollisionFreeSpeedModelV3State_SetV0(JPS_CollisionFreeSpeedModelV3State hand
  * @return radius of this agent
  */
 JUPEDSIM_API double
-JPS_CollisionFreeSpeedModelV3State_GetRadius(JPS_CollisionFreeSpeedModelV3State handle);
+JPS_AnticipationVelocityModelState_GetRadius(JPS_AnticipationVelocityModelState handle);
 
 /**
  * Write radius of this agent in meters.
  * @param handle of the Agent to access.
  * @param radius (m) of this agent.
  */
-JUPEDSIM_API void JPS_CollisionFreeSpeedModelV3State_SetRadius(
-    JPS_CollisionFreeSpeedModelV3State handle,
+JUPEDSIM_API void JPS_AnticipationVelocityModelState_SetRadius(
+    JPS_AnticipationVelocityModelState handle,
     double radius);
 
 /**
- * Describes parameters of an Agent in Collision Free Speed Model V3
+ * Describes parameters of an Agent in Anticipation Velocity Model
  */
-typedef struct JPS_CollisionFreeSpeedModelV3AgentParameters {
+typedef struct JPS_AnticipationVelocityModelAgentParameters {
     /**
      * Position of the agent.
      * The position needs to inside the accessible area.
@@ -246,7 +246,7 @@ typedef struct JPS_CollisionFreeSpeedModelV3AgentParameters {
      */
     double rangeGeometryRepulsion{0.02};
 
-} JPS_CollisionFreeSpeedModelV3AgentParameters;
+} JPS_AnticipationVelocityModelAgentParameters;
 
 #ifdef __cplusplus
 }

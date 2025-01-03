@@ -11,7 +11,7 @@ add_library(jupedsim_obj OBJECT
     src/build_info.cpp
     src/collision_free_speed_model.cpp
     src/collision_free_speed_model_v2.cpp
-    src/collision_free_speed_model_v3.cpp
+    src/anticipation_velocity_model.cpp
     src/error.cpp
     src/generalized_centrifugal_force_model.cpp
     src/geometry.cpp
@@ -113,7 +113,7 @@ install(
         ${header_dest}/build_info.h
         ${header_dest}/collision_free_speed_model.h
         ${header_dest}/collision_free_speed_model_v2.h
-        ${header_dest}/collision_free_speed_model_v3.h
+        ${header_dest}/anticipation_velocity_model.h
         ${header_dest}/error.h
         ${header_dest}/export.h
         ${header_dest}/generalized_centrifugal_force_model.h
