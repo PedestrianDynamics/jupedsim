@@ -4,15 +4,12 @@
 
 #include "Clonable.hpp"
 #include "CollisionGeometry.hpp"
-#include "GeneralizedCentrifugalForceModelData.hpp"
 #include "OperationalModelType.hpp"
 #include "OperationalModelUpdate.hpp"
 #include "Point.hpp"
 #include "SimulationError.hpp"
-#include "UniqueID.hpp"
 
 #include <optional>
-#include <unordered_map>
 
 template <typename T>
 class NeighborhoodSearch;

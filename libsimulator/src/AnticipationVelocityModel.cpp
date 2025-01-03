@@ -6,12 +6,8 @@
 #include "AnticipationVelocityModelUpdate.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
-#include "Logger.hpp"
-#include "Mathematics.hpp"
-#include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "SimulationError.hpp"
-#include "Stage.hpp"
 
 #include <algorithm>
 #include <limits>
