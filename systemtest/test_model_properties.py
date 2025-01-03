@@ -84,21 +84,21 @@ def test_set_model_parameters_collision_free_speed_model_v2(
 
 
 @pytest.fixture
-def simulation_with_collision_free_speed_model_v3():
+def simulation_with_anticipation_velocity_model():
     return jps.Simulation(
-        model=jps.CollisionFreeSpeedModelV3(),
+        model=jps.AnticipationVelocityModel(),
         geometry=[(0, 0), (10, 0), (10, 10), (0, 10)],
     )
 
 
-def test_set_model_parameters_collision_free_speed_model_v3(
-    simulation_with_collision_free_speed_model_v3,
+def test_set_model_parameters_anticipation_velocity_model(
+    simulation_with_anticipation_velocity_model,
 ):
-    sim = simulation_with_collision_free_speed_model_v3
+    sim = simulation_with_anticipation_velocity_model
     wp = sim.add_waypoint_stage((10, 1), 0.5)
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
-    agent = jps.CollisionFreeSpeedModelV3AgentParameters(
+    agent = jps.AnticipationVelocityModelAgentParameters(
         journey_id=journey_id,
         stage_id=wp,
         position=(1, 1),

@@ -1,9 +1,9 @@
 // Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "CollisionFreeSpeedModelV3.hpp"
+#include "AnticipationVelocityModel.hpp"
 #include <random> 
-#include "CollisionFreeSpeedModelV3Data.hpp"
-#include "CollisionFreeSpeedModelV3Update.hpp"
+#include "AnticipationVelocityModelData.hpp"
+#include "AnticipationVelocityModelUpdate.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
 #include "Logger.hpp"
@@ -19,12 +19,12 @@
 #include <numeric>
 #include <vector>
 
-OperationalModelType CollisionFreeSpeedModelV3::Type() const
+OperationalModelType AnticipationVelocityModel::Type() const
 {
-    return OperationalModelType::COLLISION_FREE_SPEED_V3;
+  return OperationalModelType::ANTICIPATION_VELOCITY_MODEL;
 }
 
-OperationalModelUpdate CollisionFreeSpeedModelV3::ComputeNewPosition(
+OperationalModelUpdate AnticipationVelocityModel::ComputeNewPosition(
     double dT,
     const GenericAgent& ped,
     const CollisionGeometry& geometry,
@@ -86,26 +86,26 @@ OperationalModelUpdate CollisionFreeSpeedModelV3::ComputeNewPosition(
             return std::min(res, GetSpacing(ped, neighbor, direction));
         });
 
-    const auto& model = std::get<CollisionFreeSpeedModelV3Data>(ped.model);
+    const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
     const auto optimal_speed = OptimalSpeed(ped, spacing, model.timeGap);
     const auto velocity = direction * optimal_speed;
-    return CollisionFreeSpeedModelV3Update{ped.pos + velocity * dT, direction};
+    return AnticipationVelocityModelUpdate{ped.pos + velocity * dT, direction};
 };
 
-void CollisionFreeSpeedModelV3::ApplyUpdate(const OperationalModelUpdate& upd, GenericAgent& agent)
+void AnticipationVelocityModel::ApplyUpdate(const OperationalModelUpdate& upd, GenericAgent& agent)
     const
 {
-    const auto& update = std::get<CollisionFreeSpeedModelV3Update>(upd);
+    const auto& update = std::get<AnticipationVelocityModelUpdate>(upd);
     agent.pos = update.position;
     agent.orientation = update.orientation;
 }
 
-void CollisionFreeSpeedModelV3::CheckModelConstraint(
+void AnticipationVelocityModel::CheckModelConstraint(
     const GenericAgent& agent,
     const NeighborhoodSearchType& neighborhoodSearch,
     const CollisionGeometry& geometry) const
 {
-    const auto& model = std::get<CollisionFreeSpeedModelV3Data>(agent.model);
+    const auto& model = std::get<AnticipationVelocityModelData>(agent.model);
 
     const auto r = model.radius;
     constexpr double rMin = 0.;
@@ -127,7 +127,7 @@ void CollisionFreeSpeedModelV3::CheckModelConstraint(
         if(agent.id == neighbor.id) {
             continue;
         }
-        const auto& neighbor_model = std::get<CollisionFreeSpeedModelV3Data>(neighbor.model);
+        const auto& neighbor_model = std::get<AnticipationVelocityModelData>(neighbor.model);
         const auto contanctdDist = r + neighbor_model.radius;
         const auto distance = (agent.pos - neighbor.pos).Norm();
         if(contanctdDist >= distance) {
@@ -149,29 +149,29 @@ void CollisionFreeSpeedModelV3::CheckModelConstraint(
     }
 }
 
-std::unique_ptr<OperationalModel> CollisionFreeSpeedModelV3::Clone() const
+std::unique_ptr<OperationalModel> AnticipationVelocityModel::Clone() const
 {
-    return std::make_unique<CollisionFreeSpeedModelV3>(*this);
+    return std::make_unique<AnticipationVelocityModel>(*this);
 }
 
-double CollisionFreeSpeedModelV3::OptimalSpeed(
+double AnticipationVelocityModel::OptimalSpeed(
     const GenericAgent& ped,
     double spacing,
     double time_gap) const
 {
-    const auto& model = std::get<CollisionFreeSpeedModelV3Data>(ped.model);
-    double min_spacing = -0.05;
+    const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
+    double min_spacing = -0.1;
     return std::min(std::max(spacing / time_gap, min_spacing
                            ), model.v0);
 }
 
-double CollisionFreeSpeedModelV3::GetSpacing(
+double AnticipationVelocityModel::GetSpacing(
     const GenericAgent& ped1,
     const GenericAgent& ped2,
     const Point& direction) const
 {
-    const auto& model1 = std::get<CollisionFreeSpeedModelV3Data>(ped1.model);
-    const auto& model2 = std::get<CollisionFreeSpeedModelV3Data>(ped2.model);
+    const auto& model1 = std::get<AnticipationVelocityModelData>(ped1.model);
+    const auto& model2 = std::get<AnticipationVelocityModelData>(ped2.model);
     const auto distp12 = ped2.pos - ped1.pos;
     const auto inFront = direction.ScalarProduct(distp12) >= 0;
     if(!inFront) {
@@ -179,30 +179,31 @@ double CollisionFreeSpeedModelV3::GetSpacing(
     }
 
     const auto left = direction.Rotate90Deg();
+    const auto private_space = 0.5; 
     const auto l = model1.radius + model2.radius;
-    //std::cout  << ped1.id.getID() << ": r="<< model1.radius << ", r=" << model2.radius << "\n"; // 
-    //std::cout << ped1.pos.x  << " - "  << ped2.pos.x << "\n";
-    float min_dist = l + 0.5;// TODO
+    
+    float min_dist = l + private_space;// TODO
     bool inCorridor = std::abs(left.ScalarProduct(distp12)) <= l;
     if(!inCorridor) {
         return std::numeric_limits<double>::max();
     }
     return distp12.Norm() - min_dist;
 }
-Point CollisionFreeSpeedModelV3::NeighborRepulsion(
+Point AnticipationVelocityModel::NeighborRepulsion(
     const GenericAgent& ped1,
     const GenericAgent& ped2) const
 {
     const auto distp12 = ped2.pos - ped1.pos;
     const auto [distance, direction] = distp12.NormAndNormalized();
-    const auto& model1 = std::get<CollisionFreeSpeedModelV3Data>(ped1.model);
-    const auto& model2 = std::get<CollisionFreeSpeedModelV3Data>(ped2.model);
+    const auto& model1 = std::get<AnticipationVelocityModelData>(ped1.model);
+    const auto& model2 = std::get<AnticipationVelocityModelData>(ped2.model);
     
     const auto l = model1.radius + model2.radius;
     double seed = 42;
     static std::random_device rd;
     static std::mt19937 gen(seed);
-    std::uniform_real_distribution<> dis(-0.1, 0.1); // Small random values
+    const auto displacement = 0.1;
+    std::uniform_real_distribution<> dis(displacement, displacement); // Small random values
 
     Point randomVec(dis(gen), dis(gen));
 
@@ -216,14 +217,14 @@ Point CollisionFreeSpeedModelV3::NeighborRepulsion(
     //                      exp((l - distance) / model1.rangeNeighborRepulsion));
 }
 
-Point CollisionFreeSpeedModelV3::BoundaryRepulsion(
+Point AnticipationVelocityModel::BoundaryRepulsion(
     const GenericAgent& ped,
     const LineSegment& boundary_segment) const
 {
     const auto pt = boundary_segment.ShortestPoint(ped.pos);
     const auto dist_vec = pt - ped.pos;
     const auto [dist, e_iw] = dist_vec.NormAndNormalized();
-    const auto& model = std::get<CollisionFreeSpeedModelV3Data>(ped.model);
+    const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
     const auto l = model.radius;
     const auto R_iw =
         -model.strengthGeometryRepulsion * exp((l - dist) / model.rangeGeometryRepulsion);

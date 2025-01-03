@@ -91,7 +91,7 @@ JPS_ModelType JPS_Agent_GetModelType(JPS_Agent handle)
         case 2:
             return JPS_CollisionFreeSpeedModelV2;
         case 3:
-            return JPS_CollisionFreeSpeedModelV3;    
+            return JPS_AnticipationVelocityModel;    
         case 4:
             return JPS_SocialForceModel;
     }
@@ -161,14 +161,14 @@ JPS_Agent_GetCollisionFreeSpeedModelV2State(JPS_Agent handle, JPS_ErrorMessage* 
     return nullptr;
 }
 
-JPS_CollisionFreeSpeedModelV3State
-JPS_Agent_GetCollisionFreeSpeedModelV3State(JPS_Agent handle, JPS_ErrorMessage* errorMessage)
+JPS_AnticipationVelocityModelState
+JPS_Agent_GetAnticipationVelocityModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
     const auto agent = reinterpret_cast<GenericAgent*>(handle);
     try {
-        auto& model = std::get<CollisionFreeSpeedModelV3Data>(agent->model);
-        return reinterpret_cast<JPS_CollisionFreeSpeedModelV3State>(&model);
+        auto& model = std::get<AnticipationVelocityModelData>(agent->model);
+        return reinterpret_cast<JPS_AnticipationVelocityModelState>(&model);
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});

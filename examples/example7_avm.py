@@ -32,7 +32,7 @@ def main():
     exit_polygon = Polygon([(24, 4.5), (25, 4.5), (25, 5.5), (24, 5.5)])
     trajectory_file = "example_7.sqlite"
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModelV3(),
+        model=jps.AnticipationVelocityModel(),
         geometry=geometry,
         trajectory_writer=jps.SqliteTrajectoryWriter(
             output_file=pathlib.Path(trajectory_file)
@@ -53,7 +53,7 @@ def main():
 
     for position in start_positions:
         simulation.add_agent(
-            jps.CollisionFreeSpeedModelV3AgentParameters(
+            jps.AnticipationVelocityModelAgentParameters(
                 journey_id=journey_id,
                 stage_id=exit_id,
                 position=position,
@@ -65,7 +65,7 @@ def main():
             )
         )
 
-    while simulation.agent_count() > 0 and simulation.iteration_count() < 2000:
+    while simulation.agent_count() > 0 and simulation.iteration_count() < 3000:
         try:
             simulation.iterate()
         except KeyboardInterrupt:
