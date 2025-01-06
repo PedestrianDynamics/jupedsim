@@ -74,6 +74,8 @@ OperationalModelUpdate AnticipationVelocityModel::ComputeNewPosition(
     if(direction == Point{}) {
         direction = ped.orientation;
     }
+    // update direction towards the newly calculated direction
+    direction = UpdateDirection(ped, direction, dT);
     const auto spacing = std::accumulate(
         std::begin(neighborhood),
         std::end(neighborhood),
@@ -96,6 +98,27 @@ void AnticipationVelocityModel::ApplyUpdate(const OperationalModelUpdate& upd, G
     agent.orientation = update.orientation;
 }
 
+Point AnticipationVelocityModel::UpdateDirection(const GenericAgent& ped, const Point & calculatedDirection, double dt
+) const{
+  const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
+  const Point desiredDirection = (ped.destination - ped.pos).Normalized();
+  Point actualDirection = ped.orientation;
+  Point updatedDirection;
+
+  if(desiredDirection.ScalarProduct(calculatedDirection)*desiredDirection.ScalarProduct(actualDirection) < 0) {
+    updatedDirection = calculatedDirection;
+  }
+  else{
+  // Compute the rate of change of direction (Eq. 7)
+  const Point directionDerivative =
+      (calculatedDirection.Normalized() - actualDirection) / model.reactionTime;
+  updatedDirection = actualDirection + directionDerivative * dt;
+}
+
+  return updatedDirection.Normalized();
+}
+
+
 void AnticipationVelocityModel::CheckModelConstraint(
     const GenericAgent& agent,
     const NeighborhoodSearchType& neighborhoodSearch,
@@ -117,6 +140,8 @@ void AnticipationVelocityModel::CheckModelConstraint(
     constexpr double timeGapMin = 0.1;
     constexpr double timeGapMax = 10.;
     validateConstraint(timeGap, timeGapMin, timeGapMax, "timeGap");
+
+    // TODO: Validate anticipation time and tau 
 
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
     for(const auto& neighbor : neighbors) {
