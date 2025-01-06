@@ -40,4 +40,6 @@ private:
     GetSpacing(const GenericAgent& ped1, const GenericAgent& ped2, const Point& direction) const;
     Point NeighborRepulsion(const GenericAgent& ped1, const GenericAgent& ped2) const;
     Point BoundaryRepulsion(const GenericAgent& ped, const LineSegment& boundary_segment) const;
+    Point UpdateDirection(const GenericAgent& ped, const Point& calculatedDirection, double dt) const;
+
 };
