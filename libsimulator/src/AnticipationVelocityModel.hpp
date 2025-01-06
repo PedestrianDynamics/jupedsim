@@ -33,7 +33,9 @@ public:
     std::unique_ptr<OperationalModel> Clone() const override;
 
 private:
-    double OptimalSpeed(const GenericAgent& ped, double spacing, double time_gap) const;
+    double OptimalSpeed(const GenericAgent& ped, double spacing, double time_gap)
+ const;
+  Point CalculateInfluenceDirection(const Point& desiredDirection, const Point& predictedDirection) const;
     double
     GetSpacing(const GenericAgent& ped1, const GenericAgent& ped2, const Point& direction) const;
     Point NeighborRepulsion(const GenericAgent& ped1, const GenericAgent& ped2) const;

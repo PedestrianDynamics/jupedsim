@@ -9,8 +9,10 @@ struct AnticipationVelocityModelData {
     double rangeNeighborRepulsion{};
     double strengthGeometryRepulsion{};
     double rangeGeometryRepulsion{};
-
-    double timeGap{1};
+    double anticipationTime{1.0}; // t^a
+    double reactionTime{0.3}; // tau
+    Point velocity{}; // v
+    double timeGap{1.06};
     double v0{1.2};
     double radius{0.15};
 };
@@ -27,13 +29,16 @@ struct fmt::formatter<AnticipationVelocityModelData> {
             ctx.out(),
             "AnticipationVelocityModel[strengthNeighborRepulsion={}, "
             "rangeNeighborRepulsion={}, strengthGeometryRepulsion={}, rangeGeometryRepulsion={}, "
-            "timeGap={}, v0={}, radius={}])",
+            "timeGap={}, v0={}, radius={}, reactionTime={}, anticipationTime={}, velocity={}])",
             m.strengthNeighborRepulsion,
             m.rangeNeighborRepulsion,
             m.strengthGeometryRepulsion,
             m.rangeGeometryRepulsion,
             m.timeGap,
             m.v0,
-            m.radius);
+            m.radius,
+            m.reactionTime,
+            m.anticipationTime,
+            m.velocity);
     }
 };

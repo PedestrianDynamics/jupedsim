@@ -169,6 +169,11 @@ Point& Point::operator+=(const Point& p)
     return *this;
 }
 
+Point Point::operator-() const
+{
+    return Point(-x, -y);
+}
+
 const Point operator/(const Point& p, double f)
 {
     static auto constexpr eps =

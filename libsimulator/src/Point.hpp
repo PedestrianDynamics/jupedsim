@@ -63,7 +63,8 @@ public:
     bool operator!=(const Point& p) const;
     /// Assignement
     Point& operator+=(const Point& p);
-
+    /// unary negation operator
+    Point operator-() const;
     bool operator<(const Point& rhs) const;
 
     bool operator>(const Point& rhs) const;
