@@ -141,7 +141,15 @@ void AnticipationVelocityModel::CheckModelConstraint(
     constexpr double timeGapMax = 10.;
     validateConstraint(timeGap, timeGapMin, timeGapMax, "timeGap");
 
-    // TODO: Validate anticipation time and tau 
+    const auto anticipationTime = model.anticipationTime;
+    constexpr double anticipationTimeMin = 0.0;
+    constexpr double anticipationTimeMax = 5.0;
+    validateConstraint(anticipationTime, anticipationTimeMin, anticipationTimeMax, "anticipationTime");
+
+    const auto reactionTime = model.reactionTime;
+    constexpr double reactionTimeMin = 0.05;
+    constexpr double reactionTimeMax = 1.0;
+    validateConstraint(reactionTime, reactionTimeMin, reactionTimeMax, "reactionTime");
 
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
     for(const auto& neighbor : neighbors) {
