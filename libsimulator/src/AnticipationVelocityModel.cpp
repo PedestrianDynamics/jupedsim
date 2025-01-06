@@ -247,14 +247,23 @@ Point AnticipationVelocityModel::NeighborRepulsion(
 
 Point AnticipationVelocityModel::BoundaryRepulsion(
     const GenericAgent& ped,
-    const LineSegment& boundary_segment) const
+    const LineSegment& boundarySegment) const
 {
-    const auto pt = boundary_segment.ShortestPoint(ped.pos);
-    const auto dist_vec = pt - ped.pos;
-    const auto [dist, e_iw] = dist_vec.NormAndNormalized();
+    const auto closestPoint = boundarySegment.ShortestPoint(ped.pos);
+    const auto distanceVector = closestPoint - ped.pos;
+    const auto [dist, directionToBoundary] = distanceVector.NormAndNormalized();
     const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
+    const auto& desiredDirection = (ped.destination - ped.pos).Normalized();
+    double result_e0 = desiredDirection.ScalarProduct(directionToBoundary);
+    double result_ei = ped.destination.ScalarProduct(directionToBoundary);
+
+    // Check if the boundary is behind the pedestrian or the destination is behind the pedestrian
+    if (result_e0 < 0 && result_ei < 0) return Point(0, 0);
+
     const auto l = model.radius;
-    const auto R_iw =
-        -model.strengthGeometryRepulsion * exp((l - dist) / model.rangeGeometryRepulsion);
-    return e_iw * R_iw;
+    const auto boundaryRepulsionStrength =
+      -model.strengthGeometryRepulsion * exp((l - dist) / model.rangeGeometryRepulsion);
+    const auto adjustedDirection = CalculateInfluenceDirection(desiredDirection, directionToBoundary);
+    return adjustedDirection * boundaryRepulsionStrength;
+
 }
