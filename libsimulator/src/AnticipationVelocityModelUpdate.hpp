@@ -5,5 +5,6 @@
 
 struct AnticipationVelocityModelUpdate {
     Point position{};
+    Point velocity{};
     Point orientation{};
 };

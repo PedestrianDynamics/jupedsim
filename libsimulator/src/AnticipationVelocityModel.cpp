@@ -8,7 +8,7 @@
 #include "GeometricFunctions.hpp"
 #include "OperationalModel.hpp"
 #include "SimulationError.hpp"
-
+#include "Macros.hpp"
 #include <algorithm>
 #include <limits>
 #include <memory>
@@ -185,32 +185,64 @@ double AnticipationVelocityModel::GetSpacing(
     }
     return distp12.Norm() - min_dist;
 }
+
+Point AnticipationVelocityModel::CalculateInfluenceDirection(const Point& desiredDirection, const Point& predictedDirection) const
+{
+  // Eq. (5)
+  const double seed = 42;
+  static std::random_device rd;
+  static std::mt19937 gen(seed);
+  static std::uniform_int_distribution<int> dist(0, 1); // Random integers: 0 or 1
+
+  Point orthogonalDirection = Point(-desiredDirection.y, desiredDirection.x).Normalized();
+  double alignment = orthogonalDirection.ScalarProduct(predictedDirection);
+  Point influenceDirection = orthogonalDirection;
+  if (fabs(alignment) < J_EPS) {
+    // Choose a random direction (left or right)
+    if (dist(gen) % 2 == 0) {
+      influenceDirection = -orthogonalDirection;
+    }
+  } else if (alignment > 0) {
+    influenceDirection = -orthogonalDirection;
+  }
+  return influenceDirection;
+}
+
 Point AnticipationVelocityModel::NeighborRepulsion(
     const GenericAgent& ped1,
     const GenericAgent& ped2) const
 {
-    const auto distp12 = ped2.pos - ped1.pos;
-    const auto [distance, direction] = distp12.NormAndNormalized();
     const auto& model1 = std::get<AnticipationVelocityModelData>(ped1.model);
     const auto& model2 = std::get<AnticipationVelocityModelData>(ped2.model);
+
+    const auto distp12 = ped2.pos - ped1.pos;
+    const auto [distance, ep12] = distp12.NormAndNormalized();
+    const double adjustedDist = distance - (model1.radius + model2.radius);
     
-    const auto l = model1.radius + model2.radius;
-    double seed = 42;
-    static std::random_device rd;
-    static std::mt19937 gen(seed);
-    const auto displacement = 0.1;
-    std::uniform_real_distribution<> dis(displacement, displacement); // Small random values
-
-    Point randomVec(dis(gen), dis(gen));
-
-    auto randomizedDirection = (direction + randomVec).Normalized();
-    return randomizedDirection * -(model1.strengthNeighborRepulsion *
-                                     exp((l - distance) / model1.rangeNeighborRepulsion));
-
-
+    // Pedestrian movement and desired directions
+    const auto& e1 = ped1.orientation;
+    const auto& d1 = (ped1.destination - ped1.pos).Normalized();
+    const auto& e2 = ped2.orientation;
     
-    // return direction * -(model1.strengthNeighborRepulsion *
-    //                      exp((l - distance) / model1.rangeNeighborRepulsion));
+    // Check perception range (Eq. 1)
+    const auto inPerceptionRange =  d1.ScalarProduct(ep12) >= 0 || e1.ScalarProduct(ep12) >= 0;
+    if(!inPerceptionRange) return Point(0, 0);
+    
+    double S_Gap = (model1.velocity - model2.velocity).ScalarProduct(ep12) * model1.anticipationTime;
+    double R_dist = adjustedDist - S_Gap;
+    R_dist = std::max(R_dist, 0.0); // Clamp to zero if negative
+
+    // Interaction strength (Eq. 3 & 4)
+    constexpr double alignmentBase = 1.0;
+    constexpr double alignmentWeight = 0.5;
+    const double alignmentFactor = alignmentBase + alignmentWeight * (1.0 - d1.ScalarProduct(e2));
+    const double interactionStrength = model1.strengthNeighborRepulsion * alignmentFactor * std::exp(-R_dist/model1.rangeNeighborRepulsion);
+    auto newep12 = distp12 + model2.velocity*model2.anticipationTime ; //e_ij(t+ta)
+
+    // Compute adjusted influence direction
+    const auto influenceDirection = CalculateInfluenceDirection(d1, newep12);
+    return influenceDirection * interactionStrength;
+
 }
 
 Point AnticipationVelocityModel::BoundaryRepulsion(
