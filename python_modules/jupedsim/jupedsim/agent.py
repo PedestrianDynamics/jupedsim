@@ -108,6 +108,7 @@ class Agent:
     ) -> (
         GeneralizedCentrifugalForceModelState
         | CollisionFreeSpeedModelState
+        | CollisionFreeSpeedModelV2State
         | AnticipationVelocityModelState
         | SocialForceModelState
     ):

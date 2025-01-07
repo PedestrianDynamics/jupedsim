@@ -294,7 +294,7 @@ JPS_AgentId JPS_Simulation_AddAnticipationVelocityModelAgent(
     try {
         if(simulation->ModelType() != OperationalModelType::ANTICIPATION_VELOCITY_MODEL) {
             throw std::runtime_error(
-                "Simulation is not configured to use Anticipation Velocity Model");
+                "Simulation is not configured to use Anticipation Velocity Model.");
         }
         GenericAgent agent(
             GenericAgent::ID::Invalid,
@@ -303,13 +303,16 @@ JPS_AgentId JPS_Simulation_AddAnticipationVelocityModelAgent(
             intoPoint(parameters.position),
             {},
             AnticipationVelocityModelData{
-                parameters.strengthNeighborRepulsion,
-                parameters.rangeNeighborRepulsion,
-                parameters.strengthGeometryRepulsion,
-                parameters.rangeGeometryRepulsion,
-                parameters.time_gap,
-                parameters.v0,
-                parameters.radius});
+                .strengthNeighborRepulsion = parameters.strengthNeighborRepulsion,
+                .rangeNeighborRepulsion = parameters.rangeNeighborRepulsion,
+                .strengthGeometryRepulsion = parameters.strengthGeometryRepulsion,
+                .rangeGeometryRepulsion = parameters.rangeGeometryRepulsion,
+                .anticipationTime = parameters.anticipationTime,
+                .reactionTime = parameters.reactionTime,
+                .velocity = {},
+                .timeGap = parameters.time_gap,
+                .v0 = parameters.v0,
+                .radius = parameters.radius});
         result = simulation->AddAgent(std::move(agent));
     } catch(const std::exception& ex) {
         if(errorMessage) {

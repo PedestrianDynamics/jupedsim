@@ -125,7 +125,6 @@ void AnticipationVelocityModel::CheckModelConstraint(
     const CollisionGeometry& geometry) const
 {
     const auto& model = std::get<AnticipationVelocityModelData>(agent.model);
-
     const auto r = model.radius;
     constexpr double rMin = 0.;
     constexpr double rMax = 2.;

@@ -70,7 +70,7 @@ class AnticipationVelocityModelAgentParameters:
     """
 
     position: tuple[float, float] = (0.0, 0.0)
-    time_gap: float = 1.0
+    time_gap: float = 1.06
     v0: float = 1.2
     radius: float = 0.2
     journey_id: int = 0
