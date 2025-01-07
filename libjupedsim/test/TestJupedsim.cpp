@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "AgentIterator.hpp"
 #include "Point.hpp"
+#include "jupedsim/anticipation_velocity_model.h"
 #include "gtest/gtest.h"
 #include <ErrorMessage.hpp>
 #include <jupedsim/jupedsim.h>
@@ -28,6 +29,17 @@ TEST(OperationalModel, CanConstructCollisionFreeSpeedModel)
     EXPECT_NE(model, nullptr);
     EXPECT_EQ(errorMsg, nullptr);
     JPS_CollisionFreeSpeedModelBuilder_Free(builder);
+    JPS_OperationalModel_Free(model);
+}
+
+TEST(OperationalModel, CanConstructAnticipationVelocityModel)
+{
+    JPS_ErrorMessage errorMsg{};
+    auto builder = JPS_AnticipationVelocityModelBuilder_Create(1, 1, 1, 1);
+    auto model = JPS_AnticipationVelocityModelBuilder_Build(builder, &errorMsg);
+    EXPECT_NE(model, nullptr);
+    EXPECT_EQ(errorMsg, nullptr);
+    JPS_AnticipationVelocityModelBuilder_Free(builder);
     JPS_OperationalModel_Free(model);
 }
 
