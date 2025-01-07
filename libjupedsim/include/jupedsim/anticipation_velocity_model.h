@@ -12,7 +12,7 @@ extern "C" {
 #endif
 
 /**
- * Opaque type for a Anticipation Velocity Model Builder
+ * Opaque type for a Anticipation Velocity Model Builder.
  */
 typedef struct JPS_AnticipationVelocityModelBuilder_t* JPS_AnticipationVelocityModelBuilder;
 
@@ -27,7 +27,7 @@ JUPEDSIM_API JPS_AnticipationVelocityModelBuilder JPS_AnticipationVelocityModelB
  * JPS_AnticipationVelocityModelBuilder.
  * @param handle the builder to operate on
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error
- * @return a JPS_AnticipationVelocityModel or NULL if an error occured.
+ * @return a JPS_AnticipationVelocityModel or NULL if an error occurred.
  */
 JUPEDSIM_API JPS_OperationalModel JPS_AnticipationVelocityModelBuilder_Build(
     JPS_AnticipationVelocityModelBuilder handle,
@@ -78,6 +78,40 @@ JUPEDSIM_API double JPS_AnticipationVelocityModelState_GetRangeNeighborRepulsion
 JUPEDSIM_API void JPS_AnticipationVelocityModelState_SetRangeNeighborRepulsion(
     JPS_AnticipationVelocityModelState handle,
     double rangeNeighborRepulsion);
+
+/**
+ * Read anticipation time of this agent.
+ * @param handle of the Agent to access.
+ * @return anticipation time of this agent
+ */
+JUPEDSIM_API double
+JPS_AnticipationVelocityModelState_GetAnticipationTime(JPS_AnticipationVelocityModelState handle);
+
+/**
+ * Write anticipation time of this agent.
+ * @param handle of the Agent to access.
+ * @param anticipationTime of this agent.
+ */
+JUPEDSIM_API void JPS_AnticipationVelocityModelState_SetAnticipationTime(
+    JPS_AnticipationVelocityModelState handle,
+    double anticipationTime);
+
+/**
+ * Read reaction time of this agent.
+ * @param handle of the Agent to access.
+ * @return reaction time of this agent
+ */
+JUPEDSIM_API double
+JPS_AnticipationVelocityModelState_GetReactionTime(JPS_AnticipationVelocityModelState handle);
+
+/**
+ * Write reaction time of this agent.
+ * @param handle of the Agent to access.
+ * @param reactionTime of this agent.
+ */
+JUPEDSIM_API void JPS_AnticipationVelocityModelState_SetReactionTime(
+    JPS_AnticipationVelocityModelState handle,
+    double reactionTime);
 
 /**
  * Read strength geometry repulsion of this agent.
