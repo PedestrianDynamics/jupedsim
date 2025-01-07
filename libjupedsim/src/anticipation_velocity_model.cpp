@@ -89,6 +89,40 @@ void JPS_AnticipationVelocityModelState_SetRangeNeighborRepulsion(
     state->rangeNeighborRepulsion = rangeNeighborRepulsion;
 }
 
+double JPS_AnticipationVelocityModelState_GetAnticipationTime(
+JPS_AnticipationVelocityModelState handle)
+{
+  assert(handle);
+  const auto state = reinterpret_cast<const AnticipationVelocityModelData*>(handle);
+  return state->anticipationTime;
+}
+
+void JPS_AnticipationVelocityModelState_SetAnticipationTime(
+    JPS_AnticipationVelocityModelState handle,
+    double anticipationTime)
+{
+  assert(handle);
+  auto state = reinterpret_cast<AnticipationVelocityModelData*>(handle);
+  state->anticipationTime = anticipationTime;
+}
+
+double JPS_AnticipationVelocityModelState_GetreactionTime(
+JPS_AnticipationVelocityModelState handle)
+{
+  assert(handle);
+  const auto state = reinterpret_cast<const AnticipationVelocityModelData*>(handle);
+  return state->reactionTime;
+}
+
+void JPS_AnticipationVelocityModelState_SetReactionTime(
+    JPS_AnticipationVelocityModelState handle,
+    double reactionTime)
+{
+  assert(handle);
+  auto state = reinterpret_cast<AnticipationVelocityModelData*>(handle);
+  state->reactionTime = reactionTime;
+}
+
 double JPS_AnticipationVelocityModelState_GetStrengthGeometryRepulsion(
     JPS_AnticipationVelocityModelState handle)
 {
