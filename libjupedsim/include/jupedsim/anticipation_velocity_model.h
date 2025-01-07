@@ -181,22 +181,6 @@ JUPEDSIM_API void JPS_AnticipationVelocityModelState_SetTimeGap(
     double time_gap);
 
 /**
- * Read tau of this agent.
- * @param handle of the Agent to access.
- * @return tau of this agent
- */
-JUPEDSIM_API double
-JPS_AnticipationVelocityModelState_GetTau(JPS_AnticipationVelocityModelState handle);
-
-/**
- * Write tau of this agent.
- * @param handle of the Agent to access.
- * @param tau of this agent.
- */
-JUPEDSIM_API void
-JPS_AnticipationVelocityModelState_SetTau(JPS_AnticipationVelocityModelState handle, double tau);
-
-/**
  * Read v0 of this agent.
  * @param handle of the Agent to access.
  * @return v0 of this agent
@@ -252,11 +236,11 @@ typedef struct JPS_AnticipationVelocityModelAgentParameters {
      */
     double time_gap = 1.;
     /**
-     *@param v0 of the agents using this profile(desired speed) double radius;
+     * @param v0 of the agents using this profile(desired speed) double radius;
      */
     double v0 = 1.2;
     /**
-     *@param radius of the agent in 'meters'
+     * @param radius of the agent in 'meters'
      */
     double radius = 0.2;
 
@@ -279,6 +263,16 @@ typedef struct JPS_AnticipationVelocityModelAgentParameters {
      * Range of the repulsion from geometry boundaries
      */
     double rangeGeometryRepulsion{0.02};
+
+    /**
+     * Anticipation time in seconds
+     */
+    double anticipationTime{1.0};
+
+    /**
+     * Reaction time in seconds
+     */
+    double reactionTime{0.3};
 
 } JPS_AnticipationVelocityModelAgentParameters;
 
