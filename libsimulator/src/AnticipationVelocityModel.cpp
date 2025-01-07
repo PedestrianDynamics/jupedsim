@@ -208,15 +208,12 @@ double AnticipationVelocityModel::GetSpacing(
     }
 
     const auto left = direction.Rotate90Deg();
-    const auto private_space = 0.5; 
     const auto l = model1.radius + model2.radius;
-    
-    float min_dist = l + private_space;// TODO
     bool inCorridor = std::abs(left.ScalarProduct(distp12)) <= l;
     if(!inCorridor) {
         return std::numeric_limits<double>::max();
     }
-    return distp12.Norm() - min_dist;
+    return distp12.Norm() - l;
 }
 
 Point AnticipationVelocityModel::CalculateInfluenceDirection(const Point& desiredDirection, const Point& predictedDirection) const
@@ -282,21 +279,38 @@ Point AnticipationVelocityModel::BoundaryRepulsion(
     const GenericAgent& ped,
     const LineSegment& boundarySegment) const
 {
+    const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
+    const auto& desiredDirection = (ped.destination - ped.pos).Normalized();
+
     const auto closestPoint = boundarySegment.ShortestPoint(ped.pos);
     const auto distanceVector = closestPoint - ped.pos;
     const auto [dist, directionToBoundary] = distanceVector.NormAndNormalized();
-    const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
-    const auto& desiredDirection = (ped.destination - ped.pos).Normalized();
-    double result_e0 = desiredDirection.ScalarProduct(directionToBoundary);
-    double result_ei = ped.destination.ScalarProduct(directionToBoundary);
 
-    // Check if the boundary is behind the pedestrian or the destination is behind the pedestrian
-    if (result_e0 < 0 && result_ei < 0) return Point(0, 0);
+ // Check if the boundary is behind the pedestrian
+    const std::array<Point, 2> boundaryPoints = {boundarySegment.p1, boundarySegment.p2};
+    bool boundaryBehind = true;
+    for (const auto& boundaryPoint : boundaryPoints) {
+        const auto vectorToBoundary = (boundaryPoint - ped.pos).Normalized();
+        const double resultDesired = desiredDirection.ScalarProduct(vectorToBoundary);
+        const double resultDestination = ped.destination.ScalarProduct(vectorToBoundary);
 
+        if (resultDesired >= 0 || resultDestination >= 0) {
+            boundaryBehind = false;
+            break; // Stop checking once a relevant point is found
+        }
+    }
+    if (boundaryBehind) {
+        return Point(0, 0); // No repulsion if the boundary is fully behind
+    }
+
+    // Compute the repulsion force based on distance
     const auto l = model.radius;
     const auto boundaryRepulsionStrength =
-      -model.strengthGeometryRepulsion * exp((l - dist) / model.rangeGeometryRepulsion);
+      -model.strengthGeometryRepulsion * std::exp((l - dist) / model.rangeGeometryRepulsion);
+
+    // Adjust the influence direction
     const auto adjustedDirection = CalculateInfluenceDirection(desiredDirection, directionToBoundary);
+
     return adjustedDirection * boundaryRepulsionStrength;
 
 }
