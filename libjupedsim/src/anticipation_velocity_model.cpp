@@ -106,7 +106,7 @@ void JPS_AnticipationVelocityModelState_SetAnticipationTime(
   state->anticipationTime = anticipationTime;
 }
 
-double JPS_AnticipationVelocityModelState_GetreactionTime(
+double JPS_AnticipationVelocityModelState_GetReactionTime(
 JPS_AnticipationVelocityModelState handle)
 {
   assert(handle);
