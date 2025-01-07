@@ -305,11 +305,10 @@ Point AnticipationVelocityModel::BoundaryRepulsion(
     // Compute the repulsion force based on distance
     const auto l = model.radius;
     const auto boundaryRepulsionStrength =
-      -model.strengthGeometryRepulsion * std::exp((l - dist) / model.rangeGeometryRepulsion);
+      model.strengthGeometryRepulsion * std::exp((l - dist) / model.rangeGeometryRepulsion);
 
     // Adjust the influence direction
     const auto adjustedDirection = CalculateInfluenceDirection(desiredDirection, directionToBoundary);
 
     return adjustedDirection * boundaryRepulsionStrength;
-
 }
