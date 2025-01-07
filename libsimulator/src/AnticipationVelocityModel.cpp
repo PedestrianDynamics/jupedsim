@@ -292,9 +292,9 @@ Point AnticipationVelocityModel::BoundaryRepulsion(
     for (const auto& boundaryPoint : boundaryPoints) {
         const auto vectorToBoundary = (boundaryPoint - ped.pos).Normalized();
         const double resultDesired = desiredDirection.ScalarProduct(vectorToBoundary);
-        const double resultDestination = ped.destination.ScalarProduct(vectorToBoundary);
+        const double resultDirection = ped.orientation.ScalarProduct(vectorToBoundary);
 
-        if (resultDesired >= 0 || resultDestination >= 0) {
+        if (resultDesired >= 0 || resultDirection >= 0) {
             boundaryBehind = false;
             break; // Stop checking once a relevant point is found
         }
