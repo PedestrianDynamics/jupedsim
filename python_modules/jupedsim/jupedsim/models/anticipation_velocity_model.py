@@ -65,6 +65,8 @@ class AnticipationVelocityModelAgentParameters:
         range_neighbor_repulsion: Range of the repulsion from neighbors
         strength_geometry_repulsion: Strength of the repulsion from geometry boundaries
         range_geometry_repulsion: Range of the repulsion from geometry boundaries
+        anticipation_time: Anticipation time of an agent.
+        reaction_time: reaction time of an agent to change its direction.
     """
 
     position: tuple[float, float] = (0.0, 0.0)
@@ -77,6 +79,8 @@ class AnticipationVelocityModelAgentParameters:
     range_neighbor_repulsion: float = 0.1
     strength_geometry_repulsion: float = 5.0
     range_geometry_repulsion: float = 0.02
+    anticipation_time: float = 1.0
+    reaction_time: float = 0.3
 
     def as_native(
         self,
@@ -92,6 +96,8 @@ class AnticipationVelocityModelAgentParameters:
             range_neighbor_repulsion=self.range_neighbor_repulsion,
             strength_geometry_repulsion=self.strength_geometry_repulsion,
             range_geometry_repulsion=self.range_geometry_repulsion,
+            anticipation_time=self.anticipation_time,
+            reaction_time=self.reaction_time,
         )
 
 
@@ -160,3 +166,21 @@ class AnticipationVelocityModelState:
     @range_geometry_repulsion.setter
     def range_geometry_repulsion(self, range_geometry_repulsion):
         self._obj.range_geometry_repulsion = range_geometry_repulsion
+
+    @property
+    def anticipation_time(self) -> float:
+        """Anticipation time of this agent."""
+        return self._obj.anticipation_time
+
+    @anticipation_time.setter
+    def anticipation_time(self, anticipation_time):
+        self._obj.anticipation_time = anticipation_time
+
+    @property
+    def reaction_time(self) -> float:
+        """Reaction time of this agent."""
+        return self._obj.reaction_time
+
+    @reaction_time.setter
+    def reaction_time(self, reaction_time):
+        self._obj.reaction_time = reaction_time
