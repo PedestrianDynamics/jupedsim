@@ -94,8 +94,10 @@ void AnticipationVelocityModel::ApplyUpdate(const OperationalModelUpdate& upd, G
     const
 {
     const auto& update = std::get<AnticipationVelocityModelUpdate>(upd);
+    auto& model = std::get<AnticipationVelocityModelData>(agent.model);
     agent.pos = update.position;
     agent.orientation = update.orientation;
+    model.velocity = update.velocity;
 }
 
 Point AnticipationVelocityModel::UpdateDirection(const GenericAgent& ped, const Point & calculatedDirection, double dt
@@ -256,7 +258,7 @@ Point AnticipationVelocityModel::NeighborRepulsion(
     // Check perception range (Eq. 1)
     const auto inPerceptionRange =  d1.ScalarProduct(ep12) >= 0 || e1.ScalarProduct(ep12) >= 0;
     if(!inPerceptionRange) return Point(0, 0);
-    
+
     double S_Gap = (model1.velocity - model2.velocity).ScalarProduct(ep12) * model1.anticipationTime;
     double R_dist = adjustedDist - S_Gap;
     R_dist = std::max(R_dist, 0.0); // Clamp to zero if negative
