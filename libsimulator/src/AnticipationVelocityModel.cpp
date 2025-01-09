@@ -87,7 +87,8 @@ OperationalModelUpdate AnticipationVelocityModel::ComputeNewPosition(
     const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
     const auto optimal_speed = OptimalSpeed(ped, spacing, model.timeGap);
     const auto velocity = direction * optimal_speed;
-    return AnticipationVelocityModelUpdate{ped.pos + velocity * dT, direction};
+    return AnticipationVelocityModelUpdate{
+        .position = ped.pos + velocity * dT, .velocity = velocity, .orientation = direction};
 };
 
 void AnticipationVelocityModel::ApplyUpdate(const OperationalModelUpdate& upd, GenericAgent& agent)
@@ -190,7 +191,7 @@ double AnticipationVelocityModel::OptimalSpeed(
     double time_gap) const
 {
     const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
-    double min_spacing = -0.1;
+    double min_spacing = 0.0;
     return std::min(std::max(spacing / time_gap, min_spacing
                            ), model.v0);
 }
