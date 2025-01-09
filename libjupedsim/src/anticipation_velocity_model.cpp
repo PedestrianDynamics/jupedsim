@@ -145,16 +145,16 @@ double JPS_AnticipationVelocityModelState_GetRangeGeometryRepulsion(
 {
     assert(handle);
     const auto state = reinterpret_cast<const AnticipationVelocityModelData*>(handle);
-    return state->rangeNeighborRepulsion;
+    return state->rangeGeometryRepulsion;
 }
 
 void JPS_AnticipationVelocityModelState_SetRangeGeometryRepulsion(
     JPS_AnticipationVelocityModelState handle,
-    double rangeNeighborRepulsion)
+    double rangeGeometryRepulsion)
 {
     assert(handle);
     auto state = reinterpret_cast<AnticipationVelocityModelData*>(handle);
-    state->rangeNeighborRepulsion = rangeNeighborRepulsion;
+    state->rangeGeometryRepulsion = rangeGeometryRepulsion;
 }
 
 double JPS_AnticipationVelocityModelState_GetTimeGap(JPS_AnticipationVelocityModelState handle)
