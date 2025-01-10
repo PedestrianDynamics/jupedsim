@@ -61,18 +61,43 @@ OperationalModelUpdate AnticipationVelocityModel::ComputeNewPosition(
             return res + NeighborRepulsion(ped, neighbor);
         });
 
-    const auto boundaryRepulsion = std::accumulate(
-        boundary.cbegin(),
-        boundary.cend(),
-        Point(0, 0),
-        [this, &ped](const auto& acc, const auto& element) {
-            return acc + BoundaryRepulsion(ped, element);
-        });
-
-    const auto desired_direction = (ped.destination - ped.pos).Normalized();
-    auto direction = (desired_direction + neighborRepulsion + boundaryRepulsion).Normalized();
+    const auto desiredDirection = (ped.destination - ped.pos).Normalized();
+    auto direction = (desiredDirection + neighborRepulsion).Normalized();
     if(direction == Point{}) {
         direction = ped.orientation;
+    }
+
+    // Wall sliding behavior
+    const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
+    const double wallBufferDistance = 0.2;
+    const double criticalWallDistance = wallBufferDistance + model.radius; // TODO: Model parameter for boundary effects: wall_buffer_distance
+    auto nearestWallIt = std::min_element(
+                                          boundary.cbegin(),
+                                          boundary.cend(),
+                                          [&ped](const auto& wall1, const auto& wall2) {
+                                            const auto distanceVector1 = ped.pos - wall1.ShortestPoint(ped.pos);
+                                            const auto distanceVector2 = ped.pos - wall2.ShortestPoint(ped.pos);
+                                            return distanceVector1.Norm() < distanceVector2.Norm();
+                                          });
+      if(nearestWallIt != boundary.end()) {
+        const auto closestPoint = nearestWallIt->ShortestPoint(ped.pos);
+        const auto distanceVector = ped.pos - closestPoint;
+        auto [perpendicularDistance, directionAwayFromBoundary] = distanceVector.NormAndNormalized();
+
+        if(perpendicularDistance < criticalWallDistance) {
+            // Agent is too close to wall
+            const auto dotProduct = direction.ScalarProduct(directionAwayFromBoundary);
+            if(dotProduct < 0) {
+              // ... and it is moving towards it
+                // Get wall direction (parallel to wall)
+                const auto wallVector = nearestWallIt->p2 - nearestWallIt->p1;
+                const auto wallDirection = wallVector.Normalized();
+
+                // Project direction onto wall
+                const auto parallelComponent = wallDirection * direction.ScalarProduct(wallDirection);
+                direction = parallelComponent.Normalized();
+            }
+        }
     }
     // update direction towards the newly calculated direction
     direction = UpdateDirection(ped, direction, dT);
@@ -84,7 +109,6 @@ OperationalModelUpdate AnticipationVelocityModel::ComputeNewPosition(
             return std::min(res, GetSpacing(ped, neighbor, direction));
         });
 
-    const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
     const auto optimal_speed = OptimalSpeed(ped, spacing, model.timeGap);
     const auto velocity = direction * optimal_speed;
     return AnticipationVelocityModelUpdate{
@@ -149,7 +173,7 @@ void AnticipationVelocityModel::CheckModelConstraint(
     validateConstraint(anticipationTime, anticipationTimeMin, anticipationTimeMax, "anticipationTime");
 
     const auto reactionTime = model.reactionTime;
-    constexpr double reactionTimeMin = 0.05;
+    constexpr double reactionTimeMin = 0.01;
     constexpr double reactionTimeMax = 1.0;
     validateConstraint(reactionTime, reactionTimeMin, reactionTimeMax, "reactionTime");
 
@@ -221,9 +245,7 @@ double AnticipationVelocityModel::GetSpacing(
 Point AnticipationVelocityModel::CalculateInfluenceDirection(const Point& desiredDirection, const Point& predictedDirection) const
 {
   // Eq. (5)
-  const double seed = 42;
-  static std::random_device rd;
-  static std::mt19937 gen(seed);
+  static std::mt19937 gen(42);
   static std::uniform_int_distribution<int> dist(0, 1); // Random integers: 0 or 1
 
   Point orthogonalDirection = Point(-desiredDirection.y, desiredDirection.x).Normalized();
@@ -231,7 +253,7 @@ Point AnticipationVelocityModel::CalculateInfluenceDirection(const Point& desire
   Point influenceDirection = orthogonalDirection;
   if (fabs(alignment) < J_EPS) {
     // Choose a random direction (left or right)
-    if (dist(gen) % 2 == 0) {
+    if (dist(gen)  == 0) {
       influenceDirection = -orthogonalDirection;
     }
   } else if (alignment > 0) {
