@@ -67,38 +67,16 @@ OperationalModelUpdate AnticipationVelocityModel::ComputeNewPosition(
         direction = ped.orientation;
     }
 
-    // Wall sliding behavior
     const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
-    const double wallBufferDistance = 0.2;
-    const double criticalWallDistance = wallBufferDistance + model.radius; // TODO: Model parameter for boundary effects: wall_buffer_distance
-    auto nearestWallIt = std::min_element(
-                                          boundary.cbegin(),
-                                          boundary.cend(),
-                                          [&ped](const auto& wall1, const auto& wall2) {
-                                            const auto distanceVector1 = ped.pos - wall1.ShortestPoint(ped.pos);
-                                            const auto distanceVector2 = ped.pos - wall2.ShortestPoint(ped.pos);
-                                            return distanceVector1.Norm() < distanceVector2.Norm();
-                                          });
-      if(nearestWallIt != boundary.end()) {
-        const auto closestPoint = nearestWallIt->ShortestPoint(ped.pos);
-        const auto distanceVector = ped.pos - closestPoint;
-        auto [perpendicularDistance, directionAwayFromBoundary] = distanceVector.NormAndNormalized();
+    const double wallBufferDistance = 0.1; // TODO model parameter
+    // Wall sliding behavior
+    direction = HandleWallAvoidance(
+                                    direction,
+                                    ped.pos,
+                                    model.radius,
+                                    boundary,
+                                    wallBufferDistance);
 
-        if(perpendicularDistance < criticalWallDistance) {
-            // Agent is too close to wall
-            const auto dotProduct = direction.ScalarProduct(directionAwayFromBoundary);
-            if(dotProduct < 0) {
-              // ... and it is moving towards it
-                // Get wall direction (parallel to wall)
-                const auto wallVector = nearestWallIt->p2 - nearestWallIt->p1;
-                const auto wallDirection = wallVector.Normalized();
-
-                // Project direction onto wall
-                const auto parallelComponent = wallDirection * direction.ScalarProduct(wallDirection);
-                direction = parallelComponent.Normalized();
-            }
-        }
-    }
     // update direction towards the newly calculated direction
     direction = UpdateDirection(ped, direction, dT);
     const auto spacing = std::accumulate(
@@ -299,41 +277,43 @@ Point AnticipationVelocityModel::NeighborRepulsion(
 
 }
 
-Point AnticipationVelocityModel::BoundaryRepulsion(
-    const GenericAgent& ped,
-    const LineSegment& boundarySegment) const
+
+Point AnticipationVelocityModel::HandleWallAvoidance(
+    const Point& direction,
+    const Point& agentPosition,
+    double agentRadius,
+    const std::vector<LineSegment>& boundary,
+    double wallBufferDistance) const
 {
-    const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
-    const auto& desiredDirection = (ped.destination - ped.pos).Normalized();
+    const double criticalWallDistance = wallBufferDistance + agentRadius;
 
-    const auto closestPoint = boundarySegment.ShortestPoint(ped.pos);
-    const auto distanceVector = closestPoint - ped.pos;
-    const auto [dist, directionToBoundary] = distanceVector.NormAndNormalized();
+    auto nearestWallIt = std::min_element(
+        boundary.cbegin(),
+        boundary.cend(),
+        [&agentPosition](const auto& wall1, const auto& wall2) {
+            const auto distanceVector1 = agentPosition - wall1.ShortestPoint(agentPosition);
+            const auto distanceVector2 = agentPosition - wall2.ShortestPoint(agentPosition);
+            return distanceVector1.Norm() < distanceVector2.Norm();
+        });
 
- // Check if the boundary is behind the pedestrian
-    const std::array<Point, 2> boundaryPoints = {boundarySegment.p1, boundarySegment.p2};
-    bool boundaryBehind = true;
-    for (const auto& boundaryPoint : boundaryPoints) {
-        const auto vectorToBoundary = (boundaryPoint - ped.pos).Normalized();
-        const double resultDesired = desiredDirection.ScalarProduct(vectorToBoundary);
-        const double resultDirection = ped.orientation.ScalarProduct(vectorToBoundary);
+    if(nearestWallIt != boundary.end()) {
+        const auto closestPoint = nearestWallIt->ShortestPoint(agentPosition);
+        const auto distanceVector = agentPosition - closestPoint;
+        auto [perpendicularDistance, directionAwayFromBoundary] = distanceVector.NormAndNormalized();
 
-        if (resultDesired >= 0 || resultDirection >= 0) {
-            boundaryBehind = false;
-            break; // Stop checking once a relevant point is found
+        if(perpendicularDistance < criticalWallDistance) {
+            // Agent is too close to wall
+            const auto dotProduct = direction.ScalarProduct(directionAwayFromBoundary);
+            if(dotProduct < 0) {
+                // Agent is moving towards wall
+                const auto wallVector = nearestWallIt->p2 - nearestWallIt->p1;
+                const auto wallDirection = wallVector.Normalized();
+                // Project direction onto wall
+                const auto parallelComponent = wallDirection * direction.ScalarProduct(wallDirection);
+                return parallelComponent.Normalized();
+            }
         }
     }
-    if (boundaryBehind) {
-        return Point(0, 0); // No repulsion if the boundary is fully behind
-    }
 
-    // Compute the repulsion force based on distance
-    const auto l = model.radius;
-    const auto boundaryRepulsionStrength =
-      model.strengthGeometryRepulsion * std::exp((l - dist) / model.rangeGeometryRepulsion);
-
-    // Adjust the influence direction
-    const auto adjustedDirection = CalculateInfluenceDirection(desiredDirection, directionToBoundary);
-
-    return adjustedDirection * boundaryRepulsionStrength;
+    return direction; // Return original direction if no wall correction needed
 }
