@@ -114,38 +114,21 @@ JUPEDSIM_API void JPS_AnticipationVelocityModelState_SetReactionTime(
     double reactionTime);
 
 /**
- * Read strength geometry repulsion of this agent.
+ * Write wall buffer distance of this agent.
  * @param handle of the Agent to access.
- * @return strength geometry repulsion of this agent
+ * @param wallBufferDistance of this agent.
  */
-JUPEDSIM_API double JPS_AnticipationVelocityModelState_GetStrengthGeometryRepulsion(
-    JPS_AnticipationVelocityModelState handle);
-
-/**
- * Write strength geometry repulsion of this agent.
- * @param handle of the Agent to access.
- * @param strengthGeometryRepulsion of this agent.
- */
-JUPEDSIM_API void JPS_AnticipationVelocityModelState_SetStrengthGeometryRepulsion(
+JUPEDSIM_API void JPS_AnticipationVelocityModelState_SetWallBufferDistance(
     JPS_AnticipationVelocityModelState handle,
-    double strengthGeometryRepulsion);
+    double wallBufferDistance);
 
 /**
- * Read range geometry repulsion of this agent.
+ * Read wall buffer distance of this agent.
  * @param handle of the Agent to access.
- * @return range geometry repulsion of this agent
+ * @return wall buffer distance of this agent
  */
-JUPEDSIM_API double JPS_AnticipationVelocityModelState_GetRangeGeometryRepulsion(
-    JPS_AnticipationVelocityModelState handle);
-
-/**
- * Write strength neighbor repulsion of this agent.
- * @param handle of the Agent to access.
- * @param rangeGeometryRepulsion of this agent.
- */
-JUPEDSIM_API void JPS_AnticipationVelocityModelState_SetRangeGeometryRepulsion(
-    JPS_AnticipationVelocityModelState handle,
-    double rangeGeometryRepulsion);
+JUPEDSIM_API double
+JPS_AnticipationVelocityModelState_GetWallBufferDistance(JPS_AnticipationVelocityModelState handle);
 
 /**
  * Read e0 of this agent.
@@ -255,14 +238,9 @@ typedef struct JPS_AnticipationVelocityModelAgentParameters {
     double rangeNeighborRepulsion{0.1};
 
     /**
-     * Strength of the repulsion from geometry boundaries
+     * Wall buffer distance to geometry boundaries
      */
-    double strengthGeometryRepulsion{5.0};
-
-    /**
-     * Range of the repulsion from geometry boundaries
-     */
-    double rangeGeometryRepulsion{0.02};
+    double wallBufferDistance{0.1};
 
     /**
      * Anticipation time in seconds

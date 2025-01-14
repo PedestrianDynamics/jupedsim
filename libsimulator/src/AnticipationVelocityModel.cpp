@@ -68,7 +68,7 @@ OperationalModelUpdate AnticipationVelocityModel::ComputeNewPosition(
     }
 
     const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
-    const double wallBufferDistance = 0.1; // TODO model parameter
+    const double wallBufferDistance = model.wallBufferDistance;
     // Wall sliding behavior
     direction = HandleWallAvoidance(
                                     direction,
@@ -134,6 +134,11 @@ void AnticipationVelocityModel::CheckModelConstraint(
     constexpr double rMin = 0.;
     constexpr double rMax = 2.;
     validateConstraint(r, rMin, rMax, "radius", true);
+
+    const auto buff = model.wallBufferDistance;
+    constexpr double buffMin = 0.;
+    constexpr double buffMax = 1.;
+    validateConstraint(buff, buffMin, buffMax, "wallBufferDistance");
 
     const auto v0 = model.v0;
     constexpr double v0Min = 0.;
