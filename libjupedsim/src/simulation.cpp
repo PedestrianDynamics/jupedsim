@@ -305,8 +305,7 @@ JPS_AgentId JPS_Simulation_AddAnticipationVelocityModelAgent(
             AnticipationVelocityModelData{
                 .strengthNeighborRepulsion = parameters.strengthNeighborRepulsion,
                 .rangeNeighborRepulsion = parameters.rangeNeighborRepulsion,
-                .strengthGeometryRepulsion = parameters.strengthGeometryRepulsion,
-                .rangeGeometryRepulsion = parameters.rangeGeometryRepulsion,
+                .wallBufferDistance = parameters.wallBufferDistance,
                 .anticipationTime = parameters.anticipationTime,
                 .reactionTime = parameters.reactionTime,
                 .velocity = {},

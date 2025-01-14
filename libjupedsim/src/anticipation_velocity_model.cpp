@@ -123,38 +123,22 @@ void JPS_AnticipationVelocityModelState_SetReactionTime(
   state->reactionTime = reactionTime;
 }
 
-double JPS_AnticipationVelocityModelState_GetStrengthGeometryRepulsion(
+double JPS_AnticipationVelocityModelState_GetWallBufferDistance(
     JPS_AnticipationVelocityModelState handle)
 {
     assert(handle);
     const auto state = reinterpret_cast<const AnticipationVelocityModelData*>(handle);
-    return state->strengthGeometryRepulsion;
+    return state->wallBufferDistance;
 }
 
-void JPS_AnticipationVelocityModelState_SetStrengthGeometryRepulsion(
+
+void JPS_AnticipationVelocityModelState_SetWallBufferDistance(
     JPS_AnticipationVelocityModelState handle,
-    double strengthGeometryRepulsion)
+    double wallBufferDistance)
 {
     assert(handle);
     auto state = reinterpret_cast<AnticipationVelocityModelData*>(handle);
-    state->strengthGeometryRepulsion = strengthGeometryRepulsion;
-}
-
-double JPS_AnticipationVelocityModelState_GetRangeGeometryRepulsion(
-    JPS_AnticipationVelocityModelState handle)
-{
-    assert(handle);
-    const auto state = reinterpret_cast<const AnticipationVelocityModelData*>(handle);
-    return state->rangeGeometryRepulsion;
-}
-
-void JPS_AnticipationVelocityModelState_SetRangeGeometryRepulsion(
-    JPS_AnticipationVelocityModelState handle,
-    double rangeGeometryRepulsion)
-{
-    assert(handle);
-    auto state = reinterpret_cast<AnticipationVelocityModelData*>(handle);
-    state->rangeGeometryRepulsion = rangeGeometryRepulsion;
+    state->wallBufferDistance = wallBufferDistance;
 }
 
 double JPS_AnticipationVelocityModelState_GetTimeGap(JPS_AnticipationVelocityModelState handle)

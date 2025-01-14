@@ -63,8 +63,7 @@ class AnticipationVelocityModelAgentParameters:
         stage_id: Id of the stage the agent targets.
         strength_neighbor_repulsion: Strength of the repulsion from neighbors
         range_neighbor_repulsion: Range of the repulsion from neighbors
-        strength_geometry_repulsion: Strength of the repulsion from geometry boundaries
-        range_geometry_repulsion: Range of the repulsion from geometry boundaries
+        wall_buffer_distance: Buffer distance of agents to the walls.
         anticipation_time: Anticipation time of an agent.
         reaction_time: reaction time of an agent to change its direction.
     """
@@ -77,8 +76,7 @@ class AnticipationVelocityModelAgentParameters:
     stage_id: int = 0
     strength_neighbor_repulsion: float = 8.0
     range_neighbor_repulsion: float = 0.1
-    strength_geometry_repulsion: float = 5.0
-    range_geometry_repulsion: float = 0.02
+    wall_buffer_distance: float = 0.1
     anticipation_time: float = 1.0
     reaction_time: float = 0.3
 
@@ -94,8 +92,7 @@ class AnticipationVelocityModelAgentParameters:
             stage_id=self.stage_id,
             strength_neighbor_repulsion=self.strength_neighbor_repulsion,
             range_neighbor_repulsion=self.range_neighbor_repulsion,
-            strength_geometry_repulsion=self.strength_geometry_repulsion,
-            range_geometry_repulsion=self.range_geometry_repulsion,
+            wall_buffer_distance=self.wall_buffer_distance,
             anticipation_time=self.anticipation_time,
             reaction_time=self.reaction_time,
         )
@@ -150,22 +147,13 @@ class AnticipationVelocityModelState:
         self._obj.range_neighbor_repulsion = range_neighbor_repulsion
 
     @property
-    def strength_geometry_repulsion(self) -> float:
-        """Strength of the repulsion from geometry boundaries of this agent."""
-        return self._obj.strength_geometry_repulsion
+    def wall_buffer_distance(self):
+        """Wall buffer distance of agent to walls."""
+        return self._obj.wall_buffer_distance
 
-    @strength_geometry_repulsion.setter
-    def strength_geometry_repulsion(self, strength_geometry_repulsion):
-        self._obj.strength_geometry_repulsion = strength_geometry_repulsion
-
-    @property
-    def range_geometry_repulsion(self) -> float:
-        """Range of the repulsion from geometry boundaries of this agent."""
-        return self._obj.range_geometry_repulsion
-
-    @range_geometry_repulsion.setter
-    def range_geometry_repulsion(self, range_geometry_repulsion):
-        self._obj.range_geometry_repulsion = range_geometry_repulsion
+    @wall_buffer_distance.setter
+    def wall_buffer_distance(self, wall_buffer_distance):
+        self._obj.wall_buffer_distance = wall_buffer_distance
 
     @property
     def anticipation_time(self) -> float:

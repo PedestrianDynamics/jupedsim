@@ -26,8 +26,7 @@ void init_anticipation_velocity_model(py::module_& m)
                         JPS_StageId stage_id,
                         double strengthNeighborRepulsion,
                         double rangeNeighborRepulsion,
-                        double strengthGeometryRepulsion,
-                        double rangeGeometryRepulsion,
+                        double wallBufferDistance,
                         double anticipationTime,
                         double reactionTime) {
                 return JPS_AnticipationVelocityModelAgentParameters{
@@ -39,8 +38,7 @@ void init_anticipation_velocity_model(py::module_& m)
                     radius,
                     strengthNeighborRepulsion,
                     rangeNeighborRepulsion,
-                    strengthGeometryRepulsion,
-                    rangeGeometryRepulsion,
+                    wallBufferDistance,
                     anticipationTime,
                     reactionTime};
             }),
@@ -53,8 +51,7 @@ void init_anticipation_velocity_model(py::module_& m)
             py::arg("stage_id"),
             py::arg("strength_neighbor_repulsion"),
             py::arg("range_neighbor_repulsion"),
-            py::arg("strength_geometry_repulsion"),
-            py::arg("range_geometry_repulsion"),
+            py::arg("wall_buffer_distance"),
             py::arg("anticipation_time"),
             py::arg("reaction_time"))
         .def("__repr__", [](const JPS_AnticipationVelocityModelAgentParameters& p) {
@@ -62,7 +59,7 @@ void init_anticipation_velocity_model(py::module_& m)
                 "position: {}, journey_id: {}, stage_id: {}, "
                 "time_gap: {}, v0: {}, radius: {}",
                 "strength_neighbor_repulsion: {}, range_neighbor_repulsion: {}"
-                "strength_geometry_repulsion: {}, range_geometry_repulsion: {}"
+                "wall_buffer_distance: {}"
                 "anticipation_time: {}, reaction_time: {}",
                 intoTuple(p.position),
                 p.journeyId,
@@ -72,8 +69,7 @@ void init_anticipation_velocity_model(py::module_& m)
                 p.radius,
                 p.strengthNeighborRepulsion,
                 p.rangeNeighborRepulsion,
-                p.strengthGeometryRepulsion,
-                p.rangeGeometryRepulsion,
+                p.wallBufferDistance,
                 p.anticipationTime,
                 p.reactionTime);
         });
@@ -136,22 +132,13 @@ void init_anticipation_velocity_model(py::module_& m)
                     w.handle, rangeNeighborRepulsion);
             })
         .def_property(
-            "strength_geometry_repulsion",
+            "wall_buffer_distance",
             [](const JPS_AnticipationVelocityModelState_Wrapper& w) {
-                return JPS_AnticipationVelocityModelState_GetStrengthGeometryRepulsion(w.handle);
+                return JPS_AnticipationVelocityModelState_GetWallBufferDistance(w.handle);
             },
-            [](JPS_AnticipationVelocityModelState_Wrapper& w, double strengthGeometryRepulsion) {
-                JPS_AnticipationVelocityModelState_SetStrengthGeometryRepulsion(
-                    w.handle, strengthGeometryRepulsion);
-            })
-        .def_property(
-            "range_geometry_repulsion",
-            [](const JPS_AnticipationVelocityModelState_Wrapper& w) {
-                return JPS_AnticipationVelocityModelState_GetRangeGeometryRepulsion(w.handle);
-            },
-            [](JPS_AnticipationVelocityModelState_Wrapper& w, double rangeGeometryRepulsion) {
-                JPS_AnticipationVelocityModelState_SetRangeGeometryRepulsion(
-                    w.handle, rangeGeometryRepulsion);
+            [](JPS_AnticipationVelocityModelState_Wrapper& w, double wallBufferDistance) {
+                JPS_AnticipationVelocityModelState_SetWallBufferDistance(
+                    w.handle, wallBufferDistance);
             })
         .def_property(
             "anticipation_time",
