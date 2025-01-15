@@ -224,7 +224,7 @@ add_subdirectory(python_bindings_jupedsim)
 # Code formatting
 ################################################################################
 if(UNIX AND WITH_FORMAT)
-    set(clang-format-version 19)
+    set(clang-format-version 18)
     find_program(CLANG_FORMAT
         NAMES
             clang-format-${clang-format-version}
