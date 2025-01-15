@@ -1,23 +1,23 @@
 // Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "AnticipationVelocityModel.hpp"
-#include <random> 
 #include "AnticipationVelocityModelData.hpp"
 #include "AnticipationVelocityModelUpdate.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
+#include "Macros.hpp"
 #include "OperationalModel.hpp"
 #include "SimulationError.hpp"
-#include "Macros.hpp"
 #include <algorithm>
 #include <limits>
 #include <memory>
 #include <numeric>
+#include <random>
 #include <vector>
 
 OperationalModelType AnticipationVelocityModel::Type() const
 {
-  return OperationalModelType::ANTICIPATION_VELOCITY_MODEL;
+    return OperationalModelType::ANTICIPATION_VELOCITY_MODEL;
 }
 
 OperationalModelUpdate AnticipationVelocityModel::ComputeNewPosition(
@@ -70,12 +70,7 @@ OperationalModelUpdate AnticipationVelocityModel::ComputeNewPosition(
     const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
     const double wallBufferDistance = model.wallBufferDistance;
     // Wall sliding behavior
-    direction = HandleWallAvoidance(
-                                    direction,
-                                    ped.pos,
-                                    model.radius,
-                                    boundary,
-                                    wallBufferDistance);
+    direction = HandleWallAvoidance(direction, ped.pos, model.radius, boundary, wallBufferDistance);
 
     // update direction towards the newly calculated direction
     direction = UpdateDirection(ped, direction, dT);
@@ -103,27 +98,29 @@ void AnticipationVelocityModel::ApplyUpdate(const OperationalModelUpdate& upd, G
     model.velocity = update.velocity;
 }
 
-Point AnticipationVelocityModel::UpdateDirection(const GenericAgent& ped, const Point & calculatedDirection, double dt
-) const{
-  const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
-  const Point desiredDirection = (ped.destination - ped.pos).Normalized();
-  Point actualDirection = ped.orientation;
-  Point updatedDirection;
+Point AnticipationVelocityModel::UpdateDirection(
+    const GenericAgent& ped,
+    const Point& calculatedDirection,
+    double dt) const
+{
+    const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
+    const Point desiredDirection = (ped.destination - ped.pos).Normalized();
+    Point actualDirection = ped.orientation;
+    Point updatedDirection;
 
-  if(desiredDirection.ScalarProduct(calculatedDirection)*desiredDirection.ScalarProduct(actualDirection) < 0) {
-    updatedDirection = calculatedDirection;
-  }
-  else{
-  // Compute the rate of change of direction (Eq. 7)
-  const Point directionDerivative =
-      (calculatedDirection.Normalized() - actualDirection) / model.reactionTime;
-  updatedDirection = actualDirection + directionDerivative * dt;
+    if(desiredDirection.ScalarProduct(calculatedDirection) *
+           desiredDirection.ScalarProduct(actualDirection) <
+       0) {
+        updatedDirection = calculatedDirection;
+    } else {
+        // Compute the rate of change of direction (Eq. 7)
+        const Point directionDerivative =
+            (calculatedDirection.Normalized() - actualDirection) / model.reactionTime;
+        updatedDirection = actualDirection + directionDerivative * dt;
+    }
+
+    return updatedDirection.Normalized();
 }
-
-
-  return updatedDirection.Normalized();
-}
-
 
 void AnticipationVelocityModel::CheckModelConstraint(
     const GenericAgent& agent,
@@ -141,12 +138,10 @@ void AnticipationVelocityModel::CheckModelConstraint(
     constexpr double snMax = 20.;
     validateConstraint(strengthNeighborRepulsion, snMin, snMax, "strengthNeighborRepulsion", false);
 
-
     const auto rangeNeighborRepulsion = model.rangeNeighborRepulsion;
     constexpr double rnMin = 0.;
     constexpr double rnMax = 5.;
     validateConstraint(rangeNeighborRepulsion, rnMin, rnMax, "rangeNeighborRepulsion", true);
-
 
     const auto buff = model.wallBufferDistance;
     constexpr double buffMin = 0.;
@@ -166,13 +161,13 @@ void AnticipationVelocityModel::CheckModelConstraint(
     const auto anticipationTime = model.anticipationTime;
     constexpr double anticipationTimeMin = 0.0;
     constexpr double anticipationTimeMax = 5.0;
-    validateConstraint(anticipationTime, anticipationTimeMin, anticipationTimeMax, "anticipationTime");
+    validateConstraint(
+        anticipationTime, anticipationTimeMin, anticipationTimeMax, "anticipationTime");
 
     const auto reactionTime = model.reactionTime;
     constexpr double reactionTimeMin = 0.0;
     constexpr double reactionTimeMax = 1.0;
     validateConstraint(reactionTime, reactionTimeMin, reactionTimeMax, "reactionTime", true);
-
 
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
     for(const auto& neighbor : neighbors) {
@@ -213,8 +208,7 @@ double AnticipationVelocityModel::OptimalSpeed(
 {
     const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
     double min_spacing = 0.0;
-    return std::min(std::max(spacing / time_gap, min_spacing
-                           ), model.v0);
+    return std::min(std::max(spacing / time_gap, min_spacing), model.v0);
 }
 
 double AnticipationVelocityModel::GetSpacing(
@@ -239,24 +233,26 @@ double AnticipationVelocityModel::GetSpacing(
     return distp12.Norm() - l;
 }
 
-Point AnticipationVelocityModel::CalculateInfluenceDirection(const Point& desiredDirection, const Point& predictedDirection) const
+Point AnticipationVelocityModel::CalculateInfluenceDirection(
+    const Point& desiredDirection,
+    const Point& predictedDirection) const
 {
-  // Eq. (5)
-  static std::mt19937 gen(42);
-  static std::uniform_int_distribution<int> dist(0, 1); // Random integers: 0 or 1
+    // Eq. (5)
+    static std::mt19937 gen(42);
+    static std::uniform_int_distribution<int> dist(0, 1); // Random integers: 0 or 1
 
-  Point orthogonalDirection = Point(-desiredDirection.y, desiredDirection.x).Normalized();
-  double alignment = orthogonalDirection.ScalarProduct(predictedDirection);
-  Point influenceDirection = orthogonalDirection;
-  if (fabs(alignment) < J_EPS) {
-    // Choose a random direction (left or right)
-    if (dist(gen)  == 0) {
-      influenceDirection = -orthogonalDirection;
+    Point orthogonalDirection = Point(-desiredDirection.y, desiredDirection.x).Normalized();
+    double alignment = orthogonalDirection.ScalarProduct(predictedDirection);
+    Point influenceDirection = orthogonalDirection;
+    if(fabs(alignment) < J_EPS) {
+        // Choose a random direction (left or right)
+        if(dist(gen) == 0) {
+            influenceDirection = -orthogonalDirection;
+        }
+    } else if(alignment > 0) {
+        influenceDirection = -orthogonalDirection;
     }
-  } else if (alignment > 0) {
-    influenceDirection = -orthogonalDirection;
-  }
-  return influenceDirection;
+    return influenceDirection;
 }
 
 Point AnticipationVelocityModel::NeighborRepulsion(
@@ -269,17 +265,19 @@ Point AnticipationVelocityModel::NeighborRepulsion(
     const auto distp12 = ped2.pos - ped1.pos;
     const auto [distance, ep12] = distp12.NormAndNormalized();
     const double adjustedDist = distance - (model1.radius + model2.radius);
-    
+
     // Pedestrian movement and desired directions
     const auto& e1 = ped1.orientation;
     const auto& d1 = (ped1.destination - ped1.pos).Normalized();
     const auto& e2 = ped2.orientation;
-    
-    // Check perception range (Eq. 1)
-    const auto inPerceptionRange =  d1.ScalarProduct(ep12) >= 0 || e1.ScalarProduct(ep12) >= 0;
-    if(!inPerceptionRange) return Point(0, 0);
 
-    double S_Gap = (model1.velocity - model2.velocity).ScalarProduct(ep12) * model1.anticipationTime;
+    // Check perception range (Eq. 1)
+    const auto inPerceptionRange = d1.ScalarProduct(ep12) >= 0 || e1.ScalarProduct(ep12) >= 0;
+    if(!inPerceptionRange)
+        return Point(0, 0);
+
+    double S_Gap =
+        (model1.velocity - model2.velocity).ScalarProduct(ep12) * model1.anticipationTime;
     double R_dist = adjustedDist - S_Gap;
     R_dist = std::max(R_dist, 0.0); // Clamp to zero if negative
 
@@ -287,15 +285,14 @@ Point AnticipationVelocityModel::NeighborRepulsion(
     constexpr double alignmentBase = 1.0;
     constexpr double alignmentWeight = 0.5;
     const double alignmentFactor = alignmentBase + alignmentWeight * (1.0 - d1.ScalarProduct(e2));
-    const double interactionStrength = model1.strengthNeighborRepulsion * alignmentFactor * std::exp(-R_dist/model1.rangeNeighborRepulsion);
-    auto newep12 = distp12 + model2.velocity*model2.anticipationTime ; //e_ij(t+ta)
+    const double interactionStrength = model1.strengthNeighborRepulsion * alignmentFactor *
+                                       std::exp(-R_dist / model1.rangeNeighborRepulsion);
+    auto newep12 = distp12 + model2.velocity * model2.anticipationTime; // e_ij(t+ta)
 
     // Compute adjusted influence direction
     const auto influenceDirection = CalculateInfluenceDirection(d1, newep12);
     return influenceDirection * interactionStrength;
-
 }
-
 
 Point AnticipationVelocityModel::HandleWallAvoidance(
     const Point& direction,
@@ -307,9 +304,7 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
     const double criticalWallDistance = wallBufferDistance + agentRadius;
 
     auto nearestWallIt = std::min_element(
-        boundary.cbegin(),
-        boundary.cend(),
-        [&agentPosition](const auto& wall1, const auto& wall2) {
+        boundary.cbegin(), boundary.cend(), [&agentPosition](const auto& wall1, const auto& wall2) {
             const auto distanceVector1 = agentPosition - wall1.ShortestPoint(agentPosition);
             const auto distanceVector2 = agentPosition - wall2.ShortestPoint(agentPosition);
             return distanceVector1.Norm() < distanceVector2.Norm();
@@ -318,7 +313,8 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
     if(nearestWallIt != boundary.end()) {
         const auto closestPoint = nearestWallIt->ShortestPoint(agentPosition);
         const auto distanceVector = agentPosition - closestPoint;
-        auto [perpendicularDistance, directionAwayFromBoundary] = distanceVector.NormAndNormalized();
+        auto [perpendicularDistance, directionAwayFromBoundary] =
+            distanceVector.NormAndNormalized();
 
         if(perpendicularDistance < criticalWallDistance) {
             // Agent is too close to wall
@@ -328,7 +324,8 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
                 const auto wallVector = nearestWallIt->p2 - nearestWallIt->p1;
                 const auto wallDirection = wallVector.Normalized();
                 // Project direction onto wall
-                const auto parallelComponent = wallDirection * direction.ScalarProduct(wallDirection);
+                const auto parallelComponent =
+                    wallDirection * direction.ScalarProduct(wallDirection);
                 return parallelComponent.Normalized();
             }
         }
