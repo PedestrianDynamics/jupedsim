@@ -2,9 +2,9 @@
 /* SPDX-License-Identifier: LGPL-3.0-or-later */
 #pragma once
 
+#include "anticipation_velocity_model.h"
 #include "collision_free_speed_model.h"
 #include "collision_free_speed_model_v2.h"
-#include "anticipation_velocity_model.h"
 #include "error.h"
 #include "export.h"
 #include "generalized_centrifugal_force_model.h"
@@ -127,7 +127,6 @@ JPS_Agent_GetCollisionFreeSpeedModelV2State(JPS_Agent handle, JPS_ErrorMessage* 
 JUPEDSIM_API JPS_AnticipationVelocityModelState
 JPS_Agent_GetAnticipationVelocityModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
 
-  
 /**
  * Opaque type of an iterator over agents
  */

@@ -3,9 +3,9 @@
 #pragma once
 
 #include "agent.h"
+#include "anticipation_velocity_model.h"
 #include "collision_free_speed_model.h"
 #include "collision_free_speed_model_v2.h"
-#include "anticipation_velocity_model.h"
 #include "error.h"
 #include "export.h"
 #include "generalized_centrifugal_force_model.h"
@@ -205,7 +205,6 @@ JUPEDSIM_API JPS_AgentId JPS_Simulation_AddAnticipationVelocityModelAgent(
     JPS_AnticipationVelocityModelAgentParameters parameters,
     JPS_ErrorMessage* errorMessage);
 
-  
 /**
  * Adds a new agent to the simulation.
  * This can be called at any time, i.e. agents can be added at any iteration.
