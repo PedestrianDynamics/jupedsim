@@ -32,17 +32,6 @@ TEST(OperationalModel, CanConstructCollisionFreeSpeedModel)
     JPS_OperationalModel_Free(model);
 }
 
-TEST(OperationalModel, CanConstructAnticipationVelocityModel)
-{
-    JPS_ErrorMessage errorMsg{};
-    auto builder = JPS_AnticipationVelocityModelBuilder_Create(1, 1, 1, 1);
-    auto model = JPS_AnticipationVelocityModelBuilder_Build(builder, &errorMsg);
-    EXPECT_NE(model, nullptr);
-    EXPECT_EQ(errorMsg, nullptr);
-    JPS_AnticipationVelocityModelBuilder_Free(builder);
-    JPS_OperationalModel_Free(model);
-}
-
 TEST(OperationalModel, DefaultsOfCollisionFreeSpeedModelAgentParameters)
 {
     JPS_CollisionFreeSpeedModelAgentParameters agentParameters{};
@@ -54,6 +43,33 @@ TEST(OperationalModel, DefaultsOfCollisionFreeSpeedModelAgentParameters)
     ASSERT_DOUBLE_EQ(agentParameters.time_gap, 1);
     ASSERT_DOUBLE_EQ(agentParameters.v0, 1.2);
     ASSERT_DOUBLE_EQ(agentParameters.radius, 0.2);
+}
+
+TEST(OperationalModel, CanConstructAnticipationVelocityModel)
+{
+    JPS_ErrorMessage errorMsg{};
+    auto builder = JPS_AnticipationVelocityModelBuilder_Create();
+    auto model = JPS_AnticipationVelocityModelBuilder_Build(builder, &errorMsg);
+    EXPECT_NE(model, nullptr);
+    EXPECT_EQ(errorMsg, nullptr);
+    JPS_AnticipationVelocityModelBuilder_Free(builder);
+    JPS_OperationalModel_Free(model);
+}
+
+TEST(OperationalModel, DefaultsOfAnticipationVelocityModelAgentParameters)
+{
+    JPS_AnticipationVelocityModelAgentParameters agentParameters{};
+
+    ASSERT_DOUBLE_EQ(agentParameters.position.x, 0);
+    ASSERT_DOUBLE_EQ(agentParameters.position.y, 0);
+    ASSERT_DOUBLE_EQ(agentParameters.journeyId, 0);
+    ASSERT_DOUBLE_EQ(agentParameters.stageId, 0);
+    ASSERT_DOUBLE_EQ(agentParameters.time_gap, 1.06);
+    ASSERT_DOUBLE_EQ(agentParameters.v0, 1.2);
+    ASSERT_DOUBLE_EQ(agentParameters.radius, 0.15);
+    ASSERT_DOUBLE_EQ(agentParameters.anticipationTime, 1.0);
+    ASSERT_DOUBLE_EQ(agentParameters.reactionTime, 0.3);
+    ASSERT_DOUBLE_EQ(agentParameters.wallBufferDistance, 0.1);
 }
 
 TEST(OperationalModel, CanConstructGeneralizedCentrifugalForceModel)

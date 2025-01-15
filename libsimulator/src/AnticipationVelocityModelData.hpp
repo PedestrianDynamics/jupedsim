@@ -7,7 +7,7 @@
 struct AnticipationVelocityModelData {
     double strengthNeighborRepulsion{};
     double rangeNeighborRepulsion{};
-    double wallBufferDistance{}; // buff distance of agent to wall
+    double wallBufferDistance{0.1}; // buff distance of agent to wall
     double anticipationTime{1.0}; // anticipation time
     double reactionTime{0.3}; // reaction time to update direction
     Point velocity{};
