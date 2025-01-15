@@ -120,6 +120,7 @@ Point AnticipationVelocityModel::UpdateDirection(const GenericAgent& ped, const 
   updatedDirection = actualDirection + directionDerivative * dt;
 }
 
+
   return updatedDirection.Normalized();
 }
 
@@ -135,10 +136,22 @@ void AnticipationVelocityModel::CheckModelConstraint(
     constexpr double rMax = 2.;
     validateConstraint(r, rMin, rMax, "radius", true);
 
+    const auto strengthNeighborRepulsion = model.strengthNeighborRepulsion;
+    constexpr double snMin = 0.;
+    constexpr double snMax = 20.;
+    validateConstraint(strengthNeighborRepulsion, snMin, snMax, "strengthNeighborRepulsion", false);
+
+
+    const auto rangeNeighborRepulsion = model.rangeNeighborRepulsion;
+    constexpr double rnMin = 0.;
+    constexpr double rnMax = 5.;
+    validateConstraint(rangeNeighborRepulsion, rnMin, rnMax, "rangeNeighborRepulsion", true);
+
+
     const auto buff = model.wallBufferDistance;
     constexpr double buffMin = 0.;
     constexpr double buffMax = 1.;
-    validateConstraint(buff, buffMin, buffMax, "wallBufferDistance");
+    validateConstraint(buff, buffMin, buffMax, "wallBufferDistance", false);
 
     const auto v0 = model.v0;
     constexpr double v0Min = 0.;
@@ -146,9 +159,9 @@ void AnticipationVelocityModel::CheckModelConstraint(
     validateConstraint(v0, v0Min, v0Max, "v0");
 
     const auto timeGap = model.timeGap;
-    constexpr double timeGapMin = 0.1;
+    constexpr double timeGapMin = 0.;
     constexpr double timeGapMax = 10.;
-    validateConstraint(timeGap, timeGapMin, timeGapMax, "timeGap");
+    validateConstraint(timeGap, timeGapMin, timeGapMax, "timeGap", true);
 
     const auto anticipationTime = model.anticipationTime;
     constexpr double anticipationTimeMin = 0.0;
@@ -156,9 +169,10 @@ void AnticipationVelocityModel::CheckModelConstraint(
     validateConstraint(anticipationTime, anticipationTimeMin, anticipationTimeMax, "anticipationTime");
 
     const auto reactionTime = model.reactionTime;
-    constexpr double reactionTimeMin = 0.01;
+    constexpr double reactionTimeMin = 0.0;
     constexpr double reactionTimeMax = 1.0;
-    validateConstraint(reactionTime, reactionTimeMin, reactionTimeMax, "reactionTime");
+    validateConstraint(reactionTime, reactionTimeMin, reactionTimeMax, "reactionTime", true);
+
 
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
     for(const auto& neighbor : neighbors) {
