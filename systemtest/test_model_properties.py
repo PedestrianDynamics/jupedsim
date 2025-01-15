@@ -120,11 +120,14 @@ def test_set_model_parameters_anticipation_velocity_model(
     sim.agent(agent_id).model.range_neighbor_repulsion = 6.0
     assert sim.agent(agent_id).model.range_neighbor_repulsion == 6.0
 
-    sim.agent(agent_id).model.range_geometry_repulsion = 7.0
-    assert sim.agent(agent_id).model.range_geometry_repulsion == 7.0
+    sim.agent(agent_id).model.wall_buffer_distance = 1.1
+    assert sim.agent(agent_id).model.wall_buffer_distance == 1.1
 
-    sim.agent(agent_id).model.range_geometry_repulsion = 8.0
-    assert sim.agent(agent_id).model.range_geometry_repulsion == 8.0
+    sim.agent(agent_id).model.anticipation_time = 2.1
+    assert sim.agent(agent_id).model.anticipation_time == 2.1
+
+    sim.agent(agent_id).model.reaction_time = 0.31
+    assert sim.agent(agent_id).model.reaction_time == 0.31
 
 
 @pytest.fixture
