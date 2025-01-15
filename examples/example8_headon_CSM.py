@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 import pathlib
+
 import jupedsim as jps
 from shapely import Polygon
 

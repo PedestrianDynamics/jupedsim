@@ -4,10 +4,8 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 import pathlib
-import sys
 
 import jupedsim as jps
-import shapely
 from shapely import Polygon
 
 
@@ -15,7 +13,6 @@ def main():
     width = 2
     length = 10
     geometry = Polygon([(0, 0), (length, 0), (length, width), (0, width)])
-    num_agents = 2
     exit_polygon = Polygon(
         [(length - 0.5, 0), (length, 0), (length, width), (length - 0.5, width)]
     )

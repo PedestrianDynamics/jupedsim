@@ -2,12 +2,12 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 import jupedsim.native as py_jps
+from jupedsim.models.anticipation_velocity_model import (
+    AnticipationVelocityModelState,
+)
 from jupedsim.models.collision_free_speed import CollisionFreeSpeedModelState
 from jupedsim.models.collision_free_speed_v2 import (
     CollisionFreeSpeedModelV2State,
-)
-from jupedsim.models.anticipation_velocity_model import (
-    AnticipationVelocityModelState,
 )
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModelState,
