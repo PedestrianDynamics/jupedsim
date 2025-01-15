@@ -26,12 +26,19 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set up Python 3.12
+    - name: Set up Python 3.13
       uses: actions/setup-python@v5
       with:
-        python-version: "3.12"
+        python-version: "3.13"
     - name: Install dependencies
       run: pip install ruff
+
+    - name: Install clang-format-19
+      run: |
+        sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main'
+        wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+        sudo apt update
+        sudo apt install clang-format-19
 
     - name: Run checks
       run: ./scripts/ci/check_format.sh
@@ -48,10 +55,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set up Python 3.12
+    - name: Set up Python 3.13
       uses: actions/setup-python@v5
       with:
-        python-version: "3.12"
+        python-version: "3.13"
     - name: Install dependencies
       run: pip install -r requirements.txt
 
@@ -68,6 +75,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    # Still need to use 3.12 because hdf5 is not yet available for python 3.13 and we are using this in our notbooks
     - name: Set up Python 3.12
       uses: actions/setup-python@v5
       with:
@@ -165,7 +173,7 @@ jobs:
       - uses: actions/setup-python@v5
         name: Install Python
         with:
-          python-version: 3.12
+          python-version: 3.13
 
       - name: Install dependencies
         run: python -m pip install wheel build setuptools
@@ -187,7 +195,7 @@ jobs:
     env:
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
       CIBW_SKIP: "*musllinux*"
-      MACOSX_DEPLOYMENT_TARGET: 10.16
+      MACOSX_DEPLOYMENT_TARGET: 12.05
     strategy:
       matrix:
         include:
@@ -200,6 +208,9 @@ jobs:
           - os: ubuntu-latest
             cibw_archs: "x86_64"
             cibw_build: "cp312-*"
+          - os: ubuntu-latest
+            cibw_archs: "x86_64"
+            cibw_build: "cp313-*"
           - os: windows-latest
             cibw_archs: "auto64"
             cibw_build: "cp310-*"
@@ -209,29 +220,38 @@ jobs:
           - os: windows-latest
             cibw_archs: "auto64"
             cibw_build: "cp312-*"
-          - os: macos-12
+          - os: windows-latest
+            cibw_archs: "auto64"
+            cibw_build: "cp313-*"
+          - os: macos-13
             cibw_archs: "x86_64"
             cibw_build: "cp310-*"
-          - os: macos-12
+          - os: macos-13
             cibw_archs: "x86_64"
             cibw_build: "cp311-*"
-          - os: macos-12
+          - os: macos-13
             cibw_archs: "x86_64"
             cibw_build: "cp312-*"
-          - os: macos-12
+          - os: macos-13
+            cibw_archs: "x86_64"
+            cibw_build: "cp313-*"
+          - os: macos-13
             cibw_archs: "arm64"
             cibw_build: "cp310-*"
-          - os: macos-12
+          - os: macos-13
             cibw_archs: "arm64"
             cibw_build: "cp311-*"
-          - os: macos-12
+          - os: macos-13
             cibw_archs: "arm64"
             cibw_build: "cp312-*"
+          - os: macos-13
+            cibw_archs: "arm64"
+            cibw_build: "cp313-*"
 
     steps:
       - uses: actions/checkout@v4
       - name: Build wheels for CPython ${{ matrix.cibw_build }} on ${{ matrix.cibw_archs }}
-        uses: pypa/cibuildwheel@v2.16.5
+        uses: pypa/cibuildwheel@v2.22.0
         env:
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_ARCHS: ${{ matrix.cibw_archs }}
@@ -261,8 +281,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-12, macos-14]
-        python-version: ["3.10", "3.11", "3.12"]
+        os: [ubuntu-latest, windows-latest, macos-13, macos-14, macos-15]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - name: Set up Python ${{ matrix.python-version }}
@@ -292,10 +312,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set up Python 3.12
+      - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
-          python-version: 3.12
+          python-version: 3.13
 
       - name: Download packages
         uses: actions/Download-artifact@v4

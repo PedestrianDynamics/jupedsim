@@ -416,9 +416,7 @@ std::vector<glm::vec2> Mesh::FVertices() const
         std::begin(vertices),
         std::end(vertices),
         std::back_inserter(f_vertices),
-        [](const auto& v) {
-            return glm::vec2{v.x, v.y};
-        });
+        [](const auto& v) { return glm::vec2{v.x, v.y}; });
     return f_vertices;
 }
 
