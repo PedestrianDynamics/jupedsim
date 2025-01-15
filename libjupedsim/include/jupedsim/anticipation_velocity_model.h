@@ -217,7 +217,7 @@ typedef struct JPS_AnticipationVelocityModelAgentParameters {
     /**
      * @param time_gap of the agents using this profile (T in the OV-function)
      */
-    double time_gap = 1.;
+    double time_gap = 1.06;
     /**
      * @param v0 of the agents using this profile(desired speed) double radius;
      */
@@ -225,7 +225,7 @@ typedef struct JPS_AnticipationVelocityModelAgentParameters {
     /**
      * @param radius of the agent in 'meters'
      */
-    double radius = 0.2;
+    double radius = 0.15;
 
     /**
      *  Strength of the repulsion from neighbors
@@ -245,12 +245,12 @@ typedef struct JPS_AnticipationVelocityModelAgentParameters {
     /**
      * Anticipation time in seconds
      */
-    double anticipationTime{1.0};
+    double anticipationTime{0.5};
 
     /**
      * Reaction time in seconds
      */
-    double reactionTime{0.3};
+    double reactionTime{0.1};
 
 } JPS_AnticipationVelocityModelAgentParameters;
 
