@@ -73,7 +73,7 @@ private:
     }
 
 public:
-    explicit NeighborhoodSearch(double cellSize) : _cellSize(cellSize) {};
+    explicit NeighborhoodSearch(double cellSize) : _cellSize(cellSize){};
 
     void AddAgent(const Value& item)
     {
