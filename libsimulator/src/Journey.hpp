@@ -96,7 +96,7 @@ private:
     BaseStage* next;
 
 public:
-    FixedTransition(BaseStage* next_) : next(next_) {};
+    FixedTransition(BaseStage* next_) : next(next_){};
 
     BaseStage* NextStage() override { return next; }
 };
