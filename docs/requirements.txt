@@ -14,4 +14,3 @@ plotly-express
 numpy
 pandas
 pedpy
-ipywidgets
