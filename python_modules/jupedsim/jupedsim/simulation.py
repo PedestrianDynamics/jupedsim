@@ -11,6 +11,10 @@ from jupedsim.geometry import Geometry
 from jupedsim.geometry_utils import build_geometry
 from jupedsim.internal.tracing import Trace
 from jupedsim.journey import JourneyDescription
+from jupedsim.models.anticipation_velocity_model import (
+    AnticipationVelocityModel,
+    AnticipationVelocityModelAgentParameters,
+)
 from jupedsim.models.collision_free_speed import (
     CollisionFreeSpeedModel,
     CollisionFreeSpeedModelAgentParameters,
@@ -18,10 +22,6 @@ from jupedsim.models.collision_free_speed import (
 from jupedsim.models.collision_free_speed_v2 import (
     CollisionFreeSpeedModelV2,
     CollisionFreeSpeedModelV2AgentParameters,
-)
-from jupedsim.models.anticipation_velocity_model import (
-    AnticipationVelocityModel,
-    AnticipationVelocityModelAgentParameters,
 )
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModel,

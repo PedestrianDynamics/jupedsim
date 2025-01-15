@@ -25,6 +25,11 @@ from jupedsim.library import (
     set_info_callback,
     set_warning_callback,
 )
+from jupedsim.models.anticipation_velocity_model import (
+    AnticipationVelocityModel,
+    AnticipationVelocityModelAgentParameters,
+    AnticipationVelocityModelState,
+)
 from jupedsim.models.collision_free_speed import (
     CollisionFreeSpeedModel,
     CollisionFreeSpeedModelAgentParameters,
@@ -35,12 +40,6 @@ from jupedsim.models.collision_free_speed_v2 import (
     CollisionFreeSpeedModelV2AgentParameters,
     CollisionFreeSpeedModelV2State,
 )
-from jupedsim.models.anticipation_velocity_model import (
-    AnticipationVelocityModel,
-    AnticipationVelocityModelAgentParameters,
-    AnticipationVelocityModelState,
-)
-
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,

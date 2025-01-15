@@ -7,7 +7,6 @@ import pathlib
 import sys
 
 import jupedsim as jps
-import shapely
 from shapely import Polygon
 
 
