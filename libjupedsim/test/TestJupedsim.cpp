@@ -67,8 +67,8 @@ TEST(OperationalModel, DefaultsOfAnticipationVelocityModelAgentParameters)
     ASSERT_DOUBLE_EQ(agentParameters.time_gap, 1.06);
     ASSERT_DOUBLE_EQ(agentParameters.v0, 1.2);
     ASSERT_DOUBLE_EQ(agentParameters.radius, 0.15);
-    ASSERT_DOUBLE_EQ(agentParameters.anticipationTime, 1.0);
-    ASSERT_DOUBLE_EQ(agentParameters.reactionTime, 0.3);
+    ASSERT_DOUBLE_EQ(agentParameters.anticipationTime, 0.5);
+    ASSERT_DOUBLE_EQ(agentParameters.reactionTime, 0.1);
     ASSERT_DOUBLE_EQ(agentParameters.wallBufferDistance, 0.1);
 }
 
