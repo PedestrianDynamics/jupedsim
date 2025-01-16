@@ -13,7 +13,7 @@ from shapely import Polygon
 def main():
     room1 = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])  # Room 1 (10m x 10m)
     room2 = Polygon([(15, 0), (25, 0), (25, 10), (15, 10)])
-    width = 0.8
+    width = 0.6
     num_agents = 10
     corridor = Polygon(
         [
@@ -53,6 +53,7 @@ def main():
                 position=position,
                 anticipation_time=0.5,
                 reaction_time=0.3,
+                wall_buffer_distance=0.05,
             )
         )
 
