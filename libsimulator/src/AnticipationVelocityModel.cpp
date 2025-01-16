@@ -70,10 +70,10 @@ OperationalModelUpdate AnticipationVelocityModel::ComputeNewPosition(
     const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
     const double wallBufferDistance = model.wallBufferDistance;
     // Wall sliding behavior
-    direction = HandleWallAvoidance(direction, ped.pos, model.radius, boundary, wallBufferDistance);
 
     // update direction towards the newly calculated direction
     direction = UpdateDirection(ped, direction, dT);
+    direction = HandleWallAvoidance(direction, ped.pos, model.radius, boundary, wallBufferDistance);
     const auto spacing = std::accumulate(
         std::begin(neighborhood),
         std::end(neighborhood),
