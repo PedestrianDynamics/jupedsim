@@ -46,7 +46,7 @@ def _speed_to_color(speed, min_speed, max_speed):
     """Map a speed value to a color using a colormap."""
     normalized_speed = (speed - min_speed) / (max_speed - min_speed)
     r, g, b = plt.cm.jet_r(normalized_speed)[:3]
-    return f"rgba({r*255:.0f}, {g*255:.0f}, {b*255:.0f}, 0.5)"
+    return f"rgba({r * 255:.0f}, {g * 255:.0f}, {b * 255:.0f}, 0.5)"
 
 
 def _get_line_color(disk_color):
