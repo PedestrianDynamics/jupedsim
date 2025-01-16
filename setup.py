@@ -268,10 +268,10 @@ setup(
         "jupedsim_visualizer": "python_modules/jupedsim_visualizer/jupedsim_visualizer",
     },
     install_requires=[
-        "numpy~=1.25",
+        "numpy~=2.2",
         "shapely~=2.0",
-        "pyside6~=6.5",
-        "vtk~=9.3",
+        "pyside6~=6.8",
+        "vtk~=9.4",
     ],
     scripts=["python_modules/jupedsim_visualizer/bin/jupedsim-visualizer"],
     url="https://www.jupedsim.org",
