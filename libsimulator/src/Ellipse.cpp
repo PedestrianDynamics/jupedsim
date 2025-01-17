@@ -39,7 +39,22 @@ double Ellipse::GetEB(double scale) const
     return Bmax - deltaB * scale;
 }
 
-
+/**
+ * @brief Calculates the effective distance between two ellipses.
+ *
+ * This function computes the shortest distance between two ellipses. It does so by:
+ *
+ * 1. **Coordinate Transformation:**
+ *    Transforms the center of each ellipse into the local coordinate system of the other
+ *    using their orientation vectors.
+ *
+ * 2. **Closest Point Determination:**
+ *    Identifies the closest point on each ellipse to the other ellipse in their respective
+ *    coordinate systems.
+ *
+ * 3. **Effective Distance Calculation:**
+ *    Calculates the Euclidean distance between these two closest points on the ellipses.
+ */
 double Ellipse::EffectiveDistanceToEllipse(
     const Ellipse& E2,
     Point center_first,
@@ -51,22 +66,35 @@ double Ellipse::EffectiveDistanceToEllipse(
     const Point& orientation_first,
     const Point& orientation_second) const
 {
-    // Transform centers into each other's coordinate systems using orientation as cos(φ) and sin(φ)
-    Point E2inE1 = center_second.TransformToEllipseCoordinates(center_first, orientation_first.x, orientation_first.y);
-    Point E1inE2 = center_first.TransformToEllipseCoordinates(center_second, orientation_second.x, orientation_second.y);
+    Point E2inE1 = center_second.TransformToEllipseCoordinates(
+        center_first, orientation_first.x, orientation_first.y);
+    Point E1inE2 = center_first.TransformToEllipseCoordinates(
+        center_second, orientation_second.x, orientation_second.y);
 
-    // Find the closest points on each ellipse
-    Point R1 = this->PointOnEllipse(E2inE1, scale_first, center_first, speed_first, orientation_first);
-    Point R2 = E2.PointOnEllipse(E1inE2, scale_second, center_second, speed_second, orientation_second);
+    Point R1 =
+        this->PointOnEllipse(E2inE1, scale_first, center_first, speed_first, orientation_first);
+    Point R2 =
+        E2.PointOnEllipse(E1inE2, scale_second, center_second, speed_second, orientation_second);
 
-    // Compute the shortest distance between the closest points
     return (R1 - R2).Norm();
 }
 
-// input: P is a point in the ellipse world.
-// output: The point on the ellipse (in cartesian coord) that lays on the same line OP
-// O being the center of the ellipse
-// if P approx equal to Center of ellipse return cartesian coordinats of the point (a,0)/ellipse
+/**
+ * @brief Computes the point on the ellipse boundary along the line from the ellipse center to point
+ * P.
+ *
+ * Given a point \( P \) in the local coordinate system of the ellipse, this function finds the
+ * corresponding point on the ellipse that lies on the same line extending from the center through
+ * \( P \).
+ *
+ * **Behavior:**
+ * - If \( P \) is very close to the ellipse center, it defaults to returning the point \((a, 0)\)
+ * on the ellipse.
+ * - Otherwise, it scales the direction from the center to \( P \) by the ellipse’s semi-major and
+ * semi-minor axes.
+ *
+ * @return Point on the ellipse boundary, transformed into the global coordinate system.
+ */
 Point Ellipse::PointOnEllipse(
     const Point& P,
     double scale,
@@ -76,18 +104,23 @@ Point Ellipse::PointOnEllipse(
 {
     double x = P.x, y = P.y;
     double r = x * x + y * y;
+
+    // Handle degenerate case when P is very close to the ellipse center
     if(r < J_EPS * J_EPS) {
         Point CP(this->GetEA(speed), 0);
         return CP.TransformToCartesianCoordinates(center, orientation.x, orientation.y);
     }
+
     r = sqrt(r);
 
     double cosTheta = x / r;
     double sinTheta = y / r;
+
     double a = GetEA(speed);
     double b = GetEB(scale);
     Point S;
     S.x = a * cosTheta;
     S.y = b * sinTheta;
+
     return S.TransformToCartesianCoordinates(center, orientation.x, orientation.y);
 }
