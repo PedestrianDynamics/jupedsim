@@ -29,7 +29,7 @@ class GeneralizedCentrifugalForceModel:
     max_geometry_interaction_distance: float = 2
     max_neighbor_interpolation_distance: float = 0.1
     max_geometry_interpolation_distance: float = 0.1
-    max_neighbor_repulsion_force: float = 9
+    max_neighbor_repulsion_force: float = 30
     max_geometry_repulsion_force: float = 3
 
 
