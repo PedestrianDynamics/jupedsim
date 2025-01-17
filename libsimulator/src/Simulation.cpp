@@ -180,13 +180,21 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
     if(!_geometry->InsideGeometry(agent.pos)) {
         throw SimulationError("Agent {} not inside walkable area", agent.pos);
     }
-
-    agent.orientation = agent.orientation.Normalized();
-    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry);
-
     if(_journeys.count(agent.journeyId) == 0) {
         throw SimulationError("Unknown journey id: {}", agent.journeyId);
     }
+
+    Point targetPoint = std::get<0>(_journeys.at(agent.journeyId)->Target(agent));
+    if((targetPoint - agent.pos).Norm() < 1e-6) {
+        throw SimulationError(
+            "Can not add Agent. Agent's position {} is same as target {}", agent.pos, targetPoint);
+    }
+    if(std::abs(agent.orientation.x) < 1e-6 && std::abs(agent.orientation.y) < 1e-6) {
+        Point direction = (targetPoint - agent.pos).Normalized();
+        agent.orientation = direction;
+    }
+    agent.orientation = agent.orientation.Normalized();
+    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry);
 
     if(!_journeys.at(agent.journeyId)->ContainsStage(agent.stageId)) {
         throw SimulationError("Unknown stage id: {}", agent.stageId);
