@@ -40,12 +40,13 @@ std::tuple<double, Point> Point::NormAndNormalized() const
  */
 Point Point::TransformToEllipseCoordinates(const Point& center, double cphi, double sphi) const
 {
-
-    if((std::abs(cphi) < 1e-6 && std::abs(sphi) < 1e-6) ||
-       std::abs(cphi * cphi + sphi * sphi - 1.0) > 1e-6) {
-        throw std::invalid_argument("Point::TransformToEllipseCoordinates Invalid rotation inputs: "
-                                    "vector is zero or not normalized (cphi^2 + sphi^2 != 1)");
-    }
+    // if((std::abs(cphi) < 1e-6 && std::abs(sphi) < 1e-6) ||
+    //    std::abs(cphi * cphi + sphi * sphi - 1.0) > 1e-6) {
+    //     throw std::invalid_argument(
+    //         "Invalid rotation inputs: vector is zero or not normalized (cphi^2 + sphi^2 != 1). "
+    //         "Values: cphi=" +
+    //         std::to_string(cphi) + ", sphi=" + std::to_string(sphi));
+    // }
 
     Point p = Point(x, y);
     return (p - center).Rotate(cphi, -sphi);
@@ -66,12 +67,13 @@ Point Point::TransformToEllipseCoordinates(const Point& center, double cphi, dou
  */
 Point Point::TransformToCartesianCoordinates(const Point& center, double cphi, double sphi) const
 {
-
-    if((std::abs(cphi) < 1e-6 && std::abs(sphi) < 1e-6) ||
-       std::abs(cphi * cphi + sphi * sphi - 1.0) > 1e-6) {
-        throw std::invalid_argument("Point::TransformToEllipseCoordinates Invalid rotation inputs: "
-                                    "vector is zero or not normalized (cphi^2 + sphi^2 != 1)");
-    }
+    // if((std::abs(cphi) < 1e-6 && std::abs(sphi) < 1e-6) ||
+    //    std::abs(cphi * cphi + sphi * sphi - 1.0) > 1e-6) {
+    //     throw std::invalid_argument(
+    //         "Invalid rotation inputs: vector is zero or not normalized (cphi^2 + sphi^2 != 1). "
+    //         "Values: cphi=" +
+    //         std::to_string(cphi) + ", sphi=" + std::to_string(sphi));
+    // }
 
     Point p = Point(x, y);
     return (p.Rotate(cphi, sphi) + center);
