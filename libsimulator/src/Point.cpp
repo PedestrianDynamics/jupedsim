@@ -70,7 +70,7 @@ Point Point::TransformToCartesianCoordinates(const Point& center, double cphi, d
 }
 
 /**
- * Helper method to rotate a point around the origin counterclockwise
+ * CCW rotate Point (interpreted as vector) around origin.
  * @param ctheta Cosine of rotation angle
  * @param stetha Sine of rotation angle
  * @return Rotated point
