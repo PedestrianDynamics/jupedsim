@@ -186,8 +186,11 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
 
     Point targetPoint = std::get<0>(_journeys.at(agent.journeyId)->Target(agent));
     if((targetPoint - agent.pos).Norm() < 1e-6) {
-        throw SimulationError(
-            "Can not add Agent. Agent's position {} is same as target {}", agent.pos, targetPoint);
+        std::cerr << "Warning: Agent's position " << agent.pos.x << ", " << agent.pos.y
+                  << " is the same as the target " << targetPoint.x << ", " << targetPoint.y
+                  << ". Setting default direction to (1, 0)." << std::endl;
+
+        agent.orientation = Point(1.0, 0.0);
     }
     if(std::abs(agent.orientation.x) < 1e-6 && std::abs(agent.orientation.y) < 1e-6) {
         Point direction = (targetPoint - agent.pos).Normalized();
