@@ -62,12 +62,44 @@ intends to move. Agents adjust their speed based on anticipated distance to the
 nearest neighbor in their headway, enabling navigation through congested areas
 without overlap.
 The model incorporates a reaction time factor to adjust the turning process rate
-from the current to the new direction. Walls are treated as gliding surfaces:
-when an agent is within critical distance of a wall and moving toward it, their
-direction is projected parallel to the wall surface. 
-Movement calculation occurs in two steps: first, combining the desired direction
-with neighbor influences, then adjusting for wall interactions when necessary.
-Walls do not influence the speed of agents, only their direction.
+from the current to the new direction.
+
+**Wall Influence**
+
+Walls are treated as gliding surfaces, meaning that agents adjust their movement
+to avoid collisions while maintaining smooth trajectories along wall boundaries.
+The influence of walls on an agent's movement is determined based on their distance
+to the wall and the direction of their movement.
+The following rules govern the behavior:
+
+1. **Critical Wall Distance**:
+   - A critical wall distance is defined as the sum of the agent's radius and
+     a configurable buffer distance (`wallBufferDistance`).
+   - If an agent comes within this critical distance to a wall,
+     their direction is adjusted to ensure a minimum distance is maintained.
+
+2. **Influence Start Distance**:
+   - An influence start distance is set at twice the critical wall distance to
+     allow for smoother adjustments as the agent approaches the wall.
+
+3. **Direction Adjustment**:
+   - When an agent is within the critical wall distance and moving toward the wall:
+     - The direction is projected parallel to the wall to ensure no penetration occurs.
+     - A small outward component is added to maintain the minimum distance from the wall.
+   - When an agent is between the critical wall distance and the influence start distance:
+     - If moving toward the wall, their direction is adjusted with a smooth transition
+       factor to gradually reduce components moving perpendicular to the wall.
+
+4. **Wall Direction Handling**:
+   - The agent's movement direction is decomposed into parallel and perpendicular
+     components relative to the wall surface.
+   - Adjustments are applied only to the perpendicular component, ensuring the parallel
+     component remains intact for smooth movement along the wall.
+
+In summary walls do not affect the speed of agents, only their direction.
+Agents glide along walls by adjusting their direction while maintaining the
+desired movement as much as possible. When necessary, the influence transitions smoothly
+as the agent moves closer to or farther from the wall.
 
 The anticipation velocity  model takes into account the length of the agent,
 which determines the required space for movement, and the maximum achievable
