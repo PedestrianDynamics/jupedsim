@@ -302,6 +302,8 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
     double wallBufferDistance) const
 {
     const double criticalWallDistance = wallBufferDistance + agentRadius;
+    const double influenceStartDistance =
+        2.0 * criticalWallDistance; // Smoothing earlier. The constant is chosen randomly.
 
     auto nearestWallIt = std::min_element(
         boundary.cbegin(), boundary.cend(), [&agentPosition](const auto& wall1, const auto& wall2) {
@@ -316,20 +318,52 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
         auto [perpendicularDistance, directionAwayFromBoundary] =
             distanceVector.NormAndNormalized();
 
+        // Always check if too close to wall, regardless of movement direction
         if(perpendicularDistance < criticalWallDistance) {
-            // Agent is too close to wall
+            const auto wallVector = nearestWallIt->p2 - nearestWallIt->p1;
+            const auto wallDirection = wallVector.Normalized();
+
+            // Get parallel component of current direction
+            const auto parallelComponent = wallDirection * direction.ScalarProduct(wallDirection);
+
+            // Add a small outward component to maintain minimum distance
+            const double pushoutStrength = 0.3; // TODO: This is random.
+            auto newDirection = parallelComponent + directionAwayFromBoundary * pushoutStrength;
+            return newDirection.Normalized();
+        }
+        // Check if within influence range
+        else if(perpendicularDistance < influenceStartDistance) {
             const auto dotProduct = direction.ScalarProduct(directionAwayFromBoundary);
+
+            // Only modify direction if moving towards wall
             if(dotProduct < 0) {
-                // Agent is moving towards wall
                 const auto wallVector = nearestWallIt->p2 - nearestWallIt->p1;
                 const auto wallDirection = wallVector.Normalized();
-                // Project direction onto wall
-                const auto parallelComponent =
-                    wallDirection * direction.ScalarProduct(wallDirection);
-                return parallelComponent.Normalized();
+
+                if(perpendicularDistance <= criticalWallDistance) {
+                    // At or closer than critical distance: enforce parallel movement
+                    const auto parallelComponent =
+                        wallDirection * direction.ScalarProduct(wallDirection);
+                    return parallelComponent.Normalized();
+                } else {
+                    // Between influence start and critical distance: smooth transition
+                    // Calculate influence factor: 0 at influenceStartDistance, 1 at
+                    // criticalWallDistance.
+                    const double influenceFactor =
+                        (influenceStartDistance - perpendicularDistance) /
+                        (influenceStartDistance - criticalWallDistance);
+
+                    const auto parallelComponent =
+                        wallDirection * direction.ScalarProduct(wallDirection);
+                    const auto perpendicularComponent = direction - parallelComponent;
+
+                    // Gradually reduce the perpendicular component based on distance
+                    auto newDirection =
+                        parallelComponent + perpendicularComponent * (1.0 - influenceFactor);
+                    return newDirection.Normalized();
+                }
             }
         }
     }
-
-    return direction; // Return original direction if no wall correction needed
+    return direction;
 }
