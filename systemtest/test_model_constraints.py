@@ -6,7 +6,7 @@ import pytest
 
 
 @pytest.fixture
-def square_room_100x100():
+def square_room_100x100_cfsm():
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
         geometry=[(-50, -50), (50, -50), (50, 50), (-50, 50)],
@@ -41,8 +41,10 @@ def square_room_100x100_gcfm():
     "radius",
     np.arange(0.01, 2, 0.5),
 )
-def test_collision_free_speed_model_can_set_radius(square_room_100x100, radius):
-    simulation, journey_id, exit_id, agent_position = square_room_100x100
+def test_collision_free_speed_model_can_set_radius(
+    square_room_100x100_cfsm, radius
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_cfsm
 
     simulation.add_agent(
         jps.CollisionFreeSpeedModelAgentParameters(
@@ -55,9 +57,9 @@ def test_collision_free_speed_model_can_set_radius(square_room_100x100, radius):
 
 
 def test_collision_free_speed_model_can_not_set_radius_too_small(
-    square_room_100x100,
+    square_room_100x100_cfsm,
 ):
-    simulation, journey_id, exit_id, agent_position = square_room_100x100
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_cfsm
 
     with pytest.raises(
         RuntimeError, match=r"Model constraint violation: radius -1 .*"
@@ -73,9 +75,9 @@ def test_collision_free_speed_model_can_not_set_radius_too_small(
 
 
 def test_collision_free_speed_model_can_not_set_radius_zero(
-    square_room_100x100,
+    square_room_100x100_cfsm,
 ):
-    simulation, journey_id, exit_id, agent_position = square_room_100x100
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_cfsm
 
     with pytest.raises(
         RuntimeError, match=r"Model constraint violation: radius 0 .*"
@@ -91,9 +93,9 @@ def test_collision_free_speed_model_can_not_set_radius_zero(
 
 
 def test_collision_free_speed_model_can_not_set_radius_too_large(
-    square_room_100x100,
+    square_room_100x100_cfsm,
 ):
-    simulation, journey_id, exit_id, agent_position = square_room_100x100
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_cfsm
 
     with pytest.raises(
         RuntimeError, match=r"Model constraint violation: radius 2.1 .*"
@@ -108,24 +110,26 @@ def test_collision_free_speed_model_can_not_set_radius_too_large(
         )
 
 
-@pytest.mark.parametrize("v0", np.arange(0.0, 10, 1))
-def test_collision_free_speed_model_can_set_v0(square_room_100x100, v0):
-    simulation, journey_id, exit_id, agent_position = square_room_100x100
+@pytest.mark.parametrize("desired_speed", np.arange(0.0, 10, 1))
+def test_collision_free_speed_model_can_set_desired_speed(
+    square_room_100x100_cfsm, desired_speed
+):
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_cfsm
 
     simulation.add_agent(
         jps.CollisionFreeSpeedModelAgentParameters(
             position=agent_position,
             journey_id=journey_id,
             stage_id=exit_id,
-            v0=v0,
+            desired_speed=desired_speed,
         )
     )
 
 
-def test_collision_free_speed_model_can_not_set_v0_too_small(
-    square_room_100x100,
+def test_collision_free_speed_model_can_not_set_desired_speed_too_small(
+    square_room_100x100_cfsm,
 ):
-    simulation, journey_id, exit_id, agent_position = square_room_100x100
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_cfsm
 
     with pytest.raises(
         RuntimeError, match=r"Model constraint violation: v0 -1 .*"
@@ -135,15 +139,15 @@ def test_collision_free_speed_model_can_not_set_v0_too_small(
                 position=agent_position,
                 journey_id=journey_id,
                 stage_id=exit_id,
-                v0=-1,
+                desired_speed=-1,
             )
         )
 
 
-def test_collision_free_speed_model_can_not_set_v0_too_large(
-    square_room_100x100,
+def test_collision_free_speed_model_can_not_set_desired_speed_too_large(
+    square_room_100x100_cfsm,
 ):
-    simulation, journey_id, exit_id, agent_position = square_room_100x100
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_cfsm
 
     with pytest.raises(
         RuntimeError, match=r"Model constraint violation: v0 10.1 .*"
@@ -153,16 +157,16 @@ def test_collision_free_speed_model_can_not_set_v0_too_large(
                 position=agent_position,
                 journey_id=journey_id,
                 stage_id=exit_id,
-                v0=10.1,
+                desired_speed=10.1,
             )
         )
 
 
 @pytest.mark.parametrize("time_gap", [*np.arange(0.1, 10, 1), 10])
 def test_collision_free_speed_model_can_set_time_gap(
-    square_room_100x100, time_gap
+    square_room_100x100_cfsm, time_gap
 ):
-    simulation, journey_id, exit_id, agent_position = square_room_100x100
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_cfsm
 
     simulation.add_agent(
         jps.CollisionFreeSpeedModelAgentParameters(
@@ -175,9 +179,9 @@ def test_collision_free_speed_model_can_set_time_gap(
 
 
 def test_collision_free_speed_model_can_not_set_time_gap_too_small(
-    square_room_100x100,
+    square_room_100x100_cfsm,
 ):
-    simulation, journey_id, exit_id, agent_position = square_room_100x100
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_cfsm
 
     with pytest.raises(
         RuntimeError, match=r"Model constraint violation: timeGap -1 .*"
@@ -193,9 +197,9 @@ def test_collision_free_speed_model_can_not_set_time_gap_too_small(
 
 
 def test_collision_free_speed_model_can_not_set_time_too_large(
-    square_room_100x100,
+    square_room_100x100_cfsm,
 ):
-    simulation, journey_id, exit_id, agent_position = square_room_100x100
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_cfsm
 
     with pytest.raises(
         RuntimeError, match=r"Model constraint violation: timeGap 10.1 .*"
@@ -212,10 +216,10 @@ def test_collision_free_speed_model_can_not_set_time_too_large(
 
 @pytest.mark.parametrize("radius", np.arange(0.1, 0.5, 0.1))
 def test_collision_free_speed_model_can_not_add_agent_too_close_to_wall(
-    square_room_100x100,
+    square_room_100x100_cfsm,
     radius,
 ):
-    simulation, journey_id, exit_id, agent_position = square_room_100x100
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_cfsm
 
     with pytest.raises(
         RuntimeError,
@@ -331,9 +335,9 @@ def test_generalized_centrifugal_force_model_can_not_set_tau_too_large(
         )
 
 
-@pytest.mark.parametrize("v0", [*np.arange(0, 10, 1), 10])
-def test_generalized_centrifugal_force_model_can_set_v0(
-    square_room_100x100_gcfm, v0
+@pytest.mark.parametrize("desired_speed", [*np.arange(0, 10, 1), 10])
+def test_generalized_centrifugal_force_model_can_set_desired_speed(
+    square_room_100x100_gcfm, desired_speed
 ):
     simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
 
@@ -342,12 +346,12 @@ def test_generalized_centrifugal_force_model_can_set_v0(
             position=agent_position,
             journey_id=journey_id,
             stage_id=exit_id,
-            v0=v0,
+            desired_speed=desired_speed,
         )
     )
 
 
-def test_generalized_centrifugal_force_model_can_not_set_v0_too_small(
+def test_generalized_centrifugal_force_model_can_not_set_desired_speed_too_small(
     square_room_100x100_gcfm,
 ):
     simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
@@ -359,12 +363,12 @@ def test_generalized_centrifugal_force_model_can_not_set_v0_too_small(
                 position=agent_position,
                 journey_id=journey_id,
                 stage_id=exit_id,
-                v0=-0.1,
+                desired_speed=-0.1,
             )
         )
 
 
-def test_generalized_centrifugal_force_model_can_not_set_v0_too_large(
+def test_generalized_centrifugal_force_model_can_not_set_desired_speed_too_large(
     square_room_100x100_gcfm,
 ):
     simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
@@ -376,7 +380,7 @@ def test_generalized_centrifugal_force_model_can_not_set_v0_too_large(
                 position=agent_position,
                 journey_id=journey_id,
                 stage_id=exit_id,
-                v0=10.1,
+                desired_speed=10.1,
             )
         )
 
@@ -930,8 +934,10 @@ def test_anticipation_velocity_model_can_not_set_time_gap_too_large(
         )
 
 
-@pytest.mark.parametrize("v0", [*np.arange(0.1, 10, 1)])
-def test_anticipation_velocity_model_can_set_v0(square_room_100x100_avm, v0):
+@pytest.mark.parametrize("desired_speed", [*np.arange(0.1, 10, 1)])
+def test_anticipation_velocity_model_can_set_desired_speed(
+    square_room_100x100_avm, desired_speed
+):
     simulation, journey_id, exit_id, agent_position = square_room_100x100_avm
 
     simulation.add_agent(
@@ -939,12 +945,12 @@ def test_anticipation_velocity_model_can_set_v0(square_room_100x100_avm, v0):
             position=agent_position,
             journey_id=journey_id,
             stage_id=exit_id,
-            v0=v0,
+            desired_speed=desired_speed,
         )
     )
 
 
-def test_anticipation_velocity_model_can_not_set_v0_too_small(
+def test_anticipation_velocity_model_can_not_set_desired_speed_too_small(
     square_room_100x100_avm,
 ):
     simulation, journey_id, exit_id, agent_position = square_room_100x100_avm
@@ -956,12 +962,12 @@ def test_anticipation_velocity_model_can_not_set_v0_too_small(
                 position=agent_position,
                 journey_id=journey_id,
                 stage_id=exit_id,
-                v0=-0.1,
+                desired_speed=-0.1,
             )
         )
 
 
-def test_anticipation_velocity_model_can_not_set_v0_too_large(
+def test_anticipation_velocity_model_can_not_set_desired_speed_too_large(
     square_room_100x100_avm,
 ):
     simulation, journey_id, exit_id, agent_position = square_room_100x100_avm
@@ -973,7 +979,7 @@ def test_anticipation_velocity_model_can_not_set_v0_too_large(
                 position=agent_position,
                 journey_id=journey_id,
                 stage_id=exit_id,
-                v0=10.1,
+                desired_speed=10.1,
             )
         )
 

@@ -19,7 +19,7 @@ void init_anticipation_velocity_model(py::module_& m)
         .def(
             py::init([](std::tuple<double, double> position,
                         double time_gap,
-                        double v0,
+                        double desired_speed,
                         double radius,
                         JPS_JourneyId journey_id,
                         JPS_StageId stage_id,
@@ -33,7 +33,7 @@ void init_anticipation_velocity_model(py::module_& m)
                     journey_id,
                     stage_id,
                     time_gap,
-                    v0,
+                    desired_speed,
                     radius,
                     strengthNeighborRepulsion,
                     rangeNeighborRepulsion,
@@ -44,7 +44,7 @@ void init_anticipation_velocity_model(py::module_& m)
             py::kw_only(),
             py::arg("position"),
             py::arg("time_gap"),
-            py::arg("v0"),
+            py::arg("desired_speed"),
             py::arg("radius"),
             py::arg("journey_id"),
             py::arg("stage_id"),
@@ -56,7 +56,7 @@ void init_anticipation_velocity_model(py::module_& m)
         .def("__repr__", [](const JPS_AnticipationVelocityModelAgentParameters& p) {
             return fmt::format(
                 "position: {}, journey_id: {}, stage_id: {}, "
-                "time_gap: {}, v0: {}, radius: {}",
+                "time_gap: {}, desired_speed: {}, radius: {}",
                 "strength_neighbor_repulsion: {}, range_neighbor_repulsion: {}"
                 "wall_buffer_distance: {}"
                 "anticipation_time: {}, reaction_time: {}",
@@ -101,12 +101,12 @@ void init_anticipation_velocity_model(py::module_& m)
                 JPS_AnticipationVelocityModelState_SetTimeGap(w.handle, time_gap);
             })
         .def_property(
-            "v0",
+            "desired_speed",
             [](const JPS_AnticipationVelocityModelState_Wrapper& w) {
                 return JPS_AnticipationVelocityModelState_GetV0(w.handle);
             },
-            [](JPS_AnticipationVelocityModelState_Wrapper& w, double v0) {
-                JPS_AnticipationVelocityModelState_SetV0(w.handle, v0);
+            [](JPS_AnticipationVelocityModelState_Wrapper& w, double desiredSpeed) {
+                JPS_AnticipationVelocityModelState_SetV0(w.handle, desiredSpeed);
             })
         .def_property(
             "radius",

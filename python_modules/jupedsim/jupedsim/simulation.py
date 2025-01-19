@@ -133,7 +133,7 @@ class Simulation:
             py_jps_model = model_builder.build()
         elif isinstance(model, SocialForceModel):
             model_builder = py_jps.SocialForceModelBuilder(
-                bodyForce=model.bodyForce, friction=model.friction
+                body_force=model.body_force, friction=model.friction
             )
             py_jps_model = model_builder.build()
         else:
@@ -369,7 +369,11 @@ class Simulation:
             Iterator over all agents in the simulation.
         """
 
-        return self._obj.agents()
+        def wrap_iter(agents):
+            for agent in agents:
+                yield Agent(agent)
+
+        return wrap_iter(self._obj.agents())
 
     def agent(self, agent_id) -> Agent:
         """Access specific agent in the simulation.
@@ -380,19 +384,19 @@ class Simulation:
         Returns:
             Agent instance
         """
-        return self._obj.agent(agent_id)
+        return Agent(self._obj.agent(agent_id))
 
     def agents_in_range(
         self, pos: tuple[float, float], distance: float
-    ) -> list[Agent]:
-        """Agents within the given distance to the given position.
+    ) -> list[int]:
+        """Ids of agents within the given distance to the given position.
 
         Arguments:
              pos:  point around which to search for agents
              distance: search radius
 
         Returns:
-            List of agents within the given distance to the given position.
+            List of ids of agents within the given distance to the given position.
         """
         return self._obj.agents_in_range(pos, distance)
 
@@ -407,7 +411,7 @@ class Simulation:
             | list[tuple[float, float]]
         ),
     ) -> list[Agent]:
-        """Return all agents inside the given polygon.
+        """Return all ids for agents inside the given polygon.
 
         Args:
             poly:
@@ -426,7 +430,7 @@ class Simulation:
                 * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
 
         Returns:
-            All agents inside given polygon.
+            All ids for agents inside given polygon.
 
         """
         polygon_geometry = build_geometry(poly)
