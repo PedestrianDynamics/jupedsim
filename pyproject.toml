@@ -17,6 +17,8 @@ select = [
     "F",
     # isort
     "I",
+    # Naming conventions for variables, functions, and attributes
+    "N",
 ]
 ignore = ["E501"]
 
@@ -54,3 +56,6 @@ docstring-code-format = false
 # enabled.
 docstring-code-line-length = "dynamic"
 
+# Ignore naming issues for camelCase deprecated properties
+[tool.ruff.lint.pep8-naming]
+extend-ignore-names = ["desiredSpeed", "reactionTime", "agentScale", "obstacleScale", "forceDistance", "bodyForce"]
