@@ -262,6 +262,21 @@ def test_set_model_parameters_generalized_centrifugal_force_model(
 
 
 @pytest.fixture
+def simulation_with_social_force_model_body_force():
+    with pytest.warns(
+        UserWarning, match="deprecated, use 'body_force' instead"
+    ):
+        return jps.Simulation(
+            model=jps.SocialForceModel(bodyForce=3),
+            geometry=[(0, 0), (10, 0), (10, 10), (0, 10)],
+        )
+
+
+def test_body_force_deprecated(simulation_with_social_force_model_body_force):
+    assert simulation_with_social_force_model_body_force is not None
+
+
+@pytest.fixture
 def simulation_with_social_force_model():
     return jps.Simulation(
         model=jps.SocialForceModel(),
@@ -285,39 +300,11 @@ def test_desired_speed_deprecated(simulation_with_social_force_model):
     with pytest.warns(
         UserWarning, match="deprecated, use 'desired_speed' instead"
     ):
+        sim.agent(agent_id).model.desiredSpeed = 1.5
         assert sim.agent(agent_id).model.desiredSpeed == 1.5
 
     # Verify the new snake_case property reflects the same value
     assert sim.agent(agent_id).model.desired_speed == 1.5
-
-
-@pytest.fixture
-def simulation_with_social_force_model():
-    return jps.Simulation(
-        model=jps.SocialForceModel(),
-        geometry=[(0, 0), (10, 0), (10, 10), (0, 10)],
-    )
-
-
-def test_desired_speed_deprecated(simulation_with_social_force_model):
-    sim = simulation_with_social_force_model
-    wp = sim.add_waypoint_stage((10, 1), 0.5)
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
-
-    agent = jps.SocialForceModelAgentParameters(
-        journey_id=journey_id,
-        stage_id=wp,
-        position=(1, 1),
-    )
-    agent_id = sim.add_agent(agent)
-
-    with pytest.warns(
-        UserWarning, match="deprecated, use 'desired_speed' instead"
-    ):
-        sim.agent(agent_id).model.desiredSpeed = 4.0
-        assert sim.agent(agent_id).model.desiredSpeed == 4.0
-
-    assert sim.agent(agent_id).model.desired_speed == 4.0
 
 
 def test_reaction_time_deprecated(simulation_with_social_force_model):
