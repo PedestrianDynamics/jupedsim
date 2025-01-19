@@ -48,11 +48,11 @@ void init_social_force_model(py::module_& m)
             py::arg("stage_id"),
             py::arg("velocity"),
             py::arg("mass"),
-            py::arg("desiredSpeed"),
-            py::arg("reactionTime"),
-            py::arg("agentScale"),
-            py::arg("obstacleScale"),
-            py::arg("forceDistance"),
+            py::arg("desired_speed"),
+            py::arg("reaction_time"),
+            py::arg("agent_scale"),
+            py::arg("obstacle_scale"),
+            py::arg("force_distance"),
             py::arg("radius"))
         .def("__repr__", [](const JPS_SocialForceModelAgentParameters& p) {
             return fmt::format(
@@ -80,7 +80,7 @@ void init_social_force_model(py::module_& m)
                     JPS_SocialForceModelBuilder_Create(bodyForce, friction));
             }),
             py::kw_only(),
-            py::arg("bodyForce"),
+            py::arg("body_force"),
             py::arg("friction"))
         .def("build", [](JPS_SocialForceModelBuilder_Wrapper& w) {
             JPS_ErrorMessage errorMsg{};
@@ -110,7 +110,7 @@ void init_social_force_model(py::module_& m)
                 JPS_SocialForceModelState_SetMass(w.handle, mass);
             })
         .def_property(
-            "desiredSpeed",
+            "desired_speed",
             [](const JPS_SocialForceModelState_Wrapper& w) {
                 return JPS_SocialForceModelState_GetDesiredSpeed(w.handle);
             },
@@ -118,7 +118,7 @@ void init_social_force_model(py::module_& m)
                 JPS_SocialForceModelState_SetDesiredSpeed(w.handle, desiredSpeed);
             })
         .def_property(
-            "reactionTime",
+            "reaction_time",
             [](const JPS_SocialForceModelState_Wrapper& w) {
                 return JPS_SocialForceModelState_GetReactionTime(w.handle);
             },
@@ -126,7 +126,7 @@ void init_social_force_model(py::module_& m)
                 JPS_SocialForceModelState_SetReactionTime(w.handle, reactionTime);
             })
         .def_property(
-            "agentScale",
+            "agent_scale",
             [](const JPS_SocialForceModelState_Wrapper& w) {
                 return JPS_SocialForceModelState_GetAgentScale(w.handle);
             },
@@ -134,7 +134,7 @@ void init_social_force_model(py::module_& m)
                 JPS_SocialForceModelState_SetAgentScale(w.handle, agentScale);
             })
         .def_property(
-            "obstacleScale",
+            "obstacle_scale",
             [](const JPS_SocialForceModelState_Wrapper& w) {
                 return JPS_SocialForceModelState_GetObstacleScale(w.handle);
             },
@@ -142,7 +142,7 @@ void init_social_force_model(py::module_& m)
                 JPS_SocialForceModelState_SetObstacleScale(w.handle, obstacleScale);
             })
         .def_property(
-            "ForceDistance",
+            "force_distance",
             [](const JPS_SocialForceModelState_Wrapper& w) {
                 return JPS_SocialForceModelState_GetForceDistance(w.handle);
             },

@@ -1,6 +1,12 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
+import warnings
 from dataclasses import dataclass
+
+try:
+    from warnings import deprecated
+except ImportError:
+    from deprecated import deprecated
 
 import jupedsim.native as py_jps
 
@@ -45,7 +51,7 @@ class CollisionFreeSpeedModelAgentParameters:
         .. code:: python
 
             positions = [...] # List of initial agent positions
-            params = CollisionFreeSpeedModelAgentParameters(v0=0.9) # all agents are slower
+            params = CollisionFreeSpeedModelAgentParameters(desired_speed=0.9) # all agents are slower
             for p in positions:
                 params.position = p
                 sim.add_agent(params)
@@ -53,7 +59,7 @@ class CollisionFreeSpeedModelAgentParameters:
     Attributes:
         position: Position of the agent.
         time_gap: Time constant that describe how fast pedestrian close gaps.
-        v0: Maximum speed of the agent.
+        desired_speed: Maximum speed of the agent.
         radius: Radius of the agent.
         journey_id: Id of the journey the agent follows.
         stage_id: Id of the stage the agent targets.
@@ -61,16 +67,42 @@ class CollisionFreeSpeedModelAgentParameters:
 
     position: tuple[float, float] = (0.0, 0.0)
     time_gap: float = 1.0
-    v0: float = 1.2
+    desired_speed: float = 1.2
     radius: float = 0.2
     journey_id: int = 0
     stage_id: int = 0
+
+    def __init__(
+        self,
+        *,
+        position: tuple[float, float] = (0.0, 0.0),
+        time_gap: float = 1.0,
+        desired_speed: float = 1.2,
+        radius: float = 0.2,
+        journey_id: int = 0,
+        stage_id: int = 0,
+        v0: float | None = None,
+    ):
+        self.position = position
+        self.time_gap = time_gap
+        if v0 is not None:
+            warnings.warn(
+                "'v0' is deprecated, use 'desired_speed' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            self.desired_speed = v0
+        else:
+            self.desired_speed = desired_speed
+        self.radius = radius
+        self.journey_id = journey_id
+        self.stage_id = stage_id
 
     def as_native(self) -> py_jps.CollisionFreeSpeedModelAgentParameters:
         return py_jps.CollisionFreeSpeedModelAgentParameters(
             position=self.position,
             time_gap=self.time_gap,
-            v0=self.v0,
+            desired_speed=self.desired_speed,
             radius=self.radius,
             journey_id=self.journey_id,
             stage_id=self.stage_id,
@@ -90,13 +122,24 @@ class CollisionFreeSpeedModelState:
         self._obj.time_gap = time_gap
 
     @property
+    def desired_speed(self) -> float:
+        """desired Speed of this agent."""
+        return self._obj.desired_speed
+
+    @desired_speed.setter
+    def desired_speed(self, desired_speed):
+        self._obj.desired_speed = desired_speed
+
+    @property
+    @deprecated("deprecated, use 'desired_speed' instead.")
     def v0(self) -> float:
         """Maximum speed of this agent."""
-        return self._obj.v0
+        return self._obj.desired_speed
 
     @v0.setter
+    @deprecated("deprecated, use 'desired_speed' instead.")
     def v0(self, v0):
-        self._obj.v0 = v0
+        self._obj.desired_speed = v0
 
     @property
     def radius(self) -> float:

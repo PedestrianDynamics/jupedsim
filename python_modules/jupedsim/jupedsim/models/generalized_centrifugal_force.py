@@ -1,6 +1,12 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
+import warnings
 from dataclasses import dataclass
+
+try:
+    from warnings import deprecated
+except ImportError:
+    from deprecated import deprecated
 
 import jupedsim.native as py_jps
 
@@ -64,7 +70,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
         stage_id: Id of the stage the agent targets.
         mass: Mass of the agent.
         tau: Time constant that describes how fast the agent accelerates to its desired speed (v0).
-        v0: Maximum speed of the agent.
+        desired_speed: Maximum speed of the agent.
         a_v: Stretch of the ellipsis semi-axis along the movement vector.
         a_min: Minimum length of the ellipsis semi-axis along the movement vector.
         b_min: Minimum length of the ellipsis semi-axis orthogonal to the movement vector.
@@ -79,11 +85,53 @@ class GeneralizedCentrifugalForceModelAgentParameters:
     stage_id: int = -1
     mass: float = 1
     tau: float = 0.5
-    v0: float = 1.2
+    desired_speed: float = 1.2
     a_v: float = 1
     a_min: float = 0.2
     b_min: float = 0.2
     b_max: float = 0.4
+
+    def __init__(
+        self,
+        *,
+        speed: float = 0.0,
+        e0: tuple[float, float] = (0.0, 0.0),
+        position: tuple[float, float] = (0.0, 0.0),
+        orientation: tuple[float, float] = (1.0, 0.0),
+        journey_id: int = -1,
+        stage_id: int = -1,
+        mass: float = 1,
+        tau: float = 0.5,
+        desired_speed: float = 1.2,
+        a_v: float = 1,
+        a_min: float = 0.2,
+        b_min: float = 0.2,
+        b_max: float = 0.4,
+        v0=None,
+    ):
+        """Init dataclass to handle deprecated argument."""
+        self.speed = speed
+        self.e0 = e0
+        self.position = position
+        self.orientation = orientation
+        self.journey_id = journey_id
+        self.stage_id = stage_id
+        self.mass = mass
+        self.tau = tau
+        self.a_v = a_v
+        self.a_min = a_min
+        self.b_min = b_min
+        self.b_max = b_max
+
+        if v0 is not None:
+            warnings.warn(
+                "'v0' is deprecated, use 'desired_speed' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            self.desired_speed = v0
+        else:
+            self.desired_speed = desired_speed
 
     def as_native(
         self,
@@ -97,7 +145,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
             stage_id=self.stage_id,
             mass=self.mass,
             tau=self.tau,
-            v0=self.v0,
+            desired_speed=self.desired_speed,
             a_v=self.a_v,
             a_min=self.a_min,
             b_min=self.b_min,
@@ -136,13 +184,24 @@ class GeneralizedCentrifugalForceModelState:
         self._obj.tau = tau
 
     @property
+    def desired_speed(self) -> float:
+        """desired Speed of this agent."""
+        return self._obj.desired_speed
+
+    @desired_speed.setter
+    def desired_speed(self, desired_speed):
+        self._obj.desired_speed = desired_speed
+
+    @property
+    @deprecated("deprecated, use 'desired_speed' instead.")
     def v0(self) -> float:
         """Maximum speed of this agent."""
-        return self._obj.v0
+        return self._obj.desired_speed
 
     @v0.setter
+    @deprecated("deprecated, use 'desired_speed' instead.")
     def v0(self, v0):
-        self._obj.v0 = v0
+        self._obj.desired_speed = v0
 
     @property
     def a_v(self) -> float:
