@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "AnticipationVelocityModelBuilder.hpp"
 
-AnticipationVelocityModelBuilder::AnticipationVelocityModelBuilder()
+AnticipationVelocityModelBuilder::AnticipationVelocityModelBuilder(uint64_t rng_seed)
+    : rng_seed(rng_seed)
 {
 }
 
 AnticipationVelocityModel AnticipationVelocityModelBuilder::Build()
 {
-    return AnticipationVelocityModel();
+    return AnticipationVelocityModel(rng_seed);
 }

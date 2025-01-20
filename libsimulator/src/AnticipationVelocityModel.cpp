@@ -12,8 +12,11 @@
 #include <limits>
 #include <memory>
 #include <numeric>
-#include <random>
 #include <vector>
+
+AnticipationVelocityModel::AnticipationVelocityModel(uint64_t rng_seed) : gen(rng_seed)
+{
+}
 
 OperationalModelType AnticipationVelocityModel::Type() const
 {
@@ -105,7 +108,7 @@ Point AnticipationVelocityModel::UpdateDirection(
 {
     const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
     const Point desiredDirection = (ped.destination - ped.pos).Normalized();
-    Point actualDirection = ped.orientation;
+    const Point actualDirection = ped.orientation;
     Point updatedDirection;
 
     if(desiredDirection.ScalarProduct(calculatedDirection) *
@@ -207,7 +210,7 @@ double AnticipationVelocityModel::OptimalSpeed(
     double time_gap) const
 {
     const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
-    double min_spacing = 0.0;
+    const double min_spacing = 0.0;
     return std::min(std::max(spacing / time_gap, min_spacing), model.v0);
 }
 
@@ -226,7 +229,7 @@ double AnticipationVelocityModel::GetSpacing(
 
     const auto left = direction.Rotate90Deg();
     const auto l = model1.radius + model2.radius;
-    bool inCorridor = std::abs(left.ScalarProduct(distp12)) <= l;
+    const bool inCorridor = std::abs(left.ScalarProduct(distp12)) <= l;
     if(!inCorridor) {
         return std::numeric_limits<double>::max();
     }
@@ -238,15 +241,13 @@ Point AnticipationVelocityModel::CalculateInfluenceDirection(
     const Point& predictedDirection) const
 {
     // Eq. (5)
-    static std::mt19937 gen(42);
-    static std::uniform_int_distribution<int> dist(0, 1); // Random integers: 0 or 1
 
-    Point orthogonalDirection = Point(-desiredDirection.y, desiredDirection.x).Normalized();
-    double alignment = orthogonalDirection.ScalarProduct(predictedDirection);
+    const Point orthogonalDirection = Point(-desiredDirection.y, desiredDirection.x).Normalized();
+    const double alignment = orthogonalDirection.ScalarProduct(predictedDirection);
     Point influenceDirection = orthogonalDirection;
     if(fabs(alignment) < J_EPS) {
         // Choose a random direction (left or right)
-        if(dist(gen) == 0) {
+        if(gen() % 2 == 0) {
             influenceDirection = -orthogonalDirection;
         }
     } else if(alignment > 0) {
@@ -276,7 +277,7 @@ Point AnticipationVelocityModel::NeighborRepulsion(
     if(!inPerceptionRange)
         return Point(0, 0);
 
-    double S_Gap =
+    const double S_Gap =
         (model1.velocity - model2.velocity).ScalarProduct(ep12) * model1.anticipationTime;
     double R_dist = adjustedDist - S_Gap;
     R_dist = std::max(R_dist, 0.0); // Clamp to zero if negative
@@ -287,7 +288,7 @@ Point AnticipationVelocityModel::NeighborRepulsion(
     const double alignmentFactor = alignmentBase + alignmentWeight * (1.0 - d1.ScalarProduct(e2));
     const double interactionStrength = model1.strengthNeighborRepulsion * alignmentFactor *
                                        std::exp(-R_dist / model1.rangeNeighborRepulsion);
-    auto newep12 = distp12 + model2.velocity * model2.anticipationTime; // e_ij(t+ta)
+    const auto newep12 = distp12 + model2.velocity * model2.anticipationTime; // e_ij(t+ta)
 
     // Compute adjusted influence direction
     const auto influenceDirection = CalculateInfluenceDirection(d1, newep12);
@@ -315,7 +316,7 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
     if(nearestWallIt != boundary.end()) {
         const auto closestPoint = nearestWallIt->ShortestPoint(agentPosition);
         const auto distanceVector = agentPosition - closestPoint;
-        auto [perpendicularDistance, directionAwayFromBoundary] =
+        const auto [perpendicularDistance, directionAwayFromBoundary] =
             distanceVector.NormAndNormalized();
 
         // Always check if too close to wall, regardless of movement direction
@@ -327,8 +328,9 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
             const auto parallelComponent = wallDirection * direction.ScalarProduct(wallDirection);
 
             // Add a small outward component to maintain minimum distance
-            const double pushoutStrength = 0.3; // TODO: This is random.
-            auto newDirection = parallelComponent + directionAwayFromBoundary * pushoutStrength;
+            const double pushoutStrength = 0.3; // TODO(@mchraibi): This is random.
+            const auto newDirection =
+                parallelComponent + directionAwayFromBoundary * pushoutStrength;
             return newDirection.Normalized();
         }
         // Check if within influence range
@@ -358,7 +360,7 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
                     const auto perpendicularComponent = direction - parallelComponent;
 
                     // Gradually reduce the perpendicular component based on distance
-                    auto newDirection =
+                    const auto newDirection =
                         parallelComponent + perpendicularComponent * (1.0 - influenceFactor);
                     return newDirection.Normalized();
                 }

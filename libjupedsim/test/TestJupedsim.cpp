@@ -48,7 +48,7 @@ TEST(OperationalModel, DefaultsOfCollisionFreeSpeedModelAgentParameters)
 TEST(OperationalModel, CanConstructAnticipationVelocityModel)
 {
     JPS_ErrorMessage errorMsg{};
-    auto builder = JPS_AnticipationVelocityModelBuilder_Create();
+    auto builder = JPS_AnticipationVelocityModelBuilder_Create(0);
     auto model = JPS_AnticipationVelocityModelBuilder_Build(builder, &errorMsg);
     EXPECT_NE(model, nullptr);
     EXPECT_EQ(errorMsg, nullptr);
