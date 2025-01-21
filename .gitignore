@@ -24,3 +24,9 @@ __pycache__/
 /dist/
 /jupedsim.egg-info/
 /docs/build
+
+# clangd cache
+/.cache/
+
+# compile_commands
+/compile_commands.json
