@@ -74,10 +74,13 @@ void init_anticipation_velocity_model(py::module_& m)
                 p.reactionTime);
         });
     py::class_<JPS_AnticipationVelocityModelBuilder_Wrapper>(m, "AnticipationVelocityModelBuilder")
-        .def(py::init([](uint64_t rng_seed) {
-            return std::make_unique<JPS_AnticipationVelocityModelBuilder_Wrapper>(
-                JPS_AnticipationVelocityModelBuilder_Create(rng_seed));
-        }))
+        .def(
+            py::init([](uint64_t rng_seed) {
+                return std::make_unique<JPS_AnticipationVelocityModelBuilder_Wrapper>(
+                    JPS_AnticipationVelocityModelBuilder_Create(rng_seed));
+            }),
+            py::kw_only(),
+            py::arg("rng_seed"))
         .def("build", [](JPS_AnticipationVelocityModelBuilder_Wrapper& w) {
             JPS_ErrorMessage errorMsg{};
             auto result = JPS_AnticipationVelocityModelBuilder_Build(w.handle, &errorMsg);
