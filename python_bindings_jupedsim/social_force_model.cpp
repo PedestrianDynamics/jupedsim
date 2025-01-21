@@ -49,7 +49,7 @@ void init_social_force_model(py::module_& m)
             py::arg("stage_id"),
             py::arg("velocity"),
             py::arg("mass"),
-            py::arg("desiredSpeed"),
+            py::arg("desired_speed") = py::arg("desiredSpeed"),
             py::arg("reactionTime"),
             py::arg("agentScale"),
             py::arg("obstacleScale"),
@@ -113,11 +113,24 @@ void init_social_force_model(py::module_& m)
         .def_property(
             "desiredSpeed",
             [](const JPS_SocialForceModelState_Wrapper& w) {
+                  PyErr_WarnEx(PyExc_DeprecationWarning,
+                               "'desiredSpeed' is deprecated, use 'desired_speed' instead.", 1);
+                return JPS_SocialForceModelState_GetDesiredSpeed(w.handle);
+            },
+            [](JPS_SocialForceModelState_Wrapper& w, double desiredSpeed) {
+                  PyErr_WarnEx(PyExc_DeprecationWarning,
+            "'desiredSpeed' is deprecated, use 'desired_speed' instead.", 1);
+                JPS_SocialForceModelState_SetDesiredSpeed(w.handle, desiredSpeed);
+            })
+      .def_property(
+            "desired_speed",
+            [](const JPS_SocialForceModelState_Wrapper& w) {
                 return JPS_SocialForceModelState_GetDesiredSpeed(w.handle);
             },
             [](JPS_SocialForceModelState_Wrapper& w, double desiredSpeed) {
                 JPS_SocialForceModelState_SetDesiredSpeed(w.handle, desiredSpeed);
             })
+
         .def_property(
             "reactionTime",
             [](const JPS_SocialForceModelState_Wrapper& w) {
