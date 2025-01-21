@@ -8,6 +8,7 @@
 #include "OperationalModel.hpp"
 #include "Stage.hpp"
 #include "Visitor.hpp"
+#include <Logger.hpp>
 
 #include <memory>
 #include <variant>
@@ -177,6 +178,7 @@ BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
 
 GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
 {
+
     if(!_geometry->InsideGeometry(agent.pos)) {
         throw SimulationError("Agent {} not inside walkable area", agent.pos);
     }
@@ -186,13 +188,17 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
 
     Point targetPoint = std::get<0>(_journeys.at(agent.journeyId)->Target(agent));
     if((targetPoint - agent.pos).Norm() < 1e-6) {
-        std::cerr << "Warning: Agent's position " << agent.pos.x << ", " << agent.pos.y
-                  << " is the same as the target " << targetPoint.x << ", " << targetPoint.y
-                  << ". Setting default direction to (1, 0)." << std::endl;
-
+        LOG_WARNING(
+            "Agent's position ({}, {})  is the same as the target ({}, {}). Set defaul orientation "
+            "to (1,0)",
+            agent.pos.x,
+            agent.pos.y,
+            targetPoint.x,
+            targetPoint.y);
         agent.orientation = Point(1.0, 0.0);
     }
-    if(std::abs(agent.orientation.x) < 1e-6 && std::abs(agent.orientation.y) < 1e-6) {
+
+    if(agent.orientation.isInvalidOrientation()) {
         Point direction = (targetPoint - agent.pos).Normalized();
         agent.orientation = direction;
     }
