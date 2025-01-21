@@ -7,6 +7,7 @@
 #include "operational_model.h"
 #include "types.h"
 
+#include <stdint.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -20,7 +21,8 @@ typedef struct JPS_AnticipationVelocityModelBuilder_t* JPS_AnticipationVelocityM
  * Creates a Anticipation Velocity Model builder.
  * @return the builder
  */
-JUPEDSIM_API JPS_AnticipationVelocityModelBuilder JPS_AnticipationVelocityModelBuilder_Create();
+JUPEDSIM_API JPS_AnticipationVelocityModelBuilder
+JPS_AnticipationVelocityModelBuilder_Create(uint64_t rng_seed);
 
 /**
  * Creates a JPS_OperationalModel of type Anticipation Velocity Model from the

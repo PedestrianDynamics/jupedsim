@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 from dataclasses import dataclass
+from random import randint
 
 import jupedsim.native as py_jps
 
@@ -26,9 +27,13 @@ class AnticipationVelocityModel:
 
     A general description of the AVM can be found in the originating publication
     https://doi.org/10.1016/j.trc.2021.103464
+
+    Attributes:
+        rng_seed: seed value of internally used rng. If not explicitly set this
+            value will be choosen randomly.
     """
 
-    pass
+    rng_seed: int = randint(0, 2**64 - 1)
 
 
 @dataclass(kw_only=True)

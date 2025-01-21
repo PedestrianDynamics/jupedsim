@@ -6,6 +6,8 @@
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 
+#include <random>
+
 struct GenericAgent;
 
 class AnticipationVelocityModel : public OperationalModel
@@ -16,8 +18,10 @@ public:
 private:
     double _cutOffRadius{3};
 
+    mutable std::mt19937 gen;
+
 public:
-    AnticipationVelocityModel() = default;
+    AnticipationVelocityModel(uint64_t rng_seed);
     ~AnticipationVelocityModel() override = default;
     OperationalModelType Type() const override;
     OperationalModelUpdate ComputeNewPosition(

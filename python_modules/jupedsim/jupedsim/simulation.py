@@ -116,7 +116,8 @@ class Simulation:
             model_builder = py_jps.CollisionFreeSpeedModelV2Builder()
             py_jps_model = model_builder.build()
         elif isinstance(model, AnticipationVelocityModel):
-            model_builder = py_jps.AnticipationVelocityModelBuilder()
+            model_builder = py_jps.AnticipationVelocityModelBuilder(
+                    rng_seed=model.rng_seed)
             py_jps_model = model_builder.build()
         elif isinstance(model, GeneralizedCentrifugalForceModel):
             model_builder = py_jps.GeneralizedCentrifugalForceModelBuilder(

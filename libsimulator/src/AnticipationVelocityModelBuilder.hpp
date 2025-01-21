@@ -3,9 +3,15 @@
 #pragma once
 
 #include "AnticipationVelocityModel.hpp"
+
+#include <stdint.h>
+
 class AnticipationVelocityModelBuilder
 {
 public:
-    AnticipationVelocityModelBuilder();
+    AnticipationVelocityModelBuilder(uint64_t rng_seed);
     AnticipationVelocityModel Build();
+
+private:
+    uint64_t rng_seed{};
 };

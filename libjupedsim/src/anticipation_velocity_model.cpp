@@ -10,17 +10,16 @@
 #include <AnticipationVelocityModelBuilder.hpp>
 #include <AnticipationVelocityModelData.hpp>
 
-using jupedsim::detail::intoJPS_Point;
-using jupedsim::detail::intoPoint;
-using jupedsim::detail::intoTuple;
+#include <stdint.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Anticipation Velocity Model Builder
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-JUPEDSIM_API JPS_AnticipationVelocityModelBuilder JPS_AnticipationVelocityModelBuilder_Create()
+JUPEDSIM_API JPS_AnticipationVelocityModelBuilder
+JPS_AnticipationVelocityModelBuilder_Create(uint64_t rng_seed)
 {
     return reinterpret_cast<JPS_AnticipationVelocityModelBuilder>(
-        new AnticipationVelocityModelBuilder());
+        new AnticipationVelocityModelBuilder(rng_seed));
 }
 
 JUPEDSIM_API JPS_OperationalModel JPS_AnticipationVelocityModelBuilder_Build(
