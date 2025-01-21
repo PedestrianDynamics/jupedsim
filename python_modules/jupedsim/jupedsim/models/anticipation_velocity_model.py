@@ -29,10 +29,12 @@ class AnticipationVelocityModel:
     https://doi.org/10.1016/j.trc.2021.103464
 
     Attributes:
+        pushout_strength: TODO(@mchraibi): ADD DOC :)
         rng_seed: seed value of internally used rng. If not explicitly set this
             value will be choosen randomly.
     """
 
+    pushout_strength: float = 0.3
     rng_seed: int = randint(0, 2**64 - 1)
 
 

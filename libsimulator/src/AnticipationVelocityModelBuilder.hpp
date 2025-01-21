@@ -9,9 +9,10 @@
 class AnticipationVelocityModelBuilder
 {
 public:
-    AnticipationVelocityModelBuilder(uint64_t rng_seed);
+    AnticipationVelocityModelBuilder(double pushoutStrength, uint64_t rng_seed);
     AnticipationVelocityModel Build();
 
 private:
+    double pushoutStrength{};
     uint64_t rng_seed{};
 };
