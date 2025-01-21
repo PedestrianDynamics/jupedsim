@@ -64,7 +64,7 @@ TEST(OperationalModel, DefaultsOfGeneralizedCentrifugalForceModelAgentParameters
     ASSERT_DOUBLE_EQ(agentParameters.e0.y, 0);
     ASSERT_DOUBLE_EQ(agentParameters.position.x, 0);
     ASSERT_DOUBLE_EQ(agentParameters.position.y, 0);
-    ASSERT_DOUBLE_EQ(agentParameters.orientation.x, 0);
+    ASSERT_DOUBLE_EQ(agentParameters.orientation.x, 1);
     ASSERT_DOUBLE_EQ(agentParameters.orientation.y, 0);
     ASSERT_DOUBLE_EQ(agentParameters.journeyId, 0);
     ASSERT_DOUBLE_EQ(agentParameters.stageId, 0);
