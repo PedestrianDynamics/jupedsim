@@ -1,12 +1,13 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
-from dataclasses import dataclass
 
+from dataclasses import dataclass
+from deprecated import deprecated
 import jupedsim.native as py_jps
 
 
 @dataclass(kw_only=True)
 class SocialForceModel:
-    """Parameters for Social Force Model
+    r"""Parameters for Social Force Model
 
     All attributes are initialized with reasonably good defaults.
 
@@ -106,13 +107,24 @@ class SocialForceModelState:
         self._obj.mass = mass
 
     @property
+    @deprecated("deprecated, use 'desired_speed' instead.")
     def desiredSpeed(self) -> float:
         """desired Speed of this agent."""
         return self._obj.desiredSpeed
 
     @desiredSpeed.setter
+    @deprecated("deprecated, use 'desired_speed' instead.")
     def desiredSpeed(self, desiredSpeed):
         self._obj.desiredSpeed = desiredSpeed
+
+    @property
+    def desired_speed(self) -> float:
+        """desired Speed of this agent."""
+        return self._obj.desired_speed
+
+    @desired_speed.setter
+    def desired_speed(self, desired_speed):
+        self._obj.desired_speed = desired_speed
 
     @property
     def reactionTime(self) -> float:
