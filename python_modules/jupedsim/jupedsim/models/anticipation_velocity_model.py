@@ -29,7 +29,7 @@ class AnticipationVelocityModel:
     https://doi.org/10.1016/j.trc.2021.103464
 
     Attributes:
-        rng_seed: seed value of internally used rng. If not explicitly set this 
+        rng_seed: seed value of internally used rng. If not explicitly set this
             value will be choosen randomly.
     """
 
