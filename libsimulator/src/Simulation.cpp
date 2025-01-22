@@ -8,7 +8,6 @@
 #include "OperationalModel.hpp"
 #include "Stage.hpp"
 #include "Visitor.hpp"
-#include <Logger.hpp>
 
 #include <memory>
 #include <variant>
@@ -186,12 +185,12 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
         throw SimulationError("Unknown journey id: {}", agent.journeyId);
     }
 
-    if(agent.orientation.isZeroLength()) {
-        throw SimulationError("Orientation is invalid: {}. Length should be 1.", agent.orientation);
-    }
-
     if(!_journeys.at(agent.journeyId)->ContainsStage(agent.stageId)) {
         throw SimulationError("Unknown stage id: {}", agent.stageId);
+    }
+
+    if(agent.orientation.isZeroLength()) {
+        throw SimulationError("Orientation is invalid: {}. Length should be 1.", agent.orientation);
     }
 
     agent.orientation = agent.orientation.Normalized();
