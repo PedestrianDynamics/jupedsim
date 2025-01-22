@@ -3,58 +3,51 @@
 #include "Ellipse.hpp"
 #include "Macros.hpp"
 
-/**
- * @brief Calculates the semi-major axis (EA) of an ellipse based on the given speed.
- *
- * The ellipse adapts dynamically depending on the agent's speed. This method computes
- * the semi-axis length in the direction of movement, reflecting how the ellipse
- * elongates as speed increases.
- *
- * @param speed The current speed of the object (must be non-negative).
- * @return The computed semi-axis length in the velocity direction.
- *
- */
+/// Calculates the semi-major axis (EA) of an ellipse based on the given speed.
+///
+/// The ellipse adapts dynamically depending on the agent's speed. This method computes
+/// the semi-axis length in the direction of movement, reflecting how the ellipse
+/// elongates as speed increases.
+///
+/// @param speed The current speed of the object (must be non-negative).
+/// @return The computed semi-axis length in the velocity direction.
 double Ellipse::GetEA(double speed) const
 {
     return Amin + speed * Av;
 }
 
-/**
- * @brief Calculates the semi-minor axis (EB) of an ellipse orthogonal to the direction of velocity.
- *
- * This method computes the ellipse's semi-axis length perpendicular to the object's movement,
- * allowing the ellipse to contract or expand based on the provided scaling factor.
- *
- * @param scale A scaling factor typically in the range \f$ [0, 1] \f$.
- *        - \f$ \text{scale} = 0 \f$ → returns \f$ B_{\text{max}} \f$.
- *        - \f$ \text{scale} = 1 \f$ → returns \f$ B_{\text{min}} \f$.
- * @return The computed semi-axis length orthogonal to the velocity direction.
- *
- * @note Values of `scale` outside the \f$ [0, 1] \f$ range may produce unexpected results.
- * @warning No input validation is performed on the `scale` parameter.
- */
+/// Calculates the semi-minor axis (EB) of an ellipse orthogonal to the direction of velocity.
+///
+/// This method computes the ellipse's semi-axis length perpendicular to the object's movement,
+/// allowing the ellipse to contract or expand based on the provided scaling factor.
+///
+/// @param scale A scaling factor typically in the range \f$ [0, 1] \f$.
+///        - \f$ \text{scale} = 0 \f$ → returns \f$ B_{\text{max}} \f$.
+///        - \f$ \text{scale} = 1 \f$ → returns \f$ B_{\text{min}} \f$.
+/// @return The computed semi-axis length orthogonal to the velocity direction.
+///
+/// @note Values of `scale` outside the \f$ [0, 1] \f$ range may produce unexpected results.
+/// @warning No input validation is performed on the `scale` parameter.
 double Ellipse::GetEB(double scale) const
 {
     const double deltaB = Bmax - Bmin;
     return Bmax - deltaB * scale;
 }
 
-/**
- * @brief Calculates the effective distance between two ellipses.
- *
- * This function computes the shortest distance between two ellipses. It does so by:
- *
- * 1. **Coordinate Transformation:**
- *    Transforms the center of each ellipse into the local coordinate system of the other
- *    using their orientation vectors.
- *
- * 2. **Closest Point Determination:**
- *    Identifies the closest point on each ellipse to the other ellipse in their respective
- *    coordinate systems.
- *
- * 3. **Effective Distance Calculation:**
- *    Calculates the Euclidean distance between these two closest points on the ellipses.
- */
+/// Calculates the effective distance between two ellipses.
+///
+/// This function computes the shortest distance between two ellipses. It does so by:
+///
+/// 1. **Coordinate Transformation:**
+///    Transforms the center of each ellipse into the local coordinate system of the other
+///    using their orientation vectors.
+///
+/// 2. **Closest Point Determination:**
+///    Identifies the closest point on each ellipse to the other ellipse in their respective
+///    coordinate systems.
+///
+/// 3. **Effective Distance Calculation:**
+///    Calculates the Euclidean distance between these two closest points on the ellipses.
 double Ellipse::EffectiveDistanceToEllipse(
     const Ellipse& E2,
     Point center_first,
@@ -79,22 +72,19 @@ double Ellipse::EffectiveDistanceToEllipse(
     return (R1 - R2).Norm();
 }
 
-/**
- * @brief Computes the point on the ellipse boundary along the line from the ellipse center to point
- * P.
- *
- * Given a point \( P \) in the local coordinate system of the ellipse, this function finds the
- * corresponding point on the ellipse that lies on the same line extending from the center through
- * \( P \).
- *
- * **Behavior:**
- * - If \( P \) is very close to the ellipse center, it defaults to returning the point \((a, 0)\)
- * on the ellipse.
- * - Otherwise, it scales the direction from the center to \( P \) by the ellipse’s semi-major and
- * semi-minor axes.
- *
- * @return Point on the ellipse boundary, transformed into the global coordinate system.
- */
+/// Computes the point on the ellipse boundary along the line from the ellipse center to point P.
+///
+/// Given a point \( P \) in the local coordinate system of the ellipse, this function finds the
+/// corresponding point on the ellipse that lies on the same line extending from the center through
+/// \( P \).
+///
+/// **Behavior:**
+/// - If \( P \) is very close to the ellipse center, it defaults to returning the point \((a, 0)\)
+/// on the ellipse.
+/// - Otherwise, it scales the direction from the center to \( P \) by the ellipse’s semi-major and
+/// semi-minor axes.
+///
+/// @return Point on the ellipse boundary, transformed into the global coordinate system.
 Point Ellipse::PointOnEllipse(
     const Point& P,
     double scale,
