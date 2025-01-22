@@ -12,12 +12,18 @@ add_library(simulator STATIC
     src/CollisionFreeSpeedModelBuilder.hpp
     src/CollisionFreeSpeedModelData.hpp
     src/CollisionFreeSpeedModelUpdate.hpp
-    src/CollisionFreeSpeedModelV2.cpp
+     src/CollisionFreeSpeedModelV2.cpp
     src/CollisionFreeSpeedModelV2.hpp
     src/CollisionFreeSpeedModelV2Builder.cpp
     src/CollisionFreeSpeedModelV2Builder.hpp
     src/CollisionFreeSpeedModelV2Data.hpp
     src/CollisionFreeSpeedModelV2Update.hpp
+    src/AnticipationVelocityModel.cpp
+    src/AnticipationVelocityModel.hpp
+    src/AnticipationVelocityModelBuilder.cpp
+    src/AnticipationVelocityModelBuilder.hpp
+    src/AnticipationVelocityModelData.hpp
+    src/AnticipationVelocityModelUpdate.hpp  
     src/CollisionGeometry.cpp
     src/CollisionGeometry.hpp
     src/Ellipse.cpp

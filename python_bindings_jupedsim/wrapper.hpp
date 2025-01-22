@@ -1,6 +1,7 @@
 // Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
+#include "jupedsim/anticipation_velocity_model.h"
 #include <jupedsim/jupedsim.h>
 
 #define OWNED_WRAPPER(cls)                                                                         \
@@ -38,6 +39,7 @@ OWNED_WRAPPER(JPS_GeometryBuilder);
 OWNED_WRAPPER(JPS_OperationalModel);
 OWNED_WRAPPER(JPS_CollisionFreeSpeedModelBuilder);
 OWNED_WRAPPER(JPS_CollisionFreeSpeedModelV2Builder);
+OWNED_WRAPPER(JPS_AnticipationVelocityModelBuilder);
 OWNED_WRAPPER(JPS_GeneralizedCentrifugalForceModelBuilder);
 OWNED_WRAPPER(JPS_SocialForceModelBuilder);
 OWNED_WRAPPER(JPS_JourneyDescription);
@@ -55,4 +57,5 @@ WRAPPER(JPS_Agent);
 WRAPPER(JPS_GeneralizedCentrifugalForceModelState);
 WRAPPER(JPS_CollisionFreeSpeedModelState);
 WRAPPER(JPS_CollisionFreeSpeedModelV2State);
+WRAPPER(JPS_AnticipationVelocityModelState);
 WRAPPER(JPS_SocialForceModelState);

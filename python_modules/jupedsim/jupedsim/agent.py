@@ -2,6 +2,9 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 import jupedsim.native as py_jps
+from jupedsim.models.anticipation_velocity_model import (
+    AnticipationVelocityModelState,
+)
 from jupedsim.models.collision_free_speed import CollisionFreeSpeedModelState
 from jupedsim.models.collision_free_speed_v2 import (
     CollisionFreeSpeedModelV2State,
@@ -105,6 +108,8 @@ class Agent:
     ) -> (
         GeneralizedCentrifugalForceModelState
         | CollisionFreeSpeedModelState
+        | CollisionFreeSpeedModelV2State
+        | AnticipationVelocityModelState
         | SocialForceModelState
     ):
         """Access model specific state of this agent."""
@@ -115,6 +120,8 @@ class Agent:
             return CollisionFreeSpeedModelState(model)
         elif isinstance(model, py_jps.CollisionFreeSpeedModelV2State):
             return CollisionFreeSpeedModelV2State(model)
+        elif isinstance(model, py_jps.AnticipationVelocityModelState):
+            return AnticipationVelocityModelState(model)
         elif isinstance(model, py_jps.SocialForceModelState):
             return SocialForceModelState(model)
         else:

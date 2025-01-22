@@ -11,6 +11,10 @@ from jupedsim.geometry import Geometry
 from jupedsim.geometry_utils import build_geometry
 from jupedsim.internal.tracing import Trace
 from jupedsim.journey import JourneyDescription
+from jupedsim.models.anticipation_velocity_model import (
+    AnticipationVelocityModel,
+    AnticipationVelocityModelAgentParameters,
+)
 from jupedsim.models.collision_free_speed import (
     CollisionFreeSpeedModel,
     CollisionFreeSpeedModelAgentParameters,
@@ -53,6 +57,7 @@ class Simulation:
             CollisionFreeSpeedModel
             | GeneralizedCentrifugalForceModel
             | CollisionFreeSpeedModelV2
+            | AnticipationVelocityModel
             | SocialForceModel
         ),
         geometry: (
@@ -109,6 +114,11 @@ class Simulation:
             py_jps_model = model_builder.build()
         elif isinstance(model, CollisionFreeSpeedModelV2):
             model_builder = py_jps.CollisionFreeSpeedModelV2Builder()
+            py_jps_model = model_builder.build()
+        elif isinstance(model, AnticipationVelocityModel):
+            model_builder = py_jps.AnticipationVelocityModelBuilder(
+                pushout_strength=model.pushout_strength, rng_seed=model.rng_seed
+            )
             py_jps_model = model_builder.build()
         elif isinstance(model, GeneralizedCentrifugalForceModel):
             model_builder = py_jps.GeneralizedCentrifugalForceModelBuilder(
@@ -248,6 +258,7 @@ class Simulation:
             GeneralizedCentrifugalForceModelAgentParameters
             | CollisionFreeSpeedModelAgentParameters
             | CollisionFreeSpeedModelV2AgentParameters
+            | AnticipationVelocityModelAgentParameters
             | SocialForceModelAgentParameters
         ),
     ) -> int:

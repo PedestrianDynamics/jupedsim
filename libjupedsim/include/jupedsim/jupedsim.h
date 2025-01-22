@@ -3,6 +3,7 @@
 #pragma once
 
 #include "agent.h"
+#include "anticipation_velocity_model.h"
 #include "build_info.h"
 #include "collision_free_speed_model.h"
 #include "collision_free_speed_model_v2.h"

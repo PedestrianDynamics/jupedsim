@@ -84,6 +84,53 @@ def test_set_model_parameters_collision_free_speed_model_v2(
 
 
 @pytest.fixture
+def simulation_with_anticipation_velocity_model():
+    return jps.Simulation(
+        model=jps.AnticipationVelocityModel(),
+        geometry=[(0, 0), (10, 0), (10, 10), (0, 10)],
+    )
+
+
+def test_set_model_parameters_anticipation_velocity_model(
+    simulation_with_anticipation_velocity_model,
+):
+    sim = simulation_with_anticipation_velocity_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.AnticipationVelocityModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+    )
+    agent_id = sim.add_agent(agent)
+
+    sim.agent(agent_id).model.v0 = 2.0
+    assert sim.agent(agent_id).model.v0 == 2.0
+
+    sim.agent(agent_id).model.time_gap = 3.0
+    assert sim.agent(agent_id).model.time_gap == 3.0
+
+    sim.agent(agent_id).model.radius = 4.0
+    assert sim.agent(agent_id).model.radius == 4.0
+
+    sim.agent(agent_id).model.strength_neighbor_repulsion = 5.0
+    assert sim.agent(agent_id).model.strength_neighbor_repulsion == 5.0
+
+    sim.agent(agent_id).model.range_neighbor_repulsion = 6.0
+    assert sim.agent(agent_id).model.range_neighbor_repulsion == 6.0
+
+    sim.agent(agent_id).model.wall_buffer_distance = 1.1
+    assert sim.agent(agent_id).model.wall_buffer_distance == 1.1
+
+    sim.agent(agent_id).model.anticipation_time = 2.1
+    assert sim.agent(agent_id).model.anticipation_time == 2.1
+
+    sim.agent(agent_id).model.reaction_time = 0.31
+    assert sim.agent(agent_id).model.reaction_time == 0.31
+
+
+@pytest.fixture
 def simulation_with_collision_free_speed_model():
     return jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),

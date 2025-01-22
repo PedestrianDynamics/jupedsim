@@ -1,6 +1,7 @@
 // Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
+#include "AnticipationVelocityModelData.hpp"
 #include "CollisionFreeSpeedModelData.hpp"
 #include "CollisionFreeSpeedModelV2Data.hpp"
 #include "GeneralizedCentrifugalForceModelData.hpp"
@@ -33,6 +34,7 @@ struct GenericAgent {
         GeneralizedCentrifugalForceModelData,
         CollisionFreeSpeedModelData,
         CollisionFreeSpeedModelV2Data,
+        AnticipationVelocityModelData,
         SocialForceModelData>;
     Model model{};
 

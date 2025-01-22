@@ -2,6 +2,7 @@
 /* SPDX-License-Identifier: LGPL-3.0-or-later */
 #pragma once
 
+#include "anticipation_velocity_model.h"
 #include "collision_free_speed_model.h"
 #include "collision_free_speed_model_v2.h"
 #include "error.h"
@@ -115,6 +116,16 @@ JPS_Agent_GetSocialForceModelState(JPS_Agent handle, JPS_ErrorMessage* errorMess
  */
 JUPEDSIM_API JPS_CollisionFreeSpeedModelV2State
 JPS_Agent_GetCollisionFreeSpeedModelV2State(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
+
+/**
+ * Access Anticipation Velocity Model state.
+ * Precondition: Agent needs to use Anticipation Velocity Model
+ * @param handle of the agent to access.
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return state or NULL on error
+ */
+JUPEDSIM_API JPS_AnticipationVelocityModelState
+JPS_Agent_GetAnticipationVelocityModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
 
 /**
  * Opaque type of an iterator over agents
