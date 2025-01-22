@@ -19,10 +19,12 @@ typedef struct JPS_AnticipationVelocityModelBuilder_t* JPS_AnticipationVelocityM
 
 /**
  * Creates a Anticipation Velocity Model builder.
+ * @param pushoutStrength strength of repulsive force of walls.
+ * @param rng_seed Seed value for random number generator.
  * @return the builder
  */
 JUPEDSIM_API JPS_AnticipationVelocityModelBuilder
-JPS_AnticipationVelocityModelBuilder_Create(uint64_t rng_seed);
+JPS_AnticipationVelocityModelBuilder_Create(double pushoutStrength, uint64_t rng_seed);
 
 /**
  * Creates a JPS_OperationalModel of type Anticipation Velocity Model from the

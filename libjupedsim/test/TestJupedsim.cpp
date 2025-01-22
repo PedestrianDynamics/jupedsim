@@ -1,7 +1,5 @@
 // Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "AgentIterator.hpp"
-#include "Point.hpp"
 #include "jupedsim/anticipation_velocity_model.h"
 #include "gtest/gtest.h"
 #include <ErrorMessage.hpp>
@@ -48,7 +46,7 @@ TEST(OperationalModel, DefaultsOfCollisionFreeSpeedModelAgentParameters)
 TEST(OperationalModel, CanConstructAnticipationVelocityModel)
 {
     JPS_ErrorMessage errorMsg{};
-    auto builder = JPS_AnticipationVelocityModelBuilder_Create(0);
+    auto builder = JPS_AnticipationVelocityModelBuilder_Create(0.3, 0);
     auto model = JPS_AnticipationVelocityModelBuilder_Build(builder, &errorMsg);
     EXPECT_NE(model, nullptr);
     EXPECT_EQ(errorMsg, nullptr);

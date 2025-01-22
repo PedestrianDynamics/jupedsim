@@ -17,11 +17,12 @@ public:
 
 private:
     double _cutOffRadius{3};
-
+    /// Add a small outward component to maintain minimum distance from walls.
+    double pushoutStrength = 0.3;
     mutable std::mt19937 gen;
 
 public:
-    AnticipationVelocityModel(uint64_t rng_seed);
+    AnticipationVelocityModel(double pushoutStrength, uint64_t rng_seed);
     ~AnticipationVelocityModel() override = default;
     OperationalModelType Type() const override;
     OperationalModelUpdate ComputeNewPosition(

@@ -29,10 +29,16 @@ class AnticipationVelocityModel:
     https://doi.org/10.1016/j.trc.2021.103464
 
     Attributes:
+        pushout_strength: The pushout mechanism ensures agents maintain a safe distance
+        from walls by adding a small outward component to their movement when within the
+        critical wall distance. This outward component, scaled by `pushoutStrength`,
+        combines with the parallel component of the agent's direction to create smooth,
+        gliding behavior along walls.
         rng_seed: seed value of internally used rng. If not explicitly set this
-            value will be choosen randomly.
+            value will be chosen randomly.
     """
 
+    pushout_strength: float = 0.3
     rng_seed: int = randint(0, 2**64 - 1)
 
 

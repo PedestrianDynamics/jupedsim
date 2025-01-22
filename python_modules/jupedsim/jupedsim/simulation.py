@@ -117,7 +117,8 @@ class Simulation:
             py_jps_model = model_builder.build()
         elif isinstance(model, AnticipationVelocityModel):
             model_builder = py_jps.AnticipationVelocityModelBuilder(
-                    rng_seed=model.rng_seed)
+                pushout_strength=model.pushout_strength, rng_seed=model.rng_seed
+            )
             py_jps_model = model_builder.build()
         elif isinstance(model, GeneralizedCentrifugalForceModel):
             model_builder = py_jps.GeneralizedCentrifugalForceModelBuilder(

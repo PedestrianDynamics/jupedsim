@@ -14,7 +14,8 @@
 #include <numeric>
 #include <vector>
 
-AnticipationVelocityModel::AnticipationVelocityModel(uint64_t rng_seed) : gen(rng_seed)
+AnticipationVelocityModel::AnticipationVelocityModel(double pushoutStrength, uint64_t rng_seed)
+    : pushoutStrength(pushoutStrength), gen(rng_seed)
 {
 }
 
@@ -326,8 +327,6 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
             // Get parallel component of current direction
             const auto parallelComponent = wallDirection * direction.ScalarProduct(wallDirection);
 
-            // Add a small outward component to maintain minimum distance
-            const double pushoutStrength = 0.3; // TODO(@mchraibi): This is random.
             const auto newDirection =
                 parallelComponent + directionAwayFromBoundary * pushoutStrength;
             return newDirection.Normalized();

@@ -16,10 +16,10 @@
 /// Anticipation Velocity Model Builder
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 JUPEDSIM_API JPS_AnticipationVelocityModelBuilder
-JPS_AnticipationVelocityModelBuilder_Create(uint64_t rng_seed)
+JPS_AnticipationVelocityModelBuilder_Create(double pushoutStrength, uint64_t rng_seed)
 {
     return reinterpret_cast<JPS_AnticipationVelocityModelBuilder>(
-        new AnticipationVelocityModelBuilder(rng_seed));
+        new AnticipationVelocityModelBuilder(pushoutStrength, rng_seed));
 }
 
 JUPEDSIM_API JPS_OperationalModel JPS_AnticipationVelocityModelBuilder_Build(
