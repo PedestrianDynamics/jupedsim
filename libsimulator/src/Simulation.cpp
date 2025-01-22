@@ -186,28 +186,17 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
         throw SimulationError("Unknown journey id: {}", agent.journeyId);
     }
 
-    Point targetPoint = std::get<0>(_journeys.at(agent.journeyId)->Target(agent));
-    if((targetPoint - agent.pos).Norm() < 1e-6) {
-        LOG_WARNING(
-            "Agent's position ({}, {})  is the same as the target ({}, {}). Set defaul orientation "
-            "to (1,0)",
-            agent.pos.x,
-            agent.pos.y,
-            targetPoint.x,
-            targetPoint.y);
-        agent.orientation = Point(1.0, 0.0);
-    }
-
     if(agent.orientation.isInvalidOrientation()) {
-        Point direction = (targetPoint - agent.pos).Normalized();
-        agent.orientation = direction;
+        throw SimulationError("Orientation is invalid: {}. Length should be 1.", agent.orientation);
     }
-    agent.orientation = agent.orientation.Normalized();
-    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry);
 
     if(!_journeys.at(agent.journeyId)->ContainsStage(agent.stageId)) {
         throw SimulationError("Unknown stage id: {}", agent.stageId);
     }
+
+    agent.orientation = agent.orientation.Normalized();
+    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry);
+
     _stageManager.HandleNewAgent(agent.stageId);
     _agents.emplace_back(std::move(agent));
     _neighborhoodSearch.AddAgent(_agents.back());

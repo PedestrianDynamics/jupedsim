@@ -9,7 +9,7 @@
 bool Point::isInvalidOrientation() const
 {
     if((std::abs(x) < 1e-6 && std::abs(y) < 1e-6) || (std::abs(NormSquare() - 1.0) > 1e-6)) {
-        LOG_WARNING("Orientation vector ({}, {}) is not normalized, correcting it.", x, y);
+        LOG_WARNING("Orientation vector {}, {} is not normalized, correcting it.", x, y);
         return true;
     }
     return false;
