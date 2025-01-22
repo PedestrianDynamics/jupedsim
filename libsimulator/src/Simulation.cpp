@@ -186,7 +186,7 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
         throw SimulationError("Unknown journey id: {}", agent.journeyId);
     }
 
-    if(agent.orientation.isInvalidOrientation()) {
+    if(agent.orientation.isZeroLength()) {
         throw SimulationError("Orientation is invalid: {}. Length should be 1.", agent.orientation);
     }
 

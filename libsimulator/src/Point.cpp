@@ -6,13 +6,10 @@
 #include <Logger.hpp>
 #include <limits>
 
-bool Point::isInvalidOrientation() const
+bool Point::isZeroLength() const
 {
-    if((std::abs(x) < 1e-6 && std::abs(y) < 1e-6) || (std::abs(NormSquare() - 1.0) > 1e-6)) {
-        LOG_WARNING("Orientation vector {}, {} is not normalized, correcting it.", x, y);
-        return true;
-    }
-    return false;
+    constexpr double epsilon = 1e-6;
+    return (std::abs(x) < epsilon && std::abs(y) < epsilon);
 }
 
 double Point::Norm() const
