@@ -2,6 +2,7 @@
 [![GitHub license](https://img.shields.io/badge/license-LGPL-blue.svg)](https://raw.githubusercontent.com/PedestrianDynamics/jupedsim/master/LICENSE)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/jupedsim)
 ![PyPI - Version](https://img.shields.io/pypi/v/jupedsim)
+[![All Contributors](https://img.shields.io/github/all-contributors/PedestrianDynamics/jupedsim?color=ee8449&style=flat-square)](#contributors)
 
 # Jülich Pedestrian Simulator - JuPedSim
 
