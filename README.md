@@ -6,10 +6,16 @@
 
 # Jülich Pedestrian Simulator - JuPedSim
 
-JuPedSim is a library to simulate pedestrian dynamics. This software is mainly
-developed at the Institute for Civil Safety
-[IAS-7](https://www.fz-juelich.de/en/ias/ias-7) of the Jülich Research Center
-(Forschungszentrum Jülich) in Germany.
+JuPedSim is a library to simulate pedestrian dynamics. 
+This software was initiated at the Institute for Civil Safety [IAS-7](https://www.fz-juelich.de/en/ias/ias-7) 
+of the Jülich Research Center (Forschungszentrum Jülich) in Germany 
+and continues to evolve with support and contributions from a diverse and engaged community.
+
+## Contributors
+
+We are grateful to all the contributors who have helped shape JuPedSim into what it is today.  
+You can find the full list of contributors [CONTRIBUTORS.md](CONTRIBUTORS.md).
+
 
 ## Installation
 
@@ -107,14 +113,3 @@ location of our python code and the native library.
 > is not installed in the current python environment. Otherwise there will be
 > erroneous calls to the wrong python code, resulting in crashes and/or
 > exceptions.
-
-## Contributors
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
