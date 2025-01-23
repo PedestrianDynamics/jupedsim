@@ -14,7 +14,7 @@ and continues to evolve with support and contributions from a diverse and engage
 ## Contributors
 
 We are grateful to all the contributors who have helped shape JuPedSim into what it is today.  
-You can find the full list of contributors [CONTRIBUTORS.md](CONTRIBUTORS.md).
+You can find the full list of contributors [here](CONTRIBUTORS.md).
 
 
 ## Installation
