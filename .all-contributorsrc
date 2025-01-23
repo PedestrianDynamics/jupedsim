@@ -1,8 +1,8 @@
 {
   "projectName": "jupedsim",
-  "projectOwner": "PedestrianDynamics",
+  "projectOwner": "chraibi",
   "repoType": "github",
-  "repoHost": "https://github.com/PedestrianDynamics/jupedsim",
+  "repoHost": "https://github.com/chraibi/jupedsim",
   "files": ["README.md"],
   "imageSize": 100,
   "commit": false,
