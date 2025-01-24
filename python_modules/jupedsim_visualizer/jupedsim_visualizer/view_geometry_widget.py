@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later
+# SPDX-License-Identifier: LGPL-3.0-or-later
 import jupedsim as jps
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPaintEvent

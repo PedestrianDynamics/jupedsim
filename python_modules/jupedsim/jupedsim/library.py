@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later
+# SPDX-License-Identifier: LGPL-3.0-or-later
 
 from textwrap import dedent
 from typing import Callable

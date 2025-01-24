@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later
+# SPDX-License-Identifier: LGPL-3.0-or-later
 from enum import Enum
 
 import jupedsim.native as py_jps
