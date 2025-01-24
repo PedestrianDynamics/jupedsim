@@ -1,5 +1,4 @@
-# Copyright © 2012-2024 Forschungszentrum Jülich GmbH
-# SPDX-License-Identifier: LGPL-3.0-or-later
+// SPDX-License-Identifier: LGPL-3.0-or-later
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:

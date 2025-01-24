@@ -1,5 +1,4 @@
-# Copyright © 2012-2024 Forschungszentrum Jülich GmbH
-# SPDX-License-Identifier: LGPL-3.0-or-later
+// SPDX-License-Identifier: LGPL-3.0-or-later
 class AABB:
     def __init__(
         self, *, xmin: float, xmax: float, ymin: float, ymax: float
