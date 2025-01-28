@@ -24,6 +24,6 @@
 - Olaf Angelo Banse
 - Qiancheng Xu
 - Tao Zhong
-- Tobias Schroedtert
+- Tobias Schrödter
 - Ulrich Kemloh
 - Weichen Liao
