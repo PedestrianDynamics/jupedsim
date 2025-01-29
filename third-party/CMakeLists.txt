@@ -18,7 +18,10 @@ find_package(Boost 1.82
     PATHS
     ${CMAKE_CURRENT_SOURCE_DIR}/boost-1.82.0
 )
-set_target_properties(Boost::boost PROPERTIES IMPORTED_GLOBAL TRUE)
+set_target_properties(Boost::boost PROPERTIES
+	IMPORTED_GLOBAL TRUE
+	SYSTEM TRUE
+)
 ################################################################################
 # threading
 ################################################################################
@@ -32,12 +35,12 @@ set(CGAL_DATA_DIR "none")
 set(WITH_CGAL_ImageIO OFF)
 set(WITH_CGAL_Qt5 OFF)
 set(CGAL_DISABLE_GMP ON)
-find_package(CGAL 5.5
+find_package(CGAL 6.0
     REQUIRED
     CONFIG
     NO_DEFAULT_PATH
     PATHS
-    ${CMAKE_CURRENT_SOURCE_DIR}/cgal-5.6.1
+    ${CMAKE_CURRENT_SOURCE_DIR}/cgal-6.0.1
 )
 
 ################################################################################
