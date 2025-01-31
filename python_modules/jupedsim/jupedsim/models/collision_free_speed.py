@@ -2,6 +2,7 @@
 
 import warnings
 from dataclasses import dataclass
+
 from deprecated import deprecated
 
 import jupedsim.native as py_jps
