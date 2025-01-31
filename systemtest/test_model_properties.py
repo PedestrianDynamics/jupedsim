@@ -165,7 +165,7 @@ def test_set_model_parameters_generalized_centrifugal_force_model(
 @pytest.fixture
 def simulation_with_social_force_model_body_force():
     with pytest.warns(
-        UserWarning, match="deprecated, use 'body_force' instead"
+        DeprecationWarning, match="deprecated, use 'body_force' instead"
     ):
         return jps.Simulation(
             model=jps.SocialForceModel(bodyForce=3),
@@ -221,7 +221,7 @@ def test_reaction_time_deprecated(simulation_with_social_force_model):
     agent_id = sim.add_agent(agent)
 
     with pytest.warns(
-        UserWarning, match="deprecated, use 'reaction_time' instead"
+        DeprecationWarning, match="deprecated, use 'reaction_time' instead"
     ):
         sim.agent(agent_id).model.reactionTime = 5.0
         assert sim.agent(agent_id).model.reactionTime == 5.0
@@ -242,7 +242,7 @@ def test_agent_scale_deprecated(simulation_with_social_force_model):
     agent_id = sim.add_agent(agent)
 
     with pytest.warns(
-        UserWarning, match="deprecated, use 'agent_scale' instead"
+        DeprecationWarning, match="deprecated, use 'agent_scale' instead"
     ):
         sim.agent(agent_id).model.agentScale = 6.0
         assert sim.agent(agent_id).model.agentScale == 6.0
@@ -263,7 +263,7 @@ def test_obstacle_scale_deprecated(simulation_with_social_force_model):
     agent_id = sim.add_agent(agent)
 
     with pytest.warns(
-        UserWarning, match="deprecated, use 'obstacle_scale' instead"
+        DeprecationWarning, match="deprecated, use 'obstacle_scale' instead"
     ):
         sim.agent(agent_id).model.obstacleScale = 7.0
         assert sim.agent(agent_id).model.obstacleScale == 7.0
@@ -284,7 +284,7 @@ def test_force_distance_deprecated(simulation_with_social_force_model):
     agent_id = sim.add_agent(agent)
 
     with pytest.warns(
-        UserWarning, match="deprecated, use 'force_distance' instead"
+        DeprecationWarning, match="deprecated, use 'force_distance' instead"
     ):
         sim.agent(agent_id).model.ForceDistance = 8.0
         assert sim.agent(agent_id).model.ForceDistance == 8.0

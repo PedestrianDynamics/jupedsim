@@ -50,10 +50,10 @@ void init_social_force_model(py::module_& m)
             py::arg("velocity"),
             py::arg("mass"),
             py::arg("desired_speed") = py::arg("desiredSpeed"),
-            py::arg("reactionTime"),
-            py::arg("agentScale"),
-            py::arg("obstacleScale"),
-            py::arg("forceDistance"),
+            py::arg("reaction_time") = py::arg("reactionTime"),
+            py::arg("agent_scale") = py::arg("agentScale"),
+            py::arg("obstacle_scale") = py::arg("obstacleScale"),
+            py::arg("force_distance") = py::arg("forceDistance"),
             py::arg("radius"))
         .def("__repr__", [](const JPS_SocialForceModelAgentParameters& p) {
             return fmt::format(
@@ -81,7 +81,7 @@ void init_social_force_model(py::module_& m)
                     JPS_SocialForceModelBuilder_Create(bodyForce, friction));
             }),
             py::kw_only(),
-            py::arg("bodyForce"),
+            py::arg("body_force") = py::arg("bodyForce"),
             py::arg("friction"))
         .def("build", [](JPS_SocialForceModelBuilder_Wrapper& w) {
             JPS_ErrorMessage errorMsg{};
@@ -113,16 +113,20 @@ void init_social_force_model(py::module_& m)
         .def_property(
             "desiredSpeed",
             [](const JPS_SocialForceModelState_Wrapper& w) {
-                  PyErr_WarnEx(PyExc_DeprecationWarning,
-                               "'desiredSpeed' is deprecated, use 'desired_speed' instead.", 1);
+                PyErr_WarnEx(
+                    PyExc_DeprecationWarning,
+                    "'desiredSpeed' is deprecated, use 'desired_speed' instead.",
+                    1);
                 return JPS_SocialForceModelState_GetDesiredSpeed(w.handle);
             },
             [](JPS_SocialForceModelState_Wrapper& w, double desiredSpeed) {
-                  PyErr_WarnEx(PyExc_DeprecationWarning,
-            "'desiredSpeed' is deprecated, use 'desired_speed' instead.", 1);
+                PyErr_WarnEx(
+                    PyExc_DeprecationWarning,
+                    "'desiredSpeed' is deprecated, use 'desired_speed' instead.",
+                    1);
                 JPS_SocialForceModelState_SetDesiredSpeed(w.handle, desiredSpeed);
             })
-      .def_property(
+        .def_property(
             "desired_speed",
             [](const JPS_SocialForceModelState_Wrapper& w) {
                 return JPS_SocialForceModelState_GetDesiredSpeed(w.handle);
@@ -134,6 +138,18 @@ void init_social_force_model(py::module_& m)
         .def_property(
             "reactionTime",
             [](const JPS_SocialForceModelState_Wrapper& w) {
+                PyErr_WarnEx(
+                    PyExc_DeprecationWarning,
+                    "'reactionTime' is deprecated, use 'reaction_time' instead.",
+                    1);
+                return JPS_SocialForceModelState_GetReactionTime(w.handle);
+            },
+            [](JPS_SocialForceModelState_Wrapper& w, double reactionTime) {
+                JPS_SocialForceModelState_SetReactionTime(w.handle, reactionTime);
+            })
+        .def_property(
+            "reaction_time",
+            [](const JPS_SocialForceModelState_Wrapper& w) {
                 return JPS_SocialForceModelState_GetReactionTime(w.handle);
             },
             [](JPS_SocialForceModelState_Wrapper& w, double reactionTime) {
@@ -141,6 +157,18 @@ void init_social_force_model(py::module_& m)
             })
         .def_property(
             "agentScale",
+            [](const JPS_SocialForceModelState_Wrapper& w) {
+                PyErr_WarnEx(
+                    PyExc_DeprecationWarning,
+                    "'agentScale' is deprecated, use 'agent_scale' instead.",
+                    1);
+                return JPS_SocialForceModelState_GetAgentScale(w.handle);
+            },
+            [](JPS_SocialForceModelState_Wrapper& w, double agentScale) {
+                JPS_SocialForceModelState_SetAgentScale(w.handle, agentScale);
+            })
+        .def_property(
+            "agent_scale",
             [](const JPS_SocialForceModelState_Wrapper& w) {
                 return JPS_SocialForceModelState_GetAgentScale(w.handle);
             },
@@ -150,6 +178,18 @@ void init_social_force_model(py::module_& m)
         .def_property(
             "obstacleScale",
             [](const JPS_SocialForceModelState_Wrapper& w) {
+                PyErr_WarnEx(
+                    PyExc_DeprecationWarning,
+                    "'obstacleScale' is deprecated, use 'obstacle_scale' instead.",
+                    1);
+                return JPS_SocialForceModelState_GetObstacleScale(w.handle);
+            },
+            [](JPS_SocialForceModelState_Wrapper& w, double obstacleScale) {
+                JPS_SocialForceModelState_SetObstacleScale(w.handle, obstacleScale);
+            })
+        .def_property(
+            "obstacle_scale",
+            [](const JPS_SocialForceModelState_Wrapper& w) {
                 return JPS_SocialForceModelState_GetObstacleScale(w.handle);
             },
             [](JPS_SocialForceModelState_Wrapper& w, double obstacleScale) {
@@ -157,6 +197,18 @@ void init_social_force_model(py::module_& m)
             })
         .def_property(
             "ForceDistance",
+            [](const JPS_SocialForceModelState_Wrapper& w) {
+                PyErr_WarnEx(
+                    PyExc_DeprecationWarning,
+                    "'forceDistance' is deprecated, use 'force_distance' instead.",
+                    1);
+                return JPS_SocialForceModelState_GetForceDistance(w.handle);
+            },
+            [](JPS_SocialForceModelState_Wrapper& w, double forceDistance) {
+                JPS_SocialForceModelState_SetForceDistance(w.handle, forceDistance);
+            })
+        .def_property(
+            "force_distance",
             [](const JPS_SocialForceModelState_Wrapper& w) {
                 return JPS_SocialForceModelState_GetForceDistance(w.handle);
             },
