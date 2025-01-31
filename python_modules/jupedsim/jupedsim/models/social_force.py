@@ -1,10 +1,12 @@
 # Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-from dataclasses import dataclass
-from deprecated import deprecated
-import jupedsim.native as py_jps
 import warnings
+from dataclasses import dataclass
+
+from deprecated import deprecated
+
+import jupedsim.native as py_jps
 
 
 @dataclass(kw_only=True)
@@ -186,7 +188,7 @@ class SocialForceModelState:
     @reactionTime.setter
     @deprecated("deprecated, use 'reaction_time' instead.")
     def reactionTime(self, reactionTime):
-        self._obj.reaction_time = reaction_time
+        self._obj.reaction_time = reactionTime
         object.__setattr__(self, "reactionTime", reactionTime)
 
     @property
