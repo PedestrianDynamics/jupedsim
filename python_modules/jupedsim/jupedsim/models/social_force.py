@@ -96,9 +96,7 @@ class SocialForceModelAgentParameters:
         forceDistance=None,
         **kwargs,
     ):
-        """
-        Init dataclass to handle deprecated arguments.
-        """
+        """Init dataclass to handle deprecated arguments."""
         deprecated_map = {
             "desiredSpeed": "desired_speed",
             "reactionTime": "reaction_time",
