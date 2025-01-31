@@ -56,7 +56,7 @@ class CollisionFreeSpeedModelAgentParameters:
     Attributes:
         position: Position of the agent.
         time_gap: Time constant that describe how fast pedestrian close gaps.
-        v0: Maximum speed of the agent.
+        desired_speed: Maximum speed of the agent.
         radius: Radius of the agent.
         journey_id: Id of the journey the agent follows.
         stage_id: Id of the stage the agent targets.

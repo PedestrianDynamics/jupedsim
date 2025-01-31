@@ -61,7 +61,8 @@ void init_generalized_centrifugal_force_model(py::module_& m)
         .def("__repr__", [](const JPS_GeneralizedCentrifugalForceModelAgentParameters& p) {
             return fmt::format(
                 "speed: {}, e0: {}, position: {}, orientation: {}, journey_id: {}, "
-                "stage_id: {}, mass: {}, v0: {}, a_v: {}, a_min: {}, b_min: {}, b_max: {}",
+                "stage_id: {}, mass: {}, desired_speed: {}, a_v: {}, a_min: {}, b_min: {}, b_max: "
+                "{}",
                 p.speed,
                 intoTuple(p.e0),
                 intoTuple(p.position),
@@ -154,16 +155,16 @@ void init_generalized_centrifugal_force_model(py::module_& m)
         .def_property(
             "v0",
             [](const JPS_GeneralizedCentrifugalForceModelState_Wrapper& w) {
-               PyErr_WarnEx(
+                PyErr_WarnEx(
                     PyExc_DeprecationWarning,
                     "'v0' is deprecated, use 'desired_speed' instead.",
-                    1);               
+                    1);
                 return JPS_GeneralizedCentrifugalForceModelState_GetV0(w.handle);
             },
             [](JPS_GeneralizedCentrifugalForceModelState_Wrapper& w, double v0) {
                 JPS_GeneralizedCentrifugalForceModelState_SetV0(w.handle, v0);
             })
-              .def_property(
+        .def_property(
             "desired_speed",
             [](const JPS_GeneralizedCentrifugalForceModelState_Wrapper& w) {
                 return JPS_GeneralizedCentrifugalForceModelState_GetV0(w.handle);

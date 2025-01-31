@@ -44,7 +44,7 @@ void init_anticipation_velocity_model(py::module_& m)
             py::kw_only(),
             py::arg("position"),
             py::arg("time_gap"),
-            py::arg("v0"),
+            py::arg("desired_speed") = py::arg("v0"),
             py::arg("radius"),
             py::arg("journey_id"),
             py::arg("stage_id"),
@@ -103,10 +103,22 @@ void init_anticipation_velocity_model(py::module_& m)
         .def_property(
             "v0",
             [](const JPS_AnticipationVelocityModelState_Wrapper& w) {
+                PyErr_WarnEx(
+                    PyExc_DeprecationWarning,
+                    "'v0' is deprecated, use 'desired_speed' instead.",
+                    1);
                 return JPS_AnticipationVelocityModelState_GetV0(w.handle);
             },
             [](JPS_AnticipationVelocityModelState_Wrapper& w, double v0) {
                 JPS_AnticipationVelocityModelState_SetV0(w.handle, v0);
+            })
+        .def_property(
+            "desired_speed",
+            [](const JPS_AnticipationVelocityModelState_Wrapper& w) {
+                return JPS_AnticipationVelocityModelState_GetV0(w.handle);
+            },
+            [](JPS_AnticipationVelocityModelState_Wrapper& w, double desiredSpeed) {
+                JPS_AnticipationVelocityModelState_SetV0(w.handle, desiredSpeed);
             })
         .def_property(
             "radius",
