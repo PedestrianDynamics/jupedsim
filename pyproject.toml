@@ -54,7 +54,7 @@ docstring-code-line-length = "dynamic"
 
 # Ignore naming issues for camelCase deprecated properties
 [tool.ruff.lint.pep8-naming]
-extend-ignore-names = ["desiredSpeed", "reactionTime", "agentScale", "obstacleScale", "forceDistance", "bodyForce"]
+extend-ignore-names = ["desiredSpeed", "reactionTime", "agentScale", "obstacleScale", "forceDistance", "bodyForce", "IncorrectTrajectory". "IncorrectTrajectoryError"]
 
 [tool.ruff.lint.per-file-ignores]
 "test_perftests.py" = ["N"]
