@@ -53,7 +53,7 @@ void init_generalized_centrifugal_force_model(py::module_& m)
             py::arg("stage_id"),
             py::arg("mass"),
             py::arg("tau"),
-            py::arg("v0"),
+            py::arg("desired_speed") = py::arg("v0"),
             py::arg("a_v"),
             py::arg("a_min"),
             py::arg("b_min"),
@@ -154,10 +154,22 @@ void init_generalized_centrifugal_force_model(py::module_& m)
         .def_property(
             "v0",
             [](const JPS_GeneralizedCentrifugalForceModelState_Wrapper& w) {
+               PyErr_WarnEx(
+                    PyExc_DeprecationWarning,
+                    "'v0' is deprecated, use 'desired_speed' instead.",
+                    1);               
                 return JPS_GeneralizedCentrifugalForceModelState_GetV0(w.handle);
             },
             [](JPS_GeneralizedCentrifugalForceModelState_Wrapper& w, double v0) {
                 JPS_GeneralizedCentrifugalForceModelState_SetV0(w.handle, v0);
+            })
+              .def_property(
+            "desired_speed",
+            [](const JPS_GeneralizedCentrifugalForceModelState_Wrapper& w) {
+                return JPS_GeneralizedCentrifugalForceModelState_GetV0(w.handle);
+            },
+            [](JPS_GeneralizedCentrifugalForceModelState_Wrapper& w, double desiredSpeed) {
+                JPS_GeneralizedCentrifugalForceModelState_SetV0(w.handle, desiredSpeed);
             })
         .def_property(
             "a_v",
