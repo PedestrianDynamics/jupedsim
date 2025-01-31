@@ -111,7 +111,6 @@ void init_collision_free_speed_model_v2(py::module_& m)
             [](JPS_CollisionFreeSpeedModelV2State_Wrapper& w, double desiredSpeed) {
                 JPS_CollisionFreeSpeedModelV2State_SetV0(w.handle, desiredSpeed);
             })
-
         .def_property(
             "radius",
             [](const JPS_CollisionFreeSpeedModelV2State_Wrapper& w) {
