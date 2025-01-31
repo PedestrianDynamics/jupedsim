@@ -5,9 +5,8 @@ sphinx-book-theme==1.1.2
 sphinx-favicon==1.0.1
 sphinx-notfound-page==1.0.0
 myst-nb==1.1.0
-nbconvert==7.16.
+nbconvert==7.16.4
 deprecated~=1.2.18
-
 # notebook dependencies
 shapely
 plotly
