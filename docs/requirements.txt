@@ -6,6 +6,7 @@ sphinx-favicon~=1.0
 sphinx-notfound-page~=1.1
 myst-nb~=1.1
 nbconvert~=7.16
+deprecated~=1.2.18
 
 # notebook dependencies
 shapely
