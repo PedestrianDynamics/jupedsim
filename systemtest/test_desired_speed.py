@@ -1,34 +1,64 @@
 # Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
+
 import jupedsim as jps
 import pytest
 
 
 @pytest.fixture
-def simulation_with_social_force_model():
-    return jps.Simulation(
-        model=jps.SocialForceModel(),
-        geometry=[(0, 0), (10, 0), (10, 10), (0, 10)],
-    )
+def create_simulation():
+    """Creates a generic simulation fixture for different models."""
+
+    def _create(model):
+        return jps.Simulation(
+            model=model,
+            geometry=[(0, 0), (10, 0), (10, 10), (0, 10)],
+        )
+
+    return _create
 
 
-def test_desired_speed_deprecated(simulation_with_social_force_model):
-    sim = simulation_with_social_force_model
+@pytest.mark.parametrize(
+    "model_class, agent_class, deprecated_attr",
+    [
+        (
+            jps.SocialForceModel,
+            jps.SocialForceModelAgentParameters,
+            "desiredSpeed",
+        ),
+        (
+            jps.CollisionFreeSpeedModel,
+            jps.CollisionFreeSpeedModelAgentParameters,
+            "v0",
+        ),
+        (
+            jps.GeneralizedCentrifugalForceModel,
+            jps.GeneralizedCentrifugalForceModelAgentParameters,
+            "v0",
+        ),
+    ],
+)
+def test_desired_speed_deprecated(
+    create_simulation, model_class, agent_class, deprecated_attr
+):
+    """
+    Test that deprecated 'desiredSpeed' (or 'v0' in some models) raises warnings and is mapped to 'desired_speed'.
+    """
+    sim = create_simulation(model_class())
     wp = sim.add_waypoint_stage((10, 1), 0.5)
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
-    agent = jps.SocialForceModelAgentParameters(
+    agent = agent_class(
         journey_id=journey_id,
         stage_id=wp,
         position=(1, 1),
     )
     agent_id = sim.add_agent(agent)
-    # Check if the deprecation warning is raised
+
     with pytest.warns(
         DeprecationWarning, match="deprecated, use 'desired_speed' instead"
     ):
-        sim.agent(agent_id).model.desiredSpeed = 1.5
-        assert sim.agent(agent_id).model.desiredSpeed == 1.5
+        setattr(sim.agent(agent_id).model, deprecated_attr, 1.5)
+        assert getattr(sim.agent(agent_id).model, deprecated_attr) == 1.5
 
-    # Verify the new snake_case property reflects the same value
     assert sim.agent(agent_id).model.desired_speed == 1.5
