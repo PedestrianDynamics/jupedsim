@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
+import warnings
 from dataclasses import dataclass
+
+from deprecated import deprecated
 
 import jupedsim.native as py_jps
 
@@ -59,7 +62,7 @@ class CollisionFreeSpeedModelV2AgentParameters:
 
     position: tuple[float, float] = (0.0, 0.0)
     time_gap: float = 1.0
-    v0: float = 1.2
+    desired_speed: float = 1.2
     radius: float = 0.2
     journey_id: int = 0
     stage_id: int = 0
@@ -68,13 +71,29 @@ class CollisionFreeSpeedModelV2AgentParameters:
     strength_geometry_repulsion: float = 5.0
     range_geometry_repulsion: float = 0.02
 
+    def __init__(
+        self,
+        v0=None,
+        **kwargs,
+    ):
+        """Init dataclass to handle deprecated argument."""
+        if v0 is not None:
+            warnings.warn(
+                "'v0' is deprecated, use 'desired_speed' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            self.desired_speed = v0
+
+        self.__dict__.update(kwargs)
+
     def as_native(
         self,
     ) -> py_jps.CollisionFreeSpeedModelV2AgentParameters:
         return py_jps.CollisionFreeSpeedModelV2AgentParameters(
             position=self.position,
             time_gap=self.time_gap,
-            v0=self.v0,
+            v0=self.desired_speed,
             radius=self.radius,
             journey_id=self.journey_id,
             stage_id=self.stage_id,
@@ -98,13 +117,25 @@ class CollisionFreeSpeedModelV2State:
         self._obj.time_gap = time_gap
 
     @property
+    def desired_speed(self) -> float:
+        """desired Speed of this agent."""
+        return self._obj.desired_speed
+
+    @desired_speed.setter
+    def desired_speed(self, desired_speed):
+        self._obj.desired_speed = desired_speed
+
+    @property
+    @deprecated("deprecated, use 'desired_speed' instead.")
     def v0(self) -> float:
         """Maximum speed of this agent."""
-        return self._obj.v0
+        return self._obj.desired_speed
 
     @v0.setter
+    @deprecated("deprecated, use 'desired_speed' instead.")
     def v0(self, v0):
-        self._obj.v0 = v0
+        self._obj.desired_speed = v0
+        object.__setattr__(self, "v0", v0)
 
     @property
     def radius(self) -> float:
