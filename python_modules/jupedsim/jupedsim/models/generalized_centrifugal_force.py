@@ -67,7 +67,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
         stage_id: Id of the stage the agent targets.
         mass: Mass of the agent.
         tau: Time constant that describes how fast the agent accelerates to its desired speed (v0).
-        v0: Maximum speed of the agent.
+        desired_speed: Maximum speed of the agent.
         a_v: Stretch of the ellipsis semi-axis along the movement vector.
         a_min: Minimum length of the ellipsis semi-axis along the movement vector.
         b_min: Minimum length of the ellipsis semi-axis orthogonal to the movement vector.

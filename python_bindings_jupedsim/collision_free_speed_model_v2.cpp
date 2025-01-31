@@ -52,7 +52,7 @@ void init_collision_free_speed_model_v2(py::module_& m)
         .def("__repr__", [](const JPS_CollisionFreeSpeedModelV2AgentParameters& p) {
             return fmt::format(
                 "position: {}, journey_id: {}, stage_id: {}, "
-                "time_gap: {}, v0: {}, radius: {}",
+                "time_gap: {}, desired_speed: {}, radius: {}",
                 "strength_neighbor_repulsion: {}, range_neighbor_repulsion: {}"
                 "strength_geometry_repulsion: {}, range_geometry_repulsion: {}",
                 intoTuple(p.position),
