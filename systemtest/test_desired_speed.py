@@ -31,16 +31,16 @@ def create_simulation():
             jps.CollisionFreeSpeedModelAgentParameters,
             "v0",
         ),
-        # (
-        #     jps.CollisionFreeSpeedModelV2,
-        #     jps.CollisionFreeSpeedModelAgentParametersV2,
-        #     "v0",
-        # ),
-        # (
-        #     jps.GeneralizedCentrifugalForceModel,
-        #     jps.GeneralizedCentrifugalForceModelAgentParameters,
-        #     "v0",
-        # ),
+        (
+            jps.CollisionFreeSpeedModelV2,
+            jps.CollisionFreeSpeedModelV2AgentParameters,
+            "v0",
+        ),
+        (
+            jps.GeneralizedCentrifugalForceModel,
+            jps.GeneralizedCentrifugalForceModelAgentParameters,
+            "v0",
+        ),
     ],
 )
 def test_desired_speed_deprecated(
