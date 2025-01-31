@@ -1,4 +1,3 @@
-// Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "conversion.hpp"
 #include "wrapper.hpp"
@@ -148,6 +147,20 @@ void init_simulation(py::module_& m)
                JPS_CollisionFreeSpeedModelV2AgentParameters& parameters) {
                 JPS_ErrorMessage errorMsg{};
                 auto result = JPS_Simulation_AddCollisionFreeSpeedModelV2Agent(
+                    simulation.handle, parameters, &errorMsg);
+                if(result) {
+                    return result;
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
+            })
+        .def(
+            "add_agent",
+            [](JPS_Simulation_Wrapper& simulation,
+               JPS_AnticipationVelocityModelAgentParameters& parameters) {
+                JPS_ErrorMessage errorMsg{};
+                auto result = JPS_Simulation_AddAnticipationVelocityModelAgent(
                     simulation.handle, parameters, &errorMsg);
                 if(result) {
                     return result;

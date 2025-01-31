@@ -1,4 +1,3 @@
-// Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "conversion.hpp"
 #include "wrapper.hpp"
@@ -70,6 +69,7 @@ void init_agent(py::module_& m)
                     std::unique_ptr<JPS_GeneralizedCentrifugalForceModelState_Wrapper>,
                     std::unique_ptr<JPS_CollisionFreeSpeedModelState_Wrapper>,
                     std::unique_ptr<JPS_CollisionFreeSpeedModelV2State_Wrapper>,
+                    std::unique_ptr<JPS_AnticipationVelocityModelState_Wrapper>,
                     std::unique_ptr<JPS_SocialForceModelState_Wrapper>> {
                 switch(JPS_Agent_GetModelType(w.handle)) {
                     case JPS_GeneralizedCentrifugalForceModel:
@@ -81,6 +81,9 @@ void init_agent(py::module_& m)
                     case JPS_CollisionFreeSpeedModelV2:
                         return std::make_unique<JPS_CollisionFreeSpeedModelV2State_Wrapper>(
                             JPS_Agent_GetCollisionFreeSpeedModelV2State(w.handle, nullptr));
+                    case JPS_AnticipationVelocityModel:
+                        return std::make_unique<JPS_AnticipationVelocityModelState_Wrapper>(
+                            JPS_Agent_GetAnticipationVelocityModelState(w.handle, nullptr));
                     case JPS_SocialForceModel:
                         return std::make_unique<JPS_SocialForceModelState_Wrapper>(
                             JPS_Agent_GetSocialForceModelState(w.handle, nullptr));

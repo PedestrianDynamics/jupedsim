@@ -1,5 +1,4 @@
-/* Copyright © 2012-2024 Forschungszentrum Jülich GmbH */
-/* SPDX-License-Identifier: LGPL-3.0-or-later */
+// SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
 #include "export.h"
@@ -61,6 +60,7 @@ typedef enum JPS_ModelType {
     JPS_GeneralizedCentrifugalForceModel,
     JPS_CollisionFreeSpeedModel,
     JPS_CollisionFreeSpeedModelV2,
+    JPS_AnticipationVelocityModel,
     JPS_SocialForceModel
 } JPS_ModelType;
 

@@ -7,6 +7,7 @@ models. Below is a list of all the models that are currently available. Please
 refer to the links in the respective section for a detailed discussion of the
 respective model.
 
+
 **************************
 Collision Free Speed Model
 **************************
@@ -43,6 +44,79 @@ A `detailed description
 available on `PedestrianDynamics`_.
 
 The original publication can be found at https://arxiv.org/abs/1512.05597
+
+**************************
+Anticipation Velocity Model
+**************************
+
+The anticipation velocity model (AVM) is a mathematical approach for pedestrian
+dynamics that prevents collisions through anticipatory behavior. The model divides
+anticipation into three components: situation perception, future prediction, and
+strategy selection.
+Building upon the collision-free speed model (CSM), AVM determines agent movement
+through exponential repulsion from nearby agents. Unlike CSM, the influence
+direction is orthogonal to the agent's desired direction.
+Repulsion strength is affected by agents within the perception field -
+specifically, those in the union of two half-planes where the agent moves or
+intends to move. Agents adjust their speed based on anticipated distance to the
+nearest neighbor in their headway, enabling navigation through congested areas
+without overlap.
+The model incorporates a reaction time factor to adjust the turning process rate
+from the current to the new direction.
+
+**Wall Influence**
+
+Walls are treated as gliding surfaces, meaning that agents adjust their movement
+to avoid collisions while maintaining smooth trajectories along wall boundaries.
+The influence of walls on an agent's movement is determined based on their distance
+to the wall and the direction of their movement.
+The following rules govern the behavior:
+
+1. **Critical Wall Distance**:
+   - A critical wall distance is defined as the sum of the agent's radius and
+     a configurable buffer distance (`wallBufferDistance`).
+   - If an agent comes within this critical distance to a wall,
+     their direction is adjusted to ensure a minimum distance is maintained.
+
+2. **Influence Start Distance**:
+   - An influence start distance is set at twice the critical wall distance to
+     allow for smoother adjustments as the agent approaches the wall.
+
+3. **Direction Adjustment**:
+   - When an agent is within the critical wall distance and moving toward the wall:
+     - The direction is projected parallel to the wall to ensure no penetration occurs.
+     - A small outward component is added to maintain the minimum distance from the wall.
+   - When an agent is between the critical wall distance and the influence start distance:
+     - If moving toward the wall, their direction is adjusted with a smooth transition
+       factor to gradually reduce components moving perpendicular to the wall.
+
+4. **Wall Direction Handling**:
+   - The agent's movement direction is decomposed into parallel and perpendicular
+     components relative to the wall surface.
+   - Adjustments are applied only to the perpendicular component, ensuring the parallel
+     component remains intact for smooth movement along the wall.
+
+In summary walls do not affect the speed of agents, only their direction.
+Agents glide along walls by adjusting their direction while maintaining the
+desired movement as much as possible. When necessary, the influence transitions smoothly
+as the agent moves closer to or farther from the wall.
+
+The anticipation velocity  model takes into account the length of the agent,
+which determines the required space for movement, and the maximum achievable
+speed of the agent. This simplified and computationally efficient model aims to
+mirror real-world pedestrian behaviors while maintaining smooth movement
+dynamics.
+
+The parameters of the anticipation velocity model can be defined per-agent.
+
+In :class:`~jupedsim.models.AnticipationVelocityModel` neighbor and wall
+parameters are per-agent parameters that can be set individually via
+:class:`~jupedsim.models.AnticipationVelocityModelAgentParameters` and can be
+changed at any time.
+
+
+The original publication can be found at https://doi.org/10.1016/j.trc.2021.103464
+
 
 ***********************************
 Generalized Centrifugal Force Model

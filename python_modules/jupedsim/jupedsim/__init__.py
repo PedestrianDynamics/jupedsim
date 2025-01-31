@@ -1,4 +1,3 @@
-# Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 from jupedsim.agent import Agent
@@ -24,6 +23,11 @@ from jupedsim.library import (
     set_error_callback,
     set_info_callback,
     set_warning_callback,
+)
+from jupedsim.models.anticipation_velocity_model import (
+    AnticipationVelocityModel,
+    AnticipationVelocityModelAgentParameters,
+    AnticipationVelocityModelState,
 )
 from jupedsim.models.collision_free_speed import (
     CollisionFreeSpeedModel,
@@ -105,6 +109,9 @@ __all__ = [
     "CollisionFreeSpeedModelV2AgentParameters",
     "CollisionFreeSpeedModelV2",
     "CollisionFreeSpeedModelV2State",
+    "AnticipationVelocityModelAgentParameters",
+    "AnticipationVelocityModel",
+    "AnticipationVelocityModelState",
     "SocialForceModelAgentParameters",
     "SocialForceModel",
     "SocialForceModelState",

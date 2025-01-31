@@ -1,4 +1,3 @@
-// Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Point.hpp"
 
@@ -167,6 +166,11 @@ Point& Point::operator+=(const Point& p)
     x += p.x;
     y += p.y;
     return *this;
+}
+
+Point Point::operator-() const
+{
+    return Point(-x, -y);
 }
 
 const Point operator/(const Point& p, double f)

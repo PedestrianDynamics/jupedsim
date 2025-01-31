@@ -5,6 +5,7 @@ Notebooks
 .. toctree::
     :maxdepth: 1
 
+    model-comparison
     corner
     double-bottleneck
     journey

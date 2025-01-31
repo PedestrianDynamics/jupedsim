@@ -1,18 +1,14 @@
-// Copyright © 2012-2024 Forschungszentrum Jülich GmbH
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
 #include "Clonable.hpp"
 #include "CollisionGeometry.hpp"
-#include "GeneralizedCentrifugalForceModelData.hpp"
 #include "OperationalModelType.hpp"
 #include "OperationalModelUpdate.hpp"
 #include "Point.hpp"
 #include "SimulationError.hpp"
-#include "UniqueID.hpp"
 
 #include <optional>
-#include <unordered_map>
 
 template <typename T>
 class NeighborhoodSearch;
