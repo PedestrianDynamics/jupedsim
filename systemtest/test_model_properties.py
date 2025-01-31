@@ -199,7 +199,7 @@ def test_desired_speed_deprecated(simulation_with_social_force_model):
 
     # Check if the deprecation warning is raised
     with pytest.warns(
-        UserWarning, match="deprecated, use 'desired_speed' instead"
+        DeprecationWarning, match="deprecated, use 'desired_speed' instead"
     ):
         sim.agent(agent_id).model.desiredSpeed = 1.5
         assert sim.agent(agent_id).model.desiredSpeed == 1.5

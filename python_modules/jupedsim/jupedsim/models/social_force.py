@@ -4,6 +4,7 @@
 from dataclasses import dataclass
 from deprecated import deprecated
 import jupedsim.native as py_jps
+import warnings
 
 
 @dataclass(kw_only=True)
@@ -55,7 +56,7 @@ class SocialForceModelAgentParameters:
     velocity: tuple[float, float] = (0.0, 0.0)
     # the values are from paper. doi is in class description
     mass: float = 80.0  # [kg] is called m
-    desiredSpeed: float = (
+    desired_speed: float = (
         0.8  # [m / s] is called v0 can be set higher depending on situation
     )
     reactionTime: float = 0.5  # [s] is called tau
@@ -65,6 +66,25 @@ class SocialForceModelAgentParameters:
     radius: float = (
         0.3  # [m] in paper 2r is uniformy distibuted in interval [0.5 m, 0.7 m]
     )
+
+    def __init__(self, *args, desiredSpeed=None, **kwargs):
+        """
+        Init dataclass to handle deprecated arguments.
+        """
+        if desiredSpeed is not None:
+            warnings.warn(
+                "'desiredSpeed' is deprecated, use 'desired_speed' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            self.desired_speed = desiredSpeed
+
+        super().__setattr__("__dataclass_fields__", self.__dataclass_fields__)
+        self.__dict__.update(kwargs)
+        self.__post_init__()
+
+    def __post_init__(self):
+        object.__setattr__(self, "desiredSpeed", self.desired_speed)
 
     def as_native(
         self,
@@ -76,7 +96,7 @@ class SocialForceModelAgentParameters:
             stage_id=self.stage_id,
             velocity=self.velocity,
             mass=self.mass,
-            desiredSpeed=self.desiredSpeed,
+            desiredSpeed=self.desired_speed,
             reactionTime=self.reactionTime,
             agentScale=self.agentScale,
             obstacleScale=self.obstacleScale,
@@ -111,12 +131,12 @@ class SocialForceModelState:
     @deprecated("deprecated, use 'desired_speed' instead.")
     def desiredSpeed(self) -> float:
         """desired Speed of this agent."""
-        return self._obj.desiredSpeed
+        return self._obj.desired_speed
 
     @desiredSpeed.setter
     @deprecated("deprecated, use 'desired_speed' instead.")
     def desiredSpeed(self, desiredSpeed):
-        self._obj.desiredSpeed = desiredSpeed
+        self._obj.desired_speed = desiredSpeed
 
     @property
     def desired_speed(self) -> float:
