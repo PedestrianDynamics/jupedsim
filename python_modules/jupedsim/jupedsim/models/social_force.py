@@ -165,7 +165,6 @@ class SocialForceModelState:
     @deprecated("deprecated, use 'desired_speed' instead.")
     def desiredSpeed(self, desiredSpeed):
         self._obj.desired_speed = desiredSpeed
-        object.__setattr__(self, "desiredSpeed", desiredSpeed)
 
     @property
     def desired_speed(self) -> float:
@@ -186,7 +185,6 @@ class SocialForceModelState:
     @deprecated("deprecated, use 'reaction_time' instead.")
     def reactionTime(self, reactionTime):
         self._obj.reaction_time = reactionTime
-        object.__setattr__(self, "reactionTime", reactionTime)
 
     @property
     def reaction_time(self) -> float:
@@ -205,7 +203,6 @@ class SocialForceModelState:
     @deprecated("deprecated, use 'agent_scale' instead.")
     def agentScale(self, agentScale):
         self._obj.agent_scale = agentScale
-        object.__setattr__(self, "agentScale", agentScale)
 
     @property
     def agent_scale(self) -> float:
@@ -224,7 +221,6 @@ class SocialForceModelState:
     @deprecated("deprecated, use 'obstacle_scale' instead.")
     def obstacleScale(self, obstacleScale):
         self._obj.obstacle_scale = obstacleScale
-        object.__setattr__(self, "obstacleScale", obstacleScale)
 
     @property
     def obstacle_scale(self) -> float:
@@ -243,7 +239,6 @@ class SocialForceModelState:
     @deprecated("deprecated, use 'force_distance' instead.")
     def forceDistance(self, forceDistance):
         self._obj.force_distance = forceDistance
-        object.__setattr__(self, "forceDistance", forceDistance)
 
     @property
     def force_distance(self) -> float:

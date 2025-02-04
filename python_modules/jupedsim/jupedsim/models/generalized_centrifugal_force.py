@@ -173,7 +173,6 @@ class GeneralizedCentrifugalForceModelState:
     @deprecated("deprecated, use 'desired_speed' instead.")
     def v0(self, v0):
         self._obj.desired_speed = v0
-        object.__setattr__(self, "v0", v0)
 
     @property
     def a_v(self) -> float:

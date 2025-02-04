@@ -160,7 +160,7 @@ def test_set_model_parameters_collision_free_speed_model(
     sim.agent(agent_id).model.v0 = 2.0
     assert sim.agent(agent_id).model.v0 == 2.0
 
-    sim.agent(agent_id).model.desired_ = 2.1
+    sim.agent(agent_id).model.desired_speed = 2.1
     assert sim.agent(agent_id).model.desired_speed == 2.1
 
     sim.agent(agent_id).model.time_gap = 3.0
