@@ -114,9 +114,9 @@ parameters are per-agent parameters that can be set individually via
 :class:`~jupedsim.models.AnticipationVelocityModelAgentParameters` and can be
 changed at any time.
 
-`A detailed description
-<https://pedestriandynamics.org/models/anticipation_velocity_model/>`_ is
-available on `PedestrianDynamics`_.
+A `detailed description
+<https://pedestriandynamics.org/models/anticipation_velocity_model/>`_ is available on
+`PedestrianDynamics`_.
 
 The original publication can be found at https://doi.org/10.1016/j.trc.2021.103464
 
