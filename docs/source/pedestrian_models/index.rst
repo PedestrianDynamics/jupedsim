@@ -114,12 +114,12 @@ parameters are per-agent parameters that can be set individually via
 :class:`~jupedsim.models.AnticipationVelocityModelAgentParameters` and can be
 changed at any time.
 
-A `detailed description
-<https://pedestriandynamics.org/models/anticipation_velocity_model/>`_ is available on
-`PedestrianDynamics`_.
+For an in-depth explanation of the model, refer to the 
+`detailed description <https://pedestriandynamics.org/models/anticipation_velocity_model/>`_ 
+available on the `PedestrianDynamics`_ website.
 
-The original publication can be found at https://doi.org/10.1016/j.trc.2021.103464
-
+The original research is published in 
+`Transportation Research Part C <https://doi.org/10.1016/j.trc.2021.103464>`_.
 
 ***********************************
 Generalized Centrifugal Force Model
