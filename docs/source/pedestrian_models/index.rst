@@ -45,10 +45,17 @@ available on `PedestrianDynamics`_.
 
 The original publication can be found at https://arxiv.org/abs/1512.05597
 
+The errors in the `index.rst` file can be fixed as follows:
+
+1. **Title Overline Too Short**: Ensure the overline matches the length of the title text.
+
+2. **Unexpected Indentation**: Remove unnecessary indentations.
+
+3. **Block Quote Ends Without a Blank Line**: Ensure block quotes are followed by a blank line.
+
 **************************
 Anticipation Velocity Model
 **************************
-
 The anticipation velocity model (AVM) is a mathematical approach for pedestrian
 dynamics that prevents collisions through anticipatory behavior. The model divides
 anticipation into three components: situation perception, future prediction, and
@@ -73,35 +80,35 @@ to the wall and the direction of their movement.
 The following rules govern the behavior:
 
 1. **Critical Wall Distance**:
-   - A critical wall distance is defined as the sum of the agent's radius and
-     a configurable buffer distance (`wallBufferDistance`).
-   - If an agent comes within this critical distance to a wall,
-     their direction is adjusted to ensure a minimum distance is maintained.
+    - A critical wall distance is defined as the sum of the agent's radius and
+      a configurable buffer distance (`wallBufferDistance`).
+    - If an agent comes within this critical distance to a wall,
+      their direction is adjusted to ensure a minimum distance is maintained.
 
 2. **Influence Start Distance**:
-   - An influence start distance is set at twice the critical wall distance to
-     allow for smoother adjustments as the agent approaches the wall.
+    - An influence start distance is set at twice the critical wall distance to
+      allow for smoother adjustments as the agent approaches the wall.
 
 3. **Direction Adjustment**:
-   - When an agent is within the critical wall distance and moving toward the wall:
-     - The direction is projected parallel to the wall to ensure no penetration occurs.
-     - A small outward component is added to maintain the minimum distance from the wall.
-   - When an agent is between the critical wall distance and the influence start distance:
-     - If moving toward the wall, their direction is adjusted with a smooth transition
-       factor to gradually reduce components moving perpendicular to the wall.
+    - When an agent is within the critical wall distance and moving toward the wall:
+        - The direction is projected parallel to the wall to ensure no penetration occurs.
+        - A small outward component is added to maintain the minimum distance from the wall.
+    - When an agent is between the critical wall distance and the influence start distance:
+        - If moving toward the wall, their direction is adjusted with a smooth transition
+          factor to gradually reduce components moving perpendicular to the wall.
 
 4. **Wall Direction Handling**:
-   - The agent's movement direction is decomposed into parallel and perpendicular
-     components relative to the wall surface.
-   - Adjustments are applied only to the perpendicular component, ensuring the parallel
-     component remains intact for smooth movement along the wall.
+    - The agent's movement direction is decomposed into parallel and perpendicular
+      components relative to the wall surface.
+    - Adjustments are applied only to the perpendicular component, ensuring the parallel
+      component remains intact for smooth movement along the wall.
 
-In summary walls do not affect the speed of agents, only their direction.
+In summary, walls do not affect the speed of agents, only their direction.
 Agents glide along walls by adjusting their direction while maintaining the
 desired movement as much as possible. When necessary, the influence transitions smoothly
 as the agent moves closer to or farther from the wall.
 
-The anticipation velocity  model takes into account the length of the agent,
+The anticipation velocity model takes into account the length of the agent,
 which determines the required space for movement, and the maximum achievable
 speed of the agent. This simplified and computationally efficient model aims to
 mirror real-world pedestrian behaviors while maintaining smooth movement
