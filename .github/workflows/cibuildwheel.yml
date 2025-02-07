@@ -75,11 +75,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    # Still need to use 3.12 because hdf5 is not yet available for python 3.13 and we are using this in our notbooks
-    - name: Set up Python 3.12
+    - name: Set up Python 3.13
       uses: actions/setup-python@v5
       with:
-        python-version: "3.12"
+        python-version: "3.13"
 
     - name: Install jupedsim
       run: |
