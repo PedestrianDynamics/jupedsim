@@ -1,10 +1,14 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Point.hpp"
 
-#include "Macros.hpp"
-
 #include <Logger.hpp>
 #include <limits>
+
+bool Point::isZeroLength() const
+{
+    constexpr double epsilon = 1e-6;
+    return (std::abs(x) < epsilon && std::abs(y) < epsilon);
+}
 
 double Point::Norm() const
 {
@@ -25,102 +29,51 @@ std::tuple<double, Point> Point::NormAndNormalized() const
         return std::make_tuple(0.0, Point(0.0, 0.0));
 }
 
-/* Transformiert die "normalen" Koordinaten in Koordinaten der Ellipse
- * dazu verschieben des Koordinaten Ursprungs in Center und anschliessend drehen um phi
- * alle Punkte müssen in "normalen" Koordinaten gegeben sein
- * center: Center der Ellipse in deren System transformiert werden soll
- * phi: Winkel der Ellipse in deren System transformiert werden soll
- * */
-
-/*coordinate transformation of the point P(x,y) expressed in coord system S1 to a new coord. sys S2
-
-           A
-           *
-         |     S_2
-     \   |   /
- |    \  |  /
- |     \ | /^phi
- | yc___\ /_)_________ S_3
- |       O1
- |       |
- |       |
- |       xc
- |
- |___________________________
-O
-S_1
-
-
-////////////////////////////////////
-S_1 is cartesian coordinate system!!
-////////////////////////////////////
-
-  input:
-  - (x,y)        :  coordinates of the point A in S_1
-  - (xc,yc)      : coordinate of the center in the  S_1 (Center of Ellipse)
-  - phi          : angle between the S_1 and S_2
-
-  output:
-  +  (xnew,ynew) : new coordinate of the point A in the coord. sys S2
-
-OA = OO1 + O1A
-
- [x ; y] = [xc ; yc] +  [x_3 ; y_3]   : (1) ( with [x_i ; y_i] coordinats of P in S_i and i in
-{1,2,3} )
-
-[x_2 ; y_2] = M(phi) * [x_3 ; y_3]  : (2)
-
-
-(1) in (2)--->
-
--->  [x_2 ; y_2] = M(phi) * ([x ; y] - [xc ; yc])
-
-
-
-after rotation:
-OC = OO1 +O1C
-OC  = -O1O +O1C
-
-xnew = -xc + x
-
-*/
+/**
+ * Transforms a point from the global Cartesian coordinate system (S_1)
+ * into the ellipse-local coordinate system (S_2).
+ *
+ * Steps:
+ * 1. **Translation:** Move the point relative to the ellipse center.
+ * 2. **Rotation:** Rotate by angle -phi to align with S_2 axes.
+ *
+ * @param center  The center of the ellipse in Cartesian coordinates (xc, yc)
+ * @param cphi    Cosine of rotation angle phi
+ * @param sphi    Sine of rotation angle phi
+ * @return        Point transformed into the ellipse-local frame (S_2)
+ */
 Point Point::TransformToEllipseCoordinates(const Point& center, double cphi, double sphi) const
 {
     Point p = Point(x, y);
     return (p - center).Rotate(cphi, -sphi);
 }
-
-/*
-This is the reverse funktion of TransformToEllipseCoordinates(),
-where the coord. of a point are transformated to cart. coord.
-
- input:
-  - (x,y)        :  coordinates of the point P in S_2
-  - (xc,yc)      : coordinate of the center in the  S_1 (Center of Ellipse)
-  - phi          : angle between the S_1 and S_2
-
-  output:
-  +  (xnew,ynew) : new coordinate of the point P in the coord. sys S_1
-
-[x_2 ; y_2] = M(phi) * ([x ; y] - [xc ; yc]) (see comments in CoordTransToEllipse() )
-
-
-----> [x ; y] =  M(-phi) * [x_2 ; y_2] +  [xc ; yc]
-
-*/
-
+/**
+ * Transforms coordinates from ellipse-local system (S_2) back to Cartesian system (S_1).
+ * This is the inverse operation of TransformToEllipseCoordinates().
+ *
+ * The transformation follows these steps:
+ * 1. Take point P(x,y) in ellipse system S_2
+ * 2. Rotate by -phi to align with Cartesian axes: M(-phi) * [x_2 ; y_2]
+ * 3. Add ellipse center coordinates to translate: + [xc ; yc]
+ *
+ * @param center The ellipse center coordinates (xc,yc) in Cartesian system S_1
+ * @param cphi   cos(phi), where phi is the angle between S_1 and S_2
+ * @param sphi   sin(phi)
+ * @return       Point in Cartesian coordinates (S_1)
+ */
 Point Point::TransformToCartesianCoordinates(const Point& center, double cphi, double sphi) const
 {
+
     Point p = Point(x, y);
     return (p.Rotate(cphi, sphi) + center);
 }
 
-/*rotate a two-dimensional vector by an angle of theta
-
-Rotation-matrix=[cos(theta)  -sin(theta)]
-                [ sin(theta)  cos(theta)]
-
-*/
+/**
+ * CCW rotate Point (interpreted as vector) around origin.
+ * @param ctheta Cosine of rotation angle
+ * @param stetha Sine of rotation angle
+ * @return Rotated point
+ */
 Point Point::Rotate(double ctheta, double stheta) const
 {
     return Point(x * ctheta - y * stheta, x * stheta + y * ctheta);

@@ -181,7 +181,14 @@ def test_set_model_parameters_generalized_centrifugal_force_model(
         stage_id=wp,
         position=(1, 1),
     )
+    agent2 = jps.GeneralizedCentrifugalForceModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(3, 1),
+    )
+
     agent_id = sim.add_agent(agent)
+    sim.add_agent(agent2)
 
     sim.agent(agent_id).model.speed = 2.0
     assert sim.agent(agent_id).model.speed == 2.0

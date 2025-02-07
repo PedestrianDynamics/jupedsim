@@ -241,7 +241,7 @@ typedef struct JPS_GeneralizedCentrifugalForceModelAgentParameters {
      * Orientation vector of the agent.
      * The orientation vector will internally be normalized.
      */
-    JPS_Point orientation{0, 0};
+    JPS_Point orientation{1, 0};
     /**
      * Defines the journey this agent will take use
      */

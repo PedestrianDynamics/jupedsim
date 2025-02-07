@@ -472,12 +472,16 @@ double GeneralizedCentrifugalForceModel::AgentToAgentSpacing(
     const Ellipse E2{model2.Av, model2.AMin, model2.BMax, model2.BMin};
     const auto v0_1 = model1.v0;
     const auto v0_2 = model2.v0;
+    // Avoid division by zero by setting scale to 1 when v0 is 0
+    const double scale1 = (v0_1 == 0.0) ? 1.0 : model1.speed / v0_1;
+    const double scale2 = (v0_2 == 0.0) ? 1.0 : model2.speed / v0_2;
+
     return E1.EffectiveDistanceToEllipse(
         E2,
         agent1.pos,
         agent2.pos,
-        model1.speed / v0_1,
-        model2.speed / v0_2,
+        scale1,
+        scale2,
         model1.speed,
         model2.speed,
         agent1.orientation,

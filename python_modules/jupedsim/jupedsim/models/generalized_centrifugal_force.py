@@ -74,7 +74,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
     speed: float = 0.0
     e0: tuple[float, float] = (0.0, 0.0)
     position: tuple[float, float] = (0.0, 0.0)
-    orientation: tuple[float, float] = (0.0, 0.0)
+    orientation: tuple[float, float] = (1.0, 0.0)
     journey_id: int = -1
     stage_id: int = -1
     mass: float = 1
