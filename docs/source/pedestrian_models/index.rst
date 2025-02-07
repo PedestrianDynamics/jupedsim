@@ -45,14 +45,6 @@ available on `PedestrianDynamics`_.
 
 The original publication can be found at https://arxiv.org/abs/1512.05597
 
-The errors in the `index.rst` file can be fixed as follows:
-
-1. **Title Overline Too Short**: Ensure the overline matches the length of the title text.
-
-2. **Unexpected Indentation**: Remove unnecessary indentations.
-
-3. **Block Quote Ends Without a Blank Line**: Ensure block quotes are followed by a blank line.
-
 **************************
 Anticipation Velocity Model
 **************************
