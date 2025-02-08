@@ -37,11 +37,6 @@ def create_simulation():
             "v0",
         ),
         (
-            jps.AnticipationVelocityModel,
-            jps.AnticipationVelocityModelAgentParameters,
-            "v0",
-        ),
-        (
             jps.GeneralizedCentrifugalForceModel,
             jps.GeneralizedCentrifugalForceModelAgentParameters,
             "v0",
