@@ -42,7 +42,35 @@ def create_simulation():
         ),
     ],
 )
-def test_desired_speed_deprecated(
+def test_deprecated_constructor_parameter(
+    create_simulation,
+    model_class,
+    agent_class,
+    deprecated_attr,
+):
+    """Test that passing a deprecated parameter to the agent constructor."""
+    sim = create_simulation(model_class())
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    kwargs = {
+        "journey_id": journey_id,
+        "stage_id": wp,
+        "position": (1, 1),
+        deprecated_attr: 1.5,
+    }
+
+    with pytest.warns(
+        DeprecationWarning, match="deprecated, use 'desired_speed' instead"
+    ):
+        agent = agent_class(**kwargs)
+
+    agent_id = sim.add_agent(agent)
+
+    assert sim.agent(agent_id).model.desired_speed == 1.5
+
+
+def test_changing_desired_speed_deprecated(
     create_simulation, model_class, agent_class, deprecated_attr
 ):
     """
