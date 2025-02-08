@@ -93,22 +93,6 @@ class AnticipationVelocityModelAgentParameters:
     anticipation_time: float = 1.0
     reaction_time: float = 0.3
 
-    def __init__(
-        self,
-        v0=None,
-        **kwargs,
-    ):
-        """Init dataclass to handle deprecated argument."""
-        if v0 is not None:
-            warnings.warn(
-                "'v0' is deprecated, use 'desired_speed' instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            self.desired_speed = v0
-
-        self.__dict__.update(kwargs)
-
     def as_native(
         self,
     ) -> py_jps.AnticipationVelocityModelAgentParameters:
@@ -147,17 +131,6 @@ class AnticipationVelocityModelState:
     @desired_speed.setter
     def desired_speed(self, desired_speed):
         self._obj.desired_speed = desired_speed
-
-    @property
-    @deprecated("deprecated, use 'desired_speed' instead.")
-    def v0(self) -> float:
-        """Maximum speed of this agent."""
-        return self._obj.desired_speed
-
-    @v0.setter
-    @deprecated("deprecated, use 'desired_speed' instead.")
-    def v0(self, v0):
-        self._obj.desired_speed = v0
 
     @property
     def radius(self) -> float:
