@@ -1,10 +1,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-import warnings
 from dataclasses import dataclass
 from random import randint
-
-from deprecated import deprecated
 
 import jupedsim.native as py_jps
 
