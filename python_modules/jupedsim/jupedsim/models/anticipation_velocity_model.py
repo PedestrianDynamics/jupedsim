@@ -62,7 +62,7 @@ class AnticipationVelocityModelAgentParameters:
         .. code:: python
 
             positions = [...] # List of initial agent positions
-            params = AnticipationVelocityModelAgentParameters(v0=0.9) # all agents are slower
+            params = AnticipationVelocityModelAgentParameters(desired_speed=0.9) # all agents are slower
             for p in positions:
                 params.position = p
                 sim.add_agent(params)
@@ -99,7 +99,7 @@ class AnticipationVelocityModelAgentParameters:
         return py_jps.AnticipationVelocityModelAgentParameters(
             position=self.position,
             time_gap=self.time_gap,
-            v0=self.desired_speed,
+            desired_speed=self.desired_speed,
             radius=self.radius,
             journey_id=self.journey_id,
             stage_id=self.stage_id,
