@@ -176,13 +176,10 @@ BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
 
 GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
 {
+
     if(!_geometry->InsideGeometry(agent.pos)) {
         throw SimulationError("Agent {} not inside walkable area", agent.pos);
     }
-
-    agent.orientation = agent.orientation.Normalized();
-    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry);
-
     if(_journeys.count(agent.journeyId) == 0) {
         throw SimulationError("Unknown journey id: {}", agent.journeyId);
     }
@@ -190,6 +187,16 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
     if(!_journeys.at(agent.journeyId)->ContainsStage(agent.stageId)) {
         throw SimulationError("Unknown stage id: {}", agent.stageId);
     }
+
+    if(std::holds_alternative<GeneralizedCentrifugalForceModelData>(agent.model))
+        if(agent.orientation.isZeroLength()) {
+            throw SimulationError(
+                "Orientation is invalid: {}. Length should be 1.", agent.orientation);
+        }
+
+    agent.orientation = agent.orientation.Normalized();
+    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry);
+
     _stageManager.HandleNewAgent(agent.stageId);
     _agents.emplace_back(std::move(agent));
     _neighborhoodSearch.AddAgent(_agents.back());
