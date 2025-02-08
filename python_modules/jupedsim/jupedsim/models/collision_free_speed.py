@@ -83,6 +83,11 @@ class CollisionFreeSpeedModelAgentParameters:
             )
             self.desired_speed = v0
 
+        allowed_keys = set(self.__class__.__dataclass_fields__.keys())
+        extra_keys = set(kwargs.keys()) - allowed_keys
+        if extra_keys:
+            raise TypeError(f"Unexpected keyword arguments: {extra_keys}")
+
         self.__dict__.update(kwargs)
 
     def as_native(self) -> py_jps.CollisionFreeSpeedModelAgentParameters:
