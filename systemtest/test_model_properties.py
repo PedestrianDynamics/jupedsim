@@ -46,6 +46,52 @@ def simulation_with_collision_free_speed_model_v2():
     )
 
 
+def test_initial_parameters_collision_free_speed_model_v2(
+    simulation_with_collision_free_speed_model_v2,
+):
+    sim = simulation_with_collision_free_speed_model_v2
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    # Create an agent with distinct non-default values for each parameter.
+    params = jps.CollisionFreeSpeedModelV2AgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+        time_gap=0.1,
+        v0=0.12,
+        radius=0.13,
+        strength_neighbor_repulsion=0.14,
+        range_neighbor_repulsion=0.15,
+        strength_geometry_repulsion=0.16,
+        range_geometry_repulsion=0.17,
+    )
+    agent_id = sim.add_agent(params)
+
+    agent_model = sim.agent(agent_id).model
+    assert agent_model.time_gap == 0.1, (
+        f"Expected time_gap to be 0.1, got {agent_model.time_gap}"
+    )
+    assert agent_model.v0 == 0.12, (
+        f"Expected v0 to be 0.12, got {agent_model.v0}"
+    )
+    assert agent_model.radius == 0.13, (
+        f"Expected radius to be 0.13, got {agent_model.radius}"
+    )
+    assert agent_model.strength_neighbor_repulsion == 0.14, (
+        f"Expected strength_neighbor_repulsion to be 0.14, got {agent_model.strength_neighbor_repulsion}"
+    )
+    assert agent_model.range_neighbor_repulsion == 0.15, (
+        f"Expected range_neighbor_repulsion to be 0.15, got {agent_model.range_neighbor_repulsion}"
+    )
+    assert agent_model.strength_geometry_repulsion == 0.16, (
+        f"Expected strength_geometry_repulsion to be 0.16, got {agent_model.strength_geometry_repulsion}"
+    )
+    assert agent_model.range_geometry_repulsion == 0.17, (
+        f"Expected range_geometry_repulsion to be 0.17, got {agent_model.range_geometry_repulsion}"
+    )
+
+
 def test_set_model_parameters_collision_free_speed_model_v2(
     simulation_with_collision_free_speed_model_v2,
 ):

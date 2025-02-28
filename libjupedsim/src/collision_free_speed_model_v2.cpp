@@ -110,16 +110,16 @@ double JPS_CollisionFreeSpeedModelV2State_GetRangeGeometryRepulsion(
 {
     assert(handle);
     const auto state = reinterpret_cast<const CollisionFreeSpeedModelV2Data*>(handle);
-    return state->rangeNeighborRepulsion;
+    return state->rangeGeometryRepulsion;
 }
 
 void JPS_CollisionFreeSpeedModelV2State_SetRangeGeometryRepulsion(
     JPS_CollisionFreeSpeedModelV2State handle,
-    double rangeNeighborRepulsion)
+    double rangeGeometryRepulsion)
 {
     assert(handle);
     auto state = reinterpret_cast<CollisionFreeSpeedModelV2Data*>(handle);
-    state->rangeNeighborRepulsion = rangeNeighborRepulsion;
+    state->rangeGeometryRepulsion = rangeGeometryRepulsion;
 }
 
 double JPS_CollisionFreeSpeedModelV2State_GetTimeGap(JPS_CollisionFreeSpeedModelV2State handle)
