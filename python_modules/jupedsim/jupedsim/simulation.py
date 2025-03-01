@@ -133,7 +133,7 @@ class Simulation:
             py_jps_model = model_builder.build()
         elif isinstance(model, SocialForceModel):
             model_builder = py_jps.SocialForceModelBuilder(
-                bodyForce=model.bodyForce, friction=model.friction
+                bodyForce=model.body_force, friction=model.friction
             )
             py_jps_model = model_builder.build()
         else:
