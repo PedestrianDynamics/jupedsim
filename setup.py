@@ -271,6 +271,7 @@ setup(
         "shapely~=2.0",
         "pyside6~=6.8",
         "vtk~=9.4",
+        "deprecated~=1.2.18",
     ],
     scripts=["python_modules/jupedsim_visualizer/bin/jupedsim-visualizer"],
     url="https://www.jupedsim.org",
