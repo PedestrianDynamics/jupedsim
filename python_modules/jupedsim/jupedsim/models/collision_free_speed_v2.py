@@ -76,10 +76,21 @@ class CollisionFreeSpeedModelV2AgentParameters:
 
     def __init__(
         self,
-        v0=None,
-        **kwargs,
+        *,
+        position: tuple[float, float] = (0.0, 0.0),
+        time_gap: float = 1.0,
+        desired_speed: float = 1.2,
+        v0: float | None = None,
+        radius: float = 0.2,
+        journey_id: int = 0,
+        stage_id: int = 0,
+        strength_neighbor_repulsion: float = 8.0,
+        range_neighbor_repulsion: float = 0.1,
+        strength_geometry_repulsion: float = 5.0,
+        range_geometry_repulsion: float = 0.02,
     ):
-        """Init dataclass to handle deprecated argument."""
+        self.position = position
+        self.time_gap = time_gap
         if v0 is not None:
             warnings.warn(
                 "'v0' is deprecated, use 'desired_speed' instead.",
@@ -87,13 +98,15 @@ class CollisionFreeSpeedModelV2AgentParameters:
                 stacklevel=2,
             )
             self.desired_speed = v0
-
-        allowed_keys = set(self.__class__.__dataclass_fields__.keys())
-        extra_keys = set(kwargs.keys()) - allowed_keys
-        if extra_keys:
-            raise TypeError(f"Unexpected keyword arguments: {extra_keys}")
-
-        self.__dict__.update(kwargs)
+        else:
+            self.desired_speed = desired_speed
+        self.radius = radius
+        self.journey_id = journey_id
+        self.stage_id = stage_id
+        self.strength_neighbor_repulsion = strength_neighbor_repulsion
+        self.range_neighbor_repulsion = range_neighbor_repulsion
+        self.strength_geometry_repulsion = strength_geometry_repulsion
+        self.range_geometry_repulsion = range_geometry_repulsion
 
     def as_native(
         self,

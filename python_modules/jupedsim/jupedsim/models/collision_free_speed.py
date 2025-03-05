@@ -74,10 +74,17 @@ class CollisionFreeSpeedModelAgentParameters:
 
     def __init__(
         self,
-        v0=None,
-        **kwargs,
+        *,
+        position: tuple[float, float] = (0.0, 0.0),
+        time_gap: float = 1.0,
+        desired_speed: float = 1.2,
+        v0: float | None = None,
+        radius: float = 0.2,
+        journey_id: int = 0,
+        stage_id: int = 0,
     ):
-        """Init dataclass to handle deprecated argument."""
+        self.position = position
+        self.time_gap = time_gap
         if v0 is not None:
             warnings.warn(
                 "'v0' is deprecated, use 'desired_speed' instead.",
@@ -85,13 +92,11 @@ class CollisionFreeSpeedModelAgentParameters:
                 stacklevel=2,
             )
             self.desired_speed = v0
-
-        allowed_keys = set(self.__class__.__dataclass_fields__.keys())
-        extra_keys = set(kwargs.keys()) - allowed_keys
-        if extra_keys:
-            raise TypeError(f"Unexpected keyword arguments: {extra_keys}")
-
-        self.__dict__.update(kwargs)
+        else:
+            self.desired_speed = desired_speed
+        self.radius = radius
+        self.journey_id = journey_id
+        self.stage_id = stage_id
 
     def as_native(self) -> py_jps.CollisionFreeSpeedModelAgentParameters:
         return py_jps.CollisionFreeSpeedModelAgentParameters(

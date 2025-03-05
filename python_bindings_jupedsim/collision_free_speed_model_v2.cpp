@@ -18,7 +18,7 @@ void init_collision_free_speed_model_v2(py::module_& m)
         .def(
             py::init([](std::tuple<double, double> position,
                         double time_gap,
-                        double v0,
+                        double desired_speed,
                         double radius,
                         JPS_JourneyId journey_id,
                         JPS_StageId stage_id,
@@ -31,7 +31,7 @@ void init_collision_free_speed_model_v2(py::module_& m)
                     journey_id,
                     stage_id,
                     time_gap,
-                    v0,
+                    desired_speed,
                     radius,
                     strengthNeighborRepulsion,
                     rangeNeighborRepulsion,
@@ -41,7 +41,7 @@ void init_collision_free_speed_model_v2(py::module_& m)
             py::kw_only(),
             py::arg("position"),
             py::arg("time_gap"),
-            py::arg("desired_speed") = py::arg("v0"),
+            py::arg("desired_speed"),
             py::arg("radius"),
             py::arg("journey_id"),
             py::arg("stage_id"),
@@ -89,18 +89,6 @@ void init_collision_free_speed_model_v2(py::module_& m)
             },
             [](JPS_CollisionFreeSpeedModelV2State_Wrapper& w, double time_gap) {
                 JPS_CollisionFreeSpeedModelV2State_SetTimeGap(w.handle, time_gap);
-            })
-        .def_property(
-            "v0",
-            [](const JPS_CollisionFreeSpeedModelV2State_Wrapper& w) {
-                PyErr_WarnEx(
-                    PyExc_DeprecationWarning,
-                    "'v0' is deprecated, use 'desired_speed' instead.",
-                    1);
-                return JPS_CollisionFreeSpeedModelV2State_GetV0(w.handle);
-            },
-            [](JPS_CollisionFreeSpeedModelV2State_Wrapper& w, double v0) {
-                JPS_CollisionFreeSpeedModelV2State_SetV0(w.handle, v0);
             })
         .def_property(
             "desired_speed",
