@@ -18,24 +18,24 @@ void init_collision_free_speed_model(py::module_& m)
         .def(
             py::init([](std::tuple<double, double> position,
                         double time_gap,
-                        double v0,
+                        double desired_speed,
                         double radius,
                         JPS_JourneyId journey_id,
                         JPS_StageId stage_id) {
                 return JPS_CollisionFreeSpeedModelAgentParameters{
-                    intoJPS_Point(position), journey_id, stage_id, time_gap, v0, radius};
+                    intoJPS_Point(position), journey_id, stage_id, time_gap, desired_speed, radius};
             }),
             py::kw_only(),
             py::arg("position"),
             py::arg("time_gap"),
-            py::arg("v0"),
+            py::arg("desired_speed"),
             py::arg("radius"),
             py::arg("journey_id"),
             py::arg("stage_id"))
         .def("__repr__", [](const JPS_CollisionFreeSpeedModelAgentParameters& p) {
             return fmt::format(
                 "position: {}, journey_id: {}, stage_id: {}, "
-                "time_gap: {}, v0: {}, radius: {}",
+                "time_gap: {}, desired_speed: {}, radius: {}",
                 intoTuple(p.position),
                 p.journeyId,
                 p.stageId,
@@ -81,12 +81,12 @@ void init_collision_free_speed_model(py::module_& m)
                 JPS_CollisionFreeSpeedModelState_SetTimeGap(w.handle, time_gap);
             })
         .def_property(
-            "v0",
+            "desired_speed",
             [](const JPS_CollisionFreeSpeedModelState_Wrapper& w) {
                 return JPS_CollisionFreeSpeedModelState_GetV0(w.handle);
             },
-            [](JPS_CollisionFreeSpeedModelState_Wrapper& w, double v0) {
-                JPS_CollisionFreeSpeedModelState_SetV0(w.handle, v0);
+            [](JPS_CollisionFreeSpeedModelState_Wrapper& w, double desiredSpeed) {
+                JPS_CollisionFreeSpeedModelState_SetV0(w.handle, desiredSpeed);
             })
         .def_property(
             "radius",

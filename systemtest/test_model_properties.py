@@ -109,6 +109,9 @@ def test_set_model_parameters_collision_free_speed_model_v2(
     sim.agent(agent_id).model.v0 = 2.0
     assert sim.agent(agent_id).model.v0 == 2.0
 
+    sim.agent(agent_id).model.desired_speed = 2.1
+    assert sim.agent(agent_id).model.desired_speed == 2.1
+
     sim.agent(agent_id).model.time_gap = 3.0
     assert sim.agent(agent_id).model.time_gap == 3.0
 
@@ -152,6 +155,9 @@ def test_set_model_parameters_anticipation_velocity_model(
 
     sim.agent(agent_id).model.v0 = 2.0
     assert sim.agent(agent_id).model.v0 == 2.0
+
+    sim.agent(agent_id).model.desired_speed = 2.1
+    assert sim.agent(agent_id).model.desired_speed == 2.1
 
     sim.agent(agent_id).model.time_gap = 3.0
     assert sim.agent(agent_id).model.time_gap == 3.0
@@ -199,6 +205,9 @@ def test_set_model_parameters_collision_free_speed_model(
 
     sim.agent(agent_id).model.v0 = 2.0
     assert sim.agent(agent_id).model.v0 == 2.0
+
+    sim.agent(agent_id).model.desired_speed = 2.1
+    assert sim.agent(agent_id).model.desired_speed == 2.1
 
     sim.agent(agent_id).model.time_gap = 3.0
     assert sim.agent(agent_id).model.time_gap == 3.0
@@ -248,6 +257,9 @@ def test_set_model_parameters_generalized_centrifugal_force_model(
     sim.agent(agent_id).model.v0 = 5.0
     assert sim.agent(agent_id).model.v0 == 5.0
 
+    sim.agent(agent_id).model.desired_speed = 5.1
+    assert sim.agent(agent_id).model.desired_speed == 5.1
+
     sim.agent(agent_id).model.a_v = 6.0
     assert sim.agent(agent_id).model.a_v == 6.0
 
@@ -262,6 +274,21 @@ def test_set_model_parameters_generalized_centrifugal_force_model(
 
 
 @pytest.fixture
+def simulation_with_social_force_model_body_force():
+    with pytest.warns(
+        DeprecationWarning, match="deprecated, use 'body_force' instead"
+    ):
+        return jps.Simulation(
+            model=jps.SocialForceModel(bodyForce=3),
+            geometry=[(0, 0), (10, 0), (10, 10), (0, 10)],
+        )
+
+
+def test_body_force_deprecated(simulation_with_social_force_model_body_force):
+    assert simulation_with_social_force_model_body_force is not None
+
+
+@pytest.fixture
 def simulation_with_social_force_model():
     return jps.Simulation(
         model=jps.SocialForceModel(),
@@ -269,10 +296,111 @@ def simulation_with_social_force_model():
     )
 
 
+def test_desired_speed_deprecated(simulation_with_social_force_model):
+    sim = simulation_with_social_force_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.SocialForceModelAgentParameters(
+        journey_id=journey_id, stage_id=wp, position=(1, 1), desiredSpeed=1.1
+    )
+    agent_id = sim.add_agent(agent)
+
+    # Check if the deprecation warning is raised
+    with pytest.warns(
+        DeprecationWarning, match="deprecated, use 'desired_speed' instead"
+    ):
+        sim.agent(agent_id).model.desiredSpeed = 1.5
+        assert sim.agent(agent_id).model.desiredSpeed == 1.5
+
+    # Verify the new snake_case property reflects the same value
+    assert sim.agent(agent_id).model.desired_speed == 1.5
+
+
+def test_reaction_time_deprecated(simulation_with_social_force_model):
+    sim = simulation_with_social_force_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.SocialForceModelAgentParameters(
+        journey_id=journey_id, stage_id=wp, position=(1, 1), reactionTime=1.1
+    )
+    agent_id = sim.add_agent(agent)
+
+    with pytest.warns(
+        DeprecationWarning, match="deprecated, use 'reaction_time' instead"
+    ):
+        sim.agent(agent_id).model.reactionTime = 5.0
+        assert sim.agent(agent_id).model.reactionTime == 5.0
+
+    assert sim.agent(agent_id).model.reaction_time == 5.0
+
+
+def test_agent_scale_deprecated(simulation_with_social_force_model):
+    sim = simulation_with_social_force_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.SocialForceModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+        agentScale=1.1,
+    )
+    agent_id = sim.add_agent(agent)
+
+    with pytest.warns(
+        DeprecationWarning, match="deprecated, use 'agent_scale' instead"
+    ):
+        sim.agent(agent_id).model.agentScale = 6.0
+        assert sim.agent(agent_id).model.agentScale == 6.0
+
+    assert sim.agent(agent_id).model.agent_scale == 6.0
+
+
+def test_obstacle_scale_deprecated(simulation_with_social_force_model):
+    sim = simulation_with_social_force_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.SocialForceModelAgentParameters(
+        journey_id=journey_id, stage_id=wp, position=(1, 1), obstacleScale=1.1
+    )
+    agent_id = sim.add_agent(agent)
+
+    with pytest.warns(
+        DeprecationWarning, match="deprecated, use 'obstacle_scale' instead"
+    ):
+        sim.agent(agent_id).model.obstacleScale = 7.0
+        assert sim.agent(agent_id).model.obstacleScale == 7.0
+
+    assert sim.agent(agent_id).model.obstacle_scale == 7.0
+
+
+def test_force_distance_deprecated(simulation_with_social_force_model):
+    sim = simulation_with_social_force_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.SocialForceModelAgentParameters(
+        journey_id=journey_id, stage_id=wp, position=(1, 1), forceDistance=1.1
+    )
+    agent_id = sim.add_agent(agent)
+
+    with pytest.warns(
+        DeprecationWarning, match="deprecated, use 'force_distance' instead"
+    ):
+        sim.agent(agent_id).model.ForceDistance = 8.0
+        assert sim.agent(agent_id).model.ForceDistance == 8.0
+
+    assert sim.agent(agent_id).model.force_distance == 8.0
+
+
 def test_set_model_parameters_social_force_model(
     simulation_with_social_force_model,
 ):
     sim = simulation_with_social_force_model
+
     wp = sim.add_waypoint_stage((10, 1), 0.5)
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
@@ -289,20 +417,20 @@ def test_set_model_parameters_social_force_model(
     sim.agent(agent_id).model.mass = 3.0
     assert sim.agent(agent_id).model.mass == 3.0
 
-    sim.agent(agent_id).model.desiredSpeed = 4.0
-    assert sim.agent(agent_id).model.desiredSpeed == 4.0
+    sim.agent(agent_id).model.desired_speed = 4.0
+    assert sim.agent(agent_id).model.desired_speed == 4.0
 
-    sim.agent(agent_id).model.reactionTime = 5.0
-    assert sim.agent(agent_id).model.reactionTime == 5.0
+    sim.agent(agent_id).model.reaction_time = 5.0
+    assert sim.agent(agent_id).model.reaction_time == 5.0
 
-    sim.agent(agent_id).model.agentScale = 6.0
-    assert sim.agent(agent_id).model.agentScale == 6.0
+    sim.agent(agent_id).model.agent_scale = 6.0
+    assert sim.agent(agent_id).model.agent_scale == 6.0
 
-    sim.agent(agent_id).model.obstacleScale = 7.0
-    assert sim.agent(agent_id).model.obstacleScale == 7.0
+    sim.agent(agent_id).model.obstacle_scale = 7.0
+    assert sim.agent(agent_id).model.obstacle_scale == 7.0
 
-    sim.agent(agent_id).model.ForceDistance = 8.0
-    assert sim.agent(agent_id).model.ForceDistance == 8.0
+    sim.agent(agent_id).model.force_distance = 8.0
+    assert sim.agent(agent_id).model.force_distance == 8.0
 
     sim.agent(agent_id).model.radius = 9.0
     assert sim.agent(agent_id).model.radius == 9.0

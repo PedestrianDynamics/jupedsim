@@ -11,12 +11,10 @@ extend-include = ["*.ipynb"]
 # McCabe complexity (`C901`) by default.
 # select = ["E4", "E7", "E9", "F"]
 select = [
-    # pycodestyle
-    "E",
-    # Pyflakes
-    "F",
-    # isort
-    "I",
+    "E", # pycodestyle
+    "F", # Pyflakes
+    "I", # isort
+    "N", # Naming conventions for variables, functions, and attributes
 ]
 ignore = ["E501"]
 
@@ -54,3 +52,12 @@ docstring-code-format = false
 # enabled.
 docstring-code-line-length = "dynamic"
 
+# Ignore naming issues for camelCase deprecated properties
+[tool.ruff.lint.pep8-naming]
+extend-ignore-names = ["desiredSpeed", "reactionTime", "agentScale", "obstacleScale", "forceDistance", "bodyForce", "IncorrectTrajectory", "IncorrectTrajectoryError"]
+
+[tool.ruff.lint.per-file-ignores]
+"test_perftests.py" = ["N"]
+"**{jupedsim_visualizer}/*" = ["N"]
+"serialization.py" = ["N"]
+"journey.ipynb" = ["N"]
