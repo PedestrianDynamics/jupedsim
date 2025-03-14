@@ -144,7 +144,14 @@ def parse_dxf_file(
         raise IncorrectDXFFileError(
             f"Layer '{outer_line_layer}' not found in DXF file.\n Available layers are: {layers_in_dxf}"
         )
-
+    missing_hole_layers = [
+        layer for layer in hole_layers if not layer_exists(layer, layers_in_dxf)
+    ]
+    if missing_hole_layers:
+        logging.warning(
+            f"Warning: These hole layers were not found in the DXF file: {missing_hole_layers}.\n"
+            f"Available layers: {layers_in_dxf}"
+        )
     # Iterate over all entities in the model
     for entity in msp:
         if entity.dxftype() == "LWPOLYLINE":
