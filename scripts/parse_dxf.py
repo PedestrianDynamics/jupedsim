@@ -282,54 +282,48 @@ def shapely_to_dxf(
 def parse_args():
     parser = argparse.ArgumentParser(
         description="""
-Converts the given dxf file to wkt and saves it in a new file. Can also save \
-the resulting geometry in a dxf file and plot the geometry.
+Converts a DXF file into WKT format and saves it as a new file. Optionally, 
+the resulting geometry can be exported back to DXF or visualized as a plot.
 
-Following constraints need to be fulfilled that the conversion can succeed:
+### Requirements for Successful Conversion:
+- The outer and inner polygons must be defined in different layers.
+- The outer polygon must be in a single designated layer.
+- Inner polygons (holes) can be distributed across multiple layers.
+- A hole must be defined by a **single polyline** or **single circle**:
+  - Holes **cannot** be composed of multiple disconnected lines/polylines.
+  - Circles are converted to polygons with many corners, which may impact triangulation accuracy.
+  - If circles touch other elements, they might be approximated differently than expected.
+- Holes may:
+  - **Overlap with each other**.
+  - **Be located outside the outer polygon** (this does not affect the final structure).
+- The outer polygon **must be a closed polyline**.
+- If multiple polygons exist in the outer polygon layer, they will be parsed as a **MultiPolygon**.
 
-    * outer and inner polygon are defined on different layers
-    * the definition of the inner polygon (holes) can be distributed on \
-several layers
-    * the definition of the outer polygon must be on one layer
-    * a hole is defined with ONE polyline or ONE circle
-      * there are no holes, which are composed of multiple lines/polylines
-      * keep in mind that a circle is considered a polygon with many corners. \
-This might make the triangulation too accurate and slow down the \
-simulation unnecessarily.
-      * circles touching other elements might be approximated different than \
-expected
-    * Holes may overlap
-    * Holes may be defined outside the outer polygon
-      * this does not change the structure of the polygon
-    * the outer polygon must be defined with one closed polyline
-    * if there are multiple polygons on the outer polygon a MultiPolygon will \
-be parsed
-
-The polygon should end up looking like the structure in the dxf file:
-
-    * There must be no gaps in the outer polygon or in a hole
-    * There must be no double lines
-    * all areas must be wide enough for the agents
-    * all polygons must be simple""",
+### Expected Structure in DXF:
+- No gaps in the outer polygon or holes.
+- No duplicate lines.
+- Sufficiently wide areas for agents.
+- All polygons must be **simple** (i.e., not self-intersecting).
+""",
         formatter_class=RawTextHelpFormatter,
     )
     parser.add_argument(
         "-i",
         "--input",
-        help="dxf file to parse",
+        help="Path to the DXF file to parse.",
         required=True,
         type=pathlib.Path,
     )
     parser.add_argument(
         "-o",
         "--output",
-        help="result file containing the wkt (if none given: INPUT.wkt)",
+        help="Output file to save the result in WKT format (default: INPUT.wkt).",
         type=pathlib.Path,
     )
     parser.add_argument(
         "-d",
         "--dxf-output",
-        help="result file containing the wkt",
+        help="Output file to save the result in DXF format.",
         type=pathlib.Path,
         required=False,
     )
@@ -337,13 +331,13 @@ The polygon should end up looking like the structure in the dxf file:
     parser.add_argument(
         "-w",
         "--walkable",
-        help="layer containing the walkable area",
+        help="Layer containing the walkable area (outer polygon).",
         required=True,
     )
     parser.add_argument(
         "-x",
         "--obstacles",
-        help="layer(s) containing obstacles",
+        help="One or more layers defining obstacles (holes). Can accept multiple layers.",
         nargs="+",
         default=[],
     )
@@ -351,14 +345,13 @@ The polygon should end up looking like the structure in the dxf file:
     parser.add_argument(
         "-q",
         "--quad-segments",
-        help="specifies the number of linear segments in a quarter circle in "
-        "the approximation of circular arcs (default: 4)",
+        help="Number of linear segments used to approximate a quarter-circle for curved shapes (default: 4).",
         default=4,
     )
     parser.add_argument(
         "-p",
         "--plot",
-        help="plot the parsed polygon in an interactive window",
+        help="Display an interactive plot of the parsed polygon.",
         action="store_true",
     )
     return parser.parse_args()
