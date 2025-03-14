@@ -142,7 +142,7 @@ def parse_dxf_file(
     logging.info(f"{outer_line_layer = }")
     if not layer_exists(outer_line_layer, layers_in_dxf):
         raise IncorrectDXFFileError(
-            f"Layer '{outer_line_layer}' not found in DXF file."
+            f"Layer '{outer_line_layer}' not found in DXF file.\n Available layers are: {layers_in_dxf}"
         )
 
     # Iterate over all entities in the model
