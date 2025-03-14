@@ -150,7 +150,7 @@ def parse_dxf_file(
         if entity.dxftype() == "LWPOLYLINE":
             if not entity.closed and (
                 entity.dxf.layer in hole_layers
-                or entity.dxf.layer == outer_line_layer
+                or outer_line_layer in entity.dxf.layer
             ):
                 logging.error(
                     f"There is a Polygon in layer {entity.dxf.layer} "
@@ -160,9 +160,11 @@ def parse_dxf_file(
                 raise IncorrectDXFFileError(
                     f"Unclosed polyline in layer {entity.dxf.layer}"
                 )
-            if entity.dxf.layer in hole_layers:
+            if any(
+                hole_layer in entity.dxf.layer for hole_layer in hole_layers
+            ):
                 holes.append(polyline_to_polygon(entity))
-            elif entity.dxf.layer == outer_line_layer:
+            elif outer_line_layer in entity.dxf.layer:
                 outer_lines.append(polyline_to_linestring(entity))
         elif entity.dxftype() == "CIRCLE":
             if entity.dxf.layer in hole_layers:
@@ -185,6 +187,7 @@ def parse_dxf_file(
     for line in outer_lines:
         outer_polygons.append(Polygon(line.coords))
 
+    logging.debug(f"Found {len(outer_lines)} outer lines.")
     outer_polygon = polygonize(outer_lines)
     if not outer_polygon:
         raise IncorrectDXFFileError("Could not create an outer polygon.")
@@ -210,8 +213,28 @@ def parse_dxf_file(
 
     # create new Polygon with holes
     simple_holes = polygonize(simple_holes)
-    logging.debug("the geometry was parsed")
-    return outer_polygon.difference(simple_holes)
+    logging.info("the geometry was parsed.")
+
+    logging.info(f"Got {len(list(simple_holes.geoms))} holes.")
+    logging.info(f"Got {len(list(outer_polygon.geoms))} outer polygons.")
+    if not outer_polygon or outer_polygon.is_empty:
+        logging.error(
+            "The outer polygon is empty. Returning an empty geometry."
+        )
+        return GeometryCollection()
+
+    try:
+        result = outer_polygon.difference(simple_holes)
+        if result.is_empty:
+            logging.warning(
+                "The difference operation resulted in an empty geometry."
+            )
+            return outer_polygon  # return the outer polygon without holes
+        return result
+
+    except Exception as e:
+        logging.error(f"Error while computing difference: {e}")
+        return outer_polygon
 
 
 def shapely_to_dxf(
@@ -347,7 +370,7 @@ def main():
         )
     except IncorrectDXFFileError as e:
         logging.error(f"Failed to parse DXF: {e.message}")
-    return
+        return
 
     # create a dxf file using the parsed geometry
     if parsed_args.dxf_output:
