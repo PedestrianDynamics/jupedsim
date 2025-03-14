@@ -160,12 +160,16 @@ def parse_dxf_file(
                 or outer_line_layer in entity.dxf.layer
             ):
                 logging.error(
-                    f"There is a Polygon in layer {entity.dxf.layer} "
+                    f"There is a Polygon in layer <{entity.dxf.layer}> "
                     f"that is not closed. This may cause issues "
                     f"creating the polygon."
                 )
+                points = [(p[0], p[1]) for p in entity.get_points()]
+                shape = LineString(points)
+                logging.error("Shapely representation:", shape)
+                logging.error("-" * 50)
                 raise IncorrectDXFFileError(
-                    f"Unclosed polyline in layer {entity.dxf.layer}"
+                    f"Unclosed polyline in layer <{entity.dxf.layer}>"
                 )
             if any(
                 hole_layer in entity.dxf.layer for hole_layer in hole_layers
