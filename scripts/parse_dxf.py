@@ -66,6 +66,7 @@ def line_to_linestring(line):
 def multipolygon_to_list(multipolygon: shapely.MultiPolygon):
     """converts a multipolygon to a list of polygons"""
     return [poly for poly in multipolygon.geoms]
+    # return list(multipolygon.geoms)
 
 
 def polyline_to_linestring(polyline):
@@ -109,6 +110,11 @@ def dxf_circle_to_shply(dxf_circle, quad_segs):
     return Point(pt).buffer(radius, quad_segs)
 
 
+def layer_exists(layer_name: str, layers_in_dxf: set) -> bool:
+    """Check if a given layer exists in the DXF file, allowing for sublayers."""
+    return any(layer_name in layer for layer in layers_in_dxf)
+
+
 def parse_dxf_file(
     dxf_path: pathlib.Path,
     outer_line_layer: str,
@@ -132,6 +138,12 @@ def parse_dxf_file(
     doc = ezdxf.readfile(dxf_path)
     # Access the model (modelspace)
     msp = doc.modelspace()
+    layers_in_dxf = {layer.dxf.name for layer in doc.layers}
+    logging.info(f"{outer_line_layer = }")
+    if not layer_exists(outer_line_layer, layers_in_dxf):
+        raise IncorrectDXFFileError(
+            f"Layer '{outer_line_layer}' not found in DXF file."
+        )
 
     # Iterate over all entities in the model
     for entity in msp:
@@ -144,6 +156,9 @@ def parse_dxf_file(
                     f"There is a Polygon in layer {entity.dxf.layer} "
                     f"that is not closed. This may cause issues "
                     f"creating the polygon."
+                )
+                raise IncorrectDXFFileError(
+                    f"Unclosed polyline in layer {entity.dxf.layer}"
                 )
             if entity.dxf.layer in hole_layers:
                 holes.append(polyline_to_polygon(entity))
@@ -169,7 +184,10 @@ def parse_dxf_file(
     outer_polygons = []
     for line in outer_lines:
         outer_polygons.append(Polygon(line.coords))
+
     outer_polygon = polygonize(outer_lines)
+    if not outer_polygon:
+        raise IncorrectDXFFileError("Could not create an outer polygon.")
 
     # separate simple and not simple holes
     simple_holes = []
@@ -320,12 +338,16 @@ def main():
     parsed_args = parse_args()
 
     # parse polygon(s)
-    merged_polygon = parse_dxf_file(
-        parsed_args.input,
-        parsed_args.walkable,
-        parsed_args.obstacles,
-        parsed_args.quad_segments,
-    )
+    try:
+        merged_polygon = parse_dxf_file(
+            parsed_args.input,
+            parsed_args.walkable,
+            parsed_args.obstacles,
+            parsed_args.quad_segments,
+        )
+    except IncorrectDXFFileError as e:
+        logging.error(f"Failed to parse DXF: {e.message}")
+    return
 
     # create a dxf file using the parsed geometry
     if parsed_args.dxf_output:
