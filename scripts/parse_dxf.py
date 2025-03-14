@@ -119,6 +119,8 @@ def parse_dxf_file(
     dxf_path: pathlib.Path,
     outer_line_layer: str,
     hole_layers: List[str],
+    exit_layers: List[str],
+    distribution_layers: List[str],
     quad_segs: int,
 ):
     """parses a dxf-file and creates a shapely structure resembling the file
@@ -127,15 +129,24 @@ def parse_dxf_file(
                              outer polygon is defined
     @param hole_layers: a list with all layer names in the dxf-file where holes
                         are defined
+    @param exit_layers: a list with all layer names in the dxf-file where exits
+                        are defined
+    @param distribution_layers: a list with all layer names in the dxf-file where distributions
+                        are defined
+
     @param quad_segs: Specifies the number of linear segments in a quarter
                       circle in the approximation of circular arcs.
 
     @return: shapely polygon or multipolygon from dxf-file
     """
+    doc = ezdxf.readfile(dxf_path)
+
     holes = []
+    exits = []
+    distributions = []
     outer_lines = []
     # Open the DXF file
-    doc = ezdxf.readfile(dxf_path)
+
     # Access the model (modelspace)
     msp = doc.modelspace()
     layers_in_dxf = {layer.dxf.name for layer in doc.layers}
@@ -147,6 +158,26 @@ def parse_dxf_file(
     missing_hole_layers = [
         layer for layer in hole_layers if not layer_exists(layer, layers_in_dxf)
     ]
+    missing_exit_layers = [
+        layer for layer in exit_layers if not layer_exists(layer, layers_in_dxf)
+    ]
+    missing_distribution_layers = [
+        layer
+        for layer in distribution_layers
+        if not layer_exists(layer, layers_in_dxf)
+    ]
+
+    if missing_exit_layers:
+        logging.warning(
+            f"Warning: These exit layers were not found in the DXF file: {missing_exit_layers}.\n"
+            f"Available layers: {layers_in_dxf}"
+        )
+    if missing_distribution_layers:
+        logging.warning(
+            f"Warning: These distribution layers were not found in the DXF file: {missing_distribution_layers}.\n"
+            f"Available layers: {layers_in_dxf}"
+        )
+
     if missing_hole_layers:
         logging.warning(
             f"Warning: These hole layers were not found in the DXF file: {missing_hole_layers}.\n"
@@ -157,6 +188,8 @@ def parse_dxf_file(
         if entity.dxftype() == "LWPOLYLINE":
             if not entity.closed and (
                 entity.dxf.layer in hole_layers
+                or entity.dxf.layer in exit_layers
+                or entity.dxf.layer in distribution_layers
                 or outer_line_layer in entity.dxf.layer
             ):
                 logging.error(
@@ -175,8 +208,20 @@ def parse_dxf_file(
                 hole_layer in entity.dxf.layer for hole_layer in hole_layers
             ):
                 holes.append(polyline_to_polygon(entity))
+            elif any(
+                exit_layer in entity.dxf.layer for exit_layer in exit_layers
+            ):
+                exits.append(polyline_to_polygon(entity))
             elif outer_line_layer in entity.dxf.layer:
                 outer_lines.append(polyline_to_linestring(entity))
+            elif any(
+                distribution_layer in entity.dxf.layer
+                for distribution_layer in distribution_layers
+            ):
+                distributions.append(polyline_to_polygon(entity))
+            elif outer_line_layer in entity.dxf.layer:
+                outer_lines.append(polyline_to_linestring(entity))
+
         elif entity.dxftype() == "CIRCLE":
             if entity.dxf.layer in hole_layers:
                 holes.append(dxf_circle_to_shply(entity, quad_segs))
@@ -219,15 +264,66 @@ def parse_dxf_file(
             f"not supported."
         )
         raise IncorrectDXFFileError(
-            "The file contained at least one not simple Polygon.", other_holes
+            "The file contained at least one not simple hole polygon.",
+            other_holes,
         )
 
     # create new Polygon with holes
     simple_holes = polygonize(simple_holes)
-    logging.info("the geometry was parsed.")
 
-    logging.info(f"Got {len(list(simple_holes.geoms))} holes.")
-    logging.info(f"Got {len(list(outer_polygon.geoms))} outer polygons.")
+    # separate simple and not simple exits
+    simple_exits = []
+    other_exits = []
+    for _exit in exits:
+        (
+            simple_exits.append(_exit)
+            if _exit.is_simple
+            else other_exits.append(_exit)
+        )
+
+    if len(other_exits) > 0:
+        logging.error(
+            f"{len(other_exits)} not simple polygons were parsed. These are "
+            f"not supported."
+        )
+        raise IncorrectDXFFileError(
+            "The file contained at least one not simple exit polygon.",
+            other_exits,
+        )
+
+    # create new Polygon with exits
+    simple_exits = polygonize(simple_exits)
+
+    # separate simple and not simple distribution
+    simple_distributions = []
+    other_distributions = []
+    for distribution in distributions:
+        (
+            simple_distributions.append(distribution)
+            if distribution.is_simple
+            else other_distributions.append(distribution)
+        )
+
+    if len(other_distributions) > 0:
+        logging.error(
+            f"{len(other_distributions)} not simple polygons were parsed. These are "
+            f"not supported."
+        )
+        raise IncorrectDXFFileError(
+            "The file contained at least one not simple distribution polygon.",
+            other_distributions,
+        )
+
+    # create new Polygon with exits
+    simple_distributions = polygonize(simple_distributions)
+
+    logging.info("The geometry was parsed:")
+    logging.info(f">> Got {len(list(simple_holes.geoms))} holes.")
+    logging.info(f">> Got {len(list(simple_exits.geoms))} exits.")
+    logging.info(
+        f">> Got {len(list(simple_distributions.geoms))} distributions."
+    )
+    logging.info(f">> Got {len(list(outer_polygon.geoms))} outer polygons.")
     if not outer_polygon or outer_polygon.is_empty:
         logging.error(
             "The outer polygon is empty. Returning an empty geometry."
@@ -241,7 +337,16 @@ def parse_dxf_file(
                 "The difference operation resulted in an empty geometry."
             )
             return outer_polygon  # return the outer polygon without holes
-        return result
+        walkable_area_collection = GeometryCollection(result)
+        exits_collection = GeometryCollection(simple_exits)
+        distributions_collection = GeometryCollection(simple_distributions)
+        return GeometryCollection(
+            [
+                walkable_area_collection,
+                exits_collection,
+                distributions_collection,
+            ]
+        )
 
     except Exception as e:
         logging.error(f"Error while computing difference: {e}")
@@ -345,6 +450,20 @@ the resulting geometry can be exported back to DXF or visualized as a plot.
         nargs="+",
         default=[],
     )
+    parser.add_argument(
+        "-t",
+        "--exits",
+        help="One or more layers defining exits. Can accept multiple layers.",
+        nargs="+",
+        default=[],
+    )
+    parser.add_argument(
+        "-D",
+        "--distributions",
+        help="One or more layers defining distributions. Can accept multiple layers.",
+        nargs="+",
+        default=[],
+    )
 
     parser.add_argument(
         "-q",
@@ -363,13 +482,15 @@ the resulting geometry can be exported back to DXF or visualized as a plot.
 
 def main():
     parsed_args = parse_args()
-
+    print(parsed_args)
     # parse polygon(s)
     try:
         merged_polygon = parse_dxf_file(
             parsed_args.input,
             parsed_args.walkable,
             parsed_args.obstacles,
+            parsed_args.exits,
+            parsed_args.distributions,
             parsed_args.quad_segments,
         )
     except IncorrectDXFFileError as e:
