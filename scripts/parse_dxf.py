@@ -630,6 +630,11 @@ def plot_geometry(geometry_collection):
     for a in area.geoms:
         x, y = a.exterior.xy
         plt.fill(x, y, alpha=0.1, color="gray")
+        for hole in a.interiors:
+            hx, hy = hole.xy
+            ax.fill(
+                hx, hy, alpha=1, edgecolor="gray", facecolor="white", lw=0.3
+            )
 
     for e in exits.geoms:
         x, y = e.exterior.xy
