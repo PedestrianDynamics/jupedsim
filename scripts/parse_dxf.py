@@ -11,6 +11,7 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot
 import matplotlib.pyplot as plt
 import shapely
+from shapely.ops import unary_union
 from shapely import (
     GeometryCollection,
     LineString,
@@ -56,7 +57,7 @@ def plot_polygon(polygon: shapely.Polygon):
 
 
 def line_to_linestring(line):
-    """converts an entity with dxftype line to a shapely Linestring"""
+    """Converts an entity with dxftype line to a shapely Linestring."""
     start_point = line.dxf.start
     end_point = line.dxf.end
     return LineString(
@@ -65,13 +66,13 @@ def line_to_linestring(line):
 
 
 def multipolygon_to_list(multipolygon: shapely.MultiPolygon):
-    """converts a multipolygon to a list of polygons"""
+    """Convert a multipolygon to a list of polygons."""
     return [poly for poly in multipolygon.geoms]
     # return list(multipolygon.geoms)
 
 
 def polyline_to_linestring(polyline):
-    """converts an entity with dxftype polyline to a shapely Linestring"""
+    """Convert an entity with dxftype polyline to a shapely Linestring."""
     points = []
     for point in polyline.get_points():
         points.append([point[0], point[1]])
@@ -85,7 +86,7 @@ def polyline_to_linestring(polyline):
 
 
 def polyline_to_polygon(polyline):
-    """converts an entity with dxftype polyline to a shapely Polygon"""
+    """Convert an entity with dxftype polyline to a shapely Polygon."""
     points = []
     for point in polyline.get_points():
         points.append([point[0], point[1]])
@@ -101,7 +102,8 @@ def polyline_to_polygon(polyline):
 
 
 def dxf_circle_to_shply(dxf_circle, quad_segs):
-    """converts an entity with dxftype circle to a shapely Point with buffer
+    """Convert an entity with dxftype circle to a shapely Point with buffer.
+
     @param dxf_circle: an entity with dxf-type circle
     @param quad_segs: Sets the number of line segments used to approximate an
                       angle fillet
@@ -136,6 +138,111 @@ def validate_layers(
     return matched_layers
 
 
+def validate_exits_and_distributions(
+    walkable_area: Polygon | MultiPolygon,
+    exits: List[Polygon],
+    distributions: List[Polygon],
+) -> None:
+    """Validate that exits and distribution zones.
+
+    - Are fully contained within the walkable area.
+    - Do not overlap the walkable area boundary.
+    - Do not overlap with each other.
+
+    Raises an IncorrectDXFFileError if any constraint is violated.
+
+    Parameters:
+    ----------
+    walkable_area : Polygon | MultiPolygon
+        The main walkable area in which exits and distributions must reside.
+    exits : List[Polygon]
+        A list of polygons representing exit areas.
+    distributions : List[Polygon]
+        A list of polygons representing distribution zones.
+
+    Raises:
+    ------
+    IncorrectDXFFileError
+        If exits or distribution zones are outside or overlapping the walkable area.
+    """
+    # Check if any exit is outside the walkable area
+    invalid_exits = [
+        exit_poly
+        for exit_poly in exits.geoms
+        if not walkable_area.contains(exit_poly)
+    ]
+    if invalid_exits:
+        logging.error("Some exits are outside the walkable area!")
+        for i, exit_poly in enumerate(invalid_exits, start=1):
+            logging.error(
+                f"Exit {i} has points outside the walkable area: {list(exit_poly.exterior.coords)}"
+            )
+        raise IncorrectDXFFileError(
+            "Exits must be fully contained within the walkable area."
+        )
+
+    # Check if any distribution zone is outside the walkable area
+    invalid_distributions = [
+        dist_poly
+        for dist_poly in distributions.geoms
+        if not walkable_area.contains(dist_poly)
+    ]
+    if invalid_distributions:
+        logging.error("Some distribution zones are outside the walkable area!")
+        for i, dist_poly in enumerate(invalid_distributions, start=1):
+            logging.error(
+                f"Distribution {i} has points outside the walkable area: {list(dist_poly.exterior.coords)}"
+            )
+        raise IncorrectDXFFileError(
+            "Distribution zones must be fully contained within the walkable area."
+        )
+
+    # Ensure exits do not overlap the walkable area boundary
+    overlapping_exits = [
+        exit_poly
+        for exit_poly in exits.geoms
+        if walkable_area.intersects(exit_poly)
+        and not walkable_area.contains(exit_poly)
+    ]
+    if overlapping_exits:
+        logging.error(
+            "Some exits are intersecting but not fully inside the walkable area."
+        )
+        for i, exit_poly in enumerate(overlapping_exits, start=1):
+            logging.error(
+                f"Exit {i} intersects the walkable area: {list(exit_poly.exterior.coords)}"
+            )
+        raise IncorrectDXFFileError(
+            "Exits must not overlap the walkable area boundary."
+        )
+
+    # Ensure distributions do not overlap the walkable area boundary
+    overlapping_distributions = [
+        dist_poly
+        for dist_poly in distributions.geoms
+        if walkable_area.intersects(dist_poly)
+        and not walkable_area.contains(dist_poly)
+    ]
+    if overlapping_distributions:
+        logging.error(
+            "Some distribution zones are intersecting but not fully inside the walkable area."
+        )
+        for i, dist_poly in enumerate(overlapping_distributions, start=1):
+            logging.error(
+                f"Distribution {i} intersects the walkable area: {list(dist_poly.exterior.coords)}"
+            )
+        raise IncorrectDXFFileError(
+            "Distribution zones must not overlap the walkable area boundary."
+        )
+
+    # Ensure exits and distributions do not overlap each other
+    if unary_union(exits).intersects(unary_union(distributions)):
+        logging.error("Exits and distribution zones are overlapping!")
+        raise IncorrectDXFFileError(
+            "Exits and distribution zones must not overlap each other."
+        )
+
+
 def parse_dxf_file(
     dxf_path: pathlib.Path,
     outer_line_layer: str,
@@ -144,7 +251,8 @@ def parse_dxf_file(
     distribution_layers: List[str],
     quad_segs: int,
 ):
-    """parses a dxf-file and creates a shapely structure resembling the file
+    """Parse a dxf-file and creates a shapely structure resembling the file.
+
     @param dxf_path: Path to the DXF file
     @param outer_line_layer: the name of the layer in the dxf-file where the
                              outer polygon is defined
@@ -242,7 +350,6 @@ def parse_dxf_file(
     for line in outer_lines:
         outer_polygons.append(Polygon(line.coords))
 
-    logging.debug(f"Found {len(outer_lines)} outer lines.")
     outer_polygon = polygonize(outer_lines)
     if not outer_polygon:
         raise IncorrectDXFFileError("Could not create an outer polygon.")
@@ -316,6 +423,9 @@ def parse_dxf_file(
 
     # create new Polygon with exits
     simple_distributions = polygonize(simple_distributions)
+    validate_exits_and_distributions(
+        outer_polygon, simple_exits, simple_distributions
+    )
 
     logging.info("The geometry was parsed:")
     logging.info(f">> Got {len(list(simple_holes.geoms))} holes.")
