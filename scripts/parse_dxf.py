@@ -7,6 +7,7 @@ from typing import List
 
 import ezdxf
 import geopandas as gpd
+import matplotlib.patches as mpatches
 import matplotlib.pyplot
 import matplotlib.pyplot as plt
 import shapely
@@ -110,9 +111,29 @@ def dxf_circle_to_shply(dxf_circle, quad_segs):
     return Point(pt).buffer(radius, quad_segs)
 
 
-def layer_exists(layer_name: str, layers_in_dxf: set) -> bool:
+def layer_exists(layer_name: str, layers_in_dxf: List[str]) -> bool:
     """Check if a given layer exists in the DXF file, allowing for sublayers."""
     return any(layer_name in layer for layer in layers_in_dxf)
+
+
+def validate_layers(
+    layers_in_dxf: List[str], layer_list: List[str], category: str
+) -> List[str]:
+    """Log missing layers and returns only existing layers."""
+    matched_layers = [
+        layer for layer in layer_list if layer_exists(layer, layers_in_dxf)
+    ]
+    missing_layers = [
+        layer for layer in layer_list if not layer_exists(layer, layers_in_dxf)
+    ]
+
+    if missing_layers:
+        logging.warning(
+            f"These {category} layers were not found in the DXF file: {missing_layers}."
+        )
+        logging.warning(f"Available layers are: {layers_in_dxf}.")
+
+    return matched_layers
 
 
 def parse_dxf_file(
@@ -149,40 +170,18 @@ def parse_dxf_file(
 
     # Access the model (modelspace)
     msp = doc.modelspace()
-    layers_in_dxf = {layer.dxf.name for layer in doc.layers}
+    layers_in_dxf = [layer.dxf.name for layer in doc.layers]
     logging.info(f"{outer_line_layer = }")
+
     if not layer_exists(outer_line_layer, layers_in_dxf):
         raise IncorrectDXFFileError(
             f"Layer '{outer_line_layer}' not found in DXF file.\n Available layers are: {layers_in_dxf}"
         )
-    missing_hole_layers = [
-        layer for layer in hole_layers if not layer_exists(layer, layers_in_dxf)
-    ]
-    missing_exit_layers = [
-        layer for layer in exit_layers if not layer_exists(layer, layers_in_dxf)
-    ]
-    missing_distribution_layers = [
-        layer
-        for layer in distribution_layers
-        if not layer_exists(layer, layers_in_dxf)
-    ]
-
-    if missing_exit_layers:
-        logging.warning(
-            f"Warning: These exit layers were not found in the DXF file: {missing_exit_layers}.\n"
-            f"Available layers: {layers_in_dxf}"
-        )
-    if missing_distribution_layers:
-        logging.warning(
-            f"Warning: These distribution layers were not found in the DXF file: {missing_distribution_layers}.\n"
-            f"Available layers: {layers_in_dxf}"
-        )
-
-    if missing_hole_layers:
-        logging.warning(
-            f"Warning: These hole layers were not found in the DXF file: {missing_hole_layers}.\n"
-            f"Available layers: {layers_in_dxf}"
-        )
+    hole_layers = validate_layers(layers_in_dxf, hole_layers, "hole")
+    exit_layers = validate_layers(layers_in_dxf, exit_layers, "exit")
+    distribution_layers = validate_layers(
+        layers_in_dxf, distribution_layers, "distribution"
+    )
     # Iterate over all entities in the model
     for entity in msp:
         if entity.dxftype() == "LWPOLYLINE":
@@ -199,7 +198,7 @@ def parse_dxf_file(
                 )
                 points = [(p[0], p[1]) for p in entity.get_points()]
                 shape = LineString(points)
-                logging.error("Shapely representation:", shape)
+                logging.error(shape)
                 logging.error("-" * 50)
                 raise IncorrectDXFFileError(
                     f"Unclosed polyline in layer <{entity.dxf.layer}>"
@@ -263,6 +262,7 @@ def parse_dxf_file(
             f"{len(other_holes)} not simple polygons were parsed. These are "
             f"not supported."
         )
+
         raise IncorrectDXFFileError(
             "The file contained at least one not simple hole polygon.",
             other_holes,
@@ -391,7 +391,9 @@ def shapely_to_dxf(
 def parse_args():
     parser = argparse.ArgumentParser(
         description="""
-Converts a DXF file into WKT format and saves it as a new file. Optionally, 
+Converts a DXF file into WKT format and saves it as a new file.
+
+        Optionally,
 the resulting geometry can be exported back to DXF or visualized as a plot.
 
 ### Requirements for Successful Conversion:
@@ -413,6 +415,24 @@ the resulting geometry can be exported back to DXF or visualized as a plot.
 - No duplicate lines.
 - Sufficiently wide areas for agents.
 - All polygons must be **simple** (i.e., not self-intersecting).
+
+### Structure of the Output Geometry:
+The resulting geometry is structured as a **GeometryCollection** containing:
+- The **walkable area** as a Polygon or MultiPolygon.
+- **Exits** (optional) as Polygons or empty GeometryCollections.
+- **Distribution zones** (optional) as Polygons or empty GeometryCollections.
+
+Example output:
+```
+GEOMETRYCOLLECTION (
+    GEOMETRYCOLLECTION (
+        POLYGON ((...))  -- Walkable Area
+    ),
+    GEOMETRYCOLLECTION EMPTY,  -- Exits (if present)
+    GEOMETRYCOLLECTION EMPTY   -- Distribution zones (if present)
+)
+```
+This ensures that the structure is flexible and can handle cases where exits or distributions are missing.
 """,
         formatter_class=RawTextHelpFormatter,
     )
@@ -480,10 +500,61 @@ the resulting geometry can be exported back to DXF or visualized as a plot.
     return parser.parse_args()
 
 
+def plot_geometry(geometry_collection):
+    """Plot the geometry collection with different colors for each geometry type."""
+    fig, ax = plt.subplots(figsize=(8, 8))
+    if geometry_collection.is_empty:
+        logging.info("Skipping empty geometry.")
+        return
+    polygons = list(geometry_collection.geoms)  # Unpack main-level geometries
+    area = polygons[0] if len(polygons) > 0 else None
+    # Extract exits (second collection)
+    if len(polygons) > 1:
+        exits = polygons[1]
+
+    # Extract distributions (third collection)
+    if len(polygons) > 2:
+        distributions = polygons[2]
+
+    for a in area.geoms:
+        x, y = a.exterior.xy
+        plt.fill(x, y, alpha=0.1, color="gray")
+
+    for e in exits.geoms:
+        x, y = e.exterior.xy
+        plt.fill(x, y, alpha=0.3, color="red")
+
+    for d in distributions.geoms:
+        x, y = d.exterior.xy
+        plt.fill(x, y, alpha=0.3, color="green")
+
+    legend_elements = {
+        "area": mpatches.Patch(color="gray", label="Walkable Area"),
+        "exits": mpatches.Patch(color="red", label="Exits"),
+        "distribution": mpatches.Patch(
+            color="green", label="Distribution Zones"
+        ),
+    }
+    handles = [
+        legend_elements[key]
+        for key in ["area", "exits", "distribution"]
+        if key in legend_elements
+    ]
+    ax.legend(
+        handles=handles,
+        loc="upper center",
+        bbox_to_anchor=(0.5, 1.05),
+        ncol=len(handles),
+        frameon=False,
+    )
+    ax.set_xlabel("X [m]")
+    ax.set_ylabel("Y [m]")
+    plt.show()
+
+
 def main():
     parsed_args = parse_args()
     print(parsed_args)
-    # parse polygon(s)
     try:
         merged_polygon = parse_dxf_file(
             parsed_args.input,
@@ -505,18 +576,7 @@ def main():
     if parsed_args.plot:
         matplotlib.pyplot.set_loglevel("warning")
         logging.getLogger("PIL.PngImagePlugin").setLevel(logging.WARNING)
-        if merged_polygon.geom_type == "GeometryCollection":
-            for geo in merged_polygon.geoms:
-                if geo.geom_type == "Polygon":
-                    plot_polygon(geo)
-
-        if merged_polygon.geom_type == "Polygon":
-            plot_polygon(merged_polygon)
-        if merged_polygon.geom_type == "MultiPolygon":
-            merged_polygon = multipolygon_to_list(merged_polygon)
-            for poly in merged_polygon:
-                plot_polygon(poly)
-
+        plot_geometry(merged_polygon)
     # now cast to wkt and write into a file
     out_file = (
         parsed_args.output
