@@ -93,11 +93,13 @@ def polyline_to_polygon(polyline):
 
     if len(points) < 3:
         logging.error(
-            "a polyline has at most 2 points and can not be a Polygon"
+            "A polyline with fewer than 3 points cannot form a valid polygon."
         )
         raise IncorrectDXFFileError(
-            "a polyline could not be converted to a Polygon", [points]
+            "Polyline conversion to a Polygon failed due to insufficient points.",
+            [points],
         )
+
     return Polygon(points)
 
 
@@ -364,12 +366,11 @@ def parse_dxf_file(
             else other_holes.append(hole)
         )
 
-    if len(other_holes) > 0:
+    if other_holes:
         logging.error(
-            f"{len(other_holes)} not simple polygons were parsed. These are "
-            f"not supported."
+            f"Detected {len(other_holes)} non-simple polygons in the hole layer. "
+            f"These polygons are not supported."
         )
-
         raise IncorrectDXFFileError(
             "The file contained at least one not simple hole polygon.",
             other_holes,
@@ -388,10 +389,10 @@ def parse_dxf_file(
             else other_exits.append(_exit)
         )
 
-    if len(other_exits) > 0:
+    if other_exits:
         logging.error(
-            f"{len(other_exits)} not simple polygons were parsed. These are "
-            f"not supported."
+            f"Detected {len(other_exits)} non-simple polygons in the exit layer(s). "
+            f"These polygons are not supported."
         )
         raise IncorrectDXFFileError(
             "The file contained at least one not simple exit polygon.",
@@ -411,10 +412,10 @@ def parse_dxf_file(
             else other_distributions.append(distribution)
         )
 
-    if len(other_distributions) > 0:
+    if other_distributions:
         logging.error(
-            f"{len(other_distributions)} not simple polygons were parsed. These are "
-            f"not supported."
+            f"Detected {len(other_distributions)} non-simple polygons in the distribution layer(s). "
+            f"These polygons are not supported."
         )
         raise IncorrectDXFFileError(
             "The file contained at least one not simple distribution polygon.",
