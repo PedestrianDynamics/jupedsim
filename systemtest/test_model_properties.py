@@ -366,6 +366,25 @@ def simulation_with_social_force_model_body_force():
         )
 
 
+def test_social_force_model_body_force_setter_deprecated():
+    model = jps.SocialForceModel()
+    with pytest.warns(
+        DeprecationWarning, match="deprecated, use 'body_force' instead"
+    ):
+        model.bodyForce = 5
+        assert model.body_force == 5
+
+
+def test_social_force_model_body_force_getter_deprecated():
+    model = jps.SocialForceModel()
+    model.body_force = 5
+
+    with pytest.warns(
+        DeprecationWarning, match="deprecated, use 'body_force' instead"
+    ):
+        assert model.bodyForce == 5
+
+
 def test_body_force_deprecated(simulation_with_social_force_model_body_force):
     assert simulation_with_social_force_model_body_force is not None
 
@@ -516,3 +535,208 @@ def test_set_model_parameters_social_force_model(
 
     sim.agent(agent_id).model.radius = 9.0
     assert sim.agent(agent_id).model.radius == 9.0
+
+
+def test_social_force_model_agent_paramters_desired_speed_setter_deprecated(
+    simulation_with_social_force_model,
+):
+    sim = simulation_with_social_force_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.SocialForceModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+    )
+
+    with pytest.warns(
+        DeprecationWarning, match="deprecated, use 'desired_speed' instead"
+    ):
+        agent.desiredSpeed = 3
+        assert agent.desired_speed == 3
+
+
+def test_social_force_model_agent_paramters_desired_speed_getter_deprecated(
+    simulation_with_social_force_model,
+):
+    sim = simulation_with_social_force_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.SocialForceModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+    )
+
+    desired_speed = agent.desired_speed
+    with pytest.warns(
+        DeprecationWarning,
+        match="deprecated, use 'desired_speed' instead",
+    ):
+        assert agent.desiredSpeed == desired_speed
+
+
+def test_social_force_model_agent_paramters_reaction_time_setter_deprecated(
+    simulation_with_social_force_model,
+):
+    sim = simulation_with_social_force_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.SocialForceModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+    )
+
+    with pytest.warns(
+        DeprecationWarning, match="deprecated, use 'reaction_time' instead"
+    ):
+        agent.reactionTime = 3
+        assert agent.reaction_time == 3
+
+
+def test_social_force_model_agent_paramters_reaction_time_getter_deprecated(
+    simulation_with_social_force_model,
+):
+    sim = simulation_with_social_force_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.SocialForceModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+    )
+
+    reaction_time = agent.reaction_time
+    with pytest.warns(
+        DeprecationWarning,
+        match="deprecated, use 'reaction_time' instead",
+    ):
+        assert agent.reactionTime == reaction_time
+
+
+def test_social_force_model_agent_paramters_agent_scale_setter_deprecated(
+    simulation_with_social_force_model,
+):
+    sim = simulation_with_social_force_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.SocialForceModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+    )
+
+    with pytest.warns(
+        DeprecationWarning, match="deprecated, use 'agent_scale' instead"
+    ):
+        agent.agentScale = 3
+        assert agent.agent_scale == 3
+
+
+def test_social_force_model_agent_paramters_agent_scale_getter_deprecated(
+    simulation_with_social_force_model,
+):
+    sim = simulation_with_social_force_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.SocialForceModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+    )
+
+    agent_scale = agent.agent_scale
+    with pytest.warns(
+        DeprecationWarning,
+        match="deprecated, use 'agent_scale' instead",
+    ):
+        assert agent.agentScale == agent_scale
+
+
+def test_social_force_model_agent_paramters_obstacle_scale_setter_deprecated(
+    simulation_with_social_force_model,
+):
+    sim = simulation_with_social_force_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.SocialForceModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+    )
+
+    with pytest.warns(
+        DeprecationWarning, match="deprecated, use 'obstacle_scale' instead"
+    ):
+        agent.obstacleScale = 3
+        assert agent.obstacle_scale == 3
+
+
+def test_social_force_model_agent_paramters_obstacle_scale_getter_deprecated(
+    simulation_with_social_force_model,
+):
+    sim = simulation_with_social_force_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.SocialForceModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+    )
+
+    obstacle_scale = agent.obstacle_scale
+    with pytest.warns(
+        DeprecationWarning,
+        match="deprecated, use 'obstacle_scale' instead",
+    ):
+        assert agent.obstacleScale == obstacle_scale
+
+
+def test_social_force_model_agent_paramters_force_distance_setter_deprecated(
+    simulation_with_social_force_model,
+):
+    sim = simulation_with_social_force_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.SocialForceModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+    )
+
+    with pytest.warns(
+        DeprecationWarning, match="deprecated, use 'force_distance' instead"
+    ):
+        agent.forceDistance = 3
+        assert agent.force_distance == 3
+
+
+def test_social_force_model_agent_paramters_force_distance_getter_deprecated(
+    simulation_with_social_force_model,
+):
+    sim = simulation_with_social_force_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.SocialForceModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+    )
+
+    force_distance = agent.force_distance
+    with pytest.warns(
+        DeprecationWarning,
+        match="deprecated, use 'force_distance' instead",
+    ):
+        assert agent.forceDistance == force_distance
