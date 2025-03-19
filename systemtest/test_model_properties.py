@@ -257,6 +257,47 @@ def test_set_model_parameters_collision_free_speed_model(
     assert sim.agent(agent_id).model.radius == 4.0
 
 
+def test_collision_free_speed_model_agent_paramters_v0_setter_deprecated(
+    simulation_with_collision_free_speed_model,
+):
+    sim = simulation_with_collision_free_speed_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.CollisionFreeSpeedModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+    )
+
+    with pytest.warns(
+        DeprecationWarning, match="deprecated, use 'desired_speed' instead"
+    ):
+        agent.v0 = 3
+        assert agent.desired_speed == 3
+
+
+def test_collision_free_speed_model_agent_paramters_v0_getter_deprecated(
+    simulation_with_collision_free_speed_model,
+):
+    sim = simulation_with_collision_free_speed_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.CollisionFreeSpeedModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+    )
+
+    desired_speed = agent.desired_speed
+    with pytest.warns(
+        DeprecationWarning,
+        match="deprecated, use 'desired_speed' instead",
+    ):
+        assert agent.v0 == desired_speed
+
+
 @pytest.fixture
 def simulation_with_generalized_centrifugal_force_model():
     return jps.Simulation(
