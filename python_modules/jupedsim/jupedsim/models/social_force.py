@@ -38,6 +38,8 @@ class SocialForceModel:
         """
         Init dataclass SocialForceMode to handle deprecated arguments.
         """
+        self.body_force = body_force
+
         if bodyForce is not None:
             warnings.warn(
                 "'bodyForce' is deprecated, use 'body_force' instead.",
@@ -45,8 +47,17 @@ class SocialForceModel:
                 stacklevel=2,
             )
             self.body_force = bodyForce
-        self.body_force = body_force
         self.friction = friction
+
+    @property
+    @deprecated("deprecated, use 'body_force' instead.")
+    def bodyForce(self) -> float:
+        return self.body_force
+
+    @bodyForce.setter
+    @deprecated("deprecated, use 'body_force' instead.")
+    def bodyForce(self, bodyForce):
+        self.body_force = bodyForce
 
 
 @dataclass(kw_only=True)
@@ -138,6 +149,56 @@ class SocialForceModelAgentParameters:
             else:
                 setattr(self, new_name, locals()[new_name])
         print(self)
+
+    @property
+    @deprecated("deprecated, use 'desired_speed' instead.")
+    def desiredSpeed(self) -> float:
+        return self.desired_speed
+
+    @desiredSpeed.setter
+    @deprecated("deprecated, use 'desired_speed' instead.")
+    def desiredSpeed(self, desiredSpeed):
+        self.desired_speed = desiredSpeed
+
+    @property
+    @deprecated("deprecated, use 'reaction_time' instead.")
+    def reactionTime(self) -> float:
+        return self.reaction_time
+
+    @reactionTime.setter
+    @deprecated("deprecated, use 'reaction_time' instead.")
+    def reactionTime(self, reactionTime):
+        self.reaction_time = reactionTime
+
+    @property
+    @deprecated("deprecated, use 'agent_scale' instead.")
+    def agentScale(self) -> float:
+        return self.agent_scale
+
+    @agentScale.setter
+    @deprecated("deprecated, use 'agent_scale' instead.")
+    def agentScale(self, agentScale):
+        self.agent_scale = agentScale
+
+    @property
+    @deprecated("deprecated, use 'obstacle_scale' instead.")
+    def obstacleScale(self) -> float:
+        return self.obstacle_scale
+
+    @obstacleScale.setter
+    @deprecated("deprecated, use 'obstacle_scale' instead.")
+    def obstacleScale(self, obstacleScale):
+        self.obstacle_scale = obstacleScale
+
+    @property
+    @deprecated("deprecated, use 'force_distance' instead.")
+    def forceDistance(self) -> float:
+        return self.force_distance
+
+    @forceDistance.setter
+    @deprecated("deprecated, use 'force_distance' instead.")
+    def forceDistance(self, forceDistance):
+        self.force_distance = forceDistance
 
     def as_native(
         self,
