@@ -108,6 +108,16 @@ class CollisionFreeSpeedModelV2AgentParameters:
         self.strength_geometry_repulsion = strength_geometry_repulsion
         self.range_geometry_repulsion = range_geometry_repulsion
 
+    @property
+    @deprecated("deprecated, use 'desired_speed' instead.")
+    def v0(self) -> float:
+        return self.desired_speed
+
+    @v0.setter
+    @deprecated("deprecated, use 'desired_speed' instead.")
+    def v0(self, v0):
+        self.desired_speed = v0
+
     def as_native(
         self,
     ) -> py_jps.CollisionFreeSpeedModelV2AgentParameters:
