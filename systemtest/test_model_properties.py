@@ -248,8 +248,8 @@ def test_set_model_parameters_generalized_centrifugal_force_model(
     sim.agent(agent_id).model.speed = 2.0
     assert sim.agent(agent_id).model.speed == 2.0
 
-    sim.agent(agent_id).model.e0 = (3.0, -3.0)
-    assert sim.agent(agent_id).model.e0 == (3.0, -3.0)
+    sim.agent(agent_id).model.desired_direction = (3.0, -3.0)
+    assert sim.agent(agent_id).model.desired_direction == (3.0, -3.0)
 
     sim.agent(agent_id).model.tau = 4.0
     assert sim.agent(agent_id).model.tau == 4.0
@@ -271,6 +271,64 @@ def test_set_model_parameters_generalized_centrifugal_force_model(
 
     sim.agent(agent_id).model.b_max = 9.0
     assert sim.agent(agent_id).model.b_max == 9.0
+
+
+def test_generalized_centrifugal_force_model_agent_paramters_e0_constructor_deprecated(
+    simulation_with_generalized_centrifugal_force_model,
+):
+    sim = simulation_with_generalized_centrifugal_force_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    with pytest.warns(
+        DeprecationWarning, match="deprecated, use 'desired_direction' instead"
+    ):
+        agent = jps.GeneralizedCentrifugalForceModelAgentParameters(
+            journey_id=journey_id, stage_id=wp, position=(1, 1), e0=(1, 2)
+        )
+        assert agent.desired_direction == (1, 2)
+
+
+def test_generalized_centrifugal_force_model_agent_paramters_e0_setter_deprecated(
+    simulation_with_generalized_centrifugal_force_model,
+):
+    sim = simulation_with_generalized_centrifugal_force_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.GeneralizedCentrifugalForceModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+        desired_direction=(1, 2),
+    )
+
+    with pytest.warns(
+        DeprecationWarning, match="deprecated, use 'desired_direction' instead"
+    ):
+        agent.e0 = (2, 1)
+        assert agent.desired_direction == (2, 1)
+
+
+def test_generalized_centrifugal_force_model_agent_paramters_e0_getter_deprecated(
+    simulation_with_generalized_centrifugal_force_model,
+):
+    sim = simulation_with_generalized_centrifugal_force_model
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.GeneralizedCentrifugalForceModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+        desired_direction=(1, 2),
+    )
+
+    with pytest.warns(
+        DeprecationWarning, match="deprecated, use 'desired_direction' instead"
+    ):
+        desired_direction = agent.e0
+        assert desired_direction == (1, 2)
 
 
 @pytest.fixture

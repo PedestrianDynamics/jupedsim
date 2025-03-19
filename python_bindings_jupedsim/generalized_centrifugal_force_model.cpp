@@ -17,7 +17,7 @@ void init_generalized_centrifugal_force_model(py::module_& m)
         m, "GeneralizedCentrifugalForceModelAgentParameters")
         .def(
             py::init([](double speed,
-                        std::tuple<double, double> e0,
+                        std::tuple<double, double> desired_direction,
                         std::tuple<double, double> position,
                         std::tuple<double, double> orientation,
                         JPS_JourneyId journey_id,
@@ -31,7 +31,7 @@ void init_generalized_centrifugal_force_model(py::module_& m)
                         double b_max) {
                 return JPS_GeneralizedCentrifugalForceModelAgentParameters{
                     speed,
-                    intoJPS_Point(e0),
+                    intoJPS_Point(desired_direction),
                     intoJPS_Point(position),
                     intoJPS_Point(orientation),
                     journey_id,
@@ -46,7 +46,7 @@ void init_generalized_centrifugal_force_model(py::module_& m)
             }),
             py::kw_only(),
             py::arg("speed"),
-            py::arg("e0"),
+            py::arg("desired_direction"),
             py::arg("position"),
             py::arg("orientation"),
             py::arg("journey_id"),
@@ -60,7 +60,7 @@ void init_generalized_centrifugal_force_model(py::module_& m)
             py::arg("b_max"))
         .def("__repr__", [](const JPS_GeneralizedCentrifugalForceModelAgentParameters& p) {
             return fmt::format(
-                "speed: {}, e0: {}, position: {}, orientation: {}, journey_id: {}, "
+                "speed: {}, desired_direction: {}, position: {}, orientation: {}, journey_id: {}, "
                 "stage_id: {}, mass: {}, desired_speed: {}, a_v: {}, a_min: {}, b_min: {}, b_max: "
                 "{}",
                 p.speed,
@@ -128,13 +128,14 @@ void init_generalized_centrifugal_force_model(py::module_& m)
                 JPS_GeneralizedCentrifugalForceModelState_SetSpeed(w.handle, speed);
             })
         .def_property(
-            "e0",
+            "desired_direction",
             [](const JPS_GeneralizedCentrifugalForceModelState_Wrapper& w) {
                 return intoTuple(JPS_GeneralizedCentrifugalForceModelState_GetE0(w.handle));
             },
             [](JPS_GeneralizedCentrifugalForceModelState_Wrapper& w,
-               std::tuple<double, double> e0) {
-                JPS_GeneralizedCentrifugalForceModelState_SetE0(w.handle, intoJPS_Point(e0));
+               std::tuple<double, double> desired_direction) {
+                JPS_GeneralizedCentrifugalForceModelState_SetE0(
+                    w.handle, intoJPS_Point(desired_direction));
             })
         .def_property(
             "mass",
