@@ -403,7 +403,7 @@ def test_desired_speed_deprecated(simulation_with_social_force_model):
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent = jps.SocialForceModelAgentParameters(
-        journey_id=journey_id, stage_id=wp, position=(1, 1), desiredSpeed=1.1
+        journey_id=journey_id, stage_id=wp, position=(1, 1), desired_speed=1.1
     )
     agent_id = sim.add_agent(agent)
 
@@ -424,7 +424,7 @@ def test_reaction_time_deprecated(simulation_with_social_force_model):
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent = jps.SocialForceModelAgentParameters(
-        journey_id=journey_id, stage_id=wp, position=(1, 1), reactionTime=1.1
+        journey_id=journey_id, stage_id=wp, position=(1, 1), reaction_time=1.1
     )
     agent_id = sim.add_agent(agent)
 
@@ -446,7 +446,7 @@ def test_agent_scale_deprecated(simulation_with_social_force_model):
         journey_id=journey_id,
         stage_id=wp,
         position=(1, 1),
-        agentScale=1.1,
+        agent_scale=1.1,
     )
     agent_id = sim.add_agent(agent)
 
@@ -465,7 +465,7 @@ def test_obstacle_scale_deprecated(simulation_with_social_force_model):
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent = jps.SocialForceModelAgentParameters(
-        journey_id=journey_id, stage_id=wp, position=(1, 1), obstacleScale=1.1
+        journey_id=journey_id, stage_id=wp, position=(1, 1), obstacle_scale=1.1
     )
     agent_id = sim.add_agent(agent)
 
@@ -484,7 +484,7 @@ def test_force_distance_deprecated(simulation_with_social_force_model):
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent = jps.SocialForceModelAgentParameters(
-        journey_id=journey_id, stage_id=wp, position=(1, 1), forceDistance=1.1
+        journey_id=journey_id, stage_id=wp, position=(1, 1), force_distance=1.1
     )
     agent_id = sim.add_agent(agent)
 
