@@ -63,7 +63,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
 
     Attributes:
         speed: Speed of the agent.
-        e0: Desired direction of the agent.
+        desired_direction: Desired direction of the agent.
         position: Position of the agent.
         orientation: Orientation of the agent.
         journey_id: Id of the journey the agent follows.
@@ -78,7 +78,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
     """
 
     speed: float = 0.0
-    e0: tuple[float, float] = (0.0, 0.0)
+    desired_direction: tuple[float, float] = (0.0, 0.0)
     position: tuple[float, float] = (0.0, 0.0)
     orientation: tuple[float, float] = (1.0, 0.0)
     journey_id: int = -1
@@ -95,7 +95,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
         self,
         *,
         speed: float = 0.0,
-        e0: tuple[float, float] = (0.0, 0.0),
+        desired_direction: tuple[float, float] = (0.0, 0.0),
         position: tuple[float, float] = (0.0, 0.0),
         orientation: tuple[float, float] = (1.0, 0.0),
         journey_id: int = -1,
@@ -108,10 +108,11 @@ class GeneralizedCentrifugalForceModelAgentParameters:
         b_min: float = 0.2,
         b_max: float = 0.4,
         v0=None,
+        e0=None,
     ):
         """Init dataclass to handle deprecated argument."""
         self.speed = speed
-        self.e0 = e0
+        self.desired_direction = desired_direction
         self.position = position
         self.orientation = orientation
         self.journey_id = journey_id
@@ -133,12 +134,32 @@ class GeneralizedCentrifugalForceModelAgentParameters:
         else:
             self.desired_speed = desired_speed
 
+        if e0 is not None:
+            warnings.warn(
+                "'e0' is deprecated, use 'desired_direction' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            self.desired_direction = e0
+        else:
+            self.desired_direction = desired_direction
+
+    @property
+    @deprecated("deprecated, use 'desired_direction' instead.")
+    def e0(self) -> tuple[float, float]:
+        return self.desired_direction
+
+    @e0.setter
+    @deprecated("deprecated, use 'desired_direction' instead.")
+    def e0(self, e0):
+        self.desired_direction = e0
+
     def as_native(
         self,
     ) -> py_jps.GeneralizedCentrifugalForceModelAgentParameters:
         return py_jps.GeneralizedCentrifugalForceModelAgentParameters(
             speed=self.speed,
-            e0=self.e0,
+            desired_direction=self.desired_direction,
             position=self.position,
             orientation=self.orientation,
             journey_id=self.journey_id,
@@ -167,13 +188,24 @@ class GeneralizedCentrifugalForceModelState:
         self._obj.speed = speed
 
     @property
+    def desired_direction(self) -> float:
+        """desired direction of this agent."""
+        return self._obj.desired_direction
+
+    @desired_direction.setter
+    def desired_direction(self, desired_direction):
+        self._obj.desired_direction = desired_direction
+
+    @property
+    @deprecated("deprecated, use 'desired_direction' instead.")
     def e0(self) -> tuple[float, float]:
         """Desired direction of this agent."""
-        return self._obj.e0
+        return self._obj.desired_speed
 
     @e0.setter
+    @deprecated("deprecated, use 'desired_direction' instead.")
     def e0(self, e0):
-        self._obj.e0 = e0
+        self._obj.desired_speed = e0
 
     @property
     def tau(self) -> float:
