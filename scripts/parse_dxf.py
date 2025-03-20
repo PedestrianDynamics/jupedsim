@@ -11,7 +11,6 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot
 import matplotlib.pyplot as plt
 import shapely
-from shapely.ops import unary_union
 from shapely import (
     GeometryCollection,
     LineString,
@@ -21,6 +20,7 @@ from shapely import (
     polygonize,
     to_wkt,
 )
+from shapely.ops import unary_union
 
 logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.DEBUG)
 
