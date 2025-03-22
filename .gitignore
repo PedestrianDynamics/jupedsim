@@ -24,9 +24,14 @@ __pycache__/
 /dist/
 /jupedsim.egg-info/
 /docs/build
+/docs/source/citation/*.bib
+/docs/jupyter_execute/
 
 # clangd cache
 /.cache/
 
 # compile_commands
 /compile_commands.json
+
+.idea/
+/build*
