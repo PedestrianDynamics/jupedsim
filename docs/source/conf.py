@@ -7,6 +7,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import datetime
+import subprocess
 
 project = "JuPedSim"
 copyright = (
@@ -155,3 +156,14 @@ html_sidebars = {
 
 # -- Options for EPUB output
 epub_show_urls = "footnote"
+
+# -- Automatic fetch citation info from zenodo
+def generate_bibtex():
+    result = subprocess.run(["python", "_scripts/generate-bibtex.py"], capture_output=True, text=True)
+    return result.stdout.strip()
+
+bibtex = generate_bibtex()
+output_file = "citation/jupedsim_bibtex.bib"
+
+with open(output_file, "w") as f:
+    f.write(bibtex)
