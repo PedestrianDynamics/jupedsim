@@ -7,6 +7,7 @@ sphinx-notfound-page~=1.1
 myst-nb~=1.1
 nbconvert~=7.16
 deprecated~=1.2.18
+requests~=2.32
 
 # notebook dependencies
 shapely
