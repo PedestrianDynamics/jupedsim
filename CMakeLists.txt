@@ -183,16 +183,9 @@ if(BUILD_TESTS)
                 --junit-xml=result-systemtests.xml
         DEPENDS py_jupedsim
     )
-    set(unittests_dependency_list libjupedsim-unittests libsimulator-unittests)
+    set(unittests_dependency_list libsimulator-unittests)
     add_custom_target(unittests
         DEPENDS ${unittests_dependency_list}
-    )
-
-    add_custom_target(libjupedsim-unittests
-        COMMENT "Running libjupedsim unittests"
-        COMMAND $<TARGET_FILE:libjupedsim-tests>
-                --gtest_output=xml:result-libjupedsim-unittests.xml
-        DEPENDS libjupedsim-tests
     )
     add_custom_target(libsimulator-unittests
         COMMENT "Running unit tests"
@@ -215,7 +208,6 @@ endif()
 ################################################################################
 # Add libraries / executables
 ################################################################################
-add_subdirectory(libjupedsim)
 add_subdirectory(libcommon)
 add_subdirectory(libsimulator)
 add_subdirectory(python_bindings_jupedsim)
@@ -247,7 +239,7 @@ if(UNIX AND WITH_FORMAT)
             )
             if(version MATCHES "^${clang-format-version}.*")
                 message(STATUS "Found clang-format ${version}, add format-check and reformat targets")
-                set(folders libcommon libjupedsim libsimulator)
+                set(folders libcommon libsimulator)
                 add_custom_target(check-format
                     COMMENT "Checking format with clang-format"
                     COMMAND find ${folders}

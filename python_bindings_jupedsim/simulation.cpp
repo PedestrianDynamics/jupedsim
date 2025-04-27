@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "conversion.hpp"
-#include "wrapper.hpp"
-
 #include <Unreachable.hpp>
-#include <jupedsim/jupedsim.h>
+
+#include <CollisionGeometry.hpp>
+#include <OperationalModel.hpp>
+#include <Simulation.hpp>
+#include <Stage.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -12,365 +14,106 @@ namespace py = pybind11;
 
 void init_simulation(py::module_& m)
 {
-    py::class_<JPS_OperationalModel_Wrapper>(m, "OperationalModel");
-    py::class_<JPS_Simulation_Wrapper>(m, "Simulation")
+    py::class_<Simulation>(m, "Simulation")
         .def(
-            py::init(
-                [](JPS_OperationalModel_Wrapper& model, JPS_Geometry_Wrapper& geometry, double dT) {
-                    JPS_ErrorMessage errorMsg{};
-                    auto result =
-                        JPS_Simulation_Create(model.handle, geometry.handle, dT, &errorMsg);
-                    if(result) {
-                        return std::make_unique<JPS_Simulation_Wrapper>(result);
-                    }
-                    auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                    JPS_ErrorMessage_Free(errorMsg);
-                    throw std::runtime_error{msg};
-                }),
+            py::init([](const OperationalModel* model, CollisionGeometry geometry, double dT) {
+                return std::make_unique<Simulation>(
+                    model->Clone(), std::make_unique<CollisionGeometry>(geometry), dT);
+            }),
             py::kw_only(),
             py::arg("model"),
             py::arg("geometry"),
             py::arg("dt"))
         .def(
             "add_waypoint_stage",
-            [](JPS_Simulation_Wrapper& w, std::tuple<double, double> position, double distance) {
-                JPS_ErrorMessage errorMsg{};
-                const auto result = JPS_Simulation_AddStageWaypoint(
-                    w.handle, intoJPS_Point(position), distance, &errorMsg);
-                if(result != 0) {
-                    return result;
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
+            [](Simulation& sim, std::tuple<double, double> position, double distance) {
+                return sim.AddStage(WaypointDescription{intoPoint(position), distance}).getID();
             })
         .def(
             "add_queue_stage",
-            [](JPS_Simulation_Wrapper& w,
-               const std::vector<std::tuple<double, double>>& positions) {
-                JPS_ErrorMessage errorMsg{};
-                const auto jpsPointPositions = intoJPS_Point(positions);
-                const auto result = JPS_Simulation_AddStageNotifiableQueue(
-                    w.handle, jpsPointPositions.data(), jpsPointPositions.size(), &errorMsg);
-                if(result != 0) {
-                    return result;
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
+            [](Simulation& sim, const std::vector<std::tuple<double, double>>& positions) {
+                return sim.AddStage(NotifiableQueueDescription{intoPoints(positions)}).getID();
             })
         .def(
             "add_waiting_set_stage",
-            [](JPS_Simulation_Wrapper& w,
-               const std::vector<std::tuple<double, double>>& positions) {
-                JPS_ErrorMessage errorMsg{};
-                const auto jpsPointPositions = intoJPS_Point(positions);
-                const auto result = JPS_Simulation_AddStageWaitingSet(
-                    w.handle, jpsPointPositions.data(), jpsPointPositions.size(), &errorMsg);
-                if(result != 0) {
-                    return result;
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
+            [](Simulation& sim, const std::vector<std::tuple<double, double>>& positions) {
+                return sim.AddStage(NotifiableWaitingSetDescription{intoPoints(positions)}).getID();
             })
         .def(
             "add_exit_stage",
-            [](JPS_Simulation_Wrapper& w, const std::vector<std::tuple<double, double>>& polygon) {
-                JPS_ErrorMessage errorMsg{};
-                const auto jpsPointPoly = intoJPS_Point(polygon);
-                const auto result = JPS_Simulation_AddStageExit(
-                    w.handle, jpsPointPoly.data(), jpsPointPoly.size(), &errorMsg);
-                if(result != 0) {
-                    return result;
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
+            [](Simulation& sim, const std::vector<std::tuple<double, double>>& polygon) {
+                return sim.AddStage(ExitDescription{Polygon{intoPoints(polygon)}}).getID();
             })
         .def(
             "add_direct_steering_stage",
-            [](JPS_Simulation_Wrapper& w) {
-                JPS_ErrorMessage errorMsg{};
-                const auto result = JPS_Simulation_AddStageDirectSteering(w.handle, &errorMsg);
-                if(result != 0) {
-                    return result;
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
-            })
+            [](Simulation& sim) { return sim.AddStage(DirectSteeringDescription{}).getID(); })
         .def(
             "add_journey",
-            [](JPS_Simulation_Wrapper& simulation, JPS_JourneyDescription_Wrapper& journey) {
-                JPS_ErrorMessage errorMsg{};
-                const auto result =
-                    JPS_Simulation_AddJourney(simulation.handle, journey.handle, &errorMsg);
-                if(result != 0) {
-                    return result;
+            [](Simulation& sim, std::map<uint64_t, TransitionDescription>& journey) {
+                auto native_journey = std::map<BaseStage::ID, TransitionDescription>{};
+                for(const auto& [stage_id, desc] : journey) {
+                    native_journey.emplace(stage_id, desc);
                 }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
+
+                return sim.AddJourney(native_journey).getID();
             })
         .def(
             "add_agent",
-            [](JPS_Simulation_Wrapper& simulation,
-               JPS_GeneralizedCentrifugalForceModelAgentParameters& parameters) {
-                JPS_ErrorMessage errorMsg{};
-                auto result = JPS_Simulation_AddGeneralizedCentrifugalForceModelAgent(
-                    simulation.handle, parameters, &errorMsg);
-                if(result) {
-                    return result;
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
-            })
-        .def(
-            "add_agent",
-            [](JPS_Simulation_Wrapper& simulation,
-               JPS_CollisionFreeSpeedModelAgentParameters& parameters) {
-                JPS_ErrorMessage errorMsg{};
-                auto result = JPS_Simulation_AddCollisionFreeSpeedModelAgent(
-                    simulation.handle, parameters, &errorMsg);
-                if(result) {
-                    return result;
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
-            })
-        .def(
-            "add_agent",
-            [](JPS_Simulation_Wrapper& simulation,
-               JPS_CollisionFreeSpeedModelV2AgentParameters& parameters) {
-                JPS_ErrorMessage errorMsg{};
-                auto result = JPS_Simulation_AddCollisionFreeSpeedModelV2Agent(
-                    simulation.handle, parameters, &errorMsg);
-                if(result) {
-                    return result;
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
-            })
-        .def(
-            "add_agent",
-            [](JPS_Simulation_Wrapper& simulation,
-               JPS_AnticipationVelocityModelAgentParameters& parameters) {
-                JPS_ErrorMessage errorMsg{};
-                auto result = JPS_Simulation_AddAnticipationVelocityModelAgent(
-                    simulation.handle, parameters, &errorMsg);
-                if(result) {
-                    return result;
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
-            })
-        .def(
-            "add_agent",
-            [](JPS_Simulation_Wrapper& simulation,
-               JPS_SocialForceModelAgentParameters& parameters) {
-                JPS_ErrorMessage errorMsg{};
-                auto result = JPS_Simulation_AddSocialForceModelAgent(
-                    simulation.handle, parameters, &errorMsg);
-                if(result) {
-                    return result;
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
-            })
+            [](Simulation& sim, GenericAgent& agent) { return sim.AddAgent(agent).getID(); })
         .def(
             "mark_agent_for_removal",
-            [](JPS_Simulation_Wrapper& simulation, JPS_AgentId id) {
-                JPS_ErrorMessage errorMsg{};
-                auto result = JPS_Simulation_MarkAgentForRemoval(simulation.handle, id, &errorMsg);
-                if(result) {
-                    return result;
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
-            })
-        .def(
-            "removed_agents",
-            [](const JPS_Simulation_Wrapper& simulation) {
-                const JPS_AgentId* ids{};
-                const auto count = JPS_Simulation_RemovedAgents(simulation.handle, &ids);
-                return std::vector<JPS_AgentId>{ids, ids + count};
-            })
-        .def(
-            "iterate",
-            [](const JPS_Simulation_Wrapper& simulation) {
-                JPS_ErrorMessage errorMsg{};
-                bool iterate_ok = JPS_Simulation_Iterate(simulation.handle, &errorMsg);
-                if(iterate_ok) {
-                    return;
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
-            })
+            [](Simulation& sim, uint64_t id) { sim.MarkAgentForRemoval(id); })
+        .def("removed_agents", [](const Simulation& sim) { return sim.RemovedAgents(); })
+        .def("iterate", [](Simulation& sim) { sim.Iterate(); })
         .def(
             "switch_agent_journey",
-            [](const JPS_Simulation_Wrapper& w,
-               JPS_AgentId agentId,
-               JPS_JourneyId journeyId,
-               JPS_StageId stageId) {
-                JPS_ErrorMessage errorMsg{};
-                auto result = JPS_Simulation_SwitchAgentJourney(
-                    w.handle, agentId, journeyId, stageId, &errorMsg);
-                if(result) {
-                    return;
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
+            [](Simulation& sim, uint64_t agentId, uint64_t journeyId, uint64_t stageId) {
+                sim.SwitchAgentJourney(agentId, journeyId, stageId);
             },
             py::kw_only(),
             py::arg("agent_id"),
             py::arg("journey_id"),
             py::arg("stage_id"))
-        .def(
-            "agent_count",
-            [](JPS_Simulation_Wrapper& simulation) {
-                return JPS_Simulation_AgentCount(simulation.handle);
-            })
-        .def(
-            "elapsed_time",
-            [](JPS_Simulation_Wrapper& simulation) {
-                return JPS_Simulation_ElapsedTime(simulation.handle);
-            })
-        .def(
-            "delta_time",
-            [](JPS_Simulation_Wrapper& simulation) {
-                return JPS_Simulation_DeltaTime(simulation.handle);
-            })
-        .def(
-            "iteration_count",
-            [](JPS_Simulation_Wrapper& simulation) {
-                return JPS_Simulation_IterationCount(simulation.handle);
-            })
+        .def("agent_count", [](const Simulation& sim) { return sim.AgentCount(); })
+        .def("elapsed_time", [](const Simulation& sim) { return sim.ElapsedTime(); })
+        .def("delta_time", [](const Simulation& sim) { return sim.DT(); })
+        .def("iteration_count", [](const Simulation& sim) { return sim.Iteration(); })
         .def(
             "agents",
-            [](const JPS_Simulation_Wrapper& simulation) {
-                return std::make_unique<JPS_AgentIterator_Wrapper>(
-                    JPS_Simulation_AgentIterator(simulation.handle));
-            })
+            [](Simulation& sim) { return py::make_iterator(sim.Agents()); },
+            py::keep_alive<0, 1>())
         .def(
             "agent",
-            [](const JPS_Simulation_Wrapper& simulation, JPS_AgentId agentId) {
-                JPS_ErrorMessage errorMsg{};
-                auto result = JPS_Simulation_GetAgent(simulation.handle, agentId, &errorMsg);
-                if(result) {
-                    return std::make_unique<JPS_Agent_Wrapper>(result);
-                }
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
-            },
-            py::arg("agent_id"))
+            [](Simulation& sim, uint64_t agentId) -> auto& { return sim.Agent(agentId); },
+            py::arg("agent_id"),
+            py::return_value_policy::reference)
         .def(
             "agents_in_range",
-            [](JPS_Simulation_Wrapper& w, std::tuple<double, double> pos, double distance) {
-                return std::make_unique<JPS_AgentIdIterator_Wrapper>(
-                    JPS_Simulation_AgentsInRange(w.handle, intoJPS_Point(pos), distance));
+            [](Simulation& sim, std::tuple<double, double> pos, double distance) {
+                auto agents_in_range = sim.AgentsInRange(intoPoint(pos), distance);
+                auto agents = std::vector<uint64_t>();
+                agents.reserve(agents_in_range.size());
+                for(auto agent : agents_in_range) {
+                    agents.emplace_back(agent.getID());
+                }
+                return agents;
             })
         .def(
             "agents_in_polygon",
-            [](JPS_Simulation_Wrapper& w, const std::vector<std::tuple<double, double>>& poly) {
-                const auto ppoly = intoJPS_Point(poly);
-                return std::make_unique<JPS_AgentIdIterator_Wrapper>(
-                    JPS_Simulation_AgentsInPolygon(w.handle, ppoly.data(), ppoly.size()));
-            })
-        .def(
-            "get_stage_proxy",
-            [](JPS_Simulation_Wrapper& w, JPS_StageId id)
-                -> std::variant<
-                    std::unique_ptr<JPS_WaypointProxy_Wrapper>,
-                    std::unique_ptr<JPS_NotifiableQueueProxy_Wrapper>,
-                    std::unique_ptr<JPS_WaitingSetProxy_Wrapper>,
-                    std::unique_ptr<JPS_ExitProxy_Wrapper>,
-                    std::unique_ptr<JPS_DirectSteeringProxy_Wrapper>> {
-                const auto type = JPS_Simulation_GetStageType(w.handle, id);
-                JPS_ErrorMessage errorMessage{};
-                const auto raise = [](JPS_ErrorMessage err) {
-                    const auto msg = std::string(JPS_ErrorMessage_GetMessage(err));
-                    JPS_ErrorMessage_Free(err);
-                    throw std::runtime_error{msg};
-                };
-
-                switch(type) {
-                    case JPS_NotifiableQueueType: {
-                        auto ptr = std::make_unique<JPS_NotifiableQueueProxy_Wrapper>(
-                            JPS_Simulation_GetNotifiableQueueProxy(w.handle, id, &errorMessage));
-                        if(!ptr) {
-                            raise(errorMessage);
-                        }
-                        return ptr;
-                    }
-                    case JPS_WaitingSetType: {
-                        auto ptr = std::make_unique<JPS_WaitingSetProxy_Wrapper>(
-                            JPS_Simulation_GetWaitingSetProxy(w.handle, id, &errorMessage));
-                        if(!ptr) {
-                            raise(errorMessage);
-                        }
-                        return ptr;
-                    }
-                    case JPS_WaypointType: {
-                        auto ptr = std::make_unique<JPS_WaypointProxy_Wrapper>(
-                            JPS_Simulation_GetWaypointProxy(w.handle, id, &errorMessage));
-                        if(!ptr) {
-                            raise(errorMessage);
-                        }
-                        return ptr;
-                    }
-                    case JPS_ExitType: {
-                        auto ptr = std::make_unique<JPS_ExitProxy_Wrapper>(
-                            JPS_Simulation_GetExitProxy(w.handle, id, &errorMessage));
-                        if(!ptr) {
-                            raise(errorMessage);
-                        }
-                        return ptr;
-                    }
-                    case JPS_DirectSteeringType: {
-                        auto ptr = std::make_unique<JPS_DirectSteeringProxy_Wrapper>(
-                            JPS_Simulation_GetDirectSteeringProxy(w.handle, id, &errorMessage));
-                        if(!ptr) {
-                            raise(errorMessage);
-                        }
-                        return ptr;
-                    }
+            [](Simulation& sim, const std::vector<std::tuple<double, double>>& poly) {
+                auto agents_in_range = sim.AgentsInPolygon(intoPoints(poly));
+                auto agents = std::vector<uint64_t>();
+                agents.reserve(agents_in_range.size());
+                for(auto agent : agents_in_range) {
+                    agents.emplace_back(agent.getID());
                 }
-                UNREACHABLE();
+                return agents;
             })
-        .def(
-            "set_tracing",
-            [](JPS_Simulation_Wrapper& w, bool status) {
-                JPS_Simulation_SetTracing(w.handle, status);
-            })
-        .def(
-            "get_last_trace",
-            [](JPS_Simulation_Wrapper& w) { return JPS_Simulation_GetTrace(w.handle); })
-        .def(
-            "get_geometry",
-            [](const JPS_Simulation_Wrapper& w) {
-                return std::make_unique<JPS_Geometry_Wrapper>(JPS_Simulation_GetGeometry(w.handle));
-            })
-        .def("switch_geometry", [](JPS_Simulation_Wrapper& w, JPS_Geometry_Wrapper& geometry) {
-            JPS_ErrorMessage errorMsg{};
-
-            auto success =
-                JPS_Simulation_SwitchGeometry(w.handle, geometry.handle, nullptr, &errorMsg);
-
-            if(!success) {
-                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                JPS_ErrorMessage_Free(errorMsg);
-                throw std::runtime_error{msg};
-            }
-            return success;
+        .def("get_stage_proxy", [](Simulation& sim, uint64_t id) { return sim.Stage(id); })
+        .def("set_tracing", [](Simulation& sim, bool status) { sim.SetTracing(status); })
+        .def("get_last_trace", [](Simulation& sim) { return sim.GetLastStats(); })
+        .def("get_geometry", [](Simulation& sim) { return sim.Geo(); })
+        .def("switch_geometry", [](Simulation& sim, CollisionGeometry& geometry) {
+            sim.SwitchGeometry(std::make_unique<CollisionGeometry>(geometry));
         });
 }

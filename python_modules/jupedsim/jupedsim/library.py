@@ -51,9 +51,6 @@ def set_error_callback(fn: Callable[[str], None]) -> None:
 
 
 class BuildInfo:
-    def __init__(self) -> None:
-        self.__obj = py_jps.get_build_info()
-
     @property
     def git_commit_hash(self) -> str:
         """SHA1 commit hash of this version.
@@ -62,7 +59,7 @@ class BuildInfo:
             SHA1 of this version.
 
         """
-        return self.__obj.git_commit_hash
+        return py_jps.buildinfo.git_commit_hash
 
     @property
     def git_commit_date(self) -> str:
@@ -72,7 +69,7 @@ class BuildInfo:
             Date the commit of this version as string.
 
         """
-        return self.__obj.git_commit_date
+        return py_jps.buildinfo.git_commit_date
 
     @property
     def git_branch(self) -> str:
@@ -82,7 +79,7 @@ class BuildInfo:
             name of the branch this version was build from.
 
         """
-        return self.__obj.git_branch
+        return py_jps.buildinfo.git_commit_branch
 
     @property
     def compiler(self) -> str:
@@ -91,7 +88,7 @@ class BuildInfo:
         Returns:
             Compiler identification.
         """
-        return self.__obj.compiler
+        return py_jps.buildinfo.compiler
 
     @property
     def compiler_version(self) -> str:
@@ -100,11 +97,11 @@ class BuildInfo:
         Returns:
             Compiler version number.
         """
-        return self.__obj.compiler_version
+        return py_jps.buildinfo.compiler_version
 
     @property
     def library_version(self) -> str:
-        return self.__obj.library_version
+        return py_jps.buildinfo.library_version
 
     def __repr__(self):
         return dedent(

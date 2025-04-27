@@ -144,7 +144,7 @@ class CMakeBuild(build_ext):
         cmake_args = [
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}{os.sep}",
             f"-DCMAKE_BUILD_TYPE={cfg}",  # not used on MSVC, but no harm
-            "-DCMAKE_UNITY_BUILD=ON",
+            # "-DCMAKE_UNITY_BUILD=ON",
             f"-DPython_EXECUTABLE={sys.executable}",
         ]
 

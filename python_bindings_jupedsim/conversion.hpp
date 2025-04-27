@@ -1,16 +1,27 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
-#include <jupedsim/jupedsim.h>
 
+#include "UniqueID.hpp"
+
+#include <Point.hpp>
 #include <tuple>
 #include <vector>
 
-std::tuple<double, double> intoTuple(const JPS_Point& p);
+std::tuple<double, double> intoTuple(const Point& p);
 
-std::vector<std::tuple<double, double>> intoTuple(const std::vector<JPS_Point>& p);
+std::vector<std::tuple<double, double>> intoTuples(const std::vector<Point>& in);
 
-std::vector<std::tuple<double, double>> intoTuple(const JPS_Point* beg, const JPS_Point* end);
+Point intoPoint(const std::tuple<double, double>& p);
 
-JPS_Point intoJPS_Point(const std::tuple<double, double> p);
+std::vector<Point> intoPoints(const std::vector<std::tuple<double, double>>& in);
 
-std::vector<JPS_Point> intoJPS_Point(const std::vector<std::tuple<double, double>>& p);
+template <typename T, typename U>
+std::vector<T> intoVecT(const std::vector<U>& vec)
+{
+    auto result = std::vector<T>();
+    result.reserve(vec.size());
+    for(const auto& v : vec) {
+        result.push_back(v);
+    }
+    return result;
+}
