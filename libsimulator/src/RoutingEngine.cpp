@@ -301,7 +301,7 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
     // This is an over estimation but IMO preferable to repeadted allocations.
     // Ideally we replace this with something w.o. allocations
     waypoints.reserve(path.size() + 1);
-    for(size_t index_portal = 1; index_portal <= portalCount; ++index_portal) {
+    for(size_t index_portal = 1; index_portal < portalCount; ++index_portal) {
         const auto face_from = path[index_portal - 1];
         const auto face_to = path[index_portal];
         if(face_from->neighbor(0) == face_to) {

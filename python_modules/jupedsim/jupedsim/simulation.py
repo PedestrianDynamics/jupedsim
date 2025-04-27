@@ -161,13 +161,12 @@ class Simulation:
     def add_queue_stage(self, positions: list[tuple[float, float]]) -> int:
         """Add a new queue state to this simulation.
 
-        Arguments:
-            positions: Ordered list of the waiting
-                points of this queue. The first one in the list is the head of
-                the queue while the last one is the back of the queue.
-
+         Arguments:
+             positions: Ordered list of the waiting
+                 points of this queue. The first one in the list is the head of
+                 the queue while the last one is the back of the queue.
         Returns:
-            Id of the new stage.
+             Id of the new stage.
 
         """
         return self._obj.add_queue_stage(positions)
@@ -249,7 +248,9 @@ class Simulation:
             Id of the added Journey.
 
         """
-        return self._obj.add_journey(journey._obj)
+        return self._obj.add_journey(
+            {k: v._obj for k, v in journey._transitions.items()}
+        )
 
     def add_agent(
         self,
@@ -264,16 +265,85 @@ class Simulation:
         """Add an agent to the simulation.
 
         Arguments:
-            parameters: Agent Parameters of the newly added model. The parameters have to
-                match the model used in this simulation. When adding agents with invalid parameters,
-                or too close to the boundary or other agents, this will cause an error.
+                parameters: Agent Parameters of the newly added model. The parameters have to
+                    match the model used in this simulation. When adding agents with invalid parameters,
+                    or too close to the boundary or other agents, this will cause an error.
 
-        Returns:
-            Id of the added agent.
+            Returns:
+                Id of the added agent.
         """
-        return self._obj.add_agent(parameters.as_native())
+        if isinstance(
+            parameters, GeneralizedCentrifugalForceModelAgentParameters
+        ):
+            model = py_jps.GeneralizedCentrifugalForceModelState(
+                speed=parameters.speed,
+                desired_orientation=parameters.orientation,
+                mass=parameters.mass,
+                tau=parameters.tau,
+                desired_speed=parameters.desired_speed,
+                a_v=parameters.a_v,
+                a_min=parameters.a_min,
+                b_min=parameters.b_min,
+                b_max=parameters.b_max,
+            )
+        elif isinstance(parameters, CollisionFreeSpeedModelAgentParameters):
+            model = py_jps.CollisionFreeSpeedModelState(
+                time_gap=parameters.time_gap,
+                desired_speed=parameters.desired_speed,
+                radius=parameters.radius,
+            )
+        elif isinstance(parameters, CollisionFreeSpeedModelV2AgentParameters):
+            model = py_jps.CollisionFreeSpeedModelV2State(
+                strength_neighbor_repulsion=parameters.strength_neighbor_repulsion,
+                range_neighbor_repulsion=parameters.range_neighbor_repulsion,
+                strength_geometry_repulsion=parameters.strength_geometry_repulsion,
+                range_geometry_repulsion=parameters.range_geometry_repulsion,
+                time_gap=parameters.time_gap,
+                desired_speed=parameters.desired_speed,
+                radius=parameters.radius,
+            )
+        elif isinstance(parameters, AnticipationVelocityModelAgentParameters):
+            model = py_jps.AnticipationVelocityModelState(
+                strength_neighbor_repulsion=parameters.strength_neighbor_repulsion,
+                range_neighbor_repulsion=parameters.range_neighbor_repulsion,
+                wall_buffer_distance=parameters.wall_buffer_distance,
+                anticipation_time=parameters.anticipation_time,
+                reaction_time=parameters.reaction_time,
+                time_gap=parameters.time_gap,
+                desired_speed=parameters.desired_speed,
+                radius=parameters.radius,
+            )
+        elif isinstance(parameters, SocialForceModelAgentParameters):
+            model = py_jps.SocialForceModelState(
+                velocity=parameters.velocity,
+                mass=parameters.mass,
+                desired_speed=parameters.desired_speed,
+                reaction_time=parameters.reaction_time,
+                agent_scale=parameters.agent_scale,
+                obstacle_scale=parameters.obstacle_scale,
+                force_distance=parameters.force_distance,
+                radius=parameters.radius,
+            )
 
-    def mark_agent_for_removal(self, agent_id: int) -> bool:
+        # TODO(kkratz): Some models do not have an orientation as part of their
+        # state, but we initially designed it to be. This needs to be first
+        # fixed on the C++ Level and then later here. Fix is: Move orientation
+        # into model specific data.
+        def orientation_or_zero(param):
+            if hasattr(param, "orientation"):
+                return param.orientation
+            return (0.0, 0.0)
+
+        agent = py_jps.Agent(
+            journey_id=parameters.journey_id,
+            stage_id=parameters.stage_id,
+            position=parameters.position,
+            orientation=orientation_or_zero(parameters),
+            model=model,
+        )
+        return self._obj.add_agent(agent)
+
+    def mark_agent_for_removal(self, agent_id: int):
         """Marks an agent for removal.
 
         Marks the given agent for removal in the simulation. The agent will be
@@ -283,12 +353,9 @@ class Simulation:
 
         Arguments:
             agent_id: Id of the agent marked for removal
-
-        Returns:
-            marking for removal was successful
         """
 
-        return self._obj.mark_agent_for_removal(agent_id)
+        self._obj.mark_agent_for_removal(agent_id)
 
     def removed_agents(self) -> list[int]:
         """All agents (given by Id) removed in the last iteration.

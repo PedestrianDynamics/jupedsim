@@ -174,7 +174,7 @@ BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
     return _stageManager.AddStage(stageDescription, _removedAgentsInLastIteration);
 }
 
-GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
+GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
 {
 
     if(!_geometry->InsideGeometry(agent.pos)) {

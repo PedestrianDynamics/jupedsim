@@ -11,7 +11,6 @@ add_library(py_jupedsim MODULE
     logging.cpp
     logging.hpp
     trace.cpp
-    wrapper.hpp
     geometry.cpp
     routing.cpp
     simulation.cpp
@@ -26,7 +25,7 @@ target_link_libraries(py_jupedsim
         pybind11::module
         pybind11::windows_extras
         fmt::fmt
-        jupedsim_obj
+        simulator
         common
 )
 
@@ -44,4 +43,3 @@ set_target_properties(py_jupedsim
         INTERPROCEDURAL_OPTIMIZATION ${USE_IPO}
         INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF
 )
-
