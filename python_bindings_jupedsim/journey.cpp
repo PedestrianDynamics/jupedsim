@@ -1,53 +1,49 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "conversion.hpp"
-#include "wrapper.hpp"
+#include <Journey.hpp>
+#include <Stage.hpp>
 
-#include <jupedsim/jupedsim.h>
+#include <map>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 namespace py = pybind11;
 
+using JourneyDesc = std::map<uint64_t, TransitionDescription>;
+
 void init_journey(py::module_& m)
 {
-    py::class_<JPS_JourneyDescription_Wrapper>(m, "JourneyDescription")
-        .def(py::init([]() {
-            return std::make_unique<JPS_JourneyDescription_Wrapper>(
-                JPS_JourneyDescription_Create());
-        }))
-        .def(py::init([](const std::vector<JPS_StageId>& ids) {
-            auto desc =
-                std::make_unique<JPS_JourneyDescription_Wrapper>(JPS_JourneyDescription_Create());
-            for(const auto id : ids) {
-                JPS_JourneyDescription_AddStage(desc->handle, id);
+    py::class_<JourneyDesc>(m, "JourneyDescription")
+        .def(py::init([]() { return JourneyDesc{}; }))
+        .def(py::init([](const std::vector<uint64_t>& ids) {
+            auto desc = JourneyDesc{};
+            for(auto id : ids) {
+                desc[id] = NonTransitionDescription{};
             }
             return desc;
         }))
         .def(
             "add",
-            [](JPS_JourneyDescription_Wrapper& w, JPS_StageId id) {
-                JPS_JourneyDescription_AddStage(w.handle, id);
+            [](JourneyDesc& desc, uint64_t id) {
+                desc.insert(std::make_pair(id, NonTransitionDescription{}));
             })
         .def(
             "add",
-            [](JPS_JourneyDescription_Wrapper& w, const std::vector<JPS_StageId>& ids) {
+            [](JourneyDesc& desc, const std::vector<uint64_t>& ids) {
                 for(const auto& id : ids) {
-                    JPS_JourneyDescription_AddStage(w.handle, id);
+                    desc.insert(std::make_pair(id, NonTransitionDescription{}));
                 }
             })
         .def(
             "set_transition_for_stage",
-            [](JPS_JourneyDescription_Wrapper& w,
-               JPS_StageId stageId,
-               JPS_Transition_Wrapper& transition) {
-                JPS_ErrorMessage errorMsg{};
-                auto success = JPS_JourneyDescription_SetTransitionForStage(
-                    w.handle, stageId, transition.handle, &errorMsg);
-                if(!success) {
-                    auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
-                    JPS_ErrorMessage_Free(errorMsg);
-                    throw std::runtime_error{msg};
+            [](JourneyDesc& desc, uint64_t stageId, TransitionDescription& transition) {
+                auto iter = desc.find(stageId);
+                if(iter == std::end(desc)) {
+                    throw std::runtime_error(fmt::format(
+                        "Could not set transition for given stage id {}. Stage not found.",
+                        stageId));
                 }
+                iter->second = transition;
             });
 }
