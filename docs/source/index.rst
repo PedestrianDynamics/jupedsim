@@ -11,7 +11,7 @@ JuPedSim
    Pedestrian Models <pedestrian_models/index>
    Notebooks <notebooks/index>
    History <history>
-   Coupling with Traffic Simulator <coupling_traffic>
+   Coupling with Traffic Simulator <coupling_traffic/index>
    Disclaimer <disclaimer>
    API reference <api/jupedsim/index>
 

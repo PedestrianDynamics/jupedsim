@@ -21,6 +21,7 @@ What is it for?
 ===============
 
 The integration is particularly useful in scenarios where crowd and traffic dynamics interact, such as:
+
 *	Scenarios involving congestion-prone pedestrian facilities that influence urban traffic flow or vice versa.
 *	Crowded public spaces with connections to vehicular transport systems, e.g., train stations.
 *	Modeling intermodal arrival and departure traffic during major public events.
@@ -46,6 +47,7 @@ Configuration Possibilities
 ===========================
 
 Following functionalities for configuring a *JuPedSim* simulation in *SUMO* are available:
+
 *	Precise definition of a 2D **walkable area** that is accessible for *JuPedSim* agents including obstacles (such as barriers, trees and signs) via dxf-import tool or drawing in netedit
 *	Conversion of pedestrian facilities included in a *SUMO* network to a 2D walkable area
 *	Configuration of **model parameters** for the basic :class:`~jupedsim.models.CollisionFreeSpeedModel`
@@ -65,7 +67,7 @@ Following functionalities for configuring a *JuPedSim* simulation in *SUMO* are 
 Technical Background
 ====================
 
-*SUMO* (**S**imulation of **U**rban **Mo**bility) is a collection of programs for modeling traffic flow microscopically especially for urban or interurban scenarios.
+*SUMO* (**S**\ imulation of **U**\ rban **Mo**\ bility) is a collection of programs for modeling traffic flow microscopically especially for urban or interurban scenarios.
 It started in 2001 with the idea of a multi-platform modeling approach and test bed for car-following models.
 Since then, *SUMO* evolved into a suite for intermodal traffic systems including private motor vehicles (PMV), delivery and freight transport, public transport (PT), railways and pedestrians.
 
@@ -87,7 +89,7 @@ By default, there are no 2D areas where pedestrians can move independently of th
 For simulations with *JuPedSim* pedestrian-only infrastructures need to be defined separately or imported from dxf-files; however, *SUMO* offers graphical tooling in the *netedit* program for this.
 
 All traffic elements like vehicles, traffic lights, and detectors are defined by specific data structures that capture their physical properties, behavior, and control logic.
-Corresponding OpenStreetMap (OSM) data can be import directly by *SUMO* using the so called *os-mWebwizard* python script.
+Corresponding OpenStreetMap (OSM) data can be import directly by *SUMO* using the so called *osmWebwizard* python script.
 Thus, OSM data for pedestrian facilities can be utilized for *JuPedSim* simulations.
 
 SUMO manages the simulation status in memory and provides multiple, mainly XML-based output formats at different levels of granularity and aggregation.
@@ -102,21 +104,21 @@ These edges primarily serve as reference points for waypoints (start, end, or in
 After mapping, additional adjustments are made, such as modifying pedestrian speeds or removing agents who reach their destinations or enter predefined *vanishing zones*.
 
 .. figure:: /_static/coupling/intro/Fig4_network.png
-    :width: 80%
+    :width: 60%
     :align: center
     :alt: Crossing simulation with *SUMO* striping model
 
     Simulation snapshot of a simple crossing scenario. In this simulation the pedestrians are modeled by the original striping model as they move in the lane-based *SUMO* network.
 
 .. figure:: /_static/coupling/intro/Fig5_network_walkable.png
-    :width: 80%
+    :width: 60%
     :align: center
     :alt: Crossing simulation with *SUMO-JuPedSim*
 
     Simulation snapshot of a simple crossing scenario with *JuPedSim* agents. The 2D walkable area is highlighted in light blue. The walkable area was automatically generated from the *SUMO* network.
 
 .. figure:: /_static/coupling/intro/Fig6_network_walkable_additional.png
-    :width: 80%
+    :width: 60%
     :align: center
     :alt: Crossing simulation with *SUMO-JuPedSim* and an additional walkable area
 
