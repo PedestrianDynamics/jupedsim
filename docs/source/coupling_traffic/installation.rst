@@ -25,7 +25,7 @@ Follow the instructions of the installer – you should be ready to get started 
     :align: center
     :alt: Installer for the development version
 
-    An installer for the developement version is also available for Windows.
+    For Windows an installer for the developement version is also available.
 
 
 

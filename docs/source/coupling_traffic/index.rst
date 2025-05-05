@@ -1,5 +1,5 @@
 =====================================
-Coupling With Traffic Simulator SUMO
+Coupling with Traffic Simulator SUMO
 =====================================
 
 Basic functionalities of *JuPedSim* have been integrated into the traffic simulator `SUMO <https://eclipse.dev/sumo/>`__.
