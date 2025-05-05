@@ -6,7 +6,7 @@ When analyzing the movement of crowds in urban areas — such as at train statio
 Factors like the frequency and capacity of trains, the positioning of train doors, and the interaction between cars and pedestrians at intersections significantly influence the dynamics of pedestrians.
 To investigate such scenarios holistically, including both traffic and pedestrian dynamics, basic functionalities of *JuPedSim* have been integrated into *Eclipse SUMO*.
 
-`Eclipse SUMO <https://eclipse.dev/sumo/>`__ is an open-source, multi-modal microscopic simulator that supports both vehicular and pedestrian traffic models.
+`Eclipse SUMO <https://eclipse.dev/sumo/>`__ (**S**\ imulation of **U**\ rban **Mo**\ bility) is an open-source, multi-modal microscopic simulator that supports both vehicular and pedestrian traffic models.
 However, until recently, it lacked the capability to simulate pedestrians freely in 2D space — this is where *JuPedSim* comes in.
 *JuPedSim* fills the gap in *SUMO*’s pedestrian modeling by enabling the simulation of crowd movement in 2D space.
 This required coupling two fundamentally different simulation concepts and data structures, which had to be carefully aligned.
@@ -14,7 +14,7 @@ The integration utilizes the existing framework and data structures of *SUMO*, f
 Not all features of *JuPedSim* are available in *SUMO*.
 Based on specific research projects and use cases, a subset of functionalities was selected.
 As a result, not all Python functionalities of *JuPedSim* are accessible — only those exposed via the C interface can be used within *SUMO*.
-Therefore, *SUMO-JuPedSim* is not intended as a standalone pe-destrian simulation tool; for more advanced pedestrian-specific configurations, *JuPedSim* alone remains the better choice.
+Therefore, *SUMO-JuPedSim* is not intended to serve as a standalone pedestrian simulation tool; for more advanced pedestrian-specific configurations, *JuPedSim* alone remains the preferred choice.
 
 
 What is it for?
@@ -48,9 +48,9 @@ Configuration Possibilities
 
 Following functionalities for configuring a *JuPedSim* simulation in *SUMO* are available:
 
-*	Precise definition of a 2D **walkable area** that is accessible for *JuPedSim* agents including obstacles (such as barriers, trees and signs) via dxf-import tool or drawing in netedit
+*	Precise definition of a 2D **walkable area** that is accessible for *JuPedSim* agents including obstacles (such as barriers, trees and signs) either via the DXF import tool or by drawing in netedit
 *	Conversion of pedestrian facilities included in a *SUMO* network to a 2D walkable area
-*	Configuration of **model parameters** for the basic :class:`~jupedsim.models.CollisionFreeSpeedModel`
+*	Configuration of **model parameters** for the :class:`~jupedsim.models.CollisionFreeSpeedModel`
 *	Configuration or temporary adjustment of pedestrian speed in defined areas
 
 .. note::
@@ -67,8 +67,7 @@ Following functionalities for configuring a *JuPedSim* simulation in *SUMO* are 
 Technical Background
 ====================
 
-*SUMO* (**S**\ imulation of **U**\ rban **Mo**\ bility) is a collection of programs for modeling traffic flow microscopically especially for urban or interurban scenarios.
-It started in 2001 with the idea of a multi-platform modeling approach and test bed for car-following models.
+The development of *SUMO* started in 2001 with the idea of a multi-platform modeling approach and test bed for car-following models.
 Since then, *SUMO* evolved into a suite for intermodal traffic systems including private motor vehicles (PMV), delivery and freight transport, public transport (PT), railways and pedestrians.
 
 The simulation cycle encompasses an initialization phase, where the network, various traffic demands, and additional configurations for traffic infrastructures (e.g. bus or train stops, pedestrian crossings, traffic light timings, parking facilities, etc.) are loaded.

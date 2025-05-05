@@ -10,7 +10,7 @@ Here you find details on the implementation of the coupling and tutorials to try
     :widths: 10 90
 
     * - :doc:`Introduction <introduction>`
-      - Basic introduction and technical background to the coupling
+      - Basic introduction and technical background of the coupling
 
     * - :doc:`Installation <installation>`
       - How to install *SUMO-JuPedSim*
