@@ -2,19 +2,39 @@
 SUMO-JuPedSim Installation
 ==========================
 
-For the latest release verion of *SUMO* installer for Windows and macOS are available `here <https://sumo.dlr.de/docs/Installing/index.html>`__.
-However, we recommend installing the latest development version (nightly snapshots) of *SUMO* so you can benefit from the most recent developments.
-The necessary steps for Windows and macOS are explained below.
+For the latest **release version** of *SUMO* installer for Windows and macOS are available `here <https://sumo.dlr.de/docs/Installing/index.html>`__.
 
-Windows Installer
-=================
+.. figure:: /_static/coupling/install/Installer.png
+    :width: 80%
+    :align: center
+    :alt: Installer for *SUMO-JuPedSim*
+
+    The installer helps you to get the latest version of SUMO running on your computer quite quickly. This may already be sufficient for a first simulation with *SUMO-JuPedSim*.
+
+However, if you want to use the latest developments to benefit from recent changes and enhancements, we recommend installing the nightly snapshots of *SUMO*. 
+The following explains how to install this **development version** on Windows and macOS.
+
+Installing Development Version on Windows
+=========================================
 
 Go to this `website <https://sumo.dlr.de/docs/Downloads.php#nightly_snapshots>`__ and download the installer provided by *Windows installer with all extras*. 
 Follow the instructions of the installer – you should be ready to get started with the tutorials.
 
+.. figure:: /_static/coupling/install/Installer_nightly.png
+    :width: 100%
+    :align: center
+    :alt: Installer for the development version
 
-Build on macOS
-===============
+    An installer for the developement version is also available for Windows.
+
+
+
+Installing Development Version on macOS
+=======================================
+
+For macOS there is no installer available for the nightly snapshots. 
+You will therefore need to download the source code and build it yourself. 
+To do this, perform the following steps.
 
 Preparation
 ^^^^^^^^^^^
@@ -77,3 +97,10 @@ Starting sumo-gui and netedit
 Run *SUMO* from the ``/bin`` subfolder (``/bin/sumo-gui`` and ``/bin/netedit`` should be available). 
 
 When starting ``sumo-gui`` under *Help > About* information on *JuPedSim* should be listed. If so, the installation was successful.
+
+.. figure:: /_static/coupling/install/Netedit.png
+    :width: 100%
+    :align: center
+    :alt: Netedit with information about *JuPedSim*
+
+    Netedit lists *JuPedSim* in the information. *SUMO-JuPedSim* has been successfully installed.
