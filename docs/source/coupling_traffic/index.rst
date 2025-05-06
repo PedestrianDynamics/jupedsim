@@ -4,7 +4,6 @@ Coupling with Traffic Simulator SUMO
 
 Basic functionalities of *JuPedSim* have been integrated into the traffic simulator `SUMO <https://eclipse.dev/sumo/>`__.
 The coupled simulator is referred to as *SUMO-JuPedSim*.
-Here you find details on the implementation of the coupling and tutorials to try out:
 
 .. note::
   The coupling of *SUMO* and *JuPedSim* is a joint project in close cooperation with the *SUMO* team of the German Aerospace Center (DLR).
@@ -12,7 +11,7 @@ Here you find details on the implementation of the coupling and tutorials to try
 
   We would like to thank the *SUMO* team for their collaboration!
 
-
+Here you find details on the implementation of the coupling and tutorials to try out:
 
 .. list-table::
     :widths: 10 90
