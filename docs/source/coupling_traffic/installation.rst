@@ -2,7 +2,7 @@
 SUMO-JuPedSim Installation
 ==========================
 
-For the latest **release version** of *SUMO* installer for Windows and macOS are available `here <https://sumo.dlr.de/docs/Installing/index.html>`__.
+For the latest **release version** of *SUMO* installers for Windows and macOS are available `here <https://sumo.dlr.de/docs/Installing/index.html>`__.
 
 .. figure:: /_static/coupling/install/Installer.png
     :width: 80%

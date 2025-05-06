@@ -6,6 +6,14 @@ Basic functionalities of *JuPedSim* have been integrated into the traffic simula
 The coupled simulator is referred to as *SUMO-JuPedSim*.
 Here you find details on the implementation of the coupling and tutorials to try out:
 
+.. note::
+  The coupling of *SUMO* and *JuPedSim* is a joint project in close cooperation with the *SUMO* team of the German Aerospace Center (DLR).
+  The work was (and is) driven by the research projects `SISAME <https://www.sisame.de>`__ and `CroMa-PRO <https://www.croma-pro.de>`__.
+
+  We would like to thank the *SUMO* team for their collaboration!
+
+
+
 .. list-table::
     :widths: 10 90
 
