@@ -98,7 +98,7 @@ Now we configure the crossing options for pedestrians.
 Enable the *Crossing mode* and click on the junction. 
 Select the pair of roads that should be connected by a crosswalk and press *Enter*. 
 Possible candidates are highlighted in dark green. 
-Once you have selected a candidate the matching one is highlighted in light green.
+Once you have selected a candidate (light green) the matching one is restricted to the neighbored lane.
 
 .. figure:: /_static/coupling/crossing_simulation/Network_crossing2.png
     :width: 100%
@@ -131,6 +131,15 @@ Vehicle Flow
 
 Person Flow
 ^^^^^^^^^^^
+
+
+Run with Striping Model
+=======================
+
+Run with JuPedSim Model
+=======================
+
+
 
 
 
