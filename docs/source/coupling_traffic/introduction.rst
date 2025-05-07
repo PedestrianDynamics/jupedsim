@@ -28,14 +28,14 @@ The integration is particularly useful in scenarios where crowd and traffic dyna
 
 In summary: The *SUMO-JuPedSim* integration becomes especially relevant when crowd dynamics play a significant role in traffic simulation scenarios.
 
-.. figure:: /_static/coupling/intro/Fig1_crossing.png
+.. figure:: /_static/coupling/intro/fig1_crossing.png
     :width: 80%
     :align: center
     :alt: Simulation snapshot for a crossing scenario with pedestrians and cars
 
     Simulation snapshot for a crossing scenario with multidirectional pedestrian streams that interact with cars.
 
-.. figure:: /_static/coupling/intro/Fig2_event.png
+.. figure:: /_static/coupling/intro/fig2_event.png
     :width: 80%
     :align: center
     :alt: Simulation snapshot for the arrival process to a major event
@@ -76,7 +76,7 @@ Finally, if a defined simulation step has been reached or all traffic objects ha
 
 The road network is represented as a directed graph with nodes (junctions) and edges (roads), further detailed by lanes (and sub-lanes depending on the model used) and internal connections for detailed intersection modeling.
 
-.. figure:: /_static/coupling/intro/Fig3_network_description.png
+.. figure:: /_static/coupling/intro/fig3_network_description.png
     :width: 80%
     :align: center
     :alt: Overview of SUMO network elements
@@ -102,21 +102,21 @@ Once positions are calculated, they are mapped to *SUMO*’s network in the foll
 These edges primarily serve as reference points for waypoints (start, end, or intermediate goals).
 After mapping, additional adjustments are made, such as modifying pedestrian speeds or removing agents who reach their destinations or enter predefined *vanishing zones*.
 
-.. figure:: /_static/coupling/intro/Fig4_network.png
+.. figure:: /_static/coupling/intro/fig4_network.png
     :width: 60%
     :align: center
     :alt: Crossing simulation with *SUMO* striping model
 
     Simulation snapshot of a simple crossing scenario. In this simulation the pedestrians are modeled by the original striping model as they move in the lane-based *SUMO* network.
 
-.. figure:: /_static/coupling/intro/Fig5_network_walkable.png
+.. figure:: /_static/coupling/intro/fig5_network_walkable.png
     :width: 60%
     :align: center
     :alt: Crossing simulation with *SUMO-JuPedSim*
 
     Simulation snapshot of a simple crossing scenario with *JuPedSim* agents. The 2D walkable area is highlighted in light blue. The walkable area was automatically generated from the *SUMO* network.
 
-.. figure:: /_static/coupling/intro/Fig6_network_walkable_additional.png
+.. figure:: /_static/coupling/intro/fig6_network_walkable_additional.png
     :width: 60%
     :align: center
     :alt: Crossing simulation with *SUMO-JuPedSim* and an additional walkable area

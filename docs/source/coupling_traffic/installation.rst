@@ -4,7 +4,7 @@ SUMO-JuPedSim Installation
 
 For the latest **release version** of *SUMO* installers for Windows and macOS are available `here <https://sumo.dlr.de/docs/Installing/index.html>`__.
 
-.. figure:: /_static/coupling/install/Installer.png
+.. figure:: /_static/coupling/install/installer.png
     :width: 80%
     :align: center
     :alt: Installer for *SUMO-JuPedSim*
@@ -20,7 +20,7 @@ Installing Development Version on Windows
 Go to this `website <https://sumo.dlr.de/docs/Downloads.php#nightly_snapshots>`__ and download the installer provided by *Windows installer with all extras*. 
 Follow the instructions of the installer – you should be ready to get started with the tutorials.
 
-.. figure:: /_static/coupling/install/Installer_nightly.png
+.. figure:: /_static/coupling/install/installer_nightly.png
     :width: 100%
     :align: center
     :alt: Installer for the development version
@@ -98,7 +98,7 @@ Run *SUMO* from the ``/bin`` subfolder (``/bin/sumo-gui`` and ``/bin/netedit`` s
 
 When starting ``sumo-gui`` under *Help > About* information on *JuPedSim* should be listed. If so, the installation was successful.
 
-.. figure:: /_static/coupling/install/Netedit.png
+.. figure:: /_static/coupling/install/netedit.png
     :width: 100%
     :align: center
     :alt: Netedit with information about *JuPedSim*
