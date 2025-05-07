@@ -9,6 +9,8 @@ First, you will run a simulation with the default pedestrian model of *SUMO* (`s
 Then you will switch to the *JuPedSim* model and inspect the results.
 At the end of this tutorial, you can find videos of the simulation results for both models.
 
+You can find the resulting **configuration files** for this tutorial `here <https://github.com/PedestrianDynamics/SUMO-JuPedSim-Simulations/tree/main/tutorials/crossing>`__.
+
 .. note::
 
     If you made a mistake press *Ctrl + Z* to undo the last step.
