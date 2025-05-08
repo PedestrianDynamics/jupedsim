@@ -62,7 +62,17 @@ Make sure you have installed the prerequisites and dependencies listed here for 
 Building JupedSim
 ^^^^^^^^^^^^^^^^^
 
-Build *JuPedSim* (v 1.2.1) following these `instructions <https://sumo.dlr.de/docs/Installing/Linux_Build.html#how_to_build_jupedsim_and_then_build_sumo_with_jupedsim>`__.
+Build the latest release of *JuPedSim*.
+For example, to checkout and build the release v1.3.0 type the following:
+
+.. code:: console
+
+    git clone https://github.com/PedestrianDynamics/jupedsim
+    cd jupedsim
+    git checkout v1.3.0
+    cmake -B build .
+    cmake --build build
+    cmake --install build
 
 To build and install jupedsim in a local directory type this instead:
 
@@ -78,7 +88,7 @@ Building SUMO
 ^^^^^^^^^^^^^
 
 Download the sources from the `nightly snapshots <https://sumo.dlr.de/docs/Downloads.php#nightly_snapshots>`__.
-Go to the *SUMO* repository and install the python requirements:
+Go to the downloaded *SUMO* directory and install the python requirements:
 
 .. code:: console
 
@@ -92,7 +102,7 @@ Then you can build *SUMO*
     export SUMO_HOME="$PWD"
     cmake -B build .
 
-If you compiled and installed *JuPedSim* locally, say in a directory called ``jupedsim-install`` (on the samelevel as *SUMO*) then you should type instead:
+If you compiled and installed *JuPedSim* locally, say in a directory called ``jupedsim-install`` (on the same level as *SUMO*) then you should type instead:
 
 .. code:: console
 
