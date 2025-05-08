@@ -3,7 +3,7 @@ Crossing Simulation
 ===================
 
 In this tutorial you will learn how to configure a basic simulation scenario with *netedit* from scratch.
-The scenario consists of crossing with interacting cars and pedestrians.
+The scenario consists of a crossing with interacting cars and pedestrians.
 We will define the simulation network and the demand for vehicle and person flows.
 First, you will run a simulation with the default pedestrian model of *SUMO* (`striping model <https://sumo.dlr.de/docs/Simulation/Pedestrians.html#model_striping>`__).
 Then you will switch to the *JuPedSim* model and inspect the results.
@@ -11,7 +11,13 @@ At the end of this tutorial, you can find videos of the simulation results for b
 
 You can find the resulting **configuration files** for this tutorial `here <https://github.com/PedestrianDynamics/SUMO-JuPedSim-Simulations/tree/main/tutorials/crossing>`__.
 
-.. note::
+.. attention::
+    
+    This tutorial was created for those who are not familiar with the use of *netedit*.
+    Therefore, the definiton of the network and demand are explained in detail step by step.
+    If you are only interested in how to activate the *JuPedSim* model, go to this :ref:`section <Run with JuPedSim Model>` of the tutorial.
+
+.. tip::
 
     If you made a mistake press *Ctrl + Z* to undo the last step.
     
@@ -35,7 +41,8 @@ Then you can draw the edges (roads) in the editor.
     *netedit* with highlighted **Network supermode**, *Edge mode* and *Edge opposite direction*. Four egdes have been drawn that are connected in the center.
 
 Make sure that the egdes are connected by a node in the center so that a crossing can be generated.
-To learn more about the *SUMO* road network we refer to `this <https://sumo.dlr.de/docs/Networks/SUMO_Road_Networks.html>`__ website.
+Otherwise, a bridge/underpass would be created and the roads would not be directly connected.
+To learn more about the *SUMO* road network we refer to this `website <https://sumo.dlr.de/docs/Networks/SUMO_Road_Networks.html>`__ or this `tutorial <https://sumo.dlr.de/docs/Tutorials/Hello_World.html>`__.
 
 As pedestrians are spawned distributed along an edge we define small edges at the end of the roads of interest.
 In this way, we reduce the effects of the initial conditions and the pedestrians are already in motion when they enter the network defined above.
@@ -49,7 +56,7 @@ To compute junctions press *F5* or click *Processing > Compute Junctions*.
     Short edges at the end of the roads are created which will be used for spawning and removing pedestrians (and vehicles).
 
 Now we add sidewalks for the pedestrians to our network. 
-For this, we enable the *Select Mode*.
+For this, we enable the *Select Mode* by clicking the icon indicated in the figure below or by pressing *S*.
 In the selection menu on the left choose *Apply selection* for the specified match attributes. 
 The selected edges are highlighted in blue.
 
@@ -81,7 +88,7 @@ The network should look like this:
     Final definition of edges for this tutorial.
 
 Now we add a traffic light. 
-Switch to *Traffic light mode* and select the junction in the middle of the network. 
+Switch to *Traffic light mode* by clicking the icon indicated below or by pressing *T* and select the junction in the middle of the network.
 Then click on *Create* in the left menu.
 
 .. figure:: /_static/coupling/crossing_simulation/network_traffic_lights1.png
@@ -99,7 +106,7 @@ Then click on *Create* in the left menu.
     Network after the creation of the traffic lights.
 
 Now we configure the crossing options for pedestrians. 
-Enable the *Crossing mode* and click on the junction. 
+Enable the *Crossing mode* by clicking the icon indicated below or by pressing *R* and click on the junction. 
 Select the pair of roads that should be connected by a crosswalk and press *Enter*. 
 Possible candidates are highlighted in dark green. 
 Once you have selected a candidate (light green) the matching one is restricted to the neighbored lane.
@@ -134,7 +141,7 @@ Vehicle Flow
 ^^^^^^^^^^^^
 
 We start with the vehicles.
-Switch to the **Demand supermode** and enable the *Vehicle mode*.
+Switch to the **Demand supermode** (by clicking the icon indicated below or by pressing *F3*) and enable the *Vehicle mode*.
 As we want to create a flow of vehicles, you need to choose the option *flow (from-to edges)* at the top of the menu on the left. 
 You can define properties of the flow when you scroll down the menu.
 We define that a car should appear every 30 seconds.
@@ -148,7 +155,7 @@ We define that a car should appear every 30 seconds.
 
 Now you can define the route for that flow by clicking on the edge where the flow should start. 
 If you scroll down on the left, you can see information on the coloring of the edges in the defined network.
-Select the edges you want to connect and click on *Finish route creation* in the menu on the left.
+Select the edges you want to connect and click on *Finish route creation* in the menu on the left or press *RETURN* to actually create the demand.
 
 .. figure:: /_static/coupling/crossing_simulation/demand_vehicle2.png
     :width: 100%
@@ -159,7 +166,7 @@ Select the edges you want to connect and click on *Finish route creation* in the
 
 We create a second flow and define a route starting from a different edge.  
 By default, this flow has the same properties as the previously defined flow - we keep the same attributes. 
-We switch to *Inspect mode* and click on a vehicle to check its attributes and route. 
+We switch to *Inspect mode* (by clicking the icon indicated below or by pressing *I*) and click on a vehicle to check its attributes and route. 
 This way you can modify the attributes after creating elements.
 
 .. figure:: /_static/coupling/crossing_simulation/demand_vehicle3.png
@@ -174,7 +181,7 @@ Person Flow
 ^^^^^^^^^^^
 
 Next, we add pedestrian flows to the scenario. 
-Click on the *Person mode* and choose the *personFlow* on the top of the menu on the left. 
+Click on the *Person mode* (by clicking the icon indicated below or by pressing *P*) and choose the *personFlow* on the top of the menu on the left. 
 We choose *red* as the color for the first flow.
 For *departPos* type in *random* so that the pedestrians are distributed on different positions along the edge.
 The spawning period is set to 4 seconds.
@@ -190,7 +197,8 @@ The spawning period is set to 4 seconds.
 As plan type we use the default *PersonTrip*. 
 Scroll down to the *Route creator* in the menu on the left.
 Now we can plan the route as for the vehicle flow. 
-Click on an edge where the pedestrians should be spawned and click on the destination edge. Do not forget to click on *Finish route creation*.
+Click on an edge where the pedestrians should be spawned and click on the destination edge. 
+Do not forget to click on *Finish route creation* or press *RETURN* to actually create the flow.
 
 .. figure:: /_static/coupling/crossing_simulation/demand_person2.png
     :width: 100%
