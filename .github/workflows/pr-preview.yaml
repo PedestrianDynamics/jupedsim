@@ -13,15 +13,16 @@ env:
 
 # ────────────────────────────────────────────────────────────────
 jobs:
-  build-and-deploy:
+  build-doc:
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
+    outputs:
+      artifact-name: ${{ steps.upload.outputs.doc }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
           ref: ${{ github.ref }}
     
       - name: Set up Python 3.13
@@ -38,6 +39,28 @@ jobs:
           python3 -m pip install -r docs/requirements.txt
           sphinx-build -T -E -d doctree -b html docs/source docs/build -j $(nproc)
 
+      - name: Upload documentation as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: doc
+          path: docs/build/
+  
+  deploy-doc:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    needs: build-doc
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+      
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ needs.build.outputs.doc }}
+    
       - name: Stage preview into working tree
         run: |
           rm -rf "$PREVIEW_DIR"
