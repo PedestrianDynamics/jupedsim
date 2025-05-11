@@ -12,7 +12,7 @@ jobs:
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     outputs:
-      artifact-name: ${{ steps.upload.outputs.doc }}
+      doc-artefact: ${{ steps.upload.outputs.doc }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -46,7 +46,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v3
         with:
-          name: ${{ needs.build-doc.outputs.doc }}
+          name: ${{ needs.build-doc.outputs.doc-artefact }}
       - name: Stage preview into working tree
         run: |
           rm -rf "$PREVIEW_DIR"
