@@ -1,0 +1,97 @@
+name: PR Docs Preview
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: write # push to gh-pages
+  pull-requests: write # edit PR body
+
+env:
+  PREVIEW_DIR: pull-requests/${{ github.event.pull_request.number }}
+
+# ────────────────────────────────────────────────────────────────
+jobs:
+  build-and-deploy:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+    
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+    
+      - name: Install jupedsim
+        run: |
+          python3 -m pip install .
+
+      - name: Build Documentation
+        run: |
+          python3 -m pip install -r docs/requirements.txt
+          sphinx-build -T -E -d doctree -b html docs/source docs/build -j $(nproc)
+
+      - name: Stage preview into working tree
+        run: |
+          rm -rf "$PREVIEW_DIR"
+          mkdir -p "$(dirname "$PREVIEW_DIR")"
+          cp -r docs/build/. "$PREVIEW_DIR/"
+
+      # 4 — Commit & push just that folder to *gh-pages*
+      - name: Commit preview to gh-pages
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          branch: gh-pages
+          commit_message: "docs: preview for PR #${{ github.event.pull_request.number }}"
+          file_pattern: ${{ env.PREVIEW_DIR }}/*
+
+      # 5 — Update (or insert) the preview link in the PR description
+      - name: Update PR body with preview link
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr   = context.payload.pull_request;
+            const repo = context.repo;
+            const url  = `https://${repo.owner}.github.io/${repo.repo}/${process.env.PREVIEW_DIR}/`;
+
+            const start = '<!-- PREVIEW-URL-START -->';
+            const end   = '<!-- PREVIEW-URL-END -->';
+            const snippet = `${start}\n🔗 **Preview:** ${url}\n${end}`;
+
+            const original = pr.body || '';
+            const updated  = original.includes(start)
+              ? original.replace(new RegExp(`${start}[\\s\\S]*?${end}`), snippet)
+              : `${original}\n\n${snippet}`;
+
+            await github.rest.pulls.update({
+              owner: repo.owner,
+              repo:  repo.repo,
+              pull_number: pr.number,
+              body: updated
+            });
+
+# ────────────────────────────────────────────────────────────────
+  cleanup:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: Delete preview folder
+        run: |
+          git rm -r --ignore-unmatch "$PREVIEW_DIR" || echo "Folder already gone"
+
+      - name: Commit cleanup to gh-pages
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          branch: gh-pages
+          commit_message: "chore: remove preview for PR #${{ github.event.pull_request.number }}"
+
