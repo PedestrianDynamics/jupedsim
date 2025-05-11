@@ -1,5 +1,4 @@
 name: Build CI wheels
-
 on:
   push:
     branches:
@@ -14,178 +13,153 @@ on:
     branches:
       - master
       - rls-*
-
 permissions:
   contents: write
-
 jobs:
   checks:
     name: Check Format
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.13"
-    - name: Install dependencies
-      run: pip install ruff
-
-    - name: Install clang-format-19
-      run: |
-        sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main'
-        wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-        sudo apt update
-        sudo apt install clang-format-19
-
-    - name: Run checks
-      run: ./scripts/ci/check_format.sh
-
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install ruff
+      - name: Install clang-format-19
+        run: |
+          sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main'
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+          sudo apt update
+          sudo apt install clang-format-19
+      - name: Run checks
+        run: ./scripts/ci/check_format.sh
   tests:
     name: Run tests [${{ matrix.toolchain.cxx }}]
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        toolchain: [ {cc: clang, cxx: clang++}, {cc: gcc, cxx: g++} ]
+        toolchain: [{cc: clang, cxx: clang++}, {cc: gcc, cxx: g++}]
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.13"
-    - name: Install dependencies
-      run: pip install -r requirements.txt
-
-    - name: Build & test with ${{ matrix.toolchain.cc }} / ${{ matrix.toolchain.cxx }}
-      env:
-        CC: ${{ matrix.toolchain.cc }}
-        CXX: ${{ matrix.toolchain.cxx }}
-      run: ./scripts/ci/gh_build_linux.sh
-
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Build & test with ${{ matrix.toolchain.cc }} / ${{ matrix.toolchain.cxx }}
+        env:
+          CC: ${{ matrix.toolchain.cc }}
+          CXX: ${{ matrix.toolchain.cxx }}
+        run: ./scripts/ci/gh_build_linux.sh
   docs:
     name: Documentation
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.13"
-
-    - name: Install jupedsim
-      run: |
-        python3 -m pip install .
-
-    - name: Build Documentation
-      run: |
-        python3 -m pip install -r docs/requirements.txt
-        sphinx-build -T -E -d doctree -b html docs/source docs/build -j $(nproc)
-
-    - name: Determine directory to publish docs to
-      id: docs-publish-dir
-      uses: jannekem/run-python-script-action@v1
-      with:
-        script: |
-          import os, re
-          github_ref = os.environ.get('GITHUB_REF')
-          m = re.match(r'^refs/tags/v([0-9]+\.[0-9]+\.[0-9]+(-dev\.[0-9]+)?)$',
-                       github_ref)
-          if m:
-              target = "${{ github.ref_name }}"
-          else:
-              target = ''
-          set_output('target', target)
-
-    - name: Publish docs to GitHub pages
-      if: steps.docs-publish-dir.outputs.target != ''
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: docs/build
-        destination_dir: ${{ steps.docs-publish-dir.outputs.target }}
-        keep_files: false
-
-    - name: Upload documentation as artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: pages
-        path: docs/build/
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install jupedsim
+        run: |
+          python3 -m pip install .
+      - name: Build Documentation
+        run: |
+          python3 -m pip install -r docs/requirements.txt
+          sphinx-build -T -E -d doctree -b html docs/source docs/build -j $(nproc)
+      - name: Determine directory to publish docs to
+        id: docs-publish-dir
+        uses: jannekem/run-python-script-action@v1
+        with:
+          script: |
+            import os, re
+            github_ref = os.environ.get('GITHUB_REF')
+            m = re.match(r'^refs/tags/v([0-9]+\.[0-9]+\.[0-9]+(-dev\.[0-9]+)?)$',
+                         github_ref)
+            if m:
+                target = "${{ github.ref_name }}"
+            else:
+                target = ''
+            set_output('target', target)
+      - name: Publish docs to GitHub pages
+        if: steps.docs-publish-dir.outputs.target != ''
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/build
+          destination_dir: ${{ steps.docs-publish-dir.outputs.target }}
+          keep_files: false
+      - name: Upload documentation as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages
+          path: docs/build/
     outputs:
       docs-target: ${{ steps.docs-publish-dir.outputs.target }}
-
   docs-publish:
     name: Publish docs versions JSON
     needs: docs
     if: needs.docs.outputs.docs-target != ''
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        ref: gh-pages
-    - name: Write versions to JSON file
-      uses: jannekem/run-python-script-action@v1
-      with:
-        script: |
-          import json
-          from pathlib import Path
-          from packaging.version import Version
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+      - name: Write versions to JSON file
+        uses: jannekem/run-python-script-action@v1
+        with:
+          script: |
+            import json
+            from pathlib import Path
+            from packaging.version import Version
 
-          prefix = "https://www.jupedsim.org/"
-          cwd = Path.cwd()
-          versions = [item.name[1:] for item in cwd.iterdir() if item.is_dir() and not item.name.startswith('.') and item.name.startswith("v")]
-          versions.sort(key=Version, reverse=True)
-          versions = ["v" + v for v in versions]
-          versions.insert(0, "stable")
+            prefix = "https://www.jupedsim.org/"
+            cwd = Path.cwd()
+            versions = [item.name[1:] for item in cwd.iterdir() if item.is_dir() and not item.name.startswith('.') and item.name.startswith("v")]
+            versions.sort(key=Version, reverse=True)
+            versions = ["v" + v for v in versions]
+            versions.insert(0, "stable")
 
-          versions_url = [dict(name=version, version=version, url=f"{prefix}{version}/")
-                          for version in versions]
-          target_file = Path('versions.json')
-          with target_file.open('w') as f:
-              json.dump(versions_url, f)
-
-    - name: Redirect stable to new release
-      run: |
-        rm -rf stable
-        ln -s ${{needs.docs.outputs.docs-target}} stable
-
-    - name: Update files in gh-pages branch
-      uses: stefanzweifel/git-auto-commit-action@v4
-      with:
-        branch: gh-pages
-        commit_message: Update versions and stable
-
+            versions_url = [dict(name=version, version=version, url=f"{prefix}{version}/")
+                            for version in versions]
+            target_file = Path('versions.json')
+            with target_file.open('w') as f:
+                json.dump(versions_url, f)
+      - name: Redirect stable to new release
+        run: |
+          rm -rf stable
+          ln -s ${{needs.docs.outputs.docs-target}} stable
+      - name: Update files in gh-pages branch
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: gh-pages
+          commit_message: Update versions and stable
   build_sdist:
     name: Build sdist
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         name: Install Python
         with:
           python-version: 3.13
-
       - name: Install dependencies
         run: python -m pip install wheel build setuptools
-
       - name: Build sdist
         run: |
           python -m build -s
-
       - name: Upload sdist
         uses: actions/upload-artifact@v4
         with:
           name: python-packages-sdist
           path: dist/jupedsim-*.tar.gz
           if-no-files-found: error
-
   build_wheels:
     name: Build wheels on ${{ matrix.os }} for ${{ matrix.cibw_archs }}
     runs-on: ${{ matrix.os }}
@@ -244,7 +218,6 @@ jobs:
           - os: macos-13
             cibw_archs: "arm64"
             cibw_build: "cp313-*"
-
     steps:
       - uses: actions/checkout@v4
       - name: Build wheels for CPython ${{ matrix.cibw_build }} on ${{ matrix.cibw_archs }}
@@ -252,12 +225,10 @@ jobs:
         env:
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_ARCHS: ${{ matrix.cibw_archs }}
-
       - name: Extract Python Version (Unix/Mac)
         shell: bash
         run: echo "PYTHON_VERSION=$(echo ${{ matrix.cibw_build }} | cut -d'-' -f1)" >> $GITHUB_ENV
         if: runner.os != 'Windows'
-
       - name: Extract Python Version (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
@@ -265,71 +236,59 @@ jobs:
           $pythonVersion = "${{ matrix.cibw_build }}" -split '-' | Select-Object -First 1
           $pythonVersion = $pythonVersion.Trim()
           echo "PYTHON_VERSION=$pythonVersion" | Out-File -Append -FilePath $env:GITHUB_ENV
-
       - uses: actions/upload-artifact@v4
         with:
           name: python-packages-${{ matrix.os }}-${{ matrix.cibw_archs }}-${{ env.PYTHON_VERSION }}
           path: ./wheelhouse/*.whl
           if-no-files-found: error
-
   test-wheels:
     name: Test wheel on ${{ matrix.os }} with Python ${{ matrix.python-version }}
-    needs: [ build_wheels ]
+    needs: [build_wheels]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-13, macos-14, macos-15]
         python-version: ["3.10", "3.11", "3.12", "3.13"]
-
     steps:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-
       - name: Download packages
         uses: actions/Download-artifact@v4
         with:
           pattern: python-packages-*
           merge-multiple: true
           path: dist
-
       - name: Install wheel
         run: |
           python -m pip install -U pip
           python -m pip install --find-links=dist jupedsim
-
       - name: Check installation
         run: |
           python -c "import jupedsim; print(jupedsim.__version__)"
-
   test-sdist:
     name: Test sdist install
-    needs: [ build_sdist ]
+    needs: [build_sdist]
     runs-on: ubuntu-latest
-
     steps:
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
           python-version: 3.13
-
       - name: Download packages
         uses: actions/Download-artifact@v4
         with:
           pattern: python-packages-*
           merge-multiple: true
           path: dist
-
       - name: Install wheel
         run: |
           python -m pip install -U pip
           python -m pip install dist/jupedsim*.tar.gz
-
       - name: Check installation
         run: |
           python -c "import jupedsim; print(jupedsim.__version__)"
-
   pypi-publish:
     needs: [test-wheels, test-sdist]
     if: ${{ github.event_name == 'release' && github.event.action == 'published' }}
@@ -346,6 +305,5 @@ jobs:
           pattern: python-packages-*
           merge-multiple: true
           path: dist
-
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
