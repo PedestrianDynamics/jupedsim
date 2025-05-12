@@ -13,6 +13,7 @@ JuPedSim
    History <history>
    Disclaimer <disclaimer>
    API reference <api/jupedsim/index>
+   Cite JuPedSim <citation/citation>
 
 
 **Useful links**:
