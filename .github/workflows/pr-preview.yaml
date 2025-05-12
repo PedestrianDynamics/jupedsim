@@ -32,7 +32,7 @@ jobs:
       - name: Upload documentation as artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: doc
+          name: ${{ steps.upload.outputs.doc }} 
           path: docs/build/
   deploy-doc:
     if: github.event.action != 'closed'
@@ -44,7 +44,7 @@ jobs:
         with:
           ref: gh-pages
       - name: Download build artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build-doc.outputs.doc-artefact }}
       - name: Stage preview into working tree
