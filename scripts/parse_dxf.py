@@ -23,6 +23,21 @@ from shapely import (
 from shapely.ops import unary_union
 
 logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.DEBUG)
+logging.getLogger("ezdxf").setLevel(logging.WARNING)
+
+LAYER_PATTERNS = {
+    "walkable": ["jps-walkablearea", "walkablearea"],
+    "obstacles": ["jps-obstacles", "obstacles"],
+    "exits": ["jps-exits", "exits"],
+    "distributions": ["jps-distributions", "distributions"],
+}
+
+
+def match_pattern(patterns, available_layers):
+    """Return matching layer names based on pattern keywords."""
+    return [
+        l for l in available_layers if any(p in l.lower() for p in patterns)
+    ]
 
 
 class IncorrectDXFFileError(Exception):
@@ -277,10 +292,24 @@ def parse_dxf_file(
     distributions = []
     outer_lines = []
     # Open the DXF file
+    # Filter only visible layers
+    visible_layers = [
+        layer.dxf.name
+        for layer in doc.layers
+        if not layer.is_off() and not layer.is_frozen()
+    ]
+    skipped_layers = [
+        layer.dxf.name
+        for layer in doc.layers
+        if layer.is_off() or layer.is_frozen()
+    ]
+    if skipped_layers:
+        logging.info(f"Skipping invisible layers: {skipped_layers}")
 
+    layers_in_dxf = visible_layers
     # Access the model (modelspace)
     msp = doc.modelspace()
-    layers_in_dxf = [layer.dxf.name for layer in doc.layers]
+
     logging.info(f"{outer_line_layer = }")
 
     if not layer_exists(outer_line_layer, layers_in_dxf):
@@ -504,8 +533,24 @@ def parse_args():
         description="""
 Converts a DXF file into WKT format and saves it as a new file.
 
-        Optionally,
+Optionally,
 the resulting geometry can be exported back to DXF or visualized as a plot.
+
+────────────────────────────────────────────────────────────────────────────
+
+RECOMMENDED NAMING CONVENTIONS (auto-detection if arguments are omitted):
+
+- Walkable Area Layer:        jps-walkablearea-* or walkablearea-*
+- Obstacle/Hole Layers:        jps-obstacles-* or obstacles-*
+- Exit Layers:                 jps-exits-* or exits-*
+- Distribution Zone Layers:    jps-distributions-* or distributions-*
+
+Layer names must match one of these prefixes (case-insensitive). Only visible layers are considered.
+
+If you omit --walkable, --obstacles, --exits, or --distributions, the program
+will try to infer them from visible DXF layers based on these naming patterns.
+
+────────────────────────────────────────────────────────────────────────────
 
 ### Requirements for Successful Conversion:
 - The outer and inner polygons must be defined in different layers.
@@ -572,7 +617,7 @@ This ensures that the structure is flexible and can handle cases where exits or 
         "-w",
         "--walkable",
         help="Layer containing the walkable area (outer polygon).",
-        required=True,
+        required=False,
     )
     parser.add_argument(
         "-x",
@@ -670,8 +715,49 @@ def plot_geometry(geometry_collection):
 
 def main():
     parsed_args = parse_args()
-    print(parsed_args)
+    doc = ezdxf.readfile(parsed_args.input)
+    visible_layers = [
+        layer.dxf.name
+        for layer in doc.layers
+        if not layer.is_off() and not layer.is_frozen()
+    ]
+    # Auto-infer layers if missing
+    if not parsed_args.walkable:
+        matches = match_pattern(LAYER_PATTERNS["walkable"], visible_layers)
+        if matches:
+            parsed_args.walkable = matches[0]
+            logging.info(f"Inferred walkable layer: {parsed_args.walkable}")
+
+    if not parsed_args.obstacles:
+        parsed_args.obstacles = match_pattern(
+            LAYER_PATTERNS["obstacles"], visible_layers
+        )
+        if parsed_args.obstacles:
+            logging.info(f"Inferred obstacle layers: {parsed_args.obstacles}")
+
+    if not parsed_args.exits:
+        parsed_args.exits = match_pattern(
+            LAYER_PATTERNS["exits"], visible_layers
+        )
+        if parsed_args.exits:
+            logging.info(f"Inferred exit layers: {parsed_args.exits}")
+
+    if not parsed_args.distributions:
+        parsed_args.distributions = match_pattern(
+            LAYER_PATTERNS["distributions"], visible_layers
+        )
+        if parsed_args.distributions:
+            logging.info(
+                f"Inferred distribution layers: {parsed_args.distributions}"
+            )
+
     try:
+        if not parsed_args.walkable:
+            logging.error("❌ Could not determine the walkable area layer.")
+            logging.error(
+                "Please use --walkable or name your layer with one of: jps-walkablearea-*, walkablearea-*"
+            )
+            return
         merged_polygon = parse_dxf_file(
             parsed_args.input,
             parsed_args.walkable,
@@ -700,6 +786,15 @@ def main():
         else parsed_args.input.with_suffix(".wkt")
     )
     save_as_wkt(merged_polygon, out_file=out_file)
+    if not merged_polygon.is_empty:
+        parts = list(merged_polygon.geoms)
+        logging.info("✅ Geometry summary:")
+        if len(parts) > 0:
+            logging.info(f"Walkable areas: {len(list(parts[0].geoms))}")
+        if len(parts) > 1:
+            logging.info(f"Exits: {len(list(parts[1].geoms))}")
+        if len(parts) > 2:
+            logging.info(f"Distributions: {len(list(parts[2].geoms))}")
 
 
 if __name__ == "__main__":
