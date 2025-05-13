@@ -9,6 +9,7 @@ import geopandas as gpd
 import matplotlib.patches as mpatches
 import matplotlib.pyplot
 import matplotlib.pyplot as plt
+import numpy as np
 import shapely
 import typer
 from rich.console import Console
@@ -30,6 +31,8 @@ from shapely.ops import unary_union
 logging.getLogger("markdown_it").setLevel(logging.WARNING)
 logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.DEBUG)
 logging.getLogger("ezdxf").setLevel(logging.WARNING)
+
+logging.getLogger("matplotlib").setLevel(logging.WARNING)
 
 
 help_text = """
@@ -936,6 +939,175 @@ def analyze(
     table.add_row("Total vertices", str(total_vertices))
 
     console.print(table)
+
+
+def plot_interactive(geometry, title="Interactive Geometry Viewer"):
+    """Create an interactive plot with Matplotlib"""
+    from matplotlib.patches import Polygon as MplPolygon
+    from matplotlib.widgets import CheckButtons
+
+    fig, ax = plt.subplots(figsize=(10, 8))
+    fig.canvas.manager.set_window_title(title)
+
+    walkable_areas = list(geometry.geoms[0].geoms)
+    exits = list(geometry.geoms[1].geoms) if len(geometry.geoms) > 1 else []
+    distributions = (
+        list(geometry.geoms[2].geoms) if len(geometry.geoms) > 2 else []
+    )
+
+    walkable_patches = []
+    exit_patches = []
+    distribution_patches = []
+
+    for area in walkable_areas:
+        x, y = area.exterior.xy
+        patch = MplPolygon(
+            np.column_stack([x, y]),
+            alpha=0.1,
+            color="gray",
+            label="Walkable Area",
+        )
+        ax.add_patch(patch)
+        walkable_patches.append(patch)
+
+        for hole in area.interiors:
+            hx, hy = hole.xy
+            hole_patch = MplPolygon(
+                np.column_stack([hx, hy]),
+                alpha=1,
+                edgecolor="gray",
+                facecolor="white",
+                lw=0.3,
+            )
+            ax.add_patch(hole_patch)
+            walkable_patches.append(hole_patch)
+
+    for exit_area in exits:
+        x, y = exit_area.exterior.xy
+        patch = MplPolygon(
+            np.column_stack([x, y]), alpha=0.3, color="red", label="Exit"
+        )
+        ax.add_patch(patch)
+        exit_patches.append(patch)
+
+    for dist in distributions:
+        x, y = dist.exterior.xy
+        patch = MplPolygon(
+            np.column_stack([x, y]),
+            alpha=0.3,
+            color="green",
+            label="Distribution",
+        )
+        ax.add_patch(patch)
+        distribution_patches.append(patch)
+
+    ax.autoscale_view()
+    ax.set_aspect("equal")
+    ax.set_xlabel("X [m]")
+    ax.set_ylabel("Y [m]")
+
+    ax_check = plt.axes([0.05, 0.05, 0.15, 0.15])
+    check = CheckButtons(
+        ax_check, ["Walkable", "Exits", "Distributions"], [True, True, True]
+    )
+
+    def toggle_visibility(label):
+        label = label.lower()
+        if label == "walkable":
+            for patch in walkable_patches:
+                patch.set_visible(not patch.get_visible())
+        elif label == "exits":
+            for patch in exit_patches:
+                patch.set_visible(not patch.get_visible())
+        elif label == "distributions":
+            for patch in distribution_patches:
+                patch.set_visible(not patch.get_visible())
+        fig.canvas.draw_idle()
+
+    check.on_clicked(toggle_visibility)
+
+    legend_elements = []
+    if walkable_areas:
+        legend_elements.append(
+            mpatches.Patch(color="gray", label="Walkable Area")
+        )
+    if exits:
+        legend_elements.append(mpatches.Patch(color="red", label="Exits"))
+    if distributions:
+        legend_elements.append(
+            mpatches.Patch(color="green", label="Distribution Zones")
+        )
+
+    ax.legend(
+        handles=legend_elements,
+        loc="upper center",
+        bbox_to_anchor=(0.5, 1.05),
+        ncol=3,
+    )
+
+    plt.show()
+
+
+@app.command()
+def view(
+    input: Path = typer.Option(..., "-i", help="Input WKT or DXF file"),
+    interactive: bool = typer.Option(
+        False, "--interactive", help="Use interactive mode"
+    ),
+):
+    """View geometry in an interactive viewer"""
+
+    # Load geometry
+    if input.suffix.lower() == ".wkt":
+        try:
+            with open(input) as f:
+                from shapely import wkt
+
+                geometry = wkt.loads(f.read())
+        except Exception as e:
+            console.print(f"[red]❌ Failed to load WKT file:[/] {e}")
+            raise typer.Exit(1)
+    elif input.suffix.lower() == ".dxf":
+        try:
+            doc = ezdxf.readfile(input)
+            visible_layers = [
+                layer.dxf.name
+                for layer in doc.layers
+                if not layer.is_off()
+                and not layer.is_frozen()
+                and layer.dxf.name.lower() != "defpoints"
+            ]
+
+            walkable = match_pattern(LAYER_PATTERNS["walkable"], visible_layers)
+            walkable_layer = walkable[0] if walkable else None
+
+            if not walkable_layer:
+                console.print(
+                    "[red]❌ Could not auto-detect walkable area in DXF.[/red]"
+                )
+                raise typer.Exit(1)
+
+            _, geometry = parse_dxf_file(
+                input,
+                walkable_layer,
+                match_pattern(LAYER_PATTERNS["obstacles"], visible_layers),
+                match_pattern(LAYER_PATTERNS["exits"], visible_layers),
+                match_pattern(LAYER_PATTERNS["distributions"], visible_layers),
+                quad_segs=4,
+            )
+        except Exception as e:
+            console.print(f"[red]❌ Failed to load DXF file:[/] {e}")
+            raise typer.Exit(1)
+    else:
+        console.print(
+            "[red]Unsupported file format. Please provide a .wkt or .dxf file.[/red]"
+        )
+        raise typer.Exit(1)
+
+    if interactive:
+        plot_interactive(geometry, title=f"Geometry Viewer: {input.name}")
+    else:
+        plot_geometry(geometry)
 
 
 if __name__ == "__main__":
