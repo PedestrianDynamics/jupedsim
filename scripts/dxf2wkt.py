@@ -839,5 +839,104 @@ def convert(
         console.print(table)
 
 
+@app.command()
+def analyze(
+    input: Path = typer.Option(..., "-i", help="Input WKT or DXF file"),
+):
+    """Analyze geometry and provide metrics."""
+
+    # Load geometry
+    if input.suffix.lower() == ".wkt":
+        try:
+            with open(input) as f:
+                from shapely import wkt
+
+                geometry = wkt.loads(f.read())
+        except Exception as e:
+            console.print(f"[red]❌ Failed to load WKT file:[/] {e}")
+            raise typer.Exit(1)
+    elif input.suffix.lower() == ".dxf":
+        try:
+            doc = ezdxf.readfile(input)
+            visible_layers = [
+                layer.dxf.name
+                for layer in doc.layers
+                if not layer.is_off()
+                and not layer.is_frozen()
+                and layer.dxf.name.lower() != "defpoints"
+            ]
+
+            walkable = match_pattern(LAYER_PATTERNS["walkable"], visible_layers)
+            walkable_layer = walkable[0] if walkable else None
+
+            if not walkable_layer:
+                console.print(
+                    "[red]❌ Could not auto-detect walkable area in DXF.[/red]"
+                )
+                raise typer.Exit(1)
+
+            _, geometry = parse_dxf_file(
+                input,
+                walkable_layer,
+                match_pattern(LAYER_PATTERNS["obstacles"], visible_layers),
+                match_pattern(LAYER_PATTERNS["exits"], visible_layers),
+                match_pattern(LAYER_PATTERNS["distributions"], visible_layers),
+                quad_segs=4,
+            )
+        except Exception as e:
+            console.print(f"[red]❌ Failed to load DXF file:[/] {e}")
+            raise typer.Exit(1)
+    else:
+        console.print(
+            "[red]Unsupported file format. Please provide a .wkt or .dxf file.[/red]"
+        )
+        raise typer.Exit(1)
+
+    # Extract components
+
+    walkable_areas = list(geometry.geoms[0].geoms)
+    exits = list(geometry.geoms[1].geoms) if len(geometry.geoms) > 1 else []
+    distributions = (
+        list(geometry.geoms[2].geoms) if len(geometry.geoms) > 2 else []
+    )
+
+    # Create results table
+    table = Table(title=f"📊 Geometry Analysis: {input.name}")
+    table.add_column("Metric", style="cyan")
+    table.add_column("Value", style="green")
+
+    # Walkable area metrics
+    total_area = sum(area.area for area in walkable_areas)
+    table.add_row("Total walkable area", f"{total_area:.2f} m²")
+
+    total_perimeter = sum(area.length for area in walkable_areas)
+    table.add_row("Total perimeter", f"{total_perimeter:.2f} m")
+
+    # Exit metrics
+    if exits:
+        table.add_row("Exit count", str(len(exits)))
+
+    # Distribution zones
+    if distributions:
+        total_dist_area = sum(d.area for d in distributions)
+        table.add_row("Total distribution area", f"{total_dist_area:.2f} m²")
+        table.add_row("Distribution count", str(len(distributions)))
+
+    # Obstacles
+    obstacle_count = sum(len(area.interiors) for area in walkable_areas)
+    table.add_row("Obstacle count", str(obstacle_count))
+
+    # Complexity
+    total_vertices = sum(len(area.exterior.coords) for area in walkable_areas)
+    total_vertices += sum(
+        len(interior.coords)
+        for area in walkable_areas
+        for interior in area.interiors
+    )
+    table.add_row("Total vertices", str(total_vertices))
+
+    console.print(table)
+
+
 if __name__ == "__main__":
     app()
