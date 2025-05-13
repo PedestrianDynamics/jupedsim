@@ -1110,5 +1110,92 @@ def view(
         plot_geometry(geometry)
 
 
+@app.command("clearance-heatmap")
+def clearance_heatmap(
+    input: Path = typer.Option(..., "-i", help="Input WKT file only"),
+    spacing: float = typer.Option(
+        0.2, "--spacing", "-s", help="Grid spacing in meters"
+    ),
+    max_clearance: float = typer.Option(
+        2.0, "--max", help="Max clearance to scale colormap (in meters)"
+    ),
+):
+    """Visualize minimum clearance in walkable areas using a color-coded heatmap."""
+    import numpy as np
+    from shapely.geometry import Point
+    from shapely import wkt
+    import matplotlib.pyplot as plt
+    import matplotlib.cm as cm
+
+    if input.suffix.lower() != ".wkt":
+        console.print(
+            "[red]Only WKT input is supported for clearance heatmap.[/red]"
+        )
+        raise typer.Exit(1)
+
+    try:
+        with open(input) as f:
+            geometry = wkt.loads(f.read())
+    except Exception as e:
+        console.print(f"[red]❌ Failed to load WKT file:[/] {e}")
+        raise typer.Exit(1)
+
+    walkable_area = (
+        geometry.geoms[0] if len(geometry.geoms) > 0 else GeometryCollection()
+    )
+
+    sample_points = []
+    sample_values = []
+
+    for polygon in walkable_area.geoms:
+        minx, miny, maxx, maxy = polygon.bounds
+        x_vals = np.arange(minx, maxx, spacing)
+        y_vals = np.arange(miny, maxy, spacing)
+
+        for x in x_vals:
+            for y in y_vals:
+                point = Point(x, y)
+                if polygon.contains(point) and all(
+                    not hole.contains(point) for hole in polygon.interiors
+                ):
+                    distances = [polygon.exterior.distance(point)] + [
+                        hole.distance(point) for hole in polygon.interiors
+                    ]
+                    clearance = min(distances)
+                    sample_points.append((x, y))
+                    sample_values.append(clearance)
+
+    # Normalize values to colormap
+    norm = plt.Normalize(vmin=0.0, vmax=max_clearance)
+    colors = cm.inferno(norm(sample_values))
+
+    fig, ax = plt.subplots(figsize=(10, 8))
+    for polygon in walkable_area.geoms:
+        x, y = polygon.exterior.xy
+        ax.fill(x, y, alpha=0.1, color="gray")
+        for hole in polygon.interiors:
+            hx, hy = hole.xy
+            ax.fill(
+                hx, hy, alpha=1, facecolor="white", edgecolor="gray", lw=0.5
+            )
+
+    for (x, y), color in zip(sample_points, colors):
+        circle = plt.Circle(
+            (x, y), radius=spacing * 0.3, color=color, alpha=0.8
+        )
+        ax.add_patch(circle)
+
+    sm = plt.cm.ScalarMappable(cmap="inferno", norm=norm)
+    sm.set_array([])
+    cbar = plt.colorbar(sm, ax=ax)
+    cbar.set_label("Minimum Clearance [m]")
+
+    ax.set_aspect("equal")
+    ax.set_title(f"Clearance Heatmap: {input.name}")
+    ax.set_xlabel("X [m]")
+    ax.set_ylabel("Y [m]")
+    plt.show()
+
+
 if __name__ == "__main__":
     app()
