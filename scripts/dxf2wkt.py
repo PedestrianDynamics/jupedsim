@@ -1,14 +1,8 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
-import typer
-from typing import Optional
-from rich.console import Console
-from rich.panel import Panel
-from rich.table import Table
-
-from rich.markdown import Markdown
-from rich.syntax import Syntax
-
-from typing import List
+import logging
+import pathlib
+from pathlib import Path
+from typing import List, Optional
 
 import ezdxf
 import geopandas as gpd
@@ -16,10 +10,12 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot
 import matplotlib.pyplot as plt
 import shapely
-import logging
-from pathlib import Path
-import pathlib
-
+import typer
+from rich.console import Console
+from rich.markdown import Markdown
+from rich.panel import Panel
+from rich.syntax import Syntax
+from rich.table import Table
 from shapely import (
     GeometryCollection,
     LineString,
@@ -97,7 +93,9 @@ GEOMETRYCOLLECTION (
 def match_pattern(patterns, available_layers):
     """Return matching layer names based on pattern keywords."""
     return [
-        l for l in available_layers if any(p in l.lower() for p in patterns)
+        layer
+        for layer in available_layers
+        if any(p in layer.lower() for p in patterns)
     ]
 
 
