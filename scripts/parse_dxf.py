@@ -1,8 +1,13 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
-import argparse
-import logging
-import pathlib
-from argparse import RawTextHelpFormatter
+import typer
+from typing import Optional
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+
+from rich.markdown import Markdown
+from rich.syntax import Syntax
+
 from typing import List
 
 import ezdxf
@@ -11,6 +16,10 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot
 import matplotlib.pyplot as plt
 import shapely
+import logging
+from pathlib import Path
+import pathlib
+
 from shapely import (
     GeometryCollection,
     LineString,
@@ -22,15 +31,67 @@ from shapely import (
 )
 from shapely.ops import unary_union
 
+logging.getLogger("markdown_it").setLevel(logging.WARNING)
 logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.DEBUG)
 logging.getLogger("ezdxf").setLevel(logging.WARNING)
 
-LAYER_PATTERNS = {
-    "walkable": ["jps-walkablearea", "walkablearea"],
-    "obstacles": ["jps-obstacles", "obstacles"],
-    "exits": ["jps-exits", "exits"],
-    "distributions": ["jps-distributions", "distributions"],
-}
+
+help_text = """
+Converts a DXF file into WKT format and saves it as a new file.
+
+Optionally,
+the resulting geometry can be exported back to DXF or visualized as a plot.
+
+
+## RECOMMENDED NAMING CONVENTIONS (auto-detection if arguments are omitted):
+
+- Walkable Area Layer:        jps-walkablearea-* or walkablearea-*
+- Obstacle/Hole Layers:       jps-obstacles-* or obstacles-*
+- Exit Layers:                jps-exits-* or exits-*
+- Distribution Zone Layers:   jps-distributions-* or distributions-*
+
+Layer names must match one of these prefixes (case-insensitive). **Only visible** layers are considered.
+
+If you omit --walkable, --obstacles, --exits, or --distributions, the program
+will try to infer them from visible DXF layers based on these naming patterns.
+
+
+## REQUIREMENTS FOR SUCCESSFUL CONVERSION:
+- The outer and inner polygons must be defined in different layers.
+- The outer polygon must be in a single designated layer.
+- Inner polygons (holes) can be distributed across multiple layers.
+- A hole must be defined by a **single polyline** or **single circle**:
+  - Holes **cannot** be composed of multiple disconnected lines/polylines.
+  - Circles are converted to polygons with many corners, which may impact triangulation accuracy.
+  - If circles touch other elements, they might be approximated differently than expected.
+- Holes may:
+  - **Overlap with each other**.
+  - **Be located outside the outer polygon** (this does not affect the final structure).
+- The outer polygon **must be a closed polyline**.
+- If multiple polygons exist in the outer polygon layer, they will be parsed as a **MultiPolygon**.
+
+## EXPECTED STRUCTURE IN DXF:
+- No gaps in the outer polygon or holes.
+- No duplicate lines.
+- Sufficiently wide areas for agents.
+- All polygons must be **simple** (i.e., not self-intersecting).
+
+## STRUCTURE OF THE OUTPUT GEOMETRY:
+The resulting geometry is structured as a **GeometryCollection** containing:
+- The **walkable area** as a Polygon or MultiPolygon.
+- **Exits** (optional) as Polygons or empty GeometryCollections.
+- **Distribution zones** (optional) as Polygons or empty GeometryCollections.
+"""
+
+example_wkt = """
+GEOMETRYCOLLECTION (
+    GEOMETRYCOLLECTION (
+        POLYGON ((...))  -- Walkable Area
+    ),
+    GEOMETRYCOLLECTION EMPTY,  -- Exits (if present)
+    GEOMETRYCOLLECTION EMPTY   -- Distribution zones (if present)
+)
+""".strip()
 
 
 def match_pattern(patterns, available_layers):
@@ -40,7 +101,41 @@ def match_pattern(patterns, available_layers):
     ]
 
 
+console = Console()
+app = typer.Typer()
+
+
+@app.command()
+def rich_help():
+    """Show more help."""
+    console.print(
+        Panel(
+            Markdown(help_text),
+            title="DXF to WKT Converter",
+            border_style="blue",
+            padding=(1, 2),
+        )
+    )
+    console.print(
+        Panel(
+            Syntax(example_wkt, "text", theme="ansi_dark", line_numbers=False),
+            title="Example Output Geometry",
+            border_style="green",
+        )
+    )
+
+
+LAYER_PATTERNS = {
+    "walkable": ["jps-walkablearea", "walkablearea"],
+    "obstacles": ["jps-obstacles", "obstacles"],
+    "exits": ["jps-exits", "exits"],
+    "distributions": ["jps-distributions", "distributions"],
+}
+
+
 class IncorrectDXFFileError(Exception):
+    """Exception raised when a DXF file is found to be incorrect or malformed."""
+
     def __init__(self, message, geometries=None):
         self.message = message
         self.geometries = geometries
@@ -49,11 +144,11 @@ class IncorrectDXFFileError(Exception):
 
 def save_as_wkt(geometry, out_file: pathlib.Path):
     """
-    converts geometry into wkt and writes them in out_file
+    Convert geometry into wkt and writes them in out_file.
+
     @param geometry: shapely geometry
     @param out_file: The file to write the output to.
     """
-
     # create result dir
     out_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -61,18 +156,18 @@ def save_as_wkt(geometry, out_file: pathlib.Path):
     with open(out_file, "w") as out:
         out.write(to_wkt(geometry_collection, rounding_precision=-1))
 
-    logging.info(f"wkt was written to: {out_file.absolute()}")
+    logging.info(f" WKT-file was written to: {out_file.absolute()}")
 
 
 def plot_polygon(polygon: shapely.Polygon):
-    """plots a polygon with its interior in matplotlib"""
+    """Plot a polygon with its interior in matplotlib."""
     poly = gpd.GeoSeries([polygon])
     poly.plot()
     plt.show()
 
 
 def line_to_linestring(line):
-    """Converts an entity with dxftype line to a shapely Linestring."""
+    """Convert an entity with dxftype line to a shapely Linestring."""
     start_point = line.dxf.start
     end_point = line.dxf.end
     return LineString(
@@ -83,7 +178,6 @@ def line_to_linestring(line):
 def multipolygon_to_list(multipolygon: shapely.MultiPolygon):
     """Convert a multipolygon to a list of polygons."""
     return [poly for poly in multipolygon.geoms]
-    # return list(multipolygon.geoms)
 
 
 def polyline_to_linestring(polyline):
@@ -176,13 +270,7 @@ def validate_exits_and_distributions(
         A list of polygons representing exit areas.
     distributions : List[Polygon]
         A list of polygons representing distribution zones.
-
-    Raises:
-    ------
-    IncorrectDXFFileError
-        If exits or distribution zones are outside or overlapping the walkable area.
     """
-    # Check if any exit is outside the walkable area
     invalid_exits = [
         exit_poly
         for exit_poly in exits.geoms
@@ -198,7 +286,6 @@ def validate_exits_and_distributions(
             "Exits must be fully contained within the walkable area."
         )
 
-    # Check if any distribution zone is outside the walkable area
     invalid_distributions = [
         dist_poly
         for dist_poly in distributions.geoms
@@ -214,7 +301,6 @@ def validate_exits_and_distributions(
             "Distribution zones must be fully contained within the walkable area."
         )
 
-    # Ensure exits do not overlap the walkable area boundary
     overlapping_exits = [
         exit_poly
         for exit_poly in exits.geoms
@@ -233,7 +319,6 @@ def validate_exits_and_distributions(
             "Exits must not overlap the walkable area boundary."
         )
 
-    # Ensure distributions do not overlap the walkable area boundary
     overlapping_distributions = [
         dist_poly
         for dist_poly in distributions.geoms
@@ -252,7 +337,6 @@ def validate_exits_and_distributions(
             "Distribution zones must not overlap the walkable area boundary."
         )
 
-    # Ensure exits and distributions do not overlap each other
     if unary_union(exits).intersects(unary_union(distributions)):
         logging.error("Exits and distribution zones are overlapping!")
         raise IncorrectDXFFileError(
@@ -293,28 +377,22 @@ def parse_dxf_file(
     outer_lines = []
     # Open the DXF file
     # Filter only visible layers
+
     visible_layers = [
         layer.dxf.name
         for layer in doc.layers
-        if not layer.is_off() and not layer.is_frozen()
+        if not layer.is_off()
+        and not layer.is_frozen()
+        and layer.dxf.name.lower() != "defpoints"
     ]
-    skipped_layers = [
-        layer.dxf.name
-        for layer in doc.layers
-        if layer.is_off() or layer.is_frozen()
-    ]
-    if skipped_layers:
-        logging.info(f"Skipping invisible layers: {skipped_layers}")
 
     layers_in_dxf = visible_layers
-    # Access the model (modelspace)
     msp = doc.modelspace()
-
     logging.info(f"{outer_line_layer = }")
 
     if not layer_exists(outer_line_layer, layers_in_dxf):
         raise IncorrectDXFFileError(
-            f"Layer '{outer_line_layer}' not found in DXF file.\n Available layers are: {layers_in_dxf}"
+            f"Layer '{outer_line_layer}' not found in DXF file. Ensure it exists, is visible, and matches naming conventions (e.g., 'jps-walkablearea-*').\n Available layers are: {layers_in_dxf}"
         )
     hole_layers = validate_layers(layers_in_dxf, hole_layers, "hole")
     exit_layers = validate_layers(layers_in_dxf, exit_layers, "exit")
@@ -371,9 +449,27 @@ def parse_dxf_file(
                 )
 
         elif entity.dxftype() != "INSERT":
+            coords = None
+            try:
+                # Try accessing common geometric data
+                if hasattr(entity, "dxf") and hasattr(entity.dxf, "insert"):
+                    coords = entity.dxf.insert  # For INSERT-like entities
+                elif hasattr(entity, "dxf") and hasattr(entity.dxf, "start"):
+                    coords = entity.dxf.start  # For LINE, etc.
+                elif hasattr(entity, "dxf") and hasattr(entity.dxf, "center"):
+                    coords = entity.dxf.center  # For CIRCLE, ARC, etc.
+                elif hasattr(entity, "dxf") and hasattr(entity.dxf, "vertices"):
+                    coords = list(entity.dxf.vertices)  # For some polylines
+                elif hasattr(
+                    entity, "vertices"
+                ):  # Sometimes vertices is a method or property
+                    coords = list(entity.vertices())
+
+            except Exception as e:
+                coords = f"Could not extract coordinates: {e}"
+
             logging.warning(
-                f"there is an entity of type {entity.dxftype()} defined which "
-                f"will not be parsed."
+                f"Skipped {entity.dxftype()} at ({coords[0]:.2f}, {coords[1]:.2f})"
             )
 
     # create a polygon from all outer lines
@@ -457,18 +553,12 @@ def parse_dxf_file(
         outer_polygon, simple_exits, simple_distributions
     )
 
-    logging.info("The geometry was parsed:")
-    logging.info(f">> Got {len(list(simple_holes.geoms))} holes.")
-    logging.info(f">> Got {len(list(simple_exits.geoms))} exits.")
-    logging.info(
-        f">> Got {len(list(simple_distributions.geoms))} distributions."
-    )
-    logging.info(f">> Got {len(list(outer_polygon.geoms))} outer polygons.")
+    number_obstacles = len(list(simple_holes.geoms))
     if not outer_polygon or outer_polygon.is_empty:
         logging.error(
             "The outer polygon is empty. Returning an empty geometry."
         )
-        return GeometryCollection()
+        return number_obstacles, GeometryCollection()
 
     try:
         result = outer_polygon.difference(simple_holes)
@@ -480,7 +570,7 @@ def parse_dxf_file(
         walkable_area_collection = GeometryCollection(result)
         exits_collection = GeometryCollection(simple_exits)
         distributions_collection = GeometryCollection(simple_distributions)
-        return GeometryCollection(
+        return number_obstacles, GeometryCollection(
             [
                 walkable_area_collection,
                 exits_collection,
@@ -499,7 +589,8 @@ def shapely_to_dxf(
     walkable_layer="walkable_layer",
     hole_layer="hole_layer",
 ):
-    """creates a dxf file according to the geometry
+    """Create a dxf file according to the geometry.
+
     @param geometry: shapely Polygon or Multipolygon
     @param dxf_path: path to where the created dxf file should be saved to
     @param walkable_layer: name of the layer containing the walkable area
@@ -528,134 +619,6 @@ def shapely_to_dxf(
     logging.info(f"dxf was written to: {dxf_path.absolute()}")
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(
-        description="""
-Converts a DXF file into WKT format and saves it as a new file.
-
-Optionally,
-the resulting geometry can be exported back to DXF or visualized as a plot.
-
-────────────────────────────────────────────────────────────────────────────
-
-RECOMMENDED NAMING CONVENTIONS (auto-detection if arguments are omitted):
-
-- Walkable Area Layer:        jps-walkablearea-* or walkablearea-*
-- Obstacle/Hole Layers:        jps-obstacles-* or obstacles-*
-- Exit Layers:                 jps-exits-* or exits-*
-- Distribution Zone Layers:    jps-distributions-* or distributions-*
-
-Layer names must match one of these prefixes (case-insensitive). Only visible layers are considered.
-
-If you omit --walkable, --obstacles, --exits, or --distributions, the program
-will try to infer them from visible DXF layers based on these naming patterns.
-
-────────────────────────────────────────────────────────────────────────────
-
-### Requirements for Successful Conversion:
-- The outer and inner polygons must be defined in different layers.
-- The outer polygon must be in a single designated layer.
-- Inner polygons (holes) can be distributed across multiple layers.
-- A hole must be defined by a **single polyline** or **single circle**:
-  - Holes **cannot** be composed of multiple disconnected lines/polylines.
-  - Circles are converted to polygons with many corners, which may impact triangulation accuracy.
-  - If circles touch other elements, they might be approximated differently than expected.
-- Holes may:
-  - **Overlap with each other**.
-  - **Be located outside the outer polygon** (this does not affect the final structure).
-- The outer polygon **must be a closed polyline**.
-- If multiple polygons exist in the outer polygon layer, they will be parsed as a **MultiPolygon**.
-
-### Expected Structure in DXF:
-- No gaps in the outer polygon or holes.
-- No duplicate lines.
-- Sufficiently wide areas for agents.
-- All polygons must be **simple** (i.e., not self-intersecting).
-
-### Structure of the Output Geometry:
-The resulting geometry is structured as a **GeometryCollection** containing:
-- The **walkable area** as a Polygon or MultiPolygon.
-- **Exits** (optional) as Polygons or empty GeometryCollections.
-- **Distribution zones** (optional) as Polygons or empty GeometryCollections.
-
-Example output:
-```
-GEOMETRYCOLLECTION (
-    GEOMETRYCOLLECTION (
-        POLYGON ((...))  -- Walkable Area
-    ),
-    GEOMETRYCOLLECTION EMPTY,  -- Exits (if present)
-    GEOMETRYCOLLECTION EMPTY   -- Distribution zones (if present)
-)
-```
-This ensures that the structure is flexible and can handle cases where exits or distributions are missing.
-""",
-        formatter_class=RawTextHelpFormatter,
-    )
-    parser.add_argument(
-        "-i",
-        "--input",
-        help="Path to the DXF file to parse.",
-        required=True,
-        type=pathlib.Path,
-    )
-    parser.add_argument(
-        "-o",
-        "--output",
-        help="Output file to save the result in WKT format (default: INPUT.wkt).",
-        type=pathlib.Path,
-    )
-    parser.add_argument(
-        "-d",
-        "--dxf-output",
-        help="Output file to save the result in DXF format.",
-        type=pathlib.Path,
-        required=False,
-    )
-
-    parser.add_argument(
-        "-w",
-        "--walkable",
-        help="Layer containing the walkable area (outer polygon).",
-        required=False,
-    )
-    parser.add_argument(
-        "-x",
-        "--obstacles",
-        help="One or more layers defining obstacles (holes). Can accept multiple layers.",
-        nargs="+",
-        default=[],
-    )
-    parser.add_argument(
-        "-t",
-        "--exits",
-        help="One or more layers defining exits. Can accept multiple layers.",
-        nargs="+",
-        default=[],
-    )
-    parser.add_argument(
-        "-D",
-        "--distributions",
-        help="One or more layers defining distributions. Can accept multiple layers.",
-        nargs="+",
-        default=[],
-    )
-
-    parser.add_argument(
-        "-q",
-        "--quad-segments",
-        help="Number of linear segments used to approximate a quarter-circle for curved shapes (default: 4).",
-        default=4,
-    )
-    parser.add_argument(
-        "-p",
-        "--plot",
-        help="Display an interactive plot of the parsed polygon.",
-        action="store_true",
-    )
-    return parser.parse_args()
-
-
 def plot_geometry(geometry_collection):
     """Plot the geometry collection with different colors for each geometry type."""
     fig, ax = plt.subplots(figsize=(8, 8))
@@ -671,6 +634,12 @@ def plot_geometry(geometry_collection):
     # Extract distributions (third collection)
     if len(polygons) > 2:
         distributions = polygons[2]
+
+    existing_elements = ["area"]
+    if exits.geoms:
+        existing_elements.append("exits")
+    if distributions.geoms:
+        existing_elements.append("distribution")
 
     for a in area.geoms:
         x, y = a.exterior.xy
@@ -698,7 +667,7 @@ def plot_geometry(geometry_collection):
     }
     handles = [
         legend_elements[key]
-        for key in ["area", "exits", "distribution"]
+        for key in existing_elements
         if key in legend_elements
     ]
     ax.legend(
@@ -713,89 +682,164 @@ def plot_geometry(geometry_collection):
     plt.show()
 
 
-def main():
-    parsed_args = parse_args()
-    doc = ezdxf.readfile(parsed_args.input)
+@app.command()
+def convert(
+    input: Path = typer.Option(..., "-i", help="Input DXF file"),
+    output: Optional[Path] = typer.Option(
+        None, "-o", help="Output WKT file (defaults to input.wkt)"
+    ),
+    dxf_output: Optional[Path] = typer.Option(
+        None, "-d", help="Output DXF file"
+    ),
+    walkable: Optional[str] = typer.Option(
+        None, "-w", help="Walkable area layer name"
+    ),
+    obstacles: list[str] = typer.Option(
+        [], "-x", help="Obstacle (hole) layer names"
+    ),
+    exits: list[str] = typer.Option([], "-t", help="Exit layer names"),
+    distributions: list[str] = typer.Option(
+        [], "-D", help="Distribution layer names"
+    ),
+    quad_segments: int = typer.Option(
+        4, "-q", help="Segments for approximating circles"
+    ),
+    plot: bool = typer.Option(False, "-p", help="Display parsed geometry plot"),
+):
+    """convert DXF to WKT"""
+    console.print(
+        "\n[dim] 💬 For a better overview, run:[/] [green]dxf2wkt rich-help[/green]"
+    )
+    # Validate input
+    if not input.exists():
+        console.print(f"[red]❌ Input file not found:[/] {input}")
+        raise typer.Exit(1)
+
+    if not output:
+        output = input.with_suffix(".wkt")
+
+    with console.status(f"Reading DXF file: {input}", spinner="dots"):
+        try:
+            doc = ezdxf.readfile(input)
+        except Exception as err:
+            console.print(f"[red]❌ Error reading DXF file:[/] {err}")
+            raise typer.Exit(1)
+
+    # Show visible and hidden layers
     visible_layers = [
         layer.dxf.name
         for layer in doc.layers
         if not layer.is_off() and not layer.is_frozen()
     ]
-    # Auto-infer layers if missing
-    if not parsed_args.walkable:
+
+    table = Table(title="DXF Layer Overview")
+    table.add_column("Layer Name", style="cyan", no_wrap=True)
+    table.add_column("Visibility", style="green")
+
+    for layer in doc.layers:
+        if layer.dxf.name.lower() == "defpoints":
+            continue
+        status = (
+            "Visible"
+            if not layer.is_off() and not layer.is_frozen()
+            else "Hidden"
+        )
+        style = "green" if status == "Visible" else "red"
+        table.add_row(layer.dxf.name, status, style=style)
+
+    console.print(table)
+
+    if not walkable:
         matches = match_pattern(LAYER_PATTERNS["walkable"], visible_layers)
         if matches:
-            parsed_args.walkable = matches[0]
-            logging.info(f"Inferred walkable layer: {parsed_args.walkable}")
-
-    if not parsed_args.obstacles:
-        parsed_args.obstacles = match_pattern(
-            LAYER_PATTERNS["obstacles"], visible_layers
-        )
-        if parsed_args.obstacles:
-            logging.info(f"Inferred obstacle layers: {parsed_args.obstacles}")
-
-    if not parsed_args.exits:
-        parsed_args.exits = match_pattern(
-            LAYER_PATTERNS["exits"], visible_layers
-        )
-        if parsed_args.exits:
-            logging.info(f"Inferred exit layers: {parsed_args.exits}")
-
-    if not parsed_args.distributions:
-        parsed_args.distributions = match_pattern(
-            LAYER_PATTERNS["distributions"], visible_layers
-        )
-        if parsed_args.distributions:
-            logging.info(
-                f"Inferred distribution layers: {parsed_args.distributions}"
+            walkable = matches[0]
+            console.print(
+                f"[bold green]✔ Inferred walkable layer:[/] {walkable}"
             )
+        else:
+            console.print(
+                "[red]❌ Could not infer walkable layer. Use --walkable or rename your layer to follow naming convention.[/red]"
+            )
+            raise typer.Exit(1)
+
+    if not obstacles:
+        obstacles.extend(
+            match_pattern(LAYER_PATTERNS["obstacles"], visible_layers)
+        )
+    if not exits:
+        exits.extend(match_pattern(LAYER_PATTERNS["exits"], visible_layers))
+    if not distributions:
+        distributions.extend(
+            match_pattern(LAYER_PATTERNS["distributions"], visible_layers)
+        )
+
+    doc = ezdxf.readfile(input)
+    visible_layers = [
+        layer.dxf.name
+        for layer in doc.layers
+        if not layer.is_off() and not layer.is_frozen()
+    ]
+
+    if not walkable:
+        matches = match_pattern(LAYER_PATTERNS["walkable"], visible_layers)
+        if matches:
+            walkable = matches[0]
+            console.log(
+                f"[bold green]Inferred walkable layer:[/bold green] {walkable}"
+            )
+        else:
+            console.print(
+                "[red]❌ Could not infer walkable layer. Please specify with --walkable (-w).[/red]"
+            )
+            raise typer.Exit(1)
+
+    if not obstacles:
+        obstacles.extend(
+            match_pattern(LAYER_PATTERNS["obstacles"], visible_layers)
+        )
+    if not exits:
+        exits.extend(match_pattern(LAYER_PATTERNS["exits"], visible_layers))
+    if not distributions:
+        distributions.extend(
+            match_pattern(LAYER_PATTERNS["distributions"], visible_layers)
+        )
 
     try:
-        if not parsed_args.walkable:
-            logging.error("❌ Could not determine the walkable area layer.")
-            logging.error(
-                "Please use --walkable or name your layer with one of: jps-walkablearea-*, walkablearea-*"
-            )
-            return
-        merged_polygon = parse_dxf_file(
-            parsed_args.input,
-            parsed_args.walkable,
-            parsed_args.obstacles,
-            parsed_args.exits,
-            parsed_args.distributions,
-            parsed_args.quad_segments,
+        num_obstacles, result = parse_dxf_file(
+            input, walkable, obstacles, exits, distributions, quad_segments
         )
     except IncorrectDXFFileError as e:
-        logging.error(f"Failed to parse DXF: {e.message}")
-        return
+        console.print(f"[red]DXF parsing failed:[/red] {e.message}")
+        raise typer.Exit(1)
 
-    # create a dxf file using the parsed geometry
-    if parsed_args.dxf_output:
-        shapely_to_dxf(merged_polygon, parsed_args.dxf_output)
+    if dxf_output:
+        shapely_to_dxf(result, dxf_output)
 
-    # plot final Polygon
-    if parsed_args.plot:
+    if plot:
         matplotlib.pyplot.set_loglevel("warning")
-        logging.getLogger("PIL.PngImagePlugin").setLevel(logging.WARNING)
-        plot_geometry(merged_polygon)
-    # now cast to wkt and write into a file
-    out_file = (
-        parsed_args.output
-        if parsed_args.output is not None
-        else parsed_args.input.with_suffix(".wkt")
-    )
-    save_as_wkt(merged_polygon, out_file=out_file)
-    if not merged_polygon.is_empty:
-        parts = list(merged_polygon.geoms)
-        logging.info("✅ Geometry summary:")
+        plot_geometry(result)
+
+    out_file = output if output else input.with_suffix(".wkt")
+    save_as_wkt(result, out_file)
+
+    if not result.is_empty:
+        parts = list(result.geoms)
+
+        table = Table(title="", show_lines=True)
+        table.add_column("Category", style="cyan", no_wrap=True)
+        table.add_column("Count", style="magenta")
+
         if len(parts) > 0:
-            logging.info(f"Walkable areas: {len(list(parts[0].geoms))}")
+            table.add_row("Walkable areas", str(len(list(parts[0].geoms))))
+        table.add_row("Obstacles", str(num_obstacles))
         if len(parts) > 1:
-            logging.info(f"Exits: {len(list(parts[1].geoms))}")
+            table.add_row("Exits", str(len(list(parts[1].geoms))))
         if len(parts) > 2:
-            logging.info(f"Distributions: {len(list(parts[2].geoms))}")
+            table.add_row("Distributions", str(len(list(parts[2].geoms))))
+
+        console.print("\n[bold green]✅ Geometry summary:[/bold green]")
+        console.print(table)
 
 
 if __name__ == "__main__":
-    main()
+    app()
