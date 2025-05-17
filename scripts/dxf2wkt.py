@@ -3,11 +3,11 @@ import logging
 import pathlib
 from pathlib import Path
 from typing import List, Optional
-
+import json
 import ezdxf
 import geopandas as gpd
 import matplotlib.patches as mpatches
-import matplotlib.pyplot
+from shapely.geometry.base import BaseGeometry
 import matplotlib.pyplot as plt
 import numpy as np
 import shapely
@@ -131,6 +131,8 @@ LAYER_PATTERNS = {
     "obstacles": ["jps-obstacles", "obstacles"],
     "exits": ["jps-exits", "exits"],
     "distributions": ["jps-distributions", "distributions"],
+    "waypoints": ["jps-waypoints", "waypoints"],
+    "journeys": ["jps-journeys", "journeys"],
 }
 
 
@@ -141,6 +143,18 @@ class IncorrectDXFFileError(Exception):
         self.message = message
         self.geometries = geometries
         super().__init__(self.message)
+
+
+def parse_waypoints_from_dxf(doc, waypoint_layer="jps-waypoints"):
+    """Extract waypoints from DXF circles with center and radius."""
+    waypoints = []
+    msp = doc.modelspace()
+    for entity in msp:
+        if entity.dxftype() == "CIRCLE" and entity.dxf.layer == waypoint_layer:
+            center = Point(entity.dxf.center[0], entity.dxf.center[1])
+            radius = entity.dxf.radius
+            waypoints.append((center, radius))
+    return waypoints
 
 
 def save_as_wkt(geometry, out_file: pathlib.Path):
@@ -351,6 +365,8 @@ def parse_dxf_file(
     hole_layers: List[str],
     exit_layers: List[str],
     distribution_layers: List[str],
+    waypoint_layers: List[str],
+    journey_layers: List[str],
     quad_segs: int,
 ):
     """Parse a dxf-file and creates a shapely structure resembling the file.
@@ -364,11 +380,14 @@ def parse_dxf_file(
                         are defined
     @param distribution_layers: a list with all layer names in the dxf-file where distributions
                         are defined
-
+    @param waypoint_layers: a list with all layer names in the dxf-file where waypoints
+                        are defined
+    @param journey_layers: a list with all layer names in the dxf-file where journeys
+                        are defined
     @param quad_segs: Specifies the number of linear segments in a quarter
                       circle in the approximation of circular arcs.
 
-    @return: shapely polygon or multipolygon from dxf-file
+    @return: shapely polygon or multipolygon from dxf-file and additional components
     """
     doc = ezdxf.readfile(dxf_path)
 
@@ -376,9 +395,11 @@ def parse_dxf_file(
     exits = []
     distributions = []
     outer_lines = []
+    waypoints = []
+    journeys = []
+
     # Open the DXF file
     # Filter only visible layers
-
     visible_layers = [
         layer.dxf.name
         for layer in doc.layers
@@ -400,6 +421,11 @@ def parse_dxf_file(
     distribution_layers = validate_layers(
         layers_in_dxf, distribution_layers, "distribution"
     )
+    waypoint_layers = validate_layers(
+        layers_in_dxf, waypoint_layers, "waypoint"
+    )
+    journey_layers = validate_layers(layers_in_dxf, journey_layers, "journey")
+
     # Iterate over all entities in the model
     for entity in msp:
         if entity.dxftype() == "LWPOLYLINE":
@@ -436,19 +462,39 @@ def parse_dxf_file(
                 for distribution_layer in distribution_layers
             ):
                 distributions.append(polyline_to_polygon(entity))
-            elif outer_line_layer in entity.dxf.layer:
-                outer_lines.append(polyline_to_linestring(entity))
+            elif any(
+                journey_layer in entity.dxf.layer
+                for journey_layer in journey_layers
+            ):
+                coords = [(p[0], p[1]) for p in entity.get_points()]
+                if len(coords) >= 2:
+                    journeys.append(LineString(coords))
 
         elif entity.dxftype() == "CIRCLE":
             if entity.dxf.layer in hole_layers:
                 holes.append(dxf_circle_to_shply(entity, quad_segs))
+            elif any(
+                waypoint_layer in entity.dxf.layer
+                for waypoint_layer in waypoint_layers
+            ):
+                center = Point(entity.dxf.center[0], entity.dxf.center[1])
+                radius = entity.dxf.radius
+                waypoints.append((center, radius))
             else:
                 logging.warning(
                     f"there is a circle defined in Layer {entity.dxf.layer} "
                     f"at {entity.dxf.center}. This is not valid and will be "
                     f"ignored."
                 )
-
+        elif entity.dxftype() == "LINE":
+            if any(
+                journey_layer in entity.dxf.layer
+                for journey_layer in journey_layers
+            ):
+                start = entity.dxf.start
+                end = entity.dxf.end
+                coords = [(start[0], start[1]), (end[0], end[1])]
+                journeys.append(LineString(coords))
         elif entity.dxftype() != "INSERT":
             coords = None
             try:
@@ -571,116 +617,25 @@ def parse_dxf_file(
         walkable_area_collection = GeometryCollection(result)
         exits_collection = GeometryCollection(simple_exits)
         distributions_collection = GeometryCollection(simple_distributions)
-        return number_obstacles, GeometryCollection(
-            [
-                walkable_area_collection,
-                exits_collection,
-                distributions_collection,
-            ]
-        )
+        waypoint_geoms = [pt.buffer(r) for pt, r in waypoints]
+        waypoints_collection = GeometryCollection(waypoint_geoms)
+        journeys_collection = GeometryCollection(journeys)
 
+        return (
+            number_obstacles,
+            GeometryCollection(
+                [
+                    walkable_area_collection,
+                    exits_collection,
+                    distributions_collection,
+                    waypoints_collection,
+                    journeys_collection,
+                ]
+            ),
+        )
     except Exception as e:
         logging.error(f"Error while computing difference: {e}")
         return outer_polygon
-
-
-def shapely_to_dxf(
-    geometry,
-    dxf_path,
-    walkable_layer="walkable_layer",
-    hole_layer="hole_layer",
-):
-    """Create a dxf file according to the geometry.
-
-    @param geometry: shapely Polygon or Multipolygon
-    @param dxf_path: path to where the created dxf file should be saved to
-    @param walkable_layer: name of the layer containing the walkable area
-    @param hole_layer: name of the layer containing the holes of the geometry
-    """
-
-    def add_polyline(polyline, layername):
-        points = list(polyline.coords)
-        modelspace.add_lwpolyline(points, dxfattribs={"layer": layername})
-
-    doc = ezdxf.new("R2010")
-    modelspace = doc.modelspace()
-
-    if isinstance(geometry, Polygon):
-        geometry = [geometry]
-    elif isinstance(geometry, MultiPolygon):
-        geometry = geometry.geoms
-
-    for polygon in geometry:
-        if not polygon.is_empty:
-            add_polyline(polygon.exterior, walkable_layer)
-            for hole in polygon.interiors:
-                add_polyline(hole, hole_layer)
-
-    doc.saveas(dxf_path)
-    logging.info(f"dxf was written to: {dxf_path.absolute()}")
-
-
-def plot_geometry(geometry_collection):
-    """Plot the geometry collection with different colors for each geometry type."""
-    fig, ax = plt.subplots(figsize=(8, 8))
-    if geometry_collection.is_empty:
-        logging.info("Skipping empty geometry.")
-        return
-    polygons = list(geometry_collection.geoms)  # Unpack main-level geometries
-    area = polygons[0] if len(polygons) > 0 else None
-    # Extract exits (second collection)
-    if len(polygons) > 1:
-        exits = polygons[1]
-
-    # Extract distributions (third collection)
-    if len(polygons) > 2:
-        distributions = polygons[2]
-
-    existing_elements = ["area"]
-    if exits.geoms:
-        existing_elements.append("exits")
-    if distributions.geoms:
-        existing_elements.append("distribution")
-
-    for a in area.geoms:
-        x, y = a.exterior.xy
-        plt.fill(x, y, alpha=0.1, color="gray")
-        for hole in a.interiors:
-            hx, hy = hole.xy
-            ax.fill(
-                hx, hy, alpha=1, edgecolor="gray", facecolor="white", lw=0.3
-            )
-
-    for e in exits.geoms:
-        x, y = e.exterior.xy
-        plt.fill(x, y, alpha=0.3, color="red")
-
-    for d in distributions.geoms:
-        x, y = d.exterior.xy
-        plt.fill(x, y, alpha=0.3, color="green")
-
-    legend_elements = {
-        "area": mpatches.Patch(color="gray", label="Walkable Area"),
-        "exits": mpatches.Patch(color="red", label="Exits"),
-        "distribution": mpatches.Patch(
-            color="green", label="Distribution Zones"
-        ),
-    }
-    handles = [
-        legend_elements[key]
-        for key in existing_elements
-        if key in legend_elements
-    ]
-    ax.legend(
-        handles=handles,
-        loc="upper center",
-        bbox_to_anchor=(0.5, 1.05),
-        ncol=len(handles),
-        frameon=False,
-    )
-    ax.set_xlabel("X [m]")
-    ax.set_ylabel("Y [m]")
-    plt.show()
 
 
 @app.command()
@@ -702,10 +657,11 @@ def convert(
     distributions: list[str] = typer.Option(
         [], "-D", help="Distribution layer names"
     ),
+    waypoints: list[str] = typer.Option([], "-p", help="Waypoint layer names"),
+    journeys: list[str] = typer.Option([], "-j", help="Journey layer names"),
     quad_segments: int = typer.Option(
         4, "-q", help="Segments for approximating circles"
     ),
-    plot: bool = typer.Option(False, "-p", help="Display parsed geometry plot"),
 ):
     """convert DXF to WKT"""
     console.print(
@@ -773,41 +729,25 @@ def convert(
         distributions.extend(
             match_pattern(LAYER_PATTERNS["distributions"], visible_layers)
         )
-
-    doc = ezdxf.readfile(input)
-    visible_layers = [
-        layer.dxf.name
-        for layer in doc.layers
-        if not layer.is_off() and not layer.is_frozen()
-    ]
-
-    if not walkable:
-        matches = match_pattern(LAYER_PATTERNS["walkable"], visible_layers)
-        if matches:
-            walkable = matches[0]
-            console.log(
-                f"[bold green]Inferred walkable layer:[/bold green] {walkable}"
-            )
-        else:
-            console.print(
-                "[red]❌ Could not infer walkable layer. Please specify with --walkable (-w).[/red]"
-            )
-            raise typer.Exit(1)
-
-    if not obstacles:
-        obstacles.extend(
-            match_pattern(LAYER_PATTERNS["obstacles"], visible_layers)
+    if not waypoints:
+        waypoints.extend(
+            match_pattern(LAYER_PATTERNS["waypoints"], visible_layers)
         )
-    if not exits:
-        exits.extend(match_pattern(LAYER_PATTERNS["exits"], visible_layers))
-    if not distributions:
-        distributions.extend(
-            match_pattern(LAYER_PATTERNS["distributions"], visible_layers)
+    if not journeys:
+        journeys.extend(
+            match_pattern(LAYER_PATTERNS["journeys"], visible_layers)
         )
 
     try:
         num_obstacles, result = parse_dxf_file(
-            input, walkable, obstacles, exits, distributions, quad_segments
+            input,
+            walkable,
+            obstacles,
+            exits,
+            distributions,
+            waypoints,
+            journeys,
+            quad_segments,
         )
     except IncorrectDXFFileError as e:
         console.print(f"[red]DXF parsing failed:[/red] {e.message}")
@@ -815,10 +755,6 @@ def convert(
 
     if dxf_output:
         shapely_to_dxf(result, dxf_output)
-
-    if plot:
-        matplotlib.pyplot.set_loglevel("warning")
-        plot_geometry(result)
 
     out_file = output if output else input.with_suffix(".wkt")
     save_as_wkt(result, out_file)
@@ -837,9 +773,218 @@ def convert(
             table.add_row("Exits", str(len(list(parts[1].geoms))))
         if len(parts) > 2:
             table.add_row("Distributions", str(len(list(parts[2].geoms))))
+        if len(parts) > 3:
+            table.add_row("Waypoints", str(len(list(parts[3].geoms))))
+        if len(parts) > 4:
+            table.add_row("Journeys", str(len(list(parts[4].geoms))))
 
         console.print("\n[bold green]✅ Geometry summary:[/bold green]")
         console.print(table)
+
+
+def plot_interactive(geometry, title="Interactive Geometry Viewer"):
+    """Create an interactive plot with Matplotlib"""
+    from matplotlib.patches import Polygon as MplPolygon
+    from matplotlib.widgets import CheckButtons
+
+    fig, ax = plt.subplots(figsize=(10, 8))
+    fig.canvas.manager.set_window_title(title)
+
+    # Extract geometry components
+    parts = list(geometry.geoms)
+    walkable_areas = list(parts[0].geoms) if len(parts) > 0 else []
+    exits = list(parts[1].geoms) if len(parts) > 1 else []
+    distributions = list(parts[2].geoms) if len(parts) > 2 else []
+    waypoints = list(parts[3].geoms) if len(parts) > 3 else []
+    journeys = list(parts[4].geoms) if len(parts) > 4 else []
+
+    walkable_patches = []
+    exit_patches = []
+    distribution_patches = []
+    waypoint_patches = []
+    journey_lines = []
+
+    # Plot walkable areas
+    for area in walkable_areas:
+        x, y = area.exterior.xy
+        patch = MplPolygon(
+            np.column_stack([x, y]),
+            alpha=0.1,
+            color="gray",
+            label="Walkable Area",
+        )
+        ax.add_patch(patch)
+        walkable_patches.append(patch)
+
+        for hole in area.interiors:
+            hx, hy = hole.xy
+            hole_patch = MplPolygon(
+                np.column_stack([hx, hy]),
+                alpha=1,
+                edgecolor="gray",
+                facecolor="white",
+                lw=0.3,
+            )
+            ax.add_patch(hole_patch)
+            walkable_patches.append(hole_patch)
+
+    # Plot exits
+    for exit_area in exits:
+        x, y = exit_area.exterior.xy
+        patch = MplPolygon(
+            np.column_stack([x, y]), alpha=0.3, color="red", label="Exit"
+        )
+        ax.add_patch(patch)
+        exit_patches.append(patch)
+
+    # Plot distributions
+    for dist in distributions:
+        x, y = dist.exterior.xy
+        patch = MplPolygon(
+            np.column_stack([x, y]),
+            alpha=0.3,
+            color="green",
+            label="Distribution",
+        )
+        ax.add_patch(patch)
+        distribution_patches.append(patch)
+
+    # Plot waypoints
+    for w in waypoints:
+        x, y = w.centroid.x, w.centroid.y
+        r = w.centroid.distance(Point(w.exterior.coords[0]))
+        patch = plt.Circle((x, y), r, color="blue", alpha=0.7)
+        ax.add_patch(patch)
+        waypoint_patches.append(patch)
+
+    # Plot journeys
+    for journey in journeys:
+        x, y = journey.xy
+        line = plt.Line2D(x, y, color="magenta", linewidth=2, linestyle="-")
+        ax.add_line(line)
+        journey_lines.append(line)
+
+    ax.autoscale_view()
+    ax.set_aspect("equal")
+    ax.set_xlabel("X [m]")
+    ax.set_ylabel("Y [m]")
+
+    # Add check buttons for visibility toggles
+    check_labels = [
+        "Walkable",
+        "Exits",
+        "Distributions",
+        "Waypoints",
+        "Journeys",
+    ]
+    check_defaults = [True, True, True, True, True]
+
+    # Filter out empty categories
+    active_labels = []
+    active_defaults = []
+
+    if walkable_patches:
+        active_labels.append("Walkable")
+        active_defaults.append(True)
+    if exit_patches:
+        active_labels.append("Exits")
+        active_defaults.append(True)
+    if distribution_patches:
+        active_labels.append("Distributions")
+        active_defaults.append(True)
+    if waypoint_patches:
+        active_labels.append("Waypoints")
+        active_defaults.append(True)
+    if journey_lines:
+        active_labels.append("Journeys")
+        active_defaults.append(True)
+
+    ax_check = plt.axes([0.05, 0.05, 0.15, 0.15])
+    check = CheckButtons(ax_check, active_labels, active_defaults)
+
+    def toggle_visibility(label):
+        label = label.lower()
+        if label == "walkable":
+            for patch in walkable_patches:
+                patch.set_visible(not patch.get_visible())
+        elif label == "exits":
+            for patch in exit_patches:
+                patch.set_visible(not patch.get_visible())
+        elif label == "distributions":
+            for patch in distribution_patches:
+                patch.set_visible(not patch.get_visible())
+        elif label == "waypoints":
+            for patch in waypoint_patches:
+                patch.set_visible(not patch.get_visible())
+        elif label == "journeys":
+            for line in journey_lines:
+                line.set_visible(not line.get_visible())
+        fig.canvas.draw_idle()
+
+    check.on_clicked(toggle_visibility)
+
+    legend_elements = []
+    if walkable_areas:
+        legend_elements.append(
+            mpatches.Patch(color="gray", label="Walkable Area")
+        )
+    if exits:
+        legend_elements.append(mpatches.Patch(color="red", label="Exits"))
+    if distributions:
+        legend_elements.append(
+            mpatches.Patch(color="green", label="Distribution Zones")
+        )
+    if waypoints:
+        legend_elements.append(mpatches.Patch(color="blue", label="Waypoints"))
+    if journeys:
+        legend_elements.append(
+            mpatches.Patch(color="magenta", label="Journeys")
+        )
+
+    ax.legend(
+        handles=legend_elements,
+        loc="upper center",
+        bbox_to_anchor=(0.5, 1.05),
+        ncol=len(legend_elements),
+    )
+
+    plt.show()
+
+
+def shapely_to_dxf(
+    geometry,
+    dxf_path,
+    walkable_layer="walkable_layer",
+    hole_layer="hole_layer",
+):
+    """Create a dxf file according to the geometry.
+
+    @param geometry: shapely Polygon or Multipolygon
+    @param dxf_path: path to where the created dxf file should be saved to
+    @param walkable_layer: name of the layer containing the walkable area
+    @param hole_layer: name of the layer containing the holes of the geometry
+    """
+
+    def add_polyline(polyline, layername):
+        points = list(polyline.coords)
+        modelspace.add_lwpolyline(points, dxfattribs={"layer": layername})
+
+    doc = ezdxf.new("R2010")
+    modelspace = doc.modelspace()
+
+    if isinstance(geometry, Polygon):
+        geometry = [geometry]
+    elif isinstance(geometry, MultiPolygon):
+        geometry = geometry.geoms
+
+    for polygon in geometry:
+        if not polygon.is_empty:
+            add_polyline(polygon.exterior, walkable_layer)
+            for hole in polygon.interiors:
+                add_polyline(hole, hole_layer)
+
+    doc.saveas(dxf_path)
+    logging.info(f"dxf was written to: {dxf_path.absolute()}")
 
 
 @app.command()
@@ -884,6 +1029,8 @@ def analyze(
                 match_pattern(LAYER_PATTERNS["obstacles"], visible_layers),
                 match_pattern(LAYER_PATTERNS["exits"], visible_layers),
                 match_pattern(LAYER_PATTERNS["distributions"], visible_layers),
+                match_pattern(LAYER_PATTERNS["waypoints"], visible_layers),
+                match_pattern(LAYER_PATTERNS["journeys"], visible_layers),
                 quad_segs=4,
             )
         except Exception as e:
@@ -902,6 +1049,8 @@ def analyze(
     distributions = (
         list(geometry.geoms[2].geoms) if len(geometry.geoms) > 2 else []
     )
+    waypoints = list(geometry.geoms[3].geoms) if len(geometry.geoms) > 3 else []
+    journeys = list(geometry.geoms[4].geoms) if len(geometry.geoms) > 4 else []
 
     # Create results table
     table = Table(title=f"📊 Geometry Analysis: {input.name}")
@@ -918,6 +1067,12 @@ def analyze(
     # Exit metrics
     if exits:
         table.add_row("Exit count", str(len(exits)))
+
+    if waypoints:
+        table.add_row("Waypoint count", str(len(waypoints)))
+
+    if journeys:
+        table.add_row("Journey count", str(len(journeys)))
 
     # Distribution zones
     if distributions:
@@ -941,119 +1096,9 @@ def analyze(
     console.print(table)
 
 
-def plot_interactive(geometry, title="Interactive Geometry Viewer"):
-    """Create an interactive plot with Matplotlib"""
-    from matplotlib.patches import Polygon as MplPolygon
-    from matplotlib.widgets import CheckButtons
-
-    fig, ax = plt.subplots(figsize=(10, 8))
-    fig.canvas.manager.set_window_title(title)
-
-    walkable_areas = list(geometry.geoms[0].geoms)
-    exits = list(geometry.geoms[1].geoms) if len(geometry.geoms) > 1 else []
-    distributions = (
-        list(geometry.geoms[2].geoms) if len(geometry.geoms) > 2 else []
-    )
-
-    walkable_patches = []
-    exit_patches = []
-    distribution_patches = []
-
-    for area in walkable_areas:
-        x, y = area.exterior.xy
-        patch = MplPolygon(
-            np.column_stack([x, y]),
-            alpha=0.1,
-            color="gray",
-            label="Walkable Area",
-        )
-        ax.add_patch(patch)
-        walkable_patches.append(patch)
-
-        for hole in area.interiors:
-            hx, hy = hole.xy
-            hole_patch = MplPolygon(
-                np.column_stack([hx, hy]),
-                alpha=1,
-                edgecolor="gray",
-                facecolor="white",
-                lw=0.3,
-            )
-            ax.add_patch(hole_patch)
-            walkable_patches.append(hole_patch)
-
-    for exit_area in exits:
-        x, y = exit_area.exterior.xy
-        patch = MplPolygon(
-            np.column_stack([x, y]), alpha=0.3, color="red", label="Exit"
-        )
-        ax.add_patch(patch)
-        exit_patches.append(patch)
-
-    for dist in distributions:
-        x, y = dist.exterior.xy
-        patch = MplPolygon(
-            np.column_stack([x, y]),
-            alpha=0.3,
-            color="green",
-            label="Distribution",
-        )
-        ax.add_patch(patch)
-        distribution_patches.append(patch)
-
-    ax.autoscale_view()
-    ax.set_aspect("equal")
-    ax.set_xlabel("X [m]")
-    ax.set_ylabel("Y [m]")
-
-    ax_check = plt.axes([0.05, 0.05, 0.15, 0.15])
-    check = CheckButtons(
-        ax_check, ["Walkable", "Exits", "Distributions"], [True, True, True]
-    )
-
-    def toggle_visibility(label):
-        label = label.lower()
-        if label == "walkable":
-            for patch in walkable_patches:
-                patch.set_visible(not patch.get_visible())
-        elif label == "exits":
-            for patch in exit_patches:
-                patch.set_visible(not patch.get_visible())
-        elif label == "distributions":
-            for patch in distribution_patches:
-                patch.set_visible(not patch.get_visible())
-        fig.canvas.draw_idle()
-
-    check.on_clicked(toggle_visibility)
-
-    legend_elements = []
-    if walkable_areas:
-        legend_elements.append(
-            mpatches.Patch(color="gray", label="Walkable Area")
-        )
-    if exits:
-        legend_elements.append(mpatches.Patch(color="red", label="Exits"))
-    if distributions:
-        legend_elements.append(
-            mpatches.Patch(color="green", label="Distribution Zones")
-        )
-
-    ax.legend(
-        handles=legend_elements,
-        loc="upper center",
-        bbox_to_anchor=(0.5, 1.05),
-        ncol=3,
-    )
-
-    plt.show()
-
-
 @app.command()
 def view(
     input: Path = typer.Option(..., "-i", help="Input WKT or DXF file"),
-    interactive: bool = typer.Option(
-        False, "--interactive", help="Use interactive mode"
-    ),
 ):
     """View geometry in an interactive viewer"""
 
@@ -1087,12 +1132,19 @@ def view(
                 )
                 raise typer.Exit(1)
 
+            waypoints = match_pattern(
+                LAYER_PATTERNS["waypoints"], visible_layers
+            )
+            journeys = match_pattern(LAYER_PATTERNS["journeys"], visible_layers)
+
             _, geometry = parse_dxf_file(
                 input,
                 walkable_layer,
                 match_pattern(LAYER_PATTERNS["obstacles"], visible_layers),
                 match_pattern(LAYER_PATTERNS["exits"], visible_layers),
                 match_pattern(LAYER_PATTERNS["distributions"], visible_layers),
+                waypoints,
+                journeys,
                 quad_segs=4,
             )
         except Exception as e:
@@ -1104,10 +1156,7 @@ def view(
         )
         raise typer.Exit(1)
 
-    if interactive:
-        plot_interactive(geometry, title=f"Geometry Viewer: {input.name}")
-    else:
-        plot_geometry(geometry)
+    plot_interactive(geometry, title=f"Geometry Viewer: {input.name}")
 
 
 @app.command("clearance-heatmap")
@@ -1195,6 +1244,194 @@ def clearance_heatmap(
     ax.set_xlabel("X [m]")
     ax.set_ylabel("Y [m]")
     plt.show()
+
+
+def identify_stage(point: Point, stage_dict: dict) -> Optional[str]:
+    for sid, geom in stage_dict.items():
+        if geom.contains(point):
+            return sid
+    return None
+
+
+@app.command("makejourneys")
+def make_journeys(
+    input: Path = typer.Option(
+        ...,
+        "-i",
+        help="DXF file containing journeys, waypoints, exits, and distributions",
+    ),
+    output: Path = typer.Option(
+        None,
+        "-o",
+        help="JSON file to write journey definitions to",
+    ),
+):
+    """
+    Construct journey definitions from a DXF file:
+    - Reads jps-journeys (polylines)
+    - Resolves each endpoint by containment in stage geometries (distribution, waypoint, exit)
+    - Outputs journey stage sequences and transitions
+    - Writes results to JSON file if output path is provided
+    """
+
+    def parse_polygons(doc, layers: list[str]) -> dict[str, BaseGeometry]:
+        msp = doc.modelspace()
+        geometries = {}
+        index = 0
+        for entity in msp:
+            if entity.dxftype() == "LWPOLYLINE" and any(
+                layer in entity.dxf.layer for layer in layers
+            ):
+                coords = [(p[0], p[1]) for p in entity.get_points()]
+                if len(coords) >= 3:
+                    poly = Polygon(coords)
+                    if poly.is_valid:
+                        geometries[f"{layers[0]}_{index}"] = poly
+                        index += 1
+        return geometries
+
+    def parse_circles(doc, layer: str) -> dict[str, BaseGeometry]:
+        msp = doc.modelspace()
+        circles = {}
+        index = 0
+        for entity in msp:
+            if entity.dxftype() == "CIRCLE" and entity.dxf.layer == layer:
+                center = Point(entity.dxf.center)
+                radius = entity.dxf.radius
+                circles[f"{layer}_{index}"] = center.buffer(radius)
+                index += 1
+        return circles
+
+    def identify_stage(point: Point, stage_dict: dict) -> str | None:
+        for sid, geom in stage_dict.items():
+            if geom.contains(point):
+                return sid
+        return None
+
+    def parse_journey_paths_from_dxf(doc, visible_layers):
+        """Extract journey paths from DXF polylines as LineStrings."""
+        msp = doc.modelspace()
+        journey_paths = []
+        for entity in msp:
+            if (
+                (entity.dxftype() == "LWPOLYLINE" or entity.dxftype() == "LINE")
+                and "jps-journeys" in entity.dxf.layer
+                and entity.dxf.layer in visible_layers
+            ):
+                coords = []
+                if entity.dxftype() == "LWPOLYLINE":
+                    coords = [(p[0], p[1]) for p in entity.get_points()]
+                elif entity.dxftype() == "LINE":
+                    start = entity.dxf.start
+                    end = entity.dxf.end
+                    coords = [(start[0], start[1]), (end[0], end[1])]
+
+                if len(coords) >= 2:
+                    journey_paths.append(LineString(coords))
+        return journey_paths
+
+    doc = ezdxf.readfile(input)
+    visible_layers = [
+        layer.dxf.name
+        for layer in doc.layers
+        if not layer.is_off() and not layer.is_frozen()
+    ]
+    distributions = parse_polygons(
+        doc, match_pattern(["jps-distributions"], visible_layers)
+    )
+    exits = parse_polygons(doc, match_pattern(["jps-exits"], visible_layers))
+    waypoints = parse_circles(doc, "jps-waypoints")
+    journeys = parse_journey_paths_from_dxf(doc, visible_layers)
+    if not journeys:
+        logging.info("No visible journey layer!")
+        return {}
+    # Structure to store journey data for JSON output
+    journey_data = {
+        "exits": {},
+        "distributions": {},
+        "waypoints": {},
+        "journeys": [],
+        "transitions": [],
+    }
+
+    # Add geometry information to the data structure
+    for exit_id, exit_geom in exits.items():
+        # For polygons, store the coordinates
+        coords = list(exit_geom.exterior.coords)
+        # Convert to list of lists for JSON serialization
+        coords_list = [[x, y] for x, y in coords]
+        journey_data["exits"][exit_id] = {
+            "type": "polygon",
+            "coordinates": coords_list,
+        }
+
+    for dist_id, dist_geom in distributions.items():
+        coords = list(dist_geom.exterior.coords)
+        # Convert to list of lists for JSON serialization
+        coords_list = [[x, y] for x, y in coords]
+        journey_data["distributions"][dist_id] = {
+            "type": "polygon",
+            "coordinates": coords_list,
+        }
+
+    for waypoint_id, waypoint_geom in waypoints.items():
+        # For circles, store center and radius
+        center = waypoint_geom.centroid
+        radius = Point(center).distance(Point(waypoint_geom.exterior.coords[0]))
+        journey_data["waypoints"][waypoint_id] = {
+            "type": "circle",
+            "center": [center.x, center.y],
+            "radius": radius,
+        }
+
+    for j, line in enumerate(journeys):
+        coords = list(line.coords)
+        stage_ids = []
+        start = identify_stage(Point(coords[0]), distributions)
+        if start:
+            stage_ids.append(start)
+        for pt in coords[1:-1]:
+            sid = identify_stage(Point(pt), waypoints)
+            if sid:
+                stage_ids.append(sid)
+        end = identify_stage(Point(coords[-1]), exits)
+        if end:
+            stage_ids.append(end)
+
+        if len(stage_ids) >= 2:
+            journey_id = f"journey_{j}"
+            console.print(
+                f"[green]Journey {j}[/green]: " + " ➜ ".join(stage_ids)
+            )
+
+            # Add all transitions for this journey
+            journey_transitions = []
+            for a, b in zip(stage_ids[:-1], stage_ids[1:]):
+                console.print(f"  • transition: {a} → {b}")
+                transition = {"from": a, "to": b, "journey_id": journey_id}
+                journey_data["transitions"].append(transition)
+                journey_transitions.append(transition)
+
+            # Add journey to data structure
+            journey_data["journeys"].append(
+                {
+                    "id": journey_id,
+                    "stages": stage_ids,
+                    "transitions": journey_transitions,  # Add transitions directly to journey
+                }
+            )
+        else:
+            console.print(
+                f"[yellow]Skipping journey {j}: could not resolve enough stages[/yellow]"
+            )
+
+    if output:
+        output_path = Path(output)
+        with open(output_path, "w") as f:
+            json.dump(journey_data, f, indent=2)
+        console.print(f"[green]Journey data written to {output_path}[/green]")
+
+    return journey_data
 
 
 if __name__ == "__main__":
