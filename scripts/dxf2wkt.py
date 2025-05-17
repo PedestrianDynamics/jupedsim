@@ -1263,7 +1263,7 @@ def make_journeys(
     output: Path = typer.Option(
         None,
         "-o",
-        help="JSON file to write journey definitions to",
+        help="JSON file to write journey definitions to (defaults input.json)",
     ),
 ):
     """
@@ -1425,12 +1425,14 @@ def make_journeys(
                 f"[yellow]Skipping journey {j}: could not resolve enough stages[/yellow]"
             )
 
-    if output:
-        output_path = Path(output)
-        with open(output_path, "w") as f:
-            json.dump(journey_data, f, indent=2)
-        console.print(f"[green]Journey data written to {output_path}[/green]")
+    if not output:
+        output = input.with_suffix(".json")
 
+    output_path = Path(output)
+    with open(output_path, "w") as f:
+        json.dump(journey_data, f, indent=2)
+
+    console.print(f"[green]Journey data written to {output_path}[/green]")
     return journey_data
 
 
