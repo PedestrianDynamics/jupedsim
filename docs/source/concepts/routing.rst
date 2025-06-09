@@ -373,6 +373,7 @@ The next crucial step is to determine the route that these agents will take to r
 This involves calculating the most efficient or desired paths from their current locations to their targets within the simulation environment.
 
 To determine the route, *JuPedSim* triangulates the geometry and computes the distance between two points through the triangulation.
+The triangulation is refined to avoid excessively large triangles so that the navigation mesh better follows the walkable area.
 Here, it will compute the distance between the centers of two neighboring triangles.
 When multiple paths lead to the target, the shortest one will be preferred.
 

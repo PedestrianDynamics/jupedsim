@@ -22,6 +22,8 @@
 #include <CGAL/Triangulation_vertex_base_with_info_2.h>
 #include <CGAL/draw_triangulation_2.h>
 #include <CGAL/mark_domain_in_triangulation.h>
+#include <CGAL/Delaunay_mesher_2.h>
+#include <CGAL/Delaunay_mesh_size_criteria_2.h>
 
 #include <limits>
 #include <memory>
@@ -44,6 +46,8 @@ RoutingEngine::RoutingEngine(const PolyWithHoles& poly)
         cdt.insert_constraint(p.vertices_begin(), p.vertices_end(), true);
     }
     CGAL::mark_domain_in_triangulation(cdt);
+    using Criteria = CGAL::Delaunay_mesh_size_criteria_2<CDT>;
+    CGAL::refine_Delaunay_mesh_2(cdt, Criteria(0.125, 0.5));
     mesh = std::make_unique<Mesh>(cdt);
 }
 
