@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "RoutingEngine.hpp"
 
-#include "AABB.hpp"
 #include "GeometricFunctions.hpp"
-#include "Graph.hpp"
-#include "IteratorPair.hpp"
 #include "LineSegment.hpp"
 #include "Mesh.hpp"
 #include "SimulationError.hpp"
@@ -16,20 +13,132 @@
 #include <glm/geometric.hpp>
 
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>
+#include <CGAL/Delaunay_mesh_area_criteria_2.h>
+#include <CGAL/Delaunay_mesh_size_criteria_2.h>
+#include <CGAL/Delaunay_mesher_2.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Polygon_with_holes_2.h>
 #include <CGAL/Surface_mesh.h>
+#include <CGAL/Triangulation_conformer_2.h>
 #include <CGAL/Triangulation_vertex_base_with_info_2.h>
 #include <CGAL/draw_triangulation_2.h>
 #include <CGAL/mark_domain_in_triangulation.h>
-#include <CGAL/Delaunay_mesher_2.h>
-#include <CGAL/Delaunay_mesh_size_criteria_2.h>
-
+#include <CGAL/point_generators_2.h> // for to_double()
+#include <fstream>
+#include <iostream>
 #include <limits>
 #include <memory>
-#include <queue>
+#include <string>
 #include <unordered_map>
 #include <vector>
+using Kernel = CGAL::Simple_cartesian<double>;
+using Point_2 = Kernel::Point_2;
+
+// for debuging
+void export_triangles(const CDT& cdt, const std::string& filename)
+{
+    std::ofstream out(filename);
+    if(!out) {
+        std::cerr << "Cannot open file " << filename << " for writing." << std::endl;
+        return;
+    }
+
+    for(auto fit = cdt.finite_faces_begin(); fit != cdt.finite_faces_end(); ++fit) {
+        if(!fit->get_in_domain())
+            continue;
+
+        for(int i = 0; i < 3; ++i) {
+            const auto& p = fit->vertex(i)->point();
+            out << CGAL::to_double(p.x()) << "," << CGAL::to_double(p.y()) << " ";
+        }
+        out << "\n";
+    }
+
+    std::cout << "Exported triangles to " << filename << std::endl;
+}
+
+// Split long constraint edges
+double splitLongConstraints(CDT& cdt, double threshold)
+{
+    std::vector<Point_2> points_to_add;
+
+    for(auto eit = cdt.finite_edges_begin(); eit != cdt.finite_edges_end(); ++eit) {
+        if(!cdt.is_constrained(*eit))
+            continue;
+
+        auto face = eit->first;
+        int index = eit->second;
+        Point_2 p1 = face->vertex((index + 1) % 3)->point();
+        Point_2 p2 = face->vertex((index + 2) % 3)->point();
+
+        double dx = p2.x() - p1.x();
+        double dy = p2.y() - p1.y();
+        double length_sq = dx * dx + dy * dy;
+
+        // Edge is too long -> add midpoint
+        if(length_sq > threshold * threshold) {
+            Point_2 midpoint((p1.x() + p2.x()) / 2.0, (p1.y() + p2.y()) / 2.0);
+            points_to_add.push_back(midpoint);
+        }
+    }
+
+    for(const auto& point : points_to_add) {
+        cdt.insert(point);
+    }
+
+    return points_to_add.size();
+}
+
+// Add centroids of large triangles
+double addCentroidsOfLargeTriangles(CDT& cdt, double area_threshold)
+{
+    std::vector<Point_2> centroids_to_add;
+
+    for(auto fit = cdt.finite_faces_begin(); fit != cdt.finite_faces_end(); ++fit) {
+        // Calculate triangle area
+        Point_2 p1 = fit->vertex(0)->point();
+        Point_2 p2 = fit->vertex(1)->point();
+        Point_2 p3 = fit->vertex(2)->point();
+
+        // Area = |((p2-p1) × (p3-p1))| / 2
+        double area =
+            abs(((p2.x() - p1.x()) * (p3.y() - p1.y()) - (p3.x() - p1.x()) * (p2.y() - p1.y()))) /
+            2.0;
+
+        if(area > area_threshold) {
+            // Calculate centroid
+            Point_2 centroid((p1.x() + p2.x() + p3.x()) / 3.0, (p1.y() + p2.y() + p3.y()) / 3.0);
+            centroids_to_add.push_back(centroid);
+        }
+    }
+
+    for(const auto& centroid : centroids_to_add) {
+        cdt.insert(centroid);
+    }
+    return centroids_to_add.size();
+}
+
+void improveTriangulation(CDT& cdt)
+{
+    std::vector<Point_2> points_to_add;
+    float area_threshold = 4.0;
+    float length_threshold = 2.0;
+    int res1, res2;
+    int max_iterations = cdt.number_of_vertices();
+    int count = 0;
+    while(count++ < max_iterations) {
+        res1 = splitLongConstraints(cdt, length_threshold);
+        res2 = addCentroidsOfLargeTriangles(cdt, area_threshold);
+        if(res1 == 0 && res2 == 0) {
+            break; // No more points to add
+        }
+    }
+
+    for(const auto& point : points_to_add) {
+        cdt.insert(point);
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // NavMeshRoutingEngine
@@ -45,10 +154,14 @@ RoutingEngine::RoutingEngine(const PolyWithHoles& poly)
     for(const auto& p : poly.holes()) {
         cdt.insert_constraint(p.vertices_begin(), p.vertices_end(), true);
     }
+
     CGAL::mark_domain_in_triangulation(cdt);
-    using Criteria = CGAL::Delaunay_mesh_size_criteria_2<CDT>;
-    CGAL::refine_Delaunay_mesh_2(cdt, Criteria(0.125, 0.5));
+    improveTriangulation(cdt);
+    CGAL::make_conforming_Delaunay_2(cdt);
+    CGAL::mark_domain_in_triangulation(cdt);
+
     mesh = std::make_unique<Mesh>(cdt);
+    export_triangles(cdt, "triangle_cdt.txt");
 }
 
 std::unique_ptr<RoutingEngine> RoutingEngine::Clone() const
@@ -290,12 +403,11 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
     const auto get_edge = [this](const auto& a, const auto& b) {
         for(int idx = 0; idx < 3; ++idx) {
             if(a->neighbor(idx) == b) {
-                const auto s = cdt.segment(a, idx);
-                const auto src = s.source();
-                const auto tgt = s.target();
+                auto v1 = a->vertex((idx + 1) % 3)->point();
+                auto v2 = a->vertex((idx + 2) % 3)->point();
                 return LineSegment{
-                    {CGAL::to_double(src.x()), CGAL::to_double(src.y())},
-                    {CGAL::to_double(tgt.x()), CGAL::to_double(tgt.y())}};
+                    {CGAL::to_double(v1.x()), CGAL::to_double(v1.y())},
+                    {CGAL::to_double(v2.x()), CGAL::to_double(v2.y())}};
             }
         }
         throw SimulationError("Internal Error");
