@@ -466,7 +466,7 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
     // TODO(kkratz): Remove the 0.2m edge width adjustment and replace this with p[roper
     // arc-paths from the "Efficient Triangulation-Based Pathfinding" publication
     const size_t portalCount = path.size();
-    const double radius = 0.4; // Object radius
+    const double radius = 0.2; // Object radius
     // This is the actual simple stupid funnel algorithm
     auto apex = from;
     auto portal_left = from;
