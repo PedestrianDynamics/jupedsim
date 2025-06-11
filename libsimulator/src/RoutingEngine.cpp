@@ -129,8 +129,8 @@ double splitLongConstraints(CDT& cdt, double threshold)
 {
     std::set<Point_2> points_to_add;
 
-    for (auto eit = cdt.finite_edges_begin(); eit != cdt.finite_edges_end(); ++eit) {
-        if (!cdt.is_constrained(*eit))
+    for(auto eit = cdt.finite_edges_begin(); eit != cdt.finite_edges_end(); ++eit) {
+        if(!cdt.is_constrained(*eit))
             continue;
 
         auto face = eit->first;
@@ -143,16 +143,16 @@ double splitLongConstraints(CDT& cdt, double threshold)
         double dy = p2.y() - p1.y();
         double length_sq = dx * dx + dy * dy;
 
-        if (length_sq > threshold * threshold) {
+        if(length_sq > threshold * threshold) {
             Point_2 midpoint((p1.x() + p2.x()) / 2.0, (p1.y() + p2.y()) / 2.0);
             points_to_add.insert(midpoint);
         }
     }
 
-    for (const auto& point : points_to_add) {
+    for(const auto& point : points_to_add) {
         try {
             cdt.insert(point);
-        } catch (...) {
+        } catch(...) {
             std::cerr << "Error inserting point: " << point << std::endl;
         }
     }
@@ -163,29 +163,34 @@ double splitLongConstraints(CDT& cdt, double threshold)
 // Add centroids of large triangles
 double addCentroidsOfLargeTriangles(CDT& cdt, double area_threshold)
 {
-    std::vector<Point_2> centroids_to_add;
+    std::set<Point_2> centroids_to_add;
 
     for(auto fit = cdt.finite_faces_begin(); fit != cdt.finite_faces_end(); ++fit) {
-        // Calculate triangle area
         Point_2 p1 = fit->vertex(0)->point();
         Point_2 p2 = fit->vertex(1)->point();
         Point_2 p3 = fit->vertex(2)->point();
 
-        // Area = |((p2-p1) × (p3-p1))| / 2
+        // Compute signed area using the cross product
         double area =
-            abs(((p2.x() - p1.x()) * (p3.y() - p1.y()) - (p3.x() - p1.x()) * (p2.y() - p1.y()))) /
+            std::abs(
+                (p2.x() - p1.x()) * (p3.y() - p1.y()) - (p3.x() - p1.x()) * (p2.y() - p1.y())) /
             2.0;
 
         if(area > area_threshold) {
-            // Calculate centroid
             Point_2 centroid((p1.x() + p2.x() + p3.x()) / 3.0, (p1.y() + p2.y() + p3.y()) / 3.0);
-            centroids_to_add.push_back(centroid);
+            centroids_to_add.insert(centroid);
         }
     }
 
     for(const auto& centroid : centroids_to_add) {
-        cdt.insert(centroid);
+        try {
+            cdt.insert(centroid);
+        } catch(const std::exception& e) {
+            std::cerr << "Exception inserting centroid " << centroid << ": " << e.what()
+                      << std::endl;
+        }
     }
+
     return centroids_to_add.size();
 }
 
@@ -504,14 +509,17 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
         const auto line_segment_direction = (line_segment_right - line_segment_left).Normalized();
         auto candidate_left = line_segment_left + (line_segment_direction * radius);
         auto candidate_right = line_segment_right - (line_segment_direction * radius);
-
         if(portal_length < 2.0 * radius) {
-            // Portal too small, use midpoint or original points
             const auto midpoint = (line_segment_left + line_segment_right) * 0.5;
-            candidate_left = midpoint;
-            candidate_right = midpoint;
+            waypoints.emplace_back(midpoint);
+            apex = midpoint;
+            index_apex = index_portal;
+            portal_left = apex;
+            portal_right = apex;
+            index_left = index_apex;
+            index_right = index_apex;
+            continue; // move on without normal funnel logic
         }
-
         if(triarea2d(apex, portal_right, candidate_right) <= 0.0) {
             if(apex == portal_right || triarea2d(apex, portal_left, candidate_right) > 0.0) {
                 portal_right = candidate_right;
@@ -547,5 +555,5 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
     }
     waypoints.emplace_back(to);
     auto reduced = pick_simple_points(waypoints, 5);
-    return reduced;
+    return waypoints;
 }
