@@ -35,31 +35,32 @@
 using Kernel = CGAL::Simple_cartesian<double>;
 using Point_2 = Kernel::Point_2;
 
-
-std::vector<Point> pick_simple_points(const std::vector<Point>& smooth_path, size_t num_points) {
+std::vector<Point> pick_simple_points(const std::vector<Point>& smooth_path, size_t num_points)
+{
     std::vector<Point> selected;
 
-    if (smooth_path.empty() || num_points == 0)
+    if(smooth_path.empty() || num_points == 0)
         return selected;
 
     size_t n = smooth_path.size();
-    if (num_points >= n) {
-        return smooth_path;  // If asking for more points than available, return all
+    if(num_points >= n) {
+        return smooth_path; // If asking for more points than available, return all
     }
 
     selected.reserve(num_points);
 
-    for (size_t i = 0; i < num_points; ++i) {
-        size_t idx = static_cast<size_t>(std::round((static_cast<double>(i) / (num_points - 1)) * (n - 1)));
+    for(size_t i = 0; i < num_points; ++i) {
+        size_t idx =
+            static_cast<size_t>(std::round((static_cast<double>(i) / (num_points - 1)) * (n - 1)));
         selected.push_back(smooth_path[idx]);
     }
 
     return selected;
 }
 
-
 // Cubic Bézier interpolation at t ∈ [0,1]
-Point cubic_bezier(const Point& p0, const Point& c1, const Point& c2, const Point& p1, double t) {
+Point cubic_bezier(const Point& p0, const Point& c1, const Point& c2, const Point& p1, double t)
+{
     double u = 1 - t;
     double b0 = u * u * u;
     double b1 = 3 * u * u * t;
@@ -67,17 +68,18 @@ Point cubic_bezier(const Point& p0, const Point& c1, const Point& c2, const Poin
     double b3 = t * t * t;
     return Point(
         b0 * p0.x + b1 * c1.x + b2 * c2.x + b3 * p1.x,
-        b0 * p0.y + b1 * c1.y + b2 * c2.y + b3 * p1.y
-    );
+        b0 * p0.y + b1 * c1.y + b2 * c2.y + b3 * p1.y);
 }
 
-std::vector<Point> cgal_bezier_smooth(const std::vector<Point>& waypoints, int samples = 15) {
-    if (waypoints.size() < 2) return waypoints;
+std::vector<Point> cgal_bezier_smooth(const std::vector<Point>& waypoints, int samples = 15)
+{
+    if(waypoints.size() < 2)
+        return waypoints;
 
     std::vector<Point> smooth_path;
     smooth_path.push_back(waypoints[0]);
 
-    for (size_t i = 0; i < waypoints.size() - 1; ++i) {
+    for(size_t i = 0; i < waypoints.size() - 1; ++i) {
         Point p0 = waypoints[i];
         Point p1 = waypoints[i + 1];
 
@@ -91,7 +93,7 @@ std::vector<Point> cgal_bezier_smooth(const std::vector<Point>& waypoints, int s
         Point c1 = p0 + tangent_in;
         Point c2 = p1 - tangent_out;
 
-        for (int j = 1; j <= samples; ++j) {
+        for(int j = 1; j <= samples; ++j) {
             double t = static_cast<double>(j) / samples;
             smooth_path.push_back(cubic_bezier(p0, c1, c2, p1, t));
         }
@@ -99,7 +101,6 @@ std::vector<Point> cgal_bezier_smooth(const std::vector<Point>& waypoints, int s
 
     return smooth_path;
 }
-
 
 // for debuging
 void export_triangles(const CDT& cdt, const std::string& filename)
@@ -450,7 +451,6 @@ CDT::Face_handle RoutingEngine::find_face(K::Point_2 p) const
     return face;
 }
 
-
 std::vector<Point>
 RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_handle>& path)
 {
@@ -496,9 +496,18 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
 
         const auto line_segment_left = portal.p2;
         const auto line_segment_right = portal.p1;
+        const auto portal_vector = line_segment_right - line_segment_left;
+        const auto portal_length = portal_vector.Norm();
         const auto line_segment_direction = (line_segment_right - line_segment_left).Normalized();
-        const auto candidate_left = line_segment_left + (line_segment_direction * radius);
-        const auto candidate_right = line_segment_right - (line_segment_direction * radius);
+        auto candidate_left = line_segment_left + (line_segment_direction * radius);
+        auto candidate_right = line_segment_right - (line_segment_direction * radius);
+
+        if(portal_length < 2.0 * radius) {
+            // Portal too small, use midpoint or original points
+            const auto midpoint = (line_segment_left + line_segment_right) * 0.5;
+            candidate_left = midpoint;
+            candidate_right = midpoint;
+        }
 
         if(triarea2d(apex, portal_right, candidate_right) <= 0.0) {
             if(apex == portal_right || triarea2d(apex, portal_left, candidate_right) > 0.0) {
@@ -534,7 +543,7 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
         }
     }
     waypoints.emplace_back(to);
-    auto smooth_waypoints =  cgal_bezier_smooth(waypoints, 5);
+    auto smooth_waypoints = cgal_bezier_smooth(waypoints, 5);
     auto reduced = pick_simple_points(smooth_waypoints, 5);
     return reduced;
 }
