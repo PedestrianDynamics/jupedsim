@@ -189,8 +189,8 @@ double addCentroidsOfLargeTriangles(CDT& cdt, double area_threshold)
 void improveTriangulation(CDT& cdt)
 {
     std::vector<Point_2> points_to_add;
-    float area_threshold = 4.0;
-    float length_threshold = 2.0;
+    float area_threshold = 16.0;
+    float length_threshold = 4.0;
     int res1, res2;
     int max_iterations = cdt.number_of_vertices();
     int count = 0;
@@ -543,7 +543,6 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
         }
     }
     waypoints.emplace_back(to);
-    auto smooth_waypoints = cgal_bezier_smooth(waypoints, 5);
-    auto reduced = pick_simple_points(smooth_waypoints, 5);
+    auto reduced = pick_simple_points(waypoints, 5);
     return reduced;
 }
