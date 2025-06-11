@@ -125,17 +125,17 @@ void export_triangles(const CDT& cdt, const std::string& filename)
     std::cout << "Exported triangles to " << filename << std::endl;
 }
 
-// Split long constraint edges
 double splitLongConstraints(CDT& cdt, double threshold)
 {
-    std::vector<Point_2> points_to_add;
+    std::set<Point_2> points_to_add;
 
-    for(auto eit = cdt.finite_edges_begin(); eit != cdt.finite_edges_end(); ++eit) {
-        if(!cdt.is_constrained(*eit))
+    for (auto eit = cdt.finite_edges_begin(); eit != cdt.finite_edges_end(); ++eit) {
+        if (!cdt.is_constrained(*eit))
             continue;
 
         auto face = eit->first;
         int index = eit->second;
+
         Point_2 p1 = face->vertex((index + 1) % 3)->point();
         Point_2 p2 = face->vertex((index + 2) % 3)->point();
 
@@ -143,15 +143,18 @@ double splitLongConstraints(CDT& cdt, double threshold)
         double dy = p2.y() - p1.y();
         double length_sq = dx * dx + dy * dy;
 
-        // Edge is too long -> add midpoint
-        if(length_sq > threshold * threshold) {
+        if (length_sq > threshold * threshold) {
             Point_2 midpoint((p1.x() + p2.x()) / 2.0, (p1.y() + p2.y()) / 2.0);
-            points_to_add.push_back(midpoint);
+            points_to_add.insert(midpoint);
         }
     }
 
-    for(const auto& point : points_to_add) {
-        cdt.insert(point);
+    for (const auto& point : points_to_add) {
+        try {
+            cdt.insert(point);
+        } catch (...) {
+            std::cerr << "Error inserting point: " << point << std::endl;
+        }
     }
 
     return points_to_add.size();
