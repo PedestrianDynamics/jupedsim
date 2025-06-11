@@ -35,6 +35,45 @@
 using Kernel = CGAL::Simple_cartesian<double>;
 using Point_2 = Kernel::Point_2;
 
+
+/// Chaikin corner‐cutting smoothing:
+/// each pass replaces each segment [P[i],P[i+1]] with two new points:
+///   Q = 0.75*P[i] + 0.25*P[i+1]
+///   R = 0.25*P[i] + 0.75*P[i+1]
+static std::vector<Point>
+chaikin_smooth(const std::vector<Point>& pts, int iterations=2) {
+    if (pts.size() < 2) return pts;
+    std::vector<Point> curr = pts;
+    for (int it = 0; it < iterations; ++it) {
+        std::vector<Point> next;
+        next.reserve(curr.size()*2);
+        // always keep the first point
+        next.push_back(curr.front());
+        for (size_t i = 0; i+1 < curr.size(); ++i) {
+            const auto& P = curr[i];
+            const auto& Q = curr[i+1];
+            // corner‐cut
+            next.emplace_back(
+              Point{
+                0.75*P.x + 0.25*Q.x,
+                0.75*P.y + 0.25*Q.y
+              }
+            );
+            next.emplace_back(
+              Point{
+                0.25*P.x + 0.75*Q.x,
+                0.25*P.y + 0.75*Q.y
+              }
+            );
+        }
+        // keep the last original point
+        next.push_back(curr.back());
+        curr.swap(next);
+    }
+    return curr;
+}
+
+
 // for debuging
 void export_triangles(const CDT& cdt, const std::string& filename)
 {
@@ -466,5 +505,6 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
         }
     }
     waypoints.emplace_back(to);
-    return waypoints;
+    auto smooth_waypoints = chaikin_smooth(waypoints, /*iterations=*/3);
+    return smooth_waypoints;
 }
