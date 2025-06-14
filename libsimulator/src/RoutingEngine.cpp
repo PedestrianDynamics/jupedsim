@@ -35,72 +35,6 @@
 using Kernel = CGAL::Simple_cartesian<double>;
 using Point_2 = Kernel::Point_2;
 
-std::vector<Point> pick_simple_points(const std::vector<Point>& smooth_path, size_t num_points)
-{
-    std::vector<Point> selected;
-
-    if(smooth_path.empty() || num_points == 0)
-        return selected;
-
-    size_t n = smooth_path.size();
-    if(num_points >= n) {
-        return smooth_path; // If asking for more points than available, return all
-    }
-
-    selected.reserve(num_points);
-
-    for(size_t i = 0; i < num_points; ++i) {
-        size_t idx =
-            static_cast<size_t>(std::round((static_cast<double>(i) / (num_points - 1)) * (n - 1)));
-        selected.push_back(smooth_path[idx]);
-    }
-
-    return selected;
-}
-
-// Cubic Bézier interpolation at t ∈ [0,1]
-Point cubic_bezier(const Point& p0, const Point& c1, const Point& c2, const Point& p1, double t)
-{
-    double u = 1 - t;
-    double b0 = u * u * u;
-    double b1 = 3 * u * u * t;
-    double b2 = 3 * u * t * t;
-    double b3 = t * t * t;
-    return Point(
-        b0 * p0.x + b1 * c1.x + b2 * c2.x + b3 * p1.x,
-        b0 * p0.y + b1 * c1.y + b2 * c2.y + b3 * p1.y);
-}
-
-std::vector<Point> cgal_bezier_smooth(const std::vector<Point>& waypoints, int samples = 15)
-{
-    if(waypoints.size() < 2)
-        return waypoints;
-
-    std::vector<Point> smooth_path;
-    smooth_path.push_back(waypoints[0]);
-
-    for(size_t i = 0; i < waypoints.size() - 1; ++i) {
-        Point p0 = waypoints[i];
-        Point p1 = waypoints[i + 1];
-
-        // Approximate control points using tangent heuristics
-        Point p_prev = (i == 0) ? p0 : waypoints[i - 1];
-        Point p_next = (i + 2 < waypoints.size()) ? waypoints[i + 2] : p1;
-
-        Point tangent_in = (p1 - p_prev) * 0.25;
-        Point tangent_out = (p_next - p0) * 0.25;
-
-        Point c1 = p0 + tangent_in;
-        Point c2 = p1 - tangent_out;
-
-        for(int j = 1; j <= samples; ++j) {
-            double t = static_cast<double>(j) / samples;
-            smooth_path.push_back(cubic_bezier(p0, c1, c2, p1, t));
-        }
-    }
-
-    return smooth_path;
-}
 
 // for debuging
 void export_triangles(const CDT& cdt, const std::string& filename)
@@ -459,22 +393,19 @@ CDT::Face_handle RoutingEngine::find_face(K::Point_2 p) const
     return face;
 }
 
+
 std::vector<Point>
 RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_handle>& path)
 {
-
-    // TODO(kkratz): Remove the 0.2m edge width adjustment and replace this with p[roper
-    // arc-paths from the "Efficient Triangulation-Based Pathfinding" publication
+  // This is the actual simple stupid funnel algorithm
+  //  https://cdn.aaai.org/AAAI/2006/AAAI06-148.pdf
+  // arc-paths from the "Efficient Triangulation-Based Pathfinding" publication
     const size_t portalCount = path.size();
     const double radius = 0.2; // Object radius
-    // This is the actual simple stupid funnel algorithm
+
     auto apex = from;
     auto portal_left = from;
     auto portal_right = from;
-
-    size_t index_apex{0};
-    size_t index_left{0};
-    size_t index_right{0};
 
     const auto get_edge = [](const auto& a, const auto& b) {
         for(int idx = 0; idx < 3; ++idx) {
@@ -501,59 +432,48 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
 
         const auto portal =
             index_portal < portalCount ? get_edge(face_from, face_to) : LineSegment(to, to);
+  
+        const auto p2 = portal.p2;
+        const auto p1 = portal.p1;
+        // Given edge: p1 to p2
+        Point edge = (p2 - p1).Normalized();
 
-        const auto line_segment_left = portal.p2;
-        const auto line_segment_right = portal.p1;
-        const auto portal_vector = line_segment_right - line_segment_left;
-        const auto portal_length = portal_vector.Norm();
-        const auto line_segment_direction = (line_segment_right - line_segment_left).Normalized();
-        auto candidate_left = line_segment_left + (line_segment_direction * radius);
-        auto candidate_right = line_segment_right - (line_segment_direction * radius);
-        if(portal_length < 2.0 * radius) {
-            const auto midpoint = (line_segment_left + line_segment_right) * 0.5;
-            waypoints.emplace_back(midpoint);
-            apex = midpoint;
-            index_apex = index_portal;
-            portal_left = apex;
-            portal_right = apex;
-            index_left = index_apex;
-            index_right = index_apex;
-            continue; // move on without normal funnel logic
-        }
+        // Use offset_p1 and offset_p2 as left/right funnel legs
+        // Efficient Triangulation-Based Pathfinding uses tangent points to circles around vertices.
+        // We use the inward normal to the edge as the offset direction.
+        Point normal = {-edge.y, edge.x};
+        Point offset_p1 = p1 - normal * radius;
+        Point offset_p2 = p2 + normal * radius;
+        const auto candidate_left = offset_p2;
+        const auto candidate_right = offset_p1;
+      
         if(triarea2d(apex, portal_right, candidate_right) <= 0.0) {
             if(apex == portal_right || triarea2d(apex, portal_left, candidate_right) > 0.0) {
                 portal_right = candidate_right;
-                index_right = index_portal;
             } else {
                 waypoints.emplace_back(portal_left);
                 apex = portal_left;
-                index_apex = index_left;
                 portal_left = apex;
                 portal_right = apex;
-                index_left = index_apex;
-                index_right = index_apex;
-                index_portal = index_apex;
                 continue;
             }
         }
         if(triarea2d(apex, portal_left, candidate_left) >= 0.0) {
             if(apex == portal_left || triarea2d(apex, portal_right, candidate_left) < 0.0) {
                 portal_left = candidate_left;
-                index_left = index_portal;
             } else {
                 waypoints.emplace_back(portal_right);
                 apex = portal_right;
-                index_apex = index_right;
                 portal_left = apex;
                 portal_right = apex;
-                index_left = index_apex;
-                index_right = index_apex;
-                index_portal = index_apex;
                 continue;
             }
         }
     }
-    waypoints.emplace_back(to);
-    auto reduced = pick_simple_points(waypoints, 5);
+
+    if (waypoints.empty() || waypoints.back() != to) {
+      waypoints.emplace_back(to);
+    }
+    
     return waypoints;
 }
