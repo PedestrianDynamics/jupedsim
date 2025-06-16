@@ -251,7 +251,7 @@ setup(
     ext_modules=[CMakeExtension("python_bindings_jupedsim")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
-    python_requires=">=3.10,<3.14",
+    python_requires=">=3.10,!=3.13.4,<3.14",
     packages=[
         "jupedsim",
         "jupedsim.models",
