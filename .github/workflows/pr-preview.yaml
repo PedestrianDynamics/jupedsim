@@ -12,7 +12,7 @@ jobs:
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     outputs:
-      doc-artefact: ${{ steps.upload.outputs.doc-artefact }}
+      artifact-id: ${{ steps.archive.outputs.artifact-id }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,9 +30,10 @@ jobs:
           python3 -m pip install -r docs/requirements.txt
           sphinx-build -T -E -d doctree -b html docs/source docs/build -j $(nproc)
       - name: Upload documentation as artifacts
+        id: archive
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.upload.outputs.doc-artefact }} 
+          name: documentation
           path: docs/build/
   deploy-doc:
     if: github.event.action != 'closed'
@@ -46,18 +47,20 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.build-doc.outputs.doc-artefact }}
+          artifact-ids: ${{ needs.build-doc.outputs.artifact-id }}
+          path: ${{ runner.temp }}/html
+          merge-multiple: true
       - name: Stage preview into working tree
         run: |
           rm -rf "$PREVIEW_DIR"
           mkdir -p "$(dirname "$PREVIEW_DIR")"
-          cp -r docs/build/. "$PREVIEW_DIR/"
+          cp -r ${{ runner.temp }}/html/. "$PREVIEW_DIR/"
       - name: Commit preview to gh-pages
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           branch: gh-pages
           commit_message: "docs: preview for PR #${{ github.event.pull_request.number }}"
-          file_pattern: ${{ env.PREVIEW_DIR }}/*
+          file_pattern: ${{ env.PREVIEW_DIR }}/**
       - name: Update PR body with preview link
         uses: actions/github-script@v7
         with:

@@ -1,0 +1,57 @@
+# .github/actions/build-docs/action.yml
+name: 'Build Documentation'
+description: 'Builds Sphinx documentation for jupedsim'
+
+inputs:
+  python-version:
+    description: 'Python version to use'
+    required: true
+  docs-requirements-path:
+    description: 'Path to documentation requirements file'
+    required: true
+  docs-source-path:
+    description: 'Path to documentation source directory'
+    required: true
+  docs-build-path:
+    description: 'Path to documentation build output directory'
+    required: true
+  retention-days:
+    description: 'Number of days to retain the artifact'
+    required: true
+
+outputs:
+  artifact-id:
+    description: 'ID of the uploaded documentation artifact'
+    value: ${{ steps.upload-docs.outputs.artifact-id }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install jupedsim
+      shell: bash
+      run: |
+        python3 -m pip install .
+
+    - name: Install documentation dependencies
+      shell: bash
+      run: |
+        python3 -m pip install -r ${{ inputs.docs-requirements-path }}
+
+    - name: Build Documentation
+      shell: bash
+      run: |
+        sphinx-build -T -E -b html ${{ inputs.docs-source-path }} ${{ inputs.docs-build-path }} -j $(nproc)
+
+    - name: Store documentation artifact
+      id: upload-docs
+      uses: actions/upload-artifact@v4
+      with:
+        name: documentation-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ inputs.docs-build-path }}/
+        retention-days: ${{ inputs.retention-days }}
+        if-no-files-found: error
