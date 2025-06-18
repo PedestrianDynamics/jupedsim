@@ -7,6 +7,12 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import datetime
+import logging
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "_scripts")))
+from generate_bibtex import get_latest_jupedsim_bibtex
 
 project = "JuPedSim"
 copyright = (
@@ -16,6 +22,8 @@ copyright = (
 import jupedsim
 
 version = "v" + jupedsim.__version__
+
+logging.info(f"Create documentation for JuPedSim {version}")
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -155,3 +163,11 @@ html_sidebars = {
 
 # -- Options for EPUB output
 epub_show_urls = "footnote"
+
+# -- Automatic fetch citation info from zenodo --------------------------------
+bibtex = get_latest_jupedsim_bibtex(version)
+logging.info(f"Bibtex fetched successfully:\n{bibtex}")
+output_file = "citation/jupedsim_bibtex.bib"
+
+with open(output_file, "w") as f:
+    f.write(bibtex)
