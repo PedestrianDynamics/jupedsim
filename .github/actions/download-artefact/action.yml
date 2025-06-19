@@ -1,0 +1,49 @@
+name: 'Download Triggering Workflow Artifact'
+description: 'Downloads an artifact from the workflow that triggered this workflow'
+inputs:
+  artifact-id:
+    description: 'ID of the artifact to download'
+    required: true
+  triggering-run-id:
+    description: 'Run ID of the triggering workflow'
+    required: true
+  download-path:
+    description: 'Path to download and extract the artifact'
+    required: false
+    default: './downloaded-artifact'
+
+outputs:
+  download-path:
+    description: 'Path where the artifact was extracted'
+    value: ${{ steps.download.outputs.download-path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Download artifact
+      id: download
+      shell: bash
+      env:
+        ARTIFACT_ID: ${{ inputs.artifact-id }}
+        RUN_ID: ${{ inputs.triggering-run-id }}
+        DOWNLOAD_PATH: ${{ inputs.download-path }}
+      run: |
+        echo "Downloading artifact ID '$ARTIFACT_ID' from run $RUN_ID"
+
+        # Create download directory
+        mkdir -p "$DOWNLOAD_PATH"
+
+        # Download the artifact using GitHub CLI with artifact ID
+        gh api repos/"$GITHUB_REPOSITORY"/actions/artifacts/"$ARTIFACT_ID"/zip \
+          --output artifact.zip
+
+        # Extract the downloaded artifact
+        unzip -q artifact.zip -d "$DOWNLOAD_PATH"
+        rm artifact.zip
+
+        echo "Artifact downloaded to: $DOWNLOAD_PATH"
+        echo "download-path=$DOWNLOAD_PATH" >> $GITHUB_OUTPUT
+
+        # List downloaded contents for verification
+        echo "Downloaded files:"
+        ls -la "$DOWNLOAD_PATH"
