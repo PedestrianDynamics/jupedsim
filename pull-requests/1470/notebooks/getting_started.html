@@ -1,0 +1,827 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="../_static/logo.png" sizes="482x536" rel="icon" type="image/png">
+    <title>Getting started &#8212; JuPedSim  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=d742c9ce" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/getting_started';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v1.3.0';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Concepts" href="../concepts/index.html" />
+    <link rel="prev" title="JuPedSim" href="../index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../_static/jupedsim.svg" class="logo__image only-light" alt="JuPedSim  documentation - Home"/>
+    <script>document.write(`<img src="../_static/jupedsim.svg" class="logo__image only-dark" alt="JuPedSim  documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PedestrianDynamics/jupedsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/jupedsim/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://img.shields.io/pypi/v/jupedsim" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.5281/zenodo.1293771" title="DOI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1293771.svg" class="icon-link-image" alt="DOI"/></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Getting started</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../concepts/index.html">Concepts</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../concepts/geometry.html">Geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../concepts/routing.html">Routing</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../pedestrian_models/index.html">Pedestrian Models</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="index.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="model-comparison.html">Comparative Analysis of Pedestrian Dynamics Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="corner.html">Movement around Corners</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="double-bottleneck.html">Movement through Bottlenecks</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="journey.html">How to work with Journeys</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="lane-formation.html">Lane formation in bi-directional flow</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="motivation.html">Modelling Motivation</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="queues_waiting.html">Waiting in Queues</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="routing.html">How Route Choice can Impact Evacuation Times</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="single-file.html">Simulating Single-File Movement</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../disclaimer.html">Disclaimer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/jupedsim/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citation/citation.html">Cite JuPedSim</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script></div>
+      
+        <div class="header-article-item"><button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Getting started</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#let-s-simulate-an-experiment">Let’s simulate an experiment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-the-simulation-geometry">Setting up the simulation geometry</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#distribute-the-agents-in-the-geometry">Distribute the agents in the geometry</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#collision-free-speed-model">Collision-free speed model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#comparison">Comparison</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="getting-started">
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading">#</a></h1>
+<p>Welcome to the getting started guide of <em>JuPedSim</em>, we want to guide you through the first steps for setting up a simulation.</p>
+<p>First things first, to use <em>JuPedSim</em> install it via:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>jupedsim
+</pre></div>
+</div>
+<p>Now, you are ready to set up your first simulation with <em>JuPedSim</em>.</p>
+<p>To access this Jupyter Notebook on your local machine, you can download it
+<a class="reference download internal" download="" href="../_downloads/efda07670258b4331c6c853db51b3cfb/getting_started.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">here</span></code></a> along with the accompanying data file <a class="reference download internal" download="" href="../_downloads/46bd9974e8e21d7ef412fec395a358d3/040_c_56_h-.txt"><code class="xref download docutils literal notranslate"><span class="pre">here</span></code></a>.</p>
+<section id="let-s-simulate-an-experiment">
+<h2>Let’s simulate an experiment<a class="headerlink" href="#let-s-simulate-an-experiment" title="Link to this heading">#</a></h2>
+<p>This is a bottleneck experiment conducted at the University of Wuppertal in 2018.
+You can see the basic setup of the experiment in the picture below:</p>
+<figure class="align-center">
+<a class="reference internal image-reference" href="../_images/040_c_56_h-.png"><img alt="../_images/040_c_56_h-.png" src="../_images/040_c_56_h-.png" style="width: 400px;" />
+</a>
+</figure>
+<p>We aim to replicate the bottleneck scenario described in the experimental series linked to this <a class="reference external" href="https://doi.org/10.34735/ped.2018.1">study</a> and detailed in the publication <a class="reference external" href="https://doi.org/10.1098/rsif.2019.0871">“Crowds in front of bottlenecks at entrances from the perspective of physics and social psychology”</a>.</p>
+<p>Our objective in this guide is to simulate this scenario using <em>JuPedSim</em>.</p>
+<p>If you use <em>JuPedSim</em> in your work, please cite it using the following information from Zenodo:</p>
+<p><a class="reference external" href="https://doi.org/10.5281/zenodo.1293771"><img alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/1293771.svg" /></a></p>
+</section>
+<section id="setting-up-the-simulation-geometry">
+<h2>Setting up the simulation geometry<a class="headerlink" href="#setting-up-the-simulation-geometry" title="Link to this heading">#</a></h2>
+<p>The first thing to consider when setting up a simulation is the area where the agents can move.
+In this scenario, we have a rectangular room with two obstacles that form a bottleneck, as displayed above.
+These obstacles are excluded areas from the simulation, which means that agents can not move inside these obstacles.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">shapely</span>
+
+<span class="n">geometry</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+    <span class="c1"># complete area</span>
+    <span class="p">[</span>
+        <span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span>
+        <span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+        <span class="p">(</span><span class="o">-</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+        <span class="p">(</span><span class="o">-</span><span class="mf">3.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="n">holes</span><span class="o">=</span><span class="p">[</span>
+        <span class="c1"># left barrier</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="o">-</span><span class="mf">0.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.1</span><span class="p">),</span>
+            <span class="p">(</span><span class="o">-</span><span class="mf">0.25</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.1</span><span class="p">),</span>
+            <span class="p">(</span><span class="o">-</span><span class="mf">0.25</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">),</span>
+            <span class="p">(</span><span class="o">-</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+            <span class="p">(</span><span class="o">-</span><span class="mf">2.8</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+            <span class="p">(</span><span class="o">-</span><span class="mf">2.8</span><span class="p">,</span> <span class="mf">6.7</span><span class="p">),</span>
+            <span class="p">(</span><span class="o">-</span><span class="mf">3.05</span><span class="p">,</span> <span class="mf">6.7</span><span class="p">),</span>
+            <span class="p">(</span><span class="o">-</span><span class="mf">3.05</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">),</span>
+            <span class="p">(</span><span class="o">-</span><span class="mf">0.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">),</span>
+            <span class="p">(</span><span class="o">-</span><span class="mf">0.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="c1"># right barrier</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="mf">0.25</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.1</span><span class="p">),</span>
+            <span class="p">(</span><span class="mf">0.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.1</span><span class="p">),</span>
+            <span class="p">(</span><span class="mf">0.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">),</span>
+            <span class="p">(</span><span class="mf">3.05</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">),</span>
+            <span class="p">(</span><span class="mf">3.05</span><span class="p">,</span> <span class="mf">6.7</span><span class="p">),</span>
+            <span class="p">(</span><span class="mf">2.8</span><span class="p">,</span> <span class="mf">6.7</span><span class="p">),</span>
+            <span class="p">(</span><span class="mf">2.8</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+            <span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+            <span class="p">(</span><span class="mf">0.25</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">),</span>
+            <span class="p">(</span><span class="mf">0.25</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.1</span><span class="p">),</span>
+        <span class="p">],</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>This leads to the following setup:</p>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<img alt="../_images/a12ced69b0eaf34802759843f97ab1196807128c700a533d91bdca4ae6552dbd.png" src="../_images/a12ced69b0eaf34802759843f97ab1196807128c700a533d91bdca4ae6552dbd.png" />
+</div>
+</div>
+<p>In this geometric setup, we now need to define, where the agents can exit the simulation, e.g., where their target is located.</p>
+<p>For this scenario, the exit is at the end of the bottleneck.
+If we would put it at the beginning of the bottleneck, the agents would disappear, hence, they wouldn’t be an obstacle for following agents.</p>
+<p>An exit can be defined as:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">exit_polygon</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+    <span class="p">[(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.9</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.9</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.7</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.7</span><span class="p">)]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The complete setup would then look like, where the exit is shown in red:</p>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<img alt="../_images/1ed901bd4dcca8e6cd89c4e63fcf78aaf53c40ffd9ba525867fbed3864be40fc.png" src="../_images/1ed901bd4dcca8e6cd89c4e63fcf78aaf53c40ffd9ba525867fbed3864be40fc.png" />
+</div>
+</div>
+</section>
+<section id="distribute-the-agents-in-the-geometry">
+<h2>Distribute the agents in the geometry<a class="headerlink" href="#distribute-the-agents-in-the-geometry" title="Link to this heading">#</a></h2>
+<p>The next step is to provide the initial positions of the agents in the simulation.
+<em>JuPedSim</em> provides different helper functions to automatically distribute the agents:</p>
+<ul class="simple">
+<li><p>distribute a given number of agents inside a polygon (see <a class="reference internal" href="../api/jupedsim/index.html#jupedsim.distribute_by_number" title="jupedsim.distribute_by_number"><code class="xref py py-func docutils literal notranslate"><span class="pre">distribute_by_number()</span></code></a>)</p></li>
+<li><p>distribute agents by a given density inside a polygon (see <a class="reference internal" href="../api/jupedsim/index.html#jupedsim.distribute_by_density" title="jupedsim.distribute_by_density"><code class="xref py py-func docutils literal notranslate"><span class="pre">distribute_by_density()</span></code></a>)</p></li>
+<li><p>… (more methods can be found in the <a class="reference internal" href="../api/jupedsim/index.html"><span class="doc std std-doc">API reference</span></a>, the names start with <code class="docutils literal notranslate"><span class="pre">distribute</span></code>)</p></li>
+</ul>
+<p>However, as we want to compare our simulation to the real-life experimental data, the agents in the simulation will start at the same positions as the pedestrians in the experiment.
+So we load the trajectory from the experiment and extract the locations at frame 0, which is the start of the experiment.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span>
+
+<span class="n">experiment_data</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+    <span class="s2">&quot;demo-data/bottleneck/040_c_56_h-.txt&quot;</span><span class="p">,</span>
+    <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;#&quot;</span><span class="p">,</span>
+    <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;frame&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">start_positions</span> <span class="o">=</span> <span class="n">experiment_data</span><span class="p">[</span><span class="n">experiment_data</span><span class="o">.</span><span class="n">frame</span> <span class="o">==</span> <span class="mi">0</span><span class="p">][[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="collision-free-speed-model">
+<h2>Collision-free speed model<a class="headerlink" href="#collision-free-speed-model" title="Link to this heading">#</a></h2>
+<p>At first, we want to run the simulation with the Collision-free speed model.
+In <a class="reference external" href="https://arxiv.org/abs/1512.05597">“Collision-free speed model for pedestrian dynamics”</a> you can find the complete description of the model.
+To use it in <em>JuPedSim</em> we need to state, that we will use this model in the creation of the simulation object.</p>
+<p>We also need to provide the previously defined geometry and the output file, where the resulting trajectories will be stored.
+Here, we will use the built-in <a class="reference internal" href="../api/jupedsim/index.html#jupedsim.SqliteTrajectoryWriter" title="jupedsim.SqliteTrajectoryWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">SqliteTrajectoryWriter</span></code></a>, which will write the results as a <code class="docutils literal notranslate"><span class="pre">sqlite</span></code>-database.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jupedsim</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jps</span>
+
+<span class="n">trajectory_file</span> <span class="o">=</span> <span class="s2">&quot;bottleneck_cfsm.sqlite&quot;</span>
+<span class="n">simulation_cfsm</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModel</span><span class="p">(),</span>
+    <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span>
+    <span class="n">trajectory_writer</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">SqliteTrajectoryWriter</span><span class="p">(</span>
+        <span class="n">output_file</span><span class="o">=</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">trajectory_file</span><span class="p">)</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>After we defined the simulation we need to add a goal, which the agents should target.
+As we already defined the exit polygon above, we can add it to the simulation as a stage.
+After adding the exit to the simulation, we need to create a journey containing that exit.
+Journeys are used to manage more complex routing situation, an explanation of the underlying routing concept can be found <a class="reference internal" href="../concepts/routing.html"><span class="doc std std-doc">here</span></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">exit_id</span> <span class="o">=</span> <span class="n">simulation_cfsm</span><span class="o">.</span><span class="n">add_exit_stage</span><span class="p">(</span><span class="n">exit_polygon</span><span class="p">)</span>
+<span class="n">journey</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">JourneyDescription</span><span class="p">([</span><span class="n">exit_id</span><span class="p">])</span>
+<span class="n">journey_id</span> <span class="o">=</span> <span class="n">simulation_cfsm</span><span class="o">.</span><span class="n">add_journey</span><span class="p">(</span><span class="n">journey</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now we have the setup for the simulation.
+But there are no agents in simulation yet, so we need to add them.</p>
+<p>Before adding a simulation we need to define the agent specific parameters.
+In this example, all the agents will get the same parameters.
+We will now re-use the above extracted start positions of the agents.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">start_positions</span><span class="p">:</span>
+    <span class="n">simulation_cfsm</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span>
+        <span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelAgentParameters</span><span class="p">(</span>
+            <span class="n">journey_id</span><span class="o">=</span><span class="n">journey_id</span><span class="p">,</span>
+            <span class="n">stage_id</span><span class="o">=</span><span class="n">exit_id</span><span class="p">,</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span>
+            <span class="n">radius</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>After, we have added the agents.
+We’ve got everything needed to start a simulation.
+Here, we will iterate, as long as there are agents inside the simulation, e.g., some agents have not yet reached the exit.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="p">(</span>
+    <span class="n">simulation_cfsm</span><span class="o">.</span><span class="n">agent_count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="ow">and</span> <span class="n">simulation_cfsm</span><span class="o">.</span><span class="n">iteration_count</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">2000</span>
+<span class="p">):</span>
+    <span class="n">simulation_cfsm</span><span class="o">.</span><span class="n">iterate</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now, every agent has left the simulation.
+Let’s have a look at the result:</p>
+<div class="cell tag_hide-input docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell source</span>
+<span class="expanded">Hide code cell source</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pedpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.internal.notebook_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">animate</span><span class="p">,</span> <span class="n">read_sqlite_file</span>
+
+<span class="n">trajectory_data</span><span class="p">,</span> <span class="n">walkable_area</span> <span class="o">=</span> <span class="n">read_sqlite_file</span><span class="p">(</span><span class="n">trajectory_file</span><span class="p">)</span>
+<span class="n">speed</span> <span class="o">=</span> <span class="n">pedpy</span><span class="o">.</span><span class="n">compute_individual_speed</span><span class="p">(</span><span class="n">traj_data</span><span class="o">=</span><span class="n">trajectory_data</span><span class="p">,</span> <span class="n">frame_step</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">speed</span> <span class="o">=</span> <span class="n">speed</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">trajectory_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;frame&quot;</span><span class="p">],</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
+
+<span class="n">animate</span><span class="p">(</span><span class="n">trajectory_data</span><span class="p">,</span> <span class="n">walkable_area</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</details>
+<div class="cell_output docutils container">
+</div>
+</div>
+<p>We have set up a first simple simulation with <em>JuPedSim</em>.
+The results are saved in trajectory files, which can be used for further analyzes.</p>
+<p>For more examples, how to set up simulations have a look at the following notebooks:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="corner.html"><span class="doc std std-doc">Movement around corners</span></a></p></li>
+<li><p><a class="reference internal" href="double-bottleneck.html"><span class="doc std std-doc">Movement through bottlenecks</span></a></p></li>
+<li><p><a class="reference internal" href="journey.html"><span class="doc std std-doc">How to work with Journeys</span></a></p></li>
+<li><p><a class="reference internal" href="lane-formation.html"><span class="doc std std-doc">Lane formation in bi-directional flow</span></a></p></li>
+<li><p><a class="reference internal" href="motivation.html"><span class="doc std std-doc">Modelling Motivation</span></a></p></li>
+<li><p><a class="reference internal" href="queues_waiting.html"><span class="doc std std-doc">Waiting in Queues</span></a></p></li>
+<li><p><a class="reference internal" href="../concepts/routing.html#routing"><span class="std std-ref">How Route Choice can Impact Evacuation Times</span></a></p></li>
+<li><p><a class="reference internal" href="single-file.html"><span class="doc std std-doc">Simulating Single-File Movement</span></a></p></li>
+</ul>
+<p>We would love to hear some <a class="reference external" href="https://www.github.com/PedestrianDynamics/jupedsim/discussions">feedback</a> from you!</p>
+</section>
+<section id="comparison">
+<h2>Comparison<a class="headerlink" href="#comparison" title="Link to this heading">#</a></h2>
+<p>After simulating a bottleneck scenario with the initial positions as in the experimental setup, we now want to compare the simulation results with the experiment results.
+The first step here, is to have a look at the trajectories of both:</p>
+<div class="cell tag_hide-input docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell source</span>
+<span class="expanded">Hide code cell source</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pedpy</span>
+
+<span class="n">experimental_trajectories</span> <span class="o">=</span> <span class="n">pedpy</span><span class="o">.</span><span class="n">load_trajectory</span><span class="p">(</span>
+    <span class="n">trajectory_file</span><span class="o">=</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;demo-data/bottleneck/040_c_56_h-.txt&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">cfsm_data</span><span class="p">,</span> <span class="n">walkable_area</span> <span class="o">=</span> <span class="n">read_sqlite_file</span><span class="p">(</span><span class="n">trajectory_file</span><span class="p">)</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;experimental data&quot;</span><span class="p">)</span>
+<span class="n">pedpy</span><span class="o">.</span><span class="n">plot_trajectories</span><span class="p">(</span>
+    <span class="n">traj</span><span class="o">=</span><span class="n">experimental_trajectories</span><span class="p">,</span>
+    <span class="n">axes</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span>
+    <span class="n">walkable_area</span><span class="o">=</span><span class="n">pedpy</span><span class="o">.</span><span class="n">WalkableArea</span><span class="p">(</span><span class="n">geometry</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Collision free speed model&quot;</span><span class="p">)</span>
+<span class="n">pedpy</span><span class="o">.</span><span class="n">plot_trajectories</span><span class="p">(</span>
+    <span class="n">traj</span><span class="o">=</span><span class="n">cfsm_data</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">ax2</span><span class="p">,</span> <span class="n">walkable_area</span><span class="o">=</span><span class="n">pedpy</span><span class="o">.</span><span class="n">WalkableArea</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</details>
+<div class="cell_output docutils container">
+<img alt="../_images/a87bf67053b306af4487de43e7b45bd9b6503dac1ad4b6e91033de0ee256974e.png" src="../_images/a87bf67053b306af4487de43e7b45bd9b6503dac1ad4b6e91033de0ee256974e.png" />
+</div>
+</div>
+<p>But we do not only want to have a qualitative comparision, but also a quantitive one.
+We will use <a class="reference external" href="https://pedpy.readthedocs.io">PedPy</a> for this analysis, it is a Python library designed for analysing pedestrian movement data.</p>
+<p>So, we want to compare the flow of the data sets at the bottleneck.
+First, we create a measurement line at the beginning of the bottleneck:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pedpy</span>
+
+<span class="n">measurement_line</span> <span class="o">=</span> <span class="n">pedpy</span><span class="o">.</span><span class="n">MeasurementLine</span><span class="p">([(</span><span class="mf">0.35</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.35</span><span class="p">,</span> <span class="mi">0</span><span class="p">)])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell tag_hide-input docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell source</span>
+<span class="expanded">Hide code cell source</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pedpy</span>
+
+<span class="n">pedpy</span><span class="o">.</span><span class="n">plot_measurement_setup</span><span class="p">(</span>
+    <span class="n">walkable_area</span><span class="o">=</span><span class="n">walkable_area</span><span class="p">,</span>
+    <span class="n">measurement_lines</span><span class="o">=</span><span class="p">[</span><span class="n">measurement_line</span><span class="p">],</span>
+    <span class="n">ml_color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+    <span class="n">ml_width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</details>
+<div class="cell_output docutils container">
+<img alt="../_images/8e4c5a724f3ca6adc75e7067c1e9ebc3a6f716e857e598aabb136eb2cbee5905.png" src="../_images/8e4c5a724f3ca6adc75e7067c1e9ebc3a6f716e857e598aabb136eb2cbee5905.png" />
+</div>
+</div>
+<p>For this line we can then compute the flow:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pedpy</span>
+
+<span class="n">nt_experiment</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">pedpy</span><span class="o">.</span><span class="n">compute_n_t</span><span class="p">(</span>
+    <span class="n">traj_data</span><span class="o">=</span><span class="n">experimental_trajectories</span><span class="p">,</span>
+    <span class="n">measurement_line</span><span class="o">=</span><span class="n">measurement_line</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">nt_cfsm</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">pedpy</span><span class="o">.</span><span class="n">compute_n_t</span><span class="p">(</span>
+    <span class="n">traj_data</span><span class="o">=</span><span class="n">cfsm_data</span><span class="p">,</span>
+    <span class="n">measurement_line</span><span class="o">=</span><span class="n">measurement_line</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The results can be seen here:</p>
+<div class="cell tag_hide-input docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell source</span>
+<span class="expanded">Hide code cell source</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;N-t&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">nt_experiment</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">],</span>
+    <span class="n">nt_experiment</span><span class="p">[</span><span class="s2">&quot;cumulative_pedestrians&quot;</span><span class="p">],</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;experiment&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">nt_cfsm</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">],</span> <span class="n">nt_cfsm</span><span class="p">[</span><span class="s2">&quot;cumulative_pedestrians&quot;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;cfsm&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;t / s&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;# pedestrians&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</details>
+<div class="cell_output docutils container">
+<img alt="../_images/ce11e83888b7ae7609fa5bfc6c2cbc9051d31d74e776381b05fe9b7986ddc233.png" src="../_images/ce11e83888b7ae7609fa5bfc6c2cbc9051d31d74e776381b05fe9b7986ddc233.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">JuPedSim</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../concepts/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Concepts</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#let-s-simulate-an-experiment">Let’s simulate an experiment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-the-simulation-geometry">Setting up the simulation geometry</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#distribute-the-agents-in-the-geometry">Distribute the agents in the geometry</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#collision-free-speed-model">Collision-free speed model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#comparison">Comparison</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Author name not set
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, Forschungszentrum Jülich GmbH, IAS-7.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
