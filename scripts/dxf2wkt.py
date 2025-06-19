@@ -1,13 +1,13 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
+import json
 import logging
 import pathlib
 from pathlib import Path
 from typing import List, Optional
-import json
+
 import ezdxf
 import geopandas as gpd
 import matplotlib.patches as mpatches
-from shapely.geometry.base import BaseGeometry
 import matplotlib.pyplot as plt
 import numpy as np
 import shapely
@@ -26,6 +26,7 @@ from shapely import (
     polygonize,
     to_wkt,
 )
+from shapely.geometry.base import BaseGeometry
 from shapely.ops import unary_union
 
 logging.getLogger("markdown_it").setLevel(logging.WARNING)
@@ -869,16 +870,6 @@ def plot_interactive(geometry, title="Interactive Geometry Viewer"):
     ax.set_xlabel("X [m]")
     ax.set_ylabel("Y [m]")
 
-    # Add check buttons for visibility toggles
-    check_labels = [
-        "Walkable",
-        "Exits",
-        "Distributions",
-        "Waypoints",
-        "Journeys",
-    ]
-    check_defaults = [True, True, True, True, True]
-
     # Filter out empty categories
     active_labels = []
     active_defaults = []
@@ -1170,11 +1161,11 @@ def clearance_heatmap(
     ),
 ):
     """Visualize minimum clearance in walkable areas using a color-coded heatmap."""
-    import numpy as np
-    from shapely.geometry import Point
-    from shapely import wkt
-    import matplotlib.pyplot as plt
     import matplotlib.cm as cm
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from shapely import wkt
+    from shapely.geometry import Point
 
     if input.suffix.lower() != ".wkt":
         console.print(
