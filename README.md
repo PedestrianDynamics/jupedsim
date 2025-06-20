@@ -107,6 +107,9 @@ source ./environment
 The last line in the above description will populate the python path with the
 location of our python code and the native library.
 
+> [!NOTE]
+>  JuPedSim does not build against Python 3.13.4 on Windows.
+
 > [!WARNING]
 >
 > When sourcing `./environment` from the build folder you need to ensure JuPedSim
