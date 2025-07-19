@@ -29,6 +29,9 @@ from shapely import (
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import unary_union
 
+
+from math import isclose
+
 logging.getLogger("markdown_it").setLevel(logging.WARNING)
 logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.DEBUG)
 logging.getLogger("ezdxf").setLevel(logging.WARNING)
@@ -196,25 +199,38 @@ def multipolygon_to_list(multipolygon: shapely.MultiPolygon):
     return [poly for poly in multipolygon.geoms]
 
 
-def polyline_to_linestring(polyline):
-    """Convert an entity with dxftype polyline to a shapely Linestring."""
-    points = []
-    for point in polyline.get_points():
-        points.append([point[0], point[1]])
+def extract_coords(polyline):
+    if polyline.dxftype() == "LWPOLYLINE":
+        return [(pt[0], pt[1]) for pt in polyline.get_points()]
+    elif polyline.dxftype() == "POLYLINE":
+        return [(v.dxf.location.x, v.dxf.location.y) for v in polyline.vertices]
+    return []
 
-    # if the polyline is closed this resembles a polygon
-    # to create a closed shapely linestring the last point must correspond to
-    # the first point
-    if polyline.closed:
-        points.append(points[0])
+
+def polyline_to_linestring(polyline):
+    """Convert an entity with dxftype POLYLINE or LWPOLYLINE to a shapely LineString."""
+
+    points = extract_coords(polyline)
+    if not points:
+        raise TypeError(f"Unsupported entity type: {polyline.dxftype()}")
+
+    if polyline.dxftype() == "LWPOLYLINE":
+        is_closed = polyline.closed
+    elif polyline.dxftype() == "POLYLINE":
+        is_closed = polyline.is_closed
+    else:
+        raise TypeError(f"Unsupported entity type: {polyline.dxftype()}")
+
+    if is_closed:
+        if points and (points[0] != points[-1]):
+            points.append(points[0])
+
     return LineString(points)
 
 
 def polyline_to_polygon(polyline):
-    """Convert an entity with dxftype polyline to a shapely Polygon."""
-    points = []
-    for point in polyline.get_points():
-        points.append([point[0], point[1]])
+    """Convert an entity with dxftype polyline or lwpolyline to a shapely Polygon."""
+    points = extract_coords(polyline)
 
     if len(points) < 3:
         logging.error(
@@ -360,6 +376,14 @@ def validate_exits_and_distributions(
         )
 
 
+def is_ring_closed(coords, tol=1e-6):
+    if not coords:
+        return False
+    x0, y0 = coords[0]
+    x1, y1 = coords[-1]
+    return isclose(x0, x1, abs_tol=tol) and isclose(y0, y1, abs_tol=tol)
+
+
 def parse_dxf_file(
     dxf_path: pathlib.Path,
     outer_line_layer: str,
@@ -429,19 +453,29 @@ def parse_dxf_file(
 
     # Iterate over all entities in the model
     for entity in msp:
-        if entity.dxftype() == "LWPOLYLINE":
-            if not entity.closed and (
-                entity.dxf.layer in hole_layers
-                or entity.dxf.layer in exit_layers
-                or entity.dxf.layer in distribution_layers
-                or outer_line_layer in entity.dxf.layer
-            ):
-                logging.error(
-                    f"There is a Polygon in layer <{entity.dxf.layer}> "
-                    f"that is not closed. This may cause issues "
-                    f"creating the polygon."
-                )
-                points = [(p[0], p[1]) for p in entity.get_points()]
+        if entity.dxftype() in ["LWPOLYLINE", "POLYLINE"]:
+            coords = extract_coords(entity)
+            is_closed_flag = (
+                entity.closed
+                if entity.dxftype() == "LWPOLYLINE"
+                else entity.is_closed
+            )
+
+            is_closed_geom = is_ring_closed(coords)
+            if not (is_closed_flag or is_closed_geom):
+                if (
+                    entity.dxf.layer in hole_layers
+                    or entity.dxf.layer in exit_layers
+                    or entity.dxf.layer in distribution_layers
+                    or outer_line_layer in entity.dxf.layer
+                ):
+                    logging.error(
+                        f"There is a Polygon in layer <{entity.dxf.layer}> "
+                        f"that is not closed. This may cause issues "
+                        f"creating the polygon."
+                    )
+
+                points = extract_coords(entity)
                 shape = LineString(points)
                 logging.error(shape)
                 logging.error("-" * 50)
@@ -467,7 +501,7 @@ def parse_dxf_file(
                 journey_layer in entity.dxf.layer
                 for journey_layer in journey_layers
             ):
-                coords = [(p[0], p[1]) for p in entity.get_points()]
+                coords = extract_coords(entity)
                 if len(coords) >= 2:
                     journeys.append(LineString(coords))
 
@@ -516,9 +550,23 @@ def parse_dxf_file(
             except Exception as e:
                 coords = f"Could not extract coordinates: {e}"
 
-            logging.warning(
-                f"Skipped {entity.dxftype()} at ({coords[0]:.2f}, {coords[1]:.2f})"
-            )
+            # Fix the logging warning to handle string coords properly
+            if coords is not None:
+                if isinstance(coords, str):
+                    logging.warning(f"Skipped {entity.dxftype()}: {coords}")
+                else:
+                    try:
+                        logging.warning(
+                            f"Skipped {entity.dxftype()} at ({coords[0]:.2f}, {coords[1]:.2f})"
+                        )
+                    except (IndexError, TypeError):
+                        logging.warning(
+                            f"Skipped {entity.dxftype()} at {coords}"
+                        )
+            else:
+                logging.warning(
+                    f"Skipped {entity.dxftype()} - no coordinates found"
+                )
 
     # create a polygon from all outer lines
     outer_polygons = []
@@ -574,7 +622,6 @@ def parse_dxf_file(
 
     # create new Polygon with exits
     simple_exits = polygonize(simple_exits)
-
     # separate simple and not simple distribution
     simple_distributions = []
     other_distributions = []
@@ -1273,7 +1320,7 @@ def make_journeys(
             if entity.dxftype() == "LWPOLYLINE" and any(
                 layer in entity.dxf.layer for layer in layers
             ):
-                coords = [(p[0], p[1]) for p in entity.get_points()]
+                coords = extract_coords(entity)
                 if len(coords) >= 3:
                     poly = Polygon(coords)
                     if poly.is_valid:
@@ -1311,7 +1358,8 @@ def make_journeys(
             ):
                 coords = []
                 if entity.dxftype() == "LWPOLYLINE":
-                    coords = [(p[0], p[1]) for p in entity.get_points()]
+                    coords = extract_coords(entity)
+
                 elif entity.dxftype() == "LINE":
                     start = entity.dxf.start
                     end = entity.dxf.end
