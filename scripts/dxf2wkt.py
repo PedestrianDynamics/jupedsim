@@ -475,13 +475,13 @@ def parse_dxf_file(
                         f"creating the polygon."
                     )
 
-                points = extract_coords(entity)
-                shape = LineString(points)
-                logging.error(shape)
-                logging.error("-" * 50)
-                raise IncorrectDXFFileError(
-                    f"Unclosed polyline in layer <{entity.dxf.layer}>"
-                )
+                    points = extract_coords(entity)
+                    shape = LineString(points)
+                    logging.error(shape)
+                    logging.error("-" * 50)
+                    raise IncorrectDXFFileError(
+                        f"Unclosed polyline in layer <{entity.dxf.layer}>"
+                    )
             if any(
                 hole_layer in entity.dxf.layer for hole_layer in hole_layers
             ):
