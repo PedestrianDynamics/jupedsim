@@ -93,6 +93,8 @@ GEOMETRYCOLLECTION (
     ),
     GEOMETRYCOLLECTION EMPTY,  -- Exits (if present)
     GEOMETRYCOLLECTION EMPTY   -- Distribution zones (if present)
+    GEOMETRYCOLLECTION EMPTY   -- Waypoints (if present)
+    GEOMETRYCOLLECTION EMPTY   -- Journeys (if present)
 )
 """.strip()
 
