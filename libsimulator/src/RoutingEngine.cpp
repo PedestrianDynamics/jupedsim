@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "RoutingEngine.hpp"
 
-#include "AABB.hpp"
 #include "GeometricFunctions.hpp"
-#include "Graph.hpp"
-#include "IteratorPair.hpp"
 #include "LineSegment.hpp"
 #include "Mesh.hpp"
 #include "SimulationError.hpp"
@@ -16,18 +13,141 @@
 #include <glm/geometric.hpp>
 
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>
+#include <CGAL/Delaunay_mesh_area_criteria_2.h>
+#include <CGAL/Delaunay_mesh_size_criteria_2.h>
+#include <CGAL/Delaunay_mesher_2.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Polygon_with_holes_2.h>
 #include <CGAL/Surface_mesh.h>
+#include <CGAL/Triangulation_conformer_2.h>
 #include <CGAL/Triangulation_vertex_base_with_info_2.h>
 #include <CGAL/draw_triangulation_2.h>
 #include <CGAL/mark_domain_in_triangulation.h>
-
+#include <CGAL/point_generators_2.h> // for to_double()
+#include <fstream>
+#include <iostream>
 #include <limits>
 #include <memory>
-#include <queue>
+#include <string>
 #include <unordered_map>
 #include <vector>
+using Kernel = CGAL::Simple_cartesian<double>;
+using Point_2 = Kernel::Point_2;
+
+
+// for debuging
+void export_triangles(const CDT& cdt, const std::string& filename)
+{
+    std::ofstream out(filename);
+    if(!out) {
+        std::cerr << "Cannot open file " << filename << " for writing." << std::endl;
+        return;
+    }
+
+    for(auto fit = cdt.finite_faces_begin(); fit != cdt.finite_faces_end(); ++fit) {
+        if(!fit->get_in_domain())
+            continue;
+
+        for(int i = 0; i < 3; ++i) {
+            const auto& p = fit->vertex(i)->point();
+            out << CGAL::to_double(p.x()) << "," << CGAL::to_double(p.y()) << " ";
+        }
+        out << "\n";
+    }
+
+    std::cout << "Exported triangles to " << filename << std::endl;
+}
+
+double splitLongConstraints(CDT& cdt, double threshold)
+{
+    std::set<Point_2> points_to_add;
+
+    for(auto eit = cdt.finite_edges_begin(); eit != cdt.finite_edges_end(); ++eit) {
+        if(!cdt.is_constrained(*eit))
+            continue;
+
+        auto face = eit->first;
+        int index = eit->second;
+
+        Point_2 p1 = face->vertex((index + 1) % 3)->point();
+        Point_2 p2 = face->vertex((index + 2) % 3)->point();
+
+        double dx = p2.x() - p1.x();
+        double dy = p2.y() - p1.y();
+        double length_sq = dx * dx + dy * dy;
+
+        if(length_sq > threshold * threshold) {
+            Point_2 midpoint((p1.x() + p2.x()) / 2.0, (p1.y() + p2.y()) / 2.0);
+            points_to_add.insert(midpoint);
+        }
+    }
+
+    for(const auto& point : points_to_add) {
+        try {
+            cdt.insert(point);
+        } catch(...) {
+            std::cerr << "Error inserting point: " << point << std::endl;
+        }
+    }
+
+    return points_to_add.size();
+}
+
+// Add centroids of large triangles
+double addCentroidsOfLargeTriangles(CDT& cdt, double area_threshold)
+{
+    std::set<Point_2> centroids_to_add;
+
+    for(auto fit = cdt.finite_faces_begin(); fit != cdt.finite_faces_end(); ++fit) {
+        Point_2 p1 = fit->vertex(0)->point();
+        Point_2 p2 = fit->vertex(1)->point();
+        Point_2 p3 = fit->vertex(2)->point();
+
+        // Compute signed area using the cross product
+        double area =
+            std::abs(
+                (p2.x() - p1.x()) * (p3.y() - p1.y()) - (p3.x() - p1.x()) * (p2.y() - p1.y())) /
+            2.0;
+
+        if(area > area_threshold) {
+            Point_2 centroid((p1.x() + p2.x() + p3.x()) / 3.0, (p1.y() + p2.y() + p3.y()) / 3.0);
+            centroids_to_add.insert(centroid);
+        }
+    }
+
+    for(const auto& centroid : centroids_to_add) {
+        try {
+            cdt.insert(centroid);
+        } catch(const std::exception& e) {
+            std::cerr << "Exception inserting centroid " << centroid << ": " << e.what()
+                      << std::endl;
+        }
+    }
+
+    return centroids_to_add.size();
+}
+
+void improveTriangulation(CDT& cdt)
+{
+    std::vector<Point_2> points_to_add;
+    float area_threshold = 16.0;
+    float length_threshold = 4.0;
+    int res1, res2;
+    int max_iterations = cdt.number_of_vertices();
+    int count = 0;
+    while(count++ < max_iterations) {
+        res1 = splitLongConstraints(cdt, length_threshold);
+        res2 = addCentroidsOfLargeTriangles(cdt, area_threshold);
+        if(res1 == 0 && res2 == 0) {
+            break; // No more points to add
+        }
+    }
+
+    for(const auto& point : points_to_add) {
+        cdt.insert(point);
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // NavMeshRoutingEngine
@@ -43,8 +163,14 @@ RoutingEngine::RoutingEngine(const PolyWithHoles& poly)
     for(const auto& p : poly.holes()) {
         cdt.insert_constraint(p.vertices_begin(), p.vertices_end(), true);
     }
+
     CGAL::mark_domain_in_triangulation(cdt);
+    improveTriangulation(cdt);
+    CGAL::make_conforming_Delaunay_2(cdt);
+    CGAL::mark_domain_in_triangulation(cdt);
+
     mesh = std::make_unique<Mesh>(cdt);
+    export_triangles(cdt, "triangle_cdt.txt");
 }
 
 std::unique_ptr<RoutingEngine> RoutingEngine::Clone() const
@@ -267,31 +393,28 @@ CDT::Face_handle RoutingEngine::find_face(K::Point_2 p) const
     return face;
 }
 
+
 std::vector<Point>
 RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_handle>& path)
 {
-    // TODO(kkratz): Remove the 0.2m edge width adjustment and replace this with p[roper
-    // arc-paths from the "Efficient Triangulation-Based Pathfinding" publication
+  // This is the actual simple stupid funnel algorithm
+  //  https://cdn.aaai.org/AAAI/2006/AAAI06-148.pdf
+  // arc-paths from the "Efficient Triangulation-Based Pathfinding" publication
     const size_t portalCount = path.size();
+    const double radius = 0.2; // Object radius
 
-    // This is the actual simple stupid funnel algorithm
     auto apex = from;
     auto portal_left = from;
     auto portal_right = from;
 
-    size_t index_apex{0};
-    size_t index_left{0};
-    size_t index_right{0};
-
-    const auto get_edge = [this](const auto& a, const auto& b) {
+    const auto get_edge = [](const auto& a, const auto& b) {
         for(int idx = 0; idx < 3; ++idx) {
             if(a->neighbor(idx) == b) {
-                const auto s = cdt.segment(a, idx);
-                const auto src = s.source();
-                const auto tgt = s.target();
+                auto v1 = a->vertex((idx + 1) % 3)->point();
+                auto v2 = a->vertex((idx + 2) % 3)->point();
                 return LineSegment{
-                    {CGAL::to_double(src.x()), CGAL::to_double(src.y())},
-                    {CGAL::to_double(tgt.x()), CGAL::to_double(tgt.y())}};
+                    {CGAL::to_double(v1.x()), CGAL::to_double(v1.y())},
+                    {CGAL::to_double(v2.x()), CGAL::to_double(v2.y())}};
             }
         }
         throw SimulationError("Internal Error");
@@ -309,46 +432,48 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
 
         const auto portal =
             index_portal < portalCount ? get_edge(face_from, face_to) : LineSegment(to, to);
+  
+        const auto p2 = portal.p2;
+        const auto p1 = portal.p1;
+        // Given edge: p1 to p2
+        Point edge = (p2 - p1).Normalized();
 
-        const auto line_segment_left = portal.p2;
-        const auto line_segment_right = portal.p1;
-        const auto line_segment_direction = (line_segment_right - line_segment_left).Normalized();
-        const auto candidate_left = line_segment_left + (line_segment_direction * 0.2);
-        const auto candidate_right = line_segment_right - (line_segment_direction * 0.2);
-
+        // Use offset_p1 and offset_p2 as left/right funnel legs
+        // Efficient Triangulation-Based Pathfinding uses tangent points to circles around vertices.
+        // We use the inward normal to the edge as the offset direction.
+        Point normal = {-edge.y, edge.x};
+        Point offset_p1 = p1 - normal * radius;
+        Point offset_p2 = p2 + normal * radius;
+        const auto candidate_left = offset_p2;
+        const auto candidate_right = offset_p1;
+      
         if(triarea2d(apex, portal_right, candidate_right) <= 0.0) {
             if(apex == portal_right || triarea2d(apex, portal_left, candidate_right) > 0.0) {
                 portal_right = candidate_right;
-                index_right = index_portal;
             } else {
                 waypoints.emplace_back(portal_left);
                 apex = portal_left;
-                index_apex = index_left;
                 portal_left = apex;
                 portal_right = apex;
-                index_left = index_apex;
-                index_right = index_apex;
-                index_portal = index_apex;
                 continue;
             }
         }
         if(triarea2d(apex, portal_left, candidate_left) >= 0.0) {
             if(apex == portal_left || triarea2d(apex, portal_right, candidate_left) < 0.0) {
                 portal_left = candidate_left;
-                index_left = index_portal;
             } else {
                 waypoints.emplace_back(portal_right);
                 apex = portal_right;
-                index_apex = index_right;
                 portal_left = apex;
                 portal_right = apex;
-                index_left = index_apex;
-                index_right = index_apex;
-                index_portal = index_apex;
                 continue;
             }
         }
     }
-    waypoints.emplace_back(to);
+
+    if (waypoints.empty() || waypoints.back() != to) {
+      waypoints.emplace_back(to);
+    }
+    
     return waypoints;
 }

@@ -10,6 +10,11 @@
 #include <CGAL/draw_triangulation_2.h>
 #include <CGAL/mark_domain_in_triangulation.h>
 
+#include <CGAL/Delaunay_mesher_2.h>
+#include <CGAL/Delaunay_mesh_face_base_2.h>
+#include <CGAL/Delaunay_mesh_vertex_base_2.h>
+#include <CGAL/Delaunay_mesh_size_criteria_2.h>
+
 #include <functional>
 #include <list>
 
@@ -22,13 +27,14 @@ using PolyWithHolesList = std::list<PolyWithHoles>;
 using PolyList = std::list<Poly>;
 using Vb = CGAL::Triangulation_vertex_base_2<K>;
 
-template <class Gt, class Fb = CGAL::Constrained_triangulation_face_base_2<Gt>>
+///////////////////////////
+using MeshFb = CGAL::Delaunay_mesh_face_base_2<K>;
+template <class Gt, class Fb = MeshFb>
 class MyFace : public Fb
 {
     bool in{false};
     typedef Fb Base;
     typedef typename Fb::Triangulation_data_structure TDS;
-
 public:
     using Fb::Fb;
     template <typename TDS2>
@@ -39,7 +45,9 @@ public:
     void set_in_domain(bool v) { in = v; }
     bool get_in_domain() const { return in; }
 };
-using TDS = CGAL::Triangulation_data_structure_2<Vb, MyFace<K>>;
+
+using MeshVb = CGAL::Delaunay_mesh_vertex_base_2<K>;
+using TDS = CGAL::Triangulation_data_structure_2<MeshVb, MyFace<K>>;
 using Itag = CGAL::Exact_predicates_tag;
 using CDT = CGAL::Constrained_Delaunay_triangulation_2<K, TDS, Itag>;
 
