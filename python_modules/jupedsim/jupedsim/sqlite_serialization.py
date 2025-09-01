@@ -57,8 +57,6 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         self._con.execute("PRAGMA synchronous=OFF;")
         # Don't allow rollbacks (we don't have need for it)
         self._con.execute("PRAGMA journal_mode=OFF;")
-        # Lock the DB exclusively
-        self._con.execute("PRAGMA locking_mode=EXCLUSIVE;")
 
     def begin_writing(self, simulation: Simulation) -> None:
         """Begin writing trajectory data.
