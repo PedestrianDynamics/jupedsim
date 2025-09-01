@@ -30,7 +30,12 @@ def uses_latest_database_version(connection: sqlite3.Connection) -> bool:
 class SqliteTrajectoryWriter(TrajectoryWriter):
     """Write trajectory data into a sqlite db"""
 
-    def __init__(self, *, output_file: Path, every_nth_frame: int = 4) -> None:
+    def __init__(
+        self,
+        *,
+        output_file: Path,
+        every_nth_frame: int = 4,
+    ) -> None:
         """SqliteTrajectoryWriter constructor
 
         Args:
@@ -48,6 +53,10 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
             raise TrajectoryWriter.Exception("'every_nth_frame' has to be > 0")
         self._every_nth_frame = every_nth_frame
         self._con = sqlite3.connect(self._output_file, isolation_level=None)
+        # Don't wait for the OS to persist data
+        self._con.execute("PRAGMA synchronous=OFF;")
+        # Don't allow rollbacks (we don't have need for it)
+        self._con.execute("PRAGMA journal_mode=OFF;")
 
     def begin_writing(self, simulation: Simulation) -> None:
         """Begin writing trajectory data.
