@@ -35,7 +35,6 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         *,
         output_file: Path,
         every_nth_frame: int = 4,
-        fast_writes: bool = True,
     ) -> None:
         """SqliteTrajectoryWriter constructor
 
@@ -45,10 +44,6 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                 Note: the file will not be written until the first call to :func:`begin_writing`
             every_nth_frame: int
                 indicates interval between writes, 1 means every frame, 5 every 5th
-            fast_writes: bool, default True
-                If True, use aggressive SQLite settings (synchronous=OFF)
-                for maximum performance at the cost of crash safety.
-                If False, use safer settings (journal_mode=WAL, synchronous=NORMAL).
 
         Returns:
             SqliteTrajectoryWriter
@@ -58,13 +53,12 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
             raise TrajectoryWriter.Exception("'every_nth_frame' has to be > 0")
         self._every_nth_frame = every_nth_frame
         self._con = sqlite3.connect(self._output_file, isolation_level=None)
-        if fast_writes:
-            # Aggressive mode: fastest, but unsafe on crash
-            self._con.execute("PRAGMA synchronous=OFF;")
-        else:
-            # Safer mode: still much faster than default FULL
-            self._con.execute("PRAGMA journal_mode=WAL;")
-            self._con.execute("PRAGMA synchronous=NORMAL;")
+        # Don't wait for the OS to persist data
+        self._con.execute("PRAGMA synchronous=OFF;")
+        # Don't allow rollbacks (we don't have need for it)
+        self._con.execute("PRAGMA journal_mode=OFF;")
+        # Lock the DB exclusively
+        self._con.execute("PRAGMA locking_mode=EXCLUSIVE;")
 
     def begin_writing(self, simulation: Simulation) -> None:
         """Begin writing trajectory data.
