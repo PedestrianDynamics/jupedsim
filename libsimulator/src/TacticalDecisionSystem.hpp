@@ -29,12 +29,8 @@ public:
         for(auto& agent : agents) {
             auto agent_id = agent.id;
             auto& cache_entry = path_cache[agent_id];
+            bool near_waypoint = Distance(agent.pos, cache_entry.cached_destination) < 2.0f;
 
-            
-            bool near_waypoint = Distance(agent.pos, cache_entry.cached_destination) < 0.5f;
-            std::cout << "[TacticalDecision] Agent Position: (" << agent.pos.x << ", "
-                      << agent.pos.y << ")" << std::endl;
-            
             if(!cache_entry.valid || near_waypoint) {
                 std::hash<GenericAgent::ID> hasher;
                 uint32_t seed = static_cast<uint32_t>(hasher(agent_id));
@@ -45,13 +41,6 @@ public:
                 cache_entry.cached_destination =
                     routingEngine.ComputeWaypoint(agent.pos, agent.target, agent_bias);
                 cache_entry.valid = true;
-                // --- Debug logging ---
- std::cout << "[TacticalDecision] Target: (" << agent.target.x << ", "
-                          << agent.target.y << ")" << std::endl;
-                std::cout << "[TacticalDecision] New Waypoint: ("
-                          << cache_entry.cached_destination.x << ", "
-                          << cache_entry.cached_destination.y << ")" << std::endl;
-                std::cout << "----------------------------------------" << std::endl;
             }
 
             cache_entry.last_pos = agent.pos;
