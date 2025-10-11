@@ -48,7 +48,9 @@ def check_cmake():
         for min_version, found_version in zip(
             min_cmake_version.split("."), found_cmake_version.groups()
         ):
-            if found_version < min_version:
+            if found_version > min_version:
+                return True
+            elif found_version < min_version:
                 return False
     except Exception as _:
         return False
