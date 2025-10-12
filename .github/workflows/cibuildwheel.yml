@@ -1,5 +1,8 @@
 name: Build CI wheels
 on:
+  schedule:
+    # Runs at 02:00 a.m. each Sunday
+    - cron: '00 2 * * 0'
   push:
     branches:
       - master
