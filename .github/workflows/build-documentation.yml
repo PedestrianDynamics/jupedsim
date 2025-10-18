@@ -1,0 +1,45 @@
+name: Build Documentation
+
+on:
+  schedule:
+    # Runs at 02:00 a.m. each Sunday
+    - cron: '00 2 * * 0'
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - master
+      - rls-*
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Build documentation
+        id: build-docs
+        uses: ./.github/actions/build-docs
+        with:
+          python-version: "3.13"
+          docs-requirements-path: "docs/requirements.txt"
+          docs-source-path: "docs/source"
+          docs-build-path: "docs/build"
+          retention-days: "1"
+      - name: Save PR number
+        if: github.event_name == 'pull_request'
+        run: |
+          printf "%s" "${{ github.event.pull_request.number }}" > pr-number
+
+      - name: Upload PR number
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-number
+          path: pr-number
+          retention-days: 1
