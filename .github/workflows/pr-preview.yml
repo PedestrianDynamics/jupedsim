@@ -43,6 +43,7 @@ jobs:
           mkdir -p "$(dirname "$PREVIEW_DIR")"
           cp -r ${{ runner.temp }}/html/. "$PREVIEW_DIR/"
       - name: Commit preview to gh-pages
+        working-directory: gh-pages
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           repository: gh-pages
