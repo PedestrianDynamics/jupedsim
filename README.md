@@ -26,7 +26,7 @@ It is easiest to install directly with pip from
 pip install jupedsim
 ```
 
-## Usage
+## Usage 33
 
 Please consult our [documentation.](http://jupedsim.org)
 
