@@ -19,11 +19,6 @@ inputs:
     description: 'Number of days to retain the artifact'
     required: true
 
-outputs:
-  artifact-id:
-    description: 'ID of the uploaded documentation artifact'
-    value: ${{ steps.upload-docs.outputs.artifact-id }}
-
 runs:
   using: 'composite'
   steps:
@@ -51,7 +46,7 @@ runs:
       id: upload-docs
       uses: actions/upload-artifact@v4
       with:
-        name: documentation-${{ github.run_id }}-${{ github.run_attempt }}
+        name: documentation
         path: ${{ inputs.docs-build-path }}/
         retention-days: ${{ inputs.retention-days }}
         if-no-files-found: error

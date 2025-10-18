@@ -1,49 +1,47 @@
-name: 'Download Triggering Workflow Artifact'
-description: 'Downloads an artifact from the workflow that triggered this workflow'
+name: 'Download Workflow Run Artifact'
+description: 'Downloads an artifact from a workflow run by name'
+
 inputs:
-  artifact-id:
-    description: 'ID of the artifact to download'
+  run-id:
+    description: 'Run ID of the workflow that created the artifact'
     required: true
-  triggering-run-id:
-    description: 'Run ID of the triggering workflow'
+  artifact-name:
+    description: 'Name of the artifact to download'
     required: true
   download-path:
     description: 'Path to download and extract the artifact'
     required: false
-    default: './downloaded-artifact'
+    default: '.'
+  github-token:
+    description: 'GitHub token for API authentication'
+    required: true
 
 outputs:
   download-path:
     description: 'Path where the artifact was extracted'
-    value: ${{ steps.download.outputs.download-path }}
+    value: ${{ steps.download-artifact.outputs.download-path }}
 
 runs:
   using: 'composite'
   steps:
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.14'
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        python3 -m pip install --quiet requests
+
     - name: Download artifact
-      id: download
+      id: download-artifact
       shell: bash
       env:
-        ARTIFACT_ID: ${{ inputs.artifact-id }}
-        RUN_ID: ${{ inputs.triggering-run-id }}
-        DOWNLOAD_PATH: ${{ inputs.download-path }}
+        GH_TOKEN: ${{ inputs.github-token }}
       run: |
-        echo "Downloading artifact ID '$ARTIFACT_ID' from run $RUN_ID"
-
-        # Create download directory
-        mkdir -p "$DOWNLOAD_PATH"
-
-        # Download the artifact using GitHub CLI with artifact ID
-        gh api repos/"$GITHUB_REPOSITORY"/actions/artifacts/"$ARTIFACT_ID"/zip \
-          --output artifact.zip
-
-        # Extract the downloaded artifact
-        unzip -q artifact.zip -d "$DOWNLOAD_PATH"
-        rm artifact.zip
-
-        echo "Artifact downloaded to: $DOWNLOAD_PATH"
-        echo "download-path=$DOWNLOAD_PATH" >> $GITHUB_OUTPUT
-
-        # List downloaded contents for verification
-        echo "Downloaded files:"
-        ls -la "$DOWNLOAD_PATH"
+        ${{ github.action_path }}/download-artefact.py \
+          --run-id "${{ inputs.run-id }}" \
+          --artifact-name "${{ inputs.artifact-name }}" \
+          --download-path "${{ inputs.download-path }}" \
+          --repository "${{ github.repository }}"
