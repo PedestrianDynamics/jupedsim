@@ -1,0 +1,217 @@
+name: Deploy Documentation
+
+on:
+  workflow_run:
+    workflows: ["Build Documentation"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # Deploy PR Previews on any update to a PR besides removal
+  deploy-preview:
+    name: Deploy PR Preview
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v5
+        with:
+          path: jupedsim
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v5
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Download pr-number artifact
+        uses: ./jupedsim/.github/actions/download-artefact
+        with:
+          artifact-name: pr-number
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download documentation artifact
+        uses: ./jupedsim/.github/actions/download-artefact
+        with:
+          artifact-name: documentation
+          run-id: ${{ github.event.workflow_run.id }}
+          download-path: ${{ runner.temp }}/html
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Read pr-number
+        id: read-pr-number
+        run: |
+          PR_NUMBER=$(cat ./pr-number)
+          echo "value=$PR_NUMBER" >> $GITHUB_OUTPUT
+
+      - name: Stage preview into working tree
+        run: |
+          cd gh-pages
+          mkdir -p pull-requests
+          cd pull-requests
+          rm -rf "${{ steps.read-pr-number.outputs.value }}"
+          mkdir -p "${{ steps.read-pr-number.outputs.value }}"
+          cd "${{ steps.read-pr-number.outputs.value }}"
+          cp -r ${{ runner.temp }}/html/. .
+          ls -la
+          echo -e '$(pwd)'
+
+      - name: Commit preview to gh-pages
+        working-directory: gh-pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "pull-requests"
+          git commit -m "docs: preview for PR #${{ steps.read-pr-number.outputs.value }}"
+          git push
+
+      - name: Update PR body with preview link
+        uses: actions/github-script@v8
+        env:
+          PREVIEW_DIR: pull-requests/${{ steps.read-pr-number.outputs.value }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // Read PR number from file
+            const prNumber = ${{ steps.read-pr-number.outputs.value }};
+
+            // Validate PR number
+            if (!prNumber || isNaN(prNumber)) {
+              core.setFailed('Invalid PR number');
+              return;
+            }
+
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            const repo = context.repo;
+            const url = `https://${repo.owner}.github.io/${repo.repo}/${process.env.PREVIEW_DIR}/`;
+
+            const start = '<!-- PREVIEW-URL-START -->';
+            const end = '<!-- PREVIEW-URL-END -->';
+            const snippet = `${start}\nPreview: ${url}\n${end}`;
+
+            const original = pr.body || '';
+            const updated = original.includes(start)
+              ? original.replace(new RegExp(`${start}[\\s\\S]*?${end}`), snippet)
+              : `${original}\n\n${snippet}`;
+
+            await github.rest.pulls.update({
+              owner: repo.owner,
+              repo: repo.repo,
+              pull_number: prNumber,
+              body: updated
+            });
+
+            core.info(`Updated PR #${prNumber} with preview link: ${url}`);
+
+  # Job 2: Publish to gh-pages
+  publish-docs:
+    name: Publish Documentation
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'release'
+    runs-on: ubuntu-latest
+    outputs:
+      docs-target: ${{ steps.docs-publish-dir.outputs.target }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Download documentation artifact
+        uses: ./jupedsim/.github/actions/download-artefact
+        with:
+          artifact-name: documentation
+          run-id: ${{ github.event.workflow_run.id }}
+          download-path: ${{ runner.temp }}/html
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download documentation artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p docs/build
+          gh api repos/${{ github.repository }}/actions/artifacts/${{ steps.find-artifact.outputs.artifact-id }}/zip > docs.zip
+          unzip -q docs.zip -d docs/build
+          rm docs.zip
+
+      - name: Determine directory to publish docs to
+        id: docs-publish-dir
+        uses: jannekem/run-python-script-action@v1
+        with:
+          script: |
+            import os, re
+            github_ref = os.environ.get('GITHUB_REF')
+            m = re.match(r'^refs/tags/v([0-9]+\.[0-9]+\.[0-9]+(-dev\.[0-9]+)?)$',
+                         github_ref)
+            if m:
+                target = "${{ github.ref_name }}"
+            else:
+                target = ''
+            set_output('target', target)
+
+      - name: Publish docs to GitHub pages
+        if: steps.docs-publish-dir.outputs.target != ''
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ runner.temp }}/html
+          destination_dir: ${{ steps.docs-publish-dir.outputs.target }}
+          keep_files: false
+
+  # Job 3: Update versions JSON
+  update-versions:
+    name: Update versions JSON
+    needs: publish-docs
+    if: needs.publish-docs.outputs.docs-target != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v5
+        with:
+          ref: gh-pages
+
+      - name: Write versions to JSON file
+        uses: jannekem/run-python-script-action@v1
+        with:
+          script: |
+            import json
+            from pathlib import Path
+            from packaging.version import Version
+
+            prefix = "https://www.jupedsim.org/"
+            cwd = Path.cwd()
+            versions = [item.name[1:] for item in cwd.iterdir() if item.is_dir() and not item.name.startswith('.') and item.name.startswith("v")]
+            versions.sort(key=Version, reverse=True)
+            versions = ["v" + v for v in versions]
+            versions.insert(0, "stable")
+
+            versions_url = [dict(name=version, version=version, url=f"{prefix}{version}/")
+                            for version in versions]
+            target_file = Path('versions.json')
+            with target_file.open('w') as f:
+                json.dump(versions_url, f)
+
+      - name: Redirect stable to new release
+        run: |
+          rm -rf stable
+          ln -s ${{ needs.publish-docs.outputs.docs-target }} stable
+
+      - name: Commit changes to gh-pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add versions.json stable
+          git commit -m "docs: update versions and stable symlink"
+          git push
