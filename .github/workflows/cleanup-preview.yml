@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout gh-pages branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: gh-pages
 
@@ -38,7 +38,7 @@ jobs:
 
       - name: Commit cleanup to gh-pages
         if: steps.check-preview.outputs.exists == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           branch: gh-pages
           commit_message: "chore: remove preview for PR #${{ github.event.pull_request.number }}"
