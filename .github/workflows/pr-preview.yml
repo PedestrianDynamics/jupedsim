@@ -24,21 +24,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
         with:
+          path: jupedsim
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
           ref: gh-pages
+          path: gh-pages
       - name: Download artifact from triggering workflow
-        uses: ./.github/actions/download-artefact/action.yml
+        uses: ./jupedsim/.github/actions/download-artefact
         with:
           artifact-id: ${{ inputs.artifact-id }}
           triggering-run-id: ${{ inputs.triggering-run-id }}
           download-path: ${{ runner.temp }}/html
       - name: Stage preview into working tree
         run: |
+          cd gh-pages
           rm -rf "$PREVIEW_DIR"
           mkdir -p "$(dirname "$PREVIEW_DIR")"
           cp -r ${{ runner.temp }}/html/. "$PREVIEW_DIR/"
       - name: Commit preview to gh-pages
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
+          repository: gh-pages
           branch: gh-pages
           commit_message: "docs: preview for PR #${{ inputs.pr-number }}"
           file_pattern: ${{ env.PREVIEW_DIR }}/**
