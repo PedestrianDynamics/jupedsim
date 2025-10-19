@@ -2,6 +2,7 @@
 import json
 import logging
 import pathlib
+from math import isclose
 from pathlib import Path
 from typing import List, Optional
 
@@ -28,9 +29,6 @@ from shapely import (
 )
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import unary_union
-
-
-from math import isclose
 
 logging.getLogger("markdown_it").setLevel(logging.WARNING)
 logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.DEBUG)
