@@ -45,7 +45,7 @@ JUPEDSIM_API JPS_Path
 JPS_RoutingEngine_ComputeWaypoint(JPS_RoutingEngine handle, JPS_Point from, JPS_Point to)
 {
     auto* engine = reinterpret_cast<RoutingEngine*>(handle);
-    const auto path = engine->ComputeAllWaypoints(intoPoint(from), intoPoint(to));
+    const auto path = engine->ComputeAllWaypoints(intoPoint(from), intoPoint(to), 0.0f);
     auto points = new JPS_Point[path.size()];
     JPS_Path p{path.size(), points};
     std::transform(
