@@ -6,9 +6,7 @@
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link href="_static/logo.png" sizes="482x536" rel="icon" type="image/png">
-    <title>JuPedSim &#8212; JuPedSim  documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Search - JuPedSim  documentation</title>
   
   
   
@@ -46,7 +44,7 @@
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="_static/copybutton.js?v=f281be69"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'search';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
@@ -54,9 +52,11 @@
         DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
         </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+  <script src="_static/searchtools.js"></script>
+  <script src="_static/language_data.js"></script>
+  <script src="searchindex.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Getting started" href="notebooks/getting_started.html" />
+    <link rel="search" title="Search" href="#" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -88,7 +88,7 @@
     <div class="search-button__overlay"></div>
     <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
-      action="search.html"
+      action="#"
       method="get">
   <i class="fa-solid fa-magnifying-glass"></i>
   <input type="search"
@@ -139,7 +139,7 @@
     
   
 
-<a class="navbar-brand logo" href="#">
+<a class="navbar-brand logo" href="index.html">
   
   
   
@@ -192,7 +192,7 @@
 </ul></div>
         <div class="sidebar-primary-item">
 <form class="bd-search d-flex align-items-center"
-      action="search.html"
+      action="#"
       method="get">
   <i class="fa-solid fa-magnifying-glass"></i>
   <input type="search"
@@ -312,92 +312,48 @@ document.write(`
 `);
 </script></div>
       
-        <div class="header-article-item"><button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="fa-solid fa-list"></span>
-</button></div>
-      
     </div>
   
 </div>
 </div>
               
               
-
-<div id="jb-print-docs-body" class="onlyprint">
-    <h1>JuPedSim</h1>
-    <!-- Table of contents -->
-    <div id="print-main-content">
-        <div id="jb-print-toc">
-            
-            <div>
-                <h2> Contents </h2>
-            </div>
-            <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-jupedsim">What is JuPedSim</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#where-to-get-it">Where to get it</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main-features">Main features</a></li>
-</ul>
-            </nav>
-        </div>
-    </div>
-</div>
-
-              
-                
-<div id="searchbox"></div>
-                <article class="bd-article">
-                  
-  <section id="jupedsim">
-<h1>JuPedSim<a class="headerlink" href="#jupedsim" title="Link to this heading">#</a></h1>
-<div class="toctree-wrapper compound">
-</div>
-<p><strong>Useful links</strong>:
-<a class="reference external" href="https://pypi.org/project/jupedsim/">Python Packages</a> |
-<a class="reference external" href="https://github.com/PedestrianDynamics/jupedsim">Source Repository</a> |
-<a class="reference external" href="https://github.com/PedestrianDynamics/jupedsim/issues">Issues</a> |
-<a class="reference external" href="https://github.com/PedestrianDynamics/jupedsim/discussions">Discussions</a></p>
-<section id="what-is-jupedsim">
-<h2>What is JuPedSim<a class="headerlink" href="#what-is-jupedsim" title="Link to this heading">#</a></h2>
-<p><em>JuPedSim</em> is a Python package with a C++ core to simulate pedestrian dynamics.
-This project originally started in 2010 as a C++ based CLI application. However
-looking at how this application was used and abused we decided to rewrite
-<em>JuPedSim</em> as a Python package.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you find references to versions &lt; 0.10 you need to be aware that they
-refer to the old CLI application.</p>
-</div>
-<p>If you are interested to learn about the history of this project, see
-<a class="reference internal" href="history.html#history"><span class="std std-ref">here</span></a>.</p>
-</section>
-<section id="where-to-get-it">
-<h2>Where to get it<a class="headerlink" href="#where-to-get-it" title="Link to this heading">#</a></h2>
-<p>It is easiest to install directly with pip from
-<a class="reference external" href="https://pypi.org/project/jupedsim/">PyPi.org</a>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">jupedsim</span>
-</pre></div>
-</div>
-<p>For information how to build <em>JuPedSim</em> from source, visit our <a class="reference external" href="https://github.com/PedestrianDynamics/jupedsim/">GitHub repository</a>.</p>
-</section>
-<section id="main-features">
-<h2>Main features<a class="headerlink" href="#main-features" title="Link to this heading">#</a></h2>
-<p><em>JuPedSim</em> offers a Python interface, to set up and conduct pedestrian dynamics simulations.
-With <em>JuPedSim</em> you can simulate small, simple layouts as bottleneck, but you can also simulate large, complex scenarios.
-In these complex scenarios, different crowd management measures can be modeled with built-in modules.</p>
-<p>For simulating the pedestrian movement and interactions <em>JuPedSim</em> offers two different microscopic models out of the box.
-The Collision Free Speed Model, as the name imply a speed model.
-And a force model with the Generalized Centrifugal Force Model.</p>
-<p>With <em>JuPedSim</em> different decisions-making processes in the agents route choice can be modeled.
-These routes may consist of multiple steps the agents have to complete.
-One step may already be completed when an agent reaches the target, but it may also only be completed when a condition like a waiting is fulfilled.
-After each completion one of the built-in deciders can be used to conditionally modify the agents next target.</p>
-</section>
-</section>
-
-
-                </article>
-              
+  <div class="bd-search-container">
+    <h1>Search</h1>
+    <noscript>
+      <div class="admonition error">
+        <p class="admonition-title">Error</p>
+        <p>Please activate JavaScript to enable the search functionality.</p>
+      </div>
+    </noscript>
+    
+<form class="bd-search d-flex align-items-center"
+      action="#"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    <div id="search-results"></div>
+  </div>
+  <script>
+    // Activate the search field on page load
+    let searchInput = document.querySelector("form.bd-search input");
+    if (searchInput) {
+        searchInput.focus();
+        searchInput.select();
+        console.log("[PST]: Set focus on search field.");
+    }
+  </script>
 
               
               
@@ -406,38 +362,12 @@ After each completion one of the built-in deciders can be used to conditionally 
                 <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
-    <a class="right-next"
-       href="notebooks/getting_started.html"
-       title="next page">
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Getting started</p>
-      </div>
-      <i class="fa-solid fa-angle-right"></i>
-    </a>
 </div>
                 </footer>
               
             </div>
             
             
-              
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> Contents
-  </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-jupedsim">What is JuPedSim</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#where-to-get-it">Where to get it</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main-features">Main features</a></li>
-</ul>
-  </nav></div>
-
-</div></div>
               
             
           </div>
