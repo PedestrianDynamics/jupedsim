@@ -34,10 +34,11 @@ public:
     DistanceQueryIterator(double distance, Point p, BackingIterator current, BackingIterator end)
         : _distance(distance)
         , _p(p)
-        , _current(std::find_if(
-              current,
-              end,
-              [this](const auto& t) { return dist(t, _p) <= _distance; }))
+        , _current(
+              std::find_if(
+                  current,
+                  end,
+                  [this](const auto& t) { return dist(t, _p) <= _distance; }))
         , _end(end)
     {
     }

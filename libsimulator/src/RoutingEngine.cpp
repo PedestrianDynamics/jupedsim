@@ -17,9 +17,9 @@
 
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
-#include <CGAL/Triangulation_conformer_2.h>
 #include <CGAL/Polygon_with_holes_2.h>
 #include <CGAL/Surface_mesh.h>
+#include <CGAL/Triangulation_conformer_2.h>
 #include <CGAL/Triangulation_vertex_base_with_info_2.h>
 #include <CGAL/draw_triangulation_2.h>
 #include <CGAL/mark_domain_in_triangulation.h>
@@ -28,8 +28,6 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
-
-
 
 using Kernel = CGAL::Simple_cartesian<double>;
 using Point_2 = Kernel::Point_2;
@@ -177,11 +175,11 @@ std::unique_ptr<RoutingEngine> RoutingEngine::Clone() const
 
 Point RoutingEngine::ComputeWaypoint(Point currentPosition, Point destination, float path_bias)
 {
-  auto waypoints = ComputeAllWaypoints(currentPosition, destination, path_bias);
+    auto waypoints = ComputeAllWaypoints(currentPosition, destination, path_bias);
     //       // --- Debug logging ---
-    // std::cout << "[RoutingEngine] Current Position: (" 
+    // std::cout << "[RoutingEngine] Current Position: ("
     //           << currentPosition.x << ", " << currentPosition.y << ")\n";
-    // std::cout << "[RoutingEngine] Destination: (" 
+    // std::cout << "[RoutingEngine] Destination: ("
     //           << destination.x << ", " << destination.y << ")\n";
 
     // std::cout << "[RoutingEngine] Waypoints: ";
@@ -240,7 +238,8 @@ double length_of_path(const std::vector<Point>& path)
     return segment_sum;
 }
 
-std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Point destination, float path_bias)
+std::vector<Point>
+RoutingEngine::ComputeAllWaypoints(Point currentPosition, Point destination, float path_bias)
 {
     const auto from_pos = CDT::Point{currentPosition.x, currentPosition.y};
     const auto to_pos = CDT::Point{destination.x, destination.y};
@@ -273,7 +272,8 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
             // Now compute the actual path length via funnel algorithm
             // store path and length if this variant is the shortest found so far
             const auto vertex_ids = current_state->path();
-            const auto found_path = straightenPath(currentPosition, destination, vertex_ids, path_bias);
+            const auto found_path =
+                straightenPath(currentPosition, destination, vertex_ids, path_bias);
             const double found_path_length = length_of_path(found_path);
             if(found_path_length < path_length) {
                 path = found_path;
@@ -399,8 +399,11 @@ CDT::Face_handle RoutingEngine::find_face(K::Point_2 p) const
     return face;
 }
 
-std::vector<Point>
-RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_handle>& path, float path_bias)
+std::vector<Point> RoutingEngine::straightenPath(
+    Point from,
+    Point to,
+    const std::vector<CDT::Face_handle>& path,
+    float path_bias)
 {
     // TODO(kkratz): Remove the 0.2m edge width adjustment and replace this with p[roper
     // arc-paths from the "Efficient Triangulation-Based Pathfinding" publication
@@ -434,8 +437,8 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
     // Ideally we replace this with something w.o. allocations
     waypoints.reserve(path.size() + 1);
 
-    const auto base_clearance = 0.2f; // Minimum distance from walls    
-        
+    const auto base_clearance = 0.2f; // Minimum distance from walls
+
     for(size_t index_portal = 1; index_portal <= portalCount; ++index_portal) {
         const auto face_from = path[index_portal - 1];
         const auto face_to = path[index_portal];
@@ -451,11 +454,12 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
 
         const float corridor_width = Distance(line_segment_left, line_segment_right);
         const float available_extra_space = std::max(0.0f, corridor_width - 2.0f * base_clearance);
-        const float max_extra_clearance = available_extra_space * 0.8f; // Use up to 80% of available space
-        
+        const float max_extra_clearance =
+            available_extra_space * 0.8f; // Use up to 80% of available space
+
         float left_clearance, right_clearance;
-        
-        if (path_bias < 0) {
+
+        if(path_bias < 0) {
             left_clearance = base_clearance;
             right_clearance = base_clearance + max_extra_clearance * (-path_bias);
         } else {
@@ -463,8 +467,9 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
             right_clearance = base_clearance;
         }
         const auto candidate_left = line_segment_left + (line_segment_direction * left_clearance);
-        const auto candidate_right = line_segment_right - (line_segment_direction * right_clearance);
-        
+        const auto candidate_right =
+            line_segment_right - (line_segment_direction * right_clearance);
+
         if(triarea2d(apex, portal_right, candidate_right) <= 0.0) {
             if(apex == portal_right || triarea2d(apex, portal_left, candidate_right) > 0.0) {
                 portal_right = candidate_right;

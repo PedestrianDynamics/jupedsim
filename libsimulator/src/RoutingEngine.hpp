@@ -34,7 +34,8 @@ public:
 
     std::unique_ptr<RoutingEngine> Clone() const override;
     Point ComputeWaypoint(Point currentPosition, Point destination, float path_bias = 0.0f);
-  std::vector<Point> ComputeAllWaypoints(Point currentPosition, Point destination, float path_bias);
+    std::vector<Point>
+    ComputeAllWaypoints(Point currentPosition, Point destination, float path_bias);
     bool IsRoutable(Point p) const;
     void Update();
 
@@ -42,6 +43,9 @@ public:
 
 private:
     CDT::Face_handle find_face(K::Point_2) const;
-    std::vector<Point>
-    straightenPath(Point from, Point to, const std::vector<CDT::Face_handle>& path, float path_bias = 0.0f);
+    std::vector<Point> straightenPath(
+        Point from,
+        Point to,
+        const std::vector<CDT::Face_handle>& path,
+        float path_bias = 0.0f);
 };
