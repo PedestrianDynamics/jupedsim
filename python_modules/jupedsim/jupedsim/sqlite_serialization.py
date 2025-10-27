@@ -35,6 +35,7 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         *,
         output_file: Path,
         every_nth_frame: int = 4,
+        commit_every_nth_write: int = 100,
     ) -> None:
         """SqliteTrajectoryWriter constructor
 
@@ -44,19 +45,26 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                 Note: the file will not be written until the first call to :func:`begin_writing`
             every_nth_frame: int
                 indicates interval between writes, 1 means every frame, 5 every 5th
-
-        Returns:
-            SqliteTrajectoryWriter
+            commit_every_nth_write: int
+                number of frames to keep in RAM before writing them to disk.
         """
         self._output_file = output_file
         if every_nth_frame < 1:
             raise TrajectoryWriter.Exception("'every_nth_frame' has to be > 0")
         self._every_nth_frame = every_nth_frame
-        self._con = sqlite3.connect(self._output_file, isolation_level=None)
+        self._con = sqlite3.connect(self._output_file)
         # Don't wait for the OS to persist data
         self._con.execute("PRAGMA synchronous=OFF;")
         # Don't allow rollbacks (we don't have need for it)
         self._con.execute("PRAGMA journal_mode=OFF;")
+
+        # Buffering checks
+        if commit_every_nth_write < 1:
+            raise TrajectoryWriter.Exception(
+                "'commit_every_nth_write' has to be > 0"
+            )
+        self._commit_every_nth_write = commit_every_nth_write
+        self._buffered_frame_count = 0
 
     def begin_writing(self, simulation: Simulation) -> None:
         """Begin writing trajectory data.
@@ -112,15 +120,16 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
             )
             cur.execute("COMMIT")
         except sqlite3.Error as e:
-            cur.execute("ROLLBACK")
             raise TrajectoryWriter.Exception(f"Error creating database: {e}")
 
     def write_iteration_state(self, simulation: Simulation) -> None:
         """Write trajectory data of one simulation iteration.
 
         This method is intended to handle serialization of the trajectory data
-        of a single iteration.
+        of a single iteration. The default behaviour is to buffer frames in memory
+        and only writing to disk when the buffer is full or close() is called.
         """
+
         if not self._con:
             raise TrajectoryWriter.Exception("Database not opened.")
 
@@ -130,7 +139,6 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         frame = iteration / self.every_nth_frame()
         cur = self._con.cursor()
         try:
-            cur.execute("BEGIN")
             frame_data = [
                 (
                     frame,
@@ -174,11 +182,24 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                     ("ymax", str(max(ymax, float(old_ymax)))),
                 ],
             )
-
-            cur.execute("COMMIT")
+            # Trigger flush if buffer full
+            self._buffered_frame_count += 1
+            if self._buffered_frame_count >= self._commit_every_nth_write:
+                cur.execute("COMMIT")
+                self._buffered_frame_count = 0
         except sqlite3.Error as e:
-            cur.execute("ROLLBACK")
             raise TrajectoryWriter.Exception(f"Error writing to database: {e}")
+
+    def close(self) -> None:
+        """Flush buffer and close DB connection. Call at simulation end."""
+        if self._buffered_frame_count != 0:
+            cur = self._con.cursor()
+            cur.execute("COMMIT")
+        if self._con:
+            try:
+                self._con.close()
+            finally:
+                self._con = None  # type: ignore[assignment]
 
     def every_nth_frame(self) -> int:
         return self._every_nth_frame
@@ -261,5 +282,4 @@ def convert_database_v1_to_v2(connection: sqlite3.Connection):
         cur.execute("COMMIT")
         cur.execute("VACUUM")
     except sqlite3.Error as e:
-        cur.execute("ROLLBACK")
         raise TrajectoryWriter.Exception(f"Error writing to database: {e}")
