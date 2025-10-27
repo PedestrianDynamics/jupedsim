@@ -1,0 +1,962 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>jupedsim.simulation &#8212; JuPedSim  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=d742c9ce" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/jupedsim/simulation';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v1.3.0';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../_static/jupedsim.svg" class="logo__image only-light" alt="JuPedSim  documentation - Home"/>
+    <script>document.write(`<img src="../../_static/jupedsim.svg" class="logo__image only-dark" alt="JuPedSim  documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PedestrianDynamics/jupedsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/jupedsim/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://img.shields.io/pypi/v/jupedsim" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.5281/zenodo.1293771" title="DOI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1293771.svg" class="icon-link-image" alt="DOI"/></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/getting_started.html">Getting started</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../concepts/index.html">Concepts</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../concepts/geometry.html">Geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../concepts/routing.html">Routing</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pedestrian_models/index.html">Pedestrian Models</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../notebooks/index.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/model-comparison.html">Comparative Analysis of Pedestrian Dynamics Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/corner.html">Movement around Corners</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/double-bottleneck.html">Movement through Bottlenecks</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/journey.html">How to work with Journeys</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/lane-formation.html">Lane formation in bi-directional flow</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/motivation.html">Modelling Motivation</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/queues_waiting.html">Waiting in Queues</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/routing.html">How Route Choice can Impact Evacuation Times</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/single-file.html">Simulating Single-File Movement</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../disclaimer.html">Disclaimer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/jupedsim/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citation/citation.html">Cite JuPedSim</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for jupedsim.simulation</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: LGPL-3.0-or-later</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">shapely</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jupedsim.native</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">py_jps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">Agent</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geometry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.geometry_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_geometry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.internal.tracing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Trace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.journey</span><span class="w"> </span><span class="kn">import</span> <span class="n">JourneyDescription</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.anticipation_velocity_model</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AnticipationVelocityModel</span><span class="p">,</span>
+    <span class="n">AnticipationVelocityModelAgentParameters</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.collision_free_speed</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CollisionFreeSpeedModel</span><span class="p">,</span>
+    <span class="n">CollisionFreeSpeedModelAgentParameters</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.collision_free_speed_v2</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CollisionFreeSpeedModelV2</span><span class="p">,</span>
+    <span class="n">CollisionFreeSpeedModelV2AgentParameters</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.generalized_centrifugal_force</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">GeneralizedCentrifugalForceModel</span><span class="p">,</span>
+    <span class="n">GeneralizedCentrifugalForceModelAgentParameters</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.social_force</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">SocialForceModel</span><span class="p">,</span>
+    <span class="n">SocialForceModelAgentParameters</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.serialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">TrajectoryWriter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.stages</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ExitStage</span><span class="p">,</span>
+    <span class="n">NotifiableQueueStage</span><span class="p">,</span>
+    <span class="n">WaitingSetStage</span><span class="p">,</span>
+    <span class="n">WaypointStage</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="Simulation">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Simulation</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Defines a simulation of pedestrian movement over a continuous walkable area.</span>
+
+<span class="sd">    Movement of agents is described with Journeys, Stages and Transitions.</span>
+<span class="sd">    Agents can be added and removed at will. The simulation processes one step</span>
+<span class="sd">    at a time. No automatic stop condition exists. You can simulate multiple</span>
+<span class="sd">    disconnected walkable areas by instantiating multiple instances of</span>
+<span class="sd">    simulation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="p">(</span>
+            <span class="n">CollisionFreeSpeedModel</span>
+            <span class="o">|</span> <span class="n">GeneralizedCentrifugalForceModel</span>
+            <span class="o">|</span> <span class="n">CollisionFreeSpeedModelV2</span>
+            <span class="o">|</span> <span class="n">AnticipationVelocityModel</span>
+            <span class="o">|</span> <span class="n">SocialForceModel</span>
+        <span class="p">),</span>
+        <span class="n">geometry</span><span class="p">:</span> <span class="p">(</span>
+            <span class="nb">str</span>
+            <span class="o">|</span> <span class="n">shapely</span><span class="o">.</span><span class="n">GeometryCollection</span>
+            <span class="o">|</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Polygon</span>
+            <span class="o">|</span> <span class="n">shapely</span><span class="o">.</span><span class="n">MultiPolygon</span>
+            <span class="o">|</span> <span class="n">shapely</span><span class="o">.</span><span class="n">MultiPoint</span>
+            <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span>
+        <span class="p">),</span>
+        <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+        <span class="n">trajectory_writer</span><span class="p">:</span> <span class="n">TrajectoryWriter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a Simulation.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            model (CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel | CollisionFreeSpeedModelV2):</span>
+<span class="sd">                Defines the operational model used in the simulation.</span>
+<span class="sd">            geometry:</span>
+<span class="sd">                Data to create the geometry out of. Data may be supplied as:</span>
+
+<span class="sd">                * list of 2d points describing the outer boundary, holes may be added with use of `excluded_areas` kw-argument</span>
+
+<span class="sd">                * :class:`~shapely.GeometryCollection` consisting only out of :class:`Polygons &lt;shapely.Polygon&gt;`, :class:`MultiPolygons &lt;shapely.MultiPolygon&gt;` and :class:`MultiPoints &lt;shapely.MultiPoint&gt;`</span>
+
+<span class="sd">                * :class:`~shapely.MultiPolygon`</span>
+
+<span class="sd">                * :class:`~shapely.Polygon`</span>
+
+<span class="sd">                * :class:`~shapely.MultiPoint` forming a &quot;simple&quot; polygon when points are interpreted as linear ring without repetition of the start/end point.</span>
+
+<span class="sd">                * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.</span>
+
+<span class="sd">            dt: Iteration step size in seconds. It is recommended to</span>
+<span class="sd">                leave this at its default value.</span>
+<span class="sd">            trajectory_writer: Any object implementing the</span>
+<span class="sd">                TrajectoryWriter interface. JuPedSim provides a writer that outputs trajectory data</span>
+<span class="sd">                in a sqlite database. If you want other formats such as CSV you need to provide</span>
+<span class="sd">                your own custom implementation.</span>
+
+<span class="sd">        Keyword Arguments:</span>
+<span class="sd">            excluded_areas: describes exclusions</span>
+<span class="sd">                from the walkable area. Only use this argument if `geometry` was</span>
+<span class="sd">                provided as list[tuple[float, float]].</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">CollisionFreeSpeedModel</span><span class="p">):</span>
+            <span class="n">model_builder</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelBuilder</span><span class="p">(</span>
+                <span class="n">strength_neighbor_repulsion</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">strength_neighbor_repulsion</span><span class="p">,</span>
+                <span class="n">range_neighbor_repulsion</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">range_neighbor_repulsion</span><span class="p">,</span>
+                <span class="n">strength_geometry_repulsion</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">strength_geometry_repulsion</span><span class="p">,</span>
+                <span class="n">range_geometry_repulsion</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">range_geometry_repulsion</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">py_jps_model</span> <span class="o">=</span> <span class="n">model_builder</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">CollisionFreeSpeedModelV2</span><span class="p">):</span>
+            <span class="n">model_builder</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelV2Builder</span><span class="p">()</span>
+            <span class="n">py_jps_model</span> <span class="o">=</span> <span class="n">model_builder</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">AnticipationVelocityModel</span><span class="p">):</span>
+            <span class="n">model_builder</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">AnticipationVelocityModelBuilder</span><span class="p">(</span>
+                <span class="n">pushout_strength</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">pushout_strength</span><span class="p">,</span> <span class="n">rng_seed</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">rng_seed</span>
+            <span class="p">)</span>
+            <span class="n">py_jps_model</span> <span class="o">=</span> <span class="n">model_builder</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">GeneralizedCentrifugalForceModel</span><span class="p">):</span>
+            <span class="n">model_builder</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">GeneralizedCentrifugalForceModelBuilder</span><span class="p">(</span>
+                <span class="n">strength_neighbor_repulsion</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">strength_neighbor_repulsion</span><span class="p">,</span>
+                <span class="n">strength_geometry_repulsion</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">strength_geometry_repulsion</span><span class="p">,</span>
+                <span class="n">max_neighbor_interaction_distance</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">max_neighbor_interaction_distance</span><span class="p">,</span>
+                <span class="n">max_geometry_interaction_distance</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">max_geometry_interaction_distance</span><span class="p">,</span>
+                <span class="n">max_neighbor_interpolation_distance</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">max_neighbor_interpolation_distance</span><span class="p">,</span>
+                <span class="n">max_geometry_interpolation_distance</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">max_geometry_interpolation_distance</span><span class="p">,</span>
+                <span class="n">max_neighbor_repulsion_force</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">max_neighbor_repulsion_force</span><span class="p">,</span>
+                <span class="n">max_geometry_repulsion_force</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">max_geometry_repulsion_force</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">py_jps_model</span> <span class="o">=</span> <span class="n">model_builder</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">SocialForceModel</span><span class="p">):</span>
+            <span class="n">model_builder</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">SocialForceModelBuilder</span><span class="p">(</span>
+                <span class="n">body_force</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">body_force</span><span class="p">,</span> <span class="n">friction</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">friction</span>
+            <span class="p">)</span>
+            <span class="n">py_jps_model</span> <span class="o">=</span> <span class="n">model_builder</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown model type supplied&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_writer</span> <span class="o">=</span> <span class="n">trajectory_writer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">py_jps_model</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">build_geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="Simulation.add_waypoint_stage">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.add_waypoint_stage">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_waypoint_stage</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">distance</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a new waypoint stage to this simulation.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            position: Position of the waypoint</span>
+<span class="sd">            distance: Minimum distance required to reach this waypoint</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Id of the new stage.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">add_waypoint_stage</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">distance</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Simulation.add_queue_stage">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.add_queue_stage">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_queue_stage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a new queue state to this simulation.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            positions: Ordered list of the waiting</span>
+<span class="sd">                points of this queue. The first one in the list is the head of</span>
+<span class="sd">                the queue while the last one is the back of the queue.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Id of the new stage.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">add_queue_stage</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Simulation.add_waiting_set_stage">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.add_waiting_set_stage">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_waiting_set_stage</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a new waiting set stage to this simulation.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            positions: Ordered list of the waiting points of this waiting set.</span>
+<span class="sd">                The agents will fill the waiting points in the given order. If more agents</span>
+<span class="sd">                are targeting the waiting, the remaining will wait at the last given point.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Id of the new stage.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">add_waiting_set_stage</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Simulation.add_exit_stage">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.add_exit_stage">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_exit_stage</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">polygon</span><span class="p">:</span> <span class="p">(</span>
+            <span class="nb">str</span>
+            <span class="o">|</span> <span class="n">shapely</span><span class="o">.</span><span class="n">GeometryCollection</span>
+            <span class="o">|</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Polygon</span>
+            <span class="o">|</span> <span class="n">shapely</span><span class="o">.</span><span class="n">MultiPolygon</span>
+            <span class="o">|</span> <span class="n">shapely</span><span class="o">.</span><span class="n">MultiPoint</span>
+            <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span>
+        <span class="p">),</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add an exit stage to the simulation.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            polygon:</span>
+<span class="sd">                Polygon without holes representing the exit stage. Polygon can be passed as:</span>
+
+<span class="sd">                * list of 2d points describing the outer boundary</span>
+
+<span class="sd">                * :class:`~shapely.GeometryCollection` consisting only out of :class:`Polygons &lt;shapely.Polygon&gt;`, :class:`MultiPolygons &lt;shapely.MultiPolygon&gt;` and :class:`MultiPoints &lt;shapely.MultiPoint&gt;`</span>
+
+<span class="sd">                * :class:`~shapely.MultiPolygon`</span>
+
+<span class="sd">                * :class:`~shapely.Polygon`</span>
+
+<span class="sd">                * :class:`~shapely.MultiPoint` forming a &quot;simple&quot; polygon when points are interpreted as linear ring without repetition of the start/end point.</span>
+
+<span class="sd">                * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Id of the added exit stage.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">exit_geometry</span> <span class="o">=</span> <span class="n">build_geometry</span><span class="p">(</span><span class="n">polygon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">add_exit_stage</span><span class="p">(</span><span class="n">exit_geometry</span><span class="o">.</span><span class="n">boundary</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="Simulation.add_direct_steering_stage">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.add_direct_steering_stage">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_direct_steering_stage</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add an direct steering stage to the simulation.</span>
+
+<span class="sd">        This stage allows a direct control of the target the agent is walking to.</span>
+<span class="sd">        Thus, it will bypass the tactical and stragecial level of the simulation, but the</span>
+<span class="sd">        operational level will still be active.</span>
+
+<span class="sd">        .. important::</span>
+
+<span class="sd">            A direct steering stage can only be used if it is the only stage in a Journey.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Id of the added direct steering stage.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">add_direct_steering_stage</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Simulation.add_journey">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.add_journey">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_journey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">journey</span><span class="p">:</span> <span class="n">JourneyDescription</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a journey to the simulation.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            journey: Description of the journey.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Id of the added Journey.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">add_journey</span><span class="p">(</span><span class="n">journey</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Simulation.add_agent">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.add_agent">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_agent</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="p">(</span>
+            <span class="n">GeneralizedCentrifugalForceModelAgentParameters</span>
+            <span class="o">|</span> <span class="n">CollisionFreeSpeedModelAgentParameters</span>
+            <span class="o">|</span> <span class="n">CollisionFreeSpeedModelV2AgentParameters</span>
+            <span class="o">|</span> <span class="n">AnticipationVelocityModelAgentParameters</span>
+            <span class="o">|</span> <span class="n">SocialForceModelAgentParameters</span>
+        <span class="p">),</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add an agent to the simulation.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            parameters: Agent Parameters of the newly added model. The parameters have to</span>
+<span class="sd">                match the model used in this simulation. When adding agents with invalid parameters,</span>
+<span class="sd">                or too close to the boundary or other agents, this will cause an error.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Id of the added agent.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">as_native</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="Simulation.mark_agent_for_removal">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.mark_agent_for_removal">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mark_agent_for_removal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Marks an agent for removal.</span>
+
+<span class="sd">        Marks the given agent for removal in the simulation. The agent will be</span>
+<span class="sd">        removed from the simulation in the start of the next :func:`iterate`</span>
+<span class="sd">        call. The removal will take place before any interaction between</span>
+<span class="sd">        agents will be computed.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            agent_id: Id of the agent marked for removal</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            marking for removal was successful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">mark_agent_for_removal</span><span class="p">(</span><span class="n">agent_id</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Simulation.removed_agents">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.removed_agents">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">removed_agents</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;All agents (given by Id) removed in the last iteration.</span>
+
+<span class="sd">        All agents removed from the simulation since the last call of :func:`iterate`.</span>
+<span class="sd">        These agents are can no longer be accessed.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Ids of all removed agents since the last call of :func:`iterate`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">removed_agents</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Simulation.iterate">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.iterate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">iterate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Advance the simulation by the given number of iterations.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            count: Number of iterations to advance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_writer</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration_count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_writer</span><span class="o">.</span><span class="n">begin_writing</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_writer</span><span class="o">.</span><span class="n">write_iteration_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">count</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">iterate</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_writer</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_writer</span><span class="o">.</span><span class="n">write_iteration_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Simulation.switch_agent_journey">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.switch_agent_journey">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">switch_agent_journey</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">agent_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">journey_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">stage_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Switch agent to the given journey at the given stage.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            agent_id: Id of the agent to switch</span>
+<span class="sd">            journey_id: Id of the new journey to follow</span>
+<span class="sd">            stage_id: Id of the stage in the new journey the agent continues with</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">switch_agent_journey</span><span class="p">(</span>
+            <span class="n">agent_id</span><span class="o">=</span><span class="n">agent_id</span><span class="p">,</span> <span class="n">journey_id</span><span class="o">=</span><span class="n">journey_id</span><span class="p">,</span> <span class="n">stage_id</span><span class="o">=</span><span class="n">stage_id</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Simulation.agent_count">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.agent_count">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">agent_count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of agents in the simulation.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Number of agents in the simulation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">agent_count</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Simulation.elapsed_time">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.elapsed_time">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">elapsed_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Elapsed time in seconds since the start of the simulation.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Time in seconds since the start of the simulation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Simulation.delta_time">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.delta_time">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">delta_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Time step length in seconds of one iteration.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Time step length of one iteration.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">delta_time</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Simulation.iteration_count">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.iteration_count">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">iteration_count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of iterations performed since start of the simulation.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Number of iterations performed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">iteration_count</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Simulation.agents">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.agents">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">agents</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Agent</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Agents in the simulation.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Iterator over all agents in the simulation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">wrap_iter</span><span class="p">(</span><span class="n">agents</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="n">agents</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">Agent</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">wrap_iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">agents</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="Simulation.agent">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.agent">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">agent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent_id</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Agent</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Access specific agent in the simulation.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            agent_id: Id of the agent to access</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Agent instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Agent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">agent</span><span class="p">(</span><span class="n">agent_id</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Simulation.agents_in_range">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.agents_in_range">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">agents_in_range</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">distance</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ids of agents within the given distance to the given position.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">             pos:  point around which to search for agents</span>
+<span class="sd">             distance: search radius</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List of ids of agents within the given distance to the given position.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">agents_in_range</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">distance</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Simulation.agents_in_polygon">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.agents_in_polygon">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">agents_in_polygon</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">poly</span><span class="p">:</span> <span class="p">(</span>
+            <span class="nb">str</span>
+            <span class="o">|</span> <span class="n">shapely</span><span class="o">.</span><span class="n">GeometryCollection</span>
+            <span class="o">|</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Polygon</span>
+            <span class="o">|</span> <span class="n">shapely</span><span class="o">.</span><span class="n">MultiPolygon</span>
+            <span class="o">|</span> <span class="n">shapely</span><span class="o">.</span><span class="n">MultiPoint</span>
+            <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span>
+        <span class="p">),</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Agent</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return all ids for agents inside the given polygon.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            poly:</span>
+<span class="sd">                Polygon without holes in which to check for pedestrians. Polygon can be passed as:</span>
+
+<span class="sd">                * list of 2d points describing the outer boundary</span>
+
+<span class="sd">                * :class:`~shapely.GeometryCollection` consisting only out of :class:`Polygons &lt;shapely.Polygon&gt;`, :class:`MultiPolygons &lt;shapely.MultiPolygon&gt;` and :class:`MultiPoints &lt;shapely.MultiPoint&gt;`</span>
+
+<span class="sd">                * :class:`~shapely.MultiPolygon`</span>
+
+<span class="sd">                * :class:`~shapely.Polygon`</span>
+
+<span class="sd">                * :class:`~shapely.MultiPoint` forming a &quot;simple&quot; polygon when points are interpreted as linear ring without repetition of the start/end point.</span>
+
+<span class="sd">                * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            All ids for agents inside given polygon.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">polygon_geometry</span> <span class="o">=</span> <span class="n">build_geometry</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">agents_in_polygon</span><span class="p">(</span><span class="n">polygon_geometry</span><span class="o">.</span><span class="n">boundary</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="Simulation.get_stage">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.get_stage">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_stage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Specific stage in the simulation.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            stage_id: Id of the stage to retrieve.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The stage object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">stage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">get_stage_proxy</span><span class="p">(</span><span class="n">stage_id</span><span class="p">)</span>
+        <span class="k">match</span> <span class="n">stage</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">WaypointProxy</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">WaypointStage</span><span class="p">(</span><span class="n">stage</span><span class="p">)</span>
+            <span class="k">case</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">ExitProxy</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">ExitStage</span><span class="p">(</span><span class="n">stage</span><span class="p">)</span>
+            <span class="k">case</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">NotifiableQueueProxy</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">NotifiableQueueStage</span><span class="p">(</span><span class="n">stage</span><span class="p">)</span>
+            <span class="k">case</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">WaitingSetProxy</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">WaitingSetStage</span><span class="p">(</span><span class="n">stage</span><span class="p">)</span>
+            <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Internal error, unexpected type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">stage</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_tracing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">set_tracing</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_last_trace</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Trace</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">get_last_trace</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Simulation.get_geometry">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.get_geometry">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Geometry</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Current geometry of the simulation.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The geometry of the simulation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Geometry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="Simulation.switch_geometry">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.switch_geometry">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">switch_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="p">:</span> <span class="n">Geometry</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Switch the geometry of the simulation.</span>
+
+<span class="sd">        Exchanges the current geometry with the new one. Checks if all agents</span>
+<span class="sd">        and stages lie within the new geometry.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            geometry: The new geometry to be used in the simulation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">internal_geometry</span> <span class="o">=</span> <span class="n">build_geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">switch_geometry</span><span class="p">(</span><span class="n">internal_geometry</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Author name not set
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, Forschungszentrum Jülich GmbH, IAS-7.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
