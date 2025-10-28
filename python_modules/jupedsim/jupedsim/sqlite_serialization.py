@@ -28,15 +28,7 @@ def uses_latest_database_version(connection: sqlite3.Connection) -> bool:
 
 
 class SqliteTrajectoryWriter(TrajectoryWriter):
-    """Write trajectory data into a sqlite db
-
-    Optionally buffer iteration data in RAM and flush to the
-    sqlite file only when a trigger is hit (buffer full, manual flush, close).
-    This reduces IO frequency while allowing arbitrary triggers for persistence.
-
-    Note: If buffering is enabled, (the last batch of) data is not written to disk 
-    until flush() or close() is called.
-    """
+    """Write trajectory data into a sqlite db"""
 
     def __init__(
         self,
@@ -64,28 +56,18 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         if every_nth_frame < 1:
             raise TrajectoryWriter.Exception("'every_nth_frame' has to be > 0")
         self._every_nth_frame = every_nth_frame
-        # sqlite connection in autocommit mode; we still use explicit BEGIN/COMMIT
-        self._con = sqlite3.connect(self._output_file, isolation_level=None)
+        # sqlite connection (with disabled autocommit mode); we still use explicit BEGIN/COMMIT
+        self._con = sqlite3.connect(self._output_file)#, isolation_level=None)
+        # Don't wait for the OS to persist data
+        self._con.execute("PRAGMA synchronous=OFF;")
+        # Don't allow rollbacks (we don't have need for it)
+        self._con.execute("PRAGMA journal_mode=OFF;")
+        #self._cur = self._con.cursor()
 
         # Buffering options and in-memory buffers
         self._buffer_in_memory = bool(buffer_in_memory)
         self._max_buffered_frames = int(max_buffered_frames) if max_buffered_frames > 0 else 1
-
-        # Buffers: trajectory rows (many rows per frame) and frame->geometry mapping (one per frame)
-        # trajectory row format: (frame, id, pos_x, pos_y, ori_x, ori_y)
-        self._trajectory_buffer: list[tuple] = []
-        # frame row format: (frame, geometry_hash)
-        self._frame_buffer: list[tuple] = []
-        # geometry cache for buffered frames: geo_hash -> wkt
-        self._geometry_map: dict[int, str] = {}
-        # running buffered geometry bbox values (to be merged into metadata on flush)
-        self._buffer_xmin = float("inf")
-        self._buffer_xmax = float("-inf")
-        self._buffer_ymin = float("inf")
-        self._buffer_ymax = float("-inf")
-        # keep track how many frames are buffered (unique frames)
         self._buffered_frame_count = 0
-        self._buffered_frame_set: set[int] = set()
 
     def begin_writing(self, simulation: Simulation) -> None:
         """Begin writing trajectory data.
@@ -143,75 +125,47 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         except sqlite3.Error as e:
             cur.execute("ROLLBACK")
             raise TrajectoryWriter.Exception(f"Error creating database: {e}")
+        finally:
+            if self._buffer_in_memory:
+                # start a transaction for subsequent writes
+                cur.execute("BEGIN")
 
     def write_iteration_state(self, simulation: Simulation) -> None:
         """Write trajectory data of one simulation iteration.
 
         This method is intended to handle serialization of the trajectory data
-        of a single iteration.
-
-        If buffering is disabled this writes to the DB immediately (as before).
-        If buffering is enabled the data is kept in RAM and flushed when the
-        buffer meets a trigger (size limit) or when flush() / close() is called.
+        of a single iteration. If buffering is enabled, data is only written when
+        flush() is called (either manually or automatically when the buffer is full)
         """
         if not self._con:
             raise TrajectoryWriter.Exception("Database not opened.")
 
         iteration = simulation.iteration_count()
-        # Use integer frame number (integer division)
         if iteration % self.every_nth_frame() != 0:
             return
-        frame = iteration // self.every_nth_frame()
-
-        # Build per-agent trajectory rows for this frame first
-        trajectory_rows = [
-            (
-                frame,
-                agent.id,
-                agent.position[0],
-                agent.position[1],
-                agent.orientation[0],
-                agent.orientation[1],
-            )
-            for agent in simulation.agents()
-        ]
-
-        geo_wkt = simulation.get_geometry().as_wkt()
-        geo_hash = hash(geo_wkt)
-
-        # Update per-frame bbox from geometry
-        xmin, ymin, xmax, ymax = from_wkt(geo_wkt).bounds
-        # If buffering, store rows in RAM and update running bbox
-        if self._buffer_in_memory:
-            self._trajectory_buffer.extend(trajectory_rows)
-            # avoid counting same frame multiple times if an external call writes same frame twice
-            if frame not in self._buffered_frame_set:
-                self._frame_buffer.append((frame, geo_hash))
-                self._buffered_frame_set.add(frame)
-                self._buffered_frame_count += 1
-            # store geometry text for any new geometry encountered while buffering
-            if geo_hash not in self._geometry_map:
-                self._geometry_map[geo_hash] = geo_wkt
-            # update running buffered bbox
-            self._buffer_xmin = min(self._buffer_xmin, xmin)
-            self._buffer_xmax = max(self._buffer_xmax, xmax)
-            self._buffer_ymin = min(self._buffer_ymin, ymin)
-            self._buffer_ymax = max(self._buffer_ymax, ymax)
-
-            # Trigger flush if buffer full
-            if self._buffered_frame_count >= self._max_buffered_frames:
-                self.flush()
-            return
-
-        # Non-buffered: write immediately to DB (original behaviour), using transaction
+        frame = iteration / self.every_nth_frame()
         cur = self._con.cursor()
         try:
-            cur.execute("BEGIN")
+            if not self._buffer_in_memory:
+                cur.execute("BEGIN")
+            frame_data = [
+                (
+                    frame,
+                    agent.id,
+                    agent.position[0],
+                    agent.position[1],
+                    agent.orientation[0],
+                    agent.orientation[1],
+                )
+                for agent in simulation.agents()
+            ]
             cur.executemany(
                 "INSERT INTO trajectory_data VALUES(?, ?, ?, ?, ?, ?)",
-                trajectory_rows,
+                frame_data,
             )
 
+            geo_wkt = simulation.get_geometry().as_wkt()
+            geo_hash = hash(geo_wkt)
             cur.execute(
                 "INSERT OR IGNORE INTO geometry(hash, wkt) VALUES(?,?)",
                 (geo_hash, geo_wkt),
@@ -220,6 +174,8 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                 "INSERT INTO frame_data VALUES(?, ?)",
                 (frame, geo_hash),
             )
+
+            xmin, ymin, xmax, ymax = from_wkt(geo_wkt).bounds
 
             old_xmin = self._x_min(cur)
             old_xmax = self._x_max(cur)
@@ -235,11 +191,18 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                     ("ymax", str(max(ymax, float(old_ymax)))),
                 ],
             )
-
-            cur.execute("COMMIT")
+            if not self._buffer_in_memory:
+                cur.execute("COMMIT")
+            else:
+                # Trigger flush if buffer full
+                self._buffered_frame_count += 1
+                if self._buffered_frame_count >= self._max_buffered_frames:
+                    self.flush()
+                return
         except sqlite3.Error as e:
             cur.execute("ROLLBACK")
             raise TrajectoryWriter.Exception(f"Error writing to database: {e}")
+
 
     def flush(self) -> None:
         """Flush any buffered frames to disk in a single transaction.
@@ -252,61 +215,13 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
             return
         cur = self._con.cursor()
         try:
-            cur.execute("BEGIN")
-            # Insert all trajectory rows
-            cur.executemany(
-                "INSERT INTO trajectory_data VALUES(?, ?, ?, ?, ?, ?)",
-                self._trajectory_buffer,
-            )
-            # Insert known geometries (from buffer) with INSERT OR IGNORE
-            geom_items = list(self._geometry_map.items())  # list of (hash, wkt)
-            if geom_items:
-                cur.executemany(
-                    "INSERT OR IGNORE INTO geometry(hash, wkt) VALUES(?,?)",
-                    geom_items,
-                )
-            # Insert frame_data rows (one row per buffered frame)
-            cur.executemany(
-                "INSERT INTO frame_data VALUES(?, ?)",
-                self._frame_buffer,
-            )
-
-            # Merge buffered bbox into metadata (reading old values first)
-            old_xmin = self._x_min(cur)
-            old_xmax = self._x_max(cur)
-            old_ymin = self._y_min(cur)
-            old_ymax = self._y_max(cur)
-
-            merged_xmin = min(self._buffer_xmin, float(old_xmin))
-            merged_xmax = max(self._buffer_xmax, float(old_xmax))
-            merged_ymin = min(self._buffer_ymin, float(old_ymin))
-            merged_ymax = max(self._buffer_ymax, float(old_ymax))
-
-            cur.executemany(
-                "INSERT OR REPLACE INTO metadata(key, value) VALUES(?,?)",
-                [
-                    ("xmin", str(merged_xmin)),
-                    ("xmax", str(merged_xmax)),
-                    ("ymin", str(merged_ymin)),
-                    ("ymax", str(merged_ymax)),
-                ],
-            )
-
             cur.execute("COMMIT")
         except sqlite3.Error as e:
             cur.execute("ROLLBACK")
             raise TrajectoryWriter.Exception(f"Error writing to database: {e}")
         finally:
-            # Clear buffers regardless of success/failure
-            self._trajectory_buffer.clear()
-            self._frame_buffer.clear()
-            self._geometry_map.clear()
-            self._buffer_xmin = float("inf")
-            self._buffer_xmax = float("-inf")
-            self._buffer_ymin = float("inf")
-            self._buffer_ymax = float("-inf")
+            # Reset buffered frame count regardless of success/failure
             self._buffered_frame_count = 0
-            self._buffered_frame_set.clear()
 
     def close(self) -> None:
         """Flush buffer and close DB connection. Call at simulation end."""
@@ -318,7 +233,7 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                 self._con.close()
             finally:
                 self._con = None  # type: ignore[assignment]
-
+    
     def every_nth_frame(self) -> int:
         return self._every_nth_frame
 
