@@ -19,15 +19,130 @@
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Polygon_with_holes_2.h>
 #include <CGAL/Surface_mesh.h>
+#include <CGAL/Triangulation_conformer_2.h>
 #include <CGAL/Triangulation_vertex_base_with_info_2.h>
 #include <CGAL/draw_triangulation_2.h>
 #include <CGAL/mark_domain_in_triangulation.h>
 
 #include <limits>
 #include <memory>
-#include <queue>
 #include <unordered_map>
 #include <vector>
+
+using Kernel = CGAL::Simple_cartesian<double>;
+using Point_2 = Kernel::Point_2;
+
+// for debuging
+void export_triangles(const CDT& cdt, const std::string& filename)
+{
+    std::ofstream out(filename);
+    if(!out) {
+        std::cerr << "Cannot open file " << filename << " for writing." << std::endl;
+        return;
+    }
+
+    for(auto fit = cdt.finite_faces_begin(); fit != cdt.finite_faces_end(); ++fit) {
+        if(!fit->get_in_domain())
+            continue;
+
+        for(int i = 0; i < 3; ++i) {
+            const auto& p = fit->vertex(i)->point();
+            out << CGAL::to_double(p.x()) << "," << CGAL::to_double(p.y()) << " ";
+        }
+        out << "\n";
+    }
+
+    std::cout << "Exported triangles to " << filename << std::endl;
+}
+
+double splitLongConstraints(CDT& cdt, double threshold)
+{
+    std::set<Point_2> points_to_add;
+
+    for(auto eit = cdt.finite_edges_begin(); eit != cdt.finite_edges_end(); ++eit) {
+        if(!cdt.is_constrained(*eit))
+            continue;
+
+        auto face = eit->first;
+        int index = eit->second;
+
+        Point_2 p1 = face->vertex((index + 1) % 3)->point();
+        Point_2 p2 = face->vertex((index + 2) % 3)->point();
+
+        double dx = p2.x() - p1.x();
+        double dy = p2.y() - p1.y();
+        double length_sq = dx * dx + dy * dy;
+
+        if(length_sq > threshold * threshold) {
+            Point_2 midpoint((p1.x() + p2.x()) / 2.0, (p1.y() + p2.y()) / 2.0);
+            points_to_add.insert(midpoint);
+        }
+    }
+
+    for(const auto& point : points_to_add) {
+        try {
+            cdt.insert(point);
+        } catch(...) {
+            std::cerr << "Error inserting point: " << point << std::endl;
+        }
+    }
+
+    return points_to_add.size();
+}
+
+// Add centroids of large triangles
+double addCentroidsOfLargeTriangles(CDT& cdt, double area_threshold)
+{
+    std::set<Point_2> centroids_to_add;
+
+    for(auto fit = cdt.finite_faces_begin(); fit != cdt.finite_faces_end(); ++fit) {
+        Point_2 p1 = fit->vertex(0)->point();
+        Point_2 p2 = fit->vertex(1)->point();
+        Point_2 p3 = fit->vertex(2)->point();
+
+        // Compute signed area using the cross product
+        double area =
+            std::abs(
+                (p2.x() - p1.x()) * (p3.y() - p1.y()) - (p3.x() - p1.x()) * (p2.y() - p1.y())) /
+            2.0;
+
+        if(area > area_threshold) {
+            Point_2 centroid((p1.x() + p2.x() + p3.x()) / 3.0, (p1.y() + p2.y() + p3.y()) / 3.0);
+            centroids_to_add.insert(centroid);
+        }
+    }
+
+    for(const auto& centroid : centroids_to_add) {
+        try {
+            cdt.insert(centroid);
+        } catch(const std::exception& e) {
+            std::cerr << "Exception inserting centroid " << centroid << ": " << e.what()
+                      << std::endl;
+        }
+    }
+
+    return centroids_to_add.size();
+}
+void improveTriangulation(CDT& cdt)
+{
+    std::vector<Point_2> points_to_add;
+    float area_threshold = 16.0;
+    float length_threshold = 8.0;
+    int res1, res2;
+    int max_iterations = cdt.number_of_vertices();
+    int count = 0;
+    while(count++ < max_iterations) {
+        res1 = splitLongConstraints(cdt, length_threshold);
+        res2 = addCentroidsOfLargeTriangles(cdt, area_threshold);
+        if(res1 == 0 && res2 == 0) {
+            break; // No more points to add
+        }
+    }
+
+    for(const auto& point : points_to_add) {
+        cdt.insert(point);
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // NavMeshRoutingEngine
@@ -44,6 +159,9 @@ RoutingEngine::RoutingEngine(const PolyWithHoles& poly)
         cdt.insert_constraint(p.vertices_begin(), p.vertices_end(), true);
     }
     CGAL::mark_domain_in_triangulation(cdt);
+    // improveTriangulation(cdt);
+    // CGAL::make_conforming_Delaunay_2(cdt);
+    // CGAL::mark_domain_in_triangulation(cdt);
     mesh = std::make_unique<Mesh>(cdt);
 }
 
@@ -55,9 +173,21 @@ std::unique_ptr<RoutingEngine> RoutingEngine::Clone() const
     return clone;
 }
 
-Point RoutingEngine::ComputeWaypoint(Point currentPosition, Point destination)
+Point RoutingEngine::ComputeWaypoint(Point currentPosition, Point destination, float path_bias)
 {
-    return ComputeAllWaypoints(currentPosition, destination)[1];
+    auto waypoints = ComputeAllWaypoints(currentPosition, destination, path_bias);
+    //       // --- Debug logging ---
+    // std::cout << "[RoutingEngine] Current Position: ("
+    //           << currentPosition.x << ", " << currentPosition.y << ")\n";
+    // std::cout << "[RoutingEngine] Destination: ("
+    //           << destination.x << ", " << destination.y << ")\n";
+
+    // std::cout << "[RoutingEngine] Waypoints: ";
+    // for (const auto& wp : waypoints) {
+    //     std::cout << "(" << wp.x << ", " << wp.y << ") ";
+    // }
+    // std::cout << std::endl;
+    return waypoints[1];
 }
 
 struct SearchState {
@@ -108,7 +238,8 @@ double length_of_path(const std::vector<Point>& path)
     return segment_sum;
 }
 
-std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Point destination)
+std::vector<Point>
+RoutingEngine::ComputeAllWaypoints(Point currentPosition, Point destination, float path_bias)
 {
     const auto from_pos = CDT::Point{currentPosition.x, currentPosition.y};
     const auto to_pos = CDT::Point{destination.x, destination.y};
@@ -141,7 +272,8 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
             // Now compute the actual path length via funnel algorithm
             // store path and length if this variant is the shortest found so far
             const auto vertex_ids = current_state->path();
-            const auto found_path = straightenPath(currentPosition, destination, vertex_ids);
+            const auto found_path =
+                straightenPath(currentPosition, destination, vertex_ids, path_bias);
             const double found_path_length = length_of_path(found_path);
             if(found_path_length < path_length) {
                 path = found_path;
@@ -267,8 +399,11 @@ CDT::Face_handle RoutingEngine::find_face(K::Point_2 p) const
     return face;
 }
 
-std::vector<Point>
-RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_handle>& path)
+std::vector<Point> RoutingEngine::straightenPath(
+    Point from,
+    Point to,
+    const std::vector<CDT::Face_handle>& path,
+    float path_bias)
 {
     // TODO(kkratz): Remove the 0.2m edge width adjustment and replace this with p[roper
     // arc-paths from the "Efficient Triangulation-Based Pathfinding" publication
@@ -301,6 +436,9 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
     // This is an over estimation but IMO preferable to repeadted allocations.
     // Ideally we replace this with something w.o. allocations
     waypoints.reserve(path.size() + 1);
+
+    const auto base_clearance = 0.2f; // Minimum distance from walls
+
     for(size_t index_portal = 1; index_portal <= portalCount; ++index_portal) {
         const auto face_from = path[index_portal - 1];
         const auto face_to = path[index_portal];
@@ -313,8 +451,24 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
         const auto line_segment_left = portal.p2;
         const auto line_segment_right = portal.p1;
         const auto line_segment_direction = (line_segment_right - line_segment_left).Normalized();
-        const auto candidate_left = line_segment_left + (line_segment_direction * 0.2);
-        const auto candidate_right = line_segment_right - (line_segment_direction * 0.2);
+
+        const float corridor_width = Distance(line_segment_left, line_segment_right);
+        const float available_extra_space = std::max(0.0f, corridor_width - 2.0f * base_clearance);
+        const float max_extra_clearance =
+            available_extra_space * 0.8f; // Use up to 80% of available space
+
+        float left_clearance, right_clearance;
+
+        if(path_bias < 0) {
+            left_clearance = base_clearance;
+            right_clearance = base_clearance + max_extra_clearance * (-path_bias);
+        } else {
+            left_clearance = base_clearance + max_extra_clearance * path_bias;
+            right_clearance = base_clearance;
+        }
+        const auto candidate_left = line_segment_left + (line_segment_direction * left_clearance);
+        const auto candidate_right =
+            line_segment_right - (line_segment_direction * right_clearance);
 
         if(triarea2d(apex, portal_right, candidate_right) <= 0.0) {
             if(apex == portal_right || triarea2d(apex, portal_left, candidate_right) > 0.0) {

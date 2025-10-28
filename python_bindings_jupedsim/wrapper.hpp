@@ -6,13 +6,8 @@
 #define OWNED_WRAPPER(cls)                                                                         \
     struct cls##_Wrapper {                                                                         \
         cls handle;                                                                                \
-        cls##_Wrapper(cls h) : handle(h)                                                           \
-        {                                                                                          \
-        }                                                                                          \
-        ~cls##_Wrapper()                                                                           \
-        {                                                                                          \
-            cls##_Free(handle);                                                                    \
-        }                                                                                          \
+        cls##_Wrapper(cls h) : handle(h) {}                                                        \
+        ~cls##_Wrapper() { cls##_Free(handle); }                                                   \
         cls##_Wrapper(const cls##_Wrapper&) = delete;                                              \
         cls##_Wrapper& operator=(const cls##_Wrapper&) = delete;                                   \
         cls##_Wrapper(cls##_Wrapper&&) = delete;                                                   \
@@ -22,9 +17,7 @@
 #define WRAPPER(cls)                                                                               \
     struct cls##_Wrapper {                                                                         \
         cls handle;                                                                                \
-        cls##_Wrapper(cls h) : handle(h)                                                           \
-        {                                                                                          \
-        }                                                                                          \
+        cls##_Wrapper(cls h) : handle(h) {}                                                        \
         ~cls##_Wrapper() = default;                                                                \
         cls##_Wrapper(const cls##_Wrapper&) = delete;                                              \
         cls##_Wrapper& operator=(const cls##_Wrapper&) = delete;                                   \
