@@ -77,6 +77,11 @@ OperationalModelUpdate CollisionFreeSpeedModelV2::ComputeNewPosition(
     if(direction == Point{}) {
         direction = ped.orientation;
     }
+    // low pass filter
+    const double alpha = 0.2; // adjust between 0 (no smoothing) and 1 (no memory)
+    auto smoothed_direction = ped.orientation * (1.0 - alpha) + direction * alpha;
+    direction = smoothed_direction.Normalized();
+
     const auto spacing = std::accumulate(
         std::begin(neighborhood),
         std::end(neighborhood),
