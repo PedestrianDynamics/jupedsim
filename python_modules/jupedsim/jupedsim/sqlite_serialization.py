@@ -35,6 +35,8 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         *,
         output_file: Path,
         every_nth_frame: int = 4,
+        buffer_in_memory: bool = False,
+        max_buffered_frames: int = 1000,
     ) -> None:
         """SqliteTrajectoryWriter constructor
 
@@ -44,19 +46,28 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                 Note: the file will not be written until the first call to :func:`begin_writing`
             every_nth_frame: int
                 indicates interval between writes, 1 means every frame, 5 every 5th
-
-        Returns:
-            SqliteTrajectoryWriter
+            buffer_in_memory: bool
+                if True, iteration data is kept in RAM and written only when the
+                buffer reaches max_buffered_frames or when flush() / close() is called.
+            max_buffered_frames: int
+                maximum number of frames to keep in RAM before auto-flush.
         """
         self._output_file = output_file
         if every_nth_frame < 1:
             raise TrajectoryWriter.Exception("'every_nth_frame' has to be > 0")
         self._every_nth_frame = every_nth_frame
-        self._con = sqlite3.connect(self._output_file, isolation_level=None)
+        # sqlite connection (with disabled autocommit mode); we still use explicit BEGIN/COMMIT
+        self._con = sqlite3.connect(self._output_file)#, isolation_level=None)
         # Don't wait for the OS to persist data
         self._con.execute("PRAGMA synchronous=OFF;")
         # Don't allow rollbacks (we don't have need for it)
         self._con.execute("PRAGMA journal_mode=OFF;")
+        #self._cur = self._con.cursor()
+
+        # Buffering options and in-memory buffers
+        self._buffer_in_memory = bool(buffer_in_memory)
+        self._max_buffered_frames = int(max_buffered_frames) if max_buffered_frames > 0 else 1
+        self._buffered_frame_count = 0
 
     def begin_writing(self, simulation: Simulation) -> None:
         """Begin writing trajectory data.
@@ -114,12 +125,17 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         except sqlite3.Error as e:
             cur.execute("ROLLBACK")
             raise TrajectoryWriter.Exception(f"Error creating database: {e}")
+        finally:
+            if self._buffer_in_memory:
+                # start a transaction for subsequent writes
+                cur.execute("BEGIN")
 
     def write_iteration_state(self, simulation: Simulation) -> None:
         """Write trajectory data of one simulation iteration.
 
         This method is intended to handle serialization of the trajectory data
-        of a single iteration.
+        of a single iteration. If buffering is enabled, data is only written when
+        flush() is called (either manually or automatically when the buffer is full)
         """
         if not self._con:
             raise TrajectoryWriter.Exception("Database not opened.")
@@ -130,7 +146,8 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         frame = iteration / self.every_nth_frame()
         cur = self._con.cursor()
         try:
-            cur.execute("BEGIN")
+            if not self._buffer_in_memory:
+                cur.execute("BEGIN")
             frame_data = [
                 (
                     frame,
@@ -174,12 +191,49 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                     ("ymax", str(max(ymax, float(old_ymax)))),
                 ],
             )
-
-            cur.execute("COMMIT")
+            if not self._buffer_in_memory:
+                cur.execute("COMMIT")
+            else:
+                # Trigger flush if buffer full
+                self._buffered_frame_count += 1
+                if self._buffered_frame_count >= self._max_buffered_frames:
+                    self.flush()
+                return
         except sqlite3.Error as e:
             cur.execute("ROLLBACK")
             raise TrajectoryWriter.Exception(f"Error writing to database: {e}")
 
+
+    def flush(self) -> None:
+        """Flush any buffered frames to disk in a single transaction.
+
+        Safe to call multiple times; if the buffer is empty, this won't execute.
+        """
+        if not self._buffer_in_memory:
+            return
+        if self._buffered_frame_count == 0:
+            return
+        cur = self._con.cursor()
+        try:
+            cur.execute("COMMIT")
+        except sqlite3.Error as e:
+            cur.execute("ROLLBACK")
+            raise TrajectoryWriter.Exception(f"Error writing to database: {e}")
+        finally:
+            # Reset buffered frame count regardless of success/failure
+            self._buffered_frame_count = 0
+
+    def close(self) -> None:
+        """Flush buffer and close DB connection. Call at simulation end."""
+        # Flush pending data (if any)
+        if self._buffer_in_memory:
+            self.flush()
+        if self._con:
+            try:
+                self._con.close()
+            finally:
+                self._con = None  # type: ignore[assignment]
+    
     def every_nth_frame(self) -> int:
         return self._every_nth_frame
 
