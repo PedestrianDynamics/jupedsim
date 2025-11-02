@@ -365,15 +365,7 @@ document.write(`
 <div class="viewcode-block" id="SqliteTrajectoryWriter">
 <a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.SqliteTrajectoryWriter">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SqliteTrajectoryWriter</span><span class="p">(</span><span class="n">TrajectoryWriter</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write trajectory data into a sqlite db</span>
-
-<span class="sd">    Optionally buffer iteration data in RAM and flush to the</span>
-<span class="sd">    sqlite file only when a trigger is hit (buffer full, manual flush, close).</span>
-<span class="sd">    This reduces IO frequency while allowing arbitrary triggers for persistence.</span>
-
-<span class="sd">    Note: If buffering is enabled, (the last batch of) data is not written to disk </span>
-<span class="sd">    until flush() or close() is called.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write trajectory data into a sqlite db&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -401,28 +393,18 @@ document.write(`
         <span class="k">if</span> <span class="n">every_nth_frame</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">TrajectoryWriter</span><span class="o">.</span><span class="n">Exception</span><span class="p">(</span><span class="s2">&quot;&#39;every_nth_frame&#39; has to be &gt; 0&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_every_nth_frame</span> <span class="o">=</span> <span class="n">every_nth_frame</span>
-        <span class="c1"># sqlite connection in autocommit mode; we still use explicit BEGIN/COMMIT</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_con</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_file</span><span class="p">,</span> <span class="n">isolation_level</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># sqlite connection (with disabled autocommit mode); we still use explicit BEGIN/COMMIT</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_con</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_file</span><span class="p">)</span><span class="c1">#, isolation_level=None)</span>
+        <span class="c1"># Don&#39;t wait for the OS to persist data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_con</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;PRAGMA synchronous=OFF;&quot;</span><span class="p">)</span>
+        <span class="c1"># Don&#39;t allow rollbacks (we don&#39;t have need for it)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_con</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;PRAGMA journal_mode=OFF;&quot;</span><span class="p">)</span>
+        <span class="c1">#self._cur = self._con.cursor()</span>
 
         <span class="c1"># Buffering options and in-memory buffers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_in_memory</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">buffer_in_memory</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_max_buffered_frames</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_buffered_frames</span><span class="p">)</span> <span class="k">if</span> <span class="n">max_buffered_frames</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span>
-
-        <span class="c1"># Buffers: trajectory rows (many rows per frame) and frame-&gt;geometry mapping (one per frame)</span>
-        <span class="c1"># trajectory row format: (frame, id, pos_x, pos_y, ori_x, ori_y)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_trajectory_buffer</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="c1"># frame row format: (frame, geometry_hash)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_frame_buffer</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="c1"># geometry cache for buffered frames: geo_hash -&gt; wkt</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="c1"># running buffered geometry bbox values (to be merged into metadata on flush)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_xmin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_xmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_ymin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_ymax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
-        <span class="c1"># keep track how many frames are buffered (unique frames)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffered_frame_count</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_buffered_frame_set</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
 <div class="viewcode-block" id="SqliteTrajectoryWriter.begin_writing">
 <a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.SqliteTrajectoryWriter.begin_writing">[docs]</a>
@@ -481,7 +463,11 @@ document.write(`
             <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;COMMIT&quot;</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;ROLLBACK&quot;</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="n">TrajectoryWriter</span><span class="o">.</span><span class="n">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error creating database: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+            <span class="k">raise</span> <span class="n">TrajectoryWriter</span><span class="o">.</span><span class="n">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error creating database: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_in_memory</span><span class="p">:</span>
+                <span class="c1"># start a transaction for subsequent writes</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;BEGIN&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SqliteTrajectoryWriter.write_iteration_state">
@@ -490,70 +476,38 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write trajectory data of one simulation iteration.</span>
 
 <span class="sd">        This method is intended to handle serialization of the trajectory data</span>
-<span class="sd">        of a single iteration.</span>
-
-<span class="sd">        If buffering is disabled this writes to the DB immediately (as before).</span>
-<span class="sd">        If buffering is enabled the data is kept in RAM and flushed when the</span>
-<span class="sd">        buffer meets a trigger (size limit) or when flush() / close() is called.</span>
+<span class="sd">        of a single iteration. If buffering is enabled, data is only written when</span>
+<span class="sd">        flush() is called (either manually or automatically when the buffer is full)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_con</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">TrajectoryWriter</span><span class="o">.</span><span class="n">Exception</span><span class="p">(</span><span class="s2">&quot;Database not opened.&quot;</span><span class="p">)</span>
 
         <span class="n">iteration</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">iteration_count</span><span class="p">()</span>
-        <span class="c1"># Use integer frame number (integer division)</span>
         <span class="k">if</span> <span class="n">iteration</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">every_nth_frame</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span>
-        <span class="n">frame</span> <span class="o">=</span> <span class="n">iteration</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">every_nth_frame</span><span class="p">()</span>
-
-        <span class="c1"># Build per-agent trajectory rows for this frame first</span>
-        <span class="n">trajectory_rows</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span>
-                <span class="n">frame</span><span class="p">,</span>
-                <span class="n">agent</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-                <span class="n">agent</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                <span class="n">agent</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                <span class="n">agent</span><span class="o">.</span><span class="n">orientation</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                <span class="n">agent</span><span class="o">.</span><span class="n">orientation</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="n">simulation</span><span class="o">.</span><span class="n">agents</span><span class="p">()</span>
-        <span class="p">]</span>
-
-        <span class="n">geo_wkt</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()</span><span class="o">.</span><span class="n">as_wkt</span><span class="p">()</span>
-        <span class="n">geo_hash</span> <span class="o">=</span> <span class="nb">hash</span><span class="p">(</span><span class="n">geo_wkt</span><span class="p">)</span>
-
-        <span class="c1"># Update per-frame bbox from geometry</span>
-        <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">from_wkt</span><span class="p">(</span><span class="n">geo_wkt</span><span class="p">)</span><span class="o">.</span><span class="n">bounds</span>
-        <span class="c1"># If buffering, store rows in RAM and update running bbox</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_in_memory</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_trajectory_buffer</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">trajectory_rows</span><span class="p">)</span>
-            <span class="c1"># avoid counting same frame multiple times if an external call writes same frame twice</span>
-            <span class="k">if</span> <span class="n">frame</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffered_frame_set</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_frame_buffer</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">frame</span><span class="p">,</span> <span class="n">geo_hash</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_buffered_frame_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_buffered_frame_count</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="c1"># store geometry text for any new geometry encountered while buffering</span>
-            <span class="k">if</span> <span class="n">geo_hash</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_map</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_map</span><span class="p">[</span><span class="n">geo_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">geo_wkt</span>
-            <span class="c1"># update running buffered bbox</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_xmin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_xmin</span><span class="p">,</span> <span class="n">xmin</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_xmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_xmax</span><span class="p">,</span> <span class="n">xmax</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_ymin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_ymin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_ymax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_ymax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)</span>
-
-            <span class="c1"># Trigger flush if buffer full</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffered_frame_count</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_buffered_frames</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
-            <span class="k">return</span>
-
-        <span class="c1"># Non-buffered: write immediately to DB (original behaviour), using transaction</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">iteration</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">every_nth_frame</span><span class="p">()</span>
         <span class="n">cur</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;BEGIN&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_in_memory</span><span class="p">:</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;BEGIN&quot;</span><span class="p">)</span>
+            <span class="n">frame_data</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span>
+                    <span class="n">frame</span><span class="p">,</span>
+                    <span class="n">agent</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                    <span class="n">agent</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">agent</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="n">agent</span><span class="o">.</span><span class="n">orientation</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">agent</span><span class="o">.</span><span class="n">orientation</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="n">simulation</span><span class="o">.</span><span class="n">agents</span><span class="p">()</span>
+            <span class="p">]</span>
             <span class="n">cur</span><span class="o">.</span><span class="n">executemany</span><span class="p">(</span>
                 <span class="s2">&quot;INSERT INTO trajectory_data VALUES(?, ?, ?, ?, ?, ?)&quot;</span><span class="p">,</span>
-                <span class="n">trajectory_rows</span><span class="p">,</span>
+                <span class="n">frame_data</span><span class="p">,</span>
             <span class="p">)</span>
 
+            <span class="n">geo_wkt</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()</span><span class="o">.</span><span class="n">as_wkt</span><span class="p">()</span>
+            <span class="n">geo_hash</span> <span class="o">=</span> <span class="nb">hash</span><span class="p">(</span><span class="n">geo_wkt</span><span class="p">)</span>
             <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
                 <span class="s2">&quot;INSERT OR IGNORE INTO geometry(hash, wkt) VALUES(?,?)&quot;</span><span class="p">,</span>
                 <span class="p">(</span><span class="n">geo_hash</span><span class="p">,</span> <span class="n">geo_wkt</span><span class="p">),</span>
@@ -562,6 +516,8 @@ document.write(`
                 <span class="s2">&quot;INSERT INTO frame_data VALUES(?, ?)&quot;</span><span class="p">,</span>
                 <span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">geo_hash</span><span class="p">),</span>
             <span class="p">)</span>
+
+            <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">from_wkt</span><span class="p">(</span><span class="n">geo_wkt</span><span class="p">)</span><span class="o">.</span><span class="n">bounds</span>
 
             <span class="n">old_xmin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_min</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
             <span class="n">old_xmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_max</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
@@ -577,11 +533,18 @@ document.write(`
                     <span class="p">(</span><span class="s2">&quot;ymax&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">ymax</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">old_ymax</span><span class="p">)))),</span>
                 <span class="p">],</span>
             <span class="p">)</span>
-
-            <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;COMMIT&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_in_memory</span><span class="p">:</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;COMMIT&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Trigger flush if buffer full</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_buffered_frame_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffered_frame_count</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_buffered_frames</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+                <span class="k">return</span>
         <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;ROLLBACK&quot;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="n">TrajectoryWriter</span><span class="o">.</span><span class="n">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error writing to database: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="SqliteTrajectoryWriter.flush">
@@ -597,61 +560,13 @@ document.write(`
             <span class="k">return</span>
         <span class="n">cur</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;BEGIN&quot;</span><span class="p">)</span>
-            <span class="c1"># Insert all trajectory rows</span>
-            <span class="n">cur</span><span class="o">.</span><span class="n">executemany</span><span class="p">(</span>
-                <span class="s2">&quot;INSERT INTO trajectory_data VALUES(?, ?, ?, ?, ?, ?)&quot;</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_trajectory_buffer</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="c1"># Insert known geometries (from buffer) with INSERT OR IGNORE</span>
-            <span class="n">geom_items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_geometry_map</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>  <span class="c1"># list of (hash, wkt)</span>
-            <span class="k">if</span> <span class="n">geom_items</span><span class="p">:</span>
-                <span class="n">cur</span><span class="o">.</span><span class="n">executemany</span><span class="p">(</span>
-                    <span class="s2">&quot;INSERT OR IGNORE INTO geometry(hash, wkt) VALUES(?,?)&quot;</span><span class="p">,</span>
-                    <span class="n">geom_items</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="c1"># Insert frame_data rows (one row per buffered frame)</span>
-            <span class="n">cur</span><span class="o">.</span><span class="n">executemany</span><span class="p">(</span>
-                <span class="s2">&quot;INSERT INTO frame_data VALUES(?, ?)&quot;</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_frame_buffer</span><span class="p">,</span>
-            <span class="p">)</span>
-
-            <span class="c1"># Merge buffered bbox into metadata (reading old values first)</span>
-            <span class="n">old_xmin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_min</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
-            <span class="n">old_xmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_max</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
-            <span class="n">old_ymin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_min</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
-            <span class="n">old_ymax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_max</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
-
-            <span class="n">merged_xmin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_xmin</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">old_xmin</span><span class="p">))</span>
-            <span class="n">merged_xmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_xmax</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">old_xmax</span><span class="p">))</span>
-            <span class="n">merged_ymin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_ymin</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">old_ymin</span><span class="p">))</span>
-            <span class="n">merged_ymax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_ymax</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">old_ymax</span><span class="p">))</span>
-
-            <span class="n">cur</span><span class="o">.</span><span class="n">executemany</span><span class="p">(</span>
-                <span class="s2">&quot;INSERT OR REPLACE INTO metadata(key, value) VALUES(?,?)&quot;</span><span class="p">,</span>
-                <span class="p">[</span>
-                    <span class="p">(</span><span class="s2">&quot;xmin&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">merged_xmin</span><span class="p">)),</span>
-                    <span class="p">(</span><span class="s2">&quot;xmax&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">merged_xmax</span><span class="p">)),</span>
-                    <span class="p">(</span><span class="s2">&quot;ymin&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">merged_ymin</span><span class="p">)),</span>
-                    <span class="p">(</span><span class="s2">&quot;ymax&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">merged_ymax</span><span class="p">)),</span>
-                <span class="p">],</span>
-            <span class="p">)</span>
-
             <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;COMMIT&quot;</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;ROLLBACK&quot;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="n">TrajectoryWriter</span><span class="o">.</span><span class="n">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error writing to database: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">finally</span><span class="p">:</span>
-            <span class="c1"># Clear buffers regardless of success/failure</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_trajectory_buffer</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_frame_buffer</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_map</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_xmin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_xmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_ymin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_ymax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_buffered_frame_count</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_buffered_frame_set</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+            <span class="c1"># Reset buffered frame count regardless of success/failure</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffered_frame_count</span> <span class="o">=</span> <span class="mi">0</span></div>
 
 
 <div class="viewcode-block" id="SqliteTrajectoryWriter.close">
@@ -667,7 +582,7 @@ document.write(`
             <span class="k">finally</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_con</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span></div>
 
-
+    
 <div class="viewcode-block" id="SqliteTrajectoryWriter.every_nth_frame">
 <a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.SqliteTrajectoryWriter.every_nth_frame">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">every_nth_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>

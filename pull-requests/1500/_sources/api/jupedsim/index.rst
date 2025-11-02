@@ -1997,13 +1997,6 @@ Attributes
 
    Write trajectory data into a sqlite db
 
-   Optionally buffer iteration data in RAM and flush to the
-   sqlite file only when a trigger is hit (buffer full, manual flush, close).
-   This reduces IO frequency while allowing arbitrary triggers for persistence.
-
-   Note: If buffering is enabled, (the last batch of) data is not written to disk
-   until flush() or close() is called.
-
 
    .. py:method:: begin_writing(simulation: jupedsim.simulation.Simulation) -> None
 
@@ -2048,11 +2041,8 @@ Attributes
       Write trajectory data of one simulation iteration.
 
       This method is intended to handle serialization of the trajectory data
-      of a single iteration.
-
-      If buffering is disabled this writes to the DB immediately (as before).
-      If buffering is enabled the data is kept in RAM and flushed when the
-      buffer meets a trigger (size limit) or when flush() / close() is called.
+      of a single iteration. If buffering is enabled, data is only written when
+      flush() is called (either manually or automatically when the buffer is full)
 
 
 
