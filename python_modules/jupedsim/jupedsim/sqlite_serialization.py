@@ -46,19 +46,17 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
             every_nth_frame: int
                 indicates interval between writes, 1 means every frame, 5 every 5th
             commit_every_nth_write: int
-                number of frames to keep in RAM before writing them to disk, triggered vai flush().
+                number of frames to keep in RAM before writing them to disk.
         """
         self._output_file = output_file
         if every_nth_frame < 1:
             raise TrajectoryWriter.Exception("'every_nth_frame' has to be > 0")
         self._every_nth_frame = every_nth_frame
-        # sqlite connection (with disabled autocommit mode); we still use explicit BEGIN/COMMIT
-        self._con = sqlite3.connect(self._output_file)#, isolation_level=None)
+        self._con = sqlite3.connect(self._output_file)
         # Don't wait for the OS to persist data
         self._con.execute("PRAGMA synchronous=OFF;")
         # Don't allow rollbacks (we don't have need for it)
         self._con.execute("PRAGMA journal_mode=OFF;")
-        #self._cur = self._con.cursor()
 
         # Buffering options
         self._commit_every_nth_write = int(commit_every_nth_write) if commit_every_nth_write > 0 else 1
@@ -124,8 +122,8 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         """Write trajectory data of one simulation iteration.
 
         This method is intended to handle serialization of the trajectory data
-        of a single iteration. If buffering is enabled, data is only written when
-        flush() is called (either manually or automatically when the buffer is full)
+        of a single iteration. The default behaviour is to buffer frames in memory
+        and only writing to disk when the buffer is full or close() is called.
         """
 
         if not self._con:
@@ -183,32 +181,15 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
             # Trigger flush if buffer full
             self._buffered_frame_count += 1
             if self._buffered_frame_count >= self._commit_every_nth_write:
-                self.flush()
-            #return()
+                cur.execute("COMMIT")
+                self._buffered_frame_count = 0
         except sqlite3.Error as e:
             raise TrajectoryWriter.Exception(f"Error writing to database: {e}")
-
-
-    def flush(self) -> None:
-        """Flush any buffered frames to disk in a single transaction.
-
-        Safe to call multiple times; if the buffer is empty, this won't execute.
-        """
-        if self._buffered_frame_count == 0:
-            return
-        cur = self._con.cursor()
-        try:
-            cur.execute("COMMIT")
-        except sqlite3.Error as e:
-            raise TrajectoryWriter.Exception(f"Error writing to database: {e}")
-        finally:
-            # Reset buffered frame count regardless of success/failure
-            self._buffered_frame_count = 0
 
     def close(self) -> None:
         """Flush buffer and close DB connection. Call at simulation end."""
-        # Flush pending data (if any)
-        self.flush()
+        cur = self._con.cursor()
+        cur.execute("COMMIT")
         if self._con:
             try:
                 self._con.close()
