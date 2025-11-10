@@ -200,7 +200,7 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                 self._con.close()
             finally:
                 self._con = None  # type: ignore[assignment]
-    
+
     def every_nth_frame(self) -> int:
         return self._every_nth_frame
 
