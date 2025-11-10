@@ -1990,7 +1990,7 @@ Attributes
       velocity of this agent.
 
 
-.. py:class:: SqliteTrajectoryWriter(*, output_file: pathlib.Path, every_nth_frame: int = 4, buffer_in_memory: bool = False, max_buffered_frames: int = 1000)
+.. py:class:: SqliteTrajectoryWriter(*, output_file: pathlib.Path, every_nth_frame: int = 4, commit_every_nth_write: int = 100)
 
    Bases: :py:obj:`jupedsim.serialization.TrajectoryWriter`
 
@@ -2028,21 +2028,13 @@ Attributes
 
 
 
-   .. py:method:: flush() -> None
-
-      Flush any buffered frames to disk in a single transaction.
-
-      Safe to call multiple times; if the buffer is empty, this won't execute.
-
-
-
    .. py:method:: write_iteration_state(simulation: jupedsim.simulation.Simulation) -> None
 
       Write trajectory data of one simulation iteration.
 
       This method is intended to handle serialization of the trajectory data
-      of a single iteration. If buffering is enabled, data is only written when
-      flush() is called (either manually or automatically when the buffer is full)
+      of a single iteration. The default behaviour is to buffer frames in memory
+      and only writing to disk when the buffer is full or close() is called.
 
 
 

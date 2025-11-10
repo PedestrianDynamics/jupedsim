@@ -562,7 +562,7 @@ Left-facing groups will opt to exit through the right door, while right-facing g
 <span class="k">for</span> <span class="n">number</span><span class="p">,</span> <span class="n">simulation</span> <span class="ow">in</span> <span class="n">simulations</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
     <span class="k">while</span> <span class="n">simulation</span><span class="o">.</span><span class="n">agent_count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">simulation</span><span class="o">.</span><span class="n">iteration_count</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">3000</span><span class="p">:</span>
         <span class="n">simulation</span><span class="o">.</span><span class="n">iterate</span><span class="p">()</span>
-
+    <span class="n">simulation</span><span class="o">.</span><span class="n">_writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     <span class="n">trajectory_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;trajectories_number_agents_</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">.sqlite&quot;</span>
     <span class="n">trajectory_files</span><span class="p">[</span><span class="n">number</span><span class="p">]</span> <span class="o">=</span> <span class="n">trajectory_file</span>
 </pre></div>

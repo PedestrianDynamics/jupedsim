@@ -494,8 +494,7 @@ Here, we will use the built-in <a class="reference internal" href="../api/jupeds
     <span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModel</span><span class="p">(),</span>
     <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span>
     <span class="n">trajectory_writer</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">SqliteTrajectoryWriter</span><span class="p">(</span>
-        <span class="n">output_file</span><span class="o">=</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">trajectory_file</span><span class="p">),</span>
-        <span class="n">buffer_in_memory</span><span class="o">=</span><span class="kc">True</span>
+        <span class="n">output_file</span><span class="o">=</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">trajectory_file</span><span class="p">)</span>
     <span class="p">),</span>
 <span class="p">)</span>
 </pre></div>
@@ -543,7 +542,7 @@ At the end of the simulation we need to explicitly close the output file which w
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="p">(</span>
     <span class="n">simulation_cfsm</span><span class="o">.</span><span class="n">agent_count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span>
-    <span class="ow">and</span> <span class="n">simulation_cfsm</span><span class="o">.</span><span class="n">iteration_count</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">2000</span>
+    <span class="ow">and</span> <span class="n">simulation_cfsm</span><span class="o">.</span><span class="n">iteration_count</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">10000</span>
 <span class="p">):</span>
     <span class="n">simulation_cfsm</span><span class="o">.</span><span class="n">iterate</span><span class="p">()</span>
 
@@ -634,7 +633,7 @@ The first step here, is to have a look at the trajectories of both:</p>
 </div>
 </details>
 <div class="cell_output docutils container">
-<img alt="../_images/82451374624257d3b3432387370910179dfb3da2f1fe48f2792f891b628f1ee8.png" src="../_images/82451374624257d3b3432387370910179dfb3da2f1fe48f2792f891b628f1ee8.png" />
+<img alt="../_images/b91883328d34ad1ad8327ffce466b65808834e43c6d8bbaeeff913218c2906f6.png" src="../_images/b91883328d34ad1ad8327ffce466b65808834e43c6d8bbaeeff913218c2906f6.png" />
 </div>
 </div>
 <p>But we do not only want to have a qualitative comparision, but also a quantitive one.
@@ -718,7 +717,7 @@ First, we create a measurement line at the beginning of the bottleneck:</p>
 </div>
 </details>
 <div class="cell_output docutils container">
-<img alt="../_images/82546332fca117d2fa113f4a2a14f0e703f8340bcaf98f15833d359f410e84a8.png" src="../_images/82546332fca117d2fa113f4a2a14f0e703f8340bcaf98f15833d359f410e84a8.png" />
+<img alt="../_images/983bf43710af88e86835ce6ab2889488adf9d079f7781a09540d3be26ad7e050.png" src="../_images/983bf43710af88e86835ce6ab2889488adf9d079f7781a09540d3be26ad7e050.png" />
 </div>
 </div>
 </section>

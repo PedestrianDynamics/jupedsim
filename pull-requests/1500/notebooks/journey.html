@@ -650,6 +650,7 @@ For this demonstration, the trajectories will be recorded in an sqlite database.
 
     <span class="k">while</span> <span class="n">simulation</span><span class="o">.</span><span class="n">agent_count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">simulation</span><span class="o">.</span><span class="n">iterate</span><span class="p">()</span>
+    <span class="n">simulation</span><span class="o">.</span><span class="n">_writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">filename</span><span class="p">,</span> <span class="n">simulation</span><span class="o">.</span><span class="n">iteration_count</span><span class="p">()</span>
 </pre></div>

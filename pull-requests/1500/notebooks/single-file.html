@@ -692,6 +692,7 @@ document.write(`
 
     <span class="k">while</span> <span class="n">simulation</span><span class="o">.</span><span class="n">iteration_count</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">number_iterations</span><span class="p">:</span>
         <span class="n">simulation</span><span class="o">.</span><span class="n">iterate</span><span class="p">()</span>
+    <span class="n">simulation</span><span class="o">.</span><span class="n">_writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">trajectory_file</span>
 </pre></div>
