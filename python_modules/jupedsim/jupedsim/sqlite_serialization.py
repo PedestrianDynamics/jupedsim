@@ -58,8 +58,12 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         # Don't allow rollbacks (we don't have need for it)
         self._con.execute("PRAGMA journal_mode=OFF;")
 
-        # Buffering options
-        self._commit_every_nth_write = int(commit_every_nth_write) if commit_every_nth_write > 0 else 1
+        # Buffering checks
+        if commit_every_nth_write < 1:
+            raise TrajectoryWriter.Exception(
+                "'commit_every_nth_write' has to be > 0"
+            )
+        self._commit_every_nth_write = commit_every_nth_write
         self._buffered_frame_count = 0
 
     def begin_writing(self, simulation: Simulation) -> None:
@@ -188,8 +192,9 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
 
     def close(self) -> None:
         """Flush buffer and close DB connection. Call at simulation end."""
-        cur = self._con.cursor()
-        cur.execute("COMMIT")
+        if self._buffered_frame_count != 0:
+            cur = self._con.cursor()
+            cur.execute("COMMIT")
         if self._con:
             try:
                 self._con.close()
