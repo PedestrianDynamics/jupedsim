@@ -25,10 +25,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-      - name: Set up Python 3.13
+      - name: Set up Python 3.14
         uses: actions/setup-python@v6
         with:
-          python-version: "3.13"
+          python-version: "3.14"
       - name: Install dependencies
         run: pip install ruff
       - name: Install clang-format-19
@@ -48,10 +48,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-      - name: Set up Python 3.13
+      - name: Set up Python 3.14
         uses: actions/setup-python@v6
         with:
-          python-version: "3.13"
+          python-version: "3.14"
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Build & test with ${{ matrix.toolchain.cc }} / ${{ matrix.toolchain.cxx }}
@@ -65,10 +65,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-      - name: Set up Python 3.13
+      - name: Set up Python 3.14
         uses: actions/setup-python@v6
         with:
-          python-version: "3.13"
+          python-version: "3.14"
       - name: Install jupedsim
         run: |
           python3 -m pip install .
@@ -151,7 +151,7 @@ jobs:
       - uses: actions/setup-python@v6
         name: Install Python
         with:
-          python-version: 3.13
+          python-version: 3.14
       - name: Install dependencies
         run: python -m pip install wheel build setuptools
       - name: Build sdist
@@ -175,34 +175,22 @@ jobs:
         include:
           - os: ubuntu-latest
             cibw_archs: "x86_64"
-            cibw_build: "cp310-*"
-          - os: ubuntu-latest
-            cibw_archs: "x86_64"
-            cibw_build: "cp311-*"
-          - os: ubuntu-latest
-            cibw_archs: "x86_64"
             cibw_build: "cp312-*"
           - os: ubuntu-latest
             cibw_archs: "x86_64"
             cibw_build: "cp313-*"
-          - os: windows-latest
-            cibw_archs: "auto64"
-            cibw_build: "cp310-*"
-          - os: windows-latest
-            cibw_archs: "auto64"
-            cibw_build: "cp311-*"
+          - os: ubuntu-latest
+            cibw_archs: "x86_64"
+            cibw_build: "cp314-*"
           - os: windows-latest
             cibw_archs: "auto64"
             cibw_build: "cp312-*"
           - os: windows-latest
             cibw_archs: "auto64"
             cibw_build: "cp313-*"
-          - os: macos-14
-            cibw_archs: "x86_64"
-            cibw_build: "cp310-*"
-          - os: macos-14
-            cibw_archs: "x86_64"
-            cibw_build: "cp311-*"
+          - os: windows-latest
+            cibw_archs: "auto64"
+            cibw_build: "cp314-*"
           - os: macos-14
             cibw_archs: "x86_64"
             cibw_build: "cp312-*"
@@ -210,17 +198,17 @@ jobs:
             cibw_archs: "x86_64"
             cibw_build: "cp313-*"
           - os: macos-14
-            cibw_archs: "arm64"
-            cibw_build: "cp310-*"
-          - os: macos-14
-            cibw_archs: "arm64"
-            cibw_build: "cp311-*"
+            cibw_archs: "x86_64"
+            cibw_build: "cp314-*"
           - os: macos-14
             cibw_archs: "arm64"
             cibw_build: "cp312-*"
           - os: macos-14
             cibw_archs: "arm64"
             cibw_build: "cp313-*"
+          - os: macos-14
+            cibw_archs: "arm64"
+            cibw_build: "cp314-*"
     steps:
       - uses: actions/checkout@v5
       - name: Build wheels for CPython ${{ matrix.cibw_build }} on ${{ matrix.cibw_archs }}
@@ -251,7 +239,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-14, macos-14, macos-15, macos-26]
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.12", "3.13", "3.14"]
     steps:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
@@ -275,10 +263,10 @@ jobs:
     needs: [build_sdist]
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Python 3.13
+      - name: Set up Python 3.14
         uses: actions/setup-python@v6
         with:
-          python-version: 3.13
+          python-version: 3.14
       - name: Download packages
         uses: actions/Download-artifact@v6
         with:
