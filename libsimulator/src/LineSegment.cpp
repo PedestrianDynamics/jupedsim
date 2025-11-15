@@ -1,18 +1,14 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "LineSegment.hpp"
 
-#include "AABB.hpp"
-#include "GeometricFunctions.hpp"
-#include "Logger.hpp"
 #include "Macros.hpp"
-#include "Mathematics.hpp"
 #include "Point.hpp"
 
+#include <CGAL/Distance_2/Point_2_Segment_2.h>
 #include <CGAL/Simple_cartesian.h>
-#include <CGAL/intersections.h>
-#include <boost/variant.hpp>
 
-#include <vector>
+#include <cmath>
+#include <utility>
 
 LineSegment::LineSegment(Point _p1, Point _p2) : p1(std::move(_p1)), p2(std::move(_p2))
 {

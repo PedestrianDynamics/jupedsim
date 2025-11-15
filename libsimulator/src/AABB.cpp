@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "AABB.hpp"
 
+#include "LineSegment.hpp"
+#include "Point.hpp"
+
 static bool intersectsLine(const AABB& boundingBox, const LineSegment& lineSegment)
 {
     const Point base = lineSegment.p1;

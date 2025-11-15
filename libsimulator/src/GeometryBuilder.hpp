@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CollisionGeometry.hpp"
+#include "Point.hpp"
 #include "Polygon.hpp"
 
 #include <vector>

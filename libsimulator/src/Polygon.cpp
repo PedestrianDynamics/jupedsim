@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Polygon.hpp"
 
+#include "Point.hpp"
 #include "SimulationError.hpp"
 
 #include <CGAL/enum.h>
 #include <CGAL/number_utils.h>
 
-#include <stdexcept>
+#include <algorithm>
+#include <tuple>
 #include <vector>
 
 Polygon::Polygon(const std::vector<Point>& points)

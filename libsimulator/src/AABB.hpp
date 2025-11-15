@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "IteratorPair.hpp"
 #include "LineSegment.hpp"
 #include "Point.hpp"
 #include "SimulationError.hpp"
 
+#include <algorithm>
 #include <limits>
 
 struct AABB {

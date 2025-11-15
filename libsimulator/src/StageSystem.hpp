@@ -2,6 +2,8 @@
 #pragma once
 
 #include "CollisionGeometry.hpp"
+#include "GenericAgent.hpp"
+#include "NeighborhoodSearch.hpp"
 #include "Stage.hpp"
 #include "StageManager.hpp"
 

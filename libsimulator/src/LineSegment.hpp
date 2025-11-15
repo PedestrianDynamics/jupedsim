@@ -3,8 +3,7 @@
 
 #include "Point.hpp"
 
-#include <string>
-#include <vector>
+#include <fmt/core.h>
 
 class LineSegment
 {

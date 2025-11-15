@@ -2,10 +2,13 @@
 #pragma once
 
 #include "HashCombine.hpp"
-#include "IteratorPair.hpp"
 #include "Point.hpp"
 
 #include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <functional>
 #include <iterator>
 #include <unordered_map>
 #include <vector>

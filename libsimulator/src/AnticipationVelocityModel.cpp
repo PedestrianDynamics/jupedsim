@@ -3,13 +3,20 @@
 
 #include "AnticipationVelocityModelData.hpp"
 #include "AnticipationVelocityModelUpdate.hpp"
+#include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
+#include "LineSegment.hpp"
 #include "Macros.hpp"
 #include "OperationalModel.hpp"
+#include "OperationalModelType.hpp"
+#include "Point.hpp"
 #include "SimulationError.hpp"
 
 #include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
 #include <limits>
 #include <memory>
 #include <numeric>

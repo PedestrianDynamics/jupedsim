@@ -1,11 +1,17 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "GenericAgent.hpp"
+#include "SimulationError.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
 #include "Visitor.hpp"
 
+#include <memory>
 #include <unordered_map>
+#include <utility>
+#include <variant>
+#include <vector>
 
 class StageManager
 {

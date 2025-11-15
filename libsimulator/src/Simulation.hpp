@@ -2,6 +2,7 @@
 #pragma once
 
 #include "AgentRemovalSystem.hpp"
+#include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "Journey.hpp"
 #include "NeighborhoodSearch.hpp"
@@ -9,6 +10,7 @@
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
+#include "RoutingEngine.hpp"
 #include "SimulationClock.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
@@ -18,9 +20,11 @@
 #include "TacticalDecisionSystem.hpp"
 #include "Tracing.hpp"
 
-#include <boost/iterator/zip_iterator.hpp>
-
+#include <cstddef>
+#include <cstdint>
+#include <map>
 #include <memory>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 

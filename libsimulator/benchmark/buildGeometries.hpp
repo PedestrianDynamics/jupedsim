@@ -5,6 +5,8 @@
 #include "GeometryBuilder.hpp"
 #include "Point.hpp"
 
+#include <vector>
+
 inline CollisionGeometry buildGrosserStern()
 {
     GeometryBuilder builder;

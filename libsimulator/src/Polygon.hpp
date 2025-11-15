@@ -3,6 +3,9 @@
 
 #include "CfgCgal.hpp"
 #include "Point.hpp"
+
+#include <tuple>
+#include <vector>
 class Polygon
 {
     using PolygonType = Poly;

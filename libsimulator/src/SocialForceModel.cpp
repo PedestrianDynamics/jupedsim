@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "SocialForceModel.hpp"
 
-#include "Ellipse.hpp"
+#include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
-#include "Macros.hpp"
-#include "Mathematics.hpp"
-#include "NeighborhoodSearch.hpp"
+#include "LineSegment.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
-#include "Simulation.hpp"
+#include "Point.hpp"
+#include "SimulationError.hpp"
 #include "SocialForceModelData.hpp"
 
-#include <Logger.hpp>
-
-#include <iostream>
-#include <stdexcept>
+#include <cmath>
+#include <iterator>
+#include <memory>
+#include <numeric>
+#include <string>
 
 SocialForceModel::SocialForceModel(double bodyForce_, double friction_)
     : bodyForce(bodyForce_), friction(friction_) {};

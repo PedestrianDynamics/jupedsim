@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "GeneralizedCentrifugalForceModel.hpp"
+#include "GenericAgent.hpp"
 #include "conversion.hpp"
 
-#include <GeneralizedCentrifugalForceModel.hpp>
-#include <GenericAgent.hpp>
-#include <Journey.hpp>
-#include <Stage.hpp>
-#include <Unreachable.hpp>
+#include <pybind11/cast.h>
+#include <pybind11/detail/common.h>
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include <pybind11/stl.h> // IWYU pragma: keep
+
+#include <cstdint>
+#include <tuple>
 
 namespace py = pybind11;
 

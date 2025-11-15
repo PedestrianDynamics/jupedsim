@@ -2,6 +2,9 @@
 #include "Ellipse.hpp"
 
 #include "Macros.hpp"
+#include "Point.hpp"
+
+#include <cmath>
 
 /// Calculates the semi-major axis (EA) of an ellipse based on the given speed.
 ///
