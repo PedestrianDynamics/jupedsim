@@ -250,6 +250,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     license_files=("LICENSE",),
+    license="LGPL-3.0-or-later",
     ext_modules=[CMakeExtension("python_bindings_jupedsim")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
@@ -284,7 +285,6 @@ setup(
     },
     classifiers=[
         "Development Status :: 4 - Beta",
-        "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
         "Operating System :: Microsoft :: Windows",
         "Operating System :: Unix",
         "Operating System :: MacOS",
