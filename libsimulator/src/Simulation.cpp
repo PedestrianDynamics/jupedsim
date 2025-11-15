@@ -18,8 +18,10 @@
 #include "StageDescription.hpp"
 #include "Tracing.hpp"
 #include "Visitor.hpp"
+
 #include <fmt/core.h>
 #include <fmt/format.h>
+#include <fmt/ranges.h>
 
 #include <algorithm>
 #include <cstddef>
