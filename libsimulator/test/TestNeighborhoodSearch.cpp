@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "NeighborhoodSearch.hpp"
 
-#include <cmath>
 #include <gtest/gtest.h>
+
+#include <cmath>
 #include <iostream>
 #include <iterator>
 #include <memory>

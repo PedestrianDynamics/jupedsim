@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "conversion.hpp"
+
 #include <CollisionGeometry.hpp>
 #include <RoutingEngine.hpp>
-
-#include <cstddef>
-
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <memory>
 #include <tuple>
 #include <vector>

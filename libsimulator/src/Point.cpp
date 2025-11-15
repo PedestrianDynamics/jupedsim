@@ -2,6 +2,7 @@
 #include "Point.hpp"
 
 #include <Logger.hpp>
+
 #include <limits>
 
 bool Point::isZeroLength() const

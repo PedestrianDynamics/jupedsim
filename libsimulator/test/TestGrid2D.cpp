@@ -2,5 +2,6 @@
 #include "NeighborhoodSearch.hpp"
 
 #include <gtest/gtest.h>
+
 #include <iterator>
 #include <vector>

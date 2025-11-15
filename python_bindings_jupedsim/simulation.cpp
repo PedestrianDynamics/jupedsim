@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "conversion.hpp"
-#include <Unreachable.hpp>
 
 #include <CollisionGeometry.hpp>
 #include <OperationalModel.hpp>
 #include <Simulation.hpp>
 #include <Stage.hpp>
-
+#include <Unreachable.hpp>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 

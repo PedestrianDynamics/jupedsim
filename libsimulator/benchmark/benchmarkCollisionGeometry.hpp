@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include <benchmark/benchmark.h>
-
 #include "CollisionGeometry.hpp"
 #include "buildGeometries.hpp"
+
+#include <benchmark/benchmark.h>
 
 template <class... Args>
 void bmLineSegmentsInDistanceTo(benchmark::State& state, Args&&... args)

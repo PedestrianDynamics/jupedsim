@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "conversion.hpp"
+
 #include <AnticipationVelocityModel.hpp>
 #include <AnticipationVelocityModelBuilder.hpp>
 #include <AnticipationVelocityModelData.hpp>
-
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 #include <pybind11/pybind11.h>

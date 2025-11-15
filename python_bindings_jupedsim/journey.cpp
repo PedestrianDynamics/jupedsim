@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "conversion.hpp"
+
 #include <Journey.hpp>
 #include <Stage.hpp>
-
-#include <map>
-
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <map>
 
 namespace py = pybind11;
 
@@ -40,9 +40,10 @@ void init_journey(py::module_& m)
             [](JourneyDesc& desc, uint64_t stageId, TransitionDescription& transition) {
                 auto iter = desc.find(stageId);
                 if(iter == std::end(desc)) {
-                    throw std::runtime_error(fmt::format(
-                        "Could not set transition for given stage id {}. Stage not found.",
-                        stageId));
+                    throw std::runtime_error(
+                        fmt::format(
+                            "Could not set transition for given stage id {}. Stage not found.",
+                            stageId));
                 }
                 iter->second = transition;
             });

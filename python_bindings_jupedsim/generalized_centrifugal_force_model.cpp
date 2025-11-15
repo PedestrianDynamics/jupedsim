@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "conversion.hpp"
+
 #include <GeneralizedCentrifugalForceModel.hpp>
 #include <GeneralizedCentrifugalForceModelBuilder.hpp>
 #include <GeneralizedCentrifugalForceModelData.hpp>

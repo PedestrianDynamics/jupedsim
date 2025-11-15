@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Ellipse.hpp"
+
 #include "Macros.hpp"
 
 /// Calculates the semi-major axis (EA) of an ellipse based on the given speed.

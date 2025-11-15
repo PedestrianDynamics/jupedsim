@@ -3,6 +3,7 @@
 #include "GenericAgent.hpp"
 #include "SimulationError.hpp"
 #include "Stage.hpp"
+
 #include <fmt/core.h>
 #include <fmt/format.h>
 
