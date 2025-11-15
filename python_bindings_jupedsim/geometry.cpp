@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "CollisionGeometry.hpp"
+#include "GeometryBuilder.hpp"
 #include "conversion.hpp"
 
-#include <CollisionGeometry.hpp>
-#include <GeometryBuilder.hpp>
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include <pybind11/stl.h> // IWYU pragma: keep
+
+#include <tuple>
+#include <vector>
 
 namespace py = pybind11;
 

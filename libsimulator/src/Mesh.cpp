@@ -1,21 +1,28 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Mesh.hpp"
 
+#include "AABB.hpp"
+#include "CfgCgal.hpp"
+#include "glm/ext/vector_double2.hpp"
+#include "glm/ext/vector_double3.hpp"
+#include "glm/ext/vector_float2.hpp"
+
 #include <CGAL/number_utils.h>
-#include <fmt/format.h>
-#include <fmt/ranges.h>
 #include <glm/geometric.hpp>
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <iterator>
 #include <limits>
 #include <memory>
 #include <optional>
 #include <queue>
+#include <set>
 #include <sstream>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 

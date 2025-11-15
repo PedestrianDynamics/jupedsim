@@ -1,13 +1,25 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "Simulation.hpp"
+
+#include "CollisionGeometry.hpp"
+#include "Journey.hpp"
+#include "OperationalModel.hpp"
+#include "Polygon.hpp"
+#include "Stage.hpp"
+#include "StageDescription.hpp"
 #include "conversion.hpp"
 
-#include <CollisionGeometry.hpp>
-#include <OperationalModel.hpp>
-#include <Simulation.hpp>
-#include <Stage.hpp>
-#include <Unreachable.hpp>
+#include <pybind11/attr.h>
+#include <pybind11/cast.h>
+#include <pybind11/detail/common.h>
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include <pybind11/stl.h> // IWYU pragma: keep
+
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <tuple>
+#include <vector>
 
 namespace py = pybind11;
 

@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "conversion.hpp"
+#include "CollisionGeometry.hpp"
+#include "RoutingEngine.hpp"
 
-#include <CollisionGeometry.hpp>
-#include <RoutingEngine.hpp>
+#include <glm/ext/vector_float2.hpp>
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include <pybind11/stl.h> // IWYU pragma: keep
 
-#include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <tuple>
 #include <vector>

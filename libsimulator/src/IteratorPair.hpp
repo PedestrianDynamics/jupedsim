@@ -5,6 +5,7 @@
 ///
 /// Provides begin and end method required for range based for loops.
 /// _it_second must be reachable by _it_first.
+#include <cstddef>
 #include <iterator>
 template <typename IteratorFirst, typename IteratorSecond = IteratorFirst>
 class IteratorPair

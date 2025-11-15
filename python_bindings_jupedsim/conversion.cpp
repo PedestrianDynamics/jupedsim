@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "conversion.hpp"
 
+#include "Point.hpp"
+
+#include <tuple>
+#include <vector>
+
 std::tuple<double, double> intoTuple(const Point& p)
 {
     return std::make_tuple(p.x, p.y);

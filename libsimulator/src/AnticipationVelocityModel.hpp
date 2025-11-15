@@ -2,10 +2,16 @@
 #pragma once
 
 #include "CollisionGeometry.hpp"
+#include "LineSegment.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
+#include "OperationalModelType.hpp"
+#include "Point.hpp"
 
+#include <cstdint>
+#include <memory>
 #include <random>
+#include <vector>
 
 struct GenericAgent;
 

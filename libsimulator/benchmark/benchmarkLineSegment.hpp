@@ -3,6 +3,7 @@
 #pragma once
 
 #include "LineSegment.hpp"
+#include "Point.hpp"
 
 #include <benchmark/benchmark.h>
 

@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Tracing.hpp"
 
+#include <chrono>
+#include <cstdint>
 #include <optional>
+#include <utility>
 
 namespace cr = std::chrono;
 

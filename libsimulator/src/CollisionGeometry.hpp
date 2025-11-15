@@ -5,9 +5,14 @@
 #include "HashCombine.hpp"
 #include "IteratorPair.hpp"
 #include "LineSegment.hpp"
+#include "Point.hpp"
 #include "UniqueID.hpp"
 
+#include <cstddef>
+#include <functional>
+#include <iterator>
 #include <set>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 

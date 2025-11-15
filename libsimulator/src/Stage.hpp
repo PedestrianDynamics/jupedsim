@@ -4,17 +4,23 @@
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
-#include "Logger.hpp"
+#include "LineSegment.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "Point.hpp"
 #include "Polygon.hpp"
 #include "UniqueID.hpp"
 #include "Util.hpp"
 
+#include <fmt/core.h>
+
 #include <algorithm>
+#include <cassert>
+#include <cstddef>
 #include <iterator>
 #include <limits>
+#include <set>
 #include <unordered_set>
+#include <variant>
 #include <vector>
 
 class Simulation;

@@ -4,11 +4,8 @@
 #include "AABB.hpp"
 #include "LineSegment.hpp"
 
-#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
-#include <CGAL/intersections.h>
-#include <boost/variant.hpp>
-
-#include <algorithm>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Intersections_2/Segment_2_Segment_2.h>
 
 /// Computes the cross product 2D of vectors apex->a (A) and apex->b (B)
 /// Geometrically the absolute value of the cross product in 2d is also the area of the

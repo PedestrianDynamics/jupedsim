@@ -2,11 +2,9 @@
 #pragma once
 
 #include <fmt/format.h>
-#include <fmt/ostream.h>
 
 #include <functional>
-#include <memory>
-#include <string_view>
+#include <string>
 
 namespace Logging
 {

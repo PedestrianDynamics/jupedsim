@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "conversion.hpp"
 
-#include <BuildInfo.hpp>
+#include "BuildInfo.hpp"
+
 #include <pybind11/pybind11.h>
 
 namespace py = pybind11;

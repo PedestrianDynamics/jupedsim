@@ -4,8 +4,7 @@
 #include "SimulationError.hpp"
 #include "Stage.hpp"
 
-#include <fmt/core.h>
-#include <fmt/format.h>
+#include <vector>
 
 class GeometrySwitchError : public SimulationError
 {

@@ -3,8 +3,6 @@
 
 #include "GeneralizedCentrifugalForceModel.hpp"
 
-#include <vector>
-
 class GeneralizedCentrifugalForceModelBuilder
 {
     double _nuped;

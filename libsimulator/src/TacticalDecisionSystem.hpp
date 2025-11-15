@@ -3,8 +3,6 @@
 
 #include "RoutingEngine.hpp"
 
-#include <vector>
-
 class TacticalDecisionSystem
 {
 public:

@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "conversion.hpp"
 
-#include <Journey.hpp>
-#include <Stage.hpp>
+#include "Journey.hpp"
+
+#include <fmt/core.h>
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include <pybind11/stl.h> // IWYU pragma: keep
 
+#include <cstdint>
 #include <map>
+#include <stdexcept>
+#include <utility>
+#include <vector>
 
 namespace py = pybind11;
 

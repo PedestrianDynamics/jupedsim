@@ -2,16 +2,19 @@
 #pragma once
 
 #include "GenericAgent.hpp"
-#include "NeighborhoodSearch.hpp"
 #include "Point.hpp"
-#include "RoutingEngine.hpp"
+#include "SimulationError.hpp"
 #include "Stage.hpp"
-#include "StageDescription.hpp"
 #include "UniqueID.hpp"
 
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <tuple>
+#include <utility>
+#include <variant>
 #include <vector>
 
 class NonTransitionDescription

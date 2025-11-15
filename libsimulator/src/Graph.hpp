@@ -2,13 +2,14 @@
 #pragma once
 
 #include "IteratorPair.hpp"
-#include "Point.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <map>
 #include <stdexcept>
 #include <string>
+#include <tuple>
 #include <vector>
 
 struct Empty {

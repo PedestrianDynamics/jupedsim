@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include <CGAL/Boolean_set_operations_2.h>
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>
-#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Constrained_triangulation_2.h>
+#include <CGAL/Constrained_triangulation_face_base_2.h>
+#include <CGAL/Polygon_2.h>
 #include <CGAL/Polygon_with_holes_2.h>
-#include <CGAL/Surface_mesh.h>
-#include <CGAL/Triangulation_vertex_base_with_info_2.h>
-#include <CGAL/draw_triangulation_2.h>
-#include <CGAL/mark_domain_in_triangulation.h>
+#include <CGAL/Simple_cartesian.h>
+#include <CGAL/Triangulation_data_structure_2.h>
+#include <CGAL/Triangulation_vertex_base_2.h>
 
+#include <cstddef>
 #include <functional>
 #include <list>
+#include <sstream>
+#include <string>
 
 // using K = CGAL::Exact_predicates_exact_constructions_kernel;
 using K = CGAL::Simple_cartesian<double>;
