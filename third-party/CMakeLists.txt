@@ -2,7 +2,7 @@
 # libfmt
 ################################################################################
 set(FMT_INSTALL OFF)
-add_subdirectory(fmt-10.2.1)
+add_subdirectory(fmt)
 set_target_properties(fmt PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     SYSTEM ON
@@ -35,12 +35,12 @@ set(CGAL_DATA_DIR "none")
 set(WITH_CGAL_ImageIO OFF)
 set(WITH_CGAL_Qt5 OFF)
 set(CGAL_DISABLE_GMP ON)
-find_package(CGAL 6.0
+find_package(CGAL 6.1
     REQUIRED
     CONFIG
     NO_DEFAULT_PATH
     PATHS
-    ${CMAKE_CURRENT_SOURCE_DIR}/cgal-6.0.1
+    ${CMAKE_CURRENT_SOURCE_DIR}/cgal
 )
 
 ################################################################################
@@ -49,16 +49,15 @@ find_package(CGAL 6.0
 set(Python_FIND_VIRTUALENV "FIRST")
 find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 set(PYBIND11_SIMPLE_GIL_MANAGEMENT ON)
-set(PYBIND11_NUMPY_1_ONLY ON)
 set(PYBIND11_FINDPYTHON ON)
-add_subdirectory(pybind11-2.12.0)
+add_subdirectory(pybind11)
 set(Python_EXECUTABLE ${Python_EXECUTABLE} PARENT_SCOPE)
 
 ################################################################################
 # Googletest
 ################################################################################
 if(BUILD_TESTS)
-    add_subdirectory(googletest-1.14.0)
+    add_subdirectory(googletest)
 endif()
 
 ################################################################################
@@ -69,11 +68,11 @@ if (BUILD_BENCHMARKS)
     set(BENCHMARK_ENABLE_INSTALL OFF)
     set(BENCHMARK_ENABLE_WERROR OFF)
     set(BENCHMARK_INSTALL_DOCS OFF)
-    add_subdirectory(benchmark-1.8.2)
+    add_subdirectory(benchmark)
 endif ()
 
 ################################################################################
 # glm
 ################################################################################
 set(GLM_ENABLE_CXX_20 ON CACHE BOOL "" FORCE)
-add_subdirectory(glm-1.0.1)
+add_subdirectory(glm)

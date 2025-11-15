@@ -25,6 +25,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          submodules: true
       - name: Set up Python 3.13
         uses: actions/setup-python@v6
         with:
@@ -48,6 +50,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          submodules: true
       - name: Set up Python 3.13
         uses: actions/setup-python@v6
         with:
@@ -65,6 +69,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          submodules: true
       - name: Set up Python 3.13
         uses: actions/setup-python@v6
         with:
@@ -148,6 +154,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          submodules: true
       - uses: actions/setup-python@v6
         name: Install Python
         with:
@@ -223,6 +231,8 @@ jobs:
             cibw_build: "cp313-*"
     steps:
       - uses: actions/checkout@v5
+        with:
+          submodules: true
       - name: Build wheels for CPython ${{ matrix.cibw_build }} on ${{ matrix.cibw_archs }}
         uses: pypa/cibuildwheel@v3.2.1
         env:
