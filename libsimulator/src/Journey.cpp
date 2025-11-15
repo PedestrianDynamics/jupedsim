@@ -7,6 +7,7 @@
 #include "Stage.hpp"
 #include "StageDescription.hpp"
 #include "TemplateHelper.hpp"
+#include "fmt/ranges.h"
 
 #include <algorithm>
 #include <iterator>
@@ -14,5 +15,3 @@
 #include <stdexcept>
 #include <tuple>
 #include <vector>
-
-#include "fmt/ranges.h"

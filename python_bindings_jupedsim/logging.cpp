@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "logging.hpp"
+
 #include "conversion.hpp"
 
 #include <Logger.hpp>
-
 #include <pybind11/functional.h>
 #include <pybind11/pybind11.h>
 

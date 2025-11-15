@@ -3,7 +3,6 @@
 #include "GeometryBuilder.hpp"
 #include "Journey.hpp"
 #include "Stage.hpp"
-
 #include "gtest/gtest.h"
 
 class StagesTests : public ::testing::Test

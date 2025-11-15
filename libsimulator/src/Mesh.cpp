@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Mesh.hpp"
 
+#include <CGAL/number_utils.h>
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <glm/geometric.hpp>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
-
-#include <CGAL/number_utils.h>
-
-#include <fmt/format.h>
-#include <fmt/ranges.h>
 
 #include <algorithm>
 #include <cmath>

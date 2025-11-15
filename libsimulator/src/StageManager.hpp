@@ -4,6 +4,7 @@
 #include "Stage.hpp"
 #include "StageDescription.hpp"
 #include "Visitor.hpp"
+
 #include <unordered_map>
 
 class StageManager

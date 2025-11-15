@@ -12,6 +12,7 @@
 #include "SocialForceModelData.hpp"
 
 #include <Logger.hpp>
+
 #include <iostream>
 #include <stdexcept>
 

@@ -8,11 +8,11 @@
 #include "Mathematics.hpp"
 #include "Point.hpp"
 
-#include <vector>
-
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/intersections.h>
 #include <boost/variant.hpp>
+
+#include <vector>
 
 LineSegment::LineSegment(Point _p1, Point _p2) : p1(std::move(_p1)), p2(std::move(_p2))
 {

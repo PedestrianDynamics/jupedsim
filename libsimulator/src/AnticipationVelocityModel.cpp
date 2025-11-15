@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "AnticipationVelocityModel.hpp"
+
 #include "AnticipationVelocityModelData.hpp"
 #include "AnticipationVelocityModelUpdate.hpp"
 #include "GenericAgent.hpp"
@@ -7,6 +8,7 @@
 #include "Macros.hpp"
 #include "OperationalModel.hpp"
 #include "SimulationError.hpp"
+
 #include <algorithm>
 #include <limits>
 #include <memory>

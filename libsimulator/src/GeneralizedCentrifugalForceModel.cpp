@@ -12,6 +12,7 @@
 #include "Simulation.hpp"
 
 #include <Logger.hpp>
+
 #include <stdexcept>
 
 GeneralizedCentrifugalForceModel::GeneralizedCentrifugalForceModel(

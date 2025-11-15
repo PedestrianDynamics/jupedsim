@@ -3,6 +3,7 @@
 
 #include <fmt/format.h>
 #include <gtest/gtest.h>
+
 #include <memory>
 
 using namespace fmt::literals;

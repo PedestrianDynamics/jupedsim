@@ -22,7 +22,6 @@ ConstructorInitializerAllOnOneLineOrOnePerLine: true
 Cpp11BracedListStyle: true
 EmptyLineBeforeAccessModifier: LogicalBlock
 FixNamespaceComments: true
-IncludeBlocks: Preserve
 IndentCaseLabels: true
 IndentWidth: 4
 Language: Cpp
@@ -32,6 +31,14 @@ PointerAlignment: Left
 ReferenceAlignment: Left
 ReflowComments: true
 SortIncludes: CaseSensitive
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex:           '^".*"'
+    Priority:        1
+  - Regex:           '^<.*\.(h|hpp)>'
+    Priority:        2
+  - Regex:           '^<.*'
+    Priority:        999
 SortUsingDeclarations: true
 SpaceAfterCStyleCast: true
 SpaceAfterTemplateKeyword: true
@@ -40,7 +47,7 @@ SpaceBeforeCtorInitializerColon: true
 SpaceBeforeInheritanceColon: true
 SpaceBeforeParens: Never
 SpaceBeforeRangeBasedForLoopColon: true
-Standard: c++17
+Standard: c++20
 TabWidth: 4
 UseTab: Never
 

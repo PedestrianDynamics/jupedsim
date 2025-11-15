@@ -2,6 +2,7 @@
 #pragma once
 
 #include "GeneralizedCentrifugalForceModel.hpp"
+
 #include <vector>
 
 class GeneralizedCentrifugalForceModelBuilder

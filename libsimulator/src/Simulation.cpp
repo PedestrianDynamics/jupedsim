@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Simulation.hpp"
+
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "GeometrySwitchError.hpp"

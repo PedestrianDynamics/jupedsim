@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CollisionGeometry.hpp"
 #include "LineSegment.hpp"
-
 #include "gtest/gtest.h"
+
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 #include <gtest/gtest.h>

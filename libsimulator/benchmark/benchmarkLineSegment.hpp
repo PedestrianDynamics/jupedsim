@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include <benchmark/benchmark.h>
-
 #include "LineSegment.hpp"
+
+#include <benchmark/benchmark.h>
 
 template <class... Args>
 void bmDistToOnLine(benchmark::State& state, Args&&... args)

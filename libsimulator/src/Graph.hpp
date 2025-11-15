@@ -87,7 +87,8 @@ public:
         }
     };
 
-    const auto& VertexData(VertexId id) const requires(!std::is_void_v<V>)
+    const auto& VertexData(VertexId id) const
+        requires(!std::is_void_v<V>)
     {
         return vertex_data.at(id);
     }
