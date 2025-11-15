@@ -21,7 +21,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
-
+        with:
+          submodules: true
       - name: Build documentation
         id: build-docs
         uses: ./.github/actions/build-docs
