@@ -40,6 +40,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinx.ext.autosectionlabel",
+    "sphinxcontrib.mermaid",
 ]
 
 templates_path = ["_templates"]
