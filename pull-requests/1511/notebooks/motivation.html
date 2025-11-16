@@ -1,0 +1,790 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="../_static/logo.png" sizes="482x536" rel="icon" type="image/png">
+    <title>Modelling Motivation &#8212; JuPedSim  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=d742c9ce" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/motivation';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v2.0.0';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Waiting in Queues" href="queues_waiting.html" />
+    <link rel="prev" title="Lane formation in bi-directional flow" href="lane-formation.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../_static/jupedsim.svg" class="logo__image only-light" alt="JuPedSim  documentation - Home"/>
+    <script>document.write(`<img src="../_static/jupedsim.svg" class="logo__image only-dark" alt="JuPedSim  documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PedestrianDynamics/jupedsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/jupedsim/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://img.shields.io/pypi/v/jupedsim" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.5281/zenodo.1293771" title="DOI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1293771.svg" class="icon-link-image" alt="DOI"/></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../concepts/index.html">Concepts</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../concepts/geometry.html">Geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../concepts/routing.html">Routing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../concepts/iteration.html">Iteration</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../pedestrian_models/index.html">Pedestrian Models</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Notebooks</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="model-comparison.html">Comparative Analysis of Pedestrian Dynamics Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="corner.html">Movement around Corners</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="double-bottleneck.html">Movement through Bottlenecks</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="journey.html">How to work with Journeys</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="lane-formation.html">Lane formation in bi-directional flow</a></li>
+
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Modelling Motivation</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="queues_waiting.html">Waiting in Queues</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="routing.html">How Route Choice can Impact Evacuation Times</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="single-file.html">Simulating Single-File Movement</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../disclaimer.html">Disclaimer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/jupedsim/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citation/citation.html">Cite JuPedSim</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script></div>
+      
+        <div class="header-article-item"><button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Modelling Motivation</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Modelling Motivation</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#simulation-of-a-corridor-with-different-motivations">Simulation of a corridor with different motivations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-the-geometry">Setting up the geometry</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#operational-model">Operational model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-the-simulation-object">Setting Up the Simulation Object</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#specifying-routing-details">Specifying Routing Details</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-and-distributing-agents">Defining and Distributing Agents</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#distribute-normal-agents-in-the-first-area">Distribute normal agents in the first area</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#distribute-motivated-agents-in-the-second-area">Distribute motivated agents in the second area</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#distribute-normal-agents-in-the-third-area">Distribute normal agents in the third area</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#executing-the-simulation">Executing the Simulation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#visualizing-the-trajectories">Visualizing the Trajectories</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#notes-and-comments">Notes and Comments</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#download">Download</a></li>
+</ul>
+
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="modelling-motivation">
+<h1>Modelling Motivation<a class="headerlink" href="#modelling-motivation" title="Link to this heading">#</a></h1>
+<p>This notebook can be directly downloaded <a class="reference download internal" download="" href="../_downloads/5b80739c3ce692b689ef6f3bc04a4a38/motivation.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">here</span></code></a> to run it locally.</p>
+<section id="simulation-of-a-corridor-with-different-motivations">
+<h2>Simulation of a corridor with different motivations<a class="headerlink" href="#simulation-of-a-corridor-with-different-motivations" title="Link to this heading">#</a></h2>
+<p>In this demonstration, we model a narrow corridor scenario featuring three distinct groups of agents. Among them, one group exhibits a higher level of motivation compared to the others.</p>
+<p>We employ the collision-free speed model to determine the speed of each agent. This speed is influenced by the desired speed, denoted as <span class="math notranslate nohighlight">\(v^0\)</span>, the agent’s radius <span class="math notranslate nohighlight">\(r\)</span>, and the slope factor <span class="math notranslate nohighlight">\(T\)</span>.</p>
+<p>The varying motivation levels among the groups are represented by different <span class="math notranslate nohighlight">\(T\)</span> values. The rationale for using <span class="math notranslate nohighlight">\(T\)</span> to depict motivation is that highly motivated pedestrians, who are more aggressive in their movements, will quickly occupy any available space between them, correlating to a lower <span class="math notranslate nohighlight">\(T\)</span> value. Conversely, less motivated pedestrians maintain a distance based on their walking speed, aligning with a higher <span class="math notranslate nohighlight">\(T\)</span> value.</p>
+<p>To accentuate this dynamic, the first group of agents will decelerate a few seconds into the simulation. As a result, we’ll notice that the second group, driven by high motivation, will swiftly close distances and overtake the first group as it reduces speed. In contrast, the third group, with average motivation, will decelerate upon nearing the slower agents, without attempting to pass them.</p>
+</section>
+<section id="setting-up-the-geometry">
+<h2>Setting up the geometry<a class="headerlink" href="#setting-up-the-geometry" title="Link to this heading">#</a></h2>
+<p>We will be using the a corridor 40 meters long and 4 meters wide.</p>
+<div class="cell tag_hide-input docutils container">
+<details class="admonition hide above-input">
+<summary aria-label="Toggle hidden content">
+<p class="collapsed admonition-title">Show code cell source</p>
+<p class="expanded admonition-title">Hide code cell source</p>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jupedsim</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jps</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pedpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polygon</span>
+
+<span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+</details>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">corridor</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)]</span>
+
+<span class="n">areas</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">areas</span><span class="p">[</span><span class="s2">&quot;first&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">]])</span>
+<span class="n">areas</span><span class="p">[</span><span class="s2">&quot;second&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">([[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">]])</span>
+<span class="n">areas</span><span class="p">[</span><span class="s2">&quot;third&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">([[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">24</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">24</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">]])</span>
+<span class="n">areas</span><span class="p">[</span><span class="s2">&quot;exit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">([(</span><span class="mi">56</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">59</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">59</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="p">(</span><span class="mi">56</span><span class="p">,</span> <span class="mi">4</span><span class="p">)])</span>
+
+<span class="n">walkable_area</span> <span class="o">=</span> <span class="n">pedpy</span><span class="o">.</span><span class="n">WalkableArea</span><span class="p">(</span><span class="n">corridor</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell tag_hide-input docutils container">
+<details class="admonition hide above-input">
+<summary aria-label="Toggle hidden content">
+<p class="collapsed admonition-title">Show code cell source</p>
+<p class="expanded admonition-title">Hide code cell source</p>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">walkable_area</span><span class="o">.</span><span class="n">bounds</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ymin</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">pedpy</span><span class="o">.</span><span class="n">plot_walkable_area</span><span class="p">(</span><span class="n">walkable_area</span><span class="o">=</span><span class="n">walkable_area</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">area</span> <span class="ow">in</span> <span class="n">areas</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">area</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">xy</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">)</span>
+    <span class="n">centroid</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">area</span><span class="p">)</span><span class="o">.</span><span class="n">centroid</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">centroid</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">centroid</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</details>
+<div class="cell_output docutils container">
+<img alt="../_images/8222d42f3da005ea730468d050da7f595089dd7a012c47d367a6b24baa8d7a1b.png" src="../_images/8222d42f3da005ea730468d050da7f595089dd7a012c47d367a6b24baa8d7a1b.png" />
+</div>
+</div>
+</section>
+<section id="operational-model">
+<h2>Operational model<a class="headerlink" href="#operational-model" title="Link to this heading">#</a></h2>
+<p><a id="model"></a>
+Now that the geometry is set, our subsequent task is to specify the model and its associated parameters.<br />
+For this demonstration, we’ll employ the “collision-free” model.<br />
+However, since we are interested in two different motivation states, we will have to define two different time gaps.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">T_normal</span> <span class="o">=</span> <span class="mf">1.3</span>
+<span class="n">T_motivation</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="n">v0_normal</span> <span class="o">=</span> <span class="mf">1.5</span>
+<span class="n">v0_slow</span> <span class="o">=</span> <span class="mf">0.5</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Note, that in JuPedSim the model parameter <span class="math notranslate nohighlight">\(T\)</span> is called <code class="docutils literal notranslate"><span class="pre">time_gap</span></code>.</p>
+<p>The values <span class="math notranslate nohighlight">\(1.3\, s\)</span> and <span class="math notranslate nohighlight">\(0.1\, s\)</span> are chosen according to the paper <a class="reference external" href="https://doi.org/10.1098/rsos.211822">Rzezonka2022, Fig.5</a>.</p>
+</section>
+<section id="setting-up-the-simulation-object">
+<h2>Setting Up the Simulation Object<a class="headerlink" href="#setting-up-the-simulation-object" title="Link to this heading">#</a></h2>
+<p>Having established the model and geometry details, and combined with other parameters such as the time step <span class="math notranslate nohighlight">\(dt\)</span>, we can proceed to construct our simulation object as illustrated below:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trajectory_file</span> <span class="o">=</span> <span class="s2">&quot;trajectories.sqlite&quot;</span>
+<span class="n">simulation</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
+    <span class="n">dt</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModel</span><span class="p">(</span>
+        <span class="n">strength_neighbor_repulsion</span><span class="o">=</span><span class="mf">2.6</span><span class="p">,</span>
+        <span class="n">range_neighbor_repulsion</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">range_geometry_repulsion</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">geometry</span><span class="o">=</span><span class="n">walkable_area</span><span class="o">.</span><span class="n">polygon</span><span class="p">,</span>
+    <span class="n">trajectory_writer</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">SqliteTrajectoryWriter</span><span class="p">(</span>
+        <span class="n">output_file</span><span class="o">=</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">trajectory_file</span><span class="p">)</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="specifying-routing-details">
+<h2>Specifying Routing Details<a class="headerlink" href="#specifying-routing-details" title="Link to this heading">#</a></h2>
+<p>At this point, we’ll provide basic routing instructions, guiding the agents to progress towards an exit point, which is in this case at the end of the corridor.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">exit_id</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">add_exit_stage</span><span class="p">(</span><span class="n">areas</span><span class="p">[</span><span class="s2">&quot;exit&quot;</span><span class="p">])</span>
+<span class="n">journey_id</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">add_journey</span><span class="p">(</span><span class="n">jps</span><span class="o">.</span><span class="n">JourneyDescription</span><span class="p">([</span><span class="n">exit_id</span><span class="p">]))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="defining-and-distributing-agents">
+<h2>Defining and Distributing Agents<a class="headerlink" href="#defining-and-distributing-agents" title="Link to this heading">#</a></h2>
+<p>Now, we’ll position the agents and establish their attributes, leveraging previously mentioned parameters.
+We will distribute three different groups in three different areas.</p>
+<ul class="simple">
+<li><p>First area contains normally motivated agents.</p></li>
+<li><p>The second area contains motivated agents that are more likely to close gaps to each other.</p></li>
+<li><p>The third area contains normally motivated agents. These agents will reduce their desired speeds after some seconds.</p></li>
+</ul>
+<section id="distribute-normal-agents-in-the-first-area">
+<h3>Distribute normal agents in the first area<a class="headerlink" href="#distribute-normal-agents-in-the-first-area" title="Link to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">total_agents_normal</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">positions</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">distribute_by_number</span><span class="p">(</span>
+    <span class="n">polygon</span><span class="o">=</span><span class="n">Polygon</span><span class="p">(</span><span class="n">areas</span><span class="p">[</span><span class="s2">&quot;first&quot;</span><span class="p">]),</span>
+    <span class="n">number_of_agents</span><span class="o">=</span><span class="n">total_agents_normal</span><span class="p">,</span>
+    <span class="n">distance_to_agents</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+    <span class="n">distance_to_polygon</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">45131502</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span>
+    <span class="n">simulation</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span>
+        <span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelAgentParameters</span><span class="p">(</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span>
+            <span class="n">v0</span><span class="o">=</span><span class="n">v0_normal</span><span class="p">,</span>
+            <span class="n">time_gap</span><span class="o">=</span><span class="n">T_normal</span><span class="p">,</span>
+            <span class="n">journey_id</span><span class="o">=</span><span class="n">journey_id</span><span class="p">,</span>
+            <span class="n">stage_id</span><span class="o">=</span><span class="n">exit_id</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_3689/3368576956.py:12: DeprecationWarning: &#39;v0&#39; is deprecated, use &#39;desired_speed&#39; instead.
+  jps.CollisionFreeSpeedModelAgentParameters(
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="distribute-motivated-agents-in-the-second-area">
+<h3>Distribute motivated agents in the second area<a class="headerlink" href="#distribute-motivated-agents-in-the-second-area" title="Link to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">total_agents_motivated</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">positions</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">distribute_by_number</span><span class="p">(</span>
+    <span class="n">polygon</span><span class="o">=</span><span class="n">Polygon</span><span class="p">(</span><span class="n">areas</span><span class="p">[</span><span class="s2">&quot;second&quot;</span><span class="p">]),</span>
+    <span class="n">number_of_agents</span><span class="o">=</span><span class="n">total_agents_motivated</span><span class="p">,</span>
+    <span class="n">distance_to_agents</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">distance_to_polygon</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">45131502</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span>
+    <span class="n">simulation</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span>
+        <span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelAgentParameters</span><span class="p">(</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span>
+            <span class="n">v0</span><span class="o">=</span><span class="n">v0_normal</span><span class="p">,</span>
+            <span class="n">time_gap</span><span class="o">=</span><span class="n">T_motivation</span><span class="p">,</span>
+            <span class="n">journey_id</span><span class="o">=</span><span class="n">journey_id</span><span class="p">,</span>
+            <span class="n">stage_id</span><span class="o">=</span><span class="n">exit_id</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_3689/210397533.py:11: DeprecationWarning: &#39;v0&#39; is deprecated, use &#39;desired_speed&#39; instead.
+  jps.CollisionFreeSpeedModelAgentParameters(
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="distribute-normal-agents-in-the-third-area">
+<h3>Distribute normal agents in the third area<a class="headerlink" href="#distribute-normal-agents-in-the-third-area" title="Link to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">total_agents_motivated_delay</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">positions</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">distribute_by_number</span><span class="p">(</span>
+    <span class="n">polygon</span><span class="o">=</span><span class="n">Polygon</span><span class="p">(</span><span class="n">areas</span><span class="p">[</span><span class="s2">&quot;third&quot;</span><span class="p">]),</span>
+    <span class="n">number_of_agents</span><span class="o">=</span><span class="n">total_agents_motivated_delay</span><span class="p">,</span>
+    <span class="n">distance_to_agents</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+    <span class="n">distance_to_polygon</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">45131502</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ids_third_group</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">simulation</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span>
+            <span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelAgentParameters</span><span class="p">(</span>
+                <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span>
+                <span class="n">v0</span><span class="o">=</span><span class="n">v0_normal</span><span class="p">,</span>
+                <span class="n">time_gap</span><span class="o">=</span><span class="n">T_normal</span><span class="p">,</span>
+                <span class="n">journey_id</span><span class="o">=</span><span class="n">journey_id</span><span class="p">,</span>
+                <span class="n">stage_id</span><span class="o">=</span><span class="n">exit_id</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">positions</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_3689/2258908716.py:12: DeprecationWarning: &#39;v0&#39; is deprecated, use &#39;desired_speed&#39; instead.
+  jps.CollisionFreeSpeedModelAgentParameters(
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="executing-the-simulation">
+<h2>Executing the Simulation<a class="headerlink" href="#executing-the-simulation" title="Link to this heading">#</a></h2>
+<p>With all components in place, we’re set to initiate the simulation.
+For this demonstration, the trajectories will be recorded in an sqlite database.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">simulation</span><span class="o">.</span><span class="n">iterate</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+<span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">ids_third_group</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="n">simulation</span><span class="o">.</span><span class="n">agents</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">agent</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="nb">id</span><span class="p">:</span>
+            <span class="n">agent</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">v0</span> <span class="o">=</span> <span class="n">v0_slow</span>
+
+<span class="k">while</span> <span class="n">simulation</span><span class="o">.</span><span class="n">agent_count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">simulation</span><span class="o">.</span><span class="n">iterate</span><span class="p">()</span>
+
+<span class="n">simulation</span><span class="o">.</span><span class="n">_writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_3689/3476272997.py:5: DeprecationWarning: deprecated, use &#39;desired_speed&#39; instead.
+  agent.model.v0 = v0_slow
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="visualizing-the-trajectories">
+<h2>Visualizing the Trajectories<a class="headerlink" href="#visualizing-the-trajectories" title="Link to this heading">#</a></h2>
+<p>For trajectory visualization, we’ll extract data from the sqlite database. A straightforward method for this is employing the jupedsim-visualizer.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.internal.notebook_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">animate</span><span class="p">,</span> <span class="n">read_sqlite_file</span>
+
+<span class="n">agent_trajectories</span><span class="p">,</span> <span class="n">walkable_area</span> <span class="o">=</span> <span class="n">read_sqlite_file</span><span class="p">(</span><span class="n">trajectory_file</span><span class="p">)</span>
+<span class="n">animate</span><span class="p">(</span>
+    <span class="n">agent_trajectories</span><span class="p">,</span>
+    <span class="n">walkable_area</span><span class="p">,</span>
+    <span class="n">every_nth_frame</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+</div>
+</div>
+</section>
+<section id="notes-and-comments">
+<h2>Notes and Comments<a class="headerlink" href="#notes-and-comments" title="Link to this heading">#</a></h2>
+<p>It’s noticeable that members of the second group tend to draw nearer to each other compared to those in the first group, primarily attributed to their lower <span class="math notranslate nohighlight">\(T\)</span> values. As the third group begins to decelerate after a while, due to an adjustment in the target speed <span class="math notranslate nohighlight">\(v_0\)</span>, the second group seizes this opportunity to bridge the distance and surpass them.</p>
+<p>Conversely, the first group maintains a consistent pace and doesn’t attempt to overtake the now-lagging third group.</p>
+</section>
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="download">
+<h1>Download<a class="headerlink" href="#download" title="Link to this heading">#</a></h1>
+<p>This notebook can be directly downloaded <a class="reference download internal" download="" href="../_downloads/5b80739c3ce692b689ef6f3bc04a4a38/motivation.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">here</span></code></a> to run it locally.</p>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="lane-formation.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Lane formation in bi-directional flow</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="queues_waiting.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Waiting in Queues</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Modelling Motivation</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#simulation-of-a-corridor-with-different-motivations">Simulation of a corridor with different motivations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-the-geometry">Setting up the geometry</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#operational-model">Operational model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-the-simulation-object">Setting Up the Simulation Object</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#specifying-routing-details">Specifying Routing Details</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-and-distributing-agents">Defining and Distributing Agents</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#distribute-normal-agents-in-the-first-area">Distribute normal agents in the first area</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#distribute-motivated-agents-in-the-second-area">Distribute motivated agents in the second area</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#distribute-normal-agents-in-the-third-area">Distribute normal agents in the third area</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#executing-the-simulation">Executing the Simulation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#visualizing-the-trajectories">Visualizing the Trajectories</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#notes-and-comments">Notes and Comments</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#download">Download</a></li>
+</ul>
+
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Author name not set
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, Forschungszentrum Jülich GmbH, IAS-7.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
