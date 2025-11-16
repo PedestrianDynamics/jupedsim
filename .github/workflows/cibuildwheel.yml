@@ -33,12 +33,12 @@ jobs:
           python-version: "3.13"
       - name: Install dependencies
         run: pip install ruff
-      - name: Install clang-format-19
+      - name: Install clang-format-21
         run: |
-          sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main'
+          sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-21 main'
           wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
           sudo apt update
-          sudo apt install clang-format-19
+          sudo apt install clang-format-21
       - name: Run checks
         run: ./scripts/ci/check_format.sh
   tests:
