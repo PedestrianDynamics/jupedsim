@@ -49,7 +49,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v1.3.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v2.0.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
         </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -338,8 +338,6 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">random</span><span class="w"> </span><span class="kn">import</span> <span class="n">randint</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">jupedsim.native</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">py_jps</span>
-
 
 <div class="viewcode-block" id="AnticipationVelocityModel">
 <a class="viewcode-back" href="../../../api/jupedsim/index.html#jupedsim.AnticipationVelocityModel">[docs]</a>
@@ -428,24 +426,7 @@ document.write(`
     <span class="n">range_neighbor_repulsion</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span>
     <span class="n">wall_buffer_distance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span>
     <span class="n">anticipation_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
-    <span class="n">reaction_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">as_native</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">AnticipationVelocityModelAgentParameters</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">AnticipationVelocityModelAgentParameters</span><span class="p">(</span>
-            <span class="n">position</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">,</span>
-            <span class="n">time_gap</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">time_gap</span><span class="p">,</span>
-            <span class="n">desired_speed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_speed</span><span class="p">,</span>
-            <span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span>
-            <span class="n">journey_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">journey_id</span><span class="p">,</span>
-            <span class="n">stage_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stage_id</span><span class="p">,</span>
-            <span class="n">strength_neighbor_repulsion</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">strength_neighbor_repulsion</span><span class="p">,</span>
-            <span class="n">range_neighbor_repulsion</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">range_neighbor_repulsion</span><span class="p">,</span>
-            <span class="n">wall_buffer_distance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">wall_buffer_distance</span><span class="p">,</span>
-            <span class="n">anticipation_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">anticipation_time</span><span class="p">,</span>
-            <span class="n">reaction_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reaction_time</span><span class="p">,</span>
-        <span class="p">)</span></div>
+    <span class="n">reaction_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span></div>
 
 
 

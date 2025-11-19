@@ -52,7 +52,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v1.3.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v2.0.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
         </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -682,6 +682,7 @@ document.write(`
 </li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.SqliteTrajectoryWriter"><code class="docutils literal notranslate"><span class="pre">SqliteTrajectoryWriter</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.SqliteTrajectoryWriter.begin_writing"><code class="docutils literal notranslate"><span class="pre">SqliteTrajectoryWriter.begin_writing()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.SqliteTrajectoryWriter.close"><code class="docutils literal notranslate"><span class="pre">SqliteTrajectoryWriter.close()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.SqliteTrajectoryWriter.connection"><code class="docutils literal notranslate"><span class="pre">SqliteTrajectoryWriter.connection()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.SqliteTrajectoryWriter.every_nth_frame"><code class="docutils literal notranslate"><span class="pre">SqliteTrajectoryWriter.every_nth_frame()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.SqliteTrajectoryWriter.write_iteration_state"><code class="docutils literal notranslate"><span class="pre">SqliteTrajectoryWriter.write_iteration_state()</span></code></a></li>
@@ -697,6 +698,7 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Transition"><code class="docutils literal notranslate"><span class="pre">Transition</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Transition.create_fixed_transition"><code class="docutils literal notranslate"><span class="pre">Transition.create_fixed_transition()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Transition.create_least_targeted_transition"><code class="docutils literal notranslate"><span class="pre">Transition.create_least_targeted_transition()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Transition.create_none_transition"><code class="docutils literal notranslate"><span class="pre">Transition.create_none_transition()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Transition.create_round_robin_transition"><code class="docutils literal notranslate"><span class="pre">Transition.create_round_robin_transition()</span></code></a></li>
 </ul>
 </li>
@@ -2423,12 +2425,14 @@ simulation.</p>
 <dd><p>Add an agent to the simulation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>parameters</strong> – Agent Parameters of the newly added model. The parameters have to
-match the model used in this simulation. When adding agents with invalid parameters,
+<dd class="field-odd"><p><strong>parameters</strong> – <dl class="simple">
+<dt>Agent Parameters of the newly added model. The parameters have to</dt><dd><p>match the model used in this simulation. When adding agents with invalid parameters,
 or too close to the boundary or other agents, this will cause an error.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Id of the added agent.</p>
+<dt>Returns:</dt><dd><p>Id of the added agent.</p>
+</dd>
+</dl>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2492,14 +2496,19 @@ operational level will still be active.</p>
 <dt class="sig sig-object py" id="jupedsim.Simulation.add_queue_stage">
 <span class="sig-name descname"><span class="pre">add_queue_stage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../../_modules/jupedsim/simulation.html#Simulation.add_queue_stage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.Simulation.add_queue_stage" title="Link to this definition">#</a></dt>
 <dd><p>Add a new queue state to this simulation.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>positions</strong> – Ordered list of the waiting
-points of this queue. The first one in the list is the head of
+<blockquote>
+<div><dl class="simple">
+<dt>Arguments:</dt><dd><dl class="simple">
+<dt>positions: Ordered list of the waiting</dt><dd><p>points of this queue. The first one in the list is the head of
 the queue while the last one is the back of the queue.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Id of the new stage.</p>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Id of the new stage.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2684,7 +2693,7 @@ are targeting the waiting, the remaining will wait at the last given point.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="jupedsim.Simulation.mark_agent_for_removal">
-<span class="sig-name descname"><span class="pre">mark_agent_for_removal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../_modules/jupedsim/simulation.html#Simulation.mark_agent_for_removal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.Simulation.mark_agent_for_removal" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">mark_agent_for_removal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jupedsim/simulation.html#Simulation.mark_agent_for_removal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.Simulation.mark_agent_for_removal" title="Link to this definition">#</a></dt>
 <dd><p>Marks an agent for removal.</p>
 <p>Marks the given agent for removal in the simulation. The agent will be
 removed from the simulation in the start of the next <a class="reference internal" href="#jupedsim.Simulation.iterate" title="jupedsim.Simulation.iterate"><code class="xref py py-func docutils literal notranslate"><span class="pre">iterate()</span></code></a>
@@ -2693,9 +2702,6 @@ agents will be computed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>agent_id</strong> – Id of the agent marked for removal</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>marking for removal was successful</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3022,7 +3028,7 @@ and stages lie within the new geometry.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="jupedsim.SqliteTrajectoryWriter">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SqliteTrajectoryWriter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">pathlib.Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">every_nth_frame</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jupedsim/sqlite_serialization.html#SqliteTrajectoryWriter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.SqliteTrajectoryWriter" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SqliteTrajectoryWriter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">pathlib.Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">every_nth_frame</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">commit_every_nth_write</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jupedsim/sqlite_serialization.html#SqliteTrajectoryWriter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.SqliteTrajectoryWriter" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">jupedsim.serialization.TrajectoryWriter</span></code></p>
 <p>Write trajectory data into a sqlite db</p>
 <dl class="py method">
@@ -3032,6 +3038,12 @@ and stages lie within the new geometry.</p>
 <p>This method is intended to handle all data writing that has to be done
 once before the trajectory data can be written. E.g. Meta information
 such as framerate etc…</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jupedsim.SqliteTrajectoryWriter.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../_modules/jupedsim/sqlite_serialization.html#SqliteTrajectoryWriter.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.SqliteTrajectoryWriter.close" title="Link to this definition">#</a></dt>
+<dd><p>Flush buffer and close DB connection. Call at simulation end.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3057,7 +3069,8 @@ writen and so on.</p>
 <span class="sig-name descname"><span class="pre">write_iteration_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">jupedsim.simulation.Simulation</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../_modules/jupedsim/sqlite_serialization.html#SqliteTrajectoryWriter.write_iteration_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.SqliteTrajectoryWriter.write_iteration_state" title="Link to this definition">#</a></dt>
 <dd><p>Write trajectory data of one simulation iteration.</p>
 <p>This method is intended to handle serialization of the trajectory data
-of a single iteration.</p>
+of a single iteration. The default behaviour is to buffer frames in memory
+and only writing to disk when the buffer is full or close() is called.</p>
 </dd></dl>
 
 </dd></dl>
@@ -3152,6 +3165,11 @@ This includes agents from different journeys.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jupedsim.Transition.create_none_transition">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_none_transition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#jupedsim.Transition" title="jupedsim.Transition"><span class="pre">Transition</span></a></span></span><a class="reference internal" href="../../_modules/jupedsim/journey.html#Transition.create_none_transition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.Transition.create_none_transition" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="jupedsim.Transition.create_round_robin_transition">
@@ -3982,6 +4000,7 @@ basic information about this library.</p>
 </li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.SqliteTrajectoryWriter"><code class="docutils literal notranslate"><span class="pre">SqliteTrajectoryWriter</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.SqliteTrajectoryWriter.begin_writing"><code class="docutils literal notranslate"><span class="pre">SqliteTrajectoryWriter.begin_writing()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.SqliteTrajectoryWriter.close"><code class="docutils literal notranslate"><span class="pre">SqliteTrajectoryWriter.close()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.SqliteTrajectoryWriter.connection"><code class="docutils literal notranslate"><span class="pre">SqliteTrajectoryWriter.connection()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.SqliteTrajectoryWriter.every_nth_frame"><code class="docutils literal notranslate"><span class="pre">SqliteTrajectoryWriter.every_nth_frame()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.SqliteTrajectoryWriter.write_iteration_state"><code class="docutils literal notranslate"><span class="pre">SqliteTrajectoryWriter.write_iteration_state()</span></code></a></li>
@@ -3997,6 +4016,7 @@ basic information about this library.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Transition"><code class="docutils literal notranslate"><span class="pre">Transition</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Transition.create_fixed_transition"><code class="docutils literal notranslate"><span class="pre">Transition.create_fixed_transition()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Transition.create_least_targeted_transition"><code class="docutils literal notranslate"><span class="pre">Transition.create_least_targeted_transition()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Transition.create_none_transition"><code class="docutils literal notranslate"><span class="pre">Transition.create_none_transition()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Transition.create_round_robin_transition"><code class="docutils literal notranslate"><span class="pre">Transition.create_round_robin_transition()</span></code></a></li>
 </ul>
 </li>

@@ -1480,7 +1480,8 @@ Attributes
                          match the model used in this simulation. When adding agents with invalid parameters,
                          or too close to the boundary or other agents, this will cause an error.
 
-      :returns: Id of the added agent.
+          Returns:
+              Id of the added agent.
 
 
 
@@ -1536,10 +1537,10 @@ Attributes
 
       Add a new queue state to this simulation.
 
-      :param positions: Ordered list of the waiting
-                        points of this queue. The first one in the list is the head of
-                        the queue while the last one is the back of the queue.
-
+       Arguments:
+           positions: Ordered list of the waiting
+               points of this queue. The first one in the list is the head of
+               the queue while the last one is the back of the queue.
       :returns: Id of the new stage.
 
 
@@ -1676,7 +1677,7 @@ Attributes
 
 
 
-   .. py:method:: mark_agent_for_removal(agent_id: int) -> bool
+   .. py:method:: mark_agent_for_removal(agent_id: int)
 
       Marks an agent for removal.
 
@@ -1686,8 +1687,6 @@ Attributes
       agents will be computed.
 
       :param agent_id: Id of the agent marked for removal
-
-      :returns: marking for removal was successful
 
 
 
@@ -1990,7 +1989,7 @@ Attributes
       velocity of this agent.
 
 
-.. py:class:: SqliteTrajectoryWriter(*, output_file: pathlib.Path, every_nth_frame: int = 4)
+.. py:class:: SqliteTrajectoryWriter(*, output_file: pathlib.Path, every_nth_frame: int = 4, commit_every_nth_write: int = 100)
 
    Bases: :py:obj:`jupedsim.serialization.TrajectoryWriter`
 
@@ -2005,6 +2004,12 @@ Attributes
       This method is intended to handle all data writing that has to be done
       once before the trajectory data can be written. E.g. Meta information
       such as framerate etc...
+
+
+
+   .. py:method:: close() -> None
+
+      Flush buffer and close DB connection. Call at simulation end.
 
 
 
@@ -2027,7 +2032,8 @@ Attributes
       Write trajectory data of one simulation iteration.
 
       This method is intended to handle serialization of the trajectory data
-      of a single iteration.
+      of a single iteration. The default behaviour is to buffer frames in memory
+      and only writing to disk when the buffer is full or close() is called.
 
 
 
@@ -2132,6 +2138,11 @@ Attributes
       This includes agents from different journeys.
 
       :param stage_ids: list of stage ids to choose the next target from.
+
+
+
+   .. py:method:: create_none_transition() -> Transition
+      :staticmethod:
 
 
 

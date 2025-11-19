@@ -49,7 +49,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v1.3.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v2.0.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
         </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -343,8 +343,6 @@ document.write(`
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">deprecated</span><span class="w"> </span><span class="kn">import</span> <span class="n">deprecated</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">jupedsim.native</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">py_jps</span>
-
 
 <div class="viewcode-block" id="GeneralizedCentrifugalForceModel">
 <a class="viewcode-back" href="../../../api/jupedsim/index.html#jupedsim.GeneralizedCentrifugalForceModel">[docs]</a>
@@ -492,26 +490,7 @@ document.write(`
     <span class="nd">@e0</span><span class="o">.</span><span class="n">setter</span>
     <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;desired_direction&#39; instead.&quot;</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">e0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e0</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">desired_direction</span> <span class="o">=</span> <span class="n">e0</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">as_native</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">GeneralizedCentrifugalForceModelAgentParameters</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">GeneralizedCentrifugalForceModelAgentParameters</span><span class="p">(</span>
-            <span class="n">speed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">speed</span><span class="p">,</span>
-            <span class="n">desired_direction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_direction</span><span class="p">,</span>
-            <span class="n">position</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">,</span>
-            <span class="n">orientation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span>
-            <span class="n">journey_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">journey_id</span><span class="p">,</span>
-            <span class="n">stage_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stage_id</span><span class="p">,</span>
-            <span class="n">mass</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span>
-            <span class="n">tau</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">,</span>
-            <span class="n">desired_speed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_speed</span><span class="p">,</span>
-            <span class="n">a_v</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">a_v</span><span class="p">,</span>
-            <span class="n">a_min</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">a_min</span><span class="p">,</span>
-            <span class="n">b_min</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">b_min</span><span class="p">,</span>
-            <span class="n">b_max</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">b_max</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desired_direction</span> <span class="o">=</span> <span class="n">e0</span></div>
 
 
 
@@ -533,11 +512,11 @@ document.write(`
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">desired_direction</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;desired direction of this agent.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">desired_direction</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">desired_orientation</span>
 
     <span class="nd">@desired_direction</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">desired_direction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desired_direction</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">desired_direction</span> <span class="o">=</span> <span class="n">desired_direction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">desired_orientation</span> <span class="o">=</span> <span class="n">desired_direction</span>
 
     <span class="nd">@property</span>
     <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;desired_direction&#39; instead.&quot;</span><span class="p">)</span>

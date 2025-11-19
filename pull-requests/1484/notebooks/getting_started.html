@@ -50,7 +50,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v1.3.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v2.0.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
         </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -536,14 +536,17 @@ We will now re-use the above extracted start positions of the agents.</p>
 </div>
 <p>After, we have added the agents.
 We’ve got everything needed to start a simulation.
-Here, we will iterate, as long as there are agents inside the simulation, e.g., some agents have not yet reached the exit.</p>
+Here, we will iterate, as long as there are agents inside the simulation, e.g., some agents have not yet reached the exit.
+At the end of the simulation we need to explicitly close the output file which writes all currently buffered data.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="p">(</span>
     <span class="n">simulation_cfsm</span><span class="o">.</span><span class="n">agent_count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span>
-    <span class="ow">and</span> <span class="n">simulation_cfsm</span><span class="o">.</span><span class="n">iteration_count</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">2000</span>
+    <span class="ow">and</span> <span class="n">simulation_cfsm</span><span class="o">.</span><span class="n">iteration_count</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">10000</span>
 <span class="p">):</span>
     <span class="n">simulation_cfsm</span><span class="o">.</span><span class="n">iterate</span><span class="p">()</span>
+
+<span class="n">simulation_cfsm</span><span class="o">.</span><span class="n">_writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -630,7 +633,7 @@ The first step here, is to have a look at the trajectories of both:</p>
 </div>
 </details>
 <div class="cell_output docutils container">
-<img alt="../_images/82451374624257d3b3432387370910179dfb3da2f1fe48f2792f891b628f1ee8.png" src="../_images/82451374624257d3b3432387370910179dfb3da2f1fe48f2792f891b628f1ee8.png" />
+<img alt="../_images/1844e7e52477b84f27ecaadd8f92e6e0e888b590dcf9088d4e894e3b32acb1b7.png" src="../_images/1844e7e52477b84f27ecaadd8f92e6e0e888b590dcf9088d4e894e3b32acb1b7.png" />
 </div>
 </div>
 <p>But we do not only want to have a qualitative comparision, but also a quantitive one.
@@ -667,7 +670,7 @@ First, we create a measurement line at the beginning of the bottleneck:</p>
 </div>
 </details>
 <div class="cell_output docutils container">
-<img alt="../_images/dabc84a36ecec2983693353063e69fc296faa64db5685b933b64b3c5571ee84c.png" src="../_images/dabc84a36ecec2983693353063e69fc296faa64db5685b933b64b3c5571ee84c.png" />
+<img alt="../_images/4c7f0c03953e55711141529d4617c439344ba3f00034e1db1d0482e28229607d.png" src="../_images/4c7f0c03953e55711141529d4617c439344ba3f00034e1db1d0482e28229607d.png" />
 </div>
 </div>
 <p>For this line we can then compute the flow:</p>
@@ -714,7 +717,7 @@ First, we create a measurement line at the beginning of the bottleneck:</p>
 </div>
 </details>
 <div class="cell_output docutils container">
-<img alt="../_images/82546332fca117d2fa113f4a2a14f0e703f8340bcaf98f15833d359f410e84a8.png" src="../_images/82546332fca117d2fa113f4a2a14f0e703f8340bcaf98f15833d359f410e84a8.png" />
+<img alt="../_images/465930202bbec649ab8357a121da7aa8404ab1e0579bc72e4f1ca297230f74a5.png" src="../_images/465930202bbec649ab8357a121da7aa8404ab1e0579bc72e4f1ca297230f74a5.png" />
 </div>
 </div>
 </section>

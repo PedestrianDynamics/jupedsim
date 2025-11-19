@@ -49,7 +49,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v1.3.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v2.0.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
         </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -503,13 +503,12 @@ document.write(`
     <span class="k">def</span><span class="w"> </span><span class="nf">add_queue_stage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a new queue state to this simulation.</span>
 
-<span class="sd">        Arguments:</span>
-<span class="sd">            positions: Ordered list of the waiting</span>
-<span class="sd">                points of this queue. The first one in the list is the head of</span>
-<span class="sd">                the queue while the last one is the back of the queue.</span>
-
+<span class="sd">         Arguments:</span>
+<span class="sd">             positions: Ordered list of the waiting</span>
+<span class="sd">                 points of this queue. The first one in the list is the head of</span>
+<span class="sd">                 the queue while the last one is the back of the queue.</span>
 <span class="sd">        Returns:</span>
-<span class="sd">            Id of the new stage.</span>
+<span class="sd">             Id of the new stage.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">add_queue_stage</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span></div>
@@ -603,7 +602,9 @@ document.write(`
 <span class="sd">            Id of the added Journey.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">add_journey</span><span class="p">(</span><span class="n">journey</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">add_journey</span><span class="p">(</span>
+            <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">_obj</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">journey</span><span class="o">.</span><span class="n">_transitions</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Simulation.add_agent">
@@ -621,19 +622,88 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add an agent to the simulation.</span>
 
 <span class="sd">        Arguments:</span>
-<span class="sd">            parameters: Agent Parameters of the newly added model. The parameters have to</span>
-<span class="sd">                match the model used in this simulation. When adding agents with invalid parameters,</span>
-<span class="sd">                or too close to the boundary or other agents, this will cause an error.</span>
+<span class="sd">                parameters: Agent Parameters of the newly added model. The parameters have to</span>
+<span class="sd">                    match the model used in this simulation. When adding agents with invalid parameters,</span>
+<span class="sd">                    or too close to the boundary or other agents, this will cause an error.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            Id of the added agent.</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                Id of the added agent.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">as_native</span><span class="p">())</span></div>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">parameters</span><span class="p">,</span> <span class="n">GeneralizedCentrifugalForceModelAgentParameters</span>
+        <span class="p">):</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">GeneralizedCentrifugalForceModelState</span><span class="p">(</span>
+                <span class="n">speed</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">speed</span><span class="p">,</span>
+                <span class="n">desired_orientation</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span>
+                <span class="n">mass</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span>
+                <span class="n">tau</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">tau</span><span class="p">,</span>
+                <span class="n">desired_speed</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">desired_speed</span><span class="p">,</span>
+                <span class="n">a_v</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">a_v</span><span class="p">,</span>
+                <span class="n">a_min</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">a_min</span><span class="p">,</span>
+                <span class="n">b_min</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">b_min</span><span class="p">,</span>
+                <span class="n">b_max</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">b_max</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">CollisionFreeSpeedModelAgentParameters</span><span class="p">):</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelState</span><span class="p">(</span>
+                <span class="n">time_gap</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">time_gap</span><span class="p">,</span>
+                <span class="n">desired_speed</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">desired_speed</span><span class="p">,</span>
+                <span class="n">radius</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">CollisionFreeSpeedModelV2AgentParameters</span><span class="p">):</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelV2State</span><span class="p">(</span>
+                <span class="n">strength_neighbor_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">strength_neighbor_repulsion</span><span class="p">,</span>
+                <span class="n">range_neighbor_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">range_neighbor_repulsion</span><span class="p">,</span>
+                <span class="n">strength_geometry_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">strength_geometry_repulsion</span><span class="p">,</span>
+                <span class="n">range_geometry_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">range_geometry_repulsion</span><span class="p">,</span>
+                <span class="n">time_gap</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">time_gap</span><span class="p">,</span>
+                <span class="n">desired_speed</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">desired_speed</span><span class="p">,</span>
+                <span class="n">radius</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">AnticipationVelocityModelAgentParameters</span><span class="p">):</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">AnticipationVelocityModelState</span><span class="p">(</span>
+                <span class="n">strength_neighbor_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">strength_neighbor_repulsion</span><span class="p">,</span>
+                <span class="n">range_neighbor_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">range_neighbor_repulsion</span><span class="p">,</span>
+                <span class="n">wall_buffer_distance</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">wall_buffer_distance</span><span class="p">,</span>
+                <span class="n">anticipation_time</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">anticipation_time</span><span class="p">,</span>
+                <span class="n">reaction_time</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">reaction_time</span><span class="p">,</span>
+                <span class="n">time_gap</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">time_gap</span><span class="p">,</span>
+                <span class="n">desired_speed</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">desired_speed</span><span class="p">,</span>
+                <span class="n">radius</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">SocialForceModelAgentParameters</span><span class="p">):</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">SocialForceModelState</span><span class="p">(</span>
+                <span class="n">velocity</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">velocity</span><span class="p">,</span>
+                <span class="n">mass</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span>
+                <span class="n">desired_speed</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">desired_speed</span><span class="p">,</span>
+                <span class="n">reaction_time</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">reaction_time</span><span class="p">,</span>
+                <span class="n">agent_scale</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">agent_scale</span><span class="p">,</span>
+                <span class="n">obstacle_scale</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">obstacle_scale</span><span class="p">,</span>
+                <span class="n">force_distance</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">force_distance</span><span class="p">,</span>
+                <span class="n">radius</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># TODO(kkratz): Some models do not have an orientation as part of their</span>
+        <span class="c1"># state, but we initially designed it to be. This needs to be first</span>
+        <span class="c1"># fixed on the C++ Level and then later here. Fix is: Move orientation</span>
+        <span class="c1"># into model specific data.</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">orientation_or_zero</span><span class="p">(</span><span class="n">param</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s2">&quot;orientation&quot;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">param</span><span class="o">.</span><span class="n">orientation</span>
+            <span class="k">return</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+        <span class="n">agent</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span>
+            <span class="n">journey_id</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">journey_id</span><span class="p">,</span>
+            <span class="n">stage_id</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">stage_id</span><span class="p">,</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">position</span><span class="p">,</span>
+            <span class="n">orientation</span><span class="o">=</span><span class="n">orientation_or_zero</span><span class="p">(</span><span class="n">parameters</span><span class="p">),</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Simulation.mark_agent_for_removal">
 <a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.mark_agent_for_removal">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">mark_agent_for_removal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mark_agent_for_removal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Marks an agent for removal.</span>
 
 <span class="sd">        Marks the given agent for removal in the simulation. The agent will be</span>
@@ -643,12 +713,9 @@ document.write(`
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            agent_id: Id of the agent marked for removal</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            marking for removal was successful</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">mark_agent_for_removal</span><span class="p">(</span><span class="n">agent_id</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">mark_agent_for_removal</span><span class="p">(</span><span class="n">agent_id</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Simulation.removed_agents">

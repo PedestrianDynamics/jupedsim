@@ -50,7 +50,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v1.3.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v2.0.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
         </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -602,6 +602,7 @@ All models are utilized with their default parameter settings as defined in <str
         <span class="ow">and</span> <span class="n">simulation</span><span class="o">.</span><span class="n">iteration_count</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">max_iterations</span>
     <span class="p">):</span>
         <span class="n">simulation</span><span class="o">.</span><span class="n">iterate</span><span class="p">()</span>
+    <span class="n">simulation</span><span class="o">.</span><span class="n">_writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Evacuation time: </span><span class="si">{</span><span class="n">simulation</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> s&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">simulation</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span>
 
@@ -777,18 +778,12 @@ All models are utilized with their default parameter settings as defined in <str
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_2849/1984142823.py:49: DeprecationWarning:
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_3452/1762482793.py:49: DeprecationWarning:
 
 &#39;desiredSpeed&#39; is deprecated, use &#39;desired_speed&#39; instead.
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>SocialForceModelAgentParameters(position=(1, 1), orientation=array([8., 8.]), journey_id=3, stage_id=9, velocity=(0.0, 0.0), mass=80.0, desired_speed=1.0, reaction_time=0.5, agent_scale=2000, obstacle_scale=2000, force_distance=0.08, radius=0.3)
-SocialForceModelAgentParameters(position=(9, 9), orientation=array([-8., -8.]), journey_id=3, stage_id=10, velocity=(0.0, 0.0), mass=80.0, desired_speed=1.0, reaction_time=0.5, agent_scale=2000, obstacle_scale=2000, force_distance=0.08, radius=0.3)
-SocialForceModelAgentParameters(position=(1, 9), orientation=array([ 8., -8.]), journey_id=3, stage_id=11, velocity=(0.0, 0.0), mass=80.0, desired_speed=1.0, reaction_time=0.5, agent_scale=2000, obstacle_scale=2000, force_distance=0.08, radius=0.3)
-SocialForceModelAgentParameters(position=(9, 1), orientation=array([-8.,  8.]), journey_id=3, stage_id=12, velocity=(0.0, 0.0), mass=80.0, desired_speed=1.0, reaction_time=0.5, agent_scale=2000, obstacle_scale=2000, force_distance=0.08, radius=0.3)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Evacuation time: 31.18 s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Evacuation time: 31.22 s
 </pre></div>
 </div>
 </div>
@@ -823,7 +818,7 @@ SocialForceModelAgentParameters(position=(9, 1), orientation=array([-8.,  8.]), 
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Evacuation time: 50.00 s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Evacuation time: 37.39 s
 </pre></div>
 </div>
 </div>
@@ -845,7 +840,7 @@ SocialForceModelAgentParameters(position=(9, 1), orientation=array([-8.,  8.]), 
 </div>
 </details>
 <div class="cell_output docutils container">
-<img alt="../_images/0e4a7d1e4c74af66341a15fe50d805b0341fb66fadba4f5123e1fd8cd8c14631.png" src="../_images/0e4a7d1e4c74af66341a15fe50d805b0341fb66fadba4f5123e1fd8cd8c14631.png" />
+<img alt="../_images/f48e4d4b1bf157c49225d24effc8dc0d4eb36b0fc7c7be9c7f18c121896bf584.png" src="../_images/f48e4d4b1bf157c49225d24effc8dc0d4eb36b0fc7c7be9c7f18c121896bf584.png" />
 </div>
 </div>
 </section>
@@ -999,14 +994,12 @@ SocialForceModelAgentParameters(position=(9, 1), orientation=array([-8.,  8.]), 
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_2849/1984142823.py:49: DeprecationWarning:
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_3452/1762482793.py:49: DeprecationWarning:
 
 &#39;desiredSpeed&#39; is deprecated, use &#39;desired_speed&#39; instead.
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>SocialForceModelAgentParameters(position=(-2, 0), orientation=array([15.5, -0. ]), journey_id=7, stage_id=21, velocity=(0.0, 0.0), mass=80.0, desired_speed=1.0, reaction_time=0.5, agent_scale=2000, obstacle_scale=2000, force_distance=0.08, radius=0.3)
-SocialForceModelAgentParameters(position=(2, 0), orientation=array([11.5, -0. ]), journey_id=7, stage_id=22, velocity=(0.0, 0.0), mass=80.0, desired_speed=0.8, reaction_time=0.5, agent_scale=2000, obstacle_scale=2000, force_distance=0.08, radius=0.3)
-Evacuation time: 14.51 s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Evacuation time: 14.51 s
 </pre></div>
 </div>
 </div>
@@ -1197,14 +1190,12 @@ Evacuation time: 14.51 s
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_2849/1984142823.py:49: DeprecationWarning:
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_3452/1762482793.py:49: DeprecationWarning:
 
 &#39;desiredSpeed&#39; is deprecated, use &#39;desired_speed&#39; instead.
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>SocialForceModelAgentParameters(position=(-2, 0), orientation=array([ 9.5, -0. ]), journey_id=11, stage_id=29, velocity=(0.0, 0.0), mass=80.0, desired_speed=1.0, reaction_time=0.5, agent_scale=2000, obstacle_scale=2000, force_distance=0.08, radius=0.3)
-SocialForceModelAgentParameters(position=(2, 0), orientation=array([-9.5, -0. ]), journey_id=11, stage_id=30, velocity=(0.0, 0.0), mass=80.0, desired_speed=1.0, reaction_time=0.5, agent_scale=2000, obstacle_scale=2000, force_distance=0.08, radius=0.3)
-Evacuation time: 20.00 s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Evacuation time: 20.00 s
 </pre></div>
 </div>
 </div>
@@ -1239,7 +1230,7 @@ Evacuation time: 20.00 s
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Evacuation time: 26.77 s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Evacuation time: 26.37 s
 </pre></div>
 </div>
 </div>
@@ -1261,7 +1252,7 @@ Evacuation time: 20.00 s
 </div>
 </details>
 <div class="cell_output docutils container">
-<img alt="../_images/e4c89bd24e690c745b05160ad2eac50049cb915d5ccd65963c6c28e646272ce2.png" src="../_images/e4c89bd24e690c745b05160ad2eac50049cb915d5ccd65963c6c28e646272ce2.png" />
+<img alt="../_images/846fe26c81abc98e00cea6f143cab58c0e1720601f9ef6cda762534e13379c55.png" src="../_images/846fe26c81abc98e00cea6f143cab58c0e1720601f9ef6cda762534e13379c55.png" />
 </div>
 </div>
 </section>
@@ -1409,14 +1400,12 @@ Evacuation time: 20.00 s
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_2849/1984142823.py:49: DeprecationWarning:
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_3452/1762482793.py:49: DeprecationWarning:
 
 &#39;desiredSpeed&#39; is deprecated, use &#39;desired_speed&#39; instead.
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>SocialForceModelAgentParameters(position=(-2, 0), orientation=array([ 7.5, -0. ]), journey_id=15, stage_id=37, velocity=(0.0, 0.0), mass=80.0, desired_speed=1.0, reaction_time=0.5, agent_scale=2000, obstacle_scale=2000, force_distance=0.08, radius=0.3)
-SocialForceModelAgentParameters(position=(0, -2), orientation=array([-0. ,  7.5]), journey_id=15, stage_id=38, velocity=(0.0, 0.0), mass=80.0, desired_speed=0.99, reaction_time=0.5, agent_scale=2000, obstacle_scale=2000, force_distance=0.08, radius=0.3)
-Evacuation time: 10.20 s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Evacuation time: 10.20 s
 </pre></div>
 </div>
 </div>
@@ -1451,7 +1440,7 @@ Evacuation time: 10.20 s
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Evacuation time: 12.99 s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Evacuation time: 12.39 s
 </pre></div>
 </div>
 </div>
@@ -1473,7 +1462,7 @@ Evacuation time: 10.20 s
 </div>
 </details>
 <div class="cell_output docutils container">
-<img alt="../_images/858fe8b24c532bc624d22a81d667da4a1e5f9a61856d5f388062d298d92287d0.png" src="../_images/858fe8b24c532bc624d22a81d667da4a1e5f9a61856d5f388062d298d92287d0.png" />
+<img alt="../_images/0a8f0b55e1b61702f38304431d2ef7b0fe7bb6b5c57546cdb6d0e8e40a09f179.png" src="../_images/0a8f0b55e1b61702f38304431d2ef7b0fe7bb6b5c57546cdb6d0e8e40a09f179.png" />
 </div>
 </div>
 </section>
@@ -1564,7 +1553,7 @@ Evacuation time: 10.20 s
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Evacuation time: 10.18 s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Evacuation time: 12.28 s
 </pre></div>
 </div>
 </div>
@@ -1599,7 +1588,7 @@ Evacuation time: 10.20 s
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Evacuation time: 12.21 s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Evacuation time: 12.59 s
 </pre></div>
 </div>
 </div>
@@ -1634,19 +1623,12 @@ Evacuation time: 10.20 s
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_2849/1984142823.py:49: DeprecationWarning:
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_3452/1762482793.py:49: DeprecationWarning:
 
 &#39;desiredSpeed&#39; is deprecated, use &#39;desired_speed&#39; instead.
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>SocialForceModelAgentParameters(position=(-4, -0.5), orientation=array([4.  , 2.25]), journey_id=19, stage_id=55, velocity=(0.0, 0.0), mass=80.0, desired_speed=1.0, reaction_time=0.5, agent_scale=2000, obstacle_scale=2000, force_distance=0.08, radius=0.3)
-SocialForceModelAgentParameters(position=(-3.5, -2), orientation=array([3.5 , 3.75]), journey_id=19, stage_id=56, velocity=(0.0, 0.0), mass=80.0, desired_speed=1.0, reaction_time=0.5, agent_scale=2000, obstacle_scale=2000, force_distance=0.08, radius=0.3)
-SocialForceModelAgentParameters(position=(-2, -3.5), orientation=array([2.  , 5.25]), journey_id=19, stage_id=57, velocity=(0.0, 0.0), mass=80.0, desired_speed=1.0, reaction_time=0.5, agent_scale=2000, obstacle_scale=2000, force_distance=0.08, radius=0.3)
-SocialForceModelAgentParameters(position=(0, -4), orientation=array([-0.  ,  5.75]), journey_id=19, stage_id=58, velocity=(0.0, 0.0), mass=80.0, desired_speed=1.0, reaction_time=0.5, agent_scale=2000, obstacle_scale=2000, force_distance=0.08, radius=0.3)
-SocialForceModelAgentParameters(position=(2, -3.5), orientation=array([-2.  ,  5.25]), journey_id=19, stage_id=59, velocity=(0.0, 0.0), mass=80.0, desired_speed=1.0, reaction_time=0.5, agent_scale=2000, obstacle_scale=2000, force_distance=0.08, radius=0.3)
-SocialForceModelAgentParameters(position=(3.5, -2), orientation=array([-3.5 ,  3.75]), journey_id=19, stage_id=60, velocity=(0.0, 0.0), mass=80.0, desired_speed=1.0, reaction_time=0.5, agent_scale=2000, obstacle_scale=2000, force_distance=0.08, radius=0.3)
-SocialForceModelAgentParameters(position=(4, -0.5), orientation=array([-4.  ,  2.25]), journey_id=19, stage_id=61, velocity=(0.0, 0.0), mass=80.0, desired_speed=1.0, reaction_time=0.5, agent_scale=2000, obstacle_scale=2000, force_distance=0.08, radius=0.3)
-Evacuation time: 20.00 s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Evacuation time: 20.00 s
 </pre></div>
 </div>
 </div>
@@ -1703,7 +1685,7 @@ Evacuation time: 20.00 s
 </div>
 </details>
 <div class="cell_output docutils container">
-<img alt="../_images/94f6bd6a8d7fd6bf72026a083969ae4ebfd2c203b9db19b46edd6978387e642f.png" src="../_images/94f6bd6a8d7fd6bf72026a083969ae4ebfd2c203b9db19b46edd6978387e642f.png" />
+<img alt="../_images/ee56b42a359f93755b6ec4bd75e585ec72dc5a4b520ac2f4812e1bd4f366e987.png" src="../_images/ee56b42a359f93755b6ec4bd75e585ec72dc5a4b520ac2f4812e1bd4f366e987.png" />
 </div>
 </div>
 </section>

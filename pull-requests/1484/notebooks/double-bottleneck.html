@@ -52,7 +52,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v1.3.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v2.0.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
         </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -499,6 +499,7 @@ By creating the union of all parts we end up with the whole walkable area.</p>
 
 <span class="k">while</span> <span class="n">simulation</span><span class="o">.</span><span class="n">agent_count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
     <span class="n">simulation</span><span class="o">.</span><span class="n">iterate</span><span class="p">()</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">_writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -544,7 +545,7 @@ By creating the union of all parts we end up with the whole walkable area.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/c5928dcbca15fd42e7726ecfc39ea33e6abebb094601e72e8a33eef27a68e762.png" src="../_images/c5928dcbca15fd42e7726ecfc39ea33e6abebb094601e72e8a33eef27a68e762.png" />
+<img alt="../_images/e19a7953cf6ce81373e3394bb876190ef33cf109f519c921b72b528f811d6e11.png" src="../_images/e19a7953cf6ce81373e3394bb876190ef33cf109f519c921b72b528f811d6e11.png" />
 </div>
 </div>
 <p>As a next stept we calculate the <span class="math notranslate nohighlight">\(N-t\)</span> data and plot it:</p>
@@ -576,7 +577,7 @@ By creating the union of all parts we end up with the whole walkable area.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/1720bf0f914fa26d4a574e2fe42481d0d0c24ae0b63649b229730ec6991e137a.png" src="../_images/1720bf0f914fa26d4a574e2fe42481d0d0c24ae0b63649b229730ec6991e137a.png" />
+<img alt="../_images/3f5a77ca5447d905e23e9559312542ec5c87098a989a977a85bc0aa7f4038e3b.png" src="../_images/3f5a77ca5447d905e23e9559312542ec5c87098a989a977a85bc0aa7f4038e3b.png" />
 </div>
 </div>
 <p>The results above show a similar and time-shifted flow for both bottlenecks. Further, to inspect the formation of jamming we analyse the individual speed and density over time. To do so, we use PedPy to calculate the individual speed and Voronoi polygons for each frame calculated by the simulation.</p>
@@ -658,7 +659,7 @@ By creating the union of all parts we end up with the whole walkable area.</p>
 </div>
 </details>
 <div class="cell_output docutils container">
-<img alt="../_images/ec37625b39c6e8ef433bb7a91f38ffd337b0ee4baeee4265405d4cbe60eca454.png" src="../_images/ec37625b39c6e8ef433bb7a91f38ffd337b0ee4baeee4265405d4cbe60eca454.png" />
+<img alt="../_images/038dd49e8b8aadb011e02267c9732d1eb9fe20bdced6c0d33320a80eff592bce.png" src="../_images/038dd49e8b8aadb011e02267c9732d1eb9fe20bdced6c0d33320a80eff592bce.png" />
 </div>
 </div>
 </section>
@@ -717,6 +718,7 @@ By creating the union of all parts we end up with the whole walkable area.</p>
 
 <span class="k">while</span> <span class="n">simulation_narrow</span><span class="o">.</span><span class="n">agent_count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
     <span class="n">simulation_narrow</span><span class="o">.</span><span class="n">iterate</span><span class="p">()</span>
+<span class="n">simulation_narrow</span><span class="o">.</span><span class="n">_writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -778,6 +780,7 @@ By creating the union of all parts we end up with the whole walkable area.</p>
 
 <span class="k">while</span> <span class="n">simulation_wide</span><span class="o">.</span><span class="n">agent_count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
     <span class="n">simulation_wide</span><span class="o">.</span><span class="n">iterate</span><span class="p">()</span>
+<span class="n">simulation_wide</span><span class="o">.</span><span class="n">_writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -845,7 +848,7 @@ By creating the union of all parts we end up with the whole walkable area.</p>
 </div>
 </details>
 <div class="cell_output docutils container">
-<img alt="../_images/121a9de47402ea0c5261fbaf2179ef6cf5833686a19052ca7d22921830bdc7a6.png" src="../_images/121a9de47402ea0c5261fbaf2179ef6cf5833686a19052ca7d22921830bdc7a6.png" />
+<img alt="../_images/dafca7a839918361c45c9301ae32c300c0785faf67114538ea407f1ddef0a806.png" src="../_images/dafca7a839918361c45c9301ae32c300c0785faf67114538ea407f1ddef0a806.png" />
 </div>
 </div>
 <p>The results show: the smaller the width of the bottleneck, the smaller the flow as it takes longer for all 150 agents to enter the first bottleneck.</p>
