@@ -1,6 +1,7 @@
 import subprocess
-import pytest
 from pathlib import Path
+
+import pytest
 
 dxf_dir = Path("examples/geometry/dxf")
 dxf_files = list(dxf_dir.glob("*.dxf"))
