@@ -46,7 +46,7 @@ discussions](https://github.com/PedestrianDynamics/jupedsim/discussions).
 If you found a bug and want to give us a chance to fix it we would be very
 happy to hear from you. To make it easy for us to help you please include the
 following information when you open a [new
-issue](https://github.com/PedestrianDynamics/jupedsim/issues):
+discussion](https://github.com/PedestrianDynamics/jupedsim/discussions):
 
 * What did JuPedSim do?
 * What did you expect JuPedSim to do?
@@ -99,6 +99,7 @@ library.
 pip install -r jupedsim/requirements.txt
 mkdir jupedsim-build
 cd jupedsim-build
+git submodule update --init
 cmake ../jupedsim
 make -j
 source ./environment
@@ -106,6 +107,13 @@ source ./environment
 
 The last line in the above description will populate the python path with the
 location of our python code and the native library.
+
+> [!TIP]
+> Enable automatic recursion into submodules for this repo by calling:
+> ```bash
+> git config submodule.recurse true
+> ```
+
 
 > [!NOTE]
 >  JuPedSim does not build against Python 3.13.4 on Windows.
