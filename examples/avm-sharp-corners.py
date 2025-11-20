@@ -1,15 +1,10 @@
 # %%
-import jupedsim as jps
-import pedpy
-
 import pathlib
 
+import jupedsim as jps
+import pedpy
 from shapely.geometry import Polygon
 from shapely.ops import unary_union
-
-
-from shapely.ops import unary_union
-
 
 # Define the list of coordinate lists
 default_geometry_coordinates = [
