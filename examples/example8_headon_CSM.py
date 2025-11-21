@@ -35,14 +35,14 @@ def main():
             stage_id=exit_id,
             position=start_positions[0],
             radius=0.2,
-            v0=1.2,
+            desired_speed=1.2,
         ),
         jps.CollisionFreeSpeedModelAgentParameters(
             journey_id=journey_id,
             stage_id=exit_id,
             position=start_positions[1],
             radius=0.2,
-            v0=0.2,
+            desired_speed=0.2,
         ),
     ]
     for position, param in zip(start_positions, parameters):
@@ -51,6 +51,7 @@ def main():
     while simulation.agent_count() > 0 and simulation.iteration_count() < 1000:
         simulation.iterate()
 
+    simulation._writer.close()
     print(
         f"Simulation completed after {simulation.iteration_count()} iterations ({simulation.elapsed_time()} s)"
     )

@@ -60,8 +60,11 @@ def main():
         try:
             simulation.iterate()
         except KeyboardInterrupt:
+            simulation._writer.close()
             print("CTRL-C Received! Shutting down")
             sys.exit(1)
+
+    simulation._writer.close()
     print(
         f"Simulation completed after {simulation.iteration_count()} iterations ({simulation.elapsed_time()} s)"
     )

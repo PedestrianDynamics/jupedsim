@@ -65,7 +65,7 @@ def main():
                 range_neighbor_repulsion=0.1,
                 strength_geometry_repulsion=15,
                 range_geometry_repulsion=0.1,
-                v0=0.3,
+                desired_speed=0.3,
             )
         )
 
@@ -74,7 +74,10 @@ def main():
             simulation.iterate()
         except KeyboardInterrupt:
             print("CTRL-C Recieved! Shuting down")
+            simulation._writer.close()
             sys.exit(1)
+
+    simulation._writer.close()
     print(
         f"Simulation completed after {simulation.iteration_count()} iterations"
     )

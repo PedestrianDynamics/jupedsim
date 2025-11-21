@@ -89,7 +89,10 @@ def main():
             simulation.iterate()
         except KeyboardInterrupt:
             print("CTRL-C Recieved! Shuting down")
+            simulation._writer.close()
             sys.exit(1)
+
+    simulation._writer.close()
 
 
 if __name__ == "__main__":
