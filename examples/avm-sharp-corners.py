@@ -1,10 +1,13 @@
-# %%
+"""Example simulation using the Anticipation Velocity Model (AVM) in Jupedsim with a geometry that has sharp corners."""
+
 import pathlib
 
 import jupedsim as jps
 import pedpy
 from shapely.geometry import Polygon
 from shapely.ops import unary_union
+
+N = 1000
 
 # Define the list of coordinate lists
 default_geometry_coordinates = [
@@ -53,10 +56,11 @@ polygons = [Polygon(coords) for coords in default_geometry_coordinates]
 
 walkable_area = unary_union(polygons)
 walkable_area = pedpy.WalkableArea(walkable_area)
-pedpy.plot_walkable_area(walkable_area=walkable_area, color="lightblue", alpha=0.5)
+pedpy.plot_walkable_area(
+    walkable_area=walkable_area, color="lightblue", alpha=0.5
+)
 
 
-N = 500
 print(f"Distributing {N} agents.")
 output_file = "traj.sqlite"
 simulation = jps.Simulation(
@@ -113,8 +117,17 @@ for i, pos in enumerate(pos_in_spawning_area):
         )
     )
 
-niterations = 10000
+niterations = 15000
 print(f"Start simulation with max {niterations} iterations.")
 
-while simulation.agent_count() > 0 and simulation.iteration_count() < niterations:
+while (
+    simulation.agent_count() > 0 and simulation.iteration_count() < niterations
+):
     simulation.iterate()
+
+simulation._writer.close()
+
+print(
+    f"Simulation finished after {simulation.iteration_count()} iteration ({simulation.elapsed_time()} seconds.)"
+)
+print(f"Agents remaining: {simulation.agent_count()}.")
