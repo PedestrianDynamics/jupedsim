@@ -303,9 +303,6 @@ Point AnticipationVelocityModel::NeighborRepulsion(
     return influenceDirection * interactionStrength;
 }
 
-
-
-
 Point AnticipationVelocityModel::HandleWallAvoidance(
     const Point& direction,
     const Point& agentPosition,
@@ -314,40 +311,41 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
     double wallBufferDistance) const
 {
     const double criticalWallDistance = wallBufferDistance + agentRadius;
-    const double influenceDistance = 1.0 * criticalWallDistance; // 1.0 for now. Might be different. Need more tests.
-    
+    const double influenceDistance =
+        1.0 * criticalWallDistance; // 1.0 for now. Might be different. Need more tests.
+
     Point modifiedDirection = direction;
-    
+
     for(const auto& wall : boundary) {
         const auto closestPoint = wall.ShortestPoint(agentPosition);
         const auto distanceVector = agentPosition - closestPoint;
         const auto [distance, normalTowardAgent] = distanceVector.NormAndNormalized();
-        
+
         if(distance > influenceDistance) {
             continue;
         }
-        
+
         const auto dotProduct = modifiedDirection.ScalarProduct(normalTowardAgent);
-        
+
         if(dotProduct < 0) {
             // Direction points into wall - need to project it out
             // Remove the component pointing into the wall
             const auto projectedDirection = modifiedDirection - normalTowardAgent * dotProduct;
-            
+
             if(distance <= criticalWallDistance) {
-                modifiedDirection = projectedDirection + normalTowardAgent * pushoutStrength;              
+                modifiedDirection = projectedDirection + normalTowardAgent * pushoutStrength;
             } else {
                 // Soft influence: blend between original and projected based on distance
-                const double blendFactor = (influenceDistance - distance) / 
-                                          (influenceDistance - criticalWallDistance);
-                modifiedDirection = modifiedDirection * (1.0 - blendFactor) + 
-                                   projectedDirection * blendFactor;
+                const double blendFactor =
+                    (influenceDistance - distance) / (influenceDistance - criticalWallDistance);
+                modifiedDirection =
+                    modifiedDirection * (1.0 - blendFactor) + projectedDirection * blendFactor;
             }
         }
     }
-    
+
     // Renormalize to maintain speed
     const auto finalDirection = modifiedDirection.Normalized();
-    
+
     return finalDirection;
 }
