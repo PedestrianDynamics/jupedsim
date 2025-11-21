@@ -46,10 +46,12 @@ the resulting geometry can be exported back to DXF or visualized as a plot.
 
 ## RECOMMENDED NAMING CONVENTIONS (auto-detection if arguments are omitted):
 
-- Walkable Area Layer:        jps-walkablearea-* or walkablearea-*
-- Obstacle/Hole Layers:       jps-obstacles-* or obstacles-*
-- Exit Layers:                jps-exits-* or exits-*
-- Distribution Zone Layers:   jps-distributions-* or distributions-*
+- Walkable area layer:        jps-walkablearea-* or walkablearea-*
+- Obstacles layer:            jps-obstacles-* or obstacles-*
+- Exits layer:                jps-exits-* or exits-*
+- Distributions layer:        jps-distributions-* or distributions-*
+- Waypoints layer:            jps-waypoints-* or waypoints-*
+- Journeys layer:             jps-journeys-* or journeys-*
 
 Layer names must match one of these prefixes (case-insensitive). **Only visible** layers are considered.
 
@@ -550,7 +552,8 @@ def parse_dxf_file(
             except Exception as e:
                 coords = f"Could not extract coordinates: {e}"
 
-            # Fix the logging warning to handle string coords properly
+            # Handle logging for skipped entities with various coordinate formats (string, numeric):
+            # Invalid/missing coords are logged as-is with fallback handling
             if coords is not None:
                 if isinstance(coords, str):
                     logging.warning(f"Skipped {entity.dxftype()}: {coords}")
