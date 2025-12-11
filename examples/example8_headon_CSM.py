@@ -51,11 +51,10 @@ def main():
     while simulation.agent_count() > 0 and simulation.iteration_count() < 1000:
         simulation.iterate()
 
-    simulation._writer.close()
     print(
         f"Simulation completed after {simulation.iteration_count()} iterations ({simulation.elapsed_time()} s)"
     )
-    print(f">> {trajectory_file = }")
+    simulation._writer.close()
 
 
 if __name__ == "__main__":
