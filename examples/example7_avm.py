@@ -61,11 +61,13 @@ def main():
             simulation.iterate()
         except KeyboardInterrupt:
             print("CTRL-C Received! Shutting down")
+            simulation._writer.close()
             sys.exit(1)
+
     print(
         f"Simulation completed after {simulation.iteration_count()} iterations ({simulation.elapsed_time()} s)"
     )
-    print(f"{trajectory_file = }")
+    simulation._writer.close()
 
 
 if __name__ == "__main__":

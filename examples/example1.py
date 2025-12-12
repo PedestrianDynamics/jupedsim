@@ -57,10 +57,12 @@ def main():
                     waiting_stage.state = jps.WaitingSetState.INACTIVE
         except KeyboardInterrupt:
             print("CTRL-C Recieved! Shuting down")
+            simulation._writer.close()
             sys.exit(1)
     print(
         f"Simulation completed after {simulation.iteration_count()} iterations"
     )
+    simulation._writer.close()
 
 
 if __name__ == "__main__":
