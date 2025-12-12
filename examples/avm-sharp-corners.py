@@ -117,6 +117,6 @@ while (
 simulation._writer.close()
 
 print(
-    f"Simulation finished after {simulation.iteration_count()} iteration ({simulation.elapsed_time()} seconds.)"
+    f"Simulation finished after {simulation.iteration_count()} iterations. ({simulation.elapsed_time()} seconds.)"
 )
 print(f"Agents remaining: {simulation.agent_count()}. (should be 0)")
