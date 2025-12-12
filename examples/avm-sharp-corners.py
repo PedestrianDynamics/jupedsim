@@ -7,9 +7,13 @@ import pedpy
 from shapely.geometry import Polygon
 from shapely.ops import unary_union
 
+# ---- Define simulation parameters
 N = 1000
+niterations = 15000
+output_file = "traj.sqlite"
+# ---------------------------------
 
-# Define the list of coordinate lists
+
 default_geometry_coordinates = [
     [(19.35, 56.24), (24.38, 64.50), (49.15, 49.15), (41.80, 42.57)],
     [(41.80, 42.57), (43.86, 31.48), (48.63, 32.51), (49.15, 49.15)],
@@ -42,35 +46,6 @@ default_geometry_coordinates = [
     ],
 ]
 
-
-for coords in default_geometry_coordinates:
-    poly = Polygon(coords)
-    if not poly.is_valid:
-        print("Invalid polygon:", coords)
-    if not poly.is_simple:
-        print("Non-simple polygon:", coords)
-
-print("Geometry is fine!")
-
-polygons = [Polygon(coords) for coords in default_geometry_coordinates]
-
-walkable_area = unary_union(polygons)
-walkable_area = pedpy.WalkableArea(walkable_area)
-pedpy.plot_walkable_area(
-    walkable_area=walkable_area, color="lightblue", alpha=0.5
-)
-
-
-print(f"Distributing {N} agents.")
-output_file = "traj.sqlite"
-simulation = jps.Simulation(
-    model=jps.AnticipationVelocityModel(),
-    dt=0.05,
-    geometry=walkable_area.polygon,
-    trajectory_writer=jps.SqliteTrajectoryWriter(
-        output_file=pathlib.Path(output_file), every_nth_frame=1
-    ),
-)
 goal_1 = simulation.add_exit_stage(
     [
         (113.792, 106.106),
@@ -88,6 +63,20 @@ goal_2 = simulation.add_exit_stage(
     ]
 )
 
+polygons = [Polygon(coords) for coords in default_geometry_coordinates]
+walkable_area = unary_union(polygons)
+
+
+print(f"Distributing {N} agents.")
+
+simulation = jps.Simulation(
+    model=jps.AnticipationVelocityModel(),
+    dt=0.05,
+    geometry=walkable_area.polygon,
+    trajectory_writer=jps.SqliteTrajectoryWriter(
+        output_file=pathlib.Path(output_file), every_nth_frame=1
+    ),
+)
 journey1 = jps.JourneyDescription([goal_1])
 journey2 = jps.JourneyDescription([goal_2])
 
@@ -104,7 +93,7 @@ pos_in_spawning_area = jps.distribute_by_number(
     seed=1,
 )
 
-
+# distribute agents evenly between two goals
 for i, pos in enumerate(pos_in_spawning_area):
     goal_id = goal_1 if i % 2 == 0 else goal_2
     journey_id = journey1id if i % 2 == 0 else journey2id
@@ -117,7 +106,7 @@ for i, pos in enumerate(pos_in_spawning_area):
         )
     )
 
-niterations = 15000
+
 print(f"Start simulation with max {niterations} iterations.")
 
 while (
@@ -130,4 +119,4 @@ simulation._writer.close()
 print(
     f"Simulation finished after {simulation.iteration_count()} iteration ({simulation.elapsed_time()} seconds.)"
 )
-print(f"Agents remaining: {simulation.agent_count()}.")
+print(f"Agents remaining: {simulation.agent_count()}. (should be 0)")
