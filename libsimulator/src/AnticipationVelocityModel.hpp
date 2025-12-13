@@ -23,7 +23,7 @@ public:
 private:
     double _cutOffRadius{3};
     /// Add a small outward component to maintain minimum distance from walls.
-    double pushoutStrength = 0.01;
+    double _pushoutStrength;
     mutable std::mt19937 gen;
 
 public:
