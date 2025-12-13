@@ -222,8 +222,8 @@ double AnticipationVelocityModel::OptimalSpeed(
     double time_gap) const
 {
     const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
-    const double min_speed = -0.05;  // Allow slight backward movement
-    const double creep_speed = 0.05;  // Always move at least a little
+    const double min_speed = -0.05; // Allow slight backward movement
+    const double creep_speed = 0.05; // Always move at least a little
     double speed = spacing / time_gap;
     if(speed < creep_speed && speed > min_speed) {
         // Random shuffle: 50% forward, 50% backward
