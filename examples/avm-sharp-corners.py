@@ -8,7 +8,7 @@ from shapely.ops import unary_union
 
 # ---- Define simulation parameters
 N = 1000
-niterations = 15000
+niterations = 9000
 output_file = "traj.sqlite"
 # ---------------------------------
 
@@ -54,7 +54,7 @@ print(f"Distributing {N} agents.")
 import time
 import random
 
-for niterations in [9000, 10000, 15000, 20000]:
+for _ in range(10):
     print(f"Running simulation with {niterations} iterations.")
     simulation = jps.Simulation(
         model=jps.AnticipationVelocityModel(
@@ -131,6 +131,7 @@ for niterations in [9000, 10000, 15000, 20000]:
         print(
             f"\033[31mAgents remaining: {simulation.agent_count()}. (should be 0)\033[0m"
         )
+        break
     else:
         print(
             "\033[32mAll agents have exited the simulation successfully.\033[0m"
