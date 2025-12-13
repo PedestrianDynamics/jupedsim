@@ -25,8 +25,8 @@
 AnticipationVelocityModel::AnticipationVelocityModel(double pushoutStrength, uint64_t rng_seed)
     : _pushoutStrength(pushoutStrength), gen(rng_seed)
 {
-  std::cout << "AnticipationVelocityModel created with pushoutStrength: " << pushoutStrength
-            << " and rng_seed: " << rng_seed << std::endl;
+    std::cout << "AnticipationVelocityModel created with pushoutStrength: " << pushoutStrength
+              << " and rng_seed: " << rng_seed << std::endl;
 }
 
 OperationalModelType AnticipationVelocityModel::Type() const
@@ -87,7 +87,6 @@ OperationalModelUpdate AnticipationVelocityModel::ComputeNewPosition(
 
     // update direction towards the newly calculated direction
     direction = UpdateDirection(ped, direction, dT);
-    direction = HandleWallAvoidance(direction, ped.pos, model.radius, boundary, wallBufferDistance);
     const auto spacing = std::accumulate(
         std::begin(neighborhood),
         std::end(neighborhood),
@@ -97,6 +96,8 @@ OperationalModelUpdate AnticipationVelocityModel::ComputeNewPosition(
         });
 
     const auto optimal_speed = OptimalSpeed(ped, spacing, model.timeGap);
+    direction = HandleWallAvoidance(direction, ped.pos, model.radius, boundary, wallBufferDistance);
+
     const auto velocity = direction * optimal_speed;
     return AnticipationVelocityModelUpdate{
         .position = ped.pos + velocity * dT, .velocity = velocity, .orientation = direction};
@@ -221,8 +222,13 @@ double AnticipationVelocityModel::OptimalSpeed(
     double time_gap) const
 {
     const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
-    const double min_spacing = 0.0;
-    return std::min(std::max(spacing / time_gap, min_spacing), model.v0);
+    const double min_speed = -0.01;  // Allow slight backward movement
+    const double creep_speed = 0.01;  // Always move at least a little
+    double speed = spacing / time_gap;
+    if(speed < creep_speed && speed > min_speed) {
+      speed = creep_speed;  // Creep forward instead of stopping
+    }
+    return std::min(std::max(speed, min_speed), model.v0);
 }
 
 double AnticipationVelocityModel::GetSpacing(
@@ -239,7 +245,8 @@ double AnticipationVelocityModel::GetSpacing(
     }
 
     const auto left = direction.Rotate90Deg();
-    const auto l = model1.radius + model2.radius;
+    const auto buffer = 0.02;
+    const auto l = model1.radius + model2.radius + buffer;
     const bool inCorridor = std::abs(left.ScalarProduct(distp12)) <= l;
     if(!inCorridor) {
         return std::numeric_limits<double>::max();
@@ -305,7 +312,6 @@ Point AnticipationVelocityModel::NeighborRepulsion(
     return influenceDirection * interactionStrength;
 }
 
-
 Point AnticipationVelocityModel::HandleWallAvoidance(
     const Point& direction,
     const Point& agentPosition,
@@ -324,7 +330,6 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
         //     continue;
         // }
 
-        
         const auto distanceVector = agentPosition - closestPoint;
         const auto [distance, normalTowardAgent] = distanceVector.NormAndNormalized();
 

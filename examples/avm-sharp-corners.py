@@ -1,6 +1,7 @@
 """Example simulation using the Anticipation Velocity Model (AVM) in Jupedsim with a geometry that has sharp corners."""
 
 import pathlib
+import random
 
 import jupedsim as jps
 from shapely.geometry import Polygon
@@ -8,7 +9,7 @@ from shapely.ops import unary_union
 
 # ---- Define simulation parameters
 N = 1000
-niterations = 9000
+niterations = 10000
 output_file = "traj.sqlite"
 # ---------------------------------
 
@@ -51,13 +52,12 @@ walkable_area = unary_union(polygons)
 
 
 print(f"Distributing {N} agents.")
-import time
-import random
 
 for _ in range(10):
     print(f"Running simulation with {niterations} iterations.")
     simulation = jps.Simulation(
         model=jps.AnticipationVelocityModel(
+            #            rng_seed=12627464664061456384,
             rng_seed=random.randint(0, 2**64 - 1),
             pushout_strength=0.3,
         ),
