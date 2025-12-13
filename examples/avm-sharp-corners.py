@@ -11,6 +11,7 @@ from shapely.ops import unary_union
 N = 1000
 niterations = 10000
 output_file = "traj.sqlite"
+num_runs = 50
 # ---------------------------------
 
 
@@ -53,8 +54,10 @@ walkable_area = unary_union(polygons)
 
 print(f"Distributing {N} agents.")
 
-for _ in range(10):
-    print(f"Running simulation with {niterations} iterations.")
+for i in range(num_runs):
+    print(
+        f"Running simulation {i + 1}/{num_runs} with max {niterations} iterations."
+    )
     simulation = jps.Simulation(
         model=jps.AnticipationVelocityModel(
             #            rng_seed=12627464664061456384,
