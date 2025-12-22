@@ -56,9 +56,8 @@ print(f"Distributing {N} agents.")
 
 simulation = jps.Simulation(
     model=jps.AnticipationVelocityModel(
-        #            rng_seed=12627464664061456384,
         rng_seed=random.randint(0, 2**64 - 1),
-        pushout_strength=0.3,
+        pushout_strength=0.3,  # high values lead to more distance kept away from walls.
     ),
     dt=0.05,
     rng_seed=1,
