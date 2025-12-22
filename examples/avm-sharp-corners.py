@@ -128,6 +128,5 @@ if simulation.agent_count():
     print(
         f"\033[31mAgents remaining: {simulation.agent_count()}. (should be 0)\033[0m"
     )
-    break
 else:
     print("\033[32mAll agents have exited the simulation successfully.\033[0m")
