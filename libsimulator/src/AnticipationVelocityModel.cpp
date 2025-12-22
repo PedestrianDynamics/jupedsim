@@ -25,8 +25,6 @@
 AnticipationVelocityModel::AnticipationVelocityModel(double pushoutStrength, uint64_t rng_seed)
     : _pushoutStrength(pushoutStrength), gen(rng_seed)
 {
-    std::cout << "AnticipationVelocityModel created with pushoutStrength: " << pushoutStrength
-              << " and rng_seed: " << rng_seed << std::endl;
 }
 
 OperationalModelType AnticipationVelocityModel::Type() const
