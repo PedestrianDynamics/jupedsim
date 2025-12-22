@@ -11,7 +11,7 @@ from shapely.ops import unary_union
 N = 1000
 niterations = 10000
 output_file = "traj.sqlite"
-num_runs = 50
+
 # ---------------------------------
 
 
@@ -54,88 +54,81 @@ walkable_area = unary_union(polygons)
 
 print(f"Distributing {N} agents.")
 
-for i in range(num_runs):
+simulation = jps.Simulation(
+    model=jps.AnticipationVelocityModel(
+        #            rng_seed=12627464664061456384,
+        rng_seed=random.randint(0, 2**64 - 1),
+        pushout_strength=0.3,
+    ),
+    dt=0.05,
+    rng_seed=1,
+    geometry=walkable_area,
+    trajectory_writer=jps.SqliteTrajectoryWriter(
+        output_file=pathlib.Path(output_file), every_nth_frame=1
+    ),
+)
+
+goal_1 = simulation.add_exit_stage(
+    [
+        (113.792, 106.106),
+        (113.502, 106.082),
+        (113.022, 103.660),
+        (114.308, 103.700),
+    ]
+)
+goal_2 = simulation.add_exit_stage(
+    [
+        (109.723, 69.131),
+        (110.907, 68.319),
+        (109.883, 65.822),
+        (108.334, 67.112),
+    ]
+)
+
+journey1 = jps.JourneyDescription([goal_1])
+journey2 = jps.JourneyDescription([goal_2])
+
+journey1id = simulation.add_journey(journey1)
+journey2id = simulation.add_journey(journey2)
+
+spawning_area = walkable_area
+
+pos_in_spawning_area = jps.distribute_by_number(
+    polygon=spawning_area,
+    number_of_agents=N,
+    distance_to_agents=0.30,
+    distance_to_polygon=0.15,
+    seed=1,
+)
+
+# distribute agents evenly between two goals
+for i, pos in enumerate(pos_in_spawning_area):
+    goal_id = goal_1 if i % 2 == 0 else goal_2
+    journey_id = journey1id if i % 2 == 0 else journey2id
+    simulation.add_agent(
+        parameters=jps.AnticipationVelocityModelAgentParameters(
+            journey_id=journey_id,
+            position=pos,
+            stage_id=goal_id,
+            radius=0.15,
+            desired_speed=1,
+        )
+    )
+
+while (
+    simulation.agent_count() > 0 and simulation.iteration_count() < niterations
+):
+    simulation.iterate()
+
+simulation._writer.close()
+
+print(
+    f"Simulation finished after {simulation.iteration_count()} iterations. ({simulation.elapsed_time()} seconds.)"
+)
+if simulation.agent_count():
     print(
-        f"Running simulation {i + 1}/{num_runs} with max {niterations} iterations."
+        f"\033[31mAgents remaining: {simulation.agent_count()}. (should be 0)\033[0m"
     )
-    simulation = jps.Simulation(
-        model=jps.AnticipationVelocityModel(
-            #            rng_seed=12627464664061456384,
-            rng_seed=random.randint(0, 2**64 - 1),
-            pushout_strength=0.3,
-        ),
-        dt=0.05,
-        rng_seed=1,
-        geometry=walkable_area,
-        trajectory_writer=jps.SqliteTrajectoryWriter(
-            output_file=pathlib.Path(output_file), every_nth_frame=1
-        ),
-    )
-
-    goal_1 = simulation.add_exit_stage(
-        [
-            (113.792, 106.106),
-            (113.502, 106.082),
-            (113.022, 103.660),
-            (114.308, 103.700),
-        ]
-    )
-    goal_2 = simulation.add_exit_stage(
-        [
-            (109.723, 69.131),
-            (110.907, 68.319),
-            (109.883, 65.822),
-            (108.334, 67.112),
-        ]
-    )
-
-    journey1 = jps.JourneyDescription([goal_1])
-    journey2 = jps.JourneyDescription([goal_2])
-
-    journey1id = simulation.add_journey(journey1)
-    journey2id = simulation.add_journey(journey2)
-
-    spawning_area = walkable_area
-
-    pos_in_spawning_area = jps.distribute_by_number(
-        polygon=spawning_area,
-        number_of_agents=N,
-        distance_to_agents=0.30,
-        distance_to_polygon=0.15,
-        seed=1,
-    )
-
-    # distribute agents evenly between two goals
-    for i, pos in enumerate(pos_in_spawning_area):
-        goal_id = goal_1 if i % 2 == 0 else goal_2
-        journey_id = journey1id if i % 2 == 0 else journey2id
-        simulation.add_agent(
-            parameters=jps.AnticipationVelocityModelAgentParameters(
-                journey_id=journey_id,
-                position=pos,
-                stage_id=goal_id,
-                radius=0.15,
-                desired_speed=1,
-            )
-        )
-
-    while (
-        simulation.agent_count() > 0
-        and simulation.iteration_count() < niterations
-    ):
-        simulation.iterate()
-
-    simulation._writer.close()
-
-    print(
-        f"Simulation finished after {simulation.iteration_count()} iterations. ({simulation.elapsed_time()} seconds.)"
-    )
-    if simulation.agent_count():
-        print(
-            f"\033[31mAgents remaining: {simulation.agent_count()}. (should be 0)\033[0m"
-        )
-        break
-    else:
-        print(
-            "\033[32mAll agents have exited the simulation successfully.\033[0m"
-        )
+    break
+else:
+    print("\033[32mAll agents have exited the simulation successfully.\033[0m")
