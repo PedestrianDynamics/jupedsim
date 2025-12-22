@@ -328,10 +328,6 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
 
     for(const auto& wall : boundary) {
         const auto closestPoint = wall.ShortestPoint(agentPosition);
-        // // Skip corners - if closest point is an endpoint, another wall handles it
-        // if(closestPoint == wall.p1 || closestPoint == wall.p2) {
-        //     continue;
-        // }
 
         const auto distanceVector = agentPosition - closestPoint;
         const auto [distance, normalTowardAgent] = distanceVector.NormAndNormalized();
