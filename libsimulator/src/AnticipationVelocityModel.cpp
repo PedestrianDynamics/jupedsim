@@ -23,7 +23,7 @@
 #include <vector>
 
 AnticipationVelocityModel::AnticipationVelocityModel(double pushoutStrength, uint64_t rng_seed)
-    : pushoutStrength(pushoutStrength), gen(rng_seed)
+    : _pushoutStrength(pushoutStrength), gen(rng_seed)
 {
 }
 
@@ -85,7 +85,6 @@ OperationalModelUpdate AnticipationVelocityModel::ComputeNewPosition(
 
     // update direction towards the newly calculated direction
     direction = UpdateDirection(ped, direction, dT);
-    direction = HandleWallAvoidance(direction, ped.pos, model.radius, boundary, wallBufferDistance);
     const auto spacing = std::accumulate(
         std::begin(neighborhood),
         std::end(neighborhood),
@@ -95,6 +94,8 @@ OperationalModelUpdate AnticipationVelocityModel::ComputeNewPosition(
         });
 
     const auto optimal_speed = OptimalSpeed(ped, spacing, model.timeGap);
+    direction = HandleWallAvoidance(direction, ped.pos, model.radius, boundary, wallBufferDistance);
+
     const auto velocity = direction * optimal_speed;
     return AnticipationVelocityModelUpdate{
         .position = ped.pos + velocity * dT, .velocity = velocity, .orientation = direction};
@@ -219,10 +220,18 @@ double AnticipationVelocityModel::OptimalSpeed(
     double time_gap) const
 {
     const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
-    const double min_spacing = 0.0;
-    return std::min(std::max(spacing / time_gap, min_spacing), model.v0);
-}
+    constexpr double creep_speed = 0.01;
 
+    double speed = spacing / time_gap;
+
+    if(std::abs(speed) < creep_speed) {
+        // Random shuffle: forward, backward, or stop
+        const auto r = gen() % 3;
+        speed = (r == 0) ? creep_speed : (r == 1) ? -creep_speed : 0.0;
+    }
+
+    return std::min(std::max(speed, -creep_speed), model.v0);
+}
 double AnticipationVelocityModel::GetSpacing(
     const GenericAgent& ped1,
     const GenericAgent& ped2,
@@ -237,7 +246,8 @@ double AnticipationVelocityModel::GetSpacing(
     }
 
     const auto left = direction.Rotate90Deg();
-    const auto l = model1.radius + model2.radius;
+    const auto buffer = 0.02;
+    const auto l = model1.radius + model2.radius + buffer;
     const bool inCorridor = std::abs(left.ScalarProduct(distp12)) <= l;
     if(!inCorridor) {
         return std::numeric_limits<double>::max();
@@ -311,67 +321,31 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
     double wallBufferDistance) const
 {
     const double criticalWallDistance = wallBufferDistance + agentRadius;
-    const double influenceStartDistance =
-        2.0 * criticalWallDistance; // Smoothing earlier. The constant is chosen randomly.
 
-    auto nearestWallIt = std::min_element(
-        boundary.cbegin(), boundary.cend(), [&agentPosition](const auto& wall1, const auto& wall2) {
-            const auto distanceVector1 = agentPosition - wall1.ShortestPoint(agentPosition);
-            const auto distanceVector2 = agentPosition - wall2.ShortestPoint(agentPosition);
-            return distanceVector1.Norm() < distanceVector2.Norm();
-        });
+    Point modifiedDirection = direction;
 
-    if(nearestWallIt != boundary.end()) {
-        const auto closestPoint = nearestWallIt->ShortestPoint(agentPosition);
+    for(const auto& wall : boundary) {
+        const auto closestPoint = wall.ShortestPoint(agentPosition);
+
         const auto distanceVector = agentPosition - closestPoint;
-        const auto [perpendicularDistance, directionAwayFromBoundary] =
-            distanceVector.NormAndNormalized();
+        const auto [distance, normalTowardAgent] = distanceVector.NormAndNormalized();
 
-        // Always check if too close to wall, regardless of movement direction
-        if(perpendicularDistance < criticalWallDistance) {
-            const auto wallVector = nearestWallIt->p2 - nearestWallIt->p1;
-            const auto wallDirection = wallVector.Normalized();
-
-            // Get parallel component of current direction
-            const auto parallelComponent = wallDirection * direction.ScalarProduct(wallDirection);
-
-            const auto newDirection =
-                parallelComponent + directionAwayFromBoundary * pushoutStrength;
-            return newDirection.Normalized();
+        if(distance > criticalWallDistance) {
+            continue;
         }
-        // Check if within influence range
-        else if(perpendicularDistance < influenceStartDistance) {
-            const auto dotProduct = direction.ScalarProduct(directionAwayFromBoundary);
 
-            // Only modify direction if moving towards wall
-            if(dotProduct < 0) {
-                const auto wallVector = nearestWallIt->p2 - nearestWallIt->p1;
-                const auto wallDirection = wallVector.Normalized();
+        const auto dotProduct = modifiedDirection.ScalarProduct(normalTowardAgent);
 
-                if(perpendicularDistance <= criticalWallDistance) {
-                    // At or closer than critical distance: enforce parallel movement
-                    const auto parallelComponent =
-                        wallDirection * direction.ScalarProduct(wallDirection);
-                    return parallelComponent.Normalized();
-                } else {
-                    // Between influence start and critical distance: smooth transition
-                    // Calculate influence factor: 0 at influenceStartDistance, 1 at
-                    // criticalWallDistance.
-                    const double influenceFactor =
-                        (influenceStartDistance - perpendicularDistance) /
-                        (influenceStartDistance - criticalWallDistance);
-
-                    const auto parallelComponent =
-                        wallDirection * direction.ScalarProduct(wallDirection);
-                    const auto perpendicularComponent = direction - parallelComponent;
-
-                    // Gradually reduce the perpendicular component based on distance
-                    const auto newDirection =
-                        parallelComponent + perpendicularComponent * (1.0 - influenceFactor);
-                    return newDirection.Normalized();
-                }
-            }
+        if(dotProduct < 0) {
+            // Direction points into wall - need to project it out
+            // Remove the component pointing into the wall
+            const auto projectedDirection = modifiedDirection - normalTowardAgent * dotProduct;
+            modifiedDirection = projectedDirection + normalTowardAgent * _pushoutStrength;
         }
     }
-    return direction;
+
+    // Renormalize to maintain speed
+    const auto finalDirection = modifiedDirection.Normalized();
+
+    return finalDirection;
 }
