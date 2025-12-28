@@ -3,6 +3,7 @@ name = "jupedsim"
 version = "1.3.1"
 requires-python = ">=3.10"
 description="JuPedSim is an open source pedestrian dynamics simulator."
+dynamic = ["readme"]
 
 [tool.ruff]
 extend-exclude = ["third-party", "docs"]
