@@ -1,0 +1,744 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>jupedsim.models.social_force &#8212; JuPedSim  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=d742c9ce" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/jupedsim/models/social_force';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v2.0.0';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../../_static/jupedsim.svg" class="logo__image only-light" alt="JuPedSim  documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/jupedsim.svg" class="logo__image only-dark" alt="JuPedSim  documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PedestrianDynamics/jupedsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/jupedsim/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://img.shields.io/pypi/v/jupedsim" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.5281/zenodo.1293771" title="DOI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1293771.svg" class="icon-link-image" alt="DOI"/></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/getting_started.html">Getting started</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../concepts/index.html">Concepts</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../concepts/geometry.html">Geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../concepts/routing.html">Routing</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pedestrian_models/index.html">Pedestrian Models</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../notebooks/index.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notebooks/model-comparison.html">Comparative Analysis of Pedestrian Dynamics Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notebooks/corner.html">Movement around Corners</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../../notebooks/double-bottleneck.html">Movement through Bottlenecks</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../../notebooks/journey.html">How to work with Journeys</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../../notebooks/lane-formation.html">Lane formation in bi-directional flow</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../../notebooks/motivation.html">Modelling Motivation</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../../notebooks/queues_waiting.html">Waiting in Queues</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../../notebooks/routing.html">How Route Choice can Impact Evacuation Times</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../../notebooks/single-file.html">Simulating Single-File Movement</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../disclaimer.html">Disclaimer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/jupedsim/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citation/citation.html">Cite JuPedSim</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for jupedsim.models.social_force</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: LGPL-3.0-or-later</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">deprecated</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">deprecated</span><span class="w"> </span><span class="kn">import</span> <span class="n">deprecated</span>
+
+
+<div class="viewcode-block" id="SocialForceModel">
+<a class="viewcode-back" href="../../../api/jupedsim/index.html#jupedsim.SocialForceModel">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">kw_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SocialForceModel</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Parameters for Social Force Model</span>
+
+<span class="sd">    All attributes are initialized with reasonably good defaults.</span>
+
+<span class="sd">    See the scientific publication for more details about this model</span>
+<span class="sd">    https://doi.org/10.1038/35035023</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        body_force: describes the strength with which an agent is influenced by pushing forces from obstacles and neighbors in its direct proximity. [in kg s^-2] (is called k)</span>
+<span class="sd">        friction: describes the strength with which an agent is influenced by frictional forces from obstacles and neighbors in its direct proximity. [in kg m^-1 s^-1] (is called :math:`\kappa`)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">body_force</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">120000</span>  <span class="c1"># [kg s^-2] is called k</span>
+    <span class="n">friction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">240000</span>  <span class="c1"># [kg m^-1 s^-1] is called kappa</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">body_force</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">120000</span><span class="p">,</span>
+        <span class="n">friction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">240000</span><span class="p">,</span>
+        <span class="n">bodyForce</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Init dataclass SocialForceMode to handle deprecated arguments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body_force</span> <span class="o">=</span> <span class="n">body_force</span>
+
+        <span class="k">if</span> <span class="n">bodyForce</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;&#39;bodyForce&#39; is deprecated, use &#39;body_force&#39; instead.&quot;</span><span class="p">,</span>
+                <span class="ne">DeprecationWarning</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">body_force</span> <span class="o">=</span> <span class="n">bodyForce</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">friction</span> <span class="o">=</span> <span class="n">friction</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;body_force&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bodyForce</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">body_force</span>
+
+    <span class="nd">@bodyForce</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;body_force&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bodyForce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bodyForce</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body_force</span> <span class="o">=</span> <span class="n">bodyForce</span></div>
+
+
+
+<div class="viewcode-block" id="SocialForceModelAgentParameters">
+<a class="viewcode-back" href="../../../api/jupedsim/index.html#jupedsim.SocialForceModelAgentParameters">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">kw_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SocialForceModelAgentParameters</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters required to create an Agent in the Social Force Model.</span>
+
+<span class="sd">    See the scientific publication for more details about this model</span>
+<span class="sd">    https://doi.org/10.1038/35035023</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        position: Position of the agent.</span>
+<span class="sd">        orientation: Orientation of the agent.</span>
+<span class="sd">        journey_id: Id of the journey the agent follows.</span>
+<span class="sd">        stage_id: Id of the stage the agent targets.</span>
+<span class="sd">        velocity: current velocity of the agent.</span>
+<span class="sd">        mass: mass of the agent. [in kg] (is called m)</span>
+<span class="sd">        desired_speed: desired Speed of the agent. [in m/s] (is called v0)</span>
+<span class="sd">        reaction_time: reaction Time of the agent. [in s] (is called :math:`\\tau`)</span>
+<span class="sd">        agent_scale: indicates how strong an agent is influenced by pushing forces from neighbors. [in N] (is called A)</span>
+<span class="sd">        obstacle_scale: indicates how strong an agent is influenced by pushing forces from obstacles. [in N] (is called A)</span>
+<span class="sd">        force_distance: indicates how much the distance between an agent and obstacles or neighbors influences social forces. [in m] (is called B)</span>
+<span class="sd">        radius: radius of the space an agent occupies. [in m] (is called r)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># todo write force equation from paper</span>
+    <span class="n">position</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">orientation</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">journey_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">stage_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">velocity</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="c1"># the values are from paper. doi is in class description</span>
+    <span class="n">mass</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">80.0</span>  <span class="c1"># [kg] is called m</span>
+    <span class="n">desired_speed</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">0.8</span>  <span class="c1"># [m / s] is called v0 can be set higher depending on situation</span>
+    <span class="p">)</span>
+    <span class="n">reaction_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># [s] is called tau</span>
+    <span class="n">agent_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2000</span>  <span class="c1"># [N] is called A</span>
+    <span class="n">obstacle_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2000</span>  <span class="c1"># [N] is called A</span>
+    <span class="n">force_distance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.08</span>  <span class="c1"># [m] is called B</span>
+    <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">0.3</span>  <span class="c1"># [m] in paper 2r is uniformy distibuted in interval [0.5 m, 0.7 m]</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">position</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+        <span class="n">orientation</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+        <span class="n">journey_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">stage_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">velocity</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+        <span class="n">mass</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">80.0</span><span class="p">,</span>
+        <span class="n">desired_speed</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
+        <span class="n">reaction_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">agent_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span>
+        <span class="n">obstacle_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span>
+        <span class="n">force_distance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.08</span><span class="p">,</span>
+        <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+        <span class="n">desiredSpeed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">reactionTime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">agentScale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">obstacleScale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">forceDistance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Init dataclass to handle deprecated arguments.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="n">orientation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">journey_id</span> <span class="o">=</span> <span class="n">journey_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stage_id</span> <span class="o">=</span> <span class="n">stage_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="n">velocity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span>
+
+        <span class="n">deprecated_map</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;desiredSpeed&quot;</span><span class="p">:</span> <span class="s2">&quot;desired_speed&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;reactionTime&quot;</span><span class="p">:</span> <span class="s2">&quot;reaction_time&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;agentScale&quot;</span><span class="p">:</span> <span class="s2">&quot;agent_scale&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;obstacleScale&quot;</span><span class="p">:</span> <span class="s2">&quot;obstacle_scale&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;forceDistance&quot;</span><span class="p">:</span> <span class="s2">&quot;force_distance&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">old_name</span><span class="p">,</span> <span class="n">new_name</span> <span class="ow">in</span> <span class="n">deprecated_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">locals</span><span class="p">()[</span><span class="n">old_name</span><span class="p">]:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">old_name</span><span class="si">}</span><span class="s2">&#39; is deprecated, use &#39;</span><span class="si">{</span><span class="n">new_name</span><span class="si">}</span><span class="s2">&#39; instead.&quot;</span><span class="p">,</span>
+                    <span class="ne">DeprecationWarning</span><span class="p">,</span>
+                    <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">,</span> <span class="nb">locals</span><span class="p">()[</span><span class="n">old_name</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">,</span> <span class="nb">locals</span><span class="p">()[</span><span class="n">new_name</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;desired_speed&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">desiredSpeed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">desired_speed</span>
+
+    <span class="nd">@desiredSpeed</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;desired_speed&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">desiredSpeed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desiredSpeed</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desired_speed</span> <span class="o">=</span> <span class="n">desiredSpeed</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;reaction_time&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reactionTime</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reaction_time</span>
+
+    <span class="nd">@reactionTime</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;reaction_time&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reactionTime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reactionTime</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reaction_time</span> <span class="o">=</span> <span class="n">reactionTime</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;agent_scale&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">agentScale</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_scale</span>
+
+    <span class="nd">@agentScale</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;agent_scale&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">agentScale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agentScale</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">agent_scale</span> <span class="o">=</span> <span class="n">agentScale</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;obstacle_scale&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">obstacleScale</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">obstacle_scale</span>
+
+    <span class="nd">@obstacleScale</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;obstacle_scale&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">obstacleScale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obstacleScale</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obstacle_scale</span> <span class="o">=</span> <span class="n">obstacleScale</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;force_distance&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forceDistance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_distance</span>
+
+    <span class="nd">@forceDistance</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;force_distance&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forceDistance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forceDistance</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">force_distance</span> <span class="o">=</span> <span class="n">forceDistance</span></div>
+
+
+
+<div class="viewcode-block" id="SocialForceModelState">
+<a class="viewcode-back" href="../../../api/jupedsim/index.html#jupedsim.SocialForceModelState">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SocialForceModelState</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backing</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">backing</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;velocity of this agent.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">velocity</span>
+
+    <span class="nd">@velocity</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">velocity</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="n">velocity</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mass</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;mass of this agent.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">mass</span>
+
+    <span class="nd">@mass</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mass</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">desiredSpeed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;desired Speed of this agent.&quot;&quot;&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;&#39;desiredSpeed&#39; is deprecated, use &#39;desired_speed&#39; instead.&quot;</span><span class="p">,</span>
+            <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">desired_speed</span>
+
+    <span class="nd">@desiredSpeed</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">desiredSpeed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desiredSpeed</span><span class="p">):</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;&#39;desiredSpeed&#39; is deprecated, use &#39;desired_speed&#39; instead.&quot;</span><span class="p">,</span>
+            <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">desired_speed</span> <span class="o">=</span> <span class="n">desiredSpeed</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">desired_speed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;desired Speed of this agent.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">desired_speed</span>
+
+    <span class="nd">@desired_speed</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">desired_speed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desired_speed</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">desired_speed</span> <span class="o">=</span> <span class="n">desired_speed</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;reaction_time&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reactionTime</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;reaction Time of this agent.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">reaction_time</span>
+
+    <span class="nd">@reactionTime</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;reaction_time&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reactionTime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reactionTime</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">reaction_time</span> <span class="o">=</span> <span class="n">reactionTime</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reaction_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">reaction_time</span>
+
+    <span class="nd">@reaction_time</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reaction_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reaction_time</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">reaction_time</span> <span class="o">=</span> <span class="n">reaction_time</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;agent_scale&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">agentScale</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">agent_scale</span>
+
+    <span class="nd">@agentScale</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;agent_scale&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">agentScale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agentScale</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">agent_scale</span> <span class="o">=</span> <span class="n">agentScale</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">agent_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">agent_scale</span>
+
+    <span class="nd">@agent_scale</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">agent_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent_scale</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">agent_scale</span> <span class="o">=</span> <span class="n">agent_scale</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;obstacle_scale&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">obstacleScale</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">obstacle_scale</span>
+
+    <span class="nd">@obstacleScale</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;obstacle_scale&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">obstacleScale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obstacleScale</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">obstacle_scale</span> <span class="o">=</span> <span class="n">obstacleScale</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">obstacle_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">obstacle_scale</span>
+
+    <span class="nd">@obstacle_scale</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">obstacle_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obstacle_scale</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">obstacle_scale</span> <span class="o">=</span> <span class="n">obstacle_scale</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;force_distance&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forceDistance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">force_distance</span>
+
+    <span class="nd">@forceDistance</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;force_distance&#39; instead.&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forceDistance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forceDistance</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">force_distance</span> <span class="o">=</span> <span class="n">forceDistance</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">force_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">force_distance</span>
+
+    <span class="nd">@force_distance</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">force_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_distance</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">force_distance</span> <span class="o">=</span> <span class="n">force_distance</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">radius</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;radius of this agent.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">radius</span>
+
+    <span class="nd">@radius</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">radius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span></div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Author name not set
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, Forschungszentrum Jülich GmbH, IAS-7.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
