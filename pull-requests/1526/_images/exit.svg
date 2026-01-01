@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="222.77005mm"
+   height="125.78468mm"
+   viewBox="0 0 222.77005 125.78468"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
+   sodipodi:docname="exit.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="false"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="true"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     shape-rendering="auto"
+     inkscape:clip-to-page="false"
+     labelstyle="default"
+     borderlayer="true"
+     showborder="true"
+     inkscape:zoom="1.1011145"
+     inkscape:cx="770.12884"
+     inkscape:cy="190.26178"
+     inkscape:window-width="2556"
+     inkscape:window-height="1381"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <marker
+       style="overflow:visible"
+       id="Dot"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Dot"
+       markerWidth="0.7"
+       markerHeight="0.7"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         d="M 5,0 C 5,2.76 2.76,5 0,5 -2.76,5 -5,2.76 -5,0 c 0,-2.76 2.3,-5 5,-5 2.76,0 5,2.24 5,5 z"
+         sodipodi:nodetypes="sssss"
+         id="path17" />
+    </marker>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-37.059422,-42.1102)">
+    <path
+       style="fill:#005676;fill-opacity:0.25;stroke:#005676;stroke-width:1.123;stroke-dasharray:3.36899974, 3.36899974;stroke-opacity:1;marker-mid:url(#Dot);stroke-miterlimit:3.2;stroke-dashoffset:0;marker-start:url(#Dot)"
+       d="M 52.226425,148.0012 40.36071,88.85447 106.77898,48.207857 199.4375,45.413658 256.52144,90.3717 l -42.428,74.21549 -107.67551,-1.70307 z"
+       id="path2" />
+    <circle
+       style="fill:none;stroke:#ec9929;stroke-width:1.32292;stroke-dasharray:none;stroke-opacity:1"
+       id="path3"
+       cx="149.80452"
+       cy="103.69548"
+       r="0.64305776" />
+  </g>
+</svg>
