@@ -105,7 +105,7 @@ jobs:
           destination_dir: ${{ steps.docs-publish-dir.outputs.target }}
           keep_files: false
       - name: Upload documentation as artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: pages
           path: docs/build/
@@ -166,7 +166,7 @@ jobs:
         run: |
           python -m build -s
       - name: Upload sdist
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: python-packages-sdist
           path: dist/jupedsim-*.tar.gz
@@ -249,7 +249,7 @@ jobs:
           $pythonVersion = "${{ matrix.cibw_build }}" -split '-' | Select-Object -First 1
           $pythonVersion = $pythonVersion.Trim()
           echo "PYTHON_VERSION=$pythonVersion" | Out-File -Append -FilePath $env:GITHUB_ENV
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: python-packages-${{ matrix.os }}-${{ matrix.cibw_archs }}-${{ env.PYTHON_VERSION }}
           path: ./wheelhouse/*.whl
@@ -268,7 +268,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Download packages
-        uses: actions/Download-artifact@v6
+        uses: actions/Download-artifact@v7
         with:
           pattern: python-packages-*
           merge-multiple: true
@@ -290,7 +290,7 @@ jobs:
         with:
           python-version: 3.13
       - name: Download packages
-        uses: actions/Download-artifact@v6
+        uses: actions/Download-artifact@v7
         with:
           pattern: python-packages-*
           merge-multiple: true
@@ -313,7 +313,7 @@ jobs:
     steps:
       # retrieve your distributions here
       - name: Download packages
-        uses: actions/Download-artifact@v6
+        uses: actions/Download-artifact@v7
         with:
           pattern: python-packages-*
           merge-multiple: true
