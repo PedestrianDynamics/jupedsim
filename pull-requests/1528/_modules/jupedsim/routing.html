@@ -360,7 +360,9 @@ document.write(`
         <span class="p">),</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">RoutingEngine</span><span class="p">(</span><span class="n">build_geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">RoutingEngine</span><span class="p">(</span>
+            <span class="n">build_geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">_obj</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="RoutingEngine.compute_waypoints">
 <a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.RoutingEngine.compute_waypoints">[docs]</a>
