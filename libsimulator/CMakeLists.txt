@@ -118,6 +118,7 @@ if (BUILD_TESTS)
         test/TestAABB.cpp
         test/TestBasicPrimitiveTests.cpp
         test/TestCollisionGeometry.cpp
+        test/TestGCFMParameterValidation.cpp
         test/TestGenericAgentFormatter.cpp
         test/TestGraph.cpp
         test/TestJourney.cpp

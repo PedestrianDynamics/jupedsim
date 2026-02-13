@@ -3,6 +3,8 @@
 
 #include "GeneralizedCentrifugalForceModel.hpp"
 
+#include <stdexcept>
+
 GeneralizedCentrifugalForceModelBuilder::GeneralizedCentrifugalForceModelBuilder(
     double nuped,
     double nuwall,
@@ -25,6 +27,16 @@ GeneralizedCentrifugalForceModelBuilder::GeneralizedCentrifugalForceModelBuilder
 
 GeneralizedCentrifugalForceModel GeneralizedCentrifugalForceModelBuilder::Build()
 {
+    if(_dist_effPed <= _intp_widthped) {
+        throw std::invalid_argument(
+            "max_neighbor_interaction_distance must be greater "
+            "than max_neighbor_interpolation_distance");
+    }
+    if(_dist_effWall <= _intp_widthwall) {
+        throw std::invalid_argument(
+            "max_geometry_interaction_distance must be greater "
+            "than max_geometry_interpolation_distance");
+    }
     return GeneralizedCentrifugalForceModel(
         _nuped,
         _nuwall,
