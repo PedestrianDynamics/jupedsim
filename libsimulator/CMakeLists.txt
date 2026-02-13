@@ -102,7 +102,8 @@ target_link_libraries(simulator PUBLIC
     glm::glm
 )
 target_link_options(simulator PUBLIC
-    $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_ASAN}>>:-fsanitize=address>
+    $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-fsanitize=address,undefined>
+    $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-shared-libasan>
 )
 target_include_directories(simulator PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src

@@ -78,6 +78,45 @@ jobs:
           CC: ${{ matrix.toolchain.cc }}
           CXX: ${{ matrix.toolchain.cxx }}
         run: ./scripts/ci/gh_build_linux.sh
+  sanitizers:
+    name: Sanitizers [${{ matrix.toolchain.cxx }}]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain:
+          - cc: clang-21
+            cxx: clang++-21
+            install: |
+              sudo add-apt-repository 'deb http://apt.llvm.org/noble/ llvm-toolchain-noble-21 main'
+              wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+              sudo apt-get update
+              sudo apt-get install -y clang-21
+          - cc: gcc-14
+            cxx: g++-14
+            install: |
+              sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+              sudo apt-get update
+              sudo apt-get install -y gcc-14 g++-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+      - name: Install ${{ matrix.toolchain.cxx }}
+        run: ${{ matrix.toolchain.install }}
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Build & test with sanitizers
+        env:
+          CC: ${{ matrix.toolchain.cc }}
+          CXX: ${{ matrix.toolchain.cxx }}
+          ASAN_OPTIONS: strict_string_checks=1
+          UBSAN_OPTIONS: print_stacktrace=1
+        run: ./scripts/ci/gh_build_linux_sanitizers.sh
   docs:
     name: Documentation
     runs-on: ubuntu-latest

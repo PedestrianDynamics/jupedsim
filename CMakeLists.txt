@@ -38,11 +38,11 @@ print_var(WERROR)
 set(BUILD_TESTS OFF CACHE BOOL "Build tests")
 print_var(BUILD_TESTS)
 
-set(BUILD_WITH_ASAN OFF CACHE BOOL
-  "Build with address sanitizer support. Linux / macOS only.")
-print_var(BUILD_WITH_ASAN)
-if(BUILD_WITH_ASAN AND ${CMAKE_SYSTEM} MATCHES "Windows")
-    message(FATAL_ERROR "Address sanitizer builds are not supported on Windows")
+set(BUILD_WITH_SANITIZERS OFF CACHE BOOL
+  "Build with address and undefined-behavior sanitizers. Linux / macOS only.")
+print_var(BUILD_WITH_SANITIZERS)
+if(BUILD_WITH_SANITIZERS AND ${CMAKE_SYSTEM} MATCHES "Windows")
+    message(FATAL_ERROR "Sanitizer builds are not supported on Windows")
 endif()
 
 set(BUILD_BENCHMARKS OFF CACHE BOOL "Build micro benchmark")
@@ -75,9 +75,10 @@ list(APPEND COMMON_COMPILE_OPTIONS
     $<$<CXX_COMPILER_ID:MSVC>:/W2>
     $<$<CXX_COMPILER_ID:MSVC>:/EHsc>
     $<$<CXX_COMPILER_ID:MSVC>:/MP>
-    $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_ASAN}>>:-fno-optimize-sibling-calls>
-    $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_ASAN}>>:-fsanitize=address>
-    $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_ASAN}>>:-shared-libasan>
+    $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-fsanitize=address,undefined>
+    $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-fno-optimize-sibling-calls>
+    $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-fno-sanitize-recover=all>
+    $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-shared-libasan>
 )
 
 ################################################################################
