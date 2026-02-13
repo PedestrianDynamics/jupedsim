@@ -35,7 +35,7 @@ jobs:
         run: pip install ruff
       - name: Install clang-format-21
         run: |
-          sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-21 main'
+          sudo add-apt-repository 'deb http://apt.llvm.org/noble/ llvm-toolchain-noble-21 main'
           wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
           sudo apt update
           sudo apt install clang-format-21
@@ -46,12 +46,27 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        toolchain: [{cc: clang, cxx: clang++}, {cc: gcc, cxx: g++}]
+        toolchain:
+          - cc: clang-21
+            cxx: clang++-21
+            install: |
+              sudo add-apt-repository 'deb http://apt.llvm.org/noble/ llvm-toolchain-noble-21 main'
+              wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+              sudo apt-get update
+              sudo apt-get install -y clang-21
+          - cc: gcc-14
+            cxx: g++-14
+            install: |
+              sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+              sudo apt-get update
+              sudo apt-get install -y gcc-14 g++-14
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           submodules: true
+      - name: Install ${{ matrix.toolchain.cxx }}
+        run: ${{ matrix.toolchain.install }}
       - name: Set up Python 3.13
         uses: actions/setup-python@v6
         with:
@@ -260,7 +275,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-14, macos-14, macos-15, macos-26]
+        os: [ubuntu-latest, windows-latest, macos-14, macos-15]
         python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
       - name: Set up Python ${{ matrix.python-version }}
