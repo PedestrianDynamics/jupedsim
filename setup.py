@@ -254,7 +254,7 @@ setup(
     ext_modules=[CMakeExtension("python_bindings_jupedsim")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
-    python_requires=">=3.10,<3.14",
+    python_requires=">=3.10,<3.15",
     packages=[
         "jupedsim",
         "jupedsim.models",
@@ -284,7 +284,7 @@ setup(
         "Tracker": "https://github.com/PedestrianDynamics/jupedsim/issues",
     },
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Operating System :: Microsoft :: Windows",
         "Operating System :: Unix",
         "Operating System :: MacOS",
@@ -297,6 +297,7 @@ setup(
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
     ],
