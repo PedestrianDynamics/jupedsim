@@ -193,6 +193,9 @@ jobs:
           - os: ubuntu-latest
             cibw_archs: "x86_64"
             cibw_build: "cp313-*"
+          - os: ubuntu-latest
+            cibw_archs: "x86_64"
+            cibw_build: "cp314-*"
           - os: windows-latest
             cibw_archs: "auto64"
             cibw_build: "cp310-*"
@@ -205,6 +208,9 @@ jobs:
           - os: windows-latest
             cibw_archs: "auto64"
             cibw_build: "cp313-*"
+          - os: windows-latest
+            cibw_archs: "auto64"
+            cibw_build: "cp314-*"
           - os: macos-14
             cibw_archs: "x86_64"
             cibw_build: "cp310-*"
@@ -218,6 +224,9 @@ jobs:
             cibw_archs: "x86_64"
             cibw_build: "cp313-*"
           - os: macos-14
+            cibw_archs: "x86_64"
+            cibw_build: "cp314-*"
+          - os: macos-14
             cibw_archs: "arm64"
             cibw_build: "cp310-*"
           - os: macos-14
@@ -229,6 +238,9 @@ jobs:
           - os: macos-14
             cibw_archs: "arm64"
             cibw_build: "cp313-*"
+          - os: macos-14
+            cibw_archs: "arm64"
+            cibw_build: "cp314-*"
     steps:
       - uses: actions/checkout@v6
         with:
@@ -260,8 +272,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-14, macos-14, macos-15, macos-26]
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        os: [ubuntu-latest, windows-latest, macos-14, macos-15, macos-26]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     steps:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
