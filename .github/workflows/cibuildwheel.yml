@@ -24,10 +24,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Set up Python 3.13
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: "3.13"
     - name: Install dependencies
@@ -51,10 +51,10 @@ jobs:
         toolchain: [ {cc: clang, cxx: clang++}, {cc: gcc, cxx: g++} ]
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Set up Python 3.13
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: "3.13"
     - name: Install dependencies
@@ -71,10 +71,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Set up Python 3.13
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: "3.13"
 
@@ -104,7 +104,7 @@ jobs:
 
     - name: Publish docs to GitHub pages
       if: steps.docs-publish-dir.outputs.target != ''
-      uses: peaceiris/actions-gh-pages@v3
+      uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: docs/build
@@ -112,7 +112,7 @@ jobs:
         keep_files: false
 
     - name: Upload documentation as artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: pages
         path: docs/build/
@@ -125,7 +125,7 @@ jobs:
     if: needs.docs.outputs.docs-target != ''
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         ref: gh-pages
     - name: Write versions to JSON file
@@ -155,7 +155,7 @@ jobs:
         ln -s ${{needs.docs.outputs.docs-target}} stable
 
     - name: Update files in gh-pages branch
-      uses: stefanzweifel/git-auto-commit-action@v4
+      uses: stefanzweifel/git-auto-commit-action@v7
       with:
         branch: gh-pages
         commit_message: Update versions and stable
@@ -165,9 +165,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         name: Install Python
         with:
           python-version: 3.13
@@ -180,7 +180,7 @@ jobs:
           python -m build -s
 
       - name: Upload sdist
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: python-packages-sdist
           path: dist/jupedsim-*.tar.gz
@@ -257,7 +257,7 @@ jobs:
             cibw_archs: "arm64"
             cibw_build: "cp314-*"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build wheels for CPython ${{ matrix.cibw_build }} on ${{ matrix.cibw_archs }}
         uses: pypa/cibuildwheel@v3.3.0
         env:
@@ -277,7 +277,7 @@ jobs:
           $pythonVersion = $pythonVersion.Trim()
           echo "PYTHON_VERSION=$pythonVersion" | Out-File -Append -FilePath $env:GITHUB_ENV
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: python-packages-${{ matrix.os }}-${{ matrix.cibw_archs }}-${{ env.PYTHON_VERSION }}
           path: ./wheelhouse/*.whl
@@ -293,12 +293,12 @@ jobs:
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     steps:
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Download packages
-        uses: actions/Download-artifact@v4
+        uses: actions/Download-artifact@v7
         with:
           pattern: python-packages-*
           merge-multiple: true
@@ -320,12 +320,12 @@ jobs:
 
     steps:
       - name: Set up Python 3.13
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: 3.13
 
       - name: Download packages
-        uses: actions/Download-artifact@v4
+        uses: actions/Download-artifact@v7
         with:
           pattern: python-packages-*
           merge-multiple: true
@@ -351,7 +351,7 @@ jobs:
     steps:
       # retrieve your distributions here
       - name: Download packages
-        uses: actions/Download-artifact@v4
+        uses: actions/Download-artifact@v7
         with:
           pattern: python-packages-*
           merge-multiple: true
