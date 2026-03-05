@@ -5,4 +5,5 @@
 struct CollisionFreeSpeedModelV3Update {
     Point position{};
     Point orientation{};
+    double headingAngle{};
 };

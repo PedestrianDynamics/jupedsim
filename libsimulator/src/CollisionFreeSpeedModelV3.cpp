@@ -21,10 +21,12 @@
 
 namespace
 {
-constexpr double Eps = 1e-6;
-constexpr double SideEps = 0.05;
-constexpr double SpacingBlendWeight = 0.15;
-} // namespace
+constexpr double Eps = 1e-6; // Numeric lower bound to avoid division by zero in range terms.
+constexpr double SideEps = 0.05; // Smooths left/right sign near centerline to reduce heading flips.
+constexpr double SpacingBlendWeight = 0.15; // Blends move-direction spacing with goal-direction spacing.
+constexpr double TauTheta = 0.4; // Heading relaxation timescale [s] for temporal smoothing.
+constexpr double MinReverseSpeed = -0.01; // Deterministic tiny reverse floor [m/s] to release local blockages.
+}
 
 OperationalModelType CollisionFreeSpeedModelV3::Type() const
 {
@@ -102,7 +104,10 @@ OperationalModelUpdate CollisionFreeSpeedModelV3::ComputeNewPosition(
         }
     }
 
-    const auto heading_angle = theta_max * std::tanh(best_influence);
+    const auto heading_target = theta_max * std::tanh(best_influence);
+    const auto alpha = std::clamp(dT / TauTheta, 0.0, 1.0);
+    const auto heading_angle =
+        model.headingAngle + alpha * (heading_target - model.headingAngle);
     auto direction = reference_direction.Rotate(std::cos(heading_angle), std::sin(heading_angle))
                          .Normalized();
     if(direction == Point{}) {
@@ -131,7 +136,7 @@ OperationalModelUpdate CollisionFreeSpeedModelV3::ComputeNewPosition(
 
     const auto optimal_speed = OptimalSpeed(ped, spacing, model.timeGap);
     const auto velocity = direction * optimal_speed;
-    return CollisionFreeSpeedModelV3Update{ped.pos + velocity * dT, direction};
+    return CollisionFreeSpeedModelV3Update{ped.pos + velocity * dT, direction, heading_angle};
 };
 
 void CollisionFreeSpeedModelV3::ApplyUpdate(const OperationalModelUpdate& upd, GenericAgent& agent)
@@ -140,6 +145,8 @@ void CollisionFreeSpeedModelV3::ApplyUpdate(const OperationalModelUpdate& upd, G
     const auto& update = std::get<CollisionFreeSpeedModelV3Update>(upd);
     agent.pos = update.position;
     agent.orientation = update.orientation;
+    auto& model = std::get<CollisionFreeSpeedModelV3Data>(agent.model);
+    model.headingAngle = update.headingAngle;
 }
 
 void CollisionFreeSpeedModelV3::CheckModelConstraint(
@@ -202,7 +209,7 @@ double CollisionFreeSpeedModelV3::OptimalSpeed(
 {
     const auto& model = std::get<CollisionFreeSpeedModelV3Data>(ped.model);
     const auto effective_spacing = spacing - model.agentBuffer;
-    return std::min(std::max(effective_spacing / time_gap, 0.0), model.v0);
+    return std::min(std::max(effective_spacing / time_gap, MinReverseSpeed), model.v0);
 }
 
 double CollisionFreeSpeedModelV3::GetSpacing(

@@ -17,6 +17,7 @@ struct CollisionFreeSpeedModelV3Data {
     double timeGap{1};
     double v0{1.2};
     double radius{0.15};
+    double headingAngle{0.0}; // [rad] persistent relaxed heading state
 };
 
 template <>
@@ -32,7 +33,7 @@ struct fmt::formatter<CollisionFreeSpeedModelV3Data> {
             "CollisionFreeSpeedModelV3[strengthNeighborRepulsion={}, "
             "rangeNeighborRepulsion={}, strengthGeometryRepulsion={}, rangeGeometryRepulsion={}, "
             "rangeXScale={}, rangeYScale={}, thetaMaxUpperBound={}, agentBuffer={}, "
-            "timeGap={}, v0={}, radius={}])",
+            "timeGap={}, v0={}, radius={}, headingAngle={}])",
             m.strengthNeighborRepulsion,
             m.rangeNeighborRepulsion,
             m.strengthGeometryRepulsion,
@@ -43,6 +44,7 @@ struct fmt::formatter<CollisionFreeSpeedModelV3Data> {
             m.agentBuffer,
             m.timeGap,
             m.v0,
-            m.radius);
+            m.radius,
+            m.headingAngle);
     }
 };

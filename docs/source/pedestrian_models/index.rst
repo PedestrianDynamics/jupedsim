@@ -43,6 +43,9 @@ In :class:`~jupedsim.models.CollisionFreeSpeedModelV3` the same per-agent base
 parameters are available, plus rotational steering controls
 (``range_x_scale``, ``range_y_scale``, ``theta_max_upper_bound``)
 and ``agent_buffer``.
+V3 also uses temporal heading relaxation to damp rapid left-right turning
+changes and a tiny deterministic reverse-speed floor to help unblock contact
+situations.
 
 A `detailed description
 <https://pedestriandynamics.org/models/collision_free_speed_model/>`_ is
