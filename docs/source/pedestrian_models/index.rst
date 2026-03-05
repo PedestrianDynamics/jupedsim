@@ -26,7 +26,7 @@ speed of the agent. This simplified and computationally efficient model aims to
 mirror real-world pedestrian behaviors while maintaining smooth movement
 dynamics.
 
-The collision-free speed model is available in two variants in JuPedSim. Both
+The collision-free speed model is available in three variants in JuPedSim. Both
 variants implement the same algorithm but differ when it comes to defining model
 parameters globally vs. per-agent.
 
@@ -38,6 +38,11 @@ In :class:`~jupedsim.models.CollisionFreeSpeedModelV2` neighbor and geometry
 repulsion parameters are per-agent parameters that can be set individually via
 :class:`~jupedsim.models.CollisionFreeSpeedModelV2AgentParameters` and can be
 changed at any time.
+
+In :class:`~jupedsim.models.CollisionFreeSpeedModelV3` the same per-agent base
+parameters are available, plus rotational steering controls
+(``range_x_scale``, ``range_y_scale``, ``theta_max_upper_bound``)
+and ``agent_buffer``.
 
 A `detailed description
 <https://pedestriandynamics.org/models/collision_free_speed_model/>`_ is

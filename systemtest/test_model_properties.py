@@ -798,3 +798,99 @@ def test_social_force_model_agent_paramters_force_distance_getter_deprecated(
         match="deprecated, use 'force_distance' instead",
     ):
         assert agent.forceDistance == force_distance
+
+
+@pytest.fixture
+def simulation_with_collision_free_speed_model_v3():
+    return jps.Simulation(
+        model=jps.CollisionFreeSpeedModelV3(),
+        geometry=[(0, 0), (10, 0), (10, 10), (0, 10)],
+    )
+
+
+def test_initial_parameters_collision_free_speed_model_v3(
+    simulation_with_collision_free_speed_model_v3,
+):
+    sim = simulation_with_collision_free_speed_model_v3
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    params = jps.CollisionFreeSpeedModelV3AgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+        time_gap=0.11,
+        desired_speed=0.12,
+        radius=0.13,
+        strength_neighbor_repulsion=0.14,
+        range_neighbor_repulsion=0.15,
+        strength_geometry_repulsion=0.16,
+        range_geometry_repulsion=0.17,
+        range_x_scale=21.0,
+        range_y_scale=9.0,
+        theta_max_upper_bound=0.8,
+        agent_buffer=0.4,
+    )
+    agent_id = sim.add_agent(params)
+
+    agent_model = sim.agent(agent_id).model
+    assert agent_model.time_gap == 0.11
+    assert agent_model.desired_speed == 0.12
+    assert agent_model.radius == 0.13
+    assert agent_model.strength_neighbor_repulsion == 0.14
+    assert agent_model.range_neighbor_repulsion == 0.15
+    assert agent_model.strength_geometry_repulsion == 0.16
+    assert agent_model.range_geometry_repulsion == 0.17
+    assert agent_model.range_x_scale == 21.0
+    assert agent_model.range_y_scale == 9.0
+    assert agent_model.theta_max_upper_bound == 0.8
+    assert agent_model.agent_buffer == 0.4
+
+
+def test_set_model_parameters_collision_free_speed_model_v3(
+    simulation_with_collision_free_speed_model_v3,
+):
+    sim = simulation_with_collision_free_speed_model_v3
+    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    agent = jps.CollisionFreeSpeedModelV3AgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        position=(1, 1),
+    )
+    agent_id = sim.add_agent(agent)
+    model = sim.agent(agent_id).model
+
+    model.desired_speed = 2.0
+    assert model.desired_speed == 2.0
+
+    model.time_gap = 3.0
+    assert model.time_gap == 3.0
+
+    model.radius = 0.3
+    assert model.radius == 0.3
+
+    model.strength_neighbor_repulsion = 5.0
+    assert model.strength_neighbor_repulsion == 5.0
+
+    model.range_neighbor_repulsion = 0.6
+    assert model.range_neighbor_repulsion == 0.6
+
+    model.strength_geometry_repulsion = 4.2
+    assert model.strength_geometry_repulsion == 4.2
+
+    model.range_geometry_repulsion = 0.8
+    assert model.range_geometry_repulsion == 0.8
+
+    model.range_x_scale = 15.0
+    assert model.range_x_scale == 15.0
+
+    model.range_y_scale = 6.0
+    assert model.range_y_scale == 6.0
+
+    model.theta_max_upper_bound = 0.9
+    assert model.theta_max_upper_bound == 0.9
+
+    model.agent_buffer = 0.5
+    assert model.agent_buffer == 0.5
