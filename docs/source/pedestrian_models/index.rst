@@ -52,7 +52,7 @@ V3 also uses temporal heading relaxation to damp rapid left-right turning
 changes and a tiny deterministic reverse-speed floor to help unblock contact
 situations.
 
-See :doc:`collision_free_speed_model_v3` for the full V3 specification.
+See the `V3 specification <collision_free_speed_model_v3.html>`_ for full details.
 
 A `detailed description
 <https://pedestriandynamics.org/models/collision_free_speed_model/>`_ is
