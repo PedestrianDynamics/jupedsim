@@ -2,6 +2,11 @@
 Pedestrian Models
 =================
 
+.. toctree::
+   :hidden:
+
+   collision_free_speed_model_v3
+
 JuPedSim allows creating pedestrian simulations with different microscopic
 models. Below is a list of all the models that are currently available. Please
 refer to the links in the respective section for a detailed discussion of the
