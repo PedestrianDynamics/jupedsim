@@ -1,0 +1,708 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="../_static/logo.png" sizes="482x536" rel="icon" type="image/png">
+    <title>CollisionFreeSpeedModelV3 (Rotational Steering) &#8212; JuPedSim  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=d742c9ce" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'pedestrian_models/collision_free_speed_model_v3';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v2.0.0';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Notebooks" href="../notebooks/index.html" />
+    <link rel="prev" title="Pedestrian Models" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../_static/jupedsim.svg" class="logo__image only-light" alt="JuPedSim  documentation - Home"/>
+    <script>document.write(`<img src="../_static/jupedsim.svg" class="logo__image only-dark" alt="JuPedSim  documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PedestrianDynamics/jupedsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/jupedsim/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://img.shields.io/pypi/v/jupedsim" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.5281/zenodo.1293771" title="DOI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1293771.svg" class="icon-link-image" alt="DOI"/></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/getting_started.html">Getting started</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../concepts/index.html">Concepts</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../concepts/geometry.html">Geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../concepts/routing.html">Routing</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Pedestrian Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">CollisionFreeSpeedModelV3 (Rotational Steering)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../notebooks/index.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/model-comparison.html">Comparative Analysis of Pedestrian Dynamics Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/corner.html">Movement around Corners</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/double-bottleneck.html">Movement through Bottlenecks</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/journey.html">How to work with Journeys</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/lane-formation.html">Lane formation in bi-directional flow</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/motivation.html">Modelling Motivation</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/queues_waiting.html">Waiting in Queues</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/routing.html">How Route Choice can Impact Evacuation Times</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/single-file.html">Simulating Single-File Movement</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../disclaimer.html">Disclaimer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/jupedsim/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citation/citation.html">Cite JuPedSim</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script></div>
+      
+        <div class="header-article-item"><button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>CollisionFreeSpeedModelV3 (Rotational Steering)</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#overview">Overview</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#direction-update">Direction Update</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#temporal-smoothness-heading-relaxation">Temporal Smoothness (Heading Relaxation)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#speed-update">Speed Update</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameter-mapping-old-vs-current">Parameter Mapping (Old vs Current)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implemented-internal-mapping">Implemented Internal Mapping</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#practical-interpretation">Practical Interpretation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#notes">Notes</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="collisionfreespeedmodelv3-rotational-steering">
+<h1>CollisionFreeSpeedModelV3 (Rotational Steering)<a class="headerlink" href="#collisionfreespeedmodelv3-rotational-steering" title="Link to this heading">#</a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">#</a></h2>
+<p>This document describes <code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV3</span></code>, a minimal rotational
+steering model derived from <code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV2</span></code>.</p>
+<p>The model separates:</p>
+<ul class="simple">
+<li><p><strong>Direction update</strong> (rotation of a reference desired direction).</p></li>
+<li><p><strong>Speed update</strong> (spacing-based, with explicit buffer semantics).</p></li>
+</ul>
+<p>The design goal is to answer two calibration questions with very few controls:</p>
+<ol class="arabic simple">
+<li><p>How many neighbors affect me?</p></li>
+<li><p>How strongly do I overtake vs. stick to the goal?</p></li>
+</ol>
+</section>
+<section id="direction-update">
+<h2>Direction Update<a class="headerlink" href="#direction-update" title="Link to this heading">#</a></h2>
+<p>Let:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">p</span></code> be the current agent position.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">p_j</span></code> be neighbor position.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">r_j</span> <span class="pre">=</span> <span class="pre">p_j</span> <span class="pre">-</span> <span class="pre">p</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">e_des</span></code> be normalized desired direction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">r_wall</span></code> be the boundary influence vector (same exponential form as V2).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">e_ref</span> <span class="pre">=</span> <span class="pre">normalize(e_des</span> <span class="pre">+</span> <span class="pre">r_wall)</span></code> (fallback to current orientation if zero).</p></li>
+</ul>
+<p>Unlike V2, where boundary and neighbor forces are summed into the final velocity,
+V3 uses <code class="docutils literal notranslate"><span class="pre">r_wall</span></code> only to bend the reference direction. Neighbor avoidance then
+operates via rotational steering on top of this adjusted reference.</p>
+<p>Only forward neighbors contribute:</p>
+<div class="highlight-math notranslate"><div class="highlight"><pre><span></span>x_j = e_{\mathrm{ref}} \cdot r_j,\quad x_j &gt; 0
+</pre></div>
+</div>
+<p>For each forward neighbor:</p>
+<div class="highlight-math notranslate"><div class="highlight"><pre><span></span>s_j = \mathrm{cross}(e_{\mathrm{ref}}, r_j),\quad y_j = |s_j|
+</pre></div>
+</div>
+<div class="highlight-math notranslate"><div class="highlight"><pre><span></span>w_j = \exp(-x_j / r_x)\,\exp(-y_j / r_y)
+</pre></div>
+</div>
+<div class="highlight-math notranslate"><div class="highlight"><pre><span></span>a_j = -\,w_j\,\frac{s_j}{|s_j| + \varepsilon_s}
+</pre></div>
+</div>
+<p>The model uses only the <strong>most relevant</strong> forward neighbor:</p>
+<div class="highlight-math notranslate"><div class="highlight"><pre><span></span>j^* = \arg\max_{x_j&gt;0} w_j
+</pre></div>
+</div>
+<div class="highlight-math notranslate"><div class="highlight"><pre><span></span>\theta = \theta_{\max}\,\tanh(a_{j^*})
+</pre></div>
+</div>
+<section id="temporal-smoothness-heading-relaxation">
+<h3>Temporal Smoothness (Heading Relaxation)<a class="headerlink" href="#temporal-smoothness-heading-relaxation" title="Link to this heading">#</a></h3>
+<p>The target turn angle is not applied instantly. Instead, each agent stores a
+heading angle state and relaxes toward the target:</p>
+<div class="highlight-math notranslate"><div class="highlight"><pre><span></span>\alpha = \mathrm{clamp}(\Delta t/\tau_\theta,\,0,\,1)
+</pre></div>
+</div>
+<div class="highlight-math notranslate"><div class="highlight"><pre><span></span>\theta_{t+\Delta t} = \theta_t + \alpha(\theta_{\mathrm{target}}-\theta_t)
+</pre></div>
+</div>
+<div class="highlight-math notranslate"><div class="highlight"><pre><span></span>\theta_{\mathrm{target}}=\theta_{\max}\tanh(a_{j^*})
+</pre></div>
+</div>
+<div class="highlight-math notranslate"><div class="highlight"><pre><span></span>e_{\mathrm{move}} = R(\theta_{t+\Delta t})\,e_{\mathrm{ref}}
+</pre></div>
+</div>
+<p>The negative sign in <code class="docutils literal notranslate"><span class="pre">a_j</span></code> means the agent turns <strong>away from occupied side</strong>.
+Relaxation damps fast left-right switching, reduces snake-like oscillations,
+and keeps direction changes smooth under noisy local neighbor constellations.</p>
+</section>
+</section>
+<section id="speed-update">
+<h2>Speed Update<a class="headerlink" href="#speed-update" title="Link to this heading">#</a></h2>
+<p>Spacing is computed as a blend of move-direction and goal-direction spacing:</p>
+<div class="highlight-math notranslate"><div class="highlight"><pre><span></span>s = (1 - w_b)\,s_{\mathrm{move}} + w_b\,s_{\mathrm{goal}}
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">w_b</span> <span class="pre">=</span> <span class="pre">0.15</span></code> (<code class="docutils literal notranslate"><span class="pre">SpacingBlendWeight</span></code>). Each component is the minimum
+spacing over all neighbors along the respective direction.</p>
+<p>Neighbor is considered in corridor when:</p>
+<div class="highlight-math notranslate"><div class="highlight"><pre><span></span>|\mathrm{left}(e_{\mathrm{move}})\cdot r_j| \le l,\quad l=r_i+r_j
+</pre></div>
+</div>
+<p>Geometric spacing:</p>
+<div class="highlight-math notranslate"><div class="highlight"><pre><span></span>s = \|r_j\| - l
+</pre></div>
+</div>
+<p>Speed:</p>
+<div class="highlight-math notranslate"><div class="highlight"><pre><span></span>v = \min\left(\max\left(\frac{s - b_f}{T}, v_{\min}\right), v_0\right)
+</pre></div>
+</div>
+<p>So speed is zero at:</p>
+<div class="highlight-math notranslate"><div class="highlight"><pre><span></span>s = b_f
+</pre></div>
+</div>
+<p>In the current implementation, <code class="docutils literal notranslate"><span class="pre">v_min</span> <span class="pre">=</span> <span class="pre">-0.01</span> <span class="pre">m/s</span></code> (hard-coded, deterministic)
+to allow tiny backward release in blocked contact situations.</p>
+</section>
+<section id="parameter-mapping-old-vs-current">
+<h2>Parameter Mapping (Old vs Current)<a class="headerlink" href="#parameter-mapping-old-vs-current" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Tuning question</p></th>
+<th class="head"><p>Parameter(s)</p></th>
+<th class="head"><p>Intuition</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>How many neighbors influence me?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rangeNeighborRepulsion</span></code> mapped to anisotropic ranges <code class="docutils literal notranslate"><span class="pre">r_x</span></code>, <code class="docutils literal notranslate"><span class="pre">r_y</span></code></p></td>
+<td><p>Forward and lateral reach are different (<code class="docutils literal notranslate"><span class="pre">r_x</span> <span class="pre">&gt;</span> <span class="pre">r_y</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>How strongly do I deviate/overtake?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">strengthNeighborRepulsion</span></code> mapped to <code class="docutils literal notranslate"><span class="pre">theta_max</span></code></p></td>
+<td><p>Directly sets max turning angle (with clamp)</p></td>
+</tr>
+<tr class="row-even"><td><p>How strongly walls bend direction?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">strengthGeometryRepulsion</span></code>, <code class="docutils literal notranslate"><span class="pre">rangeGeometryRepulsion</span></code></p></td>
+<td><p>Affects <code class="docutils literal notranslate"><span class="pre">e_ref</span></code> via wall influence</p></td>
+</tr>
+<tr class="row-odd"><td><p>How conservative is following speed?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">timeGap</span></code>, <code class="docutils literal notranslate"><span class="pre">v0</span></code>, <code class="docutils literal notranslate"><span class="pre">agentBuffer</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">agentBuffer</span></code> shifts speed-zero point to positive spacing</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="implemented-internal-mapping">
+<h2>Implemented Internal Mapping<a class="headerlink" href="#implemented-internal-mapping" title="Link to this heading">#</a></h2>
+<p>Current constants in code:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Symbol</p></th>
+<th class="head"><p>Code constant</p></th>
+<th class="head text-right"><p>Value</p></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">r_x</span></code> scaling</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">RangeXScale</span></code></p></td>
+<td class="text-right"><p><code class="docutils literal notranslate"><span class="pre">20.0</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">-</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r_x</span> <span class="pre">=</span> <span class="pre">20</span> <span class="pre">*</span> <span class="pre">rangeNeighborRepulsion</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">r_y</span></code> scaling</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">RangeYScale</span></code></p></td>
+<td class="text-right"><p><code class="docutils literal notranslate"><span class="pre">8.0</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">-</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">r_y</span> <span class="pre">=</span> <span class="pre">8</span> <span class="pre">*</span> <span class="pre">rangeNeighborRepulsion</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>max turn cap</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ThetaMaxUpperBound</span></code></p></td>
+<td class="text-right"><p><code class="docutils literal notranslate"><span class="pre">1.0</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rad</span></code></p></td>
+<td><p>hard upper bound on <code class="docutils literal notranslate"><span class="pre">theta_max</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>spacing blend</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SpacingBlendWeight</span></code></p></td>
+<td class="text-right"><p><code class="docutils literal notranslate"><span class="pre">0.15</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">-</span></code></p></td>
+<td><p>weight of goal-direction spacing in blend</p></td>
+</tr>
+<tr class="row-even"><td><p>heading relaxation</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">TauTheta</span></code></p></td>
+<td class="text-right"><p><code class="docutils literal notranslate"><span class="pre">0.3</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">s</span></code></p></td>
+<td><p>relaxation timescale for heading state</p></td>
+</tr>
+<tr class="row-odd"><td><p>sign smoothing</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SideEps</span></code></p></td>
+<td class="text-right"><p><code class="docutils literal notranslate"><span class="pre">0.05</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">m</span></code></p></td>
+<td><p>avoids hard sign flips near centerline</p></td>
+</tr>
+<tr class="row-even"><td><p>min reverse speed</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MinReverseSpeed</span></code></p></td>
+<td class="text-right"><p><code class="docutils literal notranslate"><span class="pre">-0.01</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">m/s</span></code></p></td>
+<td><p>tiny deterministic backward release</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Derived:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">theta_max</span> <span class="pre">=</span> <span class="pre">clamp(strengthNeighborRepulsion,</span> <span class="pre">0,</span> <span class="pre">ThetaMaxUpperBound)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">r_x</span> <span class="pre">=</span> <span class="pre">max(eps,</span> <span class="pre">rangeNeighborRepulsion</span> <span class="pre">*</span> <span class="pre">RangeXScale)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">r_y</span> <span class="pre">=</span> <span class="pre">max(eps,</span> <span class="pre">rangeNeighborRepulsion</span> <span class="pre">*</span> <span class="pre">RangeYScale)</span></code>.</p></li>
+</ul>
+</section>
+<section id="practical-interpretation">
+<h2>Practical Interpretation<a class="headerlink" href="#practical-interpretation" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>If you observe…</p></th>
+<th class="head"><p>Primary knob</p></th>
+<th class="head"><p>Typical direction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Too much queueing / too little overtaking</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">strengthNeighborRepulsion</span></code></p></td>
+<td><p>increase (small steps)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Too much zig-zag / snake behavior</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">strengthNeighborRepulsion</span></code></p></td>
+<td><p>decrease</p></td>
+</tr>
+<tr class="row-even"><td><p>Agents react too late to leaders</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rangeNeighborRepulsion</span></code></p></td>
+<td><p>increase</p></td>
+</tr>
+<tr class="row-odd"><td><p>Agents react to too many lateral neighbors</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rangeNeighborRepulsion</span></code></p></td>
+<td><p>decrease, or reduce <code class="docutils literal notranslate"><span class="pre">RangeYScale</span></code> in code</p></td>
+</tr>
+<tr class="row-even"><td><p>Early lane-like splitting</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rangeNeighborRepulsion</span></code></p></td>
+<td><p>often increase with moderate strength</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>This variant intentionally avoids blending and case-based deadlock logic.</p></li>
+<li><p>Steering uses one dominant forward neighbor, which reduces chain-following artifacts from summing many neighbors.</p></li>
+<li><p>The anisotropy comes solely from the parameter ratio <code class="docutils literal notranslate"><span class="pre">r_x</span> <span class="pre">/</span> <span class="pre">r_y</span></code>, both axes use the same linear-exponential decay.</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Pedestrian Models</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../notebooks/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Notebooks</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#overview">Overview</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#direction-update">Direction Update</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#temporal-smoothness-heading-relaxation">Temporal Smoothness (Heading Relaxation)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#speed-update">Speed Update</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameter-mapping-old-vs-current">Parameter Mapping (Old vs Current)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implemented-internal-mapping">Implemented Internal Mapping</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#practical-interpretation">Practical Interpretation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#notes">Notes</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Author name not set
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026, Forschungszentrum Jülich GmbH, IAS-7.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
