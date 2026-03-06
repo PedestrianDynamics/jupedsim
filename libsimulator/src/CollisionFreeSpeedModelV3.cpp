@@ -23,9 +23,11 @@ namespace
 {
 constexpr double Eps = 1e-6; // Numeric lower bound to avoid division by zero in range terms.
 constexpr double SideEps = 0.05; // Smooths left/right sign near centerline to reduce heading flips.
-constexpr double SpacingBlendWeight = 0.15; // Blends move-direction spacing with goal-direction spacing.
+constexpr double SpacingBlendWeight =
+    0.15; // Blends move-direction spacing with goal-direction spacing.
 constexpr double TauTheta = 0.3; // Heading relaxation timescale [s] for temporal smoothing.
-constexpr double MinReverseSpeed = -0.01; // Deterministic tiny reverse floor [m/s] to release local blockages.
+constexpr double MinReverseSpeed =
+    -0.01; // Deterministic tiny reverse floor [m/s] to release local blockages.
 
 double NeighborInfluence(
     const std::vector<GenericAgent>& neighborhood,
@@ -60,7 +62,7 @@ double NeighborInfluence(
 
     return theta_max * std::tanh(best_influence);
 }
-}
+} // namespace
 
 OperationalModelType CollisionFreeSpeedModelV3::Type() const
 {
@@ -113,12 +115,12 @@ OperationalModelUpdate CollisionFreeSpeedModelV3::ComputeNewPosition(
         reference_direction = ped.orientation;
     }
 
-    const auto heading_target = NeighborInfluence(neighborhood, ped.pos, reference_direction, model);
+    const auto heading_target =
+        NeighborInfluence(neighborhood, ped.pos, reference_direction, model);
     const auto alpha = std::clamp(dT / TauTheta, 0.0, 1.0);
-    const auto heading_angle =
-        model.headingAngle + alpha * (heading_target - model.headingAngle);
-    auto direction = reference_direction.Rotate(std::cos(heading_angle), std::sin(heading_angle))
-                         .Normalized();
+    const auto heading_angle = model.headingAngle + alpha * (heading_target - model.headingAngle);
+    auto direction =
+        reference_direction.Rotate(std::cos(heading_angle), std::sin(heading_angle)).Normalized();
     if(direction == Point{}) {
         direction = reference_direction;
     }
@@ -131,7 +133,8 @@ OperationalModelUpdate CollisionFreeSpeedModelV3::ComputeNewPosition(
             return std::min(res, GetSpacing(ped, neighbor, direction));
         });
 
-    const auto goal_direction = (desired_direction == Point{}) ? reference_direction : desired_direction;
+    const auto goal_direction =
+        (desired_direction == Point{}) ? reference_direction : desired_direction;
     const auto spacing_goal = std::accumulate(
         std::begin(neighborhood),
         std::end(neighborhood),
@@ -169,10 +172,26 @@ void CollisionFreeSpeedModelV3::CheckModelConstraint(
     validateConstraint(model.v0, 0.0, 10.0, "v0");
     validateConstraint(model.timeGap, 0.1, 10.0, "timeGap");
 
-    validateConstraint(model.strengthNeighborRepulsion, 0.0, std::numeric_limits<double>::max(), "strengthNeighborRepulsion");
-    validateConstraint(model.rangeNeighborRepulsion, 0.01, std::numeric_limits<double>::max(), "rangeNeighborRepulsion");
-    validateConstraint(model.strengthGeometryRepulsion, 0.0, std::numeric_limits<double>::max(), "strengthGeometryRepulsion");
-    validateConstraint(model.rangeGeometryRepulsion, 0.01, std::numeric_limits<double>::max(), "rangeGeometryRepulsion");
+    validateConstraint(
+        model.strengthNeighborRepulsion,
+        0.0,
+        std::numeric_limits<double>::max(),
+        "strengthNeighborRepulsion");
+    validateConstraint(
+        model.rangeNeighborRepulsion,
+        0.01,
+        std::numeric_limits<double>::max(),
+        "rangeNeighborRepulsion");
+    validateConstraint(
+        model.strengthGeometryRepulsion,
+        0.0,
+        std::numeric_limits<double>::max(),
+        "strengthGeometryRepulsion");
+    validateConstraint(
+        model.rangeGeometryRepulsion,
+        0.01,
+        std::numeric_limits<double>::max(),
+        "rangeGeometryRepulsion");
 
     validateConstraint(model.rangeXScale, 0.01, std::numeric_limits<double>::max(), "rangeXScale");
     validateConstraint(model.rangeYScale, 0.01, std::numeric_limits<double>::max(), "rangeYScale");
@@ -242,7 +261,6 @@ double CollisionFreeSpeedModelV3::GetSpacing(
 
     return distp12.Norm() - l;
 }
-
 
 Point CollisionFreeSpeedModelV3::BoundaryRepulsion(
     const GenericAgent& ped,
