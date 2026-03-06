@@ -11,7 +11,7 @@ struct CollisionFreeSpeedModelV3Data {
 
     double rangeXScale{20.0}; // [-] forward interaction stretch multiplier
     double rangeYScale{8.0}; // [-] lateral interaction stretch multiplier
-    double thetaMaxUpperBound{1.0}; // [rad] hard cap on turn angle per update
+    double thetaMaxUpperBound{1.57}; // [rad] hard cap on turn angle per update
     double agentBuffer{0.0}; // [m] stand-off used in speed law: v=0 at s<=buffer
 
     double timeGap{1};

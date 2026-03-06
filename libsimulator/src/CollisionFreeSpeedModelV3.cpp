@@ -24,7 +24,7 @@ namespace
 constexpr double Eps = 1e-6; // Numeric lower bound to avoid division by zero in range terms.
 constexpr double SideEps = 0.05; // Smooths left/right sign near centerline to reduce heading flips.
 constexpr double SpacingBlendWeight = 0.15; // Blends move-direction spacing with goal-direction spacing.
-constexpr double TauTheta = 0.4; // Heading relaxation timescale [s] for temporal smoothing.
+constexpr double TauTheta = 0.3; // Heading relaxation timescale [s] for temporal smoothing.
 constexpr double MinReverseSpeed = -0.01; // Deterministic tiny reverse floor [m/s] to release local blockages.
 
 double NeighborInfluence(
