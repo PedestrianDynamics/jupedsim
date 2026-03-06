@@ -40,6 +40,5 @@ private:
     double OptimalSpeed(const GenericAgent& ped, double spacing, double time_gap) const;
     double
     GetSpacing(const GenericAgent& ped1, const GenericAgent& ped2, const Point& direction) const;
-    Point NeighborRepulsion(const GenericAgent& ped1, const GenericAgent& ped2) const;
     Point BoundaryRepulsion(const GenericAgent& ped, const LineSegment& boundary_segment) const;
 };

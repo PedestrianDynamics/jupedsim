@@ -26,6 +26,40 @@ constexpr double SideEps = 0.05; // Smooths left/right sign near centerline to r
 constexpr double SpacingBlendWeight = 0.15; // Blends move-direction spacing with goal-direction spacing.
 constexpr double TauTheta = 0.4; // Heading relaxation timescale [s] for temporal smoothing.
 constexpr double MinReverseSpeed = -0.01; // Deterministic tiny reverse floor [m/s] to release local blockages.
+
+double NeighborInfluence(
+    const std::vector<GenericAgent>& neighborhood,
+    const Point& pos,
+    const Point& reference_direction,
+    const CollisionFreeSpeedModelV3Data& model)
+{
+    const auto range_x = std::max(Eps, model.rangeNeighborRepulsion * model.rangeXScale);
+    const auto range_y = std::max(Eps, model.rangeNeighborRepulsion * model.rangeYScale);
+    const auto theta_max =
+        std::clamp(model.strengthNeighborRepulsion, 0.0, model.thetaMaxUpperBound);
+
+    double best_influence = 0.0;
+    double best_weight = 0.0;
+    for(const auto& neighbor : neighborhood) {
+        const auto relative = neighbor.pos - pos;
+        const auto x = reference_direction.ScalarProduct(relative);
+        if(x <= 0.0) {
+            continue;
+        }
+
+        const auto signed_lateral = reference_direction.CrossProduct(relative);
+        const auto y = std::abs(signed_lateral);
+        const auto longitudinal_weight = std::exp(-x / range_x);
+        const auto lateral_weight = std::exp(-y / range_y);
+        const auto weight = longitudinal_weight * lateral_weight;
+        if(weight > best_weight) {
+            best_weight = weight;
+            best_influence = -weight * (signed_lateral / (std::abs(signed_lateral) + SideEps));
+        }
+    }
+
+    return theta_max * std::tanh(best_influence);
+}
 }
 
 OperationalModelType CollisionFreeSpeedModelV3::Type() const
@@ -79,32 +113,7 @@ OperationalModelUpdate CollisionFreeSpeedModelV3::ComputeNewPosition(
         reference_direction = ped.orientation;
     }
 
-    const auto range_x = std::max(Eps, model.rangeNeighborRepulsion * model.rangeXScale);
-    const auto range_y = std::max(Eps, model.rangeNeighborRepulsion * model.rangeYScale);
-    const auto theta_max =
-        std::clamp(model.strengthNeighborRepulsion, 0.0, model.thetaMaxUpperBound);
-
-    double best_influence = 0.0;
-    double best_weight = 0.0;
-    for(const auto& neighbor : neighborhood) {
-        const auto relative = neighbor.pos - ped.pos;
-        const auto x = reference_direction.ScalarProduct(relative);
-        if(x <= 0.0) {
-            continue;
-        }
-
-        const auto signed_lateral = reference_direction.CrossProduct(relative);
-        const auto y = std::abs(signed_lateral);
-        const auto longitudinal_weight = std::exp(-x / range_x);
-        const auto lateral_weight = std::exp(-std::pow(y / range_y, 2.0));
-        const auto weight = longitudinal_weight * lateral_weight;
-        if(weight > best_weight) {
-            best_weight = weight;
-            best_influence = -weight * (signed_lateral / (std::abs(signed_lateral) + SideEps));
-        }
-    }
-
-    const auto heading_target = theta_max * std::tanh(best_influence);
+    const auto heading_target = NeighborInfluence(neighborhood, ped.pos, reference_direction, model);
     const auto alpha = std::clamp(dT / TauTheta, 0.0, 1.0);
     const auto heading_angle =
         model.headingAngle + alpha * (heading_target - model.headingAngle);
@@ -234,19 +243,6 @@ double CollisionFreeSpeedModelV3::GetSpacing(
     return distp12.Norm() - l;
 }
 
-Point CollisionFreeSpeedModelV3::NeighborRepulsion(
-    const GenericAgent& ped1,
-    const GenericAgent& ped2) const
-{
-    const auto distp12 = ped2.pos - ped1.pos;
-    const auto [distance, direction] = distp12.NormAndNormalized();
-    const auto& model1 = std::get<CollisionFreeSpeedModelV3Data>(ped1.model);
-    const auto& model2 = std::get<CollisionFreeSpeedModelV3Data>(ped2.model);
-
-    const auto l = model1.radius + model2.radius;
-    return direction * -(model1.strengthNeighborRepulsion *
-                         std::exp((l - distance) / model1.rangeNeighborRepulsion));
-}
 
 Point CollisionFreeSpeedModelV3::BoundaryRepulsion(
     const GenericAgent& ped,
