@@ -501,66 +501,92 @@ def distribute_until_filled(
         raise IncorrectParameterError(
             "Polygon is expected to be a shapely Polygon"
         )
-    box = __get_bounding_box(polygon)
-
-    np.random.seed(seed)
-    # initialises a list for active Points and a Grid administering all created points
-    active = []
-    grid = Grid(box, distance_to_agents)
-    # initialisation of the first point
-    iteration = 0
-    while iteration < max_iterations:
-        first_point = (
-            np.random.uniform(box[0][0], box[1][0]),
-            np.random.uniform(box[0][1], box[1][1]),
+    rng = np.random.default_rng(seed)
+    polygon_buffered = polygon.buffer(-distance_to_polygon)
+    if polygon_buffered.is_empty:
+        raise IncorrectParameterError(
+            "distance_to_polygon is too large for this polygon."
         )
-        if __check_distance_constraints(
-            first_point, distance_to_polygon, grid, polygon
-        ):
-            grid.append_point(first_point)
-            active.append(first_point)
+
+    cell_size = distance_to_agents / np.sqrt(2.0)
+    xmin, ymin, xmax, ymax = polygon_buffered.bounds
+    grid = {}
+
+    def _cell_index(point):
+        i = int((point[0] - xmin) / cell_size)
+        j = int((point[1] - ymin) / cell_size)
+        return (i, j)
+
+    initial_sample = None
+    batch_size = 1000
+    attempts = max(1, max_iterations // batch_size)
+    for _ in range(attempts):
+        x = rng.uniform(xmin, xmax, size=batch_size)
+        y = rng.uniform(ymin, ymax, size=batch_size)
+        inside = shapely.contains_xy(polygon_buffered, x, y)
+        valid = np.column_stack((x[inside], y[inside]))
+        if len(valid) > 0:
+            initial_sample = (valid[0][0], valid[0][1])
             break
-        iteration = iteration + 1
-    if iteration >= max_iterations:
+
+    if initial_sample is None:
         raise IncorrectParameterError(
             "The first point could not be placed inside the polygon."
             " Check if there is enough space for agents provided inside the polygon"
         )
 
-    # Uses https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf
-    # "Fast Poisson Disk Sampling in Arbitrary Dimensions"
-    # while points are active a random reference point is selected
-    while active:
-        ref_point = active[np.random.randint(0, len(active))]
-        iteration = 0
-        # tries to find a point around the reference Point
-        while iteration < k:
-            # determines a random radius within a circle segment
-            # with radius from distance_to_agents to distance_to_agents * 2
-            rho = np.sqrt(
-                np.random.uniform(
-                    distance_to_agents**2, 4 * distance_to_agents**2
-                )
-            )
-            # determines a random degree
-            theta = np.random.uniform(0, 2 * np.pi)
+    samples = [initial_sample]
+    active_list = [0]
+    grid[_cell_index(initial_sample)] = initial_sample
+
+    r2_min = distance_to_agents**2
+    r2_max = (2 * distance_to_agents) ** 2
+
+    while active_list:
+        idx = rng.integers(0, len(active_list))
+        ref_pt = samples[active_list[idx]]
+        found = False
+
+        for _ in range(k):
+            radius = np.sqrt(rng.uniform(r2_min, r2_max))
+            theta = rng.uniform(0, 2 * np.pi)
             pt = (
-                ref_point[0] + rho * np.cos(theta),
-                ref_point[1] + rho * np.sin(theta),
+                ref_pt[0] + radius * np.cos(theta),
+                ref_pt[1] + radius * np.sin(theta),
             )
-            if __check_distance_constraints(
-                pt, distance_to_polygon, grid, polygon
-            ):
-                grid.append_point(pt)
-                active.append(pt)
-                break
-            iteration = iteration + 1
 
-        # if there was no point found around the reference point it is considered inactive
-        if iteration >= k:
-            active.remove(ref_point)
+            if not (xmin <= pt[0] <= xmax and ymin <= pt[1] <= ymax):
+                continue
+            if not polygon_buffered.contains(shapely.Point(pt)):
+                continue
 
-    return grid.get_samples()
+            i_cell, j_cell = _cell_index(pt)
+            conflict = False
+            for di in range(-2, 3):
+                for dj in range(-2, 3):
+                    neighbour = grid.get((i_cell + di, j_cell + dj))
+                    if neighbour is not None:
+                        dx = neighbour[0] - pt[0]
+                        dy = neighbour[1] - pt[1]
+                        if dx * dx + dy * dy < r2_min:
+                            conflict = True
+                            break
+                if conflict:
+                    break
+            if conflict:
+                continue
+
+            samples.append(pt)
+            active_list.append(len(samples) - 1)
+            grid[(i_cell, j_cell)] = pt
+            found = True
+            break
+
+        if not found:
+            active_list[idx] = active_list[-1]
+            active_list.pop()
+
+    return samples
 
 
 def distribute_by_percentage(
