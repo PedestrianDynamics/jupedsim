@@ -85,9 +85,7 @@ def main():
         ),
     )
 
-    exit_id = simulation.add_exit_stage(
-        [(18, 4), (20, 4), (20, 6), (18, 6)]
-    )
+    exit_id = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
     journey = jps.JourneyDescription([exit_id])
     journey_id = simulation.add_journey(journey)
 
@@ -110,7 +108,9 @@ def main():
 
     simulation._writer.close()
 
-    print(f"Simulation completed after {simulation.iteration_count()} iterations")
+    print(
+        f"Simulation completed after {simulation.iteration_count()} iterations"
+    )
 
     # Read back CSV and plot trajectories over geometry
     import matplotlib.pyplot as plt
@@ -135,8 +135,13 @@ def main():
     # Plot each agent's trajectory
     for agent_id in agent_ids:
         mask = data[:, 1] == agent_id
-        ax.plot(data[mask, 2], data[mask, 3], ".-", markersize=2,
-                label=f"Agent {agent_id}")
+        ax.plot(
+            data[mask, 2],
+            data[mask, 3],
+            ".-",
+            markersize=2,
+            label=f"Agent {agent_id}",
+        )
 
     ax.set_xlabel("x")
     ax.set_ylabel("y")
