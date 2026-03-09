@@ -1,15 +1,39 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Simulation.hpp"
+
 #include "CollisionGeometry.hpp"
+#include "GeneralizedCentrifugalForceModelData.hpp"
 #include "GenericAgent.hpp"
 #include "GeometrySwitchError.hpp"
 #include "IteratorPair.hpp"
+#include "Journey.hpp"
 #include "OperationalModel.hpp"
+#include "OperationalModelType.hpp"
+#include "Point.hpp"
+#include "Polygon.hpp"
+#include "RoutingEngine.hpp"
+#include "SimulationClock.hpp"
+#include "SimulationError.hpp"
 #include "Stage.hpp"
+#include "StageDescription.hpp"
+#include "Tracing.hpp"
 #include "Visitor.hpp"
 
+#include <fmt/core.h>
+#include <fmt/format.h>
+#include <fmt/ranges.h>
+
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <iterator>
+#include <map>
 #include <memory>
+#include <string>
+#include <tuple>
+#include <utility>
 #include <variant>
+#include <vector>
 
 Simulation::Simulation(
     std::unique_ptr<OperationalModel>&& operationalModel,
@@ -174,7 +198,7 @@ BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
     return _stageManager.AddStage(stageDescription, _removedAgentsInLastIteration);
 }
 
-GenericAgent::ID Simulation::AddAgent(GenericAgent&& agent)
+GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
 {
 
     if(!_geometry->InsideGeometry(agent.pos)) {

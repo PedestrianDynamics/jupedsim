@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
+#include "CollisionGeometry.hpp"
+#include "LineSegment.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
-#include "UniqueID.hpp"
+#include "OperationalModelType.hpp"
+#include "Point.hpp"
 
-#include <unordered_map>
-#include <vector>
+#include <memory>
 
 struct GenericAgent;
 

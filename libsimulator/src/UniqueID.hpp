@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include <atomic>
+#include <fmt/core.h>
 #include <fmt/format.h>
-#include <type_traits>
+
+#include <atomic>
+#include <cstddef>
+#include <cstdint>
+#include <functional>
 
 namespace jps
 {

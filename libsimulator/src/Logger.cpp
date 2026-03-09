@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Logger.hpp"
 
-#include <memory>
+#include <string>
 
 namespace Logging
 {

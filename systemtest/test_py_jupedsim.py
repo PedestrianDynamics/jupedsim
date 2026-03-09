@@ -121,11 +121,11 @@ def test_can_run_simulation():
     for actual, expected in zip(simulation.agents(), initial_agent_positions):
         assert actual.position == expected
 
-    assert simulation.mark_agent_for_removal(agent_id)
+    simulation.mark_agent_for_removal(agent_id)
     simulation.iterate()
 
     with pytest.raises(RuntimeError, match=r"Unknown agent id \d+"):
-        assert simulation.mark_agent_for_removal(agent_id)
+        simulation.mark_agent_for_removal(agent_id)
 
     while simulation.agent_count() > 0:
         simulation.iterate()
@@ -209,11 +209,11 @@ def test_can_wait():
     for actual, expected in zip(simulation.agents(), initial_agent_positions):
         assert actual.position == expected
 
-    assert simulation.mark_agent_for_removal(agent_id)
+    simulation.mark_agent_for_removal(agent_id)
     simulation.iterate()
 
     with pytest.raises(RuntimeError, match=r"Unknown agent id \d+"):
-        assert simulation.mark_agent_for_removal(agent_id)
+        simulation.mark_agent_for_removal(agent_id)
 
     while simulation.agent_count() > 0:
         simulation.iterate()
@@ -447,7 +447,7 @@ def test_agent_can_be_removed_from_simulation():
 
     # try removing the same agent will raise an error
     with pytest.raises(RuntimeError, match=r"Unknown agent id \d+"):
-        assert simulation.mark_agent_for_removal(agent_removed_id)
+        simulation.mark_agent_for_removal(agent_removed_id)
 
     # remove second agent form simulation
     second_agent_removed_id = actual_agent_ids.pop()

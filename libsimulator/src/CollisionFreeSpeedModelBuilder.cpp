@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CollisionFreeSpeedModelBuilder.hpp"
 
+#include "CollisionFreeSpeedModel.hpp"
+
 CollisionFreeSpeedModelBuilder::CollisionFreeSpeedModelBuilder(
     double aPed,
     double DPed,

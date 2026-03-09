@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include <functional>
-#include <memory>
-#include <string_view>
-
 #include <fmt/format.h>
-#include <fmt/ostream.h>
+
+#include <functional>
+#include <string>
 
 namespace Logging
 {

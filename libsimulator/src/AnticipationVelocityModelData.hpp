@@ -3,6 +3,8 @@
 
 #include "Point.hpp"
 
+#include <fmt/core.h>
+
 struct AnticipationVelocityModelData {
     double strengthNeighborRepulsion{};
     double rangeNeighborRepulsion{};

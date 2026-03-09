@@ -2,9 +2,9 @@
 #pragma once
 
 #include "GenericAgent.hpp"
-#include "IteratorPair.hpp"
 #include "StageManager.hpp"
 
+#include <algorithm>
 #include <map>
 #include <vector>
 

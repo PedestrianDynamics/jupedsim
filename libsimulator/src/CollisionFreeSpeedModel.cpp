@@ -1,16 +1,20 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CollisionFreeSpeedModel.hpp"
 
+#include "CollisionFreeSpeedModelData.hpp"
+#include "CollisionFreeSpeedModelUpdate.hpp"
+#include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
-#include "Logger.hpp"
-#include "Mathematics.hpp"
-#include "NeighborhoodSearch.hpp"
+#include "LineSegment.hpp"
 #include "OperationalModel.hpp"
+#include "OperationalModelType.hpp"
+#include "Point.hpp"
 #include "SimulationError.hpp"
-#include "Stage.hpp"
 
 #include <algorithm>
+#include <cmath>
+#include <cstdlib>
 #include <limits>
 #include <memory>
 #include <numeric>

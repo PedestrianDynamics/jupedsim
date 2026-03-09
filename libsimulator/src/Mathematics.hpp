@@ -3,7 +3,6 @@
 
 #include "Point.hpp"
 
-#include <cmath>
 #include <complex>
 
 bool almostEqual(double a, double b, double eps);

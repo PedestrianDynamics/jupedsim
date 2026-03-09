@@ -5,13 +5,14 @@
 - Arne Graf
 - Arno Gay-Bauer
 - Benedikt Steinbusch
-- Carlos Esparza
 - Cao Shuchao
+- Carlos Esparza
 - Christian Hirt
 - David Haensel
 - Denis Shikhalev
 - Erik Andresen
 - Fabian Mack
+- Fabian Plum
 - Gregor Jaeger
 - Gregor Laemmel
 - Guido Basten

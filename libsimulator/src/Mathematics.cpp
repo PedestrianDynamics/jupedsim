@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Mathematics.hpp"
 
+#include "Point.hpp"
+
 #include <cassert>
+#include <cmath>
+#include <complex>
 
 // ok that is not perfect. For a profound discussion see
 // http://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/

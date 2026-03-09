@@ -8,7 +8,10 @@
 #include "Point.hpp"
 #include "SimulationError.hpp"
 
+#include <fmt/core.h>
+
 #include <optional>
+#include <string>
 
 template <typename T>
 class NeighborhoodSearch;

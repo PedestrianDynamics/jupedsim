@@ -2,6 +2,7 @@
 #pragma once
 
 #include "AgentRemovalSystem.hpp"
+#include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "Journey.hpp"
 #include "NeighborhoodSearch.hpp"
@@ -9,6 +10,7 @@
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
+#include "RoutingEngine.hpp"
 #include "SimulationClock.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
@@ -18,9 +20,11 @@
 #include "TacticalDecisionSystem.hpp"
 #include "Tracing.hpp"
 
-#include <boost/iterator/zip_iterator.hpp>
-
+#include <cstddef>
+#include <cstdint>
+#include <map>
 #include <memory>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -73,7 +77,7 @@ public:
     /// Returns IDs of all agents inside the defined polygon
     /// @param polygon Required to be a simple convex polygon with CCW ordering.
     std::vector<GenericAgent::ID> AgentsInPolygon(const std::vector<Point>& polygon);
-    GenericAgent::ID AddAgent(GenericAgent&& agent);
+    GenericAgent::ID AddAgent(GenericAgent agent);
     const GenericAgent& Agent(GenericAgent::ID id) const;
     GenericAgent& Agent(GenericAgent::ID id);
     std::vector<GenericAgent>& Agents();

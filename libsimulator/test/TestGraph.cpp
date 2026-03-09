@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include <Graph.hpp>
 #include <Point.hpp>
-
 #include <gtest/gtest.h>
 
 TEST(DirectedGraph, CanConstructWithVoidData)

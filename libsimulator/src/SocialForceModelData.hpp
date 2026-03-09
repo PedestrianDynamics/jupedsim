@@ -2,6 +2,8 @@
 #pragma once
 
 #include "Point.hpp"
+
+#include <fmt/core.h>
 struct SocialForceModelData {
     Point velocity{}; // v
     double mass{}; // m

@@ -8,8 +8,6 @@ try:
 except ImportError:
     from deprecated import deprecated
 
-import jupedsim.native as py_jps
-
 
 @dataclass(kw_only=True)
 class CollisionFreeSpeedModel:
@@ -107,16 +105,6 @@ class CollisionFreeSpeedModelAgentParameters:
     @deprecated("deprecated, use 'desired_speed' instead.")
     def v0(self, v0):
         self.desired_speed = v0
-
-    def as_native(self) -> py_jps.CollisionFreeSpeedModelAgentParameters:
-        return py_jps.CollisionFreeSpeedModelAgentParameters(
-            position=self.position,
-            time_gap=self.time_gap,
-            desired_speed=self.desired_speed,
-            radius=self.radius,
-            journey_id=self.journey_id,
-            stage_id=self.stage_id,
-        )
 
 
 class CollisionFreeSpeedModelState:

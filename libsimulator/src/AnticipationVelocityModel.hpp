@@ -2,10 +2,16 @@
 #pragma once
 
 #include "CollisionGeometry.hpp"
+#include "LineSegment.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
+#include "OperationalModelType.hpp"
+#include "Point.hpp"
 
+#include <cstdint>
+#include <memory>
 #include <random>
+#include <vector>
 
 struct GenericAgent;
 
@@ -17,7 +23,7 @@ public:
 private:
     double _cutOffRadius{3};
     /// Add a small outward component to maintain minimum distance from walls.
-    double pushoutStrength = 0.3;
+    double _pushoutStrength;
     mutable std::mt19937 gen;
 
 public:

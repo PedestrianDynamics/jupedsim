@@ -2,13 +2,14 @@
 #pragma once
 
 #include "IteratorPair.hpp"
-#include "Point.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <map>
 #include <stdexcept>
 #include <string>
+#include <tuple>
 #include <vector>
 
 struct Empty {
@@ -87,7 +88,8 @@ public:
         }
     };
 
-    const auto& VertexData(VertexId id) const requires(!std::is_void_v<V>)
+    const auto& VertexData(VertexId id) const
+        requires(!std::is_void_v<V>)
     {
         return vertex_data.at(id);
     }

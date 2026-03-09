@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include <pybind11/detail/common.h>
 #include <pybind11/pybind11.h>
 
 namespace py = pybind11;
@@ -23,6 +24,7 @@ PYBIND11_MODULE(py_jupedsim, m)
 {
     init_logging(m);
     init_build_info(m);
+    init_journey(m);
     init_trace(m);
     init_generalized_centrifugal_force_model(m);
     init_collision_free_speed_model(m);
@@ -33,7 +35,6 @@ PYBIND11_MODULE(py_jupedsim, m)
     init_routing(m);
     init_agent(m);
     init_transition(m);
-    init_journey(m);
     init_stage(m);
     init_simulation(m);
 }

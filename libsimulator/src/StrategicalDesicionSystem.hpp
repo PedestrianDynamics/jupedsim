@@ -2,13 +2,10 @@
 #pragma once
 
 #include "Journey.hpp"
-#include "Stage.hpp"
 #include "StageManager.hpp"
 
 #include <memory>
-#include <tuple>
 #include <unordered_map>
-#include <vector>
 
 class StrategicalDecisionSystem
 {

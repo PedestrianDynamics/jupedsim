@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "SimulationClock.hpp"
 
-#include <chrono>
+#include <cstdint>
 
 SimulationClock::SimulationClock(double dT) : _dT(dT)
 {

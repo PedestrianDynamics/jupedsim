@@ -1,32 +1,26 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "RoutingEngine.hpp"
 
-#include "AABB.hpp"
+#include "CfgCgal.hpp"
 #include "GeometricFunctions.hpp"
-#include "Graph.hpp"
-#include "IteratorPair.hpp"
 #include "LineSegment.hpp"
 #include "Mesh.hpp"
+#include "Point.hpp"
 #include "SimulationError.hpp"
 
-#include <CGAL/Distance_3/Ray_3_Line_3.h>
-#include <CGAL/IO/OFF/Scanner_OFF.h>
-#include <CGAL/number_utils.h>
-#include <algorithm>
-#include <glm/geometric.hpp>
-
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>
-#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
-#include <CGAL/Polygon_with_holes_2.h>
-#include <CGAL/Surface_mesh.h>
-#include <CGAL/Triangulation_vertex_base_with_info_2.h>
-#include <CGAL/draw_triangulation_2.h>
+#include <CGAL/Distance_2/Point_2_Segment_2.h>
 #include <CGAL/mark_domain_in_triangulation.h>
+#include <CGAL/number_utils.h>
 
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
 #include <limits>
+#include <map>
 #include <memory>
-#include <queue>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -301,7 +295,7 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
     // This is an over estimation but IMO preferable to repeadted allocations.
     // Ideally we replace this with something w.o. allocations
     waypoints.reserve(path.size() + 1);
-    for(size_t index_portal = 1; index_portal <= portalCount; ++index_portal) {
+    for(size_t index_portal = 1; index_portal < portalCount; ++index_portal) {
         const auto face_from = path[index_portal - 1];
         const auto face_to = path[index_portal];
         if(face_from->neighbor(0) == face_to) {

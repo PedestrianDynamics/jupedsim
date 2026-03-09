@@ -4,12 +4,15 @@
 #include "AABB.hpp"
 #include "CfgCgal.hpp"
 #include "Clonable.hpp"
+#include "glm/ext/vector_double2.hpp"
+#include "glm/ext/vector_float2.hpp"
 
-#include <glm/vec2.hpp>
-
+#include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <memory>
 #include <sstream>
+#include <tuple>
 #include <vector>
 
 class Mesh : public Clonable<Mesh>

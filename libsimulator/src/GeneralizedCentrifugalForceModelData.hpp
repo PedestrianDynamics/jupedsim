@@ -2,6 +2,8 @@
 #pragma once
 
 #include "Point.hpp"
+
+#include <fmt/core.h>
 struct GeneralizedCentrifugalForceModelData {
     double speed{};
     Point e0{};

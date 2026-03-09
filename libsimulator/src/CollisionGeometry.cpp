@@ -2,21 +2,21 @@
 #include "CollisionGeometry.hpp"
 
 #include "AABB.hpp"
+#include "CfgCgal.hpp"
 #include "GeometricFunctions.hpp"
-#include "IteratorPair.hpp"
 #include "LineSegment.hpp"
-#include "Mathematics.hpp"
 #include "Point.hpp"
 
-#include <CGAL/Boolean_set_operations_2.h>
-#include <CGAL/Point_2.h>
-#include <CGAL/Polygon_2_algorithms.h>
+#include <CGAL/Boolean_set_operations_2/oriented_side.h>
 #include <CGAL/enum.h>
 #include <CGAL/number_utils.h>
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <iterator>
+#include <set>
+#include <tuple>
 #include <vector>
 
 Cell makeCell(Point p)

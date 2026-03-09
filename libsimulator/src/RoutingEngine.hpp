@@ -1,16 +1,14 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "AABB.hpp"
 #include "CfgCgal.hpp"
 #include "Clonable.hpp"
-#include "Graph.hpp"
-#include "IteratorPair.hpp"
-#include "LineSegment.hpp"
 #include "Mesh.hpp"
 #include "Point.hpp"
 
+#include <cstddef>
 #include <memory>
+#include <variant>
 #include <vector>
 
 using LocationID = size_t;

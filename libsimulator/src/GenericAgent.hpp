@@ -10,7 +10,10 @@
 #include "UniqueID.hpp"
 #include "Visitor.hpp"
 
-#include <memory>
+#include <fmt/core.h>
+
+#include <utility>
+#include <variant>
 class Journey;
 class BaseStage;
 

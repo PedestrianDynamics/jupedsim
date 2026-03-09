@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
-#include "IteratorPair.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
-#include "SimulationError.hpp"
 
 #include <boost/iterator/zip_iterator.hpp>
+#include <boost/tuple/tuple.hpp>
 
+#include <algorithm>
 #include <iterator>
 #include <memory>
+#include <optional>
+#include <utility>
 #include <vector>
 
 class OperationalDecisionSystem

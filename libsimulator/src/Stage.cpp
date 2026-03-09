@@ -2,15 +2,17 @@
 #include "Stage.hpp"
 
 #include "GenericAgent.hpp"
-#include "Journey.hpp"
 #include "Point.hpp"
+#include "Polygon.hpp"
 #include "Simulation.hpp"
-#include "UniqueID.hpp"
+#include "SimulationError.hpp"
 #include "Util.hpp"
 
+#include <algorithm>
+#include <cassert>
 #include <cstddef>
 #include <list>
-#include <stdexcept>
+#include <utility>
 #include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////

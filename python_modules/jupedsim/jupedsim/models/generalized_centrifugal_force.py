@@ -8,8 +8,6 @@ try:
 except ImportError:
     from deprecated import deprecated
 
-import jupedsim.native as py_jps
-
 
 @dataclass(kw_only=True)
 class GeneralizedCentrifugalForceModel:
@@ -154,25 +152,6 @@ class GeneralizedCentrifugalForceModelAgentParameters:
     def e0(self, e0):
         self.desired_direction = e0
 
-    def as_native(
-        self,
-    ) -> py_jps.GeneralizedCentrifugalForceModelAgentParameters:
-        return py_jps.GeneralizedCentrifugalForceModelAgentParameters(
-            speed=self.speed,
-            desired_direction=self.desired_direction,
-            position=self.position,
-            orientation=self.orientation,
-            journey_id=self.journey_id,
-            stage_id=self.stage_id,
-            mass=self.mass,
-            tau=self.tau,
-            desired_speed=self.desired_speed,
-            a_v=self.a_v,
-            a_min=self.a_min,
-            b_min=self.b_min,
-            b_max=self.b_max,
-        )
-
 
 class GeneralizedCentrifugalForceModelState:
     def __init__(self, backing) -> None:
@@ -190,11 +169,11 @@ class GeneralizedCentrifugalForceModelState:
     @property
     def desired_direction(self) -> float:
         """desired direction of this agent."""
-        return self._obj.desired_direction
+        return self._obj.desired_orientation
 
     @desired_direction.setter
     def desired_direction(self, desired_direction):
-        self._obj.desired_direction = desired_direction
+        self._obj.desired_orientation = desired_direction
 
     @property
     @deprecated("deprecated, use 'desired_direction' instead.")

@@ -2,6 +2,7 @@
 #pragma once
 #include <fmt/core.h>
 #include <fmt/format.h>
+
 #include <stdexcept>
 
 class SimulationError : public std::runtime_error

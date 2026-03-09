@@ -13,5 +13,5 @@ pytest~=8.3
 pandas~=2.2
 
 # ci deps
-jinja2
-ruff
+jinja2~=3.1
+ruff~=0.14
