@@ -502,12 +502,16 @@ def distribute_until_filled(
             "Polygon is expected to be a shapely Polygon"
         )
     rng = np.random.default_rng(seed)
+    # Shrinking the polygon up front turns the "distance to boundary" constraint
+    # into a plain point-in-polygon test for all subsequent samples.
     polygon_buffered = polygon.buffer(-distance_to_polygon)
     if polygon_buffered.is_empty:
         raise IncorrectParameterError(
             "distance_to_polygon is too large for this polygon."
         )
 
+    # One sample per cell is sufficient with this cell size, so distance checks
+    # only need to inspect a fixed neighbourhood around the candidate cell.
     cell_size = distance_to_agents / np.sqrt(2.0)
     xmin, ymin, xmax, ymax = polygon_buffered.bounds
     grid = {}
@@ -523,6 +527,8 @@ def distribute_until_filled(
     for _ in range(attempts):
         x = rng.uniform(xmin, xmax, size=batch_size)
         y = rng.uniform(ymin, ymax, size=batch_size)
+        # Vectorized checking avoids spending max_iterations scalar shapely calls
+        # just to find the first valid point.
         inside = shapely.contains_xy(polygon_buffered, x, y)
         valid = np.column_stack((x[inside], y[inside]))
         if len(valid) > 0:
@@ -583,6 +589,8 @@ def distribute_until_filled(
             break
 
         if not found:
+            # Remove inactive samples in O(1): order is irrelevant because active
+            # points are selected uniformly by index.
             active_list[idx] = active_list[-1]
             active_list.pop()
 
