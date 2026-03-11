@@ -6,13 +6,13 @@
 #include <fmt/core.h>
 struct SocialForceModelData {
     Point velocity{}; // v
-    double mass{}; // m
-    double desiredSpeed{}; // v0
-    double reactionTime{}; // tau
-    double agentScale{}; // A for other agents
-    double obstacleScale{}; // A for obstacles
-    double forceDistance{}; // B
-    double radius{}; // r
+    double mass{80.0}; // m
+    double desiredSpeed{0.8}; // v0
+    double reactionTime{0.5}; // tau
+    double agentScale{2000.0}; // A for other agents
+    double obstacleScale{2000.0}; // A for obstacles
+    double forceDistance{0.08}; // B
+    double radius{0.3}; // r
 };
 
 template <>

@@ -20,6 +20,7 @@ void init_social_force_model(py::module_& m)
         .def(py::init<double, double>(), py::kw_only(), py::arg("body_force"), py::arg("friction"))
         .def("build", &SocialForceModelBuilder::Build);
     py::class_<SocialForceModelData>(m, "SocialForceModelState")
+        .def_static("_defaults", []() { return SocialForceModelData{}; })
         .def(
             py::init([](std::tuple<double, double> velocity,
                         double mass,

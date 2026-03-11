@@ -21,6 +21,7 @@ void init_anticipation_velocity_model(py::module_& m)
             py::arg("rng_seed"))
         .def("build", &AnticipationVelocityModelBuilder::Build);
     py::class_<AnticipationVelocityModelData>(m, "AnticipationVelocityModelState")
+        .def_static("_defaults", []() { return AnticipationVelocityModelData{}; })
         .def(
             py::init([](double strengthNeighborRepulsion,
                         double rangeNeighborRepulsion,

@@ -18,6 +18,7 @@ void init_collision_free_speed_model_v2(py::module_& m)
         .def("build", &CollisionFreeSpeedModelV2Builder::Build);
 
     py::class_<CollisionFreeSpeedModelV2Data>(m, "CollisionFreeSpeedModelV2State")
+        .def_static("_defaults", []() { return CollisionFreeSpeedModelV2Data{}; })
         .def(
             py::init([](double strengthNeighborRepulsion,
                         double rangeNeighborRepulsion,

@@ -8,13 +8,13 @@ struct GeneralizedCentrifugalForceModelData {
     double speed{};
     Point e0{};
     int orientationDelay{};
-    double mass{};
-    double tau{};
+    double mass{1.0};
+    double tau{0.5};
     double v0{1.2};
-    double Av{};
-    double AMin{};
-    double BMin{};
-    double BMax;
+    double Av{1.0};
+    double AMin{0.2};
+    double BMin{0.2};
+    double BMax{0.4};
 };
 
 template <>
