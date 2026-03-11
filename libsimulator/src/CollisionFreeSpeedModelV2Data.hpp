@@ -4,14 +4,14 @@
 #include <fmt/core.h>
 
 struct CollisionFreeSpeedModelV2Data {
-    double strengthNeighborRepulsion{};
-    double rangeNeighborRepulsion{};
-    double strengthGeometryRepulsion{};
-    double rangeGeometryRepulsion{};
+    double strengthNeighborRepulsion{8.0};
+    double rangeNeighborRepulsion{0.1};
+    double strengthGeometryRepulsion{5.0};
+    double rangeGeometryRepulsion{0.02};
 
     double timeGap{1};
     double v0{1.2};
-    double radius{0.15};
+    double radius{0.2};
 };
 
 template <>

@@ -6,7 +6,7 @@
 struct CollisionFreeSpeedModelData {
     double timeGap{1};
     double v0{1.2};
-    double radius{0.15};
+    double radius{0.2};
 };
 
 template <>

@@ -6,15 +6,15 @@
 #include <fmt/core.h>
 
 struct AnticipationVelocityModelData {
-    double strengthNeighborRepulsion{};
-    double rangeNeighborRepulsion{};
+    double strengthNeighborRepulsion{8.0};
+    double rangeNeighborRepulsion{0.1};
     double wallBufferDistance{0.1}; // buff distance of agent to wall
-    double anticipationTime{0.5}; // anticipation time
-    double reactionTime{0.1}; // reaction time to update direction
+    double anticipationTime{1.0}; // anticipation time
+    double reactionTime{0.3}; // reaction time to update direction
     Point velocity{};
     double timeGap{1.06};
     double v0{1.2};
-    double radius{0.15};
+    double radius{0.2};
 };
 
 template <>

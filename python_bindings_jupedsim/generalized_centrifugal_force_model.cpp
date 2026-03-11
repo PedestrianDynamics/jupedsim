@@ -33,6 +33,8 @@ void init_generalized_centrifugal_force_model(py::module_& m)
             py::arg("max_geometry_repulsion_force"))
         .def("build", &GeneralizedCentrifugalForceModelBuilder::Build);
     py::class_<GeneralizedCentrifugalForceModelData>(m, "GeneralizedCentrifugalForceModelState")
+        .def_static(
+            "_defaults", []() { return GeneralizedCentrifugalForceModelData{}; })
         .def(
             py::init([](double speed,
                         std::tuple<double, double> desiredOrientation,

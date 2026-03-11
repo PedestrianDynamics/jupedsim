@@ -23,6 +23,7 @@ void init_collision_free_speed_model(py::module_& m)
             py::arg("range_geometry_repulsion"))
         .def("build", &CollisionFreeSpeedModelBuilder::Build);
     py::class_<CollisionFreeSpeedModelData>(m, "CollisionFreeSpeedModelState")
+        .def_static("_defaults", []() { return CollisionFreeSpeedModelData{}; })
         .def(
             py::init([](double timeGap, double desiredSpeed, double radius) {
                 return CollisionFreeSpeedModelData{
