@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <stdexcept>
 #include <tuple>
 #include <vector>
 
@@ -28,6 +29,9 @@ void init_simulation(py::module_& m)
     py::class_<Simulation>(m, "Simulation")
         .def(
             py::init([](const OperationalModel* model, CollisionGeometry geometry, double dT) {
+                if(!model) {
+                    throw std::invalid_argument("model must not be None");
+                }
                 return std::make_unique<Simulation>(
                     model->Clone(), std::make_unique<CollisionGeometry>(geometry), dT);
             }),

@@ -295,13 +295,12 @@ Point GeneralizedCentrifugalForceModel::ForceRepPed(
         F_rep = ep12 * px;
     }
     if(F_rep.x != F_rep.x || F_rep.y != F_rep.y) {
-        LOG_ERROR(
-            "NAN return p1{} p2 {} Frepx={:f} Frepy={:f} K_ij={:f}",
-            ped1.id,
-            ped2.id,
-            F_rep.x,
-            F_rep.y,
-            K_ij);
+        throw std::runtime_error(
+            fmt::format(
+                "Internal error: NaN in ForceRepPed for agents {} and {} (K_ij={:f})",
+                ped1.id,
+                ped2.id,
+                K_ij));
     }
     return F_rep;
 }
