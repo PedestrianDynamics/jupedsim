@@ -14,7 +14,7 @@ from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
 
 min_cpp_standard = 20
-min_cmake_version = "3.19"
+min_cmake_version = "3.22"
 
 # Read version number from CMakeLists.txt
 with open("CMakeLists.txt", "r", encoding="utf-8") as cmakelist:
