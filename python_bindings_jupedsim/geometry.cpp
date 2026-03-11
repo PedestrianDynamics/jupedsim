@@ -26,6 +26,7 @@ void init_geometry(py::module_& m)
             for(const auto& hole : holes) {
                 res.emplace_back(intoTuples(hole));
             }
+            return res;
         });
     py::class_<GeometryBuilder>(m, "GeometryBuilder")
         .def(py::init<>())
