@@ -218,12 +218,20 @@ add_subdirectory(python_bindings_jupedsim)
 ################################################################################
 if(UNIX AND WITH_FORMAT)
     set(clang-format-version 21)
-    find_program(CLANG_FORMAT
-        NAMES
-            clang-format-${clang-format-version}
-            clang-format
-        REQUIRED
-    )
+    if(DEFINED ENV{CLANG_FORMAT})
+        set(CLANG_FORMAT "$ENV{CLANG_FORMAT}")
+        if(NOT EXISTS "${CLANG_FORMAT}")
+            message(FATAL_ERROR "CLANG_FORMAT environment variable points to non-existent path: ${CLANG_FORMAT}")
+        endif()
+        message(STATUS "Using clang-format from CLANG_FORMAT env: ${CLANG_FORMAT}")
+    else()
+        find_program(CLANG_FORMAT
+            NAMES
+                clang-format-${clang-format-version}
+                clang-format
+            REQUIRED
+        )
+    endif()
     if(CLANG_FORMAT)
         execute_process(
             COMMAND ${CLANG_FORMAT} --version

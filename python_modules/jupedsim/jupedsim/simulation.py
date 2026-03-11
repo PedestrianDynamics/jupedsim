@@ -277,7 +277,7 @@ class Simulation:
         ):
             model = py_jps.GeneralizedCentrifugalForceModelState(
                 speed=parameters.speed,
-                desired_direction=parameters.orientation,
+                desired_direction=parameters.desired_direction,
                 mass=parameters.mass,
                 tau=parameters.tau,
                 desired_speed=parameters.desired_speed,
