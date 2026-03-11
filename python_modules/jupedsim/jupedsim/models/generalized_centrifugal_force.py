@@ -169,22 +169,22 @@ class GeneralizedCentrifugalForceModelState:
     @property
     def desired_direction(self) -> float:
         """desired direction of this agent."""
-        return self._obj.desired_orientation
+        return self._obj.desired_direction
 
     @desired_direction.setter
     def desired_direction(self, desired_direction):
-        self._obj.desired_orientation = desired_direction
+        self._obj.desired_direction = desired_direction
 
     @property
     @deprecated("deprecated, use 'desired_direction' instead.")
     def e0(self) -> tuple[float, float]:
         """Desired direction of this agent."""
-        return self._obj.desired_speed
+        return self._obj.desired_direction
 
     @e0.setter
     @deprecated("deprecated, use 'desired_direction' instead.")
     def e0(self, e0):
-        self._obj.desired_speed = e0
+        self._obj.desired_direction = e0
 
     @property
     def tau(self) -> float:

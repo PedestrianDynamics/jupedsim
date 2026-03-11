@@ -56,7 +56,7 @@ void init_generalized_centrifugal_force_model(py::module_& m)
             }),
             py::kw_only(),
             py::arg("speed"),
-            py::arg("desired_orientation"),
+            py::arg("desired_direction"),
             py::arg("mass"),
             py::arg("tau"),
             py::arg("desired_speed"),
@@ -66,7 +66,7 @@ void init_generalized_centrifugal_force_model(py::module_& m)
             py::arg("b_max"))
         .def_readwrite("speed", &GeneralizedCentrifugalForceModelData::speed)
         .def_property(
-            "desired_orientation",
+            "desired_direction",
             [](const GeneralizedCentrifugalForceModelData& obj) { return intoTuple(obj.e0); },
             [](GeneralizedCentrifugalForceModelData& obj, std::tuple<double, double> pt) {
                 obj.e0 = intoPoint(pt);
