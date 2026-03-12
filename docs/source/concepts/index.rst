@@ -14,9 +14,13 @@ If you want to know in more detail how the simulation works, have a look:
     * - :doc:`Routing <routing>`
       - How the routing is handled in *JuPedSim*
 
+    * - :doc:`Custom Serialization <custom_serialization>`
+      - How to write a custom trajectory serializer
+
 .. toctree::
     :maxdepth: 1
     :hidden:
 
     Geometry <geometry>
     Routing <routing>
+    Custom Serialization <custom_serialization>
