@@ -13,6 +13,9 @@ If you want to know in more detail how the simulation works, have a look:
 
     * - :doc:`Routing <routing>`
       - How the routing is handled in *JuPedSim*
+    
+    * - :doc:`Iteration <iteration>`
+      - How *JuPedSim* processes an iteration during simulation.
 
 .. toctree::
     :maxdepth: 1
@@ -20,3 +23,4 @@ If you want to know in more detail how the simulation works, have a look:
 
     Geometry <geometry>
     Routing <routing>
+    Iteration <iteration>
