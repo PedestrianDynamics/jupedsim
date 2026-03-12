@@ -11,10 +11,13 @@ import logging
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "_scripts")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "_scripts"))
+)
 from generate_bibtex import get_latest_jupedsim_bibtex
 
 project = "JuPedSim"
+author = "The JuPedSim Development Team"
 copyright = (
     f"{datetime.datetime.today().year}, Forschungszentrum Jülich GmbH, IAS-7"
 )
@@ -77,6 +80,7 @@ autoapi_python_use_implicit_namespaces = True
 
 add_module_names = False
 
+
 def skip_rules(app, what, name, obj, skip, options):
     if what == "module":
         skip = True
@@ -92,6 +96,7 @@ def skip_rules(app, what, name, obj, skip, options):
 
 def setup(sphinx):
     sphinx.connect("autoapi-skip-member", skip_rules)
+
 
 # -- Automatic execution of jupyter notebooks --------------------------------
 nb_execution_excludepatterns = []
