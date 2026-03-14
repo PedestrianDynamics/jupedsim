@@ -277,7 +277,6 @@ WarpDriverModel::WarpDriverModel(
     int jamStepCount)
     : _timeHorizon(timeHorizon)
     , _stepSize(stepSize)
-    , _sigma(sigma)
     , _timeUncertainty(timeUncertainty)
     , _velocityUncertainty(velocityUncertainty)
     , _numSamples(numSamples)

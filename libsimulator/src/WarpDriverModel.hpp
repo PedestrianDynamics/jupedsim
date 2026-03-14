@@ -47,7 +47,6 @@ private:
     // Model-level parameters
     double _timeHorizon;
     double _stepSize;
-    double _sigma;
     double _timeUncertainty;
     double _velocityUncertainty;
     int _numSamples;
