@@ -1,14 +1,15 @@
 """Calculate fluctuations."""
 
-import numpy as np
-import matplotlib.pyplot as plt
-from pedpy import load_trajectory_from_jupedsim_sqlite, compute_individual_speed
-from pedpy import SpeedCalculation
-
 import sys
-
-
 from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+from pedpy import (
+    SpeedCalculation,
+    compute_individual_speed,
+    load_trajectory_from_jupedsim_sqlite,
+)
 
 filename = Path(sys.argv[1])
 title = sys.argv[2]
@@ -45,9 +46,10 @@ fluctuation_magnitudes = np.sqrt(diff_x**2 + diff_y**2)
 
 # 5. Calculate Velocity Fluctuation (phi_v)
 # The formula: (1 / (I * dt)) * sum(||v_i - v_{i-1}||)
+# I: len_velocities
 total_sum = fluctuation_magnitudes.sum()
-I = len(v_i)
-phi_v = (1 / (I * dt)) * total_sum
+len_velocities = len(v_i)
+phi_v = (1 / (len_velocities * dt)) * total_sum
 
 print(f"Total Velocity Fluctuation (phi_v): {phi_v:.4f} m/s^2")
 
