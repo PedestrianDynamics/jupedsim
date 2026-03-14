@@ -1,12 +1,15 @@
 """Calculate the order parameter."""
 
-import numpy as np
-import matplotlib.pyplot as plt
-from pedpy import load_trajectory_from_jupedsim_sqlite, compute_individual_speed
-from pedpy import SpeedCalculation
-
 import sys
 from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+from pedpy import (
+    SpeedCalculation,
+    compute_individual_speed,
+    load_trajectory_from_jupedsim_sqlite,
+)
 
 filename = Path(sys.argv[1])
 title = sys.argv[2]
