@@ -7,7 +7,9 @@ import jupedsim as jps
 import shapely
 
 
-def build_simulation(model, corridor_length=50.0, corridor_width=4.0, trajectory_writer=None):
+def build_simulation(
+    model, corridor_length=50.0, corridor_width=4.0, trajectory_writer=None
+):
     area = shapely.Polygon(
         [
             (0, 0),
@@ -40,7 +42,9 @@ def build_simulation(model, corridor_length=50.0, corridor_width=4.0, trajectory
     return sim, journey_right, exit_right_id, journey_left, exit_left_id
 
 
-def add_agents_warp(sim, journey_right, exit_right_id, journey_left, exit_left_id, n=50):
+def add_agents_warp(
+    sim, journey_right, exit_right_id, journey_left, exit_left_id, n=50
+):
     spacing_y = 3.0 / max(n // 5, 1)
     for i in range(n):
         row = i // 5
@@ -74,7 +78,9 @@ def add_agents_warp(sim, journey_right, exit_right_id, journey_left, exit_left_i
         )
 
 
-def add_agents_social(sim, journey_right, exit_right_id, journey_left, exit_left_id, n=50):
+def add_agents_social(
+    sim, journey_right, exit_right_id, journey_left, exit_left_id, n=50
+):
     spacing_y = 3.0 / max(n // 5, 1)
     for i in range(n):
         row = i // 5
@@ -129,7 +135,7 @@ def run_benchmark(name, model, add_fn, n_agents=50, max_steps=5000):
     print(f"{'=' * 50}")
     print(f"  Agents       : {initial} ({n_agents} per side)")
     print(f"  Steps        : {steps}")
-    print(f"  dt           : 0.01 s")
+    print("  dt           : 0.01 s")
     print(f"  Sim time     : {steps * 0.01:.1f} s")
     print(f"  Wall clock   : {elapsed:.3f} s")
     print(f"  ms/step      : {elapsed / steps * 1000:.2f}")
@@ -142,7 +148,7 @@ def run_benchmark(name, model, add_fn, n_agents=50, max_steps=5000):
 def main():
     n = 50
     print(f"Bidirectional corridor benchmark: {n} agents per side (100 total)")
-    print(f"Corridor: 50m x 4m, dt=0.01s, max 5000 steps (50s sim time)")
+    print("Corridor: 50m x 4m, dt=0.01s, max 5000 steps (50s sim time)")
 
     t_sf, s_sf = run_benchmark(
         "SocialForceModel",
@@ -159,10 +165,14 @@ def main():
     )
 
     print(f"\n{'=' * 50}")
-    print(f"  Summary")
+    print("  Summary")
     print(f"{'=' * 50}")
-    print(f"  SocialForce  : {t_sf:.3f}s  ({s_sf} steps, {t_sf/s_sf*1000:.2f} ms/step)")
-    print(f"  WarpDriver   : {t_wd:.3f}s  ({s_wd} steps, {t_wd/s_wd*1000:.2f} ms/step)")
+    print(
+        f"  SocialForce  : {t_sf:.3f}s  ({s_sf} steps, {t_sf / s_sf * 1000:.2f} ms/step)"
+    )
+    print(
+        f"  WarpDriver   : {t_wd:.3f}s  ({s_wd} steps, {t_wd / s_wd * 1000:.2f} ms/step)"
+    )
     ratio = t_wd / t_sf if t_sf > 0 else float("inf")
     print(f"  Ratio (WD/SF): {ratio:.1f}x")
 

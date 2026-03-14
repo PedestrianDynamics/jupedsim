@@ -101,16 +101,15 @@ std::pair<double, Point> WarpDriverModel::IntrinsicField::Sample(double x, doubl
     const double v10 = values[idx(ix + 1, iy)];
     const double v01 = values[idx(ix, iy + 1)];
     const double v11 = values[idx(ix + 1, iy + 1)];
-    const double val = v00 * (1 - sx) * (1 - sy) + v10 * sx * (1 - sy) + v01 * (1 - sx) * sy +
-                       v11 * sx * sy;
+    const double val =
+        v00 * (1 - sx) * (1 - sy) + v10 * sx * (1 - sy) + v01 * (1 - sx) * sy + v11 * sx * sy;
 
     const Point g00 = gradients[idx(ix, iy)];
     const Point g10 = gradients[idx(ix + 1, iy)];
     const Point g01 = gradients[idx(ix, iy + 1)];
     const Point g11 = gradients[idx(ix + 1, iy + 1)];
-    const Point grad =
-        g00 * ((1 - sx) * (1 - sy)) + g10 * (sx * (1 - sy)) + g01 * ((1 - sx) * sy) +
-        g11 * (sx * sy);
+    const Point grad = g00 * ((1 - sx) * (1 - sy)) + g10 * (sx * (1 - sy)) + g01 * ((1 - sx) * sy) +
+                       g11 * (sx * sy);
 
     return {val, grad};
 }
@@ -125,12 +124,7 @@ namespace
 using STP = WarpDriverModel::SpaceTimePoint;
 
 // W_local: change of reference frame from agent a to agent b
-STP WarpLocalForward(
-    const STP& s,
-    Point posA,
-    Point orientA,
-    Point posB,
-    Point orientB)
+STP WarpLocalForward(const STP& s, Point posA, Point orientA, Point posB, Point orientB)
 {
     // Rotate from a's frame to world
     const double cosA = orientA.x;
@@ -304,9 +298,7 @@ std::unique_ptr<OperationalModel> WarpDriverModel::Clone() const
     return std::make_unique<WarpDriverModel>(*this);
 }
 
-void WarpDriverModel::ApplyUpdate(
-    const OperationalModelUpdate& update,
-    GenericAgent& agent) const
+void WarpDriverModel::ApplyUpdate(const OperationalModelUpdate& update, GenericAgent& agent) const
 {
     const auto& upd = std::get<WarpDriverModelUpdate>(update);
     agent.pos = upd.position;
@@ -328,7 +320,8 @@ void WarpDriverModel::CheckModelConstraint(
     }
     if(data->radius <= 0.0) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} has invalid radius {}", agent.id,
+            "WarpDriverModel constraint check: agent {} has invalid radius {}",
+            agent.id,
             data->radius);
     }
     if(data->v0 < 0.0) {
@@ -375,8 +368,9 @@ OperationalModelUpdate WarpDriverModel::ComputeNewPosition(
     // Random perturbation: small lateral offset on trajectory samples to break
     // symmetry in perfectly aligned head-on encounters where the gradient field
     // cancels by symmetry, producing no lateral avoidance.
-    std::mt19937 rng(static_cast<uint32_t>(
-        std::hash<double>{}(ped.pos.x * 1000.0 + ped.pos.y) ^ ped.id.getID()));
+    std::mt19937 rng(
+        static_cast<uint32_t>(
+            std::hash<double>{}(ped.pos.x * 1000.0 + ped.pos.y) ^ ped.id.getID()));
     std::uniform_real_distribution<double> perturbDist(-0.05, 0.05);
 
     // Storage for per-sample combined probability and gradient
@@ -508,10 +502,11 @@ OperationalModelUpdate WarpDriverModel::ComputeNewPosition(
     if(newSpeed > 1e-9) {
         Point newDirLocal = newVelLocal.Normalized();
         // Rotate from agent-centric to world
-        newVelWorld = Point{
-            effectiveOrient.x * newDirLocal.x - effectiveOrient.y * newDirLocal.y,
-            effectiveOrient.y * newDirLocal.x + effectiveOrient.x * newDirLocal.y} *
-                      newSpeed;
+        newVelWorld =
+            Point{
+                effectiveOrient.x * newDirLocal.x - effectiveOrient.y * newDirLocal.y,
+                effectiveOrient.y * newDirLocal.x + effectiveOrient.x * newDirLocal.y} *
+            newSpeed;
     } else {
         newVelWorld = desiredDir * agentData.v0 * 0.01; // tiny push towards goal
     }

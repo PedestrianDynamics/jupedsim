@@ -18,10 +18,6 @@ struct fmt::formatter<WarpDriverModelData> {
     auto format(const WarpDriverModelData& m, FormatContext& ctx) const
     {
         return fmt::format_to(
-            ctx.out(),
-            "WarpDriver[radius={}, v0={}, jamCounter={}]",
-            m.radius,
-            m.v0,
-            m.jamCounter);
+            ctx.out(), "WarpDriver[radius={}, v0={}, jamCounter={}]", m.radius, m.v0, m.jamCounter);
     }
 };

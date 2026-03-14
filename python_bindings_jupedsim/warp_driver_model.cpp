@@ -27,10 +27,7 @@ void init_warp_driver_model(py::module_& m)
     py::class_<WarpDriverModelData>(m, "WarpDriverModelState")
         .def(
             py::init([](double desired_speed, double radius) {
-                return WarpDriverModelData{
-                    .radius = radius,
-                    .v0 = desired_speed,
-                    .jamCounter = 0};
+                return WarpDriverModelData{.radius = radius, .v0 = desired_speed, .jamCounter = 0};
             }),
             py::kw_only(),
             py::arg("desired_speed") = 1.2,

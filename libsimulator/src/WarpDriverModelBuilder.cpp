@@ -26,7 +26,8 @@ WarpDriverModelBuilder::WarpDriverModelBuilder(
 WarpDriverModel WarpDriverModelBuilder::Build()
 {
     if(_timeHorizon <= 0.0) {
-        throw SimulationError("WarpDriverModelBuilder: timeHorizon must be > 0, got {}", _timeHorizon);
+        throw SimulationError(
+            "WarpDriverModelBuilder: timeHorizon must be > 0, got {}", _timeHorizon);
     }
     if(_stepSize <= 0.0) {
         throw SimulationError("WarpDriverModelBuilder: stepSize must be > 0, got {}", _stepSize);
