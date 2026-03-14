@@ -93,14 +93,19 @@ This is rotated back to world coordinates and clamped to $[0, v_0]$.
 
 If $N \approx 0$ (no collision risk), the agent follows its desired direction at speed $v_0$.
 
-### Step 4 — Repulsion forces (implementation addition)
+### Step 4 — Random perturbation (implementation addition)
 
-Two repulsion terms not in the original paper, added for robustness:
+In perfectly symmetric head-on encounters (agents at the same $y$-coordinate moving towards each other), the intrinsic field gradient $\partial I / \partial y = 0$ by symmetry, producing no lateral avoidance.
 
-**Agent repulsion**: when two agents are closer than $3 \times (r_a + r_b)$, a repulsive force pushes them apart proportional to the overlap depth.
-This prevents overlap in symmetric head-on scenarios where the gradient field cancels by symmetry.
+To break this symmetry, each trajectory sample receives a small random lateral perturbation:
 
-**Boundary repulsion**: when an agent is closer than $3 \times r$ to a wall segment, a repulsive force pushes it away from the wall.
+$$\mathbf{r}_i(t) = (v_0 \cdot t,\; \epsilon_i,\; t)$$
+
+where $\epsilon_i \sim \mathcal{U}(-0.05, 0.05)$ is drawn per sample per timestep. The perturbation is small enough not to affect normal avoidance but sufficient to break exact symmetry.
+
+**Boundary steering**: when an agent is closer than $3 \times r$ to a wall segment, a steering term adjusts its velocity away from the wall proportional to the proximity.
+
+**Agent steering (not currently active)**: when two agents are closer than $3 \times (r_a + r_b)$, a steering term adjusts their velocities apart proportional to the overlap depth. This is not used by default since the random perturbation handles symmetry breaking, but may be re-enabled as a fallback if scenarios with persistent overlap are found.
 
 ### Step 5 — Jam detection (chill mode)
 

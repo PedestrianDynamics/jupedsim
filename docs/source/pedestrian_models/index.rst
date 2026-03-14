@@ -168,4 +168,45 @@ A `detailed description
 <https://pedestriandynamics.org/models/social_force_model/>`_ is available on
 `PedestrianDynamics`_.
 
+****************
+WarpDriver Model
+****************
+
+The WarpDriver model computes collision-free velocities using probabilistic
+collision fields. Each agent projects its trajectory forward in time, evaluates
+the collision probability with every neighbor via a warped intrinsic field, and
+adjusts its velocity through gradient descent on the resulting probability
+landscape. The model is based on Wolinski, Lin, and Pettré (2016).
+
+The pipeline per agent per timestep:
+**Setup** (project trajectory) → **Perceive** (warp + sample intrinsic field
+per neighbor) → **Solve** (gradient descent via integrals over the collision
+probability landscape).
+
+Key features:
+
+* Probabilistic collision prediction via precomputed intrinsic fields
+* Five composable warp operators for coordinate transforms between agents
+* Gradient-based velocity correction (speed model, not force-based)
+* Jam detection with chill mode to prevent oscillation in dense crowds
+
+The parameters of the WarpDriver model include model-level parameters (shared
+by all agents: ``time_horizon``, ``step_size``, ``sigma``,
+``time_uncertainty``, ``velocity_uncertainty``, ``num_samples``) and per-agent
+parameters (``desired_speed``, ``radius``) that can be modified at runtime.
+
+See the `full WarpDriver model documentation <warp_driver_model.html>`_ for
+a detailed description of the algorithm, equations, warp operators, and
+parameters.
+
+The original publication: Wolinski, D., Lin, M. C., and Pettré, J. (2016).
+*WarpDriver: Context-Aware Probabilistic Motion Prediction for Crowd
+Simulation*. IEEE Transactions on Visualization and Computer Graphics, 22(12),
+2466–2480.
+
+.. toctree::
+   :hidden:
+
+   warp_driver_model
+
 .. _PedestrianDynamics: https://PedestrianDynamics.org/

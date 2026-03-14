@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cmath>
 #include <memory>
+#include <random>
 #include <variant>
 
 // ============================================================================
@@ -371,28 +372,12 @@ OperationalModelUpdate WarpDriverModel::ComputeNewPosition(
     // === Step 2: Perceive - build collision probability field ===
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(ped.pos, _cutOffRadius);
 
-    // Short-range repulsion: prevent agent overlap
-    Point repulsion{0.0, 0.0};
-    for(const auto& neighbor : neighbors) {
-        if(neighbor.id == ped.id) {
-            continue;
-        }
-        const auto* nbData = std::get_if<WarpDriverModelData>(&neighbor.model);
-        if(!nbData) {
-            continue;
-        }
-        Point diff = ped.pos - neighbor.pos;
-        const double dist = diff.Norm();
-        const double combinedRadius = agentData.radius + nbData->radius;
-        if(dist < combinedRadius * 3.0 && dist > 1e-6) {
-            // Exponential repulsion scaled by overlap severity
-            const double overlap = combinedRadius * 3.0 - dist;
-            repulsion = repulsion + diff.Normalized() * (speed * overlap / dist);
-        } else if(dist <= 1e-6) {
-            // Degenerate: agents at same position, push in perpendicular direction
-            repulsion = repulsion + Point{-desiredDir.y, desiredDir.x} * speed;
-        }
-    }
+    // Random perturbation: small lateral offset on trajectory samples to break
+    // symmetry in perfectly aligned head-on encounters where the gradient field
+    // cancels by symmetry, producing no lateral avoidance.
+    std::mt19937 rng(static_cast<uint32_t>(
+        std::hash<double>{}(ped.pos.x * 1000.0 + ped.pos.y) ^ ped.id.getID()));
+    std::uniform_real_distribution<double> perturbDist(-0.05, 0.05);
 
     // Storage for per-sample combined probability and gradient
     struct Sample {
@@ -405,7 +390,9 @@ OperationalModelUpdate WarpDriverModel::ComputeNewPosition(
 
     for(int i = 0; i < _numSamples; ++i) {
         const double t = i * dtSample;
-        samples[static_cast<size_t>(i)] = Sample{t, STP{speed * t, 0.0, t}, 0.0, STP{0, 0, 0}};
+        const double lateralPerturbation = perturbDist(rng);
+        samples[static_cast<size_t>(i)] =
+            Sample{t, STP{speed * t, lateralPerturbation, t}, 0.0, STP{0, 0, 0}};
     }
 
     for(const auto& neighbor : neighbors) {
@@ -529,7 +516,7 @@ OperationalModelUpdate WarpDriverModel::ComputeNewPosition(
         newVelWorld = desiredDir * agentData.v0 * 0.01; // tiny push towards goal
     }
 
-    // Boundary repulsion: push agents away from walls
+    // Boundary avoidance: steer agents away from walls
     const auto& walls = geometry.LineSegmentsInApproxDistanceTo(ped.pos);
     for(const auto& wall : walls) {
         const Point wallVec = wall.p2 - wall.p1;
@@ -540,13 +527,10 @@ OperationalModelUpdate WarpDriverModel::ComputeNewPosition(
         const Point diff = ped.pos - closest;
         const double dist = diff.Norm();
         if(dist < agentData.radius * 3.0 && dist > 1e-6) {
-            const double repulsion = agentData.v0 * (agentData.radius * 3.0 - dist) / dist;
-            newVelWorld = newVelWorld + diff.Normalized() * repulsion;
+            const double steering = agentData.v0 * (agentData.radius * 3.0 - dist) / dist;
+            newVelWorld = newVelWorld + diff.Normalized() * steering;
         }
     }
-
-    // Agent repulsion
-    newVelWorld = newVelWorld + repulsion;
 
     // Jam detection: if speed is below threshold, increment counter
     int jamCounter = agentData.jamCounter;
