@@ -1,0 +1,777 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="../_static/logo.png" sizes="482x536" rel="icon" type="image/png">
+    <title>WarpDriver Model &#8212; JuPedSim  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=d742c9ce" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'pedestrian_models/warp_driver_model';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v2.0.0';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Notebooks" href="../notebooks/index.html" />
+    <link rel="prev" title="Pedestrian Models" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="v2.0.0" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../_static/jupedsim.svg" class="logo__image only-light" alt="JuPedSim  documentation - Home"/>
+    <img src="../_static/jupedsim.svg" class="logo__image only-dark pst-js-only" alt="JuPedSim  documentation - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PedestrianDynamics/jupedsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/jupedsim/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://img.shields.io/pypi/v/jupedsim" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.5281/zenodo.1293771" title="DOI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1293771.svg" class="icon-link-image" alt="DOI"/></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/getting_started.html">Getting started</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../concepts/index.html">Concepts</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../concepts/geometry.html">Geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../concepts/routing.html">Routing</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Pedestrian Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">WarpDriver Model</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../notebooks/index.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/model-comparison.html">Comparative Analysis of Pedestrian Dynamics Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/corner.html">Movement around Corners</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/double-bottleneck.html">Movement through Bottlenecks</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/journey.html">How to work with Journeys</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/lane-formation.html">Lane formation in bi-directional flow</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/motivation.html">Modelling Motivation</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/queues_waiting.html">Waiting in Queues</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/routing.html">How Route Choice can Impact Evacuation Times</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/single-file.html">Simulating Single-File Movement</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../disclaimer.html">Disclaimer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/jupedsim/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citation/citation.html">Cite JuPedSim</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button></div>
+      
+        <div class="header-article-item"><button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>WarpDriver Model</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#overview">Overview</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#algorithm">Algorithm</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-setup-projected-trajectory">Step 1 — Setup: projected trajectory</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-perceive-collision-probability-via-warped-intrinsic-fields">Step 2 — Perceive: collision probability via warped intrinsic fields</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#intrinsic-field-i-x-y">Intrinsic Field <span class="math notranslate nohighlight">\(I(x, y)\)</span></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#warp-operators">Warp operators</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#collision-probability-combination">Collision probability combination</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-solve-gradient-descent">Step 3 — Solve: gradient descent</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-4-random-perturbation-implementation-addition">Step 4 — Random perturbation (implementation addition)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-5-jam-detection-chill-mode">Step 5 — Jam detection (chill mode)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#model-level-parameters">Model-level parameters</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#agent-level-parameters">Agent-level parameters</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#read-only-agent-state">Read-only agent state</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-api">Python API</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#computational-cost">Computational cost</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reference">Reference</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="warpdriver-model">
+<h1>WarpDriver Model<a class="headerlink" href="#warpdriver-model" title="Link to this heading">#</a></h1>
+<p>Based on: Wolinski, Lin, and Pettré, <em>“WarpDriver: Context-Aware Probabilistic Motion Prediction for Crowd Simulation”</em>, IEEE TVCG, 2016.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">#</a></h2>
+<p>The WarpDriver model computes collision-free velocities using <strong>probabilistic collision fields</strong>.
+Each agent projects its trajectory forward in time, evaluates the collision probability with every neighbor via a <strong>warped intrinsic field</strong>, and adjusts its velocity through gradient descent on the resulting probability landscape.</p>
+<p>The pipeline per agent per timestep:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Setup → Perceive → Solve → Update
+</pre></div>
+</div>
+</section>
+<section id="algorithm">
+<h2>Algorithm<a class="headerlink" href="#algorithm" title="Link to this heading">#</a></h2>
+<section id="step-1-setup-projected-trajectory">
+<h3>Step 1 — Setup: projected trajectory<a class="headerlink" href="#step-1-setup-projected-trajectory" title="Link to this heading">#</a></h3>
+<p>Each agent projects a straight-line trajectory in its own reference frame:</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{r}(t) = (v_0 \cdot t,\; 0,\; t), \quad t \in [0,\; T]\]</div>
+<p>where <span class="math notranslate nohighlight">\(v_0\)</span> is the agent’s desired speed and <span class="math notranslate nohighlight">\(T\)</span> is the time horizon.
+This trajectory is sampled at <code class="docutils literal notranslate"><span class="pre">num_samples</span></code> evenly spaced points.</p>
+</section>
+<section id="step-2-perceive-collision-probability-via-warped-intrinsic-fields">
+<h3>Step 2 — Perceive: collision probability via warped intrinsic fields<a class="headerlink" href="#step-2-perceive-collision-probability-via-warped-intrinsic-fields" title="Link to this heading">#</a></h3>
+<section id="intrinsic-field-i-x-y">
+<h4>Intrinsic Field <span class="math notranslate nohighlight">\(I(x, y)\)</span><a class="headerlink" href="#intrinsic-field-i-x-y" title="Link to this heading">#</a></h4>
+<p>A 2D scalar field precomputed once at model construction:</p>
+<div class="math notranslate nohighlight">
+\[I(x, y) = (f \ast g)(x, y)\]</div>
+<p>where <span class="math notranslate nohighlight">\(g\)</span> is the indicator function of the unit disk and <span class="math notranslate nohighlight">\(f = \mathcal{N}(0, \sigma^2)\)</span> is a Gaussian kernel.
+The result is a smooth bump centered at the origin, normalized so <span class="math notranslate nohighlight">\(I(0,0) = 1\)</span>.</p>
+<p>The field is stored on a 61×61 grid over <span class="math notranslate nohighlight">\([-3, 3]^2\)</span> with spacing <span class="math notranslate nohighlight">\(\Delta = 0.1\)</span>.
+Both <span class="math notranslate nohighlight">\(I\)</span> and its gradient <span class="math notranslate nohighlight">\(\nabla I = (\partial I/\partial x,\; \partial I/\partial y)\)</span> are precomputed.
+Lookups use bilinear interpolation; out-of-bounds queries return zero.</p>
+</section>
+<section id="warp-operators">
+<h4>Warp operators<a class="headerlink" href="#warp-operators" title="Link to this heading">#</a></h4>
+<p>To evaluate the collision probability between agent <span class="math notranslate nohighlight">\(a\)</span> and neighbor <span class="math notranslate nohighlight">\(b\)</span>, each sample point on <span class="math notranslate nohighlight">\(a\)</span>’s trajectory is transformed into <span class="math notranslate nohighlight">\(b\)</span>’s intrinsic field space through a chain of coordinate warps:</p>
+<div class="math notranslate nohighlight">
+\[W = W_{vu} \circ W_{ts} \circ W_r \circ W_v \circ W_\text{local}\]</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Operator</p></th>
+<th class="head"><p>Transform</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(W_\text{local}\)</span></p></td>
+<td><p>Rotate + translate from <span class="math notranslate nohighlight">\(a\)</span>’s frame to <span class="math notranslate nohighlight">\(b\)</span>’s frame</p></td>
+<td><p>Reference frame change</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(W_v\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(x' = x - v_b \cdot t\)</span></p></td>
+<td><p>Account for <span class="math notranslate nohighlight">\(b\)</span>’s forward motion</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(W_r\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((x', y') = (x, y) / r_b\)</span></p></td>
+<td><p>Normalize by combined radii (<span class="math notranslate nohighlight">\(r_a + r_b\)</span>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(W_{ts}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((x', y') = (x, y) / (1 + \lambda t)\)</span></p></td>
+<td><p>Spread field with time uncertainty</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(W_{vu}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((x', y') = (x, y) / (1 + \mu |v_b|)\)</span></p></td>
+<td><p>Spread field with velocity uncertainty</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>After warping, the normalized time <span class="math notranslate nohighlight">\(t' = t / T\)</span> must lie in <span class="math notranslate nohighlight">\([0, 1]\)</span>; otherwise the sample is skipped.</p>
+</section>
+<section id="collision-probability-combination">
+<h4>Collision probability combination<a class="headerlink" href="#collision-probability-combination" title="Link to this heading">#</a></h4>
+<p>For each sample point, the collision probability from neighbor <span class="math notranslate nohighlight">\(b\)</span> is looked up as <span class="math notranslate nohighlight">\(p_b = I(x', y')\)</span>.
+Multiple neighbors are combined with the <strong>probabilistic union</strong> (independence assumption):</p>
+<div class="math notranslate nohighlight">
+\[p_\text{total} = p_\text{total} + p_b - p_\text{total} \cdot p_b\]</div>
+<p>The gradient is combined analogously:</p>
+<div class="math notranslate nohighlight">
+\[\nabla p_\text{total} = \nabla p_\text{total} + \nabla p_b - p_\text{total} \cdot \nabla p_b - p_b \cdot \nabla p_\text{total}\]</div>
+<p>The gradient <span class="math notranslate nohighlight">\(\nabla p_b\)</span> is obtained by transforming <span class="math notranslate nohighlight">\(\nabla I\)</span> back to <span class="math notranslate nohighlight">\(a\)</span>’s frame via the <strong>inverse Jacobian</strong> of the warp chain applied in reverse order.
+This expands the 2-component field gradient into a 3-component space-time gradient <span class="math notranslate nohighlight">\((g_x, g_y, g_t)\)</span>, because the velocity warp <span class="math notranslate nohighlight">\(W_v\)</span> couples spatial and temporal dimensions.</p>
+</section>
+</section>
+<section id="step-3-solve-gradient-descent">
+<h3>Step 3 — Solve: gradient descent<a class="headerlink" href="#step-3-solve-gradient-descent" title="Link to this heading">#</a></h3>
+<p>Four integrals are computed over the sampled trajectory (Eq. 4–7 from the paper):</p>
+<div class="math notranslate nohighlight">
+\[N = \int_0^T p(t) \, dt\]</div>
+<div class="math notranslate nohighlight">
+\[P = \frac{1}{N} \int_0^T p(t)^2 \, dt\]</div>
+<div class="math notranslate nohighlight">
+\[\mathbf{G} = \frac{1}{N} \int_0^T p(t) \, \nabla p(t) \, dt\]</div>
+<div class="math notranslate nohighlight">
+\[\mathbf{S} = \frac{1}{N} \int_0^T p(t) \, \mathbf{r}(t) \, dt\]</div>
+<p>The corrected trajectory point is (Eq. 8):</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{q} = \mathbf{S} - \alpha \cdot P \cdot \mathbf{G}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\alpha\)</span> is the <code class="docutils literal notranslate"><span class="pre">step_size</span></code> parameter. The new velocity in the agent’s local frame is:</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{v}_\text{local} = \left(\frac{q_x}{q_t},\; \frac{q_y}{q_t}\right)\]</div>
+<p>This is rotated back to world coordinates and clamped to <span class="math notranslate nohighlight">\([0, v_0]\)</span>.</p>
+<p>If <span class="math notranslate nohighlight">\(N \approx 0\)</span> (no collision risk), the agent follows its desired direction at speed <span class="math notranslate nohighlight">\(v_0\)</span>.</p>
+</section>
+<section id="step-4-random-perturbation-implementation-addition">
+<h3>Step 4 — Random perturbation (implementation addition)<a class="headerlink" href="#step-4-random-perturbation-implementation-addition" title="Link to this heading">#</a></h3>
+<p>In perfectly symmetric head-on encounters (agents at the same <span class="math notranslate nohighlight">\(y\)</span>-coordinate moving towards each other), the intrinsic field gradient <span class="math notranslate nohighlight">\(\partial I / \partial y = 0\)</span> by symmetry, producing no lateral avoidance.</p>
+<p>To break this symmetry, each trajectory sample receives a small random lateral perturbation:</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{r}_i(t) = (v_0 \cdot t,\; \epsilon_i,\; t)\]</div>
+<p>where <span class="math notranslate nohighlight">\(\epsilon_i \sim \mathcal{U}(-0.05, 0.05)\)</span> is drawn per sample per timestep. The perturbation is small enough not to affect normal avoidance but sufficient to break exact symmetry.</p>
+<p><strong>Boundary steering</strong>: when an agent is closer than <span class="math notranslate nohighlight">\(3 \times r\)</span> to a wall segment, a steering term adjusts its velocity away from the wall proportional to the proximity.</p>
+<p><strong>Agent steering (not currently active)</strong>: when two agents are closer than <span class="math notranslate nohighlight">\(3 \times (r_a + r_b)\)</span>, a steering term adjusts their velocities apart proportional to the overlap depth. This is not used by default since the random perturbation handles symmetry breaking, but may be re-enabled as a fallback if scenarios with persistent overlap are found.</p>
+</section>
+<section id="step-5-jam-detection-chill-mode">
+<h3>Step 5 — Jam detection (chill mode)<a class="headerlink" href="#step-5-jam-detection-chill-mode" title="Link to this heading">#</a></h3>
+<p>After computing the new speed:</p>
+<ol class="arabic simple">
+<li><p>If speed <span class="math notranslate nohighlight">\(&lt; \)</span> <code class="docutils literal notranslate"><span class="pre">jam_speed_threshold</span></code>: increment <code class="docutils literal notranslate"><span class="pre">jam_counter</span></code></p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">jam_counter</span></code> <span class="math notranslate nohighlight">\(\geq\)</span> <code class="docutils literal notranslate"><span class="pre">jam_step_count</span></code>: enter <strong>chill mode</strong> — skip the velocity correction and stay in place</p></li>
+<li><p>If speed recovers above the threshold: reset <code class="docutils literal notranslate"><span class="pre">jam_counter</span></code> to 0</p></li>
+</ol>
+<p>This prevents oscillation in dense crowds where agents repeatedly try and fail to avoid each other.</p>
+</section>
+</section>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
+<section id="model-level-parameters">
+<h3>Model-level parameters<a class="headerlink" href="#model-level-parameters" title="Link to this heading">#</a></h3>
+<p>Set once when creating the simulation. Shared by all agents.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Symbol</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">time_horizon</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(T\)</span></p></td>
+<td><p>2.0</p></td>
+<td><p>s</p></td>
+<td><p>Look-ahead time for collision prediction. Larger values detect collisions earlier but increase computation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">step_size</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\alpha\)</span></p></td>
+<td><p>0.5</p></td>
+<td><p>—</p></td>
+<td><p>Gradient descent step size. Controls how aggressively agents deviate from their projected trajectory. Larger = stronger avoidance.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sigma</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\sigma\)</span></p></td>
+<td><p>0.3</p></td>
+<td><p>—</p></td>
+<td><p>Gaussian spread of the intrinsic field. Larger values create smoother, wider collision zones.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">time_uncertainty</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\lambda\)</span></p></td>
+<td><p>0.5</p></td>
+<td><p>—</p></td>
+<td><p>Time uncertainty parameter. Spreads the collision field along the time axis — collisions further in the future are treated as less certain.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">velocity_uncertainty</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mu\)</span></p></td>
+<td><p>0.2</p></td>
+<td><p>—</p></td>
+<td><p>Velocity uncertainty parameter. Spreads the collision field based on neighbor speed — faster neighbors have less certain positions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">num_samples</span></code></p></td>
+<td><p>—</p></td>
+<td><p>20</p></td>
+<td><p>—</p></td>
+<td><p>Number of points sampled along the projected trajectory. More samples = better accuracy but higher cost. Cost scales as <span class="math notranslate nohighlight">\(O(\text{num\_samples} \times \text{neighbors})\)</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">jam_speed_threshold</span></code></p></td>
+<td><p>—</p></td>
+<td><p>0.1</p></td>
+<td><p>m/s</p></td>
+<td><p>Speed below which an agent is considered jammed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">jam_step_count</span></code></p></td>
+<td><p>—</p></td>
+<td><p>10</p></td>
+<td><p>steps</p></td>
+<td><p>Consecutive jammed steps before entering chill mode.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="agent-level-parameters">
+<h3>Agent-level parameters<a class="headerlink" href="#agent-level-parameters" title="Link to this heading">#</a></h3>
+<p>Set per agent. Can be modified at runtime.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">desired_speed</span></code> (<span class="math notranslate nohighlight">\(v_0\)</span>)</p></td>
+<td><p>1.2</p></td>
+<td><p>m/s</p></td>
+<td><p>Free-flow speed the agent tries to maintain.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">radius</span></code> (<span class="math notranslate nohighlight">\(r\)</span>)</p></td>
+<td><p>0.15</p></td>
+<td><p>m</p></td>
+<td><p>Physical radius of the agent. Used in the Minkowski sum for collision detection (<span class="math notranslate nohighlight">\(r_a + r_b\)</span>) and in the short-range repulsion.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="read-only-agent-state">
+<h3>Read-only agent state<a class="headerlink" href="#read-only-agent-state" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Property</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">jam_counter</span></code></p></td>
+<td><p>Current count of consecutive steps the agent has been below <code class="docutils literal notranslate"><span class="pre">jam_speed_threshold</span></code>. Resets to 0 when speed recovers.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="python-api">
+<h2>Python API<a class="headerlink" href="#python-api" title="Link to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jupedsim</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jps</span>
+
+<span class="c1"># Model-level parameters (shared by all agents)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">WarpDriverModel</span><span class="p">(</span>
+    <span class="n">time_horizon</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">step_size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">sigma</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="n">time_uncertainty</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">velocity_uncertainty</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">num_samples</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">jam_speed_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">jam_step_count</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+
+<span class="c1"># Agent-level parameters</span>
+<span class="n">agent_id</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span><span class="n">jps</span><span class="o">.</span><span class="n">WarpDriverModelAgentParameters</span><span class="p">(</span>
+    <span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">),</span>
+    <span class="n">orientation</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+    <span class="n">journey_id</span><span class="o">=</span><span class="n">journey_id</span><span class="p">,</span>
+    <span class="n">stage_id</span><span class="o">=</span><span class="n">stage_id</span><span class="p">,</span>
+    <span class="n">desired_speed</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
+    <span class="n">radius</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span>
+<span class="p">))</span>
+
+<span class="c1"># Runtime state access</span>
+<span class="n">state</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">agent</span><span class="p">(</span><span class="n">agent_id</span><span class="p">)</span><span class="o">.</span><span class="n">model</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">desired_speed</span><span class="p">)</span>   <span class="c1"># 1.2</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>          <span class="c1"># 0.15</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">jam_counter</span><span class="p">)</span>     <span class="c1"># 0</span>
+
+<span class="c1"># Mutable at runtime</span>
+<span class="n">state</span><span class="o">.</span><span class="n">desired_speed</span> <span class="o">=</span> <span class="mf">0.8</span>
+<span class="n">state</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="mf">0.2</span>
+</pre></div>
+</div>
+</section>
+<section id="computational-cost">
+<h2>Computational cost<a class="headerlink" href="#computational-cost" title="Link to this heading">#</a></h2>
+<p>Per agent per timestep: <span class="math notranslate nohighlight">\(O(K \times N)\)</span> where <span class="math notranslate nohighlight">\(K\)</span> = <code class="docutils literal notranslate"><span class="pre">num_samples</span></code> and <span class="math notranslate nohighlight">\(N\)</span> = number of neighbors within <code class="docutils literal notranslate"><span class="pre">cut_off_radius</span></code> (= <span class="math notranslate nohighlight">\(3T\)</span>).</p>
+<p>Each iteration involves:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(K \times N\)</span> forward warp compositions (6 operators each)</p></li>
+<li><p><span class="math notranslate nohighlight">\(K \times N\)</span> intrinsic field lookups (bilinear interpolation)</p></li>
+<li><p><span class="math notranslate nohighlight">\(K \times N\)</span> inverse Jacobian gradient transforms</p></li>
+<li><p>1 integration pass over <span class="math notranslate nohighlight">\(K\)</span> samples</p></li>
+</ul>
+<p>Typical bottleneck: the warp composition in the inner loop.</p>
+</section>
+<section id="reference">
+<h2>Reference<a class="headerlink" href="#reference" title="Link to this heading">#</a></h2>
+<p>Wolinski, D., Lin, M. C., and Pettré, J. (2016). <em>WarpDriver: Context-Aware Probabilistic Motion Prediction for Crowd Simulation</em>. IEEE Transactions on Visualization and Computer Graphics, 22(12), 2466–2480.</p>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Pedestrian Models</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../notebooks/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Notebooks</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#overview">Overview</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#algorithm">Algorithm</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-setup-projected-trajectory">Step 1 — Setup: projected trajectory</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-perceive-collision-probability-via-warped-intrinsic-fields">Step 2 — Perceive: collision probability via warped intrinsic fields</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#intrinsic-field-i-x-y">Intrinsic Field <span class="math notranslate nohighlight">\(I(x, y)\)</span></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#warp-operators">Warp operators</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#collision-probability-combination">Collision probability combination</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-solve-gradient-descent">Step 3 — Solve: gradient descent</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-4-random-perturbation-implementation-addition">Step 4 — Random perturbation (implementation addition)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-5-jam-detection-chill-mode">Step 5 — Jam detection (chill mode)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#model-level-parameters">Model-level parameters</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#agent-level-parameters">Agent-level parameters</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#read-only-agent-state">Read-only agent state</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-api">Python API</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#computational-cost">Computational cost</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reference">Reference</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By The JuPedSim Development Team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026, Forschungszentrum Jülich GmbH, IAS-7.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
