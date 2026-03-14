@@ -73,6 +73,12 @@ add_library(simulator STATIC
     src/SocialForceModelBuilder.hpp
     src/SocialForceModelData.hpp
     src/SocialForceModelUpdate.hpp
+    src/WarpDriverModel.cpp
+    src/WarpDriverModel.hpp
+    src/WarpDriverModelBuilder.cpp
+    src/WarpDriverModelBuilder.hpp
+    src/WarpDriverModelData.hpp
+    src/WarpDriverModelUpdate.hpp
     src/Stage.cpp
     src/Stage.hpp
     src/StageDescription.hpp

@@ -12,6 +12,7 @@ void init_collision_free_speed_model(py::module_& m);
 void init_collision_free_speed_model_v2(py::module_& m);
 void init_anticipation_velocity_model(py::module_& m);
 void init_social_force_model(py::module_& m);
+void init_warp_driver_model(py::module_& m);
 void init_geometry(py::module_& m);
 void init_routing(py::module_& m);
 void init_agent(py::module_& m);
@@ -31,6 +32,7 @@ PYBIND11_MODULE(py_jupedsim, m)
     init_collision_free_speed_model_v2(m);
     init_anticipation_velocity_model(m);
     init_social_force_model(m);
+    init_warp_driver_model(m);
     init_geometry(m);
     init_routing(m);
     init_agent(m);

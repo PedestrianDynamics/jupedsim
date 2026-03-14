@@ -30,6 +30,10 @@ from jupedsim.models.social_force import (
     SocialForceModel,
     SocialForceModelAgentParameters,
 )
+from jupedsim.models.warp_driver import (
+    WarpDriverModel,
+    WarpDriverModelAgentParameters,
+)
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.stages import (
     ExitStage,
@@ -58,6 +62,7 @@ class Simulation:
             | CollisionFreeSpeedModelV2
             | AnticipationVelocityModel
             | SocialForceModel
+            | WarpDriverModel
         ),
         geometry: (
             str
@@ -134,6 +139,18 @@ class Simulation:
         elif isinstance(model, SocialForceModel):
             model_builder = py_jps.SocialForceModelBuilder(
                 body_force=model.body_force, friction=model.friction
+            )
+            py_jps_model = model_builder.build()
+        elif isinstance(model, WarpDriverModel):
+            model_builder = py_jps.WarpDriverModelBuilder(
+                time_horizon=model.time_horizon,
+                step_size=model.step_size,
+                sigma=model.sigma,
+                time_uncertainty=model.time_uncertainty,
+                velocity_uncertainty=model.velocity_uncertainty,
+                num_samples=model.num_samples,
+                jam_speed_threshold=model.jam_speed_threshold,
+                jam_step_count=model.jam_step_count,
             )
             py_jps_model = model_builder.build()
         else:
@@ -260,6 +277,7 @@ class Simulation:
             | CollisionFreeSpeedModelV2AgentParameters
             | AnticipationVelocityModelAgentParameters
             | SocialForceModelAgentParameters
+            | WarpDriverModelAgentParameters
         ),
     ) -> int:
         """Add an agent to the simulation.
@@ -322,6 +340,11 @@ class Simulation:
                 agent_scale=parameters.agent_scale,
                 obstacle_scale=parameters.obstacle_scale,
                 force_distance=parameters.force_distance,
+                radius=parameters.radius,
+            )
+        elif isinstance(parameters, WarpDriverModelAgentParameters):
+            model = py_jps.WarpDriverModelState(
+                desired_speed=parameters.desired_speed,
                 radius=parameters.radius,
             )
 
