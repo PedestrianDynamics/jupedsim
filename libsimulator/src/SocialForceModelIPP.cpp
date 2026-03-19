@@ -160,6 +160,7 @@ void SocialForceModelIPP::CheckModelConstraint(
     throwIfNegative(model.desiredSpeed, "desired speed");
     throwIfNotStrictlyPositive(model.reactionTime, "reaction time");
     throwIfNotStrictlyPositive(model.radius, "radius");
+    throwIfNotStrictlyPositive(model.height, "height");
     throwIfNegative(model.lambdaU, "unbalancing rate");
     throwIfNegative(model.lambdaB, "balancing rate");
     throwIfNegative(model.balanceSpeed, "balance speed");
