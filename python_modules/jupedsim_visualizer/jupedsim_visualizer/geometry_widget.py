@@ -1,8 +1,10 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
+import platform
+
 import jupedsim as jps
 import vtkmodules.vtkRenderingOpenGL2  # noqa: F401
 from jupedsim.internal.aabb import AABB
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import vtkRenderer
@@ -24,6 +26,12 @@ class RenderWidget(QVTKRenderWindowInteractor):
         parent=None,
     ):
         QVTKRenderWindowInteractor.__init__(self, parent)
+        # WA_PaintOnScreen causes an infinite render loop on macOS
+        # with VTK >= 9.6 and PySide6 >= 6.10.
+        if platform.system() == "Darwin":
+            self.setAttribute(
+                Qt.WidgetAttribute.WA_PaintOnScreen, False
+            )
         self.navi = navi
         self.actor_sources = actor_sources
 
