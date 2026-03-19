@@ -4,10 +4,7 @@
 #include "SocialForceModelIPP.hpp"
 class SocialForceModelIPPBuilder
 {
-    double _bodyForce;
-    double _friction;
-
 public:
-    SocialForceModelIPPBuilder(double bodyForce, double friction);
+    SocialForceModelIPPBuilder() = default;
     SocialForceModelIPP Build();
 };

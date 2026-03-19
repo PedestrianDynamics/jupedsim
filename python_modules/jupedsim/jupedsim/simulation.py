@@ -142,9 +142,7 @@ class Simulation:
             )
             py_jps_model = model_builder.build()
         elif isinstance(model, SocialForceModelIPP):
-            model_builder = py_jps.SocialForceModelIPPBuilder(
-                body_force=model.body_force, friction=model.friction
-            )
+            model_builder = py_jps.SocialForceModelIPPBuilder()
             py_jps_model = model_builder.build()
         else:
             raise Exception("Unknown model type supplied")
