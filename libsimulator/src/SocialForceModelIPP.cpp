@@ -144,11 +144,21 @@ void SocialForceModelIPP::CheckModelConstraint(
                 name);
         }
     };
+    auto throwIfNotStrictlyPositive = [](double value, std::string name) {
+        if(value <= 0) {
+            throw SimulationError(
+                "Model constraint violation: {} {} not in allowed range, "
+                "{} needs to be strictly positive",
+                name,
+                value,
+                name);
+        }
+    };
 
     const auto& model = std::get<SocialForceModelIPPData>(agent.model);
 
     throwIfNegative(model.desiredSpeed, "desired speed");
-    throwIfNegative(model.reactionTime, "reaction time");
+    throwIfNotStrictlyPositive(model.reactionTime, "reaction time");
     throwIfNegative(model.radius, "radius");
     throwIfNegative(model.lambdaU, "unbalancing rate");
     throwIfNegative(model.lambdaB, "balancing rate");
