@@ -15,6 +15,9 @@ class RecordingAgent:
     id: int
     position: tuple[float, float]
     orientation: tuple[float, float]
+    ground_support_position: tuple[float, float] | None = None
+    height: float | None = None
+    radius: float | None = None
 
 
 @dataclass
@@ -35,6 +38,18 @@ class Recording:
         )
         update_database_to_latest_version(self.db)
         self._check_version_compatible()
+        self._has_ipp_columns = self._detect_ipp_columns()
+
+    @property
+    def has_ipp_columns(self) -> bool:
+        """Whether the recording contains IPP model data."""
+        return self._has_ipp_columns
+
+    def _detect_ipp_columns(self) -> bool:
+        cur = self.db.cursor()
+        cur.execute("PRAGMA table_info(trajectory_data)")
+        col_names = {row[1] for row in cur.fetchall()}
+        return "pos_gs_x" in col_names
 
     def frame(self, index: int) -> RecordingFrame:
         """Access a single frame of the recording.
@@ -46,16 +61,40 @@ class Recording:
             A single frame.
 
         """
+        if self._has_ipp_columns:
 
-        def agent_row(cursor, row):
-            return RecordingAgent(row[0], (row[1], row[2]), (row[3], row[4]))
+            def agent_row(cursor, row):
+                return RecordingAgent(
+                    row[0],
+                    (row[1], row[2]),
+                    (row[3], row[4]),
+                    ground_support_position=(row[5], row[6]),
+                    height=row[7],
+                    radius=row[8],
+                )
+
+            query = (
+                "SELECT id, pos_x, pos_y, ori_x, ori_y,"
+                " pos_gs_x, pos_gs_y, height, radius"
+                " FROM trajectory_data"
+                " WHERE frame == (?) ORDER BY id ASC"
+            )
+        else:
+
+            def agent_row(cursor, row):
+                return RecordingAgent(
+                    row[0], (row[1], row[2]), (row[3], row[4])
+                )
+
+            query = (
+                "SELECT id, pos_x, pos_y, ori_x, ori_y"
+                " FROM trajectory_data"
+                " WHERE frame == (?) ORDER BY id ASC"
+            )
 
         cur = self.db.cursor()
         cur.row_factory = agent_row
-        res = cur.execute(
-            "SELECT id, pos_x, pos_y, ori_x, ori_y FROM trajectory_data WHERE frame == (?) ORDER BY id ASC",
-            (index,),
-        )
+        res = cur.execute(query, (index,))
         return RecordingFrame(index, res.fetchall())
 
     def geometry(self) -> shapely.GeometryCollection:
