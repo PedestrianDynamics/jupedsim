@@ -495,22 +495,22 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">desired_direction</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;desired direction of this agent.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">desired_orientation</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">desired_direction</span>
 
     <span class="nd">@desired_direction</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">desired_direction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desired_direction</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">desired_orientation</span> <span class="o">=</span> <span class="n">desired_direction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">desired_direction</span> <span class="o">=</span> <span class="n">desired_direction</span>
 
     <span class="nd">@property</span>
     <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;desired_direction&#39; instead.&quot;</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">e0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Desired direction of this agent.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">desired_orientation</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">desired_direction</span>
 
     <span class="nd">@e0</span><span class="o">.</span><span class="n">setter</span>
     <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;deprecated, use &#39;desired_direction&#39; instead.&quot;</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">e0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e0</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">desired_orientation</span> <span class="o">=</span> <span class="n">e0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">desired_direction</span> <span class="o">=</span> <span class="n">e0</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">tau</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -604,7 +604,7 @@
   <div class="footer-item">
     
 <p class="component-author">
-By Author name not set
+By The JuPedSim Development Team
 </p>
 
   </div>
