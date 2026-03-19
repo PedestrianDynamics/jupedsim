@@ -22,13 +22,15 @@ e_n = (x_n − xℓ_n) / |x_n − xℓ_n|     (from legs toward upper body)
 ### Upper body (Eq. 1 + driving force)
 
 ```
-v̇_n = (v0·ê0 − v_n)/τ  +  λ_u·(−v_s·e_n − v_n)  −  λ·v_n  +  Σ_{m≠n} F_ub(x_n, x_m)  +  Σ_w F_ub(x_n, x_w)
-       ├── driving force ──┤  ├── unbalancing ──────┤  ├─ damping ┤  ├── agent repulsion ─────┤  ├── wall repulsion ──┤
+v̇_n = (v0·ê0 − v_n)/τ  +  λ_u·(v_s·e_n − v_n)  −  λ·v_n  +  Σ_{m≠n} F_ub(x_n, x_m)  +  Σ_w F_ub(x_n, x_w)
+       ├── driving force ──┤  ├── unbalancing ─────┤  ├─ damping ┤  ├── agent repulsion ─────┤  ├── wall repulsion ──┤
 ```
 
-**Note:** The unbalancing term uses `−v_s·e_n` (pointing **away** from the legs, i.e. toward the
-direction the body is "falling"). This is confirmed by the NetLogo code:
-`- Balance_speed * sin(towards own-leg)` = velocity directed away from the leg.
+**Note:** The unbalancing term uses `+v_s·e_n` (pointing **away** from the legs, i.e. toward the
+direction the body is "falling"). Since `e_n` points from legs toward the upper body,
+`+v_s·e_n` pushes the body further in the direction it is already leaning. This is confirmed
+by the NetLogo code: `- Balance_speed * sin(towards own-leg)` where `towards own-leg` points
+toward the leg, so the negation yields a direction away from the leg = `+e_n`.
 
 ### Ground support / legs (Eq. 2)
 
@@ -67,7 +69,7 @@ Where `n̂_nm = (x_n − x_m)/|x_n − x_m|` points away from the neighbor (repu
 
 The two-level coupling creates spontaneous locomotion **without an explicit driving force**:
 
-1. Upper body "falls" away from legs (unbalancing: `−v_s·e_n`)
+1. Upper body "falls" away from legs (unbalancing: `+v_s·e_n`)
 2. Legs "chase" the upper body to restore balance (recovery: `+v_s·e_n`)
 3. This creates a sustained walking cycle
 
@@ -113,69 +115,55 @@ single parameter `v_s`, not two separate `v_u`/`v_b`.
 | `λ_b` | `lambda_b` | 1.0 | 1/s | Balancing rate |
 | `v_s` | `balance_speed` | 1.0 | m/s | Coupling speed (unbalancing & recovery) |
 | `λ` | `damping` | 1.0 | 1/s | Upper body velocity dissipation |
-| `A` | `agent_scale` | 5.0 | N | Repulsion amplitude (agents + walls) |
+| `A` | `agent_scale` | 5.0 | N | Repulsion amplitude vs agents |
+| `A_w` | `obstacle_scale` | 5.0 | N | Repulsion amplitude vs walls |
 | `B` | `force_distance` | 0.5 | m | Upper body interaction range |
+| `B_w` | `obstacle_force_distance` | 0.2 | m | Wall interaction range |
 | `Bℓ` | `leg_force_distance` | 0.3 | m | Leg interaction range |
 | `r` | `radius` | 0.15 | m | Upper body display radius |
 | `h` | `height` | 1.75 | m | Agent height (scales leg radius) |
 
-**Removed** (not in paper model): `mass`, `bodyForce`, `friction`, `obstacleScale`
+**Removed** (not in paper model): `mass`, `bodyForce`, `friction`
+
+**Added** (not in paper, needed for JuPedSim): `obstacle_scale`, `obstacle_force_distance`
+(separate wall parameters allow independent tuning of wall repulsion strength and range)
 
 **Derived:** Leg display radius = `radius × GS_SCALING_FACTOR × height`
 
-## Comparison: NetLogo ↔ Current C++ Implementation
+## Comparison: NetLogo ↔ C++ Implementation
 
-| Aspect | NetLogo (reference) | Current C++ code | Action needed |
-|--------|-------------------|------------------|---------------|
-| Driving force | None | `(v0·ê0 − v)/τ` | **Keep** (JuPedSim needs goal navigation) |
-| Unbalancing | `λ_u·(−v_s·e_n − v_n)` | `LAMBDA_2·(e_n − v_n)` | **Fix:** negate `e_n`, add `v_s` scaling |
-| Damping | `−1.0·v_n` | `−LAMBDA_3·v_n` | ✓ Correct (value matches) |
-| Balance recovery | `λ_b·(v_s·e_n − vℓ_n)` | `LAMBDA_RECOVERY_2·(e_n − vℓ_n)` | **Fix:** add `v_s` scaling |
-| UB interaction | `5·exp(−d/0.5)` | `A·exp(−d/B)` social + contact forces | **Fix:** remove contacts, use A=5 B=0.5 |
-| Leg interaction | `5·exp(−d/0.3)` | Contact forces only | **Fix:** add exponential with Bℓ=0.3 |
-| Separate Bℓ | Yes (0.3 vs 0.5) | No | **Fix:** add `leg_force_distance` |
-| Mass division | No | Social forces ÷ mass | **Fix:** remove mass division |
-| Contact forces | None | bodyForce + friction | **Fix:** remove entirely |
-| Single v_s | Yes | No speed scaling | **Fix:** one `balance_speed` param |
+| Aspect | NetLogo (reference) | C++ code | Status |
+|--------|-------------------|----------|--------|
+| Driving force | None | `(v0·ê0 − v)/τ` | ✓ Added (JuPedSim needs goal navigation) |
+| Unbalancing | `λ_u·(v_s·e_n − v_n)` | `λ_u·(v_s·e_n − v_n)` | ✓ Matches |
+| Damping | `−1.0·v_n` | `−λ·v_n` | ✓ Matches |
+| Balance recovery | `λ_b·(v_s·e_n − vℓ_n)` | `λ_b·(v_s·e_n − vℓ_n)` | ✓ Matches |
+| UB interaction | `5·exp(−d/0.5)` | `A·exp(−d/B)` | ✓ Matches |
+| Leg interaction | `5·exp(−d/0.3)` | `A·exp(−d/Bℓ)` | ✓ Matches |
+| Wall interaction | Same as agent | Separate `A_w`/`B_w` | ✓ Extended for tuning |
+| Contact forces | None | None | ✓ Removed |
+| Mass | Not used | Not used | ✓ Removed |
+| Max separation | Not in NetLogo | Clamped to `LEG_SCALING_FACTOR·h` | ✓ Added (prevents drift near walls) |
 
 ## Implementation Checklist
 
 ### C++ core (`libsimulator/src/`)
 
-- [ ] `SocialForceModelIPPData.hpp`: replace params
-  - [ ] Remove: `mass`, `agentScale`, `obstacleScale`, `forceDistance`
-  - [ ] Add: `lambdaU`, `lambdaB`, `balanceSpeed`, `damping`, `agentScale`, `forceDistance`, `legForceDistance`
-- [ ] `SocialForceModelIPP.hpp`:
-  - [ ] Remove: `bodyForce`, `friction` constructor params
-  - [ ] Remove: `DEFAULT_BODY_FORCE`, `DEFAULT_FRICTION` constants
-  - [ ] Remove: `LAMBDA_LOCOMOTION_2`, `LAMBDA_LOCOMOTION_3`, `LAMBDA_RECOVERY_2` (now per-agent)
-  - [ ] Remove: contact force function declarations
-- [ ] `SocialForceModelIPP.cpp` — rewrite `ComputeNewPosition()`:
-  - [ ] Unbalancing: `λ_u · (−v_s·e_n − v_n)` (note minus sign!)
-  - [ ] Damping: `−λ·v_n`
-  - [ ] Balance recovery: `λ_b · (v_s·e_n − vℓ_n)`
-  - [ ] Upper body repulsion: exponential only (no contacts)
-  - [ ] Leg repulsion: exponential with `legForceDistance`
-  - [ ] Wall repulsion: exponential for both levels
-  - [ ] No mass division
-  - [ ] Remove all contact force functions
-- [ ] `SocialForceModelIPP.cpp` — update `CheckModelConstraint()`
-- [ ] `SocialForceModelIPPBuilder.cpp/.hpp`: update parameter list
+- [x] `SocialForceModelIPPData.hpp`: replace params (removed mass, added lambdaU/lambdaB/balanceSpeed/damping/obstacleScale/obstacleForceDistance/legForceDistance)
+- [x] `SocialForceModelIPP.hpp`: parameterless constructor, removed contact forces, added LEG_SCALING_FACTOR
+- [x] `SocialForceModelIPP.cpp`: rewritten ComputeNewPosition() with paper equations, separate wall query for legs
+- [x] `SocialForceModelIPPBuilder.cpp/.hpp`: parameterless builder
 
 ### pybind11 (`python_bindings_jupedsim/`)
 
-- [ ] `social_force_model_IPP.cpp`:
-  - [ ] Model: remove `body_force`/`friction` from constructor
-  - [ ] Agent params: add `lambda_u`, `lambda_b`, `balance_speed`, `damping`, `leg_force_distance`
-  - [ ] Agent params: remove `mass`
-  - [ ] State: expose new params as read/write properties
+- [x] `social_force_model_IPP.cpp`: updated builder, agent params, state properties
 
 ### Python wrapper (`python_modules/jupedsim/`)
 
-- [ ] `jupedsim/models/social_force_model_ipp.py`: update class + params
-- [ ] `jupedsim/serialization.py`: update writer columns if needed
+- [x] `jupedsim/models/social_force_IPP.py`: updated classes and params
+- [x] `jupedsim/sqlite_serialization.py`: IPP trajectory writer with ground support columns
 
 ### Example + tests
 
-- [ ] `examples/2levels_model/sim_bottleneck.py`: update to new API
-- [ ] Update/add tests for new parameter validation
+- [x] `examples/2levels_model/sim_bottleneck.py`: updated to new API
+- [x] C++ and Python tests updated
