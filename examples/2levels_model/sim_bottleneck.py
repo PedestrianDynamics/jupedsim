@@ -9,7 +9,7 @@ from shapely import Polygon, GeometryCollection
 ## Setup geometries
 room1 = Polygon([(-10, -10), (10, -10), (10, 10), (-10, 10)])
 room2 = Polygon([(15, -5), (25, -5), (25, 5), (15, 5)])
-corridor = Polygon([(10, -0.38), (28, -0.38), (28, 0.38), (10, 0.38)])
+corridor = Polygon([(10, -0.5), (28, -0.5), (28, 0.5), (10, 0.5)])
 
 area = GeometryCollection(corridor.union(room1.union(room2)))
 walkable_area = pedpy.WalkableArea(area.geoms[0])
@@ -17,7 +17,7 @@ walkable_area = pedpy.WalkableArea(area.geoms[0])
 
 ## Setup spawning area
 spawning_area = Polygon([(-8, -8), (8, -8), (8, 8), (-8, 8)])
-num_agents = 5
+num_agents = 50
 pos_in_spawning_area = jps.distributions.distribute_by_number(
     polygon=spawning_area,
     number_of_agents=num_agents,
@@ -56,17 +56,19 @@ for pos, v0 in zip(pos_in_spawning_area, v_distribution):
             velocity=(0.0, 0.0),
             ground_support_position=pos,
             ground_support_velocity=(0.0, 0.0),
-            height=1.75,            # agent height [m]
-            desired_speed=v0,       # v0 [m/s]
-            reaction_time=0.5,      # tau [s]
-            lambda_u=0.5,           # unbalancing rate [1/s]
-            lambda_b=1.0,           # balancing rate [1/s]
-            balance_speed=1.0,      # coupling speed v_s [m/s]
-            damping=1.0,            # velocity dissipation [1/s]
-            agent_scale=5.0,        # A repulsion amplitude [N]
-            force_distance=0.5,     # B upper body range [m]
-            leg_force_distance=0.3, # B_leg leg range [m]
-            radius=0.15,            # upper body radius [m]
+            height=1.75,  # agent height [m]
+            desired_speed=v0,  # v0 [m/s]
+            reaction_time=0.5,  # tau [s]
+            lambda_u=0.5,  # unbalancing rate [1/s]
+            lambda_b=1.0,  # balancing rate [1/s]
+            balance_speed=1.0,  # coupling speed v_s [m/s]
+            damping=1.0,  # velocity dissipation [1/s]
+            agent_scale=5.0,  # A repulsion vs agents [N]
+            obstacle_scale=10.0,  # A_w repulsion vs walls [N]
+            force_distance=0.5,  # B upper body range [m]
+            obstacle_force_distance=0.2,  # B_w wall range [m]
+            leg_force_distance=0.3,  # B_leg leg range [m]
+            radius=0.15,  # upper body radius [m]
         )
     )
 

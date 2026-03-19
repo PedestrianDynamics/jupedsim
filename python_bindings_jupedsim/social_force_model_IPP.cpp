@@ -30,7 +30,9 @@ void init_social_force_model_IPP(py::module_& m)
                         double balanceSpeed,
                         double damping,
                         double agentScale,
+                        double obstacleScale,
                         double forceDistance,
+                        double obstacleForceDistance,
                         double legForceDistance,
                         double radius) {
                 return JPS_SocialForceModelIPPAgentParameters{
@@ -49,7 +51,9 @@ void init_social_force_model_IPP(py::module_& m)
                     balanceSpeed,
                     damping,
                     agentScale,
+                    obstacleScale,
                     forceDistance,
+                    obstacleForceDistance,
                     legForceDistance,
                     radius};
             }),
@@ -69,7 +73,9 @@ void init_social_force_model_IPP(py::module_& m)
             py::arg("balance_speed"),
             py::arg("damping"),
             py::arg("agent_scale"),
+            py::arg("obstacle_scale"),
             py::arg("force_distance"),
+            py::arg("obstacle_force_distance"),
             py::arg("leg_force_distance"),
             py::arg("radius"))
         .def("__repr__", [](const JPS_SocialForceModelIPPAgentParameters& p) {
@@ -78,7 +84,8 @@ void init_social_force_model_IPP(py::module_& m)
                 "velocity: {}, ground_support_position: {}, ground_support_velocity: {}, "
                 "height: {}, desiredSpeed: {}, reactionTime: {}, "
                 "lambdaU: {}, lambdaB: {}, balanceSpeed: {}, damping: {}, "
-                "agentScale: {}, forceDistance: {}, legForceDistance: {}, radius: {}",
+                "agentScale: {}, obstacleScale: {}, forceDistance: {}, "
+                "obstacleForceDistance: {}, legForceDistance: {}, radius: {}",
                 intoTuple(p.position),
                 intoTuple(p.orientation),
                 p.journeyId,
@@ -94,7 +101,9 @@ void init_social_force_model_IPP(py::module_& m)
                 p.balanceSpeed,
                 p.damping,
                 p.agentScale,
+                p.obstacleScale,
                 p.forceDistance,
+                p.obstacleForceDistance,
                 p.legForceDistance,
                 p.radius);
         });
@@ -206,12 +215,28 @@ void init_social_force_model_IPP(py::module_& m)
                 JPS_SocialForceModelIPPState_SetAgentScale(w.handle, agentScale);
             })
         .def_property(
+            "obstacle_scale",
+            [](const JPS_SocialForceModelIPPState_Wrapper& w) {
+                return JPS_SocialForceModelIPPState_GetObstacleScale(w.handle);
+            },
+            [](JPS_SocialForceModelIPPState_Wrapper& w, double obstacleScale) {
+                JPS_SocialForceModelIPPState_SetObstacleScale(w.handle, obstacleScale);
+            })
+        .def_property(
             "force_distance",
             [](const JPS_SocialForceModelIPPState_Wrapper& w) {
                 return JPS_SocialForceModelIPPState_GetForceDistance(w.handle);
             },
             [](JPS_SocialForceModelIPPState_Wrapper& w, double forceDistance) {
                 JPS_SocialForceModelIPPState_SetForceDistance(w.handle, forceDistance);
+            })
+        .def_property(
+            "obstacle_force_distance",
+            [](const JPS_SocialForceModelIPPState_Wrapper& w) {
+                return JPS_SocialForceModelIPPState_GetObstacleForceDistance(w.handle);
+            },
+            [](JPS_SocialForceModelIPPState_Wrapper& w, double obstacleForceDistance) {
+                JPS_SocialForceModelIPPState_SetObstacleForceDistance(w.handle, obstacleForceDistance);
             })
         .def_property(
             "leg_force_distance",

@@ -13,8 +13,10 @@ struct SocialForceModelIPPData {
     double lambdaB{}; // balancing rate [1/s]
     double balanceSpeed{}; // v_s coupling speed [m/s]
     double damping{}; // lambda velocity dissipation [1/s]
-    double agentScale{}; // A repulsion amplitude [N]
+    double agentScale{}; // A repulsion amplitude vs agents [N]
+    double obstacleScale{}; // A_w repulsion amplitude vs walls [N]
     double forceDistance{}; // B upper body interaction range [m]
+    double obstacleForceDistance{}; // B_w wall interaction range [m]
     double legForceDistance{}; // B_leg leg interaction range [m]
     double radius{}; // r upper body radius [m]
 };
@@ -30,7 +32,7 @@ struct fmt::formatter<SocialForceModelIPPData> {
         return fmt::format_to(
             ctx.out(),
             "IPP[velocity={}, gs_pos={}, gs_vel={}, h={}, v0={}, tau={}, "
-            "lambda_u={}, lambda_b={}, v_s={}, lambda={}, A={}, B={}, B_leg={}, r={}])",
+            "lambda_u={}, lambda_b={}, v_s={}, lambda={}, A={}, A_w={}, B={}, B_w={}, B_leg={}, r={}])",
             m.velocity,
             m.ground_support_position,
             m.ground_support_velocity,
@@ -42,7 +44,9 @@ struct fmt::formatter<SocialForceModelIPPData> {
             m.balanceSpeed,
             m.damping,
             m.agentScale,
+            m.obstacleScale,
             m.forceDistance,
+            m.obstacleForceDistance,
             m.legForceDistance,
             m.radius);
     }

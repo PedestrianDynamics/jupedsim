@@ -23,6 +23,10 @@ public:
     static constexpr double GS_SCALING_FACTOR =
         0.26 / (2 * 0.3 * 1.65);
 
+    // Max upper body–leg separation as fraction of height
+    // shank(0.2522) + thigh(0.2269) + ankle(0.0451)
+    static constexpr double LEG_SCALING_FACTOR = 0.5242;
+
     SocialForceModelIPP();
     ~SocialForceModelIPP() override = default;
     OperationalModelType Type() const override;

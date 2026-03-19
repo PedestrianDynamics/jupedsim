@@ -35,15 +35,24 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
     const auto& walls = geometry.LineSegmentsInApproxDistanceTo(ped.pos);
 
     // Unit vector from ground support toward upper body
-    Point e_n = (ped.pos - model.ground_support_position).Normalized();
+    // When co-located, use the driving direction as fallback
+    const Point sep = ped.pos - model.ground_support_position;
+    Point e_n;
+    if(sep.Norm() > 1e-10) {
+        e_n = sep.Normalized();
+    } else {
+        // Fallback: use direction toward destination
+        const Point toGoal = ped.destination - ped.pos;
+        e_n = (toGoal.Norm() > 1e-10) ? toGoal.Normalized() : Point(0, 0);
+    }
 
     // --- Upper body acceleration ---
     // Driving force: (v0 * e0 - v) / tau
     auto acc_ub = DrivingForce(ped);
 
-    // Unbalancing: lambda_u * (-v_s * e_n - v_n)
-    // Upper body "falls" away from legs (negative e_n direction)
-    acc_ub += (e_n * (-model.balanceSpeed) - model.velocity) * model.lambdaU;
+    // Unbalancing: lambda_u * (v_s * e_n - v_n)
+    // Upper body "falls" further in the direction it's already leaning (away from legs)
+    acc_ub += (e_n * model.balanceSpeed - model.velocity) * model.lambdaU;
 
     // Damping: -lambda * v_n
     acc_ub = acc_ub - model.velocity * model.damping;
@@ -59,7 +68,7 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
     // Upper body repulsion from walls
     for(const auto& wall : walls) {
         const Point pt = wall.ShortestPoint(ped.pos);
-        acc_ub += ExponentialRepulsion(ped.pos, pt, model.agentScale, model.forceDistance);
+        acc_ub += ExponentialRepulsion(ped.pos, pt, model.obstacleScale, model.obstacleForceDistance);
     }
 
     // --- Ground support (leg) acceleration ---
@@ -84,7 +93,7 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
     for(const auto& wall : walls) {
         const Point pt = wall.ShortestPoint(model.ground_support_position);
         acc_gs +=
-            ExponentialRepulsion(model.ground_support_position, pt, model.agentScale, model.legForceDistance);
+            ExponentialRepulsion(model.ground_support_position, pt, model.obstacleScale, model.obstacleForceDistance);
     }
 
     // --- Euler integration ---
@@ -93,6 +102,15 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
 
     update.ground_support_velocity = model.ground_support_velocity + acc_gs * dT;
     update.ground_support_position = model.ground_support_position + update.ground_support_velocity * dT;
+
+    // --- Clamp upper body–leg separation to max leg length ---
+    const double maxSeparation = LEG_SCALING_FACTOR * model.height;
+    const Point separation = update.position - update.ground_support_position;
+    const double dist = separation.Norm();
+    if(dist > maxSeparation && dist > 1e-10) {
+        // Pull upper body back toward legs
+        update.position = update.ground_support_position + separation.Normalized() * maxSeparation;
+    }
 
     return update;
 }
@@ -135,7 +153,9 @@ void SocialForceModelIPP::CheckModelConstraint(
     throwIfNegative(model.balanceSpeed, "balance speed");
     throwIfNegative(model.damping, "damping");
     throwIfNegative(model.agentScale, "agent scale");
+    throwIfNegative(model.obstacleScale, "obstacle scale");
     throwIfNegative(model.forceDistance, "force distance");
+    throwIfNegative(model.obstacleForceDistance, "obstacle force distance");
     throwIfNegative(model.legForceDistance, "leg force distance");
 
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
