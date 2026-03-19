@@ -159,16 +159,16 @@ void SocialForceModelIPP::CheckModelConstraint(
 
     throwIfNegative(model.desiredSpeed, "desired speed");
     throwIfNotStrictlyPositive(model.reactionTime, "reaction time");
-    throwIfNegative(model.radius, "radius");
+    throwIfNotStrictlyPositive(model.radius, "radius");
     throwIfNegative(model.lambdaU, "unbalancing rate");
     throwIfNegative(model.lambdaB, "balancing rate");
     throwIfNegative(model.balanceSpeed, "balance speed");
     throwIfNegative(model.damping, "damping");
     throwIfNegative(model.agentScale, "agent scale");
     throwIfNegative(model.obstacleScale, "obstacle scale");
-    throwIfNegative(model.forceDistance, "force distance");
-    throwIfNegative(model.obstacleForceDistance, "obstacle force distance");
-    throwIfNegative(model.legForceDistance, "leg force distance");
+    throwIfNotStrictlyPositive(model.forceDistance, "force distance");
+    throwIfNotStrictlyPositive(model.obstacleForceDistance, "obstacle force distance");
+    throwIfNotStrictlyPositive(model.legForceDistance, "leg force distance");
 
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
     for(const auto& neighbor : neighbors) {
