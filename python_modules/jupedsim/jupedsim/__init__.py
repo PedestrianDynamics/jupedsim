@@ -49,6 +49,11 @@ from jupedsim.models.social_force import (
     SocialForceModelAgentParameters,
     SocialForceModelState,
 )
+from jupedsim.models.social_force_IPP import (
+    SocialForceModelIPP,
+    SocialForceModelIPPAgentParameters,
+    SocialForceModelIPPState,
+)
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import RoutingEngine
 from jupedsim.serialization import TrajectoryWriter
@@ -72,9 +77,7 @@ __commit__ = get_build_info().git_commit_hash
 Commit id that was used to build this module.
 """
 
-__compiler__ = (
-    f"{get_build_info().compiler} ({get_build_info().compiler_version})"
-)
+__compiler__ = f"{get_build_info().compiler} ({get_build_info().compiler_version})"
 """
 Id of the compiler used to build the native portion of this module.
 """
@@ -115,6 +118,9 @@ __all__ = [
     "SocialForceModelAgentParameters",
     "SocialForceModel",
     "SocialForceModelState",
+    "SocialForceModelIPPAgentParameters",
+    "SocialForceModelIPP",
+    "SocialForceModelIPPState",
     "WaitingSetStage",
     "WaitingSetState",
     "WaypointStage",

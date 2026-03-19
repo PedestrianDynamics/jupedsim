@@ -73,6 +73,12 @@ add_library(simulator STATIC
     src/SocialForceModelBuilder.hpp
     src/SocialForceModelData.hpp
     src/SocialForceModelUpdate.hpp
+    src/SocialForceModelIPP.cpp
+    src/SocialForceModelIPP.hpp
+    src/SocialForceModelIPPBuilder.cpp
+    src/SocialForceModelIPPBuilder.hpp
+    src/SocialForceModelIPPData.hpp
+    src/SocialForceModelIPPUpdate.hpp
     src/Stage.cpp
     src/Stage.hpp
     src/StageDescription.hpp

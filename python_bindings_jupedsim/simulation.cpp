@@ -72,6 +72,20 @@ void init_simulation(py::module_& m)
             "add_agent",
             [](Simulation& sim, GenericAgent& agent) { return sim.AddAgent(agent).getID(); })
         .def(
+            "add_agent",
+            [](JPS_Simulation_Wrapper& simulation,
+               JPS_SocialForceModelIPPAgentParameters& parameters) {
+                JPS_ErrorMessage errorMsg{};
+                auto result = JPS_Simulation_AddSocialForceModelIPPAgent(
+                    simulation.handle, parameters, &errorMsg);
+                if(result) {
+                    return result;
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
+            })
+        .def(
             "mark_agent_for_removal",
             [](Simulation& sim, uint64_t id) { sim.MarkAgentForRemoval(id); })
         .def("removed_agents", [](const Simulation& sim) { return sim.RemovedAgents(); })

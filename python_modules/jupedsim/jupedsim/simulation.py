@@ -30,6 +30,10 @@ from jupedsim.models.social_force import (
     SocialForceModel,
     SocialForceModelAgentParameters,
 )
+from jupedsim.models.social_force_IPP import (
+    SocialForceModelIPP,
+    SocialForceModelIPPAgentParameters,
+)
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.stages import (
     ExitStage,
@@ -58,6 +62,7 @@ class Simulation:
             | CollisionFreeSpeedModelV2
             | AnticipationVelocityModel
             | SocialForceModel
+            | SocialForceModelIPP
         ),
         geometry: (
             str
@@ -136,6 +141,11 @@ class Simulation:
                 body_force=model.body_force, friction=model.friction
             )
             py_jps_model = model_builder.build()
+        elif isinstance(model, SocialForceModelIPP):
+            model_builder = py_jps.SocialForceModelIPPBuilder(
+                body_force=model.body_force, friction=model.friction
+            )
+            py_jps_model = model_builder.build()
         else:
             raise Exception("Unknown model type supplied")
         self._writer = trajectory_writer
@@ -143,9 +153,7 @@ class Simulation:
             model=py_jps_model, geometry=build_geometry(geometry)._obj, dt=dt
         )
 
-    def add_waypoint_stage(
-        self, position: tuple[float, float], distance
-    ) -> int:
+    def add_waypoint_stage(self, position: tuple[float, float], distance) -> int:
         """Add a new waypoint stage to this simulation.
 
         Arguments:
@@ -171,9 +179,7 @@ class Simulation:
         """
         return self._obj.add_queue_stage(positions)
 
-    def add_waiting_set_stage(
-        self, positions: list[tuple[float, float]]
-    ) -> int:
+    def add_waiting_set_stage(self, positions: list[tuple[float, float]]) -> int:
         """Add a new waiting set stage to this simulation.
 
         Arguments:
@@ -260,6 +266,7 @@ class Simulation:
             | CollisionFreeSpeedModelV2AgentParameters
             | AnticipationVelocityModelAgentParameters
             | SocialForceModelAgentParameters
+            | SocialForceModelIPPAgentParameters
         ),
     ) -> int:
         """Add an agent to the simulation.
@@ -453,9 +460,7 @@ class Simulation:
         """
         return Agent(self._obj.agent(agent_id))
 
-    def agents_in_range(
-        self, pos: tuple[float, float], distance: float
-    ) -> list[int]:
+    def agents_in_range(self, pos: tuple[float, float], distance: float) -> list[int]:
         """Ids of agents within the given distance to the given position.
 
         Arguments:
@@ -524,9 +529,7 @@ class Simulation:
             case py_jps.WaitingSetProxy():
                 return WaitingSetStage(stage)
             case _:
-                raise Exception(
-                    f"Internal error, unexpected type: {type(stage)}"
-                )
+                raise Exception(f"Internal error, unexpected type: {type(stage)}")
 
     def set_tracing(self, status: bool) -> None:
         self._obj.set_tracing(status)
