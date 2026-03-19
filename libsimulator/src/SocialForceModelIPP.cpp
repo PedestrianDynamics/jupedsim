@@ -89,8 +89,10 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
             model.legForceDistance);
     }
 
-    // Leg repulsion from walls
-    for(const auto& wall : walls) {
+    // Leg repulsion from walls (query from ground support position, which may
+    // be in a different cell than the upper body)
+    const auto& gsWalls = geometry.LineSegmentsInApproxDistanceTo(model.ground_support_position);
+    for(const auto& wall : gsWalls) {
         const Point pt = wall.ShortestPoint(model.ground_support_position);
         acc_gs +=
             ExponentialRepulsion(model.ground_support_position, pt, model.obstacleScale, model.obstacleForceDistance);
