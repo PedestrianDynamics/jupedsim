@@ -5,5 +5,7 @@
 
 struct SocialForceModelIPPUpdate {
     Point position{};
+    Point ground_support_position{};
+    Point ground_support_velocity{};
     Point velocity{};
 };

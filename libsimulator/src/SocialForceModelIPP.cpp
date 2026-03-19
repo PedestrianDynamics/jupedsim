@@ -58,8 +58,54 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
         });
     forces += obstacle_f / model.mass;
 
-    update.velocity = model.velocity + forces * dT;
+
+
+    // IPP model parameteres
+    // Model Antoine
+    // Point vb = 1; // balancing speed
+    // double lambda_u = 0.5; // unbalancing rate
+    // double lambda_b = 1; // Balancing rate
+
+    // update.velocity = model.velocity + ( ( - vb - model.velocity) * lambda_u - model.velocity + forces) * dT;
+    
+    // update.ground_support_velocity =    model.ground_support_velocity + 
+    //                                     (   
+    //                                         (vb - model.velocity) * lambda_b 
+    //                                     )* dT;
+                    
+    // update.position = ped.pos + update.velocity * dT;
+    // update.ground_support_position = model.ground_support_position + update.ground_support_velocity * dT;
+
+
+
+
+
+    // // model perso 
+    double lambda_friction = 0.5; 
+    Point vb = 1; // balancing speed
+    double lambda_u = 0.5; // unbalancing rate
+    double lambda_b = 10; // Balancing rate
+
+    update.velocity = model.velocity + ( ( - vb - model.velocity) * lambda_u - model.velocity + forces) * dT;
     update.position = ped.pos + update.velocity * dT;
+    update.ground_support_velocity =    model.ground_support_velocity + 
+                                        (   
+                                            (ped.pos - model.ground_support_position) * lambda_b 
+                                            - model.ground_support_velocity * lambda_friction
+                                        )* dT;
+    update.ground_support_position = model.ground_support_position + update.ground_support_velocity * dT;
+
+    // printf(
+    //     "pos=(%.2f, %.2f), vel=(%.2f, %.2f), gs_pos=(%.2f, %.2f), gs_vel=(%.2f, %.2f)\n",
+    //     update.position.x,
+    //     update.position.y,
+    //     update.velocity.x,
+    //     update.velocity.y,
+    //     update.ground_support_position.x,
+    //     update.ground_support_position.y,
+    //     update.ground_support_velocity.x,
+    //     update.ground_support_velocity.y);
+    // std::cin.get(); //pause
 
     return update;
 }
@@ -69,8 +115,11 @@ void SocialForceModelIPP::ApplyUpdate(const OperationalModelUpdate& update, Gene
     auto& model = std::get<SocialForceModelIPPData>(agent.model);
     const auto& upd = std::get<SocialForceModelIPPUpdate>(update);
     agent.pos = upd.position;
-    model.velocity = upd.velocity;
     agent.orientation = upd.velocity.Normalized();
+    model.velocity = upd.velocity;
+    model.ground_support_position = upd.ground_support_position;
+    model.ground_support_velocity = upd.ground_support_velocity;
+    
 }
 
 void SocialForceModelIPP::CheckModelConstraint(
