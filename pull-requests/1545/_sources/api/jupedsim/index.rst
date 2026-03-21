@@ -2292,29 +2292,9 @@ Attributes
 
       number of trajectory sample points.
 
-   .. attribute:: jam_speed_threshold
-
-      speed below which an agent is considered jammed [m/s].
-
-   .. attribute:: jam_step_count
-
-      consecutive jammed steps before entering chill mode.
-
    .. attribute:: rng_seed
 
       seed for the random number generator (for reproducibility).
-
-
-   .. py:attribute:: jam_speed_threshold
-      :type:  float
-      :value: 0.1
-
-
-
-   .. py:attribute:: jam_step_count
-      :type:  int
-      :value: 10
-
 
 
    .. py:attribute:: num_samples

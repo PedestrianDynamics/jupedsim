@@ -152,8 +152,6 @@ Set once when creating the simulation. Shared by all agents.
 | `velocity_uncertainty_x` | $\mu_x$ | 0.2 | — | Longitudinal velocity uncertainty. Compresses the collision field along the direction of motion based on the speed ratio $v_b / v_a$ (B.13). |
 | `velocity_uncertainty_y` | $\mu_y$ | 0.2 | — | Lateral velocity uncertainty. Expands the collision field perpendicular to the direction of motion (B.13). |
 | `num_samples` | — | 20 | — | Number of points sampled along the projected trajectory. More samples = better accuracy but higher cost. Cost scales as $O(\text{num\_samples} \times \text{neighbors})$. |
-| `jam_speed_threshold` | — | 0.1 | m/s | Speed below which an agent is considered jammed. |
-| `jam_step_count` | — | 10 | steps | Consecutive jammed steps before entering chill mode. |
 | `rng_seed` | — | 42 | — | Seed for the internal random number generator used for symmetry-breaking perturbations. Fixed for reproducibility. |
 
 ### Agent-level parameters
@@ -169,7 +167,7 @@ Set per agent. Can be modified at runtime.
 
 | Property | Description |
 |---|---|
-| `jam_counter` | Current count of consecutive steps the agent has been below `jam_speed_threshold`. Resets to 0 when speed recovers. |
+| `jam_counter` | Internal counter used by the stuck detection mechanism. |
 
 ## Python API
 
@@ -185,8 +183,6 @@ model = jps.WarpDriverModel(
     velocity_uncertainty_x=0.2,
     velocity_uncertainty_y=0.2,
     num_samples=20,
-    jam_speed_threshold=0.1,
-    jam_step_count=10,
 )
 
 sim = jps.Simulation(model=model, geometry=area, dt=0.01)

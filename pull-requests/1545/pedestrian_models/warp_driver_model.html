@@ -571,18 +571,6 @@ This expands the 2-component field gradient into a 3-component space-time gradie
 <td><p>—</p></td>
 <td><p>Number of points sampled along the projected trajectory. More samples = better accuracy but higher cost. Cost scales as <span class="math notranslate nohighlight">\(O(\text{num\_samples} \times \text{neighbors})\)</span>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">jam_speed_threshold</span></code></p></td>
-<td><p>—</p></td>
-<td><p>0.1</p></td>
-<td><p>m/s</p></td>
-<td><p>Speed below which an agent is considered jammed.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">jam_step_count</span></code></p></td>
-<td><p>—</p></td>
-<td><p>10</p></td>
-<td><p>steps</p></td>
-<td><p>Consecutive jammed steps before entering chill mode.</p></td>
-</tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rng_seed</span></code></p></td>
 <td><p>—</p></td>
 <td><p>42</p></td>
@@ -629,7 +617,7 @@ This expands the 2-component field gradient into a 3-component space-time gradie
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">jam_counter</span></code></p></td>
-<td><p>Current count of consecutive steps the agent has been below <code class="docutils literal notranslate"><span class="pre">jam_speed_threshold</span></code>. Resets to 0 when speed recovers.</p></td>
+<td><p>Internal counter used by the stuck detection mechanism.</p></td>
 </tr>
 </tbody>
 </table>
@@ -649,8 +637,6 @@ This expands the 2-component field gradient into a 3-component space-time gradie
     <span class="n">velocity_uncertainty_x</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
     <span class="n">velocity_uncertainty_y</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
     <span class="n">num_samples</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
-    <span class="n">jam_speed_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-    <span class="n">jam_step_count</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
