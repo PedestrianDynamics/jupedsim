@@ -117,15 +117,25 @@ where $\epsilon_i \sim \mathcal{U}(-0.05, 0.05)$ is drawn per sample per timeste
 
 **Boundary steering**: when an agent is closer than $3 \times r$ to a wall segment, a steering term adjusts its velocity away from the wall proportional to the proximity.
 
-### Step 5 — Jam detection (chill mode)
+### Step 5 — Velocity smoothing (implementation addition)
 
-After computing the new speed:
+The computed velocity is blended with the agent's previous orientation to damp frame-to-frame oscillations in dense clusters:
 
-1. If speed $< $ `jam_speed_threshold`: increment `jam_counter`
-2. If `jam_counter` $\geq$ `jam_step_count`: enter **chill mode** — skip collision avoidance, creep toward the goal at $0.3 \times v_0$, and decay the counter by half so the agent can eventually resume normal avoidance
-3. If speed recovers above the threshold: reset `jam_counter` to 0
+$$\mathbf{v}_\text{smooth} = 0.5 \cdot \mathbf{v}_\text{new} + 0.5 \cdot \hat{o} \cdot \|\mathbf{v}_\text{new}\|$$
 
-This prevents oscillation in dense crowds where agents repeatedly try and fail to avoid each other.
+where $\hat{o}$ is the agent's current orientation. This prevents agents from flipping direction every timestep while still allowing gradual course changes.
+
+### Step 6 — Stuck detection and detour (implementation addition)
+
+Agents can become deadlocked — oscillating in place with high instantaneous speed but zero net progress. To detect this, each agent tracks its **net displacement** from an anchor position:
+
+1. When the agent moves more than 0.3 m from its anchor, the anchor resets to the current position and the stuck timer resets.
+2. If the agent stays within 0.3 m of its anchor for 5 seconds, it enters **detour mode**.
+3. In detour mode (1 second duration), the agent moves laterally (perpendicular to its desired direction) at $0.5 \times v_0$, with a random choice of left or right side. The detour direction is 80% lateral and 20% forward.
+4. If the detour would place the agent outside the walkable area, it tries the opposite side. If both sides fail, the agent creeps slowly toward the goal.
+5. After the detour ends, all stuck tracking resets and normal avoidance resumes.
+
+This mechanism reliably breaks deadlocks that velocity smoothing alone cannot resolve, such as two agents blocking each other in a narrow passage near a wall.
 
 ## Parameters
 

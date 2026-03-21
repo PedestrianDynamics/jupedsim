@@ -334,7 +334,8 @@
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-solve-gradient-descent">Step 3 — Solve: gradient descent</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-4-random-perturbation-implementation-addition">Step 4 — Random perturbation (implementation addition)</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-5-jam-detection-chill-mode">Step 5 — Jam detection (chill mode)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-5-velocity-smoothing-implementation-addition">Step 5 — Velocity smoothing (implementation addition)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-6-stuck-detection-and-detour-implementation-addition">Step 6 — Stuck detection and detour (implementation addition)</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a><ul class="visible nav section-nav flex-column">
@@ -493,15 +494,24 @@ This expands the 2-component field gradient into a 3-component space-time gradie
 <p><strong>Short-range repulsion</strong> (implementation addition, not in the original paper): when two agents are closer than <span class="math notranslate nohighlight">\(3 \times (r_a + r_b)\)</span>, a repulsive velocity term pushes them apart proportional to the overlap depth. This is necessary because the collision probability field is anticipatory — it steers agents <em>before</em> they collide, but cannot guarantee separation when agents are already close (e.g. dense crowds, simultaneous arrivals). Similar pushout mechanisms exist in the CFS and AVM models.</p>
 <p><strong>Boundary steering</strong>: when an agent is closer than <span class="math notranslate nohighlight">\(3 \times r\)</span> to a wall segment, a steering term adjusts its velocity away from the wall proportional to the proximity.</p>
 </section>
-<section id="step-5-jam-detection-chill-mode">
-<h3>Step 5 — Jam detection (chill mode)<a class="headerlink" href="#step-5-jam-detection-chill-mode" title="Link to this heading">#</a></h3>
-<p>After computing the new speed:</p>
+<section id="step-5-velocity-smoothing-implementation-addition">
+<h3>Step 5 — Velocity smoothing (implementation addition)<a class="headerlink" href="#step-5-velocity-smoothing-implementation-addition" title="Link to this heading">#</a></h3>
+<p>The computed velocity is blended with the agent’s previous orientation to damp frame-to-frame oscillations in dense clusters:</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{v}_\text{smooth} = 0.5 \cdot \mathbf{v}_\text{new} + 0.5 \cdot \hat{o} \cdot \|\mathbf{v}_\text{new}\|\]</div>
+<p>where <span class="math notranslate nohighlight">\(\hat{o}\)</span> is the agent’s current orientation. This prevents agents from flipping direction every timestep while still allowing gradual course changes.</p>
+</section>
+<section id="step-6-stuck-detection-and-detour-implementation-addition">
+<h3>Step 6 — Stuck detection and detour (implementation addition)<a class="headerlink" href="#step-6-stuck-detection-and-detour-implementation-addition" title="Link to this heading">#</a></h3>
+<p>Agents can become deadlocked — oscillating in place with high instantaneous speed but zero net progress. To detect this, each agent tracks its <strong>net displacement</strong> from an anchor position:</p>
 <ol class="arabic simple">
-<li><p>If speed <span class="math notranslate nohighlight">\(&lt; \)</span> <code class="docutils literal notranslate"><span class="pre">jam_speed_threshold</span></code>: increment <code class="docutils literal notranslate"><span class="pre">jam_counter</span></code></p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">jam_counter</span></code> <span class="math notranslate nohighlight">\(\geq\)</span> <code class="docutils literal notranslate"><span class="pre">jam_step_count</span></code>: enter <strong>chill mode</strong> — skip collision avoidance, creep toward the goal at <span class="math notranslate nohighlight">\(0.3 \times v_0\)</span>, and decay the counter by half so the agent can eventually resume normal avoidance</p></li>
-<li><p>If speed recovers above the threshold: reset <code class="docutils literal notranslate"><span class="pre">jam_counter</span></code> to 0</p></li>
+<li><p>When the agent moves more than 0.3 m from its anchor, the anchor resets to the current position and the stuck timer resets.</p></li>
+<li><p>If the agent stays within 0.3 m of its anchor for 5 seconds, it enters <strong>detour mode</strong>.</p></li>
+<li><p>In detour mode (1 second duration), the agent moves laterally (perpendicular to its desired direction) at <span class="math notranslate nohighlight">\(0.5 \times v_0\)</span>, with a random choice of left or right side. The detour direction is 80% lateral and 20% forward.</p></li>
+<li><p>If the detour would place the agent outside the walkable area, it tries the opposite side. If both sides fail, the agent creeps slowly toward the goal.</p></li>
+<li><p>After the detour ends, all stuck tracking resets and normal avoidance resumes.</p></li>
 </ol>
-<p>This prevents oscillation in dense crowds where agents repeatedly try and fail to avoid each other.</p>
+<p>This mechanism reliably breaks deadlocks that velocity smoothing alone cannot resolve, such as two agents blocking each other in a narrow passage near a wall.</p>
 </section>
 </section>
 <section id="parameters">
@@ -751,7 +761,8 @@ This expands the 2-component field gradient into a 3-component space-time gradie
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-solve-gradient-descent">Step 3 — Solve: gradient descent</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-4-random-perturbation-implementation-addition">Step 4 — Random perturbation (implementation addition)</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-5-jam-detection-chill-mode">Step 5 — Jam detection (chill mode)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-5-velocity-smoothing-implementation-addition">Step 5 — Velocity smoothing (implementation addition)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-6-stuck-detection-and-detour-implementation-addition">Step 6 — Stuck detection and detour (implementation addition)</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a><ul class="visible nav section-nav flex-column">
