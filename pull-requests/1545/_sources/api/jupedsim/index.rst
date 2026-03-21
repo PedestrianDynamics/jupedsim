@@ -2280,9 +2280,13 @@ Attributes
 
       time uncertainty parameter (lambda).
 
-   .. attribute:: velocity_uncertainty
+   .. attribute:: velocity_uncertainty_x
 
-      velocity uncertainty parameter (mu).
+      longitudinal velocity uncertainty parameter.
+
+   .. attribute:: velocity_uncertainty_y
+
+      lateral velocity uncertainty parameter.
 
    .. attribute:: num_samples
 
@@ -2349,7 +2353,13 @@ Attributes
 
 
 
-   .. py:attribute:: velocity_uncertainty
+   .. py:attribute:: velocity_uncertainty_x
+      :type:  float
+      :value: 0.2
+
+
+
+   .. py:attribute:: velocity_uncertainty_y
       :type:  float
       :value: 0.2
 
