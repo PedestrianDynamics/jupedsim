@@ -1,6 +1,6 @@
 # WarpDriver Model
 
-Based on: Wolinski, Lin, and Pettré, *"WarpDriver: Context-Aware Probabilistic Motion Prediction for Crowd Simulation"*, IEEE TVCG, 2016.
+Based on: Wolinski, D. (2016). *Crowd Simulation Focusing on Pedestrians' Social Relations*. PhD thesis, Université de Rennes 1, Chapter 4 and Appendix B.
 
 ## Overview
 
@@ -43,15 +43,25 @@ Lookups use bilinear interpolation; out-of-bounds queries return zero.
 
 To evaluate the collision probability between agent $a$ and neighbor $b$, each sample point on $a$'s trajectory is transformed into $b$'s intrinsic field space through a chain of coordinate warps:
 
-$$W = W_{vu} \circ W_{ts} \circ W_r \circ W_v \circ W_\text{local}$$
+$$W = W_{th} \circ W_{tu} \circ W_r \circ W_v \circ W_\text{ref}$$
 
-| Operator | Transform | Purpose |
-|---|---|---|
-| $W_\text{local}$ | Rotate + translate from $a$'s frame to $b$'s frame | Reference frame change |
-| $W_v$ | $x' = x - v_b \cdot t$ | Account for $b$'s forward motion |
-| $W_r$ | $(x', y') = (x, y) / r_b$ | Normalize by combined radii ($r_a + r_b$) |
-| $W_{ts}$ | $(x', y') = (x, y) / (1 + \lambda t)$ | Spread field with time uncertainty |
-| $W_{vu}$ | $(x', y') = (x, y) / (1 + \mu \|v_b\|)$ | Spread field with velocity uncertainty |
+Forward composition order (B.1–B.15): $W_\text{ref} \to W_v \to W_r \to W_{tu} \to W_{vu} \to W_{th}$.
+Gradient inverse is applied in reverse order via Jacobian transpose chain.
+
+| Operator | Forward transform | Inverse gradient | Purpose |
+|---|---|---|---|
+| $W_\text{ref}$ (B.1) | Rotate + translate from $a$'s frame to $b$'s frame | Rotate gradient back | Reference frame change |
+| $W_v$ (B.10) | $x' = x - v_b \cdot t$ | $g_t \mathrel{-}= v_b \cdot g_x$ (B.12) | Account for $b$'s forward motion |
+| $W_r$ (B.7) | $(x', y') = (x, y) / \alpha$ where $\alpha = r_a + r_b$ | Identity — no scaling (B.9) | Normalize by Minkowski sum |
+| $W_{tu}$ (B.4) | $(x', y') = \beta \cdot (x, y)$ where $\beta = 1/(1 + \lambda \cdot \max(t, 0))$ | $g_{x,y} \mathrel{*}= \beta$; $g_t \mathrel{+}= \gamma_1 g_x + \gamma_2 g_y$ (B.6) | Time uncertainty spreading |
+| $W_{vu}$ (B.13) | $(x', y') = (\beta_1 x,\; \beta_2 y)$ where $\beta_1 = 1/(1 + \mu_x \cdot v_b/v_a)$, $\beta_2 = 1 + \mu_y$ | $g_x \mathrel{*}= \beta_1$; $g_y \mathrel{*}= \beta_2$ (B.15) | Anisotropic velocity uncertainty |
+| $W_{th}$ (B.1) | $t' = t / T$ | $g_t \mathrel{/}= T$ (B.3) | Time horizon normalization |
+
+#### Probability scaling (B.5, B.14)
+
+The warp operators $W_{tu}$ and $W_{vu}$ change the area of the collision field. To preserve probability mass, the intrinsic field value is scaled by the Jacobian determinants:
+
+$$p_b = I(x', y') \cdot \beta_{tu}^2 \cdot \beta_{1,vu} \cdot \beta_{2,vu}$$
 
 After warping, the normalized time $t' = t / T$ must lie in $[0, 1]$; otherwise the sample is skipped.
 
@@ -71,7 +81,7 @@ This expands the 2-component field gradient into a 3-component space-time gradie
 
 ### Step 3 — Solve: gradient descent
 
-Four integrals are computed over the sampled trajectory (Eq. 4–7 from the paper):
+Four integrals are computed over the sampled trajectory (Eq. 4.4–4.7 from the thesis):
 
 $$N = \int_0^T p(t) \, dt$$
 
@@ -81,7 +91,7 @@ $$\mathbf{G} = \frac{1}{N} \int_0^T p(t) \, \nabla p(t) \, dt$$
 
 $$\mathbf{S} = \frac{1}{N} \int_0^T p(t) \, \mathbf{r}(t) \, dt$$
 
-The corrected trajectory point is (Eq. 8):
+The corrected trajectory point is (Eq. 4.8):
 
 $$\mathbf{q} = \mathbf{S} - \alpha \cdot P \cdot \mathbf{G}$$
 
@@ -129,7 +139,8 @@ Set once when creating the simulation. Shared by all agents.
 | `step_size` | $\alpha$ | 0.5 | — | Gradient descent step size. Controls how aggressively agents deviate from their projected trajectory. Larger = stronger avoidance. |
 | `sigma` | $\sigma$ | 0.3 | — | Gaussian spread of the intrinsic field. Larger values create smoother, wider collision zones. |
 | `time_uncertainty` | $\lambda$ | 0.5 | — | Time uncertainty parameter. Spreads the collision field along the time axis — collisions further in the future are treated as less certain. |
-| `velocity_uncertainty` | $\mu$ | 0.2 | — | Velocity uncertainty parameter. Spreads the collision field based on neighbor speed — faster neighbors have less certain positions. |
+| `velocity_uncertainty_x` | $\mu_x$ | 0.2 | — | Longitudinal velocity uncertainty. Compresses the collision field along the direction of motion based on the speed ratio $v_b / v_a$ (B.13). |
+| `velocity_uncertainty_y` | $\mu_y$ | 0.2 | — | Lateral velocity uncertainty. Expands the collision field perpendicular to the direction of motion (B.13). |
 | `num_samples` | — | 20 | — | Number of points sampled along the projected trajectory. More samples = better accuracy but higher cost. Cost scales as $O(\text{num\_samples} \times \text{neighbors})$. |
 | `jam_speed_threshold` | — | 0.1 | m/s | Speed below which an agent is considered jammed. |
 | `jam_step_count` | — | 10 | steps | Consecutive jammed steps before entering chill mode. |
@@ -161,7 +172,8 @@ model = jps.WarpDriverModel(
     step_size=0.5,
     sigma=0.3,
     time_uncertainty=0.5,
-    velocity_uncertainty=0.2,
+    velocity_uncertainty_x=0.2,
+    velocity_uncertainty_y=0.2,
     num_samples=20,
     jam_speed_threshold=0.1,
     jam_step_count=10,
@@ -202,6 +214,12 @@ Each iteration involves:
 
 Typical bottleneck: the warp composition in the inner loop.
 
-## Reference
+## Known limitations
+
+- **$W_\text{ref}$ uses straight-line frame change only.** The thesis defines graph-based variants (Algorithm 3) that warp space along navigable paths, enabling anticipatory avoidance around corners and bends. The routing infrastructure exists (`RoutingEngine::ComputeAllWaypoints`); integrating it with the warp chain is a future extension.
+
+## References
+
+Wolinski, D. (2016). *Crowd Simulation Focusing on Pedestrians' Social Relations*. PhD thesis, Université de Rennes 1. Chapter 4 (model), Appendix B (warp operator derivations).
 
 Wolinski, D., Lin, M. C., and Pettré, J. (2016). *WarpDriver: Context-Aware Probabilistic Motion Prediction for Crowd Simulation*. IEEE Transactions on Visualization and Computer Graphics, 22(12), 2466–2480.
