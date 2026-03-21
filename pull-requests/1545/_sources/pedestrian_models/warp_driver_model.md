@@ -133,6 +133,7 @@ Set once when creating the simulation. Shared by all agents.
 | `num_samples` | — | 20 | — | Number of points sampled along the projected trajectory. More samples = better accuracy but higher cost. Cost scales as $O(\text{num\_samples} \times \text{neighbors})$. |
 | `jam_speed_threshold` | — | 0.1 | m/s | Speed below which an agent is considered jammed. |
 | `jam_step_count` | — | 10 | steps | Consecutive jammed steps before entering chill mode. |
+| `rng_seed` | — | 42 | — | Seed for the internal random number generator used for symmetry-breaking perturbations. Fixed for reproducibility. |
 
 ### Agent-level parameters
 
