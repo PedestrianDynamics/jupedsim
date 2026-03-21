@@ -469,15 +469,15 @@ This expands the 2-component field gradient into a 3-component space-time gradie
 <div class="math notranslate nohighlight">
 \[\mathbf{r}_i(t) = (v_0 \cdot t,\; \epsilon_i,\; t)\]</div>
 <p>where <span class="math notranslate nohighlight">\(\epsilon_i \sim \mathcal{U}(-0.05, 0.05)\)</span> is drawn per sample per timestep. The perturbation is small enough not to affect normal avoidance but sufficient to break exact symmetry.</p>
+<p><strong>Short-range repulsion</strong> (implementation addition, not in the original paper): when two agents are closer than <span class="math notranslate nohighlight">\(3 \times (r_a + r_b)\)</span>, a repulsive velocity term pushes them apart proportional to the overlap depth. This is necessary because the collision probability field is anticipatory — it steers agents <em>before</em> they collide, but cannot guarantee separation when agents are already close (e.g. dense crowds, simultaneous arrivals). Similar pushout mechanisms exist in the CFS and AVM models.</p>
 <p><strong>Boundary steering</strong>: when an agent is closer than <span class="math notranslate nohighlight">\(3 \times r\)</span> to a wall segment, a steering term adjusts its velocity away from the wall proportional to the proximity.</p>
-<p><strong>Agent steering (not currently active)</strong>: when two agents are closer than <span class="math notranslate nohighlight">\(3 \times (r_a + r_b)\)</span>, a steering term adjusts their velocities apart proportional to the overlap depth. This is not used by default since the random perturbation handles symmetry breaking, but may be re-enabled as a fallback if scenarios with persistent overlap are found.</p>
 </section>
 <section id="step-5-jam-detection-chill-mode">
 <h3>Step 5 — Jam detection (chill mode)<a class="headerlink" href="#step-5-jam-detection-chill-mode" title="Link to this heading">#</a></h3>
 <p>After computing the new speed:</p>
 <ol class="arabic simple">
 <li><p>If speed <span class="math notranslate nohighlight">\(&lt; \)</span> <code class="docutils literal notranslate"><span class="pre">jam_speed_threshold</span></code>: increment <code class="docutils literal notranslate"><span class="pre">jam_counter</span></code></p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">jam_counter</span></code> <span class="math notranslate nohighlight">\(\geq\)</span> <code class="docutils literal notranslate"><span class="pre">jam_step_count</span></code>: enter <strong>chill mode</strong> — skip the velocity correction and stay in place</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">jam_counter</span></code> <span class="math notranslate nohighlight">\(\geq\)</span> <code class="docutils literal notranslate"><span class="pre">jam_step_count</span></code>: enter <strong>chill mode</strong> — skip collision avoidance, creep toward the goal at <span class="math notranslate nohighlight">\(0.3 \times v_0\)</span>, and decay the counter by half so the agent can eventually resume normal avoidance</p></li>
 <li><p>If speed recovers above the threshold: reset <code class="docutils literal notranslate"><span class="pre">jam_counter</span></code> to 0</p></li>
 </ol>
 <p>This prevents oscillation in dense crowds where agents repeatedly try and fail to avoid each other.</p>

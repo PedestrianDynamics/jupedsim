@@ -103,16 +103,16 @@ $$\mathbf{r}_i(t) = (v_0 \cdot t,\; \epsilon_i,\; t)$$
 
 where $\epsilon_i \sim \mathcal{U}(-0.05, 0.05)$ is drawn per sample per timestep. The perturbation is small enough not to affect normal avoidance but sufficient to break exact symmetry.
 
-**Boundary steering**: when an agent is closer than $3 \times r$ to a wall segment, a steering term adjusts its velocity away from the wall proportional to the proximity.
+**Short-range repulsion** (implementation addition, not in the original paper): when two agents are closer than $3 \times (r_a + r_b)$, a repulsive velocity term pushes them apart proportional to the overlap depth. This is necessary because the collision probability field is anticipatory — it steers agents *before* they collide, but cannot guarantee separation when agents are already close (e.g. dense crowds, simultaneous arrivals). Similar pushout mechanisms exist in the CFS and AVM models.
 
-**Agent steering (not currently active)**: when two agents are closer than $3 \times (r_a + r_b)$, a steering term adjusts their velocities apart proportional to the overlap depth. This is not used by default since the random perturbation handles symmetry breaking, but may be re-enabled as a fallback if scenarios with persistent overlap are found.
+**Boundary steering**: when an agent is closer than $3 \times r$ to a wall segment, a steering term adjusts its velocity away from the wall proportional to the proximity.
 
 ### Step 5 — Jam detection (chill mode)
 
 After computing the new speed:
 
 1. If speed $< $ `jam_speed_threshold`: increment `jam_counter`
-2. If `jam_counter` $\geq$ `jam_step_count`: enter **chill mode** — skip the velocity correction and stay in place
+2. If `jam_counter` $\geq$ `jam_step_count`: enter **chill mode** — skip collision avoidance, creep toward the goal at $0.3 \times v_0$, and decay the counter by half so the agent can eventually resume normal avoidance
 3. If speed recovers above the threshold: reset `jam_counter` to 0
 
 This prevents oscillation in dense crowds where agents repeatedly try and fail to avoid each other.
