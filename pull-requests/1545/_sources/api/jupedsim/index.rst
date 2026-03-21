@@ -2296,6 +2296,10 @@ Attributes
 
       consecutive jammed steps before entering chill mode.
 
+   .. attribute:: rng_seed
+
+      seed for the random number generator (for reproducibility).
+
 
    .. py:attribute:: jam_speed_threshold
       :type:  float
@@ -2312,6 +2316,12 @@ Attributes
    .. py:attribute:: num_samples
       :type:  int
       :value: 20
+
+
+
+   .. py:attribute:: rng_seed
+      :type:  int
+      :value: 42
 
 
 

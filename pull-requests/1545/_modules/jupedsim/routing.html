@@ -205,6 +205,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../concepts/index.html">Concepts</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../concepts/geometry.html">Geometry</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../concepts/routing.html">Routing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../concepts/custom_serialization.html">Custom Serialization</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../pedestrian_models/index.html">Pedestrian Models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -346,7 +347,9 @@
         <span class="p">),</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">RoutingEngine</span><span class="p">(</span><span class="n">build_geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="o">*</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">RoutingEngine</span><span class="p">(</span>
+            <span class="n">build_geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">_obj</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="RoutingEngine.compute_waypoints">
 <a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.RoutingEngine.compute_waypoints">[docs]</a>

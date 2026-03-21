@@ -205,6 +205,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../concepts/index.html">Concepts</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../concepts/geometry.html">Geometry</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../concepts/routing.html">Routing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../concepts/custom_serialization.html">Custom Serialization</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../pedestrian_models/index.html">Pedestrian Models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -342,6 +343,7 @@
 <span class="sd">        num_samples: number of trajectory sample points.</span>
 <span class="sd">        jam_speed_threshold: speed below which an agent is considered jammed [m/s].</span>
 <span class="sd">        jam_step_count: consecutive jammed steps before entering chill mode.</span>
+<span class="sd">        rng_seed: seed for the random number generator (for reproducibility).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">time_horizon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span>
@@ -351,7 +353,8 @@
     <span class="n">velocity_uncertainty</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span>
     <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span>
     <span class="n">jam_speed_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span>
-    <span class="n">jam_step_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span></div>
+    <span class="n">jam_step_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">rng_seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span></div>
 
 
 

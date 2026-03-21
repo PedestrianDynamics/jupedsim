@@ -208,6 +208,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../concepts/index.html">Concepts</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../concepts/geometry.html">Geometry</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../concepts/routing.html">Routing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../concepts/custom_serialization.html">Custom Serialization</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../pedestrian_models/index.html">Pedestrian Models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -709,14 +710,16 @@
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.WarpDriverModel.num_samples"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.num_samples</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.WarpDriverModel.jam_speed_threshold"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.jam_speed_threshold</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.WarpDriverModel.jam_step_count"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.jam_step_count</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.WarpDriverModel.rng_seed"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.rng_seed</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id68"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.jam_speed_threshold</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id69"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.jam_step_count</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id70"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.num_samples</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id71"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.sigma</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id72"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.step_size</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id73"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.time_horizon</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id74"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.time_uncertainty</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id75"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.velocity_uncertainty</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id71"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.rng_seed</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id72"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.sigma</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id73"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.step_size</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id74"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.time_horizon</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id75"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.time_uncertainty</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id76"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.velocity_uncertainty</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.WarpDriverModelAgentParameters"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters</span></code></a><ul class="nav section-nav flex-column">
@@ -726,12 +729,12 @@
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.WarpDriverModelAgentParameters.stage_id"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.stage_id</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.WarpDriverModelAgentParameters.desired_speed"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.desired_speed</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.WarpDriverModelAgentParameters.radius"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.radius</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id76"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.desired_speed</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id77"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.journey_id</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id78"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.orientation</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id79"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.position</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id80"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.radius</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id81"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.stage_id</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id77"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.desired_speed</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id78"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.journey_id</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id79"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.orientation</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id80"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.position</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id81"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.radius</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id82"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.stage_id</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.WarpDriverModelState"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelState</span></code></a><ul class="nav section-nav flex-column">
@@ -3387,6 +3390,12 @@ avoidance using warped intrinsic fields.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="jupedsim.WarpDriverModel.rng_seed">
+<span class="sig-name descname"><span class="pre">rng_seed</span></span><a class="headerlink" href="#jupedsim.WarpDriverModel.rng_seed" title="Link to this definition">#</a></dt>
+<dd><p>seed for the random number generator (for reproducibility).</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="id68">
 <span class="sig-name descname"><span class="pre">jam_speed_threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.1</span></em><a class="headerlink" href="#id68" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
@@ -3403,27 +3412,32 @@ avoidance using warped intrinsic fields.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id71">
-<span class="sig-name descname"><span class="pre">sigma</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.3</span></em><a class="headerlink" href="#id71" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">rng_seed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">42</span></em><a class="headerlink" href="#id71" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id72">
-<span class="sig-name descname"><span class="pre">step_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.5</span></em><a class="headerlink" href="#id72" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">sigma</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.3</span></em><a class="headerlink" href="#id72" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id73">
-<span class="sig-name descname"><span class="pre">time_horizon</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2.0</span></em><a class="headerlink" href="#id73" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">step_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.5</span></em><a class="headerlink" href="#id73" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id74">
-<span class="sig-name descname"><span class="pre">time_uncertainty</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.5</span></em><a class="headerlink" href="#id74" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">time_horizon</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2.0</span></em><a class="headerlink" href="#id74" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id75">
-<span class="sig-name descname"><span class="pre">velocity_uncertainty</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.2</span></em><a class="headerlink" href="#id75" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">time_uncertainty</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.5</span></em><a class="headerlink" href="#id75" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id76">
+<span class="sig-name descname"><span class="pre">velocity_uncertainty</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.2</span></em><a class="headerlink" href="#id76" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -3469,33 +3483,33 @@ avoidance using warped intrinsic fields.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="id76">
-<span class="sig-name descname"><span class="pre">desired_speed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1.2</span></em><a class="headerlink" href="#id76" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="id77">
-<span class="sig-name descname"><span class="pre">journey_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-1</span></em><a class="headerlink" href="#id77" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">desired_speed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1.2</span></em><a class="headerlink" href="#id77" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id78">
-<span class="sig-name descname"><span class="pre">orientation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(0.0,</span> <span class="pre">0.0)</span></em><a class="headerlink" href="#id78" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">journey_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-1</span></em><a class="headerlink" href="#id78" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id79">
-<span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(0.0,</span> <span class="pre">0.0)</span></em><a class="headerlink" href="#id79" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">orientation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(0.0,</span> <span class="pre">0.0)</span></em><a class="headerlink" href="#id79" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id80">
-<span class="sig-name descname"><span class="pre">radius</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.15</span></em><a class="headerlink" href="#id80" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(0.0,</span> <span class="pre">0.0)</span></em><a class="headerlink" href="#id80" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id81">
-<span class="sig-name descname"><span class="pre">stage_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-1</span></em><a class="headerlink" href="#id81" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">radius</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.15</span></em><a class="headerlink" href="#id81" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id82">
+<span class="sig-name descname"><span class="pre">stage_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-1</span></em><a class="headerlink" href="#id82" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -4270,14 +4284,16 @@ basic information about this library.</p>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.WarpDriverModel.num_samples"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.num_samples</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.WarpDriverModel.jam_speed_threshold"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.jam_speed_threshold</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.WarpDriverModel.jam_step_count"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.jam_step_count</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.WarpDriverModel.rng_seed"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.rng_seed</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id68"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.jam_speed_threshold</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id69"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.jam_step_count</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id70"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.num_samples</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id71"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.sigma</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id72"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.step_size</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id73"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.time_horizon</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id74"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.time_uncertainty</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id75"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.velocity_uncertainty</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id71"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.rng_seed</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id72"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.sigma</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id73"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.step_size</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id74"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.time_horizon</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id75"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.time_uncertainty</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id76"><code class="docutils literal notranslate"><span class="pre">WarpDriverModel.velocity_uncertainty</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.WarpDriverModelAgentParameters"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters</span></code></a><ul class="nav section-nav flex-column">
@@ -4287,12 +4303,12 @@ basic information about this library.</p>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.WarpDriverModelAgentParameters.stage_id"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.stage_id</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.WarpDriverModelAgentParameters.desired_speed"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.desired_speed</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.WarpDriverModelAgentParameters.radius"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.radius</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id76"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.desired_speed</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id77"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.journey_id</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id78"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.orientation</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id79"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.position</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id80"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.radius</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id81"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.stage_id</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id77"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.desired_speed</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id78"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.journey_id</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id79"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.orientation</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id80"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.position</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id81"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.radius</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#id82"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters.stage_id</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.WarpDriverModelState"><code class="docutils literal notranslate"><span class="pre">WarpDriverModelState</span></code></a><ul class="nav section-nav flex-column">
