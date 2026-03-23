@@ -23,6 +23,8 @@ from shapely import wkt
 
 SCRIPT_DIR = Path(__file__).parent
 seed = 123
+dt = 0.05
+
 MODELS = {
     # "CFSV2": (
     #     lambda: jps.CollisionFreeSpeedModelV2(
@@ -90,7 +92,7 @@ def _make_agent(agent_cls, position, journey_id, stage_id, orientation=None):
 def _setup_bidirectional(model, writer, length=50.0, width=4.0):
     area = shapely.Polygon([(0, 0), (length, 0), (length, width), (0, width)])
     sim = jps.Simulation(
-        model=model, geometry=area, dt=0.01, trajectory_writer=writer
+        model=model, geometry=area, dt=dt, trajectory_writer=writer
     )
     exit_left = shapely.Polygon([(0, 0), (1, 0), (1, width), (0, width)])
     exit_right = shapely.Polygon(
@@ -147,7 +149,7 @@ def _load_wkt(name):
 def _setup_bottleneck(model, writer):
     geometry = _load_wkt("bottleneck.wkt")
     sim = jps.Simulation(
-        model=model, geometry=geometry, dt=0.01, trajectory_writer=writer
+        model=model, geometry=geometry, dt=dt, trajectory_writer=writer
     )
     exit_area = geometry.intersection(shapely.box(13, -5, 15, 5))
     eid = sim.add_exit_stage(exit_area)
@@ -176,7 +178,7 @@ def _add_bottleneck(sim, agent_cls, routes, geometry, n=100):
 def _setup_crossing(model, writer):
     geometry = _load_wkt("crossing.wkt")
     sim = jps.Simulation(
-        model=model, geometry=geometry, dt=0.01, trajectory_writer=writer
+        model=model, geometry=geometry, dt=dt, trajectory_writer=writer
     )
     exits = {
         "north": shapely.Polygon(
