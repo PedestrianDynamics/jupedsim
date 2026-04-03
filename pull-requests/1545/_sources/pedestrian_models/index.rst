@@ -192,7 +192,7 @@ Key features:
 
 The parameters of the WarpDriver model include model-level parameters (shared
 by all agents: ``time_horizon``, ``step_size``, ``sigma``,
-``time_uncertainty``, ``velocity_uncertainty``, ``num_samples``) and per-agent
+``time_uncertainty``, ``velocity_uncertainty_x``, ``velocity_uncertainty_y``, ``num_samples``) and per-agent
 parameters (``desired_speed``, ``radius``) that can be modified at runtime.
 
 See the `full WarpDriver model documentation <warp_driver_model.html>`_ for
