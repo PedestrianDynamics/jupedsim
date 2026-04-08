@@ -79,7 +79,7 @@ class BuildInfo:
             name of the branch this version was build from.
 
         """
-        return py_jps.buildinfo.git_commit_branch
+        return py_jps.buildinfo.git_branch
 
     @property
     def compiler(self) -> str:
