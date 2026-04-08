@@ -12,7 +12,7 @@ Logger& Logger::Instance()
     return logger;
 }
 
-void Logger::SetDebugCallback(LogCalback&& cb)
+void Logger::SetDebugCallback(LogCallback&& cb)
 {
     debug_msg_cb = cb;
 }
@@ -29,7 +29,7 @@ void Logger::LogDebugMessage(const std::string& msg)
     }
 }
 
-void Logger::SetInfoCallback(LogCalback&& cb)
+void Logger::SetInfoCallback(LogCallback&& cb)
 {
     info_msg_cb = cb;
 }
@@ -46,7 +46,7 @@ void Logger::LogInfoMessage(const std::string& msg)
     }
 }
 
-void Logger::SetWarningCallback(LogCalback&& cb)
+void Logger::SetWarningCallback(LogCallback&& cb)
 {
     warning_msg_cb = cb;
 }
@@ -63,7 +63,7 @@ void Logger::LogWarningMessage(const std::string& msg)
     }
 }
 
-void Logger::SetErrorCallback(LogCalback&& cb)
+void Logger::SetErrorCallback(LogCallback&& cb)
 {
     error_msg_cb = cb;
 }
