@@ -74,7 +74,7 @@ Here you have two options.
 
 ### With setuptools
 
-You will need a C++20 capable compiler and CMake >= 3.19 installed on your
+You will need a C++20 capable compiler and CMake >= 3.22 installed on your
 system. Then install our python dependencies via pip. Our python package
 dependencies are listed in `requirements.txt` in the root of this repository.
 Now you can call `pip install .`
@@ -89,7 +89,7 @@ pip install .
 
 ### Compile yourself
 
-You will need a C++20 capable compiler and CMake >= 3.19 installed on your
+You will need a C++20 capable compiler and CMake >= 3.22 installed on your
 system. Then install our python dependencies via pip. Our python package
 dependencies are listed in `requirements.txt` in the root of this repository.
 Now you can generate makefiles with CMake, then compile and run the python
@@ -100,7 +100,7 @@ pip install -r jupedsim/requirements.txt
 mkdir jupedsim-build
 cd jupedsim-build
 git submodule update --init
-cmake ../jupedsim
+cmake ..
 make -j
 source ./environment
 ```

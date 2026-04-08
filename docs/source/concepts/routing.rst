@@ -105,7 +105,7 @@ An exit located in the polygon :math:`(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-
 .. note::
 
     When adding exits close to the boundary of the walkable area make sure that there is enough room for the agents to enter the exit polygon.
-    Otherwise they will not be able to each the exit at all.
+    Otherwise they will not be able to reach the exit at all.
 
 .. warning::
 
