@@ -96,7 +96,8 @@ Now you can generate makefiles with CMake, then compile and run the python
 library.
 
 ```bash
-pip install -r jupedsim/requirements.txt
+cd jupedsim
+pip install -r requirements.txt
 mkdir jupedsim-build
 cd jupedsim-build
 git submodule update --init
