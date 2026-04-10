@@ -36,7 +36,7 @@ def get_latest_jupedsim_bibtex(installed_version):
 
         record_id = None
         for record in records:
-            fetched_version = record["metadata"]["version"]
+            fetched_version = record["metadata"].get('version', 'NO VERSION')
 
             if fetched_version == installed_version:
                 record_id = record["id"]
@@ -62,5 +62,5 @@ def get_latest_jupedsim_bibtex(installed_version):
         warnings.warn(f"An error occurred: {e}")
 
 # if __name__ == "__main__":
-#     jupedsim_bibtex = get_latest_jupedsim_bibtex()
+#     jupedsim_bibtex = get_latest_jupedsim_bibtex("v2.0.0")
 #     print(jupedsim_bibtex)
