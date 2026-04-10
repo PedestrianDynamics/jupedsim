@@ -28,7 +28,6 @@ add_library(simulator STATIC
     src/CollisionGeometry.hpp
     src/Ellipse.cpp
     src/Ellipse.hpp
-    src/Enum.hpp
     src/GeneralizedCentrifugalForceModel.cpp
     src/GeneralizedCentrifugalForceModel.hpp
     src/GeneralizedCentrifugalForceModelBuilder.cpp
