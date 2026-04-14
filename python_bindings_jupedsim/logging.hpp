@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include <functional>
-#include <string>
+#include "Logger.hpp"
 
 class LogCallbackOwner
 {
 public:
-    using LogCallback = std::function<void(const std::string&)>;
+    using LogCallback = Logging::Logger::LogCallback;
 
     LogCallback debug{};
     LogCallback info{};

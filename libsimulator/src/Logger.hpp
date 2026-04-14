@@ -12,26 +12,26 @@ namespace Logging
 class Logger
 {
 public:
-    using LogCalback = std::function<void(const std::string& msg)>;
+    using LogCallback = std::function<void(const std::string& msg)>;
 
 private:
-    LogCalback debug_msg_cb{};
-    LogCalback info_msg_cb{};
-    LogCalback warning_msg_cb{};
-    LogCalback error_msg_cb{};
+    LogCallback debug_msg_cb{};
+    LogCallback info_msg_cb{};
+    LogCallback warning_msg_cb{};
+    LogCallback error_msg_cb{};
 
 public:
     static Logger& Instance();
-    void SetDebugCallback(LogCalback&& cb);
+    void SetDebugCallback(LogCallback&& cb);
     void ClearDebugCallback();
     void LogDebugMessage(const std::string& msg);
-    void SetInfoCallback(LogCalback&& cb);
+    void SetInfoCallback(LogCallback&& cb);
     void ClearInfoCallback();
     void LogInfoMessage(const std::string& msg);
-    void SetWarningCallback(LogCalback&& cb);
+    void SetWarningCallback(LogCallback&& cb);
     void ClearWarningCallback();
     void LogWarningMessage(const std::string& msg);
-    void SetErrorCallback(LogCalback&& cb);
+    void SetErrorCallback(LogCallback&& cb);
     void ClearErrorCallback();
     void LogErrorMessage(const std::string& msg);
     void ClearAllCallbacks();
