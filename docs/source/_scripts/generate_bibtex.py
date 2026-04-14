@@ -1,7 +1,8 @@
+import textwrap
 import time
 import warnings
+
 import requests
-import textwrap
 
 
 def _fetch_data_with_retries(
@@ -36,7 +37,7 @@ def get_latest_jupedsim_bibtex(installed_version):
 
         record_id = None
         for record in records:
-            fetched_version = record["metadata"].get('version', 'NO VERSION')
+            fetched_version = record["metadata"].get("version", "NO VERSION")
 
             if fetched_version == installed_version:
                 record_id = record["id"]
