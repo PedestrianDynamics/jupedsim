@@ -96,12 +96,11 @@ Now you can generate makefiles with CMake, then compile and run the python
 library.
 
 ```bash
-cd jupedsim
-pip install -r requirements.txt
+pip install -r jupedsim/requirements.txt
 mkdir jupedsim-build
 cd jupedsim-build
 git submodule update --init
-cmake ..
+cmake ../jupedsim
 make -j
 source ./environment
 ```
