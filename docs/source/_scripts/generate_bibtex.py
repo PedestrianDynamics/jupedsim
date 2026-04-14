@@ -62,6 +62,7 @@ def get_latest_jupedsim_bibtex(installed_version):
     except Exception as e:
         warnings.warn(f"An error occurred: {e}")
 
+
 # if __name__ == "__main__":
 #     jupedsim_bibtex = get_latest_jupedsim_bibtex("v2.0.0")
 #     print(jupedsim_bibtex)
