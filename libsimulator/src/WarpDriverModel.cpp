@@ -269,6 +269,8 @@ STP ComposeGradientInverse(const Point& gradI, const STP& sOriginal, const WarpP
 
     // W_tu^-1 (B.6): spatial gradient scaled by beta, temporal gets cross-terms.
     // Coordinates at W_tu input = after W_ref -> W_v -> W_r on sOriginal.
+    // TODO(perf): ComposeForward already computes this intermediate; cache and
+    // reuse instead of recomputing the three warps here. ~15% per-sample saving.
     {
         const double t = sOriginal.t;
         const double beta = 1.0 / (1.0 + p.lambda * std::max(t, 0.0));
@@ -332,7 +334,12 @@ WarpDriverModel::WarpDriverModel(
     , _velocityUncertaintyX(velocityUncertaintyX)
     , _velocityUncertaintyY(velocityUncertaintyY)
     , _numSamples(numSamples)
-    , _cutOffRadius(3.0 * timeHorizon) // conservative estimate
+    // Neighborhood cutoff: maximum distance at which a neighbor can still
+    // collide with us within timeHorizon. Two agents closing head-on cover
+    // 2 * v_max * timeHorizon, plus their combined radii, plus a small margin.
+    // v_max and r_max are hardcoded pedestrian defaults; promote to constructor
+    // parameters if mixed-speed populations need a tighter or wider cutoff.
+    , _cutOffRadius(2.0 * 1.5 * timeHorizon + 2.0 * 0.3 + 0.5)
     , _rng(rngSeed)
 {
     _intrinsicField.Compute(sigma);
@@ -486,6 +493,10 @@ OperationalModelUpdate WarpDriverModel::ComputeNewPosition(
         // Neighbor speed (from v0)
         const double nbSpeed = nbData->v0;
 
+        // TODO(perf): WarpParams and all neighbor-derived constants (orientation,
+        // speed, Minkowski radius, rotation matrix cos_ab/sin_ab used in the
+        // gradient inverse) are loop-invariant w.r.t. the sample index. Hoist
+        // them out of the sample loop and precompute once per (ped, neighbor).
         WarpParams wp{};
         wp.posA = ped.pos;
         wp.orientA = effectiveOrient;
