@@ -91,7 +91,12 @@ _HAS_ORIENTATION = {
 
 
 def _make_agent(
-    agent_cls, position, journey_id, stage_id, orientation=None, agent_kwargs=None
+    agent_cls,
+    position,
+    journey_id,
+    stage_id,
+    orientation=None,
+    agent_kwargs=None,
 ):
     kwargs = dict(
         position=position,
@@ -142,7 +147,12 @@ def _add_bidirectional(sim, agent_cls, routes, n=50, agent_kwargs=None):
     for pos in pos_r:
         aid = sim.add_agent(
             _make_agent(
-                agent_cls, pos, jid_r, eid_r, orientation=(1, 0), agent_kwargs=agent_kwargs
+                agent_cls,
+                pos,
+                jid_r,
+                eid_r,
+                orientation=(1, 0),
+                agent_kwargs=agent_kwargs,
             )
         )
         streams["right"].append(aid)
@@ -156,7 +166,12 @@ def _add_bidirectional(sim, agent_cls, routes, n=50, agent_kwargs=None):
     for pos in pos_l:
         aid = sim.add_agent(
             _make_agent(
-                agent_cls, pos, jid_l, eid_l, orientation=(-1, 0), agent_kwargs=agent_kwargs
+                agent_cls,
+                pos,
+                jid_l,
+                eid_l,
+                orientation=(-1, 0),
+                agent_kwargs=agent_kwargs,
             )
         )
         streams["left"].append(aid)
@@ -195,7 +210,12 @@ def _add_bottleneck(sim, agent_cls, routes, geometry, n=100, agent_kwargs=None):
     for pos in positions:
         sim.add_agent(
             _make_agent(
-                agent_cls, pos, jid, eid, orientation=(1, 0), agent_kwargs=agent_kwargs
+                agent_cls,
+                pos,
+                jid,
+                eid,
+                orientation=(1, 0),
+                agent_kwargs=agent_kwargs,
             )
         )
     return None  # single stream, no color splitting
@@ -272,7 +292,12 @@ def _add_crossing(sim, agent_cls, routes, n=15, agent_kwargs=None):
         for pos in positions:
             aid = sim.add_agent(
                 _make_agent(
-                    agent_cls, pos, jid, eid, orientation=orient, agent_kwargs=agent_kwargs
+                    agent_cls,
+                    pos,
+                    jid,
+                    eid,
+                    orientation=orient,
+                    agent_kwargs=agent_kwargs,
                 )
             )
             ids.append(aid)
