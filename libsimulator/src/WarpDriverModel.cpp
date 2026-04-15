@@ -14,7 +14,7 @@
 // Non-thesis safety mechanisms (practical additions):
 //   - Short-range repulsion (3× combined radius) to prevent overlaps
 //   - Boundary wall steering
-//   - Jam detection with "chill mode" recovery
+//   - Stuck detection with lateral detour to break narrow-passage deadlocks
 //   - Lateral perturbation for symmetry breaking
 //
 // TODO: W_ref currently uses simple W_local (straight-line frame change).
@@ -354,7 +354,6 @@ void WarpDriverModel::ApplyUpdate(const OperationalModelUpdate& update, GenericA
     auto& data = std::get<WarpDriverModelData>(agent.model);
     agent.pos = upd.position;
     agent.orientation = upd.orientation;
-    data.jamCounter = upd.jamCounter;
     data.stuckTime = upd.stuckTime;
     data.anchorX = upd.anchorX;
     data.anchorY = upd.anchorY;
@@ -622,7 +621,6 @@ OperationalModelUpdate WarpDriverModel::ComputeNewPosition(
     // Stuck detection: measure net displacement from an anchor position over a
     // time window. Catches oscillating agents that periodically spike above the
     // speed threshold but make no real progress.
-    int jamCounter = agentData.jamCounter;
     double stuckTime = agentData.stuckTime;
     double anchorX = agentData.anchorX;
     double anchorY = agentData.anchorY;
@@ -654,10 +652,9 @@ OperationalModelUpdate WarpDriverModel::ComputeNewPosition(
             stuckTime = 0.0;
             anchorX = newPos.x;
             anchorY = newPos.y;
-            jamCounter = 0;
         }
         return WarpDriverModelUpdate{
-            newPos, detourDir, jamCounter, stuckTime, anchorX, anchorY, detourTime, detourSide};
+            newPos, detourDir, stuckTime, anchorX, anchorY, detourTime, detourSide};
     }
 
     // Measure net displacement from anchor over the stuck window
@@ -673,7 +670,6 @@ OperationalModelUpdate WarpDriverModel::ComputeNewPosition(
         stuckTime = 0.0;
         anchorX = ped.pos.x;
         anchorY = ped.pos.y;
-        jamCounter = 0;
     } else if(stuckTime >= stuckThreshold) {
         // Stuck: no net progress for stuckThreshold seconds — enter detour
         std::uniform_int_distribution<int> sideDist(0, 1);
@@ -695,5 +691,5 @@ OperationalModelUpdate WarpDriverModel::ComputeNewPosition(
     Point newOrient = (smoothedVel.Norm() > 1e-9) ? smoothedVel.Normalized() : orient;
 
     return WarpDriverModelUpdate{
-        newPos, newOrient, jamCounter, stuckTime, anchorX, anchorY, detourTime, detourSide};
+        newPos, newOrient, stuckTime, anchorX, anchorY, detourTime, detourSide};
 }

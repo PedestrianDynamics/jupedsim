@@ -75,8 +75,3 @@ class WarpDriverModelState:
     @desired_speed.setter
     def desired_speed(self, desired_speed):
         self._obj.desired_speed = desired_speed
-
-    @property
-    def jam_counter(self) -> int:
-        """Current jam counter (read-only)."""
-        return self._obj.jam_counter

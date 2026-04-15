@@ -6,7 +6,6 @@
 struct WarpDriverModelData {
     double radius{0.15};
     double v0{1.2};
-    int jamCounter{0};
     double stuckTime{0.0}; // elapsed time since anchor was set
     double anchorX{0.0}; // position when stuck tracking began
     double anchorY{0.0};
@@ -22,7 +21,6 @@ struct fmt::formatter<WarpDriverModelData> {
     template <typename FormatContext>
     auto format(const WarpDriverModelData& m, FormatContext& ctx) const
     {
-        return fmt::format_to(
-            ctx.out(), "WarpDriver[radius={}, v0={}, jamCounter={}]", m.radius, m.v0, m.jamCounter);
+        return fmt::format_to(ctx.out(), "WarpDriver[radius={}, v0={}]", m.radius, m.v0);
     }
 };

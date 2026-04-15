@@ -6,7 +6,6 @@
 struct WarpDriverModelUpdate {
     Point position{};
     Point orientation{};
-    int jamCounter{0};
     double stuckTime{0.0};
     double anchorX{0.0};
     double anchorY{0.0};

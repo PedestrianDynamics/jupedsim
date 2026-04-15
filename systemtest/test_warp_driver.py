@@ -140,7 +140,6 @@ def test_agent_parameters():
     state = sim.agent(aid).model
     assert math.isclose(state.radius, 0.2)
     assert math.isclose(state.desired_speed, 1.0)
-    assert state.jam_counter == 0
 
     # Mutate radius and desired_speed
     state.radius = 0.3
