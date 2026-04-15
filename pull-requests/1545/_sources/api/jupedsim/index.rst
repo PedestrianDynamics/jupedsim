@@ -2422,13 +2422,6 @@ Attributes
       Desired speed of this agent [m/s].
 
 
-   .. py:property:: jam_counter
-      :type: int
-
-
-      Current jam counter (read-only).
-
-
    .. py:property:: radius
       :type: float
 

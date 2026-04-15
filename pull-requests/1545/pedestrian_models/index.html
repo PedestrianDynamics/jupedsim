@@ -524,7 +524,7 @@ probability landscape).</p>
 <li><p>Probabilistic collision prediction via precomputed intrinsic fields</p></li>
 <li><p>Five composable warp operators for coordinate transforms between agents</p></li>
 <li><p>Gradient-based velocity correction (speed model, not force-based)</p></li>
-<li><p>Jam detection with chill mode to prevent oscillation in dense crowds</p></li>
+<li><p>Stuck detection with lateral detour to break narrow-passage deadlocks</p></li>
 </ul>
 <p>The parameters of the WarpDriver model include model-level parameters (shared
 by all agents: <code class="docutils literal notranslate"><span class="pre">time_horizon</span></code>, <code class="docutils literal notranslate"><span class="pre">step_size</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>,

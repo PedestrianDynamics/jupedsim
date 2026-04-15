@@ -188,7 +188,7 @@ Key features:
 * Probabilistic collision prediction via precomputed intrinsic fields
 * Five composable warp operators for coordinate transforms between agents
 * Gradient-based velocity correction (speed model, not force-based)
-* Jam detection with chill mode to prevent oscillation in dense crowds
+* Stuck detection with lateral detour to break narrow-passage deadlocks
 
 The parameters of the WarpDriver model include model-level parameters (shared
 by all agents: ``time_horizon``, ``step_size``, ``sigma``,

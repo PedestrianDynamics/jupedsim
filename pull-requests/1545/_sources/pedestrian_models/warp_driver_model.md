@@ -54,7 +54,7 @@ Gradient inverse is applied in reverse order via Jacobian transpose chain.
 | $W_v$ (B.10) | $x' = x - v_b \cdot t$ | $g_t \mathrel{-}= v_b \cdot g_x$ (B.12) | Account for $b$'s forward motion |
 | $W_r$ (B.7) | $(x', y') = (x, y) / \alpha$ where $\alpha = r_a + r_b$ | Identity — no scaling (B.9) | Normalize by Minkowski sum |
 | $W_{tu}$ (B.4) | $(x', y') = \beta \cdot (x, y)$ where $\beta = 1/(1 + \lambda \cdot \max(t, 0))$ | $g_{x,y} \mathrel{*}= \beta$; $g_t \mathrel{+}= \gamma_1 g_x + \gamma_2 g_y$ (B.6) | Time uncertainty spreading |
-| $W_{vu}$ (B.13) | $(x', y') = (\beta_1 x,\; \beta_2 y)$ where $\beta_1 = 1/(1 + \mu_x \cdot v_b/v_a)$, $\beta_2 = 1 + \mu_y$ | $g_x \mathrel{*}= \beta_1$; $g_y \mathrel{*}= \beta_2$ (B.15) | Anisotropic velocity uncertainty |
+| $W_{vu}$ (B.13) | $(x', y') = (\beta_1 x,\; \beta_2 y)$ where $\beta_1 = 1/(1 + \mu_x)$, $\beta_2 = 1 + \mu_y$ | $g_x \mathrel{*}= \beta_1$; $g_y \mathrel{*}= \beta_2$ (B.15) | Anisotropic velocity uncertainty |
 | $W_{th}$ (B.1) | $t' = t / T$ | $g_t \mathrel{/}= T$ (B.3) | Time horizon normalization |
 
 #### Probability scaling (B.5, B.14)
@@ -149,8 +149,8 @@ Set once when creating the simulation. Shared by all agents.
 | `step_size` | $\alpha$ | 0.5 | — | Gradient descent step size. Controls how aggressively agents deviate from their projected trajectory. Larger = stronger avoidance. |
 | `sigma` | $\sigma$ | 0.3 | — | Gaussian spread of the intrinsic field. Larger values create smoother, wider collision zones. |
 | `time_uncertainty` | $\lambda$ | 0.5 | — | Time uncertainty parameter. Spreads the collision field along the time axis — collisions further in the future are treated as less certain. |
-| `velocity_uncertainty_x` | $\mu_x$ | 0.2 | — | Longitudinal velocity uncertainty. Compresses the collision field along the direction of motion based on the speed ratio $v_b / v_a$ (B.13). |
-| `velocity_uncertainty_y` | $\mu_y$ | 0.2 | — | Lateral velocity uncertainty. Expands the collision field perpendicular to the direction of motion (B.13). |
+| `velocity_uncertainty_x` | $\mu_x$ | 0.2 | — | Longitudinal velocity uncertainty. Compresses the collision field along the direction of motion via $\beta_1 = 1/(1 + \mu_x)$ (B.13, simplified for $v = v_\text{pref}$). |
+| `velocity_uncertainty_y` | $\mu_y$ | 0.2 | — | Lateral velocity uncertainty. Expands the collision field perpendicular to the direction of motion via $\beta_2 = 1 + \mu_y$ (B.13, simplified for $v = v_\text{pref}$). |
 | `num_samples` | — | 20 | — | Number of points sampled along the projected trajectory. More samples = better accuracy but higher cost. Cost scales as $O(\text{num\_samples} \times \text{neighbors})$. |
 | `rng_seed` | — | 42 | — | Seed for the internal random number generator used for symmetry-breaking perturbations. Fixed for reproducibility. |
 
@@ -162,12 +162,6 @@ Set per agent. Can be modified at runtime.
 |---|---|---|---|
 | `desired_speed` ($v_0$) | 1.2 | m/s | Free-flow speed the agent tries to maintain. |
 | `radius` ($r$) | 0.15 | m | Physical radius of the agent. Used in the Minkowski sum for collision detection ($r_a + r_b$) and in the short-range repulsion. |
-
-### Read-only agent state
-
-| Property | Description |
-|---|---|
-| `jam_counter` | Internal counter used by the stuck detection mechanism. |
 
 ## Python API
 
@@ -201,7 +195,6 @@ agent_id = sim.add_agent(jps.WarpDriverModelAgentParameters(
 state = sim.agent(agent_id).model
 print(state.desired_speed)   # 1.2
 print(state.radius)          # 0.15
-print(state.jam_counter)     # 0
 
 # Mutable at runtime
 state.desired_speed = 0.8

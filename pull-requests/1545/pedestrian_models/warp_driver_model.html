@@ -341,7 +341,6 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#model-level-parameters">Model-level parameters</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#agent-level-parameters">Agent-level parameters</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#read-only-agent-state">Read-only agent state</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-api">Python API</a></li>
@@ -431,7 +430,7 @@ Gradient inverse is applied in reverse order via Jacobian transpose chain.</p>
 <td><p>Time uncertainty spreading</p></td>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(W_{vu}\)</span> (B.13)</p></td>
-<td><p><span class="math notranslate nohighlight">\((x', y') = (\beta_1 x,\; \beta_2 y)\)</span> where <span class="math notranslate nohighlight">\(\beta_1 = 1/(1 + \mu_x \cdot v_b/v_a)\)</span>, <span class="math notranslate nohighlight">\(\beta_2 = 1 + \mu_y\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((x', y') = (\beta_1 x,\; \beta_2 y)\)</span> where <span class="math notranslate nohighlight">\(\beta_1 = 1/(1 + \mu_x)\)</span>, <span class="math notranslate nohighlight">\(\beta_2 = 1 + \mu_y\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(g_x \mathrel{*}= \beta_1\)</span>; <span class="math notranslate nohighlight">\(g_y \mathrel{*}= \beta_2\)</span> (B.15)</p></td>
 <td><p>Anisotropic velocity uncertainty</p></td>
 </tr>
@@ -557,13 +556,13 @@ This expands the 2-component field gradient into a 3-component space-time gradie
 <td><p><span class="math notranslate nohighlight">\(\mu_x\)</span></p></td>
 <td><p>0.2</p></td>
 <td><p>—</p></td>
-<td><p>Longitudinal velocity uncertainty. Compresses the collision field along the direction of motion based on the speed ratio <span class="math notranslate nohighlight">\(v_b / v_a\)</span> (B.13).</p></td>
+<td><p>Longitudinal velocity uncertainty. Compresses the collision field along the direction of motion via <span class="math notranslate nohighlight">\(\beta_1 = 1/(1 + \mu_x)\)</span> (B.13, simplified for <span class="math notranslate nohighlight">\(v = v_\text{pref}\)</span>).</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">velocity_uncertainty_y</span></code></p></td>
 <td><p><span class="math notranslate nohighlight">\(\mu_y\)</span></p></td>
 <td><p>0.2</p></td>
 <td><p>—</p></td>
-<td><p>Lateral velocity uncertainty. Expands the collision field perpendicular to the direction of motion (B.13).</p></td>
+<td><p>Lateral velocity uncertainty. Expands the collision field perpendicular to the direction of motion via <span class="math notranslate nohighlight">\(\beta_2 = 1 + \mu_y\)</span> (B.13, simplified for <span class="math notranslate nohighlight">\(v = v_\text{pref}\)</span>).</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">num_samples</span></code></p></td>
 <td><p>—</p></td>
@@ -607,22 +606,6 @@ This expands the 2-component field gradient into a 3-component space-time gradie
 </table>
 </div>
 </section>
-<section id="read-only-agent-state">
-<h3>Read-only agent state<a class="headerlink" href="#read-only-agent-state" title="Link to this heading">#</a></h3>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Property</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">jam_counter</span></code></p></td>
-<td><p>Internal counter used by the stuck detection mechanism.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
 </section>
 <section id="python-api">
 <h2>Python API<a class="headerlink" href="#python-api" title="Link to this heading">#</a></h2>
@@ -655,7 +638,6 @@ This expands the 2-component field gradient into a 3-component space-time gradie
 <span class="n">state</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">agent</span><span class="p">(</span><span class="n">agent_id</span><span class="p">)</span><span class="o">.</span><span class="n">model</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">desired_speed</span><span class="p">)</span>   <span class="c1"># 1.2</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>          <span class="c1"># 0.15</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">jam_counter</span><span class="p">)</span>     <span class="c1"># 0</span>
 
 <span class="c1"># Mutable at runtime</span>
 <span class="n">state</span><span class="o">.</span><span class="n">desired_speed</span> <span class="o">=</span> <span class="mf">0.8</span>
@@ -754,7 +736,6 @@ This expands the 2-component field gradient into a 3-component space-time gradie
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#model-level-parameters">Model-level parameters</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#agent-level-parameters">Agent-level parameters</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#read-only-agent-state">Read-only agent state</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-api">Python API</a></li>
