@@ -78,7 +78,15 @@ void init_simulation(py::module_& m)
         .def(
             "mark_agent_for_removal",
             [](Simulation& sim, uint64_t id) { sim.MarkAgentForRemoval(id); })
-        .def("removed_agents", [](const Simulation& sim) { return sim.RemovedAgents(); })
+        .def("removed_agents", [](const Simulation& sim) {
+            auto removed_agent_ids = sim.RemovedAgents();
+            auto agent_ids = std::vector<GenericAgent::ID::underlying_type>();
+            agent_ids.reserve(removed_agent_ids.size());
+            for(auto agent_id : removed_agent_ids) {
+                agent_ids.emplace_back(agent_id.getID());
+            }
+            return agent_ids;
+        })
         .def("iterate", [](Simulation& sim) { sim.Iterate(); })
         .def(
             "switch_agent_journey",
