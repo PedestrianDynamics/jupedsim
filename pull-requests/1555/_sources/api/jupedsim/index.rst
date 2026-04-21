@@ -1643,6 +1643,12 @@ Attributes
 
 
 
+   .. py:method:: enable_timer() -> None
+
+      Enable the timer printout
+
+
+
    .. py:method:: get_geometry() -> jupedsim.geometry.Geometry
 
       Current geometry of the simulation.

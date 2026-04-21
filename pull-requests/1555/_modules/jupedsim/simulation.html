@@ -460,6 +460,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown model type supplied&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_writer</span> <span class="o">=</span> <span class="n">trajectory_writer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_enable_timer_printout</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
             <span class="n">model</span><span class="o">=</span><span class="n">py_jps_model</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">build_geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span>
         <span class="p">)</span>
@@ -467,7 +468,8 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Destructor for Simulation. Prints the timer output to the console.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">print_timer</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enable_timer_printout</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">print_timer</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Simulation.add_waypoint_stage">
 <a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.add_waypoint_stage">[docs]</a>
@@ -985,6 +987,13 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">push_timer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Pushes a timer probe with the given name. The time between push and pop will be recorded and printed in the timer output.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">push_timer</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="Simulation.enable_timer">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.enable_timer">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">enable_timer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Enable the timer printout&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_enable_timer_printout</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 
 <div class="viewcode-block" id="Simulation.pop_timer">
