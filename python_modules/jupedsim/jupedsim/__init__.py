@@ -49,6 +49,11 @@ from jupedsim.models.social_force import (
     SocialForceModelAgentParameters,
     SocialForceModelState,
 )
+from jupedsim.models.warp_driver import (
+    WarpDriverModel,
+    WarpDriverModelAgentParameters,
+    WarpDriverModelState,
+)
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import RoutingEngine
 from jupedsim.serialization import TrajectoryWriter
@@ -115,6 +120,9 @@ __all__ = [
     "SocialForceModelAgentParameters",
     "SocialForceModel",
     "SocialForceModelState",
+    "WarpDriverModelAgentParameters",
+    "WarpDriverModel",
+    "WarpDriverModelState",
     "WaitingSetStage",
     "WaitingSetState",
     "WaypointStage",

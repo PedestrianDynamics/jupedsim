@@ -12,6 +12,7 @@
 #include "journey.h"
 #include "operational_model.h"
 #include "social_force_model.h"
+#include "warp_driver_model.h"
 #include "stage.h"
 #include "types.h"
 
@@ -218,6 +219,22 @@ JUPEDSIM_API JPS_AgentId JPS_Simulation_AddAnticipationVelocityModelAgent(
 JUPEDSIM_API JPS_AgentId JPS_Simulation_AddSocialForceModelAgent(
     JPS_Simulation handle,
     JPS_SocialForceModelAgentParameters parameters,
+    JPS_ErrorMessage* errorMessage);
+
+/**
+ * Adds a new agent to the simulation.
+ * This can be called at any time, i.e. agents can be added at any iteration.
+ * NOTE: Currently there is no checking done to ensure the agent can be placed at the desired
+ * location.
+ * @param handle to the simulation to act on
+ * @param parameters describing the new agent.
+ * @param[out] errorMessage if not NULL. Will contain address of JPS_ErrorMessage in case of an
+ * error.
+ * @return id of the new agent or 0 if the agent could not be added due to an error.
+ */
+JPS_AgentId JPS_Simulation_AddWarpDriverModelAgent(
+    JPS_Simulation handle,
+    JPS_WarpDriverModelAgentParameters parameters,
     JPS_ErrorMessage* errorMessage);
 
 /**
