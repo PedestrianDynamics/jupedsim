@@ -1461,7 +1461,7 @@ Attributes
 
 
 
-.. py:class:: Simulation(*, model: jupedsim.models.collision_free_speed.CollisionFreeSpeedModel | jupedsim.models.generalized_centrifugal_force.GeneralizedCentrifugalForceModel | jupedsim.models.collision_free_speed_v2.CollisionFreeSpeedModelV2 | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModel | jupedsim.models.social_force.SocialForceModel, geometry: str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]], dt: float = 0.01, trajectory_writer: jupedsim.serialization.TrajectoryWriter | None = None, **kwargs: Any)
+.. py:class:: Simulation(*, model: jupedsim.models.collision_free_speed.CollisionFreeSpeedModel | jupedsim.models.generalized_centrifugal_force.GeneralizedCentrifugalForceModel | jupedsim.models.collision_free_speed_v2.CollisionFreeSpeedModelV2 | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModel | jupedsim.models.social_force.SocialForceModel, geometry: str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]], dt: float = 0.01, trajectory_writer: jupedsim.serialization.TrajectoryWriter | None = None, log_level_timer: int = 1, **kwargs: Any)
 
    Defines a simulation of pedestrian movement over a continuous walkable area.
 
@@ -1643,12 +1643,6 @@ Attributes
 
 
 
-   .. py:method:: enable_timer() -> None
-
-      Enable the timer printout
-
-
-
    .. py:method:: get_geometry() -> jupedsim.geometry.Geometry
 
       Current geometry of the simulation.
@@ -1696,24 +1690,6 @@ Attributes
 
 
 
-   .. py:method:: pop_timer(name: str) -> None
-
-      Pops a timer probe with the given name. The time between push and pop will be recorded and printed in the timer output.
-
-
-
-   .. py:method:: print_timer() -> None
-
-      Prints the timer entries to the console. By default only the main iteration loop is timed.
-
-
-
-   .. py:method:: push_timer(name: str) -> None
-
-      Pushes a timer probe with the given name. The time between push and pop will be recorded and printed in the timer output.
-
-
-
    .. py:method:: removed_agents() -> list[int]
 
       All agents (given by Id) removed in the last iteration.
@@ -1744,6 +1720,15 @@ Attributes
 
       :param geometry: The new geometry to be used in the simulation.
 
+
+
+   .. py:property:: timer
+      :type: jupedsim.internal.tracing.Trace
+
+
+      Timer for measuring time spent in different stages of the simulation.
+
+      :returns: Timer object.
 
 
 .. py:class:: SocialForceModel(*, body_force: float = 120000, friction: float = 240000, bodyForce=None)

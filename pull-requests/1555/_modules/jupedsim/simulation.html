@@ -390,6 +390,7 @@
         <span class="p">),</span>
         <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
         <span class="n">trajectory_writer</span><span class="p">:</span> <span class="n">TrajectoryWriter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">log_level_timer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a Simulation.</span>
@@ -464,12 +465,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
             <span class="n">model</span><span class="o">=</span><span class="n">py_jps_model</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">build_geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">push_timer</span><span class="p">(</span><span class="s2">&quot;Total Simulation Time&quot;</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Destructor for Simulation. Prints the timer output to the console.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enable_timer_printout</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">print_timer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">push_timer</span><span class="p">(</span><span class="s2">&quot;Total Simulation Time&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">set_log_level_timer</span><span class="p">(</span><span class="n">log_level_timer</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Simulation.add_waypoint_stage">
 <a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.add_waypoint_stage">[docs]</a>
@@ -920,7 +918,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">set_tracing</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_last_trace</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Trace</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">get_last_trace</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span>
 
 <div class="viewcode-block" id="Simulation.get_geometry">
 <a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.get_geometry">[docs]</a>
@@ -949,59 +947,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">switch_geometry</span><span class="p">(</span><span class="n">internal_geometry</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span></div>
 
     
-<div class="viewcode-block" id="Simulation.print_timer">
-<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.print_timer">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">print_timer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prints the timer entries to the console. By default only the main iteration loop is timed.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pop_timer</span><span class="p">(</span><span class="s2">&quot;Total Simulation Time&quot;</span><span class="p">)</span>
-        <span class="n">timer_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">get_last_trace</span><span class="p">()</span><span class="o">.</span><span class="n">get_timer_entries</span><span class="p">()</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">timer_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Total Simulation Time&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">):</span>
-            <span class="n">ref</span> <span class="o">=</span> <span class="n">timer_dict</span><span class="p">[</span><span class="s2">&quot;Total Simulation Time&quot;</span><span class="p">]</span>
-            <span class="n">timer_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;Total Simulation Time&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">ref</span> <span class="o">=</span> <span class="n">timer_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;TotalIteration&quot;</span><span class="p">)</span>
-            <span class="n">timer_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;TotalIteration&quot;</span><span class="p">)</span>
-        
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;JuPedSim Timings:&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-----------------------------------------------------&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">duration</span> <span class="ow">in</span> <span class="n">timer_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">duration</span><span class="o">/</span><span class="n">ref</span><span class="o">*</span><span class="mi">100</span> <span class="o">&lt;</span> <span class="mf">0.005</span><span class="p">:</span>
-                <span class="k">continue</span>
-            <span class="n">tabs</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">12</span><span class="p">:</span>
-                <span class="n">tabs</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\t\t\t</span><span class="s2">&quot;</span>
-            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">:</span>
-                <span class="n">tabs</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">&quot;</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">tabs</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">tabs</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">duration</span><span class="o">/</span><span class="mi">1000000</span><span class="si">:</span><span class="s2">8.2f</span><span class="si">}</span><span class="s2"> s (</span><span class="si">{</span><span class="n">duration</span><span class="o">/</span><span class="n">ref</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">5.2f</span><span class="si">}</span><span class="s2">%)&quot;</span><span class="p">)</span>
-   
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-----------------------------------------------------&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total Simulation Time: </span><span class="se">\t\t</span><span class="s2"> </span><span class="si">{</span><span class="n">ref</span><span class="o">/</span><span class="mi">1000000</span><span class="si">:</span><span class="s2">8.2f</span><span class="si">}</span><span class="s2"> s&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span></div>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">timer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Trace</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Timer for measuring time spent in different stages of the simulation.</span>
 
-
-<div class="viewcode-block" id="Simulation.push_timer">
-<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.push_timer">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">push_timer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pushes a timer probe with the given name. The time between push and pop will be recorded and printed in the timer output.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">push_timer</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
-
-    
-<div class="viewcode-block" id="Simulation.enable_timer">
-<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.enable_timer">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">enable_timer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Enable the timer printout&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_enable_timer_printout</span> <span class="o">=</span> <span class="kc">True</span></div>
-
-
-<div class="viewcode-block" id="Simulation.pop_timer">
-<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.pop_timer">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">pop_timer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pops a timer probe with the given name. The time between push and pop will be recorded and printed in the timer output.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">pop_timer</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
-</div>
+<span class="sd">        Returns:</span>
+<span class="sd">            Timer object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span> <span class="o">=</span> <span class="n">Trace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">get_last_trace</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span><span class="o">.</span><span class="n">set_timer_instance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">get_last_trace</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span></div>
 
 </pre></div>
 
