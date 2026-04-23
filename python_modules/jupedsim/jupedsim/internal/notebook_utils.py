@@ -14,6 +14,10 @@ import numpy as np
 import pandas as pd
 import pedpy
 import plotly.graph_objects as go
+import plotly.io as pio
+
+# Fix for plotly 6.x wrt animations in jupyter notebooks
+pio.renderers.default = "sphinx_gallery"
 
 DUMMY_SPEED = -1000
 
