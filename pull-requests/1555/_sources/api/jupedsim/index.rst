@@ -1651,6 +1651,9 @@ Attributes
 
 
 
+   .. py:method:: get_last_timer() -> jupedsim.internal.tracing.Timer
+
+
    .. py:method:: get_stage(stage_id: int)
 
       Specific stage in the simulation.
@@ -1723,7 +1726,7 @@ Attributes
 
 
    .. py:property:: timer
-      :type: jupedsim.internal.tracing.Trace
+      :type: jupedsim.internal.tracing.Timer
 
 
       Timer for measuring time spent in different stages of the simulation.

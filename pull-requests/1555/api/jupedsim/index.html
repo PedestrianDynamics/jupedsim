@@ -599,6 +599,7 @@
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Simulation.delta_time"><code class="docutils literal notranslate"><span class="pre">Simulation.delta_time()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Simulation.elapsed_time"><code class="docutils literal notranslate"><span class="pre">Simulation.elapsed_time()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Simulation.get_geometry"><code class="docutils literal notranslate"><span class="pre">Simulation.get_geometry()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Simulation.get_last_timer"><code class="docutils literal notranslate"><span class="pre">Simulation.get_last_timer()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Simulation.get_stage"><code class="docutils literal notranslate"><span class="pre">Simulation.get_stage()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Simulation.iterate"><code class="docutils literal notranslate"><span class="pre">Simulation.iterate()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Simulation.iteration_count"><code class="docutils literal notranslate"><span class="pre">Simulation.iteration_count()</span></code></a></li>
@@ -2641,6 +2642,11 @@ are targeting the waiting, the remaining will wait at the last given point.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="jupedsim.Simulation.get_last_timer">
+<span class="sig-name descname"><span class="pre">get_last_timer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">jupedsim.internal.tracing.Timer</span></span></span><a class="reference internal" href="../../_modules/jupedsim/simulation.html#Simulation.get_last_timer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.Simulation.get_last_timer" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="jupedsim.Simulation.get_stage">
 <span class="sig-name descname"><span class="pre">get_stage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stage_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jupedsim/simulation.html#Simulation.get_stage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.Simulation.get_stage" title="Link to this definition">#</a></dt>
 <dd><p>Specific stage in the simulation.</p>
@@ -2734,7 +2740,7 @@ and stages lie within the new geometry.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="jupedsim.Simulation.timer">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">timer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">jupedsim.internal.tracing.Trace</span></em><a class="headerlink" href="#jupedsim.Simulation.timer" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">timer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">jupedsim.internal.tracing.Timer</span></em><a class="headerlink" href="#jupedsim.Simulation.timer" title="Link to this definition">#</a></dt>
 <dd><p>Timer for measuring time spent in different stages of the simulation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -3931,6 +3937,7 @@ basic information about this library.</p>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Simulation.delta_time"><code class="docutils literal notranslate"><span class="pre">Simulation.delta_time()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Simulation.elapsed_time"><code class="docutils literal notranslate"><span class="pre">Simulation.elapsed_time()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Simulation.get_geometry"><code class="docutils literal notranslate"><span class="pre">Simulation.get_geometry()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Simulation.get_last_timer"><code class="docutils literal notranslate"><span class="pre">Simulation.get_last_timer()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Simulation.get_stage"><code class="docutils literal notranslate"><span class="pre">Simulation.get_stage()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Simulation.iterate"><code class="docutils literal notranslate"><span class="pre">Simulation.iterate()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Simulation.iteration_count"><code class="docutils literal notranslate"><span class="pre">Simulation.iteration_count()</span></code></a></li>
