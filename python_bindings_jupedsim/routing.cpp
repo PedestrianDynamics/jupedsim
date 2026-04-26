@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CollisionGeometry.hpp"
 #include "RoutingEngine.hpp"
+#include "conversion.hpp"
 
 #include <glm/ext/vector_float2.hpp>
 #include <pybind11/pybind11.h>
@@ -20,7 +21,13 @@ void init_routing(py::module_& m)
         .def(py::init([](const CollisionGeometry& geo) {
             return std::make_unique<RoutingEngine>(geo.Polygon());
         }))
-        .def("compute_waypoints", &RoutingEngine::ComputeAllWaypoints)
+        .def(
+            "compute_waypoints",
+            [](RoutingEngine& engine,
+               std::tuple<double, double> from,
+               std::tuple<double, double> to) {
+                return intoTuples(engine.ComputeAllWaypoints(intoPoint(from), intoPoint(to)));
+            })
         .def("is_routable", &RoutingEngine::IsRoutable)
         .def("mesh", [](const RoutingEngine& routingEngine) {
             using Pt = glm::vec2;
