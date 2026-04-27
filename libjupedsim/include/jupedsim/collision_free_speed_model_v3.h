@@ -293,10 +293,6 @@ typedef struct JPS_CollisionFreeSpeedModelV3AgentParameters {
      *@param radius of the agent in 'meters'
      */
     double radius = 0.2;
-    /**
-     * @param headingAngle [rad] persistent relaxed heading state
-     */
-    double headingAngle = 0.;
 
 } JPS_CollisionFreeSpeedModelV3AgentParameters;
 

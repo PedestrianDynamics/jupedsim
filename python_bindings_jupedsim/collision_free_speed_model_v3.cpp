@@ -20,7 +20,6 @@ void init_collision_free_speed_model_v3(py::module_& m)
                         double time_gap,
                         double desired_speed,
                         double radius,
-                        // double heading_angle,
                         JPS_JourneyId journey_id,
                         JPS_StageId stage_id,
                         double strength_neighbor_repulsion,
@@ -45,8 +44,7 @@ void init_collision_free_speed_model_v3(py::module_& m)
                     agent_buffer,
                     time_gap,
                     desired_speed,
-                    radius,
-                    0.0  /*heading_angle*/};
+                    radius};
             }),
             py::kw_only(),
             py::arg("position"),
@@ -66,7 +64,7 @@ void init_collision_free_speed_model_v3(py::module_& m)
         .def("__repr__", [](const JPS_CollisionFreeSpeedModelV3AgentParameters& p) {
             return fmt::format(
                 "position: {}, journey_id: {}, stage_id: {}, "
-                "time_gap: {}, desired_speed: {}, radius: {}, heading_angle: {}, "
+                "time_gap: {}, desired_speed: {}, radius: {}, "
                 "strength_neighbor_repulsion: {}, range_neighbor_repulsion: {}, "
                 "strength_geometry_repulsion: {}, range_geometry_repulsion: {}, "
                 "range_x_scale: {}, range_y_scale: {}, theta_max_upper_bound: {}, "
@@ -77,7 +75,6 @@ void init_collision_free_speed_model_v3(py::module_& m)
                 p.time_gap,
                 p.v0,
                 p.radius,
-                p.headingAngle,
                 p.strengthNeighborRepulsion,
                 p.rangeNeighborRepulsion,
                 p.strengthGeometryRepulsion,

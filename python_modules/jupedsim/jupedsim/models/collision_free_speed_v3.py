@@ -107,7 +107,6 @@ class CollisionFreeSpeedModelV3AgentParameters:
             time_gap=self.time_gap,
             desired_speed=self.desired_speed,
             radius=self.radius,
-            #heading_angle=self.heading_angle,
             journey_id=self.journey_id,
             stage_id=self.stage_id,
             strength_neighbor_repulsion=self.strength_neighbor_repulsion,
