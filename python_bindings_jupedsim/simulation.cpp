@@ -158,6 +158,20 @@ void init_simulation(py::module_& m)
         .def(
             "add_agent",
             [](JPS_Simulation_Wrapper& simulation,
+               JPS_CollisionFreeSpeedModelV3AgentParameters& parameters) {
+                JPS_ErrorMessage errorMsg{};
+                auto result = JPS_Simulation_AddCollisionFreeSpeedModelV3Agent(
+                    simulation.handle, parameters, &errorMsg);
+                if(result) {
+                    return result;
+                }
+                auto msg = std::string(JPS_ErrorMessage_GetMessage(errorMsg));
+                JPS_ErrorMessage_Free(errorMsg);
+                throw std::runtime_error{msg};
+            })
+        .def(
+            "add_agent",
+            [](JPS_Simulation_Wrapper& simulation,
                JPS_AnticipationVelocityModelAgentParameters& parameters) {
                 JPS_ErrorMessage errorMsg{};
                 auto result = JPS_Simulation_AddAnticipationVelocityModelAgent(
