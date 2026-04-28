@@ -57,10 +57,10 @@ void init_collision_free_speed_model_v3(py::module_& m)
             py::arg("range_neighbor_repulsion"),
             py::arg("strength_geometry_repulsion"),
             py::arg("range_geometry_repulsion"),
-            py::arg("range_x_scale"),
-            py::arg("range_y_scale"),
-            py::arg("theta_max_upper_bound"),
-            py::arg("agent_buffer"))
+            py::arg("range_x_scale") = 20.0,
+            py::arg("range_y_scale") = 8.0,
+            py::arg("theta_max_upper_bound") = 1.57,
+            py::arg("agent_buffer") = 0.0)
         .def("__repr__", [](const JPS_CollisionFreeSpeedModelV3AgentParameters& p) {
             return fmt::format(
                 "position: {}, journey_id: {}, stage_id: {}, "

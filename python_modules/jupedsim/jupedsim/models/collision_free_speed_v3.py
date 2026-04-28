@@ -24,7 +24,54 @@ class CollisionFreeSpeedModelV3:
 
 @dataclass(kw_only=True)
 class CollisionFreeSpeedModelV3AgentParameters:
-    """Agent parameters for Collision Free Speed Model V3."""
+    """
+    Agent parameters for Collision Free Speed Model V3.
+
+    V3 separates direction and speed updates: the walking direction is
+    obtained by rotating a reference direction (the desired direction
+    bent by wall repulsion) toward the side opposite the most relevant
+    forward neighbor, while the walking speed is computed from a scalar
+    spacing using the optimal-velocity relation. The heading angle is
+    relaxed in time to suppress jitter.
+
+    .. note::
+
+        Instances of this type are copied when creating the agent, you can safely
+        create one instance of this type and modify it between calls to ``add_agent``.
+
+        E.g.:
+
+        .. code:: python
+
+            positions = [...] # List of initial agent positions
+            params = CollisionFreeSpeedModelV3AgentParameters(desired_speed=0.9)
+            for p in positions:
+                params.position = p
+                sim.add_agent(params)
+
+    Attributes:
+        position: Position of the agent.
+        time_gap: Time constant that describes how fast a pedestrian closes gaps.
+        desired_speed: Maximum (free) walking speed of the agent.
+        radius: Radius of the agent.
+        journey_id: Id of the journey the agent follows.
+        stage_id: Id of the stage the agent targets.
+        strength_neighbor_repulsion: Maximum turning angle authority
+            (clamped against ``theta_max_upper_bound``).
+        range_neighbor_repulsion: Base perception range; combined with the
+            scale factors below to form the anisotropic decay lengths
+            ``r_x = range_neighbor_repulsion * range_x_scale`` and
+            ``r_y = range_neighbor_repulsion * range_y_scale``.
+        strength_geometry_repulsion: Strength of wall repulsion that
+            bends the reference direction.
+        range_geometry_repulsion: Decay length of wall repulsion.
+        range_x_scale: Longitudinal aspect factor for the perception field.
+        range_y_scale: Lateral aspect factor for the perception field.
+        theta_max_upper_bound: Hard upper bound on the per-step turning angle.
+        agent_buffer: Buffer distance subtracted from spacing in the
+            optimal-velocity relation; shifts the speed-zero point to a
+            positive spacing.
+    """
 
     position: tuple[float, float] = (0.0, 0.0)
     time_gap: float = 1.0
@@ -40,7 +87,7 @@ class CollisionFreeSpeedModelV3AgentParameters:
 
     range_x_scale: float = 20.0
     range_y_scale: float = 8.0
-    theta_max_upper_bound: float = 1.0
+    theta_max_upper_bound: float = 1.57
     agent_buffer: float = 0.0
 
     def __init__(
@@ -51,7 +98,6 @@ class CollisionFreeSpeedModelV3AgentParameters:
         desired_speed: float = 1.2,
         v0: float | None = None,
         radius: float = 0.2,
-        #heading_angle: float = 0.2,
         journey_id: int = 0,
         stage_id: int = 0,
         strength_neighbor_repulsion: float = 8.0,
@@ -60,7 +106,7 @@ class CollisionFreeSpeedModelV3AgentParameters:
         range_geometry_repulsion: float = 0.02,
         range_x_scale: float = 20.0,
         range_y_scale: float = 8.0,
-        theta_max_upper_bound: float = 1.0,
+        theta_max_upper_bound: float = 1.57,
         agent_buffer: float = 0.0,
     ):
         self.position = position
@@ -118,6 +164,7 @@ class CollisionFreeSpeedModelV3AgentParameters:
             theta_max_upper_bound=self.theta_max_upper_bound,
             agent_buffer=self.agent_buffer,
         )
+
 
 
 class CollisionFreeSpeedModelV3State:
