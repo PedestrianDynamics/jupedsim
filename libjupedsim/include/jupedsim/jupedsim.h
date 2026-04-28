@@ -20,3 +20,4 @@
 #include "stage.h"
 #include "transition.h"
 #include "types.h"
+#include "warp_driver_model.h"

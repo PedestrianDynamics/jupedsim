@@ -10,6 +10,7 @@
 #include "SocialForceModelData.hpp"
 #include "UniqueID.hpp"
 #include "Visitor.hpp"
+#include "WarpDriverModelData.hpp"
 
 #include <memory>
 class Journey;
@@ -36,7 +37,8 @@ struct GenericAgent {
         CollisionFreeSpeedModelV2Data,
         CollisionFreeSpeedModelV3Data,
         AnticipationVelocityModelData,
-        SocialForceModelData>;
+        SocialForceModelData,
+        WarpDriverModelData>;
     Model model{};
 
     GenericAgent(

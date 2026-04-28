@@ -148,7 +148,6 @@ class SocialForceModelAgentParameters:
                 setattr(self, new_name, locals()[old_name])
             else:
                 setattr(self, new_name, locals()[new_name])
-        print(self)
 
     @property
     @deprecated("deprecated, use 'desired_speed' instead.")

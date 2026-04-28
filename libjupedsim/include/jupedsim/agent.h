@@ -10,6 +10,7 @@
 #include "generalized_centrifugal_force_model.h"
 #include "social_force_model.h"
 #include "types.h"
+#include "warp_driver_model.h"
 
 #include <stdbool.h> /*NOLINT(modernize-deprecated-headers)*/
 
@@ -136,6 +137,16 @@ JPS_Agent_GetCollisionFreeSpeedModelV3State(JPS_Agent handle, JPS_ErrorMessage* 
  */
 JUPEDSIM_API JPS_AnticipationVelocityModelState
 JPS_Agent_GetAnticipationVelocityModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
+
+/**
+ * Access WarpDriver model state.
+ * Precondition: Agent needs to use WarpDriver model
+ * @param handle of the agent to access.
+ * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
+ * @return state or NULL on error
+ */
+JUPEDSIM_API JPS_WarpDriverModelState
+JPS_Agent_GetWarpDriverModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
 
 /**
  * Opaque type of an iterator over agents

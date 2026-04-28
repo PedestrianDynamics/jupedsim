@@ -7,6 +7,7 @@
 
 #include <GenericAgent.hpp>
 #include <Unreachable.hpp>
+#include <WarpDriverModelData.hpp>
 
 #include <cassert>
 
@@ -95,6 +96,8 @@ JPS_ModelType JPS_Agent_GetModelType(JPS_Agent handle)
             return JPS_AnticipationVelocityModel;
         case 5:
             return JPS_SocialForceModel;
+        case 6:
+            return JPS_WarpDriverModel;
     }
     UNREACHABLE();
 }
@@ -225,7 +228,28 @@ JPS_Agent_GetSocialForceModelState(JPS_Agent handle, JPS_ErrorMessage* errorMess
     return nullptr;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+JPS_WarpDriverModelState
+JPS_Agent_GetWarpDriverModelState(JPS_Agent handle, JPS_ErrorMessage* errorMessage)
+{
+    assert(handle);
+    const auto agent = reinterpret_cast<GenericAgent*>(handle);
+    try {
+        auto& model = std::get<WarpDriverModelData>(agent->model);
+        return reinterpret_cast<JPS_WarpDriverModelState>(&model);
+    } catch(const std::exception& ex) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});
+        }
+    } catch(...) {
+        if(errorMessage) {
+            *errorMessage = reinterpret_cast<JPS_ErrorMessage>(
+                new JPS_ErrorMessage_t{"Unknown internal error."});
+        }
+    }
+    return nullptr;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
 /// AgentIterator
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 JPS_Agent JPS_AgentIterator_Next(JPS_AgentIterator handle)
