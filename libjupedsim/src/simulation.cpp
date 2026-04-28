@@ -384,9 +384,7 @@ JPS_AgentId JPS_Simulation_AddWarpDriverModelAgent(
             BaseStage::ID(parameters.stageId),
             intoPoint(parameters.position),
             intoPoint(parameters.orientation),
-            WarpDriverModelData{
-                parameters.radius,
-                parameters.v0}};
+            WarpDriverModelData{parameters.radius, parameters.v0}};
         result = simulation->AddAgent(std::move(agent));
     } catch(const std::exception& ex) {
         if(errorMessage) {

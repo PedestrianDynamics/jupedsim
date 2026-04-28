@@ -16,21 +16,20 @@ using jupedsim::detail::intoTuple;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// WarpDriverModel Model Builder
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-JUPEDSIM_API JPS_WarpDriverModelBuilder
-JPS_WarpDriverModelBuilder_Create(double timeHorizon,
-        double stepSize,
-        double sigma,
-        double timeUncertainty,
-        double velocityUncertaintyX,
-        double velocityUncertaintyY)
+JUPEDSIM_API JPS_WarpDriverModelBuilder JPS_WarpDriverModelBuilder_Create(
+    double timeHorizon,
+    double stepSize,
+    double sigma,
+    double timeUncertainty,
+    double velocityUncertaintyX,
+    double velocityUncertaintyY)
 {
-    return reinterpret_cast<JPS_WarpDriverModelBuilder>(
-        new WarpDriverModelBuilder(timeHorizon, stepSize, sigma, timeUncertainty, velocityUncertaintyX, velocityUncertaintyY));
+    return reinterpret_cast<JPS_WarpDriverModelBuilder>(new WarpDriverModelBuilder(
+        timeHorizon, stepSize, sigma, timeUncertainty, velocityUncertaintyX, velocityUncertaintyY));
 }
 
-JUPEDSIM_API JPS_OperationalModel JPS_WarpDriverModelBuilder_Build(
-    JPS_WarpDriverModelBuilder handle,
-    JPS_ErrorMessage* errorMessage)
+JUPEDSIM_API JPS_OperationalModel
+JPS_WarpDriverModelBuilder_Build(JPS_WarpDriverModelBuilder handle, JPS_ErrorMessage* errorMessage)
 {
     assert(handle != nullptr);
     auto builder = reinterpret_cast<WarpDriverModelBuilder*>(handle);
@@ -65,8 +64,7 @@ JUPEDSIM_API double JPS_WarpDriverModelState_GetRadius(JPS_WarpDriverModelState 
     return state->radius;
 }
 
-JUPEDSIM_API void
-JPS_WarpDriverModelState_SetRadius(JPS_WarpDriverModelState handle, double radius)
+JUPEDSIM_API void JPS_WarpDriverModelState_SetRadius(JPS_WarpDriverModelState handle, double radius)
 {
     assert(handle);
     const auto state = reinterpret_cast<WarpDriverModelData*>(handle);

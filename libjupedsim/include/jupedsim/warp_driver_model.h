@@ -31,13 +31,13 @@ typedef struct JPS_WarpDriverModelBuilder_t* JPS_WarpDriverModelBuilder;
  * @param velocityUncertaintyY lateral velocity uncertainty. Expands the
  *        collision field perpendicular to the direction of motion.
  * */
-JUPEDSIM_API JPS_WarpDriverModelBuilder
-JPS_WarpDriverModelBuilder_Create(double timeHorizon,
-        double stepSize,
-        double sigma,
-        double timeUncertainty,
-        double velocityUncertaintyX,
-        double velocityUncertaintyY);
+JUPEDSIM_API JPS_WarpDriverModelBuilder JPS_WarpDriverModelBuilder_Create(
+    double timeHorizon,
+    double stepSize,
+    double sigma,
+    double timeUncertainty,
+    double velocityUncertaintyX,
+    double velocityUncertaintyY);
 
 /**
  * Creates a JPS_OperationalModel of type WarpDriverModel Model from the
@@ -46,9 +46,8 @@ JPS_WarpDriverModelBuilder_Create(double timeHorizon,
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error
  * @return a JPS_WarpDriverModel or NULL if an error occured.
  */
-JUPEDSIM_API JPS_OperationalModel JPS_WarpDriverModelBuilder_Build(
-    JPS_WarpDriverModelBuilder handle,
-    JPS_ErrorMessage* errorMessage);
+JUPEDSIM_API JPS_OperationalModel
+JPS_WarpDriverModelBuilder_Build(JPS_WarpDriverModelBuilder handle, JPS_ErrorMessage* errorMessage);
 
 /**
  * Frees a JPS_WarpDriverModelBuilder
@@ -88,8 +87,7 @@ JUPEDSIM_API double JPS_WarpDriverModelState_GetV0(JPS_WarpDriverModelState hand
  * @param handle of the Agent to access.
  * @param v0 V0 of this agent.
  */
-JUPEDSIM_API void
-JPS_WarpDriverModelState_SetV0(JPS_WarpDriverModelState handle, double v0);
+JUPEDSIM_API void JPS_WarpDriverModelState_SetV0(JPS_WarpDriverModelState handle, double v0);
 
 /**
  * Describes parameters of an Agent in WarpDriverModel
