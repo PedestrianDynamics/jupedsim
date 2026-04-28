@@ -8,8 +8,8 @@
 #include "export.h"
 #include "generalized_centrifugal_force_model.h"
 #include "social_force_model.h"
-#include "warp_driver_model.h"
 #include "types.h"
+#include "warp_driver_model.h"
 
 #include <stdbool.h> /*NOLINT(modernize-deprecated-headers)*/
 

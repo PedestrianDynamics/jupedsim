@@ -8,8 +8,8 @@
 #include "Point.hpp"
 #include "SocialForceModelData.hpp"
 #include "UniqueID.hpp"
-#include "WarpDriverModelData.hpp"
 #include "Visitor.hpp"
+#include "WarpDriverModelData.hpp"
 
 #include <memory>
 class Journey;
