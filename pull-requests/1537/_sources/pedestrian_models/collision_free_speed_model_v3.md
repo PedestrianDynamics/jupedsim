@@ -26,14 +26,14 @@ First, a reference direction $\mathbf{e}_{\mathrm{ref}}$ is constructed
 by combining the desired direction $\mathbf{e}_{\mathrm{des}}$ with a
 repulsive contribution from nearby walls,
 
-```math
+$$
 \mathbf{e}_{\mathrm{ref}} =
 \frac{\mathbf{e}_{\mathrm{des}} + \mathbf{R}_{\mathrm{wall}}}
      {\|\mathbf{e}_{\mathrm{des}} + \mathbf{R}_{\mathrm{wall}}\|},
 \qquad
 \mathbf{R}_{\mathrm{wall}} = \sum_{w}
 -\,A_w \exp\!\left(\frac{r_i - d_{iw}}{B_w}\right) \mathbf{e}_{iw},
-```
+$$
 
 where the sum runs over wall segments in the agent's vicinity, $d_{iw}$
 is the distance to the closest point on segment $w$, and
@@ -65,16 +65,16 @@ $\mathbf{r}_j = \mathbf{p}_j - \mathbf{p}_i$ with
 $x_j = \mathbf{e}_{\mathrm{ref}}\cdot\mathbf{r}_j > 0$) the signed
 lateral position is
 
-```math
+$$
 s_j = \mathbf{e}_{\mathrm{ref}} \times \mathbf{r}_j,\qquad y_j = |s_j|.
-```
+$$
 
 Neighbor relevance is determined through an anisotropic weighting that
 decays exponentially in both the longitudinal and lateral directions,
 
-```math
+$$
 w_j = \exp\!\left(-\frac{x_j}{r_x}\right)\,\exp\!\left(-\frac{y_j}{r_y}\right),
-```
+$$
 
 with independent decay lengths $r_x = R\,\sigma_x$ and
 $r_y = R\,\sigma_y$, where $R$ is the base perception range
@@ -85,17 +85,17 @@ of motion.
 
 Only the most relevant forward neighbor is used,
 
-```math
+$$
 j^* = \arg\max_{x_j > 0} w_j,
-```
+$$
 
 and the turning angle is
 
-```math
+$$
 \theta = \theta_{\max}\,\tanh(a_{j^*}),
 \qquad
 a_j = -\,w_j\,\frac{s_j}{|s_j| + \varepsilon_s},
-```
+$$
 
 where the negative sign drives the agent away from the occupied side
 and $\varepsilon_s$ regularizes the side-sign term near the centerline.
@@ -106,9 +106,9 @@ direction; it is set from `strength_neighbor_repulsion` clamped against
 The walking direction is then obtained by rotating the reference
 direction,
 
-```math
+$$
 \mathbf{e}_{\mathrm{move}} = R(\theta)\,\mathbf{e}_{\mathrm{ref}}.
-```
+$$
 
 Because the update is purely rotational, the direction vector remains
 unit length by construction.
@@ -121,19 +121,19 @@ changes when the selected neighbor $j^*$ switches between time steps.
 To suppress such artifacts, the heading angle is relaxed toward the
 target angle through a first-order dynamics,
 
-```math
+$$
 \frac{\mathrm{d}\theta}{\mathrm{d}t}
   = \frac{\theta_{\mathrm{target}} - \theta}{\tau_\theta},
-```
+$$
 
 with $\tau_\theta$ a relaxation time constant. Discretized with explicit
 Euler over a simulation step $\Delta t$,
 
-```math
+$$
 \theta^{n+1} = \theta^{n} + \alpha\,(\theta_{\mathrm{target}} - \theta^{n}),
 \qquad
 \alpha = \mathrm{clip}\!\left(\tfrac{\Delta t}{\tau_\theta},\,0,\,1\right).
-```
+$$
 
 Each agent therefore carries the heading angle as part of its state from
 one time step to the next; the direction model is not memoryless.
@@ -162,9 +162,9 @@ $s_{\mathrm{goal}}$ along the desired direction
 $\mathbf{e}_{\mathrm{des}}$; they are combined using a small blending
 weight $w_b$,
 
-```math
+$$
 s = (1 - w_b)\,s_{\mathrm{move}} + w_b\,s_{\mathrm{goal}}.
-```
+$$
 
 Each component is the minimum, over all visible neighbors, of the
 geometric spacing $\|\mathbf{r}_j\| - l$ with $l = r_i + r_j$, evaluated
@@ -172,9 +172,9 @@ within the corridor $|\mathrm{left}(\mathbf{e})\cdot\mathbf{r}_j| \le l$.
 
 The walking speed follows the optimal-velocity relation
 
-```math
+$$
 v = \min\!\left(\max\!\left(\frac{s - b_f}{T},\,v_{\min}\right),\,v_0\right),
-```
+$$
 
 where $T$ is the time gap (`time_gap`), $b_f$ the buffer distance
 (`agent_buffer`), and $v_0$ the free walking speed (`desired_speed`).
