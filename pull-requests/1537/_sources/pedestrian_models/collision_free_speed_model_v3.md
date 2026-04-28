@@ -2,168 +2,237 @@
 
 ## Overview
 
-This document describes `CollisionFreeSpeedModelV3`, a minimal rotational
-steering model derived from `CollisionFreeSpeedModelV2`.
+`CollisionFreeSpeedModelV3` is a variant of the Collision-Free Speed
+Model V2 (CFSV2; [Tordeux et al., 2016](https://doi.org/10.1007/978-3-319-33482-0_29))
+in which the steering and the speed selection are explicitly
+decoupled. The walking direction is
+obtained by rotating a reference direction toward the side opposite the
+most relevant forward neighbor, and the walking speed is computed from
+a scalar spacing using the optimal-velocity relation. A first-order
+relaxation is applied to the heading angle to suppress jitter, and a
+small reverse-speed floor is used to release contact deadlocks.
 
-The model separates:
+The two modelling questions guiding the formulation are: how many
+neighboring pedestrians influence the motion of an agent, and how
+strongly an agent deviates from its desired walking direction when
+avoiding others.
 
-- **Direction update** (rotation of a reference desired direction).
-- **Speed update** (spacing-based, with explicit buffer semantics).
+## Reference direction and visible neighbors
 
-The design goal is to answer two calibration questions with very few controls:
+Before the steering rule is applied, two preprocessing steps shape the
+input to the direction model.
 
-1. How many neighbors affect me?
-2. How strongly do I overtake vs. stick to the goal?
-
-## Direction Update
-
-Let:
-
-- `p` be the current agent position.
-- `p_j` be neighbor position.
-- `r_j = p_j - p`.
-- `e_des` be normalized desired direction.
-- `r_wall` be the boundary influence vector (same exponential form as V2).
-- `e_ref = normalize(e_des + r_wall)` (fallback to current orientation if zero).
-
-Unlike V2, where boundary and neighbor forces are summed into the final velocity,
-V3 uses `r_wall` only to bend the reference direction. Neighbor avoidance then
-operates via rotational steering on top of this adjusted reference.
-
-Only forward neighbors contribute:
+First, a reference direction $\mathbf{e}_{\mathrm{ref}}$ is constructed
+by combining the desired direction $\mathbf{e}_{\mathrm{des}}$ with a
+repulsive contribution from nearby walls,
 
 ```math
-x_j = e_{\mathrm{ref}} \cdot r_j,\quad x_j > 0
+\mathbf{e}_{\mathrm{ref}} =
+\frac{\mathbf{e}_{\mathrm{des}} + \mathbf{R}_{\mathrm{wall}}}
+     {\|\mathbf{e}_{\mathrm{des}} + \mathbf{R}_{\mathrm{wall}}\|},
+\qquad
+\mathbf{R}_{\mathrm{wall}} = \sum_{w}
+-\,A_w \exp\!\left(\frac{r_i - d_{iw}}{B_w}\right) \mathbf{e}_{iw},
 ```
 
-For each forward neighbor:
+where the sum runs over wall segments in the agent's vicinity, $d_{iw}$
+is the distance to the closest point on segment $w$, and
+$\mathbf{e}_{iw}$ is the unit vector from the agent toward that point.
+The wall repulsion only bends the reference direction; it is **not**
+summed into the final velocity as in V2. If the resulting vector is
+degenerate, the agent retains its current orientation.
+
+Second, only **visible** neighbors are considered: a neighbor whose
+connecting segment crosses a wall is excluded from both the steering
+and the spacing computations. This prevents agents from reacting to
+others that are occluded by the geometry, for instance around corners.
+
+## Direction update
+
+```{figure} ../_static/cfsv3/direction.svg
+:alt: Rotational direction model
+:width: 60%
+:align: center
+
+Rotational direction model. The most relevant forward neighbor $j^*$ is
+selected via the anisotropic weighting $w_j$. The walking direction
+$\mathbf{e}_{\mathrm{move}}$ is obtained by rotating the reference
+direction $\mathbf{e}_{\mathrm{ref}}$ by the angle $\theta$.
+```
+
+For each forward neighbor (relative position
+$\mathbf{r}_j = \mathbf{p}_j - \mathbf{p}_i$ with
+$x_j = \mathbf{e}_{\mathrm{ref}}\cdot\mathbf{r}_j > 0$) the signed
+lateral position is
 
 ```math
-s_j = \mathrm{cross}(e_{\mathrm{ref}}, r_j),\quad y_j = |s_j|
+s_j = \mathbf{e}_{\mathrm{ref}} \times \mathbf{r}_j,\qquad y_j = |s_j|.
 ```
+
+Neighbor relevance is determined through an anisotropic weighting that
+decays exponentially in both the longitudinal and lateral directions,
 
 ```math
-w_j = \exp(-x_j / r_x)\,\exp(-y_j / r_y)
+w_j = \exp\!\left(-\frac{x_j}{r_x}\right)\,\exp\!\left(-\frac{y_j}{r_y}\right),
 ```
+
+with independent decay lengths $r_x = R\,\sigma_x$ and
+$r_y = R\,\sigma_y$, where $R$ is the base perception range
+(`range_neighbor_repulsion`) and $\sigma_x$, $\sigma_y$ are the
+dimensionless aspect factors `range_x_scale`, `range_y_scale`. Setting
+$\sigma_x > \sigma_y$ elongates the perception field along the direction
+of motion.
+
+Only the most relevant forward neighbor is used,
 
 ```math
-a_j = -\,w_j\,\frac{s_j}{|s_j| + \varepsilon_s}
+j^* = \arg\max_{x_j > 0} w_j,
 ```
 
-The model uses only the **most relevant** forward neighbor:
+and the turning angle is
 
 ```math
-j^* = \arg\max_{x_j>0} w_j
+\theta = \theta_{\max}\,\tanh(a_{j^*}),
+\qquad
+a_j = -\,w_j\,\frac{s_j}{|s_j| + \varepsilon_s},
 ```
+
+where the negative sign drives the agent away from the occupied side
+and $\varepsilon_s$ regularizes the side-sign term near the centerline.
+The bound $\theta_{\max}$ caps the per-step deviation from the reference
+direction; it is set from `strength_neighbor_repulsion` clamped against
+`theta_max_upper_bound`.
+
+The walking direction is then obtained by rotating the reference
+direction,
 
 ```math
-\theta = \theta_{\max}\,\tanh(a_{j^*})
+\mathbf{e}_{\mathrm{move}} = R(\theta)\,\mathbf{e}_{\mathrm{ref}}.
 ```
 
-### Temporal Smoothness (Heading Relaxation)
+Because the update is purely rotational, the direction vector remains
+unit length by construction.
 
-The target turn angle is not applied instantly. Instead, each agent stores a
-heading angle state and relaxes toward the target:
+## Heading relaxation
+
+Applied directly, the turning angle reacts instantaneously to the
+configuration of forward neighbors and can produce jittery direction
+changes when the selected neighbor $j^*$ switches between time steps.
+To suppress such artifacts, the heading angle is relaxed toward the
+target angle through a first-order dynamics,
 
 ```math
-\alpha = \mathrm{clamp}(\Delta t/\tau_\theta,\,0,\,1)
+\frac{\mathrm{d}\theta}{\mathrm{d}t}
+  = \frac{\theta_{\mathrm{target}} - \theta}{\tau_\theta},
 ```
+
+with $\tau_\theta$ a relaxation time constant. Discretized with explicit
+Euler over a simulation step $\Delta t$,
 
 ```math
-\theta_{t+\Delta t} = \theta_t + \alpha(\theta_{\mathrm{target}}-\theta_t)
+\theta^{n+1} = \theta^{n} + \alpha\,(\theta_{\mathrm{target}} - \theta^{n}),
+\qquad
+\alpha = \mathrm{clip}\!\left(\tfrac{\Delta t}{\tau_\theta},\,0,\,1\right).
 ```
+
+Each agent therefore carries the heading angle as part of its state from
+one time step to the next; the direction model is not memoryless.
+Smaller values of $\tau_\theta$ recover the instantaneous response of
+the rotational direction model, whereas larger values produce smoother
+trajectories at the cost of a delayed reaction.
+
+## Spacing and speed
+
+```{figure} ../_static/cfsv3/corridor.svg
+:alt: Corridor used for the spacing computation
+:width: 60%
+:align: center
+
+Spacing evaluation along the movement direction. A neighbor $j$ is
+considered for the spacing calculation when its lateral offset $y_j$
+from the centerline along $\mathbf{e}_{\mathrm{move}}$ falls within the
+corridor of half-width $l = r_i + r_j$.
+```
+
+The walking speed depends only on the available spacing. As in the
+direction model, the spacing computation considers only visible
+neighbors. Two spacing values are evaluated, $s_{\mathrm{move}}$ along
+the movement direction $\mathbf{e}_{\mathrm{move}}$ and
+$s_{\mathrm{goal}}$ along the desired direction
+$\mathbf{e}_{\mathrm{des}}$; they are combined using a small blending
+weight $w_b$,
 
 ```math
-\theta_{\mathrm{target}}=\theta_{\max}\tanh(a_{j^*})
+s = (1 - w_b)\,s_{\mathrm{move}} + w_b\,s_{\mathrm{goal}}.
 ```
+
+Each component is the minimum, over all visible neighbors, of the
+geometric spacing $\|\mathbf{r}_j\| - l$ with $l = r_i + r_j$, evaluated
+within the corridor $|\mathrm{left}(\mathbf{e})\cdot\mathbf{r}_j| \le l$.
+
+The walking speed follows the optimal-velocity relation
 
 ```math
-e_{\mathrm{move}} = R(\theta_{t+\Delta t})\,e_{\mathrm{ref}}
+v = \min\!\left(\max\!\left(\frac{s - b_f}{T},\,v_{\min}\right),\,v_0\right),
 ```
 
-The negative sign in `a_j` means the agent turns **away from occupied side**.
-Relaxation damps fast left-right switching, reduces snake-like oscillations,
-and keeps direction changes smooth under noisy local neighbor constellations.
+where $T$ is the time gap (`time_gap`), $b_f$ the buffer distance
+(`agent_buffer`), and $v_0$ the free walking speed (`desired_speed`).
+The lower bound $v_{\min}$ is set to a small negative value
+($v_{\min} = -0.01$ m/s) rather than zero. This deterministic,
+sub-millimetric reverse motion releases configurations in which two
+agents are mutually blocked at spacing $s \le b_f$ that would otherwise
+form persistent deadlocks.
 
-## Speed Update
+## Per-agent parameters
 
-Spacing is computed as a blend of move-direction and goal-direction spacing:
+These are exposed via
+{class}`~jupedsim.models.CollisionFreeSpeedModelV3AgentParameters` and
+can be set or modified per agent at any time.
 
-```math
-s = (1 - w_b)\,s_{\mathrm{move}} + w_b\,s_{\mathrm{goal}}
-```
+| Symbol | Parameter (Python) | Default | Unit | Role |
+|---|---|---:|---|---|
+| $v_0$ | `desired_speed` | `1.2` | m/s | Free walking speed |
+| $T$ | `time_gap` | `1.0` | s | Time gap in the OV relation |
+| $b_f$ | `agent_buffer` | `0.0` | m | Buffer distance, shifts speed-zero point |
+| $r_i$ | `radius` | `0.2` | m | Agent radius |
+| $\theta_{\max}^{\mathrm{ub}}$ | `theta_max_upper_bound` | `1.57` | rad | Hard upper bound on $\theta_{\max}$ |
+| | `strength_neighbor_repulsion` | `8.0` | rad | Maximum turning angle (clamped against the bound above to give $\theta_{\max}$) |
+| $R$ | `range_neighbor_repulsion` | `0.1` | m | Base perception range |
+| $\sigma_x$ | `range_x_scale` | `20.0` | - | Longitudinal aspect factor, $r_x = R\,\sigma_x$ |
+| $\sigma_y$ | `range_y_scale` | `8.0` | - | Lateral aspect factor, $r_y = R\,\sigma_y$ |
+| $A_w$ | `strength_geometry_repulsion` | `5.0` | - | Wall repulsion strength |
+| $B_w$ | `range_geometry_repulsion` | `0.02` | m | Wall repulsion decay length |
 
-where `w_b = 0.15` (`SpacingBlendWeight`). Each component is the minimum
-spacing over all neighbors along the respective direction.
+## Internal constants
 
-Neighbor is considered in corridor when:
-
-```math
-|\mathrm{left}(e_{\mathrm{move}})\cdot r_j| \le l,\quad l=r_i+r_j
-```
-
-Geometric spacing:
-
-```math
-s = \|r_j\| - l
-```
-
-Speed:
-
-```math
-v = \min\left(\max\left(\frac{s - b_f}{T}, v_{\min}\right), v_0\right)
-```
-
-So speed is zero at:
-
-```math
-s = b_f
-```
-
-In the current implementation, `v_min = -0.01 m/s` (hard-coded, deterministic)
-to allow tiny backward release in blocked contact situations.
-
-## Parameter Mapping (Old vs Current)
-
-| Tuning question | Parameter(s) | Intuition |
-|---|---|---|
-| How many neighbors influence me? | `rangeNeighborRepulsion` mapped to anisotropic ranges `r_x`, `r_y` | Forward and lateral reach are different (`r_x > r_y`) |
-| How strongly do I deviate/overtake? | `strengthNeighborRepulsion` mapped to `theta_max` | Directly sets max turning angle (with clamp) |
-| How strongly walls bend direction? | `strengthGeometryRepulsion`, `rangeGeometryRepulsion` | Affects `e_ref` via wall influence |
-| How conservative is following speed? | `timeGap`, `v0`, `agentBuffer` | `agentBuffer` shifts speed-zero point to positive spacing |
-
-## Implemented Internal Mapping
-
-Current constants in code:
+These are fixed in the implementation and are not exposed as parameters.
 
 | Symbol | Code constant | Value | Unit | Role |
 |---|---|---:|---|---|
-| `r_x` scaling | `RangeXScale` | `20.0` | `-` | `r_x = 20 * rangeNeighborRepulsion` |
-| `r_y` scaling | `RangeYScale` | `8.0` | `-` | `r_y = 8 * rangeNeighborRepulsion` |
-| max turn cap | `ThetaMaxUpperBound` | `1.0` | `rad` | hard upper bound on `theta_max` |
-| spacing blend | `SpacingBlendWeight` | `0.15` | `-` | weight of goal-direction spacing in blend |
-| heading relaxation | `TauTheta` | `0.3` | `s` | relaxation timescale for heading state |
-| sign smoothing | `SideEps` | `0.05` | `m` | avoids hard sign flips near centerline |
-| min reverse speed | `MinReverseSpeed` | `-0.01` | `m/s` | tiny deterministic backward release |
+| $w_b$ | `SpacingBlendWeight` | `0.15` | - | Weight of goal-direction spacing in the blend |
+| $\tau_\theta$ | `TauTheta` | `0.3` | s | Heading relaxation timescale |
+| $\varepsilon_s$ | `SideEps` | `0.05` | m | Side-sign smoothing constant |
+| $v_{\min}$ | `MinReverseSpeed` | `-0.01` | m/s | Reverse-speed floor for deadlock release |
 
-Derived:
-
-- `theta_max = clamp(strengthNeighborRepulsion, 0, ThetaMaxUpperBound)`.
-- `r_x = max(eps, rangeNeighborRepulsion * RangeXScale)`.
-- `r_y = max(eps, rangeNeighborRepulsion * RangeYScale)`.
-
-## Practical Interpretation
+## Practical interpretation
 
 | If you observe... | Primary knob | Typical direction |
 |---|---|---|
-| Too much queueing / too little overtaking | `strengthNeighborRepulsion` | increase (small steps) |
-| Too much zig-zag / snake behavior | `strengthNeighborRepulsion` | decrease |
-| Agents react too late to leaders | `rangeNeighborRepulsion` | increase |
-| Agents react to too many lateral neighbors | `rangeNeighborRepulsion` | decrease, or reduce `RangeYScale` in code |
-| Early lane-like splitting | `rangeNeighborRepulsion` | often increase with moderate strength |
+| Too much queueing / too little overtaking | `strength_neighbor_repulsion` | increase (small steps) |
+| Too much zig-zag / snake behavior | `strength_neighbor_repulsion` | decrease |
+| Agents react too late to leaders | `range_neighbor_repulsion` | increase |
+| Agents react to too many lateral neighbors | `range_neighbor_repulsion` or `range_y_scale` | decrease |
+| Early lane-like splitting | `range_neighbor_repulsion` | often increase with moderate strength |
 
-## Notes
+## Differences from V2
 
-- This variant intentionally avoids blending and case-based deadlock logic.
-- Steering uses one dominant forward neighbor, which reduces chain-following artifacts from summing many neighbors.
-- The anisotropy comes solely from the parameter ratio `r_x / r_y`, both axes use the same linear-exponential decay.
+| Aspect | V2 | V3 |
+|---|---|---|
+| Neighbor avoidance | Sum of repulsion vectors over all neighbors | Rotational steering toward a single dominant forward neighbor |
+| Boundary contribution | Summed into the final velocity | Bends the reference direction only |
+| Heading state | None (instantaneous) | Persistent, relaxed toward the target with timescale $\tau_\theta$ |
+| Spacing direction | Single direction from the steering field | Blend of move-direction and goal-direction spacings |
+| Speed lower bound | $v \ge 0$ | $v_{\min} = -0.01$ m/s for deadlock release |
+| Anisotropy | Equal weighting of distances | Asymmetric perception field via $\sigma_x \ne \sigma_y$ |
+| Neighbor visibility | All neighbors within range | Line-of-sight filter excludes occluded neighbors |
