@@ -577,7 +577,7 @@ same tools.</p>
 <span class="n">writer</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Hdf5TrajectoryWriter</span><span class="p">(</span>
     <span class="n">output_file</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;traj.h5&quot;</span><span class="p">),</span>
     <span class="n">every_nth_frame</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-    <span class="n">compression_level</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">compression_level</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
     <span class="n">model</span><span class="o">=...</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=...</span><span class="p">,</span> <span class="n">trajectory_writer</span><span class="o">=</span><span class="n">writer</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>

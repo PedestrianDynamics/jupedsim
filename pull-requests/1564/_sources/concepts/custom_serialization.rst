@@ -254,7 +254,7 @@ Usage::
     writer = jps.Hdf5TrajectoryWriter(
         output_file=Path("traj.h5"),
         every_nth_frame=4,
-        compression_level=4,
+        compression_level=1,
     )
     sim = jps.Simulation(
         model=..., geometry=..., trajectory_writer=writer, dt=0.01,
