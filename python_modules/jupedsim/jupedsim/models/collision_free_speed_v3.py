@@ -166,7 +166,6 @@ class CollisionFreeSpeedModelV3AgentParameters:
         )
 
 
-
 class CollisionFreeSpeedModelV3State:
     def __init__(self, backing):
         self._obj = backing
