@@ -96,7 +96,7 @@ JPS_ModelType JPS_Agent_GetModelType(JPS_Agent handle)
             return JPS_AnticipationVelocityModel;
         case 5:
             return JPS_SocialForceModel;
-        case 5:
+        case 6:
             return JPS_WarpDriverModel;
     }
     UNREACHABLE();
