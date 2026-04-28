@@ -8,6 +8,9 @@ from jupedsim.models.collision_free_speed import CollisionFreeSpeedModelState
 from jupedsim.models.collision_free_speed_v2 import (
     CollisionFreeSpeedModelV2State,
 )
+from jupedsim.models.collision_free_speed_v3 import (
+    CollisionFreeSpeedModelV3State,
+)
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModelState,
 )
@@ -109,6 +112,7 @@ class Agent:
         GeneralizedCentrifugalForceModelState
         | CollisionFreeSpeedModelState
         | CollisionFreeSpeedModelV2State
+        | CollisionFreeSpeedModelV3State
         | AnticipationVelocityModelState
         | SocialForceModelState
         | WarpDriverModelState
@@ -121,6 +125,8 @@ class Agent:
             return CollisionFreeSpeedModelState(model)
         elif isinstance(model, py_jps.CollisionFreeSpeedModelV2State):
             return CollisionFreeSpeedModelV2State(model)
+        elif isinstance(model, py_jps.CollisionFreeSpeedModelV3State):
+            return CollisionFreeSpeedModelV3State(model)
         elif isinstance(model, py_jps.AnticipationVelocityModelState):
             return AnticipationVelocityModelState(model)
         elif isinstance(model, py_jps.SocialForceModelState):

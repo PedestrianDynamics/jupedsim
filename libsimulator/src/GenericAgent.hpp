@@ -3,6 +3,7 @@
 #include "AnticipationVelocityModelData.hpp"
 #include "CollisionFreeSpeedModelData.hpp"
 #include "CollisionFreeSpeedModelV2Data.hpp"
+#include "CollisionFreeSpeedModelV3Data.hpp"
 #include "GeneralizedCentrifugalForceModelData.hpp"
 #include "OperationalModel.hpp"
 #include "Point.hpp"
@@ -34,6 +35,7 @@ struct GenericAgent {
         GeneralizedCentrifugalForceModelData,
         CollisionFreeSpeedModelData,
         CollisionFreeSpeedModelV2Data,
+        CollisionFreeSpeedModelV3Data,
         AnticipationVelocityModelData,
         SocialForceModelData,
         WarpDriverModelData>;
@@ -64,36 +66,7 @@ struct fmt::formatter<GenericAgent> {
     auto format(const GenericAgent& agent, FormatContext& ctx) const
     {
         return std::visit(
-            overloaded{
-                [&ctx, &agent](const GeneralizedCentrifugalForceModelData& m) {
-                    return fmt::format_to(
-                        ctx.out(),
-                        "Agent[id={}, journey={}, stage={}, destination={}, waypoint={}, pos={}, "
-                        "orientation={}, model={})",
-                        agent.id,
-                        agent.journeyId,
-                        agent.stageId,
-                        agent.destination,
-                        agent.target,
-                        agent.pos,
-                        agent.orientation,
-                        m);
-                },
-                [&ctx, &agent](const CollisionFreeSpeedModelData& m) {
-                    return fmt::format_to(
-                        ctx.out(),
-                        "Agent[id={}, journey={}, stage={}, destination={}, waypoint={}, pos={}, "
-                        "orientation={}, model={})",
-                        agent.id,
-                        agent.journeyId,
-                        agent.stageId,
-                        agent.destination,
-                        agent.target,
-                        agent.pos,
-                        agent.orientation,
-                        m);
-                }},
-            [&ctx, &agent](const SocialForceModelData& m) {
+            [&ctx, &agent](const auto& m) {
                 return fmt::format_to(
                     ctx.out(),
                     "Agent[id={}, journey={}, stage={}, destination={}, waypoint={}, pos={}, "

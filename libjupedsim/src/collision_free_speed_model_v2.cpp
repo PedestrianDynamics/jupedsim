@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "jupedsim/collision_free_speed_model.h"
+#include "jupedsim/collision_free_speed_model_v2.h"
 #include "jupedsim/error.h"
 
 #include "Conversion.hpp"
