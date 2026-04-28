@@ -164,4 +164,3 @@ def test_invalid_parameters():
             geometry=area,
             dt=0.01,
         )
-

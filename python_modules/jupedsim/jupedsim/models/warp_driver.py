@@ -61,6 +61,7 @@ class WarpDriverModelAgentParameters:
             desired_speed=self.desired_speed,
         )
 
+
 class WarpDriverModelState:
     """State of an agent using the WarpDriver Model."""
 
