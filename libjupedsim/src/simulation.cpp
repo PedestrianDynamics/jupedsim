@@ -313,7 +313,7 @@ JPS_AgentId JPS_Simulation_AddCollisionFreeSpeedModelV3Agent(
                 parameters.time_gap,
                 parameters.v0,
                 parameters.radius,
-                0.0  /* headingAngle */});
+                0.0 /* headingAngle */});
         result = simulation->AddAgent(std::move(agent));
     } catch(const std::exception& ex) {
         if(errorMessage) {

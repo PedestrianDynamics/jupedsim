@@ -65,7 +65,7 @@ struct fmt::formatter<GenericAgent> {
     {
         return std::visit(
             [&ctx, &agent](const auto& m) {
-                    return fmt::format_to(
+                return fmt::format_to(
                     ctx.out(),
                     "Agent[id={}, journey={}, stage={}, destination={}, waypoint={}, pos={}, "
                     "orientation={}, model={})",

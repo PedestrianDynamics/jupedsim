@@ -125,8 +125,9 @@ JPS_CollisionFreeSpeedModelV3State_GetRangeXScale(JPS_CollisionFreeSpeedModelV3S
  * @param handle of the Agent to access.
  * @param rangeXScale of this agent.
  */
-JUPEDSIM_API void
-JPS_CollisionFreeSpeedModelV3State_SetRangeXScale(JPS_CollisionFreeSpeedModelV3State handle, double rangeXScale);
+JUPEDSIM_API void JPS_CollisionFreeSpeedModelV3State_SetRangeXScale(
+    JPS_CollisionFreeSpeedModelV3State handle,
+    double rangeXScale);
 
 /**
  * Read rangeYScale of this agent.
@@ -141,8 +142,9 @@ JPS_CollisionFreeSpeedModelV3State_GetRangeYScale(JPS_CollisionFreeSpeedModelV3S
  * @param handle of the Agent to access.
  * @param rangeYScale of this agent.
  */
-JUPEDSIM_API void
-JPS_CollisionFreeSpeedModelV3State_SetRangeYScale(JPS_CollisionFreeSpeedModelV3State handle, double rangeYScale);
+JUPEDSIM_API void JPS_CollisionFreeSpeedModelV3State_SetRangeYScale(
+    JPS_CollisionFreeSpeedModelV3State handle,
+    double rangeYScale);
 
 /**
  * Read thetaMaxUpperBound of this agent.
@@ -157,8 +159,9 @@ JPS_CollisionFreeSpeedModelV3State_GetThetaMaxUpperBound(JPS_CollisionFreeSpeedM
  * @param handle of the Agent to access.
  * @param thetaMaxUpperBound of this agent.
  */
-JUPEDSIM_API void
-JPS_CollisionFreeSpeedModelV3State_SetThetaMaxUpperBound(JPS_CollisionFreeSpeedModelV3State handle, double thetaMaxUpperBound);
+JUPEDSIM_API void JPS_CollisionFreeSpeedModelV3State_SetThetaMaxUpperBound(
+    JPS_CollisionFreeSpeedModelV3State handle,
+    double thetaMaxUpperBound);
 
 /**
  * Read agentBuffer of this agent.
@@ -173,8 +176,9 @@ JPS_CollisionFreeSpeedModelV3State_GetAgentBuffer(JPS_CollisionFreeSpeedModelV3S
  * @param handle of the Agent to access.
  * @param agentBuffer of this agent.
  */
-JUPEDSIM_API void
-JPS_CollisionFreeSpeedModelV3State_SetAgentBuffer(JPS_CollisionFreeSpeedModelV3State handle, double agentBuffer);
+JUPEDSIM_API void JPS_CollisionFreeSpeedModelV3State_SetAgentBuffer(
+    JPS_CollisionFreeSpeedModelV3State handle,
+    double agentBuffer);
 
 /**
  * Read time gap of this agent.
