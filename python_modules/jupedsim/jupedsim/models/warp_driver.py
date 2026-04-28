@@ -19,8 +19,6 @@ class WarpDriverModel:
         time_uncertainty: time uncertainty parameter (lambda).
         velocity_uncertainty_x: longitudinal velocity uncertainty parameter.
         velocity_uncertainty_y: lateral velocity uncertainty parameter.
-        num_samples: number of trajectory sample points.
-        rng_seed: seed for the random number generator (for reproducibility).
     """
 
     time_horizon: float = 2.0
@@ -29,8 +27,6 @@ class WarpDriverModel:
     time_uncertainty: float = 0.5
     velocity_uncertainty_x: float = 0.2
     velocity_uncertainty_y: float = 0.2
-    num_samples: int = 20
-    rng_seed: int = 42
 
 
 @dataclass(kw_only=True)

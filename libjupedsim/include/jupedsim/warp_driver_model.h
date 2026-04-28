@@ -17,14 +17,19 @@ typedef struct JPS_WarpDriverModelBuilder_t* JPS_WarpDriverModelBuilder;
 
 /**
  * Creates a WarpDriverModel builder.
- * @param timeHorizon [Mohcine]...
- * @param stepSize [Mohcine]...
- * @param sigma [Mohcine]...
- * @param timeUncertainty [Mohcine]...
- * @param velocityUncertaintyX [Mohcine]...
- * @param velocityUncertaintyY [Mohcine]...
- * @param numSamples [Mohcine]...
- * @param rngSeed [Mohcine]...
+ * @param timeHorizon look-ahead time T [s] for collision prediction. Larger
+ *        values detect collisions earlier but increase the per-step cost.
+ * @param stepSize gradient-descent step size used to deviate from the
+ *        projected trajectory. Larger values yield stronger avoidance.
+ * @param sigma Gaussian spread of the intrinsic field. Larger values
+ *        produce smoother and wider collision zones.
+ * @param timeUncertainty time uncertainty parameter. Spreads the collision
+ *        field along the time axis so that collisions further in the future
+ *        contribute less.
+ * @param velocityUncertaintyX longitudinal velocity uncertainty. Compresses
+ *        the collision field along the direction of motion.
+ * @param velocityUncertaintyY lateral velocity uncertainty. Expands the
+ *        collision field perpendicular to the direction of motion.
  * */
 JUPEDSIM_API JPS_WarpDriverModelBuilder
 JPS_WarpDriverModelBuilder_Create(double timeHorizon,
@@ -32,9 +37,7 @@ JPS_WarpDriverModelBuilder_Create(double timeHorizon,
         double sigma,
         double timeUncertainty,
         double velocityUncertaintyX,
-        double velocityUncertaintyY,
-        int numSamples,
-        uint64_t rngSeed);
+        double velocityUncertaintyY);
 
 /**
  * Creates a JPS_OperationalModel of type WarpDriverModel Model from the
@@ -89,80 +92,6 @@ JUPEDSIM_API void
 JPS_WarpDriverModelState_SetV0(JPS_WarpDriverModelState handle, double v0);
 
 /**
- * Read stuck Time (elapsed time since anchor was set) of this agent.
- * @param handle of the Agent to access.
- * @return stuck time of this agent
- */
-JUPEDSIM_API double JPS_WarpDriverModelState_GetStuckTime(JPS_WarpDriverModelState handle);
-
-/**
- * Write stuck Time (elapsed time since anchor was set) of this agent.
- * @param handle of the Agent to access.
- * @param stuckTime stuck Time (elapsed time since anchor was set) of this agent.
- */
-JUPEDSIM_API void JPS_WarpDriverModelState_SetStuckTime(JPS_WarpDriverModelState handle, double stuckTime);
-
-/**
- * Read anchorX (x position when stuck tracking began) of this agent.
- * @param handle of the Agent to access.
- * @return anchor x position of this agent
- */
-JUPEDSIM_API double JPS_WarpDriverModelState_GetAnchorX(JPS_WarpDriverModelState handle);
-
-/**
- * Write anchorX (x position when stuck tracking began) of this agent.
- * @param handle of the Agent to access.
- * @param anchorX anchor x position of this agent.
- */
-JUPEDSIM_API void
-JPS_WarpDriverModelState_SetAnchorX(JPS_WarpDriverModelState handle, double anchorX);
-
-/**
- * Read anchorY (y position when stuck tracking began) of this agent.
- * @param handle of the Agent to access.
- * @return anchor y position of this agent
- */
-JUPEDSIM_API double JPS_WarpDriverModelState_GetAnchorY(JPS_WarpDriverModelState handle);
-
-/**
- * Write anchorY (y position when stuck tracking began) of this agent.
- * @param handle of the Agent to access.
- * @param anchorY anchor x position of this agent.
- */
-JUPEDSIM_API void
-JPS_WarpDriverModelState_SetAnchorY(JPS_WarpDriverModelState handle, double anchorY);
-
-/**
- * Read detour Time of this agent.
- * @param handle of the Agent to access.
- * @return detour Time in s of this agent
- */
-JUPEDSIM_API double JPS_WarpDriverModelState_GetDetourTime(JPS_WarpDriverModelState handle);
-
-/**
- * Write detour Time of this agent.
- * @param handle of the Agent to access.
- * @param detourTime in s of this agent.
- */
-JUPEDSIM_API void
-JPS_WarpDriverModelState_SetDetourTime(JPS_WarpDriverModelState handle, double detourTime);
-
-/**
- * Read detour side (+1 = left, -1 = right of desired direction) of this agent.
- * @param handle of the Agent to access.
- * @return agent Scale of this agent
- */
-JUPEDSIM_API int JPS_WarpDriverModelState_GetDetourSide(JPS_WarpDriverModelState handle);
-
-/**
- * Write detour side (+1 = left, -1 = right of desired direction) of this agent.
- * @param handle of the Agent to access.
- * @param detourSide detour side of this agent.
- */
-JUPEDSIM_API void
-JPS_WarpDriverModelState_SetDetourSide(JPS_WarpDriverModelState handle, int detourSide);
-
-/**
  * Describes parameters of an Agent in WarpDriverModel
  */
 typedef struct JPS_WarpDriverModelAgentParameters {
@@ -192,26 +121,6 @@ typedef struct JPS_WarpDriverModelAgentParameters {
      * V0 of the agent
      */
     double v0 = 1.2;
-    /**
-     * stuck time of the agent
-     */
-    double stuckTime = 0.0;
-    /**
-     * anchor X of the agent
-     */
-    double anchorX = 0.0;
-    /**
-     * anchor Y of the agent
-     */
-    double anchorY = 0.0;
-    /**
-     * detour Time the agent
-     */
-    double detourTime = 0.0;
-    /**
-     * detour side of the agent
-     */
-    int detourSide = 1;
 
 } JPS_WarpDriverModelAgentParameters;
 

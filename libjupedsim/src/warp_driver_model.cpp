@@ -22,12 +22,10 @@ JPS_WarpDriverModelBuilder_Create(double timeHorizon,
         double sigma,
         double timeUncertainty,
         double velocityUncertaintyX,
-        double velocityUncertaintyY,
-        int numSamples,
-        uint64_t rngSeed)
+        double velocityUncertaintyY)
 {
     return reinterpret_cast<JPS_WarpDriverModelBuilder>(
-        new WarpDriverModelBuilder(timeHorizon, stepSize, sigma, timeUncertainty, velocityUncertaintyX, velocityUncertaintyY, numSamples, rngSeed));
+        new WarpDriverModelBuilder(timeHorizon, stepSize, sigma, timeUncertainty, velocityUncertaintyX, velocityUncertaintyY));
 }
 
 JUPEDSIM_API JPS_OperationalModel JPS_WarpDriverModelBuilder_Build(
@@ -87,79 +85,4 @@ JUPEDSIM_API void JPS_WarpDriverModelState_SetV0(JPS_WarpDriverModelState handle
     assert(handle);
     const auto state = reinterpret_cast<WarpDriverModelData*>(handle);
     state->v0 = v0;
-}
-
-JUPEDSIM_API double JPS_WarpDriverModelState_GetStuckTime(JPS_WarpDriverModelState handle)
-{
-    assert(handle);
-    const auto state = reinterpret_cast<const WarpDriverModelData*>(handle);
-    return state->stuckTime;
-}
-
-JUPEDSIM_API void
-JPS_WarpDriverModelState_SetStuckTime(JPS_WarpDriverModelState handle, double stuckTime)
-{
-    assert(handle);
-    const auto state = reinterpret_cast<WarpDriverModelData*>(handle);
-    state->stuckTime = stuckTime;
-}
-
-JUPEDSIM_API double JPS_WarpDriverModelState_GetAnchorX(JPS_WarpDriverModelState handle)
-{
-    assert(handle);
-    const auto state = reinterpret_cast<const WarpDriverModelData*>(handle);
-    return state->anchorX;
-}
-
-JUPEDSIM_API void
-JPS_WarpDriverModelState_SetAnchorX(JPS_WarpDriverModelState handle, double anchorX)
-{
-    assert(handle);
-    const auto state = reinterpret_cast<WarpDriverModelData*>(handle);
-    state->anchorX = anchorX;
-}
-
-JUPEDSIM_API double JPS_WarpDriverModelState_GetAnchorY(JPS_WarpDriverModelState handle)
-{
-    assert(handle);
-    const auto state = reinterpret_cast<const WarpDriverModelData*>(handle);
-    return state->anchorY;
-}
-
-JUPEDSIM_API void
-JPS_WarpDriverModelState_SetAnchorY(JPS_WarpDriverModelState handle, double anchorY)
-{
-    assert(handle);
-    const auto state = reinterpret_cast<WarpDriverModelData*>(handle);
-    state->anchorY = anchorY;
-}
-
-JUPEDSIM_API double JPS_WarpDriverModelState_GetDetourTime(JPS_WarpDriverModelState handle)
-{
-    assert(handle);
-    const auto state = reinterpret_cast<const WarpDriverModelData*>(handle);
-    return state->detourTime;
-}
-
-JUPEDSIM_API void
-JPS_WarpDriverModelState_SetDetourTime(JPS_WarpDriverModelState handle, double detourTime)
-{
-    assert(handle);
-    const auto state = reinterpret_cast<WarpDriverModelData*>(handle);
-    state->detourTime = detourTime;
-}
-
-JUPEDSIM_API int JPS_WarpDriverModelState_GetDetourSide(JPS_WarpDriverModelState handle)
-{
-    assert(handle);
-    const auto state = reinterpret_cast<const WarpDriverModelData*>(handle);
-    return state->detourSide;
-}
-
-JUPEDSIM_API void
-JPS_WarpDriverModelState_SetDetourSide(JPS_WarpDriverModelState handle, int detourSide)
-{
-    assert(handle);
-    const auto state = reinterpret_cast<WarpDriverModelData*>(handle);
-    state->detourSide = detourSide;
 }

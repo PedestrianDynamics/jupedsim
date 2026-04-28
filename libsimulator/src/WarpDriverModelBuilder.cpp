@@ -3,23 +3,29 @@
 
 #include "SimulationError.hpp"
 
+namespace
+{
+// Internal sampling and RNG defaults. Not exposed through the public
+// API: the trajectory sample count trades cost for accuracy and the
+// seed is fixed for reproducibility of the symmetry-breaking
+// perturbation.
+constexpr int kDefaultNumSamples = 20;
+constexpr uint64_t kDefaultRngSeed = 42;
+} // namespace
+
 WarpDriverModelBuilder::WarpDriverModelBuilder(
     double timeHorizon,
     double stepSize,
     double sigma,
     double timeUncertainty,
     double velocityUncertaintyX,
-    double velocityUncertaintyY,
-    int numSamples,
-    uint64_t rngSeed)
+    double velocityUncertaintyY)
     : _timeHorizon(timeHorizon)
     , _stepSize(stepSize)
     , _sigma(sigma)
     , _timeUncertainty(timeUncertainty)
     , _velocityUncertaintyX(velocityUncertaintyX)
     , _velocityUncertaintyY(velocityUncertaintyY)
-    , _numSamples(numSamples)
-    , _rngSeed(rngSeed)
 {
 }
 
@@ -49,10 +55,6 @@ WarpDriverModel WarpDriverModelBuilder::Build()
             "WarpDriverModelBuilder: velocityUncertaintyY must be >= 0, got {}",
             _velocityUncertaintyY);
     }
-    if(_numSamples <= 0) {
-        throw SimulationError(
-            "WarpDriverModelBuilder: numSamples must be > 0, got {}", _numSamples);
-    }
 
     return WarpDriverModel(
         _timeHorizon,
@@ -61,6 +63,6 @@ WarpDriverModel WarpDriverModelBuilder::Build()
         _timeUncertainty,
         _velocityUncertaintyX,
         _velocityUncertaintyY,
-        _numSamples,
-        _rngSeed);
+        kDefaultNumSamples,
+        kDefaultRngSeed);
 }
