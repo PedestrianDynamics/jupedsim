@@ -50,12 +50,12 @@ void WarpDriverModel::IntrinsicField::Compute(double sigma)
     values.resize(static_cast<size_t>(nx * ny), 0.0);
     gradients.resize(static_cast<size_t>(nx * ny), Point{0.0, 0.0});
 
-    const double sigma2 = sigma * sigma;
+    const double sigma_squared = sigma * sigma;
 
     // Compute I(x,y) = (f * g)(x,y) where g = unit disk, f = Gaussian(sigma).
     // For each grid point, numerically integrate the convolution over the disk.
-    const double intStep = 0.05;
-    const double intRadius = 1.0; // unit disk support
+    const double integrationStep = 0.05;
+    const double integrationRadius = 1.0; // unit disk support
 
     for(int ix = 0; ix < nx; ++ix) {
         for(int iy = 0; iy < ny; ++iy) {
@@ -64,16 +64,16 @@ void WarpDriverModel::IntrinsicField::Compute(double sigma)
 
             double val = 0.0;
             // Integrate f(px-u, py-v) * g(u,v) du dv over g's support (unit disk)
-            for(double u = -intRadius; u <= intRadius; u += intStep) {
-                for(double v = -intRadius; v <= intRadius; v += intStep) {
+            for(double u = -integrationRadius; u <= integrationRadius; u += integrationStep) {
+                for(double v = -integrationRadius; v <= integrationRadius; v += integrationStep) {
                     if(u * u + v * v <= 1.0) {
                         double dx2 = px - u;
                         double dy2 = py - v;
-                        val += std::exp(-(dx2 * dx2 + dy2 * dy2) / (2.0 * sigma2));
+                        val += std::exp(-(dx2 * dx2 + dy2 * dy2) / (2.0 * sigma_squared));
                     }
                 }
             }
-            val *= intStep * intStep;
+            val *= integrationStep * integrationStep;
             values[static_cast<size_t>(ix * ny + iy)] = val;
         }
     }

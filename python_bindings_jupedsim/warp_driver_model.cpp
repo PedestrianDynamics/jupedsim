@@ -13,16 +13,14 @@ void init_warp_driver_model(py::module_& m)
     py::class_<WarpDriverModel, OperationalModel>(m, "WarpDriverModel");
     py::class_<WarpDriverModelBuilder>(m, "WarpDriverModelBuilder")
         .def(
-            py::init<double, double, double, double, double, double, int, uint64_t>(),
+            py::init<double, double, double, double, double, double>(),
             py::kw_only(),
             py::arg("time_horizon") = 2.0,
             py::arg("step_size") = 0.5,
             py::arg("sigma") = 0.3,
             py::arg("time_uncertainty") = 0.5,
             py::arg("velocity_uncertainty_x") = 0.2,
-            py::arg("velocity_uncertainty_y") = 0.2,
-            py::arg("num_samples") = 20,
-            py::arg("rng_seed") = 42)
+            py::arg("velocity_uncertainty_y") = 0.2)
         .def("build", &WarpDriverModelBuilder::Build);
     py::class_<WarpDriverModelData>(m, "WarpDriverModelState")
         .def(

@@ -19,7 +19,6 @@ def test_default_model_construction():
     assert model.time_horizon == 2.0
     assert model.step_size == 0.5
     assert model.sigma == 0.3
-    assert model.num_samples == 20
 
 
 def test_simulation_runs(warp_driver_corridor):
@@ -166,9 +165,3 @@ def test_invalid_parameters():
             dt=0.01,
         )
 
-    with pytest.raises(RuntimeError, match="numSamples"):
-        jps.Simulation(
-            model=jps.WarpDriverModel(num_samples=0),
-            geometry=area,
-            dt=0.01,
-        )

@@ -149,8 +149,6 @@ class Simulation:
                 time_uncertainty=model.time_uncertainty,
                 velocity_uncertainty_x=model.velocity_uncertainty_x,
                 velocity_uncertainty_y=model.velocity_uncertainty_y,
-                num_samples=model.num_samples,
-                rng_seed=model.rng_seed,
             )
             py_jps_model = model_builder.build()
         else:

@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pedpy
 import shapely
-from pedpy import SpeedCalculation
+from _metrics import compute_fluctuation, compute_order_parameter
 from shapely import wkt
 
 SCRIPT_DIR = Path(__file__).parent
@@ -75,8 +75,6 @@ MODELS = {
             time_uncertainty=0.5,  # temporal spread of collision field
             velocity_uncertainty_x=0.2,  # longitudinal speed uncertainty
             velocity_uncertainty_y=0.2,  # lateral speed uncertainty
-            num_samples=20,  # trajectory sample points (cost ~ samples x neighbors)
-            rng_seed=42,  # RNG seed for symmetry-breaking perturbations
         ),
         "agent_cls": jps.WarpDriverModelAgentParameters,
         "agent_kwargs": {},
@@ -446,30 +444,6 @@ def plot_scenario(results, axes_row):
         ax.set_aspect("equal")
 
 
-def compute_fluctuation(sqlite_file):
-    """Compute velocity fluctuation time series from a trajectory file."""
-    traj = pedpy.load_trajectory_from_jupedsim_sqlite(Path(sqlite_file))
-    fps = traj.frame_rate
-    dt = 1.0 / fps
-
-    individual_velocity = pedpy.compute_individual_speed(
-        traj_data=traj,
-        frame_step=5,
-        compute_velocity=True,
-        speed_calculation=SpeedCalculation.BORDER_ADAPTIVE,
-    )
-    df = traj.data.merge(individual_velocity, on=["id", "frame"])
-
-    # Average velocity vector per frame
-    v_avg = df.groupby("frame")[["v_x", "v_y"]].mean()
-    v_prev = v_avg.shift(1)
-    diff = v_avg - v_prev
-    fluctuation = np.sqrt(diff["v_x"] ** 2 + diff["v_y"] ** 2) / dt
-    time_s = fluctuation.index / fps
-
-    return time_s, fluctuation
-
-
 def plot_fluctuation(results, axes_row):
     """Plot velocity fluctuation over time for one scenario across 4 axes."""
     model_colors = {
@@ -485,48 +459,6 @@ def plot_fluctuation(results, axes_row):
         ax.set_title(model_name, fontsize=9)
         ax.set_ylim(bottom=0)
         ax.grid(True, linestyle="--", alpha=0.5)
-
-
-def compute_order_parameter(sqlite_file):
-    """Compute alignment parameter (order parameter) time series."""
-    traj = pedpy.load_trajectory_from_jupedsim_sqlite(Path(sqlite_file))
-    fps = traj.frame_rate
-
-    individual_velocity = pedpy.compute_individual_speed(
-        traj_data=traj,
-        frame_step=5,
-        compute_velocity=True,
-        speed_calculation=SpeedCalculation.BORDER_ADAPTIVE,
-    )
-    df = traj.data.merge(individual_velocity, on=["id", "frame"])
-
-    # Goal = last position of each agent
-    goals = (
-        df.groupby("id")[["x", "y"]]
-        .last()
-        .rename(columns={"x": "g_x", "y": "g_y"})
-    )
-    df = df.merge(goals, on="id")
-
-    # Unit vector toward goal
-    df["dx_g"] = df["g_x"] - df["x"]
-    df["dy_g"] = df["g_y"] - df["y"]
-    df["dist_g"] = np.sqrt(df["dx_g"] ** 2 + df["dy_g"] ** 2)
-    df["u_x"] = df["dx_g"] / df["dist_g"]
-    df["u_y"] = df["dy_g"] / df["dist_g"]
-
-    # Speed and alignment
-    df["speed"] = np.sqrt(df["v_x"] ** 2 + df["v_y"] ** 2)
-    df["alignment"] = np.where(
-        df["speed"] > 0,
-        (df["v_x"] * df["u_x"] + df["v_y"] * df["u_y"]) / df["speed"],
-        0,
-    )
-
-    alignment_over_time = df.groupby("frame")["alignment"].mean()
-    time_s = alignment_over_time.index / fps
-
-    return time_s, alignment_over_time.values
 
 
 def plot_order_parameter(results, axes_row):

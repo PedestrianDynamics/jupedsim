@@ -3,8 +3,6 @@
 
 #include "WarpDriverModel.hpp"
 
-#include <cstdint>
-
 class WarpDriverModelBuilder
 {
     double _timeHorizon;
@@ -13,8 +11,6 @@ class WarpDriverModelBuilder
     double _timeUncertainty;
     double _velocityUncertaintyX;
     double _velocityUncertaintyY;
-    int _numSamples;
-    uint64_t _rngSeed;
 
 public:
     WarpDriverModelBuilder(
@@ -23,8 +19,6 @@ public:
         double sigma = 0.3,
         double timeUncertainty = 0.5,
         double velocityUncertaintyX = 0.2,
-        double velocityUncertaintyY = 0.2,
-        int numSamples = 20,
-        uint64_t rngSeed = 42);
+        double velocityUncertaintyY = 0.2);
     WarpDriverModel Build();
 };
