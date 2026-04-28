@@ -78,27 +78,16 @@ OperationalModelUpdate CollisionFreeSpeedModelV3::ComputeNewPosition(
     auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.pos, _cutOffRadius);
     const auto& boundary = geometry.LineSegmentsInApproxDistanceTo(ped.pos);
 
-    neighborhood.erase(
-        std::remove_if(
-            std::begin(neighborhood),
-            std::end(neighborhood),
-            [&ped, &boundary](const auto& neighbor) {
-                if(ped.id == neighbor.id) {
-                    return true;
-                }
-                const auto agent_to_neighbor = LineSegment(ped.pos, neighbor.pos);
-                if(std::find_if(
-                       boundary.cbegin(),
-                       boundary.cend(),
-                       [&agent_to_neighbor](const auto& boundary_segment) {
-                           return intersects(agent_to_neighbor, boundary_segment);
-                       }) != boundary.end()) {
-                    return true;
-                }
-
-                return false;
-            }),
-        std::end(neighborhood));
+    std::erase_if(neighborhood, [&ped, &boundary](const auto& neighbor) {
+        if(ped.id == neighbor.id) {
+            return true;
+        }
+        const auto agent_to_neighbor = LineSegment(ped.pos, neighbor.pos);
+        return std::any_of(
+            boundary.cbegin(), boundary.cend(), [&agent_to_neighbor](const auto& segment) {
+                return intersects(agent_to_neighbor, segment);
+            });
+    });
 
     const auto boundaryRepulsion = std::accumulate(
         boundary.cbegin(),
