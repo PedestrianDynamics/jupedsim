@@ -131,6 +131,7 @@ install(
         ${header_dest}/stage.h
         ${header_dest}/transition.h
         ${header_dest}/types.h
+        ${header_dest}/warp_driver_model.h
     DESTINATION ${header_dest}
 )
 
