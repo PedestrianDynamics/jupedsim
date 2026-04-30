@@ -304,8 +304,8 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
     for(size_t index_portal = 1; index_portal <= portalCount; ++index_portal) {
         const auto face_from = path[index_portal - 1];
 
-        const auto portal =
-            index_portal < portalCount ? get_edge(face_from, path[index_portal]) : LineSegment(to, to);
+        const auto portal = index_portal < portalCount ? get_edge(face_from, path[index_portal]) :
+                                                         LineSegment(to, to);
 
         const auto line_segment_left = portal.p2;
         const auto line_segment_right = portal.p1;
