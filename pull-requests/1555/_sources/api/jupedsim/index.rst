@@ -1461,7 +1461,7 @@ Attributes
 
 
 
-.. py:class:: Simulation(*, model: jupedsim.models.collision_free_speed.CollisionFreeSpeedModel | jupedsim.models.generalized_centrifugal_force.GeneralizedCentrifugalForceModel | jupedsim.models.collision_free_speed_v2.CollisionFreeSpeedModelV2 | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModel | jupedsim.models.social_force.SocialForceModel, geometry: str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]], dt: float = 0.01, trajectory_writer: jupedsim.serialization.TrajectoryWriter | None = None, log_level_timer: int = 1, **kwargs: Any)
+.. py:class:: Simulation(*, model: jupedsim.models.collision_free_speed.CollisionFreeSpeedModel | jupedsim.models.generalized_centrifugal_force.GeneralizedCentrifugalForceModel | jupedsim.models.collision_free_speed_v2.CollisionFreeSpeedModelV2 | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModel | jupedsim.models.social_force.SocialForceModel, geometry: str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]], dt: float = 0.01, trajectory_writer: jupedsim.serialization.TrajectoryWriter | None = None, timer_log_level: int = 1, **kwargs: Any)
 
    Defines a simulation of pedestrian movement over a continuous walkable area.
 
