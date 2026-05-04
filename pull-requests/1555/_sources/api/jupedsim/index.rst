@@ -1651,9 +1651,6 @@ Attributes
 
 
 
-   .. py:method:: get_last_timer() -> jupedsim.internal.tracing.Timer
-
-
    .. py:method:: get_stage(stage_id: int)
 
       Specific stage in the simulation.
