@@ -132,12 +132,19 @@ class MainWindow(QMainWindow):
             self.setUpdatesEnabled(False)
             geo = Geometry(navi)
             geo.show_triangulation(self._show_triangulation.isChecked())
+            print("DEBUG MainWindow._open_wkt before ViewGeometryWidget")
             tab = ViewGeometryWidget(
                 navi, geo, name_text, info_text, parent=self
             )
+            print("DEBUG MainWindow._open_wkt after ViewGeometryWidget")
             tab.render_widget.show_grid(self._show_grid.isChecked())
+            print(f"DEBUG MainWindow._open_wkt before insertTab, current tab count={self.tabs.count()}")
             tab_idx = self.tabs.insertTab(0, tab, file.name)
+            print(f"DEBUG MainWindow._open_wkt after insertTab, new tab count={self.tabs.count()}")
+            tab.setVisible(True)
+            print("DEBUG MainWindow._open_wkt after tab.setVisible")
             self.tabs.setCurrentIndex(tab_idx)
+            print("DEBUG MainWindow._open_wkt after setCurrentIndex")
             self.setUpdatesEnabled(True)
         except Exception as e:
             QMessageBox.critical(
@@ -168,10 +175,17 @@ class MainWindow(QMainWindow):
             geo = Geometry(navi)
             geo.show_triangulation(self._show_triangulation.isChecked())
             trajectory = Trajectory(rec)
+            print("DEBUG MainWindow._open_replay before ReplayWidget")
             tab = ReplayWidget(navi, rec, geo, trajectory, parent=self)
+            print("DEBUG MainWindow._open_replay after ReplayWidget")
             tab.render_widget.show_grid(self._show_grid.isChecked())
+            print(f"DEBUG MainWindow._open_replay before insertTab, current tab count={self.tabs.count()}")
             tab_idx = self.tabs.insertTab(0, tab, file.name)
+            print(f"DEBUG MainWindow._open_replay after insertTab, new tab count={self.tabs.count()}")
+            tab.setVisible(True)
+            print("DEBUG MainWindow._open_replay after tab.setVisible")
             self.tabs.setCurrentIndex(tab_idx)
+            print("DEBUG MainWindow._open_replay after setCurrentIndex")
             self.setUpdatesEnabled(True)
             self.update()
         except Exception as e:

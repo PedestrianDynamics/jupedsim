@@ -23,7 +23,9 @@ class ViewGeometryWidget(QWidget):
         info_text: str,
         parent=None,
     ):
+        print(f"DEBUG ViewGeometryWidget.__init__ start, self={id(self)}, parent={id(parent) if parent else None}")
         QWidget.__init__(self, parent)
+        print("DEBUG ViewGeometryWidget.__init__ after QWidget")
         self.geo = geo
         bottom_layout = QHBoxLayout()
         geometry_label = QLabel(name_text)
@@ -41,15 +43,20 @@ class ViewGeometryWidget(QWidget):
         reset_cam_bt = QPushButton("Reset Camera")
         layout.addWidget(reset_cam_bt)
 
-        self.render_widget = RenderWidget(geo, navi, [geo], parent=self)
-        layout.addWidget(self.render_widget)
+        print("DEBUG ViewGeometryWidget.__init__ before RenderWidget")
+        self.render_widget = RenderWidget(geo, navi, [geo])
+        print("DEBUG ViewGeometryWidget.__init__ after RenderWidget")
 
         self.hover_label = QLabel("")
         self.hover_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.hover_label)
 
         layout.addLayout(bottom_layout)
+        print("DEBUG ViewGeometryWidget.__init__ before add RenderWidget to layout")
+        layout.addWidget(self.render_widget)
+        print("DEBUG ViewGeometryWidget.__init__ before setLayout")
         self.setLayout(layout)
+        print("DEBUG ViewGeometryWidget.__init__ end")
 
         reset_cam_bt.clicked.connect(self.render_widget.reset_camera)
         self.render_widget.on_hover_triangle.connect(self.hover_label.setText)

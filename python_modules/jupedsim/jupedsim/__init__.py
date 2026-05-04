@@ -64,6 +64,11 @@ from jupedsim.routing import RoutingEngine
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
 from jupedsim.sqlite_serialization import SqliteTrajectoryWriter
+
+try:
+    from jupedsim.hdf5_serialization import Hdf5TrajectoryWriter
+except ImportError:  # h5py not installed; HDF5 writer remains unavailable.
+    Hdf5TrajectoryWriter = None  # type: ignore[assignment, misc]
 from jupedsim.stages import (
     ExitStage,
     NotifiableQueueStage,
@@ -110,6 +115,7 @@ __all__ = [
     "RoutingEngine",
     "Simulation",
     "SqliteTrajectoryWriter",
+    "Hdf5TrajectoryWriter",
     "Trace",
     "TrajectoryWriter",
     "Transition",
