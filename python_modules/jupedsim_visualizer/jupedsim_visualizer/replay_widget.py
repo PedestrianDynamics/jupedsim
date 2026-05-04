@@ -136,24 +136,18 @@ class ReplayWidget(QWidget):
         trajectory: Trajectory,
         parent=None,
     ):
-        print(f"DEBUG ReplayWidget.__init__ start, self={id(self)}, parent={id(parent) if parent else None}")
         QWidget.__init__(self, parent)
-        print("DEBUG ReplayWidget.__init__ after QWidget")
         self.rec = rec
         self.trajectory = trajectory
         self.control = PlayerControlWidget(parent=self)
-        print("DEBUG ReplayWidget.__init__ before RenderWidget")
         self.render_widget = RenderWidget(
-            geo, navi, [geo, trajectory]
+            geo, navi, [geo, trajectory], parent=self
         )
-        print("DEBUG ReplayWidget.__init__ after RenderWidget")
         self.geo = geo
         layout = QVBoxLayout()
         layout.addWidget(self.render_widget, 1)
         layout.addWidget(self.control)
-        print("DEBUG ReplayWidget.__init__ before setLayout")
         self.setLayout(layout)
-        print("DEBUG ReplayWidget.__init__ end")
         self.control.play.toggled.connect(self.play)
         self.control.forward.clicked.connect(self.frame_forward)
         self.control.backward.clicked.connect(self.frame_backward)

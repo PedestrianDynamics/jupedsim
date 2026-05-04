@@ -2,8 +2,7 @@
 import jupedsim as jps
 import vtkmodules.vtkRenderingOpenGL2  # noqa: F401
 from jupedsim.internal.aabb import AABB
-from PySide6.QtCore import QTimer, Signal
-from PySide6.QtGui import QShowEvent
+from PySide6.QtCore import Signal
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import vtkRenderer
@@ -24,12 +23,9 @@ class RenderWidget(QVTKRenderWindowInteractor):
         actor_sources,
         parent=None,
     ):
-        print(f"DEBUG RenderWidget.__init__ start, self={id(self)}, parent={id(parent) if parent else None}")
-        QVTKRenderWindowInteractor.__init__(self)
-        print("DEBUG RenderWidget.__init__ after QVTKRenderWindowInteractor")
+        QVTKRenderWindowInteractor.__init__(self, parent)
         self.navi = navi
         self.actor_sources = actor_sources
-        self._vtk_initialized = False
 
         self.ren = vtkRenderer()
         self.ren.SetBackground(Colors.d)
@@ -44,29 +40,15 @@ class RenderWidget(QVTKRenderWindowInteractor):
 
         style = vtkInteractorStyleUser()
         self.iren.SetInteractorStyle(style)
-        print("DEBUG RenderWidget.__init__ before defer Initialize")
-        QTimer.singleShot(1, self._deferred_init)
-        print("DEBUG RenderWidget.__init__ after defer Initialize")
+        self.iren.Initialize()
 
         self.move_controller = MoveController(style, cam)
+        self.move_controller.set_navi(self.navi)
         self.hover_info = HoverInfo(geo, self.ren, style, self.move_controller)
         self.hover_info.hovered.connect(self.on_hover_triangle)
 
         self.grid = Grid(self.ren, cam)
-        print("DEBUG RenderWidget.__init__ end")
-
-    def _deferred_init(self):
-        print(f"DEBUG RenderWidget._deferred_init start, window: {self.winId()}")
-        self.iren.Initialize()
-        print("DEBUG RenderWidget._deferred_init after iren.Initialize()")
-
-    def showEvent(self, event: QShowEvent) -> None:
-        print(f"DEBUG RenderWidget.showEvent, self={id(self)}, _vtk_initialized={self._vtk_initialized}")
-        if not self._vtk_initialized:
-            print("DEBUG RenderWidget.showEvent calling reset_camera")
-            self.reset_camera()
-            self._vtk_initialized = True
-        return super().showEvent(event)
+        self.reset_camera()
 
     def reset_camera(self):
         focal_pt_2d = (0, 0)
@@ -99,6 +81,4 @@ class RenderWidget(QVTKRenderWindowInteractor):
         self.grid.show(state)
 
     def render(self):
-        print(f"DEBUG RenderWidget.render, _vtk_initialized={self._vtk_initialized}")
-        if self._vtk_initialized:
-            self.iren.Render()
+        self.iren.Render()
