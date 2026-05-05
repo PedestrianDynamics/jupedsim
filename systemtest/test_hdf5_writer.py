@@ -16,9 +16,9 @@ def square_simulation(tmp_path: pathlib.Path):
     area = GeometryCollection(
         shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     )
-    out = tmp_path / "traj.h5"
+    out_filename = tmp_path / "traj.h5"
     writer = jps.Hdf5TrajectoryWriter(
-        output_file=out, every_nth_frame=1, compression_level=1
+        output_file=out_filename, every_nth_frame=1, compression_level=1
     )
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
@@ -39,7 +39,7 @@ def square_simulation(tmp_path: pathlib.Path):
     for _ in range(50):
         sim.iterate()
     writer.close()
-    return out
+    return out_filename
 
 
 def test_required_layout_is_pedpy_compatible(square_simulation):

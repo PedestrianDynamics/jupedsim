@@ -87,7 +87,6 @@ def main() -> None:
 
     fig, ax = plt.subplots(figsize=(8, 6))
     pedpy.plot_trajectories(traj=traj, walkable_area=walkable_area, axes=ax)
-    print(walkable_area)
     ax.set_aspect("equal")
     ax.set_title("Hdf5TrajectoryWriter -> pedpy.plot_trajectories")
     png = out.with_suffix(".png")
