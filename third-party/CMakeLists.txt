@@ -87,16 +87,16 @@ target_compile_features(perfetto PUBLIC cxx_std_17)
 set_target_properties(perfetto PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 if (WIN32)
-  # The perfetto library contains many symbols, so it needs the big object
-  # format.
-  target_compile_options(perfetto PRIVATE "/bigobj")
-  # Winsock symbols (e.g. accept) are provided by ws2_32 on Windows.
-  target_link_libraries(perfetto PUBLIC ws2_32)
-  # Disable legacy features in windows.h.
+    # The perfetto library contains many symbols, so it needs the big object
+    # format.
+    target_compile_options(perfetto PRIVATE "/bigobj")
+    # Winsock symbols (e.g. accept) are provided by ws2_32 on Windows.
+    target_link_libraries(perfetto PUBLIC ws2_32)
+    # Disable legacy features in windows.h.
     target_compile_definitions(
         perfetto 
         PRIVATE 
-            WIN32_LEAN_AND_MEAN 
-            NOMINMAX
+        WIN32_LEAN_AND_MEAN 
+        NOMINMAX
     )
 endif (WIN32)

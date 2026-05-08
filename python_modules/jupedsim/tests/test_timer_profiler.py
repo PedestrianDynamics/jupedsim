@@ -20,13 +20,7 @@ def test_timer_integration_small_simulation(tmp_path):
     sim = Simulation(model=CollisionFreeSpeedModel(), geometry=geom, dt=0.01)
 
     # underlying C++ simulation object exposed as _obj
-    timer = sim.get_last_timer()
-
-    # Ensure the pybind Simulation exposes timer methods
-    assert hasattr(timer, "push_timer")
-    assert hasattr(timer, "pop_timer")
-    assert hasattr(timer, "elapsed_time_us")
-
+    timer = sim.timer
     timer.push_timer("integration_test")
 
     time.sleep(0.001)
@@ -57,18 +51,6 @@ def test_profiler_integration_with_cpp_extension(tmp_path):
     except Exception:
         pytest.fail("py_jps.Trace.instance() not available")
 
-    # Ensure basic methods exist
-    required = [
-        "enable",
-        "disable",
-        "push_probe",
-        "pop_probe",
-        "dump_and_reset",
-    ]
-    if not all(hasattr(profiler, m) for m in required):
-        pytest.fail(
-            "py_jps.Profiler missing required methods for integration test"
-        )
 
     # enable/disable shouldn't raise
     profiler.enable()

@@ -75,7 +75,7 @@ class StatsWriter(jps.TrajectoryWriter):
         if iteration % self.every_nth_frame() != 0:
             return
         frame_idx = iteration / self.every_nth_frame()
-        timer = simulation.get_last_timer()
+        timer = simulation.timer
         agent_count = simulation.agent_count()
         self._con.cursor().execute(
             "INSERT INTO perf_statistics VALUES(?,?,?,?)",

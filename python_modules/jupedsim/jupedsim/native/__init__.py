@@ -6,8 +6,4 @@ except ImportError:
     from .. import py_jupedsim as py_jps
     from ..py_jupedsim import *  # noqa: F403
 
-__all__ = [
-    name
-    for name in dir(py_jps)
-    if not name.startswith("__") or name in ["Timer"]
-]
+__all__ = [name for name in dir(py_jps) if not name.startswith("__")]

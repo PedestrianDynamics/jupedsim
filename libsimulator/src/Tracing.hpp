@@ -32,43 +32,21 @@ class ProfilerSingleton
     static ProfilerSingleton profiler;
 
 public:
+    static ProfilerSingleton& instance() noexcept { return profiler; };
     class ScopedProbeGuard
     {
-        ProfilerSingleton* profiler{nullptr};
+        ProfilerSingleton& profiler = ProfilerSingleton::instance();
 
     public:
         ScopedProbeGuard() = default;
 
-        ScopedProbeGuard(ProfilerSingleton* const profiler, const std::string_view name)
-            : profiler(profiler)
-        {
-            if(this->profiler) {
-                this->profiler->pushProbe(name);
-            }
-        }
-        ~ScopedProbeGuard()
-        {
-            if(profiler) {
-                profiler->popProbe();
-            }
-        }
+        ScopedProbeGuard(const std::string_view name) { profiler.pushProbe(name); }
+        ~ScopedProbeGuard() { profiler.popProbe(); }
         ScopedProbeGuard(const ScopedProbeGuard&) = delete;
         ScopedProbeGuard& operator=(const ScopedProbeGuard&) = delete;
-        ScopedProbeGuard(ScopedProbeGuard&& other) noexcept : profiler(other.profiler)
-        {
-            other.profiler = nullptr;
-        }
-        ScopedProbeGuard& operator=(ScopedProbeGuard&& other) noexcept
-        {
-            if(this != &other) {
-                profiler = other.profiler;
-                other.profiler = nullptr;
-            }
-            return *this;
-        }
+        ScopedProbeGuard(ScopedProbeGuard&& other) noexcept = delete;
+        ScopedProbeGuard& operator=(ScopedProbeGuard&& other) = delete;
     };
-
-    static ProfilerSingleton& instance() noexcept { return profiler; };
 
     void enable();
     void disable();
@@ -86,7 +64,7 @@ public:
     }
     [[nodiscard]] inline ScopedProbeGuard scopedProbe(const std::string_view name)
     {
-        return ScopedProbeGuard(this, name);
+        return ScopedProbeGuard(name);
     }
 
     void dumpAndReset(const std::string& filename);
