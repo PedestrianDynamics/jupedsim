@@ -72,7 +72,7 @@ jobs:
           git push
 
       - name: Update PR body with preview link
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           PREVIEW_DIR: pull-requests/${{ steps.read-pr-number.outputs.value }}
         with:
