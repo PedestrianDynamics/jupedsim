@@ -7,7 +7,6 @@ from jupedsim.models.collision_free_speed import CollisionFreeSpeedModel
 def test_timer_integration_small_simulation(tmp_path):
     """
     Integration test: exercise the real C++ Timer API exposed via jupedsim.native.
-    This test will be skipped if the extension or the expected methods are not available.
     """
     # Build a Simulation with a real model to access the C++-backed Simulation object
     try:
@@ -39,7 +38,6 @@ def test_timer_integration_small_simulation(tmp_path):
 def test_profiler_integration_with_cpp_extension(tmp_path):
     """
     Integration test: exercise the real C++ Trace/Profiler API.
-    Skips when Trace.instance or methods are not available.
     """
     try:
         import jupedsim.internal.tracing as tracing
