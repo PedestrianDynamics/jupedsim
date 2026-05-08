@@ -16,37 +16,20 @@ PERFETTO_DEFINE_CATEGORIES(perfetto::Category("main").SetDescription("Main itera
 #define JPS_SCOPE_CONCAT(x, y) JPS_SCOPE_CONCAT_IMPL(x, y)
 #endif
 #ifndef JPS_SCOPED_PROBE
-#define JPS_SCOPED_PROBE(profiler_obj, name)                                                       \
-    auto JPS_SCOPE_CONCAT(_jps_scoped_probe_guard_, __COUNTER__) =                                 \
-        (profiler_obj).scopedProbe((name))
+#define JPS_SCOPED_PROBE(name) TRACE_EVENT("main", name);
 #endif
 
-// PorfilerSingleton is a wrapper around perfetto::TracingSession to provide a simple interface for
-// the rest of the codebase. It is implemented as a singleton to ensure that there is only one
-// instance of the profiler throughout the application. The Timer class also accesses the profiler
-// to record traces that aline with the timer entries.
-// This allows for a unified tracing and timing system that can be easily accessed and used
-// throughout the codebase.
+// PorfilerSingleton is a wrapper around perfetto::TracingSession to provide a simple interface
+// for the rest of the codebase. It is implemented as a singleton to ensure that there is only
+// one instance of the profiler throughout the application. The Timer class also accesses the
+// profiler to record traces that aline with the timer entries. This allows for a unified
+// tracing and timing system that can be easily accessed and used throughout the codebase.
 class ProfilerSingleton
 {
     static ProfilerSingleton profiler;
 
 public:
     static ProfilerSingleton& instance() noexcept { return profiler; };
-    class ScopedProbeGuard
-    {
-        ProfilerSingleton& profiler = ProfilerSingleton::instance();
-
-    public:
-        ScopedProbeGuard() = default;
-
-        ScopedProbeGuard(const std::string_view name) { profiler.pushProbe(name); }
-        ~ScopedProbeGuard() { profiler.popProbe(); }
-        ScopedProbeGuard(const ScopedProbeGuard&) = delete;
-        ScopedProbeGuard& operator=(const ScopedProbeGuard&) = delete;
-        ScopedProbeGuard(ScopedProbeGuard&& other) noexcept = delete;
-        ScopedProbeGuard& operator=(ScopedProbeGuard&& other) = delete;
-    };
 
     void enable();
     void disable();
@@ -61,10 +44,6 @@ public:
         if(enabled) {
             TRACE_EVENT_END("main");
         }
-    }
-    [[nodiscard]] inline ScopedProbeGuard scopedProbe(const std::string_view name)
-    {
-        return ScopedProbeGuard(name);
     }
 
     void dumpAndReset(const std::string& filename);

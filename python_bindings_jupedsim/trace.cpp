@@ -18,6 +18,7 @@ void init_trace(py::module_& m)
             py::return_value_policy::reference)
         .def("enable", [](ProfilerSingleton& ps) { ps.enable(); })
         .def("disable", [](ProfilerSingleton& ps) { ps.disable(); })
+        .def("is_enabled", [](ProfilerSingleton& ps) { return ps.isEnabled(); })
         .def(
             "push_probe",
             [](ProfilerSingleton& ps, const std::string& name) { ps.pushProbe(name); })

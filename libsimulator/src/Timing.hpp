@@ -21,7 +21,8 @@
 #ifndef JPS_SCOPED_TIMER
 #define JPS_SCOPED_TIMER(timer_obj, name, loglevel)                                                \
     auto JPS_SCOPE_CONCAT(_jps_scoped_timer_guard_, __COUNTER__) =                                 \
-        (timer_obj).scopedTimerProbe((name), (loglevel))
+        (timer_obj).scopedTimerProbe((name), (loglevel));                                          \
+    JPS_SCOPED_PROBE(name)
 #endif
 
 // Helper class to store the start time and duration of a timer entry.

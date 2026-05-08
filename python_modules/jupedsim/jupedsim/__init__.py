@@ -14,7 +14,13 @@ from jupedsim.distributions import (
     distribute_until_filled,
 )
 from jupedsim.geometry import Geometry
-from jupedsim.internal.tracing import Profiler, Timer
+from jupedsim.internal.tracing import (
+    Timer,
+    disable_tracing,
+    dump_traces,
+    enable_tracing,
+    trace_event,
+)
 from jupedsim.journey import JourneyDescription, Transition
 from jupedsim.library import (
     BuildInfo,
@@ -94,7 +100,6 @@ __all__ = [
     "NegativeValueError",
     "NotifiableQueueStage",
     "OverlappingCirclesError",
-    "Profiler",
     "Recording",
     "RecordingAgent",
     "RecordingFrame",
@@ -133,4 +138,8 @@ __all__ = [
     "set_error_callback",
     "set_info_callback",
     "set_warning_callback",
+    "enable_tracing",
+    "disable_tracing",
+    "dump_traces",
+    "trace_event",
 ]

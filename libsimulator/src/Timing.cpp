@@ -74,11 +74,6 @@ void Timer::pushTimerProbe(std::string_view name, int timer_probe_level)
     } else {
         iter->second.start();
     }
-    // If tracing is enabled a trace with the same name will also be pushed to the ProfilerSingleton
-    // instance.
-    if(ProfilerSingleton::instance().isEnabled()) {
-        ProfilerSingleton::instance().pushProbe(name);
-    }
 }
 
 void Timer::popTimerProbe(const std::string_view name)
@@ -87,11 +82,6 @@ void Timer::popTimerProbe(const std::string_view name)
     auto iter = timer_map.find(std::string(name));
     if(iter != timer_map.end()) {
         iter->second.stop();
-    }
-    // if tracing is enabled the last entry form the stack will also be popped from the
-    // ProfilerSingleton instance.
-    if(ProfilerSingleton::instance().isEnabled()) {
-        ProfilerSingleton::instance().popProbe();
     }
 }
 

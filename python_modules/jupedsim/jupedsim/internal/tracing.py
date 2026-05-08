@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 import jupedsim.native as py_jps
+from contextlib import contextmanager
+import functools
 
 
 class Timer:
@@ -99,39 +101,106 @@ class Timer:
         self._obj = timer_object
 
 
-class Profiler:
-    """
-    Profiler can be used to enable and disable the profiler and to dump the profiler traces to a file.
+class _ProfilerProxy:
+    """Thin proxy around the C++ Profiler singleton.
+
+    We expose a single module-level instance `profiler` so code can just
+    `from jupedsim.internal.tracing import profiler` and call methods on it.
     """
 
     def __init__(self):
+        # Prefer the module-level `trace` object if available to avoid the
+        # extra C++ call. Fall back to Trace.instance() for older builds.
         self._profiler = py_jps.Trace.instance()
-        self.enable()
 
-    def enable(self) -> None:
-        """Enables the profiler."""
-        self._profiler.enable()
 
-    def disable(self) -> None:
-        """Disables the profiler."""
-        self._profiler.disable()
+# Single module-level profiler instance. Importers can use this directly:
+# from jupedsim.internal.tracing import profiler
+profiler = _ProfilerProxy()
 
-    def dump_and_reset(self, filename: str) -> None:
-        """Dumps the profiler traces to a file and resets the profiler.
 
-        Args:
-            filename: Name of the file to dump the traces to.
-        """
-        self._profiler.dump_and_reset(filename)
+def enable_tracing() -> None:
+    """Enable the profiler."""
+    profiler._profiler.enable()
 
-    def push_probe(self, name: str) -> None:
-        """Pushes a probe with the given name. The probe will be stopped when the corresponding pop_probe is called.
 
-        Args:
-            name: Name of the probe to be pushed.
-        """
-        self._profiler.push_probe(name)
+def disable_tracing() -> None:
+    """Disable the profiler."""
+    profiler._profiler.disable()
 
-    def pop_probe(self) -> None:
-        """Pops the last pushed probe. The probe will be stopped and the elapsed time will be recorded."""
-        self._profiler.pop_probe()
+
+def push_probe(name: str) -> None:
+    """Push a named probe."""
+    if not profiler._profiler.is_enabled():
+        profiler._profiler.enable()  # auto-enable if not already enabled
+    profiler._profiler.push_probe(name)
+
+
+def pop_probe() -> None:
+    """Pop the last pushed probe."""
+    profiler._profiler.pop_probe()
+
+
+def dump_traces(filename: str) -> None:
+    """Dump traces to file."""
+    profiler._profiler.dump_and_reset(filename)
+
+
+def trace_event(arg=None):
+    """Use as either a decorator or a context-manager factory.
+
+    Usages supported:
+      @trace_event
+      def f(...): ...
+
+      @trace_event("custom-name")
+      def f(...): ...
+
+      with trace_event("initialisation"):
+          ...
+    """
+
+    # Decorator used without arguments: @trace_event
+    if callable(arg):
+        fn = arg
+
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):
+            push_probe(f"{fn.__name__}()")
+            try:
+                return fn(*args, **kwargs)
+            finally:
+                pop_probe()
+
+        return wrapper
+
+    # If arg is a string, we either return a context-manager instance when
+    # called (so `with trace_event("name"):` works), or return a decorator
+    # if this function is later used as `@trace_event("name")`.
+    name = arg
+
+    def decorator(fn):
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):
+            push_probe(name or f"{fn.__name__}()")
+            try:
+                return fn(*args, **kwargs)
+            finally:
+                pop_probe()
+
+        return wrapper
+
+    if isinstance(name, str):
+        # Return a context-manager instance for `with trace_event("name"):`
+        @contextmanager
+        def _cm():
+            push_probe(name)
+            try:
+                yield
+            finally:
+                pop_probe()
+
+        return _cm()
+
+    # No argument provided but parentheses used: @trace_event() -> return decorator
+    return decorator
