@@ -11,7 +11,7 @@ setuptools
 # test deps
 pytest~=8.3
 pandas~=2.2
-ezdf
+ezdxf
 geopandas
 typer
 
