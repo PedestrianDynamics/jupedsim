@@ -93,5 +93,10 @@ if (WIN32)
   # Winsock symbols (e.g. accept) are provided by ws2_32 on Windows.
   target_link_libraries(perfetto PUBLIC ws2_32)
   # Disable legacy features in windows.h.
-  add_definitions(-DWIN32_LEAN_AND_MEAN -DNOMINMAX)
+    target_compile_definitions(
+        perfetto 
+        PRIVATE 
+            WIN32_LEAN_AND_MEAN 
+            NOMINMAX
+    )
 endif (WIN32)
