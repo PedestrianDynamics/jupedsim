@@ -49,7 +49,6 @@ def test_profiler_integration_with_cpp_extension(tmp_path):
     except Exception:
         pytest.fail("py_jps.Trace.instance() not available")
 
-
     # enable/disable shouldn't raise
     profiler.enable()
     profiler.disable()
