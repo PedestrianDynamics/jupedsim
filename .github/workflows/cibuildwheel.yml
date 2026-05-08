@@ -2,7 +2,7 @@ name: Build CI wheels
 on:
   schedule:
     # Runs at 02:00 a.m. each Sunday
-    - cron: '00 2 * * 0'
+    - cron: "00 2 * * 0"
   push:
     branches:
       - master
@@ -12,7 +12,7 @@ on:
       - master
       - rls-*
   release:
-    types: [published]
+    types: [ published ]
     branches:
       - master
       - rls-*
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        toolchain: [{cc: clang, cxx: clang++}, {cc: gcc, cxx: g++}]
+        toolchain: [ { cc: clang, cxx: clang++ }, { cc: gcc, cxx: g++ } ]
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -245,14 +245,16 @@ jobs:
       - uses: actions/checkout@v6
         with:
           submodules: true
-      - name: Build wheels for CPython ${{ matrix.cibw_build }} on ${{ matrix.cibw_archs }}
+      - name: Build wheels for CPython ${{ matrix.cibw_build }} on ${{ matrix.cibw_archs
+          }}
         uses: pypa/cibuildwheel@v3.4.1
         env:
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_ARCHS: ${{ matrix.cibw_archs }}
       - name: Extract Python Version (Unix/Mac)
         shell: bash
-        run: echo "PYTHON_VERSION=$(echo ${{ matrix.cibw_build }} | cut -d'-' -f1)" >> $GITHUB_ENV
+        run: echo "PYTHON_VERSION=$(echo ${{ matrix.cibw_build }} | cut -d'-' -f1)" >>
+          $GITHUB_ENV
         if: runner.os != 'Windows'
       - name: Extract Python Version (Windows)
         if: runner.os == 'Windows'
@@ -263,17 +265,18 @@ jobs:
           echo "PYTHON_VERSION=$pythonVersion" | Out-File -Append -FilePath $env:GITHUB_ENV
       - uses: actions/upload-artifact@v7
         with:
-          name: python-packages-${{ matrix.os }}-${{ matrix.cibw_archs }}-${{ env.PYTHON_VERSION }}
+          name: python-packages-${{ matrix.os }}-${{ matrix.cibw_archs }}-${{
+            env.PYTHON_VERSION }}
           path: ./wheelhouse/*.whl
           if-no-files-found: error
   test-wheels:
     name: Test wheel on ${{ matrix.os }} with Python ${{ matrix.python-version }}
-    needs: [build_wheels]
+    needs: [ build_wheels ]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-14, macos-15, macos-26]
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        os: [ ubuntu-latest, windows-latest, macos-14, macos-15, macos-26 ]
+        python-version: [ "3.10", "3.11", "3.12", "3.13", "3.14" ]
     steps:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
@@ -294,7 +297,7 @@ jobs:
           python -c "import jupedsim; print(jupedsim.__version__)"
   test-sdist:
     name: Test sdist install
-    needs: [build_sdist]
+    needs: [ build_sdist ]
     runs-on: ubuntu-latest
     steps:
       - name: Set up Python 3.13
@@ -314,8 +317,18 @@ jobs:
       - name: Check installation
         run: |
           python -c "import jupedsim; print(jupedsim.__version__)"
+      - name: Install test dependencies
+        run: |
+          python -m pip install -U pip
+          # Install project test dependencies so pytest and any test helpers are available
+          if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
+      - name: Run pytest against installed wheel
+        run: |
+          # Run only the jupedsim Python tests from the installed wheel
+          python -m pytest -q python_modules/jupedsim/tests
+          python -m pytest -q systemtest
   pypi-publish:
-    needs: [test-wheels, test-sdist]
+    needs: [ test-wheels, test-sdist ]
     if: ${{ github.event_name == 'release' && github.event.action == 'published' }}
     name: Publish to PyPI
     runs-on: ubuntu-latest

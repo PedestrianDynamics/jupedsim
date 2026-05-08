@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import pytest
 import shapely
-from jupedsim.util import GeometryError, _polygons_from_geometry_collection
+from jupedsim.geometry_utils import (
+    GeometryError,
+    _polygons_from_geometry_collection,
+)
 
 
 @pytest.mark.parametrize(

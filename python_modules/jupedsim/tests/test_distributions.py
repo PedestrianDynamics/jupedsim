@@ -88,13 +88,13 @@ def test_bounding_box_determination():
         (1, 4),
         (3, 2),
     ]
-    s_polygon = distributions.shply.Polygon(polygon)
+    s_polygon = distributions.shapely.Polygon(polygon)
     expected_box = [(0, 0), (12, 10.5)]
     assert distributions.__get_bounding_box(s_polygon) == expected_box
 
 
 def test_minimal_distance_to_polygon():
-    polygon = distributions.shply.Polygon(
+    polygon = distributions.shapely.Polygon(
         [(0, 0), (4, 1), (5, 3), (4, 5), (2, 5), (0, 3)]
     )
     pt = (3, 3)
@@ -116,7 +116,7 @@ def test_minimal_distance_to_polygon():
 
 def test_seed_works_correct_for_determination_by_number():
     polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
-    polygon = distributions.shply.Polygon(polygon)
+    polygon = distributions.shapely.Polygon(polygon)
     distance_to_agents, distance_to_polygon = 0.3, 0.3
     number_of_agents = 100
     set_seed = 1337
@@ -139,7 +139,7 @@ def test_seed_works_correct_for_determination_by_number():
 
 def test_seed_works_correct_for_determination_in_circles_by_number():
     polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
-    polygon = distributions.shply.Polygon(polygon)
+    polygon = distributions.shapely.Polygon(polygon)
     number_of_agents = [75]
     distance_to_agents = 0.3
     distance_to_polygon = 0.3
@@ -188,7 +188,7 @@ def test_determination_by_number_creates_correct_points():
         [(8.5, 4), (10, 3), (12, 6.5), (10, 7)],
         [(10, 10.5), (11, 9.5), (14, 12.5), (11, 13)],
     ]
-    polygon = distributions.shply.Polygon(polygon, holes)
+    polygon = distributions.shapely.Polygon(polygon, holes)
     distance_to_agents, distance_to_polygon = 0.3, 0.3
     number_of_agents = 450
     set_seed = 1337
@@ -204,7 +204,7 @@ def test_determination_by_number_creates_correct_points():
 
     # all created points contained inside polygon
     for sample in samples:
-        assert polygon.contains(distributions.shply.Point(sample))
+        assert polygon.contains(distributions.shapely.Point(sample))
 
     # all Points have enough distance to another
     for i, sample in enumerate(samples):
@@ -223,7 +223,7 @@ def test_determination_by_number_creates_correct_points():
 def test_determination_by_density_creates_correct_amount():
     polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
     # polygon 10 x 10 square with 100m²
-    polygon = distributions.shply.Polygon(polygon)
+    polygon = distributions.shapely.Polygon(polygon)
     distance_to_agents, distance_to_polygon = 0.3, 0.3
     density = 2.5
     # 2.5 persons per m²
@@ -257,7 +257,7 @@ def test_distribution_in_circle_by_number_creates_correct_points():
         [(8.5, 4), (10, 3), (12, 6.5), (10, 7)],
         [(10, 10.5), (11, 9.5), (14, 12.5), (11, 13)],
     ]
-    polygon = distributions.shply.Polygon(polygon, holes)
+    polygon = distributions.shapely.Polygon(polygon, holes)
     number_of_agents = [200, 150]
     distance_to_agents = 0.3
     distance_to_polygon = 0.3
@@ -299,7 +299,7 @@ def test_distribution_in_circle_by_number_creates_correct_points():
 
     # all created points contained inside polygon
     for sample in samples:
-        assert polygon.contains(distributions.shply.Point(sample))
+        assert polygon.contains(distributions.shapely.Point(sample))
 
     # all Points have enough distance to another
     for i, sample in enumerate(samples):
@@ -318,7 +318,7 @@ def test_distribution_in_circle_by_number_creates_correct_points():
 def test_distribution_in_circle_by_density_creates_correct_amount():
     polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
     # polygon 10 x 10 square with 100m²
-    polygon = distributions.shply.Polygon(polygon)
+    polygon = distributions.shapely.Polygon(polygon)
     densities = [1]
     distance_to_agents = 0.3
     distance_to_polygon = 0.3
@@ -343,7 +343,7 @@ def test_distribution_in_circle_by_density_creates_correct_amount():
 
 def test_seed_works_correct_for_distribution_till_full():
     polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
-    polygon = distributions.shply.Polygon(polygon)
+    polygon = distributions.shapely.Polygon(polygon)
     distance_to_agents, distance_to_polygon = 0.75, 0.75
     set_seed = 1337
     samples1 = distributions.distribute_until_filled(
@@ -380,7 +380,7 @@ def test_distribution_by_percentage_creates_correct_points():
         [(8.5, 4), (10, 3), (12, 6.5), (10, 7)],
         [(10, 10.5), (11, 9.5), (14, 12.5), (11, 13)],
     ]
-    polygon = distributions.shply.Polygon(polygon, holes)
+    polygon = distributions.shapely.Polygon(polygon, holes)
     percent = 73
     distance_to_agents = 2.0
     distance_to_polygon = 1.0
@@ -398,7 +398,7 @@ def test_distribution_by_percentage_creates_correct_points():
 
     # all created points contained inside polygon
     for sample in samples:
-        assert polygon.contains(distributions.shply.Point(sample))
+        assert polygon.contains(distributions.shapely.Point(sample))
 
     # all Points have enough distance to another
     for i, sample in enumerate(samples):
@@ -416,7 +416,7 @@ def test_distribution_by_percentage_creates_correct_points():
 
 def test_seed_works_correct_for_distribution_by_percentage():
     polygon = [(0, 0), (10, 0), (10, 10), (0, 10)]
-    polygon = distributions.shply.Polygon(polygon)
+    polygon = distributions.shapely.Polygon(polygon)
     distance_to_agents, distance_to_polygon = 0.75, 0.75
     set_seed = 1337
     percent = 73
@@ -454,7 +454,7 @@ def test_box_of_intersection():
         (8, 10),
         (0, 10),
     ]
-    s_polygon = distributions.shply.Polygon(polygon)
+    s_polygon = distributions.shapely.Polygon(polygon)
     center_point = (4, 7)
     outer_radius = 3.5
     expected_box = [(0.5, 4), (7.35329, 10)]
@@ -484,7 +484,7 @@ def test_catch_wrong_inputs_for_wrong_polygon_type():
 
 
 def test_catch_wrong_inputs_negativ_value():
-    s_polygon = distributions.shply.Polygon(
+    s_polygon = distributions.shapely.Polygon(
         [(0, 0), (10, 0), (10, 10), (0, 10)]
     )
     center_point = (0, 0)
@@ -513,7 +513,7 @@ test_parameters = [
 def test_catch_wrong_inputs_incorrect_parameter(
     polygon, center_point, circle_segment_radii, numbers_of_agents
 ):
-    s_polygon = distributions.shply.Polygon(polygon)
+    s_polygon = distributions.shapely.Polygon(polygon)
     with pytest.raises(distributions.IncorrectParameterError):
         distributions.__catch_wrong_inputs(
             polygon=s_polygon,
@@ -542,7 +542,7 @@ test_parameters = [
 def test_catch_wrong_inputs_overlapping_circles(
     polygon, center_point, circle_segment_radii, numbers_of_agents
 ):
-    s_polygon = distributions.shply.Polygon(polygon)
+    s_polygon = distributions.shapely.Polygon(polygon)
     with pytest.raises(distributions.OverlappingCirclesError):
         distributions.__catch_wrong_inputs(
             polygon=s_polygon,
@@ -605,7 +605,7 @@ test_parameters = [
 def test_distribution_till_full_creates_correct_points(
     polygon, holes, distance_to_agents, distance_to_polygon, expected_size
 ):
-    polygon = distributions.shply.Polygon(polygon, holes)
+    polygon = distributions.shapely.Polygon(polygon, holes)
     set_seed = 1337
     samples = distributions.distribute_until_filled(
         polygon=polygon,
@@ -619,7 +619,7 @@ def test_distribution_till_full_creates_correct_points(
 
     # all created points contained inside polygon
     for sample in samples:
-        assert polygon.contains(distributions.shply.Point(sample))
+        assert polygon.contains(distributions.shapely.Point(sample))
 
     # all Points have enough distance to another
     for i, sample in enumerate(samples):

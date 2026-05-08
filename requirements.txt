@@ -11,6 +11,9 @@ setuptools
 # test deps
 pytest~=8.3
 pandas~=2.2
+ezdf
+geopandas
+typer
 
 # ci deps
 jinja2~=3.1
