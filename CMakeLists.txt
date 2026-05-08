@@ -163,11 +163,11 @@ endif()
 ################################################################################
 if(BUILD_TESTS)
     if(UNIX)
-        set(pytest-wrapper-in ${CMAKE_SOURCE_DIR}/cmake_templates/run-systemtests.unix.in)
-        set(pytest-wrapper-out ${CMAKE_BINARY_DIR}/run-systemtests)
+        set(pytest-wrapper-in ${CMAKE_SOURCE_DIR}/cmake_templates/run-pythontests.unix.in)
+        set(pytest-wrapper-out ${CMAKE_BINARY_DIR}/run-pythontests)
     else()
-        set(pytest-wrapper-in ${CMAKE_SOURCE_DIR}/cmake_templates/run-systemtests.windows.in)
-        set(pytest-wrapper-out ${CMAKE_BINARY_DIR}/run-systemtests.cmd)
+        set(pytest-wrapper-in ${CMAKE_SOURCE_DIR}/cmake_templates/run-pythontests.windows.in)
+        set(pytest-wrapper-out ${CMAKE_BINARY_DIR}/run-pythontests.cmd)
     endif()
     configure_file(
         ${pytest-wrapper-in}
@@ -175,13 +175,13 @@ if(BUILD_TESTS)
         @ONLY
     )
     add_custom_target(tests
-        DEPENDS systemtests unittests
+        DEPENDS pythontests unittests
     )
-    add_custom_target(systemtests
+    add_custom_target(pythontests
         COMMENT "Running system tests"
         COMMAND ${pytest-wrapper-out} -vv -s
                 --basetemp=${CMAKE_BINARY_DIR}/systemtest-out
-                --junit-xml=result-systemtests.xml
+                --junit-xml=result-pythontests.xml
         DEPENDS py_jupedsim
     )
     set(unittests_dependency_list libsimulator-unittests)
