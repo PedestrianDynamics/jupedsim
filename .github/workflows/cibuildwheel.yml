@@ -296,7 +296,9 @@ jobs:
         run: |
           python -c "import jupedsim; print(jupedsim.__version__)"
       - name: Test jupedsim Python modules
+        shell: bash
         run: |
+          ls
           if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
           # Run only the jupedsim Python tests from the installed wheel
           python -m pytest -q python_modules/jupedsim/tests
@@ -324,11 +326,13 @@ jobs:
         run: |
           python -c "import jupedsim; print(jupedsim.__version__)"
       - name: Install test dependencies
+        shell: bash
         run: |
+          ls
           python -m pip install -U pip
-          # Install project test dependencies so pytest and any test helpers are available
           if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
       - name: Run pytest against installed wheel
+        shell: bash
         run: |
           # Run only the jupedsim Python tests from the installed wheel
           python -m pytest -q python_modules/jupedsim/tests
