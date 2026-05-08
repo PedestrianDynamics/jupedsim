@@ -28,7 +28,11 @@ void init_routing(py::module_& m)
                std::tuple<double, double> to) {
                 return intoTuples(engine.ComputeAllWaypoints(intoPoint(from), intoPoint(to)));
             })
-        .def("is_routable", &RoutingEngine::IsRoutable)
+        .def(
+            "is_routable",
+            [](RoutingEngine& engine, std::tuple<double, double> point) {
+                return engine.IsRoutable(intoPoint(point));
+            })
         .def("mesh", [](const RoutingEngine& routingEngine) {
             using Pt = glm::vec2;
             using Vert = std::vector<Pt>;
