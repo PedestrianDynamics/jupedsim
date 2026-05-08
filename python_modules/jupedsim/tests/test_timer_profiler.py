@@ -29,10 +29,21 @@ def test_timer_integration_small_simulation(tmp_path):
     assert isinstance(dur, int)
     assert dur >= 0
 
+    @timer.timer_event
+    def sleep():
+        time.sleep(0.001)
+
+    sleep()
+
+    with timer.timer_region("test_region"):
+        time.sleep(0.001)
+
     s = str(timer)
 
     assert "integration_test" in s
     assert "Total Simulation Time" in s
+    assert "test_region" in s
+    assert "sleep" in s
 
 
 def test_profiler_integration_with_cpp_extension(tmp_path):

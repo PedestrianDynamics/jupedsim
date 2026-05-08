@@ -101,6 +101,66 @@ class Timer:
         """
         self._obj = timer_object
 
+    @contextmanager
+    def timer_region(self, name: str):
+        """Context manager that pushes/pops a timer around a with-block.
+
+        Usage:
+            with timer.timer_region("step"):
+                ...
+        """
+        self.push_timer(name)
+        try:
+            yield
+        finally:
+            self.pop_timer(name)
+
+    def timer_event(self, arg=None):
+        """Use as either a decorator or a context-manager factory for timers.
+
+        Supported uses:
+          @timer.timer_event
+          def f(...): ...
+
+          with timer.timer_event("name"):
+              ...
+
+        This mirrors the behavior of `trace_event` for the profiler.
+        """
+
+        # Decorator used without arguments: @timer.timer_event
+        if callable(arg):
+            fn = arg
+
+            @functools.wraps(fn)
+            def wrapper(*args, **kwargs):
+                self.push_timer(f"{fn.__name__}()")
+                try:
+                    return fn(*args, **kwargs)
+                finally:
+                    self.pop_timer(f"{fn.__name__}()")
+
+            return wrapper
+
+        name = arg
+
+        def decorator(fn):
+            @functools.wraps(fn)
+            def wrapper(*args, **kwargs):
+                self.push_timer(name or f"{fn.__name__}()")
+                try:
+                    return fn(*args, **kwargs)
+                finally:
+                    self.pop_timer(name or f"{fn.__name__}()")
+
+            return wrapper
+
+        if isinstance(name, str):
+            return self.timer_region(name)
+
+        # No argument provided but parentheses used: @timer.timer_event() -> return decorator
+        return decorator
+
 
 class _ProfilerProxy:
     """Thin proxy around the C++ Profiler singleton.
@@ -145,6 +205,15 @@ def pop_probe() -> None:
 def dump_traces(filename: str) -> None:
     """Dump traces to file."""
     profiler._profiler.dump_and_reset(filename)
+
+
+@contextmanager
+def trace_region(name):
+    push_probe(name)
+    try:
+        yield
+    finally:
+        pop_probe()
 
 
 def trace_event(arg=None):
@@ -192,16 +261,7 @@ def trace_event(arg=None):
         return wrapper
 
     if isinstance(name, str):
-        # Return a context-manager instance for `with trace_event("name"):`
-        @contextmanager
-        def _cm():
-            push_probe(name)
-            try:
-                yield
-            finally:
-                pop_probe()
-
-        return _cm()
+        return trace_region(name)
 
     # No argument provided but parentheses used: @trace_event() -> return decorator
     return decorator
