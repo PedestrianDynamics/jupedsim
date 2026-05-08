@@ -3,6 +3,14 @@ from pathlib import Path
 
 import pytest
 
+try:
+    import ezdxf  # noqa: F401
+    import geopandas  # noqa: F401
+    import rich  # noqa: F401
+    import typer  # noqa: F401
+except ImportError:
+    pytest.skip("ezdxf module not installed", allow_module_level=True)
+
 dxf_dir = Path("examples/geometry/dxf")
 dxf_files = list(dxf_dir.glob("*.dxf"))
 
