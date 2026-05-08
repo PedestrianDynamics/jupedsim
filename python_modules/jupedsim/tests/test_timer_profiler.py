@@ -44,20 +44,25 @@ def test_profiler_integration_with_cpp_extension(tmp_path):
     except Exception:
         pytest.fail("jupedsim.native extension not importable")
 
-    try:
-        profiler = tracing.Profiler()
-    except Exception:
-        pytest.fail("py_jps.Trace.instance() not available")
-
     # enable/disable shouldn't raise
-    profiler.enable()
-    profiler.disable()
+    tracing.enable_tracing()
+    tracing.disable_tracing()
 
     # push/pop probes
-    profiler.push_probe("integration_probe")
+    tracing.push_probe("integration_probe")
 
     time.sleep(0.001)
-    profiler.pop_probe()
+    tracing.pop_probe()
+
+    @tracing.trace_event
+    def sleep():
+        time.sleep(0.001)
+
+    sleep()
+
+    with tracing.trace_event("test_region"):
+        time.sleep(0.001)
+
     # dump to a temp file; some backends may not write immediately but should accept the call
-    out_file = tmp_path / "trace_out.json"
-    profiler.dump_and_reset(str(out_file))
+    out_file = tmp_path / "trace_out.ptrace"
+    tracing.dump_traces(str(out_file))

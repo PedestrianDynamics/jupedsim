@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-import jupedsim.native as py_jps
-from contextlib import contextmanager
 import functools
+from contextlib import contextmanager
+
+import jupedsim.native as py_jps
 
 
 class Timer:

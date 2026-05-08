@@ -12,7 +12,6 @@ import jupedsim as jps
 from performancetest.geometry import geometries
 from performancetest.stats_writer import StatsWriter
 
-
 positions = [
     (-2009.5709522729476, -176.15789756334283),
     (-2009.018603443178, -176.5762249878574),
