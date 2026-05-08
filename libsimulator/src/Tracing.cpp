@@ -1,5 +1,7 @@
 #include "Tracing.hpp"
 
+#include "Logger.hpp"
+
 #include <perfetto.h>
 
 #include <fstream>
@@ -62,7 +64,7 @@ void ProfilerSingleton::writeAndResetSession(const std::string& filename)
         output.write(trace_data.data(), static_cast<std::streamsize>(trace_data.size()));
         output.flush();
     } else {
-        std::cerr << "Failed to open Perfetto output file: " << filename << std::endl;
+        LOG_ERROR("Failed to open Perfetto output file: {}", filename);
     }
 
     tracing_session.reset();
