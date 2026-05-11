@@ -166,7 +166,13 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
                 continue;
             }
 
-            const auto edge = cdt.segment(target, idx);
+            // The shared edge between `current_state->id` and `target` is the edge
+            // opposite vertex `idx` of the CURRENT face. CGAL's neighbor indexing is
+            // not symmetric: the index of `target` in current's neighbor list differs
+            // from the index of `current` in target's neighbor list, so querying
+            // `cdt.segment(target, idx)` returns an unrelated edge of `target` and
+            // produces bogus g/h values that mis-rank successors in A*.
+            const auto edge = cdt.segment(current_state->id, idx);
 
             // For all remaining nodes compute g/h values
             // The h-value is the distance between the goal and the closts point on the edge
