@@ -148,6 +148,11 @@ class Timer:
         return decorator
 
 
+def is_tracing_enabled() -> bool:
+    """Check if the profiler is enabled."""
+    return py_jps.Profiler().is_enabled
+
+
 def enable_tracing() -> None:
     """Enable the profiler."""
     py_jps.Profiler().enable()
