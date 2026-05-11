@@ -3,20 +3,23 @@
 
 #include <perfetto.h>
 
-PERFETTO_DEFINE_CATEGORIES(perfetto::Category("main").SetDescription("Main iteration over agents"));
+PERFETTO_DEFINE_CATEGORIES(
+    perfetto::Category("C++").SetDescription("C++ Traces."),
+    perfetto::Category("Python").SetDescription("Python Traces."));
 
 #include <functional>
 #include <memory>
 #include <string>
 
-#ifndef JPS_SCOPE_CONCAT_IMPL
-#define JPS_SCOPE_CONCAT_IMPL(x, y) x##y
+#ifndef JPS_TRACE_EVENT
+#define JPS_TRACE_EVENT(name) TRACE_EVENT("C++", name);
+#define JPS_TRACE_EVENT_BEGIN(name) TRACE_EVENT_BEGIN("C++", name)
+#define JPS_TRACE_EVENT_END TRACE_EVENT_END("C++")
+#if defined(_MSC_VER)
+#define JPS_TRACE_FUNC JPS_TRACE_EVENT(__FUNCTION__)
+#else
+#define JPS_TRACE_FUNC JPS_TRACE_EVENT(__PRETTY_FUNCTION__)
 #endif
-#ifndef JPS_SCOPE_CONCAT
-#define JPS_SCOPE_CONCAT(x, y) JPS_SCOPE_CONCAT_IMPL(x, y)
-#endif
-#ifndef JPS_SCOPED_PROBE
-#define JPS_SCOPED_PROBE(name) TRACE_EVENT("main", name);
 #endif
 
 // PorfilerSingleton is a wrapper around perfetto::TracingSession to provide a simple interface
@@ -24,35 +27,25 @@ PERFETTO_DEFINE_CATEGORIES(perfetto::Category("main").SetDescription("Main itera
 // one instance of the profiler throughout the application. The Timer class also accesses the
 // profiler to record traces that aline with the timer entries. This allows for a unified
 // tracing and timing system that can be easily accessed and used throughout the codebase.
-class ProfilerSingleton
+class Profiler
 {
-    static ProfilerSingleton profiler;
+    static Profiler profiler;
 
 public:
-    static ProfilerSingleton& instance() noexcept { return profiler; };
+    static Profiler& instance() noexcept { return profiler; };
 
-    void enable();
-    void disable();
-    inline void pushProbe(const std::string_view name)
-    {
-        if(enabled) {
-            TRACE_EVENT_BEGIN("main", perfetto::DynamicString{name.data()});
-        }
-    }
-    inline void popProbe()
-    {
-        if(enabled) {
-            TRACE_EVENT_END("main");
-        }
-    }
+    static void enable();
+    static void disable();
 
-    void dumpAndReset(const std::string& filename);
+    static void dumpAndReset(const std::string& filename);
     inline bool isEnabled() const { return enabled; }
 
 private:
-    ProfilerSingleton() = default;
-    ProfilerSingleton(const ProfilerSingleton&) = delete;
-    ProfilerSingleton& operator=(const ProfilerSingleton&) = delete;
+    Profiler() = default;
+    Profiler(const Profiler&) = delete;
+    Profiler& operator=(const Profiler&) = delete;
+    Profiler(Profiler&&) = delete;
+    Profiler& operator=(Profiler&&) = delete;
 
     void createSession();
     void writeAndResetSession(const std::string& filename);

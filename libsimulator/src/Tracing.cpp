@@ -27,7 +27,7 @@ perfetto::TraceConfig buildDefaultTraceConfig()
 }
 } // namespace
 
-void ProfilerSingleton::createSession()
+void Profiler::createSession()
 {
     if(tracing_session) {
         return;
@@ -46,7 +46,7 @@ void ProfilerSingleton::createSession()
     tracing_session->StartBlocking();
 }
 
-void ProfilerSingleton::writeAndResetSession(const std::string& filename)
+void Profiler::writeAndResetSession(const std::string& filename)
 {
     if(!tracing_session) {
         return;
@@ -70,30 +70,33 @@ void ProfilerSingleton::writeAndResetSession(const std::string& filename)
     tracing_session.reset();
 }
 
-void ProfilerSingleton::enable()
+void Profiler::enable()
 {
-    if(enabled) {
+    auto& instance = Profiler::instance();
+    if(instance.enabled) {
         return;
     }
 
-    createSession();
-    enabled = true;
+    instance.createSession();
+    instance.enabled = true;
 }
 
-void ProfilerSingleton::disable()
+void Profiler::disable()
 {
-    if(!enabled && !tracing_session) {
+    auto& instance = Profiler::instance();
+    if(!instance.enabled && !instance.tracing_session) {
         return;
     }
 
-    writeAndResetSession("");
-    enabled = false;
+    instance.writeAndResetSession("");
+    instance.enabled = false;
 }
 
-void ProfilerSingleton::dumpAndReset(const std::string& filename)
+void Profiler::dumpAndReset(const std::string& filename)
 {
-    writeAndResetSession(filename);
-    enabled = false;
+    auto& instance = Profiler::instance();
+    instance.writeAndResetSession(filename);
+    instance.enabled = false;
 }
 
-ProfilerSingleton ProfilerSingleton::profiler{};
+Profiler Profiler::profiler{};

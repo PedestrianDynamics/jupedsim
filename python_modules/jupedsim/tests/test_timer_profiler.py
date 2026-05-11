@@ -35,7 +35,7 @@ def test_timer_integration_small_simulation(tmp_path):
 
     sleep()
 
-    with timer.timer_region("test_region"):
+    with timer.timer_event("test_region"):
         time.sleep(0.001)
 
     s = str(timer)
@@ -60,10 +60,10 @@ def test_profiler_integration_with_cpp_extension(tmp_path):
     tracing.disable_tracing()
 
     # push/pop probes
-    tracing.push_probe("integration_probe")
+    tracing.start_trace_event("integration_probe")
 
     time.sleep(0.001)
-    tracing.pop_probe()
+    tracing.end_trace_event()
 
     @tracing.trace_event
     def sleep():

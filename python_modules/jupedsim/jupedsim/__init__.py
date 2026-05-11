@@ -20,7 +20,8 @@ from jupedsim.internal.tracing import (
     dump_traces,
     enable_tracing,
     trace_event,
-    trace_region,
+    start_trace_event,
+    end_trace_event,
 )
 from jupedsim.journey import JourneyDescription, Transition
 from jupedsim.library import (
@@ -143,5 +144,6 @@ __all__ = [
     "disable_tracing",
     "dump_traces",
     "trace_event",
-    "trace_region",
+    "start_trace_event",
+    "end_trace_event",
 ]

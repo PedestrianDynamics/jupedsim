@@ -101,20 +101,6 @@ class Timer:
         """
         self._obj = timer_object
 
-    @contextmanager
-    def timer_region(self, name: str):
-        """Context manager that pushes/pops a timer around a with-block.
-
-        Usage:
-            with timer.timer_region("step"):
-                ...
-        """
-        self.push_timer(name)
-        try:
-            yield
-        finally:
-            self.pop_timer(name)
-
     def timer_event(self, arg=None):
         """Use as either a decorator or a context-manager factory for timers.
 
@@ -156,64 +142,44 @@ class Timer:
             return wrapper
 
         if isinstance(name, str):
-            return self.timer_region(name)
+
+            @contextmanager
+            def timer_region():
+                self.push_timer(name)
+                try:
+                    yield
+                finally:
+                    self.pop_timer(name)
+
+            return timer_region()
 
         # No argument provided but parentheses used: @timer.timer_event() -> return decorator
         return decorator
 
 
-class _ProfilerProxy:
-    """Thin proxy around the C++ Profiler singleton.
-
-    We expose a single module-level instance `profiler` so code can just
-    `from jupedsim.internal.tracing import profiler` and call methods on it.
-    """
-
-    def __init__(self):
-        # Prefer the module-level `trace` object if available to avoid the
-        # extra C++ call. Fall back to Trace.instance() for older builds.
-        self._profiler = py_jps.Trace.instance()
-
-
-# Single module-level profiler instance. Importers can use this directly:
-# from jupedsim.internal.tracing import profiler
-profiler = _ProfilerProxy()
-
-
 def enable_tracing() -> None:
     """Enable the profiler."""
-    profiler._profiler.enable()
+    py_jps.Profiler().enable()
 
 
 def disable_tracing() -> None:
     """Disable the profiler."""
-    profiler._profiler.disable()
+    py_jps.Profiler().disable()
 
 
-def push_probe(name: str) -> None:
-    """Push a named probe."""
-    if not profiler._profiler.is_enabled():
-        profiler._profiler.enable()  # auto-enable if not already enabled
-    profiler._profiler.push_probe(name)
+def start_trace_event(name: str) -> None:
+    """Starts a named trace event."""
+    py_jps.Profiler().start_trace_event(name)
 
 
-def pop_probe() -> None:
-    """Pop the last pushed probe."""
-    profiler._profiler.pop_probe()
+def end_trace_event() -> None:
+    """Ends the last started trace event."""
+    py_jps.Profiler().end_trace_event()
 
 
 def dump_traces(filename: str) -> None:
     """Dump traces to file."""
-    profiler._profiler.dump_and_reset(filename)
-
-
-@contextmanager
-def trace_region(name):
-    push_probe(name)
-    try:
-        yield
-    finally:
-        pop_probe()
+    py_jps.Profiler().dump_and_reset(filename)
 
 
 def trace_event(arg=None):
@@ -236,11 +202,11 @@ def trace_event(arg=None):
 
         @functools.wraps(fn)
         def wrapper(*args, **kwargs):
-            push_probe(f"{fn.__name__}()")
+            start_trace_event(f"{fn.__name__}()")
             try:
                 return fn(*args, **kwargs)
             finally:
-                pop_probe()
+                end_trace_event()
 
         return wrapper
 
@@ -252,15 +218,24 @@ def trace_event(arg=None):
     def decorator(fn):
         @functools.wraps(fn)
         def wrapper(*args, **kwargs):
-            push_probe(name or f"{fn.__name__}()")
+            start_trace_event(name or f"{fn.__name__}()")
             try:
                 return fn(*args, **kwargs)
             finally:
-                pop_probe()
+                end_trace_event()
 
         return wrapper
 
     if isinstance(name, str):
+
+        @contextmanager
+        def trace_region(name):
+            start_trace_event(name)
+            try:
+                yield
+            finally:
+                end_trace_event()
+
         return trace_region(name)
 
     # No argument provided but parentheses used: @trace_event() -> return decorator

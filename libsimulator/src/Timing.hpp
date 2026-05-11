@@ -18,11 +18,17 @@
 // It creates a scope guard that starts the timer probe when it is created and stops the timer probe
 // when it goes out of scope. The log level is used to filter which
 // timer probes are active based on the log level set in the Timer object.
+#ifndef JPS_SCOPE_CONCAT_IMPL
+#define JPS_SCOPE_CONCAT_IMPL(x, y) x##y
+#endif
+#ifndef JPS_SCOPE_CONCAT
+#define JPS_SCOPE_CONCAT(x, y) JPS_SCOPE_CONCAT_IMPL(x, y)
+#endif
 #ifndef JPS_SCOPED_TIMER
 #define JPS_SCOPED_TIMER(timer_obj, name, loglevel)                                                \
     auto JPS_SCOPE_CONCAT(_jps_scoped_timer_guard_, __COUNTER__) =                                 \
         (timer_obj).scopedTimerProbe((name), (loglevel));                                          \
-    JPS_SCOPED_PROBE(name)
+    JPS_TRACE_EVENT(name)
 #endif
 
 // Helper class to store the start time and duration of a timer entry.

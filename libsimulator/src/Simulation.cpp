@@ -60,16 +60,14 @@ const SimulationClock& Simulation::Clock() const
 void Simulation::SetTracing(bool status)
 {
     if(status) {
-        ProfilerSingleton::instance().enable();
+        Profiler::instance().enable();
     } else {
-        ProfilerSingleton::instance().disable();
+        Profiler::instance().disable();
     }
 };
 
 void Simulation::Iterate()
 {
-    // LOG_DEBUG("Iteration {} / Time {}s", _clock.Iteration(), _clock.ElapsedTime());
-
     JPS_SCOPED_TIMER(_timer, "Total Iteration", General);
 
     {
@@ -255,6 +253,7 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
 
 void Simulation::MarkAgentForRemoval(GenericAgent::ID id)
 {
+    JPS_TRACE_FUNC;
     const auto iter = std::find_if(
         std::begin(_agents), std::end(_agents), [id](auto& agent) { return agent.id == id; });
     if(iter == std::end(_agents)) {
@@ -266,6 +265,7 @@ void Simulation::MarkAgentForRemoval(GenericAgent::ID id)
 
 const GenericAgent& Simulation::Agent(GenericAgent::ID id) const
 {
+    JPS_TRACE_FUNC;
     const auto iter =
         std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
     if(iter == _agents.end()) {
@@ -276,6 +276,7 @@ const GenericAgent& Simulation::Agent(GenericAgent::ID id) const
 
 GenericAgent& Simulation::Agent(GenericAgent::ID id)
 {
+    JPS_TRACE_FUNC;
     const auto iter =
         std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
     if(iter == _agents.end()) {
@@ -319,6 +320,7 @@ void Simulation::SwitchAgentJourney(
     Journey::ID journey_id,
     BaseStage::ID stage_id)
 {
+    JPS_TRACE_FUNC;
     const auto find_iter = _journeys.find(journey_id);
     if(find_iter == std::end(_journeys)) {
         throw SimulationError("Unknown Journey id {}", journey_id);
@@ -385,7 +387,7 @@ CollisionGeometry Simulation::Geo() const
 
 void Simulation::SwitchGeometry(std::unique_ptr<CollisionGeometry>&& geometry)
 {
-    JPS_SCOPED_TIMER(_timer, "Switch Geometry", Debug);
+    JPS_TRACE_FUNC;
     ValidateGeometry(geometry);
     if(const auto& iter = geometries.find(geometry->Id()); iter != std::end(geometries)) {
         _geometry = std::get<0>(iter->second).get();
@@ -406,6 +408,7 @@ void Simulation::SwitchGeometry(std::unique_ptr<CollisionGeometry>&& geometry)
 
 void Simulation::ValidateGeometry(const std::unique_ptr<CollisionGeometry>& geometry) const
 {
+    JPS_TRACE_FUNC;
     std::vector<GenericAgent::ID> faultyAgents;
     for(const auto& agent : _agents) {
         if(const auto find_iter = std::find(
