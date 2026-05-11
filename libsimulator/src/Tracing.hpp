@@ -1,41 +1,54 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include <chrono>
-#include <cstdint>
-#include <optional>
+#include <perfetto.h>
 
-class Trace
+PERFETTO_DEFINE_CATEGORIES(
+    perfetto::Category("C++").SetDescription("C++ Traces."),
+    perfetto::Category("Python").SetDescription("Python Traces."));
+
+#include <functional>
+#include <memory>
+#include <string>
+
+#ifndef JPS_TRACE_EVENT
+#define JPS_TRACE_EVENT(name) TRACE_EVENT("C++", name);
+#define JPS_TRACE_EVENT_BEGIN(name) TRACE_EVENT_BEGIN("C++", name)
+#define JPS_TRACE_EVENT_END TRACE_EVENT_END("C++")
+#if defined(_MSC_VER)
+#define JPS_TRACE_FUNC JPS_TRACE_EVENT(__FUNCTION__)
+#else
+#define JPS_TRACE_FUNC JPS_TRACE_EVENT(__PRETTY_FUNCTION__)
+#endif
+#endif
+
+// PorfilerSingleton is a wrapper around perfetto::TracingSession to provide a simple interface
+// for the rest of the codebase. It is implemented as a singleton to ensure that there is only
+// one instance of the profiler throughout the application. The Timer class also accesses the
+// profiler to record traces that aline with the timer entries. This allows for a unified
+// tracing and timing system that can be easily accessed and used throughout the codebase.
+class Profiler
 {
-    std::chrono::high_resolution_clock::time_point startedAt;
-    uint64_t& t;
+    static Profiler profiler;
 
 public:
-    Trace(uint64_t& _t);
-    ~Trace()
-    {
-        const auto now = std::chrono::high_resolution_clock::now();
-        t = std::chrono::duration_cast<std::chrono::microseconds>(now - startedAt).count();
-    }
-    Trace(const Trace& other) = delete;
-    Trace& operator=(const Trace& other) = delete;
-    Trace(Trace&& other) = delete;
-    Trace& operator=(const Trace&& other) = delete;
-};
+    static Profiler& instance() noexcept { return profiler; };
 
-class PerfStats
-{
-    uint64_t iterate_duration{};
-    uint64_t op_dec_system_run_duration{};
-    bool enabled{false};
+    static void enable();
+    static void disable();
 
-public:
-    std::optional<Trace> TraceIterate();
-    std::optional<Trace> TraceOperationalDecisionSystemRun();
-    void SetEnabled(bool status) { enabled = status; };
-    uint64_t IterationDuration() const { return iterate_duration; };
-    uint64_t OpDecSystemRunDuration() const { return op_dec_system_run_duration; };
+    static void dumpAndReset(const std::string& filename);
+    inline bool isEnabled() const { return enabled; }
 
 private:
-    std::optional<Trace> trace(uint64_t& v);
+    Profiler() = default;
+    Profiler(const Profiler&) = delete;
+    Profiler& operator=(const Profiler&) = delete;
+    Profiler(Profiler&&) = delete;
+    Profiler& operator=(Profiler&&) = delete;
+
+    void createSession();
+    void writeAndResetSession(const std::string& filename);
+    bool enabled{false};
+    std::unique_ptr<perfetto::TracingSession> tracing_session{};
 };

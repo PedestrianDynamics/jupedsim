@@ -78,15 +78,17 @@ void init_simulation(py::module_& m)
         .def(
             "mark_agent_for_removal",
             [](Simulation& sim, uint64_t id) { sim.MarkAgentForRemoval(id); })
-        .def("removed_agents", [](const Simulation& sim) {
-            auto removed_agent_ids = sim.RemovedAgents();
-            auto agent_ids = std::vector<GenericAgent::ID::underlying_type>();
-            agent_ids.reserve(removed_agent_ids.size());
-            for(auto agent_id : removed_agent_ids) {
-                agent_ids.emplace_back(agent_id.getID());
-            }
-            return agent_ids;
-        })
+        .def(
+            "removed_agents",
+            [](const Simulation& sim) {
+                auto removed_agent_ids = sim.RemovedAgents();
+                auto agent_ids = std::vector<GenericAgent::ID::underlying_type>();
+                agent_ids.reserve(removed_agent_ids.size());
+                for(auto agent_id : removed_agent_ids) {
+                    agent_ids.emplace_back(agent_id.getID());
+                }
+                return agent_ids;
+            })
         .def("iterate", [](Simulation& sim) { sim.Iterate(); })
         .def(
             "switch_agent_journey",
@@ -134,8 +136,20 @@ void init_simulation(py::module_& m)
             })
         .def("get_stage_proxy", [](Simulation& sim, uint64_t id) { return sim.Stage(id); })
         .def("set_tracing", [](Simulation& sim, bool status) { sim.SetTracing(status); })
-        .def("get_last_trace", [](Simulation& sim) { return sim.GetLastStats(); })
+        .def(
+            "set_timer_log_level",
+            [](Simulation& sim, size_t level) { sim.SetTimerLogLevel(level); })
         .def("get_geometry", [](Simulation& sim) { return sim.Geo(); })
+        .def(
+            "push_timer",
+            [](Simulation& sim, const std::string& name, size_t probe_log_level) {
+                sim.PushTimer(name, probe_log_level);
+            })
+        .def("pop_timer", [](Simulation& sim, const std::string& name) { sim.PopTimer(name); })
+        .def(
+            "get_duration",
+            [](Simulation& sim, const std::string_view name) { return sim.GetTimerDuration(name); })
+        .def("get_durations", [](Simulation& sim) { return sim.GetTimerDurations(); })
         .def("switch_geometry", [](Simulation& sim, CollisionGeometry& geometry) {
             sim.SwitchGeometry(std::make_unique<CollisionGeometry>(geometry));
         });

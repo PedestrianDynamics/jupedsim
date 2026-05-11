@@ -27,6 +27,7 @@ target_link_libraries(py_jupedsim
         fmt::fmt
         simulator
         common
+        perfetto
 )
 
 pybind11_extension(py_jupedsim)
