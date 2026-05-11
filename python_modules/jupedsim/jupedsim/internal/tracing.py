@@ -128,11 +128,11 @@ class Timer:
 
         @contextmanager
         def timer_region():
-            self.push_timer(name)
+            self.push_timer(func)
             try:
                 yield
             finally:
-                self.pop_timer(name)
+                self.pop_timer(func)
 
         return timer_region()
 
