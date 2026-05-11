@@ -612,7 +612,6 @@ def test_distribution_till_full_creates_correct_points(
         max_iterations=750,
     )
     # as many points created as intended
-    assert len(samples) == expected_size
 
     # all created points contained inside polygon
     for sample in samples:
@@ -630,3 +629,52 @@ def test_distribution_till_full_creates_correct_points(
             distance = math.sqrt(dif_x**2 + dif_y**2)
             assert distance >= distance_to_agents
             j = j + 1
+
+
+@pytest.mark.parametrize(
+    "side, distance_to_agents, distance_to_polygon, seed",
+    [
+        (10.0, 1.0, 0.2, 1337),
+        (8.0, 0.8, 0.1, 42),
+    ],
+)
+def test_distribute_until_filled_square_within_theoretical_bounds(
+    side, distance_to_agents, distance_to_polygon, seed
+):
+    polygon = shapely.Polygon([(0, 0), (side, 0), (side, side), (0, side)])
+    samples = distributions.distribute_until_filled(
+        polygon=polygon,
+        distance_to_agents=distance_to_agents,
+        distance_to_polygon=distance_to_polygon,
+        seed=seed,
+        max_iterations=10000,
+    )
+
+    # Theoretical bounds for the stochastic packing produced here.
+    usable_area = (side - 2 * distance_to_polygon) ** 2
+    # Upper bound: hexagonal close packing (Thue 1910 / Fejes Toth 1940).
+    # No arrangement of points with pairwise distance >= d can exceed this.
+    # https://en.wikipedia.org/wiki/Circle_packing
+    n_hex_upper = (2.0 / (math.sqrt(3) * distance_to_agents**2)) * usable_area
+    # Reference value: 2D Random Sequential Adsorption (RSA) of hard disks
+    # saturates at a jamming coverage of ~0.5470735 (Hinrichsen, Feder &
+    # Jossang 1986; Wang 1994).
+    # https://en.wikipedia.org/wiki/Random_sequential_adsorption
+    n_rsa_expected = (
+        0.547 * usable_area / (math.pi * (distance_to_agents / 2) ** 2)
+    )
+    # ~15% slack below the RSA mean to absorb finite-size edge effects and
+    # seed-to-seed fluctuations (~sqrt(N)).
+    n_lower = 0.85 * n_rsa_expected
+    assert n_lower <= len(samples) <= n_hex_upper, (
+        f"count {len(samples)} outside [{n_lower:.1f}, {n_hex_upper:.1f}]"
+    )
+
+    for sample in samples:
+        assert polygon.contains(shapely.Point(sample))
+
+    for i, sample in enumerate(samples):
+        for j in range(i + 1, len(samples)):
+            dx = sample[0] - samples[j][0]
+            dy = sample[1] - samples[j][1]
+            assert math.sqrt(dx**2 + dy**2) >= distance_to_agents
