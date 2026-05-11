@@ -92,60 +92,49 @@ class Timer:
         self._prev_op_dec_time = current_op_dec_time
         return op_dec_duration
 
-    def timer_event(self, arg=None):
+    def timer_event(self, func=None, *, name=None):
         """Use as either a decorator or a context-manager factory for timers.
 
         Supported uses:
           @timer.timer_event
           def f(...): ...
 
-          with timer.timer_event("name"):
+          with timer.timer_event(name="custom-name"):
               ...
 
         This mirrors the behavior of `trace_event` for the profiler.
         """
 
-        # Decorator used without arguments: @timer.timer_event
-        if callable(arg):
-            fn = arg
-
-            @functools.wraps(fn)
-            def wrapper(*args, **kwargs):
-                self.push_timer(f"{fn.__name__}()")
-                try:
-                    return fn(*args, **kwargs)
-                finally:
-                    self.pop_timer(f"{fn.__name__}()")
-
-            return wrapper
-
-        name = arg
-
         def decorator(fn):
             @functools.wraps(fn)
             def wrapper(*args, **kwargs):
-                self.push_timer(name or f"{fn.__name__}()")
+                if name is None:
+                    event_name = f"{fn.__name__}()"
+                else:
+                    event_name = f"{name}()"
+                self.push_timer(event_name)
                 try:
                     return fn(*args, **kwargs)
                 finally:
-                    self.pop_timer(name or f"{fn.__name__}()")
+                    self.pop_timer(event_name)
 
             return wrapper
 
-        if isinstance(name, str):
+        # Decorator used without arguments: @timer.timer_event
+        if callable(func):
+            return decorator(func)
+        elif func is None:
+            return decorator
 
-            @contextmanager
-            def timer_region():
-                self.push_timer(name)
-                try:
-                    yield
-                finally:
-                    self.pop_timer(name)
+        @contextmanager
+        def timer_region():
+            self.push_timer(name)
+            try:
+                yield
+            finally:
+                self.pop_timer(name)
 
-            return timer_region()
-
-        # No argument provided but parentheses used: @timer.timer_event() -> return decorator
-        return decorator
+        return timer_region()
 
 
 def is_tracing_enabled() -> bool:
@@ -178,43 +167,28 @@ def dump_traces(filename: str) -> None:
     py_jps.Profiler().dump_and_reset(filename)
 
 
-def trace_event(arg=None):
+def trace_event(func=None, *, name=None):
     """Use as either a decorator or a context-manager factory.
 
     Usages supported:
       @trace_event
       def f(...): ...
 
-      @trace_event("custom-name")
+      @trace_event(name="custom-name")
       def f(...): ...
 
       with trace_event("initialisation"):
           ...
     """
 
-    # Decorator used without arguments: @trace_event
-    if callable(arg):
-        fn = arg
-
-        @functools.wraps(fn)
-        def wrapper(*args, **kwargs):
-            start_trace_event(f"{fn.__name__}()")
-            try:
-                return fn(*args, **kwargs)
-            finally:
-                end_trace_event()
-
-        return wrapper
-
-    # If arg is a string, we either return a context-manager instance when
-    # called (so `with trace_event("name"):` works), or return a decorator
-    # if this function is later used as `@trace_event("name")`.
-    name = arg
-
     def decorator(fn):
         @functools.wraps(fn)
         def wrapper(*args, **kwargs):
-            start_trace_event(name or f"{fn.__name__}()")
+            if name is None:
+                event_name = f"{fn.__name__}()"
+            else:
+                event_name = f"{name}()"
+            start_trace_event(event_name)
             try:
                 return fn(*args, **kwargs)
             finally:
@@ -222,17 +196,20 @@ def trace_event(arg=None):
 
         return wrapper
 
-    if isinstance(name, str):
+    if callable(func):
+        return decorator(func)
+    elif func is None:
+        return decorator
 
-        @contextmanager
-        def trace_region(name):
-            start_trace_event(name)
-            try:
-                yield
-            finally:
-                end_trace_event()
+    @contextmanager
+    def trace_region(name):
+        start_trace_event(name)
+        try:
+            yield
+        finally:
+            end_trace_event()
 
-        return trace_region(name)
+    return trace_region(func)
 
     # No argument provided but parentheses used: @trace_event() -> return decorator
     return decorator
