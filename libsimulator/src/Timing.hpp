@@ -25,7 +25,7 @@
 #define JPS_SCOPE_CONCAT(x, y) JPS_SCOPE_CONCAT_IMPL(x, y)
 #endif
 #ifndef JPS_SCOPED_TIMER
-#define JPS_SCOPED_TIMER(timer_obj, name, loglevel)                                                \
+#define JPS_SCOPED_TIMER_AND_TRACE(timer_obj, name, loglevel)                                      \
     auto JPS_SCOPE_CONCAT(_jps_scoped_timer_guard_, __COUNTER__) =                                 \
         (timer_obj).scopedTimerProbe((name), (loglevel));                                          \
     JPS_TRACE_EVENT(name)

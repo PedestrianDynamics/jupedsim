@@ -68,35 +68,35 @@ void Simulation::SetTracing(bool status)
 
 void Simulation::Iterate()
 {
-    JPS_SCOPED_TIMER(_timer, "Total Iteration", General);
+    JPS_SCOPED_TIMER_AND_TRACE(_timer, "Total Iteration", General);
 
     {
-        JPS_SCOPED_TIMER(_timer, "Agent Removal System", Detailed);
+        JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agent Removal System", Detailed);
         _agentRemovalSystem.Run(_agents, _removedAgentsInLastIteration, _stageManager);
     }
 
     {
-        JPS_SCOPED_TIMER(_timer, "Neighborhood Search", Detailed);
+        JPS_SCOPED_TIMER_AND_TRACE(_timer, "Neighborhood Search", Detailed);
         _neighborhoodSearch.Update(_agents);
     }
 
     {
-        JPS_SCOPED_TIMER(_timer, "Stage System", Detailed);
+        JPS_SCOPED_TIMER_AND_TRACE(_timer, "Stage System", Detailed);
         _stageSystem.Run(_stageManager, _neighborhoodSearch, *_geometry);
     }
 
     {
-        JPS_SCOPED_TIMER(_timer, "Strategical Decision System", General);
+        JPS_SCOPED_TIMER_AND_TRACE(_timer, "Strategical Decision System", General);
         _stategicalDecisionSystem.Run(_journeys, _agents, _stageManager);
     }
 
     {
-        JPS_SCOPED_TIMER(_timer, "Tactical Decision System", General);
+        JPS_SCOPED_TIMER_AND_TRACE(_timer, "Tactical Decision System", General);
         _tacticalDecisionSystem.Run(*_routingEngine, _agents);
     }
 
     {
-        JPS_SCOPED_TIMER(_timer, "Operational Decision System", General);
+        JPS_SCOPED_TIMER_AND_TRACE(_timer, "Operational Decision System", General);
         _operationalDecisionSystem.Run(
             _clock.dT(), _clock.ElapsedTime(), _neighborhoodSearch, *_geometry, _agents);
     }
@@ -105,7 +105,7 @@ void Simulation::Iterate()
 
 Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescription>& stages)
 {
-    JPS_SCOPED_TIMER(_timer, "Add Journey", Detailed);
+    JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Journey", Detailed);
     std::map<BaseStage::ID, JourneyNode> nodes;
     bool containsDirectSteering =
         std::find_if(std::begin(stages), std::end(stages), [this](auto const& pair) {
@@ -181,7 +181,7 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
 
 BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
 {
-    JPS_SCOPED_TIMER(_timer, "Add Stage", Detailed);
+    JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Stage", Detailed);
     std::visit(
         overloaded{
             [this](const WaypointDescription& d) -> void {
@@ -220,7 +220,7 @@ BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
 
 GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
 {
-    JPS_SCOPED_TIMER(_timer, "Add Agent", Detailed);
+    JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Agent", Detailed);
     if(!_geometry->InsideGeometry(agent.pos)) {
         throw SimulationError("Agent {} not inside walkable area", agent.pos);
     }
@@ -337,7 +337,7 @@ void Simulation::SwitchAgentJourney(
 
 std::vector<GenericAgent::ID> Simulation::AgentsInRange(Point p, double distance)
 {
-    JPS_SCOPED_TIMER(_timer, "Agents in Range", Debug);
+    JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agents in Range", Debug);
     const auto neighbors = _neighborhoodSearch.GetNeighboringAgents(p, distance);
 
     std::vector<GenericAgent::ID> neighborIds{};
@@ -352,7 +352,7 @@ std::vector<GenericAgent::ID> Simulation::AgentsInRange(Point p, double distance
 
 std::vector<GenericAgent::ID> Simulation::AgentsInPolygon(const std::vector<Point>& polygon)
 {
-    JPS_SCOPED_TIMER(_timer, "Agents in Polygon", Debug);
+    JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agents in Polygon", Debug);
     const Polygon poly{polygon};
     if(!poly.IsConvex()) {
         throw SimulationError("Polygon needs to be simple and convex");

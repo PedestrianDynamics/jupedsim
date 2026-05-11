@@ -210,6 +210,3 @@ def trace_event(func=None, *, name=None):
             end_trace_event()
 
     return trace_region(func)
-
-    # No argument provided but parentheses used: @trace_event() -> return decorator
-    return decorator
