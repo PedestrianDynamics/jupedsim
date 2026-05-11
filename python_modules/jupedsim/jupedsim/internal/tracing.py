@@ -92,15 +92,6 @@ class Timer:
         self._prev_op_dec_time = current_op_dec_time
         return op_dec_duration
 
-    def set_timer_instance(self, timer_object: py_jps.Trace) -> None:
-        """
-        Sets the timer object to be used for tracing. This can be used to set a custom timer object that is not the default one.
-
-        Args:
-            timer_object: Timer object to be used for tracing.
-        """
-        self._obj = timer_object
-
     def timer_event(self, arg=None):
         """Use as either a decorator or a context-manager factory for timers.
 
