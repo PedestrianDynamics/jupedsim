@@ -325,6 +325,11 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-available-from-the-simulation">Data available from the Simulation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-csv-writer">Example: CSV writer</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tips-for-custom-writers">Tips for custom writers</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#built-in-hdf5-writer">Built-in HDF5 writer</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-we-adopt-from-the-pda-schema">What we adopt from the PDA schema</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-we-do-not-write">What we do not write</a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -557,6 +562,91 @@ completes.</p></li>
 errors to keep error reporting consistent.</p></li>
 </ul>
 </section>
+<section id="built-in-hdf5-writer">
+<span id="hdf5-writer"></span><h2>Built-in HDF5 writer<a class="headerlink" href="#built-in-hdf5-writer" title="Link to this heading">#</a></h2>
+<p>JuPedSim provides a built-in HDF5 trajectory writer at
+<code class="xref py py-class docutils literal notranslate"><span class="pre">jupedsim.hdf5_serialization.Hdf5TrajectoryWriter</span></code>. <code class="docutils literal notranslate"><span class="pre">h5py</span></code> is an
+optional dependency; install it with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">h5py</span></code> to use this
+writer. The schema is aligned with the
+<a class="reference external" href="https://ped.fz-juelich.de/da/doku.php?id=info">Pedestrian Dynamics Data Archive (PDA)</a>
+HDF5 format used by the
+<a class="reference external" href="https://github.com/PedestrianDynamics/PedPy">PedPy</a> analysis library,
+so simulator output and experimental recordings can be analysed with the
+same tools.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jupedsim</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">writer</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Hdf5TrajectoryWriter</span><span class="p">(</span>
+    <span class="n">output_file</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;traj.h5&quot;</span><span class="p">),</span>
+    <span class="n">every_nth_frame</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">compression_level</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=...</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=...</span><span class="p">,</span> <span class="n">trajectory_writer</span><span class="o">=</span><span class="n">writer</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">while</span> <span class="n">sim</span><span class="o">.</span><span class="n">agent_count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">sim</span><span class="o">.</span><span class="n">iterate</span><span class="p">()</span>
+<span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Reading the output with PedPy:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pedpy.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_trajectory_from_ped_data_archive_hdf5</span>
+<span class="n">traj</span> <span class="o">=</span> <span class="n">load_trajectory_from_ped_data_archive_hdf5</span><span class="p">(</span>
+    <span class="n">trajectory_file</span><span class="o">=</span><span class="s2">&quot;traj.h5&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<section id="what-we-adopt-from-the-pda-schema">
+<h3>What we adopt from the PDA schema<a class="headerlink" href="#what-we-adopt-from-the-pda-schema" title="Link to this heading">#</a></h3>
+<p>The PDA schema is described in <a class="reference external" href="https://ped.fz-juelich.de/da/doku.php?id=info">the data archive documentation</a> and accompanied by a
+<a class="reference external" href="https://ped.fz-juelich.de/data/experiments/RDM_Information/schema_v2.json">JSON schema</a>
+covering experiment metadata. JuPedSim writes a subset that is
+sufficient for analysis tooling:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/trajectory</span></code> compound dataset with the columns
+<code class="docutils literal notranslate"><span class="pre">frame</span></code>, <code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">z</span></code>, plus the JuPedSim-specific
+orientation columns <code class="docutils literal notranslate"><span class="pre">ox</span></code> and <code class="docutils literal notranslate"><span class="pre">oy</span></code>. The four leading columns and
+the dataset name match the PDA convention exactly, so the dataset is
+consumed without modification by
+<code class="docutils literal notranslate"><span class="pre">pedpy.io.load_trajectory_from_ped_data_archive_hdf5</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fps</span></code> attribute on the <code class="docutils literal notranslate"><span class="pre">/trajectory</span></code> dataset (the attribute that
+PedPy reads to recover the frame rate).</p></li>
+<li><p>Root attribute <code class="docutils literal notranslate"><span class="pre">wkt_geometry</span></code> carrying the simulation walkable area
+as WKT (the attribute that
+<code class="docutils literal notranslate"><span class="pre">pedpy.io.load_walkable_area_from_ped_data_archive_hdf5</span></code> reads).</p></li>
+<li><p>Per-column <code class="docutils literal notranslate"><span class="pre">column_units</span></code> and <code class="docutils literal notranslate"><span class="pre">column_descriptions</span></code> attributes on
+<code class="docutils literal notranslate"><span class="pre">/trajectory</span></code> (JSON-encoded), in the spirit of the PDA self-
+documentation requirement.</p></li>
+</ul>
+</section>
+<section id="what-we-do-not-write">
+<h3>What we do not write<a class="headerlink" href="#what-we-do-not-write" title="Link to this heading">#</a></h3>
+<p>The PDA schema is designed for <em>experimental</em> recordings, where many
+fields describe physical setups that have no simulator counterpart.
+JuPedSim deliberately does <strong>not</strong> populate these fields:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">participants</span></code>, <code class="docutils literal notranslate"><span class="pre">persons</span></code> (with <code class="docutils literal notranslate"><span class="pre">orcid</span></code>, <code class="docutils literal notranslate"><span class="pre">affiliations</span></code>, ROR
+identifiers) – there are no human participants in a simulation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sensors</span></code> (camera/lidar models, brand) – no physical capture
+devices.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">locations</span></code> (institution, postal address) and <code class="docutils literal notranslate"><span class="pre">funding</span></code> – not
+applicable to a model run.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">date_modified</span></code> / <code class="docutils literal notranslate"><span class="pre">date_published</span></code> and DOI / publication
+metadata – belong to the eventual archival of a <em>dataset</em>, not the
+raw simulator output.</p></li>
+</ul>
+<p>JuPedSim adds a small set of producer-oriented attributes on the file
+root in their place: <code class="docutils literal notranslate"><span class="pre">producer</span> <span class="pre">=</span> <span class="pre">&quot;JuPedSim&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">producer_version</span></code>,
+<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">dt</span></code>, <code class="docutils literal notranslate"><span class="pre">every_nth_frame</span></code>, <code class="docutils literal notranslate"><span class="pre">created</span></code>, and the
+final bounding box (<code class="docutils literal notranslate"><span class="pre">xmin</span></code>, <code class="docutils literal notranslate"><span class="pre">xmax</span></code>, <code class="docutils literal notranslate"><span class="pre">ymin</span></code>, <code class="docutils literal notranslate"><span class="pre">ymax</span></code>). For runs
+in which the geometry changes during the simulation, the writer
+additionally records <code class="docutils literal notranslate"><span class="pre">/geometry/wkt</span></code>, <code class="docutils literal notranslate"><span class="pre">/geometry/hash</span></code> and
+<code class="docutils literal notranslate"><span class="pre">/frame_geometry</span></code> to preserve the per-frame mapping; these are
+ignored by the PedPy loader and are intended for tools that need the
+full time history.</p>
+</section>
+</section>
 </section>
 
 
@@ -611,6 +701,11 @@ errors to keep error reporting consistent.</p></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-available-from-the-simulation">Data available from the Simulation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-csv-writer">Example: CSV writer</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tips-for-custom-writers">Tips for custom writers</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#built-in-hdf5-writer">Built-in HDF5 writer</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-we-adopt-from-the-pda-schema">What we adopt from the PDA schema</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-we-do-not-write">What we do not write</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
