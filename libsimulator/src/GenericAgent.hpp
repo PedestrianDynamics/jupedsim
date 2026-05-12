@@ -9,6 +9,7 @@
 #include "Point.hpp"
 #include "SocialForceModelData.hpp"
 #include "UniqueID.hpp"
+#include "WarpDriverModelData.hpp"
 
 #include <fmt/core.h>
 
@@ -38,7 +39,8 @@ struct GenericAgent {
         CollisionFreeSpeedModelV2Data,
         CollisionFreeSpeedModelV3Data,
         AnticipationVelocityModelData,
-        SocialForceModelData>;
+        SocialForceModelData,
+        WarpDriverModelData>;
     Model model{};
 
     GenericAgent(
