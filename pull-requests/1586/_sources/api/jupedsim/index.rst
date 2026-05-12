@@ -71,6 +71,7 @@ Attributes
 
 .. autoapisummary::
 
+   jupedsim.Hdf5TrajectoryWriter
    jupedsim.__commit__
    jupedsim.__compiler__
    jupedsim.__version__
@@ -2504,6 +2505,10 @@ Attributes
 
    :param fn: function that accepts a msg as string
    :type fn: fn<str>
+
+
+.. py:data:: Hdf5TrajectoryWriter
+   :value: None
 
 
 
