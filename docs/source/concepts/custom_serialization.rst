@@ -229,3 +229,95 @@ Tips for custom writers
 
 - **Error handling**: Raise ``TrajectoryWriter.Exception`` for writer-specific
   errors to keep error reporting consistent.
+
+
+.. _hdf5-writer:
+
+Built-in HDF5 writer
+======================
+
+JuPedSim provides a built-in HDF5 trajectory writer at
+:class:`jupedsim.hdf5_serialization.Hdf5TrajectoryWriter`. ``h5py`` is an
+optional dependency; install it with ``pip install h5py`` to use this
+writer. The schema is aligned with the
+`Pedestrian Dynamics Data Archive (PDA) <https://ped.fz-juelich.de/da/doku.php?id=info>`_
+HDF5 format used by the
+`PedPy <https://github.com/PedestrianDynamics/PedPy>`_ analysis library,
+so simulator output and experimental recordings can be analysed with the
+same tools.
+
+Usage::
+
+    import jupedsim as jps
+    from pathlib import Path
+
+    writer = jps.Hdf5TrajectoryWriter(
+        output_file=Path("traj.h5"),
+        every_nth_frame=4,
+        compression_level=1,
+    )
+    sim = jps.Simulation(
+        model=..., geometry=..., trajectory_writer=writer, dt=0.01,
+    )
+    while sim.agent_count() > 0:
+        sim.iterate()
+    writer.close()
+
+Reading the output with PedPy::
+
+    from pedpy.io import load_trajectory_from_ped_data_archive_hdf5
+    traj = load_trajectory_from_ped_data_archive_hdf5(
+        trajectory_file="traj.h5"
+    )
+
+What we adopt from the PDA schema
+-----------------------------------
+
+The PDA schema is described in `the data archive documentation
+<https://ped.fz-juelich.de/da/doku.php?id=info>`_ and accompanied by a
+`JSON schema <https://ped.fz-juelich.de/data/experiments/RDM_Information/schema_v2.json>`_
+covering experiment metadata. JuPedSim writes a subset that is
+sufficient for analysis tooling:
+
+- ``/trajectory`` compound dataset with the columns
+  ``frame``, ``id``, ``x``, ``y``, ``z``, plus the JuPedSim-specific
+  orientation columns ``ox`` and ``oy``. The four leading columns and
+  the dataset name match the PDA convention exactly, so the dataset is
+  consumed without modification by
+  ``pedpy.io.load_trajectory_from_ped_data_archive_hdf5``.
+- ``fps`` attribute on the ``/trajectory`` dataset (the attribute that
+  PedPy reads to recover the frame rate).
+- Root attribute ``wkt_geometry`` carrying the simulation walkable area
+  as WKT (the attribute that
+  ``pedpy.io.load_walkable_area_from_ped_data_archive_hdf5`` reads).
+- Per-column ``column_units`` and ``column_descriptions`` attributes on
+  ``/trajectory`` (JSON-encoded), in the spirit of the PDA self-
+  documentation requirement.
+
+What we do not write
+-----------------------
+
+The PDA schema is designed for *experimental* recordings, where many
+fields describe physical setups that have no simulator counterpart.
+JuPedSim deliberately does **not** populate these fields:
+
+- ``participants``, ``persons`` (with ``orcid``, ``affiliations``, ROR
+  identifiers) -- there are no human participants in a simulation.
+- ``sensors`` (camera/lidar models, brand) -- no physical capture
+  devices.
+- ``locations`` (institution, postal address) and ``funding`` -- not
+  applicable to a model run.
+- ``date_modified`` / ``date_published`` and DOI / publication
+  metadata -- belong to the eventual archival of a *dataset*, not the
+  raw simulator output.
+
+JuPedSim adds a small set of producer-oriented attributes on the file
+root in their place: ``producer = "JuPedSim"``, ``producer_version``,
+``schema_version``, ``dt``, ``every_nth_frame``, ``created``, and the
+final bounding box (``xmin``, ``xmax``, ``ymin``, ``ymax``). For runs
+in which the geometry changes during the simulation, the writer
+additionally records ``/geometry/wkt``, ``/geometry/hash`` and
+``/frame_geometry`` to preserve the per-frame mapping; these are
+ignored by the PedPy loader and are intended for tools that need the
+full time history.
+

@@ -12,12 +12,18 @@ add_library(simulator STATIC
     src/CollisionFreeSpeedModelBuilder.hpp
     src/CollisionFreeSpeedModelData.hpp
     src/CollisionFreeSpeedModelUpdate.hpp
-     src/CollisionFreeSpeedModelV2.cpp
+    src/CollisionFreeSpeedModelV2.cpp
     src/CollisionFreeSpeedModelV2.hpp
     src/CollisionFreeSpeedModelV2Builder.cpp
     src/CollisionFreeSpeedModelV2Builder.hpp
     src/CollisionFreeSpeedModelV2Data.hpp
     src/CollisionFreeSpeedModelV2Update.hpp
+    src/CollisionFreeSpeedModelV3.cpp
+    src/CollisionFreeSpeedModelV3.hpp
+    src/CollisionFreeSpeedModelV3Builder.cpp
+    src/CollisionFreeSpeedModelV3Builder.hpp
+    src/CollisionFreeSpeedModelV3Data.hpp
+    src/CollisionFreeSpeedModelV3Update.hpp
     src/AnticipationVelocityModel.cpp
     src/AnticipationVelocityModel.hpp
     src/AnticipationVelocityModelBuilder.cpp
@@ -88,6 +94,8 @@ add_library(simulator STATIC
     src/StrategicalDesicionSystem.hpp
     src/TacticalDecisionSystem.hpp
     src/TemplateHelper.hpp
+    src/Timing.cpp
+    src/Timing.hpp
     src/Tracing.cpp
     src/Tracing.hpp
     src/UniqueID.hpp
@@ -105,6 +113,7 @@ target_link_libraries(simulator PUBLIC
     CGAL::CGAL
     build_info
     glm::glm
+    perfetto
 )
 target_link_options(simulator PUBLIC
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-fsanitize=address,undefined>

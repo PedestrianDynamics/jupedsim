@@ -44362,6 +44362,7 @@ class RandomProfilePicker:
         return new_agent
 
 
+@jps.trace_event
 def create_journeys(sim: jps.Simulation):
     gates = [
         (-1815.11, -175.23),
@@ -44447,21 +44448,22 @@ def main():
         model=jps.CollisionFreeSpeedModel(),
         geometry=geometries["grosser_stern"],
         trajectory_writer=stats_writer,
+        timer_log_level=3,
     )
-
+    jps.enable_tracing()
     journeys = create_journeys(simulation)
 
     agent_parameters = jps.CollisionFreeSpeedModelAgentParameters()
     agent_parameters.orientation = (1.0, 0.0)
     agent_parameters.position = (0.0, 0.0)
-
-    for pos in positions:
-        agent_parameters.position = pos
-        journey, start_stage = random.choice(journeys)
-        agent_parameters.journey_id = journey
-        agent_parameters.stage_id = start_stage
-        p = profile_picker.randomise_radius_and_v0(agent_parameters)
-        simulation.add_agent(p)
+    with jps.trace_event("initialisation"):
+        for pos in positions:
+            agent_parameters.position = pos
+            journey, start_stage = random.choice(journeys)
+            agent_parameters.journey_id = journey
+            agent_parameters.stage_id = start_stage
+            p = profile_picker.randomise_radius_and_v0(agent_parameters)
+            simulation.add_agent(p)
 
     start_time = time.perf_counter_ns()
     iteration = simulation.iteration_count()
@@ -44471,8 +44473,8 @@ def main():
             iteration = simulation.iteration_count()
 
             dt = (time.perf_counter_ns() - start_time) / 1000000000
-            duration = simulation.get_last_trace().iteration_duration
-            op_dur = simulation.get_last_trace().operational_level_duration
+            duration = simulation.timer.iteration_duration_us
+            op_dur = simulation.timer.operational_level_duration_us
 
             print(
                 f"WC-Time: {dt:6.2f}s "
@@ -44485,7 +44487,10 @@ def main():
             )
         except KeyboardInterrupt:
             print("\nCTRL-C Received! Shutting down")
+            jps.dump_traces("grosser_stern_perf_test_traces.ptrace")
             sys.exit(1)
+    print(simulation.timer)
+    jps.dump_traces("grosser_stern_perf_test_traces.ptrace")
 
 
 if __name__ == "__main__":
