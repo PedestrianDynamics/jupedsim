@@ -1713,7 +1713,7 @@ Attributes
 
 
 
-.. py:class:: Simulation(*, model: jupedsim.models.collision_free_speed.CollisionFreeSpeedModel | jupedsim.models.generalized_centrifugal_force.GeneralizedCentrifugalForceModel | jupedsim.models.collision_free_speed_v2.CollisionFreeSpeedModelV2 | jupedsim.models.collision_free_speed_v3.CollisionFreeSpeedModelV3 | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModel | jupedsim.models.social_force.SocialForceModel, geometry: str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]], dt: float = 0.01, trajectory_writer: jupedsim.serialization.TrajectoryWriter | None = None, **kwargs: Any)
+.. py:class:: Simulation(*, model: jupedsim.models.collision_free_speed.CollisionFreeSpeedModel | jupedsim.models.generalized_centrifugal_force.GeneralizedCentrifugalForceModel | jupedsim.models.collision_free_speed_v2.CollisionFreeSpeedModelV2 | jupedsim.models.collision_free_speed_v3.CollisionFreeSpeedModelV3 | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModel | jupedsim.models.social_force.SocialForceModel, geometry: str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]], dt: float = 0.01, trajectory_writer: jupedsim.serialization.TrajectoryWriter | None = None, timer_log_level: int = 1, **kwargs: Any)
 
    Defines a simulation of pedestrian movement over a continuous walkable area.
 
@@ -1972,6 +1972,15 @@ Attributes
 
       :param geometry: The new geometry to be used in the simulation.
 
+
+
+   .. py:property:: timer
+      :type: jupedsim.internal.tracing.Timer
+
+
+      Timer for measuring time spent in different stages of the simulation.
+
+      :returns: Timer object.
 
 
 .. py:class:: SocialForceModel(*, body_force: float = 120000, friction: float = 240000, bodyForce=None)

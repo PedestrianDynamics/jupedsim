@@ -336,7 +336,15 @@
     <span class="n">distribute_until_filled</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geometry</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.internal.tracing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Trace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.internal.tracing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Timer</span><span class="p">,</span>
+    <span class="n">disable_tracing</span><span class="p">,</span>
+    <span class="n">dump_traces</span><span class="p">,</span>
+    <span class="n">enable_tracing</span><span class="p">,</span>
+    <span class="n">end_trace_event</span><span class="p">,</span>
+    <span class="n">start_trace_event</span><span class="p">,</span>
+    <span class="n">trace_event</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.journey</span><span class="w"> </span><span class="kn">import</span> <span class="n">JourneyDescription</span><span class="p">,</span> <span class="n">Transition</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.library</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">BuildInfo</span><span class="p">,</span>
@@ -427,7 +435,7 @@
     <span class="s2">&quot;RoutingEngine&quot;</span><span class="p">,</span>
     <span class="s2">&quot;Simulation&quot;</span><span class="p">,</span>
     <span class="s2">&quot;SqliteTrajectoryWriter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Trace&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Timer&quot;</span><span class="p">,</span>
     <span class="s2">&quot;TrajectoryWriter&quot;</span><span class="p">,</span>
     <span class="s2">&quot;Transition&quot;</span><span class="p">,</span>
     <span class="s2">&quot;CollisionFreeSpeedModelAgentParameters&quot;</span><span class="p">,</span>
@@ -462,6 +470,12 @@
     <span class="s2">&quot;set_error_callback&quot;</span><span class="p">,</span>
     <span class="s2">&quot;set_info_callback&quot;</span><span class="p">,</span>
     <span class="s2">&quot;set_warning_callback&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;enable_tracing&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;disable_tracing&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dump_traces&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;trace_event&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;start_trace_event&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;end_trace_event&quot;</span><span class="p">,</span>
 <span class="p">]</span>
 </pre></div>
 
