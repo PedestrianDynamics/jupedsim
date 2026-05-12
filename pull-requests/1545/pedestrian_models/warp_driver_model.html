@@ -63,7 +63,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Notebooks" href="../notebooks/index.html" />
-    <link rel="prev" title="Pedestrian Models" href="index.html" />
+    <link rel="prev" title="CollisionFreeSpeedModelV3 (Rotational Steering)" href="collision_free_speed_model_v3.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="v2.0.0" />
@@ -212,6 +212,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Pedestrian Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="collision_free_speed_model_v3.html">CollisionFreeSpeedModelV3 (Rotational Steering)</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">WarpDriver Model</a></li>
 </ul>
 </details></li>
@@ -378,7 +379,8 @@ Each agent projects its trajectory forward in time, evaluates the collision prob
 <div class="math notranslate nohighlight">
 \[\mathbf{r}(t) = (v_0 \cdot t,\; 0,\; t), \quad t \in [0,\; T]\]</div>
 <p>where <span class="math notranslate nohighlight">\(v_0\)</span> is the agent’s desired speed and <span class="math notranslate nohighlight">\(T\)</span> is the time horizon.
-This trajectory is sampled at <code class="docutils literal notranslate"><span class="pre">num_samples</span></code> evenly spaced points.</p>
+This trajectory is sampled at a fixed number of evenly spaced points
+(20 in the current implementation).</p>
 </section>
 <section id="step-2-perceive-collision-probability-via-warped-intrinsic-fields">
 <h3>Step 2 — Perceive: collision probability via warped intrinsic fields<a class="headerlink" href="#step-2-perceive-collision-probability-via-warped-intrinsic-fields" title="Link to this heading">#</a></h3>
@@ -564,21 +566,13 @@ This expands the 2-component field gradient into a 3-component space-time gradie
 <td><p>—</p></td>
 <td><p>Lateral velocity uncertainty. Expands the collision field perpendicular to the direction of motion via <span class="math notranslate nohighlight">\(\beta_2 = 1 + \mu_y\)</span> (B.13, simplified for <span class="math notranslate nohighlight">\(v = v_\text{pref}\)</span>).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">num_samples</span></code></p></td>
-<td><p>—</p></td>
-<td><p>20</p></td>
-<td><p>—</p></td>
-<td><p>Number of points sampled along the projected trajectory. More samples = better accuracy but higher cost. Cost scales as <span class="math notranslate nohighlight">\(O(\text{num\_samples} \times \text{neighbors})\)</span>.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rng_seed</span></code></p></td>
-<td><p>—</p></td>
-<td><p>42</p></td>
-<td><p>—</p></td>
-<td><p>Seed for the internal random number generator used for symmetry-breaking perturbations. Fixed for reproducibility.</p></td>
-</tr>
 </tbody>
 </table>
 </div>
+<p>The trajectory is sampled at a fixed internal count (20 points) and the
+random number generator used for symmetry-breaking perturbations is
+seeded with a fixed value for reproducibility; both are
+implementation-internal and not exposed through the public API.</p>
 </section>
 <section id="agent-level-parameters">
 <h3>Agent-level parameters<a class="headerlink" href="#agent-level-parameters" title="Link to this heading">#</a></h3>
@@ -619,7 +613,6 @@ This expands the 2-component field gradient into a 3-component space-time gradie
     <span class="n">time_uncertainty</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
     <span class="n">velocity_uncertainty_x</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
     <span class="n">velocity_uncertainty_y</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
-    <span class="n">num_samples</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
@@ -647,7 +640,7 @@ This expands the 2-component field gradient into a 3-component space-time gradie
 </section>
 <section id="computational-cost">
 <h2>Computational cost<a class="headerlink" href="#computational-cost" title="Link to this heading">#</a></h2>
-<p>Per agent per timestep: <span class="math notranslate nohighlight">\(O(K \times N)\)</span> where <span class="math notranslate nohighlight">\(K\)</span> = <code class="docutils literal notranslate"><span class="pre">num_samples</span></code> and <span class="math notranslate nohighlight">\(N\)</span> = number of neighbors within <code class="docutils literal notranslate"><span class="pre">cut_off_radius</span></code> (= <span class="math notranslate nohighlight">\(3T\)</span>).</p>
+<p>Per agent per timestep: <span class="math notranslate nohighlight">\(O(K \times N)\)</span> where <span class="math notranslate nohighlight">\(K\)</span> is the trajectory sample count (fixed at 20 in the current implementation) and <span class="math notranslate nohighlight">\(N\)</span> is the number of neighbors within <code class="docutils literal notranslate"><span class="pre">cut_off_radius</span></code> (= <span class="math notranslate nohighlight">\(3T\)</span>).</p>
 <p>Each iteration involves:</p>
 <ul class="simple">
 <li><p><span class="math notranslate nohighlight">\(K \times N\)</span> forward warp compositions (6 operators each)</p></li>
@@ -682,12 +675,12 @@ This expands the 2-component field gradient into a 3-component space-time gradie
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="index.html"
+       href="collision_free_speed_model_v3.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Pedestrian Models</p>
+        <p class="prev-next-title">CollisionFreeSpeedModelV3 (Rotational Steering)</p>
       </div>
     </a>
     <a class="right-next"

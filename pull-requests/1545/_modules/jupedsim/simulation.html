@@ -209,6 +209,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../pedestrian_models/index.html">Pedestrian Models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../pedestrian_models/collision_free_speed_model_v3.html">CollisionFreeSpeedModelV3 (Rotational Steering)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../pedestrian_models/warp_driver_model.html">WarpDriver Model</a></li>
 </ul>
 </details></li>
@@ -330,7 +331,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">Agent</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geometry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.geometry_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_geometry</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.internal.tracing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Trace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.internal.tracing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.journey</span><span class="w"> </span><span class="kn">import</span> <span class="n">JourneyDescription</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.anticipation_velocity_model</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">AnticipationVelocityModel</span><span class="p">,</span>
@@ -343,6 +344,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.collision_free_speed_v2</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">CollisionFreeSpeedModelV2</span><span class="p">,</span>
     <span class="n">CollisionFreeSpeedModelV2AgentParameters</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.collision_free_speed_v3</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CollisionFreeSpeedModelV3</span><span class="p">,</span>
+    <span class="n">CollisionFreeSpeedModelV3AgentParameters</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.generalized_centrifugal_force</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">GeneralizedCentrifugalForceModel</span><span class="p">,</span>
@@ -384,6 +389,7 @@
             <span class="n">CollisionFreeSpeedModel</span>
             <span class="o">|</span> <span class="n">GeneralizedCentrifugalForceModel</span>
             <span class="o">|</span> <span class="n">CollisionFreeSpeedModelV2</span>
+            <span class="o">|</span> <span class="n">CollisionFreeSpeedModelV3</span>
             <span class="o">|</span> <span class="n">AnticipationVelocityModel</span>
             <span class="o">|</span> <span class="n">SocialForceModel</span>
             <span class="o">|</span> <span class="n">WarpDriverModel</span>
@@ -398,12 +404,13 @@
         <span class="p">),</span>
         <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
         <span class="n">trajectory_writer</span><span class="p">:</span> <span class="n">TrajectoryWriter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">timer_log_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a Simulation.</span>
 
 <span class="sd">        Arguments:</span>
-<span class="sd">            model (CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel | CollisionFreeSpeedModelV2):</span>
+<span class="sd">            model (CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel | CollisionFreeSpeedModelV2 | CollisionFreeSpeedModelV3):</span>
 <span class="sd">                Defines the operational model used in the simulation.</span>
 <span class="sd">            geometry:</span>
 <span class="sd">                Data to create the geometry out of. Data may be supplied as:</span>
@@ -443,6 +450,9 @@
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">CollisionFreeSpeedModelV2</span><span class="p">):</span>
             <span class="n">model_builder</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelV2Builder</span><span class="p">()</span>
             <span class="n">py_jps_model</span> <span class="o">=</span> <span class="n">model_builder</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">CollisionFreeSpeedModelV3</span><span class="p">):</span>
+            <span class="n">model_builder</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelV3Builder</span><span class="p">()</span>
+            <span class="n">py_jps_model</span> <span class="o">=</span> <span class="n">model_builder</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">AnticipationVelocityModel</span><span class="p">):</span>
             <span class="n">model_builder</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">AnticipationVelocityModelBuilder</span><span class="p">(</span>
                 <span class="n">pushout_strength</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">pushout_strength</span><span class="p">,</span> <span class="n">rng_seed</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">rng_seed</span>
@@ -473,8 +483,6 @@
                 <span class="n">time_uncertainty</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">time_uncertainty</span><span class="p">,</span>
                 <span class="n">velocity_uncertainty_x</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">velocity_uncertainty_x</span><span class="p">,</span>
                 <span class="n">velocity_uncertainty_y</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">velocity_uncertainty_y</span><span class="p">,</span>
-                <span class="n">num_samples</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">num_samples</span><span class="p">,</span>
-                <span class="n">rng_seed</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">rng_seed</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">py_jps_model</span> <span class="o">=</span> <span class="n">model_builder</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
@@ -483,6 +491,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
             <span class="n">model</span><span class="o">=</span><span class="n">py_jps_model</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">build_geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span>
         <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span> <span class="o">=</span> <span class="n">Timer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">timer_log_level</span><span class="o">=</span><span class="n">timer_log_level</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Simulation.add_waypoint_stage">
 <a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.add_waypoint_stage">[docs]</a>
@@ -619,6 +628,7 @@
             <span class="n">GeneralizedCentrifugalForceModelAgentParameters</span>
             <span class="o">|</span> <span class="n">CollisionFreeSpeedModelAgentParameters</span>
             <span class="o">|</span> <span class="n">CollisionFreeSpeedModelV2AgentParameters</span>
+            <span class="o">|</span> <span class="n">CollisionFreeSpeedModelV3AgentParameters</span>
             <span class="o">|</span> <span class="n">AnticipationVelocityModelAgentParameters</span>
             <span class="o">|</span> <span class="n">SocialForceModelAgentParameters</span>
             <span class="o">|</span> <span class="n">WarpDriverModelAgentParameters</span>
@@ -660,6 +670,20 @@
                 <span class="n">range_neighbor_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">range_neighbor_repulsion</span><span class="p">,</span>
                 <span class="n">strength_geometry_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">strength_geometry_repulsion</span><span class="p">,</span>
                 <span class="n">range_geometry_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">range_geometry_repulsion</span><span class="p">,</span>
+                <span class="n">time_gap</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">time_gap</span><span class="p">,</span>
+                <span class="n">desired_speed</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">desired_speed</span><span class="p">,</span>
+                <span class="n">radius</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">CollisionFreeSpeedModelV3AgentParameters</span><span class="p">):</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelV3State</span><span class="p">(</span>
+                <span class="n">strength_neighbor_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">strength_neighbor_repulsion</span><span class="p">,</span>
+                <span class="n">range_neighbor_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">range_neighbor_repulsion</span><span class="p">,</span>
+                <span class="n">strength_geometry_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">strength_geometry_repulsion</span><span class="p">,</span>
+                <span class="n">range_geometry_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">range_geometry_repulsion</span><span class="p">,</span>
+                <span class="n">range_x_scale</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">range_x_scale</span><span class="p">,</span>
+                <span class="n">range_y_scale</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">range_y_scale</span><span class="p">,</span>
+                <span class="n">theta_max_upper_bound</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">theta_max_upper_bound</span><span class="p">,</span>
+                <span class="n">agent_buffer</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">agent_buffer</span><span class="p">,</span>
                 <span class="n">time_gap</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">time_gap</span><span class="p">,</span>
                 <span class="n">desired_speed</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">desired_speed</span><span class="p">,</span>
                 <span class="n">radius</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span>
@@ -938,9 +962,6 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">set_tracing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">set_tracing</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_last_trace</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Trace</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">get_last_trace</span><span class="p">()</span>
-
 <div class="viewcode-block" id="Simulation.get_geometry">
 <a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Simulation.get_geometry">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Geometry</span><span class="p">:</span>
@@ -966,7 +987,16 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">internal_geometry</span> <span class="o">=</span> <span class="n">build_geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">switch_geometry</span><span class="p">(</span><span class="n">internal_geometry</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span></div>
-</div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">timer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Timer</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Timer for measuring time spent in different stages of the simulation.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Timer object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span></div>
 
 </pre></div>
 

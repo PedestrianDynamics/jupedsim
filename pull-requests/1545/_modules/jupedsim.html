@@ -209,6 +209,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../pedestrian_models/index.html">Pedestrian Models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../pedestrian_models/collision_free_speed_model_v3.html">CollisionFreeSpeedModelV3 (Rotational Steering)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../pedestrian_models/warp_driver_model.html">WarpDriver Model</a></li>
 </ul>
 </details></li>
@@ -336,7 +337,15 @@
     <span class="n">distribute_until_filled</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geometry</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.internal.tracing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Trace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.internal.tracing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Timer</span><span class="p">,</span>
+    <span class="n">disable_tracing</span><span class="p">,</span>
+    <span class="n">dump_traces</span><span class="p">,</span>
+    <span class="n">enable_tracing</span><span class="p">,</span>
+    <span class="n">end_trace_event</span><span class="p">,</span>
+    <span class="n">start_trace_event</span><span class="p">,</span>
+    <span class="n">trace_event</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.journey</span><span class="w"> </span><span class="kn">import</span> <span class="n">JourneyDescription</span><span class="p">,</span> <span class="n">Transition</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.library</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">BuildInfo</span><span class="p">,</span>
@@ -361,6 +370,11 @@
     <span class="n">CollisionFreeSpeedModelV2AgentParameters</span><span class="p">,</span>
     <span class="n">CollisionFreeSpeedModelV2State</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.collision_free_speed_v3</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CollisionFreeSpeedModelV3</span><span class="p">,</span>
+    <span class="n">CollisionFreeSpeedModelV3AgentParameters</span><span class="p">,</span>
+    <span class="n">CollisionFreeSpeedModelV3State</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.generalized_centrifugal_force</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">GeneralizedCentrifugalForceModel</span><span class="p">,</span>
     <span class="n">GeneralizedCentrifugalForceModelAgentParameters</span><span class="p">,</span>
@@ -381,6 +395,14 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.serialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">TrajectoryWriter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.simulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Simulation</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.sqlite_serialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">SqliteTrajectoryWriter</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.hdf5_serialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hdf5TrajectoryWriter</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># h5py not installed; HDF5 writer remains unavailable.</span>
+<div class="viewcode-block" id="Hdf5TrajectoryWriter">
+<a class="viewcode-back" href="../api/jupedsim/index.html#jupedsim.Hdf5TrajectoryWriter">[docs]</a>
+    <span class="n">Hdf5TrajectoryWriter</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment, misc]</span></div>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.stages</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">ExitStage</span><span class="p">,</span>
     <span class="n">NotifiableQueueStage</span><span class="p">,</span>
@@ -427,7 +449,8 @@
     <span class="s2">&quot;RoutingEngine&quot;</span><span class="p">,</span>
     <span class="s2">&quot;Simulation&quot;</span><span class="p">,</span>
     <span class="s2">&quot;SqliteTrajectoryWriter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Trace&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Hdf5TrajectoryWriter&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Timer&quot;</span><span class="p">,</span>
     <span class="s2">&quot;TrajectoryWriter&quot;</span><span class="p">,</span>
     <span class="s2">&quot;Transition&quot;</span><span class="p">,</span>
     <span class="s2">&quot;CollisionFreeSpeedModelAgentParameters&quot;</span><span class="p">,</span>
@@ -436,6 +459,9 @@
     <span class="s2">&quot;CollisionFreeSpeedModelV2AgentParameters&quot;</span><span class="p">,</span>
     <span class="s2">&quot;CollisionFreeSpeedModelV2&quot;</span><span class="p">,</span>
     <span class="s2">&quot;CollisionFreeSpeedModelV2State&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CollisionFreeSpeedModelV3AgentParameters&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CollisionFreeSpeedModelV3&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CollisionFreeSpeedModelV3State&quot;</span><span class="p">,</span>
     <span class="s2">&quot;AnticipationVelocityModelAgentParameters&quot;</span><span class="p">,</span>
     <span class="s2">&quot;AnticipationVelocityModel&quot;</span><span class="p">,</span>
     <span class="s2">&quot;AnticipationVelocityModelState&quot;</span><span class="p">,</span>
@@ -462,6 +488,12 @@
     <span class="s2">&quot;set_error_callback&quot;</span><span class="p">,</span>
     <span class="s2">&quot;set_info_callback&quot;</span><span class="p">,</span>
     <span class="s2">&quot;set_warning_callback&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;enable_tracing&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;disable_tracing&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dump_traces&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;trace_event&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;start_trace_event&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;end_trace_event&quot;</span><span class="p">,</span>
 <span class="p">]</span>
 </pre></div>
 

@@ -22,7 +22,8 @@ Each agent projects a straight-line trajectory in its own reference frame:
 $$\mathbf{r}(t) = (v_0 \cdot t,\; 0,\; t), \quad t \in [0,\; T]$$
 
 where $v_0$ is the agent's desired speed and $T$ is the time horizon.
-This trajectory is sampled at `num_samples` evenly spaced points.
+This trajectory is sampled at a fixed number of evenly spaced points
+(20 in the current implementation).
 
 ### Step 2 — Perceive: collision probability via warped intrinsic fields
 
@@ -151,8 +152,11 @@ Set once when creating the simulation. Shared by all agents.
 | `time_uncertainty` | $\lambda$ | 0.5 | — | Time uncertainty parameter. Spreads the collision field along the time axis — collisions further in the future are treated as less certain. |
 | `velocity_uncertainty_x` | $\mu_x$ | 0.2 | — | Longitudinal velocity uncertainty. Compresses the collision field along the direction of motion via $\beta_1 = 1/(1 + \mu_x)$ (B.13, simplified for $v = v_\text{pref}$). |
 | `velocity_uncertainty_y` | $\mu_y$ | 0.2 | — | Lateral velocity uncertainty. Expands the collision field perpendicular to the direction of motion via $\beta_2 = 1 + \mu_y$ (B.13, simplified for $v = v_\text{pref}$). |
-| `num_samples` | — | 20 | — | Number of points sampled along the projected trajectory. More samples = better accuracy but higher cost. Cost scales as $O(\text{num\_samples} \times \text{neighbors})$. |
-| `rng_seed` | — | 42 | — | Seed for the internal random number generator used for symmetry-breaking perturbations. Fixed for reproducibility. |
+
+The trajectory is sampled at a fixed internal count (20 points) and the
+random number generator used for symmetry-breaking perturbations is
+seeded with a fixed value for reproducibility; both are
+implementation-internal and not exposed through the public API.
 
 ### Agent-level parameters
 
@@ -176,7 +180,6 @@ model = jps.WarpDriverModel(
     time_uncertainty=0.5,
     velocity_uncertainty_x=0.2,
     velocity_uncertainty_y=0.2,
-    num_samples=20,
 )
 
 sim = jps.Simulation(model=model, geometry=area, dt=0.01)
@@ -203,7 +206,7 @@ state.radius = 0.2
 
 ## Computational cost
 
-Per agent per timestep: $O(K \times N)$ where $K$ = `num_samples` and $N$ = number of neighbors within `cut_off_radius` (= $3T$).
+Per agent per timestep: $O(K \times N)$ where $K$ is the trajectory sample count (fixed at 20 in the current implementation) and $N$ is the number of neighbors within `cut_off_radius` (= $3T$).
 
 Each iteration involves:
 - $K \times N$ forward warp compositions (6 operators each)
