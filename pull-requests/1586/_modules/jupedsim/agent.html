@@ -208,7 +208,10 @@
 <li class="toctree-l2"><a class="reference internal" href="../../concepts/custom_serialization.html">Custom Serialization</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="../../pedestrian_models/index.html">Pedestrian Models</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../pedestrian_models/index.html">Pedestrian Models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../pedestrian_models/collision_free_speed_model_v3.html">CollisionFreeSpeedModelV3 (Rotational Steering)</a></li>
+</ul>
+</details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../notebooks/index.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../notebooks/model-comparison.html">Comparative Analysis of Pedestrian Dynamics Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../notebooks/corner.html">Movement around Corners</a></li>
@@ -327,6 +330,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.collision_free_speed_v2</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">CollisionFreeSpeedModelV2State</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.collision_free_speed_v3</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CollisionFreeSpeedModelV3State</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.generalized_centrifugal_force</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">GeneralizedCentrifugalForceModelState</span><span class="p">,</span>
 <span class="p">)</span>
@@ -429,6 +435,7 @@
         <span class="n">GeneralizedCentrifugalForceModelState</span>
         <span class="o">|</span> <span class="n">CollisionFreeSpeedModelState</span>
         <span class="o">|</span> <span class="n">CollisionFreeSpeedModelV2State</span>
+        <span class="o">|</span> <span class="n">CollisionFreeSpeedModelV3State</span>
         <span class="o">|</span> <span class="n">AnticipationVelocityModelState</span>
         <span class="o">|</span> <span class="n">SocialForceModelState</span>
     <span class="p">):</span>
@@ -440,6 +447,8 @@
             <span class="k">return</span> <span class="n">CollisionFreeSpeedModelState</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelV2State</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">CollisionFreeSpeedModelV2State</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelV3State</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">CollisionFreeSpeedModelV3State</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">AnticipationVelocityModelState</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">AnticipationVelocityModelState</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">SocialForceModelState</span><span class="p">):</span>
