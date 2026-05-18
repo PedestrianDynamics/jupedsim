@@ -62,7 +62,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Notebooks" href="../notebooks/index.html" />
+    <link rel="next" title="CollisionFreeSpeedModelV3 (Rotational Steering)" href="collision_free_speed_model_v3.html" />
     <link rel="prev" title="Custom Serialization" href="../concepts/custom_serialization.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -211,7 +211,11 @@
 <li class="toctree-l2"><a class="reference internal" href="../concepts/custom_serialization.html">Custom Serialization</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Pedestrian Models</a></li>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Pedestrian Models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="collision_free_speed_model_v3.html">CollisionFreeSpeedModelV3 (Rotational Steering)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="warp_driver_model.html">WarpDriver Model</a></li>
+</ul>
+</details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../notebooks/index.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../notebooks/model-comparison.html">Comparative Analysis of Pedestrian Dynamics Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../notebooks/corner.html">Movement around Corners</a></li>
@@ -323,6 +327,7 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#anticipation-velocity-model">Anticipation Velocity Model</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized-centrifugal-force-model">Generalized Centrifugal Force Model</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#social-force-model">Social Force Model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#warpdriver-model">WarpDriver Model</a></li>
 </ul>
             </nav>
         </div>
@@ -336,6 +341,8 @@
                   
   <section id="pedestrian-models">
 <h1>Pedestrian Models<a class="headerlink" href="#pedestrian-models" title="Link to this heading">#</a></h1>
+<div class="toctree-wrapper compound">
+</div>
 <p>JuPedSim allows creating pedestrian simulations with different microscopic
 models. Below is a list of all the models that are currently available. Please
 refer to the links in the respective section for a detailed discussion of the
@@ -355,9 +362,13 @@ which determines the required space for movement, and the maximum achievable
 speed of the agent. This simplified and computationally efficient model aims to
 mirror real-world pedestrian behaviors while maintaining smooth movement
 dynamics.</p>
-<p>The collision-free speed model is available in two variants in JuPedSim. Both
-variants implement the same algorithm but differ when it comes to defining model
-parameters globally vs. per-agent.</p>
+<p>The collision-free speed model is available in three variants in JuPedSim.
+<code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModel</span></code> and
+<code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV2</span></code> implement the same
+algorithm and differ only in whether model parameters are defined globally
+or per-agent. <code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV3</span></code> uses a
+different steering approach (rotational steering with heading relaxation)
+in addition to per-agent parameters.</p>
 <p>In <code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModel</span></code> neighbor and geometry
 repulsion parameters are global parameters, i.e. all agents use the same values
 and the values are constant over the simulation.</p>
@@ -365,6 +376,14 @@ and the values are constant over the simulation.</p>
 repulsion parameters are per-agent parameters that can be set individually via
 <code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV2AgentParameters</span></code> and can be
 changed at any time.</p>
+<p>In <code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV3</span></code> the same per-agent base
+parameters are available, plus rotational steering controls
+(<code class="docutils literal notranslate"><span class="pre">range_x_scale</span></code>, <code class="docutils literal notranslate"><span class="pre">range_y_scale</span></code>, <code class="docutils literal notranslate"><span class="pre">theta_max_upper_bound</span></code>)
+and <code class="docutils literal notranslate"><span class="pre">agent_buffer</span></code>.
+V3 also uses temporal heading relaxation to damp rapid left-right turning
+changes and a tiny deterministic reverse-speed floor to help unblock contact
+situations.</p>
+<p>See the <a class="reference external" href="collision_free_speed_model_v3.html">V3 specification</a> for full details.</p>
 <p>A <a class="reference external" href="https://pedestriandynamics.org/models/collision_free_speed_model/">detailed description</a> is
 available on <a class="reference external" href="https://PedestrianDynamics.org/">PedestrianDynamics</a>.</p>
 <p>The original publication can be found at <a class="reference external" href="https://arxiv.org/abs/1512.05597">https://arxiv.org/abs/1512.05597</a></p>
@@ -504,6 +523,38 @@ person force to avoid collisions with obstacles in the environment.</p>
 <p>A <a class="reference external" href="https://pedestriandynamics.org/models/social_force_model/">detailed description</a> is available on
 <a class="reference external" href="https://PedestrianDynamics.org/">PedestrianDynamics</a>.</p>
 </section>
+<section id="warpdriver-model">
+<h2>WarpDriver Model<a class="headerlink" href="#warpdriver-model" title="Link to this heading">#</a></h2>
+<p>The WarpDriver model computes collision-free velocities using probabilistic
+collision fields. Each agent projects its trajectory forward in time, evaluates
+the collision probability with every neighbor via a warped intrinsic field, and
+adjusts its velocity through gradient descent on the resulting probability
+landscape. The model is based on Wolinski, Lin, and Pettré (2016).</p>
+<p>The pipeline per agent per timestep:
+<strong>Setup</strong> (project trajectory) → <strong>Perceive</strong> (warp + sample intrinsic field
+per neighbor) → <strong>Solve</strong> (gradient descent via integrals over the collision
+probability landscape).</p>
+<p>Key features:</p>
+<ul class="simple">
+<li><p>Probabilistic collision prediction via precomputed intrinsic fields</p></li>
+<li><p>Five composable warp operators for coordinate transforms between agents</p></li>
+<li><p>Gradient-based velocity correction (speed model, not force-based)</p></li>
+<li><p>Stuck detection with lateral detour to break narrow-passage deadlocks</p></li>
+</ul>
+<p>The parameters of the WarpDriver model include model-level parameters (shared
+by all agents: <code class="docutils literal notranslate"><span class="pre">time_horizon</span></code>, <code class="docutils literal notranslate"><span class="pre">step_size</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>,
+<code class="docutils literal notranslate"><span class="pre">time_uncertainty</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity_uncertainty_x</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity_uncertainty_y</span></code>, <code class="docutils literal notranslate"><span class="pre">num_samples</span></code>) and per-agent
+parameters (<code class="docutils literal notranslate"><span class="pre">desired_speed</span></code>, <code class="docutils literal notranslate"><span class="pre">radius</span></code>) that can be modified at runtime.</p>
+<p>See the <a class="reference external" href="warp_driver_model.html">full WarpDriver model documentation</a> for
+a detailed description of the algorithm, equations, warp operators, and
+parameters.</p>
+<p>The original publication: Wolinski, D., Lin, M. C., and Pettré, J. (2016).
+<em>WarpDriver: Context-Aware Probabilistic Motion Prediction for Crowd
+Simulation</em>. IEEE Transactions on Visualization and Computer Graphics, 22(12),
+2466–2480.</p>
+<div class="toctree-wrapper compound">
+</div>
+</section>
 </section>
 
 
@@ -527,11 +578,11 @@ person force to avoid collisions with obstacles in the environment.</p>
       </div>
     </a>
     <a class="right-next"
-       href="../notebooks/index.html"
+       href="collision_free_speed_model_v3.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Notebooks</p>
+        <p class="prev-next-title">CollisionFreeSpeedModelV3 (Rotational Steering)</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -557,6 +608,7 @@ person force to avoid collisions with obstacles in the environment.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#anticipation-velocity-model">Anticipation Velocity Model</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized-centrifugal-force-model">Generalized Centrifugal Force Model</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#social-force-model">Social Force Model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#warpdriver-model">WarpDriver Model</a></li>
 </ul>
   </nav></div>
 
