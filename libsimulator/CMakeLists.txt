@@ -18,6 +18,12 @@ add_library(simulator STATIC
     src/CollisionFreeSpeedModelV2Builder.hpp
     src/CollisionFreeSpeedModelV2Data.hpp
     src/CollisionFreeSpeedModelV2Update.hpp
+    src/CollisionFreeSpeedModelV3.cpp
+    src/CollisionFreeSpeedModelV3.hpp
+    src/CollisionFreeSpeedModelV3Builder.cpp
+    src/CollisionFreeSpeedModelV3Builder.hpp
+    src/CollisionFreeSpeedModelV3Data.hpp
+    src/CollisionFreeSpeedModelV3Update.hpp
     src/AnticipationVelocityModel.cpp
     src/AnticipationVelocityModel.hpp
     src/AnticipationVelocityModelBuilder.cpp
@@ -72,6 +78,12 @@ add_library(simulator STATIC
     src/SocialForceModelBuilder.hpp
     src/SocialForceModelData.hpp
     src/SocialForceModelUpdate.hpp
+    src/WarpDriverModel.cpp
+    src/WarpDriverModel.hpp
+    src/WarpDriverModelBuilder.cpp
+    src/WarpDriverModelBuilder.hpp
+    src/WarpDriverModelData.hpp
+    src/WarpDriverModelUpdate.hpp
     src/Stage.cpp
     src/Stage.hpp
     src/StageDescription.hpp

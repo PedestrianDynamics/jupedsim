@@ -47,6 +47,11 @@ from jupedsim.models.collision_free_speed_v2 import (
     CollisionFreeSpeedModelV2AgentParameters,
     CollisionFreeSpeedModelV2State,
 )
+from jupedsim.models.collision_free_speed_v3 import (
+    CollisionFreeSpeedModelV3,
+    CollisionFreeSpeedModelV3AgentParameters,
+    CollisionFreeSpeedModelV3State,
+)
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
@@ -57,11 +62,21 @@ from jupedsim.models.social_force import (
     SocialForceModelAgentParameters,
     SocialForceModelState,
 )
+from jupedsim.models.warp_driver import (
+    WarpDriverModel,
+    WarpDriverModelAgentParameters,
+    WarpDriverModelState,
+)
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import RoutingEngine
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
 from jupedsim.sqlite_serialization import SqliteTrajectoryWriter
+
+try:
+    from jupedsim.hdf5_serialization import Hdf5TrajectoryWriter
+except ImportError:  # h5py not installed; HDF5 writer remains unavailable.
+    Hdf5TrajectoryWriter = None  # type: ignore[assignment, misc]
 from jupedsim.stages import (
     ExitStage,
     NotifiableQueueStage,
@@ -108,6 +123,7 @@ __all__ = [
     "RoutingEngine",
     "Simulation",
     "SqliteTrajectoryWriter",
+    "Hdf5TrajectoryWriter",
     "Timer",
     "TrajectoryWriter",
     "Transition",
@@ -117,12 +133,18 @@ __all__ = [
     "CollisionFreeSpeedModelV2AgentParameters",
     "CollisionFreeSpeedModelV2",
     "CollisionFreeSpeedModelV2State",
+    "CollisionFreeSpeedModelV3AgentParameters",
+    "CollisionFreeSpeedModelV3",
+    "CollisionFreeSpeedModelV3State",
     "AnticipationVelocityModelAgentParameters",
     "AnticipationVelocityModel",
     "AnticipationVelocityModelState",
     "SocialForceModelAgentParameters",
     "SocialForceModel",
     "SocialForceModelState",
+    "WarpDriverModelAgentParameters",
+    "WarpDriverModel",
+    "WarpDriverModelState",
     "WaitingSetStage",
     "WaitingSetState",
     "WaypointStage",
