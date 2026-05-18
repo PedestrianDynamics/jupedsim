@@ -34,25 +34,16 @@ void init_routing(py::module_& m)
                 return engine.IsRoutable(intoPoint(point));
             })
         .def("mesh", [](const RoutingEngine& routingEngine) {
-            using Ind = std::vector<uint16_t>;
-            using Polys = std::vector<Ind>;
             const auto mesh = routingEngine.MeshData();
             const auto polygonCount = mesh->CountPolygons();
-            Polys polys{polygonCount};
+            using Ind = decltype(mesh->Polygons(0).vertices);
+            std::vector<Ind> polys;
+            polys.reserve(polygonCount);
             for(size_t index = 0; index < polygonCount; ++index) {
                 const auto& poly = mesh->Polygons(index);
                 const auto& vertices = poly.vertices;
-                polys[index].reserve(vertices.size());
-                for(size_t vertIndex = 0; vertIndex < vertices.size(); ++vertIndex) {
-                    polys[index].push_back(vertices[vertIndex]);
-                }
+                polys.emplace_back(mesh->Polygons(index).vertices);
             }
-            const auto fvertices = mesh->FVertices();
-            std::vector<std::tuple<double, double>> verts;
-            verts.reserve(fvertices.size());
-            for(const auto& v : fvertices) {
-                verts.emplace_back(v.x, v.y);
-            }
-            return std::make_tuple(verts, polys);
+            return std::make_tuple(intoTuples(mesh->FVertices()), polys);
         });
 }

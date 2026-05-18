@@ -11,16 +11,6 @@ std::tuple<double, double> intoTuple(const Point& p)
     return std::make_tuple(p.x, p.y);
 }
 
-std::vector<std::tuple<double, double>> intoTuples(const std::vector<Point>& in)
-{
-    std::vector<std::tuple<double, double>> tuples{};
-    tuples.reserve(in.size());
-    for(const auto& pt : in) {
-        tuples.emplace_back(pt.x, pt.y);
-    }
-    return tuples;
-}
-
 Point intoPoint(const std::tuple<double, double>& p)
 {
     return Point{std::get<0>(p), std::get<1>(p)};
