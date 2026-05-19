@@ -2,6 +2,9 @@
 requires = ["setuptools>=40.8.0", "cmake>=3.19", "ninja"]
 build-backend = "setuptools.build_meta"
 
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib"
+
 [tool.ruff]
 extend-exclude = ["third-party", "docs"]
 line-length = 80
