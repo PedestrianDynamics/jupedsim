@@ -16,9 +16,9 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <deque>
 #include <limits>
 #include <map>
-#include <memory>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -202,7 +202,7 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
                     // Unlike in A* this is only a first candidate solution
                     // Now compute the actual path length via funnel algorithm
                     // store path and length if this variant is the shortest found so far
-                    const SearchState dest_state{g_value, h_value, to, current_state.get()};
+                    const SearchState dest_state{g_value, h_value, to, current_state};
                     const auto vertex_ids = dest_state.path();
                     const auto found_path =
                         straightenPath(currentPosition, destination, vertex_ids);
@@ -228,13 +228,14 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
                    std::end(open_states),
                    [t2](const auto& s) { return s->id == t2; });
                iter != std::end(open_states)) {
-                if(auto& s = *iter; s->g_value > g_value) {
+                if(auto* s = *iter; s->g_value > g_value) {
                     s->g_value = g_value;
                     s->parent = current_state;
                 }
 
             } else if(auto iter = closed_states.find(target); iter != std::end(closed_states)) {
-                if(auto& [_, s] = *iter; s->g_value > g_value) {
+                auto* s = iter->second;
+                if(s->g_value > g_value) {
                     s->g_value = g_value;
                     s->parent = current_state;
                     open_states.push_back(s);
