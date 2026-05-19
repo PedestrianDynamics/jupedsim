@@ -86,9 +86,7 @@ struct SearchState {
     }
 };
 
-bool CompareSearchStatesGt(
-    const std::shared_ptr<SearchState>& a,
-    const std::shared_ptr<SearchState>& b)
+bool CompareSearchStatesGt(const SearchState* a, const SearchState* b)
 {
     return a->f_value() > b->f_value();
 }
@@ -113,13 +111,13 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
         return std::vector<Point>{currentPosition, destination};
     }
 
-    using SearchStatePtr = std::shared_ptr<SearchState>;
+    // Hold all search states inside a deque which never invalidates pointers and grows within O(1)
+    std::deque<SearchState> all_search_states{};
+    std::vector<SearchState*> open_states{};
+    all_search_states.emplace_back(0.0, Distance(currentPosition, destination), from, nullptr);
+    open_states.push_back(&all_search_states.back());
 
-    std::vector<SearchStatePtr> open_states{};
-    open_states.emplace_back(
-        new SearchState{0.0, Distance(currentPosition, destination), from, nullptr});
-
-    std::map<CDT::Face_handle, SearchStatePtr> closed_states{};
+    std::map<CDT::Face_handle, SearchState*> closed_states{};
 
     std::vector<Point> path{};
     double path_length = std::numeric_limits<double>::infinity();
@@ -232,19 +230,19 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
                iter != std::end(open_states)) {
                 if(auto& s = *iter; s->g_value > g_value) {
                     s->g_value = g_value;
-                    s->parent = current_state.get();
+                    s->parent = current_state;
                 }
 
             } else if(auto iter = closed_states.find(target); iter != std::end(closed_states)) {
                 if(auto& [_, s] = *iter; s->g_value > g_value) {
                     s->g_value = g_value;
-                    s->parent = current_state.get();
+                    s->parent = current_state;
                     open_states.push_back(s);
                     closed_states.erase(s->id);
                 }
             } else {
-                open_states.emplace_back(
-                    new SearchState{g_value, h_value, target, current_state.get()});
+                all_search_states.emplace_back(g_value, h_value, target, current_state);
+                open_states.push_back(&all_search_states.back());
             }
         }
     }
