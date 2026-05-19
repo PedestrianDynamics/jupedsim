@@ -59,6 +59,15 @@ BAD_ASTAR_ROUTINGS = [
         "max_diff": 0.2,
     },
     {
+        "test_name": "corner_with_shortcut2",
+        "description": "Same starting point, but end points differ just 0.03 on y axis, but total distance diff was >>0.03",
+        "wkt_path": "examples/geometry/corner_with_shortcut.wkt",
+        "error_type": "max_diff",
+        "path1": [(11.80, 1.00), (28.50, 13.54)],
+        "path2": [(11.80, 1.00), (28.50, 13.55)],
+        "max_diff": 0.01,
+    },
+    {
         "test_name": "aknz_evac",
         "description": "Direct path possible, but path was ways longer",
         "error_type": "direct path possible",
@@ -106,6 +115,9 @@ def test_max_diff_example(test_entry):
 
     distance1 = path_distance(path1)
     distance2 = path_distance(path2)
+    print(
+        f"distance1: {distance1}, distance2: {distance2}, max-diff: {test_entry['max_diff']}"
+    )
 
     distance_diff = math.fabs(distance2 - distance1)
     assert distance_diff <= test_entry["max_diff"]

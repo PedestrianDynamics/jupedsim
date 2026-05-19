@@ -206,6 +206,25 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
 
             const double g_value = std::max(g_value_1, std::max(g_value_2, g_value_3));
 
+            // Evaluate every route that reaches the destination inline so that all
+            // candidate routes have their funnel computed — not just the first one
+            // (minimum-f_value) to arrive.  The closed_states guard would otherwise
+            // block all subsequent routes from being evaluated.
+            if(target == to) {
+                if(g_value + h_value < path_length) {
+                    const SearchState dest_state{g_value, h_value, to, current_state.get()};
+                    const auto vertex_ids = dest_state.path();
+                    const auto found_path =
+                        straightenPath(currentPosition, destination, vertex_ids);
+                    const double found_path_length = length_of_path(found_path);
+                    if(found_path_length < path_length) {
+                        path = found_path;
+                        path_length = found_path_length;
+                    }
+                }
+                continue;
+            }
+
             // NOTE(kkratz): Clang16 seems to be confused with capturing a structured binding
             // and emits a warnign when capturing 'target' directly As of C++20 this SHOULD(TM)
             // be valid code but see:
