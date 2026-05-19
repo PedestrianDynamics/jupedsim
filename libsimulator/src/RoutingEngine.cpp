@@ -123,8 +123,8 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
     double path_length = std::numeric_limits<double>::infinity();
 
     while(!open_states.empty()) {
-        std::make_heap(std::rbegin(open_states), std::rend(open_states), CompareSearchStatesGt);
-        auto current_state = open_states.back();
+        std::pop_heap(open_states.begin(), open_states.end(), CompareSearchStatesGt);
+        SearchState* current_state = open_states.back();
         open_states.pop_back();
         closed_states.insert(std::make_pair(current_state->id, current_state));
 
@@ -231,6 +231,8 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
                 if(auto* s = *iter; s->g_value > g_value) {
                     s->g_value = g_value;
                     s->parent = current_state;
+                    // As the g_value got modified, the heap needs to be entirely remade.
+                    std::make_heap(open_states.begin(), open_states.end(), CompareSearchStatesGt);
                 }
 
             } else if(auto iter = closed_states.find(target); iter != std::end(closed_states)) {
@@ -239,11 +241,13 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
                     s->g_value = g_value;
                     s->parent = current_state;
                     open_states.push_back(s);
+                    std::push_heap(open_states.begin(), open_states.end(), CompareSearchStatesGt);
                     closed_states.erase(s->id);
                 }
             } else {
                 all_search_states.emplace_back(g_value, h_value, target, current_state);
                 open_states.push_back(&all_search_states.back());
+                std::push_heap(open_states.begin(), open_states.end(), CompareSearchStatesGt);
             }
         }
     }
