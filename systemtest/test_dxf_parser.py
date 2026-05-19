@@ -3,7 +3,19 @@ from pathlib import Path
 
 import pytest
 
-dxf_dir = Path("examples/geometry/dxf")
+try:
+    import ezdxf  # noqa: F401
+    import geopandas  # noqa: F401
+    import rich  # noqa: F401
+    import typer  # noqa: F401
+except ImportError:
+    pytest.skip(
+        "Not all of necessary modules (ezdxf, geopandas, rich, typer) are installed: ",
+        allow_module_level=True,
+    )
+
+repo_root = Path(__file__).resolve().parents[1]
+dxf_dir = repo_root / "examples" / "geometry" / "dxf"
 dxf_files = list(dxf_dir.glob("*.dxf"))
 
 
@@ -11,7 +23,13 @@ dxf_files = list(dxf_dir.glob("*.dxf"))
 def test_dxf_conversion(dxf_file):
     """Test that DXF files can be converted to WKT"""
     result = subprocess.run(
-        ["python", "scripts/dxf2wkt.py", "convert", "-i", str(dxf_file)],
+        [
+            "python",
+            repo_root / "scripts/dxf2wkt.py",
+            "convert",
+            "-i",
+            str(dxf_file),
+        ],
         capture_output=True,
         text=True,
     )
