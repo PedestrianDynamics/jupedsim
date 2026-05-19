@@ -115,10 +115,6 @@ def test_max_diff_example(test_entry):
 
     distance1 = path_distance(path1)
     distance2 = path_distance(path2)
-    print(
-        f"distance1: {distance1}, distance2: {distance2}, max-diff: {test_entry['max_diff']}"
-    )
-
     distance_diff = math.fabs(distance2 - distance1)
     assert distance_diff <= test_entry["max_diff"]
 
@@ -137,7 +133,6 @@ def test_direct_path_possible_example(test_entry):
     navi = jps.RoutingEngine(geometry)
 
     path = navi.compute_waypoints(*test_entry["path"])
-    print(f"----------- [RL, DEBUG] Path length: {len(path)}: {path}")
     distance = path_distance(path)
 
     direct_distance = path_distance(test_entry["path"])
