@@ -93,8 +93,8 @@ struct SearchState {
 struct FaceHandleHash {
     std::size_t operator()(CDT::Face_handle fh) const noexcept
     {
-        // Face_handle is an iterator type, therefore use std::to_address
-        return std::hash<decltype(std::to_address(fh))>{}(std::to_address(fh));
+        // Face_handle is an iterator, therefore use "&*"-pattern to get the address.
+        return std::hash<decltype(&*fh)>{}(&*fh);
     }
 };
 
