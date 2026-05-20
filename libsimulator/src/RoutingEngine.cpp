@@ -18,7 +18,6 @@
 #include <cstddef>
 #include <deque>
 #include <limits>
-#include <map>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -91,6 +90,14 @@ struct SearchState {
     }
 };
 
+struct FaceHandleHash {
+    std::size_t operator()(CDT::Face_handle fh) const noexcept
+    {
+        // Face_handle is an iterator type, therefore use std::to_address
+        return std::hash<decltype(std::to_address(fh))>{}(std::to_address(fh));
+    }
+};
+
 bool CompareSearchStatesGt(const SearchState* a, const SearchState* b)
 {
     return a->f_value() > b->f_value();
@@ -122,7 +129,7 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
     all_search_states.emplace_back(0.0, Distance(currentPosition, destination), from, nullptr);
     open_states.push_back(&all_search_states.back());
 
-    std::map<CDT::Face_handle, SearchState*> closed_states{};
+    std::unordered_map<CDT::Face_handle, SearchState*, FaceHandleHash> closed_states{};
 
     std::vector<Point> path{};
     double path_length = std::numeric_limits<double>::infinity();
@@ -131,7 +138,7 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
         std::pop_heap(open_states.begin(), open_states.end(), CompareSearchStatesGt);
         SearchState* current_state = open_states.back();
         open_states.pop_back();
-        closed_states.insert(std::make_pair(current_state->id, current_state));
+        closed_states.emplace(current_state->id, current_state);
 
         if(current_state->f_value() >= path_length) {
             // This search nodes f-value already excedes our paths length, and since the f-value is
@@ -239,8 +246,7 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
                     // As the g_value got modified, the heap needs to be entirely remade.
                     std::make_heap(open_states.begin(), open_states.end(), CompareSearchStatesGt);
                 }
-
-            } else if(auto iter = closed_states.find(target); iter != std::end(closed_states)) {
+            } else if(auto iter = closed_states.find(target); iter != closed_states.end()) {
                 auto* s = iter->second;
                 if(s->g_value > g_value) {
                     s->g_value = g_value;
