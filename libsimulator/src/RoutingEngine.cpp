@@ -60,6 +60,11 @@ struct SearchState {
     CDT::Face_handle id{};
     SearchState* parent{};
 
+    SearchState(double g, double h, CDT::Face_handle _id, SearchState* _parent)
+        : g_value(g), h_value(h), id(_id), parent(_parent)
+    {
+    }
+
     double f_value() const { return g_value + h_value; }
     bool parents_contain(CDT::Face_handle ancestor_id) const
     {
