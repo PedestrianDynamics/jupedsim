@@ -16,9 +16,8 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <deque>
 #include <limits>
-#include <map>
-#include <memory>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -60,6 +59,11 @@ struct SearchState {
     CDT::Face_handle id{};
     SearchState* parent{};
 
+    SearchState(double g, double h, CDT::Face_handle _id, SearchState* _parent)
+        : g_value(g), h_value(h), id(_id), parent(_parent)
+    {
+    }
+
     double f_value() const { return g_value + h_value; }
     bool parents_contain(CDT::Face_handle ancestor_id) const
     {
@@ -86,9 +90,15 @@ struct SearchState {
     }
 };
 
-bool CompareSearchStatesGt(
-    const std::shared_ptr<SearchState>& a,
-    const std::shared_ptr<SearchState>& b)
+struct FaceHandleHash {
+    std::size_t operator()(CDT::Face_handle fh) const noexcept
+    {
+        // Face_handle is an iterator, therefore use "&*"-pattern to get the address.
+        return std::hash<decltype(&*fh)>{}(&*fh);
+    }
+};
+
+bool CompareSearchStatesGt(const SearchState* a, const SearchState* b)
 {
     return a->f_value() > b->f_value();
 }
@@ -113,26 +123,27 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
         return std::vector<Point>{currentPosition, destination};
     }
 
-    using SearchStatePtr = std::shared_ptr<SearchState>;
+    // Hold all search states inside a deque which never invalidates pointers and grows within O(1)
+    std::deque<SearchState> all_search_states{};
+    std::vector<SearchState*> open_states{};
+    all_search_states.emplace_back(0.0, Distance(currentPosition, destination), from, nullptr);
+    open_states.push_back(&all_search_states.back());
 
-    std::vector<SearchStatePtr> open_states{};
-    open_states.emplace_back(
-        new SearchState{0.0, Distance(currentPosition, destination), from, nullptr});
-
-    std::map<CDT::Face_handle, SearchStatePtr> closed_states{};
+    std::unordered_map<CDT::Face_handle, SearchState*, FaceHandleHash> closed_states{};
 
     std::vector<Point> path{};
     double path_length = std::numeric_limits<double>::infinity();
 
     while(!open_states.empty()) {
-        std::make_heap(std::rbegin(open_states), std::rend(open_states), CompareSearchStatesGt);
-        auto current_state = open_states.back();
+        std::pop_heap(open_states.begin(), open_states.end(), CompareSearchStatesGt);
+        SearchState* current_state = open_states.back();
         open_states.pop_back();
-        closed_states.insert(std::make_pair(current_state->id, current_state));
+        closed_states.emplace(current_state->id, current_state);
 
         if(current_state->f_value() >= path_length) {
-            // This search nodes f-value already excedes our paths length, and since the f-value is
-            // underestimation of the path length the excat path cannot be shorter than what we have
+            // This search node's f-value already exceeds our path's length, and since the f-value
+            // is underestimation of the path length the exact path cannot be shorter than what we
+            // have
             return path;
         }
 
@@ -162,7 +173,7 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
             const auto edge = cdt.segment(current_state->id, idx);
 
             // For all remaining nodes compute g/h values
-            // The h-value is the distance between the goal and the closts point on the edge
+            // The h-value is the distance between the goal and the closest point on the edge
             // between the current triangle and this successor
             const double h_value = sqrt(CGAL::to_double((CGAL::squared_distance(to_pos, edge))));
 
@@ -182,12 +193,12 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
             // distance between two edges in a triangle was an arc path around the vertex shared
             // by these edges. Thus, if the entry edges of the triangles corresponding to s′ and
             // s form an angle θ, this estimate is calculated as g(s) + rθ. NOTE: Right now this
-            // is always g(s) + zero as we asume point size agents (for now)
+            // is always g(s) + zero as we assume point size agents (for now)
             const double g_value_2 = current_state->g_value + 0;
 
             //  Another lower bound value for g(s′) is g(s)+(h(s)−h(s′)), or the parent state’s
             //  g-value plus the difference between its h-value and that of the child state.
-            //  This is an underes- timate because the Euclidean distance metric used for the
+            //  This is an underestimate because the Euclidean distance metric used for the
             //  heuristic is consistent.
             const double g_value_3 = current_state->g_value + current_state->h_value - h_value;
 
@@ -204,7 +215,7 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
                     // Unlike in A* this is only a first candidate solution
                     // Now compute the actual path length via funnel algorithm
                     // store path and length if this variant is the shortest found so far
-                    const SearchState dest_state{g_value, h_value, to, current_state.get()};
+                    const SearchState dest_state{g_value, h_value, to, current_state};
                     const auto vertex_ids = dest_state.path();
                     const auto found_path =
                         straightenPath(currentPosition, destination, vertex_ids);
@@ -218,7 +229,7 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
             }
 
             // NOTE(kkratz): Clang16 seems to be confused with capturing a structured binding
-            // and emits a warnign when capturing 'target' directly As of C++20 this SHOULD(TM)
+            // and emits a warning when capturing 'target' directly. As of C++20 this SHOULD(TM)
             // be valid code but see:
             // https://stackoverflow.com/questions/46114214/lambda-implicit-capture-fails-with-variable-declared-from-structured-binding
             auto t2 = target;
@@ -230,21 +241,25 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
                    std::end(open_states),
                    [t2](const auto& s) { return s->id == t2; });
                iter != std::end(open_states)) {
-                if(auto& s = *iter; s->g_value > g_value) {
+                if(auto* s = *iter; s->g_value > g_value) {
                     s->g_value = g_value;
-                    s->parent = current_state.get();
+                    s->parent = current_state;
+                    // As the g_value got modified, the heap needs to be entirely remade.
+                    std::make_heap(open_states.begin(), open_states.end(), CompareSearchStatesGt);
                 }
-
-            } else if(auto iter = closed_states.find(target); iter != std::end(closed_states)) {
-                if(auto& [_, s] = *iter; s->g_value > g_value) {
+            } else if(auto iter = closed_states.find(target); iter != closed_states.end()) {
+                auto* s = iter->second;
+                if(s->g_value > g_value) {
                     s->g_value = g_value;
-                    s->parent = current_state.get();
+                    s->parent = current_state;
                     open_states.push_back(s);
+                    std::push_heap(open_states.begin(), open_states.end(), CompareSearchStatesGt);
                     closed_states.erase(s->id);
                 }
             } else {
-                open_states.emplace_back(
-                    new SearchState{g_value, h_value, target, current_state.get()});
+                all_search_states.emplace_back(g_value, h_value, target, current_state);
+                open_states.push_back(&all_search_states.back());
+                std::push_heap(open_states.begin(), open_states.end(), CompareSearchStatesGt);
             }
         }
     }
@@ -309,7 +324,7 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
     };
 
     std::vector<Point> waypoints{from};
-    // This is an over estimation but IMO preferable to repeadted allocations.
+    // This is an overestimation but IMO preferable to repeated allocations.
     // Ideally we replace this with something w.o. allocations
     waypoints.reserve(path.size() + 1);
     for(size_t index_portal = 1; index_portal <= portalCount; ++index_portal) {
