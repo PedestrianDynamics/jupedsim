@@ -141,8 +141,9 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
         closed_states.emplace(current_state->id, current_state);
 
         if(current_state->f_value() >= path_length) {
-            // This search nodes f-value already excedes our paths length, and since the f-value is
-            // underestimation of the path length the excat path cannot be shorter than what we have
+            // This search node's f-value already exceeds our path's length, and since the f-value
+            // is underestimation of the path length the exact path cannot be shorter than what we
+            // have
             return path;
         }
 
@@ -172,7 +173,7 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
             const auto edge = cdt.segment(current_state->id, idx);
 
             // For all remaining nodes compute g/h values
-            // The h-value is the distance between the goal and the closts point on the edge
+            // The h-value is the distance between the goal and the closest point on the edge
             // between the current triangle and this successor
             const double h_value = sqrt(CGAL::to_double((CGAL::squared_distance(to_pos, edge))));
 
@@ -192,12 +193,12 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
             // distance between two edges in a triangle was an arc path around the vertex shared
             // by these edges. Thus, if the entry edges of the triangles corresponding to s′ and
             // s form an angle θ, this estimate is calculated as g(s) + rθ. NOTE: Right now this
-            // is always g(s) + zero as we asume point size agents (for now)
+            // is always g(s) + zero as we assume point size agents (for now)
             const double g_value_2 = current_state->g_value + 0;
 
             //  Another lower bound value for g(s′) is g(s)+(h(s)−h(s′)), or the parent state’s
             //  g-value plus the difference between its h-value and that of the child state.
-            //  This is an underes- timate because the Euclidean distance metric used for the
+            //  This is an underestimate because the Euclidean distance metric used for the
             //  heuristic is consistent.
             const double g_value_3 = current_state->g_value + current_state->h_value - h_value;
 
@@ -228,7 +229,7 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
             }
 
             // NOTE(kkratz): Clang16 seems to be confused with capturing a structured binding
-            // and emits a warnign when capturing 'target' directly As of C++20 this SHOULD(TM)
+            // and emits a warning when capturing 'target' directly. As of C++20 this SHOULD(TM)
             // be valid code but see:
             // https://stackoverflow.com/questions/46114214/lambda-implicit-capture-fails-with-variable-declared-from-structured-binding
             auto t2 = target;
@@ -323,7 +324,7 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
     };
 
     std::vector<Point> waypoints{from};
-    // This is an over estimation but IMO preferable to repeadted allocations.
+    // This is an overestimation but IMO preferable to repeated allocations.
     // Ideally we replace this with something w.o. allocations
     waypoints.reserve(path.size() + 1);
     for(size_t index_portal = 1; index_portal <= portalCount; ++index_portal) {
