@@ -1,32 +1,26 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "RoutingEngine.hpp"
 
-#include "AABB.hpp"
+#include "CfgCgal.hpp"
 #include "GeometricFunctions.hpp"
-#include "Graph.hpp"
-#include "IteratorPair.hpp"
 #include "LineSegment.hpp"
 #include "Mesh.hpp"
+#include "Point.hpp"
 #include "SimulationError.hpp"
 
-#include <CGAL/Distance_3/Ray_3_Line_3.h>
-#include <CGAL/IO/OFF/Scanner_OFF.h>
-#include <CGAL/number_utils.h>
-#include <algorithm>
-#include <glm/geometric.hpp>
-
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>
-#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
-#include <CGAL/Polygon_with_holes_2.h>
-#include <CGAL/Surface_mesh.h>
-#include <CGAL/Triangulation_vertex_base_with_info_2.h>
-#include <CGAL/draw_triangulation_2.h>
+#include <CGAL/Distance_2/Point_2_Segment_2.h>
 #include <CGAL/mark_domain_in_triangulation.h>
+#include <CGAL/number_utils.h>
 
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
 #include <limits>
+#include <map>
 #include <memory>
-#include <queue>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -136,19 +130,6 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
         open_states.pop_back();
         closed_states.insert(std::make_pair(current_state->id, current_state));
 
-        if(current_state->id == to) {
-            // Unlike in A* this is only a first candidate solution
-            // Now compute the actual path length via funnel algorithm
-            // store path and length if this variant is the shortest found so far
-            const auto vertex_ids = current_state->path();
-            const auto found_path = straightenPath(currentPosition, destination, vertex_ids);
-            const double found_path_length = length_of_path(found_path);
-            if(found_path_length < path_length) {
-                path = found_path;
-                path_length = found_path_length;
-            }
-        }
-
         if(current_state->f_value() >= path_length) {
             // This search nodes f-value already excedes our paths length, and since the f-value is
             // underestimation of the path length the excat path cannot be shorter than what we have
@@ -172,7 +153,13 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
                 continue;
             }
 
-            const auto edge = cdt.segment(target, idx);
+            // The shared edge between `current_state->id` and `target` is the edge
+            // opposite vertex `idx` of the CURRENT face. CGAL's neighbor indexing is
+            // not symmetric: the index of `target` in current's neighbor list differs
+            // from the index of `current` in target's neighbor list, so querying
+            // `cdt.segment(target, idx)` returns an unrelated edge of `target` and
+            // produces bogus g/h values that mis-rank successors in A*.
+            const auto edge = cdt.segment(current_state->id, idx);
 
             // For all remaining nodes compute g/h values
             // The h-value is the distance between the goal and the closts point on the edge
@@ -205,6 +192,30 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
             const double g_value_3 = current_state->g_value + current_state->h_value - h_value;
 
             const double g_value = std::max(g_value_1, std::max(g_value_2, g_value_3));
+
+            // Evaluate every route that reaches the destination inline so that all
+            // candidate routes have their funnel computed — not just the first one
+            // (minimum-f_value) to arrive.  The closed_states guard would otherwise
+            // block all subsequent routes from being evaluated.
+            if(target == to) {
+                // g_value + h_value is f_value which is a lower bound and therefore needs
+                // to be smaller than current path length to be a good candidate.
+                if(g_value + h_value < path_length) {
+                    // Unlike in A* this is only a first candidate solution
+                    // Now compute the actual path length via funnel algorithm
+                    // store path and length if this variant is the shortest found so far
+                    const SearchState dest_state{g_value, h_value, to, current_state.get()};
+                    const auto vertex_ids = dest_state.path();
+                    const auto found_path =
+                        straightenPath(currentPosition, destination, vertex_ids);
+                    const double found_path_length = length_of_path(found_path);
+                    if(found_path_length < path_length) {
+                        path = found_path;
+                        path_length = found_path_length;
+                    }
+                }
+                continue;
+            }
 
             // NOTE(kkratz): Clang16 seems to be confused with capturing a structured binding
             // and emits a warnign when capturing 'target' directly As of C++20 this SHOULD(TM)
@@ -303,7 +314,6 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
     waypoints.reserve(path.size() + 1);
     for(size_t index_portal = 1; index_portal <= portalCount; ++index_portal) {
         const auto face_from = path[index_portal - 1];
-
         const auto portal = index_portal < portalCount ? get_edge(face_from, path[index_portal]) :
                                                          LineSegment(to, to);
 
