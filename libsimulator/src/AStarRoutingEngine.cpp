@@ -40,17 +40,12 @@ AStarRoutingEngine::AStarRoutingEngine(const PolyWithHoles& poly)
     mesh = std::make_unique<Mesh>(cdt);
 }
 
-std::unique_ptr<AStarRoutingEngine> AStarRoutingEngine::Clone() const
+std::unique_ptr<RoutingEngine> AStarRoutingEngine::Clone() const
 {
     auto clone = std::make_unique<AStarRoutingEngine>();
     clone->cdt = cdt;
     clone->mesh = mesh->Clone();
     return clone;
-}
-
-Point AStarRoutingEngine::ComputeWaypoint(Point currentPosition, Point destination)
-{
-    return ComputeAllWaypoints(currentPosition, destination)[1];
 }
 
 struct SearchState {
@@ -275,10 +270,6 @@ bool AStarRoutingEngine::IsRoutable(Point p) const
         return false;
     }
     return true;
-}
-
-void AStarRoutingEngine::Update()
-{
 }
 
 CDT::Face_handle AStarRoutingEngine::find_face(K::Point_2 p) const

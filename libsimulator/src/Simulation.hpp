@@ -10,7 +10,7 @@
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
-#include "AStarRoutingEngine.hpp"
+#include "RoutingEngine.hpp"
 #include "SimulationClock.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
@@ -41,9 +41,9 @@ class Simulation
     NeighborhoodSearch<GenericAgent> _neighborhoodSearch{2.2};
     std::unordered_map<
         CollisionGeometry::ID,
-        std::tuple<std::unique_ptr<CollisionGeometry>, std::unique_ptr<AStarRoutingEngine>>>
+        std::tuple<std::unique_ptr<CollisionGeometry>, std::unique_ptr<RoutingEngine>>>
         geometries{};
-    AStarRoutingEngine* _routingEngine;
+    RoutingEngine* _routingEngine;
     CollisionGeometry* _geometry;
     std::vector<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;

@@ -2,19 +2,15 @@
 #pragma once
 
 #include "CfgCgal.hpp"
-#include "Clonable.hpp"
 #include "Mesh.hpp"
 #include "Point.hpp"
+#include "RoutingEngine.hpp"
 
-#include <cstddef>
 #include <memory>
-#include <variant>
+#include <string>
 #include <vector>
 
-using LocationID = size_t;
-using Location = std::variant<Point, LocationID>;
-
-class AStarRoutingEngine : public Clonable<AStarRoutingEngine>
+class AStarRoutingEngine : public RoutingEngine
 {
     CDT cdt{};
     std::unique_ptr<Mesh> mesh{};
@@ -30,13 +26,13 @@ public:
     AStarRoutingEngine(AStarRoutingEngine&& other) = default;
     AStarRoutingEngine& operator=(AStarRoutingEngine&& other) = default;
 
-    std::unique_ptr<AStarRoutingEngine> Clone() const override;
-    Point ComputeWaypoint(Point currentPosition, Point destination);
-    std::vector<Point> ComputeAllWaypoints(Point currentPosition, Point destination);
-    bool IsRoutable(Point p) const;
-    void Update();
+    std::unique_ptr<RoutingEngine> Clone() const override;
 
-    const Mesh* MeshData() const { return mesh.get(); };
+    std::string name() const override { return "AStar"; }
+    std::vector<Point> ComputeAllWaypoints(Point from, Point destination) override;
+    bool IsRoutable(Point p) const override;
+
+    const Mesh* MeshData() const { return mesh.get(); }
 
 private:
     CDT::Face_handle find_face(K::Point_2) const;

@@ -33,6 +33,9 @@ void init_routing(py::module_& m)
             [](AStarRoutingEngine& engine, std::tuple<double, double> point) {
                 return engine.IsRoutable(intoPoint(point));
             })
+        .def_property_readonly("name", [](const AStarRoutingEngine& engine) {
+            return engine.name();
+        })
         .def("mesh", [](const AStarRoutingEngine& routingEngine) {
             const auto mesh = routingEngine.MeshData();
             const auto polygonCount = mesh->CountPolygons();

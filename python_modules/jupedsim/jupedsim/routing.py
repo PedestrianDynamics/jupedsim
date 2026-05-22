@@ -27,6 +27,11 @@ class AStarRoutingEngine:
             build_geometry(geometry, **kwargs)._obj
         )
 
+    @property
+    def name(self) -> str:
+        """Name of the routing engine implementation."""
+        return self._obj.name
+
     def compute_waypoints(
         self, frm: tuple[float, float], to: tuple[float, float]
     ) -> list[tuple[float, float]]:
