@@ -100,7 +100,11 @@ class MainWindow(QMainWindow):
     def _toggle_triangulation(self, state: bool) -> None:
         self.settings.setValue("show_triangulation", state)
         for idx in range(self.tabs.count()):
-            self.tabs.widget(idx).geo.show_triangulation(state)
+            tab = self.tabs.widget(idx)
+            if hasattr(tab, "set_triangulation_visible"):
+                tab.set_triangulation_visible(state)
+            else:
+                tab.geo.show_triangulation(state)
         self.repaint()
 
     def _toggle_grid(self, state: bool) -> None:
@@ -131,10 +135,10 @@ class MainWindow(QMainWindow):
             name_text = f"Geometry: {file}"
             self.setUpdatesEnabled(False)
             geo = Geometry(navi)
-            geo.show_triangulation(self._show_triangulation.isChecked())
             tab = ViewGeometryWidget(
                 navi, geo, name_text, info_text, parent=self
             )
+            tab.set_triangulation_visible(self._show_triangulation.isChecked())
             tab.render_widget.show_grid(self._show_grid.isChecked())
             tab_idx = self.tabs.insertTab(0, tab, file.name)
             self.tabs.setCurrentIndex(tab_idx)

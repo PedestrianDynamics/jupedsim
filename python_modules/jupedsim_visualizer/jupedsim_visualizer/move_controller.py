@@ -89,6 +89,8 @@ class MoveController:
             display_pos = interactor.GetEventPosition()
             world_pos = self._to_world_coordinate_2d(display_pos)
             self.route_from = world_pos
+            self.route_to = None
+            self.dist = 0
 
     def _on_mouse_move(self, obj, evt):
         interactor = obj.GetInteractor()
@@ -105,9 +107,10 @@ class MoveController:
 
     def _on_lmb_released(self, obj, evt):
         self.lmb_pressed = False
-        self.route_from = None
-        self.route_to = None
-        self.dist = 0
+
+    def rerender_path(self) -> None:
+        """Recalculate and redraw the current path with the active routing engine."""
+        self._render_path()
 
     def _render_path(self):
         if not self.navi:

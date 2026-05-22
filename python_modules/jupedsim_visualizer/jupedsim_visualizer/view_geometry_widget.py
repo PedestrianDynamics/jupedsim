@@ -3,6 +3,7 @@ import jupedsim as jps
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPaintEvent
 from PySide6.QtWidgets import (
+    QComboBox,
     QHBoxLayout,
     QLabel,
     QPushButton,
@@ -12,6 +13,8 @@ from PySide6.QtWidgets import (
 
 from jupedsim_visualizer.geometry import Geometry
 from jupedsim_visualizer.geometry_widget import RenderWidget
+
+_ROUTING_ENGINES = ["AStar", "DirectPath"]
 
 
 class ViewGeometryWidget(QWidget):
@@ -25,6 +28,10 @@ class ViewGeometryWidget(QWidget):
     ):
         QWidget.__init__(self, parent)
         self.geo = geo
+        self._astar_navi = navi
+        self._direct_path_navi = jps.DirectPathRoutingEngine()
+        self._show_triangulation_requested = False
+
         bottom_layout = QHBoxLayout()
         geometry_label = QLabel(name_text)
         geometry_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
@@ -36,10 +43,18 @@ class ViewGeometryWidget(QWidget):
             properties_label, 1, Qt.AlignmentFlag.AlignRight
         )
 
-        layout = QVBoxLayout()
+        toolbar_layout = QHBoxLayout()
+
+        routing_combo = QComboBox()
+        routing_combo.addItems(_ROUTING_ENGINES)
+        toolbar_layout.addWidget(routing_combo, 1)
+        self._routing_combo = routing_combo
 
         reset_cam_bt = QPushButton("Reset Camera")
-        layout.addWidget(reset_cam_bt)
+        toolbar_layout.addWidget(reset_cam_bt, 2)
+
+        layout = QVBoxLayout()
+        layout.addLayout(toolbar_layout)
 
         self.render_widget = RenderWidget(geo, navi, [geo], parent=self)
         layout.addWidget(self.render_widget)
@@ -53,6 +68,20 @@ class ViewGeometryWidget(QWidget):
 
         reset_cam_bt.clicked.connect(self.render_widget.reset_camera)
         self.render_widget.on_hover_triangle.connect(self.hover_label.setText)
+        routing_combo.currentTextChanged.connect(self._on_routing_engine_changed)
+
+    def _on_routing_engine_changed(self, engine_name: str) -> None:
+        if engine_name == "DirectPath":
+            self.geo.show_triangulation(False)
+            self.render_widget.set_routing_engine(self._direct_path_navi)
+        else:
+            self.geo.show_triangulation(self._show_triangulation_requested)
+            self.render_widget.set_routing_engine(self._astar_navi)
+
+    def set_triangulation_visible(self, state: bool) -> None:
+        self._show_triangulation_requested = state
+        if self._routing_combo.currentText() == "AStar":
+            self.geo.show_triangulation(state)
 
     def render(self):
         self.render_widget.render()

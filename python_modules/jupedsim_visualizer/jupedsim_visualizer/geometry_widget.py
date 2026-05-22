@@ -77,6 +77,11 @@ class RenderWidget(QVTKRenderWindowInteractor):
         cam.SetClippingRange(0, 200)
         self.iren.Render()
 
+    def set_routing_engine(self, navi) -> None:
+        self.navi = navi
+        self.move_controller.set_navi(navi)
+        self.move_controller.rerender_path()
+
     def show_grid(self, state: bool):
         self.grid.show(state)
 
