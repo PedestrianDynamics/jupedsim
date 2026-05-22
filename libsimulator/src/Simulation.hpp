@@ -85,6 +85,7 @@ public:
     using RoutingEngineFactory =
         std::function<std::unique_ptr<RoutingEngine>(const PolyWithHoles&)>;
     void SwitchRoutingAlgorithm(RoutingEngineFactory factory);
+    std::string RoutingEngineName() const { return _routingEngine->name(); }
     void PushTimer(const std::string_view name, size_t probe_log_level = 0);
     void PopTimer(const std::string_view name);
     void SetTimerLogLevel(int level) { _timer.setLogLevel(level); };

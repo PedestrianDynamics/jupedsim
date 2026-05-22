@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Simulation.hpp"
 
+#include "AStarRoutingEngine.hpp"
 #include "CollisionGeometry.hpp"
 #include "GeneralizedCentrifugalForceModelData.hpp"
 #include "GenericAgent.hpp"
@@ -11,7 +12,6 @@
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
 #include "Polygon.hpp"
-#include "AStarRoutingEngine.hpp"
 #include "SimulationClock.hpp"
 #include "SimulationError.hpp"
 #include "Stage.hpp"

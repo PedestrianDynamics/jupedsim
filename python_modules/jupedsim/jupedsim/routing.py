@@ -1,11 +1,90 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
+import abc
 from typing import Any
 
 import shapely
 
 import jupedsim.native as py_jps
 from jupedsim.geometry_utils import build_geometry
+
+
+class RoutingEngine(abc.ABC):
+    """Abstract base class for Python-implemented routing engines.
+
+    Subclass this to prototype a new routing algorithm in Python.  Once the
+    algorithm is proven correct it can be ported to C++ for production
+    performance.
+
+    All methods that accept or return points use ``(x, y)`` tuples.
+    """
+
+    @abc.abstractmethod
+    def name(self) -> str:
+        """Short identifier returned by :attr:`~jupedsim.Simulation.routing_engine_name`."""
+
+    @abc.abstractmethod
+    def set_geometry(self, geometry) -> None:
+        """Called when the simulation geometry changes.
+
+        Arguments:
+            geometry: A :class:`~jupedsim.native.Geometry` instance describing
+                the updated walkable area.
+        """
+
+    @abc.abstractmethod
+    def compute_all_waypoints(
+        self,
+        frm: tuple[float, float],
+        to: tuple[float, float],
+    ) -> list[tuple[float, float]]:
+        """Return the full path from *frm* to *to* as a sequence of waypoints.
+
+        The returned list must include both *frm* and *to*.
+        """
+
+    @abc.abstractmethod
+    def is_routable(self, p: tuple[float, float]) -> bool:
+        """Return ``True`` if *p* lies inside the walkable area."""
+
+    @abc.abstractmethod
+    def clone(self) -> "RoutingEngine":
+        """Return an independent copy of this engine."""
+
+
+class DirectPathRoutingEngine(RoutingEngine):
+    """Trivial routing engine that returns a straight line ignoring geometry.
+
+    Useful as a reference implementation and for open-space scenarios where
+    agents should walk directly towards their destination.
+    """
+
+    def name(self) -> str:
+        return "DirectPath"
+
+    def set_geometry(self, _) -> None:
+        pass
+
+    def compute_all_waypoints(
+        self,
+        frm: tuple[float, float],
+        to: tuple[float, float],
+    ) -> list[tuple[float, float]]:
+        return [frm, to]
+
+    def is_routable(self, _: tuple[float, float]) -> bool:
+        return True
+
+    def clone(self) -> "DirectPathRoutingEngine":
+        return DirectPathRoutingEngine()
+
+    @staticmethod
+    def factory() -> py_jps.RoutingEngineFactory:
+        """Return a factory that installs this engine in a simulation.
+
+        Pass the returned object to :meth:`~jupedsim.Simulation.switch_routing_engine`.
+        """
+        return py_jps.python_routing_factory(lambda _: DirectPathRoutingEngine())
 
 
 class AStarRoutingEngine:
@@ -26,6 +105,11 @@ class AStarRoutingEngine:
         self._obj = py_jps.AStarRoutingEngine(
             build_geometry(geometry, **kwargs)._obj
         )
+
+    @property
+    def id(self) -> int:
+        """Unique identifier of this routing engine instance."""
+        return self._obj.id
 
     @property
     def name(self) -> str:
@@ -101,3 +185,11 @@ class AStarRoutingEngine:
 
     def edges_for(self, vertex_id: int):
         return self._obj.edges_for(vertex_id)
+
+    @staticmethod
+    def factory() -> py_jps.RoutingEngineFactory:
+        """Return a factory that installs this engine in a simulation.
+
+        Pass the returned object to :meth:`~jupedsim.Simulation.switch_routing_engine`.
+        """
+        return py_jps.astar_routing_factory()

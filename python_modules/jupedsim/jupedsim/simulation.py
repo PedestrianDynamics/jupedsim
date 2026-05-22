@@ -599,6 +599,30 @@ class Simulation:
         self._obj.switch_geometry(internal_geometry._obj)
 
     @property
+    def routing_engine_name(self) -> str:
+        """Name of the currently active routing engine."""
+        return self._obj.routing_engine_name
+
+    def switch_routing_engine(self, factory) -> None:
+        """Switch to a different routing engine.
+
+        Arguments:
+            factory: Either a :class:`~jupedsim.native.RoutingEngineFactory`
+                returned by one of the built-in factory constructors (e.g.
+                :func:`~jupedsim.astar_routing_factory`), or a plain callable
+                ``factory(geometry) -> RoutingEngine`` for a Python-implemented
+                engine.  Plain callables are wrapped automatically.
+
+        Example::
+
+            sim.switch_routing_engine(jps.astar_routing_factory())
+            sim.switch_routing_engine(lambda geo: MyEngine(geo, cell_size=0.5))
+        """
+        if not isinstance(factory, py_jps.RoutingEngineFactory):
+            factory = py_jps.python_routing_factory(factory)
+        self._obj.switch_routing_algorithm(factory)
+
+    @property
     def timer(self) -> Timer:
         """Timer for measuring time spent in different stages of the simulation.
 

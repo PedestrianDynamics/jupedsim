@@ -8,6 +8,7 @@
 #include "Stage.hpp"
 #include "StageDescription.hpp"
 #include "conversion.hpp"
+#include "routing_factory.hpp"
 
 #include <pybind11/attr.h>
 #include <pybind11/cast.h>
@@ -152,5 +153,14 @@ void init_simulation(py::module_& m)
         .def("get_durations", [](Simulation& sim) { return sim.GetTimerDurations(); })
         .def("switch_geometry", [](Simulation& sim, CollisionGeometry& geometry) {
             sim.SwitchGeometry(std::make_unique<CollisionGeometry>(geometry));
-        });
+        })
+        .def_property_readonly(
+            "routing_engine_name",
+            [](const Simulation& sim) { return sim.RoutingEngineName(); })
+        .def(
+            "switch_routing_algorithm",
+            [](Simulation& sim, const RoutingFactory& factory) {
+                sim.SwitchRoutingAlgorithm(factory.func);
+            },
+            py::arg("factory"));
 }

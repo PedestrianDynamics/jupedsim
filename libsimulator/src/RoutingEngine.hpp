@@ -4,12 +4,19 @@
 #include "CfgCgal.hpp"
 #include "Clonable.hpp"
 #include "Point.hpp"
+#include "UniqueID.hpp"
 
 #include <string>
 #include <vector>
 
 class RoutingEngine : public Clonable<RoutingEngine>
 {
+public:
+    using ID = jps::UniqueID<RoutingEngine>;
+
+private:
+    ID _id{};
+
 public:
     ~RoutingEngine() override = default;
 
@@ -18,6 +25,8 @@ public:
     RoutingEngine& operator=(const RoutingEngine&) = delete;
     RoutingEngine(RoutingEngine&&) = default;
     RoutingEngine& operator=(RoutingEngine&&) = default;
+
+    ID Id() const { return _id; }
 
     virtual std::string name() const = 0;
     virtual void SetGeometry(const PolyWithHoles& poly) = 0;
