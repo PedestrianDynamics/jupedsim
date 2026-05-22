@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "RoutingEngine.hpp"
+#include "AStarRoutingEngine.hpp"
 
 #include "CfgCgal.hpp"
 #include "GeometricFunctions.hpp"
@@ -23,13 +23,13 @@
 #include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////
-// NavMeshRoutingEngine
+// AStarRoutingEngine
 ////////////////////////////////////////////////////////////////////////////////
-RoutingEngine::RoutingEngine()
+AStarRoutingEngine::AStarRoutingEngine()
 {
 }
 
-RoutingEngine::RoutingEngine(const PolyWithHoles& poly)
+AStarRoutingEngine::AStarRoutingEngine(const PolyWithHoles& poly)
 {
     cdt.insert_constraint(
         poly.outer_boundary().vertices_begin(), poly.outer_boundary().vertices_end(), true);
@@ -40,15 +40,15 @@ RoutingEngine::RoutingEngine(const PolyWithHoles& poly)
     mesh = std::make_unique<Mesh>(cdt);
 }
 
-std::unique_ptr<RoutingEngine> RoutingEngine::Clone() const
+std::unique_ptr<AStarRoutingEngine> AStarRoutingEngine::Clone() const
 {
-    auto clone = std::make_unique<RoutingEngine>();
+    auto clone = std::make_unique<AStarRoutingEngine>();
     clone->cdt = cdt;
     clone->mesh = mesh->Clone();
     return clone;
 }
 
-Point RoutingEngine::ComputeWaypoint(Point currentPosition, Point destination)
+Point AStarRoutingEngine::ComputeWaypoint(Point currentPosition, Point destination)
 {
     return ComputeAllWaypoints(currentPosition, destination)[1];
 }
@@ -112,7 +112,7 @@ double length_of_path(const std::vector<Point>& path)
     return segment_sum;
 }
 
-std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Point destination)
+std::vector<Point> AStarRoutingEngine::ComputeAllWaypoints(Point currentPosition, Point destination)
 {
     const auto from_pos = CDT::Point{currentPosition.x, currentPosition.y};
     const auto to_pos = CDT::Point{destination.x, destination.y};
@@ -267,7 +267,7 @@ std::vector<Point> RoutingEngine::ComputeAllWaypoints(Point currentPosition, Poi
     return path;
 }
 
-bool RoutingEngine::IsRoutable(Point p) const
+bool AStarRoutingEngine::IsRoutable(Point p) const
 {
     try {
         find_face({p.x, p.y});
@@ -277,11 +277,11 @@ bool RoutingEngine::IsRoutable(Point p) const
     return true;
 }
 
-void RoutingEngine::Update()
+void AStarRoutingEngine::Update()
 {
 }
 
-CDT::Face_handle RoutingEngine::find_face(K::Point_2 p) const
+CDT::Face_handle AStarRoutingEngine::find_face(K::Point_2 p) const
 {
     const auto face = cdt.locate(p);
     if(face == nullptr || cdt.is_infinite(face) || !face->get_in_domain()) {
@@ -294,7 +294,7 @@ CDT::Face_handle RoutingEngine::find_face(K::Point_2 p) const
 }
 
 std::vector<Point>
-RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_handle>& path)
+AStarRoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_handle>& path)
 {
     // TODO(kkratz): Remove the 0.2m edge width adjustment and replace this with p[roper
     // arc-paths from the "Efficient Triangulation-Based Pathfinding" publication

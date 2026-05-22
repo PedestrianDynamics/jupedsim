@@ -65,8 +65,8 @@ add_library(simulator STATIC
     src/Point.hpp
     src/Polygon.cpp
     src/Polygon.hpp
-    src/RoutingEngine.cpp
-    src/RoutingEngine.hpp
+    src/AStarRoutingEngine.cpp
+    src/AStarRoutingEngine.hpp
     src/Simulation.cpp
     src/Simulation.hpp
     src/SimulationClock.cpp

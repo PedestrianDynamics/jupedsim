@@ -8,8 +8,8 @@ import jupedsim.native as py_jps
 from jupedsim.geometry_utils import build_geometry
 
 
-class RoutingEngine:
-    """RoutingEngine to compute the shortest paths with navigation meshes."""
+class AStarRoutingEngine:
+    """AStarRoutingEngine to compute the shortest paths with navigation meshes."""
 
     def __init__(
         self,
@@ -23,7 +23,7 @@ class RoutingEngine:
         ),
         **kwargs: Any,
     ) -> None:
-        self._obj = py_jps.RoutingEngine(
+        self._obj = py_jps.AStarRoutingEngine(
             build_geometry(geometry, **kwargs)._obj
         )
 

@@ -35,7 +35,7 @@ def test_routing_engine_with_excluded_areas():
     outer = [(0, 0), (100, 0), (100, 100), (0, 100)]
     hole = [(40, 40), (60, 40), (60, 60), (40, 60)]
 
-    engine = jps.RoutingEngine(
+    engine = jps.AStarRoutingEngine(
         geometry=outer,
         excluded_areas=[hole],
     )
@@ -44,7 +44,7 @@ def test_routing_engine_with_excluded_areas():
 
 def test_routing_engine_without_excluded_areas():
     outer = [(0, 0), (100, 0), (100, 100), (0, 100)]
-    engine = jps.RoutingEngine(geometry=outer)
+    engine = jps.AStarRoutingEngine(geometry=outer)
     assert engine is not None
 
 
@@ -104,7 +104,7 @@ BAD_ASTAR_ROUTINGS = [
 )
 def test_max_diff_example(test_entry):
     geometry = load_wkt_file(test_entry["wkt_path"])
-    navi = jps.RoutingEngine(geometry)
+    navi = jps.AStarRoutingEngine(geometry)
 
     path1 = navi.compute_waypoints(
         test_entry["path1"][0], test_entry["path1"][1]
@@ -130,7 +130,7 @@ def test_max_diff_example(test_entry):
 )
 def test_direct_path_possible_example(test_entry):
     geometry = load_wkt_file(test_entry["wkt_path"])
-    navi = jps.RoutingEngine(geometry)
+    navi = jps.AStarRoutingEngine(geometry)
 
     path = navi.compute_waypoints(*test_entry["path"])
     distance = path_distance(path)

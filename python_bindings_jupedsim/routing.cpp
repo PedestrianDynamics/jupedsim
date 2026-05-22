@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "AStarRoutingEngine.hpp"
 #include "CollisionGeometry.hpp"
-#include "RoutingEngine.hpp"
 #include "conversion.hpp"
 
 #include <glm/ext/vector_float2.hpp>
@@ -17,23 +17,23 @@ namespace py = pybind11;
 
 void init_routing(py::module_& m)
 {
-    py::class_<RoutingEngine>(m, "RoutingEngine")
+    py::class_<AStarRoutingEngine>(m, "AStarRoutingEngine")
         .def(py::init([](const CollisionGeometry& geo) {
-            return std::make_unique<RoutingEngine>(geo.Polygon());
+            return std::make_unique<AStarRoutingEngine>(geo.Polygon());
         }))
         .def(
             "compute_waypoints",
-            [](RoutingEngine& engine,
+            [](AStarRoutingEngine& engine,
                std::tuple<double, double> from,
                std::tuple<double, double> to) {
                 return intoTuples(engine.ComputeAllWaypoints(intoPoint(from), intoPoint(to)));
             })
         .def(
             "is_routable",
-            [](RoutingEngine& engine, std::tuple<double, double> point) {
+            [](AStarRoutingEngine& engine, std::tuple<double, double> point) {
                 return engine.IsRoutable(intoPoint(point));
             })
-        .def("mesh", [](const RoutingEngine& routingEngine) {
+        .def("mesh", [](const AStarRoutingEngine& routingEngine) {
             const auto mesh = routingEngine.MeshData();
             const auto polygonCount = mesh->CountPolygons();
             using Ind = decltype(mesh->Polygons(0).vertices);

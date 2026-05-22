@@ -22,7 +22,7 @@
 //   along navigable paths — W_el (environment layout), W_io (obstacle
 //   interactions), W_ob (observed behaviors). These would enable anticipatory
 //   avoidance around corners and bends. The routing infrastructure exists
-//   (RoutingEngine::ComputeAllWaypoints provides the full waypoint path);
+//   (AStarRoutingEngine::ComputeAllWaypoints provides the full waypoint path);
 //   the path could serve as the graph for Algorithm 3's spatial projection.
 //
 #include "WarpDriverModel.hpp"

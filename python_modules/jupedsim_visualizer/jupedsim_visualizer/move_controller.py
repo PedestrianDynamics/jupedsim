@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import math
 
-from jupedsim import RoutingEngine
+from jupedsim import AStarRoutingEngine
 from vtkmodules.vtkCommonCore import vtkCommand, vtkPoints
 from vtkmodules.vtkCommonDataModel import (
     vtkCellArray,
@@ -42,7 +42,7 @@ class MoveController:
             vtkCommand.MouseMoveEvent, self._on_mouse_move
         )
 
-    def set_navi(self, navi: RoutingEngine | None):
+    def set_navi(self, navi: AStarRoutingEngine | None):
         self.navi = navi
 
     def _on_char(self, obj, evt):

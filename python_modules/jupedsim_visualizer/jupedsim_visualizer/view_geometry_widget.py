@@ -17,7 +17,7 @@ from jupedsim_visualizer.geometry_widget import RenderWidget
 class ViewGeometryWidget(QWidget):
     def __init__(
         self,
-        navi: jps.RoutingEngine,
+        navi: jps.AStarRoutingEngine,
         geo: Geometry,
         name_text: str,
         info_text: str,

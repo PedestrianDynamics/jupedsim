@@ -4,7 +4,7 @@
 #include "CfgCgal.hpp"
 #include "CollisionGeometry.hpp"
 #include "Point.hpp"
-#include "RoutingEngine.hpp"
+#include "AStarRoutingEngine.hpp"
 #include "SimulationError.hpp"
 
 #include <CGAL/Boolean_set_operations_2.h>

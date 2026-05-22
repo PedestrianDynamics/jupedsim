@@ -14,23 +14,23 @@
 using LocationID = size_t;
 using Location = std::variant<Point, LocationID>;
 
-class RoutingEngine : public Clonable<RoutingEngine>
+class AStarRoutingEngine : public Clonable<AStarRoutingEngine>
 {
     CDT cdt{};
     std::unique_ptr<Mesh> mesh{};
 
 public:
-    RoutingEngine();
-    explicit RoutingEngine(const PolyWithHoles& poly);
-    ~RoutingEngine() override = default;
+    AStarRoutingEngine();
+    explicit AStarRoutingEngine(const PolyWithHoles& poly);
+    ~AStarRoutingEngine() override = default;
 
-    RoutingEngine(const RoutingEngine& other) = delete;
-    RoutingEngine& operator=(const RoutingEngine& other) = delete;
+    AStarRoutingEngine(const AStarRoutingEngine& other) = delete;
+    AStarRoutingEngine& operator=(const AStarRoutingEngine& other) = delete;
 
-    RoutingEngine(RoutingEngine&& other) = default;
-    RoutingEngine& operator=(RoutingEngine&& other) = default;
+    AStarRoutingEngine(AStarRoutingEngine&& other) = default;
+    AStarRoutingEngine& operator=(AStarRoutingEngine&& other) = default;
 
-    std::unique_ptr<RoutingEngine> Clone() const override;
+    std::unique_ptr<AStarRoutingEngine> Clone() const override;
     Point ComputeWaypoint(Point currentPosition, Point destination);
     std::vector<Point> ComputeAllWaypoints(Point currentPosition, Point destination);
     bool IsRoutable(Point p) const;

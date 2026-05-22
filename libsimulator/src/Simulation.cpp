@@ -11,7 +11,7 @@
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
 #include "Polygon.hpp"
-#include "RoutingEngine.hpp"
+#include "AStarRoutingEngine.hpp"
 #include "SimulationClock.hpp"
 #include "SimulationError.hpp"
 #include "Stage.hpp"
@@ -45,7 +45,7 @@ Simulation::Simulation(
     const auto& [tup, res] = geometries.emplace(
         std::piecewise_construct,
         std::forward_as_tuple(geometry->Id()),
-        std::forward_as_tuple(std::move(geometry), std::make_unique<RoutingEngine>(p)));
+        std::forward_as_tuple(std::move(geometry), std::make_unique<AStarRoutingEngine>(p)));
     if(!res) {
         throw SimulationError("Internal error");
     }
@@ -397,7 +397,7 @@ void Simulation::SwitchGeometry(std::unique_ptr<CollisionGeometry>&& geometry)
         const auto& [tup, res] = geometries.emplace(
             std::piecewise_construct,
             std::forward_as_tuple(geometry->Id()),
-            std::forward_as_tuple(std::move(geometry), std::make_unique<RoutingEngine>(p)));
+            std::forward_as_tuple(std::move(geometry), std::make_unique<AStarRoutingEngine>(p)));
         if(!res) {
             throw SimulationError("Internal error");
         }

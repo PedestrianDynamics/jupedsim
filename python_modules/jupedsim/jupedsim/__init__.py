@@ -68,7 +68,7 @@ from jupedsim.models.warp_driver import (
     WarpDriverModelState,
 )
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
-from jupedsim.routing import RoutingEngine
+from jupedsim.routing import AStarRoutingEngine
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
 from jupedsim.sqlite_serialization import SqliteTrajectoryWriter
@@ -120,7 +120,7 @@ __all__ = [
     "Recording",
     "RecordingAgent",
     "RecordingFrame",
-    "RoutingEngine",
+    "AStarRoutingEngine",
     "Simulation",
     "SqliteTrajectoryWriter",
     "Hdf5TrajectoryWriter",
