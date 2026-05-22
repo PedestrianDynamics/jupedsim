@@ -61,7 +61,7 @@ def test_direct_path_routing_engine_waypoints():
     engine = jps.DirectPathRoutingEngine()
     frm = (10.0, 10.0)
     to = (90.0, 90.0)
-    assert engine.compute_all_waypoints(frm, to) == [frm, to]
+    assert engine.compute_waypoints(frm, to) == [frm, to]
 
 
 def test_direct_path_routing_engine_is_routable():
@@ -86,7 +86,7 @@ def test_custom_python_routing_engine():
         def set_geometry(self, _):
             pass
 
-        def compute_all_waypoints(self, frm, to):
+        def compute_waypoints(self, frm, to):
             return [frm, (50.0, 50.0), to]
 
         def is_routable(self, _):

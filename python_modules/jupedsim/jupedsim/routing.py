@@ -33,7 +33,7 @@ class RoutingEngine(abc.ABC):
         """
 
     @abc.abstractmethod
-    def compute_all_waypoints(
+    def compute_waypoints(
         self,
         frm: tuple[float, float],
         to: tuple[float, float],
@@ -65,7 +65,7 @@ class DirectPathRoutingEngine(RoutingEngine):
     def set_geometry(self, _) -> None:
         pass
 
-    def compute_all_waypoints(
+    def compute_waypoints(
         self,
         frm: tuple[float, float],
         to: tuple[float, float],
@@ -84,7 +84,9 @@ class DirectPathRoutingEngine(RoutingEngine):
 
         Pass the returned object to :meth:`~jupedsim.Simulation.switch_routing_engine`.
         """
-        return py_jps.python_routing_factory(lambda _: DirectPathRoutingEngine())
+        return py_jps.python_routing_factory(
+            lambda _: DirectPathRoutingEngine()
+        )
 
 
 class AStarRoutingEngine:

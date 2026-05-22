@@ -24,7 +24,7 @@ class PythonRoutingEngineProxy : public RoutingEngine
     // In addition it raises an error during construction rather than usage.
     py::function _name_fct;
     py::function _set_geometry_fct;
-    py::function _compute_all_waypoints_fct;
+    py::function _compute_waypoints_fct;
     py::function _is_routable_fct;
     py::function _clone_fct;
 
@@ -33,7 +33,7 @@ public:
         : _engine(std::move(engine))
         , _name_fct(_engine.attr("name"))
         , _set_geometry_fct(_engine.attr("set_geometry"))
-        , _compute_all_waypoints_fct(_engine.attr("compute_all_waypoints"))
+        , _compute_waypoints_fct(_engine.attr("compute_waypoints"))
         , _is_routable_fct(_engine.attr("is_routable"))
         , _clone_fct(_engine.attr("clone"))
     {
@@ -54,7 +54,7 @@ public:
     std::vector<Point> ComputeAllWaypoints(Point from, Point destination) override
     {
         py::gil_scoped_acquire lock{};
-        return intoPoints(_compute_all_waypoints_fct(intoTuple(from), intoTuple(destination))
+        return intoPoints(_compute_waypoints_fct(intoTuple(from), intoTuple(destination))
                               .cast<std::vector<std::tuple<double, double>>>());
     }
 

@@ -24,24 +24,22 @@ void init_routing(py::module_& m)
     // Exposed so that AStarRoutingEngine appears as a RoutingEngine subtype.
     py::class_<RoutingEngine>(m, "RoutingEngine")
         .def_property_readonly("id", [](const RoutingEngine& e) { return e.Id().getID(); })
-        .def_property_readonly("name", [](const RoutingEngine& e) { return e.name(); });
+        .def_property_readonly("name", [](const RoutingEngine& e) { return e.name(); })
+        .def(
+            "compute_waypoints",
+            [](RoutingEngine& engine,
+               std::tuple<double, double> from,
+               std::tuple<double, double> to) {
+                return intoTuples(engine.ComputeAllWaypoints(intoPoint(from), intoPoint(to)));
+            })
+        .def("is_routable", [](const RoutingEngine& engine, std::tuple<double, double> point) {
+            return engine.IsRoutable(intoPoint(point));
+        });
 
     py::class_<AStarRoutingEngine, RoutingEngine>(m, "AStarRoutingEngine")
         .def(py::init([](const CollisionGeometry& geo) {
             return std::make_unique<AStarRoutingEngine>(geo.Polygon());
         }))
-        .def(
-            "compute_waypoints",
-            [](AStarRoutingEngine& engine,
-               std::tuple<double, double> from,
-               std::tuple<double, double> to) {
-                return intoTuples(engine.ComputeAllWaypoints(intoPoint(from), intoPoint(to)));
-            })
-        .def(
-            "is_routable",
-            [](AStarRoutingEngine& engine, std::tuple<double, double> point) {
-                return engine.IsRoutable(intoPoint(point));
-            })
         .def("mesh", [](const AStarRoutingEngine& routingEngine) {
             const auto mesh = routingEngine.MeshData();
             const auto polygonCount = mesh->CountPolygons();
