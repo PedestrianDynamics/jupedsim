@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "CfgCgal.hpp"
 #include "Clonable.hpp"
 #include "Point.hpp"
 
@@ -19,6 +20,7 @@ public:
     RoutingEngine& operator=(RoutingEngine&&) = default;
 
     virtual std::string name() const = 0;
+    virtual void SetGeometry(const PolyWithHoles& poly) = 0;
     virtual std::vector<Point> ComputeAllWaypoints(Point from, Point destination) = 0;
     virtual bool IsRoutable(Point p) const = 0;
 

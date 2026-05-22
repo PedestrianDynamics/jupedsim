@@ -15,8 +15,9 @@ class AStarRoutingEngine : public RoutingEngine
     CDT cdt{};
     std::unique_ptr<Mesh> mesh{};
 
+    AStarRoutingEngine() = default; // private: used by Clone only
+
 public:
-    AStarRoutingEngine();
     explicit AStarRoutingEngine(const PolyWithHoles& poly);
     ~AStarRoutingEngine() override = default;
 
@@ -29,6 +30,7 @@ public:
     std::unique_ptr<RoutingEngine> Clone() const override;
 
     std::string name() const override { return "AStar"; }
+    void SetGeometry(const PolyWithHoles& poly) override;
     std::vector<Point> ComputeAllWaypoints(Point from, Point destination) override;
     bool IsRoutable(Point p) const override;
 

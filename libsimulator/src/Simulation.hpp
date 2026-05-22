@@ -23,9 +23,9 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <map>
 #include <memory>
-#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -39,12 +39,8 @@ class Simulation
     StageManager _stageManager{};
     StageSystem _stageSystem{};
     NeighborhoodSearch<GenericAgent> _neighborhoodSearch{2.2};
-    std::unordered_map<
-        CollisionGeometry::ID,
-        std::tuple<std::unique_ptr<CollisionGeometry>, std::unique_ptr<RoutingEngine>>>
-        geometries{};
-    RoutingEngine* _routingEngine;
-    CollisionGeometry* _geometry;
+    std::unique_ptr<RoutingEngine> _routingEngine;
+    std::unique_ptr<CollisionGeometry> _geometry;
     std::vector<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
     std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;
@@ -86,6 +82,9 @@ public:
     StageProxy Stage(BaseStage::ID stageId);
     CollisionGeometry Geo() const;
     void SwitchGeometry(std::unique_ptr<CollisionGeometry>&& geometry);
+    using RoutingEngineFactory =
+        std::function<std::unique_ptr<RoutingEngine>(const PolyWithHoles&)>;
+    void SwitchRoutingAlgorithm(RoutingEngineFactory factory);
     void PushTimer(const std::string_view name, size_t probe_log_level = 0);
     void PopTimer(const std::string_view name);
     void SetTimerLogLevel(int level) { _timer.setLogLevel(level); };

@@ -25,12 +25,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 // AStarRoutingEngine
 ////////////////////////////////////////////////////////////////////////////////
-AStarRoutingEngine::AStarRoutingEngine()
-{
-}
-
 AStarRoutingEngine::AStarRoutingEngine(const PolyWithHoles& poly)
 {
+    SetGeometry(poly);
+}
+
+void AStarRoutingEngine::SetGeometry(const PolyWithHoles& poly)
+{
+    cdt = CDT{};
     cdt.insert_constraint(
         poly.outer_boundary().vertices_begin(), poly.outer_boundary().vertices_end(), true);
     for(const auto& p : poly.holes()) {
@@ -42,7 +44,9 @@ AStarRoutingEngine::AStarRoutingEngine(const PolyWithHoles& poly)
 
 std::unique_ptr<RoutingEngine> AStarRoutingEngine::Clone() const
 {
-    auto clone = std::make_unique<AStarRoutingEngine>();
+    // std::make_unique cannot be used here as default constructor is private
+    // and therefore must be called from withint the scope of this class.
+    auto clone = std::unique_ptr<AStarRoutingEngine>(new AStarRoutingEngine());
     clone->cdt = cdt;
     clone->mesh = mesh->Clone();
     return clone;

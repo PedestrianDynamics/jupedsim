@@ -30,7 +30,6 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <tuple>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -41,16 +40,8 @@ Simulation::Simulation(
     double dT)
     : _clock(dT), _operationalDecisionSystem(std::move(operationalModel))
 {
-    const auto p = geometry->Polygon();
-    const auto& [tup, res] = geometries.emplace(
-        std::piecewise_construct,
-        std::forward_as_tuple(geometry->Id()),
-        std::forward_as_tuple(std::move(geometry), std::make_unique<AStarRoutingEngine>(p)));
-    if(!res) {
-        throw SimulationError("Internal error");
-    }
-    _geometry = std::get<0>(tup->second).get();
-    _routingEngine = std::get<1>(tup->second).get();
+    _routingEngine = std::make_unique<AStarRoutingEngine>(geometry->Polygon());
+    _geometry = std::move(geometry);
 }
 const SimulationClock& Simulation::Clock() const
 {
@@ -389,21 +380,13 @@ void Simulation::SwitchGeometry(std::unique_ptr<CollisionGeometry>&& geometry)
 {
     JPS_TRACE_FUNC;
     ValidateGeometry(geometry);
-    if(const auto& iter = geometries.find(geometry->Id()); iter != std::end(geometries)) {
-        _geometry = std::get<0>(iter->second).get();
-        _routingEngine = std::get<1>(iter->second).get();
-    } else {
-        const auto p = geometry->Polygon();
-        const auto& [tup, res] = geometries.emplace(
-            std::piecewise_construct,
-            std::forward_as_tuple(geometry->Id()),
-            std::forward_as_tuple(std::move(geometry), std::make_unique<AStarRoutingEngine>(p)));
-        if(!res) {
-            throw SimulationError("Internal error");
-        }
-        _geometry = std::get<0>(tup->second).get();
-        _routingEngine = std::get<1>(tup->second).get();
-    }
+    _routingEngine->SetGeometry(geometry->Polygon());
+    _geometry = std::move(geometry);
+}
+
+void Simulation::SwitchRoutingAlgorithm(RoutingEngineFactory factory)
+{
+    _routingEngine = factory(_geometry->Polygon());
 }
 
 void Simulation::ValidateGeometry(const std::unique_ptr<CollisionGeometry>& geometry) const
