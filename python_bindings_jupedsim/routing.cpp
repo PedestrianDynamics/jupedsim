@@ -85,7 +85,7 @@ void init_routing(py::module_& m)
         "RoutingEngine",
         R"doc(Abstract base class for routing engines.
 
-This also works for Python classes due to pybind11 trampoline.)doc")
+This also works for Python classes due to pybind11 trampoline base class.)doc")
         .def(py::init<>())
         .def_property_readonly(
             "id",
@@ -97,11 +97,31 @@ This also works for Python classes due to pybind11 trampoline.)doc")
             "Name of the routing engine implementation.")
         .def(
             "set_geometry",
-            [](RoutingEngine& engine, const CollisionGeometry& geometry) {
-                engine.set_geometry(geometry);
+            [](RoutingEngine& engine, py::object geometry, const py::kwargs& kwargs) {
+                // Build logic like in Python:
+                // geometry = geometry._obj if isinstance(geometry, Geometry) else
+                //            build_geometry(geometry, **kwargs)._obj
+                // py_jps.Geometry is CollisionGeometry underneath in _obj.
+                if(!py::isinstance<CollisionGeometry>(geometry)) {
+                    if(py::hasattr(geometry, "_obj")) {
+                        geometry = geometry.attr("_obj");
+                    }
+                    if(!py::isinstance<CollisionGeometry>(geometry)) {
+                        py::object build_geometry =
+                            py::module_::import("jupedsim.geometry_utils").attr("build_geometry");
+                        geometry = build_geometry(geometry, **kwargs).attr("_obj");
+                    }
+                }
+                engine.set_geometry(geometry.cast<const CollisionGeometry&>());
             },
             py::arg("geometry"),
             R"doc(Bind this routing engine to *geometry*.
+
+Accepts a :class:`~jupedsim.Geometry`, a WKT string, a shapely geometry,
+a list of points, or the native :class:`CollisionGeometry`. Keyword
+arguments are forwarded to :func:`~jupedsim.build_geometry` when
+*geometry* is a raw input that still needs to be built (e.g.
+``excluded_areas`` for a list of points).
 
 Must be called before any routing query (:meth:`compute_waypoints` /
 :meth:`is_routable`) is called. This is called automatically by
