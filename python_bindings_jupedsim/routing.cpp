@@ -6,24 +6,87 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
+#include <pybind11/trampoline_self_life_support.h>
 
 #include <cstddef>
 #include <memory>
+#include <string>
 #include <tuple>
 #include <vector>
 
 namespace py = pybind11;
 
+// Type caster: According to https://pybind11.readthedocs.io/en/stable/advanced/cast/custom.html
+// which coincidentally also shows a conversion for Point2D. :)
+namespace pybind11
+{
+namespace detail
+{
+template <>
+struct type_caster<Point> {
+    PYBIND11_TYPE_CASTER(Point, const_name("tuple[float, float]"));
+
+    bool load(handle src, bool)
+    {
+        if(!isinstance<sequence>(src)) {
+            return false;
+        }
+        auto seq = reinterpret_borrow<sequence>(src);
+        if(seq.size() != 2) {
+            return false;
+        }
+        value.x = seq[0].cast<double>();
+        value.y = seq[1].cast<double>();
+        return true;
+    }
+
+    static handle cast(const Point& src, return_value_policy, handle)
+    {
+        return make_tuple(src.x, src.y).release();
+    }
+};
+} // namespace detail
+} // namespace pybind11
+
+namespace
+{
+// Trampoline that lets Python subclasses of RoutingEngine override the virtual methods. Link for
+// details:
+// https://pybind11.readthedocs.io/en/stable/advanced/classes.html#overriding-virtual-functions-in-python
+class PyRoutingEngine : public RoutingEngine, public py::trampoline_self_life_support
+{
+public:
+    using RoutingEngine::RoutingEngine;
+
+    std::string name() const override { PYBIND11_OVERRIDE_PURE(std::string, RoutingEngine, name); }
+
+    void set_geometry(const CollisionGeometry& geometry) override
+    {
+        PYBIND11_OVERRIDE_PURE(void, RoutingEngine, set_geometry, geometry);
+    }
+
+    std::vector<Point> compute_waypoints(Point from, Point destination) override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            std::vector<Point>, RoutingEngine, compute_waypoints, from, destination);
+    }
+
+    bool is_routable(Point p) const override
+    {
+        PYBIND11_OVERRIDE_PURE(bool, RoutingEngine, is_routable, p);
+    }
+};
+} // namespace
+
 void init_routing(py::module_& m)
 {
-    py::class_<RoutingEngine, py::smart_holder>(
+    py::class_<RoutingEngine, PyRoutingEngine, py::smart_holder>(
         m,
         "RoutingEngine",
         R"doc(Abstract base class for routing engines.
 
-Exposed so that concrete engines such as :class:`AStarRoutingEngine` appear
-as a ``RoutingEngine`` subtype.
-)doc")
+This also works for Python classes due to pybind11 trampoline.)doc")
+        .def(py::init<>())
         .def_property_readonly(
             "id",
             [](const RoutingEngine& e) { return e.Id().getID(); },
@@ -35,7 +98,7 @@ as a ``RoutingEngine`` subtype.
         .def(
             "set_geometry",
             [](RoutingEngine& engine, const CollisionGeometry& geometry) {
-                engine.SetGeometry(geometry);
+                engine.set_geometry(geometry);
             },
             py::arg("geometry"),
             R"doc(Bind this routing engine to *geometry*.
@@ -49,7 +112,7 @@ Must be called before any routing query (:meth:`compute_waypoints` /
             [](RoutingEngine& engine,
                std::tuple<double, double> from,
                std::tuple<double, double> to) {
-                return intoTuples(engine.ComputeAllWaypoints(intoPoint(from), intoPoint(to)));
+                return intoTuples(engine.compute_waypoints(intoPoint(from), intoPoint(to)));
             },
             py::arg("frm"),
             py::arg("to"),
@@ -65,7 +128,7 @@ Returns:
         .def(
             "is_routable",
             [](const RoutingEngine& engine, std::tuple<double, double> point) {
-                return engine.IsRoutable(intoPoint(point));
+                return engine.is_routable(intoPoint(point));
             },
             py::arg("point"),
             R"doc(Tests if the supplied point is inside the underlying geometry.

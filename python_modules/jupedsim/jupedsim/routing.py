@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-import abc
 from typing import Any
 
 import shapely
@@ -9,48 +8,8 @@ import jupedsim.native as py_jps
 from jupedsim.geometry import Geometry
 from jupedsim.geometry_utils import build_geometry
 
-
-class RoutingEngine(abc.ABC):
-    """Abstract base class for Python-implemented routing engines.
-
-    Subclass this to prototype a new routing algorithm in Python.  Once the
-    algorithm is proven correct it can be ported to C++ for production
-    performance.
-
-    All methods that accept or return points use ``(x, y)`` tuples.
-    """
-
-    @abc.abstractmethod
-    def name(self) -> str:
-        """Short identifier returned by :attr:`~jupedsim.Simulation.routing_engine_name`."""
-
-    @abc.abstractmethod
-    def set_geometry(self, geometry) -> None:
-        """Called when the simulation geometry changes.
-
-        Arguments:
-            geometry: A :class:`~jupedsim.native.Geometry` instance describing
-                the updated walkable area.
-        """
-
-    @abc.abstractmethod
-    def compute_waypoints(
-        self,
-        frm: tuple[float, float],
-        to: tuple[float, float],
-    ) -> list[tuple[float, float]]:
-        """Return the full path from *frm* to *to* as a sequence of waypoints.
-
-        The returned list must include both *frm* and *to*.
-        """
-
-    @abc.abstractmethod
-    def is_routable(self, p: tuple[float, float]) -> bool:
-        """Return ``True`` if *p* lies inside the walkable area."""
-
-    @abc.abstractmethod
-    def clone(self) -> "RoutingEngine":
-        """Return an independent copy of this engine."""
+# Alias RoutingEngine to the native one
+RoutingEngine = py_jps.RoutingEngine
 
 
 class DirectPathRoutingEngine(RoutingEngine):
@@ -75,9 +34,6 @@ class DirectPathRoutingEngine(RoutingEngine):
 
     def is_routable(self, _: tuple[float, float]) -> bool:
         return True
-
-    def clone(self) -> "DirectPathRoutingEngine":
-        return DirectPathRoutingEngine()
 
 
 class AStarRoutingEngine(py_jps.AStarRoutingEngine):

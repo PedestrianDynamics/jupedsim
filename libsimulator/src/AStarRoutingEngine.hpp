@@ -25,12 +25,10 @@ public:
     AStarRoutingEngine(AStarRoutingEngine&& other) = default;
     AStarRoutingEngine& operator=(AStarRoutingEngine&& other) = default;
 
-    std::unique_ptr<RoutingEngine> Clone() const override;
-
     std::string name() const override { return "AStar"; }
-    void SetGeometry(const CollisionGeometry& geometry) override;
-    std::vector<Point> ComputeAllWaypoints(Point from, Point destination) override;
-    bool IsRoutable(Point p) const override;
+    void set_geometry(const CollisionGeometry& geometry) override;
+    std::vector<Point> compute_waypoints(Point from, Point destination) override;
+    bool is_routable(Point p) const override;
 
     const Mesh* MeshData() const { return mesh.get(); }
 

@@ -26,7 +26,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // AStarRoutingEngine
 ////////////////////////////////////////////////////////////////////////////////
-void AStarRoutingEngine::SetGeometry(const CollisionGeometry& geometry)
+void AStarRoutingEngine::set_geometry(const CollisionGeometry& geometry)
 {
     const auto& poly = geometry.Polygon();
     cdt = CDT{};
@@ -37,16 +37,6 @@ void AStarRoutingEngine::SetGeometry(const CollisionGeometry& geometry)
     }
     CGAL::mark_domain_in_triangulation(cdt);
     mesh = std::make_unique<Mesh>(cdt);
-}
-
-std::unique_ptr<RoutingEngine> AStarRoutingEngine::Clone() const
-{
-    auto clone = std::make_unique<AStarRoutingEngine>();
-    clone->cdt = cdt;
-    if(mesh) {
-        clone->mesh = mesh->Clone();
-    }
-    return clone;
 }
 
 struct SearchState {
@@ -108,10 +98,10 @@ double length_of_path(const std::vector<Point>& path)
     return segment_sum;
 }
 
-std::vector<Point> AStarRoutingEngine::ComputeAllWaypoints(Point currentPosition, Point destination)
+std::vector<Point> AStarRoutingEngine::compute_waypoints(Point currentPosition, Point destination)
 {
     if(!mesh) {
-        throw SimulationError("AStarRoutingEngine has no geometry; call SetGeometry first");
+        throw SimulationError("AStarRoutingEngine has no geometry; call set_geometry first");
     }
     const auto from_pos = CDT::Point{currentPosition.x, currentPosition.y};
     const auto to_pos = CDT::Point{destination.x, destination.y};
@@ -266,10 +256,10 @@ std::vector<Point> AStarRoutingEngine::ComputeAllWaypoints(Point currentPosition
     return path;
 }
 
-bool AStarRoutingEngine::IsRoutable(Point p) const
+bool AStarRoutingEngine::is_routable(Point p) const
 {
     if(!mesh) {
-        throw SimulationError("AStarRoutingEngine has no geometry; call SetGeometry first");
+        throw SimulationError("AStarRoutingEngine has no geometry; call set_geometry first");
     }
     try {
         find_face({p.x, p.y});

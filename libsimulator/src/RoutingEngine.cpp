@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "RoutingEngine.hpp"
 
-Point RoutingEngine::ComputeWaypoint(Point currentPosition, Point destination)
+Point RoutingEngine::compute_waypoint(Point currentPosition, Point destination)
 {
-    return ComputeAllWaypoints(currentPosition, destination)[1];
+    return compute_waypoints(currentPosition, destination)[1];
 }

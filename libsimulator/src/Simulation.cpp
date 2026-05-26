@@ -44,7 +44,7 @@ Simulation::Simulation(
     if(!routingEngine) {
         routingEngine = std::make_unique<AStarRoutingEngine>();
     }
-    routingEngine->SetGeometry(*geometry);
+    routingEngine->set_geometry(*geometry);
     _routingEngine = std::move(routingEngine);
     _geometry = std::move(geometry);
 }
@@ -385,13 +385,13 @@ void Simulation::SwitchGeometry(std::unique_ptr<CollisionGeometry>&& geometry)
 {
     JPS_TRACE_FUNC;
     ValidateGeometry(geometry);
-    _routingEngine->SetGeometry(*geometry);
+    _routingEngine->set_geometry(*geometry);
     _geometry = std::move(geometry);
 }
 
 void Simulation::SwitchRoutingEngine(std::unique_ptr<RoutingEngine>&& engine)
 {
-    engine->SetGeometry(*_geometry);
+    engine->set_geometry(*_geometry);
     _routingEngine = std::move(engine);
 }
 

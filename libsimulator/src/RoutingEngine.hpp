@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "Clonable.hpp"
 #include "Point.hpp"
 #include "UniqueID.hpp"
 
@@ -10,7 +9,7 @@
 
 class CollisionGeometry;
 
-class RoutingEngine : public Clonable<RoutingEngine>
+class RoutingEngine
 {
 public:
     using ID = jps::UniqueID<RoutingEngine>;
@@ -19,7 +18,7 @@ private:
     ID _id{};
 
 public:
-    ~RoutingEngine() override = default;
+    virtual ~RoutingEngine() = default;
 
     RoutingEngine() = default;
     RoutingEngine(const RoutingEngine&) = delete;
@@ -30,9 +29,9 @@ public:
     ID Id() const { return _id; }
 
     virtual std::string name() const = 0;
-    virtual void SetGeometry(const CollisionGeometry& geometry) = 0;
-    virtual std::vector<Point> ComputeAllWaypoints(Point from, Point destination) = 0;
-    virtual bool IsRoutable(Point p) const = 0;
+    virtual void set_geometry(const CollisionGeometry& geometry) = 0;
+    virtual std::vector<Point> compute_waypoints(Point from, Point destination) = 0;
+    virtual bool is_routable(Point p) const = 0;
 
-    Point ComputeWaypoint(Point currentPosition, Point destination);
+    Point compute_waypoint(Point currentPosition, Point destination);
 };

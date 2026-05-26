@@ -88,13 +88,6 @@ def test_direct_path_routing_engine_is_routable():
     assert engine.is_routable((50.0, 50.0)) is True
 
 
-def test_direct_path_routing_engine_clone():
-    engine = jps.DirectPathRoutingEngine()
-    clone = engine.clone()
-    assert isinstance(clone, jps.DirectPathRoutingEngine)
-    assert clone.name() == "DirectPath"
-
-
 def test_custom_python_routing_engine():
     """Users can implement a custom routing engine in Python."""
 
@@ -110,9 +103,6 @@ def test_custom_python_routing_engine():
 
         def is_routable(self, _):
             return True
-
-        def clone(self):
-            return MyEngine()
 
     sim = make_sim()
     sim.switch_routing_engine(MyEngine())

@@ -9,7 +9,6 @@
 #include "StageDescription.hpp"
 #include "RoutingEngine.hpp"
 #include "conversion.hpp"
-#include "python_routing_engine_proxy.hpp"
 
 #include <pybind11/attr.h>
 #include <pybind11/cast.h>
@@ -26,20 +25,6 @@
 
 namespace py = pybind11;
 
-namespace
-{
-// Convert a Python engine object to a C++ unique_ptr.
-// - Subclasses of py_jps.RoutingEngine are moved (ownership transfer).
-// - Anything else is wrapped in PythonRoutingEngineProxy.
-std::unique_ptr<RoutingEngine> intoRoutingEngine(py::object engine)
-{
-    if(py::isinstance<RoutingEngine>(engine)) {
-        return engine.cast<std::unique_ptr<RoutingEngine>>();
-    }
-    return std::make_unique<PythonRoutingEngineProxy>(std::move(engine));
-}
-} // namespace
-
 void init_simulation(py::module_& m)
 {
     py::class_<Simulation>(m, "Simulation")
@@ -47,25 +32,21 @@ void init_simulation(py::module_& m)
             py::init([](const OperationalModel* model,
                         CollisionGeometry geometry,
                         double dT,
-                        py::object routing_engine) {
+                        std::unique_ptr<RoutingEngine> routing_engine) {
                 if(!model) {
                     throw std::invalid_argument("model must not be None");
-                }
-                std::unique_ptr<RoutingEngine> engine;
-                if(!routing_engine.is_none()) {
-                    engine = intoRoutingEngine(std::move(routing_engine));
                 }
                 return std::make_unique<Simulation>(
                     model->Clone(),
                     std::make_unique<CollisionGeometry>(geometry),
                     dT,
-                    std::move(engine));
+                    std::move(routing_engine));
             }),
             py::kw_only(),
             py::arg("model"),
             py::arg("geometry"),
             py::arg("dt"),
-            py::arg("routing_engine") = py::none())
+            py::arg("routing_engine") = nullptr)
         .def(
             "add_waypoint_stage",
             [](Simulation& sim, std::tuple<double, double> position, double distance) {
@@ -185,11 +166,11 @@ void init_simulation(py::module_& m)
             [](const Simulation& sim) { return sim.RoutingEngineName(); })
         .def(
             "switch_routing_engine",
-            [](Simulation& sim, py::object engine) {
-                if(engine.is_none()) {
+            [](Simulation& sim, std::unique_ptr<RoutingEngine> engine) {
+                if(!engine) {
                     throw std::invalid_argument("engine must not be None");
                 }
-                sim.SwitchRoutingEngine(intoRoutingEngine(std::move(engine)));
+                sim.SwitchRoutingEngine(std::move(engine));
             },
             py::arg("engine"));
 }
