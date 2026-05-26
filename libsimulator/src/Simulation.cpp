@@ -59,26 +59,44 @@ const SimulationClock& Simulation::Clock() const
 
 void Simulation::SetTracing(bool status)
 {
-    _perfStats.SetEnabled(status);
-};
-
-PerfStats Simulation::GetLastStats() const
-{
-    return _perfStats;
+    if(status) {
+        Profiler::instance().enable();
+    } else {
+        Profiler::instance().disable();
+    }
 };
 
 void Simulation::Iterate()
 {
-    // LOG_DEBUG("Iteration {} / Time {}s", _clock.Iteration(), _clock.ElapsedTime());
-    auto t = _perfStats.TraceIterate();
-    _agentRemovalSystem.Run(_agents, _removedAgentsInLastIteration, _stageManager);
-    _neighborhoodSearch.Update(_agents);
+    JPS_SCOPED_TIMER_AND_TRACE(_timer, "Total Iteration", General);
 
-    _stageSystem.Run(_stageManager, _neighborhoodSearch, *_geometry);
-    _stategicalDecisionSystem.Run(_journeys, _agents, _stageManager);
-    _tacticalDecisionSystem.Run(*_routingEngine, _agents);
     {
-        auto t2 = _perfStats.TraceOperationalDecisionSystemRun();
+        JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agent Removal System", Detailed);
+        _agentRemovalSystem.Run(_agents, _removedAgentsInLastIteration, _stageManager);
+    }
+
+    {
+        JPS_SCOPED_TIMER_AND_TRACE(_timer, "Neighborhood Search", Detailed);
+        _neighborhoodSearch.Update(_agents);
+    }
+
+    {
+        JPS_SCOPED_TIMER_AND_TRACE(_timer, "Stage System", Detailed);
+        _stageSystem.Run(_stageManager, _neighborhoodSearch, *_geometry);
+    }
+
+    {
+        JPS_SCOPED_TIMER_AND_TRACE(_timer, "Strategical Decision System", General);
+        _stategicalDecisionSystem.Run(_journeys, _agents, _stageManager);
+    }
+
+    {
+        JPS_SCOPED_TIMER_AND_TRACE(_timer, "Tactical Decision System", General);
+        _tacticalDecisionSystem.Run(*_routingEngine, _agents);
+    }
+
+    {
+        JPS_SCOPED_TIMER_AND_TRACE(_timer, "Operational Decision System", General);
         _operationalDecisionSystem.Run(
             _clock.dT(), _clock.ElapsedTime(), _neighborhoodSearch, *_geometry, _agents);
     }
@@ -87,6 +105,7 @@ void Simulation::Iterate()
 
 Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescription>& stages)
 {
+    JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Journey", Detailed);
     std::map<BaseStage::ID, JourneyNode> nodes;
     bool containsDirectSteering =
         std::find_if(std::begin(stages), std::end(stages), [this](auto const& pair) {
@@ -162,6 +181,7 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
 
 BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
 {
+    JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Stage", Detailed);
     std::visit(
         overloaded{
             [this](const WaypointDescription& d) -> void {
@@ -200,7 +220,7 @@ BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
 
 GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
 {
-
+    JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Agent", Detailed);
     if(!_geometry->InsideGeometry(agent.pos)) {
         throw SimulationError("Agent {} not inside walkable area", agent.pos);
     }
@@ -233,6 +253,7 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
 
 void Simulation::MarkAgentForRemoval(GenericAgent::ID id)
 {
+    JPS_TRACE_FUNC;
     const auto iter = std::find_if(
         std::begin(_agents), std::end(_agents), [id](auto& agent) { return agent.id == id; });
     if(iter == std::end(_agents)) {
@@ -244,6 +265,7 @@ void Simulation::MarkAgentForRemoval(GenericAgent::ID id)
 
 const GenericAgent& Simulation::Agent(GenericAgent::ID id) const
 {
+    JPS_TRACE_FUNC;
     const auto iter =
         std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
     if(iter == _agents.end()) {
@@ -254,6 +276,7 @@ const GenericAgent& Simulation::Agent(GenericAgent::ID id) const
 
 GenericAgent& Simulation::Agent(GenericAgent::ID id)
 {
+    JPS_TRACE_FUNC;
     const auto iter =
         std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
     if(iter == _agents.end()) {
@@ -297,6 +320,7 @@ void Simulation::SwitchAgentJourney(
     Journey::ID journey_id,
     BaseStage::ID stage_id)
 {
+    JPS_TRACE_FUNC;
     const auto find_iter = _journeys.find(journey_id);
     if(find_iter == std::end(_journeys)) {
         throw SimulationError("Unknown Journey id {}", journey_id);
@@ -313,6 +337,7 @@ void Simulation::SwitchAgentJourney(
 
 std::vector<GenericAgent::ID> Simulation::AgentsInRange(Point p, double distance)
 {
+    JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agents in Range", Debug);
     const auto neighbors = _neighborhoodSearch.GetNeighboringAgents(p, distance);
 
     std::vector<GenericAgent::ID> neighborIds{};
@@ -327,6 +352,7 @@ std::vector<GenericAgent::ID> Simulation::AgentsInRange(Point p, double distance
 
 std::vector<GenericAgent::ID> Simulation::AgentsInPolygon(const std::vector<Point>& polygon)
 {
+    JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agents in Polygon", Debug);
     const Polygon poly{polygon};
     if(!poly.IsConvex()) {
         throw SimulationError("Polygon needs to be simple and convex");
@@ -361,6 +387,7 @@ CollisionGeometry Simulation::Geo() const
 
 void Simulation::SwitchGeometry(std::unique_ptr<CollisionGeometry>&& geometry)
 {
+    JPS_TRACE_FUNC;
     ValidateGeometry(geometry);
     if(const auto& iter = geometries.find(geometry->Id()); iter != std::end(geometries)) {
         _geometry = std::get<0>(iter->second).get();
@@ -381,6 +408,7 @@ void Simulation::SwitchGeometry(std::unique_ptr<CollisionGeometry>&& geometry)
 
 void Simulation::ValidateGeometry(const std::unique_ptr<CollisionGeometry>& geometry) const
 {
+    JPS_TRACE_FUNC;
     std::vector<GenericAgent::ID> faultyAgents;
     for(const auto& agent : _agents) {
         if(const auto find_iter = std::find(
@@ -441,4 +469,24 @@ void Simulation::ValidateGeometry(const std::unique_ptr<CollisionGeometry>& geom
 
         throw GeometrySwitchError(message.c_str(), faultyAgents, faultyStages);
     }
+}
+
+void Simulation::PushTimer(const std::string_view name, size_t probe_log_level)
+{
+    _timer.pushTimerProbe(name, probe_log_level);
+}
+
+void Simulation::PopTimer(const std::string_view name)
+{
+    _timer.popTimerProbe(name);
+}
+
+TimerEntry::duration_type Simulation::GetTimerDuration(const std::string_view name) const
+{
+    return _timer.getDuration(name);
+}
+
+std::map<std::string, TimerEntry::duration_type> Simulation::GetTimerDurations() const
+{
+    return _timer.getDurations();
 }

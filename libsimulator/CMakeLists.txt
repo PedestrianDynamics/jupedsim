@@ -17,6 +17,7 @@ target_link_libraries(simulator PUBLIC
     CGAL::CGAL
     build_info
     glm::glm
+    perfetto
 )
 target_link_options(simulator PUBLIC
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-fsanitize=address,undefined>

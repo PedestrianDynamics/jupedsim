@@ -29,6 +29,7 @@ __pycache__/
 
 # clangd cache
 /.cache/
+/.worktrees/
 
 # compile_commands
 /compile_commands.json

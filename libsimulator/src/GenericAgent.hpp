@@ -3,12 +3,13 @@
 #include "AnticipationVelocityModelData.hpp"
 #include "CollisionFreeSpeedModelData.hpp"
 #include "CollisionFreeSpeedModelV2Data.hpp"
+#include "CollisionFreeSpeedModelV3Data.hpp"
 #include "GeneralizedCentrifugalForceModelData.hpp"
 #include "OperationalModel.hpp"
 #include "Point.hpp"
 #include "SocialForceModelData.hpp"
 #include "UniqueID.hpp"
-#include "Visitor.hpp"
+#include "WarpDriverModelData.hpp"
 
 #include <fmt/core.h>
 
@@ -36,8 +37,10 @@ struct GenericAgent {
         GeneralizedCentrifugalForceModelData,
         CollisionFreeSpeedModelData,
         CollisionFreeSpeedModelV2Data,
+        CollisionFreeSpeedModelV3Data,
         AnticipationVelocityModelData,
-        SocialForceModelData>;
+        SocialForceModelData,
+        WarpDriverModelData>;
     Model model{};
 
     GenericAgent(

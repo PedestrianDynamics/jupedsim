@@ -6,8 +6,10 @@ add_library(py_jupedsim MODULE
     generalized_centrifugal_force_model.cpp
     collision_free_speed_model.cpp
     collision_free_speed_model_v2.cpp
+    collision_free_speed_model_v3.cpp
     anticipation_velocity_model.cpp
     social_force_model.cpp
+    warp_driver_model.cpp
     logging.cpp
     logging.hpp
     trace.cpp
@@ -27,6 +29,7 @@ target_link_libraries(py_jupedsim
         fmt::fmt
         simulator
         common
+        perfetto
 )
 
 pybind11_extension(py_jupedsim)

@@ -14,7 +14,15 @@ from jupedsim.distributions import (
     distribute_until_filled,
 )
 from jupedsim.geometry import Geometry
-from jupedsim.internal.tracing import Trace
+from jupedsim.internal.tracing import (
+    Timer,
+    disable_tracing,
+    dump_traces,
+    enable_tracing,
+    end_trace_event,
+    start_trace_event,
+    trace_event,
+)
 from jupedsim.journey import JourneyDescription, Transition
 from jupedsim.library import (
     BuildInfo,
@@ -39,6 +47,11 @@ from jupedsim.models.collision_free_speed_v2 import (
     CollisionFreeSpeedModelV2AgentParameters,
     CollisionFreeSpeedModelV2State,
 )
+from jupedsim.models.collision_free_speed_v3 import (
+    CollisionFreeSpeedModelV3,
+    CollisionFreeSpeedModelV3AgentParameters,
+    CollisionFreeSpeedModelV3State,
+)
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
@@ -49,11 +62,21 @@ from jupedsim.models.social_force import (
     SocialForceModelAgentParameters,
     SocialForceModelState,
 )
+from jupedsim.models.warp_driver import (
+    WarpDriverModel,
+    WarpDriverModelAgentParameters,
+    WarpDriverModelState,
+)
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import RoutingEngine
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
 from jupedsim.sqlite_serialization import SqliteTrajectoryWriter
+
+try:
+    from jupedsim.hdf5_serialization import Hdf5TrajectoryWriter
+except ImportError:  # h5py not installed; HDF5 writer remains unavailable.
+    Hdf5TrajectoryWriter = None  # type: ignore[assignment, misc]
 from jupedsim.stages import (
     ExitStage,
     NotifiableQueueStage,
@@ -100,7 +123,8 @@ __all__ = [
     "RoutingEngine",
     "Simulation",
     "SqliteTrajectoryWriter",
-    "Trace",
+    "Hdf5TrajectoryWriter",
+    "Timer",
     "TrajectoryWriter",
     "Transition",
     "CollisionFreeSpeedModelAgentParameters",
@@ -109,12 +133,18 @@ __all__ = [
     "CollisionFreeSpeedModelV2AgentParameters",
     "CollisionFreeSpeedModelV2",
     "CollisionFreeSpeedModelV2State",
+    "CollisionFreeSpeedModelV3AgentParameters",
+    "CollisionFreeSpeedModelV3",
+    "CollisionFreeSpeedModelV3State",
     "AnticipationVelocityModelAgentParameters",
     "AnticipationVelocityModel",
     "AnticipationVelocityModelState",
     "SocialForceModelAgentParameters",
     "SocialForceModel",
     "SocialForceModelState",
+    "WarpDriverModelAgentParameters",
+    "WarpDriverModel",
+    "WarpDriverModelState",
     "WaitingSetStage",
     "WaitingSetState",
     "WaypointStage",
@@ -132,4 +162,10 @@ __all__ = [
     "set_error_callback",
     "set_info_callback",
     "set_warning_callback",
+    "enable_tracing",
+    "disable_tracing",
+    "dump_traces",
+    "trace_event",
+    "start_trace_event",
+    "end_trace_event",
 ]

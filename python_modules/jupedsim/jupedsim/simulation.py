@@ -8,7 +8,7 @@ import jupedsim.native as py_jps
 from jupedsim.agent import Agent
 from jupedsim.geometry import Geometry
 from jupedsim.geometry_utils import build_geometry
-from jupedsim.internal.tracing import Trace
+from jupedsim.internal.tracing import Timer
 from jupedsim.journey import JourneyDescription
 from jupedsim.models.anticipation_velocity_model import (
     AnticipationVelocityModel,
@@ -22,6 +22,10 @@ from jupedsim.models.collision_free_speed_v2 import (
     CollisionFreeSpeedModelV2,
     CollisionFreeSpeedModelV2AgentParameters,
 )
+from jupedsim.models.collision_free_speed_v3 import (
+    CollisionFreeSpeedModelV3,
+    CollisionFreeSpeedModelV3AgentParameters,
+)
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
@@ -29,6 +33,10 @@ from jupedsim.models.generalized_centrifugal_force import (
 from jupedsim.models.social_force import (
     SocialForceModel,
     SocialForceModelAgentParameters,
+)
+from jupedsim.models.warp_driver import (
+    WarpDriverModel,
+    WarpDriverModelAgentParameters,
 )
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.stages import (
@@ -56,8 +64,10 @@ class Simulation:
             CollisionFreeSpeedModel
             | GeneralizedCentrifugalForceModel
             | CollisionFreeSpeedModelV2
+            | CollisionFreeSpeedModelV3
             | AnticipationVelocityModel
             | SocialForceModel
+            | WarpDriverModel
         ),
         geometry: (
             str
@@ -69,12 +79,13 @@ class Simulation:
         ),
         dt: float = 0.01,
         trajectory_writer: TrajectoryWriter | None = None,
+        timer_log_level: int = 1,
         **kwargs: Any,
     ) -> None:
         """Creates a Simulation.
 
         Arguments:
-            model (CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel | CollisionFreeSpeedModelV2):
+            model (CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel | CollisionFreeSpeedModelV2 | CollisionFreeSpeedModelV3):
                 Defines the operational model used in the simulation.
             geometry:
                 Data to create the geometry out of. Data may be supplied as:
@@ -114,6 +125,9 @@ class Simulation:
         elif isinstance(model, CollisionFreeSpeedModelV2):
             model_builder = py_jps.CollisionFreeSpeedModelV2Builder()
             py_jps_model = model_builder.build()
+        elif isinstance(model, CollisionFreeSpeedModelV3):
+            model_builder = py_jps.CollisionFreeSpeedModelV3Builder()
+            py_jps_model = model_builder.build()
         elif isinstance(model, AnticipationVelocityModel):
             model_builder = py_jps.AnticipationVelocityModelBuilder(
                 pushout_strength=model.pushout_strength, rng_seed=model.rng_seed
@@ -136,12 +150,23 @@ class Simulation:
                 body_force=model.body_force, friction=model.friction
             )
             py_jps_model = model_builder.build()
+        elif isinstance(model, WarpDriverModel):
+            model_builder = py_jps.WarpDriverModelBuilder(
+                time_horizon=model.time_horizon,
+                step_size=model.step_size,
+                sigma=model.sigma,
+                time_uncertainty=model.time_uncertainty,
+                velocity_uncertainty_x=model.velocity_uncertainty_x,
+                velocity_uncertainty_y=model.velocity_uncertainty_y,
+            )
+            py_jps_model = model_builder.build()
         else:
             raise Exception("Unknown model type supplied")
         self._writer = trajectory_writer
         self._obj = py_jps.Simulation(
             model=py_jps_model, geometry=build_geometry(geometry)._obj, dt=dt
         )
+        self._timer = Timer(self._obj, timer_log_level=timer_log_level)
 
     def add_waypoint_stage(
         self, position: tuple[float, float], distance
@@ -258,8 +283,10 @@ class Simulation:
             GeneralizedCentrifugalForceModelAgentParameters
             | CollisionFreeSpeedModelAgentParameters
             | CollisionFreeSpeedModelV2AgentParameters
+            | CollisionFreeSpeedModelV3AgentParameters
             | AnticipationVelocityModelAgentParameters
             | SocialForceModelAgentParameters
+            | WarpDriverModelAgentParameters
         ),
     ) -> int:
         """Add an agent to the simulation.
@@ -302,6 +329,20 @@ class Simulation:
                 desired_speed=parameters.desired_speed,
                 radius=parameters.radius,
             )
+        elif isinstance(parameters, CollisionFreeSpeedModelV3AgentParameters):
+            model = py_jps.CollisionFreeSpeedModelV3State(
+                strength_neighbor_repulsion=parameters.strength_neighbor_repulsion,
+                range_neighbor_repulsion=parameters.range_neighbor_repulsion,
+                strength_geometry_repulsion=parameters.strength_geometry_repulsion,
+                range_geometry_repulsion=parameters.range_geometry_repulsion,
+                range_x_scale=parameters.range_x_scale,
+                range_y_scale=parameters.range_y_scale,
+                theta_max_upper_bound=parameters.theta_max_upper_bound,
+                agent_buffer=parameters.agent_buffer,
+                time_gap=parameters.time_gap,
+                desired_speed=parameters.desired_speed,
+                radius=parameters.radius,
+            )
         elif isinstance(parameters, AnticipationVelocityModelAgentParameters):
             model = py_jps.AnticipationVelocityModelState(
                 strength_neighbor_repulsion=parameters.strength_neighbor_repulsion,
@@ -322,6 +363,11 @@ class Simulation:
                 agent_scale=parameters.agent_scale,
                 obstacle_scale=parameters.obstacle_scale,
                 force_distance=parameters.force_distance,
+                radius=parameters.radius,
+            )
+        elif isinstance(parameters, WarpDriverModelAgentParameters):
+            model = py_jps.WarpDriverModelState(
+                desired_speed=parameters.desired_speed,
                 radius=parameters.radius,
             )
 
@@ -531,9 +577,6 @@ class Simulation:
     def set_tracing(self, status: bool) -> None:
         self._obj.set_tracing(status)
 
-    def get_last_trace(self) -> Trace:
-        return self._obj.get_last_trace()
-
     def get_geometry(self) -> Geometry:
         """Current geometry of the simulation.
 
@@ -554,3 +597,12 @@ class Simulation:
         """
         internal_geometry = build_geometry(geometry)
         self._obj.switch_geometry(internal_geometry._obj)
+
+    @property
+    def timer(self) -> Timer:
+        """Timer for measuring time spent in different stages of the simulation.
+
+        Returns:
+            Timer object.
+        """
+        return self._timer

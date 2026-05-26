@@ -18,6 +18,7 @@
 #include "StageSystem.hpp"
 #include "StrategicalDesicionSystem.hpp"
 #include "TacticalDecisionSystem.hpp"
+#include "Timing.hpp"
 #include "Tracing.hpp"
 
 #include <cstddef>
@@ -47,7 +48,8 @@ class Simulation
     std::vector<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
     std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;
-    PerfStats _perfStats{};
+    Timer _timer{};
+    enum LogLevel { General = 1, Detailed = 2, Debug = 3 };
 
 public:
     Simulation(
@@ -61,7 +63,6 @@ public:
     ~Simulation() = default;
     const SimulationClock& Clock() const;
     void SetTracing(bool on);
-    PerfStats GetLastStats() const;
     void Iterate();
     Journey::ID AddJourney(const std::map<BaseStage::ID, TransitionDescription>& stages);
     BaseStage::ID AddStage(const StageDescription stageDescription);
@@ -85,6 +86,11 @@ public:
     StageProxy Stage(BaseStage::ID stageId);
     CollisionGeometry Geo() const;
     void SwitchGeometry(std::unique_ptr<CollisionGeometry>&& geometry);
+    void PushTimer(const std::string_view name, size_t probe_log_level = 0);
+    void PopTimer(const std::string_view name);
+    void SetTimerLogLevel(int level) { _timer.setLogLevel(level); };
+    TimerEntry::duration_type GetTimerDuration(const std::string_view name) const;
+    std::map<std::string, TimerEntry::duration_type> GetTimerDurations() const;
 
 private:
     void ValidateGeometry(const std::unique_ptr<CollisionGeometry>& geometry) const;

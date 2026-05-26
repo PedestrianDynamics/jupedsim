@@ -11,7 +11,7 @@ requests~=2.32
 
 # notebook dependencies
 shapely
-plotly
+plotly>=6
 plotly-express
 numpy
 pandas
