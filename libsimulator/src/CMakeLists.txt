@@ -67,6 +67,10 @@ list(APPEND SIMULATOR_SOURCES
     StageSystem.hpp
     StrategicalDesicionSystem.hpp
     TacticalDecisionSystem.hpp
+    Timing.cpp
+    Timing.hpp
+    Tracing.cpp
+    Tracing.hpp
 )
 
 list(APPEND SIMULATOR_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR})
