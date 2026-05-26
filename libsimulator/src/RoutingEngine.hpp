@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "CfgCgal.hpp"
 #include "Clonable.hpp"
 #include "Point.hpp"
 #include "UniqueID.hpp"
 
 #include <string>
 #include <vector>
+
+class CollisionGeometry;
 
 class RoutingEngine : public Clonable<RoutingEngine>
 {
@@ -29,7 +30,7 @@ public:
     ID Id() const { return _id; }
 
     virtual std::string name() const = 0;
-    virtual void SetGeometry(const PolyWithHoles& poly) = 0;
+    virtual void SetGeometry(const CollisionGeometry& geometry) = 0;
     virtual std::vector<Point> ComputeAllWaypoints(Point from, Point destination) = 0;
     virtual bool IsRoutable(Point p) const = 0;
 

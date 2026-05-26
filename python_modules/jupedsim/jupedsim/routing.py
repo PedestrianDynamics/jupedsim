@@ -6,6 +6,7 @@ from typing import Any
 import shapely
 
 import jupedsim.native as py_jps
+from jupedsim.geometry import Geometry
 from jupedsim.geometry_utils import build_geometry
 
 
@@ -78,24 +79,31 @@ class DirectPathRoutingEngine(RoutingEngine):
     def clone(self) -> "DirectPathRoutingEngine":
         return DirectPathRoutingEngine()
 
-    @staticmethod
-    def factory() -> py_jps.RoutingEngineFactory:
-        """Return a factory that installs this engine in a simulation.
 
-        Pass the returned object to :meth:`~jupedsim.Simulation.switch_routing_engine`.
-        """
-        return py_jps.python_routing_factory(
-            lambda _: DirectPathRoutingEngine()
-        )
+class AStarRoutingEngine(py_jps.AStarRoutingEngine):
+    """A* shortest-path routing on a navigation mesh.
 
+    Default-construct, then call :meth:`set_geometry` (or hand the engine to
+    a :class:`Simulation`, which calls ``set_geometry`` automatically) before
+    any routing query.
 
-class AStarRoutingEngine:
-    """AStarRoutingEngine to compute the shortest paths with navigation meshes."""
+    The only Python-side behaviour added on top of the native binding is the
+    accepted input types of :meth:`set_geometry`. All other methods come
+    straight from the C++ binding.
 
-    def __init__(
+    Note:
+        Overriding methods of this class in further Python subclasses will
+        *not* affect the routing decisions made by a :class:`Simulation`:
+        the simulation calls the native C++ implementations directly. To
+        implement custom routing in Python, subclass
+        :class:`RoutingEngine` instead.
+    """
+
+    def set_geometry(
         self,
         geometry: (
-            str
+            Geometry
+            | str
             | shapely.GeometryCollection
             | shapely.Polygon
             | shapely.MultiPolygon
@@ -104,94 +112,19 @@ class AStarRoutingEngine:
         ),
         **kwargs: Any,
     ) -> None:
-        self._obj = py_jps.AStarRoutingEngine(
-            build_geometry(geometry, **kwargs)._obj
-        )
+        """Bind this engine to *geometry*.
 
-    @property
-    def id(self) -> int:
-        """Unique identifier of this routing engine instance."""
-        return self._obj.id
-
-    @property
-    def name(self) -> str:
-        """Name of the routing engine implementation."""
-        return self._obj.name
-
-    def compute_waypoints(
-        self, frm: tuple[float, float], to: tuple[float, float]
-    ) -> list[tuple[float, float]]:
-        """Computes shortest path between specified points.
-
-        Arguments:
-            geometry: Data to create the geometry out of. Data may be supplied as:
-
-                * list of 2d points describing the outer boundary, holes may be added with use of `excluded_areas` kw-argument
-
-                * :class:`~shapely.GeometryCollection` consisting only out of :class:`Polygons <shapely.Polygon>`, :class:`MultiPolygons <shapely.MultiPolygon>` and :class:`MultiPoints <shapely.MultiPoint>`
-
-                * :class:`~shapely.MultiPolygon`
-
-                * :class:`~shapely.Polygon`
-
-                * :class:`~shapely.MultiPoint` forming a "simple" polygon when points are interpreted as linear ring without repetition of the start/end point.
-
-                * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
-
-            frm: point from which to find the shortest path
-            to: point to which to find the shortest path
+        Accepts a :class:`~jupedsim.Geometry`, a WKT string, a shapely
+        geometry, or a list of points. Forwards to the native engine after
+        converting to the internal geometry representation.
 
         Keyword Arguments:
-            excluded_areas: describes exclusions
-                from the walkable area. Only use this argument if `geometry` was
-                provided as list[tuple[float, float]].
-
-        Returns:
-            List of points (path) from 'frm' to 'to' including from and to.
-
+            excluded_areas: forwarded to :func:`~jupedsim.build_geometry`
+                when *geometry* is a list of points.
         """
-        return self._obj.compute_waypoints(frm, to)
-
-    def is_routable(self, p: tuple[float, float]) -> bool:
-        """Tests if the supplied point is inside the underlying geometry.
-
-        Returns:
-            If the point is inside the geometry.
-
-        """
-        return self._obj.is_routable(p)
-
-    def mesh(
-        self,
-    ) -> tuple[list[tuple[float, float]], list[list[int]]]:
-        """Access the navigation mesh geometry.
-
-        The navigation mesh is store as a collection of convex polygons in CCW order.
-
-        The returned data is to be interpreted as:
-
-        .. code::
-
-            tuple[
-                list[tuple[float, float]], # All vertices in this mesh.
-                list[ # List of polygons
-                    list[int] # List of indices into the vertices that compose this polygon in CCW order
-                ]
-            ]
-
-        Returns:
-            A tuple of vertices and list of polygons which in turn are a list of indices
-            tuple[list[tuple[float, float]],list[list[int]]]
-        """
-        return self._obj.mesh()
-
-    def edges_for(self, vertex_id: int):
-        return self._obj.edges_for(vertex_id)
-
-    @staticmethod
-    def factory() -> py_jps.RoutingEngineFactory:
-        """Return a factory that installs this engine in a simulation.
-
-        Pass the returned object to :meth:`~jupedsim.Simulation.switch_routing_engine`.
-        """
-        return py_jps.astar_routing_factory()
+        native = (
+            geometry._obj
+            if isinstance(geometry, Geometry)
+            else build_geometry(geometry, **kwargs)._obj
+        )
+        super().set_geometry(native)

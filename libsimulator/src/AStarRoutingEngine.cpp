@@ -2,6 +2,7 @@
 #include "AStarRoutingEngine.hpp"
 
 #include "CfgCgal.hpp"
+#include "CollisionGeometry.hpp"
 #include "GeometricFunctions.hpp"
 #include "LineSegment.hpp"
 #include "Mesh.hpp"
@@ -25,13 +26,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 // AStarRoutingEngine
 ////////////////////////////////////////////////////////////////////////////////
-AStarRoutingEngine::AStarRoutingEngine(const PolyWithHoles& poly)
+void AStarRoutingEngine::SetGeometry(const CollisionGeometry& geometry)
 {
-    SetGeometry(poly);
-}
-
-void AStarRoutingEngine::SetGeometry(const PolyWithHoles& poly)
-{
+    const auto& poly = geometry.Polygon();
     cdt = CDT{};
     cdt.insert_constraint(
         poly.outer_boundary().vertices_begin(), poly.outer_boundary().vertices_end(), true);
@@ -44,11 +41,11 @@ void AStarRoutingEngine::SetGeometry(const PolyWithHoles& poly)
 
 std::unique_ptr<RoutingEngine> AStarRoutingEngine::Clone() const
 {
-    // std::make_unique cannot be used here as default constructor is private
-    // and therefore must be called from withint the scope of this class.
-    auto clone = std::unique_ptr<AStarRoutingEngine>(new AStarRoutingEngine());
+    auto clone = std::make_unique<AStarRoutingEngine>();
     clone->cdt = cdt;
-    clone->mesh = mesh->Clone();
+    if(mesh) {
+        clone->mesh = mesh->Clone();
+    }
     return clone;
 }
 
@@ -113,6 +110,9 @@ double length_of_path(const std::vector<Point>& path)
 
 std::vector<Point> AStarRoutingEngine::ComputeAllWaypoints(Point currentPosition, Point destination)
 {
+    if(!mesh) {
+        throw SimulationError("AStarRoutingEngine has no geometry; call SetGeometry first");
+    }
     const auto from_pos = CDT::Point{currentPosition.x, currentPosition.y};
     const auto to_pos = CDT::Point{destination.x, destination.y};
     const auto from = find_face(from_pos);
@@ -268,6 +268,9 @@ std::vector<Point> AStarRoutingEngine::ComputeAllWaypoints(Point currentPosition
 
 bool AStarRoutingEngine::IsRoutable(Point p) const
 {
+    if(!mesh) {
+        throw SimulationError("AStarRoutingEngine has no geometry; call SetGeometry first");
+    }
     try {
         find_face({p.x, p.y});
     } catch(const SimulationError&) {

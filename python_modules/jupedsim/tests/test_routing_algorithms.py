@@ -19,26 +19,45 @@ def test_default_routing_is_astar():
     assert sim.routing_engine_name == "AStar"
 
 
+def test_construct_with_direct_path_engine():
+    sim = jps.Simulation(
+        model=jps.CollisionFreeSpeedModel(),
+        geometry=GEOMETRY,
+        routing_engine=jps.DirectPathRoutingEngine(),
+    )
+    assert sim.routing_engine_name == "DirectPath"
+
+
+def test_construct_with_astar_engine():
+    sim = jps.Simulation(
+        model=jps.CollisionFreeSpeedModel(),
+        geometry=GEOMETRY,
+        routing_engine=jps.AStarRoutingEngine(),
+    )
+    assert sim.routing_engine_name == "AStar"
+
+
 def test_switch_to_direct_path():
     sim = make_sim()
-    sim.switch_routing_engine(jps.DirectPathRoutingEngine.factory())
+    sim.switch_routing_engine(jps.DirectPathRoutingEngine())
     assert sim.routing_engine_name == "DirectPath"
 
 
 def test_switch_back_to_astar():
     sim = make_sim()
-    sim.switch_routing_engine(jps.DirectPathRoutingEngine.factory())
-    sim.switch_routing_engine(jps.AStarRoutingEngine.factory())
+    sim.switch_routing_engine(jps.DirectPathRoutingEngine())
+    sim.switch_routing_engine(jps.AStarRoutingEngine())
     assert sim.routing_engine_name == "AStar"
 
 
 def test_astar_engine_name():
-    navi = jps.AStarRoutingEngine(GEOMETRY)
+    navi = jps.AStarRoutingEngine()
     assert navi.name == "AStar"
 
 
 def test_astar_waypoints_straight_line_in_open_space():
-    navi = jps.AStarRoutingEngine(GEOMETRY)
+    navi = jps.AStarRoutingEngine()
+    navi.set_geometry(GEOMETRY)
     from_pt = (10.0, 10.0)
     to_pt = (90.0, 90.0)
     waypoints = navi.compute_waypoints(from_pt, to_pt)
@@ -50,7 +69,7 @@ def test_astar_waypoints_straight_line_in_open_space():
     assert math.isclose(path_dist, expected_dist, rel_tol=1e-6)
 
 
-def test_non_callable_raises():
+def test_non_engine_raises():
     sim = make_sim()
     with pytest.raises(Exception):
         sim.switch_routing_engine("NonExistent")
@@ -96,7 +115,7 @@ def test_custom_python_routing_engine():
             return MyEngine()
 
     sim = make_sim()
-    sim.switch_routing_engine(lambda _: MyEngine())
+    sim.switch_routing_engine(MyEngine())
     assert sim.routing_engine_name == "MyEngine"
 
 
@@ -116,7 +135,7 @@ def test_python_direct_path_engine_drives_simulation():
         geometry=GEOMETRY,
         dt=0.05,
     )
-    sim.switch_routing_engine(jps.DirectPathRoutingEngine.factory())
+    sim.switch_routing_engine(jps.DirectPathRoutingEngine())
     assert sim.routing_engine_name == "DirectPath"
 
     exit_id = sim.add_exit_stage([(99, 49), (100, 49), (100, 51), (99, 51)])

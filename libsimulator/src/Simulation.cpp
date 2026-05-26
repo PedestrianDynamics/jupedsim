@@ -37,10 +37,15 @@
 Simulation::Simulation(
     std::unique_ptr<OperationalModel>&& operationalModel,
     std::unique_ptr<CollisionGeometry>&& geometry,
-    double dT)
+    double dT,
+    std::unique_ptr<RoutingEngine>&& routingEngine)
     : _clock(dT), _operationalDecisionSystem(std::move(operationalModel))
 {
-    _routingEngine = std::make_unique<AStarRoutingEngine>(geometry->Polygon());
+    if(!routingEngine) {
+        routingEngine = std::make_unique<AStarRoutingEngine>();
+    }
+    routingEngine->SetGeometry(*geometry);
+    _routingEngine = std::move(routingEngine);
     _geometry = std::move(geometry);
 }
 const SimulationClock& Simulation::Clock() const
@@ -380,13 +385,14 @@ void Simulation::SwitchGeometry(std::unique_ptr<CollisionGeometry>&& geometry)
 {
     JPS_TRACE_FUNC;
     ValidateGeometry(geometry);
-    _routingEngine->SetGeometry(geometry->Polygon());
+    _routingEngine->SetGeometry(*geometry);
     _geometry = std::move(geometry);
 }
 
-void Simulation::SwitchRoutingAlgorithm(RoutingEngineFactory factory)
+void Simulation::SwitchRoutingEngine(std::unique_ptr<RoutingEngine>&& engine)
 {
-    _routingEngine = factory(_geometry->Polygon());
+    engine->SetGeometry(*_geometry);
+    _routingEngine = std::move(engine);
 }
 
 void Simulation::ValidateGeometry(const std::unique_ptr<CollisionGeometry>& geometry) const

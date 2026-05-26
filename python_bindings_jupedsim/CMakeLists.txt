@@ -16,7 +16,6 @@ add_library(py_jupedsim MODULE
     geometry.cpp
     routing.cpp
     python_routing_engine_proxy.hpp
-    routing_factory.hpp
     simulation.cpp
     agent.cpp
     stage.cpp

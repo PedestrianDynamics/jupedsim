@@ -45,10 +45,10 @@ public:
         return _name_fct().cast<std::string>();
     }
 
-    void SetGeometry(const PolyWithHoles& poly) override
+    void SetGeometry(const CollisionGeometry& geometry) override
     {
         py::gil_scoped_acquire lock{};
-        _set_geometry_fct(CollisionGeometry{poly});
+        _set_geometry_fct(geometry);
     }
 
     std::vector<Point> ComputeAllWaypoints(Point from, Point destination) override

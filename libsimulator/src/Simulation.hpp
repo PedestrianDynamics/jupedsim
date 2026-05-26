@@ -23,7 +23,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <map>
 #include <memory>
 #include <unordered_map>
@@ -51,7 +50,8 @@ public:
     Simulation(
         std::unique_ptr<OperationalModel>&& operationalModel,
         std::unique_ptr<CollisionGeometry>&& geometry,
-        double dT);
+        double dT,
+        std::unique_ptr<RoutingEngine>&& routingEngine = {});
     Simulation(const Simulation& other) = delete;
     Simulation& operator=(const Simulation& other) = delete;
     Simulation(Simulation&& other) = delete;
@@ -82,9 +82,7 @@ public:
     StageProxy Stage(BaseStage::ID stageId);
     CollisionGeometry Geo() const;
     void SwitchGeometry(std::unique_ptr<CollisionGeometry>&& geometry);
-    using RoutingEngineFactory =
-        std::function<std::unique_ptr<RoutingEngine>(const PolyWithHoles&)>;
-    void SwitchRoutingAlgorithm(RoutingEngineFactory factory);
+    void SwitchRoutingEngine(std::unique_ptr<RoutingEngine>&& engine);
     std::string RoutingEngineName() const { return _routingEngine->name(); }
     void PushTimer(const std::string_view name, size_t probe_log_level = 0);
     void PopTimer(const std::string_view name);
