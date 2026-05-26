@@ -2,10 +2,10 @@
 # Build libsimulator
 ################################################################################
 
+# Create an array to store all directories that include headers into.
+set(SIMULATOR_INCLUDE)
 # The simulator target is created in the src/ subdirectory. This keeps the
 # large explicit source list closer to the files and improves maintainability.
-set(SIMULATOR_INCLUDE)
-
 add_subdirectory(src)
 target_compile_options(simulator PRIVATE
     ${COMMON_COMPILE_OPTIONS}
