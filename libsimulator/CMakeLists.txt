@@ -4,6 +4,8 @@
 
 # The simulator target is created in the src/ subdirectory. This keeps the
 # large explicit source list closer to the files and improves maintainability.
+set(SIMULATOR_INCLUDE)
+
 add_subdirectory(src)
 target_compile_options(simulator PRIVATE
     ${COMMON_COMPILE_OPTIONS}
@@ -23,14 +25,11 @@ target_link_options(simulator PUBLIC
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-fsanitize=address,undefined>
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-shared-libasan>
 )
+
+message(WARNING ${SIMULATOR_INCLUDE})
+
 target_include_directories(simulator PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/OperationalModels
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/OperationalModels/AnticipationVelocityModel
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/OperationalModels/CollisionFreeSpeedModel
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/OperationalModels/CollisionFreeSpeedModelV2
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/OperationalModels/GeneralizedCentrifugalForceModel
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/OperationalModels/SocialForceModel
+    ${SIMULATOR_INCLUDE}
 )
 set_property(TARGET simulator PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
 set_property(TARGET simulator PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)

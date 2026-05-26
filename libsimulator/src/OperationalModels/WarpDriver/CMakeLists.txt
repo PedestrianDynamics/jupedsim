@@ -1,0 +1,14 @@
+## Generalized Centrifugal Force Model sources
+list(APPEND SIMULATOR_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/WarpDriverModel.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/WarpDriverModel.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/WarpDriverModelBuilder.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/WarpDriverModelBuilder.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/WarpDriverModelData.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/WarpDriverModelUpdate.hpp
+)
+
+list(APPEND SIMULATOR_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR})
+
+set(SIMULATOR_SOURCES ${SIMULATOR_SOURCES} PARENT_SCOPE)
+set(SIMULATOR_INCLUDE ${SIMULATOR_INCLUDE} PARENT_SCOPE)
