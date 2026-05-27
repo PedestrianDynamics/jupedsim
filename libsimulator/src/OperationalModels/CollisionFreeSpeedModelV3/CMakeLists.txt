@@ -1,14 +1,9 @@
 ## CollisionFreeSpeedModel sources
-list(APPEND SIMULATOR_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/CollisionFreeSpeedModelV3.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/CollisionFreeSpeedModelV3.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/CollisionFreeSpeedModelV3Builder.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/CollisionFreeSpeedModelV3Builder.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/CollisionFreeSpeedModelV3Data.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/CollisionFreeSpeedModelV3Update.hpp
+target_sources(simulator PRIVATE
+    CollisionFreeSpeedModelV3.cpp
+    CollisionFreeSpeedModelV3.hpp
+    CollisionFreeSpeedModelV3Builder.cpp
+    CollisionFreeSpeedModelV3Builder.hpp
+    CollisionFreeSpeedModelV3Data.hpp
+    CollisionFreeSpeedModelV3Update.hpp
 )
-
-list(APPEND SIMULATOR_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR})
-
-set(SIMULATOR_SOURCES ${SIMULATOR_SOURCES} PARENT_SCOPE)
-set(SIMULATOR_INCLUDE ${SIMULATOR_INCLUDE} PARENT_SCOPE)

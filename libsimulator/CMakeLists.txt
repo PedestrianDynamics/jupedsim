@@ -2,11 +2,75 @@
 # Build libsimulator
 ################################################################################
 
-# Create an array to store all directories that include headers into.
-set(SIMULATOR_INCLUDE)
-# The simulator target is created in the src/ subdirectory. This keeps the
-# large explicit source list closer to the files and improves maintainability.
-add_subdirectory(src)
+
+add_library(simulator STATIC)
+
+target_sources(simulator PRIVATE
+    src/AABB.cpp
+    src/AABB.hpp
+    src/AgentRemovalSystem.hpp
+    src/Clonable.hpp
+    src/CfgCgal.hpp
+    src/GenericAgent.hpp
+    src/Graph.hpp
+    src/Grid2D.hpp
+    src/HashCombine.hpp
+    src/IteratorPair.hpp
+    src/Journey.cpp
+    src/Journey.hpp
+    src/LineSegment.cpp
+    src/LineSegment.hpp
+    src/Logger.cpp
+    src/Logger.hpp
+    src/Macros.hpp
+    src/Mathematics.cpp
+    src/Mathematics.hpp
+    src/Mesh.cpp
+    src/Mesh.hpp
+    src/NeighborhoodSearch.hpp
+    src/CollisionGeometry.cpp
+    src/CollisionGeometry.hpp
+    src/Ellipse.cpp
+    src/Ellipse.hpp
+    src/GeometryBuilder.cpp
+    src/GeometryBuilder.hpp
+    src/OperationalDecisionSystem.hpp
+    src/Point.cpp
+    src/Point.hpp
+    src/Polygon.cpp
+    src/Polygon.hpp
+    src/GeometricFunctions.hpp
+    src/GeometrySwitchError.hpp
+    src/TemplateHelper.hpp
+    src/Tracing.cpp
+    src/Tracing.hpp
+    src/UniqueID.hpp
+    src/Util.hpp
+    src/Routing.cpp
+    src/Routing.hpp
+    src/RoutingEngine.cpp
+    src/RoutingEngine.hpp
+    src/Simulation.cpp
+    src/Simulation.hpp
+    src/SimulationClock.cpp
+    src/SimulationClock.hpp
+    src/SimulationError.hpp
+    src/Stage.cpp
+    src/Stage.hpp
+    src/StageDescription.hpp
+    src/StageManager.cpp
+    src/StageManager.hpp
+    src/StageSystem.cpp
+    src/StageSystem.hpp
+    src/StrategicalDesicionSystem.hpp
+    src/TacticalDecisionSystem.hpp
+    src/Timing.cpp
+    src/Timing.hpp
+    src/Tracing.cpp
+    src/Tracing.hpp
+)
+
+add_subdirectory(src/OperationalModels)
 target_compile_options(simulator PRIVATE
     ${COMMON_COMPILE_OPTIONS}
 )
@@ -26,7 +90,8 @@ target_link_options(simulator PUBLIC
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-shared-libasan>
 )
 target_include_directories(simulator PUBLIC
-    ${SIMULATOR_INCLUDE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/OperationalModels
 )
 set_property(TARGET simulator PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
 set_property(TARGET simulator PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)

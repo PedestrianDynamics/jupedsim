@@ -1,14 +1,9 @@
 ## SocialForceModel sources
-list(APPEND SIMULATOR_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/SocialForceModel.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/SocialForceModel.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/SocialForceModelBuilder.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/SocialForceModelBuilder.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/SocialForceModelData.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/SocialForceModelUpdate.hpp
+target_sources(simulator PRIVATE
+    SocialForceModel.cpp
+    SocialForceModel.hpp
+    SocialForceModelBuilder.cpp
+    SocialForceModelBuilder.hpp
+    SocialForceModelData.hpp
+    SocialForceModelUpdate.hpp
 )
-
-list(APPEND SIMULATOR_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR})
-
-set(SIMULATOR_SOURCES ${SIMULATOR_SOURCES} PARENT_SCOPE)
-set(SIMULATOR_INCLUDE ${SIMULATOR_INCLUDE} PARENT_SCOPE)
