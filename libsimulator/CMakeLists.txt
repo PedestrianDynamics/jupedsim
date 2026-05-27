@@ -11,7 +11,15 @@ target_sources(simulator PRIVATE
     src/AgentRemovalSystem.hpp
     src/Clonable.hpp
     src/CfgCgal.hpp
+    src/CollisionGeometry.cpp
+    src/CollisionGeometry.hpp
+    src/Ellipse.cpp
+    src/Ellipse.hpp
     src/GenericAgent.hpp
+    src/GeometricFunctions.hpp
+    src/GeometryBuilder.cpp
+    src/GeometryBuilder.hpp
+    src/GeometrySwitchError.hpp
     src/Graph.hpp
     src/Grid2D.hpp
     src/HashCombine.hpp
@@ -28,24 +36,11 @@ target_sources(simulator PRIVATE
     src/Mesh.cpp
     src/Mesh.hpp
     src/NeighborhoodSearch.hpp
-    src/CollisionGeometry.cpp
-    src/CollisionGeometry.hpp
-    src/Ellipse.cpp
-    src/Ellipse.hpp
-    src/GeometryBuilder.cpp
-    src/GeometryBuilder.hpp
     src/OperationalDecisionSystem.hpp
     src/Point.cpp
     src/Point.hpp
     src/Polygon.cpp
     src/Polygon.hpp
-    src/GeometricFunctions.hpp
-    src/GeometrySwitchError.hpp
-    src/TemplateHelper.hpp
-    src/Tracing.cpp
-    src/Tracing.hpp
-    src/UniqueID.hpp
-    src/Util.hpp
     src/Routing.cpp
     src/Routing.hpp
     src/RoutingEngine.cpp
@@ -64,10 +59,13 @@ target_sources(simulator PRIVATE
     src/StageSystem.hpp
     src/StrategicalDesicionSystem.hpp
     src/TacticalDecisionSystem.hpp
+    src/TemplateHelper.hpp
     src/Timing.cpp
     src/Timing.hpp
     src/Tracing.cpp
     src/Tracing.hpp
+    src/UniqueID.hpp
+    src/Util.hpp
 )
 
 add_subdirectory(src/OperationalModels)
@@ -91,7 +89,6 @@ target_link_options(simulator PUBLIC
 )
 target_include_directories(simulator PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/OperationalModels
 )
 set_property(TARGET simulator PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
 set_property(TARGET simulator PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)

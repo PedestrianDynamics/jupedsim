@@ -4,13 +4,7 @@ target_sources(simulator PRIVATE
     OperationalModelUpdate.hpp
 )
 target_include_directories(simulator PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/AnticipationVelocityModel
-    ${CMAKE_CURRENT_SOURCE_DIR}/CollisionFreeSpeedModel
-    ${CMAKE_CURRENT_SOURCE_DIR}/CollisionFreeSpeedModelV2
-    ${CMAKE_CURRENT_SOURCE_DIR}/CollisionFreeSpeedModelV3
-    ${CMAKE_CURRENT_SOURCE_DIR}/GeneralizedCentrifugalForceModel
-    ${CMAKE_CURRENT_SOURCE_DIR}/SocialForceModel
-    ${CMAKE_CURRENT_SOURCE_DIR}/WarpDriver
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 # include per-model lists
