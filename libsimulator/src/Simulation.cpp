@@ -243,7 +243,6 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
 
     _stageManager.HandleNewAgent(agent.stageId);
     _agents.emplace_back(std::move(agent));
-    _neighborhoodSearch.AddAgent(_agents.back());
 
     auto v = IteratorPair(std::prev(std::end(_agents)), std::end(_agents));
     _stategicalDecisionSystem.Run(_journeys, v, _stageManager);
@@ -310,7 +309,7 @@ size_t Simulation::AgentCount() const
     return _agents.size();
 }
 
-std::vector<GenericAgent>& Simulation::Agents()
+agent_container_t<GenericAgent>& Simulation::Agents()
 {
     return _agents;
 };
@@ -338,6 +337,7 @@ void Simulation::SwitchAgentJourney(
 std::vector<GenericAgent::ID> Simulation::AgentsInRange(Point p, double distance)
 {
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agents in Range", Debug);
+    _neighborhoodSearch.Update(_agents);
     const auto neighbors = _neighborhoodSearch.GetNeighboringAgents(p, distance);
 
     std::vector<GenericAgent::ID> neighborIds{};
@@ -358,7 +358,7 @@ std::vector<GenericAgent::ID> Simulation::AgentsInPolygon(const std::vector<Poin
         throw SimulationError("Polygon needs to be simple and convex");
     }
     const auto [p, dist] = poly.ContainingCircle();
-
+    _neighborhoodSearch.Update(_agents);
     const auto candidates = _neighborhoodSearch.GetNeighboringAgents(p, dist);
     std::vector<GenericAgent::ID> result{};
     result.reserve(candidates.size());

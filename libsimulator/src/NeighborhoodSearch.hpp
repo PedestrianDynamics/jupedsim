@@ -61,7 +61,7 @@ struct std::hash<Grid2DIndex> {
 template <typename Value>
 class NeighborhoodSearch
 {
-    using Grid = std::unordered_map<Grid2DIndex, std::vector<Value>>;
+    using Grid = std::unordered_map<Grid2DIndex, std::vector<const Value*>>;
 
     double _cellSize;
     Grid _grid{};
@@ -81,7 +81,7 @@ public:
     {
         auto index = getIndex(item.pos);
         auto& vec = _grid[index];
-        vec.push_back(item);
+        vec.push_back(&item);
     }
 
     void RemoveAgent(const Value& item)
@@ -99,13 +99,13 @@ public:
         throw SimulationError("Unknown agent id {}", item.id);
     }
 
-    void Update(const std::vector<Value>& items)
+    void Update(const std::deque<Value>& items)
     {
         _grid.clear();
         for(const auto& item : items) {
             auto index = getIndex(item.pos);
             auto& vec = _grid[index];
-            vec.push_back(item);
+            vec.push_back(&item);
         }
     }
 
@@ -128,8 +128,37 @@ public:
                 auto it = _grid.find({x, y});
                 if(it != _grid.cend()) {
                     for(const auto& item : it->second) {
-                        if(DistanceSquared(item.pos, pos) <= radiusSquared) {
-                            result.emplace_back(item);
+                        if(DistanceSquared(item->pos, pos) <= radiusSquared) {
+                            result.emplace_back(*item);
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    std::vector<Value*> GetNeighboringAgentsPtr(Point pos, double radius) const
+    {
+        std::vector<Value*> result{};
+        result.reserve(128);
+
+        const auto posIdx = getIndex(pos);
+        const auto offset = static_cast<int32_t>(std::ceil(radius / _cellSize));
+        const int32_t xMin = posIdx.idx - offset;
+        const int32_t xMax = posIdx.idx + offset;
+        const int32_t yMin = posIdx.idy - offset;
+        const int32_t yMax = posIdx.idy + offset;
+
+        const auto radiusSquared = radius * radius;
+
+        for(int32_t x = xMin; x <= xMax; ++x) {
+            for(int32_t y = yMin; y <= yMax; ++y) {
+                auto it = _grid.find({x, y});
+                if(it != _grid.cend()) {
+                    for(const auto& item : it->second) {
+                        if(DistanceSquared(item->pos, pos) <= radiusSquared) {
+                            result.emplace_back(const_cast<Value*>(item));
                         }
                     }
                 }
