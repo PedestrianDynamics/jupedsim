@@ -13,6 +13,7 @@
 
 #include <fmt/core.h>
 
+#include <deque>
 #include <utility>
 #include <variant>
 class Journey;
@@ -60,6 +61,10 @@ struct GenericAgent {
     {
     }
 };
+
+template <class Agent>
+using agent_container_t = std::deque<Agent>;
+
 template <>
 struct fmt::formatter<GenericAgent> {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
