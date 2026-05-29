@@ -45,7 +45,7 @@ class Simulation
         geometries{};
     RoutingEngine* _routingEngine;
     CollisionGeometry* _geometry;
-    agent_container_t<GenericAgent> _agents;
+    AgentContainer<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
     std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;
     Timer _timer{};
@@ -81,7 +81,7 @@ public:
     GenericAgent::ID AddAgent(GenericAgent agent);
     const GenericAgent& Agent(GenericAgent::ID id) const;
     GenericAgent& Agent(GenericAgent::ID id);
-    agent_container_t<GenericAgent>& Agents();
+    AgentContainer<GenericAgent>& Agents();
     OperationalModelType ModelType() const;
     StageProxy Stage(BaseStage::ID stageId);
     CollisionGeometry Geo() const;

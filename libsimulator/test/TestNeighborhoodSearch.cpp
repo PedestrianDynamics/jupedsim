@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "GenericAgent.hpp"
 #include "NeighborhoodSearch.hpp"
 
 #include <gtest/gtest.h>
@@ -24,7 +25,7 @@ TEST(NeighborhoodSearch, ReturnsEmptyOnEmpty)
 TEST(NeighborhoodSearch, ReturnsOneValueInRange)
 {
     NeighborhoodSearch<ValueWithPos<int>> neighborhood{3};
-    const std::vector<ValueWithPos<int>> agents{{{0, 0}, 1}};
+    const AgentContainer<ValueWithPos<int>> agents{{{0, 0}, 1}};
     neighborhood.Update(agents);
 
     const auto expected = std::set<int>{1};
@@ -41,7 +42,7 @@ TEST(NeighborhoodSearch, ReturnsOneValueInRange)
 TEST(NeighborhoodSearch, ReturnsMultipleValuesInRange)
 {
     NeighborhoodSearch<ValueWithPos<int>> neighborhood{3};
-    const std::vector<ValueWithPos<int>> agents{{{0, 0}, 1}, {{0, 0}, 0}};
+    const AgentContainer<ValueWithPos<int>> agents{{{0, 0}, 1}, {{0, 0}, 0}};
     neighborhood.Update(agents);
 
     const auto expected = std::set<int>{1, 0};
@@ -58,7 +59,7 @@ TEST(NeighborhoodSearch, ReturnsMultipleValuesInRange)
 TEST(NeighborhoodSearch, ReturnsValuesFromDifferentInternalGridCells)
 {
     NeighborhoodSearch<ValueWithPos<int>> neighborhood{3};
-    const std::vector<ValueWithPos<int>> agents{{{0, 0}, 1}, {{-3, 0}, 0}, {{4, 4}, 6}};
+    const AgentContainer<ValueWithPos<int>> agents{{{0, 0}, 1}, {{-3, 0}, 0}, {{4, 4}, 6}};
     neighborhood.Update(agents);
 
     const auto expected = std::set<int>{1, 0, 6};
@@ -75,7 +76,7 @@ TEST(NeighborhoodSearch, ReturnsValuesFromDifferentInternalGridCells)
 TEST(NeighborhoodSearch, RejectesValuesInGridCellsTooFarAway)
 {
     NeighborhoodSearch<ValueWithPos<int>> neighborhood{3};
-    const std::vector<ValueWithPos<int>> agents{
+    const AgentContainer<ValueWithPos<int>> agents{
         {{0, 0}, 1}, {{-3, 0}, 0}, {{4, 4}, 6}, {{10, 10}, 7}};
     neighborhood.Update(agents);
 
@@ -93,7 +94,7 @@ TEST(NeighborhoodSearch, RejectesValuesInGridCellsTooFarAway)
 TEST(NeighborhoodSearch, RejectsValuesFromSelectedGridThatareTooFarAway)
 {
     NeighborhoodSearch<ValueWithPos<int>> neighborhood{3};
-    const std::vector<ValueWithPos<int>> agents{{{0, 0}, 1}, {{0.5, 0.5}, 2}, {{0.4, 0.4}, 3}};
+    const AgentContainer<ValueWithPos<int>> agents{{{0, 0}, 1}, {{0.5, 0.5}, 2}, {{0.4, 0.4}, 3}};
     neighborhood.Update(agents);
 
     const auto expected = std::set<int>{1, 3};
@@ -110,7 +111,7 @@ TEST(NeighborhoodSearch, RejectsValuesFromSelectedGridThatareTooFarAway)
 TEST(NeighborhoodSearch, ReturnsValueExactlyDistanceAwayFromQueryPoint)
 {
     NeighborhoodSearch<ValueWithPos<int>> neighborhood{3};
-    const std::vector<ValueWithPos<int>> agents{{{1, 0}, 1}};
+    const AgentContainer<ValueWithPos<int>> agents{{{1, 0}, 1}};
     neighborhood.Update(agents);
 
     const auto expected = std::set<int>{1};

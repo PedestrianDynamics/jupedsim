@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
-
+#include "GenericAgent.hpp"
 #include "HashCombine.hpp"
 #include "Point.hpp"
 
@@ -99,7 +99,7 @@ public:
         throw SimulationError("Unknown agent id {}", item.id);
     }
 
-    void Update(const std::deque<Value>& items)
+    void Update(const AgentContainer<Value>& items)
     {
         _grid.clear();
         for(const auto& item : items) {
@@ -130,35 +130,6 @@ public:
                     for(const auto& item : it->second) {
                         if(DistanceSquared(item->pos, pos) <= radiusSquared) {
                             result.emplace_back(*item);
-                        }
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
-    std::vector<Value*> GetNeighboringAgentsPtr(Point pos, double radius) const
-    {
-        std::vector<Value*> result{};
-        result.reserve(128);
-
-        const auto posIdx = getIndex(pos);
-        const auto offset = static_cast<int32_t>(std::ceil(radius / _cellSize));
-        const int32_t xMin = posIdx.idx - offset;
-        const int32_t xMax = posIdx.idx + offset;
-        const int32_t yMin = posIdx.idy - offset;
-        const int32_t yMax = posIdx.idy + offset;
-
-        const auto radiusSquared = radius * radius;
-
-        for(int32_t x = xMin; x <= xMax; ++x) {
-            for(int32_t y = yMin; y <= yMax; ++y) {
-                auto it = _grid.find({x, y});
-                if(it != _grid.cend()) {
-                    for(const auto& item : it->second) {
-                        if(DistanceSquared(item->pos, pos) <= radiusSquared) {
-                            result.emplace_back(const_cast<Value*>(item));
                         }
                     }
                 }

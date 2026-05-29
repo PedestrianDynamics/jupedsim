@@ -38,7 +38,7 @@ public:
         double /*t_in_sec*/,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
         const CollisionGeometry& geometry,
-        agent_container_t<GenericAgent>& agents) const
+        AgentContainer<GenericAgent>& agents) const
     {
         std::vector<std::optional<OperationalModelUpdate>> updates{};
         updates.reserve(agents.size());

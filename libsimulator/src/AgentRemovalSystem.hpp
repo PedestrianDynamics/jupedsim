@@ -20,14 +20,14 @@ public:
     AgentRemovalSystem& operator=(AgentRemovalSystem&& other) = delete;
 
     void
-    Run(agent_container_t<Agent>& agents,
+    Run(AgentContainer<Agent>& agents,
         std::vector<GenericAgent::ID>& removedAgentIds,
         StageManager& stageManager) const;
 };
 
 template <typename Agent>
 void AgentRemovalSystem<Agent>::Run(
-    agent_container_t<Agent>& agents,
+    AgentContainer<Agent>& agents,
     std::vector<GenericAgent::ID>& removedAgentIds,
     StageManager& stageManager) const
 {
