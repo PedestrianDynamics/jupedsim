@@ -3,17 +3,17 @@
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import logging
-import pandas as pd
+import math
 import pathlib
 import sys
 import time
-import jupedsim.distributions
-import jupedsim as jps
-import shapely
-from shapely import GeometryCollection, Polygon, affinity, from_wkt, to_wkt
-import math
-from numpy.random import normal
 
+import jupedsim as jps
+import jupedsim.distributions
+import pandas as pd
+import shapely
+from numpy.random import normal
+from shapely import affinity
 
 timer_key_list = [
     "Add Agent",

@@ -9,8 +9,9 @@ import sys
 import time
 
 import jupedsim as jps
-from performancetest.geometry import geometries
 from performancetest.stats_writer import StatsWriter
+
+from performancetest.geometry import geometries
 
 
 def log_debug(msg):

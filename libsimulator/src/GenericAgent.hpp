@@ -63,7 +63,7 @@ struct GenericAgent {
 };
 
 template <class Agent>
-using agent_container_t = std::deque<Agent>;
+using AgentContainer = std::deque<Agent>;
 
 template <>
 struct fmt::formatter<GenericAgent> {
