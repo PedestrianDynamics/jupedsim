@@ -25,9 +25,10 @@ exit_id = simulation.add_exit_stage([(9, 4), (10, 4), (10, 6), (9, 6)])
 journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
 
 # 4. Agents: place a few on a small grid on the left side of the room.
+n_agents = 20
 positions = jps.distributions.distribute_by_number(
     polygon=shapely.Polygon([(0.5, 0.5), (3, 0.5), (3, 9.5), (0.5, 9.5)]),
-    number_of_agents=20,
+    number_of_agents=n_agents,
     distance_to_agents=0.4,
     distance_to_polygon=0.2,
     seed=1,
@@ -47,6 +48,6 @@ while simulation.agent_count() > 0 and simulation.iteration_count() < 10_000:
     simulation.iterate()
 
 print(
-    f"Evacuated {20} agents in {simulation.iteration_count()} iterations "
+    f"Evacuated {n_agents} agents in {simulation.iteration_count()} iterations "
     f"({simulation.elapsed_time():.1f} s). Trajectories: {trajectory_file}"
 )

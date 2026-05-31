@@ -43,11 +43,14 @@ agent_ids = [
     for position in positions
 ]
 
-# Re-route the second half to the bottom exit at runtime.
-for agent_id in agent_ids[len(agent_ids) // 2 :]:
-    simulation.switch_agent_journey(agent_id, journey_bottom, exit_bottom)
-
+# Run, re-routing the second half to the bottom exit mid-simulation so the
+# switch happens while agents are already moving (dynamic load balancing).
+rerouted = False
 while simulation.agent_count() > 0 and simulation.iteration_count() < 10_000:
+    if not rerouted and simulation.iteration_count() == 200:
+        for agent_id in agent_ids[len(agent_ids) // 2 :]:
+            simulation.switch_agent_journey(agent_id, journey_bottom, exit_bottom)
+        rerouted = True
     simulation.iterate()
 
 print(f"Done in {simulation.iteration_count()} iterations. Trajectories: {trajectory_file}")
