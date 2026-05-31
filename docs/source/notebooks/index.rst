@@ -17,7 +17,3 @@ Notebooks
     motivation
     corner
     double-bottleneck
-    journey
-    routing
-    queues_waiting
-    direct_steering
