@@ -33,8 +33,8 @@ JuPedSim documentation spans three layers. Pick the one that matches your goal:
   Monte-Carlo studies with the higher-level library:
   `jupedsim-scenarios <https://scenarios.jupedsim.org>`_.
 - **Validate against standards** — RiMEA / IMO / ISO / NIST test
-  implementations: `jupedsim standards
-  <https://github.com/PedestrianDynamics/jupedsim-web-community/tree/main/standards>`_.
+  implementations:
+  `jupedsim standards <https://github.com/PedestrianDynamics/jupedsim-web-community/tree/main/standards>`_.
 
 What is JuPedSim
 ================

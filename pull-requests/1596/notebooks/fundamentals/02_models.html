@@ -423,13 +423,16 @@ while respecting the geometry and other agents.</p>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Agent start positions: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">start_positions</span><span class="p">)</span><span class="si">}</span><span class="s2"> agents&quot;</span><span class="p">)</span>
 
+
 <span class="k">def</span><span class="w"> </span><span class="nf">run_with</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">make_agent_params</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the evacuation scenario with the given model and return (iteration_count, traj_path).&quot;&quot;&quot;</span>
     <span class="n">traj</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;models_</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.sqlite&quot;</span><span class="p">)</span>
     <span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
         <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
         <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span>
-        <span class="n">trajectory_writer</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">SqliteTrajectoryWriter</span><span class="p">(</span><span class="n">output_file</span><span class="o">=</span><span class="n">traj</span><span class="p">),</span>
+        <span class="n">trajectory_writer</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">SqliteTrajectoryWriter</span><span class="p">(</span>
+            <span class="n">output_file</span><span class="o">=</span><span class="n">traj</span><span class="p">,</span> <span class="n">commit_every_nth_write</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">),</span>
     <span class="p">)</span>
     <span class="n">exit_id</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">add_exit_stage</span><span class="p">([(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">6</span><span class="p">)])</span>
     <span class="n">journey_id</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">add_journey</span><span class="p">(</span><span class="n">jps</span><span class="o">.</span><span class="n">JourneyDescription</span><span class="p">([</span><span class="n">exit_id</span><span class="p">]))</span>
@@ -472,9 +475,13 @@ while respecting the geometry and other agents.</p>
     <span class="n">iters</span><span class="p">,</span> <span class="n">traj</span> <span class="o">=</span> <span class="n">run_with</span><span class="p">(</span>
         <span class="n">jps</span><span class="o">.</span><span class="n">AnticipationVelocityModel</span><span class="p">(),</span>
         <span class="k">lambda</span> <span class="n">j</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="n">jps</span><span class="o">.</span><span class="n">AnticipationVelocityModelAgentParameters</span><span class="p">(</span>
-            <span class="n">journey_id</span><span class="o">=</span><span class="n">j</span><span class="p">,</span> <span class="n">stage_id</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">p</span><span class="p">,</span>
-            <span class="n">desired_speed</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
-            <span class="n">anticipation_time</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">reaction_time</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+            <span class="n">journey_id</span><span class="o">=</span><span class="n">j</span><span class="p">,</span>
+            <span class="n">stage_id</span><span class="o">=</span><span class="n">s</span><span class="p">,</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">p</span><span class="p">,</span>
+            <span class="n">desired_speed</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
+            <span class="n">radius</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+            <span class="n">anticipation_time</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+            <span class="n">reaction_time</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
         <span class="p">),</span>
         <span class="s2">&quot;avm&quot;</span><span class="p">,</span>
     <span class="p">)</span>
@@ -488,8 +495,11 @@ while respecting the geometry and other agents.</p>
     <span class="n">iters</span><span class="p">,</span> <span class="n">traj</span> <span class="o">=</span> <span class="n">run_with</span><span class="p">(</span>
         <span class="n">jps</span><span class="o">.</span><span class="n">SocialForceModel</span><span class="p">(),</span>
         <span class="k">lambda</span> <span class="n">j</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="n">jps</span><span class="o">.</span><span class="n">SocialForceModelAgentParameters</span><span class="p">(</span>
-            <span class="n">journey_id</span><span class="o">=</span><span class="n">j</span><span class="p">,</span> <span class="n">stage_id</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">p</span><span class="p">,</span>
-            <span class="n">desired_speed</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+            <span class="n">journey_id</span><span class="o">=</span><span class="n">j</span><span class="p">,</span>
+            <span class="n">stage_id</span><span class="o">=</span><span class="n">s</span><span class="p">,</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">p</span><span class="p">,</span>
+            <span class="n">desired_speed</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
+            <span class="n">radius</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
             <span class="n">orientation</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
         <span class="p">),</span>
         <span class="s2">&quot;sfm&quot;</span><span class="p">,</span>
@@ -504,8 +514,11 @@ while respecting the geometry and other agents.</p>
     <span class="n">iters</span><span class="p">,</span> <span class="n">traj</span> <span class="o">=</span> <span class="n">run_with</span><span class="p">(</span>
         <span class="n">jps</span><span class="o">.</span><span class="n">GeneralizedCentrifugalForceModel</span><span class="p">(),</span>
         <span class="k">lambda</span> <span class="n">j</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="n">jps</span><span class="o">.</span><span class="n">GeneralizedCentrifugalForceModelAgentParameters</span><span class="p">(</span>
-            <span class="n">journey_id</span><span class="o">=</span><span class="n">j</span><span class="p">,</span> <span class="n">stage_id</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">p</span><span class="p">,</span>
-            <span class="n">desired_speed</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+            <span class="n">journey_id</span><span class="o">=</span><span class="n">j</span><span class="p">,</span>
+            <span class="n">stage_id</span><span class="o">=</span><span class="n">s</span><span class="p">,</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">p</span><span class="p">,</span>
+            <span class="n">desired_speed</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
+            <span class="n">orientation</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
         <span class="p">),</span>
         <span class="s2">&quot;gcfm&quot;</span><span class="p">,</span>
     <span class="p">)</span>
@@ -519,8 +532,12 @@ while respecting the geometry and other agents.</p>
     <span class="n">iters</span><span class="p">,</span> <span class="n">traj</span> <span class="o">=</span> <span class="n">run_with</span><span class="p">(</span>
         <span class="n">jps</span><span class="o">.</span><span class="n">WarpDriverModel</span><span class="p">(),</span>
         <span class="k">lambda</span> <span class="n">j</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="n">jps</span><span class="o">.</span><span class="n">WarpDriverModelAgentParameters</span><span class="p">(</span>
-            <span class="n">journey_id</span><span class="o">=</span><span class="n">j</span><span class="p">,</span> <span class="n">stage_id</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">p</span><span class="p">,</span>
-            <span class="n">desired_speed</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+            <span class="n">journey_id</span><span class="o">=</span><span class="n">j</span><span class="p">,</span>
+            <span class="n">stage_id</span><span class="o">=</span><span class="n">s</span><span class="p">,</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">p</span><span class="p">,</span>
+            <span class="n">desired_speed</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
+            <span class="n">radius</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span>
+            <span class="n">orientation</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
         <span class="p">),</span>
         <span class="s2">&quot;wd&quot;</span><span class="p">,</span>
     <span class="p">)</span>
@@ -537,8 +554,10 @@ while respecting the geometry and other agents.</p>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CFSM: 1048 iterations
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>AVM: 1130 iterations
-SFM: 956 iterations
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>AVM: 1157 iterations
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>SFM: 956 iterations
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>GCFM: 4361 iterations
@@ -557,7 +576,10 @@ All runs complete.
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-    <span class="p">{</span><span class="s2">&quot;Model&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="s2">&quot;Evacuation iterations&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">values</span><span class="p">())}</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;Model&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+        <span class="s2">&quot;Evacuation iterations&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>
+    <span class="p">}</span>
 <span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;Model&quot;</span><span class="p">)</span>
 <span class="n">display</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
@@ -565,8 +587,14 @@ All runs complete.
 <span class="n">bars</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Evacuation iterations&quot;</span><span class="p">])</span>
 <span class="k">for</span> <span class="n">bar</span> <span class="ow">in</span> <span class="n">bars</span><span class="p">:</span>
     <span class="n">h</span> <span class="o">=</span> <span class="n">bar</span><span class="o">.</span><span class="n">get_height</span><span class="p">()</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">bar</span><span class="o">.</span><span class="n">get_x</span><span class="p">()</span> <span class="o">+</span> <span class="n">bar</span><span class="o">.</span><span class="n">get_width</span><span class="p">()</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">h</span> <span class="o">+</span> <span class="mi">20</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">h</span><span class="p">),</span>
-            <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+        <span class="n">bar</span><span class="o">.</span><span class="n">get_x</span><span class="p">()</span> <span class="o">+</span> <span class="n">bar</span><span class="o">.</span><span class="n">get_width</span><span class="p">()</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">h</span> <span class="o">+</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">h</span><span class="p">),</span>
+        <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+        <span class="n">va</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span>
+        <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
+    <span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Iterations (dt = 0.1 s)&quot;</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Evacuation iterations by model — 10×10 room, 20 agents&quot;</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
@@ -608,7 +636,7 @@ All runs complete.
     </tr>
     <tr>
       <th>AVM</th>
-      <td>1130</td>
+      <td>1157</td>
     </tr>
     <tr>
       <th>SFM</th>
@@ -624,7 +652,7 @@ All runs complete.
     </tr>
   </tbody>
 </table>
-</div></div><img alt="../../_images/f88f1f2dc03f9e0254b137bea01e46b11a2114d974a56a731f6d330ae00d06d1.png" src="../../_images/f88f1f2dc03f9e0254b137bea01e46b11a2114d974a56a731f6d330ae00d06d1.png" />
+</div></div><img alt="../../_images/aba1a567db5e4dfe87b8239e0857830032bc2311f503ce0d2aa5e70f85b5fe6f.png" src="../../_images/aba1a567db5e4dfe87b8239e0857830032bc2311f503ce0d2aa5e70f85b5fe6f.png" />
 </div>
 </div>
 <div class="cell docutils container">
