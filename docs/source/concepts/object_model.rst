@@ -3,8 +3,8 @@ Object model & lifecycle
 =========================
 
 A *JuPedSim* simulation is assembled from a small set of objects. Understanding
-how they fit together makes the :doc:`Fundamentals notebooks
-<../notebooks/fundamentals/index>` easy to follow.
+how they fit together makes the
+:doc:`Fundamentals notebooks <../notebooks/fundamentals/index>` easy to follow.
 
 Lifecycle
 =========
