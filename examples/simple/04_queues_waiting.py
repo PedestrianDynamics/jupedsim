@@ -16,7 +16,9 @@ trajectory_file = pathlib.Path("queues_waiting.sqlite")
 simulation = jps.Simulation(
     model=jps.CollisionFreeSpeedModel(),
     geometry=geometry,
-    trajectory_writer=jps.SqliteTrajectoryWriter(output_file=trajectory_file),
+    trajectory_writer=jps.SqliteTrajectoryWriter(
+        output_file=trajectory_file, commit_every_nth_write=1
+    ),
 )
 
 # Queue: agents line up here and are released in batches.
@@ -32,8 +34,12 @@ waiting.state = jps.WaitingSetState.ACTIVE
 exit_id = simulation.add_exit_stage([(19, 4), (20, 4), (20, 6), (19, 6)])
 
 journey = jps.JourneyDescription([queue_id, waiting_id, exit_id])
-journey.set_transition_for_stage(queue_id, jps.Transition.create_fixed_transition(waiting_id))
-journey.set_transition_for_stage(waiting_id, jps.Transition.create_fixed_transition(exit_id))
+journey.set_transition_for_stage(
+    queue_id, jps.Transition.create_fixed_transition(waiting_id)
+)
+journey.set_transition_for_stage(
+    waiting_id, jps.Transition.create_fixed_transition(exit_id)
+)
 journey_id = simulation.add_journey(journey)
 
 positions = jps.distributions.distribute_by_number(
@@ -70,4 +76,6 @@ while simulation.agent_count() > 0 and simulation.iteration_count() < 10_000:
         waiting.state = jps.WaitingSetState.INACTIVE
     simulation.iterate()
 
-print(f"Done in {simulation.iteration_count()} iterations. Trajectories: {trajectory_file}")
+print(
+    f"Done in {simulation.iteration_count()} iterations. Trajectories: {trajectory_file}"
+)

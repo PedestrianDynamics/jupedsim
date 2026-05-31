@@ -17,7 +17,9 @@ trajectory_file = pathlib.Path("basic_simulation.sqlite")
 simulation = jps.Simulation(
     model=jps.CollisionFreeSpeedModel(),
     geometry=geometry,
-    trajectory_writer=jps.SqliteTrajectoryWriter(output_file=trajectory_file),
+    trajectory_writer=jps.SqliteTrajectoryWriter(
+        output_file=trajectory_file, commit_every_nth_write=1
+    ),
 )
 
 # 3. Stages + journey: a single exit the agents walk to.

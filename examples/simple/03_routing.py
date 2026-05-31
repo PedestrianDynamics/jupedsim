@@ -15,7 +15,9 @@ trajectory_file = pathlib.Path("routing.sqlite")
 simulation = jps.Simulation(
     model=jps.CollisionFreeSpeedModel(),
     geometry=geometry,
-    trajectory_writer=jps.SqliteTrajectoryWriter(output_file=trajectory_file),
+    trajectory_writer=jps.SqliteTrajectoryWriter(
+        output_file=trajectory_file, commit_every_nth_write=1
+    ),
 )
 
 exit_top = simulation.add_exit_stage([(19, 7), (20, 7), (20, 9), (19, 9)])
@@ -49,8 +51,12 @@ rerouted = False
 while simulation.agent_count() > 0 and simulation.iteration_count() < 10_000:
     if not rerouted and simulation.iteration_count() == 200:
         for agent_id in agent_ids[len(agent_ids) // 2 :]:
-            simulation.switch_agent_journey(agent_id, journey_bottom, exit_bottom)
+            simulation.switch_agent_journey(
+                agent_id, journey_bottom, exit_bottom
+            )
         rerouted = True
     simulation.iterate()
 
-print(f"Done in {simulation.iteration_count()} iterations. Trajectories: {trajectory_file}")
+print(
+    f"Done in {simulation.iteration_count()} iterations. Trajectories: {trajectory_file}"
+)

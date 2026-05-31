@@ -15,7 +15,9 @@ trajectory_file = pathlib.Path("direct_steering.sqlite")
 simulation = jps.Simulation(
     model=jps.CollisionFreeSpeedModel(),
     geometry=geometry,
-    trajectory_writer=jps.SqliteTrajectoryWriter(output_file=trajectory_file),
+    trajectory_writer=jps.SqliteTrajectoryWriter(
+        output_file=trajectory_file, commit_every_nth_write=1
+    ),
 )
 
 steering_stage = simulation.add_direct_steering_stage()
@@ -34,14 +36,25 @@ agent_id = simulation.add_agent(
 waypoints = [(10, 5), (10, 9), (18, 9)]
 waypoint_index = 0
 done = False
-while simulation.agent_count() > 0 and simulation.iteration_count() < 10_000 and not done:
+while (
+    simulation.agent_count() > 0
+    and simulation.iteration_count() < 10_000
+    and not done
+):
     agent = simulation.agent(agent_id)
     agent.target = waypoints[waypoint_index]
-    if shapely.Point(agent.position).distance(shapely.Point(waypoints[waypoint_index])) < 0.5:
+    if (
+        shapely.Point(agent.position).distance(
+            shapely.Point(waypoints[waypoint_index])
+        )
+        < 0.5
+    ):
         waypoint_index += 1
         if waypoint_index >= len(waypoints):
             simulation.mark_agent_for_removal(agent_id)
             done = True
     simulation.iterate()
 
-print(f"Done in {simulation.iteration_count()} iterations. Trajectories: {trajectory_file}")
+print(
+    f"Done in {simulation.iteration_count()} iterations. Trajectories: {trajectory_file}"
+)

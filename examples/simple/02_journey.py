@@ -14,7 +14,9 @@ trajectory_file = pathlib.Path("journey.sqlite")
 simulation = jps.Simulation(
     model=jps.CollisionFreeSpeedModel(),
     geometry=geometry,
-    trajectory_writer=jps.SqliteTrajectoryWriter(output_file=trajectory_file),
+    trajectory_writer=jps.SqliteTrajectoryWriter(
+        output_file=trajectory_file, commit_every_nth_write=1
+    ),
 )
 
 # Two waypoints (position, arrival distance) and a final exit.
@@ -24,8 +26,12 @@ exit_id = simulation.add_exit_stage([(19, 4), (20, 4), (20, 6), (19, 6)])
 
 # Journey wires the stages in order with fixed transitions.
 journey = jps.JourneyDescription([wp1, wp2, exit_id])
-journey.set_transition_for_stage(wp1, jps.Transition.create_fixed_transition(wp2))
-journey.set_transition_for_stage(wp2, jps.Transition.create_fixed_transition(exit_id))
+journey.set_transition_for_stage(
+    wp1, jps.Transition.create_fixed_transition(wp2)
+)
+journey.set_transition_for_stage(
+    wp2, jps.Transition.create_fixed_transition(exit_id)
+)
 journey_id = simulation.add_journey(journey)
 
 positions = jps.distributions.distribute_by_number(
@@ -48,4 +54,6 @@ for position in positions:
 while simulation.agent_count() > 0 and simulation.iteration_count() < 10_000:
     simulation.iterate()
 
-print(f"Done in {simulation.iteration_count()} iterations. Trajectories: {trajectory_file}")
+print(
+    f"Done in {simulation.iteration_count()} iterations. Trajectories: {trajectory_file}"
+)
