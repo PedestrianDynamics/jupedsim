@@ -1,0 +1,564 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="../../_static/logo.png" sizes="482x536" rel="icon" type="image/png">
+    <title>Direct Steering &#8212; JuPedSim  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=d742c9ce" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/fundamentals/10_direct_steering';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v2.0.0';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Output and Visualisation" href="11_output_visualization.html" />
+    <link rel="prev" title="Agent Distributions" href="09_agents_distributions.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="v2.0.0" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../_static/jupedsim.svg" class="logo__image only-light" alt="JuPedSim  documentation - Home"/>
+    <img src="../../_static/jupedsim.svg" class="logo__image only-dark pst-js-only" alt="JuPedSim  documentation - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PedestrianDynamics/jupedsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/jupedsim/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://img.shields.io/pypi/v/jupedsim" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.5281/zenodo.1293771" title="DOI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1293771.svg" class="icon-link-image" alt="DOI"/></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Fundamentals</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="00_getting_started.html">Getting started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="01_geometry.html">Geometry — defining the walkable area</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02_models.html">Operational models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03_exits.html">Exit Stage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04_waypoints.html">Waypoint Stage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05_queues.html">Notifiable Queue Stage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="06_waiting.html">Waiting Set Stage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="07_journeys_transitions.html">Journeys and Transitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="08_routing.html">Routing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="09_agents_distributions.html">Agent Distributions</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Direct Steering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="11_output_visualization.html">Output and Visualisation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../concepts/index.html">Concepts</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../concepts/object_model.html">Object model &amp; lifecycle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../concepts/geometry.html">Geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../concepts/routing.html">Routing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../concepts/custom_serialization.html">Custom Serialization</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../pedestrian_models/index.html">Pedestrian Models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../pedestrian_models/collision_free_speed_model_v3.html">CollisionFreeSpeedModelV3 (Rotational Steering)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pedestrian_models/warp_driver_model.html">WarpDriver Model</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../index.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../model-comparison.html">Comparative Analysis of Pedestrian Dynamics Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../lane-formation.html">Lane formation in bi-directional flow</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../single-file.html">Simulating Single-File Movement</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../motivation.html">Modelling Motivation</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../corner.html">Movement around Corners</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../double-bottleneck.html">Movement through Bottlenecks</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../disclaimer.html">Disclaimer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/jupedsim/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citation/citation.html">Cite JuPedSim</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button></div>
+      
+        <div class="header-article-item"><button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Direct Steering</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-driving-an-agent-through-a-waypoint-sequence">Example – Driving an agent through a waypoint sequence</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#try-one-change">Try one change</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#see-also">See also</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="direct-steering">
+<h1>Direct Steering<a class="headerlink" href="#direct-steering" title="Link to this heading">#</a></h1>
+<p>Most JuPedSim agents navigate autonomously via journeys.  <strong>Direct steering</strong> lets
+you take over: <code class="docutils literal notranslate"><span class="pre">simulation.add_direct_steering_stage()</span></code> creates a special stage
+where you set <code class="docutils literal notranslate"><span class="pre">agent.target</span></code> manually on every iteration, overriding the built-in
+pathfinding.  The agent still obeys collision avoidance, but <em>you</em> decide where it
+heads at each time step.</p>
+<p>Typical use cases include scripted characters, remote-controlled agents, or
+testing navigation geometry without relying on the journey system.</p>
+<section id="example-driving-an-agent-through-a-waypoint-sequence">
+<h2>Example – Driving an agent through a waypoint sequence<a class="headerlink" href="#example-driving-an-agent-through-a-waypoint-sequence" title="Link to this heading">#</a></h2>
+<p>One agent is steered through three waypoints by setting <code class="docutils literal notranslate"><span class="pre">agent.target</span></code> each
+iteration.  When the agent comes within 0.5 m of the current waypoint the
+script advances to the next one; when the last waypoint is reached the agent
+is removed.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jupedsim</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jps</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shapely</span>
+
+<span class="n">trajectory_file</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;direct_steering.sqlite&quot;</span><span class="p">)</span>
+
+<span class="n">geometry</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)])</span>
+<span class="n">simulation</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModel</span><span class="p">(),</span>
+    <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span>
+    <span class="n">trajectory_writer</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">SqliteTrajectoryWriter</span><span class="p">(</span><span class="n">output_file</span><span class="o">=</span><span class="n">trajectory_file</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">steering_stage</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">add_direct_steering_stage</span><span class="p">()</span>
+<span class="n">journey_id</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">add_journey</span><span class="p">(</span><span class="n">jps</span><span class="o">.</span><span class="n">JourneyDescription</span><span class="p">([</span><span class="n">steering_stage</span><span class="p">]))</span>
+
+<span class="n">agent_id</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span>
+    <span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelAgentParameters</span><span class="p">(</span>
+        <span class="n">journey_id</span><span class="o">=</span><span class="n">journey_id</span><span class="p">,</span>
+        <span class="n">stage_id</span><span class="o">=</span><span class="n">steering_stage</span><span class="p">,</span>
+        <span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+        <span class="n">radius</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">waypoints</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">9</span><span class="p">)]</span>
+<span class="n">waypoint_index</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="k">while</span> <span class="n">simulation</span><span class="o">.</span><span class="n">agent_count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">simulation</span><span class="o">.</span><span class="n">iteration_count</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">10_000</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
+    <span class="n">agent</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">agent</span><span class="p">(</span><span class="n">agent_id</span><span class="p">)</span>
+    <span class="n">agent</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">waypoints</span><span class="p">[</span><span class="n">waypoint_index</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">shapely</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">position</span><span class="p">)</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">shapely</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="n">waypoints</span><span class="p">[</span><span class="n">waypoint_index</span><span class="p">]))</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
+        <span class="n">waypoint_index</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">waypoint_index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">waypoints</span><span class="p">):</span>
+            <span class="n">simulation</span><span class="o">.</span><span class="n">mark_agent_for_removal</span><span class="p">(</span><span class="n">agent_id</span><span class="p">)</span>
+            <span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">simulation</span><span class="o">.</span><span class="n">iterate</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Done in </span><span class="si">{</span><span class="n">simulation</span><span class="o">.</span><span class="n">iteration_count</span><span class="p">()</span><span class="si">}</span><span class="s2"> iterations.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Done in 1555 iterations.
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.internal.notebook_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">animate</span><span class="p">,</span> <span class="n">read_sqlite_file</span>
+
+<span class="n">trajectory_data</span><span class="p">,</span> <span class="n">walkable_area</span> <span class="o">=</span> <span class="n">read_sqlite_file</span><span class="p">(</span><span class="n">trajectory_file</span><span class="p">)</span>
+<span class="n">animate</span><span class="p">(</span><span class="n">trajectory_data</span><span class="p">,</span> <span class="n">walkable_area</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>            <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG"></script><script>if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Config) {window.MathJax.Hub.Config({SVG: {font: "STIX-Web"}});}</script>                <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.5.0.min.js" integrity="sha256-fHbNLP+GlIXN+efbQec78UkemUz3NJp7UmfGxC1tNxs=" crossorigin="anonymous"></script>                <div id="76d26964-e107-489d-8d41-59755ffc8775" class="plotly-graph-div" style="height:800px; width:800px;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("76d26964-e107-489d-8d41-59755ffc8775")) {                    Plotly.newPlot(                        "76d26964-e107-489d-8d41-59755ffc8775",                        [{"hoverinfo":"name","line":{"color":"grey"},"mode":"lines","name":"Exterior","showlegend":false,"x":{"dtype":"f8","bdata":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAADRAAAAAAAAANEAAAAAAAAAAAA=="},"y":{"dtype":"f8","bdata":"AAAAAAAAJEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJEAAAAAAAAAkQA=="},"type":"scatter"},{"hoverinfo":"none","marker":{"cmax":1.2000000000000925,"cmin":0,"color":{"dtype":"f8","bdata":"ODMzMzMz8z8="},"colorbar":{"title":{"text":"Speed [m\u002fs]"}},"colorscale":[[0.0,"rgb(128,0,0)"],[0.2,"rgb(250,0,0)"],[0.4,"rgb(255,255,0)"],[0.6,"rgb(5,255,255)"],[0.8,"rgb(0,60,170)"],[1.0,"rgb(0,0,131)"]],"size":{"dtype":"f8","bdata":"mpmZmZmZ2T8="}},"mode":"markers","showlegend":false,"text":{"dtype":"f8","bdata":"ODMzMzMz8z8="},"x":{"dtype":"f8","bdata":"AAAAAAAAAEA="},"y":{"dtype":"f8","bdata":"AAAAAAAAFEA="},"type":"scatter"},{"hoverinfo":"text","marker":{"opacity":1,"size":1},"mode":"markers","showlegend":false,"text":["ID: 1, Pos(2.00,5.00)"],"x":[2.0],"y":[5.0],"type":"scatter"}],                        {"shapes":[{"fillcolor":"rgba(0, 0, 128, 0.5)","line":{"color":"rgba(0, 0, 128, 0.5)"},"type":"circle","x0":1.8,"x1":2.2,"xref":"x","y0":4.8,"y1":5.2,"yref":"y"},{"line":{"color":"white","width":3},"type":"line","x0":2.0,"x1":2.0,"y0":5.0,"y1":5.0}],"title":{"text":"\u003cb\u003eNumber of Agents: 1\u003c\u002fb\u003e","x":0.5},"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"xaxis":{"range":[-0.5,20.5]},"yaxis":{"scaleanchor":"x","scaleratio":1,"range":[-0.5,10.5]},"updatemenus":[{"buttons":[{"args":[null,{"frame":{"duration":100,"redraw":true},"fromcurrent":true}],"label":"Play","method":"animate"}],"direction":"left","pad":{"r":10,"t":87},"showactive":false,"type":"buttons","x":0.1,"xanchor":"right","y":0,"yanchor":"top"}],"sliders":[{"active":0,"currentvalue":{"font":{"size":20},"prefix":"Frame:","visible":true,"xanchor":"right"},"len":0.9,"pad":{"b":10,"t":50},"steps":[{"args":[["0"],{"frame":{"duration":100,"redraw":true},"mode":"immediate","transition":{"duration":500}}],"label":"0","method":"animate"},{"args":[["50"],{"frame":{"duration":100,"redraw":true},"mode":"immediate","transition":{"duration":500}}],"label":"50","method":"animate"},{"args":[["100"],{"frame":{"duration":100,"redraw":true},"mode":"immediate","transition":{"duration":500}}],"label":"100","method":"animate"},{"args":[["150"],{"frame":{"duration":100,"redraw":true},"mode":"immediate","transition":{"duration":500}}],"label":"150","method":"animate"},{"args":[["200"],{"frame":{"duration":100,"redraw":true},"mode":"immediate","transition":{"duration":500}}],"label":"200","method":"animate"},{"args":[["250"],{"frame":{"duration":100,"redraw":true},"mode":"immediate","transition":{"duration":500}}],"label":"250","method":"animate"}],"transition":{"duration":100,"easing":"cubic-in-out"},"x":0.1,"xanchor":"left","y":0,"yanchor":"top"}],"autosize":false,"width":800,"height":800},                        {"responsive": true}                    ).then(function(){
+                            Plotly.addFrames('76d26964-e107-489d-8d41-59755ffc8775', [{"data":[{"hoverinfo":"name","line":{"color":"grey"},"mode":"lines","name":"Exterior","showlegend":false,"x":{"dtype":"f8","bdata":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAADRAAAAAAAAANEAAAAAAAAAAAA=="},"y":{"dtype":"f8","bdata":"AAAAAAAAJEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJEAAAAAAAAAkQA=="},"type":"scatter"},{"hoverinfo":"text","marker":{"opacity":1,"size":1},"mode":"markers","showlegend":false,"text":["ID: 1, Pos(2.00,5.00)"],"x":[2.0],"y":[5.0],"type":"scatter"}],"layout":{"shapes":[{"fillcolor":"rgba(0, 0, 128, 0.5)","line":{"color":"rgba(0, 0, 128, 0.5)"},"type":"circle","x0":1.8,"x1":2.2,"xref":"x","y0":4.8,"y1":5.2,"yref":"y"},{"line":{"color":"white","width":3},"type":"line","x0":2.0,"x1":2.0,"y0":5.0,"y1":5.0}],"title":{"text":"\u003cb\u003eNumber of Agents: 1\u003c\u002fb\u003e","x":0.5}},"name":"0"},{"data":[{"hoverinfo":"name","line":{"color":"grey"},"mode":"lines","name":"Exterior","showlegend":false,"x":{"dtype":"f8","bdata":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAADRAAAAAAAAANEAAAAAAAAAAAA=="},"y":{"dtype":"f8","bdata":"AAAAAAAAJEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJEAAAAAAAAAkQA=="},"type":"scatter"},{"hoverinfo":"text","marker":{"opacity":1,"size":1},"mode":"markers","showlegend":false,"text":["ID: 1, Pos(4.40,5.00)"],"x":[4.399999999999987],"y":[5.0],"type":"scatter"}],"layout":{"shapes":[{"fillcolor":"rgba(0, 0, 128, 0.5)","line":{"color":"rgba(0, 0, 128, 0.5)"},"type":"circle","x0":4.199999999999987,"x1":4.599999999999987,"xref":"x","y0":4.8,"y1":5.2,"yref":"y"},{"line":{"color":"white","width":3},"type":"line","x0":4.399999999999987,"x1":4.599999999999987,"y0":5.0,"y1":5.0}],"title":{"text":"\u003cb\u003eNumber of Agents: 1\u003c\u002fb\u003e","x":0.5}},"name":"50"},{"data":[{"hoverinfo":"name","line":{"color":"grey"},"mode":"lines","name":"Exterior","showlegend":false,"x":{"dtype":"f8","bdata":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAADRAAAAAAAAANEAAAAAAAAAAAA=="},"y":{"dtype":"f8","bdata":"AAAAAAAAJEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJEAAAAAAAAAkQA=="},"type":"scatter"},{"hoverinfo":"text","marker":{"opacity":1,"size":1},"mode":"markers","showlegend":false,"text":["ID: 1, Pos(6.80,5.00)"],"x":[6.7999999999999],"y":[5.0],"type":"scatter"}],"layout":{"shapes":[{"fillcolor":"rgba(0, 0, 128, 0.5)","line":{"color":"rgba(0, 0, 128, 0.5)"},"type":"circle","x0":6.5999999999999,"x1":6.9999999999999005,"xref":"x","y0":4.8,"y1":5.2,"yref":"y"},{"line":{"color":"white","width":3},"type":"line","x0":6.7999999999999,"x1":6.9999999999999005,"y0":5.0,"y1":5.0}],"title":{"text":"\u003cb\u003eNumber of Agents: 1\u003c\u002fb\u003e","x":0.5}},"name":"100"},{"data":[{"hoverinfo":"name","line":{"color":"grey"},"mode":"lines","name":"Exterior","showlegend":false,"x":{"dtype":"f8","bdata":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAADRAAAAAAAAANEAAAAAAAAAAAA=="},"y":{"dtype":"f8","bdata":"AAAAAAAAJEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJEAAAAAAAAAkQA=="},"type":"scatter"},{"hoverinfo":"text","marker":{"opacity":1,"size":1},"mode":"markers","showlegend":false,"text":["ID: 1, Pos(9.20,5.00)"],"x":[9.199999999999902],"y":[5.0],"type":"scatter"}],"layout":{"shapes":[{"fillcolor":"rgba(0, 0, 128, 0.5)","line":{"color":"rgba(0, 0, 128, 0.5)"},"type":"circle","x0":8.999999999999902,"x1":9.3999999999999,"xref":"x","y0":4.8,"y1":5.2,"yref":"y"},{"line":{"color":"white","width":3},"type":"line","x0":9.199999999999902,"x1":9.3999999999999,"y0":5.0,"y1":5.0}],"title":{"text":"\u003cb\u003eNumber of Agents: 1\u003c\u002fb\u003e","x":0.5}},"name":"150"},{"data":[{"hoverinfo":"name","line":{"color":"grey"},"mode":"lines","name":"Exterior","showlegend":false,"x":{"dtype":"f8","bdata":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAADRAAAAAAAAANEAAAAAAAAAAAA=="},"y":{"dtype":"f8","bdata":"AAAAAAAAJEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJEAAAAAAAAAkQA=="},"type":"scatter"},{"hoverinfo":"text","marker":{"opacity":1,"size":1},"mode":"markers","showlegend":false,"text":["ID: 1, Pos(9.77,7.06)"],"x":[9.769313166170447],"y":[7.06145517790308],"type":"scatter"}],"layout":{"shapes":[{"fillcolor":"rgba(0, 0, 128, 0.5)","line":{"color":"rgba(0, 0, 128, 0.5)"},"type":"circle","x0":9.569313166170447,"x1":9.969313166170446,"xref":"x","y0":6.86145517790308,"y1":7.2614551779030805,"yref":"y"},{"line":{"color":"white","width":3},"type":"line","x0":9.769313166170447,"x1":9.792946419173385,"y0":7.06145517790308,"y1":7.260053942633627}],"title":{"text":"\u003cb\u003eNumber of Agents: 1\u003c\u002fb\u003e","x":0.5}},"name":"200"},{"data":[{"hoverinfo":"name","line":{"color":"grey"},"mode":"lines","name":"Exterior","showlegend":false,"x":{"dtype":"f8","bdata":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAADRAAAAAAAAANEAAAAAAAAAAAA=="},"y":{"dtype":"f8","bdata":"AAAAAAAAJEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJEAAAAAAAAAkQA=="},"type":"scatter"},{"hoverinfo":"text","marker":{"opacity":1,"size":1},"mode":"markers","showlegend":false,"text":["ID: 1, Pos(10.87,8.58)"],"x":[10.866138882642359],"y":[8.58125768204114],"type":"scatter"}],"layout":{"shapes":[{"fillcolor":"rgba(0, 0, 128, 0.5)","line":{"color":"rgba(0, 0, 128, 0.5)"},"type":"circle","x0":10.66613888264236,"x1":11.066138882642358,"xref":"x","y0":8.381257682041142,"y1":8.78125768204114,"yref":"y"},{"line":{"color":"white","width":3},"type":"line","x0":10.866138882642359,"x1":11.065795226648909,"y0":8.58125768204114,"y1":8.592977080401878}],"title":{"text":"\u003cb\u003eNumber of Agents: 1\u003c\u002fb\u003e","x":0.5}},"name":"250"}]);
+                        })                };            </script>        </div></div></div>
+</div>
+</section>
+<section id="try-one-change">
+<h2>Try one change<a class="headerlink" href="#try-one-change" title="Link to this heading">#</a></h2>
+<p>Add a second steered agent that follows a different path, or modify the
+waypoint sequence for the existing agent:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">agent_id2</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span>
+    <span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelAgentParameters</span><span class="p">(</span>
+        <span class="n">journey_id</span><span class="o">=</span><span class="n">journey_id</span><span class="p">,</span>
+        <span class="n">stage_id</span><span class="o">=</span><span class="n">steering_stage</span><span class="p">,</span>
+        <span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="n">radius</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="n">waypoints2</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
+<span class="n">waypoint_index2</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>Then inside the simulation loop, steer <code class="docutils literal notranslate"><span class="pre">agent_id2</span></code> through <code class="docutils literal notranslate"><span class="pre">waypoints2</span></code> with
+the same proximity check as the first agent.</p>
+</section>
+<section id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="07_journeys_transitions.html"><span class="doc">Journeys and Transitions</span></a> – journey-based navigation</p></li>
+<li><p><a class="reference internal" href="08_routing.html"><span class="doc">Routing</span></a> – runtime re-routing</p></li>
+<li><p><a class="reference internal" href="../../concepts/object_model.html"><span class="doc">../../concepts/object_model.rst</span></a> – JuPedSim object model overview</p></li>
+<li><p><a class="reference external" href="https://scenarios.jupedsim.org">JuPedSim scenario gallery</a></p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="09_agents_distributions.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Agent Distributions</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="11_output_visualization.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Output and Visualisation</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-driving-an-agent-through-a-waypoint-sequence">Example – Driving an agent through a waypoint sequence</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#try-one-change">Try one change</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#see-also">See also</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By The JuPedSim Development Team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026, Forschungszentrum Jülich GmbH, IAS-7.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
