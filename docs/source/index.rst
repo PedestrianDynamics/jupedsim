@@ -6,8 +6,7 @@ JuPedSim
    :maxdepth: 1
    :hidden:
 
-   Getting started <notebooks/getting_started>
-   Fundamentals <notebooks/fundamentals/index>
+   Getting started <notebooks/fundamentals/00_getting_started>
    Concepts <concepts/index>
    Pedestrian Models <pedestrian_models/index>
    Notebooks <notebooks/index>
