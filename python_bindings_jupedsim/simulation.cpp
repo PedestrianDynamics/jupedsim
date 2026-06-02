@@ -4,6 +4,7 @@
 #include "CollisionGeometry.hpp"
 #include "Journey.hpp"
 #include "OperationalModel.hpp"
+#include "OperationalModelType.hpp"
 #include "Polygon.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
@@ -28,13 +29,14 @@ void init_simulation(py::module_& m)
 {
     py::class_<Simulation>(m, "Simulation")
         .def(
-            py::init([](const OperationalModel* model, CollisionGeometry geometry, double dT) {
-                if(!model) {
-                    throw std::invalid_argument("model must not be None");
-                }
-                return std::make_unique<Simulation>(
-                    model->Clone(), std::make_unique<CollisionGeometry>(geometry), dT);
-            }),
+            py::init(
+                [](std::unique_ptr<OperationalModel> model, CollisionGeometry geometry, double dT) {
+                    if(!model) {
+                        throw std::invalid_argument("model must not be None");
+                    }
+                    return std::make_unique<Simulation>(
+                        std::move(model), std::make_unique<CollisionGeometry>(geometry), dT);
+                }),
             py::kw_only(),
             py::arg("model"),
             py::arg("geometry"),

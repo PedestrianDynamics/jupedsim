@@ -38,6 +38,12 @@ from jupedsim.models.warp_driver import (
     WarpDriverModel,
     WarpDriverModelAgentParameters,
 )
+from jupedsim.models.custom_model import (
+    CustomModelParameters,
+    CustomModelState,
+    StraightAheadModel,
+    PythonModel,
+)
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.stages import (
     ExitStage,
@@ -68,6 +74,8 @@ class Simulation:
             | AnticipationVelocityModel
             | SocialForceModel
             | WarpDriverModel
+            | PythonModel
+            | StraightAheadModel
         ),
         geometry: (
             str
@@ -160,9 +168,12 @@ class Simulation:
                 velocity_uncertainty_y=model.velocity_uncertainty_y,
             )
             py_jps_model = model_builder.build()
+        elif isinstance(model, PythonModel):
+            py_jps_model = model  # StraightAheadModel is a custom model, so we use the generic PythonModel
         else:
             raise Exception("Unknown model type supplied")
         self._writer = trajectory_writer
+        self._model = py_jps_model  # Keep a reference to the model to prevent garbage collection
         self._obj = py_jps.Simulation(
             model=py_jps_model, geometry=build_geometry(geometry)._obj, dt=dt
         )
@@ -287,6 +298,7 @@ class Simulation:
             | AnticipationVelocityModelAgentParameters
             | SocialForceModelAgentParameters
             | WarpDriverModelAgentParameters
+            | CustomModelParameters
         ),
     ) -> int:
         """Add an agent to the simulation.
@@ -370,6 +382,10 @@ class Simulation:
                 desired_speed=parameters.desired_speed,
                 radius=parameters.radius,
             )
+        elif isinstance(parameters, CustomModelParameters) or issubclass(
+            type(parameters), CustomModelParameters
+        ):
+            model = py_jps.PythonModelData()
 
         # TODO(kkratz): Some models do not have an orientation as part of their
         # state, but we initially designed it to be. This needs to be first

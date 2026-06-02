@@ -12,7 +12,8 @@ namespace py = pybind11;
 
 void init_collision_free_speed_model_v3(py::module_& m)
 {
-    py::class_<CollisionFreeSpeedModelV3, OperationalModel>(m, "CollisionFreeSpeedModelV3");
+    py::class_<CollisionFreeSpeedModelV3, OperationalModel, py::smart_holder>(
+        m, "CollisionFreeSpeedModelV3");
     py::class_<CollisionFreeSpeedModelV3Builder>(m, "CollisionFreeSpeedModelV3Builder")
         .def(py::init<>())
         .def("build", &CollisionFreeSpeedModelV3Builder::Build);
@@ -67,8 +68,7 @@ void init_collision_free_speed_model_v3(py::module_& m)
             "range_geometry_repulsion", &CollisionFreeSpeedModelV3Data::rangeGeometryRepulsion)
         .def_readwrite("range_x_scale", &CollisionFreeSpeedModelV3Data::rangeXScale)
         .def_readwrite("range_y_scale", &CollisionFreeSpeedModelV3Data::rangeYScale)
-        .def_readwrite(
-            "theta_max_upper_bound", &CollisionFreeSpeedModelV3Data::thetaMaxUpperBound)
+        .def_readwrite("theta_max_upper_bound", &CollisionFreeSpeedModelV3Data::thetaMaxUpperBound)
         .def_readwrite("agent_buffer", &CollisionFreeSpeedModelV3Data::agentBuffer)
         .def_readwrite("time_gap", &CollisionFreeSpeedModelV3Data::timeGap)
         .def_readwrite("desired_speed", &CollisionFreeSpeedModelV3Data::v0)

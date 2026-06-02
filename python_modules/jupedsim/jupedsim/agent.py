@@ -73,10 +73,18 @@ class Agent:
         """Position of the agent."""
         return self._obj.position
 
+    @position.setter
+    def position(self, position: tuple[float, float]):
+        self._obj.position = position
+
     @property
     def orientation(self) -> tuple[float, float]:
         """Orientation of the agent."""
         return self._obj.orientation
+
+    @orientation.setter
+    def orientation(self, orientation: tuple[float, float]):
+        self._obj.orientation = orientation
 
     @property
     def target(self) -> tuple[float, float]:

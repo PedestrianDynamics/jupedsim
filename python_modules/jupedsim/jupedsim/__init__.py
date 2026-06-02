@@ -67,6 +67,11 @@ from jupedsim.models.warp_driver import (
     WarpDriverModelAgentParameters,
     WarpDriverModelState,
 )
+from jupedsim.models.custom_model import (
+    CustomModelParameters,
+    CustomModelState,
+    StraightAheadModel,
+)
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import RoutingEngine
 from jupedsim.serialization import TrajectoryWriter

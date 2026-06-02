@@ -12,7 +12,8 @@ namespace py = pybind11;
 
 void init_collision_free_speed_model_v2(py::module_& m)
 {
-    py::class_<CollisionFreeSpeedModelV2, OperationalModel>(m, "CollisionFreeSpeedModelV2");
+    py::class_<CollisionFreeSpeedModelV2, OperationalModel, py::smart_holder>(
+        m, "CollisionFreeSpeedModelV2");
     py::class_<CollisionFreeSpeedModelV2Builder>(m, "CollisionFreeSpeedModelV2Builder")
         .def(py::init<>())
         .def("build", &CollisionFreeSpeedModelV2Builder::Build);

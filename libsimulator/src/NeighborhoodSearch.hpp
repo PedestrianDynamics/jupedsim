@@ -89,7 +89,7 @@ public:
         for(auto& [_, agents] : _grid) {
             const auto iter =
                 std::find_if(std::begin(agents), std::end(agents), [item](auto& agent) {
-                    return agent.id == item.id;
+                    return agent->id == item.id;
                 });
             if(iter != std::end(agents)) {
                 agents.erase(iter);

@@ -20,6 +20,8 @@ add_library(py_jupedsim MODULE
     stage.cpp
     journey.cpp
     transition.cpp
+    python_model.cpp
+    neighborhood_search.cpp
 )
 
 target_link_libraries(py_jupedsim

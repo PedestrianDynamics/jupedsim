@@ -7,6 +7,7 @@
 #include "GeneralizedCentrifugalForceModelData.hpp"
 #include "OperationalModel.hpp"
 #include "Point.hpp"
+#include "PythonModelData.hpp"
 #include "SocialForceModelData.hpp"
 #include "UniqueID.hpp"
 #include "WarpDriverModelData.hpp"
@@ -41,7 +42,8 @@ struct GenericAgent {
         CollisionFreeSpeedModelV3Data,
         AnticipationVelocityModelData,
         SocialForceModelData,
-        WarpDriverModelData>;
+        WarpDriverModelData,
+        PythonModelData>;
     Model model{};
 
     GenericAgent(

@@ -12,7 +12,8 @@ namespace py = pybind11;
 
 void init_anticipation_velocity_model(py::module_& m)
 {
-    py::class_<AnticipationVelocityModel, OperationalModel>(m, "AnticipationVelocityModel");
+    py::class_<AnticipationVelocityModel, OperationalModel, py::smart_holder>(
+        m, "AnticipationVelocityModel");
     py::class_<AnticipationVelocityModelBuilder>(m, "AnticipationVelocityModelBuilder")
         .def(
             py::init<double, double>(),

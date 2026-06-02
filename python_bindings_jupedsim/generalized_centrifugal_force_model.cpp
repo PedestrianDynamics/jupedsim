@@ -15,8 +15,7 @@ namespace py = pybind11;
 
 void init_generalized_centrifugal_force_model(py::module_& m)
 {
-    py::class_<OperationalModel>(m, "OperationalModel");
-    py::class_<GeneralizedCentrifugalForceModel, OperationalModel>(
+    py::class_<GeneralizedCentrifugalForceModel, OperationalModel, py::smart_holder>(
         m, "GeneralizedCentrifugalForceModel");
     py::class_<GeneralizedCentrifugalForceModelBuilder>(
         m, "GeneralizedCentrifugalForceModelBuilder")
@@ -33,8 +32,7 @@ void init_generalized_centrifugal_force_model(py::module_& m)
             py::arg("max_geometry_repulsion_force"))
         .def("build", &GeneralizedCentrifugalForceModelBuilder::Build);
     py::class_<GeneralizedCentrifugalForceModelData>(m, "GeneralizedCentrifugalForceModelState")
-        .def_static(
-            "_defaults", []() { return GeneralizedCentrifugalForceModelData{}; })
+        .def_static("_defaults", []() { return GeneralizedCentrifugalForceModelData{}; })
         .def(
             py::init([](double speed,
                         std::tuple<double, double> desiredOrientation,

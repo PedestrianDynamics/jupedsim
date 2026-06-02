@@ -41,10 +41,18 @@ void init_agent(py::module_& m)
             "journey_id", [](const GenericAgent& agent) { return agent.journeyId.getID(); })
         .def_property_readonly(
             "stage_id", [](const GenericAgent& agent) { return agent.stageId.getID(); })
-        .def_property_readonly(
-            "position", [](const GenericAgent& agent) { return intoTuple(agent.pos); })
-        .def_property_readonly(
-            "orientation", [](const GenericAgent& agent) { return intoTuple(agent.orientation); })
+        .def_property(
+            "position",
+            [](const GenericAgent& agent) { return intoTuple(agent.pos); },
+            [](GenericAgent& agent, std::tuple<double, double> position) {
+                agent.pos = intoPoint(position);
+            })
+        .def_property(
+            "orientation",
+            [](const GenericAgent& agent) { return intoTuple(agent.orientation); },
+            [](GenericAgent& agent, std::tuple<double, double> orientation) {
+                agent.orientation = intoPoint(orientation);
+            })
         .def_property(
             "target",
             [](const GenericAgent& agent) { return intoTuple(agent.target); },
