@@ -118,8 +118,6 @@ class StraightAheadModel(PythonModel):
 
         if pos is not None:
             agent.position = pos
-        if vel is not None:
-            agent.velocity = vel
 
     def CheckModelConstraint(self, ped, neighborhood_search, geometry):
         """

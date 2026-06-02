@@ -173,7 +173,6 @@ class Simulation:
         else:
             raise Exception("Unknown model type supplied")
         self._writer = trajectory_writer
-        self._model = py_jps_model  # Keep a reference to the model to prevent garbage collection
         self._obj = py_jps.Simulation(
             model=py_jps_model, geometry=build_geometry(geometry)._obj, dt=dt
         )
