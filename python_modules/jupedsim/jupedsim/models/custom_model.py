@@ -1,3 +1,4 @@
+from typing import Any
 import jupedsim.native as py_jps
 import numpy as np
 
@@ -5,32 +6,35 @@ import numpy as np
 PythonModel = py_jps.OperationalModel
 
 
-class CustomModuleUpdate:
+class CustomModelUpdate:
     """
     A simple data class to hold updates for the custom model.
     """
-
-    def __init__(self, dict: dict = None):
-        self._obj = py_jps.PythonModelUpdate()
-        if dict is not None:
-            self.set_dict(dict)
-
-    def set_dict(self, dict):
-        for key, value in dict.items():
-            self._obj.set(key, value)
+    def __init__(self, update_object: Any = dict()):
+        self._obj = py_jps.PythonModelUpdate(update_object)
 
     def __getattr__(self, name):
         """Automatically get from the underlying object"""
         if name.startswith("_"):
             return object.__getattribute__(self, name)
-        return self._obj.get(name)
+        if hasattr(self._obj.py_object, "keys"):
+            if name in self._obj.py_object.keys():
+                return self._obj.py_object[name]
+            else:
+                raise AttributeError(
+                    f"Key '{name}' not found in the underlying object"
+                )
+        else:
+            return getattr(self._obj.py_object, name)
 
     def __setattr__(self, name, value):
         """Automatically set on the underlying object"""
         if name.startswith("_"):
             object.__setattr__(self, name, value)
+        if hasattr(self._obj.py_object, "keys"):
+            self._obj.py_object[name] = value
         else:
-            self._obj.set(name, value)
+            setattr(self._obj.py_object, name, value)
 
 
 class CustomModelParameters:
@@ -38,21 +42,36 @@ class CustomModelParameters:
     A simple data class to hold parameters for the custom model.
     """
 
-    def __init__(self, dict: dict = None):
-        if dict is not None:
-            for key, value in dict.items():
-                setattr(self, key, value)
+    def __init__(self, param_object: Any = None):
+        """
+        Accept either:
+        - a mapping/dict-like (has .items())
+        - a dataclass or any other class
+        """
+        self._obj = py_jps.PythonModelState(param_object)
 
+    def __getattr__(self, name):
+        """Automatically get from the underlying object"""
+        if name.startswith("_"):
+            return object.__getattribute__(self, name)
+        if hasattr(self._obj.py_object, "keys"):
+            if name in self._obj.py_object.keys():
+                return self._obj.py_object[name]
+            else:
+                raise AttributeError(
+                    f"Key '{name}' not found in the underlying object"
+                )
+        else:
+            return getattr(self._obj.py_object, name)
 
-class CustomModelState:
-    """
-    A simple data class to hold state for the custom model.
-    """
-
-    def __init__(self, dict: dict = None):
-        if dict is not None:
-            for key, value in dict.items():
-                setattr(self, key, value)
+    def __setattr__(self, name, value):
+        """Automatically set on the underlying object"""
+        if name.startswith("_"):
+            object.__setattr__(self, name, value)
+        if hasattr(self._obj.py_object, "keys"):
+            self._obj.py_object[name] = value
+        else:
+            setattr(self._obj.py_object, name, value)
 
 
 class StraightAheadModel(PythonModel):
@@ -65,6 +84,7 @@ class StraightAheadModel(PythonModel):
         self.speed = speed
 
     def ComputeNewPosition(self, dT: float, ped, geometry, neighborhood_search):
+        from jupedsim.agent import Agent
         """
         Compute the new position for an agent.
 
@@ -83,10 +103,9 @@ class StraightAheadModel(PythonModel):
             ped.position, 2.0
         )  # Example of using neighborhood search
 
-        for agent in agents:
-            print(
-                f"Neighboring agent id: {agent.id}, position: {agent.position}"
-            )
+        #the ped is a GenericAgent, we want to interact with the Python native Agent class, so we wrap it
+        ped = Agent(ped)
+        model = ped.model
 
         direction = (
             ped.target[0] - ped.position[0],
@@ -99,25 +118,11 @@ class StraightAheadModel(PythonModel):
             ped.position[1] + self.speed * direction[1] / norm * dT,
         )
 
-        update = py_jps.PythonModelUpdate()
-        update.set("position", new_position)
+        update = CustomModelUpdate()
+        update.position = new_position
         # update.set("orientation", new_velocity)
 
-        return update
-
-    def ApplyUpdate(self, update, agent):
-        """
-        Apply the computed update to the agent.
-
-        Args:
-            update: OperationalModelUpdate object containing position and velocity changes
-            agent: GenericAgent object to update
-        """
-        pos = update.get("position")
-        vel = update.get("velocity")
-
-        if pos is not None:
-            agent.position = pos
+        return update._obj
 
     def CheckModelConstraint(self, ped, neighborhood_search, geometry):
         """

@@ -40,7 +40,6 @@ from jupedsim.models.warp_driver import (
 )
 from jupedsim.models.custom_model import (
     CustomModelParameters,
-    CustomModelState,
     StraightAheadModel,
     PythonModel,
 )
@@ -384,7 +383,7 @@ class Simulation:
         elif isinstance(parameters, CustomModelParameters) or issubclass(
             type(parameters), CustomModelParameters
         ):
-            model = py_jps.PythonModelData()
+            model = parameters._obj
 
         # TODO(kkratz): Some models do not have an orientation as part of their
         # state, but we initially designed it to be. This needs to be first

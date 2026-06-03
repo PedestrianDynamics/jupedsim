@@ -4,67 +4,85 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <map>
+#include <string>
+
 namespace py = pybind11;
 
 class PythonModelUpdate
 {
-    using AnyType = std::variant<int, double, std::string, bool, Point>;
-    std::unordered_map<std::string, AnyType> data;
-
 public:
-    void set(const std::string& key, const py::object& value)
+    PythonModelUpdate(py::object impl) : impl(impl) {}
+    ~PythonModelUpdate() = default;
+
+    py::object impl;
+
+    /// Extract key-value pairs from a Python object (dict, dataclass, or object with __dict__)
+    /// Returns a map<string, py::object> of all attributes found.
+    static std::map<std::string, py::object> extract_attributes(py::object obj)
     {
-        if(py::isinstance<py::bool_>(value)) {
-            data[key] = value.cast<bool>();
-        } else if(py::isinstance<py::int_>(value)) {
-            data[key] = value.cast<int>();
-        } else if(py::isinstance<py::float_>(value)) {
-            data[key] = value.cast<double>();
-        } else if(py::isinstance<py::str>(value)) {
-            data[key] = value.cast<std::string>();
-        } else if(py::isinstance<py::tuple>(value)) {
-            // Convert tuple of floats to Point
-            auto tuple = value.cast<py::tuple>();
-            if(tuple.size() == 2) {
-                try {
-                    double x = tuple[0].cast<double>();
-                    double y = tuple[1].cast<double>();
-                    data[key] = Point(x, y);
-                } catch(const std::exception&) {
-                    // If conversion fails, skip
+        std::map<std::string, py::object> result;
+        py::gil_scoped_acquire gil;
+
+        // Try __dict__ first (fast path for objects with instance dictionary)
+        if(py::hasattr(obj, "__dict__")) {
+            try {
+                py::dict d = obj.attr("__dict__");
+                for(auto item : d) {
+                    std::string key = py::cast<std::string>(item.first);
+                    result[key] = py::cast<py::object>(item.second);
+                }
+                return result;
+            } catch(const py::error_already_set&) {
+                PyErr_Clear();
+            }
+        }
+
+        // Try treating as dict-like (has .items() method)
+        if(py::hasattr(obj, "items")) {
+            try {
+                py::object items_method = obj.attr("items");
+                py::object items_result = items_method();
+                for(auto item : items_result) {
+                    py::tuple kv = py::cast<py::tuple>(item);
+                    if(kv.size() == 2) {
+                        std::string key = py::cast<std::string>(kv[0]);
+                        result[key] = py::cast<py::object>(kv[1]);
+                    }
+                }
+                return result;
+            } catch(const py::error_already_set&) {
+                PyErr_Clear();
+            }
+        }
+
+        // Try dir() as last resort for anything with attributes
+        try {
+            py::object builtins = py::module_::import("builtins");
+            py::list names = builtins.attr("dir")(obj);
+            for(auto h : names) {
+                std::string name = py::cast<std::string>(h);
+                // Skip private/dunder and special attributes
+                if(name[0] != '_') {
+                    try {
+                        py::object val = obj.attr(name.c_str());
+                        // Skip callables (methods, functions, lambdas)
+                        // Check if it's callable using Python's callable() built-in
+                        py::object builtins_callable =
+                            py::module_::import("builtins").attr("callable");
+                        bool is_callable = py::cast<bool>(builtins_callable(val));
+                        if(!is_callable) {
+                            result[name] = val;
+                        }
+                    } catch(const py::error_already_set&) {
+                        PyErr_Clear();
+                    }
                 }
             }
-        } else if(py::isinstance<py::object>(value)) {
-            // Try to cast to Point if it's a Point object
-            try {
-                auto point = value.cast<Point>();
-                data[key] = point;
-            } catch(const std::exception&) {
-                // If not a Point, ignore
-            }
+        } catch(const py::error_already_set&) {
+            PyErr_Clear();
         }
-    }
 
-    py::object get(const std::string& key)
-    {
-        auto it = data.find(key);
-        if(it == data.end())
-            return py::none();
-
-        const auto& value = it->second;
-        if(std::holds_alternative<int>(value)) {
-            return py::int_(std::get<int>(value));
-        } else if(std::holds_alternative<double>(value)) {
-            return py::float_(std::get<double>(value));
-        } else if(std::holds_alternative<bool>(value)) {
-            return py::bool_(std::get<bool>(value));
-        } else if(std::holds_alternative<std::string>(value)) {
-            return py::str(std::get<std::string>(value));
-        } else if(std::holds_alternative<Point>(value)) {
-            // Return Point as a tuple (x, y)
-            const auto& point = std::get<Point>(value);
-            return py::make_tuple(point.x, point.y);
-        }
-        return py::none();
+        return result;
     }
 };

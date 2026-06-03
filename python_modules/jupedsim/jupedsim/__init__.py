@@ -69,7 +69,7 @@ from jupedsim.models.warp_driver import (
 )
 from jupedsim.models.custom_model import (
     CustomModelParameters,
-    CustomModelState,
+    CustomModelUpdate,
     StraightAheadModel,
 )
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
@@ -150,6 +150,9 @@ __all__ = [
     "WarpDriverModelAgentParameters",
     "WarpDriverModel",
     "WarpDriverModelState",
+    "CustomModelParameters",
+    "CustomModelUpdate",
+    "StraightAheadModel",
     "WaitingSetStage",
     "WaitingSetState",
     "WaypointStage",

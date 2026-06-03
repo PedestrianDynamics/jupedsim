@@ -34,17 +34,7 @@ public:
         );
     }
 
-    virtual void
-    ApplyUpdate(const OperationalModelUpdate& update, GenericAgent& agent) const override
-    {
-        PYBIND11_OVERRIDE_PURE(
-            void, /* Return type */
-            OperationalModel, /* Parent class */
-            ApplyUpdate, /* Name of function in C++ (must match Python name) */
-            update,
-            agent /* Arguments */
-        );
-    }
+    using PythonModel::ApplyUpdate;
 
     virtual void CheckModelConstraint(
         const GenericAgent& agent,
@@ -69,25 +59,27 @@ public:
 
 void init_python_model(py::module_& m)
 {
-    py::class_<PythonModelData>(m, "PythonModelData").def(py::init<>());
+    py::class_<PythonModelData>(m, "PythonModelState")
+        .def(py::init<py::object>(), py::arg("py_object"))
+        .def_readwrite("py_object", &PythonModelData::impl);
     py::class_<PythonModelUpdate>(m, "PythonModelUpdate")
-        .def(py::init<>())
-        .def("set", &PythonModelUpdate::set)
-        .def("get", &PythonModelUpdate::get);
+        .def(py::init<py::object>(), py::arg("py_object"))
+        .def_readwrite("py_object", &PythonModelUpdate::impl);
     py::class_<OperationalModel, PythonModelTramp, py::smart_holder>(m, "OperationalModel")
         .def(py::init<>())
         .def(
             "ComputeNewPosition",
-            &OperationalModel::ComputeNewPosition,
+            [](const OperationalModel& self,
+               double dT,
+               const GenericAgent& ped,
+               const CollisionGeometry& geometry,
+               const NeighborhoodSearch<GenericAgent>& neighborhood_search) {
+                return self.ComputeNewPosition(dT, ped, geometry, neighborhood_search);
+            },
             py::arg("dT"),
             py::arg("ped"),
             py::arg("geometry"),
             py::arg("neighborhood_search"))
-        .def(
-            "ApplyUpdate",
-            [](OperationalModel& self, const PythonModelUpdate& update, GenericAgent& agent) {
-                self.ApplyUpdate(update, agent);
-            })
         .def(
             "CheckModelConstraint",
             &OperationalModel::CheckModelConstraint,
