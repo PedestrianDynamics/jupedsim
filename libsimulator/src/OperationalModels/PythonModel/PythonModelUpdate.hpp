@@ -1,6 +1,9 @@
 #pragma once
 #include "Point.hpp"
+#include "SimulationError.hpp"
 
+#include <fmt/core.h>
+#include <fmt/format.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -34,7 +37,7 @@ public:
                 }
                 return result;
             } catch(const py::error_already_set&) {
-                PyErr_Clear();
+                throw SimulationError("Error extracting attributes from object");
             }
         }
 
@@ -52,7 +55,7 @@ public:
                 }
                 return result;
             } catch(const py::error_already_set&) {
-                PyErr_Clear();
+                throw SimulationError("Error extracting attributes from dict-like object");
             }
         }
 
@@ -75,12 +78,12 @@ public:
                             result[name] = val;
                         }
                     } catch(const py::error_already_set&) {
-                        PyErr_Clear();
+                        throw SimulationError("Error extracting attribute '{}' from object", name);
                     }
                 }
             }
         } catch(const py::error_already_set&) {
-            PyErr_Clear();
+            throw SimulationError("Error extracting attributes from object");
         }
 
         return result;
@@ -94,13 +97,15 @@ public:
                 try {
                     obj.attr(py::str(key)) = value;
                 } catch(const py::error_already_set&) {
-                    throw std::runtime_error(
-                        "Error applying update for attribute '" + key +
-                        "': value cannot be set on object");
+                    throw SimulationError(
+                        "Error applying update for attribute '{}': value cannot be set on "
+                        "object",
+                        key);
                 } catch(const py::cast_error&) {
-                    throw std::runtime_error(
-                        "Error applying update for attribute '" + key +
-                        "': value cannot be cast to expected type");
+                    throw SimulationError(
+                        "Error applying update for attribute '{}': value cannot be cast to "
+                        "expected type",
+                        key);
                 }
             }
 
@@ -110,13 +115,15 @@ public:
 
                     obj[py::str(key)] = value;
                 } catch(const py::error_already_set&) {
-                    throw std::runtime_error(
-                        "Error applying update for attribute '" + key +
-                        "': value cannot be set on dict-like object");
+                    throw SimulationError(
+                        "Error applying update for attribute '{}': value cannot be set on "
+                        "dict-like object",
+                        key);
                 } catch(const py::cast_error&) {
-                    throw std::runtime_error(
-                        "Error applying update for attribute '" + key +
-                        "': value cannot be cast to expected type");
+                    throw SimulationError(
+                        "Error applying update for attribute '{}': value cannot be cast to "
+                        "expected type",
+                        key);
                 }
             }
         }
