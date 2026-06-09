@@ -19,7 +19,7 @@ public:
 
     /// Extract key-value pairs from a Python object (dict, dataclass, or object with __dict__)
     /// Returns a map<string, py::object> of all attributes found.
-    static std::map<std::string, py::object> extract_attributes(py::object obj)
+    static std::map<std::string, py::object> extract_attributes(const py::object& obj)
     {
         std::map<std::string, py::object> result;
         py::gil_scoped_acquire gil;
@@ -84,5 +84,41 @@ public:
         }
 
         return result;
+    }
+
+    static void set_attributes(const std::map<std::string, py::object>& attrs, py::object& obj)
+    {
+        py::gil_scoped_acquire gil;
+        for(const auto& [key, value] : attrs) {
+            if(py::hasattr(obj, "__dict__")) {
+                try {
+                    obj.attr(py::str(key)) = value;
+                } catch(const py::error_already_set&) {
+                    throw std::runtime_error(
+                        "Error applying update for attribute '" + key +
+                        "': value cannot be set on object");
+                } catch(const py::cast_error&) {
+                    throw std::runtime_error(
+                        "Error applying update for attribute '" + key +
+                        "': value cannot be cast to expected type");
+                }
+            }
+
+            // Try treating as dict-like (has .items() method)
+            if(py::hasattr(obj, "keys")) {
+                try {
+
+                    obj[py::str(key)] = value;
+                } catch(const py::error_already_set&) {
+                    throw std::runtime_error(
+                        "Error applying update for attribute '" + key +
+                        "': value cannot be set on dict-like object");
+                } catch(const py::cast_error&) {
+                    throw std::runtime_error(
+                        "Error applying update for attribute '" + key +
+                        "': value cannot be cast to expected type");
+                }
+            }
+        }
     }
 };

@@ -23,27 +23,32 @@ public:
         // Extract all attributes from the update object (handles dicts, dataclasses, objects)
         auto attrs = PythonModelUpdate::extract_attributes(upd.impl);
         // Extract all attributes from the model state object (handles dicts, dataclasses, objects)
-        auto modelAttrs = PythonModelUpdate::extract_attributes(model.impl);
+        model.extract_attributes();
         // Merge modelAttrs into attrs, giving precedence to update attributes
 
         // Apply each attribute to both the model data and the agent
         for(const auto& [key, val] : attrs) {
-            try {
-                // Set the attribute on the model data object
-                modelAttrs[key] = val;
-
-                // Apply special handling for certain fields
-                if(key == "position") {
-                    agent.pos = intoPoint(pybind11::cast<std::tuple<double, double>>(val));
-                } else if(key == "orientation") {
-                    agent.orientation = intoPoint(pybind11::cast<std::tuple<double, double>>(val));
+            if(key == "position" || key == "orientation") {
+                try {
+                    if(key == "position") {
+                        agent.pos = intoPoint(pybind11::cast<std::tuple<double, double>>(val));
+                    } else if(key == "orientation") {
+                        agent.orientation =
+                            intoPoint(pybind11::cast<std::tuple<double, double>>(val));
+                    }
+                } catch(const pybind11::error_already_set&) {
+                    throw std::runtime_error(
+                        "Error applying update for attribute '" + key +
+                        "': " + pybind11::cast<std::string>(pybind11::str(val)));
+                    // Silently ignore attributes that can't be cast or set
+                } catch(const pybind11::cast_error&) {
+                    // Silently ignore cast errors for non-convertible types
+                    throw std::runtime_error(
+                        "Error applying update for attribute '" + key +
+                        "': value cannot be cast to expected type");
                 }
-            } catch(const pybind11::error_already_set&) {
-                PyErr_Clear();
-                // Silently ignore attributes that can't be cast or set
-            } catch(const pybind11::cast_error&) {
-                // Silently ignore cast errors for non-convertible types
             }
         }
+        PythonModelUpdate::set_attributes(attrs, model.impl);
     }
 };

@@ -10,6 +10,7 @@ add_library(py_jupedsim MODULE
     anticipation_velocity_model.cpp
     social_force_model.cpp
     warp_driver_model.cpp
+    linesegment.cpp
     logging.cpp
     logging.hpp
     trace.cpp

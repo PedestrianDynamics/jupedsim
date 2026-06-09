@@ -184,6 +184,16 @@ CollisionGeometry::LineSegmentsInDistanceTo(double distance, Point p) const
         DistanceQueryIterator<LineSegment>{distance, p, _segments.cend(), _segments.cend()}};
 }
 
+const std::vector<LineSegment>
+CollisionGeometry::LineSegmentsInDistanceToVec(double distance, Point p) const
+{
+    std::vector<LineSegment> result{};
+    for(const auto& ls : LineSegmentsInDistanceTo(distance, p)) {
+        result.push_back(ls);
+    }
+    return result;
+}
+
 bool CollisionGeometry::IntersectsAny(const LineSegment& linesegment) const
 {
     const auto cellsToQuery = cellsFromLineSegment(linesegment);

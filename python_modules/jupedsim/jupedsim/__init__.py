@@ -68,15 +68,18 @@ from jupedsim.models.warp_driver import (
     WarpDriverModelState,
 )
 from jupedsim.models.custom_model import (
-    CustomModelParameters,
-    CustomModelUpdate,
-    StraightAheadModel,
+    CustomModelAgentParameters,
+    CustomModelAgentUpdate,
+    CustomOperationalModel,
+    PythonSocialForceModel,
 )
+from jupedsim.neighborhood import NeighborhoodSearch
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import RoutingEngine
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
 from jupedsim.sqlite_serialization import SqliteTrajectoryWriter
+from jupedsim.linesegment import LineSegment
 
 try:
     from jupedsim.hdf5_serialization import Hdf5TrajectoryWriter
@@ -117,9 +120,11 @@ __all__ = [
     "GeneralizedCentrifugalForceModel",
     "GeneralizedCentrifugalForceModelState",
     "Geometry",
+    "LineSegment",
     "IncorrectParameterError",
     "JourneyDescription",
     "NegativeValueError",
+    "NeighborhoodSearch",
     "NotifiableQueueStage",
     "OverlappingCirclesError",
     "Recording",
@@ -150,9 +155,10 @@ __all__ = [
     "WarpDriverModelAgentParameters",
     "WarpDriverModel",
     "WarpDriverModelState",
-    "CustomModelParameters",
-    "CustomModelUpdate",
-    "StraightAheadModel",
+    "CustomModelAgentParameters",
+    "CustomModelAgentUpdate",
+    "PythonModel",
+    "PythonSocialForceModel",
     "WaitingSetStage",
     "WaitingSetState",
     "WaypointStage",

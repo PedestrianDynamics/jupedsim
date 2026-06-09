@@ -14,7 +14,7 @@ from jupedsim.models.collision_free_speed_v3 import (
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModelState,
 )
-from jupedsim.models.custom_model import CustomModelParameters
+from jupedsim.models.custom_model import CustomModelAgentParameters
 from jupedsim.models.social_force import SocialForceModelState
 from jupedsim.models.warp_driver import WarpDriverModelState
 
@@ -125,7 +125,7 @@ class Agent:
         | AnticipationVelocityModelState
         | SocialForceModelState
         | WarpDriverModelState
-        | CustomModelParameters
+        | CustomModelAgentParameters
     ):
         """Access model specific state of this agent."""
         model = self._obj.model
@@ -144,6 +144,6 @@ class Agent:
         elif isinstance(model, py_jps.WarpDriverModelState):
             return WarpDriverModelState(model)
         elif isinstance(model, py_jps.PythonModelState):
-            return CustomModelParameters(model.py_object)
+            return CustomModelAgentParameters(model.py_object)
         else:
             raise Exception("Internal error")

@@ -124,6 +124,8 @@ public:
 
     const std::vector<LineSegment>& LineSegmentsInApproxDistanceTo(Point p) const;
 
+    const std::vector<LineSegment> LineSegmentsInDistanceToVec(double distance, Point p) const;
+
     /// Will perfrom a linesegment intersection versus the whole geometry, i.e. walls and closed
     /// doors.
     /// @param linesegment to test for intersection with geometry

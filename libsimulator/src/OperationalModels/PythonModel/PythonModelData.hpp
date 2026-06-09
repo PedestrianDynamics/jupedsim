@@ -7,10 +7,13 @@ namespace py = pybind11;
 class PythonModelData
 {
 public:
-    PythonModelData(py::object impl) : impl(impl) {}
+    PythonModelData(py::object _impl) : impl(_impl) {};
     ~PythonModelData() = default;
 
     py::object impl;
+    std::map<std::string, py::object> attributes;
+
+    void extract_attributes() { attributes = PythonModelUpdate::extract_attributes(impl); }
 };
 
 template <>

@@ -39,9 +39,9 @@ from jupedsim.models.warp_driver import (
     WarpDriverModelAgentParameters,
 )
 from jupedsim.models.custom_model import (
-    CustomModelParameters,
-    StraightAheadModel,
-    PythonModel,
+    CustomModelAgentParameters,
+    CustomOperationalModel,
+    PythonSocialForceModel,
 )
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.stages import (
@@ -73,8 +73,8 @@ class Simulation:
             | AnticipationVelocityModel
             | SocialForceModel
             | WarpDriverModel
-            | PythonModel
-            | StraightAheadModel
+            | PythonSocialForceModel
+            | CustomOperationalModel
         ),
         geometry: (
             str
@@ -167,7 +167,7 @@ class Simulation:
                 velocity_uncertainty_y=model.velocity_uncertainty_y,
             )
             py_jps_model = model_builder.build()
-        elif isinstance(model, PythonModel):
+        elif isinstance(model, CustomOperationalModel):
             py_jps_model = model  # StraightAheadModel is a custom model, so we use the generic PythonModel
         else:
             raise Exception("Unknown model type supplied")
@@ -296,7 +296,7 @@ class Simulation:
             | AnticipationVelocityModelAgentParameters
             | SocialForceModelAgentParameters
             | WarpDriverModelAgentParameters
-            | CustomModelParameters
+            | CustomModelAgentParameters
         ),
     ) -> int:
         """Add an agent to the simulation.
@@ -380,8 +380,8 @@ class Simulation:
                 desired_speed=parameters.desired_speed,
                 radius=parameters.radius,
             )
-        elif isinstance(parameters, CustomModelParameters) or issubclass(
-            type(parameters), CustomModelParameters
+        elif isinstance(parameters, CustomModelAgentParameters) or issubclass(
+            type(parameters), CustomModelAgentParameters
         ):
             model = parameters._obj
 
