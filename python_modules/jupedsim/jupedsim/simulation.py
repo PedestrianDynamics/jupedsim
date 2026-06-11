@@ -26,6 +26,10 @@ from jupedsim.models.collision_free_speed_v3 import (
     CollisionFreeSpeedModelV3,
     CollisionFreeSpeedModelV3AgentParameters,
 )
+from jupedsim.models.custom_model import (
+    CustomModelAgentParameters,
+    CustomOperationalModel,
+)
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
@@ -37,10 +41,6 @@ from jupedsim.models.social_force import (
 from jupedsim.models.warp_driver import (
     WarpDriverModel,
     WarpDriverModelAgentParameters,
-)
-from jupedsim.models.custom_model import (
-    CustomModelAgentParameters,
-    CustomOperationalModel,
 )
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.stages import (

@@ -11,9 +11,6 @@ public:
     ~PythonModelData() = default;
 
     py::object impl;
-    std::map<std::string, py::object> attributes;
-
-    void extract_attributes() { attributes = PythonModelUpdate::extract_attributes(impl); }
 };
 
 template <>

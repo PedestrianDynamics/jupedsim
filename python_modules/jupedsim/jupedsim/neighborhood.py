@@ -7,7 +7,7 @@ This module provides a Pythonic interface to the underlying C++ NeighborhoodSear
 implementation, making it easier to work with spatial queries in operational models.
 """
 
-from typing import TYPE_CHECKING, List, Tuple
+from typing import List, Tuple
 
 import jupedsim.native as py_jps
 

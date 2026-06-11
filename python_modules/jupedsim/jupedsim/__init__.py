@@ -32,6 +32,7 @@ from jupedsim.library import (
     set_info_callback,
     set_warning_callback,
 )
+from jupedsim.linesegment import LineSegment
 from jupedsim.models.anticipation_velocity_model import (
     AnticipationVelocityModel,
     AnticipationVelocityModelAgentParameters,
@@ -52,6 +53,11 @@ from jupedsim.models.collision_free_speed_v3 import (
     CollisionFreeSpeedModelV3AgentParameters,
     CollisionFreeSpeedModelV3State,
 )
+from jupedsim.models.custom_model import (
+    CustomModelAgentParameters,
+    CustomModelAgentUpdate,
+    CustomOperationalModel,
+)
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
@@ -67,18 +73,12 @@ from jupedsim.models.warp_driver import (
     WarpDriverModelAgentParameters,
     WarpDriverModelState,
 )
-from jupedsim.models.custom_model import (
-    CustomModelAgentParameters,
-    CustomModelAgentUpdate,
-    CustomOperationalModel,
-)
 from jupedsim.neighborhood import NeighborhoodSearch
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import RoutingEngine
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
 from jupedsim.sqlite_serialization import SqliteTrajectoryWriter
-from jupedsim.linesegment import LineSegment
 
 try:
     from jupedsim.hdf5_serialization import Hdf5TrajectoryWriter

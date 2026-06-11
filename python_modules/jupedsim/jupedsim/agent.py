@@ -11,10 +11,10 @@ from jupedsim.models.collision_free_speed_v2 import (
 from jupedsim.models.collision_free_speed_v3 import (
     CollisionFreeSpeedModelV3State,
 )
+from jupedsim.models.custom_model import CustomModelAgentParameters
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModelState,
 )
-from jupedsim.models.custom_model import CustomModelAgentParameters
 from jupedsim.models.social_force import SocialForceModelState
 from jupedsim.models.warp_driver import WarpDriverModelState
 

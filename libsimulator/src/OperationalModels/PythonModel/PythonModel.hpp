@@ -26,8 +26,6 @@ public:
 
         // Extract all attributes from the update object (handles dicts, dataclasses, objects)
         auto attrs = PythonModelUpdate::extract_attributes(upd.impl);
-        // Extract all attributes from the model state object (handles dicts, dataclasses, objects)
-        model.extract_attributes();
         // Merge modelAttrs into attrs, giving precedence to update attributes
 
         // Apply each attribute to both the model data and the agent

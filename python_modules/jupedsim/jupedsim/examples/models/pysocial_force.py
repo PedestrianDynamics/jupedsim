@@ -1,11 +1,12 @@
+from typing import Tuple
+
+import numpy as np
+from jupedsim.agent import Agent
+from jupedsim.geometry import LineSegment
 from jupedsim.models.custom_model import (
     CustomModelAgentUpdate,
     CustomOperationalModel,
 )
-import numpy as np
-from typing import Tuple
-from jupedsim.agent import Agent
-from jupedsim.geometry import LineSegment
 
 
 class PythonSocialForceModel(CustomOperationalModel):

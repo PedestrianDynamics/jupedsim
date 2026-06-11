@@ -4,7 +4,6 @@
 #include "CollisionGeometry.hpp"
 #include "Journey.hpp"
 #include "OperationalModel.hpp"
-#include "OperationalModelType.hpp"
 #include "Polygon.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"

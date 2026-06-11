@@ -1,11 +1,12 @@
-from typing import Any, TYPE_CHECKING, Tuple
-import jupedsim.native as py_jps
 from abc import abstractmethod
+from typing import Any, TYPE_CHECKING
 
-
+import jupedsim.native as py_jps
 from jupedsim.geometry import Geometry
 from jupedsim.neighborhood import NeighborhoodSearch
 
+if TYPE_CHECKING:
+    from jupedsim.agent import Agent
 
 # alias - use the correct exposed class name
 PythonModel = py_jps.OperationalModel
