@@ -256,6 +256,8 @@ setup(
     python_requires=">=3.10,<3.15",
     packages=[
         "jupedsim",
+        "jupedsim.examples",
+        "jupedsim.examples.models",
         "jupedsim.models",
         "jupedsim.internal",
         "jupedsim.native",
@@ -263,6 +265,8 @@ setup(
     ],
     package_dir={
         "jupedsim": "python_modules/jupedsim/jupedsim",
+        "jupedsim.examples": "python_modules/jupedsim/jupedsim/examples",
+        "jupedsim.examples.models": "python_modules/jupedsim/jupedsim/examples/models",
         "jupedsim.models": "python_modules/jupedsim/jupedsim/models",
         "jupedsim.internal": "python_modules/jupedsim/jupedsim/internal",
         "jupedsim.native": "python_modules/jupedsim/jupedsim/native",

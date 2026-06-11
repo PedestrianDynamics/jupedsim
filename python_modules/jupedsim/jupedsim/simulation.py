@@ -41,7 +41,6 @@ from jupedsim.models.warp_driver import (
 from jupedsim.models.custom_model import (
     CustomModelAgentParameters,
     CustomOperationalModel,
-    PythonSocialForceModel,
 )
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.stages import (
@@ -73,7 +72,6 @@ class Simulation:
             | AnticipationVelocityModel
             | SocialForceModel
             | WarpDriverModel
-            | PythonSocialForceModel
             | CustomOperationalModel
         ),
         geometry: (
@@ -168,7 +166,7 @@ class Simulation:
             )
             py_jps_model = model_builder.build()
         elif isinstance(model, CustomOperationalModel):
-            py_jps_model = model  # StraightAheadModel is a custom model, so we use the generic PythonModel
+            py_jps_model = model
         else:
             raise Exception("Unknown model type supplied")
         self._writer = trajectory_writer

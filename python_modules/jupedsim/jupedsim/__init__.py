@@ -71,7 +71,6 @@ from jupedsim.models.custom_model import (
     CustomModelAgentParameters,
     CustomModelAgentUpdate,
     CustomOperationalModel,
-    PythonSocialForceModel,
 )
 from jupedsim.neighborhood import NeighborhoodSearch
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
@@ -157,8 +156,7 @@ __all__ = [
     "WarpDriverModelState",
     "CustomModelAgentParameters",
     "CustomModelAgentUpdate",
-    "PythonModel",
-    "PythonSocialForceModel",
+    "CustomOperationalModel",
     "WaitingSetStage",
     "WaitingSetState",
     "WaypointStage",
