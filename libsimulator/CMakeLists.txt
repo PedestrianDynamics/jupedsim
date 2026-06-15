@@ -19,7 +19,6 @@ target_sources(simulator PRIVATE
     src/GeometricFunctions.hpp
     src/GeometryBuilder.cpp
     src/GeometryBuilder.hpp
-    src/GeometrySwitchError.hpp
     src/Graph.hpp
     src/Grid2D.hpp
     src/HashCombine.hpp

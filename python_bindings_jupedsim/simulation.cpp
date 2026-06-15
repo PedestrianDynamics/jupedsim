@@ -149,8 +149,5 @@ void init_simulation(py::module_& m)
         .def(
             "get_duration",
             [](Simulation& sim, const std::string_view name) { return sim.GetTimerDuration(name); })
-        .def("get_durations", [](Simulation& sim) { return sim.GetTimerDurations(); })
-        .def("switch_geometry", [](Simulation& sim, CollisionGeometry& geometry) {
-            sim.SwitchGeometry(std::make_unique<CollisionGeometry>(geometry));
-        });
+        .def("get_durations", [](Simulation& sim) { return sim.GetTimerDurations(); });
 }

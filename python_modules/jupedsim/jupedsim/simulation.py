@@ -585,19 +585,6 @@ class Simulation:
         """
         return Geometry(self._obj.get_geometry())
 
-    def switch_geometry(self, geometry: Geometry) -> None:
-        """Switch the geometry of the simulation.
-
-        Exchanges the current geometry with the new one. Checks if all agents
-        and stages lie within the new geometry.
-
-        Arguments:
-            geometry: The new geometry to be used in the simulation.
-
-        """
-        internal_geometry = build_geometry(geometry)
-        self._obj.switch_geometry(internal_geometry._obj)
-
     @property
     def timer(self) -> Timer:
         """Timer for measuring time spent in different stages of the simulation.

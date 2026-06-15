@@ -39,12 +39,8 @@ class Simulation
     StageManager _stageManager{};
     StageSystem _stageSystem{};
     NeighborhoodSearch<GenericAgent> _neighborhoodSearch{2.2};
-    std::unordered_map<
-        CollisionGeometry::ID,
-        std::tuple<std::unique_ptr<CollisionGeometry>, std::unique_ptr<RoutingEngine>>>
-        geometries{};
-    RoutingEngine* _routingEngine;
-    CollisionGeometry* _geometry;
+    std::unique_ptr<CollisionGeometry> _geometry{};
+    std::unique_ptr<RoutingEngine> _routingEngine{};
     AgentContainer<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
     std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;
@@ -85,13 +81,9 @@ public:
     OperationalModelType ModelType() const;
     StageProxy Stage(BaseStage::ID stageId);
     CollisionGeometry Geo() const;
-    void SwitchGeometry(std::unique_ptr<CollisionGeometry>&& geometry);
     void PushTimer(const std::string_view name, size_t probe_log_level = 0);
     void PopTimer(const std::string_view name);
     void SetTimerLogLevel(int level) { _timer.setLogLevel(level); };
     TimerEntry::duration_type GetTimerDuration(const std::string_view name) const;
     std::map<std::string, TimerEntry::duration_type> GetTimerDurations() const;
-
-private:
-    void ValidateGeometry(const std::unique_ptr<CollisionGeometry>& geometry) const;
 };
