@@ -4,7 +4,6 @@
 #include "CollisionGeometry.hpp"
 #include "GeneralizedCentrifugalForceModelData.hpp"
 #include "GenericAgent.hpp"
-#include "GeometrySwitchError.hpp"
 #include "IteratorPair.hpp"
 #include "Journey.hpp"
 #include "OperationalModel.hpp"
@@ -18,10 +17,6 @@
 #include "StageDescription.hpp"
 #include "Tracing.hpp"
 #include "Visitor.hpp"
-
-#include <fmt/core.h>
-#include <fmt/format.h>
-#include <fmt/ranges.h>
 
 #include <algorithm>
 #include <cstddef>
@@ -39,19 +34,13 @@ Simulation::Simulation(
     std::unique_ptr<OperationalModel>&& operationalModel,
     std::unique_ptr<CollisionGeometry>&& geometry,
     double dT)
-    : _clock(dT), _operationalDecisionSystem(std::move(operationalModel))
+    : _clock(dT)
+    , _operationalDecisionSystem(std::move(operationalModel))
+    , _geometry(std::move(geometry))
+    , _routingEngine(std::make_unique<RoutingEngine>(_geometry->Polygon()))
 {
-    const auto p = geometry->Polygon();
-    const auto& [tup, res] = geometries.emplace(
-        std::piecewise_construct,
-        std::forward_as_tuple(geometry->Id()),
-        std::forward_as_tuple(std::move(geometry), std::make_unique<RoutingEngine>(p)));
-    if(!res) {
-        throw SimulationError("Internal error");
-    }
-    _geometry = std::get<0>(tup->second).get();
-    _routingEngine = std::get<1>(tup->second).get();
 }
+
 const SimulationClock& Simulation::Clock() const
 {
     return _clock;
@@ -383,92 +372,6 @@ StageProxy Simulation::Stage(BaseStage::ID stageId)
 CollisionGeometry Simulation::Geo() const
 {
     return *_geometry;
-}
-
-void Simulation::SwitchGeometry(std::unique_ptr<CollisionGeometry>&& geometry)
-{
-    JPS_TRACE_FUNC;
-    ValidateGeometry(geometry);
-    if(const auto& iter = geometries.find(geometry->Id()); iter != std::end(geometries)) {
-        _geometry = std::get<0>(iter->second).get();
-        _routingEngine = std::get<1>(iter->second).get();
-    } else {
-        const auto p = geometry->Polygon();
-        const auto& [tup, res] = geometries.emplace(
-            std::piecewise_construct,
-            std::forward_as_tuple(geometry->Id()),
-            std::forward_as_tuple(std::move(geometry), std::make_unique<RoutingEngine>(p)));
-        if(!res) {
-            throw SimulationError("Internal error");
-        }
-        _geometry = std::get<0>(tup->second).get();
-        _routingEngine = std::get<1>(tup->second).get();
-    }
-}
-
-void Simulation::ValidateGeometry(const std::unique_ptr<CollisionGeometry>& geometry) const
-{
-    JPS_TRACE_FUNC;
-    std::vector<GenericAgent::ID> faultyAgents;
-    for(const auto& agent : _agents) {
-        if(const auto find_iter = std::find(
-               std::begin(_removedAgentsInLastIteration),
-               std::end(_removedAgentsInLastIteration),
-               agent.id);
-           find_iter != std::end(_removedAgentsInLastIteration)) {
-            continue;
-        }
-
-        if(!geometry->InsideGeometry(agent.pos)) {
-            faultyAgents.push_back(agent.id);
-        }
-    }
-
-    std::vector<BaseStage::ID> faultyStages;
-    for(const auto& [_, journey] : _journeys) {
-        for(const auto& [stageId, node] : journey->Stages()) {
-
-            if(auto exit = dynamic_cast<Exit*>(node.stage); exit != nullptr) {
-                if(!geometry->InsideGeometry(exit->Position().Centroid())) {
-                    faultyStages.push_back(stageId);
-                }
-            } else if(auto waypoint = dynamic_cast<Waypoint*>(node.stage); waypoint != nullptr) {
-                if(!geometry->InsideGeometry(waypoint->Position())) {
-                    faultyStages.push_back(stageId);
-                }
-            } else if(auto queue = dynamic_cast<NotifiableQueue*>(node.stage); queue != nullptr) {
-                for(const auto& point : queue->Slots()) {
-                    if(!geometry->InsideGeometry(point)) {
-                        faultyStages.push_back(stageId);
-                    }
-                }
-            } else if(auto waitingset = dynamic_cast<NotifiableWaitingSet*>(node.stage);
-                      waitingset != nullptr) {
-                for(const auto& point : waitingset->Slots()) {
-                    if(!geometry->InsideGeometry(point)) {
-                        faultyStages.push_back(stageId);
-                    }
-                }
-            }
-        }
-    }
-
-    if(!faultyAgents.empty() || !faultyStages.empty()) {
-        std::string message = "Could not switch the geometry.\n";
-
-        if(!faultyAgents.empty()) {
-            message += fmt::format(
-                "The following agents would be outside of the new geometry: {}\n",
-                fmt::join(faultyAgents, ", "));
-        }
-        if(!faultyStages.empty()) {
-            message += fmt::format(
-                "The following stages would be outside of the new geometry: {}",
-                fmt::join(faultyStages, ", "));
-        }
-
-        throw GeometrySwitchError(message.c_str(), faultyAgents, faultyStages);
-    }
 }
 
 void Simulation::PushTimer(const std::string_view name, size_t probe_log_level)
