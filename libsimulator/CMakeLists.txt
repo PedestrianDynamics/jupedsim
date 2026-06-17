@@ -93,8 +93,8 @@ target_include_directories(simulator PUBLIC
 set_property(TARGET simulator PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
 set_property(TARGET simulator PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 set_target_properties(simulator PROPERTIES
-    CXX_VISIBILITY_PRESET "hidden"
-    CUDA_VISIBILITY_PRESET "hidden"
+    CXX_VISIBILITY_PRESET "default"
+    CUDA_VISIBILITY_PRESET "default"
 )
 ################################################################################
 # libsimulator unit tests

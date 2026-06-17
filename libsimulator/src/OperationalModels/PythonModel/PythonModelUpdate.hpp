@@ -12,7 +12,7 @@
 
 namespace py = pybind11;
 
-class PythonModelUpdate
+class __attribute__((visibility("hidden"))) PythonModelUpdate
 {
 public:
     PythonModelUpdate(py::object impl) : impl(impl) {}

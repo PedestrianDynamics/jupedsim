@@ -4,7 +4,7 @@
 
 namespace py = pybind11;
 
-class PythonModelData
+class __attribute__((visibility("hidden"))) PythonModelData
 {
 public:
     PythonModelData(py::object _impl) : impl(_impl) {};
@@ -12,6 +12,7 @@ public:
 
     py::object impl;
 };
+;
 
 template <>
 struct fmt::formatter<PythonModelData> : fmt::formatter<std::string> {
