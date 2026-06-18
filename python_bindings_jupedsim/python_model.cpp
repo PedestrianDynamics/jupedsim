@@ -51,11 +51,6 @@ public:
             geometry /* Arguments */
         );
     }
-
-    std::unique_ptr<OperationalModel> Clone() const override
-    {
-        return std::make_unique<PythonModelTramp>(*this);
-    }
 };
 
 void init_python_model(py::module_& m)
