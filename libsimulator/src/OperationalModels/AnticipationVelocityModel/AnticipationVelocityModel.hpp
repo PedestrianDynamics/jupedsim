@@ -9,7 +9,6 @@
 #include "Point.hpp"
 
 #include <cstdint>
-#include <memory>
 #include <random>
 #include <vector>
 
@@ -40,7 +39,6 @@ public:
         const GenericAgent& agent,
         const NeighborhoodSearchType& neighborhoodSearch,
         const CollisionGeometry& geometry) const override;
-    std::unique_ptr<OperationalModel> Clone() const override;
 
 private:
     double OptimalSpeed(const GenericAgent& ped, double spacing, double time_gap) const;

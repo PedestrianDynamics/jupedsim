@@ -10,7 +10,7 @@ namespace py = pybind11;
 
 void init_warp_driver_model(py::module_& m)
 {
-    py::class_<WarpDriverModel, OperationalModel>(m, "WarpDriverModel");
+    py::class_<WarpDriverModel, OperationalModel, py::smart_holder>(m, "WarpDriverModel");
     py::class_<WarpDriverModelBuilder>(m, "WarpDriverModelBuilder")
         .def(
             py::init<double, double, double, double, double, double>(),

@@ -18,7 +18,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <limits>
-#include <memory>
 #include <numeric>
 #include <vector>
 
@@ -207,11 +206,6 @@ void AnticipationVelocityModel::CheckModelConstraint(
             agent.pos,
             r);
     }
-}
-
-std::unique_ptr<OperationalModel> AnticipationVelocityModel::Clone() const
-{
-    return std::make_unique<AnticipationVelocityModel>(*this);
 }
 
 double AnticipationVelocityModel::OptimalSpeed(

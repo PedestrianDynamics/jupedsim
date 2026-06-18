@@ -28,13 +28,17 @@ void init_simulation(py::module_& m)
 {
     py::class_<Simulation>(m, "Simulation")
         .def(
-            py::init([](const OperationalModel* model, CollisionGeometry geometry, double dT) {
-                if(!model) {
-                    throw std::invalid_argument("model must not be None");
-                }
-                return std::make_unique<Simulation>(
-                    model->Clone(), std::make_unique<CollisionGeometry>(geometry), dT);
-            }),
+            // The model is moved out of the Python object into Simulation. After this constructor
+            // returns, the Python model object passed here is disowned/invalid and must not be
+            // reused.
+            py::init(
+                [](std::unique_ptr<OperationalModel> model, CollisionGeometry geometry, double dT) {
+                    if(!model) {
+                        throw std::invalid_argument("model must not be None");
+                    }
+                    return std::make_unique<Simulation>(
+                        std::move(model), std::make_unique<CollisionGeometry>(geometry), dT);
+                }),
             py::kw_only(),
             py::arg("model"),
             py::arg("geometry"),

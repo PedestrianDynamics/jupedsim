@@ -12,7 +12,7 @@ AnticipationVelocityModelBuilder::AnticipationVelocityModelBuilder(
 {
 }
 
-AnticipationVelocityModel AnticipationVelocityModelBuilder::Build()
+std::unique_ptr<OperationalModel> AnticipationVelocityModelBuilder::Build()
 {
-    return AnticipationVelocityModel(pushoutStrength, rng_seed);
+    return std::make_unique<AnticipationVelocityModel>(pushoutStrength, rng_seed);
 }

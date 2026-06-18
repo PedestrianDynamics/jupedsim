@@ -7,7 +7,7 @@ CollisionFreeSpeedModelV3Builder::CollisionFreeSpeedModelV3Builder()
 {
 }
 
-CollisionFreeSpeedModelV3 CollisionFreeSpeedModelV3Builder::Build()
+std::unique_ptr<OperationalModel> CollisionFreeSpeedModelV3Builder::Build()
 {
-    return CollisionFreeSpeedModelV3();
+    return std::make_unique<CollisionFreeSpeedModelV3>();
 }

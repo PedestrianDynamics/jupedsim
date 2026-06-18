@@ -16,7 +16,6 @@
 #include <cmath>
 #include <cstdlib>
 #include <limits>
-#include <memory>
 #include <numeric>
 #include <vector>
 
@@ -160,11 +159,6 @@ void CollisionFreeSpeedModel::CheckModelConstraint(
             agent.pos,
             r);
     }
-}
-
-std::unique_ptr<OperationalModel> CollisionFreeSpeedModel::Clone() const
-{
-    return std::make_unique<CollisionFreeSpeedModel>(*this);
 }
 
 double CollisionFreeSpeedModel::OptimalSpeed(

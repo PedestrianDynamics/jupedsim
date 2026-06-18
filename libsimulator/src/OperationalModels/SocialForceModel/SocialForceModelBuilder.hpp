@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "SocialForceModel.hpp"
+#include "OperationalModel.hpp"
+
+#include <memory>
+
 class SocialForceModelBuilder
 {
     double _bodyForce;
@@ -9,5 +12,5 @@ class SocialForceModelBuilder
 
 public:
     SocialForceModelBuilder(double bodyForce, double friction);
-    SocialForceModel Build();
+    std::unique_ptr<OperationalModel> Build();
 };
