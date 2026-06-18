@@ -7,8 +7,6 @@
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
 
-#include <memory>
-
 struct GenericAgent;
 
 class GeneralizedCentrifugalForceModel : public OperationalModel
@@ -49,7 +47,6 @@ public:
         const GenericAgent& agent,
         const NeighborhoodSearchType& neighborhoodSearch,
         const CollisionGeometry& geometry) const override;
-    std::unique_ptr<OperationalModel> Clone() const override;
 
 private:
     /**

@@ -23,9 +23,9 @@ GeneralizedCentrifugalForceModelBuilder::GeneralizedCentrifugalForceModelBuilder
 {
 }
 
-GeneralizedCentrifugalForceModel GeneralizedCentrifugalForceModelBuilder::Build()
+std::unique_ptr<OperationalModel> GeneralizedCentrifugalForceModelBuilder::Build()
 {
-    return GeneralizedCentrifugalForceModel(
+    return std::make_unique<GeneralizedCentrifugalForceModel>(
         _nuped,
         _nuwall,
         _dist_effPed,

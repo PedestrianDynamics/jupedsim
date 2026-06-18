@@ -12,7 +12,6 @@
 
 #include <cmath>
 #include <iterator>
-#include <memory>
 #include <numeric>
 #include <string>
 
@@ -22,11 +21,6 @@ SocialForceModel::SocialForceModel(double bodyForce_, double friction_)
 OperationalModelType SocialForceModel::Type() const
 {
     return OperationalModelType::SOCIAL_FORCE;
-}
-
-std::unique_ptr<OperationalModel> SocialForceModel::Clone() const
-{
-    return std::make_unique<SocialForceModel>(*this);
 }
 
 OperationalModelUpdate SocialForceModel::ComputeNewPosition(
