@@ -3,8 +3,8 @@
 #include "CollisionFreeSpeedModelUpdate.hpp"
 #include "CollisionFreeSpeedModelV2Update.hpp"
 #include "CollisionFreeSpeedModelV3Update.hpp"
+#include "CustomModelUpdate.hpp"
 #include "GeneralizedCentrifugalForceModelUpdate.hpp"
-#include "PythonModelUpdate.hpp"
 #include "SocialForceModelUpdate.hpp"
 #include "WarpDriverModelUpdate.hpp"
 
@@ -18,4 +18,4 @@ using OperationalModelUpdate = std::variant<
     AnticipationVelocityModelUpdate,
     SocialForceModelUpdate,
     WarpDriverModelUpdate,
-    PythonModelUpdate>;
+    CustomModelUpdate>;

@@ -381,7 +381,7 @@ class Simulation:
         elif isinstance(parameters, CustomModelAgentParameters) or issubclass(
             type(parameters), CustomModelAgentParameters
         ):
-            model = parameters._obj
+            model = py_jps.CustomModelData(parameters._obj)
 
         # TODO(kkratz): Some models do not have an orientation as part of their
         # state, but we initially designed it to be. This needs to be first

@@ -143,7 +143,7 @@ class Agent:
             return SocialForceModelState(model)
         elif isinstance(model, py_jps.WarpDriverModelState):
             return WarpDriverModelState(model)
-        elif isinstance(model, py_jps.PythonModelState):
-            return CustomModelAgentParameters(model.py_object)
+        elif isinstance(model, py_jps.CustomModelData):
+            return CustomModelAgentParameters(model.get_impl())
         else:
             raise Exception("Internal error")

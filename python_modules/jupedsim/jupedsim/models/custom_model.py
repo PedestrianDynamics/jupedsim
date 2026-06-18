@@ -67,7 +67,10 @@ class CustomModelAgentParameters:
         """
         if param_object is None:
             param_object = dict()
-        self._obj = py_jps.PythonModelState(param_object)
+        elif isinstance(param_object, py_jps.PythonModelState):
+            self._obj = param_object
+        else:
+            self._obj = py_jps.PythonModelState(param_object)
 
     def __getattr__(self, name):
         """Automatically get from the underlying object"""
@@ -159,7 +162,8 @@ class CustomOperationalModel(PythonModel):
         geom = Geometry(geometry)
         neighbor = NeighborhoodSearch(neighborhoodsearch)
         upd = self.compute_new_position(dT, p, geom, neighbor)
-        return upd._obj
+
+        return py_jps.CustomModelUpdate(upd._obj)
 
     @abstractmethod
     def check_model_constraint(

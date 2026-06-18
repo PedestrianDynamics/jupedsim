@@ -1,10 +1,11 @@
 #include "CollisionGeometry.hpp"
+#include "CustomModelData.hpp"
+#include "CustomModelUpdate.hpp"
 #include "GenericAgent.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
-#include "PythonModel.hpp"
-#include "PythonModelData.hpp"
-#include "PythonModelUpdate.hpp"
+#include "python_model_data.hpp"
+#include "python_model_update.hpp"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -62,6 +63,19 @@ void init_python_model(py::module_& m)
     py::class_<PythonModelData>(m, "PythonModelState")
         .def(py::init<py::object>(), py::arg("py_object"))
         .def_readwrite("py_object", &PythonModelData::impl);
+    py::class_<CustomModelData>(m, "CustomModelData")
+        .def(py::init([](PythonModelData data) {
+            std::shared_ptr<ICustomModelDataImpl> impl = std::make_shared<PythonModelData>(data);
+            return CustomModelData(std::move(impl));
+        }))
+        .def("repr", &CustomModelData::repr)
+        .def("get_impl", &CustomModelData::get_impl);
+    py::class_<CustomModelUpdate>(m, "CustomModelUpdate")
+        .def(py::init([](PythonModelUpdate update) {
+            std::shared_ptr<ICustomModelUpdateImpl> impl =
+                std::make_shared<PythonModelUpdate>(update);
+            return CustomModelUpdate(std::move(impl));
+        }));
     py::class_<PythonModelUpdate>(m, "PythonModelUpdate")
         .def(py::init<py::object>(), py::arg("py_object"))
         .def_readwrite("py_object", &PythonModelUpdate::impl);
