@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "Clonable.hpp"
 #include "CollisionGeometry.hpp"
 #include "OperationalModelType.hpp"
 #include "OperationalModelUpdate.hpp"
@@ -76,7 +75,7 @@ void validateConstraint(
     }
 }
 
-class OperationalModel : public Clonable<OperationalModel>
+class OperationalModel
 {
 public:
     OperationalModel() = default;

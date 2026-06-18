@@ -36,7 +36,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <memory>
 #include <variant>
 
 // ============================================================================
@@ -348,11 +347,6 @@ WarpDriverModel::WarpDriverModel(
 OperationalModelType WarpDriverModel::Type() const
 {
     return OperationalModelType::WARP_DRIVER;
-}
-
-std::unique_ptr<OperationalModel> WarpDriverModel::Clone() const
-{
-    return std::make_unique<WarpDriverModel>(*this);
 }
 
 void WarpDriverModel::ApplyUpdate(const OperationalModelUpdate& update, GenericAgent& agent) const

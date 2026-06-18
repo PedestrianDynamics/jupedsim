@@ -2,6 +2,7 @@
 #include "WarpDriverModelBuilder.hpp"
 
 #include "SimulationError.hpp"
+#include "WarpDriverModel.hpp"
 
 namespace
 {
@@ -29,7 +30,7 @@ WarpDriverModelBuilder::WarpDriverModelBuilder(
 {
 }
 
-WarpDriverModel WarpDriverModelBuilder::Build()
+std::unique_ptr<OperationalModel> WarpDriverModelBuilder::Build()
 {
     if(_timeHorizon <= 0.0) {
         throw SimulationError(
@@ -56,7 +57,7 @@ WarpDriverModel WarpDriverModelBuilder::Build()
             _velocityUncertaintyY);
     }
 
-    return WarpDriverModel(
+    return std::make_unique<WarpDriverModel>(
         _timeHorizon,
         _stepSize,
         _sigma,

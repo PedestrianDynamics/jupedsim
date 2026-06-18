@@ -12,7 +12,7 @@ CollisionFreeSpeedModelBuilder::CollisionFreeSpeedModelBuilder(
 {
 }
 
-CollisionFreeSpeedModel CollisionFreeSpeedModelBuilder::Build()
+std::unique_ptr<OperationalModel> CollisionFreeSpeedModelBuilder::Build()
 {
-    return CollisionFreeSpeedModel(_aPed, _DPed, _aWall, _DWall);
+    return std::make_unique<CollisionFreeSpeedModel>(_aPed, _DPed, _aWall, _DWall);
 }

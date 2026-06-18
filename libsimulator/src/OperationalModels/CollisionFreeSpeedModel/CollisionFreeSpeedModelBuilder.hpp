@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "CollisionFreeSpeedModel.hpp"
+#include "OperationalModel.hpp"
+
+#include <memory>
+
 class CollisionFreeSpeedModelBuilder
 {
     double _aPed;
@@ -11,5 +14,5 @@ class CollisionFreeSpeedModelBuilder
 
 public:
     CollisionFreeSpeedModelBuilder(double aPed, double DPed, double aWall, double DWall);
-    CollisionFreeSpeedModel Build();
+    std::unique_ptr<OperationalModel> Build();
 };

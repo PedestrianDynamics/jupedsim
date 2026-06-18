@@ -163,11 +163,6 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
     }
 }
 
-std::unique_ptr<OperationalModel> GeneralizedCentrifugalForceModel::Clone() const
-{
-    return std::make_unique<GeneralizedCentrifugalForceModel>(*this);
-}
-
 Point GeneralizedCentrifugalForceModel::ForceDriv(
     const GenericAgent& ped,
     Point target,

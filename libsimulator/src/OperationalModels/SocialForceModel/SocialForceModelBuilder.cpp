@@ -8,7 +8,7 @@ SocialForceModelBuilder::SocialForceModelBuilder(double bodyForce, double fricti
 {
 }
 
-SocialForceModel SocialForceModelBuilder::Build()
+std::unique_ptr<OperationalModel> SocialForceModelBuilder::Build()
 {
-    return SocialForceModel(_bodyForce, _friction);
+    return std::make_unique<SocialForceModel>(_bodyForce, _friction);
 }

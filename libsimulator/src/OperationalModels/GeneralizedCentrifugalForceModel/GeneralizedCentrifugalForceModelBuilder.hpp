@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "GeneralizedCentrifugalForceModel.hpp"
+#include "OperationalModel.hpp"
+
+#include <memory>
 
 class GeneralizedCentrifugalForceModelBuilder
 {
@@ -24,5 +26,5 @@ public:
         double intp_widthwall,
         double maxfped,
         double maxfwall);
-    GeneralizedCentrifugalForceModel Build();
+    std::unique_ptr<OperationalModel> Build();
 };

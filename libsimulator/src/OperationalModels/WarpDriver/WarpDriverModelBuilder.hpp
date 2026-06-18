@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "WarpDriverModel.hpp"
+#include "OperationalModel.hpp"
+
+#include <memory>
 
 class WarpDriverModelBuilder
 {
@@ -20,5 +22,5 @@ public:
         double timeUncertainty = 0.5,
         double velocityUncertaintyX = 0.2,
         double velocityUncertaintyY = 0.2);
-    WarpDriverModel Build();
+    std::unique_ptr<OperationalModel> Build();
 };
