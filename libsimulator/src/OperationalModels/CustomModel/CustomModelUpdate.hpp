@@ -4,19 +4,16 @@
 
 #include <fmt/core.h>
 #include <fmt/format.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
+#include <any>
 #include <map>
 #include <string>
-
-namespace py = pybind11;
 
 class ICustomModelUpdateImpl
 {
 public:
     virtual ~ICustomModelUpdateImpl() {};
-    virtual std::map<std::string, py::object> extract_attributes() const = 0;
+    virtual std::any extract_attributes() const = 0;
 };
 
 class CustomModelUpdate
@@ -28,7 +25,7 @@ public:
     }
     ~CustomModelUpdate() = default;
 
-    std::map<std::string, py::object> extract_attributes() const
+    std::any extract_attributes() const
     {
         if(impl_) {
             return impl_->extract_attributes();

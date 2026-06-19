@@ -81,7 +81,6 @@ target_link_libraries(simulator PUBLIC
     build_info
     glm::glm
     perfetto
-    pybind11::module
 )
 target_link_options(simulator PUBLIC
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-fsanitize=address,undefined>

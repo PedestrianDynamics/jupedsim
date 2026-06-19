@@ -20,7 +20,7 @@ public:
 
     /// Extract key-value pairs from a Python object (dict, dataclass, or object with __dict__)
     /// Returns a map<string, py::object> of all attributes found.
-    virtual std::map<std::string, py::object> extract_attributes() const override
+    virtual std::any extract_attributes() const override
     {
         std::map<std::string, py::object> result;
         py::gil_scoped_acquire gil;

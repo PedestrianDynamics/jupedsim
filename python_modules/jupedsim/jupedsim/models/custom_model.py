@@ -1,6 +1,7 @@
+from __future__ import annotations
 from abc import abstractmethod
 from typing import Any, TYPE_CHECKING
-from __future__ import annotations
+
 
 import jupedsim.native as py_jps
 from jupedsim.geometry import Geometry
