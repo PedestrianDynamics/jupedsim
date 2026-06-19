@@ -1,7 +1,7 @@
 from __future__ import annotations
-from abc import abstractmethod
-from typing import Any, TYPE_CHECKING
 
+from abc import abstractmethod
+from typing import TYPE_CHECKING, Any
 
 import jupedsim.native as py_jps
 from jupedsim.geometry import Geometry
@@ -68,7 +68,7 @@ class CustomModelAgentParameters:
         - a dataclass or any other class
         """
         if param_object is None:
-            param_object = dict()
+            self._obj = py_jps.PythonModelState(dict())
         elif isinstance(param_object, py_jps.PythonModelState):
             self._obj = param_object
         else:
@@ -130,7 +130,7 @@ class CustomOperationalModel(PythonModel):
     @abstractmethod
     def compute_new_position(
         self,
-        dT: float,
+        dt: float,
         ped: Agent,
         geometry: Geometry,
         neighborhoodsearch: NeighborhoodSearch,
@@ -147,7 +147,7 @@ class CustomOperationalModel(PythonModel):
 
     def ComputeNewPosition(
         self,
-        dT: float,
+        dt: float,
         ped: py_jps.Agent,
         geometry: py_jps.Geometry,
         neighborhoodsearch: py_jps.NeighborhoodSearch,
@@ -163,7 +163,7 @@ class CustomOperationalModel(PythonModel):
         p = Agent(ped)
         geom = Geometry(geometry)
         neighbor = NeighborhoodSearch(neighborhoodsearch)
-        upd = self.compute_new_position(dT, p, geom, neighbor)
+        upd = self.compute_new_position(dt, p, geom, neighbor)
 
         return py_jps.CustomModelUpdate(upd._obj)
 
