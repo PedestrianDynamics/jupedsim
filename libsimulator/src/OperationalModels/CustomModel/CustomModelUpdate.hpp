@@ -7,6 +7,7 @@
 
 #include <any>
 #include <map>
+#include <memory>
 #include <string>
 
 class ICustomModelUpdateImpl
