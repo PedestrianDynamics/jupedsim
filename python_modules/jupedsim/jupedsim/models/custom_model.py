@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import typing
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Any
 
@@ -145,6 +146,7 @@ class CustomOperationalModel(PythonModel):
         """
         pass
 
+    @typing.override
     def ComputeNewPosition(
         self,
         dt: float,
@@ -183,6 +185,7 @@ class CustomOperationalModel(PythonModel):
         """
         pass
 
+    @typing.override
     def CheckModelConstraint(
         self,
         ped: py_jps.Agent,

@@ -179,7 +179,7 @@ class PythonSocialForceModel(CustomOperationalModel):
         return (fx, fy)
 
     def compute_new_position(
-        self, dT: float, ped, geometry, neighborhood_search
+        self, dt: float, ped, geometry, neighborhood_search
     ):
         """
         Compute new position using Social Force Model.
@@ -232,14 +232,14 @@ class PythonSocialForceModel(CustomOperationalModel):
 
         # Update velocity: v_new = v_old + a * dt
         new_velocity = (
-            velocity[0] + acc_x * dT,
-            velocity[1] + acc_y * dT,
+            velocity[0] + acc_x * dt,
+            velocity[1] + acc_y * dt,
         )
 
         # Update position: x_new = x_old + v_new * dt
         new_position = (
-            pos[0] + new_velocity[0] * dT,
-            pos[1] + new_velocity[1] * dT,
+            pos[0] + new_velocity[0] * dt,
+            pos[1] + new_velocity[1] * dt,
         )
 
         # Create update

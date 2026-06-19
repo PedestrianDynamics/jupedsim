@@ -62,7 +62,9 @@ def test_single_agent_reaches_exit(corridor_simulation):
             break
         sim.iterate()
 
-    assert sim.agent_count() == 0, "Agent should reach the exit within 2000 steps"
+    assert sim.agent_count() == 0, (
+        "Agent should reach the exit within 2000 steps"
+    )
 
 
 def test_multiple_agents_all_reach_exit(corridor_simulation):

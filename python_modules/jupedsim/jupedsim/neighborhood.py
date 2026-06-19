@@ -10,6 +10,7 @@ implementation, making it easier to work with spatial queries in operational mod
 from typing import List, Tuple
 
 import jupedsim.native as py_jps
+from jupedsim.agent import Agent
 
 
 class NeighborhoodSearch:
