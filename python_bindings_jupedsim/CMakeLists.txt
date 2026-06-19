@@ -1,25 +1,28 @@
 add_library(py_jupedsim MODULE
+    agent.cpp
+    anticipation_velocity_model.cpp
     bindings_jupedsim.cpp
     build_info.cpp
-    conversion.cpp
-    conversion.hpp
-    generalized_centrifugal_force_model.cpp
     collision_free_speed_model.cpp
     collision_free_speed_model_v2.cpp
     collision_free_speed_model_v3.cpp
-    anticipation_velocity_model.cpp
-    social_force_model.cpp
-    warp_driver_model.cpp
+    conversion.cpp
+    conversion.hpp
+    generalized_centrifugal_force_model.cpp
+    geometry.cpp
+    journey.cpp
+    linesegment.cpp
     logging.cpp
     logging.hpp
-    trace.cpp
-    geometry.cpp
+    neighborhood_search.cpp
     routing.cpp
     simulation.cpp
-    agent.cpp
+    social_force_model.cpp
     stage.cpp
-    journey.cpp
+    trace.cpp
     transition.cpp
+    type_casters.hpp
+    warp_driver_model.cpp
 )
 
 target_link_libraries(py_jupedsim

@@ -3,6 +3,7 @@
 import shapely
 
 import jupedsim.native as py_jps
+from jupedsim.linesegment import LineSegment
 
 
 class Geometry:
@@ -45,3 +46,54 @@ class Geometry:
             poly,
             rounding_precision=-1,
         )
+
+    def linesegments_close_to(
+        self, point: tuple[float, float]
+    ) -> list[LineSegment]:
+        """Find line segments of the geometry that are within a certain distance to a point.
+
+        Args:
+            point (tuple[float, float]): The point to check against.
+            distance (float): The maximum distance for line segments to be included.
+
+        Returns:
+            List of LineSegment objects that are close to the given point.
+        """
+        ls_list = []
+        for ls in self._obj.linesegments_close_to(point):
+            ls_list.append(LineSegment(ls))
+        return ls_list
+
+    def get_walls_close_to(
+        self, point: tuple[float, float]
+    ) -> list[LineSegment]:
+        """Find line segments of the geometry that are within a certain distance to a point.
+
+        Args:
+            point (tuple[float, float]): The point to check against.
+            distance (float): The maximum distance for line segments to be included.
+
+        Returns:
+            List of LineSegment objects that are close to the given point.
+        """
+        ls_list = []
+        for ls in self._obj.linesegments_close_to(point):
+            ls_list.append(LineSegment(ls))
+        return ls_list
+
+    def get_walls_in_distance_to(
+        self, point: tuple[float, float], distance: float
+    ) -> list[LineSegment]:
+        """Find line segments of the geometry that are within a certain distance to a point.
+
+        Args:
+            point (tuple[float, float]): The point to check against.
+            distance (float): The maximum distance for line segments to be included.
+
+        Returns:
+            List of LineSegment objects that are close to the given point.
+        """
+        ls_list = []
+        for ls in self._obj.linesegments_in_distance_to(distance, point):
+            ls_list.append(LineSegment(ls))
+        return ls_list
