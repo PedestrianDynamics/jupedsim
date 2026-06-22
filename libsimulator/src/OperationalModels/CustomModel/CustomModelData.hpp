@@ -13,12 +13,12 @@ public:
 class CustomModelData
 {
 public:
-    explicit CustomModelData(std::shared_ptr<ICustomModelDataImpl> impl) : impl_(std::move(impl)) {}
+    explicit CustomModelData(std::unique_ptr<ICustomModelDataImpl> impl) : impl_(std::move(impl)) {}
     ~CustomModelData() = default;
     std::string to_string() const
     {
         if(impl_) {
-            return impl_->print();
+            return impl_->to_string();
         }
         return "<CustomModelData: no implementation>";
     }
