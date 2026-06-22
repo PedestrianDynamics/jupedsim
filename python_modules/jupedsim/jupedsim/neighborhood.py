@@ -8,7 +8,8 @@ implementation, making it easier to work with spatial queries in operational mod
 """
 
 from __future__ import annotations
-from typing import List, Tuple, TYPE_CHECKING
+
+from typing import TYPE_CHECKING, List, Tuple
 
 import jupedsim.native as py_jps
 

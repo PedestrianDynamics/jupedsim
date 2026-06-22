@@ -1,8 +1,14 @@
 from __future__ import annotations
 
-import typing
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Any
+
+try:
+    from typing import override
+except ImportError:
+
+    def override(f):  # type: ignore[misc]
+        return f
 
 import jupedsim.native as py_jps
 from jupedsim.geometry import Geometry
@@ -146,7 +152,7 @@ class CustomOperationalModel(PythonModel):
         """
         pass
 
-    @typing.override
+    @override
     def ComputeNewPosition(
         self,
         dt: float,
@@ -185,7 +191,7 @@ class CustomOperationalModel(PythonModel):
         """
         pass
 
-    @typing.override
+    @override
     def CheckModelConstraint(
         self,
         ped: py_jps.Agent,
