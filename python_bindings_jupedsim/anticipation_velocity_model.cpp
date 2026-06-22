@@ -3,6 +3,7 @@
 #include "AnticipationVelocityModelBuilder.hpp"
 #include "AnticipationVelocityModelData.hpp"
 #include "OperationalModel.hpp"
+#include "conversion.hpp"
 
 #include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
@@ -24,7 +25,8 @@ void init_anticipation_velocity_model(py::module_& m)
     py::class_<AnticipationVelocityModelData>(m, "AnticipationVelocityModelState")
         .def_static("_defaults", []() { return AnticipationVelocityModelData{}; })
         .def(
-            py::init([](double strengthNeighborRepulsion,
+            py::init([](std::tuple<double, double> orientation,
+                        double strengthNeighborRepulsion,
                         double rangeNeighborRepulsion,
                         double wallBufferDistance,
                         double anticipationTime,
@@ -33,16 +35,18 @@ void init_anticipation_velocity_model(py::module_& m)
                         double desiredSpeed,
                         double radius) {
                 return AnticipationVelocityModelData{
-                    .strengthNeighborRepulsion = strengthNeighborRepulsion,
-                    .rangeNeighborRepulsion = rangeNeighborRepulsion,
-                    .wallBufferDistance = wallBufferDistance,
-                    .anticipationTime = anticipationTime,
-                    .reactionTime = reactionTime,
-                    .timeGap = timeGap,
-                    .v0 = desiredSpeed,
-                    .radius = radius};
+                    intoPoint(orientation),
+                    strengthNeighborRepulsion,
+                    rangeNeighborRepulsion,
+                    wallBufferDistance,
+                    anticipationTime,
+                    reactionTime,
+                    timeGap,
+                    desiredSpeed,
+                    radius};
             }),
             py::kw_only(),
+            py::arg("orientation"),
             py::arg("strength_neighbor_repulsion"),
             py::arg("range_neighbor_repulsion"),
             py::arg("wall_buffer_distance"),
@@ -51,6 +55,9 @@ void init_anticipation_velocity_model(py::module_& m)
             py::arg("time_gap"),
             py::arg("desired_speed"),
             py::arg("radius"))
+        .def_property_readonly(
+            "orientation",
+            [](const AnticipationVelocityModelData& obj) { return intoTuple(obj.orientation); })
         .def_readwrite(
             "strength_neighbor_repulsion",
             &AnticipationVelocityModelData::strengthNeighborRepulsion)

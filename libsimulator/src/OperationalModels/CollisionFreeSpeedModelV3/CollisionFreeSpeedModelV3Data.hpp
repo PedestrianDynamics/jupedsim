@@ -4,6 +4,7 @@
 #include <fmt/core.h>
 
 struct CollisionFreeSpeedModelV3Data {
+    Point orientation{0.0, 0.0};
     double strengthNeighborRepulsion{}; // [rad] max steering authority before upper bound
     double rangeNeighborRepulsion{}; // [m] base interaction range for neighbor influence
     double strengthGeometryRepulsion{}; // [-] wall repulsion strength
@@ -18,6 +19,35 @@ struct CollisionFreeSpeedModelV3Data {
     double v0{1.2};
     double radius{0.15};
     double headingAngle{0.0}; // [rad] persistent relaxed heading state
+
+    CollisionFreeSpeedModelV3Data() = default;
+    CollisionFreeSpeedModelV3Data(
+        Point orientation_,
+        double strengthNeighborRepulsion_,
+        double rangeNeighborRepulsion_,
+        double strengthGeometryRepulsion_,
+        double rangeGeometryRepulsion_,
+        double rangeXScale_,
+        double rangeYScale_,
+        double thetaMaxUpperBound_,
+        double agentBuffer_,
+        double timeGap_,
+        double v0_,
+        double radius_)
+        : orientation(orientation_.Normalized())
+        , strengthNeighborRepulsion(strengthNeighborRepulsion_)
+        , rangeNeighborRepulsion(rangeNeighborRepulsion_)
+        , strengthGeometryRepulsion(strengthGeometryRepulsion_)
+        , rangeGeometryRepulsion(rangeGeometryRepulsion_)
+        , rangeXScale(rangeXScale_)
+        , rangeYScale(rangeYScale_)
+        , thetaMaxUpperBound(thetaMaxUpperBound_)
+        , agentBuffer(agentBuffer_)
+        , timeGap(timeGap_)
+        , v0(v0_)
+        , radius(radius_)
+    {
+    }
 };
 
 template <>
@@ -30,10 +60,11 @@ struct fmt::formatter<CollisionFreeSpeedModelV3Data> {
     {
         return fmt::format_to(
             ctx.out(),
-            "CollisionFreeSpeedModelV3[strengthNeighborRepulsion={}, "
+            "CollisionFreeSpeedModelV3[orientation={}, strengthNeighborRepulsion={}, "
             "rangeNeighborRepulsion={}, strengthGeometryRepulsion={}, rangeGeometryRepulsion={}, "
             "rangeXScale={}, rangeYScale={}, thetaMaxUpperBound={}, agentBuffer={}, "
             "timeGap={}, v0={}, radius={}, headingAngle={}])",
+            m.orientation,
             m.strengthNeighborRepulsion,
             m.rangeNeighborRepulsion,
             m.strengthGeometryRepulsion,

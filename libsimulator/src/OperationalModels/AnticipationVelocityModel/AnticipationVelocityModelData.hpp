@@ -6,6 +6,7 @@
 #include <fmt/core.h>
 
 struct AnticipationVelocityModelData {
+    Point orientation{0.0, 0.0};
     double strengthNeighborRepulsion{8.0};
     double rangeNeighborRepulsion{0.1};
     double wallBufferDistance{0.1}; // buff distance of agent to wall
@@ -15,6 +16,29 @@ struct AnticipationVelocityModelData {
     double timeGap{1.06};
     double v0{1.2};
     double radius{0.2};
+
+    AnticipationVelocityModelData() = default;
+    AnticipationVelocityModelData(
+        Point orientation_,
+        double strengthNeighborRepulsion_,
+        double rangeNeighborRepulsion_,
+        double wallBufferDistance_,
+        double anticipationTime_,
+        double reactionTime_,
+        double timeGap_,
+        double v0_,
+        double radius_)
+        : orientation(orientation_.Normalized())
+        , strengthNeighborRepulsion(strengthNeighborRepulsion_)
+        , rangeNeighborRepulsion(rangeNeighborRepulsion_)
+        , wallBufferDistance(wallBufferDistance_)
+        , anticipationTime(anticipationTime_)
+        , reactionTime(reactionTime_)
+        , timeGap(timeGap_)
+        , v0(v0_)
+        , radius(radius_)
+    {
+    }
 };
 
 template <>
@@ -27,9 +51,10 @@ struct fmt::formatter<AnticipationVelocityModelData> {
     {
         return fmt::format_to(
             ctx.out(),
-            "AnticipationVelocityModel[strengthNeighborRepulsion={}, "
+            "AnticipationVelocityModel[orientation={}, strengthNeighborRepulsion={}, "
             "rangeNeighborRepulsion={}, wallBufferDistance={}, "
             "timeGap={}, v0={}, radius={}, reactionTime={}, anticipationTime={}, velocity={}])",
+            m.orientation,
             m.strengthNeighborRepulsion,
             m.rangeNeighborRepulsion,
             m.wallBufferDistance,

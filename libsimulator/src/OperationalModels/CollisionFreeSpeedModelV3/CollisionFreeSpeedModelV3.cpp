@@ -100,7 +100,7 @@ OperationalModelUpdate CollisionFreeSpeedModelV3::ComputeNewPosition(
     const auto desired_direction = (ped.destination - ped.pos).Normalized();
     auto reference_direction = (desired_direction + boundaryRepulsion).Normalized();
     if(reference_direction == Point{}) {
-        reference_direction = ped.orientation;
+        reference_direction = model.orientation;
     }
 
     const auto heading_target =
@@ -144,8 +144,8 @@ void CollisionFreeSpeedModelV3::ApplyUpdate(const OperationalModelUpdate& upd, G
 {
     const auto& update = std::get<CollisionFreeSpeedModelV3Update>(upd);
     agent.pos = update.position;
-    agent.orientation = update.orientation;
     auto& model = std::get<CollisionFreeSpeedModelV3Data>(agent.model);
+    model.orientation = update.orientation;
     model.headingAngle = update.headingAngle;
 }
 

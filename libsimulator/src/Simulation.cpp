@@ -221,13 +221,6 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
         throw SimulationError("Unknown stage id: {}", agent.stageId);
     }
 
-    if(std::holds_alternative<GeneralizedCentrifugalForceModelData>(agent.model))
-        if(agent.orientation.isZeroLength()) {
-            throw SimulationError(
-                "Orientation is invalid: {}. Length should be 1.", agent.orientation);
-        }
-
-    agent.orientation = agent.orientation.Normalized();
     _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry);
 
     _stageManager.HandleNewAgent(agent.stageId);

@@ -11,7 +11,6 @@ static GenericAgent make_agent(GenericAgent::Model model)
         jps::UniqueID<Journey>::Invalid,
         jps::UniqueID<BaseStage>::Invalid,
         Point{1.0, 2.0},
-        Point{0.0, 1.0},
         std::move(model));
 }
 

@@ -35,7 +35,8 @@ void init_generalized_centrifugal_force_model(py::module_& m)
     py::class_<GeneralizedCentrifugalForceModelData>(m, "GeneralizedCentrifugalForceModelState")
         .def_static("_defaults", []() { return GeneralizedCentrifugalForceModelData{}; })
         .def(
-            py::init([](double speed,
+            py::init([](std::tuple<double, double> orientation,
+                        double speed,
                         std::tuple<double, double> desiredOrientation,
                         double mass,
                         double tau,
@@ -45,17 +46,19 @@ void init_generalized_centrifugal_force_model(py::module_& m)
                         double bmin,
                         double bmax) {
                 return GeneralizedCentrifugalForceModelData{
-                    .speed = speed,
-                    .e0 = intoPoint(desiredOrientation),
-                    .mass = mass,
-                    .tau = tau,
-                    .v0 = desiredSpeed,
-                    .Av = av,
-                    .AMin = amin,
-                    .BMin = bmin,
-                    .BMax = bmax};
+                    intoPoint(orientation),
+                    speed,
+                    intoPoint(desiredOrientation),
+                    mass,
+                    tau,
+                    desiredSpeed,
+                    av,
+                    amin,
+                    bmin,
+                    bmax};
             }),
             py::kw_only(),
+            py::arg("orientation"),
             py::arg("speed"),
             py::arg("desired_direction"),
             py::arg("mass"),
@@ -65,6 +68,11 @@ void init_generalized_centrifugal_force_model(py::module_& m)
             py::arg("a_min"),
             py::arg("b_min"),
             py::arg("b_max"))
+        .def_property_readonly(
+            "orientation",
+            [](const GeneralizedCentrifugalForceModelData& obj) {
+                return intoTuple(obj.orientation);
+            })
         .def_readwrite("speed", &GeneralizedCentrifugalForceModelData::speed)
         .def_property(
             "desired_direction",

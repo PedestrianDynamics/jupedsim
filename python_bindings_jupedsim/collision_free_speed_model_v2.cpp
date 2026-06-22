@@ -3,6 +3,7 @@
 #include "CollisionFreeSpeedModelV2Builder.hpp"
 #include "CollisionFreeSpeedModelV2Data.hpp"
 #include "OperationalModel.hpp"
+#include "conversion.hpp"
 
 #include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
@@ -21,7 +22,8 @@ void init_collision_free_speed_model_v2(py::module_& m)
     py::class_<CollisionFreeSpeedModelV2Data>(m, "CollisionFreeSpeedModelV2State")
         .def_static("_defaults", []() { return CollisionFreeSpeedModelV2Data{}; })
         .def(
-            py::init([](double strengthNeighborRepulsion,
+            py::init([](std::tuple<double, double> orientation,
+                        double strengthNeighborRepulsion,
                         double rangeNeighborRepulsion,
                         double strengthGeometryRepulsion,
                         double rangeGeometryRepulsion,
@@ -29,15 +31,17 @@ void init_collision_free_speed_model_v2(py::module_& m)
                         double desiredSpeed,
                         double radius) {
                 return CollisionFreeSpeedModelV2Data{
-                    .strengthNeighborRepulsion = strengthNeighborRepulsion,
-                    .rangeNeighborRepulsion = rangeNeighborRepulsion,
-                    .strengthGeometryRepulsion = strengthGeometryRepulsion,
-                    .rangeGeometryRepulsion = rangeGeometryRepulsion,
-                    .timeGap = timeGap,
-                    .v0 = desiredSpeed,
-                    .radius = radius};
+                    intoPoint(orientation),
+                    strengthNeighborRepulsion,
+                    rangeNeighborRepulsion,
+                    strengthGeometryRepulsion,
+                    rangeGeometryRepulsion,
+                    timeGap,
+                    desiredSpeed,
+                    radius};
             }),
             py::kw_only(),
+            py::arg("orientation"),
             py::arg("strength_neighbor_repulsion"),
             py::arg("range_neighbor_repulsion"),
             py::arg("strength_geometry_repulsion"),
@@ -45,6 +49,9 @@ void init_collision_free_speed_model_v2(py::module_& m)
             py::arg("time_gap"),
             py::arg("desired_speed"),
             py::arg("radius"))
+        .def_property_readonly(
+            "orientation",
+            [](const CollisionFreeSpeedModelV2Data& obj) { return intoTuple(obj.orientation); })
         .def_readwrite(
             "strength_neighbor_repulsion",
             &CollisionFreeSpeedModelV2Data::strengthNeighborRepulsion)

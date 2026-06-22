@@ -56,6 +56,7 @@ class CollisionFreeSpeedModelAgentParameters:
 
     Attributes:
         position: Position of the agent.
+        orientation: Orientation of the agent.
         time_gap: Time constant that describe how fast pedestrian close gaps.
         desired_speed: Maximum speed of the agent.
         radius: Radius of the agent.
@@ -64,6 +65,7 @@ class CollisionFreeSpeedModelAgentParameters:
     """
 
     position: tuple[float, float] = (0.0, 0.0)
+    orientation: tuple[float, float] = (0.0, 0.0)
     time_gap: float = 1.0
     desired_speed: float = 1.2
     radius: float = 0.2
@@ -74,6 +76,7 @@ class CollisionFreeSpeedModelAgentParameters:
         self,
         *,
         position: tuple[float, float] = (0.0, 0.0),
+        orientation: tuple[float, float] = (0.0, 0.0),
         time_gap: float = 1.0,
         desired_speed: float = 1.2,
         radius: float = 0.2,
@@ -82,6 +85,7 @@ class CollisionFreeSpeedModelAgentParameters:
         v0: float | None = None,
     ):
         self.position = position
+        self.orientation = orientation
         self.time_gap = time_gap
         if v0 is not None:
             warnings.warn(
