@@ -11,6 +11,7 @@ from jupedsim.models.collision_free_speed_v2 import (
 from jupedsim.models.collision_free_speed_v3 import (
     CollisionFreeSpeedModelV3State,
 )
+from jupedsim.models.custom_model import CustomModelAgentParameters
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModelState,
 )
@@ -73,10 +74,18 @@ class Agent:
         """Position of the agent."""
         return self._obj.position
 
+    @position.setter
+    def position(self, position: tuple[float, float]):
+        self._obj.position = position
+
     @property
     def orientation(self) -> tuple[float, float]:
         """Orientation of the agent."""
         return self._obj.orientation
+
+    @orientation.setter
+    def orientation(self, orientation: tuple[float, float]):
+        self._obj.orientation = orientation
 
     @property
     def target(self) -> tuple[float, float]:
@@ -116,6 +125,7 @@ class Agent:
         | AnticipationVelocityModelState
         | SocialForceModelState
         | WarpDriverModelState
+        | CustomModelAgentParameters
     ):
         """Access model specific state of this agent."""
         model = self._obj.model
@@ -133,5 +143,7 @@ class Agent:
             return SocialForceModelState(model)
         elif isinstance(model, py_jps.WarpDriverModelState):
             return WarpDriverModelState(model)
+        elif isinstance(model, py_jps.CustomModelData):
+            return CustomModelAgentParameters(model.get_impl())
         else:
             raise Exception("Internal error")

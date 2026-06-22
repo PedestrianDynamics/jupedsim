@@ -19,15 +19,27 @@ void init_geometry(py::module_& m)
             [](const CollisionGeometry& geo) {
                 return intoTuples(std::get<0>(geo.AccessibleArea()));
             })
-        .def("holes", [](const CollisionGeometry& geo) {
-            const auto holes = std::get<1>(geo.AccessibleArea());
-            std::vector<std::vector<std::tuple<double, double>>> res{};
-            res.reserve(holes.size());
-            for(const auto& hole : holes) {
-                res.emplace_back(intoTuples(hole));
-            }
-            return res;
-        });
+        .def(
+            "holes",
+            [](const CollisionGeometry& geo) {
+                const auto holes = std::get<1>(geo.AccessibleArea());
+                std::vector<std::vector<std::tuple<double, double>>> res{};
+                res.reserve(holes.size());
+                for(const auto& hole : holes) {
+                    res.emplace_back(intoTuples(hole));
+                }
+                return res;
+            })
+        .def(
+            "linesegments_close_to",
+            [](const CollisionGeometry& geo, std::tuple<double, double> pos) {
+                return geo.LineSegmentsInApproxDistanceTo(intoPoint(pos));
+            })
+        .def(
+            "linesegments_in_distance_to",
+            [](const CollisionGeometry& geo, double distance, std::tuple<double, double> pos) {
+                return geo.LineSegmentsInDistanceToVec(distance, intoPoint(pos));
+            });
     py::class_<GeometryBuilder>(m, "GeometryBuilder")
         .def(py::init<>())
         .def(

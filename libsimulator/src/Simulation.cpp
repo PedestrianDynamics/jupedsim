@@ -233,7 +233,6 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
     _stageManager.HandleNewAgent(agent.stageId);
     _agents.emplace_back(std::move(agent));
     _neighborhoodSearch.AddAgent(_agents.back());
-
     auto v = IteratorPair(std::prev(std::end(_agents)), std::end(_agents));
     _stategicalDecisionSystem.Run(_journeys, v, _stageManager);
     _tacticalDecisionSystem.Run(*_routingEngine, v);

@@ -26,6 +26,10 @@ from jupedsim.models.collision_free_speed_v3 import (
     CollisionFreeSpeedModelV3,
     CollisionFreeSpeedModelV3AgentParameters,
 )
+from jupedsim.models.custom_model import (
+    CustomModelAgentParameters,
+    CustomOperationalModel,
+)
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
@@ -68,6 +72,7 @@ class Simulation:
             | AnticipationVelocityModel
             | SocialForceModel
             | WarpDriverModel
+            | CustomOperationalModel
         ),
         geometry: (
             str
@@ -160,6 +165,8 @@ class Simulation:
                 velocity_uncertainty_y=model.velocity_uncertainty_y,
             )
             py_jps_model = model_builder.build()
+        elif isinstance(model, CustomOperationalModel):
+            py_jps_model = model
         else:
             raise Exception("Unknown model type supplied")
         self._writer = trajectory_writer
@@ -287,6 +294,7 @@ class Simulation:
             | AnticipationVelocityModelAgentParameters
             | SocialForceModelAgentParameters
             | WarpDriverModelAgentParameters
+            | CustomModelAgentParameters
         ),
     ) -> int:
         """Add an agent to the simulation.
@@ -370,6 +378,10 @@ class Simulation:
                 desired_speed=parameters.desired_speed,
                 radius=parameters.radius,
             )
+        elif isinstance(parameters, CustomModelAgentParameters) or issubclass(
+            type(parameters), CustomModelAgentParameters
+        ):
+            model = py_jps.CustomModelData(parameters._obj)
 
         # TODO(kkratz): Some models do not have an orientation as part of their
         # state, but we initially designed it to be. This needs to be first

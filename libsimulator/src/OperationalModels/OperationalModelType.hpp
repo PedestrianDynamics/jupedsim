@@ -8,5 +8,6 @@ enum class OperationalModelType {
     COLLISION_FREE_SPEED_V3,
     ANTICIPATION_VELOCITY_MODEL,
     SOCIAL_FORCE,
-    WARP_DRIVER
+    WARP_DRIVER,
+    PYTHON
 };
