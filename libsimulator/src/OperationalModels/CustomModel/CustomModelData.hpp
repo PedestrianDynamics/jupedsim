@@ -6,7 +6,7 @@ class ICustomModelDataImpl
 {
 public:
     virtual ~ICustomModelDataImpl() {};
-    virtual std::string repr() const = 0;
+    virtual std::string print() const = 0;
     virtual void apply_update(const CustomModelUpdate& upd) = 0;
 };
 
@@ -15,10 +15,10 @@ class CustomModelData
 public:
     explicit CustomModelData(std::shared_ptr<ICustomModelDataImpl> impl) : impl_(std::move(impl)) {}
     ~CustomModelData() = default;
-    std::string repr() const
+    std::string print() const
     {
         if(impl_) {
-            return impl_->repr();
+            return impl_->print();
         }
         return "<CustomModelData: no implementation>";
     }
@@ -41,7 +41,7 @@ struct fmt::formatter<CustomModelData> : fmt::formatter<std::string> {
     template <typename FormatContext>
     auto format(const CustomModelData& data, FormatContext& ctx) const
     {
-        std::string repr = data.repr();
+        std::string repr = data.print();
         return fmt::formatter<std::string>::format(repr, ctx);
     }
 };
