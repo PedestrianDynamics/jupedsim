@@ -34,7 +34,9 @@ void init_social_force_model_IPP(py::module_& m)
                         double forceDistance,
                         double obstacleForceDistance,
                         double legForceDistance,
-                        double radius) {
+                        double radius,
+                        double bodyForce,
+                        double friction) {
                 return JPS_SocialForceModelIPPAgentParameters{
                     intoJPS_Point(position),
                     intoJPS_Point(orientation),
@@ -55,7 +57,9 @@ void init_social_force_model_IPP(py::module_& m)
                     forceDistance,
                     obstacleForceDistance,
                     legForceDistance,
-                    radius};
+                    radius,
+                    bodyForce,
+                    friction};
             }),
             py::kw_only(),
             py::arg("position"),
@@ -77,7 +81,9 @@ void init_social_force_model_IPP(py::module_& m)
             py::arg("force_distance"),
             py::arg("obstacle_force_distance"),
             py::arg("leg_force_distance"),
-            py::arg("radius"))
+            py::arg("radius"),
+            py::arg("body_force"),
+            py::arg("friction"))
         .def("__repr__", [](const JPS_SocialForceModelIPPAgentParameters& p) {
             return fmt::format(
                 "position: {}, orientation: {}, journey_id: {}, stage_id: {}, "
@@ -85,7 +91,8 @@ void init_social_force_model_IPP(py::module_& m)
                 "height: {}, desiredSpeed: {}, reactionTime: {}, "
                 "lambdaU: {}, lambdaB: {}, balanceSpeed: {}, damping: {}, "
                 "agentScale: {}, obstacleScale: {}, forceDistance: {}, "
-                "obstacleForceDistance: {}, legForceDistance: {}, radius: {}",
+                "obstacleForceDistance: {}, legForceDistance: {}, radius: {}, "
+                "bodyForce: {}, friction: {}",
                 intoTuple(p.position),
                 intoTuple(p.orientation),
                 p.journeyId,
@@ -105,7 +112,9 @@ void init_social_force_model_IPP(py::module_& m)
                 p.forceDistance,
                 p.obstacleForceDistance,
                 p.legForceDistance,
-                p.radius);
+                p.radius,
+                p.bodyForce,
+                p.friction);
         });
     py::class_<JPS_SocialForceModelIPPBuilder_Wrapper>(m, "SocialForceModelIPPBuilder")
         .def(
@@ -253,5 +262,21 @@ void init_social_force_model_IPP(py::module_& m)
             },
             [](JPS_SocialForceModelIPPState_Wrapper& w, double radius) {
                 JPS_SocialForceModelIPPState_SetRadius(w.handle, radius);
+            })
+        .def_property(
+            "body_force",
+            [](const JPS_SocialForceModelIPPState_Wrapper& w) {
+                return JPS_SocialForceModelIPPState_GetBodyForce(w.handle);
+            },
+            [](JPS_SocialForceModelIPPState_Wrapper& w, double bodyForce) {
+                JPS_SocialForceModelIPPState_SetBodyForce(w.handle, bodyForce);
+            })
+        .def_property(
+            "friction",
+            [](const JPS_SocialForceModelIPPState_Wrapper& w) {
+                return JPS_SocialForceModelIPPState_GetFriction(w.handle);
+            },
+            [](JPS_SocialForceModelIPPState_Wrapper& w, double friction) {
+                JPS_SocialForceModelIPPState_SetFriction(w.handle, friction);
             });
 }

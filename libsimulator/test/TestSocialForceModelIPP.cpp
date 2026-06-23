@@ -31,6 +31,8 @@ GenericAgent MakeAgent(
     data.forceDistance = 0.5;
     data.legForceDistance = 0.3;
     data.radius = radius;
+    data.bodyForce = 10000.0;
+    data.friction = 0.5;
 
     return GenericAgent(
         GenericAgent::ID{},

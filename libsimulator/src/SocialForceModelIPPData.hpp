@@ -19,8 +19,8 @@ struct SocialForceModelIPPData {
     double obstacleForceDistance{}; // B_w wall interaction range [m]
     double legForceDistance{}; // B_leg leg interaction range [m]
     double radius{}; // r upper body radius [m]
-    double bodyForce{10000.0}; // stiffness for hard contact [N]
-    double friction{0.5}; // friction coefficient [kg/s]
+    double bodyForce{}; // stiffness for hard contact [N]
+    double friction{}; // friction coefficient [kg/s]
 };
 
 template <>

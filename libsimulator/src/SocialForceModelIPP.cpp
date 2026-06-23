@@ -2,6 +2,7 @@
 #include "SocialForceModelIPP.hpp"
 
 #include "GenericAgent.hpp"
+#include "GeometricFunctions.hpp"
 #include "Mathematics.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModelType.hpp"

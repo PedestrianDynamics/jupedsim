@@ -42,6 +42,8 @@ class SocialForceModelIPPAgentParameters:
         obstacle_force_distance: Wall interaction range B_w [m].
         leg_force_distance: Leg interaction range B_leg [m].
         radius: Upper body radius [m].
+        body_force: Hertz-like contact stiffness k [N].
+        friction: Friction coefficient mu [kg/s].
     """
 
     position: tuple[float, float] = (0.0, 0.0)
@@ -64,6 +66,8 @@ class SocialForceModelIPPAgentParameters:
     obstacle_force_distance: float = 0.2
     leg_force_distance: float = 0.3
     radius: float = 0.15
+    body_force: float = 10000.0
+    friction: float = 0.5
 
     def as_native(
         self,
@@ -90,6 +94,8 @@ class SocialForceModelIPPAgentParameters:
             obstacle_force_distance=self.obstacle_force_distance,
             leg_force_distance=self.leg_force_distance,
             radius=self.radius,
+            body_force=self.body_force,
+            friction=self.friction,
         )
 
 
@@ -240,3 +246,21 @@ class SocialForceModelIPPState:
     @radius.setter
     def radius(self, radius):
         self._obj.radius = radius
+
+    @property
+    def body_force(self) -> float:
+        """Contact stiffness."""
+        return self._obj.body_force
+
+    @body_force.setter
+    def body_force(self, body_force):
+        self._obj.body_force = body_force
+
+    @property
+    def friction(self) -> float:
+        """Friction coefficient."""
+        return self._obj.friction
+
+    @friction.setter
+    def friction(self, friction):
+        self._obj.friction = friction

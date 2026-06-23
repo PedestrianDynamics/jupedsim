@@ -291,3 +291,35 @@ JPS_SocialForceModelIPPState_SetRadius(JPS_SocialForceModelIPPState handle, doub
     const auto state = reinterpret_cast<SocialForceModelIPPData*>(handle);
     state->radius = radius;
 }
+
+JUPEDSIM_API double
+JPS_SocialForceModelIPPState_GetBodyForce(JPS_SocialForceModelIPPState handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const SocialForceModelIPPData*>(handle);
+    return state->bodyForce;
+}
+
+JUPEDSIM_API void
+JPS_SocialForceModelIPPState_SetBodyForce(JPS_SocialForceModelIPPState handle, double bodyForce)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<SocialForceModelIPPData*>(handle);
+    state->bodyForce = bodyForce;
+}
+
+JUPEDSIM_API double
+JPS_SocialForceModelIPPState_GetFriction(JPS_SocialForceModelIPPState handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const SocialForceModelIPPData*>(handle);
+    return state->friction;
+}
+
+JUPEDSIM_API void
+JPS_SocialForceModelIPPState_SetFriction(JPS_SocialForceModelIPPState handle, double friction)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<SocialForceModelIPPData*>(handle);
+    state->friction = friction;
+}

@@ -107,6 +107,14 @@ JUPEDSIM_API double JPS_SocialForceModelIPPState_GetRadius(JPS_SocialForceModelI
 JUPEDSIM_API void
 JPS_SocialForceModelIPPState_SetRadius(JPS_SocialForceModelIPPState handle, double radius);
 
+JUPEDSIM_API double JPS_SocialForceModelIPPState_GetBodyForce(JPS_SocialForceModelIPPState handle);
+JUPEDSIM_API void
+JPS_SocialForceModelIPPState_SetBodyForce(JPS_SocialForceModelIPPState handle, double bodyForce);
+
+JUPEDSIM_API double JPS_SocialForceModelIPPState_GetFriction(JPS_SocialForceModelIPPState handle);
+JUPEDSIM_API void
+JPS_SocialForceModelIPPState_SetFriction(JPS_SocialForceModelIPPState handle, double friction);
+
 /**
  * Describes parameters of an Agent in SocialForceModelIPP
  */
@@ -131,6 +139,8 @@ typedef struct JPS_SocialForceModelIPPAgentParameters {
     double obstacleForceDistance = 0.2;
     double legForceDistance = 0.3;
     double radius = 0.15;
+    double bodyForce = 10000.0;
+    double friction = 0.5;
 
 } JPS_SocialForceModelIPPAgentParameters;
 
