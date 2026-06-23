@@ -20,7 +20,7 @@ public:
 class CustomModelUpdate
 {
 public:
-    explicit CustomModelUpdate(std::unique_ptr<ICustomModelUpdateImpl> impl)
+    explicit CustomModelUpdate(std::shared_ptr<ICustomModelUpdateImpl> impl)
         : impl_(std::move(impl))
     {
     }

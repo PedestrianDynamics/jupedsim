@@ -13,7 +13,7 @@ public:
 class CustomModelData
 {
 public:
-    explicit CustomModelData(std::unique_ptr<ICustomModelDataImpl> impl) : impl_(std::move(impl)) {}
+    explicit CustomModelData(std::shared_ptr<ICustomModelDataImpl> impl) : impl_(std::move(impl)) {}
     ~CustomModelData() = default;
     std::string to_string() const
     {
