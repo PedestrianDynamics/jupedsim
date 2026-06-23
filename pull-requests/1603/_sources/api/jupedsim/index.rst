@@ -32,6 +32,8 @@ Classes
    jupedsim.GeneralizedCentrifugalForceModelState
    jupedsim.Geometry
    jupedsim.JourneyDescription
+   jupedsim.LineSegment
+   jupedsim.NeighborhoodSearch
    jupedsim.NotifiableQueueStage
    jupedsim.Recording
    jupedsim.RecordingAgent
@@ -1487,11 +1489,50 @@ Attributes
 
 
 
+   .. py:method:: get_walls_close_to(point: tuple[float, float]) -> list[jupedsim.linesegment.LineSegment]
+
+      Find line segments of the geometry that are within a certain distance to a point.
+
+      :param point: The point to check against.
+      :type point: tuple[float, float]
+      :param distance: The maximum distance for line segments to be included.
+      :type distance: float
+
+      :returns: List of LineSegment objects that are close to the given point.
+
+
+
+   .. py:method:: get_walls_in_distance_to(point: tuple[float, float], distance: float) -> list[jupedsim.linesegment.LineSegment]
+
+      Find line segments of the geometry that are within a certain distance to a point.
+
+      :param point: The point to check against.
+      :type point: tuple[float, float]
+      :param distance: The maximum distance for line segments to be included.
+      :type distance: float
+
+      :returns: List of LineSegment objects that are close to the given point.
+
+
+
    .. py:method:: holes() -> list[list[tuple[float, float]]]
 
       Access holes (inner boundaries) of the walkable area.
 
       :returns: A list of polygons forming holes inside the boundary.
+
+
+
+   .. py:method:: linesegments_close_to(point: tuple[float, float]) -> list[jupedsim.linesegment.LineSegment]
+
+      Find line segments of the geometry that are within a certain distance to a point.
+
+      :param point: The point to check against.
+      :type point: tuple[float, float]
+      :param distance: The maximum distance for line segments to be included.
+      :type distance: float
+
+      :returns: List of LineSegment objects that are close to the given point.
 
 
 
@@ -1521,6 +1562,91 @@ Attributes
 
       :param stage_id: id of the stage to set the transition for.
       :param transition: transition to set
+
+
+
+.. py:class:: LineSegment(obj: jupedsim.native.LineSegment)
+
+   Represents a line segment in 2D space, defined by two endpoints p1 and p2.
+
+
+   .. py:method:: closest_point(point: tuple[float, float]) -> tuple[float, float]
+
+      Calculate the closest point on the line segment to a given point.
+
+      :param point: The point to find the closest point to.
+      :type point: tuple[float, float]
+
+      :returns: The closest point on the line segment to the given point.
+      :rtype: tuple[float, float]
+
+
+
+   .. py:method:: distance_to_point(point: tuple[float, float]) -> float
+
+      Calculate the distance from a given point to this line segment.
+
+      :param point: The point to calculate the distance to.
+      :type point: tuple[float, float]
+
+      :returns: The distance from the point to the line segment.
+      :rtype: float
+
+
+
+   .. py:property:: p1
+      :type: tuple[float, float]
+
+
+      Get the first endpoint of the line segment.
+
+
+   .. py:property:: p2
+      :type: tuple[float, float]
+
+
+      Get the second endpoint of the line segment.
+
+
+.. py:class:: NeighborhoodSearch(obj: jupedsim.native.NeighborhoodSearch)
+
+   Pure Python wrapper for the C++ NeighborhoodSearch class.
+
+   Provides efficient spatial queries for finding neighboring agents within
+   a given radius. Uses a grid-based data structure for O(1) cell lookups
+   with configurable cell size.
+
+
+   .. rubric:: Example
+
+   >>> neighbors = neighborhood.get_neighboring_agents(
+   ...     position=(5.0, 5.0),
+   ...     radius=2.0
+   ... )
+
+
+   .. py:method:: get_neighboring_agents(position: Tuple[float, float], radius: float) -> List[Agent]
+
+      Get all agents within a certain radius of a position.
+
+      Uses the underlying spatial grid for efficient O(1) average-case
+      lookup time (worst case depends on number of agents per cell).
+
+      :param position: Query position as (x, y) tuple [m]
+      :param radius: Search radius [m]
+
+      :returns: List of GenericAgent objects within the radius.
+                Empty list if no agents found.
+
+      :raises ValueError: If radius < 0
+
+      .. rubric:: Example
+
+      >>> neighbors = neighborhood.get_neighboring_agents(
+      ...     position=(5.0, 5.0),
+      ...     radius=2.5
+      ... )
+      >>> print(f"Found {len(neighbors)} neighbors")
 
 
 

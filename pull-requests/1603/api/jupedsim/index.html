@@ -593,12 +593,26 @@
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Geometry"><code class="docutils literal notranslate"><span class="pre">Geometry</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Geometry.as_wkt"><code class="docutils literal notranslate"><span class="pre">Geometry.as_wkt()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Geometry.boundary"><code class="docutils literal notranslate"><span class="pre">Geometry.boundary()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Geometry.get_walls_close_to"><code class="docutils literal notranslate"><span class="pre">Geometry.get_walls_close_to()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Geometry.get_walls_in_distance_to"><code class="docutils literal notranslate"><span class="pre">Geometry.get_walls_in_distance_to()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Geometry.holes"><code class="docutils literal notranslate"><span class="pre">Geometry.holes()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Geometry.linesegments_close_to"><code class="docutils literal notranslate"><span class="pre">Geometry.linesegments_close_to()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.JourneyDescription"><code class="docutils literal notranslate"><span class="pre">JourneyDescription</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.JourneyDescription.add"><code class="docutils literal notranslate"><span class="pre">JourneyDescription.add()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.JourneyDescription.set_transition_for_stage"><code class="docutils literal notranslate"><span class="pre">JourneyDescription.set_transition_for_stage()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.LineSegment"><code class="docutils literal notranslate"><span class="pre">LineSegment</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.LineSegment.closest_point"><code class="docutils literal notranslate"><span class="pre">LineSegment.closest_point()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.LineSegment.distance_to_point"><code class="docutils literal notranslate"><span class="pre">LineSegment.distance_to_point()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.LineSegment.p1"><code class="docutils literal notranslate"><span class="pre">LineSegment.p1</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.LineSegment.p2"><code class="docutils literal notranslate"><span class="pre">LineSegment.p2</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.NeighborhoodSearch"><code class="docutils literal notranslate"><span class="pre">NeighborhoodSearch</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.NeighborhoodSearch.get_neighboring_agents"><code class="docutils literal notranslate"><span class="pre">NeighborhoodSearch.get_neighboring_agents()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.NotifiableQueueStage"><code class="docutils literal notranslate"><span class="pre">NotifiableQueueStage</span></code></a><ul class="nav section-nav flex-column">
@@ -884,6 +898,12 @@
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.JourneyDescription" title="jupedsim.JourneyDescription"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JourneyDescription</span></code></a></p></td>
 <td><p>Used to describe a journey for construction by the <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulation</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.LineSegment" title="jupedsim.LineSegment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LineSegment</span></code></a></p></td>
+<td><p>Represents a line segment in 2D space, defined by two endpoints p1 and p2.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.NeighborhoodSearch" title="jupedsim.NeighborhoodSearch"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NeighborhoodSearch</span></code></a></p></td>
+<td><p>Pure Python wrapper for the C++ NeighborhoodSearch class.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.NotifiableQueueStage" title="jupedsim.NotifiableQueueStage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NotifiableQueueStage</span></code></a></p></td>
 <td><p>Models a queue where agents can wait until notified.</p></td>
@@ -2479,12 +2499,63 @@ create one instance of this type and modify it between calls to <cite>add_agent<
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="jupedsim.Geometry.get_walls_close_to">
+<span class="sig-name descname"><span class="pre">get_walls_close_to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">jupedsim.linesegment.LineSegment</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/jupedsim/geometry.html#Geometry.get_walls_close_to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.Geometry.get_walls_close_to" title="Link to this definition">#</a></dt>
+<dd><p>Find line segments of the geometry that are within a certain distance to a point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>point</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>]</em>) – The point to check against.</p></li>
+<li><p><strong>distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – The maximum distance for line segments to be included.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of LineSegment objects that are close to the given point.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jupedsim.Geometry.get_walls_in_distance_to">
+<span class="sig-name descname"><span class="pre">get_walls_in_distance_to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">jupedsim.linesegment.LineSegment</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/jupedsim/geometry.html#Geometry.get_walls_in_distance_to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.Geometry.get_walls_in_distance_to" title="Link to this definition">#</a></dt>
+<dd><p>Find line segments of the geometry that are within a certain distance to a point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>point</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>]</em>) – The point to check against.</p></li>
+<li><p><strong>distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – The maximum distance for line segments to be included.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of LineSegment objects that are close to the given point.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="jupedsim.Geometry.holes">
 <span class="sig-name descname"><span class="pre">holes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/jupedsim/geometry.html#Geometry.holes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.Geometry.holes" title="Link to this definition">#</a></dt>
 <dd><p>Access holes (inner boundaries) of the walkable area.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A list of polygons forming holes inside the boundary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jupedsim.Geometry.linesegments_close_to">
+<span class="sig-name descname"><span class="pre">linesegments_close_to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">jupedsim.linesegment.LineSegment</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/jupedsim/geometry.html#Geometry.linesegments_close_to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.Geometry.linesegments_close_to" title="Link to this definition">#</a></dt>
+<dd><p>Find line segments of the geometry that are within a certain distance to a point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>point</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>]</em>) – The point to check against.</p></li>
+<li><p><strong>distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – The maximum distance for line segments to be included.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of LineSegment objects that are close to the given point.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2523,6 +2594,105 @@ transitions.</p>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jupedsim.LineSegment">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LineSegment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">jupedsim.native.LineSegment</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jupedsim/linesegment.html#LineSegment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.LineSegment" title="Link to this definition">#</a></dt>
+<dd><p>Represents a line segment in 2D space, defined by two endpoints p1 and p2.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="jupedsim.LineSegment.closest_point">
+<span class="sig-name descname"><span class="pre">closest_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/jupedsim/linesegment.html#LineSegment.closest_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.LineSegment.closest_point" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the closest point on the line segment to a given point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>point</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>]</em>) – The point to find the closest point to.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The closest point on the line segment to the given point.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jupedsim.LineSegment.distance_to_point">
+<span class="sig-name descname"><span class="pre">distance_to_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../../_modules/jupedsim/linesegment.html#LineSegment.distance_to_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.LineSegment.distance_to_point" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the distance from a given point to this line segment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>point</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>]</em>) – The point to calculate the distance to.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The distance from the point to the line segment.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="jupedsim.LineSegment.p1">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">p1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#jupedsim.LineSegment.p1" title="Link to this definition">#</a></dt>
+<dd><p>Get the first endpoint of the line segment.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="jupedsim.LineSegment.p2">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">p2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#jupedsim.LineSegment.p2" title="Link to this definition">#</a></dt>
+<dd><p>Get the second endpoint of the line segment.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jupedsim.NeighborhoodSearch">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NeighborhoodSearch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">jupedsim.native.NeighborhoodSearch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jupedsim/neighborhood.html#NeighborhoodSearch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.NeighborhoodSearch" title="Link to this definition">#</a></dt>
+<dd><p>Pure Python wrapper for the C++ NeighborhoodSearch class.</p>
+<p>Provides efficient spatial queries for finding neighboring agents within
+a given radius. Uses a grid-based data structure for O(1) cell lookups
+with configurable cell size.</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">neighbors</span> <span class="o">=</span> <span class="n">neighborhood</span><span class="o">.</span><span class="n">get_neighboring_agents</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="n">radius</span><span class="o">=</span><span class="mf">2.0</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="jupedsim.NeighborhoodSearch.get_neighboring_agents">
+<span class="sig-name descname"><span class="pre">get_neighboring_agents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#jupedsim.Agent" title="jupedsim.Agent"><span class="pre">Agent</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/jupedsim/neighborhood.html#NeighborhoodSearch.get_neighboring_agents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.NeighborhoodSearch.get_neighboring_agents" title="Link to this definition">#</a></dt>
+<dd><p>Get all agents within a certain radius of a position.</p>
+<p>Uses the underlying spatial grid for efficient O(1) average-case
+lookup time (worst case depends on number of agents per cell).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>position</strong> – Query position as (x, y) tuple [m]</p></li>
+<li><p><strong>radius</strong> – Search radius [m]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of GenericAgent objects within the radius.
+Empty list if no agents found.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If radius &lt; 0</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">neighbors</span> <span class="o">=</span> <span class="n">neighborhood</span><span class="o">.</span><span class="n">get_neighboring_agents</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="n">radius</span><span class="o">=</span><span class="mf">2.5</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">neighbors</span><span class="p">)</span><span class="si">}</span><span class="s2"> neighbors&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </dd></dl>
@@ -4449,12 +4619,26 @@ basic information about this library.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Geometry"><code class="docutils literal notranslate"><span class="pre">Geometry</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Geometry.as_wkt"><code class="docutils literal notranslate"><span class="pre">Geometry.as_wkt()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Geometry.boundary"><code class="docutils literal notranslate"><span class="pre">Geometry.boundary()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Geometry.get_walls_close_to"><code class="docutils literal notranslate"><span class="pre">Geometry.get_walls_close_to()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Geometry.get_walls_in_distance_to"><code class="docutils literal notranslate"><span class="pre">Geometry.get_walls_in_distance_to()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Geometry.holes"><code class="docutils literal notranslate"><span class="pre">Geometry.holes()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Geometry.linesegments_close_to"><code class="docutils literal notranslate"><span class="pre">Geometry.linesegments_close_to()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.JourneyDescription"><code class="docutils literal notranslate"><span class="pre">JourneyDescription</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.JourneyDescription.add"><code class="docutils literal notranslate"><span class="pre">JourneyDescription.add()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.JourneyDescription.set_transition_for_stage"><code class="docutils literal notranslate"><span class="pre">JourneyDescription.set_transition_for_stage()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.LineSegment"><code class="docutils literal notranslate"><span class="pre">LineSegment</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.LineSegment.closest_point"><code class="docutils literal notranslate"><span class="pre">LineSegment.closest_point()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.LineSegment.distance_to_point"><code class="docutils literal notranslate"><span class="pre">LineSegment.distance_to_point()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.LineSegment.p1"><code class="docutils literal notranslate"><span class="pre">LineSegment.p1</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.LineSegment.p2"><code class="docutils literal notranslate"><span class="pre">LineSegment.p2</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.NeighborhoodSearch"><code class="docutils literal notranslate"><span class="pre">NeighborhoodSearch</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.NeighborhoodSearch.get_neighboring_agents"><code class="docutils literal notranslate"><span class="pre">NeighborhoodSearch.get_neighboring_agents()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.NotifiableQueueStage"><code class="docutils literal notranslate"><span class="pre">NotifiableQueueStage</span></code></a><ul class="nav section-nav flex-column">
