@@ -34,14 +34,14 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
     const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.pos, this->_cutOffRadius);
     const auto& walls = geometry.LineSegmentsInApproxDistanceTo(ped.pos);
 
-    // Unit vector from ground support toward upper body
+    // vector from ground support toward upper body
     // When co-located, use the driving direction as fallback
-    const Point sep = ped.pos - model.ground_support_position;
+    const Point vec_ub_leg = ped.pos - model.ground_support_position;
     Point e_n;
-    if(sep.Norm() > 1e-10) {
-        e_n = sep.Normalized();
+    if(vec_ub_leg.Norm() > 1e-10) {
+        e_n = vec_ub_leg.Normalized();
     } else {
-        // Fallback: use direction toward destination
+        // Fallback: use direction toward destination 
         const Point toGoal = ped.destination - ped.pos;
         e_n = (toGoal.Norm() > 1e-10) ? toGoal.Normalized() : Point(0, 0);
     }
@@ -55,20 +55,22 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
     acc_ub += (e_n * model.balanceSpeed - model.velocity) * model.lambdaU;
 
     // Damping: -lambda * v_n
-    acc_ub = acc_ub - model.velocity * model.damping;
+    acc_ub += - model.velocity * model.damping;
 
-    // Upper body repulsion from other agents
+    // Upper body repulsion from other agents (Social + hard contact)
     for(const auto& neighbor : neighborhood) {
         if(neighbor.id == ped.id) {
             continue;
         }
         acc_ub += ExponentialRepulsion(ped.pos, neighbor.pos, model.agentScale, model.forceDistance);
+        acc_ub += AgentUpperBodyContactForce(ped, neighbor);
     }
 
-    // Upper body repulsion from walls
+    // Upper body repulsion from walls (Social + hard contact)
     for(const auto& wall : walls) {
         const Point pt = wall.ShortestPoint(ped.pos);
         acc_ub += ExponentialRepulsion(ped.pos, pt, model.obstacleScale, model.obstacleForceDistance);
+        acc_ub += ObstacleUpperBodyContactForce(ped, wall);
     }
 
     // --- Ground support (leg) acceleration ---
@@ -76,7 +78,7 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
     // Legs "chase" the upper body (positive e_n direction)
     auto acc_gs = (e_n * model.balanceSpeed - model.ground_support_velocity) * model.lambdaB;
 
-    // Leg repulsion from other agents' legs
+    // Leg repulsion from other agents' legs (Social + hard contact)
     for(const auto& neighbor : neighborhood) {
         if(neighbor.id == ped.id) {
             continue;
@@ -87,15 +89,17 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
             nmodel.ground_support_position,
             model.agentScale,
             model.legForceDistance);
+        acc_gs += AgentGroundSupportContactForce(ped, neighbor);
     }
 
-    // Leg repulsion from walls (query from ground support position, which may
-    // be in a different cell than the upper body)
+    // Leg repulsion from walls (Social + hard contact)
+    // Query from ground support position, which may be in a different cell than the upper body
     const auto& gsWalls = geometry.LineSegmentsInApproxDistanceTo(model.ground_support_position);
     for(const auto& wall : gsWalls) {
         const Point pt = wall.ShortestPoint(model.ground_support_position);
         acc_gs +=
             ExponentialRepulsion(model.ground_support_position, pt, model.obstacleScale, model.obstacleForceDistance);
+        acc_gs += ObstacleGroundSupportContactForce(ped, wall);
     }
 
     // --- Euler integration ---
@@ -170,6 +174,8 @@ void SocialForceModelIPP::CheckModelConstraint(
     throwIfNotStrictlyPositive(model.forceDistance, "force distance");
     throwIfNotStrictlyPositive(model.obstacleForceDistance, "obstacle force distance");
     throwIfNotStrictlyPositive(model.legForceDistance, "leg force distance");
+    throwIfNotStrictlyPositive(model.bodyForce, "body force");
+    throwIfNotStrictlyPositive(model.friction, "friction");
 
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(agent.pos, 2);
     for(const auto& neighbor : neighbors) {
@@ -214,4 +220,101 @@ Point SocialForceModelIPP::ExponentialRepulsion(
     }
     const Point n_ij = (pt1 - pt2).Normalized();
     return n_ij * A * exp(-dist / B);
+}
+
+
+
+
+// ---------------------------------------------------------------------------
+// Hard contact forces (pushing + friction) — active when bodies overlap
+// ---------------------------------------------------------------------------
+
+Point SocialForceModelIPP::AgentUpperBodyContactForce(const GenericAgent& ped1, const GenericAgent& ped2) const
+{
+    const auto& model1 = std::get<SocialForceModelIPPData>(ped1.model);
+    const auto& model2 = std::get<SocialForceModelIPPData>(ped2.model);
+
+    const double radiuses_sum = model1.radius + model2.radius;
+
+    return ContactForceBetweenPoints(
+        ped1.pos,
+        ped2.pos,
+        radiuses_sum,
+        model2.velocity - model1.velocity,
+        model1.bodyForce,
+        model1.friction);
+};
+
+
+Point SocialForceModelIPP::AgentGroundSupportContactForce(const GenericAgent& ped1, const GenericAgent& ped2) const
+{
+    const auto& model1 = std::get<SocialForceModelIPPData>(ped1.model);
+    const auto& model2 = std::get<SocialForceModelIPPData>(ped2.model);
+
+    const double radiuses_sum = model1.radius * GS_SCALING_FACTOR * model1.height
+                             + model2.radius * GS_SCALING_FACTOR * model2.height;
+
+    return ContactForceBetweenPoints(
+        model1.ground_support_position,
+        model2.ground_support_position,
+        radiuses_sum,
+        model2.ground_support_velocity - model1.ground_support_velocity,
+        model1.bodyForce,
+        model1.friction);
+};
+
+Point SocialForceModelIPP::ObstacleUpperBodyContactForce(const GenericAgent& agent, const LineSegment& segment) const
+{
+    const auto& model = std::get<SocialForceModelIPPData>(agent.model);
+    const Point pt = segment.ShortestPoint(agent.pos);
+    return ContactForceBetweenPoints(
+        agent.pos,
+        pt,
+        model.radius,
+        model.velocity,
+        model.bodyForce,
+        model.friction);
+}
+
+Point SocialForceModelIPP::ObstacleGroundSupportContactForce(const GenericAgent& agent, const LineSegment& segment) const
+{
+    const auto& model = std::get<SocialForceModelIPPData>(agent.model);
+    const Point pt = segment.ShortestPoint(model.ground_support_position);
+    return ContactForceBetweenPoints(
+        model.ground_support_position,
+        pt,
+        model.radius * GS_SCALING_FACTOR * model.height,
+        model.ground_support_velocity,
+        model.bodyForce,
+        model.friction);
+}
+
+
+Point SocialForceModelIPP::ContactForceBetweenPoints(
+    const Point pt1,
+    const Point pt2,
+    const double radiuses_sum,
+    const Point velocity,
+    const double bodyForce,
+    const double friction)
+{
+    const double dist = (pt1 - pt2).Norm();
+    if(dist < 1e-10) {
+        return Point(0, 0);
+    }
+
+    double pushing_force_norm = 0;
+    double friction_force_norm = 0;
+    const Point n_ij = (pt1 - pt2).Normalized();
+    const Point tangent = n_ij.Rotate90Deg();
+
+    if(dist < radiuses_sum) {
+        // - Normal contact repulsion: Hertz-like nonlinear spring
+        pushing_force_norm = bodyForce * std::pow(1.0 - dist / radiuses_sum, 1.5);
+        
+        // - Friction: Coulomb-like friction * (r - d) * v_rel·t_hat along the tangent
+        friction_force_norm =
+            friction * (radiuses_sum - dist) * (velocity.ScalarProduct(tangent));
+    }
+    return n_ij * pushing_force_norm + tangent * friction_force_norm;
 }
