@@ -119,6 +119,24 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
         update.position = update.ground_support_position + separation.Normalized() * maxSeparation;
     }
 
+
+    // --- Wall crossing prevention ---
+    // If a wall crosses the segment between upper body and ground support,
+    // teleport ground support directly under the upper body and copy its
+    // velocity to prevent re-crossing and avoid lagging legs.
+    {
+        for(const auto& wall : walls) {
+            const LineSegment bodySegment(
+                update.position, update.ground_support_position);
+            if(!intersects(bodySegment, wall)) {
+                continue;
+            }
+            update.ground_support_position = update.position;
+            update.ground_support_velocity = update.velocity;
+            break;
+        }
+    }
+
     return update;
 }
 
