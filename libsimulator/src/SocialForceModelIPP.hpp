@@ -59,7 +59,8 @@ private:
         const Point pt1,
         const Point pt2,
         double A,
-        double B);
+        double B,
+        double radiuses_sum);
 
     // Hard contact: pushing + friction when bodies overlap
     Point AgentUpperBodyContactForce(const GenericAgent& ped1, const GenericAgent& ped2) const;

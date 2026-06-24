@@ -63,14 +63,16 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
         if(neighbor.id == ped.id) {
             continue;
         }
-        acc_ub += ExponentialRepulsion(ped.pos, neighbor.pos, model.agentScale, model.forceDistance);
+        const auto& nmodel = std::get<SocialForceModelIPPData>(neighbor.model);
+        acc_ub += ExponentialRepulsion(
+            ped.pos, neighbor.pos, model.agentScale, model.forceDistance, model.radius + nmodel.radius);
         acc_ub += AgentUpperBodyContactForce(ped, neighbor);
     }
 
     // Upper body repulsion from walls (Social + hard contact)
     for(const auto& wall : walls) {
         const Point pt = wall.ShortestPoint(ped.pos);
-        acc_ub += ExponentialRepulsion(ped.pos, pt, model.obstacleScale, model.obstacleForceDistance);
+        acc_ub += ExponentialRepulsion(ped.pos, pt, model.obstacleScale, model.obstacleForceDistance, model.radius);
         acc_ub += ObstacleUpperBodyContactForce(ped, wall);
     }
 
@@ -89,7 +91,9 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
             model.ground_support_position,
             nmodel.ground_support_position,
             model.legScale,
-            model.legForceDistance);
+            model.legForceDistance,
+            model.radius * GS_SCALING_FACTOR * model.height
+                + model.radius * GS_SCALING_FACTOR * model.height);
         acc_gs += AgentGroundSupportContactForce(ped, neighbor);
     }
 
@@ -98,8 +102,9 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
     const auto& gsWalls = geometry.LineSegmentsInApproxDistanceTo(model.ground_support_position);
     for(const auto& wall : gsWalls) {
         const Point pt = wall.ShortestPoint(model.ground_support_position);
-        acc_gs +=
-            ExponentialRepulsion(model.ground_support_position, pt, model.legScale, model.legForceDistance);
+        acc_gs += ExponentialRepulsion(
+            model.ground_support_position, pt, model.legScale, model.legForceDistance,
+            model.radius * GS_SCALING_FACTOR * model.height);
         acc_gs += ObstacleGroundSupportContactForce(ped, wall);
     }
 
@@ -232,14 +237,16 @@ Point SocialForceModelIPP::ExponentialRepulsion(
     const Point pt1,
     const Point pt2,
     const double A,
-    const double B)
+    const double B,
+    const double radiuses_sum)
 {
     const double dist = (pt1 - pt2).Norm();
-    if(dist < 1e-10) {
+    const double eff_dist = dist - radiuses_sum;
+    if(eff_dist < 1e-10) {
         return Point(0, 0);
     }
     const Point n_ij = (pt1 - pt2).Normalized();
-    return n_ij * A * exp(-dist / B);
+    return n_ij * A * exp(-eff_dist / B);
 }
 
 
