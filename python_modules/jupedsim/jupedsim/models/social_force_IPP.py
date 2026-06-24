@@ -38,6 +38,7 @@ class SocialForceModelIPPAgentParameters:
         damping: Upper body velocity dissipation rate [1/s].
         agent_scale: Exponential repulsion amplitude A vs agents [N].
         obstacle_scale: Exponential repulsion amplitude A_w vs walls [N].
+        leg_scale: Exponential repulsion amplitude A_leg for ground support [N].
         force_distance: Upper body interaction range B [m].
         obstacle_force_distance: Wall interaction range B_w [m].
         leg_force_distance: Leg interaction range B_leg [m].
@@ -62,6 +63,7 @@ class SocialForceModelIPPAgentParameters:
     damping: float = 1.0
     agent_scale: float = 5.0
     obstacle_scale: float = 5.0
+    leg_scale: float = 5.0
     force_distance: float = 0.5
     obstacle_force_distance: float = 0.2
     leg_force_distance: float = 0.3
@@ -90,6 +92,7 @@ class SocialForceModelIPPAgentParameters:
             damping=self.damping,
             agent_scale=self.agent_scale,
             obstacle_scale=self.obstacle_scale,
+            leg_scale=self.leg_scale,
             force_distance=self.force_distance,
             obstacle_force_distance=self.obstacle_force_distance,
             leg_force_distance=self.leg_force_distance,
@@ -210,6 +213,15 @@ class SocialForceModelIPPState:
     @obstacle_scale.setter
     def obstacle_scale(self, obstacle_scale):
         self._obj.obstacle_scale = obstacle_scale
+
+    @property
+    def leg_scale(self) -> float:
+        """Exponential repulsion amplitude for ground support."""
+        return self._obj.leg_scale
+
+    @leg_scale.setter
+    def leg_scale(self, leg_scale):
+        self._obj.leg_scale = leg_scale
 
     @property
     def force_distance(self) -> float:

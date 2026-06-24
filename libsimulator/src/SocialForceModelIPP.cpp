@@ -38,22 +38,22 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
     // vector from ground support toward upper body
     // When co-located, use the driving direction as fallback
     const Point vec_ub_leg = ped.pos - model.ground_support_position;
-    Point e_n;
+    Point e_ub_leg;
     if(vec_ub_leg.Norm() > 1e-10) {
-        e_n = vec_ub_leg.Normalized();
+        e_ub_leg = vec_ub_leg.Normalized();
     } else {
         // Fallback: use direction toward destination 
         const Point toGoal = ped.destination - ped.pos;
-        e_n = (toGoal.Norm() > 1e-10) ? toGoal.Normalized() : Point(0, 0);
+        e_ub_leg = (toGoal.Norm() > 1e-10) ? toGoal.Normalized() : Point(0, 0);
     }
 
     // --- Upper body acceleration ---
     // Driving force: (v0 * e0 - v) / tau
     auto acc_ub = DrivingForce(ped);
 
-    // Unbalancing: lambda_u * (v_s * e_n - v_n)
+    // Unbalancing: lambda_u * (v_s * e_ub_leg - v_n)
     // Upper body "falls" further in the direction it's already leaning (away from legs)
-    acc_ub += (e_n * model.balanceSpeed - model.velocity) * model.lambdaU;
+    acc_ub += (e_ub_leg * model.balanceSpeed - model.velocity) * model.lambdaU;
 
     // Damping: -lambda * v_n
     acc_ub += - model.velocity * model.damping;
@@ -75,9 +75,9 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
     }
 
     // --- Ground support (leg) acceleration ---
-    // Balance recovery: lambda_b * (v_s * e_n - v_leg)
-    // Legs "chase" the upper body (positive e_n direction)
-    auto acc_gs = (e_n * model.balanceSpeed - model.ground_support_velocity) * model.lambdaB;
+    // Balance recovery: lambda_b * (v_s * e_ub_leg - v_leg)
+    // Legs "chase" the upper body (positive e_ub_leg direction)
+    auto acc_gs = (e_ub_leg * model.balanceSpeed - model.ground_support_velocity) * model.lambdaB;
 
     // Leg repulsion from other agents' legs (Social + hard contact)
     for(const auto& neighbor : neighborhood) {
@@ -88,7 +88,7 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
         acc_gs += ExponentialRepulsion(
             model.ground_support_position,
             nmodel.ground_support_position,
-            model.agentScale,
+            model.legScale,
             model.legForceDistance);
         acc_gs += AgentGroundSupportContactForce(ped, neighbor);
     }
@@ -99,7 +99,7 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
     for(const auto& wall : gsWalls) {
         const Point pt = wall.ShortestPoint(model.ground_support_position);
         acc_gs +=
-            ExponentialRepulsion(model.ground_support_position, pt, model.obstacleScale, model.obstacleForceDistance);
+            ExponentialRepulsion(model.ground_support_position, pt, model.legScale, model.legForceDistance);
         acc_gs += ObstacleGroundSupportContactForce(ped, wall);
     }
 
@@ -190,6 +190,7 @@ void SocialForceModelIPP::CheckModelConstraint(
     throwIfNegative(model.damping, "damping");
     throwIfNegative(model.agentScale, "agent scale");
     throwIfNegative(model.obstacleScale, "obstacle scale");
+    throwIfNegative(model.legScale, "leg scale");
     throwIfNotStrictlyPositive(model.forceDistance, "force distance");
     throwIfNotStrictlyPositive(model.obstacleForceDistance, "obstacle force distance");
     throwIfNotStrictlyPositive(model.legForceDistance, "leg force distance");

@@ -232,6 +232,21 @@ JPS_SocialForceModelIPPState_SetObstacleScale(JPS_SocialForceModelIPPState handl
     state->obstacleScale = obstacleScale;
 }
 
+JUPEDSIM_API double JPS_SocialForceModelIPPState_GetLegScale(JPS_SocialForceModelIPPState handle)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<const SocialForceModelIPPData*>(handle);
+    return state->legScale;
+}
+
+JUPEDSIM_API void
+JPS_SocialForceModelIPPState_SetLegScale(JPS_SocialForceModelIPPState handle, double legScale)
+{
+    assert(handle);
+    const auto state = reinterpret_cast<SocialForceModelIPPData*>(handle);
+    state->legScale = legScale;
+}
+
 JUPEDSIM_API double JPS_SocialForceModelIPPState_GetForceDistance(JPS_SocialForceModelIPPState handle)
 {
     assert(handle);

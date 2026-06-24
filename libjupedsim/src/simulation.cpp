@@ -397,6 +397,7 @@ JPS_AgentId JPS_Simulation_AddSocialForceModelIPPAgent(
                 parameters.damping,
                 parameters.agentScale,
                 parameters.obstacleScale,
+                parameters.legScale,
                 parameters.forceDistance,
                 parameters.obstacleForceDistance,
                 parameters.legForceDistance,

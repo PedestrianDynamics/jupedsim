@@ -31,6 +31,7 @@ void init_social_force_model_IPP(py::module_& m)
                         double damping,
                         double agentScale,
                         double obstacleScale,
+                        double legScale,
                         double forceDistance,
                         double obstacleForceDistance,
                         double legForceDistance,
@@ -54,6 +55,7 @@ void init_social_force_model_IPP(py::module_& m)
                     damping,
                     agentScale,
                     obstacleScale,
+                    legScale,
                     forceDistance,
                     obstacleForceDistance,
                     legForceDistance,
@@ -78,6 +80,7 @@ void init_social_force_model_IPP(py::module_& m)
             py::arg("damping"),
             py::arg("agent_scale"),
             py::arg("obstacle_scale"),
+            py::arg("leg_scale"),
             py::arg("force_distance"),
             py::arg("obstacle_force_distance"),
             py::arg("leg_force_distance"),
@@ -90,7 +93,7 @@ void init_social_force_model_IPP(py::module_& m)
                 "velocity: {}, ground_support_position: {}, ground_support_velocity: {}, "
                 "height: {}, desiredSpeed: {}, reactionTime: {}, "
                 "lambdaU: {}, lambdaB: {}, balanceSpeed: {}, damping: {}, "
-                "agentScale: {}, obstacleScale: {}, forceDistance: {}, "
+                "agentScale: {}, obstacleScale: {}, legScale: {}, forceDistance: {}, "
                 "obstacleForceDistance: {}, legForceDistance: {}, radius: {}, "
                 "bodyForce: {}, friction: {}",
                 intoTuple(p.position),
@@ -109,6 +112,7 @@ void init_social_force_model_IPP(py::module_& m)
                 p.damping,
                 p.agentScale,
                 p.obstacleScale,
+                p.legScale,
                 p.forceDistance,
                 p.obstacleForceDistance,
                 p.legForceDistance,
@@ -230,6 +234,14 @@ void init_social_force_model_IPP(py::module_& m)
             },
             [](JPS_SocialForceModelIPPState_Wrapper& w, double obstacleScale) {
                 JPS_SocialForceModelIPPState_SetObstacleScale(w.handle, obstacleScale);
+            })
+        .def_property(
+            "leg_scale",
+            [](const JPS_SocialForceModelIPPState_Wrapper& w) {
+                return JPS_SocialForceModelIPPState_GetLegScale(w.handle);
+            },
+            [](JPS_SocialForceModelIPPState_Wrapper& w, double legScale) {
+                JPS_SocialForceModelIPPState_SetLegScale(w.handle, legScale);
             })
         .def_property(
             "force_distance",

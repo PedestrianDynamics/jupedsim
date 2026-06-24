@@ -15,6 +15,7 @@ struct SocialForceModelIPPData {
     double damping{}; // lambda velocity dissipation [1/s]
     double agentScale{}; // A, social repulsion amplitude vs agents [N]
     double obstacleScale{}; // A_w repulsion amplitude vs walls [N]
+    double legScale{}; // A_leg repulsion amplitude for ground support [N]
     double forceDistance{}; // B social interaction range [m]
     double obstacleForceDistance{}; // B_w wall interaction range [m]
     double legForceDistance{}; // B_leg leg interaction range [m]
@@ -34,7 +35,7 @@ struct fmt::formatter<SocialForceModelIPPData> {
         return fmt::format_to(
             ctx.out(),
             "IPP[velocity={}, gs_pos={}, gs_vel={}, h={}, v0={}, tau={}, "
-            "lambda_u={}, lambda_b={}, v_s={}, lambda={}, A={}, A_w={}, B={}, B_w={}, B_leg={}, "
+            "lambda_u={}, lambda_b={}, v_s={}, lambda={}, A={}, A_w={}, A_leg={}, B={}, B_w={}, B_leg={}, "
             "r={}, k={}, mu={}])",
             m.velocity,
             m.ground_support_position,
@@ -48,6 +49,7 @@ struct fmt::formatter<SocialForceModelIPPData> {
             m.damping,
             m.agentScale,
             m.obstacleScale,
+            m.legScale,
             m.forceDistance,
             m.obstacleForceDistance,
             m.legForceDistance,

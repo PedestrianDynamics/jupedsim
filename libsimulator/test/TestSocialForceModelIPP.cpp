@@ -28,6 +28,7 @@ GenericAgent MakeAgent(
     data.balanceSpeed = 1.0;
     data.damping = 1.0;
     data.agentScale = 5.0;
+    data.legScale = 5.0;
     data.forceDistance = 0.5;
     data.legForceDistance = 0.3;
     data.radius = radius;
