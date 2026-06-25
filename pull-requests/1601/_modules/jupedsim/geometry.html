@@ -327,6 +327,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">shapely</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">jupedsim.native</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">py_jps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.linesegment</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineSegment</span>
 
 
 <div class="viewcode-block" id="Geometry">
@@ -379,6 +380,66 @@
             <span class="n">poly</span><span class="p">,</span>
             <span class="n">rounding_precision</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
         <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Geometry.linesegments_close_to">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Geometry.linesegments_close_to">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">linesegments_close_to</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">LineSegment</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find line segments of the geometry that are within a certain distance to a point.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            point (tuple[float, float]): The point to check against.</span>
+<span class="sd">            distance (float): The maximum distance for line segments to be included.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List of LineSegment objects that are close to the given point.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ls_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ls</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">linesegments_close_to</span><span class="p">(</span><span class="n">point</span><span class="p">):</span>
+            <span class="n">ls_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LineSegment</span><span class="p">(</span><span class="n">ls</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">ls_list</span></div>
+
+
+<div class="viewcode-block" id="Geometry.get_walls_close_to">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Geometry.get_walls_close_to">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_walls_close_to</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">LineSegment</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find line segments of the geometry that are within a certain distance to a point.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            point (tuple[float, float]): The point to check against.</span>
+<span class="sd">            distance (float): The maximum distance for line segments to be included.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List of LineSegment objects that are close to the given point.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ls_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ls</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">linesegments_close_to</span><span class="p">(</span><span class="n">point</span><span class="p">):</span>
+            <span class="n">ls_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LineSegment</span><span class="p">(</span><span class="n">ls</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">ls_list</span></div>
+
+
+<div class="viewcode-block" id="Geometry.get_walls_in_distance_to">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.Geometry.get_walls_in_distance_to">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_walls_in_distance_to</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">distance</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">LineSegment</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find line segments of the geometry that are within a certain distance to a point.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            point (tuple[float, float]): The point to check against.</span>
+<span class="sd">            distance (float): The maximum distance for line segments to be included.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List of LineSegment objects that are close to the given point.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ls_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ls</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">linesegments_in_distance_to</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
+            <span class="n">ls_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LineSegment</span><span class="p">(</span><span class="n">ls</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">ls_list</span></div>
 </div>
 
 </pre></div>

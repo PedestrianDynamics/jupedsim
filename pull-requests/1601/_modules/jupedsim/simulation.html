@@ -646,16 +646,15 @@
 <span class="sd">                Id of the added agent.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># Helper function to allow not passing orientation to models not requiring it.</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">orientation_or_zero</span><span class="p">(</span><span class="n">param</span><span class="p">):</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s2">&quot;orientation&quot;</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">param</span><span class="o">.</span><span class="n">orientation</span>
-            <span class="k">return</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s2">&quot;orientation&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
             <span class="n">parameters</span><span class="p">,</span> <span class="n">GeneralizedCentrifugalForceModelAgentParameters</span>
         <span class="p">):</span>
             <span class="n">model</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">GeneralizedCentrifugalForceModelState</span><span class="p">(</span>
-                <span class="n">orientation</span><span class="o">=</span><span class="n">orientation_or_zero</span><span class="p">(</span><span class="n">parameters</span><span class="p">),</span>
+                <span class="n">orientation</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span>
                 <span class="n">speed</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">speed</span><span class="p">,</span>
                 <span class="n">desired_direction</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">desired_direction</span><span class="p">,</span>
                 <span class="n">mass</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span>
