@@ -4,6 +4,7 @@
 #include <fmt/core.h>
 #include <fmt/format.h>
 
+#include <limits>
 #include <tuple>
 
 class Point
@@ -50,7 +51,7 @@ public:
 
     /// Tests that the vector is length 1
     /// @return length == 1
-    bool IsUnitLength() const;
+    bool IsUnitLength(double tolerance = std::numeric_limits<double>::epsilon()) const;
 
     // operators
     /// addition

@@ -5,7 +5,7 @@
 
 #include <fmt/core.h>
 struct GeneralizedCentrifugalForceModelData {
-    Point orientation{1.0, 0.0};
+    Point orientation{0.0, 0.0};
     double speed{};
     Point e0{};
     int orientationDelay{};

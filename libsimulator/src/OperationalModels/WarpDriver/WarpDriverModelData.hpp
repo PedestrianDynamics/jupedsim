@@ -4,7 +4,7 @@
 #include <fmt/core.h>
 
 struct WarpDriverModelData {
-    Point orientation{1.0, 0.0};
+    Point orientation{0.0, 0.0};
     double radius{0.15};
     double v0{1.2};
     double stuckTime{0.0}; // elapsed time since anchor was set

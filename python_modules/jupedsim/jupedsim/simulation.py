@@ -300,16 +300,15 @@ class Simulation:
                 Id of the added agent.
         """
 
+        # Helper function to allow not passing orientation to models not requiring it.
         def orientation_or_zero(param):
-            if hasattr(param, "orientation"):
-                return param.orientation
-            return (0.0, 0.0)
+            return getattr(param, "orientation", (0.0, 0.0))
 
         if isinstance(
             parameters, GeneralizedCentrifugalForceModelAgentParameters
         ):
             model = py_jps.GeneralizedCentrifugalForceModelState(
-                orientation=orientation_or_zero(parameters),
+                orientation=parameters.orientation,
                 speed=parameters.speed,
                 desired_direction=parameters.desired_direction,
                 mass=parameters.mass,

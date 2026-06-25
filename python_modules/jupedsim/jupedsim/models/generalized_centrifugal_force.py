@@ -63,7 +63,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
         speed: Speed of the agent.
         desired_direction: Desired direction of the agent.
         position: Position of the agent.
-        orientation: Orientation of the agent.
+        orientation: Orientation of the agent. Has to be normalized to length 1.0
         journey_id: Id of the journey the agent follows.
         stage_id: Id of the stage the agent targets.
         mass: Mass of the agent.

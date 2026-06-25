@@ -4,7 +4,7 @@
 #include <fmt/core.h>
 
 struct CollisionFreeSpeedModelV2Data {
-    Point orientation{1.0, 0.0};
+    Point orientation{0.0, 0.0};
     double strengthNeighborRepulsion{8.0};
     double rangeNeighborRepulsion{0.1};
     double strengthGeometryRepulsion{5.0};

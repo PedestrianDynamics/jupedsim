@@ -98,7 +98,7 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
 {
     const auto& model = std::get<GeneralizedCentrifugalForceModelData>(agent.model);
 
-    if(model.orientation.isZeroLength()) {
+    if(!model.orientation.IsUnitLength(1e-9)) {
         throw SimulationError("Orientation is invalid: {}. Length should be 1.", model.orientation);
     }
 

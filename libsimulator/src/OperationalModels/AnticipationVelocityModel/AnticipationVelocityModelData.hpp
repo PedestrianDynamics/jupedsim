@@ -6,7 +6,7 @@
 #include <fmt/core.h>
 
 struct AnticipationVelocityModelData {
-    Point orientation{1.0, 0.0};
+    Point orientation{0.0, 0.0};
     double strengthNeighborRepulsion{8.0};
     double rangeNeighborRepulsion{0.1};
     double wallBufferDistance{0.1}; // buff distance of agent to wall
