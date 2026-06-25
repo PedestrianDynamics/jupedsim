@@ -2,6 +2,7 @@
 #include "CollisionGeometry.hpp"
 #include "GeometryBuilder.hpp"
 #include "conversion.hpp"
+#include "type_casters.hpp"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
