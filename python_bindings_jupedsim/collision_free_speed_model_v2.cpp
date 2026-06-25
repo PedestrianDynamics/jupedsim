@@ -4,6 +4,7 @@
 #include "CollisionFreeSpeedModelV2Data.hpp"
 #include "OperationalModel.hpp"
 #include "conversion.hpp"
+#include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
@@ -31,14 +32,14 @@ void init_collision_free_speed_model_v2(py::module_& m)
                         double desiredSpeed,
                         double radius) {
                 return CollisionFreeSpeedModelV2Data{
-                    intoPoint(orientation),
-                    strengthNeighborRepulsion,
-                    rangeNeighborRepulsion,
-                    strengthGeometryRepulsion,
-                    rangeGeometryRepulsion,
-                    timeGap,
-                    desiredSpeed,
-                    radius};
+                    .orientation = intoPoint(orientation),
+                    .strengthNeighborRepulsion = strengthNeighborRepulsion,
+                    .rangeNeighborRepulsion = rangeNeighborRepulsion,
+                    .strengthGeometryRepulsion = strengthGeometryRepulsion,
+                    .rangeGeometryRepulsion = rangeGeometryRepulsion,
+                    .timeGap = timeGap,
+                    .v0 = desiredSpeed,
+                    .radius = radius};
             }),
             py::kw_only(),
             py::arg("orientation"),
@@ -49,9 +50,7 @@ void init_collision_free_speed_model_v2(py::module_& m)
             py::arg("time_gap"),
             py::arg("desired_speed"),
             py::arg("radius"))
-        .def_property_readonly(
-            "orientation",
-            [](const CollisionFreeSpeedModelV2Data& obj) { return intoTuple(obj.orientation); })
+        .def_readwrite("orientation", &CollisionFreeSpeedModelV2Data::orientation)
         .def_readwrite(
             "strength_neighbor_repulsion",
             &CollisionFreeSpeedModelV2Data::strengthNeighborRepulsion)

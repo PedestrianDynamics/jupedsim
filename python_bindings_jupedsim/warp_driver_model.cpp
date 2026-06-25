@@ -4,6 +4,7 @@
 #include "WarpDriverModelBuilder.hpp"
 #include "WarpDriverModelData.hpp"
 #include "conversion.hpp"
+#include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
@@ -32,15 +33,14 @@ void init_warp_driver_model(py::module_& m)
             py::init([](std::tuple<double, double> orientation,
                         double desired_speed,
                         double radius) {
-                return WarpDriverModelData{intoPoint(orientation), radius, desired_speed};
+                return WarpDriverModelData{
+                    .orientation = intoPoint(orientation), .radius = radius, .v0 = desired_speed};
             }),
             py::kw_only(),
             py::arg("orientation"),
             py::arg("desired_speed") = 1.2,
             py::arg("radius") = 0.15)
-        .def_property_readonly(
-            "orientation",
-            [](const WarpDriverModelData& obj) { return intoTuple(obj.orientation); })
+        .def_readwrite("orientation", &WarpDriverModelData::orientation)
         .def_readwrite("radius", &WarpDriverModelData::radius)
         .def_readwrite("desired_speed", &WarpDriverModelData::v0);
 }

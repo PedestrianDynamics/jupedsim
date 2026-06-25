@@ -4,16 +4,10 @@
 #include <fmt/core.h>
 
 struct CollisionFreeSpeedModelData {
-    Point orientation{0.0, 0.0};
+    Point orientation{1.0, 0.0};
     double timeGap{1};
     double v0{1.2};
     double radius{0.2};
-
-    CollisionFreeSpeedModelData() = default;
-    CollisionFreeSpeedModelData(Point orientation_, double timeGap_, double v0_, double radius_)
-        : orientation(orientation_.Normalized()), timeGap(timeGap_), v0(v0_), radius(radius_)
-    {
-    }
 };
 
 template <>

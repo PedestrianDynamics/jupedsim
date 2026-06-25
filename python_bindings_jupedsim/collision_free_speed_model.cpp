@@ -4,6 +4,7 @@
 #include "CollisionFreeSpeedModelData.hpp"
 #include "OperationalModel.hpp"
 #include "conversion.hpp"
+#include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
@@ -32,16 +33,17 @@ void init_collision_free_speed_model(py::module_& m)
                         double desiredSpeed,
                         double radius) {
                 return CollisionFreeSpeedModelData{
-                    intoPoint(orientation), timeGap, desiredSpeed, radius};
+                    .orientation = intoPoint(orientation),
+                    .timeGap = timeGap,
+                    .v0 = desiredSpeed,
+                    .radius = radius};
             }),
             py::kw_only(),
             py::arg("orientation"),
             py::arg("time_gap"),
             py::arg("desired_speed"),
             py::arg("radius"))
-        .def_property_readonly(
-            "orientation",
-            [](const CollisionFreeSpeedModelData& obj) { return intoTuple(obj.orientation); })
+        .def_readwrite("orientation", &CollisionFreeSpeedModelData::orientation)
         .def_readwrite("time_gap", &CollisionFreeSpeedModelData::timeGap)
         .def_readwrite("desired_speed", &CollisionFreeSpeedModelData::v0)
         .def_readwrite("radius", &CollisionFreeSpeedModelData::radius);

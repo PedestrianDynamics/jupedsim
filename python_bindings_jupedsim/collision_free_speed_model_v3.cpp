@@ -4,6 +4,7 @@
 #include "CollisionFreeSpeedModelV3Data.hpp"
 #include "OperationalModel.hpp"
 #include "conversion.hpp"
+#include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
@@ -34,18 +35,18 @@ void init_collision_free_speed_model_v3(py::module_& m)
                         double thetaMaxUpperBound,
                         double agentBuffer) {
                 return CollisionFreeSpeedModelV3Data{
-                    intoPoint(orientation),
-                    strengthNeighborRepulsion,
-                    rangeNeighborRepulsion,
-                    strengthGeometryRepulsion,
-                    rangeGeometryRepulsion,
-                    rangeXScale,
-                    rangeYScale,
-                    thetaMaxUpperBound,
-                    agentBuffer,
-                    timeGap,
-                    desiredSpeed,
-                    radius};
+                    .orientation = intoPoint(orientation),
+                    .strengthNeighborRepulsion = strengthNeighborRepulsion,
+                    .rangeNeighborRepulsion = rangeNeighborRepulsion,
+                    .strengthGeometryRepulsion = strengthGeometryRepulsion,
+                    .rangeGeometryRepulsion = rangeGeometryRepulsion,
+                    .rangeXScale = rangeXScale,
+                    .rangeYScale = rangeYScale,
+                    .thetaMaxUpperBound = thetaMaxUpperBound,
+                    .agentBuffer = agentBuffer,
+                    .timeGap = timeGap,
+                    .v0 = desiredSpeed,
+                    .radius = radius};
             }),
             py::kw_only(),
             py::arg("orientation"),
@@ -60,9 +61,7 @@ void init_collision_free_speed_model_v3(py::module_& m)
             py::arg("range_y_scale") = 8.0,
             py::arg("theta_max_upper_bound") = 1.57,
             py::arg("agent_buffer") = 0.0)
-        .def_property_readonly(
-            "orientation",
-            [](const CollisionFreeSpeedModelV3Data& obj) { return intoTuple(obj.orientation); })
+        .def_readwrite("orientation", &CollisionFreeSpeedModelV3Data::orientation)
         .def_readwrite(
             "strength_neighbor_repulsion",
             &CollisionFreeSpeedModelV3Data::strengthNeighborRepulsion)

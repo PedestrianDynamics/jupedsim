@@ -4,6 +4,7 @@
 #include "AnticipationVelocityModelData.hpp"
 #include "OperationalModel.hpp"
 #include "conversion.hpp"
+#include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
@@ -35,15 +36,15 @@ void init_anticipation_velocity_model(py::module_& m)
                         double desiredSpeed,
                         double radius) {
                 return AnticipationVelocityModelData{
-                    intoPoint(orientation),
-                    strengthNeighborRepulsion,
-                    rangeNeighborRepulsion,
-                    wallBufferDistance,
-                    anticipationTime,
-                    reactionTime,
-                    timeGap,
-                    desiredSpeed,
-                    radius};
+                    .orientation = intoPoint(orientation),
+                    .strengthNeighborRepulsion = strengthNeighborRepulsion,
+                    .rangeNeighborRepulsion = rangeNeighborRepulsion,
+                    .wallBufferDistance = wallBufferDistance,
+                    .anticipationTime = anticipationTime,
+                    .reactionTime = reactionTime,
+                    .timeGap = timeGap,
+                    .v0 = desiredSpeed,
+                    .radius = radius};
             }),
             py::kw_only(),
             py::arg("orientation"),
@@ -55,9 +56,7 @@ void init_anticipation_velocity_model(py::module_& m)
             py::arg("time_gap"),
             py::arg("desired_speed"),
             py::arg("radius"))
-        .def_property_readonly(
-            "orientation",
-            [](const AnticipationVelocityModelData& obj) { return intoTuple(obj.orientation); })
+        .def_readwrite("orientation", &AnticipationVelocityModelData::orientation)
         .def_readwrite(
             "strength_neighbor_repulsion",
             &AnticipationVelocityModelData::strengthNeighborRepulsion)

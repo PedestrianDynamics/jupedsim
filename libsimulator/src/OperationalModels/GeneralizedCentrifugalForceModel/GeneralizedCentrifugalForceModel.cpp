@@ -10,6 +10,7 @@
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Simulation.hpp"
+#include "SimulationError.hpp"
 
 #include <Logger.hpp>
 
@@ -96,6 +97,10 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
     const CollisionGeometry& geometry) const
 {
     const auto& model = std::get<GeneralizedCentrifugalForceModelData>(agent.model);
+
+    if(model.orientation.isZeroLength()) {
+        throw SimulationError("Orientation is invalid: {}. Length should be 1.", model.orientation);
+    }
 
     const auto mass = model.mass;
     constexpr double massMin = 1.;

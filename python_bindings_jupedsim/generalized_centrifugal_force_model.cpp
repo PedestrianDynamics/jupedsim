@@ -4,6 +4,7 @@
 #include "GeneralizedCentrifugalForceModelData.hpp"
 #include "OperationalModel.hpp"
 #include "conversion.hpp"
+#include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
@@ -46,16 +47,16 @@ void init_generalized_centrifugal_force_model(py::module_& m)
                         double bmin,
                         double bmax) {
                 return GeneralizedCentrifugalForceModelData{
-                    intoPoint(orientation),
-                    speed,
-                    intoPoint(desiredOrientation),
-                    mass,
-                    tau,
-                    desiredSpeed,
-                    av,
-                    amin,
-                    bmin,
-                    bmax};
+                    .orientation = intoPoint(orientation),
+                    .speed = speed,
+                    .e0 = intoPoint(desiredOrientation),
+                    .mass = mass,
+                    .tau = tau,
+                    .v0 = desiredSpeed,
+                    .Av = av,
+                    .AMin = amin,
+                    .BMin = bmin,
+                    .BMax = bmax};
             }),
             py::kw_only(),
             py::arg("orientation"),
@@ -68,11 +69,7 @@ void init_generalized_centrifugal_force_model(py::module_& m)
             py::arg("a_min"),
             py::arg("b_min"),
             py::arg("b_max"))
-        .def_property_readonly(
-            "orientation",
-            [](const GeneralizedCentrifugalForceModelData& obj) {
-                return intoTuple(obj.orientation);
-            })
+        .def_readwrite("orientation", &GeneralizedCentrifugalForceModelData::orientation)
         .def_readwrite("speed", &GeneralizedCentrifugalForceModelData::speed)
         .def_property(
             "desired_direction",
