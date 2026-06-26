@@ -14,8 +14,6 @@ from PySide6.QtWidgets import (
 from jupedsim_visualizer.geometry import Geometry
 from jupedsim_visualizer.geometry_widget import RenderWidget
 
-_ROUTING_ENGINES = ["AStar", "DirectPath"]
-
 
 class ViewGeometryWidget(QWidget):
     def __init__(
@@ -28,8 +26,17 @@ class ViewGeometryWidget(QWidget):
     ):
         QWidget.__init__(self, parent)
         self.geo = geo
-        self._astar_navi = navi
-        self._direct_path_navi = jps.DirectPathRoutingEngine()
+        # Engines selectable from the toolbar combo, keyed by display name.
+        # Engines exposing a ``mesh()`` route on the triangulation and may
+        # show it; DirectPath has no mesh and never does.
+        self._engines = {
+            "AStar": navi,
+            # Pure-Python oracle on the *same* nav-mesh as native AStar.
+            "PythonTAStar": jps.PythonTAStarRoutingEngine.from_mesh(
+                *navi.mesh()
+            ),
+            "DirectPath": jps.DirectPathRoutingEngine(),
+        }
         self._show_triangulation_requested = False
 
         bottom_layout = QHBoxLayout()
@@ -46,7 +53,7 @@ class ViewGeometryWidget(QWidget):
         toolbar_layout = QHBoxLayout()
 
         routing_combo = QComboBox()
-        routing_combo.addItems(_ROUTING_ENGINES)
+        routing_combo.addItems(list(self._engines))
         toolbar_layout.addWidget(routing_combo, 1)
         self._routing_combo = routing_combo
 
@@ -73,16 +80,16 @@ class ViewGeometryWidget(QWidget):
         )
 
     def _on_routing_engine_changed(self, engine_name: str) -> None:
-        if engine_name == "DirectPath":
-            self.geo.show_triangulation(False)
-            self.render_widget.set_routing_engine(self._direct_path_navi)
-        else:
-            self.geo.show_triangulation(self._show_triangulation_requested)
-            self.render_widget.set_routing_engine(self._astar_navi)
+        navi = self._engines[engine_name]
+        # Only mesh-based engines have a triangulation worth showing.
+        show = self._show_triangulation_requested and hasattr(navi, "mesh")
+        self.geo.show_triangulation(show)
+        self.render_widget.set_routing_engine(navi)
 
     def set_triangulation_visible(self, state: bool) -> None:
         self._show_triangulation_requested = state
-        if self._routing_combo.currentText() == "AStar":
+        navi = self._engines[self._routing_combo.currentText()]
+        if hasattr(navi, "mesh"):
             self.geo.show_triangulation(state)
 
     def render(self):

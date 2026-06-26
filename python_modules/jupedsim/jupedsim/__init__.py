@@ -72,6 +72,7 @@ from jupedsim.neighborhood import NeighborhoodSearch
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import (
     DirectPathRoutingEngine,
+    PythonTAStarRoutingEngine,
     RoutingEngine,
     TAStarRoutingEngine,
 )
@@ -129,6 +130,7 @@ __all__ = [
     "RecordingAgent",
     "RecordingFrame",
     "TAStarRoutingEngine",
+    "PythonTAStarRoutingEngine",
     "DirectPathRoutingEngine",
     "RoutingEngine",
     "Simulation",
