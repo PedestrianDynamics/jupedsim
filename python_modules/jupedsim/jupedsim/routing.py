@@ -317,7 +317,10 @@ class PythonTAStarRoutingEngine(RoutingEngine):
             lv, rv = left[i], right[i]
             # Tighten the right side.
             if _tri_area2(apex, p_right, rv) <= 0.0:
-                if _points_equal(apex, p_right) or _tri_area2(apex, p_left, rv) > 0.0:
+                if (
+                    _points_equal(apex, p_right)
+                    or _tri_area2(apex, p_left, rv) > 0.0
+                ):
                     p_right, right_i = rv, i
                 else:
                     # Right crossed left: left vertex becomes a corner.
@@ -330,7 +333,10 @@ class PythonTAStarRoutingEngine(RoutingEngine):
                     continue
             # Tighten the left side.
             if _tri_area2(apex, p_left, lv) >= 0.0:
-                if _points_equal(apex, p_left) or _tri_area2(apex, p_right, lv) < 0.0:
+                if (
+                    _points_equal(apex, p_left)
+                    or _tri_area2(apex, p_right, lv) < 0.0
+                ):
                     p_left, left_i = lv, i
                 else:
                     pts.append(p_right)
@@ -427,8 +433,12 @@ class PythonTAStarRoutingEngine(RoutingEngine):
                 if nb == goal_tri:
                     heapq.heappush(
                         heap,
-                        (0.0, 1, next(counter),
-                         (channel_of((prev_tri, tri)) + [nb],)),
+                        (
+                            0.0,
+                            1,
+                            next(counter),
+                            (channel_of((prev_tri, tri)) + [nb],),
+                        ),
                     )
                     continue
                 _, new_right = self._orient(tri, a, b)
@@ -448,9 +458,7 @@ class PythonTAStarRoutingEngine(RoutingEngine):
                 h = _point_segment_distance(
                     goal_p, child.mouth_left(), child.mouth_right()
                 )
-                heapq.heappush(
-                    heap, (g + h, 0, next(counter), (key, g, child))
-                )
+                heapq.heappush(heap, (g + h, 0, next(counter), (key, g, child)))
 
         # Seed from the start triangle.
         poly = self._polygons[start_tri]
