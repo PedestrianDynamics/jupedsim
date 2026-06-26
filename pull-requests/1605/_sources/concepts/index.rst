@@ -17,9 +17,6 @@ If you want to know in more detail how the simulation works, have a look:
     * - :doc:`Custom Serialization <custom_serialization>`
       - How to write a custom trajectory serializer
 
-    * - :doc:`Profiling and Timing <profiling_and_timing>`
-      - How to measure and visualize simulation performance
-
 .. toctree::
     :maxdepth: 1
     :hidden:
@@ -27,4 +24,3 @@ If you want to know in more detail how the simulation works, have a look:
     Geometry <geometry>
     Routing <routing>
     Custom Serialization <custom_serialization>
-    Profiling and Timing <profiling_and_timing>
