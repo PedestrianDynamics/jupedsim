@@ -129,7 +129,7 @@ class MainWindow(QMainWindow):
         self.settings.setValue("files/last_wkt_location", str(file.parent))
         try:
             polygon = shapely.from_wkt(Path(file).read_text(encoding="UTF-8"))
-            navi = jps.AStarRoutingEngine()
+            navi = jps.TAStarRoutingEngine()
             navi.set_geometry(polygon)
             xmin, ymin, xmax, ymax = polygon.bounds
             info_text = f"Dimensions: {math.ceil(xmax - xmin)}m x {math.ceil(ymax - ymin)}m Polygons: {len(navi.mesh()[1])}"
@@ -169,7 +169,7 @@ class MainWindow(QMainWindow):
         try:
             rec = Recording(file.as_posix())
             self.setUpdatesEnabled(False)
-            navi = jps.AStarRoutingEngine()
+            navi = jps.TAStarRoutingEngine()
             navi.set_geometry(rec.geometry())
             geo = Geometry(navi)
             geo.show_triangulation(self._show_triangulation.isChecked())

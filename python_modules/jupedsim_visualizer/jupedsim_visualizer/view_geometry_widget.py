@@ -20,7 +20,7 @@ _ROUTING_ENGINES = ["AStar", "DirectPath"]
 class ViewGeometryWidget(QWidget):
     def __init__(
         self,
-        navi: jps.AStarRoutingEngine,
+        navi: jps.TAStarRoutingEngine,
         geo: Geometry,
         name_text: str,
         info_text: str,

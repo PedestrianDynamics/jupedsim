@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import math
 
-from jupedsim import AStarRoutingEngine
+from jupedsim import TAStarRoutingEngine
 from jupedsim.recording import Recording
 from PySide6.QtCore import QSignalBlocker, Qt, QTimer
 from PySide6.QtGui import QFont, QPaintEvent
@@ -130,7 +130,7 @@ class PlayerControlWidget(QWidget):
 class ReplayWidget(QWidget):
     def __init__(
         self,
-        navi: AStarRoutingEngine,
+        navi: TAStarRoutingEngine,
         rec: Recording,
         geo: Geometry,
         trajectory: Trajectory,
