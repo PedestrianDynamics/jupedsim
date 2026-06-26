@@ -11,6 +11,19 @@ RoutingEngine = py_jps.RoutingEngine
 TAStarRoutingEngine = py_jps.TAStarRoutingEngine
 
 
+def _tri_area2(a: np.ndarray, b: np.ndarray, c: np.ndarray) -> float:
+    """Signed area*2 of triangle (a, b, c) in Mononen's funnel convention.
+
+    > 0 when c is on the clockwise side of a->b. Matches the sign comparisons
+    used by the Simple Stupid Funnel Algorithm below.
+    """
+    return (c[0] - a[0]) * (b[1] - a[1]) - (b[0] - a[0]) * (c[1] - a[1])
+
+
+def _points_equal(a: np.ndarray, b: np.ndarray) -> bool:
+    return bool(np.allclose(a, b, atol=1e-9))
+
+
 class DirectPathRoutingEngine(RoutingEngine):
     """Trivial routing engine that returns a straight line ignoring geometry.
 
@@ -122,10 +135,85 @@ class PythonTAStarRoutingEngine(RoutingEngine):
                 return poly_idx
         return None
 
-    def _portal_midpoint(self, a: int, b: int) -> tuple[float, float]:
-        shared = sorted(set(self._polygons[a]) & set(self._polygons[b]))
-        mid = self._vertices[shared].mean(axis=0)
-        return (float(mid[0]), float(mid[1]))
+    def _portals(
+        self, channel: list[int]
+    ) -> tuple[list[np.ndarray], list[np.ndarray]]:
+        """Ordered left/right portal endpoints for the polygon *channel*.
+
+        For each transition polygon ``a -> b`` the shared edge appears in
+        ``a``'s CCW winding as ``(u, v)``; travelling a->b crosses it with the
+        edge head ``v`` on the left of travel and the tail ``u`` on the right.
+        """
+        lefts: list[np.ndarray] = []
+        rights: list[np.ndarray] = []
+        for a, b in zip(channel, channel[1:]):
+            poly = self._polygons[a]
+            other = set(self._polygons[b])
+            n = len(poly)
+            for i in range(n):
+                u, v = poly[i], poly[(i + 1) % n]
+                if u in other and v in other:
+                    lefts.append(self._vertices[v])
+                    rights.append(self._vertices[u])
+                    break
+        return lefts, rights
+
+    @staticmethod
+    def _funnel(
+        frm: tuple[float, float],
+        to: tuple[float, float],
+        lefts: list[np.ndarray],
+        rights: list[np.ndarray],
+    ) -> list[tuple[float, float]]:
+        """String-pull (Simple Stupid Funnel Algorithm) across the portals."""
+        start = np.asarray(frm, dtype=float)
+        goal = np.asarray(to, dtype=float)
+        # Pad with degenerate start/goal portals so apex moves are uniform.
+        left = [start, *lefts, goal]
+        right = [start, *rights, goal]
+
+        pts: list[np.ndarray] = [start]
+        apex, p_left, p_right = start, start, start
+        apex_i = left_i = right_i = 0
+
+        i = 1
+        while i < len(left):
+            lv, rv = left[i], right[i]
+            # Tighten the right side.
+            if _tri_area2(apex, p_right, rv) <= 0.0:
+                if _points_equal(apex, p_right) or _tri_area2(apex, p_left, rv) > 0.0:
+                    p_right, right_i = rv, i
+                else:
+                    # Right crossed left: left vertex becomes a corner.
+                    pts.append(p_left)
+                    apex = p_left
+                    apex_i = left_i
+                    p_left = p_right = apex
+                    left_i = right_i = apex_i
+                    i = apex_i + 1
+                    continue
+            # Tighten the left side.
+            if _tri_area2(apex, p_left, lv) >= 0.0:
+                if _points_equal(apex, p_left) or _tri_area2(apex, p_right, lv) < 0.0:
+                    p_left, left_i = lv, i
+                else:
+                    pts.append(p_right)
+                    apex = p_right
+                    apex_i = right_i
+                    p_left = p_right = apex
+                    left_i = right_i = apex_i
+                    i = apex_i + 1
+                    continue
+            i += 1
+        pts.append(goal)
+
+        # Drop consecutive duplicates (degenerate portals can repeat a corner).
+        out: list[tuple[float, float]] = []
+        for p in pts:
+            t = (float(p[0]), float(p[1]))
+            if not out or out[-1] != t:
+                out.append(t)
+        return out
 
     def compute_waypoints(
         self,
@@ -162,11 +250,8 @@ class PythonTAStarRoutingEngine(RoutingEngine):
         channel.append(start)
         channel.reverse()
 
-        waypoints: list[tuple[float, float]] = [frm]
-        for a, b in zip(channel, channel[1:]):
-            waypoints.append(self._portal_midpoint(a, b))
-        waypoints.append(to)
-        return waypoints
+        lefts, rights = self._portals(channel)
+        return self._funnel(frm, to, lefts, rights)
 
     def is_routable(self, point: tuple[float, float]) -> bool:
         if self._vertices is None:
