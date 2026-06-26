@@ -179,13 +179,6 @@ Attributes
       Access model specific state of this agent.
 
 
-   .. py:property:: orientation
-      :type: tuple[float, float]
-
-
-      Orientation of the agent.
-
-
    .. py:property:: position
       :type: tuple[float, float]
 
@@ -439,6 +432,13 @@ Attributes
       desired Speed of this agent.
 
 
+   .. py:property:: orientation
+      :type: tuple[float, float]
+
+
+      Orientation of this agent.
+
+
    .. py:property:: radius
       :type: float
 
@@ -686,6 +686,13 @@ Attributes
       desired Speed of this agent.
 
 
+   .. py:property:: orientation
+      :type: tuple[float, float]
+
+
+      Orientation of this agent.
+
+
    .. py:property:: radius
       :type: float
 
@@ -863,6 +870,13 @@ Attributes
 
 
       desired Speed of this agent.
+
+
+   .. py:property:: orientation
+      :type: tuple[float, float]
+
+
+      Orientation of this agent.
 
 
    .. py:property:: radius
@@ -1119,6 +1133,13 @@ Attributes
    .. py:property:: desired_speed
       :type: float
 
+
+
+   .. py:property:: orientation
+      :type: tuple[float, float]
+
+
+      Orientation of this agent.
 
 
    .. py:property:: radius
@@ -1482,6 +1503,13 @@ Attributes
       Desired direction of this agent.
 
 
+   .. py:property:: orientation
+      :type: tuple[float, float]
+
+
+      Orientation of this agent.
+
+
    .. py:property:: speed
       :type: float
 
@@ -1740,9 +1768,6 @@ Attributes
 
    .. py:method:: bounds() -> jupedsim.internal.aabb.AABB
 
-      Get bounds of the position data contained in this recording.
-
-
 
    .. py:method:: frame(index: int) -> RecordingFrame
 
@@ -1794,10 +1819,6 @@ Attributes
 
    .. py:attribute:: id
       :type:  int
-
-
-   .. py:attribute:: orientation
-      :type:  tuple[float, float]
 
 
    .. py:attribute:: position
@@ -2807,6 +2828,13 @@ Attributes
 
 
       Desired speed of this agent [m/s].
+
+
+   .. py:property:: orientation
+      :type: tuple[float, float]
+
+
+      Orientation of this agent.
 
 
    .. py:property:: radius
