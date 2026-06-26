@@ -2,6 +2,7 @@
 
 #include "Logger.hpp"
 
+#include <fmt/core.h>
 #include <perfetto.h>
 
 #include <chrono>
@@ -16,9 +17,8 @@ namespace
 std::string makeTempTracePath()
 {
     auto ts = std::chrono::steady_clock::now().time_since_epoch().count();
-    std::ostringstream name;
-    name << "jupedsim_trace_" << ts << ".pftrace";
-    return (std::filesystem::temp_directory_path() / name.str()).string();
+    std::string name = fmt::format("jupedsim_trace{}.pftrace", ts);
+    return (std::filesystem::temp_directory_path() / name).string();
 }
 
 perfetto::TraceConfig buildDefaultTraceConfig(const std::string& output_path)
