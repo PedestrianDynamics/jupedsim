@@ -6,7 +6,7 @@ The tools implemented as part of JuPedSim, that can help with debugging or profi
 For details have a look at:
 
 .. list-table::
-    :widths: 10 90
+    :widths: 30 70
 
     * - :doc:`Profiling and Timing <profiling_and_timing>`
       - How to measure and visualize simulation performance
