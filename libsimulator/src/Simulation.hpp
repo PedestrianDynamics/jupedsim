@@ -38,9 +38,9 @@ class Simulation
     StageManager _stageManager{};
     StageSystem _stageSystem{};
     NeighborhoodSearch<GenericAgent> _neighborhoodSearch{2.2};
-    std::unique_ptr<RoutingEngine> _routingEngine;
-    std::unique_ptr<CollisionGeometry> _geometry;
-    std::vector<GenericAgent> _agents;
+    std::unique_ptr<CollisionGeometry> _geometry{};
+    std::unique_ptr<RoutingEngine> _routingEngine{};
+    AgentContainer<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
     std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;
     Timer _timer{};
@@ -77,11 +77,10 @@ public:
     GenericAgent::ID AddAgent(GenericAgent agent);
     const GenericAgent& Agent(GenericAgent::ID id) const;
     GenericAgent& Agent(GenericAgent::ID id);
-    std::vector<GenericAgent>& Agents();
+    AgentContainer<GenericAgent>& Agents();
     OperationalModelType ModelType() const;
     StageProxy Stage(BaseStage::ID stageId);
     CollisionGeometry Geo() const;
-    void SwitchGeometry(std::unique_ptr<CollisionGeometry>&& geometry);
     void SwitchRoutingEngine(std::unique_ptr<RoutingEngine>&& engine);
     std::string RoutingEngineName() const { return _routingEngine->name(); }
     void PushTimer(const std::string_view name, size_t probe_log_level = 0);
@@ -89,7 +88,4 @@ public:
     void SetTimerLogLevel(int level) { _timer.setLogLevel(level); };
     TimerEntry::duration_type GetTimerDuration(const std::string_view name) const;
     std::map<std::string, TimerEntry::duration_type> GetTimerDurations() const;
-
-private:
-    void ValidateGeometry(const std::unique_ptr<CollisionGeometry>& geometry) const;
 };

@@ -267,7 +267,7 @@ Round-robin transition
 It is also possible to model a decision making process and split the agents at a stage, with a round-robin transition.
 Here, the agents will proceed in a weighted round-robin manner.
 E.g., when defining a round-robin transition with three outgoing stages and the corresponding weights 10, 5, 1, the first 10 agents to make a choice will continue with the first given stage.
-The next 4 with the second one, and the next agent will continue with the third stage.
+The next 5 with the second one, and the next agent will continue with the third stage.
 
 After this, the cycle restarts with the first stage.
 

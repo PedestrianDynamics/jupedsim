@@ -15,7 +15,7 @@ namespace py = pybind11;
 
 void init_social_force_model(py::module_& m)
 {
-    py::class_<SocialForceModel, OperationalModel>(m, "SocialForceModel");
+    py::class_<SocialForceModel, OperationalModel, py::smart_holder>(m, "SocialForceModel");
     py::class_<SocialForceModelBuilder>(m, "SocialForceModelBuilder")
         .def(py::init<double, double>(), py::kw_only(), py::arg("body_force"), py::arg("friction"))
         .def("build", &SocialForceModelBuilder::Build);
@@ -49,6 +49,9 @@ void init_social_force_model(py::module_& m)
             py::arg("obstacle_scale"),
             py::arg("force_distance"),
             py::arg("radius"))
+        .def_property_readonly(
+            "orientation",
+            [](const SocialForceModelData& obj) { return intoTuple(obj.velocity.Normalized()); })
         .def_property(
             "velocity",
             [](const SocialForceModelData& obj) { return intoTuple(obj.velocity); },

@@ -32,6 +32,7 @@ from jupedsim.library import (
     set_info_callback,
     set_warning_callback,
 )
+from jupedsim.linesegment import LineSegment
 from jupedsim.models.anticipation_velocity_model import (
     AnticipationVelocityModel,
     AnticipationVelocityModelAgentParameters,
@@ -67,6 +68,7 @@ from jupedsim.models.warp_driver import (
     WarpDriverModelAgentParameters,
     WarpDriverModelState,
 )
+from jupedsim.neighborhood import NeighborhoodSearch
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import (
     AStarRoutingEngine,
@@ -116,9 +118,11 @@ __all__ = [
     "GeneralizedCentrifugalForceModel",
     "GeneralizedCentrifugalForceModelState",
     "Geometry",
+    "LineSegment",
     "IncorrectParameterError",
     "JourneyDescription",
     "NegativeValueError",
+    "NeighborhoodSearch",
     "NotifiableQueueStage",
     "OverlappingCirclesError",
     "Recording",

@@ -68,7 +68,6 @@ class SocialForceModelAgentParameters:
 
     Attributes:
         position: Position of the agent.
-        orientation: Orientation of the agent.
         journey_id: Id of the journey the agent follows.
         stage_id: Id of the stage the agent targets.
         velocity: current velocity of the agent.
@@ -83,7 +82,6 @@ class SocialForceModelAgentParameters:
 
     # todo write force equation from paper
     position: tuple[float, float] = (0.0, 0.0)
-    orientation: tuple[float, float] = (0.0, 0.0)
     journey_id: int = -1
     stage_id: int = -1
     velocity: tuple[float, float] = (0.0, 0.0)
@@ -103,7 +101,6 @@ class SocialForceModelAgentParameters:
     def __init__(
         self,
         position: tuple[float, float] = (0.0, 0.0),
-        orientation: tuple[float, float] = (0.0, 0.0),
         journey_id: int = -1,
         stage_id: int = -1,
         velocity: tuple[float, float] = (0.0, 0.0),
@@ -122,7 +119,6 @@ class SocialForceModelAgentParameters:
     ):
         """Init dataclass to handle deprecated arguments."""
         self.position = position
-        self.orientation = orientation
         self.journey_id = journey_id
         self.stage_id = stage_id
         self.velocity = velocity

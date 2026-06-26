@@ -4,6 +4,7 @@
 #include "GeneralizedCentrifugalForceModelData.hpp"
 #include "OperationalModel.hpp"
 #include "conversion.hpp"
+#include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
@@ -15,8 +16,8 @@ namespace py = pybind11;
 
 void init_generalized_centrifugal_force_model(py::module_& m)
 {
-    py::class_<OperationalModel>(m, "OperationalModel");
-    py::class_<GeneralizedCentrifugalForceModel, OperationalModel>(
+    py::class_<OperationalModel, py::smart_holder>(m, "OperationalModel");
+    py::class_<GeneralizedCentrifugalForceModel, OperationalModel, py::smart_holder>(
         m, "GeneralizedCentrifugalForceModel");
     py::class_<GeneralizedCentrifugalForceModelBuilder>(
         m, "GeneralizedCentrifugalForceModelBuilder")
@@ -33,10 +34,10 @@ void init_generalized_centrifugal_force_model(py::module_& m)
             py::arg("max_geometry_repulsion_force"))
         .def("build", &GeneralizedCentrifugalForceModelBuilder::Build);
     py::class_<GeneralizedCentrifugalForceModelData>(m, "GeneralizedCentrifugalForceModelState")
-        .def_static(
-            "_defaults", []() { return GeneralizedCentrifugalForceModelData{}; })
+        .def_static("_defaults", []() { return GeneralizedCentrifugalForceModelData{}; })
         .def(
-            py::init([](double speed,
+            py::init([](std::tuple<double, double> orientation,
+                        double speed,
                         std::tuple<double, double> desiredOrientation,
                         double mass,
                         double tau,
@@ -46,6 +47,7 @@ void init_generalized_centrifugal_force_model(py::module_& m)
                         double bmin,
                         double bmax) {
                 return GeneralizedCentrifugalForceModelData{
+                    .orientation = intoPoint(orientation),
                     .speed = speed,
                     .e0 = intoPoint(desiredOrientation),
                     .mass = mass,
@@ -57,6 +59,7 @@ void init_generalized_centrifugal_force_model(py::module_& m)
                     .BMax = bmax};
             }),
             py::kw_only(),
+            py::arg("orientation"),
             py::arg("speed"),
             py::arg("desired_direction"),
             py::arg("mass"),
@@ -66,6 +69,7 @@ void init_generalized_centrifugal_force_model(py::module_& m)
             py::arg("a_min"),
             py::arg("b_min"),
             py::arg("b_max"))
+        .def_readwrite("orientation", &GeneralizedCentrifugalForceModelData::orientation)
         .def_readwrite("speed", &GeneralizedCentrifugalForceModelData::speed)
         .def_property(
             "desired_direction",

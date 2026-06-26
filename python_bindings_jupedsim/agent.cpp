@@ -20,21 +20,14 @@ void init_agent(py::module_& m)
             py::init([](uint64_t journeyId,
                         uint64_t stageId,
                         std::tuple<double, double> position,
-                        std::tuple<double, double> orientation,
                         GenericAgent::Model model) {
                 return GenericAgent(
-                    GenericAgent::ID::Invalid,
-                    journeyId,
-                    stageId,
-                    intoPoint(position),
-                    intoPoint(orientation),
-                    model);
+                    GenericAgent::ID::Invalid, journeyId, stageId, intoPoint(position), model);
             }),
             py::kw_only(),
             py::arg("journey_id"),
             py::arg("stage_id"),
             py::arg("position"),
-            py::arg("orientation"),
             py::arg("model"))
         .def_property_readonly("id", [](const GenericAgent& agent) { return agent.id.getID(); })
         .def_property_readonly(
@@ -43,8 +36,6 @@ void init_agent(py::module_& m)
             "stage_id", [](const GenericAgent& agent) { return agent.stageId.getID(); })
         .def_property_readonly(
             "position", [](const GenericAgent& agent) { return intoTuple(agent.pos); })
-        .def_property_readonly(
-            "orientation", [](const GenericAgent& agent) { return intoTuple(agent.orientation); })
         .def_property(
             "target",
             [](const GenericAgent& agent) { return intoTuple(agent.target); },

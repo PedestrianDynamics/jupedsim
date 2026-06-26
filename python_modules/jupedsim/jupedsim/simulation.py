@@ -307,10 +307,12 @@ class Simulation:
             Returns:
                 Id of the added agent.
         """
+
         if isinstance(
             parameters, GeneralizedCentrifugalForceModelAgentParameters
         ):
             model = py_jps.GeneralizedCentrifugalForceModelState(
+                orientation=parameters.orientation,
                 speed=parameters.speed,
                 desired_direction=parameters.desired_direction,
                 mass=parameters.mass,
@@ -323,12 +325,14 @@ class Simulation:
             )
         elif isinstance(parameters, CollisionFreeSpeedModelAgentParameters):
             model = py_jps.CollisionFreeSpeedModelState(
+                orientation=parameters.orientation,
                 time_gap=parameters.time_gap,
                 desired_speed=parameters.desired_speed,
                 radius=parameters.radius,
             )
         elif isinstance(parameters, CollisionFreeSpeedModelV2AgentParameters):
             model = py_jps.CollisionFreeSpeedModelV2State(
+                orientation=parameters.orientation,
                 strength_neighbor_repulsion=parameters.strength_neighbor_repulsion,
                 range_neighbor_repulsion=parameters.range_neighbor_repulsion,
                 strength_geometry_repulsion=parameters.strength_geometry_repulsion,
@@ -339,6 +343,7 @@ class Simulation:
             )
         elif isinstance(parameters, CollisionFreeSpeedModelV3AgentParameters):
             model = py_jps.CollisionFreeSpeedModelV3State(
+                orientation=parameters.orientation,
                 strength_neighbor_repulsion=parameters.strength_neighbor_repulsion,
                 range_neighbor_repulsion=parameters.range_neighbor_repulsion,
                 strength_geometry_repulsion=parameters.strength_geometry_repulsion,
@@ -353,6 +358,7 @@ class Simulation:
             )
         elif isinstance(parameters, AnticipationVelocityModelAgentParameters):
             model = py_jps.AnticipationVelocityModelState(
+                orientation=parameters.orientation,
                 strength_neighbor_repulsion=parameters.strength_neighbor_repulsion,
                 range_neighbor_repulsion=parameters.range_neighbor_repulsion,
                 wall_buffer_distance=parameters.wall_buffer_distance,
@@ -375,24 +381,15 @@ class Simulation:
             )
         elif isinstance(parameters, WarpDriverModelAgentParameters):
             model = py_jps.WarpDriverModelState(
+                orientation=parameters.orientation,
                 desired_speed=parameters.desired_speed,
                 radius=parameters.radius,
             )
-
-        # TODO(kkratz): Some models do not have an orientation as part of their
-        # state, but we initially designed it to be. This needs to be first
-        # fixed on the C++ Level and then later here. Fix is: Move orientation
-        # into model specific data.
-        def orientation_or_zero(param):
-            if hasattr(param, "orientation"):
-                return param.orientation
-            return (0.0, 0.0)
 
         agent = py_jps.Agent(
             journey_id=parameters.journey_id,
             stage_id=parameters.stage_id,
             position=parameters.position,
-            orientation=orientation_or_zero(parameters),
             model=model,
         )
         return self._obj.add_agent(agent)
@@ -592,19 +589,6 @@ class Simulation:
             The geometry of the simulation.
         """
         return Geometry(self._obj.get_geometry())
-
-    def switch_geometry(self, geometry: Geometry) -> None:
-        """Switch the geometry of the simulation.
-
-        Exchanges the current geometry with the new one. Checks if all agents
-        and stages lie within the new geometry.
-
-        Arguments:
-            geometry: The new geometry to be used in the simulation.
-
-        """
-        internal_geometry = build_geometry(geometry)
-        self._obj.switch_geometry(internal_geometry._obj)
 
     @property
     def routing_engine_name(self) -> str:

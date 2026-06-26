@@ -14,7 +14,6 @@ class RecordingAgent:
 
     id: int
     position: tuple[float, float]
-    orientation: tuple[float, float]
 
 
 @dataclass
@@ -26,7 +25,7 @@ class RecordingFrame:
 
 
 class Recording:
-    __supported_database_version = 2
+    __supported_database_version = 3
     """Provides access to a simulation recording in a sqlite database"""
 
     def __init__(self, db_connection_str: str, uri=False) -> None:
@@ -48,12 +47,12 @@ class Recording:
         """
 
         def agent_row(cursor, row):
-            return RecordingAgent(row[0], (row[1], row[2]), (row[3], row[4]))
+            return RecordingAgent(row[0], (row[1], row[2]))
 
         cur = self.db.cursor()
         cur.row_factory = agent_row
         res = cur.execute(
-            "SELECT id, pos_x, pos_y, ori_x, ori_y FROM trajectory_data WHERE frame == (?) ORDER BY id ASC",
+            "SELECT id, pos_x, pos_y FROM trajectory_data WHERE frame == (?) ORDER BY id ASC",
             (index,),
         )
         return RecordingFrame(index, res.fetchall())
@@ -79,16 +78,24 @@ class Recording:
         return res.fetchone()[0]
 
     def bounds(self) -> AABB:
-        """Get bounds of the position data contained in this recording."""
         cur = self.db.cursor()
-        res = cur.execute("SELECT value FROM metadata WHERE key == 'xmin'")
-        xmin = float(res.fetchone()[0])
-        res = cur.execute("SELECT value FROM metadata WHERE key == 'xmax'")
-        xmax = float(res.fetchone()[0])
-        res = cur.execute("SELECT value FROM metadata WHERE key == 'ymin'")
-        ymin = float(res.fetchone()[0])
-        res = cur.execute("SELECT value FROM metadata WHERE key == 'ymax'")
-        ymax = float(res.fetchone()[0])
+
+        def get_float_or_none(key):
+            res = cur.execute(
+                f"SELECT value FROM metadata WHERE key == '{key}'"
+            ).fetchone()
+            return float(res[0]) if res else None
+
+        xmin = get_float_or_none("xmin")
+        xmax = get_float_or_none("xmax")
+        ymin = get_float_or_none("ymin")
+        ymax = get_float_or_none("ymax")
+
+        if None in (xmin, xmax, ymin, ymax):
+            raise Exception(
+                "Recording has no position bounds metadata. It is likely empty."
+            )
+
         return AABB(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
 
     @property

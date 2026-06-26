@@ -4,6 +4,7 @@
 #include <fmt/core.h>
 #include <fmt/format.h>
 
+#include <limits>
 #include <tuple>
 
 class Point

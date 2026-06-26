@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
-
+#include "GenericAgent.hpp"
 #include "HashCombine.hpp"
 #include "Point.hpp"
 
@@ -61,7 +61,7 @@ struct std::hash<Grid2DIndex> {
 template <typename Value>
 class NeighborhoodSearch
 {
-    using Grid = std::unordered_map<Grid2DIndex, std::vector<Value>>;
+    using Grid = std::unordered_map<Grid2DIndex, std::vector<const Value*>>;
 
     double _cellSize;
     Grid _grid{};
@@ -81,7 +81,7 @@ public:
     {
         auto index = getIndex(item.pos);
         auto& vec = _grid[index];
-        vec.push_back(item);
+        vec.push_back(&item);
     }
 
     void RemoveAgent(const Value& item)
@@ -99,13 +99,13 @@ public:
         throw SimulationError("Unknown agent id {}", item.id);
     }
 
-    void Update(const std::vector<Value>& items)
+    void Update(const AgentContainer<Value>& items)
     {
         _grid.clear();
         for(const auto& item : items) {
             auto index = getIndex(item.pos);
             auto& vec = _grid[index];
-            vec.push_back(item);
+            vec.push_back(&item);
         }
     }
 
@@ -128,8 +128,8 @@ public:
                 auto it = _grid.find({x, y});
                 if(it != _grid.cend()) {
                     for(const auto& item : it->second) {
-                        if(DistanceSquared(item.pos, pos) <= radiusSquared) {
-                            result.emplace_back(item);
+                        if(DistanceSquared(item->pos, pos) <= radiusSquared) {
+                            result.emplace_back(*item);
                         }
                     }
                 }

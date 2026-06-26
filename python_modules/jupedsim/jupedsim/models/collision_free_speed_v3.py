@@ -49,6 +49,7 @@ class CollisionFreeSpeedModelV3AgentParameters:
 
     Attributes:
         position: Position of the agent.
+        orientation: Orientation of the agent.
         time_gap: Time constant that describes how fast a pedestrian closes gaps.
         desired_speed: Maximum (free) walking speed of the agent.
         radius: Radius of the agent.
@@ -72,6 +73,7 @@ class CollisionFreeSpeedModelV3AgentParameters:
     """
 
     position: tuple[float, float] = (0.0, 0.0)
+    orientation: tuple[float, float] = (0.0, 0.0)
     time_gap: float = 1.0
     desired_speed: float = 1.2
     radius: float = 0.2
@@ -92,6 +94,7 @@ class CollisionFreeSpeedModelV3AgentParameters:
         self,
         *,
         position: tuple[float, float] = (0.0, 0.0),
+        orientation: tuple[float, float] = (0.0, 0.0),
         time_gap: float = 1.0,
         desired_speed: float = 1.2,
         v0: float | None = None,
@@ -108,6 +111,7 @@ class CollisionFreeSpeedModelV3AgentParameters:
         agent_buffer: float = 0.0,
     ):
         self.position = position
+        self.orientation = orientation
         self.time_gap = time_gap
         if v0 is not None:
             warnings.warn(
@@ -147,6 +151,15 @@ class CollisionFreeSpeedModelV3AgentParameters:
 class CollisionFreeSpeedModelV3State:
     def __init__(self, backing):
         self._obj = backing
+
+    @property
+    def orientation(self) -> tuple[float, float]:
+        """Orientation of this agent."""
+        return self._obj.orientation
+
+    @orientation.setter
+    def orientation(self, orientation):
+        self._obj.orientation = orientation
 
     @property
     def time_gap(self) -> float:

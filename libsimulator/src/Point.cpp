@@ -3,8 +3,6 @@
 
 #include <Logger.hpp>
 
-#include <limits>
-
 bool Point::isZeroLength() const
 {
     constexpr double epsilon = 1e-6;
@@ -87,7 +85,8 @@ Point Point::Rotate90Deg() const
 
 bool Point::IsUnitLength() const
 {
-    return std::abs(1 - NormSquare()) <= std::numeric_limits<double>::epsilon();
+    constexpr double tolerance = 1e-9;
+    return std::abs(1 - NormSquare()) <= tolerance;
 }
 
 const Point Point::operator+(const Point& p) const

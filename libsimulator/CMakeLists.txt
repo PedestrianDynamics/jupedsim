@@ -1,51 +1,28 @@
 ################################################################################
 # Build libsimulator
 ################################################################################
-add_library(simulator STATIC
+
+
+add_library(simulator STATIC)
+
+target_sources(simulator PRIVATE
     src/AABB.cpp
     src/AABB.hpp
     src/AgentRemovalSystem.hpp
     src/Clonable.hpp
-    src/CollisionFreeSpeedModel.cpp
-    src/CollisionFreeSpeedModel.hpp
-    src/CollisionFreeSpeedModelBuilder.cpp
-    src/CollisionFreeSpeedModelBuilder.hpp
-    src/CollisionFreeSpeedModelData.hpp
-    src/CollisionFreeSpeedModelUpdate.hpp
-    src/CollisionFreeSpeedModelV2.cpp
-    src/CollisionFreeSpeedModelV2.hpp
-    src/CollisionFreeSpeedModelV2Builder.cpp
-    src/CollisionFreeSpeedModelV2Builder.hpp
-    src/CollisionFreeSpeedModelV2Data.hpp
-    src/CollisionFreeSpeedModelV2Update.hpp
-    src/CollisionFreeSpeedModelV3.cpp
-    src/CollisionFreeSpeedModelV3.hpp
-    src/CollisionFreeSpeedModelV3Builder.cpp
-    src/CollisionFreeSpeedModelV3Builder.hpp
-    src/CollisionFreeSpeedModelV3Data.hpp
-    src/CollisionFreeSpeedModelV3Update.hpp
-    src/AnticipationVelocityModel.cpp
-    src/AnticipationVelocityModel.hpp
-    src/AnticipationVelocityModelBuilder.cpp
-    src/AnticipationVelocityModelBuilder.hpp
-    src/AnticipationVelocityModelData.hpp
-    src/AnticipationVelocityModelUpdate.hpp  
+    src/CfgCgal.hpp
     src/CollisionGeometry.cpp
     src/CollisionGeometry.hpp
     src/Ellipse.cpp
     src/Ellipse.hpp
-    src/GeneralizedCentrifugalForceModel.cpp
-    src/GeneralizedCentrifugalForceModel.hpp
-    src/GeneralizedCentrifugalForceModelBuilder.cpp
-    src/GeneralizedCentrifugalForceModelBuilder.hpp
-    src/GeneralizedCentrifugalForceModelData.hpp
-    src/GeneralizedCentrifugalForceModelUpdate.hpp
     src/GenericAgent.hpp
     src/GeometricFunctions.hpp
     src/GeometryBuilder.cpp
     src/GeometryBuilder.hpp
-    src/GeometrySwitchError.hpp
     src/Graph.hpp
+    src/Grid2D.hpp
+    src/HashCombine.hpp
+    src/IteratorPair.hpp
     src/Journey.cpp
     src/Journey.hpp
     src/LineSegment.cpp
@@ -59,8 +36,6 @@ add_library(simulator STATIC
     src/Mesh.hpp
     src/NeighborhoodSearch.hpp
     src/OperationalDecisionSystem.hpp
-    src/OperationalModel.hpp
-    src/OperationalModelUpdate.hpp
     src/Point.cpp
     src/Point.hpp
     src/Polygon.cpp
@@ -74,18 +49,6 @@ add_library(simulator STATIC
     src/SimulationClock.cpp
     src/SimulationClock.hpp
     src/SimulationError.hpp
-    src/SocialForceModel.cpp
-    src/SocialForceModel.hpp
-    src/SocialForceModelBuilder.cpp
-    src/SocialForceModelBuilder.hpp
-    src/SocialForceModelData.hpp
-    src/SocialForceModelUpdate.hpp
-    src/WarpDriverModel.cpp
-    src/WarpDriverModel.hpp
-    src/WarpDriverModelBuilder.cpp
-    src/WarpDriverModelBuilder.hpp
-    src/WarpDriverModelData.hpp
-    src/WarpDriverModelUpdate.hpp
     src/Stage.cpp
     src/Stage.hpp
     src/StageDescription.hpp
@@ -103,6 +66,8 @@ add_library(simulator STATIC
     src/UniqueID.hpp
     src/Util.hpp
 )
+
+add_subdirectory(src/OperationalModels)
 target_compile_options(simulator PRIVATE
     ${COMMON_COMPILE_OPTIONS}
 )
@@ -120,6 +85,7 @@ target_link_libraries(simulator PUBLIC
 target_link_options(simulator PUBLIC
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-fsanitize=address,undefined>
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-shared-libasan>
+    $<$<CXX_COMPILER_ID:GNU>:-Werror=odr>  # error out if LTO finds multiple definitions
 )
 target_include_directories(simulator PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src

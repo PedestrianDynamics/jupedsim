@@ -85,7 +85,7 @@ def test_metadata_attributes(square_simulation):
         ):
             assert key in hf.attrs, f"missing root attribute '{key}'"
         assert hf.attrs["producer"] == "JuPedSim"
-        assert hf.attrs["schema_version"] == 1
+        assert hf.attrs["schema_version"] == 2
 
 
 def test_close_is_idempotent(tmp_path):

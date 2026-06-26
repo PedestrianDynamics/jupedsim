@@ -28,7 +28,7 @@ def read_sqlite_file(
     """ """
     with sqlite3.connect(trajectory_file) as con:
         data = pd.read_sql_query(
-            "select frame, id, pos_x as x, pos_y as y, ori_x as ox, ori_y as oy from trajectory_data",
+            "select frame, id, pos_x as x, pos_y as y from trajectory_data",
             con,
         )
         fps = float(
@@ -59,8 +59,16 @@ def _get_line_color(disk_color):
 
 
 def _create_orientation_line(row, line_length=0.2, color="black"):
-    end_x = row["x"] + line_length * row["ox"]
-    end_y = row["y"] + line_length * row["oy"]
+    # Derive the orientation from the pedpy-computed velocity (v_x, v_y).
+    vx = row["v_x"]
+    vy = row["v_y"]
+    norm = np.hypot(vx, vy)
+    if norm > 0:
+        vx, vy = vx / norm, vy / norm
+    else:
+        vx = vy = 0.0
+    end_x = row["x"] + line_length * vx
+    end_y = row["y"] + line_length * vy
 
     orientation_line = go.layout.Shape(
         type="line",
@@ -306,6 +314,7 @@ def animate(
     data_df = pedpy.compute_individual_speed(
         traj_data=data,
         frame_step=5,
+        compute_velocity=True,
         speed_calculation=pedpy.SpeedCalculation.BORDER_SINGLE_SIDED,
     )
     data_df = data_df.merge(data.data, on=["id", "frame"], how="left")

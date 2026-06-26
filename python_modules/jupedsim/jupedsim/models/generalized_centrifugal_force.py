@@ -63,7 +63,7 @@ class GeneralizedCentrifugalForceModelAgentParameters:
         speed: Speed of the agent.
         desired_direction: Desired direction of the agent.
         position: Position of the agent.
-        orientation: Orientation of the agent.
+        orientation: Orientation of the agent. Has to be normalized to length 1.0
         journey_id: Id of the journey the agent follows.
         stage_id: Id of the stage the agent targets.
         mass: Mass of the agent.
@@ -185,6 +185,15 @@ class GeneralizedCentrifugalForceModelState:
     @deprecated("deprecated, use 'desired_direction' instead.")
     def e0(self, e0):
         self._obj.desired_direction = e0
+
+    @property
+    def orientation(self) -> tuple[float, float]:
+        """Orientation of this agent."""
+        return self._obj.orientation
+
+    @orientation.setter
+    def orientation(self, orientation):
+        self._obj.orientation = orientation
 
     @property
     def tau(self) -> float:

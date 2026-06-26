@@ -5,9 +5,9 @@
 #include "Journey.hpp"
 #include "OperationalModel.hpp"
 #include "Polygon.hpp"
+#include "RoutingEngine.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
-#include "RoutingEngine.hpp"
 #include "conversion.hpp"
 
 #include <pybind11/attr.h>
@@ -29,7 +29,10 @@ void init_simulation(py::module_& m)
 {
     py::class_<Simulation>(m, "Simulation")
         .def(
-            py::init([](const OperationalModel* model,
+            // The model is moved out of the Python object into Simulation. After this constructor
+            // returns, the Python model object passed here is disowned/invalid and must not be
+            // reused.
+            py::init([](std::unique_ptr<OperationalModel> model,
                         CollisionGeometry geometry,
                         double dT,
                         std::unique_ptr<RoutingEngine> routing_engine) {
@@ -37,7 +40,7 @@ void init_simulation(py::module_& m)
                     throw std::invalid_argument("model must not be None");
                 }
                 return std::make_unique<Simulation>(
-                    model->Clone(),
+                    std::move(model),
                     std::make_unique<CollisionGeometry>(geometry),
                     dT,
                     std::move(routing_engine));
@@ -158,12 +161,8 @@ void init_simulation(py::module_& m)
             "get_duration",
             [](Simulation& sim, const std::string_view name) { return sim.GetTimerDuration(name); })
         .def("get_durations", [](Simulation& sim) { return sim.GetTimerDurations(); })
-        .def("switch_geometry", [](Simulation& sim, CollisionGeometry& geometry) {
-            sim.SwitchGeometry(std::make_unique<CollisionGeometry>(geometry));
-        })
         .def_property_readonly(
-            "routing_engine_name",
-            [](const Simulation& sim) { return sim.RoutingEngineName(); })
+            "routing_engine_name", [](const Simulation& sim) { return sim.RoutingEngineName(); })
         .def(
             "switch_routing_engine",
             [](Simulation& sim, std::unique_ptr<RoutingEngine> engine) {
