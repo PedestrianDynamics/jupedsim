@@ -4,6 +4,7 @@
 #include <fmt/core.h>
 
 struct CollisionFreeSpeedModelData {
+    Point orientation{0.0, 0.0};
     double timeGap{1};
     double v0{1.2};
     double radius{0.2};
@@ -19,7 +20,8 @@ struct fmt::formatter<CollisionFreeSpeedModelData> {
     {
         return fmt::format_to(
             ctx.out(),
-            "CollisionFreeSpeedModel[timeGap={}, v0={}, radius={}])",
+            "CollisionFreeSpeedModel[orientation={}, timeGap={}, v0={}, radius={}])",
+            m.orientation,
             m.timeGap,
             m.v0,
             m.radius);

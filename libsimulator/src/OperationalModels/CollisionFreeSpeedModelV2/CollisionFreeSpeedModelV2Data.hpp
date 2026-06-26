@@ -4,6 +4,7 @@
 #include <fmt/core.h>
 
 struct CollisionFreeSpeedModelV2Data {
+    Point orientation{0.0, 0.0};
     double strengthNeighborRepulsion{8.0};
     double rangeNeighborRepulsion{0.1};
     double strengthGeometryRepulsion{5.0};
@@ -24,9 +25,10 @@ struct fmt::formatter<CollisionFreeSpeedModelV2Data> {
     {
         return fmt::format_to(
             ctx.out(),
-            "CollisionFreeSpeedModelV2[strengthNeighborRepulsion={}, "
+            "CollisionFreeSpeedModelV2[orientation={}, strengthNeighborRepulsion={}, "
             "rangeNeighborRepulsion={}, strengthGeometryRepulsion={}, rangeGeometryRepulsion={}, "
             "timeGap={}, v0={}, radius={}])",
+            m.orientation,
             m.strengthNeighborRepulsion,
             m.rangeNeighborRepulsion,
             m.strengthGeometryRepulsion,

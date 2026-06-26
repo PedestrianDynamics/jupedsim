@@ -55,6 +55,15 @@ class WarpDriverModelState:
         self._obj = backing
 
     @property
+    def orientation(self) -> tuple[float, float]:
+        """Orientation of this agent."""
+        return self._obj.orientation
+
+    @orientation.setter
+    def orientation(self, orientation):
+        self._obj.orientation = orientation
+
+    @property
     def radius(self) -> float:
         """Radius of this agent [m]."""
         return self._obj.radius

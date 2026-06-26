@@ -4,6 +4,7 @@
 #include <fmt/core.h>
 
 struct CollisionFreeSpeedModelV3Data {
+    Point orientation{1.0, 0.0};
     double strengthNeighborRepulsion{}; // [rad] max steering authority before upper bound
     double rangeNeighborRepulsion{}; // [m] base interaction range for neighbor influence
     double strengthGeometryRepulsion{}; // [-] wall repulsion strength
@@ -30,10 +31,11 @@ struct fmt::formatter<CollisionFreeSpeedModelV3Data> {
     {
         return fmt::format_to(
             ctx.out(),
-            "CollisionFreeSpeedModelV3[strengthNeighborRepulsion={}, "
+            "CollisionFreeSpeedModelV3[orientation={}, strengthNeighborRepulsion={}, "
             "rangeNeighborRepulsion={}, strengthGeometryRepulsion={}, rangeGeometryRepulsion={}, "
             "rangeXScale={}, rangeYScale={}, thetaMaxUpperBound={}, agentBuffer={}, "
             "timeGap={}, v0={}, radius={}, headingAngle={}])",
+            m.orientation,
             m.strengthNeighborRepulsion,
             m.rangeNeighborRepulsion,
             m.strengthGeometryRepulsion,

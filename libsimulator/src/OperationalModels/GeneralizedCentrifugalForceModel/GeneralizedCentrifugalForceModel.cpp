@@ -10,6 +10,7 @@
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Simulation.hpp"
+#include "SimulationError.hpp"
 
 #include <Logger.hpp>
 
@@ -68,7 +69,7 @@ OperationalModelUpdate GeneralizedCentrifugalForceModel::ComputeNewPosition(
     Point fd = ForceDriv(agent, agent.destination, model.mass, model.tau, dT, update);
     Point acc = (fd + F_rep + repwall) / model.mass;
 
-    update.velocity = (agent.orientation * model.speed) + acc * dT;
+    update.velocity = (model.orientation * model.speed) + acc * dT;
     update.position = agent.pos + *update.velocity * dT;
     return update;
 }
@@ -85,7 +86,7 @@ void GeneralizedCentrifugalForceModel::ApplyUpdate(
         agent.pos = *update.position;
     }
     if(update.velocity) {
-        agent.orientation = (*update.velocity).Normalized();
+        model.orientation = (*update.velocity).Normalized();
         model.speed = (*update.velocity).Norm();
     }
 }
@@ -96,6 +97,10 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
     const CollisionGeometry& geometry) const
 {
     const auto& model = std::get<GeneralizedCentrifugalForceModelData>(agent.model);
+
+    if(!model.orientation.IsUnitLength()) {
+        throw SimulationError("Orientation is invalid: {}. Length should be 1.", model.orientation);
+    }
 
     const auto mass = model.mass;
     constexpr double massMin = 1.;
@@ -180,10 +185,10 @@ Point GeneralizedCentrifugalForceModel::ForceDriv(
 
         const Point e0 = mollify_e0(target, pos, deltaT, model.orientationDelay, model.e0);
         update.e0 = e0;
-        F_driv = ((e0 * model.v0 - (ped.orientation * model.speed)) * mass) / tau;
+        F_driv = ((e0 * model.v0 - (model.orientation * model.speed)) * mass) / tau;
     } else {
         const Point e0 = model.e0;
-        F_driv = ((e0 * model.v0 - (ped.orientation * model.speed)) * mass) / tau;
+        F_driv = ((e0 * model.v0 - (model.orientation * model.speed)) * mass) / tau;
     }
     return F_driv;
 }
@@ -197,8 +202,8 @@ Point GeneralizedCentrifugalForceModel::ForceRepPed(
     Point F_rep;
     // x- and y-coordinate of the distance between p1 and p2
     Point distp12 = ped2.pos - ped1.pos;
-    const Point vp1 = (ped1.orientation * model1.speed); // v Ped1
-    const Point vp2 = (ped2.orientation * model2.speed); // v Ped2
+    const Point vp1 = (model1.orientation * model1.speed); // v Ped1
+    const Point vp2 = (model2.orientation * model2.speed); // v Ped2
     Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
     double tmp, tmp2;
     double v_ij;
@@ -342,8 +347,8 @@ GeneralizedCentrifugalForceModel::ForceRepWall(const GenericAgent& ped, const Li
     }
     double mind = 0.5; // for performance reasons this distance is assumed to be constant
     const auto& model = std::get<GeneralizedCentrifugalForceModelData>(ped.model);
-    double vn =
-        w.NormalComp(ped.orientation * model.speed); // normal component of the velocity on the wall
+    double vn = w.NormalComp(
+        model.orientation * model.speed); // normal component of the velocity on the wall
     F = ForceRepStatPoint(ped, pt, mind, vn);
 
     return F; // line --> l != 0
@@ -369,7 +374,7 @@ Point GeneralizedCentrifugalForceModel::ForceRepStatPoint(
     // TODO(kkratz): this will fail for speed 0.
     // I think the code can be rewritten to account for orientation and speed separately
     const auto& model = std::get<GeneralizedCentrifugalForceModelData>(ped.model);
-    const Point v = ped.orientation * model.speed;
+    const Point v = model.orientation * model.speed;
     Point dist = p - ped.pos; // x- and y-coordinate of the distance between ped and p
     double d = dist.Norm(); // distance between the centre of ped and point p
     Point e_ij; // x- and y-coordinate of the normalized vector between ped and p
@@ -392,10 +397,10 @@ Point GeneralizedCentrifugalForceModel::ForceRepStatPoint(
     double K_ij;
     K_ij = 0.5 * bla / v.Norm(); // K_ij
     // Punkt auf der Ellipse
-    pinE = p.TransformToEllipseCoordinates(ped.pos, ped.orientation.x, ped.orientation.y);
+    pinE = p.TransformToEllipseCoordinates(ped.pos, model.orientation.x, model.orientation.y);
     const auto v0 = model.v0;
     // Punkt auf der Ellipse
-    r = E.PointOnEllipse(pinE, model.speed / v0, ped.pos, model.speed, ped.orientation);
+    r = E.PointOnEllipse(pinE, model.speed / v0, ped.pos, model.speed, model.orientation);
     // interpolierte Kraft
     F_rep = ForceInterpolation(v0, K_ij, e_ij, vn, d, (r - ped.pos).Norm(), l);
     return F_rep;
@@ -480,6 +485,6 @@ double GeneralizedCentrifugalForceModel::AgentToAgentSpacing(
         scale2,
         model1.speed,
         model2.speed,
-        agent1.orientation,
-        agent2.orientation);
+        model1.orientation,
+        model2.orientation);
 }

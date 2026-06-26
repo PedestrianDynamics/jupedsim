@@ -74,11 +74,11 @@ OperationalModelUpdate AnticipationVelocityModel::ComputeNewPosition(
 
     const auto desiredDirection = (ped.destination - ped.pos).Normalized();
     auto direction = (desiredDirection + neighborRepulsion).Normalized();
+    const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
     if(direction == Point{}) {
-        direction = ped.orientation;
+        direction = model.orientation;
     }
 
-    const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
     const double wallBufferDistance = model.wallBufferDistance;
     // Wall sliding behavior
 
@@ -106,7 +106,7 @@ void AnticipationVelocityModel::ApplyUpdate(const OperationalModelUpdate& upd, G
     const auto& update = std::get<AnticipationVelocityModelUpdate>(upd);
     auto& model = std::get<AnticipationVelocityModelData>(agent.model);
     agent.pos = update.position;
-    agent.orientation = update.orientation;
+    model.orientation = update.orientation;
     model.velocity = update.velocity;
 }
 
@@ -117,7 +117,7 @@ Point AnticipationVelocityModel::UpdateDirection(
 {
     const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
     const Point desiredDirection = (ped.destination - ped.pos).Normalized();
-    const Point actualDirection = ped.orientation;
+    const Point actualDirection = model.orientation;
     Point updatedDirection;
 
     if(desiredDirection.ScalarProduct(calculatedDirection) *
@@ -280,9 +280,9 @@ Point AnticipationVelocityModel::NeighborRepulsion(
     const double adjustedDist = distance - (model1.radius + model2.radius);
 
     // Pedestrian movement and desired directions
-    const auto& e1 = ped1.orientation;
+    const auto& e1 = model1.orientation;
     const auto& d1 = (ped1.destination - ped1.pos).Normalized();
-    const auto& e2 = ped2.orientation;
+    const auto& e2 = model2.orientation;
 
     // Check perception range (Eq. 1)
     const auto inPerceptionRange = d1.ScalarProduct(ep12) >= 0 || e1.ScalarProduct(ep12) >= 0;

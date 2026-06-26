@@ -87,8 +87,9 @@ OperationalModelUpdate CollisionFreeSpeedModel::ComputeNewPosition(
 
     const auto desired_direction = (ped.destination - ped.pos).Normalized();
     auto direction = (desired_direction + neighborRepulsion + boundaryRepulsion).Normalized();
+    const auto& model = std::get<CollisionFreeSpeedModelData>(ped.model);
     if(direction == Point{}) {
-        direction = ped.orientation;
+        direction = model.orientation;
     }
     const auto spacing = std::accumulate(
         std::begin(neighborhood),
@@ -98,7 +99,6 @@ OperationalModelUpdate CollisionFreeSpeedModel::ComputeNewPosition(
             return std::min(res, GetSpacing(ped, neighbor, direction));
         });
 
-    const auto& model = std::get<CollisionFreeSpeedModelData>(ped.model);
     const auto optimal_speed = OptimalSpeed(ped, spacing, model.timeGap);
     const auto velocity = direction * optimal_speed;
     return CollisionFreeSpeedModelUpdate{ped.pos + velocity * dT, direction};
@@ -108,8 +108,9 @@ void CollisionFreeSpeedModel::ApplyUpdate(const OperationalModelUpdate& upd, Gen
     const
 {
     const auto& update = std::get<CollisionFreeSpeedModelUpdate>(upd);
+    auto& model = std::get<CollisionFreeSpeedModelData>(agent.model);
     agent.pos = update.position;
-    agent.orientation = update.orientation;
+    model.orientation = update.orientation;
 }
 
 void CollisionFreeSpeedModel::CheckModelConstraint(

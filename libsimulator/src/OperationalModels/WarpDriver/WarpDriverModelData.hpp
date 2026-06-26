@@ -4,6 +4,7 @@
 #include <fmt/core.h>
 
 struct WarpDriverModelData {
+    Point orientation{0.0, 0.0};
     double radius{0.15};
     double v0{1.2};
     double stuckTime{0.0}; // elapsed time since anchor was set
@@ -21,6 +22,11 @@ struct fmt::formatter<WarpDriverModelData> {
     template <typename FormatContext>
     auto format(const WarpDriverModelData& m, FormatContext& ctx) const
     {
-        return fmt::format_to(ctx.out(), "WarpDriver[radius={}, v0={}]", m.radius, m.v0);
+        return fmt::format_to(
+            ctx.out(),
+            "WarpDriver[orientation={}, radius={}, v0={}]",
+            m.orientation,
+            m.radius,
+            m.v0);
     }
 };

@@ -64,6 +64,7 @@ class AnticipationVelocityModelAgentParameters:
 
     Attributes:
         position: Position of the agent.
+        orientation: Orientation of the agent.
         time_gap: Time constant that describe how fast pedestrian close gaps.
         desired_speed: Maximum speed of the agent.
         radius: Radius of the agent.
@@ -77,6 +78,7 @@ class AnticipationVelocityModelAgentParameters:
     """
 
     position: tuple[float, float] = (0.0, 0.0)
+    orientation: tuple[float, float] = (0.0, 0.0)
     time_gap: float = 1.06
     desired_speed: float = 1.2
     radius: float = 0.2
@@ -92,6 +94,15 @@ class AnticipationVelocityModelAgentParameters:
 class AnticipationVelocityModelState:
     def __init__(self, backing):
         self._obj = backing
+
+    @property
+    def orientation(self) -> tuple[float, float]:
+        """Orientation of this agent."""
+        return self._obj.orientation
+
+    @orientation.setter
+    def orientation(self, orientation):
+        self._obj.orientation = orientation
 
     @property
     def time_gap(self) -> float:

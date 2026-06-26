@@ -37,9 +37,7 @@ class CsvTrajectoryWriter(TrajectoryWriter):
     def begin_writing(self, simulation: Simulation) -> None:
         self._file = open(self._output_file, "w", newline="")
         self._csv_writer = csv.writer(self._file)
-        self._csv_writer.writerow(
-            ["frame", "id", "pos_x", "pos_y", "ori_x", "ori_y"]
-        )
+        self._csv_writer.writerow(["frame", "id", "pos_x", "pos_y"])
 
     def write_iteration_state(self, simulation: Simulation) -> None:
         iteration = simulation.iteration_count()
@@ -54,8 +52,6 @@ class CsvTrajectoryWriter(TrajectoryWriter):
                     agent.id,
                     agent.position[0],
                     agent.position[1],
-                    agent.orientation[0],
-                    agent.orientation[1],
                 ]
             )
 

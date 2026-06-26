@@ -354,7 +354,7 @@ void WarpDriverModel::ApplyUpdate(const OperationalModelUpdate& update, GenericA
     const auto& upd = std::get<WarpDriverModelUpdate>(update);
     auto& data = std::get<WarpDriverModelData>(agent.model);
     agent.pos = upd.position;
-    agent.orientation = upd.orientation;
+    data.orientation = upd.orientation;
     data.stuckTime = upd.stuckTime;
     data.anchorX = upd.anchorX;
     data.anchorY = upd.anchorY;
@@ -395,7 +395,7 @@ OperationalModelUpdate WarpDriverModel::ComputeNewPosition(
     const double speed = agentData.v0;
 
     // Agent orientation (unit vector). If zero, default to +x.
-    Point orient = ped.orientation;
+    Point orient = agentData.orientation;
     if(orient.Norm() < 1e-9) {
         orient = Point{1.0, 0.0};
     } else {
@@ -477,7 +477,7 @@ OperationalModelUpdate WarpDriverModel::ComputeNewPosition(
         }
 
         // Neighbor orientation
-        Point nbOrient = neighbor.orientation;
+        Point nbOrient = nbData->orientation;
         if(nbOrient.Norm() < 1e-9) {
             nbOrient = Point{1.0, 0.0};
         } else {

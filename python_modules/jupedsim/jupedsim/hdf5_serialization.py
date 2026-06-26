@@ -34,7 +34,7 @@ except ImportError as e:  # pragma: no cover - dependency is optional
     ) from e
 
 
-SCHEMA_VERSION: Final = 1
+SCHEMA_VERSION: Final = 2
 
 
 def _trajectory_dtype() -> "np.dtype":
@@ -43,8 +43,7 @@ def _trajectory_dtype() -> "np.dtype":
     The leading four columns (``frame``, ``id``, ``x``, ``y``) match the
     Pedestrian Dynamics Data Archive convention used by PedPy's loader.
     ``z`` is included for byte-level compatibility with the archive
-    format and is always written as ``0.0`` (planar simulation). The
-    orientation columns are JuPedSim-specific extras.
+    format and is always written as ``0.0`` (planar simulation).
     """
     return np.dtype(
         [
@@ -53,8 +52,6 @@ def _trajectory_dtype() -> "np.dtype":
             ("x", "<f8"),
             ("y", "<f8"),
             ("z", "<f8"),
-            ("ox", "<f8"),
-            ("oy", "<f8"),
         ]
     )
 
@@ -78,8 +75,8 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
 
     - ``/trajectory`` -- compound, resizable dataset with one row per
       agent per recorded frame. Columns: ``frame``, ``id``, ``x``,
-      ``y``, ``z``, ``ox``, ``oy``. Carries an ``fps`` attribute (the
-      attribute PedPy reads).
+      ``y``, ``z``. Carries an ``fps`` attribute (the attribute PedPy
+      reads).
     - Root attribute ``wkt_geometry`` -- the initial walkable area as
       WKT (the attribute PedPy reads).
     - Additional root attributes describing the producer, schema
@@ -194,8 +191,6 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
                 "x": "m",
                 "y": "m",
                 "z": "m",
-                "ox": "-",
-                "oy": "-",
             }
         )
         self._traj_ds.attrs["column_descriptions"] = json.dumps(
@@ -205,8 +200,6 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
                 "x": "position (x)",
                 "y": "position (y)",
                 "z": "position (z), always 0 for planar simulations",
-                "ox": "orientation unit vector (x)",
-                "oy": "orientation unit vector (y)",
             }
         )
 
@@ -246,8 +239,6 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
                     agent.position[0],
                     agent.position[1],
                     0.0,
-                    agent.orientation[0],
-                    agent.orientation[1],
                 )
             )
 

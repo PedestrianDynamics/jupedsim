@@ -65,7 +65,6 @@ void SocialForceModel::ApplyUpdate(const OperationalModelUpdate& update, Generic
     const auto& upd = std::get<SocialForceModelUpdate>(update);
     agent.pos = upd.position;
     model.velocity = upd.velocity;
-    agent.orientation = upd.velocity.Normalized();
 }
 
 void SocialForceModel::CheckModelConstraint(

@@ -6,6 +6,7 @@
 #include <fmt/core.h>
 
 struct AnticipationVelocityModelData {
+    Point orientation{0.0, 0.0};
     double strengthNeighborRepulsion{8.0};
     double rangeNeighborRepulsion{0.1};
     double wallBufferDistance{0.1}; // buff distance of agent to wall
@@ -27,9 +28,10 @@ struct fmt::formatter<AnticipationVelocityModelData> {
     {
         return fmt::format_to(
             ctx.out(),
-            "AnticipationVelocityModel[strengthNeighborRepulsion={}, "
+            "AnticipationVelocityModel[orientation={}, strengthNeighborRepulsion={}, "
             "rangeNeighborRepulsion={}, wallBufferDistance={}, "
             "timeGap={}, v0={}, radius={}, reactionTime={}, anticipationTime={}, velocity={}])",
+            m.orientation,
             m.strengthNeighborRepulsion,
             m.rangeNeighborRepulsion,
             m.wallBufferDistance,

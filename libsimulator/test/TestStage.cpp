@@ -34,7 +34,6 @@ TEST_F(StagesTests, NotifiableWaitingSetTargetIsCorrect)
             Journey::ID::Invalid,
             waitingSet.Id(),
             waitingPoints[i],
-            {},
             CollisionFreeSpeedModelData{});
         neighborhoodSearch.AddAgent(agent);
 
@@ -50,7 +49,6 @@ TEST_F(StagesTests, NotifiableWaitingSetTargetIsCorrect)
             GenericAgent::ID::Invalid,
             Journey::ID::Invalid,
             waitingSet.Id(),
-            {},
             {},
             CollisionFreeSpeedModelData{});
         neighborhoodSearch.AddAgent(agentToLastWaitingSetPos);

@@ -5,6 +5,7 @@
 
 #include <fmt/core.h>
 struct GeneralizedCentrifugalForceModelData {
+    Point orientation{0.0, 0.0};
     double speed{};
     Point e0{};
     int orientationDelay{};
@@ -25,6 +26,6 @@ struct fmt::formatter<GeneralizedCentrifugalForceModelData> {
     template <typename FormatContext>
     auto format(const GeneralizedCentrifugalForceModelData& m, FormatContext& ctx) const
     {
-        return fmt::format_to(ctx.out(), "GCFM[speed={}])", m.speed);
+        return fmt::format_to(ctx.out(), "GCFM[orientation={}, speed={}])", m.orientation, m.speed);
     }
 };

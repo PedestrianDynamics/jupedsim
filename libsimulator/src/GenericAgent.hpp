@@ -32,7 +32,6 @@ struct GenericAgent {
 
     // Agent fields common for all models
     Point pos{};
-    Point orientation{};
 
     using Model = std::variant<
         GeneralizedCentrifugalForceModelData,
@@ -49,14 +48,12 @@ struct GenericAgent {
         jps::UniqueID<Journey> journeyId_,
         jps::UniqueID<BaseStage> stageId_,
         Point pos_,
-        Point orientation_,
         Model model_)
         : id(id_ != ID::Invalid ? id_ : ID{})
         , journeyId(journeyId_)
         , stageId(stageId_)
         , target(pos_)
         , pos(pos_)
-        , orientation(orientation_)
         , model(std::move(model_))
     {
     }
@@ -77,14 +74,13 @@ struct fmt::formatter<GenericAgent> {
                 return fmt::format_to(
                     ctx.out(),
                     "Agent[id={}, journey={}, stage={}, destination={}, waypoint={}, pos={}, "
-                    "orientation={}, model={})",
+                    "model={})",
                     agent.id,
                     agent.journeyId,
                     agent.stageId,
                     agent.destination,
                     agent.target,
                     agent.pos,
-                    agent.orientation,
                     m);
             },
             agent.model);
